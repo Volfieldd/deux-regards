@@ -16,8 +16,10 @@ test('les en-têtes de sécurité sont posés', async t => {
   assert.equal(res.headers['x-frame-options'], 'DENY');
 });
 
-test("l'accueil provisoire compte les photos publiées", async t => {
-  const { app } = await setup(t, { seeded: true });
-  const res = await app.inject('/');
-  assert.match(res.body, /Test : 12 photos publiées/);
+test('la CSP interdit toute ressource tierce', async t => {
+  const { app } = await setup(t);
+  const csp = (await app.inject('/')).headers['content-security-policy'];
+  assert.match(csp, /default-src 'self'/);
+  assert.match(csp, /frame-ancestors 'none'/);
+  assert.doesNotMatch(csp, /unsafe-inline|https:/);
 });

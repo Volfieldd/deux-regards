@@ -1,0 +1,8 @@
+<% layout('./layout') %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+</header>
+<main class="about wrap">
+  <h1>Cette page n’existe pas, ou la photo a été retirée.</h1>
+  <p class="prose"><a class="more eyebrow" href="/">Revenir à la galerie</a></p>
+</main>

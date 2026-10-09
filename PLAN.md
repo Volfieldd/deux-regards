@@ -21,7 +21,7 @@ Références de design (artefacts claude.ai) :
 | Serveur | Node.js LTS + Fastify |
 | Données | SQLite (`better-sqlite3`), migrations SQL versionnées |
 | Images | `sharp` (resize, AVIF/WebP, suppression EXIF) |
-| Gabarits | `@fastify/view` + Eta |
+| Gabarits | Eta |
 | Auth | `openid-client` (Authorization Code + PKCE) |
 | Identité | Zitadel Cloud, Google en IdP externe dans Zitadel |
 | Déploiement | Docker + Caddy (HTTPS), sauvegarde de `storage/` et de la base |
@@ -69,7 +69,7 @@ storage/
 - Seed avec les 12 photos et les données du prototype.
 - Fichier `.env.example`, `.gitignore` (dont `storage/` et la base).
 
-### 1. Front public (d'après le mix)
+### 1. Front public, d'après le mix (fait)
 - Ouverture plein cadre avec fondu et vignettes (photos choisies dans les réglages).
 - Filtre « deux regards » : les deux / Sébastien / Julien.
 - Index des séries en grand avec aperçu au survol.
@@ -77,8 +77,9 @@ storage/
 - Page photo `/photo/:slug` : visionneuse noire, précédente/suivante, clavier, swipe, légende.
 - Pages `/serie/:slug`, `/auteur/:slug`, `/a-propos`.
 - Le site reste lisible sans JS ; le JS ajoute le fondu, le swipe et le filtre sans rechargement.
+- Polices auto-hébergées (@fontsource), CSP stricte sans ressource tierce.
 
-### 2. Images
+### 2. Images (pipeline fait ; reste l'import depuis l'admin)
 - Import : original vers `storage/originals/`, variantes générées, EXIF supprimé, rotation EXIF appliquée avant suppression.
 - `srcset` + `sizes`, lazy-loading, dimensions explicites (pas de saut de mise en page).
 - Dissuasion : clic droit et glisser désactivés sur les images, en-tête `Cache-Control` long sur les variantes.

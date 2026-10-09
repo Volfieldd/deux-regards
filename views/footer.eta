@@ -1,0 +1,4 @@
+<footer class="wrap mono">
+  <span><%= it.siteName %> · Sébastien &amp; Julien</span>
+  <span>Photographies · reproduction interdite</span>
+</footer>

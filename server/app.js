@@ -1,8 +1,31 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import formbody from '@fastify/formbody';
+import fastifyStatic from '@fastify/static';
+import { Eta } from 'eta';
+import publicRoutes from './routes/public.js';
+
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
+
+// Tout est servi depuis notre domaine : pas de script, police ni image tierce.
+const CSP = [
+  "default-src 'self'",
+  "img-src 'self'",
+  "style-src 'self'",
+  "script-src 'self'",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+].join('; ');
 
 const SECURITY_HEADERS = {
+  'content-security-policy': CSP,
   'x-content-type-options': 'nosniff',
   'referrer-policy': 'strict-origin-when-cross-origin',
   'x-frame-options': 'DENY',
@@ -17,6 +40,21 @@ export async function buildApp({ config, db, logger = true }) {
 
   await app.register(cookie, { secret: config.cookieSecret });
   await app.register(formbody);
+
+  const eta = new Eta({ views: path.join(ROOT, 'views'), cache: config.production });
+  app.decorateReply('render', function (template, data) {
+    return this.type('text/html; charset=utf-8').send(eta.render(`./${template}`, data));
+  });
+
+  await app.register(fastifyStatic, { root: path.join(ROOT, 'public'), prefix: '/static/', maxAge: config.production ? '1d' : 0 });
+  await app.register(fastifyStatic, {
+    root: path.join(ROOT, 'node_modules/@fontsource'), prefix: '/fonts/', decorateReply: false,
+    maxAge: '365d', immutable: true, allowedPath: p => p.endsWith('.woff2'),
+  });
+  // Seules les variantes sont exposées ; storage/originals n'a aucune route.
+  const variants = path.join(config.storageDir, 'variants');
+  fs.mkdirSync(variants, { recursive: true });
+  await app.register(fastifyStatic, { root: variants, prefix: '/media/', decorateReply: false, maxAge: '365d', immutable: true });
 
   app.addHook('onSend', async (request, reply) => {
     reply.headers(SECURITY_HEADERS);
@@ -33,16 +71,7 @@ export async function buildApp({ config, db, logger = true }) {
     }
   });
 
-  // Page provisoire : remplacée par le front public en phase 1.
-  app.get('/', async (request, reply) => {
-    const count = db.prepare("SELECT count(*) FROM photos WHERE status = 'published'").pluck().get();
-    reply.type('text/html; charset=utf-8');
-    return `<!doctype html><meta charset="utf-8"><title>${escapeHtml(config.siteName)}</title><p>${escapeHtml(config.siteName)} : ${count} photos publiées.</p>`;
-  });
+  await app.register(publicRoutes);
 
   return app;
-}
-
-export function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
