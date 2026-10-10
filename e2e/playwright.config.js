@@ -12,8 +12,10 @@ export default defineConfig({
   projects: [
     // Connexion locale de test (E2E_LOCAL_AUTH = LOCAL_AUTH_TOKEN du serveur), session réutilisée ensuite.
     { name: 'setup', testMatch: /auth\.setup\.js/ },
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, dependencies: ['setup'], testIgnore: /parcours|captures/ },
-    { name: 'mobile', use: { ...devices['Pixel 7'] }, dependencies: ['setup'], testIgnore: /parcours|captures/ },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, dependencies: ['setup'], testIgnore: /parcours|captures|audit/ },
+    { name: 'mobile', use: { ...devices['Pixel 7'] }, dependencies: ['setup'], testIgnore: /parcours|captures|audit/ },
+    // Audit ergonomique (E2E_AUDIT=1) : parcours mesurés et captures.
+    { name: 'audit', use: { ...devices['Desktop Chrome'] }, dependencies: ['setup'], testMatch: /audit\.spec\.js/ },
     // Captures pour la documentation (E2E_CAPTURES=1), bureau et mobile.
     { name: 'captures-bureau', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } }, dependencies: ['setup'], testMatch: /captures\.spec\.js/ },
     { name: 'captures-mobile', use: { ...devices['Pixel 7'] }, dependencies: ['setup'], testMatch: /captures\.spec\.js/ },
