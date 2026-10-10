@@ -15,8 +15,30 @@ export const POSITIONS = {
   gauche: 'À gauche', centre: 'Au centre', droite: 'À droite',
   'bas-gauche': 'En bas à gauche', bas: 'En bas', 'bas-droite': 'En bas à droite',
   mosaique: 'Mosaïque (répété en diagonale)',
+  plein: 'Plein cadre (centré, aussi grand que l’image)',
 };
+// Sources du filigrane : texte, logo envoyé (couleurs d'origine), ou dessins de la marque (Apparence),
+// teintés comme le texte.
+export const KINDS = { text: 'Texte', emblem: 'Emblème du site (Apparence)', logotype: 'Logo complet du site (Apparence)', image: 'Logo envoyé ci-dessous' };
+export const TONE_LABELS = { light: 'Claire', dark: 'Sombre', auto: 'Automatique (claire sur photo sombre, sombre sur photo claire)' };
 const TONES = { light: '#ffffff', dark: '#111111' };
+const tinted = kind => kind === 'text' || kind === 'emblem' || kind === 'logotype';
+
+// Teinte « auto » : luminosité moyenne de la zone de la photo où se pose le filigrane
+// (tiers de l'image pour les bords et les coins, image entière pour le centre, le plein cadre, la mosaïque).
+export async function resolveTone(src, mark, { limitInputPixels } = {}) {
+  if (!mark || !tinted(mark.kind) || mark.tone !== 'auto') return mark;
+  const { data, info } = await sharp(src, { limitInputPixels }).rotate().resize(48, 48, { fit: 'fill' }).greyscale().raw().toBuffer({ resolveWithObject: true });
+  const p = mark.position;
+  const [v, hz] = p.includes('-') ? p.split('-') : ['haut', 'bas'].includes(p) ? [p, 'centre'] : ['gauche', 'droite'].includes(p) ? ['centre', p] : ['tout', 'tout'];
+  const span = (k, n) => (k === 'tout' ? [0, n] : k === 'haut' || k === 'gauche' ? [0, n / 3] : k === 'bas' || k === 'droite' ? [(2 * n) / 3, n] : [n / 3, (2 * n) / 3]);
+  const [y0, y1] = span(v, info.height);
+  const [x0, x1] = span(hz, info.width);
+  let sum = 0;
+  let n = 0;
+  for (let y = Math.floor(y0); y < y1; y++) for (let x = Math.floor(x0); x < x1; x++) { sum += data[y * info.width + x]; n++; }
+  return { ...mark, tone: sum / Math.max(n, 1) > 150 ? 'dark' : 'light' };
+}
 
 const markup = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -36,6 +58,11 @@ async function stamp(mark, targetWidth, maxHeight) {
   let src;
   if (mark.kind === 'image') {
     src = await sharp(mark.imagePath, { limitInputPixels: 16_000_000 }).resize(box).png().toBuffer();
+  } else if (mark.kind === 'emblem' || mark.kind === 'logotype') {
+    // Dessin de la marque : un masque (forme dans la couche alpha), coloré dans la teinte choisie.
+    const color = sharp({ create: { width: 1, height: 1, channels: 4, background: TONES[mark.tone] || TONES.light } }).raw();
+    const shape = await sharp(mark.imagePath, { limitInputPixels: 16_000_000 }).resize(box).ensureAlpha().png().toBuffer();
+    src = await sharp(shape).composite([{ input: await color.toBuffer(), raw: { width: 1, height: 1, channels: 4 }, tile: true, blend: 'in' }]).png().toBuffer();
   } else {
     const font = FONTS[mark.font] || FONTS.sans;
     src = await sharp({
@@ -51,6 +78,15 @@ async function stamp(mark, targetWidth, maxHeight) {
 
 // Calques à passer à sharp().composite() pour une variante de w × h pixels.
 export async function overlayFor(mark, w, h) {
+  const margin = Math.round((w * mark.margin) / 100);
+  if (mark.position === 'plein') {
+    // Aussi grand que l'image (marges comprises), proportions gardées, centré.
+    const bw = Math.max(8, w - 2 * margin);
+    const bh = Math.max(8, h - 2 * margin);
+    const img = await stamp(mark, bw, bh);
+    const { width: sw, height: sh } = await sharp(img).metadata();
+    return [{ input: img, top: Math.round((h - sh) / 2), left: Math.round((w - sw) / 2) }];
+  }
   const width = Math.max(8, Math.round((w * mark.size) / 100));
   let img = await stamp(mark, width, h);
   let { width: sw, height: sh } = await sharp(img).metadata();
@@ -71,7 +107,6 @@ export async function overlayFor(mark, w, h) {
     return [{ input: tile, tile: true }];
   }
 
-  const margin = Math.round((w * mark.margin) / 100);
   const [v, hz] = mark.position === 'centre' ? ['centre', 'centre']
     : mark.position.includes('-') ? mark.position.split('-')
       : ['haut', 'bas'].includes(mark.position) ? [mark.position, 'centre'] : ['centre', mark.position];

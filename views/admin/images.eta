@@ -20,16 +20,18 @@
       <label class="inline"><input type="checkbox" name="wm_enabled"<%~ w.enabled ? ' checked' : '' %>> Ajouter un filigrane aux images du site</label>
       <fieldset class="row">
         <legend>Type</legend>
-        <label class="inline"><input type="radio" name="wm_kind" value="text"<%~ w.kind === 'text' ? ' checked' : '' %>> Texte</label>
-        <label class="inline"><input type="radio" name="wm_kind" value="image"<%~ w.kind === 'image' ? ' checked' : '' %>> Logo (image)</label>
+<% Object.entries(it.KINDS).forEach(([k, label]) => { const missing = (k === 'emblem' || k === 'logotype') && !it.brand[k]; %>
+        <label class="inline"><input type="radio" name="wm_kind" value="<%= k %>"<%~ w.kind === k ? ' checked' : '' %><%~ missing && w.kind !== k ? ' disabled' : '' %>> <%= label %><% if (missing) { %> <span class="mono">— à envoyer d’abord dans <a href="/admin/apparence">Apparence</a></span><% } %></label>
+<% }) %>
       </fieldset>
       <label>Texte <input name="wm_text" value="<%= w.text %>" maxlength="80">
         <span class="mono">Variables : {auteur} · {annee} · {site} · {titre} — ex. « © {auteur} {annee} »</span></label>
       <div class="row">
         <label>Police <select name="wm_font"><% Object.entries(it.FONTS).forEach(([k, f]) => { %><option value="<%= k %>"<%~ w.font === k ? ' selected' : '' %>><%= f.label %></option><% }) %></select></label>
-        <fieldset class="row"><legend>Teinte</legend>
-          <label class="inline"><input type="radio" name="wm_tone" value="light"<%~ w.tone !== 'dark' ? ' checked' : '' %>> Claire</label>
-          <label class="inline"><input type="radio" name="wm_tone" value="dark"<%~ w.tone === 'dark' ? ' checked' : '' %>> Sombre</label>
+        <fieldset class="row"><legend>Teinte <span class="mono">texte et dessins du site ; un logo envoyé garde ses couleurs</span></legend>
+<% Object.entries(it.TONE_LABELS).forEach(([k, label]) => { %>
+          <label class="inline"><input type="radio" name="wm_tone" value="<%= k %>"<%~ (w.tone || 'light') === k ? ' checked' : '' %>> <%= label %></label>
+<% }) %>
         </fieldset>
       </div>
       <div class="row">
@@ -38,7 +40,7 @@
       </div>
       <div class="row">
         <label>Opacité (%) <input type="number" name="wm_opacity" min="5" max="100" value="<%= w.opacity %>"></label>
-        <label>Largeur (% de l’image) <input type="number" name="wm_size" min="3" max="60" value="<%= w.size %>"></label>
+        <label>Largeur (% de l’image) <input type="number" name="wm_size" min="3" max="100" value="<%= w.size %>"><span class="mono">sans effet en plein cadre</span></label>
         <label>Marge (% de l’image) <input type="number" name="wm_margin" min="0" max="20" value="<%= w.margin %>"></label>
       </div>
     </fieldset>

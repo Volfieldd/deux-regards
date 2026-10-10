@@ -44,7 +44,14 @@ Un bandeau indique ensuite la progression (« Mise à jour des images en cours :
 ## Mettre un logo
 
 1. Dans **Logo du filigrane**, envoyer une image **PNG ou WebP à fond transparent** : 5 Mo et 4000 px de côté au plus, 8 px au moins, et un rapport largeur/hauteur de 10 au plus.
-2. Dans le formulaire du filigrane, choisir **Type : Logo (image)**, puis enregistrer.
+2. Dans le formulaire du filigrane, choisir **Type : Logo envoyé ci-dessous**, puis enregistrer. Ce logo garde ses couleurs.
+
+## Utiliser les dessins de la marque
+
+**Type : Emblème du site** ou **Logo complet du site** reprend les dessins envoyés dans Apparence (des masques : la forme seule), colorés dans la teinte choisie. Le nom du fichier entre dans l'empreinte des variantes : remplacer le dessin dans Apparence recalcule les images.
+
+- **Teinte automatique :** pour chaque photo, luminosité moyenne de la zone du filigrane (le tiers concerné pour un bord ou un coin, toute l'image pour le centre, le plein cadre et la mosaïque) ; au-dessus de 150 sur 255, le filigrane est sombre, sinon clair.
+- **Plein cadre :** le dessin tient dans l'image moins les marges, proportions gardées, centré. Réglage conseillé : opacité 15 à 25 %, marge 5 à 8 %.
 
 Envoyer un nouveau logo remplace l'ancien. **Retirer le logo** supprime le filigrane de type « Logo » jusqu'au prochain envoi.
 
