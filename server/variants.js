@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { renderVariants, renderPreview, removeVariants, hasVariants, VARIANT_RE } from './images.js';
-import { FONTS, POSITIONS } from './watermark.js';
+import { FONTS, POSITIONS, KINDS, TONE_LABELS } from './watermark.js';
 
 // Version du rendu : à incrémenter si le code de rendu change, pour régénérer toutes les variantes.
 const PIPELINE = 2;                // 2 : mentions IPTC (XMP) dans les modes signés
@@ -32,13 +32,13 @@ export function normalizeWatermark(body, current = WATERMARK_DEFAULTS) {
   const d = WATERMARK_DEFAULTS;
   return {
     enabled: body.wm_enabled === 'on' || body.wm_enabled === true,
-    kind: body.wm_kind === 'image' ? 'image' : 'text',
+    kind: oneOf(body.wm_kind, KINDS, d.kind),
     text: typeof body.wm_text === 'string' ? body.wm_text.replace(/[\x00-\x1f\x7f]/g, '').trim().slice(0, 80) : d.text,
     font: oneOf(body.wm_font, FONTS, d.font),
-    tone: body.wm_tone === 'dark' ? 'dark' : 'light',
+    tone: oneOf(body.wm_tone, TONE_LABELS, d.tone),
     position: oneOf(body.wm_position, POSITIONS, d.position),
     opacity: int(body.wm_opacity, 5, 100, d.opacity),
-    size: int(body.wm_size, 3, 60, d.size),
+    size: int(body.wm_size, 3, 100, d.size),
     margin: int(body.wm_margin, 0, 20, d.margin),
     minWidth: Number(oneOf(String(body.wm_min_width), MIN_WIDTHS, String(d.minWidth))),
     image: current.image ?? null,
@@ -57,11 +57,14 @@ export function fillText(template, p, siteName) {
 
 // Réglages effectifs d'une photo (filigrane et métadonnées) et empreinte qui nomme ses variantes.
 // Empreinte vide quand rien n'est ajouté : les variantes brutes gardent leur nom d'origine.
-export function specFor(p, { watermark, exif, siteName, watermarkDir, rightsUrl }) {
+export function specFor(p, { watermark, exif, siteName, watermarkDir, rightsUrl, brand = {}, brandDir = null }) {
   let mark = null;
   if (watermark.enabled && p.watermark !== 0) {
     if (watermark.kind === 'image' && watermark.image) {
       mark = { kind: 'image', image: watermark.image, imagePath: path.join(watermarkDir, watermark.image) };
+    } else if ((watermark.kind === 'emblem' || watermark.kind === 'logotype') && brand[watermark.kind] && brandDir) {
+      // Le nom du fichier entre dans l'empreinte : un nouveau dessin dans Apparence recalcule les images.
+      mark = { kind: watermark.kind, image: brand[watermark.kind], tone: watermark.tone, imagePath: path.join(brandDir, brand[watermark.kind]) };
     } else if (watermark.kind === 'text') {
       const text = fillText(watermark.text, p, siteName).trim();
       if (text) mark = { kind: 'text', text, font: watermark.font, tone: watermark.tone };
@@ -96,7 +99,8 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
     return { ...defaults, ...(raw ? JSON.parse(raw) : {}) };
   };
   const rightsUrl = publicUrl ? `${publicUrl}/droits` : null;
-  const context = () => ({ watermark: read('watermark', WATERMARK_DEFAULTS), exif: read('exif', EXIF_DEFAULTS), siteName: siteName(), watermarkDir, rightsUrl });
+  const brandDir = path.join(storageDir, 'brand');
+  const context = () => ({ watermark: read('watermark', WATERMARK_DEFAULTS), exif: read('exif', EXIF_DEFAULTS), siteName: siteName(), watermarkDir, rightsUrl, brand: read('brand', {}), brandDir });
 
   // File des passages complets : elle ne rejette jamais (une erreur est journalisée, pas propagée).
   let queue = Promise.resolve();

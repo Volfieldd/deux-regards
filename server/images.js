@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 import exifReader from 'exif-reader';
-import { overlayFor } from './watermark.js';
+import { overlayFor, resolveTone } from './watermark.js';
 
 export const WIDTHS = [640, 1280, 2000];
 export const FORMATS = ['avif', 'webp'];
@@ -90,8 +90,9 @@ function applyMeta(pipeline, meta, originalExif) {
 // Génère les variantes servies d'un original, avec le filigrane `mark` et les métadonnées `meta`
 // déjà résolus pour cette photo (voir variants.js). rotate() applique l'orientation EXIF.
 // onStep(fait, total) : appelé après chaque fichier (suivi du traitement à l'import).
-export async function renderVariants(storageDir, file, { key = '', mark = null, meta = null, force = false, onStep = null } = {}) {
+export async function renderVariants(storageDir, file, { key = '', mark: wanted = null, meta = null, force = false, onStep = null } = {}) {
   const src = path.join(storageDir, 'originals', file);
+  const mark = await resolveTone(src, wanted, { limitInputPixels: MAX_PIXELS });     // teinte « auto » : selon cette photo
   const outDir = path.join(storageDir, 'variants');
   fs.mkdirSync(outDir, { recursive: true });
   // metadata() ignore rotate() : les dimensions affichées viennent de autoOrient.
@@ -152,8 +153,9 @@ export function hasVariants(storageDir, photo, key) {
 }
 
 // Aperçu en mémoire d'une variante (réglages pas encore enregistrés) : rien n'est écrit sur le disque.
-export async function renderPreview(storageDir, file, width, { mark = null } = {}) {
+export async function renderPreview(storageDir, file, width, { mark: wanted = null } = {}) {
   const src = path.join(storageDir, 'originals', file);
+  const mark = await resolveTone(src, wanted, { limitInputPixels: MAX_PIXELS });
   const info = await sharp(src, { limitInputPixels: MAX_PIXELS }).metadata();
   const ow = info.autoOrient?.width ?? info.width;
   const oh = info.autoOrient?.height ?? info.height;

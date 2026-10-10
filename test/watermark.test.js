@@ -284,3 +284,57 @@ test('au démarrage, des réglages changés hors de l’admin sont appliqués', 
   await c.app.variants.idle();
   assert.ok(c.db.prepare('SELECT variant_key FROM photos').pluck().all().every(k => /^[0-9a-f]{8}$/.test(k)));
 });
+
+// ---------- dessins de la marque, plein cadre, teinte automatique ----------
+
+import { overlayFor, resolveTone } from '../server/watermark.js';
+
+// Masque de marque comme ceux d'Apparence : forme noire dans la couche alpha, fond transparent.
+async function brandMask(dir) {
+  const file = path.join(dir, 'embleme-test.png');
+  await sharp(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><ellipse cx="200" cy="100" rx="180" ry="80" fill="#000"/></svg>')).png().toFile(file);
+  return file;
+}
+const solid = (dir, name, color) => sharp({ create: { width: 1200, height: 800, channels: 3, background: color } }).jpeg().toFile(path.join(dir, name)).then(() => path.join(dir, name));
+
+test('emblème du site en filigrane : fichier dans l’empreinte, absent tant qu’il n’est pas envoyé', () => {
+  const base = { ...ctx({ enabled: true, kind: 'emblem', tone: 'auto', position: 'plein', opacity: 20 }), brandDir: '/data/brand' };
+  assert.equal(specFor(PHOTO, { ...base, brand: {} }).mark, null);
+  const a = specFor(PHOTO, { ...base, brand: { emblem: 'embleme-aaaa.png' } });
+  assert.equal(a.mark.imagePath, '/data/brand/embleme-aaaa.png');
+  assert.equal(a.mark.tone, 'auto');
+  assert.notEqual(specFor(PHOTO, { ...base, brand: { emblem: 'embleme-bbbb.png' } }).key, a.key);   // nouveau dessin : nouvelles images
+  assert.equal(specFor(PHOTO, { ...base, watermark: { ...base.watermark, kind: 'logotype' }, brand: { emblem: 'embleme-aaaa.png' } }).mark, null);
+  const n = normalizeWatermark({ wm_kind: 'emblem', wm_tone: 'auto', wm_position: 'plein', wm_size: '100' });
+  assert.deepEqual([n.kind, n.tone, n.position, n.size], ['emblem', 'auto', 'plein', 100]);
+});
+
+test('plein cadre : centré, aussi grand que l’image moins les marges, proportions gardées', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'wm-'));
+  const imagePath = await brandMask(dir);
+  const [layer] = await overlayFor({ kind: 'emblem', imagePath, tone: 'light', position: 'plein', opacity: 20, size: 22, margin: 5 }, 1000, 800);
+  const m = await sharp(layer.input).metadata();
+  assert.equal(m.width, 900);                                   // 1000 − 2 × 5 %
+  assert.equal(m.height, 450);                                  // rapport 2:1 gardé
+  assert.deepEqual([layer.left, layer.top], [50, 175]);
+  const { channels } = await sharp(layer.input).stats();
+  assert.ok(channels[0].max > 250);                             // teinte claire : blanc
+  assert.ok(channels[3].max <= 52 && channels[3].max >= 50);    // 20 % d'opacité
+  fs.rmSync(dir, { recursive: true });
+});
+
+test('teinte automatique : claire sur photo sombre, sombre sur photo claire', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'wm-'));
+  const mark = { kind: 'emblem', tone: 'auto', position: 'plein' };
+  assert.equal((await resolveTone(await solid(dir, 'nuit.jpg', '#151520'), mark)).tone, 'light');
+  assert.equal((await resolveTone(await solid(dir, 'neige.jpg', '#eeeeea'), mark)).tone, 'dark');
+  assert.equal((await resolveTone(await solid(dir, 'n.jpg', '#151520'), { ...mark, kind: 'image' })).tone, 'auto');   // logo envoyé : couleurs d'origine
+  // Rendu complet : l'emblème sombre apparaît bien sur la photo claire.
+  const neige = await solid(dir, 'neige2.jpg', '#f2f2f2');
+  fs.mkdirSync(path.join(dir, 'originals'));
+  fs.copyFileSync(neige, path.join(dir, 'originals', 'neige2.jpg'));
+  await renderVariants(dir, 'neige2.jpg', { key: 'abcd1234', mark: { ...mark, imagePath: await brandMask(dir), opacity: 60, size: 22, margin: 0, minWidth: 0 } });
+  const { channels } = await sharp(path.join(dir, 'variants', variantName('neige2.jpg', 640, 'webp', 'abcd1234'))).stats();
+  assert.ok(channels[0].min < 120, `min ${channels[0].min}`);  // des pixels assombris par l'emblème
+  fs.rmSync(dir, { recursive: true });
+});

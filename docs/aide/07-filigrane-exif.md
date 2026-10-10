@@ -12,9 +12,12 @@ Ces réglages concernent les **images servies sur le site**. Les originaux ne so
    - `{titre}` : titre de la photo.
 
    Par exemple, `© {auteur} {annee}` donne « © Julien 2024 ».
-3. **Police** (celles du site) et **teinte** : claire pour les photos sombres, sombre pour les claires.
-4. **Position** : neuf emplacements, ou **Mosaïque** (motif répété en diagonale sur toute l'image, le plus difficile à effacer).
-5. **Opacité** (5 à 100 %), **largeur** (3 à 60 % de l'image), **marge** (0 à 20 %).
+3. **Police** (celles du site) et **teinte** :
+   - claire, pour les photos sombres ;
+   - sombre, pour les photos claires ;
+   - **automatique** : choisie photo par photo, d'après la luminosité de l'endroit où se pose le filigrane.
+4. **Position** : neuf emplacements, **Mosaïque** (motif répété en diagonale sur toute l'image, le plus difficile à effacer) ou **Plein cadre** (centré, aussi grand que l'image, marges déduites).
+5. **Opacité** (5 à 100 %), **largeur** (3 à 100 % de l'image ; sans effet en plein cadre), **marge** (0 à 20 %).
 6. **Appliquer aux tailles** :
    - toutes ;
    - 1280 px et plus (vignettes épargnées) ;
@@ -29,7 +32,20 @@ Ces réglages concernent les **images servies sur le site**. Les originaux ne so
 
 L'image à gauche de la page montre, elle, les réglages **enregistrés**.
 
-## Mettre un logo en filigrane
+## Mettre le logo du site en grand, estompé
+
+Le réglage recommandé pour signer les photos sans trop gêner :
+
+1. Envoyez l'**emblème** (ou le **logo complet**) dans [Apparence](apparence), si ce n'est pas déjà fait.
+2. Ici, cochez **Ajouter un filigrane**, puis choisissez **Type : Emblème du site** (ou **Logo complet du site**).
+3. **Teinte : Automatique**. Le dessin est clair sur les photos sombres et sombre sur les photos claires.
+4. **Position : Plein cadre**, **marge** 5 à 8 %.
+5. **Opacité : 15 à 25 %**. En dessous de 10 %, le dessin disparaît presque sur certaines photos.
+6. **Aperçu sans enregistrer** sur une photo sombre, puis sur une claire. Enregistrez quand le résultat vous convient.
+
+Le dessin est celui d'Apparence : si vous le remplacez là-bas, les images du site sont recalculées avec le nouveau.
+
+## Mettre un autre logo en filigrane
 
 1. Dans **Logo du filigrane**, envoyez une image **PNG ou WebP à fond transparent** :
    - 5 Mo et 4000 px de côté au plus ;
@@ -37,7 +53,7 @@ L'image à gauche de la page montre, elle, les réglages **enregistrés**.
    - rapport largeur/hauteur de 10 au plus.
 
    Les SVG sont refusés.
-2. Choisissez **Type : Logo (image)**, puis enregistrez.
+2. Choisissez **Type : Logo envoyé ci-dessous**, puis enregistrez. Ce logo garde ses propres couleurs : la teinte ne s'y applique pas.
 
 **Retirer le logo** supprime ce filigrane jusqu'au prochain envoi.
 

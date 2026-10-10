@@ -12,7 +12,7 @@ import { sameToken, safeNext } from '../auth.js';
 import { pad } from '../format.js';
 import sharp from 'sharp';
 import { normalizeWatermark, normalizeExif, EXIF_MODES, MIN_WIDTHS } from '../variants.js';
-import { FONTS, POSITIONS } from '../watermark.js';
+import { FONTS, POSITIONS, KINDS, TONE_LABELS } from '../watermark.js';
 import { THEMES, BRAND_MODES, BRAND_SLOTS } from '../themes.js';
 import { processEmblem, processIcon, processShare, BrandError, EMBLEM_MAX_BYTES } from '../brand.js';
 import { loadHelp } from '../help.js';
@@ -631,7 +631,7 @@ export default async function adminRoutes(app) {
   const imagesPage = (request, reply) => {
     const { watermark, exif } = app.variants.context();
     return render(request, reply, 'images', {
-      title: 'Filigrane et métadonnées', watermark, exif, FONTS, POSITIONS, EXIF_MODES, MIN_WIDTHS,
+      title: 'Filigrane et métadonnées', watermark, exif, FONTS, POSITIONS, KINDS, TONE_LABELS, EXIF_MODES, MIN_WIDTHS, brand: app.appearance.brand(),
       photos: repo.photos(), previewId: Number(request.query.photo) || firstPhotoId(),
     });
   };
@@ -642,7 +642,10 @@ export default async function adminRoutes(app) {
     const watermark = normalizeWatermark(request.body || {}, current);
     repo.saveImageSettings(watermark, normalizeExif(request.body || {}));
     app.variants.schedule();
-    const note = watermark.enabled && watermark.kind === 'image' && !watermark.image ? ' Aucun logo envoyé : pas de filigrane pour l’instant.' : '';
+    const brand = app.appearance.brand();
+    const note = !watermark.enabled ? ''
+      : watermark.kind === 'image' && !watermark.image ? ' Aucun logo envoyé : pas de filigrane pour l’instant.'
+        : (watermark.kind === 'emblem' || watermark.kind === 'logotype') && !brand[watermark.kind] ? ' Ce dessin n’est pas encore envoyé dans Apparence : pas de filigrane pour l’instant.' : '';
     return done(reply, '/admin/images', `Réglages enregistrés, images en cours de mise à jour.${note}`);
   });
 
@@ -798,6 +801,7 @@ export default async function adminRoutes(app) {
     }
     saveBrand(brand);
     sweepBrand(brand);
+    app.variants.schedule();            // le dessin peut servir de filigrane
     return done(reply, '/admin/apparence', `${slot.label} enregistré.`);
   });
 
@@ -812,6 +816,7 @@ export default async function adminRoutes(app) {
     }
     saveBrand(brand);
     sweepBrand(brand);
+    app.variants.schedule();
     return done(reply, '/admin/apparence', `${slot.label} retiré.`);
   });
 
