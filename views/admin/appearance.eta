@@ -1,0 +1,51 @@
+<% layout('./layout') %>
+<% const b = it.brand; %>
+<h1>Apparence</h1>
+<p class="prose">Le thème change les couleurs et la typographie du site public ; l’admin garde son apparence. « Aperçu » ouvre le site avec un thème sans l’appliquer : vous seul le voyez, pendant une heure ou jusqu’à « Quitter l’aperçu ».</p>
+
+<form class="form" method="post" action="/admin/apparence">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <fieldset class="panel">
+    <legend>Thème</legend>
+    <div class="themes">
+<% Object.entries(it.THEMES).forEach(([id, t]) => { %>
+      <div class="theme-card">
+        <label class="inline"><input type="radio" name="theme" value="<%= id %>"<%~ id === it.themeId ? ' checked' : '' %>> <strong><%= t.label %></strong><%= id === it.themeId ? ' (actuel)' : '' %></label>
+        <span class="swatch swatch-<%= id %>" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="mono"><%= t.description %></span>
+        <a class="more eyebrow" href="/?theme=<%= id %>" target="_blank" rel="noopener">Aperçu<span class="sr-only"> du thème <%= t.label %> (nouvel onglet)</span></a>
+      </div>
+<% }) %>
+    </div>
+  </fieldset>
+
+  <fieldset class="panel form">
+    <legend>Marque</legend>
+<% Object.entries(it.BRAND_MODES).forEach(([k, label]) => { %>
+    <label class="inline"><input type="radio" name="brand_mode" value="<%= k %>"<%~ b.mode === k ? ' checked' : '' %><%~ k === 'embleme' && !b.emblem && !b.icon ? ' disabled' : '' %>> <%= label %><%= k === 'embleme' && !b.emblem && !b.icon ? ' — envoyez d’abord un emblème ou une icône' : '' %></label>
+<% }) %>
+    <label>Sous-titre sous le nom <span class="mono">ex. « Photography gallery » · 60 caractères</span><input name="subtitle" value="<%= b.subtitle || '' %>" maxlength="60"></label>
+    <p class="mono">Le nom lui-même se règle dans <a href="/admin/reglages">Réglages</a>.</p>
+  </fieldset>
+  <p class="actions"><button class="btn" type="submit">Enregistrer l’apparence</button></p>
+</form>
+
+<% Object.entries(it.BRAND_SLOTS).forEach(([slot, def]) => { const file = b[def.field]; %>
+<section class="panel brand-slot" id="marque-<%= slot %>">
+  <h2><%= def.label %></h2>
+  <p class="mono"><%= def.help %></p>
+<% if (file) { %>
+  <p class="slot-preview"><img src="/brand/<%= file %>" alt="<%= def.label %> actuel"><% if (def.kind !== 'share' && (def.field === 'icon' || (def.field === 'emblem' && !b.icon)) && b.favicon180) { %> <img class="favicon-preview" src="/brand/<%= b.favicon180 %>" alt="Icône d’onglet générée" width="64" height="64"><% } %></p>
+  <form method="post" action="/admin/apparence/marque/<%= slot %>/delete">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <button class="btn ghost" type="submit">Retirer</button>
+  </form>
+<% } %>
+  <form class="row" method="post" action="/admin/apparence/marque/<%= slot %>" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <label><%= file ? 'Remplacer' : 'Envoyer' %> <span class="mono">PNG, WebP ou JPEG · 5 Mo au plus</span>
+      <input type="file" name="fichier" accept="image/png,image/webp,image/jpeg" required></label>
+    <button class="btn" type="submit">Envoyer</button>
+  </form>
+</section>
+<% }) %>

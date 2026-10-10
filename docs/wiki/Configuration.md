@@ -6,7 +6,7 @@ Tout se règle par variables d'environnement, dans le fichier `.env` (lu par `np
 
 | Variable | Défaut | Rôle |
 |---|---|---|
-| `SITE_NAME` | `Deux Regards` | Nom affiché, si l'admin n'en définit pas (**Réglages → Nom du site**). |
+| `SITE_NAME` | `Nicephos` | Nom affiché, si l'admin n'en définit pas (**Réglages → Nom du site**). |
 | `HOST` | `127.0.0.1` | Adresse d'écoute. |
 | `PORT` | `3000` | Port d'écoute. |
 | `PUBLIC_URL` | `http://localhost:PORT` | URL publique : liens absolus (Open Graph, URL canonique), redirections OIDC. **En HTTPS, le site est considéré « en ligne »** (voir plus bas). |

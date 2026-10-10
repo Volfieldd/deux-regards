@@ -12,7 +12,7 @@ import { renderVariants, variantName, VARIANT_RE, widthsFor } from '../server/im
 const TOKEN = 'jeton-de-test-0123456789';
 const cookiesOf = res => Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
 const PHOTO = { id: 1, author: 'Julien', title: 'Quai', taken_on: '2024-03', created_at: '2026-01-01 10:00:00', watermark: null };
-const ctx = (wm = {}, exif = {}) => ({ watermark: { ...WATERMARK_DEFAULTS, ...wm }, exif: { ...EXIF_DEFAULTS, ...exif }, siteName: 'Deux Regards', watermarkDir: '/tmp' });
+const ctx = (wm = {}, exif = {}) => ({ watermark: { ...WATERMARK_DEFAULTS, ...wm }, exif: { ...EXIF_DEFAULTS, ...exif }, siteName: 'Nicephos', watermarkDir: '/tmp' });
 
 // ---------- règles ----------
 
@@ -24,7 +24,7 @@ test('sans filigrane ni métadonnée : empreinte vide, noms de variantes inchang
 
 test('filigrane texte : variables remplacées, empreinte stable et sensible aux réglages', () => {
   const a = specFor(PHOTO, ctx({ enabled: true, text: '© {auteur} {annee} · {site}' }));
-  assert.equal(a.mark.text, '© Julien 2024 · Deux Regards');
+  assert.equal(a.mark.text, '© Julien 2024 · Nicephos');
   assert.match(a.key, /^[0-9a-f]{8}$/);
   assert.equal(specFor(PHOTO, ctx({ enabled: true, text: '© {auteur} {annee} · {site}' })).key, a.key);
   assert.notEqual(specFor(PHOTO, ctx({ enabled: true, text: '© {auteur} {annee} · {site}', opacity: 61 })).key, a.key);
@@ -42,7 +42,7 @@ test('filigrane désactivé pour une photo, logo absent, texte vide : pas de fil
 
 test('métadonnées : droits écrits par le site, empreinte dédiée', () => {
   const s = specFor(PHOTO, ctx({}, { mode: 'rights' }));
-  assert.deepEqual(s.meta, { mode: 'rights', artist: 'Julien', copyright: '© 2024 Julien', credit: 'Deux Regards', webStatement: null });
+  assert.deepEqual(s.meta, { mode: 'rights', artist: 'Julien', copyright: '© 2024 Julien', credit: 'Nicephos', webStatement: null });
   assert.equal(specFor(PHOTO, { ...ctx({}, { mode: 'rights' }), rightsUrl: 'https://x.example/droits' }).meta.webStatement, 'https://x.example/droits');
   assert.notEqual(s.key, '');
   assert.notEqual(specFor(PHOTO, ctx({}, { mode: 'shooting' })).key, s.key);
@@ -106,13 +106,13 @@ test('métadonnées : aucune, droits, prise de vue sans GPS, tout', async t => {
   await renderVariants(dir, file, {});
   assert.equal(await exifOf(out(640, 'webp', '')), null);
 
-  await renderVariants(dir, file, { key: 'dddddddd', meta: { mode: 'rights', artist: 'Sébastien <&>', copyright: '© 2024 Sébastien', credit: 'Deux Regards', webStatement: 'https://x.example/droits' } });
+  await renderVariants(dir, file, { key: 'dddddddd', meta: { mode: 'rights', artist: 'Sébastien <&>', copyright: '© 2024 Sébastien', credit: 'Nicephos', webStatement: 'https://x.example/droits' } });
   // Mentions IPTC en XMP : accents conservés, valeurs échappées.
   for (const f of ['avif', 'webp']) {
     const xmp = (await sharp(out(640, f, 'dddddddd')).metadata()).xmp.toString();
     assert.match(xmp, /<dc:creator><rdf:Seq><rdf:li>Sébastien &lt;&amp;&gt;<\/rdf:li>/);
     assert.match(xmp, /<rdf:li xml:lang="x-default">© 2024 Sébastien<\/rdf:li>/);
-    assert.match(xmp, /<photoshop:Credit>Deux Regards<\/photoshop:Credit>/);
+    assert.match(xmp, /<photoshop:Credit>Nicephos<\/photoshop:Credit>/);
     assert.match(xmp, /<xmpRights:WebStatement>https:\/\/x\.example\/droits<\/xmpRights:WebStatement>/);
     assert.match(xmp, /<plus:LicensorURL>https:\/\/x\.example\/droits<\/plus:LicensorURL>/);
   }

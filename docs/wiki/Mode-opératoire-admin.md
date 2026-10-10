@@ -2,7 +2,7 @@
 
 L'admin se trouve à l'adresse **`/admin`** (par exemple `https://<domaine>/admin`). Toutes ses pages sont utilisables au clavier, et sans JavaScript ; le JavaScript ajoute seulement le glisser-déposer et l'affichage de la progression.
 
-En haut de chaque page : **Tableau de bord · Photos · Séries · Auteurs · Filigrane & EXIF · Réglages · Voir le site · Se déconnecter**.
+En haut de chaque page : **Tableau de bord · Photos · Séries · Auteurs · Filigrane & EXIF · Apparence · Réglages · Voir le site · Se déconnecter**.
 
 Après chaque action, un message confirme ce qui a été fait, ou explique pourquoi c'est refusé.
 
@@ -111,6 +111,10 @@ Renommer un auteur met à jour ses images si son nom figure dans le filigrane ou
 | À propos | Page « À propos » ; séparer les paragraphes par une ligne vide. |
 | Photos de l'ouverture | Diaporama de l'accueil : 8 au plus, parmi les photos publiées, dans l'ordre de la galerie. Sans choix : les 5 premières. |
 | Droits d'utilisation | Texte et contact de la page publique `/droits` (voir [Preuves d'antériorité et droits](Preuves-et-droits#page-droits-dutilisation)). |
+
+## 9 bis. Apparence
+
+Thème du site, emblème, sous-titre : voir [Apparence et thèmes](Apparence-et-thèmes).
 
 ## 10. Filigrane et EXIF
 

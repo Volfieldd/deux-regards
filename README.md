@@ -1,6 +1,6 @@
-# Site photo
+# Nicephos
 
-Galerie de Sébastien et Julien, avec un admin réservé aux auteurs (connexion OIDC via Zitadel Cloud). Nom provisoire : « Deux Regards », réglable par `SITE_NAME`.
+Nicephos, galerie photo de Sébastien et Julien, avec un admin réservé aux auteurs (connexion OIDC via Zitadel Cloud). Le nom affiché se règle dans l'admin (Réglages) ou par `SITE_NAME`.
 
 Le plan complet est dans [PLAN.md](PLAN.md).
 

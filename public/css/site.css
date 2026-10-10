@@ -29,6 +29,7 @@
   --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
   --gut: clamp(16px, 5vw, 72px);
+  --display-style: italic;   /* titres, légendes, nom actif : un thème peut les redresser (normal) */
 }
 
 * { box-sizing: border-box; }
@@ -47,6 +48,27 @@ picture { display: block; }
 .eyebrow { font-size: 11px; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; }
 .brand { font-family: var(--serif); font-size: 22px; font-weight: 500; letter-spacing: 0.03em; white-space: nowrap; }
 .brand i { font-weight: 400; }
+/* Emblème (logo dessiné) : masque coloré par la couleur du texte, donc par le thème. */
+.brand-emblem { display: inline-flex; align-items: center; gap: 14px; font-family: var(--sans); }
+.emblem, .emblem-compact, .logotype { display: block; height: 44px; background: currentColor; -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat; }
+.emblem-compact { display: none; }
+/* Logo complet en tête de « À propos ». */
+.logotype { height: auto; width: min(100%, 680px); }
+.brand-emblem .wordmark { display: flex; flex-direction: column; gap: 4px; }
+.brand-emblem .name { font-size: 15px; font-weight: 300; letter-spacing: .42em; text-transform: uppercase; }
+.brand-emblem .subtitle { font-size: 8.5px; font-weight: 400; letter-spacing: .48em; text-transform: uppercase; opacity: .78; }
+/* Petit écran : emblème réduit, sous-titre masqué, la navigation passe dessous plutôt que de déborder. */
+.hero header, .top { flex-wrap: wrap; row-gap: 6px; }
+@media (max-width: 640px) {
+  .emblem, .hero .emblem, .emblem-compact { height: 34px; }
+  .emblem.has-compact { display: none; }        /* sur téléphone, la version simplifiée, lisible en petit */
+  .emblem-compact { display: block; }
+  .brand-emblem { gap: 10px; }
+  .brand-emblem .name { font-size: 13px; letter-spacing: .34em; }
+}
+@media (max-width: 480px) { .brand-emblem .subtitle { display: none; } }
+.preview-bar { margin: 0; padding: 6px var(--gut); background: var(--safelight); color: #fff; position: relative; z-index: 10; }
+.preview-bar a { text-decoration: underline; }
 
 /* ---------- ouverture · B ---------- */
 .hero { position: relative; background: var(--dark); color: var(--dark-ink); height: min(86vh, 820px); min-height: 520px; overflow: hidden; }
@@ -64,7 +86,7 @@ picture { display: block; }
 .hero .cap { position: absolute; left: 0; right: 0; bottom: 118px; z-index: 2; display: none; flex-direction: column; gap: 10px; }
 .hero .cap.on { display: flex; }
 .hero .cap .k { color: var(--dark-mute); }
-.hero .cap h1 { margin: 0; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: clamp(42px, 7.4vw, 96px); line-height: .98; letter-spacing: -0.015em; text-wrap: balance; max-width: 14ch;
+.hero .cap h1 { margin: 0; font-family: var(--serif); font-style: var(--display-style); font-weight: 400; font-size: clamp(42px, 7.4vw, 96px); line-height: .98; letter-spacing: -0.015em; text-wrap: balance; max-width: 14ch;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }   /* titre long : 3 lignes au plus */
 .hero .cap .open { align-self: flex-start; margin-top: 6px; border-bottom: 1px solid var(--dark-rule); padding-bottom: 3px; }
 .hero .strip { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; gap: 8px; padding-block: 6px 34px; padding-left: calc(var(--gut) + 6px); overflow-x: auto; scrollbar-width: none; }
@@ -93,7 +115,7 @@ picture { display: block; }
 .who a:first-child { padding-left: 0; border-left: 0; }
 .who .n { font-family: var(--serif); font-size: clamp(22px, 3vw, 32px); line-height: 1; overflow-wrap: anywhere; }
 .who .c { color: var(--mute); }
-.who a[aria-current] .n { font-style: italic; }
+.who a[aria-current] .n { font-style: var(--display-style); }
 .who a[aria-current] .c::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--safelight); margin-right: 7px; vertical-align: 1px; }
 
 /* ---------- séries · C ---------- */
@@ -102,7 +124,7 @@ picture { display: block; }
 .idx { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 6px 0 8px; border-bottom: 1px solid var(--rule); font-family: var(--serif); font-size: clamp(46px, 8.4vw, 104px); line-height: .96; letter-spacing: -0.02em; transition: padding .3s; }
 .idx .mono { color: var(--mute); }
 a.idx:hover { padding-left: 10px; }
-.idx[aria-current] { font-style: italic; }
+.idx[aria-current] { font-style: var(--display-style); }
 .idx[aria-current] .mono { color: var(--safelight); }
 .idx.off { color: var(--mute); }
 .peek { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); display: none; }
@@ -115,7 +137,7 @@ a.idx:hover { padding-left: 10px; }
 
 /* ---------- grille · A + D ---------- */
 .gridhead { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; padding-block: clamp(56px, 9vw, 120px) 28px; border-bottom: 1px solid var(--ink); margin-inline: var(--gut); scroll-margin-top: 16px; }
-.gridhead h3 { margin: 0; font-family: var(--serif); font-weight: 400; font-style: italic; font-size: clamp(26px, 3.4vw, 40px); }
+.gridhead h3 { margin: 0; font-family: var(--serif); font-weight: 400; font-style: var(--display-style); font-size: clamp(26px, 3.4vw, 40px); }
 .gridhead .mono { color: var(--mute); }
 .gridhead .reset { color: var(--ink); border-bottom: 1px solid var(--ink); }
 .grid { columns: 1; column-gap: 40px; padding-block: 40px 0; }
@@ -126,10 +148,10 @@ a.idx:hover { padding-left: 10px; }
 .tile img { width: 100%; transition: transform 1.2s cubic-bezier(.2,.7,.2,1); }
 .tile:hover img { transform: scale(1.025); }
 .tile .t { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 12px; }
-.tile .ttl { font-family: var(--serif); font-style: italic; font-size: 21px; line-height: 1.2; min-width: 0; }
+.tile .ttl { font-family: var(--serif); font-style: var(--display-style); font-size: 21px; line-height: 1.2; min-width: 0; }
 .tile .mono { color: var(--mute); white-space: nowrap; }
 @keyframes rise { from { opacity: .001; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-.empty { margin: 0; padding-block: 40px; color: var(--mute); font-family: var(--serif); font-style: italic; font-size: 22px; }
+.empty { margin: 0; padding-block: 40px; color: var(--mute); font-family: var(--serif); font-style: var(--display-style); font-size: 22px; }
 .swapping { opacity: .5; transition: opacity .2s; }
 
 footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 64px calc(env(safe-area-inset-bottom, 0px) + 64px); color: var(--mute); border-top: 1px solid var(--rule); margin-top: 40px; }
@@ -146,7 +168,7 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .viewer .vimg img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; animation: fade .45s ease both; }
 .viewer .vf { align-items: flex-end; padding-block: 18px 26px; }
 .viewer .vtext { min-width: 0; }
-.viewer h1 { margin: 0; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: clamp(26px, 4vw, 40px); line-height: 1.05; text-wrap: balance; }
+.viewer h1 { margin: 0; font-family: var(--serif); font-style: var(--display-style); font-weight: 400; font-size: clamp(26px, 4vw, 40px); line-height: 1.05; text-wrap: balance; }
 .viewer .meta { margin-top: 8px; }
 .viewer .legend { margin: 10px 0 0; font-family: var(--serif); font-size: 17px; color: #c9c6be; max-width: 52ch; max-height: 6.6em; overflow-y: auto; }   /* légende longue : défile, l'image garde sa place */
 .viewer .nav { display: flex; gap: 8px; flex: 0 0 auto; }
@@ -162,7 +184,7 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .prose { max-width: 62ch; font-size: 16px; line-height: 1.7; color: var(--prose); }
 .prose p { margin: 0 0 1em; }
 .people { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 40px; border-top: 1px solid var(--ink); padding-top: 28px; }
-.people h2 { margin: 0 0 10px; font-family: var(--serif); font-weight: 400; font-style: italic; font-size: 34px; }
+.people h2 { margin: 0 0 10px; font-family: var(--serif); font-weight: 400; font-style: var(--display-style); font-size: 34px; }
 .people p { margin: 0 0 14px; color: var(--prose); line-height: 1.65; max-width: 46ch; }
 .more { border-bottom: 1px solid currentColor; padding-bottom: 2px; }
 

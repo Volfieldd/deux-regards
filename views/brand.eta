@@ -1,2 +1,7 @@
+<% const b = it.brand || {}; %>
+<% if ((b.emblem || b.icon) && b.mode === 'embleme') { %>
+<a class="brand brand-emblem" href="/"><span class="emblem<%= b.emblem && b.icon ? ' has-compact' : '' %>" aria-hidden="true"></span><% if (b.emblem && b.icon) { %><span class="emblem-compact" aria-hidden="true"></span><% } %><span class="wordmark"><span class="name"><%= it.siteName %></span><% if (b.subtitle) { %><span class="subtitle"><%= b.subtitle %></span><% } %></span></a>
+<% } else { %>
 <% const words = it.siteName.split(' '); const last = words.pop(); %>
 <a class="brand" href="/"><%= words.join(' ') %><%= words.length ? ' ' : '' %><i><%= last %></i></a>
+<% } %>

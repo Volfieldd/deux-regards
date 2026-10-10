@@ -1,6 +1,6 @@
 # Plan d'implémentation
 
-Site photo de Sébastien et Julien. Nom provisoire : « Deux Regards » (déjà pris, à remplacer ; il est défini à un seul endroit dans la config).
+Nicephos, site photo de Sébastien et Julien. Le nom est défini à un seul endroit (`SITE_NAME`, ou Réglages dans l'admin) ; « Deux Regards » était le nom provisoire.
 
 Références de design (artefacts claude.ai) :
 - Mix retenu : https://claude.ai/artifact/41G7RSWC6zQQh1gsoXtGRG
@@ -120,6 +120,11 @@ storage/
 - Sauvegarde quotidienne (instantané SQLite contrôlé, originaux jamais effacés), restauration documentée.
 - `sitemap.xml`, `robots.txt` ; Open Graph et passe d'accessibilité faits plus tôt.
 - Guide : [docs/wiki/Déploiement.md](docs/wiki/Déploiement.md).
+
+### 6. Apparence et identité (fait)
+- Thèmes déclarés dans `server/themes.js`, feuilles de variables dans `public/themes/` ; Atelier (d'origine), Nicephos nuit et jour (d'après le logo).
+- Admin → Apparence : choix du thème, aperçu réservé aux admins, emblème (masque coloré par le thème, favicon générée), sous-titre.
+- Guide : [docs/wiki/Apparence-et-thèmes.md](docs/wiki/Apparence-et-thèmes.md).
 
 ## Côté Zitadel (à faire une fois)
 
