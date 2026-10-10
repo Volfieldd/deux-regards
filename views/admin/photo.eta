@@ -45,7 +45,8 @@
     <dd>
 <% if (t && t.status === 'ok' && t.sha256 === it.photo.sha256) { %>
       <strong>Horodatée le <%= t.gen_time.replace('T', ' à ').slice(0, 21) %> UTC</strong><br>
-      <span class="mono"><%= t.signer %> · n° <%= t.serial %></span>
+<% const cn = /CN=([^,]+)/.exec(t.signer), org = /O=([^,]+)/.exec(t.signer); %>
+      <span class="mono" title="<%= t.signer %>">Autorité : <%= cn ? cn[1] : t.signer %><%= org ? ` (${org[1]})` : '' %> · n° <%= t.serial %></span>
 <% } else if (!it.tsa.url) { %>
       Désactivé sur ce serveur (<code>TSA_URL=off</code>).
 <% } else if (t && t.status === 'error') { %>

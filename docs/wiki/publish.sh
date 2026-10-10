@@ -10,9 +10,11 @@ if ! git clone -q "$remote" "$work" 2>/dev/null; then
   exit 1
 fi
 find "$work" -maxdepth 1 -name '*.md' -delete
+rm -rf "$work/captures"
 for f in "$here"/*.md; do
   [ "$(basename "$f")" = README.md ] || cp "$f" "$work/"
 done
+if [ -d "$here/captures" ]; then cp -r "$here/captures" "$work/"; fi
 cd "$work"
 git add -A
 if git diff --cached --quiet; then echo "Wiki déjà à jour."; exit 0; fi

@@ -12,8 +12,11 @@ export default defineConfig({
   projects: [
     // Connexion locale de test (E2E_LOCAL_AUTH = LOCAL_AUTH_TOKEN du serveur), session réutilisée ensuite.
     { name: 'setup', testMatch: /auth\.setup\.js/ },
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, dependencies: ['setup'], testIgnore: /parcours/ },
-    { name: 'mobile', use: { ...devices['Pixel 7'] }, dependencies: ['setup'], testIgnore: /parcours/ },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, dependencies: ['setup'], testIgnore: /parcours|captures/ },
+    { name: 'mobile', use: { ...devices['Pixel 7'] }, dependencies: ['setup'], testIgnore: /parcours|captures/ },
+    // Captures pour la documentation (E2E_CAPTURES=1), bureau et mobile.
+    { name: 'captures-bureau', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } }, dependencies: ['setup'], testMatch: /captures\.spec\.js/ },
+    { name: 'captures-mobile', use: { ...devices['Pixel 7'] }, dependencies: ['setup'], testMatch: /captures\.spec\.js/ },
     // Modifie les données : seulement après les tests de rendu, qui supposent le jeu de démonstration intact.
     { name: 'parcours', use: { ...devices['Desktop Chrome'] }, dependencies: ['desktop', 'mobile'], testMatch: /parcours\.spec\.js/ },
   ],

@@ -6,6 +6,7 @@ Site photo de Sébastien et Julien : une galerie publique et une administration 
 
 | Vous voulez… | Page |
 |---|---|
+| Voir à quoi ressemble l'admin | [Visite de l'admin](Visite-de-l-admin) |
 | Publier, ranger et retoucher les photos | [Mode opératoire de l'admin](Mode-opératoire-admin) |
 | Ajouter un filigrane, choisir les EXIF | [Filigrane et EXIF](Filigrane-et-EXIF) |
 | Prouver l'antériorité d'une photo, afficher ses droits | [Preuves d'antériorité et droits](Preuves-et-droits) |
