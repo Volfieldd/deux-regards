@@ -7,6 +7,7 @@
 
 **Installer et configurer**
 - [Installation](Installation)
+- [Déploiement](Déploiement)
 - [Configuration](Configuration)
 - [Connexion et comptes](Connexion-et-comptes)
 

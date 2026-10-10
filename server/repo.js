@@ -1,6 +1,6 @@
 import { monthYear } from './format.js';
 
-const PHOTO_COLUMNS = `p.id, p.slug, p.title, p.place, p.taken_on, p.legend, p.status, p.position, p.file, p.width, p.height, p.variant_key,
+const PHOTO_COLUMNS = `p.id, p.slug, p.title, p.place, p.taken_on, p.legend, p.status, p.position, p.file, p.width, p.height, p.variant_key, p.updated_at,
   c.slug AS category_slug, c.name AS category, a.slug AS author_slug, a.name AS author`;
 
 // n : rang de la photo parmi toutes les photos publiées, quel que soit le filtre (N°01, N°02… sans trou).

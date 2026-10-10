@@ -10,6 +10,7 @@ Site photo de Sébastien et Julien : une galerie publique et une administration 
 | Ajouter un filigrane, choisir les EXIF | [Filigrane et EXIF](Filigrane-et-EXIF) |
 | Prouver l'antériorité d'une photo, afficher ses droits | [Preuves d'antériorité et droits](Preuves-et-droits) |
 | Installer et lancer le site | [Installation](Installation) |
+| Mettre en ligne (Docker, Cloudflare Tunnel), sauvegarder, restaurer | [Déploiement](Déploiement) |
 | Régler le serveur (variables d'environnement) | [Configuration](Configuration) |
 | Configurer Zitadel, gérer les comptes | [Connexion et comptes](Connexion-et-comptes) |
 | Comprendre le traitement des images | [Images et variantes](Images-et-variantes) |

@@ -1,8 +1,17 @@
 import { loadConfig } from './config.js';
 import { openDb, migrate } from './db/index.js';
 import { buildApp } from './app.js';
+import { assertPersistentStorage } from './storage-guard.js';
 
-const config = loadConfig();
+let config;
+try {
+  config = loadConfig();
+  assertPersistentStorage(config.storageDir);
+} catch (err) {
+  // Erreur de configuration : message lisible, pas de pile d'appels.
+  console.error(`Démarrage refusé : ${err.message}`);
+  process.exit(1);
+}
 const db = openDb(config.databasePath);
 migrate(db);
 

@@ -18,7 +18,7 @@ npm run seed              # crée la base et importe les 12 photos de démonstra
 npm run dev               # http://localhost:3000, rechargement automatique
 ```
 
-En production, utilisez `npm start` (sans rechargement), avec `NODE_ENV=production` et une `PUBLIC_URL` en HTTPS.
+En production, utilisez Docker : voir [Déploiement](Déploiement).
 
 ## Ce qui est créé
 

@@ -1,0 +1,80 @@
+# Déploiement : site + sauvegarde quotidienne, et en option le tunnel Cloudflare.
+#   docker compose up -d --build                 # site + sauvegardes
+#   docker compose --profile tunnel up -d        # + cloudflared (TUNNEL_TOKEN dans .env)
+#
+# DONNÉES : DATA_DIR et BACKUP_DIR sont des dossiers de l'hôte (bind mounts), à créer avant le premier
+# lancement. Compose refuse de démarrer s'ils manquent (pas de dossier vide créé en silence) et
+# « docker compose down -v » ne peut pas les effacer. Voir docs/wiki/Déploiement.md.
+
+x-data: &data
+  type: bind
+  source: ${DATA_DIR:?DATA_DIR obligatoire (dossier des données sur l'hôte)}
+  target: /data
+  bind:
+    create_host_path: false
+
+services:
+  site:
+    build: .
+    image: site-photo:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      STORAGE_DIR: /data
+      DATABASE_PATH: /data/site.db
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    volumes:
+      - *data
+    # Par défaut, le site n'écoute que sur la machine : cloudflared le joint par le réseau Docker.
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${HOST_PORT:-3000}:3000"
+    stop_grace_period: 60s
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+  backup:
+    image: site-photo:latest
+    restart: unless-stopped
+    depends_on:
+      site:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      STORAGE_DIR: /data
+      DATABASE_PATH: /data/site.db
+      BACKUP_DIR: /backups
+      REQUIRE_PERSISTENT_STORAGE: "1"
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    command: ["node", "server/db/backup.js", "--loop"]
+    healthcheck:
+      disable: true
+    volumes:
+      - *data
+      - type: bind
+        source: ${BACKUP_DIR:?BACKUP_DIR obligatoire (dossier des sauvegardes sur l'hôte)}
+        target: /backups
+        bind:
+          create_host_path: false
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.0
+    profiles: [tunnel]
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}   # obligatoire pour le profil « tunnel » (cloudflared refuse de démarrer sans)
+    depends_on:
+      site:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true

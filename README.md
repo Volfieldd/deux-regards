@@ -9,6 +9,10 @@ Le plan complet est dans [PLAN.md](PLAN.md).
 - **Wiki** (mode opératoire, configuration, exploitation) : sources dans [`docs/wiki/`](docs/wiki/), publiées sur le [wiki GitHub](https://github.com/Volfieldd/deux-regards/wiki) par `docs/wiki/publish.sh`.
 - **Spécifications** : [`docs/specs/`](docs/specs/), dont [filigrane et EXIF](docs/specs/filigrane-et-exif.md).
 
+## Déployer
+
+Docker + Cloudflare Tunnel, données persistantes et sauvegardes : voir [docs/wiki/Déploiement.md](docs/wiki/Déploiement.md).
+
 ## Démarrer
 
 Prérequis : Node.js 22+.
