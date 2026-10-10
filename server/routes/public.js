@@ -5,6 +5,11 @@ import { pad } from '../format.js';
 import { picture } from '../picture.js';
 
 const HERO_COUNT = 5;
+const DEFAULT_RIGHTS = `Toutes les photographies publiées sur ce site sont protégées par le droit d’auteur. Elles appartiennent à leurs auteurs, {auteurs}.
+
+Toute reproduction, représentation, modification ou utilisation, totale ou partielle, sans autorisation écrite préalable est interdite (articles L.122-4 et L.335-2 du Code de la propriété intellectuelle).
+
+Pour toute demande d’utilisation ou de licence, écrivez-nous en précisant la photo, l’usage envisagé et sa durée.`;
 
 export default async function publicRoutes(app) {
   const repo = createRepo(app.db);
@@ -104,6 +109,21 @@ export default async function publicRoutes(app) {
     return reply.render('about', {
       ...helpers, settings, paragraphs, authors: repo.authors(),
       pageTitle: `À propos · ${siteName}`, canonical: '/a-propos', description: settings.tagline || '',
+    });
+  });
+
+  // Conditions d'utilisation des photos : cible des mentions IPTC (WebStatement, LicensorURL).
+  app.get('/droits', async (request, reply) => {
+    const siteName = app.siteName();
+    const settings = repo.settings();
+    const authors = repo.authors().map(a => a.name);
+    const names = authors.length > 1 ? `${authors.slice(0, -1).join(', ')} et ${authors.at(-1)}` : authors[0] || siteName;
+    const text = settings.rights_text || DEFAULT_RIGHTS.replace('{auteurs}', names);
+    const contact = String(settings.rights_contact || '').trim();
+    return reply.render('rights', {
+      ...base, siteName, paragraphs: text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean),
+      contact, contactHref: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) ? `mailto:${contact}` : /^https:\/\/\S+$/.test(contact) ? contact : null,
+      pageTitle: `Droits d’utilisation · ${siteName}`, canonical: '/droits', description: `Conditions d’utilisation des photographies de ${siteName}.`,
     });
   });
 

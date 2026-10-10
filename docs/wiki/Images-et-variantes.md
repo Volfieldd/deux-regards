@@ -15,13 +15,14 @@ Les pages utilisent `<picture>` avec `srcset` et `sizes` : le navigateur choisit
 
 1. **Import :**
    - vérification du poids (60 Mo), du nombre de pixels (120 Mpx) et du format réel, par décodage ;
+   - empreinte SHA-256 de l'original, puis horodatage RFC 3161 en arrière-plan (voir [Preuves d'antériorité et droits](Preuves-et-droits)) ;
    - l'original est rangé sous un nom aléatoire ;
    - la photo est créée en brouillon.
 2. **Rendu de chaque variante**, en un seul pipeline `sharp` :
    - application de l'orientation EXIF aux pixels ;
    - redimensionnement ;
    - filigrane éventuel ;
-   - métadonnées selon le réglage (aucune par défaut) ;
+   - métadonnées selon le réglage (aucune par défaut ; mentions IPTC en XMP dans les modes signés) ;
    - encodage AVIF (qualité 55) ou WebP (qualité 78).
 3. **Publication :** les variantes deviennent accessibles sous `/media/`.
 

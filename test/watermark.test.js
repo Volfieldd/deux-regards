@@ -42,7 +42,8 @@ test('filigrane désactivé pour une photo, logo absent, texte vide : pas de fil
 
 test('métadonnées : droits écrits par le site, empreinte dédiée', () => {
   const s = specFor(PHOTO, ctx({}, { mode: 'rights' }));
-  assert.deepEqual(s.meta, { mode: 'rights', artist: 'Julien', copyright: '© 2024 Julien' });
+  assert.deepEqual(s.meta, { mode: 'rights', artist: 'Julien', copyright: '© 2024 Julien', credit: 'Deux Regards', webStatement: null });
+  assert.equal(specFor(PHOTO, { ...ctx({}, { mode: 'rights' }), rightsUrl: 'https://x.example/droits' }).meta.webStatement, 'https://x.example/droits');
   assert.notEqual(s.key, '');
   assert.notEqual(specFor(PHOTO, ctx({}, { mode: 'shooting' })).key, s.key);
 });
@@ -105,10 +106,20 @@ test('métadonnées : aucune, droits, prise de vue sans GPS, tout', async t => {
   await renderVariants(dir, file, {});
   assert.equal(await exifOf(out(640, 'webp', '')), null);
 
-  await renderVariants(dir, file, { key: 'dddddddd', meta: { mode: 'rights', artist: 'Julien', copyright: '© 2024 Julien' } });
+  await renderVariants(dir, file, { key: 'dddddddd', meta: { mode: 'rights', artist: 'Sébastien <&>', copyright: '© 2024 Sébastien', credit: 'Deux Regards', webStatement: 'https://x.example/droits' } });
+  // Mentions IPTC en XMP : accents conservés, valeurs échappées.
+  for (const f of ['avif', 'webp']) {
+    const xmp = (await sharp(out(640, f, 'dddddddd')).metadata()).xmp.toString();
+    assert.match(xmp, /<dc:creator><rdf:Seq><rdf:li>Sébastien &lt;&amp;&gt;<\/rdf:li>/);
+    assert.match(xmp, /<rdf:li xml:lang="x-default">© 2024 Sébastien<\/rdf:li>/);
+    assert.match(xmp, /<photoshop:Credit>Deux Regards<\/photoshop:Credit>/);
+    assert.match(xmp, /<xmpRights:WebStatement>https:\/\/x\.example\/droits<\/xmpRights:WebStatement>/);
+    assert.match(xmp, /<plus:LicensorURL>https:\/\/x\.example\/droits<\/plus:LicensorURL>/);
+  }
+  assert.equal((await sharp(out(640, 'webp', '')).metadata()).xmp, undefined);   // mode « aucune » : pas de XMP
   const rights = await exifOf(out(640, 'avif', 'dddddddd'));
-  assert.equal(rights.Image.Artist, 'Julien');
-  assert.equal(rights.Image.Copyright, '(C) 2024 Julien');
+  assert.equal(rights.Image.Artist, 'Sebastien <&>');
+  assert.equal(rights.Image.Copyright, '(C) 2024 Sebastien');
   assert.equal(rights.Image.Make, undefined);
   assert.equal(rights.GPSInfo, undefined);
 

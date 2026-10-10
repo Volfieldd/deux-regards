@@ -1,10 +1,14 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const required = (env, key) => {
   const value = env[key];
   if (!value) throw new Error(`Variable d'environnement manquante : ${key}`);
   return value;
 };
+
+const DEFAULT_TSA = 'https://freetsa.org/tsr';
+const DEFAULT_TSA_CA = fileURLToPath(new URL('../assets/tsa/freetsa-cacert.pem', import.meta.url));
 
 const list = value => (value ? value.split(',').map(s => s.trim()).filter(Boolean) : []);
 
@@ -28,6 +32,11 @@ export function loadConfig(env = process.env) {
   if (localAuthToken && deployed) throw new Error('LOCAL_AUTH_TOKEN est réservé aux tests : interdit en HTTPS ou en production');
   if (localAuthToken && localAuthToken.length < 16) throw new Error('LOCAL_AUTH_TOKEN doit faire au moins 16 caractères');
 
+  // Horodatage RFC 3161 des originaux : FreeTSA par défaut, « off » pour désactiver.
+  const tsaUrl = env.TSA_URL === 'off' ? null : (env.TSA_URL || DEFAULT_TSA);
+  const tsaCaFile = env.TSA_CA_FILE || (tsaUrl === DEFAULT_TSA ? DEFAULT_TSA_CA : null);
+  if (tsaUrl && deployed && !tsaUrl.startsWith('https://')) throw new Error('TSA_URL doit être en HTTPS hors développement');
+
   return {
     production,
     deployed,
@@ -43,6 +52,7 @@ export function loadConfig(env = process.env) {
     storageDir,
     cookieSecret,
     localAuthToken,
+    tsa: { url: tsaUrl, caFile: tsaCaFile },
     authRateLimit: Math.max(Number.parseInt(env.AUTH_RATE_LIMIT, 10) || 30, 1),
     oidc: {
       issuer,

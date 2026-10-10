@@ -37,12 +37,22 @@ Tout se règle par variables d'environnement, dans le fichier `.env` (lu par `np
 | `AUTH_RATE_LIMIT` | `30` | Tentatives de connexion par IP sur 10 minutes. |
 | `LOCAL_AUTH_TOKEN` | — | Connexion locale de **test**, 16 caractères au moins. **Refusée en ligne.** |
 
+## Preuves d'antériorité
+
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `TSA_URL` | `https://freetsa.org/tsr` | Autorité d'horodatage RFC 3161. `off` : pas d'horodatage (les empreintes restent calculées). **HTTPS obligatoire en ligne.** |
+| `TSA_CA_FILE` | certificat FreeTSA fourni (`assets/tsa/`) si `TSA_URL` est la valeur par défaut | Certificat racine de l'autorité, au format PEM : la chaîne de chaque jeton est vérifiée jusqu'à lui. |
+
+Pour une présomption d'exactitude de la date (eIDAS), choisissez une **autorité qualifiée** figurant sur la liste de confiance européenne. Reportez alors son URL RFC 3161 dans `TSA_URL` et son certificat racine dans `TSA_CA_FILE`. Le serveur doit pouvoir joindre cette URL en sortie.
+
 ## Site « en ligne »
 
 Dès que `PUBLIC_URL` est en HTTPS ou que `NODE_ENV=production`, le serveur **refuse de démarrer** dans les cas suivants :
 
 - `COOKIE_SECRET` est absent ;
 - `OIDC_ISSUER` est en HTTP ;
-- `LOCAL_AUTH_TOKEN` est défini.
+- `LOCAL_AUTH_TOKEN` est défini ;
+- `TSA_URL` est en HTTP.
 
 Il fait aussi confiance au proxy local, et envoie l'en-tête HSTS quand `PUBLIC_URL` est en HTTPS. Ces protections ne dépendent donc pas d'une seule variable qu'on pourrait oublier.

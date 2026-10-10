@@ -77,7 +77,7 @@ Le bandeau de filtres propose :
 2. Cliquer sur **Supprimer cette photo**.
 3. Confirmer avec **Supprimer définitivement**.
 
-L'original et toutes ses images sont effacés, et la photo est retirée de l'ouverture. **Cette action est irréversible** (sauf restauration d'une sauvegarde, voir [Exploitation](Exploitation)).
+L'original, toutes ses images et sa preuve d'antériorité sont effacés, et la photo est retirée de l'ouverture. Téléchargez d'abord la preuve si elle peut encore servir. **Cette action est irréversible** (sauf restauration d'une sauvegarde, voir [Exploitation](Exploitation)).
 
 ## 7. Séries
 
@@ -110,11 +110,16 @@ Renommer un auteur met à jour ses images si son nom figure dans le filigrane ou
 | Introduction | Texte sous l'accroche, à l'accueil. |
 | À propos | Page « À propos » ; séparer les paragraphes par une ligne vide. |
 | Photos de l'ouverture | Diaporama de l'accueil : 8 au plus, parmi les photos publiées, dans l'ordre de la galerie. Sans choix : les 5 premières. |
+| Droits d'utilisation | Texte et contact de la page publique `/droits` (voir [Preuves d'antériorité et droits](Preuves-et-droits#page-droits-dutilisation)). |
 
 ## 10. Filigrane et EXIF
 
 Voir la page dédiée : [Filigrane et EXIF](Filigrane-et-EXIF).
 
-## 11. Se déconnecter
+## 11. Preuve d'antériorité d'une photo
+
+Chaque photo importée est horodatée automatiquement. La section **Preuve d'antériorité** de sa fiche permet de vérifier cette preuve et de la télécharger. Voir [Preuves d'antériorité et droits](Preuves-et-droits#constituer-un-dossier-en-cas-de-litige).
+
+## 12. Se déconnecter
 
 Utilisez le bouton **Se déconnecter**, en haut à droite. Pensez-y sur un ordinateur partagé : la session resterait sinon ouverte jusqu'à 8 h sans activité.

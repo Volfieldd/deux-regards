@@ -12,6 +12,7 @@ import adminRoutes from './routes/admin.js';
 import mediaRoutes from './routes/media.js';
 import { setupAuth } from './auth.js';
 import { createVariantService } from './variants.js';
+import { createProofService } from './proofs.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -61,7 +62,7 @@ function assetUrls(root, cache) {
   };
 }
 
-export async function buildApp({ config, db, logger = true, oidc }) {
+export async function buildApp({ config, db, logger = true, oidc, proofOptions = {} }) {
   const app = Fastify({ logger: loggerOptions(logger), trustProxy: config.trustProxy });
 
   app.decorate('config', config);
@@ -93,9 +94,13 @@ export async function buildApp({ config, db, logger = true, oidc }) {
   });
 
   // Variantes : vérifiées au démarrage (réglages changés, rendu interrompu), puis à chaque modification.
-  app.decorate('variants', createVariantService({ db, storageDir: config.storageDir, siteName: app.siteName, log: app.log }));
+  app.decorate('variants', createVariantService({ db, storageDir: config.storageDir, siteName: app.siteName, log: app.log, publicUrl: config.publicUrl }));
   app.addHook('onReady', async () => { app.variants.schedule(); });
   app.addHook('onClose', async () => { await app.variants.idle(); });
+  // Preuves d'antériorité : empreintes et horodatage RFC 3161, repris en arrière-plan.
+  app.decorate('proofs', createProofService({ db, storageDir: config.storageDir, tsa: config.tsa, log: app.log, ...proofOptions }));
+  app.addHook('onReady', async () => { app.proofs.start(); });
+  app.addHook('onClose', async () => { await app.proofs.stop(); });
 
   await setupAuth(app, oidc && { oidc });
   const headers = { ...SECURITY_HEADERS, 'content-security-policy': csp([app.oidc.origin].filter(Boolean)) };

@@ -109,6 +109,11 @@ storage/
 - Empreinte des réglages dans le nom des variantes : cache long sans image périmée, bascule sans image cassée ; recalcul en arrière-plan avec progression.
 - Spécification : [docs/specs/filigrane-et-exif.md](docs/specs/filigrane-et-exif.md). Wiki : [docs/wiki/](docs/wiki/).
 
+### 4 quater. Preuves d'antériorité et droits (fait)
+- Empreinte SHA-256 de chaque original, horodatée RFC 3161 (FreeTSA par défaut, autorité qualifiée eIDAS possible), reprise automatique ; téléchargement et vérification de la preuve, vérifiable avec OpenSSL sans le site.
+- Mentions IPTC (XMP) dans les modes EXIF signés ; page publique `/droits`.
+- Spécification : [docs/specs/preuves-et-droits.md](docs/specs/preuves-et-droits.md).
+
 ### 5. Mise en ligne
 - Dockerfile, Caddyfile, volume persistant pour `storage/` et la base.
 - Sauvegarde quotidienne, sitemap, Open Graph, passe d'accessibilité (focus, contrastes, `prefers-reduced-motion`, textes alternatifs).

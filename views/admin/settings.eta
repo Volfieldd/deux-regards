@@ -10,6 +10,11 @@
     <label>Introduction (accueil) <textarea name="intro" rows="3" maxlength="1000"><%= s.intro || '' %></textarea></label>
     <label>À propos <span class="mono">paragraphes séparés par une ligne vide</span><textarea name="about" rows="8" maxlength="10000"><%= s.about || '' %></textarea></label>
   </section>
+  <section class="panel">
+    <h2>Droits d’utilisation <span class="mono">page <a href="/droits" target="_blank" rel="noopener">/droits</a>, liée aux mentions IPTC des images</span></h2>
+    <label>Texte <span class="mono">vide : texte par défaut (droit d’auteur, reproduction interdite sans autorisation)</span><textarea name="rights_text" rows="6" maxlength="10000"><%= s.rights_text || '' %></textarea></label>
+    <label>Contact pour les demandes d’utilisation <span class="mono">adresse e-mail ou lien https://</span><input name="rights_contact" value="<%= s.rights_contact || '' %>" maxlength="200"></label>
+  </section>
   <fieldset class="panel">
     <legend>Photos de l’ouverture <span class="mono">8 au plus, dans l’ordre de la galerie · sans choix : les 5 premières</span></legend>
     <div class="herogrid">

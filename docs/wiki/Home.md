@@ -8,6 +8,7 @@ Site photo de Sébastien et Julien : une galerie publique et une administration 
 |---|---|
 | Publier, ranger et retoucher les photos | [Mode opératoire de l'admin](Mode-opératoire-admin) |
 | Ajouter un filigrane, choisir les EXIF | [Filigrane et EXIF](Filigrane-et-EXIF) |
+| Prouver l'antériorité d'une photo, afficher ses droits | [Preuves d'antériorité et droits](Preuves-et-droits) |
 | Installer et lancer le site | [Installation](Installation) |
 | Régler le serveur (variables d'environnement) | [Configuration](Configuration) |
 | Configurer Zitadel, gérer les comptes | [Connexion et comptes](Connexion-et-comptes) |
@@ -27,6 +28,7 @@ Site photo de Sébastien et Julien : une galerie publique et une administration 
   - photos (import, édition, publication, ordre), séries, auteurs, réglages, filigrane et EXIF ;
   - accès par connexion OIDC (Zitadel) avec le rôle `admin`. L'application ne gère aucun mot de passe.
 - **Images :**
+  - chaque original est horodaté par une autorité tierce (preuve d'antériorité) ;
   - les originaux ne sont jamais servis ;
   - le site sert des variantes AVIF et WebP en 640, 1280 et 2000 px, sans métadonnées par défaut.
 - **Technique :** Node.js 22, Fastify, SQLite, sharp et gabarits Eta, sans framework front ni étape de build.

@@ -69,6 +69,7 @@ export default async function adminRoutes(app) {
       title: 'Tableau de bord',
       counts: { published: photos.filter(p => p.status === 'published').length, draft: photos.filter(p => p.status === 'draft').length },
       categories: repo.categories().length, authors: repo.authors(), me: repo.authorBySub(request.session.sub),
+      proofs: app.proofs.status(), tsa: app.config.tsa,
     });
   });
 
@@ -143,6 +144,7 @@ export default async function adminRoutes(app) {
 
     if (!checked) return finish(403, { error: 'Jeton CSRF invalide.' }) ?? reply.code(403).send('Jeton CSRF invalide.');
     request.log.info({ imported: imported.length, refused: refused.length }, 'import de photos');
+    if (imported.length) app.proofs.schedule();          // horodatage des nouveaux originaux
     if (wantsJson) return reply.send({ imported, refused });
     const details = refused.map(r => `${r.name} : ${r.reason}`);
     const text = `${imported.length} photo(s) importée(s) en brouillon${refused.length ? `, ${refused.length} refusée(s)` : ''}.`;
@@ -163,7 +165,10 @@ export default async function adminRoutes(app) {
   app.get('/admin/photos/:id', async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
-    return render(request, reply, 'photo', { title: photo.title, photo, values: photo, errors: {}, categories: repo.categories(), authors: repo.authors() });
+    return render(request, reply, 'photo', {
+      title: photo.title, photo, values: photo, errors: {}, categories: repo.categories(), authors: repo.authors(),
+      proof: app.proofs.get(photo.id), tsa: app.config.tsa,
+    });
   });
 
   app.post('/admin/photos/:id', write, async (request, reply) => {
@@ -177,9 +182,75 @@ export default async function adminRoutes(app) {
       reply.code(422);
       return render(request, reply, 'photo', {
         title: photo.title, photo, values: { ...photo, ...err.values }, errors: err.errors, categories: repo.categories(), authors: repo.authors(),
+        proof: app.proofs.get(photo.id), tsa: app.config.tsa,
       });
     }
     return done(reply, `/admin/photos/${photo.id}`, 'Photo enregistrée.');
+  });
+
+  // ---------- preuve d'antériorité ----------
+  const ext = file => path.extname(file).slice(1);
+  const attachment = (reply, name) => reply.header('cache-control', 'no-store').header('content-disposition', `attachment; filename="${name}"`);
+
+  app.get('/admin/photos/:id/original', async (request, reply) => {
+    const photo = repo.photo(byId(request.params.id));
+    if (!photo) return reply.callNotFound();
+    return attachment(reply, `${photo.slug}.${ext(photo.file)}`).sendFile(photo.file, path.join(storageDir, 'originals'), { cacheControl: false });
+  });
+
+  app.get('/admin/photos/:id/preuve.tsr', async (request, reply) => {
+    const photo = repo.photo(byId(request.params.id));
+    const t = photo && app.proofs.get(photo.id);
+    if (!t || t.status !== 'ok') return reply.callNotFound();
+    return attachment(reply, `${photo.slug}.tsr`).type('application/timestamp-reply').send(t.token);
+  });
+
+  app.get('/admin/photos/:id/preuve.txt', async (request, reply) => {
+    const photo = repo.photo(byId(request.params.id));
+    const t = photo && app.proofs.get(photo.id);
+    if (!t || t.status !== 'ok') return reply.callNotFound();
+    const name = `${photo.slug}.${ext(photo.file)}`;
+    const ca = app.config.tsa.caFile ? 'autorite-horodatage.pem' : '<certificat racine de l’autorité>';
+    const text = [
+      `Preuve d'antériorité — « ${photo.title} » (${photo.author})`,
+      '',
+      `Fichier original      : ${name}`,
+      `Empreinte SHA-256     : ${photo.sha256}`,
+      `Date certifiée (UTC)  : ${t.gen_time}`,
+      `Autorité (TSA)        : ${t.signer}`,
+      `Service               : ${t.tsa}`,
+      `Numéro de série       : ${t.serial}`,
+      '',
+      'Le jeton d’horodatage RFC 3161 (fichier .tsr) atteste que le fichier ayant cette empreinte',
+      'existait à la date certifiée. Il se vérifie sans le site, avec OpenSSL :',
+      '',
+      `  sha256sum ${name}`,
+      `  openssl ts -reply -in ${photo.slug}.tsr -text`,
+      `  openssl ts -verify -in ${photo.slug}.tsr -data ${name} -CAfile ${ca}`,
+      '',
+      'Conservez ensemble : l’original, le fichier .tsr, cette fiche et le certificat de l’autorité.',
+      '',
+    ].join('\n');
+    return attachment(reply, `${photo.slug}-preuve.txt`).type('text/plain; charset=utf-8').send(text);
+  });
+
+  app.get('/admin/preuves/autorite.pem', async (request, reply) => {
+    if (!app.config.tsa.caFile) return reply.callNotFound();
+    return attachment(reply, 'autorite-horodatage.pem').type('application/x-pem-file').send(fs.readFileSync(app.config.tsa.caFile));
+  });
+
+  app.post('/admin/photos/:id/verifier', write, async (request, reply) => {
+    const photo = repo.photo(byId(request.params.id));
+    if (!photo) return reply.callNotFound();
+    const r = await app.proofs.verify(photo.id);
+    const to = `/admin/photos/${photo.id}#preuve`;
+    if (!r.ok) return failed(reply, to, `Preuve non valide : ${r.reason}.`);
+    return done(reply, to, `Preuve valide : original intact, horodaté le ${r.genTime.toISOString().replace('T', ' à ').slice(0, 21)} UTC, signature vérifiée${r.chained ? ' jusqu’à l’autorité racine' : ''}.`);
+  });
+
+  app.post('/admin/preuves/reessayer', write, async (request, reply) => {
+    app.proofs.schedule({ retryNow: true });
+    return done(reply, safeBack(request, '/admin'), 'Horodatage relancé : les preuves en attente sont redemandées en arrière-plan.');
   });
 
   app.post('/admin/photos/:id/status', write, async (request, reply) => {

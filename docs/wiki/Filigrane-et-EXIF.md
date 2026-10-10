@@ -57,11 +57,11 @@ Dans la fiche de la photo, choisir **Filigrane : Jamais sur cette photo**, puis 
 | Choix | Ce que contiennent les images du site | Quand le choisir |
 |---|---|---|
 | **Aucune métadonnée** (défaut) | Rien. | Par défaut : rien ne fuit. |
-| **Droits d'auteur** | Auteur et « © année auteur » | Pour signer les fichiers. |
+| **Droits d'auteur** | Auteur, « © année auteur », et mentions IPTC (crédit, lien vers la page « Droits d'utilisation ») | Pour signer les fichiers. Voir [Preuves d'antériorité et droits](Preuves-et-droits#signer-les-images-mentions-iptc). |
 | **Prise de vue** | Droits + appareil, objectif, ouverture, vitesse, ISO, focale, date | Pour partager sa technique. **Jamais la localisation.** |
 | **Tout l'EXIF de l'original** | Tout, **y compris la position GPS** et le numéro de série éventuel | Rarement : révèle où la photo a été prise. |
 
-Les champs EXIF n'acceptent que des caractères simples : « © 2024 Sébastien » y est écrit « (C) 2024 Sebastien ». Le filigrane, lui, garde les accents.
+Les champs EXIF n'acceptent que des caractères simples : « © 2024 Sébastien » y est écrit « (C) 2024 Sebastien ». Les mentions IPTC (XMP) et le filigrane, eux, gardent les accents.
 
 ## Revenir en arrière
 
