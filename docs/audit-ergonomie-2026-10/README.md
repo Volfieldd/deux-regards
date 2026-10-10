@@ -1,6 +1,6 @@
 # Audit d’ergonomie et d’accessibilité — administration de Nicephos
 
-> **Livrables :** ce rapport ; [présentation de direction](audit-ergonomie-admin-direction.pdf) (12 diapositives, [PPTX](audit-ergonomie-admin-direction.pptx)) ; [présentation détaillée](audit-ergonomie-admin-detaille.pdf) (25 diapositives, [PPTX](audit-ergonomie-admin-detaille.pptx)) ; maquettes HTML autonomes dans [`images/`](images/) ; données structurées [`donnees-audit.json`](donnees-audit.json).
+> **Livrables :** ce rapport ; [présentation de direction](audit-ergonomie-admin-direction.pdf) (12 diapositives, [PPTX](audit-ergonomie-admin-direction.pptx)) ; [présentation détaillée](audit-ergonomie-admin-detaille.pdf) (25 diapositives, [PPTX](audit-ergonomie-admin-detaille.pptx)) ; maquettes HTML autonomes dans [`images/`](images/) ; données structurées [`donnees-audit.json`](donnees-audit.json) ; **[écrans cibles et grille de notes actuel → cible](cible/README.md)** (14 écrans, 8/10 minimum à chaque critère).
 >
 > Parcours rejouables : `E2E_AUDIT=1 BASE_URL=… E2E_LOCAL_AUTH=… e2e/run.sh --project=audit` (`e2e/tests/audit.spec.js`, serveur de test uniquement : le parcours importe puis supprime des photos).
 
