@@ -16,6 +16,9 @@ done
 cd "$work"
 git add -A
 if git diff --cached --quiet; then echo "Wiki déjà à jour."; exit 0; fi
-git commit -q -m "Mise à jour du wiki depuis docs/wiki ($(git -C "$here" rev-parse --short HEAD))"
+# Identité : celle configurée, sinon l'auteur du dernier commit du dépôt.
+name="$(git config user.name || git -C "$here" log -1 --format=%an)"
+email="$(git config user.email || git -C "$here" log -1 --format=%ae)"
+git -c user.name="$name" -c user.email="$email" commit -q -m "Mise à jour du wiki depuis docs/wiki ($(git -C "$here" rev-parse --short HEAD))"
 git push -q origin HEAD
 echo "Wiki publié."
