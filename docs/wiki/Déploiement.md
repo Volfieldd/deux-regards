@@ -1,5 +1,7 @@
 # Déploiement (Docker et Cloudflare Tunnel)
 
+> **Unraid :** guide et fichiers prêts à l'emploi dans [`deploy/unraid/`](https://github.com/Volfieldd/deux-regards/tree/main/deploy/unraid) : pile Compose, modèles Unraid, export des données, configuration de Zitadel et des domaines nicephos.com / nicephos.art. L'image est publiée sur `ghcr.io/volfieldd/deux-regards` à chaque mise à jour de `main`.
+
 Le site tourne dans Docker. Il est exposé sur Internet par un **tunnel Cloudflare** (`cloudflared`) : aucun port n'est ouvert vers l'extérieur et Cloudflare fournit le HTTPS, donc ni Caddy ni certificat à gérer.
 
 ```

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>nicephos-sauvegarde</Name>
+  <Repository>ghcr.io/volfieldd/deux-regards:latest</Repository>
+  <Registry>https://github.com/Volfieldd/deux-regards/pkgs/container/deux-regards</Registry>
+  <Network>nicephos</Network>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/Volfieldd/deux-regards/wiki</Support>
+  <Project>https://github.com/Volfieldd/deux-regards</Project>
+  <Overview>Sauvegarde quotidienne de Nicephos : instantané cohérent de la base et copie des originaux, logos et marque. Mêmes données que le conteneur nicephos.</Overview>
+  <Category>Backup:</Category>
+  <ExtraParams>--user 99:100 --read-only --tmpfs /tmp --security-opt no-new-privileges:true --cap-drop ALL --no-healthcheck</ExtraParams>
+  <PostArgs>node server/db/backup.js --loop</PostArgs>
+  <Config Name="Données" Target="/data" Default="/mnt/cache/appdata/nicephos/data" Mode="rw" Description="Le même dossier que le conteneur nicephos." Type="Path" Display="always" Required="true" Mask="false">/mnt/cache/appdata/nicephos/data</Config>
+  <Config Name="Sauvegardes" Target="/backups" Default="/mnt/user/backups/nicephos" Mode="rw" Description="Sur d'autres disques que les données ; propriétaire 99:100, à créer avant." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/backups/nicephos</Config>
+    <Config Name="Instantanés gardés" Target="BACKUP_KEEP" Default="14" Mode="" Description="Nombre d'instantanés de la base conservés." Type="Variable" Display="always" Required="false" Mask="false">14</Config>
+    <Config Name="Fréquence (heures)" Target="BACKUP_INTERVAL_HOURS" Default="24" Mode="" Description="Intervalle entre deux sauvegardes." Type="Variable" Display="always" Required="false" Mask="false">24</Config>
+    <Config Name="Mode" Target="NODE_ENV" Default="production" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">production</Config>
+    <Config Name="Dossier des données (interne)" Target="STORAGE_DIR" Default="/data" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">/data</Config>
+    <Config Name="Base (interne)" Target="DATABASE_PATH" Default="/data/site.db" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">/data/site.db</Config>
+    <Config Name="Sauvegardes (interne)" Target="BACKUP_DIR" Default="/backups" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">/backups</Config>
+    <Config Name="Garde-fou de persistance" Target="REQUIRE_PERSISTENT_STORAGE" Default="1" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">1</Config>
+</Container>

@@ -14,6 +14,8 @@ L'administration est réservée aux auteurs. L'application **ne stocke et ne gè
 
 ## Configurer Zitadel (une fois)
 
+Pas à pas détaillé, avec les écrans de la console : [`deploy/unraid/README.md`, section Zitadel](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/README.md#3-zitadel--la-connexion-à-ladmin). Résumé :
+
 1. Créer une organisation, puis un projet (par exemple « site photo »). Dans le projet, créer le rôle `admin`.
 2. Dans le projet, créer une application **Web** :
    - méthode d'authentification **Code** ;
