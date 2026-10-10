@@ -37,7 +37,7 @@ Flux : `/auth/login` → Zitadel (connexion locale ou « Continuer avec Google �
 - Session côté serveur (table `sessions`), cookie `httpOnly` + `Secure` + `SameSite=Lax`, ID régénéré à la connexion, expiration glissante.
 - CSRF : jeton synchronisé sur toutes les routes d'écriture de l'admin.
 - Déconnexion : suppression de la session + RP-initiated logout (`end_session_endpoint`).
-- Config par variables d'environnement : `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_REDIRECT_URI`, `OIDC_ADMIN_ROLE`, `OIDC_ALLOWED_SUBS` (repli).
+- Config par variables d'environnement : `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_PROJECT_ID`, `OIDC_ORG_ID`, `OIDC_REDIRECT_URI`, `OIDC_ADMIN_ROLE`, `OIDC_ALLOWED_SUBS` (repli).
 - La double authentification et la politique de connexion se règlent dans Zitadel, pas dans l'application.
 
 ## Modèle de données
@@ -84,15 +84,24 @@ storage/
 - `srcset` + `sizes`, lazy-loading, dimensions explicites (pas de saut de mise en page).
 - Dissuasion : clic droit et glisser désactivés sur les images, en-tête `Cache-Control` long sur les variantes.
 
-### 3. Auth OIDC
-- Routes `/auth/login`, `/auth/callback`, `/auth/logout`, middleware `requireAdmin`.
-- Tests : rôle absent → 403, `state` invalide → refus, session expirée → redirection.
+### 3. Auth OIDC (fait)
+- Routes `/auth/login`, `/auth/callback`, `/auth/logout` (POST + CSRF), préhandlers `requireAdmin` et `verifyCsrf`.
+- Transaction (state, nonce, PKCE) dans un cookie signé de 10 min ; `next` limité aux chemins locaux.
+- Rôles lus dans l'ID token, complétés par userinfo si Zitadel ne les y met pas.
+- Session : jeton aléatoire dans le cookie (`__Host-` en HTTPS), seule son empreinte SHA-256 en base ; 8 h glissantes, 24 h au plus (un rôle retiré cesse de valoir le lendemain au plus tard).
+- Rôle accepté seulement s'il vient de l'organisation `OIDC_ORG_ID` ; `next` normalisé par l'analyseur d'URL (pas de redirection ouverte) ; 30 passages par `/auth/*` et par IP sur 10 min ; code et state masqués dans les journaux.
+- `/admin` minimal (identité + déconnexion) en attendant la phase 4.
+- Tests de bout en bout contre un faux fournisseur OIDC : rôle absent → 403 sans session, `state` invalide → refus, code rejoué, session expirée → redirection, régénération, déconnexion.
 
 ### 4. Admin (tout administrable)
 - Photos : import multiple par glisser-déposer, édition, brouillon/publiée, réordonnancement par glisser, recherche, filtres, suppression avec confirmation dans la page.
 - Séries : création, renommage, ordre, suppression (bloquée si la série contient des photos).
 - Auteurs : nom, bio, lien avec le compte OIDC.
 - Réglages : nom du site, accroche, à propos, photos de l'ouverture.
+
+### 4 bis. Points de l'audit à traiter avec l'admin
+- Variantes des brouillons : accessibles à qui connaît leur nom (UUID). Les générer à la publication, ou les servir via une route qui vérifie le statut.
+- Import : limiter taille de fichier et nombre de pixels (`sharp` `limitInputPixels`), vérifier le type réel du fichier.
 
 ### 5. Mise en ligne
 - Dockerfile, Caddyfile, volume persistant pour `storage/` et la base.
@@ -101,9 +110,11 @@ storage/
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.
-2. Créer une application OIDC « Web », Authorization Code + PKCE, redirect `https://<domaine>/auth/callback` (et `http://localhost:3000/auth/callback` en dev), post-logout redirect vers le site.
+2. Créer une application OIDC « Web », méthode d'authentification « Code » (client_secret_basic ; l'application envoie aussi PKCE), redirect `https://<domaine>/auth/callback` (et `http://localhost:3000/auth/callback` en dev), post-logout redirect vers le site.
 3. Ajouter Google comme IdP externe (client OAuth Google à créer dans Google Cloud).
 4. Donner le rôle `admin` à Sébastien et Julien ; désactiver l'inscription libre.
+5. Reporter l'ID de l'organisation dans `OIDC_ORG_ID`.
+6. Une fois le domaine choisi : ajouter `includeSubDomains` à HSTS si tous les sous-domaines sont en HTTPS.
 
 ## Ouvert
 

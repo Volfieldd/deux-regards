@@ -1,0 +1,12 @@
+<% layout('./layout') %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+  <form class="eyebrow" method="post" action="/auth/logout">
+    <input type="hidden" name="_csrf" value="<%= it.session.csrf %>">
+    <button type="submit">Se déconnecter</button>
+  </form>
+</header>
+<main class="about wrap">
+  <h1>Administration</h1>
+  <p class="prose">Connecté en tant que <%= it.session.name || it.session.email || it.session.sub %>.</p>
+</main>

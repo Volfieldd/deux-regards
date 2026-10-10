@@ -15,6 +15,12 @@ npm run seed           # crée la base et importe les 12 photos de démonstratio
 npm run dev            # http://localhost:3000
 ```
 
+## Connexion à l'admin
+
+L'admin (`/admin`) n'accepte que des comptes OIDC portant le rôle de projet `admin` (Zitadel), ou, en repli, un `sub` listé dans `OIDC_ALLOWED_SUBS` avec un e-mail vérifié. Renseigner `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_PROJECT_ID` et `OIDC_ORG_ID` dans `.env`, et déclarer `PUBLIC_URL/auth/callback` comme URL de redirection dans Zitadel. Sans ces variables, le site public fonctionne et `/auth/login` répond 503.
+
+Dès que `PUBLIC_URL` est en HTTPS (ou `NODE_ENV=production`), le serveur refuse de démarrer sans `COOKIE_SECRET` ou avec un émetteur OIDC en HTTP.
+
 ## Scripts
 
 | Commande | Rôle |

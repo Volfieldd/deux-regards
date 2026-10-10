@@ -41,3 +41,13 @@ test('slugify', () => {
   assert.equal(slugify('Élise, contre-jour'), 'elise-contre-jour');
   assert.equal(slugify('Quai, 7h12'), 'quai-7h12');
 });
+
+test('un seed qui échoue ne laisse aucun fichier orphelin', async t => {
+  const { db, config } = await setup(t);
+  db.prepare("INSERT INTO authors (slug, name) VALUES ('julien', 'Déjà là')").run();  // fera échouer la transaction
+  await assert.rejects(seed(db, config), /UNIQUE/);
+  const ls = d => (fs.existsSync(d) ? fs.readdirSync(d) : []);
+  assert.deepEqual(ls(path.join(config.storageDir, 'originals')), []);
+  assert.deepEqual(ls(path.join(config.storageDir, 'variants')), []);
+  assert.equal(db.prepare('SELECT COUNT(*) FROM photos').pluck().get(), 0);
+});

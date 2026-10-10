@@ -1,0 +1,16 @@
+<% layout('./layout') %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+</header>
+<main class="about wrap">
+  <h1><%= it.title %></h1>
+  <div class="prose">
+    <p><%= it.message %></p>
+<% if (it.switchAccount) { %>
+    <p><a class="more eyebrow" href="/auth/login?prompt=select_account">Utiliser un autre compte</a></p>
+<% } else if (it.retry) { %>
+    <p><a class="more eyebrow" href="/auth/login">Réessayer</a></p>
+<% } %>
+    <p><a class="more eyebrow" href="/">Revenir au site</a></p>
+  </div>
+</main>

@@ -7,14 +7,19 @@
 <% if (it.description) { %>
   <meta name="description" content="<%= it.description %>">
 <% } %>
+<% if (it.canonical) { %>
+  <link rel="canonical" href="<%= it.publicUrl + it.canonical %>">
+  <meta property="og:url" content="<%= it.publicUrl + it.canonical %>">
+<% } %>
+  <meta property="og:type" content="website">
   <meta property="og:title" content="<%= it.pageTitle %>">
   <meta property="og:site_name" content="<%= it.siteName %>">
 <% if (it.ogImage) { %>
-  <meta property="og:image" content="<%= it.ogImage %>">
+  <meta property="og:image" content="<%= it.publicUrl + it.ogImage %>">
 <% } %>
   <link rel="preload" href="/fonts/cormorant-garamond/files/cormorant-garamond-latin-400-italic.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/static/css/site.css">
-  <script src="/static/js/site.js" defer></script>
+  <link rel="stylesheet" href="<%= it.asset('css/site.css') %>">
+  <script src="<%= it.asset('js/site.js') %>" defer></script>
 </head>
 <body class="<%= it.bodyClass || '' %>">
 <%~ it.body %>
