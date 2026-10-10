@@ -65,10 +65,8 @@ test.describe('parcours d’une photo', () => {
     const items = page.locator('.plist li');
     const initial = await items.count();
     const firstTitle = (await items.first().locator('a.ttl').textContent()).trim();
-    await page.getByRole('link', { name: '＋ Importer des photos' }).click();
-    await page.locator('[data-import] input[type=file]').setInputFiles('fixtures/import-test.jpg');
-    await expect(page.locator('[data-files] li')).toContainText('✓ Prête à envoyer');
-    await page.getByRole('button', { name: 'Envoyer la photo valide' }).click();
+    const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('link', { name: '＋ Importer des photos' }).click()]);
+    await chooser.setFiles('fixtures/import-test.jpg');                 // l'envoi part aussitôt
     await expect(page.locator('[data-sum-title]')).toHaveText('1 photo prête sur 1', { timeout: 120_000 });
     await page.getByRole('link', { name: 'Compléter et publier la photo →' }).click();
     await expect(page.locator('h1')).toHaveText('Compléter et publier');

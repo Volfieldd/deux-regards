@@ -16,7 +16,7 @@
 <form class="bulk" id="bulk" method="post" action="/admin/photos/actions" data-bulk data-batch aria-label="Appliquer à la sélection">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
   <input type="hidden" name="back" value="/admin/photos/lot?ids=<%= it.ids.join(',') %>">
-  <strong data-bulk-count role="status">Pour les photos cochées :</strong>
+  <strong data-bulk-count role="status">Pour les photos cochées :</strong><span class="hint-dark" data-js-only hidden>série, lieu et date s’appliquent dès que vous les changez</span>
   <span class="group">
     <select name="category_id" aria-label="Série" data-bulk-category>
       <option value="">Série…</option>
@@ -24,12 +24,12 @@
 <% }) %>      <option value="new">＋ Nouvelle série…</option>
     </select>
     <input name="new_category" maxlength="80" placeholder="Nom de la nouvelle série" aria-label="Nom de la nouvelle série" data-bulk-new>
-    <button class="btn ghost" type="submit" name="action" value="category">Appliquer la série</button>
+    <button class="btn ghost" type="submit" name="action" value="category" data-nojs>Appliquer la série</button>
   </span>
   <span class="group">
     <input name="place" maxlength="120" placeholder="Lieu" aria-label="Lieu pour la sélection">
     <input name="taken_on" maxlength="40" placeholder="Date : oct. 2026" aria-label="Date pour la sélection">
-    <button class="btn ghost" type="submit" name="action" value="fields">Appliquer lieu et date</button>
+    <button class="btn ghost" type="submit" name="action" value="fields" data-nojs>Appliquer lieu et date</button>
   </span>
   <span class="spacer"></span>
   <button class="btn" type="submit" name="action" value="publish" data-publish>Publier</button>

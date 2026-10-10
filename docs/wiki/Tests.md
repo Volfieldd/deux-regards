@@ -38,6 +38,7 @@ BASE_URL=http://<hôte>:<port> E2E_LOCAL_AUTH=<LOCAL_AUTH_TOKEN du serveur> E2E_
 | `setup` | connexion locale de test ; la session est réutilisée ensuite |
 | `desktop`, `mobile` (Pixel 7) | rendu, ouverture et bouton pause, filtres sans rechargement, visionneuse (clavier, glissé), site sans JavaScript, pages de l'admin |
 | `audit` | **seulement avec `E2E_AUDIT=1`** : les cinq parcours de l'audit d'ergonomie, mesurés (actions, tabulations, positions, temps d'import) et capturés dans `e2e/audit/apres/`, plus un audit axe-core sans tolérance (toutes violations) des écrans revus et de leurs états ; nettoie ensuite ce qu'il a créé |
+| `captures-bureau`, `captures-mobile` | **seulement avec `E2E_CAPTURES=1`** : captures de la [Visite de l'admin](Visite-de-l-admin) ; avec `E2E_ALLOW_WRITES=1`, aussi les écrans d'import, de lot, de sélection et de suppression (à lancer sur une instance jetable) |
 | `parcours` | après les deux précédents, **seulement avec `E2E_ALLOW_WRITES=1`** : import, édition, publication, réordonnancement (glisser-déposer, y compris en dernière place, et menu ⋯) et suppression d'une photo ; séries (création en tête, ordre au clavier, fenêtre de suppression) ; filigrane (aperçu, application, retour) ; déconnexion |
 
 - **Données :** le projet `parcours` **modifie les données**. Il ne suppose rien du contenu, nettoie les restes d'un passage interrompu, puis restaure à l'identique les réglages d'images trouvés (même en cas d'échec). À réserver à un serveur de test.

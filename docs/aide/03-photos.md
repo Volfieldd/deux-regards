@@ -4,13 +4,14 @@ La page **Photos** réunit l'import, la recherche et la liste de toutes les phot
 
 ## Importer des photos
 
-### 1. Choisir et vérifier
+### 1. Choisir
 
-1. Cliquez sur **＋ Importer des photos** en haut de la page. Vous pouvez aussi **déposer des photos n'importe où sur la page** : l'import s'ouvre tout seul.
-2. Ajoutez les fichiers : glissez-les sur la zone en pointillés, ou cliquez dessus pour les choisir. Un second dépôt **s'ajoute** à la liste, il ne la remplace pas.
-3. Chaque fichier apparaît avec sa vignette, son poids et ses dimensions. Ceux qui ne passeront pas sont signalés **tout de suite, avant tout envoi**, avec la raison : « ✕ Ce n'est pas une image », « ✕ Trop lourde (60 Mo max.) », « ✕ Trop grande (120 Mpx max.) ». Le bouton **✕** retire un fichier de la liste.
-4. Vérifiez l'**auteur** et la **série** proposés pour le lot. Votre propre fiche est présélectionnée ; vous pourrez changer l'un et l'autre photo par photo à l'étape 3.
-5. Cliquez sur **Envoyer les *n* photos valides**. Rien n'est envoyé avant ce clic.
+1. Cliquez sur **＋ Importer des photos** : le choix des fichiers s'ouvre aussitôt. Vous pouvez aussi **déposer des photos n'importe où sur la page**.
+2. Sélectionnez vos photos. **C'est tout : l'envoi commence tout seul.**
+
+- Les fichiers qui ne passeront pas sont écartés **avant tout envoi**, avec la raison : « ✕ Ce n'est pas une image », « ✕ Trop lourde (60 Mo max.) », « ✕ Trop grande (120 Mpx max.) ». **✕** les retire de la liste.
+- **Auteur et série du lot :** en haut du panneau d'import (votre fiche est présélectionnée). Choisissez-les avant d'ajouter les photos si besoin ; sinon, changez-les photo par photo à l'étape 3.
+- Des photos ajoutées pendant l'envoi partent à leur tour.
 
 ### 2. Envoi et traitement
 
@@ -19,7 +20,7 @@ La page **Photos** réunit l'import, la recherche et la liste de toutes les phot
 - **Connexion interrompue :** seule la photo concernée échoue ; **Réessayer** la renvoie sans toucher au reste.
 - **Annuler le reste :** arrête les envois pas encore terminés. Les photos déjà envoyées restent en brouillon.
 - **Pendant l'envoi**, gardez la page ouverte (le navigateur vous prévient si vous la quittez). **Le traitement**, lui, continue sur le serveur même si vous changez de page : l'indicateur **Traitement : *n* photos** reste affiché en haut de toutes les pages.
-- Dès que l'envoi est terminé, **Compléter et publier les *n* photos →** mène à l'étape 3, même si le traitement n'est pas fini.
+- Dès que l'envoi est terminé, **Compléter et publier les *n* photos →** apparaît (et reçoit le focus) : il mène à l'étape 3, même si le traitement n'est pas fini.
 
 | | |
 |---|---|
@@ -27,10 +28,11 @@ La page **Photos** réunit l'import, la recherche et la liste de toutes les phot
 | Taille | 60 Mo et 120 mégapixels par fichier au plus |
 | Statut | **brouillon** : rien n'est visible sur le site avant publication |
 | Titre | **provisoire**, tiré du nom du fichier (`IMG_2041 quai-nord.jpg` → « IMG 2041 quai nord ») |
+| Date | **reprise de l'appareil photo** (date de prise de vue des métadonnées EXIF), quand elle existe |
 
 Au traitement, le site applique l'orientation de l'appareil, calcule les images servies (filigrane et métadonnées du moment) et prépare la [preuve d'antériorité](preuves) de l'original.
 
-> Sans JavaScript, l'import reste possible : un formulaire classique envoie tout le lot d'un coup et affiche le compte rendu à la fin.
+> Sans JavaScript, l'import reste possible : choisissez les fichiers puis **Importer** ; tout le lot part d'un coup et le compte rendu s'affiche à la fin.
 
 ### 3. Compléter et publier
 
@@ -38,8 +40,10 @@ Toutes les photos du lot sont réunies dans **un seul tableau** : titre, série,
 
 - **Chaque champ s'enregistre quand vous le quittez** (Tab, clic ailleurs ou Entrée). La colonne **État** affiche « Enregistrement… » puis « ✓ Enregistré ». Le message en bas de l'écran propose **Annuler** pendant quelques secondes.
 - **Titre provisoire :** tant que le titre est celui du nom de fichier, il est signalé sous le champ.
-- **Date en langage courant :** « oct. 2026 », « octobre 2026 », « 10/2026 », « 5/10/2026 » ou « 2026-10 ». Le site affiche ce qu'il a compris (« compris : oct. 2026 »).
-- **Pour les photos cochées** (toutes, au départ), la barre sombre applique d'un coup une **série** (y compris une nouvelle), un **lieu** et une **date**, puis **Publier**.
+- **Date :** déjà remplie quand l'appareil l'a enregistrée. Sinon, en langage courant : « oct. 2026 », « octobre 2026 », « 10/2026 », « 5/10/2026 » ou « 2026-10 ». Le site affiche ce qu'il a compris (« compris : oct. 2026 »).
+- **Pour les photos cochées** (toutes, au départ), la barre sombre applique une **série** (y compris une nouvelle), un **lieu** ou une **date** **dès que vous les changez** — sans bouton à cliquer, avec **Annuler** dans le message. Puis **Publier**.
+
+En pratique, pour un lot : tapez les titres, le lieu une fois dans la barre, puis **Publier**.
 - **Publier des photos à titre provisoire :** une fenêtre les nomme et propose d'abord **Corriger les titres**. Rien n'est publié sans votre confirmation.
 
 Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir plus bas).

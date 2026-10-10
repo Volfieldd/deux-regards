@@ -21,17 +21,16 @@ test('J1 — importer un lot de photos', async ({ page }) => {
   const m = metrics.J1 = { actions: 0 };
   await page.goto('/admin/photos');
   await shot(page, 'J1-01-photos');
-  await page.getByRole('link', { name: '＋ Importer des photos' }).click(); m.actions++;
+  // « Importer des photos » ouvre directement le choix des fichiers ; les photos valides partent aussitôt.
   const files = ['DSCF0241.jpg', 'DSCF0242.jpg', 'DSCF0243.jpg', 'notes-de-voyage.jpg'].map(f => `fixtures/audit/${f}`);
-  await page.locator('[data-import] input[type=file]').setInputFiles(files); m.actions++;
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('link', { name: '＋ Importer des photos' }).click()]);
+  m.actions++;
+  const t0 = Date.now();
+  await chooser.setFiles(files); m.actions++;
   await expect(page.locator('[data-files] li')).toHaveCount(4);
   await expect(page.getByText('✕ Ce n’est pas une image')).toBeVisible();
-  m.invalidFlaggedBeforeSend = true;
-  const send = page.getByRole('button', { name: 'Envoyer les 3 photos valides' });
-  await expect(send).toBeEnabled();
+  m.invalidFlaggedBeforeSend = await page.locator('[data-files] li.bad .cap').count() === 0;   // écarté sans envoi
   await shot(page, 'J1-02-verification');
-  const t0 = Date.now();
-  await send.click(); m.actions++;
   await expect(page.locator('[data-summary]')).toBeVisible();
   await page.waitForFunction(() => [...document.querySelectorAll('[data-files] .bar.proc i')].some(i => parseFloat(i.style.width) > 0), null, { timeout: 120_000 });
   m.progressShown = await page.locator('[data-files] .bar').count() > 0;
@@ -57,13 +56,17 @@ test('J2 — compléter puis publier les photos importées', async ({ page }) =>
     await expect(page.locator('tbody tr').nth(i).locator('[data-state]')).toHaveText('✓ Enregistré');
   }
   const bulk = page.locator('[data-bulk]');
+  // Date : reprise de l'appareil (EXIF) à l'import. Lieu : appliqué au lot dès la sortie du champ.
+  m.datesFromCamera = await page.locator('input[data-field=taken_on]').evaluateAll(f => f.every(i => /^2026-10-0\d$/.test(i.value)));
   await bulk.getByPlaceholder('Lieu').fill('Atelier'); m.actions++;
-  await bulk.getByPlaceholder('Date : oct. 2026').fill('10/2026'); m.actions++;
-  await bulk.getByRole('button', { name: 'Appliquer lieu et date' }).click(); m.actions++;
-  await expect(page.locator('tbody tr').first().locator('.cellnote').last()).toContainText('compris');
+  await bulk.getByPlaceholder('Lieu').press('Tab');
+  await expect(page.locator('[data-toast]')).toContainText('Lieu « Atelier » appliqué à 3 photos');
+  await expect(page.locator('input[data-field=place]').first()).toHaveValue('Atelier');
   await shot(page, 'J2-02-complete');
   await bulk.getByRole('button', { name: 'Publier' }).click(); m.actions++;
   await expect(page.locator('[data-toast]')).toContainText('3 photos publiées');
+  await page.reload();
+  m.placesSaved = await page.locator('input[data-field=place]').evaluateAll(f => f.every(i => i.value === 'Atelier'));
   m.published = await page.locator('tbody [data-state]').filter({ hasText: 'Publiée' }).count();
   await shot(page, 'J2-03-publie');
   save();
@@ -197,10 +200,14 @@ test('accessibilité des écrans revus (axe-core)', async ({ page }) => {
 
 test('nettoyage', async ({ page }) => {
   test.setTimeout(120_000);
-  for (const q of ['Audit', 'DSCF']) {
+  // Seulement les photos créées par ce parcours (titres exacts) : jamais celles des auteurs.
+  const mine = ['Audit lisière', 'Audit seconde veille', 'Audit pluie fine', 'DSCF0241', 'DSCF0242', 'DSCF0243'];
+  for (const q of ['Audit', 'DSCF024']) {
     await page.goto(`/admin/photos?q=${q}`);
-    if (!(await page.locator('.plist li').count())) continue;
-    await page.locator('[data-select-all] input').check();
+    const rows = page.locator('.plist li').filter({ has: page.locator('a.ttl').filter({ hasText: new RegExp(`^(${mine.join('|')})$`) }) });
+    const n = await rows.count();
+    if (!n) continue;
+    for (let i = 0; i < n; i++) await rows.nth(i).locator('.chk').check();
     await page.locator('[data-bulk]').getByRole('button', { name: 'Supprimer…' }).click();
     await page.getByRole('button', { name: 'Supprimer définitivement' }).click();
     await expect(page.locator('[data-toast]')).toContainText('supprimée');

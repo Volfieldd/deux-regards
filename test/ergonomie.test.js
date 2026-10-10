@@ -36,6 +36,8 @@ function multipart(parts) {
 }
 
 const jpeg = () => sharp({ create: { width: 1600, height: 1000, channels: 3, background: '#468' } }).jpeg().toBuffer();
+const dated = () => sharp({ create: { width: 1600, height: 1000, channels: 3, background: '#864' } })
+  .withExif({ IFD2: { DateTimeOriginal: '2026:10:04 18:32:10' } }).jpeg().toBuffer();
 
 function send(ctx, filename, value, { csrf = ctx.csrf } = {}) {
   const body = multipart([{ name: '_csrf', value: csrf }, { name: 'author_id', value: ctx.id('authors', 'julien') },
@@ -78,6 +80,15 @@ test('envoi d’une photo : réponse immédiate, traitement suivi étape par ét
   assert.deepEqual(fs.readdirSync(path.join(ctx.config.storageDir, 'tmp')), []);
   // Liste : titre provisoire signalé.
   assert.match((await ctx.as({ url: '/admin/photos?statut=draft' })).body, /Titre provisoire \(nom du fichier\)/);
+});
+
+test('envoi : date de prise de vue reprise de l’appareil (EXIF), sinon vide', async t => {
+  const ctx = await admin(t);
+  const a = (await send(ctx, 'DSCF0300.jpg', await dated())).json().id;
+  const b = (await send(ctx, 'sans-date.jpg', await jpeg())).json().id;
+  await untilReady(ctx, [a, b]);
+  assert.equal(ctx.db.prepare('SELECT taken_on FROM photos WHERE id = ?').pluck().get(a), '2026-10-04');
+  assert.equal(ctx.db.prepare('SELECT taken_on FROM photos WHERE id = ?').pluck().get(b), null);
 });
 
 test('envoi : fichier refusé avec sa raison, jeton CSRF exigé, photo inconnue signalée', async t => {
@@ -150,6 +161,12 @@ test('actions groupées : publier, changer de série (y compris nouvelle), annul
   const fields = await ctx.json('/admin/photos/actions', { ids, action: 'fields', place: 'Nantes', taken_on: 'nov. 2025' });
   assert.equal(fields.statusCode, 200);
   assert.deepEqual(ctx.db.prepare(`SELECT DISTINCT place || ' ' || taken_on FROM photos WHERE id IN (${ids.join(',')})`).pluck().all(), ['Nantes 2025-11']);
+  // Annuler : lieu et date d'avant.
+  const placesBefore = ctx.db.prepare(`SELECT id, place, taken_on FROM photos WHERE id IN (${ids.join(',')})`).all();
+  const again = (await ctx.json('/admin/photos/actions', { ids, action: 'fields', place: 'Lisbonne' })).json();
+  assert.match(again.text, /Lieu « Lisbonne » appliqué à 3 photos/);
+  await ctx.json('/admin/photos/actions', again.undo);
+  assert.deepEqual(ctx.db.prepare(`SELECT id, place, taken_on FROM photos WHERE id IN (${ids.join(',')})`).all(), placesBefore);
   assert.equal((await ctx.json('/admin/photos/actions', { ids, action: 'fields', taken_on: 'hier' })).statusCode, 422);
   assert.equal((await ctx.json('/admin/photos/actions', { ids: [], action: 'publish' })).statusCode, 422);
   assert.equal((await ctx.json('/admin/photos/actions', { ids, action: 'category', category_id: 9999 })).statusCode, 422);

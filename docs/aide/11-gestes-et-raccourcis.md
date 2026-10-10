@@ -5,7 +5,8 @@
 | Où | Geste | Effet |
 |---|---|---|
 | Partout | **Tab** dès l'arrivée sur la page | fait apparaître **Aller au contenu** : Entrée saute l'en-tête |
-| Photos | déposer des fichiers n'importe où sur la page | ouvre l'import et les ajoute à la liste |
+| Photos | **＋ Importer des photos** | ouvre directement le choix des fichiers ; l'envoi part tout seul |
+| Photos | déposer des fichiers n'importe où sur la page | ouvre l'import et les envoie |
 | Import → zone d'import | clic, ou Entrée quand elle a le focus | ouvre le choix de fichiers |
 | Import | **✕** / **Réessayer** | retire un fichier avant envoi / renvoie une photo en échec |
 | Photos → liste | case à cocher, **Maj + clic** | sélectionne une photo, ou toute une plage |
@@ -13,6 +14,7 @@
 | Photos → liste | menu **⋯** | modifier, publier ou dépublier, monter ou descendre d'une place |
 | Barre de sélection | **Annuler** dans le message | défait la dernière action (10 s) |
 | Compléter le lot | Tab ou Entrée en quittant un champ | l'enregistre |
+| Compléter le lot → barre sombre | changer la série, le lieu ou la date | l'applique aussitôt à toutes les photos cochées |
 | Séries | poignée **⠿** puis **↑ ↓ ← →** | déplace la carte d'une place |
 | Séries → nouvelle série | **Entrée** / **Échap** | crée / efface la saisie |
 | Réglages → ouverture | **←** / **→** / **✕** | réordonne ou retire une photo du diaporama |

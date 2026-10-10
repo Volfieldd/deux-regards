@@ -151,7 +151,8 @@ const activity = (() => {
     $('#import-title').setAttribute('tabindex', '-1');
     $('#import-title').focus();
   };
-  $$('[data-import-open]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); open(); }));
+  // « Importer des photos » ouvre directement le choix des fichiers.
+  $$('[data-import-open]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); open(); input.click(); }));
   $('[data-import-close]', section).addEventListener('click', e => {
     if (items.some(i => i.photoId)) return;          // des photos ont été envoyées : la liste se recharge
     e.preventDefault();
@@ -199,6 +200,10 @@ const activity = (() => {
   });
 
   async function add(files) {
+    await check(files);
+    start();                     // les photos valides partent aussitôt : aucun bouton à cliquer
+  }
+  async function check(files) {
     for (const file of files) {
       if (items.some(i => !i.removed && i.file.name === file.name && i.file.size === file.size && i.file.lastModified === file.lastModified)) continue;
       const item = { key: ++seq, file, state: 'checking', reason: '', meta: mb(file.size) };
@@ -213,9 +218,8 @@ const activity = (() => {
         if (d) item.meta += ` · ${d.w} × ${d.h}`;
         if (d && d.w * d.h > MAX_PIXELS) { Object.assign(item, { state: 'bad', reason: 'Trop grande (120 Mpx max.)' }); render(); continue; }
       } else item.label = kind.toUpperCase();
-      // Lot déjà parti : les photos ajoutées en cours de route partent à leur tour.
-      item.state = started ? 'queued' : 'ready';
-      if (started) { item.up = 0; pump(); } else render();
+      item.state = 'ready';
+      render();
     }
   }
 
@@ -293,6 +297,7 @@ const activity = (() => {
     next.hidden = sending || !ids.length;
     next.href = `/admin/photos/lot?ids=${ids.join(',')}`;
     next.textContent = `Compléter et publier ${ids.length > 1 ? `les ${ids.length} photos` : 'la photo'} →`;
+    if (!next.hidden && !next.dataset.focused) { next.dataset.focused = '1'; next.focus(); }
     cancel.hidden = !up;
     send.hidden = true;
     defaults.hidden = true;
@@ -325,15 +330,15 @@ const activity = (() => {
     }
   });
 
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    if (started || !live().some(i => i.state === 'ready')) return;
-    started = Date.now();
-    live().filter(i => i.state === 'ready').forEach(i => { i.state = 'queued'; i.up = 0; });
-    render();
-    announce('Envoi commencé.');
+  function start() {
+    const ready = live().filter(i => i.state === 'ready');
+    if (!ready.length) return;
+    if (!started) started = Date.now();
+    ready.forEach(i => { i.state = 'queued'; i.up = 0; });
+    announce(`Envoi de ${plural(ready.length, 'photo')} commencé.`);
     pump();
-  });
+  }
+  form.addEventListener('submit', e => { e.preventDefault(); start(); });
 
   cancel.addEventListener('click', () => {
     live().forEach(i => {
@@ -497,6 +502,54 @@ const activity = (() => {
     d.showModal();
   });
 
+  // Compléter le lot : série, lieu et date s'appliquent aux photos cochées dès qu'on les change.
+  if (batch) {
+    const apply = (action, extra) => run(action, extra, null);
+    catSelect.addEventListener('change', () => { if (catSelect.value && catSelect.value !== 'new') apply('category', { category_id: catSelect.value }); });
+    newName.addEventListener('change', () => { if (newName.value.trim()) apply('category', { category_id: 'new', new_category: newName.value }); });
+    bar.elements.place.addEventListener('change', () => { if (bar.elements.place.value.trim()) apply('fields', { place: bar.elements.place.value }); });
+    bar.elements.taken_on.addEventListener('change', () => { if (bar.elements.taken_on.value.trim()) apply('fields', { taken_on: bar.elements.taken_on.value }); });
+  }
+
+  async function run(action, extra, button) {
+    const ids = checked().map(b => Number(b.value));
+    if (!ids.length) return toast.show('Cochez au moins une photo.', { error: true });
+    const body = { ids, action, back: bar.elements.back.value, ...extra };
+    if (button) button.disabled = true;
+    try {
+      const r = await postJson('/admin/photos/actions', body);
+      if (batch && (action === 'fields' || action === 'category')) {
+        // Mise à jour sur place : pas de rechargement, la saisie continue.
+        for (const id of ids) {
+          const tr = $(`tr[data-id="${id}"]`);
+          if (!tr) continue;
+          if (action === 'category') {
+            const sel = $('select[data-field=category_id]', tr);
+            if (r.category && !$(`option[value="${r.category.id}"]`, sel)) sel.add(new Option(r.category.name, r.category.id));
+            if (r.category) { sel.value = r.category.id; sel.dataset.saved = sel.value; }
+          }
+          if (action === 'fields' && r.values.place) { const f = $('input[data-field=place]', tr); f.value = r.values.place; f.dataset.saved = f.value; }
+          if (action === 'fields' && r.values.taken_on) {
+            const f = $('input[data-field=taken_on]', tr);
+            f.value = r.values.taken_on; f.dataset.saved = f.value;
+            f.removeAttribute('aria-invalid');
+            const note = $('.cellnote', f.closest('td')); note.classList.remove('err'); note.textContent = `compris : ${r.values.taken_on}`;
+          }
+          $('[data-state]', tr).textContent = '✓ Enregistré';
+        }
+        if (action === 'category' && r.category && !$(`option[value="${r.category.id}"]`, catSelect)) catSelect.add(new Option(r.category.name, r.category.id), catSelect.options[catSelect.options.length - 1]);
+        if (action === 'category') { catSelect.value = ''; newName.value = ''; newName.classList.remove('on'); }
+        toast.show(r.text, r.undo ? { undo: async () => { const u = await postJson('/admin/photos/actions', r.undo); toast.keep(u.text); location.reload(); } } : {});
+        return;
+      }
+      toast.keep(r.text, r.undo || null);
+      location.reload();
+    } catch (err) {
+      if (button) button.disabled = false;
+      toast.show(err.message, { error: true });
+    }
+  }
+
   bar.addEventListener('submit', async e => {
     e.preventDefault();
     const action = e.submitter?.value;
@@ -507,15 +560,8 @@ const activity = (() => {
     if (action === 'fields') Object.assign(body, { place: bar.elements.place.value, taken_on: bar.elements.taken_on.value });
     if (action === 'delete') { if (!(await confirmDelete(ids.length))) return; body.confirm = true; }
     if (action === 'publish' && batch && !(await confirmPublish(checked().map(b => b.closest('tr'))))) return;
-    e.submitter.disabled = true;
-    try {
-      const r = await postJson('/admin/photos/actions', body);
-      toast.keep(r.text, r.undo || null);
-      location.reload();
-    } catch (err) {
-      e.submitter.disabled = false;
-      toast.show(err.message, { error: true });
-    }
+    const { ids: _, action: __, back: ___, ...extra } = body;
+    run(action, extra, e.submitter);
   });
 })();
 
