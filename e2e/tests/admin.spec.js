@@ -27,3 +27,17 @@ test('rendu des pages de l’admin', async ({ page }, info) => {
     await page.screenshot({ path: `results/admin-${shot}-${info.project.name}.png`, fullPage: true });
   }
 });
+
+test('preuve d’antériorité : horodatage affiché et vérifié', async ({ page }) => {
+  await page.goto('/admin');
+  await expect(page.getByRole('heading', { name: 'Preuves d’antériorité' })).toBeVisible();
+  await page.goto('/admin/photos');
+  await page.locator('.plist a.ttl').first().click();
+  const proof = page.locator('#preuve');
+  await expect(proof.getByText(/^Horodatée le \d{4}-\d{2}-\d{2} à /)).toBeVisible({ timeout: 30_000 });
+  await expect(proof.locator('code')).toHaveText(/^[0-9a-f]{64}$/);
+  await proof.getByRole('button', { name: 'Vérifier la preuve' }).click();
+  await expect(page.getByRole('status').first()).toContainText('Preuve valide : original intact');
+  const [download] = await Promise.all([page.waitForEvent('download'), proof.getByRole('link', { name: 'Fiche de preuve' }).click()]);
+  expect(download.suggestedFilename()).toMatch(/-preuve\.txt$/);
+});

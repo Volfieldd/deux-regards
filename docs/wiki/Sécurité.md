@@ -26,6 +26,12 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
   - les brouillons ne sont pas servis publiquement ;
   - aucune métadonnée par défaut.
 
+## Preuves d'antériorité
+
+- **Ce qui sort du serveur :** seule l'empreinte SHA-256 de l'original est envoyée à l'autorité d'horodatage, jamais l'image.
+- **Contrôle des jetons avant conservation :** empreinte et nonce identiques à la demande, signature et validité du certificat, chaîne jusqu'au certificat racine attendu.
+- **Téléchargement des originaux :** réservé à l'admin, pour constituer un dossier de preuve.
+
 ## Fichiers reçus
 
 - **Photos :** formats JPEG, PNG, WebP, TIFF et HEIF, vérifiés par décodage. Limites : 60 Mo, 120 mégapixels (aussi imposées au décodage, contre les bombes de décompression) et 50 fichiers par envoi.

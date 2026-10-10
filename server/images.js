@@ -51,13 +51,32 @@ function shootingTags(original) {
   };
 }
 
+// Mentions de droits IPTC, en XMP (lues par Google Images, Lightroom, Bridge…) :
+// créateur, copyright, crédit, page des conditions d'utilisation et contact de licence.
+const xml = v => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export function rightsXmp({ artist, copyright, credit, webStatement }) {
+  return '<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>'
+    + '<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">'
+    + '<rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"'
+    + ' xmlns:xmpRights="http://ns.adobe.com/xap/1.0/rights/" xmlns:plus="http://ns.useplus.org/ldf/xmp/1.0/">'
+    + `<dc:creator><rdf:Seq><rdf:li>${xml(artist)}</rdf:li></rdf:Seq></dc:creator>`
+    + `<dc:rights><rdf:Alt><rdf:li xml:lang="x-default">${xml(copyright)}</rdf:li></rdf:Alt></dc:rights>`
+    + `<photoshop:Credit>${xml(credit)}</photoshop:Credit>`
+    + '<xmpRights:Marked>True</xmpRights:Marked>'
+    + (webStatement ? `<xmpRights:WebStatement>${xml(webStatement)}</xmpRights:WebStatement>`
+      + `<plus:Licensor><rdf:Seq><rdf:li rdf:parseType="Resource"><plus:LicensorURL>${xml(webStatement)}</plus:LicensorURL></rdf:li></rdf:Seq></plus:Licensor>` : '')
+    + '</rdf:Description></rdf:RDF></x:xmpmeta><?xpacket end="w"?>';
+}
+
 // Applique le niveau de métadonnées voulu à un pipeline sharp.
 //   null       : aucune (comportement par défaut de sharp)
-//   rights     : auteur et copyright
+//   rights     : auteur et copyright (EXIF), mentions IPTC (XMP)
 //   shooting   : droits + appareil, objectif, exposition, date (sans GPS)
 //   all        : tout l'EXIF de l'original, GPS compris
 function applyMeta(pipeline, meta, originalExif) {
   if (!meta) return pipeline;
+  // Dès qu'on signe les fichiers, les mentions IPTC accompagnent l'EXIF (accents conservés en XMP).
+  pipeline = pipeline.withXmp(rightsXmp(meta));
   if (meta.mode === 'all') return pipeline.keepExif();
   const rights = { Artist: ascii(meta.artist), Copyright: ascii(meta.copyright) };
   if (meta.mode === 'rights') return pipeline.withExif({ IFD0: rights });

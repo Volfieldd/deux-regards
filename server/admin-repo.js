@@ -85,10 +85,10 @@ export function createAdminRepo(db) {
     },
     photo: id => q.photo.get(id),
 
-    addPhoto({ title, categoryId, authorId, file, width, height }) {
+    addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null }) {
       const position = db.prepare('SELECT COALESCE(MAX(position), -1) + 1 FROM photos').pluck().get();
-      const { lastInsertRowid } = db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height)
-        VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?)`).run(uniqueSlug('photos', title), title, categoryId, authorId, position, file, width, height);
+      const { lastInsertRowid } = db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height, sha256)
+        VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?)`).run(uniqueSlug('photos', title), title, categoryId, authorId, position, file, width, height, sha256);
       return Number(lastInsertRowid);
     },
 
@@ -193,6 +193,8 @@ export function createAdminRepo(db) {
         tagline: text(body.tagline, 200),
         intro: text(body.intro, 1000),
         about: text(body.about, 10000),
+        rights_text: text(body.rights_text, 10000),
+        rights_contact: text(body.rights_contact, 200),
         hero,
       };
       db.transaction(() => { for (const [k, v] of Object.entries(values)) q.setSetting.run(k, JSON.stringify(v)); })();

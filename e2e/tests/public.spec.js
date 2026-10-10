@@ -136,3 +136,11 @@ test.describe('sans JavaScript', () => {
     await expect(page.locator('#grid .tile')).toHaveCount(6);
   });
 });
+
+test('droits d’utilisation : page et lien en pied de page', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Droits d’utilisation' }).click();
+  await expect(page).toHaveURL(/\/droits$/);
+  await expect(page.locator('h1')).toHaveText('Droits d’utilisation');
+  await expect(page.getByText(/protégées par le droit d’auteur/)).toBeVisible();
+});

@@ -5,13 +5,13 @@ import { renderVariants, renderPreview, removeVariants, hasVariants } from './im
 import { FONTS, POSITIONS } from './watermark.js';
 
 // Version du rendu : à incrémenter si le code de rendu change, pour régénérer toutes les variantes.
-const PIPELINE = 1;
+const PIPELINE = 2;                // 2 : mentions IPTC (XMP) dans les modes signés
 
 export const EXIF_MODES = {
   none: { label: 'Aucune métadonnée', help: 'Tout est retiré (recommandé). Comportement par défaut.' },
-  rights: { label: 'Droits d’auteur', help: 'Auteur et copyright seulement (« © année auteur »), écrits par le site.' },
-  shooting: { label: 'Prise de vue', help: 'Droits + appareil, objectif, ouverture, vitesse, ISO, focale et date. Jamais la localisation.' },
-  all: { label: 'Tout l’EXIF de l’original', help: 'Y compris la localisation GPS et le numéro de série éventuel. À éviter.' },
+  rights: { label: 'Droits d’auteur', help: 'Auteur, copyright (« © année auteur ») et mentions IPTC : crédit, lien vers la page « Droits d’utilisation ».' },
+  shooting: { label: 'Prise de vue', help: 'Droits d’auteur + appareil, objectif, ouverture, vitesse, ISO, focale et date. Jamais la localisation.' },
+  all: { label: 'Tout l’EXIF de l’original', help: 'Mentions IPTC + tout l’EXIF, y compris la localisation GPS et le numéro de série éventuel. À éviter.' },
 };
 export const MIN_WIDTHS = { 0: 'Toutes les tailles', 1280: '1280 px et plus (vignettes épargnées)', 2000: '2000 px seulement' };
 
@@ -56,7 +56,7 @@ export function fillText(template, p, siteName) {
 
 // Réglages effectifs d'une photo (filigrane et métadonnées) et empreinte qui nomme ses variantes.
 // Empreinte vide quand rien n'est ajouté : les variantes brutes gardent leur nom d'origine.
-export function specFor(p, { watermark, exif, siteName, watermarkDir }) {
+export function specFor(p, { watermark, exif, siteName, watermarkDir, rightsUrl }) {
   let mark = null;
   if (watermark.enabled && p.watermark !== 0) {
     if (watermark.kind === 'image' && watermark.image) {
@@ -68,7 +68,7 @@ export function specFor(p, { watermark, exif, siteName, watermarkDir }) {
     if (mark) Object.assign(mark, { position: watermark.position, opacity: watermark.opacity, size: watermark.size, margin: watermark.margin, minWidth: watermark.minWidth });
   }
   const meta = exif.mode === 'none' ? null
-    : { mode: exif.mode, artist: p.author, copyright: `© ${yearOf(p)} ${p.author}` };
+    : { mode: exif.mode, artist: p.author, copyright: `© ${yearOf(p)} ${p.author}`, credit: siteName, webStatement: rightsUrl || null };
   if (!mark && !meta) return { key: '', mark: null, meta: null };
   const { imagePath, ...hashed } = mark || {};
   const key = crypto.createHash('sha256').update(JSON.stringify({ v: PIPELINE, mark: mark && hashed, meta })).digest('hex').slice(0, 8);
@@ -77,7 +77,7 @@ export function specFor(p, { watermark, exif, siteName, watermarkDir }) {
 
 // Service de rendu : une seule tâche à la fois (file d'attente), passage complet en arrière-plan
 // après chaque changement de réglage, rendu immédiat d'une photo à l'import.
-export function createVariantService({ db, storageDir, siteName, log }) {
+export function createVariantService({ db, storageDir, siteName, log, publicUrl = null }) {
   const watermarkDir = path.join(storageDir, 'watermarks');
   fs.mkdirSync(watermarkDir, { recursive: true });
   const q = {
@@ -92,7 +92,8 @@ export function createVariantService({ db, storageDir, siteName, log }) {
     const raw = q.setting.get(key);
     return { ...defaults, ...(raw ? JSON.parse(raw) : {}) };
   };
-  const context = () => ({ watermark: read('watermark', WATERMARK_DEFAULTS), exif: read('exif', EXIF_DEFAULTS), siteName: siteName(), watermarkDir });
+  const rightsUrl = publicUrl ? `${publicUrl}/droits` : null;
+  const context = () => ({ watermark: read('watermark', WATERMARK_DEFAULTS), exif: read('exif', EXIF_DEFAULTS), siteName: siteName(), watermarkDir, rightsUrl });
 
   let queue = Promise.resolve();
   let passQueued = false;

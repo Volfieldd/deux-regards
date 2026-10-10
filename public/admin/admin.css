@@ -102,3 +102,9 @@ input:focus, select:focus, textarea:focus { outline: 1px solid var(--ink); outli
 .logo { max-width: 240px; max-height: 120px; width: auto; background: repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 0 0 / 16px 16px; padding: 8px; }
 .preview img { width: 100%; height: auto; background: var(--frame); }
 form.form > .actions { margin-bottom: 24px; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 8px 20px; margin: 0 0 16px; }
+.facts dt { color: var(--prose); }
+.facts dd { margin: 0; min-width: 0; }
+.facts code { word-break: break-all; }
+@media (max-width: 720px) { .facts { grid-template-columns: 1fr; } .facts dd { margin-bottom: 8px; } }
+.downloads { flex-wrap: wrap; margin-bottom: 12px; }

@@ -6,7 +6,7 @@ import { openDb, migrate } from '../server/db/index.js';
 import { seed } from '../server/db/seed.js';
 import { buildApp } from '../server/app.js';
 
-const configFor = (dir, env = {}) => loadConfig({ STORAGE_DIR: dir, DATABASE_PATH: path.join(dir, 'test.db'), SITE_NAME: 'Test', ...env });
+const configFor = (dir, env = {}) => loadConfig({ STORAGE_DIR: dir, DATABASE_PATH: path.join(dir, 'test.db'), SITE_NAME: 'Test', TSA_URL: 'off', ...env });
 
 // Le seed (génération AVIF/WebP) est coûteux : on le fait une fois par fichier de test
 // dans un dossier modèle, recopié ensuite pour chaque test.
@@ -25,13 +25,13 @@ function seededTemplate() {
 }
 
 // Base et stockage jetables, dans un dossier temporaire propre à chaque test.
-export async function setup(t, { seeded = false, env, oidc, logger = false } = {}) {
+export async function setup(t, { seeded = false, env, oidc, logger = false, proofOptions } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'site-photo-'));
   if (seeded) fs.cpSync(await seededTemplate(), dir, { recursive: true });
   const config = configFor(dir, env);
   const db = openDb(config.databasePath);
   migrate(db);
-  const app = await buildApp({ config, db, logger, oidc });
+  const app = await buildApp({ config, db, logger, oidc, proofOptions });
   t.after(async () => {
     await app.close();
     db.close();

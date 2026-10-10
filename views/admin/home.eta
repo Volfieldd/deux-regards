@@ -7,6 +7,19 @@
   <a class="card" href="/admin/auteurs"><span class="big"><%= it.authors.length %></span><span class="eyebrow">auteurs</span></a>
 </div>
 <section class="panel">
+  <h2>Preuves d’antériorité</h2>
+<% const pr = it.proofs; %>
+<% if (!it.tsa.url) { %>
+  <p>Horodatage désactivé sur ce serveur (<code>TSA_URL=off</code>) : seules les empreintes des originaux sont calculées.</p>
+<% } else { %>
+  <p><strong><%= pr.ok %></strong> photo(s) sur <%= pr.photos %> horodatée(s)<%= pr.errors ? `, ${pr.errors} en attente après une erreur` : '' %>. Autorité : <span class="mono"><%= it.tsa.url %></span></p>
+<% if (pr.errors) { %>
+  <form method="post" action="/admin/preuves/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <button class="btn ghost" type="submit">Réessayer maintenant</button></form>
+<% } %>
+<% } %>
+</section>
+<section class="panel">
   <h2>Votre compte</h2>
   <p>Connecté en tant que <strong><%= it.session.name || it.session.email || it.session.sub %></strong>.</p>
 <% if (it.me) { %>
