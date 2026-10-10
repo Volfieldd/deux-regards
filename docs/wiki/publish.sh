@@ -15,6 +15,8 @@ for f in "$here"/*.md; do
   [ "$(basename "$f")" = README.md ] || cp "$f" "$work/"
 done
 if [ -d "$here/captures" ]; then cp -r "$here/captures" "$work/"; fi
+find "$work" -maxdepth 1 -name 'Aide*.md' -delete
+node "$here/aide.mjs" "$work"          # pages « Aide » générées depuis docs/aide/
 cd "$work"
 git add -A
 if git diff --cached --quiet; then echo "Wiki déjà à jour."; exit 0; fi

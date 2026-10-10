@@ -20,7 +20,7 @@
 <header class="top wrap">
   <%~ include('../brand', it) %>
   <nav class="eyebrow" aria-label="Administration">
-<% [['home', '/admin', 'Tableau de bord'], ['photos', '/admin/photos', 'Photos'], ['series', '/admin/series', 'Séries'], ['authors', '/admin/auteurs', 'Auteurs'], ['images', '/admin/images', 'Filigrane & EXIF'], ['appearance', '/admin/apparence', 'Apparence'], ['settings', '/admin/reglages', 'Réglages']].forEach(([key, href, label]) => { %>
+<% [['home', '/admin', 'Tableau de bord'], ['photos', '/admin/photos', 'Photos'], ['series', '/admin/series', 'Séries'], ['authors', '/admin/auteurs', 'Auteurs'], ['images', '/admin/images', 'Filigrane & EXIF'], ['appearance', '/admin/apparence', 'Apparence'], ['settings', '/admin/reglages', 'Réglages'], ['help', '/admin/aide', 'Aide']].forEach(([key, href, label]) => { %>
     <a href="<%= href %>"<%~ (it.section === key || (key === 'photos' && it.section === 'photo')) ? ' aria-current="page"' : '' %>><%= label %></a>
 <% }) %>
     <a href="/" target="_blank" rel="noopener">Voir le site</a>
@@ -31,6 +31,10 @@
   </form>
 </header>
 <main class="adm wrap" id="contenu">
+<% const HELP = { home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% if (HELP[it.section]) { %>
+  <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>">Aide sur cette page</a></p>
+<% } %>
 <% if (it.variants.running || it.variants.errors.length) { %>
   <div class="flash<%= it.variants.errors.length ? ' error' : '' %>" data-variants>
 <% if (it.variants.running) { %>

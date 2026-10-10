@@ -13,6 +13,7 @@ import { normalizeWatermark, normalizeExif, EXIF_MODES, MIN_WIDTHS } from '../va
 import { FONTS, POSITIONS } from '../watermark.js';
 import { THEMES, BRAND_MODES, BRAND_SLOTS } from '../themes.js';
 import { processEmblem, processIcon, processShare, BrandError, EMBLEM_MAX_BYTES } from '../brand.js';
+import { loadHelp } from '../help.js';
 
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 const LOGO_MAX_SIDE = 4000;
@@ -563,6 +564,11 @@ export default async function adminRoutes(app) {
     sweepBrand(brand);
     return done(reply, '/admin/apparence', `${slot.label} retiré.`);
   });
+
+  // ---------- aide en ligne ----------
+  // Relue à chaque affichage en développement (édition de docs/aide), une fois pour toutes en production.
+  let help = app.config.production ? loadHelp() : null;
+  app.get('/admin/aide', async (request, reply) => render(request, reply, 'help', { title: 'Aide', help: help || loadHelp() }));
 
   // ---------- réglages ----------
   app.get('/admin/reglages', async (request, reply) => render(request, reply, 'settings', {

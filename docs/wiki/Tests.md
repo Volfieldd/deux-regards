@@ -17,6 +17,9 @@ Ils utilisent `node:test`, sans dépendance supplémentaire, et prennent environ
 | `test/watermark.test.js` | règles du filigrane et des EXIF, rendu (positions, mosaïque, logo, opacité), modes EXIF, recalcul et bascule des URL |
 | `test/proofs.test.js` | requête RFC 3161, jetons FreeTSA réels (analyse, signature, chaîne, altération), reprise après erreur, téléchargements, vérification, page `/droits` |
 | `test/revue.test.js` | non-régression des constats de la revue d'octobre 2026 : redirections, erreurs génériques, protection de **toutes** les routes d'admin (liste des routes parcourue), configuration, jetons mal formés, suppressions pendant un rendu ou un horodatage, fichiers temporaires, filigrane sur petites images |
+| `test/deploiement.test.js` | garde-fou de persistance des données, sauvegarde (instantané, rotation, copie des originaux), `sitemap.xml`, `robots.txt` |
+| `test/apparence.test.js` | thèmes, aperçu réservé aux admins, emblème, icône, logo complet, image de partage, favicon |
+| `test/aide.test.js` | aide en ligne : toutes les sections, **aucun lien interne cassé**, lien « Aide sur cette page » de chaque écran |
 | `test/db.test.js` | migrations, seed |
 
 L'encodage AVIF est mis au plus rapide pendant les tests (`AVIF_EFFORT=0`, dans le script `npm test`). L'horodatage y est désactivé (`TSA_URL=off`) : les tests qui en ont besoin utilisent un faux service, qui renvoie des jetons FreeTSA réels enregistrés dans `test/fixtures/`.

@@ -25,6 +25,7 @@ COPY views ./views
 COPY public ./public
 COPY assets ./assets
 COPY seed ./seed
+COPY docs/aide ./docs/aide
 
 # Pas d'instruction VOLUME : un oubli de montage ferait écrire les données dans un volume anonyme,
 # perdu au prochain « docker compose down -v ». Le serveur refuse au contraire de démarrer sans montage.

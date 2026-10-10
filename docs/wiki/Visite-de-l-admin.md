@@ -1,6 +1,6 @@
 # Visite de l'admin
 
-Captures du serveur de test (jeu de démonstration), faites le 10/10/2026. Elles se régénèrent avec `E2E_CAPTURES=1 npm run e2e -- --project=captures-bureau --project=captures-mobile`. Pour l'usage pas à pas, voir le [Mode opératoire de l'admin](Mode-opératoire-admin).
+Captures du serveur de test (jeu de démonstration), faites le 10/10/2026. Elles se régénèrent avec `E2E_CAPTURES=1 npm run e2e -- --project=captures-bureau --project=captures-mobile`. Pour l'usage pas à pas, voir l'[Aide de l'administration](Aide), également disponible dans l'admin (menu « Aide »).
 
 En haut de chaque page : **Tableau de bord · Photos · Séries · Auteurs · Filigrane & EXIF · Apparence · Réglages · Voir le site**, et **Se déconnecter**. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
 
