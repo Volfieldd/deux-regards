@@ -1,0 +1,32 @@
+{
+  "authors": [
+    { "slug": "sebastien", "name": "Sébastien" },
+    { "slug": "julien", "name": "Julien" }
+  ],
+  "categories": [
+    { "slug": "rue", "name": "Rue" },
+    { "slug": "portrait", "name": "Portrait" },
+    { "slug": "paysage", "name": "Paysage" },
+    { "slug": "voyage", "name": "Voyage" }
+  ],
+  "photos": [
+    { "image": "brume",    "title": "Brume sur la Loire",        "category": "paysage",  "author": "sebastien", "place": "Anjou",      "taken_on": "2024-03", "legend": "Six heures, le fleuve fume encore." },
+    { "image": "nuit",     "title": "Deux, minuit",              "category": "rue",      "author": "julien",    "place": "Nantes",     "taken_on": "2023-11", "legend": "" },
+    { "image": "dune",     "title": "Dernière heure",            "category": "voyage",   "author": "sebastien", "place": "Erg Chebbi", "taken_on": "2023-04", "legend": "Le vent efface les traces avant la nuit." },
+    { "image": "portrait", "title": "Élise, contre-jour",        "category": "portrait", "author": "julien",    "place": "Atelier",    "taken_on": "2025-01", "legend": "" },
+    { "image": "quai",     "title": "Quai, 7h12",                "category": "rue",      "author": "sebastien", "place": "Angers",     "taken_on": "2024-10", "legend": "" },
+    { "image": "mer",      "title": "Ligne d’eau",               "category": "paysage",  "author": "julien",    "place": "Finistère",  "taken_on": "2024-08", "legend": "Une seule ligne, et tout le reste en dessous." },
+    { "image": "ciel",     "title": "Le ciel s’est ouvert",      "category": "paysage",  "author": "sebastien", "place": "Anjou",      "taken_on": "2025-10", "legend": "" },
+    { "image": "ruelle",   "title": "Passage, fin d’après-midi", "category": "rue",      "author": "julien",    "place": "Lisbonne",   "taken_on": "2024-05", "legend": "" },
+    { "image": "neige",    "title": "Silence blanc",             "category": "paysage",  "author": "sebastien", "place": "Vercors",    "taken_on": "2025-02", "legend": "" },
+    { "image": "foret",    "title": "Sous-bois",                 "category": "paysage",  "author": "julien",    "place": "Chandelais", "taken_on": "2025-06", "legend": "" },
+    { "image": "lac",      "title": "Le lac ne dit rien",        "category": "voyage",   "author": "sebastien", "place": "La Réunion", "taken_on": "2024-09", "legend": "" },
+    { "image": "ombre",    "title": "Deux ombres",               "category": "rue",      "author": "julien",    "place": "Paris",      "taken_on": "2023-12", "legend": "Nous deux, en passant." }
+  ],
+  "settings": {
+    "tagline": "Deux photographes, un même goût pour les heures creuses.",
+    "intro": "Sébastien et Julien photographient chacun de leur côté puis mettent leurs images en commun. Choisissez un regard, ou gardez les deux.",
+    "about": "",
+    "hero": ["le-ciel-s-est-ouvert", "brume-sur-la-loire", "deux-minuit", "derniere-heure", "ligne-d-eau"]
+  }
+}
