@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { renderVariants, renderPreview, removeVariants, hasVariants } from './images.js';
+import { renderVariants, renderPreview, removeVariants, hasVariants, VARIANT_RE } from './images.js';
 import { FONTS, POSITIONS } from './watermark.js';
 
 // Version du rendu : à incrémenter si le code de rendu change, pour régénérer toutes les variantes.
@@ -51,7 +51,8 @@ const yearOf = p => (/^\d{4}/.exec(p.taken_on || '') || /^\d{4}/.exec(p.created_
 // « © {auteur} {annee} » → « © Julien 2024 »
 export function fillText(template, p, siteName) {
   const values = { auteur: p.author, annee: yearOf(p), site: siteName, titre: p.title };
-  return template.replace(/\{(auteur|annee|site|titre)\}/g, (_, k) => values[k] ?? '');
+  // Une seule ligne : sauts de ligne et caractères de contrôle des valeurs remplacés par une espace.
+  return template.replace(/\{(auteur|annee|site|titre)\}/g, (_, k) => String(values[k] ?? '').replace(/[\x00-\x1f\x7f]+/g, ' '));
 }
 
 // Réglages effectifs d'une photo (filigrane et métadonnées) et empreinte qui nomme ses variantes.
@@ -79,12 +80,14 @@ export function specFor(p, { watermark, exif, siteName, watermarkDir, rightsUrl 
 // après chaque changement de réglage, rendu immédiat d'une photo à l'import.
 export function createVariantService({ db, storageDir, siteName, log, publicUrl = null }) {
   const watermarkDir = path.join(storageDir, 'watermarks');
+  const variantsDir = path.join(storageDir, 'variants');
   fs.mkdirSync(watermarkDir, { recursive: true });
+  const SELECT = `SELECT p.id, p.file, p.width, p.height, p.title, p.taken_on, p.created_at, p.watermark, p.variant_key, a.name AS author
+    FROM photos p JOIN authors a ON a.id = p.author_id`;
   const q = {
-    photos: db.prepare(`SELECT p.id, p.file, p.width, p.height, p.title, p.taken_on, p.created_at, p.watermark, p.variant_key, a.name AS author
-      FROM photos p JOIN authors a ON a.id = p.author_id ORDER BY p.position, p.id`),
-    photo: db.prepare(`SELECT p.id, p.file, p.width, p.height, p.title, p.taken_on, p.created_at, p.watermark, p.variant_key, a.name AS author
-      FROM photos p JOIN authors a ON a.id = p.author_id WHERE p.id = ?`),
+    ids: db.prepare('SELECT id FROM photos ORDER BY position, id').pluck(),
+    photo: db.prepare(`${SELECT} WHERE p.id = ?`),
+    files: db.prepare('SELECT file FROM photos').pluck(),
     setKey: db.prepare('UPDATE photos SET variant_key = ? WHERE id = ?'),
     setting: db.prepare('SELECT value FROM settings WHERE key = ?').pluck(),
   };
@@ -95,19 +98,59 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
   const rightsUrl = publicUrl ? `${publicUrl}/droits` : null;
   const context = () => ({ watermark: read('watermark', WATERMARK_DEFAULTS), exif: read('exif', EXIF_DEFAULTS), siteName: siteName(), watermarkDir, rightsUrl });
 
+  // File des passages complets : elle ne rejette jamais (une erreur est journalisée, pas propagée).
   let queue = Promise.resolve();
   let passQueued = false;
+  let forceQueued = false;
+  let stopping = false;
+  let swept = false;
   const state = { running: false, total: 0, done: 0, errors: [] };
-  const enqueue = job => (queue = queue.then(job, job));
+  const enqueue = job => (queue = queue.then(job).catch(err => log?.error({ err }, 'passage des variantes interrompu')));
+
+  // Verrou par photo : un import et un passage ne rendent jamais la même photo en même temps.
+  const locks = new Map();
+  function withLock(id, fn) {
+    const run = (locks.get(id) || Promise.resolve()).then(fn);
+    const tail = run.catch(() => {});
+    locks.set(id, tail);
+    tail.then(() => { if (locks.get(id) === tail) locks.delete(id); });
+    return run;
+  }
 
   // Rend une photo si son empreinte a changé ou si des fichiers manquent ; bascule puis nettoie.
-  async function render(p, ctx, { force = false } = {}) {
+  // La ligne est relue sous verrou : réglages, auteur ou suppression faits entre-temps sont pris en compte.
+  async function render(id, ctx, { force = false } = {}) {
+    const p = q.photo.get(id);
+    if (!p) return false;
     const { key, mark, meta } = specFor(p, ctx);
     if (!force && key === p.variant_key && hasVariants(storageDir, p, key)) return false;
-    await renderVariants(storageDir, p.file, { key, mark, meta, force });
+    try {
+      await renderVariants(storageDir, p.file, { key, mark, meta, force });
+    } catch (err) {
+      // Photo supprimée pendant le rendu : on efface ce qui a déjà été écrit.
+      if (!q.photo.get(id)) { removeVariants(storageDir, p.file); return false; }
+      throw err;
+    }
+    if (!q.photo.get(id)) { removeVariants(storageDir, p.file); return false; }
     q.setKey.run(key, p.id);                      // les pages pointent désormais vers les nouvelles variantes
     removeVariants(storageDir, p.file, { keep: key });
     return true;
+  }
+
+  // Ménage : fichiers temporaires d'un rendu interrompu, variantes sans photo, logos remplacés.
+  // Les .tmp ne sont effacés qu'au premier passage (démarrage) : ensuite, un import peut être en train d'écrire.
+  function sweep({ tmp = false, logos = false } = {}) {
+    const stems = new Set(q.files.all().map(f => path.parse(f).name));
+    if (fs.existsSync(variantsDir)) {
+      for (const f of fs.readdirSync(variantsDir)) {
+        const m = VARIANT_RE.exec(f);
+        if ((tmp && f.endsWith('.tmp')) || (m && !stems.has(m[1]))) fs.rmSync(path.join(variantsDir, f), { force: true });
+      }
+    }
+    if (logos) {
+      const current = read('watermark', WATERMARK_DEFAULTS).image;
+      for (const f of fs.readdirSync(watermarkDir)) if (f !== current) fs.rmSync(path.join(watermarkDir, f), { force: true });
+    }
   }
 
   return {
@@ -115,34 +158,42 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
     watermarkDir,
     status: () => ({ ...state, errors: [...state.errors] }),
 
-    // Rendu immédiat d'une photo (import) ; l'erreur remonte à l'appelant.
+    // Rendu immédiat d'une photo (import), hors de la file : il n'attend pas un passage en cours.
+    // L'erreur remonte à l'appelant.
     renderPhoto(id) {
-      return enqueue(async () => {
-        const p = q.photo.get(id);
-        if (p) await render(p, context());
-      });
+      return withLock(id, () => render(id, context()));
     },
 
     // Passage complet en arrière-plan ; plusieurs demandes rapprochées n'en font qu'un.
     schedule({ force = false } = {}) {
-      if (passQueued && !force) return queue;
+      forceQueued ||= force;
+      if (passQueued || stopping) return queue;
       passQueued = true;
       return enqueue(async () => {
         passQueued = false;
-        const ctx = context();
-        const photos = q.photos.all();
-        Object.assign(state, { running: true, total: photos.length, done: 0, errors: [] });
+        const forced = forceQueued;
+        forceQueued = false;
+        if (!swept) { sweep({ tmp: true }); swept = true; }
+        const ids = q.ids.all();
+        Object.assign(state, { running: true, total: ids.length, done: 0, errors: [] });
         let changed = 0;
-        for (const p of photos) {
-          try {
-            if (await render(p, ctx, { force })) changed++;
-          } catch (err) {
-            state.errors.push({ id: p.id, title: p.title, error: err.message });
-            log?.error({ err, photo: p.id }, 'rendu des variantes impossible');
+        try {
+          for (const id of ids) {
+            if (stopping) break;
+            try {
+              // Contexte relu à chaque photo : un réglage changé en cours de passage s'applique aux suivantes
+              // (et un nouveau passage, déjà demandé, reprend les précédentes).
+              if (await withLock(id, () => render(id, context(), { force: forced }))) changed++;
+            } catch (err) {
+              state.errors.push({ id, title: q.photo.get(id)?.title ?? `#${id}`, error: err.message });
+              log?.error({ err, photo: id }, 'rendu des variantes impossible');
+            }
+            state.done++;
           }
-          state.done++;
+          if (!stopping) sweep({ logos: true });
+        } finally {
+          state.running = false;
         }
-        state.running = false;
         if (changed) log?.info({ changed }, 'variantes régénérées');
       });
     },
@@ -155,6 +206,8 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
       return renderPreview(storageDir, p.file, 1280, { mark });
     },
 
-    idle: () => queue,
+    // Arrêt : le passage s'interrompt entre deux photos (un fichier n'est jamais laissé à moitié écrit).
+    stop() { stopping = true; return Promise.all([queue, ...locks.values()]); },
+    idle: () => Promise.all([queue, ...locks.values()]),
   };
 }

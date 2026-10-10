@@ -15,17 +15,19 @@ export function safeNext(value, fallback = '/admin') {
   if (typeof value !== 'string' || !value.startsWith('/')) return fallback;
   try {
     const url = new URL(value, LOCAL);
-    return url.origin === LOCAL ? url.pathname + url.search + url.hash : fallback;
+    const local = url.pathname + url.search + url.hash;
+    // La normalisation (« /./ », « /../ ») peut produire « //hôte » : refusé aussi après coup.
+    return url.origin === LOCAL && !/^\/[/\\]/.test(local) ? local : fallback;
   } catch {
     return fallback;
   }
 }
 
+// Comparaison à temps constant, longueur comprise (on compare des empreintes de taille fixe).
 export function sameToken(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
-  const x = Buffer.from(a);
-  const y = Buffer.from(b);
-  return x.length === y.length && crypto.timingSafeEqual(x, y);
+  const h = v => crypto.createHash('sha256').update(v).digest();
+  return crypto.timingSafeEqual(h(a), h(b)) && a.length === b.length;
 }
 
 // Authentification OIDC (Zitadel), sessions côté serveur et CSRF.
@@ -42,7 +44,9 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
 
   // Tentatives de connexion par IP sur 10 minutes (30 par défaut) : large pour un humain, freine les abus.
   const allow = createRateLimiter({ limit: config.authRateLimit, windowMs: 10 * 60 * 1000 });
-  const isAttempt = request => ['/auth/login', '/auth/callback'].includes(request.routeOptions.url)
+  // Seules les vraies tentatives comptent (retour de l'IdP, envoi du formulaire local) : la simple
+  // redirection /auth/login ne permet pas de bloquer la connexion d'un tiers derrière la même adresse.
+  const isAttempt = request => request.routeOptions.url === '/auth/callback'
     || (request.routeOptions.url === '/auth/local' && request.method === 'POST');
 
   if (config.oidc.projectId && !config.oidc.orgId) {

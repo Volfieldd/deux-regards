@@ -8,11 +8,12 @@ export default async function mediaRoutes(app) {
   const dir = path.join(app.config.storageDir, 'variants');
   fs.mkdirSync(dir, { recursive: true });
   // Seules les variantes à jour (empreinte courante) sont servies.
-  const photoOf = app.db.prepare("SELECT status, variant_key FROM photos WHERE file LIKE ? || '.%'");
+  // « <uuid>. » ≤ file < « <uuid>/ » : les fichiers « <uuid>.<ext> », via l'index unique de photos.file.
+  const photoOf = app.db.prepare("SELECT status, variant_key FROM photos WHERE file >= ? || '.' AND file < ? || '/'");
 
   function lookup(name) {
     const m = VARIANT_RE.exec(name);
-    const photo = m && photoOf.get(m[1]);
+    const photo = m && photoOf.get(m[1], m[1]);
     return photo && photo.variant_key === (m[2] || '') ? photo.status : undefined;
   }
 
@@ -23,6 +24,7 @@ export default async function mediaRoutes(app) {
 
   app.get('/admin/media/:name', { preHandler: app.requireAdmin }, async (request, reply) => {
     if (!lookup(request.params.name)) return reply.callNotFound();
-    return reply.header('cache-control', 'private, max-age=3600').sendFile(request.params.name, dir, { cacheControl: false });
+    // Brouillons : jamais conservés par le navigateur après la session (ordinateur partagé).
+    return reply.header('cache-control', 'no-store').sendFile(request.params.name, dir, { cacheControl: false });
   });
 }

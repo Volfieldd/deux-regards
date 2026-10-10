@@ -43,14 +43,20 @@ export function createProofService({ db, storageDir, tsa, log, fetchImpl = fetch
   };
   const setHash = db.prepare('UPDATE photos SET sha256 = ? WHERE id = ?');
 
+  // File unique qui ne rejette jamais : une erreur est journalisée, jamais propagée (pas de rejet non géré).
   let queue = Promise.resolve();
   let passQueued = false;
+  let retryQueued = false;
   let timer = null;
-  const enqueue = job => (queue = queue.then(job, job));
+  let stopping = false;
+  let aborter = new AbortController();
+  const enqueue = job => (queue = queue.then(job).catch(err => log?.error({ err }, 'passage d’horodatage interrompu')));
+  const exists = id => Boolean(q.photo.get(id));
 
   // Empreintes manquantes (photos antérieures à cette fonction, seed).
   async function fillHashes() {
     for (const p of q.missingHash.all()) {
+      if (stopping) return;
       try {
         setHash.run(await sha256File(path.join(storageDir, 'originals', p.file)), p.id);
       } catch (err) {
@@ -61,16 +67,20 @@ export function createProofService({ db, storageDir, tsa, log, fetchImpl = fetch
 
   async function stamp(p, attempts) {
     const base = { photo_id: p.id, sha256: p.sha256, tsa: tsa.url, attempts, updated_at: now() };
+    let result;
     try {
-      const r = await requestTimestamp(tsa.url, p.sha256, { fetchImpl, nonce: nonce?.() });
+      const r = await requestTimestamp(tsa.url, p.sha256, { fetchImpl, nonce: nonce?.(), signal: aborter.signal });
       const { signer } = verifyToken(r, { caPem });
-      q.ok.run({ ...base, token: r.reply, gen_time: r.genTime.toISOString(), serial: r.serial, signer });
-      return true;
+      result = { ok: true, row: { ...base, token: r.reply, gen_time: r.genTime.toISOString(), serial: r.serial, signer } };
     } catch (err) {
-      q.error.run({ ...base, error: err instanceof TimestampError ? err.message : `service injoignable (${err.cause?.code || err.name})` });
-      log?.warn({ err: err.message, photo: p.id }, 'horodatage impossible, nouvel essai plus tard');
-      return false;
+      result = { ok: false, err, row: { ...base, error: err instanceof TimestampError ? err.message : `service injoignable (${err.cause?.code || err.name})` } };
     }
+    // La photo a pu être supprimée pendant la requête : rien à enregistrer.
+    if (!exists(p.id) || stopping) return false;
+    if (result.ok) { q.ok.run(result.row); return true; }
+    q.error.run(result.row);
+    log?.warn({ err: result.err.message, photo: p.id }, 'horodatage impossible, nouvel essai plus tard');
+    return false;
   }
 
   const due = row => row.status !== 'error' || row.ts_sha !== row.sha256
@@ -81,17 +91,25 @@ export function createProofService({ db, storageDir, tsa, log, fetchImpl = fetch
 
     // Passage complet : empreintes manquantes, puis horodatage de ce qui doit l'être.
     schedule({ retryNow = false } = {}) {
-      if (passQueued) return queue;
+      retryQueued ||= retryNow;            // une relance demandée pendant qu'un passage attend n'est pas perdue
+      if (passQueued || stopping) return queue;
       passQueued = true;
       return enqueue(async () => {
         passQueued = false;
+        const retry = retryQueued;
+        retryQueued = false;
         await fillHashes();
         if (!tsa.url) return;
         let done = 0;
         for (const row of q.todo.all()) {
-          if (!retryNow && !due(row)) continue;
+          if (stopping) break;
+          if (!retry && !due(row)) continue;
           const attempts = row.ts_sha === row.sha256 && row.status === 'error' ? row.attempts + 1 : 1;
-          if (await stamp(row, attempts)) done++;
+          try {
+            if (await stamp(row, attempts)) done++;
+          } catch (err) {
+            log?.error({ err, photo: row.id }, 'horodatage : enregistrement impossible');
+          }
         }
         if (done) log?.info({ done }, 'originaux horodatés');
       });
@@ -102,7 +120,8 @@ export function createProofService({ db, storageDir, tsa, log, fetchImpl = fetch
       this.schedule();
       if (tsa.url && !timer) timer = setInterval(() => this.schedule(), PERIOD).unref();
     },
-    stop() { clearInterval(timer); timer = null; return queue; },
+    // Arrêt : plus de nouveau passage, requête en cours annulée.
+    stop() { stopping = true; clearInterval(timer); timer = null; aborter.abort(); return queue; },
     idle: () => queue,
 
     status: () => q.counts.get(),

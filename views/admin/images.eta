@@ -4,10 +4,14 @@
 <p class="prose">Ces réglages s’appliquent aux images servies sur le site. Les originaux ne sont jamais modifiés : à chaque enregistrement, les images sont recalculées en arrière-plan, puis le site bascule sur les nouvelles d’un coup.</p>
 
 <div class="edit">
+<% if (it.previewId) { %>
   <figure class="preview">
     <img src="/admin/images/apercu.webp?photo=<%= it.previewId %>" alt="Aperçu du filigrane enregistré" width="1280" height="853">
     <figcaption class="mono">Aperçu des réglages enregistrés (1280 px)<%= w.enabled ? '' : ' · filigrane désactivé' %></figcaption>
   </figure>
+<% } else { %>
+  <p class="panel">Importez une photo pour voir un aperçu du filigrane.</p>
+<% } %>
 
   <form class="form" method="post" action="/admin/images" id="images-form">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">

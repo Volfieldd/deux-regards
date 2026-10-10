@@ -1,14 +1,14 @@
 <% layout('./layout') %>
 <h1>Auteurs</h1>
-<% const fields = (v, errs) => { %>
+<% const fields = (v, errs) => { const bad = k => errs && errs[k] ? ` aria-invalid="true" aria-describedby="err-auteur-${v.id || 'nouveau'}"` : ''; %>
       <div class="row">
-        <label>Nom <input name="name" value="<%= v.name || '' %>" required maxlength="80"></label>
-<% if (v.id) { %>        <label>Adresse <span class="mono">/auteur/</span><input name="slug" value="<%= v.slug %>" maxlength="80"></label><% } %>
+        <label>Nom <input name="name" value="<%= v.name || '' %>" required maxlength="80"<%~ bad('name') %>></label>
+<% if (v.id) { %>        <label>Adresse <span class="mono">/auteur/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ bad('slug') %>></label><% } %>
       </div>
       <label>Biographie <textarea name="bio" rows="3" maxlength="2000"><%= v.bio || '' %></textarea></label>
       <label>Compte de connexion (identifiant OIDC « sub »)
-        <input name="oidc_sub" value="<%= v.oidc_sub || '' %>" maxlength="255" class="mono" placeholder="affiché sur le tableau de bord après connexion"></label>
-<% if (errs) { %>      <p class="err" role="alert"><%= Object.values(errs).join(' ') %></p><% } %>
+        <input name="oidc_sub" value="<%= v.oidc_sub || '' %>" maxlength="255" class="mono" placeholder="affiché sur le tableau de bord après connexion"<%~ bad('oidc_sub') %>></label>
+<% if (errs) { %>      <p class="err" role="alert" id="err-auteur-<%= v.id || 'nouveau' %>"><%= Object.values(errs).join(' ') %></p><% } %>
 <% } %>
 <% it.authors.forEach(a => { const ed = it.editErrors && it.editErrors.id === a.id ? it.editErrors : null; %>
   <section class="panel">

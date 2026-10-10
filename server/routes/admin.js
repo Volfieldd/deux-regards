@@ -6,7 +6,7 @@ import multipart from '@fastify/multipart';
 import { createAdminRepo, ValidationError } from '../admin-repo.js';
 import { importOriginal, removePhotoFiles, ImportError, MAX_FILE_BYTES } from '../media.js';
 import { picture } from '../picture.js';
-import { sameToken } from '../auth.js';
+import { sameToken, safeNext } from '../auth.js';
 import { pad } from '../format.js';
 import sharp from 'sharp';
 import { normalizeWatermark, normalizeExif, EXIF_MODES, MIN_WIDTHS } from '../variants.js';
@@ -27,12 +27,22 @@ export default async function adminRoutes(app) {
   const { storageDir, secureCookies } = app.config;
   const tmpDir = path.join(storageDir, 'tmp');
   fs.mkdirSync(tmpDir, { recursive: true });
+  // Au démarrage, aucun import n'est en cours : les restes d'un import interrompu sont effacés.
+  for (const f of fs.readdirSync(tmpDir)) fs.rmSync(path.join(tmpDir, f), { force: true, recursive: true });
 
+  // throwFileSizeLimit: false — un fichier trop lourd est refusé seul (part.file.truncated), pas tout le lot.
   await app.register(multipart, {
+    throwFileSizeLimit: false,
     limits: { fileSize: MAX_FILE_BYTES, files: MAX_FILES, fields: 10, fieldSize: 2000, parts: MAX_FILES + 10 },
   });
 
   app.addHook('preHandler', app.requireAdmin);
+  // Journal d'audit : qui a modifié quoi (les co-admins ont tous les droits).
+  app.addHook('onResponse', async (request, reply) => {
+    if (request.method !== 'GET' && request.method !== 'HEAD' && request.session) {
+      request.log.info({ audit: true, sub: request.session.sub, action: `${request.method} ${request.routeOptions.url}`, params: request.params, status: reply.statusCode }, 'action admin');
+    }
+  });
   const write = { preHandler: app.verifyCsrf };
 
   // ---------- messages après redirection (cookie signé, lu une fois) ----------
@@ -113,7 +123,12 @@ export default async function adminRoutes(app) {
           continue;
         }
         const tmp = path.join(tmpDir, crypto.randomUUID());
-        await pipeline(part.file, fs.createWriteStream(tmp));
+        try {
+          await pipeline(part.file, fs.createWriteStream(tmp));
+        } catch (err) {
+          fs.rmSync(tmp, { force: true });            // envoi interrompu : rien ne reste dans tmp/
+          throw err;
+        }
         if (part.file.truncated) {
           fs.rmSync(tmp, { force: true });
           refused.push({ name: part.filename, reason: `fichier trop lourd (${MAX_FILE_BYTES / 1024 / 1024} Mo au plus)` });
@@ -138,6 +153,7 @@ export default async function adminRoutes(app) {
         }
       }
     } catch (err) {
+      if (err.code === 'FST_INVALID_MULTIPART_CONTENT_TYPE') return reply.code(400).send({ error: 'Envoi multipart attendu.' });
       if (err.code !== 'FST_FILES_LIMIT' && err.code !== 'FST_PARTS_LIMIT') throw err;
       refused.push({ name: '…', reason: `${MAX_FILES} fichiers au plus par envoi` });
     }
@@ -245,7 +261,9 @@ export default async function adminRoutes(app) {
     const r = await app.proofs.verify(photo.id);
     const to = `/admin/photos/${photo.id}#preuve`;
     if (!r.ok) return failed(reply, to, `Preuve non valide : ${r.reason}.`);
-    return done(reply, to, `Preuve valide : original intact, horodaté le ${r.genTime.toISOString().replace('T', ' à ').slice(0, 21)} UTC, signature vérifiée${r.chained ? ' jusqu’à l’autorité racine' : ''}.`);
+    const when = r.genTime.toISOString().replace('T', ' à ').slice(0, 21);
+    if (!r.chained) return failed(reply, to, `Signature valide (original intact, horodaté le ${when} UTC), mais autorité non vérifiée : aucun certificat racine configuré (TSA_CA_FILE).`);
+    return done(reply, to, `Preuve valide : original intact, horodaté le ${when} UTC, signature vérifiée jusqu’à l’autorité racine.`);
   });
 
   app.post('/admin/preuves/reessayer', write, async (request, reply) => {
@@ -408,12 +426,17 @@ export default async function adminRoutes(app) {
           continue;
         }
         if (!checked) { part.file.resume(); break; }
-        const buf = await part.toBuffer().catch(() => null);
-        if (!buf || part.file.truncated) { error = 'Logo trop lourd (5 Mo au plus).'; continue; }
+        const chunks = [];
+        for await (const chunk of part.file) chunks.push(chunk);
+        if (part.file.truncated) { error = 'Logo trop lourd (5 Mo au plus).'; continue; }
+        const buf = Buffer.concat(chunks);
         let meta;
         try { meta = await sharp(buf, { limitInputPixels: LOGO_MAX_SIDE * LOGO_MAX_SIDE }).metadata(); } catch { meta = null; }
         if (!meta || !['png', 'webp'].includes(meta.format)) { error = 'Le logo doit être une image PNG ou WebP (de préférence à fond transparent).'; continue; }
         if (meta.width > LOGO_MAX_SIDE || meta.height > LOGO_MAX_SIDE) { error = `Logo trop grand (${LOGO_MAX_SIDE} px de côté au plus).`; continue; }
+        if (Math.min(meta.width, meta.height) < 8 || Math.max(meta.width, meta.height) > 10 * Math.min(meta.width, meta.height)) {
+          error = 'Logo trop étiré ou trop petit (8 px de côté au moins, rapport largeur/hauteur de 10 au plus).'; continue;
+        }
         saved = `${crypto.randomUUID()}.png`;
         await sharp(buf).png().toFile(path.join(app.variants.watermarkDir, saved));
       }
@@ -423,8 +446,8 @@ export default async function adminRoutes(app) {
     }
     if (!checked) return reply.code(403).send('Jeton CSRF invalide.');
     if (!saved) return failed(reply, '/admin/images', error || 'Aucun fichier reçu.');
+    // L'ancien logo n'est pas effacé ici : un passage en cours l'utilise peut-être ; le ménage de fin de passage s'en charge.
     const { watermark, exif } = app.variants.context();
-    if (watermark.image) fs.rmSync(path.join(app.variants.watermarkDir, watermark.image), { force: true });
     repo.saveImageSettings({ ...watermark, image: saved }, exif);
     app.variants.schedule();
     return done(reply, '/admin/images', 'Logo enregistré.');
@@ -432,7 +455,6 @@ export default async function adminRoutes(app) {
 
   app.post('/admin/images/logo/delete', write, async (request, reply) => {
     const { watermark, exif } = app.variants.context();
-    if (watermark.image) fs.rmSync(path.join(app.variants.watermarkDir, watermark.image), { force: true });
     repo.saveImageSettings({ ...watermark, image: null }, exif);
     app.variants.schedule();
     return done(reply, '/admin/images', 'Logo supprimé.');
@@ -452,6 +474,6 @@ export default async function adminRoutes(app) {
 
 // Retour à la liste filtrée d'où vient le formulaire (champ « back »), toujours dans l'admin.
 function safeBack(request, fallback) {
-  const back = request.body?.back;
-  return typeof back === 'string' && /^\/admin(\/|\?|$)/.test(back) && !/[\s\\]/.test(back) ? back : fallback;
+  const back = safeNext(request.body?.back, fallback);
+  return /^\/admin(\/|\?|#|$)/.test(back) ? back : fallback;
 }

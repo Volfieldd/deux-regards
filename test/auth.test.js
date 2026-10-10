@@ -291,12 +291,24 @@ test('déconnexion avec un jeton périmé : page d’erreur lisible, session con
 
 test('limite de débit sur les tentatives de connexion : 429 au-delà de 30', async t => {
   const { app } = await setup(t);
-  for (let i = 0; i < 30; i++) assert.equal((await app.inject('/auth/login')).statusCode, 503);
-  const res = await app.inject('/auth/login');
+  for (let i = 0; i < 30; i++) assert.equal((await app.inject('/auth/callback?state=x')).statusCode, 400);
+  const res = await app.inject('/auth/callback?state=x');
   assert.equal(res.statusCode, 429);
   assert.equal(res.headers['retry-after'], '600');
-  assert.equal((await app.inject('/')).statusCode, 200);      // le site public n'est pas concerné
+  assert.equal((await app.inject('/auth/login')).statusCode, 503);   // la redirection vers l'IdP n'est pas comptée ni bloquée
+  assert.equal((await app.inject('/')).statusCode, 200);             // le site public n'est pas concerné
   assert.equal((await app.inject({ method: 'POST', url: '/auth/logout' })).statusCode, 303);   // ni la déconnexion
+});
+
+test('limiteur : IPv6 regroupé par /64, mémoire bornée', async () => {
+  const { createRateLimiter, clientKey } = await import('../server/ratelimit.js');
+  assert.equal(clientKey('2001:db8:1:2:aaaa::1'), '2001:0db8:0001:0002::/64');
+  assert.equal(clientKey('2001:db8:1:2::ffff'), clientKey('2001:db8:1:2:aaaa::1'));
+  assert.equal(clientKey('::ffff:10.0.0.1'), '10.0.0.1');
+  const allow = createRateLimiter({ limit: 1, windowMs: 1000, maxKeys: 3 });
+  assert.equal(allow('2001:db8::1'), true);
+  assert.equal(allow('2001:db8::2'), false);                // même /64
+  for (let i = 0; i < 10; i++) allow(`10.0.0.${i}`);       // ne dépasse pas maxKeys
 });
 
 test('le code et le state OIDC sont masqués dans les journaux', async t => {

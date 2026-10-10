@@ -6,13 +6,18 @@ import { createVariantService } from '../variants.js';
 const config = loadConfig();
 const db = openDb(config.databasePath);
 const command = process.argv[2];
+const COMMANDS = ['migrate', 'seed', 'variants'];
+if (!COMMANDS.includes(command)) {
+  console.error(`Commande inconnue : ${command ?? '(aucune)'}. Attendu : ${COMMANDS.join(', ')}.`);
+  process.exit(2);
+}
 
 const applied = migrate(db);
 console.log(applied.length ? `Migrations appliquées : ${applied.join(', ')}` : 'Base à jour.');
 
 if (command === 'seed') {
   const result = await seed(db, config);
-  console.log(result.skipped ? 'Des photos existent déjà, jeu de démonstration ignoré.' : `${result.photos} photos de démonstration importées.`);
+  console.log(result.skipped ? 'La base contient déjà des données, jeu de démonstration ignoré.' : `${result.photos} photos de démonstration importées.`);
 }
 if (command === 'variants') {
   // Même service que le serveur : filigrane et métadonnées des réglages, empreinte dans les noms.

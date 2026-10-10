@@ -28,9 +28,11 @@
 </header>
 <main class="adm wrap" id="contenu">
 <% if (it.variants.running || it.variants.errors.length) { %>
-  <div class="flash<%= it.variants.errors.length ? ' error' : '' %>" role="status" data-variants>
-    <p><% if (it.variants.running) { %>Mise à jour des images en cours : <span data-done><%= it.variants.done %></span> / <%= it.variants.total %>.<% } %>
-<% if (it.variants.errors.length) { %> <%= it.variants.errors.length %> image(s) n’ont pas pu être recalculées : <%= it.variants.errors.map(e => e.title).join(', ') %>.<% } %></p>
+  <div class="flash<%= it.variants.errors.length ? ' error' : '' %>" data-variants>
+<% if (it.variants.running) { %>
+    <p data-running>Mise à jour des images en cours : <span data-done><%= it.variants.done %></span> / <span data-total><%= it.variants.total %></span>.</p>
+<% } %>
+    <p role="status" data-final><% if (!it.variants.running && it.variants.errors.length) { %><%= it.variants.errors.length %> image(s) n’ont pas pu être recalculées : <%= it.variants.errors.map(e => e.title).join(', ') %>.<% } %></p>
   </div>
 <% } %>
 <% if (it.flash) { %>

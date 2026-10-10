@@ -41,7 +41,7 @@
 <% it.photos.forEach((p, i) => { %>
   <li id="photo-<%= p.id %>" data-id="<%= p.id %>">
     <span class="handle mono" aria-hidden="true">N°<%= it.pad(p.n) %></span>
-    <a class="thumb" href="/admin/photos/<%= p.id %>"><%~ it.picture(p, { sizes: '96px', alt: '' }) %></a>
+    <a class="thumb" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><%~ it.picture(p, { sizes: '96px', alt: '' }) %></a>
     <div class="info">
       <a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a>
       <span class="mono"><%= p.category %> · <%= p.author %><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + p.when : '' %></span>
@@ -51,7 +51,7 @@
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
       <input type="hidden" name="back" value="/admin/photos<%= it.filtered ? '?' + new URLSearchParams({ q: f.q, auteur: f.author, serie: f.category, statut: f.status }) : '' %>">
       <input type="hidden" name="status" value="<%= p.status === 'published' ? 'draft' : 'published' %>">
-      <button class="btn ghost" type="submit"><%= p.status === 'published' ? 'Dépublier' : 'Publier' %></button>
+      <button class="btn ghost" type="submit" aria-label="<%= p.status === 'published' ? 'Dépublier' : 'Publier' %> « <%= p.title %> »"><%= p.status === 'published' ? 'Dépublier' : 'Publier' %></button>
     </form>
 <% if (!it.filtered) { %>
     <div class="move">

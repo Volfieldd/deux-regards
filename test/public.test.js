@@ -96,8 +96,10 @@ test('à propos liste les deux auteurs', async t => {
   const { app } = await setup(t, { seeded: true });
   const res = await app.inject('/a-propos');
   assert.equal(res.statusCode, 200);
-  assert.match(res.body, /Sébastien/);
-  assert.match(res.body, /Julien/);
+  // Dans la liste des auteurs elle-même (le pied de page cite aussi les noms).
+  const people = res.body.slice(res.body.indexOf('class="people"'), res.body.indexOf('</main>'));
+  assert.match(people, /<h2><a href="\/auteur\/sebastien">Sébastien<\/a><\/h2>/);
+  assert.match(people, /<h2><a href="\/auteur\/julien">Julien<\/a><\/h2>/);
 });
 
 test('chaque variante référencée par les pages existe', async t => {

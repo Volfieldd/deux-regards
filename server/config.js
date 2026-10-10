@@ -10,6 +10,16 @@ const required = (env, key) => {
 const DEFAULT_TSA = 'https://freetsa.org/tsr';
 const DEFAULT_TSA_CA = fileURLToPath(new URL('../assets/tsa/freetsa-cacert.pem', import.meta.url));
 
+// TRUST_PROXY : « false », nombre de proxys (« 1 »), ou liste d'adresses/CIDR/mots-clés.
+// « true » (faire confiance à tout X-Forwarded-For) est refusé : il rendrait la limite de débit contournable.
+function parseTrustProxy(value, deployed) {
+  if (value === undefined || value === '') return deployed ? 'loopback,uniquelocal' : false;
+  if (value === 'false') return false;
+  if (value === 'true') throw new Error('TRUST_PROXY=true est refusé : indiquer l’adresse du proxy (ex. 127.0.0.1) ou le nombre de proxys');
+  if (/^\d+$/.test(value)) return Number(value);
+  return value;
+}
+
 const list = value => (value ? value.split(',').map(s => s.trim()).filter(Boolean) : []);
 
 export function loadConfig(env = process.env) {
@@ -21,7 +31,10 @@ export function loadConfig(env = process.env) {
   // pas d'une seule variable qu'on pourrait oublier au déploiement.
   const deployed = production || https;
 
-  const cookieSecret = env.COOKIE_SECRET || (deployed ? required(env, 'COOKIE_SECRET') : 'dev-only-secret-change-me-dev-only-secret');
+  // Le secret de développement n'est accepté que sur la boucle locale : exposé sur un réseau, le serveur exige le sien.
+  const host = env.HOST || '127.0.0.1';
+  const loopback = ['127.0.0.1', '::1', 'localhost'].includes(host);
+  const cookieSecret = env.COOKIE_SECRET || (deployed || !loopback ? required(env, 'COOKIE_SECRET') : 'dev-only-secret-change-me-dev-only-secret');
   if (cookieSecret.length < 32) throw new Error('COOKIE_SECRET doit faire au moins 32 caractères');
 
   const issuer = env.OIDC_ISSUER || null;
@@ -41,13 +54,13 @@ export function loadConfig(env = process.env) {
     production,
     deployed,
     siteName: env.SITE_NAME || 'Deux Regards',
-    host: env.HOST || '127.0.0.1',
+    host,
     port: Number(env.PORT || 3000),
     publicUrl,
     // Cookies Secure dès que le site est servi en HTTPS (toujours le cas derrière Caddy).
     secureCookies: https,
     // Proxys dont on accepte X-Forwarded-* : par défaut Caddy en local ou sur le réseau Docker.
-    trustProxy: env.TRUST_PROXY || (deployed ? 'loopback,uniquelocal' : false),
+    trustProxy: parseTrustProxy(env.TRUST_PROXY, deployed),
     databasePath: path.resolve(env.DATABASE_PATH || path.join(storageDir, 'site.db')),
     storageDir,
     cookieSecret,

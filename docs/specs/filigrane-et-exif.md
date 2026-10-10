@@ -28,9 +28,9 @@ Les **originaux ne sont jamais modifiés** : filigrane et métadonnées ne conce
 | F4 | Police au choix parmi celles du site : Jost, Cormorant Garamond italique (défaut), IBM Plex Mono. Teinte claire (défaut) ou sombre. |
 | F5 | Position : 9 emplacements (coins, bords, centre ; défaut en bas à droite) ou **mosaïque** (motif répété en diagonale à 30° sur toute l'image). |
 | F6 | Opacité de 5 à 100 % (défaut 60), largeur de 3 à 60 % de la largeur de l'image (défaut 22), marge de 0 à 20 % (défaut 3). Le filigrane n'est jamais plus grand que l'image. |
-| F7 | Tailles concernées : toutes (défaut), 1280 px et plus (les vignettes de 640 px sont épargnées), ou 2000 px seulement. |
+| F7 | Tailles concernées : toutes (défaut), 1280 px et plus (les vignettes de 640 px sont épargnées), ou 2000 px seulement. La plus grande variante produite est toujours marquée, même si l'original est plus petit que le seuil. |
 | F8 | Une photo peut être **exclue** du filigrane (« Jamais sur cette photo ») ; elle reçoit tout de même les métadonnées choisies. |
-| F9 | Logo : PNG ou WebP, 5 Mo et 4000 px de côté au plus. Il est **réencodé en PNG** à l'envoi ; le fichier envoyé n'est jamais servi tel quel. Un seul logo à la fois ; l'ancien est supprimé au remplacement. Sans logo, un filigrane de type « Logo » n'est pas appliqué (et l'admin le signale). |
+| F9 | Logo : PNG ou WebP, 5 Mo et 4000 px de côté au plus, 8 px au moins, rapport largeur/hauteur de 10 au plus ; il est toujours redimensionné dans la boîte de l'image (pas d'image intermédiaire géante). Il est **réencodé en PNG** à l'envoi ; le fichier envoyé n'est jamais servi tel quel. Un seul logo à la fois ; l'ancien est supprimé au remplacement. Sans logo, un filigrane de type « Logo » n'est pas appliqué (et l'admin le signale). |
 | F10 | **Aperçu** : la page montre la photo choisie avec les réglages enregistrés ; le bouton « Aperçu sans enregistrer » ouvre dans un nouvel onglet le rendu des réglages du formulaire, sans rien enregistrer. |
 
 ### 2.2 Métadonnées

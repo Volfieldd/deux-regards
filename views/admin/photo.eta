@@ -1,6 +1,6 @@
 <% layout('./layout') %>
 <% const v = it.values, e = it.errors; %>
-<% const err = k => e[k] ? `<span class="err" id="err-${k}">${e[k]}</span>` : ''; %>
+<% const inv = k => e[k] ? ` aria-invalid="true" aria-describedby="err-${k}"` : ''; %>
 <p class="mono"><a class="more eyebrow" href="/admin/photos">← Photos</a></p>
 <h1><%= it.photo.title %></h1>
 <div class="edit">
@@ -11,15 +11,15 @@
   <form class="panel form" method="post" action="/admin/photos/<%= it.photo.id %>" novalidate>
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
 <% if (Object.keys(e).length) { %><p class="err" role="alert">Le formulaire contient des erreurs.</p><% } %>
-    <label>Titre <input name="title" value="<%= v.title %>" required maxlength="160"<%~ e.title ? ' aria-invalid="true" aria-describedby="err-title"' : '' %>><%~ err('title') %></label>
-    <label>Adresse <span class="mono">/photo/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ e.slug ? ' aria-invalid="true" aria-describedby="err-slug"' : '' %>><%~ err('slug') %></label>
+    <label>Titre <input name="title" value="<%= v.title %>" required maxlength="160"<%~ inv('title') %>></label><% if (e.title) { %><span class="err" id="err-title"><%= e.title %></span><% } %>
+    <label>Adresse <span class="mono">/photo/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ inv('slug') %>></label><% if (e.slug) { %><span class="err" id="err-slug"><%= e.slug %></span><% } %>
     <div class="row">
-      <label>Série <select name="category_id"><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select><%~ err('category_id') %></label>
-      <label>Auteur <select name="author_id"><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === Number(v.author_id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select><%~ err('author_id') %></label>
+      <label>Série <select name="category_id"<%~ inv('category_id') %>><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select></label><% if (e.category_id) { %><span class="err" id="err-category_id"><%= e.category_id %></span><% } %>
+      <label>Auteur <select name="author_id"<%~ inv('author_id') %>><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === Number(v.author_id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label><% if (e.author_id) { %><span class="err" id="err-author_id"><%= e.author_id %></span><% } %>
     </div>
     <div class="row">
       <label>Lieu <input name="place" value="<%= v.place %>" maxlength="120"></label>
-      <label>Date <input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="AAAA-MM ou AAAA-MM-JJ" inputmode="numeric"<%~ e.taken_on ? ' aria-invalid="true" aria-describedby="err-taken_on"' : '' %>><%~ err('taken_on') %></label>
+      <label>Date <input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="AAAA-MM ou AAAA-MM-JJ" inputmode="numeric"<%~ inv('taken_on') %>></label><% if (e.taken_on) { %><span class="err" id="err-taken_on"><%= e.taken_on %></span><% } %>
     </div>
     <label>Légende <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
     <fieldset class="row">

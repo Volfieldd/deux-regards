@@ -11,8 +11,8 @@ Tout se règle par variables d'environnement, dans le fichier `.env` (lu par `np
 | `PORT` | `3000` | Port d'écoute. |
 | `PUBLIC_URL` | `http://localhost:PORT` | URL publique : liens absolus (Open Graph, URL canonique), redirections OIDC. **En HTTPS, le site est considéré « en ligne »** (voir plus bas). |
 | `NODE_ENV` | — | `production` : cache des gabarits, CSS/JS en cache long, et site considéré « en ligne ». |
-| `TRUST_PROXY` | en ligne : `loopback,uniquelocal` ; sinon aucun | Proxys dont on accepte `X-Forwarded-*` (Caddy en local ou sur le réseau Docker). Liste d'IP, de CIDR ou de mots-clés. |
-| `COOKIE_SECRET` | secret de développement | Signature des cookies, 32 caractères au moins. **Obligatoire en ligne.** |
+| `TRUST_PROXY` | en ligne : `loopback,uniquelocal` ; sinon aucun | Proxys dont on accepte `X-Forwarded-*` : liste d'IP, de CIDR ou de mots-clés (`loopback`, `uniquelocal`), ou nombre de proxys (`1`). `false` : aucun. `true` est **refusé** (n'importe quel client pourrait se faire passer pour un autre et contourner la limite de connexions). Indiquez l'adresse exacte de Caddy. |
+| `COOKIE_SECRET` | secret de développement | Signature des cookies, 32 caractères au moins. **Obligatoire en ligne, et dès que `HOST` n'est pas une adresse locale** (`127.0.0.1`, `::1`, `localhost`). |
 
 ## Données
 
@@ -34,7 +34,7 @@ Tout se règle par variables d'environnement, dans le fichier `.env` (lu par `np
 | `OIDC_ORG_ID` | — | Organisation propriétaire du projet. Un rôle donné dans une autre organisation est ignoré. Fortement recommandé. |
 | `OIDC_ADMIN_ROLE` | `admin` | Rôle de projet qui ouvre l'admin. |
 | `OIDC_ALLOWED_SUBS` | — | Repli sans Zitadel (Google en direct) : identifiants `sub` autorisés, séparés par des virgules, avec e-mail vérifié. |
-| `AUTH_RATE_LIMIT` | `30` | Tentatives de connexion par IP sur 10 minutes. |
+| `AUTH_RATE_LIMIT` | `30` | Tentatives de connexion (retours de l'IdP, envois du formulaire de test) par adresse sur 10 minutes ; une adresse IPv6 compte par bloc /64. La simple redirection vers l'IdP n'est pas comptée. |
 | `LOCAL_AUTH_TOKEN` | — | Connexion locale de **test**, 16 caractères au moins. **Refusée en ligne.** |
 
 ## Preuves d'antériorité

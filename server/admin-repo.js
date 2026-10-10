@@ -107,8 +107,16 @@ export function createAdminRepo(db) {
       const watermark = body.watermark === 'none' ? 0 : null;
       const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn || null, legend: text(body.legend, 2000), status, watermark };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
-      db.prepare(`UPDATE photos SET title = @title, slug = @slug, category_id = @category_id, author_id = @author_id, place = @place,
-        taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
+      const before = q.photo.get(id);
+      db.transaction(() => {
+        db.prepare(`UPDATE photos SET title = @title, slug = @slug, category_id = @category_id, author_id = @author_id, place = @place,
+          taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
+        // L'ouverture désigne les photos par leur adresse : elle suit le renommage.
+        const hero = settings().hero;
+        if (before && before.slug !== slug && Array.isArray(hero) && hero.includes(before.slug)) {
+          q.setSetting.run('hero', JSON.stringify(hero.map(s => (s === before.slug ? slug : s))));
+        }
+      })();
     },
 
     setStatus(id, status) {
