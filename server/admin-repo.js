@@ -119,10 +119,10 @@ export function createAdminRepo(db) {
     },
     photo: id => q.photo.get(id),
 
-    addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null, sourceName = null }) {
+    addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null, sourceName = null, takenOn = null }) {
       const position = db.prepare('SELECT COALESCE(MAX(position), -1) + 1 FROM photos').pluck().get();
-      const { lastInsertRowid } = db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height, sha256, source_name)
-        VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?)`).run(uniqueSlug('photos', title), title, categoryId, authorId, position, file, width, height, sha256, sourceName);
+      const { lastInsertRowid } = db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height, sha256, source_name, taken_on)
+        VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?)`).run(uniqueSlug('photos', title), title, categoryId, authorId, position, file, width, height, sha256, sourceName, takenOn);
       return Number(lastInsertRowid);
     },
 
@@ -187,13 +187,21 @@ export function createAdminRepo(db) {
       const takenOn = parseTakenOn(body.taken_on);
       if (takenOn === undefined) errors.taken_on = DATE_HINT;
       if (Object.keys(errors).length) throw new ValidationError(errors);
+      const before = {};
       db.transaction(() => {
         for (const id of ids) {
+          const p = q.photo.get(id);
+          if (p) before[id] = { place: p.place, taken_on: p.taken_on };
           if (place) db.prepare("UPDATE photos SET place = ?, updated_at = datetime('now') WHERE id = ?").run(place, id);
           if (takenOn) db.prepare("UPDATE photos SET taken_on = ?, updated_at = datetime('now') WHERE id = ?").run(takenOn, id);
         }
       })();
-      return { place, taken_on: takenOn };
+      return { place, taken_on: takenOn, before };
+    },
+    // Annulation : lieu et date remis tels qu'avant.
+    restoreFields(map) {
+      const set = db.prepare("UPDATE photos SET place = ?, taken_on = ?, updated_at = datetime('now') WHERE id = ?");
+      db.transaction(() => { for (const [id, v] of Object.entries(map)) if (q.photo.get(Number(id))) set.run(text(v?.place, 120), parseTakenOn(v?.taken_on) || null, Number(id)); })();
     },
 
     setStatus(id, status) {

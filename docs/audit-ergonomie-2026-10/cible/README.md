@@ -123,3 +123,22 @@ Les notes cibles sont des engagements, pas des résultats. Une fois les écrans 
 Une note qui retomberait sous 8 à cette vérification serait corrigée avant la livraison.
 
 Captures réalisées dans le conteneur Playwright à partir de maquettes HTML autonomes (styles et polices réels de l’admin, photos d’essai du dépôt).
+
+## Résultats après développement (PR #13, puis simplification)
+
+Mesures du parcours d'audit rejoué sur le serveur de test (`E2E_AUDIT=1 … --project=audit`) :
+
+| Mesure | Avant | Seuil | Après |
+|---|---|---|---|
+| Fichier invalide signalé | après l'envoi (42 s) | avant l'envoi | avant l'envoi ✓ |
+| Progression pendant l'import | un message fixe | % par photo et décompte du lot, annoncés | % d'envoi, « images n / 6 », décompte, temps restant ✓ |
+| Importer un lot | 4 actions | — | **2** (Importer, choisir les fichiers : l'envoi part seul) |
+| Compléter et publier 3 photos | 20 actions, 9 écrans | ≤ 6 actions, 1 écran | **5 actions**, 1 écran ✓ (3 titres, le lieu une fois, Publier ; la date vient de l'appareil) |
+| Classer 3 photos dans une série | 12 actions, 9 écrans | ≤ 4 actions, 1 écran | 4, 1 écran ✓ |
+| Mettre une série en tête | 4 clics | 1 geste | une nouvelle série arrive en tête ; 1 touche par place ✓ |
+| Tabulations jusqu'à l'import | 15 | ≤ 3 | 3 ✓ |
+| Première photo de la liste | y = 754 px | ≤ 360 px | 357 px (bandeau de test compris) ✓ |
+| Hauteur de l'en-tête mobile | 256 px | ≤ 80 px | 60 px ✓ |
+| axe-core (WCAG 2.2 AA), toutes violations | — | 0 | 0 sur chaque écran revu et ses états ✓ |
+
+Écarts assumés par rapport aux maquettes, pour réduire les actions : l'envoi part dès le choix des fichiers (plus de bouton « Envoyer ») ; série, lieu et date de la barre s'appliquent dès qu'on les change (plus de bouton « Appliquer ») ; une série est toujours proposée par défaut (une photo en a toujours une).

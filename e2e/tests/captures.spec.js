@@ -27,7 +27,7 @@ test.describe('admin', () => {
         await page.goto('/admin/photos');
         await page.locator('.plist li a.ttl').first().click();
       }
-      for (const img of await page.locator('main img').all()) {
+      for (const img of await page.locator('main img:visible').all()) {
         await img.scrollIntoViewIfNeeded();
         await expect.poll(() => img.evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
       }
@@ -68,3 +68,55 @@ for (const [name, url] of FRONT) {
     await ctx.close();
   });
 }
+
+// Écrans des parcours (import suivi, lot, sélection, suppression d'une série) : ils créent des
+// données, donc seulement avec E2E_ALLOW_WRITES=1, sur une instance jetable (jeu de démonstration).
+test.describe('parcours', () => {
+  test.skip(process.env.E2E_ALLOW_WRITES !== '1', 'E2E_ALLOW_WRITES=1 requis');
+  test.describe.configure({ mode: 'serial' });
+  test.use({ storageState: STATE });
+  const out = (name, info) => `captures/admin/${name}-${info.project.name.replace('captures-', '')}.png`;
+  let lot = null;
+
+  test('import suivi puis lot', async ({ page }, info) => {
+    test.skip(info.project.name !== 'captures-bureau', 'bureau seulement');
+    test.setTimeout(300_000);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/admin/photos');
+    const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('link', { name: '＋ Importer des photos' }).click()]);
+    await chooser.setFiles(['DSCF0241.jpg', 'DSCF0242.jpg', 'DSCF0243.jpg', 'notes-de-voyage.jpg'].map(f => `fixtures/audit/${f}`));
+    await page.waitForFunction(() => [...document.querySelectorAll('[data-files] .bar.proc i')].some(i => parseFloat(i.style.width) > 0), null, { timeout: 120_000 });
+    await page.locator('#import').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: out('02b-import-progression', info), fullPage: true });
+    await expect(page.locator('[data-sum-title]')).toHaveText('3 photos prêtes sur 3', { timeout: 240_000 });
+    lot = await page.locator('[data-sum-next]').getAttribute('href');
+    await page.goto(lot);
+    await page.locator('[data-bulk]').getByPlaceholder('Lieu').fill('Nantes');
+    await page.locator('[data-bulk]').getByPlaceholder('Lieu').press('Tab');
+    await expect(page.locator('[data-toast]')).toContainText('appliqué');
+    await page.locator('input[data-field=title]').first().fill('Lisière');
+    await page.locator('input[data-field=title]').first().press('Tab');
+    await expect(page.locator('tbody tr').first().locator('[data-state]')).toHaveText('✓ Enregistré');
+    await page.screenshot({ path: out('02c-completer-le-lot', info) });
+  });
+
+  test('sélection multiple', async ({ page }, info) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/admin/photos');
+    const boxes = page.locator('.plist .chk');
+    await boxes.nth(0).check();
+    await boxes.nth(2).click({ modifiers: ['Shift'] });
+    await page.locator('[data-bulk]').getByLabel('Série de destination').selectOption({ label: 'Rue' });
+    await page.screenshot({ path: out('02d-selection', info) });
+  });
+
+  test('suppression d’une série', async ({ page }, info) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/admin/series');
+    const card = page.locator('.scard[data-id]').filter({ hasText: /[1-9]\d* photos/ }).first();
+    await card.locator('summary[aria-label^="Plus d’actions"]').click();
+    await card.locator('.danger > summary').click();
+    await expect(page.locator('dialog[open]')).toBeVisible();
+    await page.screenshot({ path: out('04b-series-suppression', info) });
+  });
+});

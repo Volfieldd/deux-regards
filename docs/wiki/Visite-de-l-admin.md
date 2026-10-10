@@ -1,6 +1,6 @@
 # Visite de l'admin
 
-Captures du serveur de test (jeu de démonstration), faites le 10/10/2026, **avant** la refonte ergonomique des pages Photos, Séries et Réglages (import suivi photo par photo, sélection multiple, séries en cartes, ouverture ordonnée) : l'[aide](Aide) décrit les écrans actuels. Elles se régénèrent avec `E2E_CAPTURES=1 npm run e2e -- --project=captures-bureau --project=captures-mobile`. Pour l'usage pas à pas, voir l'[Aide de l'administration](Aide), également disponible dans l'admin (menu « Aide »).
+Captures d'une instance de test avec le seul jeu de démonstration, faites le 10/10/2026 après la refonte ergonomique. Elles se régénèrent sur une instance jetable (jeu de démonstration, sans logo) avec `E2E_CAPTURES=1 E2E_ALLOW_WRITES=1 npm run e2e -- --project=captures-bureau --project=captures-mobile` : les écrans d'import créent des photos. Pour l'usage pas à pas, voir l'[Aide de l'administration](Aide), également disponible dans l'admin (menu « Aide »).
 
 En haut de chaque page : **Tableau de bord · Photos · Séries · Auteurs · Filigrane & EXIF · Apparence · Réglages · Voir le site**, et **Se déconnecter**. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
 
@@ -26,6 +26,18 @@ La page réunit :
 
 ![Liste des photos](captures/admin/02-photos-bureau.webp)
 
+**Import :** « Importer des photos » ouvre le choix des fichiers, l'envoi part aussitôt et se suit photo par photo (les fichiers invalides sont écartés avant envoi).
+
+![Import en cours](captures/admin/02b-import-progression-bureau.webp)
+
+**Compléter et publier :** tout le lot sur une page ; la date vient de l'appareil, le lieu se saisit une fois pour le lot.
+
+![Compléter et publier](captures/admin/02c-completer-le-lot-bureau.webp)
+
+**Sélection multiple :** cases à cocher (Maj + clic pour une plage) et barre d'actions.
+
+![Sélection multiple](captures/admin/02d-selection-bureau.webp)
+
 ## Fiche d'une photo
 
 On y trouve :
@@ -41,6 +53,8 @@ On y trouve :
 Des cartes avec couverture et nombre de photos : créer (en tête), renommer, ordonner par glisser ou au clavier. Supprimer une série non vide déplace ses photos vers une autre série.
 
 ![Séries](captures/admin/04-series-bureau.webp)
+
+![Suppression d'une série](captures/admin/04b-series-suppression-bureau.webp)
 
 ## Auteurs
 
@@ -68,6 +82,8 @@ Nom du site, accroche, textes, page « Droits d'utilisation », photos de l'ouve
 
 Toutes les pages s'adaptent au téléphone.
 
-| Photos | Fiche | Filigrane |
-|---|---|---|
-| ![Photos sur mobile](captures/admin/02-photos-mobile.webp) | ![Fiche sur mobile](captures/admin/03-fiche-photo-mobile.webp) | ![Filigrane sur mobile](captures/admin/06-filigrane-exif-mobile.webp) |
+Le menu se replie derrière **☰ Menu** ; la barre de sélection passe en bas de l'écran.
+
+| Photos | Sélection | Séries | Fiche |
+|---|---|---|---|
+| ![Photos sur mobile](captures/admin/02-photos-mobile.webp) | ![Sélection sur mobile](captures/admin/02d-selection-mobile.webp) | ![Séries sur mobile](captures/admin/04-series-mobile.webp) | ![Fiche sur mobile](captures/admin/03-fiche-photo-mobile.webp) |

@@ -359,9 +359,15 @@ export default async function adminRoutes(app) {
         }
         case 'fields': {
           if (!n) return ko(422, 'Aucune photo sélectionnée.');
-          const v = repo.setFields(ids, body);
+          const { before, ...v } = repo.setFields(ids, body);
           app.variants.schedule();
-          return ok(`${photosWord} ${n > 1 ? 'mises' : 'mise'} à jour.`, { values: v });
+          const what = [v.place && `lieu « ${v.place} »`, v.taken_on && 'date'].filter(Boolean).join(' et ');
+          return ok(`${what ? `${what.charAt(0).toUpperCase()}${what.slice(1)} appliqué${v.place && v.taken_on ? 's' : ''} à` : 'Rien à changer pour'} ${photosWord}.`, { values: v, undo: { action: 'restore-fields', map: before } });
+        }
+        case 'restore-fields': {
+          repo.restoreFields(map(body.map));
+          app.variants.schedule();
+          return json ? reply.send({ ok: true, text: 'Modification annulée.' }) : done(reply, back, 'Modification annulée.');
         }
         // Annulations (JSON) : état précédent renvoyé par l'action annulée.
         case 'statuses': {

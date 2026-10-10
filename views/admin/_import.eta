@@ -3,7 +3,7 @@
   <div class="toolbar">
     <div>
       <h2 id="import-title">Importer des photos</h2>
-      <p class="sub" data-import-sub>Rien n’est envoyé avant votre confirmation. Les photos arrivent en brouillon.</p>
+      <p class="sub" data-import-sub>Les photos partent dès que vous les choisissez et arrivent en brouillon : rien n’est publié sans vous. Les fichiers invalides sont écartés avant l’envoi.</p>
     </div>
     <div class="acts"><a class="btn ghost" href="/admin/photos" data-import-close>Fermer</a></div>
   </div>
@@ -14,6 +14,15 @@
   </ol>
   <form method="post" action="/admin/photos/import" enctype="multipart/form-data" data-import>
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <div class="defaults" data-defaults>
+      <label class="inline">Auteur
+        <select name="author_id"><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === it.defaultAuthor ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
+      </label>
+      <label class="inline">Série
+        <select name="category_id"><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === it.defaultCategory ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
+      </label>
+      <span class="hint">Pour tout le lot ; modifiables photo par photo à l’étape 3.</span>
+    </div>
     <label class="drop" data-drop>
       <span class="drop-icon" aria-hidden="true">⇪</span>
       <span class="drop-text"><strong data-drop-title>Glissez vos photos ici</strong>
@@ -26,17 +35,8 @@
       <a class="btn" href="#" data-sum-next hidden>Compléter et publier →</a>
     </div>
     <ul class="files" data-files aria-label="Photos choisies" hidden></ul>
-    <div class="defaults" data-defaults>
-      <label class="inline">Auteur
-        <select name="author_id"><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === it.defaultAuthor ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
-      </label>
-      <label class="inline">Série
-        <select name="category_id"><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === it.defaultCategory ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
-      </label>
-      <span class="hint">Modifiables photo par photo à l’étape 3.</span>
-    </div>
     <p class="actions">
-      <button class="btn" type="submit" data-send>Importer</button>
+      <button class="btn" type="submit" data-send data-nojs>Importer</button>
       <button class="btn ghost" type="button" data-cancel hidden>Annuler le reste</button>
       <span class="hint" data-import-note role="status"></span>
     </p>

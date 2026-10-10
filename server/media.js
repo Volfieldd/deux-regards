@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
+import exifReader from 'exif-reader';
 import { removeVariants, MAX_PIXELS } from './images.js';
 import { sha256File } from './proofs.js';
 
@@ -14,7 +15,19 @@ export class ImportError extends Error {}
 // Dimensions telles qu'affichées, après application de l'orientation EXIF.
 export async function orientedSize(file) {
   const m = await sharp(file, { limitInputPixels: MAX_PIXELS }).metadata();
-  return { format: m.format, width: m.autoOrient?.width ?? m.width, height: m.autoOrient?.height ?? m.height };
+  return { format: m.format, width: m.autoOrient?.width ?? m.width, height: m.autoOrient?.height ?? m.height, takenOn: takenOnFromExif(m.exif) };
+}
+
+// Date de prise de vue de l'appareil (EXIF DateTimeOriginal) → AAAA-MM-JJ, ou null.
+// Le champ n'a pas de fuseau : exif-reader le lit comme une heure UTC, on en garde le jour tel quel.
+export function takenOnFromExif(buffer) {
+  if (!buffer) return null;
+  let d;
+  try { d = exifReader(buffer).Photo?.DateTimeOriginal; } catch { return null; }
+  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return null;
+  const y = d.getUTCFullYear();
+  if (y < 1900 || y > 2100) return null;
+  return `${y}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
 }
 
 // Valide un fichier téléversé (déjà écrit dans tmp) et le range dans originals/.
@@ -38,7 +51,7 @@ export async function importOriginal(storageDir, tmpFile) {
     file = `${crypto.randomUUID()}.${ext}`;
     fs.renameSync(tmpFile, path.join(originals, file));
     // Les variantes sont rendues ensuite par le service (filigrane et métadonnées du moment).
-    return { file, width: meta.width, height: meta.height, sha256 };
+    return { file, width: meta.width, height: meta.height, sha256, takenOn: meta.takenOn };
   } catch (err) {
     if (file) removePhotoFiles(storageDir, file);
     throw err;

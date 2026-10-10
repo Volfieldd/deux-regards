@@ -115,12 +115,14 @@ test('page photo : swipe sur mobile', async ({ page, isMobile }, info) => {
   test.skip(!isMobile, 'mobile uniquement');
   await page.goto('/');
   await page.locator('#grid .tile').first().click();
-  await expect(page.locator('.viewer .mono').first()).toHaveText('01 / 12');
+  // Le serveur peut contenir plus que les 12 photos de démonstration.
+  await expect(page.locator('.viewer .mono').first()).toHaveText(/^01 \/ \d+$/);
+  const total = (await page.locator('.viewer .mono').first().textContent()).split(' / ')[1];
   const box = await page.locator('.vimg').boundingBox();
   const y = box.y + box.height / 2;
   await page.locator('.vimg').dispatchEvent('touchstart', { touches: [{ identifier: 0, clientX: box.x + box.width - 20, clientY: y }] });
   await page.locator('.vimg').dispatchEvent('touchend', { changedTouches: [{ identifier: 0, clientX: box.x + 20, clientY: y }] });
-  await expect(page.locator('.viewer .mono').first()).toHaveText('02 / 12');
+  await expect(page.locator('.viewer .mono').first()).toHaveText(`02 / ${total}`);
   await page.screenshot({ path: `results/photo-${info.project.name}.png` });
 });
 
@@ -154,11 +156,15 @@ test.describe('sans JavaScript', () => {
   test.use({ javaScriptEnabled: false });
   test('le site reste utilisable', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('#grid .tile')).toHaveCount(12);
+    // Toutes les photos publiées sont dans la page (au moins les 12 de démonstration).
+    const all = await page.locator('#grid .tile').count();
+    expect(all).toBeGreaterThanOrEqual(12);
     await expect(page.locator('[data-pause]')).toBeHidden();
     await page.locator('.who a', { hasText: 'Sébastien' }).click();
     await expect(page).toHaveURL(/\/auteur\/sebastien/);
-    await expect(page.locator('#grid .tile')).toHaveCount(6);
+    const his = await page.locator('#grid .tile').count();
+    expect(his).toBeGreaterThanOrEqual(6);
+    expect(his).toBeLessThan(all);
   });
 });
 
