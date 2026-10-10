@@ -7,11 +7,14 @@ import formbody from '@fastify/formbody';
 import fastifyStatic from '@fastify/static';
 import { Eta } from 'eta';
 import publicRoutes from './routes/public.js';
+import adminRoutes from './routes/admin.js';
+import { setupAuth } from './auth.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 // Tout est servi depuis notre domaine : pas de script, police ni image tierce.
-const CSP = [
+// Seule exception : form-action autorise l'IdP, cible de la redirection après déconnexion.
+const csp = formOrigins => [
   "default-src 'self'",
   "img-src 'self'",
   "style-src 'self'",
@@ -19,20 +22,19 @@ const CSP = [
   "font-src 'self'",
   "connect-src 'self'",
   "base-uri 'self'",
-  "form-action 'self'",
+  `form-action ${["'self'", ...formOrigins].join(' ')}`,
   "frame-ancestors 'none'",
   "object-src 'none'",
 ].join('; ');
 
 const SECURITY_HEADERS = {
-  'content-security-policy': CSP,
   'x-content-type-options': 'nosniff',
   'referrer-policy': 'strict-origin-when-cross-origin',
   'x-frame-options': 'DENY',
   'permissions-policy': 'camera=(), microphone=(), geolocation=()',
 };
 
-export async function buildApp({ config, db, logger = true }) {
+export async function buildApp({ config, db, logger = true, oidc }) {
   const app = Fastify({ logger, trustProxy: config.production });
 
   app.decorate('config', config);
@@ -56,8 +58,11 @@ export async function buildApp({ config, db, logger = true }) {
   fs.mkdirSync(variants, { recursive: true });
   await app.register(fastifyStatic, { root: variants, prefix: '/media/', decorateReply: false, maxAge: '365d', immutable: true });
 
+  await setupAuth(app, oidc && { oidc });
+  const headers = { ...SECURITY_HEADERS, 'content-security-policy': csp([app.oidc.origin].filter(Boolean)) };
+
   app.addHook('onSend', async (request, reply) => {
-    reply.headers(SECURITY_HEADERS);
+    reply.headers(headers);
     if (config.production) reply.header('strict-transport-security', 'max-age=31536000; includeSubDomains');
   });
 
@@ -71,6 +76,7 @@ export async function buildApp({ config, db, logger = true }) {
     }
   });
 
+  await app.register(adminRoutes);
   await app.register(publicRoutes);
 
   return app;
