@@ -1,0 +1,87 @@
+# Nicephos sur Unraid (plugin « Docker Compose Manager »).
+# Trois conteneurs : le site, la sauvegarde quotidienne et le tunnel Cloudflare (HTTPS, aucun port ouvert).
+# Réglages dans le fichier .env de la pile (modèle : env.example). Guide : README.md.
+#
+# DONNÉES : DATA_DIR et BACKUP_DIR doivent exister AVANT le premier lancement et appartenir à 99:100
+# (nobody:users). Compose refuse de démarrer s'ils manquent : jamais de dossier vide créé en silence.
+
+name: nicephos
+
+x-data: &data
+  type: bind
+  source: ${DATA_DIR:?DATA_DIR obligatoire (dossier des données, ex. /mnt/cache/appdata/nicephos/data)}
+  target: /data
+  bind:
+    create_host_path: false
+
+x-hardening: &hardening
+  read_only: true
+  tmpfs:
+    - /tmp
+  security_opt:
+    - no-new-privileges:true
+  cap_drop: [ALL]
+
+services:
+  site:
+    image: ${IMAGE:-ghcr.io/volfieldd/deux-regards:latest}
+    container_name: nicephos
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      STORAGE_DIR: /data
+      DATABASE_PATH: /data/site.db
+      REQUIRE_PERSISTENT_STORAGE: "1"
+    user: "${PUID:-99}:${PGID:-100}"
+    volumes:
+      - *data
+    # Accès depuis le réseau local (contrôle) ; Internet passe par le tunnel, pas par ce port.
+    ports:
+      - "${LAN_PORT:-3080}:3000"
+    stop_grace_period: 60s
+    <<: *hardening
+    labels:
+      net.unraid.docker.webui: "http://[IP]:[PORT:3080]/"
+
+  backup:
+    image: ${IMAGE:-ghcr.io/volfieldd/deux-regards:latest}
+    container_name: nicephos-sauvegarde
+    restart: unless-stopped
+    depends_on:
+      site:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      STORAGE_DIR: /data
+      DATABASE_PATH: /data/site.db
+      BACKUP_DIR: /backups
+      REQUIRE_PERSISTENT_STORAGE: "1"
+    user: "${PUID:-99}:${PGID:-100}"
+    command: ["node", "server/db/backup.js", "--loop"]
+    healthcheck:
+      disable: true
+    volumes:
+      - *data
+      - type: bind
+        source: ${BACKUP_DIR:?BACKUP_DIR obligatoire (ex. /mnt/user/backups/nicephos, idéalement sur un autre disque)}
+        target: /backups
+        bind:
+          create_host_path: false
+    <<: *hardening
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.0
+    container_name: nicephos-tunnel
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?TUNNEL_TOKEN obligatoire (Cloudflare Zero Trust → Tunnels)}
+    depends_on:
+      site:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true

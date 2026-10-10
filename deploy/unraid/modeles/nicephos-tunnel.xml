@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>nicephos-tunnel</Name>
+  <Repository>cloudflare/cloudflared:2026.10.0</Repository>
+  <Registry>https://hub.docker.com/r/cloudflare/cloudflared</Registry>
+  <Network>nicephos</Network>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/</Support>
+  <Project>https://github.com/cloudflare/cloudflared</Project>
+  <Overview>Tunnel Cloudflare de Nicephos : publie le site en HTTPS sans ouvrir de port. Dans Cloudflare, le Public Hostname nicephos.com pointe vers http://nicephos:3000.</Overview>
+  <Category>Network:Proxy</Category>
+  <ExtraParams>--security-opt no-new-privileges:true</ExtraParams>
+  <PostArgs>tunnel --no-autoupdate run</PostArgs>
+    <Config Name="Jeton du tunnel" Target="TUNNEL_TOKEN" Default="" Mode="" Description="Zero Trust → Networks → Tunnels → votre tunnel." Type="Variable" Display="always" Required="true" Mask="true"></Config>
+</Container>
