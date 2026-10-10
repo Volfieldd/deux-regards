@@ -110,3 +110,23 @@
     }
   }, 1500);
 })();
+
+// ----- aide : recherche dans les sections -----
+(function () {
+  const input = document.querySelector('[data-help-search]');
+  if (!input) return;
+  document.querySelectorAll('[data-js-only]').forEach(el => { el.hidden = false; });
+  const sections = [...document.querySelectorAll('[data-help-section]')];
+  const empty = document.querySelector('[data-help-empty]');
+  const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  input.addEventListener('input', () => {
+    const q = norm(input.value.trim());
+    let shown = 0;
+    for (const s of sections) {
+      const hit = !q || norm(s.textContent).includes(q);
+      s.hidden = !hit;
+      if (hit) shown++;
+    }
+    empty.hidden = shown > 0;
+  });
+})();

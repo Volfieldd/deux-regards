@@ -12,4 +12,4 @@ Ensuite, à chaque mise à jour :
 docs/wiki/publish.sh
 ```
 
-Le script recopie ces pages (sauf ce README et le script) dans le dépôt `deux-regards.wiki.git`, puis les pousse.
+Le script recopie ces pages (sauf ce README) et les captures, génère les pages « Aide » depuis `docs/aide/` (source unique, aussi affichée dans l'admin), puis pousse le tout dans `deux-regards.wiki.git`.

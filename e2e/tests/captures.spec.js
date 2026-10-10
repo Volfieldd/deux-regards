@@ -14,6 +14,7 @@ const PAGES = [
   ['06-filigrane-exif', '/admin/images'],
   ['07-reglages', '/admin/reglages'],
   ['08-apparence', '/admin/apparence'],
+  ['09-aide', '/admin/aide'],
 ];
 
 test.describe('admin', () => {

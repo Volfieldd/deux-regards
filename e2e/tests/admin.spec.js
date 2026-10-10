@@ -15,7 +15,7 @@ test.afterEach(async () => expect(errors, 'erreurs console / CSP').toEqual([]));
 test('rendu des pages de l’admin', async ({ page }, info) => {
   for (const [url, title, shot] of [['/admin', 'Tableau de bord', 'tableau'], ['/admin/photos', 'Photos', 'photos'],
     ['/admin/series', 'Séries', 'series'], ['/admin/auteurs', 'Auteurs', 'auteurs'], ['/admin/images', 'Filigrane et métadonnées', 'images'],
-    ['/admin/reglages', 'Réglages', 'reglages']]) {
+    ['/admin/reglages', 'Réglages', 'reglages'], ['/admin/aide', 'Aide', 'aide']]) {
     await page.goto(url);
     await expect(page.locator('h1')).toHaveText(title);
     await expect(page.locator('nav a[aria-current="page"]')).toBeVisible();
@@ -51,10 +51,27 @@ test('preuve d’antériorité : horodatage affiché et vérifié', async ({ pag
 test('accessibilité de l’admin : aucune violation sérieuse', async ({ page }) => {
   const { default: AxeBuilder } = await import('@axe-core/playwright');
   await page.emulateMedia({ reducedMotion: 'reduce' });   // mesure l'état final, pas une animation d'apparition
-  for (const url of ['/admin', '/admin/photos', '/admin/series', '/admin/auteurs', '/admin/images', '/admin/reglages']) {
+  for (const url of ['/admin', '/admin/photos', '/admin/series', '/admin/auteurs', '/admin/images', '/admin/apparence', '/admin/reglages', '/admin/aide']) {
     await page.goto(url);
     const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
     const serious = violations.filter(v => ['serious', 'critical'].includes(v.impact));
     expect(serious.map(v => `${url} ${v.id} : ${v.nodes.map(n => n.target.join(' ')).slice(0, 3).join(' | ')}`)).toEqual([]);
   }
+});
+
+test('aide : lien contextuel, sommaire, recherche', async ({ page }) => {
+  await page.goto('/admin/photos');
+  await page.getByRole('link', { name: 'Aide sur cette page' }).click();
+  await expect(page).toHaveURL(/\/admin\/aide#photos$/);
+  await expect(page.locator('#photos')).toBeInViewport();
+  const search = page.getByLabel('Rechercher dans l’aide');
+  await search.fill('mosaique');                                 // sans accent : trouvé quand même
+  await expect(page.locator('[data-help-section]:visible')).toHaveCount(1);
+  await expect(page.locator('#filigrane-exif')).toBeVisible();
+  await search.fill('zzzz introuvable');
+  await expect(page.getByText('Aucune section ne contient ce texte.')).toBeVisible();
+  await search.fill('');
+  await expect(page.locator('[data-help-section]:visible')).toHaveCount(12);
+  await page.locator('.help-toc').getByRole('link', { name: /^Changer l.ordre$/ }).click();
+  await expect(page.locator('#photos-changer-lordre')).toBeInViewport();
 });

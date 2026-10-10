@@ -5,8 +5,10 @@ node_modules
 storage
 e2e
 test
-docs
+docs/*
+!docs/aide
 *.md
 !assets/**/*.md
+!docs/aide/*.md
 Dockerfile
 compose*.yaml

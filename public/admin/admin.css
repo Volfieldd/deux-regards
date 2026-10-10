@@ -122,3 +122,24 @@ form.form > .actions { margin-bottom: 24px; }
 .swatch-nicephos-jour i:nth-child(1) { background: #fbfbf9; } .swatch-nicephos-jour i:nth-child(2) { background: #111111; } .swatch-nicephos-jour i:nth-child(3) { background: #7d6532; }
 .slot-preview img:first-child { max-width: 320px; max-height: 160px; width: auto; display: inline-block; vertical-align: middle; margin-right: 16px; background: repeating-conic-gradient(#e7e3da 0% 25%, #fff 0% 50%) 0 0 / 14px 14px; }
 .favicon-preview { display: inline-block; vertical-align: middle; }
+
+/* ---------- aide ---------- */
+.help-link { margin: -8px 0 8px; text-align: right; font-size: 13px; }
+.help-link a { border-bottom: 1px solid currentColor; }
+.help { display: grid; gap: 24px; }
+@media (min-width: 1000px) { .help { grid-template-columns: 260px 1fr; align-items: start; } .help-toc { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; } }
+.help-toc ol { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.help-toc ol ol { margin-top: 6px; font-size: 13px; color: var(--prose); }
+.help-toc a:hover { text-decoration: underline; }
+.help-search { margin-bottom: 16px; }
+.help-section { scroll-margin-top: 16px; line-height: 1.65; }
+.help-section h3, .help-section h4 { scroll-margin-top: 16px; font-family: var(--serif); font-weight: 500; font-size: 21px; margin: 28px 0 10px; }
+.help-section h4 { font-size: 18px; }
+.help-section p, .help-section li { max-width: 72ch; }
+.help-section table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px; }
+.help-section th, .help-section td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+.help-section th { font-weight: 500; }
+.help-section code { background: var(--frame); padding: 1px 5px; font-size: 13px; }
+.help-section blockquote { margin: 12px 0; padding: 8px 14px; border-left: 3px solid var(--safelight); background: var(--paper); }
+.help-section a:not(.btn) { text-decoration: underline; }
+.help-section mark { background: #f3e2a8; }

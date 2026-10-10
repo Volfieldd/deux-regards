@@ -2,7 +2,7 @@
 
 **Utiliser**
 - [Visite de l'admin](Visite-de-l-admin)
-- [Mode opératoire de l'admin](Mode-opératoire-admin)
+- [Aide de l'administration](Aide)
 - [Apparence et thèmes](Apparence-et-thèmes)
 - [Filigrane et EXIF](Filigrane-et-EXIF)
 - [Preuves d'antériorité et droits](Preuves-et-droits)
