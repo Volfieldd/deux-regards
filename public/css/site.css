@@ -50,14 +50,19 @@ picture { display: block; }
 .brand i { font-weight: 400; }
 /* Emblème (logo dessiné) : masque coloré par la couleur du texte, donc par le thème. */
 .brand-emblem { display: inline-flex; align-items: center; gap: 14px; font-family: var(--sans); }
-.emblem { display: block; height: 44px; background: currentColor; -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat; }
+.emblem, .emblem-compact, .logotype { display: block; height: 44px; background: currentColor; -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat; }
+.emblem-compact { display: none; }
+/* Logo complet en tête de « À propos ». */
+.logotype { height: auto; width: min(100%, 680px); }
 .brand-emblem .wordmark { display: flex; flex-direction: column; gap: 4px; }
 .brand-emblem .name { font-size: 15px; font-weight: 300; letter-spacing: .42em; text-transform: uppercase; }
 .brand-emblem .subtitle { font-size: 8.5px; font-weight: 400; letter-spacing: .48em; text-transform: uppercase; opacity: .78; }
 /* Petit écran : emblème réduit, sous-titre masqué, la navigation passe dessous plutôt que de déborder. */
 .hero header, .top { flex-wrap: wrap; row-gap: 6px; }
 @media (max-width: 640px) {
-  .emblem, .hero .emblem { height: 34px; }
+  .emblem, .hero .emblem, .emblem-compact { height: 34px; }
+  .emblem.has-compact { display: none; }        /* sur téléphone, la version simplifiée, lisible en petit */
+  .emblem-compact { display: block; }
   .brand-emblem { gap: 10px; }
   .brand-emblem .name { font-size: 13px; letter-spacing: .34em; }
 }

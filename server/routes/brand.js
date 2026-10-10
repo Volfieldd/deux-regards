@@ -36,16 +36,18 @@ export default async function brandRoutes(app) {
 
   app.get('/brand/:file', async (request, reply) => {
     const b = current();
-    if (![b.emblem, b.favicon64, b.favicon180].includes(request.params.file)) return reply.callNotFound();
+    if (![b.emblem, b.icon, b.logotype, b.share, b.favicon64, b.favicon180].filter(Boolean).includes(request.params.file)) return reply.callNotFound();
     return reply.sendFile(request.params.file, dir, { maxAge: '365d', immutable: true });
   });
 
   // Feuille générée : l'emblème en masque CSS (sa couleur suit le thème). Pas de style en ligne (CSP).
+  // L'en-tête utilise l'emblème, ou à défaut l'icône ; l'icône le remplace sur téléphone.
   app.get('/brand.css', async (request, reply) => {
     const b = current();
-    const css = b.emblem
-      ? `.emblem{-webkit-mask-image:url(/brand/${b.emblem});mask-image:url(/brand/${b.emblem});aspect-ratio:${b.ratio || 1.6}}\n`
-      : '';
+    const mask = (sel, file, ratio) => (file ? `${sel}{-webkit-mask-image:url(/brand/${file});mask-image:url(/brand/${file});aspect-ratio:${ratio || 1}}\n` : '');
+    const css = mask('.emblem', b.emblem || b.icon, b.emblem ? b.ratio : b.iconRatio)
+      + mask('.emblem-compact', b.icon, b.iconRatio)
+      + mask('.logotype', b.logotype, b.logotypeRatio);
     return reply.type('text/css; charset=utf-8').header('cache-control', 'public, max-age=31536000, immutable').send(css);
   });
 

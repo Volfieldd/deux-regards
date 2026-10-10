@@ -11,8 +11,8 @@ import { pad } from '../format.js';
 import sharp from 'sharp';
 import { normalizeWatermark, normalizeExif, EXIF_MODES, MIN_WIDTHS } from '../variants.js';
 import { FONTS, POSITIONS } from '../watermark.js';
-import { THEMES, BRAND_MODES } from '../themes.js';
-import { processEmblem, BrandError, EMBLEM_MAX_BYTES } from '../brand.js';
+import { THEMES, BRAND_MODES, BRAND_SLOTS } from '../themes.js';
+import { processEmblem, processIcon, processShare, BrandError, EMBLEM_MAX_BYTES } from '../brand.js';
 
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 const LOGO_MAX_SIDE = 4000;
@@ -466,10 +466,9 @@ export default async function adminRoutes(app) {
   const brandDir = path.join(storageDir, 'brand');
   fs.mkdirSync(brandDir, { recursive: true });
   const saveBrand = brand => repo.saveSetting('brand', brand);
-  const removeBrandFiles = b => { for (const f of [b.emblem, b.favicon64, b.favicon180]) if (f) fs.rmSync(path.join(brandDir, f), { force: true }); };
 
   app.get('/admin/apparence', async (request, reply) => render(request, reply, 'appearance', {
-    title: 'Apparence', THEMES, BRAND_MODES, themeId: app.appearance.themeId(), brand: app.appearance.brand(),
+    title: 'Apparence', THEMES, BRAND_MODES, BRAND_SLOTS, themeId: app.appearance.themeId(), brand: app.appearance.brand(),
   }));
 
   app.post('/admin/apparence', write, async (request, reply) => {
@@ -484,11 +483,30 @@ export default async function adminRoutes(app) {
     return done(reply, '/admin/apparence', 'Apparence enregistrée.');
   });
 
-  // Emblème : PNG, WebP ou JPEG, transformé en masque (la couleur suit le thème) + favicons.
-  app.post('/admin/apparence/embleme', async (request, reply) => {
+  // Marque : quatre emplacements (emblème, icône, logo complet, image de partage). PNG, WebP ou JPEG ;
+  // jeton CSRF avant le fichier ; fichiers aux noms versionnés, l'ancien est effacé au remplacement.
+  const PROCESS = { mask: processEmblem, icon: processIcon, share: processShare };
+  const brandFiles = b => [b.emblem, b.icon, b.logotype, b.share, b.favicon64, b.favicon180].filter(Boolean);
+  const sweepBrand = b => { const keep = new Set(brandFiles(b).flatMap(f => [f, `${f}.source`])); for (const f of fs.readdirSync(brandDir)) if (!keep.has(f)) fs.rmSync(path.join(brandDir, f), { force: true }); };
+  // Les icônes d'onglet viennent de l'icône simplifiée si elle existe, sinon de l'emblème.
+  async function faviconsFrom(b, id) {
+    const source = b.icon || b.emblem;
+    if (!source) return { favicon64: null, favicon180: null };
+    const original = path.join(brandDir, `${source}.source`);
+    const input = fs.readFileSync(fs.existsSync(original) ? original : path.join(brandDir, source));   // à défaut, le masque lui-même
+    const made = await (b.icon ? processIcon : processEmblem)(input);
+    const files = { favicon64: `favicon-${id}-64.png`, favicon180: `favicon-${id}-180.png` };
+    fs.writeFileSync(path.join(brandDir, files.favicon64), made.favicon64);
+    fs.writeFileSync(path.join(brandDir, files.favicon180), made.favicon180);
+    return files;
+  }
+
+  app.post('/admin/apparence/marque/:slot', async (request, reply) => {
+    const slot = BRAND_SLOTS[request.params.slot];
+    if (!slot) return reply.callNotFound();
     let checked = false;
     let error = null;
-    let made = null;
+    let upload = null;
     try {
       for await (const part of request.parts({ limits: { fileSize: EMBLEM_MAX_BYTES, files: 1 } })) {
         if (part.type === 'field') {
@@ -499,35 +517,51 @@ export default async function adminRoutes(app) {
         const chunks = [];
         for await (const chunk of part.file) chunks.push(chunk);
         if (part.file.truncated) { error = `Image trop lourde (${EMBLEM_MAX_BYTES / 1024 / 1024} Mo au plus).`; continue; }
-        try {
-          made = await processEmblem(Buffer.concat(chunks));
-        } catch (err) {
-          if (!(err instanceof BrandError)) throw err;
-          error = `Emblème refusé : ${err.message}.`;
-        }
+        upload = Buffer.concat(chunks);
       }
     } catch (err) {
       if (!err.code?.startsWith('FST_')) throw err;
       error = 'Envoi invalide.';
     }
     if (!checked) return reply.code(403).send('Jeton CSRF invalide.');
+    let made = null;
+    if (upload) {
+      try {
+        made = await PROCESS[slot.kind](upload);
+      } catch (err) {
+        if (!(err instanceof BrandError)) throw err;
+        error = `${slot.label} refusé : ${err.message}.`;
+      }
+    }
     if (!made) return failed(reply, '/admin/apparence', error || 'Aucun fichier reçu.');
+
     const id = crypto.randomUUID().slice(0, 8);
-    const files = { emblem: `embleme-${id}.png`, favicon64: `favicon-${id}-64.png`, favicon180: `favicon-${id}-180.png` };
-    fs.writeFileSync(path.join(brandDir, files.emblem), made.mask);
-    fs.writeFileSync(path.join(brandDir, files.favicon64), made.favicon64);
-    fs.writeFileSync(path.join(brandDir, files.favicon180), made.favicon180);
-    const before = app.appearance.brand();
-    saveBrand({ ...before, ...files, ratio: Math.round((made.width / made.height) * 1000) / 1000, mode: 'embleme' });
-    removeBrandFiles(before);
-    return done(reply, '/admin/apparence', 'Emblème enregistré : il s’affiche avec le nom du site.');
+    const file = `${request.params.slot}-${id}.${slot.kind === 'share' ? 'jpg' : 'png'}`;
+    fs.writeFileSync(path.join(brandDir, file), slot.kind === 'share' ? made.image : made.mask);
+    // Original conservé (privé, jamais servi) pour régénérer les icônes d'onglet.
+    if (slot.kind !== 'share') fs.writeFileSync(path.join(brandDir, `${file}.source`), upload);
+    let brand = { ...app.appearance.brand(), [slot.field]: file };
+    if (slot.ratio) brand[slot.ratio] = Math.round((made.width / made.height) * 1000) / 1000;
+    if (slot.field === 'emblem' || slot.field === 'icon') {
+      brand = { ...brand, ...(await faviconsFrom(brand, id)), mode: 'embleme' };
+    }
+    saveBrand(brand);
+    sweepBrand(brand);
+    return done(reply, '/admin/apparence', `${slot.label} enregistré.`);
   });
 
-  app.post('/admin/apparence/embleme/delete', write, async (request, reply) => {
-    const before = app.appearance.brand();
-    saveBrand({ ...before, emblem: null, favicon64: null, favicon180: null, ratio: null, mode: 'texte' });
-    removeBrandFiles(before);
-    return done(reply, '/admin/apparence', 'Emblème retiré : le nom du site s’affiche seul.');
+  app.post('/admin/apparence/marque/:slot/delete', write, async (request, reply) => {
+    const slot = BRAND_SLOTS[request.params.slot];
+    if (!slot) return reply.callNotFound();
+    let brand = { ...app.appearance.brand(), [slot.field]: null };
+    if (slot.ratio) brand[slot.ratio] = null;
+    if (slot.field === 'emblem' || slot.field === 'icon') {
+      brand = { ...brand, ...(await faviconsFrom(brand, crypto.randomUUID().slice(0, 8))) };
+      if (!brand.emblem && !brand.icon) brand.mode = 'texte';
+    }
+    saveBrand(brand);
+    sweepBrand(brand);
+    return done(reply, '/admin/apparence', `${slot.label} retiré.`);
   });
 
   // ---------- réglages ----------

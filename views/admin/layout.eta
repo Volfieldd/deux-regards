@@ -7,8 +7,9 @@
   <title><%= it.pageTitle %></title>
   <link rel="stylesheet" href="<%= it.asset('css/site.css') %>">
   <link rel="stylesheet" href="<%= it.asset('admin/admin.css') %>">
-<% if (it.brand && it.brand.emblem) { %>
-  <link rel="stylesheet" href="/brand.css?v=<%= it.brand.emblem %>">
+<% const masks = it.brand ? [it.brand.emblem, it.brand.icon, it.brand.logotype].filter(Boolean).join('.') : ''; %>
+<% if (masks) { %>
+  <link rel="stylesheet" href="/brand.css?v=<%= masks %>">
 <% } %>
   <script src="<%= it.asset('admin/admin.js') %>" defer></script>
 </head>

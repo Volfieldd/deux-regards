@@ -43,7 +43,7 @@ export async function processEmblem(input) {
   for (let i = 0; i < px; i++) if (alpha[i] > 64) visible++;
   if (visible < 50) throw new BrandError('aucun dessin trouvé dans l’image (fond uni ?)');
 
-  // Masque noir + alpha, recadré au plus près du dessin, 1200 px de large au plus.
+  // Masque noir + alpha, recadré au plus près du dessin, 1600 px de côté au plus (net en haute densité).
   const rgba = Buffer.alloc(px * 4);
   for (let i = 0; i < px; i++) rgba[i * 4 + 3] = alpha[i];
   const raw = { raw: { width: info.width, height: info.height, channels: 4 } };
@@ -53,7 +53,7 @@ export async function processEmblem(input) {
   } catch {
     throw new BrandError('aucun dessin trouvé dans l’image (fond uni ?)');
   }
-  mask = await sharp(mask).resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true }).png({ compressionLevel: 9 }).toBuffer();
+  mask = await sharp(mask).resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true }).png({ compressionLevel: 9 }).toBuffer();
   const { width, height } = await sharp(mask).metadata();
 
   // Favicon : emblème clair sur carré sombre, lisible sur onglets clairs comme sombres.
@@ -66,4 +66,31 @@ export async function processEmblem(input) {
       .composite([{ input: white, gravity: 'center' }]).png().toBuffer();
   };
   return { mask, width, height, favicon64: await favicon(64), favicon180: await favicon(180) };
+}
+
+// Icône simplifiée : masque (en-tête mobile) + icônes d'onglet. Une icône carrée et opaque fournie
+// aux bonnes couleurs est reprise telle quelle (redimensionnée), sinon elle est composée sur fond sombre.
+export async function processIcon(input) {
+  const made = await processEmblem(input);
+  const meta = await sharp(input).metadata();
+  const stats = await sharp(input).stats();
+  if (stats.isOpaque && Math.abs(meta.width - meta.height) <= 2) {
+    const sized = size => sharp(input).resize(size, size, { kernel: 'lanczos3' }).png({ compressionLevel: 9 }).toBuffer();
+    return { ...made, favicon64: await sized(64), favicon180: await sized(180) };
+  }
+  return made;
+}
+
+// Image de partage : réencodée (sans métadonnées), 1200 px de côté au plus.
+export async function processShare(input) {
+  let meta;
+  try {
+    meta = await sharp(input, { limitInputPixels: MAX_SIDE * MAX_SIDE }).metadata();
+  } catch {
+    throw new BrandError('ce fichier n’est pas une image lisible');
+  }
+  if (!['png', 'webp', 'jpeg'].includes(meta.format)) throw new BrandError('image en PNG, WebP ou JPEG');
+  const image = await sharp(input).rotate().resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
+    .flatten({ background: '#000000' }).jpeg({ quality: 86, mozjpeg: true }).toBuffer();
+  return { image };
 }

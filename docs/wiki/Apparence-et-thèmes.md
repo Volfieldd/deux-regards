@@ -21,20 +21,26 @@ Thèmes fournis :
 | **Nicephos — nuit** | D'après le logo : galerie noire, trait blanc, capitales espacées en Jost léger, sans italique, accent sable. |
 | **Nicephos — jour** | La même identité sur fond blanc, encre noire. |
 
-### Emblème (logo dessiné), nom et sous-titre
+### Marque : quatre emplacements
 
-- **Emblème :** envoyez **le dessin seul, sans le texte**. Le site écrit lui-même le nom du site et le sous-titre avec ses polices : ils restent nets, accessibles et modifiables.
-  - Formats : PNG, WebP ou JPEG.
-  - Le trait peut être sombre sur fond clair, clair sur fond sombre, ou déjà détouré : le sens est détecté.
-  - L'image est **transformée en masque** et recadrée au plus près du dessin. Sa couleur suit le thème : blanche sur la galerie noire, noire sur fond clair. Un seul fichier suffit pour tous les thèmes.
-  - Une **icône d'onglet** (favicon) est générée : l'emblème clair sur carré sombre.
-- **Marque :** « Nom du site seulement », ou « Emblème + nom (+ sous-titre) ».
-- **Sous-titre :** par exemple « Photography gallery ».
-- **Nom du site :** il se règle dans **Réglages**.
+Chaque emplacement accepte un PNG, un WebP ou un JPEG (5 Mo au plus). Les SVG sont refusés : ils peuvent contenir du script, et les PNG aux bonnes tailles suffisent.
 
-Sur téléphone, l'emblème est réduit et le sous-titre masqué sous 480 px de large.
+| Emplacement | Fichier à envoyer (kit Nicephos) | Où il apparaît |
+|---|---|---|
+| **Emblème (dessin)** | le dessin seul, sans texte | en-tête, à côté du nom, sur ordinateur |
+| **Icône (version simplifiée)** | `NICEPHOS_icone_noir_512x512.png` | icône d'onglet et d'écran d'accueil ; en-tête sur téléphone, où le trait fin du dessin deviendrait illisible |
+| **Logo complet** | `NICEPHOS_horizontal_noir_4320x1400.png` | en grand, en tête de la page « À propos » |
+| **Image de partage** | `NICEPHOS_carre_noir_1080x1080.png` | aperçu quand une page sans photo (À propos, Droits…) est partagée sur un réseau social |
 
-> Les fichiers de marque sont rangés dans les données (`DATA_DIR/brand/`) et sauvegardés avec elles. Ils ne sont pas dans le dépôt Git.
+- **Emblème, icône, logo complet :** ils sont **transformés en masque**, recadrés au plus près du dessin. Leur couleur suit le thème : blanc sur la galerie noire, noir sur fond clair. La version noire ou blanche du kit donne le même résultat.
+- **Icône d'onglet :** une icône carrée et opaque est reprise telle quelle. Sinon, l'icône d'onglet est composée (dessin clair sur carré sombre), à partir de l'icône simplifiée ou, à défaut, de l'emblème.
+- **Image de partage :** elle est utilisée telle quelle, réencodée sans métadonnées, 1200 px de côté au plus.
+- **Marque :** « Nom du site seulement », ou « Emblème + nom (+ sous-titre) ». Le nom et le sous-titre sont écrits par le site avec ses polices : nets, accessibles et modifiables. Le nom se règle dans **Réglages**.
+- **Remplacer ou retirer :** chaque emplacement se remplace ou se retire indépendamment ; l'ancien fichier est effacé.
+
+Sur téléphone, le sous-titre est masqué sous 480 px de large.
+
+> Les fichiers de marque sont rangés dans les données (`DATA_DIR/brand/`) et sauvegardés avec elles. Ils ne sont pas dans le dépôt Git, qui est public.
 
 ## Créer un thème
 

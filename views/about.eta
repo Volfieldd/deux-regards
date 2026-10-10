@@ -4,6 +4,9 @@
   <nav class="eyebrow" aria-label="Navigation"><a href="/#series">Séries</a><a href="/#galerie">Galerie</a><a href="/a-propos" aria-current="page">À propos</a></nav>
 </header>
 <main class="about wrap">
+<% if (it.brand && it.brand.logotype) { %>
+  <div class="logotype" role="img" aria-label="<%= it.siteName %><%= it.brand.subtitle ? ' — ' + it.brand.subtitle : '' %>"></div>
+<% } %>
   <h1><%= it.settings.tagline || 'À propos' %></h1>
   <div class="prose">
 <% it.paragraphs.forEach(t => { %>

@@ -120,5 +120,5 @@ form.form > .actions { margin-bottom: 24px; }
 .swatch-atelier i:nth-child(1) { background: #f6f4ef; } .swatch-atelier i:nth-child(2) { background: #1d1c1a; } .swatch-atelier i:nth-child(3) { background: #b5523b; }
 .swatch-nicephos-nuit i:nth-child(1) { background: #0b0b0b; } .swatch-nicephos-nuit i:nth-child(2) { background: #f0efeb; } .swatch-nicephos-nuit i:nth-child(3) { background: #cbb68b; }
 .swatch-nicephos-jour i:nth-child(1) { background: #fbfbf9; } .swatch-nicephos-jour i:nth-child(2) { background: #111111; } .swatch-nicephos-jour i:nth-child(3) { background: #7d6532; }
-.emblem-preview { max-width: 280px; max-height: 140px; width: auto; display: inline-block; vertical-align: middle; margin-right: 16px; }
+.slot-preview img:first-child { max-width: 320px; max-height: 160px; width: auto; display: inline-block; vertical-align: middle; margin-right: 16px; background: repeating-conic-gradient(#e7e3da 0% 25%, #fff 0% 50%) 0 0 / 14px 14px; }
 .favicon-preview { display: inline-block; vertical-align: middle; }

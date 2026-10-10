@@ -1,6 +1,6 @@
-# Deux Regards — wiki
+# Nicephos — wiki
 
-Site photo de Sébastien et Julien : une galerie publique et une administration réservée aux auteurs. Le nom « Deux Regards » est provisoire ; il se change dans l'admin (**Réglages**) ou par `SITE_NAME`.
+Nicephos, le site photo de Sébastien et Julien : une galerie publique et une administration réservée aux auteurs. Le nom affiché se change dans l'admin (**Réglages**) ou par `SITE_NAME`.
 
 ## Pour qui, quelle page
 

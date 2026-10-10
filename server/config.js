@@ -53,7 +53,7 @@ export function loadConfig(env = process.env) {
   return {
     production,
     deployed,
-    siteName: env.SITE_NAME || 'Deux Regards',
+    siteName: env.SITE_NAME || 'Nicephos',
     host,
     port: Number(env.PORT || 3000),
     publicUrl,

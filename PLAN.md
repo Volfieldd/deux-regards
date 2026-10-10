@@ -1,6 +1,6 @@
 # Plan d'implémentation
 
-Site photo de Sébastien et Julien. Nom provisoire : « Deux Regards » (déjà pris, à remplacer ; il est défini à un seul endroit dans la config).
+Nicephos, site photo de Sébastien et Julien. Le nom est défini à un seul endroit (`SITE_NAME`, ou Réglages dans l'admin) ; « Deux Regards » était le nom provisoire.
 
 Références de design (artefacts claude.ai) :
 - Mix retenu : https://claude.ai/artifact/41G7RSWC6zQQh1gsoXtGRG

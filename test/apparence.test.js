@@ -17,10 +17,10 @@ async function admin(t) {
   const csrf = c.db.prepare('SELECT csrf FROM sessions').pluck().get();
   const as = o => c.app.inject({ ...o, cookies: { ...cookies, ...o.cookies } });
   const post = (url, payload = {}) => as({ method: 'POST', url, payload: { _csrf: csrf, ...payload }, headers: { accept: 'text/html' } });
-  const upload = buf => {
+  const upload = (buf, slot = 'embleme') => {
     const b = '----t';
-    const payload = Buffer.concat([Buffer.from(`--${b}\r\nContent-Disposition: form-data; name="_csrf"\r\n\r\n${csrf}\r\n--${b}\r\nContent-Disposition: form-data; name="emblem"; filename="e.png"\r\n\r\n`), buf, Buffer.from(`\r\n--${b}--\r\n`)]);
-    return as({ method: 'POST', url: '/admin/apparence/embleme', payload, headers: { 'content-type': `multipart/form-data; boundary=${b}`, accept: 'text/html' } });
+    const payload = Buffer.concat([Buffer.from(`--${b}\r\nContent-Disposition: form-data; name="_csrf"\r\n\r\n${csrf}\r\n--${b}\r\nContent-Disposition: form-data; name="fichier"; filename="e.png"\r\n\r\n`), buf, Buffer.from(`\r\n--${b}--\r\n`)]);
+    return as({ method: 'POST', url: `/admin/apparence/marque/${slot}`, payload, headers: { 'content-type': `multipart/form-data; boundary=${b}`, accept: 'text/html' } });
   };
   return { ...c, cookies, csrf, as, post, upload };
 }
@@ -92,7 +92,7 @@ test('emblème : envoi, en-tête avec nom et sous-titre, feuille de masque, favi
   assert.equal(brand.mode, 'embleme');
   assert.match(brand.emblem, /^embleme-[0-9a-f]{8}\.png$/);
   const dir = path.join(c.config.storageDir, 'brand');
-  assert.deepEqual(fs.readdirSync(dir).sort(), [brand.emblem, brand.favicon180, brand.favicon64].sort());
+  assert.deepEqual(fs.readdirSync(dir).sort(), [brand.emblem, `${brand.emblem}.source`, brand.favicon180, brand.favicon64].sort());
 
   await c.post('/admin/apparence', { theme: 'nicephos-nuit', brand_mode: 'embleme', subtitle: 'Photography gallery' });
   const home = (await c.app.inject('/')).body;
@@ -112,7 +112,7 @@ test('emblème : envoi, en-tête avec nom et sous-titre, feuille de masque, favi
   assert.notEqual(replaced.emblem, brand.emblem);
   assert.equal(fs.existsSync(path.join(dir, brand.emblem)), false);
 
-  await c.post('/admin/apparence/embleme/delete');
+  await c.post('/admin/apparence/marque/embleme/delete');
   assert.deepEqual(fs.readdirSync(dir), []);
   assert.match((await c.app.inject('/')).body, /<a class="brand" href="\/">/);
   assert.equal((await c.app.inject('/favicon.ico')).statusCode, 204);
@@ -122,7 +122,7 @@ test('emblème invalide refusé avec un message ; jeton CSRF exigé', async t =>
   const c = await admin(t);
   const res = await c.upload(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'));
   const page = await c.as({ url: res.headers.location, cookies: { flash: cookiesOf(res).flash } });
-  assert.match(page.body, /Emblème refusé/);
+  assert.match(page.body, /Emblème \(dessin\) refusé/);
   assert.equal((await c.post('/admin/apparence', { _csrf: 'faux', theme: 'nicephos-nuit' })).statusCode, 403);
   assert.equal(c.db.prepare("SELECT COUNT(*) FROM settings WHERE key = 'theme'").pluck().get(), 0);
 });
@@ -132,4 +132,43 @@ test('chaque thème déclaré a sa feuille et un libellé', () => {
     assert.ok(t.label && t.description, id);
     if (t.stylesheet) assert.ok(fs.existsSync(path.join('public', t.stylesheet)), `${id} : ${t.stylesheet}`);
   }
+});
+
+test('icône, logo complet, image de partage : chacun à sa place', async t => {
+  const c = await admin(t);
+  const brand = () => JSON.parse(c.db.prepare("SELECT value FROM settings WHERE key = 'brand'").pluck().get());
+  await c.upload(await drawing('#111', '#f4f4f4'), 'embleme');
+  // Icône carrée et opaque (blanc sur noir) : reprise telle quelle pour l'onglet.
+  const icon = await sharp(await drawing('#fff', '#000')).resize(512, 512, { fit: 'contain', background: '#000' }).flatten({ background: '#000' }).png().toBuffer();
+  assert.equal((await c.upload(icon, 'icone')).statusCode, 303);
+  const withIcon = brand();
+  const fav = await sharp(path.join(c.config.storageDir, 'brand', withIcon.favicon64)).stats();
+  assert.ok(fav.isOpaque);
+  assert.equal(fav.channels[0].min, 0);                                          // fond noir d'origine conservé
+
+  await c.upload(await drawing('#111', '#fff'), 'logotype');
+  await c.upload(await drawing('#222', '#ddd'), 'partage');
+  const b = brand();
+  assert.match(b.share, /^partage-[0-9a-f]{8}\.jpg$/);
+
+  const home = (await c.app.inject('/')).body;
+  assert.match(home, /<span class="emblem has-compact" aria-hidden="true"><\/span><span class="emblem-compact" aria-hidden="true"><\/span>/);
+  const css = (await c.app.inject('/brand.css')).body;
+  assert.match(css, new RegExp(`\\.emblem-compact\\{[^}]*${b.icon}`));
+  assert.match(css, new RegExp(`\\.logotype\\{[^}]*${b.logotype}`));
+  const about = (await c.app.inject('/a-propos')).body;
+  assert.match(about, /<div class="logotype" role="img" aria-label="Test"><\/div>/);
+  assert.match(about, new RegExp(`<meta property="og:image" content="http://localhost:3000/brand/${b.share}">`));   // page sans photo
+  assert.doesNotMatch((await c.app.inject('/photo/brume-sur-la-loire')).body, /og:image" content="[^"]*brand/);   // la photo d'abord
+  assert.equal((await c.app.inject(`/brand/${b.emblem}.source`)).statusCode, 404);                                // originaux jamais servis
+
+  // Sans icône : les icônes d'onglet reviennent de l'emblème.
+  await c.post('/admin/apparence/marque/icone/delete');
+  const after = brand();
+  assert.equal(after.icon, null);
+  assert.ok(after.favicon64 && after.favicon64 !== withIcon.favicon64);
+  assert.equal(after.mode, 'embleme');
+  assert.doesNotMatch((await c.app.inject('/')).body, /emblem-compact/);
+  assert.equal(fs.existsSync(path.join(c.config.storageDir, 'brand', withIcon.icon)), false);
+  assert.equal((await c.post('/admin/apparence/marque/inconnu/delete')).statusCode, 404);
 });
