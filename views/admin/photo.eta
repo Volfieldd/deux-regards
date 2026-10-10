@@ -1,0 +1,41 @@
+<% layout('./layout') %>
+<% const v = it.values, e = it.errors; %>
+<% const err = k => e[k] ? `<span class="err" id="err-${k}">${e[k]}</span>` : ''; %>
+<p class="mono"><a class="more eyebrow" href="/admin/photos">← Photos</a></p>
+<h1><%= it.photo.title %></h1>
+<div class="edit">
+  <figure class="preview">
+    <%~ it.picture(it.photo, { sizes: '(min-width: 900px) 40vw, 92vw', alt: '' }) %>
+    <figcaption class="mono"><%= it.photo.width %> × <%= it.photo.height %> px<% if (it.photo.status === 'published') { %> · <a href="/photo/<%= it.photo.slug %>" target="_blank" rel="noopener">voir sur le site</a><% } %></figcaption>
+  </figure>
+  <form class="panel form" method="post" action="/admin/photos/<%= it.photo.id %>" novalidate>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (Object.keys(e).length) { %><p class="err" role="alert">Le formulaire contient des erreurs.</p><% } %>
+    <label>Titre <input name="title" value="<%= v.title %>" required maxlength="160"<%~ e.title ? ' aria-invalid="true" aria-describedby="err-title"' : '' %>><%~ err('title') %></label>
+    <label>Adresse <span class="mono">/photo/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ e.slug ? ' aria-invalid="true" aria-describedby="err-slug"' : '' %>><%~ err('slug') %></label>
+    <div class="row">
+      <label>Série <select name="category_id"><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select><%~ err('category_id') %></label>
+      <label>Auteur <select name="author_id"><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === Number(v.author_id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select><%~ err('author_id') %></label>
+    </div>
+    <div class="row">
+      <label>Lieu <input name="place" value="<%= v.place %>" maxlength="120"></label>
+      <label>Date <input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="AAAA-MM ou AAAA-MM-JJ" inputmode="numeric"<%~ e.taken_on ? ' aria-invalid="true" aria-describedby="err-taken_on"' : '' %>><%~ err('taken_on') %></label>
+    </div>
+    <label>Légende <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
+    <fieldset class="row">
+      <legend>Statut</legend>
+<% Object.entries(it.STATUSES).forEach(([k, label]) => { %>
+      <label class="inline"><input type="radio" name="status" value="<%= k %>"<%~ v.status === k ? ' checked' : '' %>> <%= label %></label>
+<% }) %>
+    </fieldset>
+    <p class="actions"><button class="btn" type="submit">Enregistrer</button></p>
+  </form>
+</div>
+<details class="danger panel">
+  <summary>Supprimer cette photo</summary>
+  <p>L’original et ses variantes seront effacés. Cette action est définitive.</p>
+  <form method="post" action="/admin/photos/<%= it.photo.id %>/delete">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <button class="btn danger" type="submit">Supprimer définitivement</button>
+  </form>
+</details>

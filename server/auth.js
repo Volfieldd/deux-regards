@@ -21,7 +21,7 @@ export function safeNext(value, fallback = '/admin') {
   }
 }
 
-function sameToken(a, b) {
+export function sameToken(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
   const x = Buffer.from(a);
   const y = Buffer.from(b);
@@ -58,7 +58,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   });
 
   const renderError = (reply, code, data) => reply.code(code).header('cache-control', 'no-store').render('auth-error', {
-    siteName: config.siteName, pageTitle: `${data.title} · ${config.siteName}`, description: '', ...data,
+    siteName: app.siteName(), pageTitle: `${data.title} · ${app.siteName()}`, description: '', ...data,
   });
 
   // preHandler des pages d'admin : sans session, retour à la connexion (GET) ou 401.
@@ -102,6 +102,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     const next = safeNext(request.query.next);
     if (request.session) return reply.redirect(next);
     if (!oidc.configured) {
+      if (config.localAuthToken) return reply.redirect(`/auth/local?next=${encodeURIComponent(next)}`);
       return renderError(reply, 503, { title: 'Connexion indisponible', message: 'La connexion n’est pas encore configurée sur ce serveur.' });
     }
     let start;
@@ -149,19 +150,49 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       });
     }
 
-    // Nouvelle session à chaque connexion ; l'ancienne éventuelle est détruite.
-    sessions.destroy(request.cookies[SESSION_COOKIE]);
-    const token = sessions.create({
+    openSession(request, reply, {
       sub: claims.sub,
       name: claims.name || claims.preferred_username || claims.email || '',
       email: claims.email || '',
       roles: [...new Set([...result.roles, 'admin'])],
       idToken: result.idToken,
     });
-    reply.setCookie(SESSION_COOKIE, token, { ...cookieBase, maxAge: IDLE_TTL / 1000 });
-    request.log.info({ sub: claims.sub }, 'connexion admin');
     return reply.header('cache-control', 'no-store').redirect(safeNext(tx.next));
   });
+
+  // Nouvelle session à chaque connexion ; l'ancienne éventuelle est détruite.
+  function openSession(request, reply, user) {
+    sessions.destroy(request.cookies[SESSION_COOKIE]);
+    reply.setCookie(SESSION_COOKIE, sessions.create(user), { ...cookieBase, maxAge: IDLE_TTL / 1000 });
+    request.log.info({ sub: user.sub }, 'connexion admin');
+  }
+
+  // Connexion locale de TEST : sans IdP, avec un jeton partagé (LOCAL_AUTH_TOKEN).
+  // loadConfig la refuse dès que le site est en ligne (HTTPS ou production).
+  if (config.localAuthToken) {
+    app.log.warn('authentification locale de test active (LOCAL_AUTH_TOKEN) : jamais en production');
+    const authors = app.db.prepare('SELECT slug, name, oidc_sub FROM authors ORDER BY id');
+    const renderLocal = (reply, code, data) => reply.code(code).header('cache-control', 'no-store').render('local-login', {
+      siteName: app.siteName(), pageTitle: `Connexion de test · ${app.siteName()}`, description: '', authors: authors.all(), ...data,
+    });
+
+    app.get('/auth/local', async (request, reply) => {
+      const next = safeNext(request.query.next);
+      if (request.session) return reply.redirect(next);
+      return renderLocal(reply, 200, { next });
+    });
+
+    app.post('/auth/local', async (request, reply) => {
+      const { token, author, next } = request.body || {};
+      const who = authors.all().find(a => a.slug === author);
+      if (!sameToken(token, config.localAuthToken) || !who) {
+        return renderLocal(reply, 401, { next: safeNext(next), error: 'Jeton ou compte invalide.' });
+      }
+      // Le sub est celui lié à l'auteur s'il existe, pour tester le lien compte ↔ auteur.
+      openSession(request, reply, { sub: who.oidc_sub || `local:${who.slug}`, name: `${who.name} (test)`, roles: ['admin'] });
+      return reply.header('cache-control', 'no-store').redirect(safeNext(next), 303);
+    });
+  }
 
   // POST + CSRF : une page tierce ne peut pas déconnecter l'utilisateur.
   app.post('/auth/logout', async (request, reply) => {
@@ -170,10 +201,13 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     sessions.destroy(request.cookies[SESSION_COOKIE]);
     reply.clearCookie(SESSION_COOKIE, cookieBase);
     let target = '/';
-    try {
-      target = (await oidc.logoutUrl(request.session.id_token)) || '/';
-    } catch (err) {
-      request.log.warn(err, 'déconnexion côté fournisseur impossible');
+    // Session OIDC : déconnexion aussi côté IdP. Session locale de test : rien à faire ailleurs.
+    if (oidc.configured && request.session.id_token) {
+      try {
+        target = (await oidc.logoutUrl(request.session.id_token)) || '/';
+      } catch (err) {
+        request.log.warn(err, 'déconnexion côté fournisseur impossible');
+      }
     }
     return reply.redirect(target, 303);
   });

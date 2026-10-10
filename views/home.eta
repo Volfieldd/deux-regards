@@ -25,8 +25,8 @@
 <% it.hero.forEach((p, i) => { %>
     <button type="button" data-h="<%= i %>" aria-label="<%= p.title %>" aria-current="<%= i === 0 %>"><%~ it.picture(p, { sizes: '64px', alt: '' }) %></button>
 <% }) %>
-    <button type="button" class="pause eyebrow" data-pause hidden>Pause</button>
   </div>
+  <button type="button" class="pause eyebrow" data-pause hidden>Pause</button>
   <div class="bar"></div>
 <% } %>
 </section>

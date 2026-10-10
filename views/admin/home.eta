@@ -1,0 +1,18 @@
+<% layout('./layout') %>
+<h1>Tableau de bord</h1>
+<div class="cards">
+  <a class="card" href="/admin/photos?statut=published"><span class="big"><%= it.counts.published %></span><span class="eyebrow">photos publiées</span></a>
+  <a class="card" href="/admin/photos?statut=draft"><span class="big"><%= it.counts.draft %></span><span class="eyebrow">brouillons</span></a>
+  <a class="card" href="/admin/series"><span class="big"><%= it.categories %></span><span class="eyebrow">séries</span></a>
+  <a class="card" href="/admin/auteurs"><span class="big"><%= it.authors.length %></span><span class="eyebrow">auteurs</span></a>
+</div>
+<section class="panel">
+  <h2>Votre compte</h2>
+  <p>Connecté en tant que <strong><%= it.session.name || it.session.email || it.session.sub %></strong>.</p>
+<% if (it.me) { %>
+  <p>Ce compte est lié à l’auteur <strong><%= it.me.name %></strong> : vos imports lui sont attribués par défaut.</p>
+<% } else { %>
+  <p>Ce compte n’est lié à aucun auteur. Pour qu’il le soit, copiez son identifiant dans la fiche de l’auteur :</p>
+  <p><code class="mono"><%= it.session.sub %></code> · <a class="more eyebrow" href="/admin/auteurs">Auteurs</a></p>
+<% } %>
+</section>

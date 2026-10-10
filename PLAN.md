@@ -79,7 +79,7 @@ storage/
 - Le site reste lisible sans JS ; le JS ajoute le fondu, le swipe et le filtre sans rechargement.
 - Polices auto-hébergées (@fontsource), CSP stricte sans ressource tierce.
 
-### 2. Images (pipeline fait ; reste l'import depuis l'admin)
+### 2. Images (fait)
 - Import : original vers `storage/originals/`, variantes générées, EXIF supprimé, rotation EXIF appliquée avant suppression.
 - `srcset` + `sizes`, lazy-loading, dimensions explicites (pas de saut de mise en page).
 - Dissuasion : clic droit et glisser désactivés sur les images, en-tête `Cache-Control` long sur les variantes.
@@ -93,15 +93,15 @@ storage/
 - `/admin` minimal (identité + déconnexion) en attendant la phase 4.
 - Tests de bout en bout contre un faux fournisseur OIDC : rôle absent → 403 sans session, `state` invalide → refus, code rejoué, session expirée → redirection, régénération, déconnexion.
 
-### 4. Admin (tout administrable)
-- Photos : import multiple par glisser-déposer, édition, brouillon/publiée, réordonnancement par glisser, recherche, filtres, suppression avec confirmation dans la page.
-- Séries : création, renommage, ordre, suppression (bloquée si la série contient des photos).
-- Auteurs : nom, bio, lien avec le compte OIDC.
-- Réglages : nom du site, accroche, à propos, photos de l'ouverture.
-
-### 4 bis. Points de l'audit à traiter avec l'admin
-- Variantes des brouillons : accessibles à qui connaît leur nom (UUID). Les générer à la publication, ou les servir via une route qui vérifie le statut.
-- Import : limiter taille de fichier et nombre de pixels (`sharp` `limitInputPixels`), vérifier le type réel du fichier.
+### 4. Admin (fait)
+- Photos : import multiple (glisser-déposer ou sélecteur), en brouillon ; édition avec validation ; publier / dépublier ; réordonnancement par glisser-déposer, avec boutons ↑ ↓ en alternative clavier et sans JS ; recherche et filtres ; suppression confirmée dans la page (original, variantes et entrée de l'ouverture).
+- Séries : création, renommage, adresse, ordre, suppression bloquée tant qu'elles contiennent des photos.
+- Auteurs : nom, adresse, bio, lien avec le compte OIDC (`sub` affiché sur le tableau de bord) ; l'auteur lié est proposé par défaut à l'import.
+- Réglages : nom du site (repli sur `SITE_NAME`), accroche, introduction, à propos, photos de l'ouverture (publiées seulement).
+- Import : 60 Mo et 120 mégapixels au plus par fichier, 50 fichiers par envoi, format vérifié par décodage (JPEG, PNG, WebP, TIFF, HEIF), jeton CSRF exigé avant le premier fichier, orientation EXIF appliquée aux dimensions.
+- Variantes : `/media/` ne sert que les photos publiées ; aperçu des brouillons sous `/admin/media/` (session admin).
+- Connexion locale de test (`LOCAL_AUTH_TOKEN`), interdite en ligne.
+- Tests navigateur (`e2e/`, conteneur Playwright) : rendu bureau et mobile, filtres, visionneuse, sans JS, admin et parcours complet d'une photo.
 
 ### 5. Mise en ligne
 - Dockerfile, Caddyfile, volume persistant pour `storage/` et la base.

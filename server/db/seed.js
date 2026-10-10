@@ -20,7 +20,8 @@ export async function seed(db, { storageDir }) {
   try {
     for (const p of data.photos) {
       const buf = fs.readFileSync(new URL(`images/${p.image}.jpg`, SEED_DIR));
-      const { width, height } = await sharp(buf).metadata();
+      const m = await sharp(buf).metadata();
+      const { width, height } = m.autoOrient ?? m;
       const file = `${crypto.randomUUID()}.jpg`;
       files.push({ file, width, height });
       fs.writeFileSync(path.join(originals, file), buf);

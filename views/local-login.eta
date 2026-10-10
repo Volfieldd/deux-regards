@@ -1,0 +1,23 @@
+<% layout('./layout') %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+</header>
+<main class="about wrap">
+  <h1>Connexion de test</h1>
+  <form class="prose local-login" method="post" action="/auth/local">
+    <p>Connexion locale, réservée aux tests : elle n’existe pas sur le site en ligne.</p>
+<% if (it.error) { %>
+    <p role="alert"><strong><%= it.error %></strong></p>
+<% } %>
+    <input type="hidden" name="next" value="<%= it.next %>">
+    <p><label for="author">Se connecter en tant que</label><br>
+      <select id="author" name="author">
+<% it.authors.forEach(a => { %>
+        <option value="<%= a.slug %>"><%= a.name %></option>
+<% }) %>
+      </select></p>
+    <p><label for="token">Jeton de test</label><br>
+      <input id="token" name="token" type="password" autocomplete="off" required></p>
+    <p><button class="more eyebrow" type="submit">Se connecter</button></p>
+  </form>
+</main>

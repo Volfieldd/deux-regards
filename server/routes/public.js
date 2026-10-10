@@ -2,26 +2,15 @@ import { createRepo } from '../repo.js';
 import { galleryUrl, photoUrl } from '../urls.js';
 import { widthsFor, variantName } from '../images.js';
 import { pad } from '../format.js';
+import { picture } from '../picture.js';
 
 const HERO_COUNT = 5;
 
 export default async function publicRoutes(app) {
   const repo = createRepo(app.db);
-  const { siteName } = app.config;
 
-  // Construit le <picture> d'une photo : AVIF puis WebP, srcset complet, dimensions explicites.
-  function picture(p, { sizes, eager = false, alt = p.title, className = '' }) {
-    const ws = widthsFor(p.width);
-    const set = format => ws.map(w => `/media/${variantName(p.file, w, format)} ${w}w`).join(', ');
-    const fallback = `/media/${variantName(p.file, ws[Math.min(1, ws.length - 1)], 'webp')}`;
-    const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-    return `<picture${className ? ` class="${className}"` : ''}>`
-      + `<source type="image/avif" srcset="${set('avif')}" sizes="${sizes}">`
-      + `<img src="${fallback}" srcset="${set('webp')}" sizes="${sizes}" width="${p.width}" height="${p.height}" alt="${esc(alt)}"`
-      + `${eager ? ' fetchpriority="high"' : ' loading="lazy"'} decoding="async"></picture>`;
-  }
-
-  const helpers = { picture, galleryUrl, photoUrl, pad, siteName };
+  // Le nom du site est réglable dans l'admin : relu à chaque page.
+  const base = { picture, galleryUrl, photoUrl, pad };
 
   // Filtres valides uniquement ; une valeur inconnue est ignorée.
   function readFilter(query, authors, categories) {
@@ -31,6 +20,8 @@ export default async function publicRoutes(app) {
   }
 
   function renderGallery(reply, filter) {
+    const siteName = app.siteName();
+    const helpers = { ...base, siteName };
     const authors = repo.authors();
     const categories = repo.categories();
     const settings = repo.settings();
@@ -80,6 +71,8 @@ export default async function publicRoutes(app) {
   });
 
   app.get('/photo/:slug', async (request, reply) => {
+    const siteName = app.siteName();
+    const helpers = { ...base, siteName };
     let filter = readFilter(request.query, repo.authors(), repo.categories());
     let list = repo.publishedPhotos({ author: filter.regard, category: filter.serie });
     let i = list.findIndex(p => p.slug === request.params.slug);
@@ -104,6 +97,8 @@ export default async function publicRoutes(app) {
   });
 
   app.get('/a-propos', async (request, reply) => {
+    const siteName = app.siteName();
+    const helpers = { ...base, siteName };
     const settings = repo.settings();
     const paragraphs = String(settings.about || settings.intro || '').split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
     return reply.render('about', {
@@ -113,6 +108,8 @@ export default async function publicRoutes(app) {
   });
 
   app.setNotFoundHandler(async (request, reply) => {
+    const siteName = app.siteName();
+    const helpers = { ...base, siteName };
     reply.code(404);
     return reply.render('notfound', { ...helpers, pageTitle: `Page introuvable · ${siteName}`, description: '' });
   });

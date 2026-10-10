@@ -21,6 +21,10 @@ L'admin (`/admin`) n'accepte que des comptes OIDC portant le rôle de projet `ad
 
 Dès que `PUBLIC_URL` est en HTTPS (ou `NODE_ENV=production`), le serveur refuse de démarrer sans `COOKIE_SECRET` ou avec un émetteur OIDC en HTTP.
 
+### Connexion locale de test
+
+Pour tester l'admin sans Zitadel, définir `LOCAL_AUTH_TOKEN` (16 caractères ou plus) : `/auth/login` mène alors à un formulaire qui demande ce jeton et l'auteur à incarner. Un bandeau rouge le signale dans l'admin. Le serveur refuse de démarrer avec cette variable dès que le site est en ligne (`PUBLIC_URL` en HTTPS ou `NODE_ENV=production`).
+
 ## Scripts
 
 | Commande | Rôle |
@@ -31,6 +35,7 @@ Dès que `PUBLIC_URL` est en HTTPS (ou `NODE_ENV=production`), le serveur refuse
 | `npm run seed` | migrations + jeu de démonstration (ignoré si des photos existent) |
 | `npm run variants` | régénère les images servies (`-- --force` pour tout refaire) |
 | `npm test` | tests (`node:test`) |
+| `npm run e2e` | tests navigateur dans le conteneur Playwright officiel, contre un serveur démarré (`BASE_URL`, et `E2E_LOCAL_AUTH` = `LOCAL_AUTH_TOKEN` pour l'admin) |
 
 ## Données
 

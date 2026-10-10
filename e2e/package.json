@@ -1,0 +1,9 @@
+{
+  "name": "site-photo-e2e",
+  "private": true,
+  "description": "Tests de bout en bout dans un navigateur, lancés dans le conteneur Playwright (voir run.sh)",
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}
