@@ -14,7 +14,8 @@
     "seed": "node --env-file-if-exists=.env server/db/cli.js seed",
     "variants": "node --env-file-if-exists=.env server/db/cli.js variants",
     "test": "AVIF_EFFORT=0 node --test \"test/**/*.test.js\"",
-    "e2e": "e2e/run.sh"
+    "e2e": "e2e/run.sh",
+    "backup": "node --env-file-if-exists=.env server/db/backup.js"
   },
   "dependencies": {
     "@fastify/cookie": "11.1.2",

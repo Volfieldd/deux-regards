@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+node_modules
+storage
+e2e
+test
+docs
+*.md
+!assets/**/*.md
+Dockerfile
+compose*.yaml

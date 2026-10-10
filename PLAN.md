@@ -114,9 +114,12 @@ storage/
 - Mentions IPTC (XMP) dans les modes EXIF signés ; page publique `/droits`.
 - Spécification : [docs/specs/preuves-et-droits.md](docs/specs/preuves-et-droits.md).
 
-### 5. Mise en ligne
-- Dockerfile, Caddyfile, volume persistant pour `storage/` et la base.
-- Sauvegarde quotidienne, sitemap, Open Graph, passe d'accessibilité (focus, contrastes, `prefers-reduced-motion`, textes alternatifs).
+### 5. Mise en ligne (fait)
+- Image Docker en deux étapes, conteneur en lecture seule, utilisateur sans droits ; exposition par Cloudflare Tunnel (`cloudflared`), sans Caddy.
+- Données dans un dossier de l'hôte monté explicitement ; refus de démarrer sans montage ; `down -v` sans effet.
+- Sauvegarde quotidienne (instantané SQLite contrôlé, originaux jamais effacés), restauration documentée.
+- `sitemap.xml`, `robots.txt` ; Open Graph et passe d'accessibilité faits plus tôt.
+- Guide : [docs/wiki/Déploiement.md](docs/wiki/Déploiement.md).
 
 ## Côté Zitadel (à faire une fois)
 

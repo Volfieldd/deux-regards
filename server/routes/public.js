@@ -127,6 +127,28 @@ export default async function publicRoutes(app) {
     });
   });
 
+  // Moteurs de recherche : tout le site public, jamais l'admin ni la connexion.
+  app.get('/robots.txt', async (request, reply) => reply.type('text/plain; charset=utf-8')
+    .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nAllow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
+
+  app.get('/sitemap.xml', async (request, reply) => {
+    const base = app.config.publicUrl;
+    const photos = repo.publishedPhotos();
+    const latest = photos.map(p => p.updated_at).sort().at(-1);
+    const day = d => (d ? d.slice(0, 10) : undefined);
+    const urls = [
+      { loc: '/', lastmod: day(latest) },
+      ...repo.categories().filter(c => photos.some(p => p.category_slug === c.slug)).map(c => ({ loc: galleryUrl({ serie: c.slug }) })),
+      ...repo.authors().filter(a => photos.some(p => p.author_slug === a.slug)).map(a => ({ loc: galleryUrl({ regard: a.slug }) })),
+      ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at) })),
+      { loc: '/a-propos' }, { loc: '/droits' },
+    ];
+    const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    const body = urls.map(u => `  <url><loc>${xml(base + u.loc)}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}</url>`).join('\n');
+    return reply.type('application/xml; charset=utf-8')
+      .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`);
+  });
+
   app.setNotFoundHandler(async (request, reply) => {
     const siteName = app.siteName();
     const helpers = { ...base, siteName };
