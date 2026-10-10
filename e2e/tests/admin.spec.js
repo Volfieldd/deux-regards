@@ -18,9 +18,16 @@ test('rendu des pages de l’admin', async ({ page }, info) => {
     ['/admin/reglages', 'Réglages', 'reglages'], ['/admin/aide', 'Aide', 'aide']]) {
     await page.goto(url);
     await expect(page.locator('h1')).toHaveText(title);
+    // Mobile : la navigation est repliée derrière « Menu ».
+    const menu = page.getByRole('button', { name: '☰ Menu' });
+    if (await menu.isVisible()) {
+      await expect(page.locator('nav a[aria-current="page"]')).toBeHidden();
+      await menu.click();
+      await expect(menu).toHaveAttribute('aria-expanded', 'true');
+    }
     await expect(page.locator('nav a[aria-current="page"]')).toBeVisible();
     // Aucune vignette cassée (les brouillons passent par /admin/media/).
-    for (const img of await page.locator('main img').all()) {
+    for (const img of await page.locator('main img:visible').all()) {
       await img.scrollIntoViewIfNeeded();
       await expect.poll(() => img.evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
     }
@@ -51,7 +58,7 @@ test('preuve d’antériorité : horodatage affiché et vérifié', async ({ pag
 test('accessibilité de l’admin : aucune violation sérieuse', async ({ page }) => {
   const { default: AxeBuilder } = await import('@axe-core/playwright');
   await page.emulateMedia({ reducedMotion: 'reduce' });   // mesure l'état final, pas une animation d'apparition
-  for (const url of ['/admin', '/admin/photos', '/admin/series', '/admin/auteurs', '/admin/images', '/admin/apparence', '/admin/reglages', '/admin/aide']) {
+  for (const url of ['/admin', '/admin/photos', '/admin/photos?importer', '/admin/photos?vue=grille', '/admin/photos/lot?ids=1,2,3', '/admin/series', '/admin/auteurs', '/admin/images', '/admin/apparence', '/admin/reglages', '/admin/aide']) {
     await page.goto(url);
     const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
     const serious = violations.filter(v => ['serious', 'critical'].includes(v.impact));

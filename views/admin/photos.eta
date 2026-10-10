@@ -1,69 +1,92 @@
 <% layout('./layout') %>
-<% const f = it.filter; %>
-<h1>Photos</h1>
-
-<form class="panel import" method="post" action="/admin/photos/import" enctype="multipart/form-data" data-import>
-  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-  <h2>Importer</h2>
-  <div class="row">
-    <label>Auteur
-      <select name="author_id"><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === it.defaultAuthor ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
-    </label>
-    <label>Série
-      <select name="category_id"><% it.categories.forEach(c => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %></select>
-    </label>
+<% const f = it.filter; const qs = it.filtered ? '?' + new URLSearchParams({ q: f.q, auteur: f.author, serie: f.category, statut: f.status }) : ''; %>
+<div class="toolbar">
+  <div>
+    <h1>Photos</h1>
+    <p class="sub"><%= it.totals.all %> photo<%= it.totals.all > 1 ? 's' : '' %> · <%= it.totals.published %> publiée<%= it.totals.published > 1 ? 's' : '' %> · <%= it.totals.draft %> brouillon<%= it.totals.draft > 1 ? 's' : '' %></p>
   </div>
-  <label class="drop" data-drop>
-    <span>Glissez vos photos ici, ou <u>choisissez des fichiers</u></span>
-    <span class="mono">JPEG, PNG, WebP, TIFF, HEIF · 60 Mo et 120 mégapixels au plus · importées en brouillon</span>
-    <input type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/tiff,image/heif,image/avif" multiple required>
-  </label>
-  <p class="actions"><button class="btn" type="submit">Importer</button> <span class="mono" data-progress aria-live="polite"></span></p>
+  <div class="acts">
+    <a class="btn big" href="/admin/photos?importer#import" data-import-open>＋ Importer des photos</a>
+    <span class="seg" role="group" aria-label="Affichage">
+<% [['liste', 'Liste'], ['grille', 'Grille']].forEach(([k, label]) => { const p = new URLSearchParams(it.filtered ? { q: f.q, auteur: f.author, serie: f.category, statut: f.status } : {}); if (k === 'grille') p.set('vue', 'grille'); %>
+      <a href="/admin/photos<%= p.toString() ? '?' + p : '' %>"<%~ it.view === k ? ' aria-current="true"' : '' %>><%= label %></a>
+<% }) %>
+    </span>
+
+  </div>
+</div>
+
+<%~ include('./_import', it) %>
+
+<form class="filters" method="get" action="/admin/photos" role="search" data-filters>
+<% if (it.view === 'grille') { %><input type="hidden" name="vue" value="grille"><% } %>
+  <input type="search" name="q" value="<%= f.q %>" placeholder="Rechercher un titre, un lieu, une légende…" aria-label="Rechercher">
+  <select name="auteur" aria-label="Auteur"><option value="">Tous les auteurs</option><% it.authors.forEach(a => { %><option value="<%= a.slug %>"<%~ a.slug === f.author ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
+  <select name="serie" aria-label="Série"><option value="">Toutes les séries</option><% it.categories.forEach(c => { %><option value="<%= c.slug %>"<%~ c.slug === f.category ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
+  <select name="statut" aria-label="Statut"><option value="">Tous les statuts</option><% Object.entries(it.STATUSES).forEach(([k, v]) => { %><option value="<%= k %>"<%~ k === f.status ? ' selected' : '' %>><%= v %></option><% }) %></select>
+  <button class="btn ghost" type="submit" data-filter-submit>Filtrer</button>
+<% if (it.filtered) { %><a class="more eyebrow" href="/admin/photos<%= it.view === 'grille' ? '?vue=grille' : '' %>">Effacer</a><% } %>
 </form>
 
-<form class="panel filters" method="get" action="/admin/photos" role="search">
-  <label>Recherche <input type="search" name="q" value="<%= f.q %>" placeholder="titre, lieu, légende"></label>
-  <label>Auteur
-    <select name="auteur"><option value="">Tous</option><% it.authors.forEach(a => { %><option value="<%= a.slug %>"<%~ a.slug === f.author ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
-  </label>
-  <label>Série
-    <select name="serie"><option value="">Toutes</option><% it.categories.forEach(c => { %><option value="<%= c.slug %>"<%~ c.slug === f.category ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
-  </label>
-  <label>Statut
-    <select name="statut"><option value="">Tous</option><% Object.entries(it.STATUSES).forEach(([k, v]) => { %><option value="<%= k %>"<%~ k === f.status ? ' selected' : '' %>><%= v %></option><% }) %></select>
-  </label>
-  <button class="btn ghost" type="submit">Filtrer</button>
-<% if (it.filtered) { %><a class="more eyebrow" href="/admin/photos">Effacer</a><% } %>
+<form class="bulk" id="bulk" method="post" action="/admin/photos/actions" data-bulk aria-label="Actions sur la sélection">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <input type="hidden" name="back" value="/admin/photos<%= qs %>">
+  <strong data-bulk-count role="status">Pour les photos cochées :</strong>
+  <button class="btn" type="submit" name="action" value="publish">Publier</button>
+  <button class="btn ghost" type="submit" name="action" value="draft">Dépublier</button>
+  <span class="group">
+    <select name="category_id" aria-label="Série de destination" data-bulk-category>
+      <option value="">Série…</option>
+<% it.categories.forEach(c => { %>      <option value="<%= c.id %>"><%= c.name %></option>
+<% }) %>      <option value="new">＋ Nouvelle série…</option>
+    </select>
+    <input name="new_category" maxlength="80" placeholder="Nom de la nouvelle série" aria-label="Nom de la nouvelle série" data-bulk-new>
+    <button class="btn ghost" type="submit" name="action" value="category">Changer de série</button>
+  </span>
+  <button class="btn ghost" type="submit" name="action" value="delete" data-bulk-delete>Supprimer…</button>
+  <span class="spacer"></span>
+  <button class="btn ghost" type="button" hidden data-bulk-clear>Tout désélectionner</button>
 </form>
 
-<p class="mono count"><%= it.photos.length %> photo(s)<%= it.filtered ? ' · réordonnancement possible sans filtre' : ' · glissez une ligne pour changer l’ordre' %></p>
-<ol class="plist"<%~ it.filtered ? '' : ' data-sortable' %>>
+<p class="mono count"><label class="inline all" hidden data-select-all><input type="checkbox" class="chk"> Tout sélectionner</label> <%= it.photos.length %> photo<%= it.photos.length > 1 ? 's' : '' %><%= it.filtered ? ' pour ces filtres · ordre modifiable sans filtre' : (it.view === 'liste' ? ' · glissez une ligne pour changer l’ordre' : '') %><span class="hint drop-hint" hidden data-drop-hint> · Astuce : déposez des photos n’importe où sur la page pour les importer.</span></p>
+<ol class="plist<%= it.view === 'grille' ? ' grid' : '' %>"<%~ it.filtered || it.view === 'grille' ? '' : ' data-sortable' %>>
 <% it.photos.forEach((p, i) => { %>
-  <li id="photo-<%= p.id %>" data-id="<%= p.id %>">
+  <li id="photo-<%= p.id %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
+    <input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="Sélectionner « <%= p.title %> »">
     <span class="handle mono" aria-hidden="true">N°<%= it.pad(p.n) %></span>
-    <a class="thumb" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><%~ it.picture(p, { sizes: '96px', alt: '' }) %></a>
+    <a class="thumb" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: it.view === 'grille' ? '240px' : '96px', alt: '' }) %><% } else { %><span class="ph">Traitement…</span><% } %></a>
     <div class="info">
       <a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a>
       <span class="mono"><%= p.category %> · <%= p.author %><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + p.when : '' %></span>
-    </div>
-    <span class="status <%= p.status %>"><%= it.STATUSES[p.status] %></span>
-    <form method="post" action="/admin/photos/<%= p.id %>/status">
-      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-      <input type="hidden" name="back" value="/admin/photos<%= it.filtered ? '?' + new URLSearchParams({ q: f.q, auteur: f.author, serie: f.category, statut: f.status }) : '' %>">
-      <input type="hidden" name="status" value="<%= p.status === 'published' ? 'draft' : 'published' %>">
-      <button class="btn ghost" type="submit" aria-label="<%= p.status === 'published' ? 'Dépublier' : 'Publier' %> « <%= p.title %> »"><%= p.status === 'published' ? 'Dépublier' : 'Publier' %></button>
-    </form>
-<% if (!it.filtered) { %>
-    <div class="move">
-<% [['up', '↑', 'Monter', i === 0], ['down', '↓', 'Descendre', i === it.photos.length - 1]].forEach(([dir, sign, label, off]) => { %>
-      <form method="post" action="/admin/photos/<%= p.id %>/move">
-        <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="dir" value="<%= dir %>">
-        <button class="btn ghost" type="submit" aria-label="<%= label %> « <%= p.title %> »"<%~ off ? ' disabled' : '' %>><%= sign %></button>
-      </form>
-<% }) %>
-    </div>
+<% if (p.provisional) { %>      <span class="note">Titre provisoire (nom du fichier)</span>
 <% } %>
+    </div>
+    <span class="st <%= p.status %>"><span aria-hidden="true"><%= p.status === 'published' ? '●' : '○' %></span> <%= it.STATUSES[p.status] %></span>
+    <details class="menu">
+      <summary class="iconbtn" aria-label="Actions pour « <%= p.title %> »"><span aria-hidden="true">⋯</span></summary>
+      <div class="menu-pop">
+        <a href="/admin/photos/<%= p.id %>">Modifier la fiche</a>
+        <form method="post" action="/admin/photos/<%= p.id %>/status">
+          <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+          <input type="hidden" name="back" value="/admin/photos<%= qs %>">
+          <input type="hidden" name="status" value="<%= p.status === 'published' ? 'draft' : 'published' %>">
+          <button type="submit"><%= p.status === 'published' ? 'Dépublier' : 'Publier' %></button>
+        </form>
+<% if (!it.filtered) { [['up', 'Monter d’une place', i === 0], ['down', 'Descendre d’une place', i === it.photos.length - 1]].forEach(([dir, label, off]) => { if (off) return; %>
+        <form method="post" action="/admin/photos/<%= p.id %>/move">
+          <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="dir" value="<%= dir %>">
+          <button type="submit"><%= label %></button>
+        </form>
+<% }) } %>
+      </div>
+    </details>
   </li>
 <% }) %>
 </ol>
 <% if (!it.photos.length) { %><p class="empty">Aucune photo<%= it.filtered ? ' pour ces filtres' : '' %>.</p><% } %>
+
+<dialog class="dialog" data-confirm-delete aria-labelledby="del-title">
+  <h2 id="del-title">Supprimer <span data-del-count></span> ?</h2>
+  <p>Les originaux et toutes leurs images seront effacés. Cette action est définitive.</p>
+  <p class="actions"><button class="btn danger" type="button" data-del-ok>Supprimer définitivement</button><button class="btn ghost" type="button" data-del-cancel autofocus>Annuler</button></p>
+</dialog>

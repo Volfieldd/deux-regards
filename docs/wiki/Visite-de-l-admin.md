@@ -1,6 +1,6 @@
 # Visite de l'admin
 
-Captures du serveur de test (jeu de démonstration), faites le 10/10/2026. Elles se régénèrent avec `E2E_CAPTURES=1 npm run e2e -- --project=captures-bureau --project=captures-mobile`. Pour l'usage pas à pas, voir l'[Aide de l'administration](Aide), également disponible dans l'admin (menu « Aide »).
+Captures du serveur de test (jeu de démonstration), faites le 10/10/2026, **avant** la refonte ergonomique des pages Photos, Séries et Réglages (import suivi photo par photo, sélection multiple, séries en cartes, ouverture ordonnée) : l'[aide](Aide) décrit les écrans actuels. Elles se régénèrent avec `E2E_CAPTURES=1 npm run e2e -- --project=captures-bureau --project=captures-mobile`. Pour l'usage pas à pas, voir l'[Aide de l'administration](Aide), également disponible dans l'admin (menu « Aide »).
 
 En haut de chaque page : **Tableau de bord · Photos · Séries · Auteurs · Filigrane & EXIF · Apparence · Réglages · Voir le site**, et **Se déconnecter**. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
 
@@ -20,9 +20,9 @@ Il montre le nombre de photos publiées et de brouillons, de séries et d'auteur
 
 La page réunit :
 
-- **l'import** : glisser-déposer, auteur et série du lot ;
+- **l'import** en trois étapes : choisir et vérifier, envoi et traitement suivis photo par photo, compléter et publier le lot sur une seule page ;
 - **la recherche et les filtres** ;
-- **la liste dans l'ordre du site** : glisser une ligne pour la déplacer, ou utiliser ↑ ↓ ; publier ou dépublier en un clic.
+- **la liste dans l'ordre du site** : glisser une ligne pour la déplacer, ou menu ⋯ ; cases à cocher et barre d'actions groupées (publier, changer de série, supprimer), annulables.
 
 ![Liste des photos](captures/admin/02-photos-bureau.webp)
 
@@ -38,7 +38,7 @@ On y trouve :
 
 ## Séries
 
-Renommer, changer l'adresse, ordonner. La suppression n'est possible que si la série est vide.
+Des cartes avec couverture et nombre de photos : créer (en tête), renommer, ordonner par glisser ou au clavier. Supprimer une série non vide déplace ses photos vers une autre série.
 
 ![Séries](captures/admin/04-series-bureau.webp)
 

@@ -2,3 +2,5 @@ node_modules/
 results/
 report/
 captures/
+fixtures/audit/
+audit/

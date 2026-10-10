@@ -1,48 +1,64 @@
 # Photos
 
-La page **Photos** réunit l'import, la recherche et la liste de toutes les photos, dans l'ordre du site.
+La page **Photos** réunit l'import, la recherche et la liste de toutes les photos, dans l'ordre du site. L'import se fait en trois étapes : **choisir et vérifier**, **envoi et traitement**, **compléter et publier**.
 
 ## Importer des photos
 
-1. Choisissez l'**auteur** et la **série** : ils s'appliquent à tout le lot. Votre propre fiche est présélectionnée si votre compte y est lié.
-2. Ajoutez les fichiers, au choix :
-   - **glissez-les** depuis votre ordinateur sur la zone en pointillés (elle se colore quand vous la survolez) ;
-   - ou **cliquez** sur la zone pour les choisir.
+### 1. Choisir et vérifier
 
-   La zone indique « *n* fichier(s) prêt(s) à importer ».
-3. Cliquez sur **Importer**. Le message « Import en cours… » s'affiche et le bouton se désactive. Comptez quelques secondes par photo : les images du site sont calculées à ce moment-là.
-4. Vous arrivez sur la liste des **brouillons**, avec un compte rendu : « 3 photo(s) importée(s) en brouillon, 1 refusée(s) », et la raison de chaque refus.
+1. Cliquez sur **＋ Importer des photos** en haut de la page. Vous pouvez aussi **déposer des photos n'importe où sur la page** : l'import s'ouvre tout seul.
+2. Ajoutez les fichiers : glissez-les sur la zone en pointillés, ou cliquez dessus pour les choisir. Un second dépôt **s'ajoute** à la liste, il ne la remplace pas.
+3. Chaque fichier apparaît avec sa vignette, son poids et ses dimensions. Ceux qui ne passeront pas sont signalés **tout de suite, avant tout envoi**, avec la raison : « ✕ Ce n'est pas une image », « ✕ Trop lourde (60 Mo max.) », « ✕ Trop grande (120 Mpx max.) ». Le bouton **✕** retire un fichier de la liste.
+4. Vérifiez l'**auteur** et la **série** proposés pour le lot. Votre propre fiche est présélectionnée ; vous pourrez changer l'un et l'autre photo par photo à l'étape 3.
+5. Cliquez sur **Envoyer les *n* photos valides**. Rien n'est envoyé avant ce clic.
+
+### 2. Envoi et traitement
+
+- **Par photo :** une barre montre l'envoi en pourcentage, puis le traitement « images *n* / 6 » (les 6 tailles d'images du site), puis « ✓ Prête ».
+- **Pour le lot :** en haut, le décompte (prêtes, en traitement, en envoi, en échec), une barre d'ensemble et le **temps restant** estimé.
+- **Connexion interrompue :** seule la photo concernée échoue ; **Réessayer** la renvoie sans toucher au reste.
+- **Annuler le reste :** arrête les envois pas encore terminés. Les photos déjà envoyées restent en brouillon.
+- **Pendant l'envoi**, gardez la page ouverte (le navigateur vous prévient si vous la quittez). **Le traitement**, lui, continue sur le serveur même si vous changez de page : l'indicateur **Traitement : *n* photos** reste affiché en haut de toutes les pages.
+- Dès que l'envoi est terminé, **Compléter et publier les *n* photos →** mène à l'étape 3, même si le traitement n'est pas fini.
 
 | | |
 |---|---|
 | Formats | JPEG, PNG, WebP, TIFF, HEIF |
 | Taille | 60 Mo et 120 mégapixels par fichier au plus |
-| Nombre | 50 fichiers par envoi au plus |
 | Statut | **brouillon** : rien n'est visible sur le site avant publication |
-| Titre | tiré du nom du fichier (`IMG_2041 quai-nord.jpg` → « IMG 2041 quai nord »), à corriger dans la fiche |
+| Titre | **provisoire**, tiré du nom du fichier (`IMG_2041 quai-nord.jpg` → « IMG 2041 quai nord ») |
 
-À l'import, le site :
+Au traitement, le site applique l'orientation de l'appareil, calcule les images servies (filigrane et métadonnées du moment) et prépare la [preuve d'antériorité](preuves) de l'original.
 
-- applique l'orientation de l'appareil (photo prise en portrait) ;
-- calcule les images servies, avec le filigrane et les métadonnées du moment ;
-- prépare la [preuve d'antériorité](preuves) de l'original.
+> Sans JavaScript, l'import reste possible : un formulaire classique envoie tout le lot d'un coup et affiche le compte rendu à la fin.
 
-Un fichier refusé (pas une image, format non pris en charge, trop lourd) n'empêche pas les autres du lot d'être importés.
+### 3. Compléter et publier
+
+Toutes les photos du lot sont réunies dans **un seul tableau** : titre, série, lieu et date.
+
+- **Chaque champ s'enregistre quand vous le quittez** (Tab, clic ailleurs ou Entrée). La colonne **État** affiche « Enregistrement… » puis « ✓ Enregistré ». Le message en bas de l'écran propose **Annuler** pendant quelques secondes.
+- **Titre provisoire :** tant que le titre est celui du nom de fichier, il est signalé sous le champ.
+- **Date en langage courant :** « oct. 2026 », « octobre 2026 », « 10/2026 », « 5/10/2026 » ou « 2026-10 ». Le site affiche ce qu'il a compris (« compris : oct. 2026 »).
+- **Pour les photos cochées** (toutes, au départ), la barre sombre applique d'un coup une **série** (y compris une nouvelle), un **lieu** et une **date**, puis **Publier**.
+- **Publier des photos à titre provisoire :** une fenêtre les nomme et propose d'abord **Corriger les titres**. Rien n'est publié sans votre confirmation.
+
+Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir plus bas).
 
 ## La liste
 
-Chaque ligne montre :
-
-- le **numéro d'ordre** (N°) ;
-- la vignette ;
-- le **titre**, avec série, auteur, lieu et date ;
-- le **statut** (Publiée ou Brouillon) ;
-- les boutons **Publier / Dépublier** et **↑ ↓**.
+Chaque ligne montre une **case à cocher**, le **numéro d'ordre** (N°), la vignette, le **titre** (avec série, auteur, lieu, date et, le cas échéant, « Titre provisoire »), le **statut** — « ● Publiée » ou « ○ Brouillon » — et le menu **⋯**.
 
 - **Ouvrir la fiche :** cliquez sur le titre (ou sur la vignette).
-- **Publier, dépublier :** un clic sur le bouton de la ligne. Une photo dépubliée disparaît aussitôt du site, et ses images cessent d'être servies. Vous restez sur la même liste, filtres compris.
+- **Menu ⋯ d'une ligne :** Modifier la fiche, Publier ou Dépublier, Monter ou Descendre d'une place.
+- **Liste / Grille :** en haut à droite, l'affichage en lignes ou en vignettes.
 
 > Le N° de l'admin est la place dans **toute** la liste, brouillons compris. Sur le site, les photos publiées sont numérotées sans trou (N°01, N°02…).
+
+## Agir sur plusieurs photos
+
+1. Cochez les photos. **Maj + clic** coche toute la plage depuis la case précédente ; **Tout sélectionner** coche la liste affichée.
+2. Une barre sombre apparaît (en haut ; en bas de l'écran sur téléphone) : **Publier**, **Dépublier**, **Changer de série** (choisissez la série, ou « ＋ Nouvelle série… » et son nom), **Supprimer…**.
+3. Un message confirme l'action et propose **Annuler** pendant 10 secondes (sauf pour la suppression, qui demande une confirmation avant).
 
 ## Changer l'ordre
 
@@ -51,17 +67,17 @@ L'ordre de la liste est celui du site : galerie, visionneuse et numéros.
 - **À la souris :** saisissez une ligne et déposez-la sur une autre.
   - Lâchée sur la **moitié haute** d'une ligne, elle se place **avant** ; sur la **moitié basse**, **après**. C'est ainsi qu'on atteint la dernière place.
   - Un trait de couleur montre l'endroit du dépôt.
-  - L'ordre est **enregistré aussitôt** ; les numéros et les boutons ↑ ↓ se mettent à jour.
-- **Au clavier, ou sans souris :** boutons **↑** (monter d'une place) et **↓** (descendre d'une place). Ils sont grisés en tête et en fin de liste.
-- **Avec des filtres :** le réordonnancement n'est possible que sur la liste **complète**. Effacez d'abord les filtres.
+  - L'ordre est **enregistré aussitôt** ; les numéros se mettent à jour.
+- **Au clavier, ou sans souris :** menu **⋯** de la ligne, **Monter d'une place** ou **Descendre d'une place**.
+- **Avec des filtres, ou en grille :** le réordonnancement n'est possible que sur la liste **complète**. Effacez d'abord les filtres.
 
 Si l'enregistrement échoue (session expirée…), la liste reprend son ordre précédent et un message vous invite à recharger la page.
 
 ## Rechercher et filtrer
 
 - **Recherche :** cherche dans le titre, le lieu, la légende et l'adresse.
-- **Auteur**, **Série**, **Statut** : à combiner librement.
-- **Filtrer** applique les filtres ; **Effacer** revient à la liste complète.
+- **Auteur**, **Série**, **Statut** : à combiner librement ; la liste se met à jour dès que vous changez un choix.
+- **Effacer** revient à la liste complète.
 
 ## La fiche d'une photo
 
@@ -71,7 +87,7 @@ Si l'enregistrement échoue (session expirée…), la liste reprend son ordre pr
 | **Adresse** | la fin de l'URL : `/photo/<adresse>`. Vide : déduite du titre. Minuscules, chiffres et tirets ; elle doit être unique. La changer casse les anciens liens partagés (l'ouverture, elle, suit). |
 | **Série**, **Auteur** | listes |
 | **Lieu** | texte libre, 120 caractères |
-| **Date** | `AAAA-MM` (mars 2024) ou `AAAA-MM-JJ` |
+| **Date** | en langage courant : « mars 2024 », « 3/2024 », « 2/3/2024 » ou `2024-03` |
 | **Légende** | affichée sous la photo, 2000 caractères |
 | **Statut** | Brouillon ou Publiée |
 | **Filigrane** | « Selon les réglages », ou « Jamais sur cette photo » (voir [Filigrane et EXIF](filigrane-exif)) |

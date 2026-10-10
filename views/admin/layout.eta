@@ -14,23 +14,26 @@
   <script src="<%= it.asset('admin/admin.js') %>" defer></script>
 </head>
 <body class="admin" data-csrf="<%= it.csrf %>">
+<a class="skip" href="#contenu">Aller au contenu</a>
 <% if (it.local) { %>
   <p class="testbar mono" role="note">Connexion locale de test — <%= it.session.name %></p>
 <% } %>
-<header class="top wrap">
+<header class="top wrap" data-top>
   <%~ include('../brand', it) %>
-  <nav class="eyebrow" aria-label="Administration">
+  <button class="menu-toggle eyebrow" type="button" aria-expanded="false" aria-controls="admin-nav" hidden data-menu>☰ Menu</button>
+  <nav class="eyebrow" id="admin-nav" aria-label="Administration">
 <% [['home', '/admin', 'Tableau de bord'], ['photos', '/admin/photos', 'Photos'], ['series', '/admin/series', 'Séries'], ['authors', '/admin/auteurs', 'Auteurs'], ['images', '/admin/images', 'Filigrane & EXIF'], ['appearance', '/admin/apparence', 'Apparence'], ['settings', '/admin/reglages', 'Réglages'], ['help', '/admin/aide', 'Aide']].forEach(([key, href, label]) => { %>
     <a href="<%= href %>"<%~ (it.section === key || (key === 'photos' && it.section === 'photo')) ? ' aria-current="page"' : '' %>><%= label %></a>
 <% }) %>
     <a href="/" target="_blank" rel="noopener">Voir le site</a>
   </nav>
-  <form method="post" action="/auth/logout">
+  <a class="activity" href="/admin/photos?statut=draft" data-activity<%~ it.activity ? '' : ' hidden' %>><span class="spin" aria-hidden="true"></span><span data-activity-text>Traitement : <%= it.activity %> photo<%= it.activity > 1 ? 's' : '' %></span></a>
+  <form class="logout" method="post" action="/auth/logout">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
     <button class="eyebrow" type="submit">Se déconnecter</button>
   </form>
 </header>
-<main class="adm wrap" id="contenu">
+<main class="adm wrap" id="contenu" tabindex="-1">
 <% const HELP = { home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>">Aide sur cette page</a></p>
@@ -53,5 +56,6 @@
 <% } %>
 <%~ it.body %>
 </main>
+<div class="toast" role="status" aria-live="polite" data-toast hidden></div>
 </body>
 </html>

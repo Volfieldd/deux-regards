@@ -21,7 +21,7 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 // Seule exception : form-action autorise l'IdP, cible de la redirection après déconnexion.
 const csp = formOrigins => [
   "default-src 'self'",
-  "img-src 'self'",
+  "img-src 'self' blob:",                 // blob: aperçus locaux des photos choisies (import de l'admin)
   "style-src 'self'",
   "script-src 'self'",
   "font-src 'self'",

@@ -49,6 +49,7 @@ Le recalcul se déclenche :
 Une seule tâche de fond tourne à la fois, et seules les photos dont l'empreinte a changé, ou dont un fichier manque, sont recalculées.
 
 - **Import :** il n'attend pas la fin d'un recalcul en cours. Un verrou par photo empêche deux rendus simultanés de la même image.
+- **Import photo par photo (page d'import) :** `POST /admin/photos/envoi` range l'original et crée le brouillon, puis répond aussitôt ; les variantes sont rendues **en arrière-plan, une photo après l'autre**. `GET /admin/photos/traitement?ids=…` donne l'état de chacune (`waiting`, `processing` avec `done / total`, `ready`, `error`) et le nombre de photos en cours (indicateur d'en-tête). Ce suivi est en mémoire : après un redémarrage, le passage de démarrage rend ce qui manque. Une photo dont le rendu échoue est supprimée (ligne, original, variantes), comme à l'import classique.
 - **Écriture :** chaque variante est écrite sous un nom temporaire, puis renommée. Un arrêt brutal ne laisse jamais de fichier tronqué.
 - **Ménage :** au démarrage, les fichiers temporaires et les variantes sans photo sont effacés ; en fin de recalcul, les logos remplacés aussi.
 - **Arrêt :** l'arrêt du serveur interrompt un recalcul entre deux photos.

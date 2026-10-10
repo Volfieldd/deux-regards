@@ -11,7 +11,8 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
   - 8 h sans activité, 24 h au plus ;
   - régénérées à chaque connexion.
 - **Cookies :** `httpOnly`, `SameSite=Lax`, et en HTTPS `Secure` avec le préfixe `__Host-`.
-- **CSRF :** jeton synchronisé sur toute écriture. Pour un import, il doit précéder le premier fichier : aucun fichier n'est lu avant sa vérification.
+- **CSRF :** jeton synchronisé sur toute écriture (champ `_csrf` ou en-tête `x-csrf-token` pour les appels JSON de l'admin : envoi photo par photo, actions groupées, enregistrement champ par champ, ordre des séries). Pour un import, il doit précéder le premier fichier : aucun fichier n'est lu avant sa vérification.
+- **Suppressions groupées :** jamais sans confirmation explicite (`confirm`) ; sans elle, l'admin affiche une page de confirmation.
 - **Redirections :** le paramètre `next` est normalisé par l'analyseur d'URL. Une adresse qui mène hors du site est refusée, y compris avec des caractères de contrôle ou des segments `/./` ou `/../` qui, une fois normalisés, donneraient `//autre-site`.
 - **Limite de débit :**
   - tentatives de connexion limitées par adresse (`AUTH_RATE_LIMIT`, 30 par 10 minutes par défaut) ;
@@ -22,7 +23,7 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
 
 ## Site public
 
-- **Politique de sécurité du contenu stricte :** tout vient du site lui-même, sans `unsafe-inline` ni ressource tierce ; seuls les formulaires peuvent rediriger vers l'IdP.
+- **Politique de sécurité du contenu stricte :** tout vient du site lui-même, sans `unsafe-inline` ni ressource tierce ; seuls les formulaires peuvent rediriger vers l'IdP. Seule ouverture : `img-src blob:`, pour l'aperçu local des photos choisies à l'import (adresses créées par le navigateur, jamais par un tiers).
 - **En-têtes :** `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, et HSTS en HTTPS.
 - **Contenu :** tout ce qui est saisi dans l'admin est échappé à l'affichage.
 - **Erreurs :** une erreur inattendue renvoie un message générique ; le détail (chemins, noms de fichiers) ne va que dans les journaux.

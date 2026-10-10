@@ -1,0 +1,84 @@
+<% layout('./layout') %>
+<% const E = it.errors, V = it.values; %>
+<div class="toolbar">
+  <div>
+    <h1>Compléter et publier</h1>
+    <p class="sub"><%= it.photos.length %> photo<%= it.photos.length > 1 ? 's' : '' %> · <span data-js-only hidden>chaque champ s’enregistre quand vous le quittez</span><span data-nojs>enregistrez avec le bouton en bas du tableau</span></p>
+  </div>
+  <div class="acts"><a class="btn ghost" href="/admin/photos">Toutes les photos</a></div>
+</div>
+<ol class="steps" aria-label="Étapes de l’import">
+  <li class="done"><span class="n">1.</span> Choisir et vérifier</li>
+  <li class="done"><span class="n">2.</span> Envoi et traitement</li>
+  <li aria-current="step"><span class="n">3.</span> Compléter et publier</li>
+</ol>
+
+<form class="bulk" id="bulk" method="post" action="/admin/photos/actions" data-bulk data-batch aria-label="Appliquer à la sélection">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <input type="hidden" name="back" value="/admin/photos/lot?ids=<%= it.ids.join(',') %>">
+  <strong data-bulk-count role="status">Pour les photos cochées :</strong>
+  <span class="group">
+    <select name="category_id" aria-label="Série" data-bulk-category>
+      <option value="">Série…</option>
+<% it.categories.forEach(c => { %>      <option value="<%= c.id %>"><%= c.name %></option>
+<% }) %>      <option value="new">＋ Nouvelle série…</option>
+    </select>
+    <input name="new_category" maxlength="80" placeholder="Nom de la nouvelle série" aria-label="Nom de la nouvelle série" data-bulk-new>
+    <button class="btn ghost" type="submit" name="action" value="category">Appliquer la série</button>
+  </span>
+  <span class="group">
+    <input name="place" maxlength="120" placeholder="Lieu" aria-label="Lieu pour la sélection">
+    <input name="taken_on" maxlength="40" placeholder="Date : oct. 2026" aria-label="Date pour la sélection">
+    <button class="btn ghost" type="submit" name="action" value="fields">Appliquer lieu et date</button>
+  </span>
+  <span class="spacer"></span>
+  <button class="btn" type="submit" name="action" value="publish" data-publish>Publier</button>
+</form>
+
+<form method="post" action="/admin/photos/lot" data-lot novalidate>
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <input type="hidden" name="ids" value="<%= it.ids.join(',') %>">
+<% if (Object.keys(E).length) { %>  <p class="flash error" role="alert">Certaines photos n’ont pas été enregistrées : corrigez les champs signalés.</p>
+<% } %>
+  <div class="tablewrap">
+  <table class="lot">
+    <thead><tr>
+      <th scope="col"><label class="inline"><input type="checkbox" class="chk" checked data-select-all-lot aria-label="Tout sélectionner"></label></th>
+      <th scope="col">Aperçu</th><th scope="col">Titre</th><th scope="col">Série</th><th scope="col">Lieu</th><th scope="col">Date</th><th scope="col">État</th>
+    </tr></thead>
+    <tbody>
+<% it.photos.forEach(p => { const e = E[p.id] || {}, v = { ...p, ...(V[p.id] || {}) }; %>
+      <tr data-id="<%= p.id %>" data-title="<%= p.title %>"<%~ p.provisional ? ' data-provisional' : '' %>>
+        <td><input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" checked aria-label="Sélectionner « <%= p.title %> »"></td>
+        <td class="thumbcell"><% if (p.ready) { %><%~ it.picture(p, { sizes: '84px', alt: '' }) %><% } else { %><span class="ph" data-processing>Traitement…</span><% } %></td>
+        <td>
+          <input name="title_<%= p.id %>" value="<%= v.title %>" maxlength="160" aria-label="Titre de la photo <%= p.id %>" data-field="title"<%~ e.title ? ' aria-invalid="true"' : '' %> aria-describedby="prov-<%= p.id %><%= e.title ? ` err-title-${p.id}` : '' %>">
+          <span class="cellnote warn" id="prov-<%= p.id %>"<%~ p.provisional ? '' : ' hidden' %>>Titre provisoire (nom du fichier)</span>
+<% if (e.title) { %>          <span class="err" id="err-title-<%= p.id %>"><%= e.title %></span>
+<% } %>
+        </td>
+        <td><select name="category_id_<%= p.id %>" aria-label="Série de la photo <%= p.id %>" data-field="category_id"><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select></td>
+        <td><input name="place_<%= p.id %>" value="<%= v.place || '' %>" maxlength="120" aria-label="Lieu de la photo <%= p.id %>" data-field="place"></td>
+        <td>
+          <input name="taken_on_<%= p.id %>" value="<%= v.taken_on || '' %>" maxlength="40" placeholder="oct. 2026" aria-label="Date de la photo <%= p.id %>" data-field="taken_on" aria-describedby="date-<%= p.id %>"<%~ e.taken_on ? ' aria-invalid="true"' : '' %>>
+          <span class="cellnote<%= e.taken_on ? ' err' : '' %>" id="date-<%= p.id %>"><%= e.taken_on || (p.when ? 'compris : ' + p.when : '') %></span>
+        </td>
+        <td><span class="saved" data-state><%= p.status === 'published' ? '● Publiée' : '○ Brouillon' %></span></td>
+      </tr>
+<% }) %>
+    </tbody>
+  </table>
+  </div>
+  <p class="actions" data-nojs>
+    <button class="btn ghost" type="submit">Enregistrer</button>
+    <button class="btn" type="submit" name="publish" value="1">Enregistrer et publier tout</button>
+  </p>
+  <p class="hint">Légende, filigrane et preuve d’antériorité : depuis la fiche de chaque photo (Photos › titre).</p>
+</form>
+
+<dialog class="dialog" data-confirm-publish aria-labelledby="pub-title" aria-describedby="pub-text">
+  <h2 id="pub-title">Publier <span data-pub-count></span> ?</h2>
+  <p id="pub-text"><span data-pub-prov></span> encore leur <strong>titre provisoire</strong> : <span data-pub-names></span>. Elles apparaîtront ainsi sur le site.</p>
+  <p class="actions"><button class="btn" type="button" data-pub-fix autofocus>Corriger les titres</button><button class="btn ghost" type="button" data-pub-ok>Publier quand même</button></p>
+  <p class="hint">Les photos restent en brouillon tant que vous ne confirmez pas.</p>
+</dialog>
