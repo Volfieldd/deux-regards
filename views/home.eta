@@ -1,0 +1,85 @@
+<% layout('./layout') %>
+<% const f = it.filter; %>
+<section class="hero" id="hero" data-hero>
+  <div class="ph">
+<% it.hero.forEach((p, i) => { %>
+    <div class="hero-item<%= i === 0 ? ' on' : '' %>" data-h="<%= i %>">
+      <%~ it.picture(p, { sizes: '100vw', eager: i === 0, alt: '' }) %>
+    </div>
+<% }) %>
+  </div>
+  <div class="veil"></div>
+  <header class="wrap">
+    <%~ include('./brand', it) %>
+    <nav class="eyebrow" aria-label="Navigation"><a href="#series">Séries</a><a href="#galerie">Galerie</a><a href="/a-propos">À propos</a></nav>
+  </header>
+<% it.hero.forEach((p, i) => { %>
+  <div class="cap wrap<%= i === 0 ? ' on' : '' %>" data-h="<%= i %>">
+    <span class="k mono"><%= p.category.toUpperCase() %> · N°<%= it.pad(p.n) %> · <%= p.place %><%= p.when ? ', ' + p.when : '' %> · <%= p.author %></span>
+    <h1><%= p.title %></h1>
+    <a class="open eyebrow" href="<%= it.photoUrl(p.slug) %>">Voir la photo</a>
+  </div>
+<% }) %>
+<% if (it.hero.length > 1) { %>
+  <div class="strip wrap">
+<% it.hero.forEach((p, i) => { %>
+    <button type="button" data-h="<%= i %>" aria-label="<%= p.title %>" aria-current="<%= i === 0 %>"><%~ it.picture(p, { sizes: '64px', alt: '' }) %></button>
+<% }) %>
+  </div>
+  <div class="bar"></div>
+<% } %>
+</section>
+
+<section class="regards wrap" id="regards">
+  <div>
+    <h2><%= it.settings.tagline %></h2>
+<% if (it.settings.intro) { %>
+    <p><%= it.settings.intro %></p>
+<% } %>
+  </div>
+  <nav class="who" aria-label="Photographe">
+<% it.regards.forEach(r => { const on = r.slug === f.regard; %>
+    <a href="<%= it.galleryUrl({ regard: r.slug, serie: f.serie }) %>" data-filter <%~ on ? 'aria-current="page"' : '' %>><span class="n"><%= r.name %></span><span class="c mono"><%= it.pad(r.count) %> photos</span></a>
+<% }) %>
+  </nav>
+</section>
+
+<section class="series wrap" id="series">
+  <nav aria-label="Séries">
+<% it.series.forEach(c => { const on = c.slug === f.serie; %>
+<% if (c.count) { %>
+    <a class="idx" href="<%= it.galleryUrl({ regard: f.regard, serie: on ? undefined : c.slug }) %>" data-filter data-scroll data-peek="<%= c.slug %>" <%~ on ? 'aria-current="page"' : '' %>><span><%= c.name %></span><span class="mono"><%= it.pad(c.count) %></span></a>
+<% } else { %>
+    <span class="idx off"><span><%= c.name %></span><span class="mono">00</span></span>
+<% } %>
+<% }) %>
+  </nav>
+  <div class="peek" aria-hidden="true">
+<% const peekDefault = f.serie || (it.series.find(c => c.count) || {}).slug; %>
+<% it.series.filter(c => c.cover).forEach(c => { %>
+    <figure class="<%= c.slug === peekDefault ? 'on' : '' %>" data-peek="<%= c.slug %>">
+      <%~ it.picture(c.cover, { sizes: '(min-width: 900px) 40vw, 1px', alt: '' }) %>
+      <figcaption class="mono"><span><%= c.name.toUpperCase() %> · N°<%= it.pad(c.cover.n) %></span><span><%= c.cover.title %></span></figcaption>
+    </figure>
+<% }) %>
+  </div>
+</section>
+
+<div class="gridhead" id="galerie">
+  <h3><%= it.activeSerie ? it.activeSerie.name : 'Toutes les séries' %><%= it.activeAuthor ? ', par ' + it.activeAuthor.name : '' %></h3>
+  <span class="mono"><%= it.pad(it.photos.length) %> / <%= it.pad(it.total) %> vues<% if (f.regard || f.serie) { %> · <a class="reset" href="/#galerie" data-filter>tout afficher</a><% } %></span>
+</div>
+<section class="grid wrap" id="grid">
+<% if (it.photos.length) { %>
+<% it.photos.forEach(p => { %>
+  <a class="tile" href="<%= it.photoUrl(p.slug, f) %>">
+    <div class="im"><%~ it.picture(p, { sizes: '(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw' }) %></div>
+    <div class="t"><span class="ttl"><%= p.title %></span><span class="mono">N°<%= it.pad(p.n) %> · <%= p.category %> · <%= p.author[0] %></span></div>
+  </a>
+<% }) %>
+<% } else { %>
+  <p class="empty">Aucune photo pour ce regard dans cette série.</p>
+<% } %>
+</section>
+
+<%~ include('./footer', it) %>

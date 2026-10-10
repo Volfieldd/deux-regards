@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 import { slugify } from '../slug.js';
+import { generateVariants } from '../images.js';
 
 const SEED_DIR = new URL('../../seed/', import.meta.url);
 
@@ -21,6 +22,7 @@ export async function seed(db, { storageDir }) {
     const { width, height } = await sharp(buf).metadata();
     const file = `${crypto.randomUUID()}.jpg`;
     fs.writeFileSync(path.join(originals, file), buf);
+    await generateVariants(storageDir, file);
     files.push({ file, width, height });
   }
 

@@ -1,0 +1,25 @@
+<% layout('./layout') %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+  <nav class="eyebrow" aria-label="Navigation"><a href="/#series">Séries</a><a href="/#galerie">Galerie</a><a href="/a-propos" aria-current="page">À propos</a></nav>
+</header>
+<main class="about wrap">
+  <h1><%= it.settings.tagline %></h1>
+  <div class="prose">
+<% it.paragraphs.forEach(t => { %>
+    <p><%= t %></p>
+<% }) %>
+  </div>
+  <div class="people">
+<% it.authors.forEach(a => { %>
+    <section>
+      <h2><a href="<%= it.galleryUrl({ regard: a.slug }) %>"><%= a.name %></a></h2>
+<% if (a.bio) { %>
+      <p><%= a.bio %></p>
+<% } %>
+      <a class="eyebrow more" href="<%= it.galleryUrl({ regard: a.slug }) %>#galerie">Voir ses photos</a>
+    </section>
+<% }) %>
+  </div>
+</main>
+<%~ include('./footer', it) %>

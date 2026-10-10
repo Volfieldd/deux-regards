@@ -4,12 +4,15 @@
   "private": true,
   "description": "Site photo de Sébastien et Julien : galerie publique et admin OIDC",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "node --watch --env-file-if-exists=.env server/index.js",
     "start": "node --env-file-if-exists=.env server/index.js",
     "migrate": "node --env-file-if-exists=.env server/db/cli.js migrate",
     "seed": "node --env-file-if-exists=.env server/db/cli.js seed",
+    "variants": "node --env-file-if-exists=.env server/db/cli.js variants",
     "test": "node --test \"test/**/*.test.js\""
   },
   "dependencies": {
@@ -17,7 +20,9 @@
     "@fastify/formbody": "9.0.0",
     "@fastify/multipart": "10.1.2",
     "@fastify/static": "10.1.4",
-    "@fastify/view": "12.0.0",
+    "@fontsource/cormorant-garamond": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/jost": "5.3.0",
     "better-sqlite3": "13.0.3",
     "eta": "4.6.0",
     "fastify": "5.12.5",

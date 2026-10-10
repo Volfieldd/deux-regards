@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title><%= it.pageTitle %></title>
+<% if (it.description) { %>
+  <meta name="description" content="<%= it.description %>">
+<% } %>
+  <meta property="og:title" content="<%= it.pageTitle %>">
+  <meta property="og:site_name" content="<%= it.siteName %>">
+<% if (it.ogImage) { %>
+  <meta property="og:image" content="<%= it.ogImage %>">
+<% } %>
+  <link rel="preload" href="/fonts/cormorant-garamond/files/cormorant-garamond-latin-400-italic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/css/site.css">
+  <script src="/static/js/site.js" defer></script>
+</head>
+<body class="<%= it.bodyClass || '' %>">
+<%~ it.body %>
+</body>
+</html>

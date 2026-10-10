@@ -23,8 +23,9 @@ npm run dev            # http://localhost:3000
 | `npm start` | serveur |
 | `npm run migrate` | applique les migrations SQL en attente |
 | `npm run seed` | migrations + jeu de démonstration (ignoré si des photos existent) |
+| `npm run variants` | régénère les images servies (`-- --force` pour tout refaire) |
 | `npm test` | tests (`node:test`) |
 
 ## Données
 
-Tout est dans `STORAGE_DIR` (par défaut `./storage`, hors Git) : la base SQLite et `originals/`, qui n'est jamais servi. Sauvegarder ce dossier suffit.
+Tout est dans `STORAGE_DIR` (par défaut `./storage`, hors Git) : la base SQLite, `originals/` (jamais servi) et `variants/` (AVIF/WebP sans EXIF, servis sous `/media/`). Sauvegarder ce dossier suffit.

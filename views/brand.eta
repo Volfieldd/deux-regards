@@ -1,0 +1,2 @@
+<% const words = it.siteName.split(' '); const last = words.pop(); %>
+<a class="brand" href="/"><%= words.join(' ') %><%= words.length ? ' ' : '' %><i><%= last %></i></a>
