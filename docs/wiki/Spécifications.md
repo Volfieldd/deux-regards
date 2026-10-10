@@ -34,8 +34,8 @@ Source : [`docs/specs/`](https://github.com/Volfieldd/deux-regards/tree/main/doc
 | A4 | **Auteurs** : nom, adresse, bio, lien avec le compte de connexion. |
 | A5 | **Réglages** : nom du site, accroche, introduction, à propos, photos de l'ouverture. |
 | A6 | **Filigrane et EXIF** : voir [Filigrane et EXIF](Filigrane-et-EXIF). |
-| A8 | **Preuves d'antériorité** : empreinte et horodatage de chaque original, téléchargement et vérification de la preuve ; texte et contact de la page des droits. |
-| A7 | Messages de confirmation ou d'erreur après chaque action ; toutes les pages sont utilisables sans JS et au clavier. |
+| A7 | **Preuves d'antériorité** : empreinte et horodatage de chaque original, téléchargement et vérification de la preuve ; texte et contact de la page des droits. |
+| A8 | Messages de confirmation ou d'erreur après chaque action ; toutes les pages sont utilisables sans JS et au clavier. |
 
 ### Images
 
