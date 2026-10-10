@@ -15,20 +15,32 @@
   if (hero) {
     const items = hero.querySelectorAll('.hero-item');
     const caps = hero.querySelectorAll('.cap');
-    const thumbs = hero.querySelectorAll('.strip button');
+    const thumbs = hero.querySelectorAll('.strip button[data-h]');
     const bar = hero.querySelector('.bar');
-    let cur = 0, timer = null;
+    const pause = hero.querySelector('[data-pause]');
+    // Défilement automatique, avec un bouton pour l'arrêter (WCAG 2.2.2) ; jamais si l'animation est réduite.
+    let cur = 0, timer = null, paused = reduce;
     const show = i => {
       cur = (i + items.length) % items.length;
       const sync = el => el.classList.toggle('on', Number(el.dataset.h) === cur);
       items.forEach(sync); caps.forEach(sync);
       thumbs.forEach(b => b.setAttribute('aria-current', String(Number(b.dataset.h) === cur)));
-      if (!bar || reduce) return;
-      bar.classList.remove('run'); void bar.offsetWidth; bar.classList.add('run');
-      clearTimeout(timer); timer = setTimeout(() => show(cur + 1), 6000);
+      clearTimeout(timer);
+      if (bar) bar.classList.remove('run');
+      if (!bar || paused) return;
+      void bar.offsetWidth; bar.classList.add('run');
+      timer = setTimeout(() => show(cur + 1), 6000);
     };
     if (items.length > 1) {
-      hero.querySelector('.strip').addEventListener('click', e => { const b = e.target.closest('button'); if (b) show(Number(b.dataset.h)); });
+      if (pause && !reduce) {
+        pause.hidden = false;
+        pause.addEventListener('click', () => {
+          paused = !paused;
+          pause.textContent = paused ? 'Lecture' : 'Pause';
+          show(cur);
+        });
+      }
+      hero.querySelector('.strip').addEventListener('click', e => { const b = e.target.closest('button[data-h]'); if (b) show(Number(b.dataset.h)); });
       let x = null;
       hero.addEventListener('touchstart', e => { x = e.touches[0].clientX; }, { passive: true });
       hero.addEventListener('touchend', e => { if (x === null) return; const dx = e.changedTouches[0].clientX - x; x = null; if (Math.abs(dx) > 50) show(cur + (dx < 0 ? 1 : -1)); });

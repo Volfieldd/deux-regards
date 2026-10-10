@@ -1,7 +1,8 @@
 import crypto from 'node:crypto';
 
 export const IDLE_TTL = 8 * 60 * 60 * 1000;          // 8 h sans activité
-export const ABSOLUTE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 jours au plus, même actif
+// 24 h au plus, même actif : un rôle retiré dans Zitadel cesse de valoir au plus tard le lendemain.
+export const ABSOLUTE_TTL = 24 * 60 * 60 * 1000;
 const TOUCH_AFTER = 60 * 1000;                       // évite une écriture par requête
 
 const hash = token => crypto.createHash('sha256').update(token).digest('hex');

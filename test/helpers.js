@@ -25,13 +25,13 @@ function seededTemplate() {
 }
 
 // Base et stockage jetables, dans un dossier temporaire propre à chaque test.
-export async function setup(t, { seeded = false, env } = {}) {
+export async function setup(t, { seeded = false, env, oidc, logger = false } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'site-photo-'));
   if (seeded) fs.cpSync(await seededTemplate(), dir, { recursive: true });
   const config = configFor(dir, env);
   const db = openDb(config.databasePath);
   migrate(db);
-  const app = await buildApp({ config, db, logger: false });
+  const app = await buildApp({ config, db, logger, oidc });
   t.after(async () => {
     await app.close();
     db.close();

@@ -107,3 +107,19 @@ test('chaque variante référencée par les pages existe', async t => {
   assert.ok(urls.size > 0);
   for (const url of urls) assert.equal((await app.inject(url)).statusCode, 200, url);
 });
+
+test('Open Graph et URL canonique sont absolus, sans les filtres sur une page photo', async t => {
+  const { app, db } = await setup(t, { seeded: true });
+  const home = (await app.inject('/')).body;
+  assert.match(home, /<meta property="og:image" content="http:\/\/localhost:3000\/media\/[\w-]+\.webp">/);
+  assert.match(home, /<link rel="canonical" href="http:\/\/localhost:3000\/">/);
+  const slug = db.prepare('SELECT slug FROM photos ORDER BY id LIMIT 1').pluck().get();
+  const photo = (await app.inject(`/photo/${slug}?regard=julien&utm=x`)).body;
+  assert.match(photo, new RegExp(`<meta property="og:url" content="http://localhost:3000/photo/${slug}">`));
+  assert.match((await app.inject('/auteur/julien')).body, /rel="canonical" href="http:\/\/localhost:3000\/auteur\/julien"/);
+});
+
+test('l’ouverture propose un bouton pause, masqué tant que le JS ne l’active pas', async t => {
+  const { app } = await setup(t, { seeded: true });
+  assert.match((await app.inject('/')).body, /<button type="button" class="pause eyebrow" data-pause hidden>Pause<\/button>/);
+});

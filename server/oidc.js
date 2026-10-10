@@ -2,13 +2,15 @@ import * as client from 'openid-client';
 
 const ROLE_CLAIM = 'urn:zitadel:iam:org:project:roles';
 
-// Rôles Zitadel : { admin: { <orgId>: <domaine> }, ... }, sous le claim générique
-// ou sous le claim propre au projet.
-export function rolesFrom(claims, projectId) {
-  const sources = [claims[ROLE_CLAIM], projectId && claims[`urn:zitadel:iam:org:project:${projectId}:roles`]];
-  const roles = new Set();
-  for (const s of sources) if (s && typeof s === 'object') Object.keys(s).forEach(r => roles.add(r));
-  return [...roles];
+// Rôles Zitadel : { admin: { <orgId>: <domaine> }, ... }. Le claim propre au projet est
+// préféré au claim générique ; avec orgId, seuls les rôles donnés dans cette organisation comptent.
+export function rolesFrom(claims, { projectId, orgId } = {}) {
+  const specific = projectId && claims[`urn:zitadel:iam:org:project:${projectId}:roles`];
+  const source = specific || claims[ROLE_CLAIM];
+  if (!source || typeof source !== 'object') return [];
+  return Object.entries(source)
+    .filter(([, orgs]) => !orgId || (orgs && typeof orgs === 'object' && Object.hasOwn(orgs, orgId)))
+    .map(([role]) => role);
 }
 
 // Admin si le rôle de projet est présent, ou (repli sans Zitadel) si le sub est
@@ -36,8 +38,8 @@ export function createOidc(config) {
     // sans secret : client public, PKCE seul.
     discovered ??= client.discovery(new URL(oidc.issuer), oidc.clientId, undefined,
       oidc.clientSecret ? client.ClientSecretBasic(oidc.clientSecret) : client.None(),
-      // HTTP accepté seulement hors production (IdP local de développement ou de test).
-      !config.production && oidc.issuer.startsWith('http://') ? { execute: [client.allowInsecureRequests] } : undefined)
+      // HTTP accepté seulement en développement (IdP local ou de test) ; refusé par loadConfig sinon.
+      !config.deployed && oidc.issuer.startsWith('http://') ? { execute: [client.allowInsecureRequests] } : undefined)
       .catch(err => { discovered = null; throw err; });
     return discovered;
   }
@@ -77,7 +79,7 @@ export function createOidc(config) {
         userinfo = await client.fetchUserInfo(cfg, tokens.access_token, idClaims.sub);
       }
       const claims = { ...userinfo, ...idClaims };
-      const roles = rolesFrom(claims, oidc.projectId);
+      const roles = rolesFrom(claims, oidc);
       return { claims, roles, admin: isAdmin(claims, roles, oidc), idToken: tokens.id_token };
     },
 

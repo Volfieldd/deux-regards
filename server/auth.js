@@ -1,13 +1,24 @@
 import crypto from 'node:crypto';
 import { createOidc } from './oidc.js';
 import { createSessionStore, IDLE_TTL } from './sessions.js';
+import { createRateLimiter } from './ratelimit.js';
 
 const TX_TTL = 10 * 60; // secondes pour revenir de l'IdP
 const PROMPTS = new Set(['login', 'select_account']);
+const STATE_RE = /^[\w-]{16,128}$/;
+const LOCAL = 'http://local.invalid';
 
-// Chemin local uniquement : refuse les URL absolues et « //hôte » (redirection ouverte).
+// Chemin local uniquement. On laisse l'analyseur d'URL du navigateur trancher :
+// « //hôte », « /\\hôte » ou « /<tab>/hôte » (tabulations et sauts de ligne supprimés)
+// sortent du site et sont refusés ; le résultat est normalisé, sans caractère de contrôle.
 export function safeNext(value, fallback = '/admin') {
-  return typeof value === 'string' && /^\/(?![/\\])/.test(value) ? value : fallback;
+  if (typeof value !== 'string' || !value.startsWith('/')) return fallback;
+  try {
+    const url = new URL(value, LOCAL);
+    return url.origin === LOCAL ? url.pathname + url.search + url.hash : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 function sameToken(a, b) {
@@ -25,8 +36,16 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // Préfixe __Host- : cookie lié à l'hôte exact, Secure, Path=/ (impossible à poser depuis un sous-domaine).
   const prefix = config.secureCookies ? '__Host-' : '';
   const SESSION_COOKIE = `${prefix}session`;
-  const TX_COOKIE = `${prefix}oidc`;
+  // Un cookie de transaction par state : deux connexions dans deux onglets ne s'écrasent pas.
+  const txCookie = state => `${prefix}oidc-${state}`;
   const cookieBase = { path: '/', httpOnly: true, secure: config.secureCookies, sameSite: 'lax' };
+
+  // 30 passages par /auth/* et par IP sur 10 minutes : large pour un humain, freine les abus.
+  const allow = createRateLimiter({ limit: 30, windowMs: 10 * 60 * 1000 });
+
+  if (config.oidc.projectId && !config.oidc.orgId) {
+    app.log.warn('OIDC_ORG_ID non défini : un rôle admin donné dans une autre organisation Zitadel serait accepté');
+  }
 
   app.decorate('oidc', oidc);
   app.decorateRequest('session', null);
@@ -59,12 +78,24 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     reply.setCookie(SESSION_COOKIE, request.cookies[SESSION_COOKIE], { ...cookieBase, maxAge });
   });
 
+  const csrfOk = request => Boolean(request.session) && sameToken(request.body?._csrf ?? request.headers['x-csrf-token'], request.session.csrf);
+  const csrfPage = reply => renderError(reply, 403, {
+    title: 'Formulaire expiré', message: 'Ce formulaire n’est plus valide. Rechargez la page et recommencez.',
+  });
+
   // preHandler des routes d'écriture : jeton synchronisé (champ _csrf ou en-tête x-csrf-token).
+  // Page d'erreur pour un formulaire, JSON pour un appel fetch.
   app.decorate('verifyCsrf', async function (request, reply) {
-    const sent = request.body?._csrf ?? request.headers['x-csrf-token'];
-    if (!request.session || !sameToken(sent, request.session.csrf)) {
-      return reply.code(403).send({ error: 'Jeton CSRF invalide.' });
-    }
+    if (csrfOk(request)) return;
+    if (request.headers.accept?.includes('text/html')) return csrfPage(reply);
+    return reply.code(403).send({ error: 'Jeton CSRF invalide.' });
+  });
+
+  app.addHook('onRequest', async (request, reply) => {
+    if (!request.url.startsWith('/auth/') || allow(request.ip)) return;
+    return renderError(reply.header('retry-after', '600'), 429, {
+      title: 'Trop de tentatives', message: 'Trop de tentatives de connexion depuis votre réseau. Réessayez dans quelques minutes.',
+    });
   });
 
   app.get('/auth/login', async (request, reply) => {
@@ -80,13 +111,15 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       request.log.error(err, 'fournisseur OIDC injoignable');
       return renderError(reply, 502, { title: 'Connexion indisponible', message: 'Le service de connexion ne répond pas. Réessayez dans un instant.', retry: true });
     }
-    reply.setCookie(TX_COOKIE, JSON.stringify({ ...start.tx, next }), { ...cookieBase, signed: true, maxAge: TX_TTL });
+    reply.setCookie(txCookie(start.tx.state), JSON.stringify({ ...start.tx, next }), { ...cookieBase, signed: true, maxAge: TX_TTL });
     return reply.header('cache-control', 'no-store').redirect(start.url);
   });
 
   app.get('/auth/callback', async (request, reply) => {
-    const raw = request.cookies[TX_COOKIE];
-    reply.clearCookie(TX_COOKIE, cookieBase);
+    const { state } = request.query;
+    const name = typeof state === 'string' && STATE_RE.test(state) ? txCookie(state) : null;
+    const raw = name && request.cookies[name];
+    if (name) reply.clearCookie(name, cookieBase);
     if (request.query.error) {
       request.log.info({ error: request.query.error }, 'connexion refusée par le fournisseur');
       return renderError(reply, 400, { title: 'Connexion annulée', message: 'La connexion n’a pas abouti.', retry: true });
@@ -96,7 +129,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     let tx = null;
     try { tx = unsigned?.valid ? JSON.parse(unsigned.value) : null; } catch { tx = null; }
     // Vérification explicite du state avant tout appel réseau (openid-client la refait).
-    if (!tx || !sameToken(request.query.state, tx.state)) {
+    if (!tx || !sameToken(state, tx.state)) {
       return renderError(reply, 400, { title: 'Connexion expirée', message: 'Le lien de connexion a expiré ou n’est pas valide.', retry: true });
     }
 
@@ -133,8 +166,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // POST + CSRF : une page tierce ne peut pas déconnecter l'utilisateur.
   app.post('/auth/logout', async (request, reply) => {
     if (!request.session) return reply.redirect('/', 303);
-    await app.verifyCsrf(request, reply);
-    if (reply.sent) return reply;
+    if (!csrfOk(request)) return csrfPage(reply);
     sessions.destroy(request.cookies[SESSION_COOKIE]);
     reply.clearCookie(SESSION_COOKIE, cookieBase);
     let target = '/';

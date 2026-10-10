@@ -4,6 +4,7 @@ import { setup } from './helpers.js';
 import { startProvider } from './oidc-provider.js';
 import { safeNext } from '../server/auth.js';
 import { rolesFrom } from '../server/oidc.js';
+import { redactUrl } from '../server/app.js';
 
 const ADMIN = { 'urn:zitadel:iam:org:project:roles': { admin: { 123: 'site.zitadel.cloud' } } };
 
@@ -36,7 +37,7 @@ test('la connexion envoie vers l’IdP avec PKCE, state, nonce et les scopes Zit
   assert.ok(url.searchParams.get('state') && url.searchParams.get('nonce'));
   assert.equal(url.searchParams.get('redirect_uri'), 'http://localhost:3000/auth/callback');
   assert.match(url.searchParams.get('scope'), /urn:zitadel:iam:org:project:id:42:aud/);
-  const tx = res.cookies.find(c => c.name === 'oidc');
+  const tx = res.cookies.find(c => c.name === `oidc-${url.searchParams.get('state')}`);
   assert.ok(tx.httpOnly);
   assert.equal(tx.sameSite, 'Lax');
 });
@@ -99,8 +100,16 @@ test('un state invalide ou un cookie de transaction absent est refusé sans appe
   const noCookie = await app.inject(`/auth/callback?code=${code}&state=x`);
   assert.equal(noCookie.statusCode, 400);
 
-  const tampered = { oidc: cookiesOf(start).oidc.replace(/\.[^.]+$/, '.faux') };
-  assert.equal((await app.inject({ url: `/auth/callback?code=${code}&state=x`, cookies: tampered })).statusCode, 400);
+  const [[name, value]] = Object.entries(cookiesOf(start));
+  const state = name.slice('oidc-'.length);
+  const tampered = { [name]: value.replace(/\.[^.]+$/, '.faux') };
+  assert.equal((await app.inject({ url: `/auth/callback?code=${code}&state=${state}`, cookies: tampered })).statusCode, 400);
+
+  // Cookie d'une autre transaction (autre state) présenté avec ce state : refusé.
+  const other = await app.inject('/auth/login');
+  const otherState = new URL(other.headers.location).searchParams.get('state');
+  const swapped = { [name]: cookiesOf(other)[`oidc-${otherState}`] };
+  assert.equal((await app.inject({ url: `/auth/callback?code=${code}&state=${state}`, cookies: swapped })).statusCode, 400);
 
   assert.equal(provider.requests.filter(p => p.endsWith('/token')).length, before);
 });
@@ -145,7 +154,7 @@ test('session trop ancienne : expiration absolue même si active', async t => {
   const { app, provider, db } = await withProvider(t);
   provider.user = { sub: 'u1', ...ADMIN };
   const { cookies } = await login(app, provider);
-  db.prepare('UPDATE sessions SET created_at = ?').run(Date.now() - 8 * 24 * 3600 * 1000);
+  db.prepare('UPDATE sessions SET created_at = ?').run(Date.now() - 25 * 3600 * 1000);
   assert.equal((await app.inject({ url: '/admin', cookies })).statusCode, 302);
 });
 
@@ -205,26 +214,101 @@ test('sans configuration OIDC : 503 sur la connexion, le site reste servi', asyn
   assert.equal((await app.inject('/')).statusCode, 200);
 });
 
-test('en HTTPS les cookies sont Secure et préfixés __Host-', async t => {
-  const provider = await startProvider(t);
-  const { app } = await setup(t, {
-    env: { PUBLIC_URL: 'https://photos.example', OIDC_ISSUER: provider.issuer, OIDC_CLIENT_ID: 'site', OIDC_CLIENT_SECRET: 'secret' },
-  });
-  const tx = (await app.inject('/auth/login')).cookies[0];
-  assert.equal(tx.name, '__Host-oidc');
+// Faux client OIDC : sans réseau, pour les cas où un IdP en HTTP serait refusé par la config.
+const fakeOidc = { configured: true, origin: 'https://idp.example', start: async () => ({ url: 'https://idp.example/authorize', tx: { state: 's'.repeat(43), nonce: 'n', verifier: 'v' } }) };
+const HTTPS = { PUBLIC_URL: 'https://photos.example', COOKIE_SECRET: 'x'.repeat(32) };
+
+test('en HTTPS les cookies sont Secure et préfixés __Host-, HSTS est posé', async t => {
+  const { app } = await setup(t, { env: HTTPS, oidc: fakeOidc });
+  const res = await app.inject('/auth/login');
+  const tx = res.cookies[0];
+  assert.equal(tx.name, `__Host-oidc-${'s'.repeat(43)}`);
   assert.ok(tx.secure);
   assert.equal(tx.path, '/');
+  assert.equal(res.headers['strict-transport-security'], 'max-age=31536000');
 });
 
-test('safeNext refuse les redirections hors du site', () => {
-  assert.equal(safeNext('/admin/photos?q=1'), '/admin/photos?q=1');
-  for (const bad of ['//evil.example', '/\\evil.example', 'https://evil.example', 'admin', undefined, ['/a']]) {
-    assert.equal(safeNext(bad), '/admin');
+test('safeNext refuse les redirections hors du site, y compris par caractères de contrôle', () => {
+  assert.equal(safeNext('/admin/photos?q=1#x'), '/admin/photos?q=1#x');
+  for (const bad of ['//evil.example', '/\\evil.example', '/\t/evil.example', '/\n/evil.example', '/\r\n/evil.example',
+    '/\\/evil.example', 'https://evil.example', 'admin', undefined, ['/a']]) {
+    assert.equal(safeNext(bad), '/admin', JSON.stringify(bad));
+  }
+  assert.equal(safeNext('/a\nb'), '/ab');                 // jamais de saut de ligne dans Location
+});
+
+test('redirection ouverte : un admin connecté n’est jamais renvoyé hors du site', async t => {
+  const { app, provider } = await withProvider(t);
+  provider.user = { sub: 'u1', ...ADMIN };
+  const { cookies } = await login(app, provider, { next: '/\t/evil.example' });
+  for (const next of ['%2F%09%2Fevil.example', '%2F%0A%2Fevil.example', '%2F%5C%2Fevil.example']) {
+    const res = await app.inject({ url: `/auth/login?next=${next}`, cookies });
+    assert.equal(res.statusCode, 302);
+    assert.equal(res.headers.location, '/admin', next);
   }
 });
 
-test('rolesFrom lit le claim générique et celui du projet', () => {
+test('rolesFrom préfère le claim du projet et filtre par organisation', () => {
   assert.deepEqual(rolesFrom(ADMIN), ['admin']);
-  assert.deepEqual(rolesFrom({ 'urn:zitadel:iam:org:project:42:roles': { editeur: {} } }, '42'), ['editeur']);
+  assert.deepEqual(rolesFrom({ 'urn:zitadel:iam:org:project:42:roles': { editeur: {} } }, { projectId: '42' }), ['editeur']);
+  assert.deepEqual(rolesFrom({ ...ADMIN, 'urn:zitadel:iam:org:project:42:roles': { lecteur: {} } }, { projectId: '42' }), ['lecteur']);
+  assert.deepEqual(rolesFrom(ADMIN, { orgId: '123' }), ['admin']);
+  assert.deepEqual(rolesFrom(ADMIN, { orgId: '999' }), []);
   assert.deepEqual(rolesFrom({}), []);
+});
+
+test('un rôle admin donné dans une autre organisation est refusé', async t => {
+  const { app, provider } = await withProvider(t, { OIDC_ORG_ID: '123' });
+  provider.user = { sub: 'u1', 'urn:zitadel:iam:org:project:roles': { admin: { 777: 'autre.zitadel.cloud' } } };
+  assert.equal((await login(app, provider)).res.statusCode, 403);
+  provider.user = { sub: 'u1', ...ADMIN };
+  assert.equal((await login(app, provider)).res.statusCode, 302);
+});
+
+test('deux connexions lancées dans deux onglets aboutissent toutes les deux', async t => {
+  const { app, provider } = await withProvider(t);
+  provider.user = { sub: 'u1', ...ADMIN };
+  const a = await app.inject('/auth/login?next=/admin/a');
+  const b = await app.inject('/auth/login?next=/admin/b');
+  const jar = { ...cookiesOf(a), ...cookiesOf(b) };
+  for (const [start, next] of [[a, '/admin/a'], [b, '/admin/b']]) {
+    const { code, state } = provider.authorize(start.headers.location);
+    const res = await app.inject({ url: `/auth/callback?code=${code}&state=${state}`, cookies: jar });
+    assert.equal(res.headers.location, next);
+  }
+});
+
+test('déconnexion avec un jeton périmé : page d’erreur lisible, session conservée', async t => {
+  const { app, provider } = await withProvider(t);
+  provider.user = { sub: 'u1', ...ADMIN };
+  const { cookies } = await login(app, provider);
+  const res = await app.inject({ method: 'POST', url: '/auth/logout', cookies, payload: { _csrf: 'périmé' } });
+  assert.equal(res.statusCode, 403);
+  assert.match(res.headers['content-type'], /text\/html/);
+  assert.match(res.body, /Formulaire expiré/);
+  assert.equal((await app.inject({ url: '/admin', cookies })).statusCode, 200);
+});
+
+test('limite de débit sur /auth/* : 429 au-delà de 30 passages', async t => {
+  const { app } = await setup(t);
+  for (let i = 0; i < 30; i++) assert.equal((await app.inject('/auth/login')).statusCode, 503);
+  const res = await app.inject('/auth/login');
+  assert.equal(res.statusCode, 429);
+  assert.equal(res.headers['retry-after'], '600');
+  assert.equal((await app.inject('/')).statusCode, 200);      // le site public n'est pas concerné
+});
+
+test('le code et le state OIDC sont masqués dans les journaux', async t => {
+  const lines = [];
+  const stream = { write: l => lines.push(l) };
+  const { app } = await setup(t, { logger: { level: 'info', stream } });
+  await app.inject('/auth/callback?code=SECRET-CODE&state=SECRET-STATE&error=x');
+  const log = lines.join('');
+  assert.match(log, /\/auth\/callback\?code=\[masqué\]&state=\[masqué\]&error=x/);
+  assert.doesNotMatch(log, /SECRET-/);
+});
+
+test('redactUrl ne touche qu’aux paramètres code et state', () => {
+  assert.equal(redactUrl('/a?code=1&x=2&state=3#h'), '/a?code=[masqué]&x=2&state=[masqué]#h');
+  assert.equal(redactUrl('/photo/code-barre?zipcode=1'), '/photo/code-barre?zipcode=1');
 });

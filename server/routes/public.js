@@ -58,6 +58,7 @@ export default async function publicRoutes(app) {
       ...helpers, filter, settings, hero, series, regards, photos, total: all.length,
       categoriesCount: categories.length, activeAuthor, activeSerie,
       pageTitle: title ? `${title} · ${siteName}` : siteName,
+      canonical: galleryUrl(filter),
       description: settings.tagline || '',
       ogImage: hero[0] && `/media/${variantName(hero[0].file, widthsFor(hero[0].width).at(-1), 'webp')}`,
     });
@@ -95,6 +96,7 @@ export default async function publicRoutes(app) {
       ...helpers, filter, photo, prev, next, position: i + 1, count: list.length,
       backUrl: `${galleryUrl(filter)}#galerie`,
       pageTitle: `${photo.title} · ${siteName}`,
+      canonical: photoUrl(photo.slug),
       description: [photo.legend, `${photo.author}, ${photo.place} ${photo.when}`.trim()].filter(Boolean).join(' '),
       ogImage: `/media/${variantName(photo.file, widthsFor(photo.width).at(-1), 'webp')}`,
       bodyClass: 'dark',
@@ -106,7 +108,7 @@ export default async function publicRoutes(app) {
     const paragraphs = String(settings.about || settings.intro || '').split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
     return reply.render('about', {
       ...helpers, settings, paragraphs, authors: repo.authors(),
-      pageTitle: `À propos · ${siteName}`, description: settings.tagline || '',
+      pageTitle: `À propos · ${siteName}`, canonical: '/a-propos', description: settings.tagline || '',
     });
   });
 
