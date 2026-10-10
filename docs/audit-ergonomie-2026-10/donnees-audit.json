@@ -1,0 +1,658 @@
+{
+ "product": "Nicephos · admin",
+ "audit_date": "2026-10-10",
+ "language": "fr",
+ "scope": "Admin du site (serveur de test http://10.21.30.23:3080/admin, thème Atelier de l’admin, connexion locale de test). Parcours d’import, de complétion, de classement en séries, de gestion des séries et de choix de l’ouverture ; navigation clavier et mobile (412 px). Code : views/admin, public/admin, server/routes/admin.js.",
+ "methodology": [
+  "Parcours réels rejoués dans Chromium (Playwright, 1440×900 et 412×915), avec des photos d’essai réalistes (3 JPEG de 24 Mpx, 9,8 Mo, et un faux fichier)",
+  "Mesures instrumentées : actions, écrans, durées, positions à l’écran, tailles de cibles, tabulations",
+  "Revue du code des gabarits, du JavaScript et des routes (références fichier:ligne)",
+  "Grille Bastien & Scapin, ISO 9241-110, WCAG 2.2 AA (contrastes calculés)",
+  "Maquettes cibles réalisées avec les styles réels de l’admin"
+ ],
+ "limitations": [
+  "Lecteur d’écran non testé (NVDA, VoiceOver) : annonces vocales non vérifiées",
+  "Zoom 200 %, espacement du texte et mode contrastes élevés non testés",
+  "Durées mesurées sur un serveur partagé chargé : elles varient selon la machine (l’encodage AVIF domine)",
+  "Un seul utilisateur d’essai : pas de test avec les auteurs eux-mêmes",
+  "Maquettes statiques : comportements (glisser, enregistrement automatique) à valider sur prototype"
+ ],
+ "executive_summary": "L’admin est sûre et correcte, mais pensée « une photo à la fois ». Importer 3 photos de 24 Mpx fige l’écran 42 s sans progression ; compléter et publier ces 3 photos demande 20 actions sur 9 écrans, et les classer dans une série 12 actions de plus. La page Séries présente des formulaires plutôt que des séries. Les fondations (brouillons, messages, clavier, contrastes) sont saines : il faut passer à un travail par lot.",
+ "decision": "Lancer la vague 1 (import avec progression par photo) puis la vague 2 (compléter le lot et sélection multiple) avant toute refonte visuelle des séries.",
+ "key_metrics": [
+  {
+   "value": "42 s",
+   "label": "d’attente sans progression pour 3 photos de 24 Mpx",
+   "tone": "critical"
+  },
+  {
+   "value": "20",
+   "label": "actions pour compléter et publier 3 photos (9 écrans)",
+   "tone": "major"
+  },
+  {
+   "value": "4 / photo",
+   "label": "actions pour changer la série d’une photo",
+   "tone": "major"
+  },
+  {
+   "value": "15",
+   "label": "tabulations pour atteindre l’import (pas de lien d’évitement)",
+   "tone": "major"
+  },
+  {
+   "value": "5,2:1",
+   "label": "contraste du texte secondaire (AA respecté)",
+   "tone": "positive"
+  }
+ ],
+ "strengths": [
+  {
+   "title": "Brouillon par défaut",
+   "detail": "Rien n’est publié par accident : l’import crée des brouillons, la publication est un geste explicite."
+  },
+  {
+   "title": "Refus précis et non bloquants",
+   "detail": "Un fichier refusé est nommé avec sa raison et n’empêche pas le reste du lot."
+  },
+  {
+   "title": "Erreurs de formulaire bien gérées",
+   "detail": "Saisie conservée, champ signalé (aria-invalid) et message relié (aria-describedby)."
+  },
+  {
+   "title": "Équivalents clavier",
+   "detail": "Le glisser-déposer de la liste a ses boutons ↑ ↓ ; focus visible de 2 px ; contrastes AA."
+  },
+  {
+   "title": "Suppressions en deux gestes",
+   "detail": "Aucune suppression d’un seul clic ; conséquences annoncées."
+  },
+  {
+   "title": "Aide contextuelle",
+   "detail": "Chaque écran mène à sa section d’aide."
+  }
+ ],
+ "journeys": [
+  {
+   "id": "J1",
+   "name": "Importer un lot de photos",
+   "persona": "Auteur, après une séance (lot de 10 à 50 photos)",
+   "goal": "Voir ses photos dans l’admin, prêtes à compléter",
+   "score": 4,
+   "actual_steps": [
+    "Ouvrir Photos",
+    "Choisir auteur et série du lot (avant les photos)",
+    "Glisser ou choisir les fichiers (seul le nombre s’affiche)",
+    "Cliquer Importer",
+    "Attendre 42 s devant un message fixe, bouton grisé",
+    "Arriver sur la liste des brouillons ; le fichier invalide n’est signalé qu’à la fin"
+   ],
+   "target_steps": [
+    "Déposer les photos (n’importe quand, en plusieurs fois)",
+    "Voir chaque photo : vignette, envoi en %, traitement, prête",
+    "Fichiers invalides refusés immédiatement",
+    "Continuer pendant le traitement, ou annuler",
+    "Passer à « Compléter » dès la première photo prête"
+   ],
+   "metrics": {
+    "clicks": "3",
+    "screens": "2",
+    "context_switches": "0",
+    "waits": "42 s sans progression (3 × 24 Mpx)"
+   },
+   "frictions": [
+    "Aucune progression ni état par photo pendant 42 s",
+    "Fichier invalide découvert après tout l’envoi",
+    "Un second glisser remplace le lot au lieu de l’ajouter",
+    "Quitter la page interrompt l’import, sans annulation possible"
+   ],
+   "strengths": [
+    "Bouton désactivé pendant l’envoi (pas de double import)",
+    "Compte rendu final précis"
+   ],
+   "potential_gains": [
+    "Premier retour en < 1 s au lieu de 42 s",
+    "Refus immédiat des fichiers invalides",
+    "Zéro perte de lot en cas de navigation"
+   ],
+   "screenshots": [
+    "images/J1-S03-fichiers-choisis.png",
+    "images/J1-S04-pendant-import.png",
+    "images/J1-S05-resultat-import.png"
+   ]
+  },
+  {
+   "id": "J2",
+   "name": "Compléter et publier les photos importées",
+   "persona": "Auteur",
+   "goal": "Titre, lieu, date, série, puis publication du lot",
+   "score": 3,
+   "actual_steps": [
+    "Filtrer les brouillons",
+    "Ouvrir la fiche d’une photo",
+    "Saisir titre, lieu, date ; cocher Publiée ; Enregistrer",
+    "Revenir à la liste",
+    "Recommencer pour chaque photo"
+   ],
+   "target_steps": [
+    "Voir tout le lot sur un écran (tableau éditable)",
+    "Sélectionner tout, appliquer série, lieu et date en une fois",
+    "Corriger les titres en place",
+    "Publier la sélection"
+   ],
+   "metrics": {
+    "clicks": "20 pour 3 photos (6 à 8 par photo)",
+    "screens": "9",
+    "context_switches": "3",
+    "waits": "aucune"
+   },
+   "frictions": [
+    "Aucune action groupée : effort proportionnel au nombre de photos",
+    "Date au format imposé : « 10/2026 » refusé",
+    "Titre par défaut « DSCF0241 » publiable tel quel"
+   ],
+   "strengths": [
+    "Erreur de date expliquée, saisie conservée"
+   ],
+   "potential_gains": [
+    "≈ 67 actions → ≈ 15 pour un lot de 10 photos",
+    "9 écrans → 1"
+   ],
+   "screenshots": [
+    "images/J2-S01-fiche-brouillon.png",
+    "images/J2-S02-erreur-date.png"
+   ]
+  },
+  {
+   "id": "J3",
+   "name": "Gérer les séries",
+   "persona": "Auteur",
+   "goal": "Créer, renommer, ordonner, supprimer une série",
+   "score": 4,
+   "actual_steps": [
+    "Ouvrir Séries : une pile de formulaires (nom, adresse, Enregistrer, ↑ ↓, Supprimer)",
+    "Faire défiler jusqu’à « Nouvelle série » (sous la ligne de flottaison)",
+    "Créer : la série arrive en dernier",
+    "Monter en tête : 1 clic par place (4 clics)",
+    "Supprimer une série non vide : le refus n’apparaît qu’après ouverture"
+   ],
+   "target_steps": [
+    "Voir les séries en cartes (couverture, nombre de photos)",
+    "« Nouvelle série » en tête, nom puis Entrée",
+    "Glisser une carte (↑ ↓ au clavier)",
+    "Supprimer : déplacer les photos vers une autre série dans le même geste"
+   ],
+   "metrics": {
+    "clicks": "7 (créer et monter en tête : 6)",
+    "screens": "1 (page de 1262 px)",
+    "context_switches": "0",
+    "waits": "aucune"
+   },
+   "frictions": [
+    "Formulaires toujours ouverts : risque de modification involontaire",
+    "Adresse technique (slug) au premier plan",
+    "Pas de couverture ni d’accès aux photos de la série",
+    "Suppression bloquée sans chemin de résolution"
+   ],
+   "strengths": [
+    "Suppression d’une série non vide impossible : aucune perte"
+   ],
+   "potential_gains": [
+    "Création visible sans défilement",
+    "Réordonnancement : 4 clics → 1 geste",
+    "Suppression d’une série non vide : de « impossible » à 2 actions"
+   ],
+   "screenshots": [
+    "images/J3-S01-page-series.png",
+    "images/J3-S04-suppression-refusee.png",
+    "images/J3-S05-series-mobile.png"
+   ]
+  },
+  {
+   "id": "J4",
+   "name": "Classer des photos dans une série",
+   "persona": "Auteur",
+   "goal": "Mettre 3 photos existantes dans une nouvelle série",
+   "score": 2,
+   "actual_steps": [
+    "Ouvrir la fiche de la photo",
+    "Changer la série",
+    "Enregistrer",
+    "Revenir à la liste",
+    "Recommencer pour chaque photo"
+   ],
+   "target_steps": [
+    "Cocher les photos dans la liste",
+    "« Changer de série » dans la barre d’actions",
+    "Confirmer"
+   ],
+   "metrics": {
+    "clicks": "12 pour 3 photos",
+    "screens": "9",
+    "context_switches": "3",
+    "waits": "aucune"
+   },
+   "frictions": [
+    "Aucune sélection multiple dans la liste",
+    "Effort linéaire : 40 actions pour 10 photos"
+   ],
+   "strengths": [],
+   "potential_gains": [
+    "4 actions par photo → 3 actions au total"
+   ],
+   "screenshots": [
+    "images/J4-S01-liste-sans-selection.png"
+   ]
+  },
+  {
+   "id": "J5",
+   "name": "Choisir les photos de l’ouverture",
+   "persona": "Auteur",
+   "goal": "Composer le diaporama de l’accueil",
+   "score": 6,
+   "actual_steps": [
+    "Ouvrir Réglages",
+    "Faire défiler jusqu’à l’ouverture",
+    "Cocher jusqu’à 8 photos parmi toutes les publiées",
+    "Enregistrer"
+   ],
+   "target_steps": [
+    "Choisir les photos",
+    "Les ordonner par glisser",
+    "Voir le compteur « 5 / 8 »"
+   ],
+   "metrics": {
+    "clicks": "1 par photo + 1",
+    "screens": "1",
+    "context_switches": "0",
+    "waits": "aucune"
+   },
+   "frictions": [
+    "Ordre imposé (celui de la galerie)",
+    "Au-delà de 8, les photos en trop sont ignorées sans avertissement"
+   ],
+   "strengths": [
+    "Vignettes cliquables en entier (cible large)"
+   ],
+   "potential_gains": [
+    "Ordre choisi par l’auteur",
+    "Limite visible avant l’envoi"
+   ],
+   "screenshots": [
+    "images/J5-S01-reglages.png"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "F-M01",
+   "severity": "Major",
+   "title": "Import : 42 s d’attente sans progression ni état par photo",
+   "journey": "J1",
+   "criteria": [
+    "Bastien & Scapin — Guidage (feedback immédiat)",
+    "ISO 9241-110 — Autodescription, contrôlabilité"
+   ],
+   "evidence_level": "cross-confirmed",
+   "evidence": [
+    "J1-S04 : message fixe pendant 42,2 s pour 3 × 24 Mpx (mesure Playwright)",
+    "public/admin/admin.js:25-26",
+    "server/routes/admin.js:111-170 : une seule requête, réponse à la fin du traitement"
+   ],
+   "impact": "L’auteur ne sait pas si l’import avance ni combien de temps attendre ; risque de rechargement, d’abandon ou de double import, et lassitude sur des lots de 30 photos (≈ 7 min).",
+   "recommendation": "Envoyer les photos une par une (fetch avec progression d’envoi) ; côté serveur, accepter le fichier puis le traiter en arrière-plan en exposant son état (reçue, traitement n/6, prête, refusée) ; afficher une ligne par photo avec vignette locale, barre d’envoi puis de traitement, et un total du lot avec temps restant estimé ; région aria-live annonçant seulement les changements d’état.",
+   "verification": "Lot de 10 × 24 Mpx : premier retour visible < 1 s, état mis à jour au moins toutes les 2 s, lecteur d’écran : une annonce par photo terminée.",
+   "effort": "Medium"
+  },
+  {
+   "id": "F-M02",
+   "severity": "Major",
+   "title": "Import tout-ou-rien : pas d’annulation, navigation qui interrompt le lot",
+   "journey": "J1",
+   "criteria": [
+    "Bastien & Scapin — Contrôle explicite",
+    "ISO 9241-110 — Contrôlabilité, tolérance aux erreurs"
+   ],
+   "evidence_level": "code-confirmed",
+   "evidence": [
+    "views/admin/photos.eta:3-22 : formulaire classique, un seul envoi",
+    "server/routes/admin.js:111 : jusqu’à 50 fichiers × 60 Mo dans une seule requête"
+   ],
+   "impact": "Une coupure réseau ou un clic ailleurs pendant l’envoi interrompt le lot sans indiquer quelles photos sont arrivées ; l’auteur doit vérifier et recommencer.",
+   "recommendation": "File d’envoi côté navigateur (une requête par photo, 2 en parallèle), bouton « Annuler le reste », reprise des seuls fichiers échoués (« Réessayer »), traitement serveur qui continue si l’onglet est fermé.",
+   "verification": "Couper le réseau à mi-lot : les photos reçues restent, les autres sont proposées en « Réessayer ».",
+   "effort": "Medium"
+  },
+  {
+   "id": "F-M03",
+   "severity": "Major",
+   "title": "Fichiers invalides découverts après l’envoi ; second glisser qui remplace le lot",
+   "journey": "J1",
+   "criteria": [
+    "Bastien & Scapin — Gestion des erreurs (prévention)",
+    "Bastien & Scapin — Charge de travail"
+   ],
+   "evidence_level": "cross-confirmed",
+   "evidence": [
+    "J1-S03 : seul « 4 fichier(s) prêt(s) » s’affiche, sans noms",
+    "J1-S05 : le faux fichier n’est signalé qu’après 42 s",
+    "public/admin/admin.js:20 : input.files = e.dataTransfer.files (remplacement)"
+   ],
+   "impact": "L’auteur attend la fin pour apprendre qu’un fichier n’est pas pris en charge ; ajouter des photos en deux fois fait perdre la première sélection sans le dire.",
+   "recommendation": "Lister les fichiers dès leur dépôt (nom, poids, vignette locale), refuser immédiatement ce qui n’est pas une image acceptée ou dépasse 60 Mo, et ajouter les dépôts successifs au lot (retrait possible par photo).",
+   "verification": "Déposer 3 photos puis 2 autres : 5 lignes ; un .txt renommé en .jpg est refusé avant tout envoi.",
+   "effort": "Small"
+  },
+  {
+   "id": "F-M04",
+   "severity": "Major",
+   "title": "Compléter un lot photo par photo : 20 actions et 9 écrans pour 3 photos",
+   "journey": "J2",
+   "criteria": [
+    "Bastien & Scapin — Charge de travail (actions minimales)",
+    "ISO 9241-110 — Adéquation à la tâche"
+   ],
+   "evidence_level": "runtime-confirmed",
+   "evidence": [
+    "Mesure J2 : 8, 6 et 6 actions par photo ; 3 écrans par photo",
+    "J2-S01 : fiche individuelle seule voie d’édition"
+   ],
+   "impact": "Le coût croît avec le lot (≈ 67 actions pour 10 photos) ; c’est l’étape la plus longue après une séance, et la plus propice aux oublis (titres « DSCF… » publiés).",
+   "recommendation": "Après l’import, écran « Compléter le lot » : tableau éditable (vignette, titre, série, lieu, date) enregistré au fil de la saisie, sélection multiple, barre « Appliquer aux n » (série, lieu, date) et « Publier les n » ; la fiche individuelle reste pour la légende et les options.",
+   "verification": "Lot de 10 : série + lieu + date + publication en ≤ 6 actions hors saisie des titres.",
+   "effort": "Medium"
+  },
+  {
+   "id": "F-M05",
+   "severity": "Major",
+   "title": "Pas de sélection multiple dans la liste des photos",
+   "journey": "J4",
+   "criteria": [
+    "Bastien & Scapin — Charge de travail",
+    "ISO 9241-110 — Adéquation à la tâche"
+   ],
+   "evidence_level": "cross-confirmed",
+   "evidence": [
+    "Mesure J4 : 12 actions et 9 écrans pour classer 3 photos",
+    "views/admin/photos.eta : aucune case de sélection"
+   ],
+   "impact": "Reclasser, publier ou dépublier plusieurs photos impose un aller-retour par photo ; les réorganisations de séries sont dissuasives.",
+   "recommendation": "Cases à cocher sur chaque ligne (et « tout sélectionner »), barre d’actions collante : Publier, Dépublier, Changer de série, Supprimer… (avec confirmation), compteur « n sélectionnées » annoncé (aria-live).",
+   "verification": "Classer 10 photos dans une série en ≤ 4 actions ; parcours entièrement au clavier.",
+   "effort": "Small"
+  },
+  {
+   "id": "F-M06",
+   "severity": "Major",
+   "title": "Page Séries : des formulaires plutôt que des séries",
+   "journey": "J3",
+   "criteria": [
+    "Bastien & Scapin — Guidage (groupement, distinction)",
+    "Bastien & Scapin — Signifiance des codes",
+    "ISO 9241-110 — Conformité aux attentes"
+   ],
+   "evidence_level": "cross-confirmed",
+   "evidence": [
+    "J3-S01 : chaque série = 2 champs toujours éditables + Enregistrer + ↑ ↓ + Supprimer",
+    "views/admin/series.eta:6-20",
+    "J3-S05 : page de 2000 px sur mobile pour 5 séries"
+   ],
+   "impact": "Lecture difficile (aucun visuel), modification involontaire possible, adresse technique au premier plan, aucun accès aux photos d’une série : la page est perçue comme austère et « technique ».",
+   "recommendation": "Cartes : couverture (première photo), nom, nombre de photos ; actions « Voir les photos » (liste filtrée), « Renommer » (édition en place, Entrée pour valider, Échap pour annuler), menu « ⋯ » (adresse, supprimer) ; adresse déplacée dans le mode Renommer.",
+   "verification": "Test 5 secondes : identifier la série la plus fournie ; aucun champ éditable hors du mode Renommer.",
+   "effort": "Medium"
+  },
+  {
+   "id": "F-M07",
+   "severity": "Major",
+   "title": "Séries : création sous la ligne de flottaison, ordre au clic par clic, suppression sans issue",
+   "journey": "J3",
+   "criteria": [
+    "Bastien & Scapin — Gestion des erreurs (correction)",
+    "Bastien & Scapin — Charge de travail"
+   ],
+   "evidence_level": "runtime-confirmed",
+   "evidence": [
+    "Mesure : formulaire de création à y = 1033 px (fenêtre de 900 px)",
+    "Mesure J3 : 4 clics pour monter une série en tête",
+    "J3-S04 : refus affiché seulement après ouverture de « Supprimer »"
+   ],
+   "impact": "On cherche où créer ; réordonner est fastidieux ; une série à fusionner impose de rouvrir chaque photo.",
+   "recommendation": "Bouton « Nouvelle série » en tête et carte « + » ; glisser-déposer des cartes avec ↑ ↓ au clavier ; dialogue de suppression : « Déplacer les n photos vers [série] puis supprimer ».",
+   "verification": "Créer une série visible sans défilement ; fusionner une série de 8 photos en 3 actions.",
+   "effort": "Small"
+  },
+  {
+   "id": "F-M08",
+   "severity": "Major",
+   "title": "Pas de lien d’évitement : 15 tabulations avant l’import",
+   "journey": "J1",
+   "criteria": [
+    "WCAG 2.4.1 Contourner des blocs (A)",
+    "Bastien & Scapin — Charge de travail"
+   ],
+   "evidence_level": "cross-confirmed",
+   "evidence": [
+    "Mesure clavier : 15 tabulations jusqu’au champ fichier",
+    "views/admin/layout.eta:16-33 : aucun lien « Aller au contenu »"
+   ],
+   "impact": "Au clavier, chaque page impose de traverser les 12 entrées du menu ; non-conformité WCAG de niveau A.",
+   "recommendation": "Lien « Aller au contenu » en premier élément focusable (visible au focus) vers main#contenu ; sur Photos, lien « Aller à l’import ».",
+   "verification": "Tab depuis le haut : 1re tabulation = « Aller au contenu », Entrée place le focus dans le contenu.",
+   "effort": "Small"
+  },
+  {
+   "id": "F-m01",
+   "severity": "Minor",
+   "title": "Date au format imposé (AAAA-MM) ; « 10/2026 » refusé",
+   "journey": "J2",
+   "criteria": [
+    "Bastien & Scapin — Gestion des erreurs (prévention)",
+    "ISO 9241-110 — Tolérance aux erreurs"
+   ],
+   "evidence_level": "cross-confirmed",
+   "evidence": [
+    "J2-S02",
+    "server/admin-repo.js:5",
+    "views/admin/photo.eta:22"
+   ],
+   "impact": "Erreur évitable à chaque saisie « naturelle » ; un aller-retour par photo.",
+   "recommendation": "Champ type=month (jour facultatif à part) et tolérance côté serveur : 10/2026, 10.2026, oct. 2026 → 2026-10.",
+   "verification": "Les quatre formats sont acceptés et normalisés.",
+   "effort": "Small"
+  },
+  {
+   "id": "F-m02",
+   "severity": "Minor",
+   "title": "Import : auteur et série demandés avant les photos, pour tout le lot",
+   "journey": "J1",
+   "criteria": [
+    "ISO 9241-110 — Conformité aux attentes",
+    "Bastien & Scapin — Compatibilité"
+   ],
+   "evidence_level": "runtime-confirmed",
+   "evidence": [
+    "J1-S02 : listes Auteur et Série au-dessus de la zone de dépôt",
+    "views/admin/photos.eta:10-13"
+   ],
+   "impact": "L’ordre inverse du geste naturel (on part des photos) et un lot mixte impose plusieurs imports.",
+   "recommendation": "Déposer d’abord ; auteur et série proposés par défaut (compte lié, dernière série) et modifiables dans « Compléter le lot ».",
+   "verification": "Import possible sans toucher aux listes ; série modifiable par photo après coup.",
+   "effort": "Small"
+  },
+  {
+   "id": "F-m03",
+   "severity": "Minor",
+   "title": "Mobile : en-tête de 256 px ; cibles ↑ ↓ de 30 × 34 px",
+   "journey": "J3",
+   "criteria": [
+    "WCAG 2.5.8 Taille de la cible (AA) — respecté (≥ 24 px)",
+    "Objectif de conception 44 × 44 px (WCAG 2.5.5 AAA)"
+   ],
+   "evidence_level": "runtime-confirmed",
+   "evidence": [
+    "J3-S05",
+    "Mesure : en-tête 412 × 256 px ; boutons ↑ ↓ 30 × 34 px"
+   ],
+   "impact": "Sur téléphone, le contenu commence bas ; petites cibles plus difficiles au doigt (sans non-conformité AA).",
+   "recommendation": "Menu replié derrière un bouton « Menu » sous 720 px ; cibles tactiles de 44 px sur mobile.",
+   "verification": "Contenu visible dès 120 px ; cibles ≥ 44 px sous 720 px.",
+   "effort": "Small"
+  },
+  {
+   "id": "F-m04",
+   "severity": "Minor",
+   "title": "Ouverture : ordre imposé ; photos au-delà de 8 ignorées sans avertissement",
+   "journey": "J5",
+   "criteria": [
+    "Bastien & Scapin — Contrôle explicite",
+    "Bastien & Scapin — Gestion des erreurs"
+   ],
+   "evidence_level": "code-confirmed",
+   "evidence": [
+    "server/admin-repo.js:199 : slice(0, 8) silencieux",
+    "views/admin/settings.eta:22 : cases dans l’ordre de la galerie"
+   ],
+   "impact": "L’auteur ne compose pas son diaporama ; une 9e photo cochée disparaît sans explication.",
+   "recommendation": "Sélection ordonnée (glisser les vignettes choisies) avec compteur « 5 / 8 » et cases désactivées à 8.",
+   "verification": "Ordre enregistré tel que composé ; impossible de cocher une 9e photo.",
+   "effort": "Small"
+  },
+  {
+   "id": "F-m05",
+   "severity": "Minor",
+   "title": "Liste des photos repoussée à 754 px par l’import et les filtres",
+   "journey": "J4",
+   "criteria": [
+    "Bastien & Scapin — Densité informationnelle"
+   ],
+   "evidence_level": "runtime-confirmed",
+   "evidence": [
+    "Mesure : première photo à y = 754 px (fenêtre de 900 px)",
+    "J1-S02"
+   ],
+   "impact": "La page Photos montre une seule ligne sans défilement : l’état du site n’est pas lisible d’un coup d’œil.",
+   "recommendation": "Import en bouton « + Importer » ouvrant le panneau (ou dépôt sur toute la page), filtres en une ligne compacte, option d’affichage en grille.",
+   "verification": "Au moins 6 photos visibles sans défilement en 1440 × 900.",
+   "effort": "Small"
+  },
+  {
+   "id": "F-m06",
+   "severity": "Minor",
+   "title": "Titre par défaut issu du nom de fichier, publiable tel quel",
+   "journey": "J2",
+   "criteria": [
+    "Bastien & Scapin — Gestion des erreurs (prévention)"
+   ],
+   "evidence_level": "risk",
+   "evidence": [
+    "Titre « DSCF0241 » observé après import (J1-S05)",
+    "Aucun contrôle à la publication"
+   ],
+   "impact": "Risque de publier « DSCF0241 » sur le site.",
+   "recommendation": "Signaler les titres non modifiés (« titre provisoire ») et demander confirmation avant de publier une photo qui en a un.",
+   "verification": "Publier une photo au titre d’origine demande une confirmation.",
+   "effort": "Small"
+  }
+ ],
+ "accessibility": {
+  "contrast_checks": [
+   {
+    "foreground": "#6B665D",
+    "background": "#F6F4EF",
+    "ratio": 5.19,
+    "required": 4.5,
+    "usage": "Texte secondaire"
+   },
+   {
+    "foreground": "#F6F4EF",
+    "background": "#1D1C1A",
+    "ratio": 15.49,
+    "required": 4.5,
+    "usage": "Bouton principal"
+   },
+   {
+    "foreground": "#8F897F",
+    "background": "#F6F4EF",
+    "ratio": 3.16,
+    "required": 3.0,
+    "usage": "Bordure des champs"
+   },
+   {
+    "foreground": "#B5523B",
+    "background": "#F6F4EF",
+    "ratio": 4.51,
+    "required": 4.5,
+    "usage": "Lien Supprimer (limite)"
+   },
+   {
+    "foreground": "#FFFFFF",
+    "background": "#B5523B",
+    "ratio": 4.96,
+    "required": 4.5,
+    "usage": "Bandeau de test"
+   }
+  ],
+  "target_size_summary": "Boutons ↑ ↓ 30 × 34 px et Publier 90 × 34 px : conformes à 2.5.8 AA (≥ 24 px), sous l’objectif de 44 px sur mobile. Cases de l’ouverture 18 px mais libellé (vignette) cliquable.",
+  "keyboard_summary": "Focus visible (2 px) et équivalents clavier au glisser-déposer ; pas de lien d’évitement (2.4.1) : 15 tabulations jusqu’à l’import.",
+  "color_independence_summary": "Statuts en texte (Publiée / Brouillon) avec bordure ; erreurs avec texte et position, pas seulement la couleur.",
+  "semantics_summary": "Libellés reliés, erreurs reliées par aria-describedby, région aria-live pour l’import ; lecteur d’écran non testé."
+ },
+ "roadmap": [
+  {
+   "wave": "Vague 1",
+   "timeframe": "1–2 semaines",
+   "title": "Import fluide et rassurant",
+   "items": [
+    "Liste des fichiers dès le dépôt, refus immédiats, dépôts cumulés (F-M03)",
+    "Envoi photo par photo avec progression, traitement en arrière-plan avec état (F-M01)",
+    "Annuler, réessayer, quitter sans perdre (F-M02)",
+    "Lien « Aller au contenu » (F-M08)"
+   ]
+  },
+  {
+   "wave": "Vague 2",
+   "timeframe": "1–2 semaines",
+   "title": "Travailler par lot",
+   "items": [
+    "Écran « Compléter le lot » : tableau éditable, appliquer aux n, publier les n (F-M04)",
+    "Sélection multiple et barre d’actions dans la liste (F-M05)",
+    "Date tolérante (F-m01), titres provisoires signalés (F-m06)"
+   ]
+  },
+  {
+   "wave": "Vague 3",
+   "timeframe": "1 semaine",
+   "title": "Séries visuelles",
+   "items": [
+    "Cartes avec couverture, voir les photos, renommer en place (F-M06)",
+    "Création en tête, glisser les cartes, suppression avec déplacement (F-M07)"
+   ]
+  },
+  {
+   "wave": "Vague 4",
+   "timeframe": "quelques jours",
+   "title": "Finitions",
+   "items": [
+    "Page Photos compacte, vue grille (F-m05)",
+    "Ouverture ordonnable avec compteur (F-m04)",
+    "Menu mobile replié, cibles 44 px (F-m03)",
+    "Import sans choix préalable (F-m02)"
+   ]
+  }
+ ],
+ "measures": [
+  "Délai avant le premier retour après dépôt (cible < 1 s)",
+  "Actions pour importer, compléter et publier 10 photos (≈ 70 aujourd’hui ; cible ≤ 20)",
+  "Actions pour classer 10 photos dans une série (40 → ≤ 4)",
+  "Tabulations jusqu’à l’import (15 → 2)",
+  "Lots interrompus récupérés sans réimport (cible 100 %)",
+  "Audit axe sans violation sérieuse ; parcours complets au clavier"
+ ],
+ "sources": [
+  "Serveur de test http://10.21.30.23:3080 (10/10/2026)",
+  "Dépôt Volfieldd/deux-regards (main, commit 90d117d)",
+  "e2e/tests/audit.spec.js (parcours instrumentés)",
+  "views/admin/*.eta, public/admin/admin.js, server/routes/admin.js, server/admin-repo.js"
+ ]
+}
