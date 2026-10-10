@@ -186,6 +186,7 @@ export function createAdminRepo(db) {
 
     // ---------- réglages ----------
     settings,
+    saveSetting: (key, value) => q.setSetting.run(key, JSON.stringify(value)),
     // Filigrane et métadonnées, déjà normalisés par variants.js.
     saveImageSettings(watermark, exif) {
       db.transaction(() => {

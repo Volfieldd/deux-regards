@@ -111,3 +111,14 @@ form.form > .actions { margin-bottom: 24px; }
 .downloads { flex-wrap: wrap; margin-bottom: 12px; }
 
 .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.theme-card { display: grid; gap: 10px; align-content: start; padding: 14px; border: 1px solid var(--rule); }
+.theme-card:has(input:checked) { border-color: var(--ink); }
+.swatch { display: flex; height: 36px; border: 1px solid var(--rule); }
+.swatch i { flex: 1; }
+.swatch-atelier i:nth-child(1) { background: #f6f4ef; } .swatch-atelier i:nth-child(2) { background: #1d1c1a; } .swatch-atelier i:nth-child(3) { background: #b5523b; }
+.swatch-nicephos-nuit i:nth-child(1) { background: #0b0b0b; } .swatch-nicephos-nuit i:nth-child(2) { background: #f0efeb; } .swatch-nicephos-nuit i:nth-child(3) { background: #cbb68b; }
+.swatch-nicephos-jour i:nth-child(1) { background: #fbfbf9; } .swatch-nicephos-jour i:nth-child(2) { background: #111111; } .swatch-nicephos-jour i:nth-child(3) { background: #7d6532; }
+.emblem-preview { max-width: 280px; max-height: 140px; width: auto; display: inline-block; vertical-align: middle; margin-right: 16px; }
+.favicon-preview { display: inline-block; vertical-align: middle; }

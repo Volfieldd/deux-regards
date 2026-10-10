@@ -36,6 +36,7 @@ Source : [`docs/specs/`](https://github.com/Volfieldd/deux-regards/tree/main/doc
 | A6 | **Filigrane et EXIF** : voir [Filigrane et EXIF](Filigrane-et-EXIF). |
 | A7 | **Preuves d'antériorité** : empreinte et horodatage de chaque original, téléchargement et vérification de la preuve ; texte et contact de la page des droits. |
 | A8 | Messages de confirmation ou d'erreur après chaque action ; toutes les pages sont utilisables sans JS et au clavier. |
+| A9 | **Apparence** : thèmes (Atelier, Nicephos nuit et jour), aperçu réservé aux admins, emblème transformé en masque coloré par le thème, sous-titre, favicon. |
 
 ### Images
 

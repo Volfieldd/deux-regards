@@ -7,6 +7,9 @@
   <title><%= it.pageTitle %></title>
   <link rel="stylesheet" href="<%= it.asset('css/site.css') %>">
   <link rel="stylesheet" href="<%= it.asset('admin/admin.css') %>">
+<% if (it.brand && it.brand.emblem) { %>
+  <link rel="stylesheet" href="/brand.css?v=<%= it.brand.emblem %>">
+<% } %>
   <script src="<%= it.asset('admin/admin.js') %>" defer></script>
 </head>
 <body class="admin" data-csrf="<%= it.csrf %>">
@@ -16,7 +19,7 @@
 <header class="top wrap">
   <%~ include('../brand', it) %>
   <nav class="eyebrow" aria-label="Administration">
-<% [['home', '/admin', 'Tableau de bord'], ['photos', '/admin/photos', 'Photos'], ['series', '/admin/series', 'Séries'], ['authors', '/admin/auteurs', 'Auteurs'], ['images', '/admin/images', 'Filigrane & EXIF'], ['settings', '/admin/reglages', 'Réglages']].forEach(([key, href, label]) => { %>
+<% [['home', '/admin', 'Tableau de bord'], ['photos', '/admin/photos', 'Photos'], ['series', '/admin/series', 'Séries'], ['authors', '/admin/auteurs', 'Auteurs'], ['images', '/admin/images', 'Filigrane & EXIF'], ['appearance', '/admin/apparence', 'Apparence'], ['settings', '/admin/reglages', 'Réglages']].forEach(([key, href, label]) => { %>
     <a href="<%= href %>"<%~ (it.section === key || (key === 'photos' && it.section === 'photo')) ? ' aria-current="page"' : '' %>><%= label %></a>
 <% }) %>
     <a href="/" target="_blank" rel="noopener">Voir le site</a>

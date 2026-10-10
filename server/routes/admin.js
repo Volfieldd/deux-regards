@@ -11,6 +11,8 @@ import { pad } from '../format.js';
 import sharp from 'sharp';
 import { normalizeWatermark, normalizeExif, EXIF_MODES, MIN_WIDTHS } from '../variants.js';
 import { FONTS, POSITIONS } from '../watermark.js';
+import { THEMES, BRAND_MODES } from '../themes.js';
+import { processEmblem, BrandError, EMBLEM_MAX_BYTES } from '../brand.js';
 
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 const LOGO_MAX_SIDE = 4000;
@@ -458,6 +460,74 @@ export default async function adminRoutes(app) {
     repo.saveImageSettings({ ...watermark, image: null }, exif);
     app.variants.schedule();
     return done(reply, '/admin/images', 'Logo supprimé.');
+  });
+
+  // ---------- apparence : thème et marque ----------
+  const brandDir = path.join(storageDir, 'brand');
+  fs.mkdirSync(brandDir, { recursive: true });
+  const saveBrand = brand => repo.saveSetting('brand', brand);
+  const removeBrandFiles = b => { for (const f of [b.emblem, b.favicon64, b.favicon180]) if (f) fs.rmSync(path.join(brandDir, f), { force: true }); };
+
+  app.get('/admin/apparence', async (request, reply) => render(request, reply, 'appearance', {
+    title: 'Apparence', THEMES, BRAND_MODES, themeId: app.appearance.themeId(), brand: app.appearance.brand(),
+  }));
+
+  app.post('/admin/apparence', write, async (request, reply) => {
+    const body = request.body || {};
+    if (THEMES[body.theme]) repo.saveSetting('theme', body.theme);
+    const brand = app.appearance.brand();
+    saveBrand({
+      ...brand,
+      mode: BRAND_MODES[body.brand_mode] ? body.brand_mode : brand.mode,
+      subtitle: typeof body.subtitle === 'string' ? body.subtitle.replace(/[\x00-\x1f\x7f]/g, '').trim().slice(0, 60) : brand.subtitle,
+    });
+    return done(reply, '/admin/apparence', 'Apparence enregistrée.');
+  });
+
+  // Emblème : PNG, WebP ou JPEG, transformé en masque (la couleur suit le thème) + favicons.
+  app.post('/admin/apparence/embleme', async (request, reply) => {
+    let checked = false;
+    let error = null;
+    let made = null;
+    try {
+      for await (const part of request.parts({ limits: { fileSize: EMBLEM_MAX_BYTES, files: 1 } })) {
+        if (part.type === 'field') {
+          if (part.fieldname === '_csrf') checked = sameToken(part.value, request.session.csrf);
+          continue;
+        }
+        if (!checked) { part.file.resume(); break; }
+        const chunks = [];
+        for await (const chunk of part.file) chunks.push(chunk);
+        if (part.file.truncated) { error = `Image trop lourde (${EMBLEM_MAX_BYTES / 1024 / 1024} Mo au plus).`; continue; }
+        try {
+          made = await processEmblem(Buffer.concat(chunks));
+        } catch (err) {
+          if (!(err instanceof BrandError)) throw err;
+          error = `Emblème refusé : ${err.message}.`;
+        }
+      }
+    } catch (err) {
+      if (!err.code?.startsWith('FST_')) throw err;
+      error = 'Envoi invalide.';
+    }
+    if (!checked) return reply.code(403).send('Jeton CSRF invalide.');
+    if (!made) return failed(reply, '/admin/apparence', error || 'Aucun fichier reçu.');
+    const id = crypto.randomUUID().slice(0, 8);
+    const files = { emblem: `embleme-${id}.png`, favicon64: `favicon-${id}-64.png`, favicon180: `favicon-${id}-180.png` };
+    fs.writeFileSync(path.join(brandDir, files.emblem), made.mask);
+    fs.writeFileSync(path.join(brandDir, files.favicon64), made.favicon64);
+    fs.writeFileSync(path.join(brandDir, files.favicon180), made.favicon180);
+    const before = app.appearance.brand();
+    saveBrand({ ...before, ...files, ratio: Math.round((made.width / made.height) * 1000) / 1000, mode: 'embleme' });
+    removeBrandFiles(before);
+    return done(reply, '/admin/apparence', 'Emblème enregistré : il s’affiche avec le nom du site.');
+  });
+
+  app.post('/admin/apparence/embleme/delete', write, async (request, reply) => {
+    const before = app.appearance.brand();
+    saveBrand({ ...before, emblem: null, favicon64: null, favicon180: null, ratio: null, mode: 'texte' });
+    removeBrandFiles(before);
+    return done(reply, '/admin/apparence', 'Emblème retiré : le nom du site s’affiche seul.');
   });
 
   // ---------- réglages ----------

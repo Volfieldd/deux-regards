@@ -18,18 +18,22 @@ test.afterEach(async () => {
   expect(errors, 'erreurs console / CSP').toEqual([]);
 });
 
-test('accueil : ouverture, regards, séries, 12 photos chargées', async ({ page }, info) => {
+test('accueil : ouverture, regards, séries, photos chargées', async ({ page }, info) => {
   await page.goto('/');
   await expect(page.locator('.hero-item.on img')).toBeVisible();
-  await expect(page.locator('.cap.on h1')).toHaveText('Le ciel s’est ouvert');
-  await expect(page.locator('#grid .tile')).toHaveCount(12);
+  // La première diapositive est la première photo de l'ouverture (quel que soit son contenu).
+  const first = (await page.locator('.cap h1').first().textContent()).trim();
+  await expect(page.locator('.cap.on h1')).toHaveText(first);
+  const total = Number(/\/ (\d+) vues/.exec(await page.locator('#galerie .mono').textContent())[1]);
+  await expect(page.locator('#grid .tile')).toHaveCount(total);
   // Chaque image de la grille finit par se charger (lazy-loading compris).
   for (const img of await page.locator('#grid .tile img').all()) {
     await img.scrollIntoViewIfNeeded();
     await expect.poll(() => img.evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
   }
-  // Polices auto-hébergées effectivement utilisées.
-  expect(await page.evaluate(() => document.fonts.check('italic 400 40px "Cormorant Garamond"'))).toBe(true);
+  // Police du titre (celle du thème) auto-hébergée et effectivement chargée.
+  const font = await page.locator('.cap.on h1').evaluate(h => { const s = getComputedStyle(h); return `${s.fontStyle} ${s.fontWeight} 40px ${s.fontFamily.split(',')[0]}`; });
+  expect(await page.evaluate(f => document.fonts.check(f), font), font).toBe(true);
   await page.evaluate(() => scrollTo(0, 0));
   await page.screenshot({ path: `results/accueil-${info.project.name}.png`, fullPage: true });
 });

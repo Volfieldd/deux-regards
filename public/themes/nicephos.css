@@ -1,0 +1,73 @@
+/* Thème Nicephos — d'après le logo : trait monochrome, capitales espacées en Jost léger.
+   Deux modes : <html class="theme-nicephos mode-nuit"> (galerie noire) ou « mode-jour » (fond blanc).
+   Toutes les couleurs ont été vérifiées : texte ≥ 4,5:1 sur le fond, en nuit comme en jour. */
+
+.theme-nicephos {
+  --serif: Jost, 'Helvetica Neue', Arial, sans-serif;   /* police « d'affichage » : celle du logo */
+  --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
+  --display-style: normal;                              /* aucune italique */
+  --dark: #050505;
+  --dark-ink: #f0efeb;
+  --dark-mute: #b4b2ac;
+  --dark-rule: rgba(240, 239, 235, 0.28);
+}
+.theme-nicephos.mode-nuit {
+  color-scheme: dark;
+  --paper: #0b0b0b;      /* fond */
+  --ink: #f0efeb;        /* 17:1 */
+  --mute: #a19f99;       /* 7,4:1 */
+  --prose: #cfcdc7;      /* 12:1 */
+  --rule: #2c2c2b;
+  --frame: #171717;
+  --safelight: #cbb68b;  /* sable : états actifs */
+  --on-accent: #0b0b0b;
+}
+.theme-nicephos.mode-jour {
+  color-scheme: light;
+  --paper: #fbfbf9;
+  --ink: #111111;        /* 18:1 */
+  --mute: #5e5d59;       /* 6,4:1 */
+  --prose: #3a3936;
+  --rule: #dddcd7;
+  --frame: #efeeea;
+  --safelight: #7d6532;  /* 5,4:1 */
+  --on-accent: #fbfbf9;
+}
+
+/* ---------- typographie : capitales espacées, aucune italique ---------- */
+.theme-nicephos body { font-weight: 300; }
+.theme-nicephos .brand i { font-style: normal; }
+.theme-nicephos .brand:not(.brand-emblem) { font-weight: 300; letter-spacing: .42em; text-transform: uppercase; font-size: 15px; }
+
+/* Ouverture : titre de la photo en capitales fines. */
+.theme-nicephos .hero .cap h1 { font-weight: 300; font-size: clamp(28px, 4.4vw, 58px); line-height: 1.1; letter-spacing: .16em; text-transform: uppercase; max-width: 20ch; }
+@media (min-width: 641px) { .theme-nicephos .hero .emblem { height: 52px; } }
+
+/* Deux regards */
+.theme-nicephos .regards h2 { font-weight: 300; font-size: clamp(26px, 3.4vw, 42px); line-height: 1.25; letter-spacing: .01em; }
+.theme-nicephos .who { border-top-color: var(--rule); }
+.theme-nicephos .who .n { font-size: clamp(14px, 1.6vw, 17px); letter-spacing: .32em; text-transform: uppercase; }
+.theme-nicephos .who a[aria-current] .n { font-weight: 400; }
+
+/* Index des séries : capitales espacées plutôt que grand romain. */
+.theme-nicephos .idx { font-weight: 300; font-size: clamp(26px, 4.6vw, 58px); letter-spacing: .2em; text-transform: uppercase; line-height: 1.15; padding: 14px 0; }
+.theme-nicephos .idx[aria-current] { font-weight: 400; }
+
+/* Grille */
+.theme-nicephos .gridhead { border-bottom-color: var(--rule); }
+.theme-nicephos .gridhead h3 { font-weight: 300; font-size: clamp(16px, 1.8vw, 20px); letter-spacing: .3em; text-transform: uppercase; }
+.theme-nicephos .tile .ttl { font-size: 15px; letter-spacing: .06em; }
+.theme-nicephos .tile .im { background: var(--frame); }
+
+/* Visionneuse */
+.theme-nicephos .viewer h1 { font-weight: 300; font-size: clamp(18px, 2.4vw, 26px); letter-spacing: .22em; text-transform: uppercase; }
+.theme-nicephos .viewer .legend { font-family: var(--sans); font-size: 15px; font-weight: 300; }
+
+/* Pages de texte */
+.theme-nicephos .about h1 { font-weight: 300; font-size: clamp(28px, 4vw, 48px); line-height: 1.2; letter-spacing: .02em; }
+.theme-nicephos .people { border-top-color: var(--rule); }
+.theme-nicephos .people h2 { font-weight: 300; font-size: 18px; letter-spacing: .32em; text-transform: uppercase; }
+.theme-nicephos .empty { font-family: var(--sans); font-size: 18px; }
+
+/* États actifs et barre d'aperçu sur l'accent sable */
+.theme-nicephos .preview-bar { color: var(--on-accent); }

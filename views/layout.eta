@@ -1,8 +1,10 @@
 <!doctype html>
-<html lang="fr">
+<% const theme = it.theme || {}; const brand = it.brand || {}; %>
+<html lang="fr"<% if (theme.classes) { %> class="<%= theme.classes %>"<% } %>>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="<%= theme.scheme || 'light' %>">
   <title><%= it.pageTitle %></title>
 <% if (it.description) { %>
   <meta name="description" content="<%= it.description %>">
@@ -19,9 +21,22 @@
 <% } %>
   <link rel="preload" href="/fonts/cormorant-garamond/files/cormorant-garamond-latin-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="<%= it.asset('css/site.css') %>">
+<% if (theme.stylesheet) { %>
+  <link rel="stylesheet" href="<%= it.asset(theme.stylesheet) %>">
+<% } %>
+<% if (brand.emblem) { %>
+  <link rel="stylesheet" href="/brand.css?v=<%= brand.emblem %>">
+<% } %>
+<% if (brand.favicon64) { %>
+  <link rel="icon" type="image/png" href="/brand/<%= brand.favicon64 %>">
+  <link rel="apple-touch-icon" href="/brand/<%= brand.favicon180 %>">
+<% } %>
   <script src="<%= it.asset('js/site.js') %>" defer></script>
 </head>
 <body class="<%= it.bodyClass || '' %>">
+<% if (theme.preview) { %>
+<p class="preview-bar mono" role="note">Aperçu du thème « <%= theme.label %> » (visible par vous seul) · <a href="/admin/apparence">Apparence</a> · <a href="?theme=off">Quitter l’aperçu</a></p>
+<% } %>
 <%~ it.body %>
 </body>
 </html>

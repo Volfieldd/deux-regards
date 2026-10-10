@@ -121,6 +121,11 @@ storage/
 - `sitemap.xml`, `robots.txt` ; Open Graph et passe d'accessibilité faits plus tôt.
 - Guide : [docs/wiki/Déploiement.md](docs/wiki/Déploiement.md).
 
+### 6. Apparence et identité (fait)
+- Thèmes déclarés dans `server/themes.js`, feuilles de variables dans `public/themes/` ; Atelier (d'origine), Nicephos nuit et jour (d'après le logo).
+- Admin → Apparence : choix du thème, aperçu réservé aux admins, emblème (masque coloré par le thème, favicon générée), sous-titre.
+- Guide : [docs/wiki/Apparence-et-thèmes.md](docs/wiki/Apparence-et-thèmes.md).
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

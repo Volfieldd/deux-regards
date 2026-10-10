@@ -10,6 +10,7 @@ import { Eta } from 'eta';
 import publicRoutes from './routes/public.js';
 import adminRoutes from './routes/admin.js';
 import mediaRoutes from './routes/media.js';
+import brandRoutes, { createAppearance } from './routes/brand.js';
 import { setupAuth } from './auth.js';
 import { createVariantService } from './variants.js';
 import { createProofService } from './proofs.js';
@@ -84,9 +85,12 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   const eta = new Eta({ views: path.join(ROOT, 'views'), cache: config.production });
   const authorNames = db.prepare('SELECT name FROM authors ORDER BY id').pluck();
   const asset = assetUrls(path.join(ROOT, 'public'), config.production);
+  app.decorate('appearance', createAppearance(app));
   app.decorateReply('render', function (template, data) {
     const names = authorNames.all();
-    const common = { asset, publicUrl: config.publicUrl, authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '' };
+    const brand = app.appearance.brand();
+    const theme = app.appearance.forRequest(this.request, this);
+    const common = { asset, theme, brand, isAdmin: Boolean(this.request.session), publicUrl: config.publicUrl, authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '' };
     return this.type('text/html; charset=utf-8').send(eta.render(`./${template}`, { ...common, ...data }));
   });
 
@@ -139,6 +143,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   });
 
   await app.register(mediaRoutes);
+  await app.register(brandRoutes);
   await app.register(adminRoutes);
   await app.register(publicRoutes);
 

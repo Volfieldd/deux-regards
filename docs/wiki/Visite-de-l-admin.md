@@ -2,7 +2,7 @@
 
 Captures du serveur de test (jeu de démonstration), faites le 10/10/2026. Elles se régénèrent avec `E2E_CAPTURES=1 npm run e2e -- --project=captures-bureau --project=captures-mobile`. Pour l'usage pas à pas, voir le [Mode opératoire de l'admin](Mode-opératoire-admin).
 
-En haut de chaque page : **Tableau de bord · Photos · Séries · Auteurs · Filigrane & EXIF · Réglages · Voir le site**, et **Se déconnecter**. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
+En haut de chaque page : **Tableau de bord · Photos · Séries · Auteurs · Filigrane & EXIF · Apparence · Réglages · Voir le site**, et **Se déconnecter**. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
 
 ## Connexion
 
@@ -53,6 +53,10 @@ Nom, adresse, biographie et lien avec le compte de connexion.
 Le filigrane (texte ou logo, position, opacité, taille), le niveau de métadonnées des images servies, et un aperçu, avec ou sans enregistrement.
 
 ![Filigrane et EXIF](captures/admin/06-filigrane-exif-bureau.webp)
+
+## Apparence
+
+Thème du site public, avec aperçu réservé aux admins, emblème et sous-titre : voir [Apparence et thèmes](Apparence-et-thèmes).
 
 ## Réglages
 
