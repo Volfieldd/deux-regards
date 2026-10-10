@@ -5,11 +5,11 @@
   <li>
     <form class="row" method="post" action="/admin/series/<%= c.id %>">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-      <label>Nom <input name="name" value="<%= v.name %>" required maxlength="80"></label>
-      <label>Adresse <span class="mono">/serie/</span><input name="slug" value="<%= v.slug %>" maxlength="80"></label>
+      <label>Nom <input name="name" value="<%= v.name %>" required maxlength="80"<%~ ed && ed.errors.name ? ` aria-invalid="true" aria-describedby="err-serie-${c.id}"` : '' %>></label>
+      <label>Adresse <span class="mono">/serie/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ ed && ed.errors.slug ? ` aria-invalid="true" aria-describedby="err-serie-${c.id}"` : '' %>></label>
       <span class="mono"><%= c.count %> photo(s)</span>
       <button class="btn ghost" type="submit">Enregistrer</button>
-<% if (ed) { %><span class="err" role="alert"><%= Object.values(ed.errors).join(' ') %></span><% } %>
+<% if (ed) { %><span class="err" role="alert" id="err-serie-<%= c.id %>"><%= Object.values(ed.errors).join(' ') %></span><% } %>
     </form>
     <div class="move">
 <% [['up', '↑', 'Monter', i === 0], ['down', '↓', 'Descendre', i === it.categories.length - 1]].forEach(([dir, sign, label, off]) => { %>
@@ -31,7 +31,7 @@
 </ol>
 <form class="panel row" method="post" action="/admin/series">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-  <label>Nouvelle série <input name="name" value="<%= it.values.name || '' %>" required maxlength="80"></label>
+  <label>Nouvelle série <input name="name" value="<%= it.values.name || '' %>" required maxlength="80"<%~ it.errors.name ? ' aria-invalid="true" aria-describedby="err-serie-nouvelle"' : '' %>></label>
   <button class="btn" type="submit">Créer</button>
-<% if (it.errors.name) { %><span class="err" role="alert"><%= it.errors.name %></span><% } %>
+<% if (it.errors.name) { %><span class="err" role="alert" id="err-serie-nouvelle"><%= it.errors.name %></span><% } %>
 </form>

@@ -29,10 +29,13 @@ async function withOpacity(png, opacity) {
 }
 
 // Filigrane seul, en PNG transparent, à la largeur voulue (texte rendu par Pango avec une police du site).
-async function stamp(mark, targetWidth) {
+// Le filigrane tient toujours dans la boîte targetWidth × maxHeight : jamais d'agrandissement démesuré
+// (logo très étiré, texte haut), donc pas d'image intermédiaire géante.
+async function stamp(mark, targetWidth, maxHeight) {
+  const box = { width: targetWidth, height: Math.max(1, maxHeight), fit: 'inside' };
   let src;
   if (mark.kind === 'image') {
-    src = await sharp(mark.imagePath).resize({ width: targetWidth, withoutEnlargement: false }).png().toBuffer();
+    src = await sharp(mark.imagePath, { limitInputPixels: 16_000_000 }).resize(box).png().toBuffer();
   } else {
     const font = FONTS[mark.font] || FONTS.sans;
     src = await sharp({
@@ -41,7 +44,7 @@ async function stamp(mark, targetWidth) {
         font: `${font.family}, 160`, fontfile: path.join(FONTS_DIR, font.file), rgba: true, dpi: 72,
       },
     }).png().toBuffer();
-    src = await sharp(src).resize({ width: targetWidth }).png().toBuffer();
+    src = await sharp(src).resize(box).png().toBuffer();
   }
   return withOpacity(src, mark.opacity);
 }
@@ -49,7 +52,7 @@ async function stamp(mark, targetWidth) {
 // Calques à passer à sharp().composite() pour une variante de w × h pixels.
 export async function overlayFor(mark, w, h) {
   const width = Math.max(8, Math.round((w * mark.size) / 100));
-  let img = await stamp(mark, width);
+  let img = await stamp(mark, width, h);
   let { width: sw, height: sh } = await sharp(img).metadata();
   // Jamais plus grand que la variante (texte très long, image en hauteur…).
   if (sw > w || sh > h) {

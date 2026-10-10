@@ -95,7 +95,7 @@ export default async function publicRoutes(app) {
       backUrl: `${galleryUrl(filter)}#galerie`,
       pageTitle: `${photo.title} · ${siteName}`,
       canonical: photoUrl(photo.slug),
-      description: [photo.legend, `${photo.author}, ${photo.place} ${photo.when}`.trim()].filter(Boolean).join(' '),
+      description: [photo.legend, [photo.author, [photo.place, photo.when].filter(Boolean).join(', ')].filter(Boolean).join(', ')].filter(Boolean).join(' '),
       ogImage: `/media/${variantName(photo.file, widthsFor(photo.width).at(-1), 'webp', photo.variant_key)}`,
       bodyClass: 'dark',
     });

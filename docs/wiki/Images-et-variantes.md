@@ -46,7 +46,14 @@ Le recalcul se déclenche :
 - au démarrage du serveur ;
 - avec `npm run variants`.
 
-Une seule tâche tourne à la fois. Seules les photos dont l'empreinte a changé, ou dont un fichier manque, sont recalculées.
+Une seule tâche de fond tourne à la fois, et seules les photos dont l'empreinte a changé, ou dont un fichier manque, sont recalculées.
+
+- **Import :** il n'attend pas la fin d'un recalcul en cours. Un verrou par photo empêche deux rendus simultanés de la même image.
+- **Écriture :** chaque variante est écrite sous un nom temporaire, puis renommée. Un arrêt brutal ne laisse jamais de fichier tronqué.
+- **Ménage :** au démarrage, les fichiers temporaires et les variantes sans photo sont effacés ; en fin de recalcul, les logos remplacés aussi.
+- **Arrêt :** l'arrêt du serveur interrompt un recalcul entre deux photos.
+
+Un visiteur dont la page a été chargée juste avant une bascule peut voir une image manquante jusqu'au rechargement : l'ancienne variante est effacée dès que la nouvelle est en place.
 
 ```bash
 npm run variants              # vérifie et recalcule ce qui doit l'être

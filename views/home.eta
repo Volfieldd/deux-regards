@@ -1,5 +1,6 @@
 <% layout('./layout') %>
 <% const f = it.filter; %>
+<% if (!it.hero.length) { %><h1 class="sr-only"><%= it.siteName %></h1><% } %>
 <section class="hero" id="hero" data-hero>
   <div class="ph">
 <% it.hero.forEach((p, i) => { %>
@@ -15,13 +16,13 @@
   </header>
 <% it.hero.forEach((p, i) => { %>
   <div class="cap wrap<%= i === 0 ? ' on' : '' %>" data-h="<%= i %>">
-    <span class="k mono"><%= p.category.toUpperCase() %> · N°<%= it.pad(p.n) %> · <%= p.place %><%= p.when ? ', ' + p.when : '' %> · <%= p.author %></span>
+    <span class="k mono"><%= [p.category.toUpperCase(), 'N°' + it.pad(p.n), [p.place, p.when].filter(Boolean).join(', '), p.author].filter(Boolean).join(' · ') %></span>
     <h1><%= p.title %></h1>
     <a class="open eyebrow" href="<%= it.photoUrl(p.slug) %>">Voir la photo</a>
   </div>
 <% }) %>
 <% if (it.hero.length > 1) { %>
-  <div class="strip wrap">
+  <div class="strip wrap" data-js-only hidden>
 <% it.hero.forEach((p, i) => { %>
     <button type="button" data-h="<%= i %>" aria-label="<%= p.title %>" aria-current="<%= i === 0 %>"><%~ it.picture(p, { sizes: '64px', alt: '' }) %></button>
 <% }) %>
@@ -31,9 +32,10 @@
 <% } %>
 </section>
 
+<main id="contenu">
 <section class="regards wrap" id="regards">
   <div>
-    <h2><%= it.settings.tagline %></h2>
+    <h2><%= it.settings.tagline || it.siteName %></h2>
 <% if (it.settings.intro) { %>
     <p><%= it.settings.intro %></p>
 <% } %>
@@ -49,7 +51,7 @@
   <nav aria-label="Séries">
 <% it.series.forEach(c => { const on = c.slug === f.serie; %>
 <% if (c.count) { %>
-    <a class="idx" href="<%= it.galleryUrl({ regard: f.regard, serie: on ? undefined : c.slug }) %>" data-filter data-scroll data-peek="<%= c.slug %>" <%~ on ? 'aria-current="page"' : '' %>><span><%= c.name %></span><span class="mono"><%= it.pad(c.count) %></span></a>
+    <a class="idx" href="<%= it.galleryUrl({ regard: f.regard, serie: on ? undefined : c.slug }) %>" data-filter data-scroll data-peek="<%= c.slug %>" <%~ on ? 'aria-current="page"' : '' %>><span><%= c.name %><% if (on) { %><span class="sr-only"> (retirer le filtre)</span><% } %></span><span class="mono"><%= it.pad(c.count) %></span></a>
 <% } else { %>
     <span class="idx off"><span><%= c.name %></span><span class="mono">00</span></span>
 <% } %>
@@ -67,15 +69,15 @@
 </section>
 
 <div class="gridhead" id="galerie">
-  <h3><%= it.activeSerie ? it.activeSerie.name : 'Toutes les séries' %><%= it.activeAuthor ? ', par ' + it.activeAuthor.name : '' %></h3>
+  <h3 tabindex="-1"><%= it.activeSerie ? it.activeSerie.name : 'Toutes les séries' %><%= it.activeAuthor ? ', par ' + it.activeAuthor.name : '' %></h3>
   <span class="mono"><%= it.pad(it.photos.length) %> / <%= it.pad(it.total) %> vues<% if (f.regard || f.serie) { %> · <a class="reset" href="/#galerie" data-filter>tout afficher</a><% } %></span>
 </div>
 <section class="grid wrap" id="grid">
 <% if (it.photos.length) { %>
 <% it.photos.forEach(p => { %>
   <a class="tile" href="<%= it.photoUrl(p.slug, f) %>">
-    <div class="im"><%~ it.picture(p, { sizes: '(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw' }) %></div>
-    <div class="t"><span class="ttl"><%= p.title %></span><span class="mono">N°<%= it.pad(p.n) %> · <%= p.category %> · <%= p.author[0] %></span></div>
+    <div class="im"><%~ it.picture(p, { sizes: '(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw', alt: '' }) %></div>
+    <div class="t"><span class="ttl"><%= p.title %></span><span class="mono">N°<%= it.pad(p.n) %> · <%= p.category %> · <span aria-hidden="true"><%= p.author[0] %></span><span class="sr-only"><%= p.author %></span></span></div>
   </a>
 <% }) %>
 <% } else { %>
@@ -83,4 +85,6 @@
 <% } %>
 </section>
 
+</main>
+<p class="sr-only" aria-live="polite" data-announce></p>
 <%~ include('./footer', it) %>

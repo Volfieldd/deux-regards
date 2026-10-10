@@ -16,6 +16,7 @@ Ils utilisent `node:test`, sans dépendance supplémentaire, et prennent environ
 | `test/admin.test.js` | connexion locale de test, toutes les actions de l'admin, import et ses refus |
 | `test/watermark.test.js` | règles du filigrane et des EXIF, rendu (positions, mosaïque, logo, opacité), modes EXIF, recalcul et bascule des URL |
 | `test/proofs.test.js` | requête RFC 3161, jetons FreeTSA réels (analyse, signature, chaîne, altération), reprise après erreur, téléchargements, vérification, page `/droits` |
+| `test/revue.test.js` | non-régression des constats de la revue d'octobre 2026 : redirections, erreurs génériques, protection de **toutes** les routes d'admin (liste des routes parcourue), configuration, jetons mal formés, suppressions pendant un rendu ou un horodatage, fichiers temporaires, filigrane sur petites images |
 | `test/db.test.js` | migrations, seed |
 
 L'encodage AVIF est mis au plus rapide pendant les tests (`AVIF_EFFORT=0`, dans le script `npm test`). L'horodatage y est désactivé (`TSA_URL=off`) : les tests qui en ont besoin utilisent un faux service, qui renvoie des jetons FreeTSA réels enregistrés dans `test/fixtures/`.
@@ -25,16 +26,18 @@ L'encodage AVIF est mis au plus rapide pendant les tests (`AVIF_EFFORT=0`, dans 
 Ils tournent dans le **conteneur officiel Playwright**, contre un serveur déjà démarré, et n'installent rien sur la machine.
 
 ```bash
-BASE_URL=http://<hôte>:<port> E2E_LOCAL_AUTH=<LOCAL_AUTH_TOKEN du serveur> npm run e2e
+BASE_URL=http://<hôte>:<port> E2E_LOCAL_AUTH=<LOCAL_AUTH_TOKEN du serveur> E2E_ALLOW_WRITES=1 npm run e2e
 ```
 
 | Projet | Contenu |
 |---|---|
 | `setup` | connexion locale de test ; la session est réutilisée ensuite |
 | `desktop`, `mobile` (Pixel 7) | rendu, ouverture et bouton pause, filtres sans rechargement, visionneuse (clavier, glissé), site sans JavaScript, pages de l'admin |
-| `parcours` | après les deux précédents : import, édition, publication, réordonnancement et suppression d'une photo ; séries ; filigrane (aperçu, application, retour) ; déconnexion |
+| `parcours` | après les deux précédents, **seulement avec `E2E_ALLOW_WRITES=1`** : import, édition, publication, réordonnancement (glisser-déposer, y compris en dernière place, et boutons) et suppression d'une photo ; séries ; filigrane (aperçu, application, retour) ; déconnexion |
 
-- **Données :** le projet `parcours` **modifie les données**, puis les remet en état ; il nettoie aussi les restes d'un passage interrompu.
+- **Données :** le projet `parcours` **modifie les données**. Il ne suppose rien du contenu, nettoie les restes d'un passage interrompu, puis restaure à l'identique les réglages d'images trouvés (même en cas d'échec). À réserver à un serveur de test.
+- **Accessibilité :** audit axe-core (WCAG 2.2 A/AA) des pages publiques et de l'admin ; aucune violation sérieuse tolérée.
+- **Temps :** le diaporama est testé avec l'horloge simulée de Playwright (pas d'attente réelle).
 - **Erreurs :** toute erreur JavaScript, toute violation de la politique de sécurité du contenu et toute ressource en échec fait échouer le test.
 - **Résultats :** captures et traces dans `e2e/results/`, rapport HTML dans `e2e/report/`.
 

@@ -34,10 +34,27 @@ test('preuve d’antériorité : horodatage affiché et vérifié', async ({ pag
   await page.goto('/admin/photos');
   await page.locator('.plist a.ttl').first().click();
   const proof = page.locator('#preuve');
-  await expect(proof.getByText(/^Horodatée le \d{4}-\d{2}-\d{2} à /)).toBeVisible({ timeout: 30_000 });
+  test.skip(await proof.getByText(/Désactivé sur ce serveur/).count() > 0, 'horodatage désactivé (TSA_URL=off)');
+  // Page rendue côté serveur : on la recharge jusqu'à ce que l'horodatage soit fait.
+  await expect.poll(async () => {
+    await page.reload();
+    return proof.getByText(/^Horodatée le \d{4}-\d{2}-\d{2} à /).count();
+  }, { timeout: 60_000, intervals: [2000] }).toBe(1);
   await expect(proof.locator('code')).toHaveText(/^[0-9a-f]{64}$/);
   await proof.getByRole('button', { name: 'Vérifier la preuve' }).click();
   await expect(page.getByRole('status').first()).toContainText('Preuve valide : original intact');
   const [download] = await Promise.all([page.waitForEvent('download'), proof.getByRole('link', { name: 'Fiche de preuve' }).click()]);
   expect(download.suggestedFilename()).toMatch(/-preuve\.txt$/);
+});
+
+// Audit automatique d'accessibilité (axe-core, WCAG 2.2 A/AA) des pages de l'admin.
+test('accessibilité de l’admin : aucune violation sérieuse', async ({ page }) => {
+  const { default: AxeBuilder } = await import('@axe-core/playwright');
+  await page.emulateMedia({ reducedMotion: 'reduce' });   // mesure l'état final, pas une animation d'apparition
+  for (const url of ['/admin', '/admin/photos', '/admin/series', '/admin/auteurs', '/admin/images', '/admin/reglages']) {
+    await page.goto(url);
+    const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+    const serious = violations.filter(v => ['serious', 'critical'].includes(v.impact));
+    expect(serious.map(v => `${url} ${v.id} : ${v.nodes.map(n => n.target.join(' ')).slice(0, 3).join(' | ')}`)).toEqual([]);
+  }
 });

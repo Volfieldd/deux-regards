@@ -28,6 +28,8 @@ La spécification complète est dans [`docs/specs/filigrane-et-exif.md`](https:/
    - toutes ;
    - 1280 px et plus, pour épargner les vignettes de la grille ;
    - 2000 px seulement, pour ne marquer que la plus grande image.
+
+   Dans tous les cas, la plus grande image produite pour une photo est marquée, même si l'original est plus petit que le seuil.
 7. Cliquer sur **Aperçu sans enregistrer** : le rendu s'ouvre dans un nouvel onglet, sur la photo choisie dans « Photo d'aperçu ». Rien n'est enregistré.
 8. Une fois le résultat convenable, cliquer sur **Enregistrer et mettre à jour les images**.
 
@@ -41,7 +43,7 @@ Un bandeau indique ensuite la progression (« Mise à jour des images en cours :
 
 ## Mettre un logo
 
-1. Dans **Logo du filigrane**, envoyer une image **PNG ou WebP à fond transparent** (5 Mo et 4000 px de côté au plus).
+1. Dans **Logo du filigrane**, envoyer une image **PNG ou WebP à fond transparent** : 5 Mo et 4000 px de côté au plus, 8 px au moins, et un rapport largeur/hauteur de 10 au plus.
 2. Dans le formulaire du filigrane, choisir **Type : Logo (image)**, puis enregistrer.
 
 Envoyer un nouveau logo remplace l'ancien. **Retirer le logo** supprime le filigrane de type « Logo » jusqu'au prochain envoi.

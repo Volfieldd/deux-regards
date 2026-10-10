@@ -44,8 +44,9 @@ test('slugify', () => {
 
 test('un seed qui échoue ne laisse aucun fichier orphelin', async t => {
   const { db, config } = await setup(t);
-  db.prepare("INSERT INTO authors (slug, name) VALUES ('julien', 'Déjà là')").run();  // fera échouer la transaction
-  await assert.rejects(seed(db, config), /UNIQUE/);
+  // Fait échouer la transaction après l'écriture des fichiers.
+  db.exec("CREATE TRIGGER echec BEFORE INSERT ON photos BEGIN SELECT RAISE(ABORT, 'échec simulé'); END;");
+  await assert.rejects(seed(db, config), /échec simulé/);
   const ls = d => (fs.existsSync(d) ? fs.readdirSync(d) : []);
   assert.deepEqual(ls(path.join(config.storageDir, 'originals')), []);
   assert.deepEqual(ls(path.join(config.storageDir, 'variants')), []);

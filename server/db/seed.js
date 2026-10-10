@@ -9,7 +9,8 @@ const SEED_DIR = new URL('../../seed/', import.meta.url);
 
 // Charge le jeu de démonstration (12 photos du prototype). Ne fait rien si la base contient déjà des photos.
 export async function seed(db, { storageDir }) {
-  if (db.prepare('SELECT count(*) FROM photos').pluck().get() > 0) return { skipped: true };
+  const existing = db.prepare('SELECT (SELECT count(*) FROM photos) + (SELECT count(*) FROM authors) + (SELECT count(*) FROM categories)').pluck().get();
+  if (existing > 0) return { skipped: true };
 
   const data = JSON.parse(fs.readFileSync(new URL('data.json', SEED_DIR), 'utf8'));
   const originals = path.join(storageDir, 'originals');

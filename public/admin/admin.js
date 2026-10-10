@@ -20,10 +20,13 @@
       input.files = e.dataTransfer.files;
       show();
     });
+    const submit = form.querySelector('button[type=submit]');
     form.addEventListener('submit', () => {
       progress.textContent = 'Import en cours… les variantes sont générées, cela peut prendre un moment.';
-      form.querySelector('button[type=submit]').disabled = true;
+      submit.disabled = true;
     });
+    // Retour arrière (cache de navigation) : le formulaire redevient utilisable.
+    addEventListener('pageshow', () => { submit.disabled = false; progress.textContent = ''; show(); });
   }
 
   // ----- réordonnancement des photos par glisser-déposer -----
@@ -31,7 +34,16 @@
   const list = document.querySelector('.plist[data-sortable]');
   if (list) {
     let dragged = null;
-    const clear = () => list.querySelectorAll('.drop-before').forEach(li => li.classList.remove('drop-before'));
+    const clear = () => list.querySelectorAll('.drop-before, .drop-after').forEach(li => li.classList.remove('drop-before', 'drop-after'));
+    // Moitié basse de la ligne visée : on dépose après elle (indispensable pour atteindre la dernière place).
+    const after = (li, e) => e.clientY > li.getBoundingClientRect().top + li.offsetHeight / 2;
+    // Numéros et boutons ↑ ↓ suivent l'ordre affiché.
+    const renumber = () => [...list.children].forEach((el, i, all) => {
+      el.querySelector('.handle').textContent = `N°${String(i + 1).padStart(2, '0')}`;
+      const [up, down] = el.querySelectorAll('.move button');
+      if (up) up.disabled = i === 0;
+      if (down) down.disabled = i === all.length - 1;
+    });
     list.querySelectorAll('li').forEach(li => {
       li.draggable = true;
       li.addEventListener('dragstart', e => { dragged = li; li.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
@@ -40,13 +52,13 @@
         if (!dragged || dragged === li) return;
         e.preventDefault();
         clear();
-        li.classList.add('drop-before');
+        li.classList.add(after(li, e) ? 'drop-after' : 'drop-before');
       });
       li.addEventListener('drop', async e => {
         e.preventDefault();
         if (!dragged || dragged === li) return;
         const before = [...list.children];
-        list.insertBefore(dragged, li);
+        list.insertBefore(dragged, after(li, e) ? li.nextSibling : li);
         clear();
         const ids = [...list.children].map(el => Number(el.dataset.id));
         try {
@@ -56,10 +68,10 @@
             body: JSON.stringify({ ids }),
           });
           if (!res.ok) throw new Error(res.status);
-          // Les numéros suivent la position, comme sur le site.
-          [...list.children].forEach((el, i) => { el.querySelector('.handle').textContent = `N°${String(i + 1).padStart(2, '0')}`; });
+          renumber();
         } catch {
           before.forEach(el => list.appendChild(el));
+          renumber();
           alert('L’ordre n’a pas pu être enregistré. Rechargez la page et réessayez.');
         }
       });
@@ -68,19 +80,33 @@
 })();
 
 // ----- progression de la mise à jour des images -----
+// Le nombre se met à jour sans être relu à chaque fois ; seul le message final est annoncé.
 (function () {
   const box = document.querySelector('[data-variants]');
   if (!box || !box.querySelector('[data-done]')) return;
+  const done = box.querySelector('[data-done]');
+  const total = box.querySelector('[data-total]');
+  const final = box.querySelector('[data-final]');
+  const finish = (text, error) => {
+    clearInterval(timer);
+    box.querySelector('[data-running]').hidden = true;
+    box.classList.toggle('error', Boolean(error));
+    final.textContent = text;
+  };
   const timer = setInterval(async () => {
     try {
-      const s = await (await fetch('/admin/images/etat', { headers: { accept: 'application/json' } })).json();
-      box.querySelector('[data-done]').textContent = s.done;
+      const res = await fetch('/admin/images/etat', { headers: { accept: 'application/json' }, redirect: 'manual' });
+      if (!res.ok) return finish('Suivi interrompu : session expirée ? Rechargez la page.', true);
+      const s = await res.json();
+      done.textContent = s.done;
+      if (total) total.textContent = s.total;
       if (!s.running) {
-        clearInterval(timer);
-        box.querySelector('p').textContent = s.errors.length
-          ? `${s.errors.length} image(s) n’ont pas pu être recalculées.`
-          : 'Images à jour.';
+        finish(s.errors.length
+          ? `${s.errors.length} image(s) n’ont pas pu être recalculées : ${s.errors.map(e => e.title).join(', ')}.`
+          : 'Images à jour.', s.errors.length);
       }
-    } catch { clearInterval(timer); }
+    } catch {
+      finish('Suivi interrompu. Rechargez la page pour voir l’état des images.', true);
+    }
   }, 1500);
 })();

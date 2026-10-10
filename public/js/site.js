@@ -1,10 +1,27 @@
 // Amélioration progressive : le site fonctionne sans ce script (liens et pages serveur).
 (function () {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('[data-js-only]').forEach(el => { el.hidden = false; });
 
   // ----- dissuasion : pas de clic droit ni de glisser sur les images -----
   document.addEventListener('contextmenu', e => { if (e.target.closest('img, picture')) e.preventDefault(); });
   document.addEventListener('dragstart', e => { if (e.target.closest('img, picture')) e.preventDefault(); });
+
+  // Glissé horizontal franc à un doigt (pas un pincement, pas un défilement vertical).
+  function onSwipe(el, handler, { ignore } = {}) {
+    let start = null;
+    el.addEventListener('touchstart', e => {
+      start = e.touches.length === 1 && !(ignore && e.target.closest(ignore)) ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+    }, { passive: true });
+    el.addEventListener('touchmove', e => { if (e.touches.length > 1) start = null; }, { passive: true });
+    el.addEventListener('touchend', e => {
+      if (!start || (window.visualViewport && visualViewport.scale > 1.01)) { start = null; return; }
+      const dx = e.changedTouches[0].clientX - start.x;
+      const dy = e.changedTouches[0].clientY - start.y;
+      start = null;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) handler(dx < 0 ? 1 : -1);
+    });
+  }
 
   function stagger(root) {
     root.querySelectorAll('.tile').forEach((t, i) => { t.style.animationDelay = `${Math.min(i, 12) * 50}ms`; });
@@ -19,7 +36,8 @@
     const bar = hero.querySelector('.bar');
     const pause = hero.querySelector('[data-pause]');
     // Défilement automatique, avec un bouton pour l'arrêter (WCAG 2.2.2) ; jamais si l'animation est réduite.
-    let cur = 0, timer = null, paused = reduce;
+    // Suspendu tant que le pointeur ou le focus clavier est dans l'ouverture (le lien « Voir la photo » ne disparaît pas sous le focus).
+    let cur = 0, timer = null, paused = reduce, hold = false;
     const show = i => {
       cur = (i + items.length) % items.length;
       const sync = el => el.classList.toggle('on', Number(el.dataset.h) === cur);
@@ -27,10 +45,11 @@
       thumbs.forEach(b => b.setAttribute('aria-current', String(Number(b.dataset.h) === cur)));
       clearTimeout(timer);
       if (bar) bar.classList.remove('run');
-      if (!bar || paused) return;
+      if (!bar || paused || hold) return;
       void bar.offsetWidth; bar.classList.add('run');
       timer = setTimeout(() => show(cur + 1), 6000);
     };
+    const setHold = v => { if (hold !== v) { hold = v; show(cur); } };
     if (items.length > 1) {
       if (pause && !reduce) {
         pause.hidden = false;
@@ -41,9 +60,11 @@
         });
       }
       hero.querySelector('.strip').addEventListener('click', e => { const b = e.target.closest('button[data-h]'); if (b) show(Number(b.dataset.h)); });
-      let x = null;
-      hero.addEventListener('touchstart', e => { x = e.touches[0].clientX; }, { passive: true });
-      hero.addEventListener('touchend', e => { if (x === null) return; const dx = e.changedTouches[0].clientX - x; x = null; if (Math.abs(dx) > 50) show(cur + (dx < 0 ? 1 : -1)); });
+      hero.addEventListener('mouseenter', () => setHold(true));
+      hero.addEventListener('mouseleave', () => setHold(hero.contains(document.activeElement)));
+      hero.addEventListener('focusin', () => setHold(true));
+      hero.addEventListener('focusout', e => { if (!hero.contains(e.relatedTarget)) setHold(hero.matches(':hover')); });
+      onSwipe(hero, step => show(cur + step), { ignore: '.strip' });
       document.addEventListener('visibilitychange', () => { if (document.hidden) clearTimeout(timer); else show(cur); });
       show(0);
     }
@@ -63,24 +84,43 @@
 
   // ----- filtres sans rechargement : on remplace les blocs concernés par ceux de la page cible -----
   const SWAP = ['regards', 'series', 'galerie', 'grid'];
-  async function swapTo(url, { push, scroll }) {
+  const here = () => location.pathname + location.search;
+  let shown = here();            // URL dont le contenu est affiché
+  let seq = 0;                   // seule la dernière requête lancée est appliquée
+  let inflight = null;
+
+  async function swapTo(url, { push, scroll, focusHref }) {
     const grid = document.getElementById('grid');
     if (!grid) { location.href = url; return; }
+    const id = ++seq;
+    inflight?.abort();
+    inflight = new AbortController();
     grid.classList.add('swapping');
     try {
-      const res = await fetch(url, { headers: { accept: 'text/html' } });
+      const res = await fetch(url, { headers: { accept: 'text/html' }, signal: inflight.signal });
       if (!res.ok) throw new Error(res.status);
       const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
-      for (const id of SWAP) {
-        const next = doc.getElementById(id), now = document.getElementById(id);
+      if (id !== seq) return;
+      for (const sid of SWAP) {
+        const next = doc.getElementById(sid), now = document.getElementById(sid);
         if (next && now) now.replaceWith(document.importNode(next, true));
       }
       document.title = doc.title;
       stagger(document.getElementById('grid'));
       if (push) history.pushState({ swap: true }, '', url);
+      shown = here();
+      // Annonce du résultat et focus conservé sur le lien activé (WCAG 2.4.3, 4.1.3).
+      const head = document.querySelector('#galerie h3');
+      const count = document.querySelector('#galerie .mono');
+      const announce = document.querySelector('[data-announce]');
+      if (announce && head) announce.textContent = `${head.textContent.trim()} : ${count ? count.textContent.trim().split(' · ')[0] : ''}`;
+      const target = focusHref && [...document.querySelectorAll('a[data-filter]')].find(a => a.getAttribute('href') === focusHref);
       if (scroll) document.getElementById('galerie').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
-    } catch {
-      location.href = url;
+      (target || (focusHref ? head : null))?.focus({ preventScroll: true });
+    } catch (err) {
+      if (err.name !== 'AbortError') location.href = url;
+    } finally {
+      if (id === seq) document.getElementById('grid')?.classList.remove('swapping');
     }
   }
   document.addEventListener('click', e => {
@@ -90,11 +130,12 @@
     const url = new URL(a.href, location.href);
     const scroll = a.hasAttribute('data-scroll') || url.hash === '#galerie';
     url.hash = '';
-    swapTo(url.href, { push: true, scroll });
+    swapTo(url.href, { push: true, scroll, focusHref: a.getAttribute('href') });
   });
   if (document.getElementById('grid')) {
-    history.replaceState({ swap: true }, '');
-    addEventListener('popstate', e => { if (e.state?.swap) swapTo(location.href, { push: false, scroll: false }); });
+    // Retour/avance : on recharge les blocs dès que l'URL affichée diffère du contenu (y compris
+    // depuis une entrée d'ancre comme #series, qui n'a pas d'état).
+    addEventListener('popstate', () => { if (here() !== shown) swapTo(here(), { push: false, scroll: false }); });
     stagger(document);
   }
 
@@ -102,14 +143,13 @@
   const viewer = document.querySelector('[data-viewer]');
   if (viewer) {
     const go = key => { const url = viewer.dataset[key]; if (url) location.href = url; };
+    const several = viewer.dataset.prev !== viewer.dataset.next || viewer.querySelector('.nav');
     document.addEventListener('keydown', e => {
-      if (e.altKey || e.ctrlKey || e.metaKey) return;
-      if (e.key === 'ArrowLeft') go('prev');
-      else if (e.key === 'ArrowRight') go('next');
-      else if (e.key === 'Escape') go('back');
+      if (e.altKey || e.ctrlKey || e.metaKey || e.target.closest('input, textarea, select, [contenteditable]')) return;
+      if (e.key === 'Escape') go('back');
+      else if (several && e.key === 'ArrowLeft') go('prev');
+      else if (several && e.key === 'ArrowRight') go('next');
     });
-    let x = null;
-    viewer.addEventListener('touchstart', e => { x = e.touches[0].clientX; }, { passive: true });
-    viewer.addEventListener('touchend', e => { if (x === null) return; const dx = e.changedTouches[0].clientX - x; x = null; if (Math.abs(dx) > 50) go(dx < 0 ? 'next' : 'prev'); });
+    if (several) onSwipe(viewer.querySelector('.vimg'), step => go(step > 0 ? 'next' : 'prev'));
   }
 })();
