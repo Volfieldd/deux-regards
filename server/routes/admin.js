@@ -3,7 +3,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import multipart from '@fastify/multipart';
-import { createAdminRepo, ValidationError } from '../admin-repo.js';
+import { createAdminRepo, ValidationError, titleFromFilename } from '../admin-repo.js';
+import { createImportTracker } from '../imports.js';
+import { variantName, widthsFor } from '../images.js';
 import { importOriginal, removePhotoFiles, ImportError, MAX_FILE_BYTES } from '../media.js';
 import { picture } from '../picture.js';
 import { sameToken, safeNext } from '../auth.js';
@@ -21,8 +23,7 @@ const LOGO_MAX_SIDE = 4000;
 const MAX_FILES = 50;
 const STATUSES = { draft: 'Brouillon', published: 'Publiée' };
 
-// « IMG_2041 quai-nord.jpg » → « IMG 2041 quai nord »
-export const titleFromFilename = name => path.parse(String(name || '')).name.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160) || 'Sans titre';
+export { titleFromFilename };
 
 // Administration : tout passe par requireAdmin ; chaque écriture par verifyCsrf.
 export default async function adminRoutes(app) {
@@ -38,6 +39,15 @@ export default async function adminRoutes(app) {
     throwFileSizeLimit: false,
     limits: { fileSize: MAX_FILE_BYTES, files: MAX_FILES, fields: 10, fieldSize: 2000, parts: MAX_FILES + 10 },
   });
+
+  // Photos envoyées une à une : rendu en arrière-plan, suivi consultable (/admin/photos/traitement).
+  const tracker = createImportTracker({
+    render: (id, onStep) => app.variants.renderPhoto(id, { onStep }),
+    onReady: () => app.proofs.schedule(),
+    onFailed: id => { const file = repo.deletePhoto(id); if (file) removePhotoFiles(storageDir, file); },
+    log: app.log,
+  });
+  app.addHook('onClose', async () => { await tracker.idle(); });
 
   app.addHook('preHandler', app.requireAdmin);
   // Journal d'audit : qui a modifié quoi (les co-admins ont tous les droits).
@@ -68,12 +78,19 @@ export default async function adminRoutes(app) {
     return reply.render(`admin/${template}`, {
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply),
       section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
-      local: request.session.sub.startsWith('local:') || !request.session.id_token,
+      local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
       description: '', ...data, pageTitle: `${data.title} · Administration · ${siteName}`,
     });
   }
 
   const byId = id => (Number.isInteger(Number(id)) ? Number(id) : -1);
+  // Variantes prêtes : la plus petite existe (les brouillons tout juste envoyés n'en ont pas encore).
+  const rendered = p => {
+    const job = tracker.get(p.id);
+    if (job && (job.state === 'waiting' || job.state === 'processing')) return false;
+    return fs.existsSync(path.join(storageDir, 'variants', variantName(p.file, widthsFor(p.width)[0], 'webp', p.variant_key)));
+  };
+  const withReady = p => p && { ...p, ready: rendered(p) };
 
   // ---------- accueil ----------
   app.get('/admin', async (request, reply) => {
@@ -91,10 +108,15 @@ export default async function adminRoutes(app) {
     const { q = '', auteur = '', serie = '', statut = '' } = request.query;
     const filter = { q: String(q), author: String(auteur), category: String(serie), status: STATUSES[statut] ? statut : '' };
     const authors = repo.authors();
+    const all = repo.photos();
     return render(request, reply, 'photos', {
-      title: 'Photos', photos: repo.photos(filter), filter, authors, categories: repo.categories(),
+      title: 'Photos', photos: repo.photos(filter).map(withReady), filter, authors, categories: repo.categories(),
       filtered: Boolean(filter.q || filter.author || filter.category || filter.status),
+      totals: { all: all.length, published: all.filter(p => p.status === 'published').length, draft: all.filter(p => p.status === 'draft').length },
+      view: request.query.vue === 'grille' ? 'grille' : 'liste', importer: 'importer' in request.query,
       defaultAuthor: repo.authorBySub(request.session.sub)?.id ?? authors[0]?.id,
+      defaultCategory: repo.categories().find(c => c.slug === filter.category)?.id ?? repo.categories()[0]?.id,
+      maxFileBytes: MAX_FILE_BYTES,
     });
   });
 
@@ -141,7 +163,7 @@ export default async function adminRoutes(app) {
         let original = null;
         try {
           original = await importOriginal(storageDir, tmp);
-          id = repo.addPhoto({ title: titleFromFilename(part.filename), categoryId, authorId, ...original });
+          id = repo.addPhoto({ title: titleFromFilename(part.filename), categoryId, authorId, sourceName: part.filename, ...original });
           await app.variants.renderPhoto(id);
           imported.push({ id, name: part.filename });
         } catch (err) {
@@ -168,6 +190,211 @@ export default async function adminRoutes(app) {
     const details = refused.map(r => `${r.name} : ${r.reason}`);
     const text = `${imported.length} photo(s) importée(s) en brouillon${refused.length ? `, ${refused.length} refusée(s)` : ''}.`;
     return (imported.length ? done : failed)(reply, '/admin/photos?statut=draft', text, details);
+  });
+
+
+  // Envoi d'une seule photo (page d'import, avec JavaScript) : réponse dès l'original rangé,
+  // les variantes sont rendues ensuite (suivi : /admin/photos/traitement).
+  app.post('/admin/photos/envoi', async (request, reply) => {
+    const fields = {};
+    let checked = false;
+    let result = null;
+    const refuse = (code, error) => { result = { code, error }; };
+    try {
+      for await (const part of request.parts({ limits: { files: 1 } })) {
+        if (part.type === 'field') {
+          fields[part.fieldname] = part.value;
+          if (part.fieldname === '_csrf') checked = sameToken(part.value, request.session.csrf);
+          continue;
+        }
+        if (!checked || result) { part.file.resume(); continue; }
+        const categoryId = Number(fields.category_id);
+        const authorId = Number(fields.author_id);
+        if (!repo.categories().some(c => c.id === categoryId) || !repo.authors().some(a => a.id === authorId)) {
+          part.file.resume();
+          refuse(422, 'série ou auteur invalide');
+          continue;
+        }
+        const tmp = path.join(tmpDir, crypto.randomUUID());
+        try {
+          await pipeline(part.file, fs.createWriteStream(tmp));
+        } catch (err) {
+          fs.rmSync(tmp, { force: true });            // envoi interrompu (annulé) : rien ne reste dans tmp/
+          throw err;
+        }
+        if (part.file.truncated) {
+          fs.rmSync(tmp, { force: true });
+          refuse(413, `trop lourde (${MAX_FILE_BYTES / 1024 / 1024} Mo au plus)`);
+          continue;
+        }
+        try {
+          const original = await importOriginal(storageDir, tmp);
+          const title = titleFromFilename(part.filename);
+          const id = repo.addPhoto({ title, categoryId, authorId, sourceName: part.filename, ...original });
+          tracker.add(id, part.filename);
+          result = { code: 200, id, title };
+        } catch (err) {
+          if (!(err instanceof ImportError)) throw err;
+          refuse(422, err.message);
+        }
+      }
+    } catch (err) {
+      if (err.code === 'FST_INVALID_MULTIPART_CONTENT_TYPE') return reply.code(400).send({ error: 'Envoi multipart attendu.' });
+      if (err.code !== 'FST_FILES_LIMIT' && err.code !== 'FST_PARTS_LIMIT') throw err;
+    }
+    if (!checked) return reply.code(403).send({ error: 'Jeton CSRF invalide.' });
+    if (!result) return reply.code(400).send({ error: 'Aucun fichier reçu.' });
+    const { code, ...payload } = result;
+    if (code === 200) request.log.info({ photo: payload.id }, 'photo envoyée');
+    return reply.code(code).send(payload);
+  });
+
+  // État du traitement : par photo (?ids=1,2) et nombre de photos encore en cours (indicateur d'en-tête).
+  const thumb = p => `/admin/media/${variantName(p.file, widthsFor(p.width)[0], 'webp', p.variant_key)}`;
+  app.get('/admin/photos/traitement', async request => {
+    const ids = String(request.query.ids || '').split(',').filter(Boolean).map(Number).filter(Number.isInteger).slice(0, 200);
+    return {
+      active: tracker.active(),
+      photos: ids.map(id => {
+        const job = tracker.get(id);
+        if (job?.state === 'error') return { id, state: 'error', error: job.error };
+        const p = repo.photo(id);
+        if (!p) return { id, state: 'missing' };
+        const ready = rendered(p);
+        return { id, state: ready ? 'ready' : (job?.state || 'processing'), done: job?.done ?? 0, total: job?.total ?? 0, thumb: ready ? thumb(p) : null };
+      }),
+    };
+  });
+
+  // ---------- compléter un lot ----------
+  const lotIds = raw => [...new Set(String([].concat(raw || []).join(',')).split(',').filter(Boolean).map(Number))].filter(Number.isInteger).slice(0, 200);
+  const lotPage = (request, reply, ids, extra = {}) => {
+    const byIdMap = new Map(repo.photos().map(p => [p.id, withReady(p)]));
+    const photos = ids.map(id => byIdMap.get(id)).filter(Boolean);
+    return render(request, reply, 'batch', {
+      title: 'Compléter et publier', photos, ids: photos.map(p => p.id), categories: repo.categories(), authors: repo.authors(),
+      errors: {}, values: {}, ...extra,
+    });
+  };
+  app.get('/admin/photos/lot', async (request, reply) => {
+    const ids = lotIds(request.query.ids);
+    if (!ids.length) return reply.redirect('/admin/photos?statut=draft', 303);
+    return lotPage(request, reply, ids);
+  });
+
+  // Sans JavaScript : tout le tableau est envoyé d'un coup (champs titre_<id>, serie_<id>…).
+  app.post('/admin/photos/lot', write, async (request, reply) => {
+    const body = request.body || {};
+    const ids = repo.existingIds(lotIds(body.ids));
+    const errors = {};
+    const values = {};
+    for (const id of ids) {
+      const fields = { title: body[`title_${id}`], category_id: body[`category_id_${id}`], place: body[`place_${id}`], taken_on: body[`taken_on_${id}`] };
+      for (const k of Object.keys(fields)) if (fields[k] === undefined) delete fields[k];
+      try {
+        repo.patchPhoto(id, fields);
+      } catch (err) {
+        if (!(err instanceof ValidationError)) throw err;
+        errors[id] = err.errors;
+        values[id] = fields;
+      }
+    }
+    app.variants.schedule();
+    if (Object.keys(errors).length) return lotPage(request, reply.code(422), ids, { errors, values });
+    const to = `/admin/photos/lot?ids=${ids.join(',')}`;
+    if (body.publish === '1') {
+      repo.setStatuses(Object.fromEntries(ids.map(id => [id, 'published'])));
+      return done(reply, '/admin/photos', `${ids.length} photo${ids.length > 1 ? 's publiées' : ' publiée'}.`);
+    }
+    return done(reply, to, 'Modifications enregistrées.');
+  });
+
+  // Un champ à la fois (enregistrement à la sortie du champ). Réponse : valeurs telles qu'enregistrées.
+  app.post('/admin/photos/:id/champs', write, async (request, reply) => {
+    const id = byId(request.params.id);
+    try {
+      const p = repo.patchPhoto(id, request.body || {});
+      if (!p) return reply.code(404).send({ error: 'Photo introuvable.' });
+      app.variants.schedule();
+      const shown = repo.photos().find(x => x.id === id);
+      return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, place: p.place, taken_on: p.taken_on, when: shown?.when || '', provisional: shown?.provisional || false } };
+    } catch (err) {
+      if (!(err instanceof ValidationError)) throw err;
+      return reply.code(422).send({ errors: err.errors });
+    }
+  });
+
+  // ---------- actions sur plusieurs photos ----------
+  // JSON (barre de sélection) ou formulaire classique. Les réponses JSON portent de quoi annuler.
+  app.post('/admin/photos/actions', write, async (request, reply) => {
+    const body = request.body || {};
+    const json = !request.headers.accept?.includes('text/html');
+    const back = safeBack(request, '/admin/photos');
+    const ids = repo.existingIds(body.ids);
+    const n = ids.length;
+    const photosWord = `${n} photo${n > 1 ? 's' : ''}`;
+    const ok = (text, extra = {}) => (json ? reply.send({ ok: true, count: n, text, ...extra }) : done(reply, back, text));
+    const ko = (code, text) => (json ? reply.code(code).send({ error: text }) : failed(reply, back, text));
+    const each = value => Object.fromEntries(ids.map(id => [id, value]));
+    const map = raw => { try { return typeof raw === 'string' ? JSON.parse(raw) : raw || {}; } catch { return {}; } };
+
+    try {
+      switch (body.action) {
+        case 'publish':
+        case 'draft': {
+          if (!n) return ko(422, 'Aucune photo sélectionnée.');
+          const before = repo.setStatuses(each(body.action === 'publish' ? 'published' : 'draft'));
+          const verb = body.action === 'publish' ? 'publiée' : 'repassée en brouillon';
+          return ok(`${photosWord} ${n > 1 ? verb.replace('publiée', 'publiées').replace('repassée', 'repassées') : verb}.`, { undo: { action: 'statuses', map: before } });
+        }
+        case 'category': {
+          if (!n) return ko(422, 'Aucune photo sélectionnée.');
+          // « Nouvelle série… » : créée à la volée.
+          const targetId = body.category_id === 'new' ? repo.saveCategory(null, { name: body.new_category }) : Number(body.category_id);
+          const target = repo.categories().find(c => c.id === targetId);
+          if (!target) return ko(422, 'Choisissez une série.');
+          const before = repo.setCategories(each(target.id));
+          app.variants.schedule();
+          return ok(`${photosWord} ${n > 1 ? 'déplacées' : 'déplacée'} vers « ${target.name} ».`, { undo: { action: 'categories', map: before }, category: { id: target.id, name: target.name } });
+        }
+        case 'fields': {
+          if (!n) return ko(422, 'Aucune photo sélectionnée.');
+          const v = repo.setFields(ids, body);
+          app.variants.schedule();
+          return ok(`${photosWord} ${n > 1 ? 'mises' : 'mise'} à jour.`, { values: v });
+        }
+        // Annulations (JSON) : état précédent renvoyé par l'action annulée.
+        case 'statuses': {
+          const m = map(body.map);
+          repo.setStatuses(Object.fromEntries(Object.entries(m).filter(([id]) => repo.photo(Number(id)))));
+          return json ? reply.send({ ok: true, text: 'Action annulée.' }) : done(reply, back, 'Action annulée.');
+        }
+        case 'categories': {
+          const m = map(body.map);
+          repo.setCategories(Object.fromEntries(Object.entries(m).filter(([id]) => repo.photo(Number(id)))));
+          app.variants.schedule();
+          return json ? reply.send({ ok: true, text: 'Déplacement annulé.' }) : done(reply, back, 'Déplacement annulé.');
+        }
+        case 'delete': {
+          if (!n) return ko(422, 'Aucune photo sélectionnée.');
+          // Sans confirmation explicite, rien n'est supprimé : page de confirmation (ou refus en JSON).
+          if (body.confirm !== '1' && body.confirm !== true) {
+            if (json) return ko(422, 'Confirmation requise.');
+            return render(request, reply, 'confirm-delete', { title: 'Supprimer des photos', photos: ids.map(id => repo.photo(id)), back });
+          }
+          for (const id of ids) {
+            const file = repo.deletePhoto(id);
+            if (file) removePhotoFiles(storageDir, file);
+          }
+          return ok(`${photosWord} ${n > 1 ? 'supprimées' : 'supprimée'}.`);
+        }
+        default:
+          return ko(400, 'Action inconnue.');
+      }
+    } catch (err) {
+      if (!(err instanceof ValidationError)) throw err;
+      return ko(422, Object.values(err.errors).join(' '));
+    }
   });
 
   // Réordonnancement par glisser-déposer (fetch JSON, en-tête x-csrf-token).
@@ -296,18 +523,18 @@ export default async function adminRoutes(app) {
 
   // ---------- séries ----------
   const seriesPage = (request, reply, extra = {}) => render(request, reply, 'series', {
-    title: 'Séries', categories: repo.categories(), errors: {}, values: {}, ...extra,
+    title: 'Séries', categories: repo.categories(), covers: Object.fromEntries(Object.entries(repo.covers()).map(([k, p]) => [k, withReady(p)])), errors: {}, values: {}, ...extra,
   });
   app.get('/admin/series', async (request, reply) => seriesPage(request, reply));
 
   app.post('/admin/series', write, async (request, reply) => {
     try {
-      repo.saveCategory(null, request.body || {});
+      const id = repo.saveCategory(null, request.body || {});
+      return done(reply, `/admin/series#serie-${id}`, `Série « ${repo.categories().find(c => c.id === id).name} » créée.`);
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
       return seriesPage(request, reply.code(422), { errors: err.errors, values: err.values });
     }
-    return done(reply, '/admin/series', 'Série créée.');
   });
 
   app.post('/admin/series/:id', write, async (request, reply) => {
@@ -319,22 +546,39 @@ export default async function adminRoutes(app) {
       if (!(err instanceof ValidationError)) throw err;
       return seriesPage(request, reply.code(422), { editErrors: { id, errors: err.errors, values: err.values } });
     }
-    return done(reply, '/admin/series', 'Série enregistrée.');
+    return done(reply, `/admin/series#serie-${id}`, 'Série enregistrée.');
+  });
+
+  // Ordre des séries par glisser-déposer ou flèches du clavier (fetch JSON).
+  app.post('/admin/series/order', write, async (request, reply) => {
+    try {
+      repo.orderCategories(Array.isArray(request.body?.ids) ? request.body.ids : []);
+    } catch (err) {
+      if (err instanceof ValidationError) return reply.code(422).send({ error: err.errors.order });
+      throw err;
+    }
+    return { ok: true };
   });
 
   app.post('/admin/series/:id/move', write, async (request, reply) => {
     repo.moveCategory(byId(request.params.id), request.body?.dir);
-    return reply.redirect('/admin/series', 303);
+    return reply.redirect(`/admin/series#serie-${byId(request.params.id)}`, 303);
   });
 
   app.post('/admin/series/:id/delete', write, async (request, reply) => {
+    let r;
     try {
-      if (!repo.deleteCategory(byId(request.params.id))) return reply.callNotFound();
+      r = repo.deleteCategory(byId(request.params.id), { moveTo: request.body?.move_to });
+      if (!r) return reply.callNotFound();
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
       return failed(reply, '/admin/series', err.errors.delete);
     }
-    return done(reply, '/admin/series', 'Série supprimée.');
+    if (r.moved) app.variants.schedule();
+    const target = r.moved ? repo.categories().find(c => c.id === Number(request.body.move_to)) : null;
+    return done(reply, '/admin/series', r.moved
+      ? `Série « ${r.name} » supprimée ; ${r.moved} photo${r.moved > 1 ? 's déplacées' : ' déplacée'} vers « ${target.name} ».`
+      : `Série « ${r.name} » supprimée.`);
   });
 
   // ---------- auteurs ----------
@@ -572,12 +816,14 @@ export default async function adminRoutes(app) {
 
   // ---------- réglages ----------
   app.get('/admin/reglages', async (request, reply) => render(request, reply, 'settings', {
+    heroMax: 8,
     title: 'Réglages', settings: repo.settings(), published: repo.photos({ status: 'published' }), defaultName: app.config.siteName,
   }));
 
   app.post('/admin/reglages', write, async (request, reply) => {
     repo.saveSettings(request.body || {});
     app.variants.schedule();            // {site} peut figurer dans le filigrane
+    if (request.body?.hero_op || request.body?.hero_save) return done(reply, '/admin/reglages#ouverture', 'Ordre de l’ouverture enregistré.');
     return done(reply, '/admin/reglages', 'Réglages enregistrés.');
   });
 }

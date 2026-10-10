@@ -2,7 +2,7 @@
 
 > **Livrables :** ce rapport ; [présentation de direction](audit-ergonomie-admin-direction.pdf) (12 diapositives, [PPTX](audit-ergonomie-admin-direction.pptx)) ; [présentation détaillée](audit-ergonomie-admin-detaille.pdf) (25 diapositives, [PPTX](audit-ergonomie-admin-detaille.pptx)) ; maquettes HTML autonomes dans [`images/`](images/) ; données structurées [`donnees-audit.json`](donnees-audit.json) ; **[écrans cibles et grille de notes actuel → cible](cible/README.md)** (14 écrans, 8/10 minimum à chaque critère).
 >
-> Parcours rejouables : `E2E_AUDIT=1 BASE_URL=… E2E_LOCAL_AUTH=… e2e/run.sh --project=audit` (`e2e/tests/audit.spec.js`, serveur de test uniquement : le parcours importe puis supprime des photos).
+> Parcours rejouables : `E2E_AUDIT=1 BASE_URL=… E2E_LOCAL_AUTH=… e2e/run.sh --project=audit` (`e2e/tests/audit.spec.js`, serveur de test uniquement : le parcours importe puis supprime des photos). Depuis la refonte (PR #13), ce fichier rejoue les mêmes tâches sur les nouveaux écrans et vérifie les seuils de [`cible/`](cible/README.md) ; la version qui a mesuré l'état « avant » est celle du commit `3f40f30`.
 
 
 **Date :** 2026-10-10  

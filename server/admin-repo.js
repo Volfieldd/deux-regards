@@ -1,8 +1,8 @@
+import path from 'node:path';
 import { slugify } from './slug.js';
 import { monthYear } from './format.js';
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const DATE_RE = /^\d{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12]\d|3[01]))?$/;
 
 export class ValidationError extends Error {
   constructor(errors) {
@@ -12,6 +12,40 @@ export class ValidationError extends Error {
 }
 
 const text = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
+
+// « IMG_2041 quai-nord.jpg » → « IMG 2041 quai nord »
+export const titleFromFilename = name => path.parse(String(name || '')).name.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160) || 'Sans titre';
+
+// Titre provisoire : encore celui tiré du nom du fichier envoyé.
+export const isProvisional = p => Boolean(p.source_name) && p.title === titleFromFilename(p.source_name);
+
+const MONTHS = ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre'];
+const two = n => String(n).padStart(2, '0');
+
+// Date de prise de vue en langage courant → AAAA-MM ou AAAA-MM-JJ ; null si vide ; undefined si incomprise.
+// « 2026-10 », « 10/2026 », « 5/10/2026 », « oct. 2026 », « octobre 2026 », « 1er oct 2026 ».
+export function parseTakenOn(input) {
+  const raw = text(input, 40);
+  if (!raw) return null;
+  const s = raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\./g, ' ').replace(/\s+/g, ' ').trim();
+  const ok = (y, m, d) => {
+    if (y < 1800 || y > 2200 || m < 1 || m > 12) return undefined;
+    if (d === undefined) return `${y}-${two(m)}`;
+    const date = new Date(Date.UTC(y, m - 1, d));
+    return date.getUTCMonth() === m - 1 && d >= 1 ? `${y}-${two(m)}-${two(d)}` : undefined;
+  };
+  let m;
+  if ((m = /^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/.exec(s))) return ok(+m[1], +m[2], m[3] && +m[3]);
+  if ((m = /^(\d{1,2})[/ -](\d{4})$/.exec(s))) return ok(+m[2], +m[1]);
+  if ((m = /^(\d{1,2})[/ -](\d{1,2})[/ -](\d{4})$/.exec(s))) return ok(+m[3], +m[2], +m[1]);
+  if ((m = /^(?:(\d{1,2})(?:er)? )?([a-z]+) (\d{4})$/.exec(s))) {
+    const found = MONTHS.map((name, i) => [name, i]).filter(([name]) => m[2].length >= 3 && name.startsWith(m[2]));
+    if (found.length !== 1) return undefined;
+    return ok(+m[3], found[0][1] + 1, m[1] && +m[1]);
+  }
+  return undefined;
+}
+export const DATE_HINT = 'Date non comprise : essayez « oct. 2026 », « 10/2026 » ou « 2026-10 ».';
 
 // Requêtes de l'administration. Toute écriture passe par ici ; les routes ne font pas de SQL.
 export function createAdminRepo(db) {
@@ -81,14 +115,14 @@ export function createAdminRepo(db) {
       return q.photos.all()
         .filter(p => (!author || p.author_slug === author) && (!category || p.category_slug === category) && (!status || p.status === status))
         .filter(p => !needle || [p.title, p.place, p.legend, p.slug].some(v => v.toLowerCase().includes(needle)))
-        .map(p => ({ ...p, n: p.position + 1, when: monthYear(p.taken_on) }));
+        .map(p => ({ ...p, n: p.position + 1, when: monthYear(p.taken_on), provisional: isProvisional(p) }));
     },
     photo: id => q.photo.get(id),
 
-    addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null }) {
+    addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null, sourceName = null }) {
       const position = db.prepare('SELECT COALESCE(MAX(position), -1) + 1 FROM photos').pluck().get();
-      const { lastInsertRowid } = db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height, sha256)
-        VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?)`).run(uniqueSlug('photos', title), title, categoryId, authorId, position, file, width, height, sha256);
+      const { lastInsertRowid } = db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height, sha256, source_name)
+        VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?)`).run(uniqueSlug('photos', title), title, categoryId, authorId, position, file, width, height, sha256, sourceName);
       return Number(lastInsertRowid);
     },
 
@@ -101,11 +135,11 @@ export function createAdminRepo(db) {
       if (!exists('categories', categoryId)) errors.category_id = 'Série inconnue.';
       const authorId = Number(body.author_id);
       if (!exists('authors', authorId)) errors.author_id = 'Auteur inconnu.';
-      const takenOn = text(body.taken_on, 10);
-      if (takenOn && !DATE_RE.test(takenOn)) errors.taken_on = 'Format AAAA-MM ou AAAA-MM-JJ.';
+      const takenOn = parseTakenOn(body.taken_on);
+      if (takenOn === undefined) errors.taken_on = DATE_HINT;
       const status = body.status === 'published' ? 'published' : 'draft';
       const watermark = body.watermark === 'none' ? 0 : null;
-      const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn || null, legend: text(body.legend, 2000), status, watermark };
+      const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn === undefined ? text(body.taken_on, 40) : takenOn, legend: text(body.legend, 2000), status, watermark };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
       const before = q.photo.get(id);
       db.transaction(() => {
@@ -117,6 +151,49 @@ export function createAdminRepo(db) {
           q.setSetting.run('hero', JSON.stringify(hero.map(s => (s === before.slug ? slug : s))));
         }
       })();
+    },
+
+    // Modification champ par champ (page « Compléter le lot ») : seuls les champs fournis sont relus.
+    patchPhoto(id, body) {
+      const p = q.photo.get(id);
+      if (!p) return null;
+      const merged = { ...p, taken_on: p.taken_on || '', watermark: p.watermark === 0 ? 'none' : 'default' };
+      for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend']) if (k in body) merged[k] = body[k];
+      // Brouillon dont l'adresse dérive encore du titre : elle suit le nouveau titre.
+      merged.slug = 'title' in body && p.status === 'draft' && p.slug === uniqueSlug('photos', p.title, id) ? '' : p.slug;
+      this.updatePhoto(id, merged);
+      return q.photo.get(id);
+    },
+
+    // Actions groupées. Renvoient l'état précédent pour pouvoir annuler.
+    existingIds: ids => [...new Set([].concat(ids || []).map(Number))].filter(id => q.photo.get(id)),
+    setStatuses(map) {
+      const set = db.prepare("UPDATE photos SET status = ?, updated_at = datetime('now') WHERE id = ?");
+      const before = {};
+      db.transaction(() => { for (const [id, status] of Object.entries(map)) { const p = q.photo.get(Number(id)); if (!p) continue; before[id] = p.status; set.run(status === 'published' ? 'published' : 'draft', Number(id)); } })();
+      return before;
+    },
+    setCategories(map) {
+      const set = db.prepare("UPDATE photos SET category_id = ?, updated_at = datetime('now') WHERE id = ?");
+      const before = {};
+      for (const c of Object.values(map)) if (!exists('categories', Number(c))) throw new ValidationError({ category_id: 'Série inconnue.' });
+      db.transaction(() => { for (const [id, c] of Object.entries(map)) { const p = q.photo.get(Number(id)); if (!p) continue; before[id] = p.category_id; set.run(Number(c), Number(id)); } })();
+      return before;
+    },
+    // Même lieu ou même date pour plusieurs photos (champ vide : inchangé).
+    setFields(ids, body) {
+      const errors = {};
+      const place = text(body.place, 120);
+      const takenOn = parseTakenOn(body.taken_on);
+      if (takenOn === undefined) errors.taken_on = DATE_HINT;
+      if (Object.keys(errors).length) throw new ValidationError(errors);
+      db.transaction(() => {
+        for (const id of ids) {
+          if (place) db.prepare("UPDATE photos SET place = ?, updated_at = datetime('now') WHERE id = ?").run(place, id);
+          if (takenOn) db.prepare("UPDATE photos SET taken_on = ?, updated_at = datetime('now') WHERE id = ?").run(takenOn, id);
+        }
+      })();
+      return { place, taken_on: takenOn };
     },
 
     setStatus(id, status) {
@@ -147,17 +224,33 @@ export function createAdminRepo(db) {
       const slug = checkedSlug('categories', id ? body.slug : '', name, id, errors);
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values: { name, slug } });
       if (id) return db.prepare('UPDATE categories SET name = ?, slug = ? WHERE id = ?').run(name, slug, id);
-      const position = db.prepare('SELECT COALESCE(MAX(position), -1) + 1 FROM categories').pluck().get();
-      db.prepare('INSERT INTO categories (name, slug, position) VALUES (?, ?, ?)').run(name, slug, position);
+      // Nouvelle série en tête : c'est celle sur laquelle on travaille.
+      return db.transaction(() => {
+        db.prepare('UPDATE categories SET position = position + 1').run();
+        return Number(db.prepare('INSERT INTO categories (name, slug, position) VALUES (?, ?, 0)').run(name, slug).lastInsertRowid);
+      })();
+    },
+    orderCategories: ids => writeOrder('categories', ids),
+    // Première photo de chaque série (couverture des cartes).
+    covers() {
+      const rows = db.prepare(`SELECT * FROM photos p WHERE p.id = (SELECT id FROM photos WHERE category_id = p.category_id
+        ORDER BY (status = 'published') DESC, position, id LIMIT 1)`).all();
+      return Object.fromEntries(rows.map(r => [r.category_id, r]));
     },
     moveCategory(id, dir) { move('categories', q.categories.all(), id, dir); },
-    // Refusé tant que la série contient des photos.
-    deleteCategory(id) {
+    // Une série qui contient des photos n'est supprimée qu'en les déplaçant vers une autre série.
+    deleteCategory(id, { moveTo = null } = {}) {
       const c = q.categories.all().find(r => r.id === Number(id));
       if (!c) return false;
-      if (c.count) throw new ValidationError({ delete: `La série « ${c.name} » contient encore ${c.count} photo(s).` });
-      db.prepare('DELETE FROM categories WHERE id = ?').run(id);
-      return true;
+      const target = Number(moveTo);
+      if (c.count && (!target || target === c.id || !exists('categories', target))) {
+        throw new ValidationError({ delete: `La série « ${c.name} » contient ${c.count} photo(s) : choisissez la série où les déplacer.` });
+      }
+      db.transaction(() => {
+        if (c.count) db.prepare("UPDATE photos SET category_id = ?, updated_at = datetime('now') WHERE category_id = ?").run(target, c.id);
+        db.prepare('DELETE FROM categories WHERE id = ?').run(c.id);
+      })();
+      return { moved: c.count, name: c.name };
     },
 
     // ---------- auteurs ----------
@@ -196,7 +289,16 @@ export function createAdminRepo(db) {
     },
     saveSettings(body) {
       const published = new Set(db.prepare("SELECT slug FROM photos WHERE status = 'published'").pluck().all());
-      const hero = [].concat(body.hero || []).filter(s => published.has(s)).slice(0, 8);
+      let hero = [...new Set([].concat(body.hero || []))].filter(s => published.has(s));
+      // Boutons ← → ✕ de l'ouverture (sans JavaScript) : « left:slug », « right:slug », « remove:slug ».
+      const [op, target] = String(body.hero_op || '').split(/:(.*)/s);
+      const i = hero.indexOf(target);
+      if (i !== -1 && op === 'remove') hero.splice(i, 1);
+      if (i !== -1 && (op === 'left' || op === 'right')) {
+        const j = i + (op === 'left' ? -1 : 1);
+        if (j >= 0 && j < hero.length) [hero[i], hero[j]] = [hero[j], hero[i]];
+      }
+      hero = hero.slice(0, 8);
       const values = {
         site_name: text(body.site_name, 60),
         tagline: text(body.tagline, 200),

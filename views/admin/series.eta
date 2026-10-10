@@ -1,37 +1,81 @@
 <% layout('./layout') %>
-<h1>Séries</h1>
-<ol class="rows">
-<% it.categories.forEach((c, i) => { const ed = it.editErrors && it.editErrors.id === c.id ? it.editErrors : null; const v = ed ? ed.values : c; %>
-  <li>
-    <form class="row" method="post" action="/admin/series/<%= c.id %>">
-      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-      <label>Nom <input name="name" value="<%= v.name %>" required maxlength="80"<%~ ed && ed.errors.name ? ` aria-invalid="true" aria-describedby="err-serie-${c.id}"` : '' %>></label>
-      <label>Adresse <span class="mono">/serie/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ ed && ed.errors.slug ? ` aria-invalid="true" aria-describedby="err-serie-${c.id}"` : '' %>></label>
-      <span class="mono"><%= c.count %> photo(s)</span>
-      <button class="btn ghost" type="submit">Enregistrer</button>
-<% if (ed) { %><span class="err" role="alert" id="err-serie-<%= c.id %>"><%= Object.values(ed.errors).join(' ') %></span><% } %>
-    </form>
-    <div class="move">
-<% [['up', '↑', 'Monter', i === 0], ['down', '↓', 'Descendre', i === it.categories.length - 1]].forEach(([dir, sign, label, off]) => { %>
-      <form method="post" action="/admin/series/<%= c.id %>/move"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="dir" value="<%= dir %>">
-        <button class="btn ghost" type="submit" aria-label="<%= label %> « <%= c.name %> »"<%~ off ? ' disabled' : '' %>><%= sign %></button></form>
-<% }) %>
-    </div>
-    <details class="danger">
-      <summary>Supprimer</summary>
-<% if (c.count) { %>
-      <p>Impossible : la série contient encore <%= c.count %> photo(s). Déplacez-les d’abord.</p>
-<% } else { %>
-      <form method="post" action="/admin/series/<%= c.id %>/delete"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
-        <button class="btn danger" type="submit">Supprimer « <%= c.name %> »</button></form>
+<% const others = c => it.categories.filter(o => o.id !== c.id); %>
+<div class="toolbar">
+  <div>
+    <h1>Séries</h1>
+    <p class="sub"><%= it.categories.length %> série<%= it.categories.length > 1 ? 's' : '' %> · l’ordre est celui de l’index du site : <span data-js-only hidden>glissez une carte (ou ↑ ↓ au clavier sur sa poignée), ou passez par le menu ⋯</span><span data-nojs>menu ⋯ de chaque carte</span></p>
+  </div>
+  <div class="acts"><a class="btn big" href="#nouvelle-serie" data-new-series>＋ Nouvelle série</a></div>
+</div>
+
+<div class="scards" data-series-list>
+  <form class="scard new" id="nouvelle-serie" method="post" action="/admin/series" data-new-card>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <div class="cover empty" aria-hidden="true">＋</div>
+    <div class="body">
+      <label>Nouvelle série <input name="name" value="<%= it.values.name || '' %>" required maxlength="80" placeholder="Nom, puis Entrée"<%~ it.errors.name ? ' aria-invalid="true" aria-describedby="err-serie-nouvelle"' : '' %>></label>
+<% if (it.errors.name) { %>      <span class="err" role="alert" id="err-serie-nouvelle"><%= it.errors.name %></span>
 <% } %>
-    </details>
-  </li>
+      <span class="hint">Elle prend la première place ; déplaçable ensuite.</span>
+    </div>
+    <div class="acts"><button class="btn" type="submit">Créer</button></div>
+  </form>
+<% it.categories.forEach((c, i) => { const ed = it.editErrors && it.editErrors.id === c.id ? it.editErrors : null; const v = ed ? ed.values : c; const cover = it.covers[c.id]; %>
+  <article class="scard" id="serie-<%= c.id %>" data-id="<%= c.id %>" aria-labelledby="nom-serie-<%= c.id %>">
+    <div class="cover">
+<% if (cover && cover.ready) { %>      <%~ it.picture(cover, { sizes: '320px', alt: '' }) %>
+<% } else { %>      <span class="empty" aria-hidden="true">Aucune photo</span>
+<% } %>
+      <button class="grip" type="button" hidden data-grip aria-label="Déplacer « <%= c.name %> » (flèches haut et bas)" aria-describedby="grip-help">⠿ Déplacer</button>
+    </div>
+    <div class="body">
+      <h2 class="title" id="nom-serie-<%= c.id %>"><%= c.name %></h2>
+      <span class="count mono"><%= c.count %> photo<%= c.count > 1 ? 's' : '' %></span>
+    </div>
+    <div class="acts">
+      <a class="btn ghost" href="/admin/photos?serie=<%= c.slug %>">Photos ›</a>
+      <details class="inline-edit"<%~ ed ? ' open' : '' %>>
+        <summary class="btn ghost">Renommer</summary>
+        <form class="pop" method="post" action="/admin/series/<%= c.id %>">
+          <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+          <label>Nom <input name="name" value="<%= v.name %>" required maxlength="80"<%~ ed && ed.errors.name ? ` aria-invalid="true" aria-describedby="err-serie-${c.id}"` : '' %>></label>
+          <details class="advanced"<%~ ed && ed.errors.slug ? ' open' : '' %>>
+            <summary>Adresse de la série (avancé)</summary>
+            <label><span class="mono">/serie/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ ed && ed.errors.slug ? ` aria-invalid="true" aria-describedby="err-serie-${c.id}"` : '' %>></label>
+            <span class="cellnote warn">Changer l’adresse casse les liens déjà partagés.</span>
+          </details>
+<% if (ed) { %>          <span class="err" role="alert" id="err-serie-<%= c.id %>"><%= Object.values(ed.errors).join(' ') %></span>
+<% } %>
+          <p class="actions"><button class="btn" type="submit">Enregistrer</button></p>
+        </form>
+      </details>
+      <details class="menu">
+        <summary class="iconbtn" aria-label="Plus d’actions pour « <%= c.name %> »"><span aria-hidden="true">⋯</span></summary>
+        <div class="menu-pop">
+<% [['up', 'Monter d’une place', i === 0], ['down', 'Descendre d’une place', i === it.categories.length - 1]].forEach(([dir, label, off]) => { if (off) return; %>
+          <form method="post" action="/admin/series/<%= c.id %>/move"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="dir" value="<%= dir %>">
+            <button type="submit"><%= label %></button></form>
 <% }) %>
-</ol>
-<form class="panel row" method="post" action="/admin/series">
-  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-  <label>Nouvelle série <input name="name" value="<%= it.values.name || '' %>" required maxlength="80"<%~ it.errors.name ? ' aria-invalid="true" aria-describedby="err-serie-nouvelle"' : '' %>></label>
-  <button class="btn" type="submit">Créer</button>
-<% if (it.errors.name) { %><span class="err" role="alert" id="err-serie-nouvelle"><%= it.errors.name %></span><% } %>
-</form>
+          <details class="danger">
+            <summary>Supprimer…</summary>
+            <form method="post" action="/admin/series/<%= c.id %>/delete" data-delete-series>
+              <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (c.count && others(c).length) { %>
+              <p>« <%= c.name %> » contient <strong><%= c.count %> photo<%= c.count > 1 ? 's' : '' %></strong>. Elles ne seront pas supprimées : choisissez où les déplacer.</p>
+              <label>Déplacer vers <select name="move_to"><% others(c).forEach(o => { %><option value="<%= o.id %>"><%= o.name %></option><% }) %></select></label>
+              <button class="btn danger" type="submit">Déplacer <%= c.count > 1 ? `les ${c.count} photos` : 'la photo' %> et supprimer</button>
+<% } else if (c.count) { %>
+              <p>C’est la seule série : ses <%= c.count %> photo<%= c.count > 1 ? 's' : '' %> n’auraient nulle part où aller. Créez d’abord une autre série.</p>
+<% } else { %>
+              <p>La série est vide.</p>
+              <button class="btn danger" type="submit">Supprimer « <%= c.name %> »</button>
+<% } %>
+            </form>
+          </details>
+        </div>
+      </details>
+    </div>
+  </article>
+<% }) %>
+</div>
+<p class="sr-only" id="grip-help">Flèches haut ou gauche : avancer d’une place. Flèches bas ou droite : reculer d’une place.</p>

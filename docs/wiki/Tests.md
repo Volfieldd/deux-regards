@@ -19,6 +19,7 @@ Ils utilisent `node:test`, sans dépendance supplémentaire, et prennent environ
 | `test/revue.test.js` | non-régression des constats de la revue d'octobre 2026 : redirections, erreurs génériques, protection de **toutes** les routes d'admin (liste des routes parcourue), configuration, jetons mal formés, suppressions pendant un rendu ou un horodatage, fichiers temporaires, filigrane sur petites images |
 | `test/deploiement.test.js` | garde-fou de persistance des données, sauvegarde (instantané, rotation, copie des originaux), `sitemap.xml`, `robots.txt` |
 | `test/apparence.test.js` | thèmes, aperçu réservé aux admins, emblème, icône, logo complet, image de partage, favicon |
+| `test/ergonomie.test.js` | écrans revus après l'audit d'ergonomie : envoi photo par photo et suivi du traitement, lot complété champ par champ ou d'un coup (sans JavaScript), dates en langage courant, actions groupées et leur annulation, suppression groupée confirmée, séries (cartes, ordre JSON, création en tête, suppression qui déplace les photos), ouverture ordonnée |
 | `test/aide.test.js` | aide en ligne : toutes les sections, **aucun lien interne cassé**, lien « Aide sur cette page » de chaque écran |
 | `test/db.test.js` | migrations, seed |
 
@@ -36,7 +37,8 @@ BASE_URL=http://<hôte>:<port> E2E_LOCAL_AUTH=<LOCAL_AUTH_TOKEN du serveur> E2E_
 |---|---|
 | `setup` | connexion locale de test ; la session est réutilisée ensuite |
 | `desktop`, `mobile` (Pixel 7) | rendu, ouverture et bouton pause, filtres sans rechargement, visionneuse (clavier, glissé), site sans JavaScript, pages de l'admin |
-| `parcours` | après les deux précédents, **seulement avec `E2E_ALLOW_WRITES=1`** : import, édition, publication, réordonnancement (glisser-déposer, y compris en dernière place, et boutons) et suppression d'une photo ; séries ; filigrane (aperçu, application, retour) ; déconnexion |
+| `audit` | **seulement avec `E2E_AUDIT=1`** : les cinq parcours de l'audit d'ergonomie, mesurés (actions, tabulations, positions, temps d'import) et capturés dans `e2e/audit/apres/`, plus un audit axe-core sans tolérance (toutes violations) des écrans revus et de leurs états ; nettoie ensuite ce qu'il a créé |
+| `parcours` | après les deux précédents, **seulement avec `E2E_ALLOW_WRITES=1`** : import, édition, publication, réordonnancement (glisser-déposer, y compris en dernière place, et menu ⋯) et suppression d'une photo ; séries (création en tête, ordre au clavier, fenêtre de suppression) ; filigrane (aperçu, application, retour) ; déconnexion |
 
 - **Données :** le projet `parcours` **modifie les données**. Il ne suppose rien du contenu, nettoie les restes d'un passage interrompu, puis restaure à l'identique les réglages d'images trouvés (même en cas d'échec). À réserver à un serveur de test.
 - **Accessibilité :** audit axe-core (WCAG 2.2 A/AA) des pages publiques et de l'admin ; aucune violation sérieuse tolérée.

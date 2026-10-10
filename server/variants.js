@@ -119,13 +119,13 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
 
   // Rend une photo si son empreinte a changé ou si des fichiers manquent ; bascule puis nettoie.
   // La ligne est relue sous verrou : réglages, auteur ou suppression faits entre-temps sont pris en compte.
-  async function render(id, ctx, { force = false } = {}) {
+  async function render(id, ctx, { force = false, onStep = null } = {}) {
     const p = q.photo.get(id);
     if (!p) return false;
     const { key, mark, meta } = specFor(p, ctx);
     if (!force && key === p.variant_key && hasVariants(storageDir, p, key)) return false;
     try {
-      await renderVariants(storageDir, p.file, { key, mark, meta, force });
+      await renderVariants(storageDir, p.file, { key, mark, meta, force, onStep });
     } catch (err) {
       // Photo supprimée pendant le rendu : on efface ce qui a déjà été écrit.
       if (!q.photo.get(id)) { removeVariants(storageDir, p.file); return false; }
@@ -160,8 +160,8 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
 
     // Rendu immédiat d'une photo (import), hors de la file : il n'attend pas un passage en cours.
     // L'erreur remonte à l'appelant.
-    renderPhoto(id) {
-      return withLock(id, () => render(id, context()));
+    renderPhoto(id, { onStep = null } = {}) {
+      return withLock(id, () => render(id, context(), { onStep }));
     },
 
     // Passage complet en arrière-plan ; plusieurs demandes rapprochées n'en font qu'un.

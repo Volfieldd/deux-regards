@@ -35,10 +35,11 @@ test.describe('parcours d’une photo', () => {
       }
     }
     await page.goto('/admin/series');
-    const leftover = page.locator('.rows li', { has: page.locator('input[value="Série E2E"]') });
+    const leftover = page.locator('.scard[data-id]').filter({ has: page.locator('.title', { hasText: 'Série E2E' }) });
     if (await leftover.count()) {
-      await leftover.getByText('Supprimer', { exact: true }).click();
-      await leftover.getByRole('button', { name: 'Supprimer « Série E2E »' }).click();
+      await leftover.locator('summary[aria-label^="Plus d’actions"]').click();
+      await leftover.locator('.danger > summary').click();
+      await page.locator('dialog[open]').getByRole('button', { name: /^Supprimer|^Déplacer/ }).click();
     }
     await page.goto('/admin/images');
     imageSettings = await page.locator('#images-form').evaluate(f => Object.fromEntries(new FormData(f)));
@@ -58,28 +59,34 @@ test.describe('parcours d’une photo', () => {
   });
 
   test('importer, éditer, publier, réordonner, supprimer', async ({ page, context }) => {
-    // Import par le formulaire.
+    test.setTimeout(240_000);          // traitement de l'import, puis une page rechargée par déplacement au menu ⋯
+    // Import : vérification, envoi, traitement suivi, puis page « Compléter et publier ».
     await page.goto('/admin/photos');
     const items = page.locator('.plist li');
     const initial = await items.count();
     const firstTitle = (await items.first().locator('a.ttl').textContent()).trim();
-    await page.locator('input[type=file]').setInputFiles('fixtures/import-test.jpg');
-    await expect(page.locator('[data-drop] span').first()).toHaveText('1 fichier(s) prêt(s) à importer');
-    await page.getByRole('button', { name: 'Importer', exact: true }).click();
-    await expect(page).toHaveURL(/statut=draft/);
-    await expect(page.getByRole('status')).toContainText('1 photo(s) importée(s) en brouillon');
+    await page.getByRole('link', { name: '＋ Importer des photos' }).click();
+    await page.locator('[data-import] input[type=file]').setInputFiles('fixtures/import-test.jpg');
+    await expect(page.locator('[data-files] li')).toContainText('✓ Prête à envoyer');
+    await page.getByRole('button', { name: 'Envoyer la photo valide' }).click();
+    await expect(page.locator('[data-sum-title]')).toHaveText('1 photo prête sur 1', { timeout: 120_000 });
+    await page.getByRole('link', { name: 'Compléter et publier la photo →' }).click();
+    await expect(page.locator('h1')).toHaveText('Compléter et publier');
+    await expect(page.locator('input[data-field=title]')).toHaveValue('import test');
+    await expect(page.getByText('Titre provisoire (nom du fichier)')).toBeVisible();
+    await page.goto('/admin/photos?statut=draft');
     const row = page.locator('.plist li', { hasText: 'import test' });
     await expect(row).toHaveCount(1);
-    await expect(row.locator('.status')).toHaveText('Brouillon');
+    await expect(row.locator('.st')).toContainText('Brouillon');
 
     // Édition : erreur de validation puis succès.
     await row.locator('a.ttl').click();
     await page.getByLabel('Date').fill('2024-13');
     await page.getByRole('button', { name: 'Enregistrer' }).click();
-    await expect(page.getByText('Format AAAA-MM ou AAAA-MM-JJ.')).toBeVisible();
+    await expect(page.getByText(/Date non comprise/)).toBeVisible();
     await page.getByLabel('Titre').fill('Lisière E2E');
     await page.getByLabel('Adresse').fill('');
-    await page.getByLabel('Date').fill('2025-09');
+    await page.getByLabel('Date').fill('sept. 2025');
     await page.getByLabel('Lieu').fill('Forêt de Chandelais');
     await page.getByLabel('Légende').fill('Test de bout en bout.');
     await page.getByLabel('Publiée').check();
@@ -109,16 +116,26 @@ test.describe('parcours d’une photo', () => {
     // Glisser sur la moitié basse de la dernière ligne : dépôt après elle (dernière place).
     await items.first().dragTo(items.last(), { targetPosition: { x: 20, y: 60 } });
     await expect(items.last()).toContainText('Lisière E2E');
-    await expect(items.last().getByRole('button', { name: /Descendre/ })).toBeDisabled();
-    await expect(items.first().getByRole('button', { name: /Monter/ })).toBeDisabled();
+    await page.reload();
+    await expect(items.last()).toContainText('Lisière E2E');
+    const menuOf = li => { const m = li.locator('details.menu'); return { open: () => m.locator('summary').click(), item: name => m.getByRole('button', { name }) }; };
+    await menuOf(items.last()).open();
+    await expect(menuOf(items.last()).item('Descendre d’une place')).toHaveCount(0);
+    await expect(menuOf(items.last()).item('Monter d’une place')).toBeVisible();
+    await page.keyboard.press('Escape');                                   // Échap referme le menu
+    await expect(items.last().locator('details.menu')).not.toHaveAttribute('open', '');
 
-    // Boutons ↑ ↓ (alternative clavier) : remonter en tête puis redescendre en dernière place.
+    // Menu ⋯ (alternative clavier) : remonter en tête puis redescendre en dernière place.
     for (let i = 0; i < initial; i++) {
-      await page.locator('.plist li', { hasText: 'Lisière E2E' }).getByRole('button', { name: /Monter/ }).click();
+      const li = page.locator('.plist li', { hasText: 'Lisière E2E' });
+      await menuOf(li).open();
+      await Promise.all([page.waitForEvent('load'), menuOf(li).item('Monter d’une place').click()]);
     }
     await expect(items.first()).toContainText('Lisière E2E');
     for (let i = 0; i < initial; i++) {
-      await page.locator('.plist li', { hasText: 'Lisière E2E' }).getByRole('button', { name: /Descendre/ }).click();
+      const li = page.locator('.plist li', { hasText: 'Lisière E2E' });
+      await menuOf(li).open();
+      await Promise.all([page.waitForEvent('load'), menuOf(li).item('Descendre d’une place').click()]);
     }
     await expect(items.last()).toContainText('Lisière E2E');
     await expect(items.first()).toContainText(firstTitle);
@@ -133,19 +150,40 @@ test.describe('parcours d’une photo', () => {
     await pub.close();
   });
 
-  test('séries : suppression refusée tant qu’elle contient des photos', async ({ page }) => {
+  test('séries : création en tête, ordre au clavier, suppression qui déplace les photos', async ({ page }) => {
     await page.goto('/admin/series');
-    const full = page.locator('.rows li').filter({ has: page.locator('.mono', { hasText: /^[1-9]\d* photo/ }) }).first();
-    await full.getByText('Supprimer', { exact: true }).click();
-    await expect(full.getByText(/Impossible : la série contient encore/)).toBeVisible();
-    // Création puis suppression d'une série vide.
-    await page.getByLabel('Nouvelle série').fill('Série E2E');
-    await page.getByRole('button', { name: 'Créer' }).click();
-    await expect(page.getByRole('status')).toHaveText('Série créée.');
-    const temp = page.locator('.rows li', { has: page.locator('input[value="Série E2E"]') });
-    await temp.getByText('Supprimer', { exact: true }).click();
-    await temp.getByRole('button', { name: 'Supprimer « Série E2E »' }).click();
-    await expect(page.getByRole('status')).toHaveText('Série supprimée.');
+    const cards = page.locator('.scard[data-id]');
+    const names = () => cards.locator('.title').allTextContents();
+    const before = await names();
+    // Création : la nouvelle série prend la première place.
+    await page.getByRole('link', { name: '＋ Nouvelle série' }).click();
+    await page.keyboard.type('Série E2E');
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('status').first()).toHaveText('Série « Série E2E » créée.');
+    expect(await names()).toEqual(['Série E2E', ...before]);
+    // Clavier sur la poignée : reculer de deux places, enregistré côté serveur.
+    await cards.first().locator('[data-grip]').focus();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('[data-toast]')).toContainText('« Série E2E » : place 3');
+    await page.reload();
+    expect((await names())[2]).toBe('Série E2E');
+    // Série non vide : la fenêtre de suppression propose de déplacer ses photos (annulée ici).
+    const full = cards.filter({ hasText: /[1-9]\d* photos?/ }).first();
+    await full.locator('summary[aria-label^="Plus d’actions"]').click();
+    await full.locator('.danger > summary').click();
+    const dialog = page.locator('dialog[open]');
+    await expect(dialog.getByText(/Elles ne seront pas supprimées/)).toBeVisible();
+    await expect(dialog.getByLabel('Déplacer vers')).toBeVisible();
+    await dialog.getByRole('button', { name: 'Annuler' }).click();
+    await expect(dialog).toHaveCount(0);
+    // Série vide : suppression simple.
+    const temp = cards.filter({ has: page.locator('.title', { hasText: 'Série E2E' }) });
+    await temp.locator('summary[aria-label^="Plus d’actions"]').click();
+    await temp.locator('.danger > summary').click();
+    await page.locator('dialog[open]').getByRole('button', { name: 'Supprimer « Série E2E »' }).click();
+    await expect(page.getByRole('status').first()).toHaveText('Série « Série E2E » supprimée.');
+    expect(await names()).toEqual(before);
   });
 
   test('filigrane : aperçu, application au site, retour à l’état initial', async ({ page, context }, info) => {

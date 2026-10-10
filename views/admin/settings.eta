@@ -1,8 +1,9 @@
 <% layout('./layout') %>
-<% const s = it.settings; const hero = Array.isArray(s.hero) ? s.hero : []; %>
+<% const s = it.settings; const hero = Array.isArray(s.hero) ? s.hero : []; const chosen = hero.map(slug => it.published.find(p => p.slug === slug)).filter(Boolean); %>
 <h1>Réglages</h1>
 <form class="form" method="post" action="/admin/reglages">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <button class="sr-only" type="submit" tabindex="-1" aria-hidden="true">Enregistrer les réglages</button>
   <section class="panel">
     <h2>Textes</h2>
     <label>Nom du site <input name="site_name" value="<%= s.site_name || '' %>" maxlength="60" placeholder="<%= it.defaultName %>"></label>
@@ -15,11 +16,35 @@
     <label>Texte <span class="mono">vide : texte par défaut (droit d’auteur, reproduction interdite sans autorisation)</span><textarea name="rights_text" rows="6" maxlength="10000"><%= s.rights_text || '' %></textarea></label>
     <label>Contact pour les demandes d’utilisation <span class="mono">adresse e-mail ou lien https://</span><input name="rights_contact" value="<%= s.rights_contact || '' %>" maxlength="200"></label>
   </section>
-  <fieldset class="panel">
-    <legend>Photos de l’ouverture <span class="mono">8 au plus, dans l’ordre de la galerie · sans choix : les 5 premières</span></legend>
-    <div class="herogrid">
-<% it.published.forEach(p => { %>
-      <label class="pick"><input type="checkbox" name="hero" value="<%= p.slug %>"<%~ hero.includes(p.slug) ? ' checked' : '' %>>
+  <fieldset class="panel hero-panel" id="ouverture" data-hero data-max="<%= it.heroMax %>">
+    <legend>Photos de l’ouverture</legend>
+    <p class="hint">Le diaporama plein écran de l’accueil, dans cet ordre. <%= it.heroMax %> photos au plus ; sans choix, les 5 premières de la galerie.</p>
+    <p class="actions"><span class="counter" role="status" data-hero-count><%= chosen.length %> / <%= it.heroMax %> choisie<%= chosen.length > 1 ? 's' : '' %></span>
+      <button class="btn" type="submit" name="hero_save" value="1">Enregistrer l’ouverture</button></p>
+    <h3>Ordre du diaporama</h3>
+    <p class="hint"><span data-js-only hidden>Glissez une vignette, ou utilisez ← → ; ✕ la retire.</span><span data-nojs>← → changent l’ordre, ✕ retire la photo (les réglages sont enregistrés en même temps).</span></p>
+    <ol class="chosen" data-hero-chosen>
+<% chosen.forEach((p, i) => { %>
+      <li class="it" data-slug="<%= p.slug %>">
+        <input type="hidden" name="hero" value="<%= p.slug %>">
+        <span class="n mono" aria-hidden="true"><%= i + 1 %></span>
+        <%~ it.picture(p, { sizes: '120px', alt: '' }) %>
+        <span class="t"><%= p.title %></span>
+        <span class="mv">
+          <button type="submit" name="hero_op" value="left:<%= p.slug %>" aria-label="Avancer « <%= p.title %> »" data-hero-left>←</button>
+          <button type="submit" name="hero_op" value="right:<%= p.slug %>" aria-label="Reculer « <%= p.title %> »" data-hero-right>→</button>
+          <button type="submit" name="hero_op" value="remove:<%= p.slug %>" aria-label="Retirer « <%= p.title %> » de l’ouverture" data-hero-remove>✕</button>
+        </span>
+      </li>
+<% }) %>
+    </ol>
+<% if (!chosen.length) { %>    <p class="hint" data-hero-empty>Aucune photo choisie : l’ouverture montre les 5 premières photos de la galerie.</p>
+<% } %>
+    <h3>Ajouter des photos publiées</h3>
+    <p class="hint">Une case cochée ajoute la photo en fin de diaporama. <span data-hero-full<%~ chosen.length >= it.heroMax ? '' : ' hidden' %>><strong>Le diaporama est complet (<%= it.heroMax %> photos) : retirez-en une pour en ajouter une autre.</strong></span></p>
+    <div class="herogrid" data-hero-pool>
+<% it.published.forEach(p => { const on = hero.includes(p.slug); %>
+      <label class="pick" data-slug="<%= p.slug %>" data-title="<%= p.title %>"<%~ on ? ' hidden' : '' %>><input type="checkbox" name="hero" value="<%= p.slug %>"<%~ on ? ' disabled' : '' %><%~ !on && chosen.length >= it.heroMax ? ' disabled' : '' %>>
         <%~ it.picture(p, { sizes: '160px', alt: '' }) %><span><%= p.title %></span></label>
 <% }) %>
     </div>

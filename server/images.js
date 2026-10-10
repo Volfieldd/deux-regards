@@ -89,7 +89,8 @@ function applyMeta(pipeline, meta, originalExif) {
 
 // Génère les variantes servies d'un original, avec le filigrane `mark` et les métadonnées `meta`
 // déjà résolus pour cette photo (voir variants.js). rotate() applique l'orientation EXIF.
-export async function renderVariants(storageDir, file, { key = '', mark = null, meta = null, force = false } = {}) {
+// onStep(fait, total) : appelé après chaque fichier (suivi du traitement à l'import).
+export async function renderVariants(storageDir, file, { key = '', mark = null, meta = null, force = false, onStep = null } = {}) {
   const src = path.join(storageDir, 'originals', file);
   const outDir = path.join(storageDir, 'variants');
   fs.mkdirSync(outDir, { recursive: true });
@@ -98,10 +99,14 @@ export async function renderVariants(storageDir, file, { key = '', mark = null, 
   const width = info.autoOrient?.width ?? info.width;
   const height = info.autoOrient?.height ?? info.height;
   const made = [];
+  const total = widthsFor(width).length * FORMATS.length;
+  let step = 0;
+  const advance = (n = 1) => { step += n; onStep?.(step, total); };
   for (const w of widthsFor(width)) {
     const h = Math.max(1, Math.floor((height * w) / width) - 1); // marge d’un pixel sur l’arrondi de sharp
     const todo = FORMATS.map(format => [format, path.join(outDir, variantName(file, w, format, key))])
       .filter(([, out]) => force || !fs.existsSync(out));
+    advance(FORMATS.length - todo.length);
     if (!todo.length) continue;
     // Seuil de taille : la plus grande variante produite est toujours marquée (original plus petit que le seuil).
     const marked = mark && (w >= (mark.minWidth || 0) || w === widthsFor(width).at(-1));
@@ -121,6 +126,7 @@ export async function renderVariants(storageDir, file, { key = '', mark = null, 
         fs.rmSync(tmp, { force: true });
       }
       made.push(out);
+      advance();
     }
   }
   return made;

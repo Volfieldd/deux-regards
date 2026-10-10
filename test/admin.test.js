@@ -215,7 +215,7 @@ test('édition d’une photo : validation puis enregistrement', async t => {
   const bad = await ctx.post(`/admin/photos/${p.id}`, { ...base, title: ' ', taken_on: '2024-13', slug: 'deux-minuit' });
   assert.equal(bad.statusCode, 422);
   assert.match(bad.body, /Le titre est obligatoire/);
-  assert.match(bad.body, /Format AAAA-MM ou AAAA-MM-JJ/);
+  assert.match(bad.body, /Date non comprise/);
   assert.match(bad.body, /Déjà utilisé/);
   assert.match(bad.body, /aria-invalid="true"/);
 
@@ -289,7 +289,7 @@ test('séries : création, renommage, ordre, suppression bloquée si non vide', 
   const ctx = await admin(t);
   assert.equal((await ctx.post('/admin/series', { name: 'Nuit' })).statusCode, 303);
   const nuit = ctx.db.prepare("SELECT * FROM categories WHERE slug = 'nuit'").get();
-  assert.equal(nuit.position, 4);
+  assert.equal(nuit.position, 0);                                  // nouvelle série en tête
   assert.equal((await ctx.post('/admin/series', { name: '  ' })).statusCode, 422);
 
   const dup = await ctx.post(`/admin/series/${nuit.id}`, { name: 'Nuit', slug: 'rue' });
@@ -299,15 +299,23 @@ test('séries : création, renommage, ordre, suppression bloquée si non vide', 
   assert.equal(ctx.db.prepare('SELECT slug FROM categories WHERE id = ?').pluck().get(nuit.id), 'nocturnes');
   assert.equal((await ctx.app.inject('/serie/nocturnes')).statusCode, 200);
 
-  await ctx.post(`/admin/series/${nuit.id}/move`, { dir: 'up' });
-  assert.equal(ctx.db.prepare('SELECT position FROM categories WHERE id = ?').pluck().get(nuit.id), 3);
+  await ctx.post(`/admin/series/${nuit.id}/move`, { dir: 'down' });
+  assert.equal(ctx.db.prepare('SELECT position FROM categories WHERE id = ?').pluck().get(nuit.id), 1);
 
   const rue = ctx.db.prepare("SELECT id FROM categories WHERE slug = 'rue'").pluck().get();
   const blocked = await ctx.post(`/admin/series/${rue}/delete`);
   assert.equal(blocked.statusCode, 303);
   assert.equal(ctx.db.prepare('SELECT COUNT(*) FROM categories WHERE id = ?').pluck().get(rue), 1);
   const page = await ctx.as({ url: '/admin/series', cookies: { flash: cookiesOf(blocked).flash } });
-  assert.match(page.body, /contient encore 4 photo\(s\)/);
+  assert.match(page.body, /contient 4 photo\(s\) : choisissez la série où les déplacer/);
+  // Suppression en déplaçant les photos : aucune n'est perdue.
+  const moved = await ctx.post(`/admin/series/${rue}/delete`, { move_to: nuit.id });
+  assert.equal(moved.statusCode, 303);
+  assert.equal(ctx.db.prepare('SELECT COUNT(*) FROM categories WHERE id = ?').pluck().get(rue), 0);
+  assert.equal(ctx.db.prepare('SELECT COUNT(*) FROM photos WHERE category_id = ?').pluck().get(nuit.id), 4);
+  assert.equal((await ctx.post(`/admin/series/${nuit.id}/delete`, { move_to: nuit.id })).statusCode, 303);   // vers elle-même : refusé
+  assert.equal(ctx.db.prepare('SELECT COUNT(*) FROM categories WHERE id = ?').pluck().get(nuit.id), 1);
+  ctx.db.prepare('UPDATE photos SET category_id = (SELECT id FROM categories WHERE id != ? LIMIT 1) WHERE category_id = ?').run(nuit.id, nuit.id);
 
   await ctx.post(`/admin/series/${nuit.id}/delete`);
   assert.equal(ctx.db.prepare('SELECT COUNT(*) FROM categories WHERE id = ?').pluck().get(nuit.id), 0);
