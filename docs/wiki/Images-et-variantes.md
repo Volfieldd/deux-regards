@@ -1,0 +1,63 @@
+# Images et variantes
+
+## Principe
+
+| | Où | Servi ? |
+|---|---|---|
+| **Original** | `STORAGE_DIR/originals/<uuid>.<ext>` | **Jamais** : aucune route ne mène à ce dossier. |
+| **Variantes** | `STORAGE_DIR/variants/` | Oui, sous `/media/`, et seulement pour les photos **publiées**. |
+
+Chaque photo a des variantes **AVIF** et **WebP** aux largeurs 640, 1280 et 2000 px. Il n'y a jamais d'agrandissement : une image de 900 px a des variantes de 640 et de 900 px.
+
+Les pages utilisent `<picture>` avec `srcset` et `sizes` : le navigateur choisit le format et la taille. Les dimensions sont toujours indiquées, ce qui évite les sauts de mise en page, et les images hors écran sont chargées à la demande.
+
+## Traitement d'une photo
+
+1. **Import :**
+   - vérification du poids (60 Mo), du nombre de pixels (120 Mpx) et du format réel, par décodage ;
+   - l'original est rangé sous un nom aléatoire ;
+   - la photo est créée en brouillon.
+2. **Rendu de chaque variante**, en un seul pipeline `sharp` :
+   - application de l'orientation EXIF aux pixels ;
+   - redimensionnement ;
+   - filigrane éventuel ;
+   - métadonnées selon le réglage (aucune par défaut) ;
+   - encodage AVIF (qualité 55) ou WebP (qualité 78).
+3. **Publication :** les variantes deviennent accessibles sous `/media/`.
+
+## Noms et cache
+
+```
+<uuid>-<largeur>.<format>               sans filigrane ni métadonnée
+<uuid>-<empreinte>-<largeur>.<format>   avec filigrane et/ou métadonnées
+```
+
+- Les variantes sont servies avec `Cache-Control: max-age=31536000, immutable`.
+- L'**empreinte** (8 caractères) résume les réglages appliqués. Quand ils changent, le nom change : le navigateur ne peut pas garder une version périmée.
+- Seule la variante qui porte l'empreinte **courante** de la photo est servie ; les autres répondent 404, puis sont supprimées.
+- Les brouillons restent visibles dans l'admin, via `/admin/media/` (session admin, cache privé).
+
+## Recalcul
+
+Le recalcul se déclenche :
+
+- après une modification dans l'admin (réglages, logo, nom du site, auteur, photo) ;
+- au démarrage du serveur ;
+- avec `npm run variants`.
+
+Une seule tâche tourne à la fois. Seules les photos dont l'empreinte a changé, ou dont un fichier manque, sont recalculées.
+
+```bash
+npm run variants              # vérifie et recalcule ce qui doit l'être
+npm run variants -- --force   # recalcule tout
+```
+
+Pour tout recalculer après une évolution du code de rendu, incrémentez `PIPELINE` dans `server/variants.js`.
+
+## Protection
+
+- **Dissuasion :** le clic droit et le glisser sont désactivés sur les images, et les originaux ne sont jamais exposés.
+- **Filigrane** optionnel (voir [Filigrane et EXIF](Filigrane-et-EXIF)).
+- **Aucune métadonnée** par défaut : pas de GPS, pas d'appareil.
+
+Aucune de ces mesures n'empêche une capture d'écran : elles rendent seulement la copie moins facile et moins utile.

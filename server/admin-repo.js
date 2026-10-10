@@ -104,10 +104,11 @@ export function createAdminRepo(db) {
       const takenOn = text(body.taken_on, 10);
       if (takenOn && !DATE_RE.test(takenOn)) errors.taken_on = 'Format AAAA-MM ou AAAA-MM-JJ.';
       const status = body.status === 'published' ? 'published' : 'draft';
-      const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn || null, legend: text(body.legend, 2000), status };
+      const watermark = body.watermark === 'none' ? 0 : null;
+      const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn || null, legend: text(body.legend, 2000), status, watermark };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
       db.prepare(`UPDATE photos SET title = @title, slug = @slug, category_id = @category_id, author_id = @author_id, place = @place,
-        taken_on = @taken_on, legend = @legend, status = @status, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
+        taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
     },
 
     setStatus(id, status) {
@@ -177,6 +178,13 @@ export function createAdminRepo(db) {
 
     // ---------- réglages ----------
     settings,
+    // Filigrane et métadonnées, déjà normalisés par variants.js.
+    saveImageSettings(watermark, exif) {
+      db.transaction(() => {
+        q.setSetting.run('watermark', JSON.stringify(watermark));
+        q.setSetting.run('exif', JSON.stringify(exif));
+      })();
+    },
     saveSettings(body) {
       const published = new Set(db.prepare("SELECT slug FROM photos WHERE status = 'published'").pluck().all());
       const hero = [].concat(body.hero || []).filter(s => published.has(s)).slice(0, 8);

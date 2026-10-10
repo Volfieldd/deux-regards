@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Publie docs/wiki/ sur le wiki GitHub du dépôt (voir README.md de ce dossier).
+set -euo pipefail
+here="$(cd "$(dirname "$0")" && pwd)"
+remote="$(git -C "$here" remote get-url origin | sed -E 's#(\.git)?$#.wiki.git#')"
+work="$(mktemp -d)"
+trap 'rm -rf "$work"' EXIT
+if ! git clone -q "$remote" "$work" 2>/dev/null; then
+  echo "Wiki introuvable : créez d'abord sa première page dans l'interface GitHub (onglet Wiki)." >&2
+  exit 1
+fi
+find "$work" -maxdepth 1 -name '*.md' -delete
+for f in "$here"/*.md; do
+  [ "$(basename "$f")" = README.md ] || cp "$f" "$work/"
+done
+cd "$work"
+git add -A
+if git diff --cached --quiet; then echo "Wiki déjà à jour."; exit 0; fi
+git commit -q -m "Mise à jour du wiki depuis docs/wiki ($(git -C "$here" rev-parse --short HEAD))"
+git push -q origin HEAD
+echo "Wiki publié."

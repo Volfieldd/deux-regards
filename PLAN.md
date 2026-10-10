@@ -103,6 +103,12 @@ storage/
 - Connexion locale de test (`LOCAL_AUTH_TOKEN`), interdite en ligne.
 - Tests navigateur (`e2e/`, conteneur Playwright) : rendu bureau et mobile, filtres, visionneuse, sans JS, admin et parcours complet d'une photo.
 
+### 4 ter. Filigrane et métadonnées (fait)
+- Filigrane texte (variables {auteur}, {annee}, {site}, {titre}, polices du site) ou logo, 9 positions ou mosaïque, opacité, taille, marge, tailles concernées ; exclusion par photo ; aperçu sans enregistrer.
+- EXIF des images servies : aucune (défaut), droits, prise de vue (sans GPS), tout l'original.
+- Empreinte des réglages dans le nom des variantes : cache long sans image périmée, bascule sans image cassée ; recalcul en arrière-plan avec progression.
+- Spécification : [docs/specs/filigrane-et-exif.md](docs/specs/filigrane-et-exif.md). Wiki : [docs/wiki/](docs/wiki/).
+
 ### 5. Mise en ligne
 - Dockerfile, Caddyfile, volume persistant pour `storage/` et la base.
 - Sauvegarde quotidienne, sitemap, Open Graph, passe d'accessibilité (focus, contrastes, `prefers-reduced-motion`, textes alternatifs).

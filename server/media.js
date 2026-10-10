@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
-import { generateVariants, removeVariants, MAX_PIXELS } from './images.js';
+import { removeVariants, MAX_PIXELS } from './images.js';
 
 // Garde-fous de l'import : poids du fichier, nombre de pixels, formats réellement décodés.
 export const MAX_FILE_BYTES = 60 * 1024 * 1024;
@@ -16,7 +16,7 @@ export async function orientedSize(file) {
   return { format: m.format, width: m.autoOrient?.width ?? m.width, height: m.autoOrient?.height ?? m.height };
 }
 
-// Valide un fichier téléversé (déjà écrit dans tmp), le range dans originals/ et génère ses variantes.
+// Valide un fichier téléversé (déjà écrit dans tmp) et le range dans originals/.
 // Le fichier temporaire est toujours supprimé.
 export async function importOriginal(storageDir, tmpFile) {
   const originals = path.join(storageDir, 'originals');
@@ -34,11 +34,7 @@ export async function importOriginal(storageDir, tmpFile) {
     if (meta.width * meta.height > MAX_PIXELS) throw new ImportError('image trop grande (120 mégapixels au plus)');
     file = `${crypto.randomUUID()}.${ext}`;
     fs.renameSync(tmpFile, path.join(originals, file));
-    try {
-      await generateVariants(storageDir, file);
-    } catch {
-      throw new ImportError('image illisible ou format non pris en charge par le serveur');
-    }
+    // Les variantes sont rendues ensuite par le service (filigrane et métadonnées du moment).
     return { file, width: meta.width, height: meta.height };
   } catch (err) {
     if (file) removePhotoFiles(storageDir, file);

@@ -28,6 +28,11 @@
       <label class="inline"><input type="radio" name="status" value="<%= k %>"<%~ v.status === k ? ' checked' : '' %>> <%= label %></label>
 <% }) %>
     </fieldset>
+    <fieldset class="row">
+      <legend>Filigrane</legend>
+      <label class="inline"><input type="radio" name="watermark" value="default"<%~ v.watermark !== 0 ? ' checked' : '' %>> Selon les <a href="/admin/images">réglages</a></label>
+      <label class="inline"><input type="radio" name="watermark" value="none"<%~ v.watermark === 0 ? ' checked' : '' %>> Jamais sur cette photo</label>
+    </fieldset>
     <p class="actions"><button class="btn" type="submit">Enregistrer</button></p>
   </form>
 </div>

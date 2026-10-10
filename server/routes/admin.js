@@ -8,6 +8,12 @@ import { importOriginal, removePhotoFiles, ImportError, MAX_FILE_BYTES } from '.
 import { picture } from '../picture.js';
 import { sameToken } from '../auth.js';
 import { pad } from '../format.js';
+import sharp from 'sharp';
+import { normalizeWatermark, normalizeExif, EXIF_MODES, MIN_WIDTHS } from '../variants.js';
+import { FONTS, POSITIONS } from '../watermark.js';
+
+const LOGO_MAX_BYTES = 5 * 1024 * 1024;
+const LOGO_MAX_SIDE = 4000;
 
 const MAX_FILES = 50;
 const STATUSES = { draft: 'Brouillon', published: 'Publiée' };
@@ -48,7 +54,7 @@ export default async function adminRoutes(app) {
     const siteName = app.siteName();
     return reply.render(`admin/${template}`, {
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply),
-      section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES,
+      section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
       local: request.session.sub.startsWith('local:') || !request.session.id_token,
       description: '', ...data, pageTitle: `${data.title} · Administration · ${siteName}`,
     });
@@ -112,13 +118,22 @@ export default async function adminRoutes(app) {
           refused.push({ name: part.filename, reason: `fichier trop lourd (${MAX_FILE_BYTES / 1024 / 1024} Mo au plus)` });
           continue;
         }
+        let id = null;
+        let original = null;
         try {
-          const original = await importOriginal(storageDir, tmp);
-          const id = repo.addPhoto({ title: titleFromFilename(part.filename), categoryId, authorId, ...original });
+          original = await importOriginal(storageDir, tmp);
+          id = repo.addPhoto({ title: titleFromFilename(part.filename), categoryId, authorId, ...original });
+          await app.variants.renderPhoto(id);
           imported.push({ id, name: part.filename });
         } catch (err) {
-          if (!(err instanceof ImportError)) throw err;
-          refused.push({ name: part.filename, reason: err.message });
+          // Rien ne reste d'une image qui n'a pas pu être rendue : ni ligne, ni original, ni variante.
+          if (id) repo.deletePhoto(id);
+          if (original) removePhotoFiles(storageDir, original.file);
+          if (err instanceof ImportError) refused.push({ name: part.filename, reason: err.message });
+          else {
+            request.log.warn({ err, file: part.filename }, 'rendu impossible à l’import');
+            refused.push({ name: part.filename, reason: 'image illisible ou format non pris en charge par le serveur' });
+          }
         }
       }
     } catch (err) {
@@ -156,6 +171,7 @@ export default async function adminRoutes(app) {
     if (!photo) return reply.callNotFound();
     try {
       repo.updatePhoto(photo.id, request.body || {});
+      app.variants.schedule();          // auteur, date, titre ou option de filigrane ont pu changer
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
       reply.code(422);
@@ -250,6 +266,7 @@ export default async function adminRoutes(app) {
     if (!repo.authors().some(a => a.id === id)) return reply.callNotFound();
     try {
       repo.saveAuthor(id, request.body || {});
+      app.variants.schedule();          // le nom de l'auteur peut figurer dans le filigrane et l'EXIF
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
       return authorsPage(request, reply.code(422), { editErrors: { id, errors: err.errors, values: err.values } });
@@ -267,6 +284,89 @@ export default async function adminRoutes(app) {
     return done(reply, '/admin/auteurs', 'Auteur supprimé.');
   });
 
+  // ---------- images : filigrane et métadonnées ----------
+  const firstPhotoId = () => repo.photos({ status: 'published' })[0]?.id ?? repo.photos()[0]?.id;
+  const imagesPage = (request, reply) => {
+    const { watermark, exif } = app.variants.context();
+    return render(request, reply, 'images', {
+      title: 'Filigrane et métadonnées', watermark, exif, FONTS, POSITIONS, EXIF_MODES, MIN_WIDTHS,
+      photos: repo.photos(), previewId: Number(request.query.photo) || firstPhotoId(),
+    });
+  };
+  app.get('/admin/images', imagesPage);
+
+  app.post('/admin/images', write, async (request, reply) => {
+    const { watermark: current } = app.variants.context();
+    const watermark = normalizeWatermark(request.body || {}, current);
+    repo.saveImageSettings(watermark, normalizeExif(request.body || {}));
+    app.variants.schedule();
+    const note = watermark.enabled && watermark.kind === 'image' && !watermark.image ? ' Aucun logo envoyé : pas de filigrane pour l’instant.' : '';
+    return done(reply, '/admin/images', `Réglages enregistrés, images en cours de mise à jour.${note}`);
+  });
+
+  const sendPreview = async (reply, id, override) => {
+    const buf = await app.variants.preview(id, override);
+    if (!buf) return reply.callNotFound();
+    return reply.header('cache-control', 'no-store').type('image/webp').send(buf);
+  };
+  // Aperçu des réglages enregistrés (affiché sur la page).
+  app.get('/admin/images/apercu.webp', async (request, reply) => sendPreview(reply, byId(request.query.photo || firstPhotoId())));
+  // Aperçu des réglages du formulaire, sans les enregistrer (bouton « Aperçu »).
+  app.post('/admin/images/apercu', write, async (request, reply) => {
+    const { watermark: current } = app.variants.context();
+    return sendPreview(reply, byId(request.body?.preview_photo), { watermark: { ...normalizeWatermark(request.body || {}, current), enabled: true } });
+  });
+
+  app.get('/admin/images/etat', async () => app.variants.status());
+
+  app.get('/admin/images/logo', async (request, reply) => {
+    const { watermark } = app.variants.context();
+    if (!watermark.image) return reply.callNotFound();
+    return reply.header('cache-control', 'no-store').sendFile(watermark.image, app.variants.watermarkDir);
+  });
+
+  // Logo : PNG ou WebP, réencodé en PNG (aucune donnée du fichier envoyé n'est servie telle quelle).
+  app.post('/admin/images/logo', async (request, reply) => {
+    let checked = false;
+    let error = null;
+    let saved = null;
+    try {
+      for await (const part of request.parts({ limits: { fileSize: LOGO_MAX_BYTES, files: 1 } })) {
+        if (part.type === 'field') {
+          if (part.fieldname === '_csrf') checked = sameToken(part.value, request.session.csrf);
+          continue;
+        }
+        if (!checked) { part.file.resume(); break; }
+        const buf = await part.toBuffer().catch(() => null);
+        if (!buf || part.file.truncated) { error = 'Logo trop lourd (5 Mo au plus).'; continue; }
+        let meta;
+        try { meta = await sharp(buf, { limitInputPixels: LOGO_MAX_SIDE * LOGO_MAX_SIDE }).metadata(); } catch { meta = null; }
+        if (!meta || !['png', 'webp'].includes(meta.format)) { error = 'Le logo doit être une image PNG ou WebP (de préférence à fond transparent).'; continue; }
+        if (meta.width > LOGO_MAX_SIDE || meta.height > LOGO_MAX_SIDE) { error = `Logo trop grand (${LOGO_MAX_SIDE} px de côté au plus).`; continue; }
+        saved = `${crypto.randomUUID()}.png`;
+        await sharp(buf).png().toFile(path.join(app.variants.watermarkDir, saved));
+      }
+    } catch (err) {
+      if (!err.code?.startsWith('FST_')) throw err;
+      error = 'Envoi invalide.';
+    }
+    if (!checked) return reply.code(403).send('Jeton CSRF invalide.');
+    if (!saved) return failed(reply, '/admin/images', error || 'Aucun fichier reçu.');
+    const { watermark, exif } = app.variants.context();
+    if (watermark.image) fs.rmSync(path.join(app.variants.watermarkDir, watermark.image), { force: true });
+    repo.saveImageSettings({ ...watermark, image: saved }, exif);
+    app.variants.schedule();
+    return done(reply, '/admin/images', 'Logo enregistré.');
+  });
+
+  app.post('/admin/images/logo/delete', write, async (request, reply) => {
+    const { watermark, exif } = app.variants.context();
+    if (watermark.image) fs.rmSync(path.join(app.variants.watermarkDir, watermark.image), { force: true });
+    repo.saveImageSettings({ ...watermark, image: null }, exif);
+    app.variants.schedule();
+    return done(reply, '/admin/images', 'Logo supprimé.');
+  });
+
   // ---------- réglages ----------
   app.get('/admin/reglages', async (request, reply) => render(request, reply, 'settings', {
     title: 'Réglages', settings: repo.settings(), published: repo.photos({ status: 'published' }), defaultName: app.config.siteName,
@@ -274,6 +374,7 @@ export default async function adminRoutes(app) {
 
   app.post('/admin/reglages', write, async (request, reply) => {
     repo.saveSettings(request.body || {});
+    app.variants.schedule();            // {site} peut figurer dans le filigrane
     return done(reply, '/admin/reglages', 'Réglages enregistrés.');
   });
 }

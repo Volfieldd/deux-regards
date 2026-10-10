@@ -4,6 +4,11 @@ Galerie de Sébastien et Julien, avec un admin réservé aux auteurs (connexion 
 
 Le plan complet est dans [PLAN.md](PLAN.md).
 
+## Documentation
+
+- **Wiki** (mode opératoire, configuration, exploitation) : sources dans [`docs/wiki/`](docs/wiki/), publiées sur le [wiki GitHub](https://github.com/Volfieldd/deux-regards/wiki) par `docs/wiki/publish.sh`.
+- **Spécifications** : [`docs/specs/`](docs/specs/), dont [filigrane et EXIF](docs/specs/filigrane-et-exif.md).
+
 ## Démarrer
 
 Prérequis : Node.js 22+.

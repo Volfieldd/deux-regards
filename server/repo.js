@@ -1,6 +1,6 @@
 import { monthYear } from './format.js';
 
-const PHOTO_COLUMNS = `p.id, p.slug, p.title, p.place, p.taken_on, p.legend, p.status, p.position, p.file, p.width, p.height,
+const PHOTO_COLUMNS = `p.id, p.slug, p.title, p.place, p.taken_on, p.legend, p.status, p.position, p.file, p.width, p.height, p.variant_key,
   c.slug AS category_slug, c.name AS category, a.slug AS author_slug, a.name AS author`;
 
 const decorate = (p, i) => ({ ...p, n: p.position + 1, when: monthYear(p.taken_on), index: i });

@@ -66,3 +66,21 @@
     });
   }
 })();
+
+// ----- progression de la mise à jour des images -----
+(function () {
+  const box = document.querySelector('[data-variants]');
+  if (!box || !box.querySelector('[data-done]')) return;
+  const timer = setInterval(async () => {
+    try {
+      const s = await (await fetch('/admin/images/etat', { headers: { accept: 'application/json' } })).json();
+      box.querySelector('[data-done]').textContent = s.done;
+      if (!s.running) {
+        clearInterval(timer);
+        box.querySelector('p').textContent = s.errors.length
+          ? `${s.errors.length} image(s) n’ont pas pu être recalculées.`
+          : 'Images à jour.';
+      }
+    } catch { clearInterval(timer); }
+  }, 1500);
+})();
