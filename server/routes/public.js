@@ -51,7 +51,7 @@ export default async function publicRoutes(app) {
       pageTitle: title ? `${title} · ${siteName}` : siteName,
       canonical: galleryUrl(filter),
       description: settings.tagline || '',
-      ogImage: hero[0] && `/media/${variantName(hero[0].file, widthsFor(hero[0].width).at(-1), 'webp')}`,
+      ogImage: hero[0] && `/media/${variantName(hero[0].file, widthsFor(hero[0].width).at(-1), 'webp', hero[0].variant_key)}`,
     });
   }
 
@@ -91,7 +91,7 @@ export default async function publicRoutes(app) {
       pageTitle: `${photo.title} · ${siteName}`,
       canonical: photoUrl(photo.slug),
       description: [photo.legend, `${photo.author}, ${photo.place} ${photo.when}`.trim()].filter(Boolean).join(' '),
-      ogImage: `/media/${variantName(photo.file, widthsFor(photo.width).at(-1), 'webp')}`,
+      ogImage: `/media/${variantName(photo.file, widthsFor(photo.width).at(-1), 'webp', photo.variant_key)}`,
       bodyClass: 'dark',
     });
   });

@@ -14,7 +14,8 @@ test.afterEach(async () => expect(errors, 'erreurs console / CSP').toEqual([]));
 
 test('rendu des pages de l’admin', async ({ page }, info) => {
   for (const [url, title, shot] of [['/admin', 'Tableau de bord', 'tableau'], ['/admin/photos', 'Photos', 'photos'],
-    ['/admin/series', 'Séries', 'series'], ['/admin/auteurs', 'Auteurs', 'auteurs'], ['/admin/reglages', 'Réglages', 'reglages']]) {
+    ['/admin/series', 'Séries', 'series'], ['/admin/auteurs', 'Auteurs', 'auteurs'], ['/admin/images', 'Filigrane et métadonnées', 'images'],
+    ['/admin/reglages', 'Réglages', 'reglages']]) {
     await page.goto(url);
     await expect(page.locator('h1')).toHaveText(title);
     await expect(page.locator('nav a[aria-current="page"]')).toBeVisible();

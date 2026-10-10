@@ -20,6 +20,7 @@ test.describe('parcours d’une photo', () => {
 
   // Restes d'un passage interrompu : supprimés avant de commencer.
   test.beforeAll(async ({ browser }) => {
+    test.setTimeout(180_000);
     const page = await browser.newPage({ storageState: STATE });
     for (const title of ['Lisière E2E', 'import test']) {
       while (await page.goto(`/admin/photos?q=${encodeURIComponent(title)}`).then(() => page.locator('.plist li').count())) {
@@ -34,6 +35,13 @@ test.describe('parcours d’une photo', () => {
       await leftover.getByText('Supprimer', { exact: true }).click();
       await leftover.getByRole('button', { name: 'Supprimer « Série E2E »' }).click();
     }
+    // Filigrane et métadonnées : état par défaut.
+    await page.goto('/admin/images');
+    await page.getByLabel('Ajouter un filigrane aux images du site').uncheck();
+    await page.getByRole('textbox', { name: /^Texte/ }).fill('© {auteur}');
+    await page.getByRole('radio', { name: 'Aucune métadonnée' }).check();
+    await page.getByRole('button', { name: 'Enregistrer et mettre à jour les images' }).click();
+    await expect.poll(async () => (await page.request.get('/admin/images/etat').then(r => r.json())).running, { timeout: 120_000 }).toBe(false);
     await page.close();
   });
 
@@ -112,6 +120,44 @@ test.describe('parcours d’une photo', () => {
     await temp.getByText('Supprimer', { exact: true }).click();
     await temp.getByRole('button', { name: 'Supprimer « Série E2E »' }).click();
     await expect(page.getByRole('status')).toHaveText('Série supprimée.');
+  });
+
+  test('filigrane : aperçu, application au site, retour à l’état initial', async ({ page, context }, info) => {
+    test.setTimeout(300_000);           // deux recalculs complets des images (AVIF)
+    await page.goto('/admin/images');
+    await expect(page.locator('h1')).toHaveText('Filigrane et métadonnées');
+    await expect.poll(() => page.locator('.preview img').evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
+
+    // Aperçu sans enregistrer : nouvel onglet avec l'image, réglages inchangés.
+    await page.getByRole('textbox', { name: /^Texte/ }).fill('© {auteur} · E2E');
+    await page.getByLabel('Position').selectOption('mosaique');
+    const [preview] = await Promise.all([context.waitForEvent('page'), page.getByRole('button', { name: 'Aperçu sans enregistrer' }).click()]);
+    await preview.waitForLoadState();
+    expect(await preview.evaluate(() => document.contentType)).toBe('image/webp');
+    await preview.close();
+
+    // Enregistrer : les images publiques changent de nom (empreinte) une fois la mise à jour finie.
+    const before = await page.request.get('/photo/brume-sur-la-loire').then(r => r.text());
+    const src = html => /\/media\/([\w-]+)-\d+\.webp/.exec(html)[1];
+    await page.getByLabel('Ajouter un filigrane aux images du site').check();
+    await page.getByLabel('Position').selectOption('bas-droite');
+    await page.getByRole('button', { name: 'Enregistrer et mettre à jour les images' }).click();
+    await expect(page.getByRole('status').first()).toContainText(/Réglages enregistrés|Mise à jour des images/);
+    await expect.poll(async () => (await page.request.get('/admin/images/etat').then(r => r.json())).running, { timeout: 120_000 }).toBe(false);
+    await page.goto('/photo/brume-sur-la-loire');
+    expect(src(await page.content())).not.toBe(src(before));
+    await expect.poll(() => page.locator('.vimg img').evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
+    await page.screenshot({ path: `results/photo-filigrane-${info.project.name}.png` });
+
+    // Retour à l'état initial (sans filigrane ni métadonnée).
+    await page.goto('/admin/images');
+    await page.getByLabel('Ajouter un filigrane aux images du site').uncheck();
+    await page.getByRole('textbox', { name: /^Texte/ }).fill('© {auteur}');
+    await page.getByRole('radio', { name: 'Aucune métadonnée' }).check();
+    await page.getByRole('button', { name: 'Enregistrer et mettre à jour les images' }).click();
+    await expect.poll(async () => (await page.request.get('/admin/images/etat').then(r => r.json())).running, { timeout: 120_000 }).toBe(false);
+    const after = await page.request.get('/photo/brume-sur-la-loire').then(r => r.text());
+    expect(src(after)).toBe(src(before));
   });
 
   test('déconnexion', async ({ browser }) => {

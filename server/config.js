@@ -43,6 +43,7 @@ export function loadConfig(env = process.env) {
     storageDir,
     cookieSecret,
     localAuthToken,
+    authRateLimit: Math.max(Number.parseInt(env.AUTH_RATE_LIMIT, 10) || 30, 1),
     oidc: {
       issuer,
       clientId: env.OIDC_CLIENT_ID || null,

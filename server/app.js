@@ -11,6 +11,7 @@ import publicRoutes from './routes/public.js';
 import adminRoutes from './routes/admin.js';
 import mediaRoutes from './routes/media.js';
 import { setupAuth } from './auth.js';
+import { createVariantService } from './variants.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -90,6 +91,11 @@ export async function buildApp({ config, db, logger = true, oidc }) {
     root: path.join(ROOT, 'node_modules/@fontsource'), prefix: '/fonts/', decorateReply: false,
     maxAge: '365d', immutable: true, allowedPath: p => p.endsWith('.woff2'),
   });
+
+  // Variantes : vérifiées au démarrage (réglages changés, rendu interrompu), puis à chaque modification.
+  app.decorate('variants', createVariantService({ db, storageDir: config.storageDir, siteName: app.siteName, log: app.log }));
+  app.addHook('onReady', async () => { app.variants.schedule(); });
+  app.addHook('onClose', async () => { await app.variants.idle(); });
 
   await setupAuth(app, oidc && { oidc });
   const headers = { ...SECURITY_HEADERS, 'content-security-policy': csp([app.oidc.origin].filter(Boolean)) };

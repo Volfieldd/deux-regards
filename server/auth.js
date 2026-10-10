@@ -40,8 +40,10 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   const txCookie = state => `${prefix}oidc-${state}`;
   const cookieBase = { path: '/', httpOnly: true, secure: config.secureCookies, sameSite: 'lax' };
 
-  // 30 passages par /auth/* et par IP sur 10 minutes : large pour un humain, freine les abus.
-  const allow = createRateLimiter({ limit: 30, windowMs: 10 * 60 * 1000 });
+  // Tentatives de connexion par IP sur 10 minutes (30 par défaut) : large pour un humain, freine les abus.
+  const allow = createRateLimiter({ limit: config.authRateLimit, windowMs: 10 * 60 * 1000 });
+  const isAttempt = request => ['/auth/login', '/auth/callback'].includes(request.routeOptions.url)
+    || (request.routeOptions.url === '/auth/local' && request.method === 'POST');
 
   if (config.oidc.projectId && !config.oidc.orgId) {
     app.log.warn('OIDC_ORG_ID non défini : un rôle admin donné dans une autre organisation Zitadel serait accepté');
@@ -92,7 +94,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   });
 
   app.addHook('onRequest', async (request, reply) => {
-    if (!request.url.startsWith('/auth/') || allow(request.ip)) return;
+    if (!isAttempt(request) || allow(request.ip)) return;
     return renderError(reply.header('retry-after', '600'), 429, {
       title: 'Trop de tentatives', message: 'Trop de tentatives de connexion depuis votre réseau. Réessayez dans quelques minutes.',
     });

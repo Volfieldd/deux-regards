@@ -289,13 +289,14 @@ test('déconnexion avec un jeton périmé : page d’erreur lisible, session con
   assert.equal((await app.inject({ url: '/admin', cookies })).statusCode, 200);
 });
 
-test('limite de débit sur /auth/* : 429 au-delà de 30 passages', async t => {
+test('limite de débit sur les tentatives de connexion : 429 au-delà de 30', async t => {
   const { app } = await setup(t);
   for (let i = 0; i < 30; i++) assert.equal((await app.inject('/auth/login')).statusCode, 503);
   const res = await app.inject('/auth/login');
   assert.equal(res.statusCode, 429);
   assert.equal(res.headers['retry-after'], '600');
   assert.equal((await app.inject('/')).statusCode, 200);      // le site public n'est pas concerné
+  assert.equal((await app.inject({ method: 'POST', url: '/auth/logout' })).statusCode, 303);   // ni la déconnexion
 });
 
 test('le code et le state OIDC sont masqués dans les journaux', async t => {
