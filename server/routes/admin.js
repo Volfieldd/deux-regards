@@ -1,12 +1,285 @@
-// Administration : tout passe par requireAdmin. Les écrans de gestion arrivent en phase 4.
-export default async function adminRoutes(app) {
-  app.addHook('preHandler', app.requireAdmin);
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { pipeline } from 'node:stream/promises';
+import multipart from '@fastify/multipart';
+import { createAdminRepo, ValidationError } from '../admin-repo.js';
+import { importOriginal, removePhotoFiles, ImportError, MAX_FILE_BYTES } from '../media.js';
+import { picture } from '../picture.js';
+import { sameToken } from '../auth.js';
+import { pad } from '../format.js';
 
+const MAX_FILES = 50;
+const STATUSES = { draft: 'Brouillon', published: 'Publiée' };
+
+// « IMG_2041 quai-nord.jpg » → « IMG 2041 quai nord »
+export const titleFromFilename = name => path.parse(String(name || '')).name.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160) || 'Sans titre';
+
+// Administration : tout passe par requireAdmin ; chaque écriture par verifyCsrf.
+export default async function adminRoutes(app) {
+  const repo = createAdminRepo(app.db);
+  const { storageDir, secureCookies } = app.config;
+  const tmpDir = path.join(storageDir, 'tmp');
+  fs.mkdirSync(tmpDir, { recursive: true });
+
+  await app.register(multipart, {
+    limits: { fileSize: MAX_FILE_BYTES, files: MAX_FILES, fields: 10, fieldSize: 2000, parts: MAX_FILES + 10 },
+  });
+
+  app.addHook('preHandler', app.requireAdmin);
+  const write = { preHandler: app.verifyCsrf };
+
+  // ---------- messages après redirection (cookie signé, lu une fois) ----------
+  const FLASH = 'flash';
+  const flash = (reply, message) => reply.setCookie(FLASH, JSON.stringify(message), {
+    path: '/admin', httpOnly: true, secure: secureCookies, sameSite: 'lax', signed: true, maxAge: 60,
+  });
+  function takeFlash(request, reply) {
+    const raw = request.cookies[FLASH];
+    if (!raw) return null;
+    reply.clearCookie(FLASH, { path: '/admin' });
+    const unsigned = request.unsignCookie(raw);
+    try { return unsigned.valid ? JSON.parse(unsigned.value) : null; } catch { return null; }
+  }
+  const done = (reply, to, text, details) => flash(reply, { type: 'ok', text, details }).redirect(to, 303);
+  const failed = (reply, to, text, details) => flash(reply, { type: 'error', text, details }).redirect(to, 303);
+
+  function render(request, reply, template, data) {
+    const siteName = app.siteName();
+    return reply.render(`admin/${template}`, {
+      siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply),
+      section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES,
+      local: request.session.sub.startsWith('local:') || !request.session.id_token,
+      description: '', ...data, pageTitle: `${data.title} · Administration · ${siteName}`,
+    });
+  }
+
+  const byId = id => (Number.isInteger(Number(id)) ? Number(id) : -1);
+
+  // ---------- accueil ----------
   app.get('/admin', async (request, reply) => {
-    const { siteName } = app.config;
-    return reply.render('admin', {
-      siteName, session: request.session,
-      pageTitle: `Administration · ${siteName}`, description: '',
+    const photos = repo.photos();
+    return render(request, reply, 'home', {
+      title: 'Tableau de bord',
+      counts: { published: photos.filter(p => p.status === 'published').length, draft: photos.filter(p => p.status === 'draft').length },
+      categories: repo.categories().length, authors: repo.authors(), me: repo.authorBySub(request.session.sub),
     });
   });
+
+  // ---------- photos ----------
+  app.get('/admin/photos', async (request, reply) => {
+    const { q = '', auteur = '', serie = '', statut = '' } = request.query;
+    const filter = { q: String(q), author: String(auteur), category: String(serie), status: STATUSES[statut] ? statut : '' };
+    const authors = repo.authors();
+    return render(request, reply, 'photos', {
+      title: 'Photos', photos: repo.photos(filter), filter, authors, categories: repo.categories(),
+      filtered: Boolean(filter.q || filter.author || filter.category || filter.status),
+      defaultAuthor: repo.authorBySub(request.session.sub)?.id ?? authors[0]?.id,
+    });
+  });
+
+  // Import multiple. Le jeton CSRF est le premier champ du formulaire : aucun fichier n'est lu avant lui.
+  app.post('/admin/photos/import', async (request, reply) => {
+    const wantsJson = !request.headers.accept?.includes('text/html');
+    const fields = {};
+    const imported = [];
+    const refused = [];
+    let checked = false;
+    const finish = (code, payload) => (wantsJson ? reply.code(code).send(payload) : null);
+
+    try {
+      for await (const part of request.parts()) {
+        if (part.type === 'field') {
+          fields[part.fieldname] = part.value;
+          if (part.fieldname === '_csrf') checked = sameToken(part.value, request.session.csrf);
+          continue;
+        }
+        if (!checked) {
+          part.file.resume();
+          return finish(403, { error: 'Jeton CSRF invalide.' }) ?? reply.code(403).send('Jeton CSRF invalide.');
+        }
+        const categoryId = Number(fields.category_id);
+        const authorId = Number(fields.author_id);
+        if (!repo.categories().some(c => c.id === categoryId) || !repo.authors().some(a => a.id === authorId)) {
+          part.file.resume();
+          refused.push({ name: part.filename, reason: 'série ou auteur invalide' });
+          continue;
+        }
+        const tmp = path.join(tmpDir, crypto.randomUUID());
+        await pipeline(part.file, fs.createWriteStream(tmp));
+        if (part.file.truncated) {
+          fs.rmSync(tmp, { force: true });
+          refused.push({ name: part.filename, reason: `fichier trop lourd (${MAX_FILE_BYTES / 1024 / 1024} Mo au plus)` });
+          continue;
+        }
+        try {
+          const original = await importOriginal(storageDir, tmp);
+          const id = repo.addPhoto({ title: titleFromFilename(part.filename), categoryId, authorId, ...original });
+          imported.push({ id, name: part.filename });
+        } catch (err) {
+          if (!(err instanceof ImportError)) throw err;
+          refused.push({ name: part.filename, reason: err.message });
+        }
+      }
+    } catch (err) {
+      if (err.code !== 'FST_FILES_LIMIT' && err.code !== 'FST_PARTS_LIMIT') throw err;
+      refused.push({ name: '…', reason: `${MAX_FILES} fichiers au plus par envoi` });
+    }
+
+    if (!checked) return finish(403, { error: 'Jeton CSRF invalide.' }) ?? reply.code(403).send('Jeton CSRF invalide.');
+    request.log.info({ imported: imported.length, refused: refused.length }, 'import de photos');
+    if (wantsJson) return reply.send({ imported, refused });
+    const details = refused.map(r => `${r.name} : ${r.reason}`);
+    const text = `${imported.length} photo(s) importée(s) en brouillon${refused.length ? `, ${refused.length} refusée(s)` : ''}.`;
+    return (imported.length ? done : failed)(reply, '/admin/photos?statut=draft', text, details);
+  });
+
+  // Réordonnancement par glisser-déposer (fetch JSON, en-tête x-csrf-token).
+  app.post('/admin/photos/order', write, async (request, reply) => {
+    try {
+      repo.orderPhotos(Array.isArray(request.body?.ids) ? request.body.ids : []);
+    } catch (err) {
+      if (err instanceof ValidationError) return reply.code(422).send({ error: err.errors.order });
+      throw err;
+    }
+    return { ok: true };
+  });
+
+  app.get('/admin/photos/:id', async (request, reply) => {
+    const photo = repo.photo(byId(request.params.id));
+    if (!photo) return reply.callNotFound();
+    return render(request, reply, 'photo', { title: photo.title, photo, values: photo, errors: {}, categories: repo.categories(), authors: repo.authors() });
+  });
+
+  app.post('/admin/photos/:id', write, async (request, reply) => {
+    const photo = repo.photo(byId(request.params.id));
+    if (!photo) return reply.callNotFound();
+    try {
+      repo.updatePhoto(photo.id, request.body || {});
+    } catch (err) {
+      if (!(err instanceof ValidationError)) throw err;
+      reply.code(422);
+      return render(request, reply, 'photo', {
+        title: photo.title, photo, values: { ...photo, ...err.values }, errors: err.errors, categories: repo.categories(), authors: repo.authors(),
+      });
+    }
+    return done(reply, `/admin/photos/${photo.id}`, 'Photo enregistrée.');
+  });
+
+  app.post('/admin/photos/:id/status', write, async (request, reply) => {
+    const photo = repo.photo(byId(request.params.id));
+    if (!photo) return reply.callNotFound();
+    repo.setStatus(photo.id, request.body?.status);
+    const published = request.body?.status === 'published';
+    return done(reply, safeBack(request, '/admin/photos'), `« ${photo.title} » ${published ? 'publiée' : 'repassée en brouillon'}.`);
+  });
+
+  app.post('/admin/photos/:id/move', write, async (request, reply) => {
+    repo.movePhoto(byId(request.params.id), request.body?.dir);
+    return reply.redirect(`/admin/photos#photo-${byId(request.params.id)}`, 303);
+  });
+
+  app.post('/admin/photos/:id/delete', write, async (request, reply) => {
+    const file = repo.deletePhoto(byId(request.params.id));
+    if (!file) return reply.callNotFound();
+    removePhotoFiles(storageDir, file);
+    return done(reply, '/admin/photos', 'Photo supprimée.');
+  });
+
+  // ---------- séries ----------
+  const seriesPage = (request, reply, extra = {}) => render(request, reply, 'series', {
+    title: 'Séries', categories: repo.categories(), errors: {}, values: {}, ...extra,
+  });
+  app.get('/admin/series', async (request, reply) => seriesPage(request, reply));
+
+  app.post('/admin/series', write, async (request, reply) => {
+    try {
+      repo.saveCategory(null, request.body || {});
+    } catch (err) {
+      if (!(err instanceof ValidationError)) throw err;
+      return seriesPage(request, reply.code(422), { errors: err.errors, values: err.values });
+    }
+    return done(reply, '/admin/series', 'Série créée.');
+  });
+
+  app.post('/admin/series/:id', write, async (request, reply) => {
+    const id = byId(request.params.id);
+    if (!repo.categories().some(c => c.id === id)) return reply.callNotFound();
+    try {
+      repo.saveCategory(id, request.body || {});
+    } catch (err) {
+      if (!(err instanceof ValidationError)) throw err;
+      return seriesPage(request, reply.code(422), { editErrors: { id, errors: err.errors, values: err.values } });
+    }
+    return done(reply, '/admin/series', 'Série enregistrée.');
+  });
+
+  app.post('/admin/series/:id/move', write, async (request, reply) => {
+    repo.moveCategory(byId(request.params.id), request.body?.dir);
+    return reply.redirect('/admin/series', 303);
+  });
+
+  app.post('/admin/series/:id/delete', write, async (request, reply) => {
+    try {
+      if (!repo.deleteCategory(byId(request.params.id))) return reply.callNotFound();
+    } catch (err) {
+      if (!(err instanceof ValidationError)) throw err;
+      return failed(reply, '/admin/series', err.errors.delete);
+    }
+    return done(reply, '/admin/series', 'Série supprimée.');
+  });
+
+  // ---------- auteurs ----------
+  const authorsPage = (request, reply, extra = {}) => render(request, reply, 'authors', {
+    title: 'Auteurs', authors: repo.authors(), errors: {}, values: {}, ...extra,
+  });
+  app.get('/admin/auteurs', async (request, reply) => authorsPage(request, reply));
+
+  app.post('/admin/auteurs', write, async (request, reply) => {
+    try {
+      repo.saveAuthor(null, request.body || {});
+    } catch (err) {
+      if (!(err instanceof ValidationError)) throw err;
+      return authorsPage(request, reply.code(422), { errors: err.errors, values: err.values });
+    }
+    return done(reply, '/admin/auteurs', 'Auteur ajouté.');
+  });
+
+  app.post('/admin/auteurs/:id', write, async (request, reply) => {
+    const id = byId(request.params.id);
+    if (!repo.authors().some(a => a.id === id)) return reply.callNotFound();
+    try {
+      repo.saveAuthor(id, request.body || {});
+    } catch (err) {
+      if (!(err instanceof ValidationError)) throw err;
+      return authorsPage(request, reply.code(422), { editErrors: { id, errors: err.errors, values: err.values } });
+    }
+    return done(reply, '/admin/auteurs', 'Auteur enregistré.');
+  });
+
+  app.post('/admin/auteurs/:id/delete', write, async (request, reply) => {
+    try {
+      if (!repo.deleteAuthor(byId(request.params.id))) return reply.callNotFound();
+    } catch (err) {
+      if (!(err instanceof ValidationError)) throw err;
+      return failed(reply, '/admin/auteurs', err.errors.delete);
+    }
+    return done(reply, '/admin/auteurs', 'Auteur supprimé.');
+  });
+
+  // ---------- réglages ----------
+  app.get('/admin/reglages', async (request, reply) => render(request, reply, 'settings', {
+    title: 'Réglages', settings: repo.settings(), published: repo.photos({ status: 'published' }), defaultName: app.config.siteName,
+  }));
+
+  app.post('/admin/reglages', write, async (request, reply) => {
+    repo.saveSettings(request.body || {});
+    return done(reply, '/admin/reglages', 'Réglages enregistrés.');
+  });
+}
+
+// Retour à la liste filtrée d'où vient le formulaire (champ « back »), toujours dans l'admin.
+function safeBack(request, fallback) {
+  const back = request.body?.back;
+  return typeof back === 'string' && /^\/admin(\/|\?|$)/.test(back) && !/[\s\\]/.test(back) ? back : fallback;
 }

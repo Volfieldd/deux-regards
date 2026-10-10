@@ -67,8 +67,11 @@ picture { display: block; }
 .hero .strip button { flex: 0 0 auto; width: 64px; height: 42px; opacity: .38; transition: opacity .3s; overflow: hidden; }
 .hero .strip button img { width: 100%; height: 100%; object-fit: cover; }
 .hero .strip button[aria-current="true"] { opacity: 1; outline: 1px solid var(--dark-ink); outline-offset: 3px; }
-.hero .strip .pause { width: auto; height: 42px; margin-left: auto; padding-inline: 4px; opacity: 1; color: var(--dark-mute); }
-.hero .strip .pause:hover { color: var(--dark-ink); }
+/* La bande défilante s’arrête avant le bouton pause, qui ne recouvre jamais une vignette. */
+.hero .strip:has(~ .pause) { right: calc(var(--gut) + 64px); padding-right: 0; }
+/* Hors de la bande défilante : toujours visible, même quand les vignettes débordent sur mobile. */
+.hero .pause { position: absolute; right: var(--gut); bottom: 34px; z-index: 3; height: 42px; color: var(--dark-mute); }
+.hero .pause:hover { color: var(--dark-ink); }
 .hero .bar { position: absolute; left: 0; bottom: 0; height: 2px; width: 0; background: var(--safelight); z-index: 3; }
 .hero .bar.run { animation: bar 6s linear forwards; }
 @keyframes bar { to { width: 100%; } }

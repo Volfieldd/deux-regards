@@ -1,0 +1,24 @@
+<% layout('./layout') %>
+<% const s = it.settings; const hero = Array.isArray(s.hero) ? s.hero : []; %>
+<h1>Réglages</h1>
+<form class="form" method="post" action="/admin/reglages">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <section class="panel">
+    <h2>Textes</h2>
+    <label>Nom du site <input name="site_name" value="<%= s.site_name || '' %>" maxlength="60" placeholder="<%= it.defaultName %>"></label>
+    <label>Accroche <input name="tagline" value="<%= s.tagline || '' %>" maxlength="200"></label>
+    <label>Introduction (accueil) <textarea name="intro" rows="3" maxlength="1000"><%= s.intro || '' %></textarea></label>
+    <label>À propos <span class="mono">paragraphes séparés par une ligne vide</span><textarea name="about" rows="8" maxlength="10000"><%= s.about || '' %></textarea></label>
+  </section>
+  <fieldset class="panel">
+    <legend>Photos de l’ouverture <span class="mono">8 au plus, dans l’ordre de la galerie · sans choix : les 5 premières</span></legend>
+    <div class="herogrid">
+<% it.published.forEach(p => { %>
+      <label class="pick"><input type="checkbox" name="hero" value="<%= p.slug %>"<%~ hero.includes(p.slug) ? ' checked' : '' %>>
+        <%~ it.picture(p, { sizes: '160px', alt: '' }) %><span><%= p.title %></span></label>
+<% }) %>
+    </div>
+<% if (!it.published.length) { %><p>Aucune photo publiée pour l’instant.</p><% } %>
+  </fieldset>
+  <p class="actions"><button class="btn" type="submit">Enregistrer les réglages</button></p>
+</form>

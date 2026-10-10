@@ -9,6 +9,7 @@ import fastifyStatic from '@fastify/static';
 import { Eta } from 'eta';
 import publicRoutes from './routes/public.js';
 import adminRoutes from './routes/admin.js';
+import mediaRoutes from './routes/media.js';
 import { setupAuth } from './auth.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -64,6 +65,12 @@ export async function buildApp({ config, db, logger = true, oidc }) {
 
   app.decorate('config', config);
   app.decorate('db', db);
+  // Nom affiché : réglage de l'admin s'il existe, sinon SITE_NAME.
+  const siteNameSetting = db.prepare("SELECT value FROM settings WHERE key = 'site_name'").pluck();
+  app.decorate('siteName', () => {
+    const v = siteNameSetting.get();
+    return (v && JSON.parse(v)) || config.siteName;
+  });
 
   await app.register(cookie, { secret: config.cookieSecret });
   await app.register(formbody);
@@ -83,10 +90,6 @@ export async function buildApp({ config, db, logger = true, oidc }) {
     root: path.join(ROOT, 'node_modules/@fontsource'), prefix: '/fonts/', decorateReply: false,
     maxAge: '365d', immutable: true, allowedPath: p => p.endsWith('.woff2'),
   });
-  // Seules les variantes sont exposées ; storage/originals n'a aucune route.
-  const variants = path.join(config.storageDir, 'variants');
-  fs.mkdirSync(variants, { recursive: true });
-  await app.register(fastifyStatic, { root: variants, prefix: '/media/', decorateReply: false, maxAge: '365d', immutable: true });
 
   await setupAuth(app, oidc && { oidc });
   const headers = { ...SECURITY_HEADERS, 'content-security-policy': csp([app.oidc.origin].filter(Boolean)) };
@@ -107,6 +110,7 @@ export async function buildApp({ config, db, logger = true, oidc }) {
     }
   });
 
+  await app.register(mediaRoutes);
   await app.register(adminRoutes);
   await app.register(publicRoutes);
 

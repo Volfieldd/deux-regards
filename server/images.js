@@ -4,6 +4,8 @@ import sharp from 'sharp';
 
 export const WIDTHS = [640, 1280, 2000];
 export const FORMATS = ['avif', 'webp'];
+// Refus de décoder au-delà (bombe de décompression) ; l'import vérifie aussi avant d'arriver ici.
+export const MAX_PIXELS = 120_000_000;
 
 // Largeurs réellement produites pour une image : jamais d'agrandissement.
 export function widthsFor(originalWidth) {
@@ -21,13 +23,15 @@ export async function generateVariants(storageDir, file, { force = false } = {})
   const src = path.join(storageDir, 'originals', file);
   const outDir = path.join(storageDir, 'variants');
   fs.mkdirSync(outDir, { recursive: true });
-  const { width } = await sharp(src).rotate().metadata();
+  // metadata() ignore rotate() : la largeur affichée vient de autoOrient.
+  const meta = await sharp(src, { limitInputPixels: MAX_PIXELS }).metadata();
+  const width = meta.autoOrient?.width ?? meta.width;
   const made = [];
   for (const w of widthsFor(width)) {
     for (const format of FORMATS) {
       const out = path.join(outDir, variantName(file, w, format));
       if (!force && fs.existsSync(out)) continue;
-      const pipeline = sharp(src).rotate().resize({ width: w, withoutEnlargement: true });
+      const pipeline = sharp(src, { limitInputPixels: MAX_PIXELS }).rotate().resize({ width: w, withoutEnlargement: true });
       await (format === 'avif' ? pipeline.avif({ quality: 55, effort: 4 }) : pipeline.webp({ quality: 78 })).toFile(out);
       made.push(out);
     }

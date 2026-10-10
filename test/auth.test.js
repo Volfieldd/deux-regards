@@ -53,7 +53,7 @@ test('un admin se connecte, accède à /admin et revient à la page demandée', 
   assert.equal(db.prepare('SELECT COUNT(*) FROM sessions WHERE id = ?').pluck().get(cookies.session), 0);
   const admin = await app.inject({ url: '/admin', cookies });
   assert.equal(admin.statusCode, 200);
-  assert.match(admin.body, /Connecté en tant que Julien/);
+  assert.match(admin.body, /Connecté en tant que <strong>Julien<\/strong>/);
   assert.equal(admin.headers['cache-control'], 'no-store');
 });
 

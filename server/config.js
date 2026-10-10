@@ -23,6 +23,11 @@ export function loadConfig(env = process.env) {
   const issuer = env.OIDC_ISSUER || null;
   if (issuer && deployed && !issuer.startsWith('https://')) throw new Error('OIDC_ISSUER doit être en HTTPS hors développement');
 
+  // Connexion locale de test : interdite dès que le site est en ligne.
+  const localAuthToken = env.LOCAL_AUTH_TOKEN || null;
+  if (localAuthToken && deployed) throw new Error('LOCAL_AUTH_TOKEN est réservé aux tests : interdit en HTTPS ou en production');
+  if (localAuthToken && localAuthToken.length < 16) throw new Error('LOCAL_AUTH_TOKEN doit faire au moins 16 caractères');
+
   return {
     production,
     deployed,
@@ -37,6 +42,7 @@ export function loadConfig(env = process.env) {
     databasePath: path.resolve(env.DATABASE_PATH || path.join(storageDir, 'site.db')),
     storageDir,
     cookieSecret,
+    localAuthToken,
     oidc: {
       issuer,
       clientId: env.OIDC_CLIENT_ID || null,

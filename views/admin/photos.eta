@@ -1,0 +1,69 @@
+<% layout('./layout') %>
+<% const f = it.filter; %>
+<h1>Photos</h1>
+
+<form class="panel import" method="post" action="/admin/photos/import" enctype="multipart/form-data" data-import>
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <h2>Importer</h2>
+  <div class="row">
+    <label>Auteur
+      <select name="author_id"><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === it.defaultAuthor ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
+    </label>
+    <label>Série
+      <select name="category_id"><% it.categories.forEach(c => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %></select>
+    </label>
+  </div>
+  <label class="drop" data-drop>
+    <span>Glissez vos photos ici, ou <u>choisissez des fichiers</u></span>
+    <span class="mono">JPEG, PNG, WebP, TIFF, HEIF · 60 Mo et 120 mégapixels au plus · importées en brouillon</span>
+    <input type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/tiff,image/heif,image/avif" multiple required>
+  </label>
+  <p class="actions"><button class="btn" type="submit">Importer</button> <span class="mono" data-progress aria-live="polite"></span></p>
+</form>
+
+<form class="panel filters" method="get" action="/admin/photos" role="search">
+  <label>Recherche <input type="search" name="q" value="<%= f.q %>" placeholder="titre, lieu, légende"></label>
+  <label>Auteur
+    <select name="auteur"><option value="">Tous</option><% it.authors.forEach(a => { %><option value="<%= a.slug %>"<%~ a.slug === f.author ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
+  </label>
+  <label>Série
+    <select name="serie"><option value="">Toutes</option><% it.categories.forEach(c => { %><option value="<%= c.slug %>"<%~ c.slug === f.category ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
+  </label>
+  <label>Statut
+    <select name="statut"><option value="">Tous</option><% Object.entries(it.STATUSES).forEach(([k, v]) => { %><option value="<%= k %>"<%~ k === f.status ? ' selected' : '' %>><%= v %></option><% }) %></select>
+  </label>
+  <button class="btn ghost" type="submit">Filtrer</button>
+<% if (it.filtered) { %><a class="more eyebrow" href="/admin/photos">Effacer</a><% } %>
+</form>
+
+<p class="mono count"><%= it.photos.length %> photo(s)<%= it.filtered ? ' · réordonnancement possible sans filtre' : ' · glissez une ligne pour changer l’ordre' %></p>
+<ol class="plist"<%~ it.filtered ? '' : ' data-sortable' %>>
+<% it.photos.forEach((p, i) => { %>
+  <li id="photo-<%= p.id %>" data-id="<%= p.id %>">
+    <span class="handle mono" aria-hidden="true">N°<%= it.pad(p.n) %></span>
+    <a class="thumb" href="/admin/photos/<%= p.id %>"><%~ it.picture(p, { sizes: '96px', alt: '' }) %></a>
+    <div class="info">
+      <a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a>
+      <span class="mono"><%= p.category %> · <%= p.author %><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + p.when : '' %></span>
+    </div>
+    <span class="status <%= p.status %>"><%= it.STATUSES[p.status] %></span>
+    <form method="post" action="/admin/photos/<%= p.id %>/status">
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+      <input type="hidden" name="back" value="/admin/photos<%= it.filtered ? '?' + new URLSearchParams({ q: f.q, auteur: f.author, serie: f.category, statut: f.status }) : '' %>">
+      <input type="hidden" name="status" value="<%= p.status === 'published' ? 'draft' : 'published' %>">
+      <button class="btn ghost" type="submit"><%= p.status === 'published' ? 'Dépublier' : 'Publier' %></button>
+    </form>
+<% if (!it.filtered) { %>
+    <div class="move">
+<% [['up', '↑', 'Monter', i === 0], ['down', '↓', 'Descendre', i === it.photos.length - 1]].forEach(([dir, sign, label, off]) => { %>
+      <form method="post" action="/admin/photos/<%= p.id %>/move">
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="dir" value="<%= dir %>">
+        <button class="btn ghost" type="submit" aria-label="<%= label %> « <%= p.title %> »"<%~ off ? ' disabled' : '' %>><%= sign %></button>
+      </form>
+<% }) %>
+    </div>
+<% } %>
+  </li>
+<% }) %>
+</ol>
+<% if (!it.photos.length) { %><p class="empty">Aucune photo<%= it.filtered ? ' pour ces filtres' : '' %>.</p><% } %>

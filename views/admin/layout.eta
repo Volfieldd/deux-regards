@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title><%= it.pageTitle %></title>
+  <link rel="stylesheet" href="<%= it.asset('css/site.css') %>">
+  <link rel="stylesheet" href="<%= it.asset('admin/admin.css') %>">
+  <script src="<%= it.asset('admin/admin.js') %>" defer></script>
+</head>
+<body class="admin" data-csrf="<%= it.csrf %>">
+<% if (it.local) { %>
+  <p class="testbar mono" role="note">Connexion locale de test — <%= it.session.name %></p>
+<% } %>
+<header class="top wrap">
+  <%~ include('../brand', it) %>
+  <nav class="eyebrow" aria-label="Administration">
+<% [['home', '/admin', 'Tableau de bord'], ['photos', '/admin/photos', 'Photos'], ['series', '/admin/series', 'Séries'], ['authors', '/admin/auteurs', 'Auteurs'], ['settings', '/admin/reglages', 'Réglages']].forEach(([key, href, label]) => { %>
+    <a href="<%= href %>"<%~ (it.section === key || (key === 'photos' && it.section === 'photo')) ? ' aria-current="page"' : '' %>><%= label %></a>
+<% }) %>
+    <a href="/" target="_blank" rel="noopener">Voir le site</a>
+  </nav>
+  <form method="post" action="/auth/logout">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <button class="eyebrow" type="submit">Se déconnecter</button>
+  </form>
+</header>
+<main class="adm wrap" id="contenu">
+<% if (it.flash) { %>
+  <div class="flash <%= it.flash.type %>" role="<%= it.flash.type === 'error' ? 'alert' : 'status' %>">
+    <p><%= it.flash.text %></p>
+<% if (it.flash.details && it.flash.details.length) { %>
+    <ul><% it.flash.details.forEach(d => { %><li><%= d %></li><% }) %></ul>
+<% } %>
+  </div>
+<% } %>
+<%~ it.body %>
+</main>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<% layout('./layout') %>
+<h1>Séries</h1>
+<ol class="rows">
+<% it.categories.forEach((c, i) => { const ed = it.editErrors && it.editErrors.id === c.id ? it.editErrors : null; const v = ed ? ed.values : c; %>
+  <li>
+    <form class="row" method="post" action="/admin/series/<%= c.id %>">
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+      <label>Nom <input name="name" value="<%= v.name %>" required maxlength="80"></label>
+      <label>Adresse <span class="mono">/serie/</span><input name="slug" value="<%= v.slug %>" maxlength="80"></label>
+      <span class="mono"><%= c.count %> photo(s)</span>
+      <button class="btn ghost" type="submit">Enregistrer</button>
+<% if (ed) { %><span class="err" role="alert"><%= Object.values(ed.errors).join(' ') %></span><% } %>
+    </form>
+    <div class="move">
+<% [['up', '↑', 'Monter', i === 0], ['down', '↓', 'Descendre', i === it.categories.length - 1]].forEach(([dir, sign, label, off]) => { %>
+      <form method="post" action="/admin/series/<%= c.id %>/move"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="dir" value="<%= dir %>">
+        <button class="btn ghost" type="submit" aria-label="<%= label %> « <%= c.name %> »"<%~ off ? ' disabled' : '' %>><%= sign %></button></form>
+<% }) %>
+    </div>
+    <details class="danger">
+      <summary>Supprimer</summary>
+<% if (c.count) { %>
+      <p>Impossible : la série contient encore <%= c.count %> photo(s). Déplacez-les d’abord.</p>
+<% } else { %>
+      <form method="post" action="/admin/series/<%= c.id %>/delete"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
+        <button class="btn danger" type="submit">Supprimer « <%= c.name %> »</button></form>
+<% } %>
+    </details>
+  </li>
+<% }) %>
+</ol>
+<form class="panel row" method="post" action="/admin/series">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <label>Nouvelle série <input name="name" value="<%= it.values.name || '' %>" required maxlength="80"></label>
+  <button class="btn" type="submit">Créer</button>
+<% if (it.errors.name) { %><span class="err" role="alert"><%= it.errors.name %></span><% } %>
+</form>
