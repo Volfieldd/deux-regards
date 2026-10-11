@@ -37,6 +37,17 @@ Tout se règle par variables d'environnement, dans le fichier `.env` (lu par `np
 | `AUTH_RATE_LIMIT` | `30` | Tentatives de connexion (retours de l'IdP, envois du formulaire de test) par adresse sur 10 minutes ; une adresse IPv6 compte par bloc /64. La simple redirection vers l'IdP n'est pas comptée. |
 | `LOCAL_AUTH_TOKEN` | — | Connexion locale de **test**, 16 caractères au moins. **Refusée en ligne.** |
 
+## Instagram
+
+Facultatif : publication des photos sur un compte Instagram professionnel. Voir [Instagram](Instagram).
+
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `INSTAGRAM_APP_ID` | — | ID de l'application **Instagram** (Meta) : active la publication sur Instagram. |
+| `INSTAGRAM_APP_SECRET` | — | Clé secrète de l'application Instagram. |
+| `INSTAGRAM_TOKEN_KEY` | dérivée de `COOKIE_SECRET` | Clé de chiffrement du jeton d'accès Instagram (32 caractères au moins). |
+| `INSTAGRAM_API_VERSION` | `v23.0` | Version de l'API Graph d'Instagram. |
+
 ## Preuves d'antériorité
 
 | Variable | Défaut | Rôle |

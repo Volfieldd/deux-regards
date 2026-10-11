@@ -15,6 +15,7 @@ import { setupAuth } from './auth.js';
 import { createVariantService } from './variants.js';
 import { createProofService } from './proofs.js';
 import { createStats } from './stats.js';
+import { createInstagram } from './instagram.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -64,7 +65,7 @@ function assetUrls(root, cache) {
   };
 }
 
-export async function buildApp({ config, db, logger = true, oidc, proofOptions = {} }) {
+export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {} }) {
   const app = Fastify({ logger: loggerOptions(logger), trustProxy: config.trustProxy });
 
   app.decorate('config', config);
@@ -111,6 +112,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Preuves d'antériorité : empreintes et horodatage RFC 3161, repris en arrière-plan.
   // Mesure d'audience anonyme (voir server/stats.js).
   app.decorate('stats', createStats({ db, publicUrl: config.publicUrl, log: app.log }));
+  // Partage Instagram : file de publication et envoi aux créneaux (voir server/instagram.js).
+  app.decorate('instagram', createInstagram({ db, storageDir: config.storageDir, config, variants: app.variants, siteName: app.siteName, log: app.log, ...instagramOptions }));
+  app.addHook('onReady', async () => { if (!instagramOptions.manual) app.instagram.start(); });
+  app.addHook('onClose', async () => { app.instagram.stop(); });
   app.decorate('proofs', createProofService({ db, storageDir: config.storageDir, tsa: config.tsa, log: app.log, ...proofOptions }));
   app.addHook('onReady', async () => { app.proofs.start(); });
   app.addHook('onClose', async () => { await app.proofs.stop(); });

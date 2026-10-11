@@ -24,7 +24,9 @@
     <Config Name="Zitadel : ID du projet" Target="OIDC_PROJECT_ID" Default="" Mode="" Description="Resource Id du projet." Type="Variable" Display="always" Required="true" Mask="false"></Config>
     <Config Name="Zitadel : ID de l'organisation" Target="OIDC_ORG_ID" Default="" Mode="" Description="Resource Id de l'organisation." Type="Variable" Display="always" Required="true" Mask="false"></Config>
     <Config Name="Zitadel : rôle admin" Target="OIDC_ADMIN_ROLE" Default="admin" Mode="" Description="Clé du rôle donnant accès à l'admin." Type="Variable" Display="advanced" Required="false" Mask="false">admin</Config>
-    <Config Name="Mode" Target="NODE_ENV" Default="production" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">production</Config>
+    <Config Name="Instagram : ID de l'application" Target="INSTAGRAM_APP_ID" Default="" Mode="" Description="Facultatif : publication sur Instagram (aide de l'admin, « Instagram »)." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Instagram : clé secrète" Target="INSTAGRAM_APP_SECRET" Default="" Mode="" Description="Clé secrète de l'application Instagram." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="Mode" Target="NODE_ENV" Default="production" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">production</Config>
     <Config Name="Dossier des données (interne)" Target="STORAGE_DIR" Default="/data" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">/data</Config>
     <Config Name="Base (interne)" Target="DATABASE_PATH" Default="/data/site.db" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">/data/site.db</Config>
     <Config Name="Garde-fou de persistance" Target="REQUIRE_PERSISTENT_STORAGE" Default="1" Mode="" Description="Refuse de démarrer si /data n'est pas monté. Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">1</Config>

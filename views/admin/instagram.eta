@@ -1,0 +1,103 @@
+<% layout('./layout') %>
+<% const s = it.s, a = it.account;
+   const fmtDate = ms => new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(ms));
+   const days = a ? Math.round((a.expires_at - Date.now()) / 86400000) : 0; %>
+<div class="toolbar">
+  <div>
+    <h1>Instagram</h1>
+    <p class="sub">Les photos publiées sur le site partent sur Instagram une par une, aux heures choisies, avec une légende tirée du modèle.</p>
+  </div>
+</div>
+
+<div class="ig-grid">
+  <section class="panel" aria-labelledby="ig-account">
+    <h2 id="ig-account">Compte</h2>
+<% if (!it.conf.configured) { %>
+    <p class="err">Le serveur n’a pas encore d’application Instagram : renseignez <code>INSTAGRAM_APP_ID</code> et <code>INSTAGRAM_APP_SECRET</code> dans sa configuration.</p>
+    <p class="hint">Création du compte professionnel et de l’application Meta, pas à pas : <a class="more" href="/admin/aide#instagram">aide « Instagram »</a>.</p>
+<% } else if (!it.conf.https) { %>
+    <p class="err">Le site doit être en HTTPS (<code>PUBLIC_URL</code>) pour se connecter à Instagram : Meta refuse les adresses en http, et doit pouvoir télécharger les images.</p>
+<% } else if (a && it.connected) { %>
+    <p>Connecté à <strong>@<%= a.username %></strong>.</p>
+    <p class="hint">Accès valable jusqu’au <%= fmtDate(a.expires_at) %> (<%= days %> jours) ; renouvelé automatiquement avant expiration.<%= days < 7 ? ' Il expire bientôt : reconnectez le compte si le renouvellement échoue.' : '' %></p>
+    <form method="post" action="/admin/instagram/deconnexion"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Déconnecter</button></form>
+<% } else { %>
+    <p>Aucun compte connecté. Les photos s’accumulent dans la file et partiront dès la connexion.</p>
+    <p class="actions"><a class="btn" href="/admin/instagram/connexion">Connecter le compte Instagram</a></p>
+    <p class="hint">Adresse de retour à déclarer dans l’application Meta : <code><%= it.conf.redirectUri %></code></p>
+<% } %>
+  </section>
+
+  <section class="panel" aria-labelledby="ig-rhythm">
+    <h2 id="ig-rhythm">Rythme</h2>
+    <p><%= s.times.length > 1 ? `${s.times.length} publications par jour` : 'Une publication par jour' %>, à <%= s.times.join(', ').replace(/:/g, ' h ') %> (heure de Paris).</p>
+    <p class="hint"><%= s.autoQueue ? 'Chaque photo publiée sur le site entre dans la file.' : 'Les photos n’entrent dans la file que si vous les y ajoutez (fiche de la photo).' %> <a class="more" href="#reglages">Modifier</a></p>
+  </section>
+
+  <section class="panel wide2" aria-labelledby="ig-queue">
+    <h2 id="ig-queue">File d’attente <span class="mono"><%= it.queue.length %> photo<%= it.queue.length > 1 ? 's' : '' %></span></h2>
+<% if (!it.queue.length) { %>
+    <p class="hint">La file est vide. Ajoutez une photo depuis sa fiche (section « Instagram »)<%= s.autoQueue ? ', ou publiez-en une sur le site' : '' %>.</p>
+<% } else { %>
+    <ol class="igq">
+<% it.queue.forEach((p, i) => { %>
+      <li>
+        <a class="igthumb" href="/admin/instagram/apercu.jpg?photo=<%= p.photo_id %>&cadre=<%= p.frame %>&filigrane=<%= p.watermark ? 1 : 0 %>" target="_blank" rel="noopener" aria-label="Aperçu de l’image envoyée (nouvel onglet)"><img src="/admin/instagram/apercu.jpg?photo=<%= p.photo_id %>&cadre=<%= p.frame %>&filigrane=<%= p.watermark ? 1 : 0 %>" alt="" loading="lazy"></a>
+        <div class="t">
+          <a href="/admin/photos/<%= p.photo_id %>#instagram"><strong><%= p.photo.title %></strong></a>
+          <span class="mono"><%= p.status === 'publishing' ? 'Envoi en cours' : `Prévue le ${p.slot.replace(' ', ' à ').replace(':', ' h ')}` %> · <%= it.FRAMES[p.frame].toLowerCase() %><%= p.watermark ? ' · filigrane' : '' %></span>
+          <span class="cap-excerpt"><%= p.caption.split('\n')[0] %>…</span>
+<% if (p.error) { %>          <span class="err">Dernier essai : <%= p.error %> (essai <%= p.attempts %> sur 3)</span>
+<% } %>
+        </div>
+<% if (p.status === 'queued') { %>
+        <div class="acts">
+<% [['monter', '↑', 'Avancer', i === 0], ['descendre', '↓', 'Reculer', i === it.queue.length - 1]].forEach(([act, sign, label, off]) => { %>
+          <form method="post" action="/admin/instagram/<%= p.id %>/<%= act %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="iconbtn" type="submit" aria-label="<%= label %> « <%= p.photo.title %> »"<%~ off ? ' disabled' : '' %>><%= sign %></button></form>
+<% }) %>
+          <form method="post" action="/admin/instagram/<%= p.id %>/publier"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"<%~ it.connected ? '' : ' disabled' %>>Publier maintenant</button></form>
+          <form method="post" action="/admin/instagram/<%= p.id %>/annuler"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Retirer</button></form>
+        </div>
+<% } %>
+      </li>
+<% }) %>
+    </ol>
+<% } %>
+  </section>
+
+<% if (it.history.length) { %>
+  <section class="panel wide2" aria-labelledby="ig-history">
+    <h2 id="ig-history">Historique</h2>
+    <ul class="rank plain">
+<% it.history.forEach(p => { %>
+      <li><span class="t"><a href="/admin/photos/<%= p.photo_id %>#instagram"><%= p.photo.title %></a>
+        <span class="mono"><%= p.status === 'published' ? `publiée le ${fmtDate(p.published_at)}` : `échec : ${p.error}` %></span></span>
+<% if (p.status === 'published' && p.permalink) { %>        <a class="more" href="<%= p.permalink %>" target="_blank" rel="noopener">Voir sur Instagram ↗</a>
+<% } else if (p.status === 'failed') { %>        <form method="post" action="/admin/instagram/<%= p.id %>/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Réessayer</button></form>
+<% } %></li>
+<% }) %>
+    </ul>
+  </section>
+<% } %>
+
+  <form class="panel wide2 form" id="reglages" method="post" action="/admin/instagram/reglages" aria-labelledby="ig-settings">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <h2 id="ig-settings">Réglages</h2>
+    <label class="inline"><input type="checkbox" name="auto_queue"<%~ s.autoQueue ? ' checked' : '' %>> Mettre dans la file chaque photo publiée sur le site</label>
+    <div class="row">
+      <label>Heures de publication <span class="mono">heure de Paris, séparées par des virgules · 4 au plus</span><input name="times" value="<%= s.times.join(', ') %>" maxlength="40" placeholder="18:30"></label>
+      <label>Cadre par défaut <select name="frame"><% Object.entries(it.FRAMES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ s.frame === k ? ' selected' : '' %>><%= l %></option><% }) %></select></label>
+    </div>
+    <label class="inline"><input type="checkbox" name="watermark"<%~ s.watermark ? ' checked' : '' %>> Filigrane par défaut (celui des réglages <a href="/admin/images">Filigrane & EXIF</a>)</label>
+    <label>Modèle de légende
+      <span class="mono">Variables : {titre} {legende} {lieu} {date} {auteur} {serie} {site} {hashtags} · une ligne dont les variables sont vides disparaît</span>
+      <textarea name="template" rows="9" maxlength="2200"><%= s.template %></textarea></label>
+    <label>Hashtags pour toutes les photos <input name="hashtags" value="<%= s.hashtags %>" maxlength="600" placeholder="#photographie #nicephos"></label>
+    <fieldset class="row">
+      <legend>Hashtags par série <span class="mono">ajoutés à ceux de toutes les photos · 30 au plus en tout</span></legend>
+<% it.categories.forEach(c => { %>      <label><%= c.name %> <input name="hashtags_<%= c.id %>" value="<%= (s.seriesHashtags || {})[c.id] || '' %>" maxlength="300" placeholder="#<%= c.slug.replace(/-/g, '') %>"></label>
+<% }) %>
+    </fieldset>
+    <p class="actions"><button class="btn" type="submit">Enregistrer les réglages</button></p>
+  </form>
+</div>

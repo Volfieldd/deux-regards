@@ -50,8 +50,24 @@ export function loadConfig(env = process.env) {
   const tsaCaFile = env.TSA_CA_FILE || (tsaUrl === DEFAULT_TSA ? DEFAULT_TSA_CA : null);
   if (tsaUrl && deployed && !tsaUrl.startsWith('https://')) throw new Error('TSA_URL doit être en HTTPS hors développement');
 
+  // Publication Instagram (API officielle de Meta, « Instagram API with Instagram Login »).
+  // La connexion exige une adresse de retour en HTTPS : sans elle, la file d'attente fonctionne mais rien ne part.
+  const igKey = env.INSTAGRAM_TOKEN_KEY || '';
+  if (igKey && igKey.length < 32) throw new Error('INSTAGRAM_TOKEN_KEY doit faire au moins 32 caractères');
+  const instagram = {
+    appId: env.INSTAGRAM_APP_ID || null,
+    appSecret: env.INSTAGRAM_APP_SECRET || null,
+    apiVersion: /^v\d+\.\d+$/.test(env.INSTAGRAM_API_VERSION || '') ? env.INSTAGRAM_API_VERSION : 'v23.0',
+    redirectUri: `${publicUrl}/admin/instagram/callback`,
+    // Clé de chiffrement du jeton d'accès : la sienne, sinon dérivée de COOKIE_SECRET.
+    tokenKey: igKey || `instagram:${cookieSecret}`,
+    https,
+  };
+  instagram.configured = Boolean(instagram.appId && instagram.appSecret);
+
   return {
     production,
+    instagram,
     deployed,
     siteName: env.SITE_NAME || 'Nicephos',
     host,

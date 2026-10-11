@@ -32,6 +32,7 @@
     search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
     upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
     menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
     stats: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
     moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
@@ -61,7 +62,7 @@
 <% } %>
   <p class="grp" id="nav-site">Site</p>
   <nav class="nav" aria-labelledby="nav-site">
-<% [['images', '/admin/images', 'Filigrane & EXIF', 'images'], ['appearance', '/admin/apparence', 'Apparence', 'appearance'], ['settings', '/admin/reglages', 'Réglages', 'settings'], ['help', '/admin/aide', 'Aide', 'help']].forEach(([key, href, label, icon]) => { %>
+<% [['instagram', '/admin/instagram', 'Instagram', 'instagram'], ['images', '/admin/images', 'Filigrane & EXIF', 'images'], ['appearance', '/admin/apparence', 'Apparence', 'appearance'], ['settings', '/admin/reglages', 'Réglages', 'settings'], ['help', '/admin/aide', 'Aide', 'help']].forEach(([key, href, label, icon]) => { %>
     <a href="<%= href %>"<%~ cur(key) ? ' aria-current="page"' : '' %>><%~ ic(icon) %><%= label %></a>
 <% }) %>
     <a href="/" target="_blank" rel="noopener"><%~ ic('site') %>Voir le site</a>
@@ -85,7 +86,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% const HELP = { instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>">Aide sur cette page</a></p>
 <% } %>

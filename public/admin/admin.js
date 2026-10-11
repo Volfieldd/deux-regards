@@ -1403,6 +1403,38 @@ const activity = (() => {
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
 })();
 
+// ----- fiche d'une photo : partage Instagram (aperçu, légende) -----
+(function () {
+  const form = $('[data-ig-form]');
+  if (!form) return;
+  const id = form.elements.photo_id.value;
+  const preview = $('[data-ig-preview]');
+  const frame = $('[data-ig-frame]', form);
+  const wm = $('[data-ig-watermark]', form);
+  const custom = $('[data-ig-custom]', form);
+  const text = $('[data-ig-caption]', form);
+  const count = $('[data-ig-count]', form);
+  const back = $('[data-ig-template]', form);
+  // L'aperçu suit le cadre et le filigrane choisis (image recalculée par le serveur).
+  const refresh = () => { preview.src = `/admin/instagram/apercu.jpg?photo=${encodeURIComponent(id)}&cadre=${encodeURIComponent(frame.value)}&filigrane=${wm.checked ? 1 : 0}`; };
+  frame.addEventListener('change', refresh);
+  wm.addEventListener('change', refresh);
+  const counter = () => { count.textContent = `${text.value.length} / 2200`; back.hidden = !custom.checked; };
+  // Modifier la légende la rend personnelle ; « Revenir au modèle » reprend celle du modèle.
+  text.addEventListener('input', () => { custom.checked = true; counter(); });
+  custom.addEventListener('change', async () => { if (!custom.checked) await template(); counter(); });
+  async function template() {
+    try {
+      const r = await (await fetch(`/admin/instagram/legende?photo=${encodeURIComponent(id)}`, { headers: { accept: 'application/json' } })).json();
+      text.value = r.caption || '';
+      custom.checked = false;
+      counter();
+    } catch { /* l'enregistrement reprendra le modèle de toute façon */ }
+  }
+  back.addEventListener('click', template);
+  counter();
+})();
+
 // ----- progression de la mise à jour des images -----
 // Le nombre se met à jour sans être relu à chaque fois ; seul le message final est annoncé.
 (function () {

@@ -77,3 +77,9 @@ Le module de statistiques (`server/stats.js`) ne stocke **aucune donnée personn
 - non comptés : robots, administrateurs connectés, `DNT: 1` et `Sec-GPC: 1`, préchargements, pages introuvables ;
 - pas de cookie, pas de script, pas de service tiers : dans le cadre de l’exemption de consentement de la CNIL pour la mesure d’audience. La page publique `/droits` en informe les visiteurs.
 
+## Instagram
+
+- Jeton d’accès **chiffré** en base (AES-256-GCM, clé `INSTAGRAM_TOKEN_KEY` ou dérivée de `COOKIE_SECRET`), jamais affiché ni journalisé ; erreurs de Meta nettoyées de tout jeton ou secret.
+- Connexion OAuth : `state` aléatoire lié au navigateur (cookie signé, `httpOnly`, 10 min, chemin `/admin/instagram`), comparaison en temps constant ; retour refusé sinon.
+- Image envoyée : adresse `/partage/instagram/<jeton>.jpg` (192 bits) valable seulement pendant l’envoi ; JPEG sans métadonnées ; originaux jamais servis.
+- Détails : [Instagram](Instagram).

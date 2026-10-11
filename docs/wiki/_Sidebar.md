@@ -6,6 +6,7 @@
 - [Apparence et thèmes](Apparence-et-thèmes)
 - [Filigrane et EXIF](Filigrane-et-EXIF)
 - [Preuves d'antériorité et droits](Preuves-et-droits)
+- [Publication sur Instagram](Instagram)
 
 **Installer et configurer**
 - [Installation](Installation)

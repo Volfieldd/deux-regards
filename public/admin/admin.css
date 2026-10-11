@@ -687,3 +687,24 @@ code.mono, .mono code { color: var(--ink2); }
 .meter i.w18 { width: 90%; }
 .meter i.w19 { width: 95%; }
 .meter i.w20 { width: 100%; }
+
+/* ---------- Instagram ---------- */
+.ig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.ig-grid .panel { margin: 0; } .ig-grid .wide2 { grid-column: 1 / -1; }
+.igq { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.igq li { display: flex; gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.igthumb img { width: 72px; height: 90px; object-fit: cover; border-radius: 6px; display: block; background: var(--s3); box-shadow: 0 0 0 1px var(--line2); }
+.igq .t { flex: 1; min-width: 200px; display: grid; gap: 2px; }
+.igq .acts { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.igq .acts form { margin: 0; }
+.cap-excerpt { color: var(--ink2); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ig-edit { display: grid; grid-template-columns: 260px 1fr; gap: 20px; align-items: start; }
+.ig-preview { margin: 0; } .ig-preview img { width: 100%; border-radius: 8px; background: var(--s3); display: block; box-shadow: 0 0 0 1px var(--line2); }
+.ig-preview figcaption { margin-top: 6px; }
+.warn-list { margin: 0; padding-left: 18px; color: var(--warn); font-size: 13px; }
+@media (max-width: 900px) { .ig-grid, .ig-edit { grid-template-columns: 1fr; } .ig-preview { max-width: 320px; } }
+/* Aide : tableaux et blocs de code défilent dans leur cadre au lieu d'élargir la page (téléphone). */
+.help-section table { display: block; overflow-x: auto; }
+.help-section pre { overflow-x: auto; background: var(--s2); padding: 10px 12px; border-radius: 8px; font-size: 12.5px; }
+.help-section code { overflow-wrap: anywhere; }
+.help-body, .help-section { min-width: 0; }

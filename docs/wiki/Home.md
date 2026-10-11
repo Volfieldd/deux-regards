@@ -28,7 +28,7 @@ Nicephos, le site photo de Sébastien et Julien : une galerie publique et une ad
   - il fonctionne sans JavaScript ;
   - aucune ressource n'est chargée depuis un autre site.
 - **Admin :**
-  - photos (import, édition, publication, ordre), séries, auteurs, réglages, filigrane et EXIF ;
+  - photos (import, édition, publication, ordre), séries, auteurs, réglages, filigrane et EXIF, statistiques anonymes, publication sur Instagram ;
   - accès par connexion OIDC (Zitadel) avec le rôle `admin`. L'application ne gère aucun mot de passe.
 - **Images :**
   - chaque original est horodaté par une autorité tierce (preuve d'antériorité) ;
