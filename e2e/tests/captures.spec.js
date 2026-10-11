@@ -4,6 +4,10 @@ import { test, expect } from '@playwright/test';
 // Lancement : E2E_CAPTURES=1 … e2e/run.sh --project=captures
 const STATE = 'results/.auth/admin.json';
 test.skip(process.env.E2E_CAPTURES !== '1', 'E2E_CAPTURES=1 requis');
+// Admin en mode sombre (son apparence par défaut dans la documentation) ; quelques vues en mode clair.
+test.beforeEach(async ({ context }) => {
+  await context.addCookies([{ name: 'admin_theme', value: 'dark', url: `${process.env.BASE_URL}/admin` }]);
+});
 
 const PAGES = [
   ['01-tableau-de-bord', '/admin'],
@@ -25,7 +29,7 @@ test.describe('admin', () => {
       if (url) await page.goto(url);
       else {
         await page.goto('/admin/photos');
-        await page.locator('.plist li a.ttl').first().click();
+        await page.goto('/admin/photos/1');
       }
       for (const img of await page.locator('main img:visible').all()) {
         await img.scrollIntoViewIfNeeded();
@@ -103,11 +107,35 @@ test.describe('parcours', () => {
   test('sélection multiple', async ({ page }, info) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/admin/photos');
-    const boxes = page.locator('.plist .chk');
-    await boxes.nth(0).check();
-    await boxes.nth(2).click({ modifiers: ['Shift'] });
-    await page.locator('[data-bulk]').getByLabel('Série de destination').selectOption({ label: 'Rue' });
+    const tiles = page.locator('.contact .tile');
+    await tiles.nth(0).click();
+    await tiles.nth(2).click({ modifiers: ['Shift'] });
     await page.screenshot({ path: out('02d-selection', info) });
+  });
+
+  test('loupe, palette, mode clair', async ({ page, context }, info) => {
+    test.skip(info.project.name !== 'captures-bureau', 'bureau seulement');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/admin/photos');
+    await page.locator('.contact .tile').nth(2).click();
+    await page.keyboard.press('l');
+    await expect(page.getByRole('dialog', { name: 'Loupe' })).toBeVisible();
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: out('02e-loupe', info) });
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Control+k');
+    await page.keyboard.type('pub');
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: out('02f-palette', info) });
+    await page.keyboard.press('Escape');
+    await context.addCookies([{ name: 'admin_theme', value: 'light', url: `${process.env.BASE_URL}/admin` }]);
+    await page.goto('/admin/photos');
+    await page.locator('.contact .tile').nth(1).click();
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: out('02g-phototheque-clair', info) });
+    await page.goto('/admin');
+    await page.screenshot({ path: out('01b-aujourdhui-clair', info) });
+    await context.clearCookies({ name: 'admin_theme' });
   });
 
   test('suppression d’une série', async ({ page }, info) => {

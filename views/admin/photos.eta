@@ -1,92 +1,188 @@
 <% layout('./layout') %>
-<% const f = it.filter; const qs = it.filtered ? '?' + new URLSearchParams({ q: f.q, auteur: f.author, serie: f.category, statut: f.status }) : ''; %>
-<div class="toolbar">
-  <div>
-    <h1>Photos</h1>
-    <p class="sub"><%= it.totals.all %> photo<%= it.totals.all > 1 ? 's' : '' %> · <%= it.totals.published %> publiée<%= it.totals.published > 1 ? 's' : '' %> · <%= it.totals.draft %> brouillon<%= it.totals.draft > 1 ? 's' : '' %></p>
-  </div>
-  <div class="acts">
-    <a class="btn big" href="/admin/photos?importer#import" data-import-open>＋ Importer des photos</a>
-    <span class="seg" role="group" aria-label="Affichage">
-<% [['liste', 'Liste'], ['grille', 'Grille']].forEach(([k, label]) => { const p = new URLSearchParams(it.filtered ? { q: f.q, auteur: f.author, serie: f.category, statut: f.status } : {}); if (k === 'grille') p.set('vue', 'grille'); %>
-      <a href="/admin/photos<%= p.toString() ? '?' + p : '' %>"<%~ it.view === k ? ' aria-current="true"' : '' %>><%= label %></a>
-<% }) %>
-    </span>
+<% const f = it.filter;
+   const params = o => { const p = new URLSearchParams(); const all = { q: f.q, auteur: f.author, serie: f.category, statut: it.todo ? 'afinir' : f.status, vue: it.view === 'liste' ? 'liste' : '', ...o }; for (const [k, v] of Object.entries(all)) if (v) p.set(k, v); const s = p.toString(); return '/admin/photos' + (s ? '?' + s : ''); };
+   const back = params({});
+   const status = it.todo ? 'afinir' : f.status; %>
+<div class="library" data-library>
+<section class="lib" aria-labelledby="lib-title">
+  <header class="lib-top">
+    <h1 id="lib-title">Photothèque</h1>
+    <span class="count"><%= it.photos.length %> photo<%= it.photos.length > 1 ? 's' : '' %><%= it.filtered ? ` sur ${it.totals.all}` : '' %></span>
+    <span class="sp"></span>
+    <div class="acts">
+      <a class="btn big" href="/admin/photos?importer#import" data-import-open>＋ Importer des photos</a>
+      <a class="btn ghost" href="/" target="_blank" rel="noopener">Voir le site</a>
+      <a class="help" href="/admin/aide#photos">Aide</a>
+    </div>
+  </header>
 
+  <div class="lib-sub">
+    <nav class="chips" aria-label="Statut">
+<% [['', 'Tout', it.totals.all], ['published', 'Publiées', it.totals.published], ['draft', 'Brouillons', it.totals.draft], ['afinir', 'À finir', it.totals.todo]].forEach(([k, label, n]) => { %>
+      <a class="chip<%= k === 'afinir' ? ' warn' : '' %>" href="<%= params({ statut: k }) %>"<%~ status === k ? ' aria-current="true"' : '' %>><%= label %> <span class="n"><%= n %></span></a>
+<% }) %>
+    </nav>
+    <form class="filters" method="get" action="/admin/photos" role="search" data-filters>
+<% if (status) { %><input type="hidden" name="statut" value="<%= status %>"><% } %>
+<% if (it.view === 'liste') { %><input type="hidden" name="vue" value="liste"><% } %>
+      <input type="search" name="q" value="<%= f.q %>" placeholder="Titre, lieu, légende…" aria-label="Rechercher">
+      <select name="auteur" aria-label="Auteur"><option value="">Tous les auteurs</option><% it.authors.forEach(a => { %><option value="<%= a.slug %>"<%~ a.slug === f.author ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
+      <select name="serie" aria-label="Série"><option value="">Toutes les séries</option><% it.categories.forEach(c => { %><option value="<%= c.slug %>"<%~ c.slug === f.category ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
+      <button class="btn ghost" type="submit" data-filter-submit data-nojs>Filtrer</button>
+<% if (it.filtered) { %><a class="more" href="<%= it.view === 'liste' ? '/admin/photos?vue=liste' : '/admin/photos' %>">Effacer</a><% } %>
+    </form>
+    <span class="sp"></span>
+<% if (it.view === 'planche') { %>
+    <label class="density" data-js-only hidden>Taille <input type="range" min="110" max="320" value="190" step="10" data-density aria-label="Taille des vignettes"></label>
+<% } %>
+    <nav class="seg" aria-label="Affichage">
+      <a href="<%= params({ vue: '' }) %>"<%~ it.view === 'planche' ? ' aria-current="true"' : '' %>>Planche</a>
+      <a href="<%= params({ vue: 'liste' }) %>"<%~ it.view === 'liste' ? ' aria-current="true"' : '' %>>Liste</a>
+    </nav>
   </div>
+
+  <%~ include('./_import', it) %>
+
+  <div class="canvas" data-canvas>
+    <p class="drop-hint mono"><label class="inline all" hidden data-select-all><input type="checkbox" class="chk"> Tout sélectionner</label>
+      <span data-js-only hidden>Clic : voir · Maj ou ⌘ + clic : plusieurs · L : loupe · ⌘K : rechercher, agir<%= it.filtered || it.view === 'liste' ? '' : ' · glisser : ordre, ou vers une série' %></span>
+      <span data-nojs>Cochez des photos, puis agissez dans le panneau de droite.</span></p>
+<% if (it.view === 'planche') { %>
+    <ol class="contact"<%~ it.filtered ? '' : ' data-sortable' %> data-contact aria-label="Photos">
+<% it.photos.forEach(p => { %>
+      <li id="photo-<%= p.id %>" class="tile <%= it.ratioClass(p) %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
+        <input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="Sélectionner « <%= p.title %> »">
+        <a class="img" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '320px', alt: '' }) %><% } else { %><span class="ph">Traitement…</span><% } %></a>
+<% if (p.status === 'draft') { %>        <span class="badge"><span aria-hidden="true">○</span> Brouillon</span>
+<% } else if (p.provisional) { %>        <span class="badge warn">Titre provisoire</span>
+<% } %>
+        <span class="cap"><a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.category %><%= p.when ? ' · ' + p.when : '' %><%= p.status === 'published' ? ' · publiée' : '' %></small></span>
+      </li>
+<% }) %>
+    </ol>
+<% } else { %>
+    <ol class="plist"<%~ it.filtered ? '' : ' data-sortable' %>>
+<% it.photos.forEach((p, i) => { %>
+      <li id="photo-<%= p.id %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
+        <input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="Sélectionner « <%= p.title %> »">
+        <span class="handle" aria-hidden="true">N°<%= it.pad(p.n) %></span>
+        <a class="thumb" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '96px', alt: '' }) %><% } else { %><span class="ph">Traitement…</span><% } %></a>
+        <div class="info">
+          <a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a>
+          <span class="mono"><%= p.category %> · <%= p.author %><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + p.when : '' %></span>
+<% if (p.provisional) { %>          <span class="note">Titre provisoire (nom du fichier)</span>
+<% } %>
+        </div>
+        <span class="st <%= p.status %>"><span aria-hidden="true"><%= p.status === 'published' ? '●' : '○' %></span> <%= it.STATUSES[p.status] %></span>
+        <details class="menu">
+          <summary class="iconbtn" aria-label="Actions pour « <%= p.title %> »"><span aria-hidden="true">⋯</span></summary>
+          <div class="menu-pop">
+            <a href="/admin/photos/<%= p.id %>">Modifier la fiche</a>
+            <form method="post" action="/admin/photos/<%= p.id %>/status">
+              <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+              <input type="hidden" name="back" value="<%= back %>">
+              <input type="hidden" name="status" value="<%= p.status === 'published' ? 'draft' : 'published' %>">
+              <button type="submit"><%= p.status === 'published' ? 'Dépublier' : 'Publier' %></button>
+            </form>
+<% if (!it.filtered) { [['up', 'Monter d’une place', i === 0], ['down', 'Descendre d’une place', i === it.photos.length - 1]].forEach(([dir, label, off]) => { if (off) return; %>
+            <form method="post" action="/admin/photos/<%= p.id %>/move">
+              <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="dir" value="<%= dir %>">
+              <button type="submit"><%= label %></button>
+            </form>
+<% }) } %>
+          </div>
+        </details>
+      </li>
+<% }) %>
+    </ol>
+<% } %>
+<% if (!it.photos.length) { %><p class="empty">Aucune photo<%= it.filtered ? ' pour ces filtres' : '' %>.</p><% } %>
+  </div>
+</section>
+
+<aside class="insp" aria-label="Inspecteur" data-inspector>
+  <form class="bulk" id="bulk" method="post" action="/admin/photos/actions" data-bulk>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <input type="hidden" name="back" value="<%= back %>">
+    <div class="insp-hd">
+      <span class="stack" data-insp-stack hidden></span>
+      <div><h2 data-insp-title>Sélection</h2><strong data-bulk-count role="status">Pour les photos cochées :</strong></div>
+      <button class="iconbtn push" type="button" data-bulk-clear hidden aria-label="Tout désélectionner (Échap)">✕</button>
+    </div>
+
+    <div class="insp-bd" data-insp-empty hidden>
+      <div class="fld"><p class="hint">Cliquez une photo pour la voir ici. Maj + clic ou ⌘ + clic pour en choisir plusieurs : série, lieu, date et publication s’appliquent alors à toutes.</p></div>
+      <div class="fld">
+        <span class="lb">Photothèque</span>
+        <p class="stat">Publiées <b><%= it.totals.published %></b></p>
+        <p class="stat">Brouillons <b><%= it.totals.draft %></b></p>
+        <p class="stat">À finir <b><%= it.totals.todo %></b></p>
+      </div>
+      <div class="fld"><span class="lb">Raccourcis</span>
+        <p class="stat"><span>Rechercher, agir</span><kbd>⌘K</kbd></p>
+        <p class="stat"><span>Publier la sélection</span><kbd>P</kbd></p>
+        <p class="stat"><span>Loupe</span><kbd>L</kbd></p>
+        <p class="stat"><span>Tout sélectionner</span><kbd>⌘A</kbd></p>
+        <p class="stat"><span>Annuler la dernière action</span><kbd>⌘Z</kbd></p>
+      </div>
+    </div>
+
+    <div data-insp-one hidden>
+      <div class="preview-one" data-one-preview></div>
+      <div class="insp-bd">
+        <div class="fld"><span class="lb">Titre <span class="r" data-one-n></span></span><input class="big-title" data-one-field="title" maxlength="160" aria-label="Titre"><span class="note" data-one-prov hidden>Titre provisoire (nom du fichier)</span></div>
+        <div class="fld"><span class="lb">Légende</span><textarea data-one-field="legend" rows="2" maxlength="2000" aria-label="Légende" placeholder="Quelques mots pour le visiteur…"></textarea></div>
+        <div class="fld"><span class="lb">Série</span><div class="pills" data-one-series role="group" aria-label="Série"><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %></div></div>
+        <div class="fld"><span class="lb">Lieu</span><input data-one-field="place" maxlength="120" aria-label="Lieu" placeholder="Où ?"></div>
+        <div class="fld"><span class="lb">Date <span class="r" data-one-when></span></span><input data-one-field="taken_on" maxlength="40" aria-label="Date" placeholder="oct. 2026, 10/2026…"></div>
+        <div class="fld"><span class="lb">Auteur</span><select data-one-field="author_id" aria-label="Auteur"><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
+        <div class="fld"><a class="more" data-one-link href="#">Fiche complète : filigrane, preuve d’antériorité, suppression →</a></div>
+      </div>
+    </div>
+
+    <div class="insp-bd" data-insp-many>
+      <div class="fld">
+        <span class="lb">Série</span>
+        <div class="pills" data-many-series role="group" aria-label="Série de la sélection" data-js-only hidden><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %><button class="pill" type="button" data-category="new">＋ Nouvelle</button></div>
+        <div class="group">
+          <select name="category_id" aria-label="Série de destination" data-bulk-category>
+            <option value="">Série…</option>
+<% it.categories.forEach(c => { %>            <option value="<%= c.id %>"><%= c.name %></option>
+<% }) %>            <option value="new">＋ Nouvelle série…</option>
+          </select>
+          <input name="new_category" maxlength="80" placeholder="Nom de la nouvelle série" aria-label="Nom de la nouvelle série" data-bulk-new>
+          <button class="btn ghost" type="submit" name="action" value="category" data-nojs>Changer de série</button>
+        </div>
+      </div>
+      <div class="fld">
+        <span class="lb">Lieu et date <span class="r" data-js-only hidden>appliqués dès la sortie du champ</span></span>
+        <input name="place" maxlength="120" placeholder="Lieu" aria-label="Lieu pour la sélection" data-many-field="place">
+        <input name="taken_on" maxlength="40" placeholder="Date : oct. 2026" aria-label="Date pour la sélection" data-many-field="taken_on">
+        <button class="btn ghost" type="submit" name="action" value="fields" data-nojs>Appliquer lieu et date</button>
+      </div>
+      <div class="fld" data-many-titles hidden><span class="lb">Titres provisoires</span><div class="titles" data-titles></div></div>
+    </div>
+
+    <div class="insp-ft">
+      <button class="btn" type="submit" name="action" value="publish" data-publish>Publier</button>
+      <div class="two">
+        <button class="btn ghost" type="submit" name="action" value="draft">Dépublier</button>
+        <button class="btn ghost" type="submit" name="action" value="delete" data-bulk-delete>Supprimer…</button>
+      </div>
+    </div>
+  </form>
+</aside>
 </div>
 
-<%~ include('./_import', it) %>
-
-<form class="filters" method="get" action="/admin/photos" role="search" data-filters>
-<% if (it.view === 'grille') { %><input type="hidden" name="vue" value="grille"><% } %>
-  <input type="search" name="q" value="<%= f.q %>" placeholder="Rechercher un titre, un lieu, une légende…" aria-label="Rechercher">
-  <select name="auteur" aria-label="Auteur"><option value="">Tous les auteurs</option><% it.authors.forEach(a => { %><option value="<%= a.slug %>"<%~ a.slug === f.author ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
-  <select name="serie" aria-label="Série"><option value="">Toutes les séries</option><% it.categories.forEach(c => { %><option value="<%= c.slug %>"<%~ c.slug === f.category ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
-  <select name="statut" aria-label="Statut"><option value="">Tous les statuts</option><% Object.entries(it.STATUSES).forEach(([k, v]) => { %><option value="<%= k %>"<%~ k === f.status ? ' selected' : '' %>><%= v %></option><% }) %></select>
-  <button class="btn ghost" type="submit" data-filter-submit>Filtrer</button>
-<% if (it.filtered) { %><a class="more eyebrow" href="/admin/photos<%= it.view === 'grille' ? '?vue=grille' : '' %>">Effacer</a><% } %>
-</form>
-
-<form class="bulk" id="bulk" method="post" action="/admin/photos/actions" data-bulk aria-label="Actions sur la sélection">
-  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-  <input type="hidden" name="back" value="/admin/photos<%= qs %>">
-  <strong data-bulk-count role="status">Pour les photos cochées :</strong>
-  <button class="btn" type="submit" name="action" value="publish">Publier</button>
-  <button class="btn ghost" type="submit" name="action" value="draft">Dépublier</button>
-  <span class="group">
-    <select name="category_id" aria-label="Série de destination" data-bulk-category>
-      <option value="">Série…</option>
-<% it.categories.forEach(c => { %>      <option value="<%= c.id %>"><%= c.name %></option>
-<% }) %>      <option value="new">＋ Nouvelle série…</option>
-    </select>
-    <input name="new_category" maxlength="80" placeholder="Nom de la nouvelle série" aria-label="Nom de la nouvelle série" data-bulk-new>
-    <button class="btn ghost" type="submit" name="action" value="category">Changer de série</button>
-  </span>
-  <button class="btn ghost" type="submit" name="action" value="delete" data-bulk-delete>Supprimer…</button>
-  <span class="spacer"></span>
-  <button class="btn ghost" type="button" hidden data-bulk-clear>Tout désélectionner</button>
-</form>
-
-<p class="mono count"><label class="inline all" hidden data-select-all><input type="checkbox" class="chk"> Tout sélectionner</label> <%= it.photos.length %> photo<%= it.photos.length > 1 ? 's' : '' %><%= it.filtered ? ' pour ces filtres · ordre modifiable sans filtre' : (it.view === 'liste' ? ' · glissez une ligne pour changer l’ordre' : '') %><span class="hint drop-hint" hidden data-drop-hint> · Astuce : déposez des photos n’importe où sur la page pour les importer.</span></p>
-<ol class="plist<%= it.view === 'grille' ? ' grid' : '' %>"<%~ it.filtered || it.view === 'grille' ? '' : ' data-sortable' %>>
-<% it.photos.forEach((p, i) => { %>
-  <li id="photo-<%= p.id %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
-    <input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="Sélectionner « <%= p.title %> »">
-    <span class="handle mono" aria-hidden="true">N°<%= it.pad(p.n) %></span>
-    <a class="thumb" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: it.view === 'grille' ? '240px' : '96px', alt: '' }) %><% } else { %><span class="ph">Traitement…</span><% } %></a>
-    <div class="info">
-      <a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a>
-      <span class="mono"><%= p.category %> · <%= p.author %><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + p.when : '' %></span>
-<% if (p.provisional) { %>      <span class="note">Titre provisoire (nom du fichier)</span>
-<% } %>
-    </div>
-    <span class="st <%= p.status %>"><span aria-hidden="true"><%= p.status === 'published' ? '●' : '○' %></span> <%= it.STATUSES[p.status] %></span>
-    <details class="menu">
-      <summary class="iconbtn" aria-label="Actions pour « <%= p.title %> »"><span aria-hidden="true">⋯</span></summary>
-      <div class="menu-pop">
-        <a href="/admin/photos/<%= p.id %>">Modifier la fiche</a>
-        <form method="post" action="/admin/photos/<%= p.id %>/status">
-          <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-          <input type="hidden" name="back" value="/admin/photos<%= qs %>">
-          <input type="hidden" name="status" value="<%= p.status === 'published' ? 'draft' : 'published' %>">
-          <button type="submit"><%= p.status === 'published' ? 'Dépublier' : 'Publier' %></button>
-        </form>
-<% if (!it.filtered) { [['up', 'Monter d’une place', i === 0], ['down', 'Descendre d’une place', i === it.photos.length - 1]].forEach(([dir, label, off]) => { if (off) return; %>
-        <form method="post" action="/admin/photos/<%= p.id %>/move">
-          <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="dir" value="<%= dir %>">
-          <button type="submit"><%= label %></button>
-        </form>
-<% }) } %>
-      </div>
-    </details>
-  </li>
-<% }) %>
-</ol>
-<% if (!it.photos.length) { %><p class="empty">Aucune photo<%= it.filtered ? ' pour ces filtres' : '' %>.</p><% } %>
+<script type="application/json" id="photos-data"><%~ it.json %></script>
 
 <dialog class="dialog" data-confirm-delete aria-labelledby="del-title">
   <h2 id="del-title">Supprimer <span data-del-count></span> ?</h2>
   <p>Les originaux et toutes leurs images seront effacés. Cette action est définitive.</p>
   <p class="actions"><button class="btn danger" type="button" data-del-ok>Supprimer définitivement</button><button class="btn ghost" type="button" data-del-cancel autofocus>Annuler</button></p>
+</dialog>
+<dialog class="dialog" data-confirm-publish aria-labelledby="pub-title" aria-describedby="pub-text">
+  <h2 id="pub-title">Publier <span data-pub-count></span> ?</h2>
+  <p id="pub-text"><span data-pub-prov></span> encore leur <strong>titre provisoire</strong> : <span data-pub-names></span>. Elles apparaîtront ainsi sur le site.</p>
+  <p class="actions"><button class="btn" type="button" data-pub-fix autofocus>Corriger les titres</button><button class="btn ghost" type="button" data-pub-ok>Publier quand même</button></p>
 </dialog>

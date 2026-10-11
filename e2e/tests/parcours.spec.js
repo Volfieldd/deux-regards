@@ -28,7 +28,7 @@ test.describe('parcours d’une photo', () => {
     test.setTimeout(180_000);
     const page = await browser.newPage({ storageState: STATE });
     for (const title of ['Lisière E2E', 'import test']) {
-      while (await page.goto(`/admin/photos?q=${encodeURIComponent(title)}`).then(() => page.locator('.plist li').count())) {
+      while (await page.goto(`/admin/photos?vue=liste&q=${encodeURIComponent(title)}`).then(() => page.locator('.plist li').count())) {
         await page.locator('.plist li a.ttl').first().click();
         await page.getByText('Supprimer cette photo').click();
         await page.getByRole('button', { name: 'Supprimer définitivement' }).click();
@@ -61,18 +61,24 @@ test.describe('parcours d’une photo', () => {
   test('importer, éditer, publier, réordonner, supprimer', async ({ page, context }) => {
     test.setTimeout(240_000);          // traitement de l'import, puis une page rechargée par déplacement au menu ⋯
     // Import : vérification, envoi, traitement suivi, puis page « Compléter et publier ».
-    await page.goto('/admin/photos');
+    await page.goto('/admin/photos?vue=liste');
     const items = page.locator('.plist li');
     const initial = await items.count();
     const firstTitle = (await items.first().locator('a.ttl').textContent()).trim();
+    await page.goto('/admin/photos');
     const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('link', { name: '＋ Importer des photos' }).click()]);
     await chooser.setFiles('fixtures/import-test.jpg');                 // l'envoi part aussitôt
     await expect(page.locator('[data-sum-title]')).toHaveText('1 photo prête sur 1', { timeout: 120_000 });
+    // Planche : la photo est arrivée, développée, et sélectionnée ; l'inspecteur propose son titre.
+    const tile = page.locator('.contact .tile', { hasText: 'import test' });
+    await expect(tile).toBeVisible();
+    await expect(tile).not.toHaveClass(/developing/);
+    await expect(page.locator('[data-inspector] [data-one-field=title]')).toHaveValue('import test');
     await page.getByRole('link', { name: 'Compléter et publier la photo →' }).click();
     await expect(page.locator('h1')).toHaveText('Compléter et publier');
     await expect(page.locator('input[data-field=title]')).toHaveValue('import test');
     await expect(page.getByText('Titre provisoire (nom du fichier)')).toBeVisible();
-    await page.goto('/admin/photos?statut=draft');
+    await page.goto('/admin/photos?statut=draft&vue=liste');
     const row = page.locator('.plist li', { hasText: 'import test' });
     await expect(row).toHaveCount(1);
     await expect(row.locator('.st')).toContainText('Brouillon');
@@ -101,7 +107,7 @@ test.describe('parcours d’une photo', () => {
     await expect.poll(() => pub.locator('.vimg img').evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
 
     // Glisser-déposer : la nouvelle photo passe en tête.
-    await page.goto('/admin/photos');
+    await page.goto('/admin/photos?vue=liste');
     await expect(items).toHaveCount(initial + 1);
     await items.last().dragTo(items.first(), { targetPosition: { x: 20, y: 4 } });
     await expect(items.first()).toContainText('Lisière E2E');
@@ -142,8 +148,8 @@ test.describe('parcours d’une photo', () => {
     await page.goto(editUrl);
     await page.getByText('Supprimer cette photo').click();
     await page.getByRole('button', { name: 'Supprimer définitivement' }).click();
-    await expect(page.getByRole('status')).toHaveText('Photo supprimée.');
-    await expect(page.locator('.plist li')).toHaveCount(initial);
+    await expect(page.locator('.flash[role=status]')).toHaveText('Photo supprimée.');
+    await expect(page.locator('.contact li')).toHaveCount(initial);
     expect((await pub.goto('/photo/lisiere-e2e')).status()).toBe(404);
     await pub.close();
   });
@@ -182,6 +188,35 @@ test.describe('parcours d’une photo', () => {
     await page.locator('dialog[open]').getByRole('button', { name: 'Supprimer « Série E2E »' }).click();
     await expect(page.getByRole('status').first()).toHaveText('Série « Série E2E » supprimée.');
     expect(await names()).toEqual(before);
+  });
+
+  test('photothèque : modifier dans l’inspecteur, annuler (⌘Z), classer en glissant vers une série', async ({ page }) => {
+    await page.goto('/admin/photos');
+    const data = () => page.evaluate(() => JSON.parse(document.getElementById('photos-data').textContent));
+    const first = (await data())[0];
+    const tile = page.locator(`#photo-${first.id}`);
+    const insp = page.locator('[data-inspector]');
+    await tile.click();
+    const title = insp.locator('[data-one-field=title]');
+    await expect(title).toHaveValue(first.title);
+    await title.fill('Titre E2E');
+    await title.press('Enter');
+    await expect(page.locator('[data-toast]')).toContainText('« Titre E2E » enregistrée');
+    await expect(tile.locator('.ttl')).toHaveText('Titre E2E');
+    await page.keyboard.press('Control+z');
+    await expect(page.locator('[data-toast]')).toContainText('Modification annulée.');
+    await page.reload();
+    expect((await data())[0].title).toBe(first.title);                       // annulé côté serveur
+
+    // Glisser la photo sur une autre série de la barre latérale, puis « Annuler » dans le message.
+    const target = page.locator('[data-drop-series]').filter({ hasNotText: first.category }).first();
+    const targetName = await target.getAttribute('data-series-name');
+    await page.locator(`#photo-${first.id}`).dragTo(target);
+    await expect(page.locator('[data-toast]')).toContainText(`1 photo déplacée vers « ${targetName} »`);
+    await page.locator('[data-toast]').getByRole('button', { name: 'Annuler' }).click();
+    await expect(page.locator('[data-toast]')).toContainText('Annulé.');
+    await page.reload();
+    expect((await data())[0].category).toBe(first.category);
   });
 
   test('filigrane : aperçu, application au site, retour à l’état initial', async ({ page, context }, info) => {

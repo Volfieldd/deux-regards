@@ -245,6 +245,28 @@ export function createAdminRepo(db) {
         ORDER BY (status = 'published') DESC, position, id LIMIT 1)`).all();
       return Object.fromEntries(rows.map(r => [r.category_id, r]));
     },
+    // Les n premières photos de chaque série (planches : publiées d'abord, dans l'ordre du site).
+    boards(n = 3) {
+      const map = {};
+      for (const r of db.prepare("SELECT * FROM photos ORDER BY (status = 'published') DESC, position, id").all()) {
+        const list = (map[r.category_id] ||= []);
+        if (list.length < n) list.push(r);
+      }
+      return map;
+    },
+    // Photos importées par mois, sur les `months` derniers mois (le plus ancien d'abord).
+    importsByMonth(months = 12) {
+      const rows = db.prepare("SELECT substr(created_at, 1, 7) AS m, COUNT(*) AS n FROM photos GROUP BY m").all();
+      const count = Object.fromEntries(rows.map(r => [r.m, r.n]));
+      const now = new Date();
+      return Array.from({ length: months }, (_, i) => {
+        const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (months - 1 - i), 1));
+        const m = d.toISOString().slice(0, 7);
+        return { month: m, n: count[m] || 0 };
+      });
+    },
+    recent: (n = 5) => db.prepare(`SELECT p.id, p.title, p.status, p.updated_at, p.file, p.width, p.height, p.variant_key, a.name AS author
+      FROM photos p JOIN authors a ON a.id = p.author_id ORDER BY p.updated_at DESC, p.id DESC LIMIT ?`).all(n),
     moveCategory(id, dir) { move('categories', q.categories.all(), id, dir); },
     // Une série qui contient des photos n'est supprimée qu'en les déplaçant vers une autre série.
     deleteCategory(id, { moveTo = null } = {}) {

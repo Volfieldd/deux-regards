@@ -196,8 +196,17 @@ test('page Photos : barre d’outils, sélection, statuts en texte, lien d’év
   assert.match(body, /<section class="importer" id="import"[^>]* hidden>/);
   assert.match((await ctx.as({ url: '/admin/photos?importer' })).body, /<section class="importer" id="import"[^>]*data-max-bytes="\d+">/);
   assert.equal((body.match(/name="ids" value="\d+" form="bulk"/g) || []).length, 12);
-  assert.match(body, /<span aria-hidden="true">●<\/span> Publiée/);
-  assert.match((await ctx.as({ url: '/admin/photos?vue=grille' })).body, /class="plist grid"/);
+  // Planche contact par défaut : une vignette par photo, au format de la photo, et l'inspecteur.
+  assert.match(body, /<ol class="contact" data-sortable data-contact/);
+  assert.match(body, /<li id="photo-\d+" class="tile ar-150"/);
+  assert.match(body, /<aside class="insp" aria-label="Inspecteur" data-inspector>/);
+  const json = JSON.parse(/<script type="application\/json" id="photos-data">([^<]*)<\/script>/.exec(body)[1]);
+  assert.equal(json.length, 12);
+  assert.ok(json[0].thumb && json[0].large && json[0].title);
+  // Vue liste : statuts en texte et symbole.
+  const list = (await ctx.as({ url: '/admin/photos?vue=liste' })).body;
+  assert.match(list, /class="plist" data-sortable/);
+  assert.match(list, /<span aria-hidden="true">●<\/span> Publiée/);
 });
 
 test('séries : cartes avec couverture, ordre par glisser (JSON), création en tête', async t => {
@@ -236,4 +245,60 @@ test('ouverture : ordre choisi, déplacer et retirer sans JavaScript, 8 au plus'
   const home = (await ctx.app.inject('/')).body;
   const first = ctx.db.prepare('SELECT title FROM photos WHERE slug = ?').pluck().get(slugs[0]);
   assert.ok(home.includes(first));
+});
+
+// ---------- refonte « Chambre noire » ----------
+
+test('mode clair / sombre : cookie de l’admin, sans effet sur le site public', async t => {
+  const ctx = await admin(t);
+  assert.doesNotMatch((await ctx.as({ url: '/admin' })).body, /<html lang="fr" data-theme/);       // par défaut : celui du système
+  const res = await ctx.post('/admin/theme', { theme: 'light', back: '/admin/photos' });
+  assert.equal(res.statusCode, 303);
+  assert.equal(res.headers.location, '/admin/photos');
+  const cookie = res.cookies.find(c => c.name === 'admin_theme');
+  assert.equal(cookie.value, 'light');
+  assert.equal(cookie.path, '/admin');
+  assert.match((await ctx.as({ url: '/admin', cookies: { admin_theme: 'light' } })).body, /<html lang="fr" data-theme="light">/);
+  assert.doesNotMatch((await ctx.as({ url: '/admin', cookies: { admin_theme: '"><script>' } })).body, /data-theme=/);   // valeur inconnue ignorée
+  assert.equal((await ctx.json('/admin/theme', { theme: 'dark' })).json().theme, 'dark');
+  assert.equal((await ctx.json('/admin/theme', { theme: 'dark' }, 'faux')).statusCode, 403);
+  assert.equal((await ctx.post('/admin/theme', { theme: 'light', back: '//evil.example' })).headers.location, '/admin');
+});
+
+test('palette ⌘K : index des photos et des séries, réservé aux admins', async t => {
+  const ctx = await admin(t);
+  const r = (await ctx.as({ url: '/admin/recherche.json' })).json();
+  assert.equal(r.photos.length, 12);
+  assert.ok(r.photos.every(p => p.id && p.title && p.thumb.startsWith('/admin/media/')));
+  assert.deepEqual(r.series.map(s => s.slug), ['rue', 'portrait', 'paysage', 'voyage']);
+  assert.notEqual((await ctx.app.inject('/admin/recherche.json')).statusCode, 200);
+});
+
+test('inspecteur : données d’une photo, filtre « À finir »', async t => {
+  const ctx = await admin(t);
+  const d = (await ctx.as({ url: '/admin/photos/1/donnees' })).json();
+  assert.equal(d.id, 1);
+  assert.ok(d.large.startsWith('/admin/media/') && d.thumb.startsWith('/admin/media/'));
+  assert.equal((await ctx.as({ url: '/admin/photos/999/donnees' })).statusCode, 404);
+  assert.notEqual((await ctx.app.inject('/admin/photos/1/donnees')).statusCode, 200);
+  const { id } = (await send(ctx, 'DSCF0400.jpg', await jpeg())).json();
+  await untilReady(ctx, [id]);
+  const body = (await ctx.as({ url: '/admin/photos?statut=afinir' })).body;
+  assert.equal((body.match(/<li id="photo-/g) || []).length, 1);
+  assert.match(body, /aria-current="true">À finir <span class="n">1<\/span>/);
+});
+
+test('aujourd’hui : à finir, ouverture, rythme ; séries en planches de 3 photos', async t => {
+  const ctx = await admin(t);
+  const { id } = (await send(ctx, 'DSCF0500.jpg', await jpeg())).json();
+  await untilReady(ctx, [id]);
+  const home = (await ctx.as({ url: '/admin' })).body;
+  assert.match(home, /<h1>(Bonjour|Bonsoir), Julien\.<\/h1>/);
+  assert.match(home, /À finir <span class="mono">1 photo<\/span>/);
+  assert.match(home, /DSCF0500[\s\S]*titre provisoire/);
+  assert.equal((home.match(/<i class="h\d+( now)?"><\/i>/g) || []).length, 12);
+  assert.match(home, /Preuves d’antériorité/);
+  const series = (await ctx.as({ url: '/admin/series' })).body;
+  const rue = /<article class="scard" id="serie-\d+"[^>]*>[\s\S]*?<\/article>/.exec(series)[0];
+  assert.equal((rue.match(/<picture>/g) || []).length, 3);
 });

@@ -1,6 +1,6 @@
 # Photos
 
-La page **Photos** réunit l'import, la recherche et la liste de toutes les photos, dans l'ordre du site. L'import se fait en trois étapes : **choisir et vérifier**, **envoi et traitement**, **compléter et publier**.
+La **Photothèque** réunit l’import, la recherche et toutes les photos, dans l’ordre du site, en **planche contact** : chaque vignette garde le format de sa photo. À droite, l’**inspecteur** montre et modifie ce que vous sélectionnez. L'import se fait en trois étapes : **choisir et vérifier**, **envoi et traitement**, **compléter et publier**.
 
 ## Importer des photos
 
@@ -14,6 +14,8 @@ La page **Photos** réunit l'import, la recherche et la liste de toutes les phot
 - Des photos ajoutées pendant l'envoi partent à leur tour.
 
 ### 2. Envoi et traitement
+
+Dans la photothèque, chaque photo envoyée **apparaît aussitôt dans la planche** et s’y « développe » : floue et grise au début, nette quand ses images sont prêtes, avec une barre d’avancement. À la fin, le lot est **sélectionné** : l’inspecteur propose de titrer les photos, de leur donner un lieu et une série, puis de les publier — sans changer de page.
 
 - **Par photo :** une barre montre l'envoi en pourcentage, puis le traitement « images *n* / 6 » (les 6 tailles d'images du site), puis « ✓ Prête ».
 - **Pour le lot :** en haut, le décompte (prêtes, en traitement, en envoi, en échec), une barre d'ensemble et le **temps restant** estimé.
@@ -48,40 +50,50 @@ En pratique, pour un lot : tapez les titres, le lieu une fois dans la barre, pui
 
 Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir plus bas).
 
-## La liste
+## La planche contact
 
-Chaque ligne montre une **case à cocher**, le **numéro d'ordre** (N°), la vignette, le **titre** (avec série, auteur, lieu, date et, le cas échéant, « Titre provisoire »), le **statut** — « ● Publiée » ou « ○ Brouillon » — et le menu **⋯**.
+- **Pastilles** en haut : **Tout**, **Publiées**, **Brouillons**, **À finir** (brouillons et titres provisoires).
+- **Recherche** (titre, lieu, légende, adresse), **auteur**, **série** : la planche se met à jour aussitôt.
+- **Taille** : le curseur agrandit ou réduit les vignettes (gardé pour la prochaine fois).
+- **Planche / Liste** : la liste montre les photos en lignes, avec le numéro d’ordre, l’auteur, le lieu et le menu **⋯** (Modifier, Publier ou Dépublier, Monter, Descendre).
+- Au survol d’une vignette : son titre, sa série, sa date. Les brouillons portent la pastille **○ Brouillon**, les titres provisoires **Titre provisoire**.
 
-- **Ouvrir la fiche :** cliquez sur le titre (ou sur la vignette).
-- **Menu ⋯ d'une ligne :** Modifier la fiche, Publier ou Dépublier, Monter ou Descendre d'une place.
-- **Liste / Grille :** en haut à droite, l'affichage en lignes ou en vignettes.
+> Le N° de l’admin est la place dans **toute** la liste, brouillons compris. Sur le site, les photos publiées sont numérotées sans trou (N°01, N°02…).
 
-> Le N° de l'admin est la place dans **toute** la liste, brouillons compris. Sur le site, les photos publiées sont numérotées sans trou (N°01, N°02…).
+## L’inspecteur
+
+Il change selon la sélection :
+
+- **Rien de sélectionné** : les chiffres de la photothèque et les raccourcis.
+- **Une photo** (un clic dessus) : l’image en grand, puis **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **auteur**. Chaque champ s’enregistre quand vous le quittez (ou Entrée) ; le message en bas propose **Annuler**. **Fiche complète** ouvre la fiche (filigrane, preuve d’antériorité, suppression).
+- **Plusieurs photos** : voir ci-dessous.
+
+En bas, toujours : **Publier**, **Dépublier**, **Supprimer…**.
 
 ## Agir sur plusieurs photos
 
-1. Cochez les photos. **Maj + clic** coche toute la plage depuis la case précédente ; **Tout sélectionner** coche la liste affichée.
-2. Une barre sombre apparaît (en haut ; en bas de l'écran sur téléphone) : **Publier**, **Dépublier**, **Changer de série** (choisissez la série, ou « ＋ Nouvelle série… » et son nom), **Supprimer…**.
-3. Un message confirme l'action et propose **Annuler** pendant 10 secondes (sauf pour la suppression, qui demande une confirmation avant).
+1. **Sélectionnez** : **Maj + clic** prend toute la plage depuis la dernière photo choisie, **⌘ + clic** (Ctrl + clic sur PC) ajoute ou retire une photo, **⌘A** prend tout, **Échap** désélectionne. Les cases à cocher des vignettes font la même chose.
+2. Dans l’inspecteur :
+   - **Série** : un clic sur une pastille classe toute la sélection (« ＋ Nouvelle » crée la série) ;
+   - **Lieu** et **Date** : appliqués à toutes dès que vous quittez le champ ;
+   - **Titres provisoires** : la liste des photos concernées, à titrer une par une ;
+   - **Publier** (ou la touche **P**), **Dépublier**, **Supprimer…** (avec confirmation).
+3. Chaque action s’annonce en bas de l’écran avec **Annuler** (ou **⌘Z**).
+
+**Classer en glissant** : glissez une photo (ou la sélection) sur une série de la **barre latérale**.
+
+## La loupe
+
+**L** (ou un double clic) ouvre la photo sélectionnée en grand, avec une pellicule en bas. **←** **→** passent d’une photo à l’autre (l’inspecteur suit) ; **Échap** referme.
 
 ## Changer l'ordre
 
-L'ordre de la liste est celui du site : galerie, visionneuse et numéros.
+L’ordre de la photothèque est celui du site : galerie, visionneuse et numéros. Il ne se change que **sans filtre**.
 
-- **À la souris :** saisissez une ligne et déposez-la sur une autre.
-  - Lâchée sur la **moitié haute** d'une ligne, elle se place **avant** ; sur la **moitié basse**, **après**. C'est ainsi qu'on atteint la dernière place.
-  - Un trait de couleur montre l'endroit du dépôt.
-  - L'ordre est **enregistré aussitôt** ; les numéros se mettent à jour.
-- **Au clavier, ou sans souris :** menu **⋯** de la ligne, **Monter d'une place** ou **Descendre d'une place**.
-- **Avec des filtres, ou en grille :** le réordonnancement n'est possible que sur la liste **complète**. Effacez d'abord les filtres.
+- **Planche** : glissez une vignette avant ou après une autre (moitié gauche ou droite de la vignette visée). L’ordre est **enregistré aussitôt**.
+- **Liste** : glissez une ligne (moitié haute : avant, moitié basse : après — c’est ainsi qu’on atteint la dernière place), ou, au clavier, menu **⋯** → **Monter d’une place** / **Descendre d’une place**.
 
-Si l'enregistrement échoue (session expirée…), la liste reprend son ordre précédent et un message vous invite à recharger la page.
-
-## Rechercher et filtrer
-
-- **Recherche :** cherche dans le titre, le lieu, la légende et l'adresse.
-- **Auteur**, **Série**, **Statut** : à combiner librement ; la liste se met à jour dès que vous changez un choix.
-- **Effacer** revient à la liste complète.
+Si l’enregistrement échoue (session expirée…), l’ordre précédent revient et un message vous invite à recharger la page.
 
 ## La fiche d'une photo
 

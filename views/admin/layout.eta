@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr"<%~ it.adminTheme ? ` data-theme="${it.adminTheme}"` : '' %>>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="<%= it.adminTheme || 'dark light' %>">
   <title><%= it.pageTitle %></title>
-  <link rel="stylesheet" href="<%= it.asset('css/site.css') %>">
   <link rel="stylesheet" href="<%= it.asset('admin/admin.css') %>">
 <% const masks = it.brand ? [it.brand.emblem, it.brand.icon, it.brand.logotype].filter(Boolean).join('.') : ''; %>
 <% if (masks) { %>
@@ -16,25 +16,75 @@
 <body class="admin" data-csrf="<%= it.csrf %>">
 <a class="skip" href="#contenu">Aller au contenu</a>
 <% if (it.local) { %>
-  <p class="testbar mono" role="note">Connexion locale de test — <%= it.session.name %></p>
+  <p class="testbar" role="note">Connexion locale de test — <%= it.session.name %></p>
 <% } %>
-<header class="top wrap" data-top>
-  <%~ include('../brand', it) %>
-  <button class="menu-toggle eyebrow" type="button" aria-expanded="false" aria-controls="admin-nav" hidden data-menu>☰ Menu</button>
-  <nav class="eyebrow" id="admin-nav" aria-label="Administration">
-<% [['home', '/admin', 'Tableau de bord'], ['photos', '/admin/photos', 'Photos'], ['series', '/admin/series', 'Séries'], ['authors', '/admin/auteurs', 'Auteurs'], ['images', '/admin/images', 'Filigrane & EXIF'], ['appearance', '/admin/apparence', 'Apparence'], ['settings', '/admin/reglages', 'Réglages'], ['help', '/admin/aide', 'Aide']].forEach(([key, href, label]) => { %>
-    <a href="<%= href %>"<%~ (it.section === key || (key === 'photos' && it.section === 'photo')) ? ' aria-current="page"' : '' %>><%= label %></a>
+<%
+  const ICON = {
+    home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+    photos: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/>',
+    series: '<rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/>',
+    authors: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+    images: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+    appearance: '<circle cx="12" cy="12" r="9"/><circle cx="8" cy="10" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="10" r="1"/><path d="M12 21a3 3 0 0 1 0-6h2"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/>',
+    site: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+    upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
+    moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+    logout: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>',
+  };
+  const ic = (k, s = 18) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+  const cur = (key) => it.section === key || (key === 'photos' && (it.section === 'photo' || it.section === 'batch' || it.section === 'confirm-delete'));
+  const b = it.brand || {};
+  const nextTheme = it.adminTheme === 'light' ? 'dark' : 'light';
+%>
+<div class="shell">
+<aside class="side" id="admin-nav" data-side>
+  <a class="word" href="/admin"><% if (b.emblem) { %><span class="emblem" aria-hidden="true"></span><% } %><span><%= it.siteName %></span></a>
+  <button class="cmdk" type="button" data-cmdk-open hidden><%~ ic('search', 16) %><span>Rechercher, agir…</span><kbd>⌘K</kbd></button>
+  <nav class="nav" aria-label="Administration">
+<% [['home', '/admin', 'Aujourd’hui', 'home'], ['photos', '/admin/photos', 'Photothèque', 'photos'], ['series', '/admin/series', 'Séries', 'series'], ['authors', '/admin/auteurs', 'Auteurs', 'authors']].forEach(([key, href, label, icon]) => { %>
+    <a href="<%= href %>"<%~ cur(key) ? ' aria-current="page"' : '' %>><%~ ic(icon) %><%= label %></a>
 <% }) %>
-    <a href="/" target="_blank" rel="noopener">Voir le site</a>
   </nav>
-  <a class="activity" href="/admin/photos?statut=draft" data-activity<%~ it.activity ? '' : ' hidden' %>><span class="spin" aria-hidden="true"></span><span data-activity-text>Traitement : <%= it.activity %> photo<%= it.activity > 1 ? 's' : '' %></span></a>
-  <form class="logout" method="post" action="/auth/logout">
-    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-    <button class="eyebrow" type="submit">Se déconnecter</button>
-  </form>
-</header>
-<main class="adm wrap" id="contenu" tabindex="-1">
-<% const HELP = { home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% if (it.navSeries && it.navSeries.length) { %>
+  <p class="grp" id="nav-series">Séries</p>
+  <ul class="ser" aria-labelledby="nav-series">
+<% it.navSeries.forEach(c => { %>
+    <li><a href="/admin/photos?serie=<%= c.slug %>" data-drop-series="<%= c.id %>" data-series-name="<%= c.name %>"><span class="sw"><% if (c.thumb) { %><img src="<%= c.thumb %>" alt="" loading="lazy"><% } %></span><span class="t"><%= c.name %></span><span class="n"><%= c.count %></span></a></li>
+<% }) %>
+  </ul>
+<% } %>
+  <p class="grp" id="nav-site">Site</p>
+  <nav class="nav" aria-labelledby="nav-site">
+<% [['images', '/admin/images', 'Filigrane & EXIF', 'images'], ['appearance', '/admin/apparence', 'Apparence', 'appearance'], ['settings', '/admin/reglages', 'Réglages', 'settings'], ['help', '/admin/aide', 'Aide', 'help']].forEach(([key, href, label, icon]) => { %>
+    <a href="<%= href %>"<%~ cur(key) ? ' aria-current="page"' : '' %>><%~ ic(icon) %><%= label %></a>
+<% }) %>
+    <a href="/" target="_blank" rel="noopener"><%~ ic('site') %>Voir le site</a>
+  </nav>
+  <div class="foot">
+    <a class="job" href="/admin/photos?statut=draft" data-activity<%~ it.activity ? '' : ' hidden' %>><span class="spin" aria-hidden="true"></span><span data-activity-text>Traitement : <%= it.activity %> photo<%= it.activity > 1 ? 's' : '' %></span></a>
+    <div class="me">
+      <span class="av" aria-hidden="true"><%= (it.session.name || '?').trim().charAt(0).toUpperCase() %></span>
+      <span class="who"><%= it.session.name || 'Administrateur' %><small>Administration</small></span>
+      <form method="post" action="/admin/theme" data-theme-form>
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+        <input type="hidden" name="back" value="<%= it.currentPath %>">
+        <button class="iconbtn" type="submit" name="theme" value="<%= nextTheme %>" data-theme-toggle aria-label="Passer en mode <%= nextTheme === 'light' ? 'clair' : 'sombre' %>" title="Mode clair / sombre"><span class="when-dark"><%~ ic('sun') %></span><span class="when-light"><%~ ic('moon') %></span></button>
+      </form>
+      <form method="post" action="/auth/logout">
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+        <button class="iconbtn" type="submit" aria-label="Se déconnecter" title="Se déconnecter"><%~ ic('logout') %></button>
+      </form>
+    </div>
+  </div>
+</aside>
+
+<main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
+<% const HELP = { home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>">Aide sur cette page</a></p>
 <% } %>
@@ -56,6 +106,21 @@
 <% } %>
 <%~ it.body %>
 </main>
+</div>
+
+<nav class="tabbar" aria-label="Navigation rapide">
+  <a href="/admin"<%~ cur('home') ? ' aria-current="page"' : '' %>><%~ ic('home', 22) %>Aujourd’hui</a>
+  <a href="/admin/photos"<%~ cur('photos') ? ' aria-current="page"' : '' %>><%~ ic('photos', 22) %>Photos</a>
+  <a class="imp" href="/admin/photos?importer#import" data-import-open aria-label="Importer des photos"><%~ ic('upload', 22) %></a>
+  <a href="/admin/series"<%~ cur('series') ? ' aria-current="page"' : '' %>><%~ ic('series', 22) %>Séries</a>
+  <button type="button" data-menu aria-expanded="false" aria-controls="admin-nav"><%~ ic('menu', 22) %>Menu</button>
+</nav>
+
 <div class="toast" role="status" aria-live="polite" data-toast hidden></div>
+<dialog class="palette" data-cmdk aria-label="Rechercher et agir">
+  <div class="pal-in"><%~ ic('search', 20) %><input type="text" data-cmdk-input placeholder="Rechercher une photo, une série, une action…" aria-label="Rechercher" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="cmdk-list"><kbd>Échap</kbd></div>
+  <ul class="pal-list" id="cmdk-list" role="listbox" data-cmdk-list></ul>
+  <p class="pal-ft"><span><kbd>↑</kbd> <kbd>↓</kbd> choisir</span><span><kbd>↵</kbd> exécuter</span><span><kbd>Échap</kbd> fermer</span></p>
+</dialog>
 </body>
 </html>

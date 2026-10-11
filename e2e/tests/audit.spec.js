@@ -117,7 +117,9 @@ test('J3 — gérer les séries', async ({ page }) => {
   await page.locator('dialog[open]').getByRole('button', { name: 'Annuler' }).click();
   await page.setViewportSize({ width: 412, height: 915 });
   await page.reload();
-  m.mobileHeaderHeight = Math.round((await page.locator('header.top').boundingBox()).height);
+  // Mobile : plus d'en-tête ; la navigation tient dans la barre d'onglets du bas.
+  m.mobileHeaderHeight = 0;
+  m.mobileTabbarHeight = Math.round((await page.locator('.tabbar').boundingBox()).height);
   await shot(page, 'J3-04-series-mobile', { fullPage: true });
   save();
 });
@@ -125,17 +127,16 @@ test('J3 — gérer les séries', async ({ page }) => {
 test('J4 — classer 3 photos dans la nouvelle série', async ({ page }) => {
   const m = metrics.J4 = { actions: 0, screens: 1 };
   await page.goto('/admin/photos?q=Audit');
-  const boxes = page.locator('.plist .chk');
-  await boxes.nth(0).check(); m.actions++;
-  await boxes.nth(2).click({ modifiers: ['Shift'] }); m.actions++;
-  await expect(page.locator('[data-bulk-count]')).toHaveText('3 sélectionnées');
-  const bar = page.locator('[data-bulk]');
-  await bar.getByLabel('Série de destination').selectOption({ label: 'Nuits d’automne' }); m.actions++;
+  const tiles = page.locator('.contact .tile');
+  await tiles.nth(0).click(); m.actions++;
+  await tiles.nth(2).click({ modifiers: ['Shift'] }); m.actions++;
+  const insp = page.locator('[data-inspector]');
+  await expect(insp.locator('[data-insp-title]')).toHaveText('3 photos');
   await shot(page, 'J4-01-selection');
-  await bar.getByRole('button', { name: 'Changer de série' }).click(); m.actions++;
+  await insp.locator('[data-many-series]').getByRole('button', { name: 'Nuits d’automne' }).click(); m.actions++;
   await expect(page.locator('[data-toast]')).toContainText('3 photos déplacées vers « Nuits d’automne »');
+  await expect(insp.locator('[data-many-series]').getByRole('button', { name: 'Nuits d’automne' })).toHaveAttribute('aria-pressed', 'true');
   await shot(page, 'J4-02-deplacees');
-  await expect(page.locator('.plist li').filter({ hasText: 'Nuits d’automne' })).toHaveCount(3);
   save();
 });
 
@@ -150,7 +151,7 @@ test('J5 — choisir les photos de l’ouverture', async ({ page }) => {
 test('mesures transverses', async ({ page }) => {
   const m = metrics.transverse = {};
   await page.goto('/admin/photos');
-  m.firstPhotoY = Math.round((await page.locator('.plist li').first().boundingBox()).y);
+  m.firstPhotoY = Math.round((await page.locator('.contact li').first().boundingBox()).y);
   // Clavier : tabulations jusqu'au bouton d'import.
   let tabs = 0;
   for (; tabs < 40; tabs++) {
@@ -176,8 +177,8 @@ test('accessibilité des écrans revus (axe-core)', async ({ page }) => {
     found[name] = violations.map(v => `${v.id} (${v.impact}) : ${v.nodes.map(n => n.target.join(' ')).slice(0, 3).join(' | ')}`);
   };
   await page.goto('/admin/photos');
-  await page.locator('.plist .chk').nth(0).check();
-  await page.locator('.plist .chk').nth(1).check();
+  await page.locator('.contact .tile').nth(0).click();
+  await page.locator('.contact .tile').nth(1).click({ modifiers: ['Shift'] });
   await check('photos + sélection');
   await page.goto('/admin/photos?importer');
   await page.locator('[data-import] input[type=file]').setInputFiles(['fixtures/audit/DSCF0241.jpg', 'fixtures/audit/notes-de-voyage.jpg']);
@@ -191,7 +192,7 @@ test('accessibilité des écrans revus (axe-core)', async ({ page }) => {
   await check('réglages (ouverture)');
   await page.setViewportSize({ width: 412, height: 915 });
   await page.goto('/admin/photos');
-  await page.locator('.plist .chk').first().check();
+  await page.locator('.contact .tile').first().click();
   await check('mobile : photos + sélection');
   metrics.axe = found;
   save();
@@ -204,20 +205,25 @@ test('nettoyage', async ({ page }) => {
   const mine = ['Audit lisière', 'Audit seconde veille', 'Audit pluie fine', 'DSCF0241', 'DSCF0242', 'DSCF0243'];
   for (const q of ['Audit', 'DSCF024']) {
     await page.goto(`/admin/photos?q=${q}`);
-    const rows = page.locator('.plist li').filter({ has: page.locator('a.ttl').filter({ hasText: new RegExp(`^(${mine.join('|')})$`) }) });
+    const rows = page.locator('.contact li').filter({ has: page.locator('a.ttl').filter({ hasText: new RegExp(`^(${mine.join('|')})$`) }) });
     const n = await rows.count();
     if (!n) continue;
-    for (let i = 0; i < n; i++) await rows.nth(i).locator('.chk').check();
+    for (let i = 0; i < n; i++) await rows.nth(i).locator('.chk').check({ force: true });
     await page.locator('[data-bulk]').getByRole('button', { name: 'Supprimer…' }).click();
     await page.getByRole('button', { name: 'Supprimer définitivement' }).click();
     await expect(page.locator('[data-toast]')).toContainText('supprimée');
   }
-  await page.goto('/admin/series');
-  const s = page.locator('.scard[data-id]').filter({ has: page.locator('.title', { hasText: 'Nuits d’automne' }) });
-  if (await s.count()) {
+  // Séries créées par ce parcours (plusieurs si un passage précédent a été interrompu).
+  const ours = () => page.locator('.scard[data-id]').filter({ has: page.locator('.title', { hasText: /^Nuits d’automne$/ }) });
+  for (let k = 0; k < 5; k++) {
+    await page.goto('/admin/series');
+    const s = ours().first();
+    if (!(await s.count())) break;
     await s.locator('summary[aria-label^="Plus d’actions"]').click();
     await s.locator('.danger > summary').click();
-    await page.locator('dialog[open]').getByRole('button', { name: /Supprimer/ }).click();
+    await page.locator('dialog[open]').getByRole('button', { name: /^Supprimer/ }).click();
+    await page.waitForLoadState('load');
   }
-  await expect(page.locator('.scard[data-id]').filter({ has: page.locator('.title', { hasText: 'Nuits d’automne' }) })).toHaveCount(0);
+  await page.goto('/admin/series');
+  await expect(ours()).toHaveCount(0);
 });

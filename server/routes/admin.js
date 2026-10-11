@@ -73,9 +73,20 @@ export default async function adminRoutes(app) {
   const done = (reply, to, text, details) => flash(reply, { type: 'ok', text, details }).redirect(to, 303);
   const failed = (reply, to, text, details) => flash(reply, { type: 'error', text, details }).redirect(to, 303);
 
+  // Apparence de l'admin : « dark », « light », ou rien (celle du système, prefers-color-scheme).
+  const THEME_COOKIE = 'admin_theme';
+  const adminTheme = request => (['dark', 'light'].includes(request.cookies[THEME_COOKIE]) ? request.cookies[THEME_COOKIE] : '');
+  // Barre latérale : les séries, avec une vignette et leur nombre de photos (cibles de dépôt).
+  const navSeries = () => {
+    const covers = repo.covers();
+    return repo.categories().map(c => ({ ...c, thumb: covers[c.id] && rendered(covers[c.id]) ? thumb(covers[c.id]) : null }));
+  };
+
   function render(request, reply, template, data) {
     const siteName = app.siteName();
     return reply.render(`admin/${template}`, {
+      // Retour après la bascule clair / sombre : la page affichée, si elle a été obtenue par GET.
+      adminTheme: adminTheme(request), navSeries: navSeries(), currentPath: request.method === 'GET' ? request.url : '/admin',
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply),
       section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
@@ -91,12 +102,36 @@ export default async function adminRoutes(app) {
     return fs.existsSync(path.join(storageDir, 'variants', variantName(p.file, widthsFor(p.width)[0], 'webp', p.variant_key)));
   };
   const withReady = p => p && { ...p, ready: rendered(p) };
+  // Images de l'admin : vignette (la plus petite variante) et grande image (1280 px au plus).
+  const thumb = p => `/admin/media/${variantName(p.file, widthsFor(p.width)[0], 'webp', p.variant_key)}`;
+  const large = p => { const ws = widthsFor(p.width); return `/admin/media/${variantName(p.file, ws.filter(w => w <= 1280).at(-1) ?? ws[0], 'webp', p.variant_key)}`; };
+  // Données d'une photo pour l'inspecteur de la photothèque.
+  const dataOf = p => ({
+    id: p.id, n: p.n, title: p.title, slug: p.slug, legend: p.legend, status: p.status, provisional: p.provisional,
+    category_id: p.category_id, category: p.category, author_id: p.author_id, author: p.author, place: p.place,
+    taken_on: p.taken_on, when: p.when, width: p.width, height: p.height, ready: p.ready,
+    thumb: p.ready ? thumb(p) : null, large: p.ready ? large(p) : null,
+  });
+  // Classe de format (« ar-150 » = 3:2) : planche contact justifiée sans style en ligne (CSP).
+  const ratioClass = p => (p.width > 0 && p.height > 0 ? `ar-${Math.min(300, Math.max(40, Math.round((p.width / p.height) * 20) * 5))}` : 'ar-150');
 
   // ---------- accueil ----------
   app.get('/admin', async (request, reply) => {
+    // Les fichiers ne sont vérifiés (withReady) que pour les quelques photos affichées.
     const photos = repo.photos();
+    const published = photos.filter(p => p.status === 'published');
+    const heroSlugs = Array.isArray(repo.settings().hero) ? repo.settings().hero : [];
+    const hero = heroSlugs.map(s => published.find(p => p.slug === s)).filter(Boolean);
+    const todo = photos.filter(p => p.status === 'draft' || p.provisional);
     return render(request, reply, 'home', {
-      title: 'Tableau de bord',
+      title: 'Aujourd’hui',
+      todo: todo.slice(0, 6).map(withReady), todoCount: todo.length,
+      hero: (hero.length ? hero : published.slice(0, 5)).map(withReady).filter(p => p.ready),
+      heroChosen: hero.length > 0,
+      rhythm: repo.importsByMonth(12),
+      recent: repo.recent(5).map(withReady),
+      themeLabel: (THEMES[app.appearance.themeId()] || {}).label,
+      publicUrl: app.config.publicUrl,
       counts: { published: photos.filter(p => p.status === 'published').length, draft: photos.filter(p => p.status === 'draft').length },
       categories: repo.categories().length, authors: repo.authors(), me: repo.authorBySub(request.session.sub),
       proofs: app.proofs.status(), tsa: app.config.tsa,
@@ -106,14 +141,22 @@ export default async function adminRoutes(app) {
   // ---------- photos ----------
   app.get('/admin/photos', async (request, reply) => {
     const { q = '', auteur = '', serie = '', statut = '' } = request.query;
+    // « À finir » : brouillons et titres provisoires.
+    const todo = statut === 'afinir';
     const filter = { q: String(q), author: String(auteur), category: String(serie), status: STATUSES[statut] ? statut : '' };
     const authors = repo.authors();
     const all = repo.photos();
+    let photos = repo.photos(filter).map(withReady);
+    if (todo) photos = photos.filter(p => p.status === 'draft' || p.provisional);
+    // Données de l'inspecteur (une photo choisie) : lues par admin.js, jamais exécutées.
+    const data = photos.map(dataOf);
     return render(request, reply, 'photos', {
-      title: 'Photos', photos: repo.photos(filter).map(withReady), filter, authors, categories: repo.categories(),
-      filtered: Boolean(filter.q || filter.author || filter.category || filter.status),
-      totals: { all: all.length, published: all.filter(p => p.status === 'published').length, draft: all.filter(p => p.status === 'draft').length },
-      view: request.query.vue === 'grille' ? 'grille' : 'liste', importer: 'importer' in request.query,
+      title: 'Photothèque', photos, filter, authors, categories: repo.categories(), ratioClass,
+      json: JSON.stringify(data).replace(/</g, '\\u003c'),
+      filtered: Boolean(filter.q || filter.author || filter.category || filter.status || todo), todo,
+      totals: { all: all.length, published: all.filter(p => p.status === 'published').length, draft: all.filter(p => p.status === 'draft').length,
+        todo: all.filter(p => p.status === 'draft' || p.provisional).length },
+      view: request.query.vue === 'liste' ? 'liste' : 'planche', importer: 'importer' in request.query, wide: true,
       defaultAuthor: repo.authorBySub(request.session.sub)?.id ?? authors[0]?.id,
       defaultCategory: repo.categories().find(c => c.slug === filter.category)?.id ?? repo.categories()[0]?.id,
       maxFileBytes: MAX_FILE_BYTES,
@@ -250,7 +293,6 @@ export default async function adminRoutes(app) {
   });
 
   // État du traitement : par photo (?ids=1,2) et nombre de photos encore en cours (indicateur d'en-tête).
-  const thumb = p => `/admin/media/${variantName(p.file, widthsFor(p.width)[0], 'webp', p.variant_key)}`;
   app.get('/admin/photos/traitement', async request => {
     const ids = String(request.query.ids || '').split(',').filter(Boolean).map(Number).filter(Number.isInteger).slice(0, 200);
     return {
@@ -263,6 +305,31 @@ export default async function adminRoutes(app) {
         const ready = rendered(p);
         return { id, state: ready ? 'ready' : (job?.state || 'processing'), done: job?.done ?? 0, total: job?.total ?? 0, thumb: ready ? thumb(p) : null };
       }),
+    };
+  });
+
+  // Une photo, pour l'inspecteur (photo arrivée par l'import, ou relue après une modification).
+  app.get('/admin/photos/:id/donnees', async (request, reply) => {
+    const p = repo.photos().find(x => x.id === byId(request.params.id));
+    if (!p) return reply.code(404).send({ error: 'Photo introuvable.' });
+    return dataOf(withReady(p));
+  });
+
+  // ---------- apparence de l'admin (clair / sombre) ----------
+  app.post('/admin/theme', write, async (request, reply) => {
+    const theme = request.body?.theme;
+    if (theme === 'dark' || theme === 'light') reply.setCookie(THEME_COOKIE, theme, { path: '/admin', httpOnly: true, sameSite: 'lax', secure: secureCookies, maxAge: 365 * 24 * 3600 });
+    else reply.clearCookie(THEME_COOKIE, { path: '/admin' });
+    if (!request.headers.accept?.includes('text/html')) return { ok: true, theme: theme === 'dark' || theme === 'light' ? theme : '' };
+    return reply.redirect(safeBack(request, '/admin'), 303);
+  });
+
+  // ---------- palette de commandes (⌘K) : photos et séries ----------
+  app.get('/admin/recherche.json', async (request, reply) => {
+    reply.header('cache-control', 'no-store');
+    return {
+      photos: repo.photos().map(p => ({ id: p.id, title: p.title, category: p.category, place: p.place, status: p.status, thumb: rendered(p) ? thumb(p) : null })),
+      series: repo.categories().map(c => ({ id: c.id, name: c.name, slug: c.slug, count: c.count })),
     };
   });
 
@@ -317,7 +384,7 @@ export default async function adminRoutes(app) {
       if (!p) return reply.code(404).send({ error: 'Photo introuvable.' });
       app.variants.schedule();
       const shown = repo.photos().find(x => x.id === id);
-      return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, place: p.place, taken_on: p.taken_on, when: shown?.when || '', provisional: shown?.provisional || false } };
+      return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, author_id: p.author_id, place: p.place, legend: p.legend, taken_on: p.taken_on, when: shown?.when || '', provisional: shown?.provisional || false } };
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
       return reply.code(422).send({ errors: err.errors });
@@ -517,7 +584,7 @@ export default async function adminRoutes(app) {
 
   app.post('/admin/photos/:id/move', write, async (request, reply) => {
     repo.movePhoto(byId(request.params.id), request.body?.dir);
-    return reply.redirect(`/admin/photos#photo-${byId(request.params.id)}`, 303);
+    return reply.redirect(`/admin/photos?vue=liste#photo-${byId(request.params.id)}`, 303);   // « Monter » et « Descendre » sont dans la vue liste
   });
 
   app.post('/admin/photos/:id/delete', write, async (request, reply) => {
@@ -529,7 +596,8 @@ export default async function adminRoutes(app) {
 
   // ---------- séries ----------
   const seriesPage = (request, reply, extra = {}) => render(request, reply, 'series', {
-    title: 'Séries', categories: repo.categories(), covers: Object.fromEntries(Object.entries(repo.covers()).map(([k, p]) => [k, withReady(p)])), errors: {}, values: {}, ...extra,
+    title: 'Séries', categories: repo.categories(), covers: Object.fromEntries(Object.entries(repo.covers()).map(([k, p]) => [k, withReady(p)])),
+    boards: Object.fromEntries(Object.entries(repo.boards(3)).map(([k, list]) => [k, list.map(withReady).filter(p => p.ready)])), errors: {}, values: {}, ...extra,
   });
   app.get('/admin/series', async (request, reply) => seriesPage(request, reply));
 

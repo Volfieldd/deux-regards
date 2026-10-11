@@ -42,7 +42,8 @@ BASE_URL=http://<hôte>:<port> E2E_LOCAL_AUTH=<LOCAL_AUTH_TOKEN du serveur> E2E_
 | `parcours` | après les deux précédents, **seulement avec `E2E_ALLOW_WRITES=1`** : import, édition, publication, réordonnancement (glisser-déposer, y compris en dernière place, et menu ⋯) et suppression d'une photo ; séries (création en tête, ordre au clavier, fenêtre de suppression) ; filigrane (aperçu, application, retour) ; déconnexion |
 
 - **Données :** le projet `parcours` **modifie les données**. Il ne suppose rien du contenu, nettoie les restes d'un passage interrompu, puis restaure à l'identique les réglages d'images trouvés (même en cas d'échec). À réserver à un serveur de test.
-- **Accessibilité :** audit axe-core (WCAG 2.2 A/AA) des pages publiques et de l'admin ; aucune violation sérieuse tolérée.
+- **Accessibilité :** audit axe-core (WCAG 2.2 A/AA) des pages publiques ; pour l’admin, **aucune violation tolérée**, en mode sombre **et** en mode clair, sur ordinateur et sur téléphone.
+- **Photothèque :** sélection (clic, Maj + clic), inspecteur, loupe, palette ⌘K, bascule clair / sombre (lecture seule, `admin.spec.js`) ; modification dans l’inspecteur, ⌘Z, classement par glisser vers une série puis Annuler (`parcours.spec.js`).
 - **Temps :** le diaporama est testé avec l'horloge simulée de Playwright (pas d'attente réelle).
 - **Erreurs :** toute erreur JavaScript, toute violation de la politique de sécurité du contenu et toute ressource en échec fait échouer le test.
 - **Résultats :** captures et traces dans `e2e/results/`, rapport HTML dans `e2e/report/`.
