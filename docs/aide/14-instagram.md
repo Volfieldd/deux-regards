@@ -6,7 +6,7 @@ La mise en place se fait une seule fois : un **compte Instagram professionnel**,
 
 ## Au quotidien
 
-1. **Publiez une photo sur le site** comme d’habitude. Elle entre dans la **file Instagram** (si l’option « Mettre dans la file chaque photo publiée » est cochée dans **Instagram → Réglages**).
+1. **Choisissez ce qui part sur Instagram.** Par défaut, rien n’y entre seul : ouvrez la fiche d’une photo publiée et cliquez sur **Ajouter à la file Instagram**. Pour qu’une série entière parte automatiquement, cochez-la dans **Instagram → Réglages → Mise en file automatique** : chaque photo publiée dans cette série entrera alors dans la **file Instagram**.
 2. **Aux heures choisies** (18 h 30 par défaut, heure de Paris), la première photo de la file part sur Instagram. Une par créneau.
 3. **Jusqu’au départ**, tout se règle :
    - dans la **fiche de la photo**, section **Instagram** : cadre, filigrane, légende, avec l’aperçu exact de l’image envoyée ;

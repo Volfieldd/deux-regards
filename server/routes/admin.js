@@ -322,7 +322,7 @@ export default async function adminRoutes(app) {
   });
 
   // ---------- Instagram (voir server/instagram.js) ----------
-  // Photos passées de brouillon à publiée : dans la file Instagram si l'option est active.
+  // Photos passées de brouillon à publiée : dans la file Instagram si leur série est en mise en file automatique.
   // Et photos repassées en brouillon : retirées de la file (elles ne partiront pas).
   function queued(before) {
     const now = id => repo.photo(Number(id))?.status;

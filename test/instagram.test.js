@@ -68,13 +68,13 @@ test('légende : variables, lignes vides retirées, hashtags dédoublonnés', ()
 });
 
 test('réglages : heures valides, cadre connu, hashtags nettoyés', () => {
-  const s = normalizeSettings({ times: '18:30, 07:05 25:00 abc, 18:30', frame: 'rouge', hashtags: 'photo #ok #très_bien !', hashtags_2: '#portrait', auto_queue: 'on' }, [{ id: 2 }]);
+  const s = normalizeSettings({ times: '18:30, 07:05 25:00 abc, 18:30', frame: 'rouge', hashtags: 'photo #ok #très_bien !', hashtags_2: '#portrait', auto_2: 'on', auto_9: 'on' }, [{ id: 2 }, { id: 3 }]);
   assert.deepEqual(s.times, ['07:05', '18:30']);
   assert.equal(s.frame, 'white');
   assert.equal(s.hashtags, '#ok #très_bien');
   assert.deepEqual(s.seriesHashtags, { 2: '#portrait' });
-  assert.equal(s.autoQueue, true);
-  assert.equal(normalizeSettings({}).autoQueue, false);
+  assert.deepEqual(s.autoSeries, [2]);                                       // série inconnue (9) ignorée
+  assert.deepEqual(normalizeSettings({}).autoSeries, []);
 });
 
 test('jeton chiffré : aller-retour, falsification refusée', () => {
@@ -190,7 +190,9 @@ async function admin(t, env = {}) {
 test('admin : file automatique à la publication, réglages, fiche, aperçu, actions de file', async t => {
   const c = await admin(t, { INSTAGRAM_APP_ID: '1', INSTAGRAM_APP_SECRET: 's' });
   const draft = c.db.prepare("SELECT id FROM photos WHERE status = 'published' LIMIT 1").pluck().get();
+  const cat = c.db.prepare('SELECT category_id FROM photos WHERE id = ?').pluck().get(draft);
   c.db.prepare("UPDATE photos SET status = 'draft' WHERE id = ?").run(draft);
+  await c.post('/admin/instagram/reglages', { [`auto_${cat}`]: 'on' });
   await c.post(`/admin/photos/${draft}/status`, { status: 'published' });
   assert.equal(c.db.prepare("SELECT COUNT(*) FROM instagram_posts WHERE photo_id = ? AND status = 'queued'").pluck().get(draft), 1);
   await c.post(`/admin/photos/${draft}/status`, { status: 'draft' });
@@ -323,4 +325,37 @@ test('image publique : 15 minutes au plus, refusée si la photo n’est plus pub
   setNow(new Date('2026-10-11T10:01:00Z'));
   db.prepare("UPDATE photos SET status = 'draft' WHERE id = ?").run(photo);
   assert.equal((await app.inject(`/partage/instagram/${'b'.repeat(32)}.jpg`)).statusCode, 404);
+});
+
+test('mise en file automatique : rien par défaut, seulement les séries cochées', async t => {
+  const c = await admin(t, { INSTAGRAM_APP_ID: '1', INSTAGRAM_APP_SECRET: 's' });
+  const queued = id => c.db.prepare("SELECT COUNT(*) FROM instagram_posts WHERE photo_id = ? AND status = 'queued'").pluck().get(id);
+  const [a, b] = c.db.prepare(`SELECT p.id FROM photos p WHERE p.status = 'published'
+    AND p.category_id <> (SELECT category_id FROM photos WHERE status = 'published' ORDER BY id LIMIT 1) LIMIT 1`).pluck().all()
+    .concat(c.db.prepare("SELECT id FROM photos WHERE status = 'published' ORDER BY id LIMIT 1").pluck().all());
+  const catOf = id => c.db.prepare('SELECT category_id FROM photos WHERE id = ?').pluck().get(id);
+  assert.notEqual(catOf(a), catOf(b));
+  const republish = async id => {
+    c.db.prepare("UPDATE photos SET status = 'draft' WHERE id = ?").run(id);
+    await c.post(`/admin/photos/${id}/status`, { status: 'published' });
+  };
+
+  // Réglages jamais enregistrés : rien n'entre dans la file.
+  await republish(a); await republish(b);
+  assert.equal(queued(a) + queued(b), 0);
+  assert.match((await c.as({ url: '/admin/instagram' })).body, /Aucune mise en file automatique/);
+
+  // Ancien réglage global encore en base (coché par défaut avant) : ignoré.
+  c.db.prepare("INSERT INTO settings (key, value) VALUES ('instagram', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(JSON.stringify({ autoQueue: true }));
+  await republish(a);
+  assert.equal(queued(a), 0);
+
+  // Une série cochée : seules ses photos entrent dans la file.
+  await c.post('/admin/instagram/reglages', { [`auto_${catOf(b)}`]: 'on' });
+  await republish(a); await republish(b);
+  assert.equal(queued(a), 0);
+  assert.equal(queued(b), 1);
+  const page = (await c.as({ url: '/admin/instagram' })).body;
+  assert.match(page, new RegExp(`name="auto_${catOf(b)}" checked`));
+  assert.match(page, /Mise en file automatique à la publication : /);
 });

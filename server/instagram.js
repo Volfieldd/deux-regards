@@ -24,7 +24,9 @@ export const DEFAULT_TEMPLATE = `{titre}
 Lien en bio · {site}
 
 {hashtags}`;
-export const DEFAULTS = { autoQueue: true, times: ['18:30'], frame: 'white', watermark: false, template: DEFAULT_TEMPLATE, hashtags: '#photographie', seriesHashtags: {} };
+// autoSeries : séries dont les photos entrent seules dans la file à leur publication. Vide par défaut :
+// rien ne part sur Instagram sans un choix explicite (série cochée, ou ajout depuis la fiche).
+export const DEFAULTS = { autoSeries: [], times: ['18:30'], frame: 'white', watermark: false, template: DEFAULT_TEMPLATE, hashtags: '#photographie', seriesHashtags: {} };
 export const LIMITS = { caption: 2200, hashtags: 30, times: 4, attempts: 3 };
 const VARIABLES = ['titre', 'legende', 'lieu', 'date', 'auteur', 'serie', 'site', 'hashtags'];
 const GRAPH = 'https://graph.instagram.com';
@@ -39,8 +41,9 @@ export function normalizeSettings(body = {}, categories = []) {
   const times = [...new Set(String(body.times ?? '').split(/[,;\s]+/).filter(t => /^([01]\d|2[0-3]):[0-5]\d$/.test(t)))].sort().slice(0, LIMITS.times);
   const series = {};
   for (const c of categories) { const h = tag(body[`hashtags_${c.id}`]).join(' '); if (h) series[c.id] = h; }
+  const on = v => v === 'on' || v === true;
   return {
-    autoQueue: body.auto_queue === 'on' || body.auto_queue === true,
+    autoSeries: categories.filter(c => on(body[`auto_${c.id}`])).map(c => c.id),
     times: times.length ? times : DEFAULTS.times,
     frame: Object.hasOwn(FRAMES, body.frame) ? body.frame : DEFAULTS.frame,
     watermark: body.watermark === 'on' || body.watermark === true,
@@ -160,7 +163,8 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
   // Envoi interrompu par un arrêt du serveur : on ne sait pas s'il a abouti, donc pas de nouvel essai automatique.
   db.prepare(`UPDATE instagram_posts SET status = 'failed', media_token = NULL,
     error = 'envoi interrompu par un redémarrage du serveur : vérifiez sur Instagram avant de réessayer' WHERE status = 'publishing'`).run();
-  const settings = () => read('instagram', DEFAULTS);
+  // L'ancien interrupteur global « autoQueue » (coché par défaut) est ignoré : on repart de « aucune série ».
+  const settings = () => { const { autoQueue, ...s } = read('instagram', DEFAULTS); return { ...s, autoSeries: Array.isArray(s.autoSeries) ? s.autoSeries.map(Number) : [] }; };
 
   const account = {
     get: () => q.account.get() || null,
@@ -285,14 +289,14 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     const set = db.prepare('UPDATE instagram_posts SET position = ? WHERE id = ?');
     db.transaction(() => list.forEach((id, k) => set.run(k, id)))();
   }
-  // Photos qui viennent d'être publiées sur le site : dans la file si l'option est active
-  // (jamais une photo déjà partagée ou déjà dans la file).
+  // Photos qui viennent d'être publiées sur le site : dans la file si leur série est en mise en file
+  // automatique (jamais une photo déjà partagée ou déjà dans la file).
   function onPublished(ids) {
-    const s = settings();
-    if (!s.autoQueue) return [];
+    const auto = new Set(settings().autoSeries);
+    if (!auto.size) return [];
     const added = [];
     for (const id of ids) {
-      if (q.latest.get(id)) continue;
+      if (!auto.has(q.photo.get(id)?.category_id) || q.latest.get(id)) continue;
       try { added.push(enqueue(id)); } catch { /* photo dépubliée entre-temps */ }
     }
     return added;

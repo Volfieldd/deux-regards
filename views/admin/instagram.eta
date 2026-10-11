@@ -34,13 +34,14 @@
   <section class="panel" aria-labelledby="ig-rhythm">
     <h2 id="ig-rhythm">Rythme</h2>
     <p><%= s.times.length > 1 ? `${s.times.length} publications par jour` : 'Une publication par jour' %>, à <%= s.times.join(', ').replace(/:/g, ' h ') %> (heure de Paris).</p>
-    <p class="hint"><%= s.autoQueue ? 'Chaque photo publiée sur le site entre dans la file.' : 'Les photos n’entrent dans la file que si vous les y ajoutez (fiche de la photo).' %> <a class="more" href="#reglages">Modifier</a></p>
+<% const autoNames = it.categories.filter(c => s.autoSeries.includes(c.id)).map(c => c.name); %>
+    <p class="hint"><%= autoNames.length ? `Mise en file automatique à la publication : ${autoNames.join(', ')}. Les autres séries seulement depuis la fiche de la photo.` : 'Aucune mise en file automatique : une photo n’entre dans la file que si vous l’y ajoutez depuis sa fiche.' %> <a class="more" href="#auto">Modifier</a></p>
   </section>
 
   <section class="panel wide2" aria-labelledby="ig-queue">
     <h2 id="ig-queue">File d’attente <span class="mono"><%= it.queue.length %> photo<%= it.queue.length > 1 ? 's' : '' %></span></h2>
 <% if (!it.queue.length) { %>
-    <p class="hint">La file est vide. Ajoutez une photo depuis sa fiche (section « Instagram »)<%= s.autoQueue ? ', ou publiez-en une sur le site' : '' %>.</p>
+    <p class="hint">La file est vide. Ajoutez une photo depuis sa fiche (section « Instagram »)<%= s.autoSeries.length ? ', ou publiez-en une dans une série en mise en file automatique' : '' %>.</p>
 <% } else { %>
     <ol class="igq">
 <% it.queue.forEach((p, i) => { %>
@@ -86,7 +87,12 @@
   <form class="panel wide2 form" id="reglages" method="post" action="/admin/instagram/reglages" aria-labelledby="ig-settings">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
     <h2 id="ig-settings">Réglages</h2>
-    <label class="inline"><input type="checkbox" name="auto_queue"<%~ s.autoQueue ? ' checked' : '' %>> Mettre dans la file chaque photo publiée sur le site</label>
+    <fieldset class="row" id="auto">
+      <legend>Mise en file automatique <span class="mono">à la publication sur le site · décochez tout pour ne choisir qu’à la main</span></legend>
+<% it.categories.forEach(c => { %>      <label class="inline"><input type="checkbox" name="auto_<%= c.id %>"<%~ s.autoSeries.includes(c.id) ? ' checked' : '' %>> <%= c.name %></label>
+<% }) %>
+      <p class="hint">Une photo publiée dans une série cochée entre seule dans la file. Pour les autres, utilisez « Ajouter à la file Instagram » sur la fiche de la photo. Les photos déjà dans la file y restent : retirez-les une par une si besoin.</p>
+    </fieldset>
     <div class="row">
       <label>Heures de publication <span class="mono">heure de Paris, séparées par des virgules · 4 au plus</span><input name="times" value="<%= s.times.join(', ') %>" maxlength="40" placeholder="18:30"></label>
       <label>Cadre par défaut <select name="frame"><% Object.entries(it.FRAMES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ s.frame === k ? ' selected' : '' %>><%= l %></option><% }) %></select></label>
