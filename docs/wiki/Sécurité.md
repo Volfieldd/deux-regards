@@ -66,3 +66,14 @@ Dès que `PUBLIC_URL` est en HTTPS ou que `NODE_ENV=production`, le serveur refu
 - **HSTS :** il est envoyé sans `includeSubDomains`. À ajouter une fois le domaine choisi, si tous ses sous-domaines sont en HTTPS.
 - **Cache des images publiées :** il dure un an. Une photo dépubliée cesse d'être servie par le site, mais un navigateur ou un proxy qui l'a déjà en cache peut la garder.
 - **Co-admins :** ils ont tous les mêmes droits (supprimer, changer le mode EXIF…). Le journal d'audit permet de savoir qui a fait quoi.
+
+## Mesure d’audience
+
+Le module de statistiques (`server/stats.js`) ne stocke **aucune donnée personnelle** :
+
+- un visiteur du jour est reconnu par une empreinte HMAC-SHA-256 (adresse IP + navigateur) calculée avec une clé aléatoire **renouvelée chaque jour**, gardée **en mémoire** puis oubliée à minuit ;
+- la base ne reçoit que des compteurs par jour (tables `stats_*`), purgés au-delà de 25 mois ;
+- provenance : le nom de domaine seul, jamais l’adresse complète ni les paramètres ;
+- non comptés : robots, administrateurs connectés, `DNT: 1` et `Sec-GPC: 1`, préchargements, pages introuvables ;
+- pas de cookie, pas de script, pas de service tiers : dans le cadre de l’exemption de consentement de la CNIL pour la mesure d’audience. La page publique `/droits` en informe les visiteurs.
+

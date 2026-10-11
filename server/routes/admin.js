@@ -16,6 +16,7 @@ import { FONTS, POSITIONS, KINDS, TONE_LABELS } from '../watermark.js';
 import { THEMES, BRAND_MODES, BRAND_SLOTS } from '../themes.js';
 import { processEmblem, processIcon, processShare, BrandError, EMBLEM_MAX_BYTES } from '../brand.js';
 import { loadHelp } from '../help.js';
+import { barsAndLine, sparkline } from '../charts.js';
 
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 const LOGO_MAX_SIDE = 4000;
@@ -130,6 +131,8 @@ export default async function adminRoutes(app) {
       heroChosen: hero.length > 0,
       rhythm: repo.importsByMonth(12),
       recent: repo.recent(5).map(withReady),
+      visitorsToday: app.stats.today(),
+      monthTop: (() => { const { from, to } = app.stats.range(30); const t = app.stats.topPhotos(from, to, 1)[0]; const p = t && photos.find(x => x.id === t.id); return p ? { ...withReady(p), views: t.views } : null; })(),
       themeLabel: (THEMES[app.appearance.themeId()] || {}).label,
       publicUrl: app.config.publicUrl,
       counts: { published: photos.filter(p => p.status === 'published').length, draft: photos.filter(p => p.status === 'draft').length },
@@ -315,6 +318,65 @@ export default async function adminRoutes(app) {
     return dataOf(withReady(p));
   });
 
+  // ---------- statistiques (anonymes, voir server/stats.js) ----------
+  const SHORT = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  const dayLabel = d => `${Number(d.slice(8))} ${SHORT[Number(d.slice(5, 7)) - 1]}`;
+  const monthLabel = m => `${SHORT[Number(m.slice(5, 7)) - 1]} ${m.slice(0, 4)}`;
+  const PERIODS = { 30: '30 jours', 90: '3 mois', 365: '12 mois' };
+  const pageLabel = (page, categories, authors) => {
+    if (page === 'accueil') return 'Accueil';
+    if (page === 'a-propos') return 'À propos';
+    if (page === 'droits') return 'Droits d’utilisation';
+    const [kind, slug] = page.split(':');
+    if (kind === 'serie') return `Série « ${categories.find(c => c.slug === slug)?.name || slug} »`;
+    if (kind === 'auteur') return `Regard de ${authors.find(a => a.slug === slug)?.name || slug}`;
+    return page;
+  };
+  const photoStats = id => {
+    const { from, to } = app.stats.range(30);
+    const s = app.stats.photo(id, from, to);
+    return { ...s, spark: sparkline(s.days.map(d => d.views)) };
+  };
+
+  app.get('/admin/statistiques', async (request, reply) => {
+    const days = PERIODS[request.query.periode] ? Number(request.query.periode) : 30;
+    const { from, to } = app.stats.range(days);
+    const prev = app.stats.range(days * 2);
+    const eve = new Date(`${from}T12:00:00Z`);
+    eve.setUTCDate(eve.getUTCDate() - 1);
+    const before = app.stats.daily(prev.from, eve.toISOString().slice(0, 10));     // période précédente, même durée
+    const daily = app.stats.daily(from, to);
+    // 12 mois : regroupés par mois (visiteurs : somme des visiteurs de chaque jour).
+    let points = daily.map(d => ({ ...d, label: dayLabel(d.day) }));
+    if (days === 365) {
+      const months = new Map();
+      for (const d of daily) { const m = d.day.slice(0, 7); const o = months.get(m) || { day: m, views: 0, visitors: 0, mobile: 0 }; o.views += d.views; o.visitors += d.visitors; o.mobile += d.mobile; months.set(m, o); }
+      points = [...months.values()].map(m => ({ ...m, label: monthLabel(m.day) }));
+    }
+    const sum = (list, k) => list.reduce((a, d) => a + d[k], 0);
+    const totals = { views: sum(daily, 'views'), visitors: sum(daily, 'visitors'), mobile: sum(daily, 'mobile') };
+    const previous = { views: sum(before, 'views'), visitors: sum(before, 'visitors') };
+    const photoViews = sum(app.stats.topPhotos(from, to, 100000), 'views');
+    const all = new Map(repo.photos().map(p => [p.id, p]));
+    const categories = repo.categories();
+    const authors = repo.authors();
+    return render(request, reply, 'stats', {
+      title: 'Statistiques', days, PERIODS, from, to, totals, previous, photoViews,
+      chart: barsAndLine(points, { labels: [points[0].label, points.at(-1).label] }), points,
+      top: app.stats.topPhotos(from, to, 10).map(r => ({ ...r, photo: all.get(r.id) && withReady(all.get(r.id)) })).filter(r => r.photo),
+      pages: app.stats.topPages(from, to, 8).map(r => ({ ...r, label: pageLabel(r.page, categories, authors) })),
+      sources: app.stats.sources(from, to, 8),
+    });
+  });
+
+  // Audience d'une photo (inspecteur de la photothèque) : 30 derniers jours.
+  app.get('/admin/photos/:id/statistiques', async (request, reply) => {
+    const id = byId(request.params.id);
+    if (!repo.photo(id)) return reply.code(404).send({ error: 'Photo introuvable.' });
+    const s = photoStats(id);
+    return { total: s.total, rank: s.rank, spark: s.spark, days: s.days.map(d => d.views) };
+  });
+
   // ---------- apparence de l'admin (clair / sombre) ----------
   app.post('/admin/theme', write, async (request, reply) => {
     const theme = request.body?.theme;
@@ -486,7 +548,7 @@ export default async function adminRoutes(app) {
     if (!photo) return reply.callNotFound();
     return render(request, reply, 'photo', {
       title: photo.title, photo, values: photo, errors: {}, categories: repo.categories(), authors: repo.authors(),
-      proof: app.proofs.get(photo.id), tsa: app.config.tsa,
+      proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id),
     });
   });
 
@@ -501,7 +563,7 @@ export default async function adminRoutes(app) {
       reply.code(422);
       return render(request, reply, 'photo', {
         title: photo.title, photo, values: { ...photo, ...err.values }, errors: err.errors, categories: repo.categories(), authors: repo.authors(),
-        proof: app.proofs.get(photo.id), tsa: app.config.tsa,
+        proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id),
       });
     }
     return done(reply, `/admin/photos/${photo.id}`, 'Photo enregistrée.');

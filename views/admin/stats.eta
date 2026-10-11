@@ -1,0 +1,77 @@
+<% layout('./layout') %>
+<% const t = it.totals, pv = it.previous;
+   const delta = (now, before) => { if (!before) return now ? 'nouveau' : ''; const d = Math.round(((now - before) / before) * 100); return `${d > 0 ? '+' : ''}${d} %`; };
+   const fmt = n => n.toLocaleString('fr-FR');
+   const max = it.top.length ? it.top[0].views : 1;
+   const pmax = it.pages.length ? it.pages[0].views : 1;
+   const smax = it.sources.length ? it.sources[0].visits : 1;
+   const label = s => (s === 'direct' ? 'Accès direct (favori, lien tapé, messagerie)' : s); %>
+<div class="toolbar">
+  <div>
+    <h1>Statistiques</h1>
+    <p class="sub">Mesure anonyme, sans cookie ni service extérieur · visites des administrateurs et des robots exclues</p>
+  </div>
+  <nav class="seg" aria-label="Période">
+<% Object.entries(it.PERIODS).forEach(([k, l]) => { %>    <a href="/admin/statistiques?periode=<%= k %>"<%~ Number(k) === it.days ? ' aria-current="true"' : '' %>><%= l %></a>
+<% }) %>  </nav>
+</div>
+
+<div class="stats-grid">
+  <section class="panel wide2" aria-label="Chiffres de la période">
+    <div class="figures">
+      <div><b><%= fmt(t.visitors) %></b><span>visiteurs <small class="delta"><%= delta(t.visitors, pv.visitors) %></small></span></div>
+      <div><b><%= fmt(t.views) %></b><span>pages vues <small class="delta"><%= delta(t.views, pv.views) %></small></span></div>
+      <div><b><%= fmt(it.photoViews) %></b><span>photos ouvertes en grand</span></div>
+      <div><b><%= t.visitors ? Math.round((t.mobile / t.visitors) * 100) : 0 %> %</b><span>sur téléphone</span></div>
+    </div>
+    <p class="hint">Visiteurs : visiteurs différents chaque jour, additionnés sur la période. Évolution : par rapport aux <%= it.PERIODS[it.days] %> précédents.</p>
+  </section>
+
+  <section class="panel wide2" aria-labelledby="chart-title">
+    <h2 id="chart-title">Fréquentation <span class="mono"><span class="key bar"></span> pages vues · <span class="key line"></span> visiteurs</span></h2>
+    <figure class="chartbox"><%~ it.chart %>
+      <figcaption class="sr-only">Pages vues et visiteurs, <%= it.days === 365 ? 'par mois' : 'par jour' %>, du <%= it.points[0].label %> au <%= it.points.at(-1).label %>.</figcaption></figure>
+    <details class="data"><summary>Voir les données</summary>
+      <table class="simple"><thead><tr><th scope="col"><%= it.days === 365 ? 'Mois' : 'Jour' %></th><th scope="col">Pages vues</th><th scope="col">Visiteurs</th></tr></thead>
+        <tbody><% it.points.slice().reverse().forEach(p => { %><tr><td><%= p.label %></td><td><%= p.views %></td><td><%= p.visitors %></td></tr><% }) %></tbody></table>
+    </details>
+  </section>
+
+  <section class="panel" aria-labelledby="top-title">
+    <h2 id="top-title">Photos les plus vues</h2>
+<% if (!it.top.length) { %>    <p class="hint">Aucune photo ouverte sur la période.</p>
+<% } else { %>
+    <ol class="rank">
+<% it.top.forEach((r, i) => { %>
+      <li><span class="pos"><%= i + 1 %></span><% if (r.photo.ready) { %><%~ it.picture(r.photo, { sizes: '56px', alt: '' }) %><% } %>
+        <span class="t"><a href="/admin/photos/<%= r.photo.id %>"><%= r.photo.title %></a><span class="meter" aria-hidden="true"><i class="w<%= Math.max(1, Math.round((r.views / max) * 20)) %>"></i></span></span>
+        <b><%= fmt(r.views) %></b></li>
+<% }) %>
+    </ol>
+<% } %>
+  </section>
+
+  <section class="panel" aria-labelledby="pages-title">
+    <h2 id="pages-title">Pages</h2>
+<% if (!it.pages.length) { %>    <p class="hint">Aucune page vue sur la période.</p>
+<% } else { %>
+    <ul class="rank plain">
+<% it.pages.forEach(r => { %>      <li><span class="t"><%= r.label %><span class="meter" aria-hidden="true"><i class="w<%= Math.max(1, Math.round((r.views / pmax) * 20)) %>"></i></span></span><b><%= fmt(r.views) %></b></li>
+<% }) %>
+    </ul>
+<% } %>
+    <h2 id="src-title" class="mt">Provenance</h2>
+<% if (!it.sources.length) { %>    <p class="hint">Aucune visite sur la période.</p>
+<% } else { %>
+    <ul class="rank plain" aria-labelledby="src-title">
+<% it.sources.forEach(r => { %>      <li><span class="t"><%= label(r.source) %><span class="meter" aria-hidden="true"><i class="w<%= Math.max(1, Math.round((r.visits / smax) * 20)) %>"></i></span></span><b><%= fmt(r.visits) %></b></li>
+<% }) %>
+    </ul>
+<% } %>
+  </section>
+
+  <section class="panel wide2">
+    <h2>Ce qui est mesuré</h2>
+    <p class="hint">Les pages du site et les photos ouvertes dans la visionneuse, jour par jour. Un visiteur est reconnu pour la journée seulement, par une empreinte anonyme oubliée à minuit : aucune adresse IP ni aucun cookie. Les navigateurs qui demandent à ne pas être suivis ne sont pas comptés. Les compteurs sont effacés au bout de 25 mois. La page « Droits d’utilisation » du site en informe les visiteurs. <a class="more" href="/admin/aide#statistiques">En savoir plus</a></p>
+  </section>
+</div>

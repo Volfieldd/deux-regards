@@ -15,7 +15,7 @@ test.afterEach(async () => expect(errors, 'erreurs console / CSP').toEqual([]));
 test('rendu des pages de l’admin', async ({ page }, info) => {
   for (const [url, title, shot] of [['/admin', /^(Bonjour|Bonsoir)/, 'tableau'], ['/admin/photos', 'Photothèque', 'photos'],
     ['/admin/series', 'Séries', 'series'], ['/admin/auteurs', 'Auteurs', 'auteurs'], ['/admin/images', 'Filigrane et métadonnées', 'images'],
-    ['/admin/reglages', 'Réglages', 'reglages'], ['/admin/aide', 'Aide', 'aide']]) {
+    ['/admin/reglages', 'Réglages', 'reglages'], ['/admin/statistiques', 'Statistiques', 'statistiques'], ['/admin/aide', 'Aide', 'aide']]) {
     await page.goto(url);
     await expect(page.locator('h1')).toHaveText(title);
     // Mobile : la barre latérale est repliée derrière « Menu » (barre d'onglets en bas).
@@ -62,7 +62,7 @@ test('accessibilité de l’admin : aucune violation, en mode sombre et en mode 
   await page.emulateMedia({ reducedMotion: 'reduce' });   // mesure l'état final, pas une animation d'apparition
   for (const theme of ['dark', 'light']) {
     await context.addCookies([{ name: 'admin_theme', value: theme, url: `${process.env.BASE_URL}/admin` }]);
-    for (const url of ['/admin', '/admin/photos', '/admin/photos?importer', '/admin/photos?vue=liste', '/admin/photos/lot?ids=1,2,3', '/admin/series', '/admin/auteurs', '/admin/images', '/admin/apparence', '/admin/reglages', '/admin/aide']) {
+    for (const url of ['/admin', '/admin/photos', '/admin/photos?importer', '/admin/photos?vue=liste', '/admin/photos/lot?ids=1,2,3', '/admin/series', '/admin/auteurs', '/admin/images', '/admin/apparence', '/admin/reglages', '/admin/statistiques', '/admin/aide']) {
       await page.goto(url);
       const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
       const serious = violations;
@@ -87,7 +87,7 @@ test('aide : lien contextuel, sommaire, recherche', async ({ page }) => {
   await search.fill('zzzz introuvable');
   await expect(page.getByText('Aucune section ne contient ce texte.')).toBeVisible();
   await search.fill('');
-  await expect(page.locator('[data-help-section]:visible')).toHaveCount(12);
+  await expect(page.locator('[data-help-section]:visible')).toHaveCount(13);
   await page.locator('.help-toc').getByRole('link', { name: /^Changer l.ordre$/ }).click();
   await expect(page.locator('#photos-changer-lordre')).toBeInViewport();
 });
@@ -132,4 +132,19 @@ test('photothèque : inspecteur, loupe, palette, mode clair / sombre', async ({ 
   await expect(page.locator('html')).toHaveAttribute('data-theme', other);
   await page.locator('[data-theme-toggle]').click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', before);
+});
+
+// Statistiques : une visite publique (navigateur ordinaire, hors session admin) apparaît dans l'admin.
+test('statistiques : une visite publique est comptée et visible dans l’admin', async ({ page, browser, isMobile }) => {
+  test.skip(isMobile, 'une fois suffit');
+  await page.goto('/admin/statistiques');
+  const views = async () => Number((await page.locator('.figures div', { hasText: 'pages vues' }).locator('b').textContent()).replace(/\s/g, ''));
+  const before = await views();
+  const visitor = await browser.newContext({ storageState: { cookies: [], origins: [] }, userAgent: 'Mozilla/5.0 (X11; Linux x86_64) Firefox/131.0 E2E' });
+  const pub = await visitor.newPage();
+  await pub.goto('/a-propos');
+  await visitor.close();
+  await page.reload();
+  expect(await views()).toBe(before + 1);
+  await expect(page.locator('.chart')).toBeVisible();
 });
