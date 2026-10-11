@@ -1,31 +1,103 @@
 <% layout('./layout') %>
-<h1>Tableau de bord</h1>
-<div class="cards">
-  <a class="card" href="/admin/photos?statut=published"><span class="big"><%= it.counts.published %></span><span class="eyebrow">photos publiées</span></a>
-  <a class="card" href="/admin/photos?statut=draft"><span class="big"><%= it.counts.draft %></span><span class="eyebrow">brouillons</span></a>
-  <a class="card" href="/admin/series"><span class="big"><%= it.categories %></span><span class="eyebrow">séries</span></a>
-  <a class="card" href="/admin/auteurs"><span class="big"><%= it.authors.length %></span><span class="eyebrow">auteurs</span></a>
-</div>
-<section class="panel">
-  <h2>Preuves d’antériorité</h2>
-<% const pr = it.proofs; %>
+<% // Date et salutation à l'heure de Paris (le serveur peut tourner en UTC).
+   const paris = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', hourCycle: 'h23' }).formatToParts(new Date()).reduce((o, p) => ({ ...o, [p.type]: p.value }), {});
+   const SHORT = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+   const h = Number(paris.hour);
+   const first = (it.me && it.me.name) || (it.session.name || '').split(' ')[0];
+   const max = Math.max(1, ...it.rhythm.map(r => r.n));
+   const ago = iso => { const d = (Date.now() - new Date(iso.replace(' ', 'T') + 'Z')) / 1000; if (d < 3600) return `il y a ${Math.max(1, Math.round(d / 60))} min`; if (d < 86400) return `il y a ${Math.round(d / 3600)} h`; if (d < 172800) return 'hier'; return `il y a ${Math.round(d / 86400)} j`; };
+   const pr = it.proofs; %>
+<div class="today">
+  <div class="head">
+    <div>
+      <p class="date"><%= paris.weekday %> <%= paris.day %> <%= paris.month %></p>
+      <h1><%= h < 5 || h >= 18 ? 'Bonsoir' : 'Bonjour' %><%= first ? `, ${first}` : '' %>.</h1>
+    </div>
+    <span class="sp"></span>
+    <a class="btn ghost" href="/" target="_blank" rel="noopener">Voir le site</a>
+    <a class="btn big" href="/admin/photos?importer#import">＋ Importer des photos</a>
+  </div>
+
+  <div class="bento">
+    <section class="panel" aria-labelledby="todo-title">
+      <h2 id="todo-title">À finir <span class="mono"><%= it.todoCount ? `${it.todoCount} photo${it.todoCount > 1 ? 's' : ''}` : 'rien' %></span><% if (it.todo.length) { %><a class="btn ghost push" href="/admin/photos?statut=afinir">Tout finir en un écran →</a><% } %></h2>
+<% if (!it.todo.length) { %>
+      <p class="hint">Tout est publié et titré. Belle journée.</p>
+<% } else { %>
+      <ul class="todo">
+<% it.todo.forEach(p => { %>
+        <li>
+          <% if (p.ready) { %><%~ it.picture(p, { sizes: '56px', alt: '' }) %><% } else { %><span class="ph">…</span><% } %>
+          <span class="t"><a href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.provisional ? 'titre provisoire' : 'brouillon, prêt à publier' %><%= p.place ? '' : ' · sans lieu' %></small></span>
+<% if (p.provisional) { %>
+          <a class="btn ghost" href="/admin/photos/<%= p.id %>">Titrer</a>
+<% } else { %>
+          <form method="post" action="/admin/photos/<%= p.id %>/status">
+            <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin"><input type="hidden" name="status" value="published">
+            <button class="btn ghost" type="submit">Publier</button>
+          </form>
+<% } %>
+        </li>
+<% }) %>
+      </ul>
+<% } %>
+    </section>
+
+    <section class="panel" aria-labelledby="site-title">
+      <h2 id="site-title">Le site, en ce moment</h2>
+      <div class="filmstrip"><% it.hero.forEach(p => { %><%~ it.picture(p, { sizes: '140px', alt: '' }) %><% }) %></div>
+      <p class="hint">Ouverture : <%= it.hero.length %> photo<%= it.hero.length > 1 ? 's' : '' %><%= it.heroChosen ? ', dans l’ordre choisi' : ' (les premières de la galerie)' %> · thème <%= it.themeLabel || '—' %> · <a class="more" href="/admin/reglages#ouverture">modifier</a></p>
+    </section>
+
+    <section class="panel" aria-label="Chiffres">
+      <div class="figures">
+        <a href="/admin/photos?statut=published"><b><%= it.counts.published %></b><span>photos publiées</span></a>
+        <a href="/admin/photos?statut=draft"><b><%= it.counts.draft %></b><span>brouillons</span></a>
+        <a href="/admin/series"><b><%= it.categories %></b><span>séries</span></a>
+        <a href="/admin/auteurs"><b><%= it.authors.length %></b><span>auteurs</span></a>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="rhythm-title">
+      <h2 id="rhythm-title">Rythme <span class="mono">photos importées par mois</span></h2>
+      <div class="rhythm" role="img" aria-label="<%= it.rhythm.map(r => `${SHORT[Number(r.month.slice(5)) - 1]} ${r.month.slice(0, 4)} : ${r.n}`).join(', ') %>">
+<% it.rhythm.forEach((r, i) => { %>        <i class="h<%= Math.round((r.n / max) * 10) %><%= i === it.rhythm.length - 1 ? ' now' : '' %>"></i>
+<% }) %>
+      </div>
+      <p class="rhythm-legend"><span><%= SHORT[Number(it.rhythm[0].month.slice(5)) - 1] %> <%= it.rhythm[0].month.slice(0, 4) %></span><span><%= SHORT[Number(it.rhythm.at(-1).month.slice(5)) - 1] %> <%= it.rhythm.at(-1).month.slice(0, 4) %></span></p>
+    </section>
+
+    <section class="panel" aria-labelledby="recent-title">
+      <h2 id="recent-title">Dernières modifications</h2>
+      <ul class="recent">
+<% it.recent.forEach(p => { %>
+        <li><% if (p.ready) { %><%~ it.picture(p, { sizes: '40px', alt: '' }) %><% } else { %><span class="ph"></span><% } %><a href="/admin/photos/<%= p.id %>"><%= p.title %></a><span class="mono"><%= p.status === 'published' ? 'publiée' : 'brouillon' %> · <%= p.author %></span><span class="w"><%= ago(p.updated_at) %></span></li>
+<% }) %>
+      </ul>
+    </section>
+
+    <section class="panel" aria-labelledby="proofs-title">
+      <h2 id="proofs-title">Preuves d’antériorité</h2>
 <% if (!it.tsa.url) { %>
-  <p>Horodatage désactivé sur ce serveur (<code>TSA_URL=off</code>) : seules les empreintes des originaux sont calculées.</p>
+      <p class="hint">Horodatage désactivé sur ce serveur (<code>TSA_URL=off</code>) : seules les empreintes des originaux sont calculées.</p>
 <% } else { %>
-  <p><strong><%= pr.ok %></strong> photo(s) sur <%= pr.photos %> horodatée(s)<%= pr.errors ? `, ${pr.errors} en attente après une erreur` : '' %>. Autorité : <span class="mono"><%= it.tsa.url %></span></p>
+      <p><strong><%= pr.ok %></strong> photo(s) sur <%= pr.photos %> horodatée(s)<%= pr.errors ? `, ${pr.errors} en attente après une erreur` : '' %>. <span class="hint">Autorité : <%= it.tsa.url %></span></p>
 <% if (pr.errors) { %>
-  <form method="post" action="/admin/preuves/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
-    <button class="btn ghost" type="submit">Réessayer maintenant</button></form>
+      <form method="post" action="/admin/preuves/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
+        <button class="btn ghost" type="submit">Réessayer maintenant</button></form>
 <% } %>
 <% } %>
-</section>
-<section class="panel">
-  <h2>Votre compte</h2>
-  <p>Connecté en tant que <strong><%= it.session.name || it.session.email || it.session.sub %></strong>.</p>
+    </section>
+
+    <section class="panel wide2" aria-labelledby="account-title">
+      <h2 id="account-title">Votre compte</h2>
+      <p>Connecté en tant que <strong><%= it.session.name || it.session.email || it.session.sub %></strong>.
 <% if (it.me) { %>
-  <p>Ce compte est lié à l’auteur <strong><%= it.me.name %></strong> : vos imports lui sont attribués par défaut.</p>
+      Ce compte est lié à l’auteur <strong><%= it.me.name %></strong> : vos imports lui sont attribués par défaut.</p>
 <% } else { %>
-  <p>Ce compte n’est lié à aucun auteur. Pour qu’il le soit, copiez son identifiant dans la fiche de l’auteur :</p>
-  <p><code class="mono"><%= it.session.sub %></code> · <a class="more eyebrow" href="/admin/auteurs">Auteurs</a></p>
+      Ce compte n’est lié à aucun auteur. Pour qu’il le soit, copiez son identifiant dans la fiche de l’auteur :</p>
+      <p><code><%= it.session.sub %></code> · <a class="more" href="/admin/auteurs">Auteurs</a></p>
 <% } %>
-</section>
+    </section>
+  </div>
+</div>

@@ -1,8 +1,8 @@
 # Visite de l'admin
 
-Captures d'une instance de test avec le seul jeu de démonstration, faites le 10/10/2026 après la refonte ergonomique. Elles se régénèrent sur une instance jetable (jeu de démonstration, sans logo) avec `E2E_CAPTURES=1 E2E_ALLOW_WRITES=1 npm run e2e -- --project=captures-bureau --project=captures-mobile` : les écrans d'import créent des photos. Pour l'usage pas à pas, voir l'[Aide de l'administration](Aide), également disponible dans l'admin (menu « Aide »).
+Captures d’une instance de test avec le seul jeu de démonstration, faites le 11/10/2026 : admin « Chambre noire » (police Jost), en mode sombre ; il existe aussi un mode clair (bouton soleil / lune, ou réglage du système). Elles se régénèrent sur une instance jetable (jeu de démonstration, sans logo) avec `E2E_CAPTURES=1 E2E_ALLOW_WRITES=1 npm run e2e -- --project=captures-bureau --project=captures-mobile` : les écrans d'import créent des photos. Pour l'usage pas à pas, voir l'[Aide de l'administration](Aide), également disponible dans l'admin (menu « Aide »).
 
-En haut de chaque page : **Tableau de bord · Photos · Séries · Auteurs · Filigrane & EXIF · Apparence · Réglages · Voir le site**, et **Se déconnecter**. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
+À gauche, une **barre latérale** : recherche ⌘K, **Aujourd’hui · Photothèque · Séries · Auteurs**, la liste des séries (où l’on dépose des photos pour les classer), puis **Filigrane & EXIF · Apparence · Réglages · Aide · Voir le site**, et en bas le mode clair / sombre et la déconnexion. Sur téléphone : une barre d’onglets en bas. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
 
 ## Connexion
 
@@ -10,21 +10,19 @@ En ligne, la connexion passe par Zitadel. Sur un serveur de test, ce formulaire 
 
 ![Connexion de test](captures/admin/00-connexion-de-test-bureau.webp)
 
-## Tableau de bord
+## Aujourd’hui (tableau de bord)
 
-Il montre le nombre de photos publiées et de brouillons, de séries et d'auteurs, l'état des preuves d'antériorité, et le compte connecté avec l'auteur auquel il est lié.
+Ce qui reste à finir (avec le geste direct), le site tel qu’il est (l’ouverture), les chiffres, le rythme d’import, les dernières modifications, les preuves d’antériorité et le compte connecté.
+
+![Aujourd’hui, en mode clair](captures/admin/01b-aujourdhui-clair-bureau.webp)
 
 ![Tableau de bord](captures/admin/01-tableau-de-bord-bureau.webp)
 
-## Photos
+## Photothèque
 
-La page réunit :
+Une **planche contact** (chaque vignette garde le format de sa photo) et, à droite, l’**inspecteur** : une photo sélectionnée s’y modifie champ par champ ; plusieurs photos s’y classent, se datent, se publient d’un coup. Tout est annulable (⌘Z).
 
-- **l'import** en trois étapes : choisir et vérifier, envoi et traitement suivis photo par photo, compléter et publier le lot sur une seule page ;
-- **la recherche et les filtres** ;
-- **la liste dans l'ordre du site** : glisser une ligne pour la déplacer, ou menu ⋯ ; cases à cocher et barre d'actions groupées (publier, changer de série, supprimer), annulables.
-
-![Liste des photos](captures/admin/02-photos-bureau.webp)
+![Photothèque](captures/admin/02-photos-bureau.webp)
 
 **Import :** « Importer des photos » ouvre le choix des fichiers, l'envoi part aussitôt et se suit photo par photo (les fichiers invalides sont écartés avant envoi).
 
@@ -34,9 +32,21 @@ La page réunit :
 
 ![Compléter et publier](captures/admin/02c-completer-le-lot-bureau.webp)
 
-**Sélection multiple :** cases à cocher (Maj + clic pour une plage) et barre d'actions.
+**Sélection multiple :** Maj + clic, ⌘ + clic ; l’inspecteur s’adapte.
 
 ![Sélection multiple](captures/admin/02d-selection-bureau.webp)
+
+**Loupe** (touche L) : la photo en grand, pellicule en bas, l’inspecteur suit.
+
+![Loupe](captures/admin/02e-loupe-bureau.webp)
+
+**Palette ⌘K** : une photo, une série, une page ou une action, au clavier.
+
+![Palette de commandes](captures/admin/02f-palette-bureau.webp)
+
+**Mode clair :**
+
+![Photothèque en mode clair](captures/admin/02g-phototheque-clair-bureau.webp)
 
 ## Fiche d'une photo
 
@@ -50,7 +60,7 @@ On y trouve :
 
 ## Séries
 
-Des cartes avec couverture et nombre de photos : créer (en tête), renommer, ordonner par glisser ou au clavier. Supprimer une série non vide déplace ses photos vers une autre série.
+Des planches de trois photos : créer (en tête), renommer, ordonner par glisser ou au clavier. Supprimer une série non vide déplace ses photos vers une autre série.
 
 ![Séries](captures/admin/04-series-bureau.webp)
 
@@ -82,7 +92,7 @@ Nom du site, accroche, textes, page « Droits d'utilisation », photos de l'ouve
 
 Toutes les pages s'adaptent au téléphone.
 
-Le menu se replie derrière **☰ Menu** ; la barre de sélection passe en bas de l'écran.
+Barre d’onglets en bas (Importer au centre) ; l’inspecteur s’ouvre comme une feuille depuis le bas.
 
 | Photos | Sélection | Séries | Fiche |
 |---|---|---|---|

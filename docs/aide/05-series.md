@@ -1,6 +1,6 @@
 # Séries
 
-Les séries regroupent les photos (Rue, Portrait…). Elles forment l'index du site et servent de filtre. Chaque série est une **carte** : sa couverture (sa première photo), son nom et son nombre de photos.
+Les séries regroupent les photos (Rue, Portrait…). Elles forment l'index du site et servent de filtre. Chaque série est une **planche** : ses trois premières photos, son nom et son nombre de photos.
 
 - **Créer :** **＋ Nouvelle série** en haut de la page place le curseur dans la carte de création. Tapez le nom, puis **Entrée** (ou **Créer**) ; **Échap** efface la saisie. La nouvelle série prend la **première place**, avec une adresse déduite du nom.
 - **Voir ses photos :** **Photos ›** ouvre la liste des photos filtrée sur cette série.

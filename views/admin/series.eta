@@ -20,11 +20,12 @@
     </div>
     <div class="acts"><button class="btn" type="submit">Créer</button></div>
   </form>
-<% it.categories.forEach((c, i) => { const ed = it.editErrors && it.editErrors.id === c.id ? it.editErrors : null; const v = ed ? ed.values : c; const cover = it.covers[c.id]; %>
+<% it.categories.forEach((c, i) => { const ed = it.editErrors && it.editErrors.id === c.id ? it.editErrors : null; const v = ed ? ed.values : c; %>
   <article class="scard" id="serie-<%= c.id %>" data-id="<%= c.id %>" aria-labelledby="nom-serie-<%= c.id %>">
-    <div class="cover">
-<% if (cover && cover.ready) { %>      <%~ it.picture(cover, { sizes: '320px', alt: '' }) %>
-<% } else { %>      <span class="empty" aria-hidden="true">Aucune photo</span>
+<% const board = (it.boards && it.boards[c.id]) || []; %>
+    <div class="cover<%= board.length === 1 ? ' one' : board.length === 2 ? ' two' : '' %>">
+<% if (board.length) { board.forEach((p, k) => { %>      <%~ it.picture(p, { sizes: k ? '160px' : '360px', alt: '' }) %>
+<% }) } else { %>      <span class="empty" aria-hidden="true">Aucune photo</span>
 <% } %>
       <button class="grip" type="button" hidden data-grip aria-label="Déplacer « <%= c.name %> » (flèches haut et bas)" aria-describedby="grip-help">⠿ Déplacer</button>
     </div>

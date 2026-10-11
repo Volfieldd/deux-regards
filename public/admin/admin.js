@@ -26,6 +26,7 @@ const toast = (() => {
   function show(text, { undo = null, error = false } = {}) {
     if (!box) return;
     clearTimeout(timer);
+    window.__lastUndo = undo;              // ⌘Z rejoue la dernière annulation proposée
     box.classList.toggle('error', error);
     box.innerHTML = `<span>${esc(text)}</span>`;
     if (undo) {
@@ -39,7 +40,7 @@ const toast = (() => {
       box.appendChild(b);
     }
     box.hidden = false;
-    timer = setTimeout(() => { box.hidden = true; }, undo ? 10000 : 6000);
+    timer = setTimeout(() => { box.hidden = true; window.__lastUndo = null; }, undo ? 10000 : 6000);
   }
   // Après rechargement : message (et annulation d'action groupée) mis de côté avant.
   const saved = sessionStorage.getItem('toast');
@@ -64,13 +65,34 @@ $$('[data-js-only]').forEach(el => { el.hidden = false; });
 
 // ----- menu mobile -----
 (function () {
-  const top = $('[data-top]');
+  const side = $('[data-side]');
   const btn = $('[data-menu]');
-  if (!top || !btn) return;
-  btn.hidden = false;
-  btn.addEventListener('click', () => {
-    const open = top.classList.toggle('open');
+  if (!side || !btn) return;
+  const set = open => {
+    side.classList.toggle('open', open);
     btn.setAttribute('aria-expanded', String(open));
+    if (open) setTimeout(() => $('a[aria-current], a', side)?.focus(), 50);
+  };
+  btn.addEventListener('click', e => { e.stopPropagation(); set(!side.classList.contains('open')); });
+  document.addEventListener('click', e => { if (side.classList.contains('open') && !side.contains(e.target)) set(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && side.classList.contains('open')) { set(false); btn.focus(); } });
+})();
+
+// ----- mode clair / sombre : appliqué tout de suite, mémorisé (cookie lu par le serveur) -----
+(function () {
+  const form = $('[data-theme-form]');
+  if (!form) return;
+  const btn = $('[data-theme-toggle]', form);
+  const effective = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  const label = () => { const next = effective() === 'light' ? 'dark' : 'light'; btn.value = next; btn.setAttribute('aria-label', `Passer en mode ${next === 'light' ? 'clair' : 'sombre'}`); };
+  label();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const next = effective() === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    $('meta[name=color-scheme]')?.setAttribute('content', next);
+    label();
+    try { await postJson('/admin/theme', { theme: next }); } catch { /* le choix reste appliqué pour cette page */ }
   });
 })();
 
@@ -135,6 +157,7 @@ const activity = (() => {
   const MAX_PIXELS = 120e6;
   const PARALLEL = 2;
   input.required = false;
+  if ($('[data-contact]')) section.classList.add('with-grid');
 
   const items = [];
   let seq = 0;
@@ -215,7 +238,7 @@ const activity = (() => {
       if (['jpeg', 'png', 'webp'].includes(kind)) {
         item.url = URL.createObjectURL(file);
         const d = await size(item.url);
-        if (d) item.meta += ` · ${d.w} × ${d.h}`;
+        if (d) { item.meta += ` · ${d.w} × ${d.h}`; item.w = d.w; item.h = d.h; }
         if (d && d.w * d.h > MAX_PIXELS) { Object.assign(item, { state: 'bad', reason: 'Trop grande (120 Mpx max.)' }); render(); continue; }
       } else item.label = kind.toUpperCase();
       item.state = 'ready';
@@ -380,7 +403,8 @@ const activity = (() => {
       let data = {};
       try { data = JSON.parse(xhr.responseText); } catch { /* vide */ }
       if (xhr.status === 200 && data.id) {
-        Object.assign(i, { state: 'waiting', photoId: data.id, up: 100, done: 0, total: 0 });
+        Object.assign(i, { state: 'waiting', photoId: data.id, up: 100, done: 0, total: 0, title: data.title });
+        window.__library?.arrived(i);
         watch();
       } else if (xhr.status >= 400 && xhr.status < 500 && xhr.status !== 403) {
         Object.assign(i, { state: 'bad', reason: data.error ? data.error.charAt(0).toUpperCase() + data.error.slice(1) : 'Refusée' });
@@ -416,14 +440,15 @@ const activity = (() => {
         if (!firstStep && data.photos.some(p => p.state === 'processing' || p.state === 'ready')) firstStep = Date.now() - 1000;
         for (const p of data.photos) {
           const i = pending.find(x => x.photoId === p.id);
-          if (p.state === 'ready') { Object.assign(i, { state: 'done', done: p.total, total: p.total }); lastDone = Date.now(); announce(`${i.file.name} prête.`); }
-          else if (p.state === 'error' || p.state === 'missing') Object.assign(i, { state: 'failed', retry: false, photoId: null, reason: p.error || 'photo supprimée entre-temps' });
-          else Object.assign(i, { state: p.state, done: p.done, total: p.total });
+          if (p.state === 'ready') { Object.assign(i, { state: 'done', done: p.total, total: p.total }); lastDone = Date.now(); announce(`${i.file.name} prête.`); window.__library?.ready(i); }
+          else if (p.state === 'error' || p.state === 'missing') { window.__library?.gone(i); Object.assign(i, { state: 'failed', retry: false, photoId: null, reason: p.error || 'photo supprimée entre-temps' }); }
+          else { Object.assign(i, { state: p.state, done: p.done, total: p.total }); window.__library?.progress(i); }
         }
         render();
         if (!live().some(i => ['queued', 'uploading', 'waiting', 'processing'].includes(i.state))) {
           const ok = live().filter(i => i.state === 'done').length;
           announce(`Import terminé : ${plural(ok, 'photo prête', 'photos prêtes')}.`);
+          window.__library?.finished(live().filter(i => i.state === 'done').map(i => i.photoId));
         }
       } catch { /* réseau : prochain tour */ }
     }, 1000);
@@ -437,6 +462,7 @@ const activity = (() => {
   const bar = $('[data-bulk]');
   if (!bar) return;
   const batch = bar.hasAttribute('data-batch');
+  const library = Boolean(bar.closest('[data-library]'));
   const boxes = () => $$(`input.chk[name=ids][form=bulk]`);
   const checked = () => boxes().filter(b => b.checked);
   const count = $('[data-bulk-count]', bar);
@@ -451,7 +477,8 @@ const activity = (() => {
   function update() {
     const n = checked().length;
     count.textContent = n ? `${n} sélectionnée${n > 1 ? 's' : ''}` : 'Aucune photo sélectionnée';
-    if (!batch) bar.hidden = n === 0;
+    if (!batch && !library) bar.hidden = n === 0;
+    document.dispatchEvent(new CustomEvent('selection', { detail: { n } }));
     $$('button[name=action]', bar).forEach(b => { b.disabled = n === 0; });
     if (allBox) { allBox.checked = n > 0 && n === boxes().length; allBox.indeterminate = n > 0 && n < boxes().length; }
   }
@@ -490,14 +517,16 @@ const activity = (() => {
     d.showModal();
   });
   const confirmPublish = rows => new Promise(resolve => {
+    rows = rows.filter(Boolean);
+    const title = r => r.dataset.title || window.__photoTitle?.(Number(r.dataset.id)) || '';
     const prov = rows.filter(r => r.hasAttribute('data-provisional'));
     const d = $('[data-confirm-publish]');
     if (!prov.length || !d) return resolve(true);
     $('[data-pub-count]', d).textContent = plural(rows.length, 'photo');
     $('[data-pub-prov]', d).textContent = prov.length > 1 ? `${prov.length} photos ont` : '1 photo a';
-    $('[data-pub-names]', d).textContent = prov.map(r => `« ${r.dataset.title} »`).join(', ');
+    $('[data-pub-names]', d).textContent = prov.map(r => `« ${title(r)} »`).join(', ');
     $('[data-pub-ok]', d).onclick = () => { d.close(); resolve(true); };
-    $('[data-pub-fix]', d).onclick = () => { d.close(); resolve(false); $('input[data-field=title]', prov[0])?.focus(); };
+    $('[data-pub-fix]', d).onclick = () => { d.close(); resolve(false); ($('input[data-field=title]', prov[0]) || $('[data-titles] input') || $('[data-one-field=title]'))?.focus(); };
     d.oncancel = () => resolve(false);
     d.showModal();
   });
@@ -559,7 +588,7 @@ const activity = (() => {
     if (action === 'category') Object.assign(body, { category_id: catSelect.value, new_category: newName.value });
     if (action === 'fields') Object.assign(body, { place: bar.elements.place.value, taken_on: bar.elements.taken_on.value });
     if (action === 'delete') { if (!(await confirmDelete(ids.length))) return; body.confirm = true; }
-    if (action === 'publish' && batch && !(await confirmPublish(checked().map(b => b.closest('tr'))))) return;
+    if (action === 'publish' && (batch || library) && !(await confirmPublish(checked().map(b => b.closest('tr, li'))))) return;
     const { ids: _, action: __, back: ___, ...extra } = body;
     run(action, extra, e.submitter);
   });
@@ -841,6 +870,522 @@ const activity = (() => {
     toast.show(`« ${label.dataset.title} » ajoutée en place ${items().length} (pensez à enregistrer).`);
   });
   refresh();
+})();
+
+// ----- photothèque : planche contact, sélection, inspecteur, loupe, raccourcis -----
+(function () {
+  const lib = $('[data-library]');
+  if (!lib) return;
+  const contact = $('[data-contact]');
+  const insp = $('[data-inspector]');
+  const form = $('[data-bulk]', insp);
+  const dataEl = $('#photos-data');
+  const data = new Map((dataEl ? JSON.parse(dataEl.textContent) : []).map(p => [p.id, p]));
+  window.__photoTitle = id => data.get(id)?.title;
+  const panes = { empty: $('[data-insp-empty]', insp), one: $('[data-insp-one]', insp), many: $('[data-insp-many]', insp) };
+  const boxes = () => $$('input.chk[name=ids][form=bulk]');
+  const checked = () => boxes().filter(b => b.checked);
+  const selIds = () => checked().map(b => Number(b.value));
+  const tileOf = id => document.getElementById(`photo-${id}`);
+  const boxOf = id => $(`input.chk[value="${id}"]`, tileOf(id) || document);
+  const typing = el => el && (el.matches('input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea, select') || el.isContentEditable);
+  const notify = () => document.dispatchEvent(new Event('change-selection'));
+  let anchor = null;
+
+  // Taille des vignettes (mémorisée).
+  const density = $('[data-density]');
+  if (density && contact) {
+    const saved = Number(localStorage.getItem('planche-taille'));
+    if (saved) density.value = saved;
+    // Sur téléphone, la taille reste celle de la feuille de style (le curseur y est masqué).
+    const wide = matchMedia('(min-width: 721px)');
+    const apply = () => { if (wide.matches) contact.style.setProperty('--rowh', `${density.value}px`); else contact.style.removeProperty('--rowh'); };
+    wide.addEventListener('change', apply);
+    apply();
+    density.addEventListener('input', () => { apply(); localStorage.setItem('planche-taille', density.value); });
+  }
+
+  // ---------- sélection ----------
+  function select(ids, { add = false } = {}) {
+    if (!add) boxes().forEach(b => { b.checked = false; });
+    ids.forEach(id => { const b = boxOf(id); if (b) b.checked = true; });
+    boxes()[0]?.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  if (contact) {
+    contact.addEventListener('click', e => {
+      const tile = e.target.closest('.tile');
+      if (!tile || e.target.closest('input, .ttl')) return;
+      e.preventDefault();
+      const id = Number(tile.dataset.id);
+      const box = boxOf(id);
+      if (e.shiftKey && anchor) {
+        const all = $$('.tile', contact).map(t => Number(t.dataset.id));
+        const [a, b] = [all.indexOf(anchor), all.indexOf(id)].sort((x, y) => x - y);
+        select(all.slice(a, b + 1), { add: e.metaKey || e.ctrlKey });
+      } else if (e.metaKey || e.ctrlKey) {
+        box.checked = !box.checked;
+        box.dispatchEvent(new Event('change', { bubbles: true }));
+        anchor = id;
+      } else {
+        select([id]);
+        anchor = id;
+      }
+      box.focus({ preventScroll: true });
+    });
+    contact.addEventListener('dblclick', e => { const t = e.target.closest('.tile'); if (t) loupe.open(Number(t.dataset.id)); });
+    contact.addEventListener('change', e => { if (e.target.matches('.chk')) anchor = Number(e.target.value); });
+  }
+
+  // ---------- inspecteur ----------
+  const one = {
+    root: panes.one,
+    preview: $('[data-one-preview]', panes.one),
+    field: k => $(`[data-one-field="${k}"]`, panes.one),
+    id: null,
+  };
+  function stack(ids) {
+    const el = $('[data-insp-stack]', insp);
+    const imgs = ids.slice(-3).map(id => data.get(id)?.thumb).filter(Boolean);
+    el.hidden = !imgs.length;
+    el.innerHTML = imgs.map(src => `<img src="${esc(src)}" alt="">`).join('');
+  }
+  function render() {
+    const ids = selIds();
+    const n = ids.length;
+    insp.classList.toggle('has-sel', n > 0);
+    lib.classList.toggle('selecting', n > 0);
+    panes.empty.hidden = n !== 0;
+    panes.one.hidden = n !== 1;
+    panes.many.hidden = n < 2;
+    $('[data-bulk-clear]', insp).hidden = n === 0;
+    $$('.insp-ft .btn', insp).forEach(b => { b.disabled = n === 0; });
+    const title = $('[data-insp-title]', insp);
+    stack(n > 1 ? ids : []);
+    if (n === 0) { title.textContent = 'Photothèque'; return; }
+    if (n === 1) return showOne(ids[0]);
+    const list = ids.map(id => data.get(id)).filter(Boolean);
+    title.textContent = `${n} photos`;
+    const drafts = list.filter(p => p.status === 'draft').length;
+    $('[data-bulk-count]', insp).textContent = [drafts && plural(drafts, 'brouillon'), n - drafts && plural(n - drafts, 'publiée')].filter(Boolean).join(' · ');
+    const cats = new Set(list.map(p => p.category_id));
+    $$('[data-many-series] .pill', insp).forEach(b => b.setAttribute('aria-pressed', String(cats.size === 1 && cats.has(Number(b.dataset.category)))));
+    // Titres provisoires de la sélection : à saisir ici (lot qui vient d'arriver).
+    const prov = list.filter(p => p.provisional).slice(0, 12);
+    $('[data-many-titles]', insp).hidden = !prov.length;
+    $('[data-titles]', insp).innerHTML = prov.map(p => `<label>${p.thumb ? `<img src="${esc(p.thumb)}" alt="">` : '<span class="ph"></span>'}<input value="${esc(p.title)}" data-title-of="${p.id}" aria-label="Titre de la photo ${esc(p.title)}"></label>`).join('');
+    const pub = $('[data-publish]', insp);
+    pub.textContent = drafts ? `Publier ${n === drafts ? `les ${n}` : `${plural(drafts, 'brouillon')}`}` : 'Déjà publiées';
+    pub.disabled = !drafts;
+  }
+  function showOne(id) {
+    const p = data.get(id);
+    one.id = id;
+    $('[data-insp-title]', insp).textContent = p ? (p.status === 'published' ? 'Publiée' : 'Brouillon') : 'Photo';
+    $('[data-bulk-count]', insp).textContent = p ? `N°${String(p.n || '').padStart(2, '0')} · ${p.category}` : '';
+    if (!p) return;
+    one.preview.innerHTML = p.large ? `<img src="${esc(p.large)}" alt="${esc(p.title)}">` : '<span class="ph">Traitement…</span>';
+    // Le champ en cours de saisie n'est jamais réécrit (une réponse qui arrive pendant la frappe).
+    const put = (k, v) => { const f = one.field(k); if (f !== document.activeElement) f.value = v; };
+    put('title', p.title);
+    put('legend', p.legend || '');
+    put('place', p.place || '');
+    put('taken_on', p.taken_on || '');
+    put('author_id', p.author_id ? String(p.author_id) : '');
+    $('[data-one-when]', insp).textContent = p.when ? `compris : ${p.when}` : '';
+    $('[data-one-prov]', insp).hidden = !p.provisional;
+    $('[data-one-n]', insp).textContent = `/photo/${p.slug}`;
+    $('[data-one-link]', insp).href = `/admin/photos/${p.id}`;
+    $$('[data-one-series] .pill', insp).forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.category) === p.category_id)));
+    $('[data-publish]', insp).textContent = p.status === 'published' ? 'Déjà publiée' : 'Publier';
+    $('[data-publish]', insp).disabled = p.status === 'published';
+  }
+  document.addEventListener('change-selection', render);
+  document.addEventListener('selection', render);
+
+  // Mise à jour de la planche après une modification.
+  function refreshTile(p) {
+    const t = tileOf(p.id);
+    if (!t) return;
+    const ttl = $('.ttl', t);
+    if (ttl) ttl.textContent = p.title;
+    const small = $('.cap small', t);
+    if (small) small.textContent = [p.category, p.when, p.status === 'published' ? 'publiée' : ''].filter(Boolean).join(' · ');
+    t.toggleAttribute('data-provisional', p.provisional);
+    const box = $('.chk', t);
+    if (box) box.setAttribute('aria-label', `Sélectionner « ${p.title} »`);
+    let badge = $('.badge', t);
+    const want = p.status === 'draft' ? '○ Brouillon' : p.provisional ? 'Titre provisoire' : '';
+    if (!want && badge) badge.remove();
+    if (want) { if (!badge) { badge = document.createElement('span'); t.querySelector('.img').after(badge); } badge.className = `badge${p.status !== 'draft' ? ' warn' : ''}`; badge.textContent = want; }
+  }
+  async function reload(id) {
+    try {
+      const res = await fetch(`/admin/photos/${id}/donnees`, { headers: { accept: 'application/json' } });
+      if (res.ok) { const p = await res.json(); data.set(p.id, { ...data.get(p.id), ...p }); refreshTile(data.get(p.id)); return data.get(p.id); }
+    } catch { /* réseau */ }
+    return null;
+  }
+
+  // Une photo : enregistrement champ par champ.
+  async function saveOne(key, value, previous) {
+    const id = one.id;
+    try {
+      const r = await postJson(`/admin/photos/${id}/champs`, { [key]: value });
+      Object.assign(data.get(id), r.photo);
+      await reload(id);                       // série, auteur, « compris : … » : la version du serveur
+      window.__paletteReset?.();
+      if (one.id === id) showOne(id);
+      const field = one.field(key);
+      field?.removeAttribute('aria-invalid');
+      toast.show(`« ${data.get(id).title} » enregistrée`, previous === undefined ? {} : {
+        undo: async () => { await postJson(`/admin/photos/${id}/champs`, { [key]: previous }); await reload(id); if (one.id === id) showOne(id); toast.show('Modification annulée.'); },
+      });
+    } catch (err) {
+      const msg = err.data?.errors ? Object.values(err.data.errors).join(' ') : err.message;
+      one.field(key)?.setAttribute('aria-invalid', 'true');
+      toast.show(msg, { error: true });
+    }
+  }
+  ['title', 'legend', 'place', 'taken_on', 'author_id'].forEach(k => {
+    const f = one.field(k);
+    f.addEventListener('focus', () => { f.dataset.before = f.value; });
+    f.addEventListener('change', () => saveOne(k, f.value, f.dataset.before));
+    if (f.matches('input')) f.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); f.blur(); } });
+  });
+  $('[data-one-series]', insp).addEventListener('click', e => {
+    const b = e.target.closest('[data-category]');
+    if (!b) return;
+    const p = data.get(one.id);
+    saveOne('category_id', b.dataset.category, String(p.category_id));
+  });
+
+  // Plusieurs photos : série, lieu et date appliqués aussitôt.
+  async function applyMany(action, extra) {
+    const ids = selIds();
+    if (!ids.length) return;
+    try {
+      const before = ids.map(id => data.get(id)?.category_id);
+      const r = await postJson('/admin/photos/actions', { ids, action, ...extra });
+      await Promise.all(ids.map(reload));
+      if (action === 'category' && r.category) { before.forEach(c => bump(c, -1)); bump(r.category.id, ids.length); }
+      window.__paletteReset?.();
+      render();
+      toast.show(r.text, r.undo ? { undo: async () => { await postJson('/admin/photos/actions', r.undo); await Promise.all(ids.map(reload)); render(); toast.show('Annulé.'); } } : {});
+      if (r.category && !$(`[data-many-series] [data-category="${r.category.id}"]`, insp)) location.reload();   // nouvelle série : la barre latérale doit l'afficher
+    } catch (err) { toast.show(err.message, { error: true }); }
+  }
+  const newName = $('[data-bulk-new]', insp);
+  $('[data-many-series]', insp).addEventListener('click', e => {
+    const b = e.target.closest('[data-category]');
+    if (!b) return;
+    if (b.dataset.category === 'new') { newName.classList.add('on'); newName.focus(); return; }
+    applyMany('category', { category_id: b.dataset.category });
+  });
+  newName.addEventListener('change', () => { if (newName.value.trim()) applyMany('category', { category_id: 'new', new_category: newName.value }); });
+  newName.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); newName.blur(); } });
+  $$('[data-many-field]', insp).forEach(f => {
+    f.addEventListener('change', async () => { if (!f.value.trim()) return; await applyMany('fields', { [f.dataset.manyField]: f.value }); f.value = ''; });
+    f.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); f.blur(); } });
+  });
+  $('[data-titles]', insp).addEventListener('change', async e => {
+    const f = e.target.closest('[data-title-of]');
+    if (!f) return;
+    const id = Number(f.dataset.titleOf);
+    try { await postJson(`/admin/photos/${id}/champs`, { title: f.value }); await reload(id); toast.show(`« ${f.value} » enregistrée`); } catch (err) { toast.show(err.data?.errors ? Object.values(err.data.errors).join(' ') : err.message, { error: true }); }
+  });
+  $('[data-titles]', insp).addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) { e.preventDefault(); const next = e.target.closest('label').nextElementSibling; e.target.blur(); $('input', next || document.body)?.focus?.(); } });
+
+  // ---------- loupe ----------
+  const loupe = (() => {
+    let el = null;
+    let current = null;
+    const order = () => $$('.tile', contact).map(t => Number(t.dataset.id)).filter(id => data.get(id)?.large);
+    // Pellicule : 40 vignettes au plus autour de la photo affichée.
+    const strip = () => { const o = order(); const i = Math.max(0, o.indexOf(current) - 20); return o.slice(i, i + 40); };
+    function draw() {
+      const p = data.get(current);
+      $('.stage img', el).src = p.large;
+      $('.stage img', el).alt = p.title;
+      $('[data-loupe-title]', el).textContent = `${p.title} · ${p.category}${p.when ? ` · ${p.when}` : ''}`;
+      $$('.strip button', el).forEach(b => b.toggleAttribute('aria-current', Number(b.dataset.id) === current));
+      $(`.strip button[data-id="${current}"]`, el)?.scrollIntoView({ block: 'nearest', inline: 'center' });
+      select([current]);
+    }
+    function open(id) {
+      if (!contact || !data.get(id)?.large) return;
+      if (el) close();
+      current = id;
+      el = document.createElement('div');
+      el.className = 'loupe';
+      el.setAttribute('role', 'dialog');
+      el.setAttribute('aria-modal', 'true');
+      el.setAttribute('aria-label', 'Loupe');
+      el.innerHTML = `<div class="lbar"><span data-loupe-title></span><span class="sp"></span><span>← → photo suivante · Échap ou Espace : fermer</span><button class="iconbtn" type="button" data-loupe-close aria-label="Fermer la loupe">✕</button></div>
+        <div class="stage"><button class="iconbtn nav-l" type="button" data-loupe-prev aria-label="Photo précédente">←</button><img alt=""><button class="iconbtn nav-r" type="button" data-loupe-next aria-label="Photo suivante">→</button></div>
+        <div class="strip">${strip().map(i => `<button type="button" data-id="${i}" aria-label="${esc(data.get(i).title)}"><img src="${esc(data.get(i).thumb)}" alt=""></button>`).join('')}</div>`;
+      $('[data-canvas]').appendChild(el);
+      el.addEventListener('click', e => {
+        if (e.target.closest('[data-loupe-close]')) close();
+        else if (e.target.closest('[data-loupe-prev]')) step(-1);
+        else if (e.target.closest('[data-loupe-next]')) step(1);
+        else { const b = e.target.closest('.strip button'); if (b) { current = Number(b.dataset.id); draw(); } }
+      });
+      // Le focus reste dans la loupe (Tab et Maj + Tab bouclent).
+      el.addEventListener('keydown', e => {
+        if (e.key !== 'Tab') return;
+        const f = $$('button', el);
+        if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f.at(-1).focus(); }
+        else if (!e.shiftKey && document.activeElement === f.at(-1)) { e.preventDefault(); f[0].focus(); }
+      });
+      draw();
+      $('[data-loupe-close]', el).focus();
+    }
+    function step(d) {
+      const o = order(); const i = o.indexOf(current);
+      if (i + d < 0 || i + d >= o.length) return;
+      current = o[i + d];
+      if (!$(`.strip button[data-id="${current}"]`, el)) { const id = current; close(); open(id); return; }   // hors de la pellicule : on la recentre
+      draw();
+    }
+    function close() { el?.remove(); el = null; boxOf(current)?.focus(); }
+    return { open, close, step, get open_() { return Boolean(el); } };
+  })();
+
+  // ---------- raccourcis ----------
+  document.addEventListener('keydown', e => {
+    if (e.defaultPrevented || $('dialog[open]')) return;
+    const mod = e.metaKey || e.ctrlKey;
+    if (loupe.open_) {
+      if (e.key === 'Escape' || (e.key === ' ' && !typing(document.activeElement))) { e.preventDefault(); loupe.close(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); loupe.step(-1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); loupe.step(1); }
+      return;
+    }
+    if (typing(document.activeElement)) return;
+    if (mod && e.key.toLowerCase() === 'a' && contact) { e.preventDefault(); select(boxes().map(b => Number(b.value))); }
+    else if (mod && e.key.toLowerCase() === 'z' && window.__lastUndo) { e.preventDefault(); const u = window.__lastUndo; window.__lastUndo = null; u(); }
+    else if (mod) return;
+    else if (e.key === 'Escape' && selIds().length) { e.preventDefault(); select([]); }
+    else if (e.key.toLowerCase() === 'p' && selIds().length) { e.preventDefault(); $('[data-publish]', insp).click(); }
+    else if (e.key.toLowerCase() === 'i') { e.preventDefault(); $('[data-import-open]')?.click(); }
+    else if (contact && (e.key.toLowerCase() === 'l' || (e.key === ' ' && !document.activeElement?.matches('button, a, input')))) {
+      const id = selIds()[0] || Number(document.activeElement?.closest?.('.tile')?.dataset.id);
+      if (id) { e.preventDefault(); loupe.open(id); }
+    }
+  });
+
+  // ---------- glisser : ordre de la planche, ou vers une série ----------
+  if (contact) {
+    let dragged = null;
+    const sortable = contact.hasAttribute('data-sortable');
+    const clear = () => $$('.drop-before, .drop-after', contact).forEach(t => t.classList.remove('drop-before', 'drop-after'));
+    const after = (t, e) => e.clientX > t.getBoundingClientRect().left + t.offsetWidth / 2;
+    const prepare = t => { t.draggable = true; $$('a, img', t).forEach(x => { x.draggable = false; }); };
+    $$('.tile', contact).forEach(prepare);
+    window.__prepareTile = prepare;
+    contact.addEventListener('dragstart', e => {
+      const t = e.target.closest('.tile');
+      if (!t) return;
+      dragged = t;
+      t.classList.add('dragging');
+      const id = Number(t.dataset.id);
+      const ids = boxOf(id)?.checked ? selIds() : [id];
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('application/x-nicephos-photos', JSON.stringify(ids));
+      e.dataTransfer.setData('text/plain', ids.join(','));
+    });
+    contact.addEventListener('dragend', () => { dragged?.classList.remove('dragging'); clear(); dragged = null; });
+    contact.addEventListener('dragover', e => {
+      const t = e.target.closest('.tile');
+      if (!sortable || !dragged || !t || t === dragged) return;
+      e.preventDefault();
+      clear();
+      t.classList.add(after(t, e) ? 'drop-after' : 'drop-before');
+    });
+    contact.addEventListener('drop', async e => {
+      const t = e.target.closest('.tile');
+      if (!sortable || !dragged || !t || t === dragged) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const before = $$('.tile', contact);
+      contact.insertBefore(dragged, after(t, e) ? t.nextSibling : t);
+      clear();
+      try {
+        await postJson('/admin/photos/order', { ids: $$('.tile', contact).map(x => Number(x.dataset.id)) });
+        toast.show('Ordre enregistré.');
+      } catch {
+        before.forEach(x => contact.appendChild(x));
+        toast.show('L’ordre n’a pas pu être enregistré. Rechargez la page et réessayez.', { error: true });
+      }
+    });
+  }
+  // Dépôt sur une série de la barre latérale : les photos glissées y sont classées.
+  $$('[data-drop-series]').forEach(a => {
+    a.addEventListener('dragover', e => { if ([...e.dataTransfer.types].includes('application/x-nicephos-photos')) { e.preventDefault(); a.classList.add('over'); } });
+    a.addEventListener('dragleave', () => a.classList.remove('over'));
+    a.addEventListener('drop', async e => {
+      a.classList.remove('over');
+      const raw = e.dataTransfer.getData('application/x-nicephos-photos');
+      if (!raw) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const ids = JSON.parse(raw);
+      try {
+        const before = ids.map(id => data.get(id)?.category_id);
+        const r = await postJson('/admin/photos/actions', { ids, action: 'category', category_id: a.dataset.dropSeries });
+        before.forEach(c => bump(c, -1));
+        bump(Number(a.dataset.dropSeries), ids.length);
+        window.__paletteReset?.();
+        await Promise.all(ids.map(reload));
+        render();
+        toast.show(r.text, { undo: async () => { await postJson('/admin/photos/actions', r.undo); await Promise.all(ids.map(reload)); render(); toast.show('Annulé.'); } });
+      } catch (err) { toast.show(err.message, { error: true }); }
+    });
+  });
+
+  // Compteurs de la barre latérale après un classement.
+  function bump(categoryId, d) {
+    const n = $(`[data-drop-series="${categoryId}"] .n`);
+    if (n) n.textContent = String(Math.max(0, Number(n.textContent) + d));
+  }
+
+  // ---------- import : les photos arrivent dans la planche et s'y développent ----------
+  const ratio = (w, h) => `ar-${Math.min(300, Math.max(40, Math.round((w / h) * 20) * 5))}`;
+  window.__library = contact && {
+    arrived(i) {
+      data.set(i.photoId, { id: i.photoId, title: i.title, status: 'draft', provisional: true, category: '', ready: false, thumb: i.url || null });
+      const li = document.createElement('li');
+      li.id = `photo-${i.photoId}`;
+      li.className = `tile developing ${i.w && i.h ? ratio(i.w, i.h) : 'ar-150'}`;
+      li.dataset.id = i.photoId;
+      li.setAttribute('data-provisional', '');
+      li.innerHTML = `<input class="chk" type="checkbox" name="ids" value="${i.photoId}" form="bulk" aria-label="Sélectionner « ${esc(i.title)} »">
+        <a class="img" href="/admin/photos/${i.photoId}" tabindex="-1" aria-hidden="true">${i.url ? `<img src="${i.url}" alt="">` : '<span class="ph">Développement…</span>'}</a>
+        <span class="badge">Développement</span><span class="dev"><i></i></span>
+        <span class="cap"><a class="ttl" href="/admin/photos/${i.photoId}">${esc(i.title)}</a><small>brouillon</small></span>`;
+      contact.appendChild(li);
+      window.__prepareTile?.(li);
+      this.progress(i);
+      li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    },
+    progress(i) {
+      const t = tileOf(i.photoId);
+      if (!t) return;
+      const f = i.total ? i.done / i.total : 0;
+      const img = $('img', t);
+      if (img) img.style.filter = `blur(${((1 - f) * 12).toFixed(1)}px) grayscale(${(1 - f).toFixed(2)}) brightness(${(0.6 + 0.4 * f).toFixed(2)})`;
+      $('.dev i', t).style.width = `${Math.round(f * 100)}%`;
+      $('.badge', t).textContent = i.total ? `Développement · ${i.done} / ${i.total}` : 'En file';
+    },
+    async ready(i) {
+      const t = tileOf(i.photoId);
+      const p = await reload(i.photoId);
+      if (!t) return;
+      t.classList.remove('developing');
+      $('.dev', t)?.remove();
+      const img = $('img', t);
+      if (img) { img.style.filter = ''; if (p?.thumb) img.src = p.thumb; }
+      if (selIds().includes(i.photoId)) render();
+    },
+    gone(i) { tileOf(i.photoId)?.remove(); data.delete(i.photoId); if (anchor === i.photoId) anchor = null; },
+    finished(ids) {
+      if (!ids.length) return;
+      const busy = typing(document.activeElement);
+      select(ids);
+      if (!busy) ($('[data-titles] input') || one.field('title'))?.focus();
+    },
+  };
+
+  // Tout sélectionner (case de la planche).
+  render();
+})();
+
+// ----- palette de commandes ⌘K : actions, photos, séries, pages -----
+(function () {
+  const dlg = $('[data-cmdk]');
+  if (!dlg) return;
+  const input = $('[data-cmdk-input]', dlg);
+  const list = $('[data-cmdk-list]', dlg);
+  const opener = $('[data-cmdk-open]');
+  if (opener) opener.hidden = false;
+  let index = null;
+  window.__paletteReset = () => { index = null; };
+  let items = [];
+  let active = 0;
+  const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const selection = () => $$('input.chk[name=ids][form=bulk]:checked').length;
+  const click = sel => () => $(sel)?.click();
+  const go = href => () => { location.href = href; };
+  const PAGES = [['Aujourd’hui', '/admin'], ['Photothèque', '/admin/photos'], ['Photos à finir', '/admin/photos?statut=afinir'], ['Brouillons', '/admin/photos?statut=draft'], ['Séries', '/admin/series'], ['Auteurs', '/admin/auteurs'], ['Filigrane & EXIF', '/admin/images'], ['Apparence', '/admin/apparence'], ['Réglages', '/admin/reglages'], ['Photos de l’ouverture', '/admin/reglages#ouverture'], ['Aide', '/admin/aide']];
+  function actions() {
+    const n = selection();
+    const a = [];
+    if (n) {
+      a.push({ label: `<b>Publier</b> la sélection`, r: plural(n, 'photo'), key: 'P', run: click('[data-publish]') });
+      a.push({ label: `<b>Dépublier</b> la sélection`, r: plural(n, 'photo'), run: click('[data-inspector] button[value=draft]') });
+      a.push({ label: `<b>Supprimer</b> la sélection…`, r: plural(n, 'photo'), run: click('[data-bulk-delete]') });
+    }
+    a.push({ label: '<b>Importer</b> des photos', key: 'I', run: $('[data-import-open]') && location.pathname === '/admin/photos' ? click('[data-import-open]') : go('/admin/photos?importer#import') });
+    a.push({ label: '<b>Nouvelle série</b>', run: go('/admin/series#nouvelle-serie') });
+    a.push({ label: 'Basculer en mode <b>clair / sombre</b>', run: () => $('[data-theme-form]')?.requestSubmit() });
+    a.push({ label: '<b>Voir le site</b> public', run: () => window.open('/', '_blank', 'noopener') });
+    return a;
+  }
+  async function load() {
+    if (index) return index;
+    try { index = await (await fetch('/admin/recherche.json', { headers: { accept: 'application/json' } })).json(); } catch { index = { photos: [], series: [] }; }
+    return index;
+  }
+  function build(q) {
+    const nq = norm(q);
+    const hit = s => !nq || norm(s).includes(nq);
+    const groups = [];
+    const acts = actions().filter(a => hit(a.label.replace(/<[^>]+>/g, '')));
+    if (acts.length) groups.push(['Actions', acts]);
+    const pages = PAGES.filter(([t]) => hit(t)).map(([t, href]) => ({ label: `Aller à <b>${esc(t)}</b>`, run: go(href) }));
+    if (index) {
+      const series = index.series.filter(s => hit(s.name)).map(s => ({ label: `Série <b>${esc(s.name)}</b>`, r: plural(s.count, 'photo'), run: go(`/admin/photos?serie=${encodeURIComponent(s.slug)}`) }));
+      const photos = nq ? index.photos.filter(p => hit(`${p.title} ${p.category} ${p.place}`)).slice(0, 8).map(p => ({ label: `${p.thumb ? `<img src="${esc(p.thumb)}" alt="">` : ''}<b>${esc(p.title)}</b> <span>${esc(p.category)}${p.place ? ` · ${esc(p.place)}` : ''}</span>`, r: p.status === 'draft' ? 'brouillon' : 'publiée', run: go(`/admin/photos/${p.id}`) })) : [];
+      if (photos.length) groups.push(['Photos', photos]);
+      if (series.length) groups.push(['Séries', series]);
+    }
+    if (pages.length) groups.push(['Aller à', pages]);
+    items = groups.flatMap(([, g]) => g);
+    active = Math.min(active, Math.max(items.length - 1, 0));
+    let k = 0;
+    list.innerHTML = groups.map(([name, g]) => `<li class="sec" role="presentation">${name}</li>` + g.map(it => { const i = k++; return `<li role="option" id="cmdk-${i}" data-i="${i}" aria-selected="${i === active}">${it.label}${it.r || it.key ? `<span class="r">${it.r || ''}${it.key ? ` <kbd>${it.key}</kbd>` : ''}</span>` : ''}</li>`; }).join('')).join('')
+      || '<li class="sec" role="presentation">Aucun résultat</li>';
+    input.setAttribute('aria-activedescendant', items.length ? `cmdk-${active}` : '');
+  }
+  function move(d) {
+    if (!items.length) return;
+    active = (active + d + items.length) % items.length;
+    $$('[role=option]', list).forEach(o => o.setAttribute('aria-selected', String(Number(o.dataset.i) === active)));
+    $(`#cmdk-${active}`)?.scrollIntoView({ block: 'nearest' });
+    input.setAttribute('aria-activedescendant', `cmdk-${active}`);
+  }
+  function run(i) { const it = items[i]; if (!it) return; dlg.close(); it.run(); }
+  async function open() {
+    active = 0;
+    input.value = '';
+    build('');
+    dlg.showModal();
+    input.focus();
+    await load();
+    build(input.value);
+  }
+  opener?.addEventListener('click', open);
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); if (dlg.open) dlg.close(); else open(); }
+  });
+  input.addEventListener('input', () => { active = 0; build(input.value); });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+    else if (e.key === 'Enter') { e.preventDefault(); run(active); }
+  });
+  list.addEventListener('click', e => { const o = e.target.closest('[role=option]'); if (o) run(Number(o.dataset.i)); });
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
 })();
 
 // ----- progression de la mise à jour des images -----

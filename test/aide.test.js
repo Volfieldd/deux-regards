@@ -45,5 +45,5 @@ test('chaque écran de l’admin mène à sa section d’aide', async t => {
     assert.ok(m, `${url} : lien d’aide absent`);
     assert.ok(help.has(m[1]), `${url} : #${m[1]} absent de l’aide`);
   }
-  assert.match((await c.as('/admin')).body, /<a href="\/admin\/aide">Aide<\/a>/);
+  assert.match((await c.as('/admin')).body, /<a href="\/admin\/aide"><svg[^]*?<\/svg>Aide<\/a>/);
 });

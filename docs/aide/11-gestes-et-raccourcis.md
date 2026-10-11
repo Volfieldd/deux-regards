@@ -4,28 +4,27 @@
 
 | Où | Geste | Effet |
 |---|---|---|
-| Partout | **Tab** dès l'arrivée sur la page | fait apparaître **Aller au contenu** : Entrée saute l'en-tête |
-| Photos | **＋ Importer des photos** | ouvre directement le choix des fichiers ; l'envoi part tout seul |
-| Photos | déposer des fichiers n'importe où sur la page | ouvre l'import et les envoie |
-| Import → zone d'import | clic, ou Entrée quand elle a le focus | ouvre le choix de fichiers |
-| Import | **✕** / **Réessayer** | retire un fichier avant envoi / renvoie une photo en échec |
-| Photos → liste | case à cocher, **Maj + clic** | sélectionne une photo, ou toute une plage |
-| Photos → liste | glisser une ligne sur une autre | la déplace : moitié haute = avant, moitié basse = après |
-| Photos → liste | menu **⋯** | modifier, publier ou dépublier, monter ou descendre d'une place |
-| Barre de sélection | **Annuler** dans le message | défait la dernière action (10 s) |
-| Compléter le lot | Tab ou Entrée en quittant un champ | l'enregistre |
-| Compléter le lot → barre sombre | changer la série, le lieu ou la date | l'applique aussitôt à toutes les photos cochées |
-| Séries | poignée **⠿** puis **↑ ↓ ← →** | déplace la carte d'une place |
+| Partout | **⌘K** (Ctrl+K) | palette : chercher une photo, une série, une page, ou lancer une action |
+| Partout | **Tab** dès l’arrivée | fait apparaître **Aller au contenu** : Entrée saute la barre latérale |
+| Partout | bouton **soleil / lune** | mode clair ou sombre |
+| Photothèque | **clic** sur une vignette | la sélectionne seule : l’inspecteur la montre |
+| Photothèque | **Maj + clic** · **⌘ + clic** · **⌘A** · **Échap** | plage · ajouter ou retirer · tout · rien |
+| Photothèque | **P** | publier la sélection |
+| Photothèque | **L**, double clic | loupe ; **← →** photo précédente ou suivante, **Échap** ferme |
+| Photothèque | **I** | importer des photos |
+| Photothèque | **⌘Z** (Ctrl+Z) | annuler la dernière modification proposée en bas de l’écran |
+| Photothèque | glisser une vignette sur une autre | change l’ordre (sans filtre) |
+| Photothèque | glisser une vignette sur une série de la barre latérale | la classe dans cette série |
+| Photothèque | déposer des fichiers n’importe où | les importe |
+| Photothèque → inspecteur | quitter un champ, ou Entrée | l’enregistre |
+| Liste | menu **⋯** | modifier, publier ou dépublier, monter ou descendre d’une place |
+| Compléter le lot | quitter un champ | l’enregistre ; série, lieu et date de la barre s’appliquent aux photos cochées |
+| Séries | poignée **⠿** puis **↑ ↓ ← →** | déplace la planche d’une place |
 | Séries → nouvelle série | **Entrée** / **Échap** | crée / efface la saisie |
 | Réglages → ouverture | **←** / **→** / **✕** | réordonne ou retire une photo du diaporama |
-| Menus ⋯, fenêtres | **Échap** | les ferme |
-| Toute fiche | **Supprimer…** puis **Supprimer définitivement** | suppression en deux gestes, jamais par erreur |
-| Filigrane & EXIF | **Aperçu sans enregistrer** | rendu dans un nouvel onglet, rien n'est enregistré |
-| Apparence | **Aperçu** sous un thème | site avec ce thème, pour vous seul |
-| Partout | **Tab** / **Maj + Tab** | passer d'un élément à l'autre (le focus est entouré) |
-| Partout | **Entrée** sur un bouton | l'activer |
+| Menus ⋯, fenêtres, loupe, palette | **Échap** | les ferme |
 
-Tout fonctionne au clavier : chaque glisser-déposer a son équivalent en boutons ou en touches fléchées. Sur téléphone, le menu de l'admin est replié derrière **☰ Menu**.
+Tout fonctionne au clavier : chaque glisser-déposer a son équivalent en boutons ou en touches fléchées. Sur téléphone, la barre d’onglets du bas remplace la barre latérale (**Menu** l’ouvre).
 
 ## Sur le site public
 
