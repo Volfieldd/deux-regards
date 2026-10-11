@@ -18,7 +18,7 @@ Sans ces variables, ou en `http://`, la file fonctionne (photos ajoutées, régl
 
 ## Fonctionnement
 
-1. **Entrée dans la file** : à chaque passage brouillon → publiée (fiche, liste, actions groupées, lot), si l’option « Mettre dans la file chaque photo publiée » est active ; jamais une photo déjà dans la file ou déjà partagée. Ajout manuel depuis la fiche (section Instagram).
+1. **Entrée dans la file** : à chaque passage brouillon → publiée (fiche, liste, actions groupées, lot), seulement si la série de la photo est cochée dans **Réglages → Mise en file automatique** (aucune par défaut ; l’ancien interrupteur global `autoQueue` est ignoré) ; jamais une photo déjà dans la file ou déjà partagée. Ajout manuel depuis la fiche (section Instagram), quelle que soit la série.
 2. **Créneaux** : chaque minute, le site regarde le dernier créneau passé (heure de Paris) ; au premier passage après un créneau, la tête de file part. Au tout premier démarrage, il attend le créneau suivant (pas de rafale au déploiement). Si le serveur était arrêté, une seule photo part au redémarrage.
 3. **Envoi** :
    1. un jeton aléatoire (24 octets) ouvre l’adresse `/partage/instagram/<jeton>.jpg`, valable **uniquement pendant l’envoi** ;
