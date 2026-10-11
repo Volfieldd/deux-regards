@@ -133,9 +133,19 @@ export default async function publicRoutes(app) {
     });
   });
 
+  // Image d'une publication Instagram, le temps de l'envoi : Instagram la télécharge depuis cette adresse
+  // (jeton aléatoire, valable seulement pendant l'envoi ; 404 le reste du temps).
+  app.get('/partage/instagram/:file', async (request, reply) => {
+    const m = /^([\w-]{20,64})\.jpg$/.exec(request.params.file);
+    const post = m && app.instagram.byMediaToken(m[1]);
+    if (!post || !app.instagram.isPublic(post.photo_id)) return reply.callNotFound();
+    const buf = await app.instagram.image(post.photo_id, app.instagram.optionsOf(post));
+    return reply.header('cache-control', 'no-store').header('x-robots-tag', 'noindex').type('image/jpeg').send(buf);
+  });
+
   // Moteurs de recherche : tout le site public, jamais l'admin ni la connexion.
   app.get('/robots.txt', async (request, reply) => reply.type('text/plain; charset=utf-8')
-    .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nAllow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
+    .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nDisallow: /partage/\nAllow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
 
   app.get('/sitemap.xml', async (request, reply) => {
     const base = app.config.publicUrl;

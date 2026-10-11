@@ -25,12 +25,13 @@ export function createImportTracker({ render, onReady = () => {}, onFailed = () 
           Object.assign(job, { state: 'ready', at: Date.now() });
           onReady(id);
         } catch (err) {
-          Object.assign(job, { state: 'error', error: 'image illisible ou format non pris en charge par le serveur', at: Date.now() });
+          Object.assign(job, { state: 'error', error: 'images non calculées pour l’instant : la photo est gardée en brouillon, nouvel essai au prochain passage', at: Date.now() });
           log?.warn({ err, photo: id, file: name }, 'rendu impossible à l’import');
           onFailed(id);
         }
       };
-      return (queue = queue.then(run));
+      // Une erreur dans un rappel ne doit jamais bloquer les imports suivants.
+      return (queue = queue.then(run).catch(err => log?.error({ err, photo: id }, 'suivi d’import')));
     },
     get: id => jobs.get(id) || null,
     // Photos en attente ou en cours de traitement.

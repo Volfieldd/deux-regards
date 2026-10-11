@@ -43,7 +43,9 @@ export function loadHelp() {
         },
       },
     });
-    return { id, title, html: marked.parse(md), headings };
+    // Tableaux et blocs de code défilent seuls sur téléphone : atteignables au clavier (WCAG 2.1.1).
+    const html = marked.parse(md).replace(/<pre>/g, '<pre tabindex="0">').replace(/<table>/g, '<table tabindex="0">');
+    return { id, title, html, headings };
   });
   return { sections, ids };
 }

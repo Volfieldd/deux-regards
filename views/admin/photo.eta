@@ -47,6 +47,49 @@
 <% } %>
   <p><a class="more" href="/admin/statistiques">Toutes les statistiques</a></p>
 </section>
+<% const ig = it.insta; %>
+<section class="panel ig" id="instagram" aria-labelledby="ig-title" data-ig>
+  <h2 id="ig-title">Instagram</h2>
+<% if (ig.post && ig.post.status === 'published') { %>
+  <p>Publiée sur Instagram<% if (ig.post.permalink) { %> · <a class="more" href="<%= ig.post.permalink %>" target="_blank" rel="noopener">voir le post ↗</a><% } %>.</p>
+<% } else if (ig.post && ig.post.status === 'publishing') { %>
+  <p>Envoi à Instagram en cours…</p>
+<% } else if (ig.active) { %>
+  <p>Dans la file : prévue le <strong><%= (ig.slot || '').replace(' ', ' à ').replace(':', ' h ') %></strong>.<% if (ig.post.error) { %> <span class="err">Dernier essai : <%= ig.post.error %></span><% } %></p>
+<% } else if (ig.post && ig.post.status === 'failed') { %>
+  <p class="err">Échec de la publication : <%= ig.post.error %> (voir la page <a href="/admin/instagram">Instagram</a> pour réessayer).</p>
+<% } %>
+<% if (it.photo.status !== 'published') { %>
+  <p class="hint">Publiez d’abord la photo sur le site pour la partager sur Instagram.</p>
+<% } else if (!ig.post || ig.active || ig.post.status === 'failed' || ig.post.status === 'published') { if (!(ig.post && ig.post.status === 'publishing')) { %>
+  <div class="ig-edit">
+    <figure class="ig-preview"><img src="/admin/instagram/apercu.jpg?photo=<%= it.photo.id %>&cadre=<%= ig.post ? ig.post.frame : ig.s.frame %>&filigrane=<%= (ig.post ? ig.post.watermark : ig.s.watermark) ? 1 : 0 %>" alt="Aperçu de l’image envoyée à Instagram" data-ig-preview loading="lazy">
+      <figcaption class="mono">L’image telle qu’elle partira (1080 px, JPEG, sans métadonnées)</figcaption></figure>
+    <form class="form" method="post" action="/admin/instagram/file" data-ig-form>
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+      <input type="hidden" name="photo_id" value="<%= it.photo.id %>">
+      <input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>#instagram">
+      <input type="hidden" name="watermark_set" value="1">
+      <div class="row">
+        <label>Cadre <select name="frame" data-ig-frame><% Object.entries(ig.FRAMES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ (ig.post ? ig.post.frame : ig.s.frame) === k ? ' selected' : '' %>><%= l %></option><% }) %></select></label>
+        <label class="inline"><input type="checkbox" name="watermark" data-ig-watermark<%~ (ig.post ? ig.post.watermark : ig.s.watermark) ? ' checked' : '' %>> Avec le filigrane</label>
+      </div>
+      <label class="inline"><input type="checkbox" name="custom" data-ig-custom<%~ ig.custom ? ' checked' : '' %>> Légende personnalisée pour cette photo <span class="mono">sinon, celle du modèle</span></label>
+      <label>Légende <span class="mono" data-ig-count><%= ig.caption.length %> / 2200</span><textarea name="caption" rows="9" maxlength="2200" data-ig-caption><%= ig.caption %></textarea></label>
+<% if (ig.warnings.length) { %>      <ul class="warn-list" data-ig-warnings><% ig.warnings.forEach(w => { %><li><%= w %></li><% }) %></ul>
+<% } %>
+      <p class="actions">
+        <button class="btn" type="submit"><%= ig.active ? 'Mettre à jour' : ig.post && ig.post.status === 'published' ? 'Republier (remettre dans la file)' : 'Ajouter à la file Instagram' %></button>
+        <button class="btn ghost" type="button" data-ig-template hidden>Revenir au modèle</button>
+<% if (!ig.connected) { %>        <span class="hint">Aucun compte connecté : la photo attendra dans la file (<a href="/admin/instagram">Instagram</a>).</span><% } %>
+      </p>
+    </form>
+<% if (ig.active && ig.post.status === 'queued') { %>
+    <form method="post" action="/admin/instagram/<%= ig.post.id %>/annuler"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>#instagram"><button class="btn ghost" type="submit">Retirer de la file</button></form>
+<% } %>
+  </div>
+<% } } %>
+</section>
 <section class="panel proof" id="preuve">
   <h2>Preuve d’antériorité</h2>
 <% const t = it.proof; %>

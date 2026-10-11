@@ -143,7 +143,7 @@ export function removeVariants(storageDir, file, { keep = null } = {}) {
   const id = stem(file);
   for (const f of fs.readdirSync(dir)) {
     const m = VARIANT_RE.exec(f);
-    if (m && m[1] === id && (keep === null || (m[2] || '') !== keep)) fs.rmSync(path.join(dir, f));
+    if (m && m[1] === id && (keep === null || (m[2] || '') !== keep)) fs.rmSync(path.join(dir, f), { force: true });   // suppressions concurrentes
   }
 }
 

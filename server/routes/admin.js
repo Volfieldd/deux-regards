@@ -17,6 +17,7 @@ import { THEMES, BRAND_MODES, BRAND_SLOTS } from '../themes.js';
 import { processEmblem, processIcon, processShare, BrandError, EMBLEM_MAX_BYTES } from '../brand.js';
 import { loadHelp } from '../help.js';
 import { barsAndLine, sparkline } from '../charts.js';
+import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, captionWarnings, InstagramError } from '../instagram.js';
 
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 const LOGO_MAX_SIDE = 4000;
@@ -45,7 +46,9 @@ export default async function adminRoutes(app) {
   const tracker = createImportTracker({
     render: (id, onStep) => app.variants.renderPhoto(id, { onStep }),
     onReady: () => app.proofs.schedule(),
-    onFailed: id => { const file = repo.deletePhoto(id); if (file) removePhotoFiles(storageDir, file); },
+    // Rendu impossible (disque plein, incident passager…) : l'original, déjà validé et rangé, n'est jamais effacé ;
+    // la photo reste en brouillon et le passage suivant recalcule ses images.
+    onFailed: () => app.variants.schedule(),
     log: app.log,
   });
   app.addHook('onClose', async () => { await tracker.idle(); });
@@ -313,9 +316,118 @@ export default async function adminRoutes(app) {
 
   // Une photo, pour l'inspecteur (photo arrivée par l'import, ou relue après une modification).
   app.get('/admin/photos/:id/donnees', async (request, reply) => {
-    const p = repo.photos().find(x => x.id === byId(request.params.id));
+    const p = repo.photoView(byId(request.params.id));
     if (!p) return reply.code(404).send({ error: 'Photo introuvable.' });
     return dataOf(withReady(p));
+  });
+
+  // ---------- Instagram (voir server/instagram.js) ----------
+  // Photos passées de brouillon à publiée : dans la file Instagram si l'option est active.
+  // Et photos repassées en brouillon : retirées de la file (elles ne partiront pas).
+  function queued(before) {
+    const now = id => repo.photo(Number(id))?.status;
+    const up = Object.entries(before).filter(([id, st]) => st === 'draft' && now(id) === 'published').map(([id]) => Number(id));
+    const down = Object.entries(before).filter(([id, st]) => st === 'published' && now(id) === 'draft').map(([id]) => Number(id));
+    if (up.length) app.instagram.onPublished(up);
+    if (down.length) app.instagram.onUnpublished(down);
+  }
+  const IG_STATE = 'ig_state';
+  const igPage = (request, reply, extra = {}) => {
+    const ig = app.instagram;
+    const s = ig.settings();
+    const photos = new Map(repo.photos().map(p => [p.id, p]));
+    const withPhoto = list => list.map(x => ({ ...x, photo: photos.get(x.photo_id) && withReady(photos.get(x.photo_id)), caption: ig.captionOf(x, s) })).filter(x => x.photo);
+    return render(request, reply, 'instagram', {
+      title: 'Instagram', s, FRAMES, DEFAULT_TEMPLATE, categories: repo.categories(),
+      conf: { configured: app.config.instagram.configured, https: app.config.instagram.https, redirectUri: app.config.instagram.redirectUri, apiVersion: app.config.instagram.apiVersion },
+      account: ig.account.get(), connected: ig.account.connected(),
+      queue: withPhoto(ig.queue()), history: withPhoto(ig.history(20)), ...extra,
+    });
+  };
+  app.get('/admin/instagram', async (request, reply) => igPage(request, reply));
+
+  app.post('/admin/instagram/reglages', write, async (request, reply) => {
+    app.instagram.saveSettings(normalizeSettings(request.body || {}, repo.categories()));
+    return done(reply, '/admin/instagram#reglages', 'Réglages Instagram enregistrés.');
+  });
+
+  // Connexion : redirection vers Instagram, avec un « state » lié à ce navigateur (cookie signé).
+  app.get('/admin/instagram/connexion', async (request, reply) => {
+    const c = app.config.instagram;
+    if (!c.configured) return failed(reply, '/admin/instagram', 'INSTAGRAM_APP_ID et INSTAGRAM_APP_SECRET manquent dans la configuration du serveur.');
+    if (!c.https) return failed(reply, '/admin/instagram', 'La connexion à Instagram exige que le site soit en HTTPS (PUBLIC_URL).');
+    const state = crypto.randomBytes(24).toString('base64url');
+    reply.setCookie(IG_STATE, state, { path: '/admin/instagram', httpOnly: true, secure: secureCookies, sameSite: 'lax', signed: true, maxAge: 600 });
+    return reply.redirect(app.instagram.authorizeUrl(state), 303);
+  });
+  app.get('/admin/instagram/callback', async (request, reply) => {
+    const raw = request.cookies[IG_STATE];
+    reply.clearCookie(IG_STATE, { path: '/admin/instagram' });
+    const expected = raw && request.unsignCookie(raw);
+    const { code, state, error_description: denied } = request.query;
+    if (!expected?.valid || typeof state !== 'string' || !sameToken(state, expected.value)) return failed(reply, '/admin/instagram', 'Connexion refusée : la demande ne vient pas de cet écran ou a expiré. Recommencez.');
+    if (!code) return failed(reply, '/admin/instagram', `Connexion annulée${denied ? ` : ${String(denied).slice(0, 200)}` : ''}.`);
+    try {
+      const username = await app.instagram.connect(String(code));
+      return done(reply, '/admin/instagram', `Compte Instagram @${username} connecté.`);
+    } catch (err) {
+      if (!(err instanceof InstagramError)) throw err;
+      return failed(reply, '/admin/instagram', `Connexion impossible : ${err.message}`);
+    }
+  });
+  app.post('/admin/instagram/deconnexion', write, async (request, reply) => {
+    app.instagram.account.remove();
+    return done(reply, '/admin/instagram', 'Compte Instagram déconnecté (le jeton est effacé ; retirez aussi l’accès dans Instagram si besoin).');
+  });
+
+  // Une photo dans la file (ou ses options modifiées) : depuis la fiche ou l'inspecteur.
+  app.post('/admin/instagram/file', write, async (request, reply) => {
+    const body = request.body || {};
+    const json = !request.headers.accept?.includes('text/html');
+    const id = byId(body.photo_id);
+    const back = safeBack(request, `/admin/photos/${id}#instagram`);
+    try {
+      // Case « filigrane » : absente du formulaire quand elle est décochée, d'où le champ témoin watermark_set.
+      const watermark = body.watermark_set ? body.watermark === 'on' || body.watermark === true : undefined;
+      app.instagram.enqueue(id, { frame: body.frame, watermark, caption: body.custom === 'on' || body.custom === true ? body.caption : null });
+    } catch (err) {
+      if (!(err instanceof InstagramError)) throw err;
+      return json ? reply.code(422).send({ error: err.message }) : failed(reply, back, `Instagram : ${err.message}.`);
+    }
+    return json ? reply.send({ ok: true, text: 'Dans la file Instagram.' }) : done(reply, back, 'Photo dans la file Instagram.');
+  });
+
+  for (const [act, label] of [['annuler', 'Retirée de la file Instagram.'], ['monter', null], ['descendre', null], ['reessayer', 'Remise en tête de file.'], ['publier', 'Publiée sur Instagram.']]) {
+    app.post(`/admin/instagram/:id/${act}`, write, async (request, reply) => {
+      const id = byId(request.params.id);
+      const back = safeBack(request, '/admin/instagram');
+      if (!app.instagram.post(id)) return reply.callNotFound();
+      try {
+        if (act === 'annuler') app.instagram.cancel(id);
+        else if (act === 'monter' || act === 'descendre') app.instagram.move(id, act === 'monter' ? 'up' : 'down');
+        else if (act === 'reessayer') app.instagram.retry(id);
+        else await app.instagram.publish(id);
+      } catch (err) {
+        if (!(err instanceof InstagramError)) throw err;
+        return failed(reply, back, `Instagram : ${err.message}.`);
+      }
+      return label ? done(reply, back, label) : reply.redirect(back, 303);
+    });
+  }
+
+  // Aperçu exact de l'image envoyée, et légende du modèle (bouton « Revenir au modèle »).
+  app.get('/admin/instagram/apercu.jpg', async (request, reply) => {
+    const id = byId(request.query.photo);
+    if (!repo.photo(id)) return reply.callNotFound();
+    const frame = Object.hasOwn(FRAMES, request.query.cadre) ? request.query.cadre : app.instagram.settings().frame;
+    const buf = await app.instagram.image(id, { frame, watermark: request.query.filigrane === '1' });
+    return reply.header('cache-control', 'no-store').type('image/jpeg').send(buf);
+  });
+  app.get('/admin/instagram/legende', async (request, reply) => {
+    const id = byId(request.query.photo);
+    if (!repo.photo(id)) return reply.code(404).send({ error: 'Photo introuvable.' });
+    const caption = app.instagram.caption(id);
+    return { caption, warnings: captionWarnings(caption) };
   });
 
   // ---------- statistiques (anonymes, voir server/stats.js) ----------
@@ -331,6 +443,15 @@ export default async function adminRoutes(app) {
     if (kind === 'serie') return `Série « ${categories.find(c => c.slug === slug)?.name || slug} »`;
     if (kind === 'auteur') return `Regard de ${authors.find(a => a.slug === slug)?.name || slug}`;
     return page;
+  };
+  const instaOf = photo => {
+    const ig = app.instagram;
+    const s = ig.settings();
+    const post = ig.forPhoto(photo.id);
+    const active = post && (post.status === 'queued' || post.status === 'publishing');
+    const caption = post?.caption || ig.caption(photo.id, s);
+    return { post, active, s, FRAMES, caption, custom: Boolean(post?.caption), warnings: captionWarnings(caption), connected: ig.account.connected(),
+      slot: active ? ig.queue().find(x => x.id === post.id)?.slot : null };
   };
   const photoStats = id => {
     const { from, to } = app.stats.range(30);
@@ -432,7 +553,8 @@ export default async function adminRoutes(app) {
     if (Object.keys(errors).length) return lotPage(request, reply.code(422), ids, { errors, values });
     const to = `/admin/photos/lot?ids=${ids.join(',')}`;
     if (body.publish === '1') {
-      repo.setStatuses(Object.fromEntries(ids.map(id => [id, 'published'])));
+      const before = repo.setStatuses(Object.fromEntries(ids.map(id => [id, 'published'])));
+      queued(before);
       return done(reply, '/admin/photos', `${ids.length} photo${ids.length > 1 ? 's publiées' : ' publiée'}.`);
     }
     return done(reply, to, 'Modifications enregistrées.');
@@ -445,7 +567,7 @@ export default async function adminRoutes(app) {
       const p = repo.patchPhoto(id, request.body || {});
       if (!p) return reply.code(404).send({ error: 'Photo introuvable.' });
       app.variants.schedule();
-      const shown = repo.photos().find(x => x.id === id);
+      const shown = repo.photoView(id);
       return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, author_id: p.author_id, place: p.place, legend: p.legend, taken_on: p.taken_on, when: shown?.when || '', provisional: shown?.provisional || false } };
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
@@ -473,6 +595,7 @@ export default async function adminRoutes(app) {
         case 'draft': {
           if (!n) return ko(422, 'Aucune photo sélectionnée.');
           const before = repo.setStatuses(each(body.action === 'publish' ? 'published' : 'draft'));
+          queued(before);
           const verb = body.action === 'publish' ? 'publiée' : 'repassée en brouillon';
           return ok(`${photosWord} ${n > 1 ? verb.replace('publiée', 'publiées').replace('repassée', 'repassées') : verb}.`, { undo: { action: 'statuses', map: before } });
         }
@@ -501,7 +624,8 @@ export default async function adminRoutes(app) {
         // Annulations (JSON) : état précédent renvoyé par l'action annulée.
         case 'statuses': {
           const m = map(body.map);
-          repo.setStatuses(Object.fromEntries(Object.entries(m).filter(([id]) => repo.photo(Number(id)))));
+          const undone = repo.setStatuses(Object.fromEntries(Object.entries(m).filter(([id]) => repo.photo(Number(id)))));
+          queued(undone);                 // annuler « publier » retire aussi de la file Instagram
           return json ? reply.send({ ok: true, text: 'Action annulée.' }) : done(reply, back, 'Action annulée.');
         }
         case 'categories': {
@@ -548,7 +672,7 @@ export default async function adminRoutes(app) {
     if (!photo) return reply.callNotFound();
     return render(request, reply, 'photo', {
       title: photo.title, photo, values: photo, errors: {}, categories: repo.categories(), authors: repo.authors(),
-      proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id),
+      proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo),
     });
   });
 
@@ -558,12 +682,13 @@ export default async function adminRoutes(app) {
     try {
       repo.updatePhoto(photo.id, request.body || {});
       app.variants.schedule();          // auteur, date, titre ou option de filigrane ont pu changer
+      queued({ [photo.id]: photo.status });
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
       reply.code(422);
       return render(request, reply, 'photo', {
         title: photo.title, photo, values: { ...photo, ...err.values }, errors: err.errors, categories: repo.categories(), authors: repo.authors(),
-        proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id),
+        proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo),
       });
     }
     return done(reply, `/admin/photos/${photo.id}`, 'Photo enregistrée.');
@@ -640,6 +765,7 @@ export default async function adminRoutes(app) {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
     repo.setStatus(photo.id, request.body?.status);
+    queued({ [photo.id]: photo.status });
     const published = request.body?.status === 'published';
     return done(reply, safeBack(request, '/admin/photos'), `« ${photo.title} » ${published ? 'publiée' : 'repassée en brouillon'}.`);
   });
@@ -824,7 +950,9 @@ export default async function adminRoutes(app) {
           error = 'Logo trop étiré ou trop petit (8 px de côté au moins, rapport largeur/hauteur de 10 au plus).'; continue;
         }
         saved = `${crypto.randomUUID()}.png`;
-        await sharp(buf).png().toFile(path.join(app.variants.watermarkDir, saved));
+        // Écrit sous un nom provisoire (« .part », jamais effacé par le ménage d'un passage en cours),
+        // puis renommé au moment même où les réglages le désignent (sans attente entre les deux).
+        await sharp(buf).png().toFile(path.join(app.variants.watermarkDir, `${saved}.part`));
       }
     } catch (err) {
       if (!err.code?.startsWith('FST_')) throw err;
@@ -835,6 +963,7 @@ export default async function adminRoutes(app) {
     // L'ancien logo n'est pas effacé ici : un passage en cours l'utilise peut-être ; le ménage de fin de passage s'en charge.
     const { watermark, exif } = app.variants.context();
     repo.saveImageSettings({ ...watermark, image: saved }, exif);
+    fs.renameSync(path.join(app.variants.watermarkDir, `${saved}.part`), path.join(app.variants.watermarkDir, saved));
     app.variants.schedule();
     return done(reply, '/admin/images', 'Logo enregistré.');
   });

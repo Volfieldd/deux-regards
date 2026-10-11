@@ -165,6 +165,10 @@ Les images servies ne sont pas dans l'archive : elles sont recalculées au déma
 
 **Restaurer :** arrêtez la pile. Copiez `db/site-<date>.db` en `data/site.db`, recopiez `files/*` dans `data/`, puis `chown -R 99:100 data` et relancez la pile.
 
+### Instagram (facultatif)
+
+Pour publier automatiquement sur Instagram : compte professionnel, application Meta, puis `INSTAGRAM_APP_ID` et `INSTAGRAM_APP_SECRET` dans le `.env` de la pile. Le pas à pas complet est dans l’aide de l’admin (**Aide → Instagram**) et dans le wiki ([Instagram](https://github.com/Volfieldd/deux-regards/wiki/Instagram)). L’adresse de retour à déclarer chez Meta est `https://nicephos.com/admin/instagram/callback`.
+
 ### Mettre à jour
 
 Dans Compose Manager : **Update Stack** (ou **Compose Pull**, puis **Compose Up**). Les données ne bougent pas : elles sont dans `data/`, jamais dans l'image. Une mise à jour qui modifie la base l'applique toute seule au démarrage. Prenez quand même l'habitude de vérifier la date de `last.json` avant.

@@ -9,6 +9,17 @@ import crypto from 'node:crypto';
 export const RETENTION_MONTHS = 25;
 const BOTS = /bot|crawl|spider|slurp|archiver|facebookexternalhit|embedly|whatsapp|telegram|discord|slack|preview|curl|wget|python|httpclient|go-http|java\/|headless|lighthouse|pingdom|uptime|monitor|scan/i;
 const MOBILE = /mobi|android|iphone|ipod|ipad/i;
+// Bornes contre le gonflement des compteurs (et de la mémoire) par un seul client qui varie son navigateur :
+export const LIMITS = { visitors: 200_000, perAddress: 5, sources: 60 };
+
+// Provenance : le domaine « enregistrable » approximatif (« l.instagram.com » → « instagram.com »,
+// « news.bbc.co.uk » → « bbc.co.uk »), pour que chaque sous-domaine ne crée pas sa propre ligne.
+export function siteOf(host) {
+  const parts = host.split('.');
+  if (parts.length <= 2) return host;
+  const sld = parts.at(-2);
+  return parts.slice(sld.length <= 3 && ['co', 'com', 'org', 'net', 'gov', 'ac', 'edu', 'gouv'].includes(sld) ? -3 : -2).join('.');
+}
 
 // Jour à l'heure de Paris : AAAA-MM-JJ.
 export const parisDay = (d = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
@@ -19,7 +30,8 @@ export function sourceOf(referer, ownHost) {
   let host;
   try { host = new URL(referer).hostname.toLowerCase().replace(/^www\./, ''); } catch { return 'direct'; }
   if (!host || host === ownHost) return null;
-  return host.slice(0, 80);
+  if (!/^[a-z0-9.-]+$/.test(host)) return 'autres';
+  return siteOf(host).slice(0, 80);
 }
 
 export function createStats({ db, publicUrl, now = () => new Date(), log }) {
@@ -33,6 +45,8 @@ export function createStats({ db, publicUrl, now = () => new Date(), log }) {
   let day = null;
   let salt = null;
   let seen = new Set();
+  let perAddress = new Map();                     // empreinte de l'adresse seule → nombre de navigateurs vus
+  let sourcesToday = new Set();
 
   // Nouveau jour : nouvelle clé, empreintes oubliées, purge des compteurs trop anciens.
   function rollover() {
@@ -41,6 +55,8 @@ export function createStats({ db, publicUrl, now = () => new Date(), log }) {
     day = today;
     salt = crypto.randomBytes(32);
     seen = new Set();
+    perAddress = new Map();
+    sourcesToday = new Set(db.prepare('SELECT source FROM stats_sources WHERE day = ?').pluck().all(today));
     const limit = new Date(now());
     limit.setUTCMonth(limit.getUTCMonth() - RETENTION_MONTHS);
     const cut = parisDay(limit);
@@ -67,13 +83,19 @@ export function createStats({ db, publicUrl, now = () => new Date(), log }) {
         const today = rollover();
         const ua = request.headers['user-agent'] || '';
         const print = crypto.createHmac('sha256', salt).update(`${request.ip}|${ua}`).digest('base64url').slice(0, 22);
+        const addr = crypto.createHmac('sha256', salt).update(String(request.ip)).digest('base64url').slice(0, 16);
+        // Nouveau visiteur : pas plus de 5 navigateurs différents par adresse et par jour, 200 000 au total.
+        const fresh = !seen.has(print) && seen.size < LIMITS.visitors && (perAddress.get(addr) || 0) < LIMITS.perAddress;
         db.transaction(() => {
           if (target.photoId) q.photo.run(today, target.photoId);
           else q.page.run(today, target.page);
-          if (!seen.has(print)) {
+          if (fresh) {
             seen.add(print);
+            perAddress.set(addr, (perAddress.get(addr) || 0) + 1);
             q.visitor.run(today, MOBILE.test(ua) ? 1 : 0);
-            const source = sourceOf(request.headers.referer, ownHost);
+            let source = sourceOf(request.headers.referer, ownHost);
+            // Au-delà de 60 provenances différentes dans la journée : regroupées sous « autres ».
+            if (source && !sourcesToday.has(source)) { if (sourcesToday.size >= LIMITS.sources) source = 'autres'; else sourcesToday.add(source); }
             if (source) q.source.run(today, source);
           }
         })();

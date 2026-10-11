@@ -13,6 +13,13 @@ x-data: &data
   bind:
     create_host_path: false
 
+x-logging: &logging
+  # Journaux Docker bornés (ils contiennent des adresses IP tronquées et les pages vues) : 3 × 10 Mo par conteneur.
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   site:
     build: .
@@ -31,6 +38,9 @@ services:
     ports:
       - "${BIND_ADDR:-127.0.0.1}:${HOST_PORT:-3000}:3000"
     stop_grace_period: 60s
+    logging: *logging
+    mem_limit: 3g                     # un original de 120 Mpx décodé pèse ~0,5 Go
+    pids_limit: 256
     read_only: true
     tmpfs:
       - /tmp
@@ -44,16 +54,20 @@ services:
     depends_on:
       site:
         condition: service_healthy
-    env_file: .env
+    # Pas de .env : la sauvegarde n'a besoin d'aucun secret (cookies, OIDC, Instagram, tunnel).
     environment:
       STORAGE_DIR: /data
       DATABASE_PATH: /data/site.db
       BACKUP_DIR: /backups
+      BACKUP_KEEP: ${BACKUP_KEEP:-14}
+      BACKUP_INTERVAL_HOURS: ${BACKUP_INTERVAL_HOURS:-24}
       REQUIRE_PERSISTENT_STORAGE: "1"
     user: "${APP_UID:-1000}:${APP_GID:-1000}"
     command: ["node", "server/db/backup.js", "--loop"]
     healthcheck:
       disable: true
+    logging: *logging
+    mem_limit: 512m
     volumes:
       - *data
       - type: bind
@@ -76,5 +90,8 @@ services:
     depends_on:
       site:
         condition: service_healthy
+    logging: *logging
+    read_only: true
+    cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true

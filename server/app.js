@@ -15,6 +15,7 @@ import { setupAuth } from './auth.js';
 import { createVariantService } from './variants.js';
 import { createProofService } from './proofs.js';
 import { createStats } from './stats.js';
+import { createInstagram } from './instagram.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -40,15 +41,26 @@ const SECURITY_HEADERS = {
   'permissions-policy': 'camera=(), microphone=(), geolocation=()',
 };
 
-// Le code d'autorisation et le state OIDC n'ont rien à faire dans les journaux.
+// Le code d'autorisation, le state OAuth et le jeton d'image Instagram n'ont rien à faire dans les journaux,
+// même encodés dans un paramètre (« next=…%3Fcode%3D… »).
 export function redactUrl(url) {
-  return url.replace(/([?&](?:code|state)=)[^&#]*/g, '$1[masqué]');
+  let u = String(url);
+  try { u = decodeURIComponent(u); } catch { /* URL mal encodée : telle quelle */ }
+  return u.replace(/([?&](?:code|state)=)[^&#]*/g, '$1[masqué]').replace(/(\/partage\/instagram\/)[^/?#]+/, '$1[masqué]');
+}
+// Adresse IP tronquée dans les journaux (/24 en IPv4, /48 en IPv6) : assez pour diagnostiquer, pas pour identifier.
+export function truncateIp(ip) {
+  const s = String(ip || '');
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(s)) return s.replace(/\.\d+$/, '.0');
+  if (s.startsWith('::ffff:')) return truncateIp(s.slice(7));
+  if (s.includes(':')) return `${s.split(':').slice(0, 3).join(':')}::`;
+  return s;
 }
 
 const loggerOptions = logger => logger && {
   ...(typeof logger === 'object' ? logger : {}),
   serializers: {
-    req: req => ({ method: req.method, url: redactUrl(req.url), host: req.host, remoteAddress: req.ip }),
+    req: req => ({ method: req.method, url: redactUrl(req.url), host: req.host, remoteAddress: truncateIp(req.ip) }),
   },
 };
 
@@ -64,7 +76,7 @@ function assetUrls(root, cache) {
   };
 }
 
-export async function buildApp({ config, db, logger = true, oidc, proofOptions = {} }) {
+export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {} }) {
   const app = Fastify({ logger: loggerOptions(logger), trustProxy: config.trustProxy });
 
   app.decorate('config', config);
@@ -111,6 +123,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Preuves d'antériorité : empreintes et horodatage RFC 3161, repris en arrière-plan.
   // Mesure d'audience anonyme (voir server/stats.js).
   app.decorate('stats', createStats({ db, publicUrl: config.publicUrl, log: app.log }));
+  // Partage Instagram : file de publication et envoi aux créneaux (voir server/instagram.js).
+  app.decorate('instagram', createInstagram({ db, storageDir: config.storageDir, config, variants: app.variants, siteName: app.siteName, log: app.log, ...instagramOptions }));
+  app.addHook('onReady', async () => { if (!instagramOptions.manual) app.instagram.start(); });
+  app.addHook('onClose', async () => { app.instagram.stop(); });
   app.decorate('proofs', createProofService({ db, storageDir: config.storageDir, tsa: config.tsa, log: app.log, ...proofOptions }));
   app.addHook('onReady', async () => { app.proofs.start(); });
   app.addHook('onClose', async () => { await app.proofs.stop(); });
@@ -121,7 +137,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onSend', async (request, reply) => {
     reply.headers(headers);
     // Sans includeSubDomains : le domaine définitif n'est pas encore choisi, ses sous-domaines pas connus.
-    if (config.secureCookies) reply.header('strict-transport-security', 'max-age=31536000');
+    // COOP n'a d'effet qu'en HTTPS : en http, le navigateur l'ignore avec un avertissement.
+    if (config.secureCookies) reply.header('strict-transport-security', 'max-age=31536000').header('cross-origin-opener-policy', 'same-origin');
   });
 
   // Erreurs inattendues : détail dans les journaux, jamais dans la réponse (chemins, noms de fichiers…).

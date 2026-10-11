@@ -153,7 +153,13 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
     }
     if (logos) {
       const current = read('watermark', WATERMARK_DEFAULTS).image;
-      for (const f of fs.readdirSync(watermarkDir)) if (f !== current) fs.rmSync(path.join(watermarkDir, f), { force: true });
+      // Un logo en cours d'envoi (« .part ») n'est pas effacé, sauf s'il traîne depuis plus d'une heure.
+      const stale = Date.now() - 60 * 60 * 1000;
+      for (const f of fs.readdirSync(watermarkDir)) {
+        const file = path.join(watermarkDir, f);
+        if (f === current || (f.endsWith('.part') && fs.statSync(file).mtimeMs > stale)) continue;
+        fs.rmSync(file, { force: true });
+      }
     }
   }
 
