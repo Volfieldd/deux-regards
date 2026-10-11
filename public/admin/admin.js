@@ -998,6 +998,21 @@ const activity = (() => {
     $$('[data-one-series] .pill', insp).forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.category) === p.category_id)));
     $('[data-publish]', insp).textContent = p.status === 'published' ? 'Déjà publiée' : 'Publier';
     $('[data-publish]', insp).disabled = p.status === 'published';
+    audience(id);
+  }
+  // Audience de la photo (30 jours) : chiffre, rang, petite courbe rendue par le serveur.
+  async function audience(id) {
+    const box = $('[data-one-aud]', insp);
+    box.innerHTML = '<span class="hint">…</span>';
+    try {
+      const res = await fetch(`/admin/photos/${id}/statistiques`, { headers: { accept: 'application/json' } });
+      if (!res.ok || one.id !== id) return;
+      const s = await res.json();
+      if (one.id !== id) return;
+      box.innerHTML = s.total
+        ? `<span><b>${s.total}</b> ouverture${s.total > 1 ? 's' : ''} en grand${s.rank ? ` · ${s.rank === 1 ? '1ʳᵉ' : `${s.rank}ᵉ`} photo la plus vue` : ''}</span>${s.spark}`
+        : '<span class="hint">Pas encore ouverte en grand ces 30 derniers jours.</span>';
+    } catch { box.innerHTML = ''; }
   }
   document.addEventListener('change-selection', render);
   document.addEventListener('selection', render);

@@ -51,6 +51,7 @@
 
     <section class="panel" aria-label="Chiffres">
       <div class="figures">
+        <a href="/admin/statistiques"><b><%= it.visitorsToday %></b><span>visiteur<%= it.visitorsToday > 1 ? 's' : '' %> aujourd’hui</span></a>
         <a href="/admin/photos?statut=published"><b><%= it.counts.published %></b><span>photos publiées</span></a>
         <a href="/admin/photos?statut=draft"><b><%= it.counts.draft %></b><span>brouillons</span></a>
         <a href="/admin/series"><b><%= it.categories %></b><span>séries</span></a>
@@ -58,6 +59,12 @@
       </div>
     </section>
 
+<% if (it.monthTop) { %>
+    <section class="panel" aria-labelledby="top-title">
+      <h2 id="top-title">La photo du moment <span class="mono"><%= it.monthTop.views %> ouverture<%= it.monthTop.views > 1 ? 's' : '' %> en 30 jours</span><a class="btn ghost push" href="/admin/statistiques">Statistiques →</a></h2>
+      <a class="motm" href="/admin/photos/<%= it.monthTop.id %>"><% if (it.monthTop.ready) { %><%~ it.picture(it.monthTop, { sizes: '320px', alt: '' }) %><% } %><span><%= it.monthTop.title %></span></a>
+    </section>
+<% } %>
     <section class="panel" aria-labelledby="rhythm-title">
       <h2 id="rhythm-title">Rythme <span class="mono">photos importées par mois</span></h2>
       <div class="rhythm" role="img" aria-label="<%= it.rhythm.map(r => `${SHORT[Number(r.month.slice(5)) - 1]} ${r.month.slice(0, 4)} : ${r.n}`).join(', ') %>">

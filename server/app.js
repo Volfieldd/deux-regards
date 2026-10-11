@@ -14,6 +14,7 @@ import brandRoutes, { createAppearance } from './routes/brand.js';
 import { setupAuth } from './auth.js';
 import { createVariantService } from './variants.js';
 import { createProofService } from './proofs.js';
+import { createStats } from './stats.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -108,6 +109,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { app.variants.schedule(); });
   app.addHook('onClose', async () => { await app.variants.stop(); });
   // Preuves d'antériorité : empreintes et horodatage RFC 3161, repris en arrière-plan.
+  // Mesure d'audience anonyme (voir server/stats.js).
+  app.decorate('stats', createStats({ db, publicUrl: config.publicUrl, log: app.log }));
   app.decorate('proofs', createProofService({ db, storageDir: config.storageDir, tsa: config.tsa, log: app.log, ...proofOptions }));
   app.addHook('onReady', async () => { app.proofs.start(); });
   app.addHook('onClose', async () => { await app.proofs.stop(); });

@@ -12,7 +12,7 @@
     <div class="acts">
       <a class="btn big" href="/admin/photos?importer#import" data-import-open>＋ Importer des photos</a>
       <a class="btn ghost" href="/" target="_blank" rel="noopener">Voir le site</a>
-      <a class="help" href="/admin/aide#photos">Aide</a>
+      <a class="help-inline" href="/admin/aide#photos">Aide</a>
     </div>
   </header>
 
@@ -136,6 +136,7 @@
         <div class="fld"><span class="lb">Lieu</span><input data-one-field="place" maxlength="120" aria-label="Lieu" placeholder="Où ?"></div>
         <div class="fld"><span class="lb">Date <span class="r" data-one-when></span></span><input data-one-field="taken_on" maxlength="40" aria-label="Date" placeholder="oct. 2026, 10/2026…"></div>
         <div class="fld"><span class="lb">Auteur</span><select data-one-field="author_id" aria-label="Auteur"><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
+        <div class="fld" data-one-audience><span class="lb">Audience <span class="r">30 jours</span></span><div class="aud" data-one-aud><span class="hint">…</span></div></div>
         <div class="fld"><a class="more" data-one-link href="#">Fiche complète : filigrane, preuve d’antériorité, suppression →</a></div>
       </div>
     </div>

@@ -62,16 +62,19 @@ export default async function publicRoutes(app) {
 
   app.get('/', async (request, reply) => {
     const filter = readFilter(request.query, repo.authors(), repo.categories());
+    app.stats.hit(request, { page: filter.serie ? `serie:${filter.serie}` : filter.regard ? `auteur:${filter.regard}` : 'accueil' });
     return renderGallery(reply, filter);
   });
 
   app.get('/serie/:slug', async (request, reply) => {
     if (!repo.categories().some(c => c.slug === request.params.slug)) return reply.callNotFound();
+    app.stats.hit(request, { page: `serie:${request.params.slug}` });
     return renderGallery(reply, { serie: request.params.slug });
   });
 
   app.get('/auteur/:slug', async (request, reply) => {
     if (!repo.authors().some(a => a.slug === request.params.slug)) return reply.callNotFound();
+    app.stats.hit(request, { page: `auteur:${request.params.slug}` });
     return renderGallery(reply, { regard: request.params.slug });
   });
 
@@ -88,6 +91,7 @@ export default async function publicRoutes(app) {
     }
     if (i === -1) return reply.callNotFound();
     const photo = list[i];
+    app.stats.hit(request, { photoId: photo.id });
     const prev = list[(i - 1 + list.length) % list.length];
     const next = list[(i + 1) % list.length];
     return reply.render('photo', {
@@ -106,6 +110,7 @@ export default async function publicRoutes(app) {
     const helpers = { ...base, siteName };
     const settings = repo.settings();
     const paragraphs = String(settings.about || settings.intro || '').split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+    app.stats.hit(request, { page: 'a-propos' });
     return reply.render('about', {
       ...helpers, settings, paragraphs, authors: repo.authors(),
       pageTitle: `À propos · ${siteName}`, canonical: '/a-propos', description: settings.tagline || '',
@@ -120,6 +125,7 @@ export default async function publicRoutes(app) {
     const names = authors.length > 1 ? `${authors.slice(0, -1).join(', ')} et ${authors.at(-1)}` : authors[0] || siteName;
     const text = settings.rights_text || DEFAULT_RIGHTS.replace('{auteurs}', names);
     const contact = String(settings.rights_contact || '').trim();
+    app.stats.hit(request, { page: 'droits' });
     return reply.render('rights', {
       ...base, siteName, paragraphs: text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean),
       contact, contactHref: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) ? `mailto:${contact}` : /^https:\/\/\S+$/.test(contact) ? contact : null,
