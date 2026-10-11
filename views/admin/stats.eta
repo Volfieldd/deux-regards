@@ -5,7 +5,7 @@
    const max = it.top.length ? it.top[0].views : 1;
    const pmax = it.pages.length ? it.pages[0].views : 1;
    const smax = it.sources.length ? it.sources[0].visits : 1;
-   const label = s => (s === 'direct' ? 'Accès direct (favori, lien tapé, messagerie)' : s); %>
+   const label = s => (s === 'direct' ? 'Accès direct (favori, lien tapé, messagerie)' : s === 'autres' ? 'Autres sites' : s); %>
 <div class="toolbar">
   <div>
     <h1>Statistiques</h1>

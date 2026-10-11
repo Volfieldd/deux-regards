@@ -46,7 +46,9 @@ export default async function adminRoutes(app) {
   const tracker = createImportTracker({
     render: (id, onStep) => app.variants.renderPhoto(id, { onStep }),
     onReady: () => app.proofs.schedule(),
-    onFailed: id => { const file = repo.deletePhoto(id); if (file) removePhotoFiles(storageDir, file); },
+    // Rendu impossible (disque plein, incident passager…) : l'original, déjà validé et rangé, n'est jamais effacé ;
+    // la photo reste en brouillon et le passage suivant recalcule ses images.
+    onFailed: () => app.variants.schedule(),
     log: app.log,
   });
   app.addHook('onClose', async () => { await tracker.idle(); });
@@ -314,16 +316,20 @@ export default async function adminRoutes(app) {
 
   // Une photo, pour l'inspecteur (photo arrivée par l'import, ou relue après une modification).
   app.get('/admin/photos/:id/donnees', async (request, reply) => {
-    const p = repo.photos().find(x => x.id === byId(request.params.id));
+    const p = repo.photoView(byId(request.params.id));
     if (!p) return reply.code(404).send({ error: 'Photo introuvable.' });
     return dataOf(withReady(p));
   });
 
   // ---------- Instagram (voir server/instagram.js) ----------
   // Photos passées de brouillon à publiée : dans la file Instagram si l'option est active.
+  // Et photos repassées en brouillon : retirées de la file (elles ne partiront pas).
   function queued(before) {
-    const ids = Object.entries(before).filter(([id, st]) => st === 'draft' && repo.photo(Number(id))?.status === 'published').map(([id]) => Number(id));
-    if (ids.length) app.instagram.onPublished(ids);
+    const now = id => repo.photo(Number(id))?.status;
+    const up = Object.entries(before).filter(([id, st]) => st === 'draft' && now(id) === 'published').map(([id]) => Number(id));
+    const down = Object.entries(before).filter(([id, st]) => st === 'published' && now(id) === 'draft').map(([id]) => Number(id));
+    if (up.length) app.instagram.onPublished(up);
+    if (down.length) app.instagram.onUnpublished(down);
   }
   const IG_STATE = 'ig_state';
   const igPage = (request, reply, extra = {}) => {
@@ -561,7 +567,7 @@ export default async function adminRoutes(app) {
       const p = repo.patchPhoto(id, request.body || {});
       if (!p) return reply.code(404).send({ error: 'Photo introuvable.' });
       app.variants.schedule();
-      const shown = repo.photos().find(x => x.id === id);
+      const shown = repo.photoView(id);
       return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, author_id: p.author_id, place: p.place, legend: p.legend, taken_on: p.taken_on, when: shown?.when || '', provisional: shown?.provisional || false } };
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
@@ -589,7 +595,7 @@ export default async function adminRoutes(app) {
         case 'draft': {
           if (!n) return ko(422, 'Aucune photo sélectionnée.');
           const before = repo.setStatuses(each(body.action === 'publish' ? 'published' : 'draft'));
-          if (body.action === 'publish') queued(before);
+          queued(before);
           const verb = body.action === 'publish' ? 'publiée' : 'repassée en brouillon';
           return ok(`${photosWord} ${n > 1 ? verb.replace('publiée', 'publiées').replace('repassée', 'repassées') : verb}.`, { undo: { action: 'statuses', map: before } });
         }
@@ -618,7 +624,8 @@ export default async function adminRoutes(app) {
         // Annulations (JSON) : état précédent renvoyé par l'action annulée.
         case 'statuses': {
           const m = map(body.map);
-          repo.setStatuses(Object.fromEntries(Object.entries(m).filter(([id]) => repo.photo(Number(id)))));
+          const undone = repo.setStatuses(Object.fromEntries(Object.entries(m).filter(([id]) => repo.photo(Number(id)))));
+          queued(undone);                 // annuler « publier » retire aussi de la file Instagram
           return json ? reply.send({ ok: true, text: 'Action annulée.' }) : done(reply, back, 'Action annulée.');
         }
         case 'categories': {
@@ -943,7 +950,9 @@ export default async function adminRoutes(app) {
           error = 'Logo trop étiré ou trop petit (8 px de côté au moins, rapport largeur/hauteur de 10 au plus).'; continue;
         }
         saved = `${crypto.randomUUID()}.png`;
-        await sharp(buf).png().toFile(path.join(app.variants.watermarkDir, saved));
+        // Écrit sous un nom provisoire (« .part », jamais effacé par le ménage d'un passage en cours),
+        // puis renommé au moment même où les réglages le désignent (sans attente entre les deux).
+        await sharp(buf).png().toFile(path.join(app.variants.watermarkDir, `${saved}.part`));
       }
     } catch (err) {
       if (!err.code?.startsWith('FST_')) throw err;
@@ -954,6 +963,7 @@ export default async function adminRoutes(app) {
     // L'ancien logo n'est pas effacé ici : un passage en cours l'utilise peut-être ; le ménage de fin de passage s'en charge.
     const { watermark, exif } = app.variants.context();
     repo.saveImageSettings({ ...watermark, image: saved }, exif);
+    fs.renameSync(path.join(app.variants.watermarkDir, `${saved}.part`), path.join(app.variants.watermarkDir, saved));
     app.variants.schedule();
     return done(reply, '/admin/images', 'Logo enregistré.');
   });

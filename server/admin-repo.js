@@ -118,6 +118,11 @@ export function createAdminRepo(db) {
         .map(p => ({ ...p, n: p.position + 1, when: monthYear(p.taken_on), provisional: isProvisional(p) }));
     },
     photo: id => q.photo.get(id),
+    // Une photo avec les champs calculés de la liste (n, when, provisional), sans charger toutes les photos.
+    photoView(id) {
+      const p = q.photo.get(id);
+      return p && { ...p, n: p.position + 1, when: monthYear(p.taken_on), provisional: isProvisional(p) };
+    },
 
     addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null, sourceName = null, takenOn = null }) {
       const position = db.prepare('SELECT COALESCE(MAX(position), -1) + 1 FROM photos').pluck().get();

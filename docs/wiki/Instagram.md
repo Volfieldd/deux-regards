@@ -10,7 +10,7 @@ Mode d’emploi et **mise en place pas à pas** (compte professionnel, applicati
 |---|---|---|
 | `INSTAGRAM_APP_ID` | oui | ID **de l’application Instagram** (Meta → Instagram → API setup with Instagram login) |
 | `INSTAGRAM_APP_SECRET` | oui | clé secrète de l’application Instagram |
-| `INSTAGRAM_TOKEN_KEY` | non | clé de chiffrement du jeton d’accès (32+ caractères) ; à défaut, dérivée de `COOKIE_SECRET` |
+| `INSTAGRAM_TOKEN_KEY` | conseillée | clé de chiffrement du jeton d’accès (32+ caractères) ; à défaut, dérivée de `COOKIE_SECRET` (changer ce secret, ou restaurer la base ailleurs, impose alors de reconnecter le compte) |
 | `INSTAGRAM_API_VERSION` | non | version de l’API Graph (`v23.0` par défaut) ; à relever quand Meta retire une version |
 | `PUBLIC_URL` | en HTTPS | adresse de retour OAuth (`PUBLIC_URL/admin/instagram/callback`) et adresse de l’image envoyée |
 
@@ -26,8 +26,9 @@ Sans ces variables, ou en `http://`, la file fonctionne (photos ajoutées, régl
    3. attente du statut `FINISHED` ;
    4. `POST /{ig-user-id}/media_publish` → publication, puis lecture du `permalink` ;
    5. le jeton d’image est effacé : l’adresse renvoie 404.
-4. **Échec** : la publication reste en tête de file avec son erreur et repart au créneau suivant ; après **3 essais**, elle passe en échec (bouton **Réessayer**).
-5. **Jeton d’accès** : échangé contre un jeton longue durée (60 jours) à la connexion ; renouvelé automatiquement (`refresh_access_token`) dès qu’il lui reste moins de 30 jours, au plus une fois par jour.
+4. **Échec** : la publication reste en tête de file avec son erreur et repart au créneau suivant ; après **3 essais**, elle passe en échec (bouton **Réessayer**). Exceptions, sans nouvel essai automatique pour éviter un doublon : échec pendant `media_publish` (le post existe peut-être), et envoi interrompu par un redémarrage du serveur. Chaque appel à Meta a un délai maximal de 30 s.
+5. **Photo dépubliée** : retirée de la file ; une photo non publiée en tête de file est sautée (le créneau sert à la suivante). Changer les heures ne fait rien partir d’avance.
+6. **Jeton d’accès** : échangé contre un jeton longue durée (60 jours) à la connexion ; renouvelé automatiquement (`refresh_access_token`) dès qu’il lui reste moins de 30 jours, au plus une fois par jour.
 
 ## Image
 

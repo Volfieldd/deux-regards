@@ -17,6 +17,9 @@
     <p class="hint">Création du compte professionnel et de l’application Meta, pas à pas : <a class="more" href="/admin/aide#instagram">aide « Instagram »</a>.</p>
 <% } else if (!it.conf.https) { %>
     <p class="err">Le site doit être en HTTPS (<code>PUBLIC_URL</code>) pour se connecter à Instagram : Meta refuse les adresses en http, et doit pouvoir télécharger les images.</p>
+<% } else if (a && !it.connected) { %>
+    <p class="err">Le compte @<%= a.username %> est enregistré, mais son jeton d’accès ne peut plus être lu : la clé de chiffrement a changé (<code>INSTAGRAM_TOKEN_KEY</code> ou <code>COOKIE_SECRET</code>), par exemple après une restauration sur un autre serveur.</p>
+    <p class="actions"><a class="btn" href="/admin/instagram/connexion">Reconnecter le compte</a></p>
 <% } else if (a && it.connected) { %>
     <p>Connecté à <strong>@<%= a.username %></strong>.</p>
     <p class="hint">Accès valable jusqu’au <%= fmtDate(a.expires_at) %> (<%= days %> jours) ; renouvelé automatiquement avant expiration.<%= days < 7 ? ' Il expire bientôt : reconnectez le compte si le renouvellement échoue.' : '' %></p>
@@ -42,7 +45,7 @@
     <ol class="igq">
 <% it.queue.forEach((p, i) => { %>
       <li>
-        <a class="igthumb" href="/admin/instagram/apercu.jpg?photo=<%= p.photo_id %>&cadre=<%= p.frame %>&filigrane=<%= p.watermark ? 1 : 0 %>" target="_blank" rel="noopener" aria-label="Aperçu de l’image envoyée (nouvel onglet)"><img src="/admin/instagram/apercu.jpg?photo=<%= p.photo_id %>&cadre=<%= p.frame %>&filigrane=<%= p.watermark ? 1 : 0 %>" alt="" loading="lazy"></a>
+        <a class="igthumb" href="/admin/instagram/apercu.jpg?photo=<%= p.photo_id %>&cadre=<%= p.frame %>&filigrane=<%= p.watermark ? 1 : 0 %>" target="_blank" rel="noopener" aria-label="Aperçu exact de l’image envoyée (nouvel onglet)"><% if (p.photo.ready) { %><%~ it.picture(p.photo, { sizes: '72px', alt: '' }) %><% } %></a>
         <div class="t">
           <a href="/admin/photos/<%= p.photo_id %>#instagram"><strong><%= p.photo.title %></strong></a>
           <span class="mono"><%= p.status === 'publishing' ? 'Envoi en cours' : `Prévue le ${p.slot.replace(' ', ' à ').replace(':', ' h ')}` %> · <%= it.FRAMES[p.frame].toLowerCase() %><%= p.watermark ? ' · filigrane' : '' %></span>

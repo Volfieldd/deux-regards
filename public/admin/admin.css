@@ -708,3 +708,4 @@ code.mono, .mono code { color: var(--ink2); }
 .help-section pre { overflow-x: auto; background: var(--s2); padding: 10px 12px; border-radius: 8px; font-size: 12.5px; }
 .help-section code { overflow-wrap: anywhere; }
 .help-body, .help-section { min-width: 0; }
+.igthumb picture { display: contents; }

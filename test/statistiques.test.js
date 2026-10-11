@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { setup } from './helpers.js';
-import { createStats, parisDay, sourceOf } from '../server/stats.js';
+import { createStats, parisDay, sourceOf, siteOf } from '../server/stats.js';
 
 const TOKEN = 'jeton-de-test-0123456789';
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15';
@@ -107,4 +107,14 @@ test('admin : page Statistiques, audience d’une photo, accueil ; réservé aux
   assert.notEqual((await app.inject('/admin/statistiques')).statusCode, 200);
   assert.notEqual((await app.inject(`/admin/photos/${p.id}/statistiques`)).statusCode, 200);
   assert.match((await app.inject('/droits')).body, /Mesure d’audience/);
+});
+
+test('bornes : un client qui change de navigateur ne gonfle ni les visiteurs ni les provenances', async t => {
+  const { app, db } = await setup(t, { seeded: true });
+  for (let i = 0; i < 40; i++) await visit(app, '/', { ua: `${UA} variante/${i}`, headers: { referer: `https://site${i}.example/page` } });
+  assert.equal(count(db, 'SELECT visitors FROM stats_days'), 5);                       // 5 navigateurs au plus par adresse
+  assert.equal(count(db, 'SELECT views FROM stats_pages WHERE page = ?', 'accueil'), 40);   // les pages vues, elles, comptent
+  assert.equal(siteOf('l.instagram.com'), 'instagram.com');
+  assert.equal(siteOf('news.bbc.co.uk'), 'bbc.co.uk');
+  assert.equal(sourceOf('https://xn--caf-dma.fr/', 'x'), 'xn--caf-dma.fr');
 });

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
 import { setup } from './helpers.js';
-import { renderCaption, normalizeSettings, captionWarnings, sealer, upcomingSlots, lastSlot, hashtagsFor, DEFAULTS } from '../server/instagram.js';
+import { renderCaption, normalizeSettings, captionWarnings, sealer, upcomingSlots, lastSlot, hashtagsFor, DEFAULTS, createInstagram } from '../server/instagram.js';
 
 const TOKEN = 'jeton-de-test-0123456789';
 const cookiesOf = res => Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
@@ -11,6 +11,7 @@ const HTTPS = { PUBLIC_URL: 'https://nicephos.example', COOKIE_SECRET: 'x'.repea
 
 // Faux service Meta : enregistre les appels ; `fail` force une erreur sur une étape.
 function fakeMeta({ getApp, fail = null } = {}) {
+  let published = 0;
   const calls = [];
   const json = (body, status = 200) => ({ ok: status < 400, status, json: async () => body });
   const fetchImpl = async (url, init = {}) => {
@@ -22,6 +23,8 @@ function fakeMeta({ getApp, fail = null } = {}) {
     if (u.pathname === '/refresh_access_token') return json({ access_token: `${LONG}-r`, expires_in: 5184000 });
     if (u.pathname.endsWith('/me')) return json({ user_id: '1784', username: 'nicephos' });
     if (u.pathname.endsWith('/1784/media')) {
+      // Meta muette : la requête n'aboutit jamais, seul le délai maximal l'interrompt.
+      if (fail === 'hang') return new Promise((_, reject) => init.signal.addEventListener('abort', () => reject(init.signal.reason)));
       if (fail === 'media') return json({ error: { message: `Invalid parameter access_token=${form.access_token}` } }, 400);
       // Instagram télécharge l'image à l'adresse donnée : on vérifie qu'elle est bien servie.
       const img = await getApp().inject(new URL(form.image_url).pathname);
@@ -29,18 +32,22 @@ function fakeMeta({ getApp, fail = null } = {}) {
       return json({ id: 'container-1' });
     }
     if (u.pathname.endsWith('/container-1')) return json({ status_code: 'FINISHED' });
-    if (u.pathname.endsWith('/1784/media_publish')) return json({ id: 'media-9' });
+    if (u.pathname.endsWith('/1784/media_publish')) {
+      published++;
+      if (fail === 'publish') return json({ error: { message: 'Service temporairement indisponible' } }, 500);
+      return json({ id: 'media-9' });
+    }
     if (u.pathname.endsWith('/media-9')) return json({ permalink: 'https://www.instagram.com/p/abc/' });
     return json({ error: { message: 'inconnu' } }, 404);
   };
-  return { calls, fetchImpl };
+  return { calls, fetchImpl, published: () => published };
 }
 
 async function igApp(t, { fail, clock } = {}) {
   let app;
   const meta = fakeMeta({ getApp: () => app, fail });
   let now = clock || new Date('2026-10-11T10:00:00Z');
-  const ctx = await setup(t, { seeded: true, env: HTTPS, instagramOptions: { manual: true, fetchImpl: meta.fetchImpl, sleep: async () => {}, now: () => now } });
+  const ctx = await setup(t, { seeded: true, env: HTTPS, instagramOptions: { manual: true, fetchImpl: meta.fetchImpl, sleep: async () => {}, now: () => now, timeoutMs: 100 } });
   app = ctx.app;
   return { ...ctx, meta, setNow: d => { now = d; } };
 }
@@ -237,4 +244,83 @@ test('admin : connexion refusée sans HTTPS, « state » vérifié, CSRF, réser
   for (const url of ['/admin/instagram', '/admin/instagram/apercu.jpg?photo=1', '/admin/instagram/legende?photo=1', '/admin/instagram/connexion']) {
     assert.notEqual((await c.app.inject(url)).statusCode, 200, url);
   }
+});
+
+// ---------- revue de code : cas limites ----------
+
+test('envoi interrompu par un redémarrage : jamais bloqué, jamais republié tout seul', async t => {
+  const { app, db, config } = await igApp(t);
+  const photo = db.prepare("SELECT id FROM photos WHERE status = 'published' LIMIT 1").pluck().get();
+  const post = app.instagram.enqueue(photo);
+  db.prepare("UPDATE instagram_posts SET status = 'publishing', media_token = ? WHERE id = ?").run('a'.repeat(32), post);
+  createInstagram({ db, storageDir: config.storageDir, config, variants: app.variants, siteName: () => 'N' });   // redémarrage
+  const row = db.prepare('SELECT status, media_token, error FROM instagram_posts WHERE id = ?').get(post);
+  assert.equal(row.status, 'failed');
+  assert.equal(row.media_token, null);
+  assert.match(row.error, /redémarrage/);
+  assert.equal(app.instagram.retry(post), true);                                      // déblocable depuis l'admin
+});
+
+test('Meta muette : délai maximal, la file n’est pas bloquée', async t => {
+  const { app, db } = await igApp(t, { fail: 'hang' });
+  // Le minuteur d'AbortSignal.timeout ne retient pas le processus : le serveur, lui, tourne.
+  const keep = setInterval(() => {}, 20);
+  t.after(() => clearInterval(keep));
+  await app.instagram.connect('code');
+  const photo = db.prepare("SELECT id FROM photos WHERE status = 'published' LIMIT 1").pluck().get();
+  const post = app.instagram.enqueue(photo);
+  await assert.rejects(app.instagram.publish(post), /pas répondu à temps/);
+  assert.equal(db.prepare('SELECT status FROM instagram_posts WHERE id = ?').pluck().get(post), 'queued');
+  await assert.rejects(app.instagram.publish(post), /pas répondu à temps/);            // pas « déjà en cours »
+});
+
+test('échec pendant la publication : pas de nouvel essai automatique (pas de doublon)', async t => {
+  const { app, db, meta } = await igApp(t, { fail: 'publish' });
+  await app.instagram.connect('code');
+  const photo = db.prepare("SELECT id FROM photos WHERE status = 'published' LIMIT 1").pluck().get();
+  const post = app.instagram.enqueue(photo);
+  await assert.rejects(app.instagram.publish(post), /a peut-être abouti/);
+  const row = db.prepare('SELECT status, attempts FROM instagram_posts WHERE id = ?').get(post);
+  assert.deepEqual([row.status, row.attempts], ['failed', 1]);
+  assert.equal(meta.published(), 1);
+});
+
+test('créneaux : changer les heures ne publie rien d’avance ; photo dépubliée sautée ; horaires affichés', async t => {
+  const { app, db, setNow } = await igApp(t, { clock: new Date('2026-10-11T15:00:00Z') });
+  await app.instagram.connect('code');
+  const [a, b, c] = db.prepare("SELECT id FROM photos WHERE status = 'published' ORDER BY position LIMIT 3").pluck().all();
+  [a, b, c].forEach(id => app.instagram.enqueue(id));
+  await app.instagram.tick();                                                         // premier passage
+  setNow(new Date('2026-10-11T16:31:00Z'));                                          // 18 h 31 : a part
+  assert.ok(await app.instagram.tick());
+  setNow(new Date('2026-10-11T17:00:00Z'));                                          // 19 h
+  app.instagram.saveSettings({ ...app.instagram.settings(), times: ['12:00'] });
+  assert.equal(await app.instagram.tick(), null);                                     // pas de second post aujourd'hui
+  // b repasse en brouillon : retirée de la file (route), c part au créneau suivant.
+  db.prepare("UPDATE photos SET status = 'draft' WHERE id = ?").run(b);
+  app.instagram.onUnpublished([b]);
+  assert.equal(db.prepare('SELECT COUNT(*) FROM instagram_posts WHERE photo_id = ?').pluck().get(b), 0);
+  setNow(new Date('2026-10-12T10:05:00Z'));                                          // lendemain 12 h 05
+  await app.instagram.tick();
+  assert.equal(db.prepare('SELECT status FROM instagram_posts WHERE photo_id = ?').pluck().get(c), 'published');
+  // Horaires : la tête de file en attente prend le premier créneau.
+  const d = db.prepare("SELECT id FROM photos WHERE status = 'published' AND id NOT IN (?, ?, ?) LIMIT 2").pluck().all(a, b, c);
+  d.forEach(id => app.instagram.enqueue(id));
+  db.prepare("UPDATE instagram_posts SET status = 'publishing' WHERE photo_id = ?").run(d[0]);
+  const q = app.instagram.queue();
+  assert.equal(q[0].slot, 'maintenant');
+  assert.equal(q[1].slot, '2026-10-13 12:00');
+});
+
+test('image publique : 15 minutes au plus, refusée si la photo n’est plus publiée', async t => {
+  const { app, db, setNow } = await igApp(t);
+  const photo = db.prepare("SELECT id FROM photos WHERE status = 'published' LIMIT 1").pluck().get();
+  const post = app.instagram.enqueue(photo);
+  db.prepare("UPDATE instagram_posts SET status = 'publishing', media_token = ?, media_token_at = ? WHERE id = ?").run('b'.repeat(32), Date.parse('2026-10-11T10:00:00Z'), post);
+  assert.equal((await app.inject(`/partage/instagram/${'b'.repeat(32)}.jpg`)).statusCode, 200);
+  setNow(new Date('2026-10-11T10:16:00Z'));                                          // 16 minutes plus tard : expirée
+  assert.equal((await app.inject(`/partage/instagram/${'b'.repeat(32)}.jpg`)).statusCode, 404);
+  setNow(new Date('2026-10-11T10:01:00Z'));
+  db.prepare("UPDATE photos SET status = 'draft' WHERE id = ?").run(photo);
+  assert.equal((await app.inject(`/partage/instagram/${'b'.repeat(32)}.jpg`)).statusCode, 404);
 });

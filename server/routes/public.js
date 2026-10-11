@@ -138,7 +138,7 @@ export default async function publicRoutes(app) {
   app.get('/partage/instagram/:file', async (request, reply) => {
     const m = /^([\w-]{20,64})\.jpg$/.exec(request.params.file);
     const post = m && app.instagram.byMediaToken(m[1]);
-    if (!post) return reply.callNotFound();
+    if (!post || !app.instagram.isPublic(post.photo_id)) return reply.callNotFound();
     const buf = await app.instagram.image(post.photo_id, app.instagram.optionsOf(post));
     return reply.header('cache-control', 'no-store').header('x-robots-tag', 'noindex').type('image/jpeg').send(buf);
   });

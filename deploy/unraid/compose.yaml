@@ -22,6 +22,21 @@ x-hardening: &hardening
     - no-new-privileges:true
   cap_drop: [ALL]
 
+x-logging: &logging
+  # Journaux Docker bornés (ils contiennent des adresses IP tronquées et les pages vues) : 3 × 10 Mo par conteneur.
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# Réseau dédié à adresses fixes : le site ne fait confiance à X-Forwarded-For que venant du tunnel
+# (un poste du réseau local ne peut donc pas se faire passer pour un autre visiteur).
+networks:
+  nicephos:
+    ipam:
+      config:
+        - subnet: ${NET_SUBNET:-172.29.42.0/24}
+
 services:
   site:
     image: ${IMAGE:-ghcr.io/volfieldd/deux-regards:latest}
@@ -35,7 +50,12 @@ services:
       STORAGE_DIR: /data
       DATABASE_PATH: /data/site.db
       REQUIRE_PERSISTENT_STORAGE: "1"
+      TRUST_PROXY: ${TUNNEL_IP:-172.29.42.10}
     user: "${PUID:-99}:${PGID:-100}"
+    networks: [nicephos]
+    logging: *logging
+    mem_limit: 3g                     # un original de 120 Mpx décodé pèse ~0,5 Go
+    pids_limit: 256
     volumes:
       - *data
     # Accès depuis le réseau local (contrôle) ; Internet passe par le tunnel, pas par ce port.
@@ -53,17 +73,22 @@ services:
     depends_on:
       site:
         condition: service_healthy
-    env_file: .env
+    # Pas de .env : la sauvegarde n'a besoin d'aucun secret.
     environment:
       NODE_ENV: production
       STORAGE_DIR: /data
       DATABASE_PATH: /data/site.db
       BACKUP_DIR: /backups
+      BACKUP_KEEP: ${BACKUP_KEEP:-14}
+      BACKUP_INTERVAL_HOURS: ${BACKUP_INTERVAL_HOURS:-24}
       REQUIRE_PERSISTENT_STORAGE: "1"
     user: "${PUID:-99}:${PGID:-100}"
     command: ["node", "server/db/backup.js", "--loop"]
     healthcheck:
       disable: true
+    networks: [nicephos]
+    logging: *logging
+    mem_limit: 512m
     volumes:
       - *data
       - type: bind
@@ -83,5 +108,11 @@ services:
     depends_on:
       site:
         condition: service_healthy
+    networks:
+      nicephos:
+        ipv4_address: ${TUNNEL_IP:-172.29.42.10}
+    logging: *logging
+    read_only: true
+    cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true

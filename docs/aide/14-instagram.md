@@ -104,7 +104,7 @@ INSTAGRAM_APP_ID=…            # ID de l'application Instagram
 INSTAGRAM_APP_SECRET=…        # clé secrète de l'application Instagram
 ```
 
-Facultatif : `INSTAGRAM_TOKEN_KEY`, une clé de chiffrement du jeton d’accès (`openssl rand -base64 32`). Sans elle, la clé est dérivée de `COOKIE_SECRET`.
+Conseillé : `INSTAGRAM_TOKEN_KEY`, une clé de chiffrement du jeton d’accès (`openssl rand -base64 32`). Sans elle, la clé est dérivée de `COOKIE_SECRET` : changer ce secret, ou restaurer la base sur un serveur qui en a un autre, oblige alors à **reconnecter** le compte (l’admin le signale ; aucune photo n’est perdue).
 
 Puis redémarrez le site (**Compose Up**). Le site doit être en **HTTPS** (`PUBLIC_URL=https://…`) : Meta refuse les adresses en `http`, et doit pouvoir télécharger l’image.
 
