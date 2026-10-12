@@ -108,7 +108,7 @@ test('page photo : visionneuse, clavier, retour à la galerie filtrée', async (
   await expect(page.locator('.vtext h1')).toHaveText(first);
   await page.screenshot({ path: `results/photo-${info.project.name}.png` });
   await page.keyboard.press('Escape');
-  await expect(page).toHaveURL(/\/auteur\/julien#galerie$/);
+  await expect(page).toHaveURL(/\/auteur\/julien$/);                 // vrai retour arrière : la galerie telle qu'on l'a quittée
 });
 
 test('page photo : swipe sur mobile', async ({ page, isMobile }, info) => {
@@ -210,4 +210,34 @@ test('retour arrière depuis une ancre : contenu et adresse restent cohérents',
   await page.goBack();
   await expect(page).toHaveURL(/\/#series$/);
   await expect(page.locator('#grid .tile')).toHaveCount(total);
+});
+
+test('retour à la série après une photo : position conservée, même après avoir parcouru des photos', async ({ page }) => {
+  const visible = (slug) => page.evaluate(s => {
+    const a = document.querySelector(`#grid a.tile[href^="/photo/${s}"]`);
+    const b = a.getBoundingClientRect();
+    return b.top >= 0 && b.bottom <= innerHeight;
+  }, slug);
+  const open = async () => {
+    await page.goto('/serie/paysage');
+    const tile = page.locator('#grid a.tile').last();
+    await tile.scrollIntoViewIfNeeded();
+    const y = await page.evaluate(() => scrollY);
+    expect(y).toBeGreaterThan(300);                                   // la série est longue : on est bien descendu
+    await tile.click();
+    await page.waitForURL(/\/photo\//);
+    return y;
+  };
+  // Fermer : la page de la série revient là où on l'avait quittée (pas en haut de la galerie).
+  const y = await open();
+  await page.locator('.viewer a.back').click();
+  await page.waitForURL(/\/serie\/paysage$/);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(y - 120);
+  // Deux photos plus loin, puis le bouton Retour du navigateur : un seul retour, la dernière photo vue à l'écran.
+  await open();
+  for (let i = 0; i < 2; i++) { const u = page.url(); await page.keyboard.press('ArrowLeft'); await page.waitForURL(x => x.href !== u); }
+  const slug = new URL(page.url()).pathname.split('/').pop();
+  await page.goBack();
+  await page.waitForURL(/\/serie\/paysage$/);
+  await expect.poll(() => visible(slug)).toBe(true);
 });

@@ -139,14 +139,68 @@
     stagger(document);
   }
 
-  // ----- page photo : clavier et swipe -----
+  // ----- retour à la galerie, à l'endroit quitté -----
+  // Mémoire de l'onglet : galerie d'où l'on a ouvert une photo (chemin + requête), dernière photo vue,
+  // et « armed » tant que l'entrée d'historique précédente est bien cette galerie.
+  const RETOUR = 'retour-galerie';
+  const readRetour = () => {
+    try { const r = JSON.parse(sessionStorage.getItem(RETOUR) || 'null'); return r && Date.now() - r.t < 3 * 3600e3 ? r : null; } catch { return null; }
+  };
+  const writeRetour = r => { try { sessionStorage.setItem(RETOUR, JSON.stringify({ ...r, t: Date.now() })); } catch { /* stockage refusé : liens simples */ } };
+  const keyOf = u => u.pathname + u.search;
   const viewer = document.querySelector('[data-viewer]');
+  if (!viewer) {
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[href^="/photo/"]');
+      if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      writeRetour({ gallery: keyOf(location), slug: null, armed: false });
+    });
+  }
+  if (document.getElementById('grid')) {
+    // De retour sur la galerie (bouton Retour, Fermer, Échap) : la dernière photo vue doit être à l'écran.
+    addEventListener('pageshow', () => requestAnimationFrame(() => {
+      const r = readRetour();
+      if (!r || r.gallery !== keyOf(location) || !r.slug) return;
+      writeRetour({ ...r, slug: null, armed: false });
+      const tile = [...document.querySelectorAll('#grid a.tile')].find(a => decodeURIComponent(new URL(a.href).pathname) === `/photo/${r.slug}`);
+      if (!tile) return;
+      const b = tile.getBoundingClientRect();
+      if (b.top < 0 || b.bottom > innerHeight) tile.scrollIntoView({ block: 'center' });
+    }));
+  }
+
+  // ----- page photo : clavier, swipe, retour -----
   if (viewer) {
-    const go = key => { const url = viewer.dataset[key]; if (url) location.href = url; };
+    // Arrivée depuis la galerie notée, ou photo voisine ouverte depuis une photo qui l'était déjà.
+    const slug = decodeURIComponent(location.pathname.split('/').pop());
+    const r = readRetour();
+    if (r) {
+      let ref = null;
+      try { ref = document.referrer ? new URL(document.referrer) : null; } catch { ref = null; }
+      const refKey = ref && ref.origin === location.origin ? keyOf(ref) : null;
+      const armed = refKey === r.gallery || (r.armed && Boolean(refKey) && refKey.startsWith('/photo/'));
+      writeRetour({ ...r, slug, armed });
+    }
+    // Photo précédente / suivante : remplace l'entrée d'historique, un seul Retour ramène à la galerie.
+    const go = key => { const url = viewer.dataset[key]; if (url) location.replace(url); };
+    // Fermer, Échap : vrai retour arrière si l'on vient de cette galerie (le navigateur rend la position).
+    const close = () => {
+      const target = new URL(viewer.dataset.back, location.href);
+      const now = readRetour();
+      if (now?.armed && now.gallery === keyOf(target) && history.length > 1) history.back();
+      else location.href = viewer.dataset.back;
+    };
+    viewer.addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      const a = e.target.closest('a.back, .nav a[rel]');
+      if (!a) return;
+      e.preventDefault();
+      if (a.matches('a.back')) close(); else go(a.rel === 'prev' ? 'prev' : 'next');
+    });
     const several = viewer.dataset.prev !== viewer.dataset.next || viewer.querySelector('.nav');
     document.addEventListener('keydown', e => {
       if (e.altKey || e.ctrlKey || e.metaKey || e.target.closest('input, textarea, select, [contenteditable]')) return;
-      if (e.key === 'Escape') go('back');
+      if (e.key === 'Escape') close();
       else if (several && e.key === 'ArrowLeft') go('prev');
       else if (several && e.key === 'ArrowRight') go('next');
     });
