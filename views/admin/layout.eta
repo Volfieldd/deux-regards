@@ -71,7 +71,7 @@
     <a class="job" href="/admin/photos?statut=draft" data-activity<%~ it.activity ? '' : ' hidden' %>><span class="spin" aria-hidden="true"></span><span data-activity-text>Traitement : <%= it.activity %> photo<%= it.activity > 1 ? 's' : '' %></span></a>
     <div class="me">
       <span class="av" aria-hidden="true"><%= (it.session.name || '?').trim().charAt(0).toUpperCase() %></span>
-      <span class="who"><%= it.session.name || 'Administrateur' %><small>Administration</small></span>
+      <span class="who" title="<%= it.session.name || 'Administrateur' %>"><%= it.session.name || 'Administrateur' %><small>Administration</small></span>
       <form method="post" action="/admin/theme" data-theme-form>
         <input type="hidden" name="_csrf" value="<%= it.csrf %>">
         <input type="hidden" name="back" value="<%= it.currentPath %>">

@@ -149,3 +149,19 @@ test('statistiques : une visite publique est comptée et visible dans l’admin'
   expect(await views()).toBe(before + 1);
   await expect(page.locator('.chart')).toBeVisible();
 });
+
+test('réglages : vignettes de l’ouverture aux proportions fixes, pied de la barre latérale dans son cadre', async ({ page, isMobile }) => {
+  await page.goto('/admin/reglages#ouverture');
+  // Une vignette ne dépend jamais de la taille de l'original (attribut height de l'image) : cadre 3:2, photo entière.
+  const sizes = await page.locator('.pick:not([hidden]) img').evaluateAll(is => is.map(i => [i.getBoundingClientRect().width, i.getBoundingClientRect().height, getComputedStyle(i).objectFit]));
+  expect(sizes.length).toBeGreaterThan(0);
+  for (const [w, h, fit] of sizes) { expect(Math.abs(w / h - 1.5)).toBeLessThan(0.02); expect(fit).toBe('contain'); }
+  test.skip(isMobile, 'barre latérale repliée sur téléphone');
+  // Nom long : tronqué, boutons du pied toujours dans la barre.
+  await page.evaluate(() => { document.querySelector('.who').firstChild.textContent = 'Sebastien Wojcicki-Delacroix'; });
+  const { side, right } = await page.evaluate(() => ({
+    side: document.querySelector('.side').getBoundingClientRect().right,
+    right: Math.max(...[...document.querySelectorAll('.me button')].map(b => b.getBoundingClientRect().right)),
+  }));
+  expect(right).toBeLessThanOrEqual(side);
+});
