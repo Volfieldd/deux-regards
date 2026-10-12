@@ -26,14 +26,15 @@ Tout est créé dans `STORAGE_DIR` (par défaut `./storage`, hors Git) :
 
 ```
 storage/
-  site.db          base SQLite (photos, séries, auteurs, réglages, sessions)
+  site.db          base SQLite (photos, séries, auteurs, réglages, sessions, preuves, statistiques, Instagram)
   originals/       originaux importés, jamais servis
   variants/        images servies (AVIF/WebP), recalculables
   watermarks/      logo du filigrane
+  brand/           fichiers de marque (emblème, icône, logo complet, image de partage)
   tmp/             fichiers en cours d'import
 ```
 
-Les migrations SQL (`server/db/migrations/`) s'appliquent seules au démarrage, et aussi avec `npm run migrate`.
+Les dossiers apparaissent au premier usage. Les migrations SQL (`server/db/migrations/`, numérotées `001` à `008`) s'appliquent seules au démarrage, et aussi avec `npm run migrate`.
 
 ## Commandes
 
@@ -44,8 +45,9 @@ Les migrations SQL (`server/db/migrations/`) s'appliquent seules au démarrage, 
 | `npm run migrate` | applique les migrations en attente |
 | `npm run seed` | migrations + jeu de démonstration (ignoré si des photos existent) |
 | `npm run variants` | vérifie et recalcule les images servies (`-- --force` : tout recalculer) |
+| `npm run backup` | une sauvegarde de la base et des fichiers irremplaçables dans `BACKUP_DIR` (voir [Exploitation](Exploitation#sauvegarde)) |
 | `npm test` | tests unitaires et d'intégration |
-| `npm run e2e` | tests navigateur (voir [Tests](Tests)) |
+| `npm run e2e` | tests navigateur dans le conteneur Playwright, contre un serveur déjà démarré (voir [Tests](Tests)) |
 
 ## Se connecter sans Zitadel (tests)
 

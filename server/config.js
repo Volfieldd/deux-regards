@@ -73,9 +73,9 @@ export function loadConfig(env = process.env) {
     host,
     port: Number(env.PORT || 3000),
     publicUrl,
-    // Cookies Secure dès que le site est servi en HTTPS (toujours le cas derrière Caddy).
+    // Cookies Secure dès que le site est servi en HTTPS (toujours le cas derrière Cloudflare Tunnel).
     secureCookies: https,
-    // Proxys dont on accepte X-Forwarded-* : par défaut Caddy en local ou sur le réseau Docker.
+    // Proxys dont on accepte X-Forwarded-* : par défaut cloudflared en local ou sur le réseau Docker.
     trustProxy: parseTrustProxy(env.TRUST_PROXY, deployed),
     databasePath: path.resolve(env.DATABASE_PATH || path.join(storageDir, 'site.db')),
     storageDir,

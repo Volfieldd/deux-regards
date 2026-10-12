@@ -1,19 +1,19 @@
 # Instagram
 
-Les photos publiées sur le site peuvent partir automatiquement sur **un compte Instagram** (celui de Nicephos), **une par une, aux heures choisies**, avec une légende tirée d’un **modèle**. Pour chaque photo, vous pouvez changer le cadre, le filigrane et la légende.
+Les photos publiées sur le site peuvent partir sur **un compte Instagram** (celui de Nicephos), **une par une, aux heures choisies**, avec une légende tirée d’un **modèle**. Pour chaque photo, vous pouvez changer le cadre, le filigrane et la légende.
 
 La mise en place se fait une seule fois : un **compte Instagram professionnel**, une **application Meta**, deux lignes dans la configuration du serveur, puis **Connecter** dans l’admin. Comptez une demi-heure.
 
 ## Au quotidien
 
-1. **Choisissez ce qui part sur Instagram.** Par défaut, rien n’y entre seul : ouvrez la fiche d’une photo publiée et cliquez sur **Ajouter à la file Instagram**. Pour qu’une série entière parte automatiquement, cochez-la dans **Instagram → Réglages → Mise en file automatique** : chaque photo publiée dans cette série entrera alors dans la **file Instagram**.
+1. **Choisissez ce qui part sur Instagram.** Par défaut, rien n’y entre seul : ouvrez la fiche d’une photo publiée sur le site et, dans la section **Instagram**, cliquez sur **Ajouter à la file Instagram**. (Une photo en brouillon doit d’abord être publiée sur le site.) Pour qu’une série entière parte automatiquement, cochez-la dans **Instagram → Réglages → Mise en file automatique** : chaque photo publiée dans cette série entrera alors dans la **file Instagram**.
 2. **Aux heures choisies** (18 h 30 par défaut, heure de Paris), la première photo de la file part sur Instagram. Une par créneau.
 3. **Jusqu’au départ**, tout se règle :
-   - dans la **fiche de la photo**, section **Instagram** : cadre, filigrane, légende, avec l’aperçu exact de l’image envoyée ;
+   - dans la **fiche de la photo**, section **Instagram** : cadre, filigrane, légende, avec l’aperçu exact de l’image envoyée, puis **Mettre à jour** ; **Retirer de la file** l’en sort ;
    - dans la page **Instagram** : l’ordre de la file (↑ ↓), **Publier maintenant**, **Retirer**.
-4. Une fois publiée, la fiche et l’historique donnent le lien **Voir sur Instagram**.
+4. Une fois publiée, la fiche donne le lien **voir le post ↗**, et l’historique de la page Instagram le lien **Voir sur Instagram ↗**.
 
-> Une photo n’entre jamais deux fois d’elle-même dans la file : dépubliée puis republiée, elle n’est pas reproposée. Pour la partager à nouveau, utilisez **Republier** dans sa fiche.
+> Une photo n’entre jamais deux fois d’elle-même dans la file : dépubliée puis republiée, elle n’est pas reproposée. Pour la partager à nouveau, utilisez **Republier (remettre dans la file)** dans sa fiche.
 
 ## Le cadre de l’image
 
@@ -23,7 +23,7 @@ Instagram n’accepte que des images entre **4:5** (en hauteur) et **1,91:1** (e
 |---|---|
 | **Passe-partout blanc** | la photo entière, avec une marge blanche, sur un carré 4:5 de 1080 × 1350 px : un fil régulier |
 | **Passe-partout noir** | la même chose sur fond noir |
-| **Recadrage** | sans bordure : les photos en hauteur sont recadrées en 4:5 (au centre de l’intérêt), les autres gardent leur format |
+| **Recadrage (sans bordure)** | sans bordure : les photos en hauteur sont recadrées en 4:5 (au centre de l’intérêt), les autres gardent leur format |
 
 L’image envoyée est un JPEG de 1080 px de large, **sans aucune métadonnée**. Le **filigrane** (case dans la fiche, valeur par défaut dans les réglages) est celui de **Filigrane & EXIF**, même s’il est désactivé sur le site. Une photo réglée sur « jamais de filigrane » n’en a pas non plus sur Instagram.
 
@@ -46,7 +46,7 @@ Le **modèle** (Instagram → Réglages) s’applique à toutes les photos, avec
 
 - **Nouvel essai automatique :** la photo reste en tête de file, et le message d’erreur s’affiche dans la file et dans la fiche. Elle repart au créneau suivant, **3 essais au plus**.
 - **Après 3 échecs :** elle passe dans l’**historique**, avec **Réessayer**.
-- **Accès expiré :** le jeton d’accès dure 60 jours et se renouvelle tout seul. S’il a expiré (plus de 60 jours sans fonctionner), cliquez sur **Connecter** de nouveau.
+- **Accès expiré :** le jeton d’accès dure 60 jours et se renouvelle tout seul. S’il a expiré (plus de 60 jours sans fonctionner), reconnectez le compte depuis la page **Instagram** : **Déconnecter**, puis **Connecter le compte Instagram**. Si l’admin affiche **Reconnecter le compte** (clé de chiffrement changée, voir l’étape 6), cliquez simplement dessus.
 
 ---
 
@@ -84,7 +84,7 @@ L’API de publication ne fonctionne qu’avec un compte **Créateur** ou **Entr
 
    Ce sont les identifiants **Instagram** de l’application, différents de son ID Facebook affiché en haut.
 3. Section **Configurer la connexion professionnelle Instagram** (« Set up Instagram business login ») → **Paramètres de l’application** :
-   - **URI de redirection OAuth valides :** `https://nicephos.com/admin/instagram/callback`. C’est l’adresse affichée sur la page **Instagram** de l’admin, au caractère près.
+   - **URI de redirection OAuth valides :** `https://www.nicephos.art/admin/instagram/callback`. C’est l’adresse affichée sur la page **Instagram** de l’admin, au caractère près.
    - Enregistrez.
 4. Autorisations demandées par le site, rien à cocher : `instagram_business_basic` et `instagram_business_content_publish`.
 

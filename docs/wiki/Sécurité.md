@@ -19,17 +19,24 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
   - IPv6 par bloc /64, mémoire bornée ;
   - `TRUST_PROXY=true` refusé.
 - **Journal d'audit :** chaque action d'écriture de l'admin est journalisée (`action admin`), avec le compte (`sub`), la route et le résultat.
-- **Journaux :** le code et le `state` OIDC sont masqués.
+- **Journaux :** le code et le `state` OIDC, et le jeton de l'adresse d'image Instagram, sont masqués dans les URL, même encodés dans un paramètre ; les adresses IP sont tronquées (/24 en IPv4, /48 en IPv6).
 
 ## Site public
 
-- **Politique de sécurité du contenu stricte :** tout vient du site lui-même, sans `unsafe-inline` ni ressource tierce ; seuls les formulaires peuvent rediriger vers l'IdP. Seule ouverture : `img-src blob:`, pour l'aperçu local des photos choisies à l'import (adresses créées par le navigateur, jamais par un tiers).
-- **En-têtes :** `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, et HSTS en HTTPS.
+- **Politique de sécurité du contenu stricte** (`server/app.js`), sur toutes les réponses :
+
+  ```
+  default-src 'self'; img-src 'self' blob:; style-src 'self'; script-src 'self'; font-src 'self';
+  connect-src 'self'; base-uri 'self'; form-action 'self' <origine de l'IdP>; frame-ancestors 'none'; object-src 'none'
+  ```
+
+  Tout vient du site lui-même, sans `unsafe-inline` ni ressource tierce. `form-action` n'ajoute que l'origine de l'IdP OIDC (cible de la redirection après déconnexion), quand OIDC est configuré. Seule autre ouverture : `img-src blob:`, pour l'aperçu local des photos choisies à l'import (adresses créées par le navigateur, jamais par un tiers).
+- **En-têtes :** `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()` ; en HTTPS seulement, `Strict-Transport-Security: max-age=31536000` et `Cross-Origin-Opener-Policy: same-origin`.
 - **Contenu :** tout ce qui est saisi dans l'admin est échappé à l'affichage.
 - **Erreurs :** une erreur inattendue renvoie un message générique ; le détail (chemins, noms de fichiers) ne va que dans les journaux.
 - **Images :**
   - les originaux ne sont jamais servis ;
-  - les brouillons ne sont pas servis publiquement ;
+  - les brouillons ne sont pas servis publiquement (l'admin les voit via `/admin/media/`, sous session, sans cache) ;
   - aucune métadonnée par défaut.
 
 ## Preuves d'antériorité
@@ -49,6 +56,7 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
 
 - **Photos :** formats JPEG, PNG, WebP, TIFF et HEIF, vérifiés par décodage. Limites : 60 Mo, 120 mégapixels (aussi imposées au décodage, contre les bombes de décompression) et 50 fichiers par envoi.
 - **Logo du filigrane :** PNG ou WebP seulement (le SVG est refusé), 5 Mo, 4000 px de côté. Il est réencodé avant usage.
+- **Fichiers de marque (Apparence) :** PNG, WebP ou JPEG (SVG refusé), 5 Mo, 6000 px de côté ; réencodés, sans métadonnées.
 - **Stockage :** les noms de fichiers sont toujours générés par le site (UUID) ; le nom envoyé ne sert qu'à proposer un titre.
 
 ## Configuration en ligne
@@ -57,7 +65,10 @@ Dès que `PUBLIC_URL` est en HTTPS ou que `NODE_ENV=production`, le serveur refu
 
 - sans `COOKIE_SECRET` ;
 - avec un émetteur OIDC en HTTP ;
-- avec la connexion locale de test (`LOCAL_AUTH_TOKEN`).
+- avec la connexion locale de test (`LOCAL_AUTH_TOKEN`) ;
+- avec une autorité d'horodatage en HTTP (`TSA_URL`).
+
+Détail et autres refus de démarrage : [Configuration](Configuration), section « Site en ligne ».
 
 ## Points d'attention
 

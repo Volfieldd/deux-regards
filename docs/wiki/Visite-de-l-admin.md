@@ -2,7 +2,9 @@
 
 Captures d’une instance de test avec le seul jeu de démonstration, faites le 11/10/2026 : admin « Chambre noire » (police Jost), en mode sombre ; il existe aussi un mode clair (bouton soleil / lune, ou réglage du système). Elles se régénèrent sur une instance jetable (jeu de démonstration, sans logo) avec `E2E_CAPTURES=1 E2E_ALLOW_WRITES=1 npm run e2e -- --project=captures-bureau --project=captures-mobile` : les écrans d'import créent des photos. Pour l'usage pas à pas, voir l'[Aide de l'administration](Aide), également disponible dans l'admin (menu « Aide »).
 
-À gauche, une **barre latérale** : recherche ⌘K, **Aujourd’hui · Photothèque · Séries · Auteurs**, la liste des séries (où l’on dépose des photos pour les classer), puis **Filigrane & EXIF · Apparence · Réglages · Aide · Voir le site**, et en bas le mode clair / sombre et la déconnexion. Sur téléphone : une barre d’onglets en bas. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
+À gauche, une **barre latérale** : recherche ⌘K, **Aujourd’hui · Photothèque · Séries · Statistiques · Auteurs**, la liste des séries (où l’on dépose des photos pour les classer), puis, sous « Site », **Instagram · Filigrane & EXIF · Apparence · Réglages · Aide · Voir le site**, et en bas le mode clair / sombre et la déconnexion. Sur téléphone : une barre d’onglets en bas (**Aujourd’hui · Photos · Importer · Séries · Menu**).
+
+Les captures datent d’avant les écrans Statistiques et Instagram, la mise en page iPhone (lot en cartes, « Ouvrir la fiche ») et les réglages des droits en trois langues : ces écrans sont décrits ci-dessous sans capture. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
 
 ## Connexion
 
@@ -28,7 +30,7 @@ Une **planche contact** (chaque vignette garde le format de sa photo) et, à dro
 
 ![Import en cours](captures/admin/02b-import-progression-bureau.webp)
 
-**Compléter et publier :** tout le lot sur une page ; la date vient de l'appareil, le lieu se saisit une fois pour le lot.
+**Compléter et publier :** tout le lot sur une page ; la date vient de l'appareil, le lieu se saisit une fois pour le lot. Sur téléphone, le tableau devient une carte par photo (titre, série, lieu, date les uns sous les autres) et les réglages communs se replient derrière un bouton.
 
 ![Compléter et publier](captures/admin/02c-completer-le-lot-bureau.webp)
 
@@ -44,6 +46,8 @@ Une **planche contact** (chaque vignette garde le format de sa photo) et, à dro
 
 ![Palette de commandes](captures/admin/02f-palette-bureau.webp)
 
+**Sur téléphone :** toucher une photo la sélectionne ; son titre, ou le bouton **Ouvrir la fiche**, ouvre sa fiche en un toucher.
+
 **Mode clair :**
 
 ![Photothèque en mode clair](captures/admin/02g-phototheque-clair-bureau.webp)
@@ -54,6 +58,8 @@ On y trouve :
 
 - **l'édition** : titre, adresse, série, auteur, lieu, date, légende, statut, filigrane ;
 - **la preuve d'antériorité** : empreinte, date certifiée, téléchargements, vérification ;
+- **Instagram** : état de la photo dans la file, ajout manuel ;
+- **l'audience** de la photo ;
 - **la suppression**, confirmée dans la page.
 
 ![Fiche d'une photo](captures/admin/03-fiche-photo-bureau.webp)
@@ -72,6 +78,14 @@ Nom, adresse, biographie et lien avec le compte de connexion.
 
 ![Auteurs](captures/admin/05-auteurs-bureau.webp)
 
+## Statistiques
+
+Fréquentation jour par jour (pages vues, visiteurs), photos les plus vues, pages, provenance, et ce qui est mesuré. Pas de capture pour l'instant.
+
+## Instagram
+
+Compte connecté, rythme (créneaux), file d’attente, historique, puis réglages : mise en file automatique par série (aucune par défaut), cadre et filigrane par défaut, modèle de légende, hashtags par série. Voir [Instagram](Instagram). Pas de capture pour l'instant.
+
 ## Filigrane et EXIF
 
 Le filigrane (texte ou logo, position, opacité, taille), le niveau de métadonnées des images servies, et un aperçu, avec ou sans enregistrement.
@@ -84,13 +98,13 @@ Thème du site public, avec aperçu réservé aux admins, emblème et sous-titre
 
 ## Réglages
 
-Nom du site, accroche, textes, page « Droits d'utilisation », photos de l'ouverture.
+Nom du site, accroche, textes ; page « Droits d'utilisation » en français, anglais et allemand (chaque champ montre le texte lu par les visiteurs, pastille « Texte par défaut » ou « Texte personnalisé », bouton « Rétablir le texte par défaut ») et contact ; photos de l'ouverture (ordre, 8 au plus, vignettes en cadre 3:2). La capture montre encore l'ancien champ unique des droits.
 
 ![Réglages](captures/admin/07-reglages-bureau.webp)
 
 ## Sur mobile
 
-Toutes les pages s'adaptent au téléphone.
+Toutes les pages s'adaptent au téléphone ; les boutons, champs et liens y font au moins 44 px de haut.
 
 Barre d’onglets en bas (Importer au centre) ; l’inspecteur s’ouvre comme une feuille depuis le bas.
 

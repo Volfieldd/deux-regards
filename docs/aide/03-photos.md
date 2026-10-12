@@ -17,12 +17,12 @@ La **Photothèque** réunit l’import, la recherche et toutes les photos, dans 
 
 Dans la photothèque, chaque photo envoyée **apparaît aussitôt dans la planche** et s’y « développe » : floue et grise au début, nette quand ses images sont prêtes, avec une barre d’avancement. À la fin, le lot est **sélectionné** : l’inspecteur propose de titrer les photos, de leur donner un lieu et une série, puis de les publier — sans changer de page.
 
-- **Par photo :** une barre montre l'envoi en pourcentage, puis le traitement « images *n* / 6 » (les 6 tailles d'images du site), puis « ✓ Prête ».
+- **Par photo :** une barre montre l'envoi en pourcentage, puis « Traitement : images *n* / 6 » (les 6 images servies par le site), puis « ✓ Prête ».
 - **Pour le lot :** en haut, le décompte (prêtes, en traitement, en envoi, en échec), une barre d'ensemble et le **temps restant** estimé.
 - **Connexion interrompue :** seule la photo concernée échoue ; **Réessayer** la renvoie sans toucher au reste.
 - **Annuler le reste :** arrête les envois pas encore terminés. Les photos déjà envoyées restent en brouillon.
-- **Pendant l'envoi**, gardez la page ouverte (le navigateur vous prévient si vous la quittez). **Le traitement**, lui, continue sur le serveur même si vous changez de page : l'indicateur **Traitement : *n* photos** reste affiché en haut de toutes les pages.
-- Dès que l'envoi est terminé, **Compléter et publier les *n* photos →** apparaît (et reçoit le focus) : il mène à l'étape 3, même si le traitement n'est pas fini.
+- **Pendant l'envoi**, gardez la page ouverte (le navigateur vous prévient si vous la quittez). **Le traitement**, lui, continue sur le serveur même si vous changez de page : l'indicateur **Traitement : *n* photos** reste affiché en bas de la barre latérale, sur toutes les pages.
+- Dès que l'envoi est terminé, **Compléter et publier les *n* photos →** (ou **la photo**) apparaît (et reçoit le focus) : il mène à l'étape 3, même si le traitement n'est pas fini.
 
 | | |
 |---|---|
@@ -38,12 +38,17 @@ Au traitement, le site applique l'orientation de l'appareil, calcule les images 
 
 ### 3. Compléter et publier
 
-Toutes les photos du lot sont réunies dans **un seul tableau** : titre, série, lieu et date.
+Toutes les photos du lot sont réunies sur un seul écran : titre, série, lieu et date.
+
+- **Sur ordinateur :** un tableau, une ligne par photo.
+- **Sur téléphone :** une **carte par photo**, avec sa case, sa vignette, son état, puis les champs Titre, Série, Lieu et Date les uns sous les autres.
 
 - **Chaque champ s'enregistre quand vous le quittez** (Tab, clic ailleurs ou Entrée). La colonne **État** affiche « Enregistrement… » puis « ✓ Enregistré ». Le message en bas de l'écran propose **Annuler** pendant quelques secondes.
 - **Titre provisoire :** tant que le titre est celui du nom de fichier, il est signalé sous le champ.
 - **Date :** déjà remplie quand l'appareil l'a enregistrée. Sinon, en langage courant : « oct. 2026 », « octobre 2026 », « 10/2026 », « 5/10/2026 » ou « 2026-10 ». Le site affiche ce qu'il a compris (« compris : oct. 2026 »).
-- **Pour les photos cochées** (toutes, au départ), la barre sombre applique une **série** (y compris une nouvelle), un **lieu** ou une **date** **dès que vous les changez** — sans bouton à cliquer, avec **Annuler** dans le message. Puis **Publier**.
+- **Pour les photos cochées** (toutes, au départ), la barre du haut applique une **série** (y compris une nouvelle), un **lieu** ou une **date** **dès que vous les changez** — sans bouton à cliquer, avec **Annuler** dans le message. Puis **Publier**.
+  - Sur ordinateur, la barre reste visible quand vous faites défiler le tableau.
+  - Sur téléphone, elle reste en haut de la page, sans suivre le défilement. Ses champs sont repliés : touchez **Série, lieu ou date pour toutes les cochées…** pour les ouvrir. Ils changent toutes les photos cochées d’un coup.
 
 En pratique, pour un lot : tapez les titres, le lieu une fois dans la barre, puis **Publier**.
 - **Publier des photos à titre provisoire :** une fenêtre les nomme et propose d'abord **Corriger les titres**. Rien n'est publié sans votre confirmation.
@@ -55,8 +60,9 @@ Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir pl
 - **Pastilles** en haut : **Tout**, **Publiées**, **Brouillons**, **À finir** (brouillons et titres provisoires).
 - **Recherche** (titre, lieu, légende, adresse), **auteur**, **série** : la planche se met à jour aussitôt.
 - **Taille** : le curseur agrandit ou réduit les vignettes (gardé pour la prochaine fois).
-- **Planche / Liste** : la liste montre les photos en lignes, avec le numéro d’ordre, l’auteur, le lieu et le menu **⋯** (Modifier, Publier ou Dépublier, Monter, Descendre).
-- Au survol d’une vignette : son titre, sa série, sa date. Les brouillons portent la pastille **○ Brouillon**, les titres provisoires **Titre provisoire**.
+- **Planche / Liste** : la liste montre les photos en lignes, avec le numéro d’ordre, l’auteur, le lieu et le menu **⋯** (**Modifier la fiche**, **Publier** ou **Dépublier**, **Monter d’une place**, **Descendre d’une place**).
+- Au survol d’une vignette : son titre, sa série, sa date. Un clic sur le titre ouvre la fiche. Les brouillons portent la pastille **○ Brouillon**, les titres provisoires **Titre provisoire**.
+- **Sur téléphone :** touchez une vignette pour la choisir ; son titre apparaît, souligné : touchez-le pour ouvrir la fiche. Le panneau de la photo s’ouvre en bas de l’écran.
 
 > Le N° de l’admin est la place dans **toute** la liste, brouillons compris. Sur le site, les photos publiées sont numérotées sans trou (N°01, N°02…).
 
@@ -65,7 +71,7 @@ Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir pl
 Il change selon la sélection :
 
 - **Rien de sélectionné** : les chiffres de la photothèque et les raccourcis.
-- **Une photo** (un clic dessus) : l’image en grand, puis **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **auteur**. Chaque champ s’enregistre quand vous le quittez (ou Entrée) ; le message en bas propose **Annuler**. **Fiche complète** ouvre la fiche (filigrane, preuve d’antériorité, suppression).
+- **Une photo** (un clic dessus) : en tête du panneau, le bouton **Ouvrir la fiche** ; puis l’image en grand, **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **auteur** et son **audience** sur 30 jours. Chaque champ s’enregistre quand vous le quittez (ou Entrée) ; le message en bas propose **Annuler**. **Ouvrir la fiche**, ou le lien **Fiche complète** en bas du panneau, mène à la fiche (filigrane, Instagram, preuve d’antériorité, suppression).
 - **Plusieurs photos** : voir ci-dessous.
 
 En bas, toujours : **Publier**, **Dépublier**, **Supprimer…**.
@@ -84,7 +90,7 @@ En bas, toujours : **Publier**, **Dépublier**, **Supprimer…**.
 
 ## La loupe
 
-**L** (ou un double clic) ouvre la photo sélectionnée en grand, avec une pellicule en bas. **←** **→** passent d’une photo à l’autre (l’inspecteur suit) ; **Échap** referme.
+**L** (ou **Espace**, ou un double clic) ouvre la photo sélectionnée en grand, avec une pellicule en bas. **←** **→** passent d’une photo à l’autre (l’inspecteur suit) ; **Échap** (ou **Espace**) referme.
 
 ## Changer l'ordre
 
@@ -112,7 +118,11 @@ Cliquez sur **Enregistrer**.
 
 L'aperçu à gauche montre l'image telle que servie (filigrane compris) et ses dimensions. Pour une photo publiée, **voir sur le site** l'ouvre dans la galerie.
 
-Plus bas, la section [Preuve d'antériorité](preuves) montre l'empreinte et l'horodatage de l'original.
+Plus bas :
+
+- **Audience** : les ouvertures de la photo sur 30 jours (voir [Statistiques](statistiques)) ;
+- **Instagram** : cadre, filigrane et légende pour Instagram, et **Ajouter à la file Instagram** (voir [Instagram](instagram)) ;
+- [Preuve d'antériorité](preuves) : l'empreinte et l'horodatage de l'original.
 
 ## Supprimer une photo
 

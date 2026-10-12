@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Statut | Implémenté (branche `feat/preuves-iptc`) |
-| Écrans | fiche photo (section « Preuve d'antériorité »), tableau de bord, Réglages → Droits d'utilisation, page publique `/droits` |
-| Code | `server/timestamp.js`, `server/proofs.js`, `server/images.js` (`rightsXmp`), `server/routes/admin.js`, `server/routes/public.js` |
-| Tests | `test/proofs.test.js`, `test/watermark.test.js`, `e2e/tests/admin.spec.js`, `e2e/tests/public.spec.js` |
+| Statut | Implémenté, dans `main` (pages des droits en anglais et en allemand ajoutées ensuite) |
+| Écrans | fiche photo (section « Preuve d'antériorité »), tableau de bord, Réglages → Droits d'utilisation, pages publiques `/droits`, `/droits/en`, `/droits/de` |
+| Code | `server/timestamp.js`, `server/proofs.js`, `server/images.js` (`rightsXmp`), `server/rights.js`, `server/routes/admin.js`, `server/routes/public.js` |
+| Tests | `test/proofs.test.js`, `test/watermark.test.js`, `test/admin.test.js` (textes par défaut des droits), `e2e/tests/admin.spec.js`, `e2e/tests/public.spec.js` |
 
 ## 1. Objectif
 
@@ -80,6 +80,8 @@ openssl ts -verify -in photo.tsr -data photo.jpg -CAfile autorite-horodatage.pem
 | D1 | Dans les modes EXIF « Droits d'auteur », « Prise de vue » et « Tout », les images servies portent aussi des **mentions IPTC en XMP** : créateur, copyright, crédit (nom du site), `WebStatement` et `LicensorURL` vers `/droits`, et la marque « protégé ». En mode « Aucune métadonnée », rien n'est écrit. |
 | D2 | Le XMP conserve les accents (UTF-8), contrairement aux champs EXIF ASCII. Les valeurs sont échappées. |
 | D3 | La page publique **`/droits`** présente les conditions d'utilisation : texte réglable (par défaut : droit d'auteur, auteurs nommés, reproduction interdite sans autorisation écrite, articles L.122-4 et L.335-2 du CPI) et contact (adresse e-mail ou lien `https://`). Elle est liée depuis le pied de page. |
+| D5 | Traductions à **`/droits/en`** et **`/droits/de`** (`server/rights.js`) : langue déclarée (`lang`), sélecteur de langue, liens `hreflang` entre les trois versions, les trois dans `sitemap.xml`. Chaque texte est réglable (`rights_text`, `rights_text_en`, `rights_text_de`). Les mentions IPTC pointent toujours vers `/droits`. |
+| D6 | Dans Réglages, chaque champ affiche le texte que lisent les visiteurs (le texte par défaut s'il n'est pas personnalisé) avec une pastille « Texte par défaut » / « Texte personnalisé » et un bouton « Rétablir le texte par défaut ». Un texte envoyé identique au texte par défaut (aux espaces près) est enregistré vide : il reste « par défaut » et suit les noms des auteurs. |
 | D4 | Ces champs sont ceux que lisent Google Images (badge « Licence ») et les logiciels photo (Lightroom, Bridge, digiKam). |
 
 ### 3.2 Champs écrits
@@ -105,4 +107,5 @@ La version du rendu (`PIPELINE`) passe à 2 : les images déjà signées sont re
 - À l'import, l'empreinte est celle du fichier reçu. À la suppression, la preuve disparaît.
 - Le XMP contient les six champs, avec accents et échappement ; il est absent en mode « Aucune ».
 - `/droits` : texte par défaut avec les noms des auteurs, texte et contact personnalisés, aucun lien `javascript:`.
+- `/droits/en` et `/droits/de` : textes par défaut, langue déclarée, sélecteur, `hreflang`, textes réglables et échappés ; dans Réglages, texte par défaut affiché et gardé « par défaut » s'il ne change pas.
 - Contrôle manuel du 10/10/2026 sur le serveur de test : preuve téléchargée depuis l'admin, `openssl ts -verify` → `Verification: OK`.

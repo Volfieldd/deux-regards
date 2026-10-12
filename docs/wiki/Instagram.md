@@ -18,10 +18,10 @@ Sans ces variables, ou en `http://`, la file fonctionne (photos ajoutées, régl
 
 ## Fonctionnement
 
-1. **Entrée dans la file** : à chaque passage brouillon → publiée (fiche, liste, actions groupées, lot), seulement si la série de la photo est cochée dans **Réglages → Mise en file automatique** (aucune par défaut ; l’ancien interrupteur global `autoQueue` est ignoré) ; jamais une photo déjà dans la file ou déjà partagée. Ajout manuel depuis la fiche (section Instagram), quelle que soit la série.
+1. **Entrée dans la file** : à chaque passage brouillon → publiée (fiche, liste, actions groupées, lot), seulement si la série de la photo est cochée dans **Instagram → Réglages → Mise en file automatique** (aucune par défaut ; l’ancien interrupteur global `autoQueue` est ignoré) ; jamais une photo déjà dans la file ou déjà partagée. Ajout manuel depuis la fiche (section Instagram), quelle que soit la série.
 2. **Créneaux** : chaque minute, le site regarde le dernier créneau passé (heure de Paris) ; au premier passage après un créneau, la tête de file part. Au tout premier démarrage, il attend le créneau suivant (pas de rafale au déploiement). Si le serveur était arrêté, une seule photo part au redémarrage.
 3. **Envoi** :
-   1. un jeton aléatoire (24 octets) ouvre l’adresse `/partage/instagram/<jeton>.jpg`, valable **uniquement pendant l’envoi** ;
+   1. un jeton aléatoire (24 octets) ouvre l’adresse `/partage/instagram/<jeton>.jpg`, valable **uniquement pendant l’envoi**, 15 minutes au plus, et seulement si la photo est toujours publiée ;
    2. `POST /{ig-user-id}/media` (`image_url`, `caption`) → conteneur ;
    3. attente du statut `FINISHED` ;
    4. `POST /{ig-user-id}/media_publish` → publication, puis lecture du `permalink` ;
@@ -42,8 +42,8 @@ Sans ces variables, ou en `http://`, la file fonctionne (photos ajoutées, régl
 | Table | Contenu |
 |---|---|
 | `instagram_account` | une ligne : identifiant et nom du compte, **jeton chiffré** (AES-256-GCM), échéance |
-| `instagram_posts` | la file et l’historique : photo, statut, ordre, cadre, filigrane, légende personnalisée (ou `NULL` = modèle), erreur, essais, lien du post |
-| `settings.instagram` | réglages : option automatique, heures, cadre et filigrane par défaut, modèle, hashtags |
+| `instagram_posts` | la file et l’historique : photo, statut, ordre, cadre, filigrane, légende personnalisée (ou `NULL` = modèle), erreur, essais, lien du post, jeton d’image et sa date d’émission |
+| `settings.instagram` | réglages : séries mises en file automatiquement (`autoSeries`, vide par défaut), heures des créneaux (4 au plus, `18:30` par défaut), cadre et filigrane par défaut, modèle de légende (2 200 caractères au plus), hashtags généraux et par série (30 au plus en tout) |
 | `settings.instagram_state` | dernier créneau traité |
 
 Supprimer une photo supprime ses publications en file (`ON DELETE CASCADE`) ; les posts déjà sur Instagram n’y sont pas touchés.
@@ -53,5 +53,5 @@ Supprimer une photo supprime ses publications en file (`ON DELETE CASCADE`) ; le
 - Jeton d’accès **chiffré** en base, jamais affiché ni journalisé ; les messages d’erreur de Meta sont **nettoyés** (`access_token=…`, secret de l’application) avant d’être enregistrés.
 - Connexion OAuth protégée par un `state` aléatoire lié au navigateur (cookie signé, `httpOnly`, 10 minutes, limité à `/admin/instagram`), comparé en temps constant.
 - Toutes les routes `/admin/instagram/*` exigent une session d’administrateur ; les écritures, le jeton CSRF.
-- L’adresse publique de l’image n’existe que pendant l’envoi (jeton de 192 bits) ; `robots.txt` exclut `/partage/`.
+- L’adresse publique de l’image n’existe que pendant l’envoi (jeton de 192 bits, 15 minutes au plus), répond `no-store` et `noindex` ; `robots.txt` exclut `/partage/` ; le jeton est masqué dans les journaux.
 - Les originaux ne quittent jamais le serveur : seul le JPEG préparé est servi.

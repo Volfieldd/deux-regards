@@ -23,7 +23,7 @@ Thèmes fournis :
 
 ### Marque : quatre emplacements
 
-Chaque emplacement accepte un PNG, un WebP ou un JPEG (5 Mo au plus). Les SVG sont refusés : ils peuvent contenir du script, et les PNG aux bonnes tailles suffisent.
+Chaque emplacement accepte un PNG, un WebP ou un JPEG (5 Mo et 6000 px de côté au plus). Les SVG sont refusés : ils peuvent contenir du script, et les PNG aux bonnes tailles suffisent.
 
 | Emplacement | Fichier à envoyer (kit Nicephos) | Où il apparaît |
 |---|---|---|
@@ -40,7 +40,7 @@ Chaque emplacement accepte un PNG, un WebP ou un JPEG (5 Mo au plus). Les SVG so
 
 Sur téléphone, le sous-titre est masqué sous 480 px de large.
 
-> Les fichiers de marque sont rangés dans les données (`DATA_DIR/brand/`) et sauvegardés avec elles. Ils ne sont pas dans le dépôt Git, qui est public.
+> Les fichiers de marque sont rangés dans les données (`STORAGE_DIR/brand/`, soit `DATA_DIR/brand/` sur l'hôte en Docker), servis sous `/brand/`, et sauvegardés avec elles. Ils ne sont pas dans le dépôt Git, qui est public.
 
 ## Créer un thème
 

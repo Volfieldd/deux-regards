@@ -6,6 +6,7 @@
 |---|---|---|
 | **Original** | `STORAGE_DIR/originals/<uuid>.<ext>` | **Jamais** : aucune route ne mène à ce dossier. |
 | **Variantes** | `STORAGE_DIR/variants/` | Oui, sous `/media/`, et seulement pour les photos **publiées**. |
+| **Image Instagram** | aucun fichier : calculée à la demande depuis l'original | Seulement pendant un envoi, sous `/partage/instagram/<jeton>.jpg` (voir [Instagram](Instagram)). |
 
 Chaque photo a des variantes **AVIF** et **WebP** aux largeurs 640, 1280 et 2000 px. Il n'y a jamais d'agrandissement : une image de 900 px a des variantes de 640 et de 900 px.
 
@@ -36,13 +37,13 @@ Les pages utilisent `<picture>` avec `srcset` et `sizes` : le navigateur choisit
 - Les variantes sont servies avec `Cache-Control: max-age=31536000, immutable`.
 - L'**empreinte** (8 caractères) résume les réglages appliqués. Quand ils changent, le nom change : le navigateur ne peut pas garder une version périmée.
 - Seule la variante qui porte l'empreinte **courante** de la photo est servie ; les autres répondent 404, puis sont supprimées.
-- Les brouillons restent visibles dans l'admin, via `/admin/media/` (session admin, cache privé).
+- Les brouillons restent visibles dans l'admin, via `/admin/media/` (session admin, `Cache-Control: no-store`).
 
 ## Recalcul
 
 Le recalcul se déclenche :
 
-- après une modification dans l'admin (réglages, logo, nom du site, auteur, photo) ;
+- après une modification dans l'admin (réglages du filigrane ou des métadonnées, logo, dessins de la marque utilisés en filigrane, nom du site, auteur, photo) ;
 - au démarrage du serveur ;
 - avec `npm run variants`.
 
