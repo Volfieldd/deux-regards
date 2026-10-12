@@ -533,6 +533,16 @@ const activity = (() => {
 
   // Compléter le lot : série, lieu et date s'appliquent aux photos cochées dès qu'on les change.
   if (batch) {
+    // Sur téléphone, ces champs (qui changent toutes les photos cochées) sont repliés derrière un bouton.
+    const toggle = $('[data-bulk-toggle]', bar);
+    if (toggle) {
+      toggle.hidden = false;
+      toggle.addEventListener('click', () => {
+        const open = bar.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', String(open));
+        if (open) catSelect.focus();
+      });
+    }
     const apply = (action, extra) => run(action, extra, null);
     catSelect.addEventListener('change', () => { if (catSelect.value && catSelect.value !== 'new') apply('category', { category_id: catSelect.value }); });
     newName.addEventListener('change', () => { if (newName.value.trim()) apply('category', { category_id: 'new', new_category: newName.value }); });
@@ -958,6 +968,7 @@ const activity = (() => {
     panes.one.hidden = n !== 1;
     panes.many.hidden = n < 2;
     $('[data-bulk-clear]', insp).hidden = n === 0;
+    $('[data-one-open]', insp).hidden = n !== 1;
     $$('.insp-ft .btn', insp).forEach(b => { b.disabled = n === 0; });
     const title = $('[data-insp-title]', insp);
     stack(n > 1 ? ids : []);
@@ -995,6 +1006,7 @@ const activity = (() => {
     $('[data-one-prov]', insp).hidden = !p.provisional;
     $('[data-one-n]', insp).textContent = `/photo/${p.slug}`;
     $('[data-one-link]', insp).href = `/admin/photos/${p.id}`;
+    $('[data-one-open]', insp).href = `/admin/photos/${p.id}`;
     $$('[data-one-series] .pill', insp).forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.category) === p.category_id)));
     $('[data-publish]', insp).textContent = p.status === 'published' ? 'Déjà publiée' : 'Publier';
     $('[data-publish]', insp).disabled = p.status === 'published';

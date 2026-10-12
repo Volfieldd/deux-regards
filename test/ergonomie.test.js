@@ -109,6 +109,12 @@ test('compléter le lot : champ par champ, date comprise, adresse qui suit le ti
   assert.equal(page.statusCode, 200);
   assert.match(page.body, /Compléter et publier/);
   assert.match(page.body, /data-provisional/);
+  // Téléphone (audit iPhone) : cellules étiquetées pour l'affichage en cartes, champs du lot repliables.
+  for (const label of ['Titre', 'Série', 'Lieu', 'Date']) assert.match(page.body, new RegExp(`data-label="${label}"`));
+  assert.match(page.body, /data-bulk-toggle aria-expanded="false" aria-controls="bulk-groups" hidden/);
+  assert.match(page.body, /<div class="bulk-groups" id="bulk-groups">/);
+  // Photothèque : bouton « Ouvrir la fiche » dans le panneau d'une photo.
+  assert.match((await ctx.as({ url: '/admin/photos' })).body, /data-one-open hidden>Ouvrir la fiche</);
 
   const r = (await ctx.json(`/admin/photos/${id}/champs`, { title: 'Seconde veille' })).json();
   assert.equal(r.photo.provisional, false);
