@@ -17,6 +17,7 @@ import { THEMES, BRAND_MODES, BRAND_SLOTS } from '../themes.js';
 import { processEmblem, processIcon, processShare, BrandError, EMBLEM_MAX_BYTES } from '../brand.js';
 import { loadHelp } from '../help.js';
 import { barsAndLine, sparkline } from '../charts.js';
+import { RIGHTS, LANGS, rightsDefaults, withoutDefaults } from '../rights.js';
 import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, captionWarnings, InstagramError } from '../instagram.js';
 
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
@@ -1085,13 +1086,15 @@ export default async function adminRoutes(app) {
   app.get('/admin/aide', async (request, reply) => render(request, reply, 'help', { title: 'Aide', help: help || loadHelp() }));
 
   // ---------- réglages ----------
+  const defaultsNow = () => rightsDefaults(repo.authors().map(a => a.name), app.siteName());
   app.get('/admin/reglages', async (request, reply) => render(request, reply, 'settings', {
     heroMax: 8,
     title: 'Réglages', settings: repo.settings(), published: repo.photos({ status: 'published' }), defaultName: app.config.siteName,
+    rights: LANGS.map(l => ({ lang: l, ...RIGHTS[l] })), rightsDefaults: defaultsNow(),
   }));
 
   app.post('/admin/reglages', write, async (request, reply) => {
-    repo.saveSettings(request.body || {});
+    repo.saveSettings(withoutDefaults(request.body || {}, defaultsNow()));
     app.variants.schedule();            // {site} peut figurer dans le filigrane
     if (request.body?.hero_op || request.body?.hero_save) return done(reply, '/admin/reglages#ouverture', 'Ordre de l’ouverture enregistré.');
     return done(reply, '/admin/reglages', 'Réglages enregistrés.');

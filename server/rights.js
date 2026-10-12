@@ -61,3 +61,20 @@ export function rightsText(settings, lang, names, siteName) {
   const own = String(settings[RIGHTS[lang].setting] || '').trim();
   return own || RIGHTS[lang].text.replace('{auteurs}', joinNames(names, lang, siteName));
 }
+
+// Textes par défaut des trois langues, avec les noms des auteurs du moment (affichés dans l'admin).
+export function rightsDefaults(names, siteName) {
+  return Object.fromEntries(LANGS.map(l => [l, rightsText({}, l, names, siteName)]));
+}
+
+// Un texte envoyé par l'admin identique au texte par défaut est enregistré vide : il reste « par défaut »
+// et suit les changements de noms d'auteurs. Comparaison sans tenir compte des espaces et retours à la ligne.
+const norm = v => String(v ?? '').replace(/\r\n?/g, '\n').split('\n').map(l => l.trim().replace(/\s+/g, ' ')).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+export function withoutDefaults(body, defaults) {
+  const out = { ...body };
+  for (const l of LANGS) {
+    const key = RIGHTS[l].setting;
+    if (key in out && norm(out[key]) === norm(defaults[l])) out[key] = '';
+  }
+  return out;
+}
