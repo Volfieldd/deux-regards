@@ -56,5 +56,6 @@ test('robots.txt et sitemap.xml : site public seulement, URL absolues', async t 
   assert.ok(locs.includes('http://localhost:3000/serie/rue'));
   assert.ok(!locs.some(l => l.includes('deux-minuit')));                            // brouillon absent
   assert.ok(!locs.some(l => l.includes('/admin')));
-  assert.equal(locs.length, 11 + 4 + 2 + 3);
+  assert.ok(locs.includes('http://localhost:3000/droits/en') && locs.includes('http://localhost:3000/droits/de'));
+  assert.equal(locs.length, 11 + 4 + 2 + 5);                                        // accueil, à propos, droits FR / EN / DE
 });

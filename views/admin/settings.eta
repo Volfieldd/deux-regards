@@ -14,6 +14,11 @@
   <section class="panel">
     <h2>Droits d’utilisation <span class="mono">page <a href="/droits" target="_blank" rel="noopener">/droits</a>, liée aux mentions IPTC des images</span></h2>
     <label>Texte <span class="mono">vide : texte par défaut (droit d’auteur, reproduction interdite sans autorisation)</span><textarea name="rights_text" rows="6" maxlength="10000"><%= s.rights_text || '' %></textarea></label>
+    <details class="advanced"<%~ s.rights_text_en || s.rights_text_de ? ' open' : '' %>>
+      <summary>Traductions (pages <a href="/droits/en" target="_blank" rel="noopener">/droits/en</a> et <a href="/droits/de" target="_blank" rel="noopener">/droits/de</a>)</summary>
+      <label>Texte en anglais <span class="mono">vide : traduction du texte par défaut ; à remplir si vous avez changé le texte français</span><textarea name="rights_text_en" rows="5" maxlength="10000" lang="en"><%= s.rights_text_en || '' %></textarea></label>
+      <label>Texte en allemand <span class="mono">vide : traduction du texte par défaut ; à remplir si vous avez changé le texte français</span><textarea name="rights_text_de" rows="5" maxlength="10000" lang="de"><%= s.rights_text_de || '' %></textarea></label>
+    </details>
     <label>Contact pour les demandes d’utilisation <span class="mono">adresse e-mail ou lien https://</span><input name="rights_contact" value="<%= s.rights_contact || '' %>" maxlength="200"></label>
   </section>
   <fieldset class="panel hero-panel" id="ouverture" data-hero data-max="<%= it.heroMax %>">

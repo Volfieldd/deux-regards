@@ -83,7 +83,7 @@ Ces champs sont lus par Google Images, qui affiche alors un badge « Licence » 
 - **Texte :** vide, le texte par défaut s'affiche (droit d'auteur, auteurs nommés, reproduction interdite sans autorisation écrite, articles du Code de la propriété intellectuelle). Sinon, écrivez le vôtre, en séparant les paragraphes par une ligne vide.
 - **Contact :** une adresse e-mail ou un lien `https://`, affiché comme lien.
 
-La page est publique (`/droits`) et liée en pied de page de tout le site.
+La page est publique (`/droits`) et liée en pied de page de tout le site. Elle existe aussi en anglais (`/droits/en`) et en allemand (`/droits/de`), avec un sélecteur de langue et des liens `hreflang` ; textes dans `server/rights.js`, réglables (`rights_text_en`, `rights_text_de`). Les métadonnées IPTC pointent toujours vers `/droits`.
 
 ## Questions fréquentes
 

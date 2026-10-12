@@ -340,6 +340,8 @@ export function createAdminRepo(db) {
         intro: text(body.intro, 1000),
         about: text(body.about, 10000),
         rights_text: text(body.rights_text, 10000),
+        rights_text_en: text(body.rights_text_en, 10000),
+        rights_text_de: text(body.rights_text_de, 10000),
         rights_contact: text(body.rights_contact, 200),
         hero,
       };

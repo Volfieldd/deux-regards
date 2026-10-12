@@ -179,6 +179,11 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .top { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding-block: calc(env(safe-area-inset-top, 0px) + 22px) 22px; border-bottom: 1px solid var(--rule); }
 .top nav a { color: var(--mute); padding-block: 10px; }
 .top nav a:hover, .top nav a[aria-current] { color: var(--ink); }
+/* Langues de la page Droits d'utilisation (FR / EN / DE). */
+.langs { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+.langs a { display: inline-flex; align-items: center; min-height: 44px; color: var(--mute); }
+.langs a:hover { color: var(--ink); }
+.langs a[aria-current] { color: var(--ink); text-decoration: underline; text-underline-offset: 6px; }
 .about { padding-block: clamp(48px, 9vw, 120px) 0; display: grid; gap: 40px; }
 .about h1 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(36px, 5.6vw, 68px); line-height: 1.02; letter-spacing: -0.01em; max-width: 18ch; text-wrap: balance; }
 .prose { max-width: 62ch; font-size: 16px; line-height: 1.7; color: var(--prose); }

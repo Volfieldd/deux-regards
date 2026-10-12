@@ -3,14 +3,9 @@ import { galleryUrl, photoUrl } from '../urls.js';
 import { widthsFor, variantName } from '../images.js';
 import { pad } from '../format.js';
 import { picture } from '../picture.js';
+import { RIGHTS, LANGS, rightsText } from '../rights.js';
 
 const HERO_COUNT = 5;
-const DEFAULT_RIGHTS = `Toutes les photographies publiées sur ce site sont protégées par le droit d’auteur. Elles appartiennent à leurs auteurs, {auteurs}.
-
-Toute reproduction, représentation, modification ou utilisation, totale ou partielle, sans autorisation écrite préalable est interdite (articles L.122-4 et L.335-2 du Code de la propriété intellectuelle).
-
-Pour toute demande d’utilisation ou de licence, écrivez-nous en précisant la photo, l’usage envisagé et sa durée.`;
-
 export default async function publicRoutes(app) {
   const repo = createRepo(app.db);
 
@@ -118,20 +113,25 @@ export default async function publicRoutes(app) {
   });
 
   // Conditions d'utilisation des photos : cible des mentions IPTC (WebStatement, LicensorURL).
-  app.get('/droits', async (request, reply) => {
+  // Français à /droits, traductions à /droits/en et /droits/de (voir server/rights.js).
+  async function rightsPage(request, reply, lang) {
     const siteName = app.siteName();
     const settings = repo.settings();
-    const authors = repo.authors().map(a => a.name);
-    const names = authors.length > 1 ? `${authors.slice(0, -1).join(', ')} et ${authors.at(-1)}` : authors[0] || siteName;
-    const text = settings.rights_text || DEFAULT_RIGHTS.replace('{auteurs}', names);
+    const t = RIGHTS[lang];
+    const text = rightsText(settings, lang, repo.authors().map(a => a.name), siteName);
     const contact = String(settings.rights_contact || '').trim();
     app.stats.hit(request, { page: 'droits' });
     return reply.render('rights', {
-      ...base, siteName, paragraphs: text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean),
+      ...base, siteName, lang, t, paragraphs: text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean),
+      langs: LANGS.map(l => ({ code: l, name: RIGHTS[l].name, path: RIGHTS[l].path, current: l === lang })),
+      alternates: LANGS.map(l => ({ lang: l, href: RIGHTS[l].path })),
+      footerText: { ...t.footer, rights: t.title, rightsHref: t.path },
       contact, contactHref: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) ? `mailto:${contact}` : /^https:\/\/\S+$/.test(contact) ? contact : null,
-      pageTitle: `Droits d’utilisation · ${siteName}`, canonical: '/droits', description: `Conditions d’utilisation des photographies de ${siteName}.`,
+      pageTitle: `${t.title} · ${siteName}`, canonical: t.path, description: t.description(siteName),
     });
-  });
+  }
+  app.get('/droits', (request, reply) => rightsPage(request, reply, 'fr'));
+  for (const lang of LANGS.filter(l => l !== 'fr')) app.get(RIGHTS[lang].path, (request, reply) => rightsPage(request, reply, lang));
 
   // Image d'une publication Instagram, le temps de l'envoi : Instagram la télécharge depuis cette adresse
   // (jeton aléatoire, valable seulement pendant l'envoi ; 404 le reste du temps).
@@ -157,7 +157,7 @@ export default async function publicRoutes(app) {
       ...repo.categories().filter(c => photos.some(p => p.category_slug === c.slug)).map(c => ({ loc: galleryUrl({ serie: c.slug }) })),
       ...repo.authors().filter(a => photos.some(p => p.author_slug === a.slug)).map(a => ({ loc: galleryUrl({ regard: a.slug }) })),
       ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at) })),
-      { loc: '/a-propos' }, { loc: '/droits' },
+      { loc: '/a-propos' }, ...LANGS.map(l => ({ loc: RIGHTS[l].path })),
     ];
     const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
     const body = urls.map(u => `  <url><loc>${xml(base + u.loc)}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}</url>`).join('\n');

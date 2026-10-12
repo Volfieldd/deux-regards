@@ -208,3 +208,40 @@ test('page /droits : texte par défaut, texte et contact réglables, lien en pie
   set('rights_contact', 'javascript:alert(1)');
   assert.doesNotMatch((await c.app.inject('/droits')).body, /href="javascript/);
 });
+
+test('page /droits en anglais et en allemand : textes par défaut, langues déclarées, sélecteur, textes réglables', async t => {
+  const c = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: TOKEN } });
+  const en = await c.app.inject('/droits/en');
+  assert.equal(en.statusCode, 200);
+  assert.match(en.body, /<html lang="en"/);
+  assert.match(en.body, /<h1>Terms of use<\/h1>/);
+  assert.match(en.body, /belong to their authors, Sébastien and Julien\./);
+  assert.match(en.body, /French Intellectual Property Code/);
+  assert.match(en.body, /<h2>Audience measurement<\/h2>/);
+  assert.match(en.body, /<a href="\/droits\/en">Terms of use<\/a>/);                       // pied de page traduit
+  const de = (await c.app.inject('/droits/de')).body;
+  assert.match(de, /<html lang="de"/);
+  assert.match(de, /gehören ihren Urhebern, Sébastien und Julien\./);
+  assert.match(de, /<h2>Reichweitenmessung<\/h2>/);
+  // Chaque version annonce les autres (hreflang) et propose le sélecteur, langue courante marquée.
+  const fr = (await c.app.inject('/droits')).body;
+  for (const body of [fr, en.body, de]) {
+    for (const [l, p] of [['fr', '/droits'], ['en', '/droits/en'], ['de', '/droits/de']]) {
+      assert.match(body, new RegExp(`<link rel="alternate" hreflang="${l}" href="[^"]*${p.replace(/\//g, '\\/')}">`));
+      assert.match(body, new RegExp(`<a href="${p.replace(/\//g, '\\/')}" hreflang="${l}" lang="${l}"`));
+    }
+  }
+  assert.match(fr, /<html lang="fr"/);
+  assert.match(fr, /href="\/droits" hreflang="fr" lang="fr" aria-current="page"/);
+  assert.equal((await c.app.inject('/droits/es')).statusCode, 404);
+  assert.match((await c.app.inject('/sitemap.xml')).body, /\/droits\/de<\/loc>/);
+
+  // Textes propres à chaque langue ; le contact est commun.
+  const set = (k, v) => c.db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run(k, JSON.stringify(v));
+  set('rights_text_en', 'Licence on request <b>now</b>.');
+  set('rights_contact', 'photos@example.org');
+  const custom = (await c.app.inject('/droits/en')).body;
+  assert.match(custom, /<p>Licence on request &lt;b&gt;now&lt;\/b&gt;\.<\/p>/);                // échappé
+  assert.match(custom, /Contact: <a class="more" href="mailto:photos@example\.org">/);
+  assert.match((await c.app.inject('/droits/de')).body, /Kontakt: /);
+});

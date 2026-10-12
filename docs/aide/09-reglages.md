@@ -7,6 +7,7 @@
 | **Introduction** | texte sous l'accroche, à l'accueil |
 | **À propos** | page « À propos ». Séparez les paragraphes par une ligne vide. |
 | **Droits d'utilisation : texte** | page publique `/droits`. Vide : texte par défaut (droit d'auteur, auteurs nommés, reproduction interdite sans autorisation). |
+| **Droits d'utilisation : traductions** | pages `/droits/en` (anglais) et `/droits/de` (allemand), proposées aux visiteurs par le sélecteur Français · English · Deutsch. Vide : traduction du texte par défaut. **Si vous avez changé le texte français, remplissez aussi ces deux champs**, sinon les visiteurs étrangers lisent l'ancien texte traduit. |
 | **Droits d'utilisation : contact** | adresse e-mail ou lien `https://`, affiché comme lien sur `/droits` |
 | **Photos de l'ouverture** | le diaporama plein écran de l'accueil, dans l'ordre choisi |
 
