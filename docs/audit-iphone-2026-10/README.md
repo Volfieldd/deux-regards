@@ -106,3 +106,20 @@ La fiche fait ≈ 4,5 écrans ; la photo occupe tout le premier, et le bouton «
 | 6 | Fiche : image réduite, « Enregistrer » collant | m1 | petit |
 
 Les lots 1 à 3 règlent les trois plaintes remontées ; à vérifier ensuite sur un vrai iPhone (Safari), clavier ouvert.
+
+## Suite donnée (lots 1 à 3)
+
+Branche `fix/admin-iphone`, vérifiée dans WebKit sur iPhone SE et iPhone 15 :
+
+| Mesure | Avant | Après |
+|---|---|---|
+| Champs du lot touchables (3 photos × 4 champs) | 6 à 8 sur 12 | **12 sur 12** |
+| Série d'une photo changée depuis le lot | impossible pour les dernières photos | depuis sa carte |
+| Accès à la fiche depuis la photothèque | lien à ≈ 1 130 px dans le panneau | **« Ouvrir la fiche »** en tête du panneau, titre de la vignette touchable une fois choisie |
+| Cibles < 44 px (Photothèque, Séries, fiche) | 20 et plus | **0** |
+
+- « Compléter et publier » : une carte par photo sous 720 px ; la barre d'actions n'est plus fixée en bas ; série, lieu et date pour toutes les cochées sont repliés derrière un bouton (on ne change plus tout le lot par mégarde).
+- Le grand écran ne change pas, sauf le bouton « Ouvrir la fiche », présent aussi dans le panneau du bureau.
+- Test permanent : projet e2e `iphone` (`e2e/tests/iphone.spec.js`).
+
+Restent à faire : lots 4 (mode « Sélectionner »), 5 (Séries) et 6 (fiche), puis un essai sur un vrai iPhone.

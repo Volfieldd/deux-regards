@@ -365,6 +365,9 @@ body.dropping .canvas { outline: 2px dashed var(--accent); outline-offset: -10px
 .main:not(.wide) .bulk .group { display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .main:not(.wide) .bulk select, .main:not(.wide) .bulk input:not([type]) { width: auto; min-width: 150px; min-height: 36px; }
 .bulk .spacer { flex: 1; }
+.bulk-groups { display: contents; }
+.bulk-toggle { display: none; }
+.open-one:not([hidden]) + .iconbtn { margin-left: 0; }
 .bulk .hint-dark { color: var(--ink3); font-size: 12.5px; flex-basis: 100%; order: 9; }
 .js [data-bulk-new] { display: none; }
 .js [data-bulk-new].on { display: inline-block; }
@@ -548,13 +551,51 @@ body.dropping .canvas { outline: 2px dashed var(--accent); outline-offset: -10px
   .scards { grid-template-columns: 1fr; }
   .plist li { grid-template-columns: 30px 84px minmax(0, 1fr) 44px; grid-template-areas: "chk thumb info menu" "chk thumb st menu"; row-gap: 4px; }
   .plist li .chk { grid-area: chk; } .plist li .thumb { grid-area: thumb; } .plist li .info { grid-area: info; } .plist li .st { grid-area: st; justify-self: start; } .plist li .menu { grid-area: menu; } .plist li .handle { display: none; }
-  .main:not(.wide) .bulk { position: fixed; top: auto; bottom: 74px; left: 0; right: 0; margin: 0; border-radius: 16px 16px 0 0; z-index: 30; }
+  .main:not(.wide) .bulk { position: static; margin: 0 0 14px; }
   .main:not(.wide) .bulk .btn { flex: 1; }
   .main:not(.wide) .bulk .spacer, .main:not(.wide) .bulk [data-bulk-clear] { display: none; }
   .chosen .mv button { width: 44px; height: 44px; }
   .scard .grip { display: none; }
 }
 @media (pointer: coarse) { .scard .grip { display: none !important; } }
+
+/* ---------- téléphone : audit iPhone (docs/audit-iphone-2026-10) ---------- */
+@media (max-width: 720px) {
+  /* Compléter et publier : une carte par photo au lieu d'un tableau de 778 px. */
+  .tablewrap { overflow: visible; border-radius: 0; box-shadow: none; }
+  .lot, .lot tbody { display: block; background: transparent; }
+  .lot thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .lot tr { display: grid; grid-template-columns: 44px 96px minmax(0, 1fr); grid-template-areas: "chk thumb state" "title title title" "cat cat cat" "place place place" "date date date"; gap: 10px; align-items: center; margin: 0 0 12px; padding: 12px; border-radius: 14px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+  .lot td { display: block; padding: 0; border: 0; min-width: 0; }
+  .lot .c-chk { grid-area: chk; } .lot .c-thumb { grid-area: thumb; } .lot .c-state { grid-area: state; justify-self: end; }
+  .lot .c-title { grid-area: title; } .lot .c-cat { grid-area: cat; } .lot .c-place { grid-area: place; } .lot .c-date { grid-area: date; }
+  .lot td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 4px; color: var(--ink3); font-size: 12.5px; }
+  .lot input:not([type]), .lot select { width: 100%; min-width: 0; min-height: 44px; }
+  .lot .chk, .all .chk { width: 28px; height: 28px; }
+  /* Barre du lot : en haut, non fixe ; série, lieu et date pour toutes repliés derrière un bouton. */
+  .js .bulk-toggle:not([hidden]) { display: inline-flex; flex-basis: 100%; }
+  .js .bulk:not(.open) .bulk-groups { display: none; }
+  .bulk-groups .group { flex-basis: 100%; }
+  .main:not(.wide) .bulk select, .main:not(.wide) .bulk input:not([type]) { flex: 1; min-height: 44px; }
+  .bulk .hint-dark { display: none; }
+
+  /* Photothèque : la photo choisie s'ouvre en un toucher (titre, ou « Ouvrir la fiche »). */
+  .tile:has(> .chk:checked) .cap { opacity: 1; }
+  .tile:has(> .chk:checked) .cap .ttl { pointer-events: auto; text-decoration: underline; text-underline-offset: 3px; }
+  .preview-one { aspect-ratio: auto; height: 28vh; }
+
+  /* Cibles d'au moins 44 px. */
+  .filters input[type="search"], .filters select, .scard .acts .btn, .btn, .btn.big { min-height: 44px; }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]), select { min-height: 44px; }
+  .menu-pop a, .menu-pop button, .menu-pop summary, details > summary { min-height: 44px; display: flex; align-items: center; }
+  .more, .help-inline, .help-link a, .preview figcaption a { display: inline-flex; align-items: center; min-height: 44px; }
+  label.inline { min-height: 44px; }
+  .form input[type="radio"], .form input[type="checkbox"] { width: 22px; height: 22px; }
+  /* Séries : renommer sur toute la largeur de la carte. */
+  .scard .acts { flex-wrap: wrap; }
+  .scard .inline-edit[open] { flex-basis: 100%; }
+  .scard .inline-edit .pop, .scard .inline-edit .pop label, .scard .inline-edit .pop input { width: 100%; min-width: 0; }
+}
 
 /* Formats (générés) : flex-grow proportionnel au rapport largeur/hauteur. */
 .ar-40 { flex: 40 1 calc(var(--rowh) * 0.40); max-width: calc(var(--rowh) * 0.64); }

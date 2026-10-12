@@ -107,6 +107,7 @@
     <div class="insp-hd">
       <span class="stack" data-insp-stack hidden></span>
       <div><h2 data-insp-title>Sélection</h2><strong data-bulk-count role="status">Pour les photos cochées :</strong></div>
+      <a class="btn ghost push open-one" href="#" data-one-open hidden>Ouvrir la fiche</a>
       <button class="iconbtn push" type="button" data-bulk-clear hidden aria-label="Tout désélectionner (Échap)">✕</button>
     </div>
 
