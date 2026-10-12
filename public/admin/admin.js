@@ -1498,3 +1498,14 @@ const activity = (() => {
     empty.hidden = shown > 0;
   });
 })();
+
+// ----- réglages : rétablir un texte par défaut (droits d'utilisation) -----
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-reset-default]');
+  if (!b) return;
+  const ta = document.getElementById(b.dataset.resetDefault);
+  if (!ta) return;
+  ta.value = ta.dataset.default;
+  ta.focus();
+  toast.show('Texte par défaut rétabli : enregistrez les réglages pour l’appliquer.');
+});

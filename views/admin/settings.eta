@@ -13,7 +13,17 @@
   </section>
   <section class="panel">
     <h2>Droits d’utilisation <span class="mono">page <a href="/droits" target="_blank" rel="noopener">/droits</a>, liée aux mentions IPTC des images</span></h2>
-    <label>Texte <span class="mono">vide : texte par défaut (droit d’auteur, reproduction interdite sans autorisation)</span><textarea name="rights_text" rows="6" maxlength="10000"><%= s.rights_text || '' %></textarea></label>
+    <p class="hint">Le texte affiché ci-dessous est celui que lisent les visiteurs. Tant que vous gardez le texte par défaut, il suit les noms des auteurs ; modifié, il est enregistré tel quel.</p>
+<% const frOwn = Boolean(String(s.rights_text || '').trim()); %>
+<% it.rights.forEach(r => { const own = Boolean(String(s[r.setting] || '').trim()); %>
+    <div class="rights-field">
+      <label for="<%= r.setting %>"><%= r.name %> <a class="mono" href="<%= r.path %>" target="_blank" rel="noopener"><%= r.path %></a>
+        <span class="badge-text<%= own ? ' own' : '' %>"><%= own ? 'Texte personnalisé' : 'Texte par défaut' %></span></label>
+<% if (r.lang !== 'fr' && frOwn && !own) { %>      <p class="cellnote warn">Le texte français a été modifié : adaptez aussi cette traduction, sinon les visiteurs lisent la traduction du texte par défaut.</p>
+<% } %>      <textarea id="<%= r.setting %>" name="<%= r.setting %>" rows="<%= r.lang === 'fr' ? 7 : 6 %>" maxlength="10000" lang="<%= r.lang %>" data-default="<%= it.rightsDefaults[r.lang] %>"><%= own ? s[r.setting] : it.rightsDefaults[r.lang] %></textarea>
+      <p class="actions" data-js-only hidden><button class="btn ghost" type="button" data-reset-default="<%= r.setting %>">Rétablir le texte par défaut</button></p>
+    </div>
+<% }) %>
     <label>Contact pour les demandes d’utilisation <span class="mono">adresse e-mail ou lien https://</span><input name="rights_contact" value="<%= s.rights_contact || '' %>" maxlength="200"></label>
   </section>
   <fieldset class="panel hero-panel" id="ouverture" data-hero data-max="<%= it.heroMax %>">

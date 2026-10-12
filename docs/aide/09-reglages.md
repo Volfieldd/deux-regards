@@ -6,7 +6,8 @@
 | **Accroche** | titre de la section « regards » de l'accueil, titre de « À propos », description pour les moteurs de recherche |
 | **Introduction** | texte sous l'accroche, à l'accueil |
 | **À propos** | page « À propos ». Séparez les paragraphes par une ligne vide. |
-| **Droits d'utilisation : texte** | page publique `/droits`. Vide : texte par défaut (droit d'auteur, auteurs nommés, reproduction interdite sans autorisation). |
+| **Droits d'utilisation : texte** | page publique `/droits`. Le champ affiche le texte publié, avec un badge **Texte par défaut** ou **Texte personnalisé**. Laissé tel quel, le texte par défaut suit les noms des auteurs ; **Rétablir le texte par défaut** le remet (puis enregistrez). |
+| **Droits d'utilisation : traductions** | pages `/droits/en` (anglais) et `/droits/de` (allemand), proposées aux visiteurs par le sélecteur Français · English · Deutsch. Mêmes badges et même bouton. Si le texte français est personnalisé et pas une traduction, un avertissement le signale : adaptez-la, sinon les visiteurs étrangers lisent la traduction du texte par défaut. |
 | **Droits d'utilisation : contact** | adresse e-mail ou lien `https://`, affiché comme lien sur `/droits` |
 | **Photos de l'ouverture** | le diaporama plein écran de l'accueil, dans l'ordre choisi |
 

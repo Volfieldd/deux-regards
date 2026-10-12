@@ -1,19 +1,23 @@
 <% layout('./layout') %>
+<% const t = it.t; %>
 <header class="top wrap">
   <%~ include('./brand', it) %>
-  <nav class="eyebrow" aria-label="Navigation"><a href="/#series">Séries</a><a href="/#galerie">Galerie</a><a href="/a-propos">À propos</a></nav>
+  <nav class="eyebrow" aria-label="<%= t.nav.label %>"><a href="/#series"><%= t.nav.series %></a><a href="/#galerie"><%= t.nav.gallery %></a><a href="/a-propos"><%= t.nav.about %></a></nav>
 </header>
 <main class="about wrap">
-  <h1>Droits d’utilisation</h1>
+  <nav class="langs eyebrow" aria-label="<%= t.nav.langs %>">
+<% it.langs.forEach(l => { %>    <a href="<%= l.path %>" hreflang="<%= l.code %>" lang="<%= l.code %>"<%~ l.current ? ' aria-current="page"' : '' %>><%= l.name %></a>
+<% }) %>  </nav>
+  <h1><%= t.title %></h1>
   <div class="prose">
-<% it.paragraphs.forEach(t => { %>
-    <p><%= t %></p>
+<% it.paragraphs.forEach(p => { %>
+    <p><%= p %></p>
 <% }) %>
 <% if (it.contact) { %>
-    <p>Contact : <% if (it.contactHref) { %><a class="more" href="<%= it.contactHref %>"><%= it.contact %></a><% } else { %><%= it.contact %><% } %></p>
+    <p><%= t.contact %> <% if (it.contactHref) { %><a class="more" href="<%= it.contactHref %>"><%= it.contact %></a><% } else { %><%= it.contact %><% } %></p>
 <% } %>
-    <h2>Mesure d’audience</h2>
-    <p>Ce site compte ses visites de façon anonyme, sans cookie et sans service extérieur : nombre de pages et de photos vues, nombre de visiteurs par jour, site d’origine. Aucune adresse IP ni aucun identifiant n’est conservé, et les compteurs sont effacés au bout de 25 mois. Si votre navigateur demande à ne pas être suivi (« Do Not Track » ou « Global Privacy Control »), vos visites ne sont pas comptées.</p>
+    <h2><%= t.audienceTitle %></h2>
+    <p><%= t.audience %></p>
   </div>
 </main>
 <%~ include('./footer', it) %>
