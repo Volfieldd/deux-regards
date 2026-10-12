@@ -15,7 +15,7 @@
   <PostArgs/>
   <Config Name="Données" Target="/data" Default="/mnt/cache/appdata/nicephos/data" Mode="rw" Description="Base, originaux, preuves, logos. Chemin direct du pool (/mnt/cache/…), propriétaire 99:100, à créer avant." Type="Path" Display="always" Required="true" Mask="false">/mnt/cache/appdata/nicephos/data</Config>
   <Config Name="Port réseau local" Target="3000" Default="3080" Mode="tcp" Description="Contrôle depuis le réseau local ; Internet passe par le tunnel." Type="Port" Display="always" Required="false" Mask="false">3080</Config>
-    <Config Name="Adresse publique" Target="PUBLIC_URL" Default="https://nicephos.com" Mode="" Description="Domaine principal, en HTTPS." Type="Variable" Display="always" Required="true" Mask="false">https://nicephos.com</Config>
+    <Config Name="Adresse publique" Target="PUBLIC_URL" Default="https://www.nicephos.art" Mode="" Description="Domaine principal, en HTTPS." Type="Variable" Display="always" Required="true" Mask="false">https://nicephos.com</Config>
     <Config Name="Secret des cookies" Target="COOKIE_SECRET" Default="" Mode="" Description="32+ caractères aléatoires : openssl rand -base64 32" Type="Variable" Display="always" Required="true" Mask="true"></Config>
     <Config Name="Nom du site" Target="SITE_NAME" Default="Nicephos" Mode="" Description="Nom affiché (modifiable dans l'admin)." Type="Variable" Display="always" Required="false" Mask="false">Nicephos</Config>
     <Config Name="Zitadel : émetteur" Target="OIDC_ISSUER" Default="https://INSTANCE.zitadel.cloud" Mode="" Description="Adresse de l'instance Zitadel." Type="Variable" Display="always" Required="true" Mask="false">https://INSTANCE.zitadel.cloud</Config>

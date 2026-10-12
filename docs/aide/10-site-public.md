@@ -7,7 +7,7 @@ Ce que vos visiteurs peuvent faire, pour savoir ce que vos réglages changent.
 - **Ouverture :**
   - photos plein écran qui défilent toutes les 6 secondes ;
   - vignettes pour choisir une photo ;
-  - bouton **Pause** pour arrêter le défilement ;
+  - bouton **Pause** pour arrêter le défilement (il devient **Lecture** pour le relancer) ;
   - le défilement s'interrompt aussi quand la souris ou le clavier est sur l'ouverture.
 - **Deux regards :** « Les deux », ou un photographe. La galerie se filtre **sans recharger la page**, et l'adresse change (`/auteur/julien`) : elle se partage.
 - **Séries :** l'index en grand. Le survol montre une photo de la série ; un clic filtre, un second clic retire le filtre. Les filtres se combinent avec les regards.
@@ -19,15 +19,17 @@ Ce que vos visiteurs peuvent faire, pour savoir ce que vos réglages changent.
 |---|---|
 | **→** ou glissé vers la gauche | photo suivante |
 | **←** ou glissé vers la droite | photo précédente |
-| **Échap** ou « Fermer » | retour à la galerie, au même filtre |
+| **Échap**, « Fermer » ou le bouton Retour du navigateur | retour à la série (ou à la galerie), au même filtre et à l'endroit quitté |
 | pincement (téléphone) | zoom sur la photo |
 
 La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste dans cette sélection.
 
+**Retour à la série :** passer d'une photo à la précédente ou à la suivante ne s'empile pas dans l'historique du navigateur. Après avoir vu dix photos, **un seul** Retour (ou **Fermer**, ou **Échap**) ramène à la série, à la hauteur où on l'avait quittée, et la dernière photo vue est remise à l'écran.
+
 ## Autres pages
 
 - **À propos :** logo complet, accroche, texte, biographies des auteurs.
-- **Droits d'utilisation :** conditions et contact.
+- **Droits d'utilisation :** conditions, contact et information sur la mesure d'audience, en trois langues : `/droits` (français), `/droits/en` (anglais), `/droits/de` (allemand). Un sélecteur **Français · English · Deutsch** en haut de la page passe de l'une à l'autre. Les textes se règlent dans [Réglages](reglages).
 - **Page introuvable :** pour une adresse inconnue ou une photo dépubliée.
 
 ## Toujours

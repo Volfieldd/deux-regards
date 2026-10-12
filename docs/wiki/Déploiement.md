@@ -1,6 +1,8 @@
 # Déploiement (Docker et Cloudflare Tunnel)
 
-> **Unraid :** guide et fichiers prêts à l'emploi dans [`deploy/unraid/`](https://github.com/Volfieldd/deux-regards/tree/main/deploy/unraid) : pile Compose, modèles Unraid, export des données, configuration de Zitadel et des domaines nicephos.com / nicephos.art. L'image est publiée sur `ghcr.io/volfieldd/deux-regards` à chaque mise à jour de `main`.
+> **Unraid :** guide et fichiers prêts à l'emploi dans [`deploy/unraid/`](https://github.com/Volfieldd/deux-regards/tree/main/deploy/unraid) : pile Compose, modèles Unraid, export des données, configuration de Zitadel et de Cloudflare. Le site de production est `https://www.nicephos.art`. L'image est publiée sur `ghcr.io/volfieldd/deux-regards` à chaque mise à jour de `main` (voir [Image Docker](#image-docker)).
+
+Cette page décrit la pile générique du dépôt (`compose.yaml` à la racine), qui **construit l'image sur place**. La pile Unraid, elle, télécharge l'image publiée.
 
 Le site tourne dans Docker. Il est exposé sur Internet par un **tunnel Cloudflare** (`cloudflared`) : aucun port n'est ouvert vers l'extérieur et Cloudflare fournit le HTTPS, donc ni Caddy ni certificat à gérer.
 
@@ -64,7 +66,26 @@ OIDC_ISSUER=… OIDC_CLIENT_ID=… OIDC_CLIENT_SECRET=… OIDC_PROJECT_ID=… OI
 4. Lancer `docker compose --profile tunnel up -d`.
 5. Dans Zitadel, déclarer `https://<domaine>/auth/callback` et `https://<domaine>/`.
 
-L'adresse réelle des visiteurs arrive par `X-Forwarded-For`. Le site fait confiance au réseau Docker local (`TRUST_PROXY` par défaut) : la limite de connexions s'applique donc par visiteur, pas au tunnel entier.
+L'adresse réelle des visiteurs arrive par `X-Forwarded-For`. Le site fait confiance aux adresses privées (`TRUST_PROXY` par défaut en ligne : `loopback,uniquelocal`), donc à `cloudflared` sur le réseau Docker : la limite de connexions s'applique par visiteur, pas au tunnel entier. Si le port du site est ouvert sur le réseau local (`BIND_ADDR`), un poste de ce réseau peut lui aussi se faire passer pour un autre visiteur : fixez alors `TRUST_PROXY` à l'adresse exacte de `cloudflared`, comme le fait la pile Unraid (réseau dédié, `TUNNEL_IP`).
+
+## Cloudflare : une seule adresse publique
+
+Le site n'a qu'une adresse canonique, celle de `PUBLIC_URL` (en production `https://www.nicephos.art`). Elle sert aux liens absolus, à la connexion Zitadel, à Instagram et aux mentions de droits des images. Toutes les autres adresses (`nicephos.art` sans `www`, autres sous-domaines, `http://`) y sont redirigées par Cloudflare, avant d'atteindre le tunnel.
+
+1. **Tunnel :** le *Public hostname* du tunnel est `www.nicephos.art` (service `http://site:3000`, ou `nicephos:3000` sur Unraid).
+2. **DNS :** pour que Cloudflare puisse rediriger une adresse, elle doit exister et être **proxifiée** (nuage orange) : un enregistrement pour `@` et un pour `*`. Leur cible importe peu, puisque la règle répond avant tout contact avec un serveur (par exemple un `A` vers `192.0.2.1`, adresse de documentation jamais jointe). `www` garde l'enregistrement `CNAME` créé par le tunnel.
+3. **Rules → Redirect Rules → Create rule :**
+   - *If incoming requests match…* : **Custom filter expression**, puis *Field* **Hostname**, *Operator* **does not equal**, *Value* `www.nicephos.art` (sans guillemets). L'*Expression Preview* doit afficher exactement `(http.host ne "www.nicephos.art")` ;
+   - *Then* : **Dynamic**, expression `concat("https://www.nicephos.art", http.request.uri.path)` ;
+   - code **301**, case **Preserve query string** cochée.
+4. **SSL/TLS → Edge Certificates → Always Use HTTPS** : activé. `http://www.nicephos.art` passe ainsi en HTTPS (la règle ci-dessus ne le traite pas, puisque l'hôte est déjà le bon).
+
+Pièges :
+
+- **Expression dans le champ *Value* :** le champ *Value* n'attend qu'un nom de domaine. Y coller une expression (`http.host ne …`), ou laisser *Field* sur **URI Full**, produit une règle qui compare l'URL complète à ce texte : avec l'opérateur *wildcard*, elle ne correspond jamais (aucune redirection) ; avec *does not equal*, elle correspond toujours, y compris pour `www.nicephos.art`, d'où une **boucle de redirection** et un site inaccessible. Si cela arrive : désactiver la règle (le site revient aussitôt), corriger l'aperçu comme ci-dessus, et tester en **302** avant de repasser en 301 (un navigateur garde un 301 en mémoire).
+- **Certificat :** le certificat gratuit de Cloudflare (*Universal SSL*) couvre `nicephos.art` et `*.nicephos.art`, soit **un seul niveau** de sous-domaine. `a.b.nicephos.art` provoquerait une erreur de certificat avant toute redirection : ne créez pas d'adresse à deux niveaux.
+
+**Vérifier :** `curl -sI "https://nicephos.art/serie/rue?x=1"` doit répondre `301` avec `location: https://www.nicephos.art/serie/rue?x=1`, et `curl -sI https://www.nicephos.art/` doit répondre `200`.
 
 ## Sauvegardes
 
@@ -98,12 +119,27 @@ docker compose up -d                                                 # les varia
 
 Les preuves d'antériorité restent valides : elles portent sur les originaux, restaurés à l'identique.
 
+## Image Docker
+
+Le workflow [`.github/workflows/image.yml`](https://github.com/Volfieldd/deux-regards/blob/main/.github/workflows/image.yml) construit l'image (`linux/amd64`) à chaque push sur `main`, ou à la demande (*Run workflow*), et la publie sur `ghcr.io/volfieldd/deux-regards` avec deux étiquettes :
+
+| Étiquette | Usage |
+|---|---|
+| `latest` | dernière version de `main` |
+| `sha-xxxxxxx` | version d'un commit précis (7 premiers caractères) : pour revenir en arrière ou figer une version |
+
+L'image ([`Dockerfile`](https://github.com/Volfieldd/deux-regards/blob/main/Dockerfile)) part de `node:22-bookworm-slim`, tourne sous l'utilisateur `node`, sans compilateur, et contient seulement le code, les gabarits, les fichiers publics, `assets/`, `seed/` et `docs/aide/`. Elle fixe `NODE_ENV=production`, `HOST=0.0.0.0`, `PORT=3000`, `STORAGE_DIR=/data`, `DATABASE_PATH=/data/site.db` et `REQUIRE_PERSISTENT_STORAGE=1`, et vérifie sa santé sur `/healthz`. Elle n'a pas d'instruction `VOLUME` : sans montage de `/data`, le serveur refuse de démarrer.
+
 ## Mettre à jour
+
+Pile générique (image construite sur place) :
 
 ```bash
 git pull
 docker compose up -d --build        # migrations appliquées au démarrage
 ```
+
+Pile Unraid (image publiée) : **Compose Pull** puis **Compose Up**. Pour revenir à une version précise, mettez `IMAGE=ghcr.io/volfieldd/deux-regards:sha-xxxxxxx` dans le `.env` de la pile. Attention : une migration déjà appliquée par une version plus récente n'est pas défaite ; en cas de doute, restaurez aussi la base d'avant la mise à jour.
 
 Pour plus de sûreté, faites d'abord une sauvegarde manuelle (voir plus haut).
 

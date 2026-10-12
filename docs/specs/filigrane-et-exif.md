@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Statut | Implémenté (branche `feat/filigrane-exif`) |
+| Statut | Implémenté, dans `main` |
 | Écran | Admin → **Filigrane & EXIF** (`/admin/images`), option par photo dans la fiche photo |
 | Code | `server/watermark.js`, `server/images.js`, `server/variants.js`, `server/routes/admin.js` |
-| Tests | `test/watermark.test.js`, `e2e/tests/parcours.spec.js` |
+| Tests | `test/watermark.test.js`, `test/revue.test.js`, `e2e/tests/parcours.spec.js` |
 
 ## 1. Objectif
 
@@ -23,11 +23,11 @@ Les **originaux ne sont jamais modifiés** : filigrane et métadonnées ne conce
 | Id | Exigence |
 |---|---|
 | F1 | Le filigrane est désactivé par défaut. Une case l'active pour tout le site. |
-| F2 | Deux types : **texte** ou **logo** (image PNG ou WebP, de préférence transparente). |
+| F2 | Quatre types : **texte**, **logo envoyé** (image PNG ou WebP, de préférence transparente, couleurs d'origine), **emblème du site** ou **logo complet du site** (dessins envoyés dans Apparence, utilisés comme masques et teintés comme le texte ; le nom du fichier entre dans l'empreinte). |
 | F3 | Le texte accepte des variables : `{auteur}` (nom de l'auteur de la photo), `{annee}` (année de prise de vue, à défaut année d'import), `{site}` (nom du site), `{titre}` (titre de la photo). 80 caractères au plus. Défaut : `© {auteur}`. |
-| F4 | Police au choix parmi celles du site : Jost, Cormorant Garamond italique (défaut), IBM Plex Mono. Teinte claire (défaut) ou sombre. |
-| F5 | Position : 9 emplacements (coins, bords, centre ; défaut en bas à droite) ou **mosaïque** (motif répété en diagonale à 30° sur toute l'image). |
-| F6 | Opacité de 5 à 100 % (défaut 60), largeur de 3 à 60 % de la largeur de l'image (défaut 22), marge de 0 à 20 % (défaut 3). Le filigrane n'est jamais plus grand que l'image. |
+| F4 | Police au choix parmi celles du site : Jost, Cormorant Garamond italique (défaut), IBM Plex Mono. Teinte claire (défaut), sombre ou **automatique** : par photo, luminosité moyenne de la zone du filigrane (le tiers concerné pour un bord ou un coin, toute l'image pour le centre, le plein cadre et la mosaïque) ; au-dessus de 150 sur 255, teinte sombre, sinon claire. |
+| F5 | Position : 9 emplacements (coins, bords, centre ; défaut en bas à droite), **mosaïque** (motif répété en diagonale à 30° sur toute l'image) ou **plein cadre** (centré, aussi grand que l'image moins les marges, proportions gardées). |
+| F6 | Opacité de 5 à 100 % (défaut 60), largeur de 3 à 100 % de la largeur de l'image (défaut 22), marge de 0 à 20 % (défaut 3). Le filigrane n'est jamais plus grand que l'image. |
 | F7 | Tailles concernées : toutes (défaut), 1280 px et plus (les vignettes de 640 px sont épargnées), ou 2000 px seulement. La plus grande variante produite est toujours marquée, même si l'original est plus petit que le seuil. |
 | F8 | Une photo peut être **exclue** du filigrane (« Jamais sur cette photo ») ; elle reçoit tout de même les métadonnées choisies. |
 | F9 | Logo : PNG ou WebP, 5 Mo et 4000 px de côté au plus, 8 px au moins, rapport largeur/hauteur de 10 au plus ; il est toujours redimensionné dans la boîte de l'image (pas d'image intermédiaire géante). Il est **réencodé en PNG** à l'envoi ; le fichier envoyé n'est jamais servi tel quel. Un seul logo à la fois ; l'ancien est supprimé au remplacement. Sans logo, un filigrane de type « Logo » n'est pas appliqué (et l'admin le signale). |
@@ -97,7 +97,7 @@ Migration `003_variants.sql` :
 | `photos.watermark` | `NULL` = réglage général, `0` = jamais de filigrane sur cette photo |
 | `photos.variant_key` | empreinte des variantes servies (`''` = brutes) |
 
-Réglages (table `settings`, JSON) : `watermark` (`enabled`, `kind`, `text`, `font`, `tone`, `position`, `opacity`, `size`, `margin`, `minWidth`, `image`) et `exif` (`mode`). Le logo est rangé dans `STORAGE_DIR/watermarks/<uuid>.png`.
+Réglages (table `settings`, JSON) : `watermark` (`enabled`, `kind` = `text` / `image` / `emblem` / `logotype`, `text`, `font`, `tone` = `light` / `dark` / `auto`, `position`, `opacity`, `size`, `margin`, `minWidth`, `image`) et `exif` (`mode`). Le logo est rangé dans `STORAGE_DIR/watermarks/<uuid>.png`.
 
 ### 3.5 Routes
 

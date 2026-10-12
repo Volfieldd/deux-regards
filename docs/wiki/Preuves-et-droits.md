@@ -15,7 +15,7 @@ La spécification complète est dans [`docs/specs/preuves-et-droits.md`](https:/
 3. L'autorité renvoie un **jeton signé** qui atteste : « cette empreinte existait le 10/10/2026 à 11:10:55 UTC ».
 4. Le site contrôle le jeton, puis le conserve.
 
-Si l'autorité ne répond pas, le site réessaie tout seul (dans quelques minutes, puis toutes les heures).
+Si l'autorité ne répond pas, le site réessaie tout seul : après 2 minutes, puis en doublant le délai à chaque échec (jusqu'à une fois par jour), avec un passage de reprise toutes les heures.
 
 ## Consulter la preuve d'une photo
 
@@ -80,10 +80,13 @@ Ces champs sont lus par Google Images, qui affiche alors un badge « Licence » 
 
 **Réglages → Droits d'utilisation**
 
-- **Texte :** vide, le texte par défaut s'affiche (droit d'auteur, auteurs nommés, reproduction interdite sans autorisation écrite, articles du Code de la propriété intellectuelle). Sinon, écrivez le vôtre, en séparant les paragraphes par une ligne vide.
-- **Contact :** une adresse e-mail ou un lien `https://`, affiché comme lien.
+Un champ par langue : **français** (`/droits`), **anglais** (`/droits/en`) et **allemand** (`/droits/de`).
 
-La page est publique (`/droits`) et liée en pied de page de tout le site. Elle existe aussi en anglais (`/droits/en`) et en allemand (`/droits/de`), avec un sélecteur de langue et des liens `hreflang` ; textes dans `server/rights.js`, réglables (`rights_text_en`, `rights_text_de`). Les métadonnées IPTC pointent toujours vers `/droits`.
+- **Texte :** chaque champ affiche le texte que lisent les visiteurs, avec une pastille « Texte par défaut » ou « Texte personnalisé ». Le texte par défaut (droit d'auteur, auteurs nommés, reproduction interdite sans autorisation écrite, articles L.122-4 et L.335-2 du Code de la propriété intellectuelle) suit les noms des auteurs. Modifiez-le pour écrire le vôtre, en séparant les paragraphes par une ligne vide. **Rétablir le texte par défaut** (avec JavaScript) le remet ; un texte enregistré identique au texte par défaut reste « par défaut ».
+- **Traductions :** si le français est personnalisé alors qu'une traduction est restée par défaut, l'admin le signale sous cette traduction : adaptez-la aussi.
+- **Contact :** une adresse e-mail ou un lien `https://`, affiché comme lien sur les trois pages.
+
+La page est publique et liée en pied de page de tout le site. Chaque version déclare sa langue, propose un sélecteur de langue et des liens `hreflang` vers les deux autres ; les trois sont dans `sitemap.xml`. Textes par défaut dans `server/rights.js` ; réglages `rights_text`, `rights_text_en`, `rights_text_de` et `rights_contact`. La page rappelle aussi la mesure d'audience anonyme. Les métadonnées IPTC pointent toujours vers `/droits`.
 
 ## Questions fréquentes
 

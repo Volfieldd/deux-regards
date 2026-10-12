@@ -1,7 +1,10 @@
 # Questions fréquentes
 
 **J'ai importé une photo mais elle n'est pas sur le site.**
-Elle est en **brouillon** : publiez-la depuis la liste ou sa fiche.
+Elle est en **brouillon** : publiez-la depuis la photothèque ou sa fiche.
+
+**J'ai publié une photo, mais elle n'est pas partie sur Instagram.**
+Par défaut, rien n'entre seul dans la file Instagram. Ouvrez la fiche de la photo et cliquez sur **Ajouter à la file Instagram**, ou cochez sa série dans **Instagram → Réglages → Mise en file automatique**. Voir [Instagram](instagram#au-quotidien).
 
 **Je ne vois pas le nouveau filigrane.**
 Attendez la fin du bandeau « Mise à jour des images », puis rechargez la page du site. Les nouvelles images ont une nouvelle adresse : votre navigateur ne peut pas garder l'ancienne.
@@ -13,10 +16,13 @@ Comptez quelques secondes par photo. Vous pouvez continuer à travailler pendant
 Son original est peut-être illisible. Supprimez-la, puis importez-la de nouveau.
 
 **Je ne peux pas glisser les photos pour les réordonner.**
-Un filtre ou une recherche est actif : cliquez sur **Effacer**.
+Un filtre, une recherche ou une pastille autre que **Tout** est actif : cliquez sur **Effacer**. Sur téléphone, le glisser n'est pas pratique : passez en **Liste** et utilisez le menu **⋯** (**Monter d’une place**, **Descendre d’une place**).
 
-**Je ne peux pas supprimer une série (ou un auteur).**
-Elle contient encore des photos. Changez leur série (ou leur auteur) dans leurs fiches.
+**Je ne peux pas supprimer un auteur.**
+Il a encore des photos. Changez leur auteur dans leurs fiches.
+
+**Je ne peux pas supprimer une série.**
+Une série qui contient des photos peut être supprimée : la fenêtre propose de déplacer ses photos dans une autre série. Seule la dernière série restante ne peut pas l'être : créez-en d'abord une autre. Voir [Séries](series).
 
 **« Formulaire expiré ».**
 Votre session a changé depuis l'ouverture de la page. Rechargez-la et recommencez.

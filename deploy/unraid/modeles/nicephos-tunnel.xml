@@ -8,7 +8,7 @@
   <Privileged>false</Privileged>
   <Support>https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/</Support>
   <Project>https://github.com/cloudflare/cloudflared</Project>
-  <Overview>Tunnel Cloudflare de Nicephos : publie le site en HTTPS sans ouvrir de port. Dans Cloudflare, le Public Hostname nicephos.com pointe vers http://nicephos:3000.</Overview>
+  <Overview>Tunnel Cloudflare de Nicephos : publie le site en HTTPS sans ouvrir de port. Dans Cloudflare, le Public Hostname www.nicephos.art pointe vers http://nicephos:3000.</Overview>
   <Category>Network:Proxy</Category>
   <ExtraParams>--security-opt no-new-privileges:true</ExtraParams>
   <PostArgs>tunnel --no-autoupdate run</PostArgs>

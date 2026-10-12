@@ -136,7 +136,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
 
   app.addHook('onSend', async (request, reply) => {
     reply.headers(headers);
-    // Sans includeSubDomains : le domaine définitif n'est pas encore choisi, ses sous-domaines pas connus.
+    // Sans includeSubDomains : à ajouter quand tous les sous-domaines de nicephos.art seront servis en HTTPS (PLAN.md, feuille de route).
     // COOP n'a d'effet qu'en HTTPS : en http, le navigateur l'ignore avec un avertissement.
     if (config.secureCookies) reply.header('strict-transport-security', 'max-age=31536000').header('cross-origin-opener-policy', 'same-origin');
   });

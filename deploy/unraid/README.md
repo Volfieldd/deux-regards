@@ -10,7 +10,7 @@ Ce dossier contient tout le nécessaire :
 | `exporter-donnees.sh` | exporte les données d'une installation existante (serveur de test) pour les reprendre sur Unraid |
 
 ```
-Internet ─HTTPS─► Cloudflare (nicephos.com ; nicephos.art redirigé) ─tunnel─► nicephos-tunnel ─► nicephos:3000
+Internet ─HTTPS─► Cloudflare (www.nicephos.art ; autres adresses redirigées) ─tunnel─► nicephos-tunnel ─► nicephos:3000
                                                                                         │
                                        /mnt/cache/appdata/nicephos/data ◄── /data ──────┘
                  nicephos-sauvegarde (chaque jour) ──► /mnt/user/backups/nicephos
@@ -32,7 +32,7 @@ Aucun port n'est ouvert sur votre box : le tunnel sort vers Cloudflare, qui four
 
 ## 1. Image Docker
 
-L'image est construite par GitHub à chaque mise à jour de `main` (`.github/workflows/image.yml`) et publiée sur `ghcr.io/volfieldd/deux-regards`. Elle ne contient **aucune donnée** : ni photos, ni base, ni logo.
+L'image est construite par GitHub à chaque mise à jour de `main` (`.github/workflows/image.yml`) et publiée sur `ghcr.io/volfieldd/deux-regards`, avec deux étiquettes : `latest` (dernière version) et `sha-xxxxxxx` (version d'un commit, pour revenir en arrière). Elle ne contient **aucune donnée** : ni photos, ni base, ni logo.
 
 **Une seule fois**, après la première publication : sur GitHub, **Profil → Packages → deux-regards → Package settings → Change visibility → Public**. Sinon, Unraid ne pourra pas la télécharger sans identifiants. Si vous préférez la garder privée : dans le terminal Unraid, `docker login ghcr.io -u Volfieldd`, avec comme mot de passe un jeton GitHub qui a le droit `read:packages`.
 
@@ -69,8 +69,8 @@ L'admin n'a pas de mot de passe à elle : on s'y connecte avec un compte **Zitad
 3. **Applications → New**, dans le projet :
    - nom : « Site Nicephos » ; type : **Web** ;
    - méthode d'authentification : **CODE** (avec secret client) ;
-   - *Redirect URIs* : `https://nicephos.com/auth/callback` ;
-   - *Post Logout URIs* : `https://nicephos.com/` ;
+   - *Redirect URIs* : `https://www.nicephos.art/auth/callback` ;
+   - *Post Logout URIs* : `https://www.nicephos.art/` ;
    - à la création, Zitadel affiche le **Client ID** (**`OIDC_CLIENT_ID`**) et le **Client Secret** (**`OIDC_CLIENT_SECRET`**). **Copiez le secret tout de suite** : il n'est plus montré ensuite. En cas d'oubli, vous pouvez en générer un nouveau.
 
 ### 3.3 Comptes de Sébastien et Julien
@@ -91,22 +91,31 @@ OIDC_ORG_ID=…
 OIDC_ADMIN_ROLE=admin
 ```
 
-**Vérifier :** ouvrez `https://nicephos.com/admin`. Vous êtes renvoyé vers Zitadel, vous vous connectez, puis vous arrivez sur le tableau de bord. Un compte sans le rôle voit « Accès refusé », et aucune session n'est créée. En cas d'erreur, consultez les journaux du conteneur `nicephos` : le message indique l'étape en cause.
+**Vérifier :** ouvrez `https://www.nicephos.art/admin`. Vous êtes renvoyé vers Zitadel, vous vous connectez, puis vous arrivez sur le tableau de bord. Un compte sans le rôle voit « Accès refusé », et aucune session n'est créée. En cas d'erreur, consultez les journaux du conteneur `nicephos` : le message indique l'étape en cause.
 
 **Lier chaque compte à son auteur** (pour que l'import propose le bon auteur) : le tableau de bord affiche l'identifiant `sub` du compte connecté. Copiez-le dans **Auteurs → fiche de l'auteur → Compte de connexion**.
 
 ## 4. Cloudflare : tunnel et domaines
 
-1. Ajoutez **nicephos.com** et **nicephos.art** à votre compte Cloudflare, puis changez les serveurs DNS chez le registraire, comme Cloudflare l'indique.
-2. **Tunnel :** Zero Trust → **Networks → Tunnels → Create a tunnel** (type *Cloudflared*), nommé par exemple « nicephos ». Copiez le **jeton** affiché dans `TUNNEL_TOKEN`. Inutile d'installer cloudflared à la main : c'est le conteneur `nicephos-tunnel`.
-3. Dans le tunnel, ouvrez **Public Hostname → Add** :
-   - `nicephos.com`, service **HTTP**, URL `nicephos:3000` ;
-   - facultatif : `www.nicephos.com`, avec le même service.
-4. **nicephos.art → nicephos.com :** dans la zone nicephos.art :
-   - **DNS :** enregistrement `A` `@` → `192.0.2.1`, **proxifié** (nuage orange). Faites de même pour `www` si vous le voulez. L'adresse n'est jamais jointe, la redirection intervient avant.
-   - **Rules → Redirect Rules → Create** : *Hostname* `nicephos.art` ou `www.nicephos.art`, puis *Dynamic* `concat("https://nicephos.com", http.request.uri.path)`, code **301**, avec *Preserve query string*.
+Le site n'a qu'une adresse : **`https://www.nicephos.art`** (`PUBLIC_URL`). Toutes les autres (`nicephos.art` sans `www`, autres sous-domaines, `http://`) y sont redirigées par Cloudflare. Une seule adresse garde cohérents la connexion à l'admin, les liens de partage, Instagram et les mentions de droits des images.
 
-Un seul domaine principal (`PUBLIC_URL`), c'est ce qui garde la connexion à l'admin, les liens de partage et les mentions de droits cohérents.
+1. Ajoutez **nicephos.art** à votre compte Cloudflare, puis changez les serveurs DNS chez le registraire, comme Cloudflare l'indique.
+2. **Tunnel :** Zero Trust → **Networks → Tunnels → Create a tunnel** (type *Cloudflared*), nommé par exemple « nicephos ». Copiez le **jeton** affiché dans `TUNNEL_TOKEN`. Inutile d'installer cloudflared à la main : c'est le conteneur `nicephos-tunnel`.
+3. Dans le tunnel, **Public Hostname → Add** : `www.nicephos.art`, service **HTTP**, URL `nicephos:3000`. Cloudflare crée l'enregistrement DNS `www`.
+4. **DNS des autres adresses** (zone nicephos.art) : enregistrement `A` `@` → `192.0.2.1`, et `A` `*` → `192.0.2.1` pour les autres sous-domaines, tous deux **proxifiés** (nuage orange). L'adresse n'est jamais jointe : la redirection intervient avant.
+5. **Redirection :** **Rules → Redirect Rules → Create rule** :
+   - *If incoming requests match…* : **Custom filter expression**, `(http.host ne "www.nicephos.art")` ;
+   - *Then* : type **Dynamic**, `concat("https://www.nicephos.art", http.request.uri.path)` ;
+   - code **301**, **Preserve query string** coché.
+6. **SSL/TLS → Edge Certificates → Always Use HTTPS** : activé (pour `http://www.nicephos.art`).
+
+**Pièges :**
+
+- Le champ *Value* n'attend qu'un nom de domaine (`www.nicephos.art`), avec *Field* **Hostname** et *Operator* **does not equal** : l'aperçu doit afficher exactement `(http.host ne "www.nicephos.art")`. Une expression collée dans *Value*, ou *Field* laissé sur **URI Full**, donne soit aucune redirection, soit une **boucle** sur `www.nicephos.art` (site inaccessible) : désactivez alors la règle, corrigez-la, et testez en 302 avant de repasser en 301. Détails : [Déploiement](../../docs/wiki/Déploiement.md).
+- Le certificat gratuit (*Universal SSL*) couvre `nicephos.art` et `*.nicephos.art`, soit **un seul niveau** de sous-domaine : `a.b.nicephos.art` donne une erreur de certificat avant toute redirection.
+- Un autre domaine (par exemple `nicephos.com`) se redirige de la même façon : zone ajoutée à Cloudflare, enregistrements `@` et `*` proxifiés, même règle dans cette zone.
+
+**Vérifier :** `curl -sI "https://nicephos.art/serie/rue?x=1"` répond `301` vers `https://www.nicephos.art/serie/rue?x=1`.
 
 ## 5. Lancer la pile
 
@@ -114,7 +123,7 @@ Un seul domaine principal (`PUBLIC_URL`), c'est ce qui garde la connexion à l'a
 
 1. Docker → en bas, **Add New Stack**, nommée `nicephos`.
 2. **Edit Stack → Compose File :** collez le contenu de `compose.yaml`.
-3. **Edit Stack → ENV File :** collez `env.example`, puis remplissez `COOKIE_SECRET` (`openssl rand -base64 32` dans le terminal), la partie Zitadel et `TUNNEL_TOKEN`.
+3. **Edit Stack → ENV File :** collez `env.example`, puis remplissez `PUBLIC_URL=https://www.nicephos.art`, `COOKIE_SECRET` (`openssl rand -base64 32` dans le terminal), la partie Zitadel et `TUNNEL_TOKEN`.
 4. **Compose Up.** Les trois conteneurs apparaissent dans l'onglet Docker : `nicephos`, `nicephos-sauvegarde` et `nicephos-tunnel`.
 
 Au premier lancement sans données reprises, le site part d'une base vide : pas de photos, pas d'auteurs. Créez d'abord les auteurs dans l'admin.
@@ -147,12 +156,12 @@ L'archive contient :
 - la base, dans un instantané cohérent pris pendant que le site tourne ;
 - les originaux, les preuves d'antériorité, les logos et la marque.
 
-Les images servies ne sont pas dans l'archive : elles sont recalculées au démarrage, ce qui prend quelques minutes, et le site reste en ligne pendant ce temps. Comme le domaine change, les mentions de droits inscrites dans les images pointent désormais vers nicephos.com.
+Les images servies ne sont pas dans l'archive : elles sont recalculées au démarrage, ce qui prend quelques minutes, et le site reste en ligne pendant ce temps. Si l'adresse publique change, les mentions de droits inscrites dans les images suivent `PUBLIC_URL` (ici `https://www.nicephos.art/droits`).
 
 ## 7. Premier accès
 
 - **Contrôle local :** `http://<ip-unraid>:3080/`. Le site s'affiche ; l'admin, elle, ne fonctionne que par le domaine en HTTPS.
-- **En ligne :** `https://nicephos.com/` et `https://nicephos.com/admin`.
+- **En ligne :** `https://www.nicephos.art/` et `https://www.nicephos.art/admin`.
 - **Santé :** l'onglet Docker affiche `healthy` pour `nicephos`.
 
 ### Sauvegardes
@@ -163,15 +172,15 @@ Les images servies ne sont pas dans l'archive : elles sont recalculées au déma
 - `files/` : originaux, logos et marque. Les originaux y sont ajoutés et jamais effacés ;
 - `last.json` : compte rendu de la dernière sauvegarde.
 
-**Restaurer :** arrêtez la pile. Copiez `db/site-<date>.db` en `data/site.db`, recopiez `files/*` dans `data/`, puis `chown -R 99:100 data` et relancez la pile.
+**Restaurer :** arrêtez la pile et gardez une copie de `data/`. Copiez `db/site-<date>.db` en `data/site.db` et supprimez `data/site.db-wal` et `data/site.db-shm` s'ils existent ; recopiez `files/*` dans `data/`, puis `chown -R 99:100 data` et relancez la pile. Les images servies se recalculent au démarrage.
 
 ### Instagram (facultatif)
 
-Pour publier automatiquement sur Instagram : compte professionnel, application Meta, puis `INSTAGRAM_APP_ID` et `INSTAGRAM_APP_SECRET` dans le `.env` de la pile. Le pas à pas complet est dans l’aide de l’admin (**Aide → Instagram**) et dans le wiki ([Instagram](https://github.com/Volfieldd/deux-regards/wiki/Instagram)). L’adresse de retour à déclarer chez Meta est `https://nicephos.com/admin/instagram/callback`.
+Pour publier automatiquement sur Instagram : compte professionnel, application Meta, puis `INSTAGRAM_APP_ID` et `INSTAGRAM_APP_SECRET` dans le `.env` de la pile. Le pas à pas complet est dans l’aide de l’admin (**Aide → Instagram**) et dans le wiki ([Instagram](https://github.com/Volfieldd/deux-regards/wiki/Instagram)). L’adresse de retour à déclarer chez Meta est `https://www.nicephos.art/admin/instagram/callback`. Sans `INSTAGRAM_TOKEN_KEY`, le jeton est chiffré avec `COOKIE_SECRET` : changer ce secret impose de reconnecter le compte.
 
 ### Mettre à jour
 
-Dans Compose Manager : **Update Stack** (ou **Compose Pull**, puis **Compose Up**). Les données ne bougent pas : elles sont dans `data/`, jamais dans l'image. Une mise à jour qui modifie la base l'applique toute seule au démarrage. Prenez quand même l'habitude de vérifier la date de `last.json` avant.
+Dans Compose Manager : **Update Stack** (ou **Compose Pull**, puis **Compose Up**). Pour revenir à une version précise : `IMAGE=ghcr.io/volfieldd/deux-regards:sha-xxxxxxx` dans le `.env` de la pile (une migration de base déjà appliquée n'est pas défaite : restaurez alors aussi la base). Les données ne bougent pas : elles sont dans `data/`, jamais dans l'image. Une mise à jour qui modifie la base l'applique toute seule au démarrage. Prenez quand même l'habitude de vérifier la date de `last.json` avant.
 
 ### Ce qui protège les données
 
@@ -179,3 +188,4 @@ Dans Compose Manager : **Update Stack** (ou **Compose Pull**, puis **Compose Up*
 - **Dossier absent :** Compose refuse de démarrer au lieu d'en créer un vide.
 - **Conteneurs :** système de fichiers en lecture seule, sans privilège, utilisateur 99:100.
 - **Connexion de test :** jamais en ligne ; le serveur refuse `LOCAL_AUTH_TOKEN` en production.
+- **Adresse des visiteurs :** réseau Docker dédié ; le site ne croit `X-Forwarded-For` que venant du tunnel (`TRUST_PROXY` = `TUNNEL_IP`), pas d'un poste du réseau local.

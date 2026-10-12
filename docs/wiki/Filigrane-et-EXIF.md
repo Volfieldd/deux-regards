@@ -11,8 +11,8 @@ La spécification complète est dans [`docs/specs/filigrane-et-exif.md`](https:/
 ## Mettre un filigrane texte
 
 1. Cocher **Ajouter un filigrane aux images du site**.
-2. Choisir **Type : Texte**.
-3. Saisir le **texte**, avec si besoin ces variables :
+2. Choisir **Type : Texte** (les autres types : emblème ou logo complet du site, logo envoyé, voir plus bas).
+3. Saisir le **texte** (80 caractères au plus), avec si besoin ces variables :
 
    | Variable | Remplacée par |
    |---|---|
@@ -22,7 +22,7 @@ La spécification complète est dans [`docs/specs/filigrane-et-exif.md`](https:/
    | `{titre}` | le titre de la photo |
 
    Par exemple, `© {auteur} {annee}` donne « © Julien 2024 ».
-4. Choisir la **police** (celles du site), la **teinte** (claire sur les photos sombres, sombre sur les photos claires) et la **position**.
+4. Choisir la **police** (Jost, Cormorant Garamond italique ou IBM Plex Mono), la **teinte** (claire, sombre, ou automatique : claire sur les photos sombres, sombre sur les photos claires) et la **position** (neuf emplacements, mosaïque ou plein cadre).
 5. Régler l'**opacité**, la **largeur** (en % de la largeur de l'image) et la **marge**.
 6. Choisir **Appliquer aux tailles** :
    - toutes ;
