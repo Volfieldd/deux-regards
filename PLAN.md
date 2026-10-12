@@ -120,7 +120,7 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Séries : création, renommage, adresse, ordre, suppression bloquée tant qu'elles contiennent des photos.
 - Auteurs : nom, adresse, bio, lien avec le compte OIDC (`sub` affiché sur le tableau de bord) ; l'auteur lié est proposé par défaut à l'import.
 - Réglages : nom du site (repli sur `SITE_NAME`), accroche, introduction, à propos, photos de l'ouverture (publiées seulement).
-- Import : 60 Mo et 120 mégapixels au plus par fichier, 50 fichiers par envoi, format vérifié par décodage (JPEG, PNG, WebP, TIFF, HEIF), jeton CSRF exigé avant le premier fichier, orientation EXIF appliquée aux dimensions.
+- Import : 60 Mo (90 Mo depuis la phase 11) et 120 mégapixels au plus par fichier, 50 fichiers par envoi, format vérifié par décodage (JPEG, PNG, WebP, TIFF, HEIF), jeton CSRF exigé avant le premier fichier, orientation EXIF appliquée aux dimensions.
 - Variantes : `/media/` ne sert que les photos publiées ; aperçu des brouillons sous `/admin/media/` (session admin).
 - Connexion locale de test (`LOCAL_AUTH_TOKEN`), interdite en ligne.
 - Tests navigateur (`e2e/`, conteneur Playwright) : rendu bureau et mobile, filtres, visionneuse, sans JS, admin et parcours complet d'une photo.
@@ -164,6 +164,11 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Vignettes de l'ouverture en cadre 3:2, photo entière ; nom long dans la barre latérale (#23).
 - Droits d'utilisation en français, anglais et allemand (`/droits`, `/droits/en`, `/droits/de`), textes par défaut affichés et rétablissables dans Réglages (#24).
 - Site public : retour à la série à l'endroit quitté depuis une photo (#25).
+
+### 11. Vitesse de l'import (fait)
+- Mesure : une photo de 24 Mpx mettait ~6,5 s à calculer (original décodé six fois, sharp sur un seul thread sous glibc, une photo à la fois).
+- Décodage unique de l'original puis variantes dérivées et encodées en parallèle ; `IMAGE_THREADS` (4) et jemalloc dans l'image ; `IMPORT_CONCURRENCY` (2 photos à la fois) : 1,5 s par photo, ×7 sur un lot.
+- Envoi : 3 photos à la fois au plus et 100 Mo en cours d'envoi au plus ; 90 Mo par fichier (une requête par photo, sous le plafond de 100 Mo par requête de Cloudflare).
 
 ## Côté Zitadel (à faire une fois)
 

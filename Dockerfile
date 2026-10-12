@@ -9,13 +9,17 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
 # 2. Image finale, sans compilateur.
 FROM node:22-bookworm-slim
+# jemalloc : recommandé par sharp quand libvips utilise plusieurs threads sous glibc (IMAGE_THREADS),
+# sinon la mémoire du processus se fragmente et grossit au fil des imports.
+RUN apt-get update && apt-get install -y --no-install-recommends libjemalloc2 && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=3000 \
     STORAGE_DIR=/data \
     DATABASE_PATH=/data/site.db \
-    REQUIRE_PERSISTENT_STORAGE=1
+    REQUIRE_PERSISTENT_STORAGE=1 \
+    LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules

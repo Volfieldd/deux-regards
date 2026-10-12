@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
 import exifReader from 'exif-reader';
@@ -11,6 +12,10 @@ export const FORMATS = ['avif', 'webp'];
 export const MAX_PIXELS = 120_000_000;
 // Effort d'encodage AVIF (0 rapide … 9 compact) ; les tests le mettent à 0.
 const AVIF_EFFORT = Math.min(Math.max(Number(process.env.AVIF_EFFORT ?? 4) || 0, 0), 9);
+// Threads de libvips par opération. Sous Linux glibc (image Docker Debian), sharp n'en prend qu'un par
+// défaut : une photo de 24 Mpx mettait ~6 s. IMAGE_THREADS (1–16) ; défaut : 4, ou moins si la machine a moins de cœurs.
+export const IMAGE_THREADS = Math.min(Math.max(Math.round(Number(process.env.IMAGE_THREADS) || Math.min(4, os.availableParallelism())), 1), 16);
+sharp.concurrency(IMAGE_THREADS);
 
 // Largeurs réellement produites pour une image : jamais d'agrandissement.
 export function widthsFor(originalWidth) {
@@ -90,46 +95,65 @@ function applyMeta(pipeline, meta, originalExif) {
 // Génère les variantes servies d'un original, avec le filigrane `mark` et les métadonnées `meta`
 // déjà résolus pour cette photo (voir variants.js). rotate() applique l'orientation EXIF.
 // onStep(fait, total) : appelé après chaque fichier (suivi du traitement à l'import).
+//
+// Performance : l'original (souvent 24 Mpx) n'est décodé qu'une fois, en une base orientée à la plus grande
+// largeur servie, gardée en mémoire ; chaque taille en dérive et les fichiers s'encodent en parallèle.
+// Exception : le mode « tout l'EXIF de l'original » relit l'original pour chaque fichier (keepExif()
+// recopie l'EXIF de l'entrée, absent d'une base en mémoire).
 export async function renderVariants(storageDir, file, { key = '', mark: wanted = null, meta = null, force = false, onStep = null } = {}) {
   const src = path.join(storageDir, 'originals', file);
-  const mark = await resolveTone(src, wanted, { limitInputPixels: MAX_PIXELS });     // teinte « auto » : selon cette photo
   const outDir = path.join(storageDir, 'variants');
   fs.mkdirSync(outDir, { recursive: true });
   // metadata() ignore rotate() : les dimensions affichées viennent de autoOrient.
   const info = await sharp(src, { limitInputPixels: MAX_PIXELS }).metadata();
   const width = info.autoOrient?.width ?? info.width;
   const height = info.autoOrient?.height ?? info.height;
-  const made = [];
-  const total = widthsFor(width).length * FORMATS.length;
+  const widths = widthsFor(width);
+  const total = widths.length * FORMATS.length;
   let step = 0;
   const advance = (n = 1) => { step += n; onStep?.(step, total); };
-  for (const w of widthsFor(width)) {
-    const h = Math.max(1, Math.floor((height * w) / width) - 1); // marge d’un pixel sur l’arrondi de sharp
-    const todo = FORMATS.map(format => [format, path.join(outDir, variantName(file, w, format, key))])
-      .filter(([, out]) => force || !fs.existsSync(out));
-    advance(FORMATS.length - todo.length);
-    if (!todo.length) continue;
-    // Seuil de taille : la plus grande variante produite est toujours marquée (original plus petit que le seuil).
-    const marked = mark && (w >= (mark.minWidth || 0) || w === widthsFor(width).at(-1));
-    const overlay = marked && w >= 16 && h >= 16 ? await overlayFor(mark, w, h) : null;
-    for (const [format, out] of todo) {
-      // sharp applique composite() après le redimensionnement : filigrane posé à la taille finale,
-      // sans réencodage intermédiaire, et l'EXIF de l'original reste disponible.
-      let pipeline = sharp(src, { limitInputPixels: MAX_PIXELS }).rotate().resize({ width: w, withoutEnlargement: true });
-      if (overlay) pipeline = pipeline.composite(overlay);
-      pipeline = applyMeta(pipeline, meta, info.exif);
-      // Écriture atomique : un rendu interrompu ne laisse jamais un fichier tronqué sous le nom final.
-      const tmp = `${out}.${crypto.randomBytes(4).toString('hex')}.tmp`;
-      try {
-        await (format === 'avif' ? pipeline.avif({ quality: 55, effort: AVIF_EFFORT }) : pipeline.webp({ quality: 78 })).toFile(tmp);
-        fs.renameSync(tmp, out);
-      } finally {
-        fs.rmSync(tmp, { force: true });
-      }
-      made.push(out);
-      advance();
-    }
+  const jobs = widths.flatMap(w => FORMATS.map(format => ({ w, format, out: path.join(outDir, variantName(file, w, format, key)) })))
+    .filter(j => force || !fs.existsSync(j.out));
+  advance(total - jobs.length);
+  if (!jobs.length) return [];
+
+  const fromSource = meta?.mode === 'all';
+  let base = null;
+  if (!fromSource) {
+    const { data, info: b } = await sharp(src, { limitInputPixels: MAX_PIXELS }).rotate()
+      .resize({ width: widths.at(-1), withoutEnlargement: true }).raw().toBuffer({ resolveWithObject: true });
+    base = { data, raw: { raw: { width: b.width, height: b.height, channels: b.channels } } };
   }
+  const input = () => (base ? sharp(base.data, base.raw) : sharp(src, { limitInputPixels: MAX_PIXELS }).rotate());
+  // Teinte « auto » du filigrane : selon cette photo (lue sur la base quand elle existe).
+  const mark = await resolveTone(base ? base.data : src, wanted, base ? base.raw : { limitInputPixels: MAX_PIXELS });
+
+  // Filigrane : un calque par largeur, calculé une fois pour les deux formats.
+  const overlays = new Map();
+  for (const w of new Set(jobs.map(j => j.w))) {
+    const h = Math.max(1, Math.floor((height * w) / width) - 1); // marge d'un pixel sur l'arrondi de sharp
+    // Seuil de taille : la plus grande variante produite est toujours marquée (original plus petit que le seuil).
+    const marked = mark && (w >= (mark.minWidth || 0) || w === widths.at(-1));
+    overlays.set(w, marked && w >= 16 && h >= 16 ? await overlayFor(mark, w, h) : null);
+  }
+
+  const made = [];
+  await Promise.all(jobs.map(async ({ w, format, out }) => {
+    // sharp applique composite() après le redimensionnement : filigrane posé à la taille finale.
+    let pipeline = input().resize({ width: w, withoutEnlargement: true });
+    if (overlays.get(w)) pipeline = pipeline.composite(overlays.get(w));
+    pipeline = applyMeta(pipeline, meta, info.exif);
+    // Écriture atomique : un rendu interrompu ne laisse jamais un fichier tronqué sous le nom final.
+    const tmp = `${out}.${crypto.randomBytes(4).toString('hex')}.tmp`;
+    try {
+      await (format === 'avif' ? pipeline.avif({ quality: 55, effort: AVIF_EFFORT }) : pipeline.webp({ quality: 78 })).toFile(tmp);
+      fs.renameSync(tmp, out);
+    } finally {
+      fs.rmSync(tmp, { force: true });
+    }
+    made.push(out);
+    advance();
+  }));
   return made;
 }
 

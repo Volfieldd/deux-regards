@@ -15,16 +15,15 @@ Les pages utilisent `<picture>` avec `srcset` et `sizes` : le navigateur choisit
 ## Traitement d'une photo
 
 1. **Import :**
-   - vérification du poids (60 Mo), du nombre de pixels (120 Mpx) et du format réel, par décodage ;
+   - vérification du poids (90 Mo), du nombre de pixels (120 Mpx) et du format réel, par décodage ;
    - empreinte SHA-256 de l'original, puis horodatage RFC 3161 en arrière-plan (voir [Preuves d'antériorité et droits](Preuves-et-droits)) ;
    - l'original est rangé sous un nom aléatoire ;
    - la photo est créée en brouillon.
-2. **Rendu de chaque variante**, en un seul pipeline `sharp` :
-   - application de l'orientation EXIF aux pixels ;
-   - redimensionnement ;
-   - filigrane éventuel ;
-   - métadonnées selon le réglage (aucune par défaut ; mentions IPTC en XMP dans les modes signés) ;
-   - encodage AVIF (qualité 55) ou WebP (qualité 78).
+2. **Rendu des variantes :**
+   - l'original n'est décodé **qu'une fois** : orientation EXIF appliquée, réduction à la plus grande largeur servie (2000 px au plus), base gardée en mémoire ;
+   - chaque taille en dérive : redimensionnement, filigrane éventuel, métadonnées selon le réglage (aucune par défaut ; mentions IPTC en XMP dans les modes signés), encodage AVIF (qualité 55) ou WebP (qualité 78) ;
+   - les six fichiers s'encodent en parallèle ; exception : le mode « tout l'EXIF de l'original » relit l'original pour chaque fichier (l'EXIF n'est pas dans la base en mémoire).
+   - **Concurrence :** `IMPORT_CONCURRENCY` photos à la fois (2), `IMAGE_THREADS` threads de libvips (4) ; voir [Configuration](Configuration). Mesure sur une photo de 24 Mpx (16 cœurs) : 6,5 s avant, 1,5 s après ; 4 photos : ~26 s avant, 3,7 s après.
 3. **Publication :** les variantes deviennent accessibles sous `/media/`.
 
 ## Noms et cache

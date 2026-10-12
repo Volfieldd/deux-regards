@@ -155,7 +155,10 @@ const activity = (() => {
   const steps = $$('.steps li', section);
   const MAX_BYTES = Number(section.dataset.maxBytes);
   const MAX_PIXELS = 120e6;
-  const PARALLEL = 2;
+  // Envois simultanés : 3 au plus, et 100 Mo au plus en cours d'envoi (au-delà, la photo suivante attend).
+  // Chaque photo est une requête distincte : la limite de Cloudflare (100 Mo par requête) vaut par fichier.
+  const PARALLEL = 3;
+  const INFLIGHT_BYTES = 100 * 1000 * 1000;
   input.required = false;
   if ($('[data-contact]')) section.classList.add('with-grid');
 
@@ -375,9 +378,12 @@ const activity = (() => {
   addEventListener('beforeunload', e => { if (sending) { e.preventDefault(); e.returnValue = ''; } });
 
   function pump() {
-    while (live().filter(i => i.state === 'uploading').length < PARALLEL) {
+    for (;;) {
+      const sendingNow = live().filter(i => i.state === 'uploading');
       const i = live().find(x => x.state === 'queued');
-      if (!i) break;
+      if (!i || sendingNow.length >= PARALLEL) break;
+      const inflight = sendingNow.reduce((sum, x) => sum + x.file.size, 0);
+      if (sendingNow.length && inflight + i.file.size > INFLIGHT_BYTES) break;   // attend qu'un envoi se termine
       upload(i);
     }
     render();

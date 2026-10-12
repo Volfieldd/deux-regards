@@ -54,7 +54,7 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
 
 ## Fichiers reçus
 
-- **Photos :** formats JPEG, PNG, WebP, TIFF et HEIF, vérifiés par décodage. Limites : 60 Mo, 120 mégapixels (aussi imposées au décodage, contre les bombes de décompression) et 50 fichiers par envoi.
+- **Photos :** formats JPEG, PNG, WebP, TIFF et HEIF, vérifiés par décodage. Limites : 90 Mo (sous le plafond de 100 Mo par requête de Cloudflare), 120 mégapixels (aussi imposées au décodage, contre les bombes de décompression) et 50 fichiers par envoi.
 - **Logo du filigrane :** PNG ou WebP seulement (le SVG est refusé), 5 Mo, 4000 px de côté. Il est réencodé avant usage.
 - **Fichiers de marque (Apparence) :** PNG, WebP ou JPEG (SVG refusé), 5 Mo, 6000 px de côté ; réencodés, sans métadonnées.
 - **Stockage :** les noms de fichiers sont toujours générés par le site (UUID) ; le nom envoyé ne sert qu'à proposer un titre.

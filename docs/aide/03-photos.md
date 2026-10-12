@@ -9,7 +9,7 @@ La **Photothèque** réunit l’import, la recherche et toutes les photos, dans 
 1. Cliquez sur **＋ Importer des photos** : le choix des fichiers s'ouvre aussitôt. Vous pouvez aussi **déposer des photos n'importe où sur la page**.
 2. Sélectionnez vos photos. **C'est tout : l'envoi commence tout seul.**
 
-- Les fichiers qui ne passeront pas sont écartés **avant tout envoi**, avec la raison : « ✕ Ce n'est pas une image », « ✕ Trop lourde (60 Mo max.) », « ✕ Trop grande (120 Mpx max.) ». **✕** les retire de la liste.
+- Les fichiers qui ne passeront pas sont écartés **avant tout envoi**, avec la raison : « ✕ Ce n'est pas une image », « ✕ Trop lourde (90 Mo max.) », « ✕ Trop grande (120 Mpx max.) ». **✕** les retire de la liste.
 - **Auteur et série du lot :** en haut du panneau d'import (votre fiche est présélectionnée). Choisissez-les avant d'ajouter les photos si besoin ; sinon, changez-les photo par photo à l'étape 3.
 - Des photos ajoutées pendant l'envoi partent à leur tour.
 
@@ -27,7 +27,7 @@ Dans la photothèque, chaque photo envoyée **apparaît aussitôt dans la planch
 | | |
 |---|---|
 | Formats | JPEG, PNG, WebP, TIFF, HEIF |
-| Taille | 60 Mo et 120 mégapixels par fichier au plus |
+| Taille | 90 Mo et 120 mégapixels par fichier au plus |
 | Statut | **brouillon** : rien n'est visible sur le site avant publication |
 | Titre | **provisoire**, tiré du nom du fichier (`IMG_2041 quai-nord.jpg` → « IMG 2041 quai nord ») |
 | Date | **reprise de l'appareil photo** (date de prise de vue des métadonnées EXIF), quand elle existe |

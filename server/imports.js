@@ -1,15 +1,34 @@
 // Suivi du traitement des photos envoyées une à une (page d'import) : les variantes sont rendues
-// en arrière-plan, une photo après l'autre, et chaque étape est consultable (barre de progression).
+// en arrière-plan, IMPORT_CONCURRENCY photos à la fois (2 par défaut), et chaque étape est consultable
+// (barre de progression). Un verrou par photo (variants.js) empêche deux rendus de la même photo.
 // En mémoire seulement : après un redémarrage, le passage complet de démarrage rend ce qui manque.
 const KEEP_MS = 30 * 60 * 1000;      // les états terminés restent consultables 30 min
+export const IMPORT_CONCURRENCY = Math.min(Math.max(Math.round(Number(process.env.IMPORT_CONCURRENCY) || 2), 1), 8);
 
-export function createImportTracker({ render, onReady = () => {}, onFailed = () => {}, log }) {
+export function createImportTracker({ render, onReady = () => {}, onFailed = () => {}, log, concurrency = IMPORT_CONCURRENCY }) {
   const jobs = new Map();            // id → { name, state: waiting|processing|ready|error, done, total, error, at }
-  let queue = Promise.resolve();
+  const waiting = [];                // tâches en attente d'une place, dans l'ordre d'arrivée
+  const running = new Set();         // promesses des rendus en cours
+  let idleResolvers = [];
 
   const prune = () => {
     const old = Date.now() - KEEP_MS;
     for (const [id, j] of jobs) if ((j.state === 'ready' || j.state === 'error') && j.at < old) jobs.delete(id);
+  };
+  const settleIdle = () => {
+    if (running.size || waiting.length) return;
+    idleResolvers.forEach(r => r());
+    idleResolvers = [];
+  };
+  // Lance les tâches en attente tant qu'il reste des places.
+  const pump = () => {
+    while (running.size < concurrency && waiting.length) {
+      const { run, resolve } = waiting.shift();
+      // Une erreur dans un rappel ne doit jamais bloquer les imports suivants.
+      const p = run().catch(err => log?.error({ err }, 'suivi d’import'));
+      running.add(p);
+      p.then(() => { running.delete(p); resolve(); pump(); settleIdle(); });
+    }
   };
 
   return {
@@ -30,12 +49,13 @@ export function createImportTracker({ render, onReady = () => {}, onFailed = () 
           onFailed(id);
         }
       };
-      // Une erreur dans un rappel ne doit jamais bloquer les imports suivants.
-      return (queue = queue.then(run).catch(err => log?.error({ err, photo: id }, 'suivi d’import')));
+      const done = new Promise(resolve => waiting.push({ run, resolve }));
+      pump();
+      return done;
     },
     get: id => jobs.get(id) || null,
     // Photos en attente ou en cours de traitement.
     active: () => [...jobs.values()].filter(j => j.state === 'waiting' || j.state === 'processing').length,
-    idle: () => queue,
+    idle: () => (running.size || waiting.length ? new Promise(r => idleResolvers.push(r)) : Promise.resolve()),
   };
 }

@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
+import { MAX_FILE_BYTES } from '../server/media.js';
 import { setup } from './helpers.js';
 import { loadConfig } from '../server/config.js';
 import { safeNext } from '../server/auth.js';
@@ -242,7 +243,7 @@ test('import : un fichier trop lourd est refusé seul, le reste du lot passe', a
   const boundary = '----t';
   const part = (name, value, filename) => Buffer.concat([Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"${filename ? `; filename="${filename}"` : ''}\r\n\r\n`), Buffer.from(value), Buffer.from('\r\n')]);
   const payload = Buffer.concat([part('_csrf', c.csrf), part('author_id', '1'), part('category_id', '1'),
-    part('photos', png, 'ok.png'), part('photos', Buffer.alloc(61 * 1024 * 1024), 'enorme.jpg'), Buffer.from(`--${boundary}--\r\n`)]);
+    part('photos', png, 'ok.png'), part('photos', Buffer.alloc(MAX_FILE_BYTES + 1024 * 1024), 'enorme.jpg'), Buffer.from(`--${boundary}--\r\n`)]);
   const res = await c.as({ method: 'POST', url: '/admin/photos/import', payload, headers: { 'content-type': `multipart/form-data; boundary=${boundary}`, accept: 'application/json' } });
   assert.equal(res.statusCode, 200);
   const { imported, refused } = res.json();
