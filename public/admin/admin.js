@@ -875,6 +875,79 @@ const activity = (() => {
   refresh();
 })();
 
+// ----- villes proposées au fil de la frappe (fiche, photothèque) -----
+// Liste embarquée côté serveur (/admin/villes) ; ↑ ↓ pour choisir, Entrée pour valider, Échap pour fermer.
+// Choisir une ville remplit le champ et l'identifiant caché, puis émet « city-chosen » sur le conteneur [data-city].
+// Taper sans choisir efface l'identifiant : le serveur reconnaît alors la ville si le nom est exact.
+(function () {
+  let n = 0;
+  $$('[data-city]').forEach(box => {
+    const input = $('[data-city-input]', box);
+    const hidden = $('[data-city-id]', box);
+    if (!input || !hidden) return;
+    const list = document.createElement('ul');
+    list.className = 'city-list';
+    list.id = `villes-${++n}`;
+    list.setAttribute('role', 'listbox');
+    list.hidden = true;
+    input.after(list);
+    input.setAttribute('role', 'combobox');
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-controls', list.id);
+    input.setAttribute('aria-expanded', 'false');
+    let items = [], active = -1, timer = null, seq = 0;
+    const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); active = -1; };
+    const mark = i => {
+      active = i;
+      $$('li', list).forEach((li, k) => li.setAttribute('aria-selected', String(k === i)));
+      if (i >= 0) input.setAttribute('aria-activedescendant', `${list.id}-${i}`); else input.removeAttribute('aria-activedescendant');
+    };
+    const choose = i => {
+      const v = items[i];
+      if (!v) return;
+      input.value = v.label;
+      hidden.value = v.id;
+      close();
+      box.dispatchEvent(new CustomEvent('city-chosen', { detail: v }));
+    };
+    const draw = () => {
+      list.replaceChildren(...items.map((v, i) => {
+        const li = document.createElement('li');
+        li.id = `${list.id}-${i}`;
+        li.setAttribute('role', 'option');
+        li.textContent = v.label;
+        li.addEventListener('mousedown', e => { e.preventDefault(); choose(i); });
+        return li;
+      }));
+      list.hidden = !items.length;
+      input.setAttribute('aria-expanded', String(items.length > 0));
+      mark(-1);
+    };
+    input.addEventListener('input', () => {
+      hidden.value = '';
+      clearTimeout(timer);
+      const q = input.value.trim();
+      if (q.length < 2) { items = []; draw(); return; }
+      timer = setTimeout(async () => {
+        const mine = ++seq;
+        try {
+          const res = await fetch(`/admin/villes?q=${encodeURIComponent(q)}`, { headers: { accept: 'application/json' } });
+          const data = await res.json();
+          if (mine === seq) { items = data.villes || []; draw(); }
+        } catch { /* réseau : pas de proposition */ }
+      }, 150);
+    });
+    input.addEventListener('keydown', e => {
+      if (list.hidden) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); mark(Math.min(active + 1, items.length - 1)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); mark(Math.max(active - 1, 0)); }
+      else if (e.key === 'Enter' && active >= 0) { e.preventDefault(); choose(active); }
+      else if (e.key === 'Escape') { e.preventDefault(); close(); }
+    });
+    input.addEventListener('blur', () => setTimeout(close, 120));
+  });
+})();
+
 // ----- photothèque : planche contact, sélection, inspecteur, loupe, raccourcis -----
 (function () {
   const lib = $('[data-library]');
@@ -999,6 +1072,12 @@ const activity = (() => {
     $('[data-one-prov]', insp).hidden = !p.provisional;
     $('[data-one-n]', insp).textContent = `/photo/${p.slug}`;
     $('[data-one-link]', insp).href = `/admin/photos/${p.id}`;
+    const cityInput = $('[data-one-city]', insp);
+    if (cityInput && cityInput !== document.activeElement) { cityInput.value = p.city || ''; $('[data-city-id]', cityInput.closest('[data-city]')).value = p.city_id || ''; }
+    const onMap = $('[data-one-onmap]', insp);
+    if (onMap) { onMap.checked = Boolean(p.on_map); onMap.disabled = !p.city_id; }
+    const cityNote = $('[data-one-citynote]', insp);
+    if (cityNote) cityNote.hidden = !(p.city_source === 'gps' && p.city);
     $('[data-one-open]', insp).href = `/admin/photos/${p.id}`;
     $$('[data-one-series] .pill', insp).forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.category) === p.category_id)));
     $('[data-publish]', insp).textContent = p.status === 'published' ? 'Déjà publiée' : 'Publier';
@@ -1079,6 +1158,31 @@ const activity = (() => {
     saveOne('category_id', b.dataset.category, String(p.category_id));
   });
 
+  // Ville et carte : enregistrées aussitôt (ville choisie dans la liste, effacée, ou tapée telle quelle).
+  async function saveLocation(body, undoBody) {
+    const id = one.id;
+    try {
+      const r = await postJson(`/admin/photos/${id}/champs`, body);
+      Object.assign(data.get(id), r.photo);
+      if (one.id === id) showOne(id);
+      toast.show(`« ${data.get(id).title} » enregistrée`, undoBody ? { undo: async () => { const u = await postJson(`/admin/photos/${id}/champs`, undoBody); Object.assign(data.get(id), u.photo); if (one.id === id) showOne(id); toast.show('Modification annulée.'); } } : {});
+    } catch (err) {
+      toast.show(err.data?.errors ? Object.values(err.data.errors).join(' ') : err.message, { error: true });
+      if (one.id === id) showOne(id);
+    }
+  }
+  const cityBox = $('[data-one-city]', insp)?.closest('[data-city]');
+  if (cityBox) {
+    const before = () => { const p = data.get(one.id); return { city_id: p.city_id || '', city_label: p.city || '', on_map: p.on_map ? '1' : '0' }; };
+    cityBox.addEventListener('city-chosen', e => saveLocation({ city_id: e.detail.id, city_label: e.detail.label }, before()));
+    $('[data-one-city]', insp).addEventListener('change', e => {
+      const v = e.target.value.trim();
+      if (v === (data.get(one.id)?.city || '') || $('[data-city-id]', cityBox).value) return;   // inchangé, ou déjà choisi dans la liste
+      saveLocation({ city_label: v }, before());
+    });
+    $('[data-one-onmap]', insp).addEventListener('change', e => saveLocation({ on_map: e.target.checked ? '1' : '0' }, { on_map: e.target.checked ? '0' : '1' }));
+  }
+
   // Plusieurs photos : série, lieu et date appliqués aussitôt.
   async function applyMany(action, extra) {
     const ids = selIds();
@@ -1102,6 +1206,7 @@ const activity = (() => {
     applyMany('category', { category_id: b.dataset.category });
   });
   newName.addEventListener('change', () => { if (newName.value.trim()) applyMany('category', { category_id: 'new', new_category: newName.value }); });
+  $$('[data-many-map]', insp).forEach(b => b.addEventListener('click', () => applyMany(b.dataset.manyMap, {})));
   newName.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); newName.blur(); } });
   $$('[data-many-field]', insp).forEach(f => {
     f.addEventListener('change', async () => { if (!f.value.trim()) return; await applyMany('fields', { [f.dataset.manyField]: f.value }); f.value = ''; });

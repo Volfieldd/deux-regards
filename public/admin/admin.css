@@ -767,3 +767,9 @@ code.mono, .mono code { color: var(--ink2); }
 .world .carte circle { fill: var(--accent); fill-opacity: .5; stroke: var(--accent); stroke-width: 1; }
 .world .carte circle:hover { fill-opacity: .8; }
 @media (max-width: 900px) { .world { grid-template-columns: 1fr; } }
+
+/* Ville (carte du site) : propositions au fil de la frappe */
+[data-city] { position: relative; }
+.city-list { position: absolute; z-index: 30; left: 0; right: 0; margin: 4px 0 0; padding: 4px; list-style: none; background: var(--s1); border-radius: 10px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); max-height: 280px; overflow-y: auto; }
+.city-list li { padding: 10px 12px; border-radius: 7px; cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.city-list li:hover, .city-list li[aria-selected="true"] { background: var(--s2); color: var(--ink); }

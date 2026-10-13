@@ -50,7 +50,7 @@ Schéma dans `server/db/migrations/` (fichiers `NNN_*.sql` appliqués dans l'ord
 |---|---|
 | `authors` | nom, adresse (slug), bio, `oidc_sub` (lien avec le compte) |
 | `categories` | séries : nom, adresse, ordre |
-| `photos` | titre, adresse, série, auteur, lieu, date, légende, statut (brouillon / publiée), ordre, original, dimensions, nom du fichier d'origine, empreinte SHA-256, clé de variantes, exclusion du filigrane |
+| `photos` | titre, adresse, série, auteur, lieu, date, légende, statut (brouillon / publiée), ordre, original, dimensions, nom du fichier d'origine, empreinte SHA-256, clé de variantes, exclusion du filigrane, date de première publication, ville (nom, pays, centre ; origine GPS ou manuelle), présence sur la carte |
 | `settings` | réglages clé → JSON : textes, droits (FR, EN, DE), ouverture, thème, filigrane et EXIF, Instagram |
 | `sessions` | empreinte du jeton, `sub`, nom, rôles, CSRF, expirations |
 | `timestamps` | preuves d'antériorité RFC 3161 |
@@ -184,6 +184,11 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 15. Statistiques : carte des visiteurs par pays (fait)
 - Pays transmis par Cloudflare (`CF-IPCountry`, cru derrière le proxy de confiance seulement), compté par visiteur unique du jour (`stats_countries`, migration 011) ; aucune géolocalisation par le site, aucune IP conservée.
 - Mappemonde Natural Earth embarquée (`public/admin/carte-monde.svg`, centres des pays dans `server/pays-centres.json`, générés par `scripts/carte-monde.mjs`), bulles proportionnelles, liste des 10 premiers ; mention publique « Mesure d'audience » complétée (FR/EN/DE).
+
+### 16. Ville des photos, préparation de la carte (fait)
+- Liste des villes GeoNames (plus de 5 000 habitants, CC BY 4.0) embarquée (`server/geo/villes.tsv`, `scripts/villes.mjs`) ; recherche au fil de la frappe et ville d'une position GPS (`server/geo/cities.js`).
+- Champ Ville (fiche, photothèque), ville proposée d'après le GPS à l'import et pour les photos existantes (`server/geo/locate.js`) ; seule la ville est gardée ; case « Afficher sur la carte » décochée par défaut, actions groupées (migration 012).
+- Suite : page publique « Carte » (désactivée par défaut), miniatures sur les villes, zoom et déplacement.
 
 ## Côté Zitadel (à faire une fois)
 

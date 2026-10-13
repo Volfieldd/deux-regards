@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createLocator } from './geo/locate.js';
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import formbody from '@fastify/formbody';
@@ -119,6 +120,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Variantes : vérifiées au démarrage (réglages changés, rendu interrompu), puis à chaque modification.
   app.decorate('variants', createVariantService({ db, storageDir: config.storageDir, siteName: app.siteName, log: app.log, publicUrl: config.publicUrl }));
   app.addHook('onReady', async () => { app.variants.schedule(); });
+  // Villes proposées d'après le GPS des originaux importés avant la carte (une seule lecture par photo).
+  app.decorate('locator', createLocator({ db, storageDir: config.storageDir, log: app.log }));
+  app.addHook('onReady', async () => { app.locator.schedule(); });
+  app.addHook('onClose', async () => { await app.locator.stop(); });
   app.addHook('onClose', async () => { await app.variants.stop(); });
   // Preuves d'antériorité : empreintes et horodatage RFC 3161, repris en arrière-plan.
   // Mesure d'audience anonyme (voir server/stats.js).

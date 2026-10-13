@@ -1,4 +1,5 @@
 import path from 'node:path';
+import * as cities from './geo/cities.js';
 import { slugify } from './slug.js';
 import { monthYear } from './format.js';
 
@@ -48,6 +49,32 @@ export function parseTakenOn(input) {
 export const DATE_HINT = 'Date non comprise : essayez « oct. 2026 », « 10/2026 » ou « 2026-10 ».';
 
 // Requêtes de l'administration. Toute écriture passe par ici ; les routes ne font pas de SQL.
+// Ville d'une photo (carte du site). city_label : ce qui est affiché dans le champ (« Angers, France ») ; city_id :
+// la ville choisie dans la liste proposée. Sans city_label (modification d'un autre champ), la ville ne change pas.
+// Une ville tapée sans la choisir (sans JavaScript) est reconnue si elle correspond exactement à une ville connue.
+// « Afficher sur la carte » exige une ville ; sans ville, la photo quitte la carte.
+const truthy = v => v === true || v === 1 || v === '1' || v === 'on' || v === 'true';
+function resolveLocation(body, before, errors) {
+  const keep = { city_id: before?.city_id ?? null, city_name: before?.city_name ?? null, city_cc: before?.city_cc ?? null, city_lat: before?.city_lat ?? null, city_lon: before?.city_lon ?? null, city_source: before?.city_source ?? null };
+  let loc = keep;
+  if ('city_label' in body) {
+    const typed = String(body.city_label ?? '').trim().slice(0, 120);
+    if (!typed) loc = { city_id: null, city_name: null, city_cc: null, city_lat: null, city_lon: null, city_source: null };
+    else {
+      const n = cities.norm(typed);
+      const chosen = Number(body.city_id) ? cities.byId(body.city_id) : null;
+      const city = chosen && (cities.norm(chosen.label) === n || cities.norm(chosen.name) === n) ? chosen
+        : cities.search(typed, 10).find(c => cities.norm(c.label) === n || cities.norm(c.name) === n);
+      if (!city) errors.city = 'Ville introuvable : choisissez-la dans la liste proposée (villes de plus de 5 000 habitants). Pour un lieu précis, utilisez le champ Lieu.';
+      else if (city.id === before?.city_id) loc = keep;
+      else loc = { city_id: city.id, city_name: city.name, city_cc: city.cc, city_lat: city.lat, city_lon: city.lon, city_source: 'manuel' };
+    }
+  }
+  const wantMap = truthy(body.on_map);
+  if (wantMap && !loc.city_id && !errors.city) errors.on_map = 'Choisissez d’abord une ville pour afficher la photo sur la carte.';
+  return { ...loc, on_map: wantMap && loc.city_id ? 1 : 0 };
+}
+
 export function createAdminRepo(db) {
   const PHOTO = `SELECT p.*, c.name AS category, c.slug AS category_slug, a.name AS author, a.slug AS author_slug
     FROM photos p JOIN categories c ON c.id = p.category_id JOIN authors a ON a.id = p.author_id`;
@@ -124,10 +151,14 @@ export function createAdminRepo(db) {
       return p && { ...p, n: p.position + 1, when: monthYear(p.taken_on), provisional: isProvisional(p) };
     },
 
-    addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null, sourceName = null, takenOn = null }) {
+    // gps : position lue dans l'original ; seule la ville la plus proche est gardée (proposée, pas sur la carte).
+    addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null, sourceName = null, takenOn = null, gps = null }) {
       const position = db.prepare('SELECT COALESCE(MAX(position), -1) + 1 FROM photos').pluck().get();
-      const { lastInsertRowid } = db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height, sha256, source_name, taken_on)
-        VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?)`).run(uniqueSlug('photos', title), title, categoryId, authorId, position, file, width, height, sha256, sourceName, takenOn);
+      const city = gps ? cities.nearest(gps.lat, gps.lon) : null;
+      const { lastInsertRowid } = db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height, sha256, source_name, taken_on,
+          city_id, city_name, city_cc, city_lat, city_lon, city_source, gps_checked)
+        VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`).run(uniqueSlug('photos', title), title, categoryId, authorId, position, file, width, height, sha256, sourceName, takenOn,
+        city?.id ?? null, city?.name ?? null, city?.cc ?? null, city?.lat ?? null, city?.lon ?? null, city ? 'gps' : null);
       return Number(lastInsertRowid);
     },
 
@@ -144,12 +175,16 @@ export function createAdminRepo(db) {
       if (takenOn === undefined) errors.taken_on = DATE_HINT;
       const status = body.status === 'published' ? 'published' : 'draft';
       const watermark = body.watermark === 'none' ? 0 : null;
-      const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn === undefined ? text(body.taken_on, 40) : takenOn, legend: text(body.legend, 2000), status, watermark };
-      if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
       const before = q.photo.get(id);
+      const loc = resolveLocation(body, before, errors);
+      const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn === undefined ? text(body.taken_on, 40) : takenOn, legend: text(body.legend, 2000), status, watermark,
+        city_label: 'city_label' in body ? text(body.city_label, 120) : (before?.city_name ? cities.label({ name: before.city_name, cc: before.city_cc }) : ''), on_map: loc.on_map };
+      if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
       db.transaction(() => {
         db.prepare(`UPDATE photos SET title = @title, slug = @slug, category_id = @category_id, author_id = @author_id, place = @place,
           taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
+        db.prepare(`UPDATE photos SET city_id = @city_id, city_name = @city_name, city_cc = @city_cc, city_lat = @city_lat, city_lon = @city_lon,
+          city_source = @city_source, on_map = @on_map WHERE id = @id`).run({ ...loc, id });
         // L'ouverture désigne les photos par leur adresse : elle suit le renommage.
         const hero = settings().hero;
         if (before && before.slug !== slug && Array.isArray(hero) && hero.includes(before.slug)) {
@@ -163,11 +198,24 @@ export function createAdminRepo(db) {
       const p = q.photo.get(id);
       if (!p) return null;
       const merged = { ...p, taken_on: p.taken_on || '', watermark: p.watermark === 0 ? 'none' : 'default' };
-      for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend']) if (k in body) merged[k] = body[k];
+      for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend', 'city_id', 'city_label', 'on_map']) if (k in body) merged[k] = body[k];
       // Brouillon dont l'adresse dérive encore du titre : elle suit le nouveau titre.
       merged.slug = 'title' in body && p.status === 'draft' && p.slug === uniqueSlug('photos', p.title, id) ? '' : p.slug;
       this.updatePhoto(id, merged);
       return q.photo.get(id);
+    },
+
+    // Carte : afficher ou retirer plusieurs photos (seulement celles qui ont une ville) ; état précédent pour annuler.
+    withCity: ids => ids.filter(id => q.photo.get(id)?.city_id),
+    setOnMap(ids, on) {
+      const before = {};
+      const set = db.prepare('UPDATE photos SET on_map = ? WHERE id = ?');
+      db.transaction(() => { for (const id of ids) { const p = q.photo.get(id); if (!p || (on && !p.city_id) || Boolean(p.on_map) === on) continue; before[id] = p.on_map ? 1 : 0; set.run(on ? 1 : 0, id); } })();
+      return before;
+    },
+    restoreOnMap(map) {
+      const set = db.prepare('UPDATE photos SET on_map = ? WHERE id = ? AND (? = 0 OR city_id IS NOT NULL)');
+      db.transaction(() => { for (const [id, v] of Object.entries(map || {})) { const on = Number(v) ? 1 : 0; set.run(on, Number(id), on); } })();
     },
 
     // Actions groupées. Renvoient l'état précédent pour pouvoir annuler.
