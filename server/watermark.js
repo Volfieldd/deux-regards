@@ -26,9 +26,10 @@ const tinted = kind => kind === 'text' || kind === 'emblem' || kind === 'logotyp
 
 // Teinte « auto » : luminosité moyenne de la zone de la photo où se pose le filigrane
 // (tiers de l'image pour les bords et les coins, image entière pour le centre, le plein cadre, la mosaïque).
-export async function resolveTone(src, mark, { limitInputPixels } = {}) {
+// `input` : chemin de l'original, ou base déjà décodée (Buffer) avec ses options sharp ({ raw: … }).
+export async function resolveTone(input, mark, options = {}) {
   if (!mark || !tinted(mark.kind) || mark.tone !== 'auto') return mark;
-  const { data, info } = await sharp(src, { limitInputPixels }).rotate().resize(48, 48, { fit: 'fill' }).greyscale().raw().toBuffer({ resolveWithObject: true });
+  const { data, info } = await sharp(input, options).rotate().resize(48, 48, { fit: 'fill' }).greyscale().raw().toBuffer({ resolveWithObject: true });
   const p = mark.position;
   const [v, hz] = p.includes('-') ? p.split('-') : ['haut', 'bas'].includes(p) ? [p, 'centre'] : ['gauche', 'droite'].includes(p) ? ['centre', p] : ['tout', 'tout'];
   const span = (k, n) => (k === 'tout' ? [0, n] : k === 'haut' || k === 'gauche' ? [0, n / 3] : k === 'bas' || k === 'droite' ? [(2 * n) / 3, n] : [n / 3, (2 * n) / 3]);

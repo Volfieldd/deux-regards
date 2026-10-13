@@ -16,6 +16,7 @@ Ils utilisent `node:test`, sans dépendance supplémentaire, et prennent environ
 | `test/admin.test.js` | connexion locale de test, toutes les actions de l'admin, import et ses refus, réglages (ouverture, textes des droits par défaut affichés et gardés « par défaut » s'ils ne changent pas) |
 | `test/watermark.test.js` | règles du filigrane et des EXIF, rendu (positions, mosaïque, logo, opacité), modes EXIF, recalcul et bascule des URL |
 | `test/proofs.test.js` | requête RFC 3161, jetons FreeTSA réels (analyse, signature, chaîne, altération), reprise après erreur, téléchargements, vérification, page `/droits` en français, anglais et allemand (langue déclarée, `hreflang`, sélecteur, textes réglables et échappés) |
+| `test/import-perf.test.js` | performance de l'import : file de traitement concurrente (limite, ordre, une erreur ne bloque pas), threads de libvips, rendu à décodage unique identique à un rendu direct (dimensions, orientation, image) |
 | `test/revue.test.js` | non-régression des constats de la revue d'octobre 2026 : redirections, erreurs génériques, protection de **toutes** les routes d'admin (liste des routes parcourue), configuration, jetons mal formés, suppressions pendant un rendu ou un horodatage, fichiers temporaires, filigrane sur petites images |
 | `test/deploiement.test.js` | garde-fou de persistance des données, sauvegarde (instantané, rotation, copie des originaux), `sitemap.xml`, `robots.txt` |
 | `test/apparence.test.js` | thèmes, aperçu réservé aux admins, emblème, icône, logo complet, image de partage, favicon |

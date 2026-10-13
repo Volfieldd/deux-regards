@@ -7,7 +7,9 @@ import { removeVariants, MAX_PIXELS } from './images.js';
 import { sha256File } from './proofs.js';
 
 // Garde-fous de l'import : poids du fichier, nombre de pixels, formats réellement décodés.
-export const MAX_FILE_BYTES = 60 * 1024 * 1024;
+// 90 Mio par fichier : chaque photo part dans sa propre requête, et Cloudflare refuse les requêtes de plus de
+// 100 Mo (offre gratuite) ; la marge couvre l'enveloppe multipart.
+export const MAX_FILE_BYTES = 90 * 1024 * 1024;
 const FORMATS = { jpeg: 'jpg', png: 'png', webp: 'webp', tiff: 'tif', heif: 'heic' };
 
 export class ImportError extends Error {}
