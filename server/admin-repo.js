@@ -391,6 +391,7 @@ export function createAdminRepo(db) {
         rights_text_en: text(body.rights_text_en, 10000),
         rights_text_de: text(body.rights_text_de, 10000),
         rights_contact: text(body.rights_contact, 200),
+        map_page: body.map_page === 'on',
         hero,
       };
       db.transaction(() => { for (const [k, v] of Object.entries(values)) q.setSetting.run(k, JSON.stringify(v)); })();

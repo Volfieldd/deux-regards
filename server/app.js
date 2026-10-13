@@ -98,13 +98,15 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
 
   const eta = new Eta({ views: path.join(ROOT, 'views'), cache: config.production });
   const authorNames = db.prepare('SELECT name FROM authors ORDER BY id').pluck();
+  // Page « Carte » (facultative, désactivée par défaut) : lien dans le menu du site seulement si elle est publiée.
+  const mapSetting = db.prepare("SELECT value FROM settings WHERE key = 'map_page'").pluck();
   const asset = assetUrls(path.join(ROOT, 'public'), config.production);
   app.decorate('appearance', createAppearance(app));
   app.decorateReply('render', function (template, data) {
     const names = authorNames.all();
     const brand = app.appearance.brand();
     const theme = app.appearance.forRequest(this.request, this);
-    const common = { asset, theme, brand, isAdmin: Boolean(this.request.session), publicUrl: config.publicUrl, authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '' };
+    const common = { asset, theme, brand, isAdmin: Boolean(this.request.session), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '' };
     return this.type('text/html; charset=utf-8').send(eta.render(`./${template}`, { ...common, ...data }));
   });
 

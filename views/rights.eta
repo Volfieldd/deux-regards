@@ -2,7 +2,7 @@
 <% const t = it.t; %>
 <header class="top wrap">
   <%~ include('./brand', it) %>
-  <nav class="eyebrow" aria-label="<%= t.nav.label %>"><a href="/#series"><%= t.nav.series %></a><a href="/#galerie"><%= t.nav.gallery %></a><a href="/a-propos"><%= t.nav.about %></a></nav>
+  <nav class="eyebrow" aria-label="<%= t.nav.label %>"><a href="/#series"><%= t.nav.series %></a><a href="/#galerie"><%= t.nav.gallery %></a><% if (it.mapPage) { %><a href="/carte"><%= t.nav.map %></a><% } %><a href="/a-propos"><%= t.nav.about %></a></nav>
 </header>
 <main class="about wrap">
   <nav class="langs eyebrow" aria-label="<%= t.nav.langs %>">

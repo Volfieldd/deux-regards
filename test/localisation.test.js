@@ -164,3 +164,64 @@ test('plusieurs photos : sur la carte (celles qui ont une ville), retirer, annul
   assert.match(page, /data-many-map="map_on"/);
   assert.match(page, /data-one-onmap/);
 });
+
+// ---------- page publique « Carte » ----------
+
+test('page Carte : introuvable tant qu’elle n’est pas publiée, aperçu pour les auteurs, réglage dans Réglages', async t => {
+  const ctx = await admin(t);
+  assert.equal((await ctx.app.inject('/carte')).statusCode, 404);
+  assert.doesNotMatch((await ctx.app.inject('/')).body, /href="\/carte"/);
+  assert.doesNotMatch((await ctx.app.inject('/sitemap.xml')).body, /\/carte</);
+  const preview = await ctx.as({ url: '/carte' });
+  assert.equal(preview.statusCode, 200);
+  assert.equal(preview.headers['x-robots-tag'], 'noindex');
+  assert.match(preview.body, /Aperçu réservé aux auteurs/);
+  assert.match(preview.body, /Aucune photo sur la carte : choisissez la ville/);
+  const settings = (await ctx.as({ url: '/admin/reglages' })).body;
+  assert.match(settings, /id="carte"/);
+  assert.match(settings, /name="map_page">/);                                          // décochée par défaut
+  assert.match(settings, /\(0 aujourd’hui\)/);
+  assert.equal((await ctx.post('/admin/reglages', { map_page: 'on' })).statusCode, 303);
+  assert.match((await ctx.as({ url: '/admin/reglages' })).body, /name="map_page" checked/);
+  assert.equal((await ctx.app.inject('/carte')).statusCode, 200);
+  for (const url of ['/', '/a-propos', '/droits', '/droits/en']) assert.match((await ctx.app.inject(url)).body, /href="\/carte">(Carte|Map)</, url);
+  assert.match((await ctx.app.inject('/sitemap.xml')).body, /localhost:3000\/carte</);
+  await ctx.post('/admin/reglages', {});                                               // décochée : retirée
+  assert.equal((await ctx.app.inject('/carte')).statusCode, 404);
+});
+
+test('page Carte : photos publiées cochées, groupées par ville, à leur place sur la carte ; jamais les brouillons', async t => {
+  const ctx = await admin(t);
+  ctx.db.prepare("INSERT INTO settings (key, value) VALUES ('map_page', 'true')").run();
+  const set = (slug, label, onMap = 1) => {
+    const c = search(label)[0];
+    ctx.db.prepare('UPDATE photos SET city_id = ?, city_name = ?, city_cc = ?, city_lat = ?, city_lon = ?, city_source = ?, on_map = ? WHERE slug = ?')
+      .run(c.id, c.name, c.cc, c.lat, c.lon, 'manuel', onMap, slug);
+  };
+  set('quai-7h12', 'Angers');
+  set('brume-sur-la-loire', 'Angers');
+  set('deux-minuit', 'Lisbon');                                                        // cochée, mais brouillon
+  ctx.db.prepare("UPDATE photos SET status = 'draft' WHERE slug = 'deux-minuit'").run();
+  const slugs = ctx.db.prepare("SELECT slug FROM photos WHERE status = 'published' AND slug NOT IN ('quai-7h12', 'brume-sur-la-loire')").pluck().all();
+  set(slugs[0], 'Tokyo');
+  set(slugs[1], 'Munich', 0);                                                          // ville choisie, pas sur la carte
+  const res = await ctx.app.inject({ url: '/carte', headers: { 'user-agent': 'Mozilla/5.0 (test)' } });
+  assert.equal(res.statusCode, 200);
+  const body = res.body;
+  assert.doesNotMatch(body, /Aperçu réservé/);
+  const pins = [...body.matchAll(/data-pin="(\d+)"[^>]*data-x="([\d.]+)" data-y="([\d.]+)" data-n="(\d+)" data-name="([^"]+)"/g)]
+    .map(m => ({ name: m[5], n: Number(m[4]), x: Number(m[2]), y: Number(m[3]) }));
+  assert.deepEqual(pins.map(p => [p.name, p.n]), [['Angers', 2], ['Tokyo', 1]]);       // la plus fournie d'abord
+  const angers = pins[0], tokyo = pins[1];
+  assert.ok(angers.x > 490 && angers.x < 510 && angers.y < 130, JSON.stringify(angers)); // Europe de l'Ouest
+  assert.ok(tokyo.x > 840 && tokyo.x < 870 && tokyo.y > 120 && tokyo.y < 170, JSON.stringify(tokyo));
+  assert.match(body, /3 photos · 2 lieux/);
+  assert.match(body, /<section class="lieu" id="lieu-\d+">\s*<h2>Angers <span class="mono">France · 2 photos/);
+  assert.doesNotMatch(body, /Lisbon|Munich/);
+  assert.match(body, /GeoNames/);
+  assert.match(body, /href="\/static\/carte-terre\.svg\?v=[0-9a-f]{10}#terre"/);
+  assert.match(body, /<image href="\/media\/[^"]+-640\.webp"/);
+  assert.doesNotMatch(body, /style="/);                                                // CSP : aucun style en ligne
+  const visits = ctx.db.prepare("SELECT SUM(views) FROM stats_pages WHERE page = 'carte'").pluck();
+  assert.equal(visits.get(), 1);
+});

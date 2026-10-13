@@ -26,6 +26,11 @@
 <% }) %>
     <label>Contact pour les demandes d’utilisation <span class="mono">adresse e-mail ou lien https://</span><input name="rights_contact" value="<%= s.rights_contact || '' %>" maxlength="200"></label>
   </section>
+  <section class="panel" id="carte">
+    <h2>Page Carte <span class="mono"><a href="/carte" target="_blank" rel="noopener">/carte</a><%= s.map_page ? '' : ' · aperçu réservé aux auteurs' %></span></h2>
+    <p class="hint">Une carte du monde avec la vignette des photos à l’emplacement de leur ville, et la liste des lieux. Seules les photos publiées dont la fiche coche « Afficher sur la carte » y figurent (<%= it.mapCount %> aujourd’hui<%= it.mapCount ? `, ${it.mapCities} ville${it.mapCities > 1 ? 's' : ''}` : '' %>).</p>
+    <label class="inline"><input type="checkbox" name="map_page"<%~ s.map_page ? ' checked' : '' %>> Publier la page Carte <span class="mono">lien « Carte » dans le menu du site</span></label>
+  </section>
   <fieldset class="panel hero-panel" id="ouverture" data-hero data-max="<%= it.heroMax %>">
     <legend>Photos de l’ouverture</legend>
     <p class="hint">Le diaporama plein écran de l’accueil, dans cet ordre. <%= it.heroMax %> photos au plus ; sans choix, les 5 premières de la galerie.</p>
