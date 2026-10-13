@@ -454,6 +454,10 @@ body.dropping .canvas { outline: 2px dashed var(--accent); outline-offset: -10px
 .tr summary .mono { margin-left: 6px; color: var(--ink3); }
 .tr label { margin-top: 8px; }
 .tr-lang { display: inline-flex; align-items: center; gap: 8px; }
+.ig-likes { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.ig-likes strong { font-size: 18px; }
+.ig-spark { margin: 4px 0 10px; } .ig-spark .spark { width: 100%; max-width: 320px; height: 44px; }
+.ig-top .ig-n { white-space: nowrap; }
 .tr-act { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
 .tr-act .cellnote { margin: 0; }
 .linkbtn { background: none; border: 0; padding: 0 2px; min-height: 24px; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; }

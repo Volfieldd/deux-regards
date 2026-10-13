@@ -164,6 +164,15 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     callsSince: db.prepare('SELECT at FROM instagram_calls WHERE at > ? ORDER BY at').pluck(),
     pruneCalls: db.prepare('DELETE FROM instagram_calls WHERE at < ?'),
     publishedSince: db.prepare("SELECT published_at FROM instagram_posts WHERE status = 'published' AND published_at > ? ORDER BY published_at").pluck(),
+    mediaIds: db.prepare("SELECT DISTINCT ig_media_id FROM instagram_posts WHERE status = 'published' AND ig_media_id IS NOT NULL").pluck(),
+    saveEngagement: db.prepare(`INSERT INTO instagram_engagement (ig_media_id, day, likes, comments) VALUES (?, ?, ?, ?)
+      ON CONFLICT(ig_media_id, day) DO UPDATE SET likes = excluded.likes, comments = excluded.comments`),
+    lastEngagement: db.prepare('SELECT * FROM instagram_engagement WHERE ig_media_id = ? ORDER BY day DESC LIMIT 1'),
+    engagementSeries: db.prepare('SELECT day, likes, comments FROM instagram_engagement WHERE ig_media_id = ? AND day >= ? ORDER BY day'),
+    mostLiked: db.prepare(`SELECT p.photo_id, p.permalink, p.published_at, e.ig_media_id, e.likes, e.comments, e.day FROM instagram_engagement e
+      JOIN instagram_posts p ON p.ig_media_id = e.ig_media_id AND p.status = 'published'
+      WHERE e.day = (SELECT MAX(day) FROM instagram_engagement WHERE ig_media_id = e.ig_media_id)
+      ORDER BY e.likes DESC, e.comments DESC LIMIT ?`),
   };
   const read = (key, dflt) => { try { const raw = q.setting.get(key); return raw ? { ...dflt, ...JSON.parse(raw) } : { ...dflt }; } catch { return { ...dflt }; } };
   // Envoi interrompu par un arrêt du serveur : on ne sait pas s'il a abouti, donc pas de nouvel essai automatique.
@@ -443,6 +452,57 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     return true;
   }
 
+  // ---------- likes et commentaires ----------
+  // Une fois par jour (après 6 h, heure de Paris), relevé des likes et commentaires des posts publiés depuis le site :
+  // la liste des posts du compte, 100 par page (1 à 3 appels), comptés dans le budget d'appels comme le reste.
+  // Seuls les posts connus du site sont gardés. Après un échec, nouvel essai une heure plus tard.
+  const engagementState = () => read('instagram_engagement', { day: null, at: 0, triedAt: 0, error: '', count: 0 });
+  async function syncEngagement() {
+    const a = account.get();
+    const token = account.token();
+    const t = now().getTime();
+    const day = parisKey(now()).day;
+    const known = new Set(q.mediaIds.all());
+    if (!a || !token || !known.size) return { count: 0, skipped: true };
+    q.save.run('instagram_engagement', JSON.stringify({ ...engagementState(), triedAt: t }));
+    let url = api(`${a.ig_user_id}/media`, { fields: 'id,like_count,comments_count', limit: 100, access_token: token });
+    let count = 0;
+    try {
+      for (let page = 0; url && page < 20 && count < known.size; page++) {
+        const data = await call(url, { kind: 'engagement' });
+        db.transaction(() => {
+          for (const m of data.data || []) {
+            if (!known.has(String(m.id))) continue;
+            q.saveEngagement.run(String(m.id), day, Math.max(0, Number(m.like_count) || 0), Math.max(0, Number(m.comments_count) || 0));
+            count++;
+          }
+        })();
+        // Page suivante : adresse donnée par Meta, acceptée seulement sur l'API Instagram.
+        url = typeof data.paging?.next === 'string' && data.paging.next.startsWith(`${GRAPH}/`) ? data.paging.next : null;
+      }
+    } catch (err) {
+      q.save.run('instagram_engagement', JSON.stringify({ ...engagementState(), error: scrub(err.message, secrets()) }));
+      throw err;
+    }
+    q.save.run('instagram_engagement', JSON.stringify({ day, at: now().getTime(), triedAt: t, error: '', count }));
+    return { count };
+  }
+  async function maybeSyncEngagement() {
+    const st = engagementState();
+    const { day, time } = parisKey(now());
+    if (st.day === day || time < '06:00' || now().getTime() - st.triedAt < 3600 * 1000) return null;
+    if (!account.get() || !ig.configured) return null;
+    try { return await syncEngagement(); } catch (err) { log?.warn({ err: err.message }, 'likes Instagram non relevés'); return null; }
+  }
+  // Derniers chiffres d'un post, et leur évolution sur `days` jours.
+  function engagementOf(mediaId, days = 30) {
+    if (!mediaId) return null;
+    const last = q.lastEngagement.get(String(mediaId));
+    if (!last) return null;
+    const from = parisKey(new Date(now().getTime() - days * 24 * 3600 * 1000)).day;
+    return { ...last, series: q.engagementSeries.all(String(mediaId), from) };
+  }
+
   // ---------- créneaux ----------
   // Chaque minute : au premier passage après un créneau, la tête de file part (une photo par créneau).
   let refreshFailedAt = 0;
@@ -511,7 +571,17 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     // Jeton d'image valable 15 minutes au plus (Instagram la télécharge dans les secondes qui suivent).
     byMediaToken: token => (/^[\w-]{20,64}$/.test(token) ? q.byToken.get(token, now().getTime() - 15 * 60 * 1000) : null),
     authorizeUrl, connect, refresh, tick,
-    start() { if (!timer) { timer = setInterval(() => { tick().catch(err => log?.error({ err }, 'file Instagram')); }, 60 * 1000); timer.unref(); } },
+    syncEngagement, maybeSyncEngagement, engagementOf, engagementState,
+    // Relevé à la demande : pas plus d'une fois toutes les 10 minutes.
+    canSyncNow: () => now().getTime() - engagementState().triedAt >= 10 * 60 * 1000,
+    mostLiked: (n = 10) => q.mostLiked.all(n),
+    start() {
+      if (timer) return;
+      timer = setInterval(() => {
+        tick().catch(err => log?.error({ err }, 'file Instagram')).then(() => maybeSyncEngagement());
+      }, 60 * 1000);
+      timer.unref();
+    },
     stop() { clearInterval(timer); timer = null; },
   };
 }

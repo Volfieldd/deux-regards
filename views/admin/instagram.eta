@@ -80,13 +80,34 @@
 <% } %>
   </section>
 
+<% if (it.connected || it.mostLiked.length) { const es = it.engagementState; %>
+  <section class="panel wide2" id="likes" aria-labelledby="ig-likes">
+    <h2 id="ig-likes">Les plus aimées sur Instagram</h2>
+    <p class="hint">Likes et commentaires des photos publiées depuis le site, relevés chaque matin (seulement des nombres : Instagram ne dit pas qui a aimé).
+      <%= es.at ? `Dernier relevé : ${fmtDate(es.at)} à ${new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(new Date(es.at))}.` : 'Pas encore de relevé.' %></p>
+<% if (es.error) { %>    <p class="cellnote warn">Dernier essai sans succès : <%= es.error %></p>
+<% } %>
+<% if (it.mostLiked.length) { %>
+    <ol class="rank plain ig-top">
+<% it.mostLiked.forEach(m => { %>      <li><span class="t"><a href="/admin/photos/<%= m.photo_id %>#instagram"><%= m.photo.title %></a>
+        <span class="mono">publiée le <%= fmtDate(m.published_at) %></span></span>
+        <span class="ig-n"><strong><%= m.likes %></strong> like<%= m.likes > 1 ? 's' : '' %> · <%= m.comments %> comm.</span>
+<% if (m.permalink) { %>        <a class="more" href="<%= m.permalink %>" target="_blank" rel="noopener">Voir ↗</a>
+<% } %></li>
+<% }) %>    </ol>
+<% } %>
+<% if (it.connected) { %>    <form method="post" action="/admin/instagram/likes"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Relever maintenant</button></form>
+<% } %>
+  </section>
+<% } %>
+
 <% if (it.history.length) { %>
   <section class="panel wide2" aria-labelledby="ig-history">
     <h2 id="ig-history">Historique</h2>
     <ul class="rank plain">
 <% it.history.forEach(p => { %>
       <li><span class="t"><a href="/admin/photos/<%= p.photo_id %>#instagram"><%= p.photo.title %></a>
-        <span class="mono"><%= p.status === 'published' ? `publiée le ${fmtDate(p.published_at)}` : `échec : ${p.error}` %></span></span>
+        <span class="mono"><%= p.status === 'published' ? `publiée le ${fmtDate(p.published_at)}${p.engagement ? ` · ${p.engagement.likes} like${p.engagement.likes > 1 ? 's' : ''}, ${p.engagement.comments} comm.` : ''}` : `échec : ${p.error}` %></span></span>
 <% if (p.status === 'published' && p.permalink) { %>        <a class="more" href="<%= p.permalink %>" target="_blank" rel="noopener">Voir sur Instagram ↗</a>
 <% } else if (p.status === 'failed') { %>        <form method="post" action="/admin/instagram/<%= p.id %>/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Réessayer</button></form>
 <% } %></li>

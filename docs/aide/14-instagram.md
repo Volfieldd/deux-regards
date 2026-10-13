@@ -56,6 +56,16 @@ Il n’existe pas d’offre payante de l’API d’Instagram : Meta autorise **1
 - **Si Instagram signale une limite**, la file se met **en pause** le temps qu’il indique (sinon 1 h, puis 2 h, 4 h, 8 h, 24 h). La photo reste en tête de file et **l’essai n’est pas compté**. Un bandeau l’annonce sur la page **Instagram**, avec **Reprendre maintenant** pour lever la pause à la main. À la reprise, une photo par créneau, jamais de rafale.
 - La page **Instagram** affiche la **consommation** : publications sur 24 h, appels sur la dernière heure, quota lu chez Instagram.
 
+## Likes et commentaires
+
+Chaque matin (après 6 h), le site relève les **likes** et les **commentaires** des photos qu'il a publiées sur Instagram, et garde un relevé par jour.
+
+- **Fiche d'une photo**, section Instagram : « 39 likes · 4 commentaires », la date du relevé et une courbe de l'évolution des likes.
+- **Page Instagram**, « Les plus aimées sur Instagram » : le classement des photos par likes, avec le lien vers chaque post. **Relever maintenant** fait un relevé sans attendre le lendemain (une fois toutes les 10 minutes au plus).
+- **Seulement des nombres** : Instagram ne dit pas qui a aimé ni ce que disent les commentaires.
+- **Posts publiés directement sur Instagram**, sans passer par le site : ils ne sont pas relevés (ils ne sont liés à aucune photo du site).
+- Le relevé coûte 1 à 3 appels par jour, comptés dans les limites ci-dessus. S'il échoue (Instagram indisponible), un nouvel essai a lieu une heure plus tard et le motif s'affiche sur la page Instagram.
+
 ## En cas d’échec
 
 - **Nouvel essai automatique :** la photo reste en tête de file, et le message d’erreur s’affiche dans la file et dans la fiche. Elle repart au créneau suivant, **3 essais au plus**.

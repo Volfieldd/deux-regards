@@ -359,12 +359,26 @@ export default async function adminRoutes(app) {
       title: 'Instagram', s, FRAMES, DEFAULT_TEMPLATE, categories: repo.categories(),
       conf: { configured: app.config.instagram.configured, https: app.config.instagram.https, redirectUri: app.config.instagram.redirectUri, apiVersion: app.config.instagram.apiVersion },
       account: ig.account.get(), connected: ig.account.connected(),
-      queue: withPhoto(ig.queue()), history: withPhoto(ig.history(20)), usage: ig.usage(), IG_PRESETS, IG_BOUNDS, ...extra,
+      queue: withPhoto(ig.queue()), history: withPhoto(ig.history(20)).map(x => ({ ...x, engagement: x.status === 'published' ? ig.engagementOf(x.ig_media_id) : null })),
+      mostLiked: withPhoto(ig.mostLiked(10)), engagementState: ig.engagementState(), usage: ig.usage(), IG_PRESETS, IG_BOUNDS, ...extra,
     });
   };
   app.get('/admin/instagram', async (request, reply) => igPage(request, reply));
   // Lever une pause « limite atteinte » à la main (Meta a rendu l'accès plus tôt, réglage changé…).
   app.post('/admin/instagram/reprendre', write, async (request, reply) => { app.instagram.resume(); return done(reply, '/admin/instagram', 'File Instagram reprise.'); });
+
+  // Likes et commentaires relevés à la demande (sinon une fois par jour) ; pas plus d'une fois toutes les 10 minutes.
+  app.post('/admin/instagram/likes', write, async (request, reply) => {
+    const ig = app.instagram;
+    if (!ig.account.connected()) return failed(reply, '/admin/instagram#likes', 'Connectez d’abord le compte Instagram.');
+    if (!ig.canSyncNow()) return failed(reply, '/admin/instagram#likes', 'Relevé déjà demandé il y a moins de 10 minutes : réessayez un peu plus tard.');
+    try {
+      const r = await ig.syncEngagement();
+      return done(reply, '/admin/instagram#likes', r.skipped ? 'Aucun post publié depuis le site à relever pour l’instant.' : `Likes et commentaires relevés pour ${r.count} post${r.count > 1 ? 's' : ''}.`);
+    } catch (err) {
+      return failed(reply, '/admin/instagram#likes', `Relevé impossible : ${err.message}`);
+    }
+  });
 
   app.post('/admin/instagram/reglages', write, async (request, reply) => {
     app.instagram.saveSettings(normalizeSettings(request.body || {}, repo.categories()));
@@ -471,7 +485,9 @@ export default async function adminRoutes(app) {
     const post = ig.forPhoto(photo.id);
     const active = post && (post.status === 'queued' || post.status === 'publishing');
     const caption = post?.caption || ig.caption(photo.id, s);
+    const engagement = post?.status === 'published' ? ig.engagementOf(post.ig_media_id) : null;
     return { post, active, s, FRAMES, caption, custom: Boolean(post?.caption), warnings: captionWarnings(caption), connected: ig.account.connected(),
+      engagement, likesSpark: engagement && engagement.series.length > 1 ? sparkline(engagement.series.map(d => d.likes)) : '',
       slot: active ? ig.queue().find(x => x.id === post.id)?.slot : null };
   };
   const photoStats = id => {

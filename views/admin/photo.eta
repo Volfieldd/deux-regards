@@ -64,6 +64,14 @@
   <h2 id="ig-title">Instagram</h2>
 <% if (ig.post && ig.post.status === 'published') { %>
   <p>Publiée sur Instagram<% if (ig.post.permalink) { %> · <a class="more" href="<%= ig.post.permalink %>" target="_blank" rel="noopener">voir le post ↗</a><% } %>.</p>
+<% if (ig.engagement) { const e = ig.engagement; %>
+  <p class="ig-likes"><span><strong><%= e.likes %></strong> like<%= e.likes > 1 ? 's' : '' %></span> · <span><strong><%= e.comments %></strong> commentaire<%= e.comments > 1 ? 's' : '' %></span>
+    <span class="mono">relevé le <%= new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(e.day)) %></span></p>
+<% if (ig.likesSpark) { %>  <figure class="ig-spark"><%~ ig.likesSpark %><figcaption class="mono">likes, <%= e.series.length %> derniers relevés</figcaption></figure>
+<% } %>
+<% } else { %>
+  <p class="hint">Likes et commentaires : relevés chaque matin (voir <a href="/admin/instagram#likes">Instagram</a>).</p>
+<% } %>
 <% } else if (ig.post && ig.post.status === 'publishing') { %>
   <p>Envoi à Instagram en cours…</p>
 <% } else if (ig.active) { %>
