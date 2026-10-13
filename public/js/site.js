@@ -255,7 +255,49 @@
       inner: el.querySelector('[data-pin-in]'), count: el.querySelector('[data-pin-count]'),
     })).sort((a, b) => b.n - a.n);
     const btn = k => carte.querySelector(`[data-carte-zoom="${k}"]`);
-    const ZMAX = 10;                                           // fond 1:110m : au-delà, les côtes deviennent grossières
+    const ZMAX = 40;
+    // Fond détaillé (1:50m) chargé au premier zoom seulement : la vue du monde reste légère.
+    let fine = false;
+    const uses = svg.querySelectorAll('use[data-fine]');
+    const useFine = () => { fine = true; uses.forEach(u => u.setAttribute('href', u.dataset.fine)); };
+    // Au-delà du zoom × 8 : tuiles 1:10m (petites îles…) de la zone visible, lues une fois puis gardées.
+    const detail = svg.querySelector('[data-detail]');
+    const version = new URL(svg.dataset.tiles, location.href).search;
+    const tileBase = new URL('./', new URL(svg.dataset.tiles, location.href)).pathname;
+    let tileIndex = null;
+    const tiles = new Map();                                   // « i-j » → promesse (tuile insérée)
+    const done = new Set();
+    const loadTile = t => {
+      if (!tiles.has(t)) {
+        tiles.set(t, fetch(`${tileBase}${t}.svg${version}`).then(r => (r.ok ? r.text() : '')).then(text => {
+          const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          doc.querySelectorAll('path').forEach(p => g.appendChild(document.importNode(p, true)));
+          detail.appendChild(g);
+        }).catch(() => {}).finally(() => done.add(t)));
+      }
+      return tiles.get(t);
+    };
+    let wanted = 0;
+    function updateTiles() {
+      const deep = view.w <= W / 8 + 0.01;
+      const show = on => { detail.setAttribute('display', on ? 'inline' : 'none'); uses.forEach(u => u.setAttribute('display', on ? 'none' : 'inline')); };
+      if (!deep) { show(false); return; }
+      if (!tileIndex) {
+        tileIndex = fetch(svg.dataset.tiles).then(r => r.json()).then(j => ({ ...j, set: new Set(j.tiles) })).catch(() => null);
+      }
+      const ticket = ++wanted;
+      tileIndex.then(ix => {
+        if (!ix || ticket !== wanted) return;
+        const h = (view.w * H) / W, need = [];
+        for (let i = Math.floor(view.x / ix.w); i <= Math.floor((view.x + view.w) / ix.w); i++) {
+          for (let j = Math.floor(view.y / ix.h); j <= Math.floor((view.y + h) / ix.h); j++) if (ix.set.has(`${i}-${j}`)) need.push(`${i}-${j}`);
+        }
+        if (need.some(t => !done.has(t))) show(false);
+        // Le fond 1:50m reste affiché tant que toute la zone visible n'est pas arrivée (pas de trou pendant le chargement).
+        Promise.all(need.map(loadTile)).then(() => { if (ticket === wanted && view.w <= W / 8 + 0.01) show(true); });
+      });
+    }
     let view = { x: 0, y: 0, w: W };
 
     const clamp = v => {
@@ -287,6 +329,8 @@
         p.inner.setAttribute('transform', `scale(${s})`);
       }
       const zoomed = view.w < W - 0.5;
+      if (zoomed && !fine) useFine();
+      updateTiles();
       vue.classList.toggle('zoomed', zoomed);
       btn('out').disabled = !zoomed;
       btn('reset').disabled = !zoomed;

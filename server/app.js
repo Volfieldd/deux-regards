@@ -7,6 +7,7 @@ import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import formbody from '@fastify/formbody';
 import fastifyStatic from '@fastify/static';
+import * as cities from './geo/cities.js';
 import { Eta } from 'eta';
 import publicRoutes from './routes/public.js';
 import adminRoutes from './routes/admin.js';
@@ -112,6 +113,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
 
   await app.register(fastifyStatic, {
     root: path.join(ROOT, 'public'), prefix: '/static/',
+    preCompressed: true,                 // fonds de carte : .br / .gz à côté du fichier
     ...(config.production ? { maxAge: '365d', immutable: true } : { maxAge: 0 }),
   });
   await app.register(fastifyStatic, {
@@ -125,6 +127,9 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Villes proposées d'après le GPS des originaux importés avant la carte (une seule lecture par photo).
   app.decorate('locator', createLocator({ db, storageDir: config.storageDir, log: app.log }));
   app.addHook('onReady', async () => { app.locator.schedule(); });
+  // Liste des villes (~250 000 lieux, 1 à 2 s de lecture) : chargée juste après le démarrage en production, pas à la
+  // première frappe dans le champ Ville.
+  if (config.production) app.addHook('onReady', async () => { setTimeout(() => cities.byId(0), 1000).unref(); });
   app.addHook('onClose', async () => { await app.locator.stop(); });
   app.addHook('onClose', async () => { await app.variants.stop(); });
   // Preuves d'antériorité : empreintes et horodatage RFC 3161, repris en arrière-plan.

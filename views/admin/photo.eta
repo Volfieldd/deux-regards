@@ -22,7 +22,7 @@
       <label>Date <input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="AAAA-MM ou AAAA-MM-JJ" inputmode="numeric"<%~ inv('taken_on') %>></label><% if (e.taken_on) { %><span class="err" id="err-taken_on"><%= e.taken_on %></span><% } %>
     </div>
     <div class="city-field" data-city>
-      <label for="city_label">Ville <span class="mono">pour la carte du site · villes de plus de 5 000 habitants</span></label>
+      <label for="city_label">Ville <span class="mono">pour la carte du site · toutes les communes de France, plus de 500 habitants ailleurs</span></label>
       <input id="city_label" name="city_label" value="<%= v.city_label || '' %>" maxlength="120" autocomplete="off" placeholder="Commencez à taper : Angers, Lisbonne…" data-city-input<%~ inv('city') %>>
       <input type="hidden" name="city_id" value="<%= v.city_id || '' %>" data-city-id>
 <% if (e.city) { %>      <span class="err" id="err-city"><%= e.city %></span>
