@@ -134,6 +134,8 @@
         <div class="fld"><span class="lb">Titre <span class="r" data-one-n></span></span><input class="big-title" data-one-field="title" maxlength="160" aria-label="Titre"><span class="note" data-one-prov hidden>Titre provisoire (nom du fichier)</span></div>
         <div class="fld"><span class="lb">Légende</span><textarea data-one-field="legend" rows="2" maxlength="2000" aria-label="Légende" placeholder="Quelques mots pour le visiteur…"></textarea></div>
         <div class="fld"><span class="lb">Série</span><div class="pills" data-one-series role="group" aria-label="Série"><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %></div></div>
+        <div class="fld" data-city><span class="lb">Ville <span class="r">carte du site</span></span><input data-city-input data-one-city maxlength="120" aria-label="Ville (carte du site)" placeholder="Angers, Lisbonne…" autocomplete="off"><input type="hidden" data-city-id>
+          <label class="inline"><input type="checkbox" data-one-onmap> Afficher sur la carte</label><span class="note" data-one-citynote hidden>Proposée d’après le GPS de la photo : vérifiez-la.</span></div>
         <div class="fld"><span class="lb">Lieu</span><input data-one-field="place" maxlength="120" aria-label="Lieu" placeholder="Où ?"></div>
         <div class="fld"><span class="lb">Date <span class="r" data-one-when></span></span><input data-one-field="taken_on" maxlength="40" aria-label="Date" placeholder="oct. 2026, 10/2026…"></div>
         <div class="fld"><span class="lb">Auteur</span><select data-one-field="author_id" aria-label="Auteur"><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
@@ -162,6 +164,8 @@
         <input name="taken_on" maxlength="40" placeholder="Date : oct. 2026" aria-label="Date pour la sélection" data-many-field="taken_on">
         <button class="btn ghost" type="submit" name="action" value="fields" data-nojs>Appliquer lieu et date</button>
       </div>
+      <div class="fld"><span class="lb">Carte du site <span class="r">photos qui ont une ville</span></span>
+        <div class="two"><button class="btn ghost" type="button" data-many-map="map_on">Sur la carte</button><button class="btn ghost" type="button" data-many-map="map_off">Retirer de la carte</button></div></div>
       <div class="fld" data-many-titles hidden><span class="lb">Titres provisoires</span><div class="titles" data-titles></div></div>
     </div>
 

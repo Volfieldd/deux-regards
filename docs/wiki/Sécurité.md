@@ -88,6 +88,7 @@ Le module de statistiques (`server/stats.js`) ne stocke **aucune donnée personn
 - non comptés : robots, administrateurs connectés, `DNT: 1` et `Sec-GPC: 1`, préchargements, pages introuvables ;
 - pas de cookie, pas de script, pas de service tiers : dans le cadre de l’exemption de consentement de la CNIL pour la mesure d’audience. La page publique `/droits` en informe les visiteurs.
 - pays des visiteurs : celui que calcule Cloudflare (en-tête `CF-IPCountry`), cru seulement si la requête vient du proxy de confiance (`TRUST_PROXY`) ; le site ne géolocalise rien et ne conserve pas l’adresse ; compteurs par jour et par pays, purgés à 25 mois (exemption CNIL : pas plus précis que la ville).
+- **Position des photos** : le GPS des originaux ne sert qu’à proposer la ville la plus proche ; il n’est jamais enregistré (seuls la ville, son pays et le centre de la ville, à 0,01° près). Rien ne va sur la carte sans la case cochée par un auteur. Liste des villes embarquée (GeoNames) : aucun service de géocodage extérieur.
 
 ## Instagram
 

@@ -20,6 +20,7 @@ import { barsAndLine, sparkline } from '../charts.js';
 import { RIGHTS, LANGS, rightsDefaults, withoutDefaults } from '../rights.js';
 import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, captionWarnings, InstagramError } from '../instagram.js';
 import { PRESETS as IG_PRESETS, BOUNDS as IG_BOUNDS } from '../instagram-limits.js';
+import * as cities from '../geo/cities.js';
 
 // Carte des visiteurs (page Statistiques) : centre de chaque pays dans le repère 1000 × 520 du fond de carte
 // (public/admin/carte-monde.svg, généré par scripts/carte-monde.mjs), nom du pays en français.
@@ -129,6 +130,7 @@ export default async function adminRoutes(app) {
     id: p.id, n: p.n, title: p.title, slug: p.slug, legend: p.legend, status: p.status, provisional: p.provisional,
     category_id: p.category_id, category: p.category, author_id: p.author_id, author: p.author, place: p.place,
     taken_on: p.taken_on, when: p.when, width: p.width, height: p.height, ready: p.ready,
+    city_id: p.city_id ?? null, city: p.city_name ? cities.label({ name: p.city_name, cc: p.city_cc }) : '', city_source: p.city_source ?? null, on_map: Boolean(p.on_map),
     thumb: p.ready ? thumb(p) : null, large: p.ready ? large(p) : null,
   });
   // Classe de format (« ar-150 » = 3:2) : planche contact justifiée sans style en ligne (CSP).
@@ -589,12 +591,16 @@ export default async function adminRoutes(app) {
       if (!p) return reply.code(404).send({ error: 'Photo introuvable.' });
       app.variants.schedule();
       const shown = repo.photoView(id);
-      return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, author_id: p.author_id, place: p.place, legend: p.legend, taken_on: p.taken_on, when: shown?.when || '', provisional: shown?.provisional || false } };
+      return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, author_id: p.author_id, place: p.place, legend: p.legend, taken_on: p.taken_on, when: shown?.when || '', provisional: shown?.provisional || false,
+        city_id: p.city_id ?? null, city: p.city_name ? cities.label({ name: p.city_name, cc: p.city_cc }) : '', city_source: p.city_source ?? null, on_map: Boolean(p.on_map) } };
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
       return reply.code(422).send({ errors: err.errors });
     }
   });
+
+  // Villes proposées au fil de la frappe (fiche, photothèque) : liste embarquée, aucun service extérieur.
+  app.get('/admin/villes', async request => ({ villes: cities.search(String(request.query.q || '').slice(0, 60), 8).map(c => ({ id: c.id, label: c.label })) }));
 
   // ---------- actions sur plusieurs photos ----------
   // JSON (barre de sélection) ou formulaire classique. Les réponses JSON portent de quoi annuler.
@@ -622,6 +628,23 @@ export default async function adminRoutes(app) {
           const prov = body.action === 'publish' ? ids.filter(id => repo.photoView(id)?.provisional).length : 0;
           const note = prov ? ` ${prov === n ? (n > 1 ? 'Elles gardent' : 'Elle garde') : `${prov} garde${prov > 1 ? 'nt' : ''}`} le nom du fichier comme titre : corrigez-le dans la photothèque.` : '';
           return ok(`${photosWord} ${n > 1 ? verb.replace('publiée', 'publiées').replace('repassée', 'repassées') : verb}.${note}`, { undo: { action: 'statuses', map: before } });
+        }
+        case 'map_on':
+        case 'map_off': {
+          if (!n) return ko(422, 'Aucune photo sélectionnée.');
+          // Sur la carte : seulement les photos qui ont une ville ; les autres sont signalées.
+          const before = repo.setOnMap(ids, body.action === 'map_on');
+          const changed = Object.keys(before).length;
+          const skipped = body.action === 'map_on' ? n - repo.withCity(ids).length : 0;
+          const word = c => `${c} photo${c > 1 ? 's' : ''}`;
+          const text = body.action === 'map_on'
+            ? `${word(changed)} sur la carte.${skipped ? ` ${word(skipped)} sans ville : choisissez sa ville dans la fiche.` : ''}`
+            : `${word(changed)} retirée${changed > 1 ? 's' : ''} de la carte.`;
+          return ok(text, { undo: { action: 'map_restore', map: before } });
+        }
+        case 'map_restore': {
+          repo.restoreOnMap(map(body.map));
+          return ok('Carte rétablie.');
         }
         case 'category': {
           if (!n) return ko(422, 'Aucune photo sélectionnée.');
@@ -695,7 +718,7 @@ export default async function adminRoutes(app) {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
     return render(request, reply, 'photo', {
-      title: photo.title, photo, values: photo, errors: {}, categories: repo.categories(), authors: repo.authors(),
+      title: photo.title, photo, values: { ...photo, city_label: photo.city_name ? cities.label({ name: photo.city_name, cc: photo.city_cc }) : '' }, errors: {}, categories: repo.categories(), authors: repo.authors(),
       proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo),
     });
   });

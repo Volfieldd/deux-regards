@@ -21,6 +21,15 @@
       <label>Lieu <input name="place" value="<%= v.place %>" maxlength="120"></label>
       <label>Date <input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="AAAA-MM ou AAAA-MM-JJ" inputmode="numeric"<%~ inv('taken_on') %>></label><% if (e.taken_on) { %><span class="err" id="err-taken_on"><%= e.taken_on %></span><% } %>
     </div>
+    <div class="city-field" data-city>
+      <label for="city_label">Ville <span class="mono">pour la carte du site · villes de plus de 5 000 habitants</span></label>
+      <input id="city_label" name="city_label" value="<%= v.city_label || '' %>" maxlength="120" autocomplete="off" placeholder="Commencez à taper : Angers, Lisbonne…" data-city-input<%~ inv('city') %>>
+      <input type="hidden" name="city_id" value="<%= v.city_id || '' %>" data-city-id>
+<% if (e.city) { %>      <span class="err" id="err-city"><%= e.city %></span>
+<% } else if (it.photo.city_source === 'gps' && v.city_label) { %>      <span class="cellnote">Proposée d’après le GPS de la photo : vérifiez-la. Seule la ville est gardée, jamais la position exacte.</span>
+<% } %>      <span class="cellnote">Villes : <a href="https://www.geonames.org" target="_blank" rel="noopener">GeoNames</a>, licence CC BY 4.0.</span>
+    </div>
+    <label class="inline"><input type="checkbox" name="on_map"<%~ Number(v.on_map) ? ' checked' : '' %><%~ inv('on_map') %>> Afficher sur la carte du site</label><% if (e.on_map) { %><span class="err" id="err-on_map"><%= e.on_map %></span><% } %>
     <label>Légende <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
     <fieldset class="row">
       <legend>Statut</legend>

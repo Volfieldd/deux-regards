@@ -17,7 +17,23 @@ export class ImportError extends Error {}
 // Dimensions telles qu'affichées, après application de l'orientation EXIF.
 export async function orientedSize(file) {
   const m = await sharp(file, { limitInputPixels: MAX_PIXELS }).metadata();
-  return { format: m.format, width: m.autoOrient?.width ?? m.width, height: m.autoOrient?.height ?? m.height, takenOn: takenOnFromExif(m.exif) };
+  return { format: m.format, width: m.autoOrient?.width ?? m.width, height: m.autoOrient?.height ?? m.height, takenOn: takenOnFromExif(m.exif), gps: gpsFromExif(m.exif) };
+}
+
+// Position GPS de la prise de vue (EXIF GPSInfo) → { lat, lon }, ou null. Sert seulement à proposer la ville
+// la plus proche : la position elle-même n'est jamais enregistrée.
+export function gpsFromExif(buffer) {
+  if (!buffer) return null;
+  let g;
+  try { g = exifReader(buffer).GPSInfo; } catch { return null; }
+  if (!g) return null;
+  const dms = v => (Array.isArray(v) && v.length >= 1 ? Number(v[0]) + Number(v[1] || 0) / 60 + Number(v[2] || 0) / 3600 : Number(v));
+  let lat = dms(g.GPSLatitude);
+  let lon = dms(g.GPSLongitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) return null;
+  if (String(g.GPSLatitudeRef).toUpperCase() === 'S') lat = -lat;
+  if (String(g.GPSLongitudeRef).toUpperCase() === 'W') lon = -lon;
+  return Math.abs(lat) <= 90 && Math.abs(lon) <= 180 ? { lat, lon } : null;
 }
 
 // Date de prise de vue de l'appareil (EXIF DateTimeOriginal) → AAAA-MM-JJ, ou null.
@@ -53,7 +69,7 @@ export async function importOriginal(storageDir, tmpFile) {
     file = `${crypto.randomUUID()}.${ext}`;
     fs.renameSync(tmpFile, path.join(originals, file));
     // Les variantes sont rendues ensuite par le service (filigrane et métadonnées du moment).
-    return { file, width: meta.width, height: meta.height, sha256, takenOn: meta.takenOn };
+    return { file, width: meta.width, height: meta.height, sha256, takenOn: meta.takenOn, gps: meta.gps };
   } catch (err) {
     if (file) removePhotoFiles(storageDir, file);
     throw err;

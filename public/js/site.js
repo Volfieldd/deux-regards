@@ -111,7 +111,7 @@
       shown = here();
       // Annonce du résultat et focus conservé sur le lien activé (WCAG 2.4.3, 4.1.3).
       const head = document.querySelector('#galerie h3');
-      const count = document.querySelector('#galerie .mono');
+      const count = document.querySelector('#galerie > .mono');
       const announce = document.querySelector('[data-announce]');
       if (announce && head) announce.textContent = `${head.textContent.trim()} : ${count ? count.textContent.trim().split(' · ')[0] : ''}`;
       const target = focusHref && [...document.querySelectorAll('a[data-filter]')].find(a => a.getAttribute('href') === focusHref);
