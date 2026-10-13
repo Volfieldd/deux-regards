@@ -5,7 +5,9 @@ import crypto from 'node:crypto';
 //   (IP + navigateur + clé aléatoire du jour), gardée en mémoire jusqu'à minuit puis oubliée ;
 // - la clé change chaque jour : impossible de suivre quelqu'un d'un jour à l'autre ;
 // - seuls des compteurs par jour sont écrits, et effacés au bout de 25 mois ;
-// - robots, visites des administrateurs et navigateurs « Do Not Track » / GPC ne sont pas comptés.
+// - robots, visites des administrateurs et navigateurs « Do Not Track » / GPC ne sont pas comptés ;
+// - pays : le code fourni par Cloudflare (en-tête CF-IPCountry), seulement derrière le proxy de confiance ;
+//   le site ne géolocalise rien lui-même et ne garde pas l'adresse.
 export const RETENTION_MONTHS = 25;
 const BOTS = /bot|crawl|spider|slurp|archiver|facebookexternalhit|embedly|whatsapp|telegram|discord|slack|preview|curl|wget|python|httpclient|go-http|java\/|headless|lighthouse|pingdom|uptime|monitor|scan/i;
 const MOBILE = /mobi|android|iphone|ipod|ipad/i;
@@ -34,13 +36,21 @@ export function sourceOf(referer, ownHost) {
   return siteOf(host).slice(0, 80);
 }
 
-export function createStats({ db, publicUrl, now = () => new Date(), log }) {
+// Pays du visiteur : code ISO à deux lettres donné par Cloudflare ; « XX » si absent, invalide, Tor (« T1 »),
+// ou si la requête ne vient pas du proxy de confiance (l'en-tête pourrait alors être inventé).
+export function countryOf(headers, trusted) {
+  const c = String(headers?.['cf-ipcountry'] || '').toUpperCase();
+  return trusted && /^[A-Z]{2}$/.test(c) && c !== 'XX' && c !== 'T1' ? c : 'XX';
+}
+
+export function createStats({ db, publicUrl, now = () => new Date(), log, trustCountry = false }) {
   const ownHost = (() => { try { return new URL(publicUrl).hostname.replace(/^www\./, ''); } catch { return ''; } })();
   const q = {
     page: db.prepare('INSERT INTO stats_pages (day, page, views) VALUES (?, ?, 1) ON CONFLICT(day, page) DO UPDATE SET views = views + 1'),
     photo: db.prepare('INSERT INTO stats_photos (day, photo_id, views) VALUES (?, ?, 1) ON CONFLICT(day, photo_id) DO UPDATE SET views = views + 1'),
     visitor: db.prepare('INSERT INTO stats_days (day, visitors, mobile) VALUES (?, 1, ?) ON CONFLICT(day) DO UPDATE SET visitors = visitors + 1, mobile = mobile + excluded.mobile'),
     source: db.prepare('INSERT INTO stats_sources (day, source, visits) VALUES (?, ?, 1) ON CONFLICT(day, source) DO UPDATE SET visits = visits + 1'),
+    country: db.prepare('INSERT INTO stats_countries (day, country, visitors) VALUES (?, ?, 1) ON CONFLICT(day, country) DO UPDATE SET visitors = visitors + 1'),
   };
   let day = null;
   let salt = null;
@@ -60,7 +70,7 @@ export function createStats({ db, publicUrl, now = () => new Date(), log }) {
     const limit = new Date(now());
     limit.setUTCMonth(limit.getUTCMonth() - RETENTION_MONTHS);
     const cut = parisDay(limit);
-    for (const t of ['stats_pages', 'stats_photos', 'stats_days', 'stats_sources']) db.prepare(`DELETE FROM ${t} WHERE day < ?`).run(cut);
+    for (const t of ['stats_pages', 'stats_photos', 'stats_days', 'stats_sources', 'stats_countries']) db.prepare(`DELETE FROM ${t} WHERE day < ?`).run(cut);
     return today;
   }
 
@@ -97,6 +107,7 @@ export function createStats({ db, publicUrl, now = () => new Date(), log }) {
             // Au-delà de 60 provenances différentes dans la journée : regroupées sous « autres ».
             if (source && !sourcesToday.has(source)) { if (sourcesToday.size >= LIMITS.sources) source = 'autres'; else sourcesToday.add(source); }
             if (source) q.source.run(today, source);
+            q.country.run(today, countryOf(request.headers, trustCountry));
           }
         })();
         return true;
@@ -129,6 +140,8 @@ export function createStats({ db, publicUrl, now = () => new Date(), log }) {
       GROUP BY photo_id ORDER BY views DESC, photo_id LIMIT ?`).all(from, to, limit),
     topPages: (from, to, limit = 10) => db.prepare(`SELECT page, SUM(views) AS views FROM stats_pages WHERE day BETWEEN ? AND ?
       GROUP BY page ORDER BY views DESC, page LIMIT ?`).all(from, to, limit),
+    countries: (from, to) => db.prepare(`SELECT country, SUM(visitors) AS visitors FROM stats_countries WHERE day BETWEEN ? AND ?
+      GROUP BY country ORDER BY visitors DESC, country`).all(from, to),
     sources: (from, to, limit = 10) => db.prepare(`SELECT source, SUM(visits) AS visits FROM stats_sources WHERE day BETWEEN ? AND ?
       GROUP BY source ORDER BY visits DESC, source LIMIT ?`).all(from, to, limit),
     // Vues d'une photo jour par jour, et son rang parmi les photos vues sur la période.

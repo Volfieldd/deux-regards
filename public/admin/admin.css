@@ -760,3 +760,10 @@ code.mono, .mono code { color: var(--ink2); }
 /* Instagram : consommation de l'API */
 .ig-usage { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
 #limites > label.inline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin: 6px 0; }
+
+/* Statistiques : carte des visiteurs par pays (bulles), liste à côté */
+.world { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.world .carte { width: 100%; height: auto; display: block; }
+.world .carte circle { fill: var(--accent); fill-opacity: .5; stroke: var(--accent); stroke-width: 1; }
+.world .carte circle:hover { fill-opacity: .8; }
+@media (max-width: 900px) { .world { grid-template-columns: 1fr; } }
