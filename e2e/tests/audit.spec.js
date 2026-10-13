@@ -72,17 +72,16 @@ test('J2 — compléter puis publier les photos importées', async ({ page }) =>
   save();
 });
 
-test('J2b — titres provisoires : confirmation avant publication', async ({ page }) => {
+test('J2b — titres provisoires : publication en un clic, titre provisoire rappelé', async ({ page }) => {
   await page.goto(lotUrl);
   const first = page.locator('input[data-field=title]').first();
   const original = await first.inputValue();
   await first.fill('DSCF0241'); await first.press('Tab');
   await expect(page.locator('tbody tr').first().locator('[data-state]')).toHaveText('✓ Enregistré');
+  await expect(page.locator('tbody tr').first().locator('[id^=prov-]')).toBeVisible();     // signalé avant le clic
   await page.locator('[data-bulk]').getByRole('button', { name: 'Publier' }).click();
-  await expect(page.locator('[data-confirm-publish]')).toBeVisible();
+  await expect(page.locator('.toast')).toContainText('nom du fichier comme titre');
   await shot(page, 'J2-04-titres-provisoires');
-  await page.getByRole('button', { name: 'Corriger les titres' }).click();
-  await expect(first).toBeFocused();
   await first.fill(original); await first.press('Tab');
   await expect(page.locator('tbody tr').first().locator('[data-state]')).toHaveText('✓ Enregistré');
 });

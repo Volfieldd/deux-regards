@@ -308,3 +308,21 @@ test('aujourd’hui : à finir, ouverture, rythme ; séries en planches de 3 pho
   const rue = /<article class="scard" id="serie-\d+"[^>]*>[\s\S]*?<\/article>/.exec(series)[0];
   assert.equal((rue.match(/<picture>/g) || []).length, 3);
 });
+
+test('publier en un clic : titre provisoire rappelé dans le message, Annuler possible, plus de fenêtre de confirmation', async t => {
+  const ctx = await admin(t);
+  const { id } = (await send(ctx, 'DSCF0777.jpg', await jpeg())).json();
+  await untilReady(ctx, [id]);
+  const named = ctx.db.prepare("SELECT id FROM photos WHERE status = 'published' LIMIT 1").pluck().get();
+  ctx.db.prepare("UPDATE photos SET status = 'draft' WHERE id = ?").run(named);
+  const one = (await ctx.json('/admin/photos/actions', { ids: [id], action: 'publish' })).json();
+  assert.equal(one.text, '1 photo publiée. Elle garde le nom du fichier comme titre : corrigez-le dans la photothèque.');
+  assert.equal(ctx.db.prepare('SELECT status FROM photos WHERE id = ?').pluck().get(id), 'published');
+  assert.deepEqual(one.undo, { action: 'statuses', map: { [id]: 'draft' } });
+  await ctx.json('/admin/photos/actions', one.undo);
+  const two = (await ctx.json('/admin/photos/actions', { ids: [id, named], action: 'publish' })).json();
+  assert.equal(two.text, '2 photos publiées. 1 garde le nom du fichier comme titre : corrigez-le dans la photothèque.');
+  const plain = (await ctx.json('/admin/photos/actions', { ids: [named], action: 'publish' })).json();
+  assert.equal(plain.text, '1 photo publiée.');
+  for (const url of ['/admin/photos', `/admin/photos/lot?ids=${id}`]) assert.doesNotMatch((await ctx.as({ url })).body, /data-confirm-publish/);
+});

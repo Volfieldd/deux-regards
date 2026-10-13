@@ -598,7 +598,10 @@ export default async function adminRoutes(app) {
           const before = repo.setStatuses(each(body.action === 'publish' ? 'published' : 'draft'));
           queued(before);
           const verb = body.action === 'publish' ? 'publiée' : 'repassée en brouillon';
-          return ok(`${photosWord} ${n > 1 ? verb.replace('publiée', 'publiées').replace('repassée', 'repassées') : verb}.`, { undo: { action: 'statuses', map: before } });
+          // Publication en un clic : un titre provisoire (nom du fichier) est rappelé dans le message.
+          const prov = body.action === 'publish' ? ids.filter(id => repo.photoView(id)?.provisional).length : 0;
+          const note = prov ? ` ${prov === n ? (n > 1 ? 'Elles gardent' : 'Elle garde') : `${prov} garde${prov > 1 ? 'nt' : ''}`} le nom du fichier comme titre : corrigez-le dans la photothèque.` : '';
+          return ok(`${photosWord} ${n > 1 ? verb.replace('publiée', 'publiées').replace('repassée', 'repassées') : verb}.${note}`, { undo: { action: 'statuses', map: before } });
         }
         case 'category': {
           if (!n) return ko(422, 'Aucune photo sélectionnée.');
