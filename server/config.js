@@ -65,6 +65,10 @@ export function loadConfig(env = process.env) {
   };
   instagram.configured = Boolean(instagram.appId && instagram.appSecret);
 
+  // Propositions de traduction (admin) : serveur LibreTranslate du réseau local (http://libretranslate:5000).
+  const translateUrl = env.TRANSLATE_URL || null;
+  if (translateUrl && !/^https?:\/\/[^\s/]+/.test(translateUrl)) throw new Error('TRANSLATE_URL doit être une adresse http:// ou https://');
+
   return {
     production,
     instagram,
@@ -82,6 +86,7 @@ export function loadConfig(env = process.env) {
     cookieSecret,
     localAuthToken,
     tsa: { url: tsaUrl, caFile: tsaCaFile },
+    translate: { url: translateUrl, apiKey: env.TRANSLATE_API_KEY || null },
     authRateLimit: Math.max(Number.parseInt(env.AUTH_RATE_LIMIT, 10) || 30, 1),
     oidc: {
       issuer,

@@ -18,6 +18,7 @@ import { setupAuth } from './auth.js';
 import { createVariantService } from './variants.js';
 import { createProofService } from './proofs.js';
 import { createStats } from './stats.js';
+import { createTranslator } from './translate.js';
 import { createInstagram } from './instagram.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -139,6 +140,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Preuves d'antériorité : empreintes et horodatage RFC 3161, repris en arrière-plan.
   // Mesure d'audience anonyme (voir server/stats.js).
   // Pays : l'en-tête de Cloudflare n'est cru que derrière un proxy de confiance (tunnel), sinon « inconnu ».
+  app.decorate('translator', createTranslator({ ...config.translate, log: app.log }));
   app.decorate('stats', createStats({ db, publicUrl: config.publicUrl, log: app.log, trustCountry: Boolean(config.trustProxy) }));
   // Partage Instagram : file de publication et envoi aux créneaux (voir server/instagram.js).
   app.decorate('instagram', createInstagram({ db, storageDir: config.storageDir, config, variants: app.variants, siteName: app.siteName, log: app.log, ...instagramOptions }));

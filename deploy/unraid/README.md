@@ -4,7 +4,7 @@ Ce dossier contient tout le nécessaire :
 
 | Fichier | Rôle |
 |---|---|
-| `compose.yaml` | la pile complète : site, sauvegarde quotidienne, tunnel Cloudflare (**méthode recommandée**) |
+| `compose.yaml` | la pile complète : site, sauvegarde quotidienne, tunnel Cloudflare, traducteur LibreTranslate (**méthode recommandée**) |
 | `env.example` | les réglages, à copier en `.env` de la pile |
 | `modeles/*.xml` | les mêmes conteneurs en modèles Unraid (onglet Docker), si vous préférez ne pas utiliser Compose |
 | `exporter-donnees.sh` | exporte les données d'une installation existante (serveur de test) pour les reprendre sur Unraid |
@@ -177,6 +177,17 @@ Les images servies ne sont pas dans l'archive : elles sont recalculées au déma
 ### Instagram (facultatif)
 
 Pour publier automatiquement sur Instagram : compte professionnel, application Meta, puis `INSTAGRAM_APP_ID` et `INSTAGRAM_APP_SECRET` dans le `.env` de la pile. Le pas à pas complet est dans l’aide de l’admin (**Aide → Instagram**) et dans le wiki ([Instagram](https://github.com/Volfieldd/deux-regards/wiki/Instagram)). L’adresse de retour à déclarer chez Meta est `https://www.nicephos.art/admin/instagram/callback`. Sans `INSTAGRAM_TOKEN_KEY`, le jeton est chiffré avec `COOKIE_SECRET` : changer ce secret impose de reconnecter le compte.
+
+### Traduction (propositions dans l'admin)
+
+Le conteneur `nicephos-traduction` (LibreTranslate, logiciel libre) propose les traductions anglaises et allemandes dans l'admin (bouton **Proposer une traduction** sous chaque champ « en anglais et en allemand »). Tout se passe sur le serveur : aucun texte ne part sur Internet, aucun compte, 0 €.
+
+- **Premier lancement :** il télécharge une seule fois ses modèles français, anglais et allemand (environ 300 Mo, gardés dans le volume `nicephos_traduction-modeles`) ; comptez quelques minutes avant que le bouton réponde. Ensuite il fonctionne hors ligne.
+- **Ressources :** environ 1 Go de mémoire (limite 2 Go), une seconde par texte, sans carte graphique.
+- **Réseau :** aucun port publié ; seul le site le joint (`TRANSLATE_URL=http://libretranslate:5000`, réglé par défaut dans la pile).
+- **Qualité :** une base à relire (« Six heures » peut devenir « Six hours »), jamais publiée sans vous.
+- **Ne pas l'utiliser :** mettez `TRANSLATE_URL=` (vide) dans le `.env` : le bouton disparaît. Vous pouvez alors supprimer le conteneur.
+- **Modèles Unraid** (sans Compose) : ajoutez le conteneur `libretranslate/libretranslate:v1.9.6` (variables `LT_LOAD_ONLY=fr,en,de` et `LT_DISABLE_WEB_UI=true`, dossier `/home/libretranslate/.local` à garder) sur le même réseau que le site, puis `TRANSLATE_URL` vers lui.
 
 ### Mettre à jour
 

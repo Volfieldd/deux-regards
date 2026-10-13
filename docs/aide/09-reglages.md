@@ -1,6 +1,6 @@
 # Réglages
 
-Accroche, introduction et « À propos » ont chacun leur version **anglaise et allemande**, facultative, repliée sous le champ français (« … en anglais et en allemand » ; l'état indique *facultatif*, *1 langue sur 2* ou *traduit*). Vide : les visiteurs anglais et allemands lisent le texte français (voir [Le site vu par les visiteurs](site-public)).
+Accroche, introduction et « À propos » ont chacun leur version **anglaise et allemande**, facultative, repliée sous le champ français (« … en anglais et en allemand » ; l'état indique *facultatif*, *1 langue sur 2* ou *traduit*). Vide : les visiteurs anglais et allemands lisent le texte français (voir [Le site vu par les visiteurs](site-public)). Le bouton **Proposer une traduction** pré-remplit un champ (voir [Photos](photos), « La fiche d'une photo »).
 
 | Champ | Où il apparaît |
 |---|---|

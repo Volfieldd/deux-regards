@@ -1,6 +1,7 @@
 # Déploiement : site + sauvegarde quotidienne, et en option le tunnel Cloudflare.
 #   docker compose up -d --build                 # site + sauvegardes
 #   docker compose --profile tunnel up -d        # + cloudflared (TUNNEL_TOKEN dans .env)
+#   docker compose --profile traduction up -d    # + LibreTranslate (TRANSLATE_URL=http://libretranslate:5000 dans .env)
 #
 # DONNÉES : DATA_DIR et BACKUP_DIR sont des dossiers de l'hôte (bind mounts), à créer avant le premier
 # lancement. Compose refuse de démarrer s'ils manquent (pas de dossier vide créé en silence) et
@@ -95,3 +96,24 @@ services:
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
+
+  # Propositions de traduction dans l'admin (profil « traduction ») : sur place, aucun texte ne sort du serveur.
+  # Premier lancement : téléchargement unique des modèles français, anglais et allemand (~300 Mo, gardés dans le volume).
+  libretranslate:
+    image: libretranslate/libretranslate:v1.9.6
+    profiles: [traduction]
+    restart: unless-stopped
+    environment:
+      LT_LOAD_ONLY: fr,en,de
+      LT_DISABLE_WEB_UI: "true"
+    logging: *logging
+    mem_limit: 2g
+    pids_limit: 256
+    volumes:
+      - traduction-modeles:/home/libretranslate/.local
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+volumes:
+  traduction-modeles:

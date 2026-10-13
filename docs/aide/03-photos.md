@@ -115,6 +115,8 @@ Si l’enregistrement échoue (session expirée…), l’ordre précédent revie
 | **Filigrane** | « Selon les réglages », ou « Jamais sur cette photo » (voir [Filigrane et EXIF](filigrane-exif)) |
 | **… en anglais et en allemand** | sous le titre, le lieu et la légende : leur version anglaise et allemande, facultative. Vide : la page anglaise ou allemande montre le texte français (une photo décrite seulement en anglais s'affiche en anglais partout ; voir [Le site vu par les visiteurs](site-public)). |
 
+**Proposer une traduction** (sous chaque champ anglais et allemand, si le traducteur de la pile est installé) remplit le champ d'après le texte français (ou, s'il est vide, l'autre traduction). Le traducteur tourne sur votre serveur : le texte ne part pas sur Internet. C'est une proposition : relisez-la et corrigez-la, puis enregistrez ; **Annuler** remet le texte d'avant.
+
 Cliquez sur **Enregistrer**. Les traductions se saisissent dans la fiche ; modifier un champ depuis la photothèque ou « Compléter et publier » ne les efface pas.
 
 L'aperçu à gauche montre l'image telle que servie (filigrane compris) et ses dimensions. Pour une photo publiée, **voir sur le site** l'ouvre dans la galerie.
