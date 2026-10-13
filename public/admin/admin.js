@@ -484,8 +484,9 @@ const activity = (() => {
     const n = checked().length;
     count.textContent = n ? `${n} sélectionnée${n > 1 ? 's' : ''}` : 'Aucune photo sélectionnée';
     if (!batch && !library) bar.hidden = n === 0;
-    document.dispatchEvent(new CustomEvent('selection', { detail: { n } }));
+    // D'abord l'état général des boutons, puis l'inspecteur l'affine (ex. « Déjà publiée » reste désactivé).
     $$('button[name=action]', bar).forEach(b => { b.disabled = n === 0; });
+    document.dispatchEvent(new CustomEvent('selection', { detail: { n } }));
     if (allBox) { allBox.checked = n > 0 && n === boxes().length; allBox.indeterminate = n > 0 && n < boxes().length; }
   }
   document.addEventListener('change', e => { if (e.target.matches('input.chk[name=ids][form=bulk]')) update(); });
@@ -511,7 +512,8 @@ const activity = (() => {
   });
   update();
 
-  // Confirmation avant suppression, et avant de publier des titres provisoires.
+  // Confirmation avant suppression. La publication, elle, se fait en un clic : le titre provisoire est
+  // signalé dans la page avant le clic, et le message qui suit propose Annuler.
   const confirmDelete = n => new Promise(resolve => {
     const d = $('[data-confirm-delete]');
     if (!d) return resolve(confirm(`Supprimer ${plural(n, 'photo')} ?`));
@@ -519,20 +521,6 @@ const activity = (() => {
     const done = v => { d.close(); resolve(v); };
     $('[data-del-ok]', d).onclick = () => done(true);
     $('[data-del-cancel]', d).onclick = () => done(false);
-    d.oncancel = () => resolve(false);
-    d.showModal();
-  });
-  const confirmPublish = rows => new Promise(resolve => {
-    rows = rows.filter(Boolean);
-    const title = r => r.dataset.title || window.__photoTitle?.(Number(r.dataset.id)) || '';
-    const prov = rows.filter(r => r.hasAttribute('data-provisional'));
-    const d = $('[data-confirm-publish]');
-    if (!prov.length || !d) return resolve(true);
-    $('[data-pub-count]', d).textContent = plural(rows.length, 'photo');
-    $('[data-pub-prov]', d).textContent = prov.length > 1 ? `${prov.length} photos ont` : '1 photo a';
-    $('[data-pub-names]', d).textContent = prov.map(r => `« ${title(r)} »`).join(', ');
-    $('[data-pub-ok]', d).onclick = () => { d.close(); resolve(true); };
-    $('[data-pub-fix]', d).onclick = () => { d.close(); resolve(false); ($('input[data-field=title]', prov[0]) || $('[data-titles] input') || $('[data-one-field=title]'))?.focus(); };
     d.oncancel = () => resolve(false);
     d.showModal();
   });
@@ -604,7 +592,6 @@ const activity = (() => {
     if (action === 'category') Object.assign(body, { category_id: catSelect.value, new_category: newName.value });
     if (action === 'fields') Object.assign(body, { place: bar.elements.place.value, taken_on: bar.elements.taken_on.value });
     if (action === 'delete') { if (!(await confirmDelete(ids.length))) return; body.confirm = true; }
-    if (action === 'publish' && (batch || library) && !(await confirmPublish(checked().map(b => b.closest('tr, li'))))) return;
     const { ids: _, action: __, back: ___, ...extra } = body;
     run(action, extra, e.submitter);
   });

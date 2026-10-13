@@ -80,9 +80,3 @@
   <p class="hint">Légende, filigrane et preuve d’antériorité : depuis la fiche de chaque photo (Photos › titre).</p>
 </form>
 
-<dialog class="dialog" data-confirm-publish aria-labelledby="pub-title" aria-describedby="pub-text">
-  <h2 id="pub-title">Publier <span data-pub-count></span> ?</h2>
-  <p id="pub-text"><span data-pub-prov></span> encore leur <strong>titre provisoire</strong> : <span data-pub-names></span>. Elles apparaîtront ainsi sur le site.</p>
-  <p class="actions"><button class="btn" type="button" data-pub-fix autofocus>Corriger les titres</button><button class="btn ghost" type="button" data-pub-ok>Publier quand même</button></p>
-  <p class="hint">Les photos restent en brouillon tant que vous ne confirmez pas.</p>
-</dialog>

@@ -51,7 +51,7 @@ Toutes les photos du lot sont réunies sur un seul écran : titre, série, lieu 
   - Sur téléphone, elle reste en haut de la page, sans suivre le défilement. Ses champs sont repliés : touchez **Série, lieu ou date pour toutes les cochées…** pour les ouvrir. Ils changent toutes les photos cochées d’un coup.
 
 En pratique, pour un lot : tapez les titres, le lieu une fois dans la barre, puis **Publier**.
-- **Publier des photos à titre provisoire :** une fenêtre les nomme et propose d'abord **Corriger les titres**. Rien n'est publié sans votre confirmation.
+- **Publier des photos à titre provisoire :** un seul clic suffit. Le titre provisoire est signalé avant (« Titre provisoire (nom du fichier) » sous le titre) et rappelé dans le message qui suit, avec **Annuler** pour revenir en arrière.
 
 Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir plus bas).
 

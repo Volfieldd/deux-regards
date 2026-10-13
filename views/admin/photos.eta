@@ -183,8 +183,3 @@
   <p>Les originaux et toutes leurs images seront effacés. Cette action est définitive.</p>
   <p class="actions"><button class="btn danger" type="button" data-del-ok>Supprimer définitivement</button><button class="btn ghost" type="button" data-del-cancel autofocus>Annuler</button></p>
 </dialog>
-<dialog class="dialog" data-confirm-publish aria-labelledby="pub-title" aria-describedby="pub-text">
-  <h2 id="pub-title">Publier <span data-pub-count></span> ?</h2>
-  <p id="pub-text"><span data-pub-prov></span> encore leur <strong>titre provisoire</strong> : <span data-pub-names></span>. Elles apparaîtront ainsi sur le site.</p>
-  <p class="actions"><button class="btn" type="button" data-pub-fix autofocus>Corriger les titres</button><button class="btn ghost" type="button" data-pub-ok>Publier quand même</button></p>
-</dialog>
