@@ -458,6 +458,7 @@ export default async function adminRoutes(app) {
     if (page === 'accueil') return 'Accueil';
     if (page === 'a-propos') return 'À propos';
     if (page === 'droits') return 'Droits d’utilisation';
+    if (page === 'carte') return 'Carte';
     const [kind, slug] = page.split(':');
     if (kind === 'serie') return `Série « ${categories.find(c => c.slug === slug)?.name || slug} »`;
     if (kind === 'auteur') return `Regard de ${authors.find(a => a.slug === slug)?.name || slug}`;
@@ -1132,11 +1133,13 @@ export default async function adminRoutes(app) {
   app.get('/admin/aide', async (request, reply) => render(request, reply, 'help', { title: 'Aide', help: help || loadHelp() }));
 
   // ---------- réglages ----------
+  const mapCounts = app.db.prepare("SELECT COUNT(*) AS mapCount, COUNT(DISTINCT city_id) AS mapCities FROM photos WHERE status = 'published' AND on_map = 1 AND city_id IS NOT NULL");
   const defaultsNow = () => rightsDefaults(repo.authors().map(a => a.name), app.siteName());
   app.get('/admin/reglages', async (request, reply) => render(request, reply, 'settings', {
     heroMax: 8,
     title: 'Réglages', settings: repo.settings(), published: repo.photos({ status: 'published' }), defaultName: app.config.siteName,
     rights: LANGS.map(l => ({ lang: l, ...RIGHTS[l] })), rightsDefaults: defaultsNow(),
+    ...mapCounts.get(),
   }));
 
   app.post('/admin/reglages', write, async (request, reply) => {

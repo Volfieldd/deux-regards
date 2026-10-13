@@ -239,4 +239,142 @@
     });
     if (several) onSwipe(viewer.querySelector('.vimg'), step => go(step > 0 ? 'next' : 'prev'));
   }
+
+  // ----- carte : zoom (boutons, pincement, Ctrl + molette), déplacement, vignettes regroupées -----
+  // Sans ce script : carte fixe, chaque vignette mène à son lieu dans la liste. Le zoom change le viewBox ; les
+  // vignettes gardent leur taille à l'écran, et celles qui se chevauchent n'en font qu'une (nombre cumulé), qu'un
+  // clic agrandit.
+  const carte = document.querySelector('[data-carte]');
+  if (carte) {
+    const vue = carte.querySelector('[data-carte-vue]');
+    const svg = carte.querySelector('[data-carte-svg]');
+    const [, , W, H] = svg.getAttribute('viewBox').split(' ').map(Number);
+    const pins = [...svg.querySelectorAll('[data-pin]')].map(el => ({
+      el, x: Number(el.dataset.x), y: Number(el.dataset.y), n: Number(el.dataset.n), name: el.dataset.name,
+      label: el.getAttribute('aria-label'), href: el.getAttribute('href'),
+      inner: el.querySelector('[data-pin-in]'), count: el.querySelector('[data-pin-count]'),
+    })).sort((a, b) => b.n - a.n);
+    const btn = k => carte.querySelector(`[data-carte-zoom="${k}"]`);
+    const ZMAX = 10;                                           // fond 1:110m : au-delà, les côtes deviennent grossières
+    let view = { x: 0, y: 0, w: W };
+
+    const clamp = v => {
+      const w = Math.min(W, Math.max(W / ZMAX, v.w));
+      const h = (w * H) / W;
+      return { w, x: Math.min(W - w, Math.max(0, v.x)), y: Math.min(H - h, Math.max(0, v.y)) };
+    };
+    function render() {
+      const h = (view.w * H) / W;
+      svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${h}`);
+      const px = svg.clientWidth || W;
+      const unit = view.w / px;                                // unités de carte par pixel
+      const s = ((px < 520 ? 13 : 16) * unit) / 15;            // rayon de la vignette : 13 ou 16 px
+      const near = 30 * s * 0.9;                               // deux vignettes qui se chevauchent
+      const taken = new Set();
+      for (const p of pins) {
+        if (taken.has(p)) continue;
+        const group = pins.filter(q => !taken.has(q) && Math.hypot(q.x - p.x, q.y - p.y) < near);
+        group.forEach(q => taken.add(q));
+        group.forEach(q => { if (q !== p) q.el.setAttribute('display', 'none'); });
+        const n = group.reduce((t, q) => t + q.n, 0);
+        p.el.removeAttribute('display');
+        p.el.dataset.n = n;
+        p.count.textContent = n;
+        p.group = group.length > 1 ? group : null;
+        p.el.setAttribute('aria-label', p.group
+          ? `${p.name} et ${group.length - 1} autre${group.length > 2 ? 's' : ''} lieu${group.length > 2 ? 'x' : ''} : ${n} photos. Agrandir`
+          : p.label);
+        p.inner.setAttribute('transform', `scale(${s})`);
+      }
+      const zoomed = view.w < W - 0.5;
+      vue.classList.toggle('zoomed', zoomed);
+      btn('out').disabled = !zoomed;
+      btn('reset').disabled = !zoomed;
+      btn('in').disabled = view.w <= W / ZMAX + 0.01;
+    }
+    // Zoom de facteur f autour d'un point de la carte (en unités de carte).
+    function zoomAt(f, ux, uy) {
+      const w = Math.min(W, Math.max(W / ZMAX, view.w / f));
+      const k = w / view.w;
+      view = clamp({ w, x: ux - (ux - view.x) * k, y: uy - (uy - view.y) * k });
+      render();
+    }
+    const toMap = (cx, cy) => {
+      const r = svg.getBoundingClientRect();
+      return [view.x + ((cx - r.left) * view.w) / r.width, view.y + ((cy - r.top) * view.w) / r.width];
+    };
+    const centre = () => [view.x + view.w / 2, view.y + (view.w * H) / W / 2];
+
+    carte.addEventListener('click', e => {
+      const b = e.target.closest('[data-carte-zoom]');
+      if (!b) return;
+      if (b.dataset.carteZoom === 'reset') { view = { x: 0, y: 0, w: W }; render(); }
+      else zoomAt(b.dataset.carteZoom === 'in' ? 2 : 0.5, ...centre());
+    });
+
+    // Vignette regroupée : agrandit jusqu'à séparer les lieux ; sinon, le lieu dans la liste.
+    let moved = false;
+    svg.addEventListener('click', e => {
+      if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; return; }
+      const el = e.target.closest('[data-pin]');
+      const p = el && pins.find(q => q.el === el);
+      if (!p?.group) return;
+      e.preventDefault();
+      const xs = p.group.map(q => q.x), ys = p.group.map(q => q.y);
+      const spanW = Math.max(Math.max(...xs) - Math.min(...xs), ((Math.max(...ys) - Math.min(...ys)) * W) / H);
+      // Assez près pour séparer les deux lieux les plus proches, sans perdre les autres du groupe.
+      const d = Math.min(...p.group.flatMap((a, i) => p.group.slice(i + 1).map(b => Math.hypot(a.x - b.x, a.y - b.y))));
+      const px = svg.clientWidth || W;
+      const sep = (d * px) / ((px < 520 ? 13 : 16) * 2 + 8);
+      const w = Math.max(W / ZMAX, spanW * 1.3, Math.min(view.w / 2, sep));
+      view = clamp({ w, x: (Math.min(...xs) + Math.max(...xs)) / 2 - w / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 - (w * H) / W / 2 });
+      render();
+    }, true);
+
+    // Ctrl + molette (et pincement du pavé tactile) : zoom ; la molette seule fait défiler la page.
+    vue.addEventListener('wheel', e => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      zoomAt(Math.exp(-e.deltaY * 0.01), ...toMap(e.clientX, e.clientY));
+    }, { passive: false });
+
+    // Glisser (carte agrandie) et pincement à deux doigts.
+    const pts = new Map();
+    let last = null;
+    const gesture = () => {
+      const [a, b] = [...pts.values()];
+      return b ? { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, d: Math.hypot(a.x - b.x, a.y - b.y) } : { x: a.x, y: a.y, d: 0 };
+    };
+    vue.addEventListener('pointerdown', e => {
+      if (e.button !== 0 || pts.size >= 2) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      last = gesture();
+      moved = false;
+    });
+    vue.addEventListener('pointermove', e => {
+      if (!pts.has(e.pointerId)) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const g = gesture();
+      if (pts.size === 1 && view.w >= W - 0.5) { last = g; return; } // monde entier : rien à déplacer
+      if (!moved && Math.hypot(g.x - last.x, g.y - last.y) < 4 && Math.abs(g.d - last.d) < 4) return;
+      if (!moved) { moved = true; vue.classList.add('dragging'); try { vue.setPointerCapture(e.pointerId); } catch { /* déjà relâché */ } }
+      const r = svg.getBoundingClientRect();
+      const k = view.w / r.width;
+      view = clamp({ ...view, x: view.x - (g.x - last.x) * k, y: view.y - (g.y - last.y) * k });
+      if (pts.size === 2 && last.d > 0 && g.d > 0) zoomAt(g.d / last.d, ...toMap(g.x, g.y));
+      else render();
+      last = g;
+    });
+    const up = e => {
+      if (!pts.delete(e.pointerId)) return;
+      vue.classList.remove('dragging');
+      last = pts.size ? gesture() : null;
+      // Le clic qui suit un glissé ne doit pas ouvrir une vignette.
+      if (moved && e.type === 'pointercancel') moved = false;
+    };
+    vue.addEventListener('pointerup', up);
+    vue.addEventListener('pointercancel', up);
+    addEventListener('resize', render);
+    render();
+  }
 })();

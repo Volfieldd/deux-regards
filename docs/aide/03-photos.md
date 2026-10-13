@@ -135,7 +135,7 @@ L'original, les images du site et la preuve d'antériorité sont effacés, et la
 
 ## Ville et carte du site
 
-Chaque photo peut être rattachée à une **ville** : c’est ce qui la placera sur la future **carte du site** (page « Carte », désactivée par défaut).
+Chaque photo peut être rattachée à une **ville** : c’est ce qui la place sur la **carte du site** (page « Carte », désactivée par défaut : voir [Réglages](reglages)).
 
 - **Champ Ville** (fiche de la photo, et panneau de la photothèque) : commencez à taper (« Ang… »), choisissez dans la liste (↑ ↓ puis Entrée, ou un clic). Villes de plus de 5 000 habitants, partout dans le monde ; les grandes villes se trouvent aussi sous leur nom français (« Londres », « Munich »). Pour un lieu précis (« Baie de Monterey »), gardez le champ **Lieu** : il reste libre et c’est lui qui s’affiche sur le site.
 - **Proposée d’après le GPS** : si l’original contient la position de la prise de vue (téléphones, boîtiers récents), la ville la plus proche est remplie à l’import, avec la mention « Proposée d’après le GPS de la photo : vérifiez-la ». Les photos importées avant cette fonction reçoivent aussi leur proposition. Une ville choisie à la main n’est jamais remplacée.

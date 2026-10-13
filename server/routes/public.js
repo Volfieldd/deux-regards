@@ -4,6 +4,8 @@ import { widthsFor, variantName } from '../images.js';
 import { pad } from '../format.js';
 import { picture } from '../picture.js';
 import { RIGHTS, LANGS, rightsText } from '../rights.js';
+import { project, MAP } from '../geo/projection.js';
+import { countryName, ATTRIBUTION } from '../geo/cities.js';
 
 const HERO_COUNT = 5;
 export default async function publicRoutes(app) {
@@ -113,6 +115,40 @@ export default async function publicRoutes(app) {
     });
   });
 
+  // Page « Carte » : les photos publiées que leur auteur a mises sur la carte, groupées par ville (jamais de
+  // position exacte). Facultative : tant qu'elle n'est pas publiée (Réglages), introuvable pour les visiteurs et
+  // visible en aperçu par les auteurs connectés.
+  const mapEnabled = () => repo.settings().map_page === true;
+  const thumb = p => `/media/${variantName(p.file, widthsFor(p.width)[0], 'webp', p.variant_key)}`;
+  function mapPlaces() {
+    const byCity = new Map();
+    for (const p of repo.publishedPhotos().filter(p => p.on_map && p.city_id)) {
+      if (!byCity.has(p.city_id)) {
+        const [x, y] = project(p.city_lat, p.city_lon);
+        byCity.set(p.city_id, { id: p.city_id, name: p.city_name, country: countryName(p.city_cc), x, y, photos: [] });
+      }
+      byCity.get(p.city_id).photos.push(p);
+    }
+    // Les villes les plus fournies d'abord ; à égalité, par nom.
+    return [...byCity.values()].map(c => ({ ...c, cover: c.photos[0], thumb: thumb(c.photos[0]) }))
+      .sort((a, b) => b.photos.length - a.photos.length || a.name.localeCompare(b.name, 'fr'));
+  }
+  app.get('/carte', async (request, reply) => {
+    const enabled = mapEnabled();
+    if (!enabled && !request.session) return reply.callNotFound();
+    const siteName = app.siteName();
+    const settings = repo.settings();
+    const places = mapPlaces();
+    if (enabled) app.stats.hit(request, { page: 'carte' });
+    if (!enabled) reply.header('x-robots-tag', 'noindex');
+    return reply.render('carte', {
+      ...base, siteName, settings, places, map: MAP, preview: !enabled, credit: ATTRIBUTION,
+      count: places.reduce((n, c) => n + c.photos.length, 0),
+      pageTitle: `Carte · ${siteName}`, canonical: '/carte',
+      description: places.length ? `Les lieux des photos : ${places.slice(0, 6).map(c => c.name).join(', ')}${places.length > 6 ? '…' : ''}` : (settings.tagline || ''),
+    });
+  });
+
   // Conditions d'utilisation des photos : cible des mentions IPTC (WebStatement, LicensorURL).
   // Français à /droits, traductions à /droits/en et /droits/de (voir server/rights.js).
   async function rightsPage(request, reply, lang) {
@@ -158,6 +194,7 @@ export default async function publicRoutes(app) {
       ...repo.categories().filter(c => photos.some(p => p.category_slug === c.slug)).map(c => ({ loc: galleryUrl({ serie: c.slug }) })),
       ...repo.authors().filter(a => photos.some(p => p.author_slug === a.slug)).map(a => ({ loc: galleryUrl({ regard: a.slug }) })),
       ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at) })),
+      ...(mapEnabled() ? [{ loc: '/carte' }] : []),
       { loc: '/a-propos' }, ...LANGS.map(l => ({ loc: RIGHTS[l].path })),
     ];
     const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');

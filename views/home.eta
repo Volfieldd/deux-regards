@@ -12,7 +12,7 @@
   <div class="veil"></div>
   <header class="wrap">
     <%~ include('./brand', it) %>
-    <nav class="eyebrow" aria-label="Navigation"><a href="#series">Séries</a><a href="#galerie">Galerie</a><a href="/a-propos">À propos</a></nav>
+    <nav class="eyebrow" aria-label="Navigation"><a href="#series">Séries</a><a href="#galerie">Galerie</a><% if (it.mapPage) { %><a href="/carte">Carte</a><% } %><a href="/a-propos">À propos</a></nav>
   </header>
 <% it.hero.forEach((p, i) => { %>
   <div class="cap wrap<%= i === 0 ? ' on' : '' %>" data-h="<%= i %>">

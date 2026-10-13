@@ -1,7 +1,7 @@
 <% layout('./layout') %>
 <header class="top wrap">
   <%~ include('./brand', it) %>
-  <nav class="eyebrow" aria-label="Navigation"><a href="/#series">Séries</a><a href="/#galerie">Galerie</a><a href="/a-propos" aria-current="page">À propos</a></nav>
+  <nav class="eyebrow" aria-label="Navigation"><a href="/#series">Séries</a><a href="/#galerie">Galerie</a><% if (it.mapPage) { %><a href="/carte">Carte</a><% } %><a href="/a-propos" aria-current="page">À propos</a></nav>
 </header>
 <main class="about wrap">
 <% if (it.brand && it.brand.logotype) { %>

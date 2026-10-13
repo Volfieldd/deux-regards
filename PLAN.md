@@ -188,7 +188,11 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 16. Ville des photos, préparation de la carte (fait)
 - Liste des villes GeoNames (plus de 5 000 habitants, CC BY 4.0) embarquée (`server/geo/villes.tsv`, `scripts/villes.mjs`) ; recherche au fil de la frappe et ville d'une position GPS (`server/geo/cities.js`).
 - Champ Ville (fiche, photothèque), ville proposée d'après le GPS à l'import et pour les photos existantes (`server/geo/locate.js`) ; seule la ville est gardée ; case « Afficher sur la carte » décochée par défaut, actions groupées (migration 012).
-- Suite : page publique « Carte » (désactivée par défaut), miniatures sur les villes, zoom et déplacement.
+
+### 17. Page publique « Carte » (fait)
+- Réglage `map_page` (faux par défaut) : `/carte` en 404 pour les visiteurs tant qu'elle n'est pas publiée, aperçu pour les auteurs connectés ; lien « Carte » dans le menu (FR / EN / DE sur `/droits`) et entrée de `sitemap.xml` une fois publiée ; vue comptée dans les statistiques (`carte`).
+- Fond `public/carte-terre.svg` (symboles sans couleur : le thème donne l'encre) et réglages de la projection (`server/geo/projection.json`, appliqués par `server/geo/projection.js`), générés par `scripts/carte-monde.mjs` ; villes placées côté serveur.
+- Vignettes rondes dans le SVG (sans JS : carte fixe, liens vers la liste des lieux) ; `site.js` : zoom par le viewBox (×10 au plus), taille des vignettes constante, regroupement des vignettes qui se chevauchent, pincement, Ctrl + molette, glisser.
 
 ## Côté Zitadel (à faire une fois)
 

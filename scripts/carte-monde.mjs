@@ -5,7 +5,8 @@
 // Données : Natural Earth (domaine public), redistribuées par world-atlas (ISC). Outils non installés avec le
 // site ; dans un dossier temporaire :
 //   npm i world-atlas@2.0.2 topojson-client@3.1.0 d3-geo@3.1.1 i18n-iso-countries@7.11.0
-//   node /chemin/du/depot/scripts/carte-monde.mjs   (écrit carte-monde.svg et pays-centres.json dans le dossier courant)
+//   node /chemin/du/depot/scripts/carte-monde.mjs   (écrit carte-monde.svg, pays-centres.json, carte-terre.svg et projection.json
+//   dans le dossier courant : les copier dans public/admin/, server/, public/ et server/geo/)
 import fs from 'node:fs';
 import { feature } from 'topojson-client';
 import { geoNaturalEarth1, geoPath, geoCentroid, geoArea } from 'd3-geo';
@@ -33,4 +34,8 @@ for (const f of feature(c50, c50.objects.countries).features) {
   if (p && Number.isFinite(p[0])) out[a2] = [Math.round(p[0]), Math.round(p[1])];
 }
 fs.writeFileSync('pays-centres.json', JSON.stringify(out));
+// Page publique « Carte » : même fond, en symbole sans couleur (le thème du site la donne), et réglages de la
+// projection pour placer les villes côté serveur (server/geo/projection.js).
+fs.writeFileSync('carte-terre.svg', `<svg xmlns="http://www.w3.org/2000/svg">\n<!-- Fond de carte : Natural Earth 1:110m (domaine public), via world-atlas (ISC). Généré par scripts/carte-monde.mjs. -->\n<symbol id="terre" viewBox="0 0 ${W} ${H}"><path d="${landD}"/></symbol>\n<symbol id="globe" viewBox="0 0 ${W} ${H}"><path d="${sphere}"/></symbol>\n</svg>\n`);
+fs.writeFileSync('projection.json', JSON.stringify({ width: W, height: H, scale: projection.scale(), translate: projection.translate() }));
 console.log('pays :', Object.keys(out).length, '| carte :', (fs.statSync('carte-monde.svg').size / 1024).toFixed(0), 'Ko', '| FR', out.FR, 'US', out.US, 'DE', out.DE, 'JP', out.JP, 'SG', out.SG, 'MT', out.MT);

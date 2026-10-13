@@ -34,6 +34,15 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
 
 - **À propos :** logo complet, accroche, texte, biographies des auteurs.
 - **Droits d'utilisation :** conditions, contact et information sur la mesure d'audience, en trois langues : `/droits` (français), `/droits/en` (anglais), `/droits/de` (allemand). Un sélecteur **Français · English · Deutsch** en haut de la page passe de l'une à l'autre. Les textes se règlent dans [Réglages](reglages).
+- **Carte** (si vous l'avez publiée dans les [Réglages](reglages)) : une mappemonde aux couleurs du thème, avec la vignette ronde d'une photo sur chaque ville et, en pastille, le nombre de photos de cette ville. Les villes trop proches pour être distinguées se regroupent (nombre cumulé) ; un clic sur le groupe agrandit la carte jusqu'à les séparer. Sous la carte, la liste des lieux avec leurs photos ; un clic sur une vignette de la carte y mène.
+
+  | Geste | Effet |
+  |---|---|
+  | **+**, **−**, **Monde** | zoom avant, arrière, retour au monde entier |
+  | pincement (téléphone), **Ctrl + molette** ou pincement du pavé tactile | zoom à l'endroit visé |
+  | glisser (carte agrandie) | se déplacer |
+
+  La molette seule et le glissé vertical sur la carte au monde entier font défiler la page, comme ailleurs. Sans JavaScript, la carte est fixe et la liste des lieux reste complète.
 - **Page introuvable :** pour une adresse inconnue ou une photo dépubliée.
 
 ## Toujours
