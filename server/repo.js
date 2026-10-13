@@ -1,6 +1,6 @@
 import { monthYear } from './format.js';
 
-const PHOTO_COLUMNS = `p.id, p.slug, p.title, p.place, p.taken_on, p.legend, p.status, p.position, p.file, p.width, p.height, p.variant_key, p.updated_at,
+const PHOTO_COLUMNS = `p.id, p.slug, p.title, p.place, p.taken_on, p.legend, p.status, p.position, p.file, p.width, p.height, p.variant_key, p.updated_at, p.published_at,
   c.slug AS category_slug, c.name AS category, a.slug AS author_slug, a.name AS author`;
 
 // n : rang de la photo parmi toutes les photos publiées, quel que soit le filtre (N°01, N°02… sans trou).
@@ -17,10 +17,12 @@ export function createRepo(db) {
   };
 
   return {
-    publishedPhotos({ author, category } = {}) {
-      return q.published.all().map(decorate)
-        .filter(p => (!author || p.author_slug === author) && (!category || p.category_slug === category))
-        .map((p, i) => ({ ...p, index: i }));
+    // ordre : « recentes » = date de première publication, la plus récente d'abord ; sinon l'ordre de la galerie.
+    publishedPhotos({ author, category, ordre } = {}) {
+      const list = q.published.all().map(decorate)
+        .filter(p => (!author || p.author_slug === author) && (!category || p.category_slug === category));
+      if (ordre === 'recentes') list.sort((a, b) => (b.published_at || '').localeCompare(a.published_at || '') || b.id - a.id);
+      return list.map((p, i) => ({ ...p, index: i }));
     },
     categories: () => q.categories.all(),
     authors: () => q.authors.all(),

@@ -170,6 +170,10 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Décodage unique de l'original puis variantes dérivées et encodées en parallèle ; `IMAGE_THREADS` (4) et jemalloc dans l'image ; `IMPORT_CONCURRENCY` (2 photos à la fois) : 1,5 s par photo, ×7 sur un lot.
 - Envoi : 3 photos à la fois au plus et 100 Mo en cours d'envoi au plus ; 90 Mo par fichier (une requête par photo, sous le plafond de 100 Mo par requête de Cloudflare).
 
+### 12. Galerie par ordre de publication (fait)
+- Sélecteur « Ordre : Sélection · Plus récentes » au-dessus de la grille, cumulable avec les filtres, suivi par la visionneuse ; `?ordre=recentes`.
+- Colonne `photos.published_at` (migration 009), posée par déclencheurs à la première publication ; photos déjà publiées : date d'import.
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

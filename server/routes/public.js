@@ -1,5 +1,5 @@
 import { createRepo } from '../repo.js';
-import { galleryUrl, photoUrl } from '../urls.js';
+import { galleryUrl, photoUrl, ORDRES } from '../urls.js';
 import { widthsFor, variantName } from '../images.js';
 import { pad } from '../format.js';
 import { picture } from '../picture.js';
@@ -16,7 +16,8 @@ export default async function publicRoutes(app) {
   function readFilter(query, authors, categories) {
     const regard = authors.some(a => a.slug === query.regard) ? query.regard : undefined;
     const serie = categories.some(c => c.slug === query.serie) ? query.serie : undefined;
-    return { regard, serie };
+    const ordre = ORDRES.includes(query.ordre) ? query.ordre : undefined;
+    return { regard, serie, ordre };
   }
 
   function renderGallery(reply, filter) {
@@ -26,7 +27,7 @@ export default async function publicRoutes(app) {
     const categories = repo.categories();
     const settings = repo.settings();
     const all = repo.publishedPhotos();
-    const photos = repo.publishedPhotos({ author: filter.regard, category: filter.serie });
+    const photos = repo.publishedPhotos({ author: filter.regard, category: filter.serie, ordre: filter.ordre });
     const byRegard = repo.publishedPhotos({ author: filter.regard });
 
     const heroSlugs = Array.isArray(settings.hero) ? settings.hero : [];
@@ -49,7 +50,7 @@ export default async function publicRoutes(app) {
       ...helpers, filter, settings, hero, series, regards, photos, total: all.length,
       categoriesCount: categories.length, activeAuthor, activeSerie,
       pageTitle: title ? `${title} · ${siteName}` : siteName,
-      canonical: galleryUrl(filter),
+      canonical: galleryUrl({ regard: filter.regard, serie: filter.serie }),   // même contenu, quel que soit l'ordre
       description: settings.tagline || '',
       ogImage: hero[0] && `/media/${variantName(hero[0].file, widthsFor(hero[0].width).at(-1), 'webp', hero[0].variant_key)}`,
     });
@@ -64,24 +65,24 @@ export default async function publicRoutes(app) {
   app.get('/serie/:slug', async (request, reply) => {
     if (!repo.categories().some(c => c.slug === request.params.slug)) return reply.callNotFound();
     app.stats.hit(request, { page: `serie:${request.params.slug}` });
-    return renderGallery(reply, { serie: request.params.slug });
+    return renderGallery(reply, { serie: request.params.slug, ordre: readFilter(request.query, [], []).ordre });
   });
 
   app.get('/auteur/:slug', async (request, reply) => {
     if (!repo.authors().some(a => a.slug === request.params.slug)) return reply.callNotFound();
     app.stats.hit(request, { page: `auteur:${request.params.slug}` });
-    return renderGallery(reply, { regard: request.params.slug });
+    return renderGallery(reply, { regard: request.params.slug, ordre: readFilter(request.query, [], []).ordre });
   });
 
   app.get('/photo/:slug', async (request, reply) => {
     const siteName = app.siteName();
     const helpers = { ...base, siteName };
     let filter = readFilter(request.query, repo.authors(), repo.categories());
-    let list = repo.publishedPhotos({ author: filter.regard, category: filter.serie });
+    let list = repo.publishedPhotos({ author: filter.regard, category: filter.serie, ordre: filter.ordre });
     let i = list.findIndex(p => p.slug === request.params.slug);
     if (i === -1 && (filter.regard || filter.serie)) {
-      filter = {};
-      list = repo.publishedPhotos();
+      filter = { ordre: filter.ordre };
+      list = repo.publishedPhotos({ ordre: filter.ordre });
       i = list.findIndex(p => p.slug === request.params.slug);
     }
     if (i === -1) return reply.callNotFound();
