@@ -162,20 +162,28 @@ a.idx:hover { padding-left: 10px; }
 footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 64px calc(env(safe-area-inset-bottom, 0px) + 64px); color: var(--mute); border-top: 1px solid var(--rule); margin-top: 40px; }
 
 /* ---------- page photo · B ---------- */
-.viewer { min-height: 100vh; min-height: 100dvh; height: 100vh; height: 100dvh; display: flex; flex-direction: column; padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px); }
+/* Page photo : l'image occupe le premier écran avec le titre et le début de la légende ; la suite se lit en faisant
+   défiler la page (une seule barre de défilement, celle de la page). site.js ajuste la hauteur de l'image (--vimg-h). */
+.viewer { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px); }
 .viewer .vh, .viewer .vf { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 16px; }
 .viewer .back { display: flex; align-items: center; gap: 10px; min-height: 44px; }
 .viewer .vh .mono, .viewer .meta { color: var(--dark-mute); }
 .viewer .meta a { border-bottom: 1px solid var(--dark-rule); }
-.viewer { overflow-y: auto; }
-.viewer .vimg { flex: 1; min-height: 45vh; min-height: 45dvh; display: flex; align-items: center; justify-content: center; padding-inline: var(--gut); touch-action: pan-y pinch-zoom; }
+.viewer .vimg { flex: none; height: 70vh; height: var(--vimg-h, 70dvh); min-height: 45vh; min-height: 45dvh; display: flex; align-items: center; justify-content: center; padding-inline: var(--gut); touch-action: pan-y pinch-zoom; }
 .viewer .vimg picture { max-height: 100%; display: flex; justify-content: center; }
 .viewer .vimg img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; animation: fade .45s ease both; }
 .viewer .vf { align-items: flex-end; padding-block: 18px 26px; }
 .viewer .vtext { min-width: 0; }
-.viewer h1 { margin: 0; font-family: var(--serif); font-style: var(--display-style); font-weight: 400; font-size: clamp(26px, 4vw, 40px); line-height: 1.05; text-wrap: balance; }
+.viewer h1 { margin: 0; font-family: var(--serif); font-style: var(--display-style); font-weight: 400; font-size: clamp(26px, 4vw, 40px); line-height: 1.05; text-wrap: balance; overflow-wrap: anywhere; hyphens: auto; }
 .viewer .meta { margin-top: 8px; }
-.viewer .legend { margin: 10px 0 0; font-family: var(--serif); font-size: 17px; color: #c9c6be; max-width: 52ch; max-height: 6.6em; overflow-y: auto; }   /* légende longue : défile, l'image garde sa place */
+.viewer .legend { margin: 10px 0 0; font-family: var(--serif); font-size: 17px; line-height: 1.55; color: #c9c6be; max-width: 60ch; }
+/* Légende longue : trois lignes qui s'estompent, puis « Lire la suite » (site.js) ; sans JS, le texte entier. */
+.viewer .legend.clamp:not(.open) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent); mask-image: linear-gradient(to bottom, #000 55%, transparent); }
+.viewer .more-legend { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: 2px; color: var(--dark-ink); border-bottom: 1px solid var(--dark-rule); font-size: 13px; letter-spacing: .08em; }
+.viewer .more-legend:hover { border-bottom-color: var(--dark-ink); }
+/* Téléphone : le texte prend toute la largeur, les flèches passent dessous (le glissé reste possible). */
+@media (max-width: 640px) { .viewer .vf { flex-wrap: wrap; } .viewer .vtext { flex-basis: 100%; } .viewer .nav { margin-left: auto; } }
 .viewer .nav { display: flex; gap: 8px; flex: 0 0 auto; }
 .viewer .nav a { width: 48px; height: 48px; border-radius: 999px; border: 1px solid var(--dark-rule); display: flex; align-items: center; justify-content: center; }
 .viewer .nav a:hover { border-color: var(--dark-ink); }
