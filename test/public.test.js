@@ -125,3 +125,43 @@ test('l’ouverture propose un bouton pause, masqué tant que le JS ne l’activ
   const { app } = await setup(t, { seeded: true });
   assert.match((await app.inject('/')).body, /<button type="button" class="pause eyebrow" data-pause hidden>Pause<\/button>/);
 });
+
+test('galerie par ordre de publication : tri, filtres cumulés, navigation, adresse canonique', async t => {
+  const { app, db } = await setup(t, { seeded: true });
+  // Dates de publication connues : la photo en dernière position de la galerie est la plus récente.
+  const ids = db.prepare("SELECT id FROM photos WHERE status = 'published' ORDER BY position").pluck().all();
+  const set = db.prepare('UPDATE photos SET published_at = ? WHERE id = ?');
+  ids.forEach((id, i) => set.run(`2026-01-${String(i + 1).padStart(2, '0')} 10:00:00`, id));
+  const slugs = html => [...html.matchAll(/<a class="tile" href="\/photo\/([^"?]+)/g)].map(m => m[1]);
+  const bySel = slugs((await app.inject('/')).body);
+  const byNew = slugs((await app.inject('/?ordre=recentes')).body);
+  assert.equal(byNew.length, bySel.length);
+  assert.deepEqual(byNew, [...bySel].reverse());
+
+  const page = (await app.inject('/serie/rue?ordre=recentes')).body;
+  assert.match(page, /<a href="\/serie\/rue#galerie" data-filter >Sélection<\/a>/);
+  assert.match(page, /href="\/serie\/rue\?ordre=recentes#galerie" data-filter aria-current="true">Plus récentes/);
+  assert.match(page, /href="\/\?regard=julien&amp;serie=rue&amp;ordre=recentes"/);           // le filtre photographe garde l'ordre
+  assert.match(page, /<link rel="canonical" href="[^"]*\/serie\/rue">/);                      // même contenu : une seule adresse canonique
+  assert.match(page, /href="\/photo\/[^"]+\?serie=rue&amp;ordre=recentes"/);
+  // Page photo : précédente / suivante dans le même ordre, retour vers la galerie triée.
+  const [first, second] = slugs((await app.inject('/?ordre=recentes')).body);
+  const photo = (await app.inject(`/photo/${first}?ordre=recentes`)).body;
+  assert.match(photo, new RegExp(`href="/photo/${second}\\?ordre=recentes" rel="next"`));
+  assert.match(photo, /data-back="\/\?ordre=recentes#galerie"/);
+  assert.deepEqual(slugs((await app.inject('/?ordre=nimportequoi')).body), bySel);              // valeur inconnue : ordre par défaut
+});
+
+test('date de publication : posée à la première publication, gardée si l’on republie', async t => {
+  const { db } = await setup(t, { seeded: true });
+  assert.equal(db.prepare("SELECT COUNT(*) FROM photos WHERE status = 'published' AND published_at IS NULL").pluck().get(), 0);
+  const id = db.prepare("SELECT id FROM photos WHERE status = 'published' LIMIT 1").pluck().get();
+  db.prepare("UPDATE photos SET status = 'draft', published_at = NULL WHERE id = ?").run(id);
+  db.prepare("UPDATE photos SET status = 'published' WHERE id = ?").run(id);
+  const first = db.prepare('SELECT published_at FROM photos WHERE id = ?').pluck().get(id);
+  assert.match(first, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+  db.prepare("UPDATE photos SET published_at = '2020-05-05 08:00:00' WHERE id = ?").run(id);
+  db.prepare("UPDATE photos SET status = 'draft' WHERE id = ?").run(id);
+  db.prepare("UPDATE photos SET status = 'published' WHERE id = ?").run(id);
+  assert.equal(db.prepare('SELECT published_at FROM photos WHERE id = ?').pluck().get(id), '2020-05-05 08:00:00');
+});

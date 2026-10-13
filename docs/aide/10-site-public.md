@@ -11,6 +11,7 @@ Ce que vos visiteurs peuvent faire, pour savoir ce que vos réglages changent.
   - le défilement s'interrompt aussi quand la souris ou le clavier est sur l'ouverture.
 - **Deux regards :** « Les deux », ou un photographe. La galerie se filtre **sans recharger la page**, et l'adresse change (`/auteur/julien`) : elle se partage.
 - **Séries :** l'index en grand. Le survol montre une photo de la série ; un clic filtre, un second clic retire le filtre. Les filtres se combinent avec les regards.
+- **Ordre :** au-dessus de la grille, **Sélection** (l'ordre que vous avez choisi dans la photothèque, par défaut) ou **Plus récentes** (par date de publication, la dernière publiée d'abord). L'ordre se cumule avec les filtres, garde son adresse (`?ordre=recentes`) et vaut aussi pour la photo précédente et suivante. La date retenue est celle de la **première** publication : une photo dépubliée puis republiée garde sa place.
 - **Galerie :** toutes les photos publiées, dans l'ordre de l'admin.
 
 ## Visionneuse (page d'une photo)

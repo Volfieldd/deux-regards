@@ -18,6 +18,7 @@
 | P3 | **Index des séries** en grand, avec aperçu au survol ; une série vide n'est pas cliquable. |
 | P4 | **Grille** en quinconce, numérotation `N°04 · Rue · J`. |
 | P5 | Filtres combinables, URL partageables (`/auteur/julien`, `/serie/rue`, `/?regard=…&serie=…`), sans rechargement avec JS, et fonctionnels sans JS. |
+| P5b | **Ordre de la galerie** : « Sélection » (ordre de la photothèque, défaut) ou « Plus récentes » (`?ordre=recentes`, date de première publication décroissante, colonne `published_at` posée par déclencheur SQLite) ; se cumule avec les filtres, suivi par la visionneuse (précédente, suivante, retour) ; URL canonique sans l'ordre. Photos publiées avant la migration 009 : date d'import. |
 | P6 | **Visionneuse** `/photo/<adresse>` : fond noir, précédente et suivante dans le filtre actif, clavier (← → Échap), glissé, légende, lieu et date. |
 | P7 | **Retour à la série à l'endroit quitté** : Fermer et Échap font un vrai retour arrière quand on vient de la galerie (le navigateur rend la position) ; précédente et suivante remplacent l'entrée d'historique (`location.replace`), si bien qu'un seul Retour ramène à la galerie ; la dernière photo vue est ramenée à l'écran. Mémoire de l'onglet (`sessionStorage`, 3 h) ; sans elle, liens simples. |
 | P8 | Pages **À propos** (accroche, texte, auteurs) et **404**. |

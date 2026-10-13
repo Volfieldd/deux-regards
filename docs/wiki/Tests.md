@@ -11,7 +11,7 @@ Ils utilisent `node:test`, sans dépendance supplémentaire, et prennent environ
 | Fichier | Couvre |
 |---|---|
 | `test/app.test.js` | en-têtes de sécurité, configuration « en ligne », versionnage CSS/JS |
-| `test/public.test.js` | pages publiques, filtres, visionneuse (navigation en boucle dans le filtre), Open Graph, bouton pause de l'ouverture, polices, isolement des originaux et des brouillons |
+| `test/public.test.js` | pages publiques, filtres, ordre « Plus récentes » (tri, filtres cumulés, navigation, canonique) et date de première publication (déclencheur), visionneuse (navigation en boucle dans le filtre), Open Graph, bouton pause de l'ouverture, polices, isolement des originaux et des brouillons |
 | `test/auth.test.js` | flux OIDC de bout en bout contre un faux fournisseur, sessions, CSRF, redirections, limite de débit |
 | `test/admin.test.js` | connexion locale de test, toutes les actions de l'admin, import et ses refus, réglages (ouverture, textes des droits par défaut affichés et gardés « par défaut » s'ils ne changent pas) |
 | `test/watermark.test.js` | règles du filigrane et des EXIF, rendu (positions, mosaïque, logo, opacité), modes EXIF, recalcul et bascule des URL |

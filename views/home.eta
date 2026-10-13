@@ -42,7 +42,7 @@
   </div>
   <nav class="who" aria-label="Photographe">
 <% it.regards.forEach(r => { const on = r.slug === f.regard; %>
-    <a href="<%= it.galleryUrl({ regard: r.slug, serie: f.serie }) %>" data-filter <%~ on ? 'aria-current="page"' : '' %>><span class="n"><%= r.name %></span><span class="c mono"><%= it.pad(r.count) %> photos</span></a>
+    <a href="<%= it.galleryUrl({ regard: r.slug, serie: f.serie, ordre: f.ordre }) %>" data-filter <%~ on ? 'aria-current="page"' : '' %>><span class="n"><%= r.name %></span><span class="c mono"><%= it.pad(r.count) %> photos</span></a>
 <% }) %>
   </nav>
 </section>
@@ -51,7 +51,7 @@
   <nav aria-label="Séries">
 <% it.series.forEach(c => { const on = c.slug === f.serie; %>
 <% if (c.count) { %>
-    <a class="idx" href="<%= it.galleryUrl({ regard: f.regard, serie: on ? undefined : c.slug }) %>" data-filter data-scroll data-peek="<%= c.slug %>" <%~ on ? 'aria-current="page"' : '' %>><span><%= c.name %><% if (on) { %><span class="sr-only"> (retirer le filtre)</span><% } %></span><span class="mono"><%= it.pad(c.count) %></span></a>
+    <a class="idx" href="<%= it.galleryUrl({ regard: f.regard, serie: on ? undefined : c.slug, ordre: f.ordre }) %>" data-filter data-scroll data-peek="<%= c.slug %>" <%~ on ? 'aria-current="page"' : '' %>><span><%= c.name %><% if (on) { %><span class="sr-only"> (retirer le filtre)</span><% } %></span><span class="mono"><%= it.pad(c.count) %></span></a>
 <% } else { %>
     <span class="idx off"><span><%= c.name %></span><span class="mono">00</span></span>
 <% } %>
@@ -70,7 +70,11 @@
 
 <div class="gridhead" id="galerie">
   <h3 tabindex="-1"><%= it.activeSerie ? it.activeSerie.name : 'Toutes les séries' %><%= it.activeAuthor ? ', par ' + it.activeAuthor.name : '' %></h3>
-  <span class="mono"><%= it.pad(it.photos.length) %> / <%= it.pad(it.total) %> vues<% if (f.regard || f.serie) { %> · <a class="reset" href="/#galerie" data-filter>tout afficher</a><% } %></span>
+  <span class="mono"><%= it.pad(it.photos.length) %> / <%= it.pad(it.total) %> vues<% if (f.regard || f.serie) { %> · <a class="reset" href="<%= it.galleryUrl({ ordre: f.ordre }) %>#galerie" data-filter>tout afficher</a><% } %></span>
+  <nav class="order mono" aria-label="Ordre des photos">Ordre :
+    <a href="<%= it.galleryUrl({ regard: f.regard, serie: f.serie }) %>#galerie" data-filter <%~ f.ordre ? '' : 'aria-current="true"' %>>Sélection</a> ·
+    <a href="<%= it.galleryUrl({ regard: f.regard, serie: f.serie, ordre: 'recentes' }) %>#galerie" data-filter <%~ f.ordre === 'recentes' ? 'aria-current="true"' : '' %>>Plus récentes</a>
+  </nav>
 </div>
 <section class="grid wrap" id="grid">
 <% if (it.photos.length) { %>
