@@ -174,6 +174,9 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Sélecteur « Ordre : Sélection · Plus récentes » au-dessus de la grille, cumulable avec les filtres, suivi par la visionneuse ; `?ordre=recentes`.
 - Colonne `photos.published_at` (migration 009), posée par déclencheurs à la première publication ; photos déjà publiées : date d'import.
 
+### 13. Visionneuse : légendes longues (fait)
+- Plus d'ascenseur intérieur : légende repliée à 3 lignes avec « Lire la suite », la page défile ; image ajustée au premier écran ; titres longs coupés à la ligne ; flèches sous le texte sur téléphone.
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

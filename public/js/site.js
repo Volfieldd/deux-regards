@@ -181,6 +181,39 @@
       const armed = refKey === r.gallery || (r.armed && Boolean(refKey) && refKey.startsWith('/photo/'));
       writeRetour({ ...r, slug, armed });
     }
+    // Légende longue : trois lignes, puis « Lire la suite » ; dépliée, c'est la page qui défile (plus d'ascenseur intérieur).
+    const legend = viewer.querySelector('.legend');
+    let toggle = null;
+    if (legend) {
+      legend.classList.add('clamp');
+      if (legend.scrollHeight > legend.clientHeight + 2) {
+        toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'more-legend';
+        toggle.setAttribute('aria-controls', legend.id);
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.textContent = 'Lire la suite';
+        legend.after(toggle);
+        toggle.addEventListener('click', () => {
+          const open = legend.classList.toggle('open');
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.textContent = open ? 'Réduire' : 'Lire la suite';
+          if (!open) viewer.scrollIntoView({ block: 'start' });
+        });
+      } else {
+        legend.classList.remove('clamp');
+      }
+    }
+    // Premier écran : l'image prend la place laissée par l'en-tête et le texte replié (45 % de l'écran au moins).
+    const vimg = viewer.querySelector('.vimg');
+    const fit = () => {
+      if (legend?.classList.contains('open')) return;              // dépliée : l'image garde sa hauteur
+      const used = viewer.querySelector('.vh').offsetHeight + viewer.querySelector('.vf').offsetHeight;
+      vimg.style.setProperty('--vimg-h', `${Math.max(Math.round(innerHeight * 0.45), innerHeight - used)}px`);
+    };
+    fit();
+    addEventListener('resize', fit);
+
     // Photo précédente / suivante : remplace l'entrée d'historique, un seul Retour ramène à la galerie.
     const go = key => { const url = viewer.dataset[key]; if (url) location.replace(url); };
     // Fermer, Échap : vrai retour arrière si l'on vient de cette galerie (le navigateur rend la position).

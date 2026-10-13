@@ -22,6 +22,9 @@ Ce que vos visiteurs peuvent faire, pour savoir ce que vos réglages changent.
 | **←** ou glissé vers la droite | photo précédente |
 | **Échap**, « Fermer » ou le bouton Retour du navigateur | retour à la série (ou à la galerie), au même filtre et à l'endroit quitté |
 | pincement (téléphone) | zoom sur la photo |
+| **Lire la suite** | déplie une légende longue (3 lignes sinon) ; on la lit en faisant défiler la page, **Réduire** la replie |
+
+Le premier écran montre la photo, son titre et le début de la légende ; une légende courte s'affiche en entier. Sur téléphone, les flèches ‹ › sont sous le texte.
 
 La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste dans cette sélection.
 

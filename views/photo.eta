@@ -12,7 +12,7 @@
       <h1><%= p.title %></h1>
       <div class="meta mono">N°<%= it.pad(p.n) %> · <%= p.category %> · <a href="<%= it.galleryUrl({ regard: p.author_slug }) %>"><%= p.author %></a><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + p.when : '' %></div>
 <% if (p.legend) { %>
-      <p class="legend"><%= p.legend %></p>
+      <p class="legend" id="legende"><%= p.legend %></p>
 <% } %>
     </div>
 <% if (it.count > 1) { %>
