@@ -454,6 +454,9 @@ body.dropping .canvas { outline: 2px dashed var(--accent); outline-offset: -10px
 .tr summary .mono { margin-left: 6px; color: var(--ink3); }
 .tr label { margin-top: 8px; }
 .tr-lang { display: inline-flex; align-items: center; gap: 8px; }
+.tr-act { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.tr-act .cellnote { margin: 0; }
+.linkbtn { background: none; border: 0; padding: 0 2px; min-height: 24px; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; }
 .flag { display: inline-block; width: 20px; height: 14px; object-fit: cover; box-shadow: 0 0 0 1px rgba(0, 0, 0, .18); }
 
 /* ---------- ouverture, filigrane, apparence, aide ---------- */

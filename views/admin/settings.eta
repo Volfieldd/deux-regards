@@ -9,11 +9,11 @@
     <label>Nom du site <input name="site_name" value="<%= s.site_name || '' %>" maxlength="60" placeholder="<%= it.defaultName %>"></label>
     <p class="hint">Le site est en français, anglais et allemand : chaque texte a sa version anglaise et allemande, facultative (vide : la version française s’affiche).</p>
     <label>Accroche <input name="tagline" value="<%= s.tagline || '' %>" maxlength="200"></label>
-    <%~ include('./_tr', { asset: it.asset, v: s, name: 'tagline', label: 'Accroche', max: 200 }) %>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v: s, name: 'tagline', label: 'Accroche', max: 200 }) %>
     <label>Introduction (accueil) <textarea name="intro" rows="3" maxlength="1000"><%= s.intro || '' %></textarea></label>
-    <%~ include('./_tr', { asset: it.asset, v: s, name: 'intro', label: 'Introduction', max: 1000, rows: 3 }) %>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v: s, name: 'intro', label: 'Introduction', max: 1000, rows: 3 }) %>
     <label>À propos <span class="mono">paragraphes séparés par une ligne vide</span><textarea name="about" rows="8" maxlength="10000"><%= s.about || '' %></textarea></label>
-    <%~ include('./_tr', { asset: it.asset, v: s, name: 'about', label: 'À propos', max: 10000, rows: 8 }) %>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v: s, name: 'about', label: 'À propos', max: 10000, rows: 8 }) %>
   </section>
   <section class="panel">
     <h2>Droits d’utilisation <span class="mono">page <a href="/droits" target="_blank" rel="noopener">/droits</a>, liée aux mentions IPTC des images</span></h2>

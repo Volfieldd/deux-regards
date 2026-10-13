@@ -203,6 +203,11 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Pages publiques enregistrées trois fois (préfixe vide, `/en`, `/de`) ; arrivée sur une page française redirigée selon le choix (cookie `langue`, posé par `/langue/:lang`) ou la détection, jamais pour les robots ; `/droits/en` et `/droits/de` redirigées vers `/en/droits`, `/de/droits` ; `hreflang`, `x-default`, `og:locale`, sitemap avec les trois langues.
 - Traductions facultatives (migration 013) : photos (titre, légende, lieu), séries, biographies ; réglages `tagline_en`, `intro_de`… ; champs repliés dans l'admin (`views/admin/_tr.eta`) ; sélecteur à drapeaux (`views/langs.eta`, `public/flags/`).
 
+### 20. Propositions de traduction (fait)
+- `server/translate.js` : client LibreTranslate (`TRANSLATE_URL`, `TRANSLATE_API_KEY` facultative), délai borné, erreurs expliquées ; `POST /admin/traduction`.
+- Bouton « Proposer une traduction » sous chaque champ anglais et allemand (texte français, sinon l'autre traduction), proposition à relire, « Annuler ».
+- Conteneur `libretranslate/libretranslate:v1.9.6` dans la pile Unraid (réseau interne, modèles fr / en / de dans un volume) et en profil `traduction` dans `compose.yaml`.
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

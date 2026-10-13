@@ -21,6 +21,7 @@ import { RIGHTS, LANGS, rightsDefaults, withoutDefaults } from '../rights.js';
 import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, captionWarnings, InstagramError } from '../instagram.js';
 import { PRESETS as IG_PRESETS, BOUNDS as IG_BOUNDS } from '../instagram-limits.js';
 import * as cities from '../geo/cities.js';
+import { TranslateError } from '../translate.js';
 
 // Carte des visiteurs (page Statistiques) : centre de chaque pays dans le repère 1000 × 520 du fond de carte
 // (public/admin/carte-monde.svg, généré par scripts/carte-monde.mjs), nom du pays en français.
@@ -110,7 +111,7 @@ export default async function adminRoutes(app) {
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply),
       section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
-      description: '', ...data, pageTitle: `${data.title} · Administration · ${siteName}`,
+      translate: app.translator.enabled, description: '', ...data, pageTitle: `${data.title} · Administration · ${siteName}`,
     });
   }
 
@@ -1131,6 +1132,18 @@ export default async function adminRoutes(app) {
   // Relue à chaque affichage en développement (édition de docs/aide), une fois pour toutes en production.
   let help = app.config.production ? loadHelp() : null;
   app.get('/admin/aide', async (request, reply) => render(request, reply, 'help', { title: 'Aide', help: help || loadHelp() }));
+
+  // ---------- traductions ----------
+  // Proposition de traduction d'un champ (LibreTranslate du réseau local) : l'auteur la relit avant d'enregistrer.
+  app.post('/admin/traduction', write, async (request, reply) => {
+    const { text, source, target } = request.body || {};
+    try {
+      return { text: await app.translator.translate(String(text || '').slice(0, 20000), String(source), String(target)) };
+    } catch (err) {
+      if (!(err instanceof TranslateError)) throw err;
+      return reply.code(422).send({ error: err.message });
+    }
+  });
 
   // ---------- réglages ----------
   const mapCounts = app.db.prepare("SELECT COUNT(*) AS mapCount, COUNT(DISTINCT city_id) AS mapCities FROM photos WHERE status = 'published' AND on_map = 1 AND city_id IS NOT NULL");

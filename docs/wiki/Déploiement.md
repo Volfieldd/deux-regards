@@ -131,6 +131,10 @@ Le workflow [`.github/workflows/image.yml`](https://github.com/Volfieldd/deux-re
 
 L'image ([`Dockerfile`](https://github.com/Volfieldd/deux-regards/blob/main/Dockerfile)) part de `node:22-bookworm-slim`, tourne sous l'utilisateur `node`, sans compilateur, et contient seulement le code, les gabarits, les fichiers publics, `assets/`, `seed/` et `docs/aide/`. Elle fixe `NODE_ENV=production`, `HOST=0.0.0.0`, `PORT=3000`, `STORAGE_DIR=/data`, `DATABASE_PATH=/data/site.db` et `REQUIRE_PERSISTENT_STORAGE=1`, et vérifie sa santé sur `/healthz`. Elle n'a pas d'instruction `VOLUME` : sans montage de `/data`, le serveur refuse de démarrer.
 
+## Traduction (facultatif)
+
+Les propositions de traduction de l'admin passent par un serveur [LibreTranslate](https://github.com/LibreTranslate/LibreTranslate) installé à côté du site : `docker compose --profile traduction up -d`, puis `TRANSLATE_URL=http://libretranslate:5000` dans le `.env`. Il télécharge une fois ses modèles (fr, en, de, ~300 Mo dans le volume `traduction-modeles`) et travaille ensuite hors ligne : aucun texte ne sort du serveur. Environ 1 Go de mémoire. Sans `TRANSLATE_URL`, le bouton n'apparaît pas. Sur Unraid, le conteneur fait partie de la pile (voir `deploy/unraid/README.md`).
+
 ## Mettre à jour
 
 Pile générique (image construite sur place) :

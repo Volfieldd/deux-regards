@@ -3,8 +3,11 @@
 <details class="tr"<%~ it.open ? ' open' : '' %>>
   <summary><%= it.label %> en anglais et en allemand <span class="mono"><%= n === 2 ? 'traduit' : n === 1 ? '1 langue sur 2' : 'facultatif' %></span></summary>
 <% [['en', 'English', en], ['de', 'Deutsch', de]].forEach(([l, name, val]) => { %>
+  <div class="tr-field">
 <% if (it.rows) { %>  <label><span class="tr-lang"><img class="flag" src="<%= it.asset(`flags/${l}.svg`) %>" alt="" width="20" height="14"> <%= name %></span><textarea name="<%= it.name %>_<%= l %>" rows="<%= it.rows %>" maxlength="<%= it.max %>" lang="<%= l %>"><%= val %></textarea></label>
 <% } else { %>  <label><span class="tr-lang"><img class="flag" src="<%= it.asset(`flags/${l}.svg`) %>" alt="" width="20" height="14"> <%= name %></span><input name="<%= it.name %>_<%= l %>" value="<%= val %>" maxlength="<%= it.max %>" lang="<%= l %>"></label>
 <% } %>
+<% if (it.translate) { %>  <p class="tr-act" data-js-only hidden><button class="btn ghost" type="button" data-translate="<%= it.name %>" data-to="<%= l %>">Proposer une traduction</button> <span class="cellnote" role="status" data-translate-status></span></p>
+<% } %>  </div>
 <% }) %>  <p class="cellnote">Vide : la version française s’affiche (sur la page allemande comme sur la page anglaise).</p>
 </details>

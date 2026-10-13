@@ -12,7 +12,7 @@
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
 <% if (Object.keys(e).length) { %><p class="err" role="alert">Le formulaire contient des erreurs.</p><% } %>
     <label>Titre <input name="title" value="<%= v.title %>" required maxlength="160"<%~ inv('title') %>></label><% if (e.title) { %><span class="err" id="err-title"><%= e.title %></span><% } %>
-    <%~ include('./_tr', { asset: it.asset, v, name: 'title', label: 'Titre', max: 160 }) %>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'title', label: 'Titre', max: 160 }) %>
     <label>Adresse <span class="mono">/photo/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ inv('slug') %>></label><% if (e.slug) { %><span class="err" id="err-slug"><%= e.slug %></span><% } %>
     <div class="row">
       <label>Série <select name="category_id"<%~ inv('category_id') %>><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select></label><% if (e.category_id) { %><span class="err" id="err-category_id"><%= e.category_id %></span><% } %>
@@ -31,9 +31,9 @@
 <% } %>      <span class="cellnote">Villes : <a href="https://www.geonames.org" target="_blank" rel="noopener">GeoNames</a>, licence CC BY 4.0.</span>
     </div>
     <label class="inline"><input type="checkbox" name="on_map"<%~ Number(v.on_map) ? ' checked' : '' %><%~ inv('on_map') %>> Afficher sur la carte du site</label><% if (e.on_map) { %><span class="err" id="err-on_map"><%= e.on_map %></span><% } %>
-    <%~ include('./_tr', { asset: it.asset, v, name: 'place', label: 'Lieu', max: 120 }) %>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'place', label: 'Lieu', max: 120 }) %>
     <label>Légende <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
-    <%~ include('./_tr', { asset: it.asset, v, name: 'legend', label: 'Légende', max: 2000, rows: 3 }) %>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'legend', label: 'Légende', max: 2000, rows: 3 }) %>
     <fieldset class="row">
       <legend>Statut</legend>
 <% Object.entries(it.STATUSES).forEach(([k, label]) => { %>

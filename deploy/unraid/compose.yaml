@@ -1,5 +1,6 @@
 # Nicephos sur Unraid (plugin « Docker Compose Manager »).
-# Trois conteneurs : le site, la sauvegarde quotidienne et le tunnel Cloudflare (HTTPS, aucun port ouvert).
+# Quatre conteneurs : le site, la sauvegarde quotidienne, le tunnel Cloudflare (HTTPS, aucun port ouvert) et le
+# traducteur LibreTranslate (propositions de traduction dans l'admin, sur place : aucun texte ne sort du serveur).
 # Réglages dans le fichier .env de la pile (modèle : env.example). Guide : README.md.
 #
 # DONNÉES : DATA_DIR et BACKUP_DIR doivent exister AVANT le premier lancement et appartenir à 99:100
@@ -51,6 +52,8 @@ services:
       DATABASE_PATH: /data/site.db
       REQUIRE_PERSISTENT_STORAGE: "1"
       TRUST_PROXY: ${TUNNEL_IP:-172.29.42.10}
+      # Traducteur de la pile (vide dans le .env pour retirer le bouton « Proposer une traduction »).
+      TRANSLATE_URL: ${TRANSLATE_URL-http://libretranslate:5000}
     user: "${PUID:-99}:${PGID:-100}"
     networks: [nicephos]
     logging: *logging
@@ -116,3 +119,26 @@ services:
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
+
+  # Propositions de traduction (anglais, allemand) dans l'admin. Joignable seulement par le site (réseau de la pile,
+  # aucun port publié). Premier lancement : télécharge une fois ses modèles français, anglais et allemand (~300 Mo,
+  # gardés dans le volume) ; ensuite tout se fait hors ligne.
+  libretranslate:
+    image: libretranslate/libretranslate:v1.9.6
+    container_name: nicephos-traduction
+    restart: unless-stopped
+    environment:
+      LT_LOAD_ONLY: fr,en,de
+      LT_DISABLE_WEB_UI: "true"
+    networks: [nicephos]
+    logging: *logging
+    mem_limit: 2g
+    pids_limit: 256
+    volumes:
+      - traduction-modeles:/home/libretranslate/.local
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+volumes:
+  traduction-modeles:

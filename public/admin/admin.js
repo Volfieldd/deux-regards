@@ -1607,3 +1607,40 @@ document.addEventListener('click', e => {
   ta.focus();
   toast.show('Texte par défaut rétabli : enregistrez les réglages pour l’appliquer.');
 });
+
+// ----- propositions de traduction (LibreTranslate du réseau local) -----
+// Remplit le champ anglais ou allemand d'après le texte français (sinon l'autre traduction) ; l'auteur relit, corrige et
+// enregistre. « Annuler » remet le texte d'avant.
+document.addEventListener('click', async e => {
+  const btn = e.target.closest('[data-translate]');
+  if (!btn) return;
+  const form = btn.closest('form');
+  const name = btn.dataset.translate, to = btn.dataset.to;
+  const field = form.elements[`${name}_${to}`];
+  const status = btn.parentElement.querySelector('[data-translate-status]');
+  const sources = [['fr', form.elements[name]], ...['en', 'de'].filter(l => l !== to).map(l => [l, form.elements[`${name}_${l}`]])];
+  const [source, input] = sources.find(([, el]) => el && el.value.trim()) || [];
+  if (!input) { status.textContent = 'Rien à traduire : remplissez d’abord le texte français.'; return; }
+  btn.disabled = true;
+  btn.setAttribute('aria-busy', 'true');
+  status.textContent = 'Traduction en cours…';
+  try {
+    const { text } = await postJson('/admin/traduction', { text: input.value, source, target: to });
+    const before = field.value;
+    field.value = text;
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+    status.innerHTML = `Proposition ${source === 'fr' ? 'traduite du français' : `traduite de ${source === 'en' ? 'l’anglais' : 'l’allemand'}`} : relisez-la avant d’enregistrer. <button class="linkbtn" type="button" data-translate-undo>Annuler</button>`;
+    status.querySelector('[data-translate-undo]').addEventListener('click', () => {
+      field.value = before;
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+      status.textContent = 'Proposition retirée.';
+      field.focus();
+    }, { once: true });
+    field.focus();
+  } catch (err) {
+    status.textContent = err.message;
+  } finally {
+    btn.disabled = false;
+    btn.removeAttribute('aria-busy');
+  }
+});
