@@ -208,6 +208,10 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Bouton « Proposer une traduction » sous chaque champ anglais et allemand (texte français, sinon l'autre traduction), proposition à relire, « Annuler ».
 - Conteneur `libretranslate/libretranslate:v1.9.6` dans la pile Unraid (réseau interne, modèles fr / en / de dans un volume) et en profil `traduction` dans `compose.yaml`.
 
+### 21. Likes Instagram dans l'admin (fait)
+- Relevé quotidien des likes et commentaires des posts publiés depuis le site (`syncEngagement`, après 6 h à Paris, 1 à 3 appels, dans le budget), historique par jour (migration 014, `instagram_engagement`).
+- Fiche photo : chiffres et courbe ; page Instagram : « Les plus aimées sur Instagram », « Relever maintenant » (10 minutes au moins entre deux relevés).
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

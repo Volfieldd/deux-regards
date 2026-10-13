@@ -32,6 +32,10 @@ Sans ces variables, ou en `http://`, la file fonctionne (photos ajoutées, régl
 6. **Photo dépubliée** : retirée de la file ; une photo non publiée en tête de file est sautée (le créneau sert à la suivante). Changer les heures ne fait rien partir d’avance.
 7. **Jeton d’accès** : échangé contre un jeton longue durée (60 jours) à la connexion ; renouvelé automatiquement (`refresh_access_token`) dès qu’il lui reste moins de 30 jours, au plus une fois par jour.
 
+## Likes et commentaires
+
+Une fois par jour, au premier passage de la minuterie après 6 h (heure de Paris), `GET /{ig-user-id}/media?fields=id,like_count,comments_count&limit=100`, pages suivies (adresse `paging.next` acceptée seulement sur `graph.instagram.com`, 20 pages au plus) jusqu'à avoir trouvé tous les posts connus du site (`instagram_posts.ig_media_id`). Autorisation `instagram_business_basic`, déjà demandée pour la publication : pas de reconnexion. Appels journalisés (`engagement`) et comptés dans le budget horaire. Échec : motif nettoyé (jamais de jeton), nouvel essai une heure plus tard. **Relever maintenant** (`POST /admin/instagram/likes`) : 10 minutes au moins entre deux relevés.
+
 ## Image
 
 - JPEG 1080 px de large, qualité 90, sans métadonnées (ni EXIF ni XMP), sRGB.
@@ -48,6 +52,8 @@ Sans ces variables, ou en `http://`, la file fonctionne (photos ajoutées, régl
 | `settings.instagram` | réglages : limites (`limits` : préréglage, publications sur 24 h, écart en minutes, appels par heure), séries mises en file automatiquement (`autoSeries`, vide par défaut), heures des créneaux (4 au plus, `18:30` par défaut), cadre et filigrane par défaut, modèle de légende (2 200 caractères au plus), hashtags généraux et par série (30 au plus en tout) |
 | `instagram_calls` | journal des appels à l’API : date et type (`media`, `status`, `publish`, `quota`, `token`…), jamais de jeton ni de contenu ; effacé après 7 jours |
 | `settings.instagram_state` | dernier créneau traité, pause en cours (fin, motif, palier), dernier quota lu chez Meta |
+| `instagram_engagement` | likes et commentaires des posts publiés depuis le site, un relevé par post et par jour (heure de Paris) ; seulement des nombres (migration 014) |
+| `settings.instagram_engagement` | dernier relevé : jour, date, nombre de posts relevés, dernier essai et motif d'échec |
 
 Supprimer une photo supprime ses publications en file (`ON DELETE CASCADE`) ; les posts déjà sur Instagram n’y sont pas touchés.
 
