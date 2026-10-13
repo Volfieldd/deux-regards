@@ -40,6 +40,7 @@
         <form class="pop" method="post" action="/admin/series/<%= c.id %>">
           <input type="hidden" name="_csrf" value="<%= it.csrf %>">
           <label>Nom <input name="name" value="<%= v.name %>" required maxlength="80"<%~ ed && ed.errors.name ? ` aria-invalid="true" aria-describedby="err-serie-${c.id}"` : '' %>></label>
+          <%~ include('./_tr', { asset: it.asset, v, name: 'name', label: 'Nom', max: 80 }) %>
           <details class="advanced"<%~ ed && ed.errors.slug ? ' open' : '' %>>
             <summary>Adresse de la série (avancé)</summary>
             <label><span class="mono">/serie/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ ed && ed.errors.slug ? ` aria-invalid="true" aria-describedby="err-serie-${c.id}"` : '' %>></label>

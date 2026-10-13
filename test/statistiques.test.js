@@ -157,6 +157,6 @@ test('admin : carte des visiteurs par pays (bulles) et liste ; mention publique 
   assert.ok(circles[0].x > 480 && circles[0].x < 540 && circles[0].y > 90 && circles[0].y < 140, 'France en Europe de l’Ouest');
   assert.match(page, /<li><span class="t">Pays inconnu/);
   assert.match((await ctx.app.inject('/droits')).body, /pays \(indiqué par notre hébergeur Cloudflare\)/);
-  assert.match((await ctx.app.inject('/droits/en')).body, /country \(as provided by our host, Cloudflare\)/);
-  assert.match((await ctx.app.inject('/droits/de')).body, /Land \(von unserem Hoster Cloudflare übermittelt\)/);
+  assert.match((await ctx.app.inject('/en/droits')).body, /country \(as provided by our host, Cloudflare\)/);
+  assert.match((await ctx.app.inject('/de/droits')).body, /Land \(von unserem Hoster Cloudflare übermittelt\)/);
 });

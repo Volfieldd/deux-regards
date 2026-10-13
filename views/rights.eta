@@ -1,23 +1,20 @@
 <% layout('./layout') %>
-<% const t = it.t; %>
+<% const r = it.r; %>
 <header class="top wrap">
   <%~ include('./brand', it) %>
-  <nav class="eyebrow" aria-label="<%= t.nav.label %>"><a href="/#series"><%= t.nav.series %></a><a href="/#galerie"><%= t.nav.gallery %></a><% if (it.mapPage) { %><a href="/carte"><%= t.nav.map %></a><% } %><a href="/a-propos"><%= t.nav.about %></a></nav>
+  <%~ include('./nav', it) %>
 </header>
 <main class="about wrap">
-  <nav class="langs eyebrow" aria-label="<%= t.nav.langs %>">
-<% it.langs.forEach(l => { %>    <a href="<%= l.path %>" hreflang="<%= l.code %>" lang="<%= l.code %>"<%~ l.current ? ' aria-current="page"' : '' %>><%= l.name %></a>
-<% }) %>  </nav>
-  <h1><%= t.title %></h1>
+  <h1><%= r.title %></h1>
   <div class="prose">
 <% it.paragraphs.forEach(p => { %>
     <p><%= p %></p>
 <% }) %>
 <% if (it.contact) { %>
-    <p><%= t.contact %> <% if (it.contactHref) { %><a class="more" href="<%= it.contactHref %>"><%= it.contact %></a><% } else { %><%= it.contact %><% } %></p>
+    <p><%= r.contact %> <% if (it.contactHref) { %><a class="more" href="<%= it.contactHref %>"><%= it.contact %></a><% } else { %><%= it.contact %><% } %></p>
 <% } %>
-    <h2><%= t.audienceTitle %></h2>
-    <p><%= t.audience %></p>
+    <h2><%= r.audienceTitle %></h2>
+    <p><%= r.audience %></p>
   </div>
 </main>
 <%~ include('./footer', it) %>

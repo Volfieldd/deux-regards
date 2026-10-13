@@ -123,7 +123,7 @@ test('Open Graph et URL canonique sont absolus, sans les filtres sur une page ph
 
 test('l’ouverture propose un bouton pause, masqué tant que le JS ne l’active pas', async t => {
   const { app } = await setup(t, { seeded: true });
-  assert.match((await app.inject('/')).body, /<button type="button" class="pause eyebrow" data-pause hidden>Pause<\/button>/);
+  assert.match((await app.inject('/')).body, /<button type="button" class="pause eyebrow" data-pause data-play="Lecture" hidden>Pause<\/button>/);
 });
 
 test('galerie par ordre de publication : tri, filtres cumulés, navigation, adresse canonique', async t => {

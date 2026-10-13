@@ -8,6 +8,7 @@ import cookie from '@fastify/cookie';
 import formbody from '@fastify/formbody';
 import fastifyStatic from '@fastify/static';
 import * as cities from './geo/cities.js';
+import { LANGS, NAMES, LOCALES, localize, splitLang } from './i18n.js';
 import { Eta } from 'eta';
 import publicRoutes from './routes/public.js';
 import adminRoutes from './routes/admin.js';
@@ -107,7 +108,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     const names = authorNames.all();
     const brand = app.appearance.brand();
     const theme = app.appearance.forRequest(this.request, this);
-    const common = { asset, theme, brand, isAdmin: Boolean(this.request.session), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '' };
+    const common = { asset, theme, brand, isAdmin: Boolean(this.request.session), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true',
+      // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
+      here: splitLang(this.request.url).path, langs: LANGS, langNames: NAMES, locales: LOCALES, localize,
+      authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '' };
     return this.type('text/html; charset=utf-8').send(eta.render(`./${template}`, { ...common, ...data }));
   });
 

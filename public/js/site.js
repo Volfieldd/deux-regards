@@ -3,6 +3,14 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll('[data-js-only]').forEach(el => { el.hidden = false; });
 
+  // ----- sélecteur de langue : se referme au clic ailleurs et avec Échap -----
+  const picks = document.querySelectorAll('[data-lang-pick]');
+  document.addEventListener('click', e => picks.forEach(d => { if (d.open && !d.contains(e.target)) d.open = false; }));
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    picks.forEach(d => { if (d.open) { d.open = false; d.querySelector('summary').focus(); e.stopImmediatePropagation(); } });
+  }, true);
+
   // ----- dissuasion : pas de clic droit ni de glisser sur les images -----
   document.addEventListener('contextmenu', e => { if (e.target.closest('img, picture')) e.preventDefault(); });
   document.addEventListener('dragstart', e => { if (e.target.closest('img, picture')) e.preventDefault(); });
@@ -35,6 +43,7 @@
     const thumbs = hero.querySelectorAll('.strip button[data-h]');
     const bar = hero.querySelector('.bar');
     const pause = hero.querySelector('[data-pause]');
+    const pauseLabel = pause ? pause.textContent : '';
     // Défilement automatique, avec un bouton pour l'arrêter (WCAG 2.2.2) ; jamais si l'animation est réduite.
     // Suspendu tant que le pointeur ou le focus clavier est dans l'ouverture (le lien « Voir la photo » ne disparaît pas sous le focus).
     let cur = 0, timer = null, paused = reduce, hold = false;
@@ -55,7 +64,7 @@
         pause.hidden = false;
         pause.addEventListener('click', () => {
           paused = !paused;
-          pause.textContent = paused ? 'Lecture' : 'Pause';
+          pause.textContent = paused ? pause.dataset.play : pauseLabel;
           show(cur);
         });
       }
@@ -111,7 +120,7 @@
       shown = here();
       // Annonce du résultat et focus conservé sur le lien activé (WCAG 2.4.3, 4.1.3).
       const head = document.querySelector('#galerie h3');
-      const count = document.querySelector('#galerie > .mono');
+      const count = document.querySelector('#galerie > span.mono');
       const announce = document.querySelector('[data-announce]');
       if (announce && head) announce.textContent = `${head.textContent.trim()} : ${count ? count.textContent.trim().split(' · ')[0] : ''}`;
       const target = focusHref && [...document.querySelectorAll('a[data-filter]')].find(a => a.getAttribute('href') === focusHref);
@@ -151,7 +160,7 @@
   const viewer = document.querySelector('[data-viewer]');
   if (!viewer) {
     document.addEventListener('click', e => {
-      const a = e.target.closest('a[href^="/photo/"]');
+      const a = e.target.closest('a[href^="/photo/"], a[href^="/en/photo/"], a[href^="/de/photo/"]');
       if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
       writeRetour({ gallery: keyOf(location), slug: null, armed: false });
     });
@@ -162,7 +171,7 @@
       const r = readRetour();
       if (!r || r.gallery !== keyOf(location) || !r.slug) return;
       writeRetour({ ...r, slug: null, armed: false });
-      const tile = [...document.querySelectorAll('#grid a.tile')].find(a => decodeURIComponent(new URL(a.href).pathname) === `/photo/${r.slug}`);
+      const tile = [...document.querySelectorAll('#grid a.tile')].find(a => decodeURIComponent(new URL(a.href).pathname).endsWith(`/photo/${r.slug}`));
       if (!tile) return;
       const b = tile.getBoundingClientRect();
       if (b.top < 0 || b.bottom > innerHeight) tile.scrollIntoView({ block: 'center' });
@@ -178,7 +187,7 @@
       let ref = null;
       try { ref = document.referrer ? new URL(document.referrer) : null; } catch { ref = null; }
       const refKey = ref && ref.origin === location.origin ? keyOf(ref) : null;
-      const armed = refKey === r.gallery || (r.armed && Boolean(refKey) && refKey.startsWith('/photo/'));
+      const armed = refKey === r.gallery || (r.armed && Boolean(refKey) && /^(\/(en|de))?\/photo\//.test(refKey));
       writeRetour({ ...r, slug, armed });
     }
     // Légende longue : trois lignes, puis « Lire la suite » ; dépliée, c'est la page qui défile (plus d'ascenseur intérieur).
@@ -192,12 +201,12 @@
         toggle.className = 'more-legend';
         toggle.setAttribute('aria-controls', legend.id);
         toggle.setAttribute('aria-expanded', 'false');
-        toggle.textContent = 'Lire la suite';
+        toggle.textContent = viewer.dataset.more;
         legend.after(toggle);
         toggle.addEventListener('click', () => {
           const open = legend.classList.toggle('open');
           toggle.setAttribute('aria-expanded', String(open));
-          toggle.textContent = open ? 'Réduire' : 'Lire la suite';
+          toggle.textContent = open ? viewer.dataset.less : viewer.dataset.more;
           if (!open) viewer.scrollIntoView({ block: 'start' });
         });
       } else {
@@ -323,8 +332,9 @@
         p.el.dataset.n = n;
         p.count.textContent = n;
         p.group = group.length > 1 ? group : null;
+        const others = group.length - 1;
         p.el.setAttribute('aria-label', p.group
-          ? `${p.name} et ${group.length - 1} autre${group.length > 2 ? 's' : ''} lieu${group.length > 2 ? 'x' : ''} : ${n} photos. Agrandir`
+          ? (others > 1 ? carte.dataset.clusterMany : carte.dataset.clusterOne).replace('{name}', p.name).replace('{others}', others).replace('{n}', n)
           : p.label);
         p.inner.setAttribute('transform', `scale(${s})`);
       }

@@ -448,6 +448,13 @@ body.dropping .canvas { outline: 2px dashed var(--accent); outline-offset: -10px
 .badge-text.own { color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent); }
 .rights-field .actions { margin: 0; }
 .advanced label { margin-top: 6px; }
+/* Traductions facultatives (anglais, allemand) repliées sous le champ français. */
+.tr { margin-top: -4px; }
+.tr summary { cursor: pointer; font-size: 13px; color: var(--ink2); padding-block: 6px; }  /* cible de 24 px au moins (WCAG 2.5.8) */
+.tr summary .mono { margin-left: 6px; color: var(--ink3); }
+.tr label { margin-top: 8px; }
+.tr-lang { display: inline-flex; align-items: center; gap: 8px; }
+.flag { display: inline-block; width: 20px; height: 14px; object-fit: cover; box-shadow: 0 0 0 1px rgba(0, 0, 0, .18); }
 
 /* ---------- ouverture, filigrane, apparence, aide ---------- */
 .hero-panel h3 { font-weight: 500; font-size: 15px; margin: 18px 0 6px; }

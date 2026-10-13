@@ -1,0 +1,5 @@
+<% /* Menu du site et sélecteur de langue. it.home : liens d'ancre de l'accueil ; it.current : page active. */ %>
+<% const t = it.t; %>
+<nav class="eyebrow site-nav" aria-label="<%= t.nav.label %>"><a href="<%= it.home ? '' : it.u('/') %>#series"><%= t.nav.series %></a><a href="<%= it.home ? '' : it.u('/') %>#galerie"><%= t.nav.gallery %></a><% if (it.mapPage) { %><a href="<%= it.u('/carte') %>"<%~ it.current === 'carte' ? ' aria-current="page"' : '' %>><%= t.nav.map %></a><% } %><a href="<%= it.u('/a-propos') %>"<%~ it.current === 'about' ? ' aria-current="page"' : '' %>><%= t.nav.about %></a>
+  <%~ include('./langs', it) %>
+</nav>

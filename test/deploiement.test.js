@@ -56,6 +56,9 @@ test('robots.txt et sitemap.xml : site public seulement, URL absolues', async t 
   assert.ok(locs.includes('http://localhost:3000/serie/rue'));
   assert.ok(!locs.some(l => l.includes('deux-minuit')));                            // brouillon absent
   assert.ok(!locs.some(l => l.includes('/admin')));
-  assert.ok(locs.includes('http://localhost:3000/droits/en') && locs.includes('http://localhost:3000/droits/de'));
-  assert.equal(locs.length, 11 + 4 + 2 + 5);                                        // accueil, à propos, droits FR / EN / DE
+  assert.ok(locs.includes('http://localhost:3000/en/droits') && locs.includes('http://localhost:3000/de/droits'));
+  assert.ok(locs.includes('http://localhost:3000/en/photo/brume-sur-la-loire') && locs.includes('http://localhost:3000/de/serie/rue'));
+  assert.equal(locs.length, (1 + 4 + 2 + 11 + 2) * 3);                              // accueil, séries, auteurs, photos, à propos, droits ; × 3 langues
+  assert.match(res.body, /<xhtml:link rel="alternate" hreflang="de" href="http:\/\/localhost:3000\/de\/photo\/brume-sur-la-loire"\/>/);
+  assert.match(robots, /Disallow: \/langue\//);
 });

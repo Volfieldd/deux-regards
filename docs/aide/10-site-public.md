@@ -2,6 +2,23 @@
 
 Ce que vos visiteurs peuvent faire, pour savoir ce que vos réglages changent.
 
+## Langues
+
+Le site existe en **français** (adresses habituelles, `/photo/…`), **anglais** (`/en/…`) et **allemand** (`/de/…`).
+
+- **Ce qui est traduit :** menus, titres de sections, boutons, pied de page, dates (« oct. 2024 », « Oct 2024 », « Okt. 2024 »), noms de pays sur la carte. Ces textes sont fournis par le site, sans traduction automatique.
+- **Vos textes** (accroche, introduction, À propos, biographies, noms des séries, titres, légendes et lieux des photos) : leur version anglaise et allemande est **facultative** ; vous la remplissez dans l'admin (repliée sous chaque champ, « en anglais et en allemand »). Si elle manque, on affiche une autre langue :
+  - page en allemand : allemand, sinon français, sinon anglais ;
+  - page en anglais : anglais, sinon français, sinon allemand ;
+  - page en français : français, sinon anglais, sinon allemand.
+- **Sélecteur :** au bout du menu (et en haut de la page d'une photo), le drapeau et le code de la langue (🇫🇷 FR). Il ouvre la **même page** dans une autre langue, filtres compris. Le choix est retenu (le seul cookie du site, posé seulement à ce moment-là).
+- **Langue à l'arrivée** sur une page française, si le visiteur n'a rien choisi :
+  - pays de langue française (France, Monaco, outre-mer, Afrique francophone…) : français ;
+  - Allemagne, Autriche, Liechtenstein : allemand ;
+  - Belgique, Suisse, Luxembourg, Canada : la langue du navigateur départage (une Zurichoise a l'allemand, un Belge néerlandophone l'anglais) ;
+  - ailleurs : anglais ; pays inconnu (réseau local) : la langue du navigateur.
+- **Jamais redirigés :** les robots des moteurs de recherche (chaque langue est indexée à sa propre adresse, liées entre elles), les aperçus de liens, et toute adresse en `/en/` ou `/de/` (un lien partagé s'ouvre dans la langue choisie par celui qui le partage).
+
 ## Accueil
 
 - **Ouverture :**
@@ -33,7 +50,7 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
 ## Autres pages
 
 - **À propos :** logo complet, accroche, texte, biographies des auteurs.
-- **Droits d'utilisation :** conditions, contact et information sur la mesure d'audience, en trois langues : `/droits` (français), `/droits/en` (anglais), `/droits/de` (allemand). Un sélecteur **Français · English · Deutsch** en haut de la page passe de l'une à l'autre. Les textes se règlent dans [Réglages](reglages).
+- **Droits d'utilisation :** conditions, contact et information sur la mesure d'audience, en trois langues : `/droits` (français), `/en/droits` (anglais), `/de/droits` (allemand). Le sélecteur de langue du menu passe de l'une à l'autre (les anciennes adresses `/droits/en` et `/droits/de` mènent aux nouvelles). Les textes se règlent dans [Réglages](reglages).
 - **Carte** (si vous l'avez publiée dans les [Réglages](reglages)) : une mappemonde aux couleurs du thème, avec la vignette ronde d'une photo sur chaque ville et, en pastille, le nombre de photos de cette ville. Les villes trop proches pour être distinguées se regroupent (nombre cumulé) ; un clic sur le groupe agrandit la carte jusqu'à les séparer. Sous la carte, la liste des lieux avec leurs photos ; un clic sur une vignette de la carte y mène.
 
   | Geste | Effet |

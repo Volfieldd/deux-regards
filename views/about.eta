@@ -1,13 +1,13 @@
 <% layout('./layout') %>
 <header class="top wrap">
   <%~ include('./brand', it) %>
-  <nav class="eyebrow" aria-label="Navigation"><a href="/#series">Séries</a><a href="/#galerie">Galerie</a><% if (it.mapPage) { %><a href="/carte">Carte</a><% } %><a href="/a-propos" aria-current="page">À propos</a></nav>
+  <%~ include('./nav', { ...it, current: 'about' }) %>
 </header>
 <main class="about wrap">
 <% if (it.brand && it.brand.logotype) { %>
   <div class="logotype" role="img" aria-label="<%= it.siteName %><%= it.brand.subtitle ? ' — ' + it.brand.subtitle : '' %>"></div>
 <% } %>
-  <h1><%= it.settings.tagline || 'À propos' %></h1>
+  <h1><%= it.tagline || it.t.nav.about %></h1>
   <div class="prose">
 <% it.paragraphs.forEach(t => { %>
     <p><%= t %></p>
@@ -20,7 +20,7 @@
 <% if (a.bio) { %>
       <p><%= a.bio %></p>
 <% } %>
-      <a class="eyebrow more" href="<%= it.galleryUrl({ regard: a.slug }) %>#galerie">Voir ses photos</a>
+      <a class="eyebrow more" href="<%= it.galleryUrl({ regard: a.slug }) %>#galerie"><%= it.t.seePhotosOf %></a>
     </section>
 <% }) %>
   </div>

@@ -113,8 +113,9 @@ Si l’enregistrement échoue (session expirée…), l’ordre précédent revie
 | **Légende** | affichée sous la photo, 2000 caractères |
 | **Statut** | Brouillon ou Publiée |
 | **Filigrane** | « Selon les réglages », ou « Jamais sur cette photo » (voir [Filigrane et EXIF](filigrane-exif)) |
+| **… en anglais et en allemand** | sous le titre, le lieu et la légende : leur version anglaise et allemande, facultative. Vide : la page anglaise ou allemande montre le texte français (une photo décrite seulement en anglais s'affiche en anglais partout ; voir [Le site vu par les visiteurs](site-public)). |
 
-Cliquez sur **Enregistrer**.
+Cliquez sur **Enregistrer**. Les traductions se saisissent dans la fiche ; modifier un champ depuis la photothèque ou « Compléter et publier » ne les efface pas.
 
 L'aperçu à gauche montre l'image telle que servie (filigrane compris) et ses dimensions. Pour une photo publiée, **voir sur le site** l'ouvre dans la galerie.
 

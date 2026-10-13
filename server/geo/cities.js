@@ -8,8 +8,8 @@ import fs from 'node:fs';
 // peu de mémoire et répondre en quelques millisecondes.
 const FILE = new URL('./villes.tsv', import.meta.url);
 export const ATTRIBUTION = 'Villes : GeoNames (geonames.org), licence CC BY 4.0';
-const REGIONS = new Intl.DisplayNames(['fr'], { type: 'region' });
-export const countryName = cc => { try { return REGIONS.of(cc) || cc; } catch { return cc; } };
+const REGIONS = Object.fromEntries(['fr', 'en', 'de'].map(l => [l, new Intl.DisplayNames([l], { type: 'region' })]));
+export const countryName = (cc, lang = 'fr') => { try { return (REGIONS[lang] || REGIONS.fr).of(cc) || cc; } catch { return cc; } };
 const fold = s => s.toLowerCase().replace(/[’'`.\-_/]/g, ' ').replace(/\s+/g, ' ').trim();
 export const norm = s => fold(String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
 const NON_ASCII = /[^\x00-\x7f]/;

@@ -4,7 +4,7 @@ Les séries regroupent les photos (Rue, Portrait…). Elles forment l'index du s
 
 - **Créer :** **＋ Nouvelle série** en haut de la page place le curseur dans la carte de création. Tapez le nom, puis **Entrée** (ou **Créer**) ; **Échap** efface la saisie. La nouvelle série prend la **première place**, avec une adresse déduite du nom.
 - **Voir ses photos :** **Photos ›** ouvre la liste des photos filtrée sur cette série.
-- **Renommer :** **Renommer** ouvre le nom dans la carte, puis **Enregistrer**. L'adresse (`/serie/<adresse>`) est rangée sous « Adresse de la série (avancé) » : la changer casse les liens déjà partagés.
+- **Renommer :** **Renommer** ouvre le nom dans la carte, puis **Enregistrer**. Sous le nom, « Nom en anglais et en allemand » : la version affichée sur les pages anglaises et allemandes du site (facultative ; vide : le nom français). L'adresse (`/serie/<adresse>`) est rangée sous « Adresse de la série (avancé) » : la changer casse les liens déjà partagés.
 - **Ordonner :** c'est l'ordre de l'index des séries sur le site.
   - à la souris : saisissez la poignée **⠿ Déplacer** et glissez la carte à sa nouvelle place ;
   - au clavier : Tab jusqu'à la poignée, puis **↑ / ←** (avancer d'une place) ou **↓ / →** (reculer d'une place) ;

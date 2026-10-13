@@ -6,6 +6,7 @@
 <% if (v.id) { %>        <label>Adresse <span class="mono">/auteur/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ bad('slug') %>></label><% } %>
       </div>
       <label>Biographie <textarea name="bio" rows="3" maxlength="2000"><%= v.bio || '' %></textarea></label>
+      <%~ include('./_tr', { asset: it.asset, v, name: 'bio', label: 'Biographie', max: 2000, rows: 3 }) %>
       <label>Compte de connexion (identifiant OIDC « sub »)
         <input name="oidc_sub" value="<%= v.oidc_sub || '' %>" maxlength="255" class="mono" placeholder="affiché sur le tableau de bord après connexion"<%~ bad('oidc_sub') %>></label>
 <% if (errs) { %>      <p class="err" role="alert" id="err-auteur-<%= v.id || 'nouveau' %>"><%= Object.values(errs).join(' ') %></p><% } %>

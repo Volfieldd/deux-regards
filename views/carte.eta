@@ -1,21 +1,21 @@
 <% layout('./layout') %>
-<% const terre = it.asset('carte-terre.svg'); const fine = it.asset('carte-terre-fine.svg'); const plural = (n, s) => `${n} ${s}${n > 1 ? 's' : ''}`; %>
+<% const terre = it.asset('carte-terre.svg'); const fine = it.asset('carte-terre-fine.svg'); const t = it.t, m = it.t.map; %>
 <header class="top wrap">
   <%~ include('./brand', it) %>
-  <nav class="eyebrow" aria-label="Navigation"><a href="/#series">Séries</a><a href="/#galerie">Galerie</a><a href="/carte" aria-current="page">Carte</a><a href="/a-propos">À propos</a></nav>
+  <%~ include('./nav', { ...it, current: 'carte', mapPage: true }) %>
 </header>
 <main class="carte-page wrap">
 <% if (it.preview) { %>
   <p class="apercu mono" role="note">Aperçu réservé aux auteurs : cette page n’est pas publiée. Les visiteurs ne la voient pas et le menu du site ne la montre pas. <a href="/admin/reglages#carte">Publier la page Carte dans les Réglages</a></p>
 <% } %>
   <div class="carte-head">
-    <h1>Carte</h1>
-    <p class="mono"><%= it.places.length ? `${plural(it.count, 'photo')} · ${it.places.length} lieu${it.places.length > 1 ? 'x' : ''}` : 'Aucune photo sur la carte pour l’instant' %></p>
+    <h1><%= m.title %></h1>
+    <p class="mono"><%= it.places.length ? `${t.photos(it.count)} · ${t.places(it.places.length)}` : m.none %></p>
   </div>
-  <figure class="carte" data-carte>
+  <figure class="carte" data-carte data-cluster-one="<%= m.cluster('{name}', 1, '{n}') %>" data-cluster-many="<%= m.cluster('{name}', 99, '{n}').replace('99', '{others}') %>">
     <div class="carte-vue" data-carte-vue>
       <svg class="carte-svg" viewBox="0 0 <%= it.map.width %> <%= it.map.height %>" data-carte-svg data-tiles="<%= it.asset('carte-tuiles/index.json') %>" role="group" aria-labelledby="carte-titre">
-        <title id="carte-titre">Carte du monde des lieux de prise de vue<%= it.places.length ? ` : ${it.places.slice(0, 8).map(c => c.name).join(', ')}${it.places.length > 8 ? '…' : ''}` : '' %></title>
+        <title id="carte-titre"><%= m.svgTitle %><%= it.places.length ? ` : ${it.places.slice(0, 8).map(c => c.name).join(', ')}${it.places.length > 8 ? '…' : ''}` : '' %></title>
         <defs><clipPath id="carte-rond" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath></defs>
         <use class="globe" href="<%= terre %>#globe" width="<%= it.map.width %>" height="<%= it.map.height %>"/>
         <use class="terre" href="<%= terre %>#terre" data-fine="<%= fine %>#terre" width="<%= it.map.width %>" height="<%= it.map.height %>"/>
@@ -23,7 +23,7 @@
         <g class="detail" data-detail display="none"></g>
         <g class="pins" data-pins>
 <% it.places.forEach(c => { const n = c.photos.length; %>
-          <a class="pin" href="#lieu-<%= c.id %>" data-pin="<%= c.id %>" data-x="<%= c.x %>" data-y="<%= c.y %>" data-n="<%= n %>" data-name="<%= c.name %>" transform="translate(<%= c.x %> <%= c.y %>)" aria-label="<%= c.name %>, <%= c.country %> : <%= plural(n, 'photo') %>">
+          <a class="pin" href="#lieu-<%= c.id %>" data-pin="<%= c.id %>" data-x="<%= c.x %>" data-y="<%= c.y %>" data-n="<%= n %>" data-name="<%= c.name %>" transform="translate(<%= c.x %> <%= c.y %>)" aria-label="<%= c.name %>, <%= c.country %><%= t.colon %> <%= t.photos(n) %>">
             <g class="pin-in" data-pin-in>
               <circle class="pin-bord" r="15"/>
               <image href="<%= c.thumb %>" x="-13" y="-13" width="26" height="26" preserveAspectRatio="xMidYMid slice" clip-path="url(#carte-rond)"/>
@@ -35,17 +35,17 @@
       </svg>
     </div>
     <div class="carte-outils" data-js-only hidden>
-      <button type="button" data-carte-zoom="in" aria-label="Zoom avant">+</button>
-      <button type="button" data-carte-zoom="out" aria-label="Zoom arrière" disabled>−</button>
-      <button type="button" class="eyebrow" data-carte-zoom="reset" disabled>Monde</button>
+      <button type="button" data-carte-zoom="in" aria-label="<%= m.zoomIn %>">+</button>
+      <button type="button" data-carte-zoom="out" aria-label="<%= m.zoomOut %>" disabled>−</button>
+      <button type="button" class="eyebrow" data-carte-zoom="reset" disabled><%= m.world %></button>
     </div>
-    <figcaption class="mono"><span data-js-only hidden>Pincez ou Ctrl + molette pour zoomer, glissez pour vous déplacer. </span>Fond de carte : Natural Earth · <%= it.credit %></figcaption>
+    <figcaption class="mono"><span data-js-only hidden><%= m.help %> </span><%= m.base %> · <%= m.credit %></figcaption>
   </figure>
 <% if (it.places.length) { %>
   <div class="lieux">
 <% it.places.forEach(c => { %>
     <section class="lieu" id="lieu-<%= c.id %>">
-      <h2><%= c.name %> <span class="mono"><%= c.country %> · <%= plural(c.photos.length, 'photo') %></span></h2>
+      <h2><%= c.name %> <span class="mono"><%= c.country %> · <%= t.photos(c.photos.length) %></span></h2>
       <ul>
 <% c.photos.forEach(p => { %>
         <li><a href="<%= it.photoUrl(p.slug) %>"><span class="im"><%~ it.picture(p, { sizes: '(min-width: 640px) 220px, 45vw', alt: '' }) %></span><span class="ttl"><%= p.title %></span></a></li>
@@ -55,7 +55,7 @@
 <% }) %>
   </div>
 <% } else { %>
-  <p class="empty"><%= it.preview ? 'Aucune photo sur la carte : choisissez la ville d’une photo publiée et cochez « Afficher sur la carte » dans sa fiche.' : 'Les lieux arrivent bientôt.' %></p>
+  <p class="empty"><%= it.preview ? 'Aucune photo sur la carte : choisissez la ville d’une photo publiée et cochez « Afficher sur la carte » dans sa fiche.' : m.soon %></p>
 <% } %>
 </main>
 <%~ include('./footer', it) %>

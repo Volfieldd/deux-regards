@@ -7,6 +7,8 @@ export default defineConfig({
   fullyParallel: true,
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    // Site en trois langues : un navigateur en français reste sur les pages françaises (sinon redirigé vers /en/).
+    locale: 'fr-FR',
     trace: 'retain-on-failure',
   },
   projects: [

@@ -177,12 +177,17 @@ export function createAdminRepo(db) {
       const watermark = body.watermark === 'none' ? 0 : null;
       const before = q.photo.get(id);
       const loc = resolveLocation(body, before, errors);
+      // Traductions facultatives (site en anglais et en allemand) : gardées telles quelles si le formulaire ne les envoie pas.
+      const tr = (field, max) => Object.fromEntries(['en', 'de'].map(l => [`${field}_${l}`, `${field}_${l}` in body ? text(body[`${field}_${l}`], max) : (before?.[`${field}_${l}`] ?? '')]));
       const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn === undefined ? text(body.taken_on, 40) : takenOn, legend: text(body.legend, 2000), status, watermark,
+        ...tr('title', 160), ...tr('legend', 2000), ...tr('place', 120),
         city_label: 'city_label' in body ? text(body.city_label, 120) : (before?.city_name ? cities.label({ name: before.city_name, cc: before.city_cc }) : ''), on_map: loc.on_map };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
       db.transaction(() => {
         db.prepare(`UPDATE photos SET title = @title, slug = @slug, category_id = @category_id, author_id = @author_id, place = @place,
-          taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
+          taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark,
+          title_en = @title_en, title_de = @title_de, legend_en = @legend_en, legend_de = @legend_de, place_en = @place_en, place_de = @place_de,
+          updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
         db.prepare(`UPDATE photos SET city_id = @city_id, city_name = @city_name, city_cc = @city_cc, city_lat = @city_lat, city_lon = @city_lon,
           city_source = @city_source, on_map = @on_map WHERE id = @id`).run({ ...loc, id });
         // L'ouverture désigne les photos par leur adresse : elle suit le renommage.
@@ -283,8 +288,11 @@ export function createAdminRepo(db) {
       const name = text(body.name, 80);
       if (!name) errors.name = 'Le nom est obligatoire.';
       const slug = checkedSlug('categories', id ? body.slug : '', name, id, errors);
-      if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values: { name, slug } });
-      if (id) return db.prepare('UPDATE categories SET name = ?, slug = ? WHERE id = ?').run(name, slug, id);
+      const old = id ? db.prepare('SELECT name_en, name_de FROM categories WHERE id = ?').get(id) : null;
+      const name_en = 'name_en' in body ? text(body.name_en, 80) : old?.name_en ?? '';
+      const name_de = 'name_de' in body ? text(body.name_de, 80) : old?.name_de ?? '';
+      if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values: { name, slug, name_en, name_de } });
+      if (id) return db.prepare('UPDATE categories SET name = ?, slug = ?, name_en = ?, name_de = ? WHERE id = ?').run(name, slug, name_en, name_de, id);
       // Nouvelle série en tête : c'est celle sur laquelle on travaille.
       return db.transaction(() => {
         db.prepare('UPDATE categories SET position = position + 1').run();
@@ -347,10 +355,10 @@ export function createAdminRepo(db) {
       const slug = checkedSlug('authors', id ? body.slug : '', name, id, errors);
       const sub = text(body.oidc_sub, 255) || null;
       if (sub && q.authors.all().some(a => a.oidc_sub === sub && a.id !== Number(id))) errors.oidc_sub = 'Ce compte est déjà lié à un autre auteur.';
-      const values = { name, slug, bio: text(body.bio, 2000), oidc_sub: sub };
+      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), oidc_sub: sub };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
-      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, oidc_sub = @oidc_sub WHERE id = @id').run({ ...values, id });
-      db.prepare('INSERT INTO authors (name, slug, bio, oidc_sub) VALUES (@name, @slug, @bio, @oidc_sub)').run(values);
+      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, oidc_sub = @oidc_sub WHERE id = @id').run({ ...values, id });
+      db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, oidc_sub) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @oidc_sub)').run(values);
     },
     deleteAuthor(id) {
       const a = q.authors.all().find(r => r.id === Number(id));
@@ -384,9 +392,9 @@ export function createAdminRepo(db) {
       hero = hero.slice(0, 8);
       const values = {
         site_name: text(body.site_name, 60),
-        tagline: text(body.tagline, 200),
-        intro: text(body.intro, 1000),
-        about: text(body.about, 10000),
+        tagline: text(body.tagline, 200), tagline_en: text(body.tagline_en, 200), tagline_de: text(body.tagline_de, 200),
+        intro: text(body.intro, 1000), intro_en: text(body.intro_en, 1000), intro_de: text(body.intro_de, 1000),
+        about: text(body.about, 10000), about_en: text(body.about_en, 10000), about_de: text(body.about_de, 10000),
         rights_text: text(body.rights_text, 10000),
         rights_text_en: text(body.rights_text_en, 10000),
         rights_text_de: text(body.rights_text_de, 10000),

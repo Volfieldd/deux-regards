@@ -356,8 +356,8 @@ test('réglages : nom du site, textes et ouverture (photos publiées seulement)'
   assert.match((await ctx.app.inject('/a-propos')).body, /<p>Un\.<\/p>\s*<p>Deux\.<\/p>/);
   // Droits d'utilisation : textes anglais et allemand enregistrés depuis les réglages.
   await ctx.post('/admin/reglages', { site_name: 'Heures Creuses', rights_text_en: 'Ask first.', rights_text_de: 'Erst fragen.' });
-  assert.match((await ctx.app.inject('/droits/en')).body, /<p>Ask first\.<\/p>/);
-  assert.match((await ctx.app.inject('/droits/de')).body, /<p>Erst fragen\.<\/p>/);
+  assert.match((await ctx.app.inject('/en/droits')).body, /<p>Ask first\.<\/p>/);
+  assert.match((await ctx.app.inject('/de/droits')).body, /<p>Erst fragen\.<\/p>/);
   assert.match((await ctx.as({ url: '/admin/reglages' })).body, /name="rights_text_en"[^>]*>Ask first\.<\/textarea>/);
 });
 
