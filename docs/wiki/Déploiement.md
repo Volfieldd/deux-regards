@@ -79,6 +79,7 @@ Le site n'a qu'une adresse canonique, celle de `PUBLIC_URL` (en production `http
    - *Then* : **Dynamic**, expression `concat("https://www.nicephos.art", http.request.uri.path)` ;
    - code **301**, case **Preserve query string** cochée.
 4. **SSL/TLS → Edge Certificates → Always Use HTTPS** : activé. `http://www.nicephos.art` passe ainsi en HTTPS (la règle ci-dessus ne le traite pas, puisque l'hôte est déjà le bon).
+5. **Network → IP Geolocation** : activé (c’est le cas par défaut). Cloudflare transmet alors le pays du visiteur (`CF-IPCountry`), utilisé par la carte de la page Statistiques ; sans lui, les visites sont comptées en « Pays inconnu ».
 
 Pièges :
 

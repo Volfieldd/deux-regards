@@ -122,7 +122,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onClose', async () => { await app.variants.stop(); });
   // Preuves d'antériorité : empreintes et horodatage RFC 3161, repris en arrière-plan.
   // Mesure d'audience anonyme (voir server/stats.js).
-  app.decorate('stats', createStats({ db, publicUrl: config.publicUrl, log: app.log }));
+  // Pays : l'en-tête de Cloudflare n'est cru que derrière un proxy de confiance (tunnel), sinon « inconnu ».
+  app.decorate('stats', createStats({ db, publicUrl: config.publicUrl, log: app.log, trustCountry: Boolean(config.trustProxy) }));
   // Partage Instagram : file de publication et envoi aux créneaux (voir server/instagram.js).
   app.decorate('instagram', createInstagram({ db, storageDir: config.storageDir, config, variants: app.variants, siteName: app.siteName, log: app.log, ...instagramOptions }));
   app.addHook('onReady', async () => { if (!instagramOptions.manual) app.instagram.start(); });

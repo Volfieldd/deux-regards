@@ -70,8 +70,26 @@
 <% } %>
   </section>
 
+  <section class="panel wide2" aria-labelledby="pays-title">
+    <h2 id="pays-title">Pays <span class="mono">visiteurs, selon Cloudflare</span></h2>
+<% const cmax = it.countries.length ? it.countries[0].visitors : 1; %>
+    <div class="world">
+      <svg class="carte" viewBox="0 0 1000 520" role="img" aria-labelledby="carte-titre">
+        <title id="carte-titre">Carte des visiteurs par pays sur la période<%= it.countries.length ? ` : ${it.countries.slice(0, 5).map(r => `${r.name} ${fmt(r.visitors)}`).join(', ')}` : ' : aucune visite' %></title>
+        <image href="<%= it.asset('admin/carte-monde.svg') %>" x="0" y="0" width="1000" height="520"/>
+<% it.bubbles.forEach(b => { %>        <circle cx="<%= b.x %>" cy="<%= b.y %>" r="<%= b.r %>"><title><%= b.name %> · <%= fmt(b.visitors) %> visiteur<%= b.visitors > 1 ? 's' : '' %></title></circle>
+<% }) %>      </svg>
+<% if (!it.countries.length) { %>      <p class="hint">Aucune visite sur la période. Les pays apparaissent à partir des visites suivant la mise à jour ; Cloudflare doit transmettre le pays (option <em>IP Geolocation</em>, activée par défaut).</p>
+<% } else { %>
+      <ul class="rank plain" aria-labelledby="pays-title">
+<% it.countries.slice(0, 10).forEach(r => { %>        <li><span class="t"><%= r.name %><span class="meter" aria-hidden="true"><i class="w<%= Math.max(1, Math.round((r.visitors / cmax) * 20)) %>"></i></span></span><b><%= fmt(r.visitors) %></b></li>
+<% }) %>      </ul>
+<% } %>
+    </div>
+  </section>
+
   <section class="panel wide2">
     <h2>Ce qui est mesuré</h2>
-    <p class="hint">Les pages du site et les photos ouvertes dans la visionneuse, jour par jour. Un visiteur est reconnu pour la journée seulement, par une empreinte anonyme oubliée à minuit : aucune adresse IP ni aucun cookie. Les navigateurs qui demandent à ne pas être suivis ne sont pas comptés. Les compteurs sont effacés au bout de 25 mois. La page « Droits d’utilisation » du site en informe les visiteurs. <a class="more" href="/admin/aide#statistiques">En savoir plus</a></p>
+    <p class="hint">Les pages du site et les photos ouvertes dans la visionneuse, jour par jour. Un visiteur est reconnu pour la journée seulement, par une empreinte anonyme oubliée à minuit : aucune adresse IP ni aucun cookie. Son pays est celui que transmet Cloudflare ; le site ne le calcule pas et ne garde pas l’adresse. Les navigateurs qui demandent à ne pas être suivis ne sont pas comptés. Les compteurs sont effacés au bout de 25 mois. La page « Droits d’utilisation » du site en informe les visiteurs. <a class="more" href="/admin/aide#statistiques">En savoir plus</a></p>
   </section>
 </div>

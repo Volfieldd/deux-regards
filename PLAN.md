@@ -181,6 +181,10 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Pas d'offre payante de l'API : budget réglable (Prudent par défaut : 25 publications / 24 h, 60 min d'écart, 100 appels / h ; Limites de Meta ; Personnalisé), quota réel lu avant chaque envoi, pause sans essai consommé quand Meta signale une limite, consommation affichée, « Publier maintenant » refusé hors budget ; vérifications espacées (≈ 6 appels par publication au lieu de 32).
 - Journal des appels `instagram_calls` (migration 010), dates et types seulement, 7 jours.
 
+### 15. Statistiques : carte des visiteurs par pays (fait)
+- Pays transmis par Cloudflare (`CF-IPCountry`, cru derrière le proxy de confiance seulement), compté par visiteur unique du jour (`stats_countries`, migration 011) ; aucune géolocalisation par le site, aucune IP conservée.
+- Mappemonde Natural Earth embarquée (`public/admin/carte-monde.svg`, centres des pays dans `server/pays-centres.json`, générés par `scripts/carte-monde.mjs`), bulles proportionnelles, liste des 10 premiers ; mention publique « Mesure d'audience » complétée (FR/EN/DE).
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

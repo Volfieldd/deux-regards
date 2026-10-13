@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { setup } from './helpers.js';
-import { createStats, parisDay, sourceOf, siteOf } from '../server/stats.js';
+import { createStats, parisDay, sourceOf, siteOf, countryOf } from '../server/stats.js';
 
 const TOKEN = 'jeton-de-test-0123456789';
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15';
@@ -117,4 +117,46 @@ test('bornes : un client qui change de navigateur ne gonfle ni les visiteurs ni 
   assert.equal(siteOf('l.instagram.com'), 'instagram.com');
   assert.equal(siteOf('news.bbc.co.uk'), 'bbc.co.uk');
   assert.equal(sourceOf('https://xn--caf-dma.fr/', 'x'), 'xn--caf-dma.fr');
+});
+
+test('pays : code de Cloudflare, derrière le proxy de confiance seulement, par visiteur unique', async t => {
+  assert.equal(countryOf({ 'cf-ipcountry': 'fr' }, true), 'FR');
+  for (const v of ['XX', 'T1', 'FRA', '', undefined, '<b>']) assert.equal(countryOf({ 'cf-ipcountry': v }, true), 'XX', String(v));
+  assert.equal(countryOf({ 'cf-ipcountry': 'FR' }, false), 'XX');                      // sans proxy de confiance : en-tête inventable
+  // Derrière un proxy de confiance (comme le tunnel Cloudflare en production).
+  const { app, db } = await setup(t, { seeded: true, env: { TRUST_PROXY: '127.0.0.1' } });
+  const fr = { 'cf-ipcountry': 'FR' };
+  await visit(app, '/', { ip: '127.0.0.1', headers: { ...fr, 'x-forwarded-for': '203.0.113.7' } });
+  await visit(app, '/a-propos', { ip: '127.0.0.1', headers: { ...fr, 'x-forwarded-for': '203.0.113.7' } });   // même visiteur
+  await visit(app, '/', { ip: '127.0.0.1', headers: { 'cf-ipcountry': 'DE', 'x-forwarded-for': '198.51.100.4' } });
+  await visit(app, '/', { ip: '127.0.0.1', headers: { 'x-forwarded-for': '192.0.2.9' } });                  // sans pays
+  assert.deepEqual(db.prepare('SELECT country, visitors FROM stats_countries ORDER BY country').all(),
+    [{ country: 'DE', visitors: 1 }, { country: 'FR', visitors: 1 }, { country: 'XX', visitors: 1 }]);
+  assert.doesNotMatch(JSON.stringify(db.prepare('SELECT * FROM stats_countries').all()), /203\.0\.113|198\.51/);
+});
+
+test('sans proxy de confiance, le pays envoyé par le client est ignoré', async t => {
+  const { app, db } = await setup(t, { seeded: true });
+  await visit(app, '/', { headers: { 'cf-ipcountry': 'JP' } });
+  assert.deepEqual(db.prepare('SELECT country, visitors FROM stats_countries').all(), [{ country: 'XX', visitors: 1 }]);
+});
+
+test('admin : carte des visiteurs par pays (bulles) et liste ; mention publique dans les trois langues', async t => {
+  const ctx = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: TOKEN } });
+  const day = parisDay();
+  const ins = ctx.db.prepare('INSERT INTO stats_countries (day, country, visitors) VALUES (?, ?, ?)');
+  ins.run(day, 'FR', 120); ins.run(day, 'DE', 30); ins.run(day, 'JP', 3); ins.run(day, 'XX', 5);
+  const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', payload: { token: TOKEN, author: 'julien' } });
+  const page = (await ctx.app.inject({ url: '/admin/statistiques', cookies: cookiesOf(res) })).body;
+  assert.match(page, /<image href="\/static\/admin\/carte-monde\.svg[^"]*"/);
+  const circles = [...page.matchAll(/<circle cx="(\d+)" cy="(\d+)" r="([\d.]+)"><title>([^<]+)<\/title>/g)].map(m => ({ x: +m[1], y: +m[2], r: +m[3], t: m[4] }));
+  assert.equal(circles.length, 3);                                                     // pays inconnu : liste seulement
+  assert.equal(circles[0].t, 'France · 120 visiteurs');
+  assert.equal(circles[0].r, 24);                                                      // la plus grande bulle
+  assert.ok(circles[1].r < circles[0].r && circles[2].r < circles[1].r);
+  assert.ok(circles[0].x > 480 && circles[0].x < 540 && circles[0].y > 90 && circles[0].y < 140, 'France en Europe de l’Ouest');
+  assert.match(page, /<li><span class="t">Pays inconnu/);
+  assert.match((await ctx.app.inject('/droits')).body, /pays \(indiqué par notre hébergeur Cloudflare\)/);
+  assert.match((await ctx.app.inject('/droits/en')).body, /country \(as provided by our host, Cloudflare\)/);
+  assert.match((await ctx.app.inject('/droits/de')).body, /Land \(von unserem Hoster Cloudflare übermittelt\)/);
 });

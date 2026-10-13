@@ -21,6 +21,19 @@ import { RIGHTS, LANGS, rightsDefaults, withoutDefaults } from '../rights.js';
 import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, captionWarnings, InstagramError } from '../instagram.js';
 import { PRESETS as IG_PRESETS, BOUNDS as IG_BOUNDS } from '../instagram-limits.js';
 
+// Carte des visiteurs (page Statistiques) : centre de chaque pays dans le repère 1000 × 520 du fond de carte
+// (public/admin/carte-monde.svg, généré par scripts/carte-monde.mjs), nom du pays en français.
+const COUNTRY_CENTRES = JSON.parse(fs.readFileSync(new URL('../pays-centres.json', import.meta.url), 'utf8'));
+const REGION_NAMES = new Intl.DisplayNames(['fr'], { type: 'region' });
+const countryName = code => { if (code === 'XX') return 'Pays inconnu'; try { return REGION_NAMES.of(code) || code; } catch { return code; } };
+// Bulles : surface proportionnelle aux visiteurs (rayon en racine carrée), 3 à 24 unités ; les petites dessinées en dernier.
+function countryBubbles(rows) {
+  const known = rows.filter(r => COUNTRY_CENTRES[r.country]);
+  const max = Math.max(1, ...known.map(r => r.visitors));
+  return known.map(r => ({ ...r, x: COUNTRY_CENTRES[r.country][0], y: COUNTRY_CENTRES[r.country][1], r: Math.round((3 + 21 * Math.sqrt(r.visitors / max)) * 10) / 10 }))
+    .sort((a, b) => b.visitors - a.visitors);
+}
+
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 const LOGO_MAX_SIDE = 4000;
 
@@ -491,6 +504,10 @@ export default async function adminRoutes(app) {
       top: app.stats.topPhotos(from, to, 10).map(r => ({ ...r, photo: all.get(r.id) && withReady(all.get(r.id)) })).filter(r => r.photo),
       pages: app.stats.topPages(from, to, 8).map(r => ({ ...r, label: pageLabel(r.page, categories, authors) })),
       sources: app.stats.sources(from, to, 8),
+      ...(() => {
+        const countries = app.stats.countries(from, to).map(r => ({ ...r, name: countryName(r.country) }));
+        return { countries, bubbles: countryBubbles(countries) };
+      })(),
     });
   });
 
