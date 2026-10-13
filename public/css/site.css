@@ -222,6 +222,9 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .carte-svg { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 520; }
 .carte-svg .globe { fill: var(--ink); fill-opacity: .035; }
 .carte-svg .terre { fill: var(--ink); fill-opacity: .14; }
+/* Teinte pleine : les tuiles détaillées se chevauchent un peu sans laisser de jointure plus sombre. */
+@supports (fill: color-mix(in srgb, red 50%, blue)) { .carte-svg .terre { fill: color-mix(in srgb, var(--ink) 16%, var(--paper)); fill-opacity: 1; } }
+.carte-svg .frontieres { fill: none; stroke: var(--paper); stroke-width: .8; stroke-linejoin: round; }  /* trait constant à l’écran : vector-effect dans le symbole */
 .pin { cursor: pointer; }
 .pin .pin-bord { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
 .pin image { pointer-events: none; }

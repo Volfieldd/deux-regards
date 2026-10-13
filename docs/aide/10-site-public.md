@@ -42,7 +42,7 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
   | pincement (téléphone), **Ctrl + molette** ou pincement du pavé tactile | zoom à l'endroit visé |
   | glisser (carte agrandie) | se déplacer |
 
-  La molette seule et le glissé vertical sur la carte au monde entier font défiler la page, comme ailleurs. Sans JavaScript, la carte est fixe et la liste des lieux reste complète.
+  En zoomant, le fond devient plus détaillé (côtes, frontières, petites îles) : seule la zone affichée est chargée. La molette seule et le glissé vertical sur la carte au monde entier font défiler la page, comme ailleurs. Sans JavaScript, la carte est fixe et la liste des lieux reste complète.
 - **Page introuvable :** pour une adresse inconnue ou une photo dépubliée.
 
 ## Toujours

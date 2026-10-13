@@ -58,6 +58,12 @@ test('villes : recherche au fil de la frappe, noms alternatifs, ville d’une po
   assert.equal(nearest(48.8352, 2.2410).label, 'Boulogne-Billancourt, France');        // une voisine garde son nom
   assert.equal(nearest(47.0, -30.0), null);                                            // en plein Atlantique
   assert.equal(byId(search('Angers')[0].id).name, 'Angers');
+  // Petites communes (toutes les communes de France, localités de plus de 500 habitants ailleurs) et noms français.
+  assert.equal(search('ars en re')[0].label, 'Ars-en-Ré, France');
+  assert.equal(search('Saint-Clément-des-Baleines')[0].label, 'Saint-Clément-des-Baleines, France');
+  assert.equal(nearest(46.2066, -1.5167).label, 'Ars-en-Ré, France');
+  assert.equal(search('venise')[0].label, 'Venice, Italie');                           // pas le hameau homonyme
+  assert.equal(search('anvers')[0].label, 'Antwerp, Belgique');
 });
 
 test('GPS de l’original : lu en degrés décimaux, hémisphères, valeurs absurdes écartées', async () => {
@@ -221,6 +227,13 @@ test('page Carte : photos publiées cochées, groupées par ville, à leur place
   assert.match(body, /GeoNames/);
   assert.match(body, /href="\/static\/carte-terre\.svg\?v=[0-9a-f]{10}#terre"/);
   assert.match(body, /<image href="\/media\/[^"]+-640\.webp"/);
+  // Fonds plus détaillés au zoom : 1:50m, puis tuiles 1:10m de la zone visible (servies compressées).
+  assert.match(body, /data-fine="\/static\/carte-terre-fine\.svg\?v=[0-9a-f]{10}#terre"/);
+  const tiles = body.match(/data-tiles="([^"]+)"/)[1];
+  const index = (await ctx.app.inject(tiles)).json();
+  assert.ok(index.tiles.length > 100 && index.tiles.includes('9-2'));                  // côte atlantique française
+  const tile = await ctx.app.inject({ url: '/static/carte-tuiles/9-2.svg', headers: { 'accept-encoding': 'br' } });
+  assert.equal(tile.headers['content-encoding'], 'br');
   assert.doesNotMatch(body, /style="/);                                                // CSP : aucun style en ligne
   const visits = ctx.db.prepare("SELECT SUM(views) FROM stats_pages WHERE page = 'carte'").pluck();
   assert.equal(visits.get(), 1);

@@ -65,7 +65,7 @@ function resolveLocation(body, before, errors) {
       const chosen = Number(body.city_id) ? cities.byId(body.city_id) : null;
       const city = chosen && (cities.norm(chosen.label) === n || cities.norm(chosen.name) === n) ? chosen
         : cities.search(typed, 10).find(c => cities.norm(c.label) === n || cities.norm(c.name) === n);
-      if (!city) errors.city = 'Ville introuvable : choisissez-la dans la liste proposée (villes de plus de 5 000 habitants). Pour un lieu précis, utilisez le champ Lieu.';
+      if (!city) errors.city = 'Ville introuvable : choisissez-la dans la liste proposée (toutes les communes de France, localités de plus de 500 habitants ailleurs). Pour un lieu précis, utilisez le champ Lieu.';
       else if (city.id === before?.city_id) loc = keep;
       else loc = { city_id: city.id, city_name: city.name, city_cc: city.cc, city_lat: city.lat, city_lon: city.lon, city_source: 'manuel' };
     }

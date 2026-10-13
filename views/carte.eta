@@ -1,5 +1,5 @@
 <% layout('./layout') %>
-<% const terre = it.asset('carte-terre.svg'); const plural = (n, s) => `${n} ${s}${n > 1 ? 's' : ''}`; %>
+<% const terre = it.asset('carte-terre.svg'); const fine = it.asset('carte-terre-fine.svg'); const plural = (n, s) => `${n} ${s}${n > 1 ? 's' : ''}`; %>
 <header class="top wrap">
   <%~ include('./brand', it) %>
   <nav class="eyebrow" aria-label="Navigation"><a href="/#series">Séries</a><a href="/#galerie">Galerie</a><a href="/carte" aria-current="page">Carte</a><a href="/a-propos">À propos</a></nav>
@@ -14,11 +14,13 @@
   </div>
   <figure class="carte" data-carte>
     <div class="carte-vue" data-carte-vue>
-      <svg class="carte-svg" viewBox="0 0 <%= it.map.width %> <%= it.map.height %>" data-carte-svg role="group" aria-labelledby="carte-titre">
+      <svg class="carte-svg" viewBox="0 0 <%= it.map.width %> <%= it.map.height %>" data-carte-svg data-tiles="<%= it.asset('carte-tuiles/index.json') %>" role="group" aria-labelledby="carte-titre">
         <title id="carte-titre">Carte du monde des lieux de prise de vue<%= it.places.length ? ` : ${it.places.slice(0, 8).map(c => c.name).join(', ')}${it.places.length > 8 ? '…' : ''}` : '' %></title>
         <defs><clipPath id="carte-rond" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath></defs>
         <use class="globe" href="<%= terre %>#globe" width="<%= it.map.width %>" height="<%= it.map.height %>"/>
-        <use class="terre" href="<%= terre %>#terre" width="<%= it.map.width %>" height="<%= it.map.height %>"/>
+        <use class="terre" href="<%= terre %>#terre" data-fine="<%= fine %>#terre" width="<%= it.map.width %>" height="<%= it.map.height %>"/>
+        <use class="frontieres" href="<%= terre %>#frontieres" data-fine="<%= fine %>#frontieres" width="<%= it.map.width %>" height="<%= it.map.height %>"/>
+        <g class="detail" data-detail display="none"></g>
         <g class="pins" data-pins>
 <% it.places.forEach(c => { const n = c.photos.length; %>
           <a class="pin" href="#lieu-<%= c.id %>" data-pin="<%= c.id %>" data-x="<%= c.x %>" data-y="<%= c.y %>" data-n="<%= n %>" data-name="<%= c.name %>" transform="translate(<%= c.x %> <%= c.y %>)" aria-label="<%= c.name %>, <%= c.country %> : <%= plural(n, 'photo') %>">
