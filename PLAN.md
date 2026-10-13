@@ -177,6 +177,10 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 13. Visionneuse : légendes longues (fait)
 - Plus d'ascenseur intérieur : légende repliée à 3 lignes avec « Lire la suite », la page défile ; image ajustée au premier écran ; titres longs coupés à la ligne ; flèches sous le texte sur téléphone.
 
+### 14. Instagram dans les limites de l'API (fait)
+- Pas d'offre payante de l'API : budget réglable (Prudent par défaut : 25 publications / 24 h, 60 min d'écart, 100 appels / h ; Limites de Meta ; Personnalisé), quota réel lu avant chaque envoi, pause sans essai consommé quand Meta signale une limite, consommation affichée, « Publier maintenant » refusé hors budget ; vérifications espacées (≈ 6 appels par publication au lieu de 32).
+- Journal des appels `instagram_calls` (migration 010), dates et types seulement, 7 jours.
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

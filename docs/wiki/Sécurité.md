@@ -91,6 +91,7 @@ Le module de statistiques (`server/stats.js`) ne stocke **aucune donnée personn
 ## Instagram
 
 - Jeton d’accès **chiffré** en base (AES-256-GCM, clé `INSTAGRAM_TOKEN_KEY` ou dérivée de `COOKIE_SECRET`), jamais affiché ni journalisé ; erreurs de Meta nettoyées de tout jeton ou secret.
+- Journal des appels à l’API (`instagram_calls`) : date et type d’appel seulement, sans jeton, URL ni contenu ; effacé après 7 jours. Budget d’appels par heure et pauses sur limite de Meta : la file ne martèle jamais l’API.
 - Connexion OAuth : `state` aléatoire lié au navigateur (cookie signé, `httpOnly`, 10 min, chemin `/admin/instagram`), comparaison en temps constant ; retour refusé sinon.
 - Image envoyée : adresse `/partage/instagram/<jeton>.jpg` (192 bits) valable seulement pendant l’envoi ; JPEG sans métadonnées ; originaux jamais servis.
 - Détails : [Instagram](Instagram).

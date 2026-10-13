@@ -42,6 +42,20 @@ Le **modèle** (Instagram → Réglages) s’applique à toutes les photos, avec
 
 **Pour une photo**, dans sa fiche : modifiez directement la légende. La case **Légende personnalisée** se coche toute seule ; **Revenir au modèle** reprend celle du modèle. Le compteur indique la longueur (2 200 caractères au plus). Des avertissements signalent un lien (non cliquable sur Instagram : préférez « lien en bio ») ou plus de 30 hashtags.
 
+## Limites de l’API
+
+Il n’existe pas d’offre payante de l’API d’Instagram : Meta autorise **100 publications par compte sur 24 h glissantes** et un nombre d’appels qu’il calcule lui-même. Le site publie donc dans un **budget**, réglé dans **Instagram → Réglages → Limites de l’API** :
+
+| Réglage | Publications sur 24 h | Écart entre deux | Appels par heure |
+|---|---|---|---|
+| **Prudent** (par défaut) | 25 | 60 min | 100 |
+| **Limites de Meta** | le quota lu chez Instagram (100 aujourd’hui) | aucun | 200 |
+| **Personnalisé** | 1 à 100 | 0 à 1 440 min | 10 à 1 000 |
+
+- **Hors budget**, la photo attend dans la file. **Publier maintenant** refuse en expliquant pourquoi et quand ce sera possible (« Dernière publication il y a 20 min ; 60 min au moins entre deux publications : prochaine possible à 14 h 30 »).
+- **Si Instagram signale une limite**, la file se met **en pause** le temps qu’il indique (sinon 1 h, puis 2 h, 4 h, 8 h, 24 h). La photo reste en tête de file et **l’essai n’est pas compté**. Un bandeau l’annonce sur la page **Instagram**, avec **Reprendre maintenant** pour lever la pause à la main. À la reprise, une photo par créneau, jamais de rafale.
+- La page **Instagram** affiche la **consommation** : publications sur 24 h, appels sur la dernière heure, quota lu chez Instagram.
+
 ## En cas d’échec
 
 - **Nouvel essai automatique :** la photo reste en tête de file, et le message d’erreur s’affiche dans la file et dans la fiche. Elle repart au créneau suivant, **3 essais au plus**.

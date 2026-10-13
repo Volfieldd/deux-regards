@@ -19,6 +19,7 @@ import { loadHelp } from '../help.js';
 import { barsAndLine, sparkline } from '../charts.js';
 import { RIGHTS, LANGS, rightsDefaults, withoutDefaults } from '../rights.js';
 import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, captionWarnings, InstagramError } from '../instagram.js';
+import { PRESETS as IG_PRESETS, BOUNDS as IG_BOUNDS } from '../instagram-limits.js';
 
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 const LOGO_MAX_SIDE = 4000;
@@ -342,10 +343,12 @@ export default async function adminRoutes(app) {
       title: 'Instagram', s, FRAMES, DEFAULT_TEMPLATE, categories: repo.categories(),
       conf: { configured: app.config.instagram.configured, https: app.config.instagram.https, redirectUri: app.config.instagram.redirectUri, apiVersion: app.config.instagram.apiVersion },
       account: ig.account.get(), connected: ig.account.connected(),
-      queue: withPhoto(ig.queue()), history: withPhoto(ig.history(20)), ...extra,
+      queue: withPhoto(ig.queue()), history: withPhoto(ig.history(20)), usage: ig.usage(), IG_PRESETS, IG_BOUNDS, ...extra,
     });
   };
   app.get('/admin/instagram', async (request, reply) => igPage(request, reply));
+  // Lever une pause « limite atteinte » à la main (Meta a rendu l'accès plus tôt, réglage changé…).
+  app.post('/admin/instagram/reprendre', write, async (request, reply) => { app.instagram.resume(); return done(reply, '/admin/instagram', 'File Instagram reprise.'); });
 
   app.post('/admin/instagram/reglages', write, async (request, reply) => {
     app.instagram.saveSettings(normalizeSettings(request.body || {}, repo.categories()));
@@ -410,7 +413,7 @@ export default async function adminRoutes(app) {
         else await app.instagram.publish(id);
       } catch (err) {
         if (!(err instanceof InstagramError)) throw err;
-        return failed(reply, back, `Instagram : ${err.message}.`);
+        return failed(reply, back, `Instagram : ${err.message.replace(/\.$/, '')}.`);
       }
       return label ? done(reply, back, label) : reply.redirect(back, 303);
     });

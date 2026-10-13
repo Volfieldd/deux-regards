@@ -34,7 +34,7 @@ storage/
   tmp/             fichiers en cours d'import
 ```
 
-Les dossiers apparaissent au premier usage. Les migrations SQL (`server/db/migrations/`, numérotées `001` à `009`) s'appliquent seules au démarrage, et aussi avec `npm run migrate`.
+Les dossiers apparaissent au premier usage. Les migrations SQL (`server/db/migrations/`, numérotées `001` à `010`) s'appliquent seules au démarrage, et aussi avec `npm run migrate`.
 
 ## Commandes
 

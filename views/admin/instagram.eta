@@ -36,7 +36,18 @@
     <p><%= s.times.length > 1 ? `${s.times.length} publications par jour` : 'Une publication par jour' %>, à <%= s.times.join(', ').replace(/:/g, ' h ') %> (heure de Paris).</p>
 <% const autoNames = it.categories.filter(c => s.autoSeries.includes(c.id)).map(c => c.name); %>
     <p class="hint"><%= autoNames.length ? `Mise en file automatique à la publication : ${autoNames.join(', ')}. Les autres séries seulement depuis la fiche de la photo.` : 'Aucune mise en file automatique : une photo n’entre dans la file que si vous l’y ajoutez depuis sa fiche.' %> <a class="more" href="#auto">Modifier</a></p>
-  </section>
+<% const u = it.usage; %>
+    <h3>Consommation <span class="mono">limites « <%= it.IG_PRESETS[u.preset].label %> »</span></h3>
+<% if (u.paused) { %>    <p class="flash error" role="status">File en pause jusqu’<%= u.paused.when.replace(/^à /, 'à ').replace(/^le /, 'au ') %> : <%= u.paused.reason %>.</p>
+    <form method="post" action="/admin/instagram/reprendre"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Reprendre maintenant</button></form>
+<% } %>    <ul class="ig-usage">
+      <li>Publications sur 24 h glissantes : <strong><%= u.posts24h %> / <%= u.limits.postsPerDay %></strong></li>
+      <li>Appels à l’API sur la dernière heure : <strong><%= u.callsHour %> / <%= u.limits.callsPerHour %></strong> <span class="mono">(<%= u.calls24h %> sur 24 h)</span></li>
+<% if (u.liveQuota) { %>      <li>Quota lu chez Instagram : <strong><%= u.liveQuota.usage %> / <%= u.liveQuota.total || '?' %></strong> <span class="mono">sur 24 h</span></li>
+<% } %><% if (u.limits.minGapMinutes) { %>      <li>Au moins <strong><%= u.limits.minGapMinutes %> min</strong> entre deux publications</li>
+<% } %>    </ul>
+<% if (!u.budget.ok && !u.paused) { %>    <p class="hint"><%= u.budget.reason %></p>
+<% } %>  </section>
 
   <section class="panel wide2" aria-labelledby="ig-queue">
     <h2 id="ig-queue">File d’attente <span class="mono"><%= it.queue.length %> photo<%= it.queue.length > 1 ? 's' : '' %></span></h2>
@@ -87,6 +98,16 @@
   <form class="panel wide2 form" id="reglages" method="post" action="/admin/instagram/reglages" aria-labelledby="ig-settings">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
     <h2 id="ig-settings">Réglages</h2>
+    <fieldset id="limites">
+      <legend>Limites de l’API <span class="mono">Meta ne vend pas de quota supplémentaire : on règle le rythme</span></legend>
+<% const L = s.limits; %><% Object.entries(it.IG_PRESETS).forEach(([k, p]) => { %>      <label class="inline"><input type="radio" name="limits_preset" value="<%= k %>"<%~ L.preset === k ? ' checked' : '' %>> <strong><%= p.label %></strong><% if (k !== 'custom') { %> <span class="mono"><%= k === 'meta' ? 'quota lu chez Instagram (100 / 24 h aujourd’hui)' : `${p.postsPerDay} / 24 h` %>, <%= p.minGapMinutes ? `${p.minGapMinutes} min entre deux` : 'sans écart minimal' %>, <%= p.callsPerHour %> appels / h</span><% } %></label>
+<% }) %>      <div class="row">
+        <label>Publications sur 24 h <span class="mono">« Personnalisé » · <%= it.IG_BOUNDS.postsPerDay.join('–') %></span><input type="number" name="limits_posts" value="<%= L.postsPerDay %>" min="<%= it.IG_BOUNDS.postsPerDay[0] %>" max="<%= it.IG_BOUNDS.postsPerDay[1] %>"></label>
+        <label>Minutes entre deux <span class="mono"><%= it.IG_BOUNDS.minGapMinutes.join('–') %></span><input type="number" name="limits_gap" value="<%= L.minGapMinutes %>" min="<%= it.IG_BOUNDS.minGapMinutes[0] %>" max="<%= it.IG_BOUNDS.minGapMinutes[1] %>"></label>
+        <label>Appels par heure <span class="mono"><%= it.IG_BOUNDS.callsPerHour.join('–') %></span><input type="number" name="limits_calls" value="<%= L.callsPerHour %>" min="<%= it.IG_BOUNDS.callsPerHour[0] %>" max="<%= it.IG_BOUNDS.callsPerHour[1] %>"></label>
+      </div>
+      <p class="hint">Hors budget, la photo attend dans la file (« Publier maintenant » refuse en expliquant pourquoi). Si Instagram signale une limite, la file se met en pause le temps indiqué (sinon 1 h, 2 h, 4 h…) sans compter d’essai, puis reprend à raison d’une photo par créneau.</p>
+    </fieldset>
     <fieldset class="row" id="auto">
       <legend>Mise en file automatique <span class="mono">à la publication sur le site · décochez tout pour ne choisir qu’à la main</span></legend>
 <% it.categories.forEach(c => { %>      <label class="inline"><input type="checkbox" name="auto_<%= c.id %>"<%~ s.autoSeries.includes(c.id) ? ' checked' : '' %>> <%= c.name %></label>
