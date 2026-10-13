@@ -24,7 +24,7 @@ test('accueil : ouverture, regards, séries, photos chargées', async ({ page },
   // La première diapositive est la première photo de l'ouverture (quel que soit son contenu).
   const first = (await page.locator('.cap h1').first().textContent()).trim();
   await expect(page.locator('.cap.on h1')).toHaveText(first);
-  const total = Number(/\/ (\d+) vues/.exec(await page.locator('#galerie > .mono').textContent())[1]);
+  const total = Number(/\/ (\d+) vues/.exec(await page.locator('#galerie > span.mono').textContent())[1]);
   await expect(page.locator('#grid .tile')).toHaveCount(total);
   // Chaque image de la grille finit par se charger (lazy-loading compris).
   for (const img of await page.locator('#grid .tile img').all()) {

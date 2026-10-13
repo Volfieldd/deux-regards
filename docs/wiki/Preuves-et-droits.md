@@ -80,7 +80,7 @@ Ces champs sont lus par Google Images, qui affiche alors un badge « Licence » 
 
 **Réglages → Droits d'utilisation**
 
-Un champ par langue : **français** (`/droits`), **anglais** (`/droits/en`) et **allemand** (`/droits/de`).
+Un champ par langue : **français** (`/droits`), **anglais** (`/en/droits`) et **allemand** (`/de/droits`).
 
 - **Texte :** chaque champ affiche le texte que lisent les visiteurs, avec une pastille « Texte par défaut » ou « Texte personnalisé ». Le texte par défaut (droit d'auteur, auteurs nommés, reproduction interdite sans autorisation écrite, articles L.122-4 et L.335-2 du Code de la propriété intellectuelle) suit les noms des auteurs. Modifiez-le pour écrire le vôtre, en séparant les paragraphes par une ligne vide. **Rétablir le texte par défaut** (avec JavaScript) le remet ; un texte enregistré identique au texte par défaut reste « par défaut ».
 - **Traductions :** si le français est personnalisé alors qu'une traduction est restée par défaut, l'admin le signale sous cette traduction : adaptez-la aussi.

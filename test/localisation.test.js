@@ -190,7 +190,7 @@ test('page Carte : introuvable tant qu’elle n’est pas publiée, aperçu pour
   assert.equal((await ctx.post('/admin/reglages', { map_page: 'on' })).statusCode, 303);
   assert.match((await ctx.as({ url: '/admin/reglages' })).body, /name="map_page" checked/);
   assert.equal((await ctx.app.inject('/carte')).statusCode, 200);
-  for (const url of ['/', '/a-propos', '/droits', '/droits/en']) assert.match((await ctx.app.inject(url)).body, /href="\/carte">(Carte|Map)</, url);
+  for (const url of ['/', '/a-propos', '/droits', '/en/droits', '/de/']) assert.match((await ctx.app.inject(url)).body, /href="(\/en|\/de)?\/carte">(Carte|Map|Karte)</, url);
   assert.match((await ctx.app.inject('/sitemap.xml')).body, /localhost:3000\/carte</);
   await ctx.post('/admin/reglages', {});                                               // décochée : retirée
   assert.equal((await ctx.app.inject('/carte')).statusCode, 404);

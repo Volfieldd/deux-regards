@@ -1,5 +1,5 @@
-<% const f = it.footerText || { photos: 'Photographies', noRepro: 'reproduction interdite', rights: 'Droits d’utilisation', rightsHref: '/droits' }; %>
+<% const f = it.t.footer; %>
 <footer class="wrap mono">
   <span><%= it.siteName %><%= it.authorNames ? ' · ' + it.authorNames : '' %></span>
-  <span><%= f.photos %> · <%= f.noRepro %> · <a href="<%= f.rightsHref %>"><%= f.rights %></a></span>
+  <span><%= f.photos %> · <%= f.noRepro %> · <a href="<%= it.u('/droits') %>"><%= f.rights %></a></span>
 </footer>

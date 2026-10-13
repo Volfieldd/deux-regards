@@ -162,7 +162,7 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 10. Admin sur iPhone, finitions (fait)
 - Audit sur iPhone ([docs/audit-iphone-2026-10/](docs/audit-iphone-2026-10/README.md)) ; lot en cartes sur téléphone, « Ouvrir la fiche », cibles de 44 px, projet e2e `iphone` en WebKit (#22).
 - Vignettes de l'ouverture en cadre 3:2, photo entière ; nom long dans la barre latérale (#23).
-- Droits d'utilisation en français, anglais et allemand (`/droits`, `/droits/en`, `/droits/de`), textes par défaut affichés et rétablissables dans Réglages (#24).
+- Droits d'utilisation en français, anglais et allemand (`/droits`, `/en/droits`, `/de/droits`), textes par défaut affichés et rétablissables dans Réglages (#24).
 - Site public : retour à la série à l'endroit quitté depuis une photo (#25).
 
 ### 11. Vitesse de l'import (fait)
@@ -197,6 +197,11 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 18. Carte et villes plus précises (fait)
 - Villes : toutes les communes de France (ADM4 du fichier FR de GeoNames) et les localités de plus de 500 habitants ailleurs (~250 000 lieux) ; noms français des villes de plus de 30 000 habitants ; classement pondéré par la population ; colonnes compactes et index des débuts de mots (~55 Mo, quelques ms par recherche), liste chargée au démarrage en production.
 - Fond de carte en trois niveaux : 1:110m (monde, frontières), 1:50m chargé au premier zoom, tuiles 1:10m (`public/carte-tuiles/`, 157 fichiers) de la zone visible au-delà de × 8 ; zoom jusqu'à × 40 ; fichiers `.br` / `.gz` servis tels quels (`preCompressed`).
+
+### 19. Site en trois langues (fait)
+- `server/i18n.js` : textes de l'interface FR / EN / DE, repli des textes des auteurs (`pick`), détection de la langue (pays Cloudflare, `Accept-Language`), adresses préfixées (`/en`, `/de`).
+- Pages publiques enregistrées trois fois (préfixe vide, `/en`, `/de`) ; arrivée sur une page française redirigée selon le choix (cookie `langue`, posé par `/langue/:lang`) ou la détection, jamais pour les robots ; `/droits/en` et `/droits/de` redirigées vers `/en/droits`, `/de/droits` ; `hreflang`, `x-default`, `og:locale`, sitemap avec les trois langues.
+- Traductions facultatives (migration 013) : photos (titre, légende, lieu), séries, biographies ; réglages `tagline_en`, `intro_de`… ; champs repliés dans l'admin (`views/admin/_tr.eta`) ; sélecteur à drapeaux (`views/langs.eta`, `public/flags/`).
 
 ## Côté Zitadel (à faire une fois)
 

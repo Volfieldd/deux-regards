@@ -12,13 +12,13 @@
   <div class="veil"></div>
   <header class="wrap">
     <%~ include('./brand', it) %>
-    <nav class="eyebrow" aria-label="Navigation"><a href="#series">Séries</a><a href="#galerie">Galerie</a><% if (it.mapPage) { %><a href="/carte">Carte</a><% } %><a href="/a-propos">À propos</a></nav>
+    <%~ include('./nav', { ...it, home: true }) %>
   </header>
 <% it.hero.forEach((p, i) => { %>
   <div class="cap wrap<%= i === 0 ? ' on' : '' %>" data-h="<%= i %>">
     <span class="k mono"><%= [p.category.toUpperCase(), 'N°' + it.pad(p.n), [p.place, p.when].filter(Boolean).join(', '), p.author].filter(Boolean).join(' · ') %></span>
     <h1><%= p.title %></h1>
-    <a class="open eyebrow" href="<%= it.photoUrl(p.slug) %>">Voir la photo</a>
+    <a class="open eyebrow" href="<%= it.photoUrl(p.slug) %>"><%= it.t.seePhoto %></a>
   </div>
 <% }) %>
 <% if (it.hero.length > 1) { %>
@@ -27,7 +27,7 @@
     <button type="button" data-h="<%= i %>" aria-label="<%= p.title %>" aria-current="<%= i === 0 %>"><%~ it.picture(p, { sizes: '64px', alt: '' }) %></button>
 <% }) %>
   </div>
-  <button type="button" class="pause eyebrow" data-pause hidden>Pause</button>
+  <button type="button" class="pause eyebrow" data-pause data-play="<%= it.t.play %>" hidden><%= it.t.pause %></button>
   <div class="bar"></div>
 <% } %>
 </section>
@@ -35,23 +35,23 @@
 <main id="contenu">
 <section class="regards wrap" id="regards">
   <div>
-    <h2><%= it.settings.tagline || it.siteName %></h2>
-<% if (it.settings.intro) { %>
-    <p><%= it.settings.intro %></p>
+    <h2><%= it.tagline || it.siteName %></h2>
+<% if (it.intro) { %>
+    <p><%= it.intro %></p>
 <% } %>
   </div>
-  <nav class="who" aria-label="Photographe">
+  <nav class="who" aria-label="<%= it.t.photographer %>">
 <% it.regards.forEach(r => { const on = r.slug === f.regard; %>
-    <a href="<%= it.galleryUrl({ regard: r.slug, serie: f.serie, ordre: f.ordre }) %>" data-filter <%~ on ? 'aria-current="page"' : '' %>><span class="n"><%= r.name %></span><span class="c mono"><%= it.pad(r.count) %> photos</span></a>
+    <a href="<%= it.galleryUrl({ regard: r.slug, serie: f.serie, ordre: f.ordre }) %>" data-filter <%~ on ? 'aria-current="page"' : '' %>><span class="n"><%= r.name %></span><span class="c mono"><%= it.t.photos(it.pad(r.count)) %></span></a>
 <% }) %>
   </nav>
 </section>
 
 <section class="series wrap" id="series">
-  <nav aria-label="Séries">
+  <nav aria-label="<%= it.t.nav.series %>">
 <% it.series.forEach(c => { const on = c.slug === f.serie; %>
 <% if (c.count) { %>
-    <a class="idx" href="<%= it.galleryUrl({ regard: f.regard, serie: on ? undefined : c.slug, ordre: f.ordre }) %>" data-filter data-scroll data-peek="<%= c.slug %>" <%~ on ? 'aria-current="page"' : '' %>><span><%= c.name %><% if (on) { %><span class="sr-only"> (retirer le filtre)</span><% } %></span><span class="mono"><%= it.pad(c.count) %></span></a>
+    <a class="idx" href="<%= it.galleryUrl({ regard: f.regard, serie: on ? undefined : c.slug, ordre: f.ordre }) %>" data-filter data-scroll data-peek="<%= c.slug %>" <%~ on ? 'aria-current="page"' : '' %>><span><%= c.name %><% if (on) { %><span class="sr-only"> <%= it.t.removeFilter %></span><% } %></span><span class="mono"><%= it.pad(c.count) %></span></a>
 <% } else { %>
     <span class="idx off"><span><%= c.name %></span><span class="mono">00</span></span>
 <% } %>
@@ -69,11 +69,11 @@
 </section>
 
 <div class="gridhead" id="galerie">
-  <h3 tabindex="-1"><%= it.activeSerie ? it.activeSerie.name : 'Toutes les séries' %><%= it.activeAuthor ? ', par ' + it.activeAuthor.name : '' %></h3>
-  <span class="mono"><%= it.pad(it.photos.length) %> / <%= it.pad(it.total) %> vues<% if (f.regard || f.serie) { %> · <a class="reset" href="<%= it.galleryUrl({ ordre: f.ordre }) %>#galerie" data-filter>tout afficher</a><% } %></span>
-  <nav class="order mono" aria-label="Ordre des photos">Ordre :
-    <a href="<%= it.galleryUrl({ regard: f.regard, serie: f.serie }) %>#galerie" data-filter <%~ f.ordre ? '' : 'aria-current="true"' %>>Sélection</a> ·
-    <a href="<%= it.galleryUrl({ regard: f.regard, serie: f.serie, ordre: 'recentes' }) %>#galerie" data-filter <%~ f.ordre === 'recentes' ? 'aria-current="true"' : '' %>>Plus récentes</a>
+  <h3 tabindex="-1"><%= it.activeSerie ? it.activeSerie.name : it.t.allSeries %><%= it.activeAuthor ? ', ' + it.t.by(it.activeAuthor.name) : '' %></h3>
+  <span class="mono"><%= it.pad(it.photos.length) %> / <%= it.pad(it.total) %> <%= it.t.views %><% if (f.regard || f.serie) { %> · <a class="reset" href="<%= it.galleryUrl({ ordre: f.ordre }) %>#galerie" data-filter><%= it.t.showAll %></a><% } %></span>
+  <nav class="order mono" aria-label="<%= it.t.order %>"><%= it.t.orderLabel %>
+    <a href="<%= it.galleryUrl({ regard: f.regard, serie: f.serie }) %>#galerie" data-filter <%~ f.ordre ? '' : 'aria-current="true"' %>><%= it.t.selection %></a> ·
+    <a href="<%= it.galleryUrl({ regard: f.regard, serie: f.serie, ordre: 'recentes' }) %>#galerie" data-filter <%~ f.ordre === 'recentes' ? 'aria-current="true"' : '' %>><%= it.t.recent %></a>
   </nav>
 </div>
 <section class="grid wrap" id="grid">
@@ -85,7 +85,7 @@
   </a>
 <% }) %>
 <% } else { %>
-  <p class="empty">Aucune photo pour ce regard dans cette série.</p>
+  <p class="empty"><%= it.t.emptyGallery %></p>
 <% } %>
 </section>
 

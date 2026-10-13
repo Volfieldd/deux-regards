@@ -9,7 +9,7 @@ import crypto from 'node:crypto';
 // - pays : le code fourni par Cloudflare (en-tête CF-IPCountry), seulement derrière le proxy de confiance ;
 //   le site ne géolocalise rien lui-même et ne garde pas l'adresse.
 export const RETENTION_MONTHS = 25;
-const BOTS = /bot|crawl|spider|slurp|archiver|facebookexternalhit|embedly|whatsapp|telegram|discord|slack|preview|curl|wget|python|httpclient|go-http|java\/|headless|lighthouse|pingdom|uptime|monitor|scan/i;
+export const BOTS = /bot|crawl|spider|slurp|archiver|facebookexternalhit|embedly|whatsapp|telegram|discord|slack|preview|curl|wget|python|httpclient|go-http|java\/|headless|lighthouse|pingdom|uptime|monitor|scan/i;
 const MOBILE = /mobi|android|iphone|ipod|ipad/i;
 // Bornes contre le gonflement des compteurs (et de la mémoire) par un seul client qui varie son navigateur :
 export const LIMITS = { visitors: 200_000, perAddress: 5, sources: 60 };
