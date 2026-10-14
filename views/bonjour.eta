@@ -14,7 +14,7 @@
   </div>
 <% } else { %>
   <h1><%= h.title %></h1>
-  <p class="prose lead"><%= h.intro.replace('{site}', it.siteName) %></p>
+  <p class="prose lead"><%= it.who ? h.introWho(it.who.name) : h.intro.replace('{site}', it.siteName) %></p>
 <% if (Object.keys(e).length) { %>
   <div class="hello-errors" role="alert">
     <p><%= h.errorsTitle %></p>
@@ -22,12 +22,14 @@
   </div>
 <% } %>
   <form class="hello-form" method="post" action="<%= it.u('/bonjour') %>" novalidate>
+<% if (it.who) { %>    <input type="hidden" name="photographer" value="<%= v.photographer %>">
+<% } %>
     <fieldset>
       <legend><%= h.card %></legend>
 <% if (it.card && it.card.author) { %>      <p class="hello-card mono"><%= it.card.ref %> · <%= it.card.verified ? h.cardOk(it.card.author.name) : h.cardUnverified %></p>
 <% } %>      <label><%= h.refLabel %> <span class="hint"><%= h.refHint %></span>
         <input name="ref" value="<%= v.ref || '' %>" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false"<%~ e.ref ? ' aria-invalid="true"' : '' %>></label>
-      <details class="hello-nocard"<%~ (!v.ref && (v.met_on || v.place || e.where)) ? ' open' : '' %>>
+      <details class="hello-nocard"<%~ (it.who || (!v.ref && (v.met_on || v.place || e.where))) ? ' open' : '' %>>
         <summary><%= h.noCard %></summary>
         <div class="hello-row">
           <label><%= h.metOn %> <input type="date" name="met_on" value="<%= v.met_on || '' %>"<%~ e.where ? ' aria-invalid="true"' : '' %>></label>

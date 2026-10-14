@@ -20,6 +20,20 @@
 <% fields(ed ? { ...a, ...ed.values } : a, ed && ed.errors) %>
       <p class="actions"><button class="btn" type="submit">Enregistrer</button></p>
     </form>
+    <details class="qr-wear">
+      <summary>QR pour les vêtements <span class="mono"><%= it.publicUrl.replace(/^https?:\/\/(www\.)?/, '') %>/bonjour/<%= a.card_prefix || a.slug.charAt(0).toUpperCase() %></span></summary>
+      <p class="hint">Le QR générique de <%= a.name %> : il ouvre la page <a href="/bonjour/<%= a.card_prefix || a.slug.charAt(0).toUpperCase() %>" target="_blank" rel="noopener">/bonjour</a> avec son nom, sans numéro de carte (la personne indique la date et le lieu). Pour un tee-shirt (le logo sur la poitrine, le QR dans le dos), un sac, une casquette, un écusson ; avec le logo envoyé dans <a href="/admin/apparence">Apparence</a>. Fichiers vectoriels (SVG, texte en tracés : l’imprimeur n’a pas besoin des polices ; le logo y est intégré en haute définition) ou PNG transparent à 300 dpi.</p>
+      <div class="qr-models">
+<% [['vertical', 'Dos de tee-shirt, sac', '12 × 19,8 cm'], ['logo', 'Logo seul : poitrine, casquette', '10 × 5 cm'], ['carre', 'Écusson', '8 × 9,6 cm'], ['qr', 'QR seul', 'à la taille voulue']].forEach(([model, label, size]) => { %>
+<% ['noir', 'blanc'].forEach(ink => { const f = `/admin/auteurs/${a.id}/qr/${model}-${ink}`; %>
+        <figure class="qr-model <%= ink %>">
+          <img src="<%= f %>.svg?apercu=1" alt="" loading="lazy">
+          <figcaption><strong><%= label %></strong> · <%= ink === 'noir' ? 'encre noire, textile clair' : 'encre blanche, textile foncé' %><br><span class="mono"><%= size %></span> · <a href="<%= f %>.svg">SVG</a> · <a href="<%= f %>.png">PNG</a></figcaption>
+        </figure>
+<% }) %>
+<% }) %>      </div>
+      <p class="hint">Taille conseillée du QR : 8 à 10 cm de côté au moins sur un dos (lisible à un ou deux mètres), 4 à 5 cm sur une casquette ou un écusson (scanné de près). Gardez la marge blanche autour du QR.</p>
+    </details>
     <details class="danger">
       <summary>Supprimer</summary>
 <% if (a.count) { %>
