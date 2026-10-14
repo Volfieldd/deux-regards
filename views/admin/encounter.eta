@@ -78,7 +78,7 @@
 <% } %>
 
 <% if (e.refused) { %>
-<section class="panel" aria-labelledby="enc-refusal">
+<section class="panel" id="refus" aria-labelledby="enc-refusal">
   <h2 id="enc-refusal">Refus de publication</h2>
   <p>Les photos liées à cette rencontre <strong>ne peuvent plus être publiées</strong>. <%= it.photos.some(p => p.status === 'published') ? 'Certaines le sont encore :' : 'Aucune n’est publiée.' %></p>
 <% if (it.photos.some(p => p.status === 'published')) { %>  <form method="post" action="/admin/rencontres/<%= e.id %>/refus"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn danger" type="submit">Appliquer le refus : dépublier et retirer de la file Instagram</button></form>

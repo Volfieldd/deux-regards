@@ -58,7 +58,7 @@
   const people = it.section === 'encounters' || it.section === 'encounter';
 %>
   <nav class="nav" aria-label="Administration">
-    <%~ item(['home', '/admin', 'Aujourd’hui', 'home']) %>
+    <a href="/admin"<%~ cur('home') ? ' aria-current="page"' : '' %>><%~ ic('home') %>Aujourd’hui<% if (it.urgent) { %><span class="nav-badge urgent" aria-label="<%= it.urgent %> urgence<%= it.urgent > 1 ? 's' : '' %>">✕ <%= it.urgent %></span><% } %></a>
   </nav>
   <p class="grp" id="nav-work">Travailler</p>
   <nav class="nav" aria-labelledby="nav-work">

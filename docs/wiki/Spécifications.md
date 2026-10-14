@@ -39,7 +39,7 @@ Source : [`docs/specs/`](https://github.com/Volfieldd/deux-regards/tree/main/doc
 | Id | Fonction |
 |---|---|
 | A1 | **Connexion OIDC** (Zitadel), rôle `admin`, déconnexion côté site et IdP ; connexion locale de test hors production. |
-| A2 | **Aujourd'hui** (tableau de bord) : photos à finir, ouverture, chiffres, rythme d'import, preuves, compte connecté et son `sub`. |
+| A2 | **Aujourd'hui** (tableau de bord) : **À faire** trié par urgence (urgent ✕ : demandes d'accès ou d'effacement avec leur échéance d'un mois, refus dont des photos liées sont encore publiées ; bientôt ▲ : refus dans une sortie avec des photos publiées ni liées ni exclues, nouvelles personnes, Instagram en échec ou en pause ; plus tard ○ : photos à finir, publiées sans ville, titres sans traduction, preuves en erreur), chaque ligne menant à l'écran qui la règle, urgences comptées dans le menu ; photothèque filtrable par ce qui manque (`?manque=ville`, `?manque=traduction`) ; photos à finir, ouverture, chiffres, rythme d'import, preuves, compte connecté et son `sub`. |
 | A3 | **Photothèque** : planche contact, inspecteur (une photo modifiée champ par champ, plusieurs photos classées, datées ou publiées d'un coup), sélection multiple, loupe, palette ⌘K, classement par glisser vers une série, annulation (⌘Z), recherche et filtres, suppression confirmée ; mode clair / sombre de l'admin. |
 | A4 | **Import** : envoi photo par photo avec suivi du traitement, photos en brouillon, date de prise de vue reprise de l'EXIF, titre provisoire tiré du nom de fichier ; puis **Compléter et publier** le lot (champ par champ ou d'un coup, sans JS aussi). |
 | A5 | **Fiche photo** : édition validée, publication, ordre, filigrane par photo, preuve d'antériorité, Instagram, audience de la photo. |

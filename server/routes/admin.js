@@ -112,7 +112,7 @@ export default async function adminRoutes(app) {
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply),
       section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
-      translate: app.translator.enabled, encountersNew: app.encounters.countNew(), description: '', ...data, pageTitle: `${data.title} · Administration · ${siteName}`,
+      translate: app.translator.enabled, encountersNew: app.encounters.countNew(), urgent: app.todo.urgentCount(), description: '', ...data, pageTitle: `${data.title} · Administration · ${siteName}`,
     });
   }
 
@@ -147,7 +147,7 @@ export default async function adminRoutes(app) {
     const hero = heroSlugs.map(s => published.find(p => p.slug === s)).filter(Boolean);
     const todo = photos.filter(p => p.status === 'draft' || p.provisional);
     return render(request, reply, 'home', {
-      title: 'Aujourd’hui',
+      title: 'Aujourd’hui', tasks: app.todo.list(),
       todo: todo.slice(0, 6).map(withReady), todoCount: todo.length,
       hero: (hero.length ? hero : published.slice(0, 5)).map(withReady).filter(p => p.ready),
       heroChosen: hero.length > 0,
@@ -166,6 +166,10 @@ export default async function adminRoutes(app) {
   // ---------- photos ----------
   app.get('/admin/photos', async (request, reply) => {
     const { q = '', auteur = '', serie = '', statut = '' } = request.query;
+    // Ce qui manque (liens d'« Aujourd'hui ») : ville (carte du monde) ou traduction du titre, photos publiées.
+    const MISSING = { ville: { label: 'Publiées sans ville', test: p => p.status === 'published' && p.city_id == null },
+      traduction: { label: 'Titres sans traduction', test: p => p.status === 'published' && (!p.title_en || !p.title_de) } };
+    const missing = Object.hasOwn(MISSING, request.query.manque) ? request.query.manque : '';
     // « À finir » : brouillons et titres provisoires.
     const todo = statut === 'afinir';
     const filter = { q: String(q), author: String(auteur), category: String(serie), status: STATUSES[statut] ? statut : '' };
@@ -173,12 +177,14 @@ export default async function adminRoutes(app) {
     const all = repo.photos();
     let photos = repo.photos(filter).map(withReady);
     if (todo) photos = photos.filter(p => p.status === 'draft' || p.provisional);
+    if (missing) photos = photos.filter(MISSING[missing].test);
     // Données de l'inspecteur (une photo choisie) : lues par admin.js, jamais exécutées.
     const data = photos.map(dataOf);
     return render(request, reply, 'photos', {
       title: 'Photothèque', photos, filter, authors, categories: repo.categories(), ratioClass,
       json: JSON.stringify(data).replace(/</g, '\\u003c'),
-      filtered: Boolean(filter.q || filter.author || filter.category || filter.status || todo), todo,
+      filtered: Boolean(filter.q || filter.author || filter.category || filter.status || todo || missing), todo,
+      missing: missing ? { key: missing, label: MISSING[missing].label } : null,
       totals: { all: all.length, published: all.filter(p => p.status === 'published').length, draft: all.filter(p => p.status === 'draft').length,
         todo: all.filter(p => p.status === 'draft' || p.provisional).length },
       view: request.query.vue === 'liste' ? 'liste' : 'planche', importer: 'importer' in request.query, wide: true,
