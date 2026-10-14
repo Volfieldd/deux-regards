@@ -3,6 +3,7 @@ import { EncounterError, SCOPES, SCOPE_LABELS } from '../encounters.js';
 import { sameToken } from '../auth.js';
 import { TEXTS, PER_SHEET, MAX_PAIRS, buildPairs, sheets } from '../cards.js';
 import { UI } from '../i18n.js';
+import { composition, MODELS, INKS } from '../textile.js';
 
 // Admin « Rencontres » : demandes reçues par la page /bonjour, accords papier (carte « pour nous ») et refus.
 // Enregistré dans le plugin d'administration (session d'admin exigée, comme le reste de /admin).
@@ -80,6 +81,23 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
   });
 
   app.get('/admin/rencontres/:id', async (request, reply) => detail(request, reply, byId(request.params.id)));
+
+  // ---------- QR générique d'un photographe (vêtements, accessoires) ----------
+  // /bonjour/J : SVG vectoriel (texte en tracés) ou PNG transparent à 300 dpi (600 dpi pour le QR seul).
+  app.get('/admin/auteurs/:id/qr/:file', async (request, reply) => {
+    const author = repo.authors().find(a => a.id === byId(request.params.id));
+    const m = /^(qr|vertical|carre)-(noir|blanc)\.(svg|png)$/.exec(request.params.file);
+    if (!author || !m) return reply.callNotFound();
+    const [, model, ink, ext] = m;
+    const letter = author.card_prefix || author.slug.charAt(0).toUpperCase();
+    const url = `${app.config.publicUrl}/bonjour/${letter}`;
+    const svg = composition({ model, ink, url, display: url.replace(/^https?:\/\/(www\.)?/, ''), name: author.name, siteName: app.siteName() });
+    const name = `${app.siteName()}-${author.slug}-${model}-${ink}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    reply.header('cache-control', 'no-store');
+    if (request.query.apercu !== '1') reply.header('content-disposition', `attachment; filename="${name}.${ext}"`);
+    if (ext === 'svg') return reply.type('image/svg+xml').send(svg);
+    return reply.type('image/png').send(await sharp(Buffer.from(svg), { density: model === 'qr' ? 600 : 300 }).png().toBuffer());
+  });
 
   // ---------- cartes à imprimer ----------
   // Dernier numéro imprimé par lettre (réglage « cards_printed ») : la planche suivante continue la série.

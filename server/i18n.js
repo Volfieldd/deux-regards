@@ -93,6 +93,7 @@ export const UI = {
     hello: {
       title: 'Bonjour !', pageTitle: 'Je vous ai photographié',
       intro: 'Vous avez croisé un photographe de {site} et il vous a peut-être pris en photo. Cette photo vous concerne : vous décidez de ce qu’elle devient.',
+      introWho: name => `Vous avez croisé ${name} et il vous a peut-être pris en photo. Cette photo vous concerne : vous décidez de ce qu’elle devient.`,
       card: 'Votre carte', refLabel: 'Référence de la carte', refHint: 'Par exemple J-0142 (en bas de la carte).',
       cardOk: name => `Carte de ${name} : merci de l’avoir gardée.`, cardUnverified: 'Référence notée.',
       noCard: 'Pas de carte ? Dites-nous quand et où',
@@ -152,6 +153,7 @@ export const UI = {
     hello: {
       title: 'Hello!', pageTitle: 'I took your photo',
       intro: 'You met a photographer from {site} who may have taken your photo. This photo is about you: you decide what happens to it.',
+      introWho: name => `You met ${name}, who may have taken your photo. This photo is about you: you decide what happens to it.`,
       card: 'Your card', refLabel: 'Card reference', refHint: 'For example J-0142 (at the bottom of the card).',
       cardOk: name => `Card from ${name}: thank you for keeping it.`, cardUnverified: 'Reference noted.',
       noCard: 'No card? Tell us when and where',
@@ -211,6 +213,7 @@ export const UI = {
     hello: {
       title: 'Hallo!', pageTitle: 'Ich habe Sie fotografiert',
       intro: 'Sie sind einem Fotografen von {site} begegnet, der Sie vielleicht fotografiert hat. Dieses Foto betrifft Sie: Sie entscheiden, was damit geschieht.',
+      introWho: name => `Sie sind ${name} begegnet, der Sie vielleicht fotografiert hat. Dieses Foto betrifft Sie: Sie entscheiden, was damit geschieht.`,
       card: 'Ihre Karte', refLabel: 'Referenz der Karte', refHint: 'Zum Beispiel J-0142 (unten auf der Karte).',
       cardOk: name => `Karte von ${name}: danke, dass Sie sie aufbewahrt haben.`, cardUnverified: 'Referenz notiert.',
       noCard: 'Keine Karte? Sagen Sie uns wann und wo',

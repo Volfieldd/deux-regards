@@ -67,6 +67,9 @@ export function createEncounters({ db, now = () => Date.now() }) {
     return { ...r, author, verified: r.code ? verify(r.ref, r.code) : false, badCode: Boolean(r.code) && !verify(r.ref, r.code) };
   }
 
+  // QR générique d'un photographe (/bonjour/J, tee-shirt) : la lettre seule désigne l'auteur.
+  const photographer = letter => (/^[A-Za-z]$/.test(String(letter || '')) ? q.authorByPrefix.get({ p: String(letter).toUpperCase() }) || null : null);
+
   const scopesOf = body => Object.fromEntries(SCOPES.map(s => [s, body[`scope_${s}`] === 'on' || body[`scope_${s}`] === true]));
   const log = (id, kind, detail = {}, verified = false) => q.event.run(id, now(), kind, verified ? 1 : 0, JSON.stringify(detail));
   const touch = id => db.prepare('UPDATE encounters SET updated_at = ? WHERE id = ?').run(now(), id);
@@ -103,7 +106,7 @@ export function createEncounters({ db, now = () => Date.now() }) {
       let e = c ? q.byRef.get(c.ref) : null;
       if (!e) {
         const id = Number(db.prepare(`INSERT INTO encounters (ref, author_id, lang, met_on, met_time, place, details, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(c?.ref ?? null, c?.author?.id ?? null, lang, metOn, text(body.met_time, 20), place, text(body.details, 500), t, t).lastInsertRowid);
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(c?.ref ?? null, c?.author?.id ?? photographer(body.photographer)?.id ?? null, lang, metOn, text(body.met_time, 20), place, text(body.details, 500), t, t).lastInsertRowid);
         e = { id, verified: 0 };
       }
       const set = { status: 'nouvelle', lang, updated_at: t, verified: e.verified || (c?.verified ? 1 : 0) };
@@ -222,7 +225,7 @@ export function createEncounters({ db, now = () => Date.now() }) {
   };
 
   return {
-    createShare, shares, share, countShare, revokeShare,
+    createShare, shares, share, countShare, revokeShare, photographer,
     parseRef, card, codeOf, submit, list, get, events, photos: id => q.photos.all(id), saveCard, setStatus, link, unlink, applyRefusal, remove, purge,
     cardJpeg: id => db.prepare('SELECT card_jpeg FROM encounters WHERE id = ?').pluck().get(id) || null,
     countNew: () => q.countNew.get(),

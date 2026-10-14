@@ -20,6 +20,15 @@ La planche s'ouvre prête à imprimer : cinq paires par feuille A4, d'un seul c�
 
 Les cartes imprimées par le site portent un **code de contrôle** (J-0142-K7Q) : la demande arrive alors marquée **carte vérifiée**. Une référence tapée sans le code (cartes numérotées au tampon) est acceptée, marquée **non vérifiée**.
 
+## Le QR des vêtements
+
+Pour un tee-shirt, un sac, une casquette ou un écusson : **Auteurs → QR pour les vêtements**, sur la fiche de chaque photographe. Ce QR ouvre `nicephos.art/bonjour/J` (ou `/S`) : la page accueille la personne avec le nom du photographe (« Vous avez croisé Julien ? ») ; sans numéro de carte, elle indique la date et le lieu.
+
+- **Compositions** : verticale (« Bonjour ! », la phrase en trois langues, le QR, l'adresse ; pour un dos de tee-shirt ou un sac), carrée (pour un écusson ou une casquette), ou le QR seul.
+- **Encre noire** pour un textile clair, **encre blanche** pour un textile foncé (le QR est alors un carré blanc évidé, lisible par tous les téléphones).
+- **Fichiers** : SVG vectoriel (le texte est converti en tracés : l'imprimeur n'a pas besoin des polices du site) ou PNG transparent à 300 dpi.
+- **Taille** : 8 à 10 cm de côté au moins pour le QR sur un dos (lisible à un ou deux mètres), 4 à 5 cm sur une casquette ou un écusson. Gardez la marge blanche autour du QR. Le QR résiste aux plis et à l'usure (correction d'erreur maximale), et son adresse ne changera jamais.
+
 ## La page /bonjour
 
 C'est la page du QR (en français, anglais et allemand, sans lien dans le menu, jamais indexée). La personne y indique sa référence, ou à défaut la date, le lieu et un détail, puis ce qu'elle souhaite :

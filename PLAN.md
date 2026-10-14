@@ -24,6 +24,7 @@ Références de design (artefacts claude.ai) :
 | Données | SQLite (`better-sqlite3`), migrations SQL versionnées |
 | Images | `sharp` (resize, AVIF/WebP, suppression EXIF) |
 | QR des cartes de rencontre | `qrcode` (SVG, sans dépendance native) |
+| Texte en tracés (QR des vêtements) | `opentype.js` (lit les polices WOFF du site) |
 | Gabarits | Eta |
 | Auth | `openid-client` (Authorization Code + PKCE) |
 | Identité | Zitadel Cloud, Google en IdP externe dans Zitadel |
@@ -220,6 +221,10 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 23. Cartes à imprimer et photo offerte (fait)
 - Planches A4 (`/admin/rencontres/cartes`) : paires « pour nous » / « pour eux » au format carte de visite, cinq par feuille, d'un seul côté ; numérotées (QR et code de contrôle uniques, numéros réservés dans `settings.cards_printed`) ou génériques (QR vers `/bonjour`, numéro au tampon) ; textes dans `server/cards.js`.
 - Photo offerte : lien privé `/pour-vous/<jeton>` (30 jours, révocable, compteurs ; migration 016), page dans la langue de la personne, JPEG 2048 px (jamais l'original, EXIF « usage personnel »), message prêt à envoyer (mailto) dans sa langue.
+
+### 24. QR des vêtements (fait)
+- `/bonjour/J` : QR générique d'un photographe (sans numéro), demande attribuée à l'auteur ; la date et le lieu restent demandés.
+- Auteurs → « QR pour les vêtements » : compositions vectorielles (`server/textile.js`, texte converti en tracés) verticale (dos, sac), carrée (écusson, casquette) et QR seul, encre noire (textile clair) ou blanche (textile foncé, carré blanc évidé), en SVG ou PNG transparent ; QR en correction H avec sa marge.
 
 ## Côté Zitadel (à faire une fois)
 

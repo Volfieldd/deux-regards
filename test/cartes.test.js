@@ -96,3 +96,31 @@ test('photo offerte : lien privé dans la langue de la personne, JPEG jamais l�
   assert.equal((await c.post(`/admin/rencontres/${id}/liens/${token}/retirer`)).statusCode, 303);
   assert.equal((await c.app.inject(`/pour-vous/${token}`)).statusCode, 404);
 });
+
+test('QR générique d’un photographe : /bonjour/J, demande attribuée sans carte ; fichiers SVG et PNG pour les vêtements', async t => {
+  const c = await ctxOf(t);
+  const page = (await c.app.inject('/bonjour/J')).body;
+  assert.match(page, /Vous avez croisé Julien et il vous a peut-être pris en photo/);
+  assert.match(page, /<input type="hidden" name="photographer" value="J">/);
+  assert.match((await c.app.inject('/en/bonjour/s')).body, /You met Sébastien/);
+  const r = await c.app.inject({ method: 'POST', url: '/bonjour', payload: { photographer: 'J', met_on: '2026-10-14', place: 'Angers', wants_photo: 'on', email: 'eve@exemple.fr' } });
+  assert.equal(r.headers.location, '/bonjour/merci');
+  const e = c.db.prepare('SELECT ref, author_id FROM encounters').get();
+  assert.deepEqual([e.ref, e.author_id], [null, c.author('julien')]);
+  // Sans date ni lieu, la lettre ne suffit pas : il faut retrouver la photo.
+  assert.equal((await c.app.inject({ method: 'POST', url: '/bonjour', payload: { photographer: 'J', wants_photo: 'on', email: 'eve@exemple.fr' } })).statusCode, 422);
+  // Fichiers à imprimer, depuis la fiche de l'auteur.
+  const authors = (await c.as({ url: '/admin/auteurs' })).body;
+  assert.match(authors, new RegExp(`/admin/auteurs/${c.author('julien')}/qr/vertical-blanc\\.svg`));
+  const svg = await c.as({ url: `/admin/auteurs/${c.author('julien')}/qr/vertical-noir.svg` });
+  assert.equal(svg.headers['content-type'], 'image/svg+xml');
+  assert.match(svg.headers['content-disposition'], /attachment; filename="test-julien-vertical-noir\.svg"/);
+  assert.match(svg.body, /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="120mm" height="175mm"/);
+  assert.doesNotMatch(svg.body, /<text|font-family/);                                       // texte converti en tracés
+  assert.match(svg.body, /<title>Test · Julien · localhost:3000\/bonjour\/J<\/title>/);
+  const png = await c.as({ url: `/admin/auteurs/${c.author('julien')}/qr/qr-blanc.png` });
+  const meta = await sharp(png.rawPayload).metadata();
+  assert.deepEqual([meta.format, meta.hasAlpha, meta.width > 1800], ['png', true, true]);   // 80 mm à 600 dpi
+  assert.equal((await c.as({ url: `/admin/auteurs/${c.author('julien')}/qr/autre-noir.svg` })).statusCode, 404);
+  assert.notEqual((await c.app.inject(`/admin/auteurs/${c.author('julien')}/qr/qr-noir.svg`)).statusCode, 200);
+});

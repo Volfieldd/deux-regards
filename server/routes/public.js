@@ -279,11 +279,11 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit }) {
 
   // « Je vous ai photographié » : page du QR des cartes « pour eux » (référence dans l'adresse) ou tapée à la main.
   // Jamais indexée ; aucune photo ni donnée d'une autre personne n'y est montrée.
-  function hello(request, reply, { values = {}, errors = {}, card = null, status = 200 } = {}) {
+  function hello(request, reply, { values = {}, errors = {}, card = null, who = null, status = 200 } = {}) {
     const siteName = app.siteName();
     reply.code(status).header('x-robots-tag', 'noindex').header('cache-control', 'no-store');
     return reply.render('bonjour', {
-      ...base, siteName, values, errors, card, h: t.hello,
+      ...base, siteName, values, errors, card, who: who || app.encounters.photographer(values.photographer), h: t.hello,
       pageTitle: `${t.hello.pageTitle} · ${siteName}`, canonical: '/bonjour', description: t.hello.intro.replace('{site}', siteName),
     });
   }
@@ -296,6 +296,9 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit }) {
       pageTitle: `${t.hello.thanks} · ${siteName}`, canonical: '/bonjour', description: '' });
   });
   app.get('/bonjour/:ref', async (request, reply) => {
+    // QR générique d'un photographe (tee-shirt, sac…) : /bonjour/J, sans numéro de carte.
+    const who = app.encounters.photographer(request.params.ref);
+    if (who) { app.stats.hit(request, { page: 'bonjour' }); return hello(request, reply, { values: { photographer: request.params.ref.toUpperCase() }, who }); }
     const card = app.encounters.card(request.params.ref);
     app.stats.hit(request, { page: 'bonjour' });
     return hello(request, reply, { card: card && !card.badCode ? card : null, values: { ref: card && !card.badCode ? request.params.ref.toUpperCase() : '' } });
