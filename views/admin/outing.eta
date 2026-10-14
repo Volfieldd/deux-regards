@@ -10,7 +10,7 @@
 </div>
 <% if (o.parts.length > 1) { %>
 <nav class="chips" aria-label="Parties de la journée">
-<% o.parts.forEach(p => { %>  <a class="chip" href="<%= it.partUrl(p) %>"<%~ p.starts === o.starts ? ' aria-current="true"' : '' %>><%= p.starts === '00:00' ? 'Début de journée' : `À partir de ${p.starts.replace(':', ' h ')}` %></a>
+<% o.parts.forEach(p => { %>  <a class="chip" href="<%= it.partUrl(p) %>"<%~ p.starts === o.starts ? ' aria-current="true"' : '' %>><%= p.starts === '00:00' ? 'Début de journée' : `À partir de ${p.starts.replace(':', ' h ').replace(/ h 00$/, ' h')}` %></a>
 <% }) %></nav>
 <% } %>
 

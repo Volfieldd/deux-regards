@@ -13,10 +13,10 @@ test.beforeEach(async ({ page }) => {
 test.afterEach(async () => expect(errors, 'erreurs console / CSP').toEqual([]));
 
 test('rendu des pages de l’admin', async ({ page }, info) => {
-  test.setTimeout(90_000);            // 10 pages, captures pleine page
+  test.setTimeout(120_000);           // 13 pages, captures pleine page
   for (const [url, title, shot] of [['/admin', /^(Bonjour|Bonsoir)/, 'tableau'], ['/admin/photos', 'Photothèque', 'photos'],
-    ['/admin/series', 'Séries', 'series'], ['/admin/auteurs', 'Auteurs', 'auteurs'], ['/admin/images', 'Filigrane et métadonnées', 'images'],
-    ['/admin/reglages', 'Réglages', 'reglages'], ['/admin/statistiques', 'Statistiques', 'statistiques'], ['/admin/instagram', 'Instagram', 'instagram'], ['/admin/aide', 'Aide', 'aide']]) {
+    ['/admin/series', 'Séries', 'series'], ['/admin/auteurs', 'Photographes', 'auteurs'], ['/admin/images', 'Filigrane et métadonnées', 'images'],
+    ['/admin/site', 'Site public', 'site'], ['/admin/droits', 'Droits & confidentialité', 'droits'], ['/admin/terrain', 'Sur le terrain', 'terrain'], ['/admin/sorties', 'Sorties', 'sorties'], ['/admin/statistiques', 'Statistiques', 'statistiques'], ['/admin/instagram', 'Instagram', 'instagram'], ['/admin/aide', 'Aide', 'aide']]) {
     await page.goto(url);
     await expect(page.locator('h1')).toHaveText(title);
     // Mobile : la barre latérale est repliée derrière « Menu » (barre d'onglets en bas).
@@ -88,7 +88,7 @@ test('aide : lien contextuel, sommaire, recherche', async ({ page }) => {
   await search.fill('zzzz introuvable');
   await expect(page.getByText('Aucune section ne contient ce texte.')).toBeVisible();
   await search.fill('');
-  await expect(page.locator('[data-help-section]:visible')).toHaveCount(14);
+  await expect(page.locator('[data-help-section]:visible')).toHaveCount(15);
   await page.locator('.help-toc').getByRole('link', { name: /^Changer l.ordre$/ }).click();
   await expect(page.locator('#photos-changer-lordre')).toBeInViewport();
 });
