@@ -158,7 +158,11 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('translator', createTranslator({ ...config.translate, log: app.log }));
   app.decorate('stats', createStats({ db, publicUrl: config.publicUrl, log: app.log, trustCountry: Boolean(config.trustProxy) }));
   // Partage Instagram : file de publication et envoi aux créneaux (voir server/instagram.js).
-  app.decorate('instagram', createInstagram({ db, storageDir: config.storageDir, config, variants: app.variants, siteName: app.siteName, log: app.log, ...instagramOptions }));
+  // Instagram suit les accords : une photo dont une personne n'a pas accepté Instagram ne part pas, et sort de la file
+  // dès qu'un accord change.
+  app.decorate('instagram', createInstagram({ db, storageDir: config.storageDir, config, variants: app.variants, siteName: app.siteName, log: app.log,
+    blockedBy: id => app.encounters.instagramBlock(id), ...instagramOptions }));
+  app.encounters.onChange(() => app.instagram.dropBlocked());
   app.addHook('onReady', async () => { if (!instagramOptions.manual) app.instagram.start(); });
   app.addHook('onClose', async () => { app.instagram.stop(); });
   app.decorate('proofs', createProofService({ db, storageDir: config.storageDir, tsa: config.tsa, log: app.log, ...proofOptions }));

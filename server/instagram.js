@@ -144,7 +144,11 @@ export function lastSlot(times, now) {
 }
 
 // ---------- service ----------
-export function createInstagram({ db, storageDir, config, variants, siteName, log, fetchImpl = fetch, now = () => new Date(), sleep = ms => new Promise(r => setTimeout(r, ms)), timeoutMs = 30_000 }) {
+// Accords des personnes photographiées : blockedBy(photoId) renvoie celles qui n'ont pas accepté Instagram
+// (refus, ou accord sans Instagram). Une photo bloquée n'entre pas dans la file et n'en part jamais.
+export const blockReason = who => `bloquée : ${who.map(w => w.ref).join(', ')} ${who.length > 1 ? 'n’ont' : 'n’a'} pas accepté Instagram`;
+
+export function createInstagram({ db, storageDir, config, variants, siteName, log, blockedBy = () => [], fetchImpl = fetch, now = () => new Date(), sleep = ms => new Promise(r => setTimeout(r, ms)), timeoutMs = 30_000 }) {
   const ig = config.instagram;
   const vault = sealer(ig.tokenKey);
   const secrets = () => [ig.appSecret, account.token()];
@@ -296,6 +300,8 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     const p = q.photo.get(photoId);
     if (!p) throw new InstagramError('photo introuvable');
     if (p.status !== 'published') throw new InstagramError('seules les photos publiées sur le site partent sur Instagram');
+    const who = blockedBy(photoId);
+    if (who.length) throw new InstagramError(blockReason(who));
     const fields = {
       frame: Object.hasOwn(FRAMES, frame) ? frame : s.frame,
       watermark: watermark === undefined ? (s.watermark ? 1 : 0) : (watermark ? 1 : 0),
@@ -360,6 +366,9 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     if (!post || post.status !== 'queued') throw new InstagramError('publication introuvable dans la file');
     const photo = q.photo.get(post.photo_id);
     if (!photo || photo.status !== 'published') { db.prepare("UPDATE instagram_posts SET status = 'failed', error = ? WHERE id = ?").run('photo dépubliée sur le site', postId); throw new InstagramError('photo dépubliée sur le site'); }
+    // Dernier contrôle juste avant l'envoi : un refus a pu arriver pendant l'attente.
+    const who = blockedBy(photo.id);
+    if (who.length) { db.prepare("UPDATE instagram_posts SET status = 'failed', error = ? WHERE id = ?").run(blockReason(who), postId); throw new InstagramError(blockReason(who)); }
     // Budget : réglage (publications sur 24 h, écart minimal, appels par heure) et pause éventuelle.
     // Refus expliqué, sans rien consommer : la photo reste en file (aussi pour « Publier maintenant »).
     let b = budget();
@@ -423,6 +432,9 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     }
   }
   function retry(postId) {
+    const post = q.post.get(postId);
+    const who = post ? blockedBy(post.photo_id) : [];
+    if (who.length) throw new InstagramError(blockReason(who));
     const pos = db.prepare("SELECT COALESCE(MIN(position), 1) - 1 FROM instagram_posts WHERE status = 'queued'").pluck().get();
     return db.prepare("UPDATE instagram_posts SET status = 'queued', attempts = 0, error = NULL, position = ? WHERE id = ? AND status = 'failed'").run(pos, postId).changes > 0;
   }
@@ -520,12 +532,27 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     if (st.lastSlot && slot <= st.lastSlot) return null;
     setState({ lastSlot: slot });
     if (!st.lastSlot) return null;                    // premier démarrage : on attend le prochain créneau
-    // Tête de file parmi les photos encore publiées sur le site (une photo dépubliée ne consomme pas le créneau).
+    // Tête de file parmi les photos encore publiées sur le site (une photo dépubliée ne consomme pas le créneau) ;
+    // les photos devenues bloquées sortent d'abord de la file.
+    dropBlocked();
     const next = q.queue.all().find(p => p.status === 'queued' && q.photo.get(p.photo_id)?.status === 'published');
     if (!next || !account.get() || !ig.configured || !ig.https) return null;
     try { return await publish(next.id); } catch { return null; }
   }
   let timer = null;
+
+  // Photos de la file que les accords bloquent désormais : sorties de la file, en échec avec la raison (visible
+  // dans l'historique et sur la fiche). Appelé à chaque changement d'accord et avant chaque créneau.
+  function dropBlocked() {
+    const fail = db.prepare("UPDATE instagram_posts SET status = 'failed', error = ? WHERE id = ? AND status = 'queued'");
+    const out = [];
+    for (const p of q.queue.all()) {
+      if (p.status !== 'queued') continue;
+      const who = blockedBy(p.photo_id);
+      if (who.length && fail.run(blockReason(who), p.id).changes) out.push(p.photo_id);
+    }
+    return out;
+  }
 
   return {
     settings,
@@ -541,7 +568,8 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     },
     account: { get: account.get, remove: account.remove, state: () => account.state(), connected: () => account.state() === 'ok' },
     isPublic: photoId => q.photo.get(photoId)?.status === 'published',
-    image, enqueue, cancel, move, onPublished, publish, retry, captionOf, optionsOf,
+    image, enqueue, cancel, move, onPublished, publish, retry, captionOf, optionsOf, dropBlocked,
+    blocked: photoId => blockedBy(photoId),
     caption: (photoId, s = settings()) => { const p = q.photo.get(photoId); return p ? renderCaption(s.template, p, s, siteName()) : ''; },
     post: id => q.post.get(id),
     forPhoto: photoId => q.latest.get(photoId) || null,

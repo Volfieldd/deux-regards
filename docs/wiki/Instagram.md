@@ -18,6 +18,7 @@ Sans ces variables, ou en `http://`, la file fonctionne (photos ajoutées, régl
 
 ## Fonctionnement
 
+1. **Accords des personnes photographiées** (`instagramBlock` dans `server/encounters.js`, `blockedBy` dans `server/instagram.js`) : une photo est **bloquée** pour Instagram si une personne liée à la photo, ou rencontrée ce jour-là par son photographe (sauf « Pas sur cette photo »), refuse la publication ou n’a pas accepté Instagram. Instagram suppose le site. Le blocage est vérifié à l’entrée dans la file, à chaque changement d’accord (la photo sort de la file, en échec « bloquée : … »), avant chaque créneau et juste avant l’envoi ; **Réessayer** est refusé tant qu’il dure. Aucune confirmation ne le lève.
 1. **Entrée dans la file** : à chaque passage brouillon → publiée (fiche, liste, actions groupées, lot), seulement si la série de la photo est cochée dans **Instagram → Réglages → Mise en file automatique** (aucune par défaut ; l’ancien interrupteur global `autoQueue` est ignoré) ; jamais une photo déjà dans la file ou déjà partagée. Ajout manuel depuis la fiche (section Instagram), quelle que soit la série.
 2. **Créneaux** : chaque minute, le site regarde le dernier créneau passé (heure de Paris) ; au premier passage après un créneau, la tête de file part. Au tout premier démarrage, il attend le créneau suivant (pas de rafale au déploiement). Si le serveur était arrêté, une seule photo part au redémarrage.
 3. **Envoi** :

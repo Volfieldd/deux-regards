@@ -307,8 +307,11 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const id = byId(request.params.id);
     if (!enc.get(id)) return reply.callNotFound();
     const out = request.body?.exclure === '1';
-    enc.exclude(id, byId(request.params.pid), out);
-    return done(reply, `/admin/rencontres/${id}#session`, out ? 'Photo exclue de l’accord de cette session.' : 'Photo de nouveau couverte par l’accord de cette session.');
+    const pid = byId(request.params.pid);
+    enc.exclude(id, pid, out);
+    // Depuis la fiche photo (« Pas sur cette photo ») : retour à la fiche.
+    const back = request.body?.depuis === 'photo' ? `/admin/photos/${pid}#rencontres` : `/admin/rencontres/${id}#session`;
+    return done(reply, back, out ? 'Photo exclue de l’accord de cette session : la personne n’y figure pas.' : 'Photo de nouveau couverte par l’accord de cette session.');
   });
 
   app.post('/admin/rencontres/:id/photos', write, async (request, reply) => {

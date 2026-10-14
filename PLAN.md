@@ -248,6 +248,16 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Un accord couvre les photos de son photographe prises le jour de la session (date EXIF ; `session_day` corrige une horloge décalée), sauf exclusions (`encounter_exclusions`, migration 020) ; fiche d'une photo : « Personnes rencontrées » (même session ou liées) ; un refus reste ciblé sur les photos liées ; durée de conservation de l'accord tant qu'une photo de la session ou liée existe.
 - Photo de la personne (visage) : dans l'app ou ajoutée à la fiche, vignette ronde dans la liste, la fiche et la fiche photo ; gardée avec l'accord (sinon 6 mois) ; consentement, page Confidentialité et registre mis à jour.
 
+### 30. Instagram suit les accords (fait)
+- Instagram suppose le site : refuser le site, c'est refuser Instagram (formulaires `/bonjour`, app, carte ; anciens accords lus sans Instagram).
+- Photo bloquée pour Instagram, sans confirmation possible, si une personne liée ou de la session (non exclue) refuse ou n'a pas accepté Instagram : entrée dans la file refusée, file vidée à chaque changement d'accord et avant chaque créneau, contrôle juste avant l'envoi ; fiche photo « Instagram bloqué » et « Pas sur cette photo ».
+
+### 31. Parcours de l'admin autour de la sortie (à faire, maquettes validées le 14 octobre 2026)
+1. Mots (Sortie, Personne, Accord, Carte d'accord, Carte du monde, « Où »), menu en quatre groupes (Travailler, Publier, Sur le terrain, Réglages), page « Sur le terrain » (app, cartes d'accord, QR des vêtements avec logo, une seule composition), états lisibles par un daltonien (forme + mot, palette bleu / jaune / vermillon).
+2. « Aujourd'hui » en liste de choses à faire, triée par urgence.
+3. Sorties (une par photographe et par jour, découpables par une heure de coupure), détection des visages locale (sans reconnaissance), état par usage « prête / à vérifier / bloquée » ; « à vérifier » demande une confirmation explicite, gardée dans l'historique ; une fiche Personne pour plusieurs rencontres (un accord par sortie, un refus vaut pour tout, rapprochement par e-mail confirmé à la main).
+4. Fiche photo en rubriques, accueil « Terrain » sur le téléphone (nouvelle rencontre, montrer mon QR, ma sortie du jour).
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

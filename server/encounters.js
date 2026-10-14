@@ -13,6 +13,10 @@ import { createVault } from './vault.js';
 
 export const SCOPES = ['site', 'instagram', 'print', 'name'];
 export const SCOPE_LABELS = { site: 'site', instagram: 'Instagram', print: 'expositions et tirages', name: 'avec son prénom' };
+// Instagram suppose le site : refuser le site, c'est refuser Instagram (l'inverse non). Un accord enregistré avec
+// Instagram sans le site (avant cette règle) est lu sans Instagram.
+export const normalizeConsent = c => (c && typeof c === 'object' ? { ...c, instagram: Boolean(c.instagram && c.site) } : null);
+const instagramWithoutSite = scopes => scopes.instagram && !scopes.site;
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';       // sans 0/O, 1/I/L : lisible à la main
 const RETENTION = 365 * 24 * 3600 * 1000;
 const EMAIL = /^[^\s@<>]{1,100}@[^\s@<>]{1,100}\.[^\s@<>]{2,30}$/;
@@ -115,6 +119,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     const rights = ['acces', 'effacement'].includes(body.rights) ? body.rights : '';
     const scopes = scopesOf(body);
     if (decision === 'accord' && !SCOPES.slice(0, 3).some(s => scopes[s])) errors.scopes = 'scopes';
+    else if (decision === 'accord' && instagramWithoutSite(scopes)) errors.scopes = 'instagram';
     const email = text(body.email, 200);
     const name = text(body.name, 80);
     const message = text(body.message, 2000);
@@ -166,7 +171,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     const e = openRow(row);
     if (typeof e.last === 'string') e.last = O(e.last);
     let consent = null; let last = null;
-    try { consent = e.consent ? JSON.parse(e.consent) : null; } catch { consent = null; }
+    try { consent = e.consent ? normalizeConsent(JSON.parse(e.consent)) : null; } catch { consent = null; }
     try { last = e.last ? JSON.parse(e.last) : null; } catch { last = null; }
     return { ...e, consent, last, hasCard: e.card_jpeg != null, hasPortrait: e.portrait_jpeg != null || Boolean(e.has_portrait), hasSignature: e.signature_png != null, card_jpeg: undefined, portrait_jpeg: undefined, signature_png: undefined };
   }
@@ -181,6 +186,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     const scopes = scopesOf(body);
     const signed = body.signed === 'on';
     if (signed && !SCOPES.slice(0, 3).some(s => scopes[s])) errors.scopes = 'Cochez au moins un usage accepté sur la carte.';
+    else if (signed && instagramWithoutSite(scopes)) errors.scopes = 'Instagram suppose le site : cochez aussi le site si la carte l’indique, sinon décochez Instagram.';
     const email = text(body.email, 200);
     if (email && !EMAIL.test(email)) errors.email = 'Adresse e-mail invalide.';
     const metOn = /^\d{4}-\d{2}-\d{2}$/.test(String(body.met_on || '')) ? body.met_on : '';
@@ -252,6 +258,17 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     return [...linked, ...sessionRows.filter(e => !seen.has(e.id)).map(e => ({ ...decorate(e), via: 'session' }))];
   }
 
+  // Instagram bloqué : une personne liée à la photo, ou rencontrée ce jour-là par son photographe (sauf « pas sur
+  // cette photo »), refuse la publication ou n'a pas accepté Instagram. Aucune confirmation ne lève ce blocage.
+  // Renvoie les personnes en cause (vide : rien ne bloque).
+  function instagramBlock(photoId) {
+    return forPhoto(photoId).filter(e => e.refused || (e.consent && !e.consent.instagram))
+      .map(e => ({ id: e.id, ref: e.ref || (e.anonymized ? 'personne anonymisée' : 'sans référence'), refused: Boolean(e.refused), via: e.via }));
+  }
+  // Accords modifiés (demande, carte, téléphone, photos liées ou exclues) : prévenir (file Instagram).
+  const listeners = [];
+  const changed = () => { for (const f of listeners) { try { f(); } catch { /* un abonné défaillant ne bloque pas l'enregistrement */ } } };
+
   // ---------- numérotation ----------
   // Prochain numéro d'une lettre : après les cartes déjà imprimées (« cards_printed ») et les rencontres existantes.
   const printed = () => { try { return JSON.parse(db.prepare("SELECT value FROM settings WHERE key = 'cards_printed'").pluck().get() || '{}'); } catch { return {}; } };
@@ -281,6 +298,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     let signature = null;
     if (decision === 'accord') {
       if (!SCOPES.slice(0, 3).some(s => scopes[s])) errors.scopes = 'Cochez au moins un usage accepté.';
+      else if (instagramWithoutSite(scopes)) errors.scopes = 'Instagram suppose le site : cochez aussi le site, ou décochez Instagram.';
       if (!name) errors.name = 'Le nom de la personne est nécessaire avec son accord.';
       if (adult === null) errors.adult = 'Indiquez si la personne est majeure.';
       if (adult === 0 && !guardian) errors.guardian = 'Personne mineure : le nom du parent qui signe est nécessaire.';
@@ -330,7 +348,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   function exportData(id) {
     const e = openRow(db.prepare('SELECT e.*, a.name AS author FROM encounters e LEFT JOIN authors a ON a.id = e.author_id WHERE e.id = ?').get(id));
     if (!e) return null;
-    const consent = e.consent ? JSON.parse(e.consent) : null;
+    const consent = e.consent ? normalizeConsent(JSON.parse(e.consent)) : null;
     const iso = ms => (ms ? new Date(ms).toISOString() : null);
     return {
       data: {
@@ -414,10 +432,15 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   };
 
   return {
-    createShare, shares, share, countShare, revokeShare, photographer, nextNumber, reserve, saveApp, markMailed, exportData, erase, rightsDone,
+    instagramBlock, onChange: fn => listeners.push(fn),
+    createShare, shares, share, countShare, revokeShare, photographer, nextNumber, reserve, markMailed,
+    saveApp: async (...args) => { const r = await saveApp(...args); changed(); return r; }, exportData, erase, rightsDone,
     portraitJpeg: id => vault.openBuf(db.prepare('SELECT portrait_jpeg FROM encounters WHERE id = ?').pluck().get(id)) || null,
     signaturePng: id => vault.openBuf(db.prepare('SELECT signature_png FROM encounters WHERE id = ?').pluck().get(id)) || null,
-    parseRef, card, codeOf, submit, list, get, events, photos: id => q.photos.all(id), saveCard, setStatus, link, unlink, applyRefusal, remove, purge,
+    parseRef, card, codeOf, list, get, events, photos: id => q.photos.all(id), setStatus, unlink, applyRefusal, remove, purge,
+    submit: (...args) => { const r = submit(...args); changed(); return r; },
+    saveCard: (...args) => { const r = saveCard(...args); changed(); return r; },
+    link: (...args) => { link(...args); changed(); },
     cardJpeg: id => vault.openBuf(db.prepare('SELECT card_jpeg FROM encounters WHERE id = ?').pluck().get(id)) || null,
     // Données déjà en base, en clair (clé ajoutée après coup) : chiffrées au démarrage, une fois.
     sealExisting() {
@@ -440,7 +463,8 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     encrypted: vault.enabled,
     countNew: () => q.countNew.get(),
     // Accords et refus attachés à une photo (fiche photo) ; refus = publication impossible.
-    forPhoto, session, exclude,
+    forPhoto, session,
+    exclude: (...args) => { exclude(...args); changed(); },
     refusalFor: photoId => q.forPhoto.all(photoId).find(e => e.refused) || null,
   };
 }

@@ -489,7 +489,7 @@ export default async function adminRoutes(app) {
     const active = post && (post.status === 'queued' || post.status === 'publishing');
     const caption = post?.caption || ig.caption(photo.id, s);
     const engagement = post?.status === 'published' ? ig.engagementOf(post.ig_media_id) : null;
-    return { post, active, s, FRAMES, caption, custom: Boolean(post?.caption), warnings: captionWarnings(caption), connected: ig.account.connected(),
+    return { post, active, s, FRAMES, caption, blocked: ig.blocked(photo.id), custom: Boolean(post?.caption), warnings: captionWarnings(caption), connected: ig.account.connected(),
       engagement, likesSpark: engagement && engagement.series.length > 1 ? sparkline(engagement.series.map(d => d.likes)) : '',
       slot: active ? ig.queue().find(x => x.id === post.id)?.slot : null };
   };
