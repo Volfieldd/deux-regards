@@ -113,3 +113,35 @@ test('Aujourd’hui : choses à faire triées par urgence, lien vers l’écran 
   assert.doesNotMatch(after, /J-0139 a refusé|Refus de J-0139/);
   assert.match(after, /aria-label="1 urgence">✕ 1</);
 });
+
+test('accueil Terrain : nouvelle rencontre, mon QR, ma sortie du jour ; onglet Terrain ; départ de l’app', async t => {
+  const c = await admin(t);
+  const julien = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(Date.now());
+  const id = c.app.encounters.saveCard(null, { ref: 'J-0500', signed: 'on', scope_site: 'on', met_on: today, author_id: julien, name: 'Marie' });
+  c.app.encounters.saveCard(null, { ref: 'J-0501', met_on: today, author_id: julien });
+  const home = (await c.get(`/admin/rencontre/accueil?photographe=${julien}`)).body;
+  assert.match(home, /＋ Nouvelle rencontre<\/strong><span>prochaine carte : <span class="mono">J-0502/);
+  assert.match(home, /Ma sortie du jour/);
+  assert.match(home, /2 personnes rencontrées/);
+  assert.match(home, /Marie<small class="mono">J-0500<\/small><\/span>\s*<span class="app-tag ok">✓ site<\/span>/);
+  assert.match(home, /J-0501[\s\S]*en attente/);
+  assert.match(home, new RegExp(`href="/admin/sorties/julien/${today}">Ouvrir la sortie`));
+  const qr = (await c.get(`/admin/rencontre/qr?photographe=${julien}`)).body;
+  assert.match(qr, new RegExp(`/admin/auteurs/${julien}/qr/vertical-noir\\.svg\\?apercu=1`));
+  assert.equal(JSON.parse((await c.app.inject('/rencontre.webmanifest')).body).start_url, '/admin/rencontre/accueil');
+  assert.match((await c.get('/admin')).body, /<nav class="tabbar"[\s\S]*href="\/admin\/rencontre\/accueil"[\s\S]*Terrain<\/a>/);
+  assert.ok(id);
+});
+
+test('fiche photo en rubriques : résumés, rubriques ouvertes quand il y a à faire', async t => {
+  const c = await admin(t);
+  const p = c.db.prepare("SELECT id FROM photos WHERE status = 'published' ORDER BY id LIMIT 1").pluck().get();
+  const page = (await c.get(`/admin/photos/${p}`)).body;
+  for (const r of ['Infos', 'Où', 'Diffusion']) assert.match(page, new RegExp(`<summary>${r} <span class="sum">`));
+  assert.match(page, /<details class="panel ig rub-panel" id="instagram" data-ig>/);              // rien à faire : repliée
+  assert.match(page, /<details class="panel proof rub-panel" id="preuve">/);
+  // Un visage sans accord : Instagram à vérifier, la rubrique s'ouvre.
+  c.db.prepare('UPDATE photos SET faces = 1 WHERE id = ?').run(p);
+  assert.match((await c.get(`/admin/photos/${p}`)).body, /id="instagram" data-ig open>/);
+});

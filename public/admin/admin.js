@@ -1662,3 +1662,13 @@ document.addEventListener('change', e => {
   if (t.name === 'scope_instagram' && t.checked) other.checked = true;
   if (t.name === 'scope_site' && !t.checked) other.checked = false;
 });
+
+// ----- rubriques repliées : un lien vers une ancre (#instagram, #rencontres…) ouvre la rubrique qui la contient -----
+function openFor(hash) {
+  if (!hash || hash.length < 2) return;
+  let el = null;
+  try { el = document.getElementById(decodeURIComponent(hash.slice(1))); } catch { return; }
+  for (let d = el && el.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) d.open = true;
+}
+openFor(location.hash);
+window.addEventListener('hashchange', () => openFor(location.hash));

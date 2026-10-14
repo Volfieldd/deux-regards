@@ -84,7 +84,7 @@ Sans configuration, l'app Rencontre propose un bouton qui ouvre Mail sur l'iPhon
 
 1. Dans **Safari**, ouvrez `https://www.nicephos.art/admin/rencontre` et connectez-vous.
 2. Touchez **Partager** puis **Sur l'écran d'accueil** ; validez le nom « Rencontre ».
-3. L'icône ouvre l'écran en plein écran. Au premier usage, autorisez la **position** (« Lors de l'utilisation de l'app ») et l'**appareil photo**.
+3. L'icône ouvre l'**accueil Terrain** en plein écran (nouvelle rencontre, mon QR, ma sortie du jour). Au premier usage, autorisez la **position** (« Lors de l'utilisation de l'app ») et l'**appareil photo**.
 4. La connexion dure au plus 24 heures : reconnectez-vous en début de sortie.
 
 Utilisation : [Aide → Rencontres](Aide-Rencontres).

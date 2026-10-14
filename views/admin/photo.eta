@@ -29,6 +29,10 @@
   <form class="panel form" method="post" action="/admin/photos/<%= it.photo.id %>" novalidate>
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
 <% if (Object.keys(e).length) { %><p class="err" role="alert">Le formulaire contient des erreurs.</p><% } %>
+<% const has = k => Boolean(String(v[k] || '').trim()); const flag = (k, l) => `<span class="flag${has(k) ? '' : ' miss'}" title="${l}${has(k) ? '' : ' : manquant'}">${l.slice(0, 2).toUpperCase()}</span>`; %>
+    <details class="rub" open>
+      <summary>Infos <span class="sum"><%~ flag('title', 'fr') %><%~ flag('title_en', 'en') %><%~ flag('title_de', 'de') %></span></summary>
+      <div class="rub-body">
     <label>Titre <input name="title" value="<%= v.title %>" required maxlength="160"<%~ inv('title') %>></label><% if (e.title) { %><span class="err" id="err-title"><%= e.title %></span><% } %>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'title', label: 'Titre', max: 160 }) %>
     <label>Adresse <span class="mono">/photo/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ inv('slug') %>></label><% if (e.slug) { %><span class="err" id="err-slug"><%= e.slug %></span><% } %>
@@ -36,10 +40,16 @@
       <label>Série <select name="category_id"<%~ inv('category_id') %>><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select></label><% if (e.category_id) { %><span class="err" id="err-category_id"><%= e.category_id %></span><% } %>
       <label>Photographe <select name="author_id"<%~ inv('author_id') %>><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === Number(v.author_id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label><% if (e.author_id) { %><span class="err" id="err-author_id"><%= e.author_id %></span><% } %>
     </div>
-    <div class="row">
-      <label>Lieu affiché <span class="mono">texte libre, avec la photo</span><input name="place" value="<%= v.place %>" maxlength="120"></label>
-      <label>Date <input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="AAAA-MM ou AAAA-MM-JJ" inputmode="numeric"<%~ inv('taken_on') %>></label><% if (e.taken_on) { %><span class="err" id="err-taken_on"><%= e.taken_on %></span><% } %>
-    </div>
+    <label>Date <span class="mono">AAAA-MM ou AAAA-MM-JJ<%= it.photo.taken_time ? ` · prise à ${it.photo.taken_time.replace(':', ' h ')}` : '' %></span><input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="AAAA-MM ou AAAA-MM-JJ" inputmode="numeric"<%~ inv('taken_on') %>></label><% if (e.taken_on) { %><span class="err" id="err-taken_on"><%= e.taken_on %></span><% } %>
+    <label>Légende <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'legend', label: 'Légende', max: 2000, rows: 3 }) %>
+      </div>
+    </details>
+    <details class="rub" open>
+      <summary>Où <span class="sum"><%= v.city_label || 'sans ville' %><%= Number(v.on_map) ? ' · sur la carte du monde' : '' %></span></summary>
+      <div class="rub-body">
+    <label>Lieu affiché <span class="mono">texte libre, avec la photo</span><input name="place" value="<%= v.place %>" maxlength="120"></label>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'place', label: 'Lieu', max: 120 }) %>
     <div class="city-field" data-city>
       <label for="city_label">Ville <span class="mono">pour la carte du monde · toutes les communes de France, plus de 500 habitants ailleurs</span></label>
       <input id="city_label" name="city_label" value="<%= v.city_label || '' %>" maxlength="120" autocomplete="off" placeholder="Commencez à taper : Angers, Lisbonne…" data-city-input<%~ inv('city') %>>
@@ -49,9 +59,11 @@
 <% } %>      <span class="cellnote">Villes : <a href="https://www.geonames.org" target="_blank" rel="noopener">GeoNames</a>, licence CC BY 4.0.</span>
     </div>
     <label class="inline"><input type="checkbox" name="on_map"<%~ Number(v.on_map) ? ' checked' : '' %><%~ inv('on_map') %>> Afficher sur la carte du monde</label><% if (e.on_map) { %><span class="err" id="err-on_map"><%= e.on_map %></span><% } %>
-    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'place', label: 'Lieu', max: 120 }) %>
-    <label>Légende <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
-    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'legend', label: 'Légende', max: 2000, rows: 3 }) %>
+      </div>
+    </details>
+    <details class="rub" open>
+      <summary>Diffusion <span class="sum"><%= v.status === 'published' ? 'publiée' : 'brouillon' %> · filigrane <%= v.watermark === 0 ? 'jamais' : 'selon les réglages' %></span></summary>
+      <div class="rub-body">
 <% if (e.status) { %>    <span class="err" id="err-status" role="alert"><%= e.status %></span>
 <% } %>    <fieldset class="row">
       <legend>Statut</legend>
@@ -69,23 +81,27 @@
       <label class="inline"><input type="radio" name="watermark" value="default"<%~ v.watermark !== 0 ? ' checked' : '' %>> Selon les <a href="/admin/images">réglages</a></label>
       <label class="inline"><input type="radio" name="watermark" value="none"<%~ v.watermark === 0 ? ' checked' : '' %>> Jamais sur cette photo</label>
     </fieldset>
+    <p class="hint">Instagram : rubrique <a class="more" href="#instagram">Instagram</a>, plus bas.</p>
+      </div>
+    </details>
     <p class="actions"><button class="btn" type="submit">Enregistrer</button></p>
   </form>
 </div>
 <% if (it.encounters && it.encounters.length) { %>
-<section class="panel" id="rencontres" aria-labelledby="enc-title">
-  <h2 id="enc-title">Personnes rencontrées <span class="mono">accords de la sortie et photos liées</span><% if (it.outingUrl) { %> <a class="btn ghost push" href="<%= it.outingUrl %>">Ouvrir la sortie →</a><% } %></h2>
+<details class="panel rub-panel" id="rencontres"<%~ R.site.level !== 'ok' || R.instagram.level !== 'ok' ? ' open' : '' %>>
+  <summary><h2 id="enc-title">Personnes &amp; accords <span class="sum"><%= it.encounters.length %> personne<%= it.encounters.length > 1 ? 's' : '' %> · accords de la sortie et photos liées</span></h2></summary>
+<% if (it.outingUrl) { %>  <p><a class="btn ghost" href="<%= it.outingUrl %>">Ouvrir la sortie →</a></p><% } %>
   <p class="hint">Les personnes rencontrées par <%= it.photo.author || 'le photographe' %> le jour de cette photo (date EXIF), et celles liées à la photo. Vérifiez que celles qui y apparaissent ont accepté l’usage prévu.</p>
   <ul class="rank plain">
 <% it.encounters.forEach(r => { %>    <li><span class="t"><span class="enc-who"><% if (r.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= r.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } %><a href="/admin/rencontres/<%= r.id %>">Rencontre <%= r.ref || 'sans carte' %><%= r.name ? ` · ${r.name}` : '' %></a> <span class="mono"><%= r.via === 'session' ? 'même sortie' : 'liée à la photo' %></span></span></span>
       <% if (r.via === 'session') { %><form class="enc-absent" method="post" action="/admin/rencontres/<%= r.id %>/session/<%= it.photo.id %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="exclure" value="1"><input type="hidden" name="depuis" value="photo"><button class="btn ghost" type="submit">Pas sur cette photo</button></form><% } %>
       <% if (r.refused && r.via === 'lien') { %><span class="enc-tag no">Refuse la publication : la photo ne peut pas être publiée</span><% } else if (r.refused) { %><span class="enc-tag warn">A refusé : si elle est sur cette photo, liez-la au refus (fiche de la rencontre)</span><% } else if (r.consent) { %><span class="enc-tag ok">Accord <%= r.consent_source !== 'en_ligne' ? 'signé' : 'en ligne' %> : <%= ['site', 'instagram', 'print', 'name'].filter(s => r.consent[s]).map(s => ({ site: 'site', instagram: 'Instagram', print: 'expositions et tirages', name: 'avec son prénom' })[s]).join(', ') %></span><% } else { %><span class="enc-tag">Ni accord ni refus pour l’instant</span><% } %></li>
 <% }) %>  </ul>
-</section>
+</details>
 <% } %>
-<section class="panel audience" id="audience" aria-labelledby="audience-title">
-  <h2 id="audience-title">Audience <span class="mono">30 derniers jours</span></h2>
 <% const au = it.audience; %>
+<details class="panel audience rub-panel" id="audience">
+  <summary><h2 id="audience-title">Audience <span class="sum"><%= au && au.total ? `${au.total} ouverture${au.total > 1 ? 's' : ''} en 30 jours` : 'pas encore vue en grand' %></span></h2></summary>
 <% if (au && au.total) { %>
   <p><strong><%= au.total %></strong> ouverture<%= au.total > 1 ? 's' : '' %> en grand<%= au.rank ? ` · ${au.rank === 1 ? '1ʳᵉ' : au.rank + 'ᵉ'} photo la plus vue` : '' %></p>
   <%~ au.spark %>
@@ -93,10 +109,10 @@
   <p class="hint">Pas encore ouverte en grand ces 30 derniers jours<%= it.photo.status === 'draft' ? ' (brouillon : invisible sur le site)' : '' %>.</p>
 <% } %>
   <p><a class="more" href="/admin/statistiques">Toutes les statistiques</a></p>
-</section>
+</details>
 <% const ig = it.insta; %>
-<section class="panel ig" id="instagram" aria-labelledby="ig-title" data-ig>
-  <h2 id="ig-title">Instagram</h2>
+<details class="panel ig rub-panel" id="instagram" data-ig<%~ ig.active || R.instagram.level !== 'ok' ? ' open' : '' %>>
+  <summary><h2 id="ig-title">Instagram <span class="sum"><%= ig.post && ig.post.status === 'published' ? 'publiée sur Instagram' : ig.active ? 'dans la file' : ig.post && ig.post.status === 'failed' ? 'en échec' : R.instagram.level === 'no' ? 'bloquée' : R.instagram.level === 'warn' ? 'à vérifier' : 'pas encore partagée' %></span></h2></summary>
 <% if (ig.post && ig.post.status === 'published') { %>
   <p>Publiée sur Instagram<% if (ig.post.permalink) { %> · <a class="more" href="<%= ig.post.permalink %>" target="_blank" rel="noopener">voir le post ↗</a><% } %>.</p>
 <% if (ig.engagement) { const e = ig.engagement; %>
@@ -115,7 +131,7 @@
   <p class="err">Échec de la publication : <%= ig.post.error %> (voir la page <a href="/admin/instagram">Instagram</a> pour réessayer).</p>
 <% } %>
 <% if (ig.blocked.length) { %>
-  <p class="ig-blocked" role="note"><strong>Instagram bloqué</strong> : <%= ig.blocked.join(' ; ') %>. Aucune confirmation ne lève ce blocage : si la personne n’est pas sur cette photo, indiquez-le dans <a class="more" href="#rencontres">Personnes rencontrées</a>.</p>
+  <p class="ig-blocked" role="note"><strong>Instagram bloqué</strong> : <%= ig.blocked.join(' ; ') %>. Aucune confirmation ne lève ce blocage : si la personne n’est pas sur cette photo, indiquez-le dans <a class="more" href="#rencontres">Personnes &amp; accords</a>.</p>
 <% } else if (it.photo.status !== 'published') { %>
   <p class="hint">Publiez d’abord la photo sur le site pour la partager sur Instagram.</p>
 <% } else if (!ig.post || ig.active || ig.post.status === 'failed' || ig.post.status === 'published') { if (!(ig.post && ig.post.status === 'publishing')) { %>
@@ -147,10 +163,10 @@
 <% } %>
   </div>
 <% } } %>
-</section>
-<section class="panel proof" id="preuve">
-  <h2>Preuve d’antériorité</h2>
+</details>
 <% const t = it.proof; %>
+<details class="panel proof rub-panel" id="preuve">
+  <summary><h2>Preuve d’antériorité <span class="sum"><%= t && t.status === 'ok' && t.sha256 === it.photo.sha256 ? 'horodatée' : it.photo.sha256 ? 'empreinte calculée' : 'en cours' %></span></h2></summary>
   <dl class="facts">
     <dt>Empreinte SHA-256 de l’original</dt><dd><code class="mono"><%= it.photo.sha256 || 'en cours de calcul' %></code></dd>
     <dt>Horodatage RFC 3161</dt>
@@ -185,7 +201,7 @@
     <button class="btn ghost" type="submit">Réessayer maintenant</button>
   </form>
 <% } %>
-</section>
+</details>
 
 <details class="danger panel">
   <summary>Supprimer cette photo</summary>

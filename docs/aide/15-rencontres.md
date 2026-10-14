@@ -49,11 +49,18 @@ C'est la page du QR (en français, anglais et allemand, sans lien dans le menu, 
 
 Elle peut revenir à tout moment et changer d'avis : le dernier choix l'emporte, l'historique garde les précédents. Contre les abus : 8 demandes par heure et par connexion, et un piège pour les robots.
 
-## Sur le téléphone : l'app Rencontre
+## Sur le téléphone : l'accueil Terrain et l'app Rencontre
 
 Pour remplir **avec la personne**, au moment de la photo, sans carte papier : **Sur le terrain → Nouvelle rencontre** (ou **Personnes → Nouvelle rencontre**), ou directement `nicephos.art/admin/rencontre` sur l'iPhone.
 
-**L'installer comme une app** (une fois) : dans Safari, ouvrez la page, touchez **Partager** puis **Sur l'écran d'accueil**. L'icône « Rencontre » ouvre l'écran en plein écran. Il faut être connecté à l'admin (connexion à refaire au plus une fois par jour).
+**L'installer comme une app** (une fois) : dans Safari, ouvrez la page, touchez **Partager** puis **Sur l'écran d'accueil**. Il faut être connecté à l'admin (connexion à refaire au plus une fois par jour).
+
+**L'icône « Rencontre » ouvre l'accueil Terrain** (`/admin/rencontre/accueil`), aussi accessible par l'onglet **Terrain** de la barre du bas de l'admin sur le téléphone :
+
+- **＋ Nouvelle rencontre**, avec la prochaine référence de vos cartes ;
+- **Montrer mon QR** : la composition des vêtements (avec le logo), en grand ; la personne la scanne sur votre écran quand vous n'avez plus de carte ;
+- **Ma sortie du jour** : les personnes déjà rencontrées aujourd'hui, avec leur visage et leur décision (✓ accord et usages, ✕ refus, en attente) ; regardez-la avant de redemander un accord ; **Ouvrir la sortie dans l'admin** ;
+- **Admin complet**, en haut à droite. Si votre compte n'est lié à aucun photographe, choisissez votre nom en haut.
 
 **En une minute :**
 
@@ -103,19 +110,19 @@ Un accord vaut pour **la sortie** : toutes les photos que le photographe a prise
 
 - **Fiche de la rencontre → Photos de la sortie** : les photos du jour, couvertes par l'accord. **Exclure** celles qui ne concernent pas la personne (une autre prise de vue le même jour, par exemple) ; **Rétablir** pour revenir en arrière.
 - **Horloge de l'appareil décalée** (changement d'heure oublié, réglage faux) : indiquez la **Date de la sortie**, celle que portent les photos, dans le formulaire de la fiche.
-- **Fiche d'une photo → Personnes rencontrées** : les personnes rencontrées par son photographe ce jour-là (« même sortie ») et celles liées à la photo, avec leur accord, leur visage et leurs usages acceptés. Vérifiez que celles qui apparaissent sur la photo ont accepté l'usage prévu.
+- **Fiche d'une photo → Personnes & accords** : les personnes rencontrées par son photographe ce jour-là (« même sortie ») et celles liées à la photo, avec leur accord, leur visage et leurs usages acceptés. Vérifiez que celles qui apparaissent sur la photo ont accepté l'usage prévu.
 - **Un refus, lui, est ciblé** pour le site : il ne bloque que les **photos liées** (les autres personnes du jour ont pu accepter). Liez au refus les photos où la personne apparaît ; la fiche d'une photo de la sortie le rappelle.
 
 ## Instagram suit les accords
 
 - **Instagram suppose le site** : refuser le site, c'est refuser Instagram (l'inverse non). Dans les formulaires, cocher Instagram coche le site ; un accord « Instagram sans le site » est refusé (sur une carte papier mal remplie : cochez le site seulement si la carte l'indique, sinon décochez Instagram).
 - **Une photo est bloquée pour Instagram**, sans confirmation possible, dès qu'une personne **liée à la photo** ou **rencontrée pendant la sortie** (si la photo a un visage) refuse la publication ou n'a pas accepté Instagram. La fiche de la photo l'affiche (« Instagram bloqué ») à la place du formulaire Instagram. Une photo **à vérifier** n'entre dans la file que si vous cochez la confirmation sous le formulaire Instagram.
-- **La personne n'est pas sur cette photo** : dans la fiche de la photo, **Personnes rencontrées → Pas sur cette photo** l'exclut de la sortie pour cette photo ; le blocage tombe si plus personne ne bloque.
+- **La personne n'est pas sur cette photo** : dans la fiche de la photo, **Personnes & accords → Pas sur cette photo** l'exclut de la sortie pour cette photo ; le blocage tombe si plus personne ne bloque.
 - **Un refus arrive alors que la photo attend dans la file** : elle sort de la file tout de suite, en échec « bloquée : … » (page Instagram), et **Réessayer** est refusé tant que le blocage dure. Elle est aussi revérifiée juste avant l'envoi.
 
 ## Un visage sur le nom
 
-La **photo de la personne** (son visage) aide à savoir qui a signé et à retrouver les bonnes images : prise dans l'app sur le téléphone (« Photographier la personne »), ou ajoutée dans le formulaire de la fiche (carte papier, photo de votre téléphone). Elle apparaît en rond dans la liste, sur la fiche et dans « Personnes rencontrées ». Gardée en privé, **aussi longtemps que l'accord** ; sans accord, effacée après 6 mois. Le texte du consentement (app et cartes) le dit à la personne.
+La **photo de la personne** (son visage) aide à savoir qui a signé et à retrouver les bonnes images : prise dans l'app sur le téléphone (« Photographier la personne »), ou ajoutée dans le formulaire de la fiche (carte papier, photo de votre téléphone). Elle apparaît en rond dans la liste, sur la fiche et dans « Personnes & accords » de la fiche photo. Gardée en privé, **aussi longtemps que l'accord** ; sans accord, effacée après 6 mois. Le texte du consentement (app et cartes) le dit à la personne.
 
 ## Traiter une rencontre
 

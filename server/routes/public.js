@@ -72,7 +72,7 @@ export default async function publicRoutes(app) {
   app.get('/rencontre.webmanifest', async (request, reply) => {
     const b = app.appearance.brand();
     return reply.type('application/manifest+json').header('cache-control', 'no-cache').send(JSON.stringify({
-      name: `Rencontre · ${app.siteName()}`, short_name: 'Rencontre', lang: 'fr', start_url: '/admin/rencontre', scope: '/admin/', display: 'standalone',
+      name: `Rencontre · ${app.siteName()}`, short_name: 'Rencontre', lang: 'fr', start_url: '/admin/rencontre/accueil', scope: '/admin/', display: 'standalone',
       background_color: '#f6f4ef', theme_color: '#1d1c1a',
       icons: b.favicon180 ? [{ src: `/brand/${b.favicon180}`, sizes: '180x180', type: 'image/png' }] : [],
     }));

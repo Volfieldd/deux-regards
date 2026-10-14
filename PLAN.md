@@ -256,7 +256,7 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 1. (fait) Mots (Sortie, Personne, Accord, Carte d'accord, Carte du monde, « Où »), menu en quatre groupes (Travailler, Publier, Sur le terrain, Réglages), page « Sur le terrain » (app, cartes d'accord, QR des vêtements avec logo, une seule composition), états lisibles par un daltonien (forme + mot, palette bleu / jaune / vermillon).
 2. (fait) « Aujourd'hui » en liste de choses à faire, triée par urgence.
 3. (fait) Sorties (une par photographe et par jour, découpables par une heure de coupure), détection des visages locale (sans reconnaissance), état par usage « prête / à vérifier / bloquée » ; « à vérifier » demande une confirmation explicite, gardée dans l'historique ; une fiche Personne pour plusieurs rencontres (un accord par sortie, un refus vaut pour tout, rapprochement par e-mail confirmé à la main).
-4. Fiche photo en rubriques, accueil « Terrain » sur le téléphone (nouvelle rencontre, montrer mon QR, ma sortie du jour).
+4. (fait) Fiche photo en rubriques, accueil « Terrain » sur le téléphone (nouvelle rencontre, montrer mon QR, ma sortie du jour).
 
 ## Côté Zitadel (à faire une fois)
 

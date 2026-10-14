@@ -1,0 +1,42 @@
+<!doctype html>
+<% const a = it.author; const LABELS = { site: 'site', instagram: 'Instagram', print: 'tirages', name: 'prénom' };
+   const q = a ? `?photographe=${a.id}` : ''; %>
+<html lang="fr">
+<head>
+<%~ include('./_app-head', it) %>
+</head>
+<body>
+<header class="app-bar">
+  <span class="app-face" aria-hidden="true"><%= a ? a.name.charAt(0).toUpperCase() : '?' %></span>
+  <strong>Terrain</strong>
+  <a class="app-bar-link" href="/admin">Admin complet</a>
+</header>
+<main class="app-home">
+<% if (!a || it.authors.length > 1) { %>
+  <nav class="app-who" aria-label="Photographe">
+<% it.authors.forEach(x => { %>    <a href="/admin/rencontre/accueil?photographe=<%= x.id %>"<%~ a && x.id === a.id ? ' aria-current="true"' : '' %>><%= x.name %></a>
+<% }) %>  </nav>
+<% } %>
+<% if (a) { %>
+  <a class="app-big primary" href="/admin/rencontre"><strong>＋ Nouvelle rencontre</strong><span>prochaine carte : <span class="mono"><%= it.next %></span></span></a>
+  <a class="app-big" href="/admin/rencontre/qr<%= q %>"><strong>Montrer mon QR</strong><span>la personne le scanne sur votre écran, sans carte</span></a>
+  <section class="app-today" aria-labelledby="today-title">
+    <h2 id="today-title">Ma sortie du jour<% if (it.place) { %> <span class="hint">· <%= it.place %></span><% } %></h2>
+    <p class="hint"><%= it.people.length %> personne<%= it.people.length > 1 ? 's' : '' %> rencontrée<%= it.people.length > 1 ? 's' : '' %> · <%= it.photos %> photo<%= it.photos > 1 ? 's' : '' %> importée<%= it.photos > 1 ? 's' : '' %></p>
+<% if (it.people.length) { %>
+    <ul class="app-people">
+<% it.people.forEach(e => { %>      <li><% if (e.hasPortrait) { %><img src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="40" height="40"><% } else { %><span class="app-face small" aria-hidden="true"><%= (e.name || e.ref || '?').charAt(0).toUpperCase() %></span><% } %>
+        <span class="who"><%= e.name || e.ref || 'Sans carte' %><small class="mono"><%= e.ref || '' %><%= e.met_time ? ` · ${e.met_time}` : '' %></small></span>
+        <% if (e.refused) { %><span class="app-tag no">✕ refus</span><% } else if (e.consent) { %><span class="app-tag ok">✓ <%= Object.keys(LABELS).filter(s => e.consent[s]).map(s => LABELS[s]).join(', ') %></span><% } else { %><span class="app-tag">en attente</span><% } %></li>
+<% }) %>    </ul>
+<% } else { %>
+    <p class="hint">Personne pour l’instant. Avant de redemander un accord, regardez ici : la personne a peut-être déjà signé.</p>
+<% } %>
+<% if (it.outingUrl) { %>    <p><a class="app-link" href="<%= it.outingUrl %>">Ouvrir la sortie dans l’admin</a></p><% } %>
+  </section>
+<% } else { %>
+  <p class="hint">Choisissez votre nom ci-dessus (votre compte n’est lié à aucun photographe).</p>
+<% } %>
+</main>
+</body>
+</html>

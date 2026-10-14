@@ -107,6 +107,30 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
   }
   app.get('/admin/rencontre', { config: { geolocation: true } }, async (request, reply) => appPage(request, reply));
 
+  // ---------- accueil « Terrain » de l'app ----------
+  // Ce qu'ouvre l'icône de l'app : nouvelle rencontre, mon QR (la composition des vêtements, à montrer), ma sortie
+  // du jour (les personnes déjà vues aujourd'hui et leur décision), et l'admin complet.
+  const parisDay = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(Date.now());
+  const fieldAuthor = request => {
+    const authors = repo.authors();
+    return { authors, author: authors.find(a => a.id === Number(request.query.photographe)) || authorOf(request) || null };
+  };
+  app.get('/admin/rencontre/accueil', async (request, reply) => {
+    const { authors, author } = fieldAuthor(request);
+    const day = parisDay();
+    const people = author ? app.db.prepare("SELECT id FROM encounters WHERE author_id = ? AND COALESCE(NULLIF(session_day, ''), NULLIF(met_on, '')) = ? AND anonymized = 0 ORDER BY id")
+      .pluck().all(author.id, day).map(id => enc.get(id)).filter(Boolean) : [];
+    const outing = author ? app.outings.get(author.slug, day) : null;
+    return appView(reply, 'app-home', { title: 'Terrain', authors, author, people, day, csrf: request.session.csrf,
+      next: author ? `${prefixOf(author)}-${String(nextNumber(prefixOf(author))).padStart(4, '0')}` : null,
+      place: outing?.place || '', outingUrl: author ? app.outings.urlOf(author.id, day, null) : null, photos: outing ? outing.photos.length : 0 });
+  });
+  app.get('/admin/rencontre/qr', async (request, reply) => {
+    const { authors, author } = fieldAuthor(request);
+    if (!author) return reply.redirect('/admin/rencontre/accueil', 303);
+    return appView(reply, 'app-qr', { title: 'Mon QR', author, authors, letter: prefixOf(author), host: app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, '') });
+  });
+
   // Récapitulatif pour la personne, dans sa langue : ce qu'elle a accepté ou refusé, et le lien vers sa page.
   function recap(e) {
     const lang = UI[e.lang] ? e.lang : 'fr';
