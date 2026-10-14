@@ -5,6 +5,7 @@
 // Chaque ligne mène à l'écran qui la règle. Requêtes simples : la liste est recalculée à chaque page de l'admin
 // (le badge du menu compte les urgences).
 import { isProvisional } from './admin-repo.js';
+import { samePartSql } from './outings.js';
 
 export const LEVELS = ['urgent', 'bientot', 'plus-tard'];
 const MONTH = 30 * 864e5;
@@ -25,6 +26,7 @@ export function createTodo({ db, encounters, instagram, proofs, now = () => Date
       WHERE e.refused = 1 AND e.anonymized = 0 AND p.status = 'published'
       AND NOT EXISTS (SELECT 1 FROM encounter_photos ep WHERE ep.encounter_id = e.id AND ep.photo_id = p.id)
       AND NOT EXISTS (SELECT 1 FROM encounter_exclusions x WHERE x.encounter_id = e.id AND x.photo_id = p.id)
+      AND ${samePartSql('p.author_id', 'p.taken_on', "COALESCE(p.taken_time, '')", 'e.met_time')}
       GROUP BY e.id ORDER BY e.id`),
     fresh: db.prepare("SELECT COUNT(*) FROM encounters WHERE status = 'nouvelle'").pluck(),
     igFailed: db.prepare("SELECT COUNT(*) FROM instagram_posts WHERE status = 'failed' AND NOT EXISTS (SELECT 1 FROM instagram_posts b WHERE b.photo_id = instagram_posts.photo_id AND b.id > instagram_posts.id)").pluck(),

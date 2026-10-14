@@ -51,7 +51,7 @@
 </div>
 <% if (it.encounters && it.encounters.length) { %>
 <section class="panel" id="rencontres" aria-labelledby="enc-title">
-  <h2 id="enc-title">Personnes rencontrées <span class="mono">accords de la sortie et photos liées</span></h2>
+  <h2 id="enc-title">Personnes rencontrées <span class="mono">accords de la sortie et photos liées</span><% if (it.outingUrl) { %> <a class="btn ghost push" href="<%= it.outingUrl %>">Ouvrir la sortie →</a><% } %></h2>
   <p class="hint">Les personnes rencontrées par <%= it.photo.author || 'le photographe' %> le jour de cette photo (date EXIF), et celles liées à la photo. Vérifiez que celles qui y apparaissent ont accepté l’usage prévu.</p>
   <ul class="rank plain">
 <% it.encounters.forEach(r => { %>    <li><span class="t"><span class="enc-who"><% if (r.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= r.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } %><a href="/admin/rencontres/<%= r.id %>">Rencontre <%= r.ref || 'sans carte' %><%= r.name ? ` · ${r.name}` : '' %></a> <span class="mono"><%= r.via === 'session' ? 'même sortie' : 'liée à la photo' %></span></span></span>

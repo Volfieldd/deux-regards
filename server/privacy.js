@@ -25,7 +25,7 @@ export const PRIVACY = {
       ['Quand vous nous écrivez ou nous donnez votre accord', [
         `Par la page ${host}/bonjour (le QR de nos cartes et vêtements), par une carte signée ou sur notre téléphone au moment de la photo, nous recueillons seulement ce que vous nous donnez : la référence de votre carte, la date et le lieu de la rencontre, votre nom, votre e-mail si vous voulez recevoir la photo ou une réponse, vos choix (recevoir la photo, accord par usage, refus) et vos messages.`,
         'Sur notre téléphone s’y ajoutent votre signature, une photo de vous jointe à votre accord (pour savoir qui a signé et retrouver les bonnes images) et la position de la rencontre, arrondie à une centaine de mètres. Pour une personne mineure, un parent signe avec elle et nous notons son nom.',
-        'Votre accord couvre les photos que le photographe a prises ce jour-là (la session) ; votre refus s’applique aux photos où vous apparaissez.',
+        'Votre accord couvre les photos que le photographe a prises ce jour-là (la sortie ; si la journée est partagée en deux, la partie de la journée où il vous a rencontré) ; votre refus s’applique aux photos où vous apparaissez.',
         'Base légale : votre consentement, que vous pouvez retirer à tout moment sur la même page, sans justification.',
         'Nous ne vous envoyons rien d’autre que ce que vous avez demandé : votre photo, une réponse, le récapitulatif de votre accord.',
       ]],
@@ -72,7 +72,7 @@ export const PRIVACY = {
       ['When you write to us or give your consent', [
         `Through the page ${host}/bonjour (the QR code on our cards and clothes), on a signed card or on our phone when the photo is taken, we only collect what you give us: your card reference, the date and place of the meeting, your name, your email if you want to receive the photo or a reply, your choices (receive the photo, consent per use, refusal) and your messages.`,
         'On our phone we also record your signature, a photo of you attached to your consent (to know who signed and find the right images) and the place of the meeting, rounded to about a hundred metres. For a minor, a parent signs with them and we note the parent’s name.',
-        'Your consent covers the photos the photographer took that day (the session); your refusal applies to the photos you appear in.',
+        'Your consent covers the photos the photographer took that day (the outing; if the day is split in two, the part of the day when you met); your refusal applies to the photos you appear in.',
         'Legal basis: your consent, which you can withdraw at any time on the same page, without giving a reason.',
         'We send you nothing other than what you asked for: your photo, a reply, a summary of your consent.',
       ]],
@@ -119,7 +119,7 @@ export const PRIVACY = {
       ['Wenn Sie uns schreiben oder einwilligen', [
         `Über die Seite ${host}/bonjour (den QR-Code unserer Karten und Kleidung), auf einer unterschriebenen Karte oder auf unserem Handy beim Fotografieren erheben wir nur, was Sie uns geben: die Referenz Ihrer Karte, Datum und Ort der Begegnung, Ihren Namen, Ihre E-Mail, wenn Sie das Foto oder eine Antwort erhalten möchten, Ihre Wahl (Foto erhalten, Einwilligung je Nutzung, Ablehnung) und Ihre Nachrichten.`,
         'Auf unserem Handy kommen Ihre Unterschrift, ein Foto von Ihnen zu Ihrer Einwilligung (um zu wissen, wer unterschrieben hat, und die richtigen Bilder zu finden) und der Ort der Begegnung hinzu, auf etwa hundert Meter gerundet. Bei Minderjährigen unterschreibt ein Elternteil mit, dessen Namen wir notieren.',
-        'Ihre Einwilligung gilt für die Fotos, die der Fotograf an diesem Tag gemacht hat (die Session); Ihre Ablehnung gilt für die Fotos, auf denen Sie zu sehen sind.',
+        'Ihre Einwilligung gilt für die Fotos, die der Fotograf an diesem Tag gemacht hat (der Ausflug; ist der Tag geteilt, der Teil des Tages, an dem Sie sich begegnet sind); Ihre Ablehnung gilt für die Fotos, auf denen Sie zu sehen sind.',
         'Rechtsgrundlage: Ihre Einwilligung, die Sie jederzeit auf derselben Seite ohne Begründung widerrufen können.',
         'Wir schicken Ihnen nur, was Sie angefragt haben: Ihr Foto, eine Antwort, eine Zusammenfassung Ihrer Einwilligung.',
       ]],

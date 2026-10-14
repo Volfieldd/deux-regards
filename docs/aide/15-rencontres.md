@@ -64,9 +64,24 @@ Pour remplir **avec la personne**, au moment de la photo, sans carte papier : **
 
 Il faut du réseau (la 4G suffit) : sans réseau, l'enregistrement échoue sans rien perdre à l'écran ; réessayez un peu plus loin. Un accord signé sur le téléphone vaut une carte signée : la fiche montre la signature et la photo de repère.
 
+## Les sorties
+
+La page **Sorties** (barre latérale, groupe « Travailler ») montre une ligne par **journée de prise de vue** d'un photographe : la date et le lieu, quelques vignettes, le nombre de photos (et de publiées), les visages des personnes rencontrées avec leurs accords et refus, et un **état** lisible sans la couleur : **✕ refus à appliquer** (une personne a refusé et des photos publiées de la sortie ne sont pas exclues pour elle), **▲ à trier** (brouillons, ou personne sans décision), **✓ terminée**. Les pastilles filtrent par état et par photographe.
+
+Une sortie **se crée toute seule** : à l'import (la date que l'appareil inscrit dans chaque photo) ou à la première rencontre du jour. Rien à déclarer.
+
+**La fiche d'une sortie** met côte à côte :
+
+- **les photos** (avec leur heure de prise de vue et les personnes liées) : cochez-en, puis **Lier à cette personne** (celle qui y figure), **Personne de la sortie n'y figure** (un paysage, une autre scène : les accords et refus de la sortie ne la concernent plus ; les photos liées à la main restent liées) ou **Rétablir** ;
+- **les personnes rencontrées**, avec leur visage et leurs usages acceptés, et **Nouvelle rencontre** ;
+- **le lieu** (proposé d'après les rencontres et les villes des photos, modifiable) ;
+- **Couper la sortie à** une heure : matin à Angers, soir à Saumur. Les photos (heure de l'appareil) et les rencontres (heure de saisie) d'après forment une autre sortie ; l'accord d'une personne ne couvre plus que sa partie de la journée. **Réunir avec la sortie précédente** annule la coupure. Une photo ou une rencontre **sans heure connue** compte dans toutes les parties du jour, par prudence.
+
+Les fiches d'une rencontre et d'une photo ont un bouton **Ouvrir la sortie →**.
+
 ## Un accord couvre la sortie
 
-Un accord vaut pour **la sortie** : toutes les photos que le photographe a prises **ce jour-là** (la date que l'appareil inscrit dans chaque photo). Rien à lier photo par photo.
+Un accord vaut pour **la sortie** : toutes les photos que le photographe a prises **ce jour-là** (la date que l'appareil inscrit dans chaque photo), ou seulement sa partie de journée si la sortie est coupée. Rien à lier photo par photo.
 
 - **Fiche de la rencontre → Photos de la sortie** : les photos du jour, couvertes par l'accord. **Exclure** celles qui ne concernent pas la personne (une autre prise de vue le même jour, par exemple) ; **Rétablir** pour revenir en arrière.
 - **Horloge de l'appareil décalée** (changement d'heure oublié, réglage faux) : indiquez la **Date de la sortie**, celle que portent les photos, dans le formulaire de la fiche.

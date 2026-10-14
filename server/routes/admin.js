@@ -23,6 +23,7 @@ import { PRESETS as IG_PRESETS, BOUNDS as IG_BOUNDS } from '../instagram-limits.
 import * as cities from '../geo/cities.js';
 import { TranslateError } from '../translate.js';
 import { registerEncounters } from './rencontres.js';
+import { registerOutings } from './sorties.js';
 
 // Carte des visiteurs (page Statistiques) : centre de chaque pays dans le repère 1000 × 520 du fond de carte
 // (public/admin/carte-monde.svg, généré par scripts/carte-monde.mjs), nom du pays en français.
@@ -751,6 +752,7 @@ export default async function adminRoutes(app) {
     return render(request, reply, 'photo', {
       title: photo.title, photo, values: { ...photo, city_label: photo.city_name ? cities.label({ name: photo.city_name, cc: photo.city_cc }) : '' }, errors: {}, categories: repo.categories(), authors: repo.authors(),
       proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
+      outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
     });
   });
 
@@ -1164,6 +1166,7 @@ export default async function adminRoutes(app) {
 
   // ---------- rencontres (page /bonjour, cartes) ----------
   registerEncounters(app, { repo, render, write, done, failed, withReady });
+  registerOutings(app, { repo, render, write, done, failed, withReady });
 
   // ---------- traductions ----------
   // Proposition de traduction d'un champ (LibreTranslate du réseau local) : l'auteur la relit avant d'enregistrer.

@@ -37,6 +37,7 @@
     stats: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
     people: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/>',
     globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/>',
+    outing: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/>',
     pin: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
     shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
@@ -62,6 +63,7 @@
   </nav>
   <p class="grp" id="nav-work">Travailler</p>
   <nav class="nav" aria-labelledby="nav-work">
+    <a href="/admin/sorties"<%~ it.section === 'outings' || it.section === 'outing' ? ' aria-current="page"' : '' %>><%~ ic('outing') %>Sorties</a>
     <%~ item(['photos', '/admin/photos', 'Photothèque', 'photos']) %>
     <a href="/admin/rencontres"<%~ people ? ' aria-current="page"' : '' %>><%~ ic('people') %>Personnes<% if (it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew %> nouvelle<%= it.encountersNew > 1 ? 's' : '' %>"><%= it.encountersNew %></span><% } %></a>
   </nav>
@@ -113,7 +115,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% const HELP = { outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>">Aide sur cette page</a></p>
 <% } %>

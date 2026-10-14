@@ -17,7 +17,8 @@ La **barre latérale**, à gauche, est toujours là. Elle est rangée par intent
 |---|---|---|
 | | **Rechercher, agir… ⌘K** | la palette de commandes : une photo, une série, une page ou une action, au clavier |
 | | **Aujourd’hui** | ce qui reste à faire et l’état du site d’un coup d’œil |
-| **Travailler** | **Photothèque** | importer, voir, compléter, publier, ordonner, supprimer |
+| **Travailler** | **Sorties** | une ligne par journée de prise de vue : ses photos et les personnes rencontrées, à trier ensemble (voir [Rencontres](rencontres#les-sorties)) |
+| | **Photothèque** | importer, voir, compléter, publier, ordonner, supprimer |
 | | **Personnes** | les personnes photographiées : demandes, accords, refus (voir [Rencontres](rencontres)) |
 | **Publier** | **Site public** | nom du site, textes, photos de l’ouverture, carte du monde |
 | | **Séries** | créer, renommer, ordonner les séries ; sous l’entrée, *la liste des séries*, où l’on **dépose** des photos glissées depuis la photothèque |
