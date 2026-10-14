@@ -294,8 +294,16 @@ export function createEncounters({ db, now = () => Date.now() }) {
   const countShare = (token, kind) => db.prepare(`UPDATE encounter_shares SET ${kind === 'download' ? 'downloads' : 'views'} = ${kind === 'download' ? 'downloads' : 'views'} + 1, last_at = ? WHERE token = ?`).run(now(), token);
   const revokeShare = (id, token) => db.prepare('DELETE FROM encounter_shares WHERE encounter_id = ? AND token = ?').run(id, token).changes > 0;
   // Demandes sans accord ni refus, sans nouvelle depuis 12 mois : effacées (adresse, message, photo de carte).
+  // Durées de conservation (annoncées sur la page /confidentialite) :
+  //   - demande sans accord ni refus : 12 mois sans nouvelle ;
+  //   - photo de repère (app) : 6 mois, le temps de retrouver les bonnes images ;
+  //   - accord ou refus : tant qu'une photo liée existe, puis 5 ans (délai pour agir en justice) ;
+  //   - lien « photo offerte » : effacé un mois après son expiration.
   const purge = () => {
-    db.prepare('DELETE FROM encounter_shares WHERE expires_at < ?').run(now() - 30 * 864e5);       // liens expirés depuis un mois
+    db.prepare('DELETE FROM encounter_shares WHERE expires_at < ?').run(now() - 30 * 864e5);
+    db.prepare('UPDATE encounters SET portrait_jpeg = NULL WHERE portrait_jpeg IS NOT NULL AND created_at < ?').run(now() - 183 * 864e5);
+    db.prepare(`DELETE FROM encounters WHERE (consent IS NOT NULL OR refused = 1) AND updated_at < ?
+      AND NOT EXISTS (SELECT 1 FROM encounter_photos ep WHERE ep.encounter_id = encounters.id)`).run(now() - 5 * RETENTION);
     return db.prepare('DELETE FROM encounters WHERE updated_at < ? AND consent IS NULL AND refused = 0').run(now() - RETENTION).changes;
   };
 

@@ -182,7 +182,7 @@ test('accessibilité du site : aucune violation sérieuse', async ({ page }) => 
   await page.emulateMedia({ reducedMotion: 'reduce' });   // mesure l'état final, pas une animation d'apparition
   await page.goto('/');
   const photo = await page.locator('#grid .tile').first().getAttribute('href');
-  for (const url of ['/', '/a-propos', '/droits', photo, '/page-inexistante', '/bonjour', '/en/bonjour']) {
+  for (const url of ['/', '/a-propos', '/droits', photo, '/page-inexistante', '/bonjour', '/en/bonjour', '/confidentialite']) {
     await page.goto(url);
     const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
     const serious = violations.filter(v => ['serious', 'critical'].includes(v.impact));

@@ -4,6 +4,7 @@ import { widthsFor, variantName } from '../images.js';
 import { pad } from '../format.js';
 import { picture } from '../picture.js';
 import { RIGHTS, rightsText } from '../rights.js';
+import { PRIVACY, UPDATED as PRIVACY_UPDATED } from '../privacy.js';
 import { project, MAP } from '../geo/projection.js';
 import { countryName } from '../geo/cities.js';
 import { LANGS, PREFIX, UI, pick, localize, splitLang, detectLang } from '../i18n.js';
@@ -106,7 +107,7 @@ export default async function publicRoutes(app) {
       ...repo.authors().filter(a => photos.some(p => p.author_slug === a.slug)).map(a => ({ loc: galleryUrl({ regard: a.slug }) })),
       ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at) })),
       ...(mapEnabled() ? [{ loc: '/carte' }] : []),
-      { loc: '/a-propos' }, { loc: '/droits' },
+      { loc: '/a-propos' }, { loc: '/droits' }, { loc: '/confidentialite' },
     ];
     const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
     const links = loc => LANGS.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${xml(base + localize(loc, l))}"/>`).join('');
@@ -326,6 +327,24 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit }) {
       if (!(err instanceof EncounterError)) throw err;
       return hello(request, reply, { values: body, errors: err.errors, card: card?.badCode ? null : card, status: 422 });
     }
+  });
+
+  // Confidentialité (RGPD) : ce que le site collecte, pourquoi, combien de temps, et les droits des personnes.
+  app.get('/confidentialite', async (request, reply) => {
+    const siteName = app.siteName();
+    const settings = repo.settings();
+    const P = PRIVACY[lang];
+    const contact = String(settings.privacy_contact || settings.rights_contact || '').trim();
+    const host = app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, '');
+    const sections = P.sections({ site: siteName, authors: repo.authors().map(a => a.name), contact: contact || `${host}/bonjour`, host,
+      mfa: settings.privacy_mfa === true, encrypted: settings.privacy_encrypted === true });
+    const date = new Intl.DateTimeFormat({ fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(PRIVACY_UPDATED));
+    app.stats.hit(request, { page: 'confidentialite' });
+    return reply.render('privacy', {
+      ...base, siteName, P, sections, updated: P.updated(date), contact,
+      contactHref: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) ? `mailto:${contact}` : null,
+      pageTitle: `${P.title} · ${siteName}`, canonical: '/confidentialite', description: P.description(siteName),
+    });
   });
 
   // Conditions d'utilisation des photos : cible des mentions IPTC (WebStatement, LicensorURL), à /droits en français.

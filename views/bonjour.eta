@@ -59,7 +59,7 @@
         <label><%= h.email %> <input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ e.email ? ' aria-invalid="true"' : '' %>></label>
         <label><%= h.name %> <input name="name" value="<%= v.name || '' %>" maxlength="80" autocomplete="name"<%~ e.name ? ' aria-invalid="true"' : '' %>></label>
       </div>
-      <p class="hint"><%= h.privacy %></p>
+      <p class="hint"><%= h.privacy %> <a href="<%= it.u('/confidentialite') %>"><%= it.t.footer.privacy %></a></p>
     </fieldset>
     <div class="hello-trap" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
     <p><button class="hello-send eyebrow" type="submit"><%= h.send %></button></p>

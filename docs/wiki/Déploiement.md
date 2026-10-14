@@ -95,13 +95,13 @@ Le service `backup` fait une sauvegarde au démarrage, puis toutes les 24 h :
 ```
 BACKUP_DIR/
   db/site-2026-10-10T130335.db     instantané cohérent de la base, contrôlé (14 derniers gardés)
-  files/originals/…                originaux : ajoutés, jamais effacés
+  files/originals/…                originaux : ajoutés ; un original supprimé est effacé 90 jours après
   files/watermarks/…, files/brand/…
   last.json                        compte rendu de la dernière sauvegarde
 ```
 
 - **Variantes :** elles ne sont pas sauvegardées, puisqu'elles se recalculent.
-- **Originaux :** ceux qu'on supprime dans l'admin restent dans la sauvegarde.
+- **Originaux :** ceux qu'on supprime dans l'admin restent récupérables dans la sauvegarde pendant 90 jours (`BACKUP_DELETED_DAYS`), puis ils en sont effacés (droit à l'effacement). Garde-fou : si le dossier des originaux est vide ou absent (montage raté), rien n'est effacé.
 - **Hors de la machine :** copiez aussi `BACKUP_DIR` ailleurs (`rsync`, `restic`, disque externe). Une sauvegarde sur la même machine ne protège pas d'une panne de celle-ci.
 
 Vérifier : `cat $BACKUP_DIR/last.json` ou `docker compose logs backup`.

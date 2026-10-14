@@ -74,6 +74,7 @@
       <label class="check"><input type="radio" name="adult" value="non"<%~ v.adult === 'non' ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.minor %></span><% }) %></label>
       <label><% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.guardian %></span><% }) %><input name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off"></label>
     </fieldset>
+    <p class="hint app-privacy"><% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.privacy(it.host) %></span><% }) %></p>
     <div class="app-sign">
       <p><% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.sign %></span><% }) %></p>
       <canvas data-sign aria-label="Signature" role="img"></canvas>

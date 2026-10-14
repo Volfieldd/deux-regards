@@ -99,7 +99,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
   function appPage(request, reply, extra = {}) {
     const author = authorOf(request);
     const authors = repo.authors().map(a => ({ ...a, prefix: prefixOf(a), next: `${prefixOf(a)}-${String(nextNumber(prefixOf(a))).padStart(4, '0')}` }));
-    return appView(reply, 'app', { title: 'Nouvelle rencontre', author, authors, csrf: request.session.csrf, errors: {}, values: { lang: 'fr', author_id: author?.id }, ...extra });
+    return appView(reply, 'app', { title: 'Nouvelle rencontre', host: app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, ''), author, authors, csrf: request.session.csrf, errors: {}, values: { lang: 'fr', author_id: author?.id }, ...extra });
   }
   app.get('/admin/rencontre', { config: { geolocation: true } }, async (request, reply) => appPage(request, reply));
 

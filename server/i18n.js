@@ -64,7 +64,7 @@ const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 export const UI = {
   fr: {
     nav: { series: 'Séries', gallery: 'Galerie', map: 'Carte', about: 'À propos', label: 'Navigation', lang: 'Langue', langCurrent: 'Langue : français' },
-    footer: { photos: 'Photographies', noRepro: 'reproduction interdite', rights: 'Droits d’utilisation' },
+    footer: { photos: 'Photographies', noRepro: 'reproduction interdite', rights: 'Droits d’utilisation', privacy: 'Confidentialité' },
     both: 'Les deux', colon: ' :',
     photos: n => plural(n, 'photo', 'photos'),
     places: n => plural(n, 'lieu', 'lieux'),
@@ -86,6 +86,7 @@ export const UI = {
       accept: 'J’accepte, pour :', refuse: 'Je refuse que ces photos soient publiées', later: 'Je ne décide pas maintenant',
       adult: 'J’ai 18 ans ou plus', minor: 'J’ai moins de 18 ans : un parent signe avec moi', guardian: 'Nom du parent',
       sign: 'Signez ici avec le doigt', clear: 'Effacer', name: 'Prénom et nom', email: 'E-mail (facultatif)',
+      privacy: host => `Vos données (nom, e-mail, signature, photo de repère, lieu) servent seulement à gérer votre accord et à vous envoyer votre photo. Durées et droits : ${host}/confidentialite.`,
       thanks: 'Merci !', scan: 'Scannez ce code avec votre téléphone : vous y retrouverez votre page pour recevoir votre photo, changer d’avis ou nous écrire.',
       mailSubject: site => `Votre accord · ${site}`,
       mail: ({ name, date, place, accepted, refused, link, author }) => `Bonjour${name ? ` ${name}` : ''},\n\nMerci pour notre rencontre${date ? ` du ${date}` : ''}${place ? ` à ${place}` : ''}.\n\n${refused ? 'Vous avez refusé que vos photos soient publiées : c’est noté, elles ne le seront pas.' : accepted ? `Vous avez accepté leur publication : ${accepted}.` : 'Vous n’avez pas encore décidé si vos photos peuvent être publiées.'}\n\nVous pouvez recevoir votre photo, changer d’avis à tout moment ou nous écrire ici :\n${link}\n\n${author}`,
@@ -133,7 +134,7 @@ export const UI = {
   },
   en: {
     nav: { series: 'Series', gallery: 'Gallery', map: 'Map', about: 'About', label: 'Navigation', lang: 'Language', langCurrent: 'Language: English' },
-    footer: { photos: 'Photographs', noRepro: 'all rights reserved', rights: 'Terms of use' },
+    footer: { photos: 'Photographs', noRepro: 'all rights reserved', rights: 'Terms of use', privacy: 'Privacy' },
     both: 'Both', colon: ':',
     photos: n => plural(n, 'photo', 'photos'),
     places: n => plural(n, 'place', 'places'),
@@ -155,6 +156,7 @@ export const UI = {
       accept: 'I agree, for:', refuse: 'I do not want these photos to be published', later: 'I won’t decide now',
       adult: 'I am 18 or older', minor: 'I am under 18: a parent signs with me', guardian: 'Parent’s name',
       sign: 'Sign here with your finger', clear: 'Clear', name: 'First and last name', email: 'Email (optional)',
+      privacy: host => `Your data (name, email, signature, reference photo, place) is only used to manage your consent and send you your photo. Retention and rights: ${host}/en/confidentialite.`,
       thanks: 'Thank you!', scan: 'Scan this code with your phone: you will find your page to receive your photo, change your mind or write to us.',
       mailSubject: site => `Your consent · ${site}`,
       mail: ({ name, date, place, accepted, refused, link, author }) => `Hello${name ? ` ${name}` : ''},\n\nThank you for our meeting${date ? ` on ${date}` : ''}${place ? ` in ${place}` : ''}.\n\n${refused ? 'You do not want your photos to be published: noted, they will not be.' : accepted ? `You agreed to their publication: ${accepted}.` : 'You have not decided yet whether your photos may be published.'}\n\nYou can receive your photo, change your mind at any time or write to us here:\n${link}\n\n${author}`,
@@ -202,7 +204,7 @@ export const UI = {
   },
   de: {
     nav: { series: 'Serien', gallery: 'Galerie', map: 'Karte', about: 'Über uns', label: 'Navigation', lang: 'Sprache', langCurrent: 'Sprache: Deutsch' },
-    footer: { photos: 'Fotografien', noRepro: 'alle Rechte vorbehalten', rights: 'Nutzungsrechte' },
+    footer: { photos: 'Fotografien', noRepro: 'alle Rechte vorbehalten', rights: 'Nutzungsrechte', privacy: 'Datenschutz' },
     both: 'Beide', colon: ':',
     photos: n => plural(n, 'Foto', 'Fotos'),
     places: n => plural(n, 'Ort', 'Orte'),
@@ -224,6 +226,7 @@ export const UI = {
       accept: 'Ich bin einverstanden, für:', refuse: 'Ich möchte nicht, dass diese Fotos veröffentlicht werden', later: 'Ich entscheide mich später',
       adult: 'Ich bin 18 Jahre oder älter', minor: 'Ich bin unter 18: Ein Elternteil unterschreibt mit mir', guardian: 'Name des Elternteils',
       sign: 'Hier mit dem Finger unterschreiben', clear: 'Löschen', name: 'Vor- und Nachname', email: 'E-Mail (freiwillig)',
+      privacy: host => `Ihre Daten (Name, E-Mail, Unterschrift, Erinnerungsfoto, Ort) dienen nur dazu, Ihre Einwilligung zu verwalten und Ihnen Ihr Foto zu schicken. Fristen und Rechte: ${host}/de/confidentialite.`,
       thanks: 'Danke!', scan: 'Scannen Sie diesen Code mit Ihrem Handy: Dort finden Sie Ihre Seite, um Ihr Foto zu erhalten, Ihre Meinung zu ändern oder uns zu schreiben.',
       mailSubject: site => `Ihre Einwilligung · ${site}`,
       mail: ({ name, date, place, accepted, refused, link, author }) => `Hallo${name ? ` ${name}` : ''},\n\ndanke für unsere Begegnung${date ? ` am ${date}` : ''}${place ? ` in ${place}` : ''}.\n\n${refused ? 'Sie möchten nicht, dass Ihre Fotos veröffentlicht werden: notiert, sie werden es nicht.' : accepted ? `Sie haben der Veröffentlichung zugestimmt: ${accepted}.` : 'Sie haben noch nicht entschieden, ob Ihre Fotos veröffentlicht werden dürfen.'}\n\nHier können Sie Ihr Foto erhalten, Ihre Meinung jederzeit ändern oder uns schreiben:\n${link}\n\n${author}`,

@@ -142,7 +142,7 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 5. Mise en ligne (fait)
 - Image Docker en deux étapes, conteneur en lecture seule, utilisateur sans droits ; exposition par Cloudflare Tunnel (`cloudflared`), sans Caddy.
 - Données dans un dossier de l'hôte monté explicitement ; refus de démarrer sans montage ; `down -v` sans effet.
-- Sauvegarde quotidienne (instantané SQLite contrôlé, originaux jamais effacés), restauration documentée.
+- Sauvegarde quotidienne (instantané SQLite contrôlé, originaux supprimés effacés des sauvegardes après 90 jours), restauration documentée.
 - `sitemap.xml`, `robots.txt` ; Open Graph et passe d'accessibilité faits plus tôt.
 - Guide : [docs/wiki/Déploiement.md](docs/wiki/Déploiement.md).
 
@@ -230,6 +230,11 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 25. App Rencontre sur le téléphone (fait)
 - `/admin/rencontre` : web app installable (manifeste, plein écran) ; position arrondie (Permissions-Policy limitée à cette route), photo de repère, consentement en trois langues, signature au doigt, majorité ou parent ; numéro suivant du photographe (partagé avec les cartes) ; écran « Merci » avec le QR de la page de la personne ; récapitulatif par SMTP (`server/mailer.js`, `SMTP_URL`, `MAIL_FROM`) ou mailto ; migration 017.
 - Suite possible : mode hors ligne (enregistrement différé).
+
+### 26. Confidentialité (RGPD), premier volet (fait)
+- Page `/confidentialite` en trois langues (`server/privacy.js`) : responsables conjoints, données par traitement, durées, destinataires (Cloudflare, Instagram si accepté, messagerie), cookies, sécurité (deux facteurs et disque chiffré annoncés seulement une fois cochés dans Réglages), droits et CNIL ; liens en pied de page, sur `/bonjour`, dans l'app et sur les cartes (via le QR).
+- Durées automatisées : photo de repère 6 mois ; accord ou refus tant qu'une photo liée existe puis 5 ans ; originaux supprimés effacés des sauvegardes après 90 jours (`BACKUP_DELETED_DAYS`, garde-fou si le dossier est vide).
+- Suite : export des données d'une personne et effacement complet (photos comprises), chiffrement des champs sensibles, registre des traitements, analyse d'impact, procédure de violation, accord entre responsables conjoints.
 
 ## Côté Zitadel (à faire une fois)
 
