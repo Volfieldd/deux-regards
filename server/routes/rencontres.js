@@ -101,7 +101,8 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
   const appView = (reply, view, data) => reply.header('cache-control', 'no-store').render(`admin/${view}`, { siteName: app.siteName(), UI, ...data });
   const authorOf = request => repo.authorBySub(request.session.sub) || null;
   function appPage(request, reply, extra = {}) {
-    const author = authorOf(request);
+    // Photographe : celui choisi sur l'accueil Terrain (?photographe=), sinon celui du compte.
+    const author = repo.authors().find(a => a.id === Number(request.query?.photographe)) || authorOf(request);
     const authors = repo.authors().map(a => ({ ...a, prefix: prefixOf(a), next: `${prefixOf(a)}-${String(nextNumber(prefixOf(a))).padStart(4, '0')}` }));
     return appView(reply, 'app', { title: 'Nouvelle rencontre', host: app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, ''), author, authors, csrf: request.session.csrf, errors: {}, values: { lang: 'fr', author_id: author?.id }, ...extra });
   }
@@ -120,10 +121,12 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const day = parisDay();
     const people = author ? app.db.prepare("SELECT id FROM encounters WHERE author_id = ? AND COALESCE(NULLIF(session_day, ''), NULLIF(met_on, '')) = ? AND anonymized = 0 ORDER BY id")
       .pluck().all(author.id, day).map(id => enc.get(id)).filter(Boolean) : [];
-    const outing = author ? app.outings.get(author.slug, day) : null;
+    // La partie de la journée en cours (si la sortie est coupée).
+    const nowTime = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(Date.now());
+    const outing = author ? app.outings.partAt(author.slug, day, nowTime) : null;
     return appView(reply, 'app-home', { title: 'Terrain', authors, author, people, day, csrf: request.session.csrf,
       next: author ? `${prefixOf(author)}-${String(nextNumber(prefixOf(author))).padStart(4, '0')}` : null,
-      place: outing?.place || '', outingUrl: author ? app.outings.urlOf(author.id, day, null) : null, photos: outing ? outing.photos.length : 0 });
+      place: outing?.place || '', outingUrl: author ? app.outings.urlOf(author.id, day, nowTime) : null, photos: outing ? outing.photos.length : 0 });
   });
   app.get('/admin/rencontre/qr', async (request, reply) => {
     const { authors, author } = fieldAuthor(request);

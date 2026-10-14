@@ -1,6 +1,7 @@
 import sharp from 'sharp';
 import path from 'node:path';
 import { takenTimeFromExif } from './media.js';
+import { facesOf } from './readiness.js';
 
 // Sorties : une journée de prise de vue d'un photographe, avec ses photos de ce jour-là (date EXIF) et les
 // personnes rencontrées. Une sortie existe d'elle-même ; on peut la couper à une heure (matin, soir) : chaque
@@ -9,7 +10,7 @@ import { takenTimeFromExif } from './media.js';
 export const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 // « 15:10 », « 9h05 », « 15 h » → HH:MM ; sinon null.
 export function normTime(v) {
-  const m = /^\s*(\d{1,2})\s*(?:[h:]\s*(\d{2})?)\s*$/i.exec(String(v || ''));
+  const m = /^\s*(\d{1,2})\s*(?:[h:]\s*([0-5]\d)?)\s*$/i.exec(String(v || ''));
   if (!m || Number(m[1]) > 23) return null;
   return `${m[1].padStart(2, '0')}:${m[2] || '00'}`;
 }
@@ -52,12 +53,17 @@ export function createOutings({ db, encounters, storageDir, log, now = () => Dat
     const linked = cache.linked || new Set(q.linked.all().map(x => `${x.encounter_id}:${x.photo_id}`));
     const decided = e => e.refused || e.consent;
     // Refus à appliquer : une photo publiée de la partie, non exclue pour cette personne (liée ou non).
-    const refusalOpen = people.some(e => e.refused && photos.some(p => p.status === 'published' && !excluded.has(`${e.id}:${p.id}`)));
+    // Refus à appliquer : une photo publiée où la personne peut figurer (visage, ou liée), non exclue pour elle.
+    const refusalOpen = people.some(e => e.refused && photos.some(p => p.status === 'published' && !excluded.has(`${e.id}:${p.id}`)
+      && (facesOf(p).has || linked.has(`${e.id}:${p.id}`))));
     const state = refusalOpen ? 'refus' : photos.some(p => p.status === 'draft') || people.some(e => !decided(e)) ? 'a-trier' : 'terminee';
     const row = q.row.get(author.id, day, part.starts);
-    const cities = photos.map(p => p.city_name).filter(Boolean);
-    const common = cities.sort((a, b) => cities.filter(c => c === b).length - cities.filter(c => c === a).length)[0];
-    const place = row?.place || people.find(e => e.place && !e.place.startsWith('«'))?.place || common || photos.find(p => p.place)?.place || '';
+    // Lieu proposé : la ville la plus fréquente des photos, sinon leur lieu affiché. Jamais le lieu d'une rencontre
+    // (donnée personnelle chiffrée : il serait recopié en clair dans la sortie).
+    const counts = new Map();
+    for (const p of photos) if (p.city_name) counts.set(p.city_name, (counts.get(p.city_name) || 0) + 1);
+    const common = [...counts].sort((a, b) => b[1] - a[1])[0]?.[0];
+    const place = row?.place || common || photos.find(p => p.place)?.place || '';
     return {
       author, day, ...part, place, placeSet: Boolean(row?.place), photos, people, state, excluded, linked,
       split: part.starts !== '00:00' || Boolean(part.ends),
@@ -107,22 +113,27 @@ export function createOutings({ db, encounters, storageDir, log, now = () => Dat
   }
 
   // Heure des photos importées avant la colonne taken_time : lue une fois dans l'original, en arrière-plan.
-  let stopped = false;
+  let stopped = false, running = null;
   async function backfillTimes(batch = 20) {
     const rows = db.prepare('SELECT id, file FROM photos WHERE taken_time IS NULL LIMIT ?').all(batch);
     for (const r of rows) {
       if (stopped) return 0;
       let time = '';
       try { time = takenTimeFromExif((await sharp(path.join(storageDir, 'originals', r.file)).metadata()).exif); } catch { time = ''; }
+      if (stopped) return 0;                     // arrêt pendant la lecture : la base est peut-être déjà fermée
       db.prepare('UPDATE photos SET taken_time = ? WHERE id = ?').run(time, r.id);
     }
     return rows.length;
   }
-  async function backfillAll() {
-    let n = 0;
-    try { for (let k; !stopped && (k = await backfillTimes()); ) n += k; } catch (err) { log?.error({ err }, 'sorties : heures des photos'); }
-    if (n) log?.info({ photos: n }, 'sorties : heures de prise de vue lues');
-    return n;
+  function backfillAll() {
+    running ??= (async () => {
+      let n = 0;
+      try { for (let k; !stopped && (k = await backfillTimes()); ) n += k; } catch (err) { log?.error({ err }, 'sorties : heures des photos'); }
+      if (n) log?.info({ photos: n }, 'sorties : heures de prise de vue lues');
+      running = null;
+      return n;
+    })();
+    return running;
   }
 
   // Adresse de la sortie qui contient ce moment (photographe, jour, heure ; heure inconnue : la première partie).
@@ -135,5 +146,14 @@ export function createOutings({ db, encounters, storageDir, log, now = () => Dat
     return `/admin/sorties/${a.slug}/${day}${part && part.starts !== '00:00' ? `?depuis=${part.starts.replace(':', '')}` : ''}`;
   }
 
-  return { list, get, cut, join, setPlace, partsOf, urlOf, backfillAll, stop: () => { stopped = true; } };
+  // Partie de la journée qui contient cette heure (heure inconnue : la première).
+  function partAt(authorSlug, day, time) {
+    const a = q.authors.all().find(x => x.slug === authorSlug);
+    if (!a || !DAY.test(day)) return null;
+    const parts = partsOf(a.id, day);
+    const p = TIME.test(time || '') ? parts.find(x => inPart(time, x)) : parts[0];
+    return get(authorSlug, day, p.starts);
+  }
+
+  return { list, get, partAt, cut, join, setPlace, partsOf, urlOf, backfillAll, stop: () => { stopped = true; return running || Promise.resolve(0); } };
 }

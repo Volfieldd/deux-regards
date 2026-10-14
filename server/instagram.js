@@ -351,7 +351,8 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     const added = [];
     for (const id of ids) {
       if (!auto.has(q.photo.get(id)?.category_id) || q.latest.get(id)) continue;
-      try { added.push(enqueue(id)); } catch { /* photo dépubliée entre-temps */ }
+      // Bloquée, à vérifier sans confirmation, ou dépubliée entre-temps : pas de mise en file, la raison est notée.
+      try { added.push(enqueue(id)); } catch (err) { log?.info({ photo: id, raison: err.message }, 'instagram : pas de mise en file automatique'); }
     }
     return added;
   }

@@ -93,12 +93,18 @@ test('demandes : validations expliquées, piège à robots, carte vérifiée, ch
   let e = c.db.prepare("SELECT * FROM encounters WHERE ref = 'J-0142'").get();
   assert.deepEqual([e.verified, e.wants_photo, e.refused, e.consent_source, JSON.parse(e.consent).instagram, e.email], [1, 1, 0, 'en_ligne', true, 'alice@exemple.fr']);
   assert.equal(e.author_id, c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get());
-  // Plus tard, en allemand : elle change d'avis. Le refus l'emporte ; l'historique garde les deux.
+  // Plus tard, en allemand, sans le code (référence tapée) : son refus est appliqué (il la protège), mais rien
+  // d'autre ne change (rencontre vérifiée) ; l'historique garde la demande, marquée non vérifiée.
   r = await c.app.inject({ method: 'POST', url: '/de/bonjour', payload: { ref: 'J-0142', decision: 'refus', message: 'Bitte nicht veröffentlichen.' }, remoteAddress: '203.0.113.8' });
   assert.equal(r.headers.location, '/de/bonjour/merci?ref=J-0142');
   e = c.db.prepare("SELECT * FROM encounters WHERE ref = 'J-0142'").get();
-  assert.deepEqual([e.refused, e.lang, e.status], [1, 'de', 'nouvelle']);
+  assert.deepEqual([e.refused, e.lang, e.status], [1, 'fr', 'nouvelle']);
   assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounter_events WHERE encounter_id = ?').pluck().get(e.id), 2);
+  // Quelqu'un d'autre, avec la seule référence (elle se devine) : ni accord, ni adresse, ni nom ne remplacent le refus.
+  await c.hello({ ref: 'J-0142', decision: 'accord', scope_site: 'on', scope_instagram: 'on', name: 'X', email: 'attaquant@exemple.fr', rights: 'acces' }, '203.0.113.10');
+  e = c.db.prepare("SELECT * FROM encounters WHERE ref = 'J-0142'").get();
+  assert.deepEqual([e.refused, e.email, e.rights_request], [1, 'alice@exemple.fr', 'acces']);   // demande de droits signalée, identité à vérifier
+  assert.match(c.app.encounters.events(e.id).at(-1).detail.non_verifiee ? 'ok' : '', /ok/);
   // Sans carte : date et lieu suffisent.
   r = await c.hello({ met_on: '2026-10-11', place: 'Angers, place du Ralliement', details: 'veste rouge', wants_photo: 'on', email: 'bob@exemple.fr' }, '203.0.113.9');
   assert.equal(r.headers.location, '/bonjour/merci');

@@ -135,13 +135,25 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
 
     const t = now();
     const detail = { wants_photo: wantsPhoto, decision, rights: rights || undefined, scopes: decision === 'accord' ? scopes : undefined, message: message || undefined,
-      email: email || undefined, name: name || undefined, met_on: metOn || undefined, met_time: text(body.met_time, 20) || undefined,
+      email: email || undefined, name: name || undefined, met_on: metOn || undefined, met_time: normTime(body.met_time) || undefined,
       place: place || undefined, details: text(body.details, 500) || undefined, code: c ? (c.verified ? 'ok' : 'absent') : undefined };
     return db.transaction(() => {
       let e = c ? q.byRef.get(c.ref) : null;
+      // Rencontre déjà établie (vérifiée, carte signée ou accord signé sur le téléphone) : une demande sans code de
+      // contrôle (la référence seule se devine) ne change ni l'accord, ni l'adresse, ni le nom. Un refus, lui, est
+      // appliqué (il protège la personne) ; une demande de droits est signalée (identité à vérifier). Tout est gardé
+      // dans l'historique, marqué non vérifié, et la rencontre repasse en « nouvelle ».
+      if (e && !c?.verified && (e.verified || ['carte', 'signature'].includes(e.consent_source))) {
+        const held = { status: 'nouvelle', updated_at: t };
+        if (decision === 'refus') Object.assign(held, { refused: 1, refused_at: t });
+        if (rights) Object.assign(held, { rights_request: rights, rights_requested_at: t, rights_done_at: null });
+        db.prepare(`UPDATE encounters SET ${Object.keys(held).map(k => `${k} = @${k}`).join(', ')} WHERE id = @id`).run({ ...held, id: e.id });
+        log(e.id, 'visiteur', { ...detail, non_verifiee: true }, false);
+        return { id: e.id, ref: c.ref, author: c.author?.name ?? null, verified: false, held: true };
+      }
       if (!e) {
         const id = Number(db.prepare(`INSERT INTO encounters (ref, author_id, lang, met_on, met_time, place, details, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(c?.ref ?? null, c?.author?.id ?? photographer(body.photographer)?.id ?? null, lang, metOn, normTime(body.met_time) || text(body.met_time, 20), S(place), S(text(body.details, 500)), t, t).lastInsertRowid);
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(c?.ref ?? null, c?.author?.id ?? photographer(body.photographer)?.id ?? null, lang, metOn, normTime(body.met_time) || '', S(place), S(text(body.details, 500)), t, t).lastInsertRowid);
         e = { id, verified: 0 };
       }
       const set = { status: 'nouvelle', lang, updated_at: t, verified: e.verified || (c?.verified ? 1 : 0) };
@@ -252,13 +264,20 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     log(id, 'session', { photo: Number(photoId), exclue: Boolean(on) });
   }
   // Personnes d'une photo : liées à la main (« lien ») et rencontrées ce jour-là par son photographe (« session »).
-  function forPhoto(photoId) {
-    const p = db.prepare('SELECT id, author_id, taken_on, taken_time FROM photos WHERE id = ?').get(photoId);
+  // cache (facultatif) : rencontres déjà déchiffrées, partagées entre plusieurs photos (photothèque, Aujourd'hui).
+  const photoForSession = db.prepare('SELECT id, author_id, taken_on, taken_time FROM photos WHERE id = ?');
+  function forPhoto(photoId, cache = null) {
+    const p = photoForSession.get(photoId);
     if (!p) return [];
-    const linked = q.forPhoto.all(photoId).map(e => ({ ...decorate(e), via: 'lien' }));
+    const dec = row => {
+      if (!cache) return decorate(row);
+      if (!cache.has(row.id)) cache.set(row.id, decorate(row));
+      return cache.get(row.id);
+    };
+    const linked = q.forPhoto.all(photoId).map(e => ({ ...dec(e), via: 'lien' }));
     const seen = new Set(linked.map(e => e.id));
     const sessionRows = p.taken_on && /^\d{4}-\d{2}-\d{2}$/.test(p.taken_on) ? q.forSession.all({ author: p.author_id, day: p.taken_on, photo: photoId, time: p.taken_time || '' }) : [];
-    return [...linked, ...sessionRows.filter(e => !seen.has(e.id)).map(e => ({ ...decorate(e), via: 'session' }))];
+    return [...linked, ...sessionRows.filter(e => !seen.has(e.id)).map(e => ({ ...dec(e), via: 'session' }))];
   }
 
   // Accords modifiés (demande, carte, téléphone, photos liées ou exclues) : prévenir (file Instagram).

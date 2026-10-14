@@ -255,7 +255,8 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 31. Parcours de l'admin autour de la sortie (maquettes validées le 14 octobre 2026)
 1. (fait) Mots (Sortie, Personne, Accord, Carte d'accord, Carte du monde, « Où »), menu en quatre groupes (Travailler, Publier, Sur le terrain, Réglages), page « Sur le terrain » (app, cartes d'accord, QR des vêtements avec logo, une seule composition), états lisibles par un daltonien (forme + mot, palette bleu / jaune / vermillon).
 2. (fait) « Aujourd'hui » en liste de choses à faire, triée par urgence.
-3. (fait) Sorties (une par photographe et par jour, découpables par une heure de coupure), détection des visages locale (sans reconnaissance), état par usage « prête / à vérifier / bloquée » ; « à vérifier » demande une confirmation explicite, gardée dans l'historique ; une fiche Personne pour plusieurs rencontres (un accord par sortie, un refus vaut pour tout, rapprochement par e-mail confirmé à la main).
+3. (fait) Sorties (une par photographe et par jour, découpables par une heure de coupure), détection des visages locale (sans reconnaissance), état par usage « prête / à vérifier / bloquée » ; « à vérifier » demande une confirmation explicite, gardée dans l'historique .
+   - **Reste à faire** : une fiche Personne pour plusieurs rencontres (un accord par sortie, un refus vaut pour tout, rapprochement par e-mail confirmé à la main, jamais par le visage).
 4. (fait) Fiche photo en rubriques, accueil « Terrain » sur le téléphone (nouvelle rencontre, montrer mon QR, ma sortie du jour).
 
 ## Côté Zitadel (à faire une fois)
@@ -274,10 +275,9 @@ Fait côté nom et domaine : **Nicephos**, en ligne sur `https://www.nicephos.ar
 À faire, par ordre de priorité :
 1. Essai de l'admin sur un vrai iPhone (clavier ouvert, barres de Safari), après le déploiement de #22.
 2. Audit iPhone, lots restants : mode « Sélectionner » dans la photothèque (4), page Séries au toucher (5), fiche photo raccourcie avec « Enregistrer » collant (6).
-3. Test e2e `statistiques` : le rendre indépendant des visites faites en parallèle par les autres projets (il passe seul).
-4. HSTS : ajouter `includeSubDomains` si tous les sous-domaines restent en HTTPS.
-5. `compose.yaml` générique : avec `TRUST_PROXY` par défaut (adresses privées) et le port ouvert sur le réseau local, un poste du réseau peut fausser `X-Forwarded-For` ; fixer `TRUST_PROXY` à l'adresse du tunnel comme sur Unraid (documenté dans Déploiement).
-6. Petites incohérences relevées lors de la relecture de l'aide (octobre 2026) :
+3. HSTS : ajouter `includeSubDomains` si tous les sous-domaines restent en HTTPS.
+4. `compose.yaml` générique : avec `TRUST_PROXY` par défaut (adresses privées) et le port ouvert sur le réseau local, un poste du réseau peut fausser `X-Forwarded-For` ; fixer `TRUST_PROXY` à l'adresse du tunnel comme sur Unraid (documenté dans Déploiement).
+5. Petites incohérences relevées lors de la relecture de l'aide (octobre 2026) :
    - fiche photo : l'indication du champ Date (« AAAA-MM ou AAAA-MM-JJ ») ne dit pas que « oct. 2026 » ou « 10/2026 » sont aussi compris ;
    - Instagram : jeton expiré mais lisible, la page affiche « Connecté » sans bouton pour se reconnecter directement ;
    - Instagram : un seul libellé pour le lien vers le post (« voir le post ↗ » sur la fiche, « Voir sur Instagram ↗ » dans l'historique) ;

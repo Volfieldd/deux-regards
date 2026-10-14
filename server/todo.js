@@ -24,6 +24,8 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, now =
     refusedSession: db.prepare(`SELECT e.id, COUNT(*) AS n FROM encounters e JOIN photos p ON p.author_id = e.author_id
       AND p.taken_on = COALESCE(NULLIF(e.session_day, ''), NULLIF(e.met_on, ''))
       WHERE e.refused = 1 AND e.anonymized = 0 AND p.status = 'published'
+      -- seulement les photos où quelqu'un peut figurer (visage, ou pas encore examinée) : un paysage ne concerne personne
+      AND (p.faces_override = 1 OR (p.faces_override IS NULL AND (p.faces IS NULL OR p.faces <> 0)))
       AND NOT EXISTS (SELECT 1 FROM encounter_photos ep WHERE ep.encounter_id = e.id AND ep.photo_id = p.id)
       AND NOT EXISTS (SELECT 1 FROM encounter_exclusions x WHERE x.encounter_id = e.id AND x.photo_id = p.id)
       AND ${samePartSql('p.author_id', 'p.taken_on', "COALESCE(p.taken_time, '')", 'e.met_time')}
@@ -65,7 +67,8 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, now =
         detail: `${e.author || 'photographe'} · ${e.session_day || e.met_on} : liez au refus celles où la personne figure, excluez les autres`, href: `/admin/rencontres/${r.id}#session`, action: 'Vérifier' });
     }
     // Photos publiées avant les règles d'accord, ou dont une personne de la sortie n'a pas encore décidé.
-    const verify = readiness ? db.prepare("SELECT id, status, faces, faces_override FROM photos WHERE status = 'published'").all().filter(p => readiness.state(p).site.level === 'warn').length : 0;
+    const cache = new Map();
+    const verify = readiness ? db.prepare("SELECT id, status, faces, faces_override FROM photos WHERE status = 'published'").all().filter(p => readiness.pending(p, 'site', cache)).length : 0;
     if (verify) items.push({ level: 'bientot', title: `${plural(verify, 'photo publiée', 'photos publiées')} à vérifier`,
       detail: 'un visage, et un accord manque : confirmez, liez la personne, ou dépubliez', href: '/admin/photos?manque=verifier', action: 'Vérifier' });
     const fresh = q.fresh.get();

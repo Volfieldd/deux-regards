@@ -86,7 +86,7 @@ test('Aujourd’hui : choses à faire triées par urgence, lien vers l’écran 
   const c = await admin(t);
   const julien = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
   const [p1, p2] = c.db.prepare("SELECT id FROM photos WHERE status = 'published' ORDER BY id LIMIT 2").pluck().all();
-  c.db.prepare("UPDATE photos SET author_id = ?, taken_on = '2026-10-11' WHERE id IN (?, ?)").run(julien, p1, p2);
+  c.db.prepare("UPDATE photos SET author_id = ?, taken_on = '2026-10-11', faces = 1 WHERE id IN (?, ?)").run(julien, p1, p2);   // des visages
   const enc = c.app.encounters;
   // Demande d'effacement (urgent), refus d'une photo liée encore publiée (urgent), refus dans une sortie (bientôt).
   await c.app.inject({ method: 'POST', url: '/bonjour', payload: { ref: 'J-0131', rights: 'effacement', email: 'clara@exemple.fr' } });

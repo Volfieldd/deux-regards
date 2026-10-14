@@ -114,9 +114,14 @@ test('publier une photo à vérifier : confirmation explicite exigée, gardée ;
   assert.equal(conf[0].usage, 'site');
   assert.match(conf[0].reasons[0], /1 visage/);
   assert.match((await c.get(`/admin/photos/${c.portrait}`)).body, /Confirmations : site par/);
-  // Photothèque et Aujourd'hui la signalent.
+  // Confirmée : ni la photothèque ni Aujourd'hui ne la signalent plus. Une photo en ligne non confirmée, si.
+  assert.doesNotMatch((await c.get('/admin')).body, /publiées? à vérifier/);
+  const other = c.db.prepare("SELECT id FROM photos WHERE status = 'published' AND id NOT IN (?, ?) LIMIT 1").pluck().get(c.portrait, c.landscape);
+  c.db.prepare('UPDATE photos SET faces = 1 WHERE id = ?').run(other);
   assert.match((await c.get('/admin/photos?manque=verifier')).body, /▲ À vérifier <span class="n">1/);
   assert.match((await c.get('/admin')).body, /1 photo publiée à vérifier/);
+  // Elle se confirme depuis sa fiche, sans la dépublier.
+  assert.match((await c.get(`/admin/photos/${other}`)).body, /Photo en ligne à vérifier : je confirme/);
 });
 
 test('sortie : « Publier les photos prêtes » ne publie que les prêtes', async t => {
@@ -126,4 +131,29 @@ test('sortie : « Publier les photos prêtes » ne publie que les prêtes', asyn
   await c.post('/admin/sorties/julien/2026-10-13/publier');
   assert.equal(c.db.prepare('SELECT status FROM photos WHERE id = ?').pluck().get(c.landscape), 'published');
   assert.equal(c.db.prepare('SELECT status FROM photos WHERE id = ?').pluck().get(c.portrait), 'draft');
+});
+
+test('revue de sécurité : accord en ligne sans code, annulation, modèle indisponible', async t => {
+  const c = await ctxOf(t);
+  // Un « accord » anonyme par le QR des vêtements (lettre J, date de la sortie) ne rend pas une photo prête.
+  const r = await c.app.inject({ method: 'POST', url: '/bonjour', payload: { photographer: 'J', met_on: DAY, place: 'x', decision: 'accord', scope_site: 'on', scope_instagram: 'on', name: 'X', email: 'x@exemple.fr' }, remoteAddress: '203.0.113.50' });
+  assert.equal(r.statusCode, 303);
+  const s = c.state(c.portrait);
+  assert.equal(s.site.level, 'warn');
+  assert.match(s.site.reasons.join(), /accord en ligne non vérifié/);
+  assert.doesNotMatch(s.site.reasons.join(), /X/);                                   // jamais le nom dans les raisons
+  // « Annuler » ne publie pas une photo à vérifier sans confirmation.
+  const csrf = c.db.prepare('SELECT csrf FROM sessions').pluck().get();
+  const undo = await c.post('/admin/photos/actions', { action: 'statuses', map: JSON.stringify({ [c.portrait]: 'published' }), _csrf: csrf });
+  assert.equal(undo.statusCode, 303);
+  assert.equal(c.db.prepare('SELECT status FROM photos WHERE id = ?').pluck().get(c.portrait), 'draft');
+  // Modèle indisponible : rien n'est écrit, la photo reste à examiner (et sera retentée).
+  const { createFaceService, ModelError } = await import('../server/faces.js');
+  c.db.prepare('UPDATE photos SET faces = NULL WHERE id = ?').run(c.landscape);
+  const svc = createFaceService({ db: c.db, storageDir: c.config.storageDir, detector: { detect: async () => { throw new ModelError('absent'); } } });
+  await svc.run();
+  await svc.examine(c.landscape);
+  assert.equal(c.db.prepare('SELECT faces FROM photos WHERE id = ?').pluck().get(c.landscape), null);
+  c.db.prepare('UPDATE photos SET faces = -1 WHERE id = ?').run(c.landscape);
+  assert.equal(svc.retryFailed(), 1);
 });
