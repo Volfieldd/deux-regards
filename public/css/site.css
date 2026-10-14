@@ -230,6 +230,37 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .people p { margin: 0 0 14px; color: var(--prose); line-height: 1.65; max-width: 46ch; }
 .more { border-bottom: 1px solid currentColor; padding-bottom: 2px; }
 
+/* ---------- « je vous ai photographié » (/bonjour) ---------- */
+.hello { padding-block: clamp(40px, 7vw, 96px) 0; display: grid; gap: 28px; max-width: 760px; }
+.hello h1 { margin: 0; font-family: var(--serif); font-weight: 400; font-style: var(--display-style); font-size: clamp(40px, 6vw, 72px); line-height: 1; }
+.hello .lead { margin: 0; font-size: 17px; }
+.hello-form { display: grid; gap: 34px; }
+.hello-form fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: 14px; min-width: 0; }
+.hello-form > fieldset > legend { padding: 0 0 12px; margin-bottom: 4px; width: 100%; border-bottom: 1px solid var(--ink); font-family: var(--serif); font-style: var(--display-style); font-size: 26px; }
+.hello-form label { display: grid; gap: 6px; font-size: 14px; }
+.hello-form .hint { color: var(--mute); font-size: 12.5px; line-height: 1.5; }
+.hello-form input:not([type="checkbox"]):not([type="radio"]), .hello-form textarea {
+  font: inherit; font-size: 16px; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 10px 2px; border-radius: 0; min-height: 44px; }
+.hello-form textarea { border: 1px solid var(--rule); padding: 10px; resize: vertical; }
+.hello-form input:focus, .hello-form textarea:focus { outline: none; border-color: var(--ink); }
+.hello-form [aria-invalid="true"] { border-color: var(--safelight) !important; }
+.hello-form label.check { display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 15px; }
+.hello-form input[type="checkbox"], .hello-form input[type="radio"] { width: 20px; height: 20px; margin: 0; accent-color: var(--ink); flex: none; }
+.hello-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 14px 24px; }
+.hello-decision { gap: 2px !important; }
+.hello-decision > legend { font-size: 14px; color: var(--mute); padding-bottom: 4px; }
+.hello-scopes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); padding-left: 32px; }
+.hello-nocard summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--mute); }
+.hello-nocard[open] summary { color: var(--ink); }
+.hello-nocard > :not(summary) { margin-top: 12px; }
+.hello-card { margin: 0; padding: 10px 14px; border: 1px solid var(--rule); color: var(--ink); }
+.hello-errors { padding: 14px 18px; border: 1px solid var(--safelight); }
+.hello-errors p { margin: 0 0 6px; font-weight: 500; }
+.hello-errors ul { margin: 0; padding-left: 18px; line-height: 1.6; }
+.hello-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.hello-send { min-height: 48px; padding: 0 28px; background: var(--ink); color: var(--paper); border-radius: 0; }
+.hello-send:hover { opacity: .88; }
+
 /* ---------- carte ---------- */
 /* Fond sans couleur propre (public/carte-terre.svg) : la terre et le globe prennent l'encre du thème. Vignettes rondes
    à l'emplacement de la ville ; site.js garde leur taille à l'écran pendant le zoom et regroupe celles qui se chevauchent. */

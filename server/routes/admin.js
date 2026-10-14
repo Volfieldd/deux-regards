@@ -22,6 +22,7 @@ import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, captionWarnings, Instagram
 import { PRESETS as IG_PRESETS, BOUNDS as IG_BOUNDS } from '../instagram-limits.js';
 import * as cities from '../geo/cities.js';
 import { TranslateError } from '../translate.js';
+import { registerEncounters } from './rencontres.js';
 
 // Carte des visiteurs (page Statistiques) : centre de chaque pays dans le repère 1000 × 520 du fond de carte
 // (public/admin/carte-monde.svg, généré par scripts/carte-monde.mjs), nom du pays en français.
@@ -111,7 +112,7 @@ export default async function adminRoutes(app) {
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply),
       section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
-      translate: app.translator.enabled, description: '', ...data, pageTitle: `${data.title} · Administration · ${siteName}`,
+      translate: app.translator.enabled, encountersNew: app.encounters.countNew(), description: '', ...data, pageTitle: `${data.title} · Administration · ${siteName}`,
     });
   }
 
@@ -474,6 +475,7 @@ export default async function adminRoutes(app) {
     if (page === 'a-propos') return 'À propos';
     if (page === 'droits') return 'Droits d’utilisation';
     if (page === 'carte') return 'Carte';
+    if (page === 'bonjour') return 'Je vous ai photographié (/bonjour)';
     const [kind, slug] = page.split(':');
     if (kind === 'serie') return `Série « ${categories.find(c => c.slug === slug)?.name || slug} »`;
     if (kind === 'auteur') return `Regard de ${authors.find(a => a.slug === slug)?.name || slug}`;
@@ -639,13 +641,17 @@ export default async function adminRoutes(app) {
         case 'publish':
         case 'draft': {
           if (!n) return ko(422, 'Aucune photo sélectionnée.');
+          const refused = body.action === 'publish' ? ids.filter(id => repo.refusalOf(id)) : [];
           const before = repo.setStatuses(each(body.action === 'publish' ? 'published' : 'draft'));
           queued(before);
+          if (refused.length === n) return ko(422, `${n > 1 ? 'Ces photos ne peuvent pas être publiées' : 'Cette photo ne peut pas être publiée'} : la personne photographiée refuse la publication (voir Rencontres).`);
           const verb = body.action === 'publish' ? 'publiée' : 'repassée en brouillon';
           // Publication en un clic : un titre provisoire (nom du fichier) est rappelé dans le message.
           const prov = body.action === 'publish' ? ids.filter(id => repo.photoView(id)?.provisional).length : 0;
           const note = prov ? ` ${prov === n ? (n > 1 ? 'Elles gardent' : 'Elle garde') : `${prov} garde${prov > 1 ? 'nt' : ''}`} le nom du fichier comme titre : corrigez-le dans la photothèque.` : '';
-          return ok(`${photosWord} ${n > 1 ? verb.replace('publiée', 'publiées').replace('repassée', 'repassées') : verb}.${note}`, { undo: { action: 'statuses', map: before } });
+          const blocked = refused.length ? ` ${refused.length} photo${refused.length > 1 ? 's restent' : ' reste'} en brouillon : la personne photographiée refuse la publication (voir Rencontres).` : '';
+          const m = n - refused.length;
+          return ok(`${m} photo${m > 1 ? 's' : ''} ${m > 1 ? verb.replace('publiée', 'publiées').replace('repassée', 'repassées') : verb}.${note}${blocked}`, { undo: { action: 'statuses', map: before } });
         }
         case 'map_on':
         case 'map_off': {
@@ -737,7 +743,7 @@ export default async function adminRoutes(app) {
     if (!photo) return reply.callNotFound();
     return render(request, reply, 'photo', {
       title: photo.title, photo, values: { ...photo, city_label: photo.city_name ? cities.label({ name: photo.city_name, cc: photo.city_cc }) : '' }, errors: {}, categories: repo.categories(), authors: repo.authors(),
-      proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo),
+      proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
     });
   });
 
@@ -753,7 +759,7 @@ export default async function adminRoutes(app) {
       reply.code(422);
       return render(request, reply, 'photo', {
         title: photo.title, photo, values: { ...photo, ...err.values }, errors: err.errors, categories: repo.categories(), authors: repo.authors(),
-        proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo),
+        proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
       });
     }
     return done(reply, `/admin/photos/${photo.id}`, 'Photo enregistrée.');
@@ -1148,6 +1154,9 @@ export default async function adminRoutes(app) {
   // Relue à chaque affichage en développement (édition de docs/aide), une fois pour toutes en production.
   let help = app.config.production ? loadHelp() : null;
   app.get('/admin/aide', async (request, reply) => render(request, reply, 'help', { title: 'Aide', help: help || loadHelp() }));
+
+  // ---------- rencontres (page /bonjour, cartes) ----------
+  registerEncounters(app, { repo, render, write, done, failed, withReady });
 
   // ---------- traductions ----------
   // Proposition de traduction d'un champ (LibreTranslate du réseau local) : l'auteur la relit avant d'enregistrer.

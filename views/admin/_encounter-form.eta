@@ -1,0 +1,28 @@
+<% const v = it.v, e = it.errors || {}; const on = k => v[k] === 'on' || v[k] === true; %>
+<form class="form" method="post" action="<%= it.action %>" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (Object.keys(e).length) { %>  <p class="err" role="alert"><%= Object.values(e).join(' ') %></p>
+<% } %>  <div class="row">
+    <label>Référence <span class="mono">J-0142</span><input name="ref" value="<%= v.ref || '' %>" maxlength="20" autocapitalize="characters"<%~ e.ref ? ' aria-invalid="true"' : '' %>></label>
+    <label>Photographe <select name="author_id"><option value="">d’après la référence</option><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ Number(v.author_id) === a.id ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label>
+  </div>
+  <div class="row">
+    <label>Nom <input name="name" value="<%= v.name || '' %>" maxlength="80"></label>
+    <label>E-mail <input type="email" name="email" value="<%= v.email || '' %>" maxlength="200"<%~ e.email ? ' aria-invalid="true"' : '' %>></label>
+  </div>
+  <div class="row">
+    <label>Date <input type="date" name="met_on" value="<%= v.met_on || '' %>"></label>
+    <label>Lieu <input name="place" value="<%= v.place || '' %>" maxlength="120"></label>
+  </div>
+  <label>Détails <input name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="tenue, scène…"></label>
+  <fieldset>
+    <legend>Accord signé sur la carte</legend>
+    <label class="inline"><input type="checkbox" name="signed"<%~ on('signed') ? ' checked' : '' %>> La carte « pour nous » est signée</label>
+    <div class="enc-scopes">
+<% it.SCOPES.forEach(s => { %>      <label class="inline"><input type="checkbox" name="scope_<%= s %>"<%~ on(`scope_${s}`) ? ' checked' : '' %>> <%= it.SCOPE_LABELS[s] %></label>
+<% }) %>    </div>
+<% if (e.scopes) { %>    <span class="err"><%= e.scopes %></span><% } %>
+  </fieldset>
+  <label>Photo de la carte signée <span class="mono">preuve, gardée en privé · JPEG, PNG ou WebP</span><input type="file" name="card" accept="image/jpeg,image/png,image/webp" capture="environment"></label>
+  <p class="actions"><button class="btn" type="submit"><%= it.isNew ? 'Enregistrer la rencontre' : 'Enregistrer' %></button></p>
+</form>

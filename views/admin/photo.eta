@@ -34,7 +34,8 @@
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'place', label: 'Lieu', max: 120 }) %>
     <label>Légende <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'legend', label: 'Légende', max: 2000, rows: 3 }) %>
-    <fieldset class="row">
+<% if (e.status) { %>    <span class="err" id="err-status" role="alert"><%= e.status %></span>
+<% } %>    <fieldset class="row">
       <legend>Statut</legend>
 <% Object.entries(it.STATUSES).forEach(([k, label]) => { %>
       <label class="inline"><input type="radio" name="status" value="<%= k %>"<%~ v.status === k ? ' checked' : '' %>> <%= label %></label>
@@ -48,6 +49,15 @@
     <p class="actions"><button class="btn" type="submit">Enregistrer</button></p>
   </form>
 </div>
+<% if (it.encounters && it.encounters.length) { %>
+<section class="panel" id="rencontres" aria-labelledby="enc-title">
+  <h2 id="enc-title">Personne photographiée</h2>
+  <ul class="rank plain">
+<% it.encounters.forEach(r => { %>    <li><span class="t"><a href="/admin/rencontres/<%= r.id %>">Rencontre <%= r.ref || 'sans carte' %><%= r.name ? ` · ${r.name}` : '' %></a></span>
+      <% if (r.refused) { %><span class="enc-tag no">Refuse la publication : la photo ne peut pas être publiée</span><% } else if (r.consent) { %><span class="enc-tag ok">Accord <%= r.consent_source === 'carte' ? 'signé' : 'en ligne' %> : <%= ['site', 'instagram', 'print', 'name'].filter(s => r.consent[s]).map(s => ({ site: 'site', instagram: 'Instagram', print: 'expositions et tirages', name: 'avec son prénom' })[s]).join(', ') %></span><% } else { %><span class="enc-tag">Ni accord ni refus pour l’instant</span><% } %></li>
+<% }) %>  </ul>
+</section>
+<% } %>
 <section class="panel audience" id="audience" aria-labelledby="audience-title">
   <h2 id="audience-title">Audience <span class="mono">30 derniers jours</span></h2>
 <% const au = it.audience; %>

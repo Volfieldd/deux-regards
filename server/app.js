@@ -19,6 +19,7 @@ import { createVariantService } from './variants.js';
 import { createProofService } from './proofs.js';
 import { createStats } from './stats.js';
 import { createTranslator } from './translate.js';
+import { createEncounters } from './encounters.js';
 import { createInstagram } from './instagram.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -140,6 +141,15 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Preuves d'antériorité : empreintes et horodatage RFC 3161, repris en arrière-plan.
   // Mesure d'audience anonyme (voir server/stats.js).
   // Pays : l'en-tête de Cloudflare n'est cru que derrière un proxy de confiance (tunnel), sinon « inconnu ».
+  // Rencontres (page /bonjour, cartes) ; demandes sans accord ni refus effacées après 12 mois (contrôle quotidien).
+  app.decorate('encounters', createEncounters({ db }));
+  let purgeTimer = null;
+  app.addHook('onReady', async () => {
+    app.encounters.purge();
+    purgeTimer = setInterval(() => { try { app.encounters.purge(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
+    purgeTimer.unref();
+  });
+  app.addHook('onClose', async () => clearInterval(purgeTimer));
   app.decorate('translator', createTranslator({ ...config.translate, log: app.log }));
   app.decorate('stats', createStats({ db, publicUrl: config.publicUrl, log: app.log, trustCountry: Boolean(config.trustProxy) }));
   // Partage Instagram : file de publication et envoi aux créneaux (voir server/instagram.js).
