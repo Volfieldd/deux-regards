@@ -14,7 +14,7 @@ En ligne, la connexion passe par Zitadel. Sur un serveur de test, ce formulaire 
 
 ## Aujourd’hui (tableau de bord)
 
-Ce qui reste à finir (avec le geste direct), le site tel qu’il est (l’ouverture), les chiffres, le rythme d’import, les dernières modifications, les preuves d’antériorité et le compte connecté.
+**À faire**, trié par urgence (✕ urgent, ▲ bientôt, ○ plus tard) avec un bouton vers l’écran qui règle chaque ligne, puis ce qui reste à finir (avec le geste direct), le site tel qu’il est (l’ouverture), les chiffres, le rythme d’import, les dernières modifications, les preuves d’antériorité et le compte connecté.
 
 ![Aujourd’hui, en mode clair](captures/admin/01b-aujourdhui-clair-bureau.webp)
 

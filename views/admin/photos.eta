@@ -1,6 +1,6 @@
 <% layout('./layout') %>
 <% const f = it.filter;
-   const params = o => { const p = new URLSearchParams(); const all = { q: f.q, auteur: f.author, serie: f.category, statut: it.todo ? 'afinir' : f.status, vue: it.view === 'liste' ? 'liste' : '', ...o }; for (const [k, v] of Object.entries(all)) if (v) p.set(k, v); const s = p.toString(); return '/admin/photos' + (s ? '?' + s : ''); };
+   const params = o => { const p = new URLSearchParams(); const all = { q: f.q, auteur: f.author, serie: f.category, statut: it.todo ? 'afinir' : f.status, manque: it.missing ? it.missing.key : '', vue: it.view === 'liste' ? 'liste' : '', ...o }; for (const [k, v] of Object.entries(all)) if (v) p.set(k, v); const s = p.toString(); return '/admin/photos' + (s ? '?' + s : ''); };
    const back = params({});
    const status = it.todo ? 'afinir' : f.status; %>
 <div class="library" data-library>
@@ -21,9 +21,11 @@
 <% [['', 'Tout', it.totals.all], ['published', 'Publiées', it.totals.published], ['draft', 'Brouillons', it.totals.draft], ['afinir', 'À finir', it.totals.todo]].forEach(([k, label, n]) => { %>
       <a class="chip<%= k === 'afinir' ? ' warn' : '' %>" href="<%= params({ statut: k }) %>"<%~ status === k ? ' aria-current="true"' : '' %>><%= label %> <span class="n"><%= n %></span></a>
 <% }) %>
-    </nav>
+<% if (it.missing) { %>      <a class="chip" href="<%= params({ manque: '' }) %>" aria-current="true" title="Retirer ce filtre"><%= it.missing.label %> <span class="n"><%= it.photos.length %></span> ✕</a>
+<% } %>    </nav>
     <form class="filters" method="get" action="/admin/photos" role="search" data-filters>
 <% if (status) { %><input type="hidden" name="statut" value="<%= status %>"><% } %>
+<% if (it.missing) { %><input type="hidden" name="manque" value="<%= it.missing.key %>"><% } %>
 <% if (it.view === 'liste') { %><input type="hidden" name="vue" value="liste"><% } %>
       <input type="search" name="q" value="<%= f.q %>" placeholder="Titre, lieu, légende…" aria-label="Rechercher">
       <select name="auteur" aria-label="Photographe"><option value="">Tous les photographes</option><% it.authors.forEach(a => { %><option value="<%= a.slug %>"<%~ a.slug === f.author ? ' selected' : '' %>><%= a.name %></option><% }) %></select>

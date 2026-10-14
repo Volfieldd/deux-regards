@@ -81,3 +81,35 @@ test('états lisibles sans la couleur : palette bleu / jaune / vermillon, forme 
   assert.doesNotMatch(css, /--ok: #7fc79a|--ok: #2e7d4f/);                     // plus de vert contre rouge
   for (const k of ['ok', 'warn', 'no']) assert.match(css, new RegExp(`\\.enc-tag\\.${k}::before \\{ content: "[✓▲✕] "`));
 });
+
+test('Aujourd’hui : choses à faire triées par urgence, lien vers l’écran qui les règle ; badge des urgences', async t => {
+  const c = await admin(t);
+  const julien = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
+  const [p1, p2] = c.db.prepare("SELECT id FROM photos WHERE status = 'published' ORDER BY id LIMIT 2").pluck().all();
+  c.db.prepare("UPDATE photos SET author_id = ?, taken_on = '2026-10-11' WHERE id IN (?, ?)").run(julien, p1, p2);
+  const enc = c.app.encounters;
+  // Demande d'effacement (urgent), refus d'une photo liée encore publiée (urgent), refus dans une sortie (bientôt).
+  await c.app.inject({ method: 'POST', url: '/bonjour', payload: { ref: 'J-0131', rights: 'effacement', email: 'clara@exemple.fr' } });
+  const refus = enc.saveCard(null, { ref: 'J-0139', author_id: julien, met_on: '2026-10-11' });
+  c.db.prepare('UPDATE encounters SET refused = 1 WHERE id = ?').run(refus);
+  enc.link(refus, [p1]);
+  const body = (await c.get('/admin')).body;
+  const tasks = body.slice(body.indexOf('class="task-list"'), body.indexOf('</ul>', body.indexOf('class="task-list"')));
+  const levels = [...tasks.matchAll(/class="task ([a-z-]+)"/g)].map(m => m[1]);
+  assert.deepEqual(levels, [...levels].sort((a, b) => ['urgent', 'bientot', 'plus-tard'].indexOf(a) - ['urgent', 'bientot', 'plus-tard'].indexOf(b)));
+  assert.match(tasks, /Demande d’effacement de J-0131[\s\S]*à traiter avant le/);
+  assert.match(tasks, new RegExp(`Refus de J-0139 : 1 photo encore publiée[\\s\\S]*href="/admin/rencontres/${refus}#refus"`));
+  assert.match(tasks, /J-0139 a refusé : 1 photo publiée de sa sortie à vérifier/);   // p2 : ni liée ni exclue
+  assert.match(tasks, /nouvelles personnes photographiées|nouvelle personne photographiée/);
+  assert.match(tasks, /photos? publiées? sans ville[\s\S]*href="\/admin\/photos\?manque=ville"/);
+  assert.match(body, /class="nav-badge urgent" aria-label="2 urgences">✕ 2</);
+  // Le lien « sans ville » filtre la photothèque.
+  const lib = (await c.get('/admin/photos?manque=ville')).body;
+  assert.match(lib, /Publiées sans ville <span class="n">/);
+  // Exclure p2 de la sortie et dépublier p1 : plus que la demande d'effacement en urgence.
+  enc.exclude(refus, p2, true);
+  enc.applyRefusal(refus);
+  const after = (await c.get('/admin')).body;
+  assert.doesNotMatch(after, /J-0139 a refusé|Refus de J-0139/);
+  assert.match(after, /aria-label="1 urgence">✕ 1</);
+});

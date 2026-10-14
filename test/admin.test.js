@@ -81,7 +81,7 @@ test('connexion locale : jeton exigé, /auth/login y renvoie sans OIDC, déconne
   const cookies = cookiesOf(ok);
   const home = await app.inject({ url: '/admin', cookies });
   assert.match(home.body, /Connexion locale de test/);
-  assert.match(home.body, /lié à l’auteur <strong>Julien<\/strong>/);   // l'auteur choisi à la connexion
+  assert.match(home.body, /lié au photographe <strong>Julien<\/strong>/);   // l'auteur choisi à la connexion
   const photos = await app.inject({ url: '/admin/photos', cookies });
   const julien = db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
   assert.match(photos.body, new RegExp(`<option value="${julien}" selected>Julien</option>`)); // auteur par défaut de l'import
@@ -96,7 +96,7 @@ test('connexion locale : le sub lié à l’auteur est repris', async t => {
   ctx.db.prepare("UPDATE authors SET oidc_sub = 'zitadel-123' WHERE slug = 'julien'").run();
   const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', payload: { token: TOKEN, author: 'julien' } });
   const home = await ctx.app.inject({ url: '/admin', cookies: cookiesOf(res) });
-  assert.match(home.body, /lié à l’auteur <strong>Julien<\/strong>/);
+  assert.match(home.body, /lié au photographe <strong>Julien<\/strong>/);
 });
 
 // ---------- accès ----------

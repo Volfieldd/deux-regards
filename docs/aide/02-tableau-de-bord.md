@@ -2,9 +2,16 @@
 
 C’est la page **Aujourd’hui**, celle où l’on arrive. En haut, **Voir le site** et **＋ Importer des photos**. Puis :
 
+- **À faire** : ce qui demande votre attention, **trié par urgence**, chaque ligne avec un bouton qui mène à l’écran qui la règle. L’urgence se lit sans la couleur, par la forme et par l’ordre de la liste :
+  - **✕ dans un carré, urgent** : une **demande d’accès ou d’effacement** (avec sa date limite, un mois après la demande ; « en retard » au-delà) ; un **refus** dont des photos liées sont encore publiées (**Appliquer le refus**) ;
+  - **! dans un triangle, bientôt** : une personne qui **a refusé** alors que des photos publiées de sa sortie ne sont ni liées ni exclues (vérifiez si elle y figure) ; les **nouvelles personnes photographiées** ; des **publications Instagram en échec** (bloquées par un accord ou refusées par Instagram) ; **Instagram en pause** ;
+  - **rond creux, quand vous avez le temps** : les **photos à finir**, les photos publiées **sans ville** (absentes de la carte du monde), les **titres sans traduction** en anglais ou en allemand, les **preuves d’antériorité** en attente après une erreur.
+
+  Les urgences sont aussi comptées dans la barre latérale, à côté d’**Aujourd’hui** (✕ et leur nombre). Les liens « sans ville » et « sans traduction » ouvrent la photothèque filtrée ; la pastille du filtre, avec ✕, le retire.
+
 - **À finir** : les brouillons et les photos qui ont encore leur titre provisoire, chacun avec son geste direct : **Publier**, ou **Titrer** (ouvre la fiche). **Tout finir en un écran** ouvre la photothèque filtrée sur « À finir ».
 - **Le site, en ce moment** : les photos de l’ouverture, dans l’ordre, et le thème du site. **modifier** mène à [Site public](reglages#photos-de-louverture).
-- **Chiffres** : visiteurs du jour, photos publiées, brouillons, séries, auteurs ; un clic ouvre la page correspondante.
+- **Chiffres** : visiteurs du jour, photos publiées, brouillons, séries, photographes ; un clic ouvre la page correspondante.
 - **La photo du moment** : la photo la plus ouverte en grand sur 30 jours, avec son nombre d’ouvertures. **Statistiques →** ouvre les [Statistiques](statistiques). Ce cadre n’apparaît que si des photos ont été vues.
 - **Rythme** : le nombre de photos importées chaque mois, sur un an.
 - **Dernières modifications** : les cinq photos modifiées le plus récemment.
