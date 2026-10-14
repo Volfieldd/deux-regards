@@ -1,17 +1,26 @@
 # Rencontres
 
-Quand vous photographiez quelqu'un dans la rue, la page **Rencontres** (barre latérale) réunit ce qui le concerne : sa demande, son accord ou son refus, et les photos où il apparaît.
+Quand vous photographiez quelqu'un dans la rue, la page **Personnes** (barre latérale, groupe « Travailler ») réunit ce qui le concerne : sa demande, son accord ou son refus, et les photos où il apparaît. Chaque **rencontre** (une personne, un jour) a sa fiche.
+
+## Sur le terrain
+
+La page **Sur le terrain** (barre latérale, « App, cartes, QR ») réunit ce qui part dans la rue avec vous, pour le photographe choisi en haut (le vôtre par défaut) :
+
+- **L'app Rencontre** : le bouton **Nouvelle rencontre**, la prochaine référence, et comment l'installer sur l'iPhone (voir plus bas) ;
+- **Cartes d'accord** : combien de cartes numérotées imprimées restent à utiliser, et **Préparer une planche** ;
+- **QR des vêtements** : la composition du dos, avec le logo, à montrer telle quelle ou à faire imprimer (SVG, encre noire ou blanche) ;
+- **Avant de partir** : jusqu'à quand votre connexion reste valable (24 heures au plus : reconnectez-vous avant une longue sortie), les cartes en réserve, et si le récapitulatif part tout seul par e-mail.
 
 ## Les cartes
 
-Chaque photographe a sa **lettre** (J pour Julien, S pour Sébastien, réglable dans [Auteurs](auteurs)) et numérote ses cartes : **J-0142**. Une rencontre, c'est une paire de cartes avec le même numéro :
+Chaque photographe a sa **lettre** (J pour Julien, S pour Sébastien, réglable dans [Photographes](auteurs)) et numérote ses cartes : **J-0142**. Une rencontre, c'est une paire de cartes avec le même numéro :
 
 - **la carte « pour nous »** : l'accord signé (site, Instagram, expositions et tirages, avec ou sans le prénom), le nom, la date, le lieu ; vous la gardez ;
 - **la carte « pour eux »** : un merci, la référence et un QR vers `nicephos.art/bonjour/J-0142` ; la personne la garde.
 
 Astuce : juste après la photo, photographiez la carte que vous tendez. Elle marque la suite d'images et vous retrouverez la bonne photo sans hésiter.
 
-**Imprimer les cartes** : **Rencontres → Cartes à imprimer**. Choisissez le photographe, puis :
+**Imprimer les cartes** : **Sur le terrain → Cartes d'accord → Préparer une planche**. Choisissez le photographe, puis :
 
 - **Numérotées** : chaque paire a sa référence et son propre QR ; la série continue d'une planche à l'autre (le prochain numéro est proposé) ;
 - **Génériques** : sans numéro, avec un QR vers `/bonjour` : le modèle à confier à un imprimeur, puis numérotez les deux cartes de chaque paire au tampon numéroteur.
@@ -22,13 +31,9 @@ Les cartes imprimées par le site portent un **code de contrôle** (J-0142-K7Q) 
 
 ## Le QR des vêtements
 
-Pour un tee-shirt, un sac, une casquette ou un écusson : **Auteurs → QR pour les vêtements**, sur la fiche de chaque photographe. Ce QR ouvre `nicephos.art/bonjour/J` (ou `/S`) : la page accueille la personne avec le nom du photographe (« Vous avez croisé Julien ? ») ; sans numéro de carte, elle indique la date et le lieu.
+Pour un tee-shirt ou un sac : **Sur le terrain → QR des vêtements**. L'écran montre une seule composition, celle du dos avec le logo : c'est elle qu'on montre et qu'on imprime. Ce QR ouvre `nicephos.art/bonjour/J` (ou `/S`) : la page accueille la personne avec le nom du photographe (« Vous avez croisé Julien ? ») ; sans numéro de carte, elle indique la date et le lieu.
 
-- **Compositions**, avec le logo envoyé dans [Apparence](apparence) (le nom du site s'il n'y en a pas) :
-  - **verticale**, pour un dos de tee-shirt ou un sac : le logo complet, « Bonjour ! », la phrase en trois langues, le QR et l'adresse ;
-  - **logo seul**, pour la poitrine ou une casquette (le classique : le logo devant, le QR dans le dos) ;
-  - **écusson** : l'emblème au-dessus du QR ;
-  - **QR seul**, pour vos propres compositions.
+- **Composition** : le logo envoyé dans [Apparence](apparence) (le nom du site s'il n'y en a pas), « Bonjour ! », la phrase en trois langues, le QR et l'adresse ; 12 × 19,8 cm.
 - **Encre noire** pour un textile clair, **encre blanche** pour un textile foncé (le QR est alors un carré blanc évidé, lisible par tous les téléphones).
 - **Fichiers** : SVG vectoriel (le texte est converti en tracés : l'imprimeur n'a pas besoin des polices du site ; le logo y est intégré en haute définition, à la couleur de l'encre) ou PNG transparent à 300 dpi.
 - **Taille** : 8 à 10 cm de côté au moins pour le QR sur un dos (lisible à un ou deux mètres), 4 à 5 cm sur une casquette ou un écusson. Gardez la marge blanche autour du QR. Le QR résiste aux plis et à l'usure (correction d'erreur maximale), et son adresse ne changera jamais.
@@ -46,7 +51,7 @@ Elle peut revenir à tout moment et changer d'avis : le dernier choix l'emporte,
 
 ## Sur le téléphone : l'app Rencontre
 
-Pour remplir **avec la personne**, au moment de la photo, sans carte papier : **Rencontres → Nouvelle rencontre**, ou directement `nicephos.art/admin/rencontre` sur l'iPhone.
+Pour remplir **avec la personne**, au moment de la photo, sans carte papier : **Sur le terrain → Nouvelle rencontre** (ou **Personnes → Nouvelle rencontre**), ou directement `nicephos.art/admin/rencontre` sur l'iPhone.
 
 **L'installer comme une app** (une fois) : dans Safari, ouvrez la page, touchez **Partager** puis **Sur l'écran d'accueil**. L'icône « Rencontre » ouvre l'écran en plein écran. Il faut être connecté à l'admin (connexion à refaire au plus une fois par jour).
 
@@ -59,20 +64,20 @@ Pour remplir **avec la personne**, au moment de la photo, sans carte papier : **
 
 Il faut du réseau (la 4G suffit) : sans réseau, l'enregistrement échoue sans rien perdre à l'écran ; réessayez un peu plus loin. Un accord signé sur le téléphone vaut une carte signée : la fiche montre la signature et la photo de repère.
 
-## Un accord couvre la session
+## Un accord couvre la sortie
 
-Un accord vaut pour **la session** : toutes les photos que le photographe a prises **ce jour-là** (la date que l'appareil inscrit dans chaque photo). Rien à lier photo par photo.
+Un accord vaut pour **la sortie** : toutes les photos que le photographe a prises **ce jour-là** (la date que l'appareil inscrit dans chaque photo). Rien à lier photo par photo.
 
-- **Fiche de la rencontre → Photos de la session** : les photos du jour, couvertes par l'accord. **Exclure** celles qui ne concernent pas la personne (une autre sortie le même jour, par exemple) ; **Rétablir** pour revenir en arrière.
-- **Horloge de l'appareil décalée** (changement d'heure oublié, réglage faux) : indiquez la **Date de la session**, celle que portent les photos, dans le formulaire de la fiche.
-- **Fiche d'une photo → Personnes rencontrées** : les personnes rencontrées par son photographe ce jour-là (« même session ») et celles liées à la photo, avec leur accord, leur visage et leurs usages acceptés. Vérifiez que celles qui apparaissent sur la photo ont accepté l'usage prévu.
-- **Un refus, lui, est ciblé** pour le site : il ne bloque que les **photos liées** (les autres personnes du jour ont pu accepter). Liez au refus les photos où la personne apparaît ; la fiche d'une photo de la session le rappelle.
+- **Fiche de la rencontre → Photos de la sortie** : les photos du jour, couvertes par l'accord. **Exclure** celles qui ne concernent pas la personne (une autre prise de vue le même jour, par exemple) ; **Rétablir** pour revenir en arrière.
+- **Horloge de l'appareil décalée** (changement d'heure oublié, réglage faux) : indiquez la **Date de la sortie**, celle que portent les photos, dans le formulaire de la fiche.
+- **Fiche d'une photo → Personnes rencontrées** : les personnes rencontrées par son photographe ce jour-là (« même sortie ») et celles liées à la photo, avec leur accord, leur visage et leurs usages acceptés. Vérifiez que celles qui apparaissent sur la photo ont accepté l'usage prévu.
+- **Un refus, lui, est ciblé** pour le site : il ne bloque que les **photos liées** (les autres personnes du jour ont pu accepter). Liez au refus les photos où la personne apparaît ; la fiche d'une photo de la sortie le rappelle.
 
 ## Instagram suit les accords
 
 - **Instagram suppose le site** : refuser le site, c'est refuser Instagram (l'inverse non). Dans les formulaires, cocher Instagram coche le site ; un accord « Instagram sans le site » est refusé (sur une carte papier mal remplie : cochez le site seulement si la carte l'indique, sinon décochez Instagram).
 - **Une photo est bloquée pour Instagram**, sans confirmation possible, dès qu'une personne **liée à la photo** ou **rencontrée ce jour-là** par son photographe refuse la publication ou n'a pas accepté Instagram. La fiche de la photo l'affiche (« Instagram bloqué ») à la place du formulaire Instagram.
-- **La personne n'est pas sur cette photo** : dans la fiche de la photo, **Personnes rencontrées → Pas sur cette photo** l'exclut de la session pour cette photo ; le blocage tombe si plus personne ne bloque.
+- **La personne n'est pas sur cette photo** : dans la fiche de la photo, **Personnes rencontrées → Pas sur cette photo** l'exclut de la sortie pour cette photo ; le blocage tombe si plus personne ne bloque.
 - **Un refus arrive alors que la photo attend dans la file** : elle sort de la file tout de suite, en échec « bloquée : … » (page Instagram), et **Réessayer** est refusé tant que le blocage dure. Elle est aussi revérifiée juste avant l'envoi.
 
 ## Un visage sur le nom
@@ -84,7 +89,7 @@ La **photo de la personne** (son visage) aide à savoir qui a signé et à retro
 Les nouvelles demandes s'affichent en tête, avec un compteur dans la barre latérale. Dans la fiche d'une rencontre :
 
 - **Écrire** ouvre votre messagerie avec l'adresse de la personne : le site n'envoie aucun e-mail.
-- **Lier des photos** (pour un refus, une photo offerte, ou une photo hors session) : les photos du photographe prises ou importées ce jour-là sont proposées en premier ; une recherche permet d'en trouver d'autres.
+- **Lier des photos** (pour un refus, une photo offerte, ou une photo hors sortie) : les photos du photographe prises ou importées ce jour-là sont proposées en premier ; une recherche permet d'en trouver d'autres.
 - **Carte signée** : cochez « La carte « pour nous » est signée » et les usages acceptés, puis joignez la **photo de la carte** (preuve, visible seulement dans l'admin). **Saisir une carte signée**, en bas de la liste, crée une rencontre directement depuis la carte papier.
 - **Marquer « En cours » / « Traitée »** pour suivre où vous en êtes.
 

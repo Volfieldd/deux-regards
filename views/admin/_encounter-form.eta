@@ -14,7 +14,7 @@
     <label>Date <input type="date" name="met_on" value="<%= v.met_on || '' %>"></label>
     <label>Lieu <input name="place" value="<%= v.place || '' %>" maxlength="120"></label>
   </div>
-  <label>Date de la session <span class="mono">facultatif : si l’horloge de l’appareil photo était décalée, la date que portent les photos</span><input type="date" name="session_day" value="<%= v.session_day || '' %>"></label>
+  <label>Date de la sortie <span class="mono">facultatif : si l’horloge de l’appareil photo était décalée, la date que portent les photos</span><input type="date" name="session_day" value="<%= v.session_day || '' %>"></label>
   <label>Détails <input name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="tenue, scène…"></label>
   <fieldset>
     <legend>Accord signé sur la carte</legend>

@@ -35,6 +35,10 @@
     menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
     instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
     stats: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+    people: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/>',
+    pin: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+    shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
     moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
     logout: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>',
@@ -48,24 +52,46 @@
 <aside class="side" id="admin-nav" data-side>
   <a class="word" href="/admin"><% if (b.emblem) { %><span class="emblem" aria-hidden="true"></span><% } %><span><%= it.siteName %></span></a>
   <button class="cmdk" type="button" data-cmdk-open hidden><%~ ic('search', 16) %><span>Rechercher, agir…</span><kbd>⌘K</kbd></button>
+<%
+  // Menu rangé par intention : travailler les photos et les personnes, publier, préparer le terrain, régler.
+  const item = ([key, href, label, icon, extra]) => `<a href="${href}"${(extra || cur(key)) ? ' aria-current="page"' : ''}>${ic(icon)}${label}</a>`;
+  const people = it.section === 'encounters' || it.section === 'encounter';
+%>
   <nav class="nav" aria-label="Administration">
-<% [['home', '/admin', 'Aujourd’hui', 'home'], ['photos', '/admin/photos', 'Photothèque', 'photos'], ['series', '/admin/series', 'Séries', 'series'], ['stats', '/admin/statistiques', 'Statistiques', 'stats'], ['authors', '/admin/auteurs', 'Auteurs', 'authors'], ['encounters', '/admin/rencontres', 'Rencontres', 'encounters']].forEach(([key, href, label, icon]) => { %>
-    <a href="<%= href %>"<%~ cur(key) || (key === 'encounters' && (it.section === 'encounter' || it.section === 'cards')) ? ' aria-current="page"' : '' %>><%~ ic(icon) %><%= label %><% if (key === 'encounters' && it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew %> nouvelle<%= it.encountersNew > 1 ? 's' : '' %>"><%= it.encountersNew %></span><% } %></a>
-<% }) %>
+    <%~ item(['home', '/admin', 'Aujourd’hui', 'home']) %>
+  </nav>
+  <p class="grp" id="nav-work">Travailler</p>
+  <nav class="nav" aria-labelledby="nav-work">
+    <%~ item(['photos', '/admin/photos', 'Photothèque', 'photos']) %>
+    <a href="/admin/rencontres"<%~ people ? ' aria-current="page"' : '' %>><%~ ic('people') %>Personnes<% if (it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew %> nouvelle<%= it.encountersNew > 1 ? 's' : '' %>"><%= it.encountersNew %></span><% } %></a>
+  </nav>
+  <p class="grp" id="nav-publish">Publier</p>
+  <nav class="nav" aria-labelledby="nav-publish">
+    <%~ item(['site', '/admin/site', 'Site public', 'globe']) %>
+    <%~ item(['series', '/admin/series', 'Séries', 'series']) %>
   </nav>
 <% if (it.navSeries && it.navSeries.length) { %>
-  <p class="grp" id="nav-series">Séries</p>
-  <ul class="ser" aria-labelledby="nav-series">
+  <ul class="ser" aria-label="Séries">
 <% it.navSeries.forEach(c => { %>
     <li><a href="/admin/photos?serie=<%= c.slug %>" data-drop-series="<%= c.id %>" data-series-name="<%= c.name %>"><span class="sw"><% if (c.thumb) { %><img src="<%= c.thumb %>" alt="" loading="lazy"><% } %></span><span class="t"><%= c.name %></span><span class="n"><%= c.count %></span></a></li>
 <% }) %>
   </ul>
 <% } %>
-  <p class="grp" id="nav-site">Site</p>
-  <nav class="nav" aria-labelledby="nav-site">
-<% [['instagram', '/admin/instagram', 'Instagram', 'instagram'], ['images', '/admin/images', 'Filigrane & EXIF', 'images'], ['appearance', '/admin/apparence', 'Apparence', 'appearance'], ['settings', '/admin/reglages', 'Réglages', 'settings'], ['help', '/admin/aide', 'Aide', 'help']].forEach(([key, href, label, icon]) => { %>
-    <a href="<%= href %>"<%~ cur(key) ? ' aria-current="page"' : '' %>><%~ ic(icon) %><%= label %></a>
-<% }) %>
+  <nav class="nav" aria-label="Diffusion">
+    <%~ item(['instagram', '/admin/instagram', 'Instagram', 'instagram']) %>
+    <%~ item(['stats', '/admin/statistiques', 'Statistiques', 'stats']) %>
+  </nav>
+  <p class="grp" id="nav-field">Sur le terrain</p>
+  <nav class="nav" aria-labelledby="nav-field">
+    <a href="/admin/terrain"<%~ it.section === 'terrain' || it.section === 'cards' ? ' aria-current="page"' : '' %>><%~ ic('pin') %>App, cartes, QR</a>
+  </nav>
+  <p class="grp" id="nav-settings">Réglages</p>
+  <nav class="nav" aria-labelledby="nav-settings">
+    <%~ item(['authors', '/admin/auteurs', 'Photographes', 'authors']) %>
+    <%~ item(['appearance', '/admin/apparence', 'Apparence', 'appearance']) %>
+    <%~ item(['images', '/admin/images', 'Filigrane &amp; EXIF', 'images']) %>
+    <%~ item(['droits', '/admin/droits', 'Droits &amp; confidentialité', 'shield']) %>
+    <%~ item(['help', '/admin/aide', 'Aide', 'help']) %>
     <a href="/" target="_blank" rel="noopener"><%~ ic('site') %>Voir le site</a>
   </nav>
   <div class="foot">
@@ -87,7 +113,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% const HELP = { site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>">Aide sur cette page</a></p>
 <% } %>

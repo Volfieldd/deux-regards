@@ -1,9 +1,17 @@
 <% layout('./layout') %>
 <% const s = it.settings; const hero = Array.isArray(s.hero) ? s.hero : []; const chosen = hero.map(slug => it.published.find(p => p.slug === slug)).filter(Boolean); %>
-<h1>Réglages</h1>
+<% const site = it.part === 'site'; %>
+<h1><%= it.title %></h1>
+<% if (site) { %>
+<p class="prose">Ce que voient les visiteurs : les textes, l’ouverture de l’accueil et la carte du monde. Les thèmes se règlent dans <a class="more" href="/admin/series">Séries</a>, l’allure dans <a class="more" href="/admin/apparence">Apparence</a>.</p>
+<% } else { %>
+<p class="prose">Les pages légales du site : les droits d’utilisation des images (<a class="more" href="/droits" target="_blank" rel="noopener">/droits</a>) et la confidentialité des données (<a class="more" href="/confidentialite" target="_blank" rel="noopener">/confidentialite</a>).</p>
+<% } %>
 <form class="form" method="post" action="/admin/reglages">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-  <button class="sr-only" type="submit" tabindex="-1" aria-hidden="true">Enregistrer les réglages</button>
+  <input type="hidden" name="part" value="<%= it.part %>">
+  <button class="sr-only" type="submit" tabindex="-1" aria-hidden="true">Enregistrer</button>
+<% if (site) { %>
   <section class="panel">
     <h2>Textes</h2>
     <label>Nom du site <input name="site_name" value="<%= s.site_name || '' %>" maxlength="60" placeholder="<%= it.defaultName %>"></label>
@@ -15,6 +23,7 @@
     <label>À propos <span class="mono">paragraphes séparés par une ligne vide</span><textarea name="about" rows="8" maxlength="10000"><%= s.about || '' %></textarea></label>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, v: s, name: 'about', label: 'À propos', max: 10000, rows: 8 }) %>
   </section>
+<% } else { %>
   <section class="panel">
     <h2>Droits d’utilisation <span class="mono">page <a href="/droits" target="_blank" rel="noopener">/droits</a>, liée aux mentions IPTC des images</span></h2>
     <p class="hint">Le texte affiché ci-dessous est celui que lisent les visiteurs. Tant que vous gardez le texte par défaut, il suit les noms des auteurs ; modifié, il est enregistré tel quel.</p>
@@ -38,10 +47,12 @@
     <label class="inline"><input type="checkbox" name="privacy_encrypted"<%~ s.privacy_encrypted ? ' checked' : '' %>> Les données et les sauvegardes sont sur des disques chiffrés</label>
     <p class="<%= it.encrypted ? 'cellnote' : 'cellnote warn' %>"><strong>Chiffrement des données personnelles dans la base</strong> (noms, adresses, signatures, photos de repère et de carte, messages, positions) : <%= it.encrypted ? 'actif (clé DATA_KEY du serveur). Gardez une copie de la clé hors du serveur : perdue, ces données sont illisibles.' : 'inactif. Ajoutez DATA_KEY au fichier .env du serveur (voir le guide Unraid) : les données existantes seront chiffrées au redémarrage.' %></p>
   </section>
+<% } %>
+<% if (site) { %>
   <section class="panel" id="carte">
-    <h2>Page Carte <span class="mono"><a href="/carte" target="_blank" rel="noopener">/carte</a><%= s.map_page ? '' : ' · aperçu réservé aux auteurs' %></span></h2>
-    <p class="hint">Une carte du monde avec la vignette des photos à l’emplacement de leur ville, et la liste des lieux. Seules les photos publiées dont la fiche coche « Afficher sur la carte » y figurent (<%= it.mapCount %> aujourd’hui<%= it.mapCount ? `, ${it.mapCities} ville${it.mapCities > 1 ? 's' : ''}` : '' %>).</p>
-    <label class="inline"><input type="checkbox" name="map_page"<%~ s.map_page ? ' checked' : '' %>> Publier la page Carte <span class="mono">lien « Carte » dans le menu du site</span></label>
+    <h2>Carte du monde <span class="mono"><a href="/carte" target="_blank" rel="noopener">/carte</a><%= s.map_page ? '' : ' · aperçu réservé aux photographes' %></span></h2>
+    <p class="hint">Une carte du monde avec la vignette des photos à l’emplacement de leur ville, et la liste des lieux. Seules les photos publiées dont la fiche coche « Afficher sur la carte du monde » y figurent (<%= it.mapCount %> aujourd’hui<%= it.mapCount ? `, ${it.mapCities} ville${it.mapCities > 1 ? 's' : ''}` : '' %>).</p>
+    <label class="inline"><input type="checkbox" name="map_page"<%~ s.map_page ? ' checked' : '' %>> Publier la carte du monde <span class="mono">lien « Carte » dans le menu du site</span></label>
   </section>
   <fieldset class="panel hero-panel" id="ouverture" data-hero data-max="<%= it.heroMax %>">
     <legend>Photos de l’ouverture</legend>
@@ -77,5 +88,6 @@
     </div>
 <% if (!it.published.length) { %><p>Aucune photo publiée pour l’instant.</p><% } %>
   </fieldset>
-  <p class="actions"><button class="btn" type="submit">Enregistrer les réglages</button></p>
+<% } %>
+  <p class="actions"><button class="btn" type="submit"><%= site ? 'Enregistrer le site public' : 'Enregistrer' %></button></p>
 </form>

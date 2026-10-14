@@ -6,7 +6,7 @@
 </header>
 <main class="carte-page wrap">
 <% if (it.preview) { %>
-  <p class="apercu mono" role="note">Aperçu réservé aux auteurs : cette page n’est pas publiée. Les visiteurs ne la voient pas et le menu du site ne la montre pas. <a href="/admin/reglages#carte">Publier la page Carte dans les Réglages</a></p>
+  <p class="apercu mono" role="note">Aperçu réservé aux photographes : cette page n’est pas publiée. Les visiteurs ne la voient pas et le menu du site ne la montre pas. <a href="/admin/site#carte">Publier la carte du monde (Site public)</a></p>
 <% } %>
   <div class="carte-head">
     <h1><%= m.title %></h1>

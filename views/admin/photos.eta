@@ -26,7 +26,7 @@
 <% if (status) { %><input type="hidden" name="statut" value="<%= status %>"><% } %>
 <% if (it.view === 'liste') { %><input type="hidden" name="vue" value="liste"><% } %>
       <input type="search" name="q" value="<%= f.q %>" placeholder="Titre, lieu, légende…" aria-label="Rechercher">
-      <select name="auteur" aria-label="Auteur"><option value="">Tous les auteurs</option><% it.authors.forEach(a => { %><option value="<%= a.slug %>"<%~ a.slug === f.author ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
+      <select name="auteur" aria-label="Photographe"><option value="">Tous les photographes</option><% it.authors.forEach(a => { %><option value="<%= a.slug %>"<%~ a.slug === f.author ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
       <select name="serie" aria-label="Série"><option value="">Toutes les séries</option><% it.categories.forEach(c => { %><option value="<%= c.slug %>"<%~ c.slug === f.category ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
       <button class="btn ghost" type="submit" data-filter-submit data-nojs>Filtrer</button>
 <% if (it.filtered) { %><a class="more" href="<%= it.view === 'liste' ? '/admin/photos?vue=liste' : '/admin/photos' %>">Effacer</a><% } %>
@@ -138,7 +138,7 @@
           <label class="inline"><input type="checkbox" data-one-onmap> Afficher sur la carte</label><span class="note" data-one-citynote hidden>Proposée d’après le GPS de la photo : vérifiez-la.</span></div>
         <div class="fld"><span class="lb">Lieu</span><input data-one-field="place" maxlength="120" aria-label="Lieu" placeholder="Où ?"></div>
         <div class="fld"><span class="lb">Date <span class="r" data-one-when></span></span><input data-one-field="taken_on" maxlength="40" aria-label="Date" placeholder="oct. 2026, 10/2026…"></div>
-        <div class="fld"><span class="lb">Auteur</span><select data-one-field="author_id" aria-label="Auteur"><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
+        <div class="fld"><span class="lb">Photographe</span><select data-one-field="author_id" aria-label="Photographe"><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
         <div class="fld" data-one-audience><span class="lb">Audience <span class="r">30 jours</span></span><div class="aud" data-one-aud><span class="hint">…</span></div></div>
         <div class="fld"><a class="more" data-one-link href="#">Fiche complète : filigrane, preuve d’antériorité, suppression →</a></div>
       </div>

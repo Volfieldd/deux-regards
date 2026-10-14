@@ -22,7 +22,7 @@ Chaque thème est présenté avec ses trois couleurs (fond, encre, accent) et un
 
 - **Nom du site seulement**, ou **Emblème + nom (+ sous-titre)**. Le second choix n'est possible qu'avec un emblème ou une icône envoyés.
 - **Sous-titre** : par exemple « Photography gallery », 60 caractères au plus.
-- Le **nom** du site se règle dans [Réglages](reglages).
+- Le **nom** du site se règle dans [Site public](reglages#site-public).
 
 ## Logos : quatre emplacements
 

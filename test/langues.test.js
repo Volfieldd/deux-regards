@@ -140,5 +140,5 @@ test('admin : traductions des photos, séries, biographies et textes du site ; v
   await ctx.post('/admin/reglages', { tagline: 'Deux regards', tagline_en: 'Two views', intro: 'Intro', about: 'À propos.' });
   assert.match((await ctx.app.inject('/en/')).body, /<h2>Two views<\/h2>/);
   assert.match((await ctx.app.inject('/de/')).body, /<h2>Deux regards<\/h2>/);
-  assert.match((await ctx.as({ url: '/admin/reglages' })).body, /name="tagline_en" value="Two views"/);
+  assert.match((await ctx.as({ url: '/admin/site' })).body, /name="tagline_en" value="Two views"/);
 });

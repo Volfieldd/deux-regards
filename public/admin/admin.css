@@ -13,7 +13,9 @@
   --bg: #0b0b0c; --s1: #121214; --s2: #18181b; --s3: #202024; --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.13);
   --ink: #eeece7; --ink2: #a9a59c; --ink3: #8a857c;
   --accent: #f0a94c; --on-accent: #1b1206; --accent-ink: #f0a94c; --accent-soft: rgba(240,169,76,.14);
-  --ok: #7fc79a; --warn: #e9b45c; --danger: #e0675a; --danger-soft: rgba(224,103,90,.12);
+  /* États lisibles par un daltonien (deutéranope compris) : bleu / jaune / vermillon (palette Okabe-Ito), jamais
+     vert contre rouge ; la couleur double toujours une forme ou un mot (✓, ▲, ✕). */
+  --ok: #56b4e9; --warn: #f0e442; --danger: #e8743b; --danger-soft: rgba(232,116,59,.12);
   --shadow: 0 18px 40px rgba(0,0,0,.45); --scrim: rgba(5,5,6,.62); --photo-bg: #000;
   --font: Jost, 'Helvetica Neue', Arial, sans-serif;
   --r: 10px; --side: 248px; --insp: 360px;
@@ -23,7 +25,7 @@
   --bg: #f6f4ef; --s1: #ffffff; --s2: #f1eee8; --s3: #e8e4dc; --line: rgba(20,18,14,.08); --line2: rgba(20,18,14,.15);
   --ink: #1b1a17; --ink2: #55514a; --ink3: #6b665d;
   --accent-ink: #9a5b0c; --accent-soft: rgba(240,169,76,.20);
-  --ok: #2e7d4f; --warn: #8f5a0a; --danger: #b03a2e; --danger-soft: rgba(176,58,46,.08);
+  --ok: #0067a3; --warn: #6e6000; --danger: #b2410a; --danger-soft: rgba(178,65,10,.08);
   --shadow: 0 18px 40px rgba(60,40,10,.16); --scrim: rgba(30,26,20,.38); --photo-bg: #e8e4dc;
 }
 @media (prefers-color-scheme: light) {
@@ -32,7 +34,7 @@
     --bg: #f6f4ef; --s1: #ffffff; --s2: #f1eee8; --s3: #e8e4dc; --line: rgba(20,18,14,.08); --line2: rgba(20,18,14,.15);
     --ink: #1b1a17; --ink2: #55514a; --ink3: #6b665d;
     --accent-ink: #9a5b0c; --accent-soft: rgba(240,169,76,.20);
-    --ok: #2e7d4f; --warn: #8f5a0a; --danger: #b03a2e; --danger-soft: rgba(176,58,46,.08);
+    --ok: #0067a3; --warn: #6e6000; --danger: #b2410a; --danger-soft: rgba(178,65,10,.08);
     --shadow: 0 18px 40px rgba(60,40,10,.16); --scrim: rgba(30,26,20,.38); --photo-bg: #e8e4dc;
   }
 }
@@ -799,8 +801,10 @@ code.mono, .mono code { color: var(--ink2); }
 .enc-tag { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--s2); color: var(--ink2); box-shadow: inset 0 0 0 1px var(--line2); white-space: nowrap; }
 .enc-tag.ok { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ok); }
 .enc-tag.ok::before { content: "✓ "; color: var(--ok); }
-.enc-tag.no { color: var(--danger); box-shadow: inset 0 0 0 1px currentColor; }
-.enc-tag.warn { color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent); }
+.enc-tag.no { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--danger); }
+.enc-tag.no::before { content: "✕ "; color: var(--danger); font-weight: 600; }
+.enc-tag.warn { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--warn); }
+.enc-tag.warn::before { content: "▲ "; color: var(--warn); font-size: .8em; }
 .enc-quote { grid-column: 1 / -1; margin: 0; color: var(--ink2); font-size: 13.5px; }
 .enc-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); align-items: start; }
 .enc-card-img { max-width: 100%; border-radius: 8px; box-shadow: 0 0 0 1px var(--line); }
@@ -837,3 +841,16 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .ig-blocked strong::before { content: "✕ "; color: var(--danger); }
 .enc-absent { margin: 0; }
 .enc-absent .btn { min-height: 30px; padding: 0 10px; font-size: 12.5px; }
+
+/* ---------- Sur le terrain ---------- */
+.field-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 18px; }
+.field-tools .panel { margin: 0; display: grid; gap: 10px; align-content: start; }
+.field-tool .qr-model { max-width: 240px; }
+.field-tool .qr-model img { aspect-ratio: auto; height: auto; }
+.field-tool .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.checklist li { display: flex; gap: 10px; align-items: baseline; color: var(--ink2); }
+.checklist li::before { flex: none; width: 1.2em; text-align: center; font-weight: 600; }
+.checklist li.ok::before { content: "✓"; color: var(--ok); }
+.checklist li.warn::before { content: "▲"; color: var(--warn); font-size: .85em; }
+.checklist li.off::before { content: "○"; color: var(--ink3); }

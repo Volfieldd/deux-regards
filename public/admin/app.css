@@ -4,7 +4,7 @@
 @font-face { font-family: Jost; font-weight: 400; src: url(/fonts/jost/files/jost-latin-400-normal.woff2) format('woff2'); }
 @font-face { font-family: Jost; font-weight: 500; src: url(/fonts/jost/files/jost-latin-500-normal.woff2) format('woff2'); }
 @font-face { font-family: 'IBM Plex Mono'; font-weight: 400; src: url(/fonts/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2) format('woff2'); }
-:root { color-scheme: light; --paper: #f6f4ef; --ink: #1d1c1a; --mute: #6b665d; --rule: #dcd7cd; --accent: #f0a94c; --ok: #2e7d4f; --ko: #b03a2e; }
+:root { color-scheme: light; --paper: #f6f4ef; --ink: #1d1c1a; --mute: #6b665d; --rule: #dcd7cd; --accent: #f0a94c; --ok: #0067a3; --ko: #b2410a; }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.45 Jost, -apple-system, sans-serif; padding-bottom: env(safe-area-inset-bottom); }

@@ -103,7 +103,7 @@ test('connexion locale : le sub lié à l’auteur est repris', async t => {
 
 test('toutes les pages de l’admin exigent une session et répondent une fois connecté', async t => {
   const ctx = await admin(t);
-  for (const url of ['/admin', '/admin/photos', '/admin/photos/1', '/admin/series', '/admin/auteurs', '/admin/reglages']) {
+  for (const url of ['/admin', '/admin/photos', '/admin/photos/1', '/admin/series', '/admin/auteurs', '/admin/site', '/admin/droits', '/admin/terrain']) {
     assert.equal((await ctx.app.inject(url)).statusCode, 302, url);
     const res = await ctx.as({ url });
     assert.equal(res.statusCode, 200, url);
@@ -358,13 +358,13 @@ test('réglages : nom du site, textes et ouverture (photos publiées seulement)'
   await ctx.post('/admin/reglages', { site_name: 'Heures Creuses', rights_text_en: 'Ask first.', rights_text_de: 'Erst fragen.' });
   assert.match((await ctx.app.inject('/en/droits')).body, /<p>Ask first\.<\/p>/);
   assert.match((await ctx.app.inject('/de/droits')).body, /<p>Erst fragen\.<\/p>/);
-  assert.match((await ctx.as({ url: '/admin/reglages' })).body, /name="rights_text_en"[^>]*>Ask first\.<\/textarea>/);
+  assert.match((await ctx.as({ url: '/admin/droits' })).body, /name="rights_text_en"[^>]*>Ask first\.<\/textarea>/);
 });
 
 test('réglages : textes des droits par défaut affichés, gardés « par défaut » s’ils ne changent pas', async t => {
   const ctx = await admin(t);
   const setting = k => JSON.parse(ctx.db.prepare('SELECT value FROM settings WHERE key = ?').pluck().get(k) ?? 'null');
-  const page = (await ctx.as({ url: '/admin/reglages' })).body;
+  const page = (await ctx.as({ url: '/admin/droits' })).body;
   // Le texte publié est présenté dans le champ, avec son état et le bouton pour y revenir.
   const fr = /<textarea id="rights_text"[^>]*>([^<]*)<\/textarea>/.exec(page)[1];
   assert.match(fr, /appartiennent à leurs auteurs, Sébastien et Julien\./);
@@ -380,7 +380,7 @@ test('réglages : textes des droits par défaut affichés, gardés « par défau
   // Modifié : enregistré ; les traductions restées par défaut sont signalées.
   await ctx.post('/admin/reglages', { rights_text: 'Licence sur demande.' });
   assert.equal(setting('rights_text'), 'Licence sur demande.');
-  const after = (await ctx.as({ url: '/admin/reglages' })).body;
+  const after = (await ctx.as({ url: '/admin/droits' })).body;
   assert.match(after, />Texte personnalisé</);
   assert.equal((after.match(/Le texte français a été modifié/g) || []).length, 2);
   assert.match((await ctx.app.inject('/droits')).body, /<p>Licence sur demande\.<\/p>/);

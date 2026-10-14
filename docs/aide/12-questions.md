@@ -18,8 +18,8 @@ Son original est peut-être illisible. Supprimez-la, puis importez-la de nouveau
 **Je ne peux pas glisser les photos pour les réordonner.**
 Un filtre, une recherche ou une pastille autre que **Tout** est actif : cliquez sur **Effacer**. Sur téléphone, le glisser n'est pas pratique : passez en **Liste** et utilisez le menu **⋯** (**Monter d’une place**, **Descendre d’une place**).
 
-**Je ne peux pas supprimer un auteur.**
-Il a encore des photos. Changez leur auteur dans leurs fiches.
+**Je ne peux pas supprimer un photographe.**
+Il a encore des photos. Changez leur photographe dans leurs fiches.
 
 **Je ne peux pas supprimer une série.**
 Une série qui contient des photos peut être supprimée : la fenêtre propose de déplacer ses photos dans une autre série. Seule la dernière série restante ne peut pas l'être : créez-en d'abord une autre. Voir [Séries](series).

@@ -2,7 +2,7 @@
 
 Captures d’une instance de test avec le seul jeu de démonstration, faites le 11/10/2026 : admin « Chambre noire » (police Jost), en mode sombre ; il existe aussi un mode clair (bouton soleil / lune, ou réglage du système). Elles se régénèrent sur une instance jetable (jeu de démonstration, sans logo) avec `E2E_CAPTURES=1 E2E_ALLOW_WRITES=1 npm run e2e -- --project=captures-bureau --project=captures-mobile` : les écrans d'import créent des photos. Pour l'usage pas à pas, voir l'[Aide de l'administration](Aide), également disponible dans l'admin (menu « Aide »).
 
-À gauche, une **barre latérale** : recherche ⌘K, **Aujourd’hui · Photothèque · Séries · Statistiques · Auteurs**, la liste des séries (où l’on dépose des photos pour les classer), puis, sous « Site », **Instagram · Filigrane & EXIF · Apparence · Réglages · Aide · Voir le site**, et en bas le mode clair / sombre et la déconnexion. Sur téléphone : une barre d’onglets en bas (**Aujourd’hui · Photos · Importer · Séries · Menu**).
+À gauche, une **barre latérale** rangée par intention : recherche ⌘K et **Aujourd’hui** ; « Travailler » : **Photothèque · Personnes** ; « Publier » : **Site public · Séries** (avec la liste des séries, où l’on dépose des photos pour les classer) **· Instagram · Statistiques** ; « Sur le terrain » : **App, cartes, QR** ; « Réglages » : **Photographes · Apparence · Filigrane & EXIF · Droits & confidentialité · Aide · Voir le site** ; en bas le mode clair / sombre et la déconnexion. Les états (accords, contrôles) se lisent par une forme et un mot (✓, ▲, ✕), dans des couleurs choisies pour les daltoniens. Sur téléphone : une barre d’onglets en bas (**Aujourd’hui · Photos · Importer · Séries · Menu**).
 
 Les captures datent d’avant les écrans Statistiques, Instagram et Rencontres, la mise en page iPhone (lot en cartes, « Ouvrir la fiche »), les traductions et les réglages de confidentialité : ces écrans sont décrits ci-dessous sans capture. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
 
@@ -72,7 +72,7 @@ Des planches de trois photos : créer (en tête), renommer, ordonner par glisser
 
 ![Suppression d'une série](captures/admin/04b-series-suppression-bureau.webp)
 
-## Auteurs
+## Photographes
 
 Nom, adresse, biographie et lien avec le compte de connexion.
 
@@ -96,15 +96,15 @@ Le filigrane (texte ou logo, position, opacité, taille), le niveau de métadonn
 
 Thème du site public, avec aperçu réservé aux admins, emblème et sous-titre : voir [Apparence et thèmes](Apparence-et-thèmes).
 
-## Réglages
+## Site public, droits et confidentialité
 
 Nom du site, accroche, textes (et leur version anglaise et allemande, repliée sous chaque champ, avec « Proposer une traduction ») ; page « Droits d'utilisation » en français, anglais et allemand (chaque champ montre le texte lu par les visiteurs, pastille « Texte par défaut » ou « Texte personnalisé », bouton « Rétablir le texte par défaut ») et contact ; **Confidentialité** (contact des responsables, deux facteurs et disques chiffrés à cocher quand c'est vrai, état du chiffrement `DATA_KEY`) ; page **Carte** ; photos de l'ouverture (ordre, 8 au plus, vignettes en cadre 3:2). La capture montre encore l'ancien champ unique des droits.
 
 ![Réglages](captures/admin/07-reglages-bureau.webp)
 
-## Rencontres
+## Personnes et Sur le terrain
 
-Les personnes photographiées : demandes reçues sur `/bonjour` (nouvelles en tête, compteur dans la barre latérale, badge rouge pour une demande RGPD avec son échéance), fiche d'une rencontre (personne, historique, photos liées, carte signée, photo offerte par lien privé, droits : export et effacement), **Cartes à imprimer** et **Nouvelle rencontre** (l'app de l'iPhone : position, photo de repère, consentement en trois langues, signature au doigt, écran « Merci » avec QR). Les QR pour les vêtements sont dans **Auteurs**. Pas encore de capture : voir [Aide → Rencontres](Aide-Rencontres).
+Les personnes photographiées : demandes reçues sur `/bonjour` (nouvelles en tête, compteur dans la barre latérale, badge rouge pour une demande RGPD avec son échéance), fiche d'une rencontre (personne, historique, photos liées, carte signée, photo offerte par lien privé, droits : export et effacement), **Nouvelle rencontre** (l'app de l'iPhone : position, photo de repère, consentement en trois langues, signature au doigt, écran « Merci » avec QR). **Sur le terrain** réunit l'app, les cartes d'accord à imprimer et le QR des vêtements (une composition, avec le logo), avec une liste de contrôle avant de partir. Pas encore de capture : voir [Aide → Rencontres](Aide-Rencontres).
 
 ## Sur mobile
 

@@ -25,7 +25,7 @@
     <label class="inline"><input type="radio" name="brand_mode" value="<%= k %>"<%~ b.mode === k ? ' checked' : '' %><%~ k === 'embleme' && !b.emblem && !b.icon ? ' disabled' : '' %>> <%= label %><%= k === 'embleme' && !b.emblem && !b.icon ? ' — envoyez d’abord un emblème ou une icône' : '' %></label>
 <% }) %>
     <label>Sous-titre sous le nom <span class="mono">ex. « Photography gallery » · 60 caractères</span><input name="subtitle" value="<%= b.subtitle || '' %>" maxlength="60"></label>
-    <p class="mono">Le nom lui-même se règle dans <a href="/admin/reglages">Réglages</a>.</p>
+    <p class="mono">Le nom lui-même se règle dans <a href="/admin/site">Site public</a>.</p>
   </fieldset>
   <p class="actions"><button class="btn" type="submit">Enregistrer l’apparence</button></p>
 </form>
