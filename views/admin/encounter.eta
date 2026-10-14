@@ -3,7 +3,8 @@
    const values = it.values || { ...e, signed: e.consent_source === 'carte' ? 'on' : '', ...Object.fromEntries(it.SCOPES.map(s => [`scope_${s}`, e.consent_source === 'carte' && e.consent && e.consent[s] ? 'on' : ''])) };
    const mail = e.email ? `mailto:${e.email}?subject=${encodeURIComponent(`Votre photo${e.ref ? ` (${e.ref})` : ''} · ${it.siteName}`)}` : null; %>
 <p class="mono"><a class="more eyebrow" href="/admin/rencontres">← Rencontres</a></p>
-<h1><%= it.title %><%= e.name ? ` · ${e.name}` : '' %></h1>
+<h1><%= e.anonymized ? 'Refus anonymisé' : it.title %><%= e.name ? ` · ${e.name}` : '' %></h1>
+<% if (e.anonymized) { %><p class="hint">Les données de cette personne ont été effacées à sa demande. Il ne reste que son refus, pour que les photos liées ne soient jamais publiées.</p><% } %>
 <div class="enc-meta">
   <span class="enc-tag"><%= it.STATUS[e.status] %></span>
 <% if (e.author) { %>  <span class="enc-tag"><%= e.author %></span><% } %>
@@ -44,12 +45,15 @@
 <% it.events.slice().reverse().forEach(ev => { const d = ev.detail; %>
       <li><span class="mono"><%= it.fmt(ev.at) %></span><br>
 <% if (ev.kind === 'visiteur') { %>        Demande sur la page /bonjour<%= ev.verified ? ' (carte vérifiée)' : '' %> :
-        <%= [d.wants_photo && 'veut la photo', d.decision === 'accord' && `accepte (${scopes(d.scopes)})`, d.decision === 'refus' && 'refuse la publication'].filter(Boolean).join(', ') || 'message' %>
+        <%= [d.wants_photo && 'veut la photo', d.decision === 'accord' && `accepte (${scopes(d.scopes)})`, d.decision === 'refus' && 'refuse la publication', d.rights === 'acces' && 'demande une copie de ses données', d.rights === 'effacement' && 'demande l’effacement de ses données'].filter(Boolean).join(', ') || 'message' %>
 <% if (d.message) { %>        <br>« <%= d.message %> »<% } %>
 <% } else if (ev.kind === 'carte') { %>        Saisie de la carte<%= d.signed ? ` : accord signé (${scopes(d.scopes)})` : '' %><%= d.card ? ', photo de la carte jointe' : '' %>
 <% } else if (ev.kind === 'liaison') { %>        <%= d.retiree ? 'Photo retirée' : `${(d.photos || []).length} photo(s) liée(s)` %>
 <% } else if (ev.kind === 'app') { %>        Saisie avec la personne sur le téléphone : <%= d.decision === 'accord' ? `accord signé (${scopes(d.scopes)})` : d.decision === 'refus' ? 'refus de publication' : 'sans décision' %><%= d.position ? ', position notée' : '' %>
 <% } else if (ev.kind === 'email') { %>        Récapitulatif envoyé par e-mail
+<% } else if (ev.kind === 'export') { %>        Données exportées (archive remise à la personne)
+<% } else if (ev.kind === 'droits_traites') { %>        Demande sur les données traitée
+<% } else if (ev.kind === 'anonymise') { %>        Données effacées ; refus gardé sans identité
 <% } else if (ev.kind === 'lien') { %>        Lien privé créé (photo offerte)
 <% } else if (ev.kind === 'refus_applique') { %>        Refus appliqué : <%= (d.photos || []).length %> photo(s) dépubliée(s)
 <% } else { %>        <%= ev.kind %><% } %></li>
@@ -57,6 +61,21 @@
     </ol>
   </section>
 </div>
+
+<% const due = e.rights_requested_at ? e.rights_requested_at + 30 * 864e5 : null; %>
+<% if (!e.anonymized) { %>
+<section class="panel" id="droits" aria-labelledby="enc-rights">
+  <h2 id="enc-rights">Droits de la personne <span class="mono">RGPD</span></h2>
+<% if (e.rights_request && !e.rights_done_at) { %>  <p class="<%= due < Date.now() ? 'err' : 'cellnote warn' %>">Demande <strong><%= e.rights_request === 'acces' ? 'd’accès (copie de ses données)' : 'd’effacement' %></strong> le <%= it.fmt(e.rights_requested_at) %> : à traiter avant le <strong><%= it.fmt(due) %></strong>.<%= e.ref && !e.verified ? ' Référence non vérifiée : assurez-vous que la demande vient bien de cette personne (même adresse e-mail, ou réponse à votre message).' : '' %></p>
+<% } else if (e.rights_done_at) { %>  <p class="hint">Dernière demande sur les données traitée le <%= it.fmt(e.rights_done_at) %>.</p>
+<% } %>
+  <p class="actions">
+    <a class="btn ghost" href="/admin/rencontres/<%= e.id %>/export.zip">Exporter ses données (.zip)</a>
+<% if (e.rights_request && !e.rights_done_at) { %>    <form method="post" action="/admin/rencontres/<%= e.id %>/droits-traites"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Marquer la demande comme traitée</button></form><% } %>
+  </p>
+  <p class="hint">L’archive contient tout ce que le site garde sur elle (rencontre, choix, accord ou refus, historique), la signature, les photos de repère et de carte, et les photos liées en JPEG : envoyez-la-lui (en pièce jointe ou par votre messagerie).</p>
+</section>
+<% } %>
 
 <% if (e.refused) { %>
 <section class="panel" aria-labelledby="enc-refusal">
@@ -111,8 +130,12 @@
   <%~ include('./_encounter-form', { ...it, v: values, action: `/admin/rencontres/${e.id}`, isNew: false }) %>
 </section>
 
-<details class="danger">
-  <summary>Supprimer cette rencontre</summary>
-  <p>Efface l’adresse, les messages, l’historique et la photo de la carte. À faire si la personne le demande<%= e.consent || e.refused ? ' ; attention, l’accord ou le refus disparaît aussi' : '' %>.</p>
-  <form method="post" action="/admin/rencontres/<%= e.id %>/supprimer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn danger" type="submit">Supprimer définitivement</button></form>
+<details class="danger"<%~ e.rights_request === 'effacement' && !e.rights_done_at ? ' open' : '' %>>
+  <summary>Effacer les données de cette personne</summary>
+  <form method="post" action="/admin/rencontres/<%= e.id %>/effacer">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <p>Efface son nom, son adresse, ses messages, sa signature, les photos de repère et de carte, et l’historique.<%= e.refused ? ' Son refus reste appliqué, sans aucune donnée sur elle, tant que des photos liées sont gardées.' : (e.consent ? ' Son accord disparaît aussi : les photos liées ne pourront plus être publiées en s’en prévalant.' : '') %></p>
+<% if (it.photos.length) { %>    <label class="inline"><input type="checkbox" name="photos"> Supprimer aussi les <%= it.photos.length %> photo<%= it.photos.length > 1 ? 's' : '' %> où elle apparaît (originaux et images ; effacées des sauvegardes sous 90 jours)</label>
+<% } %>    <p class="actions"><button class="btn danger" type="submit">Effacer définitivement</button></p>
+  </form>
 </details>

@@ -17,7 +17,7 @@
 <% it.list.forEach(e => { %>
   <li class="enc-item <%= e.status %>">
     <div>
-      <h2><a href="/admin/rencontres/<%= e.id %>"><%= e.ref || 'Sans carte' %><%= e.name ? ` · ${e.name}` : '' %></a></h2>
+      <h2><a href="/admin/rencontres/<%= e.id %>"><%= e.anonymized ? 'Refus anonymisé' : (e.ref || 'Sans carte') %><%= e.name ? ` · ${e.name}` : '' %></a></h2>
       <div class="enc-meta">
         <span class="enc-tag"><%= it.STATUS[e.status] %></span>
 <% if (e.author) { %>        <span class="enc-tag"><%= e.author %></span><% } %>
@@ -25,6 +25,8 @@
 <% if (e.wants_photo) { %>        <span class="enc-tag">veut la photo</span><% } %>
         <%~ consentTag(e) %>
 <% if (e.photos) { %>        <span class="enc-tag"><%= e.photos %> photo<%= e.photos > 1 ? 's' : '' %> liée<%= e.photos > 1 ? 's' : '' %></span><% } %>
+<% if (e.rights_request && !e.rights_done_at) { const due = e.rights_requested_at + 30 * 864e5; %>        <span class="enc-tag no">Demande <%= e.rights_request === 'acces' ? 'd’accès' : 'd’effacement' %> · avant le <%= it.fmt(due).replace(/,? \d+:\d+$/, '') %></span><% } %>
+<% if (e.anonymized) { %>        <span class="enc-tag">refus anonymisé</span><% } %>
       </div>
     </div>
     <span class="mono"><%= it.fmt(e.updated_at) %></span>

@@ -88,6 +88,8 @@ export function createEncounters({ db, now = () => Date.now() }) {
     if (!c && !(metOn && place)) errors.where = 'where';
     const wantsPhoto = body.wants_photo === 'on';
     const decision = ['accord', 'refus'].includes(body.decision) ? body.decision : '';
+    // Droits RGPD : copie de ses données, ou leur effacement (traités par les auteurs sous un mois).
+    const rights = ['acces', 'effacement'].includes(body.rights) ? body.rights : '';
     const scopes = scopesOf(body);
     if (decision === 'accord' && !SCOPES.slice(0, 3).some(s => scopes[s])) errors.scopes = 'scopes';
     const email = text(body.email, 200);
@@ -95,13 +97,13 @@ export function createEncounters({ db, now = () => Date.now() }) {
     const message = text(body.message, 2000);
     if (email && !EMAIL.test(email)) errors.email = 'email';
     // Un refus peut rester anonyme ; recevoir la photo, accepter ou attendre une réponse demande une adresse.
-    else if (!email && (wantsPhoto || decision === 'accord' || (message && decision !== 'refus'))) errors.email = 'email_required';
+    else if (!email && (wantsPhoto || decision === 'accord' || rights === 'acces' || (message && decision !== 'refus'))) errors.email = 'email_required';
     if (decision === 'accord' && !name) errors.name = 'name';
-    if (!wantsPhoto && !decision && !message) errors.what = 'what';
+    if (!wantsPhoto && !decision && !message && !rights) errors.what = 'what';
     if (Object.keys(errors).length) throw new EncounterError(errors);
 
     const t = now();
-    const detail = { wants_photo: wantsPhoto, decision, scopes: decision === 'accord' ? scopes : undefined, message: message || undefined,
+    const detail = { wants_photo: wantsPhoto, decision, rights: rights || undefined, scopes: decision === 'accord' ? scopes : undefined, message: message || undefined,
       email: email || undefined, name: name || undefined, met_on: metOn || undefined, met_time: text(body.met_time, 20) || undefined,
       place: place || undefined, details: text(body.details, 500) || undefined, code: c ? (c.verified ? 'ok' : 'absent') : undefined };
     return db.transaction(() => {
@@ -118,6 +120,7 @@ export function createEncounters({ db, now = () => Date.now() }) {
       // Le dernier choix exprimé l'emporte ; l'historique garde les précédents.
       if (decision === 'refus') Object.assign(set, { refused: 1, refused_at: t });
       if (decision === 'accord') Object.assign(set, { refused: 0, consent: JSON.stringify(scopes), consent_source: 'en_ligne', consent_at: t });
+      if (rights) Object.assign(set, { rights_request: rights, rights_requested_at: t, rights_done_at: null });
       const cols = Object.keys(set);
       db.prepare(`UPDATE encounters SET ${cols.map(k => `${k} = @${k}`).join(', ')} WHERE id = @id`).run({ ...set, id: e.id });
       log(e.id, 'visiteur', detail, c?.verified);
@@ -128,7 +131,7 @@ export function createEncounters({ db, now = () => Date.now() }) {
   // ---------- admin ----------
   function list({ status } = {}) {
     const rows = db.prepare(`SELECT e.id, e.ref, e.status, e.verified, e.email, e.name, e.wants_photo, e.consent, e.consent_source, e.refused,
-        e.met_on, e.place, e.created_at, e.updated_at, a.name AS author,
+        e.met_on, e.place, e.created_at, e.updated_at, e.rights_request, e.rights_requested_at, e.rights_done_at, e.anonymized, a.name AS author,
         (SELECT COUNT(*) FROM encounter_photos ep WHERE ep.encounter_id = e.id) AS photos,
         (SELECT detail FROM encounter_events ev WHERE ev.encounter_id = e.id AND ev.kind = 'visiteur' ORDER BY ev.at DESC, ev.id DESC LIMIT 1) AS last
       FROM encounters e LEFT JOIN authors a ON a.id = e.author_id
@@ -269,6 +272,51 @@ export function createEncounters({ db, now = () => Date.now() }) {
   }
   const markMailed = id => { db.prepare('UPDATE encounters SET mailed_at = ? WHERE id = ?').run(now(), id); log(id, 'email', {}); };
 
+  // ---------- droits : accès (export) et effacement ----------
+  // Tout ce que la base garde sur la personne, lisible (pour l'archive remise à la personne).
+  function exportData(id) {
+    const e = db.prepare('SELECT e.*, a.name AS author FROM encounters e LEFT JOIN authors a ON a.id = e.author_id WHERE e.id = ?').get(id);
+    if (!e) return null;
+    const consent = e.consent ? JSON.parse(e.consent) : null;
+    const iso = ms => (ms ? new Date(ms).toISOString() : null);
+    return {
+      data: {
+        reference: e.ref, photographe: e.author, langue: e.lang, nom: e.name || null, email: e.email || null,
+        rencontre: { date: e.met_on || null, heure: e.met_time || null, lieu: e.place || null, details: e.details || null,
+          position: e.lat != null ? { latitude: e.lat, longitude: e.lon, precision: '≈ 100 m' } : null },
+        recevoir_la_photo: Boolean(e.wants_photo),
+        accord: consent ? { usages: SCOPES.filter(s => consent[s]).map(s => SCOPE_LABELS[s]), source: e.consent_source, date: iso(e.consent_at) } : null,
+        refus: e.refused ? { date: iso(e.refused_at) } : null,
+        majeur: e.adult == null ? null : Boolean(e.adult), parent: e.guardian || null,
+        demande_droits: e.rights_request ? { type: e.rights_request, date: iso(e.rights_requested_at) } : null,
+        historique: events(id).map(ev => ({ date: iso(ev.at), type: ev.kind, ...ev.detail })),
+        liens_photo_offerte: shares(id).map(s => ({ cree: iso(s.created_at), expire: iso(s.expires_at), vues: s.views, telechargements: s.downloads })),
+        cree: iso(e.created_at), modifie: iso(e.updated_at),
+      },
+      files: { signature: e.signature_png, portrait: e.portrait_jpeg, card: e.card_jpeg },
+      lang: e.lang, ref: e.ref,
+    };
+  }
+  // Effacement : la rencontre disparaît. Si la personne refusait la publication et que des photos liées restent,
+  // une trace anonyme garde le refus (sans nom, adresse, signature, images ni historique) : les photos restent
+  // impossibles à publier.
+  function erase(id) {
+    const e = q.byId.get(id);
+    if (!e) return null;
+    const keepRefusal = Boolean(e.refused) && q.photos.all(id).length > 0;
+    db.transaction(() => {
+      if (!keepRefusal) { db.prepare('DELETE FROM encounters WHERE id = ?').run(id); return; }
+      db.prepare(`UPDATE encounters SET ref = NULL, email = '', name = '', details = '', place = '', met_time = '', consent = NULL, consent_source = NULL,
+        consent_at = NULL, wants_photo = 0, card_jpeg = NULL, portrait_jpeg = NULL, signature_png = NULL, lat = NULL, lon = NULL, adult = NULL, guardian = '',
+        rights_request = NULL, rights_done_at = ?, anonymized = 1, verified = 0, status = 'traitee', updated_at = ? WHERE id = ?`).run(now(), now(), id);
+      db.prepare('DELETE FROM encounter_events WHERE encounter_id = ?').run(id);
+      db.prepare('DELETE FROM encounter_shares WHERE encounter_id = ?').run(id);
+      log(id, 'anonymise', {});
+    })();
+    return { anonymized: keepRefusal };
+  }
+  const rightsDone = id => { db.prepare('UPDATE encounters SET rights_done_at = ?, updated_at = ? WHERE id = ?').run(now(), now(), id); log(id, 'droits_traites', {}); };
+
   // ---------- photo offerte ----------
   // Lien privé vers une photo liée à la rencontre : jeton de 192 bits, valable 30 jours, révocable.
   const SHARE_DAYS = 30;
@@ -308,7 +356,7 @@ export function createEncounters({ db, now = () => Date.now() }) {
   };
 
   return {
-    createShare, shares, share, countShare, revokeShare, photographer, nextNumber, reserve, saveApp, markMailed,
+    createShare, shares, share, countShare, revokeShare, photographer, nextNumber, reserve, saveApp, markMailed, exportData, erase, rightsDone,
     portraitJpeg: id => db.prepare('SELECT portrait_jpeg FROM encounters WHERE id = ?').pluck().get(id) || null,
     signaturePng: id => db.prepare('SELECT signature_png FROM encounters WHERE id = ?').pluck().get(id) || null,
     parseRef, card, codeOf, submit, list, get, events, photos: id => q.photos.all(id), saveCard, setStatus, link, unlink, applyRefusal, remove, purge,

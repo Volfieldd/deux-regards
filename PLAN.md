@@ -236,6 +236,10 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Durées automatisées : photo de repère 6 mois ; accord ou refus tant qu'une photo liée existe puis 5 ans ; originaux supprimés effacés des sauvegardes après 90 jours (`BACKUP_DELETED_DAYS`, garde-fou si le dossier est vide).
 - Suite : export des données d'une personne et effacement complet (photos comprises), chiffrement des champs sensibles, registre des traitements, analyse d'impact, procédure de violation, accord entre responsables conjoints.
 
+### 27. Confidentialité (RGPD), deuxième volet : droits (fait)
+- `/bonjour` : « Vos données » (copie ou effacement) ; migration 019 (`rights_request`, `rights_requested_at`, `rights_done_at`, `anonymized`) ; badge avec échéance d'un mois.
+- Export ZIP (`server/zip.js`, sans dépendance) ; effacement avec suppression des photos sur demande, refus gardé sans identité, rappel des posts Instagram.
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

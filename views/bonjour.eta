@@ -51,6 +51,12 @@
 <% }) %>        </div>
         <label class="check"><input type="radio" name="decision" value="refus"<%~ v.decision === 'refus' ? ' checked' : '' %>> <%= h.refuse %></label>
       </fieldset>
+      <fieldset class="hello-decision">
+        <legend><%= h.rightsLegend %></legend>
+        <label class="check"><input type="radio" name="rights" value=""<%~ !v.rights ? ' checked' : '' %>> <%= h.rightsNone %></label>
+        <label class="check"><input type="radio" name="rights" value="acces"<%~ v.rights === 'acces' ? ' checked' : '' %>> <%= h.rightsAccess %></label>
+        <label class="check"><input type="radio" name="rights" value="effacement"<%~ v.rights === 'effacement' ? ' checked' : '' %>> <%= h.rightsErase %></label>
+      </fieldset>
       <label><%= h.message %> <textarea name="message" rows="4" maxlength="2000"><%= v.message || '' %></textarea></label>
     </fieldset>
     <fieldset>

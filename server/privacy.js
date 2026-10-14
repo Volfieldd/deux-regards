@@ -49,7 +49,7 @@ export const PRIVACY = {
         `Accès réservé à nous deux${mfa ? ', avec une authentification à deux facteurs' : ''} ; connexions chiffrées (HTTPS) ; signatures, photos de repère et cartes signées visibles seulement de nous ; données ${encrypted ? 'stockées sur un disque chiffré et ' : ''}sauvegardées chaque jour sur un autre disque.`,
       ]],
       ['Vos droits', [
-        `Vous pouvez à tout moment demander à accéder à vos données, les faire corriger ou effacer, vous opposer à leur utilisation ou retirer votre accord : sur la page ${host}/bonjour (avec la référence de votre carte si vous l’avez) ou à ${contact}. Nous répondons dans un délai d’un mois.`,
+        `Vous pouvez à tout moment demander à accéder à vos données (nous vous en envoyons une copie complète), les faire corriger ou effacer (photos comprises si vous le souhaitez), vous opposer à leur utilisation ou retirer votre accord : sur la page ${host}/bonjour, rubrique « Vos données » (avec la référence de votre carte si vous l’avez), ou à ${contact}. Nous répondons dans un délai d’un mois.`,
         'Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL (www.cnil.fr/plaintes).',
       ]],
     ],
@@ -95,7 +95,7 @@ export const PRIVACY = {
         `Access restricted to the two of us${mfa ? ', with two-factor authentication' : ''}; encrypted connections (HTTPS); signatures, reference photos and signed cards visible only to us; data ${encrypted ? 'stored on an encrypted disk and ' : ''}backed up daily on another disk.`,
       ]],
       ['Your rights', [
-        `You can at any time ask to access your data, have it corrected or deleted, object to its use or withdraw your consent: on the page ${host}/bonjour (with your card reference if you have it) or at ${contact}. We reply within one month.`,
+        `You can at any time ask to access your data (we send you a full copy), have it corrected or deleted (photos included if you wish), object to its use or withdraw your consent: on the page ${host}/bonjour, section “Your data” (with your card reference if you have it), or at ${contact}. We reply within one month.`,
         'If you believe your rights are not respected, you can lodge a complaint with the CNIL, the French data protection authority (www.cnil.fr/plaintes), or with the authority of your country.',
       ]],
     ],
@@ -141,7 +141,7 @@ export const PRIVACY = {
         `Zugang nur für uns beide${mfa ? ', mit Zwei-Faktor-Authentifizierung' : ''}; verschlüsselte Verbindungen (HTTPS); Unterschriften, Erinnerungsfotos und unterschriebene Karten nur für uns sichtbar; Daten ${encrypted ? 'auf einer verschlüsselten Festplatte gespeichert und ' : ''}täglich auf einer anderen Festplatte gesichert.`,
       ]],
       ['Ihre Rechte', [
-        `Sie können jederzeit Auskunft über Ihre Daten verlangen, sie berichtigen oder löschen lassen, der Nutzung widersprechen oder Ihre Einwilligung widerrufen: auf der Seite ${host}/bonjour (mit der Referenz Ihrer Karte, falls vorhanden) oder unter ${contact}. Wir antworten innerhalb eines Monats.`,
+        `Sie können jederzeit Auskunft über Ihre Daten verlangen (wir schicken Ihnen eine vollständige Kopie), sie berichtigen oder löschen lassen (auf Wunsch einschließlich der Fotos), der Nutzung widersprechen oder Ihre Einwilligung widerrufen: auf der Seite ${host}/bonjour, Abschnitt „Ihre Daten“ (mit der Referenz Ihrer Karte, falls vorhanden), oder unter ${contact}. Wir antworten innerhalb eines Monats.`,
         'Wenn Sie meinen, dass Ihre Rechte nicht gewahrt werden, können Sie sich bei der CNIL, der französischen Datenschutzbehörde (www.cnil.fr/plaintes), oder bei der Aufsichtsbehörde Ihres Landes beschweren.',
       ]],
     ],
