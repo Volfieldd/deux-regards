@@ -7,6 +7,7 @@ Une fiche par photographe.
 | **Nom** | affiché sur le site (filtre « deux regards », légendes, À propos) |
 | **Adresse** | `/auteur/<adresse>` (fiches existantes seulement) |
 | **Biographie** | affichée sur la page « À propos » ; version anglaise et allemande facultative, repliée dessous (vide : la biographie française) |
+| **Lettre des cartes** | la lettre des cartes de rencontre (J-0142) ; vide : la première lettre de l'adresse. Une lettre par auteur (voir [Rencontres](rencontres)). |
 | **Compte de connexion** | identifiant du compte qui se connecte à l'admin (voir ci-dessous) |
 
 - **Enregistrer** : sous chaque fiche.

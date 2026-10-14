@@ -162,6 +162,10 @@ export function createAdminRepo(db) {
       return Number(lastInsertRowid);
     },
 
+    // Rencontre où la personne photographiée refuse la publication : la photo ne peut plus être publiée.
+    refusalOf: photoId => db.prepare(`SELECT COALESCE(e.ref, 'sans référence') FROM encounter_photos ep JOIN encounters e ON e.id = ep.encounter_id
+      WHERE ep.photo_id = ? AND e.refused = 1 ORDER BY e.id LIMIT 1`).pluck().get(photoId) || null,
+
     updatePhoto(id, body) {
       const errors = {};
       const title = text(body.title, 160);
@@ -174,6 +178,8 @@ export function createAdminRepo(db) {
       const takenOn = parseTakenOn(body.taken_on);
       if (takenOn === undefined) errors.taken_on = DATE_HINT;
       const status = body.status === 'published' ? 'published' : 'draft';
+      const refusal = status === 'published' ? this.refusalOf(id) : null;
+      if (refusal) errors.status = `La personne photographiée refuse la publication (rencontre ${refusal}) : la photo reste en brouillon.`;
       const watermark = body.watermark === 'none' ? 0 : null;
       const before = q.photo.get(id);
       const loc = resolveLocation(body, before, errors);
@@ -228,7 +234,13 @@ export function createAdminRepo(db) {
     setStatuses(map) {
       const set = db.prepare("UPDATE photos SET status = ?, updated_at = datetime('now') WHERE id = ?");
       const before = {};
-      db.transaction(() => { for (const [id, status] of Object.entries(map)) { const p = q.photo.get(Number(id)); if (!p) continue; before[id] = p.status; set.run(status === 'published' ? 'published' : 'draft', Number(id)); } })();
+      db.transaction(() => {
+        for (const [id, status] of Object.entries(map)) {
+          const p = q.photo.get(Number(id));
+          if (!p || (status === 'published' && this.refusalOf(Number(id)))) continue;      // refus de la personne photographiée
+          before[id] = p.status; set.run(status === 'published' ? 'published' : 'draft', Number(id));
+        }
+      })();
       return before;
     },
     setCategories(map) {
@@ -355,10 +367,14 @@ export function createAdminRepo(db) {
       const slug = checkedSlug('authors', id ? body.slug : '', name, id, errors);
       const sub = text(body.oidc_sub, 255) || null;
       if (sub && q.authors.all().some(a => a.oidc_sub === sub && a.id !== Number(id))) errors.oidc_sub = 'Ce compte est déjà lié à un autre auteur.';
-      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), oidc_sub: sub };
+      // Lettre des cartes de rencontre (J-0142) : une lettre, propre à chaque auteur.
+      const prefix = text(body.card_prefix, 1).toUpperCase();
+      if (prefix && !/^[A-Z]$/.test(prefix)) errors.card_prefix = 'Lettre des cartes : une seule lettre, de A à Z.';
+      else if (prefix && q.authors.all().some(a => a.id !== Number(id) && (a.card_prefix || a.slug.charAt(0).toUpperCase()) === prefix)) errors.card_prefix = `La lettre ${prefix} est déjà celle d’un autre auteur.`;
+      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), oidc_sub: sub, card_prefix: prefix };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
-      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, oidc_sub = @oidc_sub WHERE id = @id').run({ ...values, id });
-      db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, oidc_sub) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @oidc_sub)').run(values);
+      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, oidc_sub = @oidc_sub, card_prefix = @card_prefix WHERE id = @id').run({ ...values, id });
+      db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, oidc_sub, card_prefix) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @oidc_sub, @card_prefix)').run(values);
     },
     deleteAuthor(id) {
       const a = q.authors.all().find(r => r.id === Number(id));

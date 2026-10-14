@@ -212,6 +212,11 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Relevé quotidien des likes et commentaires des posts publiés depuis le site (`syncEngagement`, après 6 h à Paris, 1 à 3 appels, dans le budget), historique par jour (migration 014, `instagram_engagement`).
 - Fiche photo : chiffres et courbe ; page Instagram : « Les plus aimées sur Instagram », « Relever maintenant » (10 minutes au moins entre deux relevés).
 
+### 22. Rencontres : « je vous ai photographié » (fait)
+- Page `/bonjour` (trois langues) : référence de carte (code de contrôle HMAC), ou date et lieu ; recevoir la photo, accord ou refus, message ; anti-abus (limite par adresse, champ piège) ; migration 015 (`encounters`, `encounter_events`, `encounter_photos`, lettre des cartes `authors.card_prefix`).
+- Admin « Rencontres » : liste, fiche, photos liées, carte signée (photo gardée dans la base), refus qui bloque la publication et « Appliquer le refus » (brouillon, file Instagram) ; purge à 12 mois.
+- Suite : planches de cartes à imprimer (paires « pour nous » / « pour eux », numéros et QR), lien privé pour donner la photo.
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

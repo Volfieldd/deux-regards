@@ -1,0 +1,41 @@
+<% layout('./layout') %>
+<% const consentTag = e => e.refused ? '<span class="enc-tag no">Refus de publication</span>'
+     : e.consent ? `<span class="enc-tag ok">Accord ${e.consent_source === 'carte' ? 'signé' : 'en ligne'} : ${it.SCOPES.filter(s => e.consent[s]).map(s => it.SCOPE_LABELS[s]).join(', ')}</span>` : ''; %>
+<div class="toolbar">
+  <div>
+    <h1>Rencontres</h1>
+    <p class="sub">Les personnes photographiées dans la rue : demandes reçues par la page <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> (QR des cartes) et accords signés sur les cartes.</p>
+  </div>
+</div>
+<nav class="chips" aria-label="Filtrer les rencontres">
+  <a href="/admin/rencontres"<%~ !it.status ? ' aria-current="true"' : '' %>>Toutes</a>
+<% Object.entries(it.STATUS).forEach(([k, label]) => { %>  <a href="/admin/rencontres?statut=<%= k %>"<%~ it.status === k ? ' aria-current="true"' : '' %>><%= label %>s</a>
+<% }) %></nav>
+<% if (it.list.length) { %>
+<ul class="enc-list">
+<% it.list.forEach(e => { %>
+  <li class="enc-item <%= e.status %>">
+    <div>
+      <h2><a href="/admin/rencontres/<%= e.id %>"><%= e.ref || 'Sans carte' %><%= e.name ? ` · ${e.name}` : '' %></a></h2>
+      <div class="enc-meta">
+        <span class="enc-tag"><%= it.STATUS[e.status] %></span>
+<% if (e.author) { %>        <span class="enc-tag"><%= e.author %></span><% } %>
+<% if (e.ref && !e.verified) { %>        <span class="enc-tag warn" title="Référence tapée sans le code de contrôle de la carte">non vérifiée</span><% } %>
+<% if (e.wants_photo) { %>        <span class="enc-tag">veut la photo</span><% } %>
+        <%~ consentTag(e) %>
+<% if (e.photos) { %>        <span class="enc-tag"><%= e.photos %> photo<%= e.photos > 1 ? 's' : '' %> liée<%= e.photos > 1 ? 's' : '' %></span><% } %>
+      </div>
+    </div>
+    <span class="mono"><%= it.fmt(e.updated_at) %></span>
+<% if (e.last && (e.last.message || e.last.place)) { %>    <p class="enc-quote"><%= e.last.message ? `« ${e.last.message.slice(0, 160)}${e.last.message.length > 160 ? '…' : ''} »` : `${e.last.met_on || ''} · ${e.last.place}` %></p><% } %>
+  </li>
+<% }) %>
+</ul>
+<% } else { %>
+<p class="panel hint">Aucune rencontre<%= it.status ? ' dans cette catégorie' : ' pour l’instant' %>. Les demandes envoyées depuis <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> arrivent ici.</p>
+<% } %>
+
+<details class="panel" id="nouvelle"<%~ Object.keys(it.errors).length ? ' open' : '' %>>
+  <summary><strong>Saisir une carte signée</strong> <span class="mono">accord papier (carte « pour nous »)</span></summary>
+  <%~ include('./_encounter-form', { ...it, v: it.values || {}, action: '/admin/rencontres', isNew: true }) %>
+</details>

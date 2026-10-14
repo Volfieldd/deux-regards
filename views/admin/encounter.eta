@@ -1,0 +1,96 @@
+<% layout('./layout') %>
+<% const e = it.e; const scopes = c => it.SCOPES.filter(s => c && c[s]).map(s => it.SCOPE_LABELS[s]).join(', ');
+   const values = it.values || { ...e, signed: e.consent_source === 'carte' ? 'on' : '', ...Object.fromEntries(it.SCOPES.map(s => [`scope_${s}`, e.consent_source === 'carte' && e.consent && e.consent[s] ? 'on' : ''])) };
+   const mail = e.email ? `mailto:${e.email}?subject=${encodeURIComponent(`Votre photo${e.ref ? ` (${e.ref})` : ''} · ${it.siteName}`)}` : null; %>
+<p class="mono"><a class="more eyebrow" href="/admin/rencontres">← Rencontres</a></p>
+<h1><%= it.title %><%= e.name ? ` · ${e.name}` : '' %></h1>
+<div class="enc-meta">
+  <span class="enc-tag"><%= it.STATUS[e.status] %></span>
+<% if (e.author) { %>  <span class="enc-tag"><%= e.author %></span><% } %>
+<% if (e.ref) { %>  <span class="enc-tag<%= e.verified ? ' ok' : ' warn' %>"><%= e.verified ? 'carte vérifiée' : 'référence non vérifiée' %></span><% } %>
+<% if (e.wants_photo) { %>  <span class="enc-tag">veut recevoir la photo</span><% } %>
+<% if (e.refused) { %>  <span class="enc-tag no">Refuse la publication</span>
+<% } else if (e.consent) { %>  <span class="enc-tag ok">Accord <%= e.consent_source === 'carte' ? 'signé' : 'donné en ligne' %> : <%= scopes(e.consent) %></span><% } %>
+</div>
+
+<div class="enc-grid">
+  <section class="panel" aria-labelledby="enc-who">
+    <h2 id="enc-who">La personne</h2>
+    <dl class="kv">
+      <dt>E-mail</dt><dd><%= e.email || '—' %><% if (mail) { %> · <a class="more" href="<%= mail %>">Écrire</a><% } %></dd>
+      <dt>Rencontre</dt><dd><%= [e.met_on, e.met_time, e.place].filter(Boolean).join(' · ') || '—' %></dd>
+<% if (e.details) { %>      <dt>Détails</dt><dd><%= e.details %></dd><% } %>
+      <dt>Langue</dt><dd><%= { fr: 'français', en: 'anglais', de: 'allemand' }[e.lang] || e.lang %></dd>
+<% if (it.code) { %>      <dt>Code de la carte</dt><dd class="mono"><%= e.ref %>-<%= it.code %></dd><% } %>
+    </dl>
+<% if (e.consent && e.consent_source === 'en_ligne') { %>    <p class="cellnote warn">Accord donné en ligne<%= e.verified ? ' avec la carte en main' : ', sans le code de la carte' %> : moins sûr qu’une carte signée. Pour une exposition ou un tirage, demandez une signature.</p><% } %>
+    <form class="actions" method="post" action="/admin/rencontres/<%= e.id %>/statut">
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% Object.entries(it.STATUS).filter(([k]) => k !== e.status).forEach(([k, label]) => { %>      <button class="btn ghost" type="submit" name="status" value="<%= k %>">Marquer « <%= label %> »</button>
+<% }) %>    </form>
+  </section>
+
+  <section class="panel" aria-labelledby="enc-history">
+    <h2 id="enc-history">Historique</h2>
+    <ol class="enc-events">
+<% it.events.slice().reverse().forEach(ev => { const d = ev.detail; %>
+      <li><span class="mono"><%= it.fmt(ev.at) %></span><br>
+<% if (ev.kind === 'visiteur') { %>        Demande sur la page /bonjour<%= ev.verified ? ' (carte vérifiée)' : '' %> :
+        <%= [d.wants_photo && 'veut la photo', d.decision === 'accord' && `accepte (${scopes(d.scopes)})`, d.decision === 'refus' && 'refuse la publication'].filter(Boolean).join(', ') || 'message' %>
+<% if (d.message) { %>        <br>« <%= d.message %> »<% } %>
+<% } else if (ev.kind === 'carte') { %>        Saisie de la carte<%= d.signed ? ` : accord signé (${scopes(d.scopes)})` : '' %><%= d.card ? ', photo de la carte jointe' : '' %>
+<% } else if (ev.kind === 'liaison') { %>        <%= d.retiree ? 'Photo retirée' : `${(d.photos || []).length} photo(s) liée(s)` %>
+<% } else if (ev.kind === 'refus_applique') { %>        Refus appliqué : <%= (d.photos || []).length %> photo(s) dépubliée(s)
+<% } else { %>        <%= ev.kind %><% } %></li>
+<% }) %>
+    </ol>
+  </section>
+</div>
+
+<% if (e.refused) { %>
+<section class="panel" aria-labelledby="enc-refusal">
+  <h2 id="enc-refusal">Refus de publication</h2>
+  <p>Les photos liées à cette rencontre <strong>ne peuvent plus être publiées</strong>. <%= it.photos.some(p => p.status === 'published') ? 'Certaines le sont encore :' : 'Aucune n’est publiée.' %></p>
+<% if (it.photos.some(p => p.status === 'published')) { %>  <form method="post" action="/admin/rencontres/<%= e.id %>/refus"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn danger" type="submit">Appliquer le refus : dépublier et retirer de la file Instagram</button></form>
+<% } %>  <p class="hint">Les posts déjà publiés sur Instagram ne sont pas touchés : supprimez-les dans l’application Instagram.</p>
+</section>
+<% } %>
+
+<section class="panel" id="photos" aria-labelledby="enc-photos">
+  <h2 id="enc-photos">Photos de cette rencontre</h2>
+<% if (it.photos.length) { %>
+  <div class="enc-photos">
+<% it.photos.forEach(p => { %>    <div class="enc-photo">
+      <a href="/admin/photos/<%= p.id %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '130px', alt: '' }) %><% } %></a>
+      <span><%= p.title %> · <%= p.status === 'published' ? 'publiée' : 'brouillon' %></span>
+      <form method="post" action="/admin/rencontres/<%= e.id %>/photos/<%= p.id %>/retirer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit">Retirer</button></form>
+    </div>
+<% }) %>  </div>
+<% } else { %>  <p class="hint">Aucune photo liée : choisissez-la ci-dessous.</p><% } %>
+  <h3>Lier des photos</h3>
+  <form class="search-inline" method="get" action="/admin/rencontres/<%= e.id %>#photos">
+    <label>Chercher <input name="q" value="<%= it.search %>" placeholder="titre, lieu, adresse…"></label> <button class="btn ghost" type="submit">Chercher</button>
+  </form>
+  <p class="hint"><%= it.search ? 'Résultats de la recherche.' : `Photos ${e.author ? `de ${e.author}` : ''} ${e.met_on ? `prises ou importées vers le ${e.met_on} d’abord` : 'les plus récentes'}.` %></p>
+  <form method="post" action="/admin/rencontres/<%= e.id %>/photos">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <div class="enc-photos">
+<% it.candidates.forEach(p => { %>      <div class="enc-photo"><% if (p.ready) { %><%~ it.picture(p, { sizes: '130px', alt: '' }) %><% } %>
+        <label><input type="checkbox" name="photo" value="<%= p.id %>"> <span><%= p.title %><br><span class="mono"><%= p.taken_on || '' %> · <%= p.status === 'published' ? 'publiée' : 'brouillon' %></span></span></label></div>
+<% }) %>    </div>
+<% if (!it.candidates.length) { %>    <p class="hint">Aucune photo trouvée.</p><% } %>
+    <p class="actions"><button class="btn" type="submit">Lier les photos cochées</button></p>
+  </form>
+</section>
+
+<section class="panel" aria-labelledby="enc-card">
+  <h2 id="enc-card">Carte signée</h2>
+<% if (e.hasCard) { %>  <p><a href="/admin/rencontres/<%= e.id %>/carte" target="_blank" rel="noopener"><img class="enc-card-img" src="/admin/rencontres/<%= e.id %>/carte" alt="Photo de la carte signée" width="480"></a></p><% } %>
+  <%~ include('./_encounter-form', { ...it, v: values, action: `/admin/rencontres/${e.id}`, isNew: false }) %>
+</section>
+
+<details class="danger">
+  <summary>Supprimer cette rencontre</summary>
+  <p>Efface l’adresse, les messages, l’historique et la photo de la carte. À faire si la personne le demande<%= e.consent || e.refused ? ' ; attention, l’accord ou le refus disparaît aussi' : '' %>.</p>
+  <form method="post" action="/admin/rencontres/<%= e.id %>/supprimer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn danger" type="submit">Supprimer définitivement</button></form>
+</details>

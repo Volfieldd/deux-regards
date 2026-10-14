@@ -1,0 +1,67 @@
+<% layout('./layout') %>
+<% const h = it.h, v = it.values || {}, e = it.errors || {}; const on = k => v[k] === 'on' || v[k] === true; %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+  <%~ include('./nav', it) %>
+</header>
+<main class="hello wrap">
+<% if (it.sent) { %>
+  <h1><%= h.thanks %></h1>
+  <div class="prose">
+    <p><%= h.thanksText %></p>
+<% if (it.sentRef) { %>    <p class="mono"><%= h.thanksRef(it.sentRef) %></p>
+<% } %>    <p><a class="more eyebrow" href="<%= it.u('/') %>"><%= h.back %></a></p>
+  </div>
+<% } else { %>
+  <h1><%= h.title %></h1>
+  <p class="prose lead"><%= h.intro.replace('{site}', it.siteName) %></p>
+<% if (Object.keys(e).length) { %>
+  <div class="hello-errors" role="alert">
+    <p><%= h.errorsTitle %></p>
+    <ul><% Object.values(e).forEach(code => { %><li><%= h.errors[code] || code %></li><% }) %></ul>
+  </div>
+<% } %>
+  <form class="hello-form" method="post" action="<%= it.u('/bonjour') %>" novalidate>
+    <fieldset>
+      <legend><%= h.card %></legend>
+<% if (it.card && it.card.author) { %>      <p class="hello-card mono"><%= it.card.ref %> · <%= it.card.verified ? h.cardOk(it.card.author.name) : h.cardUnverified %></p>
+<% } %>      <label><%= h.refLabel %> <span class="hint"><%= h.refHint %></span>
+        <input name="ref" value="<%= v.ref || '' %>" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false"<%~ e.ref ? ' aria-invalid="true"' : '' %>></label>
+      <details class="hello-nocard"<%~ (!v.ref && (v.met_on || v.place || e.where)) ? ' open' : '' %>>
+        <summary><%= h.noCard %></summary>
+        <div class="hello-row">
+          <label><%= h.metOn %> <input type="date" name="met_on" value="<%= v.met_on || '' %>"<%~ e.where ? ' aria-invalid="true"' : '' %>></label>
+          <label><%= h.metTime %> <input name="met_time" value="<%= v.met_time || '' %>" maxlength="20" placeholder="16 h"></label>
+        </div>
+        <label><%= h.place %> <input name="place" value="<%= v.place || '' %>" maxlength="120" placeholder="<%= h.placeHint %>"<%~ e.where ? ' aria-invalid="true"' : '' %>></label>
+        <label><%= h.details %> <input name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="<%= h.detailsHint %>"></label>
+      </details>
+    </fieldset>
+    <fieldset>
+      <legend><%= h.wish %></legend>
+      <label class="check"><input type="checkbox" name="wants_photo"<%~ on('wants_photo') ? ' checked' : '' %>> <%= h.wantsPhoto %></label>
+      <fieldset class="hello-decision"<%~ e.scopes ? ' aria-invalid="true"' : '' %>>
+        <legend><%= h.decision %></legend>
+        <label class="check"><input type="radio" name="decision" value=""<%~ !v.decision ? ' checked' : '' %>> <%= h.undecided %></label>
+        <label class="check"><input type="radio" name="decision" value="accord"<%~ v.decision === 'accord' ? ' checked' : '' %>> <%= h.agree %></label>
+        <div class="hello-scopes">
+<% ['site', 'instagram', 'print', 'name'].forEach(s => { %>          <label class="check"><input type="checkbox" name="scope_<%= s %>"<%~ on(`scope_${s}`) ? ' checked' : '' %>> <%= h.scopes[s] %></label>
+<% }) %>        </div>
+        <label class="check"><input type="radio" name="decision" value="refus"<%~ v.decision === 'refus' ? ' checked' : '' %>> <%= h.refuse %></label>
+      </fieldset>
+      <label><%= h.message %> <textarea name="message" rows="4" maxlength="2000"><%= v.message || '' %></textarea></label>
+    </fieldset>
+    <fieldset>
+      <legend><%= h.contact %></legend>
+      <div class="hello-row">
+        <label><%= h.email %> <input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ e.email ? ' aria-invalid="true"' : '' %>></label>
+        <label><%= h.name %> <input name="name" value="<%= v.name || '' %>" maxlength="80" autocomplete="name"<%~ e.name ? ' aria-invalid="true"' : '' %>></label>
+      </div>
+      <p class="hint"><%= h.privacy %></p>
+    </fieldset>
+    <div class="hello-trap" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    <p><button class="hello-send eyebrow" type="submit"><%= h.send %></button></p>
+  </form>
+<% } %>
+</main>
+<%~ include('./footer', it) %>

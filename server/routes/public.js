@@ -8,6 +8,8 @@ import { project, MAP } from '../geo/projection.js';
 import { countryName } from '../geo/cities.js';
 import { LANGS, PREFIX, UI, pick, localize, splitLang, detectLang } from '../i18n.js';
 import { BOTS, countryOf } from '../stats.js';
+import { createRateLimiter } from '../ratelimit.js';
+import { EncounterError } from '../encounters.js';
 
 const HERO_COUNT = 5;
 const YEAR = 365 * 24 * 3600;
@@ -17,8 +19,10 @@ export default async function publicRoutes(app) {
   // Page « Carte » facultative (Réglages) : tant qu'elle n'est pas publiée, introuvable pour les visiteurs.
   const mapEnabled = () => repo.settings().map_page === true;
 
+  // Page /bonjour : 8 demandes par heure et par adresse au plus (partagé entre les trois langues).
+  const helloLimit = createRateLimiter({ limit: 8, windowMs: 3600 * 1000 });
   // Mêmes pages en français (racine), en anglais (/en) et en allemand (/de).
-  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled });
+  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit });
 
   // Sélecteur de langue : retient le choix (seul cookie du site, posé à ce moment-là) puis ouvre la page demandée.
   app.get('/langue/:lang', async (request, reply) => {
@@ -82,7 +86,7 @@ function helpers(lang) {
   return { picture, pad, lang, t: UI[lang], u, galleryUrl: f => u(galleryUrl(f)), photoUrl: (slug, f) => u(photoUrl(slug, f)) };
 }
 
-async function pages(app, { lang, repo, mapEnabled }) {
+async function pages(app, { lang, repo, mapEnabled, helloLimit }) {
   const t = UI[lang];
   const base = helpers(lang);
   const trusted = Boolean(app.config.trustProxy);
@@ -237,6 +241,44 @@ async function pages(app, { lang, repo, mapEnabled }) {
       pageTitle: `${t.map.title} · ${siteName}`, canonical: '/carte',
       description: places.length ? t.map.description(names) : pick(settings, 'tagline', lang),
     });
+  });
+
+  // « Je vous ai photographié » : page du QR des cartes « pour eux » (référence dans l'adresse) ou tapée à la main.
+  // Jamais indexée ; aucune photo ni donnée d'une autre personne n'y est montrée.
+  function hello(request, reply, { values = {}, errors = {}, card = null, status = 200 } = {}) {
+    const siteName = app.siteName();
+    reply.code(status).header('x-robots-tag', 'noindex').header('cache-control', 'no-store');
+    return reply.render('bonjour', {
+      ...base, siteName, values, errors, card, h: t.hello,
+      pageTitle: `${t.hello.pageTitle} · ${siteName}`, canonical: '/bonjour', description: t.hello.intro.replace('{site}', siteName),
+    });
+  }
+  app.get('/bonjour', async (request, reply) => { app.stats.hit(request, { page: 'bonjour' }); return hello(request, reply); });
+  app.get('/bonjour/merci', async (request, reply) => {
+    const siteName = app.siteName();
+    const c = app.encounters.card(request.query.ref);
+    reply.header('x-robots-tag', 'noindex').header('cache-control', 'no-store');
+    return reply.render('bonjour', { ...base, siteName, h: t.hello, sent: true, sentRef: c?.ref || null, values: {}, errors: {},
+      pageTitle: `${t.hello.thanks} · ${siteName}`, canonical: '/bonjour', description: '' });
+  });
+  app.get('/bonjour/:ref', async (request, reply) => {
+    const card = app.encounters.card(request.params.ref);
+    app.stats.hit(request, { page: 'bonjour' });
+    return hello(request, reply, { card: card && !card.badCode ? card : null, values: { ref: card && !card.badCode ? request.params.ref.toUpperCase() : '' } });
+  });
+  app.post('/bonjour', async (request, reply) => {
+    const body = request.body || {};
+    // Piège à robots : un champ invisible rempli. Réponse « merci » sans rien enregistrer.
+    if (String(body.website || '').trim()) return reply.redirect(localize('/bonjour/merci', lang), 303);
+    const card = body.ref ? app.encounters.card(body.ref) : null;
+    if (!helloLimit(request.ip)) return hello(request, reply, { values: body, errors: { limit: 'limit' }, card: card?.badCode ? null : card, status: 429 });
+    try {
+      const r = app.encounters.submit(body, { lang });
+      return reply.redirect(`${localize('/bonjour/merci', lang)}${r.ref ? `?ref=${encodeURIComponent(r.ref)}` : ''}`, 303);
+    } catch (err) {
+      if (!(err instanceof EncounterError)) throw err;
+      return hello(request, reply, { values: body, errors: err.errors, card: card?.badCode ? null : card, status: 422 });
+    }
   });
 
   // Conditions d'utilisation des photos : cible des mentions IPTC (WebStatement, LicensorURL), à /droits en français.

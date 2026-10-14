@@ -123,6 +123,8 @@ L'aperçu à gauche montre l'image telle que servie (filigrane compris) et ses d
 
 Plus bas :
 
+- **Personne photographiée** : les rencontres liées à la photo, avec l'accord ou le refus (voir [Rencontres](rencontres)). Un refus empêche de publier la photo ;
+
 - **Audience** : les ouvertures de la photo sur 30 jours (voir [Statistiques](statistiques)) ;
 - **Instagram** : cadre, filigrane et légende pour Instagram, et **Ajouter à la file Instagram** (voir [Instagram](instagram)) ;
 - [Preuve d'antériorité](preuves) : l'empreinte et l'horodatage de l'original.
