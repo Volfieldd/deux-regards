@@ -261,6 +261,16 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .hello-send { min-height: 48px; padding: 0 28px; background: var(--ink); color: var(--paper); border-radius: 0; }
 .hello-send:hover { opacity: .88; }
 
+/* ---------- photo offerte (/pour-vous/…) ---------- */
+.gift { padding-block: clamp(40px, 7vw, 96px) 0; display: grid; gap: 24px; max-width: 980px; }
+.gift h1 { margin: 0; font-family: var(--serif); font-weight: 400; font-style: var(--display-style); font-size: clamp(40px, 6vw, 72px); line-height: 1; }
+.gift .lead { margin: 0; font-size: 17px; }
+.gift-photo { margin: 0; }
+.gift-photo img { width: auto; max-width: 100%; max-height: 75vh; height: auto; background: var(--frame); }
+.gift-photo figcaption { margin-top: 10px; color: var(--mute); }
+.gift-dl { display: inline-flex; align-items: center; min-height: 48px; padding: 0 28px; background: var(--ink); color: var(--paper); margin-right: 10px; }
+.gift .small { font-size: 14px; color: var(--mute); }
+
 /* ---------- carte ---------- */
 /* Fond sans couleur propre (public/carte-terre.svg) : la terre et le globe prennent l'encre du thème. Vignettes rondes
    à l'emplacement de la ville ; site.js garde leur taille à l'écran pendant le zoom et regroupe celles qui se chevauchent. */

@@ -23,6 +23,7 @@ Références de design (artefacts claude.ai) :
 | Serveur | Node.js LTS + Fastify |
 | Données | SQLite (`better-sqlite3`), migrations SQL versionnées |
 | Images | `sharp` (resize, AVIF/WebP, suppression EXIF) |
+| QR des cartes de rencontre | `qrcode` (SVG, sans dépendance native) |
 | Gabarits | Eta |
 | Auth | `openid-client` (Authorization Code + PKCE) |
 | Identité | Zitadel Cloud, Google en IdP externe dans Zitadel |
@@ -215,7 +216,10 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 22. Rencontres : « je vous ai photographié » (fait)
 - Page `/bonjour` (trois langues) : référence de carte (code de contrôle HMAC), ou date et lieu ; recevoir la photo, accord ou refus, message ; anti-abus (limite par adresse, champ piège) ; migration 015 (`encounters`, `encounter_events`, `encounter_photos`, lettre des cartes `authors.card_prefix`).
 - Admin « Rencontres » : liste, fiche, photos liées, carte signée (photo gardée dans la base), refus qui bloque la publication et « Appliquer le refus » (brouillon, file Instagram) ; purge à 12 mois.
-- Suite : planches de cartes à imprimer (paires « pour nous » / « pour eux », numéros et QR), lien privé pour donner la photo.
+
+### 23. Cartes à imprimer et photo offerte (fait)
+- Planches A4 (`/admin/rencontres/cartes`) : paires « pour nous » / « pour eux » au format carte de visite, cinq par feuille, d'un seul côté ; numérotées (QR et code de contrôle uniques, numéros réservés dans `settings.cards_printed`) ou génériques (QR vers `/bonjour`, numéro au tampon) ; textes dans `server/cards.js`.
+- Photo offerte : lien privé `/pour-vous/<jeton>` (30 jours, révocable, compteurs ; migration 016), page dans la langue de la personne, JPEG 2048 px (jamais l'original, EXIF « usage personnel »), message prêt à envoyer (mailto) dans sa langue.
 
 ## Côté Zitadel (à faire une fois)
 

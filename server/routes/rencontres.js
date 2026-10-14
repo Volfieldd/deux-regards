@@ -1,6 +1,8 @@
 import sharp from 'sharp';
 import { EncounterError, SCOPES, SCOPE_LABELS } from '../encounters.js';
 import { sameToken } from '../auth.js';
+import { TEXTS, PER_SHEET, MAX_PAIRS, buildPairs, sheets } from '../cards.js';
+import { UI } from '../i18n.js';
 
 // Admin « Rencontres » : demandes reçues par la page /bonjour, accords papier (carte « pour nous ») et refus.
 // Enregistré dans le plugin d'administration (session d'admin exigée, comme le reste de /admin).
@@ -45,10 +47,85 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     return page(request, reply, 'encounter', {
       title: e.ref ? `Rencontre ${e.ref}` : `Rencontre du ${fmt(e.created_at)}`, e, events: enc.events(id),
       photos: enc.photos(id).map(withReady), candidates: candidates(e, search), search, authors: repo.authors(),
-      code: e.ref ? enc.codeOf(e.ref) : null, errors: {}, values: null, ...extra,
+      code: e.ref ? enc.codeOf(e.ref) : null, shares: sharesOf(e), errors: {}, values: null, ...extra,
     });
   }
+  // Liens « photo offerte » : adresse, et message prêt à envoyer dans la langue de la personne (mailto).
+  function sharesOf(e) {
+    const g = UI[e.lang] ? UI[e.lang].gift : UI.fr.gift;
+    const locale = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[e.lang] || 'fr-FR';
+    return enc.shares(e.id).map(s => {
+      const url = `${app.config.publicUrl}/pour-vous/${s.token}`;
+      const date = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(s.expires_at);
+      const author = repo.photo(s.photo_id) && repo.authors().find(a => a.id === repo.photo(s.photo_id).author_id)?.name;
+      const mail = e.email ? `mailto:${e.email}?${new URLSearchParams({ subject: g.mailSubject(app.siteName()), body: g.mail({ name: e.name, link: url, date, author: author || app.siteName() }) }).toString().replace(/\+/g, '%20')}` : null;
+      return { ...s, url, mail, expired: s.expires_at <= Date.now(), until: fmt(s.expires_at) };
+    });
+  }
+  app.post('/admin/rencontres/:id/liens', write, async (request, reply) => {
+    const id = byId(request.params.id);
+    if (!enc.get(id)) return reply.callNotFound();
+    try {
+      enc.createShare(id, Number(request.body?.photo_id));
+    } catch (err) {
+      if (!(err instanceof EncounterError)) throw err;
+      return failed(reply, `/admin/rencontres/${id}#photos`, err.message);
+    }
+    return done(reply, `/admin/rencontres/${id}#liens`, 'Lien privé créé, valable 30 jours : envoyez-le à la personne.');
+  });
+  app.post('/admin/rencontres/:id/liens/:token/retirer', write, async (request, reply) => {
+    const id = byId(request.params.id);
+    if (!enc.revokeShare(id, String(request.params.token))) return reply.callNotFound();
+    return done(reply, `/admin/rencontres/${id}#liens`, 'Lien retiré : il ne fonctionne plus.');
+  });
+
   app.get('/admin/rencontres/:id', async (request, reply) => detail(request, reply, byId(request.params.id)));
+
+  // ---------- cartes à imprimer ----------
+  // Dernier numéro imprimé par lettre (réglage « cards_printed ») : la planche suivante continue la série.
+  const printed = () => { try { return JSON.parse(app.db.prepare("SELECT value FROM settings WHERE key = 'cards_printed'").pluck().get() || '{}'); } catch { return {}; } };
+  const prefixOf = a => a.card_prefix || a.slug.charAt(0).toUpperCase();
+  const nextNumber = prefix => {
+    const used = app.db.prepare("SELECT ref FROM encounters WHERE ref LIKE ? || '-%'").pluck().all(prefix).map(r => Number(r.split('-')[1]) || 0);
+    return Math.max(Number(printed()[prefix]) || 0, ...used, 0) + 1;
+  };
+  function cardsPage(request, reply, extra = {}) {
+    const authors = repo.authors().map(a => ({ ...a, prefix: prefixOf(a), next: nextNumber(prefixOf(a)) }));
+    return render(request, reply, 'cards', { title: 'Cartes à imprimer', authors, printed: printed(), PER_SHEET, MAX_PAIRS, errors: {}, values: {}, ...extra });
+  }
+  app.get('/admin/rencontres/cartes', async (request, reply) => cardsPage(request, reply));
+  app.post('/admin/rencontres/cartes', write, async (request, reply) => {
+    const b = request.body || {};
+    const author = repo.authors().find(a => a.id === Number(b.author_id));
+    const generic = b.mode === 'generiques';
+    const count = Math.round(Number(b.count));
+    const from = Math.round(Number(b.from));
+    const errors = {};
+    if (!author) errors.author = 'Choisissez le photographe.';
+    if (!(count >= 1 && count <= MAX_PAIRS)) errors.count = `De 1 à ${MAX_PAIRS} paires de cartes.`;
+    if (!generic && !(from >= 1 && from + count - 1 <= 9999)) errors.from = 'Numéro de départ entre 1 et 9999.';
+    if (Object.keys(errors).length) return cardsPage(request, reply.code(422), { errors, values: b });
+    const qs = new URLSearchParams({ auteur: author.id, nombre: count, ...(generic ? { generiques: '1' } : { de: from }) });
+    if (!generic) {
+      // Numéros réservés : la prochaine planche de ce photographe commencera après.
+      const p = printed();
+      p[prefixOf(author)] = Math.max(Number(p[prefixOf(author)]) || 0, from + count - 1);
+      app.db.prepare("INSERT INTO settings (key, value) VALUES ('cards_printed', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(JSON.stringify(p));
+    }
+    return reply.redirect(`/admin/rencontres/cartes/planche?${qs}`, 303);
+  });
+  // Planche à imprimer : page autonome (sans l'habillage de l'admin), au format A4.
+  app.get('/admin/rencontres/cartes/planche', async (request, reply) => {
+    const author = repo.authors().find(a => a.id === Number(request.query.auteur));
+    const count = Math.min(MAX_PAIRS, Math.max(1, Math.round(Number(request.query.nombre)) || PER_SHEET));
+    const generic = request.query.generiques === '1';
+    const from = Math.max(1, Math.round(Number(request.query.de)) || 1);
+    if (!author || (!generic && from + count - 1 > 9999)) return reply.callNotFound();
+    const { host, pairs } = await buildPairs({ publicUrl: app.config.publicUrl, prefix: prefixOf(author), from, count, generic, codeOf: ref => enc.codeOf(ref) });
+    return reply.header('cache-control', 'no-store').render('admin/cards-sheet', {
+      title: `Cartes ${generic ? 'génériques' : `${pairs[0].ref} à ${pairs.at(-1).ref}`} · ${author.name}`, author, T: TEXTS, host, sheets: sheets(pairs), generic, siteName: app.siteName(),
+    });
+  });
 
   // Photo de la carte signée : réencodée en JPEG (1600 px, sans métadonnées), gardée dans la base.
   async function readCardForm(request) {

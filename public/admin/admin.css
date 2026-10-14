@@ -814,4 +814,5 @@ code.mono, .mono code { color: var(--ink2); }
 .enc-photo label { display: flex; gap: 8px; align-items: flex-start; }
 .search-inline { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
 .search-inline label { display: grid; gap: 4px; }
+.share-url { width: 100%; margin-top: 6px; font-size: 12px; }
 .enc-scopes { display: flex; flex-wrap: wrap; gap: 6px 18px; }

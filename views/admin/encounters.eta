@@ -6,6 +6,7 @@
     <h1>Rencontres</h1>
     <p class="sub">Les personnes photographiées dans la rue : demandes reçues par la page <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> (QR des cartes) et accords signés sur les cartes.</p>
   </div>
+  <a class="btn" href="/admin/rencontres/cartes">Cartes à imprimer</a>
 </div>
 <nav class="chips" aria-label="Filtrer les rencontres">
   <a href="/admin/rencontres"<%~ !it.status ? ' aria-current="true"' : '' %>>Toutes</a>

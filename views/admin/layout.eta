@@ -50,7 +50,7 @@
   <button class="cmdk" type="button" data-cmdk-open hidden><%~ ic('search', 16) %><span>Rechercher, agir…</span><kbd>⌘K</kbd></button>
   <nav class="nav" aria-label="Administration">
 <% [['home', '/admin', 'Aujourd’hui', 'home'], ['photos', '/admin/photos', 'Photothèque', 'photos'], ['series', '/admin/series', 'Séries', 'series'], ['stats', '/admin/statistiques', 'Statistiques', 'stats'], ['authors', '/admin/auteurs', 'Auteurs', 'authors'], ['encounters', '/admin/rencontres', 'Rencontres', 'encounters']].forEach(([key, href, label, icon]) => { %>
-    <a href="<%= href %>"<%~ cur(key) || (key === 'encounters' && it.section === 'encounter') ? ' aria-current="page"' : '' %>><%~ ic(icon) %><%= label %><% if (key === 'encounters' && it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew %> nouvelle<%= it.encountersNew > 1 ? 's' : '' %>"><%= it.encountersNew %></span><% } %></a>
+    <a href="<%= href %>"<%~ cur(key) || (key === 'encounters' && (it.section === 'encounter' || it.section === 'cards')) ? ' aria-current="page"' : '' %>><%~ ic(icon) %><%= label %><% if (key === 'encounters' && it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew %> nouvelle<%= it.encountersNew > 1 ? 's' : '' %>"><%= it.encountersNew %></span><% } %></a>
 <% }) %>
   </nav>
 <% if (it.navSeries && it.navSeries.length) { %>
@@ -87,7 +87,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% const HELP = { instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>">Aide sur cette page</a></p>
 <% } %>

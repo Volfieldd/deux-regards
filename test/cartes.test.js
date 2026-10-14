@@ -1,0 +1,98 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import sharp from 'sharp';
+import { setup } from './helpers.js';
+
+// Cartes de rencontre à imprimer (paires numérotées avec QR et code de contrôle, ou génériques) et photo offerte
+// (lien privé de 30 jours vers une version JPEG, dans la langue de la personne).
+const TOKEN = 'jeton-de-test-0123456789';
+const cookiesOf = res => Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
+
+async function ctxOf(t) {
+  const ctx = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: TOKEN } });
+  const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', payload: { token: TOKEN, author: 'julien', next: '/admin' } });
+  const cookies = cookiesOf(res);
+  const csrf = ctx.db.prepare('SELECT csrf FROM sessions').pluck().get();
+  const as = opts => ctx.app.inject({ ...opts, cookies: { ...cookies, ...opts.cookies } });
+  const post = (url, payload = {}) => as({ method: 'POST', url, payload: { _csrf: csrf, ...payload }, headers: { accept: 'text/html' } });
+  const author = slug => ctx.db.prepare('SELECT id FROM authors WHERE slug = ?').pluck().get(slug);
+  return { ...ctx, as, post, author };
+}
+
+test('planches de cartes : paires numérotées (QR, code de contrôle), numéros retenus, génériques ; réservé aux admins', async t => {
+  const c = await ctxOf(t);
+  const form = (await c.as({ url: '/admin/rencontres/cartes' })).body;
+  assert.match(form, /Julien \(lettre J, prochaine carte J-0001\)/);
+  let r = await c.post('/admin/rencontres/cartes', { author_id: c.author('julien'), mode: 'numerotees', from: 1, count: 7 });
+  assert.deepEqual([r.statusCode, r.headers.location], [303, `/admin/rencontres/cartes/planche?auteur=${c.author('julien')}&nombre=7&de=1`]);
+  const sheet = await c.as({ url: r.headers.location });
+  assert.equal(sheet.statusCode, 200);
+  assert.equal((sheet.body.match(/<section class="sheet">/g) || []).length, 2);              // 7 paires : 2 feuilles
+  assert.equal((sheet.body.match(/<div class="pair">/g) || []).length, 7);
+  assert.equal((sheet.body.match(/<svg /g) || []).length, 7);                               // un QR par carte « pour eux »
+  assert.match(sheet.body, /que Julien a prises de moi aujourd’hui/);
+  const labels = [...sheet.body.matchAll(/Réf\. <b>(J-\d{4}-[A-Z0-9]{3})<\/b>/g)].map(m => m[1]);
+  assert.equal(labels.length, 7);
+  assert.equal(labels[6].slice(0, 6), 'J-0007');
+  for (const l of labels) assert.equal(c.app.encounters.card(l).verified, true);            // le code imprimé est accepté
+  assert.doesNotMatch(sheet.body, /style="/);                                               // CSP
+  // La série continue : prochaine planche à J-0008.
+  assert.match((await c.as({ url: '/admin/rencontres/cartes' })).body, /prochaine carte J-0008/);
+  // Génériques : sans numéro, QR vers /bonjour.
+  r = await c.post('/admin/rencontres/cartes', { author_id: c.author('sebastien'), mode: 'generiques', count: 5 });
+  const generic = (await c.as({ url: r.headers.location })).body;
+  assert.equal((generic.match(/class="blank"/g) || []).length, 10);
+  assert.match(generic, /que Sébastien a prises/);
+  assert.match((await c.as({ url: '/admin/rencontres/cartes' })).body, /prochaine carte S-0001/);   // génériques : rien de réservé
+  assert.equal((await c.post('/admin/rencontres/cartes', { author_id: c.author('julien'), mode: 'numerotees', from: 1, count: 0 })).statusCode, 422);
+  assert.notEqual((await c.app.inject(`/admin/rencontres/cartes/planche?auteur=${c.author('julien')}&nombre=5&de=1`)).statusCode, 200);
+});
+
+test('photo offerte : lien privé dans la langue de la personne, JPEG jamais l’original, compteurs, expiration, retrait', async t => {
+  const c = await ctxOf(t);
+  await c.app.inject({ method: 'POST', url: '/de/bonjour', payload: { ref: 'J-0142', wants_photo: 'on', email: 'anna@beispiel.de', name: 'Anna' } });
+  const id = c.db.prepare("SELECT id FROM encounters WHERE ref = 'J-0142'").pluck().get();
+  const photo = c.db.prepare("SELECT * FROM photos WHERE slug = 'brume-sur-la-loire'").get();
+  // Photo non liée : refusée.
+  let r = await c.post(`/admin/rencontres/${id}/liens`, { photo_id: photo.id });
+  assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounter_shares').pluck().get(), 0);
+  await c.post(`/admin/rencontres/${id}/photos`, { photo: String(photo.id) });
+  r = await c.post(`/admin/rencontres/${id}/liens`, { photo_id: photo.id });
+  assert.equal(r.statusCode, 303);
+  const token = c.db.prepare('SELECT token FROM encounter_shares').pluck().get();
+  assert.match(token, /^[\w-]{32}$/);
+  const detail = (await c.as({ url: `/admin/rencontres/${id}` })).body;
+  assert.match(detail, new RegExp(`value="http://localhost:3000/pour-vous/${token}"`));
+  assert.match(detail, /mailto:anna@beispiel\.de\?subject=Ihr%20Foto/);                     // message en allemand
+  assert.match(detail, /Hier%20ist%20Ihr%20Foto/);
+  // La page, en allemand, sans indexation.
+  const page = await c.app.inject(`/pour-vous/${token}`);
+  assert.equal(page.statusCode, 200);
+  assert.equal(page.headers['x-robots-tag'], 'noindex');
+  assert.match(page.body, /<html lang="de"/);
+  assert.match(page.body, /<h1>Ihr Foto<\/h1>/);
+  assert.match(page.body, /Foto herunterladen/);
+  const preview = await c.app.inject(`/pour-vous/${token}/apercu.jpg`);
+  const pm = await sharp(preview.rawPayload).metadata();
+  assert.equal(pm.format, 'jpeg');
+  assert.ok(Math.max(pm.width, pm.height) <= 1200);
+  const dl = await c.app.inject(`/pour-vous/${token}/photo.jpg`);
+  assert.match(dl.headers['content-disposition'], /attachment; filename="test-J-0142\.jpg"/);
+  const dm = await sharp(dl.rawPayload).metadata();
+  assert.ok(Math.max(dm.width, dm.height) <= 2048);
+  assert.match(dm.exif.toString('latin1'), /usage personnel/);
+  const s = c.db.prepare('SELECT views, downloads FROM encounter_shares').get();
+  assert.deepEqual([s.views, s.downloads], [1, 1]);
+  assert.match((await c.app.inject('/robots.txt')).body, /Disallow: \/pour-vous\//);
+  assert.equal((await c.app.inject('/pour-vous/court')).statusCode, 404);
+  // Expiré : page « lien expiré » (410), plus d'image.
+  c.db.prepare('UPDATE encounter_shares SET expires_at = ?').run(Date.now() - 1000);
+  const expired = await c.app.inject(`/pour-vous/${token}`);
+  assert.equal(expired.statusCode, 410);
+  assert.match(expired.body, /Dieser Link ist abgelaufen/);
+  assert.equal((await c.app.inject(`/pour-vous/${token}/photo.jpg`)).statusCode, 404);
+  // Retiré : introuvable.
+  c.db.prepare('UPDATE encounter_shares SET expires_at = ?').run(Date.now() + 864e5);
+  assert.equal((await c.post(`/admin/rencontres/${id}/liens/${token}/retirer`)).statusCode, 303);
+  assert.equal((await c.app.inject(`/pour-vous/${token}`)).statusCode, 404);
+});

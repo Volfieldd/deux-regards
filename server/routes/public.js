@@ -8,6 +8,8 @@ import { project, MAP } from '../geo/projection.js';
 import { countryName } from '../geo/cities.js';
 import { LANGS, PREFIX, UI, pick, localize, splitLang, detectLang } from '../i18n.js';
 import { BOTS, countryOf } from '../stats.js';
+import path from 'node:path';
+import sharp from 'sharp';
 import { createRateLimiter } from '../ratelimit.js';
 import { EncounterError } from '../encounters.js';
 
@@ -33,6 +35,38 @@ export default async function publicRoutes(app) {
     reply.setCookie('langue', lang, { path: '/', maxAge: YEAR, sameSite: 'lax', httpOnly: true, secure: app.config.publicUrl.startsWith('https://') });
     return reply.header('x-robots-tag', 'noindex').redirect(localize(splitLang(target).path, lang), 303);
   });
+  // Photo offerte à une personne photographiée : lien privé de la fiche Rencontre (30 jours), dans sa langue.
+  // Une version JPEG (2048 px, ou 1200 px pour l'aperçu), jamais l'original ; aucune indexation, aucun cache.
+  const ascii = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x20-\x7e]/g, '').slice(0, 100);
+  const giftJpeg = (s, width) => sharp(path.join(app.config.storageDir, 'originals', s.file)).rotate()
+    .resize({ width, height: width, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 88, mozjpeg: true })
+    .withExif({ IFD0: { Artist: ascii(s.author), Copyright: `(C) ${ascii(s.author)} - ${ascii(app.siteName())} - usage personnel / personal use` } }).toBuffer();
+  const giftHeaders = reply => reply.header('x-robots-tag', 'noindex').header('cache-control', 'no-store').header('referrer-policy', 'no-referrer');
+  app.get('/pour-vous/:token', async (request, reply) => {
+    const s = app.encounters.share(request.params.token);
+    if (!s) return reply.callNotFound();
+    const lang = LANGS.includes(s.lang) ? s.lang : 'fr';
+    if (!s.expired) app.encounters.countShare(s.token, 'view');
+    const siteName = app.siteName();
+    const date = new Intl.DateTimeFormat({ fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(s.expires_at);
+    giftHeaders(reply);
+    if (s.expired) reply.code(410);
+    return reply.render('gift', { ...helpers(lang), siteName, s, g: UI[lang].gift, date, base: `/pour-vous/${s.token}`,
+      pageTitle: `${UI[lang].gift.title} · ${siteName}`, description: '' });
+  });
+  for (const [name, width, kind] of [['apercu.jpg', 1200, 'view'], ['photo.jpg', 2048, 'download']]) {
+    app.get(`/pour-vous/:token/${name}`, async (request, reply) => {
+      const s = app.encounters.share(request.params.token);
+      if (!s || s.expired) return reply.callNotFound();
+      const buf = await giftJpeg(s, width);
+      if (kind === 'download') {
+        app.encounters.countShare(s.token, 'download');
+        reply.header('content-disposition', `attachment; filename="${ascii(app.siteName()).replace(/\W+/g, '-').toLowerCase() || 'photo'}${s.ref ? `-${s.ref}` : ''}.jpg"`);
+      }
+      return giftHeaders(reply).type('image/jpeg').send(buf);
+    });
+  }
+
   // Anciennes adresses des traductions de la page Droits.
   for (const lang of ['en', 'de']) app.get(`/droits/${lang}`, async (request, reply) => reply.redirect(`/${lang}/droits`, 301));
 
@@ -48,7 +82,7 @@ export default async function publicRoutes(app) {
 
   // Moteurs de recherche : tout le site public, jamais l'admin ni la connexion.
   app.get('/robots.txt', async (request, reply) => reply.type('text/plain; charset=utf-8')
-    .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nDisallow: /partage/\nDisallow: /langue/\nAllow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
+    .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nDisallow: /partage/\nDisallow: /langue/\nDisallow: /pour-vous/\nAllow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
 
   // Chaque page dans ses trois langues, avec les liens hreflang entre elles.
   app.get('/sitemap.xml', async (request, reply) => {
