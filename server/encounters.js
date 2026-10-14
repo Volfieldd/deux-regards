@@ -230,10 +230,11 @@ export function createEncounters({ db, now = () => Date.now() }) {
       if (adult === 0 && !guardian) errors.guardian = 'Personne mineure : le nom du parent qui signe est nécessaire.';
       const m = /^data:image\/png;base64,([A-Za-z0-9+/=]+)$/.exec(String(body.signature || ''));
       const raw = m ? Buffer.from(m[1], 'base64') : null;
-      if (!raw || raw.length > 600_000) errors.signature = 'La signature manque.';
+      if (!raw || raw.length > 500_000) errors.signature = 'La signature manque.';
       else {
         try {
           // Réencodée (jamais le fichier reçu tel quel), sur fond blanc, 1200 px de large au plus.
+          if ((await sharp(raw).metadata()).format !== 'png') throw new Error('pas un PNG');
           signature = await sharp(raw, { limitInputPixels: 4e6 }).flatten({ background: '#ffffff' }).resize({ width: 1200, withoutEnlargement: true }).png().toBuffer();
         } catch { errors.signature = 'Signature illisible : recommencez.'; }
       }
@@ -255,7 +256,7 @@ export function createEncounters({ db, now = () => Date.now() }) {
       const number = nextNumber(prefix);
       const ref = `${prefix}-${String(number).padStart(4, '0')}`;
       reserve(prefix, number);
-      const row = { ref, author_id: author.id, status: 'en_cours', verified: decision === 'accord' ? 1 : 0, email, name, lang, wants_photo: body.wants_photo === 'on' || Boolean(email) ? 1 : 0,
+      const row = { ref, author_id: author.id, status: 'en_cours', verified: decision === 'accord' ? 1 : 0, email, name, lang, wants_photo: body.wants_photo === 'on' ? 1 : 0,
         consent: decision === 'accord' ? JSON.stringify(scopes) : null, consent_source: decision === 'accord' ? 'signature' : null, consent_at: decision === 'accord' ? t : null,
         refused: decision === 'refus' ? 1 : 0, refused_at: decision === 'refus' ? t : null, met_on: parisDay, met_time: new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(t),
         place: text(body.place, 120) || (city ? city.label : ''), details: text(body.details, 500), portrait_jpeg: portraitJpeg, signature_png: signature,

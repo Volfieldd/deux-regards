@@ -6,8 +6,9 @@ import nodemailer from 'nodemailer';
 
 export class MailError extends Error {}
 
+// Délais courts : à l'enregistrement d'une rencontre, le photographe attend dans la rue.
 export function createMailer({ url, from, log, transport = null } = {}) {
-  const t = transport || (url ? nodemailer.createTransport(url, { connectionTimeout: 15000, greetingTimeout: 15000, socketTimeout: 30000 }) : null);
+  const t = transport || (url ? nodemailer.createTransport(url, { connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 15000 }) : null);
   return {
     enabled: Boolean(t),
     async send({ to, subject, text, replyTo }) {

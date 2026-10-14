@@ -123,3 +123,28 @@ test('récapitulatif envoyé par le serveur quand SMTP est configuré ; en cas d
   assert.throws(() => loadConfig({ SMTP_URL: 'smtps://a:b@smtp.exemple.fr:465' }), /MAIL_FROM est obligatoire/);
   assert.throws(() => loadConfig({ SMTP_URL: 'http://x', MAIL_FROM: 'a@b.fr' }), /SMTP_URL doit commencer/);
 });
+
+test('sécurité : seules des photos sont acceptées (pas de SVG), signature exigée en PNG, case « recevoir la photo » respectée', async t => {
+  const c = await ctxOf(t);
+  const svg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40"/></svg>');
+  let r = await c.send({ decision: 'refus' }, svg);
+  assert.equal(r.statusCode, 422);
+  assert.match(r.body, /La photo doit être une image JPEG, PNG ou WebP/);
+  const jpegAsPng = `data:image/png;base64,${(await sharp({ create: { width: 50, height: 20, channels: 3, background: '#000' } }).jpeg().toBuffer()).toString('base64')}`;
+  r = await c.send({ decision: 'accord', scope_site: 'on', name: 'X', adult: 'oui', signature: jpegAsPng });
+  assert.match(r.body, /Signature illisible/);
+  assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounters').pluck().get(), 0);
+  // Une adresse seule ne vaut pas « veut recevoir la photo ».
+  r = await c.send({ decision: '', email: 'x@exemple.fr', __proto__x: 'y' });
+  assert.equal(r.statusCode, 303);
+  assert.equal(c.db.prepare('SELECT wants_photo FROM encounters').pluck().get(), 0);
+  // Carte signée envoyée en SVG : refusée aussi.
+  const boundary = '----t' + Math.random().toString(16).slice(2);
+  const payload = Buffer.concat([
+    Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="_csrf"\r\n\r\n${c.csrf}\r\n`),
+    Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="ref"\r\n\r\nJ-0500\r\n`),
+    Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="card"; filename="c.svg"\r\nContent-Type: image/svg+xml\r\n\r\n`), svg, Buffer.from(`\r\n--${boundary}--\r\n`)]);
+  const card = await c.as({ method: 'POST', url: '/admin/rencontres', payload, headers: { 'content-type': `multipart/form-data; boundary=${boundary}` } });
+  assert.equal(card.statusCode, 303);
+  assert.equal(c.db.prepare("SELECT COUNT(*) FROM encounters WHERE ref = 'J-0500'").pluck().get(), 0);
+});

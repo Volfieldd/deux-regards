@@ -12,6 +12,12 @@ import { MailError } from '../mailer.js';
 // Admin « Rencontres » : demandes reçues par la page /bonjour, accords papier (carte « pour nous ») et refus.
 // Enregistré dans le plugin d'administration (session d'admin exigée, comme le reste de /admin).
 const CARD_MAX_BYTES = 15 * 1024 * 1024;
+// Photos envoyées (carte signée, photo de repère) : seulement des photos ; jamais un SVG ou un PDF que sharp saurait
+// aussi lire (contenu actif, ressources externes).
+const PHOTO_FORMATS = ['jpeg', 'png', 'webp'];
+async function photoFormat(buf) { try { return PHOTO_FORMATS.includes((await sharp(buf).metadata()).format); } catch { return false; } }
+// Champs des formulaires multipart : noms simples seulement (rien comme « __proto__ »).
+const FIELD = /^[a-z_]{1,30}$/;
 
 export function registerEncounters(app, { repo, render, write, done, failed, withReady }) {
   const enc = app.encounters;
@@ -116,10 +122,11 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const body = {};
     let checked = false; let portrait = null; let error = null;
     try {
+      // fieldSize : la signature (PNG en base64, 500 Ko au plus une fois décodée) tient dans un champ.
       for await (const part of request.parts({ limits: { fileSize: CARD_MAX_BYTES, files: 1, fields: 40, fieldSize: 700_000 } })) {
         if (part.type === 'field') {
           if (part.fieldname === '_csrf') checked = sameToken(part.value, request.session.csrf);
-          else body[part.fieldname] = part.value;
+          else if (FIELD.test(part.fieldname)) body[part.fieldname] = part.valueTruncated ? '' : part.value;
           continue;
         }
         if (!checked) { part.file.resume(); break; }
@@ -136,7 +143,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const author = repo.authors().find(a => a.id === Number(body.author_id)) || authorOf(request);
     try {
       if (error) throw new EncounterError({ portrait: error });
-      if (portrait) { try { await sharp(portrait).metadata(); } catch { throw new EncounterError({ portrait: 'La photo doit être une image JPEG, PNG ou WebP.' }); } }
+      if (portrait && !(await photoFormat(portrait))) throw new EncounterError({ portrait: 'La photo doit être une image JPEG, PNG ou WebP.' });
       const r = await enc.saveApp(body, { author, portrait });
       const e = enc.get(r.id);
       if (e.email && app.mailer.enabled) await sendRecap(e).catch(() => {});      // échec : bouton « Renvoyer » sur l'écran suivant
@@ -239,7 +246,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     for await (const part of request.parts({ limits: { fileSize: CARD_MAX_BYTES, files: 1, fields: 30 } })) {
       if (part.type === 'field') {
         if (part.fieldname === '_csrf') checked = sameToken(part.value, request.session.csrf);
-        else body[part.fieldname] = part.value;
+        else if (FIELD.test(part.fieldname)) body[part.fieldname] = part.value;
         continue;
       }
       if (!checked) { part.file.resume(); break; }
@@ -247,6 +254,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
       for await (const chunk of part.file) chunks.push(chunk);
       if (!chunks.length) continue;                                  // champ fichier laissé vide
       if (part.file.truncated) { error = 'Photo de la carte trop lourde (15 Mo au plus).'; continue; }
+      if (!(await photoFormat(Buffer.concat(chunks)))) { error = 'La photo de la carte doit être une image JPEG, PNG ou WebP (sur iPhone, l’appareil photo la convertit tout seul).'; continue; }
       try {
         jpeg = await sharp(Buffer.concat(chunks), { limitInputPixels: 60e6 }).rotate().resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 80 }).toBuffer();
       } catch {
