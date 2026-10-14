@@ -19,7 +19,7 @@ async function ctxOf(t) {
   // Une photo publiée de Julien, prise le jour de la session.
   const julien = ctx.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
   const photo = ctx.db.prepare("SELECT id FROM photos WHERE status = 'published' ORDER BY id LIMIT 1").pluck().get();
-  ctx.db.prepare('UPDATE photos SET author_id = ?, taken_on = ? WHERE id = ?').run(julien, DAY, photo);
+  ctx.db.prepare('UPDATE photos SET author_id = ?, taken_on = ?, faces = 1 WHERE id = ?').run(julien, DAY, photo);   // un visage
   return { ...ctx, post, get, julien, photo, enc: ctx.app.encounters, ig: ctx.app.instagram };
 }
 
@@ -54,12 +54,19 @@ test('personne de la session sans Instagram : file refusée, levée par « Pas s
   const out = await post(`/admin/rencontres/${id}/session/${photo}`, { exclure: '1', depuis: 'photo' });
   assert.equal(out.headers.location, `/admin/photos/${photo}#rencontres`);
   assert.deepEqual(ig.blocked(photo), []);
-  assert.ok(ig.enqueue(photo));
+  // Plus bloquée, mais un visage sans accord : à vérifier, mise en file sur confirmation.
+  assert.throws(() => ig.enqueue(photo), /à vérifier/);
+  const ok = await post('/admin/instagram/file', { photo_id: String(photo), confirmer: '1' });
+  assert.equal(ok.statusCode, 303);
+  assert.ok(ig.forPhoto(photo));
 });
 
 test('refus ou accord sans Instagram arrivé après la mise en file : la photo sort de la file, en échec expliqué', async t => {
   const { app, db, enc, ig, julien, photo } = await ctxOf(t);
-  const postId = ig.enqueue(photo);
+  // Un visage, personne rencontrée encore : à vérifier, mise en file sur confirmation explicite (gardée).
+  assert.throws(() => ig.enqueue(photo), /à vérifier : 1 visage, personne rencontrée/);
+  const postId = ig.enqueue(photo, { confirmed: true, byName: 'Julien' });
+  assert.equal(app.readiness.confirmations(photo)[0].usage, 'instagram');
   // La personne refuse sur /bonjour (carte J-0220, rencontrée ce jour-là).
   const r = await app.inject({ method: 'POST', url: '/bonjour', payload: { ref: 'J-0220', decision: 'refus', met_on: DAY } });
   assert.ok(r.statusCode < 400);
@@ -69,7 +76,7 @@ test('refus ou accord sans Instagram arrivé après la mise en file : la photo s
   assert.throws(() => ig.retry(postId), /bloquée/);
   // Accord limité au site d'une personne liée à la photo, saisi sur une carte : même effet.
   db.prepare('DELETE FROM encounters').run();
-  const again = ig.enqueue(photo);
+  const again = ig.enqueue(photo, { confirmed: true });
   const id = enc.saveCard(null, { ref: 'J-0230', signed: 'on', scope_site: 'on', author_id: julien });
   assert.equal(ig.post(again).status, 'queued');                  // ni liée ni de la session (pas de date) : rien ne bloque
   enc.link(id, [photo]);

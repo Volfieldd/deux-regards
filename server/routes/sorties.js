@@ -31,7 +31,7 @@ export function registerOutings(app, { repo, render, done, failed, write, withRe
     const o = load(request);
     if (!o) return reply.callNotFound();
     return render(request, reply, 'outing', {
-      title: `Sortie du ${fmtDay(o.day)}`, o: { ...o, photos: o.photos.map(withReady), url: outingUrl(o), when: fmtDay(o.day), range: range(o) },
+      title: `Sortie du ${fmtDay(o.day)}`, o: { ...o, photos: o.photos.map(p => ({ ...withReady(p), state: app.readiness.state(p) })), url: outingUrl(o), when: fmtDay(o.day), range: range(o) },
       partUrl: p => outingUrl({ ...o, starts: p.starts }), STATES, hhmm,
     });
   });
@@ -57,6 +57,18 @@ export function registerOutings(app, { repo, render, done, failed, write, withRe
     out.setPlace(o.author.id, o.day, o.starts, request.body?.lieu);
     return done(reply, back(o), 'Lieu de la sortie enregistré.');
   });
+  // « Publier les photos prêtes » : les brouillons prêts de la sortie ; à vérifier et bloquées restent en brouillon.
+  app.post('/admin/sorties/:author/:day/publier', write, async (request, reply) => {
+    const o = load(request);
+    if (!o) return reply.callNotFound();
+    const drafts = o.photos.filter(p => p.status === 'draft').map(p => p.id);
+    const g = app.readiness.gate(drafts);
+    const before = repo.setStatuses(Object.fromEntries(g.ok.map(id => [id, 'published'])));
+    app.instagram.onPublished(Object.keys(before).map(Number));
+    const rest = g.verify.length + g.blocked.length;
+    return done(reply, back(o), `${g.ok.length} photo${g.ok.length > 1 ? 's publiées' : ' publiée'}.${rest ? ` ${rest} reste${rest > 1 ? 'nt' : ''} en brouillon (à vérifier ou bloquée${rest > 1 ? 's' : ''}) : ouvrez leur fiche.` : ''}`);
+  });
+
   // Photos choisies : liées à une personne de la sortie, ou exclues de la sortie (personne de la liste n'y figure).
   app.post('/admin/sorties/:author/:day/photos', write, async (request, reply) => {
     const o = load(request);

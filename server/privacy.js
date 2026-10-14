@@ -20,7 +20,7 @@ export const PRIVACY = {
       ['Les photos', [
         'Nous photographions dans la rue, à des fins artistiques. Une photo où vous êtes reconnaissable n’est publiée (sur ce site, sur Instagram, en exposition ou en tirage) que pour les usages que vous avez acceptés, ou dans le cadre de la liberté d’expression artistique.',
         'Si vous refusez, la photo ne peut plus être publiée : nous la retirons du site et de la file Instagram. Un post déjà publié sur Instagram est supprimé à la main par nos soins.',
-        'Les photos ne sont jamais analysées pour reconnaître des visages.',
+        'Les photos ne sont jamais analysées pour reconnaître des visages. Sur notre serveur, un programme repère seulement s’il y a un visage sur une photo, et où (sans chercher à qui il appartient, et sans rien garder qui permette de le reconnaître) : cela nous dit s’il faut obtenir l’accord de quelqu’un avant de la publier.',
       ]],
       ['Quand vous nous écrivez ou nous donnez votre accord', [
         `Par la page ${host}/bonjour (le QR de nos cartes et vêtements), par une carte signée ou sur notre téléphone au moment de la photo, nous recueillons seulement ce que vous nous donnez : la référence de votre carte, la date et le lieu de la rencontre, votre nom, votre e-mail si vous voulez recevoir la photo ou une réponse, vos choix (recevoir la photo, accord par usage, refus) et vos messages.`,
@@ -67,7 +67,7 @@ export const PRIVACY = {
       ['Photographs', [
         'We photograph in the street, for artistic purposes. A photograph in which you are recognisable is only published (on this website, on Instagram, in exhibitions or as prints) for the uses you have agreed to, or within the freedom of artistic expression.',
         'If you refuse, the photograph can no longer be published: we remove it from the website and from the Instagram queue. A post already published on Instagram is deleted by hand by us.',
-        'Photographs are never analysed to recognise faces.',
+        'Photographs are never analysed to recognise faces. On our server, a program only detects whether there is a face in a photograph, and where (without trying to find out whose it is, and without keeping anything that would allow it to be recognised): this tells us whether we need someone’s consent before publishing it.',
       ]],
       ['When you write to us or give your consent', [
         `Through the page ${host}/bonjour (the QR code on our cards and clothes), on a signed card or on our phone when the photo is taken, we only collect what you give us: your card reference, the date and place of the meeting, your name, your email if you want to receive the photo or a reply, your choices (receive the photo, consent per use, refusal) and your messages.`,
@@ -114,7 +114,7 @@ export const PRIVACY = {
       ['Die Fotos', [
         'Wir fotografieren auf der Straße, zu künstlerischen Zwecken. Ein Foto, auf dem Sie erkennbar sind, wird nur für die Nutzungen veröffentlicht, denen Sie zugestimmt haben (auf dieser Website, auf Instagram, in Ausstellungen oder als Abzug), oder im Rahmen der künstlerischen Freiheit.',
         'Wenn Sie ablehnen, kann das Foto nicht mehr veröffentlicht werden: Wir entfernen es von der Website und aus der Instagram-Warteschlange. Einen bereits auf Instagram veröffentlichten Beitrag löschen wir von Hand.',
-        'Die Fotos werden nie zur Gesichtserkennung ausgewertet.',
+        'Die Fotos werden nie zur Gesichtserkennung ausgewertet. Auf unserem Server erkennt ein Programm nur, ob auf einem Foto ein Gesicht ist und wo (ohne herauszufinden, wem es gehört, und ohne etwas zu speichern, das eine Erkennung ermöglicht): So wissen wir, ob wir vor der Veröffentlichung jemandes Einwilligung brauchen.',
       ]],
       ['Wenn Sie uns schreiben oder einwilligen', [
         `Über die Seite ${host}/bonjour (den QR-Code unserer Karten und Kleidung), auf einer unterschriebenen Karte oder auf unserem Handy beim Fotografieren erheben wir nur, was Sie uns geben: die Referenz Ihrer Karte, Datum und Ort der Begegnung, Ihren Namen, Ihre E-Mail, wenn Sie das Foto oder eine Antwort erhalten möchten, Ihre Wahl (Foto erhalten, Einwilligung je Nutzung, Ablehnung) und Ihre Nachrichten.`,

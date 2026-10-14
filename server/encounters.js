@@ -261,13 +261,6 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     return [...linked, ...sessionRows.filter(e => !seen.has(e.id)).map(e => ({ ...decorate(e), via: 'session' }))];
   }
 
-  // Instagram bloqué : une personne liée à la photo, ou rencontrée ce jour-là par son photographe (sauf « pas sur
-  // cette photo »), refuse la publication ou n'a pas accepté Instagram. Aucune confirmation ne lève ce blocage.
-  // Renvoie les personnes en cause (vide : rien ne bloque).
-  function instagramBlock(photoId) {
-    return forPhoto(photoId).filter(e => e.refused || (e.consent && !e.consent.instagram))
-      .map(e => ({ id: e.id, ref: e.ref || (e.anonymized ? 'personne anonymisée' : 'sans référence'), refused: Boolean(e.refused), via: e.via }));
-  }
   // Accords modifiés (demande, carte, téléphone, photos liées ou exclues) : prévenir (file Instagram).
   const listeners = [];
   const changed = () => { for (const f of listeners) { try { f(); } catch { /* un abonné défaillant ne bloque pas l'enregistrement */ } } };
@@ -441,7 +434,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   };
 
   return {
-    instagramBlock, onChange: fn => listeners.push(fn),
+    onChange: fn => listeners.push(fn),
     createShare, shares, share, countShare, revokeShare, photographer, nextNumber, reserve, cardsLeft, markMailed,
     saveApp: async (...args) => { const r = await saveApp(...args); changed(); return r; }, exportData, erase, rightsDone,
     portraitJpeg: id => vault.openBuf(db.prepare('SELECT portrait_jpeg FROM encounters WHERE id = ?').pluck().get(id)) || null,

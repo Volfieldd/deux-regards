@@ -79,6 +79,24 @@ Une sortie **se crée toute seule** : à l'import (la date que l'appareil inscri
 
 Les fiches d'une rencontre et d'une photo ont un bouton **Ouvrir la sortie →**.
 
+## Visages et état des photos
+
+À l'import, le serveur **repère les visages** de chaque photo (combien, et où). Il ne reconnaît personne et ne garde aucune empreinte de visage : seulement le nombre et les cadres. Les photos importées avant cette fonction sont examinées une fois, en arrière-plan.
+
+Chaque photo a alors un **état pour chaque usage** (site, Instagram), lisible par sa forme :
+
+- **✓ prête** : aucun visage, ou toutes les personnes concernées ont accepté cet usage ;
+- **▲ à vérifier** : un visage, et un accord manque (personne rencontrée ce jour-là, une personne sans décision, un usage non accepté, ou une personne qui a refusé dans la même sortie). La publier demande de **cocher une confirmation** (« les personnes reconnaissables ont accepté, ou n'y sont pas reconnaissables ») ; la confirmation est gardée avec ce qui manquait, et ne vaut que pour ces raisons-là ;
+- **✕ bloquée** : site : un refus lié à la photo ; Instagram : une personne concernée refuse ou n'a pas accepté Instagram. Aucune confirmation ne lève un blocage.
+
+Personnes concernées : celles liées à la photo, et celles de sa sortie si la photo a un visage. Une photo **sans visage** ne concerne donc personne de la sortie : un paysage est prêt d'office.
+
+**Corriger la détection** (un profil manqué, un visage flou, une affiche) : en tête de la fiche, **Il y a quelqu'un**, **Personne de reconnaissable** ou **Revenir à la détection**. Une photo pas encore examinée compte comme ayant un visage.
+
+**Où le voir** : la bande en tête de la fiche (état site et Instagram, visages, raisons, confirmations) ; une pastille ▲ ou ✕ sur les vignettes de la photothèque et les filtres **▲ À vérifier**, **✕ Bloquées**, **Sans visage** ; l'état de chaque photo dans la fiche d'une sortie, avec **Publier les photos prêtes** ; « Aujourd'hui » signale les photos publiées à vérifier.
+
+**Publier en un clic** (Aujourd'hui, actions groupées, lot, sortie) ne publie que les photos prêtes : les autres restent en brouillon, le message dit pourquoi, et la confirmation se fait dans leur fiche.
+
 ## Un accord couvre la sortie
 
 Un accord vaut pour **la sortie** : toutes les photos que le photographe a prises **ce jour-là** (la date que l'appareil inscrit dans chaque photo), ou seulement sa partie de journée si la sortie est coupée. Rien à lier photo par photo.
@@ -91,7 +109,7 @@ Un accord vaut pour **la sortie** : toutes les photos que le photographe a prise
 ## Instagram suit les accords
 
 - **Instagram suppose le site** : refuser le site, c'est refuser Instagram (l'inverse non). Dans les formulaires, cocher Instagram coche le site ; un accord « Instagram sans le site » est refusé (sur une carte papier mal remplie : cochez le site seulement si la carte l'indique, sinon décochez Instagram).
-- **Une photo est bloquée pour Instagram**, sans confirmation possible, dès qu'une personne **liée à la photo** ou **rencontrée ce jour-là** par son photographe refuse la publication ou n'a pas accepté Instagram. La fiche de la photo l'affiche (« Instagram bloqué ») à la place du formulaire Instagram.
+- **Une photo est bloquée pour Instagram**, sans confirmation possible, dès qu'une personne **liée à la photo** ou **rencontrée pendant la sortie** (si la photo a un visage) refuse la publication ou n'a pas accepté Instagram. La fiche de la photo l'affiche (« Instagram bloqué ») à la place du formulaire Instagram. Une photo **à vérifier** n'entre dans la file que si vous cochez la confirmation sous le formulaire Instagram.
 - **La personne n'est pas sur cette photo** : dans la fiche de la photo, **Personnes rencontrées → Pas sur cette photo** l'exclut de la sortie pour cette photo ; le blocage tombe si plus personne ne bloque.
 - **Un refus arrive alors que la photo attend dans la file** : elle sort de la file tout de suite, en échec « bloquée : … » (page Instagram), et **Réessayer** est refusé tant que le blocage dure. Elle est aussi revérifiée juste avant l'envoi.
 
