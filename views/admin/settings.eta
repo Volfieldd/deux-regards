@@ -30,6 +30,13 @@
 <% }) %>
     <label>Contact pour les demandes d’utilisation <span class="mono">adresse e-mail ou lien https://</span><input name="rights_contact" value="<%= s.rights_contact || '' %>" maxlength="200"></label>
   </section>
+  <section class="panel" id="confidentialite">
+    <h2>Confidentialité <span class="mono">page <a href="/confidentialite" target="_blank" rel="noopener">/confidentialite</a> (RGPD), en trois langues</span></h2>
+    <p class="hint">La page décrit ce que le site fait des données : responsables (les auteurs), données, durées, destinataires, droits. Elle suit le code : rien à rédiger ici, sauf le contact et deux cases qui ne doivent être cochées que lorsque c’est vrai.</p>
+    <label>Contact des responsables <span class="mono">adresse e-mail</span><input name="privacy_contact" value="<%= s.privacy_contact || '' %>" maxlength="200" placeholder="info@nicephos.art"></label>
+    <label class="inline"><input type="checkbox" name="privacy_mfa"<%~ s.privacy_mfa ? ' checked' : '' %>> L’authentification à deux facteurs est activée pour tous les comptes de l’admin (Zitadel)</label>
+    <label class="inline"><input type="checkbox" name="privacy_encrypted"<%~ s.privacy_encrypted ? ' checked' : '' %>> Les données et les sauvegardes sont sur des disques chiffrés</label>
+  </section>
   <section class="panel" id="carte">
     <h2>Page Carte <span class="mono"><a href="/carte" target="_blank" rel="noopener">/carte</a><%= s.map_page ? '' : ' · aperçu réservé aux auteurs' %></span></h2>
     <p class="hint">Une carte du monde avec la vignette des photos à l’emplacement de leur ville, et la liste des lieux. Seules les photos publiées dont la fiche coche « Afficher sur la carte » y figurent (<%= it.mapCount %> aujourd’hui<%= it.mapCount ? `, ${it.mapCities} ville${it.mapCities > 1 ? 's' : ''}` : '' %>).</p>

@@ -415,6 +415,7 @@ export function createAdminRepo(db) {
         rights_text_en: text(body.rights_text_en, 10000),
         rights_text_de: text(body.rights_text_de, 10000),
         rights_contact: text(body.rights_contact, 200),
+        privacy_contact: text(body.privacy_contact, 200), privacy_mfa: body.privacy_mfa === 'on', privacy_encrypted: body.privacy_encrypted === 'on',
         map_page: body.map_page === 'on',
         hero,
       };

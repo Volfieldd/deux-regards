@@ -89,5 +89,9 @@ Dès qu'une personne refuse, **les photos liées ne peuvent plus être publiées
 
 - Seul ce que la personne écrit est gardé : référence, adresse, nom, choix, messages, et la photo de la carte signée.
 - **Supprimer cette rencontre** efface tout, à la demande de la personne.
-- Une demande sans accord ni refus, sans nouvelle depuis **12 mois**, est effacée automatiquement. Les accords et les refus sont gardés comme preuve.
+- Durées, automatiques et annoncées sur la page `/confidentialite` :
+  - demande sans accord ni refus : effacée après **12 mois** sans nouvelle ;
+  - photo de repère prise sur le téléphone : effacée après **6 mois** ;
+  - accord ou refus (avec la signature) : gardé tant qu'une photo liée existe, puis **5 ans** (délai pour agir en justice) ;
+  - photo supprimée : effacée des sauvegardes après **90 jours**.
 - La photo de la carte est rangée dans la base de données, dont les sauvegardes tournent sur 14 jours : une suppression disparaît aussi des sauvegardes au bout de deux semaines.

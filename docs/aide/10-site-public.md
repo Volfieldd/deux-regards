@@ -61,6 +61,7 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
 
   En zoomant, le fond devient plus détaillé (côtes, frontières, petites îles) : seule la zone affichée est chargée. La molette seule et le glissé vertical sur la carte au monde entier font défiler la page, comme ailleurs. Sans JavaScript, la carte est fixe et la liste des lieux reste complète.
 - **« Je vous ai photographié »** (`/bonjour`) : la page du QR des cartes de rencontre et des vêtements (`/bonjour/J` : avec le nom du photographe), sans lien dans le menu (voir [Rencontres](rencontres)).
+- **Confidentialité** (`/confidentialite`, en trois langues, lien en pied de page) : qui est responsable, ce que le site collecte et pourquoi, combien de temps, qui le reçoit, et comment exercer ses droits (voir [Réglages](reglages)).
 - **Page introuvable :** pour une adresse inconnue ou une photo dépubliée.
 
 ## Toujours

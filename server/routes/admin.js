@@ -475,6 +475,7 @@ export default async function adminRoutes(app) {
     if (page === 'a-propos') return 'À propos';
     if (page === 'droits') return 'Droits d’utilisation';
     if (page === 'carte') return 'Carte';
+    if (page === 'confidentialite') return 'Confidentialité';
     if (page === 'bonjour') return 'Je vous ai photographié (/bonjour)';
     const [kind, slug] = page.split(':');
     if (kind === 'serie') return `Série « ${categories.find(c => c.slug === slug)?.name || slug} »`;

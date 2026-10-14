@@ -19,7 +19,7 @@ export const TEXTS = {
   thanks: 'Merci !',
   thanksText: name => `Merci de m’avoir laissé saisir ce moment. Je vais soigner ces images et vous en envoyer une, rien que pour vous. — ${name}`,
   thanksTr: 'EN Thank you for letting me capture this moment: I’ll send you a photo. · DE Danke für diesen Moment: Ich schicke Ihnen ein Foto.',
-  qrText: 'Votre photo, votre accord, un message · Your photo · Ihr Foto',
+  qrText: 'Votre photo, votre accord, vos données · Your photo · Ihr Foto',
 };
 
 const qr = url => QRCode.toString(url, { type: 'svg', errorCorrectionLevel: 'Q', margin: 0 });

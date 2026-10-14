@@ -36,8 +36,24 @@ test('sauvegarde : instantané intègre, fichiers copiés une fois, rotation, ja
   run();
   assert.deepEqual(fs.readdirSync(path.join(backups, 'db')).filter(f => !f.endsWith('.db')), []);    // ni .part ni -wal/-shm
   assert.equal(fs.readdirSync(path.join(backups, 'db')).filter(f => f.endsWith('.db')).length, 2);   // BACKUP_KEEP
-  assert.equal(fs.readdirSync(path.join(backups, 'files', 'originals')).length, 12);
+  const stored = () => fs.readdirSync(path.join(backups, 'files', 'originals')).filter(f => !f.startsWith('.'));
+  assert.equal(stored().length, 12);
   assert.ok(JSON.parse(fs.readFileSync(path.join(backups, 'last.json'))).snapshot);
+
+  // Original supprimé dans l'admin : gardé 90 jours dans la sauvegarde, puis effacé (droit à l'effacement).
+  const gone = fs.readdirSync(path.join(dir, 'originals'))[0];
+  fs.rmSync(path.join(dir, 'originals', gone));
+  const day = 864e5;
+  const t0 = Date.now();
+  assert.equal(run({ ...env, BACKUP_NOW_MS: String(t0) }).pruned.originals, 0);
+  assert.ok(stored().includes(gone));
+  assert.equal(run({ ...env, BACKUP_NOW_MS: String(t0 + 89 * day) }).pruned.originals, 0);
+  assert.equal(run({ ...env, BACKUP_NOW_MS: String(t0 + 91 * day) }).pruned.originals, 1);
+  assert.equal(stored().length, 11);
+  // Garde-fou : dossier des originaux vide (montage raté) : rien n'est effacé.
+  for (const f of fs.readdirSync(path.join(dir, 'originals'))) fs.renameSync(path.join(dir, 'originals', f), path.join(dir, f));
+  assert.equal(run({ ...env, BACKUP_NOW_MS: String(t0 + 400 * day) }).pruned.originals, 0);
+  assert.equal(stored().length, 11);
 
   assert.throws(() => execFileSync('node', ['server/db/backup.js'], { env: { ...env, BACKUP_DIR: path.join(dir, 'sauv') }, stdio: 'pipe' }));
 });
@@ -58,7 +74,7 @@ test('robots.txt et sitemap.xml : site public seulement, URL absolues', async t 
   assert.ok(!locs.some(l => l.includes('/admin')));
   assert.ok(locs.includes('http://localhost:3000/en/droits') && locs.includes('http://localhost:3000/de/droits'));
   assert.ok(locs.includes('http://localhost:3000/en/photo/brume-sur-la-loire') && locs.includes('http://localhost:3000/de/serie/rue'));
-  assert.equal(locs.length, (1 + 4 + 2 + 11 + 2) * 3);                              // accueil, séries, auteurs, photos, à propos, droits ; × 3 langues
+  assert.equal(locs.length, (1 + 4 + 2 + 11 + 3) * 3);                              // accueil, séries, auteurs, photos, à propos, droits, confidentialité ; × 3 langues
   assert.match(res.body, /<xhtml:link rel="alternate" hreflang="de" href="http:\/\/localhost:3000\/de\/photo\/brume-sur-la-loire"\/>/);
   assert.match(robots, /Disallow: \/langue\//);
 });

@@ -47,6 +47,7 @@ chown -R 99:100 /mnt/cache/appdata/nicephos /mnt/user/backups/nicephos
 
 - **Données sur le pool cache, chemin direct** (`/mnt/cache/…`, pas `/mnt/user/…`). La base SQLite fonctionne mal à travers la couche FUSE de `/mnt/user`. Si votre pool porte un autre nom, remplacez `cache`. Avec Unraid 6.12 et plus, un partage `appdata` « exclusif » convient aussi.
 - **Sauvegardes sur le tableau**, donc sur d'autres disques que les données. Ajoutez-y une copie hors de la machine (plugin de sauvegarde, disque externe, cloud).
+- **Disques chiffrés (recommandé, RGPD)** : la base contient des noms, des e-mails, des signatures. Voir « Chiffrer les données » plus bas.
 - **99:100**, c'est-à-dire `nobody:users` : l'utilisateur standard des conteneurs Unraid. Les conteneurs tournent sous cet utilisateur, sans aucun privilège.
 
 ## 3. Zitadel : la connexion à l'admin
@@ -169,7 +170,7 @@ Les images servies ne sont pas dans l'archive : elles sont recalculées au déma
 `nicephos-sauvegarde` fait une sauvegarde au démarrage, puis toutes les 24 h, dans `/mnt/user/backups/nicephos` :
 
 - `db/` : instantanés de la base, les 14 derniers ;
-- `files/` : originaux, logos et marque. Les originaux y sont ajoutés et jamais effacés ;
+- `files/` : originaux, logos et marque. Un original supprimé dans l'admin y reste récupérable **90 jours**, puis il est effacé (droit à l'effacement ; `BACKUP_DELETED_DAYS` pour changer ce délai). Si le dossier des originaux est vide (montage raté), rien n'est effacé ;
 - `last.json` : compte rendu de la dernière sauvegarde.
 
 **Restaurer :** arrêtez la pile et gardez une copie de `data/`. Copiez `db/site-<date>.db` en `data/site.db` et supprimez `data/site.db-wal` et `data/site.db-shm` s'ils existent ; recopiez `files/*` dans `data/`, puis `chown -R 99:100 data` et relancez la pile. Les images servies se recalculent au démarrage.
@@ -192,6 +193,18 @@ Le conteneur `nicephos-traduction` (LibreTranslate, logiciel libre) propose les 
 ### Mettre à jour
 
 Dans Compose Manager : **Update Stack** (ou **Compose Pull**, puis **Compose Up**). Pour revenir à une version précise : `IMAGE=ghcr.io/volfieldd/deux-regards:sha-xxxxxxx` dans le `.env` de la pile (une migration de base déjà appliquée n'est pas défaite : restaurez alors aussi la base). Les données ne bougent pas : elles sont dans `data/`, jamais dans l'image. Une mise à jour qui modifie la base l'applique toute seule au démarrage. Prenez quand même l'habitude de vérifier la date de `last.json` avant.
+
+### Chiffrer les données (disque volé, disque jeté)
+
+La base contient des données personnelles (noms, e-mails, signatures, photos de repère) : les ranger sur des disques chiffrés protège contre le vol du serveur ou un disque revendu. Unraid sait le faire (chiffrement LUKS) :
+
+1. **Pool chiffré pour les données** : *Main → Add Pool* (ou un pool existant vidé), système de fichiers **« xfs - encrypted »** ou **« btrfs - encrypted »**, puis formatez. Unraid demande une phrase de passe (ou un fichier clé) au démarrage du tableau.
+2. **Déplacez les données** pile arrêtée : `rsync -a /mnt/cache/appdata/nicephos/ /mnt/<pool-chiffré>/appdata/nicephos/`, puis changez `DATA_DIR` dans le `.env` de la pile et relancez.
+3. **Sauvegardes** : sur des disques du tableau eux aussi chiffrés (même choix de format, disque par disque), ou une copie hors de la machine déjà chiffrée.
+4. **La clé** : avec une phrase de passe tapée à chaque démarrage, un disque volé ne révèle rien ; mais après une coupure de courant, le site attend que vous déverrouilliez le tableau. Un fichier clé posé sur la clé USB d'Unraid démarre tout seul, mais protège moins (la clé USB voyage avec le serveur).
+5. Une fois fait, cochez **Réglages → Confidentialité → « Les données et les sauvegardes sont sur des disques chiffrés »** : la page `/confidentialite` l'annonce.
+
+Pensez aussi à **l'authentification à deux facteurs** dans Zitadel (*Settings → Login Behavior and Access → Multifactor*, ou l'obligation par organisation) pour vos deux comptes, puis cochez la case correspondante dans Réglages.
 
 ### Ce qui protège les données
 
