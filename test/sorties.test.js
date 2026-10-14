@@ -21,7 +21,7 @@ async function ctxOf(t) {
   const julien = ctx.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
   // Trois photos publiées de Julien ce jour-là : le matin, l'après-midi, et sans heure connue.
   const [morning, evening, unknown] = ctx.db.prepare("SELECT id FROM photos WHERE status = 'published' ORDER BY id LIMIT 3").pluck().all();
-  const set = ctx.db.prepare('UPDATE photos SET author_id = ?, taken_on = ?, taken_time = ? WHERE id = ?');
+  const set = ctx.db.prepare('UPDATE photos SET author_id = ?, taken_on = ?, taken_time = ?, faces = 1 WHERE id = ?');   // un visage chacune
   set.run(julien, DAY, '10:05', morning); set.run(julien, DAY, '15:40', evening); set.run(julien, DAY, '', unknown);
   // Une rencontre à 15 h 10, accord pour le site seulement.
   const enc = ctx.app.encounters;

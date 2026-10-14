@@ -168,8 +168,14 @@ export default async function adminRoutes(app) {
   app.get('/admin/photos', async (request, reply) => {
     const { q = '', auteur = '', serie = '', statut = '' } = request.query;
     // Ce qui manque (liens d'« Aujourd'hui ») : ville (carte du monde) ou traduction du titre, photos publiées.
+    // État pour le site (server/readiness.js) : à vérifier, bloquée, sans visage.
+    const stateOf = new Map();
+    const st = p => { if (!stateOf.has(p.id)) stateOf.set(p.id, app.readiness.state(p)); return stateOf.get(p.id); };
     const MISSING = { ville: { label: 'Publiées sans ville', test: p => p.status === 'published' && p.city_id == null },
-      traduction: { label: 'Titres sans traduction', test: p => p.status === 'published' && (!p.title_en || !p.title_de) } };
+      traduction: { label: 'Titres sans traduction', test: p => p.status === 'published' && (!p.title_en || !p.title_de) },
+      verifier: { label: '▲ À vérifier', test: p => st(p).site.level === 'warn' },
+      bloquee: { label: '✕ Bloquées', test: p => st(p).site.level === 'no' },
+      'sans-visage': { label: 'Sans visage', test: p => !st(p).faces.has } };
     const missing = Object.hasOwn(MISSING, request.query.manque) ? request.query.manque : '';
     // « À finir » : brouillons et titres provisoires.
     const todo = statut === 'afinir';
@@ -179,6 +185,7 @@ export default async function adminRoutes(app) {
     let photos = repo.photos(filter).map(withReady);
     if (todo) photos = photos.filter(p => p.status === 'draft' || p.provisional);
     if (missing) photos = photos.filter(MISSING[missing].test);
+    photos = photos.map(p => ({ ...p, site: st(p).site }));
     // Données de l'inspecteur (une photo choisie) : lues par admin.js, jamais exécutées.
     const data = photos.map(dataOf);
     return render(request, reply, 'photos', {
@@ -187,7 +194,8 @@ export default async function adminRoutes(app) {
       filtered: Boolean(filter.q || filter.author || filter.category || filter.status || todo || missing), todo,
       missing: missing ? { key: missing, label: MISSING[missing].label } : null,
       totals: { all: all.length, published: all.filter(p => p.status === 'published').length, draft: all.filter(p => p.status === 'draft').length,
-        todo: all.filter(p => p.status === 'draft' || p.provisional).length },
+        todo: all.filter(p => p.status === 'draft' || p.provisional).length,
+        verifier: all.filter(MISSING.verifier.test).length, bloquee: all.filter(MISSING.bloquee.test).length, 'sans-visage': all.filter(MISSING['sans-visage'].test).length },
       view: request.query.vue === 'liste' ? 'liste' : 'planche', importer: 'importer' in request.query, wide: true,
       defaultAuthor: repo.authorBySub(request.session.sub)?.id ?? authors[0]?.id,
       defaultCategory: repo.categories().find(c => c.slug === filter.category)?.id ?? repo.categories()[0]?.id,
@@ -240,6 +248,7 @@ export default async function adminRoutes(app) {
           original = await importOriginal(storageDir, tmp);
           id = repo.addPhoto({ title: titleFromFilename(part.filename), categoryId, authorId, sourceName: part.filename, ...original });
           await app.variants.renderPhoto(id);
+          await app.faces.examine(id);
           imported.push({ id, name: part.filename });
         } catch (err) {
           // Rien ne reste d'une image qui n'a pas pu être rendue : ni ligne, ni original, ni variante.
@@ -306,6 +315,7 @@ export default async function adminRoutes(app) {
           const original = await importOriginal(storageDir, tmp);
           const title = titleFromFilename(part.filename);
           const id = repo.addPhoto({ title, categoryId, authorId, sourceName: part.filename, ...original });
+          await app.faces.examine(id);
           tracker.add(id, part.filename);
           result = { code: 200, id, title };
         } catch (err) {
@@ -431,7 +441,8 @@ export default async function adminRoutes(app) {
     try {
       // Case « filigrane » : absente du formulaire quand elle est décochée, d'où le champ témoin watermark_set.
       const watermark = body.watermark_set ? body.watermark === 'on' || body.watermark === true : undefined;
-      app.instagram.enqueue(id, { frame: body.frame, watermark, caption: body.custom === 'on' || body.custom === true ? body.caption : null });
+      app.instagram.enqueue(id, { frame: body.frame, watermark, caption: body.custom === 'on' || body.custom === true ? body.caption : null,
+        confirmed: body.confirmer === '1' || body.confirmer === true, byName: request.session.name });
     } catch (err) {
       if (!(err instanceof InstagramError)) throw err;
       return json ? reply.code(422).send({ error: err.message }) : failed(reply, back, `Instagram : ${err.message}.`);
@@ -500,6 +511,12 @@ export default async function adminRoutes(app) {
       engagement, likesSpark: engagement && engagement.series.length > 1 ? sparkline(engagement.series.map(d => d.likes)) : '',
       slot: active ? ig.queue().find(x => x.id === post.id)?.slot : null };
   };
+  // Ce que la fiche montre en plus du formulaire : audience, Instagram, personnes, sortie, état et confirmations.
+  const photoExtras = photo => ({
+    proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
+    outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
+    ready: app.readiness.state(photo.id), confirmations: app.readiness.confirmations(photo.id), igConfirmed: app.readiness.confirmed(photo.id, 'instagram'),
+  });
   const photoStats = id => {
     const { from, to } = app.stats.range(30);
     const s = app.stats.photo(id, from, to);
@@ -604,9 +621,11 @@ export default async function adminRoutes(app) {
     if (Object.keys(errors).length) return lotPage(request, reply.code(422), ids, { errors, values });
     const to = `/admin/photos/lot?ids=${ids.join(',')}`;
     if (body.publish === '1') {
-      const before = repo.setStatuses(Object.fromEntries(ids.map(id => [id, 'published'])));
+      const g = app.readiness.gate(ids);
+      const before = repo.setStatuses(Object.fromEntries(g.ok.map(id => [id, 'published'])));
       queued(before);
-      return done(reply, '/admin/photos', `${ids.length} photo${ids.length > 1 ? 's publiées' : ' publiée'}.`);
+      const held = g.verify.length + g.blocked.length;
+      return done(reply, '/admin/photos', `${g.ok.length} photo${g.ok.length > 1 ? 's publiées' : ' publiée'}.${held ? ` ${held} reste${held > 1 ? 'nt' : ''} en brouillon : ${g.verify.length ? `${g.verify.length} à vérifier (confirmez dans leur fiche)` : ''}${g.verify.length && g.blocked.length ? ', ' : ''}${g.blocked.length ? `${g.blocked.length} bloquée${g.blocked.length > 1 ? 's' : ''} par un refus` : ''}.` : ''}`);
     }
     return done(reply, to, 'Modifications enregistrées.');
   });
@@ -649,16 +668,20 @@ export default async function adminRoutes(app) {
         case 'publish':
         case 'draft': {
           if (!n) return ko(422, 'Aucune photo sélectionnée.');
-          const refused = body.action === 'publish' ? ids.filter(id => repo.refusalOf(id)) : [];
-          const before = repo.setStatuses(each(body.action === 'publish' ? 'published' : 'draft'));
+          // Publier : seulement les photos prêtes ; à vérifier → leur fiche (confirmation) ; bloquées → refus.
+          const g = body.action === 'publish' ? app.readiness.gate(ids) : { ok: ids, verify: [], blocked: [] };
+          const refused = g.blocked.map(b => b.id);
+          const before = repo.setStatuses(body.action === 'publish' ? Object.fromEntries(g.ok.map(id => [id, 'published'])) : each('draft'));
           queued(before);
           if (refused.length === n) return ko(422, `${n > 1 ? 'Ces photos ne peuvent pas être publiées' : 'Cette photo ne peut pas être publiée'} : la personne photographiée refuse la publication (voir Personnes).`);
+          if (g.verify.length && !g.ok.length && !refused.length) return ko(422, `${n > 1 ? 'Ces photos sont' : 'Cette photo est'} à vérifier (${g.verify[0].reasons[0]}${g.verify.length > 1 ? '…' : ''}) : confirmez dans ${n > 1 ? 'leur' : 'sa'} fiche pour publier.`);
           const verb = body.action === 'publish' ? 'publiée' : 'repassée en brouillon';
           // Publication en un clic : un titre provisoire (nom du fichier) est rappelé dans le message.
           const prov = body.action === 'publish' ? ids.filter(id => repo.photoView(id)?.provisional).length : 0;
           const note = prov ? ` ${prov === n ? (n > 1 ? 'Elles gardent' : 'Elle garde') : `${prov} garde${prov > 1 ? 'nt' : ''}`} le nom du fichier comme titre : corrigez-le dans la photothèque.` : '';
-          const blocked = refused.length ? ` ${refused.length} photo${refused.length > 1 ? 's restent' : ' reste'} en brouillon : la personne photographiée refuse la publication (voir Personnes).` : '';
-          const m = n - refused.length;
+          const blocked = (refused.length ? ` ${refused.length} photo${refused.length > 1 ? 's restent' : ' reste'} en brouillon : la personne photographiée refuse la publication (voir Personnes).` : '')
+            + (g.verify.length ? ` ${g.verify.length} photo${g.verify.length > 1 ? 's' : ''} à vérifier ${g.verify.length > 1 ? 'restent' : 'reste'} en brouillon : confirmez dans ${g.verify.length > 1 ? 'leur' : 'sa'} fiche.` : '');
+          const m = n - refused.length - g.verify.length;
           return ok(`${m} photo${m > 1 ? 's' : ''} ${m > 1 ? verb.replace('publiée', 'publiées').replace('repassée', 'repassées') : verb}.${note}${blocked}`, { undo: { action: 'statuses', map: before } });
         }
         case 'map_on':
@@ -751,16 +774,25 @@ export default async function adminRoutes(app) {
     if (!photo) return reply.callNotFound();
     return render(request, reply, 'photo', {
       title: photo.title, photo, values: { ...photo, city_label: photo.city_name ? cities.label({ name: photo.city_name, cc: photo.city_cc }) : '' }, errors: {}, categories: repo.categories(), authors: repo.authors(),
-      proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
-      outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
+      ...photoExtras(photo),
     });
   });
 
   app.post('/admin/photos/:id', write, async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
+    const body = request.body || {};
     try {
-      repo.updatePhoto(photo.id, request.body || {});
+      // Publier une photo à vérifier : confirmation explicite exigée, puis gardée (le blocage, lui, est refusé plus bas).
+      const publishing = body.status === 'published' && photo.status !== 'published';
+      const site = publishing ? app.readiness.state(photo.id).site : null;
+      if (site?.level === 'warn' && body.confirmer !== '1') {
+        const err = new ValidationError({ status: `Photo à vérifier (${site.reasons.join(' ; ')}) : cochez la confirmation pour la publier.` });
+        err.values = body;
+        throw err;
+      }
+      repo.updatePhoto(photo.id, body);
+      if (site?.level === 'warn') app.readiness.confirm(photo.id, 'site', request.session.name, site.reasons);
       app.variants.schedule();          // auteur, date, titre ou option de filigrane ont pu changer
       queued({ [photo.id]: photo.status });
     } catch (err) {
@@ -768,7 +800,7 @@ export default async function adminRoutes(app) {
       reply.code(422);
       return render(request, reply, 'photo', {
         title: photo.title, photo, values: { ...photo, ...err.values }, errors: err.errors, categories: repo.categories(), authors: repo.authors(),
-        proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
+        ...photoExtras(photo),
       });
     }
     return done(reply, `/admin/photos/${photo.id}`, 'Photo enregistrée.');
@@ -844,10 +876,26 @@ export default async function adminRoutes(app) {
   app.post('/admin/photos/:id/status', write, async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
+    const published = request.body?.status === 'published';
+    if (published && photo.status !== 'published') {
+      // Publication en un clic : seulement une photo prête ; à vérifier → la fiche (confirmation), bloquée → refus.
+      const g = app.readiness.gate([photo.id]);
+      if (g.blocked.length) return failed(reply, safeBack(request, '/admin/photos'), `« ${photo.title} » ne peut pas être publiée : ${g.blocked[0].reasons.join(' ; ')}.`);
+      if (g.verify.length) return failed(reply, `/admin/photos/${photo.id}`, `« ${photo.title} » est à vérifier (${g.verify[0].reasons.join(' ; ')}) : confirmez dans la fiche pour la publier.`);
+    }
     repo.setStatus(photo.id, request.body?.status);
     queued({ [photo.id]: photo.status });
-    const published = request.body?.status === 'published';
     return done(reply, safeBack(request, '/admin/photos'), `« ${photo.title} » ${published ? 'publiée' : 'repassée en brouillon'}.`);
+  });
+
+  // Visages : correction à la main (il y a quelqu'un / personne de reconnaissable / revenir à la détection).
+  app.post('/admin/photos/:id/visages', write, async (request, reply) => {
+    const photo = repo.photo(byId(request.params.id));
+    if (!photo) return reply.callNotFound();
+    const v = { oui: 1, non: 0 }[request.body?.valeur];
+    app.readiness.setFaces(photo.id, v ?? null);
+    app.instagram.dropBlocked();
+    return done(reply, `/admin/photos/${photo.id}`, v === 1 ? 'Indiqué : quelqu’un est sur la photo.' : v === 0 ? 'Indiqué : personne de reconnaissable sur la photo.' : 'La détection des visages fait de nouveau foi.');
   });
 
   app.post('/admin/photos/:id/move', write, async (request, reply) => {

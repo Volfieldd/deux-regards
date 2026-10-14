@@ -25,6 +25,8 @@ import { createVault } from './vault.js';
 import { createInstagram } from './instagram.js';
 import { createTodo } from './todo.js';
 import { createOutings } from './outings.js';
+import { createReadiness } from './readiness.js';
+import { createFaceDetector, createFaceService } from './faces.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -85,7 +87,7 @@ function assetUrls(root, cache) {
   };
 }
 
-export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {}, mailTransport = null }) {
+export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {}, faceOptions = {}, mailTransport = null }) {
   const app = Fastify({ logger: loggerOptions(logger), trustProxy: config.trustProxy });
 
   app.decorate('config', config);
@@ -160,10 +162,19 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('translator', createTranslator({ ...config.translate, log: app.log }));
   app.decorate('stats', createStats({ db, publicUrl: config.publicUrl, log: app.log, trustCountry: Boolean(config.trustProxy) }));
   // Partage Instagram : file de publication et envoi aux créneaux (voir server/instagram.js).
-  // Instagram suit les accords : une photo dont une personne n'a pas accepté Instagram ne part pas, et sort de la file
-  // dès qu'un accord change.
+  // État de chaque photo pour chaque usage (prête, à vérifier, bloquée), d'après ses visages et les accords.
+  app.decorate('readiness', createReadiness({ db, encounters: app.encounters }));
+  // Visages : détectés (jamais reconnus) sur le serveur, à l'import et une fois pour les anciennes photos.
+  // faceOptions.manual (tests) : rien ne démarre seul ; faceOptions.detector remplace le modèle.
+  app.decorate('faces', createFaceService({ db, storageDir: config.storageDir, detector: faceOptions.detector || createFaceDetector({ log: app.log }), log: app.log, auto: !faceOptions.manual }));
+  if (!faceOptions.manual) app.addHook('onReady', async () => { setTimeout(() => app.faces.run(), 3000).unref(); });
+  app.addHook('onClose', async () => { app.faces.stop(); await app.faces.idle(); });
+  // Instagram suit les accords : une photo bloquée ne part pas, une photo à vérifier seulement sur confirmation ; la
+  // file est revue dès qu'un accord change.
   app.decorate('instagram', createInstagram({ db, storageDir: config.storageDir, config, variants: app.variants, siteName: app.siteName, log: app.log,
-    blockedBy: id => app.encounters.instagramBlock(id), ...instagramOptions }));
+    readinessOf: id => app.readiness.state(id)?.instagram,
+    confirmedFor: id => app.readiness.confirmed(id, 'instagram'),
+    onConfirm: (id, reasons, by) => app.readiness.confirm(id, 'instagram', by, reasons), ...instagramOptions }));
   app.encounters.onChange(() => app.instagram.dropBlocked());
   app.addHook('onReady', async () => { if (!instagramOptions.manual) app.instagram.start(); });
   app.addHook('onClose', async () => { app.instagram.stop(); });
@@ -174,7 +185,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { setTimeout(() => app.outings.backfillAll(), 2000).unref(); });
   app.addHook('onClose', async () => app.outings.stop());
   // « Aujourd'hui » : ce qui demande votre attention (voir server/todo.js).
-  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs }));
+  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
 
   await setupAuth(app, oidc && { oidc });

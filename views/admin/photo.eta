@@ -3,6 +3,24 @@
 <% const inv = k => e[k] ? ` aria-invalid="true" aria-describedby="err-${k}"` : ''; %>
 <p class="mono"><a class="more eyebrow" href="/admin/photos">← Photos</a></p>
 <h1><%= it.photo.title %></h1>
+<% const R = it.ready, F = R.faces, LV = { ok: 'prête', warn: 'à vérifier', no: 'bloquée' }; %>
+<section class="ready-band" aria-label="État de la photo">
+  <span class="enc-tag <%= R.site.level %>">Site : <%= LV[R.site.level] %></span>
+  <span class="enc-tag <%= R.instagram.level %>">Instagram : <%= LV[R.instagram.level] %></span>
+  <span class="mono"><%= F.source === 'main' ? (F.has ? 'quelqu’un sur la photo (indiqué à la main)' : 'personne de reconnaissable (indiqué à la main)') : F.source === 'attente' ? 'visages : examen en attente' : F.source === 'echec' ? 'visages : examen impossible' : F.n ? `${F.n} visage${F.n > 1 ? 's' : ''} détecté${F.n > 1 ? 's' : ''}` : 'aucun visage détecté' %></span>
+  <form class="faces-fix" method="post" action="/admin/photos/<%= it.photo.id %>/visages">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (!(F.source === 'main' && F.has)) { %>    <button class="linkbtn" type="submit" name="valeur" value="oui">Il y a quelqu’un</button>
+<% } %><% if (!(F.source === 'main' && !F.has)) { %>    <button class="linkbtn" type="submit" name="valeur" value="non">Personne de reconnaissable</button>
+<% } %><% if (F.source === 'main') { %>    <button class="linkbtn" type="submit" name="valeur" value="auto">Revenir à la détection</button>
+<% } %>  </form>
+<% const reasons = [...new Set([...R.site.reasons, ...R.instagram.reasons])]; if (reasons.length) { %>
+  <ul class="ready-reasons"><% reasons.forEach(r => { %><li><%= r %></li><% }) %></ul>
+<% } %>
+<% if (it.confirmations.length) { %>
+  <p class="mono">Confirmations : <%= it.confirmations.map(c => `${c.usage === 'site' ? 'site' : 'Instagram'} par ${c.by_name || '?'} le ${new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Paris' }).format(c.at)}`).join(' · ') %></p>
+<% } %>
+</section>
 <div class="edit">
   <figure class="preview">
     <%~ it.picture(it.photo, { sizes: '(min-width: 900px) 40vw, 92vw', alt: '' }) %>
@@ -41,6 +59,11 @@
       <label class="inline"><input type="radio" name="status" value="<%= k %>"<%~ v.status === k ? ' checked' : '' %>> <%= label %></label>
 <% }) %>
     </fieldset>
+<% if (it.photo.status !== 'published' && R.site.level === 'warn') { %>
+    <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> Pour publier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.</label>
+<% } else if (it.photo.status !== 'published' && R.site.level === 'no') { %>
+    <p class="cellnote err">Publication impossible : <%= R.site.reasons.join(' ; ') %>.</p>
+<% } %>
     <fieldset class="row">
       <legend>Filigrane</legend>
       <label class="inline"><input type="radio" name="watermark" value="default"<%~ v.watermark !== 0 ? ' checked' : '' %>> Selon les <a href="/admin/images">réglages</a></label>
@@ -92,7 +115,7 @@
   <p class="err">Échec de la publication : <%= ig.post.error %> (voir la page <a href="/admin/instagram">Instagram</a> pour réessayer).</p>
 <% } %>
 <% if (ig.blocked.length) { %>
-  <p class="ig-blocked" role="note"><strong>Instagram bloqué</strong> : <%= ig.blocked.map(w => w.ref).join(', ') %> <%= ig.blocked.length > 1 ? 'n’ont' : 'n’a' %> pas accepté Instagram (refus, ou accord sans Instagram). Aucune confirmation ne lève ce blocage : si la personne n’est pas sur cette photo, indiquez-le dans <a class="more" href="#rencontres">Personnes rencontrées</a>.</p>
+  <p class="ig-blocked" role="note"><strong>Instagram bloqué</strong> : <%= ig.blocked.join(' ; ') %>. Aucune confirmation ne lève ce blocage : si la personne n’est pas sur cette photo, indiquez-le dans <a class="more" href="#rencontres">Personnes rencontrées</a>.</p>
 <% } else if (it.photo.status !== 'published') { %>
   <p class="hint">Publiez d’abord la photo sur le site pour la partager sur Instagram.</p>
 <% } else if (!ig.post || ig.active || ig.post.status === 'failed' || ig.post.status === 'published') { if (!(ig.post && ig.post.status === 'publishing')) { %>
@@ -108,7 +131,8 @@
         <label>Cadre <select name="frame" data-ig-frame><% Object.entries(ig.FRAMES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ (ig.post ? ig.post.frame : ig.s.frame) === k ? ' selected' : '' %>><%= l %></option><% }) %></select></label>
         <label class="inline"><input type="checkbox" name="watermark" data-ig-watermark<%~ (ig.post ? ig.post.watermark : ig.s.watermark) ? ' checked' : '' %>> Avec le filigrane</label>
       </div>
-      <label class="inline"><input type="checkbox" name="custom" data-ig-custom<%~ ig.custom ? ' checked' : '' %>> Légende personnalisée pour cette photo <span class="mono">sinon, celle du modèle</span></label>
+<% if (R.instagram.level === 'warn' && !it.igConfirmed) { %>      <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> Instagram à vérifier (<%= R.instagram.reasons.join(' ; ') %>) : je confirme que les personnes reconnaissables ont accepté Instagram, ou n’y sont pas reconnaissables.</label>
+<% } %>      <label class="inline"><input type="checkbox" name="custom" data-ig-custom<%~ ig.custom ? ' checked' : '' %>> Légende personnalisée pour cette photo <span class="mono">sinon, celle du modèle</span></label>
       <label>Légende <span class="mono" data-ig-count><%= ig.caption.length %> / 2200</span><textarea name="caption" rows="9" maxlength="2200" data-ig-caption><%= ig.caption %></textarea></label>
 <% if (ig.warnings.length) { %>      <ul class="warn-list" data-ig-warnings><% ig.warnings.forEach(w => { %><li><%= w %></li><% }) %></ul>
 <% } %>

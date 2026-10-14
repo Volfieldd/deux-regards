@@ -123,6 +123,7 @@ L'aperçu à gauche montre l'image telle que servie (filigrane compris) et ses d
 
 Plus bas :
 
+- **Bande d'état** (en tête) : l'état pour le site et pour Instagram (✓ prête, ▲ à vérifier, ✕ bloquée), les visages détectés avec **Il y a quelqu'un** / **Personne de reconnaissable** pour corriger, les raisons et les confirmations (voir [Rencontres](rencontres#visages-et-état-des-photos)). Une photo à vérifier ne se publie qu'en cochant la confirmation sous **Statut**.
 - **Personne photographiée** : les rencontres liées à la photo, avec l'accord ou le refus (voir [Rencontres](rencontres)). Un refus empêche de publier la photo ;
 
 - **Audience** : les ouvertures de la photo sur 30 jours (voir [Statistiques](statistiques)) ;

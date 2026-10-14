@@ -13,7 +13,7 @@ const MONTH = 30 * 864e5;
 const plural = (n, one, many = `${one}s`) => `${n} ${n > 1 ? many : one}`;
 const day = ms => new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
 
-export function createTodo({ db, encounters, instagram, proofs, now = () => Date.now() }) {
+export function createTodo({ db, encounters, instagram, proofs, readiness, now = () => Date.now() }) {
   const q = {
     rights: db.prepare(`SELECT id FROM encounters WHERE rights_request IS NOT NULL AND rights_done_at IS NULL ORDER BY rights_requested_at`).pluck(),
     // Refus dont des photos liées sont encore publiées.
@@ -64,6 +64,10 @@ export function createTodo({ db, encounters, instagram, proofs, now = () => Date
       items.push({ level: 'bientot', title: `${who(e)} a refusé : ${plural(r.n, 'photo publiée', 'photos publiées')} de sa sortie à vérifier`,
         detail: `${e.author || 'photographe'} · ${e.session_day || e.met_on} : liez au refus celles où la personne figure, excluez les autres`, href: `/admin/rencontres/${r.id}#session`, action: 'Vérifier' });
     }
+    // Photos publiées avant les règles d'accord, ou dont une personne de la sortie n'a pas encore décidé.
+    const verify = readiness ? db.prepare("SELECT id, status, faces, faces_override FROM photos WHERE status = 'published'").all().filter(p => readiness.state(p).site.level === 'warn').length : 0;
+    if (verify) items.push({ level: 'bientot', title: `${plural(verify, 'photo publiée', 'photos publiées')} à vérifier`,
+      detail: 'un visage, et un accord manque : confirmez, liez la personne, ou dépubliez', href: '/admin/photos?manque=verifier', action: 'Vérifier' });
     const fresh = q.fresh.get();
     if (fresh) items.push({ level: 'bientot', title: `${plural(fresh, 'nouvelle personne photographiée', 'nouvelles personnes photographiées')}`,
       detail: 'demandes reçues sur /bonjour ou rencontres à traiter', href: '/admin/rencontres?statut=nouvelle', action: 'Voir' });

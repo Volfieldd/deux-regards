@@ -911,3 +911,19 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .o-actions label { flex: 1 1 200px; }
 @media (max-width: 980px) { .outing-grid { grid-template-columns: minmax(0, 1fr); } .outing-row { grid-template-columns: minmax(0, 1fr) auto; } .o-strip, .o-n { display: none; } .o-people { grid-column: 1; } }
 .outing-side .panel > form + form { margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+/* ---------- États prête / à vérifier / bloquée (photothèque, fiche, sorties) ---------- */
+.tile .badge.state { top: auto; bottom: 8px; left: 8px; right: auto; }
+.tile .badge.state.warn > span { color: #f0e442; }
+.tile .badge.state.no > span { color: #ff8a50; }
+.ready-band { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: -6px 0 18px; padding: 10px 14px; border-radius: 12px; background: var(--s1); border: 1px solid var(--line); }
+.ready-band .faces-fix { display: inline-flex; gap: 12px; margin: 0; }
+.ready-band .ready-reasons { flex-basis: 100%; margin: 0; padding-left: 18px; color: var(--ink2); font-size: 13px; }
+.ready-band > .mono { flex-basis: auto; }
+.confirm-box { align-items: flex-start; padding: 10px 12px; border-radius: 10px; box-shadow: inset 0 0 0 1.5px var(--warn); font-size: 13.5px; }
+.confirm-box input { margin-top: 2px; flex: none; }
+.o-state { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; }
+.o-photos li > .enc-tag { justify-self: start; }
+/* Pastilles d'accord longues : à la ligne plutôt que hors de l'écran (téléphone). */
+.rank li { flex-wrap: wrap; }
+.rank .enc-tag { white-space: normal; }

@@ -5,7 +5,10 @@ FROM node:22-bookworm-slim AS deps
 RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
+# ONNX Runtime (détection des visages) : sans le module GPU (CUDA), et seulement les binaires Linux x64 de l'image.
+ENV ONNXRUNTIME_NODE_INSTALL_CUDA=skip
+RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force \
+ && rm -rf node_modules/onnxruntime-node/bin/napi-v*/darwin node_modules/onnxruntime-node/bin/napi-v*/win32 node_modules/onnxruntime-node/bin/napi-v*/linux/arm64
 
 # 2. Image finale, sans compilateur.
 FROM node:22-bookworm-slim

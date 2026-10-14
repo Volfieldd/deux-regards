@@ -21,7 +21,10 @@
 <% [['', 'Tout', it.totals.all], ['published', 'Publiées', it.totals.published], ['draft', 'Brouillons', it.totals.draft], ['afinir', 'À finir', it.totals.todo]].forEach(([k, label, n]) => { %>
       <a class="chip<%= k === 'afinir' ? ' warn' : '' %>" href="<%= params({ statut: k }) %>"<%~ status === k ? ' aria-current="true"' : '' %>><%= label %> <span class="n"><%= n %></span></a>
 <% }) %>
-<% if (it.missing) { %>      <a class="chip" href="<%= params({ manque: '' }) %>" aria-current="true" title="Retirer ce filtre"><%= it.missing.label %> <span class="n"><%= it.photos.length %></span> ✕</a>
+<% ;[['verifier', '▲ À vérifier'], ['bloquee', '✕ Bloquées'], ['sans-visage', 'Sans visage']].forEach(([k, label]) => { if (!it.totals[k] && !(it.missing && it.missing.key === k)) return; %>
+      <a class="chip" href="<%= params({ manque: it.missing && it.missing.key === k ? '' : k }) %>"<%~ it.missing && it.missing.key === k ? ' aria-current="true"' : '' %>><%= label %> <span class="n"><%= it.totals[k] %></span></a>
+<% }) %>
+<% if (it.missing && !['verifier', 'bloquee', 'sans-visage'].includes(it.missing.key)) { %>      <a class="chip" href="<%= params({ manque: '' }) %>" aria-current="true" title="Retirer ce filtre"><%= it.missing.label %> <span class="n"><%= it.photos.length %></span> ✕</a>
 <% } %>    </nav>
     <form class="filters" method="get" action="/admin/photos" role="search" data-filters>
 <% if (status) { %><input type="hidden" name="statut" value="<%= status %>"><% } %>
@@ -57,6 +60,7 @@
         <a class="img" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '320px', alt: '' }) %><% } else { %><span class="ph">Traitement…</span><% } %></a>
 <% if (p.status === 'draft') { %>        <span class="badge"><span aria-hidden="true">○</span> Brouillon</span>
 <% } else if (p.provisional) { %>        <span class="badge warn">Titre provisoire</span>
+<% } %><% if (p.site && p.site.level !== 'ok') { %>        <span class="badge state <%= p.site.level %>" title="<%= p.site.reasons.join(' ; ') %>"><span aria-hidden="true"><%= p.site.level === 'no' ? '✕' : '▲' %></span> <%= p.site.level === 'no' ? 'Bloquée' : 'À vérifier' %></span>
 <% } %>
         <span class="cap"><a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.category %><%= p.when ? ' · ' + p.when : '' %><%= p.status === 'published' ? ' · publiée' : '' %></small></span>
       </li>
