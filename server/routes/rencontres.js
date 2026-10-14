@@ -59,7 +59,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const search = String(request.query.q || '').slice(0, 100);
     return page(request, reply, 'encounter', {
       title: e.ref ? `Rencontre ${e.ref}` : `Rencontre du ${fmt(e.created_at)}`, e, events: enc.events(id),
-      photos: enc.photos(id).map(withReady), candidates: candidates(e, search), search, authors: repo.authors(),
+      photos: enc.photos(id).map(withReady), session: (s => ({ ...s, photos: s.photos.map(withReady) }))(enc.session(id)), candidates: candidates(e, search), search, authors: repo.authors(),
       code: e.ref ? enc.codeOf(e.ref) : null, shares: sharesOf(e), errors: {}, values: null, ...extra,
     });
   }
@@ -176,6 +176,10 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     app.get(`/admin/rencontres/:id/${name}`, async (request, reply) => {
       const buf = get(byId(request.params.id));
       if (!buf) return reply.callNotFound();
+      // Vignette ronde des listes (visage) : 160 px suffisent.
+      if (name === 'portrait' && request.query.mini === '1') {
+        return reply.header('cache-control', 'no-store').type('image/jpeg').send(await sharp(buf).resize(160, 160, { fit: 'cover' }).jpeg({ quality: 75 }).toBuffer());
+      }
       return reply.header('cache-control', 'no-store').type(type).send(buf);
     });
   }
@@ -244,8 +248,9 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
   // Photo de la carte signée : réencodée en JPEG (1600 px, sans métadonnées), gardée dans la base.
   async function readCardForm(request) {
     const body = {};
-    let checked = false; let jpeg = null; let error = null;
-    for await (const part of request.parts({ limits: { fileSize: CARD_MAX_BYTES, files: 1, fields: 30 } })) {
+    let checked = false; let error = null;
+    const images = { card: null, portrait: null };
+    for await (const part of request.parts({ limits: { fileSize: CARD_MAX_BYTES, files: 2, fields: 30 } })) {
       if (part.type === 'field') {
         if (part.fieldname === '_csrf') checked = sameToken(part.value, request.session.csrf);
         else if (FIELD.test(part.fieldname)) body[part.fieldname] = part.value;
@@ -254,16 +259,13 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
       if (!checked) { part.file.resume(); break; }
       const chunks = [];
       for await (const chunk of part.file) chunks.push(chunk);
-      if (!chunks.length) continue;                                  // champ fichier laissé vide
-      if (part.file.truncated) { error = 'Photo de la carte trop lourde (15 Mo au plus).'; continue; }
-      if (!(await photoFormat(Buffer.concat(chunks)))) { error = 'La photo de la carte doit être une image JPEG, PNG ou WebP (sur iPhone, l’appareil photo la convertit tout seul).'; continue; }
-      try {
-        jpeg = await sharp(Buffer.concat(chunks), { limitInputPixels: 60e6 }).rotate().resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 80 }).toBuffer();
-      } catch {
-        error = 'La photo de la carte doit être une image JPEG, PNG ou WebP (sur iPhone, l’appareil photo la convertit tout seul).';
-      }
+      if (!chunks.length || !Object.hasOwn(images, part.fieldname)) continue;   // champ fichier laissé vide
+      const label = part.fieldname === 'card' ? 'La photo de la carte' : 'La photo de la personne';
+      if (part.file.truncated) { error = `${label} est trop lourde (15 Mo au plus).`; continue; }
+      if (!(await photoFormat(Buffer.concat(chunks)))) { error = `${label} doit être une image JPEG, PNG ou WebP (sur iPhone, l’appareil photo la convertit tout seul).`; continue; }
+      images[part.fieldname] = await sharp(Buffer.concat(chunks), { limitInputPixels: 60e6 }).rotate().resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 80 }).toBuffer();
     }
-    return { body, checked, jpeg, error };
+    return { body, checked, jpeg: images.card, portrait: images.portrait, error };
   }
   async function saveCard(request, reply, id) {
     let form;
@@ -272,7 +274,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const back = id ? `/admin/rencontres/${id}` : '/admin/rencontres';
     if (form.error) return failed(reply, back, form.error);
     try {
-      const saved = enc.saveCard(id, form.body, form.jpeg);
+      const saved = enc.saveCard(id, form.body, form.jpeg, form.portrait);
       return done(reply, `/admin/rencontres/${saved}`, form.body.signed === 'on' ? 'Accord signé enregistré.' : 'Rencontre enregistrée.');
     } catch (err) {
       if (!(err instanceof EncounterError)) throw err;
@@ -298,6 +300,15 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     if (!enc.get(id)) return reply.callNotFound();
     enc.setStatus(id, request.body?.status);
     return done(reply, `/admin/rencontres/${id}`, `Rencontre marquée « ${STATUS[request.body?.status] || '?'} ».`);
+  });
+
+  // Accord par session : exclure (ou rétablir) une photo du jour que l'accord ne doit pas couvrir.
+  app.post('/admin/rencontres/:id/session/:pid', write, async (request, reply) => {
+    const id = byId(request.params.id);
+    if (!enc.get(id)) return reply.callNotFound();
+    const out = request.body?.exclure === '1';
+    enc.exclude(id, byId(request.params.pid), out);
+    return done(reply, `/admin/rencontres/${id}#session`, out ? 'Photo exclue de l’accord de cette session.' : 'Photo de nouveau couverte par l’accord de cette session.');
   });
 
   app.post('/admin/rencontres/:id/photos', write, async (request, reply) => {

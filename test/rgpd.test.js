@@ -83,7 +83,7 @@ test('effacement : rencontre effacée ; refus gardé sans identité si des photo
   assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounter_shares').pluck().get(), 0);
   const edit = await c.post(`/admin/photos/${quai.id}`, { title: quai.title, slug: quai.slug, category_id: quai.category_id, author_id: quai.author_id, status: 'published' });
   assert.equal(edit.statusCode, 422);                                                      // le refus tient toujours
-  assert.match((await c.as({ url: `/admin/rencontres/${id}` })).body, /<h1>Refus anonymisé<\/h1>/);
+  assert.match((await c.as({ url: `/admin/rencontres/${id}` })).body, /<h1 class="enc-title">Refus anonymisé<\/h1>/);
   // Avec les photos : originaux supprimés, rappel des posts Instagram à retirer à la main.
   await c.hello({ ref: 'J-0003', decision: 'refus' });
   const id3 = c.enc('J-0003').id;

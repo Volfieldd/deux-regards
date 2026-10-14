@@ -17,7 +17,7 @@
 <% it.list.forEach(e => { %>
   <li class="enc-item <%= e.status %>">
     <div>
-      <h2><a href="/admin/rencontres/<%= e.id %>"><%= e.anonymized ? 'Refus anonymisé' : (e.ref || 'Sans carte') %><%= e.name ? ` · ${e.name}` : '' %></a></h2>
+      <h2><% if (e.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"> <% } %><a href="/admin/rencontres/<%= e.id %>"><%= e.anonymized ? 'Refus anonymisé' : (e.ref || 'Sans carte') %><%= e.name ? ` · ${e.name}` : '' %></a></h2>
       <div class="enc-meta">
         <span class="enc-tag"><%= it.STATUS[e.status] %></span>
 <% if (e.author) { %>        <span class="enc-tag"><%= e.author %></span><% } %>

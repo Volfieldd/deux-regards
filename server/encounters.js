@@ -59,8 +59,15 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     events: db.prepare('SELECT * FROM encounter_events WHERE encounter_id = ? ORDER BY at, id'),
     photos: db.prepare(`SELECT p.id, p.title, p.slug, p.status, p.file, p.width, p.height, p.variant_key, p.taken_on FROM encounter_photos ep
       JOIN photos p ON p.id = ep.photo_id WHERE ep.encounter_id = ? ORDER BY p.position, p.id`),
-    forPhoto: db.prepare(`SELECT e.id, e.ref, e.name, e.consent, e.consent_source, e.refused, e.verified FROM encounter_photos ep
-      JOIN encounters e ON e.id = ep.encounter_id WHERE ep.photo_id = ? ORDER BY e.id`),
+    forPhoto: db.prepare(`SELECT e.id, e.ref, e.name, e.consent, e.consent_source, e.refused, e.verified, e.anonymized, (e.portrait_jpeg IS NOT NULL) AS has_portrait
+      FROM encounter_photos ep JOIN encounters e ON e.id = ep.encounter_id WHERE ep.photo_id = ? ORDER BY e.id`),
+    // Accord par session : rencontres du même photographe ce jour-là (date de session, sinon date de rencontre).
+    forSession: db.prepare(`SELECT e.id, e.ref, e.name, e.consent, e.consent_source, e.refused, e.verified, e.anonymized, (e.portrait_jpeg IS NOT NULL) AS has_portrait
+      FROM encounters e WHERE e.author_id = ? AND COALESCE(NULLIF(e.session_day, ''), NULLIF(e.met_on, '')) = ? AND e.anonymized = 0
+      AND NOT EXISTS (SELECT 1 FROM encounter_exclusions x WHERE x.encounter_id = e.id AND x.photo_id = ?) ORDER BY e.id`),
+    sessionPhotos: db.prepare(`SELECT p.id, p.title, p.slug, p.status, p.file, p.width, p.height, p.variant_key, p.taken_on,
+      EXISTS (SELECT 1 FROM encounter_exclusions x WHERE x.encounter_id = @id AND x.photo_id = p.id) AS excluded
+      FROM photos p WHERE p.author_id = @author AND p.taken_on = @day ORDER BY p.position, p.id`),
     countNew: db.prepare("SELECT COUNT(*) FROM encounters WHERE status = 'nouvelle'").pluck(),
   };
 
@@ -147,7 +154,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   // ---------- admin ----------
   function list({ status } = {}) {
     const rows = db.prepare(`SELECT e.id, e.ref, e.status, e.verified, e.email, e.name, e.wants_photo, e.consent, e.consent_source, e.refused,
-        e.met_on, e.place, e.created_at, e.updated_at, e.rights_request, e.rights_requested_at, e.rights_done_at, e.anonymized, a.name AS author,
+        e.met_on, e.session_day, e.place, e.created_at, e.updated_at, (e.portrait_jpeg IS NOT NULL) AS has_portrait, e.rights_request, e.rights_requested_at, e.rights_done_at, e.anonymized, a.name AS author,
         (SELECT COUNT(*) FROM encounter_photos ep WHERE ep.encounter_id = e.id) AS photos,
         (SELECT detail FROM encounter_events ev WHERE ev.encounter_id = e.id AND ev.kind = 'visiteur' ORDER BY ev.at DESC, ev.id DESC LIMIT 1) AS last
       FROM encounters e LEFT JOIN authors a ON a.id = e.author_id
@@ -161,13 +168,13 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     let consent = null; let last = null;
     try { consent = e.consent ? JSON.parse(e.consent) : null; } catch { consent = null; }
     try { last = e.last ? JSON.parse(e.last) : null; } catch { last = null; }
-    return { ...e, consent, last, hasCard: e.card_jpeg != null, hasPortrait: e.portrait_jpeg != null, hasSignature: e.signature_png != null, card_jpeg: undefined, portrait_jpeg: undefined, signature_png: undefined };
+    return { ...e, consent, last, hasCard: e.card_jpeg != null, hasPortrait: e.portrait_jpeg != null || Boolean(e.has_portrait), hasSignature: e.signature_png != null, card_jpeg: undefined, portrait_jpeg: undefined, signature_png: undefined };
   }
   const get = id => decorate(q.byId.get(id));
   const events = id => q.events.all(id).map(ev => { let detail = {}; try { detail = JSON.parse(O(ev.detail) || '{}'); } catch { detail = { illisible: true }; } return { ...ev, detail }; });
 
   // Accord papier (carte « pour nous ») ou rencontre créée à la main ; la photo de la carte est la preuve.
-  function saveCard(id, body, cardJpeg = null) {
+  function saveCard(id, body, cardJpeg = null, portraitJpeg = null) {
     const errors = {};
     const c = text(body.ref, 20) ? card(body.ref) : null;
     if (text(body.ref, 20) && !c) errors.ref = 'Référence illisible : une lettre et un numéro, par exemple J-0142.';
@@ -178,6 +185,8 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     if (email && !EMAIL.test(email)) errors.email = 'Adresse e-mail invalide.';
     const metOn = /^\d{4}-\d{2}-\d{2}$/.test(String(body.met_on || '')) ? body.met_on : '';
     const authorId = Number(body.author_id) || c?.author?.id || null;
+    // Date de la session si l'horloge de l'appareil photo était décalée (vide : la date de la rencontre).
+    const sessionDay = /^\d{4}-\d{2}-\d{2}$/.test(String(body.session_day || '')) ? body.session_day : null;
     if (Object.keys(errors).length) throw new EncounterError(errors);
     const t = now();
     return db.transaction(() => {
@@ -187,11 +196,12 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
         target = { id: Number(db.prepare('INSERT INTO encounters (ref, author_id, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)').run(c?.ref ?? null, authorId, 'en_cours', t, t).lastInsertRowid) };
       }
       const set = { ref: c?.ref ?? target.ref ?? null, author_id: authorId ?? target.author_id ?? null, name: S(text(body.name, 80)), email: S(email), met_on: metOn,
-        place: S(text(body.place, 120)), details: S(text(body.details, 500)), updated_at: t };
+        place: S(text(body.place, 120)), details: S(text(body.details, 500)), session_day: sessionDay, updated_at: t };
       if (signed) Object.assign(set, { consent: JSON.stringify(scopes), consent_source: 'carte', consent_at: t, refused: 0, verified: 1 });
       if (cardJpeg) set.card_jpeg = vault.sealBuf(cardJpeg);
+      if (portraitJpeg) set.portrait_jpeg = vault.sealBuf(portraitJpeg);
       db.prepare(`UPDATE encounters SET ${Object.keys(set).map(k => `${k} = @${k}`).join(', ')} WHERE id = @id`).run({ ...set, id: target.id });
-      log(target.id, 'carte', { signed, scopes: signed ? scopes : undefined, card: Boolean(cardJpeg) }, signed);
+      log(target.id, 'carte', { signed, scopes: signed ? scopes : undefined, card: Boolean(cardJpeg), portrait: Boolean(portraitJpeg) }, signed);
       return target.id;
     })();
   }
@@ -216,6 +226,31 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     return ids;
   }
   const remove = id => db.prepare('DELETE FROM encounters WHERE id = ?').run(id).changes > 0;
+
+  // ---------- accord par session ----------
+  // Une rencontre couvre les photos de son photographe prises le jour de la session (date EXIF), sauf exclusions,
+  // et les photos liées à la main. Un refus, lui, ne bloque que les photos liées (les autres personnes du jour ont pu
+  // accepter).
+  const dayOf = e => e.session_day || e.met_on || '';
+  function session(id) {
+    const e = q.byId.get(id);
+    if (!e || !e.author_id || !dayOf(e)) return { day: dayOf(e || {}), photos: [] };
+    return { day: dayOf(e), photos: q.sessionPhotos.all({ id, author: e.author_id, day: dayOf(e) }).map(p => ({ ...p, excluded: Boolean(p.excluded) })) };
+  }
+  function exclude(id, photoId, on) {
+    if (on) db.prepare('INSERT OR IGNORE INTO encounter_exclusions (encounter_id, photo_id) SELECT ?, id FROM photos WHERE id = ?').run(id, Number(photoId));
+    else db.prepare('DELETE FROM encounter_exclusions WHERE encounter_id = ? AND photo_id = ?').run(id, Number(photoId));
+    log(id, 'session', { photo: Number(photoId), exclue: Boolean(on) });
+  }
+  // Personnes d'une photo : liées à la main (« lien ») et rencontrées ce jour-là par son photographe (« session »).
+  function forPhoto(photoId) {
+    const p = db.prepare('SELECT id, author_id, taken_on FROM photos WHERE id = ?').get(photoId);
+    if (!p) return [];
+    const linked = q.forPhoto.all(photoId).map(e => ({ ...decorate(e), via: 'lien' }));
+    const seen = new Set(linked.map(e => e.id));
+    const sessionRows = p.taken_on && /^\d{4}-\d{2}-\d{2}$/.test(p.taken_on) ? q.forSession.all(p.author_id, p.taken_on, photoId) : [];
+    return [...linked, ...sessionRows.filter(e => !seen.has(e.id)).map(e => ({ ...decorate(e), via: 'session' }))];
+  }
 
   // ---------- numérotation ----------
   // Prochain numéro d'une lettre : après les cartes déjà imprimées (« cards_printed ») et les rencontres existantes.
@@ -302,6 +337,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
         reference: e.ref, photographe: e.author, langue: e.lang, nom: e.name || null, email: e.email || null,
         rencontre: { date: e.met_on || null, heure: e.met_time || null, lieu: e.place || null, details: e.details || null,
           position: e.lat != null ? { latitude: e.lat, longitude: e.lon, precision: '≈ 100 m' } : null },
+        session: (s => (s.day ? { photographe: e.author, jour: s.day, photos_couvertes: s.photos.filter(p => !p.excluded).map(p => p.title) } : null))(session(id)),
         recevoir_la_photo: Boolean(e.wants_photo),
         accord: consent ? { usages: SCOPES.filter(s => consent[s]).map(s => SCOPE_LABELS[s]), source: e.consent_source, date: iso(e.consent_at) } : null,
         refus: e.refused ? { date: iso(e.refused_at) } : null,
@@ -362,14 +398,18 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   // Demandes sans accord ni refus, sans nouvelle depuis 12 mois : effacées (adresse, message, photo de carte).
   // Durées de conservation (annoncées sur la page /confidentialite) :
   //   - demande sans accord ni refus : 12 mois sans nouvelle ;
-  //   - photo de repère (app) : 6 mois, le temps de retrouver les bonnes images ;
+  //   - photo de la personne (visage) : avec son accord, aussi longtemps que l'accord ; sans accord, 6 mois ;
   //   - accord ou refus : tant qu'une photo liée existe, puis 5 ans (délai pour agir en justice) ;
   //   - lien « photo offerte » : effacé un mois après son expiration.
   const purge = () => {
     db.prepare('DELETE FROM encounter_shares WHERE expires_at < ?').run(now() - 30 * 864e5);
-    db.prepare('UPDATE encounters SET portrait_jpeg = NULL WHERE portrait_jpeg IS NOT NULL AND created_at < ?').run(now() - 183 * 864e5);
+    db.prepare('UPDATE encounters SET portrait_jpeg = NULL WHERE portrait_jpeg IS NOT NULL AND consent IS NULL AND created_at < ?').run(now() - 183 * 864e5);
+    // « Une photo existe » : liée à la main, ou de la session couverte (même photographe, même jour, non exclue).
     db.prepare(`DELETE FROM encounters WHERE (consent IS NOT NULL OR refused = 1) AND updated_at < ?
-      AND NOT EXISTS (SELECT 1 FROM encounter_photos ep WHERE ep.encounter_id = encounters.id)`).run(now() - 5 * RETENTION);
+      AND NOT EXISTS (SELECT 1 FROM encounter_photos ep WHERE ep.encounter_id = encounters.id)
+      AND NOT EXISTS (SELECT 1 FROM photos p WHERE p.author_id = encounters.author_id
+        AND p.taken_on = COALESCE(NULLIF(encounters.session_day, ''), NULLIF(encounters.met_on, ''))
+        AND NOT EXISTS (SELECT 1 FROM encounter_exclusions x WHERE x.encounter_id = encounters.id AND x.photo_id = p.id))`).run(now() - 5 * RETENTION);
     return db.prepare('DELETE FROM encounters WHERE updated_at < ? AND consent IS NULL AND refused = 0').run(now() - RETENTION).changes;
   };
 
@@ -400,7 +440,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     encrypted: vault.enabled,
     countNew: () => q.countNew.get(),
     // Accords et refus attachés à une photo (fiche photo) ; refus = publication impossible.
-    forPhoto: photoId => q.forPhoto.all(photoId).map(decorate),
+    forPhoto, session, exclude,
     refusalFor: photoId => q.forPhoto.all(photoId).find(e => e.refused) || null,
   };
 }

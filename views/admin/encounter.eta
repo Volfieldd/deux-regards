@@ -3,7 +3,7 @@
    const values = it.values || { ...e, signed: e.consent_source === 'carte' ? 'on' : '', ...Object.fromEntries(it.SCOPES.map(s => [`scope_${s}`, e.consent_source === 'carte' && e.consent && e.consent[s] ? 'on' : ''])) };
    const mail = e.email ? `mailto:${e.email}?subject=${encodeURIComponent(`Votre photo${e.ref ? ` (${e.ref})` : ''} · ${it.siteName}`)}` : null; %>
 <p class="mono"><a class="more eyebrow" href="/admin/rencontres">← Rencontres</a></p>
-<h1><%= e.anonymized ? 'Refus anonymisé' : it.title %><%= e.name ? ` · ${e.name}` : '' %></h1>
+<h1 class="enc-title"><% if (e.hasPortrait) { %><img class="enc-face big" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="64" height="64"><% } %><%= e.anonymized ? 'Refus anonymisé' : it.title %><%= e.name ? ` · ${e.name}` : '' %></h1>
 <% if (e.anonymized) { %><p class="hint">Les données de cette personne ont été effacées à sa demande. Il ne reste que son refus, pour que les photos liées ne soient jamais publiées.</p><% } %>
 <div class="enc-meta">
   <span class="enc-tag"><%= it.STATUS[e.status] %></span>
@@ -86,8 +86,24 @@
 </section>
 <% } %>
 
+<% const ses = it.session; %>
+<section class="panel" id="session" aria-labelledby="enc-session">
+  <h2 id="enc-session">Photos de la session <span class="mono"><%= ses.day ? `${e.author || 'photographe'} · ${ses.day}` : 'date inconnue' %></span></h2>
+<% if (!ses.day || !e.author_id) { %>  <p class="hint">Indiquez le photographe et la date de la rencontre (ou de la session, ci-dessous) : l’accord couvrira alors toutes ses photos de ce jour-là.</p>
+<% } else if (!ses.photos.length) { %>  <p class="hint">Aucune photo de <%= e.author %> datée du <%= ses.day %> pour l’instant (date EXIF). Elles seront couvertes dès leur import. Si l’horloge de l’appareil était décalée, corrigez la « date de la session ».</p>
+<% } else { %>  <p class="hint"><%= e.consent ? 'L’accord de cette personne couvre' : e.refused ? 'Son refus ne bloque que les photos liées (plus bas) : cochez celles où elle apparaît. Photos du jour' : 'Pas encore de décision ; quand elle en prendra une, elle couvrira' %> les <%= ses.photos.filter(p => !p.excluded).length %> photo<%= ses.photos.filter(p => !p.excluded).length > 1 ? 's' : '' %> de <%= e.author %> prises ce jour-là. Excluez celles qui ne la concernent pas (une autre sortie le même jour, par exemple).</p>
+  <div class="enc-photos">
+<% ses.photos.forEach(p => { %>    <div class="enc-photo<%= p.excluded ? ' excluded' : '' %>">
+      <a href="/admin/photos/<%= p.id %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '130px', alt: '' }) %><% } %></a>
+      <span><%= p.title %> · <%= p.excluded ? 'exclue' : 'couverte' %></span>
+      <form method="post" action="/admin/rencontres/<%= e.id %>/session/<%= p.id %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="exclure" value="<%= p.excluded ? '0' : '1' %>"><button class="linkbtn" type="submit"><%= p.excluded ? 'Rétablir' : 'Exclure' %></button></form>
+    </div>
+<% }) %>  </div>
+<% } %>
+</section>
+
 <section class="panel" id="photos" aria-labelledby="enc-photos">
-  <h2 id="enc-photos">Photos de cette rencontre</h2>
+  <h2 id="enc-photos">Photos liées <span class="mono">refus, photo offerte, ou photo hors session</span></h2>
 <% if (it.photos.length) { %>
   <div class="enc-photos">
 <% it.photos.forEach(p => { %>    <div class="enc-photo">

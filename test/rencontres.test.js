@@ -126,7 +126,8 @@ test('admin : liste, fiche, photos liées ; un refus empêche toute publication 
   const quai = c.photo('quai-7h12'), deux = c.photo('deux-minuit');
   assert.equal((await c.post(`/admin/rencontres/${id}/photos`, { photo: [String(quai.id), String(deux.id)] })).statusCode, 303);
   const detail = (await c.as({ url: `/admin/rencontres/${id}` })).body;
-  assert.match(detail, /Photos de cette rencontre/);
+  assert.match(detail, /Photos liées/);
+  assert.match(detail, /Photos de la session/);
   assert.match(detail, /mailto:alice@exemple\.fr\?subject=Votre%20photo%20\(J-0142\)/);
   assert.match((await c.as({ url: `/admin/photos/${quai.id}` })).body, /Ni accord ni refus pour l’instant/);
   // Refus : la fiche ne publie plus, l'action groupée non plus.
@@ -171,4 +172,40 @@ test('carte signée saisie dans l’admin : accord, photo de la carte (privée),
   c.db.prepare('UPDATE encounters SET updated_at = ?').run(Date.now() - 400 * 864e5);
   assert.equal(c.app.encounters.purge(), 1);
   assert.equal(c.db.prepare('SELECT ref FROM encounters').pluck().get(), 'J-0001');      // le refus est gardé
+});
+
+test('accord par session : les photos du photographe ce jour-là sont couvertes, exclusion possible ; visage sur la fiche', async t => {
+  const c = await ctxOf(t);
+  const julien = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
+  const ids = c.db.prepare('SELECT id FROM photos WHERE author_id = ? ORDER BY id LIMIT 3').pluck().all(julien);
+  c.db.prepare("UPDATE photos SET taken_on = '2026-10-14' WHERE id IN (?, ?)").run(ids[0], ids[1]);
+  c.db.prepare("UPDATE photos SET taken_on = '2026-10-13' WHERE id = ?").run(ids[2]);
+  // Carte signée le 14 octobre, avec le visage de la personne.
+  const face = await sharp({ create: { width: 600, height: 800, channels: 3, background: '#a88' } }).jpeg().toBuffer();
+  const form = multipart([{ name: '_csrf', value: c.csrf }, { name: 'ref', value: 'J-0200' }, { name: 'name', value: 'Lou' }, { name: 'met_on', value: '2026-10-14' },
+    { name: 'signed', value: 'on' }, { name: 'scope_site', value: 'on' }, { name: 'portrait', filename: 'lou.jpg', value: face }]);
+  assert.equal((await c.as({ method: 'POST', url: '/admin/rencontres', ...form })).statusCode, 303);
+  const e = c.db.prepare("SELECT * FROM encounters WHERE ref = 'J-0200'").get();
+  assert.ok(e.portrait_jpeg);
+  assert.deepEqual(c.app.encounters.session(e.id).photos.map(p => p.id).sort(), [ids[0], ids[1]].sort());
+  // La fiche de chaque photo du jour montre l'accord ; pas celle de la veille.
+  const fiche = (await c.as({ url: `/admin/photos/${ids[0]}` })).body;
+  assert.match(fiche, /Personnes rencontrées/);
+  assert.match(fiche, /Rencontre J-0200 · Lou<\/a> <span class="mono">même session<\/span>/);
+  assert.match(fiche, /class="enc-face"/);
+  assert.doesNotMatch((await c.as({ url: `/admin/photos/${ids[2]}` })).body, /J-0200/);
+  // Exclure une photo du jour : elle n'est plus couverte.
+  await c.post(`/admin/rencontres/${e.id}/session/${ids[1]}`, { exclure: '1' });
+  assert.doesNotMatch((await c.as({ url: `/admin/photos/${ids[1]}` })).body, /J-0200/);
+  assert.match((await c.as({ url: `/admin/rencontres/${e.id}` })).body, /exclue/);
+  // Horloge de l'appareil décalée d'un jour : la date de session corrige.
+  const fix = multipart([{ name: '_csrf', value: c.csrf }, { name: 'ref', value: 'J-0200' }, { name: 'name', value: 'Lou' }, { name: 'met_on', value: '2026-10-14' },
+    { name: 'session_day', value: '2026-10-13' }, { name: 'signed', value: 'on' }, { name: 'scope_site', value: 'on' }]);
+  await c.as({ method: 'POST', url: `/admin/rencontres/${e.id}`, ...fix });
+  assert.deepEqual(c.app.encounters.session(e.id).photos.map(p => p.id), [ids[2]]);
+  assert.ok(c.db.prepare('SELECT portrait_jpeg FROM encounters WHERE id = ?').pluck().get(e.id));   // visage gardé
+  // Vignette du visage dans la liste.
+  assert.match((await c.as({ url: '/admin/rencontres' })).body, new RegExp(`/admin/rencontres/${e.id}/portrait\\?mini=1`));
+  const mini = await c.as({ url: `/admin/rencontres/${e.id}/portrait?mini=1` });
+  assert.deepEqual([(await sharp(mini.rawPayload).metadata()).width], [160]);
 });

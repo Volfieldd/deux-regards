@@ -244,6 +244,10 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - `server/vault.js` : AES-256-GCM, clé `DATA_KEY` (HKDF) ; champs des rencontres (textes, position, historique, images) chiffrés à l'écriture, déchiffrés à la lecture ; données existantes chiffrées au démarrage ; état dans Réglages et sur `/confidentialite`.
 - Wiki [RGPD](docs/wiki/RGPD.md) : registre des traitements, accord entre responsables conjoints, analyse d'impact simplifiée, procédure de violation, liste des actions restantes.
 
+### 29. Accord par session, visage sur le nom (fait)
+- Un accord couvre les photos de son photographe prises le jour de la session (date EXIF ; `session_day` corrige une horloge décalée), sauf exclusions (`encounter_exclusions`, migration 020) ; fiche d'une photo : « Personnes rencontrées » (même session ou liées) ; un refus reste ciblé sur les photos liées ; durée de conservation de l'accord tant qu'une photo de la session ou liée existe.
+- Photo de la personne (visage) : dans l'app ou ajoutée à la fiche, vignette ronde dans la liste, la fiche et la fiche photo ; gardée avec l'accord (sinon 6 mois) ; consentement, page Confidentialité et registre mis à jour.
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.
