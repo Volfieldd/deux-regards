@@ -1,5 +1,7 @@
 # Déployer Nicephos sur Unraid
 
+Les marches à suivre ponctuelles (mise à jour, chiffrement `DATA_KEY`, disques chiffrés, deux facteurs, e-mails, app iPhone, demandes RGPD) sont regroupées dans le wiki : [Procédures](https://github.com/Volfieldd/deux-regards/wiki/Procédures).
+
 Ce dossier contient tout le nécessaire :
 
 | Fichier | Rôle |

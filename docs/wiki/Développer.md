@@ -7,8 +7,8 @@ Cette page est pour qui reprend le code : où sont les choses, quelles règles s
 | Dossier | Contenu |
 |---|---|
 | `server/` | serveur Fastify. `app.js` assemble tout (plugins, CSP et en-têtes, rendu Eta, fichiers statiques) ; `config.js` lit l'environnement ([Configuration](Configuration)) |
-| `server/routes/` | `public.js` (site), `admin.js` (admin), `media.js` (images), `brand.js` (emblème, favicon) |
-| `server/*.js` | un module par sujet : `auth.js` / `oidc.js` / `sessions.js` (connexion), `repo.js` / `admin-repo.js` (données), `images.js` / `media.js` / `variants.js` / `watermark.js` (images), `proofs.js` / `timestamp.js` (preuves), `stats.js`, `instagram.js`, `rights.js` (textes des droits FR/EN/DE), `themes.js`, `help.js` (aide intégrée) |
+| `server/routes/` | `public.js` (site, trois langues, `/bonjour`, `/pour-vous`, `/confidentialite`), `admin.js` (admin), `rencontres.js` (Rencontres, cartes, QR des vêtements, app iPhone, droits RGPD ; enregistré dans le plugin admin), `media.js` (images), `brand.js` (emblème, favicon) |
+| `server/*.js` | un module par sujet : `auth.js` / `oidc.js` / `sessions.js` (connexion), `repo.js` / `admin-repo.js` (données), `images.js` / `media.js` / `variants.js` / `watermark.js` (images), `proofs.js` / `timestamp.js` (preuves), `stats.js`, `instagram.js` / `instagram-limits.js`, `rights.js` (textes des droits FR/EN/DE), `privacy.js` (page Confidentialité FR/EN/DE), `i18n.js` (textes de l'interface, repli des traductions, détection de la langue), `translate.js` (LibreTranslate), `encounters.js` (rencontres, codes des cartes, consentements, durées de conservation), `vault.js` (chiffrement des données personnelles, `DATA_KEY`), `mailer.js` (SMTP facultatif), `cards.js` (planches de cartes), `textile.js` (QR des vêtements, texte en tracés), `zip.js` (export RGPD), `geo/` (villes GeoNames, projection de la carte), `themes.js`, `help.js` (aide intégrée) |
 | `server/db/` | migrations SQL, seed de démonstration, CLI (`migrate`, `seed`, `variants`), sauvegarde |
 | `views/`, `views/admin/` | gabarits Eta du site et de l'admin |
 | `public/` | `css/` et `js/` du site, `admin/` (CSS et JS de l'admin), `themes/` |
@@ -24,6 +24,7 @@ Cette page est pour qui reprend le code : où sont les choses, quelles règles s
 - **CSP stricte, rien de tiers** (`server/app.js`) : aucun script ni style en ligne, aucune ressource d'un autre site. Un style dynamique passe par une classe CSS ou par `element.style` en JS (autorisé), jamais par un attribut `style="…"` dans un gabarit.
 - **Échappement** : dans les gabarits, `<%= … %>` (échappé) pour toute donnée ; `<%~ … %>` (brut) seulement pour du HTML produit par le serveur et de confiance.
 - **Migrations** : un nouveau fichier `NNN_nom.sql` par changement de schéma ; ne jamais modifier une migration déjà fusionnée.
+- **Données personnelles** : tout nouveau champ qui concerne une personne passe par `vault.js` (`seal` à l'écriture, `open` à la lecture), a une durée de conservation (`purge` dans `encounters.js`), figure dans l'export (`exportData`) et sur la page `/confidentialite` (`privacy.js`), et met à jour la page [RGPD](RGPD) (registre).
 - **Réglages** : table `settings`, une clé par réglage, valeur JSON. Un texte « par défaut » est stocké vide et affiché tel quel dans l'admin (exemple : `server/rights.js`).
 - **Originaux** : jamais servis. Seules les variantes sortent (`/media/`, `/admin/media/` pour les brouillons).
 - **Accessibilité** : cibles d'au moins 44 px sur téléphone, focus visible, champs étiquetés ; l'admin doit rester utilisable sur iPhone (projet e2e `iphone`).

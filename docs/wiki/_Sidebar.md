@@ -9,6 +9,8 @@
 - [Publication sur Instagram](Instagram)
 
 **Installer et configurer**
+- [Procédures](Procédures)
+- [Guide Unraid](Unraid)
 - [Installation](Installation)
 - [Déploiement](Déploiement)
 - [Configuration](Configuration)
