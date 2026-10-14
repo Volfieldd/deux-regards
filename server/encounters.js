@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import sharp from 'sharp';
 import { nearest } from './geo/cities.js';
+import { createVault } from './vault.js';
 
 // Rencontres : les personnes photographiées dans la rue.
 //   - Carte « pour eux » : référence de l'auteur (J-0142), et sur les cartes générées par le site un code de contrôle
@@ -30,7 +31,22 @@ export function parseRef(input) {
   return { prefix, number: Number(m[2]), ref: `${prefix}-${String(Number(m[2])).padStart(4, '0')}`, code: m[3] ? m[3].toUpperCase() : null };
 }
 
-export function createEncounters({ db, now = () => Date.now() }) {
+// Données personnelles chiffrées dans la base (vault, clé DATA_KEY) : textes, position, historique, images.
+const SEALED_TEXT = ['email', 'name', 'guardian', 'details', 'place'];
+const SEALED_BLOB = ['card_jpeg', 'portrait_jpeg', 'signature_png'];
+
+export function createEncounters({ db, now = () => Date.now(), vault = createVault(null) }) {
+  const S = vault.seal, O = vault.open;
+  // Ligne lue : champs déchiffrés ; position rendue en nombres.
+  const openRow = e => {
+    if (!e) return e;
+    const r = { ...e };
+    for (const k of SEALED_TEXT) if (k in r) r[k] = O(r[k]);
+    for (const k of SEALED_BLOB) if (k in r) r[k] = vault.openBuf(r[k]);
+    for (const k of ['lat', 'lon']) if (typeof r[k] === 'string') { const n = Number(O(r[k])); r[k] = Number.isFinite(n) ? n : null; }
+    return r;
+  };
+  const sealPos = v => (v == null ? null : vault.enabled ? S(String(v)) : v);
   const q = {
     setting: db.prepare("SELECT value FROM settings WHERE key = 'encounter_key'").pluck(),
     saveKey: db.prepare("INSERT INTO settings (key, value) VALUES ('encounter_key', ?) ON CONFLICT(key) DO NOTHING"),
@@ -73,7 +89,7 @@ export function createEncounters({ db, now = () => Date.now() }) {
   const photographer = letter => (/^[A-Za-z]$/.test(String(letter || '')) ? q.authorByPrefix.get({ p: String(letter).toUpperCase() }) || null : null);
 
   const scopesOf = body => Object.fromEntries(SCOPES.map(s => [s, body[`scope_${s}`] === 'on' || body[`scope_${s}`] === true]));
-  const log = (id, kind, detail = {}, verified = false) => q.event.run(id, now(), kind, verified ? 1 : 0, JSON.stringify(detail));
+  const log = (id, kind, detail = {}, verified = false) => q.event.run(id, now(), kind, verified ? 1 : 0, S(JSON.stringify(detail)));
   const touch = id => db.prepare('UPDATE encounters SET updated_at = ? WHERE id = ?').run(now(), id);
 
   // ---------- page /bonjour ----------
@@ -110,12 +126,12 @@ export function createEncounters({ db, now = () => Date.now() }) {
       let e = c ? q.byRef.get(c.ref) : null;
       if (!e) {
         const id = Number(db.prepare(`INSERT INTO encounters (ref, author_id, lang, met_on, met_time, place, details, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(c?.ref ?? null, c?.author?.id ?? photographer(body.photographer)?.id ?? null, lang, metOn, text(body.met_time, 20), place, text(body.details, 500), t, t).lastInsertRowid);
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(c?.ref ?? null, c?.author?.id ?? photographer(body.photographer)?.id ?? null, lang, metOn, text(body.met_time, 20), S(place), S(text(body.details, 500)), t, t).lastInsertRowid);
         e = { id, verified: 0 };
       }
       const set = { status: 'nouvelle', lang, updated_at: t, verified: e.verified || (c?.verified ? 1 : 0) };
-      if (email) set.email = email;
-      if (name) set.name = name;
+      if (email) set.email = S(email);
+      if (name) set.name = S(name);
       if (wantsPhoto) set.wants_photo = 1;
       // Le dernier choix exprimé l'emporte ; l'historique garde les précédents.
       if (decision === 'refus') Object.assign(set, { refused: 1, refused_at: t });
@@ -138,15 +154,17 @@ export function createEncounters({ db, now = () => Date.now() }) {
       ${status ? 'WHERE e.status = ?' : ''} ORDER BY (e.status = 'nouvelle') DESC, e.updated_at DESC LIMIT 500`).all(...(status ? [status] : []));
     return rows.map(decorate);
   }
-  function decorate(e) {
-    if (!e) return null;
+  function decorate(row) {
+    if (!row) return null;
+    const e = openRow(row);
+    if (typeof e.last === 'string') e.last = O(e.last);
     let consent = null; let last = null;
     try { consent = e.consent ? JSON.parse(e.consent) : null; } catch { consent = null; }
     try { last = e.last ? JSON.parse(e.last) : null; } catch { last = null; }
     return { ...e, consent, last, hasCard: e.card_jpeg != null, hasPortrait: e.portrait_jpeg != null, hasSignature: e.signature_png != null, card_jpeg: undefined, portrait_jpeg: undefined, signature_png: undefined };
   }
   const get = id => decorate(q.byId.get(id));
-  const events = id => q.events.all(id).map(ev => ({ ...ev, detail: JSON.parse(ev.detail || '{}') }));
+  const events = id => q.events.all(id).map(ev => { let detail = {}; try { detail = JSON.parse(O(ev.detail) || '{}'); } catch { detail = { illisible: true }; } return { ...ev, detail }; });
 
   // Accord papier (carte « pour nous ») ou rencontre créée à la main ; la photo de la carte est la preuve.
   function saveCard(id, body, cardJpeg = null) {
@@ -168,10 +186,10 @@ export function createEncounters({ db, now = () => Date.now() }) {
       if (!target) {
         target = { id: Number(db.prepare('INSERT INTO encounters (ref, author_id, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)').run(c?.ref ?? null, authorId, 'en_cours', t, t).lastInsertRowid) };
       }
-      const set = { ref: c?.ref ?? target.ref ?? null, author_id: authorId ?? target.author_id ?? null, name: text(body.name, 80), email, met_on: metOn,
-        place: text(body.place, 120), details: text(body.details, 500), updated_at: t };
+      const set = { ref: c?.ref ?? target.ref ?? null, author_id: authorId ?? target.author_id ?? null, name: S(text(body.name, 80)), email: S(email), met_on: metOn,
+        place: S(text(body.place, 120)), details: S(text(body.details, 500)), updated_at: t };
       if (signed) Object.assign(set, { consent: JSON.stringify(scopes), consent_source: 'carte', consent_at: t, refused: 0, verified: 1 });
-      if (cardJpeg) set.card_jpeg = cardJpeg;
+      if (cardJpeg) set.card_jpeg = vault.sealBuf(cardJpeg);
       db.prepare(`UPDATE encounters SET ${Object.keys(set).map(k => `${k} = @${k}`).join(', ')} WHERE id = @id`).run({ ...set, id: target.id });
       log(target.id, 'carte', { signed, scopes: signed ? scopes : undefined, card: Boolean(cardJpeg) }, signed);
       return target.id;
@@ -259,11 +277,11 @@ export function createEncounters({ db, now = () => Date.now() }) {
       const number = nextNumber(prefix);
       const ref = `${prefix}-${String(number).padStart(4, '0')}`;
       reserve(prefix, number);
-      const row = { ref, author_id: author.id, status: 'en_cours', verified: decision === 'accord' ? 1 : 0, email, name, lang, wants_photo: body.wants_photo === 'on' ? 1 : 0,
+      const row = { ref, author_id: author.id, status: 'en_cours', verified: decision === 'accord' ? 1 : 0, email: S(email), name: S(name), lang, wants_photo: body.wants_photo === 'on' ? 1 : 0,
         consent: decision === 'accord' ? JSON.stringify(scopes) : null, consent_source: decision === 'accord' ? 'signature' : null, consent_at: decision === 'accord' ? t : null,
         refused: decision === 'refus' ? 1 : 0, refused_at: decision === 'refus' ? t : null, met_on: parisDay, met_time: new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(t),
-        place: text(body.place, 120) || (city ? city.label : ''), details: text(body.details, 500), portrait_jpeg: portraitJpeg, signature_png: signature,
-        lat: pos?.lat ?? null, lon: pos?.lon ?? null, adult, guardian: adult === 0 ? guardian : '', created_at: t, updated_at: t };
+        place: S(text(body.place, 120) || (city ? city.label : '')), details: S(text(body.details, 500)), portrait_jpeg: vault.sealBuf(portraitJpeg), signature_png: vault.sealBuf(signature),
+        lat: sealPos(pos?.lat ?? null), lon: sealPos(pos?.lon ?? null), adult, guardian: S(adult === 0 ? guardian : ''), created_at: t, updated_at: t };
       const cols = Object.keys(row);
       const id = Number(db.prepare(`INSERT INTO encounters (${cols.join(', ')}) VALUES (${cols.map(c => `@${c}`).join(', ')})`).run(row).lastInsertRowid);
       log(id, 'app', { decision, scopes: decision === 'accord' ? scopes : undefined, adult, guardian: guardian || undefined, portrait: Boolean(portraitJpeg), position: Boolean(pos) }, decision === 'accord');
@@ -275,7 +293,7 @@ export function createEncounters({ db, now = () => Date.now() }) {
   // ---------- droits : accès (export) et effacement ----------
   // Tout ce que la base garde sur la personne, lisible (pour l'archive remise à la personne).
   function exportData(id) {
-    const e = db.prepare('SELECT e.*, a.name AS author FROM encounters e LEFT JOIN authors a ON a.id = e.author_id WHERE e.id = ?').get(id);
+    const e = openRow(db.prepare('SELECT e.*, a.name AS author FROM encounters e LEFT JOIN authors a ON a.id = e.author_id WHERE e.id = ?').get(id));
     if (!e) return null;
     const consent = e.consent ? JSON.parse(e.consent) : null;
     const iso = ms => (ms ? new Date(ms).toISOString() : null);
@@ -337,7 +355,7 @@ export function createEncounters({ db, now = () => Date.now() }) {
     const s = db.prepare(`SELECT s.*, e.lang, e.name, e.ref, p.file, p.title, p.width, p.height, a.name AS author FROM encounter_shares s
       JOIN encounters e ON e.id = s.encounter_id JOIN photos p ON p.id = s.photo_id JOIN authors a ON a.id = p.author_id WHERE s.token = ?`).get(token);
     if (!s) return null;
-    return { ...s, expired: s.expires_at <= now() };
+    return { ...s, name: O(s.name), expired: s.expires_at <= now() };
   }
   const countShare = (token, kind) => db.prepare(`UPDATE encounter_shares SET ${kind === 'download' ? 'downloads' : 'views'} = ${kind === 'download' ? 'downloads' : 'views'} + 1, last_at = ? WHERE token = ?`).run(now(), token);
   const revokeShare = (id, token) => db.prepare('DELETE FROM encounter_shares WHERE encounter_id = ? AND token = ?').run(id, token).changes > 0;
@@ -357,10 +375,29 @@ export function createEncounters({ db, now = () => Date.now() }) {
 
   return {
     createShare, shares, share, countShare, revokeShare, photographer, nextNumber, reserve, saveApp, markMailed, exportData, erase, rightsDone,
-    portraitJpeg: id => db.prepare('SELECT portrait_jpeg FROM encounters WHERE id = ?').pluck().get(id) || null,
-    signaturePng: id => db.prepare('SELECT signature_png FROM encounters WHERE id = ?').pluck().get(id) || null,
+    portraitJpeg: id => vault.openBuf(db.prepare('SELECT portrait_jpeg FROM encounters WHERE id = ?').pluck().get(id)) || null,
+    signaturePng: id => vault.openBuf(db.prepare('SELECT signature_png FROM encounters WHERE id = ?').pluck().get(id)) || null,
     parseRef, card, codeOf, submit, list, get, events, photos: id => q.photos.all(id), saveCard, setStatus, link, unlink, applyRefusal, remove, purge,
-    cardJpeg: id => db.prepare('SELECT card_jpeg FROM encounters WHERE id = ?').pluck().get(id) || null,
+    cardJpeg: id => vault.openBuf(db.prepare('SELECT card_jpeg FROM encounters WHERE id = ?').pluck().get(id)) || null,
+    // Données déjà en base, en clair (clé ajoutée après coup) : chiffrées au démarrage, une fois.
+    sealExisting() {
+      if (!vault.enabled) return 0;
+      let n = 0;
+      db.transaction(() => {
+        for (const e of db.prepare('SELECT * FROM encounters').all()) {
+          const set = {};
+          for (const k of SEALED_TEXT) if (e[k] && !vault.sealed(e[k])) set[k] = S(e[k]);
+          for (const k of SEALED_BLOB) if (e[k] && !vault.sealed(e[k])) set[k] = vault.sealBuf(e[k]);
+          for (const k of ['lat', 'lon']) if (typeof e[k] === 'number') set[k] = S(String(e[k]));
+          if (Object.keys(set).length) { db.prepare(`UPDATE encounters SET ${Object.keys(set).map(k => `${k} = @${k}`).join(', ')} WHERE id = @id`).run({ ...set, id: e.id }); n++; }
+        }
+        for (const ev of db.prepare('SELECT id, detail FROM encounter_events').all()) {
+          if (ev.detail && !vault.sealed(ev.detail)) { db.prepare('UPDATE encounter_events SET detail = ? WHERE id = ?').run(S(ev.detail), ev.id); n++; }
+        }
+      })();
+      return n;
+    },
+    encrypted: vault.enabled,
     countNew: () => q.countNew.get(),
     // Accords et refus attachés à une photo (fiche photo) ; refus = publication impossible.
     forPhoto: photoId => q.forPhoto.all(photoId).map(decorate),

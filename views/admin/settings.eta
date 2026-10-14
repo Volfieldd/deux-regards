@@ -36,6 +36,7 @@
     <label>Contact des responsables <span class="mono">adresse e-mail</span><input name="privacy_contact" value="<%= s.privacy_contact || '' %>" maxlength="200" placeholder="info@nicephos.art"></label>
     <label class="inline"><input type="checkbox" name="privacy_mfa"<%~ s.privacy_mfa ? ' checked' : '' %>> L’authentification à deux facteurs est activée pour tous les comptes de l’admin (Zitadel)</label>
     <label class="inline"><input type="checkbox" name="privacy_encrypted"<%~ s.privacy_encrypted ? ' checked' : '' %>> Les données et les sauvegardes sont sur des disques chiffrés</label>
+    <p class="<%= it.encrypted ? 'cellnote' : 'cellnote warn' %>"><strong>Chiffrement des données personnelles dans la base</strong> (noms, adresses, signatures, photos de repère et de carte, messages, positions) : <%= it.encrypted ? 'actif (clé DATA_KEY du serveur). Gardez une copie de la clé hors du serveur : perdue, ces données sont illisibles.' : 'inactif. Ajoutez DATA_KEY au fichier .env du serveur (voir le guide Unraid) : les données existantes seront chiffrées au redémarrage.' %></p>
   </section>
   <section class="panel" id="carte">
     <h2>Page Carte <span class="mono"><a href="/carte" target="_blank" rel="noopener">/carte</a><%= s.map_page ? '' : ' · aperçu réservé aux auteurs' %></span></h2>
