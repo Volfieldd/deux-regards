@@ -45,7 +45,7 @@ test('écran de l’app : installable (manifeste), numéro suivant du photograph
   assert.equal(page.headers['permissions-policy'], 'camera=(), microphone=(), geolocation=(self)');
   assert.match((await c.as({ url: '/admin/rencontres' })).headers['permissions-policy'], /geolocation=\(\)/);   // ailleurs : interdite
   const manifest = (await c.app.inject('/rencontre.webmanifest')).json();
-  assert.deepEqual([manifest.start_url, manifest.display, manifest.short_name], ['/admin/rencontre', 'standalone', 'Rencontre']);
+  assert.deepEqual([manifest.start_url, manifest.display, manifest.short_name], ['/admin/rencontre/accueil', 'standalone', 'Rencontre']);
   assert.notEqual((await c.app.inject('/admin/rencontre')).statusCode, 200);
 });
 

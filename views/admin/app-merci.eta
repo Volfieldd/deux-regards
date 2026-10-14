@@ -32,7 +32,8 @@
 <% } %>
 <% } else { %>  <p class="hint">Pas d’e-mail : la personne garde son lien en scannant le QR.</p>
 <% } %>
-  <p class="app-row"><a class="app-btn" href="/admin/rencontre">Nouvelle rencontre</a> <a class="app-btn ghost" href="/admin/rencontres/<%= e.id %>">Voir la fiche</a></p>
+  <p class="app-row"><a class="app-btn" href="/admin/rencontre">Nouvelle rencontre</a> <a class="app-btn ghost" href="/admin/rencontre/accueil">Accueil Terrain</a></p>
+  <p><a class="app-link" href="/admin/rencontres/<%= e.id %>">Voir la fiche de la rencontre</a></p>
 </section>
 </body>
 </html>

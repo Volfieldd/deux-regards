@@ -190,7 +190,7 @@ test('accord par session : les photos du photographe ce jour-là sont couvertes,
   assert.deepEqual(c.app.encounters.session(e.id).photos.map(p => p.id).sort(), [ids[0], ids[1]].sort());
   // La fiche de chaque photo du jour montre l'accord ; pas celle de la veille.
   const fiche = (await c.as({ url: `/admin/photos/${ids[0]}` })).body;
-  assert.match(fiche, /Personnes rencontrées/);
+  assert.match(fiche, /Personnes &amp; accords/);
   assert.match(fiche, /Rencontre J-0200 · Lou<\/a> <span class="mono">même sortie<\/span>/);
   assert.match(fiche, /class="enc-face"/);
   assert.doesNotMatch((await c.as({ url: `/admin/photos/${ids[2]}` })).body, /J-0200/);

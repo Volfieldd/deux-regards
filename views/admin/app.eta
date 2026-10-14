@@ -20,7 +20,7 @@
 </head>
 <body>
 <header class="app-bar">
-  <a href="/admin/rencontres" aria-label="Retour aux rencontres">←</a>
+  <a href="/admin/rencontre/accueil" aria-label="Retour à l’accueil Terrain">←</a>
   <strong>Nouvelle rencontre</strong>
   <span class="mono" data-next><%= author.next %></span>
 </header>

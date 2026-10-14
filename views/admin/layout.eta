@@ -143,7 +143,7 @@
   <a href="/admin"<%~ cur('home') ? ' aria-current="page"' : '' %>><%~ ic('home', 22) %>Aujourd’hui</a>
   <a href="/admin/photos"<%~ cur('photos') ? ' aria-current="page"' : '' %>><%~ ic('photos', 22) %>Photos</a>
   <a class="imp" href="/admin/photos?importer#import" data-import-open aria-label="Importer des photos"><%~ ic('upload', 22) %></a>
-  <a href="/admin/series"<%~ cur('series') ? ' aria-current="page"' : '' %>><%~ ic('series', 22) %>Séries</a>
+  <a href="/admin/rencontre/accueil"<%~ it.section === 'terrain' ? ' aria-current="page"' : '' %>><%~ ic('pin', 22) %>Terrain</a>
   <button type="button" data-menu aria-expanded="false" aria-controls="admin-nav"><%~ ic('menu', 22) %>Menu</button>
 </nav>
 
