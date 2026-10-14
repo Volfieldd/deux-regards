@@ -17,7 +17,7 @@ export class ImportError extends Error {}
 // Dimensions telles qu'affichées, après application de l'orientation EXIF.
 export async function orientedSize(file) {
   const m = await sharp(file, { limitInputPixels: MAX_PIXELS }).metadata();
-  return { format: m.format, width: m.autoOrient?.width ?? m.width, height: m.autoOrient?.height ?? m.height, takenOn: takenOnFromExif(m.exif), gps: gpsFromExif(m.exif) };
+  return { format: m.format, width: m.autoOrient?.width ?? m.width, height: m.autoOrient?.height ?? m.height, takenOn: takenOnFromExif(m.exif), takenTime: takenTimeFromExif(m.exif), gps: gpsFromExif(m.exif) };
 }
 
 // Position GPS de la prise de vue (EXIF GPSInfo) → { lat, lon }, ou null. Sert seulement à proposer la ville
@@ -48,6 +48,16 @@ export function takenOnFromExif(buffer) {
   return `${y}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
 }
 
+// Heure de prise de vue (EXIF DateTimeOriginal) → HH:MM, telle que l'appareil l'a inscrite ; '' si absente.
+// Sert à découper une journée en sorties (matin, soir).
+export function takenTimeFromExif(buffer) {
+  if (!buffer) return '';
+  let d;
+  try { d = exifReader(buffer).Photo?.DateTimeOriginal; } catch { return ''; }
+  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return '';
+  return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+}
+
 // Valide un fichier téléversé (déjà écrit dans tmp) et le range dans originals/.
 // Le fichier temporaire est toujours supprimé.
 export async function importOriginal(storageDir, tmpFile) {
@@ -69,7 +79,7 @@ export async function importOriginal(storageDir, tmpFile) {
     file = `${crypto.randomUUID()}.${ext}`;
     fs.renameSync(tmpFile, path.join(originals, file));
     // Les variantes sont rendues ensuite par le service (filigrane et métadonnées du moment).
-    return { file, width: meta.width, height: meta.height, sha256, takenOn: meta.takenOn, gps: meta.gps };
+    return { file, width: meta.width, height: meta.height, sha256, takenOn: meta.takenOn, takenTime: meta.takenTime, gps: meta.gps };
   } catch (err) {
     if (file) removePhotoFiles(storageDir, file);
     throw err;

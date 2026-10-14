@@ -21,7 +21,7 @@ async function admin(t) {
 test('menu en groupes, dans l’ordre ; vocabulaire de l’admin', async t => {
   const c = await admin(t);
   const body = (await c.get('/admin')).body;
-  const order = ['Aujourd’hui', 'Travailler', 'Photothèque', 'Personnes', 'Publier', 'Site public', 'Séries', 'Instagram', 'Statistiques',
+  const order = ['Aujourd’hui', 'Travailler', 'Sorties', 'Photothèque', 'Personnes', 'Publier', 'Site public', 'Séries', 'Instagram', 'Statistiques',
     'Sur le terrain', 'App, cartes, QR', 'Réglages', 'Photographes', 'Apparence', 'Filigrane &amp; EXIF', 'Droits &amp; confidentialité', 'Aide', 'Voir le site'];
   const side = body.slice(body.indexOf('<aside'), body.indexOf('</aside>'));
   let at = 0;

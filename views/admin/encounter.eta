@@ -88,7 +88,7 @@
 
 <% const ses = it.session; %>
 <section class="panel" id="session" aria-labelledby="enc-session">
-  <h2 id="enc-session">Photos de la sortie <span class="mono"><%= ses.day ? `${e.author || 'photographe'} · ${ses.day}` : 'date inconnue' %></span></h2>
+  <h2 id="enc-session">Photos de la sortie <span class="mono"><%= ses.day ? `${e.author || 'photographe'} · ${ses.day}` : 'date inconnue' %></span><% if (it.outingUrl) { %> <a class="btn ghost push" href="<%= it.outingUrl %>">Ouvrir la sortie →</a><% } %></h2>
 <% if (!ses.day || !e.author_id) { %>  <p class="hint">Indiquez le photographe et la date de la rencontre (ou de la sortie, ci-dessous) : l’accord couvrira alors toutes ses photos de ce jour-là.</p>
 <% } else if (!ses.photos.length) { %>  <p class="hint">Aucune photo de <%= e.author %> datée du <%= ses.day %> pour l’instant (date EXIF). Elles seront couvertes dès leur import. Si l’horloge de l’appareil était décalée, corrigez la « date de la sortie ».</p>
 <% } else { %>  <p class="hint"><%= e.consent ? 'L’accord de cette personne couvre' : e.refused ? 'Son refus ne bloque que les photos liées (plus bas) : cochez celles où elle apparaît. Photos du jour' : 'Pas encore de décision ; quand elle en prendra une, elle couvrira' %> les <%= ses.photos.filter(p => !p.excluded).length %> photo<%= ses.photos.filter(p => !p.excluded).length > 1 ? 's' : '' %> de <%= e.author %> prises ce jour-là. Excluez celles qui ne la concernent pas (une autre sortie le même jour, par exemple).</p>

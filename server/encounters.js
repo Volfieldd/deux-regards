@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import sharp from 'sharp';
 import { nearest } from './geo/cities.js';
 import { createVault } from './vault.js';
+import { samePartSql, normTime } from './outings.js';
 
 // Rencontres : les personnes photographiées dans la rue.
 //   - Carte « pour eux » : référence de l'auteur (J-0142), et sur les cartes générées par le site un code de contrôle
@@ -67,11 +68,13 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       FROM encounter_photos ep JOIN encounters e ON e.id = ep.encounter_id WHERE ep.photo_id = ? ORDER BY e.id`),
     // Accord par session : rencontres du même photographe ce jour-là (date de session, sinon date de rencontre).
     forSession: db.prepare(`SELECT e.id, e.ref, e.name, e.consent, e.consent_source, e.refused, e.verified, e.anonymized, (e.portrait_jpeg IS NOT NULL) AS has_portrait
-      FROM encounters e WHERE e.author_id = ? AND COALESCE(NULLIF(e.session_day, ''), NULLIF(e.met_on, '')) = ? AND e.anonymized = 0
-      AND NOT EXISTS (SELECT 1 FROM encounter_exclusions x WHERE x.encounter_id = e.id AND x.photo_id = ?) ORDER BY e.id`),
+      FROM encounters e WHERE e.author_id = @author AND COALESCE(NULLIF(e.session_day, ''), NULLIF(e.met_on, '')) = @day AND e.anonymized = 0
+      AND NOT EXISTS (SELECT 1 FROM encounter_exclusions x WHERE x.encounter_id = e.id AND x.photo_id = @photo)
+      AND ${samePartSql('e.author_id', '@day', 'e.met_time', "COALESCE(@time, '')")} ORDER BY e.id`),
     sessionPhotos: db.prepare(`SELECT p.id, p.title, p.slug, p.status, p.file, p.width, p.height, p.variant_key, p.taken_on,
       EXISTS (SELECT 1 FROM encounter_exclusions x WHERE x.encounter_id = @id AND x.photo_id = p.id) AS excluded
-      FROM photos p WHERE p.author_id = @author AND p.taken_on = @day ORDER BY p.position, p.id`),
+      FROM photos p WHERE p.author_id = @author AND p.taken_on = @day
+      AND ${samePartSql('p.author_id', '@day', "COALESCE(p.taken_time, '')", '@time')} ORDER BY p.position, p.id`),
     countNew: db.prepare("SELECT COUNT(*) FROM encounters WHERE status = 'nouvelle'").pluck(),
   };
 
@@ -138,7 +141,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       let e = c ? q.byRef.get(c.ref) : null;
       if (!e) {
         const id = Number(db.prepare(`INSERT INTO encounters (ref, author_id, lang, met_on, met_time, place, details, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(c?.ref ?? null, c?.author?.id ?? photographer(body.photographer)?.id ?? null, lang, metOn, text(body.met_time, 20), S(place), S(text(body.details, 500)), t, t).lastInsertRowid);
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(c?.ref ?? null, c?.author?.id ?? photographer(body.photographer)?.id ?? null, lang, metOn, normTime(body.met_time) || text(body.met_time, 20), S(place), S(text(body.details, 500)), t, t).lastInsertRowid);
         e = { id, verified: 0 };
       }
       const set = { status: 'nouvelle', lang, updated_at: t, verified: e.verified || (c?.verified ? 1 : 0) };
@@ -241,7 +244,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   function session(id) {
     const e = q.byId.get(id);
     if (!e || !e.author_id || !dayOf(e)) return { day: dayOf(e || {}), photos: [] };
-    return { day: dayOf(e), photos: q.sessionPhotos.all({ id, author: e.author_id, day: dayOf(e) }).map(p => ({ ...p, excluded: Boolean(p.excluded) })) };
+    return { day: dayOf(e), photos: q.sessionPhotos.all({ id, author: e.author_id, day: dayOf(e), time: e.met_time || '' }).map(p => ({ ...p, excluded: Boolean(p.excluded) })) };
   }
   function exclude(id, photoId, on) {
     if (on) db.prepare('INSERT OR IGNORE INTO encounter_exclusions (encounter_id, photo_id) SELECT ?, id FROM photos WHERE id = ?').run(id, Number(photoId));
@@ -250,11 +253,11 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   }
   // Personnes d'une photo : liées à la main (« lien ») et rencontrées ce jour-là par son photographe (« session »).
   function forPhoto(photoId) {
-    const p = db.prepare('SELECT id, author_id, taken_on FROM photos WHERE id = ?').get(photoId);
+    const p = db.prepare('SELECT id, author_id, taken_on, taken_time FROM photos WHERE id = ?').get(photoId);
     if (!p) return [];
     const linked = q.forPhoto.all(photoId).map(e => ({ ...decorate(e), via: 'lien' }));
     const seen = new Set(linked.map(e => e.id));
-    const sessionRows = p.taken_on && /^\d{4}-\d{2}-\d{2}$/.test(p.taken_on) ? q.forSession.all(p.author_id, p.taken_on, photoId) : [];
+    const sessionRows = p.taken_on && /^\d{4}-\d{2}-\d{2}$/.test(p.taken_on) ? q.forSession.all({ author: p.author_id, day: p.taken_on, photo: photoId, time: p.taken_time || '' }) : [];
     return [...linked, ...sessionRows.filter(e => !seen.has(e.id)).map(e => ({ ...decorate(e), via: 'session' }))];
   }
 
@@ -432,7 +435,8 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       AND NOT EXISTS (SELECT 1 FROM encounter_photos ep WHERE ep.encounter_id = encounters.id)
       AND NOT EXISTS (SELECT 1 FROM photos p WHERE p.author_id = encounters.author_id
         AND p.taken_on = COALESCE(NULLIF(encounters.session_day, ''), NULLIF(encounters.met_on, ''))
-        AND NOT EXISTS (SELECT 1 FROM encounter_exclusions x WHERE x.encounter_id = encounters.id AND x.photo_id = p.id))`).run(now() - 5 * RETENTION);
+        AND NOT EXISTS (SELECT 1 FROM encounter_exclusions x WHERE x.encounter_id = encounters.id AND x.photo_id = p.id)
+        AND ${samePartSql('p.author_id', 'p.taken_on', "COALESCE(p.taken_time, '')", 'encounters.met_time')})`).run(now() - 5 * RETENTION);
     return db.prepare('DELETE FROM encounters WHERE updated_at < ? AND consent IS NULL AND refused = 0').run(now() - RETENTION).changes;
   };
 

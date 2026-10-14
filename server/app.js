@@ -24,6 +24,7 @@ import { createMailer } from './mailer.js';
 import { createVault } from './vault.js';
 import { createInstagram } from './instagram.js';
 import { createTodo } from './todo.js';
+import { createOutings } from './outings.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -168,6 +169,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onClose', async () => { app.instagram.stop(); });
   app.decorate('proofs', createProofService({ db, storageDir: config.storageDir, tsa: config.tsa, log: app.log, ...proofOptions }));
   app.addHook('onReady', async () => { app.proofs.start(); });
+  // Sorties : journées de prise de vue, découpables (voir server/outings.js) ; heures des anciennes photos lues une fois.
+  app.decorate('outings', createOutings({ db, encounters: app.encounters, storageDir: config.storageDir, log: app.log }));
+  app.addHook('onReady', async () => { setTimeout(() => app.outings.backfillAll(), 2000).unref(); });
+  app.addHook('onClose', async () => app.outings.stop());
   // « Aujourd'hui » : ce qui demande votre attention (voir server/todo.js).
   app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });

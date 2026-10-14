@@ -1,0 +1,88 @@
+<% layout('./layout') %>
+<% const o = it.o; const TAG = { refus: 'no', 'a-trier': 'warn', terminee: 'ok' };
+   const LABELS = { site: 'site', instagram: 'Instagram', print: 'tirages', name: 'prénom' };
+   const peopleOf = p => o.people.filter(e => o.linked.has(`${e.id}:${p.id}`));
+   const excludedAll = p => o.people.length > 0 && o.people.every(e => o.excluded.has(`${e.id}:${p.id}`) && !o.linked.has(`${e.id}:${p.id}`)); %>
+<p class="mono"><a class="more eyebrow" href="/admin/sorties">← Sorties</a></p>
+<div class="outing-head">
+  <h1><%= o.place || o.author.name %><span class="sub"><%= o.when %><%= o.range ? ` · ${o.range}` : '' %> · <%= o.author.name %> · <%= o.counts.photos %> photo<%= o.counts.photos > 1 ? 's' : '' %> · <%= o.people.length %> personne<%= o.people.length > 1 ? 's' : '' %></span></h1>
+  <span class="enc-tag <%= TAG[o.state] %>"><%= it.STATES[o.state] %></span>
+</div>
+<% if (o.parts.length > 1) { %>
+<nav class="chips" aria-label="Parties de la journée">
+<% o.parts.forEach(p => { %>  <a class="chip" href="<%= it.partUrl(p) %>"<%~ p.starts === o.starts ? ' aria-current="true"' : '' %>><%= p.starts === '00:00' ? 'Début de journée' : `À partir de ${p.starts.replace(':', ' h ')}` %></a>
+<% }) %></nav>
+<% } %>
+
+<div class="outing-grid">
+  <section class="panel" aria-labelledby="o-photos">
+    <h2 id="o-photos">Photos de la sortie <span class="mono">prises ce jour-là<%= o.range ? `, ${o.range}` : '' %> (heure de l’appareil)</span></h2>
+<% if (!o.photos.length) { %>
+    <p class="hint">Aucune photo de <%= o.author.name %> datée de ce jour<%= o.range ? ' à ces heures' : '' %> pour l’instant : elles apparaîtront dès leur import.</p>
+<% } else { %>
+    <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/photos" class="o-photos-form">
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+      <input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>">
+      <ul class="o-photos">
+<% o.photos.forEach(p => { const who = peopleOf(p); const out = excludedAll(p); %>
+        <li>
+          <label class="o-photo">
+            <input type="checkbox" name="photo" value="<%= p.id %>" aria-label="Choisir « <%= p.title %> »">
+            <% if (p.ready) { %><%~ it.picture(p, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %>
+          </label>
+          <a href="/admin/photos/<%= p.id %>" class="o-title"><%= p.title %></a>
+          <span class="mono"><%= p.taken_time ? p.taken_time.replace(':', ' h ') : 'heure inconnue' %> · <%= p.status === 'published' ? 'publiée' : 'brouillon' %></span>
+<% if (who.length) { %>          <span class="o-who"><%= who.map(e => e.ref || e.name || 'rencontre').join(', ') %></span>
+<% } else if (out) { %>          <span class="o-who hint">personne de la sortie</span>
+<% } %>        </li>
+<% }) %>
+      </ul>
+<% if (o.people.length) { %>
+      <div class="o-actions">
+        <label>Personne <select name="personne"><% o.people.forEach(e => { %><option value="<%= e.id %>"><%= e.ref || 'sans carte' %><%= e.name ? ` · ${e.name}` : '' %></option><% }) %></select></label>
+        <button class="btn ghost" type="submit" name="action" value="lier">Lier à cette personne</button>
+        <button class="btn ghost" type="submit" name="action" value="exclure">Personne de la sortie n’y figure</button>
+        <button class="btn ghost" type="submit" name="action" value="retablir">Rétablir</button>
+      </div>
+      <p class="hint">Les accords de la sortie couvrent toutes ses photos. Liez une photo à la personne qui y figure ; si personne de la liste n’y figure (un paysage, une autre scène), indiquez-le : ses accords et refus ne la concernent plus.</p>
+<% } %>
+    </form>
+<% } %>
+  </section>
+
+  <div class="outing-side">
+    <section class="panel" aria-labelledby="o-people">
+      <h2 id="o-people">Personnes rencontrées</h2>
+<% if (!o.people.length) { %>
+      <p class="hint">Personne n’a été rencontré pendant cette sortie.</p>
+<% } else { %>
+      <ul class="rank plain">
+<% o.people.forEach(e => { %>        <li><span class="t"><span class="enc-who"><% if (e.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } %><a href="/admin/rencontres/<%= e.id %>"><%= e.ref || 'Sans carte' %><%= e.name ? ` · ${e.name}` : '' %></a><% if (e.met_time) { %> <span class="mono"><%= e.met_time %></span><% } %></span></span>
+          <% if (e.refused) { %><span class="enc-tag no">refuse la publication</span><% } else if (e.consent) { %><span class="enc-tag ok"><%= Object.keys(LABELS).filter(s => e.consent[s]).map(s => LABELS[s]).join(', ') %></span><% } else { %><span class="enc-tag">sans décision</span><% } %></li>
+<% }) %>      </ul>
+<% } %>
+      <p class="actions"><a class="btn ghost" href="/admin/rencontre">＋ Nouvelle rencontre</a></p>
+    </section>
+
+    <section class="panel" aria-labelledby="o-settings">
+      <h2 id="o-settings">La sortie</h2>
+      <form class="form" method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/lieu">
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>">
+        <label>Lieu <span class="mono"><%= o.placeSet ? 'choisi' : 'proposé d’après les rencontres et les photos' %></span><input name="lieu" value="<%= o.place %>" maxlength="120"></label>
+        <p class="actions"><button class="btn ghost" type="submit">Enregistrer le lieu</button></p>
+      </form>
+      <form class="form" method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/couper">
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>">
+        <label>Couper la sortie à <span class="mono">les photos et rencontres d’après forment une autre sortie</span><input type="time" name="heure" required step="60"></label>
+        <p class="actions"><button class="btn ghost" type="submit">Couper</button></p>
+      </form>
+<% if (o.starts !== '00:00') { %>
+      <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/reunir">
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>">
+        <button class="btn ghost" type="submit">Réunir avec la sortie précédente</button>
+      </form>
+<% } %>
+      <p class="hint">Une photo ou une rencontre sans heure connue compte dans toutes les parties de la journée.</p>
+    </section>
+  </div>
+</div>

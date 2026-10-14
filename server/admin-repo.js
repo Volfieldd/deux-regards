@@ -152,13 +152,14 @@ export function createAdminRepo(db) {
     },
 
     // gps : position lue dans l'original ; seule la ville la plus proche est gardée (proposée, pas sur la carte).
-    addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null, sourceName = null, takenOn = null, gps = null }) {
+    addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null, sourceName = null, takenOn = null, takenTime = null, gps = null }) {
       const position = db.prepare('SELECT COALESCE(MAX(position), -1) + 1 FROM photos').pluck().get();
       const city = gps ? cities.nearest(gps.lat, gps.lon) : null;
       const { lastInsertRowid } = db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height, sha256, source_name, taken_on,
           city_id, city_name, city_cc, city_lat, city_lon, city_source, gps_checked)
         VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`).run(uniqueSlug('photos', title), title, categoryId, authorId, position, file, width, height, sha256, sourceName, takenOn,
         city?.id ?? null, city?.name ?? null, city?.cc ?? null, city?.lat ?? null, city?.lon ?? null, city ? 'gps' : null);
+      if (takenTime !== null) db.prepare('UPDATE photos SET taken_time = ? WHERE id = ?').run(takenTime, lastInsertRowid);
       return Number(lastInsertRowid);
     },
 

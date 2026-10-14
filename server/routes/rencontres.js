@@ -61,7 +61,8 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     return page(request, reply, 'encounter', {
       title: e.ref ? `Rencontre ${e.ref}` : `Rencontre du ${fmt(e.created_at)}`, e, events: enc.events(id),
       photos: enc.photos(id).map(withReady), session: (s => ({ ...s, photos: s.photos.map(withReady) }))(enc.session(id)), candidates: candidates(e, search), search, authors: repo.authors(),
-      code: e.ref ? enc.codeOf(e.ref) : null, shares: sharesOf(e), errors: {}, values: null, ...extra,
+      code: e.ref ? enc.codeOf(e.ref) : null, shares: sharesOf(e), errors: {}, values: null,
+      outingUrl: e.author_id ? app.outings.urlOf(e.author_id, e.session_day || e.met_on, e.met_time) : null, ...extra,
     });
   }
   // Liens « photo offerte » : adresse, et message prêt à envoyer dans la langue de la personne (mailto).
