@@ -44,6 +44,21 @@ C'est la page du QR (en français, anglais et allemand, sans lien dans le menu, 
 
 Elle peut revenir à tout moment et changer d'avis : le dernier choix l'emporte, l'historique garde les précédents. Contre les abus : 8 demandes par heure et par connexion, et un piège pour les robots.
 
+## Sur le téléphone : l'app Rencontre
+
+Pour remplir **avec la personne**, au moment de la photo, sans carte papier : **Rencontres → Nouvelle rencontre**, ou directement `nicephos.art/admin/rencontre` sur l'iPhone.
+
+**L'installer comme une app** (une fois) : dans Safari, ouvrez la page, touchez **Partager** puis **Sur l'écran d'accueil**. L'icône « Rencontre » ouvre l'écran en plein écran. Il faut être connecté à l'admin (connexion à refaire au plus une fois par jour).
+
+**En une minute :**
+
+1. **Vous** : le photographe (celui de votre compte), la **position** (demandée au téléphone, gardée à 100 m près ; la ville en est déduite), une **photo de repère** de la personne (gardée en privé, pour retrouver les bonnes images), des notes.
+2. **Tendez le téléphone** : la personne choisit sa langue (FR · EN · DE), lit le consentement, coche ce qu'elle accepte (ou refuse, ou ne décide pas), indique son nom, son e-mail si elle veut recevoir la photo, son âge (**moins de 18 ans : un parent signe avec elle**, son nom est demandé) et **signe avec le doigt**.
+3. **Enregistrer** : la rencontre reçoit le numéro suivant de vos cartes (J-0143). L'écran **Merci** s'affiche dans sa langue avec un **QR** : en le scannant, elle retrouve sa page `/bonjour/J-0143-…` pour recevoir sa photo, changer d'avis ou vous écrire.
+4. **Récapitulatif** : si l'envoi d'e-mails est configuré sur le serveur, il part tout seul (son accord, ce qu'elle a coché, le lien vers sa page) ; sinon, **Envoyer le récapitulatif depuis Mail** ouvre le message tout prêt, dans sa langue, à envoyer depuis votre adresse.
+
+Il faut du réseau (la 4G suffit) : sans réseau, l'enregistrement échoue sans rien perdre à l'écran ; réessayez un peu plus loin. Un accord signé sur le téléphone vaut une carte signée : la fiche montre la signature et la photo de repère.
+
 ## Traiter une rencontre
 
 Les nouvelles demandes s'affichent en tête, avec un compteur dans la barre latérale. Dans la fiche d'une rencontre :

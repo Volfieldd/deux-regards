@@ -25,6 +25,7 @@ Références de design (artefacts claude.ai) :
 | Images | `sharp` (resize, AVIF/WebP, suppression EXIF) |
 | QR des cartes de rencontre | `qrcode` (SVG, sans dépendance native) |
 | Texte en tracés (QR des vêtements) | `opentype.js` (lit les polices WOFF du site) |
+| E-mails (facultatif) | `nodemailer` (SMTP de votre boîte) |
 | Gabarits | Eta |
 | Auth | `openid-client` (Authorization Code + PKCE) |
 | Identité | Zitadel Cloud, Google en IdP externe dans Zitadel |
@@ -225,6 +226,10 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 24. QR des vêtements (fait)
 - `/bonjour/J` : QR générique d'un photographe (sans numéro), demande attribuée à l'auteur ; la date et le lieu restent demandés.
 - Auteurs → « QR pour les vêtements » : compositions vectorielles (`server/textile.js`, texte converti en tracés, logo d'Apparence intégré à la couleur de l'encre) verticale (dos, sac), logo seul (poitrine, casquette), écusson et QR seul, encre noire (textile clair) ou blanche (textile foncé, carré blanc évidé), en SVG ou PNG transparent ; QR en correction H avec sa marge.
+
+### 25. App Rencontre sur le téléphone (fait)
+- `/admin/rencontre` : web app installable (manifeste, plein écran) ; position arrondie (Permissions-Policy limitée à cette route), photo de repère, consentement en trois langues, signature au doigt, majorité ou parent ; numéro suivant du photographe (partagé avec les cartes) ; écran « Merci » avec le QR de la page de la personne ; récapitulatif par SMTP (`server/mailer.js`, `SMTP_URL`, `MAIL_FROM`) ou mailto ; migration 017.
+- Suite possible : mode hors ligne (enregistrement différé).
 
 ## Côté Zitadel (à faire une fois)
 

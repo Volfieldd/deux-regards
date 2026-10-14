@@ -81,6 +81,15 @@ export const UI = {
     more: 'Lire la suite', less: 'Réduire',
     seePhotosOf: 'Voir ses photos',
     notFound: 'Cette page n’existe pas, ou la photo a été retirée.', notFoundTitle: 'Page introuvable', backHome: 'Revenir à la galerie',
+    app: {
+      consentTitle: 'Votre accord', consent: name => `J’autorise l’usage artistique et la publication des photos que ${name} a prises de moi aujourd’hui. Je peux changer d’avis à tout moment.`,
+      accept: 'J’accepte, pour :', refuse: 'Je refuse que ces photos soient publiées', later: 'Je ne décide pas maintenant',
+      adult: 'J’ai 18 ans ou plus', minor: 'J’ai moins de 18 ans : un parent signe avec moi', guardian: 'Nom du parent',
+      sign: 'Signez ici avec le doigt', clear: 'Effacer', name: 'Prénom et nom', email: 'E-mail (facultatif)',
+      thanks: 'Merci !', scan: 'Scannez ce code avec votre téléphone : vous y retrouverez votre page pour recevoir votre photo, changer d’avis ou nous écrire.',
+      mailSubject: site => `Votre accord · ${site}`,
+      mail: ({ name, date, place, accepted, refused, link, author }) => `Bonjour${name ? ` ${name}` : ''},\n\nMerci pour notre rencontre${date ? ` du ${date}` : ''}${place ? ` à ${place}` : ''}.\n\n${refused ? 'Vous avez refusé que vos photos soient publiées : c’est noté, elles ne le seront pas.' : accepted ? `Vous avez accepté leur publication : ${accepted}.` : 'Vous n’avez pas encore décidé si vos photos peuvent être publiées.'}\n\nVous pouvez recevoir votre photo, changer d’avis à tout moment ou nous écrire ici :\n${link}\n\n${author}`,
+    },
     gift: {
       title: 'Votre photo', text: 'Merci pour ce moment. Voici votre photo, rien que pour vous.',
       download: 'Télécharger la photo', format: 'JPEG, 2048 px',
@@ -141,6 +150,15 @@ export const UI = {
     more: 'Read more', less: 'Show less',
     seePhotosOf: 'See the photos',
     notFound: 'This page does not exist, or the photo has been removed.', notFoundTitle: 'Page not found', backHome: 'Back to the gallery',
+    app: {
+      consentTitle: 'Your consent', consent: name => `I agree to the artistic use and publication of the photos ${name} took of me today. I can change my mind at any time.`,
+      accept: 'I agree, for:', refuse: 'I do not want these photos to be published', later: 'I won’t decide now',
+      adult: 'I am 18 or older', minor: 'I am under 18: a parent signs with me', guardian: 'Parent’s name',
+      sign: 'Sign here with your finger', clear: 'Clear', name: 'First and last name', email: 'Email (optional)',
+      thanks: 'Thank you!', scan: 'Scan this code with your phone: you will find your page to receive your photo, change your mind or write to us.',
+      mailSubject: site => `Your consent · ${site}`,
+      mail: ({ name, date, place, accepted, refused, link, author }) => `Hello${name ? ` ${name}` : ''},\n\nThank you for our meeting${date ? ` on ${date}` : ''}${place ? ` in ${place}` : ''}.\n\n${refused ? 'You do not want your photos to be published: noted, they will not be.' : accepted ? `You agreed to their publication: ${accepted}.` : 'You have not decided yet whether your photos may be published.'}\n\nYou can receive your photo, change your mind at any time or write to us here:\n${link}\n\n${author}`,
+    },
     gift: {
       title: 'Your photo', text: 'Thank you for this moment. Here is your photo, just for you.',
       download: 'Download the photo', format: 'JPEG, 2048 px',
@@ -201,6 +219,15 @@ export const UI = {
     more: 'Weiterlesen', less: 'Weniger',
     seePhotosOf: 'Fotos ansehen',
     notFound: 'Diese Seite existiert nicht, oder das Foto wurde entfernt.', notFoundTitle: 'Seite nicht gefunden', backHome: 'Zurück zur Galerie',
+    app: {
+      consentTitle: 'Ihre Einwilligung', consent: name => `Ich willige in die künstlerische Nutzung und Veröffentlichung der Fotos ein, die ${name} heute von mir gemacht hat. Ich kann meine Meinung jederzeit ändern.`,
+      accept: 'Ich bin einverstanden, für:', refuse: 'Ich möchte nicht, dass diese Fotos veröffentlicht werden', later: 'Ich entscheide mich später',
+      adult: 'Ich bin 18 Jahre oder älter', minor: 'Ich bin unter 18: Ein Elternteil unterschreibt mit mir', guardian: 'Name des Elternteils',
+      sign: 'Hier mit dem Finger unterschreiben', clear: 'Löschen', name: 'Vor- und Nachname', email: 'E-Mail (freiwillig)',
+      thanks: 'Danke!', scan: 'Scannen Sie diesen Code mit Ihrem Handy: Dort finden Sie Ihre Seite, um Ihr Foto zu erhalten, Ihre Meinung zu ändern oder uns zu schreiben.',
+      mailSubject: site => `Ihre Einwilligung · ${site}`,
+      mail: ({ name, date, place, accepted, refused, link, author }) => `Hallo${name ? ` ${name}` : ''},\n\ndanke für unsere Begegnung${date ? ` am ${date}` : ''}${place ? ` in ${place}` : ''}.\n\n${refused ? 'Sie möchten nicht, dass Ihre Fotos veröffentlicht werden: notiert, sie werden es nicht.' : accepted ? `Sie haben der Veröffentlichung zugestimmt: ${accepted}.` : 'Sie haben noch nicht entschieden, ob Ihre Fotos veröffentlicht werden dürfen.'}\n\nHier können Sie Ihr Foto erhalten, Ihre Meinung jederzeit ändern oder uns schreiben:\n${link}\n\n${author}`,
+    },
     gift: {
       title: 'Ihr Foto', text: 'Danke für diesen Moment. Hier ist Ihr Foto, nur für Sie.',
       download: 'Foto herunterladen', format: 'JPEG, 2048 px',

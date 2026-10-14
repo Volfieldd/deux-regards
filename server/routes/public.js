@@ -67,6 +67,16 @@ export default async function publicRoutes(app) {
     });
   }
 
+  // Web app « Rencontre » (admin, sur le téléphone) : manifeste pour l'ajouter à l'écran d'accueil.
+  app.get('/rencontre.webmanifest', async (request, reply) => {
+    const b = app.appearance.brand();
+    return reply.type('application/manifest+json').header('cache-control', 'no-cache').send(JSON.stringify({
+      name: `Rencontre · ${app.siteName()}`, short_name: 'Rencontre', lang: 'fr', start_url: '/admin/rencontre', scope: '/admin/', display: 'standalone',
+      background_color: '#f6f4ef', theme_color: '#1d1c1a',
+      icons: b.favicon180 ? [{ src: `/brand/${b.favicon180}`, sizes: '180x180', type: 'image/png' }] : [],
+    }));
+  });
+
   // Anciennes adresses des traductions de la page Droits.
   for (const lang of ['en', 'de']) app.get(`/droits/${lang}`, async (request, reply) => reply.redirect(`/${lang}/droits`, 301));
 

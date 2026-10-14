@@ -20,6 +20,7 @@ import { createProofService } from './proofs.js';
 import { createStats } from './stats.js';
 import { createTranslator } from './translate.js';
 import { createEncounters } from './encounters.js';
+import { createMailer } from './mailer.js';
 import { createInstagram } from './instagram.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -81,7 +82,7 @@ function assetUrls(root, cache) {
   };
 }
 
-export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {} }) {
+export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {}, mailTransport = null }) {
   const app = Fastify({ logger: loggerOptions(logger), trustProxy: config.trustProxy });
 
   app.decorate('config', config);
@@ -143,6 +144,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Pays : l'en-tête de Cloudflare n'est cru que derrière un proxy de confiance (tunnel), sinon « inconnu ».
   // Rencontres (page /bonjour, cartes) ; demandes sans accord ni refus effacées après 12 mois (contrôle quotidien).
   app.decorate('encounters', createEncounters({ db }));
+  app.decorate('mailer', createMailer({ ...config.mail, log: app.log, transport: mailTransport }));
   let purgeTimer = null;
   app.addHook('onReady', async () => {
     app.encounters.purge();
@@ -165,6 +167,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
 
   app.addHook('onSend', async (request, reply) => {
     reply.headers(headers);
+    // Seul l'écran « Rencontre » de l'admin (sur le téléphone) peut demander la position, au site lui-même.
+    if (request.routeOptions?.config?.geolocation) reply.header('permissions-policy', 'camera=(), microphone=(), geolocation=(self)');
     // Sans includeSubDomains : à ajouter quand tous les sous-domaines de nicephos.art seront servis en HTTPS (PLAN.md, feuille de route).
     // COOP n'a d'effet qu'en HTTPS : en http, le navigateur l'ignore avec un avertissement.
     if (config.secureCookies) reply.header('strict-transport-security', 'max-age=31536000').header('cross-origin-opener-policy', 'same-origin');

@@ -5,11 +5,19 @@ import { EncounterError, SCOPES, SCOPE_LABELS } from '../encounters.js';
 import { sameToken } from '../auth.js';
 import { TEXTS, PER_SHEET, MAX_PAIRS, buildPairs, sheets } from '../cards.js';
 import { UI } from '../i18n.js';
-import { composition, MODELS, INKS } from '../textile.js';
+import QRCode from 'qrcode';
+import { composition } from '../textile.js';
+import { MailError } from '../mailer.js';
 
 // Admin « Rencontres » : demandes reçues par la page /bonjour, accords papier (carte « pour nous ») et refus.
 // Enregistré dans le plugin d'administration (session d'admin exigée, comme le reste de /admin).
 const CARD_MAX_BYTES = 15 * 1024 * 1024;
+// Photos envoyées (carte signée, photo de repère) : seulement des photos ; jamais un SVG ou un PDF que sharp saurait
+// aussi lire (contenu actif, ressources externes).
+const PHOTO_FORMATS = ['jpeg', 'png', 'webp'];
+async function photoFormat(buf) { try { return PHOTO_FORMATS.includes((await sharp(buf).metadata()).format); } catch { return false; } }
+// Champs des formulaires multipart : noms simples seulement (rien comme « __proto__ »).
+const FIELD = /^[a-z_]{1,30}$/;
 
 export function registerEncounters(app, { repo, render, write, done, failed, withReady }) {
   const enc = app.encounters;
@@ -84,6 +92,92 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
 
   app.get('/admin/rencontres/:id', async (request, reply) => detail(request, reply, byId(request.params.id)));
 
+  // ---------- rencontre saisie sur le téléphone (web app installable) ----------
+  const LOCALE = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' };
+  const appView = (reply, view, data) => reply.header('cache-control', 'no-store').render(`admin/${view}`, { siteName: app.siteName(), UI, ...data });
+  const authorOf = request => repo.authorBySub(request.session.sub) || null;
+  function appPage(request, reply, extra = {}) {
+    const author = authorOf(request);
+    const authors = repo.authors().map(a => ({ ...a, prefix: prefixOf(a), next: `${prefixOf(a)}-${String(nextNumber(prefixOf(a))).padStart(4, '0')}` }));
+    return appView(reply, 'app', { title: 'Nouvelle rencontre', author, authors, csrf: request.session.csrf, errors: {}, values: { lang: 'fr', author_id: author?.id }, ...extra });
+  }
+  app.get('/admin/rencontre', { config: { geolocation: true } }, async (request, reply) => appPage(request, reply));
+
+  // Récapitulatif pour la personne, dans sa langue : ce qu'elle a accepté ou refusé, et le lien vers sa page.
+  function recap(e) {
+    const lang = UI[e.lang] ? e.lang : 'fr';
+    const A = UI[lang].app;
+    const accepted = e.consent ? SCOPES.filter(s => e.consent[s]).map(s => UI[lang].hello.scopes[s]).join(', ') : '';
+    const date = e.created_at ? new Intl.DateTimeFormat(LOCALE[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(e.created_at) : '';
+    const link = `${app.config.publicUrl}${lang === 'fr' ? '' : `/${lang}`}/bonjour/${e.ref}-${enc.codeOf(e.ref)}`;
+    return { link, subject: A.mailSubject(app.siteName()), text: A.mail({ name: e.name, date, place: e.place, accepted, refused: Boolean(e.refused), link, author: e.author || app.siteName() }) };
+  }
+  async function sendRecap(e) {
+    const r = recap(e);
+    await app.mailer.send({ to: e.email, subject: r.subject, text: r.text });
+    enc.markMailed(e.id);
+  }
+
+  app.post('/admin/rencontre', { config: { geolocation: true } }, async (request, reply) => {
+    const body = {};
+    let checked = false; let portrait = null; let error = null;
+    try {
+      // fieldSize : la signature (PNG en base64, 500 Ko au plus une fois décodée) tient dans un champ.
+      for await (const part of request.parts({ limits: { fileSize: CARD_MAX_BYTES, files: 1, fields: 40, fieldSize: 700_000 } })) {
+        if (part.type === 'field') {
+          if (part.fieldname === '_csrf') checked = sameToken(part.value, request.session.csrf);
+          else if (FIELD.test(part.fieldname)) body[part.fieldname] = part.valueTruncated ? '' : part.value;
+          continue;
+        }
+        if (!checked) { part.file.resume(); break; }
+        const chunks = [];
+        for await (const chunk of part.file) chunks.push(chunk);
+        if (part.file.truncated) error = 'Photo trop lourde (15 Mo au plus).';
+        else if (chunks.length) portrait = Buffer.concat(chunks);
+      }
+    } catch (err) {
+      if (!err.code?.startsWith('FST_')) throw err;
+      error = 'Envoi invalide.';
+    }
+    if (!checked) return reply.code(403).send('Jeton CSRF invalide.');
+    const author = repo.authors().find(a => a.id === Number(body.author_id)) || authorOf(request);
+    try {
+      if (error) throw new EncounterError({ portrait: error });
+      if (portrait && !(await photoFormat(portrait))) throw new EncounterError({ portrait: 'La photo doit être une image JPEG, PNG ou WebP.' });
+      const r = await enc.saveApp(body, { author, portrait });
+      const e = enc.get(r.id);
+      if (e.email && app.mailer.enabled) await sendRecap(e).catch(() => {});      // échec : bouton « Renvoyer » sur l'écran suivant
+      return reply.redirect(`/admin/rencontre/${r.id}/merci`, 303);
+    } catch (err) {
+      if (!(err instanceof EncounterError)) throw err;
+      return appPage(request, reply.code(422), { errors: err.errors, values: { ...body, signature: '' } });
+    }
+  });
+
+  // Écran « Merci » montré à la personne : QR vers sa page (/bonjour/J-0143-…), dans sa langue ; puis, pour le
+  // photographe, le récapitulatif (envoyé par le serveur, ou prêt dans Mail).
+  app.get('/admin/rencontre/:id/merci', async (request, reply) => {
+    const e = enc.get(byId(request.params.id));
+    if (!e || !e.ref) return reply.callNotFound();
+    const r = recap(e);
+    const qr = await QRCode.toString(r.link, { type: 'svg', errorCorrectionLevel: 'Q', margin: 2 });
+    const mailto = e.email ? `mailto:${e.email}?${new URLSearchParams({ subject: r.subject, body: r.text }).toString().replace(/\+/g, '%20')}` : null;
+    return appView(reply, 'app-merci', { title: `Rencontre ${e.ref}`, e, A: UI[e.lang] ? UI[e.lang].app : UI.fr.app, qr, mailto, smtp: app.mailer.enabled, csrf: request.session.csrf, flash: request.query.envoi || null });
+  });
+  app.post('/admin/rencontre/:id/envoyer', write, async (request, reply) => {
+    const e = enc.get(byId(request.params.id));
+    if (!e || !e.email) return reply.callNotFound();
+    try { await sendRecap(e); } catch (err) { if (!(err instanceof MailError)) throw err; return reply.redirect(`/admin/rencontre/${e.id}/merci?envoi=echec`, 303); }
+    return reply.redirect(`/admin/rencontre/${e.id}/merci?envoi=ok`, 303);
+  });
+  for (const [name, get, type] of [['portrait', id => enc.portraitJpeg(id), 'image/jpeg'], ['signature', id => enc.signaturePng(id), 'image/png']]) {
+    app.get(`/admin/rencontres/:id/${name}`, async (request, reply) => {
+      const buf = get(byId(request.params.id));
+      if (!buf) return reply.callNotFound();
+      return reply.header('cache-control', 'no-store').type(type).send(buf);
+    });
+  }
+
   // ---------- QR générique d'un photographe (vêtements, accessoires) ----------
   // /bonjour/J : SVG vectoriel (texte en tracés) ou PNG transparent à 300 dpi (600 dpi pour le QR seul).
   app.get('/admin/auteurs/:id/qr/:file', async (request, reply) => {
@@ -107,15 +201,11 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
 
   // ---------- cartes à imprimer ----------
   // Dernier numéro imprimé par lettre (réglage « cards_printed ») : la planche suivante continue la série.
-  const printed = () => { try { return JSON.parse(app.db.prepare("SELECT value FROM settings WHERE key = 'cards_printed'").pluck().get() || '{}'); } catch { return {}; } };
   const prefixOf = a => a.card_prefix || a.slug.charAt(0).toUpperCase();
-  const nextNumber = prefix => {
-    const used = app.db.prepare("SELECT ref FROM encounters WHERE ref LIKE ? || '-%'").pluck().all(prefix).map(r => Number(r.split('-')[1]) || 0);
-    return Math.max(Number(printed()[prefix]) || 0, ...used, 0) + 1;
-  };
+  const nextNumber = prefix => enc.nextNumber(prefix);
   function cardsPage(request, reply, extra = {}) {
     const authors = repo.authors().map(a => ({ ...a, prefix: prefixOf(a), next: nextNumber(prefixOf(a)) }));
-    return render(request, reply, 'cards', { title: 'Cartes à imprimer', authors, printed: printed(), PER_SHEET, MAX_PAIRS, errors: {}, values: {}, ...extra });
+    return render(request, reply, 'cards', { title: 'Cartes à imprimer', authors, PER_SHEET, MAX_PAIRS, errors: {}, values: {}, ...extra });
   }
   app.get('/admin/rencontres/cartes', async (request, reply) => cardsPage(request, reply));
   app.post('/admin/rencontres/cartes', write, async (request, reply) => {
@@ -132,9 +222,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const qs = new URLSearchParams({ auteur: author.id, nombre: count, ...(generic ? { generiques: '1' } : { de: from }) });
     if (!generic) {
       // Numéros réservés : la prochaine planche de ce photographe commencera après.
-      const p = printed();
-      p[prefixOf(author)] = Math.max(Number(p[prefixOf(author)]) || 0, from + count - 1);
-      app.db.prepare("INSERT INTO settings (key, value) VALUES ('cards_printed', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(JSON.stringify(p));
+      enc.reserve(prefixOf(author), from + count - 1);
     }
     return reply.redirect(`/admin/rencontres/cartes/planche?${qs}`, 303);
   });
@@ -158,7 +246,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     for await (const part of request.parts({ limits: { fileSize: CARD_MAX_BYTES, files: 1, fields: 30 } })) {
       if (part.type === 'field') {
         if (part.fieldname === '_csrf') checked = sameToken(part.value, request.session.csrf);
-        else body[part.fieldname] = part.value;
+        else if (FIELD.test(part.fieldname)) body[part.fieldname] = part.value;
         continue;
       }
       if (!checked) { part.file.resume(); break; }
@@ -166,6 +254,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
       for await (const chunk of part.file) chunks.push(chunk);
       if (!chunks.length) continue;                                  // champ fichier laissé vide
       if (part.file.truncated) { error = 'Photo de la carte trop lourde (15 Mo au plus).'; continue; }
+      if (!(await photoFormat(Buffer.concat(chunks)))) { error = 'La photo de la carte doit être une image JPEG, PNG ou WebP (sur iPhone, l’appareil photo la convertit tout seul).'; continue; }
       try {
         jpeg = await sharp(Buffer.concat(chunks), { limitInputPixels: 60e6 }).rotate().resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 80 }).toBuffer();
       } catch {
