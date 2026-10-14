@@ -224,7 +224,7 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 
 ### 24. QR des vêtements (fait)
 - `/bonjour/J` : QR générique d'un photographe (sans numéro), demande attribuée à l'auteur ; la date et le lieu restent demandés.
-- Auteurs → « QR pour les vêtements » : compositions vectorielles (`server/textile.js`, texte converti en tracés) verticale (dos, sac), carrée (écusson, casquette) et QR seul, encre noire (textile clair) ou blanche (textile foncé, carré blanc évidé), en SVG ou PNG transparent ; QR en correction H avec sa marge.
+- Auteurs → « QR pour les vêtements » : compositions vectorielles (`server/textile.js`, texte converti en tracés, logo d'Apparence intégré à la couleur de l'encre) verticale (dos, sac), logo seul (poitrine, casquette), écusson et QR seul, encre noire (textile clair) ou blanche (textile foncé, carré blanc évidé), en SVG ou PNG transparent ; QR en correction H avec sa marge.
 
 ## Côté Zitadel (à faire une fois)
 

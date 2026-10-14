@@ -24,9 +24,13 @@ Les cartes imprimées par le site portent un **code de contrôle** (J-0142-K7Q) 
 
 Pour un tee-shirt, un sac, une casquette ou un écusson : **Auteurs → QR pour les vêtements**, sur la fiche de chaque photographe. Ce QR ouvre `nicephos.art/bonjour/J` (ou `/S`) : la page accueille la personne avec le nom du photographe (« Vous avez croisé Julien ? ») ; sans numéro de carte, elle indique la date et le lieu.
 
-- **Compositions** : verticale (« Bonjour ! », la phrase en trois langues, le QR, l'adresse ; pour un dos de tee-shirt ou un sac), carrée (pour un écusson ou une casquette), ou le QR seul.
+- **Compositions**, avec le logo envoyé dans [Apparence](apparence) (le nom du site s'il n'y en a pas) :
+  - **verticale**, pour un dos de tee-shirt ou un sac : le logo complet, « Bonjour ! », la phrase en trois langues, le QR et l'adresse ;
+  - **logo seul**, pour la poitrine ou une casquette (le classique : le logo devant, le QR dans le dos) ;
+  - **écusson** : l'emblème au-dessus du QR ;
+  - **QR seul**, pour vos propres compositions.
 - **Encre noire** pour un textile clair, **encre blanche** pour un textile foncé (le QR est alors un carré blanc évidé, lisible par tous les téléphones).
-- **Fichiers** : SVG vectoriel (le texte est converti en tracés : l'imprimeur n'a pas besoin des polices du site) ou PNG transparent à 300 dpi.
+- **Fichiers** : SVG vectoriel (le texte est converti en tracés : l'imprimeur n'a pas besoin des polices du site ; le logo y est intégré en haute définition, à la couleur de l'encre) ou PNG transparent à 300 dpi.
 - **Taille** : 8 à 10 cm de côté au moins pour le QR sur un dos (lisible à un ou deux mètres), 4 à 5 cm sur une casquette ou un écusson. Gardez la marge blanche autour du QR. Le QR résiste aux plis et à l'usure (correction d'erreur maximale), et son adresse ne changera jamais.
 
 ## La page /bonjour

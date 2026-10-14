@@ -115,9 +115,18 @@ test('QR générique d’un photographe : /bonjour/J, demande attribuée sans ca
   const svg = await c.as({ url: `/admin/auteurs/${c.author('julien')}/qr/vertical-noir.svg` });
   assert.equal(svg.headers['content-type'], 'image/svg+xml');
   assert.match(svg.headers['content-disposition'], /attachment; filename="test-julien-vertical-noir\.svg"/);
-  assert.match(svg.body, /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="120mm" height="175mm"/);
+  assert.match(svg.body, /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="120mm" height="198mm"/);
+  assert.match((await c.as({ url: `/admin/auteurs/${c.author('julien')}/qr/logo-blanc.svg` })).body, /width="100mm" height="50mm"/);   // sans logo envoyé : le nom du site
   assert.doesNotMatch(svg.body, /<text|font-family/);                                       // texte converti en tracés
   assert.match(svg.body, /<title>Test · Julien · localhost:3000\/bonjour\/J<\/title>/);
+  // Avec le logo d'Apparence : intégré à la couleur de l'encre.
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  fs.mkdirSync(path.join(c.config.storageDir, 'brand'), { recursive: true });
+  await sharp({ create: { width: 400, height: 200, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 1 } } }).png().toFile(path.join(c.config.storageDir, 'brand', 'logotype-test.png'));
+  c.db.prepare("INSERT INTO settings (key, value) VALUES ('brand', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(JSON.stringify({ logotype: 'logotype-test.png' }));
+  const withLogo = (await c.as({ url: `/admin/auteurs/${c.author('julien')}/qr/vertical-blanc.svg` })).body;
+  assert.match(withLogo, /<image x="13" y="6" width="94" height="47" href="data:image\/png;base64,/);
   const png = await c.as({ url: `/admin/auteurs/${c.author('julien')}/qr/qr-blanc.png` });
   const meta = await sharp(png.rawPayload).metadata();
   assert.deepEqual([meta.format, meta.hasAlpha, meta.width > 1800], ['png', true, true]);   // 80 mm à 600 dpi

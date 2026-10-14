@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module';
+import sharp from 'sharp';
 import QRCode from 'qrcode';
 import opentype from 'opentype.js';
 
@@ -21,9 +22,10 @@ const F = () => (fonts ??= {
 });
 
 export const MODELS = {
+  vertical: { label: 'Dos de tee-shirt, sac', w: 120, h: 198 },
+  carre: { label: 'Écusson', w: 80, h: 96 },
+  logo: { label: 'Logo seul (poitrine, casquette)', w: 100, h: 50 },
   qr: { label: 'QR seul', w: 80, h: 80 },
-  vertical: { label: 'Dos de tee-shirt, sac (vertical)', w: 120, h: 175 },
-  carre: { label: 'Écusson, casquette (carré)', w: 80, h: 80 },
 };
 export const INKS = { noir: { label: 'Encre noire (textile clair)', fg: '#000000' }, blanc: { label: 'Encre blanche (textile foncé)', fg: '#ffffff' } };
 
@@ -56,35 +58,59 @@ function qrPath(url, x, y, size, { box = false } = {}) {
   return parts.join('');
 }
 
-export function composition({ model = 'vertical', ink = 'noir', url, display, name, siteName }) {
+// Logo de la marque (masque PNG d'Apparence) à la couleur de l'encre, en image intégrée au SVG ; place (x, y, w, h)
+// en millimètres, centré dans la boîte. Sans logo : le nom du site en tracés.
+async function logo(mask, box, fg, fallback) {
+  if (!mask) {
+    const f = F();
+    const size = Math.min(box.h * 0.8, 30);
+    return { text: text(f.serif, fallback, box.x + box.w / 2, box.y + box.h * 0.72, size, box.w) };
+  }
+  const meta = await sharp(mask).metadata();
+  const alpha = await sharp(mask).ensureAlpha().extractChannel(3).toBuffer();
+  const rgb = fg === '#ffffff' ? { r: 255, g: 255, b: 255 } : { r: 0, g: 0, b: 0 };
+  const png = await sharp({ create: { width: meta.width, height: meta.height, channels: 3, background: rgb } }).joinChannel(alpha).png().toBuffer();
+  const ratio = meta.width / meta.height;
+  const w = Math.min(box.w, box.h * ratio);
+  const h = w / ratio;
+  return { image: `<image x="${r1(box.x + (box.w - w) / 2)}" y="${r1(box.y + (box.h - h) / 2)}" width="${r1(w)}" height="${r1(h)}" href="data:image/png;base64,${png.toString('base64')}"/>` };
+}
+
+// logos : { logotype, emblem } (masques PNG d'Apparence, ou null).
+export async function composition({ model = 'vertical', ink = 'noir', url, display, name, siteName, logos = {} }) {
   const M = MODELS[model] || MODELS.vertical;
   const fg = (INKS[ink] || INKS.noir).fg;
   const box = ink === 'blanc';                                 // textile foncé : carré blanc évidé
   const f = F();
   const paths = [];
-  let qr;
+  const images = [];
+  let qr = '';
   const { w, h } = M;
+  const addLogo = async (mask, b) => { const l = await logo(mask, b, fg, siteName); if (l.image) images.push(l.image); else paths.push(l.text); };
   if (model === 'qr') {
     qr = qrPath(url, 0, 0, w, { box });
+  } else if (model === 'logo') {
+    await addLogo(logos.logotype || logos.emblem, { x: 0, y: 0, w, h });
   } else if (model === 'carre') {
-    const q = 58;
-    qr = qrPath(url, (w - q) / 2, 2, q, { box });
-    paths.push(text(f.serif, 'Bonjour !', w / 2, 69, 9.5, w - 8));
-    paths.push(text(f.mono, display, w / 2, 75, 3.6, w - 8));
+    await addLogo(logos.emblem || logos.logotype, { x: 10, y: 3, w: w - 20, h: 24 });
+    const q = 56;
+    qr = qrPath(url, (w - q) / 2, 29, q, { box });
+    paths.push(text(f.mono, display, w / 2, 91, 3.6, w - 8));
   } else {
-    paths.push(text(f.serif, 'Bonjour !', w / 2, 27, 24, w - 10));
-    paths.push(text(f.sans, 'Je vous ai peut-être photographié.', w / 2, 38, 6, w - 12));
-    paths.push(text(f.light, 'I may have taken your photo · Vielleicht habe ich Sie fotografiert', w / 2, 45, 3.6, w - 12));
-    const q = 96;
-    qr = qrPath(url, (w - q) / 2, 50, q, { box });
-    paths.push(text(f.mono, display, w / 2, 158, 5.6, w - 12));
-    paths.push(text(f.light, `${name} · ${siteName}`, w / 2, 167, 4, w - 20));
+    await addLogo(logos.logotype || logos.emblem, { x: 12, y: 6, w: w - 24, h: 47 });
+    paths.push(text(f.serif, 'Bonjour !', w / 2, 70, 16, w - 10));
+    paths.push(text(f.sans, 'Je vous ai peut-être photographié.', w / 2, 79, 5.4, w - 12));
+    paths.push(text(f.light, 'I may have taken your photo · Vielleicht habe ich Sie fotografiert', w / 2, 85.5, 3.4, w - 12));
+    const q = 84;
+    qr = qrPath(url, (w - q) / 2, 89, q, { box });
+    paths.push(text(f.mono, display, w / 2, 183, 5.2, w - 12));
+    paths.push(text(f.light, name, w / 2, 191.5, 3.8, w - 20));
   }
   // QR : règle « evenodd » (modules évidés dans le carré blanc) ; texte : « nonzero » (contours des lettres).
-  const texts = paths;
   const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}mm" height="${h}mm" viewBox="0 0 ${w} ${h}">`
     + `<title>${esc(`${siteName} · ${name} · ${display}`)}</title>`
-    + `<path fill="${fg}" fill-rule="evenodd" d="${qr}"/>`
-    + (texts.length ? `<path fill="${fg}" d="${texts.join('')}"/>` : '') + '</svg>\n';
+    + images.join('')
+    + (qr ? `<path fill="${fg}" fill-rule="evenodd" d="${qr}"/>` : '')
+    + (paths.length ? `<path fill="${fg}" d="${paths.join('')}"/>` : '') + '</svg>\n';
 }
