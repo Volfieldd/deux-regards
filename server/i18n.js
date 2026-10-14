@@ -81,6 +81,15 @@ export const UI = {
     more: 'Lire la suite', less: 'Réduire',
     seePhotosOf: 'Voir ses photos',
     notFound: 'Cette page n’existe pas, ou la photo a été retirée.', notFoundTitle: 'Page introuvable', backHome: 'Revenir à la galerie',
+    gift: {
+      title: 'Votre photo', text: 'Merci pour ce moment. Voici votre photo, rien que pour vous.',
+      download: 'Télécharger la photo', format: 'JPEG, 2048 px',
+      personal: 'Pour votre usage personnel : la garder, la partager avec vos proches, l’imprimer chez vous. Pour toute autre utilisation, écrivez-nous.',
+      until: date => `Lien valable jusqu’au ${date}.`, by: name => `Photo de ${name}`,
+      expired: 'Ce lien a expiré', expiredText: 'Les liens restent valables 30 jours. Écrivez-nous et nous vous en enverrons un nouveau.', contact: 'Nous écrire',
+      mailSubject: site => `Votre photo · ${site}`,
+      mail: ({ name, link, date, author }) => `Bonjour${name ? ` ${name}` : ''},\n\nMerci encore pour ce moment. Voici votre photo, rien que pour vous :\n${link}\n\nLe lien est valable jusqu’au ${date}.\n\n${author}`,
+    },
     hello: {
       title: 'Bonjour !', pageTitle: 'Je vous ai photographié',
       intro: 'Vous avez croisé un photographe de {site} et il vous a peut-être pris en photo. Cette photo vous concerne : vous décidez de ce qu’elle devient.',
@@ -131,6 +140,15 @@ export const UI = {
     more: 'Read more', less: 'Show less',
     seePhotosOf: 'See the photos',
     notFound: 'This page does not exist, or the photo has been removed.', notFoundTitle: 'Page not found', backHome: 'Back to the gallery',
+    gift: {
+      title: 'Your photo', text: 'Thank you for this moment. Here is your photo, just for you.',
+      download: 'Download the photo', format: 'JPEG, 2048 px',
+      personal: 'For your personal use: keep it, share it with your friends and family, print it at home. For any other use, please write to us.',
+      until: date => `Link valid until ${date}.`, by: name => `Photo by ${name}`,
+      expired: 'This link has expired', expiredText: 'Links are valid for 30 days. Write to us and we will send you a new one.', contact: 'Write to us',
+      mailSubject: site => `Your photo · ${site}`,
+      mail: ({ name, link, date, author }) => `Hello${name ? ` ${name}` : ''},\n\nThank you again for this moment. Here is your photo, just for you:\n${link}\n\nThe link is valid until ${date}.\n\n${author}`,
+    },
     hello: {
       title: 'Hello!', pageTitle: 'I took your photo',
       intro: 'You met a photographer from {site} who may have taken your photo. This photo is about you: you decide what happens to it.',
@@ -181,6 +199,15 @@ export const UI = {
     more: 'Weiterlesen', less: 'Weniger',
     seePhotosOf: 'Fotos ansehen',
     notFound: 'Diese Seite existiert nicht, oder das Foto wurde entfernt.', notFoundTitle: 'Seite nicht gefunden', backHome: 'Zurück zur Galerie',
+    gift: {
+      title: 'Ihr Foto', text: 'Danke für diesen Moment. Hier ist Ihr Foto, nur für Sie.',
+      download: 'Foto herunterladen', format: 'JPEG, 2048 px',
+      personal: 'Für Ihren persönlichen Gebrauch: behalten, mit Familie und Freunden teilen, zu Hause ausdrucken. Für jede andere Nutzung schreiben Sie uns bitte.',
+      until: date => `Link gültig bis ${date}.`, by: name => `Foto von ${name}`,
+      expired: 'Dieser Link ist abgelaufen', expiredText: 'Links sind 30 Tage gültig. Schreiben Sie uns, und wir schicken Ihnen einen neuen.', contact: 'Uns schreiben',
+      mailSubject: site => `Ihr Foto · ${site}`,
+      mail: ({ name, link, date, author }) => `Hallo${name ? ` ${name}` : ''},\n\nnochmals danke für diesen Moment. Hier ist Ihr Foto, nur für Sie:\n${link}\n\nDer Link ist gültig bis ${date}.\n\n${author}`,
+    },
     hello: {
       title: 'Hallo!', pageTitle: 'Ich habe Sie fotografiert',
       intro: 'Sie sind einem Fotografen von {site} begegnet, der Sie vielleicht fotografiert hat. Dieses Foto betrifft Sie: Sie entscheiden, was damit geschieht.',

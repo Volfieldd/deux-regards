@@ -190,10 +190,39 @@ export function createEncounters({ db, now = () => Date.now() }) {
     return ids;
   }
   const remove = id => db.prepare('DELETE FROM encounters WHERE id = ?').run(id).changes > 0;
+
+  // ---------- photo offerte ----------
+  // Lien privé vers une photo liée à la rencontre : jeton de 192 bits, valable 30 jours, révocable.
+  const SHARE_DAYS = 30;
+  function createShare(id, photoId) {
+    const linked = q.photos.all(id).some(p => p.id === Number(photoId));
+    if (!linked) throw new EncounterError({ photo: 'Liez d’abord la photo à la rencontre.' });
+    const token = crypto.randomBytes(24).toString('base64url');
+    const t = now();
+    db.prepare('INSERT INTO encounter_shares (token, encounter_id, photo_id, created_at, expires_at) VALUES (?, ?, ?, ?, ?)').run(token, id, Number(photoId), t, t + SHARE_DAYS * 864e5);
+    log(id, 'lien', { photo: Number(photoId) });
+    touch(id);
+    return token;
+  }
+  const shares = id => db.prepare('SELECT * FROM encounter_shares WHERE encounter_id = ? ORDER BY created_at DESC').all(id);
+  // Lien valide (non expiré) : la rencontre, la photo et l'auteur ; sinon null.
+  function share(token) {
+    if (!/^[\w-]{32}$/.test(String(token || ''))) return null;
+    const s = db.prepare(`SELECT s.*, e.lang, e.name, e.ref, p.file, p.title, p.width, p.height, a.name AS author FROM encounter_shares s
+      JOIN encounters e ON e.id = s.encounter_id JOIN photos p ON p.id = s.photo_id JOIN authors a ON a.id = p.author_id WHERE s.token = ?`).get(token);
+    if (!s) return null;
+    return { ...s, expired: s.expires_at <= now() };
+  }
+  const countShare = (token, kind) => db.prepare(`UPDATE encounter_shares SET ${kind === 'download' ? 'downloads' : 'views'} = ${kind === 'download' ? 'downloads' : 'views'} + 1, last_at = ? WHERE token = ?`).run(now(), token);
+  const revokeShare = (id, token) => db.prepare('DELETE FROM encounter_shares WHERE encounter_id = ? AND token = ?').run(id, token).changes > 0;
   // Demandes sans accord ni refus, sans nouvelle depuis 12 mois : effacées (adresse, message, photo de carte).
-  const purge = () => db.prepare('DELETE FROM encounters WHERE updated_at < ? AND consent IS NULL AND refused = 0').run(now() - RETENTION).changes;
+  const purge = () => {
+    db.prepare('DELETE FROM encounter_shares WHERE expires_at < ?').run(now() - 30 * 864e5);       // liens expirés depuis un mois
+    return db.prepare('DELETE FROM encounters WHERE updated_at < ? AND consent IS NULL AND refused = 0').run(now() - RETENTION).changes;
+  };
 
   return {
+    createShare, shares, share, countShare, revokeShare,
     parseRef, card, codeOf, submit, list, get, events, photos: id => q.photos.all(id), saveCard, setStatus, link, unlink, applyRefusal, remove, purge,
     cardJpeg: id => db.prepare('SELECT card_jpeg FROM encounters WHERE id = ?').pluck().get(id) || null,
     countNew: () => q.countNew.get(),

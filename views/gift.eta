@@ -1,0 +1,22 @@
+<% layout('./layout') %>
+<% const g = it.g, s = it.s; %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+</header>
+<main class="gift wrap">
+<% if (s.expired) { %>
+  <h1><%= g.expired %></h1>
+  <p class="prose"><%= g.expiredText %></p>
+  <p><a class="more eyebrow" href="<%= it.u('/bonjour') %><%= s.ref ? '/' + s.ref : '' %>"><%= g.contact %></a></p>
+<% } else { %>
+  <h1><%= g.title %></h1>
+  <p class="prose lead"><%= g.text %></p>
+  <figure class="gift-photo">
+    <img src="<%= it.base %>/apercu.jpg" alt="<%= s.title %>" width="<%= s.width >= s.height ? 1200 : Math.round(1200 * s.width / s.height) %>" height="<%= s.width >= s.height ? Math.round(1200 * s.height / s.width) : 1200 %>">
+    <figcaption class="mono"><%= s.title %> · <%= g.by(s.author) %></figcaption>
+  </figure>
+  <p><a class="gift-dl eyebrow" href="<%= it.base %>/photo.jpg" download><%= g.download %></a> <span class="mono"><%= g.format %></span></p>
+  <p class="prose small"><%= g.personal %> <span class="mono"><%= g.until(it.date) %></span></p>
+<% } %>
+</main>
+<%~ include('./footer', it) %>

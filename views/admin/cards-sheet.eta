@@ -1,0 +1,44 @@
+<!doctype html>
+<% const T = it.T, a = it.author; %>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title><%= it.title %></title>
+  <link rel="stylesheet" href="<%= it.asset('admin/cards.css') %>">
+  <script src="<%= it.asset('admin/print.js') %>" defer></script>
+</head>
+<body>
+<div class="bar">
+  <p><strong><%= it.title %></strong> · <%= it.sheets.length %> feuille<%= it.sheets.length > 1 ? 's' : '' %> A4. Imprimez à 100 % (taille réelle), puis découpez le long des traits.</p>
+  <p><button type="button" data-print>Imprimer</button> <a href="/admin/rencontres/cartes">Retour</a></p>
+</div>
+<% it.sheets.forEach(sheet => { %>
+<section class="sheet">
+<% sheet.forEach(p => { %>
+  <div class="pair">
+    <div class="card nous">
+      <div class="lab"><%= T.consentLabel %></div>
+      <h2><%= T.consent(a.name) %></h2>
+      <p class="tr"><%= T.consentTr %></p>
+      <div class="box"><% T.scopes.forEach(s => { %><span><%= s %></span><% }) %></div>
+      <div class="f"><% T.fields.forEach(f => { %><div><%= f %></div><% }) %></div>
+      <div class="sig"><%= T.signature %></div>
+      <div class="ref"><% if (p.ref) { %>Réf. <b><%= p.ref %></b><% } else { %>Réf. <span class="blank"></span><% } %></div>
+    </div>
+    <div class="card eux">
+      <h1><%= T.thanks %></h1>
+      <p class="msg"><%= T.thanksText(a.name) %></p>
+      <p class="tr"><%= T.thanksTr %></p>
+      <div class="qr"><%~ p.qr %></div>
+      <div class="qrt"><%= T.qrText %></div>
+      <div class="url"><span class="brand"><%= it.siteName %></span> · <%= it.host %>/bonjour</div>
+      <div class="ref"><% if (p.ref) { %>Réf. <b><%= p.label %></b><% } else { %>Réf. <span class="blank"></span><% } %></div>
+    </div>
+  </div>
+<% }) %>
+</section>
+<% }) %>
+</body>
+</html>

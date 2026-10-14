@@ -1644,3 +1644,10 @@ document.addEventListener('click', async e => {
     btn.removeAttribute('aria-busy');
   }
 });
+
+// ----- cartes à imprimer : le premier numéro suit le photographe choisi -----
+const cardsAuthor = $('[data-cards-author]');
+if (cardsAuthor) cardsAuthor.addEventListener('change', () => { $('[data-cards-from]').value = cardsAuthor.selectedOptions[0].dataset.next; });
+
+// ----- lien privé : sélectionné d'un clic, prêt à copier -----
+document.addEventListener('focusin', e => { if (e.target.matches('[data-select-all]')) e.target.select(); });

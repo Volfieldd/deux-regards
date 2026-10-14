@@ -40,6 +40,7 @@
 <% if (d.message) { %>        <br>« <%= d.message %> »<% } %>
 <% } else if (ev.kind === 'carte') { %>        Saisie de la carte<%= d.signed ? ` : accord signé (${scopes(d.scopes)})` : '' %><%= d.card ? ', photo de la carte jointe' : '' %>
 <% } else if (ev.kind === 'liaison') { %>        <%= d.retiree ? 'Photo retirée' : `${(d.photos || []).length} photo(s) liée(s)` %>
+<% } else if (ev.kind === 'lien') { %>        Lien privé créé (photo offerte)
 <% } else if (ev.kind === 'refus_applique') { %>        Refus appliqué : <%= (d.photos || []).length %> photo(s) dépubliée(s)
 <% } else { %>        <%= ev.kind %><% } %></li>
 <% }) %>
@@ -63,9 +64,20 @@
 <% it.photos.forEach(p => { %>    <div class="enc-photo">
       <a href="/admin/photos/<%= p.id %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '130px', alt: '' }) %><% } %></a>
       <span><%= p.title %> · <%= p.status === 'published' ? 'publiée' : 'brouillon' %></span>
+      <form method="post" action="/admin/rencontres/<%= e.id %>/liens"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="photo_id" value="<%= p.id %>"><button class="btn ghost" type="submit">Offrir cette photo</button></form>
       <form method="post" action="/admin/rencontres/<%= e.id %>/photos/<%= p.id %>/retirer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit">Retirer</button></form>
     </div>
 <% }) %>  </div>
+<% if (it.shares.length) { %>
+  <h3 id="liens">Photos offertes</h3>
+  <p class="hint">Un lien privé vers une version JPEG (2048 px, jamais l’original), valable 30 jours. « Envoyer » prépare le message dans votre messagerie, dans la langue de la personne.</p>
+  <ul class="rank plain">
+<% it.shares.forEach(s => { const p = it.photos.find(x => x.id === s.photo_id); %>    <li><span class="t"><%= p ? p.title : 'Photo' %> <span class="mono"><%= s.expired ? 'expiré' : `jusqu’au ${s.until}` %> · vu <%= s.views %> fois · téléchargé <%= s.downloads %> fois</span>
+      <input class="mono share-url" value="<%= s.url %>" readonly aria-label="Lien privé" data-select-all></span>
+<% if (s.mail && !s.expired) { %>      <a class="btn" href="<%= s.mail %>">Envoyer</a><% } %>
+      <form method="post" action="/admin/rencontres/<%= e.id %>/liens/<%= s.token %>/retirer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit">Retirer le lien</button></form></li>
+<% }) %>  </ul>
+<% } %>
 <% } else { %>  <p class="hint">Aucune photo liée : choisissez-la ci-dessous.</p><% } %>
   <h3>Lier des photos</h3>
   <form class="search-inline" method="get" action="/admin/rencontres/<%= e.id %>#photos">

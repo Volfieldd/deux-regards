@@ -11,6 +11,13 @@ Chaque photographe a sa **lettre** (J pour Julien, S pour Sébastien, réglable 
 
 Astuce : juste après la photo, photographiez la carte que vous tendez. Elle marque la suite d'images et vous retrouverez la bonne photo sans hésiter.
 
+**Imprimer les cartes** : **Rencontres → Cartes à imprimer**. Choisissez le photographe, puis :
+
+- **Numérotées** : chaque paire a sa référence et son propre QR ; la série continue d'une planche à l'autre (le prochain numéro est proposé) ;
+- **Génériques** : sans numéro, avec un QR vers `/bonjour` : le modèle à confier à un imprimeur, puis numérotez les deux cartes de chaque paire au tampon numéroteur.
+
+La planche s'ouvre prête à imprimer : cinq paires par feuille A4, d'un seul côté. Imprimez à **100 %** (taille réelle, sans « ajuster à la page »), sur du papier épais (250 à 350 g/m²), et découpez le long des pointillés. Pour changer les textes des cartes, demandez-le : ils sont réunis au même endroit.
+
 Les cartes imprimées par le site portent un **code de contrôle** (J-0142-K7Q) : la demande arrive alors marquée **carte vérifiée**. Une référence tapée sans le code (cartes numérotées au tampon) est acceptée, marquée **non vérifiée**.
 
 ## La page /bonjour
@@ -34,6 +41,17 @@ Les nouvelles demandes s'affichent en tête, avec un compteur dans la barre lat�
 - **Marquer « En cours » / « Traitée »** pour suivre où vous en êtes.
 
 Un accord donné en ligne est moins sûr qu'une carte signée (la fiche le rappelle) : pour une exposition ou une vente de tirages, demandez une signature.
+
+## Offrir la photo
+
+Dans la fiche d'une rencontre, sous chaque photo liée : **Offrir cette photo**. Un **lien privé** est créé, valable **30 jours** :
+
+- il ouvre une page « Votre photo » dans la langue de la personne, avec un bouton **Télécharger** ;
+- la photo est une belle version JPEG (2048 px), **jamais l'original**, marquée « usage personnel » ;
+- **Envoyer** ouvre votre messagerie avec le message tout prêt (dans sa langue) et le lien ; relisez et envoyez ;
+- la fiche indique combien de fois le lien a été vu et la photo téléchargée ; **Retirer le lien** le désactive.
+
+Après 30 jours, la page indique que le lien a expiré et invite à vous écrire ; créez-en un nouveau si besoin.
 
 ## Refus de publication
 
