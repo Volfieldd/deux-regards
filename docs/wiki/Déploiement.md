@@ -1,6 +1,6 @@
 # Déploiement (Docker et Cloudflare Tunnel)
 
-> **Unraid :** guide et fichiers prêts à l'emploi dans [`deploy/unraid/`](https://github.com/Volfieldd/deux-regards/tree/main/deploy/unraid) : pile Compose, modèles Unraid, export des données, configuration de Zitadel et de Cloudflare. Le site de production est `https://www.nicephos.art`. L'image est publiée sur `ghcr.io/volfieldd/deux-regards` à chaque mise à jour de `main` (voir [Image Docker](#image-docker)).
+> **Unraid :** voir le [Guide Unraid](Unraid) (fichiers prêts à l'emploi dans [`deploy/unraid/`](https://github.com/Volfieldd/deux-regards/tree/main/deploy/unraid)) et les [Procédures](Procédures) : pile Compose, modèles Unraid, export des données, configuration de Zitadel et de Cloudflare. Le site de production est `https://www.nicephos.art`. L'image est publiée sur `ghcr.io/volfieldd/deux-regards` à chaque mise à jour de `main` (voir [Image Docker](#image-docker)).
 
 Cette page décrit la pile générique du dépôt (`compose.yaml` à la racine), qui **construit l'image sur place**. La pile Unraid, elle, télécharge l'image publiée.
 

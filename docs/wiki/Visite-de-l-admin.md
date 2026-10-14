@@ -4,7 +4,7 @@ Captures d’une instance de test avec le seul jeu de démonstration, faites le 
 
 À gauche, une **barre latérale** : recherche ⌘K, **Aujourd’hui · Photothèque · Séries · Statistiques · Auteurs**, la liste des séries (où l’on dépose des photos pour les classer), puis, sous « Site », **Instagram · Filigrane & EXIF · Apparence · Réglages · Aide · Voir le site**, et en bas le mode clair / sombre et la déconnexion. Sur téléphone : une barre d’onglets en bas (**Aujourd’hui · Photos · Importer · Séries · Menu**).
 
-Les captures datent d’avant les écrans Statistiques et Instagram, la mise en page iPhone (lot en cartes, « Ouvrir la fiche ») et les réglages des droits en trois langues : ces écrans sont décrits ci-dessous sans capture. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
+Les captures datent d’avant les écrans Statistiques, Instagram et Rencontres, la mise en page iPhone (lot en cartes, « Ouvrir la fiche »), les traductions et les réglages de confidentialité : ces écrans sont décrits ci-dessous sans capture. Le bandeau rouge « Connexion locale de test » n'apparaît qu'avec la connexion de test.
 
 ## Connexion
 
@@ -98,9 +98,13 @@ Thème du site public, avec aperçu réservé aux admins, emblème et sous-titre
 
 ## Réglages
 
-Nom du site, accroche, textes ; page « Droits d'utilisation » en français, anglais et allemand (chaque champ montre le texte lu par les visiteurs, pastille « Texte par défaut » ou « Texte personnalisé », bouton « Rétablir le texte par défaut ») et contact ; photos de l'ouverture (ordre, 8 au plus, vignettes en cadre 3:2). La capture montre encore l'ancien champ unique des droits.
+Nom du site, accroche, textes (et leur version anglaise et allemande, repliée sous chaque champ, avec « Proposer une traduction ») ; page « Droits d'utilisation » en français, anglais et allemand (chaque champ montre le texte lu par les visiteurs, pastille « Texte par défaut » ou « Texte personnalisé », bouton « Rétablir le texte par défaut ») et contact ; **Confidentialité** (contact des responsables, deux facteurs et disques chiffrés à cocher quand c'est vrai, état du chiffrement `DATA_KEY`) ; page **Carte** ; photos de l'ouverture (ordre, 8 au plus, vignettes en cadre 3:2). La capture montre encore l'ancien champ unique des droits.
 
 ![Réglages](captures/admin/07-reglages-bureau.webp)
+
+## Rencontres
+
+Les personnes photographiées : demandes reçues sur `/bonjour` (nouvelles en tête, compteur dans la barre latérale, badge rouge pour une demande RGPD avec son échéance), fiche d'une rencontre (personne, historique, photos liées, carte signée, photo offerte par lien privé, droits : export et effacement), **Cartes à imprimer** et **Nouvelle rencontre** (l'app de l'iPhone : position, photo de repère, consentement en trois langues, signature au doigt, écran « Merci » avec QR). Les QR pour les vêtements sont dans **Auteurs**. Pas encore de capture : voir [Aide → Rencontres](Aide-Rencontres).
 
 ## Sur mobile
 
