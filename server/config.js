@@ -65,6 +65,11 @@ export function loadConfig(env = process.env) {
   };
   instagram.configured = Boolean(instagram.appId && instagram.appSecret);
 
+  // Chiffrement des données personnelles dans la base (rencontres) : clé à garder aussi hors du serveur (gestionnaire de
+  // mots de passe) — perdue, les données chiffrées sont illisibles.
+  const dataKey = env.DATA_KEY || null;
+  if (dataKey && dataKey.length < 32) throw new Error('DATA_KEY doit faire au moins 32 caractères (openssl rand -base64 32)');
+
   // E-mails (facultatif) : boîte d'une adresse que vous possédez (SMTP), par exemple Gmail avec un mot de passe d'application.
   const smtpUrl = env.SMTP_URL || null;
   if (smtpUrl && !/^smtps?:\/\//.test(smtpUrl)) throw new Error('SMTP_URL doit commencer par smtp:// ou smtps://');
@@ -94,6 +99,7 @@ export function loadConfig(env = process.env) {
     tsa: { url: tsaUrl, caFile: tsaCaFile },
     translate: { url: translateUrl, apiKey: env.TRANSLATE_API_KEY || null },
     mail: { url: smtpUrl, from: mailFrom },
+    dataKey,
     authRateLimit: Math.max(Number.parseInt(env.AUTH_RATE_LIMIT, 10) || 30, 1),
     oidc: {
       issuer,

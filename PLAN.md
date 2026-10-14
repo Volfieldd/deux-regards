@@ -240,6 +240,10 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - `/bonjour` : « Vos données » (copie ou effacement) ; migration 019 (`rights_request`, `rights_requested_at`, `rights_done_at`, `anonymized`) ; badge avec échéance d'un mois.
 - Export ZIP (`server/zip.js`, sans dépendance) ; effacement avec suppression des photos sur demande, refus gardé sans identité, rappel des posts Instagram.
 
+### 28. Confidentialité (RGPD), troisième volet : chiffrement et documents (fait)
+- `server/vault.js` : AES-256-GCM, clé `DATA_KEY` (HKDF) ; champs des rencontres (textes, position, historique, images) chiffrés à l'écriture, déchiffrés à la lecture ; données existantes chiffrées au démarrage ; état dans Réglages et sur `/confidentialite`.
+- Wiki [RGPD](docs/wiki/RGPD.md) : registre des traitements, accord entre responsables conjoints, analyse d'impact simplifiée, procédure de violation, liste des actions restantes.
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

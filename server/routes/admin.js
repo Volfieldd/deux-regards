@@ -1178,7 +1178,7 @@ export default async function adminRoutes(app) {
     heroMax: 8,
     title: 'Réglages', settings: repo.settings(), published: repo.photos({ status: 'published' }), defaultName: app.config.siteName,
     rights: LANGS.map(l => ({ lang: l, ...RIGHTS[l] })), rightsDefaults: defaultsNow(),
-    ...mapCounts.get(),
+    ...mapCounts.get(), encrypted: app.encounters.encrypted,
   }));
 
   app.post('/admin/reglages', write, async (request, reply) => {

@@ -21,6 +21,7 @@ import { createStats } from './stats.js';
 import { createTranslator } from './translate.js';
 import { createEncounters } from './encounters.js';
 import { createMailer } from './mailer.js';
+import { createVault } from './vault.js';
 import { createInstagram } from './instagram.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -143,10 +144,12 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Mesure d'audience anonyme (voir server/stats.js).
   // Pays : l'en-tête de Cloudflare n'est cru que derrière un proxy de confiance (tunnel), sinon « inconnu ».
   // Rencontres (page /bonjour, cartes) ; demandes sans accord ni refus effacées après 12 mois (contrôle quotidien).
-  app.decorate('encounters', createEncounters({ db }));
+  app.decorate('encounters', createEncounters({ db, vault: createVault(config.dataKey) }));
   app.decorate('mailer', createMailer({ ...config.mail, log: app.log, transport: mailTransport }));
   let purgeTimer = null;
   app.addHook('onReady', async () => {
+    const sealed = app.encounters.sealExisting();
+    if (sealed) app.log.info({ sealed }, 'rencontres : données en clair chiffrées');
     app.encounters.purge();
     purgeTimer = setInterval(() => { try { app.encounters.purge(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
     purgeTimer.unref();

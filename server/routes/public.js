@@ -337,7 +337,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit }) {
     const contact = String(settings.privacy_contact || settings.rights_contact || '').trim();
     const host = app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, '');
     const sections = P.sections({ site: siteName, authors: repo.authors().map(a => a.name), contact: contact || `${host}/bonjour`, host,
-      mfa: settings.privacy_mfa === true, encrypted: settings.privacy_encrypted === true });
+      mfa: settings.privacy_mfa === true, encrypted: settings.privacy_encrypted === true, fields: app.encounters.encrypted });
     const date = new Intl.DateTimeFormat({ fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(PRIVACY_UPDATED));
     app.stats.hit(request, { page: 'confidentialite' });
     return reply.render('privacy', {

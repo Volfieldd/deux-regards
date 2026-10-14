@@ -12,7 +12,7 @@ export const PRIVACY = {
     title: 'Confidentialité', link: 'Confidentialité',
     description: site => `Données personnelles sur ${site} : ce qui est collecté, pourquoi, combien de temps, et vos droits.`,
     updated: d => `Mise à jour : ${d}.`,
-    sections: ({ site, authors, contact, host, mfa, encrypted }) => [
+    sections: ({ site, authors, contact, host, mfa, encrypted, fields }) => [
       ['Qui est responsable', [
         `${list(authors, ' et ')}, photographes du site ${site}, sont responsables ensemble (responsables conjoints) des données décrites ici. Pour toute question ou demande : ${contact}.`,
         'Le site est hébergé chez nous, en France, sur notre propre serveur. Il ne contient ni publicité, ni outil de suivi, ni service extérieur dans ses pages.',
@@ -46,7 +46,7 @@ export const PRIVACY = {
         'Le seul cookie du site public retient la langue que vous choisissez avec le sélecteur de langue. Nos journaux techniques, destinés à la sécurité, ne gardent que des adresses IP tronquées.',
       ]],
       ['Sécurité', [
-        `Accès réservé à nous deux${mfa ? ', avec une authentification à deux facteurs' : ''} ; connexions chiffrées (HTTPS) ; signatures, photos de repère et cartes signées visibles seulement de nous ; données ${encrypted ? 'stockées sur un disque chiffré et ' : ''}sauvegardées chaque jour sur un autre disque.`,
+        `Accès réservé à nous deux${mfa ? ', avec une authentification à deux facteurs' : ''} ; connexions chiffrées (HTTPS) ; signatures, photos de repère et cartes signées visibles seulement de nous ; données ${encrypted ? 'stockées sur un disque chiffré et ' : ''}sauvegardées chaque jour sur un autre disque${fields ? ' ; vos nom, adresse, signature et messages sont en plus chiffrés dans notre base, avec une clé conservée à part' : ''}.`,
       ]],
       ['Vos droits', [
         `Vous pouvez à tout moment demander à accéder à vos données (nous vous en envoyons une copie complète), les faire corriger ou effacer (photos comprises si vous le souhaitez), vous opposer à leur utilisation ou retirer votre accord : sur la page ${host}/bonjour, rubrique « Vos données » (avec la référence de votre carte si vous l’avez), ou à ${contact}. Nous répondons dans un délai d’un mois.`,
@@ -58,7 +58,7 @@ export const PRIVACY = {
     title: 'Privacy', link: 'Privacy',
     description: site => `Personal data on ${site}: what is collected, why, for how long, and your rights.`,
     updated: d => `Updated: ${d}.`,
-    sections: ({ site, authors, contact, host, mfa, encrypted }) => [
+    sections: ({ site, authors, contact, host, mfa, encrypted, fields }) => [
       ['Who is responsible', [
         `${list(authors, ' and ')}, the photographers of ${site}, are jointly responsible (joint controllers) for the data described here. For any question or request: ${contact}.`,
         'The website is hosted by us, in France, on our own server. Its pages contain no advertising, no tracking tool and no third-party service.',
@@ -92,7 +92,7 @@ export const PRIVACY = {
         'The only cookie on the public website remembers the language you choose with the language selector. Our technical logs, used for security, only keep truncated IP addresses.',
       ]],
       ['Security', [
-        `Access restricted to the two of us${mfa ? ', with two-factor authentication' : ''}; encrypted connections (HTTPS); signatures, reference photos and signed cards visible only to us; data ${encrypted ? 'stored on an encrypted disk and ' : ''}backed up daily on another disk.`,
+        `Access restricted to the two of us${mfa ? ', with two-factor authentication' : ''}; encrypted connections (HTTPS); signatures, reference photos and signed cards visible only to us; data ${encrypted ? 'stored on an encrypted disk and ' : ''}backed up daily on another disk${fields ? '; your name, address, signature and messages are also encrypted in our database, with a key kept separately' : ''}.`,
       ]],
       ['Your rights', [
         `You can at any time ask to access your data (we send you a full copy), have it corrected or deleted (photos included if you wish), object to its use or withdraw your consent: on the page ${host}/bonjour, section “Your data” (with your card reference if you have it), or at ${contact}. We reply within one month.`,
@@ -104,7 +104,7 @@ export const PRIVACY = {
     title: 'Datenschutz', link: 'Datenschutz',
     description: site => `Personenbezogene Daten auf ${site}: was erhoben wird, warum, wie lange, und Ihre Rechte.`,
     updated: d => `Stand: ${d}.`,
-    sections: ({ site, authors, contact, host, mfa, encrypted }) => [
+    sections: ({ site, authors, contact, host, mfa, encrypted, fields }) => [
       ['Verantwortliche', [
         `${list(authors, ' und ')}, die Fotografen von ${site}, sind gemeinsam verantwortlich (gemeinsam Verantwortliche) für die hier beschriebenen Daten. Für Fragen oder Anfragen: ${contact}.`,
         'Die Website wird von uns in Frankreich auf unserem eigenen Server betrieben. Ihre Seiten enthalten weder Werbung noch Tracking-Werkzeuge noch externe Dienste.',
@@ -138,7 +138,7 @@ export const PRIVACY = {
         'Das einzige Cookie der öffentlichen Website speichert die Sprache, die Sie mit der Sprachauswahl wählen. Unsere technischen Protokolle dienen der Sicherheit und enthalten nur gekürzte IP-Adressen.',
       ]],
       ['Sicherheit', [
-        `Zugang nur für uns beide${mfa ? ', mit Zwei-Faktor-Authentifizierung' : ''}; verschlüsselte Verbindungen (HTTPS); Unterschriften, Erinnerungsfotos und unterschriebene Karten nur für uns sichtbar; Daten ${encrypted ? 'auf einer verschlüsselten Festplatte gespeichert und ' : ''}täglich auf einer anderen Festplatte gesichert.`,
+        `Zugang nur für uns beide${mfa ? ', mit Zwei-Faktor-Authentifizierung' : ''}; verschlüsselte Verbindungen (HTTPS); Unterschriften, Erinnerungsfotos und unterschriebene Karten nur für uns sichtbar; Daten ${encrypted ? 'auf einer verschlüsselten Festplatte gespeichert und ' : ''}täglich auf einer anderen Festplatte gesichert${fields ? '; Ihr Name, Ihre Adresse, Ihre Unterschrift und Ihre Nachrichten sind zusätzlich in unserer Datenbank verschlüsselt, mit einem separat aufbewahrten Schlüssel' : ''}.`,
       ]],
       ['Ihre Rechte', [
         `Sie können jederzeit Auskunft über Ihre Daten verlangen (wir schicken Ihnen eine vollständige Kopie), sie berichtigen oder löschen lassen (auf Wunsch einschließlich der Fotos), der Nutzung widersprechen oder Ihre Einwilligung widerrufen: auf der Seite ${host}/bonjour, Abschnitt „Ihre Daten“ (mit der Referenz Ihrer Karte, falls vorhanden), oder unter ${contact}. Wir antworten innerhalb eines Monats.`,

@@ -36,6 +36,7 @@ Lues par [`server/db/backup.js`](https://github.com/Volfieldd/deux-regards/blob/
 | `BACKUP_DIR` | — | Dossier des sauvegardes. **Obligatoire** pour le script, et jamais à l'intérieur de `STORAGE_DIR`. Dans Compose, c'est `/backups`, monté depuis le `BACKUP_DIR` de l'hôte. |
 | `BACKUP_KEEP` | `14` | Nombre d'instantanés de la base conservés (1 au moins). |
 | `BACKUP_INTERVAL_HOURS` | `24` | Intervalle entre deux sauvegardes avec `--loop` (1 au moins). |
+| `BACKUP_DELETED_DAYS` | `90` | Jours pendant lesquels un fichier supprimé des données (original, logo) reste dans la sauvegarde avant d'en être effacé (droit à l'effacement). Garde-fou : un dossier source vide n'efface rien. |
 
 ## Connexion
 
@@ -84,3 +85,14 @@ Dès que `PUBLIC_URL` est en HTTPS ou que `NODE_ENV=production`, le serveur **re
 Le serveur refuse aussi de démarrer, en ligne ou non, si `COOKIE_SECRET` fait moins de 32 caractères, si `LOCAL_AUTH_TOKEN` en fait moins de 16, si `INSTAGRAM_TOKEN_KEY` en fait moins de 32, si `TRUST_PROXY=true`, ou si `COOKIE_SECRET` manque alors que `HOST` n'est pas une adresse locale.
 
 En ligne, il fait aussi confiance par défaut aux proxys locaux (`TRUST_PROXY`). Quand `PUBLIC_URL` est en HTTPS, les cookies sont `Secure` et préfixés `__Host-`, et les en-têtes HSTS et COOP sont envoyés. Ces protections ne dépendent donc pas d'une seule variable qu'on pourrait oublier.
+
+## Données personnelles, e-mails, traduction
+
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `DATA_KEY` | — | Clé de chiffrement des données personnelles des rencontres dans la base (noms, e-mails, signatures, photos de repère, messages, positions), 32 caractères au moins (`openssl rand -base64 32`). **Gardez-en une copie hors du serveur : perdue, ces données sont illisibles.** Sans elle, rien n'est chiffré (Réglages → Confidentialité le signale). Données existantes chiffrées au démarrage. Voir [RGPD](RGPD). |
+| `SMTP_URL` | — | Envoi d'e-mails par le serveur (récapitulatif d'une rencontre), par votre propre boîte : `smtps://utilisateur:motdepasse@serveur:465`. Sans elle : bouton « Mail » sur le téléphone. |
+| `MAIL_FROM` | — | Expéditeur, **obligatoire avec `SMTP_URL`** : `Nicephos <adresse@exemple.fr>`. |
+| `TRANSLATE_URL` | — (pile Unraid : `http://libretranslate:5000`) | Serveur LibreTranslate du réseau local pour les propositions de traduction dans l'admin. Sans elle, pas de bouton. |
+| `TRANSLATE_API_KEY` | — | Clé, seulement si votre LibreTranslate en exige une. |
+

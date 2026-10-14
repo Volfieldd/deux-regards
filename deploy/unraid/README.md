@@ -125,7 +125,7 @@ Le site n'a qu'une adresse : **`https://www.nicephos.art`** (`PUBLIC_URL`). Tout
 1. Docker → en bas, **Add New Stack**, nommée `nicephos`.
 2. **Edit Stack → Compose File :** collez le contenu de `compose.yaml`.
 3. **Edit Stack → ENV File :** collez `env.example`, puis remplissez `PUBLIC_URL=https://www.nicephos.art`, `COOKIE_SECRET` (`openssl rand -base64 32` dans le terminal), la partie Zitadel et `TUNNEL_TOKEN`.
-4. **Compose Up.** Les trois conteneurs apparaissent dans l'onglet Docker : `nicephos`, `nicephos-sauvegarde` et `nicephos-tunnel`.
+4. **Compose Up.** Les quatre conteneurs apparaissent dans l'onglet Docker : `nicephos`, `nicephos-sauvegarde`, `nicephos-tunnel` et `nicephos-traduction`.
 
 Au premier lancement sans données reprises, le site part d'une base vide : pas de photos, pas d'auteurs. Créez d'abord les auteurs dans l'admin.
 
@@ -202,7 +202,8 @@ La base contient des données personnelles (noms, e-mails, signatures, photos de
 2. **Déplacez les données** pile arrêtée : `rsync -a /mnt/cache/appdata/nicephos/ /mnt/<pool-chiffré>/appdata/nicephos/`, puis changez `DATA_DIR` dans le `.env` de la pile et relancez.
 3. **Sauvegardes** : sur des disques du tableau eux aussi chiffrés (même choix de format, disque par disque), ou une copie hors de la machine déjà chiffrée.
 4. **La clé** : avec une phrase de passe tapée à chaque démarrage, un disque volé ne révèle rien ; mais après une coupure de courant, le site attend que vous déverrouilliez le tableau. Un fichier clé posé sur la clé USB d'Unraid démarre tout seul, mais protège moins (la clé USB voyage avec le serveur).
-5. Une fois fait, cochez **Réglages → Confidentialité → « Les données et les sauvegardes sont sur des disques chiffrés »** : la page `/confidentialite` l'annonce.
+5. **Chiffrement dans la base**, en plus des disques : ajoutez `DATA_KEY` au `.env` de la pile (`openssl rand -base64 32`, une seule fois) et gardez-en une copie dans un gestionnaire de mots de passe. Au redémarrage, les noms, e-mails, signatures, photos de repère et messages déjà enregistrés sont chiffrés ; Réglages → Confidentialité affiche « actif ». **Clé perdue = données illisibles**, sauvegardes comprises ; ne la changez pas sans aide.
+6. Une fois fait, cochez **Réglages → Confidentialité → « Les données et les sauvegardes sont sur des disques chiffrés »** : la page `/confidentialite` l'annonce.
 
 Pensez aussi à **l'authentification à deux facteurs** dans Zitadel (*Settings → Login Behavior and Access → Multifactor*, ou l'obligation par organisation) pour vos deux comptes, puis cochez la case correspondante dans Réglages.
 

@@ -18,6 +18,7 @@
 - [Spécifications](Spécifications)
 - [Images et variantes](Images-et-variantes)
 - [Sécurité](Sécurité)
+- [RGPD : registre et procédures](RGPD)
 
 **Maintenir**
 - [Développer](Développer)
