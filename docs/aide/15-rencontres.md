@@ -85,6 +85,16 @@ Après 30 jours, la page indique que le lien a expiré et invite à vous écrire
 
 Dès qu'une personne refuse, **les photos liées ne peuvent plus être publiées** : ni depuis la fiche, ni par une action groupée (un message explique pourquoi). La fiche de la photo l'indique (« Personne photographiée »). Si certaines sont déjà en ligne, **Appliquer le refus** les repasse en brouillon et les retire de la file Instagram. Les posts déjà publiés sur Instagram ne sont pas touchés : supprimez-les dans l'application.
 
+## Droits des personnes (RGPD)
+
+Une personne peut demander **une copie de ses données** ou **leur effacement** : sur `/bonjour` (« Vos données »), par e-mail, ou de vive voix. La loi laisse **un mois** pour répondre.
+
+- **Demande reçue sur `/bonjour`** : la rencontre porte un badge rouge « Demande d’accès / d’effacement · avant le … » (liste et fiche). Si la référence n'est pas vérifiée, assurez-vous que la demande vient bien de cette personne (même adresse, réponse à votre message) avant de lui envoyer quoi que ce soit.
+- **Exporter ses données (.zip)** (fiche, « Droits de la personne ») : une archive avec tout ce que le site garde sur elle (rencontre, choix, accord ou refus, historique de ses demandes), sa signature, les photos de repère et de carte, et les photos où elle apparaît (JPEG 2048 px, jamais l'original), avec un mode d'emploi dans sa langue. Envoyez-la-lui en pièce jointe.
+- **Effacer les données de cette personne** (en bas de la fiche) : nom, adresse, messages, signature, images et historique disparaissent. Cochez **Supprimer aussi les photos où elle apparaît** si elle le demande : originaux et images sont supprimés, et effacés des sauvegardes sous 90 jours. Si elle avait **refusé** la publication et que vous gardez des photos, une **trace anonyme** garde ce refus (sans aucune donnée sur elle) : ces photos restent impossibles à publier.
+- Les **posts déjà publiés sur Instagram** sont rappelés après l'effacement : supprimez-les dans l'application.
+- **Marquer la demande comme traitée** une fois la réponse envoyée.
+
 ## Données
 
 - Seul ce que la personne écrit est gardé : référence, adresse, nom, choix, messages, et la photo de la carte signée.

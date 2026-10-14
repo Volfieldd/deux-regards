@@ -8,6 +8,8 @@ import { UI } from '../i18n.js';
 import QRCode from 'qrcode';
 import { composition } from '../textile.js';
 import { MailError } from '../mailer.js';
+import { removePhotoFiles } from '../media.js';
+import { zip } from '../zip.js';
 
 // Admin « Rencontres » : demandes reçues par la page /bonjour, accords papier (carte « pour nous ») et refus.
 // Enregistré dans le plugin d'administration (session d'admin exigée, comme le reste de /admin).
@@ -327,9 +329,58 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     return done(reply, `/admin/rencontres/${id}`, ids.length ? `${ids.length} photo${ids.length > 1 ? 's repassées' : ' repassée'} en brouillon et retirée${ids.length > 1 ? 's' : ''} de la file Instagram.` : 'Aucune photo publiée : les photos liées restent en brouillon et ne pourront pas être publiées.');
   });
 
-  app.post('/admin/rencontres/:id/supprimer', write, async (request, reply) => {
+  // ---------- droits de la personne (RGPD) ----------
+  // Accès : une archive avec tout ce que la base garde sur elle, les images (signature, photo de repère, carte) et les
+  // photos liées (JPEG 2048 px, jamais l'original), et un mode d'emploi dans sa langue.
+  const README = {
+    fr: (site, ref) => `Vos données chez ${site}${ref ? ` (rencontre ${ref})` : ''}\n\ndonnees.json : tout ce que nous gardons sur vous (rencontre, choix, accord ou refus, historique de vos demandes).\nsignature.png, photo-de-reperage.jpg, carte-signee.jpg : s'ils existent.\nphotos/ : les photos où vous apparaissez.\n\nDurées de conservation et droits : page « Confidentialité » du site.\n`,
+    en: (site, ref) => `Your data at ${site}${ref ? ` (meeting ${ref})` : ''}\n\ndonnees.json: everything we keep about you (meeting, choices, consent or refusal, history of your requests).\nsignature.png, photo-de-reperage.jpg, carte-signee.jpg: if they exist.\nphotos/: the photos you appear in.\n\nRetention periods and rights: the website's "Privacy" page.\n`,
+    de: (site, ref) => `Ihre Daten bei ${site}${ref ? ` (Begegnung ${ref})` : ''}\n\ndonnees.json: alles, was wir über Sie speichern (Begegnung, Wahl, Einwilligung oder Ablehnung, Verlauf Ihrer Anfragen).\nsignature.png, photo-de-reperage.jpg, carte-signee.jpg: falls vorhanden.\nphotos/: die Fotos, auf denen Sie zu sehen sind.\n\nAufbewahrungsfristen und Rechte: Seite „Datenschutz“ der Website.\n`,
+  };
+  app.get('/admin/rencontres/:id/export.zip', async (request, reply) => {
     const id = byId(request.params.id);
-    if (!enc.remove(id)) return reply.callNotFound();
-    return done(reply, '/admin/rencontres', 'Rencontre supprimée (adresse, messages et photo de la carte effacés).');
+    const x = enc.exportData(id);
+    if (!x) return reply.callNotFound();
+    const entries = [{ name: 'LISEZMOI.txt', data: (README[x.lang] || README.fr)(app.siteName(), x.ref) }, { name: 'donnees.json', data: `${JSON.stringify(x.data, null, 2)}\n` }];
+    if (x.files.signature) entries.push({ name: 'signature.png', data: x.files.signature });
+    if (x.files.portrait) entries.push({ name: 'photo-de-reperage.jpg', data: x.files.portrait });
+    if (x.files.card) entries.push({ name: 'carte-signee.jpg', data: x.files.card });
+    for (const p of enc.photos(id)) {
+      try {
+        const jpeg = await sharp(path.join(app.config.storageDir, 'originals', p.file)).rotate().resize({ width: 2048, height: 2048, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 88 }).toBuffer();
+        entries.push({ name: `photos/${p.slug}.jpg`, data: jpeg });
+      } catch { /* original introuvable : la photo est signalée dans donnees.json */ }
+    }
+    app.db.prepare('INSERT INTO encounter_events (encounter_id, at, kind, detail) VALUES (?, ?, ?, ?)').run(id, Date.now(), 'export', '{}');
+    const name = `${app.siteName()}-donnees-${x.ref || id}`.toLowerCase().replace(/[^a-z0-9-]+/g, '-');
+    return reply.header('cache-control', 'no-store').header('content-disposition', `attachment; filename="${name}.zip"`).type('application/zip').send(zip(entries));
+  });
+
+  // Effacement à la demande : la rencontre (adresse, messages, signature, images), et sur demande les photos liées
+  // (originaux et images ; effacées des sauvegardes sous 90 jours). Un refus reste appliqué sous forme anonyme si des
+  // photos liées sont gardées. Les posts déjà publiés sur Instagram sont rappelés : à supprimer dans l'application.
+  async function eraseEncounter(request, reply, { withPhotos }) {
+    const id = byId(request.params.id);
+    const e = enc.get(id);
+    if (!e) return reply.callNotFound();
+    const linked = enc.photos(id);
+    const posts = linked.length ? app.db.prepare(`SELECT permalink FROM instagram_posts WHERE status = 'published' AND permalink IS NOT NULL
+      AND photo_id IN (${linked.map(() => '?').join(',')})`).pluck().all(...linked.map(p => p.id)) : [];
+    if (withPhotos) {
+      for (const p of linked) { const file = repo.deletePhoto(p.id); if (file) removePhotoFiles(app.config.storageDir, file); }
+      app.instagram.onUnpublished(linked.map(p => p.id));
+    }
+    const r = enc.erase(id);
+    const details = posts.length ? ['Encore sur Instagram, à supprimer dans l’application :', ...posts] : undefined;
+    const text = `${r.anonymized ? 'Données de la personne effacées ; son refus reste appliqué aux photos gardées (trace anonyme).' : 'Rencontre et données de la personne effacées.'}${withPhotos && linked.length ? ` ${linked.length} photo${linked.length > 1 ? 's supprimées' : ' supprimée'} (effacée${linked.length > 1 ? 's' : ''} des sauvegardes sous 90 jours).` : ''}`;
+    return done(reply, r.anonymized ? `/admin/rencontres/${id}` : '/admin/rencontres', text, details);
+  }
+  app.post('/admin/rencontres/:id/effacer', write, async (request, reply) => eraseEncounter(request, reply, { withPhotos: request.body?.photos === 'on' }));
+  app.post('/admin/rencontres/:id/supprimer', write, async (request, reply) => eraseEncounter(request, reply, { withPhotos: false }));
+  app.post('/admin/rencontres/:id/droits-traites', write, async (request, reply) => {
+    const id = byId(request.params.id);
+    if (!enc.get(id)) return reply.callNotFound();
+    enc.rightsDone(id);
+    return done(reply, `/admin/rencontres/${id}`, 'Demande sur les données marquée comme traitée.');
   });
 }
