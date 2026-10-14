@@ -11,7 +11,7 @@ export const MAX_PAIRS = 200;
 
 export const TEXTS = {
   consentLabel: 'Autorisation · Consent · Einwilligung',
-  consent: name => `J’autorise l’usage artistique et la publication des photos que ${name} a prises de moi aujourd’hui. Révocable à tout moment.`,
+  consent: name => `J’autorise l’usage artistique et la publication des photos que ${name} a prises de moi aujourd’hui (une photo de moi peut y être jointe). Révocable à tout moment.`,
   consentTr: 'EN I agree to the artistic use & publication of today’s photos of me. Revocable at any time. · DE Ich willige in die künstlerische Nutzung & Veröffentlichung der heutigen Fotos von mir ein. Jederzeit widerrufbar.',
   scopes: ['site nicephos.art', 'Instagram', 'expo · tirages / prints', 'avec mon prénom / name'],
   fields: ['Nom · Name', 'Date', 'Lieu · Place', 'E-mail (facultatif)'],

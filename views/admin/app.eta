@@ -37,7 +37,7 @@
     <label>Lieu <span class="hint">facultatif : la ville est déduite de la position</span><input name="place" value="<%= v.place || '' %>" maxlength="120" placeholder="Rue, quartier…"></label>
     <label class="app-photo">
       <span class="app-big">Photographier la personne</span>
-      <span class="hint">une photo de repère, pour retrouver les bonnes images ; gardée en privé</span>
+      <span class="hint">son visage, joint à son accord : pour savoir qui a signé et retrouver les bonnes images ; gardé en privé, aussi longtemps que l’accord</span>
       <input type="file" name="portrait" accept="image/*" capture="environment" data-portrait>
       <img alt="" hidden data-portrait-preview>
     </label>

@@ -59,12 +59,25 @@ Pour remplir **avec la personne**, au moment de la photo, sans carte papier : **
 
 Il faut du réseau (la 4G suffit) : sans réseau, l'enregistrement échoue sans rien perdre à l'écran ; réessayez un peu plus loin. Un accord signé sur le téléphone vaut une carte signée : la fiche montre la signature et la photo de repère.
 
+## Un accord couvre la session
+
+Un accord vaut pour **la session** : toutes les photos que le photographe a prises **ce jour-là** (la date que l'appareil inscrit dans chaque photo). Rien à lier photo par photo.
+
+- **Fiche de la rencontre → Photos de la session** : les photos du jour, couvertes par l'accord. **Exclure** celles qui ne concernent pas la personne (une autre sortie le même jour, par exemple) ; **Rétablir** pour revenir en arrière.
+- **Horloge de l'appareil décalée** (changement d'heure oublié, réglage faux) : indiquez la **Date de la session**, celle que portent les photos, dans le formulaire de la fiche.
+- **Fiche d'une photo → Personnes rencontrées** : les personnes rencontrées par son photographe ce jour-là (« même session ») et celles liées à la photo, avec leur accord, leur visage et leurs usages acceptés. Vérifiez que celles qui apparaissent sur la photo ont accepté l'usage prévu.
+- **Un refus, lui, est ciblé** : il ne bloque que les **photos liées** (les autres personnes du jour ont pu accepter). Liez au refus les photos où la personne apparaît ; la fiche d'une photo de la session le rappelle.
+
+## Un visage sur le nom
+
+La **photo de la personne** (son visage) aide à savoir qui a signé et à retrouver les bonnes images : prise dans l'app sur le téléphone (« Photographier la personne »), ou ajoutée dans le formulaire de la fiche (carte papier, photo de votre téléphone). Elle apparaît en rond dans la liste, sur la fiche et dans « Personnes rencontrées ». Gardée en privé, **aussi longtemps que l'accord** ; sans accord, effacée après 6 mois. Le texte du consentement (app et cartes) le dit à la personne.
+
 ## Traiter une rencontre
 
 Les nouvelles demandes s'affichent en tête, avec un compteur dans la barre latérale. Dans la fiche d'une rencontre :
 
 - **Écrire** ouvre votre messagerie avec l'adresse de la personne : le site n'envoie aucun e-mail.
-- **Lier des photos** : les photos du photographe prises ou importées ce jour-là sont proposées en premier ; une recherche permet d'en trouver d'autres.
+- **Lier des photos** (pour un refus, une photo offerte, ou une photo hors session) : les photos du photographe prises ou importées ce jour-là sont proposées en premier ; une recherche permet d'en trouver d'autres.
 - **Carte signée** : cochez « La carte « pour nous » est signée » et les usages acceptés, puis joignez la **photo de la carte** (preuve, visible seulement dans l'admin). **Saisir une carte signée**, en bas de la liste, crée une rencontre directement depuis la carte papier.
 - **Marquer « En cours » / « Traitée »** pour suivre où vous en êtes.
 
@@ -101,7 +114,7 @@ Une personne peut demander **une copie de ses données** ou **leur effacement** 
 - **Supprimer cette rencontre** efface tout, à la demande de la personne.
 - Durées, automatiques et annoncées sur la page `/confidentialite` :
   - demande sans accord ni refus : effacée après **12 mois** sans nouvelle ;
-  - photo de repère prise sur le téléphone : effacée après **6 mois** ;
+  - photo de la personne (visage) : gardée avec l'accord ; sans accord, effacée après **6 mois** ;
   - accord ou refus (avec la signature) : gardé tant qu'une photo liée existe, puis **5 ans** (délai pour agir en justice) ;
   - photo supprimée : effacée des sauvegardes après **90 jours**.
 - La photo de la carte est rangée dans la base de données, dont les sauvegardes tournent sur 14 jours : une suppression disparaît aussi des sauvegardes au bout de deux semaines.

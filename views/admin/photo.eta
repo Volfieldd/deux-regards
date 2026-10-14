@@ -51,10 +51,11 @@
 </div>
 <% if (it.encounters && it.encounters.length) { %>
 <section class="panel" id="rencontres" aria-labelledby="enc-title">
-  <h2 id="enc-title">Personne photographiée</h2>
+  <h2 id="enc-title">Personnes rencontrées <span class="mono">accords de la session et photos liées</span></h2>
+  <p class="hint">Les personnes rencontrées par <%= it.photo.author || 'le photographe' %> le jour de cette photo (date EXIF), et celles liées à la photo. Vérifiez que celles qui y apparaissent ont accepté l’usage prévu.</p>
   <ul class="rank plain">
-<% it.encounters.forEach(r => { %>    <li><span class="t"><a href="/admin/rencontres/<%= r.id %>">Rencontre <%= r.ref || 'sans carte' %><%= r.name ? ` · ${r.name}` : '' %></a></span>
-      <% if (r.refused) { %><span class="enc-tag no">Refuse la publication : la photo ne peut pas être publiée</span><% } else if (r.consent) { %><span class="enc-tag ok">Accord <%= r.consent_source === 'carte' ? 'signé' : 'en ligne' %> : <%= ['site', 'instagram', 'print', 'name'].filter(s => r.consent[s]).map(s => ({ site: 'site', instagram: 'Instagram', print: 'expositions et tirages', name: 'avec son prénom' })[s]).join(', ') %></span><% } else { %><span class="enc-tag">Ni accord ni refus pour l’instant</span><% } %></li>
+<% it.encounters.forEach(r => { %>    <li><span class="t"><span class="enc-who"><% if (r.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= r.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } %><a href="/admin/rencontres/<%= r.id %>">Rencontre <%= r.ref || 'sans carte' %><%= r.name ? ` · ${r.name}` : '' %></a> <span class="mono"><%= r.via === 'session' ? 'même session' : 'liée à la photo' %></span></span></span>
+      <% if (r.refused && r.via === 'lien') { %><span class="enc-tag no">Refuse la publication : la photo ne peut pas être publiée</span><% } else if (r.refused) { %><span class="enc-tag warn">A refusé : si elle est sur cette photo, liez-la au refus (fiche de la rencontre)</span><% } else if (r.consent) { %><span class="enc-tag ok">Accord <%= r.consent_source !== 'en_ligne' ? 'signé' : 'en ligne' %> : <%= ['site', 'instagram', 'print', 'name'].filter(s => r.consent[s]).map(s => ({ site: 'site', instagram: 'Instagram', print: 'expositions et tirages', name: 'avec son prénom' })[s]).join(', ') %></span><% } else { %><span class="enc-tag">Ni accord ni refus pour l’instant</span><% } %></li>
 <% }) %>  </ul>
 </section>
 <% } %>

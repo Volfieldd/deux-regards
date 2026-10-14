@@ -821,6 +821,11 @@ code.mono, .mono code { color: var(--ink2); }
 .qr-model { margin: 0; display: grid; gap: 8px; font-size: 12.5px; }
 .qr-model img { width: 100%; aspect-ratio: 1; object-fit: contain; padding: 12px; border-radius: 8px; background: #f2efe8; box-shadow: inset 0 0 0 1px var(--line); }
 .qr-model.blanc img { background: #1f2a37; }
+img.enc-face, .rank img.enc-face { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; vertical-align: middle; box-shadow: 0 0 0 1px var(--line); background: var(--s2); }
+img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
+.rank .t .enc-who { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.enc-title { display: flex; align-items: center; }
+.enc-photo.excluded img { opacity: .35; filter: grayscale(1); }
 .enc-captures { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0; }
 .enc-captures figure { margin: 0; display: grid; gap: 4px; }
 .enc-captures img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 0 0 1px var(--line); background: #fff; }

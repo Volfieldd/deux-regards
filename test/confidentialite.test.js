@@ -14,7 +14,7 @@ test('page Confidentialité : trois langues, responsables conjoints et contact, 
   assert.match(fr.body, /Sébastien et Julien, photographes du site Test, sont responsables ensemble \(responsables conjoints\)/);
   assert.match(fr.body, /info@nicephos\.art/);                                            // contact par défaut (migration 018)
   assert.match(fr.body, /effacée après 12 mois sans nouvelle/);
-  assert.match(fr.body, /Photo de repère prise sur notre téléphone : effacée après 6 mois/);
+  assert.match(fr.body, /Photo de vous jointe à votre accord : conservée avec l’accord ; sans accord, effacée après 6 mois/);
   assert.match(fr.body, /une photo que nous supprimons disparaît de nos sauvegardes au bout de 90 jours/);
   assert.match(fr.body, /www\.cnil\.fr\/plaintes/);
   // Rien d'affirmé avant d'être vrai : authentification à deux facteurs et disque chiffré déclarés dans Réglages.
@@ -47,19 +47,25 @@ test('réglages : contact et cases de sécurité ; l’app montre l’informatio
   assert.match(app, /Retention and rights: localhost:3000\/en\/confidentialite/);
 });
 
-test('durées de conservation : photo de repère à 6 mois, accord gardé tant qu’une photo liée existe, puis 5 ans', async t => {
+test('durées de conservation : visage gardé avec l’accord (6 mois sans accord), accord gardé tant qu’une photo liée existe, puis 5 ans', async t => {
   const { app, db } = await setup(t, { seeded: true });
   const day = 864e5;
   const ins = db.prepare(`INSERT INTO encounters (ref, status, consent, consent_source, refused, portrait_jpeg, created_at, updated_at)
     VALUES (?, 'en_cours', ?, 'signature', ?, ?, ?, ?)`);
   const old = Date.now() - 200 * day;
   ins.run('J-0001', '{"site":true}', 0, Buffer.from('x'), old, old);
+  ins.run('J-0004', null, 0, Buffer.from('y'), old, old);                                   // pas d'accord : visage effacé à 6 mois
   const veryOld = Date.now() - 6 * 365 * day;
   ins.run('J-0002', '{"site":true}', 0, null, veryOld, veryOld);                          // aucune photo liée : effacée
   ins.run('J-0003', null, 1, null, veryOld, veryOld);                                      // refus, photo liée : gardé
   const photo = db.prepare("SELECT id FROM photos LIMIT 1").pluck().get();
   db.prepare("INSERT INTO encounter_photos (encounter_id, photo_id) SELECT id, ? FROM encounters WHERE ref = 'J-0003'").run(photo);
+  // Accord sans photo liée mais avec une photo de sa session : gardé lui aussi.
+  const julien = db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
+  db.prepare("UPDATE photos SET taken_on = '2020-05-02' WHERE id = (SELECT id FROM photos WHERE author_id = ? LIMIT 1)").run(julien);
+  db.prepare("INSERT INTO encounters (ref, status, consent, consent_source, author_id, met_on, created_at, updated_at) VALUES ('J-0005', 'en_cours', '{\"site\":true}', 'carte', ?, '2020-05-02', ?, ?)").run(julien, veryOld, veryOld);
   app.encounters.purge();
-  assert.equal(db.prepare("SELECT portrait_jpeg FROM encounters WHERE ref = 'J-0001'").pluck().get(), null);
-  assert.deepEqual(db.prepare('SELECT ref FROM encounters ORDER BY ref').pluck().all(), ['J-0001', 'J-0003']);
+  assert.ok(db.prepare("SELECT portrait_jpeg FROM encounters WHERE ref = 'J-0001'").pluck().get());      // avec l'accord : gardé
+  assert.equal(db.prepare("SELECT portrait_jpeg FROM encounters WHERE ref = 'J-0004'").pluck().get(), null);
+  assert.deepEqual(db.prepare('SELECT ref FROM encounters ORDER BY ref').pluck().all(), ['J-0001', 'J-0003', 'J-0004', 'J-0005']);
 });
