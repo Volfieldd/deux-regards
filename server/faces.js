@@ -1,5 +1,7 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import { MAX_PIXELS } from './images.js';
 
 // Détection des visages (pas de reconnaissance) : dit seulement « il y a un visage, ici, de cette taille ».
 // Sert à savoir s'il y a un accord à aller chercher : une photo sans visage n'a besoin de l'accord de personne.
@@ -43,13 +45,20 @@ export function decode(outputs, { score = SCORE } = {}) {
   return kept;
 }
 
-export function createFaceDetector({ modelPath = new URL('../assets/models/face_detection_yunet_2023mar.onnx', import.meta.url).pathname, log } = {}) {
+// Le modèle ne se charge pas (binaire absent, fichier illisible) : rien n'est écrit, la photo reste « à examiner ».
+export class ModelError extends Error {}
+
+export function createFaceDetector({ modelPath = fileURLToPath(new URL('../assets/models/face_detection_yunet_2023mar.onnx', import.meta.url)), log } = {}) {
   let session = null;
-  const load = async () => {
-    if (!session) {
+  const load = () => {
+    session ??= (async () => {
       const ort = (await import('onnxruntime-node')).default;
-      session = ort.InferenceSession.create(modelPath, { intraOpNumThreads: 1, interOpNumThreads: 1 }).then(s => ({ s, ort }));
-    }
+      return { s: await ort.InferenceSession.create(modelPath, { intraOpNumThreads: 1, interOpNumThreads: 1 }), ort };
+    })().catch(err => {
+      session = null;                            // nouvel essai au prochain appel
+      log?.error({ err }, 'visages : modèle illisible');
+      throw new ModelError(err.message);
+    });
     return session;
   };
 
@@ -57,8 +66,8 @@ export function createFaceDetector({ modelPath = new URL('../assets/models/face_
   // sûr ; les visages trop petits pour être reconnaissables sont écartés.
   async function detect(input) {
     const { s, ort } = await load();
-    const img = sharp(input, { limitInputPixels: 200e6 }).rotate();
-    const meta = await sharp(input, { limitInputPixels: 200e6 }).rotate().metadata();
+    const img = sharp(input, { limitInputPixels: MAX_PIXELS }).rotate();
+    const meta = await sharp(input, { limitInputPixels: MAX_PIXELS }).rotate().metadata();
     const W = meta.autoOrient?.width ?? meta.width, H = meta.autoOrient?.height ?? meta.height;
     const scale = SIZE / Math.max(W, H);
     // Image entière dans 640 × 640, en haut à gauche, fond noir ; planes B, G, R (ordre d'OpenCV), valeurs 0-255.
@@ -74,20 +83,31 @@ export function createFaceDetector({ modelPath = new URL('../assets/models/face_
       .map(b => ({ ...b, x: +b.x.toFixed(4), y: +b.y.toFixed(4), w: +b.w.toFixed(4), h: +b.h.toFixed(4) }));
   }
 
-  return { detect, warm: () => load().catch(err => { log?.error({ err }, 'visages : modèle illisible'); }) };
+  return { detect };
 }
 
 // Service : détecte les visages des photos qui ne l'ont pas encore été (à l'import et, une fois, pour les
 // anciennes), une à la fois, en arrière-plan. faces NULL : pas encore vu ; -1 : échec (illisible).
-export function createFaceService({ db, storageDir, detector, log, auto = true }) {
+export function createFaceService({ db, storageDir, detector, log }) {
   let running = null, stopped = false;
   const save = db.prepare('UPDATE photos SET faces = ?, face_boxes = ? WHERE id = ?');
-  // Une photo, tout de suite (à l'import) : jamais d'erreur, au pire « examen impossible ».
+  const busy = new Set();                      // photos en cours d'examen (import et rattrapage ne se doublent pas)
+  // Une photo : nombre et cadres ; image illisible : -1 (« examen impossible ») ; modèle indisponible : rien.
+  async function one(p) {
+    busy.add(p.id);
+    try {
+      const boxes = await detector.detect(path.join(storageDir, 'originals', p.file));
+      if (!stopped) save.run(boxes.length, JSON.stringify(boxes), p.id);
+    } catch (err) {
+      if (err instanceof ModelError) throw err;
+      if (!stopped) save.run(-1, null, p.id);
+      log?.warn({ err: err.message, photo: p.id }, 'visages : détection impossible');
+    } finally { busy.delete(p.id); }
+  }
+  // À l'import, tout de suite : jamais d'erreur (modèle indisponible : la photo reste à examiner).
   async function examine(id) {
     const p = db.prepare('SELECT id, file FROM photos WHERE id = ?').get(id);
-    if (!p) return;
-    try { const boxes = await detector.detect(path.join(storageDir, 'originals', p.file)); save.run(boxes.length, JSON.stringify(boxes), p.id); }
-    catch (err) { save.run(-1, null, p.id); log?.warn({ err: err.message, photo: p.id }, 'visages : détection impossible'); }
+    if (p) await one(p).catch(() => {});
   }
   async function run() {
     if (running) return running;
@@ -95,15 +115,9 @@ export function createFaceService({ db, storageDir, detector, log, auto = true }
       let n = 0;
       for (;;) {
         if (stopped) break;
-        const p = db.prepare('SELECT id, file FROM photos WHERE faces IS NULL ORDER BY id DESC LIMIT 1').get();
+        const p = db.prepare(`SELECT id, file FROM photos WHERE faces IS NULL AND id NOT IN (${[...busy, 0].join(',')}) ORDER BY id DESC LIMIT 1`).get();
         if (!p) break;
-        try {
-          const boxes = await detector.detect(path.join(storageDir, 'originals', p.file));
-          if (!stopped) save.run(boxes.length, JSON.stringify(boxes), p.id);
-        } catch (err) {
-          if (!stopped) save.run(-1, null, p.id);
-          log?.warn({ err: err.message, photo: p.id }, 'visages : détection impossible');
-        }
+        try { await one(p); } catch { break; }      // modèle indisponible : on s'arrête, rien n'est écrit
         n++;
       }
       if (n) log?.info({ photos: n }, 'visages : photos examinées');
@@ -112,7 +126,7 @@ export function createFaceService({ db, storageDir, detector, log, auto = true }
     })();
     return running;
   }
-  // Après un import : examen en arrière-plan (sauf en mode manuel, pour les tests).
-  const kick = () => { if (auto && !stopped) run().catch(err => log?.error({ err }, 'visages')); };
-  return { run, kick, examine, stop: () => { stopped = true; }, idle: () => running || Promise.resolve(0) };
+  // Au démarrage : les examens impossibles sont retentés une fois (modèle réparé, image remplacée…).
+  const retryFailed = () => db.prepare('UPDATE photos SET faces = NULL WHERE faces = -1').run().changes;
+  return { run, examine, retryFailed, stop: () => { stopped = true; }, idle: () => running || Promise.resolve(0) };
 }

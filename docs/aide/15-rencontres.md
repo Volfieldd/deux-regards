@@ -27,7 +27,7 @@ Astuce : juste après la photo, photographiez la carte que vous tendez. Elle mar
 
 La planche s'ouvre prête à imprimer : cinq paires par feuille A4, d'un seul côté. Imprimez à **100 %** (taille réelle, sans « ajuster à la page »), sur du papier épais (250 à 350 g/m²), et découpez le long des pointillés. Pour changer les textes des cartes, demandez-le : ils sont réunis au même endroit.
 
-Les cartes imprimées par le site portent un **code de contrôle** (J-0142-K7Q) : la demande arrive alors marquée **carte vérifiée**. Une référence tapée sans le code (cartes numérotées au tampon) est acceptée, marquée **non vérifiée**.
+Les cartes imprimées par le site portent un **code de contrôle** (J-0142-K7Q) : la demande arrive alors marquée **carte vérifiée**. Une référence tapée sans le code (cartes numérotées au tampon) est acceptée, marquée **non vérifiée**. Sur une rencontre déjà établie (carte signée, accord signé sur le téléphone, ou demande déjà vérifiée), une demande **sans code** ne change ni l'accord, ni l'adresse, ni le nom : un **refus** est appliqué (il protège la personne), une demande de droits est signalée (vérifiez l'identité), et le reste est seulement noté dans l'historique, marqué non vérifié.
 
 ## Le QR des vêtements
 
@@ -92,9 +92,11 @@ Les fiches d'une rencontre et d'une photo ont un bouton **Ouvrir la sortie →**
 
 Chaque photo a alors un **état pour chaque usage** (site, Instagram), lisible par sa forme :
 
-- **✓ prête** : aucun visage, ou toutes les personnes concernées ont accepté cet usage ;
+- **✓ prête** : aucun visage, ou toutes les personnes concernées ont accepté cet usage, par un accord **sûr** (carte signée, signature sur le téléphone, ou demande en ligne avec le code de la carte) ;
 - **▲ à vérifier** : un visage, et un accord manque (personne rencontrée ce jour-là, une personne sans décision, un usage non accepté, ou une personne qui a refusé dans la même sortie). La publier demande de **cocher une confirmation** (« les personnes reconnaissables ont accepté, ou n'y sont pas reconnaissables ») ; la confirmation est gardée avec ce qui manquait, et ne vaut que pour ces raisons-là ;
 - **✕ bloquée** : site : un refus lié à la photo ; Instagram : une personne concernée refuse ou n'a pas accepté Instagram. Aucune confirmation ne lève un blocage.
+
+Un accord donné en ligne **sans code de carte** (QR des vêtements, référence tapée à la main) peut venir de n'importe qui : il laisse la photo **à vérifier** (« accord en ligne non vérifié »). Une photo déjà en ligne à vérifier se confirme aussi depuis sa fiche, sans la dépublier ; confirmée, elle ne réapparaît plus dans « Aujourd'hui ».
 
 Personnes concernées : celles liées à la photo, et celles de sa sortie si la photo a un visage. Une photo **sans visage** ne concerne donc personne de la sortie : un paysage est prêt d'office.
 

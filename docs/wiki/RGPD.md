@@ -44,7 +44,8 @@ Une analyse d'impact complète (AIPD) n'est pas obligatoire ici : petit volume, 
 
 | Risque pour les personnes | Gravité | Mesures en place | Risque résiduel |
 |---|---|---|---|
-| Publication d'une personne reconnaissable sans son accord | Importante | État par usage d'après les visages détectés et les accords de la sortie : « à vérifier » exige une confirmation explicite, gardée avec ce qui manquait ; correction à la main de la détection | Faible |
+| Publication d'une personne reconnaissable sans son accord | Importante | État par usage d'après les visages détectés et les accords de la sortie : « à vérifier » exige une confirmation explicite, gardée avec ce qui manquait ; un accord en ligne sans code de carte ne suffit pas ; correction à la main de la détection | Faible |
+| Usurpation d'une personne sur `/bonjour` (référence devinée) | Modérée | Sans code de contrôle, une rencontre établie n'est jamais modifiée (accord, adresse, nom) : seul un refus est appliqué ; les demandes de droits sont signalées pour vérification d'identité | Faible |
 | Publication d'une photo malgré un refus | Importante | Refus bloquant (fiche et actions groupées), « Appliquer le refus » (brouillon, file Instagram), refus gardé même après effacement des données ; Instagram bloqué sans confirmation possible si une personne liée ou de la session ne l'a pas accepté (Instagram suppose le site), vérifié à l'entrée dans la file, à chaque changement d'accord et avant l'envoi | Faible (Instagram : retrait manuel des posts déjà publiés) |
 | Fuite des noms, e-mails, signatures (vol du serveur, d'une sauvegarde) | Importante | Chiffrement des données dans la base (`DATA_KEY` hors base), disques chiffrés, sauvegardes sur un autre disque, accès admin protégé | Faible une fois `DATA_KEY` et disques chiffrés en place |
 | Accès non autorisé à l'admin | Importante | Zitadel (deux facteurs), sessions limitées, CSRF, journal des actions | Faible |

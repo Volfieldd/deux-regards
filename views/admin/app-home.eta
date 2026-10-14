@@ -18,7 +18,7 @@
 <% }) %>  </nav>
 <% } %>
 <% if (a) { %>
-  <a class="app-big primary" href="/admin/rencontre"><strong>＋ Nouvelle rencontre</strong><span>prochaine carte : <span class="mono"><%= it.next %></span></span></a>
+  <a class="app-big primary" href="/admin/rencontre<%= q %>"><strong>＋ Nouvelle rencontre</strong><span>prochaine carte : <span class="mono"><%= it.next %></span></span></a>
   <a class="app-big" href="/admin/rencontre/qr<%= q %>"><strong>Montrer mon QR</strong><span>la personne le scanne sur votre écran, sans carte</span></a>
   <section class="app-today" aria-labelledby="today-title">
     <h2 id="today-title">Ma sortie du jour<% if (it.place) { %> <span class="hint">· <%= it.place %></span><% } %></h2>

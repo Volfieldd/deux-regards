@@ -10,7 +10,11 @@
 export const USAGES = ['site', 'instagram'];
 export const LEVEL_LABEL = { ok: 'prête', warn: 'à vérifier', no: 'bloquée' };
 
-const who = e => (e.anonymized ? 'refus anonymisé' : `${e.ref || 'sans carte'}${e.name ? ` · ${e.name}` : ''}`);
+// Les raisons sont gardées (confirmations, erreurs Instagram) : seulement la référence, jamais le nom (chiffré en base).
+const who = e => (e.anonymized ? 'refus anonymisé' : e.ref || `rencontre sans carte n°${e.id}`);
+// Un accord ne lève « à vérifier » que s'il est sûr : carte ou signature, ou demande en ligne avec le code de contrôle
+// de la carte. Un accord en ligne sans code (QR des vêtements, référence tapée) peut venir de n'importe qui.
+const trusted = e => ['carte', 'signature'].includes(e.consent_source) || Boolean(e.verified);
 
 export function facesOf(p) {
   if (p.faces_override === 1) return { has: true, n: Math.max(1, p.faces || 0), source: 'main' };
@@ -22,11 +26,12 @@ export function facesOf(p) {
 export function createReadiness({ db, encounters }) {
   const photoRow = db.prepare('SELECT id, status, faces, faces_override FROM photos WHERE id = ?');
 
-  function state(photoOrId) {
+  // cache (facultatif) : Map partagée entre plusieurs appels, pour ne déchiffrer chaque rencontre qu'une fois.
+  function state(photoOrId, cache = null) {
     const p = typeof photoOrId === 'object' ? photoOrId : photoRow.get(photoOrId);
     if (!p) return null;
     const faces = facesOf(p);
-    const all = encounters.forPhoto(p.id);
+    const all = encounters.forPhoto(p.id, cache);
     const linked = all.filter(e => e.via === 'lien');
     const concerned = faces.has ? all : linked;
     const result = { faces, people: concerned };
@@ -44,6 +49,7 @@ export function createReadiness({ db, encounters }) {
           if (e.refused) reasons.push(`${who(e)} a refusé (même sortie) : est-elle sur la photo ?`);
           else if (!e.consent) reasons.push(`${who(e)} n’a pas encore décidé`);
           else if (!e.consent[u]) reasons.push(`${who(e)} n’a pas accepté ${u === 'site' ? 'le site' : 'Instagram'}`);
+          else if (!trusted(e)) reasons.push(`${who(e)} : accord en ligne non vérifié (sans code de carte)`);
         }
         if (reasons.length) level = 'warn';
       }
@@ -59,30 +65,31 @@ export function createReadiness({ db, encounters }) {
     db.prepare('INSERT INTO photo_confirmations (photo_id, usage, at, by_name, reasons) VALUES (?, ?, ?, ?, ?)').run(photoId, usage, Date.now(), String(byName || '').slice(0, 120), JSON.stringify(reasons || []));
   }
 
-  // Tri avant publication sur le site : bloquées écartées, à vérifier écartées sauf confirmation (alors gardée).
-  function gate(ids, { confirmed = false, byName = '' } = {}) {
+  // Tri avant publication sur le site : bloquées écartées ; à vérifier écartées, sauf si une confirmation couvre déjà
+  // leurs raisons (republication, annulation).
+  function gate(ids) {
     const ok = [], verify = [], blocked = [];
     for (const id of ids) {
       const s = state(Number(id));
       if (!s) continue;
       if (s.site.level === 'no') blocked.push({ id: Number(id), reasons: s.site.reasons });
-      else if (s.site.level === 'warn' && !confirmed) verify.push({ id: Number(id), reasons: s.site.reasons });
-      else {
-        if (s.site.level === 'warn') confirm(Number(id), 'site', byName, s.site.reasons);
-        ok.push(Number(id));
-      }
+      else if (s.site.level === 'warn' && !confirmed(Number(id), 'site')) verify.push({ id: Number(id), reasons: s.site.reasons });
+      else ok.push(Number(id));
     }
     return { ok, verify, blocked };
   }
 
   // Une confirmation couvre ce qu'elle a vu : elle vaut tant que les raisons actuelles en font toutes partie.
-  function confirmed(photoId, usage) {
-    const r = state(photoId)?.[usage];
+  function confirmed(photoId, usage, s = null) {
+    const r = (s || state(photoId))?.[usage];
     const c = confirmations(photoId).find(x => x.usage === usage);
     return Boolean(r && c && r.reasons.every(x => c.reasons.includes(x)));
   }
 
   const setFaces = (photoId, value) => db.prepare('UPDATE photos SET faces_override = ? WHERE id = ?').run(value === 1 || value === 0 ? value : null, photoId);
 
-  return { state, gate, confirm, confirmed, confirmations, setFaces };
+  // À vérifier et pas encore confirmée (photothèque, Aujourd'hui) : une photo confirmée ne réapparaît pas.
+  const pending = (p, usage = 'site', cache = null) => { const s = state(p, cache); return s && s[usage].level === 'warn' && !confirmed(p.id ?? p, usage, s); };
+
+  return { state, gate, confirm, confirmed, pending, confirmations, setFaces };
 }

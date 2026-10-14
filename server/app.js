@@ -166,8 +166,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('readiness', createReadiness({ db, encounters: app.encounters }));
   // Visages : détectés (jamais reconnus) sur le serveur, à l'import et une fois pour les anciennes photos.
   // faceOptions.manual (tests) : rien ne démarre seul ; faceOptions.detector remplace le modèle.
-  app.decorate('faces', createFaceService({ db, storageDir: config.storageDir, detector: faceOptions.detector || createFaceDetector({ log: app.log }), log: app.log, auto: !faceOptions.manual }));
-  if (!faceOptions.manual) app.addHook('onReady', async () => { setTimeout(() => app.faces.run(), 3000).unref(); });
+  app.decorate('faces', createFaceService({ db, storageDir: config.storageDir, detector: faceOptions.detector || createFaceDetector({ log: app.log }), log: app.log }));
+  if (!faceOptions.manual) app.addHook('onReady', async () => { app.faces.retryFailed(); setTimeout(() => app.faces.run(), 3000).unref(); });
   app.addHook('onClose', async () => { app.faces.stop(); await app.faces.idle(); });
   // Instagram suit les accords : une photo bloquée ne part pas, une photo à vérifier seulement sur confirmation ; la
   // file est revue dès qu'un accord change.
@@ -183,7 +183,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Sorties : journées de prise de vue, découpables (voir server/outings.js) ; heures des anciennes photos lues une fois.
   app.decorate('outings', createOutings({ db, encounters: app.encounters, storageDir: config.storageDir, log: app.log }));
   app.addHook('onReady', async () => { setTimeout(() => app.outings.backfillAll(), 2000).unref(); });
-  app.addHook('onClose', async () => app.outings.stop());
+  app.addHook('onClose', async () => { await app.outings.stop(); });
   // « Aujourd'hui » : ce qui demande votre attention (voir server/todo.js).
   app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });

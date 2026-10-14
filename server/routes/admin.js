@@ -169,11 +169,11 @@ export default async function adminRoutes(app) {
     const { q = '', auteur = '', serie = '', statut = '' } = request.query;
     // Ce qui manque (liens d'« Aujourd'hui ») : ville (carte du monde) ou traduction du titre, photos publiées.
     // État pour le site (server/readiness.js) : à vérifier, bloquée, sans visage.
-    const stateOf = new Map();
-    const st = p => { if (!stateOf.has(p.id)) stateOf.set(p.id, app.readiness.state(p)); return stateOf.get(p.id); };
+    const stateOf = new Map(), people = new Map();
+    const st = p => { if (!stateOf.has(p.id)) stateOf.set(p.id, app.readiness.state(p, people)); return stateOf.get(p.id); };
     const MISSING = { ville: { label: 'Publiées sans ville', test: p => p.status === 'published' && p.city_id == null },
       traduction: { label: 'Titres sans traduction', test: p => p.status === 'published' && (!p.title_en || !p.title_de) },
-      verifier: { label: '▲ À vérifier', test: p => st(p).site.level === 'warn' },
+      verifier: { label: '▲ À vérifier', test: p => st(p).site.level === 'warn' && !app.readiness.confirmed(p.id, 'site', st(p)) },
       bloquee: { label: '✕ Bloquées', test: p => st(p).site.level === 'no' },
       'sans-visage': { label: 'Sans visage', test: p => !st(p).faces.has } };
     const missing = Object.hasOwn(MISSING, request.query.manque) ? request.query.manque : '';
@@ -516,6 +516,7 @@ export default async function adminRoutes(app) {
     proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
     outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
     ready: app.readiness.state(photo.id), confirmations: app.readiness.confirmations(photo.id), igConfirmed: app.readiness.confirmed(photo.id, 'instagram'),
+    siteConfirmed: app.readiness.confirmed(photo.id, 'site'),
   });
   const photoStats = id => {
     const { from, to } = app.stats.range(30);
@@ -621,7 +622,7 @@ export default async function adminRoutes(app) {
     if (Object.keys(errors).length) return lotPage(request, reply.code(422), ids, { errors, values });
     const to = `/admin/photos/lot?ids=${ids.join(',')}`;
     if (body.publish === '1') {
-      const g = app.readiness.gate(ids);
+      const g = app.readiness.gate(ids.filter(id => repo.photo(id)?.status !== 'published'));
       const before = repo.setStatuses(Object.fromEntries(g.ok.map(id => [id, 'published'])));
       queued(before);
       const held = g.verify.length + g.blocked.length;
@@ -669,11 +670,14 @@ export default async function adminRoutes(app) {
         case 'draft': {
           if (!n) return ko(422, 'Aucune photo sélectionnée.');
           // Publier : seulement les photos prêtes ; à vérifier → leur fiche (confirmation) ; bloquées → refus.
-          const g = body.action === 'publish' ? app.readiness.gate(ids) : { ok: ids, verify: [], blocked: [] };
+          // Seulement les brouillons : une photo déjà en ligne n'est ni republiée ni annoncée « restée en brouillon ».
+          const online = body.action === 'publish' ? ids.filter(id => repo.photo(id)?.status === 'published') : [];
+          const g = body.action === 'publish' ? app.readiness.gate(ids.filter(id => !online.includes(id))) : { ok: ids, verify: [], blocked: [] };
+          const refusedOnline = online.filter(id => repo.refusalOf(id));
           const refused = g.blocked.map(b => b.id);
           const before = repo.setStatuses(body.action === 'publish' ? Object.fromEntries(g.ok.map(id => [id, 'published'])) : each('draft'));
           queued(before);
-          if (refused.length === n) return ko(422, `${n > 1 ? 'Ces photos ne peuvent pas être publiées' : 'Cette photo ne peut pas être publiée'} : la personne photographiée refuse la publication (voir Personnes).`);
+          if (refused.length + refusedOnline.length === n) return ko(422, `${n > 1 ? 'Ces photos ne peuvent pas être publiées' : 'Cette photo ne peut pas être publiée'} : la personne photographiée refuse la publication (voir Personnes)${refusedOnline.length ? ' ; déjà en ligne : appliquez le refus' : ''}.`);
           if (g.verify.length && !g.ok.length && !refused.length) return ko(422, `${n > 1 ? 'Ces photos sont' : 'Cette photo est'} à vérifier (${g.verify[0].reasons[0]}${g.verify.length > 1 ? '…' : ''}) : confirmez dans ${n > 1 ? 'leur' : 'sa'} fiche pour publier.`);
           const verb = body.action === 'publish' ? 'publiée' : 'repassée en brouillon';
           // Publication en un clic : un titre provisoire (nom du fichier) est rappelé dans le message.
@@ -681,7 +685,7 @@ export default async function adminRoutes(app) {
           const note = prov ? ` ${prov === n ? (n > 1 ? 'Elles gardent' : 'Elle garde') : `${prov} garde${prov > 1 ? 'nt' : ''}`} le nom du fichier comme titre : corrigez-le dans la photothèque.` : '';
           const blocked = (refused.length ? ` ${refused.length} photo${refused.length > 1 ? 's restent' : ' reste'} en brouillon : la personne photographiée refuse la publication (voir Personnes).` : '')
             + (g.verify.length ? ` ${g.verify.length} photo${g.verify.length > 1 ? 's' : ''} à vérifier ${g.verify.length > 1 ? 'restent' : 'reste'} en brouillon : confirmez dans ${g.verify.length > 1 ? 'leur' : 'sa'} fiche.` : '');
-          const m = n - refused.length - g.verify.length;
+          const m = n - refused.length - g.verify.length - refusedOnline.length;
           return ok(`${m} photo${m > 1 ? 's' : ''} ${m > 1 ? verb.replace('publiée', 'publiées').replace('repassée', 'repassées') : verb}.${note}${blocked}`, { undo: { action: 'statuses', map: before } });
         }
         case 'map_on':
@@ -725,8 +729,11 @@ export default async function adminRoutes(app) {
         }
         // Annulations (JSON) : état précédent renvoyé par l'action annulée.
         case 'statuses': {
-          const m = map(body.map);
-          const undone = repo.setStatuses(Object.fromEntries(Object.entries(m).filter(([id]) => repo.photo(Number(id)))));
+          // Republier passe par le même contrôle que publier (à vérifier : seulement si une confirmation couvre ses raisons).
+          const m = Object.fromEntries(Object.entries(map(body.map)).filter(([id]) => repo.photo(Number(id))));
+          const back2 = Object.entries(m).filter(([id, st]) => st === 'published' && repo.photo(Number(id)).status !== 'published').map(([id]) => Number(id));
+          const allowed = new Set(app.readiness.gate(back2).ok);
+          const undone = repo.setStatuses(Object.fromEntries(Object.entries(m).filter(([id, st]) => st !== 'published' || !back2.includes(Number(id)) || allowed.has(Number(id)))));
           queued(undone);                 // annuler « publier » retire aussi de la file Instagram
           return json ? reply.send({ ok: true, text: 'Action annulée.' }) : done(reply, back, 'Action annulée.');
         }
@@ -785,14 +792,16 @@ export default async function adminRoutes(app) {
     try {
       // Publier une photo à vérifier : confirmation explicite exigée, puis gardée (le blocage, lui, est refusé plus bas).
       const publishing = body.status === 'published' && photo.status !== 'published';
-      const site = publishing ? app.readiness.state(photo.id).site : null;
-      if (site?.level === 'warn' && body.confirmer !== '1') {
+      const site = app.readiness.state(photo.id).site;
+      const covered = app.readiness.confirmed(photo.id, 'site');
+      if (publishing && site.level === 'warn' && !covered && body.confirmer !== '1') {
         const err = new ValidationError({ status: `Photo à vérifier (${site.reasons.join(' ; ')}) : cochez la confirmation pour la publier.` });
         err.values = body;
         throw err;
       }
       repo.updatePhoto(photo.id, body);
-      if (site?.level === 'warn') app.readiness.confirm(photo.id, 'site', request.session.name, site.reasons);
+      // Confirmation cochée (brouillon publié, ou photo déjà en ligne à vérifier) : gardée avec ses raisons.
+      if (site.level === 'warn' && !covered && body.confirmer === '1' && body.status === 'published') app.readiness.confirm(photo.id, 'site', request.session.name, site.reasons);
       app.variants.schedule();          // auteur, date, titre ou option de filigrane ont pu changer
       queued({ [photo.id]: photo.status });
     } catch (err) {
@@ -1241,7 +1250,8 @@ export default async function adminRoutes(app) {
   });
   app.get('/admin/site', async (request, reply) => settingsPage(request, reply, 'site'));
   app.get('/admin/droits', async (request, reply) => settingsPage(request, reply, 'droits'));
-  // Ancienne adresse : les ancres de la page Réglages mènent à la bonne page.
+  // Ancienne adresse : renvoie vers Site public (le #fragment ne parvient pas au serveur ; les liens de l'admin et de
+  // l'aide pointent déjà vers /admin/site ou /admin/droits).
   app.get('/admin/reglages', async (request, reply) => reply.redirect('/admin/site', 301));
 
   app.post('/admin/reglages', write, async (request, reply) => {

@@ -71,8 +71,8 @@
       <label class="inline"><input type="radio" name="status" value="<%= k %>"<%~ v.status === k ? ' checked' : '' %>> <%= label %></label>
 <% }) %>
     </fieldset>
-<% if (it.photo.status !== 'published' && R.site.level === 'warn') { %>
-    <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> Pour publier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.</label>
+<% if (R.site.level === 'warn' && !it.siteConfirmed) { %>
+    <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> <%= it.photo.status === 'published' ? 'Photo en ligne à vérifier : je confirme' : 'Pour publier : je confirme' %> que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.</label>
 <% } else if (it.photo.status !== 'published' && R.site.level === 'no') { %>
     <p class="cellnote err">Publication impossible : <%= R.site.reasons.join(' ; ') %>.</p>
 <% } %>

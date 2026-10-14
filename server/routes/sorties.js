@@ -42,7 +42,7 @@ export function registerOutings(app, { repo, render, done, failed, write, withRe
     if (!o) return reply.callNotFound();
     const time = String(request.body?.heure || '').trim();
     if (!TIME.test(time) || time === '00:00') return failed(reply, back(o), 'Heure de coupure invalide : une heure comme 13:00.');
-    out.cut(o.author.id, o.day, time);
+    if (!out.cut(o.author.id, o.day, time)) return failed(reply, back(o), `La journée est déjà coupée à ${time.replace(':', ' h ')}.`);
     return done(reply, outingUrl({ ...o, starts: time }), `Sortie coupée à ${time.replace(':', ' h ')} : les photos et les rencontres d’après forment une nouvelle sortie.`);
   });
   app.post('/admin/sorties/:author/:day/reunir', write, async (request, reply) => {
