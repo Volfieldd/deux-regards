@@ -17,7 +17,7 @@ Responsables conjoints : **Sébastien et Julien**, photographes de Nicephos. Con
 | **Mesure d'audience** | Connaître la fréquentation | Visiteurs | Compteurs anonymes (pages, pays, provenance), sans IP ni identifiant | Intérêt légitime ; exemption de consentement CNIL (mesure d'audience anonyme) | 25 mois | Nous deux |
 | **Cookie de langue** | Retenir la langue choisie | Visiteurs qui choisissent une langue | `langue=fr/en/de` | Demande de la personne (cookie fonctionnel) | 1 an | — |
 | **Administration** | Sécurité, journal des actions | Nous deux | Comptes (Zitadel), journal (IP tronquée, actions) | Intérêt légitime (sécurité) | Journaux Docker bornés (3 × 10 Mo) | Zitadel (fournisseur d'identité) |
-| **Instagram** | Publier des photos | Personnes photographiées (si usage accepté) | Photo, légende | Consentement (usage « Instagram ») | Selon Meta ; retrait manuel en cas de refus | Meta |
+| **Instagram** | Publier des photos | Personnes photographiées (si usage accepté) | Photo, légende | Consentement (usage « Instagram », qui suppose le site) ; aucune photo de la session envoyée si une personne rencontrée ce jour-là l'a refusé | Selon Meta ; retrait manuel en cas de refus | Meta |
 
 **Sous-traitants** : Cloudflare (acheminement HTTPS, conditions de traitement des données de Cloudflare, transferts encadrés : Data Privacy Framework, clauses contractuelles types) ; Zitadel (connexion à l'admin) ; fournisseur de messagerie si `SMTP_URL` est configuré (préférer un fournisseur européen avec un contrat de sous-traitance ; pas un Gmail personnel). Hébergement : notre serveur, en France.
 
@@ -44,7 +44,7 @@ Une analyse d'impact complète (AIPD) n'est pas obligatoire ici : petit volume, 
 
 | Risque pour les personnes | Gravité | Mesures en place | Risque résiduel |
 |---|---|---|---|
-| Publication d'une photo malgré un refus | Importante | Refus bloquant (fiche et actions groupées), « Appliquer le refus » (brouillon, file Instagram), refus gardé même après effacement des données | Faible (Instagram : retrait manuel) |
+| Publication d'une photo malgré un refus | Importante | Refus bloquant (fiche et actions groupées), « Appliquer le refus » (brouillon, file Instagram), refus gardé même après effacement des données ; Instagram bloqué sans confirmation possible si une personne liée ou de la session ne l'a pas accepté (Instagram suppose le site), vérifié à l'entrée dans la file, à chaque changement d'accord et avant l'envoi | Faible (Instagram : retrait manuel des posts déjà publiés) |
 | Fuite des noms, e-mails, signatures (vol du serveur, d'une sauvegarde) | Importante | Chiffrement des données dans la base (`DATA_KEY` hors base), disques chiffrés, sauvegardes sur un autre disque, accès admin protégé | Faible une fois `DATA_KEY` et disques chiffrés en place |
 | Accès non autorisé à l'admin | Importante | Zitadel (deux facteurs), sessions limitées, CSRF, journal des actions | Faible |
 | Localisation d'une personne | Modérée | Position arrondie à ~100 m, jamais publiée, effacée avec la rencontre ; carte publique à la ville | Négligeable |

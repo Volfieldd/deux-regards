@@ -831,3 +831,9 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .enc-captures img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 0 0 1px var(--line); background: #fff; }
 .share-url { width: 100%; margin-top: 6px; font-size: 12px; }
 .enc-scopes { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+/* Instagram bloqué par les accords (fiche photo) ; « Pas sur cette photo » à côté d'une personne de la session. */
+.ig-blocked { margin: 4px 0 0; padding: 10px 14px; border-radius: 10px; background: var(--danger-soft); box-shadow: inset 0 0 0 1px var(--danger); }
+.ig-blocked strong::before { content: "✕ "; color: var(--danger); }
+.enc-absent { margin: 0; }
+.enc-absent .btn { min-height: 30px; padding: 0 10px; font-size: 12.5px; }

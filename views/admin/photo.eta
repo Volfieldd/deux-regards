@@ -55,6 +55,7 @@
   <p class="hint">Les personnes rencontrées par <%= it.photo.author || 'le photographe' %> le jour de cette photo (date EXIF), et celles liées à la photo. Vérifiez que celles qui y apparaissent ont accepté l’usage prévu.</p>
   <ul class="rank plain">
 <% it.encounters.forEach(r => { %>    <li><span class="t"><span class="enc-who"><% if (r.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= r.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } %><a href="/admin/rencontres/<%= r.id %>">Rencontre <%= r.ref || 'sans carte' %><%= r.name ? ` · ${r.name}` : '' %></a> <span class="mono"><%= r.via === 'session' ? 'même session' : 'liée à la photo' %></span></span></span>
+      <% if (r.via === 'session') { %><form class="enc-absent" method="post" action="/admin/rencontres/<%= r.id %>/session/<%= it.photo.id %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="exclure" value="1"><input type="hidden" name="depuis" value="photo"><button class="btn ghost" type="submit">Pas sur cette photo</button></form><% } %>
       <% if (r.refused && r.via === 'lien') { %><span class="enc-tag no">Refuse la publication : la photo ne peut pas être publiée</span><% } else if (r.refused) { %><span class="enc-tag warn">A refusé : si elle est sur cette photo, liez-la au refus (fiche de la rencontre)</span><% } else if (r.consent) { %><span class="enc-tag ok">Accord <%= r.consent_source !== 'en_ligne' ? 'signé' : 'en ligne' %> : <%= ['site', 'instagram', 'print', 'name'].filter(s => r.consent[s]).map(s => ({ site: 'site', instagram: 'Instagram', print: 'expositions et tirages', name: 'avec son prénom' })[s]).join(', ') %></span><% } else { %><span class="enc-tag">Ni accord ni refus pour l’instant</span><% } %></li>
 <% }) %>  </ul>
 </section>
@@ -90,7 +91,9 @@
 <% } else if (ig.post && ig.post.status === 'failed') { %>
   <p class="err">Échec de la publication : <%= ig.post.error %> (voir la page <a href="/admin/instagram">Instagram</a> pour réessayer).</p>
 <% } %>
-<% if (it.photo.status !== 'published') { %>
+<% if (ig.blocked.length) { %>
+  <p class="ig-blocked" role="note"><strong>Instagram bloqué</strong> : <%= ig.blocked.map(w => w.ref).join(', ') %> <%= ig.blocked.length > 1 ? 'n’ont' : 'n’a' %> pas accepté Instagram (refus, ou accord sans Instagram). Aucune confirmation ne lève ce blocage : si la personne n’est pas sur cette photo, indiquez-le dans <a class="more" href="#rencontres">Personnes rencontrées</a>.</p>
+<% } else if (it.photo.status !== 'published') { %>
   <p class="hint">Publiez d’abord la photo sur le site pour la partager sur Instagram.</p>
 <% } else if (!ig.post || ig.active || ig.post.status === 'failed' || ig.post.status === 'published') { if (!(ig.post && ig.post.status === 'publishing')) { %>
   <div class="ig-edit">

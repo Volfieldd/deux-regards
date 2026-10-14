@@ -39,7 +39,7 @@ export const PRIVACY = {
       ['Qui reçoit vos données', [
         'Nous deux uniquement. Nous ne vendons ni ne cédons aucune donnée.',
         'Cloudflare achemine les connexions vers notre serveur (il assure le chiffrement HTTPS) ; il agit pour notre compte, sous ses conditions de protection des données, avec des transferts encadrés hors de l’Union européenne (Data Privacy Framework et clauses contractuelles types).',
-        'Instagram (Meta) reçoit une photo seulement si vous avez accepté cet usage.',
+        'Instagram (Meta) reçoit une photo seulement si vous avez accepté cet usage, qui suppose aussi le site. Si vous refusez Instagram, aucune photo de ce jour-là où vous pourriez figurer n’y est envoyée.',
         'Si nous vous écrivons par e-mail, le message passe par notre fournisseur de messagerie.',
       ]],
       ['Mesure d’audience et cookies', [
@@ -86,7 +86,7 @@ export const PRIVACY = {
       ['Who receives your data', [
         'Only the two of us. We never sell or pass on any data.',
         'Cloudflare routes connections to our server (it provides HTTPS encryption); it acts on our behalf, under its data protection terms, with safeguarded transfers outside the European Union (Data Privacy Framework and standard contractual clauses).',
-        'Instagram (Meta) only receives a photo if you agreed to that use.',
+        'Instagram (Meta) only receives a photo if you agreed to that use, which also requires the website. If you refuse Instagram, no photo from that day in which you might appear is sent there.',
         'If we email you, the message goes through our email provider.',
       ]],
       ['Audience measurement and cookies', [
@@ -133,7 +133,7 @@ export const PRIVACY = {
       ['Wer Ihre Daten erhält', [
         'Nur wir beide. Wir verkaufen oder übermitteln keine Daten.',
         'Cloudflare leitet die Verbindungen zu unserem Server (und sorgt für die HTTPS-Verschlüsselung); es handelt in unserem Auftrag, nach seinen Datenschutzbedingungen, mit abgesicherten Übermittlungen außerhalb der Europäischen Union (Data Privacy Framework und Standardvertragsklauseln).',
-        'Instagram (Meta) erhält ein Foto nur, wenn Sie dieser Nutzung zugestimmt haben.',
+        'Instagram (Meta) erhält ein Foto nur, wenn Sie dieser Nutzung zugestimmt haben, die auch die Website voraussetzt. Wenn Sie Instagram ablehnen, wird kein Foto dieses Tages, auf dem Sie zu sehen sein könnten, dorthin gesendet.',
         'Wenn wir Ihnen eine E-Mail schreiben, läuft sie über unseren E-Mail-Anbieter.',
       ]],
       ['Reichweitenmessung und Cookies', [

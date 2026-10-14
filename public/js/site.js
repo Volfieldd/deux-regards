@@ -432,3 +432,14 @@
     render();
   }
 })();
+
+// Accord : Instagram suppose le site (cocher Instagram coche le site, décocher le site décoche Instagram).
+// Le serveur refuse de toute façon un accord Instagram sans le site.
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (!t.form || (t.name !== 'scope_instagram' && t.name !== 'scope_site')) return;
+  const other = t.form.elements[t.name === 'scope_instagram' ? 'scope_site' : 'scope_instagram'];
+  if (!other) return;
+  if (t.name === 'scope_instagram' && t.checked) other.checked = true;
+  if (t.name === 'scope_site' && !t.checked) other.checked = false;
+});

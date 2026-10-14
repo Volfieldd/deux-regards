@@ -20,7 +20,7 @@
     <legend>Accord signé sur la carte</legend>
     <label class="inline"><input type="checkbox" name="signed"<%~ on('signed') ? ' checked' : '' %>> La carte « pour nous » est signée</label>
     <div class="enc-scopes">
-<% it.SCOPES.forEach(s => { %>      <label class="inline"><input type="checkbox" name="scope_<%= s %>"<%~ on(`scope_${s}`) ? ' checked' : '' %>> <%= it.SCOPE_LABELS[s] %></label>
+<% it.SCOPES.forEach(s => { %>      <label class="inline"><input type="checkbox" name="scope_<%= s %>"<%~ on(`scope_${s}`) ? ' checked' : '' %>> <%= it.SCOPE_LABELS[s] %><%= s === 'instagram' ? ' (avec le site)' : '' %></label>
 <% }) %>    </div>
 <% if (e.scopes) { %>    <span class="err"><%= e.scopes %></span><% } %>
   </fieldset>
