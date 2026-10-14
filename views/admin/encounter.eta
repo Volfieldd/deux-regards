@@ -10,7 +10,7 @@
 <% if (e.ref) { %>  <span class="enc-tag<%= e.verified ? ' ok' : ' warn' %>"><%= e.verified ? 'carte vérifiée' : 'référence non vérifiée' %></span><% } %>
 <% if (e.wants_photo) { %>  <span class="enc-tag">veut recevoir la photo</span><% } %>
 <% if (e.refused) { %>  <span class="enc-tag no">Refuse la publication</span>
-<% } else if (e.consent) { %>  <span class="enc-tag ok">Accord <%= e.consent_source === 'carte' ? 'signé' : 'donné en ligne' %> : <%= scopes(e.consent) %></span><% } %>
+<% } else if (e.consent) { %>  <span class="enc-tag ok">Accord <%= e.consent_source !== 'en_ligne' ? 'signé' : 'donné en ligne' %> : <%= scopes(e.consent) %></span><% } %>
 </div>
 
 <div class="enc-grid">
@@ -21,8 +21,16 @@
       <dt>Rencontre</dt><dd><%= [e.met_on, e.met_time, e.place].filter(Boolean).join(' · ') || '—' %></dd>
 <% if (e.details) { %>      <dt>Détails</dt><dd><%= e.details %></dd><% } %>
       <dt>Langue</dt><dd><%= { fr: 'français', en: 'anglais', de: 'allemand' }[e.lang] || e.lang %></dd>
+<% if (e.lat != null) { %>      <dt>Position</dt><dd class="mono"><%= e.lat.toFixed(3) %>, <%= e.lon.toFixed(3) %> <span class="hint">(à 100 m près)</span></dd><% } %>
+<% if (e.adult !== null && e.adult !== undefined) { %>      <dt>Âge</dt><dd><%= e.adult ? 'majeure' : `mineure · parent : ${e.guardian}` %></dd><% } %>
+<% if (e.mailed_at) { %>      <dt>Récapitulatif</dt><dd>envoyé le <%= it.fmt(e.mailed_at) %></dd><% } %>
 <% if (it.code) { %>      <dt>Code de la carte</dt><dd class="mono"><%= e.ref %>-<%= it.code %></dd><% } %>
     </dl>
+<% if (e.hasPortrait || e.hasSignature) { %>    <div class="enc-captures">
+<% if (e.hasPortrait) { %>      <figure><a href="/admin/rencontres/<%= e.id %>/portrait" target="_blank" rel="noopener"><img src="/admin/rencontres/<%= e.id %>/portrait" alt="Photo de repère de la personne" width="200"></a><figcaption class="mono">photo de repère</figcaption></figure><% } %>
+<% if (e.hasSignature) { %>      <figure><img class="enc-signature" src="/admin/rencontres/<%= e.id %>/signature" alt="Signature de la personne" width="240"><figcaption class="mono">signature<%= e.adult === 0 ? ' (avec le parent)' : '' %></figcaption></figure><% } %>
+    </div>
+<% } %>
 <% if (e.consent && e.consent_source === 'en_ligne') { %>    <p class="cellnote warn">Accord donné en ligne<%= e.verified ? ' avec la carte en main' : ', sans le code de la carte' %> : moins sûr qu’une carte signée. Pour une exposition ou un tirage, demandez une signature.</p><% } %>
     <form class="actions" method="post" action="/admin/rencontres/<%= e.id %>/statut">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
@@ -40,6 +48,8 @@
 <% if (d.message) { %>        <br>« <%= d.message %> »<% } %>
 <% } else if (ev.kind === 'carte') { %>        Saisie de la carte<%= d.signed ? ` : accord signé (${scopes(d.scopes)})` : '' %><%= d.card ? ', photo de la carte jointe' : '' %>
 <% } else if (ev.kind === 'liaison') { %>        <%= d.retiree ? 'Photo retirée' : `${(d.photos || []).length} photo(s) liée(s)` %>
+<% } else if (ev.kind === 'app') { %>        Saisie avec la personne sur le téléphone : <%= d.decision === 'accord' ? `accord signé (${scopes(d.scopes)})` : d.decision === 'refus' ? 'refus de publication' : 'sans décision' %><%= d.position ? ', position notée' : '' %>
+<% } else if (ev.kind === 'email') { %>        Récapitulatif envoyé par e-mail
 <% } else if (ev.kind === 'lien') { %>        Lien privé créé (photo offerte)
 <% } else if (ev.kind === 'refus_applique') { %>        Refus appliqué : <%= (d.photos || []).length %> photo(s) dépubliée(s)
 <% } else { %>        <%= ev.kind %><% } %></li>

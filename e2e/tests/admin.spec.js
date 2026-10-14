@@ -63,7 +63,7 @@ test('accessibilité de l’admin : aucune violation, en mode sombre et en mode 
   await page.emulateMedia({ reducedMotion: 'reduce' });   // mesure l'état final, pas une animation d'apparition
   for (const theme of ['dark', 'light']) {
     await context.addCookies([{ name: 'admin_theme', value: theme, url: `${process.env.BASE_URL}/admin` }]);
-    for (const url of ['/admin', '/admin/photos', '/admin/photos?importer', '/admin/photos?vue=liste', '/admin/photos/lot?ids=1,2,3', '/admin/series', '/admin/auteurs', '/admin/images', '/admin/apparence', '/admin/reglages', '/admin/statistiques', '/admin/instagram', '/admin/photos/1', '/admin/aide', '/admin/rencontres', '/admin/rencontres/cartes']) {
+    for (const url of ['/admin', '/admin/photos', '/admin/photos?importer', '/admin/photos?vue=liste', '/admin/photos/lot?ids=1,2,3', '/admin/series', '/admin/auteurs', '/admin/images', '/admin/apparence', '/admin/reglages', '/admin/statistiques', '/admin/instagram', '/admin/photos/1', '/admin/aide', '/admin/rencontres', '/admin/rencontres/cartes', '/admin/rencontre']) {
       await page.goto(url);
       const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
       const serious = violations;

@@ -1,4 +1,6 @@
 import crypto from 'node:crypto';
+import sharp from 'sharp';
+import { nearest } from './geo/cities.js';
 
 // Rencontres : les personnes photographiées dans la rue.
 //   - Carte « pour eux » : référence de l'auteur (J-0142), et sur les cartes générées par le site un code de contrôle
@@ -138,7 +140,7 @@ export function createEncounters({ db, now = () => Date.now() }) {
     let consent = null; let last = null;
     try { consent = e.consent ? JSON.parse(e.consent) : null; } catch { consent = null; }
     try { last = e.last ? JSON.parse(e.last) : null; } catch { last = null; }
-    return { ...e, consent, last, hasCard: e.card_jpeg != null, card_jpeg: undefined };
+    return { ...e, consent, last, hasCard: e.card_jpeg != null, hasPortrait: e.portrait_jpeg != null, hasSignature: e.signature_png != null, card_jpeg: undefined, portrait_jpeg: undefined, signature_png: undefined };
   }
   const get = id => decorate(q.byId.get(id));
   const events = id => q.events.all(id).map(ev => ({ ...ev, detail: JSON.parse(ev.detail || '{}') }));
@@ -194,6 +196,78 @@ export function createEncounters({ db, now = () => Date.now() }) {
   }
   const remove = id => db.prepare('DELETE FROM encounters WHERE id = ?').run(id).changes > 0;
 
+  // ---------- numérotation ----------
+  // Prochain numéro d'une lettre : après les cartes déjà imprimées (« cards_printed ») et les rencontres existantes.
+  const printed = () => { try { return JSON.parse(db.prepare("SELECT value FROM settings WHERE key = 'cards_printed'").pluck().get() || '{}'); } catch { return {}; } };
+  function nextNumber(prefix) {
+    const used = db.prepare("SELECT ref FROM encounters WHERE ref LIKE ? || '-%'").pluck().all(prefix).map(r => Number(r.split('-')[1]) || 0);
+    return Math.max(Number(printed()[prefix]) || 0, ...used, 0) + 1;
+  }
+  function reserve(prefix, last) {
+    const p = printed();
+    p[prefix] = Math.max(Number(p[prefix]) || 0, last);
+    db.prepare("INSERT INTO settings (key, value) VALUES ('cards_printed', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(JSON.stringify(p));
+  }
+
+  // ---------- rencontre saisie sur le téléphone ----------
+  // Avec la personne : photo de repère, nom, accord signé au doigt (ou refus), majorité, position arrondie (~100 m).
+  // La rencontre reçoit le numéro suivant du photographe (comme une carte) ; son code de contrôle sert au QR affiché.
+  async function saveApp(body, { author, portrait = null }) {
+    const errors = {};
+    if (!author) errors.author = 'Aucun photographe lié à votre compte : choisissez-le.';
+    const decision = ['accord', 'refus'].includes(body.decision) ? body.decision : '';
+    const scopes = scopesOf(body);
+    const name = text(body.name, 80);
+    const email = text(body.email, 200);
+    if (email && !EMAIL.test(email)) errors.email = 'Adresse e-mail invalide.';
+    const adult = body.adult === 'oui' ? 1 : body.adult === 'non' ? 0 : null;
+    const guardian = text(body.guardian, 80);
+    let signature = null;
+    if (decision === 'accord') {
+      if (!SCOPES.slice(0, 3).some(s => scopes[s])) errors.scopes = 'Cochez au moins un usage accepté.';
+      if (!name) errors.name = 'Le nom de la personne est nécessaire avec son accord.';
+      if (adult === null) errors.adult = 'Indiquez si la personne est majeure.';
+      if (adult === 0 && !guardian) errors.guardian = 'Personne mineure : le nom du parent qui signe est nécessaire.';
+      const m = /^data:image\/png;base64,([A-Za-z0-9+/=]+)$/.exec(String(body.signature || ''));
+      const raw = m ? Buffer.from(m[1], 'base64') : null;
+      if (!raw || raw.length > 600_000) errors.signature = 'La signature manque.';
+      else {
+        try {
+          // Réencodée (jamais le fichier reçu tel quel), sur fond blanc, 1200 px de large au plus.
+          signature = await sharp(raw, { limitInputPixels: 4e6 }).flatten({ background: '#ffffff' }).resize({ width: 1200, withoutEnlargement: true }).png().toBuffer();
+        } catch { errors.signature = 'Signature illisible : recommencez.'; }
+      }
+    }
+    if (!decision && !email && !body.wants_photo) errors.what = 'Rien à enregistrer : un accord, un refus, ou au moins une adresse pour envoyer la photo.';
+    const lat = Number(body.lat), lon = Number(body.lon);
+    const hasPos = Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && body.lat !== '' && body.lon !== '';
+    if (Object.keys(errors).length) throw new EncounterError(errors);
+    let portraitJpeg = null;
+    if (portrait) portraitJpeg = await sharp(portrait, { limitInputPixels: 60e6 }).rotate().resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 80 }).toBuffer();
+    const t = now();
+    const prefix = author.card_prefix || author.slug.charAt(0).toUpperCase();
+    // Position arrondie à 0,001° (~100 m) ; la ville la plus proche sert de lieu.
+    const pos = hasPos ? { lat: Math.round(lat * 1000) / 1000, lon: Math.round(lon * 1000) / 1000 } : null;
+    const city = pos ? nearest(lat, lon) : null;
+    const lang = ['fr', 'en', 'de'].includes(body.lang) ? body.lang : 'fr';
+    const parisDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(t);
+    return db.transaction(() => {
+      const number = nextNumber(prefix);
+      const ref = `${prefix}-${String(number).padStart(4, '0')}`;
+      reserve(prefix, number);
+      const row = { ref, author_id: author.id, status: 'en_cours', verified: decision === 'accord' ? 1 : 0, email, name, lang, wants_photo: body.wants_photo === 'on' || Boolean(email) ? 1 : 0,
+        consent: decision === 'accord' ? JSON.stringify(scopes) : null, consent_source: decision === 'accord' ? 'signature' : null, consent_at: decision === 'accord' ? t : null,
+        refused: decision === 'refus' ? 1 : 0, refused_at: decision === 'refus' ? t : null, met_on: parisDay, met_time: new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(t),
+        place: text(body.place, 120) || (city ? city.label : ''), details: text(body.details, 500), portrait_jpeg: portraitJpeg, signature_png: signature,
+        lat: pos?.lat ?? null, lon: pos?.lon ?? null, adult, guardian: adult === 0 ? guardian : '', created_at: t, updated_at: t };
+      const cols = Object.keys(row);
+      const id = Number(db.prepare(`INSERT INTO encounters (${cols.join(', ')}) VALUES (${cols.map(c => `@${c}`).join(', ')})`).run(row).lastInsertRowid);
+      log(id, 'app', { decision, scopes: decision === 'accord' ? scopes : undefined, adult, guardian: guardian || undefined, portrait: Boolean(portraitJpeg), position: Boolean(pos) }, decision === 'accord');
+      return { id, ref, code: codeOf(ref) };
+    })();
+  }
+  const markMailed = id => { db.prepare('UPDATE encounters SET mailed_at = ? WHERE id = ?').run(now(), id); log(id, 'email', {}); };
+
   // ---------- photo offerte ----------
   // Lien privé vers une photo liée à la rencontre : jeton de 192 bits, valable 30 jours, révocable.
   const SHARE_DAYS = 30;
@@ -225,7 +299,9 @@ export function createEncounters({ db, now = () => Date.now() }) {
   };
 
   return {
-    createShare, shares, share, countShare, revokeShare, photographer,
+    createShare, shares, share, countShare, revokeShare, photographer, nextNumber, reserve, saveApp, markMailed,
+    portraitJpeg: id => db.prepare('SELECT portrait_jpeg FROM encounters WHERE id = ?').pluck().get(id) || null,
+    signaturePng: id => db.prepare('SELECT signature_png FROM encounters WHERE id = ?').pluck().get(id) || null,
     parseRef, card, codeOf, submit, list, get, events, photos: id => q.photos.all(id), saveCard, setStatus, link, unlink, applyRefusal, remove, purge,
     cardJpeg: id => db.prepare('SELECT card_jpeg FROM encounters WHERE id = ?').pluck().get(id) || null,
     countNew: () => q.countNew.get(),

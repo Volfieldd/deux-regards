@@ -1,0 +1,38 @@
+<!doctype html>
+<% const e = it.e, A = it.A, b = it.brand || {}; %>
+<html lang="<%= e.lang || 'fr' %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#1d1c1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/rencontre.webmanifest">
+<% if (b.favicon180) { %>  <link rel="apple-touch-icon" href="/brand/<%= b.favicon180 %>">
+<% } %>  <title><%= it.title %> · <%= it.siteName %></title>
+  <link rel="stylesheet" href="<%= it.asset('admin/app.css') %>">
+</head>
+<body class="merci">
+<main class="app-merci">
+  <h1><%= A.thanks %></h1>
+  <div class="app-qr"><%~ it.qr %></div>
+  <p class="app-scan"><%= A.scan %></p>
+  <p class="mono app-ref"><%= e.ref %></p>
+</main>
+<section class="app-after" lang="fr">
+  <h2>Pour vous</h2>
+<% if (it.flash === 'ok') { %>  <p class="ok">Récapitulatif envoyé à <%= e.email %>.</p>
+<% } else if (it.flash === 'echec') { %>  <p class="ko">L’e-mail n’est pas parti (voir la fiche de la rencontre) : envoyez-le depuis Mail.</p>
+<% } %>
+<% if (e.email) { %>
+<% if (e.mailed_at && it.flash !== 'ok') { %>  <p class="ok">Récapitulatif envoyé à <%= e.email %>.</p>
+<% } else if (!e.mailed_at) { %>
+<% if (it.smtp) { %>  <form method="post" action="/admin/rencontre/<%= e.id %>/envoyer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="app-btn" type="submit">Envoyer le récapitulatif à <%= e.email %></button></form>
+<% } %>  <p><a class="app-btn<%= it.smtp ? ' ghost' : '' %>" href="<%= it.mailto %>">Envoyer le récapitulatif depuis Mail</a></p>
+<% } %>
+<% } else { %>  <p class="hint">Pas d’e-mail : la personne garde son lien en scannant le QR.</p>
+<% } %>
+  <p class="app-row"><a class="app-btn" href="/admin/rencontre">Nouvelle rencontre</a> <a class="app-btn ghost" href="/admin/rencontres/<%= e.id %>">Voir la fiche</a></p>
+</section>
+</body>
+</html>

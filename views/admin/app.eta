@@ -1,0 +1,87 @@
+<!doctype html>
+<% const v = it.values || {}, e = it.errors || {}; const L = ['fr', 'en', 'de']; const FLAG = { fr: 'FR', en: 'EN', de: 'DE' };
+   const author = it.authors.find(a => a.id === Number(v.author_id)) || it.authors[0] || { name: '', next: '' };
+   const on = k => v[k] === 'on'; const b = it.brand || {}; %>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#1d1c1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rencontre">
+  <link rel="manifest" href="/rencontre.webmanifest">
+<% if (b.favicon180) { %>  <link rel="apple-touch-icon" href="/brand/<%= b.favicon180 %>">
+<% } %>  <title><%= it.title %> · <%= it.siteName %></title>
+  <link rel="stylesheet" href="<%= it.asset('admin/app.css') %>">
+  <script src="<%= it.asset('admin/app.js') %>" defer></script>
+</head>
+<body>
+<header class="app-bar">
+  <a href="/admin/rencontres" aria-label="Retour aux rencontres">←</a>
+  <strong>Nouvelle rencontre</strong>
+  <span class="mono" data-next><%= author.next %></span>
+</header>
+<form class="app-form" method="post" action="/admin/rencontre" enctype="multipart/form-data" data-app data-lang="<%= L.includes(v.lang) ? v.lang : 'fr' %>">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (Object.keys(e).length) { %>  <div class="app-errors" role="alert"><ul><% Object.values(e).forEach(m => { %><li><%= m %></li><% }) %></ul></div>
+<% } %>
+  <section class="app-step">
+    <h2>Vous</h2>
+    <label>Photographe <select name="author_id" data-author><% it.authors.forEach(a => { %><option value="<%= a.id %>" data-next="<%= a.next %>"<%~ a.id === author.id ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label>
+    <input type="hidden" name="lat" value="<%= v.lat || '' %>" data-lat>
+    <input type="hidden" name="lon" value="<%= v.lon || '' %>" data-lon>
+    <p class="app-pos" data-pos role="status">Position : en attente… <button type="button" class="linkbtn" data-pos-retry hidden>Réessayer</button></p>
+    <label>Lieu <span class="hint">facultatif : la ville est déduite de la position</span><input name="place" value="<%= v.place || '' %>" maxlength="120" placeholder="Rue, quartier…"></label>
+    <label class="app-photo">
+      <span class="app-big">Photographier la personne</span>
+      <span class="hint">une photo de repère, pour retrouver les bonnes images ; gardée en privé</span>
+      <input type="file" name="portrait" accept="image/*" capture="environment" data-portrait>
+      <img alt="" hidden data-portrait-preview>
+    </label>
+    <label>Notes <input name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="tenue, scène…"></label>
+  </section>
+
+  <section class="app-step app-person">
+    <h2>La personne <span class="hint">à lui tendre</span></h2>
+    <fieldset class="app-langs">
+      <legend class="sr-only">Langue</legend>
+<% L.forEach(l => { %>      <label><input type="radio" name="lang" value="<%= l %>" data-lang-pick<%~ (v.lang || 'fr') === l ? ' checked' : '' %>> <img class="flag" src="<%= it.asset(`flags/${l}.svg`) %>" alt="" width="24" height="17"> <%= FLAG[l] %></label>
+<% }) %>    </fieldset>
+<% L.forEach(l => { const A = it.UI[l].app, H = it.UI[l].hello; %>
+    <div class="app-l10n" data-l="<%= l %>" lang="<%= l %>">
+      <h3><%= A.consentTitle %></h3>
+      <p class="app-consent"><%= A.consent('\u0000').split('\u0000')[0] %><span data-author-name><%= author.name %></span><%= A.consent('\u0000').split('\u0000')[1] %></p>
+    </div>
+<% }) %>
+    <fieldset class="app-decision">
+      <legend class="sr-only">Décision</legend>
+      <label class="check big"><input type="radio" name="decision" value="accord"<%~ v.decision === 'accord' ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.accept %></span><% }) %></label>
+      <div class="app-scopes">
+<% ['site', 'instagram', 'print', 'name'].forEach(s => { %>        <label class="check"><input type="checkbox" name="scope_<%= s %>"<%~ on(`scope_${s}`) ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].hello.scopes[s] %></span><% }) %></label>
+<% }) %>      </div>
+      <label class="check big"><input type="radio" name="decision" value="refus"<%~ v.decision === 'refus' ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.refuse %></span><% }) %></label>
+      <label class="check big"><input type="radio" name="decision" value=""<%~ !v.decision ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.later %></span><% }) %></label>
+    </fieldset>
+    <label><% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.name %></span><% }) %><input name="name" value="<%= v.name || '' %>" maxlength="80" autocomplete="off"></label>
+    <label><% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.email %></span><% }) %><input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="off" inputmode="email"></label>
+    <label class="check"><input type="checkbox" name="wants_photo"<%~ on('wants_photo') ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].hello.wantsPhoto %></span><% }) %></label>
+    <fieldset class="app-age">
+      <legend class="sr-only">Âge</legend>
+      <label class="check"><input type="radio" name="adult" value="oui"<%~ v.adult === 'oui' ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.adult %></span><% }) %></label>
+      <label class="check"><input type="radio" name="adult" value="non"<%~ v.adult === 'non' ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.minor %></span><% }) %></label>
+      <label><% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.guardian %></span><% }) %><input name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off"></label>
+    </fieldset>
+    <div class="app-sign">
+      <p><% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.sign %></span><% }) %></p>
+      <canvas data-sign aria-label="Signature" role="img"></canvas>
+      <input type="hidden" name="signature" data-sign-value>
+      <button type="button" class="linkbtn" data-sign-clear><% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.clear %></span><% }) %></button>
+    </div>
+  </section>
+  <p class="app-actions"><button class="app-save" type="submit" data-save>Enregistrer</button></p>
+</form>
+</body>
+</html>

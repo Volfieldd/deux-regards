@@ -65,6 +65,12 @@ export function loadConfig(env = process.env) {
   };
   instagram.configured = Boolean(instagram.appId && instagram.appSecret);
 
+  // E-mails (facultatif) : boîte d'une adresse que vous possédez (SMTP), par exemple Gmail avec un mot de passe d'application.
+  const smtpUrl = env.SMTP_URL || null;
+  if (smtpUrl && !/^smtps?:\/\//.test(smtpUrl)) throw new Error('SMTP_URL doit commencer par smtp:// ou smtps://');
+  const mailFrom = env.MAIL_FROM || null;
+  if (smtpUrl && !mailFrom) throw new Error('MAIL_FROM est obligatoire avec SMTP_URL (par exemple « Nicephos <adresse@exemple.fr> »)');
+
   // Propositions de traduction (admin) : serveur LibreTranslate du réseau local (http://libretranslate:5000).
   const translateUrl = env.TRANSLATE_URL || null;
   if (translateUrl && !/^https?:\/\/[^\s/]+/.test(translateUrl)) throw new Error('TRANSLATE_URL doit être une adresse http:// ou https://');
@@ -87,6 +93,7 @@ export function loadConfig(env = process.env) {
     localAuthToken,
     tsa: { url: tsaUrl, caFile: tsaCaFile },
     translate: { url: translateUrl, apiKey: env.TRANSLATE_API_KEY || null },
+    mail: { url: smtpUrl, from: mailFrom },
     authRateLimit: Math.max(Number.parseInt(env.AUTH_RATE_LIMIT, 10) || 30, 1),
     oidc: {
       issuer,
