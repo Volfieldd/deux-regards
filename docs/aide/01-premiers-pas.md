@@ -6,28 +6,34 @@
 2. Vous êtes envoyé vers la page de connexion (Zitadel). Connectez-vous avec votre compte, ou avec « Continuer avec Google » si c'est ainsi que votre compte a été créé.
 3. Vous arrivez sur **Aujourd’hui**, ou sur la page que vous aviez demandée.
 
-- **« Accès refusé » :** votre compte n'a pas le rôle d'administration. Utilisez « Utiliser un autre compte », ou demandez le rôle à l'autre auteur.
-- **Connexion de test :** sur un serveur de test seulement, un formulaire « Connexion de test » remplace Zitadel. Il demande l'auteur à incarner et un jeton. Un bandeau rouge « Connexion locale de test » reste alors affiché en haut de l'admin.
+- **« Accès refusé » :** votre compte n'a pas le rôle d'administration. Utilisez « Utiliser un autre compte », ou demandez le rôle à l'autre photographe.
+- **Connexion de test :** sur un serveur de test seulement, un formulaire « Connexion de test » remplace Zitadel. Il demande le photographe à incarner et un jeton. Un bandeau rouge « Connexion locale de test » reste alors affiché en haut de l'admin.
 
 ## Se repérer
 
-La **barre latérale**, à gauche, est toujours là :
+La **barre latérale**, à gauche, est toujours là. Elle est rangée par intention :
 
-| Entrée | Pour |
-|---|---|
-| **Rechercher, agir… ⌘K** | la palette de commandes : une photo, une série, une page ou une action, au clavier |
-| **Aujourd’hui** | ce qui reste à faire et l’état du site d’un coup d’œil |
-| **Photothèque** | importer, voir, compléter, publier, ordonner, supprimer |
-| **Séries** | créer, renommer, ordonner les séries |
-| **Statistiques** | la fréquentation du site, mesurée de façon anonyme |
-| **Auteurs** | fiches des photographes, lien avec leur compte |
-| *liste des séries* | chaque série, avec sa vignette et son nombre de photos ; on peut y **déposer** des photos glissées depuis la photothèque |
-| **Instagram** | la file des photos à publier sur Instagram, et ses réglages |
-| **Filigrane & EXIF** | marquer les images, choisir les métadonnées |
-| **Apparence** | thème du site, logo, icône |
-| **Réglages** | nom du site, textes, photos de l’ouverture |
-| **Aide** | cette aide |
-| **Voir le site** | le site public, dans un nouvel onglet |
+| Groupe | Entrée | Pour |
+|---|---|---|
+| | **Rechercher, agir… ⌘K** | la palette de commandes : une photo, une série, une page ou une action, au clavier |
+| | **Aujourd’hui** | ce qui reste à faire et l’état du site d’un coup d’œil |
+| **Travailler** | **Photothèque** | importer, voir, compléter, publier, ordonner, supprimer |
+| | **Personnes** | les personnes photographiées : demandes, accords, refus (voir [Rencontres](rencontres)) |
+| **Publier** | **Site public** | nom du site, textes, photos de l’ouverture, carte du monde |
+| | **Séries** | créer, renommer, ordonner les séries ; sous l’entrée, *la liste des séries*, où l’on **dépose** des photos glissées depuis la photothèque |
+| | **Instagram** | la file des photos à publier sur Instagram, et ses réglages |
+| | **Statistiques** | la fréquentation du site, mesurée de façon anonyme |
+| **Sur le terrain** | **App, cartes, QR** | l’app Rencontre du téléphone, les cartes d’accord à imprimer, le QR des vêtements |
+| **Réglages** | **Photographes** | fiches des photographes, lettre des cartes, lien avec leur compte |
+| | **Apparence** | thème du site, logo, icône |
+| | **Filigrane & EXIF** | marquer les images, choisir les métadonnées |
+| | **Droits & confidentialité** | textes des droits d’utilisation, page de confidentialité |
+| | **Aide** | cette aide |
+| | **Voir le site** | le site public, dans un nouvel onglet |
+
+**Les mots de l’admin** : une **série** est un thème du site public (ce que voit le visiteur) ; une **sortie** est une journée de prise de vue d’un photographe (ses photos de ce jour-là et les personnes rencontrées) ; un **accord** (ou un **refus**) est ce qu’une personne photographiée a décidé, usage par usage ; la **carte d’accord** est le carton à faire signer ; la **carte du monde** est la page publique `/carte`.
+
+Les **états** se lisent sans la couleur : **✓** (rond) c’est bon, **▲** (triangle) à vérifier, **✕** (carré ou croix) bloqué ; la couleur (bleu, jaune, vermillon) ne fait que le souligner.
 
 En bas : votre nom, le bouton **soleil / lune** qui passe l’admin en **mode clair ou sombre**, et **Se déconnecter**. Sans choix de votre part, l’admin suit le réglage clair ou sombre de votre ordinateur ; votre choix est gardé pour les visites suivantes.
 

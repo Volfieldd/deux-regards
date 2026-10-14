@@ -1,6 +1,6 @@
 # Nicephos — wiki
 
-Nicephos, le site photo de Sébastien et Julien : une galerie publique et une administration réservée aux auteurs. Le nom affiché se change dans l'admin (**Réglages**) ou par `SITE_NAME`.
+Nicephos, le site photo de Sébastien et Julien : une galerie publique et une administration réservée aux auteurs. Le nom affiché se change dans l'admin (**Site public**) ou par `SITE_NAME`.
 
 ## Pour qui, quelle page
 
@@ -39,7 +39,7 @@ Nicephos, le site photo de Sébastien et Julien : une galerie publique et une ad
 - **Admin :**
   - photos (import, édition, publication, ordre), séries, auteurs, réglages, filigrane et EXIF, statistiques anonymes, publication sur Instagram (avec les likes relevés chaque jour) ;
   - **traductions** des textes proposées par un LibreTranslate local ;
-  - **Rencontres** : accords et refus des personnes photographiées, cartes numérotées à imprimer, QR pour les vêtements, **app installable sur l'iPhone** (signature au doigt), photo offerte par lien privé, export et effacement des données ;
+  - **Personnes** et **Sur le terrain** : accords et refus des personnes photographiées, cartes d'accord numérotées à imprimer, QR des vêtements, **app installable sur l'iPhone** (signature au doigt), photo offerte par lien privé, export et effacement des données ;
   - utilisable sur ordinateur et sur iPhone ;
   - accès par connexion OIDC (Zitadel) avec le rôle `admin`. L'application ne gère aucun mot de passe.
 - **Données personnelles :** chiffrées dans la base (`DATA_KEY`), durées de conservation automatiques, documents RGPD tenus à jour.

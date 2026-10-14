@@ -173,7 +173,7 @@ test('plusieurs photos : sur la carte (celles qui ont une ville), retirer, annul
 
 // ---------- page publique « Carte » ----------
 
-test('page Carte : introuvable tant qu’elle n’est pas publiée, aperçu pour les auteurs, réglage dans Réglages', async t => {
+test('page Carte : introuvable tant qu’elle n’est pas publiée, aperçu pour les photographes, réglage dans Site public', async t => {
   const ctx = await admin(t);
   assert.equal((await ctx.app.inject('/carte')).statusCode, 404);
   assert.doesNotMatch((await ctx.app.inject('/')).body, /href="\/carte"/);
@@ -181,14 +181,14 @@ test('page Carte : introuvable tant qu’elle n’est pas publiée, aperçu pour
   const preview = await ctx.as({ url: '/carte' });
   assert.equal(preview.statusCode, 200);
   assert.equal(preview.headers['x-robots-tag'], 'noindex');
-  assert.match(preview.body, /Aperçu réservé aux auteurs/);
+  assert.match(preview.body, /Aperçu réservé aux photographes/);
   assert.match(preview.body, /Aucune photo sur la carte : choisissez la ville/);
-  const settings = (await ctx.as({ url: '/admin/reglages' })).body;
+  const settings = (await ctx.as({ url: '/admin/site' })).body;
   assert.match(settings, /id="carte"/);
   assert.match(settings, /name="map_page">/);                                          // décochée par défaut
   assert.match(settings, /\(0 aujourd’hui\)/);
   assert.equal((await ctx.post('/admin/reglages', { map_page: 'on' })).statusCode, 303);
-  assert.match((await ctx.as({ url: '/admin/reglages' })).body, /name="map_page" checked/);
+  assert.match((await ctx.as({ url: '/admin/site' })).body, /name="map_page" checked/);
   assert.equal((await ctx.app.inject('/carte')).statusCode, 200);
   for (const url of ['/', '/a-propos', '/droits', '/en/droits', '/de/']) assert.match((await ctx.app.inject(url)).body, /href="(\/en|\/de)?\/carte">(Carte|Map|Karte)</, url);
   assert.match((await ctx.app.inject('/sitemap.xml')).body, /localhost:3000\/carte</);

@@ -56,7 +56,7 @@ test('proposition de traduction : texte envoyé au serveur local, réponse rendu
   for (const f of ['title', 'place', 'legend']) for (const l of ['en', 'de']) assert.match(fiche, new RegExp(`data-translate="${f}" data-to="${l}"`));
   assert.match((await ctx.as({ url: '/admin/series' })).body, /data-translate="name" data-to="de"/);
   assert.match((await ctx.as({ url: '/admin/auteurs' })).body, /data-translate="bio" data-to="en"/);
-  assert.match((await ctx.as({ url: '/admin/reglages' })).body, /data-translate="about" data-to="de"/);
+  assert.match((await ctx.as({ url: '/admin/site' })).body, /data-translate="about" data-to="de"/);
 
   const ok = await ctx.translate({ text: 'Six heures, le fleuve fume encore.', source: 'fr', target: 'de' });
   assert.equal(ok.statusCode, 200);

@@ -10,7 +10,7 @@ La **Photothèque** réunit l’import, la recherche et toutes les photos, dans 
 2. Sélectionnez vos photos. **C'est tout : l'envoi commence tout seul.**
 
 - Les fichiers qui ne passeront pas sont écartés **avant tout envoi**, avec la raison : « ✕ Ce n'est pas une image », « ✕ Trop lourde (90 Mo max.) », « ✕ Trop grande (120 Mpx max.) ». **✕** les retire de la liste.
-- **Auteur et série du lot :** en haut du panneau d'import (votre fiche est présélectionnée). Choisissez-les avant d'ajouter les photos si besoin ; sinon, changez-les photo par photo à l'étape 3.
+- **Photographe et série du lot :** en haut du panneau d'import (votre fiche est présélectionnée). Choisissez-les avant d'ajouter les photos si besoin ; sinon, changez-les photo par photo à l'étape 3.
 - Des photos ajoutées pendant l'envoi partent à leur tour.
 
 ### 2. Envoi et traitement
@@ -58,9 +58,9 @@ Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir pl
 ## La planche contact
 
 - **Pastilles** en haut : **Tout**, **Publiées**, **Brouillons**, **À finir** (brouillons et titres provisoires).
-- **Recherche** (titre, lieu, légende, adresse), **auteur**, **série** : la planche se met à jour aussitôt.
+- **Recherche** (titre, lieu, légende, adresse), **photographe**, **série** : la planche se met à jour aussitôt.
 - **Taille** : le curseur agrandit ou réduit les vignettes (gardé pour la prochaine fois).
-- **Planche / Liste** : la liste montre les photos en lignes, avec le numéro d’ordre, l’auteur, le lieu et le menu **⋯** (**Modifier la fiche**, **Publier** ou **Dépublier**, **Monter d’une place**, **Descendre d’une place**).
+- **Planche / Liste** : la liste montre les photos en lignes, avec le numéro d’ordre, le photographe, le lieu et le menu **⋯** (**Modifier la fiche**, **Publier** ou **Dépublier**, **Monter d’une place**, **Descendre d’une place**).
 - Au survol d’une vignette : son titre, sa série, sa date. Un clic sur le titre ouvre la fiche. Les brouillons portent la pastille **○ Brouillon**, les titres provisoires **Titre provisoire**.
 - **Sur téléphone :** touchez une vignette pour la choisir ; son titre apparaît, souligné : touchez-le pour ouvrir la fiche. Le panneau de la photo s’ouvre en bas de l’écran.
 
@@ -71,7 +71,7 @@ Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir pl
 Il change selon la sélection :
 
 - **Rien de sélectionné** : les chiffres de la photothèque et les raccourcis.
-- **Une photo** (un clic dessus) : en tête du panneau, le bouton **Ouvrir la fiche** ; puis l’image en grand, **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **auteur** et son **audience** sur 30 jours. Chaque champ s’enregistre quand vous le quittez (ou Entrée) ; le message en bas propose **Annuler**. **Ouvrir la fiche**, ou le lien **Fiche complète** en bas du panneau, mène à la fiche (filigrane, Instagram, preuve d’antériorité, suppression).
+- **Une photo** (un clic dessus) : en tête du panneau, le bouton **Ouvrir la fiche** ; puis l’image en grand, **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **photographe** et son **audience** sur 30 jours. Chaque champ s’enregistre quand vous le quittez (ou Entrée) ; le message en bas propose **Annuler**. **Ouvrir la fiche**, ou le lien **Fiche complète** en bas du panneau, mène à la fiche (filigrane, Instagram, preuve d’antériorité, suppression).
 - **Plusieurs photos** : voir ci-dessous.
 
 En bas, toujours : **Publier**, **Dépublier**, **Supprimer…**.
@@ -107,7 +107,7 @@ Si l’enregistrement échoue (session expirée…), l’ordre précédent revie
 |---|---|
 | **Titre** | obligatoire, 160 caractères au plus |
 | **Adresse** | la fin de l'URL : `/photo/<adresse>`. Vide : déduite du titre. Minuscules, chiffres et tirets ; elle doit être unique. La changer casse les anciens liens partagés (l'ouverture, elle, suit). |
-| **Série**, **Auteur** | listes |
+| **Série**, **Photographe** | listes |
 | **Lieu** | texte libre, 120 caractères |
 | **Date** | en langage courant : « mars 2024 », « 3/2024 », « 2/3/2024 » ou `2024-03` |
 | **Légende** | affichée sous la photo, 2000 caractères |
@@ -138,12 +138,12 @@ L'original, les images du site et la preuve d'antériorité sont effacés, et la
 
 **C'est irréversible depuis l'admin.** Téléchargez d'abord l'original et la preuve si vous voulez les garder. L'original reste par ailleurs dans les sauvegardes du serveur.
 
-## Ville et carte du site
+## Ville et carte du monde
 
-Chaque photo peut être rattachée à une **ville** : c’est ce qui la place sur la **carte du site** (page « Carte », désactivée par défaut : voir [Réglages](reglages)).
+Chaque photo peut être rattachée à une **ville** : c’est ce qui la place sur la **carte du monde** (page « Carte », désactivée par défaut : voir [Site public](reglages#carte-du-monde)).
 
 - **Champ Ville** (fiche de la photo, et panneau de la photothèque) : commencez à taper (« Ang… »), choisissez dans la liste (↑ ↓ puis Entrée, ou un clic). **Toutes les communes de France**, même les plus petites (« Ars-en-Ré », « Loix »), et ailleurs les localités de plus de 500 habitants ; les villes de plus de 30 000 habitants se trouvent aussi sous leur nom français (« Londres », « Venise », « Anvers »), et la liste les affiche sous leur nom local (« Venice, Italie »). Pour un lieu précis (« Baie de Monterey »), gardez le champ **Lieu** : il reste libre et c’est lui qui s’affiche sur le site.
 - **Proposée d’après le GPS** : si l’original contient la position de la prise de vue (téléphones, boîtiers récents), la ville la plus proche est remplie à l’import, avec la mention « Proposée d’après le GPS de la photo : vérifiez-la ». Les photos importées avant cette fonction reçoivent aussi leur proposition. Une ville choisie à la main n’est jamais remplacée.
 - **Seule la ville est gardée**, jamais la position exacte : une photo prise chez vous apparaîtra sur votre commune, pas sur votre maison.
-- **Afficher sur la carte** : case à cocher, **décochée par défaut**. Rien n’apparaît sur la carte sans votre accord. Il faut une ville ; effacer la ville retire la photo de la carte.
+- **Afficher sur la carte du monde** : case à cocher, **décochée par défaut**. Rien n’apparaît sur la carte sans votre accord. Il faut une ville ; effacer la ville retire la photo de la carte.
 - **Plusieurs photos** : sélectionnez-les dans la photothèque, puis **Sur la carte** ou **Retirer de la carte** (seules celles qui ont une ville sont concernées ; **Annuler** dans le message).

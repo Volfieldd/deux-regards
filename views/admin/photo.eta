@@ -16,21 +16,21 @@
     <label>Adresse <span class="mono">/photo/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ inv('slug') %>></label><% if (e.slug) { %><span class="err" id="err-slug"><%= e.slug %></span><% } %>
     <div class="row">
       <label>Série <select name="category_id"<%~ inv('category_id') %>><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select></label><% if (e.category_id) { %><span class="err" id="err-category_id"><%= e.category_id %></span><% } %>
-      <label>Auteur <select name="author_id"<%~ inv('author_id') %>><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === Number(v.author_id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label><% if (e.author_id) { %><span class="err" id="err-author_id"><%= e.author_id %></span><% } %>
+      <label>Photographe <select name="author_id"<%~ inv('author_id') %>><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === Number(v.author_id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label><% if (e.author_id) { %><span class="err" id="err-author_id"><%= e.author_id %></span><% } %>
     </div>
     <div class="row">
-      <label>Lieu <input name="place" value="<%= v.place %>" maxlength="120"></label>
+      <label>Lieu affiché <span class="mono">texte libre avec la photo : « Nantes, quai de la Fosse »</span><input name="place" value="<%= v.place %>" maxlength="120"></label>
       <label>Date <input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="AAAA-MM ou AAAA-MM-JJ" inputmode="numeric"<%~ inv('taken_on') %>></label><% if (e.taken_on) { %><span class="err" id="err-taken_on"><%= e.taken_on %></span><% } %>
     </div>
     <div class="city-field" data-city>
-      <label for="city_label">Ville <span class="mono">pour la carte du site · toutes les communes de France, plus de 500 habitants ailleurs</span></label>
+      <label for="city_label">Ville <span class="mono">pour la carte du monde · toutes les communes de France, plus de 500 habitants ailleurs</span></label>
       <input id="city_label" name="city_label" value="<%= v.city_label || '' %>" maxlength="120" autocomplete="off" placeholder="Commencez à taper : Angers, Lisbonne…" data-city-input<%~ inv('city') %>>
       <input type="hidden" name="city_id" value="<%= v.city_id || '' %>" data-city-id>
 <% if (e.city) { %>      <span class="err" id="err-city"><%= e.city %></span>
 <% } else if (it.photo.city_source === 'gps' && v.city_label) { %>      <span class="cellnote">Proposée d’après le GPS de la photo : vérifiez-la. Seule la ville est gardée, jamais la position exacte.</span>
 <% } %>      <span class="cellnote">Villes : <a href="https://www.geonames.org" target="_blank" rel="noopener">GeoNames</a>, licence CC BY 4.0.</span>
     </div>
-    <label class="inline"><input type="checkbox" name="on_map"<%~ Number(v.on_map) ? ' checked' : '' %><%~ inv('on_map') %>> Afficher sur la carte du site</label><% if (e.on_map) { %><span class="err" id="err-on_map"><%= e.on_map %></span><% } %>
+    <label class="inline"><input type="checkbox" name="on_map"<%~ Number(v.on_map) ? ' checked' : '' %><%~ inv('on_map') %>> Afficher sur la carte du monde</label><% if (e.on_map) { %><span class="err" id="err-on_map"><%= e.on_map %></span><% } %>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'place', label: 'Lieu', max: 120 }) %>
     <label>Légende <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'legend', label: 'Légende', max: 2000, rows: 3 }) %>
@@ -51,10 +51,10 @@
 </div>
 <% if (it.encounters && it.encounters.length) { %>
 <section class="panel" id="rencontres" aria-labelledby="enc-title">
-  <h2 id="enc-title">Personnes rencontrées <span class="mono">accords de la session et photos liées</span></h2>
+  <h2 id="enc-title">Personnes rencontrées <span class="mono">accords de la sortie et photos liées</span></h2>
   <p class="hint">Les personnes rencontrées par <%= it.photo.author || 'le photographe' %> le jour de cette photo (date EXIF), et celles liées à la photo. Vérifiez que celles qui y apparaissent ont accepté l’usage prévu.</p>
   <ul class="rank plain">
-<% it.encounters.forEach(r => { %>    <li><span class="t"><span class="enc-who"><% if (r.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= r.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } %><a href="/admin/rencontres/<%= r.id %>">Rencontre <%= r.ref || 'sans carte' %><%= r.name ? ` · ${r.name}` : '' %></a> <span class="mono"><%= r.via === 'session' ? 'même session' : 'liée à la photo' %></span></span></span>
+<% it.encounters.forEach(r => { %>    <li><span class="t"><span class="enc-who"><% if (r.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= r.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } %><a href="/admin/rencontres/<%= r.id %>">Rencontre <%= r.ref || 'sans carte' %><%= r.name ? ` · ${r.name}` : '' %></a> <span class="mono"><%= r.via === 'session' ? 'même sortie' : 'liée à la photo' %></span></span></span>
       <% if (r.via === 'session') { %><form class="enc-absent" method="post" action="/admin/rencontres/<%= r.id %>/session/<%= it.photo.id %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="exclure" value="1"><input type="hidden" name="depuis" value="photo"><button class="btn ghost" type="submit">Pas sur cette photo</button></form><% } %>
       <% if (r.refused && r.via === 'lien') { %><span class="enc-tag no">Refuse la publication : la photo ne peut pas être publiée</span><% } else if (r.refused) { %><span class="enc-tag warn">A refusé : si elle est sur cette photo, liez-la au refus (fiche de la rencontre)</span><% } else if (r.consent) { %><span class="enc-tag ok">Accord <%= r.consent_source !== 'en_ligne' ? 'signé' : 'en ligne' %> : <%= ['site', 'instagram', 'print', 'name'].filter(s => r.consent[s]).map(s => ({ site: 'site', instagram: 'Instagram', print: 'expositions et tirages', name: 'avec son prénom' })[s]).join(', ') %></span><% } else { %><span class="enc-tag">Ni accord ni refus pour l’instant</span><% } %></li>
 <% }) %>  </ul>

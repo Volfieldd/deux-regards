@@ -62,7 +62,7 @@ test('avec DATA_KEY : demandes et rencontres chiffrées dans la base, en clair d
   // Export : déchiffré pour la personne.
   assert.match((await ctx.app.inject({ url: `/admin/rencontres/${raw.id}/export.zip`, cookies })).rawPayload.toString('utf8'), /"email": "alice@exemple\.fr"/);
   // Réglages et page Confidentialité l'annoncent.
-  assert.match((await ctx.app.inject({ url: '/admin/reglages', cookies })).body, /Chiffrement des données personnelles dans la base<\/strong>[^<]*: actif/);
+  assert.match((await ctx.app.inject({ url: '/admin/droits', cookies })).body, /Chiffrement des données personnelles dans la base<\/strong>[^<]*: actif/);
   assert.match((await ctx.app.inject('/confidentialite')).body, /chiffrés dans notre base, avec une clé conservée à part/);
   // Données entrées avant la clé : chiffrées au démarrage suivant.
   ctx.db.prepare("INSERT INTO encounters (ref, email, name, created_at, updated_at) VALUES ('S-0001', 'ancien@exemple.fr', 'Ancien', 1, 1)").run();
@@ -82,6 +82,6 @@ test('sans DATA_KEY : rien n’est chiffré, et Réglages le signale', async t =
   await ctx.app.inject({ method: 'POST', url: '/bonjour', payload: { ref: 'J-0001', wants_photo: 'on', email: 'z@exemple.fr' } });
   assert.equal(ctx.db.prepare("SELECT email FROM encounters WHERE ref = 'J-0001'").pluck().get(), 'z@exemple.fr');
   const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', payload: { token: TOKEN, author: 'julien', next: '/admin' } });
-  assert.match((await ctx.app.inject({ url: '/admin/reglages', cookies: cookiesOf(res) })).body, /: inactif\. Ajoutez DATA_KEY/);
+  assert.match((await ctx.app.inject({ url: '/admin/droits', cookies: cookiesOf(res) })).body, /: inactif\. Ajoutez DATA_KEY/);
   assert.doesNotMatch((await ctx.app.inject('/confidentialite')).body, /chiffrés dans notre base/);
 });

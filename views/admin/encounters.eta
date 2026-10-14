@@ -3,10 +3,10 @@
      : e.consent ? `<span class="enc-tag ok">Accord ${e.consent_source !== 'en_ligne' ? 'signé' : 'en ligne'} : ${it.SCOPES.filter(s => e.consent[s]).map(s => it.SCOPE_LABELS[s]).join(', ')}</span>` : ''; %>
 <div class="toolbar">
   <div>
-    <h1>Rencontres</h1>
+    <h1>Personnes photographiées</h1>
     <p class="sub">Les personnes photographiées dans la rue : demandes reçues par la page <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> (QR des cartes) et accords signés sur les cartes.</p>
   </div>
-  <span class="toolbar-actions"><a class="btn" href="/admin/rencontre">Nouvelle rencontre</a> <a class="btn ghost" href="/admin/rencontres/cartes">Cartes à imprimer</a></span>
+  <span class="toolbar-actions"><a class="btn" href="/admin/rencontre">Nouvelle rencontre</a> <a class="btn ghost" href="/admin/terrain">Sur le terrain</a></span>
 </div>
 <nav class="chips" aria-label="Filtrer les rencontres">
   <a href="/admin/rencontres"<%~ !it.status ? ' aria-current="true"' : '' %>>Toutes</a>

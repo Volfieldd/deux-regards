@@ -15,7 +15,7 @@
   <form method="post" action="/admin/photos/import" enctype="multipart/form-data" data-import>
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
     <div class="defaults" data-defaults>
-      <label class="inline">Auteur
+      <label class="inline">Photographe
         <select name="author_id"><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === it.defaultAuthor ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
       </label>
       <label class="inline">Série

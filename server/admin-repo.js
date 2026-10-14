@@ -394,7 +394,8 @@ export function createAdminRepo(db) {
         q.setSetting.run('exif', JSON.stringify(exif));
       })();
     },
-    saveSettings(body) {
+    // part : « site » ou « droits » n'enregistre que les champs de cette page ; absent, tous.
+    saveSettings(body, part = null) {
       const published = new Set(db.prepare("SELECT slug FROM photos WHERE status = 'published'").pluck().all());
       let hero = [...new Set([].concat(body.hero || []))].filter(s => published.has(s));
       // Boutons ← → ✕ de l'ouverture (sans JavaScript) : « left:slug », « right:slug », « remove:slug ».
@@ -419,7 +420,9 @@ export function createAdminRepo(db) {
         map_page: body.map_page === 'on',
         hero,
       };
-      db.transaction(() => { for (const [k, v] of Object.entries(values)) q.setSetting.run(k, JSON.stringify(v)); })();
+      const DROITS = /^(rights_|privacy_)/;
+      const keep = k => !part || (part === 'droits' ? DROITS.test(k) : !DROITS.test(k));
+      db.transaction(() => { for (const [k, v] of Object.entries(values)) if (keep(k)) q.setSetting.run(k, JSON.stringify(v)); })();
     },
   };
 }

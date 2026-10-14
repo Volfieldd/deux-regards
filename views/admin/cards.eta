@@ -1,7 +1,7 @@
 <% layout('./layout') %>
 <% const v = it.values || {}, e = it.errors || {}; %>
-<p class="mono"><a class="more eyebrow" href="/admin/rencontres">← Rencontres</a></p>
-<h1>Cartes à imprimer</h1>
+<p class="mono"><a class="more eyebrow" href="/admin/terrain">← Sur le terrain</a></p>
+<h1>Cartes d’accord</h1>
 <p class="sub">Des paires de cartes au format carte de visite (85 × 55 mm) : à gauche la carte <strong>« pour nous »</strong> (l’accord, signé, que vous gardez), à droite la carte <strong>« pour eux »</strong> (le merci, la référence et le QR vers <code>/bonjour</code>). Cinq paires par feuille A4, d’un seul côté : rien à aligner au recto et au verso.</p>
 <form class="panel form" method="post" action="/admin/rencontres/cartes">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">

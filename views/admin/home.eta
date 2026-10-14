@@ -46,7 +46,7 @@
     <section class="panel" aria-labelledby="site-title">
       <h2 id="site-title">Le site, en ce moment</h2>
       <div class="filmstrip"><% it.hero.forEach(p => { %><%~ it.picture(p, { sizes: '140px', alt: '' }) %><% }) %></div>
-      <p class="hint">Ouverture : <%= it.hero.length %> photo<%= it.hero.length > 1 ? 's' : '' %><%= it.heroChosen ? ', dans l’ordre choisi' : ' (les premières de la galerie)' %> · thème <%= it.themeLabel || '—' %> · <a class="more" href="/admin/reglages#ouverture">modifier</a></p>
+      <p class="hint">Ouverture : <%= it.hero.length %> photo<%= it.hero.length > 1 ? 's' : '' %><%= it.heroChosen ? ', dans l’ordre choisi' : ' (les premières de la galerie)' %> · thème <%= it.themeLabel || '—' %> · <a class="more" href="/admin/site#ouverture">modifier</a></p>
     </section>
 
     <section class="panel" aria-label="Chiffres">
@@ -103,7 +103,7 @@
       Ce compte est lié à l’auteur <strong><%= it.me.name %></strong> : vos imports lui sont attribués par défaut.</p>
 <% } else { %>
       Ce compte n’est lié à aucun auteur. Pour qu’il le soit, copiez son identifiant dans la fiche de l’auteur :</p>
-      <p><code><%= it.session.sub %></code> · <a class="more" href="/admin/auteurs">Auteurs</a></p>
+      <p><code><%= it.session.sub %></code> · <a class="more" href="/admin/auteurs">Photographes</a></p>
 <% } %>
     </section>
   </div>

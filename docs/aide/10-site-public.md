@@ -50,8 +50,8 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
 ## Autres pages
 
 - **À propos :** logo complet, accroche, texte, biographies des auteurs.
-- **Droits d'utilisation :** conditions, contact et information sur la mesure d'audience, en trois langues : `/droits` (français), `/en/droits` (anglais), `/de/droits` (allemand). Le sélecteur de langue du menu passe de l'une à l'autre (les anciennes adresses `/droits/en` et `/droits/de` mènent aux nouvelles). Les textes se règlent dans [Réglages](reglages).
-- **Carte** (si vous l'avez publiée dans les [Réglages](reglages)) : une mappemonde aux couleurs du thème, avec la vignette ronde d'une photo sur chaque ville et, en pastille, le nombre de photos de cette ville. Les villes trop proches pour être distinguées se regroupent (nombre cumulé) ; un clic sur le groupe agrandit la carte jusqu'à les séparer. Sous la carte, la liste des lieux avec leurs photos ; un clic sur une vignette de la carte y mène.
+- **Droits d'utilisation :** conditions, contact et information sur la mesure d'audience, en trois langues : `/droits` (français), `/en/droits` (anglais), `/de/droits` (allemand). Le sélecteur de langue du menu passe de l'une à l'autre (les anciennes adresses `/droits/en` et `/droits/de` mènent aux nouvelles). Les textes se règlent dans [Droits & confidentialité](reglages#droits-et-confidentialité).
+- **Carte** (si vous l'avez publiée dans [Site public](reglages#carte-du-monde)) : une mappemonde aux couleurs du thème, avec la vignette ronde d'une photo sur chaque ville et, en pastille, le nombre de photos de cette ville. Les villes trop proches pour être distinguées se regroupent (nombre cumulé) ; un clic sur le groupe agrandit la carte jusqu'à les séparer. Sous la carte, la liste des lieux avec leurs photos ; un clic sur une vignette de la carte y mène.
 
   | Geste | Effet |
   |---|---|
@@ -60,8 +60,8 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
   | glisser (carte agrandie) | se déplacer |
 
   En zoomant, le fond devient plus détaillé (côtes, frontières, petites îles) : seule la zone affichée est chargée. La molette seule et le glissé vertical sur la carte au monde entier font défiler la page, comme ailleurs. Sans JavaScript, la carte est fixe et la liste des lieux reste complète.
-- **« Je vous ai photographié »** (`/bonjour`) : la page du QR des cartes de rencontre et des vêtements (`/bonjour/J` : avec le nom du photographe), sans lien dans le menu (voir [Rencontres](rencontres)).
-- **Confidentialité** (`/confidentialite`, en trois langues, lien en pied de page) : qui est responsable, ce que le site collecte et pourquoi, combien de temps, qui le reçoit, et comment exercer ses droits (voir [Réglages](reglages)).
+- **« Je vous ai photographié »** (`/bonjour`) : la page du QR des cartes d’accord et des vêtements (`/bonjour/J` : avec le nom du photographe), sans lien dans le menu (voir [Rencontres](rencontres)).
+- **Confidentialité** (`/confidentialite`, en trois langues, lien en pied de page) : qui est responsable, ce que le site collecte et pourquoi, combien de temps, qui le reçoit, et comment exercer ses droits (voir [Droits & confidentialité](reglages#droits-et-confidentialité)).
 - **Page introuvable :** pour une adresse inconnue ou une photo dépubliée.
 
 ## Toujours

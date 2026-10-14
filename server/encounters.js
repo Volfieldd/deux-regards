@@ -276,6 +276,11 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     const used = db.prepare("SELECT ref FROM encounters WHERE ref LIKE ? || '-%'").pluck().all(prefix).map(r => Number(r.split('-')[1]) || 0);
     return Math.max(Number(printed()[prefix]) || 0, ...used, 0) + 1;
   }
+  // Cartes numérotées imprimées mais pas encore utilisées (après la dernière rencontre de cette lettre).
+  function cardsLeft(prefix) {
+    const used = db.prepare("SELECT ref FROM encounters WHERE ref LIKE ? || '-%'").pluck().all(prefix).map(r => Number(r.split('-')[1]) || 0);
+    return Math.max(0, (Number(printed()[prefix]) || 0) - Math.max(0, ...used));
+  }
   function reserve(prefix, last) {
     const p = printed();
     p[prefix] = Math.max(Number(p[prefix]) || 0, last);
@@ -433,7 +438,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
 
   return {
     instagramBlock, onChange: fn => listeners.push(fn),
-    createShare, shares, share, countShare, revokeShare, photographer, nextNumber, reserve, markMailed,
+    createShare, shares, share, countShare, revokeShare, photographer, nextNumber, reserve, cardsLeft, markMailed,
     saveApp: async (...args) => { const r = await saveApp(...args); changed(); return r; }, exportData, erase, rightsDone,
     portraitJpeg: id => vault.openBuf(db.prepare('SELECT portrait_jpeg FROM encounters WHERE id = ?').pluck().get(id)) || null,
     signaturePng: id => vault.openBuf(db.prepare('SELECT signature_png FROM encounters WHERE id = ?').pluck().get(id)) || null,

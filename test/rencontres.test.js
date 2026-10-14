@@ -127,7 +127,7 @@ test('admin : liste, fiche, photos liées ; un refus empêche toute publication 
   assert.equal((await c.post(`/admin/rencontres/${id}/photos`, { photo: [String(quai.id), String(deux.id)] })).statusCode, 303);
   const detail = (await c.as({ url: `/admin/rencontres/${id}` })).body;
   assert.match(detail, /Photos liées/);
-  assert.match(detail, /Photos de la session/);
+  assert.match(detail, /Photos de la sortie/);
   assert.match(detail, /mailto:alice@exemple\.fr\?subject=Votre%20photo%20\(J-0142\)/);
   assert.match((await c.as({ url: `/admin/photos/${quai.id}` })).body, /Ni accord ni refus pour l’instant/);
   // Refus : la fiche ne publie plus, l'action groupée non plus.
@@ -191,7 +191,7 @@ test('accord par session : les photos du photographe ce jour-là sont couvertes,
   // La fiche de chaque photo du jour montre l'accord ; pas celle de la veille.
   const fiche = (await c.as({ url: `/admin/photos/${ids[0]}` })).body;
   assert.match(fiche, /Personnes rencontrées/);
-  assert.match(fiche, /Rencontre J-0200 · Lou<\/a> <span class="mono">même session<\/span>/);
+  assert.match(fiche, /Rencontre J-0200 · Lou<\/a> <span class="mono">même sortie<\/span>/);
   assert.match(fiche, /class="enc-face"/);
   assert.doesNotMatch((await c.as({ url: `/admin/photos/${ids[2]}` })).body, /J-0200/);
   // Exclure une photo du jour : elle n'est plus couverte.

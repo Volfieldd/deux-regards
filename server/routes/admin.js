@@ -645,12 +645,12 @@ export default async function adminRoutes(app) {
           const refused = body.action === 'publish' ? ids.filter(id => repo.refusalOf(id)) : [];
           const before = repo.setStatuses(each(body.action === 'publish' ? 'published' : 'draft'));
           queued(before);
-          if (refused.length === n) return ko(422, `${n > 1 ? 'Ces photos ne peuvent pas être publiées' : 'Cette photo ne peut pas être publiée'} : la personne photographiée refuse la publication (voir Rencontres).`);
+          if (refused.length === n) return ko(422, `${n > 1 ? 'Ces photos ne peuvent pas être publiées' : 'Cette photo ne peut pas être publiée'} : la personne photographiée refuse la publication (voir Personnes).`);
           const verb = body.action === 'publish' ? 'publiée' : 'repassée en brouillon';
           // Publication en un clic : un titre provisoire (nom du fichier) est rappelé dans le message.
           const prov = body.action === 'publish' ? ids.filter(id => repo.photoView(id)?.provisional).length : 0;
           const note = prov ? ` ${prov === n ? (n > 1 ? 'Elles gardent' : 'Elle garde') : `${prov} garde${prov > 1 ? 'nt' : ''}`} le nom du fichier comme titre : corrigez-le dans la photothèque.` : '';
-          const blocked = refused.length ? ` ${refused.length} photo${refused.length > 1 ? 's restent' : ' reste'} en brouillon : la personne photographiée refuse la publication (voir Rencontres).` : '';
+          const blocked = refused.length ? ` ${refused.length} photo${refused.length > 1 ? 's restent' : ' reste'} en brouillon : la personne photographiée refuse la publication (voir Personnes).` : '';
           const m = n - refused.length;
           return ok(`${m} photo${m > 1 ? 's' : ''} ${m > 1 ? verb.replace('publiée', 'publiées').replace('repassée', 'repassées') : verb}.${note}${blocked}`, { undo: { action: 'statuses', map: before } });
         }
@@ -917,7 +917,7 @@ export default async function adminRoutes(app) {
 
   // ---------- auteurs ----------
   const authorsPage = (request, reply, extra = {}) => render(request, reply, 'authors', {
-    title: 'Auteurs', authors: repo.authors(), errors: {}, values: {}, ...extra,
+    title: 'Photographes', authors: repo.authors(), errors: {}, values: {}, ...extra,
   });
   app.get('/admin/auteurs', async (request, reply) => authorsPage(request, reply));
 
@@ -1174,18 +1174,25 @@ export default async function adminRoutes(app) {
   // ---------- réglages ----------
   const mapCounts = app.db.prepare("SELECT COUNT(*) AS mapCount, COUNT(DISTINCT city_id) AS mapCities FROM photos WHERE status = 'published' AND on_map = 1 AND city_id IS NOT NULL");
   const defaultsNow = () => rightsDefaults(repo.authors().map(a => a.name), app.siteName());
-  app.get('/admin/reglages', async (request, reply) => render(request, reply, 'settings', {
-    heroMax: 8,
-    title: 'Réglages', settings: repo.settings(), published: repo.photos({ status: 'published' }), defaultName: app.config.siteName,
+  // Deux pages, un seul enregistrement : « Site public » (textes, ouverture, carte du monde) et « Droits &
+  // confidentialité ». Chaque formulaire n'enregistre que ses propres champs (part).
+  const settingsPage = (request, reply, part) => render(request, reply, 'settings', {
+    heroMax: 8, part, section: part,
+    title: part === 'site' ? 'Site public' : 'Droits & confidentialité', settings: repo.settings(), published: repo.photos({ status: 'published' }), defaultName: app.config.siteName,
     rights: LANGS.map(l => ({ lang: l, ...RIGHTS[l] })), rightsDefaults: defaultsNow(),
     ...mapCounts.get(), encrypted: app.encounters.encrypted,
-  }));
+  });
+  app.get('/admin/site', async (request, reply) => settingsPage(request, reply, 'site'));
+  app.get('/admin/droits', async (request, reply) => settingsPage(request, reply, 'droits'));
+  // Ancienne adresse : les ancres de la page Réglages mènent à la bonne page.
+  app.get('/admin/reglages', async (request, reply) => reply.redirect('/admin/site', 301));
 
   app.post('/admin/reglages', write, async (request, reply) => {
-    repo.saveSettings(withoutDefaults(request.body || {}, defaultsNow()));
+    const part = ['site', 'droits'].includes(request.body?.part) ? request.body.part : null;
+    repo.saveSettings(withoutDefaults(request.body || {}, defaultsNow()), part);
     app.variants.schedule();            // {site} peut figurer dans le filigrane
-    if (request.body?.hero_op || request.body?.hero_save) return done(reply, '/admin/reglages#ouverture', 'Ordre de l’ouverture enregistré.');
-    return done(reply, '/admin/reglages', 'Réglages enregistrés.');
+    if (request.body?.hero_op || request.body?.hero_save) return done(reply, '/admin/site#ouverture', 'Ordre de l’ouverture enregistré.');
+    return done(reply, part === 'droits' ? '/admin/droits' : '/admin/site', 'Réglages enregistrés.');
   });
 }
 

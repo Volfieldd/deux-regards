@@ -238,13 +238,13 @@ test('ouverture : ordre choisi, déplacer et retirer sans JavaScript, 8 au plus'
   await ctx.post('/admin/reglages', { hero: [slugs[3], slugs[0], slugs[5]] });
   assert.deepEqual(hero(), [slugs[3], slugs[0], slugs[5]]);                      // l'ordre donné, pas celui de la galerie
   const left = await ctx.post('/admin/reglages', { hero: hero(), hero_op: `left:${slugs[0]}` });
-  assert.equal(left.headers.location, '/admin/reglages#ouverture');
+  assert.equal(left.headers.location, '/admin/site#ouverture');
   assert.deepEqual(hero(), [slugs[0], slugs[3], slugs[5]]);
   await ctx.post('/admin/reglages', { hero: hero(), hero_op: `remove:${slugs[3]}` });
   assert.deepEqual(hero(), [slugs[0], slugs[5]]);
   await ctx.post('/admin/reglages', { hero: slugs });
   assert.equal(hero().length, 8);
-  const page = (await ctx.as({ url: '/admin/reglages' })).body;
+  const page = (await ctx.as({ url: '/admin/site' })).body;
   assert.match(page, /8 \/ 8 choisies/);
   assert.match(page, /Le diaporama est complet/);
   // Le site public suit cet ordre.

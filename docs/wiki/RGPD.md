@@ -2,7 +2,7 @@
 
 Les documents à garder pour montrer que le site respecte le RGPD. Ils décrivent ce que le code fait réellement ; la page publique [`/confidentialite`](https://www.nicephos.art/confidentialite) en est la version pour les visiteurs. **À relire et dater ensemble une fois par an**, et à chaque nouvelle fonction qui touche des données personnelles.
 
-Responsables conjoints : **Sébastien et Julien**, photographes de Nicephos. Contact : **info@nicephos.art** (réglable dans Réglages → Confidentialité).
+Responsables conjoints : **Sébastien et Julien**, photographes de Nicephos. Contact : **info@nicephos.art** (réglable dans Droits & confidentialité).
 
 > Ce ne sont pas des conseils juridiques : pour une exposition, une vente de tirages ou un litige, faites relire par un avocat. La CNIL publie des modèles et des guides (www.cnil.fr) qui ont servi de trame.
 
@@ -11,7 +11,7 @@ Responsables conjoints : **Sébastien et Julien**, photographes de Nicephos. Con
 | Traitement | Finalité | Personnes | Données | Base légale | Durée | Destinataires |
 |---|---|---|---|---|---|---|
 | **Photos de rue** | Création et diffusion artistiques (site, Instagram, expositions, tirages) | Personnes photographiées | Image (photo), date, ville | Liberté d'expression artistique (art. 85 RGPD, art. 80 loi Informatique et Libertés) ; consentement par usage pour la publication d'une personne reconnaissable | Tant que la photo est gardée ; supprimée des sauvegardes 90 jours après sa suppression | Nous deux ; visiteurs du site si publiée ; Meta si l'usage « Instagram » est accepté |
-| **Rencontres** (`/bonjour`, cartes, app sur le téléphone) | Gérer l'accord ou le refus de publication, envoyer la photo, répondre | Personnes photographiées (dont mineurs avec un parent) | Référence de carte, nom, e-mail, choix, messages, signature, photo de la personne (visage), position arrondie à ~100 m, majorité, nom du parent | Consentement (art. 6.1.a), retirable à tout moment ; l'accord couvre les photos de la session (le photographe, ce jour-là) | Sans accord ni refus : 12 mois ; photo de la personne : avec l'accord (sans accord : 6 mois) ; accord ou refus : tant qu'une photo liée existe, puis 5 ans | Nous deux ; fournisseur de messagerie si e-mail envoyé |
+| **Rencontres** (`/bonjour`, cartes, app sur le téléphone) | Gérer l'accord ou le refus de publication, envoyer la photo, répondre | Personnes photographiées (dont mineurs avec un parent) | Référence de carte, nom, e-mail, choix, messages, signature, photo de la personne (visage), position arrondie à ~100 m, majorité, nom du parent | Consentement (art. 6.1.a), retirable à tout moment ; l'accord couvre les photos de la sortie (le photographe, ce jour-là) | Sans accord ni refus : 12 mois ; photo de la personne : avec l'accord (sans accord : 6 mois) ; accord ou refus : tant qu'une photo liée existe, puis 5 ans | Nous deux ; fournisseur de messagerie si e-mail envoyé |
 | **Photo offerte** | Remettre sa photo à la personne | Personnes photographiées | Lien privé, compteurs de visites | Consentement (demande de la personne) | 30 jours, effacé un mois après | Nous deux |
 | **Droits des personnes** | Répondre aux demandes d'accès, d'effacement, d'opposition | Personnes concernées | Demande, date, réponse | Obligation légale (art. 6.1.c) | Avec la rencontre | Nous deux |
 | **Mesure d'audience** | Connaître la fréquentation | Visiteurs | Compteurs anonymes (pages, pays, provenance), sans IP ni identifiant | Intérêt légitime ; exemption de consentement CNIL (mesure d'audience anonyme) | 25 mois | Nous deux |
@@ -30,7 +30,7 @@ Responsables conjoints : **Sébastien et Julien**, photographes de Nicephos. Con
 > **Sébastien** et **Julien** décident ensemble des finalités et des moyens des traitements du site Nicephos décrits au registre ci-dessus. Ils conviennent que :
 > 1. **Point de contact** des personnes : info@nicephos.art, relevé par les deux ; chacun peut répondre à toute demande.
 > 2. **Information** des personnes : la page `/confidentialite`, tenue à jour par les deux à chaque évolution du site.
-> 3. **Droits** (accès, rectification, effacement, opposition, retrait du consentement) : celui qui reçoit la demande la traite dans le mois, depuis l'admin (Rencontres → Droits de la personne), et en informe l'autre.
+> 3. **Droits** (accès, rectification, effacement, opposition, retrait du consentement) : celui qui reçoit la demande la traite dans le mois, depuis l'admin (Personnes → fiche → Droits de la personne), et en informe l'autre.
 > 4. **Ses propres photos** : chacun est responsable des photos qu'il prend, de l'accord des personnes photographiées et du respect de leur refus.
 > 5. **Sécurité** : chacun protège son compte (authentification à deux facteurs), ne partage ni la clé `DATA_KEY` ni les accès au serveur, et signale à l'autre tout incident sans délai.
 > 6. **Violation de données** : la procédure du point 4 ci-dessous s'applique ; la notification à la CNIL est faite par celui qui découvre l'incident, avec l'accord de l'autre si possible dans le délai.
@@ -69,7 +69,7 @@ Une analyse d'impact complète (AIPD) n'est pas obligatoire ici : petit volume, 
 ## 5. Ce qui reste à faire de votre côté
 
 - [ ] **`DATA_KEY`** dans le `.env` de la pile (`openssl rand -base64 32`), avec une copie dans un gestionnaire de mots de passe : perdue, les données chiffrées sont illisibles.
-- [ ] **Disques chiffrés** pour les données et les sauvegardes (guide Unraid, « Chiffrer les données »), puis cocher la case dans Réglages → Confidentialité.
+- [ ] **Disques chiffrés** pour les données et les sauvegardes (guide Unraid, « Chiffrer les données »), puis cocher la case dans Droits & confidentialité.
 - [ ] **Authentification à deux facteurs** dans Zitadel pour les deux comptes, puis cocher la case.
 - [ ] **Messagerie** : garder le bouton Mail, ou un fournisseur avec contrat de sous-traitance pour `SMTP_URL`.
 - [ ] **Signer l'accord** du point 2 et le garder.

@@ -35,7 +35,7 @@ test('réglages : contact et cases de sécurité ; l’app montre l’informatio
   const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', payload: { token: TOKEN, author: 'julien', next: '/admin' } });
   const cookies = cookiesOf(res);
   const csrf = ctx.db.prepare('SELECT csrf FROM sessions').pluck().get();
-  const page = (await ctx.app.inject({ url: '/admin/reglages', cookies })).body;
+  const page = (await ctx.app.inject({ url: '/admin/droits', cookies })).body;
   assert.match(page, /name="privacy_contact" value="info@nicephos\.art"/);
   await ctx.app.inject({ method: 'POST', url: '/admin/reglages', cookies, payload: { _csrf: csrf, privacy_contact: 'admin@nicephos.art', privacy_mfa: 'on' }, headers: { accept: 'text/html' } });
   const body = (await ctx.app.inject('/confidentialite')).body;

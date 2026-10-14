@@ -1441,7 +1441,7 @@ const activity = (() => {
   const selection = () => $$('input.chk[name=ids][form=bulk]:checked').length;
   const click = sel => () => $(sel)?.click();
   const go = href => () => { location.href = href; };
-  const PAGES = [['Aujourd’hui', '/admin'], ['Photothèque', '/admin/photos'], ['Photos à finir', '/admin/photos?statut=afinir'], ['Brouillons', '/admin/photos?statut=draft'], ['Séries', '/admin/series'], ['Auteurs', '/admin/auteurs'], ['Filigrane & EXIF', '/admin/images'], ['Apparence', '/admin/apparence'], ['Réglages', '/admin/reglages'], ['Photos de l’ouverture', '/admin/reglages#ouverture'], ['Aide', '/admin/aide']];
+  const PAGES = [['Aujourd’hui', '/admin'], ['Photothèque', '/admin/photos'], ['Photos à finir', '/admin/photos?statut=afinir'], ['Brouillons', '/admin/photos?statut=draft'], ['Personnes photographiées', '/admin/rencontres'], ['Nouvelle rencontre', '/admin/rencontre'], ['Séries', '/admin/series'], ['Site public', '/admin/site'], ['Photos de l’ouverture', '/admin/site#ouverture'], ['Carte du monde', '/admin/site#carte'], ['Instagram', '/admin/instagram'], ['Statistiques', '/admin/statistiques'], ['Sur le terrain', '/admin/terrain'], ['Cartes d’accord', '/admin/rencontres/cartes'], ['Photographes', '/admin/auteurs'], ['Apparence', '/admin/apparence'], ['Filigrane & EXIF', '/admin/images'], ['Droits & confidentialité', '/admin/droits'], ['Aide', '/admin/aide']];
   function actions() {
     const n = selection();
     const a = [];

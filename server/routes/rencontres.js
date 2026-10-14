@@ -3,6 +3,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import { EncounterError, SCOPES, SCOPE_LABELS } from '../encounters.js';
 import { sameToken } from '../auth.js';
+import { ABSOLUTE_TTL } from '../sessions.js';
 import { TEXTS, PER_SHEET, MAX_PAIRS, buildPairs, sheets } from '../cards.js';
 import { UI } from '../i18n.js';
 import QRCode from 'qrcode';
@@ -50,7 +51,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
 
   app.get('/admin/rencontres', async (request, reply) => {
     const status = Object.hasOwn(STATUS, request.query.statut) ? request.query.statut : undefined;
-    return page(request, reply, 'encounters', { title: 'Rencontres', list: enc.list({ status }), status, authors: repo.authors(), errors: {}, values: {} });
+    return page(request, reply, 'encounters', { title: 'Personnes photographiées', list: enc.list({ status }), status, authors: repo.authors(), errors: {}, values: {} });
   });
 
   function detail(request, reply, id, extra = {}) {
@@ -205,13 +206,30 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     return reply.type('image/png').send(await sharp(Buffer.from(svg), { density: model === 'qr' ? 600 : 300 }).png().toBuffer());
   });
 
+  // ---------- sur le terrain ----------
+  // Ce qui part dans la rue : l'app sur le téléphone, les cartes d'accord, le QR des vêtements (une seule
+  // composition, celle du dos avec le logo, à montrer telle quelle), et une liste de contrôle avant de partir.
+  app.get('/admin/terrain', async (request, reply) => {
+    const authors = repo.authors();
+    const mine = authorOf(request);
+    const chosen = authors.find(a => a.id === Number(request.query.photographe)) || mine || authors[0] || null;
+    const prefix = chosen ? prefixOf(chosen) : null;
+    const until = request.session.created_at ? request.session.created_at + ABSOLUTE_TTL : null;
+    return render(request, reply, 'terrain', {
+      title: 'Sur le terrain', authors, chosen, prefix,
+      next: prefix ? enc.nextNumber(prefix) : null, left: prefix ? enc.cardsLeft(prefix) : 0,
+      until: until ? new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', weekday: 'long', hour: '2-digit', minute: '2-digit' }).format(until) : null,
+      smtp: app.mailer.enabled, host: app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, ''),
+    });
+  });
+
   // ---------- cartes à imprimer ----------
   // Dernier numéro imprimé par lettre (réglage « cards_printed ») : la planche suivante continue la série.
   const prefixOf = a => a.card_prefix || a.slug.charAt(0).toUpperCase();
   const nextNumber = prefix => enc.nextNumber(prefix);
   function cardsPage(request, reply, extra = {}) {
     const authors = repo.authors().map(a => ({ ...a, prefix: prefixOf(a), next: nextNumber(prefixOf(a)) }));
-    return render(request, reply, 'cards', { title: 'Cartes à imprimer', authors, PER_SHEET, MAX_PAIRS, errors: {}, values: {}, ...extra });
+    return render(request, reply, 'cards', { title: 'Cartes d’accord', authors, PER_SHEET, MAX_PAIRS, errors: {}, values: {}, ...extra });
   }
   app.get('/admin/rencontres/cartes', async (request, reply) => cardsPage(request, reply));
   app.post('/admin/rencontres/cartes', write, async (request, reply) => {
@@ -279,7 +297,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     } catch (err) {
       if (!(err instanceof EncounterError)) throw err;
       if (id) return detail(request, reply.code(422), id, { errors: err.errors, values: form.body });
-      return page(request, reply.code(422), 'encounters', { title: 'Rencontres', list: enc.list(), authors: repo.authors(), errors: err.errors, values: form.body });
+      return page(request, reply.code(422), 'encounters', { title: 'Personnes photographiées', list: enc.list(), authors: repo.authors(), errors: err.errors, values: form.body });
     }
   }
   app.post('/admin/rencontres', async (request, reply) => saveCard(request, reply, null));
@@ -311,7 +329,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     enc.exclude(id, pid, out);
     // Depuis la fiche photo (« Pas sur cette photo ») : retour à la fiche.
     const back = request.body?.depuis === 'photo' ? `/admin/photos/${pid}#rencontres` : `/admin/rencontres/${id}#session`;
-    return done(reply, back, out ? 'Photo exclue de l’accord de cette session : la personne n’y figure pas.' : 'Photo de nouveau couverte par l’accord de cette session.');
+    return done(reply, back, out ? 'Photo exclue de l’accord de cette sortie : la personne n’y figure pas.' : 'Photo de nouveau couverte par l’accord de cette sortie.');
   });
 
   app.post('/admin/rencontres/:id/photos', write, async (request, reply) => {

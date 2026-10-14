@@ -24,7 +24,7 @@
 | Compléter le lot, sur téléphone | **Série, lieu ou date pour toutes les cochées…** | ouvre les champs de la barre |
 | Séries | poignée **⠿** puis **↑ ↓ ← →** | déplace la planche d’une place |
 | Séries → nouvelle série | **Entrée** / **Échap** | crée / efface la saisie |
-| Réglages → ouverture | **←** / **→** / **✕** | réordonne ou retire une photo du diaporama |
+| Site public → ouverture | **←** / **→** / **✕** | réordonne ou retire une photo du diaporama |
 | Menus ⋯, fenêtres, loupe, palette | **Échap** | les ferme |
 
 Tout fonctionne au clavier : chaque glisser-déposer a son équivalent en boutons ou en touches fléchées. Sur téléphone, la barre d’onglets du bas remplace la barre latérale (**Menu** l’ouvre).

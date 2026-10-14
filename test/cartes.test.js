@@ -110,7 +110,7 @@ test('QR générique d’un photographe : /bonjour/J, demande attribuée sans ca
   // Sans date ni lieu, la lettre ne suffit pas : il faut retrouver la photo.
   assert.equal((await c.app.inject({ method: 'POST', url: '/bonjour', payload: { photographer: 'J', wants_photo: 'on', email: 'eve@exemple.fr' } })).statusCode, 422);
   // Fichiers à imprimer, depuis la fiche de l'auteur.
-  const authors = (await c.as({ url: '/admin/auteurs' })).body;
+  const authors = (await c.as({ url: '/admin/terrain' })).body;
   assert.match(authors, new RegExp(`/admin/auteurs/${c.author('julien')}/qr/vertical-blanc\\.svg`));
   const svg = await c.as({ url: `/admin/auteurs/${c.author('julien')}/qr/vertical-noir.svg` });
   assert.equal(svg.headers['content-type'], 'image/svg+xml');
