@@ -34,7 +34,7 @@ export function fakeImageModel(vectors = new Map()) {
       if (src) src.forEach((x, i) => { v[i] = x; }); else v[(n++) % 512] = 1; let m = 0; for (const x of v) m += x * x; return v.map(x => x / Math.sqrt(m)); } };
 }
 
-export async function setup(t, { seeded = false, env, oidc, logger = false, proofOptions, instagramOptions = { manual: true }, faceOptions = { manual: true, detector: { detect: async () => [] } }, seriesOptions = { manual: true, model: fakeImageModel() }, mailTransport = null } = {}) {
+export async function setup(t, { seeded = false, env, oidc, logger = false, proofOptions, instagramOptions = { manual: true }, faceOptions = { manual: true, detector: { detect: async () => [] } }, seriesOptions = { manual: true, model: fakeImageModel() }, describeOptions = { manual: true, model: { describe: async () => 'A test photo.', unload: async () => {}, remove: async () => {} } }, mailTransport = null } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'site-photo-'));
   if (seeded) fs.cpSync(await seededTemplate(), dir, { recursive: true });
   const config = configFor(dir, env);
@@ -42,7 +42,7 @@ export async function setup(t, { seeded = false, env, oidc, logger = false, proo
   migrate(db);
   // Photos de démonstration : des paysages, examinés sans visage (ce que dirait la détection).
   if (seeded) db.prepare('UPDATE photos SET faces = 0, face_boxes = \'[]\' WHERE faces IS NULL').run();
-  const app = await buildApp({ config, db, logger, oidc, proofOptions, instagramOptions, faceOptions, seriesOptions, mailTransport });
+  const app = await buildApp({ config, db, logger, oidc, proofOptions, instagramOptions, faceOptions, seriesOptions, describeOptions, mailTransport });
   t.after(async () => {
     await app.close();
     db.close();

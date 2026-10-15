@@ -1149,3 +1149,7 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .kw-chip { font: inherit; font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px dashed var(--line2); background: transparent; color: var(--ink); cursor: pointer; }
 .kw-chip:hover, .kw-chip:focus-visible { border-style: solid; background: var(--s2); }
 .js .kw-plain { display: none; }
+/* Description suggérée (Florence-2) */
+.desc-sugg { border-left: 2px dashed var(--line2); padding: 2px 0 2px 12px; margin: -2px 0 8px; display: grid; gap: 4px; }
+.desc-sugg p { margin: 0; }
+.desc-sugg .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }

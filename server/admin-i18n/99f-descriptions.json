@@ -1,0 +1,122 @@
+{
+ "Décrire cette photo": {
+  "en": "Describe this photo",
+  "de": "Dieses Foto beschreiben"
+ },
+ "Décrire de nouveau": {
+  "en": "Describe again",
+  "de": "Erneut beschreiben"
+ },
+ "Description suggérée": {
+  "en": "Suggested description",
+  "de": "Vorgeschlagene Beschreibung"
+ },
+ "en anglais : aucun traducteur configuré": {
+  "en": "in English: no translator configured",
+  "de": "auf Englisch: kein Übersetzer eingerichtet"
+ },
+ "en cours de calcul…": {
+  "en": "being computed…",
+  "de": "wird berechnet…"
+ },
+ "Florence-2, sur ce serveur : une phrase factuelle, à relire et à réécrire à votre façon.": {
+  "en": "Florence-2, on this server: a factual sentence, to review and rewrite your way.",
+  "de": "Florence-2, auf diesem Server: ein sachlicher Satz, zum Prüfen und Umschreiben nach Ihrer Art."
+ },
+ "pas encore calculée": {
+  "en": "not computed yet",
+  "de": "noch nicht berechnet"
+ },
+ "Reprendre comme légende": {
+  "en": "Use as caption",
+  "de": "Als Bildunterschrift übernehmen"
+ },
+ "à": {
+  "en": "to",
+  "de": "bis"
+ },
+ "Allumé": {
+  "en": "On",
+  "de": "Ein"
+ },
+ "Allumer les descriptions": {
+  "en": "Turn on descriptions",
+  "de": "Beschreibungen einschalten"
+ },
+ "Décrire les photos": {
+  "en": "Describe the photos",
+  "de": "Fotos beschreiben"
+ },
+ "Dernier essai sans succès": {
+  "en": "Last attempt failed",
+  "de": "Letzter Versuch erfolglos"
+ },
+ "Description en cours": {
+  "en": "Describing",
+  "de": "Beschreibung läuft"
+ },
+ "{done} photos décrites sur {total}": {
+  "en": "{done} of {total} photos described",
+  "de": "{done} von {total} Fotos beschrieben"
+ },
+ "Éteindre et effacer le modèle": {
+  "en": "Turn off and delete the model",
+  "de": "Ausschalten und Modell löschen"
+ },
+ "Florence-2 {k} · ≈ {mb} Mo à télécharger · ≈ {ram} Go de mémoire pendant le calcul": {
+  "en": "Florence-2 {k} · ≈ {mb} MB to download · ≈ {ram} GB of memory while computing",
+  "de": "Florence-2 {k} · ≈ {mb} MB herunterzuladen · ≈ {ram} GB Speicher während der Berechnung"
+ },
+ "h": {
+  "en": "h",
+  "de": "Uhr"
+ },
+ "La nuit, de": {
+  "en": "At night, from",
+  "de": "Nachts, von"
+ },
+ "Léger": {
+  "en": "Light",
+  "de": "Leicht"
+ },
+ "Le modèle écrit en anglais ; la description est traduite en français et en allemand par le traducteur du site.": {
+  "en": "The model writes in English; the description is translated into French and German by the site’s translator.",
+  "de": "Das Modell schreibt auf Englisch; die Beschreibung wird vom Übersetzer der Website ins Französische und Deutsche übersetzt."
+ },
+ "Le modèle écrit en anglais. Sans traducteur configuré (TRANSLATE_URL), la description reste en anglais.": {
+  "en": "The model writes in English. Without a configured translator (TRANSLATE_URL), the description stays in English.",
+  "de": "Das Modell schreibt auf Englisch. Ohne eingerichteten Übersetzer (TRANSLATE_URL) bleibt die Beschreibung auf Englisch."
+ },
+ "Les photos sans description sont décrites pendant ces heures (heure de Paris), une à la fois, sur un seul cœur. Une photo demandée depuis sa fiche passe tout de suite.": {
+  "en": "Photos without a description are described during these hours (Paris time), one at a time, on a single core. A photo requested from its page goes first, right away.",
+  "de": "Fotos ohne Beschreibung werden in diesen Stunden beschrieben (Pariser Zeit), eines nach dem anderen, auf einem einzigen Kern. Ein auf seiner Seite angefordertes Foto kommt sofort an die Reihe."
+ },
+ "Modèle": {
+  "en": "Model",
+  "de": "Modell"
+ },
+ "Précis": {
+  "en": "Precise",
+  "de": "Genau"
+ },
+ "Une phrase courte et factuelle par photo (« un phare rouge sur une petite île »), proposée sur la fiche, sous la légende : à relire et à réécrire, jamais recopiée seule. Modèle libre Florence-2, sur ce serveur : aucune image n’en sort, et il ne nomme jamais les personnes.": {
+  "en": "A short, factual sentence per photo (“a red lighthouse on a small island”), suggested on the photo’s page, under the caption: to review and rewrite, never copied by itself. Free Florence-2 model, on this server: no image leaves it, and it never names people.",
+  "de": "Ein kurzer, sachlicher Satz pro Foto („ein roter Leuchtturm auf einer kleinen Insel“), auf der Seite des Fotos unter der Bildunterschrift vorgeschlagen: zum Prüfen und Umschreiben, nie von selbst übernommen. Freies Modell Florence-2, auf diesem Server: Kein Bild verlässt ihn, und es nennt nie Personen."
+ },
+ "Description demandée : elle arrive dans une minute environ.": {
+  "en": "Description requested: it arrives in about a minute.",
+  "de": "Beschreibung angefordert: Sie kommt in etwa einer Minute."
+ },
+ "Descriptions allumées : au premier calcul, le modèle se télécharge ; les photos sont décrites la nuit, de {from} h à {to} h.": {
+  "en": "Descriptions turned on: at the first computation, the model downloads; photos are described at night, from {from}:00 to {to}:00.",
+  "de": "Beschreibungen eingeschaltet: Bei der ersten Berechnung wird das Modell heruntergeladen; die Fotos werden nachts beschrieben, von {from} bis {to} Uhr."
+ },
+ "Descriptions éteintes : modèle effacé (les descriptions déjà faites restent).": {
+  "en": "Descriptions turned off: model deleted (existing descriptions remain).",
+  "de": "Beschreibungen ausgeschaltet: Modell gelöscht (vorhandene Beschreibungen bleiben)."
+ },
+ "Les descriptions suggérées sont éteintes (page Séries).": {
+  "en": "Suggested descriptions are turned off (Series page).",
+  "de": "Vorgeschlagene Beschreibungen sind ausgeschaltet (Seite Serien)."
+ }
+}

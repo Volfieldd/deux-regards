@@ -28,6 +28,7 @@ import { createMailer } from './mailer.js';
 import { createReminders } from './reminders.js';
 import { createTrips } from './trips.js';
 import { createKeywordSuggester } from './keywords-suggest.js';
+import { createDescriber, createFlorence } from './describe.js';
 import { createVault } from './vault.js';
 import { createInstagram } from './instagram.js';
 import { createTodo } from './todo.js';
@@ -98,7 +99,7 @@ function assetUrls(root, cache) {
   };
 }
 
-export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {}, faceOptions = {}, seriesOptions = {}, mailTransport = null }) {
+export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {}, faceOptions = {}, seriesOptions = {}, describeOptions = {}, mailTransport = null }) {
   const app = Fastify({ logger: loggerOptions(logger), trustProxy: config.trustProxy });
 
   app.decorate('config', config);
@@ -241,6 +242,13 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onClose', async () => clearInterval(reviewTimer));
   app.decorate('trips', createTrips({ db }));
   app.decorate('keywordSuggest', createKeywordSuggester({ db }));
+  // Descriptions suggérées (Florence-2, désactivées par défaut) : demandes depuis la fiche tout de suite, file de nuit
+  // vérifiée toutes les 10 minutes. describeOptions.model (tests) remplace le modèle ; manual : rien ne démarre seul.
+  app.decorate('describer', createDescriber({ db, storageDir: config.storageDir, translator: app.translator, log: app.log,
+    model: describeOptions.model || createFlorence({ dir: path.join(config.storageDir, 'models', 'florence'), log: app.log }) }));
+  let describeTimer = null;
+  if (!describeOptions.manual) app.addHook('onReady', async () => { describeTimer = setInterval(() => app.describer.run(), 10 * 60 * 1000); describeTimer.unref(); });
+  app.addHook('onClose', async () => clearInterval(describeTimer));
   app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
   // Relances par e-mail (demandes RGPD par quarts du délai, récapitulatifs) : toutes les heures.

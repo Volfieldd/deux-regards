@@ -2019,3 +2019,26 @@ document.addEventListener('click', e => {
   b.remove();
 });
 document.querySelectorAll('[data-kw-add]').forEach(b => { b.hidden = false; });
+
+// ----- description suggérée (fiche) : la reprendre comme légende ; suivre son calcul sans recharger -----
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-desc-use]');
+  if (!b) return;
+  const legend = b.closest('form')?.querySelector('textarea[name="legend"]');
+  if (!legend) return;
+  legend.value = b.dataset.descUse;
+  legend.dispatchEvent(new Event('input', { bubbles: true }));
+  legend.focus();
+});
+document.querySelectorAll('[data-desc-pending]').forEach(box => {
+  let n = 0;
+  const poll = async () => {
+    if (++n > 120) return;
+    try {
+      const d = await (await fetch(box.dataset.descUrl, { headers: { accept: 'application/json' } })).json();
+      if (!d.pending) { location.reload(); return; }
+    } catch { /* réseau : on réessaie */ }
+    setTimeout(poll, 5000);
+  };
+  setTimeout(poll, 4000);
+});
