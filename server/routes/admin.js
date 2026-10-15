@@ -546,6 +546,19 @@ export default async function adminRoutes(app) {
     return { ...s, spark: sparkline(s.days.map(d => d.views)) };
   };
 
+  // ---------- signalements des visiteurs ----------
+  app.get('/admin/signalements', async (request, reply) => render(request, reply, 'reports', {
+    title: request.t('Signalements des visiteurs'), reports: app.feedback.reports().map(r => withReady({ ...r, id: r.pid, reportId: r.id })),
+  }));
+  app.post('/admin/signalements/:id/traite', write, async (request, reply) => {
+    app.feedback.done(byId(request.params.id));
+    return done(reply, '/admin/signalements', request.t('Signalement marqué comme traité.'));
+  });
+  app.post('/admin/signalements/:id/supprimer', write, async (request, reply) => {
+    app.feedback.remove(byId(request.params.id));
+    return done(reply, '/admin/signalements', request.t('Signalement supprimé.'));
+  });
+
   app.get('/admin/statistiques', async (request, reply) => {
     const days = PERIODS[request.query.periode] ? Number(request.query.periode) : 30;
     const { from, to } = app.stats.range(days);

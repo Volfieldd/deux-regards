@@ -26,6 +26,7 @@ import { createInstagram } from './instagram.js';
 import { createTodo } from './todo.js';
 import { createOutings } from './outings.js';
 import { createPeople } from './people.js';
+import { createFeedback } from './feedback.js';
 import { createReadiness } from './readiness.js';
 import { createFaceDetector, createFaceService } from './faces.js';
 
@@ -154,15 +155,19 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Personnes : chaque rencontre a la sienne, un refus récent vaut pour toutes ses rencontres (voir server/people.js).
   // Premier abonné aux changements d'accord : la file Instagram, ensuite, voit déjà les refus étendus.
   app.decorate('people', createPeople({ db, encounters: app.encounters }));
+  // J'aime et signalements des visiteurs (voir server/feedback.js).
+  app.decorate('feedback', createFeedback({ db, vault: createVault(config.dataKey) }));
   app.encounters.onChange(() => app.people.sync());
   let purgeTimer = null;
   app.addHook('onReady', async () => {
     const sealed = app.encounters.sealExisting();
     if (sealed) app.log.info({ sealed }, 'rencontres : données en clair chiffrées');
     app.encounters.reindexEmails();
+    app.feedback.sealExisting();
     app.encounters.purge();
+    app.feedback.purge();
     app.people.sync();
-    purgeTimer = setInterval(() => { try { app.encounters.purge(); app.people.sync(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
+    purgeTimer = setInterval(() => { try { app.encounters.purge(); app.feedback.purge(); app.people.sync(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
     purgeTimer.unref();
   });
   app.addHook('onClose', async () => clearInterval(purgeTimer));
@@ -192,7 +197,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { setTimeout(() => app.outings.backfillAll(), 2000).unref(); });
   app.addHook('onClose', async () => { await app.outings.stop(); });
   // « Aujourd'hui » : ce qui demande votre attention (voir server/todo.js).
-  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness }));
+  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
 
   await setupAuth(app, oidc && { oidc });

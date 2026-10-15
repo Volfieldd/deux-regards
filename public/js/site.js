@@ -443,3 +443,27 @@ document.addEventListener('change', e => {
   if (t.name === 'scope_instagram' && t.checked) other.checked = true;
   if (t.name === 'scope_site' && !t.checked) other.checked = false;
 });
+
+// J'aime (page photo) : sans rechargement ; le navigateur retient ce qu'il a aimé (aucun cookie, aucun compte),
+// et le serveur ignore un second « j'aime » de la même adresse.
+document.querySelectorAll('[data-like]').forEach(form => {
+  const btn = form.querySelector('button');
+  const n = form.querySelector('[data-like-n]');
+  const key = `aime:${form.dataset.slug}`;
+  let liked = false;
+  try { liked = localStorage.getItem(key) === '1'; } catch { liked = false; }
+  const show = () => { btn.setAttribute('aria-pressed', String(liked)); btn.setAttribute('aria-label', liked ? form.dataset.unlikeLabel : form.dataset.likeLabel); };
+  show();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const undo = liked;
+    liked = !liked; show();
+    try {
+      const res = await fetch(form.action, { method: 'POST', headers: { accept: 'application/json', 'content-type': 'application/x-www-form-urlencoded' }, body: undo ? 'retirer=1' : '' });
+      if (!res.ok) throw new Error(String(res.status));
+      const r = await res.json();
+      n.textContent = r.label;
+      try { if (liked) localStorage.setItem(key, '1'); else localStorage.removeItem(key); } catch { /* stockage indisponible */ }
+    } catch { liked = undo; show(); }
+  });
+});

@@ -322,3 +322,15 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- j'aime et signaler (page photo) ---------- */
+.viewer .vact { display: flex; align-items: center; gap: 18px; margin-top: 14px; }
+.viewer .vact form { margin: 0; }
+.viewer .like { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 2px; background: none; border: 0; color: var(--dark-ink); cursor: pointer; font: inherit; }
+.viewer .like svg { transition: transform .15s ease; }
+.viewer .like[aria-pressed="true"] svg { fill: currentColor; }
+.viewer .like:active svg { transform: scale(1.15); }
+.viewer .like .mono { color: var(--dark-mute); font-size: 13px; }
+.viewer .report { color: var(--dark-mute); font-size: 13px; border-bottom: 1px solid var(--dark-rule); }
+.viewer .report:hover { color: var(--dark-ink); }
+@media (prefers-reduced-motion: reduce) { .viewer .like svg { transition: none; } }

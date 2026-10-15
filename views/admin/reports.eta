@@ -1,0 +1,25 @@
+<% layout('./layout') %>
+<% const t = it.t; const KIND = { inapproprie: t('Ne devrait pas être en ligne'), texte: t('Suggestion pour le texte'), autre: t('Autre chose') };
+   const when = ms => new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).format(ms); %>
+<h1><%= t('Signalements des visiteurs') %></h1>
+<p class="prose"><%= t('Envoyés depuis le lien « Signaler » sous chaque photo du site. Message et adresse chiffrés, effacés au bout de 12 mois. Une personne qui se reconnaît est renvoyée vers la page /bonjour (accord ou refus).') %></p>
+<% if (!it.reports.length) { %>
+<p class="empty"><%= t('Aucun signalement.') %></p>
+<% } else { %>
+<ul class="reports">
+<% it.reports.forEach(r => { %>
+  <li class="panel<%= r.status === 'nouveau' ? ' fresh' : '' %>">
+    <a class="rp-photo" href="/admin/photos/<%= r.pid %>"><% if (r.ready) { %><%~ it.picture(r, { sizes: '96px', alt: '' }) %><% } %><span><%= r.title %></span></a>
+    <div class="rp-body">
+      <p><span class="enc-tag <%= r.kind === 'inapproprie' ? 'warn' : '' %>"><%= KIND[r.kind] || r.kind %></span> <span class="mono"><%= when(r.created_at) %> · <%= r.lang.toUpperCase() %><%= r.status === 'traite' ? ` · ${t('traité')}` : '' %></span></p>
+<% if (r.message) { %>      <p class="rp-msg"><%= r.message %></p>
+<% } %><% if (r.email) { %>      <p class="mono"><a class="more" href="mailto:<%= r.email %>"><%= r.email %></a></p>
+<% } %>      <div class="rp-acts">
+<% if (r.status === 'nouveau') { %>        <form method="post" action="/admin/signalements/<%= r.reportId %>/traite"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Traité') %></button></form>
+<% } %>        <form method="post" action="/admin/signalements/<%= r.reportId %>/supprimer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit"><%= t('Supprimer') %></button></form>
+      </div>
+    </div>
+  </li>
+<% }) %>
+</ul>
+<% } %>

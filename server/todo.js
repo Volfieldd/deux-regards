@@ -15,7 +15,7 @@ const MONTH = 30 * 864e5;
 const FR = translator('fr');
 const dayOf = t => ms => new Intl.DateTimeFormat(t.locale || 'fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
 
-export function createTodo({ db, encounters, instagram, proofs, readiness, now = () => Date.now() }) {
+export function createTodo({ db, encounters, instagram, proofs, readiness, feedback, now = () => Date.now() }) {
   const q = {
     rights: db.prepare(`SELECT id FROM encounters WHERE rights_request IS NOT NULL AND rights_done_at IS NULL ORDER BY rights_requested_at`).pluck(),
     // Refus dont des photos liées sont encore publiées.
@@ -82,6 +82,9 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, now =
     const legal = Object.fromEntries(db.prepare("SELECT key, value FROM settings WHERE key LIKE 'legal_%' OR key = 'privacy_contact'").all()
       .map(r => { try { return [r.key, JSON.parse(r.value)]; } catch { return [r.key, '']; } }));
     if (legalMissing(legal).length) items.push({ level: 'bientot', title: t('Mentions légales / Impressum à compléter'), detail: t('obligatoires en France et en Allemagne : éditeurs, adresse postale, responsable'), href: '/admin/droits#mentions', action: t('Compléter') });
+    const reports = feedback ? feedback.pending() : 0;
+    if (reports) items.push({ level: 'bientot', title: reports > 1 ? t('{n} signalements de visiteurs', { n: reports }) : t('{n} signalement de visiteur', { n: reports }),
+      detail: t('photo à retirer, suggestion pour le texte ou autre'), href: '/admin/signalements', action: t('Voir') });
     const fresh = q.fresh.get();
     if (fresh) items.push({ level: 'bientot', title: fresh > 1 ? t('{n} nouvelles personnes photographiées', { n: fresh }) : t('{n} nouvelle personne photographiée', { n: fresh }),
       detail: t('demandes reçues sur /bonjour ou rencontres à traiter'), href: '/admin/rencontres?statut=nouvelle', action: t('Voir') });
