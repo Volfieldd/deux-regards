@@ -1,0 +1,110 @@
+{
+ "1 à traiter": {
+  "en": "1 to handle",
+  "de": "1 zu erledigen"
+ },
+ "{n} à traiter": {
+  "en": "{n} to handle",
+  "de": "{n} zu erledigen"
+ },
+ "adressées aux photographes": {
+  "en": "sent to the photographers",
+  "de": "an die Fotografen gerichtet"
+ },
+ "aucune": {
+  "en": "none",
+  "de": "keine"
+ },
+ "À vérifier : la confirmation des accords revient au photographe ou à un administrateur, qui voient les personnes.": {
+  "en": "To check: confirming the consents is up to the photographer or an administrator, who can see the people.",
+  "de": "Zu prüfen: Die Einwilligungen bestätigt der Fotograf oder ein Administrator, die die Personen sehen."
+ },
+ "Bloquée : elle ne peut pas être publiée.": {
+  "en": "Blocked: it cannot be published.",
+  "de": "Gesperrt: Es kann nicht veröffentlicht werden."
+ },
+ "Brouillon, prête à publier.": {
+  "en": "Draft, ready to publish.",
+  "de": "Entwurf, bereit zur Veröffentlichung."
+ },
+ "Ce compte corrige les textes ; la série, la date, le lieu sur la carte et le reste sont réglés par le photographe ou un administrateur.": {
+  "en": "This account corrects texts; the series, date, map location and the rest are set by the photographer or an administrator.",
+  "de": "Dieses Konto korrigiert Texte; Serie, Datum, Ort auf der Karte und der Rest werden vom Fotografen oder einem Administrator eingestellt."
+ },
+ "Ce compte ne peut pas changer la série, le lieu ou la date de plusieurs photos à la fois.": {
+  "en": "This account cannot change the series, place or date of several photos at once.",
+  "de": "Dieses Konto kann Serie, Ort oder Datum mehrerer Fotos nicht auf einmal ändern."
+ },
+ "elle apparaît dans son « Aujourd’hui » ; parlez de la photo, jamais des personnes": {
+  "en": "it appears in their “Today”; talk about the photo, never about the people",
+  "de": "sie erscheint unter „Heute“; sprechen Sie über das Foto, nie über die Personen"
+ },
+ "Envoyer au photographe": {
+  "en": "Send to the photographer",
+  "de": "An den Fotografen senden"
+ },
+ "Fait": {
+  "en": "Done",
+  "de": "Erledigt"
+ },
+ "Le détail (personnes et accords) est visible du photographe et des administrateurs.": {
+  "en": "The details (people and consents) are visible to the photographer and administrators.",
+  "de": "Die Details (Personen und Einwilligungen) sehen der Fotograf und die Administratoren."
+ },
+ "l’équipe": {
+  "en": "the team",
+  "de": "das Team"
+ },
+ "{n} remarques sur des photos, pas encore traitées": {
+  "en": "{n} notes on photos, not yet handled",
+  "de": "{n} Hinweise zu Fotos, noch nicht erledigt"
+ },
+ "{n} remarque sur une photo, pas encore traitée": {
+  "en": "{n} note on a photo, not yet handled",
+  "de": "{n} Hinweis zu einem Foto, noch nicht erledigt"
+ },
+ "Publiée sur le site.": {
+  "en": "Published on the site.",
+  "de": "Auf der Website veröffentlicht."
+ },
+ "Remarque de {name} sur « {title} »": {
+  "en": "Note from {name} on “{title}”",
+  "de": "Hinweis von {name} zu „{title}“"
+ },
+ "Remarque envoyée au photographe.": {
+  "en": "Note sent to the photographer.",
+  "de": "Hinweis an den Fotografen gesendet."
+ },
+ "Remarque marquée comme faite.": {
+  "en": "Note marked as done.",
+  "de": "Hinweis als erledigt markiert."
+ },
+ "Remarque pour le photographe": {
+  "en": "Note for the photographer",
+  "de": "Hinweis für den Fotografen"
+ },
+ "Remarques": {
+  "en": "Notes",
+  "de": "Hinweise"
+ },
+ "Statut : {status}. La publication est faite par un administrateur ou un modérateur.": {
+  "en": "Status: {status}. Publishing is done by an administrator or a moderator.",
+  "de": "Status: {status}. Veröffentlicht wird von einem Administrator oder Moderator."
+ },
+ "Écrivez la remarque.": {
+  "en": "Write the note.",
+  "de": "Schreiben Sie den Hinweis."
+ },
+ "Textes de la photo modifiés": {
+  "en": "Photo texts changed",
+  "de": "Fototexte geändert"
+ },
+ "Remarque adressée au photographe": {
+  "en": "Note sent to the photographer",
+  "de": "Hinweis an den Fotografen gerichtet"
+ },
+ "Remarque faite": {
+  "en": "Note done",
+  "de": "Hinweis erledigt"
+ }
+}

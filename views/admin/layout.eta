@@ -13,7 +13,7 @@
 <% } %>
   <script src="<%= it.asset('admin/admin.js') %>" defer></script>
 </head>
-<body class="admin" data-csrf="<%= it.csrf %>">
+<body class="admin" data-csrf="<%= it.csrf %>" data-can="<%= (it.grants || []).join(' ') %>">
 <% const t = it.t; %>
 <a class="skip" href="#contenu"><%= t('Aller au contenu') %></a>
 <% if (it.local) { %>

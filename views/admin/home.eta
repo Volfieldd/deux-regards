@@ -18,7 +18,8 @@
     </div>
     <span class="sp"></span>
     <a class="btn ghost" href="/" target="_blank" rel="noopener"><%= t('Voir le site') %></a>
-    <a class="btn big" href="/admin/photos?importer#import">＋ <%= t('Importer des photos') %></a>
+<% if (it.can('photos.importer')) { %>    <a class="btn big" href="/admin/photos?importer#import">＋ <%= t('Importer des photos') %></a>
+<% } %>
   </div>
 
   <section class="panel tasks" aria-labelledby="tasks-title">

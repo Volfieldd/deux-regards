@@ -8,6 +8,7 @@
      'POST /admin/photos/:id/status': t('Statut de la photo changé'), 'POST /admin/photos/actions': t('Action sur plusieurs photos'), 'POST /admin/photos/:id/delete': t('Photo supprimée'),
      'POST /admin/reglages': t('Réglages enregistrés'), 'POST /admin/instagram/file': t('Mise en file Instagram'), 'POST /admin/rencontres/:id/refus': t('Refus appliqué'),
      'POST /admin/rencontres/:id/effacer': t('Rencontre effacée'), 'POST /admin/personnes/:id/effacer': t('Personne effacée'), 'POST /admin/signalements/:id/traite': t('Signalement traité'),
+     'POST /admin/photos/:id/textes': t('Textes de la photo modifiés'), 'POST /admin/photos/:id/remarques': t('Remarque adressée au photographe'), 'POST /admin/remarques/:id/fait': t('Remarque faite'),
    }; %>
 <h1><%= t('Journal') %></h1>
 <p class="prose"><%= t('Qui a fait quoi dans l’admin : connexions, modifications, publications, comptes. Gardé 13 mois.') %></p>

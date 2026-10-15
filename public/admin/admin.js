@@ -1,6 +1,9 @@
 // Amélioration progressive de l'admin : tout fonctionne sans ce script (formulaires classiques).
 document.documentElement.classList.add('js');
 const CSRF = document.body.dataset.csrf;
+// Droits du compte (attribut data-can de la page) : on ne propose que ce qui est permis ; le serveur reste seul juge.
+const GRANTS = document.body.dataset.can === undefined ? null : new Set(document.body.dataset.can.split(' ').filter(Boolean));
+const can = perm => !GRANTS || GRANTS.has(perm);
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -183,6 +186,8 @@ const I18N = {
   "Proposition traduite de l’anglais : relisez-la avant d’enregistrer.": {"en": "Suggestion translated from English: review it before saving.", "de": "Vorschlag aus dem Englischen übersetzt: Prüfen Sie ihn vor dem Speichern."},
   "Proposition traduite de l’allemand : relisez-la avant d’enregistrer.": {"en": "Suggestion translated from German: review it before saving.", "de": "Vorschlag aus dem Deutschen übersetzt: Prüfen Sie ihn vor dem Speichern."},
   "Proposition retirée.": {"en": "Suggestion removed.", "de": "Vorschlag entfernt."},
+  "Comptes et rôles": {"en": "Accounts and roles", "de": "Konten und Rollen"},
+  "Journal": {"en": "Log", "de": "Protokoll"},
   "ou": {"en": "or", "de": "oder"},
   "Série proposée :": {"en": "Suggested series:", "de": "Vorgeschlagene Serie:"},
   "Série proposée": {"en": "Suggested series", "de": "Vorgeschlagene Serie"},
@@ -1309,7 +1314,7 @@ const activity = (() => {
       b.classList.toggle('sug', sugg.some(x => x.id === Number(b.dataset.category)));
     });
     const sugBox = $('[data-one-suggest]', insp);
-    if (sugBox) {
+    if (sugBox && can('photos.modifier')) {
       sugBox.hidden = !sugg.length;
       sugBox.innerHTML = sugg.map((x, i) => `<div class="sugbox${i ? ' alt' : ''}"><span>${i ? esc(tr('ou')) : `✦ ${esc(tr('Série proposée :'))}`} <b>${esc(x.name)}</b></span>`
         + `<span class="why">${esc(tr('ressemble à {n} de ses {total} photos', { n: x.votes, total: x.size }))}</span>`
@@ -1547,7 +1552,7 @@ const activity = (() => {
     else if (mod && e.key.toLowerCase() === 'z' && window.__lastUndo) { e.preventDefault(); const u = window.__lastUndo; window.__lastUndo = null; u(); }
     else if (mod) return;
     else if (e.key === 'Escape' && selIds().length) { e.preventDefault(); select([]); }
-    else if (e.key.toLowerCase() === 'p' && selIds().length) { e.preventDefault(); $('[data-publish]', insp).click(); }
+    else if (e.key.toLowerCase() === 'p' && selIds().length && can('photos.publier')) { e.preventDefault(); $('[data-publish]', insp).click(); }
     else if (e.key.toLowerCase() === 'i') { e.preventDefault(); $('[data-import-open]')?.click(); }
     else if (contact && (e.key.toLowerCase() === 'l' || (e.key === ' ' && !document.activeElement?.matches('button, a, input')))) {
       const id = selIds()[0] || Number(document.activeElement?.closest?.('.tile')?.dataset.id);
@@ -1601,7 +1606,8 @@ const activity = (() => {
     });
   }
   // Dépôt sur une série de la barre latérale : les photos glissées y sont classées.
-  $$('[data-drop-series]').forEach(a => {
+  // Glisser vers une série du menu : seulement avec le droit de changer la série.
+  if (can('photos.modifier')) $$('[data-drop-series]').forEach(a => {
     a.addEventListener('dragover', e => { if ([...e.dataTransfer.types].includes('application/x-nicephos-photos')) { e.preventDefault(); a.classList.add('over'); } });
     a.addEventListener('dragleave', () => a.classList.remove('over'));
     a.addEventListener('drop', async e => {
@@ -1697,17 +1703,18 @@ const activity = (() => {
   const selection = () => $$('input.chk[name=ids][form=bulk]:checked').length;
   const click = sel => () => $(sel)?.click();
   const go = href => () => { location.href = href; };
-  const PAGES = [[tr('Aujourd’hui'), '/admin'], [tr('Photothèque'), '/admin/photos'], [tr('Photos à finir'), '/admin/photos?statut=afinir'], [tr('Brouillons'), '/admin/photos?statut=draft'], [tr('Sorties'), '/admin/sorties'], [tr('Personnes photographiées'), '/admin/rencontres'], [tr('Nouvelle rencontre'), '/admin/rencontre'], [tr('Séries'), '/admin/series'], [tr('Site public'), '/admin/site'], [tr('Photos de l’ouverture'), '/admin/site#ouverture'], [tr('Carte du monde'), '/admin/site#carte'], ['Instagram', '/admin/instagram'], [tr('Statistiques'), '/admin/statistiques'], [tr('Sur le terrain'), '/admin/terrain'], [tr('Cartes d’accord'), '/admin/rencontres/cartes'], [tr('Photographes'), '/admin/auteurs'], [tr('Apparence'), '/admin/apparence'], [tr('Filigrane & EXIF'), '/admin/images'], [tr('Droits & confidentialité'), '/admin/droits'], [tr('Aide'), '/admin/aide']];
+  // Pages proposées, avec la permission qu'il faut pour les ouvrir.
+  const PAGES = [[tr('Aujourd’hui'), '/admin', 'admin.acceder'], [tr('Photothèque'), '/admin/photos', 'photos.voir'], [tr('Photos à finir'), '/admin/photos?statut=afinir', 'photos.voir'], [tr('Brouillons'), '/admin/photos?statut=draft', 'photos.voir'], [tr('Sorties'), '/admin/sorties', 'sorties.voir'], [tr('Personnes photographiées'), '/admin/rencontres', 'personnes.voir'], [tr('Nouvelle rencontre'), '/admin/rencontre', 'terrain.app'], [tr('Séries'), '/admin/series', 'series.gerer'], [tr('Site public'), '/admin/site', 'site.textes'], [tr('Photos de l’ouverture'), '/admin/site#ouverture', 'site.textes'], [tr('Carte du monde'), '/admin/site#carte', 'site.textes'], ['Instagram', '/admin/instagram', 'instagram.voir'], [tr('Statistiques'), '/admin/statistiques', 'statistiques.voir'], [tr('Sur le terrain'), '/admin/terrain', 'terrain.app'], [tr('Cartes d’accord'), '/admin/rencontres/cartes', 'terrain.cartes'], [tr('Photographes'), '/admin/auteurs', 'photographes.gerer'], [tr('Comptes et rôles'), '/admin/comptes', 'comptes.gerer'], [tr('Journal'), '/admin/journal', 'journal.voir'], [tr('Apparence'), '/admin/apparence', 'site.apparence'], [tr('Filigrane & EXIF'), '/admin/images', 'site.filigrane'], [tr('Droits & confidentialité'), '/admin/droits', 'reglages.droits'], [tr('Aide'), '/admin/aide', 'admin.acceder']].filter(([, , perm]) => can(perm));
   function actions() {
     const n = selection();
     const a = [];
     if (n) {
-      a.push({ label: tr('<b>Publier</b> la sélection'), r: nPhotos(n), key: 'P', run: click('[data-publish]') });
-      a.push({ label: tr('<b>Dépublier</b> la sélection'), r: nPhotos(n), run: click('[data-inspector] button[value=draft]') });
-      a.push({ label: tr('<b>Supprimer</b> la sélection…'), r: nPhotos(n), run: click('[data-bulk-delete]') });
+      if (can('photos.publier')) a.push({ label: tr('<b>Publier</b> la sélection'), r: nPhotos(n), key: 'P', run: click('[data-publish]') });
+      if (can('photos.publier')) a.push({ label: tr('<b>Dépublier</b> la sélection'), r: nPhotos(n), run: click('[data-inspector] button[value=draft]') });
+      if (can('photos.supprimer')) a.push({ label: tr('<b>Supprimer</b> la sélection…'), r: nPhotos(n), run: click('[data-bulk-delete]') });
     }
-    a.push({ label: tr('<b>Importer</b> des photos'), key: 'I', run: $('[data-import-open]') && location.pathname === '/admin/photos' ? click('[data-import-open]') : go('/admin/photos?importer#import') });
-    a.push({ label: tr('<b>Nouvelle série</b>'), run: go('/admin/series#nouvelle-serie') });
+    if (can('photos.importer')) a.push({ label: tr('<b>Importer</b> des photos'), key: 'I', run: $('[data-import-open]') && location.pathname === '/admin/photos' ? click('[data-import-open]') : go('/admin/photos?importer#import') });
+    if (can('series.gerer')) a.push({ label: tr('<b>Nouvelle série</b>'), run: go('/admin/series#nouvelle-serie') });
     a.push({ label: tr('Basculer en mode <b>clair / sombre</b>'), run: () => $('[data-theme-form]')?.requestSubmit() });
     a.push({ label: tr('<b>Voir le site</b> public'), run: () => window.open('/', '_blank', 'noopener') });
     return a;

@@ -76,8 +76,8 @@
 <% } else if (e.rights_done_at) { %>  <p class="hint"><%= t('Dernière demande sur les données traitée le {date}.', { date: it.fmt(e.rights_done_at) }) %></p>
 <% } %>
   <p class="actions">
-    <a class="btn ghost" href="/admin/rencontres/<%= e.id %>/export.zip"><%= t('Exporter ses données (.zip)') %></a>
-<% if (e.rights_request && !e.rights_done_at) { %>    <form method="post" action="/admin/rencontres/<%= e.id %>/droits-traites"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Marquer la demande comme traitée') %></button></form><% } %>
+<% if (it.can('personnes.exporter')) { %>    <a class="btn ghost" href="/admin/rencontres/<%= e.id %>/export.zip"><%= t('Exporter ses données (.zip)') %></a>
+<% } %><% if (e.rights_request && !e.rights_done_at && it.can('personnes.effacer')) { %>    <form method="post" action="/admin/rencontres/<%= e.id %>/droits-traites"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Marquer la demande comme traitée') %></button></form><% } %>
   </p>
   <p class="hint"><%= t('L’archive contient tout ce que le site garde sur elle (rencontre, choix, accord ou refus, historique), la signature, les photos de repère et de carte, et les photos liées en JPEG : envoyez-la-lui (en pièce jointe ou par votre messagerie).') %></p>
 </section>
@@ -152,6 +152,9 @@
   <%~ include('./_encounter-form', { ...it, v: values, action: `/admin/rencontres/${e.id}`, isNew: false }) %>
 </section>
 
+<% if (!it.can('personnes.effacer')) { %>
+<p class="hint"><%= t('L’export et l’effacement des données sont faits par un administrateur.') %></p>
+<% } else { %>
 <details class="danger"<%~ e.rights_request === 'effacement' && !e.rights_done_at ? ' open' : '' %>>
   <summary><%= t('Effacer les données de cette personne') %></summary>
   <form method="post" action="/admin/rencontres/<%= e.id %>/effacer">
@@ -161,3 +164,4 @@
 <% } %>    <p class="actions"><button class="btn danger" type="submit"><%= t('Effacer définitivement') %></button></p>
   </form>
 </details>
+<% } %>

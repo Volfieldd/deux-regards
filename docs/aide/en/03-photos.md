@@ -131,6 +131,14 @@ Further down:
 - **Instagram**: frame, watermark and caption for Instagram, and **Add to the Instagram queue** (see [Instagram](instagram));
 - [Proof of prior existence](preuves): the fingerprint and timestamp of the original.
 
+**Depending on the account’s role** (see [Accounts and roles](reglages#comptes-et-rôles)): the page only shows what the account can do.
+
+- **Photographer**: the full page for their own photos, without the status choice (publishing is done by an administrator or a moderator) or Instagram; they can delete their photos.
+- **Moderator** and **Proofreader**: a form limited to texts (title, caption, place and their translations). The moderator also has **Publish** or **Unpublish** for a ready photo; a photo to check waits for confirmation by the photographer or an administrator, who can see the people. Neither sees the people and consents: the status band keeps the state, without the details.
+- **Notes**: a moderator or an administrator writes a note for the photographer (“the caption mentions the Loire, it is the Erdre”). It appears in the photographer’s “Today” and at the top of the page, until they click **Done**. Notes are about the photo, never about the people.
+
+In the photo library likewise: the Publish, Unpublish, Delete and Import buttons, dragging to reorder, the ⌘K palette and the help only appear to those who are allowed.
+
 ## Deleting a photo
 
 1. At the bottom of the details, open **Delete this photo**.

@@ -274,7 +274,7 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
   - publier (site et Instagram) est un droit à part, donné pour l'instant à l'administrateur et au modérateur ;
   - le modérateur publie, dépublie, traite les signalements et fait remonter au photographe les éléments à traiter, sans accès aux données personnelles ;
   - quatre rôles au départ (Administrateur, Photographe, Modérateur, Relecteur), rôles sur mesure plus tard ;
-  - étapes 1 (socle : permission déclarée par route, fermé par défaut), 2 (comptes et rôles en base, compte en attente, garde-fou `ADMIN_SUBS`, journal, menu selon les droits) et 3 (portée « les miennes », rôle Photographe) faites ; puis interface selon les droits (boutons, ⌘K, aide), rôles sur mesure.
+  - étapes 1 (socle : permission déclarée par route, fermé par défaut), 2 (comptes et rôles en base, compte en attente, garde-fou `ADMIN_SUBS`, journal, menu selon les droits), 3 (portée « les miennes », rôle Photographe) et 4 (interface selon les droits, textes seuls pour modérateur et relecteur, remarques adressées au photographe) faites ; reste l'étape 5, rôles sur mesure, plus tard.
 - Circuit de publication (proposer, valider, renvoyer avec remarque, dépublier) : cadré le 15 octobre 2026, à construire après les rôles ; questions en attente.
 - Écarté : repérer les personnes de dos (pas d'obligation de consentement ; une personne de dos peut toujours être enregistrée si elle le souhaite).
 
