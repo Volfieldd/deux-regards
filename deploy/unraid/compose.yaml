@@ -57,7 +57,9 @@ services:
     user: "${PUID:-99}:${PGID:-100}"
     networks: [nicephos]
     logging: *logging
-    mem_limit: 3g                     # un original de 120 Mpx décodé pèse ~0,5 Go
+    # Mémoire du site : un original de 120 Mpx décodé pèse ~0,5 Go. Descriptions « Précis » (Florence-2 large,
+    # ~4 Go pendant le calcul, dans ce conteneur) : SITE_MEM_LIMIT=6g dans le .env ; « Léger » tient dans 3g.
+    mem_limit: ${SITE_MEM_LIMIT:-3g}
     pids_limit: 256
     volumes:
       - *data
@@ -84,6 +86,7 @@ services:
       BACKUP_DIR: /backups
       BACKUP_KEEP: ${BACKUP_KEEP:-14}
       BACKUP_INTERVAL_HOURS: ${BACKUP_INTERVAL_HOURS:-24}
+      BACKUP_DELETED_DAYS: ${BACKUP_DELETED_DAYS:-90}
       REQUIRE_PERSISTENT_STORAGE: "1"
     user: "${PUID:-99}:${PGID:-100}"
     command: ["node", "server/db/backup.js", "--loop"]

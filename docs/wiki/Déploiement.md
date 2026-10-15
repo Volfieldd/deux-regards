@@ -47,6 +47,8 @@ Variables propres au déploiement, dans `.env` :
 | `TUNNEL_TOKEN` | — | Jeton du tunnel Cloudflare (profil `tunnel`). |
 | `BACKUP_KEEP` | `14` | Nombre d'instantanés de base conservés. |
 | `BACKUP_INTERVAL_HOURS` | `24` | Fréquence des sauvegardes. |
+| `BACKUP_DELETED_DAYS` | `90` | Jours pendant lesquels un fichier supprimé (original, logo) reste dans la sauvegarde ; transmise au conteneur de sauvegarde. |
+| `SITE_MEM_LIMIT` | `3g` (`6g` pour « Précis ») | Mémoire du conteneur du site (`mem_limit`). Les descriptions « Précis » (Florence-2 large, page Séries) demandent `6g` ; « Léger » tient dans `3g`. Le site lit la limite réelle et refuse un modèle qui ne tient pas. |
 
 Et pour le site en ligne :
 
