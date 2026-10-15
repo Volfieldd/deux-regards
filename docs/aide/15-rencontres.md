@@ -96,6 +96,17 @@ Une sortie **se crée toute seule** : à l'import (la date que l'appareil inscri
 
 Les fiches d'une rencontre et d'une photo ont un bouton **Ouvrir la sortie →**.
 
+## Les voyages
+
+Un **voyage** regroupe des sorties : « Maroc 2025 », dix journées de prise de vue. C’est facultatif. Une journée d’un photographe appartient à un voyage au plus.
+
+- **Créer** : page **Voyages** (sous Sorties dans le menu, ou le bouton **Voyages** de la page Sorties), un nom, puis **Créer le voyage**. Un administrateur choisit s’il est celui d’un photographe ou **des deux photographes** ; un photographe crée les siens.
+- **Rattacher des journées** : sur la page du voyage, **Du … Au …** rattache toutes les journées de prise de vue entre ces deux dates (photos datées par l’appareil, ou rencontres) ; ou cochez des sorties dans la liste. Depuis la page d’une sortie, le menu **Voyage** la rattache, la change de voyage ou l’en détache. Une journée déjà dans un autre voyage y est déplacée.
+- **La page du voyage** : ses journées dans l’ordre (J1, J2…), chacune avec son lieu, ses photos, ses personnes et un lien vers la sortie ; toutes les photos du voyage avec leur état ; **Proposer les photos prêtes** (ou **Publier les photos prêtes**) d’un coup, comme pour une sortie.
+- **Nom et texte**, en trois langues : ils serviront à la page publique du voyage, à venir.
+- **Retirer** une journée, ou **Supprimer ce voyage** : les sorties et les photos restent.
+- **Photographe** : il ne voit que ses voyages et n’y rattache que ses journées.
+
 ## Visages et état des photos
 
 À l'import, le serveur **repère les visages** de chaque photo (combien, et où). Il ne reconnaît personne et ne garde aucune empreinte de visage : seulement le nombre et les cadres. Les photos importées avant cette fonction sont examinées une fois, en arrière-plan.

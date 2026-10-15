@@ -29,6 +29,7 @@ import * as cities from '../geo/cities.js';
 import { TranslateError } from '../translate.js';
 import { registerEncounters } from './rencontres.js';
 import { registerOutings } from './sorties.js';
+import { registerTrips } from './voyages.js';
 import { ADMIN_LANGS, ADMIN_LANG_NAMES, translator } from '../admin-i18n.js';
 import { monthYear } from '../format.js';
 import { legalMissing } from '../legal.js';
@@ -1882,6 +1883,7 @@ export default async function adminRoutes(app) {
   // ---------- rencontres (page /bonjour, cartes) ----------
   registerEncounters(app, { repo, render, P, W, done, failed, withReady });
   registerOutings(app, { repo, render, P, W, done, failed, withReady });
+  registerTrips(app, { repo, render, P, W, done, failed, withReady });
 
   // ---------- traductions ----------
   // Proposition de traduction d'un champ (LibreTranslate du réseau local) : l'auteur la relit avant d'enregistrer.

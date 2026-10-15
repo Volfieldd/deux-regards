@@ -1,0 +1,218 @@
+{
+ "— aucun voyage —": {
+  "en": "— no trip —",
+  "de": "— keine Reise —"
+ },
+ "Changer": {
+  "en": "Change",
+  "de": "Ändern"
+ },
+ "— le détacher —": {
+  "en": "— detach it —",
+  "de": "— lösen —"
+ },
+ "Rattacher à ce voyage": {
+  "en": "Attach to this trip",
+  "de": "Dieser Reise zuordnen"
+ },
+ "Voyage :": {
+  "en": "Trip:",
+  "de": "Reise:"
+ },
+ "Voyage de cette journée": {
+  "en": "Trip of this day",
+  "de": "Reise dieses Tages"
+ },
+ "voyage « {name} »": {
+  "en": "trip “{name}”",
+  "de": "Reise „{name}“"
+ },
+ "Au": {
+  "en": "To",
+  "de": "Bis"
+ },
+ "Du": {
+  "en": "From",
+  "de": "Vom"
+ },
+ "Aucune journée : rattachez-en ci-dessous, ou depuis la page d’une sortie.": {
+  "en": "No day: attach some below, or from an outing’s page.",
+  "de": "Kein Tag: Ordnen Sie unten welche zu oder von der Seite eines Ausflugs aus."
+ },
+ "Aucune photo : les photos d’un voyage sont celles de ses journées (date de l’appareil).": {
+  "en": "No photo: a trip’s photos are those of its days (camera date).",
+  "de": "Kein Foto: Die Fotos einer Reise sind die ihrer Tage (Kameradatum)."
+ },
+ "chacune est une sortie": {
+  "en": "each one is an outing",
+  "de": "jeder ist ein Ausflug"
+ },
+ "dans « {name} »": {
+  "en": "in “{name}”",
+  "de": "in „{name}“"
+ },
+ "J{n}": {
+  "en": "D{n}",
+  "de": "T{n}"
+ },
+ "Journées du voyage": {
+  "en": "Days of the trip",
+  "de": "Tage der Reise"
+ },
+ "les deux": {
+  "en": "both",
+  "de": "beide"
+ },
+ "les plus récentes d’abord": {
+  "en": "most recent first",
+  "de": "neueste zuerst"
+ },
+ "Nom en allemand": {
+  "en": "Name in German",
+  "de": "Name auf Deutsch"
+ },
+ "Nom en anglais": {
+  "en": "Name in English",
+  "de": "Name auf Englisch"
+ },
+ "Nom et texte": {
+  "en": "Name and text",
+  "de": "Name und Text"
+ },
+ "Ou cochez des sorties": {
+  "en": "Or tick outings",
+  "de": "Oder Ausflüge ankreuzen"
+ },
+ "Photos du voyage": {
+  "en": "Photos of the trip",
+  "de": "Fotos der Reise"
+ },
+ "pour la page publique du voyage, à venir": {
+  "en": "for the trip’s public page, coming soon",
+  "de": "für die öffentliche Seite der Reise, in Vorbereitung"
+ },
+ "Rattacher des journées": {
+  "en": "Attach days",
+  "de": "Tage zuordnen"
+ },
+ "Retirer la journée du {date} du voyage": {
+  "en": "Remove the day of {date} from the trip",
+  "de": "Den Tag {date} aus der Reise entfernen"
+ },
+ "ses sorties et ses photos restent": {
+  "en": "its outings and photos remain",
+  "de": "seine Ausflüge und Fotos bleiben"
+ },
+ "Supprimer ce voyage": {
+  "en": "Delete this trip",
+  "de": "Diese Reise löschen"
+ },
+ "Texte en allemand": {
+  "en": "Text in German",
+  "de": "Text auf Deutsch"
+ },
+ "Texte en anglais": {
+  "en": "Text in English",
+  "de": "Text auf Englisch"
+ },
+ "Toutes les journées de prise de vue entre ces deux dates (photos datées par l’appareil, ou rencontres). Une journée déjà dans un autre voyage y est déplacée.": {
+  "en": "All shooting days between these two dates (photos dated by the camera, or encounters). A day already in another trip is moved here.",
+  "de": "Alle Aufnahmetage zwischen diesen beiden Daten (von der Kamera datierte Fotos oder Begegnungen). Ein Tag, der schon zu einer anderen Reise gehört, wird hierher verschoben."
+ },
+ "Aucun voyage pour l’instant.": {
+  "en": "No trip yet.",
+  "de": "Noch keine Reise."
+ },
+ "Créer le voyage": {
+  "en": "Create the trip",
+  "de": "Reise anlegen"
+ },
+ "Maroc 2025": {
+  "en": "Morocco 2025",
+  "de": "Marokko 2025"
+ },
+ "{n} journée": {
+  "en": "{n} day",
+  "de": "{n} Tag"
+ },
+ "{n} journées": {
+  "en": "{n} days",
+  "de": "{n} Tage"
+ },
+ "Nouveau voyage": {
+  "en": "New trip",
+  "de": "Neue Reise"
+ },
+ "Un voyage regroupe des sorties : « Maroc 2025 », dix journées de prise de vue. C’est facultatif ; une journée appartient à un voyage au plus. Ses photos et ses personnes se retrouvent sur la page du voyage.": {
+  "en": "A trip groups outings: “Morocco 2025”, ten shooting days. It is optional; a day belongs to one trip at most. Its photos and people are gathered on the trip’s page.",
+  "de": "Eine Reise fasst Ausflüge zusammen: „Marokko 2025“, zehn Aufnahmetage. Das ist freiwillig; ein Tag gehört höchstens zu einer Reise. Ihre Fotos und Personen finden sich auf der Seite der Reise."
+ },
+ "aucune journée": {
+  "en": "no day",
+  "de": "kein Tag"
+ },
+ "Aucune journée de prise de vue à rattacher.": {
+  "en": "No shooting day to attach.",
+  "de": "Kein Aufnahmetag zum Zuordnen."
+ },
+ "Aucun photographe lié à votre compte.": {
+  "en": "No photographer linked to your account.",
+  "de": "Kein Fotograf mit Ihrem Konto verknüpft."
+ },
+ "Ce voyage ne peut pas recevoir cette sortie.": {
+  "en": "This trip cannot take this outing.",
+  "de": "Diese Reise kann diesen Ausflug nicht aufnehmen."
+ },
+ "du {from} au {to}": {
+  "en": "from {from} to {to}",
+  "de": "vom {from} bis {to}"
+ },
+ "Journée retirée du voyage (la sortie reste).": {
+  "en": "Day removed from the trip (the outing remains).",
+  "de": "Tag aus der Reise entfernt (der Ausflug bleibt)."
+ },
+ "les deux photographes": {
+  "en": "both photographers",
+  "de": "beide Fotografen"
+ },
+ "{n} journée rattachée au voyage.": {
+  "en": "{n} day attached to the trip.",
+  "de": "{n} Tag der Reise zugeordnet."
+ },
+ "{n} journées rattachées au voyage.": {
+  "en": "{n} days attached to the trip.",
+  "de": "{n} Tage der Reise zugeordnet."
+ },
+ "Sortie détachée de son voyage.": {
+  "en": "Outing detached from its trip.",
+  "de": "Ausflug von seiner Reise gelöst."
+ },
+ "Sortie rattachée au voyage « {name} ».": {
+  "en": "Outing attached to the trip “{name}”.",
+  "de": "Ausflug der Reise „{name}“ zugeordnet."
+ },
+ "Voyage créé : rattachez-y ses journées.": {
+  "en": "Trip created: attach its days.",
+  "de": "Reise angelegt: Ordnen Sie ihre Tage zu."
+ },
+ "Voyage enregistré.": {
+  "en": "Trip saved.",
+  "de": "Reise gespeichert."
+ },
+ "Voyage « {name} » supprimé : ses sorties et ses photos restent.": {
+  "en": "Trip “{name}” deleted: its outings and photos remain.",
+  "de": "Reise „{name}“ gelöscht: Ihre Ausflüge und Fotos bleiben."
+ },
+ "Voyages": {
+  "en": "Trips",
+  "de": "Reisen"
+ },
+ "Donnez un nom au voyage.": {
+  "en": "Give the trip a name.",
+  "de": "Geben Sie der Reise einen Namen."
+ },
+ "Indiquez deux dates (AAAA-MM-JJ).": {
+  "en": "Give two dates (YYYY-MM-DD).",
+  "de": "Geben Sie zwei Daten an (JJJJ-MM-TT)."
+ }
+}

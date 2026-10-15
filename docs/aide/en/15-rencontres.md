@@ -96,6 +96,17 @@ An outing **creates itself**: on import (the date the camera writes into each ph
 
 The pages of an encounter and of a photo have an **Open the outing →** button.
 
+## Trips
+
+A **trip** groups outings: “Morocco 2025”, ten shooting days. It is optional. A photographer’s day belongs to one trip at most.
+
+- **Create**: **Trips** page (under Outings in the menu, or the **Trips** button on the Outings page), a name, then **Create the trip**. An administrator chooses whether it belongs to one photographer or to **both photographers**; a photographer creates their own.
+- **Attach days**: on the trip’s page, **From … To …** attaches every shooting day between these two dates (photos dated by the camera, or encounters); or tick outings in the list. From an outing’s page, the **Trip** menu attaches it, moves it to another trip or detaches it. A day already in another trip is moved.
+- **The trip’s page**: its days in order (D1, D2…), each with its place, photos, people and a link to the outing; all the trip’s photos with their status; **Propose the ready photos** (or **Publish the ready photos**) at once, as for an outing.
+- **Name and text**, in three languages: they will be used for the trip’s public page, coming soon.
+- **Remove** a day, or **Delete this trip**: the outings and photos remain.
+- **Photographer**: sees only their own trips and attaches only their own days.
+
 ## Faces and photo status
 
 On import, the server **detects the faces** in each photo (how many, and where). It recognises no one and keeps no facial fingerprint: only the number and the boxes. Photos imported before this feature are examined once, in the background.

@@ -14,6 +14,14 @@
 <% if (readyDrafts && !it.can('photos.publier') && it.can('photos.proposer')) { %>  <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/proposer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>"><button class="btn" type="submit"><%= t('Proposer les photos prêtes · {n}', { n: readyDrafts }) %></button></form>
 <% } %><% if (readyDrafts && it.can('photos.publier')) { %>  <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/publier"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>"><button class="btn" type="submit"><%= t('Publier les photos prêtes · {n}', { n: readyDrafts }) %></button></form>
 <% } %></div>
+<% if (it.trip || it.trips.length) { %>
+<form class="trip-of row-form" method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/voyage">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (it.trip) { %>  <span><%= t('Voyage :') %> <a class="more" href="/admin/voyages/<%= it.trip.id %>"><%= it.trip.name %></a></span>
+<% } %><% if (it.trips.length) { %>  <label class="inline"><span class="sr-only"><%= t('Voyage de cette journée') %></span><select name="voyage"><option value=""><%= it.trip ? t('— le détacher —') : t('— aucun voyage —') %></option><% it.trips.forEach(x => { %><option value="<%= x.id %>"<%~ it.trip && it.trip.id === x.id ? ' selected' : '' %>><%= x.name %></option><% }) %></select></label>
+  <button class="btn ghost sm" type="submit"><%= it.trip ? t('Changer') : t('Rattacher à ce voyage') %></button>
+<% } %></form>
+<% } %>
 <% if (o.parts.length > 1) { %>
 <nav class="chips" aria-label="<%= t('Parties de la journée') %>">
 <% o.parts.forEach(p => { %>  <a class="chip" href="<%= it.partUrl(p) %>"<%~ p.starts === o.starts ? ' aria-current="true"' : '' %>><%= p.starts === '00:00' ? t('Début de journée') : t('À partir de {time}', { time: hm(p.starts) }) %></a>
