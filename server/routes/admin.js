@@ -158,7 +158,7 @@ export default async function adminRoutes(app) {
   const W = perm => ({ preHandler: app.verifyCsrf, config: { perm } });
   // Routes qui font plusieurs choses : la permission de l'action précise est vérifiée en plus.
   // Textes d'une photo (photos.textes) ; changer un autre champ demande photos.modifier.
-  const TEXT_FIELDS = new Set(['title', 'legend', 'place', 'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de']);
+  const TEXT_FIELDS = new Set(['title', 'legend', 'place', 'keywords', 'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de']);
   // Une photo publiée ne se modifie qu'avec « modifier ses photos publiées » (réglable par photographe).
   // Après une modification par qui ne valide pas lui-même (le photographe) : une photo programmée repasse en
   // proposition, pour que le modérateur revoie ce qui partira en ligne.

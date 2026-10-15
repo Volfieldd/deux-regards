@@ -54,6 +54,7 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
 ## Autres pages
 
 - **À propos :** logo complet, accroche, texte, biographies des auteurs.
+- **Rechercher** (si elle est proposée, voir [Site public](reglages#recherche)) : un champ, puis les photos trouvées, la plus pertinente d'abord. Chaque mot doit être trouvé ; un début de mot suffit (« brum » trouve « brume ») ; sans accents ni majuscules. Les pages de résultats ne sont pas indexées par les moteurs de recherche.
 - **Droits d'utilisation :** conditions, contact et information sur la mesure d'audience, en trois langues : `/droits` (français), `/en/droits` (anglais), `/de/droits` (allemand). Le sélecteur de langue du menu passe de l'une à l'autre (les anciennes adresses `/droits/en` et `/droits/de` mènent aux nouvelles). Les textes se règlent dans [Droits & confidentialité](reglages#droits-et-confidentialité).
 - **Carte** (si vous l'avez publiée dans [Site public](reglages#carte-du-monde)) : une mappemonde aux couleurs du thème, avec la vignette ronde d'une photo sur chaque ville et, en pastille, le nombre de photos de cette ville. Les villes trop proches pour être distinguées se regroupent (nombre cumulé) ; un clic sur le groupe agrandit la carte jusqu'à les séparer. Sous la carte, la liste des lieux avec leurs photos ; un clic sur une vignette de la carte y mène.
 

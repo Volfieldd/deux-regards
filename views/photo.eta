@@ -13,6 +13,8 @@
       <div class="meta mono">N°<%= it.pad(p.n) %> · <%= p.category %> · <a href="<%= it.galleryUrl({ regard: p.author_slug }) %>"><%= p.author %></a><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + p.when : '' %></div>
 <% if (p.legend) { %>
       <p class="legend" id="legende"><%= p.legend %></p>
+<% } %><% const kws = it.showKeywords && p.keywords ? p.keywords.split(',').map(k => k.trim()).filter(Boolean) : []; if (kws.length) { %>
+      <ul class="kw mono" aria-label="<%= it.t.search.keywords %>"><% kws.forEach(k => { %><li><% if (it.searchPage) { %><a href="<%= it.u('/recherche') %>?q=<%= encodeURIComponent(k) %>" rel="nofollow"><%= k %></a><% } else { %><%= k %><% } %></li><% }) %></ul>
 <% } %>
       <div class="vact">
         <form method="post" action="<%= it.u(`/photo/${p.slug}/aime`) %>" data-like data-slug="<%= p.slug %>" data-like-label="<%= it.t.fb.like %>" data-unlike-label="<%= it.t.fb.unlike %>">

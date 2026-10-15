@@ -123,7 +123,7 @@ L'aperçu à gauche montre l'image telle que servie (filigrane compris) et ses d
 
 Plus bas :
 
-- **Rubriques** : la fiche se lit de haut en bas, en rubriques repliables, chacune avec son résumé : **Infos** (titre et ses traductions FR · EN · DE, adresse, série, photographe, date et heure de prise de vue, légende), **Où** (lieu affiché, ville, carte du monde), **Diffusion** (statut, filigrane), puis **Personnes & accords**, **Instagram**, **Audience**, **Preuve d'antériorité**. Les rubriques à regarder s'ouvrent seules (accords à vérifier, Instagram en file) ; un lien vers l'une d'elles l'ouvre.
+- **Rubriques** : la fiche se lit de haut en bas, en rubriques repliables, chacune avec son résumé : **Infos** (titre et ses traductions FR · EN · DE, adresse, série, photographe, date et heure de prise de vue, légende, **mots-clés** — séparés par des virgules, pour la recherche du site, en plusieurs langues si besoin), **Où** (lieu affiché, ville, carte du monde), **Diffusion** (statut, filigrane), puis **Personnes & accords**, **Instagram**, **Audience**, **Preuve d'antériorité**. Les rubriques à regarder s'ouvrent seules (accords à vérifier, Instagram en file) ; un lien vers l'une d'elles l'ouvre.
 - **Bande d'état** (en tête) : l'état pour le site et pour Instagram (✓ prête, ▲ à vérifier, ✕ bloquée), les visages détectés avec **Il y a quelqu'un** / **Personne de reconnaissable** pour corriger, les raisons et les confirmations (voir [Rencontres](rencontres#visages-et-état-des-photos)). Une photo à vérifier ne se publie qu'en cochant la confirmation sous **Statut**.
 - **Personne photographiée** : les rencontres liées à la photo, avec l'accord ou le refus (voir [Rencontres](rencontres)). Un refus empêche de publier la photo ;
 

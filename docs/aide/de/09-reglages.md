@@ -13,11 +13,18 @@ Was die Besucher sehen. Slogan, Einleitung und „Über“ haben jeweils eine op
 | **Einleitung** | Text unter dem Slogan, auf der Startseite |
 | **Über** | Seite „Über uns“. Trennen Sie Absätze durch eine Leerzeile. |
 | **Weltkarte** | siehe unten |
+| **Suche** | siehe unten |
 | **Fotos der Start-Diashow** | die Vollbild-Diashow der Startseite, in der gewählten Reihenfolge (siehe unten) |
 
 ### Weltkarte
 
 Kästchen **Weltkarte veröffentlichen**, standardmäßig nicht aktiviert. Aktiviert: Die Seite `/carte` ist für Besucher geöffnet, ein Link **Karte** erscheint im Menü der Website, und die Seite wird in `sitemap.xml` aufgenommen. Nicht aktiviert: Besucher erhalten „Seite nicht gefunden“; angemeldet sehen Sie sie als **Vorschau** (Banner oben). Das Feld zeigt, wie viele Fotos auf der Karte sind. Nur **veröffentlichte** Fotos, in deren Datenblatt **Auf der Weltkarte anzeigen** aktiviert ist, erscheinen dort (siehe [Fotos](photos)).
+
+### Suche
+
+Kästchen **Suche anbieten**, standardmäßig aktiviert: Ein Link **Suchen** (eine Lupe auf dem Telefon) erscheint im Menü der Website und öffnet `/recherche`. Besucher durchsuchen dort die veröffentlichten Fotos nach Stichwörtern, in Titeln, Bildunterschriften, Orten, Städten und Regionen, Serien, Fotografen und den **Stichwörtern** der Fotos, in allen drei Sprachen. Nicht aktiviert: Die Seite existiert für Besucher nicht mehr.
+
+Kästchen **Stichwörter auf der Seite des Fotos anzeigen**, standardmäßig nicht aktiviert. Aktiviert: Die Stichwörter erscheinen unter der Bildunterschrift, und jedes führt zur Suche. Sonst dienen sie nur der Suche.
 
 ### Fotos der Start-Diashow
 

@@ -54,6 +54,17 @@ export const DATE_HINT = 'Date non comprise : essayez « oct. 2026 », « 10/202
 // Une ville tapée sans la choisir (sans JavaScript) est reconnue si elle correspond exactement à une ville connue.
 // « Afficher sur la carte » exige une ville ; sans ville, la photo quitte la carte.
 const truthy = v => v === true || v === 1 || v === '1' || v === 'on' || v === 'true';
+// Mots-clés : séparés par des virgules (ou des points-virgules, des retours à la ligne), sans doublon, 30 au plus.
+export function normKeywords(raw) {
+  const seen = new Set(), out = [];
+  for (const w of String(raw ?? '').split(/[,;\n]+/)) {
+    const k = w.replace(/\s+/g, ' ').trim().replace(/^#/, '').slice(0, 40);
+    if (!k || seen.has(k.toLowerCase())) continue;
+    seen.add(k.toLowerCase()); out.push(k);
+    if (out.length >= 30) break;
+  }
+  return out.join(', ');
+}
 function resolveLocation(body, before, errors) {
   const keep = { city_id: before?.city_id ?? null, city_name: before?.city_name ?? null, city_cc: before?.city_cc ?? null, city_lat: before?.city_lat ?? null, city_lon: before?.city_lon ?? null, city_source: before?.city_source ?? null };
   let loc = keep;
@@ -188,6 +199,7 @@ export function createAdminRepo(db) {
       const tr = (field, max) => Object.fromEntries(['en', 'de'].map(l => [`${field}_${l}`, `${field}_${l}` in body ? text(body[`${field}_${l}`], max) : (before?.[`${field}_${l}`] ?? '')]));
       const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn === undefined ? text(body.taken_on, 40) : takenOn, legend: text(body.legend, 2000), status, watermark,
         ...tr('title', 160), ...tr('legend', 2000), ...tr('place', 120),
+        keywords: 'keywords' in body ? normKeywords(body.keywords) : (before?.keywords ?? ''),
         city_label: 'city_label' in body ? text(body.city_label, 120) : cities.labelOf(before), on_map: loc.on_map };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
       db.transaction(() => {
@@ -195,7 +207,7 @@ export function createAdminRepo(db) {
         db.prepare(`UPDATE photos SET series_checked = CASE WHEN category_id = @category_id THEN series_checked ELSE 1 END, title = @title, slug = @slug, category_id = @category_id, author_id = @author_id, place = @place,
           taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark,
           title_en = @title_en, title_de = @title_de, legend_en = @legend_en, legend_de = @legend_de, place_en = @place_en, place_de = @place_de,
-          updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
+          keywords = @keywords, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
         db.prepare(`UPDATE photos SET city_id = @city_id, city_name = @city_name, city_cc = @city_cc, city_lat = @city_lat, city_lon = @city_lon,
           city_source = @city_source, on_map = @on_map WHERE id = @id`).run({ ...loc, id });
         // L'ouverture désigne les photos par leur adresse : elle suit le renommage.
@@ -211,7 +223,7 @@ export function createAdminRepo(db) {
       const p = q.photo.get(id);
       if (!p) return null;
       const merged = { ...p, taken_on: p.taken_on || '', watermark: p.watermark === 0 ? 'none' : 'default' };
-      for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend', 'city_id', 'city_label', 'on_map']) if (k in body) merged[k] = body[k];
+      for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend', 'keywords', 'city_id', 'city_label', 'on_map']) if (k in body) merged[k] = body[k];
       // Brouillon dont l'adresse dérive encore du titre : elle suit le nouveau titre.
       merged.slug = 'title' in body && p.status === 'draft' && p.slug === uniqueSlug('photos', p.title, id) ? '' : p.slug;
       this.updatePhoto(id, merged);
@@ -426,6 +438,7 @@ export function createAdminRepo(db) {
         privacy_contact: text(body.privacy_contact, 200), privacy_mfa: body.privacy_mfa === 'on', privacy_encrypted: body.privacy_encrypted === 'on',
         legal_names: text(body.legal_names, 200), legal_address: text(body.legal_address, 400), legal_email: text(body.legal_email, 200), legal_phone: text(body.legal_phone, 40), legal_director: text(body.legal_director, 120),
         map_page: body.map_page === 'on',
+        search_page: body.search_page === 'on', keywords_shown: body.keywords_shown === 'on',
         hero,
       };
       const DROITS = /^(rights_|privacy_|legal_)/;

@@ -13,11 +13,18 @@ What visitors see. Tagline, introduction and “About” each have an optional *
 | **Introduction** | text below the tagline, on the home page |
 | **About** | “About” page. Separate paragraphs with a blank line. |
 | **World map** | see below |
+| **Search** | see below |
 | **Opening slideshow photos** | the full-screen slideshow on the home page, in the chosen order (see below) |
 
 ### World map
 
 **Publish the world map** box, unticked by default. Ticked: the `/carte` page is open to visitors, a **Map** link appears in the site menu, and the page is added to `sitemap.xml`. Unticked: visitors get “page not found”; when signed in, you see it as a **preview** (banner at the top). The panel shows how many photos are on the map. Only **published** photos whose record has **Show on the world map** ticked appear on it (see [Photos](photos)).
+
+### Search
+
+**Offer the search** box, ticked by default: a **Search** link (a magnifier on phones) appears in the site menu and opens `/recherche`. Visitors search the published photos by keyword, in titles, captions, places, towns and regions, series, photographers and the photos’ **keywords**, in all three languages. Unticked: the page no longer exists for visitors.
+
+**Show the keywords on the photo page** box, unticked by default. Ticked: the keywords are shown under the caption, and each leads to the search. Otherwise, they are only used for the search.
 
 ### Opening slideshow photos
 
