@@ -175,6 +175,12 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     logCall: db.prepare('INSERT INTO instagram_calls (at, kind) VALUES (?, ?)'),
     callsSince: db.prepare('SELECT at FROM instagram_calls WHERE at > ? ORDER BY at').pluck(),
     pruneCalls: db.prepare('DELETE FROM instagram_calls WHERE at < ?'),
+    addEvent: db.prepare('INSERT INTO instagram_events (at, post_id, photo_id, level, message, by_name) VALUES (?, ?, ?, ?, ?, ?)'),
+    events: db.prepare('SELECT e.*, p.title FROM instagram_events e LEFT JOIN photos p ON p.id = e.photo_id ORDER BY e.at DESC, e.id DESC LIMIT ?'),
+    pruneEvents: db.prepare('DELETE FROM instagram_events WHERE at < ?'),
+    published: db.prepare("SELECT * FROM instagram_posts WHERE status = 'published' ORDER BY published_at DESC, id DESC LIMIT ?"),
+    failedLatest: db.prepare(`SELECT p.* FROM instagram_posts p WHERE p.status = 'failed'
+      AND NOT EXISTS (SELECT 1 FROM instagram_posts n WHERE n.photo_id = p.photo_id AND n.id > p.id AND n.status <> 'cancelled') ORDER BY p.id DESC LIMIT ?`),
     publishedSince: db.prepare("SELECT published_at FROM instagram_posts WHERE status = 'published' AND published_at > ? ORDER BY published_at").pluck(),
     mediaIds: db.prepare("SELECT DISTINCT ig_media_id FROM instagram_posts WHERE status = 'published' AND ig_media_id IS NOT NULL").pluck(),
     saveEngagement: db.prepare(`INSERT INTO instagram_engagement (ig_media_id, day, likes, comments) VALUES (?, ?, ?, ?)
@@ -195,6 +201,11 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
   // État de la file : dernier créneau, pause (jusqu'à, motif, palier) et dernier quota lu chez Meta.
   const state = () => read('instagram_state', { lastSlot: null, pausedUntil: 0, pauseReason: '', pauseLevel: 0, liveQuota: null });
   const setState = patch => q.save.run('instagram_state', JSON.stringify({ ...state(), ...patch }));
+  // Journal de la file (page Instagram) : jamais de jeton ni de réponse brute de l'API.
+  const event = (post, level, message, byName = '') => { try { q.addEvent.run(now().getTime(), post?.id ?? null, post?.photo_id ?? null, level, String(message).slice(0, 500), String(byName || '').slice(0, 200)); } catch (err) { log?.warn({ err: err.message }, 'journal Instagram'); } };
+  // Avancement d'un envoi en cours (« Publier maintenant » suivi sans recharger la page) : en mémoire seulement.
+  const progress = new Map();
+  const step = (postId, key, extra = {}) => progress.set(postId, { step: key, at: now().getTime(), ...extra });
   // Peut-on publier maintenant, dans les limites du réglage et de Meta ?
   const budget = () => {
     const t = now().getTime();
@@ -310,7 +321,13 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     if (r.level === 'warn' && !confirmedFor(photoId)) return verifyReason(r.reasons);
     return null;
   }
-  function enqueue(photoId, { frame, watermark, caption, confirmed = false, byName = '' } = {}) {
+  function enqueue(photoId, opts = {}) {
+    const existing = q.active.get(photoId);
+    const id = enqueueRaw(photoId, opts);
+    event({ id, photo_id: photoId }, 'info', existing ? 'Mise à jour dans la file' : opts.auto ? 'Mise en file automatique (série)' : 'Mise en file', opts.byName);
+    return id;
+  }
+  function enqueueRaw(photoId, { frame, watermark, caption, confirmed = false, byName = '' } = {}) {
     const s = settings();
     const p = q.photo.get(photoId);
     if (!p) throw new InstagramError('photo introuvable');
@@ -336,8 +353,11 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     return Number(db.prepare(`INSERT INTO instagram_posts (photo_id, status, position, frame, watermark, caption, created_at)
       VALUES (?, 'queued', ?, ?, ?, ?, ?)`).run(photoId, pos, fields.frame, fields.watermark, fields.caption, now().getTime()).lastInsertRowid);
   }
-  function cancel(postId) {
-    return db.prepare("DELETE FROM instagram_posts WHERE id = ? AND status = 'queued'").run(postId).changes > 0;
+  function cancel(postId, byName = '') {
+    const post = q.post.get(postId);
+    const ok = db.prepare("DELETE FROM instagram_posts WHERE id = ? AND status = 'queued'").run(postId).changes > 0;
+    if (ok) event(post, 'info', 'Retirée de la file', byName);
+    return ok;
   }
   function move(postId, dir) {
     const list = db.prepare("SELECT id FROM instagram_posts WHERE status = 'queued' ORDER BY position, id").pluck().all();
@@ -357,7 +377,7 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     for (const id of ids) {
       if (!auto.has(q.photo.get(id)?.category_id) || q.latest.get(id)) continue;
       // Bloquée, à vérifier sans confirmation, ou dépubliée entre-temps : pas de mise en file, la raison est notée.
-      try { added.push(enqueue(id)); } catch (err) { log?.info({ photo: id, raison: err.message }, 'instagram : pas de mise en file automatique'); }
+      try { added.push(enqueue(id, { auto: true })); } catch (err) { log?.info({ photo: id, raison: err.message }, 'instagram : pas de mise en file automatique'); }
     }
     return added;
   }
@@ -371,12 +391,25 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     const until = Math.max(st.pausedUntil || 0, t + wait);
     setState({ pausedUntil: until, pauseReason: err.message, pauseLevel: (st.pauseLevel || 0) + 1 });
     log?.warn({ until: new Date(until).toISOString(), reason: err.message }, 'file Instagram en pause');
+    event(null, 'warn', `File en pause : ${err.message}`);
     return new InstagramError(`En attente : ${err.message}. File en pause jusqu’${whenText(until, t).replace(/^à /, 'à ').replace(/^le /, 'au ')}.`);
   }
 
   // ---------- envoi ----------
   let busy = false;
-  async function publish(postId) {
+  async function publish(postId, { byName = '' } = {}) {
+    if (busy) throw new InstagramError('un envoi est déjà en cours');    // sans toucher à l'avancement de l'envoi en cours
+    step(postId, 'controle');
+    try {
+      return await publishSteps(postId, byName);
+    } catch (err) {
+      const post = q.post.get(postId);
+      step(postId, 'erreur', { error: err.message, status: post?.status || null });
+      if (!err.logged) event(post || { id: postId }, post?.status === 'failed' ? 'error' : 'warn', `${post?.status === 'failed' ? 'Échec' : 'Pas envoyée'} : ${err.message}`, byName);
+      throw err;
+    }
+  }
+  async function publishSteps(postId, byName) {
     if (busy) throw new InstagramError('un envoi est déjà en cours');
     const a = account.get();
     const token = account.token();
@@ -408,10 +441,14 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     let phase = 'prepare';                            // « publish » : Meta a peut-être déjà publié
     const mediaToken = crypto.randomBytes(24).toString('base64url');
     db.prepare("UPDATE instagram_posts SET status = 'publishing', media_token = ?, media_token_at = ?, attempts = attempts + 1, error = NULL WHERE id = ?").run(mediaToken, now().getTime(), postId);
+    event(post, 'info', 'Envoi à Instagram commencé', byName);
+    step(postId, 'envoi');
     try {
       const container = await call(api(`${a.ig_user_id}/media`), { kind: 'media', form: { image_url: `${config.publicUrl}/partage/instagram/${mediaToken}.jpg`, caption: captionOf(post), access_token: token } });
       // Traitement de l'image chez Instagram : vérifications espacées (2, 3, 5, 8… s), 8 au plus, ~1 min 30 en tout.
-      for (const delay of [0, 2, 3, 5, 8, 13, 21, 34]) {
+      const delays = [0, 2, 3, 5, 8, 13, 21, 34];
+      for (const [k, delay] of delays.entries()) {
+        step(postId, 'traitement', { n: k + 1, of: delays.length });
         if (delay) await sleep(delay * 1000);
         const st = await call(api(container.id, { fields: 'status_code,status', access_token: token }), { kind: 'status' });
         if (st.status_code === 'FINISHED') { phase = 'ready'; break; }
@@ -419,6 +456,7 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
       }
       if (phase !== 'ready') throw new InstagramError('Instagram n’a pas fini de traiter l’image');
       phase = 'publish';
+      step(postId, 'publication');
       const media = await call(api(`${a.ig_user_id}/media_publish`), { kind: 'publish', form: { creation_id: container.id, access_token: token } });
       phase = 'done';
       let permalink = null;
@@ -428,6 +466,8 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
         .run(String(media.id), permalink, now().getTime(), postId);
       if (state().pauseLevel) setState({ pauseLevel: 0 });
       log?.info({ post: postId, photo: post.photo_id }, 'publié sur Instagram');
+      event(post, 'ok', 'Publiée sur Instagram', byName);
+      step(postId, 'fini', { permalink });
       return { permalink };
     } catch (err) {
       // Limite (appels ou quota) : rien n'a été publié (media_publish refuse au-delà du quota) ; pause, la photo
@@ -451,19 +491,23 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
       busy = false;
     }
   }
-  function retry(postId) {
+  function retry(postId, byName = '') {
     const post = q.post.get(postId);
     const held = post ? hold(post.photo_id) : null;
     if (held) throw new InstagramError(held);
     const pos = db.prepare("SELECT COALESCE(MIN(position), 1) - 1 FROM instagram_posts WHERE status = 'queued'").pluck().get();
-    return db.prepare("UPDATE instagram_posts SET status = 'queued', attempts = 0, error = NULL, position = ?, retry_requested_at = NULL, retry_requested_by = NULL WHERE id = ? AND status = 'failed'").run(pos, postId).changes > 0;
+    const ok = db.prepare("UPDATE instagram_posts SET status = 'queued', attempts = 0, error = NULL, position = ?, retry_requested_at = NULL, retry_requested_by = NULL WHERE id = ? AND status = 'failed'").run(pos, postId).changes > 0;
+    if (ok) event(post, 'info', 'Remise en tête de file', byName);
+    return ok;
   }
   // Demande de republication (photographe sans la main sur la file) : seulement pour le dernier envoi de la photo,
   // en échec, et pas déjà demandée. Renvoie true si la demande est nouvelle.
   function requestRetry(postId, byName = '') {
     const post = q.post.get(postId);
     if (!post || post.status !== 'failed' || post.retry_requested_at || q.latest.get(post.photo_id)?.id !== post.id) return false;
-    return db.prepare('UPDATE instagram_posts SET retry_requested_at = ?, retry_requested_by = ? WHERE id = ?').run(now().getTime(), String(byName || '').slice(0, 200), postId).changes > 0;
+    const ok = db.prepare('UPDATE instagram_posts SET retry_requested_at = ?, retry_requested_by = ? WHERE id = ?').run(now().getTime(), String(byName || '').slice(0, 200), postId).changes > 0;
+    if (ok) event(post, 'warn', 'Republication demandée', byName);
+    return ok;
   }
   // Demandes en attente : envois en échec, toujours les derniers de leur photo.
   const retryRequests = () => db.prepare(`SELECT p.* FROM instagram_posts p WHERE p.status = 'failed' AND p.retry_requested_at IS NOT NULL
@@ -554,6 +598,7 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
       try { await refresh(); } catch (err) { refreshFailedAt = now().getTime(); log?.warn({ err: err.message }, 'jeton Instagram non renouvelé'); }
     }
     q.pruneCalls.run(now().getTime() - 7 * 24 * 3600 * 1000);
+    q.pruneEvents.run(now().getTime() - 90 * 24 * 3600 * 1000);
     const s = settings();
     const slot = lastSlot(s.times, now());
     const st = state();
@@ -579,7 +624,7 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     for (const p of q.queue.all()) {
       if (p.status !== 'queued') continue;
       const held = hold(p.photo_id);
-      if (held && fail.run(held, p.id).changes) out.push(p.photo_id);
+      if (held && fail.run(held, p.id).changes) { out.push(p.photo_id); event(p, 'error', `Sortie de la file : ${held}`); }
     }
     return out;
   }
@@ -626,7 +671,12 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
         budget: budget(),
       };
     },
-    resume() { setState({ pausedUntil: 0, pauseReason: '', pauseLevel: 0 }); },
+    resume(byName = '') { setState({ pausedUntil: 0, pauseReason: '', pauseLevel: 0 }); event(null, 'info', 'File reprise à la main', byName); },
+    events: (n = 50) => q.events.all(n),
+    published: (n = 10) => q.published.all(n),
+    failedLatest: (n = 20) => q.failedLatest.all(n),
+    progressOf: postId => progress.get(postId) || null,
+    busy: () => busy,
     // Jeton d'image valable 15 minutes au plus (Instagram la télécharge dans les secondes qui suivent).
     byMediaToken: token => (/^[\w-]{20,64}$/.test(token) ? q.byToken.get(token, now().getTime() - 15 * 60 * 1000) : null),
     authorizeUrl, connect, refresh, tick,

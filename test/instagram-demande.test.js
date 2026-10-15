@@ -47,13 +47,13 @@ test('photographe : demander la republication d’un post en échec, une fois ; 
   // Une seule fois : pas de second e-mail ; la fiche dit « demandée ».
   await ph.post(`${url}/instagram/demande`);
   assert.equal(c.sent.length, 1);
-  assert.match(await ph.get(url), /✓ Republication demandée/);
+  assert.match(await ph.get(url), /class="enc-tag ok">Republication demandée/);
   assert.doesNotMatch(await ph.get('/admin'), /en échec/);
   // L'équipe : Aujourd'hui, page Instagram, fiche ; republier depuis la fiche remet en tête de file et efface la demande.
   assert.match(await mod.get('/admin'), /1 republication Instagram demandée/);
-  assert.match(await mod.get('/admin/instagram'), /⚑ Republication demandée · seb/);
+  assert.match(await mod.get('/admin/instagram'), /class="enc-tag warn">Republication demandée · seb/);
   const modFiche = await mod.get(url);
-  assert.match(modFiche, /⚑ Republication demandée/);
+  assert.match(modFiche, /class="enc-tag warn">Republication demandée/);
   assert.match(modFiche, new RegExp(`action="/admin/instagram/${c.postId}/reessayer"`));
   const r = await mod.post(`/admin/instagram/${c.postId}/reessayer`, { back: `${url}#instagram` });
   assert.deepEqual([r.statusCode, r.headers.location], [303, `${url}#instagram`]);

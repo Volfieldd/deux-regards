@@ -10,8 +10,16 @@ Die Einrichtung erfolgt nur einmal: ein **professionelles Instagram-Konto**, ein
 2. **Zu den gewählten Zeiten** (standardmäßig 18:30 Uhr, Pariser Zeit) geht das erste Foto der Warteschlange auf Instagram. Eines pro Zeitfenster.
 3. **Bis zum Versand** lässt sich alles einstellen:
    - auf der **Seite des Fotos**, Abschnitt **Instagram**: Rahmen, Wasserzeichen, Bildunterschrift, mit genauer Vorschau des gesendeten Bildes, dann **Aktualisieren**; **Aus der Warteschlange entfernen** nimmt es heraus;
-   - auf der Seite **Instagram**: die Reihenfolge der Warteschlange (↑ ↓), **Jetzt veröffentlichen**, **Entfernen**.
-4. Nach der Veröffentlichung zeigt die Seite des Fotos den Link **Beitrag ansehen ↗** und der Verlauf der Instagram-Seite den Link **Auf Instagram ansehen ↗**.
+   - auf der Seite **Instagram**: die Reihenfolge der Warteschlange (↑ ↓), **Jetzt veröffentlichen**, **Entfernen**. Nach **Jetzt veröffentlichen** zeigt ein Fortschrittsbalken jeden Schritt, ohne die Seite neu zu laden (Prüfungen, Bild gesendet, Verarbeitung durch Instagram, Veröffentlichung). Am Ende erscheint ✓ mit dem Link zum Beitrag oder ✕ mit dem Grund.
+4. Nach der Veröffentlichung zeigt die Seite des Fotos den Link **Beitrag ansehen ↗** und die Instagram-Seite den Link **Ansehen ↗** unter **Letzte Veröffentlichungen**.
+
+**Die Instagram-Seite** zeigt:
+- oben das Konto, den Veröffentlichungsrhythmus und den Verbrauch;
+- links die **Warteschlange**;
+- rechts die **fehlgeschlagenen** Fotos (mit **Erneut versuchen**) und die **10 letzten Veröffentlichungen**;
+- unten das **Protokoll**: Einreihen, Senden, Schritte, Veröffentlichungen, Fehlschläge, Pausen, Fortsetzungen, Anfragen zur erneuten Veröffentlichung. Für jedes Ereignis: das Datum, der Status (✓ erfolgreich, ✕ fehlgeschlagen, ▲ Achtung, Info), das Foto und wer es ausgelöst hat (sonst „automatisch“). Das Protokoll wird 90 Tage aufbewahrt.
+
+Die **Einstellungen** sind unter dem Protokoll eingeklappt.
 
 > Ein Foto kommt nie von selbst zweimal in die Warteschlange: Zurückgezogen und erneut veröffentlicht, wird es nicht wieder vorgeschlagen. Um es noch einmal zu teilen, verwenden Sie **Erneut veröffentlichen (wieder in die Warteschlange)** auf seiner Seite.
 
@@ -72,8 +80,8 @@ Jeden Morgen (nach 6 Uhr) erfasst die Website die **Likes** und **Kommentare** d
 ## Bei einem Fehler
 
 - **Automatischer neuer Versuch:** Das Foto bleibt an der Spitze der Warteschlange, und die Fehlermeldung erscheint in der Warteschlange und auf der Seite des Fotos. Es wird im nächsten Zeitfenster erneut gesendet, **höchstens 3 Versuche**.
-- **Nach 3 Fehlschlägen:** Es kommt in den **Verlauf**, mit **Erneut versuchen**. Die Seite des Fotos bietet auch **Erneut veröffentlichen (wieder an den Anfang der Warteschlange)**.
-- **Der Fotograf** (der die Warteschlange nicht verwaltet) sieht den Fehlschlag unter **Heute** und auf der Seite des Fotos, mit **Erneute Veröffentlichung anfragen**. Eine Anfrage pro Fehlschlag. Sie erscheint dann, markiert mit ⚑ „Erneute Veröffentlichung angefragt“, unter **Heute** bei denen, die die Warteschlange verwalten, im Verlauf und auf der Seite des Fotos; per E-Mail auch, wenn sie das gewählt haben. Sie verschwindet, sobald das Foto wieder in der Warteschlange ist. Ist das Foto schon in der Warteschlange, gibt es nichts anzufragen.
+- **Nach 3 Fehlschlägen:** Es kommt zu **Fehlgeschlagen**, mit **Erneut versuchen**. Die Seite des Fotos bietet auch **Erneut veröffentlichen (wieder an den Anfang der Warteschlange)**.
+- **Der Fotograf** (der die Warteschlange nicht verwaltet) sieht den Fehlschlag unter **Heute** und auf der Seite des Fotos, mit **Erneute Veröffentlichung anfragen**. Eine Anfrage pro Fehlschlag. Sie erscheint dann, markiert mit ▲ „Erneute Veröffentlichung angefragt“, unter **Heute** bei denen, die die Warteschlange verwalten, unter **Fehlgeschlagen** auf der Instagram-Seite und auf der Seite des Fotos; per E-Mail auch, wenn sie das gewählt haben. Sie verschwindet, sobald das Foto wieder in der Warteschlange ist. Ist das Foto schon in der Warteschlange, gibt es nichts anzufragen.
 - **Zugang abgelaufen:** Das Zugriffstoken gilt 60 Tage und erneuert sich selbst. Ist es abgelaufen (mehr als 60 Tage ohne Funktion), verbinden Sie das Konto über die Seite **Instagram** neu: **Trennen**, dann **Instagram-Konto verbinden**. Zeigt die Verwaltung **Konto erneut verbinden** an (Verschlüsselungsschlüssel geändert, siehe Schritt 6), klicken Sie einfach darauf.
 
 ---

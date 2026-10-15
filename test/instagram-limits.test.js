@@ -181,7 +181,7 @@ test('admin : réglage des limites, consommation affichée, reprise manuelle', a
   const post = (url, payload) => as({ method: 'POST', url, payload: { _csrf: csrf, ...payload }, headers: { accept: 'text/html' } });
   let page = (await as({ url: '/admin/instagram' })).body;
   assert.match(page, /name="limits_preset" value="prudent" checked/);
-  assert.match(page, /Publications sur 24 h glissantes : <strong>0 \/ 25<\/strong>/);
+  assert.match(page, /Publications sur 24 h glissantes :<\/span> <strong>0 \/ 25<\/strong>/);
   await post('/admin/instagram/reglages', { times: '18:30', limits_preset: 'custom', limits_posts: '8', limits_gap: '120', limits_calls: '50' });
   assert.deepEqual(JSON.parse(ctx.db.prepare("SELECT value FROM settings WHERE key = 'instagram'").pluck().get()).limits, { preset: 'custom', postsPerDay: 8, minGapMinutes: 120, callsPerHour: 50 });
   page = (await as({ url: '/admin/instagram' })).body;

@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
+import crypto from 'node:crypto';
+import { createSessionStore } from '../server/sessions.js';
 import { setup } from './helpers.js';
 import { renderCaption, normalizeSettings, captionWarnings, sealer, upcomingSlots, lastSlot, hashtagsFor, DEFAULTS, createInstagram } from '../server/instagram.js';
 
@@ -380,4 +382,68 @@ test('signature du photographe : sous la légende si la photo en a une, retirabl
   await ctx.app.inject({ method: 'POST', url: '/admin/instagram/file', cookies, payload: { _csrf: csrf, photo_id: String(p), signature_set: '1' }, headers: { accept: 'text/html' } });
   assert.equal(ctx.db.prepare('SELECT ig_signature FROM photos WHERE id = ?').pluck().get(p), 0);
   assert.doesNotMatch(ctx.app.instagram.caption(p), /@julien/);
+});
+
+// ---------- page Instagram : publier maintenant suivi, journal, dernières publications ----------
+
+async function igAdmin(t, { fail } = {}) {
+  let app;
+  const meta = fakeMeta({ getApp: () => app, fail });
+  const ctx = await setup(t, { seeded: true, env: HTTPS, instagramOptions: { manual: true, fetchImpl: meta.fetchImpl, sleep: async () => {}, timeoutMs: 100 } });
+  app = ctx.app;
+  await app.instagram.connect('code-oauth');
+  // Session d'administrateur (la connexion locale de test est interdite en HTTPS).
+  app.accounts.ensure({ sub: 'julien', name: 'julien', roles: ['admin'] });
+  const julien = ctx.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
+  app.accounts.update(app.accounts.bySub('julien').id, { authorId: julien }, 'test');
+  const token = createSessionStore(ctx.db).create({ sub: 'julien', name: 'julien', roles: [] });
+  const cookies = { [app.config.secureCookies ? '__Host-session' : 'session']: token };
+  const csrf = ctx.db.prepare('SELECT csrf FROM sessions WHERE id = ?').pluck().get(crypto.createHash('sha256').update(token).digest('hex'));
+  const json = (method, url) => app.inject({ method, url, cookies, headers: { accept: 'application/json', 'x-csrf-token': csrf } });
+  const html = url => app.inject({ url, cookies, headers: { accept: 'text/html' } }).then(r => r.body);
+  const photo = ctx.db.prepare("SELECT id FROM photos WHERE status = 'published' LIMIT 1").pluck().get();
+  ctx.db.prepare('UPDATE photos SET faces = 0 WHERE id = ?').run(photo);
+  return { ...ctx, meta, json, html, photo, cookies, csrf };
+}
+
+test('publier maintenant depuis la page : envoi en arrière-plan, avancement, journal et dernières publications', async t => {
+  const c = await igAdmin(t);
+  const post = c.app.instagram.enqueue(c.photo, { byName: 'julien' });
+  const page = await c.html('/admin/instagram');
+  assert.match(page, new RegExp(`data-ig-publish="${post}"`));
+  assert.match(page, /data-ig-progress hidden/);
+  const r = await c.json('POST', `/admin/instagram/${post}/publier`);
+  assert.ok([200, 202].includes(r.statusCode));
+  let st;
+  for (let k = 0; k < 50; k++) {
+    st = (await c.json('GET', `/admin/instagram/${post}/etat`)).json();
+    if (st.done) break;
+    await new Promise(res => setTimeout(res, 20));
+  }
+  assert.deepEqual([st.done, st.ok, st.percent, st.permalink], [true, true, 100, 'https://www.instagram.com/p/abc/']);
+  assert.equal(st.label, 'Publiée sur Instagram.');
+  const after = await c.html('/admin/instagram');
+  assert.match(after, /Dernières publications[\s\S]*voir|Dernières publications[\s\S]*publiée le/i);
+  // Journal : mise en file, envoi commencé, publiée, avec qui ; état par forme et mot.
+  assert.match(after, /class="enc-tag ok">réussi<\/span><\/td><td><a href="\/admin\/photos\/\d+#instagram">[^<]+<\/a><\/td><td>Publiée sur Instagram<\/td><td class="mono">julien/);
+  assert.match(after, /<td>Envoi à Instagram commencé<\/td>/);
+  assert.match(after, /<td>Mise en file<\/td>/);
+  // En anglais, les messages du journal sont traduits.
+  const en = (await c.app.inject({ url: '/admin/instagram', cookies: { ...c.cookies, admin_langue: 'en' }, headers: { accept: 'text/html' } })).body;
+  assert.match(en, /<td>Published on Instagram<\/td>/);
+});
+
+test('publier maintenant : un refus ou un échec revient avec l’état, et s’inscrit au journal', async t => {
+  const c = await igAdmin(t, { fail: 'media' });
+  const post = c.app.instagram.enqueue(c.photo);
+  const r = await c.json('POST', `/admin/instagram/${post}/publier`);
+  let st = r.statusCode === 422 ? r.json().state : null;
+  for (let k = 0; !st?.done && k < 50; k++) { await new Promise(res => setTimeout(res, 20)); st = (await c.json('GET', `/admin/instagram/${post}/etat`)).json(); }
+  assert.equal(st.done, true);
+  assert.equal(st.ok, false);
+  assert.match(st.label, /^Pas envoyée : /);                                      // 1er essai : reste en file
+  assert.doesNotMatch(st.label, /IGQV|access_token=[^…]/);
+  assert.match(await c.html('/admin/instagram'), /class="enc-tag warn">attention[\s\S]*Pas envoyée/);
+  // Hors file : introuvable ; état d'un post inconnu : « retiré ».
+  assert.equal((await c.json('GET', '/admin/instagram/9999/etat')).json().status, 'removed');
 });

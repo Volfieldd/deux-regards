@@ -198,6 +198,10 @@ const I18N = {
   "Série choisie : elle sera gardée à l’enregistrement.": {"en": "Series chosen: it will be kept when you save.", "de": "Serie gewählt: Sie wird beim Speichern übernommen."},
   "{got} Mo sur {total}": {"en": "{got} MB of {total}", "de": "{got} MB von {total}"},
   "{done} photos sur {total}": {"en": "{done} of {total} photos", "de": "{done} von {total} Fotos"},
+  "Envoi en cours…": {"en": "Sending…", "de": "Wird gesendet…"},
+  "Voir le post ↗": {"en": "See the post ↗", "de": "Beitrag ansehen ↗"},
+  "Mettre à jour la page": {"en": "Refresh the page", "de": "Seite aktualisieren"},
+  "Suivi interrompu : rechargez la page pour voir où en est l’envoi.": {"en": "Tracking interrupted: reload the page to see how the sending is going.", "de": "Verfolgung unterbrochen: Laden Sie die Seite neu, um den Stand der Sendung zu sehen."},
 };
 function tr(s, params) {
   const e = I18N[s];
@@ -1774,6 +1778,62 @@ const activity = (() => {
   });
   list.addEventListener('click', e => { const o = e.target.closest('[role=option]'); if (o) run(Number(o.dataset.i)); });
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+})();
+
+// ----- page Instagram : « Publier maintenant » suivi sans recharger (étapes, barre d'avancement) -----
+(function () {
+  const items = $$('[data-ig-item]');
+  if (!items.length) return;
+  const box = id => $(`[data-ig-item="${id}"] [data-ig-progress]`);
+  const show = (id, st) => {
+    const b = box(id);
+    if (!b) return;
+    b.hidden = false;
+    $('progress', b).value = st.percent || 0;
+    $('[data-ig-progress-label]', b).textContent = st.label || tr('Envoi en cours…');
+    b.classList.toggle('done-ok', Boolean(st.done && st.ok));
+    b.classList.toggle('done-ko', Boolean(st.done && !st.ok));
+  };
+  const finish = (id, st) => {
+    const b = box(id);
+    $$('[data-ig-publish] button').forEach(x => { x.disabled = false; });
+    if (st.ok && st.permalink) { const a = document.createElement('a'); a.className = 'more'; a.href = st.permalink; a.target = '_blank'; a.rel = 'noopener'; a.textContent = tr('Voir le post ↗'); b.append(' ', a); }
+    // Les listes (file, dernières publications, journal) suivent : la page se recharge après un succès.
+    if (st.ok) setTimeout(() => location.reload(), 2500);
+    else { const a = document.createElement('a'); a.className = 'more'; a.href = location.pathname; a.textContent = tr('Mettre à jour la page'); b.append(' ', a); }
+  };
+  async function watch(id) {
+    for (let k = 0; k < 240; k++) {
+      await new Promise(r => setTimeout(r, k ? 1000 : 300));
+      let st;
+      try { st = await (await fetch(`/admin/instagram/${id}/etat`, { headers: { accept: 'application/json' } })).json(); } catch { st = null; }
+      if (!st) continue;
+      show(id, st);
+      if (st.done) return finish(id, st);
+    }
+    show(id, { percent: 0, label: tr('Suivi interrompu : rechargez la page pour voir où en est l’envoi.'), done: true, ok: false });
+  }
+  document.addEventListener('submit', async e => {
+    const form = e.target.closest('[data-ig-publish]');
+    if (!form) return;
+    e.preventDefault();
+    const id = form.dataset.igPublish;
+    $$('[data-ig-publish] button').forEach(x => { x.disabled = true; });
+    show(id, { percent: 3, label: tr('Envoi en cours…') });
+    try {
+      const res = await fetch(form.action, { method: 'POST', redirect: 'manual', headers: { 'x-csrf-token': CSRF, accept: 'application/json' } });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { show(id, { ...(data.state || {}), percent: 0, label: data.error || tr('Erreur {status}', { status: res.status }), done: true, ok: false }); return finish(id, { ok: false }); }
+      show(id, data.state);
+      if (data.state?.done) return finish(id, data.state);
+      watch(id);
+    } catch {
+      show(id, { percent: 0, label: tr('Session expirée ? Rechargez la page.'), done: true, ok: false });
+      finish(id, { ok: false });
+    }
+  });
+  // Envoi déjà en cours à l'ouverture de la page (créneau, autre onglet) : suivi aussi.
+  $$('[data-ig-watch]').forEach(b => watch(b.dataset.igWatch));
 })();
 
 // ----- fiche d'une photo : partage Instagram (aperçu, légende) -----

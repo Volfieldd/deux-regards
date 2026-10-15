@@ -10,8 +10,16 @@ La mise en place se fait une seule fois : un **compte Instagram professionnel**,
 2. **Aux heures choisies** (18 h 30 par défaut, heure de Paris), la première photo de la file part sur Instagram. Une par créneau.
 3. **Jusqu’au départ**, tout se règle :
    - dans la **fiche de la photo**, section **Instagram** : cadre, filigrane, légende, avec l’aperçu exact de l’image envoyée, puis **Mettre à jour** ; **Retirer de la file** l’en sort ;
-   - dans la page **Instagram** : l’ordre de la file (↑ ↓), **Publier maintenant**, **Retirer**.
-4. Une fois publiée, la fiche donne le lien **voir le post ↗**, et l’historique de la page Instagram le lien **Voir sur Instagram ↗**.
+   - dans la page **Instagram** : l’ordre de la file (↑ ↓), **Publier maintenant**, **Retirer**. Après **Publier maintenant**, une barre d’avancement montre chaque étape sans recharger la page (vérifications, image envoyée, traitement par Instagram, publication). À la fin, elle affiche ✓ avec le lien du post, ou ✕ avec la raison.
+4. Une fois publiée, la fiche donne le lien **voir le post ↗**, et la page Instagram le lien **Voir ↗** dans **Dernières publications**.
+
+**La page Instagram** montre :
+- en haut, le compte, le rythme de publication et la consommation ;
+- à gauche, la **file d’attente** ;
+- à droite, les photos **en échec** (avec **Réessayer**) et les **10 dernières publications** ;
+- en bas, le **journal** : mises en file, envois, étapes, publications, échecs, pauses, reprises, demandes de republication. Pour chaque événement : la date, l’état (✓ réussi, ✕ échec, ▲ attention, info), la photo et qui l’a déclenché (sinon « automatique »). Le journal est gardé 90 jours.
+
+Les **réglages** sont repliés sous le journal.
 
 > Une photo n’entre jamais deux fois d’elle-même dans la file : dépubliée puis republiée, elle n’est pas reproposée. Pour la partager à nouveau, utilisez **Republier (remettre dans la file)** dans sa fiche.
 
@@ -72,8 +80,8 @@ Chaque matin (après 6 h), le site relève les **likes** et les **commentaires**
 ## En cas d’échec
 
 - **Nouvel essai automatique :** la photo reste en tête de file, et le message d’erreur s’affiche dans la file et dans la fiche. Elle repart au créneau suivant, **3 essais au plus**.
-- **Après 3 échecs :** elle passe dans l’**historique**, avec **Réessayer**. La fiche de la photo propose aussi **Republier (remettre en tête de file)**.
-- **Le photographe** (qui ne gère pas la file) voit l’échec dans **Aujourd’hui** et sur la fiche, avec **Demander la republication**. Une seule demande par échec. Elle s’affiche ensuite, marquée ⚑ « Republication demandée », dans l’**Aujourd’hui** de ceux qui gèrent la file, dans l’historique et sur la fiche ; ils la reçoivent aussi par e-mail s’ils l’ont choisi. Elle s’efface quand la photo repart dans la file. Si la photo est déjà dans la file, il n’y a rien à demander.
+- **Après 3 échecs :** elle passe dans **En échec**, avec **Réessayer**. La fiche de la photo propose aussi **Republier (remettre en tête de file)**.
+- **Le photographe** (qui ne gère pas la file) voit l’échec dans **Aujourd’hui** et sur la fiche, avec **Demander la republication**. Une seule demande par échec. Elle s’affiche ensuite, marquée ▲ « Republication demandée », dans l’**Aujourd’hui** de ceux qui gèrent la file, dans **En échec** sur la page Instagram et sur la fiche ; ils la reçoivent aussi par e-mail s’ils l’ont choisi. Elle s’efface quand la photo repart dans la file. Si la photo est déjà dans la file, il n’y a rien à demander.
 - **Accès expiré :** le jeton d’accès dure 60 jours et se renouvelle tout seul. S’il a expiré (plus de 60 jours sans fonctionner), reconnectez le compte depuis la page **Instagram** : **Déconnecter**, puis **Connecter le compte Instagram**. Si l’admin affiche **Reconnecter le compte** (clé de chiffrement changée, voir l’étape 6), cliquez simplement dessus.
 
 ---
