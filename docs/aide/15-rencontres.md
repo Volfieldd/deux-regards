@@ -171,6 +171,7 @@ Une personne peut demander **une copie de ses données** ou **leur effacement** 
 - **Effacer les données de cette personne** (en bas de la fiche) : nom, adresse, messages, signature, images et historique disparaissent. Cochez **Supprimer aussi les photos où elle apparaît** si elle le demande : originaux et images sont supprimés, et effacés des sauvegardes sous 90 jours. Si elle avait **refusé** la publication et que vous gardez des photos, une **trace anonyme** garde ce refus (sans aucune donnée sur elle) : ces photos restent impossibles à publier.
 - Les **posts déjà publiés sur Instagram** sont rappelés après l'effacement : supprimez-les dans l'application.
 - **Marquer la demande comme traitée** une fois la réponse envoyée.
+- **Relances par e-mail** (si l'envoi d'e-mails est configuré) : dès l'arrivée de la demande, un e-mail part au photographe concerné, même s'il n'a pas choisi les e-mails. Un rappel suit au quart du délai (environ 8 jours), puis un autre à la moitié avec l'administrateur en copie, et un dernier e-mail **prioritaire** aux trois quarts (il reste moins d'une semaine). Sans photographe joignable, l'administrateur les reçoit directement. Les e-mails ne donnent que la référence de la carte, jamais le nom ni l'adresse de la personne. Tout s'arrête quand la demande est marquée traitée.
 
 ## Données
 

@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { ROLES, PERMISSIONS, grantsOf } from '../permissions.js';
+import { MailError } from '../mailer.js';
 import { AccountError } from '../accounts.js';
 import { NoteError } from '../notes.js';
 import { ReviewError } from '../review.js';
@@ -819,7 +820,22 @@ export default async function adminRoutes(app) {
   app.get('/admin/comptes', P('comptes.gerer'), async (request, reply) => render(request, reply, 'accounts', {
     title: request.t('Comptes et rôles'), accounts: app.accounts.list(), authors: repo.authors(), me: request.session.sub,
     roles: ROLE_ORDER.map(key => ({ key, label: ROLES[key].label, ready: READY_ROLES.has(key) })), guarded: (app.config.adminSubs || []).length > 0,
+    mail: { enabled: app.mailer.enabled, from: app.mailer.from, mine: (a => a?.notify_to || a?.email || request.session.email || '')(app.accounts.bySub(request.session.sub)) },
   }));
+  // Tester l'envoi d'e-mails : à l'adresse choisie (la sienne par défaut) ; l'erreur du serveur de messagerie sinon.
+  app.post('/admin/comptes/test-email', W('comptes.gerer'), async (request, reply) => {
+    const to = String(request.body?.adresse || '').trim().slice(0, 200);
+    const back = '/admin/comptes#email';
+    if (!app.mailer.enabled) return failed(reply, back, request.t('L’envoi d’e-mails n’est pas configuré sur ce serveur (SMTP_URL).'));
+    if (!/^[^\s@<>",]+@[^\s@<>",]+\.[^\s@<>",]+$/.test(to)) return failed(reply, back, request.t('Cette adresse e-mail n’est pas valide.'));
+    try {
+      await app.reminders.test(to, request.t);
+    } catch (err) {
+      if (!(err instanceof MailError)) throw err;
+      return failed(reply, back, request.t.msg(err.message));
+    }
+    return done(reply, back, request.t('E-mail de test envoyé à {to} : vérifiez la boîte de réception (et les indésirables).', { to }));
+  });
   app.post('/admin/comptes/:id', W('comptes.gerer'), async (request, reply) => {
     const body = request.body || {};
     const a = app.accounts.byId(byId(request.params.id));
@@ -1399,7 +1415,7 @@ export default async function adminRoutes(app) {
   // Préférence de chacun : être prévenu par e-mail (propositions, décisions).
   app.post('/admin/compte/notifications', W('admin.acceder'), async (request, reply) => {
     try {
-      app.accounts.setNotify(request.session.sub, { on: request.body?.email === '1', to: request.body?.adresse });
+      app.accounts.setNotify(request.session.sub, { on: request.body?.email === '1', to: request.body?.adresse, digest: request.body?.recap });
     } catch (err) {
       if (!(err instanceof AccountError)) throw err;
       return failed(reply, '/admin#compte', request.t.msg(err.message));

@@ -67,6 +67,7 @@ As long as the essentials are missing (names, address, email, person responsible
 - **Deactivated:** the account can no longer sign in, and its current session loses access at once.
 - **Delete this account:** the account and its sessions are erased; if it signs in again, it starts over as pending.
 - **Safeguards:** there is always at least one active administrator; you cannot deactivate or delete yourself; accounts listed in `ADMIN_SUBS` (server configuration, marked “protected”) remain administrators whatever happens. The **identifier (sub)** shown under each account is the one to copy into `ADMIN_SUBS` (one click selects it).
+- **Emails** (bottom of the page): shows whether the server can send emails (`SMTP_URL`, `MAIL_FROM`) and from which address. **Send the test** sends an email to the chosen address (yours by default). If it is refused, the reason is shown, for example credentials refused or server unreachable.
 
 The menu only shows the pages the account can open.
 

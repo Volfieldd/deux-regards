@@ -171,6 +171,7 @@ Eine Person kann **eine Kopie ihrer Daten** oder **deren Löschung** verlangen: 
 - **Daten dieser Person löschen** (unten auf der Seite): Name, Adresse, Nachrichten, Unterschrift, Bilder und Verlauf verschwinden. Kreuzen Sie **Auch die Fotos löschen, auf denen sie zu sehen ist** an, wenn sie es wünscht: Originale und Bilder werden gelöscht und innerhalb von 90 Tagen aus den Sicherungen entfernt. Hatte sie die Veröffentlichung **abgelehnt** und behalten Sie Fotos, bewahrt ein **anonymer Eintrag** diese Ablehnung (ohne jegliche Daten über sie): Diese Fotos bleiben unveröffentlichbar.
 - An die **bereits auf Instagram veröffentlichten Beiträge** wird nach der Löschung erinnert: Löschen Sie sie in der App.
 - **Anfrage als bearbeitet markieren**, sobald die Antwort verschickt ist.
+- **Erinnerungen per E-Mail** (wenn der E-Mail-Versand eingerichtet ist): Sobald die Anfrage eingeht, geht eine E-Mail an den betroffenen Fotografen, auch wenn er keine E-Mails gewählt hat. Nach einem Viertel der Frist (etwa 8 Tage) folgt eine Erinnerung, zur Hälfte eine weitere mit dem Administrator in Kopie und nach drei Vierteln eine letzte E-Mail mit **hoher Priorität** (weniger als eine Woche übrig). Ist kein Fotograf erreichbar, erhält der Administrator sie direkt. Die E-Mails nennen nur die Referenz der Karte, nie Namen oder Adresse der Person. Alles endet, sobald die Anfrage als bearbeitet markiert ist.
 
 ## Daten
 

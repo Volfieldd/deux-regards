@@ -16,7 +16,10 @@ Das ist die Seite **Heute**, auf der Sie landen. Oben **Website ansehen** und **
 - **Rhythmus**: die Anzahl der jeden Monat importierten Fotos, über ein Jahr.
 - **Letzte Änderungen**: die fünf zuletzt geänderten Fotos.
 - **Prioritätsnachweise**: Anzahl der Fotos mit Zeitstempel und der nach einem Fehler ausstehenden, mit **Jetzt erneut versuchen**. Siehe [Prioritätsnachweise](preuves).
-- **Ihr Konto**: der Name des angemeldeten Kontos, seine Rollen und der Fotograf, mit dem es verknüpft ist.
+- **Ihr Konto**: der Name des angemeldeten Kontos, seine Rollen und der Fotograf, mit dem es verknüpft ist. Hier werden auch die E-Mails eingestellt:
+  - **Mich auch per E-Mail benachrichtigen**: Vorschläge, Entscheidungen zu Ihren Fotos und Anmerkungen, sobald sie eintreffen;
+  - **Zusammenfassung dessen, was ansteht**: **nie**, **jeden Tag** oder **jede Woche (montags)**. Sie geht gegen 8 Uhr hinaus, nur wenn etwas ansteht, nie öfter als einmal am Tag;
+  - **DSGVO-Anfragen** werden Ihnen immer gesendet, mit ihren Erinnerungen (siehe die Hilfe „Fotografierte Personen“).
   - **Konto nicht verknüpft:** Ein Administrator verknüpft es unter [Konten und Rollen](reglages#comptes-et-rôles) mit seinem Fotografen.
   - **Konto verknüpft:** Ihre Importe werden Ihnen standardmäßig zugeordnet.
 

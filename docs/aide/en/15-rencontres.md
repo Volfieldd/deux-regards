@@ -171,6 +171,7 @@ A person can ask for **a copy of their data** or **for it to be erased**: on `/b
 - **Erase this person’s data** (at the bottom of the page): name, address, messages, signature, images and history disappear. Tick **Also delete the photos they appear in** if they ask: originals and images are deleted, and erased from backups within 90 days. If they had **refused** publication and you keep photos, an **anonymous record** keeps that refusal (with no data about them): those photos remain impossible to publish.
 - **Posts already published on Instagram** are listed as a reminder after the erasure: delete them in the app.
 - **Mark the request as handled** once the reply has been sent.
+- **Email reminders** (if sending email is configured): as soon as the request arrives, an email goes to the photographer concerned, even if they have not chosen emails. A reminder follows at a quarter of the deadline (about 8 days), then another at half with the administrator in copy, and a last **high-priority** email at three quarters (less than a week left). If no photographer can be reached, the administrator receives them directly. The emails only give the card reference, never the person’s name or address. Everything stops once the request is marked as handled.
 
 ## Data
 

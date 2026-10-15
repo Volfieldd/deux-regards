@@ -136,6 +136,9 @@
         <input type="hidden" name="_csrf" value="<%= it.csrf %>">
         <label class="inline"><input type="checkbox" name="email" value="1"<%~ it.account && it.account.notify_email ? ' checked' : '' %>> <%= t('Me prévenir aussi par e-mail (propositions, décisions sur mes photos, remarques)') %></label>
         <label><%= t('Adresse') %> <span class="mono"><%= it.account && it.account.email ? t('vide : {email}', { email: it.account.email }) : t('obligatoire pour recevoir les e-mails') %></span><input type="email" name="adresse" value="<%= it.account ? it.account.notify_to : '' %>" maxlength="200"></label>
+        <label><%= t('Récapitulatif de ce qui vous attend') %> <span class="mono"><%= t('par e-mail, vers 8 h, seulement s’il y a quelque chose') %></span>
+          <select name="recap"><% [['off', t('jamais')], ['daily', t('chaque jour')], ['weekly', t('chaque semaine (le lundi)')]].forEach(([k, l]) => { %><option value="<%= k %>"<%~ (it.account?.digest || 'off') === k ? ' selected' : '' %>><%= l %></option><% }) %></select></label>
+        <p class="hint"><%= t('Les demandes RGPD (accès, effacement) vous sont toujours envoyées, avec des relances au fil du délai d’un mois.') %></p>
 <% if (!it.mailer) { %>        <p class="hint"><%= t('L’envoi d’e-mails n’est pas configuré sur ce serveur : seul « Aujourd’hui » vous préviendra.') %></p><% } %>
         <p class="actions"><button class="btn ghost" type="submit"><%= t('Enregistrer') %></button></p>
       </form>

@@ -25,6 +25,7 @@ import { createStats } from './stats.js';
 import { createTranslator } from './translate.js';
 import { createEncounters } from './encounters.js';
 import { createMailer } from './mailer.js';
+import { createReminders } from './reminders.js';
 import { createVault } from './vault.js';
 import { createInstagram } from './instagram.js';
 import { createTodo } from './todo.js';
@@ -233,6 +234,11 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onClose', async () => clearInterval(reviewTimer));
   app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
+  // Relances par e-mail (demandes RGPD par quarts du délai, récapitulatifs) : toutes les heures.
+  app.decorate('reminders', createReminders({ db, accounts: app.accounts, todo: app.todo, mailer: app.mailer, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log }));
+  let remindTimer = null;
+  app.addHook('onReady', async () => { remindTimer = setInterval(() => app.reminders.run(), 3600 * 1000); remindTimer.unref(); setTimeout(() => app.reminders.run(), 60 * 1000).unref(); });
+  app.addHook('onClose', async () => clearInterval(remindTimer));
 
   await setupAuth(app, oidc && { oidc });
   const headers = { ...SECURITY_HEADERS, 'content-security-policy': csp([app.oidc.origin].filter(Boolean)) };

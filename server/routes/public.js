@@ -403,6 +403,8 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     if (!helloLimit(request.ip)) return hello(request, reply, { values: body, errors: { limit: 'limit' }, card: card?.badCode ? null : card, status: 429 });
     try {
       const r = app.encounters.submit(body, { lang });
+      // Demande RGPD : le photographe est prévenu tout de suite (relances ensuite, voir server/reminders.js).
+      if (body.rights) app.reminders?.rights().catch(err => request.log.warn({ err: err.message }, 'relance RGPD'));
       return reply.redirect(`${localize('/bonjour/merci', lang)}${r.ref ? `?ref=${encodeURIComponent(r.ref)}` : ''}`, 303);
     } catch (err) {
       if (!(err instanceof EncounterError)) throw err;

@@ -67,6 +67,7 @@ Solange das Wesentliche fehlt (Namen, Adresse, E-Mail, Verantwortlicher), weist 
 - **Deaktiviert:** Das Konto kann sich nicht mehr anmelden, und seine laufende Sitzung verliert sofort den Zugriff.
 - **Dieses Konto löschen:** Konto und Sitzungen werden gelöscht; meldet es sich erneut an, beginnt es wieder wartend.
 - **Schutzmaßnahmen:** Es gibt immer mindestens einen aktiven Administrator; man kann sich nicht selbst deaktivieren oder löschen; die in `ADMIN_SUBS` aufgeführten Konten (Serverkonfiguration, als „geschützt“ markiert) bleiben in jedem Fall Administratoren. Die unter jedem Konto angezeigte **Kennung (sub)** ist die, die in `ADMIN_SUBS` einzutragen ist (ein Klick markiert sie).
+- **E-Mails** (unten auf der Seite): zeigt, ob der Server E-Mails senden kann (`SMTP_URL`, `MAIL_FROM`) und von welcher Adresse. **Test senden** schickt eine E-Mail an die gewählte Adresse (standardmäßig Ihre). Bei einer Ablehnung wird der Grund angezeigt, zum Beispiel abgelehnte Zugangsdaten oder ein nicht erreichbarer Server.
 
 Das Menü zeigt nur die Seiten, die das Konto öffnen darf.
 
