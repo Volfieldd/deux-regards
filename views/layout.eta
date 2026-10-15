@@ -24,8 +24,12 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="<%= it.pageTitle %>">
   <meta property="og:site_name" content="<%= it.siteName %>">
+<% if (it.description) { %>
+  <meta property="og:description" content="<%= it.description %>">
+<% } %>
 <% if (ogImage) { %>
   <meta property="og:image" content="<%= ogImage %>">
+  <meta name="twitter:card" content="summary_large_image">
 <% } %>
   <link rel="preload" href="/fonts/cormorant-garamond/files/cormorant-garamond-latin-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="<%= it.asset('css/site.css') %>">

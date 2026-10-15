@@ -49,6 +49,8 @@ The next photo depends on the active filter: in “Street, by Julien”, you sta
 
 **Like and Report**: under each photo’s text, a **Like** heart (anonymous: no account, no cookie; visitors can take their like back, and the count is shown next to it) and a **Report** link: a photo that should not be online, a suggestion for the text, something else, with a message and an optional address. Someone who recognises themselves is sent to `/bonjour`. Reports arrive in “Today” and on the **Visitor reports** page; the number of likes is shown in the Audience section of the photo’s page.
 
+**Share**: next to the heart. On a phone, it opens the phone’s share menu (Instagram, Signal, Messages, WhatsApp…). On a computer, a window shows the preview (image, title, photographer, site), the WhatsApp, Facebook, Bluesky, X, Pinterest and Email buttons, **View on Instagram** if the photo was posted from the site, the link to copy and a QR code to open the photo on a phone. The page is shared, never the file. These are plain links: no script from these services is loaded, no cookie is set. Without JavaScript, the button leads to a page with the same links. Shares are counted anonymously (see [Statistics](statistiques)).
+
 ## Other pages
 
 - **About:** full logo, tagline, text, authors’ biographies.

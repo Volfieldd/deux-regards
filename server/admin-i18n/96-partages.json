@@ -1,0 +1,13 @@
+{
+  "Partages": {"en": "Shares", "de": "Geteilt"},
+  "{n} sur la période": {"en": "{n} in this period", "de": "{n} im Zeitraum"},
+  "Aucun partage sur la période.": {"en": "No shares in this period.", "de": "Im Zeitraum nicht geteilt."},
+  "Photos les plus partagées": {"en": "Most shared photos", "de": "Am häufigsten geteilte Fotos"},
+  "Comptés sans rien savoir du visiteur : un nombre par photo, par moyen et par jour. Sur téléphone, le menu du téléphone ne dit pas quelle app a été choisie.": {"en": "Counted without knowing anything about the visitor: one number per photo, per channel and per day. On a phone, the phone’s share menu does not say which app was chosen.", "de": "Gezählt, ohne etwas über den Besucher zu wissen: eine Zahl pro Foto, Kanal und Tag. Auf dem Telefon verrät das Teilen-Menü nicht, welche App gewählt wurde."},
+  "Lien copié": {"en": "Link copied", "de": "Link kopiert"},
+  "Post Instagram ouvert": {"en": "Instagram post opened", "de": "Instagram-Beitrag geöffnet"},
+  "Menu du téléphone": {"en": "Phone share menu", "de": "Teilen-Menü des Telefons"},
+  "QR scanné": {"en": "QR scanned", "de": "QR gescannt"},
+  "{n} partage": {"en": "{n} share", "de": "{n}-mal geteilt"},
+  "{n} partages": {"en": "{n} shares", "de": "{n}-mal geteilt"}
+}

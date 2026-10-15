@@ -334,3 +334,51 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .viewer .report { color: var(--dark-mute); font-size: 13px; border-bottom: 1px solid var(--dark-rule); }
 .viewer .report:hover { color: var(--dark-ink); }
 @media (prefers-reduced-motion: reduce) { .viewer .like svg { transition: none; } }
+
+/* ---------- Partager : bouton, fenêtre (ordinateur), feuille qui monte du bas (téléphone sans menu de partage) ---------- */
+.viewer .share-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px 0 11px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--dark-rule); color: var(--dark-ink); font: 400 13px var(--mono); }
+.viewer .share-btn:hover { box-shadow: inset 0 0 0 1.5px var(--dark-ink); }
+.share-dialog, .share-box { --sh-bg: #151517; --sh-s2: #1e1e21; --sh-s3: #29292d; background: var(--sh-bg); color: var(--dark-ink); }
+.share-dialog { width: min(540px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); border: 0; border-radius: 18px; padding: 20px 22px 22px; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 30px 80px rgba(0,0,0,.55); overflow: auto; }
+.share-dialog[open] { display: grid; gap: 16px; animation: share-in .18s ease-out; }
+.share-dialog::backdrop { background: rgba(5,5,6,.62); backdrop-filter: blur(3px); }
+@keyframes share-in { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+.share-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.share-h h1, .share-h h2 { margin: 0; font: italic 400 28px/1 var(--serif); }
+.share-x { width: 36px; height: 36px; flex: none; border-radius: 50%; border: 0; background: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); color: var(--dark-mute); display: grid; place-items: center; font-size: 15px; cursor: pointer; }
+.share-x:hover { color: var(--dark-ink); }
+.share-card { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px; border-radius: 12px; background: var(--sh-s2); }
+.share-card img { width: 92px; height: 61px; object-fit: cover; border-radius: 6px; display: block; }
+.share-card b { display: block; font: italic 400 21px/1.15 var(--serif); overflow-wrap: anywhere; }
+.share-card small { font-size: 11px; color: var(--dark-mute); }
+.share-nets { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 6px; }
+.share-nets .net { display: grid; justify-items: center; gap: 7px; width: 100%; padding: 2px 0; background: none; border: 0; color: var(--dark-mute); font: 400 12px/1.25 var(--sans); text-align: center; cursor: pointer; }
+.share-nets .net:hover, .share-nets .net:focus-visible { color: var(--dark-ink); }
+.share-nets .ic { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--sh-s3); transition: transform .15s ease; }
+.share-nets .net:hover .ic { transform: translateY(-2px); }
+.share-nets .ic-whatsapp { background: #25d366; } .share-nets .ic-facebook { background: #1877f2; } .share-nets .ic-bluesky { background: #1185fe; }
+.share-nets .ic-x { background: #000; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); } .share-nets .ic-pinterest { background: #e60023; } .share-nets .ic-email { background: #55555d; }
+.share-nets .ic-instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); }
+.share-nets .ic-more { box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+.share-copy { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px 6px 6px 14px; border-radius: 12px; background: var(--sh-s2); }
+.share-copy input { min-width: 0; border: 0; background: none; color: var(--dark-mute); font: 12.5px var(--mono); padding: 6px 0; }
+.share-copy input:focus { outline: none; color: var(--dark-ink); }
+.share-copy-btn { min-height: 38px; padding: 0 16px; border: 0; border-radius: 9px; background: var(--dark-ink); color: var(--dark); font: 500 13px var(--sans); white-space: nowrap; cursor: pointer; }
+.share-copy-btn.done { background: #56b4e9; color: #071621; }
+.share-qr { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.1); }
+.share-qr .qr { display: block; width: 92px; height: 92px; padding: 6px; border-radius: 10px; background: #fff; }
+.share-qr .qr svg { display: block; width: 100%; height: 100%; }
+.share-qr p { margin: 0; font-size: 12.5px; color: var(--dark-mute); }
+/* Téléphone (sans menu de partage du téléphone) : feuille en bas de l'écran, sans QR. */
+@media (max-width: 600px) {
+  .share-dialog { width: 100vw; max-width: none; margin: auto 0 0; border-radius: 22px 22px 0 0; padding: 18px 16px calc(22px + env(safe-area-inset-bottom, 0px)); max-height: 88dvh; }
+  .share-dialog[open] { animation-name: share-up; }
+  .share-dialog .share-qr { display: none; }
+  .share-nets .ic { width: 50px; height: 50px; }
+}
+@keyframes share-up { from { transform: translateY(100%); } }
+@media (prefers-reduced-motion: reduce) { .share-dialog[open] { animation: none; } .share-nets .ic { transition: none; } }
+/* Page « Partager » (sans JavaScript). */
+.share-page { min-height: 100dvh; display: grid; place-items: center; padding-block: 32px; }
+.share-box { width: min(540px, 100%); border-radius: 18px; padding: 20px 22px 22px; display: grid; gap: 16px; box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
+.share-box .more { color: var(--dark-mute); }

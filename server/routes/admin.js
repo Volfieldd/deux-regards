@@ -565,7 +565,7 @@ export default async function adminRoutes(app) {
   };
   // Ce que la fiche montre en plus du formulaire : audience, Instagram, personnes, sortie, état et confirmations.
   const photoExtras = (photo, t) => ({
-    proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
+    proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), shares: app.shares.forPhoto(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
     outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
     suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(photo.id)), undefined, true),
     ready: app.readiness.state(photo.id, null, t), confirmations: app.readiness.confirmations(photo.id), igConfirmed: app.readiness.confirmed(photo.id, 'instagram'),
@@ -618,6 +618,15 @@ export default async function adminRoutes(app) {
       top: app.stats.topPhotos(from, to, 10).map(r => ({ ...r, photo: all.get(r.id) && withReady(all.get(r.id)) })).filter(r => r.photo),
       pages: app.stats.topPages(from, to, 8).map(r => ({ ...r, label: pageLabel(r.page, categories, authors, request.t) })),
       sources: app.stats.sources(from, to, 8),
+      // Partages : par moyen, et photos les plus partagées.
+      shares: (() => {
+        const t = request.t;
+        const VIA = { whatsapp: 'WhatsApp', facebook: 'Facebook', bluesky: 'Bluesky', x: 'X', pinterest: 'Pinterest', email: t('E-mail'),
+          copie: t('Lien copié'), instagram: t('Post Instagram ouvert'), telephone: t('Menu du téléphone'), qr: t('QR scanné') };
+        const byVia = app.shares.byVia(from, to).map(r => ({ ...r, label: VIA[r.via] || r.via }));
+        return { byVia, total: byVia.reduce((a, r) => a + r.n, 0),
+          top: app.shares.topPhotos(from, to, 5).map(r => ({ ...r, photo: all.get(r.id) && withReady(all.get(r.id)) })).filter(r => r.photo) };
+      })(),
       ...(() => {
         const countries = app.stats.countries(from, to).map(r => ({ ...r, name: countryName(r.country, request.t) }));
         return { countries, bubbles: countryBubbles(countries) };
