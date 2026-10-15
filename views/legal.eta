@@ -1,0 +1,16 @@
+<% layout('./layout') %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+  <%~ include('./nav', it) %>
+</header>
+<main class="about wrap privacy">
+  <h1><%= it.L.title %></h1>
+  <div class="prose">
+<% it.sections.forEach(([h, ps]) => { %>
+    <h2><%= h %></h2>
+<% ps.forEach(p => { %>    <p><%= p %></p>
+<% }) %>
+<% }) %>
+  </div>
+</main>
+<%~ include('./footer', it) %>

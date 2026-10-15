@@ -5,6 +5,7 @@ import { pad } from '../format.js';
 import { picture } from '../picture.js';
 import { RIGHTS, rightsText } from '../rights.js';
 import { PRIVACY, UPDATED as PRIVACY_UPDATED } from '../privacy.js';
+import { LEGAL } from '../legal.js';
 import { project, MAP } from '../geo/projection.js';
 import { countryName } from '../geo/cities.js';
 import { LANGS, PREFIX, UI, pick, localize, splitLang, detectLang } from '../i18n.js';
@@ -28,6 +29,10 @@ export default async function publicRoutes(app) {
   for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit });
 
   // Sélecteur de langue : retient le choix (seul cookie du site, posé à ce moment-là) puis ouvre la page demandée.
+  // Adresses habituelles des mentions légales en Allemagne et en anglais.
+  app.get('/impressum', async (request, reply) => reply.redirect('/de/mentions-legales', 301));
+  app.get('/legal-notice', async (request, reply) => reply.redirect('/en/mentions-legales', 301));
+
   app.get('/langue/:lang', async (request, reply) => {
     const lang = LANGS.includes(request.params.lang) ? request.params.lang : null;
     const to = String(request.query.vers || '');
@@ -107,7 +112,7 @@ export default async function publicRoutes(app) {
       ...repo.authors().filter(a => photos.some(p => p.author_slug === a.slug)).map(a => ({ loc: galleryUrl({ regard: a.slug }) })),
       ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at) })),
       ...(mapEnabled() ? [{ loc: '/carte' }] : []),
-      { loc: '/a-propos' }, { loc: '/droits' }, { loc: '/confidentialite' },
+      { loc: '/a-propos' }, { loc: '/droits' }, { loc: '/confidentialite' }, { loc: '/mentions-legales' },
     ];
     const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
     const links = loc => LANGS.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${xml(base + localize(loc, l))}"/>`).join('');
@@ -345,6 +350,18 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit }) {
       contactHref: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) ? `mailto:${contact}` : null,
       pageTitle: `${P.title} · ${siteName}`, canonical: '/confidentialite', description: P.description(siteName),
     });
+  });
+
+  // Mentions légales / Impressum (obligatoires en France et en Allemagne), en pied de chaque page.
+  app.get('/mentions-legales', async (request, reply) => {
+    const siteName = app.siteName();
+    const s = repo.settings();
+    const L = LEGAL[lang];
+    const host = app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, '');
+    const sections = L.sections({ site: siteName, names: String(s.legal_names || '').trim(), address: s.legal_address, email: String(s.legal_email || s.privacy_contact || '').trim(),
+      phone: String(s.legal_phone || '').trim(), director: String(s.legal_director || '').trim(), host });
+    app.stats.hit(request, { page: 'mentions-legales' });
+    return reply.render('legal', { ...base, siteName, L, sections, pageTitle: `${L.title} · ${siteName}`, canonical: '/mentions-legales', description: L.description(siteName) });
   });
 
   // Conditions d'utilisation des photos : cible des mentions IPTC (WebStatement, LicensorURL), à /droits en français.

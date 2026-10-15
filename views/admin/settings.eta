@@ -39,6 +39,18 @@
 <% }) %>
     <label><%= t('Contact pour les demandes d’utilisation') %> <span class="mono"><%= t('adresse e-mail ou lien https://') %></span><input name="rights_contact" value="<%= s.rights_contact || '' %>" maxlength="200"></label>
   </section>
+  <section class="panel" id="mentions">
+    <h2><%= t('Mentions légales') %> <span class="mono"><%= t('page') %> <a href="/mentions-legales" target="_blank" rel="noopener">/mentions-legales</a> <%= t('(Impressum en allemand), liée en bas de chaque page') %></span></h2>
+    <p class="hint"><%= t('Obligatoires en France comme en Allemagne : qui édite le site, une adresse postale où vous joindre, un e-mail, et la personne responsable du contenu. Le texte est rédigé par le site (trois langues) ; seuls ces renseignements sont à donner.') %></p>
+<% if (it.legalMissing.length) { %>    <p class="cellnote warn"><%= t('Incomplètes : la page n’affiche que ce qui est rempli.') %></p>
+<% } %>    <label><%= t('Éditeurs') %> <span class="mono"><%= t('prénoms et noms, ex. « Sébastien … et Julien … »') %></span><input name="legal_names" value="<%= s.legal_names || '' %>" maxlength="200"></label>
+    <label><%= t('Adresse postale') %> <span class="mono"><%= t('rue, code postal, ville, pays ; une ligne par ligne d’adresse') %></span><textarea name="legal_address" rows="3" maxlength="400"><%= s.legal_address || '' %></textarea></label>
+    <div class="row">
+      <label><%= t('E-mail') %> <span class="mono"><%= t('vide : celui de la confidentialité') %></span><input name="legal_email" value="<%= s.legal_email || '' %>" maxlength="200"></label>
+      <label><%= t('Téléphone') %> <span class="mono"><%= t('facultatif') %></span><input name="legal_phone" value="<%= s.legal_phone || '' %>" maxlength="40"></label>
+    </div>
+    <label><%= t('Responsable de la publication') %> <span class="mono"><%= t('une personne physique (en Allemagne : « Verantwortlich nach § 18 MStV »)') %></span><input name="legal_director" value="<%= s.legal_director || '' %>" maxlength="120"></label>
+  </section>
   <section class="panel" id="confidentialite">
     <h2><%= t('Confidentialité') %> <span class="mono"><%= t('page') %> <a href="/confidentialite" target="_blank" rel="noopener">/confidentialite</a> <%= t('(RGPD), en trois langues') %></span></h2>
     <p class="hint"><%= t('La page décrit ce que le site fait des données : responsables (les auteurs), données, durées, destinataires, droits. Elle suit le code : rien à rédiger ici, sauf le contact et deux cases qui ne doivent être cochées que lorsque c’est vrai.') %></p>
