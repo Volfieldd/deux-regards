@@ -830,6 +830,8 @@ export default async function adminRoutes(app) {
     outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
     notes: app.notes.open({ photoId: photo.id }), ownPhoto: app.accounts.authorIdOf(request.session.sub) === photo.author_id,
     // Instagram : la main sur la file pour cette photo, ou seulement la proposer (circuit) ; sa proposition en cours.
+    // Mots-clés suggérés par CLIP (empreinte des propositions de séries) ; null : pas encore d'empreinte.
+    keywordSuggestions: app.keywordSuggest.forPhoto(photo, { lang: request.t.lang, have: photo.keywords }), seriesSuggestOn: app.seriesSuggest.enabled(),
     igFile: request.owns('instagram.file', photo.author_id), igPropose: request.owns('instagram.proposer', photo.author_id), igProposal: app.instagram.openProposal(photo.id),
     review: { state: repo.photo(photo.id)?.review || null, at: repo.photo(photo.id)?.publish_at || null, history: app.review.history(photo.id).slice(0, 10) },
     suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(photo.id)), undefined, true, request),

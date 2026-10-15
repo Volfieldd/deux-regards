@@ -1,4 +1,5 @@
 import { byId as cityById, norm } from './geo/cities.js';
+import { formsOf } from './keywords-suggest.js';
 
 // Recherche par mots-clés sur le site public : parmi les photos publiées, dans le titre, la légende, le lieu, les
 // mots-clés, la ville (et sa région), la série et le photographe, dans toutes les langues (« München » trouve une photo
@@ -23,7 +24,9 @@ export function createSearch({ db }) {
   // Mots de chaque champ d'une photo, une fois par champ (pondération).
   const docOf = r => {
     const city = r.city_id ? cityById(r.city_id) : null;
-    const v = { ...r, city: city ? city.labels.join(' ') : r.city_name || '' };
+    // Un mot-clé du vocabulaire est cherchable dans les trois langues (« phare » : aussi lighthouse, Leuchtturm).
+    const keywords = String(r.keywords || '').split(',').flatMap(k => formsOf(k) || [k]).join(' ');
+    const v = { ...r, keywords, city: city ? city.labels.join(' ') : r.city_name || '' };
     return FIELDS.map(([cols, w]) => [new Set(cols.flatMap(k => words(v[k] || ''))), w]);
   };
   return {

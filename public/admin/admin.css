@@ -1144,3 +1144,8 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .rel-v { display: inline-block; padding: 1px 7px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line2); font-size: 11px; margin-right: 4px; }
 .releases { list-style: none; margin: 16px 0; padding: 0; display: grid; gap: 12px; }
 .release h2 { font-size: 17px; }
+/* Mots-clés suggérés (CLIP) */
+.kw-sugg { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: -4px 0 6px; }
+.kw-chip { font: inherit; font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px dashed var(--line2); background: transparent; color: var(--ink); cursor: pointer; }
+.kw-chip:hover, .kw-chip:focus-visible { border-style: solid; background: var(--s2); }
+.js .kw-plain { display: none; }
