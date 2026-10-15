@@ -1,0 +1,174 @@
+{
+ "Emblème du site (Apparence)": {
+  "en": "Site emblem (Appearance)",
+  "de": "Emblem der Website (Erscheinungsbild)"
+ },
+ "Logo complet du site (Apparence)": {
+  "en": "Full site logo (Appearance)",
+  "de": "Vollständiges Logo der Website (Erscheinungsbild)"
+ },
+ "Logo envoyé ci-dessous": {
+  "en": "Logo uploaded below",
+  "de": "Unten hochgeladenes Logo"
+ },
+ "En haut à gauche": {
+  "en": "Top left",
+  "de": "Oben links"
+ },
+ "En haut": {
+  "en": "Top",
+  "de": "Oben"
+ },
+ "En haut à droite": {
+  "en": "Top right",
+  "de": "Oben rechts"
+ },
+ "À gauche": {
+  "en": "Left",
+  "de": "Links"
+ },
+ "Au centre": {
+  "en": "Centre",
+  "de": "Mitte"
+ },
+ "À droite": {
+  "en": "Right",
+  "de": "Rechts"
+ },
+ "En bas à gauche": {
+  "en": "Bottom left",
+  "de": "Unten links"
+ },
+ "En bas": {
+  "en": "Bottom",
+  "de": "Unten"
+ },
+ "En bas à droite": {
+  "en": "Bottom right",
+  "de": "Unten rechts"
+ },
+ "Mosaïque (répété en diagonale)": {
+  "en": "Tiled (repeated diagonally)",
+  "de": "Kachelung (diagonal wiederholt)"
+ },
+ "Plein cadre (centré, aussi grand que l’image)": {
+  "en": "Full frame (centred, as large as the image)",
+  "de": "Vollformat (zentriert, so groß wie das Bild)"
+ },
+ "Jost (sans empattement)": {
+  "en": "Jost (sans serif)",
+  "de": "Jost (serifenlos)"
+ },
+ "Cormorant Garamond italique": {
+  "en": "Cormorant Garamond italic",
+  "de": "Cormorant Garamond kursiv"
+ },
+ "IBM Plex Mono": {
+  "en": "IBM Plex Mono",
+  "de": "IBM Plex Mono"
+ },
+ "Aucune métadonnée": {
+  "en": "No metadata",
+  "de": "Keine Metadaten"
+ },
+ "Tout est retiré (recommandé). Comportement par défaut.": {
+  "en": "Everything is removed (recommended). Default behaviour.",
+  "de": "Alles wird entfernt (empfohlen). Standardverhalten."
+ },
+ "Droits d’auteur": {
+  "en": "Copyright",
+  "de": "Urheberrecht"
+ },
+ "Auteur, copyright (« © année auteur ») et mentions IPTC : crédit, lien vers la page « Droits d’utilisation ».": {
+  "en": "Author, copyright (“© year author”) and IPTC notices: credit, link to the “Usage rights” page.",
+  "de": "Urheber, Copyright („© Jahr Urheber“) und IPTC-Angaben: Credit, Link zur Seite „Nutzungsrechte“."
+ },
+ "Prise de vue": {
+  "en": "Shooting data",
+  "de": "Aufnahmedaten"
+ },
+ "Droits d’auteur + appareil, objectif, ouverture, vitesse, ISO, focale et date. Jamais la localisation.": {
+  "en": "Copyright + camera, lens, aperture, shutter speed, ISO, focal length and date. Never the location.",
+  "de": "Urheberrecht + Kamera, Objektiv, Blende, Belichtungszeit, ISO, Brennweite und Datum. Nie der Standort."
+ },
+ "Tout l’EXIF de l’original": {
+  "en": "All EXIF of the original",
+  "de": "Alle EXIF-Daten des Originals"
+ },
+ "Mentions IPTC + tout l’EXIF, y compris la localisation GPS et le numéro de série éventuel. À éviter.": {
+  "en": "IPTC notices + all EXIF, including GPS location and any serial number. Best avoided.",
+  "de": "IPTC-Angaben + alle EXIF-Daten, einschließlich GPS-Standort und eventueller Seriennummer. Besser vermeiden."
+ },
+ "Atelier": {
+  "en": "Studio",
+  "de": "Atelier"
+ },
+ "Nicephos — nuit": {
+  "en": "Nicephos — night",
+  "de": "Nicephos — Nacht"
+ },
+ "Nicephos — jour": {
+  "en": "Nicephos — day",
+  "de": "Nicephos — Tag"
+ },
+ "Prudent": {
+  "en": "Cautious",
+  "de": "Vorsichtig"
+ },
+ "Limites de Meta": {
+  "en": "Meta’s limits",
+  "de": "Grenzen von Meta"
+ },
+ "Personnalisé": {
+  "en": "Custom",
+  "de": "Benutzerdefiniert"
+ },
+ "Passe-partout blanc": {
+  "en": "White mat",
+  "de": "Weißes Passepartout"
+ },
+ "Passe-partout noir": {
+  "en": "Black mat",
+  "de": "Schwarzes Passepartout"
+ },
+ "Recadrage (sans bordure)": {
+  "en": "Crop (no border)",
+  "de": "Zuschnitt (ohne Rand)"
+ },
+ "Papier chaud, Cormorant Garamond en italique, accent « lampe inactinique ». Le thème d’origine.": {
+  "en": "Warm paper, Cormorant Garamond italic, “safelight” accent. The original theme.",
+  "de": "Warmes Papier, Cormorant Garamond kursiv, Akzent „Dunkelkammerlampe“. Das ursprüngliche Theme."
+ },
+ "Galerie noire, trait blanc du logo, capitales espacées en Jost léger, accent sable.": {
+  "en": "Black gallery, white logo line, spaced capitals in light Jost, sand accent.",
+  "de": "Schwarze Galerie, weiße Logolinie, gesperrte Großbuchstaben in leichtem Jost, Sandakzent."
+ },
+ "La même identité sur fond blanc, encre noire.": {
+  "en": "The same identity on white, black ink.",
+  "de": "Dieselbe Identität auf Weiß, schwarze Tinte."
+ },
+ "Le dessin seul, sans texte : il s’affiche à côté du nom, dans l’en-tête. Trait sombre sur fond clair, clair sur fond sombre, ou détouré.": {
+  "en": "The drawing alone, without text: shown next to the name in the header. Dark line on a light background, light on dark, or cut out.",
+  "de": "Die Zeichnung allein, ohne Text: Sie erscheint neben dem Namen in der Kopfzeile. Dunkle Linie auf hellem Grund, helle auf dunklem, oder freigestellt."
+ },
+ "Version à trait épais, lisible en petit : icône d’onglet, et emblème de l’en-tête sur téléphone. Carré de 512 px idéalement.": {
+  "en": "Thick-line version, legible when small: tab icon, and header emblem on phones. Ideally a 512 px square.",
+  "de": "Version mit dicker Linie, auch klein lesbar: Tab-Symbol und Emblem der Kopfzeile auf dem Telefon. Idealerweise ein Quadrat von 512 px."
+ },
+ "Le logo avec le nom (version horizontale) : affiché en grand en tête de la page « À propos ».": {
+  "en": "The logo with the name (horizontal version): shown large at the top of the “About” page.",
+  "de": "Das Logo mit dem Namen (horizontale Version): groß oben auf der Seite „Über uns“ angezeigt."
+ },
+ "Aperçu quand une page sans photo (À propos, Droits…) est partagée sur un réseau social. Carré 1080 px ou 1200 × 630, utilisé tel quel.": {
+  "en": "Preview when a page without a photo (About, Rights…) is shared on a social network. 1080 px square or 1200 × 630, used as is.",
+  "de": "Vorschau, wenn eine Seite ohne Foto (Über uns, Rechte…) in einem sozialen Netzwerk geteilt wird. Quadrat 1080 px oder 1200 × 630, unverändert verwendet."
+ },
+ "Nom du site seulement": {
+  "en": "Site name only",
+  "de": "Nur der Name der Website"
+ },
+ "Emblème + nom (+ sous-titre)": {
+  "en": "Emblem + name (+ subtitle)",
+  "de": "Emblem + Name (+ Untertitel)"
+ }
+}

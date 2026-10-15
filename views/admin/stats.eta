@@ -1,45 +1,45 @@
 <% layout('./layout') %>
-<% const t = it.totals, pv = it.previous;
-   const delta = (now, before) => { if (!before) return now ? 'nouveau' : ''; const d = Math.round(((now - before) / before) * 100); return `${d > 0 ? '+' : ''}${d} %`; };
-   const fmt = n => n.toLocaleString('fr-FR');
+<% const t = it.t, tot = it.totals, pv = it.previous;
+   const delta = (now, before) => { if (!before) return now ? t('nouveau') : ''; const d = Math.round(((now - before) / before) * 100); return `${d > 0 ? '+' : ''}${d} %`; };
+   const fmt = n => n.toLocaleString(it.locale);
    const max = it.top.length ? it.top[0].views : 1;
    const pmax = it.pages.length ? it.pages[0].views : 1;
    const smax = it.sources.length ? it.sources[0].visits : 1;
-   const label = s => (s === 'direct' ? 'Accès direct (favori, lien tapé, messagerie)' : s === 'autres' ? 'Autres sites' : s); %>
+   const label = s => (s === 'direct' ? t('Accès direct (favori, lien tapé, messagerie)') : s === 'autres' ? t('Autres sites') : s); %>
 <div class="toolbar">
   <div>
-    <h1>Statistiques</h1>
-    <p class="sub">Mesure anonyme, sans cookie ni service extérieur · visites des administrateurs et des robots exclues</p>
+    <h1><%= t('Statistiques') %></h1>
+    <p class="sub"><%= t('Mesure anonyme, sans cookie ni service extérieur · visites des administrateurs et des robots exclues') %></p>
   </div>
-  <nav class="seg" aria-label="Période">
+  <nav class="seg" aria-label="<%= t('Période') %>">
 <% Object.entries(it.PERIODS).forEach(([k, l]) => { %>    <a href="/admin/statistiques?periode=<%= k %>"<%~ Number(k) === it.days ? ' aria-current="true"' : '' %>><%= l %></a>
 <% }) %>  </nav>
 </div>
 
 <div class="stats-grid">
-  <section class="panel wide2" aria-label="Chiffres de la période">
+  <section class="panel wide2" aria-label="<%= t('Chiffres de la période') %>">
     <div class="figures">
-      <div><b><%= fmt(t.visitors) %></b><span>visiteurs <small class="delta"><%= delta(t.visitors, pv.visitors) %></small></span></div>
-      <div><b><%= fmt(t.views) %></b><span>pages vues <small class="delta"><%= delta(t.views, pv.views) %></small></span></div>
-      <div><b><%= fmt(it.photoViews) %></b><span>photos ouvertes en grand</span></div>
-      <div><b><%= t.visitors ? Math.round((t.mobile / t.visitors) * 100) : 0 %> %</b><span>sur téléphone</span></div>
+      <div><b><%= fmt(tot.visitors) %></b><span><%= t('visiteurs') %> <small class="delta"><%= delta(tot.visitors, pv.visitors) %></small></span></div>
+      <div><b><%= fmt(tot.views) %></b><span><%= t('pages vues') %> <small class="delta"><%= delta(tot.views, pv.views) %></small></span></div>
+      <div><b><%= fmt(it.photoViews) %></b><span><%= t('photos ouvertes en grand') %></span></div>
+      <div><b><%= tot.visitors ? Math.round((tot.mobile / tot.visitors) * 100) : 0 %> %</b><span><%= t('sur téléphone') %></span></div>
     </div>
-    <p class="hint">Visiteurs : visiteurs différents chaque jour, additionnés sur la période. Évolution : par rapport aux <%= it.PERIODS[it.days] %> précédents.</p>
+    <p class="hint"><%= t('Visiteurs : visiteurs différents chaque jour, additionnés sur la période. Évolution : par rapport aux {period} précédents.', { period: it.PERIODS[it.days] }) %></p>
   </section>
 
   <section class="panel wide2" aria-labelledby="chart-title">
-    <h2 id="chart-title">Fréquentation <span class="mono"><span class="key bar"></span> pages vues · <span class="key line"></span> visiteurs</span></h2>
+    <h2 id="chart-title"><%= t('Fréquentation') %> <span class="mono"><span class="key bar"></span> <%= t('pages vues') %> · <span class="key line"></span> <%= t('visiteurs') %></span></h2>
     <figure class="chartbox"><%~ it.chart %>
-      <figcaption class="sr-only">Pages vues et visiteurs, <%= it.days === 365 ? 'par mois' : 'par jour' %>, du <%= it.points[0].label %> au <%= it.points.at(-1).label %>.</figcaption></figure>
-    <details class="data"><summary>Voir les données</summary>
-      <table class="simple"><thead><tr><th scope="col"><%= it.days === 365 ? 'Mois' : 'Jour' %></th><th scope="col">Pages vues</th><th scope="col">Visiteurs</th></tr></thead>
+      <figcaption class="sr-only"><%= it.days === 365 ? t('Pages vues et visiteurs, par mois, du {from} au {to}.', { from: it.points[0].label, to: it.points.at(-1).label }) : t('Pages vues et visiteurs, par jour, du {from} au {to}.', { from: it.points[0].label, to: it.points.at(-1).label }) %></figcaption></figure>
+    <details class="data"><summary><%= t('Voir les données') %></summary>
+      <table class="simple"><thead><tr><th scope="col"><%= it.days === 365 ? t('Mois') : t('Jour') %></th><th scope="col"><%= t('Pages vues') %></th><th scope="col"><%= t('Visiteurs') %></th></tr></thead>
         <tbody><% it.points.slice().reverse().forEach(p => { %><tr><td><%= p.label %></td><td><%= p.views %></td><td><%= p.visitors %></td></tr><% }) %></tbody></table>
     </details>
   </section>
 
   <section class="panel" aria-labelledby="top-title">
-    <h2 id="top-title">Photos les plus vues</h2>
-<% if (!it.top.length) { %>    <p class="hint">Aucune photo ouverte sur la période.</p>
+    <h2 id="top-title"><%= t('Photos les plus vues') %></h2>
+<% if (!it.top.length) { %>    <p class="hint"><%= t('Aucune photo ouverte sur la période.') %></p>
 <% } else { %>
     <ol class="rank">
 <% it.top.forEach((r, i) => { %>
@@ -52,16 +52,16 @@
   </section>
 
   <section class="panel" aria-labelledby="pages-title">
-    <h2 id="pages-title">Pages</h2>
-<% if (!it.pages.length) { %>    <p class="hint">Aucune page vue sur la période.</p>
+    <h2 id="pages-title"><%= t('Pages') %></h2>
+<% if (!it.pages.length) { %>    <p class="hint"><%= t('Aucune page vue sur la période.') %></p>
 <% } else { %>
     <ul class="rank plain">
 <% it.pages.forEach(r => { %>      <li><span class="t"><%= r.label %><span class="meter" aria-hidden="true"><i class="w<%= Math.max(1, Math.round((r.views / pmax) * 20)) %>"></i></span></span><b><%= fmt(r.views) %></b></li>
 <% }) %>
     </ul>
 <% } %>
-    <h2 id="src-title" class="mt">Provenance</h2>
-<% if (!it.sources.length) { %>    <p class="hint">Aucune visite sur la période.</p>
+    <h2 id="src-title" class="mt"><%= t('Provenance') %></h2>
+<% if (!it.sources.length) { %>    <p class="hint"><%= t('Aucune visite sur la période.') %></p>
 <% } else { %>
     <ul class="rank plain" aria-labelledby="src-title">
 <% it.sources.forEach(r => { %>      <li><span class="t"><%= label(r.source) %><span class="meter" aria-hidden="true"><i class="w<%= Math.max(1, Math.round((r.visits / smax) * 20)) %>"></i></span></span><b><%= fmt(r.visits) %></b></li>
@@ -71,15 +71,15 @@
   </section>
 
   <section class="panel wide2" aria-labelledby="pays-title">
-    <h2 id="pays-title">Pays <span class="mono">visiteurs, selon Cloudflare</span></h2>
+    <h2 id="pays-title"><%= t('Pays') %> <span class="mono"><%= t('visiteurs, selon Cloudflare') %></span></h2>
 <% const cmax = it.countries.length ? it.countries[0].visitors : 1; %>
     <div class="world">
       <svg class="carte" viewBox="0 0 1000 520" role="img" aria-labelledby="carte-titre">
-        <title id="carte-titre">Carte des visiteurs par pays sur la période<%= it.countries.length ? ` : ${it.countries.slice(0, 5).map(r => `${r.name} ${fmt(r.visitors)}`).join(', ')}` : ' : aucune visite' %></title>
+        <title id="carte-titre"><%= t('Carte des visiteurs par pays sur la période') %><%= it.countries.length ? ` : ${it.countries.slice(0, 5).map(r => `${r.name} ${fmt(r.visitors)}`).join(', ')}` : ` : ${t('aucune visite')}` %></title>
         <image href="<%= it.asset('admin/carte-monde.svg') %>" x="0" y="0" width="1000" height="520"/>
-<% it.bubbles.forEach(b => { %>        <circle cx="<%= b.x %>" cy="<%= b.y %>" r="<%= b.r %>"><title><%= b.name %> · <%= fmt(b.visitors) %> visiteur<%= b.visitors > 1 ? 's' : '' %></title></circle>
+<% it.bubbles.forEach(b => { %>        <circle cx="<%= b.x %>" cy="<%= b.y %>" r="<%= b.r %>"><title><%= b.name %> · <%= b.visitors > 1 ? t('{n} visiteurs', { n: fmt(b.visitors) }) : t('{n} visiteur', { n: fmt(b.visitors) }) %></title></circle>
 <% }) %>      </svg>
-<% if (!it.countries.length) { %>      <p class="hint">Aucune visite sur la période. Les pays apparaissent à partir des visites suivant la mise à jour ; Cloudflare doit transmettre le pays (option <em>IP Geolocation</em>, activée par défaut).</p>
+<% if (!it.countries.length) { %>      <p class="hint"><%= t('Aucune visite sur la période.') %> <%= t('Les pays apparaissent à partir des visites suivant la mise à jour ; Cloudflare doit transmettre le pays (option') %> <em>IP Geolocation</em>, <%= t('activée par défaut).') %></p>
 <% } else { %>
       <ul class="rank plain" aria-labelledby="pays-title">
 <% it.countries.slice(0, 10).forEach(r => { %>        <li><span class="t"><%= r.name %><span class="meter" aria-hidden="true"><i class="w<%= Math.max(1, Math.round((r.visitors / cmax) * 20)) %>"></i></span></span><b><%= fmt(r.visitors) %></b></li>
@@ -89,7 +89,7 @@
   </section>
 
   <section class="panel wide2">
-    <h2>Ce qui est mesuré</h2>
-    <p class="hint">Les pages du site et les photos ouvertes dans la visionneuse, jour par jour. Un visiteur est reconnu pour la journée seulement, par une empreinte anonyme oubliée à minuit : aucune adresse IP ni aucun cookie. Son pays est celui que transmet Cloudflare ; le site ne le calcule pas et ne garde pas l’adresse. Les navigateurs qui demandent à ne pas être suivis ne sont pas comptés. Les compteurs sont effacés au bout de 25 mois. La page « Droits d’utilisation » du site en informe les visiteurs. <a class="more" href="/admin/aide#statistiques">En savoir plus</a></p>
+    <h2><%= t('Ce qui est mesuré') %></h2>
+    <p class="hint"><%= t('Les pages du site et les photos ouvertes dans la visionneuse, jour par jour. Un visiteur est reconnu pour la journée seulement, par une empreinte anonyme oubliée à minuit : aucune adresse IP ni aucun cookie. Son pays est celui que transmet Cloudflare ; le site ne le calcule pas et ne garde pas l’adresse. Les navigateurs qui demandent à ne pas être suivis ne sont pas comptés. Les compteurs sont effacés au bout de 25 mois. La page « Droits d’utilisation » du site en informe les visiteurs.') %> <a class="more" href="/admin/aide#statistiques"><%= t('En savoir plus') %></a></p>
   </section>
 </div>

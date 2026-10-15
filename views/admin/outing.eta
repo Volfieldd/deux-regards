@@ -1,26 +1,29 @@
 <% layout('./layout') %>
-<% const o = it.o; const TAG = { refus: 'no', 'a-trier': 'warn', terminee: 'ok' };
-   const LABELS = { site: 'site', instagram: 'Instagram', print: 'tirages', name: 'prénom' };
+<% const hm = x => (it.lang === 'fr' ? x.replace(':', ' h ').replace(/ h 00$/, ' h') : x); %>
+<% const t = it.t; const o = it.o; const TAG = { refus: 'no', 'a-trier': 'warn', terminee: 'ok' };
+   const LABELS = { site: t('site'), instagram: t('Instagram'), print: t('tirages'), name: t('prénom') };
+   const LEVEL = { ok: t('prête'), warn: t('à vérifier'), no: t('bloquée') };
+   const pl = (n, zero, one, many) => n > 1 ? many : n === 1 ? one : zero;
    const peopleOf = p => o.people.filter(e => o.linked.has(`${e.id}:${p.id}`));
    const excludedAll = p => o.people.length > 0 && o.people.every(e => o.excluded.has(`${e.id}:${p.id}`) && !o.linked.has(`${e.id}:${p.id}`)); %>
-<p class="mono"><a class="more eyebrow" href="/admin/sorties">← Sorties</a></p>
+<p class="mono"><a class="more eyebrow" href="/admin/sorties">← <%= t('Sorties') %></a></p>
 <% const readyDrafts = o.photos.filter(p => p.status === 'draft' && p.state.site.level === 'ok').length; %>
 <div class="outing-head">
-  <h1><%= o.place || o.author.name %><span class="sub"><%= o.when %><%= o.range ? ` · ${o.range}` : '' %> · <%= o.author.name %> · <%= o.counts.photos %> photo<%= o.counts.photos > 1 ? 's' : '' %> · <%= o.people.length %> personne<%= o.people.length > 1 ? 's' : '' %></span></h1>
+  <h1><%= o.place || o.author.name %><span class="sub"><%= o.when %><%= o.range ? ` · ${o.range}` : '' %> · <%= o.author.name %> · <%= pl(o.counts.photos, t('0 photo'), t('1 photo'), t('{n} photos', { n: o.counts.photos })) %> · <%= pl(o.people.length, t('0 personne'), t('1 personne'), t('{n} personnes', { n: o.people.length })) %></span></h1>
   <span class="enc-tag <%= TAG[o.state] %>"><%= it.STATES[o.state] %></span>
-<% if (readyDrafts) { %>  <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/publier"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>"><button class="btn" type="submit">Publier les photos prêtes · <%= readyDrafts %></button></form>
+<% if (readyDrafts) { %>  <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/publier"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>"><button class="btn" type="submit"><%= t('Publier les photos prêtes · {n}', { n: readyDrafts }) %></button></form>
 <% } %></div>
 <% if (o.parts.length > 1) { %>
-<nav class="chips" aria-label="Parties de la journée">
-<% o.parts.forEach(p => { %>  <a class="chip" href="<%= it.partUrl(p) %>"<%~ p.starts === o.starts ? ' aria-current="true"' : '' %>><%= p.starts === '00:00' ? 'Début de journée' : `À partir de ${p.starts.replace(':', ' h ').replace(/ h 00$/, ' h')}` %></a>
+<nav class="chips" aria-label="<%= t('Parties de la journée') %>">
+<% o.parts.forEach(p => { %>  <a class="chip" href="<%= it.partUrl(p) %>"<%~ p.starts === o.starts ? ' aria-current="true"' : '' %>><%= p.starts === '00:00' ? t('Début de journée') : t('À partir de {time}', { time: hm(p.starts) }) %></a>
 <% }) %></nav>
 <% } %>
 
 <div class="outing-grid">
   <section class="panel" aria-labelledby="o-photos">
-    <h2 id="o-photos">Photos de la sortie <span class="mono">prises ce jour-là<%= o.range ? `, ${o.range}` : '' %> (heure de l’appareil)</span></h2>
+    <h2 id="o-photos"><%= t('Photos de la sortie') %> <span class="mono"><%= o.range ? t('prises ce jour-là, {range} (heure de l’appareil)', { range: o.range }) : t('prises ce jour-là (heure de l’appareil)') %></span></h2>
 <% if (!o.photos.length) { %>
-    <p class="hint">Aucune photo de <%= o.author.name %> datée de ce jour<%= o.range ? ' à ces heures' : '' %> pour l’instant : elles apparaîtront dès leur import.</p>
+    <p class="hint"><%= o.range ? t('Aucune photo de {name} datée de ce jour à ces heures pour l’instant : elles apparaîtront dès leur import.', { name: o.author.name }) : t('Aucune photo de {name} datée de ce jour pour l’instant : elles apparaîtront dès leur import.', { name: o.author.name }) %></p>
 <% } else { %>
     <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/photos" class="o-photos-form">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
@@ -29,25 +32,25 @@
 <% o.photos.forEach(p => { const who = peopleOf(p); const out = excludedAll(p); %>
         <li>
           <label class="o-photo">
-            <input type="checkbox" name="photo" value="<%= p.id %>" aria-label="Choisir « <%= p.title %> »">
+            <input type="checkbox" name="photo" value="<%= p.id %>" aria-label="<%= t('Choisir « {title} »', { title: p.title }) %>">
             <% if (p.ready) { %><%~ it.picture(p, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %>
           </label>
           <a href="/admin/photos/<%= p.id %>" class="o-title"><%= p.title %></a>
-          <span class="mono"><%= p.taken_time ? p.taken_time.replace(':', ' h ') : 'heure inconnue' %> · <%= p.status === 'published' ? 'publiée' : 'brouillon' %> · <%= p.state.faces.n == null ? (p.state.faces.has ? 'visage ?' : '') : p.state.faces.n ? `${p.state.faces.n} visage${p.state.faces.n > 1 ? 's' : ''}` : 'sans visage' %></span>
-          <span class="enc-tag <%= p.state.site.level %>" title="<%= p.state.site.reasons.join(' ; ') %>"><%= { ok: 'prête', warn: 'à vérifier', no: 'bloquée' }[p.state.site.level] %></span>
-<% if (who.length) { %>          <span class="o-who"><%= who.map(e => e.ref || e.name || 'rencontre').join(', ') %></span>
-<% } else if (out) { %>          <span class="o-who hint">personne de la sortie</span>
+          <span class="mono"><%= p.taken_time ? hm(p.taken_time) : t('heure inconnue') %> · <%= p.status === 'published' ? t('publiée') : t('brouillon') %> · <%= p.state.faces.n == null ? (p.state.faces.has ? t('visage ?') : '') : p.state.faces.n ? (p.state.faces.n > 1 ? t('{n} visages', { n: p.state.faces.n }) : t('{n} visage', { n: p.state.faces.n })) : t('sans visage') %></span>
+          <span class="enc-tag <%= p.state.site.level %>" title="<%= p.state.site.reasons.join(' ; ') %>"><%= LEVEL[p.state.site.level] %></span>
+<% if (who.length) { %>          <span class="o-who"><%= who.map(e => e.ref || e.name || t('rencontre')).join(', ') %></span>
+<% } else if (out) { %>          <span class="o-who hint"><%= t('personne de la sortie') %></span>
 <% } %>        </li>
 <% }) %>
       </ul>
 <% if (o.people.length) { %>
       <div class="o-actions">
-        <label>Personne <select name="personne"><% o.people.forEach(e => { %><option value="<%= e.id %>"><%= e.ref || 'sans carte' %><%= e.name ? ` · ${e.name}` : '' %></option><% }) %></select></label>
-        <button class="btn ghost" type="submit" name="action" value="lier">Lier à cette personne</button>
-        <button class="btn ghost" type="submit" name="action" value="exclure">Personne de la sortie n’y figure</button>
-        <button class="btn ghost" type="submit" name="action" value="retablir">Rétablir</button>
+        <label><%= t('Personne') %> <select name="personne"><% o.people.forEach(e => { %><option value="<%= e.id %>"><%= e.ref || t('sans carte') %><%= e.name ? ` · ${e.name}` : '' %></option><% }) %></select></label>
+        <button class="btn ghost" type="submit" name="action" value="lier"><%= t('Lier à cette personne') %></button>
+        <button class="btn ghost" type="submit" name="action" value="exclure"><%= t('Personne de la sortie n’y figure') %></button>
+        <button class="btn ghost" type="submit" name="action" value="retablir"><%= t('Rétablir') %></button>
       </div>
-      <p class="hint">Les accords de la sortie couvrent toutes ses photos. Liez une photo à la personne qui y figure ; si personne de la liste n’y figure (un paysage, une autre scène), indiquez-le : ses accords et refus ne la concernent plus.</p>
+      <p class="hint"><%= t('Les accords de la sortie couvrent toutes ses photos. Liez une photo à la personne qui y figure ; si personne de la liste n’y figure (un paysage, une autre scène), indiquez-le : ses accords et refus ne la concernent plus.') %></p>
 <% } %>
     </form>
 <% } %>
@@ -55,37 +58,37 @@
 
   <div class="outing-side">
     <section class="panel" aria-labelledby="o-people">
-      <h2 id="o-people">Personnes rencontrées</h2>
+      <h2 id="o-people"><%= t('Personnes rencontrées') %></h2>
 <% if (!o.people.length) { %>
-      <p class="hint">Personne n’a été rencontré pendant cette sortie.</p>
+      <p class="hint"><%= t('Personne n’a été rencontré pendant cette sortie.') %></p>
 <% } else { %>
       <ul class="rank plain">
-<% o.people.forEach(e => { %>        <li><span class="t"><span class="enc-who"><% if (e.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } %><a href="/admin/rencontres/<%= e.id %>"><%= e.ref || 'Sans carte' %><%= e.name ? ` · ${e.name}` : '' %></a><% if (e.met_time) { %> <span class="mono"><%= e.met_time %></span><% } %></span></span>
-          <% if (e.refused) { %><span class="enc-tag no">refuse la publication</span><% } else if (e.consent) { %><span class="enc-tag ok"><%= Object.keys(LABELS).filter(s => e.consent[s]).map(s => LABELS[s]).join(', ') %></span><% } else { %><span class="enc-tag">sans décision</span><% } %></li>
+<% o.people.forEach(e => { %>        <li><span class="t"><span class="enc-who"><% if (e.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } %><a href="/admin/rencontres/<%= e.id %>"><%= e.ref || t('Sans carte') %><%= e.name ? ` · ${e.name}` : '' %></a><% if (e.met_time) { %> <span class="mono"><%= e.met_time %></span><% } %></span></span>
+          <% if (e.refused) { %><span class="enc-tag no"><%= t('refuse la publication') %></span><% } else if (e.consent) { %><span class="enc-tag ok"><%= Object.keys(LABELS).filter(s => e.consent[s]).map(s => LABELS[s]).join(', ') %></span><% } else { %><span class="enc-tag"><%= t('sans décision') %></span><% } %></li>
 <% }) %>      </ul>
 <% } %>
-      <p class="actions"><a class="btn ghost" href="/admin/rencontre">＋ Nouvelle rencontre</a></p>
+      <p class="actions"><a class="btn ghost" href="/admin/rencontre">＋ <%= t('Nouvelle rencontre') %></a></p>
     </section>
 
     <section class="panel" aria-labelledby="o-settings">
-      <h2 id="o-settings">La sortie</h2>
+      <h2 id="o-settings"><%= t('La sortie') %></h2>
       <form class="form" method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/lieu">
         <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>">
-        <label>Lieu <span class="mono"><%= o.placeSet ? 'choisi' : 'proposé d’après les rencontres et les photos' %></span><input name="lieu" value="<%= o.place %>" maxlength="120"></label>
-        <p class="actions"><button class="btn ghost" type="submit">Enregistrer le lieu</button></p>
+        <label><%= t('Lieu') %> <span class="mono"><%= o.placeSet ? t('choisi') : t('proposé d’après les rencontres et les photos') %></span><input name="lieu" value="<%= o.place %>" maxlength="120"></label>
+        <p class="actions"><button class="btn ghost" type="submit"><%= t('Enregistrer le lieu') %></button></p>
       </form>
       <form class="form" method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/couper">
         <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>">
-        <label>Couper la sortie à <span class="mono">les photos et rencontres d’après forment une autre sortie</span><input type="time" name="heure" required step="60"></label>
-        <p class="actions"><button class="btn ghost" type="submit">Couper</button></p>
+        <label><%= t('Couper la sortie à') %> <span class="mono"><%= t('les photos et rencontres d’après forment une autre sortie') %></span><input type="time" name="heure" required step="60"></label>
+        <p class="actions"><button class="btn ghost" type="submit"><%= t('Couper') %></button></p>
       </form>
 <% if (o.starts !== '00:00') { %>
       <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/reunir">
         <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>">
-        <button class="btn ghost" type="submit">Réunir avec la sortie précédente</button>
+        <button class="btn ghost" type="submit"><%= t('Réunir avec la sortie précédente') %></button>
       </form>
 <% } %>
-      <p class="hint">Une photo ou une rencontre sans heure connue compte dans toutes les parties de la journée.</p>
+      <p class="hint"><%= t('Une photo ou une rencontre sans heure connue compte dans toutes les parties de la journée.') %></p>
     </section>
   </div>
 </div>

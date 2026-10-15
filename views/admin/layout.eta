@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"<%~ it.adminTheme ? ` data-theme="${it.adminTheme}"` : '' %>>
+<html lang="<%= it.lang || 'fr' %>"<%~ it.adminTheme ? ` data-theme="${it.adminTheme}"` : '' %>>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,9 +14,10 @@
   <script src="<%= it.asset('admin/admin.js') %>" defer></script>
 </head>
 <body class="admin" data-csrf="<%= it.csrf %>">
-<a class="skip" href="#contenu">Aller au contenu</a>
+<% const t = it.t; %>
+<a class="skip" href="#contenu"><%= t('Aller au contenu') %></a>
 <% if (it.local) { %>
-  <p class="testbar" role="note">Connexion locale de test — <%= it.session.name %></p>
+  <p class="testbar" role="note"><%= t('Connexion locale de test') %> — <%= it.session.name %></p>
 <% } %>
 <%
   const ICON = {
@@ -52,63 +53,70 @@
 <div class="shell">
 <aside class="side" id="admin-nav" data-side>
   <a class="word" href="/admin"><% if (b.emblem) { %><span class="emblem" aria-hidden="true"></span><% } %><span><%= it.siteName %></span></a>
-  <button class="cmdk" type="button" data-cmdk-open hidden><%~ ic('search', 16) %><span>Rechercher, agir…</span><kbd>⌘K</kbd></button>
+  <button class="cmdk" type="button" data-cmdk-open hidden><%~ ic('search', 16) %><span><%= t('Rechercher, agir…') %></span><kbd>⌘K</kbd></button>
 <%
   // Menu rangé par intention : travailler les photos et les personnes, publier, préparer le terrain, régler.
-  const item = ([key, href, label, icon, extra]) => `<a href="${href}"${(extra || cur(key)) ? ' aria-current="page"' : ''}>${ic(icon)}${label}</a>`;
+  const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const item = ([key, href, label, icon, extra]) => `<a href="${href}"${(extra || cur(key)) ? ' aria-current="page"' : ''}>${ic(icon)}${esc(t(label))}</a>`;
   const people = it.section === 'encounters' || it.section === 'encounter' || it.section === 'people' || it.section === 'person';
 %>
-  <nav class="nav" aria-label="Administration">
-    <a href="/admin"<%~ cur('home') ? ' aria-current="page"' : '' %>><%~ ic('home') %>Aujourd’hui<% if (it.urgent) { %><span class="nav-badge urgent" aria-label="<%= it.urgent %> urgence<%= it.urgent > 1 ? 's' : '' %>">✕ <%= it.urgent %></span><% } %></a>
+  <nav class="nav" aria-label="<%= t('Administration') %>">
+    <a href="/admin"<%~ cur('home') ? ' aria-current="page"' : '' %>><%~ ic('home') %><%= t('Aujourd’hui') %><% if (it.urgent) { %><span class="nav-badge urgent" aria-label="<%= it.urgent > 1 ? t('{n} urgences', { n: it.urgent }) : t('1 urgence') %>">✕ <%= it.urgent %></span><% } %></a>
   </nav>
-  <p class="grp" id="nav-work">Travailler</p>
+  <p class="grp" id="nav-work"><%= t('Travailler') %></p>
   <nav class="nav" aria-labelledby="nav-work">
-    <a href="/admin/sorties"<%~ it.section === 'outings' || it.section === 'outing' ? ' aria-current="page"' : '' %>><%~ ic('outing') %>Sorties</a>
+    <a href="/admin/sorties"<%~ it.section === 'outings' || it.section === 'outing' ? ' aria-current="page"' : '' %>><%~ ic('outing') %><%= t('Sorties') %></a>
     <%~ item(['photos', '/admin/photos', 'Photothèque', 'photos']) %>
-    <a href="/admin/personnes"<%~ people ? ' aria-current="page"' : '' %>><%~ ic('people') %>Personnes<% if (it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew %> nouvelle<%= it.encountersNew > 1 ? 's' : '' %>"><%= it.encountersNew %></span><% } %></a>
+    <a href="/admin/personnes"<%~ people ? ' aria-current="page"' : '' %>><%~ ic('people') %><%= t('Personnes') %><% if (it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew > 1 ? t('{n} nouvelles', { n: it.encountersNew }) : t('1 nouvelle') %>"><%= it.encountersNew %></span><% } %></a>
   </nav>
-  <p class="grp" id="nav-publish">Publier</p>
+  <p class="grp" id="nav-publish"><%= t('Publier') %></p>
   <nav class="nav" aria-labelledby="nav-publish">
     <%~ item(['site', '/admin/site', 'Site public', 'globe']) %>
     <%~ item(['series', '/admin/series', 'Séries', 'series']) %>
   </nav>
 <% if (it.navSeries && it.navSeries.length) { %>
-  <ul class="ser" aria-label="Séries">
+  <ul class="ser" aria-label="<%= t('Séries') %>">
 <% it.navSeries.forEach(c => { %>
     <li><a href="/admin/photos?serie=<%= c.slug %>" data-drop-series="<%= c.id %>" data-series-name="<%= c.name %>"><span class="sw"><% if (c.thumb) { %><img src="<%= c.thumb %>" alt="" loading="lazy"><% } %></span><span class="t"><%= c.name %></span><span class="n"><%= c.count %></span></a></li>
 <% }) %>
   </ul>
 <% } %>
-  <nav class="nav" aria-label="Diffusion">
+  <nav class="nav" aria-label="<%= t('Diffusion') %>">
     <%~ item(['instagram', '/admin/instagram', 'Instagram', 'instagram']) %>
     <%~ item(['stats', '/admin/statistiques', 'Statistiques', 'stats']) %>
   </nav>
-  <p class="grp" id="nav-field">Sur le terrain</p>
+  <p class="grp" id="nav-field"><%= t('Sur le terrain') %></p>
   <nav class="nav" aria-labelledby="nav-field">
-    <a href="/admin/terrain"<%~ it.section === 'terrain' || it.section === 'cards' ? ' aria-current="page"' : '' %>><%~ ic('pin') %>App, cartes, QR</a>
+    <a href="/admin/terrain"<%~ it.section === 'terrain' || it.section === 'cards' ? ' aria-current="page"' : '' %>><%~ ic('pin') %><%= t('App, cartes, QR') %></a>
   </nav>
-  <p class="grp" id="nav-settings">Réglages</p>
+  <p class="grp" id="nav-settings"><%= t('Réglages') %></p>
   <nav class="nav" aria-labelledby="nav-settings">
     <%~ item(['authors', '/admin/auteurs', 'Photographes', 'authors']) %>
     <%~ item(['appearance', '/admin/apparence', 'Apparence', 'appearance']) %>
-    <%~ item(['images', '/admin/images', 'Filigrane &amp; EXIF', 'images']) %>
-    <%~ item(['droits', '/admin/droits', 'Droits &amp; confidentialité', 'shield']) %>
+    <%~ item(['images', '/admin/images', 'Filigrane & EXIF', 'images']) %>
+    <%~ item(['droits', '/admin/droits', 'Droits & confidentialité', 'shield']) %>
     <%~ item(['help', '/admin/aide', 'Aide', 'help']) %>
-    <a href="/" target="_blank" rel="noopener"><%~ ic('site') %>Voir le site</a>
+    <a href="/" target="_blank" rel="noopener"><%~ ic('site') %><%= t('Voir le site') %></a>
   </nav>
+  <details class="lang-pick admin-lang">
+    <summary aria-label="<%= t('Langue de l’administration') %> : <%= it.langNames[it.lang] %>"><img class="flag" src="<%= it.asset(`flags/${it.lang}.svg`) %>" alt="" width="20" height="14"><span><%= it.lang.toUpperCase() %></span></summary>
+    <ul role="list" aria-label="<%= t('Langue de l’administration') %>">
+<% it.adminLangs.forEach(l => { %>      <li><form method="post" action="/admin/langue"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= it.currentPath %>"><button type="submit" name="lang" value="<%= l %>" lang="<%= l %>"<%~ l === it.lang ? ' aria-current="true"' : '' %>><img class="flag" src="<%= it.asset(`flags/${l}.svg`) %>" alt="" width="20" height="14"><%= it.langNames[l] %></button></form></li>
+<% }) %>    </ul>
+  </details>
   <div class="foot">
-    <a class="job" href="/admin/photos?statut=draft" data-activity<%~ it.activity ? '' : ' hidden' %>><span class="spin" aria-hidden="true"></span><span data-activity-text>Traitement : <%= it.activity %> photo<%= it.activity > 1 ? 's' : '' %></span></a>
+    <a class="job" href="/admin/photos?statut=draft" data-activity<%~ it.activity ? '' : ' hidden' %>><span class="spin" aria-hidden="true"></span><span data-activity-text><%= it.activity > 1 ? t('Traitement : {n} photos', { n: it.activity }) : t('Traitement : {n} photo', { n: it.activity }) %></span></a>
     <div class="me">
       <span class="av" aria-hidden="true"><%= (it.session.name || '?').trim().charAt(0).toUpperCase() %></span>
-      <span class="who" title="<%= it.session.name || 'Administrateur' %>"><%= it.session.name || 'Administrateur' %><small>Administration</small></span>
+      <span class="who" title="<%= it.session.name || t('Administrateur') %>"><%= it.session.name || t('Administrateur') %><small><%= t('Administration') %></small></span>
       <form method="post" action="/admin/theme" data-theme-form>
         <input type="hidden" name="_csrf" value="<%= it.csrf %>">
         <input type="hidden" name="back" value="<%= it.currentPath %>">
-        <button class="iconbtn" type="submit" name="theme" value="<%= nextTheme %>" data-theme-toggle aria-label="Passer en mode <%= nextTheme === 'light' ? 'clair' : 'sombre' %>" title="Mode clair / sombre"><span class="when-dark"><%~ ic('sun') %></span><span class="when-light"><%~ ic('moon') %></span></button>
+        <button class="iconbtn" type="submit" name="theme" value="<%= nextTheme %>" data-theme-toggle aria-label="<%= nextTheme === 'light' ? t('Passer en mode clair') : t('Passer en mode sombre') %>" title="<%= t('Mode clair / sombre') %>"><span class="when-dark"><%~ ic('sun') %></span><span class="when-light"><%~ ic('moon') %></span></button>
       </form>
       <form method="post" action="/auth/logout">
         <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-        <button class="iconbtn" type="submit" aria-label="Se déconnecter" title="Se déconnecter"><%~ ic('logout') %></button>
+        <button class="iconbtn" type="submit" aria-label="<%= t('Se déconnecter') %>" title="<%= t('Se déconnecter') %>"><%~ ic('logout') %></button>
       </form>
     </div>
   </div>
@@ -117,14 +125,14 @@
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
 <% const HELP = { people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
-  <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>">Aide sur cette page</a></p>
+  <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>"><%= t('Aide sur cette page') %></a></p>
 <% } %>
 <% if (it.variants.running || it.variants.errors.length) { %>
   <div class="flash<%= it.variants.errors.length ? ' error' : '' %>" data-variants>
 <% if (it.variants.running) { %>
-    <p data-running>Mise à jour des images en cours : <span data-done><%= it.variants.done %></span> / <span data-total><%= it.variants.total %></span>.</p>
+    <p data-running><%= t('Mise à jour des images en cours :') %> <span data-done><%= it.variants.done %></span> / <span data-total><%= it.variants.total %></span>.</p>
 <% } %>
-    <p role="status" data-final><% if (!it.variants.running && it.variants.errors.length) { %><%= it.variants.errors.length %> image(s) n’ont pas pu être recalculées : <%= it.variants.errors.map(e => e.title).join(', ') %>.<% } %></p>
+    <p role="status" data-final><% if (!it.variants.running && it.variants.errors.length) { %><%= t('{n} image(s) n’ont pas pu être recalculées : {titles}.', { n: it.variants.errors.length, titles: it.variants.errors.map(e => e.title).join(', ') }) %><% } %></p>
   </div>
 <% } %>
 <% if (it.flash) { %>
@@ -139,19 +147,19 @@
 </main>
 </div>
 
-<nav class="tabbar" aria-label="Navigation rapide">
-  <a href="/admin"<%~ cur('home') ? ' aria-current="page"' : '' %>><%~ ic('home', 22) %>Aujourd’hui</a>
-  <a href="/admin/photos"<%~ cur('photos') ? ' aria-current="page"' : '' %>><%~ ic('photos', 22) %>Photos</a>
-  <a class="imp" href="/admin/photos?importer#import" data-import-open aria-label="Importer des photos"><%~ ic('upload', 22) %></a>
-  <a href="/admin/rencontre/accueil"<%~ it.section === 'terrain' ? ' aria-current="page"' : '' %>><%~ ic('pin', 22) %>Terrain</a>
-  <button type="button" data-menu aria-expanded="false" aria-controls="admin-nav"><%~ ic('menu', 22) %>Menu</button>
+<nav class="tabbar" aria-label="<%= t('Navigation rapide') %>">
+  <a href="/admin"<%~ cur('home') ? ' aria-current="page"' : '' %>><%~ ic('home', 22) %><%= t('Aujourd’hui') %></a>
+  <a href="/admin/photos"<%~ cur('photos') ? ' aria-current="page"' : '' %>><%~ ic('photos', 22) %><%= t('Photos') %></a>
+  <a class="imp" href="/admin/photos?importer#import" data-import-open aria-label="<%= t('Importer des photos') %>"><%~ ic('upload', 22) %></a>
+  <a href="/admin/rencontre/accueil"<%~ it.section === 'terrain' ? ' aria-current="page"' : '' %>><%~ ic('pin', 22) %><%= t('Terrain') %></a>
+  <button type="button" data-menu aria-expanded="false" aria-controls="admin-nav"><%~ ic('menu', 22) %><%= t('Menu') %></button>
 </nav>
 
 <div class="toast" role="status" aria-live="polite" data-toast hidden></div>
-<dialog class="palette" data-cmdk aria-label="Rechercher et agir">
-  <div class="pal-in"><%~ ic('search', 20) %><input type="text" data-cmdk-input placeholder="Rechercher une photo, une série, une action…" aria-label="Rechercher" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="cmdk-list"><kbd>Échap</kbd></div>
+<dialog class="palette" data-cmdk aria-label="<%= t('Rechercher et agir') %>">
+  <div class="pal-in"><%~ ic('search', 20) %><input type="text" data-cmdk-input placeholder="<%= t('Rechercher une photo, une série, une action…') %>" aria-label="<%= t('Rechercher') %>" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="cmdk-list"><kbd><%= t('Échap') %></kbd></div>
   <ul class="pal-list" id="cmdk-list" role="listbox" data-cmdk-list></ul>
-  <p class="pal-ft"><span><kbd>↑</kbd> <kbd>↓</kbd> choisir</span><span><kbd>↵</kbd> exécuter</span><span><kbd>Échap</kbd> fermer</span></p>
+  <p class="pal-ft"><span><kbd>↑</kbd> <kbd>↓</kbd> <%= t('choisir') %></span><span><kbd>↵</kbd> <%= t('exécuter') %></span><span><kbd><%= t('Échap') %></kbd> <%= t('fermer') %></span></p>
 </dialog>
 </body>
 </html>

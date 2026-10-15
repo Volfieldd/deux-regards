@@ -1,0 +1,1094 @@
+{
+ "{n} séries": {
+  "en": "{n} series",
+  "de": "{n} Serien"
+ },
+ "{n} série": {
+  "en": "{n} series",
+  "de": "{n} Serie"
+ },
+ "l’ordre est celui de l’index du site :": {
+  "en": "the order is that of the site index:",
+  "de": "die Reihenfolge entspricht dem Index der Website:"
+ },
+ "glissez une carte (ou ↑ ↓ au clavier sur sa poignée), ou passez par le menu ⋯": {
+  "en": "drag a card (or use ↑ ↓ on its handle), or use the ⋯ menu",
+  "de": "ziehen Sie eine Karte (oder ↑ ↓ auf ihrem Griff) oder nutzen Sie das Menü ⋯"
+ },
+ "menu ⋯ de chaque carte": {
+  "en": "⋯ menu on each card",
+  "de": "Menü ⋯ jeder Karte"
+ },
+ "Nouvelle série": {
+  "en": "New series",
+  "de": "Neue Serie"
+ },
+ "Nom, puis Entrée": {
+  "en": "Name, then Enter",
+  "de": "Name, dann Eingabe"
+ },
+ "Elle prend la première place ; déplaçable ensuite.": {
+  "en": "It goes first; you can move it afterwards.",
+  "de": "Sie kommt an die erste Stelle und lässt sich danach verschieben."
+ },
+ "Créer": {
+  "en": "Create",
+  "de": "Erstellen"
+ },
+ "Aucune photo": {
+  "en": "No photos",
+  "de": "Keine Fotos"
+ },
+ "Déplacer « {name} » (flèches haut et bas)": {
+  "en": "Move “{name}” (up and down arrows)",
+  "de": "„{name}“ verschieben (Pfeiltasten auf und ab)"
+ },
+ "Déplacer": {
+  "en": "Move",
+  "de": "Verschieben"
+ },
+ "Renommer": {
+  "en": "Rename",
+  "de": "Umbenennen"
+ },
+ "Nom": {
+  "en": "Name",
+  "de": "Name"
+ },
+ "Adresse de la série (avancé)": {
+  "en": "Series address (advanced)",
+  "de": "Adresse der Serie (erweitert)"
+ },
+ "Changer l’adresse casse les liens déjà partagés.": {
+  "en": "Changing the address breaks links already shared.",
+  "de": "Eine geänderte Adresse macht bereits geteilte Links ungültig."
+ },
+ "Plus d’actions pour « {name} »": {
+  "en": "More actions for “{name}”",
+  "de": "Weitere Aktionen für „{name}“"
+ },
+ "Supprimer…": {
+  "en": "Delete…",
+  "de": "Löschen…"
+ },
+ "« {name} » contient": {
+  "en": "“{name}” contains",
+  "de": "„{name}“ enthält"
+ },
+ "Elles ne seront pas supprimées : choisissez où les déplacer.": {
+  "en": "They will not be deleted: choose where to move them.",
+  "de": "Sie werden nicht gelöscht: Wählen Sie, wohin sie verschoben werden."
+ },
+ "Déplacer vers": {
+  "en": "Move to",
+  "de": "Verschieben nach"
+ },
+ "Déplacer les {n} photos et supprimer": {
+  "en": "Move the {n} photos and delete",
+  "de": "Die {n} Fotos verschieben und löschen"
+ },
+ "Déplacer la photo et supprimer": {
+  "en": "Move the photo and delete",
+  "de": "Das Foto verschieben und löschen"
+ },
+ "C’est la seule série : ses {n} photos n’auraient nulle part où aller. Créez d’abord une autre série.": {
+  "en": "This is the only series: its {n} photos would have nowhere to go. Create another series first.",
+  "de": "Dies ist die einzige Serie: Ihre {n} Fotos hätten keinen anderen Platz. Erstellen Sie zuerst eine weitere Serie."
+ },
+ "La série est vide.": {
+  "en": "The series is empty.",
+  "de": "Die Serie ist leer."
+ },
+ "Supprimer « {name} »": {
+  "en": "Delete “{name}”",
+  "de": "„{name}“ löschen"
+ },
+ "Flèches haut ou gauche : avancer d’une place. Flèches bas ou droite : reculer d’une place.": {
+  "en": "Up or left arrow: move forward one place. Down or right arrow: move back one place.",
+  "de": "Pfeil nach oben oder links: eine Stelle nach vorn. Pfeil nach unten oder rechts: eine Stelle zurück."
+ },
+ "Adresse": {
+  "en": "Address",
+  "de": "Adresse"
+ },
+ "Biographie": {
+  "en": "Biography",
+  "de": "Biografie"
+ },
+ "Lettre des cartes d’accord": {
+  "en": "Consent card letter",
+  "de": "Buchstabe der Einwilligungskarten"
+ },
+ "J-0142 ; vide : {letter}": {
+  "en": "J-0142; empty: {letter}",
+  "de": "J-0142; leer: {letter}"
+ },
+ "première lettre de l’adresse": {
+  "en": "first letter of the address",
+  "de": "erster Buchstabe der Adresse"
+ },
+ "Signature des posts Instagram": {
+  "en": "Instagram post signature",
+  "de": "Signatur der Instagram-Beiträge"
+ },
+ "ajoutée sous la légende des photos qui en ont une, retirable photo par photo · ex. « — {name} · @compte »": {
+  "en": "added below the caption of photos that have one, removable photo by photo · e.g. “— {name} · @account”",
+  "de": "unter der Bildunterschrift der Fotos, die eine haben, für jedes Foto entfernbar · z. B. „— {name} · @konto“"
+ },
+ "Compte de connexion (identifiant OIDC « sub »)": {
+  "en": "Sign-in account (OIDC “sub” identifier)",
+  "de": "Anmeldekonto (OIDC-Kennung „sub“)"
+ },
+ "affiché sur le tableau de bord après connexion": {
+  "en": "shown on the dashboard after signing in",
+  "de": "wird nach der Anmeldung im Dashboard angezeigt"
+ },
+ "{n} photo(s)": {
+  "en": "{n} photo(s)",
+  "de": "{n} Foto(s)"
+ },
+ "Cartes d’accord et QR des vêtements de {name} :": {
+  "en": "Consent cards and clothing QR codes for {name}:",
+  "de": "Einwilligungskarten und Kleidungs-QR-Codes von {name}:"
+ },
+ "Supprimer": {
+  "en": "Delete",
+  "de": "Löschen"
+ },
+ "Impossible : {name} a encore {n} photo(s).": {
+  "en": "Not possible: {name} still has {n} photo(s).",
+  "de": "Nicht möglich: {name} hat noch {n} Foto(s)."
+ },
+ "Nouveau photographe": {
+  "en": "New photographer",
+  "de": "Neuer Fotograf"
+ },
+ "Ajouter": {
+  "en": "Add",
+  "de": "Hinzufügen"
+ },
+ "Ces réglages s’appliquent aux images servies sur le site. Les originaux ne sont jamais modifiés : à chaque enregistrement, les images sont recalculées en arrière-plan, puis le site bascule sur les nouvelles d’un coup.": {
+  "en": "These settings apply to the images served on the site. Originals are never modified: each time you save, the images are regenerated in the background, then the site switches to the new ones all at once.",
+  "de": "Diese Einstellungen gelten für die auf der Website ausgelieferten Bilder. Die Originale werden nie verändert: Bei jedem Speichern werden die Bilder im Hintergrund neu berechnet, dann wechselt die Website auf einen Schlag zu den neuen."
+ },
+ "Aperçu du filigrane enregistré": {
+  "en": "Preview of the saved watermark",
+  "de": "Vorschau des gespeicherten Wasserzeichens"
+ },
+ "Aperçu des réglages enregistrés (1280 px)": {
+  "en": "Preview of the saved settings (1280 px)",
+  "de": "Vorschau der gespeicherten Einstellungen (1280 px)"
+ },
+ "filigrane désactivé": {
+  "en": "watermark off",
+  "de": "Wasserzeichen deaktiviert"
+ },
+ "Importez une photo pour voir un aperçu du filigrane.": {
+  "en": "Import a photo to see a watermark preview.",
+  "de": "Importieren Sie ein Foto, um eine Vorschau des Wasserzeichens zu sehen."
+ },
+ "Filigrane": {
+  "en": "Watermark",
+  "de": "Wasserzeichen"
+ },
+ "Ajouter un filigrane aux images du site": {
+  "en": "Add a watermark to the site’s images",
+  "de": "Den Bildern der Website ein Wasserzeichen hinzufügen"
+ },
+ "Type": {
+  "en": "Type",
+  "de": "Art"
+ },
+ "à envoyer d’abord dans": {
+  "en": "upload it first in",
+  "de": "zuerst hochladen unter"
+ },
+ "Texte": {
+  "en": "Text",
+  "de": "Text"
+ },
+ "Variables :": {
+  "en": "Variables:",
+  "de": "Variablen:"
+ },
+ "ex.": {
+  "en": "e.g.",
+  "de": "z. B."
+ },
+ "Police": {
+  "en": "Font",
+  "de": "Schrift"
+ },
+ "Teinte": {
+  "en": "Tone",
+  "de": "Farbton"
+ },
+ "texte et dessins du site ; un logo envoyé garde ses couleurs": {
+  "en": "site text and drawings; an uploaded logo keeps its colours",
+  "de": "Text und Zeichnungen der Website; ein hochgeladenes Logo behält seine Farben"
+ },
+ "Position": {
+  "en": "Position",
+  "de": "Position"
+ },
+ "Appliquer aux tailles": {
+  "en": "Apply to sizes",
+  "de": "Auf Größen anwenden"
+ },
+ "Opacité (%)": {
+  "en": "Opacity (%)",
+  "de": "Deckkraft (%)"
+ },
+ "Largeur (% de l’image)": {
+  "en": "Width (% of the image)",
+  "de": "Breite (% des Bildes)"
+ },
+ "sans effet en plein cadre": {
+  "en": "no effect when full-frame",
+  "de": "ohne Wirkung bei Vollbild"
+ },
+ "Marge (% de l’image)": {
+  "en": "Margin (% of the image)",
+  "de": "Rand (% des Bildes)"
+ },
+ "Métadonnées (EXIF) des images servies": {
+  "en": "Metadata (EXIF) of served images",
+  "de": "Metadaten (EXIF) der ausgelieferten Bilder"
+ },
+ "Photo d’aperçu": {
+  "en": "Preview photo",
+  "de": "Vorschaufoto"
+ },
+ "Aperçu sans enregistrer": {
+  "en": "Preview without saving",
+  "de": "Vorschau ohne Speichern"
+ },
+ "Enregistrer et mettre à jour les images": {
+  "en": "Save and update images",
+  "de": "Speichern und Bilder aktualisieren"
+ },
+ "Logo du filigrane": {
+  "en": "Watermark logo",
+  "de": "Logo des Wasserzeichens"
+ },
+ "Logo actuel du filigrane": {
+  "en": "Current watermark logo",
+  "de": "Aktuelles Logo des Wasserzeichens"
+ },
+ "Retirer le logo": {
+  "en": "Remove logo",
+  "de": "Logo entfernen"
+ },
+ "Aucun logo. Pour un filigrane de type « Logo », envoyez une image PNG ou WebP à fond transparent.": {
+  "en": "No logo. For a “Logo” watermark, upload a PNG or WebP image with a transparent background.",
+  "de": "Kein Logo. Für ein Wasserzeichen vom Typ „Logo“ laden Sie ein PNG- oder WebP-Bild mit transparentem Hintergrund hoch."
+ },
+ "Nouveau logo": {
+  "en": "New logo",
+  "de": "Neues Logo"
+ },
+ "PNG ou WebP · 5 Mo et 4000 px de côté au plus": {
+  "en": "PNG or WebP · 5 MB and 4000 px per side at most",
+  "de": "PNG oder WebP · höchstens 5 MB und 4000 px Kantenlänge"
+ },
+ "Le thème change les couleurs et la typographie du site public ; l’admin garde son apparence. « Aperçu » ouvre le site avec un thème sans l’appliquer : vous seul le voyez, pendant une heure ou jusqu’à « Quitter l’aperçu ».": {
+  "en": "The theme changes the colours and typography of the public site; the admin keeps its look. “Preview” opens the site with a theme without applying it: only you see it, for one hour or until you click “Quitter l’aperçu” (exit preview).",
+  "de": "Das Theme ändert Farben und Typografie der öffentlichen Website; die Verwaltung behält ihr Aussehen. „Vorschau“ öffnet die Website mit einem Theme, ohne es anzuwenden: Nur Sie sehen es, eine Stunde lang oder bis „Quitter l’aperçu“ (Vorschau beenden)."
+ },
+ "Thème": {
+  "en": "Theme",
+  "de": "Theme"
+ },
+ "(actuel)": {
+  "en": "(current)",
+  "de": "(aktuell)"
+ },
+ "Aperçu": {
+  "en": "Preview",
+  "de": "Vorschau"
+ },
+ "du thème {name} (nouvel onglet)": {
+  "en": "of the {name} theme (new tab)",
+  "de": "des Themes {name} (neuer Tab)"
+ },
+ "Marque": {
+  "en": "Brand",
+  "de": "Marke"
+ },
+ "envoyez d’abord un emblème ou une icône": {
+  "en": "upload an emblem or an icon first",
+  "de": "laden Sie zuerst ein Emblem oder ein Symbol hoch"
+ },
+ "Sous-titre sous le nom": {
+  "en": "Subtitle below the name",
+  "de": "Untertitel unter dem Namen"
+ },
+ "ex. « Photography gallery » · 60 caractères": {
+  "en": "e.g. “Photography gallery” · 60 characters",
+  "de": "z. B. „Photography gallery“ · 60 Zeichen"
+ },
+ "Le nom lui-même se règle dans": {
+  "en": "The name itself is set in",
+  "de": "Der Name selbst wird festgelegt unter"
+ },
+ "Enregistrer l’apparence": {
+  "en": "Save appearance",
+  "de": "Erscheinungsbild speichern"
+ },
+ "{name} actuel": {
+  "en": "Current {name}",
+  "de": "Aktuell: {name}"
+ },
+ "Icône d’onglet générée": {
+  "en": "Generated tab icon",
+  "de": "Erzeugtes Tab-Symbol"
+ },
+ "Retirer": {
+  "en": "Remove",
+  "de": "Entfernen"
+ },
+ "Remplacer": {
+  "en": "Replace",
+  "de": "Ersetzen"
+ },
+ "PNG, WebP ou JPEG · 5 Mo au plus": {
+  "en": "PNG, WebP or JPEG · 5 MB at most",
+  "de": "PNG, WebP oder JPEG · höchstens 5 MB"
+ },
+ "Ce que voient les visiteurs : les textes, l’ouverture de l’accueil et la carte du monde. Les thèmes se règlent dans": {
+  "en": "What visitors see: the texts, the home page opening slideshow and the world map. Themes are set in",
+  "de": "Was Besucher sehen: die Texte, die Start-Diashow der Startseite und die Weltkarte. Die Themen werden festgelegt unter"
+ },
+ "l’allure dans": {
+  "en": "the look in",
+  "de": "das Aussehen unter"
+ },
+ "Les pages légales du site : les droits d’utilisation des images": {
+  "en": "The site’s legal pages: image usage rights",
+  "de": "Die rechtlichen Seiten der Website: die Nutzungsrechte der Bilder"
+ },
+ "et la confidentialité des données": {
+  "en": "and data privacy",
+  "de": "und der Datenschutz"
+ },
+ "Textes": {
+  "en": "Texts",
+  "de": "Texte"
+ },
+ "Nom du site": {
+  "en": "Site name",
+  "de": "Name der Website"
+ },
+ "Le site est en français, anglais et allemand : chaque texte a sa version anglaise et allemande, facultative (vide : la version française s’affiche).": {
+  "en": "The site is in French, English and German: each text has an optional English and German version (empty: the French version is shown).",
+  "de": "Die Website ist auf Französisch, Englisch und Deutsch: Jeder Text hat eine optionale englische und deutsche Fassung (leer: Die französische Fassung wird angezeigt)."
+ },
+ "Accroche": {
+  "en": "Tagline",
+  "de": "Slogan"
+ },
+ "Introduction (accueil)": {
+  "en": "Introduction (home page)",
+  "de": "Einleitung (Startseite)"
+ },
+ "Introduction": {
+  "en": "Introduction",
+  "de": "Einleitung"
+ },
+ "paragraphes séparés par une ligne vide": {
+  "en": "paragraphs separated by a blank line",
+  "de": "Absätze durch eine Leerzeile getrennt"
+ },
+ "page": {
+  "en": "page",
+  "de": "Seite"
+ },
+ "liée aux mentions IPTC des images": {
+  "en": "linked to the images’ IPTC notices",
+  "de": "mit den IPTC-Angaben der Bilder verknüpft"
+ },
+ "Le texte affiché ci-dessous est celui que lisent les visiteurs. Tant que vous gardez le texte par défaut, il suit les noms des auteurs ; modifié, il est enregistré tel quel.": {
+  "en": "The text shown below is what visitors read. As long as you keep the default text, it follows the authors’ names; once edited, it is saved as is.",
+  "de": "Der unten angezeigte Text ist der, den Besucher lesen. Solange Sie den Standardtext behalten, folgt er den Namen der Autoren; geändert wird er unverändert gespeichert."
+ },
+ "Texte personnalisé": {
+  "en": "Custom text",
+  "de": "Eigener Text"
+ },
+ "Texte par défaut": {
+  "en": "Default text",
+  "de": "Standardtext"
+ },
+ "Le texte français a été modifié : adaptez aussi cette traduction, sinon les visiteurs lisent la traduction du texte par défaut.": {
+  "en": "The French text has been edited: adapt this translation too, otherwise visitors read the translation of the default text.",
+  "de": "Der französische Text wurde geändert: Passen Sie auch diese Übersetzung an, sonst lesen Besucher die Übersetzung des Standardtexts."
+ },
+ "Rétablir le texte par défaut": {
+  "en": "Restore default text",
+  "de": "Standardtext wiederherstellen"
+ },
+ "Contact pour les demandes d’utilisation": {
+  "en": "Contact for usage requests",
+  "de": "Kontakt für Nutzungsanfragen"
+ },
+ "adresse e-mail ou lien https://": {
+  "en": "email address or https:// link",
+  "de": "E-Mail-Adresse oder https://-Link"
+ },
+ "(RGPD), en trois langues": {
+  "en": "(GDPR), in three languages",
+  "de": "(DSGVO), in drei Sprachen"
+ },
+ "La page décrit ce que le site fait des données : responsables (les auteurs), données, durées, destinataires, droits. Elle suit le code : rien à rédiger ici, sauf le contact et deux cases qui ne doivent être cochées que lorsque c’est vrai.": {
+  "en": "The page describes what the site does with data: controllers (the authors), data, retention periods, recipients, rights. It follows the code: nothing to write here, except the contact and two boxes that must only be ticked when true.",
+  "de": "Die Seite beschreibt, was die Website mit Daten macht: Verantwortliche (die Autoren), Daten, Speicherdauer, Empfänger, Rechte. Sie folgt dem Code: Hier ist nichts zu verfassen außer dem Kontakt und zwei Kästchen, die nur angekreuzt werden dürfen, wenn es zutrifft."
+ },
+ "Contact des responsables": {
+  "en": "Controllers’ contact",
+  "de": "Kontakt der Verantwortlichen"
+ },
+ "adresse e-mail": {
+  "en": "email address",
+  "de": "E-Mail-Adresse"
+ },
+ "L’authentification à deux facteurs est activée pour tous les comptes de l’admin (Zitadel)": {
+  "en": "Two-factor authentication is enabled for all admin accounts (Zitadel)",
+  "de": "Die Zwei-Faktor-Authentifizierung ist für alle Verwaltungskonten aktiviert (Zitadel)"
+ },
+ "Les données et les sauvegardes sont sur des disques chiffrés": {
+  "en": "Data and backups are on encrypted disks",
+  "de": "Daten und Sicherungen liegen auf verschlüsselten Festplatten"
+ },
+ "Chiffrement des données personnelles dans la base": {
+  "en": "Encryption of personal data in the database",
+  "de": "Verschlüsselung personenbezogener Daten in der Datenbank"
+ },
+ "(noms, adresses, signatures, photos de repère et de carte, messages, positions) :": {
+  "en": "(names, addresses, signatures, reference and card photos, messages, locations):",
+  "de": "(Namen, Adressen, Unterschriften, Referenz- und Kartenfotos, Nachrichten, Standorte):"
+ },
+ "actif (clé DATA_KEY du serveur). Gardez une copie de la clé hors du serveur : perdue, ces données sont illisibles.": {
+  "en": "on (server DATA_KEY). Keep a copy of the key off the server: if it is lost, this data becomes unreadable.",
+  "de": "aktiv (Schlüssel DATA_KEY des Servers). Bewahren Sie eine Kopie des Schlüssels außerhalb des Servers auf: Geht er verloren, sind diese Daten unlesbar."
+ },
+ "inactif. Ajoutez DATA_KEY au fichier .env du serveur (voir le guide Unraid) : les données existantes seront chiffrées au redémarrage.": {
+  "en": "off. Add DATA_KEY to the server’s .env file (see the Unraid guide): existing data will be encrypted on restart.",
+  "de": "inaktiv. Fügen Sie DATA_KEY zur .env-Datei des Servers hinzu (siehe Unraid-Anleitung): Vorhandene Daten werden beim Neustart verschlüsselt."
+ },
+ "Carte du monde": {
+  "en": "World map",
+  "de": "Weltkarte"
+ },
+ "aperçu réservé aux photographes": {
+  "en": "preview for photographers only",
+  "de": "Vorschau nur für Fotografen"
+ },
+ "Une carte du monde avec la vignette des photos à l’emplacement de leur ville, et la liste des lieux. Seules les photos publiées dont la fiche coche « Afficher sur la carte du monde » y figurent": {
+  "en": "A world map with photo thumbnails at the location of their town, and the list of places. Only published photos whose page has “Show on the world map” ticked appear on it",
+  "de": "Eine Weltkarte mit den Vorschaubildern der Fotos am Ort ihrer Stadt und der Liste der Orte. Nur veröffentlichte Fotos, bei denen „Auf der Weltkarte anzeigen“ angekreuzt ist, erscheinen dort"
+ },
+ "{n} aujourd’hui": {
+  "en": "{n} today",
+  "de": "heute {n}"
+ },
+ ", {n} villes": {
+  "en": ", {n} towns",
+  "de": ", {n} Orte"
+ },
+ ", {n} ville": {
+  "en": ", {n} town",
+  "de": ", {n} Ort"
+ },
+ "Publier la carte du monde": {
+  "en": "Publish the world map",
+  "de": "Weltkarte veröffentlichen"
+ },
+ "lien « Carte » dans le menu du site": {
+  "en": "“Map” link in the site menu",
+  "de": "Link „Karte“ im Menü der Website"
+ },
+ "Photos de l’ouverture": {
+  "en": "Opening slideshow photos",
+  "de": "Fotos der Start-Diashow"
+ },
+ "Le diaporama plein écran de l’accueil, dans cet ordre.": {
+  "en": "The full-screen slideshow on the home page, in this order.",
+  "de": "Die Vollbild-Diashow der Startseite, in dieser Reihenfolge."
+ },
+ "{n} photos au plus ; sans choix, les 5 premières de la galerie.": {
+  "en": "{n} photos at most; if none are chosen, the first 5 in the gallery.",
+  "de": "Höchstens {n} Fotos; ohne Auswahl die ersten 5 der Galerie."
+ },
+ "{n} / {max} choisies": {
+  "en": "{n} / {max} chosen",
+  "de": "{n} / {max} ausgewählt"
+ },
+ "{n} / {max} choisie": {
+  "en": "{n} / {max} chosen",
+  "de": "{n} / {max} ausgewählt"
+ },
+ "Enregistrer l’ouverture": {
+  "en": "Save opening slideshow",
+  "de": "Start-Diashow speichern"
+ },
+ "Ordre du diaporama": {
+  "en": "Slideshow order",
+  "de": "Reihenfolge der Diashow"
+ },
+ "Glissez une vignette, ou utilisez ← → ; ✕ la retire.": {
+  "en": "Drag a thumbnail, or use ← →; ✕ removes it.",
+  "de": "Ziehen Sie ein Vorschaubild oder nutzen Sie ← →; ✕ entfernt es."
+ },
+ "← → changent l’ordre, ✕ retire la photo (les réglages sont enregistrés en même temps).": {
+  "en": "← → change the order, ✕ removes the photo (settings are saved at the same time).",
+  "de": "← → ändern die Reihenfolge, ✕ entfernt das Foto (die Einstellungen werden gleichzeitig gespeichert)."
+ },
+ "Avancer « {title} »": {
+  "en": "Move “{title}” forward",
+  "de": "„{title}“ nach vorn"
+ },
+ "Reculer « {title} »": {
+  "en": "Move “{title}” back",
+  "de": "„{title}“ nach hinten"
+ },
+ "Retirer « {title} » de l’ouverture": {
+  "en": "Remove “{title}” from the opening slideshow",
+  "de": "„{title}“ aus der Start-Diashow entfernen"
+ },
+ "Aucune photo choisie : l’ouverture montre les 5 premières photos de la galerie.": {
+  "en": "No photo chosen: the opening slideshow shows the first 5 photos in the gallery.",
+  "de": "Kein Foto ausgewählt: Die Start-Diashow zeigt die ersten 5 Fotos der Galerie."
+ },
+ "Ajouter des photos publiées": {
+  "en": "Add published photos",
+  "de": "Veröffentlichte Fotos hinzufügen"
+ },
+ "Une case cochée ajoute la photo en fin de diaporama.": {
+  "en": "Ticking a box adds the photo at the end of the slideshow.",
+  "de": "Ein angekreuztes Kästchen fügt das Foto am Ende der Diashow hinzu."
+ },
+ "Le diaporama est complet ({n} photos) : retirez-en une pour en ajouter une autre.": {
+  "en": "The slideshow is full ({n} photos): remove one to add another.",
+  "de": "Die Diashow ist voll ({n} Fotos): Entfernen Sie eines, um ein anderes hinzuzufügen."
+ },
+ "Aucune photo publiée pour l’instant.": {
+  "en": "No published photos yet.",
+  "de": "Noch keine veröffentlichten Fotos."
+ },
+ "Enregistrer le site public": {
+  "en": "Save public site",
+  "de": "Öffentliche Website speichern"
+ },
+ "nouveau": {
+  "en": "new",
+  "de": "neu"
+ },
+ "Accès direct (favori, lien tapé, messagerie)": {
+  "en": "Direct (bookmark, typed link, messaging)",
+  "de": "Direktzugriff (Lesezeichen, eingetippter Link, Messenger)"
+ },
+ "Autres sites": {
+  "en": "Other sites",
+  "de": "Andere Websites"
+ },
+ "Mesure anonyme, sans cookie ni service extérieur · visites des administrateurs et des robots exclues": {
+  "en": "Anonymous measurement, no cookies or third-party services · visits by administrators and bots excluded",
+  "de": "Anonyme Messung, ohne Cookies und externe Dienste · Besuche von Administratoren und Bots ausgenommen"
+ },
+ "Période": {
+  "en": "Period",
+  "de": "Zeitraum"
+ },
+ "Chiffres de la période": {
+  "en": "Figures for the period",
+  "de": "Zahlen des Zeitraums"
+ },
+ "visiteurs": {
+  "en": "visitors",
+  "de": "Besucher"
+ },
+ "pages vues": {
+  "en": "page views",
+  "de": "Seitenaufrufe"
+ },
+ "photos ouvertes en grand": {
+  "en": "photos opened full size",
+  "de": "groß geöffnete Fotos"
+ },
+ "sur téléphone": {
+  "en": "on phones",
+  "de": "auf dem Smartphone"
+ },
+ "Visiteurs : visiteurs différents chaque jour, additionnés sur la période. Évolution : par rapport aux {period} précédents.": {
+  "en": "Visitors: distinct visitors each day, added up over the period. Change: compared with the previous {period}.",
+  "de": "Besucher: verschiedene Besucher pro Tag, über den Zeitraum addiert. Entwicklung: im Vergleich zu den vorherigen {period}."
+ },
+ "Fréquentation": {
+  "en": "Traffic",
+  "de": "Besucherzahlen"
+ },
+ "Pages vues et visiteurs, par mois, du {from} au {to}.": {
+  "en": "Page views and visitors, by month, from {from} to {to}.",
+  "de": "Seitenaufrufe und Besucher, pro Monat, vom {from} bis {to}."
+ },
+ "Pages vues et visiteurs, par jour, du {from} au {to}.": {
+  "en": "Page views and visitors, by day, from {from} to {to}.",
+  "de": "Seitenaufrufe und Besucher, pro Tag, vom {from} bis {to}."
+ },
+ "Voir les données": {
+  "en": "View the data",
+  "de": "Daten anzeigen"
+ },
+ "Mois": {
+  "en": "Month",
+  "de": "Monat"
+ },
+ "Jour": {
+  "en": "Day",
+  "de": "Tag"
+ },
+ "Pages vues": {
+  "en": "Page views",
+  "de": "Seitenaufrufe"
+ },
+ "Visiteurs": {
+  "en": "Visitors",
+  "de": "Besucher"
+ },
+ "Photos les plus vues": {
+  "en": "Most viewed photos",
+  "de": "Meistgesehene Fotos"
+ },
+ "Aucune photo ouverte sur la période.": {
+  "en": "No photos opened during the period.",
+  "de": "Im Zeitraum wurde kein Foto geöffnet."
+ },
+ "Pages": {
+  "en": "Pages",
+  "de": "Seiten"
+ },
+ "Aucune page vue sur la période.": {
+  "en": "No pages viewed during the period.",
+  "de": "Im Zeitraum wurde keine Seite aufgerufen."
+ },
+ "Provenance": {
+  "en": "Sources",
+  "de": "Herkunft"
+ },
+ "Aucune visite sur la période.": {
+  "en": "No visits during the period.",
+  "de": "Keine Besuche im Zeitraum."
+ },
+ "Pays": {
+  "en": "Countries",
+  "de": "Länder"
+ },
+ "visiteurs, selon Cloudflare": {
+  "en": "visitors, according to Cloudflare",
+  "de": "Besucher, laut Cloudflare"
+ },
+ "Carte des visiteurs par pays sur la période": {
+  "en": "Map of visitors by country over the period",
+  "de": "Karte der Besucher nach Land im Zeitraum"
+ },
+ "aucune visite": {
+  "en": "no visits",
+  "de": "keine Besuche"
+ },
+ "{n} visiteurs": {
+  "en": "{n} visitors",
+  "de": "{n} Besucher"
+ },
+ "{n} visiteur": {
+  "en": "{n} visitor",
+  "de": "{n} Besucher"
+ },
+ "Les pays apparaissent à partir des visites suivant la mise à jour ; Cloudflare doit transmettre le pays (option": {
+  "en": "Countries appear for visits after the update; Cloudflare must pass on the country (option",
+  "de": "Länder erscheinen für Besuche nach dem Update; Cloudflare muss das Land übermitteln (Option"
+ },
+ "activée par défaut).": {
+  "en": "on by default).",
+  "de": "standardmäßig aktiviert)."
+ },
+ "Ce qui est mesuré": {
+  "en": "What is measured",
+  "de": "Was gemessen wird"
+ },
+ "Les pages du site et les photos ouvertes dans la visionneuse, jour par jour. Un visiteur est reconnu pour la journée seulement, par une empreinte anonyme oubliée à minuit : aucune adresse IP ni aucun cookie. Son pays est celui que transmet Cloudflare ; le site ne le calcule pas et ne garde pas l’adresse. Les navigateurs qui demandent à ne pas être suivis ne sont pas comptés. Les compteurs sont effacés au bout de 25 mois. La page « Droits d’utilisation » du site en informe les visiteurs.": {
+  "en": "Site pages and photos opened in the viewer, day by day. A visitor is recognised for that day only, by an anonymous fingerprint forgotten at midnight: no IP address and no cookies. Their country is the one Cloudflare passes on; the site does not work it out and does not keep the address. Browsers that ask not to be tracked are not counted. Counters are erased after 25 months. The site’s “Usage rights” page informs visitors of this.",
+  "de": "Die Seiten der Website und die im Betrachter geöffneten Fotos, Tag für Tag. Ein Besucher wird nur für den Tag erkannt, über einen anonymen Fingerabdruck, der um Mitternacht vergessen wird: keine IP-Adresse, keine Cookies. Sein Land ist das von Cloudflare übermittelte; die Website ermittelt es nicht selbst und speichert die Adresse nicht. Browser, die nicht verfolgt werden möchten, werden nicht gezählt. Die Zähler werden nach 25 Monaten gelöscht. Die Seite „Nutzungsrechte“ der Website informiert die Besucher darüber."
+ },
+ "En savoir plus": {
+  "en": "Learn more (in French)",
+  "de": "Mehr erfahren (auf Französisch)"
+ },
+ "Les photos publiées sur le site partent sur Instagram une par une, aux heures choisies, avec une légende tirée du modèle.": {
+  "en": "Photos published on the site go out to Instagram one by one, at the chosen times, with a caption built from the template.",
+  "de": "Die auf der Website veröffentlichten Fotos gehen einzeln zu den gewählten Uhrzeiten an Instagram, mit einer Bildunterschrift aus der Vorlage."
+ },
+ "Compte": {
+  "en": "Account",
+  "de": "Konto"
+ },
+ "Le serveur n’a pas encore d’application Instagram : renseignez <code>INSTAGRAM_APP_ID</code> et <code>INSTAGRAM_APP_SECRET</code> dans sa configuration.": {
+  "en": "The server has no Instagram app yet: set <code>INSTAGRAM_APP_ID</code> and <code>INSTAGRAM_APP_SECRET</code> in its configuration.",
+  "de": "Der Server hat noch keine Instagram-App: Tragen Sie <code>INSTAGRAM_APP_ID</code> und <code>INSTAGRAM_APP_SECRET</code> in seine Konfiguration ein."
+ },
+ "Création du compte professionnel et de l’application Meta, pas à pas :": {
+  "en": "Creating the professional account and the Meta app, step by step:",
+  "de": "Einrichtung des professionellen Kontos und der Meta-App, Schritt für Schritt:"
+ },
+ "aide « Instagram »": {
+  "en": "“Instagram” help (in French)",
+  "de": "Hilfe „Instagram“ (auf Französisch)"
+ },
+ "Le site doit être en HTTPS (<code>PUBLIC_URL</code>) pour se connecter à Instagram : Meta refuse les adresses en http, et doit pouvoir télécharger les images.": {
+  "en": "The site must use HTTPS (<code>PUBLIC_URL</code>) to connect to Instagram: Meta rejects http addresses and must be able to download the images.",
+  "de": "Die Website muss HTTPS verwenden (<code>PUBLIC_URL</code>), um sich mit Instagram zu verbinden: Meta lehnt http-Adressen ab und muss die Bilder herunterladen können."
+ },
+ "Le compte @{name} est enregistré, mais son jeton d’accès ne peut plus être lu : la clé de chiffrement a changé": {
+  "en": "The account @{name} is saved, but its access token can no longer be read: the encryption key has changed",
+  "de": "Das Konto @{name} ist gespeichert, aber sein Zugriffstoken kann nicht mehr gelesen werden: Der Verschlüsselungsschlüssel hat sich geändert"
+ },
+ "ou": {
+  "en": "or",
+  "de": "oder"
+ },
+ "par exemple après une restauration sur un autre serveur.": {
+  "en": "for example after a restore on another server.",
+  "de": "zum Beispiel nach einer Wiederherstellung auf einem anderen Server."
+ },
+ "Reconnecter le compte": {
+  "en": "Reconnect the account",
+  "de": "Konto erneut verbinden"
+ },
+ "Connecté à": {
+  "en": "Connected to",
+  "de": "Verbunden mit"
+ },
+ "Accès valable jusqu’au {date} ({n} jours) ; renouvelé automatiquement avant expiration.": {
+  "en": "Access valid until {date} ({n} days); renewed automatically before it expires.",
+  "de": "Zugriff gültig bis {date} ({n} Tage); wird vor Ablauf automatisch erneuert."
+ },
+ "Il expire bientôt : reconnectez le compte si le renouvellement échoue.": {
+  "en": "It expires soon: reconnect the account if renewal fails.",
+  "de": "Er läuft bald ab: Verbinden Sie das Konto erneut, falls die Erneuerung fehlschlägt."
+ },
+ "Déconnecter": {
+  "en": "Disconnect",
+  "de": "Trennen"
+ },
+ "Aucun compte connecté. Les photos s’accumulent dans la file et partiront dès la connexion.": {
+  "en": "No account connected. Photos build up in the queue and will go out as soon as one is connected.",
+  "de": "Kein Konto verbunden. Die Fotos sammeln sich in der Warteschlange und gehen nach der Verbindung raus."
+ },
+ "Connecter le compte Instagram": {
+  "en": "Connect the Instagram account",
+  "de": "Instagram-Konto verbinden"
+ },
+ "Adresse de retour à déclarer dans l’application Meta :": {
+  "en": "Redirect URI to declare in the Meta app:",
+  "de": "In der Meta-App anzugebende Weiterleitungsadresse:"
+ },
+ "{n} publications par jour, à {times} (heure de Paris).": {
+  "en": "{n} posts a day, at {times} (Paris time).",
+  "de": "{n} Beiträge pro Tag, um {times} (Pariser Zeit)."
+ },
+ "Une publication par jour, à {times} (heure de Paris).": {
+  "en": "One post a day, at {times} (Paris time).",
+  "de": "Ein Beitrag pro Tag, um {times} (Pariser Zeit)."
+ },
+ "Mise en file automatique à la publication : {names}. Les autres séries seulement depuis la fiche de la photo.": {
+  "en": "Automatically queued on publication: {names}. Other series only from the photo’s page.",
+  "de": "Automatisch in die Warteschlange bei Veröffentlichung: {names}. Andere Serien nur über die Seite des Fotos."
+ },
+ "Aucune mise en file automatique : une photo n’entre dans la file que si vous l’y ajoutez depuis sa fiche.": {
+  "en": "No automatic queueing: a photo only enters the queue if you add it from its page.",
+  "de": "Keine automatische Warteschlange: Ein Foto kommt nur hinein, wenn Sie es über seine Seite hinzufügen."
+ },
+ "Modifier": {
+  "en": "Edit",
+  "de": "Ändern"
+ },
+ "Consommation": {
+  "en": "Usage",
+  "de": "Verbrauch"
+ },
+ "limites « {name} »": {
+  "en": "“{name}” limits",
+  "de": "Limits „{name}“"
+ },
+ "File en pause jusqu’{when} : {reason}.": {
+  "en": "Queue paused until {when}: {reason}.",
+  "de": "Warteschlange pausiert bis {when}: {reason}."
+ },
+ "Reprendre maintenant": {
+  "en": "Resume now",
+  "de": "Jetzt fortsetzen"
+ },
+ "Publications sur 24 h glissantes :": {
+  "en": "Posts over a rolling 24 h:",
+  "de": "Beiträge in den letzten 24 Std.:"
+ },
+ "Appels à l’API sur la dernière heure :": {
+  "en": "API calls in the last hour:",
+  "de": "API-Aufrufe in der letzten Stunde:"
+ },
+ "{n} sur 24 h": {
+  "en": "{n} over 24 h",
+  "de": "{n} in 24 Std."
+ },
+ "Quota lu chez Instagram :": {
+  "en": "Quota read from Instagram:",
+  "de": "Bei Instagram gelesenes Kontingent:"
+ },
+ "sur 24 h": {
+  "en": "over 24 h",
+  "de": "in 24 Std."
+ },
+ "Au moins": {
+  "en": "At least",
+  "de": "Mindestens"
+ },
+ "{n} min": {
+  "en": "{n} min",
+  "de": "{n} Min."
+ },
+ "entre deux publications": {
+  "en": "between two posts",
+  "de": "zwischen zwei Beiträgen"
+ },
+ "File d’attente": {
+  "en": "Queue",
+  "de": "Warteschlange"
+ },
+ "La file est vide. Ajoutez une photo depuis sa fiche (section « Instagram »), ou publiez-en une dans une série en mise en file automatique.": {
+  "en": "The queue is empty. Add a photo from its page (“Instagram” section), or publish one in a series with automatic queueing.",
+  "de": "Die Warteschlange ist leer. Fügen Sie ein Foto über seine Seite hinzu (Abschnitt „Instagram“) oder veröffentlichen Sie eines in einer Serie mit automatischer Warteschlange."
+ },
+ "La file est vide. Ajoutez une photo depuis sa fiche (section « Instagram »).": {
+  "en": "The queue is empty. Add a photo from its page (“Instagram” section).",
+  "de": "Die Warteschlange ist leer. Fügen Sie ein Foto über seine Seite hinzu (Abschnitt „Instagram“)."
+ },
+ "Aperçu exact de l’image envoyée (nouvel onglet)": {
+  "en": "Exact preview of the image sent (new tab)",
+  "de": "Genaue Vorschau des gesendeten Bildes (neuer Tab)"
+ },
+ "Envoi en cours": {
+  "en": "Sending",
+  "de": "Wird gesendet"
+ },
+ "Prévue le {date} à {time}": {
+  "en": "Scheduled for {date} at {time}",
+  "de": "Geplant am {date} um {time}"
+ },
+ "filigrane": {
+  "en": "watermark",
+  "de": "Wasserzeichen"
+ },
+ "Dernier essai : {error} (essai {n} sur 3)": {
+  "en": "Last attempt: {error} (attempt {n} of 3)",
+  "de": "Letzter Versuch: {error} (Versuch {n} von 3)"
+ },
+ "Publier maintenant": {
+  "en": "Publish now",
+  "de": "Jetzt veröffentlichen"
+ },
+ "Les plus aimées sur Instagram": {
+  "en": "Most liked on Instagram",
+  "de": "Am meisten gelikt auf Instagram"
+ },
+ "Likes et commentaires des photos publiées depuis le site, relevés chaque matin (seulement des nombres : Instagram ne dit pas qui a aimé).": {
+  "en": "Likes and comments on photos published from the site, collected every morning (numbers only: Instagram does not say who liked).",
+  "de": "Likes und Kommentare der von der Website veröffentlichten Fotos, jeden Morgen erfasst (nur Zahlen: Instagram verrät nicht, wer gelikt hat)."
+ },
+ "Dernier relevé : {date} à {time}.": {
+  "en": "Last collected: {date} at {time}.",
+  "de": "Letzte Erfassung: {date} um {time}."
+ },
+ "Pas encore de relevé.": {
+  "en": "Not collected yet.",
+  "de": "Noch keine Erfassung."
+ },
+ "Dernier essai sans succès : {error}": {
+  "en": "Last attempt failed: {error}",
+  "de": "Letzter Versuch fehlgeschlagen: {error}"
+ },
+ "publiée le {date}": {
+  "en": "published on {date}",
+  "de": "veröffentlicht am {date}"
+ },
+ "likes": {
+  "en": "likes",
+  "de": "Likes"
+ },
+ "like": {
+  "en": "like",
+  "de": "Like"
+ },
+ "{n} comm.": {
+  "en": "{n} comm.",
+  "de": "{n} Komm."
+ },
+ "Voir": {
+  "en": "View",
+  "de": "Ansehen"
+ },
+ "Relever maintenant": {
+  "en": "Collect now",
+  "de": "Jetzt erfassen"
+ },
+ "Historique": {
+  "en": "History",
+  "de": "Verlauf"
+ },
+ "{n} likes": {
+  "en": "{n} likes",
+  "de": "{n} Likes"
+ },
+ "{n} like": {
+  "en": "{n} like",
+  "de": "{n} Like"
+ },
+ "échec : {error}": {
+  "en": "failed: {error}",
+  "de": "fehlgeschlagen: {error}"
+ },
+ "Voir sur Instagram": {
+  "en": "View on Instagram",
+  "de": "Auf Instagram ansehen"
+ },
+ "Limites de l’API": {
+  "en": "API limits",
+  "de": "API-Limits"
+ },
+ "Meta ne vend pas de quota supplémentaire : on règle le rythme": {
+  "en": "Meta does not sell extra quota: you set the pace",
+  "de": "Meta verkauft kein zusätzliches Kontingent: Sie legen den Rhythmus fest"
+ },
+ "quota lu chez Instagram (100 / 24 h aujourd’hui)": {
+  "en": "quota read from Instagram (100 / 24 h today)",
+  "de": "bei Instagram gelesenes Kontingent (heute 100 / 24 Std.)"
+ },
+ "{n} min entre deux": {
+  "en": "{n} min between two",
+  "de": "{n} Min. dazwischen"
+ },
+ "sans écart minimal": {
+  "en": "no minimum gap",
+  "de": "ohne Mindestabstand"
+ },
+ "{n} appels / h": {
+  "en": "{n} calls / h",
+  "de": "{n} Aufrufe / Std."
+ },
+ "Publications sur 24 h": {
+  "en": "Posts per 24 h",
+  "de": "Beiträge pro 24 Std."
+ },
+ "« {name} » · {range}": {
+  "en": "“{name}” · {range}",
+  "de": "„{name}“ · {range}"
+ },
+ "Minutes entre deux": {
+  "en": "Minutes between two",
+  "de": "Minuten dazwischen"
+ },
+ "Appels par heure": {
+  "en": "Calls per hour",
+  "de": "Aufrufe pro Stunde"
+ },
+ "Hors budget, la photo attend dans la file (« Publier maintenant » refuse en expliquant pourquoi). Si Instagram signale une limite, la file se met en pause le temps indiqué (sinon 1 h, 2 h, 4 h…) sans compter d’essai, puis reprend à raison d’une photo par créneau.": {
+  "en": "Over budget, the photo waits in the queue (“Publish now” refuses and explains why). If Instagram reports a limit, the queue pauses for the time given (otherwise 1 h, 2 h, 4 h…) without counting an attempt, then resumes at one photo per slot.",
+  "de": "Außerhalb des Budgets wartet das Foto in der Warteschlange („Jetzt veröffentlichen“ lehnt mit Begründung ab). Meldet Instagram ein Limit, pausiert die Warteschlange für die angegebene Zeit (sonst 1 Std., 2 Std., 4 Std. …), ohne einen Versuch zu zählen, und setzt dann mit einem Foto pro Zeitfenster fort."
+ },
+ "Mise en file automatique": {
+  "en": "Automatic queueing",
+  "de": "Automatische Warteschlange"
+ },
+ "à la publication sur le site · décochez tout pour ne choisir qu’à la main": {
+  "en": "on publication on the site · untick everything to choose by hand only",
+  "de": "bei Veröffentlichung auf der Website · alles abwählen, um nur manuell auszuwählen"
+ },
+ "Une photo publiée dans une série cochée entre seule dans la file. Pour les autres, utilisez « Ajouter à la file Instagram » sur la fiche de la photo. Les photos déjà dans la file y restent : retirez-les une par une si besoin.": {
+  "en": "A photo published in a ticked series enters the queue by itself. For the others, use “Add to Instagram queue” on the photo’s page. Photos already in the queue stay there: remove them one by one if needed.",
+  "de": "Ein Foto, das in einer angekreuzten Serie veröffentlicht wird, kommt von selbst in die Warteschlange. Für die anderen nutzen Sie „Zur Instagram-Warteschlange hinzufügen“ auf der Seite des Fotos. Fotos, die schon in der Warteschlange sind, bleiben dort: Entfernen Sie sie bei Bedarf einzeln."
+ },
+ "Heures de publication": {
+  "en": "Posting times",
+  "de": "Veröffentlichungszeiten"
+ },
+ "heure de Paris, séparées par des virgules · 4 au plus": {
+  "en": "Paris time, separated by commas · 4 at most",
+  "de": "Pariser Zeit, durch Kommas getrennt · höchstens 4"
+ },
+ "Cadre par défaut": {
+  "en": "Default frame",
+  "de": "Standardrahmen"
+ },
+ "Filigrane par défaut (celui des réglages": {
+  "en": "Watermark by default (the one from the",
+  "de": "Standardmäßig Wasserzeichen (das aus den Einstellungen"
+ },
+ "Modèle de légende": {
+  "en": "Caption template",
+  "de": "Vorlage der Bildunterschrift"
+ },
+ "une ligne dont les variables sont vides disparaît ; sans {signature}, la signature du photographe se place sous la légende": {
+  "en": "a line whose variables are empty disappears; without {signature}, the photographer’s signature goes below the caption",
+  "de": "eine Zeile mit leeren Variablen entfällt; ohne {signature} steht die Signatur des Fotografen unter der Bildunterschrift"
+ },
+ "Hashtags pour toutes les photos": {
+  "en": "Hashtags for all photos",
+  "de": "Hashtags für alle Fotos"
+ },
+ "Hashtags par série": {
+  "en": "Hashtags per series",
+  "de": "Hashtags pro Serie"
+ },
+ "ajoutés à ceux de toutes les photos · 30 au plus en tout": {
+  "en": "added to those for all photos · 30 at most in total",
+  "de": "zusätzlich zu denen aller Fotos · insgesamt höchstens 30"
+ },
+ "Enregistrer les réglages": {
+  "en": "Save settings",
+  "de": "Einstellungen speichern"
+ },
+ "L’aide est rédigée en français.": {
+  "en": "The help is written in French.",
+  "de": "Die Hilfe ist auf Französisch verfasst."
+ },
+ "Sommaire de l’aide": {
+  "en": "Help contents",
+  "de": "Inhalt der Hilfe"
+ },
+ "Rechercher dans l’aide": {
+  "en": "Search the help",
+  "de": "In der Hilfe suchen"
+ },
+ "ex. filigrane, ordre, supprimer": {
+  "en": "e.g. filigrane, ordre, supprimer (search in French)",
+  "de": "z. B. filigrane, ordre, supprimer (auf Französisch suchen)"
+ },
+ "Aucune section ne contient ce texte.": {
+  "en": "No section contains this text.",
+  "de": "Kein Abschnitt enthält diesen Text."
+ },
+ "Haut de l’aide": {
+  "en": "Back to top of help",
+  "de": "Zum Anfang der Hilfe"
+ },
+ "Envoyer le fichier": {
+  "en": "Upload",
+  "de": "Hochladen"
+ },
+ "Rythme de publication": {
+  "en": "Posting schedule",
+  "de": "Veröffentlichungsrhythmus"
+ },
+ "C’est la seule série : sa photo n’aurait nulle part où aller. Créez d’abord une autre série.": {
+  "en": "This is the only series: its photo would have nowhere to go. Create another series first.",
+  "de": "Dies ist die einzige Serie: Ihr Foto hätte keinen anderen Platz. Erstellen Sie zuerst eine weitere Serie."
+ }
+}

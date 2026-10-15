@@ -1,4 +1,5 @@
 <% layout('./layout') %>
+<% const t = it.t; %>
 <% const f = it.filter;
    const params = o => { const p = new URLSearchParams(); const all = { q: f.q, auteur: f.author, serie: f.category, statut: it.todo ? 'afinir' : f.status, manque: it.missing ? it.missing.key : '', vue: it.view === 'liste' ? 'liste' : '', ...o }; for (const [k, v] of Object.entries(all)) if (v) p.set(k, v); const s = p.toString(); return '/admin/photos' + (s ? '?' + s : ''); };
    const back = params({});
@@ -6,63 +7,63 @@
 <div class="library" data-library>
 <section class="lib" aria-labelledby="lib-title">
   <header class="lib-top">
-    <h1 id="lib-title">Photothèque</h1>
-    <span class="count"><%= it.photos.length %> photo<%= it.photos.length > 1 ? 's' : '' %><%= it.filtered ? ` sur ${it.totals.all}` : '' %></span>
+    <h1 id="lib-title"><%= t('Photothèque') %></h1>
+    <span class="count"><%= it.photos.length > 1 ? t('{n} photos', { n: it.photos.length }) : t('{n} photo', { n: it.photos.length }) %><%= it.filtered ? ' ' + t('sur {n}', { n: it.totals.all }) : '' %></span>
     <span class="sp"></span>
     <div class="acts">
-      <a class="btn big" href="/admin/photos?importer#import" data-import-open>＋ Importer des photos</a>
-      <a class="btn ghost" href="/" target="_blank" rel="noopener">Voir le site</a>
-      <a class="help-inline" href="/admin/aide#photos">Aide</a>
+      <a class="btn big" href="/admin/photos?importer#import" data-import-open>＋ <%= t('Importer des photos') %></a>
+      <a class="btn ghost" href="/" target="_blank" rel="noopener"><%= t('Voir le site') %></a>
+      <a class="help-inline" href="/admin/aide#photos"><%= t('Aide') %></a>
     </div>
   </header>
 
   <div class="lib-sub">
-    <nav class="chips" aria-label="Statut">
-<% [['', 'Tout', it.totals.all], ['published', 'Publiées', it.totals.published], ['draft', 'Brouillons', it.totals.draft], ['afinir', 'À finir', it.totals.todo]].forEach(([k, label, n]) => { %>
+    <nav class="chips" aria-label="<%= t('Statut') %>">
+<% [['', t('Tout'), it.totals.all], ['published', t('Publiées'), it.totals.published], ['draft', t('Brouillons'), it.totals.draft], ['afinir', t('À finir'), it.totals.todo]].forEach(([k, label, n]) => { %>
       <a class="chip<%= k === 'afinir' ? ' warn' : '' %>" href="<%= params({ statut: k }) %>"<%~ status === k ? ' aria-current="true"' : '' %>><%= label %> <span class="n"><%= n %></span></a>
 <% }) %>
-<% ;[['verifier', '▲ À vérifier'], ['bloquee', '✕ Bloquées'], ['sans-visage', 'Sans visage']].forEach(([k, label]) => { if (!it.totals[k] && !(it.missing && it.missing.key === k)) return; %>
+<% ;[['verifier', '▲ ' + t('À vérifier')], ['bloquee', '✕ ' + t('Bloquées')], ['sans-visage', t('Sans visage')]].forEach(([k, label]) => { if (!it.totals[k] && !(it.missing && it.missing.key === k)) return; %>
       <a class="chip" href="<%= params({ manque: it.missing && it.missing.key === k ? '' : k }) %>"<%~ it.missing && it.missing.key === k ? ' aria-current="true"' : '' %>><%= label %> <span class="n"><%= it.totals[k] %></span></a>
 <% }) %>
-<% if (it.missing && !['verifier', 'bloquee', 'sans-visage'].includes(it.missing.key)) { %>      <a class="chip" href="<%= params({ manque: '' }) %>" aria-current="true" title="Retirer ce filtre"><%= it.missing.label %> <span class="n"><%= it.photos.length %></span> ✕</a>
+<% if (it.missing && !['verifier', 'bloquee', 'sans-visage'].includes(it.missing.key)) { %>      <a class="chip" href="<%= params({ manque: '' }) %>" aria-current="true" title="<%= t('Retirer ce filtre') %>"><%= it.missing.label %> <span class="n"><%= it.photos.length %></span> ✕</a>
 <% } %>    </nav>
     <form class="filters" method="get" action="/admin/photos" role="search" data-filters>
 <% if (status) { %><input type="hidden" name="statut" value="<%= status %>"><% } %>
 <% if (it.missing) { %><input type="hidden" name="manque" value="<%= it.missing.key %>"><% } %>
 <% if (it.view === 'liste') { %><input type="hidden" name="vue" value="liste"><% } %>
-      <input type="search" name="q" value="<%= f.q %>" placeholder="Titre, lieu, légende…" aria-label="Rechercher">
-      <select name="auteur" aria-label="Photographe"><option value="">Tous les photographes</option><% it.authors.forEach(a => { %><option value="<%= a.slug %>"<%~ a.slug === f.author ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
-      <select name="serie" aria-label="Série"><option value="">Toutes les séries</option><% it.categories.forEach(c => { %><option value="<%= c.slug %>"<%~ c.slug === f.category ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
-      <button class="btn ghost" type="submit" data-filter-submit data-nojs>Filtrer</button>
-<% if (it.filtered) { %><a class="more" href="<%= it.view === 'liste' ? '/admin/photos?vue=liste' : '/admin/photos' %>">Effacer</a><% } %>
+      <input type="search" name="q" value="<%= f.q %>" placeholder="<%= t('Titre, lieu, légende…') %>" aria-label="<%= t('Rechercher') %>">
+      <select name="auteur" aria-label="<%= t('Photographe') %>"><option value=""><%= t('Tous les photographes') %></option><% it.authors.forEach(a => { %><option value="<%= a.slug %>"<%~ a.slug === f.author ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
+      <select name="serie" aria-label="<%= t('Série') %>"><option value=""><%= t('Toutes les séries') %></option><% it.categories.forEach(c => { %><option value="<%= c.slug %>"<%~ c.slug === f.category ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
+      <button class="btn ghost" type="submit" data-filter-submit data-nojs><%= t('Filtrer') %></button>
+<% if (it.filtered) { %><a class="more" href="<%= it.view === 'liste' ? '/admin/photos?vue=liste' : '/admin/photos' %>"><%= t('Effacer') %></a><% } %>
     </form>
     <span class="sp"></span>
 <% if (it.view === 'planche') { %>
-    <label class="density" data-js-only hidden>Taille <input type="range" min="110" max="320" value="190" step="10" data-density aria-label="Taille des vignettes"></label>
+    <label class="density" data-js-only hidden><%= t('Taille') %> <input type="range" min="110" max="320" value="190" step="10" data-density aria-label="<%= t('Taille des vignettes') %>"></label>
 <% } %>
-    <nav class="seg" aria-label="Affichage">
-      <a href="<%= params({ vue: '' }) %>"<%~ it.view === 'planche' ? ' aria-current="true"' : '' %>>Planche</a>
-      <a href="<%= params({ vue: 'liste' }) %>"<%~ it.view === 'liste' ? ' aria-current="true"' : '' %>>Liste</a>
+    <nav class="seg" aria-label="<%= t('Affichage') %>">
+      <a href="<%= params({ vue: '' }) %>"<%~ it.view === 'planche' ? ' aria-current="true"' : '' %>><%= t('Planche') %></a>
+      <a href="<%= params({ vue: 'liste' }) %>"<%~ it.view === 'liste' ? ' aria-current="true"' : '' %>><%= t('Liste') %></a>
     </nav>
   </div>
 
   <%~ include('./_import', it) %>
 
   <div class="canvas" data-canvas>
-    <p class="drop-hint mono"><label class="inline all" hidden data-select-all><input type="checkbox" class="chk"> Tout sélectionner</label>
-      <span data-js-only hidden>Clic : voir · Maj ou ⌘ + clic : plusieurs · L : loupe · ⌘K : rechercher, agir<%= it.filtered || it.view === 'liste' ? '' : ' · glisser : ordre, ou vers une série' %></span>
-      <span data-nojs>Cochez des photos, puis agissez dans le panneau de droite.</span></p>
+    <p class="drop-hint mono"><label class="inline all" hidden data-select-all><input type="checkbox" class="chk"> <%= t('Tout sélectionner') %></label>
+      <span data-js-only hidden><%= t('Clic : voir · Maj ou ⌘ + clic : plusieurs · L : loupe · ⌘K : rechercher, agir') %><%= it.filtered || it.view === 'liste' ? '' : ' · ' + t('glisser : ordre, ou vers une série') %></span>
+      <span data-nojs><%= t('Cochez des photos, puis agissez dans le panneau de droite.') %></span></p>
 <% if (it.view === 'planche') { %>
-    <ol class="contact"<%~ it.filtered ? '' : ' data-sortable' %> data-contact aria-label="Photos">
+    <ol class="contact"<%~ it.filtered ? '' : ' data-sortable' %> data-contact aria-label="<%= t('Photos') %>">
 <% it.photos.forEach(p => { %>
       <li id="photo-<%= p.id %>" class="tile <%= it.ratioClass(p) %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
-        <input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="Sélectionner « <%= p.title %> »">
-        <a class="img" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '320px', alt: '' }) %><% } else { %><span class="ph">Traitement…</span><% } %></a>
-<% if (p.status === 'draft') { %>        <span class="badge"><span aria-hidden="true">○</span> Brouillon</span>
-<% } else if (p.provisional) { %>        <span class="badge warn">Titre provisoire</span>
-<% } %><% if (p.site && p.site.level !== 'ok') { %>        <span class="badge state <%= p.site.level %>" title="<%= p.site.reasons.join(' ; ') %>"><span aria-hidden="true"><%= p.site.level === 'no' ? '✕' : '▲' %></span> <%= p.site.level === 'no' ? 'Bloquée' : 'À vérifier' %></span>
+        <input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="<%= t('Sélectionner « {title} »', { title: p.title }) %>">
+        <a class="img" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '320px', alt: '' }) %><% } else { %><span class="ph"><%= t('Traitement…') %></span><% } %></a>
+<% if (p.status === 'draft') { %>        <span class="badge"><span aria-hidden="true">○</span> <%= t('Brouillon') %></span>
+<% } else if (p.provisional) { %>        <span class="badge warn"><%= t('Titre provisoire') %></span>
+<% } %><% if (p.site && p.site.level !== 'ok') { %>        <span class="badge state <%= p.site.level %>" title="<%= p.site.reasons.join(' ; ') %>"><span aria-hidden="true"><%= p.site.level === 'no' ? '✕' : '▲' %></span> <%= p.site.level === 'no' ? t('Bloquée') : t('À vérifier') %></span>
 <% } %>
-        <span class="cap"><a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.category %><%= p.when ? ' · ' + p.when : '' %><%= p.status === 'published' ? ' · publiée' : '' %></small></span>
+        <span class="cap"><a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.category %><%= p.when ? ' · ' + p.when : '' %><%= p.status === 'published' ? ' · ' + t('publiée') : '' %></small></span>
       </li>
 <% }) %>
     </ol>
@@ -70,27 +71,27 @@
     <ol class="plist"<%~ it.filtered ? '' : ' data-sortable' %>>
 <% it.photos.forEach((p, i) => { %>
       <li id="photo-<%= p.id %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
-        <input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="Sélectionner « <%= p.title %> »">
+        <input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="<%= t('Sélectionner « {title} »', { title: p.title }) %>">
         <span class="handle" aria-hidden="true">N°<%= it.pad(p.n) %></span>
-        <a class="thumb" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '96px', alt: '' }) %><% } else { %><span class="ph">Traitement…</span><% } %></a>
+        <a class="thumb" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '96px', alt: '' }) %><% } else { %><span class="ph"><%= t('Traitement…') %></span><% } %></a>
         <div class="info">
           <a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a>
           <span class="mono"><%= p.category %> · <%= p.author %><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + p.when : '' %></span>
-<% if (p.provisional) { %>          <span class="note">Titre provisoire (nom du fichier)</span>
+<% if (p.provisional) { %>          <span class="note"><%= t('Titre provisoire (nom du fichier)') %></span>
 <% } %>
         </div>
-        <span class="st <%= p.status %>"><span aria-hidden="true"><%= p.status === 'published' ? '●' : '○' %></span> <%= it.STATUSES[p.status] %></span>
+        <span class="st <%= p.status %>"><span aria-hidden="true"><%= p.status === 'published' ? '●' : '○' %></span> <%= t(it.STATUSES[p.status]) %></span>
         <details class="menu">
-          <summary class="iconbtn" aria-label="Actions pour « <%= p.title %> »"><span aria-hidden="true">⋯</span></summary>
+          <summary class="iconbtn" aria-label="<%= t('Actions pour « {title} »', { title: p.title }) %>"><span aria-hidden="true">⋯</span></summary>
           <div class="menu-pop">
-            <a href="/admin/photos/<%= p.id %>">Modifier la fiche</a>
+            <a href="/admin/photos/<%= p.id %>"><%= t('Modifier la fiche') %></a>
             <form method="post" action="/admin/photos/<%= p.id %>/status">
               <input type="hidden" name="_csrf" value="<%= it.csrf %>">
               <input type="hidden" name="back" value="<%= back %>">
               <input type="hidden" name="status" value="<%= p.status === 'published' ? 'draft' : 'published' %>">
-              <button type="submit"><%= p.status === 'published' ? 'Dépublier' : 'Publier' %></button>
+              <button type="submit"><%= p.status === 'published' ? t('Dépublier') : t('Publier') %></button>
             </form>
-<% if (!it.filtered) { [['up', 'Monter d’une place', i === 0], ['down', 'Descendre d’une place', i === it.photos.length - 1]].forEach(([dir, label, off]) => { if (off) return; %>
+<% if (!it.filtered) { [['up', t('Monter d’une place'), i === 0], ['down', t('Descendre d’une place'), i === it.photos.length - 1]].forEach(([dir, label, off]) => { if (off) return; %>
             <form method="post" action="/admin/photos/<%= p.id %>/move">
               <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="dir" value="<%= dir %>">
               <button type="submit"><%= label %></button>
@@ -102,84 +103,84 @@
 <% }) %>
     </ol>
 <% } %>
-<% if (!it.photos.length) { %><p class="empty">Aucune photo<%= it.filtered ? ' pour ces filtres' : '' %>.</p><% } %>
+<% if (!it.photos.length) { %><p class="empty"><%= it.filtered ? t('Aucune photo pour ces filtres.') : t('Aucune photo.') %></p><% } %>
   </div>
 </section>
 
-<aside class="insp" aria-label="Inspecteur" data-inspector>
+<aside class="insp" aria-label="<%= t('Inspecteur') %>" data-inspector>
   <form class="bulk" id="bulk" method="post" action="/admin/photos/actions" data-bulk>
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
     <input type="hidden" name="back" value="<%= back %>">
     <div class="insp-hd">
       <span class="stack" data-insp-stack hidden></span>
-      <div><h2 data-insp-title>Sélection</h2><strong data-bulk-count role="status">Pour les photos cochées :</strong></div>
-      <a class="btn ghost push open-one" href="#" data-one-open hidden>Ouvrir la fiche</a>
-      <button class="iconbtn push" type="button" data-bulk-clear hidden aria-label="Tout désélectionner (Échap)">✕</button>
+      <div><h2 data-insp-title><%= t('Sélection') %></h2><strong data-bulk-count role="status"><%= t('Pour les photos cochées :') %></strong></div>
+      <a class="btn ghost push open-one" href="#" data-one-open hidden><%= t('Ouvrir la fiche') %></a>
+      <button class="iconbtn push" type="button" data-bulk-clear hidden aria-label="<%= t('Tout désélectionner (Échap)') %>">✕</button>
     </div>
 
     <div class="insp-bd" data-insp-empty hidden>
-      <div class="fld"><p class="hint">Cliquez une photo pour la voir ici. Maj + clic ou ⌘ + clic pour en choisir plusieurs : série, lieu, date et publication s’appliquent alors à toutes.</p></div>
+      <div class="fld"><p class="hint"><%= t('Cliquez une photo pour la voir ici. Maj + clic ou ⌘ + clic pour en choisir plusieurs : série, lieu, date et publication s’appliquent alors à toutes.') %></p></div>
       <div class="fld">
-        <span class="lb">Photothèque</span>
-        <p class="stat">Publiées <b><%= it.totals.published %></b></p>
-        <p class="stat">Brouillons <b><%= it.totals.draft %></b></p>
-        <p class="stat">À finir <b><%= it.totals.todo %></b></p>
+        <span class="lb"><%= t('Photothèque') %></span>
+        <p class="stat"><%= t('Publiées') %> <b><%= it.totals.published %></b></p>
+        <p class="stat"><%= t('Brouillons') %> <b><%= it.totals.draft %></b></p>
+        <p class="stat"><%= t('À finir') %> <b><%= it.totals.todo %></b></p>
       </div>
-      <div class="fld"><span class="lb">Raccourcis</span>
-        <p class="stat"><span>Rechercher, agir</span><kbd>⌘K</kbd></p>
-        <p class="stat"><span>Publier la sélection</span><kbd>P</kbd></p>
-        <p class="stat"><span>Loupe</span><kbd>L</kbd></p>
-        <p class="stat"><span>Tout sélectionner</span><kbd>⌘A</kbd></p>
-        <p class="stat"><span>Annuler la dernière action</span><kbd>⌘Z</kbd></p>
+      <div class="fld"><span class="lb"><%= t('Raccourcis') %></span>
+        <p class="stat"><span><%= t('Rechercher, agir') %></span><kbd>⌘K</kbd></p>
+        <p class="stat"><span><%= t('Publier la sélection') %></span><kbd>P</kbd></p>
+        <p class="stat"><span><%= t('Loupe') %></span><kbd>L</kbd></p>
+        <p class="stat"><span><%= t('Tout sélectionner') %></span><kbd>⌘A</kbd></p>
+        <p class="stat"><span><%= t('Annuler la dernière action') %></span><kbd>⌘Z</kbd></p>
       </div>
     </div>
 
     <div data-insp-one hidden>
       <div class="preview-one" data-one-preview></div>
       <div class="insp-bd">
-        <div class="fld"><span class="lb">Titre <span class="r" data-one-n></span></span><input class="big-title" data-one-field="title" maxlength="160" aria-label="Titre"><span class="note" data-one-prov hidden>Titre provisoire (nom du fichier)</span></div>
-        <div class="fld"><span class="lb">Légende</span><textarea data-one-field="legend" rows="2" maxlength="2000" aria-label="Légende" placeholder="Quelques mots pour le visiteur…"></textarea></div>
-        <div class="fld"><span class="lb">Série</span><div class="pills" data-one-series role="group" aria-label="Série"><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %></div></div>
-        <div class="fld" data-city><span class="lb">Ville <span class="r">carte du site</span></span><input data-city-input data-one-city maxlength="120" aria-label="Ville (carte du site)" placeholder="Angers, Lisbonne…" autocomplete="off"><input type="hidden" data-city-id>
-          <label class="inline"><input type="checkbox" data-one-onmap> Afficher sur la carte</label><span class="note" data-one-citynote hidden>Proposée d’après le GPS de la photo : vérifiez-la.</span></div>
-        <div class="fld"><span class="lb">Lieu</span><input data-one-field="place" maxlength="120" aria-label="Lieu" placeholder="Où ?"></div>
-        <div class="fld"><span class="lb">Date <span class="r" data-one-when></span></span><input data-one-field="taken_on" maxlength="40" aria-label="Date" placeholder="oct. 2026, 10/2026…"></div>
-        <div class="fld"><span class="lb">Photographe</span><select data-one-field="author_id" aria-label="Photographe"><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
-        <div class="fld" data-one-audience><span class="lb">Audience <span class="r">30 jours</span></span><div class="aud" data-one-aud><span class="hint">…</span></div></div>
-        <div class="fld"><a class="more" data-one-link href="#">Fiche complète : filigrane, preuve d’antériorité, suppression →</a></div>
+        <div class="fld"><span class="lb"><%= t('Titre') %> <span class="r" data-one-n></span></span><input class="big-title" data-one-field="title" maxlength="160" aria-label="<%= t('Titre') %>"><span class="note" data-one-prov hidden><%= t('Titre provisoire (nom du fichier)') %></span></div>
+        <div class="fld"><span class="lb"><%= t('Légende') %></span><textarea data-one-field="legend" rows="2" maxlength="2000" aria-label="<%= t('Légende') %>" placeholder="<%= t('Quelques mots pour le visiteur…') %>"></textarea></div>
+        <div class="fld"><span class="lb"><%= t('Série') %></span><div class="pills" data-one-series role="group" aria-label="<%= t('Série') %>"><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %></div></div>
+        <div class="fld" data-city><span class="lb"><%= t('Ville') %> <span class="r"><%= t('carte du site') %></span></span><input data-city-input data-one-city maxlength="120" aria-label="<%= t('Ville (carte du site)') %>" placeholder="<%= t('Angers, Lisbonne…') %>" autocomplete="off"><input type="hidden" data-city-id>
+          <label class="inline"><input type="checkbox" data-one-onmap> <%= t('Afficher sur la carte') %></label><span class="note" data-one-citynote hidden><%= t('Proposée d’après le GPS de la photo : vérifiez-la.') %></span></div>
+        <div class="fld"><span class="lb"><%= t('Lieu') %></span><input data-one-field="place" maxlength="120" aria-label="<%= t('Lieu') %>" placeholder="<%= t('Où ?') %>"></div>
+        <div class="fld"><span class="lb"><%= t('Date') %> <span class="r" data-one-when></span></span><input data-one-field="taken_on" maxlength="40" aria-label="<%= t('Date') %>" placeholder="<%= t('oct. 2026, 10/2026…') %>"></div>
+        <div class="fld"><span class="lb"><%= t('Photographe') %></span><select data-one-field="author_id" aria-label="<%= t('Photographe') %>"><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
+        <div class="fld" data-one-audience><span class="lb"><%= t('Audience') %> <span class="r"><%= t('30 jours') %></span></span><div class="aud" data-one-aud><span class="hint">…</span></div></div>
+        <div class="fld"><a class="more" data-one-link href="#"><%= t('Fiche complète : filigrane, preuve d’antériorité, suppression →') %></a></div>
       </div>
     </div>
 
     <div class="insp-bd" data-insp-many>
       <div class="fld">
-        <span class="lb">Série</span>
-        <div class="pills" data-many-series role="group" aria-label="Série de la sélection" data-js-only hidden><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %><button class="pill" type="button" data-category="new">＋ Nouvelle</button></div>
+        <span class="lb"><%= t('Série') %></span>
+        <div class="pills" data-many-series role="group" aria-label="<%= t('Série de la sélection') %>" data-js-only hidden><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %><button class="pill" type="button" data-category="new">＋ <%= t('Nouvelle') %></button></div>
         <div class="group">
-          <select name="category_id" aria-label="Série de destination" data-bulk-category>
-            <option value="">Série…</option>
+          <select name="category_id" aria-label="<%= t('Série de destination') %>" data-bulk-category>
+            <option value=""><%= t('Série…') %></option>
 <% it.categories.forEach(c => { %>            <option value="<%= c.id %>"><%= c.name %></option>
-<% }) %>            <option value="new">＋ Nouvelle série…</option>
+<% }) %>            <option value="new">＋ <%= t('Nouvelle série…') %></option>
           </select>
-          <input name="new_category" maxlength="80" placeholder="Nom de la nouvelle série" aria-label="Nom de la nouvelle série" data-bulk-new>
-          <button class="btn ghost" type="submit" name="action" value="category" data-nojs>Changer de série</button>
+          <input name="new_category" maxlength="80" placeholder="<%= t('Nom de la nouvelle série') %>" aria-label="<%= t('Nom de la nouvelle série') %>" data-bulk-new>
+          <button class="btn ghost" type="submit" name="action" value="category" data-nojs><%= t('Changer de série') %></button>
         </div>
       </div>
       <div class="fld">
-        <span class="lb">Lieu et date <span class="r" data-js-only hidden>appliqués dès la sortie du champ</span></span>
-        <input name="place" maxlength="120" placeholder="Lieu" aria-label="Lieu pour la sélection" data-many-field="place">
-        <input name="taken_on" maxlength="40" placeholder="Date : oct. 2026" aria-label="Date pour la sélection" data-many-field="taken_on">
-        <button class="btn ghost" type="submit" name="action" value="fields" data-nojs>Appliquer lieu et date</button>
+        <span class="lb"><%= t('Lieu et date') %> <span class="r" data-js-only hidden><%= t('appliqués dès la sortie du champ') %></span></span>
+        <input name="place" maxlength="120" placeholder="<%= t('Lieu') %>" aria-label="<%= t('Lieu pour la sélection') %>" data-many-field="place">
+        <input name="taken_on" maxlength="40" placeholder="<%= t('Date : oct. 2026') %>" aria-label="<%= t('Date pour la sélection') %>" data-many-field="taken_on">
+        <button class="btn ghost" type="submit" name="action" value="fields" data-nojs><%= t('Appliquer lieu et date') %></button>
       </div>
-      <div class="fld"><span class="lb">Carte du site <span class="r">photos qui ont une ville</span></span>
-        <div class="two"><button class="btn ghost" type="button" data-many-map="map_on">Sur la carte</button><button class="btn ghost" type="button" data-many-map="map_off">Retirer de la carte</button></div></div>
-      <div class="fld" data-many-titles hidden><span class="lb">Titres provisoires</span><div class="titles" data-titles></div></div>
+      <div class="fld"><span class="lb"><%= t('Carte du site') %> <span class="r"><%= t('photos qui ont une ville') %></span></span>
+        <div class="two"><button class="btn ghost" type="button" data-many-map="map_on"><%= t('Sur la carte') %></button><button class="btn ghost" type="button" data-many-map="map_off"><%= t('Retirer de la carte') %></button></div></div>
+      <div class="fld" data-many-titles hidden><span class="lb"><%= t('Titres provisoires') %></span><div class="titles" data-titles></div></div>
     </div>
 
     <div class="insp-ft">
-      <button class="btn" type="submit" name="action" value="publish" data-publish>Publier</button>
+      <button class="btn" type="submit" name="action" value="publish" data-publish><%= t('Publier') %></button>
       <div class="two">
-        <button class="btn ghost" type="submit" name="action" value="draft">Dépublier</button>
-        <button class="btn ghost" type="submit" name="action" value="delete" data-bulk-delete>Supprimer…</button>
+        <button class="btn ghost" type="submit" name="action" value="draft"><%= t('Dépublier') %></button>
+        <button class="btn ghost" type="submit" name="action" value="delete" data-bulk-delete><%= t('Supprimer…') %></button>
       </div>
     </div>
   </form>
@@ -189,7 +190,7 @@
 <script type="application/json" id="photos-data"><%~ it.json %></script>
 
 <dialog class="dialog" data-confirm-delete aria-labelledby="del-title">
-  <h2 id="del-title">Supprimer <span data-del-count></span> ?</h2>
-  <p>Les originaux et toutes leurs images seront effacés. Cette action est définitive.</p>
-  <p class="actions"><button class="btn danger" type="button" data-del-ok>Supprimer définitivement</button><button class="btn ghost" type="button" data-del-cancel autofocus>Annuler</button></p>
+  <h2 id="del-title"><%~ t('Supprimer {n} ?', { n: '<span data-del-count></span>' }) %></h2>
+  <p><%= t('Les originaux et toutes leurs images seront effacés. Cette action est définitive.') %></p>
+  <p class="actions"><button class="btn danger" type="button" data-del-ok><%= t('Supprimer définitivement') %></button><button class="btn ghost" type="button" data-del-cancel autofocus><%= t('Annuler') %></button></p>
 </dialog>

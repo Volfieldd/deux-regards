@@ -1,58 +1,61 @@
 <% layout('./layout') %>
+<% const t = it.t; %>
 <% // Date et salutation à l'heure de Paris (le serveur peut tourner en UTC).
-   const paris = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', hourCycle: 'h23' }).formatToParts(new Date()).reduce((o, p) => ({ ...o, [p.type]: p.value }), {});
-   const SHORT = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+   const paris = new Intl.DateTimeFormat(it.locale, { timeZone: 'Europe/Paris', weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', hourCycle: 'h23' }).formatToParts(new Date()).reduce((o, p) => ({ ...o, [p.type]: p.value }), {});
+   const SHORT = it.lang === 'fr' || !it.lang ? ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.']
+     : Array.from({ length: 12 }, (_, i) => new Intl.DateTimeFormat(it.locale, { month: 'short', timeZone: 'UTC' }).format(Date.UTC(2000, i, 1)));
    const h = Number(paris.hour);
    const first = (it.me && it.me.name) || (it.session.name || '').split(' ')[0];
    const max = Math.max(1, ...it.rhythm.map(r => r.n));
-   const ago = iso => { const d = (Date.now() - new Date(iso.replace(' ', 'T') + 'Z')) / 1000; if (d < 3600) return `il y a ${Math.max(1, Math.round(d / 60))} min`; if (d < 86400) return `il y a ${Math.round(d / 3600)} h`; if (d < 172800) return 'hier'; return `il y a ${Math.round(d / 86400)} j`; };
+   const ago = iso => { const d = (Date.now() - new Date(iso.replace(' ', 'T') + 'Z')) / 1000; if (d < 3600) return t('il y a {n} min', { n: Math.max(1, Math.round(d / 60)) }); if (d < 86400) return t('il y a {n} h', { n: Math.round(d / 3600) }); if (d < 172800) return t('hier'); return t('il y a {n} j', { n: Math.round(d / 86400) }); };
+   const photosN = n => n > 1 ? t('{n} photos', { n }) : t('{n} photo', { n });
    const pr = it.proofs; %>
 <div class="today">
   <div class="head">
     <div>
-      <p class="date"><%= paris.weekday %> <%= paris.day %> <%= paris.month %></p>
-      <h1><%= h < 5 || h >= 18 ? 'Bonsoir' : 'Bonjour' %><%= first ? `, ${first}` : '' %>.</h1>
+      <p class="date"><%= t('{weekday} {day} {month}', { weekday: paris.weekday, day: paris.day, month: paris.month }) %></p>
+      <h1><%= h < 5 || h >= 18 ? t('Bonsoir') : t('Bonjour') %><%= first ? `, ${first}` : '' %>.</h1>
     </div>
     <span class="sp"></span>
-    <a class="btn ghost" href="/" target="_blank" rel="noopener">Voir le site</a>
-    <a class="btn big" href="/admin/photos?importer#import">＋ Importer des photos</a>
+    <a class="btn ghost" href="/" target="_blank" rel="noopener"><%= t('Voir le site') %></a>
+    <a class="btn big" href="/admin/photos?importer#import">＋ <%= t('Importer des photos') %></a>
   </div>
 
   <section class="panel tasks" aria-labelledby="tasks-title">
-    <h2 id="tasks-title">À faire <span class="mono"><%= it.tasks.length ? `${it.tasks.length} chose${it.tasks.length > 1 ? 's' : ''}, les plus urgentes d’abord` : 'rien pour l’instant' %></span></h2>
+    <h2 id="tasks-title"><%= t('À faire') %> <span class="mono"><%= it.tasks.length ? (it.tasks.length > 1 ? t('{n} choses, les plus urgentes d’abord', { n: it.tasks.length }) : t('1 chose, les plus urgentes d’abord')) : t('rien pour l’instant') %></span></h2>
 <% if (!it.tasks.length) { %>
-    <p class="hint">Rien ne demande votre attention : ni demande à traiter, ni refus en attente, ni photo à finir.</p>
-<% } else { const LABEL = { urgent: 'Urgent', bientot: 'Bientôt', 'plus-tard': 'Quand vous avez le temps' }; %>
+    <p class="hint"><%= t('Rien ne demande votre attention : ni demande à traiter, ni refus en attente, ni photo à finir.') %></p>
+<% } else { const LABEL = { urgent: t('Urgent'), bientot: t('Bientôt'), 'plus-tard': t('Quand vous avez le temps') }; %>
     <ul class="task-list">
-<% it.tasks.forEach(t => { %>
-      <li class="task <%= t.level %>">
+<% it.tasks.forEach(task => { %>
+      <li class="task <%= task.level %>">
         <span class="st" aria-hidden="true"></span>
-        <span class="t"><a href="<%= t.href %>"><%= t.title %></a><small><span class="sr-only"><%= LABEL[t.level] %> : </span><%= t.detail %></small></span>
-        <a class="btn <%= t.level === 'urgent' ? '' : 'ghost' %>" href="<%= t.href %>" tabindex="-1" aria-hidden="true"><%= t.action %></a>
+        <span class="t"><a href="<%= task.href %>"><%= task.title %></a><small><span class="sr-only"><%= t('{level} :', { level: LABEL[task.level] }) %> </span><%= task.detail %></small></span>
+        <a class="btn <%= task.level === 'urgent' ? '' : 'ghost' %>" href="<%= task.href %>" tabindex="-1" aria-hidden="true"><%= task.action %></a>
       </li>
 <% }) %>
     </ul>
-    <p class="task-legend mono" aria-hidden="true"><span class="task urgent"><span class="st"></span>urgent</span><span class="task bientot"><span class="st"></span>bientôt</span><span class="task plus-tard"><span class="st"></span>quand vous avez le temps</span></p>
+    <p class="task-legend mono" aria-hidden="true"><span class="task urgent"><span class="st"></span><%= t('urgent') %></span><span class="task bientot"><span class="st"></span><%= t('bientôt') %></span><span class="task plus-tard"><span class="st"></span><%= t('quand vous avez le temps') %></span></p>
 <% } %>
   </section>
 
   <div class="bento">
     <section class="panel" id="a-finir" aria-labelledby="todo-title">
-      <h2 id="todo-title">À finir <span class="mono"><%= it.todoCount ? `${it.todoCount} photo${it.todoCount > 1 ? 's' : ''}` : 'rien' %></span><% if (it.todo.length) { %><a class="btn ghost push" href="/admin/photos?statut=afinir">Tout finir en un écran →</a><% } %></h2>
+      <h2 id="todo-title"><%= t('À finir') %> <span class="mono"><%= it.todoCount ? photosN(it.todoCount) : t('rien') %></span><% if (it.todo.length) { %><a class="btn ghost push" href="/admin/photos?statut=afinir"><%= t('Tout finir en un écran →') %></a><% } %></h2>
 <% if (!it.todo.length) { %>
-      <p class="hint">Tout est publié et titré. Belle journée.</p>
+      <p class="hint"><%= t('Tout est publié et titré. Belle journée.') %></p>
 <% } else { %>
       <ul class="todo">
 <% it.todo.forEach(p => { %>
         <li>
           <% if (p.ready) { %><%~ it.picture(p, { sizes: '56px', alt: '' }) %><% } else { %><span class="ph">…</span><% } %>
-          <span class="t"><a href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.provisional ? 'titre provisoire' : 'brouillon, prêt à publier' %><%= p.place ? '' : ' · sans lieu' %></small></span>
+          <span class="t"><a href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.provisional ? t('titre provisoire') : t('brouillon, prêt à publier') %><%= p.place ? '' : ' · ' + t('sans lieu') %></small></span>
 <% if (p.provisional) { %>
-          <a class="btn ghost" href="/admin/photos/<%= p.id %>">Titrer</a>
+          <a class="btn ghost" href="/admin/photos/<%= p.id %>"><%= t('Titrer') %></a>
 <% } else { %>
           <form method="post" action="/admin/photos/<%= p.id %>/status">
             <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin"><input type="hidden" name="status" value="published">
-            <button class="btn ghost" type="submit">Publier</button>
+            <button class="btn ghost" type="submit"><%= t('Publier') %></button>
           </form>
 <% } %>
         </li>
@@ -62,30 +65,30 @@
     </section>
 
     <section class="panel" aria-labelledby="site-title">
-      <h2 id="site-title">Le site, en ce moment</h2>
+      <h2 id="site-title"><%= t('Le site, en ce moment') %></h2>
       <div class="filmstrip"><% it.hero.forEach(p => { %><%~ it.picture(p, { sizes: '140px', alt: '' }) %><% }) %></div>
-      <p class="hint">Ouverture : <%= it.hero.length %> photo<%= it.hero.length > 1 ? 's' : '' %><%= it.heroChosen ? ', dans l’ordre choisi' : ' (les premières de la galerie)' %> · thème <%= it.themeLabel || '—' %> · <a class="more" href="/admin/site#ouverture">modifier</a></p>
+      <p class="hint"><%= it.heroChosen ? t('Ouverture : {photos}, dans l’ordre choisi', { photos: photosN(it.hero.length) }) : t('Ouverture : {photos} (les premières de la galerie)', { photos: photosN(it.hero.length) }) %> · <%= t('thème {theme}', { theme: it.themeLabel || '—' }) %> · <a class="more" href="/admin/site#ouverture"><%= t('modifier') %></a></p>
     </section>
 
-    <section class="panel" aria-label="Chiffres">
+    <section class="panel" aria-label="<%= t('Chiffres') %>">
       <div class="figures">
-        <a href="/admin/statistiques"><b><%= it.visitorsToday %></b><span>visiteur<%= it.visitorsToday > 1 ? 's' : '' %> aujourd’hui</span></a>
-        <a href="/admin/photos?statut=published"><b><%= it.counts.published %></b><span>photos publiées</span></a>
-        <a href="/admin/photos?statut=draft"><b><%= it.counts.draft %></b><span>brouillons</span></a>
-        <a href="/admin/series"><b><%= it.categories %></b><span>séries</span></a>
-        <a href="/admin/auteurs"><b><%= it.authors.length %></b><span>photographe<%= it.authors.length > 1 ? 's' : '' %></span></a>
+        <a href="/admin/statistiques"><b><%= it.visitorsToday %></b><span><%= it.visitorsToday > 1 ? t('visiteurs aujourd’hui') : t('visiteur aujourd’hui') %></span></a>
+        <a href="/admin/photos?statut=published"><b><%= it.counts.published %></b><span><%= t('photos publiées') %></span></a>
+        <a href="/admin/photos?statut=draft"><b><%= it.counts.draft %></b><span><%= t('brouillons') %></span></a>
+        <a href="/admin/series"><b><%= it.categories %></b><span><%= t('séries') %></span></a>
+        <a href="/admin/auteurs"><b><%= it.authors.length %></b><span><%= it.authors.length > 1 ? t('photographes') : t('photographe') %></span></a>
       </div>
     </section>
 
 <% if (it.monthTop) { %>
     <section class="panel" aria-labelledby="top-title">
-      <h2 id="top-title">La photo du moment <span class="mono"><%= it.monthTop.views %> ouverture<%= it.monthTop.views > 1 ? 's' : '' %> en 30 jours</span><a class="btn ghost push" href="/admin/statistiques">Statistiques →</a></h2>
+      <h2 id="top-title"><%= t('La photo du moment') %> <span class="mono"><%= it.monthTop.views > 1 ? t('{n} ouvertures en 30 jours', { n: it.monthTop.views }) : t('{n} ouverture en 30 jours', { n: it.monthTop.views }) %></span><a class="btn ghost push" href="/admin/statistiques"><%= t('Statistiques') %> →</a></h2>
       <a class="motm" href="/admin/photos/<%= it.monthTop.id %>"><% if (it.monthTop.ready) { %><%~ it.picture(it.monthTop, { sizes: '320px', alt: '' }) %><% } %><span><%= it.monthTop.title %></span></a>
     </section>
 <% } %>
     <section class="panel" aria-labelledby="rhythm-title">
-      <h2 id="rhythm-title">Rythme <span class="mono">photos importées par mois</span></h2>
-      <div class="rhythm" role="img" aria-label="<%= it.rhythm.map(r => `${SHORT[Number(r.month.slice(5)) - 1]} ${r.month.slice(0, 4)} : ${r.n}`).join(', ') %>">
+      <h2 id="rhythm-title"><%= t('Rythme') %> <span class="mono"><%= t('photos importées par mois') %></span></h2>
+      <div class="rhythm" role="img" aria-label="<%= it.rhythm.map(r => t('{month} : {n}', { month: `${SHORT[Number(r.month.slice(5)) - 1]} ${r.month.slice(0, 4)}`, n: r.n })).join(', ') %>">
 <% it.rhythm.forEach((r, i) => { %>        <i class="h<%= Math.round((r.n / max) * 10) %><%= i === it.rhythm.length - 1 ? ' now' : '' %>"></i>
 <% }) %>
       </div>
@@ -93,35 +96,35 @@
     </section>
 
     <section class="panel" aria-labelledby="recent-title">
-      <h2 id="recent-title">Dernières modifications</h2>
+      <h2 id="recent-title"><%= t('Dernières modifications') %></h2>
       <ul class="recent">
 <% it.recent.forEach(p => { %>
-        <li><% if (p.ready) { %><%~ it.picture(p, { sizes: '40px', alt: '' }) %><% } else { %><span class="ph"></span><% } %><a href="/admin/photos/<%= p.id %>"><%= p.title %></a><span class="mono"><%= p.status === 'published' ? 'publiée' : 'brouillon' %> · <%= p.author %></span><span class="w"><%= ago(p.updated_at) %></span></li>
+        <li><% if (p.ready) { %><%~ it.picture(p, { sizes: '40px', alt: '' }) %><% } else { %><span class="ph"></span><% } %><a href="/admin/photos/<%= p.id %>"><%= p.title %></a><span class="mono"><%= p.status === 'published' ? t('publiée') : t('brouillon') %> · <%= p.author %></span><span class="w"><%= ago(p.updated_at) %></span></li>
 <% }) %>
       </ul>
     </section>
 
     <section class="panel" aria-labelledby="proofs-title">
-      <h2 id="proofs-title">Preuves d’antériorité</h2>
+      <h2 id="proofs-title"><%= t('Preuves d’antériorité') %></h2>
 <% if (!it.tsa.url) { %>
-      <p class="hint">Horodatage désactivé sur ce serveur (<code>TSA_URL=off</code>) : seules les empreintes des originaux sont calculées.</p>
+      <p class="hint"><%~ t('Horodatage désactivé sur ce serveur ({code}) : seules les empreintes des originaux sont calculées.', { code: '<code>TSA_URL=off</code>' }) %></p>
 <% } else { %>
-      <p><strong><%= pr.ok %></strong> photo(s) sur <%= pr.photos %> horodatée(s)<%= pr.errors ? `, ${pr.errors} en attente après une erreur` : '' %>. <span class="hint">Autorité : <%= it.tsa.url %></span></p>
+      <p><%~ pr.errors ? t('{ok} photo(s) sur {total} horodatée(s), {errors} en attente après une erreur.', { ok: `<strong>${__eta.e(pr.ok)}</strong>`, total: __eta.e(pr.photos), errors: __eta.e(pr.errors) }) : t('{ok} photo(s) sur {total} horodatée(s).', { ok: `<strong>${__eta.e(pr.ok)}</strong>`, total: __eta.e(pr.photos) }) %> <span class="hint"><%= t('Autorité : {name}', { name: it.tsa.url }) %></span></p>
 <% if (pr.errors) { %>
       <form method="post" action="/admin/preuves/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
-        <button class="btn ghost" type="submit">Réessayer maintenant</button></form>
+        <button class="btn ghost" type="submit"><%= t('Réessayer maintenant') %></button></form>
 <% } %>
 <% } %>
     </section>
 
     <section class="panel wide2" aria-labelledby="account-title">
-      <h2 id="account-title">Votre compte</h2>
-      <p>Connecté en tant que <strong><%= it.session.name || it.session.email || it.session.sub %></strong>.
+      <h2 id="account-title"><%= t('Votre compte') %></h2>
+      <p><%~ t('Connecté en tant que {name}.', { name: `<strong>${__eta.e(it.session.name || it.session.email || it.session.sub)}</strong>` }) %>
 <% if (it.me) { %>
-      Ce compte est lié au photographe <strong><%= it.me.name %></strong> : vos imports lui sont attribués par défaut.</p>
+      <%~ t('Ce compte est lié au photographe {name} : vos imports lui sont attribués par défaut.', { name: `<strong>${__eta.e(it.me.name)}</strong>` }) %></p>
 <% } else { %>
-      Ce compte n’est lié à aucun photographe. Pour qu’il le soit, copiez son identifiant dans la fiche du photographe :</p>
-      <p><code><%= it.session.sub %></code> · <a class="more" href="/admin/auteurs">Photographes</a></p>
+      <%= t('Ce compte n’est lié à aucun photographe. Pour qu’il le soit, copiez son identifiant dans la fiche du photographe :') %></p>
+      <p><code><%= it.session.sub %></code> · <a class="more" href="/admin/auteurs"><%= t('Photographes') %></a></p>
 <% } %>
     </section>
   </div>

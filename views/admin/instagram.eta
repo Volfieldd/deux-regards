@@ -1,77 +1,78 @@
 <% layout('./layout') %>
-<% const s = it.s, a = it.account;
-   const fmtDate = ms => new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(ms));
+<% const s = it.s, a = it.account, t = it.t;
+   const hm = x => (it.lang === 'fr' ? x.replace(/:/g, ' h ') : x);
+   const fmtDate = ms => new Intl.DateTimeFormat(it.locale, { timeZone: 'Europe/Paris', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(ms));
    const days = a ? Math.round((a.expires_at - Date.now()) / 86400000) : 0; %>
 <div class="toolbar">
   <div>
     <h1>Instagram</h1>
-    <p class="sub">Les photos publiées sur le site partent sur Instagram une par une, aux heures choisies, avec une légende tirée du modèle.</p>
+    <p class="sub"><%= t('Les photos publiées sur le site partent sur Instagram une par une, aux heures choisies, avec une légende tirée du modèle.') %></p>
   </div>
 </div>
 
 <div class="ig-grid">
   <section class="panel" aria-labelledby="ig-account">
-    <h2 id="ig-account">Compte</h2>
+    <h2 id="ig-account"><%= t('Compte') %></h2>
 <% if (!it.conf.configured) { %>
-    <p class="err">Le serveur n’a pas encore d’application Instagram : renseignez <code>INSTAGRAM_APP_ID</code> et <code>INSTAGRAM_APP_SECRET</code> dans sa configuration.</p>
-    <p class="hint">Création du compte professionnel et de l’application Meta, pas à pas : <a class="more" href="/admin/aide#instagram">aide « Instagram »</a>.</p>
+    <p class="err"><%~ t('Le serveur n’a pas encore d’application Instagram : renseignez <code>INSTAGRAM_APP_ID</code> et <code>INSTAGRAM_APP_SECRET</code> dans sa configuration.') %></p>
+    <p class="hint"><%= t('Création du compte professionnel et de l’application Meta, pas à pas :') %> <a class="more" href="/admin/aide#instagram"><%= t('aide « Instagram »') %></a>.</p>
 <% } else if (!it.conf.https) { %>
-    <p class="err">Le site doit être en HTTPS (<code>PUBLIC_URL</code>) pour se connecter à Instagram : Meta refuse les adresses en http, et doit pouvoir télécharger les images.</p>
+    <p class="err"><%~ t('Le site doit être en HTTPS (<code>PUBLIC_URL</code>) pour se connecter à Instagram : Meta refuse les adresses en http, et doit pouvoir télécharger les images.') %></p>
 <% } else if (a && !it.connected) { %>
-    <p class="err">Le compte @<%= a.username %> est enregistré, mais son jeton d’accès ne peut plus être lu : la clé de chiffrement a changé (<code>INSTAGRAM_TOKEN_KEY</code> ou <code>COOKIE_SECRET</code>), par exemple après une restauration sur un autre serveur.</p>
-    <p class="actions"><a class="btn" href="/admin/instagram/connexion">Reconnecter le compte</a></p>
+    <p class="err"><%= t('Le compte @{name} est enregistré, mais son jeton d’accès ne peut plus être lu : la clé de chiffrement a changé', { name: a.username }) %> (<code>INSTAGRAM_TOKEN_KEY</code> <%= t('ou') %> <code>COOKIE_SECRET</code>), <%= t('par exemple après une restauration sur un autre serveur.') %></p>
+    <p class="actions"><a class="btn" href="/admin/instagram/connexion"><%= t('Reconnecter le compte') %></a></p>
 <% } else if (a && it.connected) { %>
-    <p>Connecté à <strong>@<%= a.username %></strong>.</p>
-    <p class="hint">Accès valable jusqu’au <%= fmtDate(a.expires_at) %> (<%= days %> jours) ; renouvelé automatiquement avant expiration.<%= days < 7 ? ' Il expire bientôt : reconnectez le compte si le renouvellement échoue.' : '' %></p>
-    <form method="post" action="/admin/instagram/deconnexion"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Déconnecter</button></form>
+    <p><%= t('Connecté à') %> <strong>@<%= a.username %></strong>.</p>
+    <p class="hint"><%= t('Accès valable jusqu’au {date} ({n} jours) ; renouvelé automatiquement avant expiration.', { date: fmtDate(a.expires_at), n: days }) %><%= days < 7 ? ` ${t('Il expire bientôt : reconnectez le compte si le renouvellement échoue.')}` : '' %></p>
+    <form method="post" action="/admin/instagram/deconnexion"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Déconnecter') %></button></form>
 <% } else { %>
-    <p>Aucun compte connecté. Les photos s’accumulent dans la file et partiront dès la connexion.</p>
-    <p class="actions"><a class="btn" href="/admin/instagram/connexion">Connecter le compte Instagram</a></p>
-    <p class="hint">Adresse de retour à déclarer dans l’application Meta : <code><%= it.conf.redirectUri %></code></p>
+    <p><%= t('Aucun compte connecté. Les photos s’accumulent dans la file et partiront dès la connexion.') %></p>
+    <p class="actions"><a class="btn" href="/admin/instagram/connexion"><%= t('Connecter le compte Instagram') %></a></p>
+    <p class="hint"><%= t('Adresse de retour à déclarer dans l’application Meta :') %> <code><%= it.conf.redirectUri %></code></p>
 <% } %>
   </section>
 
   <section class="panel" aria-labelledby="ig-rhythm">
-    <h2 id="ig-rhythm">Rythme</h2>
-    <p><%= s.times.length > 1 ? `${s.times.length} publications par jour` : 'Une publication par jour' %>, à <%= s.times.join(', ').replace(/:/g, ' h ') %> (heure de Paris).</p>
+    <h2 id="ig-rhythm"><%= t('Rythme de publication') %></h2>
+    <p><%= s.times.length > 1 ? t('{n} publications par jour, à {times} (heure de Paris).', { n: s.times.length, times: hm(s.times.join(', ')) }) : t('Une publication par jour, à {times} (heure de Paris).', { times: hm(s.times.join(', ')) }) %></p>
 <% const autoNames = it.categories.filter(c => s.autoSeries.includes(c.id)).map(c => c.name); %>
-    <p class="hint"><%= autoNames.length ? `Mise en file automatique à la publication : ${autoNames.join(', ')}. Les autres séries seulement depuis la fiche de la photo.` : 'Aucune mise en file automatique : une photo n’entre dans la file que si vous l’y ajoutez depuis sa fiche.' %> <a class="more" href="#auto">Modifier</a></p>
+    <p class="hint"><%= autoNames.length ? t('Mise en file automatique à la publication : {names}. Les autres séries seulement depuis la fiche de la photo.', { names: autoNames.join(', ') }) : t('Aucune mise en file automatique : une photo n’entre dans la file que si vous l’y ajoutez depuis sa fiche.') %> <a class="more" href="#auto"><%= t('Modifier') %></a></p>
 <% const u = it.usage; %>
-    <h3>Consommation <span class="mono">limites « <%= it.IG_PRESETS[u.preset].label %> »</span></h3>
-<% if (u.paused) { %>    <p class="flash error" role="status">File en pause jusqu’<%= u.paused.when.replace(/^à /, 'à ').replace(/^le /, 'au ') %> : <%= u.paused.reason %>.</p>
-    <form method="post" action="/admin/instagram/reprendre"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Reprendre maintenant</button></form>
+    <h3><%= t('Consommation') %> <span class="mono"><%= t('limites « {name} »', { name: t(it.IG_PRESETS[u.preset].label) }) %></span></h3>
+<% if (u.paused) { %>    <p class="flash error" role="status"><%= t('File en pause jusqu’{when} : {reason}.', { when: u.paused.when.replace(/^à /, 'à ').replace(/^le /, 'au '), reason: u.paused.reason }) %></p>
+    <form method="post" action="/admin/instagram/reprendre"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Reprendre maintenant') %></button></form>
 <% } %>    <ul class="ig-usage">
-      <li>Publications sur 24 h glissantes : <strong><%= u.posts24h %> / <%= u.limits.postsPerDay %></strong></li>
-      <li>Appels à l’API sur la dernière heure : <strong><%= u.callsHour %> / <%= u.limits.callsPerHour %></strong> <span class="mono">(<%= u.calls24h %> sur 24 h)</span></li>
-<% if (u.liveQuota) { %>      <li>Quota lu chez Instagram : <strong><%= u.liveQuota.usage %> / <%= u.liveQuota.total || '?' %></strong> <span class="mono">sur 24 h</span></li>
-<% } %><% if (u.limits.minGapMinutes) { %>      <li>Au moins <strong><%= u.limits.minGapMinutes %> min</strong> entre deux publications</li>
+      <li><%= t('Publications sur 24 h glissantes :') %> <strong><%= u.posts24h %> / <%= u.limits.postsPerDay %></strong></li>
+      <li><%= t('Appels à l’API sur la dernière heure :') %> <strong><%= u.callsHour %> / <%= u.limits.callsPerHour %></strong> <span class="mono">(<%= t('{n} sur 24 h', { n: u.calls24h }) %>)</span></li>
+<% if (u.liveQuota) { %>      <li><%= t('Quota lu chez Instagram :') %> <strong><%= u.liveQuota.usage %> / <%= u.liveQuota.total || '?' %></strong> <span class="mono"><%= t('sur 24 h') %></span></li>
+<% } %><% if (u.limits.minGapMinutes) { %>      <li><%= t('Au moins') %> <strong><%= t('{n} min', { n: u.limits.minGapMinutes }) %></strong> <%= t('entre deux publications') %></li>
 <% } %>    </ul>
 <% if (!u.budget.ok && !u.paused) { %>    <p class="hint"><%= u.budget.reason %></p>
 <% } %>  </section>
 
   <section class="panel wide2" aria-labelledby="ig-queue">
-    <h2 id="ig-queue">File d’attente <span class="mono"><%= it.queue.length %> photo<%= it.queue.length > 1 ? 's' : '' %></span></h2>
+    <h2 id="ig-queue"><%= t('File d’attente') %> <span class="mono"><%= it.queue.length > 1 ? t('{n} photos', { n: it.queue.length }) : t('{n} photo', { n: it.queue.length }) %></span></h2>
 <% if (!it.queue.length) { %>
-    <p class="hint">La file est vide. Ajoutez une photo depuis sa fiche (section « Instagram »)<%= s.autoSeries.length ? ', ou publiez-en une dans une série en mise en file automatique' : '' %>.</p>
+    <p class="hint"><%= s.autoSeries.length ? t('La file est vide. Ajoutez une photo depuis sa fiche (section « Instagram »), ou publiez-en une dans une série en mise en file automatique.') : t('La file est vide. Ajoutez une photo depuis sa fiche (section « Instagram »).') %></p>
 <% } else { %>
     <ol class="igq">
 <% it.queue.forEach((p, i) => { %>
       <li>
-        <a class="igthumb" href="/admin/instagram/apercu.jpg?photo=<%= p.photo_id %>&cadre=<%= p.frame %>&filigrane=<%= p.watermark ? 1 : 0 %>" target="_blank" rel="noopener" aria-label="Aperçu exact de l’image envoyée (nouvel onglet)"><% if (p.photo.ready) { %><%~ it.picture(p.photo, { sizes: '72px', alt: '' }) %><% } %></a>
+        <a class="igthumb" href="/admin/instagram/apercu.jpg?photo=<%= p.photo_id %>&cadre=<%= p.frame %>&filigrane=<%= p.watermark ? 1 : 0 %>" target="_blank" rel="noopener" aria-label="<%= t('Aperçu exact de l’image envoyée (nouvel onglet)') %>"><% if (p.photo.ready) { %><%~ it.picture(p.photo, { sizes: '72px', alt: '' }) %><% } %></a>
         <div class="t">
           <a href="/admin/photos/<%= p.photo_id %>#instagram"><strong><%= p.photo.title %></strong></a>
-          <span class="mono"><%= p.status === 'publishing' ? 'Envoi en cours' : `Prévue le ${p.slot.replace(' ', ' à ').replace(':', ' h ')}` %> · <%= it.FRAMES[p.frame].toLowerCase() %><%= p.watermark ? ' · filigrane' : '' %></span>
+          <span class="mono"><%= p.status === 'publishing' ? t('Envoi en cours') : t('Prévue le {date} à {time}', { date: p.slot.split(' ')[0], time: hm(p.slot.split(' ')[1] || '') }) %> · <%= t(it.FRAMES[p.frame]).toLowerCase() %><%= p.watermark ? ` · ${t('filigrane')}` : '' %></span>
           <span class="cap-excerpt"><%= p.caption.split('\n')[0] %>…</span>
-<% if (p.error) { %>          <span class="err">Dernier essai : <%= p.error %> (essai <%= p.attempts %> sur 3)</span>
+<% if (p.error) { %>          <span class="err"><%= t('Dernier essai : {error} (essai {n} sur 3)', { error: p.error, n: p.attempts }) %></span>
 <% } %>
         </div>
 <% if (p.status === 'queued') { %>
         <div class="acts">
-<% [['monter', '↑', 'Avancer', i === 0], ['descendre', '↓', 'Reculer', i === it.queue.length - 1]].forEach(([act, sign, label, off]) => { %>
-          <form method="post" action="/admin/instagram/<%= p.id %>/<%= act %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="iconbtn" type="submit" aria-label="<%= label %> « <%= p.photo.title %> »"<%~ off ? ' disabled' : '' %>><%= sign %></button></form>
+<% [['monter', '↑', t('Avancer « {title} »', { title: p.photo.title }), i === 0], ['descendre', '↓', t('Reculer « {title} »', { title: p.photo.title }), i === it.queue.length - 1]].forEach(([act, sign, label, off]) => { %>
+          <form method="post" action="/admin/instagram/<%= p.id %>/<%= act %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="iconbtn" type="submit" aria-label="<%= label %>"<%~ off ? ' disabled' : '' %>><%= sign %></button></form>
 <% }) %>
-          <form method="post" action="/admin/instagram/<%= p.id %>/publier"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"<%~ it.connected ? '' : ' disabled' %>>Publier maintenant</button></form>
-          <form method="post" action="/admin/instagram/<%= p.id %>/annuler"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Retirer</button></form>
+          <form method="post" action="/admin/instagram/<%= p.id %>/publier"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"<%~ it.connected ? '' : ' disabled' %>><%= t('Publier maintenant') %></button></form>
+          <form method="post" action="/admin/instagram/<%= p.id %>/annuler"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Retirer') %></button></form>
         </div>
 <% } %>
       </li>
@@ -82,34 +83,34 @@
 
 <% if (it.connected || it.mostLiked.length) { const es = it.engagementState; %>
   <section class="panel wide2" id="likes" aria-labelledby="ig-likes">
-    <h2 id="ig-likes">Les plus aimées sur Instagram</h2>
-    <p class="hint">Likes et commentaires des photos publiées depuis le site, relevés chaque matin (seulement des nombres : Instagram ne dit pas qui a aimé).
-      <%= es.at ? `Dernier relevé : ${fmtDate(es.at)} à ${new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(new Date(es.at))}.` : 'Pas encore de relevé.' %></p>
-<% if (es.error) { %>    <p class="cellnote warn">Dernier essai sans succès : <%= es.error %></p>
+    <h2 id="ig-likes"><%= t('Les plus aimées sur Instagram') %></h2>
+    <p class="hint"><%= t('Likes et commentaires des photos publiées depuis le site, relevés chaque matin (seulement des nombres : Instagram ne dit pas qui a aimé).') %>
+      <%= es.at ? t('Dernier relevé : {date} à {time}.', { date: fmtDate(es.at), time: new Intl.DateTimeFormat(it.locale, { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(new Date(es.at)) }) : t('Pas encore de relevé.') %></p>
+<% if (es.error) { %>    <p class="cellnote warn"><%= t('Dernier essai sans succès : {error}', { error: es.error }) %></p>
 <% } %>
 <% if (it.mostLiked.length) { %>
     <ol class="rank plain ig-top">
 <% it.mostLiked.forEach(m => { %>      <li><span class="t"><a href="/admin/photos/<%= m.photo_id %>#instagram"><%= m.photo.title %></a>
-        <span class="mono">publiée le <%= fmtDate(m.published_at) %></span></span>
-        <span class="ig-n"><strong><%= m.likes %></strong> like<%= m.likes > 1 ? 's' : '' %> · <%= m.comments %> comm.</span>
-<% if (m.permalink) { %>        <a class="more" href="<%= m.permalink %>" target="_blank" rel="noopener">Voir ↗</a>
+        <span class="mono"><%= t('publiée le {date}', { date: fmtDate(m.published_at) }) %></span></span>
+        <span class="ig-n"><strong><%= m.likes %></strong> <%= m.likes > 1 ? t('likes') : t('like') %> · <%= t('{n} comm.', { n: m.comments }) %></span>
+<% if (m.permalink) { %>        <a class="more" href="<%= m.permalink %>" target="_blank" rel="noopener"><%= t('Voir') %> ↗</a>
 <% } %></li>
 <% }) %>    </ol>
 <% } %>
-<% if (it.connected) { %>    <form method="post" action="/admin/instagram/likes"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Relever maintenant</button></form>
+<% if (it.connected) { %>    <form method="post" action="/admin/instagram/likes"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Relever maintenant') %></button></form>
 <% } %>
   </section>
 <% } %>
 
 <% if (it.history.length) { %>
   <section class="panel wide2" aria-labelledby="ig-history">
-    <h2 id="ig-history">Historique</h2>
+    <h2 id="ig-history"><%= t('Historique') %></h2>
     <ul class="rank plain">
 <% it.history.forEach(p => { %>
       <li><span class="t"><a href="/admin/photos/<%= p.photo_id %>#instagram"><%= p.photo.title %></a>
-        <span class="mono"><%= p.status === 'published' ? `publiée le ${fmtDate(p.published_at)}${p.engagement ? ` · ${p.engagement.likes} like${p.engagement.likes > 1 ? 's' : ''}, ${p.engagement.comments} comm.` : ''}` : `échec : ${p.error}` %></span></span>
-<% if (p.status === 'published' && p.permalink) { %>        <a class="more" href="<%= p.permalink %>" target="_blank" rel="noopener">Voir sur Instagram ↗</a>
-<% } else if (p.status === 'failed') { %>        <form method="post" action="/admin/instagram/<%= p.id %>/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Réessayer</button></form>
+        <span class="mono"><%= p.status === 'published' ? `${t('publiée le {date}', { date: fmtDate(p.published_at) })}${p.engagement ? ` · ${p.engagement.likes > 1 ? t('{n} likes', { n: p.engagement.likes }) : t('{n} like', { n: p.engagement.likes })}, ${t('{n} comm.', { n: p.engagement.comments })}` : ''}` : t('échec : {error}', { error: p.error }) %></span></span>
+<% if (p.status === 'published' && p.permalink) { %>        <a class="more" href="<%= p.permalink %>" target="_blank" rel="noopener"><%= t('Voir sur Instagram') %> ↗</a>
+<% } else if (p.status === 'failed') { %>        <form method="post" action="/admin/instagram/<%= p.id %>/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Réessayer') %></button></form>
 <% } %></li>
 <% }) %>
     </ul>
@@ -118,37 +119,37 @@
 
   <form class="panel wide2 form" id="reglages" method="post" action="/admin/instagram/reglages" aria-labelledby="ig-settings">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-    <h2 id="ig-settings">Réglages</h2>
+    <h2 id="ig-settings"><%= t('Réglages') %></h2>
     <fieldset id="limites">
-      <legend>Limites de l’API <span class="mono">Meta ne vend pas de quota supplémentaire : on règle le rythme</span></legend>
-<% const L = s.limits; %><% Object.entries(it.IG_PRESETS).forEach(([k, p]) => { %>      <label class="inline"><input type="radio" name="limits_preset" value="<%= k %>"<%~ L.preset === k ? ' checked' : '' %>> <strong><%= p.label %></strong><% if (k !== 'custom') { %> <span class="mono"><%= k === 'meta' ? 'quota lu chez Instagram (100 / 24 h aujourd’hui)' : `${p.postsPerDay} / 24 h` %>, <%= p.minGapMinutes ? `${p.minGapMinutes} min entre deux` : 'sans écart minimal' %>, <%= p.callsPerHour %> appels / h</span><% } %></label>
+      <legend><%= t('Limites de l’API') %> <span class="mono"><%= t('Meta ne vend pas de quota supplémentaire : on règle le rythme') %></span></legend>
+<% const L = s.limits; %><% Object.entries(it.IG_PRESETS).forEach(([k, p]) => { %>      <label class="inline"><input type="radio" name="limits_preset" value="<%= k %>"<%~ L.preset === k ? ' checked' : '' %>> <strong><%= t(p.label) %></strong><% if (k !== 'custom') { %> <span class="mono"><%= k === 'meta' ? t('quota lu chez Instagram (100 / 24 h aujourd’hui)') : `${p.postsPerDay} / 24 h` %>, <%= p.minGapMinutes ? t('{n} min entre deux', { n: p.minGapMinutes }) : t('sans écart minimal') %>, <%= t('{n} appels / h', { n: p.callsPerHour }) %></span><% } %></label>
 <% }) %>      <div class="row">
-        <label>Publications sur 24 h <span class="mono">« Personnalisé » · <%= it.IG_BOUNDS.postsPerDay.join('–') %></span><input type="number" name="limits_posts" value="<%= L.postsPerDay %>" min="<%= it.IG_BOUNDS.postsPerDay[0] %>" max="<%= it.IG_BOUNDS.postsPerDay[1] %>"></label>
-        <label>Minutes entre deux <span class="mono"><%= it.IG_BOUNDS.minGapMinutes.join('–') %></span><input type="number" name="limits_gap" value="<%= L.minGapMinutes %>" min="<%= it.IG_BOUNDS.minGapMinutes[0] %>" max="<%= it.IG_BOUNDS.minGapMinutes[1] %>"></label>
-        <label>Appels par heure <span class="mono"><%= it.IG_BOUNDS.callsPerHour.join('–') %></span><input type="number" name="limits_calls" value="<%= L.callsPerHour %>" min="<%= it.IG_BOUNDS.callsPerHour[0] %>" max="<%= it.IG_BOUNDS.callsPerHour[1] %>"></label>
+        <label><%= t('Publications sur 24 h') %> <span class="mono"><%= t('« {name} » · {range}', { name: t(it.IG_PRESETS.custom.label), range: it.IG_BOUNDS.postsPerDay.join('–') }) %></span><input type="number" name="limits_posts" value="<%= L.postsPerDay %>" min="<%= it.IG_BOUNDS.postsPerDay[0] %>" max="<%= it.IG_BOUNDS.postsPerDay[1] %>"></label>
+        <label><%= t('Minutes entre deux') %> <span class="mono"><%= it.IG_BOUNDS.minGapMinutes.join('–') %></span><input type="number" name="limits_gap" value="<%= L.minGapMinutes %>" min="<%= it.IG_BOUNDS.minGapMinutes[0] %>" max="<%= it.IG_BOUNDS.minGapMinutes[1] %>"></label>
+        <label><%= t('Appels par heure') %> <span class="mono"><%= it.IG_BOUNDS.callsPerHour.join('–') %></span><input type="number" name="limits_calls" value="<%= L.callsPerHour %>" min="<%= it.IG_BOUNDS.callsPerHour[0] %>" max="<%= it.IG_BOUNDS.callsPerHour[1] %>"></label>
       </div>
-      <p class="hint">Hors budget, la photo attend dans la file (« Publier maintenant » refuse en expliquant pourquoi). Si Instagram signale une limite, la file se met en pause le temps indiqué (sinon 1 h, 2 h, 4 h…) sans compter d’essai, puis reprend à raison d’une photo par créneau.</p>
+      <p class="hint"><%= t('Hors budget, la photo attend dans la file (« Publier maintenant » refuse en expliquant pourquoi). Si Instagram signale une limite, la file se met en pause le temps indiqué (sinon 1 h, 2 h, 4 h…) sans compter d’essai, puis reprend à raison d’une photo par créneau.') %></p>
     </fieldset>
     <fieldset class="row" id="auto">
-      <legend>Mise en file automatique <span class="mono">à la publication sur le site · décochez tout pour ne choisir qu’à la main</span></legend>
+      <legend><%= t('Mise en file automatique') %> <span class="mono"><%= t('à la publication sur le site · décochez tout pour ne choisir qu’à la main') %></span></legend>
 <% it.categories.forEach(c => { %>      <label class="inline"><input type="checkbox" name="auto_<%= c.id %>"<%~ s.autoSeries.includes(c.id) ? ' checked' : '' %>> <%= c.name %></label>
 <% }) %>
-      <p class="hint">Une photo publiée dans une série cochée entre seule dans la file. Pour les autres, utilisez « Ajouter à la file Instagram » sur la fiche de la photo. Les photos déjà dans la file y restent : retirez-les une par une si besoin.</p>
+      <p class="hint"><%= t('Une photo publiée dans une série cochée entre seule dans la file. Pour les autres, utilisez « Ajouter à la file Instagram » sur la fiche de la photo. Les photos déjà dans la file y restent : retirez-les une par une si besoin.') %></p>
     </fieldset>
     <div class="row">
-      <label>Heures de publication <span class="mono">heure de Paris, séparées par des virgules · 4 au plus</span><input name="times" value="<%= s.times.join(', ') %>" maxlength="40" placeholder="18:30"></label>
-      <label>Cadre par défaut <select name="frame"><% Object.entries(it.FRAMES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ s.frame === k ? ' selected' : '' %>><%= l %></option><% }) %></select></label>
+      <label><%= t('Heures de publication') %> <span class="mono"><%= t('heure de Paris, séparées par des virgules · 4 au plus') %></span><input name="times" value="<%= s.times.join(', ') %>" maxlength="40" placeholder="18:30"></label>
+      <label><%= t('Cadre par défaut') %> <select name="frame"><% Object.entries(it.FRAMES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ s.frame === k ? ' selected' : '' %>><%= t(l) %></option><% }) %></select></label>
     </div>
-    <label class="inline"><input type="checkbox" name="watermark"<%~ s.watermark ? ' checked' : '' %>> Filigrane par défaut (celui des réglages <a href="/admin/images">Filigrane & EXIF</a>)</label>
-    <label>Modèle de légende
-      <span class="mono">Variables : {titre} {legende} {signature} {lieu} {date} {auteur} {serie} {site} {hashtags} · une ligne dont les variables sont vides disparaît ; sans {signature}, la signature du photographe se place sous la légende</span>
+    <label class="inline"><input type="checkbox" name="watermark"<%~ s.watermark ? ' checked' : '' %>> <%= t('Filigrane par défaut (celui des réglages') %> <a href="/admin/images"><%~ t('Filigrane & EXIF') %></a>)</label>
+    <label><%= t('Modèle de légende') %>
+      <span class="mono"><%= t('Variables :') %> {titre} {legende} {signature} {lieu} {date} {auteur} {serie} {site} {hashtags} · <%= t('une ligne dont les variables sont vides disparaît ; sans {signature}, la signature du photographe se place sous la légende') %></span>
       <textarea name="template" rows="9" maxlength="2200"><%= s.template %></textarea></label>
-    <label>Hashtags pour toutes les photos <input name="hashtags" value="<%= s.hashtags %>" maxlength="600" placeholder="#photographie #nicephos"></label>
+    <label><%= t('Hashtags pour toutes les photos') %> <input name="hashtags" value="<%= s.hashtags %>" maxlength="600" placeholder="#photographie #nicephos"></label>
     <fieldset class="row">
-      <legend>Hashtags par série <span class="mono">ajoutés à ceux de toutes les photos · 30 au plus en tout</span></legend>
+      <legend><%= t('Hashtags par série') %> <span class="mono"><%= t('ajoutés à ceux de toutes les photos · 30 au plus en tout') %></span></legend>
 <% it.categories.forEach(c => { %>      <label><%= c.name %> <input name="hashtags_<%= c.id %>" value="<%= (s.seriesHashtags || {})[c.id] || '' %>" maxlength="300" placeholder="#<%= c.slug.replace(/-/g, '') %>"></label>
 <% }) %>
     </fieldset>
-    <p class="actions"><button class="btn" type="submit">Enregistrer les réglages</button></p>
+    <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer les réglages') %></button></p>
   </form>
 </div>

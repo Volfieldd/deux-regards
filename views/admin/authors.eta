@@ -1,44 +1,45 @@
 <% layout('./layout') %>
-<h1>Photographes</h1>
+<% const t = it.t; %>
+<h1><%= t('Photographes') %></h1>
 <% const fields = (v, errs) => { const bad = k => errs && errs[k] ? ` aria-invalid="true" aria-describedby="err-auteur-${v.id || 'nouveau'}"` : ''; %>
       <div class="row">
-        <label>Nom <input name="name" value="<%= v.name || '' %>" required maxlength="80"<%~ bad('name') %>></label>
-<% if (v.id) { %>        <label>Adresse <span class="mono">/auteur/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ bad('slug') %>></label><% } %>
+        <label><%= t('Nom') %> <input name="name" value="<%= v.name || '' %>" required maxlength="80"<%~ bad('name') %>></label>
+<% if (v.id) { %>        <label><%= t('Adresse') %> <span class="mono">/auteur/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ bad('slug') %>></label><% } %>
       </div>
-      <label>Biographie <textarea name="bio" rows="3" maxlength="2000"><%= v.bio || '' %></textarea></label>
-      <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'bio', label: 'Biographie', max: 2000, rows: 3 }) %>
-      <label>Lettre des cartes d’accord <span class="mono">J-0142 ; vide : <%= v.slug ? v.slug.charAt(0).toUpperCase() : 'première lettre de l’adresse' %></span><input name="card_prefix" value="<%= v.card_prefix || '' %>" maxlength="1" autocapitalize="characters" class="mono" size="2"<%~ bad('card_prefix') %>></label>
-      <label>Signature des posts Instagram <span class="mono">ajoutée sous la légende des photos qui en ont une, retirable photo par photo · ex. « — <%= v.name || 'Julien' %> · @compte »</span>
+      <label><%= t('Biographie') %> <textarea name="bio" rows="3" maxlength="2000"><%= v.bio || '' %></textarea></label>
+      <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'bio', label: t('Biographie'), max: 2000, rows: 3 }) %>
+      <label><%= t('Lettre des cartes d’accord') %> <span class="mono"><%= t('J-0142 ; vide : {letter}', { letter: v.slug ? v.slug.charAt(0).toUpperCase() : t('première lettre de l’adresse') }) %></span><input name="card_prefix" value="<%= v.card_prefix || '' %>" maxlength="1" autocapitalize="characters" class="mono" size="2"<%~ bad('card_prefix') %>></label>
+      <label><%= t('Signature des posts Instagram') %> <span class="mono"><%= t('ajoutée sous la légende des photos qui en ont une, retirable photo par photo · ex. « — {name} · @compte »', { name: v.name || 'Julien' }) %></span>
         <input name="ig_signature" value="<%= v.ig_signature || '' %>" maxlength="200"></label>
-      <label>Compte de connexion (identifiant OIDC « sub »)
-        <input name="oidc_sub" value="<%= v.oidc_sub || '' %>" maxlength="255" class="mono" placeholder="affiché sur le tableau de bord après connexion"<%~ bad('oidc_sub') %>></label>
+      <label><%= t('Compte de connexion (identifiant OIDC « sub »)') %>
+        <input name="oidc_sub" value="<%= v.oidc_sub || '' %>" maxlength="255" class="mono" placeholder="<%= t('affiché sur le tableau de bord après connexion') %>"<%~ bad('oidc_sub') %>></label>
 <% if (errs) { %>      <p class="err" role="alert" id="err-auteur-<%= v.id || 'nouveau' %>"><%= Object.values(errs).join(' ') %></p><% } %>
 <% } %>
 <% it.authors.forEach(a => { const ed = it.editErrors && it.editErrors.id === a.id ? it.editErrors : null; %>
   <section class="panel">
-    <h2><%= a.name %> <span class="mono"><%= a.count %> photo(s)</span></h2>
+    <h2><%= a.name %> <span class="mono"><%= t('{n} photo(s)', { n: a.count }) %></span></h2>
     <form class="form" method="post" action="/admin/auteurs/<%= a.id %>">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
 <% fields(ed ? { ...a, ...ed.values } : a, ed && ed.errors) %>
-      <p class="actions"><button class="btn" type="submit">Enregistrer</button></p>
+      <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
     </form>
-    <p class="hint">Cartes d’accord et QR des vêtements de <%= a.name %> : <a class="more" href="/admin/terrain?photographe=<%= a.id %>">Sur le terrain</a>.</p>
+    <p class="hint"><%= t('Cartes d’accord et QR des vêtements de {name} :', { name: a.name }) %> <a class="more" href="/admin/terrain?photographe=<%= a.id %>"><%= t('Sur le terrain') %></a>.</p>
     <details class="danger">
-      <summary>Supprimer</summary>
+      <summary><%= t('Supprimer') %></summary>
 <% if (a.count) { %>
-      <p>Impossible : <%= a.name %> a encore <%= a.count %> photo(s).</p>
+      <p><%= t('Impossible : {name} a encore {n} photo(s).', { name: a.name, n: a.count }) %></p>
 <% } else { %>
       <form method="post" action="/admin/auteurs/<%= a.id %>/delete"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
-        <button class="btn danger" type="submit">Supprimer « <%= a.name %> »</button></form>
+        <button class="btn danger" type="submit"><%= t('Supprimer « {name} »', { name: a.name }) %></button></form>
 <% } %>
     </details>
   </section>
 <% }) %>
 <section class="panel">
-  <h2>Nouveau photographe</h2>
+  <h2><%= t('Nouveau photographe') %></h2>
   <form class="form" method="post" action="/admin/auteurs">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
 <% fields(it.values, Object.keys(it.errors).length ? it.errors : null) %>
-    <p class="actions"><button class="btn" type="submit">Ajouter</button></p>
+    <p class="actions"><button class="btn" type="submit"><%= t('Ajouter') %></button></p>
   </form>
 </section>

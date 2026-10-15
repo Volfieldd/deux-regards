@@ -1,215 +1,216 @@
 <% layout('./layout') %>
+<% const t = it.t, fr = !['en', 'de'].includes(it.lang), esc = __eta.e; %>
 <% const v = it.values, e = it.errors; %>
 <% const inv = k => e[k] ? ` aria-invalid="true" aria-describedby="err-${k}"` : ''; %>
-<p class="mono"><a class="more eyebrow" href="/admin/photos">← Photos</a></p>
+<p class="mono"><a class="more eyebrow" href="/admin/photos">← <%= t('Photos') %></a></p>
 <h1><%= it.photo.title %></h1>
-<% const R = it.ready, F = R.faces, LV = { ok: 'prête', warn: 'à vérifier', no: 'bloquée' }; %>
-<section class="ready-band" aria-label="État de la photo">
-  <span class="enc-tag <%= R.site.level %>">Site : <%= LV[R.site.level] %></span>
-  <span class="enc-tag <%= R.instagram.level %>">Instagram : <%= LV[R.instagram.level] %></span>
-  <span class="mono"><%= F.source === 'main' ? (F.has ? 'quelqu’un sur la photo (indiqué à la main)' : 'personne de reconnaissable (indiqué à la main)') : F.source === 'attente' ? 'visages : examen en attente' : F.source === 'echec' ? 'visages : examen impossible' : F.n ? `${F.n} visage${F.n > 1 ? 's' : ''} détecté${F.n > 1 ? 's' : ''}` : 'aucun visage détecté' %></span>
+<% const R = it.ready, F = R.faces, LV = { ok: t('prête'), warn: t('à vérifier'), no: t('bloquée') }; %>
+<section class="ready-band" aria-label="<%= t('État de la photo') %>">
+  <span class="enc-tag <%= R.site.level %>"><%= t('Site : {state}', { state: LV[R.site.level] }) %></span>
+  <span class="enc-tag <%= R.instagram.level %>"><%= t('Instagram : {state}', { state: LV[R.instagram.level] }) %></span>
+  <span class="mono"><%= F.source === 'main' ? (F.has ? t('quelqu’un sur la photo (indiqué à la main)') : t('personne de reconnaissable (indiqué à la main)')) : F.source === 'attente' ? t('visages : examen en attente') : F.source === 'echec' ? t('visages : examen impossible') : F.n ? (F.n > 1 ? t('{n} visages détectés', { n: F.n }) : t('{n} visage détecté', { n: F.n })) : t('aucun visage détecté') %></span>
   <form class="faces-fix" method="post" action="/admin/photos/<%= it.photo.id %>/visages">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-<% if (!(F.source === 'main' && F.has)) { %>    <button class="linkbtn" type="submit" name="valeur" value="oui">Il y a quelqu’un</button>
-<% } %><% if (!(F.source === 'main' && !F.has)) { %>    <button class="linkbtn" type="submit" name="valeur" value="non">Personne de reconnaissable</button>
-<% } %><% if (F.source === 'main') { %>    <button class="linkbtn" type="submit" name="valeur" value="auto">Revenir à la détection</button>
+<% if (!(F.source === 'main' && F.has)) { %>    <button class="linkbtn" type="submit" name="valeur" value="oui"><%= t('Il y a quelqu’un') %></button>
+<% } %><% if (!(F.source === 'main' && !F.has)) { %>    <button class="linkbtn" type="submit" name="valeur" value="non"><%= t('Personne de reconnaissable') %></button>
+<% } %><% if (F.source === 'main') { %>    <button class="linkbtn" type="submit" name="valeur" value="auto"><%= t('Revenir à la détection') %></button>
 <% } %>  </form>
 <% const reasons = [...new Set([...R.site.reasons, ...R.instagram.reasons])]; if (reasons.length) { %>
   <ul class="ready-reasons"><% reasons.forEach(r => { %><li><%= r %></li><% }) %></ul>
 <% } %>
 <% if (it.confirmations.length) { %>
-  <p class="mono">Confirmations : <%= it.confirmations.map(c => `${c.usage === 'site' ? 'site' : 'Instagram'} par ${c.by_name || '?'} le ${new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Paris' }).format(c.at)}`).join(' · ') %></p>
+  <p class="mono"><%= t('Confirmations :') %> <%= it.confirmations.map(c => t('{usage} par {name} le {date}', { usage: c.usage === 'site' ? t('site') : 'Instagram', name: c.by_name || '?', date: new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Paris' }).format(c.at) })).join(' · ') %></p>
 <% } %>
 </section>
 <div class="edit">
   <figure class="preview">
     <%~ it.picture(it.photo, { sizes: '(min-width: 900px) 40vw, 92vw', alt: '' }) %>
-    <figcaption class="mono"><%= it.photo.width %> × <%= it.photo.height %> px<% if (it.photo.status === 'published') { %> · <a href="/photo/<%= it.photo.slug %>" target="_blank" rel="noopener">voir sur le site</a><% } %></figcaption>
+    <figcaption class="mono"><%= it.photo.width %> × <%= it.photo.height %> px<% if (it.photo.status === 'published') { %> · <a href="/photo/<%= it.photo.slug %>" target="_blank" rel="noopener"><%= t('voir sur le site') %></a><% } %></figcaption>
   </figure>
   <form class="panel form" method="post" action="/admin/photos/<%= it.photo.id %>" novalidate>
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-<% if (Object.keys(e).length) { %><p class="err" role="alert">Le formulaire contient des erreurs.</p><% } %>
-<% const has = k => Boolean(String(v[k] || '').trim()); const flag = (k, l) => `<span class="flag${has(k) ? '' : ' miss'}" title="${l}${has(k) ? '' : ' : manquant'}">${l.slice(0, 2).toUpperCase()}</span>`; %>
+<% if (Object.keys(e).length) { %><p class="err" role="alert"><%= t('Le formulaire contient des erreurs.') %></p><% } %>
+<% const has = k => Boolean(String(v[k] || '').trim()); const flag = (k, l) => `<span class="flag${has(k) ? '' : ' miss'}" title="${has(k) ? l : esc(t('{lang} : manquant', { lang: l }))}">${l.slice(0, 2).toUpperCase()}</span>`; %>
     <details class="rub" open>
-      <summary>Infos <span class="sum"><%~ flag('title', 'fr') %><%~ flag('title_en', 'en') %><%~ flag('title_de', 'de') %></span></summary>
+      <summary><%= t('Infos') %> <span class="sum"><%~ flag('title', 'fr') %><%~ flag('title_en', 'en') %><%~ flag('title_de', 'de') %></span></summary>
       <div class="rub-body">
-    <label>Titre <input name="title" value="<%= v.title %>" required maxlength="160"<%~ inv('title') %>></label><% if (e.title) { %><span class="err" id="err-title"><%= e.title %></span><% } %>
-    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'title', label: 'Titre', max: 160 }) %>
-    <label>Adresse <span class="mono">/photo/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ inv('slug') %>></label><% if (e.slug) { %><span class="err" id="err-slug"><%= e.slug %></span><% } %>
+    <label><%= t('Titre') %> <input name="title" value="<%= v.title %>" required maxlength="160"<%~ inv('title') %>></label><% if (e.title) { %><span class="err" id="err-title"><%= e.title %></span><% } %>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'title', label: t('Titre'), max: 160 }) %>
+    <label><%= t('Adresse') %> <span class="mono">/photo/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ inv('slug') %>></label><% if (e.slug) { %><span class="err" id="err-slug"><%= e.slug %></span><% } %>
     <div class="row">
-      <label>Série <select name="category_id"<%~ inv('category_id') %>><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select></label><% if (e.category_id) { %><span class="err" id="err-category_id"><%= e.category_id %></span><% } %>
-      <label>Photographe <select name="author_id"<%~ inv('author_id') %>><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === Number(v.author_id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label><% if (e.author_id) { %><span class="err" id="err-author_id"><%= e.author_id %></span><% } %>
+      <label><%= t('Série') %> <select name="category_id"<%~ inv('category_id') %>><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select></label><% if (e.category_id) { %><span class="err" id="err-category_id"><%= e.category_id %></span><% } %>
+      <label><%= t('Photographe') %> <select name="author_id"<%~ inv('author_id') %>><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === Number(v.author_id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label><% if (e.author_id) { %><span class="err" id="err-author_id"><%= e.author_id %></span><% } %>
     </div>
-    <label>Date <span class="mono">AAAA-MM ou AAAA-MM-JJ<%= it.photo.taken_time ? ` · prise à ${it.photo.taken_time.replace(':', ' h ')}` : '' %></span><input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="AAAA-MM ou AAAA-MM-JJ" inputmode="numeric"<%~ inv('taken_on') %>></label><% if (e.taken_on) { %><span class="err" id="err-taken_on"><%= e.taken_on %></span><% } %>
-    <label>Légende <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
-    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'legend', label: 'Légende', max: 2000, rows: 3 }) %>
+    <label><%= t('Date') %> <span class="mono"><%= t('AAAA-MM ou AAAA-MM-JJ') %><%= it.photo.taken_time ? ' · ' + t('prise à {time}', { time: fr ? it.photo.taken_time.replace(':', ' h ') : it.photo.taken_time }) : '' %></span><input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="<%= t('AAAA-MM ou AAAA-MM-JJ') %>" inputmode="numeric"<%~ inv('taken_on') %>></label><% if (e.taken_on) { %><span class="err" id="err-taken_on"><%= e.taken_on %></span><% } %>
+    <label><%= t('Légende') %> <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'legend', label: t('Légende'), max: 2000, rows: 3 }) %>
       </div>
     </details>
     <details class="rub" open>
-      <summary>Où <span class="sum"><%= v.city_label || 'sans ville' %><%= Number(v.on_map) ? ' · sur la carte du monde' : '' %></span></summary>
+      <summary><%= t('Où') %> <span class="sum"><%= v.city_label || t('sans ville') %><%= Number(v.on_map) ? ' · ' + t('sur la carte du monde') : '' %></span></summary>
       <div class="rub-body">
-    <label>Lieu affiché <span class="mono">texte libre, avec la photo</span><input name="place" value="<%= v.place %>" maxlength="120"></label>
-    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'place', label: 'Lieu', max: 120 }) %>
+    <label><%= t('Lieu affiché') %> <span class="mono"><%= t('texte libre, avec la photo') %></span><input name="place" value="<%= v.place %>" maxlength="120"></label>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'place', label: t('Lieu'), max: 120 }) %>
     <div class="city-field" data-city>
-      <label for="city_label">Ville <span class="mono">pour la carte du monde · toutes les communes de France, plus de 500 habitants ailleurs</span></label>
-      <input id="city_label" name="city_label" value="<%= v.city_label || '' %>" maxlength="120" autocomplete="off" placeholder="Commencez à taper : Angers, Lisbonne…" data-city-input<%~ inv('city') %>>
+      <label for="city_label"><%= t('Ville') %> <span class="mono"><%= t('pour la carte du monde · toutes les communes de France, plus de 500 habitants ailleurs') %></span></label>
+      <input id="city_label" name="city_label" value="<%= v.city_label || '' %>" maxlength="120" autocomplete="off" placeholder="<%= t('Commencez à taper : Angers, Lisbonne…') %>" data-city-input<%~ inv('city') %>>
       <input type="hidden" name="city_id" value="<%= v.city_id || '' %>" data-city-id>
 <% if (e.city) { %>      <span class="err" id="err-city"><%= e.city %></span>
-<% } else if (it.photo.city_source === 'gps' && v.city_label) { %>      <span class="cellnote">Proposée d’après le GPS de la photo : vérifiez-la. Seule la ville est gardée, jamais la position exacte.</span>
-<% } %>      <span class="cellnote">Villes : <a href="https://www.geonames.org" target="_blank" rel="noopener">GeoNames</a>, licence CC BY 4.0.</span>
+<% } else if (it.photo.city_source === 'gps' && v.city_label) { %>      <span class="cellnote"><%= t('Proposée d’après le GPS de la photo : vérifiez-la. Seule la ville est gardée, jamais la position exacte.') %></span>
+<% } %>      <span class="cellnote"><%~ t('Villes : {link}, licence CC BY 4.0.', { link: '<a href="https://www.geonames.org" target="_blank" rel="noopener">GeoNames</a>' }) %></span>
     </div>
-    <label class="inline"><input type="checkbox" name="on_map"<%~ Number(v.on_map) ? ' checked' : '' %><%~ inv('on_map') %>> Afficher sur la carte du monde</label><% if (e.on_map) { %><span class="err" id="err-on_map"><%= e.on_map %></span><% } %>
+    <label class="inline"><input type="checkbox" name="on_map"<%~ Number(v.on_map) ? ' checked' : '' %><%~ inv('on_map') %>> <%= t('Afficher sur la carte du monde') %></label><% if (e.on_map) { %><span class="err" id="err-on_map"><%= e.on_map %></span><% } %>
       </div>
     </details>
     <details class="rub" open>
-      <summary>Diffusion <span class="sum"><%= v.status === 'published' ? 'publiée' : 'brouillon' %> · filigrane <%= v.watermark === 0 ? 'jamais' : 'selon les réglages' %></span></summary>
+      <summary><%= t('Diffusion') %> <span class="sum"><%= v.status === 'published' ? t('publiée') : t('brouillon') %> · <%= v.watermark === 0 ? t('filigrane jamais') : t('filigrane selon les réglages') %></span></summary>
       <div class="rub-body">
 <% if (e.status) { %>    <span class="err" id="err-status" role="alert"><%= e.status %></span>
 <% } %>    <fieldset class="row">
-      <legend>Statut</legend>
+      <legend><%= t('Statut') %></legend>
 <% Object.entries(it.STATUSES).forEach(([k, label]) => { %>
-      <label class="inline"><input type="radio" name="status" value="<%= k %>"<%~ v.status === k ? ' checked' : '' %>> <%= label %></label>
+      <label class="inline"><input type="radio" name="status" value="<%= k %>"<%~ v.status === k ? ' checked' : '' %>> <%= t(label) %></label>
 <% }) %>
     </fieldset>
 <% if (R.site.level === 'warn' && !it.siteConfirmed) { %>
-    <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> <%= it.photo.status === 'published' ? 'Photo en ligne à vérifier : je confirme' : 'Pour publier : je confirme' %> que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.</label>
+    <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> <%= it.photo.status === 'published' ? t('Photo en ligne à vérifier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.') : t('Pour publier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.') %></label>
 <% } else if (it.photo.status !== 'published' && R.site.level === 'no') { %>
-    <p class="cellnote err">Publication impossible : <%= R.site.reasons.join(' ; ') %>.</p>
+    <p class="cellnote err"><%= t('Publication impossible : {reasons}.', { reasons: R.site.reasons.join(' ; ') }) %></p>
 <% } %>
     <fieldset class="row">
-      <legend>Filigrane</legend>
-      <label class="inline"><input type="radio" name="watermark" value="default"<%~ v.watermark !== 0 ? ' checked' : '' %>> Selon les <a href="/admin/images">réglages</a></label>
-      <label class="inline"><input type="radio" name="watermark" value="none"<%~ v.watermark === 0 ? ' checked' : '' %>> Jamais sur cette photo</label>
+      <legend><%= t('Filigrane') %></legend>
+      <label class="inline"><input type="radio" name="watermark" value="default"<%~ v.watermark !== 0 ? ' checked' : '' %>> <%~ t('Selon les {link}', { link: `<a href="/admin/images">${esc(t('réglages'))}</a>` }) %></label>
+      <label class="inline"><input type="radio" name="watermark" value="none"<%~ v.watermark === 0 ? ' checked' : '' %>> <%= t('Jamais sur cette photo') %></label>
     </fieldset>
-    <p class="hint">Instagram : rubrique <a class="more" href="#instagram">Instagram</a>, plus bas.</p>
+    <p class="hint"><%~ t('Instagram : rubrique {link}, plus bas.', { link: '<a class="more" href="#instagram">Instagram</a>' }) %></p>
       </div>
     </details>
-    <p class="actions"><button class="btn" type="submit">Enregistrer</button></p>
+    <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
   </form>
 </div>
 <% if (it.encounters && it.encounters.length) { %>
 <details class="panel rub-panel" id="rencontres"<%~ R.site.level !== 'ok' || R.instagram.level !== 'ok' ? ' open' : '' %>>
-  <summary><h2 id="enc-title">Personnes &amp; accords <span class="sum"><%= it.encounters.length %> personne<%= it.encounters.length > 1 ? 's' : '' %> · accords de la sortie et photos liées</span></h2></summary>
-<% if (it.outingUrl) { %>  <p><a class="btn ghost" href="<%= it.outingUrl %>">Ouvrir la sortie →</a></p><% } %>
-  <p class="hint">Les personnes rencontrées par <%= it.photo.author || 'le photographe' %> le jour de cette photo (date EXIF), et celles liées à la photo. Vérifiez que celles qui y apparaissent ont accepté l’usage prévu.</p>
+  <summary><h2 id="enc-title"><%= t('Personnes & accords') %> <span class="sum"><%= it.encounters.length > 1 ? t('{n} personnes', { n: it.encounters.length }) : t('{n} personne', { n: it.encounters.length }) %> · <%= t('accords de la sortie et photos liées') %></span></h2></summary>
+<% if (it.outingUrl) { %>  <p><a class="btn ghost" href="<%= it.outingUrl %>"><%= t('Ouvrir la sortie →') %></a></p><% } %>
+  <p class="hint"><%= t('Les personnes rencontrées par {author} le jour de cette photo (date EXIF), et celles liées à la photo. Vérifiez que celles qui y apparaissent ont accepté l’usage prévu.', { author: it.photo.author || t('le photographe') }) %></p>
   <ul class="rank plain">
-<% it.encounters.forEach(r => { %>    <li><span class="t"><span class="enc-who"><% if (r.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= r.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } %><a href="/admin/rencontres/<%= r.id %>">Rencontre <%= r.ref || 'sans carte' %><%= r.name ? ` · ${r.name}` : '' %></a> <span class="mono"><%= r.via === 'session' ? 'même sortie' : 'liée à la photo' %></span></span></span>
-      <% if (r.via === 'session') { %><form class="enc-absent" method="post" action="/admin/rencontres/<%= r.id %>/session/<%= it.photo.id %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="exclure" value="1"><input type="hidden" name="depuis" value="photo"><button class="btn ghost" type="submit">Pas sur cette photo</button></form><% } %>
-      <% if (r.refused && r.via === 'lien') { %><span class="enc-tag no">Refuse la publication : la photo ne peut pas être publiée</span><% } else if (r.refused) { %><span class="enc-tag warn">A refusé : si elle est sur cette photo, liez-la au refus (fiche de la rencontre)</span><% } else if (r.consent) { %><span class="enc-tag ok">Accord <%= r.consent_source !== 'en_ligne' ? 'signé' : 'en ligne' %> : <%= ['site', 'instagram', 'print', 'name'].filter(s => r.consent[s]).map(s => ({ site: 'site', instagram: 'Instagram', print: 'expositions et tirages', name: 'avec son prénom' })[s]).join(', ') %></span><% } else { %><span class="enc-tag">Ni accord ni refus pour l’instant</span><% } %></li>
+<% it.encounters.forEach(r => { %>    <li><span class="t"><span class="enc-who"><% if (r.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= r.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } %><a href="/admin/rencontres/<%= r.id %>"><%= t('Rencontre {ref}', { ref: r.ref || t('sans carte') }) %><%= r.name ? ` · ${r.name}` : '' %></a> <span class="mono"><%= r.via === 'session' ? t('même sortie') : t('liée à la photo') %></span></span></span>
+      <% if (r.via === 'session') { %><form class="enc-absent" method="post" action="/admin/rencontres/<%= r.id %>/session/<%= it.photo.id %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="exclure" value="1"><input type="hidden" name="depuis" value="photo"><button class="btn ghost" type="submit"><%= t('Pas sur cette photo') %></button></form><% } %>
+      <% if (r.refused && r.via === 'lien') { %><span class="enc-tag no"><%= t('Refuse la publication : la photo ne peut pas être publiée') %></span><% } else if (r.refused) { %><span class="enc-tag warn"><%= t('A refusé : si elle est sur cette photo, liez-la au refus (fiche de la rencontre)') %></span><% } else if (r.consent) { const uses = ['site', 'instagram', 'print', 'name'].filter(s => r.consent[s]).map(s => ({ site: t('site'), instagram: 'Instagram', print: t('expositions et tirages'), name: t('avec son prénom') })[s]).join(', '); %><span class="enc-tag ok"><%= r.consent_source !== 'en_ligne' ? t('Accord signé : {uses}', { uses }) : t('Accord en ligne : {uses}', { uses }) %></span><% } else { %><span class="enc-tag"><%= t('Ni accord ni refus pour l’instant') %></span><% } %></li>
 <% }) %>  </ul>
 </details>
 <% } %>
 <% const au = it.audience; %>
 <details class="panel audience rub-panel" id="audience">
-  <summary><h2 id="audience-title">Audience <span class="sum"><%= au && au.total ? `${au.total} ouverture${au.total > 1 ? 's' : ''} en 30 jours` : 'pas encore vue en grand' %></span></h2></summary>
+  <summary><h2 id="audience-title"><%= t('Audience') %> <span class="sum"><%= au && au.total ? (au.total > 1 ? t('{n} ouvertures en 30 jours', { n: au.total }) : t('{n} ouverture en 30 jours', { n: au.total })) : t('pas encore vue en grand') %></span></h2></summary>
 <% if (au && au.total) { %>
-  <p><strong><%= au.total %></strong> ouverture<%= au.total > 1 ? 's' : '' %> en grand<%= au.rank ? ` · ${au.rank === 1 ? '1ʳᵉ' : au.rank + 'ᵉ'} photo la plus vue` : '' %></p>
+  <p><%~ au.total > 1 ? t('{n} ouvertures en grand', { n: `<strong>${esc(au.total)}</strong>` }) : t('{n} ouverture en grand', { n: `<strong>${esc(au.total)}</strong>` }) %><%= au.rank ? ' · ' + (au.rank === 1 ? t('1ʳᵉ photo la plus vue') : t('{rank}ᵉ photo la plus vue', { rank: au.rank })) : '' %></p>
   <%~ au.spark %>
 <% } else { %>
-  <p class="hint">Pas encore ouverte en grand ces 30 derniers jours<%= it.photo.status === 'draft' ? ' (brouillon : invisible sur le site)' : '' %>.</p>
+  <p class="hint"><%= it.photo.status === 'draft' ? t('Pas encore ouverte en grand ces 30 derniers jours (brouillon : invisible sur le site).') : t('Pas encore ouverte en grand ces 30 derniers jours.') %></p>
 <% } %>
-  <p><a class="more" href="/admin/statistiques">Toutes les statistiques</a></p>
+  <p><a class="more" href="/admin/statistiques"><%= t('Toutes les statistiques') %></a></p>
 </details>
 <% const ig = it.insta; %>
 <details class="panel ig rub-panel" id="instagram" data-ig<%~ ig.active || R.instagram.level !== 'ok' ? ' open' : '' %>>
-  <summary><h2 id="ig-title">Instagram <span class="sum"><%= ig.post && ig.post.status === 'published' ? 'publiée sur Instagram' : ig.active ? 'dans la file' : ig.post && ig.post.status === 'failed' ? 'en échec' : R.instagram.level === 'no' ? 'bloquée' : R.instagram.level === 'warn' ? 'à vérifier' : 'pas encore partagée' %></span></h2></summary>
+  <summary><h2 id="ig-title">Instagram <span class="sum"><%= ig.post && ig.post.status === 'published' ? t('publiée sur Instagram') : ig.active ? t('dans la file') : ig.post && ig.post.status === 'failed' ? t('en échec') : R.instagram.level === 'no' ? t('bloquée') : R.instagram.level === 'warn' ? t('à vérifier') : t('pas encore partagée') %></span></h2></summary>
 <% if (ig.post && ig.post.status === 'published') { %>
-  <p>Publiée sur Instagram<% if (ig.post.permalink) { %> · <a class="more" href="<%= ig.post.permalink %>" target="_blank" rel="noopener">voir le post ↗</a><% } %>.</p>
+  <p><%= t('Publiée sur Instagram') %><% if (ig.post.permalink) { %> · <a class="more" href="<%= ig.post.permalink %>" target="_blank" rel="noopener"><%= t('voir le post ↗') %></a><% } %>.</p>
 <% if (ig.engagement) { const e = ig.engagement; %>
-  <p class="ig-likes"><span><strong><%= e.likes %></strong> like<%= e.likes > 1 ? 's' : '' %></span> · <span><strong><%= e.comments %></strong> commentaire<%= e.comments > 1 ? 's' : '' %></span>
-    <span class="mono">relevé le <%= new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(e.day)) %></span></p>
-<% if (ig.likesSpark) { %>  <figure class="ig-spark"><%~ ig.likesSpark %><figcaption class="mono">likes, <%= e.series.length %> derniers relevés</figcaption></figure>
+  <p class="ig-likes"><span><strong><%= e.likes %></strong> <%= e.likes > 1 ? t('likes') : t('like') %></span> · <span><strong><%= e.comments %></strong> <%= e.comments > 1 ? t('commentaires') : t('commentaire') %></span>
+    <span class="mono"><%= t('relevé le {date}', { date: new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(e.day)) }) %></span></p>
+<% if (ig.likesSpark) { %>  <figure class="ig-spark"><%~ ig.likesSpark %><figcaption class="mono"><%= t('likes, {n} derniers relevés', { n: e.series.length }) %></figcaption></figure>
 <% } %>
 <% } else { %>
-  <p class="hint">Likes et commentaires : relevés chaque matin (voir <a href="/admin/instagram#likes">Instagram</a>).</p>
+  <p class="hint"><%~ t('Likes et commentaires : relevés chaque matin (voir {link}).', { link: '<a href="/admin/instagram#likes">Instagram</a>' }) %></p>
 <% } %>
 <% } else if (ig.post && ig.post.status === 'publishing') { %>
-  <p>Envoi à Instagram en cours…</p>
-<% } else if (ig.active) { %>
-  <p>Dans la file : prévue le <strong><%= (ig.slot || '').replace(' ', ' à ').replace(':', ' h ') %></strong>.<% if (ig.post.error) { %> <span class="err">Dernier essai : <%= ig.post.error %></span><% } %></p>
+  <p><%= t('Envoi à Instagram en cours…') %></p>
+<% } else if (ig.active) { const slot = ig.slot || '', sp = slot.indexOf(' '); const when = sp < 0 ? (fr ? slot.replace(':', ' h ') : slot) : t('{date} à {time}', { date: slot.slice(0, sp), time: fr ? slot.slice(sp + 1).replace(':', ' h ') : slot.slice(sp + 1) }); %>
+  <p><%~ t('Dans la file : prévue le {slot}.', { slot: `<strong>${esc(when)}</strong>` }) %><% if (ig.post.error) { %> <span class="err"><%= t('Dernier essai : {error}', { error: ig.post.error }) %></span><% } %></p>
 <% } else if (ig.post && ig.post.status === 'failed') { %>
-  <p class="err">Échec de la publication : <%= ig.post.error %> (voir la page <a href="/admin/instagram">Instagram</a> pour réessayer).</p>
+  <p class="err"><%~ t('Échec de la publication : {error} (voir la page {link} pour réessayer).', { error: esc(ig.post.error), link: '<a href="/admin/instagram">Instagram</a>' }) %></p>
 <% } %>
 <% if (ig.blocked.length) { %>
-  <p class="ig-blocked" role="note"><strong>Instagram bloqué</strong> : <%= ig.blocked.join(' ; ') %>. Aucune confirmation ne lève ce blocage : si la personne n’est pas sur cette photo, indiquez-le dans <a class="more" href="#rencontres">Personnes &amp; accords</a>.</p>
+  <p class="ig-blocked" role="note"><%~ t('{title} : {reasons}. Aucune confirmation ne lève ce blocage : si la personne n’est pas sur cette photo, indiquez-le dans {link}.', { title: `<strong>${esc(t('Instagram bloqué'))}</strong>`, reasons: esc(ig.blocked.join(' ; ')), link: `<a class="more" href="#rencontres">${esc(t('Personnes & accords'))}</a>` }) %></p>
 <% } else if (it.photo.status !== 'published') { %>
-  <p class="hint">Publiez d’abord la photo sur le site pour la partager sur Instagram.</p>
+  <p class="hint"><%= t('Publiez d’abord la photo sur le site pour la partager sur Instagram.') %></p>
 <% } else if (!ig.post || ig.active || ig.post.status === 'failed' || ig.post.status === 'published') { if (!(ig.post && ig.post.status === 'publishing')) { %>
   <div class="ig-edit">
-    <figure class="ig-preview"><img src="/admin/instagram/apercu.jpg?photo=<%= it.photo.id %>&cadre=<%= ig.post ? ig.post.frame : ig.s.frame %>&filigrane=<%= (ig.post ? ig.post.watermark : ig.s.watermark) ? 1 : 0 %>" alt="Aperçu de l’image envoyée à Instagram" data-ig-preview loading="lazy">
-      <figcaption class="mono">L’image telle qu’elle partira (1080 px, JPEG, sans métadonnées)</figcaption></figure>
+    <figure class="ig-preview"><img src="/admin/instagram/apercu.jpg?photo=<%= it.photo.id %>&cadre=<%= ig.post ? ig.post.frame : ig.s.frame %>&filigrane=<%= (ig.post ? ig.post.watermark : ig.s.watermark) ? 1 : 0 %>" alt="<%= t('Aperçu de l’image envoyée à Instagram') %>" data-ig-preview loading="lazy">
+      <figcaption class="mono"><%= t('L’image telle qu’elle partira (1080 px, JPEG, sans métadonnées)') %></figcaption></figure>
     <form class="form" method="post" action="/admin/instagram/file" data-ig-form>
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
       <input type="hidden" name="photo_id" value="<%= it.photo.id %>">
       <input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>#instagram">
       <input type="hidden" name="watermark_set" value="1">
       <div class="row">
-        <label>Cadre <select name="frame" data-ig-frame><% Object.entries(ig.FRAMES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ (ig.post ? ig.post.frame : ig.s.frame) === k ? ' selected' : '' %>><%= l %></option><% }) %></select></label>
-        <label class="inline"><input type="checkbox" name="watermark" data-ig-watermark<%~ (ig.post ? ig.post.watermark : ig.s.watermark) ? ' checked' : '' %>> Avec le filigrane</label>
+        <label><%= t('Cadre') %> <select name="frame" data-ig-frame><% Object.entries(ig.FRAMES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ (ig.post ? ig.post.frame : ig.s.frame) === k ? ' selected' : '' %>><%= t(l) %></option><% }) %></select></label>
+        <label class="inline"><input type="checkbox" name="watermark" data-ig-watermark<%~ (ig.post ? ig.post.watermark : ig.s.watermark) ? ' checked' : '' %>> <%= t('Avec le filigrane') %></label>
       </div>
-<% if (R.instagram.level === 'warn' && !it.igConfirmed) { %>      <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> Instagram à vérifier (<%= R.instagram.reasons.join(' ; ') %>) : je confirme que les personnes reconnaissables ont accepté Instagram, ou n’y sont pas reconnaissables.</label>
+<% if (R.instagram.level === 'warn' && !it.igConfirmed) { %>      <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> <%= t('Instagram à vérifier ({reasons}) : je confirme que les personnes reconnaissables ont accepté Instagram, ou n’y sont pas reconnaissables.', { reasons: R.instagram.reasons.join(' ; ') }) %></label>
 <% } %><% if (ig.signature) { %>      <input type="hidden" name="signature_set" value="1">
-      <label class="inline"><input type="checkbox" name="signature"<%~ it.photo.ig_signature !== 0 ? ' checked' : '' %>> Ajouter ma signature <span class="mono">« <%= ig.signature %> »<%= String(it.photo.legend || '').trim() ? '' : ' · seulement si la photo a une légende' %></span></label>
-<% } %>      <label class="inline"><input type="checkbox" name="custom" data-ig-custom<%~ ig.custom ? ' checked' : '' %>> Légende personnalisée pour cette photo <span class="mono">sinon, celle du modèle</span></label>
-      <label>Légende <span class="mono" data-ig-count><%= ig.caption.length %> / 2200</span><textarea name="caption" rows="9" maxlength="2200" data-ig-caption><%= ig.caption %></textarea></label>
+      <label class="inline"><input type="checkbox" name="signature"<%~ it.photo.ig_signature !== 0 ? ' checked' : '' %>> <%= t('Ajouter ma signature') %> <span class="mono">« <%= ig.signature %> »<%= String(it.photo.legend || '').trim() ? '' : ' · ' + t('seulement si la photo a une légende') %></span></label>
+<% } %>      <label class="inline"><input type="checkbox" name="custom" data-ig-custom<%~ ig.custom ? ' checked' : '' %>> <%= t('Légende personnalisée pour cette photo') %> <span class="mono"><%= t('sinon, celle du modèle') %></span></label>
+      <label><%= t('Légende') %> <span class="mono" data-ig-count><%= ig.caption.length %> / 2200</span><textarea name="caption" rows="9" maxlength="2200" data-ig-caption><%= ig.caption %></textarea></label>
 <% if (ig.warnings.length) { %>      <ul class="warn-list" data-ig-warnings><% ig.warnings.forEach(w => { %><li><%= w %></li><% }) %></ul>
 <% } %>
       <p class="actions">
-        <button class="btn" type="submit"><%= ig.active ? 'Mettre à jour' : ig.post && ig.post.status === 'published' ? 'Republier (remettre dans la file)' : 'Ajouter à la file Instagram' %></button>
-        <button class="btn ghost" type="button" data-ig-template hidden>Revenir au modèle</button>
-<% if (!ig.connected) { %>        <span class="hint">Aucun compte connecté : la photo attendra dans la file (<a href="/admin/instagram">Instagram</a>).</span><% } %>
+        <button class="btn" type="submit"><%= ig.active ? t('Mettre à jour') : ig.post && ig.post.status === 'published' ? t('Republier (remettre dans la file)') : t('Ajouter à la file Instagram') %></button>
+        <button class="btn ghost" type="button" data-ig-template hidden><%= t('Revenir au modèle') %></button>
+<% if (!ig.connected) { %>        <span class="hint"><%~ t('Aucun compte connecté : la photo attendra dans la file ({link}).', { link: '<a href="/admin/instagram">Instagram</a>' }) %></span><% } %>
       </p>
     </form>
 <% if (ig.active && ig.post.status === 'queued') { %>
-    <form method="post" action="/admin/instagram/<%= ig.post.id %>/annuler"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>#instagram"><button class="btn ghost" type="submit">Retirer de la file</button></form>
+    <form method="post" action="/admin/instagram/<%= ig.post.id %>/annuler"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>#instagram"><button class="btn ghost" type="submit"><%= t('Retirer de la file') %></button></form>
 <% } %>
   </div>
 <% } } %>
 </details>
-<% const t = it.proof; %>
+<% const pf = it.proof; %>
 <details class="panel proof rub-panel" id="preuve">
-  <summary><h2>Preuve d’antériorité <span class="sum"><%= t && t.status === 'ok' && t.sha256 === it.photo.sha256 ? 'horodatée' : it.photo.sha256 ? 'empreinte calculée' : 'en cours' %></span></h2></summary>
+  <summary><h2><%= t('Preuve d’antériorité') %> <span class="sum"><%= pf && pf.status === 'ok' && pf.sha256 === it.photo.sha256 ? t('horodatée') : it.photo.sha256 ? t('empreinte calculée') : t('en cours') %></span></h2></summary>
   <dl class="facts">
-    <dt>Empreinte SHA-256 de l’original</dt><dd><code class="mono"><%= it.photo.sha256 || 'en cours de calcul' %></code></dd>
-    <dt>Horodatage RFC 3161</dt>
+    <dt><%= t('Empreinte SHA-256 de l’original') %></dt><dd><code class="mono"><%= it.photo.sha256 || t('en cours de calcul') %></code></dd>
+    <dt><%= t('Horodatage RFC 3161') %></dt>
     <dd>
-<% if (t && t.status === 'ok' && t.sha256 === it.photo.sha256) { %>
-      <strong>Horodatée le <%= t.gen_time.replace('T', ' à ').slice(0, 21) %> UTC</strong><br>
-<% const cn = /CN=([^,]+)/.exec(t.signer), org = /O=([^,]+)/.exec(t.signer); %>
-      <span class="mono" title="<%= t.signer %>">Autorité : <%= cn ? cn[1] : t.signer %><%= org ? ` (${org[1]})` : '' %> · n° <%= t.serial %></span>
+<% if (pf && pf.status === 'ok' && pf.sha256 === it.photo.sha256) { %>
+      <strong><%= t('Horodatée le {date} UTC', { date: t('{date} à {time}', { date: pf.gen_time.slice(0, 10), time: pf.gen_time.slice(11, 19) }) }) %></strong><br>
+<% const cn = /CN=([^,]+)/.exec(pf.signer), org = /O=([^,]+)/.exec(pf.signer); %>
+      <span class="mono" title="<%= pf.signer %>"><%= t('Autorité : {name}', { name: (cn ? cn[1] : pf.signer) + (org ? ` (${org[1]})` : '') }) %> · <%= t('n° {n}', { n: pf.serial }) %></span>
 <% } else if (!it.tsa.url) { %>
-      Désactivé sur ce serveur (<code>TSA_URL=off</code>).
-<% } else if (t && t.status === 'error') { %>
-      <span class="err">En attente : <%= t.error %> (essai n° <%= t.attempts %>, nouvel essai automatique).</span>
+      <%~ t('Désactivé sur ce serveur ({code}).', { code: '<code>TSA_URL=off</code>' }) %>
+<% } else if (pf && pf.status === 'error') { %>
+      <span class="err"><%= t('En attente : {error} (essai n° {n}, nouvel essai automatique).', { error: pf.error, n: pf.attempts }) %></span>
 <% } else { %>
-      En attente (quelques secondes après l’import).
+      <%= t('En attente (quelques secondes après l’import).') %>
 <% } %>
     </dd>
   </dl>
-<% if (t && t.status === 'ok') { %>
+<% if (pf && pf.status === 'ok') { %>
   <p class="actions downloads">
-    <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/original" download>Original</a>
-    <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/preuve.tsr" download>Jeton (.tsr)</a>
-    <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/preuve.txt" download>Fiche de preuve</a>
-<% if (it.tsa.caFile) { %>    <a class="btn ghost" href="/admin/preuves/autorite.pem" download>Certificat de l’autorité</a><% } %>
+    <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/original" download><%= t('Original') %></a>
+    <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/preuve.tsr" download><%= t('Jeton (.tsr)') %></a>
+    <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/preuve.txt" download><%= t('Fiche de preuve') %></a>
+<% if (it.tsa.caFile) { %>    <a class="btn ghost" href="/admin/preuves/autorite.pem" download><%= t('Certificat de l’autorité') %></a><% } %>
   </p>
   <form method="post" action="/admin/photos/<%= it.photo.id %>/verifier">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-    <button class="btn" type="submit">Vérifier la preuve</button>
+    <button class="btn" type="submit"><%= t('Vérifier la preuve') %></button>
   </form>
-<% } else if (t && t.status === 'error') { %>
+<% } else if (pf && pf.status === 'error') { %>
   <form method="post" action="/admin/preuves/reessayer">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>">
-    <button class="btn ghost" type="submit">Réessayer maintenant</button>
+    <button class="btn ghost" type="submit"><%= t('Réessayer maintenant') %></button>
   </form>
 <% } %>
 </details>
 
 <details class="danger panel">
-  <summary>Supprimer cette photo</summary>
-  <p>L’original, ses variantes et sa preuve d’antériorité seront effacés. Cette action est définitive : téléchargez d’abord l’original et la preuve si vous voulez les garder.</p>
+  <summary><%= t('Supprimer cette photo') %></summary>
+  <p><%= t('L’original, ses variantes et sa preuve d’antériorité seront effacés. Cette action est définitive : téléchargez d’abord l’original et la preuve si vous voulez les garder.') %></p>
   <form method="post" action="/admin/photos/<%= it.photo.id %>/delete">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-    <button class="btn danger" type="submit">Supprimer définitivement</button>
+    <button class="btn danger" type="submit"><%= t('Supprimer définitivement') %></button>
   </form>
 </details>

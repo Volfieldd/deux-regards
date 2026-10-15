@@ -1,30 +1,31 @@
-<% const v = it.v, e = it.errors || {}; const on = k => v[k] === 'on' || v[k] === true; %>
+<% const t = it.t || (s => s); const v = it.v, e = it.errors || {}; const on = k => v[k] === 'on' || v[k] === true;
+   const SL = { site: t('site'), instagram: t('Instagram'), print: t('expositions et tirages'), name: t('avec son prénom') }; %>
 <form class="form" method="post" action="<%= it.action %>" enctype="multipart/form-data">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
 <% if (Object.keys(e).length) { %>  <p class="err" role="alert"><%= Object.values(e).join(' ') %></p>
 <% } %>  <div class="row">
-    <label>Référence <span class="mono">J-0142</span><input name="ref" value="<%= v.ref || '' %>" maxlength="20" autocapitalize="characters"<%~ e.ref ? ' aria-invalid="true"' : '' %>></label>
-    <label>Photographe <select name="author_id"><option value="">d’après la référence</option><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ Number(v.author_id) === a.id ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label>
+    <label><%= t('Référence') %> <span class="mono">J-0142</span><input name="ref" value="<%= v.ref || '' %>" maxlength="20" autocapitalize="characters"<%~ e.ref ? ' aria-invalid="true"' : '' %>></label>
+    <label><%= t('Photographe') %> <select name="author_id"><option value=""><%= t('d’après la référence') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ Number(v.author_id) === a.id ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label>
   </div>
   <div class="row">
-    <label>Nom <input name="name" value="<%= v.name || '' %>" maxlength="80"></label>
-    <label>E-mail <input type="email" name="email" value="<%= v.email || '' %>" maxlength="200"<%~ e.email ? ' aria-invalid="true"' : '' %>></label>
+    <label><%= t('Nom') %> <input name="name" value="<%= v.name || '' %>" maxlength="80"></label>
+    <label><%= t('E-mail') %> <input type="email" name="email" value="<%= v.email || '' %>" maxlength="200"<%~ e.email ? ' aria-invalid="true"' : '' %>></label>
   </div>
   <div class="row">
-    <label>Date <input type="date" name="met_on" value="<%= v.met_on || '' %>"></label>
-    <label>Lieu <input name="place" value="<%= v.place || '' %>" maxlength="120"></label>
+    <label><%= t('Date') %> <input type="date" name="met_on" value="<%= v.met_on || '' %>"></label>
+    <label><%= t('Lieu') %> <input name="place" value="<%= v.place || '' %>" maxlength="120"></label>
   </div>
-  <label>Date de la sortie <span class="mono">facultatif : si l’horloge de l’appareil photo était décalée, la date que portent les photos</span><input type="date" name="session_day" value="<%= v.session_day || '' %>"></label>
-  <label>Détails <input name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="tenue, scène…"></label>
+  <label><%= t('Date de la sortie') %> <span class="mono"><%= t('facultatif : si l’horloge de l’appareil photo était décalée, la date que portent les photos') %></span><input type="date" name="session_day" value="<%= v.session_day || '' %>"></label>
+  <label><%= t('Détails') %> <input name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="<%= t('tenue, scène…') %>"></label>
   <fieldset>
-    <legend>Accord signé sur la carte</legend>
-    <label class="inline"><input type="checkbox" name="signed"<%~ on('signed') ? ' checked' : '' %>> La carte « pour nous » est signée</label>
+    <legend><%= t('Accord signé sur la carte') %></legend>
+    <label class="inline"><input type="checkbox" name="signed"<%~ on('signed') ? ' checked' : '' %>> <%= t('La carte « pour nous » est signée') %></label>
     <div class="enc-scopes">
-<% it.SCOPES.forEach(s => { %>      <label class="inline"><input type="checkbox" name="scope_<%= s %>"<%~ on(`scope_${s}`) ? ' checked' : '' %>> <%= it.SCOPE_LABELS[s] %><%= s === 'instagram' ? ' (avec le site)' : '' %></label>
+<% it.SCOPES.forEach(s => { %>      <label class="inline"><input type="checkbox" name="scope_<%= s %>"<%~ on(`scope_${s}`) ? ' checked' : '' %>> <%= SL[s] || it.SCOPE_LABELS[s] %><%= s === 'instagram' ? ` ${t('(avec le site)')}` : '' %></label>
 <% }) %>    </div>
 <% if (e.scopes) { %>    <span class="err"><%= e.scopes %></span><% } %>
   </fieldset>
-  <label>Photo de la personne <span class="mono">visage, pour mettre un nom sur un visage · gardée en privé, avec son accord</span><input type="file" name="portrait" accept="image/jpeg,image/png,image/webp" capture="environment"></label>
-  <label>Photo de la carte signée <span class="mono">preuve, gardée en privé · JPEG, PNG ou WebP</span><input type="file" name="card" accept="image/jpeg,image/png,image/webp" capture="environment"></label>
-  <p class="actions"><button class="btn" type="submit"><%= it.isNew ? 'Enregistrer la rencontre' : 'Enregistrer' %></button></p>
+  <label><%= t('Photo de la personne') %> <span class="mono"><%= t('visage, pour mettre un nom sur un visage · gardée en privé, avec son accord') %></span><input type="file" name="portrait" accept="image/jpeg,image/png,image/webp" capture="environment"></label>
+  <label><%= t('Photo de la carte signée') %> <span class="mono"><%= t('preuve, gardée en privé · JPEG, PNG ou WebP') %></span><input type="file" name="card" accept="image/jpeg,image/png,image/webp" capture="environment"></label>
+  <p class="actions"><button class="btn" type="submit"><%= it.isNew ? t('Enregistrer la rencontre') : t('Enregistrer') %></button></p>
 </form>

@@ -1,62 +1,67 @@
 <% layout('./layout') %>
-<% const e = it.e; const scopes = c => it.SCOPES.filter(s => c && c[s]).map(s => it.SCOPE_LABELS[s]).join(', ');
+<% const t = it.t;
+   const SL = { site: t('site'), instagram: t('Instagram'), print: t('expositions et tirages'), name: t('avec son prénom') };
+   const ST = { nouvelle: t('Nouvelle'), en_cours: t('En cours'), traitee: t('Traitée') };
+   const e = it.e; const scopes = c => it.SCOPES.filter(s => c && c[s]).map(s => SL[s] || it.SCOPE_LABELS[s]).join(', ');
    const values = it.values || { ...e, signed: e.consent_source === 'carte' ? 'on' : '', ...Object.fromEntries(it.SCOPES.map(s => [`scope_${s}`, e.consent_source === 'carte' && e.consent && e.consent[s] ? 'on' : ''])) };
-   const mail = e.email ? `mailto:${e.email}?subject=${encodeURIComponent(`Votre photo${e.ref ? ` (${e.ref})` : ''} · ${it.siteName}`)}` : null; %>
-<p class="mono"><a class="more eyebrow" href="/admin/rencontres">← Personnes photographiées</a></p>
-<h1 class="enc-title"><% if (e.hasPortrait) { %><img class="enc-face big" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="64" height="64"><% } %><%= e.anonymized ? 'Refus anonymisé' : it.title %><%= e.name ? ` · ${e.name}` : '' %></h1>
-<% if (e.person_id) { %><p class="mono"><a class="more" href="/admin/personnes/<%= e.person_id %>">Fiche de la personne</a> · toutes ses rencontres, ses photos, ses droits</p><% } %>
-<% if (e.anonymized) { %><p class="hint">Les données de cette personne ont été effacées à sa demande. Il ne reste que son refus, pour que les photos liées ne soient jamais publiées.</p><% } %>
+   const mail = e.email ? `mailto:${e.email}?subject=${encodeURIComponent(`Votre photo${e.ref ? ` (${e.ref})` : ''} · ${it.siteName}`)}` : null;
+   const status = k => ST[k] || it.STATUS[k];
+   const published = p => p.status === 'published' ? t('publiée') : t('brouillon'); %>
+<p class="mono"><a class="more eyebrow" href="/admin/rencontres">← <%= t('Personnes photographiées') %></a></p>
+<h1 class="enc-title"><% if (e.hasPortrait) { %><img class="enc-face big" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="64" height="64"><% } %><%= e.anonymized ? t('Refus anonymisé') : it.title %><%= e.name ? ` · ${e.name}` : '' %></h1>
+<% if (e.person_id) { %><p class="mono"><a class="more" href="/admin/personnes/<%= e.person_id %>"><%= t('Fiche de la personne') %></a> · <%= t('toutes ses rencontres, ses photos, ses droits') %></p><% } %>
+<% if (e.anonymized) { %><p class="hint"><%= t('Les données de cette personne ont été effacées à sa demande. Il ne reste que son refus, pour que les photos liées ne soient jamais publiées.') %></p><% } %>
 <div class="enc-meta">
-  <span class="enc-tag"><%= it.STATUS[e.status] %></span>
+  <span class="enc-tag"><%= status(e.status) %></span>
 <% if (e.author) { %>  <span class="enc-tag"><%= e.author %></span><% } %>
-<% if (e.ref) { %>  <span class="enc-tag<%= e.verified ? ' ok' : ' warn' %>"><%= e.verified ? 'carte vérifiée' : 'référence non vérifiée' %></span><% } %>
-<% if (e.wants_photo) { %>  <span class="enc-tag">veut recevoir la photo</span><% } %>
-<% if (e.refused) { %>  <span class="enc-tag no">Refuse la publication</span>
-<% } else if (e.consent) { %>  <span class="enc-tag ok">Accord <%= e.consent_source !== 'en_ligne' ? 'signé' : 'donné en ligne' %> : <%= scopes(e.consent) %></span><% } %>
+<% if (e.ref) { %>  <span class="enc-tag<%= e.verified ? ' ok' : ' warn' %>"><%= e.verified ? t('carte vérifiée') : t('référence non vérifiée') %></span><% } %>
+<% if (e.wants_photo) { %>  <span class="enc-tag"><%= t('veut recevoir la photo') %></span><% } %>
+<% if (e.refused) { %>  <span class="enc-tag no"><%= t('Refuse la publication') %></span>
+<% } else if (e.consent) { %>  <span class="enc-tag ok"><%= e.consent_source !== 'en_ligne' ? t('Accord signé : {scopes}', { scopes: scopes(e.consent) }) : t('Accord donné en ligne : {scopes}', { scopes: scopes(e.consent) }) %></span><% } %>
 </div>
 
 <div class="enc-grid">
   <section class="panel" aria-labelledby="enc-who">
-    <h2 id="enc-who">La personne</h2>
+    <h2 id="enc-who"><%= t('La personne') %></h2>
     <dl class="kv">
-      <dt>E-mail</dt><dd><%= e.email || '—' %><% if (mail) { %> · <a class="more" href="<%= mail %>">Écrire</a><% } %></dd>
-      <dt>Rencontre</dt><dd><%= [e.met_on, e.met_time, e.place].filter(Boolean).join(' · ') || '—' %></dd>
-<% if (e.details) { %>      <dt>Détails</dt><dd><%= e.details %></dd><% } %>
-      <dt>Langue</dt><dd><%= { fr: 'français', en: 'anglais', de: 'allemand' }[e.lang] || e.lang %></dd>
-<% if (e.lat != null) { %>      <dt>Position</dt><dd class="mono"><%= e.lat.toFixed(3) %>, <%= e.lon.toFixed(3) %> <span class="hint">(à 100 m près)</span></dd><% } %>
-<% if (e.adult !== null && e.adult !== undefined) { %>      <dt>Âge</dt><dd><%= e.adult ? 'majeure' : `mineure · parent : ${e.guardian}` %></dd><% } %>
-<% if (e.mailed_at) { %>      <dt>Récapitulatif</dt><dd>envoyé le <%= it.fmt(e.mailed_at) %></dd><% } %>
-<% if (it.code) { %>      <dt>Code de la carte</dt><dd class="mono"><%= e.ref %>-<%= it.code %></dd><% } %>
+      <dt><%= t('E-mail') %></dt><dd><%= e.email || '—' %><% if (mail) { %> · <a class="more" href="<%= mail %>"><%= t('Écrire') %></a><% } %></dd>
+      <dt><%= t('Rencontre') %></dt><dd><%= [e.met_on, e.met_time, e.place].filter(Boolean).join(' · ') || '—' %></dd>
+<% if (e.details) { %>      <dt><%= t('Détails') %></dt><dd><%= e.details %></dd><% } %>
+      <dt><%= t('Langue') %></dt><dd><%= { fr: t('français'), en: t('anglais'), de: t('allemand') }[e.lang] || e.lang %></dd>
+<% if (e.lat != null) { %>      <dt><%= t('Position') %></dt><dd class="mono"><%= e.lat.toFixed(3) %>, <%= e.lon.toFixed(3) %> <span class="hint"><%= t('(à 100 m près)') %></span></dd><% } %>
+<% if (e.adult !== null && e.adult !== undefined) { %>      <dt><%= t('Âge') %></dt><dd><%= e.adult ? t('majeure') : t('mineure · parent : {guardian}', { guardian: e.guardian }) %></dd><% } %>
+<% if (e.mailed_at) { %>      <dt><%= t('Récapitulatif') %></dt><dd><%= t('envoyé le {date}', { date: it.fmt(e.mailed_at) }) %></dd><% } %>
+<% if (it.code) { %>      <dt><%= t('Code de la carte') %></dt><dd class="mono"><%= e.ref %>-<%= it.code %></dd><% } %>
     </dl>
 <% if (e.hasPortrait || e.hasSignature) { %>    <div class="enc-captures">
-<% if (e.hasPortrait) { %>      <figure><a href="/admin/rencontres/<%= e.id %>/portrait" target="_blank" rel="noopener"><img src="/admin/rencontres/<%= e.id %>/portrait" alt="Photo de repère de la personne" width="200"></a><figcaption class="mono">photo de repère</figcaption></figure><% } %>
-<% if (e.hasSignature) { %>      <figure><img class="enc-signature" src="/admin/rencontres/<%= e.id %>/signature" alt="Signature de la personne" width="240"><figcaption class="mono">signature<%= e.adult === 0 ? ' (avec le parent)' : '' %></figcaption></figure><% } %>
+<% if (e.hasPortrait) { %>      <figure><a href="/admin/rencontres/<%= e.id %>/portrait" target="_blank" rel="noopener"><img src="/admin/rencontres/<%= e.id %>/portrait" alt="<%= t('Photo de repère de la personne') %>" width="200"></a><figcaption class="mono"><%= t('photo de repère') %></figcaption></figure><% } %>
+<% if (e.hasSignature) { %>      <figure><img class="enc-signature" src="/admin/rencontres/<%= e.id %>/signature" alt="<%= t('Signature de la personne') %>" width="240"><figcaption class="mono"><%= e.adult === 0 ? t('signature (avec le parent)') : t('signature') %></figcaption></figure><% } %>
     </div>
 <% } %>
-<% if (e.consent && e.consent_source === 'en_ligne') { %>    <p class="cellnote warn">Accord donné en ligne<%= e.verified ? ' avec la carte en main' : ', sans le code de la carte' %> : moins sûr qu’une carte signée. Pour une exposition ou un tirage, demandez une signature.</p><% } %>
+<% if (e.consent && e.consent_source === 'en_ligne') { %>    <p class="cellnote warn"><%= e.verified ? t('Accord donné en ligne avec la carte en main : moins sûr qu’une carte signée. Pour une exposition ou un tirage, demandez une signature.') : t('Accord donné en ligne, sans le code de la carte : moins sûr qu’une carte signée. Pour une exposition ou un tirage, demandez une signature.') %></p><% } %>
     <form class="actions" method="post" action="/admin/rencontres/<%= e.id %>/statut">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-<% Object.entries(it.STATUS).filter(([k]) => k !== e.status).forEach(([k, label]) => { %>      <button class="btn ghost" type="submit" name="status" value="<%= k %>">Marquer « <%= label %> »</button>
+<% Object.entries(it.STATUS).filter(([k]) => k !== e.status).forEach(([k, label]) => { %>      <button class="btn ghost" type="submit" name="status" value="<%= k %>"><%= t('Marquer « {label} »', { label: ST[k] || label }) %></button>
 <% }) %>    </form>
   </section>
 
   <section class="panel" aria-labelledby="enc-history">
-    <h2 id="enc-history">Historique</h2>
+    <h2 id="enc-history"><%= t('Historique') %></h2>
     <ol class="enc-events">
 <% it.events.slice().reverse().forEach(ev => { const d = ev.detail; %>
       <li><span class="mono"><%= it.fmt(ev.at) %></span><br>
-<% if (ev.kind === 'visiteur') { %>        Demande sur la page /bonjour<%= ev.verified ? ' (carte vérifiée)' : '' %> :
-        <%= [d.wants_photo && 'veut la photo', d.decision === 'accord' && `accepte (${scopes(d.scopes)})`, d.decision === 'refus' && 'refuse la publication', d.rights === 'acces' && 'demande une copie de ses données', d.rights === 'effacement' && 'demande l’effacement de ses données'].filter(Boolean).join(', ') || 'message' %>
+<% if (ev.kind === 'visiteur') { %>        <%= ev.verified ? t('Demande sur la page /bonjour (carte vérifiée) :') : t('Demande sur la page /bonjour :') %>
+        <%= [d.wants_photo && t('veut la photo'), d.decision === 'accord' && t('accepte ({scopes})', { scopes: scopes(d.scopes) }), d.decision === 'refus' && t('refuse la publication'), d.rights === 'acces' && t('demande une copie de ses données'), d.rights === 'effacement' && t('demande l’effacement de ses données')].filter(Boolean).join(', ') || t('message') %>
 <% if (d.message) { %>        <br>« <%= d.message %> »<% } %>
-<% } else if (ev.kind === 'carte') { %>        Saisie de la carte<%= d.signed ? ` : accord signé (${scopes(d.scopes)})` : '' %><%= d.card ? ', photo de la carte jointe' : '' %>
-<% } else if (ev.kind === 'liaison') { %>        <%= d.retiree ? 'Photo retirée' : `${(d.photos || []).length} photo(s) liée(s)` %>
-<% } else if (ev.kind === 'app') { %>        Saisie avec la personne sur le téléphone : <%= d.decision === 'accord' ? `accord signé (${scopes(d.scopes)})` : d.decision === 'refus' ? 'refus de publication' : 'sans décision' %><%= d.position ? ', position notée' : '' %>
-<% } else if (ev.kind === 'email') { %>        Récapitulatif envoyé par e-mail
-<% } else if (ev.kind === 'export') { %>        Données exportées (archive remise à la personne)
-<% } else if (ev.kind === 'droits_traites') { %>        Demande sur les données traitée
-<% } else if (ev.kind === 'anonymise') { %>        Données effacées ; refus gardé sans identité
-<% } else if (ev.kind === 'lien') { %>        Lien privé créé (photo offerte)
-<% } else if (ev.kind === 'refus_applique') { %>        Refus appliqué : <%= (d.photos || []).length %> photo(s) dépubliée(s)
+<% } else if (ev.kind === 'carte') { %>        <%= d.signed ? (d.card ? t('Saisie de la carte : accord signé ({scopes}), photo de la carte jointe', { scopes: scopes(d.scopes) }) : t('Saisie de la carte : accord signé ({scopes})', { scopes: scopes(d.scopes) })) : (d.card ? t('Saisie de la carte, photo de la carte jointe') : t('Saisie de la carte')) %>
+<% } else if (ev.kind === 'liaison') { %>        <%= d.retiree ? t('Photo retirée') : t('{n} photo(s) liée(s)', { n: (d.photos || []).length }) %>
+<% } else if (ev.kind === 'app') { const what = d.decision === 'accord' ? t('accord signé ({scopes})', { scopes: scopes(d.scopes) }) : d.decision === 'refus' ? t('refus de publication') : t('sans décision'); %>        <%= d.position ? t('Saisie avec la personne sur le téléphone : {what}, position notée', { what }) : t('Saisie avec la personne sur le téléphone : {what}', { what }) %>
+<% } else if (ev.kind === 'email') { %>        <%= t('Récapitulatif envoyé par e-mail') %>
+<% } else if (ev.kind === 'export') { %>        <%= t('Données exportées (archive remise à la personne)') %>
+<% } else if (ev.kind === 'droits_traites') { %>        <%= t('Demande sur les données traitée') %>
+<% } else if (ev.kind === 'anonymise') { %>        <%= t('Données effacées ; refus gardé sans identité') %>
+<% } else if (ev.kind === 'lien') { %>        <%= t('Lien privé créé (photo offerte)') %>
+<% } else if (ev.kind === 'refus_applique') { %>        <%= t('Refus appliqué : {n} photo(s) dépubliée(s)', { n: (d.photos || []).length }) %>
 <% } else { %>        <%= ev.kind %><% } %></li>
 <% }) %>
     </ol>
@@ -66,93 +71,93 @@
 <% const due = e.rights_requested_at ? e.rights_requested_at + 30 * 864e5 : null; %>
 <% if (!e.anonymized) { %>
 <section class="panel" id="droits" aria-labelledby="enc-rights">
-  <h2 id="enc-rights">Droits de la personne <span class="mono">RGPD</span></h2>
-<% if (e.rights_request && !e.rights_done_at) { %>  <p class="<%= due < Date.now() ? 'err' : 'cellnote warn' %>">Demande <strong><%= e.rights_request === 'acces' ? 'd’accès (copie de ses données)' : 'd’effacement' %></strong> le <%= it.fmt(e.rights_requested_at) %> : à traiter avant le <strong><%= it.fmt(due) %></strong>.<%= e.ref && !e.verified ? ' Référence non vérifiée : assurez-vous que la demande vient bien de cette personne (même adresse e-mail, ou réponse à votre message).' : '' %></p>
-<% } else if (e.rights_done_at) { %>  <p class="hint">Dernière demande sur les données traitée le <%= it.fmt(e.rights_done_at) %>.</p>
+  <h2 id="enc-rights"><%= t('Droits de la personne') %> <span class="mono"><%= t('RGPD') %></span></h2>
+<% if (e.rights_request && !e.rights_done_at) { const dates = { date: it.fmt(e.rights_requested_at), due: it.fmt(due) }; %>  <p class="<%= due < Date.now() ? 'err' : 'cellnote warn' %>"><%~ e.rights_request === 'acces' ? t('Demande <strong>d’accès (copie de ses données)</strong> le {date} : à traiter avant le <strong>{due}</strong>.', dates) : t('Demande <strong>d’effacement</strong> le {date} : à traiter avant le <strong>{due}</strong>.', dates) %><%= e.ref && !e.verified ? ` ${t('Référence non vérifiée : assurez-vous que la demande vient bien de cette personne (même adresse e-mail, ou réponse à votre message).')}` : '' %></p>
+<% } else if (e.rights_done_at) { %>  <p class="hint"><%= t('Dernière demande sur les données traitée le {date}.', { date: it.fmt(e.rights_done_at) }) %></p>
 <% } %>
   <p class="actions">
-    <a class="btn ghost" href="/admin/rencontres/<%= e.id %>/export.zip">Exporter ses données (.zip)</a>
-<% if (e.rights_request && !e.rights_done_at) { %>    <form method="post" action="/admin/rencontres/<%= e.id %>/droits-traites"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit">Marquer la demande comme traitée</button></form><% } %>
+    <a class="btn ghost" href="/admin/rencontres/<%= e.id %>/export.zip"><%= t('Exporter ses données (.zip)') %></a>
+<% if (e.rights_request && !e.rights_done_at) { %>    <form method="post" action="/admin/rencontres/<%= e.id %>/droits-traites"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Marquer la demande comme traitée') %></button></form><% } %>
   </p>
-  <p class="hint">L’archive contient tout ce que le site garde sur elle (rencontre, choix, accord ou refus, historique), la signature, les photos de repère et de carte, et les photos liées en JPEG : envoyez-la-lui (en pièce jointe ou par votre messagerie).</p>
+  <p class="hint"><%= t('L’archive contient tout ce que le site garde sur elle (rencontre, choix, accord ou refus, historique), la signature, les photos de repère et de carte, et les photos liées en JPEG : envoyez-la-lui (en pièce jointe ou par votre messagerie).') %></p>
 </section>
 <% } %>
 
 <% if (e.refused) { %>
 <section class="panel" id="refus" aria-labelledby="enc-refusal">
-  <h2 id="enc-refusal">Refus de publication</h2>
-  <p>Les photos liées à cette rencontre <strong>ne peuvent plus être publiées</strong>. <%= it.photos.some(p => p.status === 'published') ? 'Certaines le sont encore :' : 'Aucune n’est publiée.' %></p>
-<% if (it.photos.some(p => p.status === 'published')) { %>  <form method="post" action="/admin/rencontres/<%= e.id %>/refus"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn danger" type="submit">Appliquer le refus : dépublier et retirer de la file Instagram</button></form>
-<% } %>  <p class="hint">Les posts déjà publiés sur Instagram ne sont pas touchés : supprimez-les dans l’application Instagram.</p>
+  <h2 id="enc-refusal"><%= t('Refus de publication') %></h2>
+  <p><%~ t('Les photos liées à cette rencontre <strong>ne peuvent plus être publiées</strong>.') %> <%= it.photos.some(p => p.status === 'published') ? t('Certaines le sont encore :') : t('Aucune n’est publiée.') %></p>
+<% if (it.photos.some(p => p.status === 'published')) { %>  <form method="post" action="/admin/rencontres/<%= e.id %>/refus"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn danger" type="submit"><%= t('Appliquer le refus : dépublier et retirer de la file Instagram') %></button></form>
+<% } %>  <p class="hint"><%= t('Les posts déjà publiés sur Instagram ne sont pas touchés : supprimez-les dans l’application Instagram.') %></p>
 </section>
 <% } %>
 
 <% const ses = it.session; %>
 <section class="panel" id="session" aria-labelledby="enc-session">
-  <h2 id="enc-session">Photos de la sortie <span class="mono"><%= ses.day ? `${e.author || 'photographe'} · ${ses.day}` : 'date inconnue' %></span><% if (it.outingUrl) { %> <a class="btn ghost push" href="<%= it.outingUrl %>">Ouvrir la sortie →</a><% } %></h2>
-<% if (!ses.day || !e.author_id) { %>  <p class="hint">Indiquez le photographe et la date de la rencontre (ou de la sortie, ci-dessous) : l’accord couvrira alors toutes ses photos de ce jour-là.</p>
-<% } else if (!ses.photos.length) { %>  <p class="hint">Aucune photo de <%= e.author %> datée du <%= ses.day %> pour l’instant (date EXIF). Elles seront couvertes dès leur import. Si l’horloge de l’appareil était décalée, corrigez la « date de la sortie ».</p>
-<% } else { %>  <p class="hint"><%= e.consent ? 'L’accord de cette personne couvre' : e.refused ? 'Son refus ne bloque que les photos liées (plus bas) : cochez celles où elle apparaît. Photos du jour' : 'Pas encore de décision ; quand elle en prendra une, elle couvrira' %> les <%= ses.photos.filter(p => !p.excluded).length %> photo<%= ses.photos.filter(p => !p.excluded).length > 1 ? 's' : '' %> de <%= e.author %> prises ce jour-là. Excluez celles qui ne la concernent pas (une autre sortie le même jour, par exemple).</p>
+  <h2 id="enc-session"><%= t('Photos de la sortie') %> <span class="mono"><%= ses.day ? `${e.author || t('photographe')} · ${ses.day}` : t('date inconnue') %></span><% if (it.outingUrl) { %> <a class="btn ghost push" href="<%= it.outingUrl %>"><%= t('Ouvrir la sortie →') %></a><% } %></h2>
+<% if (!ses.day || !e.author_id) { %>  <p class="hint"><%= t('Indiquez le photographe et la date de la rencontre (ou de la sortie, ci-dessous) : l’accord couvrira alors toutes ses photos de ce jour-là.') %></p>
+<% } else if (!ses.photos.length) { %>  <p class="hint"><%= t('Aucune photo de {author} datée du {day} pour l’instant (date EXIF). Elles seront couvertes dès leur import. Si l’horloge de l’appareil était décalée, corrigez la « date de la sortie ».', { author: e.author, day: ses.day }) %></p>
+<% } else { const n = ses.photos.filter(p => !p.excluded).length; %>  <p class="hint"><%= e.consent ? t('L’accord de cette personne couvre') : e.refused ? t('Son refus ne bloque que les photos liées (plus bas) : cochez celles où elle apparaît. Photos du jour') : t('Pas encore de décision ; quand elle en prendra une, elle couvrira') %> <%= n > 1 ? t('les {n} photos de {author} prises ce jour-là.', { n, author: e.author }) : t('les {n} photo de {author} prises ce jour-là.', { n, author: e.author }) %> <%= t('Excluez celles qui ne la concernent pas (une autre sortie le même jour, par exemple).') %></p>
   <div class="enc-photos">
 <% ses.photos.forEach(p => { %>    <div class="enc-photo<%= p.excluded ? ' excluded' : '' %>">
       <a href="/admin/photos/<%= p.id %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '130px', alt: '' }) %><% } %></a>
-      <span><%= p.title %> · <%= p.excluded ? 'exclue' : 'couverte' %></span>
-      <form method="post" action="/admin/rencontres/<%= e.id %>/session/<%= p.id %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="exclure" value="<%= p.excluded ? '0' : '1' %>"><button class="linkbtn" type="submit"><%= p.excluded ? 'Rétablir' : 'Exclure' %></button></form>
+      <span><%= p.title %> · <%= p.excluded ? t('exclue') : t('couverte') %></span>
+      <form method="post" action="/admin/rencontres/<%= e.id %>/session/<%= p.id %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="exclure" value="<%= p.excluded ? '0' : '1' %>"><button class="linkbtn" type="submit"><%= p.excluded ? t('Rétablir') : t('Exclure') %></button></form>
     </div>
 <% }) %>  </div>
 <% } %>
 </section>
 
 <section class="panel" id="photos" aria-labelledby="enc-photos">
-  <h2 id="enc-photos">Photos liées <span class="mono">refus, photo offerte, ou photo hors sortie</span></h2>
+  <h2 id="enc-photos"><%= t('Photos liées') %> <span class="mono"><%= t('refus, photo offerte, ou photo hors sortie') %></span></h2>
 <% if (it.photos.length) { %>
   <div class="enc-photos">
 <% it.photos.forEach(p => { %>    <div class="enc-photo">
       <a href="/admin/photos/<%= p.id %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '130px', alt: '' }) %><% } %></a>
-      <span><%= p.title %> · <%= p.status === 'published' ? 'publiée' : 'brouillon' %></span>
-      <form method="post" action="/admin/rencontres/<%= e.id %>/liens"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="photo_id" value="<%= p.id %>"><button class="btn ghost" type="submit">Offrir cette photo</button></form>
-      <form method="post" action="/admin/rencontres/<%= e.id %>/photos/<%= p.id %>/retirer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit">Retirer</button></form>
+      <span><%= p.title %> · <%= published(p) %></span>
+      <form method="post" action="/admin/rencontres/<%= e.id %>/liens"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="photo_id" value="<%= p.id %>"><button class="btn ghost" type="submit"><%= t('Offrir cette photo') %></button></form>
+      <form method="post" action="/admin/rencontres/<%= e.id %>/photos/<%= p.id %>/retirer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit"><%= t('Retirer') %></button></form>
     </div>
 <% }) %>  </div>
 <% if (it.shares.length) { %>
-  <h3 id="liens">Photos offertes</h3>
-  <p class="hint">Un lien privé vers une version JPEG (2048 px, jamais l’original), valable 30 jours. « Envoyer » prépare le message dans votre messagerie, dans la langue de la personne.</p>
+  <h3 id="liens"><%= t('Photos offertes') %></h3>
+  <p class="hint"><%= t('Un lien privé vers une version JPEG (2048 px, jamais l’original), valable 30 jours. « Envoyer » prépare le message dans votre messagerie, dans la langue de la personne.') %></p>
   <ul class="rank plain">
-<% it.shares.forEach(s => { const p = it.photos.find(x => x.id === s.photo_id); %>    <li><span class="t"><%= p ? p.title : 'Photo' %> <span class="mono"><%= s.expired ? 'expiré' : `jusqu’au ${s.until}` %> · vu <%= s.views %> fois · téléchargé <%= s.downloads %> fois</span>
-      <input class="mono share-url" value="<%= s.url %>" readonly aria-label="Lien privé" data-select-all></span>
-<% if (s.mail && !s.expired) { %>      <a class="btn" href="<%= s.mail %>">Envoyer</a><% } %>
-      <form method="post" action="/admin/rencontres/<%= e.id %>/liens/<%= s.token %>/retirer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit">Retirer le lien</button></form></li>
+<% it.shares.forEach(s => { const p = it.photos.find(x => x.id === s.photo_id); %>    <li><span class="t"><%= p ? p.title : t('Photo') %> <span class="mono"><%= s.expired ? t('expiré') : t('jusqu’au {until}', { until: s.until }) %> · <%= t('vu {views} fois · téléchargé {downloads} fois', { views: s.views, downloads: s.downloads }) %></span>
+      <input class="mono share-url" value="<%= s.url %>" readonly aria-label="<%= t('Lien privé') %>" data-select-all></span>
+<% if (s.mail && !s.expired) { %>      <a class="btn" href="<%= s.mail %>"><%= t('Envoyer') %></a><% } %>
+      <form method="post" action="/admin/rencontres/<%= e.id %>/liens/<%= s.token %>/retirer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit"><%= t('Retirer le lien') %></button></form></li>
 <% }) %>  </ul>
 <% } %>
-<% } else { %>  <p class="hint">Aucune photo liée : choisissez-la ci-dessous.</p><% } %>
-  <h3>Lier des photos</h3>
+<% } else { %>  <p class="hint"><%= t('Aucune photo liée : choisissez-la ci-dessous.') %></p><% } %>
+  <h3><%= t('Lier des photos') %></h3>
   <form class="search-inline" method="get" action="/admin/rencontres/<%= e.id %>#photos">
-    <label>Chercher <input name="q" value="<%= it.search %>" placeholder="titre, lieu, adresse…"></label> <button class="btn ghost" type="submit">Chercher</button>
+    <label><%= t('Chercher') %> <input name="q" value="<%= it.search %>" placeholder="<%= t('titre, lieu, adresse…') %>"></label> <button class="btn ghost" type="submit"><%= t('Chercher') %></button>
   </form>
-  <p class="hint"><%= it.search ? 'Résultats de la recherche.' : `Photos ${e.author ? `de ${e.author}` : ''} ${e.met_on ? `prises ou importées vers le ${e.met_on} d’abord` : 'les plus récentes'}.` %></p>
+  <p class="hint"><%= it.search ? t('Résultats de la recherche.') : e.author ? (e.met_on ? t('Photos de {author} prises ou importées vers le {day} d’abord.', { author: e.author, day: e.met_on }) : t('Photos de {author} les plus récentes.', { author: e.author })) : (e.met_on ? t('Photos prises ou importées vers le {day} d’abord.', { day: e.met_on }) : t('Photos les plus récentes.')) %></p>
   <form method="post" action="/admin/rencontres/<%= e.id %>/photos">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
     <div class="enc-photos">
 <% it.candidates.forEach(p => { %>      <div class="enc-photo"><% if (p.ready) { %><%~ it.picture(p, { sizes: '130px', alt: '' }) %><% } %>
-        <label><input type="checkbox" name="photo" value="<%= p.id %>"> <span><%= p.title %><br><span class="mono"><%= p.taken_on || '' %> · <%= p.status === 'published' ? 'publiée' : 'brouillon' %></span></span></label></div>
+        <label><input type="checkbox" name="photo" value="<%= p.id %>"> <span><%= p.title %><br><span class="mono"><%= p.taken_on || '' %> · <%= published(p) %></span></span></label></div>
 <% }) %>    </div>
-<% if (!it.candidates.length) { %>    <p class="hint">Aucune photo trouvée.</p><% } %>
-    <p class="actions"><button class="btn" type="submit">Lier les photos cochées</button></p>
+<% if (!it.candidates.length) { %>    <p class="hint"><%= t('Aucune photo trouvée.') %></p><% } %>
+    <p class="actions"><button class="btn" type="submit"><%= t('Lier les photos cochées') %></button></p>
   </form>
 </section>
 
 <section class="panel" aria-labelledby="enc-card">
-  <h2 id="enc-card">Carte signée</h2>
-<% if (e.hasCard) { %>  <p><a href="/admin/rencontres/<%= e.id %>/carte" target="_blank" rel="noopener"><img class="enc-card-img" src="/admin/rencontres/<%= e.id %>/carte" alt="Photo de la carte signée" width="480"></a></p><% } %>
+  <h2 id="enc-card"><%= t('Carte signée') %></h2>
+<% if (e.hasCard) { %>  <p><a href="/admin/rencontres/<%= e.id %>/carte" target="_blank" rel="noopener"><img class="enc-card-img" src="/admin/rencontres/<%= e.id %>/carte" alt="<%= t('Photo de la carte signée') %>" width="480"></a></p><% } %>
   <%~ include('./_encounter-form', { ...it, v: values, action: `/admin/rencontres/${e.id}`, isNew: false }) %>
 </section>
 
 <details class="danger"<%~ e.rights_request === 'effacement' && !e.rights_done_at ? ' open' : '' %>>
-  <summary>Effacer les données de cette personne</summary>
+  <summary><%= t('Effacer les données de cette personne') %></summary>
   <form method="post" action="/admin/rencontres/<%= e.id %>/effacer">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-    <p>Efface son nom, son adresse, ses messages, sa signature, les photos de repère et de carte, et l’historique.<%= e.refused ? ' Son refus reste appliqué, sans aucune donnée sur elle, tant que des photos liées sont gardées.' : (e.consent ? ' Son accord disparaît aussi : les photos liées ne pourront plus être publiées en s’en prévalant.' : '') %></p>
-<% if (it.photos.length) { %>    <label class="inline"><input type="checkbox" name="photos"> Supprimer aussi les <%= it.photos.length %> photo<%= it.photos.length > 1 ? 's' : '' %> où elle apparaît (originaux et images ; effacées des sauvegardes sous 90 jours)</label>
-<% } %>    <p class="actions"><button class="btn danger" type="submit">Effacer définitivement</button></p>
+    <p><%= t('Efface son nom, son adresse, ses messages, sa signature, les photos de repère et de carte, et l’historique.') %><%= e.refused ? ` ${t('Son refus reste appliqué, sans aucune donnée sur elle, tant que des photos liées sont gardées.')}` : (e.consent ? ` ${t('Son accord disparaît aussi : les photos liées ne pourront plus être publiées en s’en prévalant.')}` : '') %></p>
+<% if (it.photos.length) { %>    <label class="inline"><input type="checkbox" name="photos"> <%= it.photos.length > 1 ? t('Supprimer aussi les {n} photos où elle apparaît (originaux et images ; effacées des sauvegardes sous 90 jours)', { n: it.photos.length }) : t('Supprimer aussi les {n} photo où elle apparaît (originaux et images ; effacées des sauvegardes sous 90 jours)', { n: it.photos.length }) %></label>
+<% } %>    <p class="actions"><button class="btn danger" type="submit"><%= t('Effacer définitivement') %></button></p>
   </form>
 </details>

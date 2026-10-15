@@ -1,32 +1,38 @@
 <% layout('./layout') %>
-<% const consentTag = e => e.refused ? '<span class="enc-tag no">Refus de publication</span>'
-     : e.consent ? `<span class="enc-tag ok">Accord ${e.consent_source !== 'en_ligne' ? 'signé' : 'en ligne'} : ${it.SCOPES.filter(s => e.consent[s]).map(s => it.SCOPE_LABELS[s]).join(', ')}</span>` : ''; %>
+<% const t = it.t;
+   const SL = { site: t('site'), instagram: t('Instagram'), print: t('expositions et tirages'), name: t('avec son prénom') };
+   const ST = { nouvelle: t('Nouvelle'), en_cours: t('En cours'), traitee: t('Traitée') };
+   const STS = { nouvelle: t('Nouvelles'), en_cours: t('En cours'), traitee: t('Traitées') };
+   const consentTag = e => { if (e.refused) return `<span class="enc-tag no">${t('Refus de publication')}</span>`;
+     if (!e.consent) return '';
+     const scopes = it.SCOPES.filter(s => e.consent[s]).map(s => SL[s] || it.SCOPE_LABELS[s]).join(', ');
+     return `<span class="enc-tag ok">${e.consent_source !== 'en_ligne' ? t('Accord signé : {scopes}', { scopes }) : t('Accord en ligne : {scopes}', { scopes })}</span>`; }; %>
 <div class="toolbar">
   <div>
-    <h1>Personnes photographiées</h1>
-    <p class="sub">Les personnes photographiées dans la rue : demandes reçues par la page <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> (QR des cartes) et accords signés sur les cartes.</p>
+    <h1><%= t('Personnes photographiées') %></h1>
+    <p class="sub"><%~ t('Les personnes photographiées dans la rue : demandes reçues par la page <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> (QR des cartes) et accords signés sur les cartes.') %></p>
   </div>
-  <span class="toolbar-actions"><a class="btn" href="/admin/rencontre">Nouvelle rencontre</a> <a class="btn ghost" href="/admin/terrain">Sur le terrain</a></span>
+  <span class="toolbar-actions"><a class="btn" href="/admin/rencontre"><%= t('Nouvelle rencontre') %></a> <a class="btn ghost" href="/admin/terrain"><%= t('Sur le terrain') %></a></span>
 </div>
-<nav class="chips" aria-label="Filtrer les rencontres">
-  <a href="/admin/rencontres"<%~ !it.status ? ' aria-current="true"' : '' %>>Toutes</a>
-<% Object.entries(it.STATUS).forEach(([k, label]) => { %>  <a href="/admin/rencontres?statut=<%= k %>"<%~ it.status === k ? ' aria-current="true"' : '' %>><%= label %>s</a>
+<nav class="chips" aria-label="<%= t('Filtrer les rencontres') %>">
+  <a href="/admin/rencontres"<%~ !it.status ? ' aria-current="true"' : '' %>><%= t('Toutes') %></a>
+<% Object.entries(it.STATUS).forEach(([k, label]) => { %>  <a href="/admin/rencontres?statut=<%= k %>"<%~ it.status === k ? ' aria-current="true"' : '' %>><%= STS[k] || `${label}s` %></a>
 <% }) %></nav>
 <% if (it.list.length) { %>
 <ul class="enc-list">
 <% it.list.forEach(e => { %>
   <li class="enc-item <%= e.status %>">
     <div>
-      <h2><% if (e.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"> <% } %><a href="/admin/rencontres/<%= e.id %>"><%= e.anonymized ? 'Refus anonymisé' : (e.ref || 'Sans carte') %><%= e.name ? ` · ${e.name}` : '' %></a></h2>
+      <h2><% if (e.hasPortrait) { %><img class="enc-face" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"> <% } %><a href="/admin/rencontres/<%= e.id %>"><%= e.anonymized ? t('Refus anonymisé') : (e.ref || t('Sans carte')) %><%= e.name ? ` · ${e.name}` : '' %></a></h2>
       <div class="enc-meta">
-        <span class="enc-tag"><%= it.STATUS[e.status] %></span>
+        <span class="enc-tag"><%= ST[e.status] || it.STATUS[e.status] %></span>
 <% if (e.author) { %>        <span class="enc-tag"><%= e.author %></span><% } %>
-<% if (e.ref && !e.verified) { %>        <span class="enc-tag warn" title="Référence tapée sans le code de contrôle de la carte">non vérifiée</span><% } %>
-<% if (e.wants_photo) { %>        <span class="enc-tag">veut la photo</span><% } %>
+<% if (e.ref && !e.verified) { %>        <span class="enc-tag warn" title="<%= t('Référence tapée sans le code de contrôle de la carte') %>"><%= t('non vérifiée') %></span><% } %>
+<% if (e.wants_photo) { %>        <span class="enc-tag"><%= t('veut la photo') %></span><% } %>
         <%~ consentTag(e) %>
-<% if (e.photos) { %>        <span class="enc-tag"><%= e.photos %> photo<%= e.photos > 1 ? 's' : '' %> liée<%= e.photos > 1 ? 's' : '' %></span><% } %>
-<% if (e.rights_request && !e.rights_done_at) { const due = e.rights_requested_at + 30 * 864e5; %>        <span class="enc-tag no">Demande <%= e.rights_request === 'acces' ? 'd’accès' : 'd’effacement' %> · avant le <%= it.fmt(due).replace(/,? \d+:\d+$/, '') %></span><% } %>
-<% if (e.anonymized) { %>        <span class="enc-tag">refus anonymisé</span><% } %>
+<% if (e.photos) { %>        <span class="enc-tag"><%= e.photos > 1 ? t('{n} photos liées', { n: e.photos }) : t('{n} photo liée', { n: e.photos }) %></span><% } %>
+<% if (e.rights_request && !e.rights_done_at) { const due = it.fmt(e.rights_requested_at + 30 * 864e5).replace(/,? \d+:\d+$/, ''); %>        <span class="enc-tag no"><%= e.rights_request === 'acces' ? t('Demande d’accès · avant le {date}', { date: due }) : t('Demande d’effacement · avant le {date}', { date: due }) %></span><% } %>
+<% if (e.anonymized) { %>        <span class="enc-tag"><%= t('refus anonymisé') %></span><% } %>
       </div>
     </div>
     <span class="mono"><%= it.fmt(e.updated_at) %></span>
@@ -35,10 +41,10 @@
 <% }) %>
 </ul>
 <% } else { %>
-<p class="panel hint">Aucune rencontre<%= it.status ? ' dans cette catégorie' : ' pour l’instant' %>. Les demandes envoyées depuis <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> arrivent ici.</p>
+<p class="panel hint"><%~ it.status ? t('Aucune rencontre dans cette catégorie. Les demandes envoyées depuis <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> arrivent ici.') : t('Aucune rencontre pour l’instant. Les demandes envoyées depuis <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> arrivent ici.') %></p>
 <% } %>
 
 <details class="panel" id="nouvelle"<%~ Object.keys(it.errors).length ? ' open' : '' %>>
-  <summary><strong>Saisir une carte signée</strong> <span class="mono">accord papier (carte « pour nous »)</span></summary>
+  <summary><strong><%= t('Saisir une carte signée') %></strong> <span class="mono"><%= t('accord papier (carte « pour nous »)') %></span></summary>
   <%~ include('./_encounter-form', { ...it, v: it.values || {}, action: '/admin/rencontres', isNew: true }) %>
 </details>

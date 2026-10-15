@@ -1,82 +1,82 @@
 <% layout('./layout') %>
-<% const w = it.watermark; %>
-<h1>Filigrane et métadonnées</h1>
-<p class="prose">Ces réglages s’appliquent aux images servies sur le site. Les originaux ne sont jamais modifiés : à chaque enregistrement, les images sont recalculées en arrière-plan, puis le site bascule sur les nouvelles d’un coup.</p>
+<% const w = it.watermark; const t = it.t; %>
+<h1><%= t('Filigrane et métadonnées') %></h1>
+<p class="prose"><%= t('Ces réglages s’appliquent aux images servies sur le site. Les originaux ne sont jamais modifiés : à chaque enregistrement, les images sont recalculées en arrière-plan, puis le site bascule sur les nouvelles d’un coup.') %></p>
 
 <div class="edit">
 <% if (it.previewId) { %>
   <figure class="preview">
-    <img src="/admin/images/apercu.webp?photo=<%= it.previewId %>" alt="Aperçu du filigrane enregistré" width="1280" height="853">
-    <figcaption class="mono">Aperçu des réglages enregistrés (1280 px)<%= w.enabled ? '' : ' · filigrane désactivé' %></figcaption>
+    <img src="/admin/images/apercu.webp?photo=<%= it.previewId %>" alt="<%= t('Aperçu du filigrane enregistré') %>" width="1280" height="853">
+    <figcaption class="mono"><%= t('Aperçu des réglages enregistrés (1280 px)') %><%= w.enabled ? '' : ` · ${t('filigrane désactivé')}` %></figcaption>
   </figure>
 <% } else { %>
-  <p class="panel">Importez une photo pour voir un aperçu du filigrane.</p>
+  <p class="panel"><%= t('Importez une photo pour voir un aperçu du filigrane.') %></p>
 <% } %>
 
   <form class="form" method="post" action="/admin/images" id="images-form">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
     <fieldset class="panel form">
-      <legend>Filigrane</legend>
-      <label class="inline"><input type="checkbox" name="wm_enabled"<%~ w.enabled ? ' checked' : '' %>> Ajouter un filigrane aux images du site</label>
+      <legend><%= t('Filigrane') %></legend>
+      <label class="inline"><input type="checkbox" name="wm_enabled"<%~ w.enabled ? ' checked' : '' %>> <%= t('Ajouter un filigrane aux images du site') %></label>
       <fieldset class="row">
-        <legend>Type</legend>
+        <legend><%= t('Type') %></legend>
 <% Object.entries(it.KINDS).forEach(([k, label]) => { const missing = (k === 'emblem' || k === 'logotype') && !it.brand[k]; %>
-        <label class="inline"><input type="radio" name="wm_kind" value="<%= k %>"<%~ w.kind === k ? ' checked' : '' %><%~ missing && w.kind !== k ? ' disabled' : '' %>> <%= label %><% if (missing) { %> <span class="mono">— à envoyer d’abord dans <a href="/admin/apparence">Apparence</a></span><% } %></label>
+        <label class="inline"><input type="radio" name="wm_kind" value="<%= k %>"<%~ w.kind === k ? ' checked' : '' %><%~ missing && w.kind !== k ? ' disabled' : '' %>> <%= t(label) %><% if (missing) { %> <span class="mono">— <%= t('à envoyer d’abord dans') %> <a href="/admin/apparence"><%= t('Apparence') %></a></span><% } %></label>
 <% }) %>
       </fieldset>
-      <label>Texte <input name="wm_text" value="<%= w.text %>" maxlength="80">
-        <span class="mono">Variables : {auteur} · {annee} · {site} · {titre} — ex. « © {auteur} {annee} »</span></label>
+      <label><%= t('Texte') %> <input name="wm_text" value="<%= w.text %>" maxlength="80">
+        <span class="mono"><%= t('Variables :') %> {auteur} · {annee} · {site} · {titre} — <%= t('ex.') %> « © {auteur} {annee} »</span></label>
       <div class="row">
-        <label>Police <select name="wm_font"><% Object.entries(it.FONTS).forEach(([k, f]) => { %><option value="<%= k %>"<%~ w.font === k ? ' selected' : '' %>><%= f.label %></option><% }) %></select></label>
-        <fieldset class="row"><legend>Teinte <span class="mono">texte et dessins du site ; un logo envoyé garde ses couleurs</span></legend>
+        <label><%= t('Police') %> <select name="wm_font"><% Object.entries(it.FONTS).forEach(([k, f]) => { %><option value="<%= k %>"<%~ w.font === k ? ' selected' : '' %>><%= t(f.label) %></option><% }) %></select></label>
+        <fieldset class="row"><legend><%= t('Teinte') %> <span class="mono"><%= t('texte et dessins du site ; un logo envoyé garde ses couleurs') %></span></legend>
 <% Object.entries(it.TONE_LABELS).forEach(([k, label]) => { %>
           <label class="inline"><input type="radio" name="wm_tone" value="<%= k %>"<%~ (w.tone || 'light') === k ? ' checked' : '' %>> <%= label %></label>
 <% }) %>
         </fieldset>
       </div>
       <div class="row">
-        <label>Position <select name="wm_position"><% Object.entries(it.POSITIONS).forEach(([k, label]) => { %><option value="<%= k %>"<%~ w.position === k ? ' selected' : '' %>><%= label %></option><% }) %></select></label>
-        <label>Appliquer aux tailles <select name="wm_min_width"><% Object.entries(it.MIN_WIDTHS).forEach(([k, label]) => { %><option value="<%= k %>"<%~ String(w.minWidth) === k ? ' selected' : '' %>><%= label %></option><% }) %></select></label>
+        <label><%= t('Position') %> <select name="wm_position"><% Object.entries(it.POSITIONS).forEach(([k, label]) => { %><option value="<%= k %>"<%~ w.position === k ? ' selected' : '' %>><%= t(label) %></option><% }) %></select></label>
+        <label><%= t('Appliquer aux tailles') %> <select name="wm_min_width"><% Object.entries(it.MIN_WIDTHS).forEach(([k, label]) => { %><option value="<%= k %>"<%~ String(w.minWidth) === k ? ' selected' : '' %>><%= label %></option><% }) %></select></label>
       </div>
       <div class="row">
-        <label>Opacité (%) <input type="number" name="wm_opacity" min="5" max="100" value="<%= w.opacity %>"></label>
-        <label>Largeur (% de l’image) <input type="number" name="wm_size" min="3" max="100" value="<%= w.size %>"><span class="mono">sans effet en plein cadre</span></label>
-        <label>Marge (% de l’image) <input type="number" name="wm_margin" min="0" max="20" value="<%= w.margin %>"></label>
+        <label><%= t('Opacité (%)') %> <input type="number" name="wm_opacity" min="5" max="100" value="<%= w.opacity %>"></label>
+        <label><%= t('Largeur (% de l’image)') %> <input type="number" name="wm_size" min="3" max="100" value="<%= w.size %>"><span class="mono"><%= t('sans effet en plein cadre') %></span></label>
+        <label><%= t('Marge (% de l’image)') %> <input type="number" name="wm_margin" min="0" max="20" value="<%= w.margin %>"></label>
       </div>
     </fieldset>
 
     <fieldset class="panel form">
-      <legend>Métadonnées (EXIF) des images servies</legend>
+      <legend><%= t('Métadonnées (EXIF) des images servies') %></legend>
 <% Object.entries(it.EXIF_MODES).forEach(([k, m]) => { %>
-      <label class="choice<%= k === 'all' ? ' warn' : '' %>"><span><input type="radio" name="exif_mode" value="<%= k %>"<%~ it.exif.mode === k ? ' checked' : '' %>> <strong><%= m.label %></strong></span>
-        <span class="mono"><%= m.help %></span></label>
+      <label class="choice<%= k === 'all' ? ' warn' : '' %>"><span><input type="radio" name="exif_mode" value="<%= k %>"<%~ it.exif.mode === k ? ' checked' : '' %>> <strong><%= t(m.label) %></strong></span>
+        <span class="mono"><%= t(m.help) %></span></label>
 <% }) %>
     </fieldset>
 
     <div class="panel row">
-      <label>Photo d’aperçu
+      <label><%= t('Photo d’aperçu') %>
         <select name="preview_photo"><% it.photos.forEach(p => { %><option value="<%= p.id %>"<%~ p.id === it.previewId ? ' selected' : '' %>><%= p.title %></option><% }) %></select></label>
-      <button class="btn ghost" type="submit" formaction="/admin/images/apercu" formtarget="_blank">Aperçu sans enregistrer</button>
+      <button class="btn ghost" type="submit" formaction="/admin/images/apercu" formtarget="_blank"><%= t('Aperçu sans enregistrer') %></button>
     </div>
-    <p class="actions"><button class="btn" type="submit">Enregistrer et mettre à jour les images</button></p>
+    <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer et mettre à jour les images') %></button></p>
   </form>
 </div>
 
 <section class="panel">
-  <h2>Logo du filigrane</h2>
+  <h2><%= t('Logo du filigrane') %></h2>
 <% if (w.image) { %>
-  <p><img class="logo" src="/admin/images/logo" alt="Logo actuel du filigrane"></p>
+  <p><img class="logo" src="/admin/images/logo" alt="<%= t('Logo actuel du filigrane') %>"></p>
   <form method="post" action="/admin/images/logo/delete">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-    <button class="btn ghost" type="submit">Retirer le logo</button>
+    <button class="btn ghost" type="submit"><%= t('Retirer le logo') %></button>
   </form>
 <% } else { %>
-  <p>Aucun logo. Pour un filigrane de type « Logo », envoyez une image PNG ou WebP à fond transparent.</p>
+  <p><%= t('Aucun logo. Pour un filigrane de type « Logo », envoyez une image PNG ou WebP à fond transparent.') %></p>
 <% } %>
   <form class="row" method="post" action="/admin/images/logo" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-    <label>Nouveau logo <span class="mono">PNG ou WebP · 5 Mo et 4000 px de côté au plus</span>
+    <label><%= t('Nouveau logo') %> <span class="mono"><%= t('PNG ou WebP · 5 Mo et 4000 px de côté au plus') %></span>
       <input type="file" name="logo" accept="image/png,image/webp" required></label>
-    <button class="btn" type="submit">Envoyer</button>
+    <button class="btn" type="submit"><%= t('Envoyer le fichier') %></button>
   </form>
 </section>

@@ -1,8 +1,9 @@
 <!doctype html>
+<% const t = it.t; %>
 <% const v = it.values || {}, e = it.errors || {}; const L = ['fr', 'en', 'de']; const FLAG = { fr: 'FR', en: 'EN', de: 'DE' };
    const author = it.authors.find(a => a.id === Number(v.author_id)) || it.authors[0] || { name: '', next: '' };
    const on = k => v[k] === 'on'; const b = it.brand || {}; %>
-<html lang="fr">
+<html lang="<%= it.lang %>">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -20,8 +21,8 @@
 </head>
 <body>
 <header class="app-bar">
-  <a href="/admin/rencontre/accueil" aria-label="Retour à l’accueil Terrain">←</a>
-  <strong>Nouvelle rencontre</strong>
+  <a href="/admin/rencontre/accueil" aria-label="<%= t('Retour à l’accueil Terrain') %>">←</a>
+  <strong><%= t('Nouvelle rencontre') %></strong>
   <span class="mono" data-next><%= author.next %></span>
 </header>
 <form class="app-form" method="post" action="/admin/rencontre" enctype="multipart/form-data" data-app data-lang="<%= L.includes(v.lang) ? v.lang : 'fr' %>">
@@ -29,26 +30,26 @@
 <% if (Object.keys(e).length) { %>  <div class="app-errors" role="alert"><ul><% Object.values(e).forEach(m => { %><li><%= m %></li><% }) %></ul></div>
 <% } %>
   <section class="app-step">
-    <h2>Vous</h2>
-    <label>Photographe <select name="author_id" data-author><% it.authors.forEach(a => { %><option value="<%= a.id %>" data-next="<%= a.next %>"<%~ a.id === author.id ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label>
+    <h2><%= t('Vous') %></h2>
+    <label><%= t('Photographe') %> <select name="author_id" data-author><% it.authors.forEach(a => { %><option value="<%= a.id %>" data-next="<%= a.next %>"<%~ a.id === author.id ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label>
     <input type="hidden" name="lat" value="<%= v.lat || '' %>" data-lat>
     <input type="hidden" name="lon" value="<%= v.lon || '' %>" data-lon>
-    <p class="app-pos" data-pos role="status">Position : en attente… <button type="button" class="linkbtn" data-pos-retry hidden>Réessayer</button></p>
-    <label>Lieu <span class="hint">facultatif : la ville est déduite de la position</span><input name="place" value="<%= v.place || '' %>" maxlength="120" placeholder="Rue, quartier…"></label>
+    <p class="app-pos" data-pos role="status"><%= t('Position : en attente…') %> <button type="button" class="linkbtn" data-pos-retry hidden><%= t('Réessayer') %></button></p>
+    <label><%= t('Lieu') %> <span class="hint"><%= t('facultatif : la ville est déduite de la position') %></span><input name="place" value="<%= v.place || '' %>" maxlength="120" placeholder="<%= t('Rue, quartier…') %>"></label>
     <label class="app-photo">
-      <span class="app-big">Photographier la personne</span>
-      <span class="hint">son visage, joint à son accord : pour savoir qui a signé et retrouver les bonnes images ; gardé en privé, aussi longtemps que l’accord</span>
+      <span class="app-big"><%= t('Photographier la personne') %></span>
+      <span class="hint"><%= t('son visage, joint à son accord : pour savoir qui a signé et retrouver les bonnes images ; gardé en privé, aussi longtemps que l’accord') %></span>
       <input type="file" name="portrait" accept="image/*" capture="environment" data-portrait>
       <img alt="" hidden data-portrait-preview>
     </label>
-    <label>Notes <input name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="tenue, scène…"></label>
-<% if (it.recent && it.recent.length) { %>    <label>Déjà rencontrée ? <span class="hint">facultatif : la rencontre sera ajoutée à sa fiche (un nouvel accord reste à signer pour aujourd’hui)</span>
-      <select name="person_id"><option value="">Non, nouvelle personne</option><% it.recent.forEach(p => { %><option value="<%= p.id %>"<%~ Number(v.person_id) === p.id ? ' selected' : '' %>><%= p.name || p.ref || 'Sans nom' %><%= p.ref ? ` · ${p.ref}` : '' %> · <%= p.day %><%= p.refused ? ' · refus' : '' %></option><% }) %></select></label>
+    <label><%= t('Notes') %> <input name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="<%= t('tenue, scène…') %>"></label>
+<% if (it.recent && it.recent.length) { %>    <label><%= t('Déjà rencontrée ?') %> <span class="hint"><%= t('facultatif : la rencontre sera ajoutée à sa fiche (un nouvel accord reste à signer pour aujourd’hui)') %></span>
+      <select name="person_id"><option value=""><%= t('Non, nouvelle personne') %></option><% it.recent.forEach(p => { %><option value="<%= p.id %>"<%~ Number(v.person_id) === p.id ? ' selected' : '' %>><%= p.name || p.ref || t('Sans nom') %><%= p.ref ? ` · ${p.ref}` : '' %> · <%= p.day %><%= p.refused ? ` · ${t('refus')}` : '' %></option><% }) %></select></label>
 <% } %>
   </section>
 
   <section class="app-step app-person">
-    <h2>La personne <span class="hint">à lui tendre</span></h2>
+    <h2><%= t('La personne') %> <span class="hint"><%= t('à lui tendre') %></span></h2>
     <fieldset class="app-langs">
       <legend class="sr-only">Langue</legend>
 <% L.forEach(l => { %>      <label><input type="radio" name="lang" value="<%= l %>" data-lang-pick<%~ (v.lang || 'fr') === l ? ' checked' : '' %>> <img class="flag" src="<%= it.asset(`flags/${l}.svg`) %>" alt="" width="24" height="17"> <%= FLAG[l] %></label>
@@ -85,7 +86,7 @@
       <button type="button" class="linkbtn" data-sign-clear><% L.forEach(l => { %><span data-l="<%= l %>"><%= it.UI[l].app.clear %></span><% }) %></button>
     </div>
   </section>
-  <p class="app-actions"><button class="app-save" type="submit" data-save>Enregistrer</button></p>
+  <p class="app-actions"><button class="app-save" type="submit" data-save><%= t('Enregistrer') %></button></p>
 </form>
 </body>
 </html>

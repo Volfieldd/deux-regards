@@ -1,3 +1,13 @@
+// Textes de l'écran, dans la langue de l'admin du photographe (<html lang>) ; le français est la clé.
+const I18N = {
+  'Position : indisponible sur cet appareil (indiquez le lieu).': { en: 'Location: not available on this device (enter the place).', de: 'Standort: auf diesem Gerät nicht verfügbar (Ort angeben).' },
+  'Position : recherche… ': { en: 'Location: searching… ', de: 'Standort: wird gesucht… ' },
+  'Position prise (à 100 m près ; la ville sera déduite). ': { en: 'Location found (to within 100 m; the town will be worked out). ', de: 'Standort ermittelt (auf 100 m genau; der Ort wird abgeleitet). ' },
+  'Position refusée ou introuvable : indiquez le lieu. ': { en: 'Location refused or not found: enter the place. ', de: 'Standort verweigert oder nicht gefunden: Ort angeben. ' },
+  'Position prise. ': { en: 'Location found. ', de: 'Standort ermittelt. ' },
+  'Enregistrement…': { en: 'Saving…', de: 'Wird gespeichert…' },
+};
+const tr = s => I18N[s]?.[document.documentElement.lang] ?? s;
 // Rencontre sur le téléphone : position (arrondie à ~100 m), aperçu de la photo, langue de la personne,
 // signature au doigt. Le formulaire part en une fois (multipart) ; rien n'est gardé sur le téléphone.
 (function () {
@@ -9,21 +19,21 @@
   const pos = $('[data-pos]');
   const retry = $('[data-pos-retry]');
   function locate() {
-    if (!navigator.geolocation) { pos.firstChild.textContent = 'Position : indisponible sur cet appareil (indiquez le lieu).'; return; }
-    pos.firstChild.textContent = 'Position : recherche… ';
+    if (!navigator.geolocation) { pos.firstChild.textContent = tr('Position : indisponible sur cet appareil (indiquez le lieu).'); return; }
+    pos.firstChild.textContent = tr('Position : recherche… ');
     retry.hidden = true;
     navigator.geolocation.getCurrentPosition(p => {
       $('[data-lat]').value = p.coords.latitude.toFixed(3);
       $('[data-lon]').value = p.coords.longitude.toFixed(3);
-      pos.firstChild.textContent = 'Position prise (à 100 m près ; la ville sera déduite). ';
+      pos.firstChild.textContent = tr('Position prise (à 100 m près ; la ville sera déduite). ');
       pos.classList.add('ok');
     }, () => {
-      pos.firstChild.textContent = 'Position refusée ou introuvable : indiquez le lieu. ';
+      pos.firstChild.textContent = tr('Position refusée ou introuvable : indiquez le lieu. ');
       retry.hidden = false;
     }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 });
   }
   retry.addEventListener('click', locate);
-  if (!$('[data-lat]').value) locate(); else { pos.firstChild.textContent = 'Position prise. '; pos.classList.add('ok'); }
+  if (!$('[data-lat]').value) locate(); else { pos.firstChild.textContent = tr('Position prise. '); pos.classList.add('ok'); }
 
   // ----- photographe : prochaine référence et nom dans le consentement -----
   const author = $('[data-author]');
@@ -81,7 +91,7 @@
     if (drawn) $('[data-sign-value]').value = canvas.toDataURL('image/png');
     const save = $('[data-save]');
     save.disabled = true;
-    save.textContent = 'Enregistrement…';
+    save.textContent = tr('Enregistrement…');
   });
 })();
 

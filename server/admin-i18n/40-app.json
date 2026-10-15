@@ -1,0 +1,194 @@
+{
+ "Retour à l’accueil Terrain": {
+  "en": "Back to Field home",
+  "de": "Zurück zur Unterwegs-Startseite"
+ },
+ "Nouvelle rencontre": {
+  "en": "New encounter",
+  "de": "Neue Begegnung"
+ },
+ "Vous": {
+  "en": "You",
+  "de": "Sie"
+ },
+ "Photographe": {
+  "en": "Photographer",
+  "de": "Fotograf"
+ },
+ "Position : en attente…": {
+  "en": "Position: waiting…",
+  "de": "Position: wird abgewartet…"
+ },
+ "Réessayer": {
+  "en": "Try again",
+  "de": "Erneut versuchen"
+ },
+ "Lieu": {
+  "en": "Place",
+  "de": "Ort"
+ },
+ "facultatif : la ville est déduite de la position": {
+  "en": "optional: the town is worked out from the position",
+  "de": "optional: Der Ort wird aus der Position ermittelt"
+ },
+ "Rue, quartier…": {
+  "en": "Street, neighbourhood…",
+  "de": "Straße, Viertel…"
+ },
+ "Photographier la personne": {
+  "en": "Photograph the person",
+  "de": "Die Person fotografieren"
+ },
+ "son visage, joint à son accord : pour savoir qui a signé et retrouver les bonnes images ; gardé en privé, aussi longtemps que l’accord": {
+  "en": "their face, attached to their consent: to know who signed and find the right images; kept private, for as long as the consent",
+  "de": "ihr Gesicht, mit ihrer Einwilligung verknüpft: um zu wissen, wer unterschrieben hat, und die richtigen Bilder zu finden; privat aufbewahrt, so lange wie die Einwilligung"
+ },
+ "Notes": {
+  "en": "Notes",
+  "de": "Notizen"
+ },
+ "tenue, scène…": {
+  "en": "outfit, scene…",
+  "de": "Kleidung, Szene…"
+ },
+ "Déjà rencontrée ?": {
+  "en": "Met before?",
+  "de": "Schon begegnet?"
+ },
+ "facultatif : la rencontre sera ajoutée à sa fiche (un nouvel accord reste à signer pour aujourd’hui)": {
+  "en": "optional: the encounter will be added to their record (a new consent still needs signing for today)",
+  "de": "optional: Die Begegnung wird ihrem Eintrag hinzugefügt (für heute ist trotzdem eine neue Einwilligung zu unterschreiben)"
+ },
+ "Non, nouvelle personne": {
+  "en": "No, new person",
+  "de": "Nein, neue Person"
+ },
+ "Sans nom": {
+  "en": "No name",
+  "de": "Ohne Namen"
+ },
+ "refus": {
+  "en": "refusal",
+  "de": "Ablehnung"
+ },
+ "La personne": {
+  "en": "The person",
+  "de": "Die Person"
+ },
+ "à lui tendre": {
+  "en": "hand this over",
+  "de": "zum Weiterreichen"
+ },
+ "Enregistrer": {
+  "en": "Save",
+  "de": "Speichern"
+ },
+ "site": {
+  "en": "site",
+  "de": "Website"
+ },
+ "tirages": {
+  "en": "prints",
+  "de": "Abzüge"
+ },
+ "prénom": {
+  "en": "first name",
+  "de": "Vorname"
+ },
+ "Admin complet": {
+  "en": "Full admin",
+  "de": "Vollständige Verwaltung"
+ },
+ "prochaine carte :": {
+  "en": "next card:",
+  "de": "nächste Karte:"
+ },
+ "Montrer mon QR": {
+  "en": "Show my QR",
+  "de": "Meinen QR zeigen"
+ },
+ "la personne le scanne sur votre écran, sans carte": {
+  "en": "the person scans it on your screen, no card needed",
+  "de": "die Person scannt ihn auf Ihrem Bildschirm, ohne Karte"
+ },
+ "Ma sortie du jour": {
+  "en": "Today’s outing",
+  "de": "Mein heutiger Ausflug"
+ },
+ "{n} personnes rencontrées": {
+  "en": "{n} people met",
+  "de": "{n} Personen getroffen"
+ },
+ "{n} personne rencontrée": {
+  "en": "{n} person met",
+  "de": "{n} Person getroffen"
+ },
+ "{n} photos importées": {
+  "en": "{n} photos imported",
+  "de": "{n} Fotos importiert"
+ },
+ "{n} photo importée": {
+  "en": "{n} photo imported",
+  "de": "{n} Foto importiert"
+ },
+ "Sans carte": {
+  "en": "No card",
+  "de": "Ohne Karte"
+ },
+ "en attente": {
+  "en": "pending",
+  "de": "ausstehend"
+ },
+ "Personne pour l’instant. Avant de redemander un accord, regardez ici : la personne a peut-être déjà signé.": {
+  "en": "Nobody yet. Before asking for consent again, check here: the person may already have signed.",
+  "de": "Noch niemand. Bevor Sie erneut um Einwilligung bitten, sehen Sie hier nach: Die Person hat vielleicht schon unterschrieben."
+ },
+ "Ouvrir la sortie dans l’admin": {
+  "en": "Open the outing in the admin",
+  "de": "Ausflug in der Verwaltung öffnen"
+ },
+ "Choisissez votre nom ci-dessus (votre compte n’est lié à aucun photographe).": {
+  "en": "Choose your name above (your account is not linked to any photographer).",
+  "de": "Wählen Sie oben Ihren Namen (Ihr Konto ist mit keinem Fotografen verknüpft)."
+ },
+ "Mon QR": {
+  "en": "My QR",
+  "de": "Mein QR"
+ },
+ "QR de {name}, vers {url}": {
+  "en": "QR code of {name}, to {url}",
+  "de": "QR-Code von {name}, zu {url}"
+ },
+ "Pour vous": {
+  "en": "For you",
+  "de": "Für Sie"
+ },
+ "Récapitulatif envoyé à {email}.": {
+  "en": "Summary sent to {email}.",
+  "de": "Zusammenfassung an {email} gesendet."
+ },
+ "L’e-mail n’est pas parti (voir la fiche de la rencontre) : envoyez-le depuis Mail.": {
+  "en": "The e-mail was not sent (see the encounter record): send it from Mail.",
+  "de": "Die E-Mail wurde nicht gesendet (siehe Eintrag der Begegnung): Senden Sie sie über Mail."
+ },
+ "Envoyer le récapitulatif à {email}": {
+  "en": "Send the summary to {email}",
+  "de": "Zusammenfassung an {email} senden"
+ },
+ "Envoyer le récapitulatif depuis Mail": {
+  "en": "Send the summary from Mail",
+  "de": "Zusammenfassung über Mail senden"
+ },
+ "Pas d’e-mail : la personne garde son lien en scannant le QR.": {
+  "en": "No e-mail: the person keeps their link by scanning the QR code.",
+  "de": "Keine E-Mail: Die Person erhält ihren Link, indem sie den QR-Code scannt."
+ },
+ "Accueil Terrain": {
+  "en": "Field home",
+  "de": "Unterwegs-Startseite"
+ },
+ "Voir la fiche de la rencontre": {
+  "en": "View the encounter record",
+  "de": "Eintrag der Begegnung ansehen"
+ }
+}

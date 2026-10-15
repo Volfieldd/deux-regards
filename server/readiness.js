@@ -7,11 +7,18 @@
 // Personnes concernées : celles liées à la photo, et celles de sa sortie (même photographe, même partie de journée,
 // non exclues) si la photo a un visage. Visages : la correction à la main l'emporte ; pas encore examinée ou examen
 // impossible : un visage est supposé (prudence).
+import { translator } from './admin-i18n.js';
+
 export const USAGES = ['site', 'instagram'];
 export const LEVEL_LABEL = { ok: 'prête', warn: 'à vérifier', no: 'bloquée' };
+// Libellé d'un niveau dans la langue de l'admin (t : request.t ; sans t, en français).
+export const levelLabel = (level, t = FR) => ({ ok: t('prête'), warn: t('à vérifier'), no: t('bloquée') })[level];
+const FR = translator('fr');
 
-// Les raisons sont gardées (confirmations, erreurs Instagram) : seulement la référence, jamais le nom (chiffré en base).
-const who = e => (e.anonymized ? 'refus anonymisé' : e.ref || `rencontre sans carte n°${e.id}`);
+// Les raisons sont gardées (confirmations, erreurs Instagram) en français : seulement la référence, jamais le nom
+// (chiffré en base). Chaque raison est une fonction de la langue (t) : gardée en français, affichée dans la langue
+// de l'admin.
+const who = (e, t) => (e.anonymized ? t('refus anonymisé') : e.ref || t('rencontre sans carte n°{id}', { id: e.id }));
 // Un accord ne lève « à vérifier » que s'il est sûr : carte ou signature, ou demande en ligne avec le code de contrôle
 // de la carte. Un accord en ligne sans code (QR des vêtements, référence tapée) peut venir de n'importe qui.
 const trusted = e => ['carte', 'signature'].includes(e.consent_source) || Boolean(e.verified);
@@ -27,7 +34,9 @@ export function createReadiness({ db, encounters }) {
   const photoRow = db.prepare('SELECT id, status, faces, faces_override FROM photos WHERE id = ?');
 
   // cache (facultatif) : Map partagée entre plusieurs appels, pour ne déchiffrer chaque rencontre qu'une fois.
-  function state(photoOrId, cache = null) {
+  // t (facultatif, request.t) : raisons et libellés affichés dans la langue de l'admin ; les raisons en français
+  // (celles que l'on garde et compare aux confirmations) restent dans « stored ».
+  function state(photoOrId, cache = null, t = null) {
     const p = typeof photoOrId === 'object' ? photoOrId : photoRow.get(photoOrId);
     if (!p) return null;
     const faces = facesOf(p);
@@ -42,18 +51,22 @@ export function createReadiness({ db, encounters }) {
       const hard = u === 'site' ? refusedLinked : concerned.filter(e => e.refused || (e.consent && !e.consent.instagram));
       if (hard.length) {
         level = 'no';
-        for (const e of hard) reasons.push(e.refused ? `${who(e)} refuse la publication` : `${who(e)} n’a pas accepté Instagram`);
+        for (const e of hard) reasons.push(e.refused ? t => t('{who} refuse la publication', { who: who(e, t) }) : t => t('{who} n’a pas accepté Instagram', { who: who(e, t) }));
       } else if (faces.has) {
-        if (!concerned.length) reasons.push(faces.source === 'main' ? 'quelqu’un est sur la photo, sans accord' : faces.n == null ? 'visages pas encore examinés' : `${faces.n} visage${faces.n > 1 ? 's' : ''}, personne rencontrée`);
+        if (!concerned.length) {
+          reasons.push(faces.source === 'main' ? t => t('quelqu’un est sur la photo, sans accord') : faces.n == null ? t => t('visages pas encore examinés')
+            : faces.n > 1 ? t => t('{n} visages, personne rencontrée', { n: faces.n }) : t => t('1 visage, personne rencontrée'));
+        }
         for (const e of concerned) {
-          if (e.refused) reasons.push(`${who(e)} a refusé (même sortie) : est-elle sur la photo ?`);
-          else if (!e.consent) reasons.push(`${who(e)} n’a pas encore décidé`);
-          else if (!e.consent[u]) reasons.push(`${who(e)} n’a pas accepté ${u === 'site' ? 'le site' : 'Instagram'}`);
-          else if (!trusted(e)) reasons.push(`${who(e)} : accord en ligne non vérifié (sans code de carte)`);
+          if (e.refused) reasons.push(t => t('{who} a refusé (même sortie) : est-elle sur la photo ?', { who: who(e, t) }));
+          else if (!e.consent) reasons.push(t => t('{who} n’a pas encore décidé', { who: who(e, t) }));
+          else if (!e.consent[u]) reasons.push(u === 'site' ? t => t('{who} n’a pas accepté le site', { who: who(e, t) }) : t => t('{who} n’a pas accepté Instagram', { who: who(e, t) }));
+          else if (!trusted(e)) reasons.push(t => t('{who} : accord en ligne non vérifié (sans code de carte)', { who: who(e, t) }));
         }
         if (reasons.length) level = 'warn';
       }
-      result[u] = { level, reasons };
+      const stored = reasons.map(r => r(FR));
+      result[u] = { level, reasons: t ? reasons.map(r => r(t)) : stored, stored, label: levelLabel(level, t || FR) };
     }
     return result;
   }
@@ -83,7 +96,7 @@ export function createReadiness({ db, encounters }) {
   function confirmed(photoId, usage, s = null) {
     const r = (s || state(photoId))?.[usage];
     const c = confirmations(photoId).find(x => x.usage === usage);
-    return Boolean(r && c && r.reasons.every(x => c.reasons.includes(x)));
+    return Boolean(r && c && (r.stored || r.reasons).every(x => c.reasons.includes(x)));
   }
 
   const setFaces = (photoId, value) => db.prepare('UPDATE photos SET faces_override = ? WHERE id = ?').run(value === 1 || value === 0 ? value : null, photoId);

@@ -6,12 +6,13 @@
 // (le badge du menu compte les urgences).
 import { isProvisional } from './admin-repo.js';
 import { samePartSql } from './outings.js';
+import { translator } from './admin-i18n.js';
 
 export const LEVELS = ['urgent', 'bientot', 'plus-tard'];
 const MONTH = 30 * 864e5;
 
-const plural = (n, one, many = `${one}s`) => `${n} ${n > 1 ? many : one}`;
-const day = ms => new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
+const FR = translator('fr');
+const dayOf = t => ms => new Intl.DateTimeFormat(t.locale || 'fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
 
 export function createTodo({ db, encounters, instagram, proofs, readiness, now = () => Date.now() }) {
   const q = {
@@ -37,56 +38,61 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, now =
     noCity: db.prepare("SELECT COUNT(*) FROM photos WHERE status = 'published' AND city_id IS NULL").pluck(),
     untranslated: db.prepare("SELECT COUNT(*) FROM photos WHERE status = 'published' AND (title_en = '' OR title_de = '')").pluck(),
   };
-  const who = e => (e.anonymized ? 'refus anonymisé' : `${e.ref || 'sans carte'}${e.name ? ` · ${e.name}` : ''}`);
+  // t : request.t (langue de l'admin) ; sans t, en français.
+  const who = (e, t) => (e.anonymized ? t('refus anonymisé') : `${e.ref || t('sans carte')}${e.name ? ` · ${e.name}` : ''}`);
 
-  function urgent() {
+  function urgent(t = FR) {
+    const day = dayOf(t);
     const items = [];
     for (const id of q.rights.all()) {
       const e = encounters.get(id);
       if (!e) continue;
       const due = (e.rights_requested_at || 0) + MONTH;
       const late = due < now();
-      items.push({ level: 'urgent', title: `Demande ${e.rights_request === 'effacement' ? 'd’effacement' : 'd’accès'} de ${who(e)}`,
-        detail: late ? `en retard : à traiter depuis le ${day(due)}` : `à traiter avant le ${day(due)}`, href: `/admin/rencontres/${id}#droits`, action: 'Traiter' });
+      const w = who(e, t);
+      items.push({ level: 'urgent', title: e.rights_request === 'effacement' ? t('Demande d’effacement de {who}', { who: w }) : t('Demande d’accès de {who}', { who: w }),
+        detail: late ? t('en retard : à traiter depuis le {date}', { date: day(due) }) : t('à traiter avant le {date}', { date: day(due) }), href: `/admin/rencontres/${id}#droits`, action: t('Traiter') });
     }
     for (const r of q.refusedOnline.all()) {
       const e = encounters.get(r.id);
       if (!e) continue;
-      items.push({ level: 'urgent', title: `Refus de ${who(e)} : ${plural(r.n, 'photo')} encore ${r.n > 1 ? 'publiées' : 'publiée'}`,
-        detail: 'la personne refuse la publication des photos liées', href: `/admin/rencontres/${r.id}#refus`, action: 'Appliquer le refus' });
+      const w = who(e, t);
+      items.push({ level: 'urgent', title: r.n > 1 ? t('Refus de {who} : {n} photos encore publiées', { who: w, n: r.n }) : t('Refus de {who} : {n} photo encore publiée', { who: w, n: r.n }),
+        detail: t('la personne refuse la publication des photos liées'), href: `/admin/rencontres/${r.id}#refus`, action: t('Appliquer le refus') });
     }
     return items;
   }
 
-  function list() {
-    const items = urgent();
+  function list(t = FR) {
+    const items = urgent(t);
     for (const r of q.refusedSession.all()) {
       const e = encounters.get(r.id);
       if (!e) continue;
-      items.push({ level: 'bientot', title: `${who(e)} a refusé : ${plural(r.n, 'photo publiée', 'photos publiées')} de sa sortie à vérifier`,
-        detail: `${e.author || 'photographe'} · ${e.session_day || e.met_on} : liez au refus celles où la personne figure, excluez les autres`, href: `/admin/rencontres/${r.id}#session`, action: 'Vérifier' });
+      const w = who(e, t);
+      items.push({ level: 'bientot', title: r.n > 1 ? t('{who} a refusé : {n} photos publiées de sa sortie à vérifier', { who: w, n: r.n }) : t('{who} a refusé : {n} photo publiée de sa sortie à vérifier', { who: w, n: r.n }),
+        detail: t('{author} · {day} : liez au refus celles où la personne figure, excluez les autres', { author: e.author || t('photographe'), day: e.session_day || e.met_on }), href: `/admin/rencontres/${r.id}#session`, action: t('Vérifier') });
     }
     // Photos publiées avant les règles d'accord, ou dont une personne de la sortie n'a pas encore décidé.
     const cache = new Map();
     const verify = readiness ? db.prepare("SELECT id, status, faces, faces_override FROM photos WHERE status = 'published'").all().filter(p => readiness.pending(p, 'site', cache)).length : 0;
-    if (verify) items.push({ level: 'bientot', title: `${plural(verify, 'photo publiée', 'photos publiées')} à vérifier`,
-      detail: 'un visage, et un accord manque : confirmez, liez la personne, ou dépubliez', href: '/admin/photos?manque=verifier', action: 'Vérifier' });
+    if (verify) items.push({ level: 'bientot', title: verify > 1 ? t('{n} photos publiées à vérifier', { n: verify }) : t('{n} photo publiée à vérifier', { n: verify }),
+      detail: t('un visage, et un accord manque : confirmez, liez la personne, ou dépubliez'), href: '/admin/photos?manque=verifier', action: t('Vérifier') });
     const fresh = q.fresh.get();
-    if (fresh) items.push({ level: 'bientot', title: `${plural(fresh, 'nouvelle personne photographiée', 'nouvelles personnes photographiées')}`,
-      detail: 'demandes reçues sur /bonjour ou rencontres à traiter', href: '/admin/rencontres?statut=nouvelle', action: 'Voir' });
+    if (fresh) items.push({ level: 'bientot', title: fresh > 1 ? t('{n} nouvelles personnes photographiées', { n: fresh }) : t('{n} nouvelle personne photographiée', { n: fresh }),
+      detail: t('demandes reçues sur /bonjour ou rencontres à traiter'), href: '/admin/rencontres?statut=nouvelle', action: t('Voir') });
     const failed = q.igFailed.get();
-    if (failed) items.push({ level: 'bientot', title: `Instagram : ${plural(failed, 'publication en échec', 'publications en échec')}`,
-      detail: 'bloquées par un accord, ou refusées par Instagram : la raison est dans l’historique', href: '/admin/instagram', action: 'Voir' });
+    if (failed) items.push({ level: 'bientot', title: failed > 1 ? t('Instagram : {n} publications en échec', { n: failed }) : t('Instagram : {n} publication en échec', { n: failed }),
+      detail: t('bloquées par un accord, ou refusées par Instagram : la raison est dans l’historique'), href: '/admin/instagram', action: t('Voir') });
     const paused = instagram?.usage().paused;
-    if (paused) items.push({ level: 'bientot', title: 'Instagram en pause', detail: `reprise ${paused.when} : ${paused.reason}`, href: '/admin/instagram', action: 'Voir' });
+    if (paused) items.push({ level: 'bientot', title: t('Instagram en pause'), detail: t('reprise {when} : {reason}', { when: paused.when, reason: paused.reason }), href: '/admin/instagram', action: t('Voir') });
     const toFinish = q.toFinish.all().filter(p => p.status === 'draft' || isProvisional(p)).length;
-    if (toFinish) items.push({ level: 'plus-tard', title: `${plural(toFinish, 'photo')} à finir`, detail: 'brouillons ou titres provisoires', href: '/admin/photos?statut=afinir', action: 'Finir' });
+    if (toFinish) items.push({ level: 'plus-tard', title: toFinish > 1 ? t('{n} photos à finir', { n: toFinish }) : t('{n} photo à finir', { n: toFinish }), detail: t('brouillons ou titres provisoires'), href: '/admin/photos?statut=afinir', action: t('Finir') });
     const noCity = q.noCity.get();
-    if (noCity) items.push({ level: 'plus-tard', title: `${plural(noCity, 'photo publiée', 'photos publiées')} sans ville`, detail: 'elles ne peuvent pas apparaître sur la carte du monde', href: '/admin/photos?manque=ville', action: 'Compléter' });
+    if (noCity) items.push({ level: 'plus-tard', title: noCity > 1 ? t('{n} photos publiées sans ville', { n: noCity }) : t('{n} photo publiée sans ville', { n: noCity }), detail: t('elles ne peuvent pas apparaître sur la carte du monde'), href: '/admin/photos?manque=ville', action: t('Compléter') });
     const untranslated = q.untranslated.get();
-    if (untranslated) items.push({ level: 'plus-tard', title: `${plural(untranslated, 'titre', 'titres')} sans traduction`, detail: 'en anglais ou en allemand : le site montre alors le français', href: '/admin/photos?manque=traduction', action: 'Traduire' });
+    if (untranslated) items.push({ level: 'plus-tard', title: untranslated > 1 ? t('{n} titres sans traduction', { n: untranslated }) : t('{n} titre sans traduction', { n: untranslated }), detail: t('en anglais ou en allemand : le site montre alors le français'), href: '/admin/photos?manque=traduction', action: t('Traduire') });
     const pr = proofs?.status();
-    if (pr?.errors) items.push({ level: 'plus-tard', title: `${plural(pr.errors, 'preuve d’antériorité', 'preuves d’antériorité')} en attente après une erreur`, detail: 'l’horodatage sera retenté', href: '/admin#proofs-title', action: 'Voir' });
+    if (pr?.errors) items.push({ level: 'plus-tard', title: pr.errors > 1 ? t('{n} preuves d’antériorité en attente après une erreur', { n: pr.errors }) : t('{n} preuve d’antériorité en attente après une erreur', { n: pr.errors }), detail: t('l’horodatage sera retenté'), href: '/admin#proofs-title', action: t('Voir') });
     return items;
   }
 

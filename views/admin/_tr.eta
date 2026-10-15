@@ -1,13 +1,14 @@
 <% /* Traductions facultatives d'un champ (anglais, allemand). it.name, it.v (valeurs), it.label, it.max, it.rows (zone de texte). */ %>
+<% const t = it.t || (s => s); %>
 <% const en = String(it.v[it.name + '_en'] || ''), de = String(it.v[it.name + '_de'] || ''); const n = [en, de].filter(s => s.trim()).length; %>
 <details class="tr"<%~ it.open ? ' open' : '' %>>
-  <summary><%= it.label %> en anglais et en allemand <span class="mono"><%= n === 2 ? 'traduit' : n === 1 ? '1 langue sur 2' : 'facultatif' %></span></summary>
+  <summary><%= t('{label} en anglais et en allemand', { label: it.label }) %> <span class="mono"><%= n === 2 ? t('traduit') : n === 1 ? t('1 langue sur 2') : t('facultatif') %></span></summary>
 <% [['en', 'English', en], ['de', 'Deutsch', de]].forEach(([l, name, val]) => { %>
   <div class="tr-field">
 <% if (it.rows) { %>  <label><span class="tr-lang"><img class="flag" src="<%= it.asset(`flags/${l}.svg`) %>" alt="" width="20" height="14"> <%= name %></span><textarea name="<%= it.name %>_<%= l %>" rows="<%= it.rows %>" maxlength="<%= it.max %>" lang="<%= l %>"><%= val %></textarea></label>
 <% } else { %>  <label><span class="tr-lang"><img class="flag" src="<%= it.asset(`flags/${l}.svg`) %>" alt="" width="20" height="14"> <%= name %></span><input name="<%= it.name %>_<%= l %>" value="<%= val %>" maxlength="<%= it.max %>" lang="<%= l %>"></label>
 <% } %>
-<% if (it.translate) { %>  <p class="tr-act" data-js-only hidden><button class="btn ghost" type="button" data-translate="<%= it.name %>" data-to="<%= l %>">Proposer une traduction</button> <span class="cellnote" role="status" data-translate-status></span></p>
+<% if (it.translate) { %>  <p class="tr-act" data-js-only hidden><button class="btn ghost" type="button" data-translate="<%= it.name %>" data-to="<%= l %>"><%= t('Proposer une traduction') %></button> <span class="cellnote" role="status" data-translate-status></span></p>
 <% } %>  </div>
-<% }) %>  <p class="cellnote">Vide : la version française s’affiche (sur la page allemande comme sur la page anglaise).</p>
+<% }) %>  <p class="cellnote"><%= t('Vide : la version française s’affiche (sur la page allemande comme sur la page anglaise).') %></p>
 </details>
