@@ -142,6 +142,10 @@ export const UI = {
       map: name => `Itinéraire du voyage « ${name} »`, stop: (n, when, city) => `Étape ${n}, ${when} : ${city}`, open: 'Voir le voyage',
       by: names => `par ${names}`, story: 'Jour après jour', back: 'Tous les voyages',
     },
+    near: {
+      title: 'À proximité', map: city => `Carte : la photo a été prise à ${city}`, here: city => `Prise à ${city}`, same: 'même ville',
+      km: n => `${n} km`, more: n => `${n} photo${n > 1 ? 's' : ''} à proximité`, others: (city, n) => `${city} : ${n} photo${n > 1 ? 's' : ''}`, world: 'Voir la carte du monde',
+    },
     search: {
       title: 'Rechercher', label: 'Mots-clés', placeholder: 'brume, Loire, portrait…', submit: 'Chercher',
       hint: 'Dans les titres, légendes, lieux, villes, séries et photographes. Chaque mot doit être trouvé.',
@@ -237,6 +241,10 @@ export const UI = {
       map: name => `Route of the trip “${name}”`, stop: (n, when, city) => `Stop ${n}, ${when}: ${city}`, open: 'See the trip',
       by: names => `by ${names}`, story: 'Day by day', back: 'All trips',
     },
+    near: {
+      title: 'Nearby', map: city => `Map: the photo was taken in ${city}`, here: city => `Taken in ${city}`, same: 'same town',
+      km: n => `${n} km`, more: n => `${n} photo${n === 1 ? '' : 's'} nearby`, others: (city, n) => `${city}: ${n} photo${n === 1 ? '' : 's'}`, world: 'See the world map',
+    },
     search: {
       title: 'Search', label: 'Keywords', placeholder: 'mist, Loire, portrait…', submit: 'Search',
       hint: 'In titles, captions, places, towns, series and photographers. Every word must be found.',
@@ -331,6 +339,10 @@ export const UI = {
       span: (a, b) => `${a} – ${b}`, days: n => `${n} ${n === 1 ? 'Tag' : 'Tage'}`, day: n => `Tag ${n}`, short: n => `T${n}`,
       map: name => `Route der Reise „${name}“`, stop: (n, when, city) => `Etappe ${n}, ${when}: ${city}`, open: 'Reise ansehen',
       by: names => `von ${names}`, story: 'Tag für Tag', back: 'Alle Reisen',
+    },
+    near: {
+      title: 'In der Nähe', map: city => `Karte: Das Foto wurde in ${city} aufgenommen`, here: city => `Aufgenommen in ${city}`, same: 'selber Ort',
+      km: n => `${n} km`, more: n => `${n} ${n === 1 ? 'Foto' : 'Fotos'} in der Nähe`, others: (city, n) => `${city}: ${n} ${n === 1 ? 'Foto' : 'Fotos'}`, world: 'Weltkarte ansehen',
     },
     search: {
       title: 'Suchen', label: 'Stichwörter', placeholder: 'Nebel, Loire, Porträt…', submit: 'Suchen',

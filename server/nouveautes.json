@@ -1,5 +1,27 @@
 [
   {
+    "version": "1.85.0",
+    "date": "2026-10-15",
+    "pr": 85,
+    "title": {
+      "fr": "Où la photo a été prise",
+      "en": "Where the photo was taken",
+      "de": "Wo das Foto aufgenommen wurde"
+    },
+    "items": [
+      {
+        "fr": "Sur la page d’une photo cochée « sur la carte », une petite carte montre sa ville, et les autres photos prises à proximité.",
+        "en": "On the page of a photo ticked “on the map”, a small map shows its town, and the other photos taken nearby.",
+        "de": "Auf der Seite eines Fotos, das „auf der Karte“ aktiviert ist, zeigt eine kleine Karte seinen Ort und die anderen Fotos in der Nähe."
+      },
+      {
+        "fr": "Sous la photo, la rangée « À proximité » donne les plus proches, avec leur ville et leur distance.",
+        "en": "Below the photo, the “Nearby” row gives the closest ones, with their town and distance.",
+        "de": "Unter dem Foto zeigt die Reihe „In der Nähe“ die nächsten, mit Ort und Entfernung."
+      }
+    ]
+  },
+  {
     "version": "1.84.0",
     "date": "2026-10-15",
     "pr": 84,

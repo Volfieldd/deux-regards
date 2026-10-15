@@ -455,3 +455,27 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
   .trip-svg { width: 680px; max-width: none; }
 }
 @media (max-width: 600px) { .top nav, .hero nav { gap: 12px; } .site-nav a { letter-spacing: .12em; } }
+/* Page d'une photo : où elle a été prise, et les photos à proximité (fond sombre de la visionneuse). */
+.viewer .vf { flex-wrap: wrap; }
+.viewer .vtext { flex: 1 1 320px; }
+.vmap { margin: 0; flex: 0 0 300px; display: grid; gap: 6px; }
+.vmap svg { display: block; width: 100%; aspect-ratio: 100 / 62; background: #17171a; border: 1px solid var(--dark-rule); border-radius: 2px; }
+.vmap .terre, .vmap .detail path { fill: #2c2c30; }
+.vmap .frontieres { fill: none; stroke: #17171a; stroke-width: .5; }
+.vmap-o circle { fill: var(--dark-ink); fill-opacity: .55; stroke: #17171a; stroke-width: 1.5px; }
+.vmap-o:hover circle, .vmap-o:focus-visible circle { fill-opacity: 1; }
+.vmap-halo { fill: #17171a; stroke: var(--dark-ink); stroke-width: 2px; }
+.vmap figcaption { color: var(--dark-mute); }
+.vmap figcaption a { color: var(--dark-ink); border-bottom: 1px solid var(--dark-rule); }
+@media (max-width: 720px) { .vmap { flex: 1 1 100%; order: 3; } }
+.near { padding-block: 8px 48px; color: var(--dark-ink); }
+.near h2 { color: var(--dark-mute); margin: 0 0 14px; font-weight: 400; }
+.near ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; }
+.near a { display: grid; gap: 6px; color: inherit; }
+.near .im { display: block; aspect-ratio: 4 / 3; overflow: hidden; background: #1c1c1f; }
+.near .im img { width: 100%; height: 100%; object-fit: cover; }
+.near .ttl { font-family: var(--serif); font-style: var(--display-style); font-size: 17px; line-height: 1.2; }
+.near .mono { color: var(--dark-mute); }
+.vmap text { fill: var(--dark-mute); font-family: var(--mono); dominant-baseline: central; paint-order: stroke; stroke: #17171a; stroke-width: 3px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.vmap .vmap-me-t { fill: var(--dark-ink); text-anchor: middle; }
+.vmap-o:hover text, .vmap-o:focus-visible text { fill: var(--dark-ink); }

@@ -1,6 +1,6 @@
 {
   "name": "site-photo",
-  "version": "1.84.0",
+  "version": "1.85.0",
   "private": true,
   "description": "Site photo de Sébastien et Julien : galerie publique et admin OIDC",
   "type": "module",

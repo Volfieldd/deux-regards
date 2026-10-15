@@ -51,6 +51,8 @@ The next photo depends on the active filter: in “Street, by Julien”, you sta
 
 **Share**: next to the heart. On a phone, it opens the phone’s share menu (Instagram, Signal, Messages, WhatsApp…). On a computer, a window shows the preview (image, title, photographer, site), the WhatsApp, Facebook, Bluesky, X, Pinterest and Email buttons, **View on Instagram** if the photo was posted from the site, the link to copy and a QR code to open the photo on a phone. The page is shared, never the file. These are plain links: no script from these services is loaded, no cookie is set. Without JavaScript, the button leads to a page with the same links. Shares are counted anonymously (see [Statistics](statistiques)).
 
+**Where and nearby**: if the photo’s record has **Show on the world map** ticked, a small map is shown next to the text, framed on its town. The photo’s thumbnail appears in a circle, and the other photos taken within 250 km as markers, with their town’s name; each marker leads to its photo. Below the photo, the **Nearby** row shows the closest ones, with their town and distance. Only photos ticked “on the map” appear, and only the town is known, never the exact position. The **See the world map** link appears if the Map page is published.
+
 ## Other pages
 
 - **About:** full logo, tagline, text, authors’ biographies.
