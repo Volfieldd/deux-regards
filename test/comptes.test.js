@@ -48,9 +48,15 @@ test('comptes : en attente, rôle donné puis retiré avec effet immédiat ; les
   assert.match(menu, /href="\/admin\/photos"/);
   assert.doesNotMatch(menu, /href="\/admin\/personnes"|href="\/admin\/comptes"|href="\/admin\/journal"|href="\/admin\/auteurs"/);
   assert.match(side((await c.get('/admin')).body), /href="\/admin\/comptes"[\s\S]*href="\/admin\/journal"/);
-  // Retirer le rôle : plus d'accès, tout de suite.
+  // Retirer le rôle : plus d'accès, tout de suite (sa session est fermée).
   await c.post(`/admin/comptes/${camille.id}`, { author_id: '' });
-  assert.equal((await as('/admin/signalements')).statusCode, 403);
+  assert.equal((await as('/admin/signalements')).statusCode, 302);
+  // Une décision d'administrateur : l'IdP ne la contredit pas, et la purge des comptes jamais traités l'ignore.
+  c.app.accounts.login({ sub: 'zitadel-camille', name: 'Camille', idpAdmin: true });
+  assert.deepEqual(c.app.accounts.bySub('zitadel-camille').roles, []);
+  c.db.prepare("UPDATE accounts SET created_at = 0 WHERE sub = 'zitadel-camille'").run();
+  c.app.accounts.purgePending();
+  assert.ok(c.app.accounts.bySub('zitadel-camille'));
   // Journal : le détail de la modification.
   const log = c.db.prepare("SELECT action, target, detail FROM audit_log WHERE action = 'compte modifié' ORDER BY id").all();
   assert.equal(log.length, 2);

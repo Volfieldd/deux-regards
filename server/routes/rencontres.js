@@ -233,7 +233,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   });
   app.post('/admin/rencontre/:id/envoyer', W('terrain.app'), async (request, reply) => {
     const e = enc.get(byId(request.params.id));
-    if (!e || !e.email) return reply.callNotFound();
+    if (!e || !e.email || !request.owns('terrain.app', e.author_id)) return reply.callNotFound();      // seulement ses rencontres
     try { await sendRecap(e); } catch (err) { if (!(err instanceof MailError)) throw err; return reply.redirect(`/admin/rencontre/${e.id}/merci?envoi=echec`, 303); }
     return reply.redirect(`/admin/rencontre/${e.id}/merci?envoi=ok`, 303);
   });
@@ -360,12 +360,12 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const back = id ? `/admin/rencontres/${id}` : '/admin/rencontres';
     if (form.error) return failed(reply, back, form.error);
     try {
-      const saved = enc.saveCard(id, form.body, form.jpeg, form.portrait);
+      const saved = enc.saveCard(id, form.body, form.jpeg, form.portrait, { canTouch: authorId => request.owns('personnes.gerer', authorId) });
       return done(reply, `/admin/rencontres/${saved}`, form.body.signed === 'on' ? request.t('Accord signé enregistré.') : request.t('Rencontre enregistrée.'));
     } catch (err) {
       if (!(err instanceof EncounterError)) throw err;
       if (id) return detail(request, reply.code(422), id, { errors: err.errors, values: form.body });
-      return page(request, reply.code(422), 'encounters', { title: request.t('Personnes photographiées'), list: enc.list(), authors: repo.authors(), errors: err.errors, values: form.body });
+      return page(request, reply.code(422), 'encounters', { title: request.t('Personnes photographiées'), list: request.mine('personnes.voir', enc.list()), authors: request.mine('personnes.gerer', repo.authors(), 'id'), errors: err.errors, values: form.body });
     }
   }
   app.post('/admin/rencontres', P('personnes.gerer'), async (request, reply) => saveCard(request, reply, null));
@@ -415,6 +415,8 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   app.post('/admin/rencontres/:id/photos/:pid/retirer', W('personnes.gerer'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!enc.get(id)) return reply.callNotFound();
+    // La photo aussi doit être à lui : défaire le lien d'un refus avec la photo d'un autre la débloquerait.
+    if (!request.owns('photos.voir', repo.photo(byId(request.params.pid))?.author_id)) return reply.callNotFound();
     enc.unlink(id, byId(request.params.pid));
     return done(reply, `/admin/rencontres/${id}#photos`, request.t('Photo retirée de la rencontre.'));
   });

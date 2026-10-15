@@ -34,7 +34,11 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
     list: () => q.all.all().map(parse),
     pending: () => db.prepare("SELECT COUNT(*) FROM accounts WHERE status = 'en_attente'").pluck().get(),
     // Comptes restés en attente 90 jours sans qu'on leur donne de rôle : effacés (nom et e-mail ne sont pas gardés pour rien).
-    purgePending: () => db.prepare("DELETE FROM accounts WHERE status = 'en_attente' AND created_at < ?").run(now() - 90 * 864e5).changes,
+    purgePending() {
+      const subs = db.prepare("SELECT sub FROM accounts WHERE status = 'en_attente' AND decided_at IS NULL AND created_at < ?").pluck().all(now() - 90 * 864e5);
+      for (const sub of subs) { db.prepare('DELETE FROM sessions WHERE sub = ?').run(sub); db.prepare('DELETE FROM accounts WHERE sub = ?').run(sub); }
+      return subs.length;
+    },
     // Rôles effectifs d'une identité : ceux du compte actif ; garde-fou ADMIN_SUBS.
     rolesOf(sub) {
       if (adminSubs.includes(sub)) return ['admin'];
@@ -47,12 +51,15 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
       let a = bySub(sub);
       const admin = idpAdmin || adminSubs.includes(sub);
       if (!a) a = create({ sub, name, email, roles: admin ? ['admin'] : [] });
-      // En attente (aucun administrateur n'a encore statué) et l'IdP transporte désormais le rôle « admin » : promu.
-      else if (a.status === 'en_attente' && admin) db.prepare("UPDATE accounts SET roles = '[\"admin\"]', status = 'actif' WHERE id = ?").run(a.id);
+      // En attente sans décision d'un administrateur, et l'IdP transporte désormais le rôle « admin » : promu. Un
+      // compte dont un administrateur a retiré les rôles ne l'est jamais.
+      else if (a.status === 'en_attente' && !a.decided_at && admin) db.prepare("UPDATE accounts SET roles = '[\"admin\"]', status = 'actif' WHERE id = ?").run(a.id);
       db.prepare('UPDATE accounts SET name = ?, email = ?, last_login_at = ? WHERE id = ?').run(name || a.name, email || a.email, now(), a.id);
       return bySub(sub);
     },
-    // Session d'avant les comptes (ou créée par un test) : le compte est créé avec les rôles qu'elle portait.
+    // Compte d'une session : s'il manque (session d'avant les comptes), il est créé SANS rôle, en attente : les rôles
+    // stockés dans la session ne valent jamais (sinon un compte effacé reviendrait avec ses anciens droits).
+    // roles : seulement pour un appel explicite (tests, outils), jamais depuis une session.
     ensure({ sub, name = '', email = '', roles = [] }) {
       return bySub(sub) || create({ sub, name, email, roles: roles.filter(r => Object.hasOwn(ROLES, r)) });
     },
@@ -82,7 +89,8 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
     // Être prévenu par e-mail (circuit de publication) : choisi par chacun pour lui-même.
     setNotify(sub, { on, to = '' }) {
       const addr = String(to || '').trim().slice(0, 200);
-      if (addr && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr)) throw new AccountError('Cette adresse e-mail n’est pas valide.');
+      if (addr && !/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(addr)) throw new AccountError('Cette adresse e-mail n’est pas valide.');
+      if (on && !addr && !bySub(sub)?.email) throw new AccountError('Indiquez l’adresse où vous prévenir.');
       db.prepare('UPDATE accounts SET notify_email = ?, notify_to = ? WHERE sub = ?').run(on ? 1 : 0, addr, sub);
       return bySub(sub);
     },
@@ -108,7 +116,10 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
       if (wasAdmin && !staysAdmin && activeAdmins().length <= 1) throw new AccountError('Il faut au moins un administrateur actif.');
       if (next.author_id && db.prepare('SELECT 1 FROM accounts WHERE author_id = ? AND id != ?').get(next.author_id, id)) throw new AccountError('Ce photographe est déjà lié à un autre compte.');
       if (next.author_id && !db.prepare('SELECT 1 FROM authors WHERE id = ?').get(next.author_id)) throw new AccountError('Photographe inconnu.');
-      db.prepare('UPDATE accounts SET roles = ?, author_id = ?, status = ? WHERE id = ?').run(JSON.stringify(next.roles), next.author_id, next.status, id);
+      const decided = next.roles.join() !== a.roles.join() || next.status !== a.status;
+      db.prepare('UPDATE accounts SET roles = ?, author_id = ?, status = ?, decided_at = CASE WHEN ? THEN ? ELSE decided_at END WHERE id = ?').run(JSON.stringify(next.roles), next.author_id, next.status, decided ? 1 : 0, now(), id);
+      // Plus aucun accès : ses sessions sont fermées tout de suite.
+      if (next.status !== 'actif') db.prepare('DELETE FROM sessions WHERE sub = ?').run(a.sub);
       return { before: a, after: byId(id) };
     },
     remove(id, by) {

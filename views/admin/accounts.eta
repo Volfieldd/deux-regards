@@ -5,7 +5,7 @@
 <p class="prose"><%= t('Un compte est créé à la première connexion. Il reste « en attente » tant qu’aucun rôle ne lui est donné ; un rôle s’applique tout de suite, et le retirer aussi.') %> <%= t('Le photographe lié sert aux valeurs par défaut (import, app Terrain) et décide de ce que voit un compte Photographe : seulement ses photos, ses sorties et ses personnes.') %></p>
 <ul class="role-legend" aria-label="<%= t('Rôles') %>">
   <li><strong><%= t('Administrateur') %></strong> <%= t('tout, y compris les comptes et le journal') %></li>
-  <li><strong><%= t('Modérateur') %></strong> <%= t('publie et dépublie, signalements, textes ; aucune donnée personnelle') %></li>
+  <li><strong><%= t('Modérateur') %></strong> <%= t('valide et publie, signalements, remarques au photographe ; ne retouche pas, aucune donnée personnelle') %></li>
   <li><strong><%= t('Relecteur') %></strong> <%= t('relit et traduit les textes') %></li>
   <li><strong><%= t('Photographe') %></strong> <%= t('ses photos, ses sorties, ses personnes ; ne publie pas') %></li>
 </ul>

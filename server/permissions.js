@@ -101,6 +101,7 @@ export const hasRole = roles => (roles || []).some(r => Object.hasOwn(ROLES, r))
 // permission déclarée par la route ; app.forbid répond 403 en HTML ou en JSON selon l'appel.
 export function registerPermissions(app, { renderError }) {
   app.decorateRequest('grants', null);
+  app.decorateRequest('ownAuthor', undefined);
   app.decorateRequest('can', function (perm) {
     if (!Object.hasOwn(PERMISSIONS, perm)) throw new Error(`permission inconnue : ${perm}`);
     this.grants ??= grantsOf(this.session?.roles, this.session?.adjust);
@@ -123,7 +124,8 @@ export function registerPermissions(app, { renderError }) {
     const g = this.can(perm);
     if (!g) return null;
     if (g === ALL) return { all: true };
-    return { all: false, authorId: app.accounts?.authorIdOf(this.session?.sub) ?? -1 };
+    if (this.ownAuthor === undefined) this.ownAuthor = app.accounts?.authorIdOf(this.session?.sub) ?? -1;   // une fois par requête
+    return { all: false, authorId: this.ownAuthor };
   });
   // Ce qui appartient au photographe authorId est-il accessible pour cette permission ?
   app.decorateRequest('owns', function (perm, authorId) { const s = this.scope(perm); return Boolean(s && (s.all || s.authorId === authorId)); });

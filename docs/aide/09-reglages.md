@@ -57,10 +57,10 @@ Tant qu'il manque l'essentiel (noms, adresse, e-mail, responsable), « Aujourd'h
 
 **Comptes et rôles** (groupe Réglages, administrateurs seulement) liste les comptes qui se sont connectés.
 
-- **Première connexion :** le compte est créé. Si Zitadel lui donne le rôle « admin », il est administrateur ; sinon il reste **en attente**, sans accès, et « Aujourd'hui » l'indique. Un compte resté en attente 90 jours est effacé.
+- **Première connexion :** le compte est créé. Si Zitadel lui donne le rôle « admin », il est administrateur ; sinon il reste **en attente**, sans accès, et « Aujourd'hui » l'indique. Un compte jamais traité, resté en attente 90 jours, est effacé (un compte dont un administrateur a retiré les rôles est gardé, et l’IdP ne peut pas lui redonner le rôle « admin »).
 - **Donner un rôle :** cochez-le, puis **Donner ce rôle** (ou **Enregistrer**). Il s'applique tout de suite, sans nouvelle connexion ; le retirer aussi.
   - **Administrateur** : tout, y compris les comptes et le journal.
-  - **Modérateur** : publie et dépublie (site et Instagram), traite les signalements, corrige les textes, adresse des remarques au photographe ; jamais les données personnelles.
+  - **Modérateur** : valide, programme, publie et dépublie (site et Instagram), traite les signalements, renvoie au photographe ou lui adresse une remarque, règle le circuit de publication ; il ne retouche pas les photos et ne voit jamais les données personnelles.
   - **Relecteur** : relit et traduit les textes.
   - **Photographe** : seulement **ses** photos, ses sorties et les personnes qu'il a rencontrées (l'accord est donné par sortie et par photographe). Il importe, modifie et supprime ses photos (elles restent sa propriété), voit les demandes RGPD qui le concernent, utilise l'app Terrain et ses cartes ; il ne publie pas, et ne voit ni Instagram, ni les réglages, ni la fréquentation du site (ses Statistiques ne montrent que ses photos). Ce qui est à l'autre photographe n'existe pas pour lui, même en tapant l'adresse. Une personne rencontrée par les deux ne lui apparaît qu'avec ses propres rencontres ; la rapprocher, la séparer, l'exporter ou l'effacer reste à l'administrateur.
 - **Photographe lié :** sert aux valeurs par défaut (import, app Terrain) et décide de ce que voit un compte Photographe ; sans photographe lié, un compte Photographe ne voit rien. Un photographe ne peut être lié qu'à un seul compte.

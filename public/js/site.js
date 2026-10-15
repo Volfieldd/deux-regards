@@ -508,7 +508,9 @@ document.querySelectorAll('[data-share]').forEach(btn => {
   const label = copy?.textContent;
   let timer = null;
   copy?.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(url); } catch { field.select(); document.execCommand?.('copy'); }
+    let ok = false;
+    try { await navigator.clipboard.writeText(url); ok = true; } catch { field.select(); try { ok = document.execCommand('copy'); } catch { ok = false; } }
+    if (!ok) { field.focus(); field.select(); return; }                     // le lien reste sélectionné, à copier à la main
     copy.textContent = copy.dataset.copied;
     copy.classList.add('done');
     count('copie');
