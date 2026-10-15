@@ -67,7 +67,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     if (!token) return;
     request.session = sessions.load(token);
     if (!request.session) { reply.clearCookie(SESSION_COOKIE, cookieBase); return; }
-    accounts.ensure(request.session);                 // session ouverte avant les comptes : compte créé avec ses rôles
+    accounts.ensure({ sub: request.session.sub, name: request.session.name, email: request.session.email });   // sans rôle s'il manquait
     request.session.roles = accounts.rolesOf(request.session.sub);
     request.session.adjust = accounts.adjustOf(request.session.sub);
   });

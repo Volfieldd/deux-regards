@@ -57,10 +57,10 @@ As long as the essentials are missing (names, address, email, person responsible
 
 **Accounts and roles** (Settings group, administrators only) lists the accounts that have signed in.
 
-- **First sign-in:** the account is created. If Zitadel gives it the “admin” role, it is an administrator; otherwise it stays **pending**, with no access, and “Today” says so. An account left pending for 90 days is deleted.
+- **First sign-in:** the account is created. If Zitadel gives it the “admin” role, it is an administrator; otherwise it stays **pending**, with no access, and “Today” says so. An account never dealt with and left pending for 90 days is deleted (an account whose roles an administrator removed is kept, and the IdP cannot give it the “admin” role back).
 - **Give a role:** tick it, then **Give this role** (or **Save**). It takes effect at once, without signing in again; removing it too.
   - **Administrator**: everything, including accounts and the log.
-  - **Moderator**: publishes and unpublishes (site and Instagram), handles reports, corrects texts, sends notes to the photographer; never personal data.
+  - **Moderator**: approves, schedules, publishes and unpublishes (site and Instagram), handles reports, sends photos back or writes notes to the photographer, sets the publishing workflow; does not edit photos and never sees personal data.
   - **Proofreader**: proofreads and translates texts.
   - **Photographer**: only **their own** photos, outings and the people they met (consent is given per outing and per photographer). They import, edit and delete their photos (which remain their property), see the GDPR requests that concern them, use the Field app and their cards; they do not publish, and see neither Instagram, nor settings, nor site traffic (their Statistics show only their photos). What belongs to the other photographer does not exist for them, even by typing the address. A person met by both only appears with their own encounters; merging, splitting, exporting or erasing them is left to the administrator.
 - **Linked photographer:** used for defaults (import, Field app) and decides what a Photographer account sees; with no linked photographer, a Photographer account sees nothing. A photographer can only be linked to one account.

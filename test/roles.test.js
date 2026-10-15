@@ -33,6 +33,7 @@ test('matrice : modérateur, relecteur, photographe et compte sans rôle n’att
   const ctx = await setup(t, { seeded: true });
   const store = createSessionStore(ctx.db);
   const as = role => {
+    ctx.app.accounts.ensure({ sub: `test:${role}`, name: role, roles: [role] });       // les rôles viennent du compte, jamais de la session
     const token = store.create({ sub: `test:${role}`, name: role, roles: [role] });
     const csrf = ctx.db.prepare('SELECT csrf FROM sessions WHERE id = ?').pluck().get(crypto.createHash('sha256').update(token).digest('hex'));
     const req = (method, url, payload) => ctx.app.inject({ method, url, cookies: { session: token }, headers: { accept: 'text/html', 'x-csrf-token': csrf }, payload });

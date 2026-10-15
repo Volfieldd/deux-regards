@@ -17,3 +17,6 @@ CREATE INDEX photo_reviews_photo ON photo_reviews(photo_id);
 ALTER TABLE accounts ADD COLUMN adjust TEXT NOT NULL DEFAULT '{}';
 ALTER TABLE accounts ADD COLUMN notify_email INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE accounts ADD COLUMN notify_to TEXT NOT NULL DEFAULT '';
+-- Date de la dernière décision d'un administrateur sur les rôles ou l'état du compte : un compte « en attente » par
+-- décision n'est ni promu par l'IdP, ni effacé par la purge des comptes jamais traités.
+ALTER TABLE accounts ADD COLUMN decided_at INTEGER;

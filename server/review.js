@@ -33,7 +33,9 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
     // Proposer (le photographe) : ids déjà filtrés sur ses photos. confirm : il confirme les accords « à vérifier ».
     // Renvoie { proposed, verify, blocked } (les photos refusées et pourquoi).
     async propose(ids, by, { message = '', confirm = false } = {}) {
-      const g = readiness.gate(ids.filter(id => photo(id)?.status === 'draft'));
+      // Déjà proposées ou programmées : laissées telles quelles (une date choisie par le modérateur n'est jamais perdue).
+      const skipped = ids.filter(id => ['proposee', 'programmee'].includes(photo(id)?.review));
+      const g = readiness.gate(ids.filter(id => photo(id)?.status === 'draft' && !skipped.includes(id)));
       const verify = [];
       const ok = [...g.ok];
       for (const v of g.verify) {
@@ -44,7 +46,7 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
         await mail(moderatorMail(), ok.length > 1 ? `${ok.length} photos proposées à la publication` : 'Une photo proposée à la publication',
           [`${by.name || 'Un photographe'} propose ${ok.length > 1 ? `${ok.length} photos` : `« ${photo(ok[0]).title} »`} à la publication.`, message ? `Son mot : ${message}` : '']);
       }
-      return { proposed: ok, verify, blocked: g.blocked };
+      return { proposed: ok, verify, blocked: g.blocked, skipped };
     },
     withdraw(id, by) {
       const p = photo(id);
@@ -72,7 +74,7 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
     // Renvoyer avec une remarque : elle arrive dans l'« Aujourd'hui » du photographe (et par e-mail s'il l'a choisi).
     async sendBack(id, by, message) {
       const p = photo(id);
-      if (!p) return false;
+      if (!p || !['proposee', 'programmee'].includes(p.review)) throw new ReviewError('Seule une photo proposée ou programmée se renvoie.');
       if (!String(message || '').trim()) throw new ReviewError('Écrivez la remarque.');
       notes.add(id, message, by);
       setReview.run('a_reprendre', null, id); log_(id, 'renvoyee', by, message);
@@ -89,6 +91,24 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
       publish([], [id]);
       await mail(photographerMail(p.author_id), 'Photo dépubliée', [`« ${p.title} » a été dépubliée par ${by.name || 'le modérateur'} :`, String(reason).trim()]);
       return true;
+    },
+    // Annuler une programmation : la photo attend de nouveau le modérateur si elle avait été proposée, sinon elle
+    // redevient un simple brouillon.
+    unschedule(id, by) {
+      const p = photo(id);
+      if (!p || p.review !== 'programmee') return false;
+      const proposed = db.prepare("SELECT 1 FROM photo_reviews WHERE photo_id = ? AND action = 'proposee' LIMIT 1").get(id);
+      setReview.run(proposed ? 'proposee' : null, null, id); log_(id, 'deprogrammee', by);
+      return true;
+    },
+    // Une photo proposée ou programmée modifiée par son photographe : une programmation est annulée (le modérateur
+    // doit revoir ce qui partira en ligne) ; une proposition reste en attente avec le nouveau contenu.
+    edited(ids, by) {
+      for (const id of ids) {
+        const p = photo(id);
+        if (p?.review !== 'programmee') continue;
+        setReview.run('proposee', null, id); log_(id, 'modifiee', by, 'Modifiée après validation : à revoir.');
+      }
     },
     // Publications programmées arrivées à échéance : publiées si elles sont toujours prêtes, sinon renvoyées.
     async runDue() {
@@ -111,10 +131,10 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
     // Ce qui attend le modérateur (la plus ancienne proposition d'abord), avec le mot du photographe.
     pending: () => db.prepare(`SELECT p.id, p.author_id, (SELECT r.at FROM photo_reviews r WHERE r.photo_id = p.id AND r.action = 'proposee' ORDER BY r.at DESC LIMIT 1) AS at,
       (SELECT r.message FROM photo_reviews r WHERE r.photo_id = p.id AND r.action = 'proposee' ORDER BY r.at DESC LIMIT 1) AS message
-      FROM photos p WHERE p.review = 'proposee' ORDER BY at, p.id`).all(),
-    scheduled: () => db.prepare("SELECT id, author_id, publish_at FROM photos WHERE review = 'programmee' ORDER BY publish_at, id").all(),
+      FROM photos p WHERE p.review = 'proposee' AND p.status = 'draft' ORDER BY at, p.id`).all(),
+    scheduled: () => db.prepare("SELECT id, author_id, publish_at FROM photos WHERE review = 'programmee' AND status = 'draft' ORDER BY publish_at, id").all(),
     history: id => db.prepare('SELECT * FROM photo_reviews WHERE photo_id = ? ORDER BY at DESC, id DESC').all(id),
-    countFor: (state, authorId = null) => db.prepare('SELECT COUNT(*) FROM photos WHERE review = @s AND (@a IS NULL OR author_id = @a)').pluck().get({ s: state, a: authorId }),
+    countFor: (state, authorId = null) => db.prepare("SELECT COUNT(*) FROM photos WHERE review = @s AND status = 'draft' AND (@a IS NULL OR author_id = @a)").pluck().get({ s: state, a: authorId }),
     // Une photo publiée directement (administrateur, ou photographe autorisé) sort du circuit.
     clear: id => setReview.run(null, null, id),
   };

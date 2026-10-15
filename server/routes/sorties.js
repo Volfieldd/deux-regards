@@ -83,6 +83,7 @@ export function registerOutings(app, { repo, render, done, failed, P, W, withRea
     const g = app.readiness.gate(drafts);
     const before = repo.setStatuses(Object.fromEntries(g.ok.map(id => [id, 'published'])));
     app.instagram.onPublished(Object.keys(before).map(Number));
+    for (const id of Object.keys(before).map(Number)) app.review.clear(id);   // publiée directement : hors circuit
     const rest = g.verify.length + g.blocked.length;
     const t = request.t, n = g.ok.length;
     const published = n > 1 ? t('{n} photos publiées.', { n }) : n === 1 ? t('1 photo publiée.') : t('0 photo publiée.');

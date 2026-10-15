@@ -50,6 +50,7 @@ export function createImageModel({ dir, log, fetchImpl = globalThis.fetch } = {}
       for await (const chunk of res.body) {
         hash.update(chunk);
         progress.got += chunk.length;
+        if (progress.got > MODEL.bytes * 1.1) throw new ModelError('fichier du modèle trop gros : téléchargement interrompu');
         if (!out.write(chunk)) await new Promise(r => out.once('drain', r));
       }
       await new Promise((resolve, reject) => out.end(err => (err ? reject(err) : resolve())));

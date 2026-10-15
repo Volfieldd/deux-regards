@@ -134,7 +134,7 @@ Plus bas :
 **Selon le rôle du compte** (voir [Comptes et rôles](reglages#comptes-et-rôles)) : la fiche ne montre que ce que le compte peut faire.
 
 - **Photographe** : la fiche complète de ses photos, sans le choix du statut (la publication est faite par un administrateur ou un modérateur) ni Instagram ; il peut supprimer ses photos.
-- **Modérateur** et **Relecteur** : un formulaire limité aux textes (titre, légende, lieu et leurs traductions). Le modérateur a aussi **Publier** ou **Dépublier** pour une photo prête ; une photo à vérifier attend la confirmation du photographe ou d'un administrateur, qui voient les personnes. Ni l'un ni l'autre ne voient les personnes et accords : la bande d'état garde l'état, sans le détail.
+- **Modérateur** : la fiche en lecture, avec la rubrique **Publication** (publier, programmer, renvoyer avec une remarque, dépublier en disant pourquoi) ; il ne retouche pas la photo. **Relecteur** : un formulaire limité aux textes (titre, légende, lieu et leurs traductions), y compris pour une photo publiée. Une photo à vérifier attend la confirmation du photographe ou d'un administrateur, qui voient les personnes. Ni l'un ni l'autre ne voient les personnes et accords : la bande d'état garde l'état, sans le détail.
 - **Remarques** : un modérateur ou un administrateur écrit une remarque pour le photographe (« la légende parle de la Loire, c'est l'Erdre »). Elle apparaît dans l'« Aujourd'hui » du photographe et en tête de la fiche, jusqu'à ce qu'il clique **Fait**. On y parle de la photo, jamais des personnes.
 
 Dans la photothèque, de même : les boutons Publier, Dépublier, Supprimer, Importer, le glisser pour réordonner, la palette ⌘K et l'aide n'apparaissent qu'à qui en a le droit.

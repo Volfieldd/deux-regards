@@ -341,9 +341,10 @@ test('comptes : inconnu en attente sans session, rôle donné dans l’admin, d�
   assert.equal(second.res.statusCode, 302);
   assert.equal((await app.inject({ url: '/admin/signalements', cookies: second.cookies })).statusCode, 200);
   assert.equal((await app.inject({ url: '/admin/personnes', cookies: second.cookies, headers: { accept: 'text/html' } })).statusCode, 403);
-  // Désactivé : la session en cours perd l'accès tout de suite, et la connexion est refusée.
+  // Désactivé : la session en cours est fermée tout de suite, et la connexion est refusée.
   app.accounts.update(app.accounts.bySub('invite-1').id, { status: 'desactive' }, 'quelqu-un');
-  assert.equal((await app.inject({ url: '/admin', cookies: second.cookies })).statusCode, 403);
+  assert.equal((await app.inject({ url: '/admin', cookies: second.cookies })).statusCode, 302);
+  assert.equal(db.prepare("SELECT COUNT(*) FROM sessions WHERE sub = 'invite-1'").pluck().get(), 0);
   const third = await login(app, provider);
   assert.equal(third.res.statusCode, 403);
   assert.match(third.res.body, /désactivé/);

@@ -7,11 +7,11 @@
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
   <ul class="review-list">
 <% it.pending.forEach(r => { const p = r.photo; %>    <li class="panel">
-      <label class="rv-pick"><input type="checkbox" name="ids" value="<%= p.id %>"<%~ p.site.level === 'ok' ? '' : ' disabled' %> aria-label="<%= t('Choisir « {title} »', { title: p.title }) %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></label>
+      <label class="rv-pick"><input type="checkbox" name="ids" value="<%= p.id %>"<%~ r.ready ? '' : ' disabled' %> aria-label="<%= t('Choisir « {title} »', { title: p.title }) %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></label>
       <div class="rv-body">
         <a class="o-title" href="/admin/photos/<%= p.id %>#publication"><%= p.title %></a>
         <span class="mono"><%= r.author %> · <%= p.category %><%= p.taken_on ? ` · ${p.taken_on}` : '' %> · <%= t('proposée le {date}', { date: r.when }) %></span>
-        <span class="enc-tag <%= p.site.level %>"><%= t('Site : {state}', { state: LV[p.site.level] }) %></span>
+        <span class="enc-tag <%= r.ready ? 'ok' : p.site.level %>"><%= r.ready && p.site.level === 'warn' ? t('Site : à vérifier, confirmée par le photographe') : t('Site : {state}', { state: LV[p.site.level] }) %></span>
 <% if (r.message) { %>        <q class="rv-msg"><%= r.message %></q>
 <% } %>        <a class="more" href="/admin/photos/<%= p.id %>#publication"><%= t('Ouvrir : programmer, renvoyer avec une remarque') %></a>
       </div>

@@ -135,7 +135,7 @@
 <% } %>
   <div class="edit-lower">
 <% const RV = it.review, propose = can('photos.proposer'), when = ms => new Intl.DateTimeFormat(it.locale, { dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ms);
-   const ACT = { proposee: t('proposée'), retiree: t('proposition retirée'), programmee: t('programmée'), deprogrammee: t('programmation annulée'), publiee: t('publiée'), renvoyee: t('renvoyée avec une remarque'), depubliee: t('dépubliée') }; %>
+   const ACT = { proposee: t('proposée'), retiree: t('proposition retirée'), programmee: t('programmée'), deprogrammee: t('programmation annulée'), modifiee: t('modifiée après validation'), publiee: t('publiée'), renvoyee: t('renvoyée avec une remarque'), depubliee: t('dépubliée') }; %>
 <% if (propose || pubOk) { %>
 <section class="panel rub-panel publication" id="publication" aria-labelledby="pub-title">
   <h2 id="pub-title"><%= t('Publication') %> <span class="sum"><%= it.photo.status === 'published' ? t('publiée') : RV.state === 'proposee' ? t('proposée, attend le modérateur') : RV.state === 'programmee' ? t('programmée le {date}', { date: when(RV.at) }) : RV.state === 'a_reprendre' ? t('à reprendre') : t('brouillon') %></span></h2>
@@ -189,7 +189,7 @@
 <details class="panel rub-panel" id="remarques"<%~ it.notes.length ? ' open' : '' %>>
   <summary><h2><%= t('Remarques') %> <span class="sum"><%= it.notes.length ? (it.notes.length > 1 ? t('{n} à traiter', { n: it.notes.length }) : t('1 à traiter')) : t('aucune') %></span></h2></summary>
 <% it.notes.forEach(n => { %>  <div class="note-item"><p><strong><%= n.from_name || t('l’équipe') %></strong> <span class="mono"><%= new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).format(n.created_at) %></span></p><p><%= n.message %></p>
-    <form method="post" action="/admin/remarques/<%= n.id %>/fait"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>#remarques"><button class="btn ghost" type="submit"><%= t('Fait') %></button></form></div>
+<% if (can('taches.adresser') || it.ownPhoto) { %>    <form method="post" action="/admin/remarques/<%= n.id %>/fait"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>#remarques"><button class="btn ghost" type="submit"><%= t('Fait') %></button></form><% } %></div>
 <% }) %><% if (can('taches.adresser')) { %>  <form class="form" method="post" action="/admin/photos/<%= it.photo.id %>/remarques">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
     <label><%= t('Remarque pour le photographe') %> <span class="mono"><%= t('elle apparaît dans son « Aujourd’hui » ; parlez de la photo, jamais des personnes') %></span><textarea name="message" rows="2" maxlength="1000" required></textarea></label>
@@ -243,7 +243,9 @@
 <% } else if (ig.post && ig.post.status === 'failed') { %>
   <p class="err"><%~ t('Échec de la publication : {error} (voir la page {link} pour réessayer).', { error: esc(ig.post.error), link: '<a href="/admin/instagram">Instagram</a>' }) %></p>
 <% } %>
-<% if (ig.blocked.length) { %>
+<% if (ig.blocked.length && !seePeople) { %>
+  <p class="ig-blocked" role="note"><strong><%= t('Instagram bloqué') %></strong> · <%= t('Le détail (personnes et accords) est visible du photographe et des administrateurs.') %></p>
+<% } else if (ig.blocked.length) { %>
   <p class="ig-blocked" role="note"><%~ t('{title} : {reasons}. Aucune confirmation ne lève ce blocage : si la personne n’est pas sur cette photo, indiquez-le dans {link}.', { title: `<strong>${esc(t('Instagram bloqué'))}</strong>`, reasons: esc(ig.blocked.join(' ; ')), link: `<a class="more" href="#rencontres">${esc(t('Personnes & accords'))}</a>` }) %></p>
 <% } else if (it.photo.status !== 'published') { %>
   <p class="hint"><%= t('Publiez d’abord la photo sur le site pour la partager sur Instagram.') %></p>
@@ -260,7 +262,7 @@
         <label><%= t('Cadre') %> <select name="frame" data-ig-frame><% Object.entries(ig.FRAMES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ (ig.post ? ig.post.frame : ig.s.frame) === k ? ' selected' : '' %>><%= t(l) %></option><% }) %></select></label>
         <label class="inline"><input type="checkbox" name="watermark" data-ig-watermark<%~ (ig.post ? ig.post.watermark : ig.s.watermark) ? ' checked' : '' %>> <%= t('Avec le filigrane') %></label>
       </div>
-<% if (R.instagram.level === 'warn' && !it.igConfirmed) { %>      <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> <%= t('Instagram à vérifier ({reasons}) : je confirme que les personnes reconnaissables ont accepté Instagram, ou n’y sont pas reconnaissables.', { reasons: R.instagram.reasons.join(' ; ') }) %></label>
+<% if (R.instagram.level === 'warn' && !it.igConfirmed && seePeople) { %>      <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> <%= t('Instagram à vérifier ({reasons}) : je confirme que les personnes reconnaissables ont accepté Instagram, ou n’y sont pas reconnaissables.', { reasons: R.instagram.reasons.join(' ; ') }) %></label>
 <% } %><% if (ig.signature) { %>      <input type="hidden" name="signature_set" value="1">
       <label class="inline"><input type="checkbox" name="signature"<%~ it.photo.ig_signature !== 0 ? ' checked' : '' %>> <%= t('Ajouter ma signature') %> <span class="mono">« <%= ig.signature %> »<%= String(it.photo.legend || '').trim() ? '' : ' · ' + t('seulement si la photo a une légende') %></span></label>
 <% } %>      <label class="inline"><input type="checkbox" name="custom" data-ig-custom<%~ ig.custom ? ' checked' : '' %>> <%= t('Légende personnalisée pour cette photo') %> <span class="mono"><%= t('sinon, celle du modèle') %></span></label>

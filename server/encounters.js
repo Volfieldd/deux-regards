@@ -201,7 +201,8 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   const events = id => q.events.all(id).map(ev => { let detail = {}; try { detail = JSON.parse(O(ev.detail) || '{}'); } catch { detail = { illisible: true }; } return { ...ev, detail }; });
 
   // Accord papier (carte « pour nous ») ou rencontre créée à la main ; la photo de la carte est la preuve.
-  function saveCard(id, body, cardJpeg = null, portraitJpeg = null) {
+  // canTouch(authorId) : le compte peut-il écrire dans une rencontre de ce photographe ? (portée « les miennes »)
+  function saveCard(id, body, cardJpeg = null, portraitJpeg = null, { canTouch = () => true } = {}) {
     const errors = {};
     const c = text(body.ref, 20) ? card(body.ref) : null;
     if (text(body.ref, 20) && !c) errors.ref = 'Référence illisible : une lettre et un numéro, par exemple J-0142.';
@@ -220,6 +221,8 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     return db.transaction(() => {
       let target = id ? q.byId.get(id) : (c ? q.byRef.get(c.ref) : null);
       if (c && target && target.ref !== c.ref && q.byRef.get(c.ref)) throw new EncounterError({ ref: `La référence ${c.ref} est déjà une autre rencontre.` });
+      // Une référence qui désigne la rencontre d'un autre photographe, ou une rencontre attribuée à un autre : refusé.
+      if ((target && !canTouch(target.author_id)) || (authorId && !canTouch(authorId))) throw new EncounterError({ ref: `La référence ${c?.ref || ''} n’est pas l’une de vos rencontres.`.replace('  ', ' ') });
       if (!target) {
         target = { id: Number(db.prepare('INSERT INTO encounters (ref, author_id, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)').run(c?.ref ?? null, authorId, 'en_cours', t, t).lastInsertRowid) };
       }

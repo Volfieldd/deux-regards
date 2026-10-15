@@ -386,5 +386,41 @@
  "Circuit réglé": {
   "en": "Workflow set",
   "de": "Ablauf eingestellt"
+ },
+ "Cette photo est déjà proposée.": {
+  "en": "This photo is already submitted.",
+  "de": "Dieses Foto ist bereits vorgeschlagen."
+ },
+ "{n} déjà proposée(s) ou programmée(s), laissée(s) telle(s) quelle(s).": {
+  "en": "{n} already submitted or scheduled, left as they are.",
+  "de": "{n} bereits vorgeschlagen oder geplant, unverändert gelassen."
+ },
+ "Programmation annulée.": {
+  "en": "Schedule cancelled.",
+  "de": "Planung aufgehoben."
+ },
+ "Rien à retirer : la photo n’est pas proposée.": {
+  "en": "Nothing to withdraw: the photo is not submitted.",
+  "de": "Nichts zurückzuziehen: Das Foto ist nicht vorgeschlagen."
+ },
+ "Site : à vérifier, confirmée par le photographe": {
+  "en": "Site: to check, confirmed by the photographer",
+  "de": "Website: zu prüfen, vom Fotografen bestätigt"
+ },
+ "Seule une photo proposée ou programmée se renvoie.": {
+  "en": "Only a submitted or scheduled photo can be sent back.",
+  "de": "Nur ein vorgeschlagenes oder geplantes Foto kann zurückgeschickt werden."
+ },
+ "Indiquez l’adresse où vous prévenir.": {
+  "en": "Enter the address to notify you at.",
+  "de": "Geben Sie die Adresse für Benachrichtigungen an."
+ },
+ "modifiée après validation": {
+  "en": "edited after approval",
+  "de": "nach der Bestätigung geändert"
+ },
+ "valide et publie, signalements, remarques au photographe ; ne retouche pas, aucune donnée personnelle": {
+  "en": "approves and publishes, reports, notes to the photographer; does not edit, no personal data",
+  "de": "bestätigt und veröffentlicht, Meldungen, Hinweise an den Fotografen; bearbeitet nicht, keine personenbezogenen Daten"
  }
 }
