@@ -70,6 +70,9 @@ test('matrice : modérateur, relecteur, photographe et compte sans rôle n’att
   assert.equal(await code(r.get('/admin/series')), 403);
 
   // Photographe : ses photos, ses sorties, ses personnes, le terrain ; ne publie pas, pas d'Instagram ni de réglages.
+  // (lié au photographe de la photo p : portée « les miennes »)
+  ctx.app.accounts.ensure({ sub: 'test:photographe', roles: ['photographe'] });
+  ctx.app.accounts.update(ctx.app.accounts.bySub('test:photographe').id, { authorId: p.author_id }, 'test');
   const ph = as('photographe');
   assert.equal(await code(ph.get('/admin/personnes')), 200);
   assert.equal(await code(ph.get('/admin/terrain')), 200);

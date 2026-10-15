@@ -10,6 +10,7 @@
   <div>
     <h1><%= t('Statistiques') %></h1>
     <p class="sub"><%= t('Mesure anonyme, sans cookie ni service extérieur · visites des administrateurs et des robots exclues') %></p>
+<% if (it.own) { %>    <p class="sub"><%= t('Vos photos : ouvertures en grand et partages.') %></p><% } %>
   </div>
   <nav class="seg" aria-label="<%= t('Période') %>">
 <% Object.entries(it.PERIODS).forEach(([k, l]) => { %>    <a href="/admin/statistiques?periode=<%= k %>"<%~ Number(k) === it.days ? ' aria-current="true"' : '' %>><%= l %></a>
@@ -17,6 +18,7 @@
 </div>
 
 <div class="stats-grid">
+<% if (!it.own) { %>
   <section class="panel wide2" aria-label="<%= t('Chiffres de la période') %>">
     <div class="figures">
       <div><b><%= fmt(tot.visitors) %></b><span><%= t('visiteurs') %> <small class="delta"><%= delta(tot.visitors, pv.visitors) %></small></span></div>
@@ -36,6 +38,7 @@
         <tbody><% it.points.slice().reverse().forEach(p => { %><tr><td><%= p.label %></td><td><%= p.views %></td><td><%= p.visitors %></td></tr><% }) %></tbody></table>
     </details>
   </section>
+<% } %>
 
   <section class="panel" aria-labelledby="top-title">
     <h2 id="top-title"><%= t('Photos les plus vues') %></h2>
@@ -69,6 +72,7 @@
     <p class="hint"><%= t('Comptés sans rien savoir du visiteur : un nombre par photo, par moyen et par jour. Sur téléphone, le menu du téléphone ne dit pas quelle app a été choisie.') %></p>
   </section>
 
+<% if (!it.own) { %>
   <section class="panel" aria-labelledby="pages-title">
     <h2 id="pages-title"><%= t('Pages') %></h2>
 <% if (!it.pages.length) { %>    <p class="hint"><%= t('Aucune page vue sur la période.') %></p>
@@ -87,7 +91,9 @@
     </ul>
 <% } %>
   </section>
+<% } %>
 
+<% if (!it.own) { %>
   <section class="panel wide2" aria-labelledby="pays-title">
     <h2 id="pays-title"><%= t('Pays') %> <span class="mono"><%= t('visiteurs, selon Cloudflare') %></span></h2>
 <% const cmax = it.countries.length ? it.countries[0].visitors : 1; %>
@@ -105,6 +111,7 @@
 <% } %>
     </div>
   </section>
+<% } %>
 
   <section class="panel wide2">
     <h2><%= t('Ce qui est mesuré') %></h2>

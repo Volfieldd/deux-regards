@@ -82,6 +82,31 @@ export default async function adminRoutes(app) {
   app.addHook('onRoute', r => { if (r.url.startsWith('/admin') && !r.config?.perm) throw new Error(`route d’admin sans permission : ${r.method} ${r.url}`); });
   app.addHook('preHandler', app.requireAdmin);
   app.addHook('preHandler', app.requirePermission);
+  // Portée « les miennes » : une photo, une rencontre, une personne, une sortie ou un QR qui n'est pas au photographe du
+  // compte n'existe pas pour lui (404). Les listes, elles, sont filtrées dans chaque route.
+  const encounterAuthor = app.db.prepare('SELECT author_id FROM encounters WHERE id = ?');
+  const personHasOwn = app.db.prepare('SELECT 1 FROM encounters WHERE person_id = ? AND author_id = ? LIMIT 1');
+  app.addHook('preHandler', async (request, reply) => {
+    const url = request.routeOptions.url || '';
+    const id = Number(request.params?.id);
+    let hidden = false;
+    if (url.startsWith('/admin/photos/:id')) {
+      const p = repo.photo(id);
+      hidden = Boolean(p) && !request.owns('photos.voir', p.author_id);
+    } else if (url.startsWith('/admin/rencontres/:id')) {
+      const e = encounterAuthor.get(id);
+      hidden = Boolean(e) && !request.owns('personnes.voir', e.author_id);
+    } else if (url.startsWith('/admin/personnes/:id')) {
+      const s = request.scope('personnes.voir');
+      hidden = Boolean(s) && !s.all && !personHasOwn.get(id, s.authorId);
+    } else if (url.startsWith('/admin/sorties/:author')) {
+      const a = repo.authors().find(x => x.slug === request.params.author);
+      hidden = !a || !request.owns('sorties.voir', a.id);
+    } else if (url === '/admin/auteurs/:id/qr/:file') {
+      hidden = !request.owns('terrain.cartes', id);
+    }
+    if (hidden) { reply.callNotFound(); return reply; }
+  });
   // Langue de l'admin : celle du photographe lié au compte, sinon le cookie du compte, sinon le français.
   // request.t traduit (voir server/admin-i18n.js) ; elle sert aux pages et aux messages après redirection.
   const LANG_COOKIE = 'admin_langue';
@@ -132,20 +157,37 @@ export default async function adminRoutes(app) {
   const THEME_COOKIE = 'admin_theme';
   const adminTheme = request => (['dark', 'light'].includes(request.cookies[THEME_COOKIE]) ? request.cookies[THEME_COOKIE] : '');
   // Barre latérale : les séries, avec une vignette et leur nombre de photos (cibles de dépôt).
-  const navSeries = () => {
-    const covers = repo.covers();
-    return repo.categories().map(c => ({ ...c, thumb: covers[c.id] && rendered(covers[c.id]) ? thumb(covers[c.id]) : null }));
+  // Nouvelles rencontres (badge de la barre latérale) : celles du photographe du compte en portée « les miennes ».
+  const newEncounters = request => {
+    const s = request.scope('personnes.voir');
+    if (!s) return 0;
+    return s.all ? app.encounters.countNew() : app.db.prepare("SELECT COUNT(*) FROM encounters WHERE status = 'nouvelle' AND author_id = ?").pluck().get(s.authorId);
+  };
+  // Séries du menu : nombre de photos et vignette (la première photo, publiée d'abord) ; en portée « les miennes »,
+  // seulement ses photos.
+  const navSeries = request => {
+    const s = request.scope('photos.voir');
+    if (!s) return [];
+    if (s.all) {
+      const covers = repo.covers();
+      return repo.categories().map(c => ({ ...c, thumb: covers[c.id] && rendered(covers[c.id]) ? thumb(covers[c.id]) : null }));
+    }
+    const mine = request.mine('photos.voir', repo.photos()).sort((a, b) => (b.status === 'published') - (a.status === 'published') || a.position - b.position || a.id - b.id);
+    return repo.categories().map(c => {
+      const list = mine.filter(p => p.category_id === c.id);
+      return { ...c, count: list.length, thumb: list[0] && rendered(list[0]) ? thumb(list[0]) : null };
+    });
   };
 
   function render(request, reply, template, data) {
     const siteName = app.siteName();
     return reply.render(`admin/${template}`, {
       // Retour après la bascule clair / sombre : la page affichée, si elle a été obtenue par GET.
-      adminTheme: adminTheme(request), navSeries: navSeries(), currentPath: request.method === 'GET' ? request.url : '/admin',
+      adminTheme: adminTheme(request), navSeries: navSeries(request), currentPath: request.method === 'GET' ? request.url : '/admin',
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply), can: perm => Boolean(request.can(perm)),
       section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
-      translate: app.translator.enabled, encountersNew: app.encounters.countNew(), urgent: app.todo.urgentCount(), description: '',
+      translate: app.translator.enabled, encountersNew: newEncounters(request), urgent: app.todo.urgentCount(perm => request.scope(perm)), description: '',
       t: request.t, lang: request.t.lang, locale: request.t.locale, adminLangs: ADMIN_LANGS, langNames: ADMIN_LANG_NAMES,
       ...data, pageTitle: `${data.title} · ${request.t('Administration')} · ${siteName}`,
     });
@@ -180,26 +222,29 @@ export default async function adminRoutes(app) {
   // ---------- accueil ----------
   app.get('/admin', P('admin.acceder'), async (request, reply) => {
     // Les fichiers ne sont vérifiés (withReady) que pour les quelques photos affichées.
-    const photos = repo.photos();
+    // Portée « les miennes » : les photos, les chiffres et le rythme du photographe du compte.
+    const sv = request.scope('photos.voir');
+    const own = sv && !sv.all ? sv.authorId : null;
+    const photos = request.mine('photos.voir', repo.photos());
     const published = photos.filter(p => p.status === 'published');
     const heroSlugs = Array.isArray(repo.settings().hero) ? repo.settings().hero : [];
     const hero = heroSlugs.map(s => published.find(p => p.slug === s)).filter(Boolean);
     const todo = photos.filter(p => p.status === 'draft' || p.provisional);
     return render(request, reply, 'home', {
-      title: request.t('Aujourd’hui'), tasks: app.todo.list(request.t),
+      title: request.t('Aujourd’hui'), tasks: app.todo.list(request.t, perm => request.scope(perm)),
       todo: todo.slice(0, 6).map(withReady), todoCount: todo.length,
       hero: (hero.length ? hero : published.slice(0, 5)).map(withReady).filter(p => p.ready),
       heroChosen: hero.length > 0,
-      rhythm: repo.importsByMonth(12),
-      recent: repo.recent(5).map(withReady),
-      visitorsToday: app.stats.today(),
-      monthTop: (() => { const { from, to } = app.stats.range(30); const t = app.stats.topPhotos(from, to, 1)[0]; const p = t && photos.find(x => x.id === t.id); return p ? { ...withReady(p), views: t.views } : null; })(),
+      rhythm: repo.importsByMonth(12, own),
+      recent: repo.recent(5, own).map(withReady),
+      visitorsToday: request.scope('statistiques.voir')?.all ? app.stats.today() : null,
+      monthTop: (() => { if (!request.can('statistiques.voir')) return null; const { from, to } = app.stats.range(30); const t = app.stats.topPhotos(from, to, 100).find(r => photos.some(x => x.id === r.id)); const p = t && photos.find(x => x.id === t.id); return p ? { ...withReady(p), views: t.views } : null; })(),
       themeLabel: (THEMES[app.appearance.themeId()] || {}).label,
       publicUrl: app.config.publicUrl,
       counts: { published: photos.filter(p => p.status === 'published').length, draft: photos.filter(p => p.status === 'draft').length },
       categories: repo.categories().length, authors: repo.authors(), me: repo.authorBySub(request.session.sub),
       roleLabels: Object.fromEntries(Object.entries(ROLES).map(([k, r]) => [k, r.label])),
-      proofs: app.proofs.status(), tsa: app.config.tsa,
+      proofs: app.proofs.status(), tsa: app.config.tsa, allPhotos: own == null,
     });
   });
 
@@ -210,7 +255,7 @@ export default async function adminRoutes(app) {
     // État pour le site (server/readiness.js) : à vérifier, bloquée, sans visage.
     const stateOf = new Map(), people = new Map();
     const st = p => { if (!stateOf.has(p.id)) stateOf.set(p.id, app.readiness.state(p, people, request.t)); return stateOf.get(p.id); };
-    const all = repo.photos();
+    const all = request.mine('photos.voir', repo.photos());
     const sugg = app.seriesSuggest.forPhotos(all), names = catNames();
     const MISSING = { ville: { label: request.t('Publiées sans ville'), test: p => p.status === 'published' && p.city_id == null },
       traduction: { label: request.t('Titres sans traduction'), test: p => p.status === 'published' && (!p.title_en || !p.title_de) },
@@ -222,9 +267,9 @@ export default async function adminRoutes(app) {
     // « À finir » : brouillons et titres provisoires.
     const todo = statut === 'afinir';
     const filter = { q: String(q), author: String(auteur), category: String(serie), status: STATUSES[statut] ? statut : '' };
-    const authors = repo.authors();
+    const authors = request.mine('photos.modifier', repo.authors(), 'id');   // portée « les miennes » : son photographe seulement
     // Mois de prise de vue dans la langue de l'admin (« oct. 2026 », « Oct 2026 », « Okt. 2026 »).
-    let photos = repo.photos(filter).map(p => withReady({ ...p, when: monthYear(p.taken_on, request.t.lang) }));
+    let photos = request.mine('photos.voir', repo.photos(filter)).map(p => withReady({ ...p, when: monthYear(p.taken_on, request.t.lang) }));
     if (todo) photos = photos.filter(p => p.status === 'draft' || p.provisional);
     if (missing) photos = photos.filter(MISSING[missing].test);
     photos = photos.map(p => ({ ...p, site: st(p).site, suggest: suggestOf(sugg.get(p.id), names) }));
@@ -267,7 +312,8 @@ export default async function adminRoutes(app) {
         }
         const categoryId = Number(fields.category_id);
         const authorId = Number(fields.author_id);
-        if (!repo.categories().some(c => c.id === categoryId) || !repo.authors().some(a => a.id === authorId)) {
+        // Portée « les miennes » : on n'importe que pour son propre photographe.
+        if (!repo.categories().some(c => c.id === categoryId) || !repo.authors().some(a => a.id === authorId) || !request.owns('photos.modifier', authorId)) {
           part.file.resume();
           refused.push({ name: part.filename, reason: request.t('série ou auteur invalide') });
           continue;
@@ -338,7 +384,8 @@ export default async function adminRoutes(app) {
         if (!checked || result) { part.file.resume(); continue; }
         const categoryId = Number(fields.category_id);
         const authorId = Number(fields.author_id);
-        if (!repo.categories().some(c => c.id === categoryId) || !repo.authors().some(a => a.id === authorId)) {
+        // Portée « les miennes » : on n'importe que pour son propre photographe.
+        if (!repo.categories().some(c => c.id === categoryId) || !repo.authors().some(a => a.id === authorId) || !request.owns('photos.modifier', authorId)) {
           part.file.resume();
           refuse(422, request.t('série ou auteur invalide'));
           continue;
@@ -381,7 +428,8 @@ export default async function adminRoutes(app) {
 
   // État du traitement : par photo (?ids=1,2) et nombre de photos encore en cours (indicateur d'en-tête).
   app.get('/admin/photos/traitement', P('photos.voir'), async request => {
-    const ids = String(request.query.ids || '').split(',').filter(Boolean).map(Number).filter(Number.isInteger).slice(0, 200);
+    const visible = new Set(request.mine('photos.voir', repo.photos()).map(p => p.id));
+    const ids = String(request.query.ids || '').split(',').filter(Boolean).map(Number).filter(id => Number.isInteger(id) && (visible.has(id) || !repo.photo(id))).slice(0, 200);
     return {
       active: tracker.active(),
       photos: ids.map(id => {
@@ -628,27 +676,32 @@ export default async function adminRoutes(app) {
     const sum = (list, k) => list.reduce((a, d) => a + d[k], 0);
     const totals = { views: sum(daily, 'views'), visitors: sum(daily, 'visitors'), mobile: sum(daily, 'mobile') };
     const previous = { views: sum(before, 'views'), visitors: sum(before, 'visitors') };
-    const photoViews = sum(app.stats.topPhotos(from, to, 100000), 'views');
-    const all = new Map(repo.photos().map(p => [p.id, p]));
+    // Portée « les miennes » : seulement les photos du photographe du compte (pas la fréquentation du site).
+    const ss = request.scope('statistiques.voir');
+    const own = ss.all ? null : ss.authorId;
+    const all = new Map(request.mine('statistiques.voir', repo.photos()).map(p => [p.id, p]));
+    const viewed = app.stats.topPhotos(from, to, 100000).filter(r => own == null || all.has(r.id));
+    const photoViews = sum(viewed, 'views');
     const categories = repo.categories();
     const authors = repo.authors();
     return render(request, reply, 'stats', {
       title: request.t('Statistiques'), days, PERIODS: periods(request.t), from, to, totals, previous, photoViews,
       chart: barsAndLine(points, { labels: [points[0].label, points.at(-1).label] }), points,
-      top: app.stats.topPhotos(from, to, 10).map(r => ({ ...r, photo: all.get(r.id) && withReady(all.get(r.id)) })).filter(r => r.photo),
-      pages: app.stats.topPages(from, to, 8).map(r => ({ ...r, label: pageLabel(r.page, categories, authors, request.t) })),
-      sources: app.stats.sources(from, to, 8),
+      own: own != null,
+      top: viewed.slice(0, own == null ? 10 : 100).map(r => ({ ...r, photo: all.get(r.id) && withReady(all.get(r.id)) })).filter(r => r.photo).slice(0, 10),
+      pages: own != null ? [] : app.stats.topPages(from, to, 8).map(r => ({ ...r, label: pageLabel(r.page, categories, authors, request.t) })),
+      sources: own != null ? [] : app.stats.sources(from, to, 8),
       // Partages : par moyen, et photos les plus partagées.
       shares: (() => {
         const t = request.t;
         const VIA = { whatsapp: 'WhatsApp', facebook: 'Facebook', bluesky: 'Bluesky', x: 'X', pinterest: 'Pinterest', email: t('E-mail'),
           copie: t('Lien copié'), instagram: t('Post Instagram ouvert'), telephone: t('Menu du téléphone'), qr: t('QR scanné') };
-        const byVia = app.shares.byVia(from, to).map(r => ({ ...r, label: VIA[r.via] || r.via }));
+        const byVia = app.shares.byVia(from, to, own).map(r => ({ ...r, label: VIA[r.via] || r.via }));
         return { byVia, total: byVia.reduce((a, r) => a + r.n, 0),
-          top: app.shares.topPhotos(from, to, 5).map(r => ({ ...r, photo: all.get(r.id) && withReady(all.get(r.id)) })).filter(r => r.photo) };
+          top: app.shares.topPhotos(from, to, 5, own).map(r => ({ ...r, photo: all.get(r.id) && withReady(all.get(r.id)) })).filter(r => r.photo) };
       })(),
       ...(() => {
-        const countries = app.stats.countries(from, to).map(r => ({ ...r, name: countryName(r.country, request.t) }));
+        const countries = own != null ? [] : app.stats.countries(from, to).map(r => ({ ...r, name: countryName(r.country, request.t) }));
         return { countries, bubbles: countryBubbles(countries) };
       })(),
     });
@@ -663,10 +716,9 @@ export default async function adminRoutes(app) {
   });
 
   // ---------- comptes et rôles, journal ----------
-  // Rôles proposés dans l'ordre ; « Photographe » attend l'étape 3 (portée « les miennes » sur les listes) : d'ici là,
-  // il ne peut pas être donné, pour ne montrer à personne les photos et les personnes des autres.
-  const ROLE_ORDER = ['admin', 'moderateur', 'relecteur', 'photographe'];
-  const READY_ROLES = new Set(['admin', 'moderateur', 'relecteur']);
+  // Rôles proposés dans l'ordre (un rôle hors de READY_ROLES serait affiché sans pouvoir être donné).
+  const ROLE_ORDER = ['admin', 'photographe', 'moderateur', 'relecteur'];
+  const READY_ROLES = new Set(ROLE_ORDER);
   const STATUS_FR = { actif: 'actif', en_attente: 'en attente', desactive: 'désactivé' };
   app.get('/admin/comptes', P('comptes.gerer'), async (request, reply) => render(request, reply, 'accounts', {
     title: request.t('Comptes et rôles'), accounts: app.accounts.list(), authors: repo.authors(), me: request.session.sub,
@@ -738,7 +790,7 @@ export default async function adminRoutes(app) {
   app.get('/admin/recherche.json', P('admin.acceder'), async (request, reply) => {
     reply.header('cache-control', 'no-store');
     return {
-      photos: repo.photos().map(p => ({ id: p.id, title: p.title, category: p.category, place: p.place, status: p.status, thumb: rendered(p) ? thumb(p) : null })),
+      photos: request.mine('photos.voir', repo.photos()).map(p => ({ id: p.id, title: p.title, category: p.category, place: p.place, status: p.status, thumb: rendered(p) ? thumb(p) : null })),
       series: repo.categories().map(c => ({ id: c.id, name: c.name, slug: c.slug, count: c.count })),
     };
   });
@@ -749,12 +801,13 @@ export default async function adminRoutes(app) {
     const byIdMap = new Map(repo.photos().map(p => [p.id, withReady(p)]));
     const photos = ids.map(id => byIdMap.get(id)).filter(Boolean);
     return render(request, reply, 'batch', {
-      title: request.t('Compléter et publier'), photos, ids: photos.map(p => p.id), categories: repo.categories(), authors: repo.authors(),
+      title: request.t('Compléter et publier'), photos, ids: photos.map(p => p.id), categories: repo.categories(), authors: request.mine('photos.modifier', repo.authors(), 'id'),
       errors: {}, values: {}, ...extra,
     });
   };
   app.get('/admin/photos/lot', P('photos.textes'), async (request, reply) => {
-    const ids = lotIds(request.query.ids);
+    const visible = new Set(request.mine('photos.voir', repo.photos()).map(p => p.id));
+    const ids = lotIds(request.query.ids).filter(id => visible.has(id));
     if (!ids.length) return reply.redirect('/admin/photos?statut=draft', 303);
     return lotPage(request, reply, ids);
   });
@@ -762,7 +815,7 @@ export default async function adminRoutes(app) {
   // Sans JavaScript : tout le tableau est envoyé d'un coup (champs titre_<id>, serie_<id>…).
   app.post('/admin/photos/lot', W('photos.textes'), async (request, reply) => {
     const body = request.body || {};
-    const ids = repo.existingIds(lotIds(body.ids));
+    const ids = repo.existingIds(lotIds(body.ids)).filter(id => request.owns('photos.voir', repo.photo(id)?.author_id));
     if (body.publish === '1' && !request.can('photos.publier')) return app.forbid(request, reply);
     if (!request.can('photos.modifier') && ids.some(id => touchesMore(repo.photo(id), { category_id: body[`category_id_${id}`], taken_on: body[`taken_on_${id}`] }))) return app.forbid(request, reply);
     const errors = {};
@@ -800,6 +853,7 @@ export default async function adminRoutes(app) {
   app.post('/admin/photos/:id/champs', W('photos.textes'), async (request, reply) => {
     const id = byId(request.params.id);
     if (touchesMore(repo.photo(id), request.body || {}) && !request.can('photos.modifier')) return app.forbid(request, reply);
+    if (request.body?.author_id !== undefined && !request.owns('photos.modifier', Number(request.body.author_id))) return app.forbid(request, reply);
     try {
       const p = repo.patchPhoto(id, request.body || {});
       if (!p) return reply.code(404).send({ error: request.t('Photo introuvable.') });
@@ -822,7 +876,8 @@ export default async function adminRoutes(app) {
     const body = request.body || {};
     const json = !request.headers.accept?.includes('text/html');
     const back = safeBack(request, '/admin/photos');
-    const ids = repo.existingIds(body.ids);
+    // Portée « les miennes » : seules ses photos sont touchées.
+    const ids = repo.existingIds(body.ids).filter(id => request.owns('photos.voir', repo.photo(id)?.author_id));
     const n = ids.length;
     const t = request.t;
     const photosWord = n > 1 ? t('{n} photos', { n }) : t('{n} photo', { n });
@@ -951,6 +1006,7 @@ export default async function adminRoutes(app) {
 
   // Réordonnancement par glisser-déposer (fetch JSON, en-tête x-csrf-token).
   app.post('/admin/photos/order', W('photos.modifier'), async (request, reply) => {
+    if (!request.scope('photos.modifier')?.all) return app.forbid(request, reply);      // l'ordre de la galerie touche toutes les photos
     try {
       repo.orderPhotos(Array.isArray(request.body?.ids) ? request.body.ids : []);
     } catch (err) {
@@ -964,7 +1020,7 @@ export default async function adminRoutes(app) {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
     return render(request, reply, 'photo', {
-      title: photo.title, photo, values: { ...photo, city_label: photo.city_name ? cities.label({ name: photo.city_name, cc: photo.city_cc }) : '' }, errors: {}, categories: repo.categories(), authors: repo.authors(),
+      title: photo.title, photo, values: { ...photo, city_label: photo.city_name ? cities.label({ name: photo.city_name, cc: photo.city_cc }) : '' }, errors: {}, categories: repo.categories(), authors: request.mine('photos.modifier', repo.authors(), 'id'),
       ...photoExtras(photo, request.t),
     });
   });
@@ -974,6 +1030,7 @@ export default async function adminRoutes(app) {
     if (!photo) return reply.callNotFound();
     const body = request.body || {};
     if ((body.status === 'published' ? 'published' : 'draft') !== photo.status && !request.can('photos.publier')) return app.forbid(request, reply);
+    if (!request.owns('photos.modifier', Number(body.author_id))) return app.forbid(request, reply);          // pas à un autre photographe
     try {
       // Publier une photo à vérifier : confirmation explicite exigée, puis gardée (le blocage, lui, est refusé plus bas).
       const publishing = body.status === 'published' && photo.status !== 'published';
@@ -994,7 +1051,7 @@ export default async function adminRoutes(app) {
       if (!(err instanceof ValidationError)) throw err;
       reply.code(422);
       return render(request, reply, 'photo', {
-        title: photo.title, photo, values: { ...photo, ...err.values }, errors: err.errors, categories: repo.categories(), authors: repo.authors(),
+        title: photo.title, photo, values: { ...photo, ...err.values }, errors: err.errors, categories: repo.categories(), authors: request.mine('photos.modifier', repo.authors(), 'id'),
         ...photoExtras(photo, request.t),
       });
     }
@@ -1096,6 +1153,7 @@ export default async function adminRoutes(app) {
   });
 
   app.post('/admin/photos/:id/move', W('photos.modifier'), async (request, reply) => {
+    if (!request.scope('photos.modifier')?.all) return app.forbid(request, reply);      // l'ordre de la galerie touche toutes les photos
     repo.movePhoto(byId(request.params.id), request.body?.dir);
     return reply.redirect(`/admin/photos?vue=liste#photo-${byId(request.params.id)}`, 303);   // « Monter » et « Descendre » sont dans la vue liste
   });

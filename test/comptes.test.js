@@ -23,20 +23,20 @@ function sessionFor(ctx, sub) {
   return url => ctx.app.inject({ url, cookies: { session: token }, headers: { accept: 'text/html' } });
 }
 
-test('comptes : en attente, rôle donné puis retiré avec effet immédiat, Photographe pas encore proposé', async t => {
+test('comptes : en attente, rôle donné puis retiré avec effet immédiat ; les quatre rôles proposés', async t => {
   const c = await admin(t);
   c.app.accounts.login({ sub: 'zitadel-camille', name: 'Camille', email: 'camille@example.org' });
   assert.match((await c.get('/admin')).body, /1 compte en attente d’un rôle/);
   const page = (await c.get('/admin/comptes')).body;
   assert.match(page, /Camille/);
   assert.match(page, /en attente/);
-  assert.match(page, /value="photographe" disabled/);
+  assert.match(page, /value="photographe">/);                               // proposé depuis l'étape 3
   const camille = c.app.accounts.bySub('zitadel-camille');
   const as = sessionFor(c, 'zitadel-camille');
   assert.equal((await as('/admin')).statusCode, 403);
   assert.match((await as('/admin')).body, /Compte en attente/);
-  // Rôle Modérateur (et Photographe, ignoré tant qu'il n'est pas proposé).
-  const r = await c.post(`/admin/comptes/${camille.id}`, { roles: ['moderateur', 'photographe'], author_id: '' });
+  // Rôle Modérateur ; un rôle inconnu est ignoré.
+  const r = await c.post(`/admin/comptes/${camille.id}`, { roles: ['moderateur', 'pirate'], author_id: '' });
   assert.equal(r.statusCode, 303);
   assert.deepEqual(c.app.accounts.bySub('zitadel-camille').roles, ['moderateur']);
   assert.equal(c.app.accounts.bySub('zitadel-camille').status, 'actif');

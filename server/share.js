@@ -35,8 +35,9 @@ export function createShares({ db, now = () => new Date() }) {
       return true;
     },
     // Partages d'une période : par moyen, et les photos les plus partagées.
-    byVia: (from, to) => db.prepare('SELECT via, SUM(n) AS n FROM photo_shares WHERE day BETWEEN ? AND ? GROUP BY via ORDER BY n DESC').all(from, to),
-    topPhotos: (from, to, limit = 10) => db.prepare('SELECT photo_id AS id, SUM(n) AS n FROM photo_shares WHERE day BETWEEN ? AND ? GROUP BY photo_id ORDER BY n DESC LIMIT ?').all(from, to, limit),
+    // authorId : seulement les photos de ce photographe (portée « les miennes »).
+    byVia: (from, to, authorId = null) => db.prepare('SELECT s.via, SUM(s.n) AS n FROM photo_shares s JOIN photos p ON p.id = s.photo_id WHERE s.day BETWEEN ? AND ? AND (? IS NULL OR p.author_id = ?) GROUP BY s.via ORDER BY n DESC').all(from, to, authorId, authorId),
+    topPhotos: (from, to, limit = 10, authorId = null) => db.prepare('SELECT s.photo_id AS id, SUM(s.n) AS n FROM photo_shares s JOIN photos p ON p.id = s.photo_id WHERE s.day BETWEEN ? AND ? AND (? IS NULL OR p.author_id = ?) GROUP BY s.photo_id ORDER BY n DESC LIMIT ?').all(from, to, authorId, authorId, limit),
     forPhoto: id => db.prepare('SELECT COALESCE(SUM(n), 0) FROM photo_shares WHERE photo_id = ?').pluck().get(id),
   };
 }

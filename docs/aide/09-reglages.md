@@ -62,8 +62,8 @@ Tant qu'il manque l'essentiel (noms, adresse, e-mail, responsable), « Aujourd'h
   - **Administrateur** : tout, y compris les comptes et le journal.
   - **Modérateur** : publie et dépublie (site et Instagram), traite les signalements, corrige les textes ; jamais les données personnelles.
   - **Relecteur** : relit et traduit les textes.
-  - **Photographe** : ses photos, ses sorties et ses personnes ; proposé à la prochaine étape, quand l'admin ne montrera à chacun que ce qui est à lui.
-- **Photographe lié :** sert aux valeurs par défaut (import, app Terrain). Un photographe ne peut être lié qu'à un seul compte.
+  - **Photographe** : seulement **ses** photos, ses sorties et les personnes qu'il a rencontrées (l'accord est donné par sortie et par photographe). Il importe, modifie et supprime ses photos (elles restent sa propriété), voit les demandes RGPD qui le concernent, utilise l'app Terrain et ses cartes ; il ne publie pas, et ne voit ni Instagram, ni les réglages, ni la fréquentation du site (ses Statistiques ne montrent que ses photos). Ce qui est à l'autre photographe n'existe pas pour lui, même en tapant l'adresse. Une personne rencontrée par les deux ne lui apparaît qu'avec ses propres rencontres ; la rapprocher, la séparer, l'exporter ou l'effacer reste à l'administrateur.
+- **Photographe lié :** sert aux valeurs par défaut (import, app Terrain) et décide de ce que voit un compte Photographe ; sans photographe lié, un compte Photographe ne voit rien. Un photographe ne peut être lié qu'à un seul compte.
 - **Désactivé :** le compte ne peut plus se connecter, et sa session en cours perd l'accès aussitôt.
 - **Supprimer ce compte :** le compte et ses sessions sont effacés ; s'il se reconnecte, il repart « en attente ».
 - **Garde-fous :** il reste toujours au moins un administrateur actif ; on ne peut ni se désactiver ni se supprimer soi-même ; les comptes listés dans `ADMIN_SUBS` (configuration du serveur, marqués « protégé ») restent administrateurs quoi qu'il arrive.

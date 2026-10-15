@@ -32,19 +32,20 @@
 <% p.meetings.forEach(e => { const url = e.author_id && dayOf(e) ? it.outingUrl(e.author_id, dayOf(e), e.met_time) : null; %>
     <li><span class="t"><span class="enc-who"><a href="/admin/rencontres/<%= e.id %>"><%= e.ref || t('Sans carte') %></a> <span class="mono"><%= e.author || '' %><%= dayOf(e) ? ` · ${dayOf(e)}` : '' %><%= e.met_time ? ` · ${e.met_time}` : '' %></span><% if (url) { %> <a class="more" href="<%= url %>"><%= t('sortie') %></a><% } %></span></span>
       <% if (e.refused) { %><span class="enc-tag no"><%= t('refus') %></span><% } else if (e.consent) { %><span class="enc-tag ok"><%= e.consent_source === 'en_ligne' && !e.verified ? t('en ligne, non vérifié : {usages}', { usages: usages(e.consent) }) : t('accord : {usages}', { usages: usages(e.consent) }) %></span><% } else { %><span class="enc-tag"><%= t('sans décision') %></span><% } %>
-<% if (p.meetings.length > 1) { %>      <form method="post" action="/admin/personnes/<%= p.id %>/detacher"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="rencontre" value="<%= e.id %>"><button class="linkbtn" type="submit"><%= t('Ce n’est pas elle') %></button></form>
+<% if (p.meetings.length > 1 && it.canManage) { %>      <form method="post" action="/admin/personnes/<%= p.id %>/detacher"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="rencontre" value="<%= e.id %>"><button class="linkbtn" type="submit"><%= t('Ce n’est pas elle') %></button></form>
 <% } %>    </li>
 <% }) %>
   </ul>
-  <div class="pp-actions">
-    <a class="btn" href="/admin/rencontre">＋ <%= t('Nouvelle rencontre sur le téléphone') %></a>
-    <form class="row" method="post" action="/admin/personnes/<%= p.id %>/sortie">
+<% if (p.shared) { %>  <p class="hint"><%= t('Cette personne a aussi été photographiée par l’autre photographe : vous ne voyez que vos rencontres, et seul un administrateur peut la rapprocher, la séparer ou la modifier.') %></p>
+<% } %>  <div class="pp-actions">
+<% if (it.can('terrain.app')) { %>    <a class="btn" href="/admin/rencontre">＋ <%= t('Nouvelle rencontre sur le téléphone') %></a>
+<% } %><% if (it.canManage) { %>    <form class="row" method="post" action="/admin/personnes/<%= p.id %>/sortie">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
       <label><%= t('Était aussi là lors de la sortie') %> <select name="sortie"><% it.outings.forEach(o => { %><option value="<%= o.author.id %>|<%= o.day %>|<%= o.starts %>"><%= o.day %> · <%= o.author.name %><%= o.place ? ` · ${o.place}` : '' %><%= o.starts !== '00:00' ? ` · ${t('à partir de {time}', { time: o.starts })}` : '' %></option><% }) %></select></label>
       <button class="btn ghost" type="submit"><%= t('Ajouter la rencontre') %></button>
     </form>
-  </div>
-  <details class="pp-attach">
+<% } %>  </div>
+<% if (it.canManage) { %>  <details class="pp-attach">
     <summary><%= t('Rattacher une rencontre existante') %> <span class="mono"><%= t('la même personne, saisie à part') %></span></summary>
     <form method="get" action="/admin/personnes/<%= p.id %>" role="search" class="row"><input type="search" name="q" value="<%= it.search %>" placeholder="<%= t('Référence, nom, adresse…') %>" aria-label="<%= t('Chercher une rencontre') %>"> <button class="btn ghost" type="submit"><%= t('Chercher') %></button></form>
 <% if (it.attachable.length) { %>
@@ -54,7 +55,7 @@
 <% }) %>    </ul>
 <% } else { %>    <p class="hint"><%= it.search ? t('Aucune autre rencontre pour cette recherche.') : t('Aucune autre rencontre.') %></p><% } %>
   </details>
-</section>
+<% } %></section>
 
 <section class="panel" aria-labelledby="pp-photos">
   <h2 id="pp-photos"><%= t('Photos') %> <span class="mono"><%= t('liées à l’une de ses rencontres') %></span></h2>
@@ -63,7 +64,7 @@
 <% p.photos.forEach(ph => { %>    <li><a class="o-photo" href="/admin/photos/<%= ph.id %>"><% if (ph.ready) { %><%~ it.picture(ph, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></a><a class="o-title" href="/admin/photos/<%= ph.id %>"><%= ph.title %></a><span class="mono"><%= ph.status === 'published' ? t('publiée') : t('brouillon') %></span></li>
 <% }) %>  </ul>
 <% } else { %>  <p class="hint"><%= t('Aucune photo liée : les photos de ses sorties la concernent déjà si elles ont un visage ; liez celles où elle figure.') %></p><% } %>
-  <details class="pp-attach">
+<% if (it.canManage) { %>  <details class="pp-attach">
     <summary><%= t('Lier des photos où elle figure') %> <span class="mono"><%= t('rattachées à sa rencontre de la sortie de chaque photo (créée sans décision si besoin)') %></span></summary>
     <form method="get" action="/admin/personnes/<%= p.id %>" role="search" class="row"><input type="search" name="q" value="<%= it.search %>" placeholder="<%= t('Titre, lieu…') %>" aria-label="<%= t('Chercher une photo') %>"> <button class="btn ghost" type="submit"><%= t('Chercher') %></button></form>
     <form method="post" action="/admin/personnes/<%= p.id %>/photos">
@@ -74,13 +75,13 @@
       <p class="actions"><button class="btn ghost" type="submit"><%= t('Lier les photos cochées') %></button></p>
     </form>
   </details>
-</section>
+<% } %></section>
 
 <section class="panel" id="droits" aria-labelledby="pp-rights">
   <h2 id="pp-rights"><%= t('Droits de la personne') %> <span class="mono"><%= t('RGPD, toutes rencontres confondues') %></span></h2>
 <% if (p.rights) { %>  <p class="enc-tag no"><%= p.rights.rights_request === 'effacement' ? t('Demande d’effacement en cours (rencontre {ref}) : traitez-la sur la fiche de la rencontre.', { ref: p.rights.ref || t('sans carte') }) : t('Demande d’accès en cours (rencontre {ref}) : traitez-la sur la fiche de la rencontre.', { ref: p.rights.ref || t('sans carte') }) %></p><% } %>
-  <p class="actions"><a class="btn ghost" href="/admin/personnes/<%= p.id %>/export.zip"><%= t('Exporter ses données (.zip)') %></a></p>
-  <details class="danger">
+<% if (it.can('personnes.exporter')) { %>  <p class="actions"><a class="btn ghost" href="/admin/personnes/<%= p.id %>/export.zip"><%= t('Exporter ses données (.zip)') %></a></p>
+<% } %><% if (it.can('personnes.effacer')) { %>  <details class="danger">
     <summary><%= t('Effacer cette personne') %></summary>
     <form method="post" action="/admin/personnes/<%= p.id %>/effacer">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
@@ -89,4 +90,5 @@
       <p class="actions"><button class="btn danger" type="submit"><%= t('Effacer définitivement') %></button></p>
     </form>
   </details>
-</section>
+<% } %><% if (!it.can('personnes.effacer')) { %>  <p class="hint"><%= t('L’export et l’effacement des données sont faits par un administrateur.') %></p>
+<% } %></section>
