@@ -62,8 +62,8 @@ Solange das Wesentliche fehlt (Namen, Adresse, E-Mail, Verantwortlicher), weist 
   - **Administrator**: alles, auch Konten und Protokoll.
   - **Moderator**: veröffentlicht und zieht zurück (Website und Instagram), bearbeitet Meldungen, korrigiert Texte; nie personenbezogene Daten.
   - **Korrektor**: liest Texte Korrektur und übersetzt sie.
-  - **Fotograf**: eigene Fotos, Ausflüge und Personen; im nächsten Schritt verfügbar, wenn die Verwaltung jedem nur das Seine zeigt.
-- **Verknüpfter Fotograf:** dient für Voreinstellungen (Import, App Unterwegs). Ein Fotograf kann nur mit einem Konto verknüpft werden.
+  - **Fotograf**: nur **seine eigenen** Fotos, Ausflüge und die Personen, denen er begegnet ist (die Einwilligung gilt pro Ausflug und pro Fotograf). Er importiert, bearbeitet und löscht seine Fotos (sie bleiben sein Eigentum), sieht die DSGVO-Anfragen, die ihn betreffen, nutzt die App Unterwegs und seine Karten; er veröffentlicht nicht und sieht weder Instagram noch die Einstellungen noch die Besucherzahlen der Website (seine Statistiken zeigen nur seine Fotos). Was dem anderen Fotografen gehört, existiert für ihn nicht, auch nicht über die Adresse. Eine Person, der beide begegnet sind, erscheint ihm nur mit seinen eigenen Begegnungen; sie zusammenzuführen, zu trennen, zu exportieren oder zu löschen bleibt dem Administrator überlassen.
+- **Verknüpfter Fotograf:** dient für Voreinstellungen (Import, App Unterwegs) und bestimmt, was ein Fotografen-Konto sieht; ohne verknüpften Fotografen sieht ein Fotografen-Konto nichts. Ein Fotograf kann nur mit einem Konto verknüpft werden.
 - **Deaktiviert:** Das Konto kann sich nicht mehr anmelden, und seine laufende Sitzung verliert sofort den Zugriff.
 - **Dieses Konto löschen:** Konto und Sitzungen werden gelöscht; meldet es sich erneut an, beginnt es wieder wartend.
 - **Schutzmaßnahmen:** Es gibt immer mindestens einen aktiven Administrator; man kann sich nicht selbst deaktivieren oder löschen; die in `ADMIN_SUBS` aufgeführten Konten (Serverkonfiguration, als „geschützt“ markiert) bleiben in jedem Fall Administratoren.

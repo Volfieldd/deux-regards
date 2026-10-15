@@ -334,8 +334,8 @@ export function createAdminRepo(db) {
       return map;
     },
     // Photos importées par mois, sur les `months` derniers mois (le plus ancien d'abord).
-    importsByMonth(months = 12) {
-      const rows = db.prepare("SELECT substr(created_at, 1, 7) AS m, COUNT(*) AS n FROM photos GROUP BY m").all();
+    importsByMonth(months = 12, authorId = null) {
+      const rows = db.prepare("SELECT substr(created_at, 1, 7) AS m, COUNT(*) AS n FROM photos WHERE (? IS NULL OR author_id = ?) GROUP BY m").all(authorId, authorId);
       const count = Object.fromEntries(rows.map(r => [r.m, r.n]));
       const now = new Date();
       return Array.from({ length: months }, (_, i) => {
@@ -344,8 +344,8 @@ export function createAdminRepo(db) {
         return { month: m, n: count[m] || 0 };
       });
     },
-    recent: (n = 5) => db.prepare(`SELECT p.id, p.title, p.status, p.updated_at, p.file, p.width, p.height, p.variant_key, a.name AS author
-      FROM photos p JOIN authors a ON a.id = p.author_id ORDER BY p.updated_at DESC, p.id DESC LIMIT ?`).all(n),
+    recent: (n = 5, authorId = null) => db.prepare(`SELECT p.id, p.title, p.status, p.updated_at, p.file, p.width, p.height, p.variant_key, p.author_id, a.name AS author
+      FROM photos p JOIN authors a ON a.id = p.author_id WHERE (? IS NULL OR p.author_id = ?) ORDER BY p.updated_at DESC, p.id DESC LIMIT ?`).all(authorId, authorId, n),
     moveCategory(id, dir) { move('categories', q.categories.all(), id, dir); },
     // Une série qui contient des photos n'est supprimée qu'en les déplaçant vers une autre série.
     deleteCategory(id, { moveTo = null } = {}) {

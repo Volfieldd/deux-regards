@@ -1,6 +1,6 @@
 # Connexion et comptes
 
-L'administration est réservée aux comptes qui ont un rôle (Administrateur, Modérateur, Relecteur ; Photographe à venir). L'application **ne stocke et ne gère aucun mot de passe** : la connexion passe par OpenID Connect, avec Zitadel Cloud comme fournisseur. Google peut y être branché comme fournisseur externe.
+L'administration est réservée aux comptes qui ont un rôle (Administrateur, Photographe, Modérateur, Relecteur). L'application **ne stocke et ne gère aucun mot de passe** : la connexion passe par OpenID Connect, avec Zitadel Cloud comme fournisseur. Google peut y être branché comme fournisseur externe.
 
 ## Parcours de connexion
 

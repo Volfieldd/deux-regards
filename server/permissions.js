@@ -3,8 +3,8 @@
 // refusée au démarrage. Un rôle est un paquet de permissions ; certaines ont une portée : « tout » ou « les miennes »
 // (ce qui appartient au photographe lié au compte). Les rôles vivent dans la base du site ; l'IdP ne fait que
 // transporter l'identité.
-// Étape 1 (socle) : tous les comptes existants sont administrateurs ; la portée « les miennes » est déclarée ici et
-// sera appliquée aux listes à l'étape 3.
+// Portée « les miennes » : le photographe lié au compte (page « Comptes et rôles ») ; un compte sans photographe lié
+// n'a rien à lui. Ce qui n'est pas à lui n'existe pas pour lui (404), et les listes sont filtrées à la source.
 
 // Permission → { scoped : peut se limiter à « les miennes » }.
 export const PERMISSIONS = {
@@ -27,8 +27,8 @@ export const PERMISSIONS = {
   'personnes.exporter': {},
   'personnes.effacer': {},             // effacer, et marquer une demande RGPD comme traitée
   'personnes.offrir': { scoped: true },
-  'terrain.app': {},
-  'terrain.cartes': {},
+  'terrain.app': { scoped: true },      // app Rencontre : les rencontres sont enregistrées pour son photographe
+  'terrain.cartes': { scoped: true },   // cartes d'accord et QR de son photographe
   'instagram.voir': {},
   'instagram.file': {},
   'instagram.publier': {},             // publier maintenant (droit à part)
@@ -53,7 +53,8 @@ export const ROLES = {
   photographe: {
     label: 'Photographe',
     perms: {
-      ...all(['admin.acceder', 'photos.importer', 'terrain.app', 'terrain.cartes']),
+      ...all(['admin.acceder', 'photos.importer']),
+      'terrain.app': OWN, 'terrain.cartes': OWN,
       'photos.voir': OWN, 'photos.textes': OWN, 'photos.modifier': OWN, 'photos.supprimer': OWN, 'photos.original': OWN,
       'sorties.voir': OWN, 'sorties.gerer': OWN,
       'personnes.voir': OWN, 'personnes.gerer': OWN, 'personnes.refus': OWN, 'personnes.demandes': OWN, 'personnes.offrir': OWN,
@@ -100,4 +101,16 @@ export function registerPermissions(app, { renderError }) {
     const perm = request.routeOptions.config?.perm;
     if (!perm || !request.can(perm)) return forbid(request, reply);      // fermé par défaut
   });
+  // Portée d'une permission pour ce compte : null (refusée), { all: true }, ou { all: false, authorId } (le photographe
+  // lié ; aucun : -1, rien n'est à lui).
+  app.decorateRequest('scope', function (perm) {
+    const g = this.can(perm);
+    if (!g) return null;
+    if (g === ALL) return { all: true };
+    return { all: false, authorId: app.accounts?.authorIdOf(this.session?.sub) ?? -1 };
+  });
+  // Ce qui appartient au photographe authorId est-il accessible pour cette permission ?
+  app.decorateRequest('owns', function (perm, authorId) { const s = this.scope(perm); return Boolean(s && (s.all || s.authorId === authorId)); });
+  // Une liste réduite à ce qui est accessible (key : la colonne du photographe).
+  app.decorateRequest('mine', function (perm, list, key = 'author_id') { const s = this.scope(perm); return !s ? [] : s.all ? list : list.filter(x => x[key] === s.authorId); });
 }

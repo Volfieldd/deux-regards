@@ -53,7 +53,7 @@ export function createPeople({ db, encounters, now = () => Date.now() }) {
     const named = meetings.find(e => e.name);
     const face = meetings.find(e => e.hasPortrait);
     const decided = meetings.filter(e => e.refused || e.consent).sort((a, b) => Math.max(b.refused_at || 0, b.consent_at || 0) - Math.max(a.refused_at || 0, a.consent_at || 0));
-    const photos = db.prepare(`SELECT DISTINCT p.id, p.title, p.slug, p.status, p.file, p.width, p.height, p.variant_key, p.taken_on FROM encounter_photos ep
+    const photos = db.prepare(`SELECT DISTINCT p.id, p.title, p.slug, p.status, p.file, p.width, p.height, p.variant_key, p.taken_on, p.author_id FROM encounter_photos ep
       JOIN photos p ON p.id = ep.photo_id JOIN encounters e ON e.id = ep.encounter_id WHERE e.person_id = ? ORDER BY p.position, p.id`).all(id);
     return {
       id, meetings, name: named?.name || '', ref: meetings[0].ref, faceFrom: face?.id ?? null, refused: meetings.some(e => e.refused),

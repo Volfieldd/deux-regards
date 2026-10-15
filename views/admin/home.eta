@@ -64,19 +64,23 @@
 <% } %>
     </section>
 
+<% if (it.can('site.textes')) { %>
     <section class="panel" aria-labelledby="site-title">
       <h2 id="site-title"><%= t('Le site, en ce moment') %></h2>
       <div class="filmstrip"><% it.hero.forEach(p => { %><%~ it.picture(p, { sizes: '140px', alt: '' }) %><% }) %></div>
       <p class="hint"><%= it.heroChosen ? t('Ouverture : {photos}, dans l’ordre choisi', { photos: photosN(it.hero.length) }) : t('Ouverture : {photos} (les premières de la galerie)', { photos: photosN(it.hero.length) }) %> · <%= t('thème {theme}', { theme: it.themeLabel || '—' }) %> · <a class="more" href="/admin/site#ouverture"><%= t('modifier') %></a></p>
     </section>
+<% } %>
 
     <section class="panel" aria-label="<%= t('Chiffres') %>">
       <div class="figures">
-        <a href="/admin/statistiques"><b><%= it.visitorsToday %></b><span><%= it.visitorsToday > 1 ? t('visiteurs aujourd’hui') : t('visiteur aujourd’hui') %></span></a>
+<% if (it.visitorsToday != null) { %>        <a href="/admin/statistiques"><b><%= it.visitorsToday %></b><span><%= it.visitorsToday > 1 ? t('visiteurs aujourd’hui') : t('visiteur aujourd’hui') %></span></a>
+<% } %>
         <a href="/admin/photos?statut=published"><b><%= it.counts.published %></b><span><%= t('photos publiées') %></span></a>
         <a href="/admin/photos?statut=draft"><b><%= it.counts.draft %></b><span><%= t('brouillons') %></span></a>
-        <a href="/admin/series"><b><%= it.categories %></b><span><%= t('séries') %></span></a>
-        <a href="/admin/auteurs"><b><%= it.authors.length %></b><span><%= it.authors.length > 1 ? t('photographes') : t('photographe') %></span></a>
+<% if (it.can('series.gerer')) { %>        <a href="/admin/series"><b><%= it.categories %></b><span><%= t('séries') %></span></a>
+<% } %><% if (it.can('photographes.gerer')) { %>        <a href="/admin/auteurs"><b><%= it.authors.length %></b><span><%= it.authors.length > 1 ? t('photographes') : t('photographe') %></span></a>
+<% } %>
       </div>
     </section>
 
@@ -104,6 +108,7 @@
       </ul>
     </section>
 
+<% if (it.can('photos.modifier') && it.allPhotos) { %>
     <section class="panel" aria-labelledby="proofs-title">
       <h2 id="proofs-title"><%= t('Preuves d’antériorité') %></h2>
 <% if (!it.tsa.url) { %>
@@ -116,6 +121,7 @@
 <% } %>
 <% } %>
     </section>
+<% } %>
 
     <section class="panel wide2" aria-labelledby="account-title">
       <h2 id="account-title"><%= t('Votre compte') %></h2>

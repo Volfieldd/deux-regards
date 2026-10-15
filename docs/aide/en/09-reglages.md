@@ -62,8 +62,8 @@ As long as the essentials are missing (names, address, email, person responsible
   - **Administrator**: everything, including accounts and the log.
   - **Moderator**: publishes and unpublishes (site and Instagram), handles reports, corrects texts; never personal data.
   - **Proofreader**: proofreads and translates texts.
-  - **Photographer**: their photos, outings and people; offered in the next step, when the admin shows each person only what is theirs.
-- **Linked photographer:** used for defaults (import, Field app). A photographer can only be linked to one account.
+  - **Photographer**: only **their own** photos, outings and the people they met (consent is given per outing and per photographer). They import, edit and delete their photos (which remain their property), see the GDPR requests that concern them, use the Field app and their cards; they do not publish, and see neither Instagram, nor settings, nor site traffic (their Statistics show only their photos). What belongs to the other photographer does not exist for them, even by typing the address. A person met by both only appears with their own encounters; merging, splitting, exporting or erasing them is left to the administrator.
+- **Linked photographer:** used for defaults (import, Field app) and decides what a Photographer account sees; with no linked photographer, a Photographer account sees nothing. A photographer can only be linked to one account.
 - **Deactivated:** the account can no longer sign in, and its current session loses access at once.
 - **Delete this account:** the account and its sessions are erased; if it signs in again, it starts over as pending.
 - **Safeguards:** there is always at least one active administrator; you cannot deactivate or delete yourself; accounts listed in `ADMIN_SUBS` (server configuration, marked “protected”) remain administrators whatever happens.

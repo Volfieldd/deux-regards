@@ -274,5 +274,33 @@
  "Rôles : {roles}": {
   "en": "Roles: {roles}",
   "de": "Rollen: {roles}"
+ },
+ "Vos photos : ouvertures en grand et partages.": {
+  "en": "Your photos: full-size views and shares.",
+  "de": "Ihre Fotos: Großansichten und Teilungen."
+ },
+ "ses photos, ses sorties, ses personnes ; ne publie pas": {
+  "en": "their own photos, outings and people; does not publish",
+  "de": "eigene Fotos, Ausflüge und Personen; veröffentlicht nicht"
+ },
+ "Le photographe lié sert aux valeurs par défaut (import, app Terrain) et décide de ce que voit un compte Photographe : seulement ses photos, ses sorties et ses personnes.": {
+  "en": "The linked photographer is used for defaults (import, Field app) and decides what a Photographer account sees: only their own photos, outings and people.",
+  "de": "Der verknüpfte Fotograf dient für Voreinstellungen (Import, App Unterwegs) und bestimmt, was ein Fotografen-Konto sieht: nur eigene Fotos, Ausflüge und Personen."
+ },
+ "Un compte est créé à la première connexion. Il reste « en attente » tant qu’aucun rôle ne lui est donné ; un rôle s’applique tout de suite, et le retirer aussi.": {
+  "en": "An account is created at first sign-in. It stays “pending” until it is given a role; a role takes effect at once, and so does removing it.",
+  "de": "Ein Konto wird bei der ersten Anmeldung angelegt. Es bleibt „wartend“, bis es eine Rolle erhält; eine Rolle gilt sofort, ebenso ihr Entzug."
+ },
+ "Photographe sans photographe lié : il ne voit rien tant qu’un photographe ne lui est pas relié.": {
+  "en": "Photographer with no linked photographer: they see nothing until a photographer is linked.",
+  "de": "Fotograf ohne verknüpften Fotografen: Er sieht nichts, bis ein Fotograf verknüpft ist."
+ },
+ "Cette personne a aussi été photographiée par l’autre photographe : vous ne voyez que vos rencontres, et seul un administrateur peut la rapprocher, la séparer ou la modifier.": {
+  "en": "This person was also photographed by the other photographer: you only see your own encounters, and only an administrator can merge, split or change them.",
+  "de": "Diese Person wurde auch vom anderen Fotografen fotografiert: Sie sehen nur Ihre Begegnungen, und nur ein Administrator kann sie zusammenführen, trennen oder ändern."
+ },
+ "L’export et l’effacement des données sont faits par un administrateur.": {
+  "en": "Exporting and erasing the data is done by an administrator.",
+  "de": "Export und Löschung der Daten übernimmt ein Administrator."
  }
 }

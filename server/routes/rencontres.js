@@ -23,6 +23,29 @@ async function photoFormat(buf) { try { return PHOTO_FORMATS.includes((await sha
 const FIELD = /^[a-z_]{1,30}$/;
 
 export function registerEncounters(app, { repo, render, P, W, done, failed, withReady }) {
+  // ---------- portée « les miennes » ----------
+  // L'accord est donné par sortie et par photographe : un photographe ne voit que ses rencontres, ses photos, et une
+  // personne seulement avec ce qui le concerne. Agir sur une personne partagée avec l'autre photographe (rapprocher,
+  // rattacher, séparer, ajouter à une sortie, lier des photos) reste à l'administrateur.
+  const dayOf = e => e.session_day || e.met_on || '';
+  const ownPerson = (request, person) => {
+    if (!person) return null;
+    const s = request.scope('personnes.voir');
+    if (!s) return null;
+    if (s.all) return person;
+    const meetings = person.meetings.filter(e => e.author_id === s.authorId);
+    if (!meetings.length) return null;
+    const decided = meetings.filter(e => e.refused || e.consent).sort((a, b) => Math.max(b.refused_at || 0, b.consent_at || 0) - Math.max(a.refused_at || 0, a.consent_at || 0));
+    return { ...person, meetings, name: meetings.find(e => e.name)?.name || '', ref: meetings[0].ref, faceFrom: meetings.find(e => e.hasPortrait)?.id ?? null,
+      refused: meetings.some(e => e.refused), latest: decided[0] || null, photos: person.photos.filter(p => p.author_id === s.authorId),
+      fresh: meetings.some(e => e.status === 'nouvelle'), rights: meetings.find(e => e.rights_request && !e.rights_done_at) || null,
+      days: [...new Set(meetings.map(dayOf).filter(Boolean))], suggestions: 0, shared: meetings.length < person.meetings.length };
+  };
+  // Toutes les rencontres de la personne sont-elles à ce photographe ? (sinon, l'administrateur s'en charge)
+  const exclusive = (request, person) => {
+    const s = request.scope('personnes.gerer');
+    return Boolean(s && person && (s.all || person.meetings.every(e => e.author_id === s.authorId)));
+  };
   const enc = app.encounters;
   const STATUS = { nouvelle: 'Nouvelle', en_cours: 'En cours', traitee: 'Traitée' };
   // Libellés et dates dans la langue de l'admin (t : request.t).
@@ -53,7 +76,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
 
   app.get('/admin/rencontres', P('personnes.voir'), async (request, reply) => {
     const status = Object.hasOwn(STATUS, request.query.statut) ? request.query.statut : undefined;
-    return page(request, reply, 'encounters', { title: request.t('Personnes photographiées'), list: enc.list({ status }), status, authors: repo.authors(), errors: {}, values: {} });
+    return page(request, reply, 'encounters', { title: request.t('Personnes photographiées'), list: request.mine('personnes.voir', enc.list({ status })), status, authors: request.mine('personnes.voir', repo.authors(), 'id'), errors: {}, values: {} });
   });
 
   function detail(request, reply, id, extra = {}) {
@@ -62,7 +85,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const search = String(request.query.q || '').slice(0, 100);
     return page(request, reply, 'encounter', {
       title: e.ref ? request.t('Rencontre {ref}', { ref: e.ref }) : request.t('Rencontre du {date}', { date: fmtOf(request.t)(e.created_at) }), e, events: enc.events(id),
-      photos: enc.photos(id).map(withReady), session: (s => ({ ...s, photos: s.photos.map(withReady) }))(enc.session(id)), candidates: candidates(e, search), search, authors: repo.authors(),
+      photos: enc.photos(id).map(withReady), session: (s => ({ ...s, photos: s.photos.map(withReady) }))(enc.session(id)), candidates: request.mine('photos.voir', candidates(e, search)), search, authors: request.mine('personnes.voir', repo.authors(), 'id'),
       code: e.ref ? enc.codeOf(e.ref) : null, shares: sharesOf(e, fmtOf(request.t)), errors: {}, values: null,
       outingUrl: e.author_id ? app.outings.urlOf(e.author_id, e.session_day || e.met_on, e.met_time) : null, ...extra,
     });
@@ -104,8 +127,11 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   const authorOf = request => repo.authorBySub(request.session.sub) || null;
   function appPage(request, reply, extra = {}) {
     // Photographe : celui choisi sur l'accueil Terrain (?photographe=), sinon celui du compte.
-    const author = repo.authors().find(a => a.id === Number(request.query?.photographe)) || authorOf(request);
-    const authors = repo.authors().map(a => ({ ...a, prefix: prefixOf(a), next: `${prefixOf(a)}-${String(nextNumber(prefixOf(a))).padStart(4, '0')}` }));
+    // Portée « les miennes » : seulement son photographe.
+    const allowed = request.mine('terrain.app', repo.authors(), 'id');
+    const own = authorOf(request);
+    const author = allowed.find(a => a.id === Number(request.query?.photographe)) || allowed.find(a => a.id === own?.id) || (request.scope('terrain.app').all ? null : allowed[0]) || null;
+    const authors = allowed.map(a => ({ ...a, prefix: prefixOf(a), next: `${prefixOf(a)}-${String(nextNumber(prefixOf(a))).padStart(4, '0')}` }));
     // « Déjà rencontrée ? » : les personnes vues par ce photographe ces 30 derniers jours.
     const since = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(Date.now() - 30 * 864e5);
     const recent = author ? app.db.prepare(`SELECT person_id, MAX(COALESCE(NULLIF(session_day, ''), met_on)) AS d FROM encounters WHERE author_id = ? AND person_id IS NOT NULL
@@ -120,8 +146,9 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   // du jour (les personnes déjà vues aujourd'hui et leur décision), et l'admin complet.
   const parisDay = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(Date.now());
   const fieldAuthor = request => {
-    const authors = repo.authors();
-    return { authors, author: authors.find(a => a.id === Number(request.query.photographe)) || authorOf(request) || null };
+    const authors = request.mine('terrain.app', repo.authors(), 'id');
+    const own = authorOf(request);
+    return { authors, author: authors.find(a => a.id === Number(request.query.photographe)) || authors.find(a => a.id === own?.id) || (request.scope('terrain.app').all ? null : authors[0]) || null };
   };
   app.get('/admin/rencontre/accueil', P('terrain.app'), async (request, reply) => {
     const { authors, author } = fieldAuthor(request);
@@ -178,7 +205,9 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       error = request.t('Envoi invalide.');
     }
     if (!checked) return reply.code(403).send(request.t('Jeton CSRF invalide.'));
-    const author = repo.authors().find(a => a.id === Number(body.author_id)) || authorOf(request);
+    const allowed = request.mine('terrain.app', repo.authors(), 'id');
+    const author = allowed.find(a => a.id === Number(body.author_id)) || allowed.find(a => a.id === authorOf(request)?.id) || (request.scope('terrain.app').all ? null : allowed[0]);
+    if (!author && !request.scope('terrain.app').all) return app.forbid(request, reply);
     try {
       if (error) throw new EncounterError({ portrait: error });
       if (portrait && !(await photoFormat(portrait))) throw new EncounterError({ portrait: request.t('La photo doit être une image JPEG, PNG ou WebP.') });
@@ -196,7 +225,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   // photographe, le récapitulatif (envoyé par le serveur, ou prêt dans Mail).
   app.get('/admin/rencontre/:id/merci', P('terrain.app'), async (request, reply) => {
     const e = enc.get(byId(request.params.id));
-    if (!e || !e.ref) return reply.callNotFound();
+    if (!e || !e.ref || !request.owns('terrain.app', e.author_id)) return reply.callNotFound();
     const r = recap(e);
     const qr = await QRCode.toString(r.link, { type: 'svg', errorCorrectionLevel: 'Q', margin: 2 });
     const mailto = e.email ? `mailto:${e.email}?${new URLSearchParams({ subject: r.subject, body: r.text }).toString().replace(/\+/g, '%20')}` : null;
@@ -245,7 +274,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   // Ce qui part dans la rue : l'app sur le téléphone, les cartes d'accord, le QR des vêtements (une seule
   // composition, celle du dos avec le logo, à montrer telle quelle), et une liste de contrôle avant de partir.
   app.get('/admin/terrain', P('terrain.app'), async (request, reply) => {
-    const authors = repo.authors();
+    const authors = request.mine('terrain.app', repo.authors(), 'id');
     const mine = authorOf(request);
     const chosen = authors.find(a => a.id === Number(request.query.photographe)) || mine || authors[0] || null;
     const prefix = chosen ? prefixOf(chosen) : null;
@@ -263,13 +292,13 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   const prefixOf = a => a.card_prefix || a.slug.charAt(0).toUpperCase();
   const nextNumber = prefix => enc.nextNumber(prefix);
   function cardsPage(request, reply, extra = {}) {
-    const authors = repo.authors().map(a => ({ ...a, prefix: prefixOf(a), next: nextNumber(prefixOf(a)) }));
+    const authors = request.mine('terrain.cartes', repo.authors(), 'id').map(a => ({ ...a, prefix: prefixOf(a), next: nextNumber(prefixOf(a)) }));
     return render(request, reply, 'cards', { title: request.t('Cartes d’accord'), authors, PER_SHEET, MAX_PAIRS, errors: {}, values: {}, ...extra });
   }
   app.get('/admin/rencontres/cartes', P('terrain.cartes'), async (request, reply) => cardsPage(request, reply));
   app.post('/admin/rencontres/cartes', W('terrain.cartes'), async (request, reply) => {
     const b = request.body || {};
-    const author = repo.authors().find(a => a.id === Number(b.author_id));
+    const author = request.mine('terrain.cartes', repo.authors(), 'id').find(a => a.id === Number(b.author_id));
     const generic = b.mode === 'generiques';
     const count = Math.round(Number(b.count));
     const from = Math.round(Number(b.from));
@@ -287,7 +316,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   });
   // Planche à imprimer : page autonome (sans l'habillage de l'admin), au format A4.
   app.get('/admin/rencontres/cartes/planche', P('terrain.cartes'), async (request, reply) => {
-    const author = repo.authors().find(a => a.id === Number(request.query.auteur));
+    const author = request.mine('terrain.cartes', repo.authors(), 'id').find(a => a.id === Number(request.query.auteur));
     const count = Math.min(MAX_PAIRS, Math.max(1, Math.round(Number(request.query.nombre)) || PER_SHEET));
     const generic = request.query.generiques === '1';
     const from = Math.max(1, Math.round(Number(request.query.de)) || 1);
@@ -365,6 +394,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     if (!enc.get(id)) return reply.callNotFound();
     const out = request.body?.exclure === '1';
     const pid = byId(request.params.pid);
+    if (!request.owns('photos.voir', repo.photo(pid)?.author_id)) return reply.callNotFound();
     enc.exclude(id, pid, out);
     // Depuis la fiche photo (« Pas sur cette photo ») : retour à la fiche.
     const back = request.body?.depuis === 'photo' ? `/admin/photos/${pid}#rencontres` : `/admin/rencontres/${id}#session`;
@@ -375,7 +405,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const id = byId(request.params.id);
     const e = enc.get(id);
     if (!e) return reply.callNotFound();
-    const ids = [].concat(request.body?.photo || []).map(Number).filter(Number.isInteger);
+    const ids = [].concat(request.body?.photo || []).map(Number).filter(Number.isInteger).filter(pid => request.owns('photos.voir', repo.photo(pid)?.author_id));
     if (!ids.length) return failed(reply, `/admin/rencontres/${id}#photos`, request.t('Cochez au moins une photo.'));
     enc.link(id, ids);
     const refusal = e.refused ? ` ${request.t('La personne refuse la publication : appliquez le refus pour dépublier les photos liées.')}` : '';
@@ -463,44 +493,51 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   const personPage = (request, reply, view, data) => page(request, reply, view, { section: 'people', ...data });
   app.get('/admin/personnes', P('personnes.voir'), async (request, reply) => {
     const search = String(request.query.q || '').slice(0, 100);
-    return personPage(request, reply, 'people', { title: request.t('Personnes photographiées'), list: people.list({ search }), search });
+    return personPage(request, reply, 'people', { title: request.t('Personnes photographiées'), list: people.list({ search }).map(p => ownPerson(request, p)).filter(Boolean), search });
   });
   app.get('/admin/personnes/:id', P('personnes.voir'), async (request, reply) => {
     const id = byId(request.params.id);
-    const person = people.get(id);
+    const person = ownPerson(request, people.get(id));
     if (!person) return reply.callNotFound();
     const search = String(request.query.q || '').slice(0, 100);
-    const others = people.suggestions(id).map(o => people.get(o)).filter(Boolean);
+    const all = request.scope('personnes.voir').all;
+    const others = all ? people.suggestions(id).map(o => people.get(o)).filter(Boolean) : [];
     // Rencontres d'autres personnes à rattacher (les plus récentes, ou cherchées par référence ou nom).
     const needle = search.toLowerCase();
-    const attachable = enc.list().filter(e => e.person_id !== id && !e.anonymized)
+    const attachable = (exclusive(request, people.get(id)) ? request.mine('personnes.gerer', enc.list()) : []).filter(e => e.person_id !== id && !e.anonymized)
       .filter(e => !needle || [e.ref, e.name, e.email].some(v => String(v || '').toLowerCase().includes(needle))).slice(0, 20);
     const linked = new Set(person.photos.map(p => p.id));
-    const photoCandidates = repo.photos({ q: search }).filter(p => !linked.has(p.id) && /^\d{4}-\d{2}-\d{2}$/.test(p.taken_on || '')).slice(0, 24).map(withReady);
-    const outings = app.outings.list().slice(0, 40).map(o => ({ author: o.author, day: o.day, starts: o.starts, place: o.place }));
+    const photoCandidates = request.mine('photos.voir', repo.photos({ q: search })).filter(p => !linked.has(p.id) && /^\d{4}-\d{2}-\d{2}$/.test(p.taken_on || '')).slice(0, 24).map(withReady);
+    const outings = request.mine('sorties.voir', app.outings.list().map(o => ({ ...o, author_id: o.author?.id }))).slice(0, 40).map(o => ({ author: o.author, day: o.day, starts: o.starts, place: o.place }));
     return personPage(request, reply, 'person', { title: person.name || person.ref || request.t('Personne'), person: { ...person, photos: person.photos.map(withReady) },
-      others, attachable, photoCandidates, outings, search, outingUrl: (aid, d, t) => app.outings.urlOf(aid, d, t) });
+      others, attachable, photoCandidates, outings, search, canManage: exclusive(request, people.get(id)), outingUrl: (aid, d, t) => app.outings.urlOf(aid, d, t) });
   });
   const personOr404 = (request, reply) => { const p = people.get(byId(request.params.id)); if (!p) reply.callNotFound(); return p; };
   const toPerson = id => `/admin/personnes/${id}`;
   app.post('/admin/personnes/:id/fusionner', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
+    if (!exclusive(request, p)) return app.forbid(request, reply);                // personne partagée : l'administrateur s'en charge
     const other = Number(request.body?.autre);
+    if (!exclusive(request, people.get(other))) return app.forbid(request, reply);
     if (!people.merge(p.id, other)) return failed(reply, toPerson(p.id), request.t('Rapprochement impossible.'));
     return done(reply, toPerson(p.id), request.t('Rencontres réunies : c’est la même personne.'));
   });
   app.post('/admin/personnes/:id/ecarter', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
+    if (!exclusive(request, p)) return app.forbid(request, reply);                // personne partagée : l'administrateur s'en charge
     people.dismiss(p.id, Number(request.body?.autre));
     return done(reply, toPerson(p.id), request.t('Rapprochement écarté : ce sont deux personnes différentes.'));
   });
   app.post('/admin/personnes/:id/rattacher', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
+    if (!exclusive(request, p)) return app.forbid(request, reply);                // personne partagée : l'administrateur s'en charge
+    if (!request.owns('personnes.gerer', app.db.prepare('SELECT author_id FROM encounters WHERE id = ?').pluck().get(Number(request.body?.rencontre)))) return app.forbid(request, reply);
     if (!people.attach(p.id, Number(request.body?.rencontre))) return failed(reply, toPerson(p.id), request.t('Rencontre introuvable.'));
     return done(reply, toPerson(p.id), request.t('Rencontre rattachée à cette personne.'));
   });
   app.post('/admin/personnes/:id/detacher', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
+    if (!exclusive(request, p)) return app.forbid(request, reply);                // personne partagée : l'administrateur s'en charge
     const eid = Number(request.body?.rencontre);
     if (!p.meetings.some(e => e.id === eid)) return failed(reply, toPerson(p.id), request.t('Rencontre introuvable.'));
     const pid = people.detach(eid);
@@ -509,15 +546,17 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   });
   app.post('/admin/personnes/:id/sortie', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
+    if (!exclusive(request, p)) return app.forbid(request, reply);                // personne partagée : l'administrateur s'en charge
     const [aid, d, t] = String(request.body?.sortie || '').split('|');
-    const author = repo.authors().find(a => a.id === Number(aid));
+    const author = request.mine('sorties.gerer', repo.authors(), 'id').find(a => a.id === Number(aid));
     const id = author ? people.addMeeting(p.id, { authorId: author.id, day: d, time: t === '00:00' ? '' : t }) : null;
     if (!id) return failed(reply, toPerson(p.id), request.t('Choisissez une sortie.'));
     return done(reply, toPerson(p.id), request.t('La personne est ajoutée à cette sortie (sans décision : demandez-lui son accord).'));
   });
   app.post('/admin/personnes/:id/photos', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
-    const ids = [].concat(request.body?.photo || []).map(Number).filter(Number.isInteger);
+    if (!exclusive(request, p)) return app.forbid(request, reply);                // personne partagée : l'administrateur s'en charge
+    const ids = [].concat(request.body?.photo || []).map(Number).filter(Number.isInteger).filter(pid => request.owns('photos.voir', repo.photo(pid)?.author_id));
     if (!ids.length) return failed(reply, toPerson(p.id), request.t('Cochez au moins une photo.'));
     const n = people.linkPhotos(p.id, ids);
     return done(reply, toPerson(p.id), n > 1 ? request.t('{n} photos liées à cette personne (à sa rencontre de la sortie de chaque photo).', { n }) : request.t('{n} photo liée à cette personne (à sa rencontre de la sortie de chaque photo).', { n }));

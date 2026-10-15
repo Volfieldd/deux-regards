@@ -20,8 +20,10 @@ export function registerOutings(app, { repo, render, done, failed, P, W, withRea
   const range = (o, t) => (!o.split ? '' : o.starts === '00:00' ? t('jusqu’à {h}', { h: h(o.ends, t) }) : o.ends ? t('de {from} à {to}', { from: h(o.starts, t), to: h(o.ends, t) }) : t('à partir de {h}', { h: h(o.starts, t) }));
 
   app.get('/admin/sorties', P('sorties.voir'), async (request, reply) => {
-    const authors = repo.authors();
-    const author = authors.find(a => a.slug === request.query.photographe) || null;
+    // Portée « les miennes » : ses sorties seulement (le choix du photographe disparaît).
+    const authors = request.mine('sorties.voir', repo.authors(), 'id');
+    const s = request.scope('sorties.voir');
+    const author = s.all ? authors.find(a => a.slug === request.query.photographe) || null : authors[0] || { id: -1 };
     const state = Object.hasOwn(STATES, request.query.etat) ? request.query.etat : '';
     const all = out.list({ author: author?.id ?? null });
     const list = all.filter(o => !state || o.state === state).slice(0, 200)
