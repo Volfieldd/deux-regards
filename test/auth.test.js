@@ -325,3 +325,34 @@ test('redactUrl ne touche qu’aux paramètres code et state', () => {
   assert.equal(redactUrl('/a?code=1&x=2&state=3#h'), '/a?code=[masqué]&x=2&state=[masqué]#h');
   assert.equal(redactUrl('/photo/code-barre?zipcode=1'), '/photo/code-barre?zipcode=1');
 });
+
+test('comptes : inconnu en attente sans session, rôle donné dans l’admin, désactivé refusé, garde-fou ADMIN_SUBS', async t => {
+  const { app, provider, db } = await withProvider(t, { ADMIN_SUBS: 'secours-1' });
+  // Sans rôle dans l'IdP : compte créé « en attente », aucune session.
+  provider.user = { sub: 'invite-1', name: 'Invité', email: 'invite@example.org' };
+  const first = await login(app, provider);
+  assert.equal(first.res.statusCode, 403);
+  assert.match(first.res.body, /Compte en attente/);
+  assert.equal(db.prepare('SELECT COUNT(*) FROM sessions').pluck().get(), 0);
+  assert.deepEqual(db.prepare("SELECT name, email, status, roles FROM accounts WHERE sub = 'invite-1'").get(), { name: 'Invité', email: 'invite@example.org', status: 'en_attente', roles: '[]' });
+  // Un administrateur lui donne un rôle : la connexion suivante passe, avec ce rôle-là seulement.
+  app.accounts.update(app.accounts.bySub('invite-1').id, { roles: ['moderateur'] }, 'quelqu-un');
+  const second = await login(app, provider);
+  assert.equal(second.res.statusCode, 302);
+  assert.equal((await app.inject({ url: '/admin/signalements', cookies: second.cookies })).statusCode, 200);
+  assert.equal((await app.inject({ url: '/admin/personnes', cookies: second.cookies, headers: { accept: 'text/html' } })).statusCode, 403);
+  // Désactivé : la session en cours perd l'accès tout de suite, et la connexion est refusée.
+  app.accounts.update(app.accounts.bySub('invite-1').id, { status: 'desactive' }, 'quelqu-un');
+  assert.equal((await app.inject({ url: '/admin', cookies: second.cookies })).statusCode, 403);
+  const third = await login(app, provider);
+  assert.equal(third.res.statusCode, 403);
+  assert.match(third.res.body, /désactivé/);
+  // Garde-fou : une identité de ADMIN_SUBS est administratrice, même sans rôle dans l'IdP.
+  provider.user = { sub: 'secours-1', name: 'Secours' };
+  const rescue = await login(app, provider);
+  assert.equal(rescue.res.statusCode, 302);
+  assert.equal((await app.inject({ url: '/admin/comptes', cookies: rescue.cookies })).statusCode, 200);
+  // Le journal garde les connexions, réussies ou non.
+  const actions = db.prepare('SELECT action FROM audit_log ORDER BY id').pluck().all();
+  assert.deepEqual(actions.filter(a => a.startsWith('connexion')), ['connexion en attente d’un rôle', 'connexion', 'connexion refusée (compte désactivé)', 'connexion']);
+});

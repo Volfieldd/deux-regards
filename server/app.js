@@ -1,4 +1,6 @@
 import crypto from 'node:crypto';
+import { createAccounts, createAudit } from './accounts.js';
+import { hasRole } from './permissions.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -120,7 +122,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     const names = authorNames.all();
     const brand = app.appearance.brand();
     const theme = app.appearance.forRequest(this.request, this);
-    const common = { asset, theme, brand, isAdmin: Boolean(this.request.session), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true',
+    const common = { asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true',
       // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
       here: splitLang(this.request.url).path, langs: LANGS, langNames: NAMES, locales: LOCALES, localize,
       authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '' };
@@ -159,6 +161,9 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('people', createPeople({ db, encounters: app.encounters }));
   // J'aime et signalements des visiteurs (voir server/feedback.js).
   app.decorate('feedback', createFeedback({ db, vault: createVault(config.dataKey) }));
+  // Comptes de l'admin et journal (server/accounts.js), utilisés aussi par la connexion (server/auth.js).
+  app.decorate('accounts', createAccounts({ db, adminSubs: config.adminSubs || [] }));
+  app.decorate('audit', createAudit({ db }));
   // Partages des photos, comptés anonymement (voir server/share.js).
   app.decorate('shares', createShares({ db }));
   app.encounters.onChange(() => app.people.sync());
@@ -171,7 +176,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     app.encounters.purge();
     app.feedback.purge();
     app.people.sync();
-    purgeTimer = setInterval(() => { try { app.encounters.purge(); app.feedback.purge(); app.people.sync(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
+    app.audit.purge(); app.accounts.purgePending();
+    purgeTimer = setInterval(() => { try { app.encounters.purge(); app.feedback.purge(); app.audit.purge(); app.accounts.purgePending(); app.people.sync(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
     purgeTimer.unref();
   });
   app.addHook('onClose', async () => clearInterval(purgeTimer));
@@ -207,7 +213,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { setTimeout(() => app.outings.backfillAll(), 2000).unref(); });
   app.addHook('onClose', async () => { await app.outings.stop(); });
   // « Aujourd'hui » : ce qui demande votre attention (voir server/todo.js).
-  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest }));
+  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
 
   await setupAuth(app, oidc && { oidc });

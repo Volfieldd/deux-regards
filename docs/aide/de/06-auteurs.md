@@ -10,7 +10,6 @@ Ein Datenblatt pro Fotograf.
 | **Signatur der Instagram-Beiträge** | wird unter der Bildunterschrift der Instagram-Beiträge seiner Fotos angefügt, die eine Bildunterschrift haben; Foto für Foto entfernbar (siehe [Instagram](instagram#la-légende)) |
 | **Buchstabe der Einwilligungskarten** | der Buchstabe der Einwilligungskarten (J-0142); leer: der erste Buchstabe der Adresse. Ein Buchstabe pro Fotograf (siehe [Begegnungen](rencontres)). |
 | **Unterwegs** | Link zu seinen Einwilligungskarten und dem QR-Code für seine Kleidung (siehe [Begegnungen](rencontres#sur-le-terrain)) |
-| **Anmeldekonto** | Kennung des Kontos, das sich in der Verwaltung anmeldet (siehe unten) |
 
 - **Speichern**: unter jedem Datenblatt.
 - **Fotograf hinzufügen**: Formular „Neuer Fotograf“, ganz unten.
@@ -19,10 +18,4 @@ Ein Datenblatt pro Fotograf.
 
 ## Ein Konto mit einem Fotografen verknüpfen
 
-Sobald das Konto verknüpft ist, werden seine Importe standardmäßig diesem Fotografen zugeordnet, und das Dashboard zeigt „Dieses Konto ist mit dem Fotografen … verknüpft“.
-
-1. Die Person meldet sich an: Ihr Dashboard zeigt ihre Kontokennung.
-2. Kopieren Sie diese in das Feld **Anmeldekonto** ihres Datenblatts.
-3. Klicken Sie auf **Speichern**.
-
-Ein Konto kann nur mit einem einzigen Fotografen verknüpft werden.
+Das Konto, das sich anmeldet, und der Fotograf werden unter [Konten und Rollen](reglages#comptes-et-rôles) verknüpft, nur für Administratoren: Wählen Sie den Fotografen unter **Verknüpfter Fotograf**, dann **Speichern**. Danach werden seine Importe ihm standardmäßig zugeordnet, und das Dashboard zeigt „Dieses Konto ist mit dem Fotografen … verknüpft“. Ein Fotograf kann nur mit einem Konto verknüpft werden.

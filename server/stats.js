@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { hasRole } from './permissions.js';
 
 // Mesure d'audience anonyme, sans cookie ni service tiers (exemption de consentement CNIL) :
 // - aucune adresse IP ni identifiant n'est stocké : un visiteur du jour est reconnu par une empreinte
@@ -80,7 +81,7 @@ export function createStats({ db, publicUrl, now = () => new Date(), log, trustC
     const h = request.headers;
     if (h.dnt === '1' || h['sec-gpc'] === '1') return false;
     if (/prefetch|prerender/i.test(`${h.purpose || ''} ${h['sec-purpose'] || ''}`)) return false;
-    if (request.session) return false;                     // les auteurs ne se comptent pas eux-mêmes
+    if (hasRole(request.session?.roles)) return false;     // les membres de l'admin ne se comptent pas eux-mêmes
     const ua = h['user-agent'] || '';
     return Boolean(ua) && !BOTS.test(ua);
   }

@@ -93,7 +93,7 @@ test('connexion locale : jeton exigé, /auth/login y renvoie sans OIDC, déconne
 
 test('connexion locale : le sub lié à l’auteur est repris', async t => {
   const ctx = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: TOKEN } });
-  ctx.db.prepare("UPDATE authors SET oidc_sub = 'zitadel-123' WHERE slug = 'julien'").run();
+  ctx.db.prepare("INSERT INTO accounts (sub, name, author_id, roles, status, created_at) SELECT 'zitadel-123', 'Julien', id, '[\"admin\"]', 'actif', 0 FROM authors WHERE slug = 'julien'").run();
   const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', payload: { token: TOKEN, author: 'julien' } });
   const home = await ctx.app.inject({ url: '/admin', cookies: cookiesOf(res) });
   assert.match(home.body, /lié au photographe <strong>Julien<\/strong>/);
@@ -321,15 +321,12 @@ test('séries : création, renommage, ordre, suppression bloquée si non vide', 
   assert.equal(ctx.db.prepare('SELECT COUNT(*) FROM categories WHERE id = ?').pluck().get(nuit.id), 0);
 });
 
-test('auteurs : ajout, lien avec un compte unique, suppression bloquée', async t => {
+test('auteurs : ajout, suppression bloquée ; le compte lié ne se règle plus ici', async t => {
   const ctx = await admin(t);
   await ctx.post('/admin/auteurs', { name: 'Camille', bio: 'Invitée.', oidc_sub: 'sub-camille' });
   const camille = ctx.db.prepare("SELECT * FROM authors WHERE slug = 'camille'").get();
-  assert.equal(camille.oidc_sub, 'sub-camille');
+  assert.equal(camille.oidc_sub, null);                                   // lien compte ↔ photographe : page « Comptes et rôles »
   const julien = ctx.db.prepare("SELECT * FROM authors WHERE slug = 'julien'").get();
-  const dup = await ctx.post(`/admin/auteurs/${julien.id}`, { name: 'Julien', slug: 'julien', oidc_sub: 'sub-camille' });
-  assert.equal(dup.statusCode, 422);
-  assert.match(dup.body, /déjà lié à un autre auteur/);
   await ctx.post(`/admin/auteurs/${julien.id}`, { name: 'Julien', slug: 'julien', bio: 'Rue et portraits.', oidc_sub: '' });
   assert.equal(ctx.db.prepare('SELECT bio FROM authors WHERE id = ?').pluck().get(julien.id), 'Rue et portraits.');
   await ctx.post(`/admin/auteurs/${julien.id}/delete`);

@@ -49,6 +49,7 @@ Lues par [`server/db/backup.js`](https://github.com/Volfieldd/deux-regards/blob/
 | `OIDC_PROJECT_ID` | — | Projet Zitadel : ajoute le projet à l'audience pour recevoir les rôles. |
 | `OIDC_ORG_ID` | — | Organisation propriétaire du projet. Un rôle donné dans une autre organisation est ignoré. Fortement recommandé : sans lui (et avec `OIDC_PROJECT_ID`), le serveur l'écrit dans ses journaux au démarrage. |
 | `OIDC_ADMIN_ROLE` | `admin` | Rôle de projet qui ouvre l'admin. |
+| `ADMIN_SUBS` | — | Garde-fou : identifiants `sub` (séparés par des virgules) toujours administrateurs, quoi qu'il arrive aux comptes dans l'admin. Conseillé : le vôtre. |
 | `OIDC_ALLOWED_SUBS` | — | Repli sans Zitadel (Google en direct) : identifiants `sub` autorisés, séparés par des virgules, avec e-mail vérifié. |
 | `AUTH_RATE_LIMIT` | `30` | Tentatives de connexion (retours de l'IdP, envois du formulaire de test) par adresse sur 10 minutes ; une adresse IPv6 compte par bloc /64. La simple redirection vers l'IdP n'est pas comptée. |
 | `LOCAL_AUTH_TOKEN` | — | Connexion locale de **test**, 16 caractères au moins. **Refusée en ligne.** |

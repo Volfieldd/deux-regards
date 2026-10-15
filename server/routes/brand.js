@@ -15,7 +15,7 @@ export function createAppearance(app) {
     // Thème de la page : celui des réglages, ou celui en aperçu (?theme=…, mémorisé une heure) pour un admin.
     forRequest(request, reply) {
       let preview = null;
-      if (request.session) {
+      if (request.can?.('site.apparence')) {
         const asked = typeof request.query?.theme === 'string' ? request.query.theme : null;
         if (asked === 'off') reply.clearCookie(PREVIEW_COOKIE, { path: '/' });
         else if (asked && THEMES[asked]) {

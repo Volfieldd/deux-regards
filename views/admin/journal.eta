@@ -1,0 +1,26 @@
+<% layout('./layout') %>
+<% const t = it.t; const f = it.filter;
+   // Libellés lisibles des actions les plus courantes ; les autres gardent leur adresse.
+   const LABELS = {
+     'connexion': t('Connexion'), 'connexion (test)': t('Connexion (test)'), 'connexion en attente d’un rôle': t('Connexion en attente d’un rôle'),
+     'connexion refusée (compte désactivé)': t('Connexion refusée (compte désactivé)'), 'compte modifié': t('Compte modifié'), 'compte supprimé': t('Compte supprimé'),
+     'POST /admin/photos/import': t('Photos importées'), 'POST /admin/photos/:id': t('Fiche photo enregistrée'), 'POST /admin/photos/:id/champs': t('Photo modifiée'),
+     'POST /admin/photos/:id/status': t('Statut de la photo changé'), 'POST /admin/photos/actions': t('Action sur plusieurs photos'), 'POST /admin/photos/:id/delete': t('Photo supprimée'),
+     'POST /admin/reglages': t('Réglages enregistrés'), 'POST /admin/instagram/file': t('Mise en file Instagram'), 'POST /admin/rencontres/:id/refus': t('Refus appliqué'),
+     'POST /admin/rencontres/:id/effacer': t('Rencontre effacée'), 'POST /admin/personnes/:id/effacer': t('Personne effacée'), 'POST /admin/signalements/:id/traite': t('Signalement traité'),
+   }; %>
+<h1><%= t('Journal') %></h1>
+<p class="prose"><%= t('Qui a fait quoi dans l’admin : connexions, modifications, publications, comptes. Gardé 13 mois.') %></p>
+<form class="filters" method="get" action="/admin/journal" role="search">
+  <select name="compte" aria-label="<%= t('Compte') %>"><option value=""><%= t('Tous les comptes') %></option><% it.accounts.forEach(a => { %><option value="<%= a.sub %>"<%~ a.sub === f.sub ? ' selected' : '' %>><%= a.name || a.sub %></option><% }) %></select>
+  <input type="search" name="q" value="<%= f.q %>" placeholder="<%= t('Action, cible…') %>" aria-label="<%= t('Rechercher') %>">
+  <button class="btn ghost" type="submit"><%= t('Filtrer') %></button>
+</form>
+<% if (!it.entries.length) { %><p class="empty"><%= t('Rien dans le journal pour ces filtres.') %></p><% } else { %>
+<div class="table-wrap"><table class="journal">
+  <thead><tr><th><%= t('Quand') %></th><th><%= t('Qui') %></th><th><%= t('Action') %></th><th><%= t('Cible') %></th><th><%= t('Résultat') %></th></tr></thead>
+  <tbody>
+<% it.entries.forEach(e => { const ok = e.status == null || e.status < 400; %>    <tr><td class="mono"><%= it.when(e.at) %></td><td><%= e.name || e.sub || '—' %></td><td><%= LABELS[e.action] || e.action %><% if (e.detail) { %><br><span class="mono"><%= e.detail %></span><% } %></td><td class="mono"><%= e.target %></td><td><span class="enc-tag <%= ok ? 'ok' : 'no' %>"><%= ok ? t('fait') : t('refusé') %></span></td></tr>
+<% }) %>  </tbody>
+</table></div>
+<% } %>

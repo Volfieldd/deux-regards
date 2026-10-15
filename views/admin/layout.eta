@@ -41,6 +41,8 @@
     outing: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/>',
     pin: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
     shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/>',
+    key: '<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/>',
+    journal: '<path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
     moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
     logout: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>',
@@ -57,7 +59,9 @@
 <%
   // Menu rangé par intention : travailler les photos et les personnes, publier, préparer le terrain, régler.
   const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;');
-  const item = ([key, href, label, icon, extra]) => `<a href="${href}"${(extra || cur(key)) ? ' aria-current="page"' : ''}>${ic(icon)}${esc(t(label))}</a>`;
+  // Une entrée n'apparaît que si le compte a le droit d'ouvrir la page.
+  const can = it.can || (() => true);
+  const item = ([key, href, label, icon, extra, perm]) => (perm && !can(perm) ? '' : `<a href="${href}"${(extra || cur(key)) ? ' aria-current="page"' : ''}>${ic(icon)}${esc(t(label))}</a>`);
   const people = it.section === 'encounters' || it.section === 'encounter' || it.section === 'people' || it.section === 'person';
 %>
   <nav class="nav" aria-label="<%= t('Administration') %>">
@@ -65,16 +69,17 @@
   </nav>
   <p class="grp" id="nav-work"><%= t('Travailler') %></p>
   <nav class="nav" aria-labelledby="nav-work">
-    <a href="/admin/sorties"<%~ it.section === 'outings' || it.section === 'outing' ? ' aria-current="page"' : '' %>><%~ ic('outing') %><%= t('Sorties') %></a>
-    <%~ item(['photos', '/admin/photos', 'Photothèque', 'photos']) %>
-    <a href="/admin/personnes"<%~ people ? ' aria-current="page"' : '' %>><%~ ic('people') %><%= t('Personnes') %><% if (it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew > 1 ? t('{n} nouvelles', { n: it.encountersNew }) : t('1 nouvelle') %>"><%= it.encountersNew %></span><% } %></a>
-  </nav>
+<% if (can('sorties.voir')) { %>    <a href="/admin/sorties"<%~ it.section === 'outings' || it.section === 'outing' ? ' aria-current="page"' : '' %>><%~ ic('outing') %><%= t('Sorties') %></a>
+<% } %>
+    <%~ item(['photos', '/admin/photos', 'Photothèque', 'photos', null, 'photos.voir']) %>
+<% if (can('personnes.voir')) { %>    <a href="/admin/personnes"<%~ people ? ' aria-current="page"' : '' %>><%~ ic('people') %><%= t('Personnes') %><% if (it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew > 1 ? t('{n} nouvelles', { n: it.encountersNew }) : t('1 nouvelle') %>"><%= it.encountersNew %></span><% } %></a>
+<% } %>  </nav>
   <p class="grp" id="nav-publish"><%= t('Publier') %></p>
   <nav class="nav" aria-labelledby="nav-publish">
-    <%~ item(['site', '/admin/site', 'Site public', 'globe']) %>
-    <%~ item(['series', '/admin/series', 'Séries', 'series']) %>
+    <%~ item(['site', '/admin/site', 'Site public', 'globe', null, 'site.textes']) %>
+    <%~ item(['series', '/admin/series', 'Séries', 'series', null, 'series.gerer']) %>
   </nav>
-<% if (it.navSeries && it.navSeries.length) { %>
+<% if (it.navSeries && it.navSeries.length && can('photos.voir')) { %>
   <ul class="ser" aria-label="<%= t('Séries') %>">
 <% it.navSeries.forEach(c => { %>
     <li><a href="/admin/photos?serie=<%= c.slug %>" data-drop-series="<%= c.id %>" data-series-name="<%= c.name %>"><span class="sw"><% if (c.thumb) { %><img src="<%= c.thumb %>" alt="" loading="lazy"><% } %></span><span class="t"><%= c.name %></span><span class="n"><%= c.count %></span></a></li>
@@ -82,19 +87,22 @@
   </ul>
 <% } %>
   <nav class="nav" aria-label="<%= t('Diffusion') %>">
-    <%~ item(['instagram', '/admin/instagram', 'Instagram', 'instagram']) %>
-    <%~ item(['stats', '/admin/statistiques', 'Statistiques', 'stats']) %>
+    <%~ item(['instagram', '/admin/instagram', 'Instagram', 'instagram', null, 'instagram.voir']) %>
+    <%~ item(['stats', '/admin/statistiques', 'Statistiques', 'stats', null, 'statistiques.voir']) %>
   </nav>
-  <p class="grp" id="nav-field"><%= t('Sur le terrain') %></p>
+<% if (can('terrain.app')) { %>  <p class="grp" id="nav-field"><%= t('Sur le terrain') %></p>
   <nav class="nav" aria-labelledby="nav-field">
     <a href="/admin/terrain"<%~ it.section === 'terrain' || it.section === 'cards' ? ' aria-current="page"' : '' %>><%~ ic('pin') %><%= t('App, cartes, QR') %></a>
   </nav>
+<% } %>
   <p class="grp" id="nav-settings"><%= t('Réglages') %></p>
   <nav class="nav" aria-labelledby="nav-settings">
-    <%~ item(['authors', '/admin/auteurs', 'Photographes', 'authors']) %>
-    <%~ item(['appearance', '/admin/apparence', 'Apparence', 'appearance']) %>
-    <%~ item(['images', '/admin/images', 'Filigrane & EXIF', 'images']) %>
-    <%~ item(['droits', '/admin/droits', 'Droits & confidentialité', 'shield']) %>
+    <%~ item(['authors', '/admin/auteurs', 'Photographes', 'authors', null, 'photographes.gerer']) %>
+    <%~ item(['accounts', '/admin/comptes', 'Comptes et rôles', 'key', null, 'comptes.gerer']) %>
+    <%~ item(['journal', '/admin/journal', 'Journal', 'journal', null, 'journal.voir']) %>
+    <%~ item(['appearance', '/admin/apparence', 'Apparence', 'appearance', null, 'site.apparence']) %>
+    <%~ item(['images', '/admin/images', 'Filigrane & EXIF', 'images', null, 'site.filigrane']) %>
+    <%~ item(['droits', '/admin/droits', 'Droits & confidentialité', 'shield', null, 'reglages.droits']) %>
     <%~ item(['help', '/admin/aide', 'Aide', 'help']) %>
     <a href="/" target="_blank" rel="noopener"><%~ ic('site') %><%= t('Voir le site') %></a>
   </nav>
@@ -123,7 +131,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% const HELP = { accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>"><%= t('Aide sur cette page') %></a></p>
 <% } %>
@@ -149,9 +157,10 @@
 
 <nav class="tabbar" aria-label="<%= t('Navigation rapide') %>">
   <a href="/admin"<%~ cur('home') ? ' aria-current="page"' : '' %>><%~ ic('home', 22) %><%= t('Aujourd’hui') %></a>
-  <a href="/admin/photos"<%~ cur('photos') ? ' aria-current="page"' : '' %>><%~ ic('photos', 22) %><%= t('Photos') %></a>
-  <a class="imp" href="/admin/photos?importer#import" data-import-open aria-label="<%= t('Importer des photos') %>"><%~ ic('upload', 22) %></a>
-  <a href="/admin/rencontre/accueil"<%~ it.section === 'terrain' ? ' aria-current="page"' : '' %>><%~ ic('pin', 22) %><%= t('Terrain') %></a>
+<% if (can('photos.voir')) { %>  <a href="/admin/photos"<%~ cur('photos') ? ' aria-current="page"' : '' %>><%~ ic('photos', 22) %><%= t('Photos') %></a>
+<% } %><% if (can('photos.importer')) { %>  <a class="imp" href="/admin/photos?importer#import" data-import-open aria-label="<%= t('Importer des photos') %>"><%~ ic('upload', 22) %></a>
+<% } %><% if (can('terrain.app')) { %>  <a href="/admin/rencontre/accueil"<%~ it.section === 'terrain' ? ' aria-current="page"' : '' %>><%~ ic('pin', 22) %><%= t('Terrain') %></a>
+<% } %>
   <button type="button" data-menu aria-expanded="false" aria-controls="admin-nav"><%~ ic('menu', 22) %><%= t('Menu') %></button>
 </nav>
 

@@ -52,3 +52,24 @@ Solange das Wesentliche fehlt (Namen, Adresse, E-Mail, Verantwortlicher), weist 
 | **Nutzungsrechte: English, Deutsch** | Seiten `/en/droits` (Englisch) und `/de/droits` (Deutsch), den Besuchern über die Sprachauswahl oben auf der Seite angeboten (Français, English, Deutsch). Dieselben Abzeichen und dieselbe Schaltfläche. Ist der französische Text angepasst und dieser keine Übersetzung davon, weist eine Warnung darauf hin: Passen Sie ihn an, sonst lesen ausländische Besucher die Übersetzung des Standardtexts. |
 | **Nutzungsrechte: Kontakt** | E-Mail-Adresse oder `https://`-Link, als Link auf `/droits` angezeigt |
 | **Datenschutz** | der **Kontakt** der Verantwortlichen, angezeigt auf der Seite `/confidentialite` (DSGVO, in drei Sprachen), und zwei Kästchen, die Sie **nur aktivieren, wenn es zutrifft**: Zwei-Faktor-Authentifizierung für alle Konten der Verwaltung und verschlüsselte Festplatten für Daten und Sicherungen (die Seite gibt sie dann an). Die Seite zeigt auch, ob die Verschlüsselung personenbezogener Daten in der Datenbank (`DATA_KEY`) aktiv ist. Der Rest der Seite folgt der Website automatisch. |
+
+## Konten und Rollen
+
+**Konten und Rollen** (Gruppe Einstellungen, nur für Administratoren) listet die Konten auf, die sich angemeldet haben.
+
+- **Erste Anmeldung:** Das Konto wird angelegt. Gibt Zitadel ihm die Rolle „admin“, ist es Administrator; sonst bleibt es **wartend**, ohne Zugriff, und „Heute“ weist darauf hin. Ein Konto, das 90 Tage wartend bleibt, wird gelöscht.
+- **Eine Rolle vergeben:** Ankreuzen, dann **Diese Rolle vergeben** (oder **Speichern**). Sie gilt sofort, ohne neue Anmeldung; ihr Entzug ebenso.
+  - **Administrator**: alles, auch Konten und Protokoll.
+  - **Moderator**: veröffentlicht und zieht zurück (Website und Instagram), bearbeitet Meldungen, korrigiert Texte; nie personenbezogene Daten.
+  - **Korrektor**: liest Texte Korrektur und übersetzt sie.
+  - **Fotograf**: eigene Fotos, Ausflüge und Personen; im nächsten Schritt verfügbar, wenn die Verwaltung jedem nur das Seine zeigt.
+- **Verknüpfter Fotograf:** dient für Voreinstellungen (Import, App Unterwegs). Ein Fotograf kann nur mit einem Konto verknüpft werden.
+- **Deaktiviert:** Das Konto kann sich nicht mehr anmelden, und seine laufende Sitzung verliert sofort den Zugriff.
+- **Dieses Konto löschen:** Konto und Sitzungen werden gelöscht; meldet es sich erneut an, beginnt es wieder wartend.
+- **Schutzmaßnahmen:** Es gibt immer mindestens einen aktiven Administrator; man kann sich nicht selbst deaktivieren oder löschen; die in `ADMIN_SUBS` aufgeführten Konten (Serverkonfiguration, als „geschützt“ markiert) bleiben in jedem Fall Administratoren.
+
+Das Menü zeigt nur die Seiten, die das Konto öffnen darf.
+
+## Protokoll
+
+**Protokoll** (Administratoren): wer was in der Verwaltung getan hat, das Neueste zuerst: Anmeldungen (erfolgreich, wartend, abgelehnt), Änderungen, Veröffentlichungen, Aktionen für mehrere Fotos, geänderte Konten (mit Details: Rollen, Zustand, verknüpfter Fotograf). Nach Konto oder Stichwort filtern. Die Wahl von Sprache und Design wird nicht erfasst. Das Protokoll wird 13 Monate aufbewahrt.

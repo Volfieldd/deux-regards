@@ -364,23 +364,24 @@ export function createAdminRepo(db) {
 
     // ---------- auteurs ----------
     authors: () => q.authors.all(),
-    // Auteur lié au compte ; en connexion locale de test (« local:<slug> »), l'auteur choisi.
-    authorBySub: sub => q.authors.all().find(a => a.oidc_sub === sub || `local:${a.slug}` === sub),
+    // Photographe lié au compte (page « Comptes et rôles ») ; en connexion locale de test (« local:<slug> »), celui choisi.
+    authorBySub(sub) {
+      const id = db.prepare('SELECT author_id FROM accounts WHERE sub = ?').pluck().get(sub);
+      return q.authors.all().find(a => (id != null && a.id === id) || `local:${a.slug}` === sub);
+    },
     saveAuthor(id, body) {
       const errors = {};
       const name = text(body.name, 80);
       if (!name) errors.name = 'Le nom est obligatoire.';
       const slug = checkedSlug('authors', id ? body.slug : '', name, id, errors);
-      const sub = text(body.oidc_sub, 255) || null;
-      if (sub && q.authors.all().some(a => a.oidc_sub === sub && a.id !== Number(id))) errors.oidc_sub = 'Ce compte est déjà lié à un autre auteur.';
       // Lettre des cartes de rencontre (J-0142) : une lettre, propre à chaque auteur.
       const prefix = text(body.card_prefix, 1).toUpperCase();
       if (prefix && !/^[A-Z]$/.test(prefix)) errors.card_prefix = 'Lettre des cartes : une seule lettre, de A à Z.';
       else if (prefix && q.authors.all().some(a => a.id !== Number(id) && (a.card_prefix || a.slug.charAt(0).toUpperCase()) === prefix)) errors.card_prefix = `La lettre ${prefix} est déjà celle d’un autre auteur.`;
-      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), oidc_sub: sub, card_prefix: prefix, ig_signature: text(body.ig_signature, 200) };
+      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), card_prefix: prefix, ig_signature: text(body.ig_signature, 200) };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
-      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, oidc_sub = @oidc_sub, card_prefix = @card_prefix, ig_signature = @ig_signature WHERE id = @id').run({ ...values, id });
-      db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, oidc_sub, card_prefix, ig_signature) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @oidc_sub, @card_prefix, @ig_signature)').run(values);
+      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, card_prefix = @card_prefix, ig_signature = @ig_signature WHERE id = @id').run({ ...values, id });
+      db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, card_prefix, ig_signature) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @card_prefix, @ig_signature)').run(values);
     },
     deleteAuthor(id) {
       const a = q.authors.all().find(r => r.id === Number(id));

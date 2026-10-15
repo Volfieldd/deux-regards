@@ -286,7 +286,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   }
   app.get('/carte', async (request, reply) => {
     const enabled = mapEnabled();
-    if (!enabled && !request.session) return reply.callNotFound();
+    if (!enabled && !request.can('site.textes')) return reply.callNotFound();          // aperçu pour qui règle le site
     const siteName = app.siteName();
     const settings = repo.settings();
     const places = mapPlaces();

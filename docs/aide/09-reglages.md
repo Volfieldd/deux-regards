@@ -52,3 +52,24 @@ Tant qu'il manque l'essentiel (noms, adresse, e-mail, responsable), « Aujourd'h
 | **Droits d'utilisation : English, Deutsch** | pages `/en/droits` (anglais) et `/de/droits` (allemand), proposées aux visiteurs par le sélecteur de langue en haut de la page (Français, English, Deutsch). Mêmes badges et même bouton. Si le texte français est personnalisé et pas une traduction, un avertissement le signale : adaptez-la, sinon les visiteurs étrangers lisent la traduction du texte par défaut. |
 | **Droits d'utilisation : contact** | adresse e-mail ou lien `https://`, affiché comme lien sur `/droits` |
 | **Confidentialité** | le **contact** des responsables affiché sur la page `/confidentialite` (RGPD, en trois langues) et deux cases à cocher **seulement quand c'est vrai** : l'authentification à deux facteurs pour tous les comptes de l'admin, et des disques chiffrés pour les données et les sauvegardes (la page les annonce alors). La page indique aussi si le chiffrement des données personnelles dans la base (`DATA_KEY`) est actif. Le reste de la page suit le site tout seul. |
+
+## Comptes et rôles
+
+**Comptes et rôles** (groupe Réglages, administrateurs seulement) liste les comptes qui se sont connectés.
+
+- **Première connexion :** le compte est créé. Si Zitadel lui donne le rôle « admin », il est administrateur ; sinon il reste **en attente**, sans accès, et « Aujourd'hui » l'indique. Un compte resté en attente 90 jours est effacé.
+- **Donner un rôle :** cochez-le, puis **Donner ce rôle** (ou **Enregistrer**). Il s'applique tout de suite, sans nouvelle connexion ; le retirer aussi.
+  - **Administrateur** : tout, y compris les comptes et le journal.
+  - **Modérateur** : publie et dépublie (site et Instagram), traite les signalements, corrige les textes ; jamais les données personnelles.
+  - **Relecteur** : relit et traduit les textes.
+  - **Photographe** : ses photos, ses sorties et ses personnes ; proposé à la prochaine étape, quand l'admin ne montrera à chacun que ce qui est à lui.
+- **Photographe lié :** sert aux valeurs par défaut (import, app Terrain). Un photographe ne peut être lié qu'à un seul compte.
+- **Désactivé :** le compte ne peut plus se connecter, et sa session en cours perd l'accès aussitôt.
+- **Supprimer ce compte :** le compte et ses sessions sont effacés ; s'il se reconnecte, il repart « en attente ».
+- **Garde-fous :** il reste toujours au moins un administrateur actif ; on ne peut ni se désactiver ni se supprimer soi-même ; les comptes listés dans `ADMIN_SUBS` (configuration du serveur, marqués « protégé ») restent administrateurs quoi qu'il arrive.
+
+Le menu ne montre que les pages que le compte peut ouvrir.
+
+## Journal
+
+**Journal** (administrateurs) : qui a fait quoi dans l'admin, les plus récents d'abord : connexions (réussies, en attente, refusées), modifications, publications, actions sur plusieurs photos, comptes modifiés (avec le détail : rôles, état, photographe lié). Filtrez par compte ou par mot. Le choix de la langue et du thème n'y figure pas. Le journal est gardé 13 mois.

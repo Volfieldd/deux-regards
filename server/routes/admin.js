@@ -1,4 +1,6 @@
 import crypto from 'node:crypto';
+import { ROLES } from '../permissions.js';
+import { AccountError } from '../accounts.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
@@ -90,10 +92,17 @@ export default async function adminRoutes(app) {
     const lang = ADMIN_LANGS.includes(author?.admin_lang) ? author.admin_lang : ADMIN_LANGS.includes(request.cookies[LANG_COOKIE]) ? request.cookies[LANG_COOKIE] : 'fr';
     request.t = translator(lang);
   });
-  // Journal d'audit : qui a modifié quoi.
+  // Journal d'audit : qui a modifié quoi, dans le journal du serveur et dans la base (page « Journal »). Une action
+  // déjà notée avec son détail par la route (request.audited) n'est pas notée deux fois ; la langue et le thème de
+  // l'admin, simples préférences, ne le sont pas.
+  app.decorateRequest('audited', false);
   app.addHook('onResponse', async (request, reply) => {
     if (request.method !== 'GET' && request.method !== 'HEAD' && request.session) {
-      request.log.info({ audit: true, sub: request.session.sub, action: `${request.method} ${request.routeOptions.url}`, params: request.params, status: reply.statusCode }, 'action admin');
+      const action = `${request.method} ${request.routeOptions.url}`;
+      request.log.info({ audit: true, sub: request.session.sub, action, params: request.params, status: reply.statusCode }, 'action admin');
+      if (!request.audited && !['POST /admin/langue', 'POST /admin/theme'].includes(action)) {
+        app.audit.log({ sub: request.session.sub, name: request.session.name, action, target: Object.values(request.params || {}).join(' / '), status: reply.statusCode });
+      }
     }
   });
   // Permission de la route (P), et pour une écriture le jeton CSRF en plus (W).
@@ -133,7 +142,7 @@ export default async function adminRoutes(app) {
     return reply.render(`admin/${template}`, {
       // Retour après la bascule clair / sombre : la page affichée, si elle a été obtenue par GET.
       adminTheme: adminTheme(request), navSeries: navSeries(), currentPath: request.method === 'GET' ? request.url : '/admin',
-      siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply),
+      siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply), can: perm => Boolean(request.can(perm)),
       section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
       translate: app.translator.enabled, encountersNew: app.encounters.countNew(), urgent: app.todo.urgentCount(), description: '',
@@ -189,6 +198,7 @@ export default async function adminRoutes(app) {
       publicUrl: app.config.publicUrl,
       counts: { published: photos.filter(p => p.status === 'published').length, draft: photos.filter(p => p.status === 'draft').length },
       categories: repo.categories().length, authors: repo.authors(), me: repo.authorBySub(request.session.sub),
+      roleLabels: Object.fromEntries(Object.entries(ROLES).map(([k, r]) => [k, r.label])),
       proofs: app.proofs.status(), tsa: app.config.tsa,
     });
   });
@@ -650,6 +660,59 @@ export default async function adminRoutes(app) {
     if (!repo.photo(id)) return reply.code(404).send({ error: request.t('Photo introuvable.') });
     const s = photoStats(id);
     return { total: s.total, rank: s.rank, spark: s.spark, days: s.days.map(d => d.views) };
+  });
+
+  // ---------- comptes et rôles, journal ----------
+  // Rôles proposés dans l'ordre ; « Photographe » attend l'étape 3 (portée « les miennes » sur les listes) : d'ici là,
+  // il ne peut pas être donné, pour ne montrer à personne les photos et les personnes des autres.
+  const ROLE_ORDER = ['admin', 'moderateur', 'relecteur', 'photographe'];
+  const READY_ROLES = new Set(['admin', 'moderateur', 'relecteur']);
+  const STATUS_FR = { actif: 'actif', en_attente: 'en attente', desactive: 'désactivé' };
+  app.get('/admin/comptes', P('comptes.gerer'), async (request, reply) => render(request, reply, 'accounts', {
+    title: request.t('Comptes et rôles'), accounts: app.accounts.list(), authors: repo.authors(), me: request.session.sub,
+    roles: ROLE_ORDER.map(key => ({ key, label: ROLES[key].label, ready: READY_ROLES.has(key) })), guarded: (app.config.adminSubs || []).length > 0,
+  }));
+  app.post('/admin/comptes/:id', W('comptes.gerer'), async (request, reply) => {
+    const body = request.body || {};
+    const a = app.accounts.byId(byId(request.params.id));
+    if (!a) return reply.callNotFound();
+    // Un rôle pas encore proposé (Photographe) déjà présent est gardé tel quel.
+    const roles = [...[].concat(body.roles || []).filter(r => READY_ROLES.has(r)), ...a.roles.filter(r => !READY_ROLES.has(r))];
+    const status = body.status === 'desactive' ? 'desactive' : roles.length ? 'actif' : a.status === 'desactive' ? 'actif' : 'en_attente';
+    const authorId = body.author_id === undefined ? undefined : Number(body.author_id) || null;
+    try {
+      const { before, after } = app.accounts.update(a.id, { roles, authorId, status }, request.session.sub);
+      const lbl = list => list.map(r => ROLES[r]?.label || r).join(', ') || '—';
+      const changes = [before.roles.join() !== after.roles.join() && `rôles : ${lbl(before.roles)} → ${lbl(after.roles)}`,
+        before.status !== after.status && `état : ${STATUS_FR[before.status]} → ${STATUS_FR[after.status]}`,
+        before.author_id !== after.author_id && `photographe : ${repo.authors().find(x => x.id === before.author_id)?.name || '—'} → ${repo.authors().find(x => x.id === after.author_id)?.name || '—'}`].filter(Boolean);
+      if (changes.length) app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'compte modifié', target: after.name || after.sub, status: 303, detail: changes.join(' ; ') });
+      request.audited = true;
+      return done(reply, '/admin/comptes', request.t('Compte « {name} » enregistré.', { name: after.name || after.sub }));
+    } catch (err) {
+      if (!(err instanceof AccountError)) throw err;
+      return failed(reply, '/admin/comptes', request.t(err.message));
+    }
+  });
+  app.post('/admin/comptes/:id/supprimer', W('comptes.gerer'), async (request, reply) => {
+    try {
+      const a = app.accounts.remove(byId(request.params.id), request.session.sub);
+      app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'compte supprimé', target: a.name || a.sub, status: 303 });
+      request.audited = true;
+      return done(reply, '/admin/comptes', request.t('Compte « {name} » supprimé.', { name: a.name || a.sub }));
+    } catch (err) {
+      if (!(err instanceof AccountError)) throw err;
+      return failed(reply, '/admin/comptes', request.t(err.message));
+    }
+  });
+  // Journal : les 300 dernières actions, filtrables par compte et par texte.
+  app.get('/admin/journal', P('journal.voir'), async (request, reply) => {
+    const sub = String(request.query.compte || '');
+    const q = String(request.query.q || '').slice(0, 80);
+    return render(request, reply, 'journal', {
+      title: request.t('Journal'), entries: app.audit.list({ sub, q }), accounts: app.accounts.list(), filter: { sub, q },
+      when: at => new Intl.DateTimeFormat(request.t.locale, { dateStyle: 'short', timeStyle: 'short' }).format(new Date(at)),
+    });
   });
 
   // ---------- apparence de l'admin (clair / sombre) ----------

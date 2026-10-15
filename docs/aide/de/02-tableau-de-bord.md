@@ -16,8 +16,8 @@ Das ist die Seite **Heute**, auf der Sie landen. Oben **Website ansehen** und **
 - **Rhythmus**: die Anzahl der jeden Monat importierten Fotos, über ein Jahr.
 - **Letzte Änderungen**: die fünf zuletzt geänderten Fotos.
 - **Prioritätsnachweise**: Anzahl der Fotos mit Zeitstempel und der nach einem Fehler ausstehenden, mit **Jetzt erneut versuchen**. Siehe [Prioritätsnachweise](preuves).
-- **Ihr Konto**: der Name des angemeldeten Kontos und der Fotograf, mit dem es verknüpft ist.
-  - **Konto nicht verknüpft:** Die Kennung des Kontos wird angezeigt. Kopieren Sie sie in das Feld „Anmeldekonto“ Ihres Profils unter [Fotografen](auteurs).
+- **Ihr Konto**: der Name des angemeldeten Kontos, seine Rollen und der Fotograf, mit dem es verknüpft ist.
+  - **Konto nicht verknüpft:** Ein Administrator verknüpft es unter [Konten und Rollen](reglages#comptes-et-rôles) mit seinem Fotografen.
   - **Konto verknüpft:** Ihre Importe werden Ihnen standardmäßig zugeordnet.
 
 **Banner „Bilder werden aktualisiert“**: Es erscheint nach einer Änderung von Wasserzeichen, EXIF, Autorenname… Der Zähler läuft von selbst weiter; siehe [Wasserzeichen und EXIF](filigrane-exif#mise-à-jour-des-images).
