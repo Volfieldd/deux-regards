@@ -33,3 +33,15 @@ At the bottom of the Series page, **Suggest a series** helps you file incoming p
 - **Switch off:** **Switch off and delete** removes the model and all image fingerprints.
 
 The analysis runs on your server: no image is sent anywhere else. A photo’s fingerprint (a series of numbers) is only used to compare images with each other. It cannot recognise a person, and it is deleted with the photo.
+
+## Describing photos
+
+Below **Suggest a series**, the **Describe the photos** panel suggests a short, factual sentence for each photo (“a red lighthouse on a small island”), shown on the photo’s page under the caption. It is **off by default**.
+
+- **Turn on:** choose the model, **Precise** (Florence-2 large: about 850 MB to download, 4 GB of memory while computing) or **Light** (Florence-2 base: about 270 MB, 2 GB), and the **night hours** (1 am to 6 am by default, Paris time), then **Turn on descriptions**. The model downloads once, at the first computation.
+- **When:** photos without a description are described during the night hours, one at a time, on a single processor core, so as not to slow the rest of the server. The model only takes memory while computing.
+- **On the photo’s page:** **Describe this photo** puts it first, right away (about a minute). Then **Use as caption** copies the sentence into the Caption field, to review, rewrite and save. **Describe again** recomputes it. Nothing is ever copied by itself.
+- **Language:** the model writes in English. If the site has a translator (LibreTranslate), the sentence is translated into French and German; otherwise it stays in English.
+- **Turn off:** **Turn off and delete the model** removes the model from disk; existing descriptions remain.
+
+The analysis happens on your server: no image is sent elsewhere. The model describes what it sees, without ever naming people.

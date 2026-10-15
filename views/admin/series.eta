@@ -100,4 +100,30 @@
 <% } else { %>    <button class="btn" type="submit" name="action" value="on"><%= t('Allumer les propositions') %></button>
 <% } %>  </form>
 </section>
+<% const ds = it.describe, DM = it.describeModels; if (ds && it.can('series.propositions')) { %>
+<section class="panel suggest-panel" id="descriptions" aria-labelledby="descriptions-titre">
+  <h2 id="descriptions-titre"><%= t('Décrire les photos') %> <span class="mono"><%= t('désactivé par défaut') %></span></h2>
+  <p class="hint"><%= t('Une phrase courte et factuelle par photo (« un phare rouge sur une petite île »), proposée sur la fiche, sous la légende : à relire et à réécrire, jamais recopiée seule. Modèle libre Florence-2, sur ce serveur : aucune image n’en sort, et il ne nomme jamais les personnes.') %></p>
+  <p class="hint"><%= it.translate ? t('Le modèle écrit en anglais ; la description est traduite en français et en allemand par le traducteur du site.') : t('Le modèle écrit en anglais. Sans traducteur configuré (TRANSLATE_URL), la description reste en anglais.') %></p>
+  <p class="suggest-status" role="status">
+<% if (!ds.on) { %>    <span class="enc-tag"><%= t('Éteint') %></span>
+<% } else if (ds.busy) { %>    <span class="enc-tag warn"><%= t('Description en cours') %></span> <%= t('{done} photos décrites sur {total}', { done: ds.done, total: ds.total }) %>
+<% } else if (ds.error) { %>    <span class="enc-tag no"><%= t('Dernier essai sans succès') %></span> <%= t.msg(ds.error) %>
+<% } else { %>    <span class="enc-tag ok"><%= t('Allumé') %></span> <%= t('{done} photos décrites sur {total}', { done: ds.done, total: ds.total }) %>
+<% } %>  </p>
+  <form method="post" action="/admin/series/descriptions" class="form">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <fieldset class="row"><legend><%= t('Modèle') %></legend>
+<% Object.entries(DM).forEach(([k, m]) => { %>      <label class="inline"><input type="radio" name="model" value="<%= k %>"<%~ ds.model === k ? ' checked' : '' %>> <strong><%= k === 'large' ? t('Précis') : t('Léger') %></strong> <span class="mono"><%= t('Florence-2 {k} · ≈ {mb} Mo à télécharger · ≈ {ram} Go de mémoire pendant le calcul', { k, mb: m.mb, ram: m.ram }) %></span></label>
+<% }) %>    </fieldset>
+    <div class="row">
+      <label><%= t('La nuit, de') %> <input type="number" name="from" min="0" max="23" value="<%= ds.from %>"> <%= t('h') %></label>
+      <label><%= t('à') %> <input type="number" name="to" min="0" max="23" value="<%= ds.to %>"> <%= t('h') %></label>
+    </div>
+    <p class="hint"><%= t('Les photos sans description sont décrites pendant ces heures (heure de Paris), une à la fois, sur un seul cœur. Une photo demandée depuis sa fiche passe tout de suite.') %></p>
+    <p class="actions"><button class="btn" type="submit" name="action" value="on"><%= ds.on ? t('Enregistrer') : t('Allumer les descriptions') %></button>
+<% if (ds.on) { %>      <button class="btn ghost" type="submit" name="action" value="off" formnovalidate><%= t('Éteindre et effacer le modèle') %></button><% } %></p>
+  </form>
+</section>
+<% } %>
 <p class="sr-only" id="grip-help"><%= t('Flèches haut ou gauche : avancer d’une place. Flèches bas ou droite : reculer d’une place.') %></p>

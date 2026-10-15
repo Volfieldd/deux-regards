@@ -6,10 +6,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
 WORKDIR /app
 COPY package.json package-lock.json .npmrc ./
 # ONNX Runtime (détection des visages) : aucun téléchargement à l'installation (le binaire CPU est dans le paquet ;
-# voir aussi .npmrc), et seulement les binaires Linux x64 de l'image.
+# voir aussi .npmrc), et seulement les binaires Linux x64 de l'image. transformers.js (descriptions Florence-2) :
+# seulement sa version Node ; les fichiers pour navigateur (WebAssembly, WebGPU, cartes de source) sont retirés.
 ENV ONNXRUNTIME_NODE_INSTALL=skip
 RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force \
- && rm -rf node_modules/onnxruntime-node/bin/napi-v*/darwin node_modules/onnxruntime-node/bin/napi-v*/win32 node_modules/onnxruntime-node/bin/napi-v*/linux/arm64
+ && rm -rf node_modules/onnxruntime-node/bin/napi-v*/darwin node_modules/onnxruntime-node/bin/napi-v*/win32 node_modules/onnxruntime-node/bin/napi-v*/linux/arm64 \
+ && rm -rf node_modules/onnxruntime-web/dist/*.map node_modules/onnxruntime-web/dist/*webgl* node_modules/onnxruntime-web/dist/*webgpu* node_modules/onnxruntime-web/dist/*.wasm \
+           node_modules/@huggingface/transformers/dist/*.map node_modules/@huggingface/transformers/dist/transformers.js node_modules/@huggingface/transformers/dist/transformers.min.js \
+           node_modules/@huggingface/transformers/dist/ort-wasm-*
 
 # 2. Image finale, sans compilateur.
 FROM node:22-bookworm-slim

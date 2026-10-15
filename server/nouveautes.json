@@ -1,5 +1,29 @@
 [
   {
+    "version": "1.87.0",
+    "date": "2026-10-15",
+    "pr": 87,
+    "title": {
+      "fr": "Des descriptions suggérées",
+      "en": "Suggested descriptions",
+      "de": "Vorgeschlagene Beschreibungen"
+    },
+    "items": [
+      {
+        "fr": "Page Séries : « Décrire les photos » (désactivé par défaut). Un modèle libre, sur votre serveur, propose une phrase factuelle pour chaque photo, la nuit.",
+        "en": "Series page: “Describe the photos” (off by default). A free model, on your server, suggests a factual sentence for each photo, at night.",
+        "de": "Seite Serien: „Fotos beschreiben“ (standardmäßig aus). Ein freies Modell auf Ihrem Server schlägt nachts für jedes Foto einen sachlichen Satz vor.",
+        "perm": "series.propositions"
+      },
+      {
+        "fr": "Sur la fiche : « Décrire cette photo », puis « Reprendre comme légende », à relire et à réécrire. Rien n’est recopié seul.",
+        "en": "On the photo’s page: “Describe this photo”, then “Use as caption”, to review and rewrite. Nothing is copied by itself.",
+        "de": "Auf der Seite des Fotos: „Dieses Foto beschreiben“, dann „Als Bildunterschrift übernehmen“, zum Prüfen und Umschreiben. Nichts wird von selbst übernommen.",
+        "perm": "photos.textes"
+      }
+    ]
+  },
+  {
     "version": "1.86.0",
     "date": "2026-10-15",
     "pr": 86,

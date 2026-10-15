@@ -832,6 +832,8 @@ export default async function adminRoutes(app) {
     // Instagram : la main sur la file pour cette photo, ou seulement la proposer (circuit) ; sa proposition en cours.
     // Mots-clés suggérés par CLIP (empreinte des propositions de séries) ; null : pas encore d'empreinte.
     keywordSuggestions: app.keywordSuggest.forPhoto(photo, { lang: request.t.lang, have: photo.keywords }), seriesSuggestOn: app.seriesSuggest.enabled(),
+    // Description suggérée (Florence-2) : seulement si la fonction est allumée.
+    description: app.describer.settings().on ? (app.describer.forPhoto(photo.id, request.t.lang) || { pending: false, text: '' }) : null,
     igFile: request.owns('instagram.file', photo.author_id), igPropose: request.owns('instagram.proposer', photo.author_id), igProposal: app.instagram.openProposal(photo.id),
     review: { state: repo.photo(photo.id)?.review || null, at: repo.photo(photo.id)?.publish_at || null, history: app.review.history(photo.id).slice(0, 10) },
     suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(photo.id)), undefined, true, request),
@@ -924,6 +926,16 @@ export default async function adminRoutes(app) {
     roles: ROLE_ORDER.map(key => ({ key, label: ROLES[key].label, ready: READY_ROLES.has(key) })), guarded: (app.config.adminSubs || []).length > 0,
     mail: { enabled: app.mailer.enabled, from: app.mailer.from, mine: (a => a?.notify_to || a?.email || request.session.email || '')(app.accounts.bySub(request.session.sub)) },
   }));
+  // Description suggérée d'une photo : la demander (elle passe avant la file de nuit), et son état (suivi sans recharger).
+  app.post('/admin/photos/:id/description', W('photos.textes'), async (request, reply) => {
+    const id = byId(request.params.id);
+    if (!app.describer.settings().on) return failed(reply, `/admin/photos/${id}`, request.t('Les descriptions suggérées sont éteintes (page Séries).'));
+    app.describer.request(id);
+    if (!request.headers.accept?.includes('text/html')) return { ok: true };
+    return done(reply, `/admin/photos/${id}#description`, request.t('Description demandée : elle arrive dans une minute environ.'));
+  });
+  app.get('/admin/photos/:id/description', P('photos.voir'), async request => app.describer.forPhoto(byId(request.params.id), request.t.lang) || { pending: false, text: '' });
+
   // Nouveautés : toutes les versions, la plus récente d'abord, et la version installée.
   app.get('/admin/nouveautes', P('admin.acceder'), async (request, reply) => render(request, reply, 'releases', {
     title: request.t('Nouveautés'), releases: RELEASES.map(r => localizeRelease(r, request.t.lang, perm => Boolean(request.can(perm)))).filter(r => r.items.length),
@@ -1576,7 +1588,7 @@ export default async function adminRoutes(app) {
   const seriesPage = (request, reply, extra = {}) => render(request, reply, 'series', {
     title: request.t('Séries'), categories: repo.categories(), covers: Object.fromEntries(Object.entries(repo.covers()).map(([k, p]) => [k, withReady(p)])),
     boards: Object.fromEntries(Object.entries(repo.boards(3)).map(([k, list]) => [k, list.map(withReady).filter(p => p.ready)])), errors: {}, values: {},
-    suggest: app.seriesSuggest.state(), ...extra,
+    suggest: app.seriesSuggest.state(), describe: app.describer.state(), describeModels: app.describer.MODELS, translate: app.translator.enabled, ...extra,
   });
   app.get('/admin/series', P('series.gerer'), async (request, reply) => seriesPage(request, reply));
 
@@ -1589,6 +1601,18 @@ export default async function adminRoutes(app) {
     }
     await app.seriesSuggest.disable();
     return done(reply, '/admin/series#propositions', request.t('Propositions de série éteintes : modèle et empreintes effacés.'));
+  });
+
+  // Descriptions suggérées (Florence-2) : allumer avec le modèle et les heures de nuit choisis, ou éteindre et effacer.
+  app.post('/admin/series/descriptions', W('series.propositions'), async (request, reply) => {
+    const b = request.body || {};
+    if (b.action === 'off') {
+      await app.describer.remove();
+      return done(reply, '/admin/series#descriptions', request.t('Descriptions éteintes : modèle effacé (les descriptions déjà faites restent).'));
+    }
+    const s = app.describer.save({ on: true, model: b.model, from: b.from, to: b.to });
+    app.describer.run();
+    return done(reply, '/admin/series#descriptions', request.t('Descriptions allumées : au premier calcul, le modèle se télécharge ; les photos sont décrites la nuit, de {from} h à {to} h.', { from: s.from, to: s.to }));
   });
 
   app.post('/admin/series', W('series.gerer'), async (request, reply) => {

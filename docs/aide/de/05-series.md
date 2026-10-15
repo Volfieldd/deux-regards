@@ -33,3 +33,15 @@ Unten auf der Seite Serien hilft **Serie vorschlagen** beim Einordnen neuer Foto
 - **Ausschalten:** **Ausschalten und löschen** entfernt das Modell und alle Bild-Fingerabdrücke.
 
 Die Analyse läuft auf Ihrem Server: Kein Bild wird anderswohin gesendet. Der Fingerabdruck eines Fotos (eine Zahlenfolge) dient nur dazu, Bilder miteinander zu vergleichen. Er kann keine Person erkennen und wird mit dem Foto gelöscht.
+
+## Fotos beschreiben
+
+Unter **Serie vorschlagen** schlägt das Feld **Fotos beschreiben** für jedes Foto einen kurzen, sachlichen Satz vor („ein roter Leuchtturm auf einer kleinen Insel“), angezeigt auf der Seite des Fotos unter der Bildunterschrift. Es ist **standardmäßig ausgeschaltet**.
+
+- **Einschalten:** Wählen Sie das Modell, **Genau** (Florence-2 large: etwa 850 MB herunterzuladen, 4 GB Speicher während der Berechnung) oder **Leicht** (Florence-2 base: etwa 270 MB, 2 GB), und die **Nachtstunden** (standardmäßig 1 bis 6 Uhr, Pariser Zeit), dann **Beschreibungen einschalten**. Das Modell wird einmal heruntergeladen, bei der ersten Berechnung.
+- **Wann:** Fotos ohne Beschreibung werden in den Nachtstunden beschrieben, eines nach dem anderen, auf einem einzigen Prozessorkern, um den Rest des Servers nicht zu bremsen. Das Modell belegt nur während der Berechnung Speicher.
+- **Auf der Seite des Fotos:** **Dieses Foto beschreiben** kommt sofort an die Reihe (etwa eine Minute). Dann kopiert **Als Bildunterschrift übernehmen** den Satz in das Feld Bildunterschrift, zum Prüfen, Umschreiben und Speichern. **Erneut beschreiben** berechnet ihn neu. Nichts wird je von selbst übernommen.
+- **Sprache:** Das Modell schreibt auf Englisch. Hat die Website einen Übersetzer (LibreTranslate), wird der Satz ins Französische und Deutsche übersetzt; sonst bleibt er auf Englisch.
+- **Ausschalten:** **Ausschalten und Modell löschen** entfernt das Modell von der Festplatte; vorhandene Beschreibungen bleiben.
+
+Die Analyse erfolgt auf Ihrem Server: Kein Bild wird woandershin gesendet. Das Modell beschreibt, was es sieht, ohne je Personen zu nennen.
