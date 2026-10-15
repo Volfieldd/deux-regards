@@ -98,7 +98,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
 
   // ---------- rencontre saisie sur le téléphone (web app installable) ----------
   const LOCALE = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' };
-  const appView = (reply, view, data) => reply.header('cache-control', 'no-store').render(`admin/${view}`, { siteName: app.siteName(), UI, ...data });
+  const appView = (reply, view, data) => reply.header('cache-control', 'no-store').render(`admin/${view}`, { siteName: app.siteName(), UI, t: reply.request.t, lang: reply.request.t.lang, locale: reply.request.t.locale, ...data });
   const authorOf = request => repo.authorBySub(request.session.sub) || null;
   function appPage(request, reply, extra = {}) {
     // Photographe : celui choisi sur l'accueil Terrain (?photographe=), sinon celui du compte.

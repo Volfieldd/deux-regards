@@ -24,6 +24,7 @@ import * as cities from '../geo/cities.js';
 import { TranslateError } from '../translate.js';
 import { registerEncounters } from './rencontres.js';
 import { registerOutings } from './sorties.js';
+import { ADMIN_LANGS, ADMIN_LANG_NAMES, translator } from '../admin-i18n.js';
 
 // Carte des visiteurs (page Statistiques) : centre de chaque pays dans le repère 1000 × 520 du fond de carte
 // (public/admin/carte-monde.svg, généré par scripts/carte-monde.mjs), nom du pays en français.
@@ -73,6 +74,16 @@ export default async function adminRoutes(app) {
   app.addHook('onClose', async () => { await tracker.idle(); });
 
   app.addHook('preHandler', app.requireAdmin);
+  // Langue de l'admin : celle du photographe lié au compte, sinon le cookie du compte, sinon le français.
+  // request.t traduit (voir server/admin-i18n.js) ; elle sert aux pages et aux messages après redirection.
+  const LANG_COOKIE = 'admin_langue';
+  app.decorateRequest('t', null);
+  app.addHook('preHandler', async request => {
+    if (!request.session) return;
+    const author = repo.authorBySub(request.session.sub);
+    const lang = ADMIN_LANGS.includes(author?.admin_lang) ? author.admin_lang : ADMIN_LANGS.includes(request.cookies[LANG_COOKIE]) ? request.cookies[LANG_COOKIE] : 'fr';
+    request.t = translator(lang);
+  });
   // Journal d'audit : qui a modifié quoi (les co-admins ont tous les droits).
   app.addHook('onResponse', async (request, reply) => {
     if (request.method !== 'GET' && request.method !== 'HEAD' && request.session) {
@@ -113,7 +124,9 @@ export default async function adminRoutes(app) {
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply),
       section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
-      translate: app.translator.enabled, encountersNew: app.encounters.countNew(), urgent: app.todo.urgentCount(), description: '', ...data, pageTitle: `${data.title} · Administration · ${siteName}`,
+      translate: app.translator.enabled, encountersNew: app.encounters.countNew(), urgent: app.todo.urgentCount(), description: '',
+      t: request.t, lang: request.t.lang, locale: request.t.locale, adminLangs: ADMIN_LANGS, langNames: ADMIN_LANG_NAMES,
+      ...data, pageTitle: `${data.title} · ${request.t('Administration')} · ${siteName}`,
     });
   }
 
@@ -571,6 +584,16 @@ export default async function adminRoutes(app) {
   });
 
   // ---------- apparence de l'admin (clair / sombre) ----------
+  // Langue de l'admin : gardée sur le photographe lié au compte (elle le suit d'un appareil à l'autre), sinon dans un
+  // cookie du compte.
+  app.post('/admin/langue', write, async (request, reply) => {
+    const lang = ADMIN_LANGS.includes(request.body?.lang) ? request.body.lang : 'fr';
+    const author = repo.authorBySub(request.session.sub);
+    if (author) app.db.prepare('UPDATE authors SET admin_lang = ? WHERE id = ?').run(lang, author.id);
+    else reply.setCookie(LANG_COOKIE, lang, { path: '/admin', httpOnly: true, sameSite: 'lax', secure: secureCookies, maxAge: 365 * 24 * 3600 });
+    return reply.redirect(safeBack(request, '/admin'), 303);
+  });
+
   app.post('/admin/theme', write, async (request, reply) => {
     const theme = request.body?.theme;
     if (theme === 'dark' || theme === 'light') reply.setCookie(THEME_COOKIE, theme, { path: '/admin', httpOnly: true, sameSite: 'lax', secure: secureCookies, maxAge: 365 * 24 * 3600 });

@@ -959,3 +959,15 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .pp-actions form { flex: 1 1 360px; margin: 0; }
 .pp-attach { margin-top: 14px; }
 .pp-attach > summary { cursor: pointer; font-weight: 500; min-height: 36px; display: flex; align-items: center; gap: 8px; }
+
+/* ---------- Langue de l'administration (même sélecteur que le site : drapeau et code) ---------- */
+.admin-lang { position: relative; margin: 4px 0 0; }
+.admin-lang summary { list-style: none; display: inline-flex; align-items: center; gap: 10px; min-height: 32px; padding: 0 10px; border-radius: 8px; color: var(--ink2); cursor: pointer; font-size: 13.5px; }
+.admin-lang summary::-webkit-details-marker { display: none; }
+.admin-lang summary:hover, .admin-lang[open] summary { background: var(--s2); color: var(--ink); }
+.admin-lang .flag { box-shadow: 0 0 0 1px var(--line2); border-radius: 2px; }
+.admin-lang ul { list-style: none; margin: 4px 0 0; padding: 4px; display: grid; gap: 2px; background: var(--s2); border-radius: 10px; box-shadow: inset 0 0 0 1px var(--line2); }
+.admin-lang form { margin: 0; }
+.admin-lang button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 34px; padding: 0 10px; border-radius: 7px; color: var(--ink2); text-align: left; }
+.admin-lang button:hover { background: var(--s3); color: var(--ink); }
+.admin-lang button[aria-current] { color: var(--ink); font-weight: 500; }

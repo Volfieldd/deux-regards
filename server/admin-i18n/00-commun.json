@@ -1,0 +1,206 @@
+{
+ "Administration": {
+  "en": "Administration",
+  "de": "Verwaltung"
+ },
+ "Aller au contenu": {
+  "en": "Skip to content",
+  "de": "Zum Inhalt springen"
+ },
+ "Connexion locale de test": {
+  "en": "Local test sign-in",
+  "de": "Lokale Testanmeldung"
+ },
+ "Rechercher, agir…": {
+  "en": "Search, act…",
+  "de": "Suchen, handeln…"
+ },
+ "Aujourd’hui": {
+  "en": "Today",
+  "de": "Heute"
+ },
+ "{n} urgences": {
+  "en": "{n} urgent items",
+  "de": "{n} dringende Punkte"
+ },
+ "1 urgence": {
+  "en": "1 urgent item",
+  "de": "1 dringender Punkt"
+ },
+ "Travailler": {
+  "en": "Work",
+  "de": "Arbeiten"
+ },
+ "Sorties": {
+  "en": "Outings",
+  "de": "Ausflüge"
+ },
+ "Photothèque": {
+  "en": "Photo library",
+  "de": "Fotothek"
+ },
+ "Personnes": {
+  "en": "People",
+  "de": "Personen"
+ },
+ "{n} nouvelles": {
+  "en": "{n} new",
+  "de": "{n} neue"
+ },
+ "1 nouvelle": {
+  "en": "1 new",
+  "de": "1 neue"
+ },
+ "Publier": {
+  "en": "Publish",
+  "de": "Veröffentlichen"
+ },
+ "Site public": {
+  "en": "Public site",
+  "de": "Öffentliche Website"
+ },
+ "Séries": {
+  "en": "Series",
+  "de": "Serien"
+ },
+ "Diffusion": {
+  "en": "Distribution",
+  "de": "Verbreitung"
+ },
+ "Instagram": {
+  "en": "Instagram",
+  "de": "Instagram"
+ },
+ "Statistiques": {
+  "en": "Statistics",
+  "de": "Statistiken"
+ },
+ "Sur le terrain": {
+  "en": "In the field",
+  "de": "Unterwegs"
+ },
+ "App, cartes, QR": {
+  "en": "App, cards, QR",
+  "de": "App, Karten, QR"
+ },
+ "Réglages": {
+  "en": "Settings",
+  "de": "Einstellungen"
+ },
+ "Photographes": {
+  "en": "Photographers",
+  "de": "Fotografen"
+ },
+ "Apparence": {
+  "en": "Appearance",
+  "de": "Erscheinungsbild"
+ },
+ "Filigrane & EXIF": {
+  "en": "Watermark & EXIF",
+  "de": "Wasserzeichen & EXIF"
+ },
+ "Droits & confidentialité": {
+  "en": "Rights & privacy",
+  "de": "Rechte & Datenschutz"
+ },
+ "Aide": {
+  "en": "Help (in French)",
+  "de": "Hilfe (auf Französisch)"
+ },
+ "Voir le site": {
+  "en": "View site",
+  "de": "Website ansehen"
+ },
+ "Langue de l’administration": {
+  "en": "Admin language",
+  "de": "Sprache der Verwaltung"
+ },
+ "Traitement : {n} photos": {
+  "en": "Processing: {n} photos",
+  "de": "Verarbeitung: {n} Fotos"
+ },
+ "Traitement : {n} photo": {
+  "en": "Processing: {n} photo",
+  "de": "Verarbeitung: {n} Foto"
+ },
+ "Administrateur": {
+  "en": "Administrator",
+  "de": "Administrator"
+ },
+ "Passer en mode clair": {
+  "en": "Switch to light mode",
+  "de": "Zum hellen Modus wechseln"
+ },
+ "Passer en mode sombre": {
+  "en": "Switch to dark mode",
+  "de": "Zum dunklen Modus wechseln"
+ },
+ "Mode clair / sombre": {
+  "en": "Light / dark mode",
+  "de": "Heller / dunkler Modus"
+ },
+ "Se déconnecter": {
+  "en": "Sign out",
+  "de": "Abmelden"
+ },
+ "Aide sur cette page": {
+  "en": "Help for this page (in French)",
+  "de": "Hilfe zu dieser Seite (auf Französisch)"
+ },
+ "Mise à jour des images en cours :": {
+  "en": "Updating images:",
+  "de": "Bilder werden aktualisiert:"
+ },
+ "{n} image(s) n’ont pas pu être recalculées : {titles}.": {
+  "en": "{n} image(s) could not be regenerated: {titles}.",
+  "de": "{n} Bild(er) konnten nicht neu berechnet werden: {titles}."
+ },
+ "Navigation rapide": {
+  "en": "Quick navigation",
+  "de": "Schnellnavigation"
+ },
+ "Photos": {
+  "en": "Photos",
+  "de": "Fotos"
+ },
+ "Importer des photos": {
+  "en": "Import photos",
+  "de": "Fotos importieren"
+ },
+ "Terrain": {
+  "en": "Field",
+  "de": "Unterwegs"
+ },
+ "Menu": {
+  "en": "Menu",
+  "de": "Menü"
+ },
+ "Rechercher et agir": {
+  "en": "Search and act",
+  "de": "Suchen und handeln"
+ },
+ "Rechercher une photo, une série, une action…": {
+  "en": "Search for a photo, a series, an action…",
+  "de": "Ein Foto, eine Serie, eine Aktion suchen…"
+ },
+ "Rechercher": {
+  "en": "Search",
+  "de": "Suchen"
+ },
+ "Échap": {
+  "en": "Esc",
+  "de": "Esc"
+ },
+ "choisir": {
+  "en": "choose",
+  "de": "auswählen"
+ },
+ "exécuter": {
+  "en": "run",
+  "de": "ausführen"
+ },
+ "fermer": {
+  "en": "close",
+  "de": "schließen"
+ }
+}
