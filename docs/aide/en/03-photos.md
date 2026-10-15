@@ -148,6 +148,20 @@ The original, the site images and the proof of prior existence are erased, and t
 
 **This cannot be undone from the admin.** Download the original and the proof first if you want to keep them. The original also remains in the server backups.
 
+## The publishing workflow
+
+A photographer does not publish on their own: they **submit**, and a moderator (or an administrator) **approves**.
+
+- **Submit**: on the photo’s page, **Publishing** section, with an optional word for the moderator; or several photos from the library (**Submit for publishing** button); or a whole outing (**Submit the ready photos** on the outing page). Consents are checked at that moment, by the photographer, who can see the people: a blocked photo cannot be submitted, a photo to check asks for their confirmation. **Withdraw the submission** puts it back as a draft.
+- **Approve**: the **To approve** page (Publish menu, with the number waiting) lists the submissions, oldest first, with the photographer’s word. Tick, then **Publish now** or **Schedule for** (Paris date and time). A scheduled photo is published automatically at that time if it is still ready; otherwise it goes back to the photographer with the reason. **Cancel the schedule** puts it back in waiting.
+- **Send back with a note** (from the photo’s page): the moderator does not edit the photo; the note reaches the photographer’s “Today”, who corrects it and submits it again.
+- **Unpublish**: the moderator says why; the photographer receives the reason.
+- **Notifications**: “Today” tells everyone what is waiting for them (submissions to approve, submitted, scheduled, sent-back photos). Everyone can also choose to be notified **by email**, in **Your account** on the Today page (if sending email is configured on the server).
+- **History**: each photo keeps who submitted, approved, scheduled, sent back or unpublished it, and when.
+- **Per-photographer settings** (**Publishing workflow** page, moderators and administrators): **Publish their photos without approval** (the photographer then publishes their own photos directly, outside the workflow) and **Edit their photos once published** (yes by default; removed, a published photo no longer changes without the moderator).
+
+An administrator publishes directly, as before. A visitor report never unpublishes anything on its own: the moderator decides.
+
 ## Town and world map
 
 Each photo can be attached to a **town**: this is what places it on the **world map** (the “Carte” page, off by default: see [Public site](reglages#carte-du-monde)).

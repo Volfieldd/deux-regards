@@ -11,7 +11,8 @@
 <div class="outing-head">
   <h1><%= o.place || o.author.name %><span class="sub"><%= o.when %><%= o.range ? ` · ${o.range}` : '' %> · <%= o.author.name %> · <%= pl(o.counts.photos, t('0 photo'), t('1 photo'), t('{n} photos', { n: o.counts.photos })) %> · <%= pl(o.people.length, t('0 personne'), t('1 personne'), t('{n} personnes', { n: o.people.length })) %></span></h1>
   <span class="enc-tag <%= TAG[o.state] %>"><%= it.STATES[o.state] %></span>
-<% if (readyDrafts && it.can('photos.publier')) { %>  <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/publier"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>"><button class="btn" type="submit"><%= t('Publier les photos prêtes · {n}', { n: readyDrafts }) %></button></form>
+<% if (readyDrafts && !it.can('photos.publier') && it.can('photos.proposer')) { %>  <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/proposer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>"><button class="btn" type="submit"><%= t('Proposer les photos prêtes · {n}', { n: readyDrafts }) %></button></form>
+<% } %><% if (readyDrafts && it.can('photos.publier')) { %>  <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/publier"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>"><button class="btn" type="submit"><%= t('Publier les photos prêtes · {n}', { n: readyDrafts }) %></button></form>
 <% } %></div>
 <% if (o.parts.length > 1) { %>
 <nav class="chips" aria-label="<%= t('Parties de la journée') %>">

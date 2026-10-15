@@ -148,6 +148,20 @@ Das Original, die Bilder der Website und der Prioritätsnachweis werden gelösch
 
 **Das lässt sich in der Verwaltung nicht rückgängig machen.** Laden Sie vorher das Original und den Nachweis herunter, wenn Sie sie behalten möchten. Das Original bleibt außerdem in den Sicherungen des Servers erhalten.
 
+## Der Veröffentlichungsablauf
+
+Ein Fotograf veröffentlicht nicht selbst: Er **schlägt vor**, und ein Moderator (oder Administrator) **bestätigt**.
+
+- **Vorschlagen**: auf der Fotoseite, Abschnitt **Veröffentlichung**, mit einem optionalen Wort für den Moderator; oder mehrere Fotos aus der Fotothek (Schaltfläche **Zur Veröffentlichung vorschlagen**); oder einen ganzen Ausflug (**Bereite Fotos vorschlagen** auf der Seite des Ausflugs). Die Einwilligungen werden in diesem Moment vom Fotografen geprüft, der die Personen sieht: Ein gesperrtes Foto kann nicht vorgeschlagen werden, ein zu prüfendes verlangt seine Bestätigung. **Vorschlag zurückziehen** macht es wieder zum Entwurf.
+- **Bestätigen**: Die Seite **Zu bestätigen** (Menü Veröffentlichen, mit der Zahl der wartenden) listet die Vorschläge, das älteste zuerst, mit dem Wort des Fotografen. Ankreuzen, dann **Veröffentlichen** oder **Planen für** (Datum und Uhrzeit, Pariser Zeit). Ein geplantes Foto wird zur angegebenen Zeit automatisch veröffentlicht, wenn es noch bereit ist; sonst geht es mit dem Grund an den Fotografen zurück. **Planung aufheben** setzt es wieder auf wartend.
+- **Mit Hinweis zurückschicken** (auf der Fotoseite): Der Moderator bearbeitet das Foto nicht; sein Hinweis erscheint unter „Heute“ des Fotografen, der korrigiert und erneut vorschlägt.
+- **Zurückziehen**: Der Moderator nennt den Grund; der Fotograf erhält ihn.
+- **Benachrichtigungen**: „Heute“ zeigt jedem, was auf ihn wartet (zu bestätigende Vorschläge, vorgeschlagene, geplante, zurückgeschickte Fotos). Jeder kann sich auch **per E-Mail** benachrichtigen lassen, unter **Ihr Konto** auf der Seite Heute (wenn der E-Mail-Versand auf dem Server eingerichtet ist).
+- **Verlauf**: Jedes Foto behält, wer es vorgeschlagen, bestätigt, geplant, zurückgeschickt oder zurückgezogen hat, und wann.
+- **Einstellungen pro Fotograf** (Seite **Veröffentlichungsablauf**, Moderatoren und Administratoren): **Eigene Fotos ohne Bestätigung veröffentlichen** (der Fotograf veröffentlicht seine Fotos dann selbst, außerhalb des Ablaufs) und **Eigene Fotos nach der Veröffentlichung bearbeiten** (standardmäßig ja; entzogen, ändert sich ein veröffentlichtes Foto nicht mehr ohne den Moderator).
+
+Ein Administrator veröffentlicht wie bisher direkt. Eine Besuchermeldung zieht nie etwas von selbst zurück: Der Moderator entscheidet.
+
 ## Ort und Weltkarte
 
 Jedes Foto kann einem **Ort** (Stadt oder Gemeinde) zugeordnet werden: Das platziert es auf der **Weltkarte** (Seite „Carte“, standardmäßig deaktiviert: siehe [Öffentliche Website](reglages#carte-du-monde)).

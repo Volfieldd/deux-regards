@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { ROLES, PERMISSIONS } from '../permissions.js';
 import { AccountError } from '../accounts.js';
 import { NoteError } from '../notes.js';
+import { ReviewError } from '../review.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
@@ -137,6 +138,8 @@ export default async function adminRoutes(app) {
   // Routes qui font plusieurs choses : la permission de l'action précise est vérifiée en plus.
   // Textes d'une photo (photos.textes) ; changer un autre champ demande photos.modifier.
   const TEXT_FIELDS = new Set(['title', 'legend', 'place', 'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de']);
+  // Une photo publiée ne se modifie qu'avec « modifier ses photos publiées » (réglable par photographe).
+  const editable = (request, photo) => Boolean(photo) && (photo.status !== 'published' || request.owns('photos.publiees.modifier', photo.author_id));
   const touchesMore = (photo, fields) => Object.entries(fields).some(([k, v]) => !TEXT_FIELDS.has(k) && v !== undefined && String(v ?? '') !== String(photo?.[k] ?? ''));
 
   // ---------- messages après redirection (cookie signé, lu une fois) ----------
@@ -190,7 +193,7 @@ export default async function adminRoutes(app) {
       grants: Object.keys(PERMISSIONS).filter(p => request.can(p)),
       section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
-      translate: app.translator.enabled, encountersNew: newEncounters(request), urgent: app.todo.urgentCount(perm => request.scope(perm)), description: '',
+      translate: app.translator.enabled, encountersNew: newEncounters(request), urgent: app.todo.urgentCount(perm => request.scope(perm)), toValidate: request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0, description: '',
       t: request.t, lang: request.t.lang, locale: request.t.locale, adminLangs: ADMIN_LANGS, langNames: ADMIN_LANG_NAMES,
       ...data, pageTitle: `${data.title} · ${request.t('Administration')} · ${siteName}`,
     });
@@ -246,7 +249,7 @@ export default async function adminRoutes(app) {
       publicUrl: app.config.publicUrl,
       counts: { published: photos.filter(p => p.status === 'published').length, draft: photos.filter(p => p.status === 'draft').length },
       categories: repo.categories().length, authors: repo.authors(), me: repo.authorBySub(request.session.sub),
-      roleLabels: Object.fromEntries(Object.entries(ROLES).map(([k, r]) => [k, r.label])),
+      roleLabels: Object.fromEntries(Object.entries(ROLES).map(([k, r]) => [k, r.label])), account: app.accounts.bySub(request.session.sub), mailer: app.mailer.enabled,
       proofs: app.proofs.status(), tsa: app.config.tsa, allPhotos: own == null,
     });
   });
@@ -265,7 +268,10 @@ export default async function adminRoutes(app) {
       verifier: { label: request.t('▲ À vérifier'), test: p => st(p).site.level === 'warn' && !app.readiness.confirmed(p.id, 'site', st(p)) },
       bloquee: { label: request.t('✕ Bloquées'), test: p => st(p).site.level === 'no' },
       'sans-visage': { label: request.t('Sans visage'), test: p => !st(p).faces.has },
-      proposee: { label: request.t('✦ Série proposée'), test: p => sugg.has(p.id) } };
+      proposee: { label: request.t('✦ Série proposée'), test: p => sugg.has(p.id) },
+      proposees: { label: request.t('▷ Proposées'), test: p => p.review === 'proposee' },
+      programmees: { label: request.t('⏲ Programmées'), test: p => p.review === 'programmee' },
+      'a-reprendre': { label: request.t('↩ À reprendre'), test: p => p.review === 'a_reprendre' } };
     const missing = Object.hasOwn(MISSING, request.query.manque) ? request.query.manque : '';
     // « À finir » : brouillons et titres provisoires.
     const todo = statut === 'afinir';
@@ -285,7 +291,8 @@ export default async function adminRoutes(app) {
       missing: missing ? { key: missing, label: MISSING[missing].label } : null,
       totals: { all: all.length, published: all.filter(p => p.status === 'published').length, draft: all.filter(p => p.status === 'draft').length,
         todo: all.filter(p => p.status === 'draft' || p.provisional).length,
-        verifier: all.filter(MISSING.verifier.test).length, bloquee: all.filter(MISSING.bloquee.test).length, 'sans-visage': all.filter(MISSING['sans-visage'].test).length, proposee: sugg.size },
+        verifier: all.filter(MISSING.verifier.test).length, bloquee: all.filter(MISSING.bloquee.test).length, 'sans-visage': all.filter(MISSING['sans-visage'].test).length, proposee: sugg.size,
+        proposees: all.filter(MISSING.proposees.test).length, programmees: all.filter(MISSING.programmees.test).length, 'a-reprendre': all.filter(MISSING['a-reprendre'].test).length },
       view: request.query.vue === 'liste' ? 'liste' : 'planche', importer: 'importer' in request.query, wide: true,
       defaultAuthor: repo.authorBySub(request.session.sub)?.id ?? authors[0]?.id,
       defaultCategory: repo.categories().find(c => c.slug === filter.category)?.id ?? repo.categories()[0]?.id,
@@ -458,6 +465,7 @@ export default async function adminRoutes(app) {
   app.post('/admin/photos/:id/serie', W('photos.modifier'), async (request, reply) => {
     const id = byId(request.params.id);
     const photo = repo.photo(id);
+    if (photo && !editable(request, photo)) return app.forbid(request, reply);
     const json = !request.headers.accept?.includes('text/html');
     const back = safeBack(request, `/admin/photos/${id}`);
     if (!photo) return json ? reply.code(404).send({ error: request.t('Photo introuvable.') }) : reply.callNotFound();
@@ -484,6 +492,7 @@ export default async function adminRoutes(app) {
     const down = Object.entries(before).filter(([id, st]) => st === 'published' && now(id) === 'draft').map(([id]) => Number(id));
     if (up.length) app.instagram.onPublished(up);
     if (down.length) app.instagram.onUnpublished(down);
+    for (const id of [...up, ...down]) app.review.clear(id);              // publiée ou dépubliée directement : hors circuit
   }
   const IG_STATE = 'ig_state';
   const igPage = (request, reply, extra = {}) => {
@@ -639,6 +648,7 @@ export default async function adminRoutes(app) {
     proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), shares: app.shares.forPhoto(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
     outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
     notes: app.notes.open({ photoId: photo.id }),
+    review: { state: repo.photo(photo.id)?.review || null, at: repo.photo(photo.id)?.publish_at || null, history: app.review.history(photo.id).slice(0, 10) },
     suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(photo.id)), undefined, true),
     ready: app.readiness.state(photo.id, null, t), confirmations: app.readiness.confirmations(photo.id), igConfirmed: app.readiness.confirmed(photo.id, 'instagram'),
     siteConfirmed: app.readiness.confirmed(photo.id, 'site'),
@@ -819,7 +829,7 @@ export default async function adminRoutes(app) {
   // Sans JavaScript : tout le tableau est envoyé d'un coup (champs titre_<id>, serie_<id>…).
   app.post('/admin/photos/lot', W('photos.textes'), async (request, reply) => {
     const body = request.body || {};
-    const ids = repo.existingIds(lotIds(body.ids)).filter(id => request.owns('photos.voir', repo.photo(id)?.author_id));
+    const ids = repo.existingIds(lotIds(body.ids)).filter(id => request.owns('photos.voir', repo.photo(id)?.author_id) && editable(request, repo.photo(id)));
     if (body.publish === '1' && !request.can('photos.publier')) return app.forbid(request, reply);
     if (!request.can('photos.modifier') && ids.some(id => touchesMore(repo.photo(id), { category_id: body[`category_id_${id}`], taken_on: body[`taken_on_${id}`] }))) return app.forbid(request, reply);
     const errors = {};
@@ -856,6 +866,7 @@ export default async function adminRoutes(app) {
   // Un champ à la fois (enregistrement à la sortie du champ). Réponse : valeurs telles qu'enregistrées.
   app.post('/admin/photos/:id/champs', W('photos.textes'), async (request, reply) => {
     const id = byId(request.params.id);
+    if (!editable(request, repo.photo(id))) return app.forbid(request, reply);
     if (touchesMore(repo.photo(id), request.body || {}) && !request.can('photos.modifier')) return app.forbid(request, reply);
     if (request.body?.author_id !== undefined && !request.owns('photos.modifier', Number(request.body.author_id))) return app.forbid(request, reply);
     try {
@@ -889,9 +900,15 @@ export default async function adminRoutes(app) {
     const ko = (code, text) => (json ? reply.code(code).send({ error: text }) : failed(reply, back, text));
     const each = value => Object.fromEntries(ids.map(id => [id, value]));
     const map = raw => { try { return typeof raw === 'string' ? JSON.parse(raw) : raw || {}; } catch { return {}; } };
-    // Chaque action a sa permission : publier ou dépublier, supprimer, sinon modifier.
-    const NEED = { publish: 'photos.publier', draft: 'photos.publier', statuses: 'photos.publier', delete: 'photos.supprimer' };
+    // Chaque action a sa permission : publier ou dépublier, supprimer, proposer, sinon modifier (et seulement les
+    // photos modifiables : une photo publiée demande « modifier ses photos publiées »).
+    const NEED = { publish: 'photos.publier', draft: 'photos.publier', statuses: 'photos.publier', delete: 'photos.supprimer', propose: 'photos.proposer' };
     if (!request.can(NEED[body.action] || 'photos.modifier')) return app.forbid(request, reply);
+    if (!NEED[body.action]) ids.splice(0, ids.length, ...ids.filter(id => editable(request, repo.photo(id))));
+    if (body.action === 'propose') {
+      const r = await app.review.propose(ids.filter(id => request.owns('photos.proposer', repo.photo(id)?.author_id)), by(request), { message: body.message });
+      return ok(proposedText(request.t, r));
+    }
 
     try {
       switch (body.action) {
@@ -1035,6 +1052,7 @@ export default async function adminRoutes(app) {
     const body = request.body || {};
     if ((body.status === 'published' ? 'published' : 'draft') !== photo.status && !request.can('photos.publier')) return app.forbid(request, reply);
     if (!request.owns('photos.modifier', Number(body.author_id))) return app.forbid(request, reply);          // pas à un autre photographe
+    if (!editable(request, photo)) return app.forbid(request, reply);
     try {
       // Publier une photo à vérifier : confirmation explicite exigée, puis gardée (le blocage, lui, est refusé plus bas).
       const publishing = body.status === 'published' && photo.status !== 'published';
@@ -1134,6 +1152,7 @@ export default async function adminRoutes(app) {
   app.post('/admin/photos/:id/textes', W('photos.textes'), async (request, reply) => {
     const id = byId(request.params.id);
     const body = request.body || {};
+    if (!editable(request, repo.photo(id))) return app.forbid(request, reply);
     const fields = Object.fromEntries([...TEXT_FIELDS].filter(k => k in body).map(k => [k, body[k]]));
     try {
       repo.patchPhoto(id, fields);
@@ -1162,6 +1181,124 @@ export default async function adminRoutes(app) {
     if (!request.can('taches.adresser') && app.accounts.authorIdOf(request.session.sub) !== n.author_id) return app.forbid(request, reply);
     app.notes.done(n.id, request.session.name);
     return done(reply, safeBack(request, `/admin/photos/${n.photo_id}#remarques`), request.t('Remarque marquée comme faite.'));
+  });
+
+  // ---------- circuit de publication (server/review.js) ----------
+  const by = request => ({ sub: request.session.sub, name: request.session.name });
+  const proposedText = (t, r) => [r.proposed.length ? (r.proposed.length > 1 ? t('{n} photos proposées à la publication.', { n: r.proposed.length }) : t('{n} photo proposée à la publication.', { n: r.proposed.length })) : t('Aucune photo proposée.'),
+    r.verify.length ? (r.verify.length > 1 ? t('{n} à vérifier : confirmez les accords dans leur fiche.', { n: r.verify.length }) : t('{n} à vérifier : confirmez les accords dans sa fiche.', { n: r.verify.length })) : '',
+    r.blocked.length ? (r.blocked.length > 1 ? t('{n} bloquées par un refus.', { n: r.blocked.length }) : t('{n} bloquée par un refus.', { n: r.blocked.length })) : ''].filter(Boolean).join(' ');
+  const approvedText = (t, r, at) => [r.done.length ? (at ? (r.done.length > 1 ? t('{n} photos programmées.', { n: r.done.length }) : t('{n} photo programmée.', { n: r.done.length })) : (r.done.length > 1 ? t('{n} photos publiées.', { n: r.done.length }) : t('{n} photo publiée.', { n: r.done.length }))) : t('Aucune photo publiée.'),
+    r.verify.length + r.blocked.length ? t('{n} ne sont pas prêtes (accords) : renvoyez-les au photographe.', { n: r.verify.length + r.blocked.length }) : ''].filter(Boolean).join(' ');
+  // Date de publication programmée : champ datetime-local, heure de Paris.
+  const parseAt = raw => {
+    const m = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/.exec(String(raw || ''));
+    if (!m) return null;
+    const guess = Date.parse(`${m[1]}T${m[2]}:00Z`);
+    const offset = (d => { const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Paris', timeZoneName: 'shortOffset' }).formatToParts(d).find(x => x.type === 'timeZoneName').value; const mm = /GMT([+-]\d+)(?::(\d+))?/.exec(p); return mm ? Number(mm[1]) * 60 + Math.sign(Number(mm[1])) * Number(mm[2] || 0) : 0; })(new Date(guess));
+    return guess - offset * 60000;
+  };
+  app.post('/admin/photos/:id/proposer', W('photos.proposer'), async (request, reply) => {
+    const id = byId(request.params.id);
+    const r = await app.review.propose([id], by(request), { message: request.body?.message, confirm: request.body?.confirmer === '1' });
+    return (r.proposed.length ? done : failed)(reply, `/admin/photos/${id}#publication`, proposedText(request.t, r));
+  });
+  app.post('/admin/photos/:id/retirer-proposition', W('photos.proposer'), async (request, reply) => {
+    const id = byId(request.params.id);
+    app.review.withdraw(id, by(request));
+    return done(reply, `/admin/photos/${id}#publication`, request.t('Proposition retirée : la photo reste en brouillon.'));
+  });
+  app.post('/admin/photos/:id/valider', W('photos.publier'), async (request, reply) => {
+    const id = byId(request.params.id);
+    const at = request.body?.quand === 'date' ? parseAt(request.body?.date) : null;
+    if (request.body?.quand === 'date' && !at) return failed(reply, safeBack(request, `/admin/photos/${id}#publication`), request.t('Choisissez une date et une heure.'));
+    try {
+      const r = await app.review.approve([id], by(request), { at });
+      return (r.done.length ? done : failed)(reply, safeBack(request, `/admin/photos/${id}#publication`), approvedText(request.t, r, at));
+    } catch (err) {
+      if (!(err instanceof ReviewError)) throw err;
+      return failed(reply, safeBack(request, `/admin/photos/${id}#publication`), request.t(err.message));
+    }
+  });
+  app.post('/admin/photos/:id/deprogrammer', W('photos.publier'), async (request, reply) => {
+    const id = byId(request.params.id);
+    if (repo.photo(id)?.review === 'programmee') { app.db.prepare("UPDATE photos SET review = 'proposee', publish_at = NULL WHERE id = ?").run(id); app.db.prepare('INSERT INTO photo_reviews (photo_id, action, by_sub, by_name, at) VALUES (?, ?, ?, ?, ?)').run(id, 'deprogrammee', request.session.sub, request.session.name, Date.now()); }
+    return done(reply, safeBack(request, `/admin/photos/${id}#publication`), request.t('Programmation annulée : la photo attend de nouveau d’être validée.'));
+  });
+  app.post('/admin/photos/:id/renvoyer', W('photos.publier'), async (request, reply) => {
+    const id = byId(request.params.id);
+    try {
+      await app.review.sendBack(id, by(request), request.body?.message);
+    } catch (err) {
+      if (!(err instanceof ReviewError) && !(err instanceof NoteError)) throw err;
+      return failed(reply, safeBack(request, `/admin/photos/${id}#publication`), request.t(err.message));
+    }
+    return done(reply, safeBack(request, `/admin/photos/${id}#publication`), request.t('Photo renvoyée au photographe avec votre remarque.'));
+  });
+  app.post('/admin/photos/:id/depublier', W('photos.publier'), async (request, reply) => {
+    const id = byId(request.params.id);
+    try {
+      await app.review.unpublish(id, by(request), request.body?.raison);
+    } catch (err) {
+      if (!(err instanceof ReviewError) && !(err instanceof NoteError)) throw err;
+      return failed(reply, `/admin/photos/${id}#publication`, request.t(err.message));
+    }
+    return done(reply, `/admin/photos/${id}#publication`, request.t('Photo dépubliée ; le photographe reçoit la raison.'));
+  });
+  // Page « À valider » : les propositions (la plus ancienne d'abord) et les publications programmées.
+  app.get('/admin/a-valider', P('photos.publier'), async (request, reply) => {
+    const all = new Map(request.mine('photos.publier', repo.photos()).map(p => [p.id, p]));
+    const names = new Map(repo.authors().map(a => [a.id, a.name]));
+    const states = new Map();
+    const withState = p => ({ ...withReady(p), site: (states.get(p.id) ?? states.set(p.id, app.readiness.state(p, null, request.t)).get(p.id)).site });
+    const when = ms => new Intl.DateTimeFormat(request.t.locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ms);
+    return render(request, reply, 'review', {
+      title: request.t('À valider'),
+      pending: app.review.pending().filter(r => all.has(r.id)).map(r => ({ ...r, photo: withState(all.get(r.id)), author: names.get(r.author_id) || '', when: r.at ? when(r.at) : '' })),
+      scheduled: app.review.scheduled().filter(r => all.has(r.id)).map(r => ({ ...r, photo: withReady(all.get(r.id)), author: names.get(r.author_id) || '', when: when(r.publish_at) })),
+    });
+  });
+  // Valider plusieurs propositions d'un coup : publier ou programmer la sélection.
+  app.post('/admin/a-valider', W('photos.publier'), async (request, reply) => {
+    const ids = repo.existingIds(request.body?.ids).filter(id => request.owns('photos.publier', repo.photo(id)?.author_id));
+    if (!ids.length) return failed(reply, '/admin/a-valider', request.t('Cochez au moins une photo.'));
+    const at = request.body?.quand === 'date' ? parseAt(request.body?.date) : null;
+    if (request.body?.quand === 'date' && !at) return failed(reply, '/admin/a-valider', request.t('Choisissez une date et une heure.'));
+    try {
+      const r = await app.review.approve(ids, by(request), { at });
+      return done(reply, '/admin/a-valider', approvedText(request.t, r, at));
+    } catch (err) {
+      if (!(err instanceof ReviewError)) throw err;
+      return failed(reply, '/admin/a-valider', request.t(err.message));
+    }
+  });
+  // Réglages du circuit, photographe par photographe : publier sans validation, modifier ses photos publiées.
+  app.get('/admin/circuit', P('circuit.regler'), async (request, reply) => {
+    const authors = new Map(repo.authors().map(a => [a.id, a.name]));
+    const list = app.accounts.list().filter(a => a.roles.includes('photographe') && !a.roles.includes('admin'))
+      .map(a => ({ ...a, author: authors.get(a.author_id) || '', publishAlone: a.adjust.add.includes('photos.publier'), editPublished: !a.adjust.remove.includes('photos.publiees.modifier') }));
+    return render(request, reply, 'circuit', { title: request.t('Circuit de publication'), list });
+  });
+  app.post('/admin/circuit/:id', W('circuit.regler'), async (request, reply) => {
+    const a = app.accounts.byId(byId(request.params.id));
+    if (!a || !a.roles.includes('photographe') || a.roles.includes('admin')) return reply.callNotFound();
+    const alone = request.body?.publier === '1', edit = request.body?.modifier === '1';
+    app.accounts.setAdjust(a.id, 'photos.publier', alone ? true : null);
+    app.accounts.setAdjust(a.id, 'photos.publiees.modifier', edit ? null : false);
+    app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'circuit réglé', target: a.name || a.sub, status: 303,
+      detail: `publier sans validation : ${alone ? 'oui' : 'non'} ; modifier ses photos publiées : ${edit ? 'oui' : 'non'}` });
+    request.audited = true;
+    return done(reply, '/admin/circuit', request.t('Réglages de {name} enregistrés.', { name: a.name || a.sub }));
+  });
+  // Préférence de chacun : être prévenu par e-mail (propositions, décisions).
+  app.post('/admin/compte/notifications', W('admin.acceder'), async (request, reply) => {
+    try {
+      app.accounts.setNotify(request.session.sub, { on: request.body?.email === '1', to: request.body?.adresse });
+    } catch (err) {
+      if (!(err instanceof AccountError)) throw err;
+      return failed(reply, '/admin#compte', request.t(err.message));
+    }
+    return done(reply, '/admin#compte', request.t('Préférence enregistrée.'));
   });
 
   app.post('/admin/photos/:id/status', W('photos.publier'), async (request, reply) => {

@@ -1,0 +1,32 @@
+<% layout('./layout') %>
+<% const t = it.t; const LV = { ok: t('prête'), warn: t('à vérifier'), no: t('bloquée') }; %>
+<h1><%= t('À valider') %></h1>
+<p class="prose"><%= t('Les photos proposées par les photographes, la plus ancienne d’abord. Publiez-les, programmez-les, ou renvoyez-les avec une remarque (depuis leur fiche). Une photo à vérifier attend la confirmation des accords par le photographe ou un administrateur.') %></p>
+<% if (!it.pending.length) { %><p class="empty"><%= t('Aucune photo à valider.') %></p><% } else { %>
+<form method="post" action="/admin/a-valider" class="review-form">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <ul class="review-list">
+<% it.pending.forEach(r => { const p = r.photo; %>    <li class="panel">
+      <label class="rv-pick"><input type="checkbox" name="ids" value="<%= p.id %>"<%~ p.site.level === 'ok' ? '' : ' disabled' %> aria-label="<%= t('Choisir « {title} »', { title: p.title }) %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></label>
+      <div class="rv-body">
+        <a class="o-title" href="/admin/photos/<%= p.id %>#publication"><%= p.title %></a>
+        <span class="mono"><%= r.author %> · <%= p.category %><%= p.taken_on ? ` · ${p.taken_on}` : '' %> · <%= t('proposée le {date}', { date: r.when }) %></span>
+        <span class="enc-tag <%= p.site.level %>"><%= t('Site : {state}', { state: LV[p.site.level] }) %></span>
+<% if (r.message) { %>        <q class="rv-msg"><%= r.message %></q>
+<% } %>        <a class="more" href="/admin/photos/<%= p.id %>#publication"><%= t('Ouvrir : programmer, renvoyer avec une remarque') %></a>
+      </div>
+    </li>
+<% }) %>  </ul>
+  <div class="rv-actions panel">
+    <label class="inline"><input type="radio" name="quand" value="maintenant" checked> <%= t('Publier maintenant') %></label>
+    <label class="inline"><input type="radio" name="quand" value="date"> <%= t('Programmer le') %> <input type="datetime-local" name="date" aria-label="<%= t('Jour et heure de publication') %>"></label>
+    <button class="btn" type="submit"><%= t('Valider les photos cochées') %></button>
+  </div>
+</form>
+<% } %>
+<% if (it.scheduled.length) { %>
+<h2><%= t('Programmées') %></h2>
+<ul class="rank plain">
+<% it.scheduled.forEach(r => { %>  <li><span class="t"><a href="/admin/photos/<%= r.id %>#publication"><%= r.photo.title %></a> <span class="mono"><%= r.author %></span></span><span class="mono"><%= r.when %></span></li>
+<% }) %></ul>
+<% } %>

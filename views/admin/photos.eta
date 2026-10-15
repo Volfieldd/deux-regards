@@ -1,6 +1,7 @@
 <% layout('./layout') %>
 <% const t = it.t; %>
 <% // Droits du compte : ce qui n'est pas permis est masqué (le serveur refuse de toute façon).
+   const prop = it.can('photos.proposer') && !it.can('photos.publier');
    const mod = it.can('photos.modifier'), pub = it.can('photos.publier'), del = it.can('photos.supprimer'), order = it.canAll('photos.modifier'), imp = it.can('photos.importer'); %>
 <% const f = it.filter;
    const params = o => { const p = new URLSearchParams(); const all = { q: f.q, auteur: f.author, serie: f.category, statut: it.todo ? 'afinir' : f.status, manque: it.missing ? it.missing.key : '', vue: it.view === 'liste' ? 'liste' : '', ...o }; for (const [k, v] of Object.entries(all)) if (v) p.set(k, v); const s = p.toString(); return '/admin/photos' + (s ? '?' + s : ''); };
@@ -25,10 +26,10 @@
 <% [['', t('Tout'), it.totals.all], ['published', t('Publiées'), it.totals.published], ['draft', t('Brouillons'), it.totals.draft], ['afinir', t('À finir'), it.totals.todo]].forEach(([k, label, n]) => { %>
       <a class="chip<%= k === 'afinir' ? ' warn' : '' %>" href="<%= params({ statut: k }) %>"<%~ status === k ? ' aria-current="true"' : '' %>><%= label %> <span class="n"><%= n %></span></a>
 <% }) %>
-<% ;[['verifier', '▲ ' + t('À vérifier')], ['bloquee', '✕ ' + t('Bloquées')], ['sans-visage', t('Sans visage')], ['proposee', '✦ ' + t('Série proposée')]].forEach(([k, label]) => { if (!it.totals[k] && !(it.missing && it.missing.key === k)) return; %>
+<% ;[['verifier', '▲ ' + t('À vérifier')], ['bloquee', '✕ ' + t('Bloquées')], ['sans-visage', t('Sans visage')], ['proposee', '✦ ' + t('Série proposée')], ['proposees', '▷ ' + t('Proposées')], ['programmees', '⏲ ' + t('Programmées')], ['a-reprendre', '↩ ' + t('À reprendre')]].forEach(([k, label]) => { if (!it.totals[k] && !(it.missing && it.missing.key === k)) return; %>
       <a class="chip" href="<%= params({ manque: it.missing && it.missing.key === k ? '' : k }) %>"<%~ it.missing && it.missing.key === k ? ' aria-current="true"' : '' %>><%= label %> <span class="n"><%= it.totals[k] %></span></a>
 <% }) %>
-<% if (it.missing && !['verifier', 'bloquee', 'sans-visage', 'proposee'].includes(it.missing.key)) { %>      <a class="chip" href="<%= params({ manque: '' }) %>" aria-current="true" title="<%= t('Retirer ce filtre') %>"><%= it.missing.label %> <span class="n"><%= it.photos.length %></span> ✕</a>
+<% if (it.missing && !['verifier', 'bloquee', 'sans-visage', 'proposee', 'proposees', 'programmees', 'a-reprendre'].includes(it.missing.key)) { %>      <a class="chip" href="<%= params({ manque: '' }) %>" aria-current="true" title="<%= t('Retirer ce filtre') %>"><%= it.missing.label %> <span class="n"><%= it.photos.length %></span> ✕</a>
 <% } %>    </nav>
     <form class="filters" method="get" action="/admin/photos" role="search" data-filters>
 <% if (status) { %><input type="hidden" name="statut" value="<%= status %>"><% } %>
@@ -63,7 +64,7 @@
       <li id="photo-<%= p.id %>" class="tile <%= it.ratioClass(p) %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
         <input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="<%= t('Sélectionner « {title} »', { title: p.title }) %>">
         <a class="img" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '320px', alt: '' }) %><% } else { %><span class="ph"><%= t('Traitement…') %></span><% } %></a>
-        <span class="badges"><% if (p.status === 'draft') { %><span class="badge status"><span aria-hidden="true">○</span> <%= t('Brouillon') %></span><% } else if (p.provisional) { %><span class="badge status warn"><%= t('Titre provisoire') %></span><% } %><% if (p.site && p.site.level !== 'ok') { %><span class="badge state <%= p.site.level %>"<%~ it.can('personnes.voir') ? ` title="${__eta.e(p.site.reasons.join(' ; '))}"` : '' %>><span aria-hidden="true"><%= p.site.level === 'no' ? '✕' : '▲' %></span> <%= p.site.level === 'no' ? t('Bloquée') : t('À vérifier') %></span><% } %><% if (p.suggest && p.suggest.length) { %><span class="badge sug" title="<%= t('Série proposée') %>"><span aria-hidden="true">✦</span> <%= p.suggest[0].name %></span><% } %></span>
+        <span class="badges"><% if (p.status === 'draft') { %><span class="badge status"><span aria-hidden="true">○</span> <%= t('Brouillon') %></span><% } else if (p.provisional) { %><span class="badge status warn"><%= t('Titre provisoire') %></span><% } %><% if (p.site && p.site.level !== 'ok') { %><span class="badge state <%= p.site.level %>"<%~ it.can('personnes.voir') ? ` title="${__eta.e(p.site.reasons.join(' ; '))}"` : '' %>><span aria-hidden="true"><%= p.site.level === 'no' ? '✕' : '▲' %></span> <%= p.site.level === 'no' ? t('Bloquée') : t('À vérifier') %></span><% } %><% if (p.suggest && p.suggest.length) { %><span class="badge sug" title="<%= t('Série proposée') %>"><span aria-hidden="true">✦</span> <%= p.suggest[0].name %></span><% } %><% if (p.review) { %><span class="badge review"><span aria-hidden="true"><%= { proposee: '▷', programmee: '⏲', a_reprendre: '↩' }[p.review] %></span> <%= { proposee: t('Proposée'), programmee: t('Programmée'), a_reprendre: t('À reprendre') }[p.review] %></span><% } %></span>
 
         <span class="cap"><a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.category %><%= p.when ? ' · ' + p.when : '' %><%= p.status === 'published' ? ' · ' + t('publiée') : '' %></small></span>
       </li>
@@ -184,6 +185,8 @@
 
     <div class="insp-ft">
       <button class="btn" type="submit" name="action" value="publish" data-publish<%~ pub ? '' : ' hidden' %>><%= t('Publier') %></button>
+<% if (prop) { %>      <button class="btn" type="submit" name="action" value="propose" data-propose><%= t('Proposer à la publication') %></button>
+<% } %>
       <div class="two">
         <button class="btn ghost" type="submit" name="action" value="draft"<%~ pub ? '' : ' hidden' %>><%= t('Dépublier') %></button>
         <button class="btn ghost" type="submit" name="action" value="delete" data-bulk-delete<%~ del ? '' : ' hidden' %>><%= t('Supprimer…') %></button>

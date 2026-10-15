@@ -39,24 +39,25 @@ test('photothèque : boutons et glisser selon les droits ; droits transmis à la
   assert.doesNotMatch(ph, /data-sortable/);                                     // l'ordre touche toutes les photos
 });
 
-test('fiche : textes seuls pour le modérateur et le relecteur, sans données personnelles ; fiche du photographe sans publication', async t => {
+test('fiche : le modérateur valide sans retoucher ni voir les personnes ; le relecteur corrige les textes ; le photographe propose', async t => {
   const c = await accounts(t);
   const url = `/admin/photos/${c.photo.id}`;
   const mod = await c.mod.get(url);
-  assert.match(mod, new RegExp(`action="/admin/photos/${c.photo.id}/textes"`));
+  assert.doesNotMatch(mod, new RegExp(`action="/admin/photos/${c.photo.id}/textes"`));                // il ne retouche pas
   assert.doesNotMatch(mod, new RegExp(`<form class="panel form" method="post" action="/admin/photos/${c.photo.id}" novalidate>`));
   assert.doesNotMatch(mod, /class="faces-fix"|id="rencontres"|Supprimer cette photo|\/original"/);
   assert.match(mod, /id="instagram"/);
-  assert.match(mod, new RegExp(`action="/admin/photos/${c.photo.id}/status"`));
+  assert.match(mod, new RegExp(`action="/admin/photos/${c.photo.id}/depublier"`));                      // photo publiée : dépublier, avec la raison
   assert.match(mod, /Remarque pour le photographe/);
-  // Enregistrer un texte : oui ; changer la série par ce formulaire : ignoré.
+  assert.equal((await c.mod.post(`${url}/textes`, { title: 'Non' })).statusCode, 403);
+  // Relecteur : enregistrer un texte, oui ; changer la série par ce formulaire : ignoré.
   const other = c.db.prepare('SELECT id FROM categories WHERE id != ? LIMIT 1').pluck().get(c.photo.category_id);
-  await c.mod.post(`${url}/textes`, { title: 'Titre relu', legend: 'Légende relue', category_id: String(other) });
+  await c.rel.post(`${url}/textes`, { title: 'Titre relu', legend: 'Légende relue', category_id: String(other) });
   assert.deepEqual(c.db.prepare('SELECT title, legend, category_id FROM photos WHERE id = ?').get(c.photo.id), { title: 'Titre relu', legend: 'Légende relue', category_id: c.photo.category_id });
   // Relecteur : textes, sans publication, sans Instagram ni remarques.
   const rel = await c.rel.get(url);
   assert.match(rel, /\/textes"/);
-  assert.doesNotMatch(rel, new RegExp(`action="/admin/photos/${c.photo.id}/status"|id="instagram"|Remarque pour le photographe`));
+  assert.doesNotMatch(rel, new RegExp(`action="/admin/photos/${c.photo.id}/(status|depublier|valider)"|id="instagram"|Remarque pour le photographe`));
   // Photographe : la fiche complète, sans le choix du statut ni Instagram ; supprimer et l'original : permis.
   const ph = await c.ph.get(url);
   assert.match(ph, /name="status" value="(draft|published)">\s*<p class="hint">Statut :/);

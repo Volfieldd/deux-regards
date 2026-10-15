@@ -13,7 +13,9 @@ export const PERMISSIONS = {
   'photos.importer': {},
   'photos.textes': { scoped: true },   // titre, légende, lieu et leurs traductions
   'photos.modifier': { scoped: true }, // tout le reste de la fiche : série, date, photographe, ville, ordre, preuve
-  'photos.publier': {},                // publier et dépublier sur le site (droit à part)
+  'photos.proposer': { scoped: true },  // proposer à la publication (circuit : le modérateur valide)
+  'photos.publier': { scoped: true },   // publier, programmer et dépublier sur le site, valider les propositions (droit à part)
+  'photos.publiees.modifier': { scoped: true }, // modifier une photo déjà publiée (réglable par photographe)
   'photos.supprimer': { scoped: true },
   'photos.original': { scoped: true }, // télécharger l'original (avec son GPS)
   'series.gerer': {},
@@ -36,6 +38,7 @@ export const PERMISSIONS = {
   'signalements.traiter': {},
   'statistiques.voir': { scoped: true },
   'taches.adresser': {},               // faire remonter un élément à traiter à un photographe
+  'circuit.regler': {},                // régler, photographe par photographe, « publier sans validation » et « modifier ses photos publiées »
   'site.textes': {},
   'site.apparence': {},
   'site.filigrane': {},
@@ -56,6 +59,7 @@ export const ROLES = {
       ...all(['admin.acceder', 'photos.importer']),
       'terrain.app': OWN, 'terrain.cartes': OWN,
       'photos.voir': OWN, 'photos.textes': OWN, 'photos.modifier': OWN, 'photos.supprimer': OWN, 'photos.original': OWN,
+      'photos.proposer': OWN, 'photos.publiees.modifier': OWN,
       'sorties.voir': OWN, 'sorties.gerer': OWN,
       'personnes.voir': OWN, 'personnes.gerer': OWN, 'personnes.refus': OWN, 'personnes.demandes': OWN, 'personnes.offrir': OWN,
       'statistiques.voir': OWN,
@@ -63,19 +67,31 @@ export const ROLES = {
   },
   moderateur: {
     label: 'Modérateur',
-    perms: all(['admin.acceder', 'photos.voir', 'photos.textes', 'photos.publier', 'series.gerer', 'instagram.voir', 'instagram.file',
-      'instagram.publier', 'signalements.traiter', 'statistiques.voir', 'taches.adresser', 'site.textes']),
+    // Le modérateur ne retouche pas les photos : il valide, programme, dépublie, ou renvoie avec une remarque.
+    perms: all(['admin.acceder', 'photos.voir', 'photos.publier', 'series.gerer', 'instagram.voir', 'instagram.file',
+      'instagram.publier', 'signalements.traiter', 'statistiques.voir', 'taches.adresser', 'circuit.regler', 'site.textes']),
   },
-  relecteur: { label: 'Relecteur', perms: all(['admin.acceder', 'photos.voir', 'photos.textes', 'site.textes']) },
+  // Le relecteur corrige les textes, y compris ceux des photos déjà en ligne (photos.textes reste sa seule écriture).
+  relecteur: { label: 'Relecteur', perms: all(['admin.acceder', 'photos.voir', 'photos.textes', 'photos.publiees.modifier', 'site.textes']) },
 };
 export const SCOPES = { ALL, OWN };
 
-// Droits d'un ensemble de rôles : permission → « tout » ou « les miennes » (la plus large l'emporte).
-export function grantsOf(roles = []) {
+// Droits réglables photographe par photographe (page « Circuit de publication », permission circuit.regler) :
+// ajoutés (sur ses photos seulement) ou retirés de ce que donnent ses rôles.
+export const ADJUSTABLE = {
+  'photos.publier': 'Publier ses photos sans validation',
+  'photos.publiees.modifier': 'Modifier ses photos une fois publiées',
+};
+// Droits d'un ensemble de rôles : permission → « tout » ou « les miennes » (la plus large l'emporte), puis les
+// réglages du compte (adjust : { add: [...], remove: [...] }, seulement des droits de ADJUSTABLE).
+export function grantsOf(roles = [], adjust = {}) {
   const out = new Map();
   for (const r of roles) {
     for (const [perm, scope] of Object.entries(ROLES[r]?.perms || {})) if (out.get(perm) !== ALL) out.set(perm, scope);
   }
+  if (roles.includes('admin')) return out;                          // l'administrateur n'est jamais restreint
+  for (const perm of adjust.remove || []) if (Object.hasOwn(ADJUSTABLE, perm)) out.delete(perm);
+  for (const perm of adjust.add || []) if (Object.hasOwn(ADJUSTABLE, perm) && !out.has(perm)) out.set(perm, PERMISSIONS[perm].scoped ? OWN : ALL);
   return out;
 }
 // Le compte a-t-il au moins un rôle de l'admin ?
@@ -87,7 +103,7 @@ export function registerPermissions(app, { renderError }) {
   app.decorateRequest('grants', null);
   app.decorateRequest('can', function (perm) {
     if (!Object.hasOwn(PERMISSIONS, perm)) throw new Error(`permission inconnue : ${perm}`);
-    this.grants ??= grantsOf(this.session?.roles);
+    this.grants ??= grantsOf(this.session?.roles, this.session?.adjust);
     return this.grants.get(perm) || false;
   });
   const forbid = (request, reply) => {

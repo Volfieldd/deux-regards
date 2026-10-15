@@ -124,7 +124,7 @@
     </section>
 <% } %>
 
-    <section class="panel wide2" aria-labelledby="account-title">
+    <section class="panel wide2" id="compte" aria-labelledby="account-title">
       <h2 id="account-title"><%= t('Votre compte') %></h2>
       <p><%~ t('Connecté en tant que {name}.', { name: `<strong>${__eta.e(it.session.name || it.session.email || it.session.sub)}</strong>` }) %>
 <% if (it.me) { %>
@@ -132,6 +132,13 @@
 <% } else { %>
       <%= t('Ce compte n’est lié à aucun photographe : un administrateur peut le relier dans « Comptes et rôles ».') %></p>
 <% } %>
+      <form class="form notify-form" method="post" action="/admin/compte/notifications">
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+        <label class="inline"><input type="checkbox" name="email" value="1"<%~ it.account && it.account.notify_email ? ' checked' : '' %>> <%= t('Me prévenir aussi par e-mail (propositions, décisions sur mes photos, remarques)') %></label>
+        <label><%= t('Adresse') %> <span class="mono"><%= it.account && it.account.email ? t('vide : {email}', { email: it.account.email }) : t('obligatoire pour recevoir les e-mails') %></span><input type="email" name="adresse" value="<%= it.account ? it.account.notify_to : '' %>" maxlength="200"></label>
+<% if (!it.mailer) { %>        <p class="hint"><%= t('L’envoi d’e-mails n’est pas configuré sur ce serveur : seul « Aujourd’hui » vous préviendra.') %></p><% } %>
+        <p class="actions"><button class="btn ghost" type="submit"><%= t('Enregistrer') %></button></p>
+      </form>
       <p class="mono"><%= t('Rôles : {roles}', { roles: (it.session.roles || []).map(r => t(it.roleLabels[r] || r)).join(', ') || '—' }) %><% if (it.can('comptes.gerer')) { %> · <a class="more" href="/admin/comptes"><%= t('Comptes et rôles') %></a><% } %></p>
     </section>
   </div>

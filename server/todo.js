@@ -15,7 +15,7 @@ const MONTH = 30 * 864e5;
 const FR = translator('fr');
 const dayOf = t => ms => new Intl.DateTimeFormat(t.locale || 'fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
 
-export function createTodo({ db, encounters, instagram, proofs, readiness, feedback, seriesSuggest, accounts, notes, now = () => Date.now() }) {
+export function createTodo({ db, encounters, instagram, proofs, readiness, feedback, seriesSuggest, accounts, notes, review, now = () => Date.now() }) {
   const q = {
     rights: db.prepare(`SELECT id FROM encounters WHERE rights_request IS NOT NULL AND rights_done_at IS NULL ORDER BY rights_requested_at`).pluck(),
     // Refus dont des photos liées sont encore publiées.
@@ -104,6 +104,15 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
       for (const n of open) items.push({ level: 'bientot', title: t('Remarque de {name} sur « {title} »', { name: n.from_name || t('l’équipe'), title: n.title }), detail: n.message, href: `/admin/photos/${n.photo_id}#remarques`, action: t('Voir') });
     } else if (open.length) {
       items.push({ level: 'bientot', title: open.length > 1 ? t('{n} remarques sur des photos, pas encore traitées', { n: open.length }) : t('{n} remarque sur une photo, pas encore traitée', { n: open.length }), detail: t('adressées aux photographes'), href: `/admin/photos/${open[0].photo_id}#remarques`, action: t('Voir') });
+    }
+    // Circuit de publication : à valider (qui publie pour tout le monde) ; proposées et programmées (ses photos).
+    const toValidate = review && a.all('photos.publier') ? review.countFor('proposee') : 0;
+    if (toValidate) items.push({ level: 'bientot', title: toValidate > 1 ? t('{n} photos proposées à valider', { n: toValidate }) : t('{n} photo proposée à valider', { n: toValidate }), detail: t('publier, programmer ou renvoyer avec une remarque'), href: '/admin/a-valider', action: t('Valider') });
+    const pr_ = a.author('photos.proposer');
+    if (review && pr_ != null) {
+      const waitingMine = review.countFor('proposee', pr_), planned = review.countFor('programmee', pr_);
+      if (waitingMine) items.push({ level: 'plus-tard', title: waitingMine > 1 ? t('{n} photos proposées, en attente du modérateur', { n: waitingMine }) : t('{n} photo proposée, en attente du modérateur', { n: waitingMine }), detail: t('vous serez prévenu de sa décision'), href: '/admin/photos?manque=proposees', action: t('Voir') });
+      if (planned) items.push({ level: 'plus-tard', title: planned > 1 ? t('{n} photos programmées', { n: planned }) : t('{n} photo programmée', { n: planned }), detail: t('publiées automatiquement à la date choisie'), href: '/admin/photos?manque=programmees', action: t('Voir') });
     }
     const waiting = accounts && a.all('comptes.gerer') ? accounts.pending() : 0;
     if (waiting) items.push({ level: 'bientot', title: waiting > 1 ? t('{n} comptes en attente d’un rôle', { n: waiting }) : t('{n} compte en attente d’un rôle', { n: waiting }), detail: t('connectés une fois, ils n’ont encore accès à rien'), href: '/admin/comptes', action: t('Voir') });

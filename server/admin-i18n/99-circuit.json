@@ -1,0 +1,390 @@
+{
+ "Annuler la programmation": {
+  "en": "Cancel the schedule",
+  "de": "Planung aufheben"
+ },
+ "à reprendre": {
+  "en": "to rework",
+  "de": "zu überarbeiten"
+ },
+ "↩ À reprendre": {
+  "en": "↩ To rework",
+  "de": "↩ Zu überarbeiten"
+ },
+ "À reprendre": {
+  "en": "To rework",
+  "de": "Zu überarbeiten"
+ },
+ "Aucun compte Photographe.": {
+  "en": "No Photographer account.",
+  "de": "Kein Fotografen-Konto."
+ },
+ "Aucune photo à valider.": {
+  "en": "No photo to approve.",
+  "de": "Kein Foto zu bestätigen."
+ },
+ "Aucune photo proposée.": {
+  "en": "No photo submitted.",
+  "de": "Kein Foto vorgeschlagen."
+ },
+ "Aucune photo publiée.": {
+  "en": "No photo published.",
+  "de": "Kein Foto veröffentlicht."
+ },
+ "aucun photographe lié": {
+  "en": "no linked photographer",
+  "de": "kein verknüpfter Fotograf"
+ },
+ "À valider": {
+  "en": "To approve",
+  "de": "Zu bestätigen"
+ },
+ "À vérifier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.": {
+  "en": "To check: I confirm that the recognisable people in this photo have agreed to the site, or are not recognisable.",
+  "de": "Zu prüfen: Ich bestätige, dass die erkennbaren Personen auf diesem Foto der Website zugestimmt haben oder nicht erkennbar sind."
+ },
+ "Bloquée par un refus : elle ne peut pas être proposée.": {
+  "en": "Blocked by a refusal: it cannot be submitted.",
+  "de": "Durch eine Ablehnung gesperrt: Es kann nicht vorgeschlagen werden."
+ },
+ "Choisissez une date et une heure.": {
+  "en": "Choose a date and a time.",
+  "de": "Wählen Sie Datum und Uhrzeit."
+ },
+ "Choisissez une date à venir.": {
+  "en": "Choose a future date.",
+  "de": "Wählen Sie ein künftiges Datum."
+ },
+ "Circuit de publication": {
+  "en": "Publishing workflow",
+  "de": "Veröffentlichungsablauf"
+ },
+ "Jour et heure de publication": {
+  "en": "Day and time of publishing",
+  "de": "Tag und Uhrzeit der Veröffentlichung"
+ },
+ "dépubliée": {
+  "en": "unpublished",
+  "de": "zurückgezogen"
+ },
+ "Dépublier : pourquoi ?": {
+  "en": "Unpublish: why?",
+  "de": "Zurückziehen: warum?"
+ },
+ "Dites pourquoi la photo est dépubliée.": {
+  "en": "Say why the photo is unpublished.",
+  "de": "Sagen Sie, warum das Foto zurückgezogen wird."
+ },
+ "L’envoi d’e-mails n’est pas configuré sur ce serveur : seul « Aujourd’hui » vous préviendra.": {
+  "en": "Sending email is not configured on this server: only “Today” will notify you.",
+  "de": "Der E-Mail-Versand ist auf diesem Server nicht eingerichtet: Nur „Heute“ benachrichtigt Sie."
+ },
+ "le photographe reçoit la raison": {
+  "en": "the photographer receives the reason",
+  "de": "der Fotograf erhält den Grund"
+ },
+ "Les photos proposées par les photographes, la plus ancienne d’abord. Publiez-les, programmez-les, ou renvoyez-les avec une remarque (depuis leur fiche). Une photo à vérifier attend la confirmation des accords par le photographe ou un administrateur.": {
+  "en": "Photos submitted by the photographers, oldest first. Publish them, schedule them, or send them back with a note (from their page). A photo to check waits for the photographer or an administrator to confirm the consents.",
+  "de": "Von den Fotografen vorgeschlagene Fotos, das älteste zuerst. Veröffentlichen, planen oder mit einem Hinweis zurückschicken (auf ihrer Seite). Ein zu prüfendes Foto wartet auf die Bestätigung der Einwilligungen durch den Fotografen oder einen Administrator."
+ },
+ "Me prévenir aussi par e-mail (propositions, décisions sur mes photos, remarques)": {
+  "en": "Also notify me by email (submissions, decisions on my photos, notes)",
+  "de": "Mich auch per E-Mail benachrichtigen (Vorschläge, Entscheidungen zu meinen Fotos, Hinweise)"
+ },
+ "Modifier ses photos une fois publiées": {
+  "en": "Edit their photos once published",
+  "de": "Eigene Fotos nach der Veröffentlichung bearbeiten"
+ },
+ "{n} à vérifier : confirmez les accords dans leur fiche.": {
+  "en": "{n} to check: confirm the consents on their pages.",
+  "de": "{n} zu prüfen: Bestätigen Sie die Einwilligungen auf ihren Seiten."
+ },
+ "{n} à vérifier : confirmez les accords dans sa fiche.": {
+  "en": "{n} to check: confirm the consents on its page.",
+  "de": "{n} zu prüfen: Bestätigen Sie die Einwilligungen auf seiner Seite."
+ },
+ "{n} bloquée par un refus.": {
+  "en": "{n} blocked by a refusal.",
+  "de": "{n} durch eine Ablehnung gesperrt."
+ },
+ "{n} bloquées par un refus.": {
+  "en": "{n} blocked by a refusal.",
+  "de": "{n} durch eine Ablehnung gesperrt."
+ },
+ "{n} ne sont pas prêtes (accords) : renvoyez-les au photographe.": {
+  "en": "{n} are not ready (consents): send them back to the photographer.",
+  "de": "{n} sind nicht bereit (Einwilligungen): Schicken Sie sie an den Fotografen zurück."
+ },
+ "{n} photo programmée": {
+  "en": "{n} scheduled photo",
+  "de": "{n} geplantes Foto"
+ },
+ "{n} photo programmée.": {
+  "en": "{n} photo scheduled.",
+  "de": "{n} Foto geplant."
+ },
+ "{n} photo proposée à la publication.": {
+  "en": "{n} photo submitted for publishing.",
+  "de": "{n} Foto zur Veröffentlichung vorgeschlagen."
+ },
+ "{n} photo proposée à valider": {
+  "en": "{n} submitted photo to approve",
+  "de": "{n} vorgeschlagenes Foto zu bestätigen"
+ },
+ "{n} photo proposée, en attente du modérateur": {
+  "en": "{n} submitted photo, waiting for the moderator",
+  "de": "{n} vorgeschlagenes Foto, wartet auf den Moderator"
+ },
+ "{n} photos programmées": {
+  "en": "{n} scheduled photos",
+  "de": "{n} geplante Fotos"
+ },
+ "{n} photos programmées.": {
+  "en": "{n} photos scheduled.",
+  "de": "{n} Fotos geplant."
+ },
+ "{n} photos proposées à la publication.": {
+  "en": "{n} photos submitted for publishing.",
+  "de": "{n} Fotos zur Veröffentlichung vorgeschlagen."
+ },
+ "{n} photos proposées à valider": {
+  "en": "{n} submitted photos to approve",
+  "de": "{n} vorgeschlagene Fotos zu bestätigen"
+ },
+ "{n} photos proposées, en attente du modérateur": {
+  "en": "{n} submitted photos, waiting for the moderator",
+  "de": "{n} vorgeschlagene Fotos, warten auf den Moderator"
+ },
+ "obligatoire pour recevoir les e-mails": {
+  "en": "required to receive emails",
+  "de": "nötig, um E-Mails zu erhalten"
+ },
+ "Ouvrir : programmer, renvoyer avec une remarque": {
+  "en": "Open: schedule, send back with a note",
+  "de": "Öffnen: planen, mit Hinweis zurückschicken"
+ },
+ "Par défaut, un photographe propose ses photos et le modérateur les valide ; il peut modifier ses photos une fois publiées. Ces deux droits se règlent ici, photographe par photographe.": {
+  "en": "By default, a photographer submits their photos and the moderator approves them; they can edit their photos once published. Both rights are set here, photographer by photographer.",
+  "de": "Standardmäßig schlägt ein Fotograf seine Fotos vor und der Moderator bestätigt sie; er kann seine Fotos nach der Veröffentlichung bearbeiten. Beide Rechte werden hier eingestellt, Fotograf für Fotograf."
+ },
+ "Photo dépubliée ; le photographe reçoit la raison.": {
+  "en": "Photo unpublished; the photographer receives the reason.",
+  "de": "Foto zurückgezogen; der Fotograf erhält den Grund."
+ },
+ "photographe lié : {name}": {
+  "en": "linked photographer: {name}",
+  "de": "verknüpfter Fotograf: {name}"
+ },
+ "Photo renvoyée au photographe avec votre remarque.": {
+  "en": "Photo sent back to the photographer with your note.",
+  "de": "Foto mit Ihrem Hinweis an den Fotografen zurückgeschickt."
+ },
+ "Pour une correction, écrivez une remarque au photographe (plus bas) ou renvoyez-lui la photo.": {
+  "en": "For a correction, write a note to the photographer (below) or send the photo back.",
+  "de": "Für eine Korrektur schreiben Sie dem Fotografen einen Hinweis (unten) oder schicken Sie ihm das Foto zurück."
+ },
+ "Préférence enregistrée.": {
+  "en": "Preference saved.",
+  "de": "Einstellung gespeichert."
+ },
+ "programmation annulée": {
+  "en": "schedule cancelled",
+  "de": "Planung aufgehoben"
+ },
+ "Programmation annulée : la photo attend de nouveau d’être validée.": {
+  "en": "Schedule cancelled: the photo is waiting to be approved again.",
+  "de": "Planung aufgehoben: Das Foto wartet erneut auf Bestätigung."
+ },
+ "programmée": {
+  "en": "scheduled",
+  "de": "geplant"
+ },
+ "Programmée": {
+  "en": "Scheduled",
+  "de": "Geplant"
+ },
+ "programmée le {date}": {
+  "en": "scheduled for {date}",
+  "de": "geplant für {date}"
+ },
+ "⏲ Programmées": {
+  "en": "⏲ Scheduled",
+  "de": "⏲ Geplant"
+ },
+ "Programmées": {
+  "en": "Scheduled",
+  "de": "Geplant"
+ },
+ "Programmer le": {
+  "en": "Schedule for",
+  "de": "Planen für"
+ },
+ "proposée": {
+  "en": "submitted",
+  "de": "vorgeschlagen"
+ },
+ "Proposée": {
+  "en": "Submitted",
+  "de": "Vorgeschlagen"
+ },
+ "proposée, attend le modérateur": {
+  "en": "submitted, waiting for the moderator",
+  "de": "vorgeschlagen, wartet auf den Moderator"
+ },
+ "proposée le {date}": {
+  "en": "submitted on {date}",
+  "de": "vorgeschlagen am {date}"
+ },
+ "Proposée : le modérateur va la publier, la programmer ou vous la renvoyer avec une remarque.": {
+  "en": "Submitted: the moderator will publish it, schedule it or send it back to you with a note.",
+  "de": "Vorgeschlagen: Der Moderator wird es veröffentlichen, planen oder Ihnen mit einem Hinweis zurückschicken."
+ },
+ "Proposée par {name} le {date}.": {
+  "en": "Submitted by {name} on {date}.",
+  "de": "Vorgeschlagen von {name} am {date}."
+ },
+ "▷ Proposées": {
+  "en": "▷ Submitted",
+  "de": "▷ Vorgeschlagen"
+ },
+ "Proposées": {
+  "en": "Submitted",
+  "de": "Vorgeschlagen"
+ },
+ "Proposer à la publication": {
+  "en": "Submit for publishing",
+  "de": "Zur Veröffentlichung vorschlagen"
+ },
+ "Proposer les photos prêtes · {n}": {
+  "en": "Submit the ready photos · {n}",
+  "de": "Bereite Fotos vorschlagen · {n}"
+ },
+ "proposition retirée": {
+  "en": "submission withdrawn",
+  "de": "Vorschlag zurückgezogen"
+ },
+ "Proposition retirée : la photo reste en brouillon.": {
+  "en": "Submission withdrawn: the photo stays a draft.",
+  "de": "Vorschlag zurückgezogen: Das Foto bleibt ein Entwurf."
+ },
+ "Publication": {
+  "en": "Publishing",
+  "de": "Veröffentlichung"
+ },
+ "publiées automatiquement à la date choisie": {
+  "en": "published automatically on the chosen date",
+  "de": "automatisch zum gewählten Datum veröffentlicht"
+ },
+ "Publiée sur le site. La modifier demande un droit que le modérateur peut vous donner.": {
+  "en": "Published on the site. Editing it requires a right the moderator can give you.",
+  "de": "Auf der Website veröffentlicht. Zum Bearbeiten braucht es ein Recht, das der Moderator Ihnen geben kann."
+ },
+ "Publiée sur le site. Vos modifications y apparaissent tout de suite.": {
+  "en": "Published on the site. Your changes appear there at once.",
+  "de": "Auf der Website veröffentlicht. Ihre Änderungen erscheinen dort sofort."
+ },
+ "publier, programmer ou renvoyer avec une remarque": {
+  "en": "publish, schedule or send back with a note",
+  "de": "veröffentlichen, planen oder mit Hinweis zurückschicken"
+ },
+ "Publier ses photos sans validation": {
+  "en": "Publish their photos without approval",
+  "de": "Eigene Fotos ohne Bestätigung veröffentlichen"
+ },
+ "Réglages de {name} enregistrés.": {
+  "en": "Settings for {name} saved.",
+  "de": "Einstellungen für {name} gespeichert."
+ },
+ "renvoyée avec une remarque": {
+  "en": "sent back with a note",
+  "de": "mit Hinweis zurückgeschickt"
+ },
+ "Renvoyée : voyez la remarque ci-dessous, corrigez, puis proposez-la de nouveau.": {
+  "en": "Sent back: see the note below, correct it, then submit it again.",
+  "de": "Zurückgeschickt: Lesen Sie den Hinweis unten, korrigieren Sie, und schlagen Sie es erneut vor."
+ },
+ "Renvoyer": {
+  "en": "Send back",
+  "de": "Zurückschicken"
+ },
+ "Renvoyer au photographe avec une remarque": {
+  "en": "Send back to the photographer with a note",
+  "de": "Mit einem Hinweis an den Fotografen zurückschicken"
+ },
+ "Retirer la proposition": {
+  "en": "Withdraw the submission",
+  "de": "Vorschlag zurückziehen"
+ },
+ "sinon, il les propose au modérateur": {
+  "en": "otherwise, they submit them to the moderator",
+  "de": "sonst schlägt er sie dem Moderator vor"
+ },
+ "sinon, une photo publiée ne change plus sans vous": {
+  "en": "otherwise, a published photo no longer changes without you",
+  "de": "sonst ändert sich ein veröffentlichtes Foto nicht mehr ohne Sie"
+ },
+ "Un mot pour le modérateur": {
+  "en": "A word for the moderator",
+  "de": "Ein Wort für den Moderator"
+ },
+ "Validée : elle sera publiée le {date}.": {
+  "en": "Approved: it will be published on {date}.",
+  "de": "Bestätigt: Es wird am {date} veröffentlicht."
+ },
+ "Valider": {
+  "en": "Approve",
+  "de": "Bestätigen"
+ },
+ "Valider les photos cochées": {
+  "en": "Approve the ticked photos",
+  "de": "Angekreuzte Fotos bestätigen"
+ },
+ "vide : {email}": {
+  "en": "empty: {email}",
+  "de": "leer: {email}"
+ },
+ "vous serez prévenu de sa décision": {
+  "en": "you will be told of the decision",
+  "de": "Sie werden über die Entscheidung informiert"
+ },
+ "Réglage inconnu.": {
+  "en": "Unknown setting.",
+  "de": "Unbekannte Einstellung."
+ },
+ "Cette adresse e-mail n’est pas valide.": {
+  "en": "This email address is not valid.",
+  "de": "Diese E-Mail-Adresse ist ungültig."
+ },
+ "Photo proposée": {
+  "en": "Photo submitted",
+  "de": "Foto vorgeschlagen"
+ },
+ "Photo validée": {
+  "en": "Photo approved",
+  "de": "Foto bestätigt"
+ },
+ "Photos validées": {
+  "en": "Photos approved",
+  "de": "Fotos bestätigt"
+ },
+ "Photo renvoyée au photographe": {
+  "en": "Photo sent back to the photographer",
+  "de": "Foto an den Fotografen zurückgeschickt"
+ },
+ "Photo dépubliée": {
+  "en": "Photo unpublished",
+  "de": "Foto zurückgezogen"
+ },
+ "Proposition retirée": {
+  "en": "Submission withdrawn",
+  "de": "Vorschlag zurückgezogen"
+ },
+ "Sortie proposée": {
+  "en": "Outing submitted",
+  "de": "Ausflug vorgeschlagen"
+ },
+ "Circuit réglé": {
+  "en": "Workflow set",
+  "de": "Ablauf eingestellt"
+ }
+}

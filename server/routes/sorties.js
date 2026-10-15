@@ -67,6 +67,15 @@ export function registerOutings(app, { repo, render, done, failed, P, W, withRea
     return done(reply, back(o), request.t('Lieu de la sortie enregistré.'));
   });
   // « Publier les photos prêtes » : les brouillons prêts de la sortie ; à vérifier et bloquées restent en brouillon.
+  // Proposer toute la sortie (ses photos prêtes, encore en brouillon et hors circuit) au modérateur.
+  app.post('/admin/sorties/:author/:day/proposer', W('photos.proposer'), async (request, reply) => {
+    const o = load(request);
+    if (!o) return reply.callNotFound();
+    const ids = o.photos.filter(p => p.status === 'draft' && !p.review && request.owns('photos.proposer', p.author_id)).map(p => p.id);
+    const r = await app.review.propose(ids, { sub: request.session.sub, name: request.session.name });
+    const n = r.proposed.length;
+    return done(reply, back(o), n > 1 ? request.t('{n} photos proposées à la publication.', { n }) : n ? request.t('{n} photo proposée à la publication.', { n }) : request.t('Aucune photo proposée.'));
+  });
   app.post('/admin/sorties/:author/:day/publier', W('photos.publier'), async (request, reply) => {
     const o = load(request);
     if (!o) return reply.callNotFound();
