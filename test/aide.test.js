@@ -39,7 +39,7 @@ test('aide : réservée à l’admin, toutes les sections, aucun lien interne ca
 test('chaque écran de l’admin mène à sa section d’aide', async t => {
   const c = await admin(t);
   const help = ids((await c.as('/admin/aide')).body);
-  for (const url of ['/admin', '/admin/photos', '/admin/photos/1', '/admin/series', '/admin/statistiques', '/admin/instagram', '/admin/auteurs', '/admin/images', '/admin/apparence', '/admin/site', '/admin/droits', '/admin/terrain', '/admin/sorties']) {
+  for (const url of ['/admin', '/admin/photos', '/admin/photos/1', '/admin/series', '/admin/statistiques', '/admin/instagram', '/admin/auteurs', '/admin/images', '/admin/apparence', '/admin/site', '/admin/droits', '/admin/terrain', '/admin/sorties', '/admin/personnes']) {
     const body = (await c.as(url)).body;
     const m = /<p class="help-link"><a href="\/admin\/aide#([^"]+)">Aide sur cette page<\/a><\/p>/.exec(body);
     assert.ok(m, `${url} : lien d’aide absent`);

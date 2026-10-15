@@ -942,3 +942,20 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .rub-panel > summary { cursor: pointer; list-style: none; }
 .rub-panel > summary h2 { display: flex; align-items: center; gap: 10px; margin: 0; }
 .rub-panel[open] > summary h2 { margin-bottom: 12px; }
+
+/* ---------- Personnes ---------- */
+.people-list { list-style: none; margin: 16px 0 0; padding: 0; display: grid; }
+.people-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 4px; border-top: 1px solid var(--line); }
+.people-list li:first-child { border-top: 0; }
+.pp-main { display: flex; align-items: center; gap: 12px; flex: 1 1 280px; min-width: 0; }
+.pp-main img.enc-face { width: 40px; height: 40px; }
+.face-ini.big { width: 40px; height: 40px; font-size: 15px; }
+.pp-who { display: grid; min-width: 0; }
+.pp-who strong { font-weight: 500; }
+.pp-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.pp-merge { align-items: center; }
+.pp-merge form { margin: 0; }
+.pp-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-top: 12px; }
+.pp-actions form { flex: 1 1 360px; margin: 0; }
+.pp-attach { margin-top: 14px; }
+.pp-attach > summary { cursor: pointer; font-weight: 500; min-height: 36px; display: flex; align-items: center; gap: 8px; }

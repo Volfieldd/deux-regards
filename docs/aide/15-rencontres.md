@@ -2,6 +2,16 @@
 
 Quand vous photographiez quelqu'un dans la rue, la page **Personnes** (barre latérale, groupe « Travailler ») réunit ce qui le concerne : sa demande, son accord ou son refus, et les photos où il apparaît. Chaque **rencontre** (une personne, un jour) a sa fiche.
 
+## Les personnes
+
+La page **Personnes** (barre latérale, groupe « Travailler ») montre une ligne par **personne photographiée**, qu'elle ait été rencontrée une fois ou lors de plusieurs sorties : son visage, son nom, ses références de cartes, ses rencontres et ses photos, sa décision (dernier accord, ou refus), et les signaux à traiter (nouvelle demande, demande de droits, rapprochement proposé). **Demandes et rencontres** ouvre la liste détaillée des rencontres.
+
+- **Une rencontre par sortie** : chaque rencontre a sa carte et son accord. **Un accord ne vaut que pour la sortie** où il a été donné ; **un refus vaut pour tout** : le refus le plus récent d'une personne s'étend à toutes ses rencontres (noté « refus étendu » dans leur historique). Un accord donné plus tard, avec le code de la carte, vaut pour sa sortie ; il ne défait pas les autres refus, à lever à la main si la personne le demande.
+- **Créer** : d'abord sur le téléphone, avec **Nouvelle rencontre** ; dans l'app, **Déjà rencontrée ?** propose les personnes vues ces 30 derniers jours par ce photographe, pour ajouter la rencontre du jour à sa fiche (un nouvel accord reste à signer). Une carte signée saisie ou une demande sur `/bonjour` créent aussi une personne.
+- **Rapprocher** : quand deux personnes ont la **même adresse e-mail**, la fiche propose **C'est la même personne** (leurs rencontres sont réunies) ou **Ce n'est pas elle** (la proposition disparaît). Jamais d'après le visage. **Rattacher une rencontre existante** réunit à la main ; **Ce n'est pas elle**, sur une rencontre, la sépare.
+- **Sorties et photos** : **Était aussi là lors de la sortie** ajoute une rencontre sans décision ; **Lier des photos où elle figure** rattache chaque photo à sa rencontre de la sortie de la photo (créée sans décision si besoin) : la photo reste à vérifier tant que l'accord de cette sortie manque.
+- **Droits** : **Exporter ses données** réunit toutes ses rencontres dans une archive ; **Effacer cette personne** efface toutes ses rencontres (photos comprises sur demande ; un refus reste appliqué sous forme anonyme si des photos liées restent).
+
 ## Sur le terrain
 
 La page **Sur le terrain** (barre latérale, « App, cartes, QR ») réunit ce qui part dans la rue avec vous, pour le photographe choisi en haut (le vôtre par défaut) :

@@ -1,0 +1,32 @@
+<% layout('./layout') %>
+<% const LABELS = { site: 'site', instagram: 'Instagram', print: 'tirages', name: 'prénom' }; %>
+<div class="toolbar">
+  <div>
+    <h1>Personnes photographiées</h1>
+    <p class="sub">Une personne peut avoir été rencontrée lors de plusieurs sorties : une rencontre par sortie, chacune avec son accord ; un refus vaut pour toutes.</p>
+  </div>
+  <span class="toolbar-actions"><a class="btn" href="/admin/rencontre">＋ Nouvelle rencontre</a> <a class="btn ghost" href="/admin/rencontres">Demandes et rencontres</a></span>
+</div>
+<form class="filters" method="get" action="/admin/personnes" role="search"><input type="search" name="q" value="<%= it.search %>" placeholder="Nom, référence, adresse…" aria-label="Rechercher une personne"> <button class="btn ghost" type="submit">Rechercher</button></form>
+<% if (!it.list.length) { %>
+<p class="empty">Aucune personne<%= it.search ? ' pour cette recherche' : '' %>. Elles apparaissent à chaque rencontre : sur le téléphone (Nouvelle rencontre), par une carte signée saisie, ou par une demande sur /bonjour.</p>
+<% } else { %>
+<ul class="people-list">
+<% it.list.forEach(p => { const L = p.latest; %>
+  <li>
+    <a class="pp-main" href="/admin/personnes/<%= p.id %>">
+      <% if (p.faceFrom) { %><img class="enc-face" src="/admin/rencontres/<%= p.faceFrom %>/portrait?mini=1" alt="" width="40" height="40" loading="lazy"><% } else { %><span class="face-ini big" aria-hidden="true"><%= (p.name || p.ref || '?').charAt(0).toUpperCase() %></span><% } %>
+      <span class="pp-who"><strong><%= p.name || p.ref || 'Sans nom' %></strong><small class="mono"><%= p.meetings.map(e => e.ref).filter(Boolean).join(' · ') || 'sans carte' %> · <%= p.meetings.length %> rencontre<%= p.meetings.length > 1 ? 's' : '' %> · <%= p.photos.length %> photo<%= p.photos.length > 1 ? 's' : '' %></small></span>
+    </a>
+    <span class="pp-tags">
+<% if (p.refused) { %>      <span class="enc-tag no">refuse la publication</span>
+<% } else if (L && L.consent) { %>      <span class="enc-tag ok">dernier accord : <%= Object.keys(LABELS).filter(s => L.consent[s]).map(s => LABELS[s]).join(', ') %></span>
+<% } else { %>      <span class="enc-tag">sans décision</span>
+<% } %><% if (p.fresh) { %>      <span class="enc-tag warn">nouvelle demande</span>
+<% } %><% if (p.rights) { %>      <span class="enc-tag no">droits : <%= p.rights.rights_request === 'effacement' ? 'effacement' : 'accès' %></span>
+<% } %><% if (p.suggestions) { %>      <span class="enc-tag warn">rapprochement proposé</span>
+<% } %>    </span>
+  </li>
+<% }) %>
+</ul>
+<% } %>

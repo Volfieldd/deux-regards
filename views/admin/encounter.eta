@@ -4,6 +4,7 @@
    const mail = e.email ? `mailto:${e.email}?subject=${encodeURIComponent(`Votre photo${e.ref ? ` (${e.ref})` : ''} · ${it.siteName}`)}` : null; %>
 <p class="mono"><a class="more eyebrow" href="/admin/rencontres">← Personnes photographiées</a></p>
 <h1 class="enc-title"><% if (e.hasPortrait) { %><img class="enc-face big" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="64" height="64"><% } %><%= e.anonymized ? 'Refus anonymisé' : it.title %><%= e.name ? ` · ${e.name}` : '' %></h1>
+<% if (e.person_id) { %><p class="mono"><a class="more" href="/admin/personnes/<%= e.person_id %>">Fiche de la personne</a> · toutes ses rencontres, ses photos, ses droits</p><% } %>
 <% if (e.anonymized) { %><p class="hint">Les données de cette personne ont été effacées à sa demande. Il ne reste que son refus, pour que les photos liées ne soient jamais publiées.</p><% } %>
 <div class="enc-meta">
   <span class="enc-tag"><%= it.STATUS[e.status] %></span>

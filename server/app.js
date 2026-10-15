@@ -25,6 +25,7 @@ import { createVault } from './vault.js';
 import { createInstagram } from './instagram.js';
 import { createTodo } from './todo.js';
 import { createOutings } from './outings.js';
+import { createPeople } from './people.js';
 import { createReadiness } from './readiness.js';
 import { createFaceDetector, createFaceService } from './faces.js';
 
@@ -150,12 +151,18 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Rencontres (page /bonjour, cartes) ; demandes sans accord ni refus effacées après 12 mois (contrôle quotidien).
   app.decorate('encounters', createEncounters({ db, vault: createVault(config.dataKey) }));
   app.decorate('mailer', createMailer({ ...config.mail, log: app.log, transport: mailTransport }));
+  // Personnes : chaque rencontre a la sienne, un refus récent vaut pour toutes ses rencontres (voir server/people.js).
+  // Premier abonné aux changements d'accord : la file Instagram, ensuite, voit déjà les refus étendus.
+  app.decorate('people', createPeople({ db, encounters: app.encounters }));
+  app.encounters.onChange(() => app.people.sync());
   let purgeTimer = null;
   app.addHook('onReady', async () => {
     const sealed = app.encounters.sealExisting();
     if (sealed) app.log.info({ sealed }, 'rencontres : données en clair chiffrées');
+    app.encounters.reindexEmails();
     app.encounters.purge();
-    purgeTimer = setInterval(() => { try { app.encounters.purge(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
+    app.people.sync();
+    purgeTimer = setInterval(() => { try { app.encounters.purge(); app.people.sync(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
     purgeTimer.unref();
   });
   app.addHook('onClose', async () => clearInterval(purgeTimer));

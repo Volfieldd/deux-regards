@@ -42,6 +42,9 @@
       <img alt="" hidden data-portrait-preview>
     </label>
     <label>Notes <input name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="tenue, scène…"></label>
+<% if (it.recent && it.recent.length) { %>    <label>Déjà rencontrée ? <span class="hint">facultatif : la rencontre sera ajoutée à sa fiche (un nouvel accord reste à signer pour aujourd’hui)</span>
+      <select name="person_id"><option value="">Non, nouvelle personne</option><% it.recent.forEach(p => { %><option value="<%= p.id %>"<%~ Number(v.person_id) === p.id ? ' selected' : '' %>><%= p.name || p.ref || 'Sans nom' %><%= p.ref ? ` · ${p.ref}` : '' %> · <%= p.day %><%= p.refused ? ' · refus' : '' %></option><% }) %></select></label>
+<% } %>
   </section>
 
   <section class="app-step app-person">
