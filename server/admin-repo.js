@@ -418,10 +418,11 @@ export function createAdminRepo(db) {
         rights_text_de: text(body.rights_text_de, 10000),
         rights_contact: text(body.rights_contact, 200),
         privacy_contact: text(body.privacy_contact, 200), privacy_mfa: body.privacy_mfa === 'on', privacy_encrypted: body.privacy_encrypted === 'on',
+        legal_names: text(body.legal_names, 200), legal_address: text(body.legal_address, 400), legal_email: text(body.legal_email, 200), legal_phone: text(body.legal_phone, 40), legal_director: text(body.legal_director, 120),
         map_page: body.map_page === 'on',
         hero,
       };
-      const DROITS = /^(rights_|privacy_)/;
+      const DROITS = /^(rights_|privacy_|legal_)/;
       const keep = k => !part || (part === 'droits' ? DROITS.test(k) : !DROITS.test(k));
       db.transaction(() => { for (const [k, v] of Object.entries(values)) if (keep(k)) q.setSetting.run(k, JSON.stringify(v)); })();
     },

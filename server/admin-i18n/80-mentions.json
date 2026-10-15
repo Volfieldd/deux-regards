@@ -1,0 +1,58 @@
+{
+ "Mentions légales": {
+  "en": "Legal notice",
+  "de": "Impressum"
+ },
+ "(Impressum en allemand), liée en bas de chaque page": {
+  "en": "(“Impressum” in German), linked at the bottom of every page",
+  "de": "(auf Deutsch „Impressum“), unten auf jeder Seite verlinkt"
+ },
+ "Obligatoires en France comme en Allemagne : qui édite le site, une adresse postale où vous joindre, un e-mail, et la personne responsable du contenu. Le texte est rédigé par le site (trois langues) ; seuls ces renseignements sont à donner.": {
+  "en": "Required in France and in Germany: who publishes the site, a postal address where you can be reached, an email address and the person responsible for the content. The text is written by the site (three languages); only these details are needed.",
+  "de": "In Frankreich wie in Deutschland Pflicht: wer die Website anbietet, eine ladungsfähige Anschrift, eine E-Mail-Adresse und die für den Inhalt verantwortliche Person. Der Text wird von der Website verfasst (drei Sprachen); nur diese Angaben sind nötig."
+ },
+ "Incomplètes : la page n’affiche que ce qui est rempli.": {
+  "en": "Incomplete: the page only shows what is filled in.",
+  "de": "Unvollständig: Die Seite zeigt nur, was ausgefüllt ist."
+ },
+ "Éditeurs": {
+  "en": "Publishers",
+  "de": "Anbieter"
+ },
+ "prénoms et noms, ex. « Sébastien … et Julien … »": {
+  "en": "first and last names, e.g. “Sébastien … and Julien …”",
+  "de": "Vor- und Nachnamen, z. B. „Sébastien … und Julien …“"
+ },
+ "Adresse postale": {
+  "en": "Postal address",
+  "de": "Postanschrift"
+ },
+ "rue, code postal, ville, pays ; une ligne par ligne d’adresse": {
+  "en": "street, postcode, town, country; one line per address line",
+  "de": "Straße, Postleitzahl, Ort, Land; eine Zeile pro Adresszeile"
+ },
+ "vide : celui de la confidentialité": {
+  "en": "empty: the privacy one",
+  "de": "leer: die aus dem Datenschutz"
+ },
+ "Téléphone": {
+  "en": "Phone",
+  "de": "Telefon"
+ },
+ "Responsable de la publication": {
+  "en": "Person responsible for the content",
+  "de": "Verantwortlich für den Inhalt"
+ },
+ "une personne physique (en Allemagne : « Verantwortlich nach § 18 MStV »)": {
+  "en": "a natural person (in Germany: “Verantwortlich nach § 18 MStV”)",
+  "de": "eine natürliche Person („Verantwortlich nach § 18 MStV“)"
+ },
+ "Mentions légales / Impressum à compléter": {
+  "en": "Legal notice / Impressum to complete",
+  "de": "Impressum zu vervollständigen"
+ },
+ "obligatoires en France et en Allemagne : éditeurs, adresse postale, responsable": {
+  "en": "required in France and Germany: publishers, postal address, person responsible",
+  "de": "in Frankreich und Deutschland Pflicht: Anbieter, Anschrift, Verantwortliche"
+ }
+}

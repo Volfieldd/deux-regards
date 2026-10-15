@@ -35,6 +35,17 @@ Cliquez sur **Enregistrer l'ouverture** (ou **Enregistrer le site public** en ba
 
 ## Droits et confidentialité
 
+### Mentions légales (Impressum)
+
+Obligatoires en France (LCEN) comme en Allemagne (Impressum, § 5 DDG) : la page `/mentions-legales`, liée en bas de **chaque page** du site (« Mentions légales », « Legal notice », « Impressum » selon la langue ; `/impressum` y mène aussi). Le texte est rédigé par le site, en trois langues ; vous donnez seulement :
+
+- **Éditeurs** : vos prénoms et noms ;
+- **Adresse postale** : une adresse où l'on peut vous joindre (une ligne par ligne d'adresse) ;
+- **E-mail** (vide : celui de la confidentialité) et **téléphone** (facultatif) ;
+- **Responsable de la publication** : une personne (en Allemagne, « Verantwortlich nach § 18 MStV »).
+
+Tant qu'il manque l'essentiel (noms, adresse, e-mail, responsable), « Aujourd'hui » le signale et la page n'affiche que ce qui est rempli. L'hébergement (votre serveur, en France ; acheminement par Cloudflare) et les renvois vers les droits d'utilisation et la confidentialité sont ajoutés tout seuls.
+
 | Champ | Où il apparaît |
 |---|---|
 | **Droits d'utilisation : Français** | page publique `/droits`. Le champ affiche le texte publié, avec un badge **Texte par défaut** ou **Texte personnalisé**. Laissé tel quel, le texte par défaut suit les noms des photographes ; **Rétablir le texte par défaut** le remet (puis enregistrez). |

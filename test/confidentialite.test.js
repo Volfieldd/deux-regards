@@ -69,3 +69,25 @@ test('durées de conservation : visage gardé avec l’accord (6 mois sans accor
   assert.equal(db.prepare("SELECT portrait_jpeg FROM encounters WHERE ref = 'J-0004'").pluck().get(), null);
   assert.deepEqual(db.prepare('SELECT ref FROM encounters ORDER BY ref').pluck().all(), ['J-0001', 'J-0003', 'J-0004', 'J-0005']);
 });
+
+test('mentions légales / Impressum : en pied de chaque page, remplies depuis l’admin, signalées tant qu’incomplètes', async t => {
+  const ctx = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: 'jeton-de-test-0123456789' } });
+  for (const [url, label] of [['/', 'Mentions légales'], ['/en/', 'Legal notice'], ['/de/droits', 'Impressum']]) {
+    assert.match((await ctx.app.inject(url)).body, new RegExp(`href="(/en|/de)?/mentions-legales">${label}</a>`), url);
+  }
+  assert.equal((await ctx.app.inject('/impressum')).headers.location, '/de/mentions-legales');
+  const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', payload: { token: 'jeton-de-test-0123456789', author: 'julien', next: '/admin' } });
+  const cookies = Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
+  const csrf = ctx.db.prepare('SELECT csrf FROM sessions').pluck().get();
+  assert.match((await ctx.app.inject({ url: '/admin', cookies })).body, /Mentions légales \/ Impressum à compléter/);
+  await ctx.app.inject({ method: 'POST', url: '/admin/reglages', cookies, headers: { accept: 'text/html' }, payload: { _csrf: csrf, part: 'droits',
+    legal_names: 'Sébastien Exemple et Julien Exemple', legal_address: '1 rue des Photos\n49000 Angers\nFrance', legal_email: 'info@nicephos.art', legal_director: 'Sébastien Exemple' } });
+  const de = (await ctx.app.inject('/de/mentions-legales')).body;
+  assert.match(de, /<h1>Impressum<\/h1>/);
+  assert.match(de, /Angaben gemäß § 5 DDG<\/h2>\s*<p>Sébastien Exemple et Julien Exemple<\/p>\s*<p>1 rue des Photos<\/p>\s*<p>49000 Angers<\/p>/);
+  assert.match(de, /Verantwortlich für den Inhalt nach § 18 Abs\. 2 MStV<\/h2>\s*<p>Sébastien Exemple<\/p>/);
+  assert.match((await ctx.app.inject('/mentions-legales')).body, /E-mail : info@nicephos\.art/);
+  assert.doesNotMatch((await ctx.app.inject({ url: '/admin', cookies })).body, /Impressum à compléter/);
+  // Enregistrer la page Droits ne touche pas au site public, et inversement.
+  assert.match((await ctx.app.inject({ url: '/admin/droits', cookies })).body, /name="legal_names" value="Sébastien Exemple et Julien Exemple"/);
+});

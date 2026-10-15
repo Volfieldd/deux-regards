@@ -64,7 +64,7 @@ const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 export const UI = {
   fr: {
     nav: { series: 'Séries', gallery: 'Galerie', map: 'Carte', about: 'À propos', label: 'Navigation', lang: 'Langue', langCurrent: 'Langue : français' },
-    footer: { photos: 'Photographies', noRepro: 'reproduction interdite', rights: 'Droits d’utilisation', privacy: 'Confidentialité' },
+    footer: { photos: 'Photographies', noRepro: 'reproduction interdite', rights: 'Droits d’utilisation', privacy: 'Confidentialité', legal: 'Mentions légales' },
     both: 'Les deux', colon: ' :',
     photos: n => plural(n, 'photo', 'photos'),
     places: n => plural(n, 'lieu', 'lieux'),
@@ -135,7 +135,7 @@ export const UI = {
   },
   en: {
     nav: { series: 'Series', gallery: 'Gallery', map: 'Map', about: 'About', label: 'Navigation', lang: 'Language', langCurrent: 'Language: English' },
-    footer: { photos: 'Photographs', noRepro: 'all rights reserved', rights: 'Terms of use', privacy: 'Privacy' },
+    footer: { photos: 'Photographs', noRepro: 'all rights reserved', rights: 'Terms of use', privacy: 'Privacy', legal: 'Legal notice' },
     both: 'Both', colon: ':',
     photos: n => plural(n, 'photo', 'photos'),
     places: n => plural(n, 'place', 'places'),
@@ -206,7 +206,7 @@ export const UI = {
   },
   de: {
     nav: { series: 'Serien', gallery: 'Galerie', map: 'Karte', about: 'Über uns', label: 'Navigation', lang: 'Sprache', langCurrent: 'Sprache: Deutsch' },
-    footer: { photos: 'Fotografien', noRepro: 'alle Rechte vorbehalten', rights: 'Nutzungsrechte', privacy: 'Datenschutz' },
+    footer: { photos: 'Fotografien', noRepro: 'alle Rechte vorbehalten', rights: 'Nutzungsrechte', privacy: 'Datenschutz', legal: 'Impressum' },
     both: 'Beide', colon: ':',
     photos: n => plural(n, 'Foto', 'Fotos'),
     places: n => plural(n, 'Ort', 'Orte'),

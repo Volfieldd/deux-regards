@@ -6,6 +6,7 @@
 // (le badge du menu compte les urgences).
 import { isProvisional } from './admin-repo.js';
 import { samePartSql } from './outings.js';
+import { legalMissing } from './legal.js';
 import { translator } from './admin-i18n.js';
 
 export const LEVELS = ['urgent', 'bientot', 'plus-tard'];
@@ -77,6 +78,10 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, now =
     const verify = readiness ? db.prepare("SELECT id, status, faces, faces_override FROM photos WHERE status = 'published'").all().filter(p => readiness.pending(p, 'site', cache)).length : 0;
     if (verify) items.push({ level: 'bientot', title: verify > 1 ? t('{n} photos publiées à vérifier', { n: verify }) : t('{n} photo publiée à vérifier', { n: verify }),
       detail: t('un visage, et un accord manque : confirmez, liez la personne, ou dépubliez'), href: '/admin/photos?manque=verifier', action: t('Vérifier') });
+    // Mentions légales / Impressum : obligatoires, signalées tant qu'il manque l'essentiel.
+    const legal = Object.fromEntries(db.prepare("SELECT key, value FROM settings WHERE key LIKE 'legal_%' OR key = 'privacy_contact'").all()
+      .map(r => { try { return [r.key, JSON.parse(r.value)]; } catch { return [r.key, '']; } }));
+    if (legalMissing(legal).length) items.push({ level: 'bientot', title: t('Mentions légales / Impressum à compléter'), detail: t('obligatoires en France et en Allemagne : éditeurs, adresse postale, responsable'), href: '/admin/droits#mentions', action: t('Compléter') });
     const fresh = q.fresh.get();
     if (fresh) items.push({ level: 'bientot', title: fresh > 1 ? t('{n} nouvelles personnes photographiées', { n: fresh }) : t('{n} nouvelle personne photographiée', { n: fresh }),
       detail: t('demandes reçues sur /bonjour ou rencontres à traiter'), href: '/admin/rencontres?statut=nouvelle', action: t('Voir') });

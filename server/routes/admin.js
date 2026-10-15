@@ -26,6 +26,7 @@ import { registerEncounters } from './rencontres.js';
 import { registerOutings } from './sorties.js';
 import { ADMIN_LANGS, ADMIN_LANG_NAMES, translator } from '../admin-i18n.js';
 import { monthYear } from '../format.js';
+import { legalMissing } from '../legal.js';
 
 // Carte des visiteurs (page Statistiques) : centre de chaque pays dans le repère 1000 × 520 du fond de carte
 // (public/admin/carte-monde.svg, généré par scripts/carte-monde.mjs), nom du pays en français.
@@ -1300,7 +1301,7 @@ export default async function adminRoutes(app) {
     heroMax: 8, part, section: part,
     title: part === 'site' ? request.t('Site public') : request.t('Droits & confidentialité'), settings: repo.settings(), published: repo.photos({ status: 'published' }), defaultName: app.config.siteName,
     rights: LANGS.map(l => ({ lang: l, ...RIGHTS[l] })), rightsDefaults: defaultsNow(),
-    ...mapCounts.get(), encrypted: app.encounters.encrypted,
+    ...mapCounts.get(), encrypted: app.encounters.encrypted, legalMissing: legalMissing(repo.settings()),
   });
   app.get('/admin/site', async (request, reply) => settingsPage(request, reply, 'site'));
   app.get('/admin/droits', async (request, reply) => settingsPage(request, reply, 'droits'));
