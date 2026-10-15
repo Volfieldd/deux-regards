@@ -41,6 +41,19 @@
       <label><%= t('Série') %> <select name="category_id"<%~ inv('category_id') %>><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select></label><% if (e.category_id) { %><span class="err" id="err-category_id"><%= e.category_id %></span><% } %>
       <label><%= t('Photographe') %> <select name="author_id"<%~ inv('author_id') %>><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === Number(v.author_id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label><% if (e.author_id) { %><span class="err" id="err-author_id"><%= e.author_id %></span><% } %>
     </div>
+<% if (it.suggest && it.suggest.length) { %>
+    <div class="sug-list" data-suggest-fiche>
+      <input type="hidden" name="serie_choisie" value="" data-series-chosen>
+<% it.suggest.forEach((x, i) => { %>
+      <div class="sugbox<%= i ? ' alt' : '' %>">
+        <span><%= i ? t('ou') : '✦ ' + t('Série proposée :') %> <b><%= x.name %></b></span>
+        <span class="why"><%= t('ressemble à {n} de ses {total} photos', { n: x.votes, total: x.size }) %><% if (x.like && x.like.length) { %><span class="mini"><% x.like.forEach(l => { %><img src="<%= l.thumb %>" alt="" title="<%= l.title %>"><% }) %></span><% } %></span>
+        <span class="acts" data-js-only hidden><button class="btn<%= i ? ' ghost' : '' %> sm" type="button" data-pick-series="<%= x.id %>"><%= t('Choisir') %></button></span>
+      </div>
+<% }) %>
+      <p class="hint"><span data-js-only hidden><%= t('« Choisir » remplit le champ Série, « Enregistrer » valide.') %> <button class="more" type="button" data-pick-series="<%= it.photo.category_id %>"><%= t('Garder « {name} »', { name: it.photo.category }) %></button></span><span data-nojs><%= t('Changez la série ci-dessus si la proposition vous convient.') %></span></p>
+    </div>
+<% } %>
     <label><%= t('Date') %> <span class="mono"><%= t('AAAA-MM ou AAAA-MM-JJ') %><%= it.photo.taken_time ? ' · ' + t('prise à {time}', { time: fr ? it.photo.taken_time.replace(':', ' h ') : it.photo.taken_time }) : '' %></span><input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="<%= t('AAAA-MM ou AAAA-MM-JJ') %>" inputmode="numeric"<%~ inv('taken_on') %>></label><% if (e.taken_on) { %><span class="err" id="err-taken_on"><%= e.taken_on %></span><% } %>
     <label><%= t('Légende') %> <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'legend', label: t('Légende'), max: 2000, rows: 3 }) %>

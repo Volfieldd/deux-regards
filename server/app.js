@@ -29,6 +29,7 @@ import { createPeople } from './people.js';
 import { createFeedback } from './feedback.js';
 import { createReadiness } from './readiness.js';
 import { createFaceDetector, createFaceService } from './faces.js';
+import { createImageModel, createSeriesSuggest } from './series-suggest.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -89,7 +90,7 @@ function assetUrls(root, cache) {
   };
 }
 
-export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {}, faceOptions = {}, mailTransport = null }) {
+export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {}, faceOptions = {}, seriesOptions = {}, mailTransport = null }) {
   const app = Fastify({ logger: loggerOptions(logger), trustProxy: config.trustProxy });
 
   app.decorate('config', config);
@@ -181,6 +182,12 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('faces', createFaceService({ db, storageDir: config.storageDir, detector: faceOptions.detector || createFaceDetector({ log: app.log }), log: app.log }));
   if (!faceOptions.manual) app.addHook('onReady', async () => { app.faces.retryFailed(); setTimeout(() => app.faces.run(), 3000).unref(); });
   app.addHook('onClose', async () => { app.faces.stop(); await app.faces.idle(); });
+  // Série proposée (désactivée par défaut) : empreintes d'images calculées sur le serveur, modèle téléchargé à
+  // l'allumage dans le dossier de données. seriesOptions.model (tests) remplace le modèle ; manual : rien ne démarre seul.
+  app.decorate('seriesSuggest', createSeriesSuggest({ db, storageDir: config.storageDir, log: app.log,
+    model: seriesOptions.model || createImageModel({ dir: path.join(config.storageDir, 'models'), log: app.log }) }));
+  if (!seriesOptions.manual) app.addHook('onReady', async () => { app.seriesSuggest.retryFailed(); setTimeout(() => app.seriesSuggest.run(), 5000).unref(); });
+  app.addHook('onClose', async () => { app.seriesSuggest.stop(); await app.seriesSuggest.idle(); });
   // Instagram suit les accords : une photo bloquée ne part pas, une photo à vérifier seulement sur confirmation ; la
   // file est revue dès qu'un accord change.
   app.decorate('instagram', createInstagram({ db, storageDir: config.storageDir, config, variants: app.variants, siteName: app.siteName, log: app.log,
@@ -197,7 +204,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { setTimeout(() => app.outings.backfillAll(), 2000).unref(); });
   app.addHook('onClose', async () => { await app.outings.stop(); });
   // « Aujourd'hui » : ce qui demande votre attention (voir server/todo.js).
-  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback }));
+  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
 
   await setupAuth(app, oidc && { oidc });

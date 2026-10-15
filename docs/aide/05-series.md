@@ -16,3 +16,20 @@ Les séries regroupent les photos (Rue, Portrait…). Elles forment l'index du s
   - Série avec des photos : **elles ne sont jamais supprimées**. Choisissez la série où les déplacer, puis **Déplacer les *n* photos et supprimer**.
 
 Pour classer des photos dans une série, le plus rapide est la [sélection multiple](photos#agir-sur-plusieurs-photos) de la page Photos. Sur le site, une série sans photo publiée est grisée et n'est pas cliquable.
+
+## Série proposée
+
+En bas de la page Séries, **Proposer une série** aide à ranger les photos qui arrivent. C'est **désactivé par défaut**.
+
+- **Allumer :** **Allumer les propositions**. Le modèle d'analyse (environ 90 Mo, un modèle libre appelé CLIP) se télécharge une seule fois dans le dossier des données. Les photos existantes sont ensuite analysées en tâche de fond, avec une barre de progression ; chaque photo importée l'est ensuite tout de suite.
+- **Ce qu'il propose :** à l'import, chaque photo reçoit la série choisie dans le formulaire. Tant que vous ne l'avez pas choisie vous-même, le serveur compare la photo aux photos déjà rangées (les vôtres et celles de l'autre photographe : la ressemblance se calcule par série). Si une **autre** série lui ressemble nettement plus, il la propose, et en propose deux quand elles sont presque aussi proches. Une série n'est proposée qu'à partir de **3 photos** rangées. Une photo publiée n'a jamais de proposition.
+- **Où la voir :** une étoile **✦** et un contour en pointillés la distinguent, sans dépendre de la couleur.
+  - sur la vignette de la [planche contact](photos#la-planche-contact), et avec le filtre **✦ Série proposée** ;
+  - dans l'[inspecteur](photos#linspecteur) : **Classer dans « … »** l'applique tout de suite, **Garder « … »** confirme la série actuelle ;
+  - sur la [fiche de la photo](photos#la-fiche-dune-photo) : **Choisir** remplit le champ Série, et **Enregistrer** valide ; les petites vignettes montrent les photos de la série qui lui ressemblent le plus ;
+  - sur la page d'une [sortie](rencontres#les-sorties), sous chaque photo ;
+  - dans **Aujourd'hui**, une ligne « *n* photos avec une série proposée ».
+- **Une photo à la fois :** rien n'est jamais classé sans votre clic, et il n'y a pas de « tout accepter ». Dès que vous choisissez une série (proposée ou non, ou en glissant la photo vers une série), la proposition disparaît et la photo sert d'exemple pour les suivantes.
+- **Éteindre :** **Éteindre et effacer** supprime le modèle et toutes les empreintes d'images.
+
+L'analyse se fait sur votre serveur : aucune image n'est envoyée ailleurs. L'empreinte d'une photo (une suite de nombres) sert seulement à comparer des images entre elles. Elle ne permet pas de reconnaître une personne, et elle est effacée avec la photo.

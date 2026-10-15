@@ -68,4 +68,4 @@ Le site est exposé par Cloudflare Tunnel ; toutes les adresses (`nicephos.art`,
 
 ## Données
 
-Tout est dans `STORAGE_DIR` (par défaut `./storage`, hors Git) : la base SQLite, `originals/` (jamais servis), `variants/` (AVIF/WebP, servis sous `/media/`, recalculables), `watermarks/` (logos de filigrane) et `brand/` (emblème, favicon). Sauvegarder ce dossier suffit ; `npm run backup` le fait sans arrêter le site.
+Tout est dans `STORAGE_DIR` (par défaut `./storage`, hors Git) : la base SQLite, `originals/` (jamais servis), `variants/` (AVIF/WebP, servis sous `/media/`, recalculables), `watermarks/` (logos de filigrane), `brand/` (emblème, favicon) et, si « Proposer une série » est allumé, `models/` (modèle d'analyse d'images, ≈ 90 Mo, retéléchargeable, hors sauvegarde). Sauvegarder ce dossier suffit ; `npm run backup` le fait sans arrêter le site.

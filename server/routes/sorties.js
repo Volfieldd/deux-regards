@@ -34,8 +34,11 @@ export function registerOutings(app, { repo, render, done, failed, write, withRe
   app.get('/admin/sorties/:author/:day', async (request, reply) => {
     const o = load(request);
     if (!o) return reply.callNotFound();
+    // Séries proposées (une photo à la fois, comme ailleurs).
+    const sugg = app.seriesSuggest.forPhotos(o.photos), names = new Map(repo.categories().map(c => [c.id, c.name]));
+    const suggestOf = p => (sugg.get(p.id) || []).map(x => ({ id: x.category_id, name: names.get(x.category_id) || '', votes: x.votes, size: x.size }));
     return render(request, reply, 'outing', {
-      title: request.t('Sortie du {date}', { date: fmtDay(o.day, request.t) }), o: { ...o, photos: o.photos.map(p => ({ ...withReady(p), state: app.readiness.state(p, null, request.t) })), url: outingUrl(o), when: fmtDay(o.day, request.t), range: range(o, request.t) },
+      title: request.t('Sortie du {date}', { date: fmtDay(o.day, request.t) }), o: { ...o, photos: o.photos.map(p => ({ ...withReady(p), state: app.readiness.state(p, null, request.t), suggest: suggestOf(p) })), url: outingUrl(o), when: fmtDay(o.day, request.t), range: range(o, request.t) },
       partUrl: p => outingUrl({ ...o, starts: p.starts }), STATES: statesOf(request.t), hhmm,
     });
   });

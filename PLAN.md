@@ -264,6 +264,11 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Signature Instagram du photographe, sous la légende, retirable par photo.
 - Admin en français, anglais, allemand ; préférence par photographe ; aide traduite en anglais et en allemand (docs/aide/en, docs/aide/de).
 
+### 33. Retours d'un ami allemand et série proposée (fait)
+- Impressum / mentions légales en pied de chaque page ; aide traduite ; ergonomie de la fiche ; « J'aime » et « Signaler » sur la page photo.
+- Série proposée (maquettes validées le 15 octobre 2026) : désactivée par défaut ; modèle CLIP (ONNX allégé, ≈ 90 Mo) téléchargé à l'allumage dans le dossier des données, empreinte SHA-256 vérifiée ; empreinte visuelle de chaque photo calculée sur le serveur. Pour un brouillon dont la série n'a pas été choisie à la main, chaque série d'au moins 3 photos rangées reçoit la moyenne des ressemblances de ses 3 photos les plus proches ; une autre série est proposée si elle ressemble nettement plus (deux si elles sont presque à égalité). Ressemblance par série, quel que soit le photographe. Vue rapide, fiche, sortie, filtre et Aujourd'hui ; une photo à la fois, jamais de « tout accepter ».
+- Écarté : repérer les personnes de dos (pas d'obligation de consentement ; une personne de dos peut toujours être enregistrée si elle le souhaite).
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

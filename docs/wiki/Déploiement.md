@@ -101,6 +101,7 @@ BACKUP_DIR/
 ```
 
 - **Variantes :** elles ne sont pas sauvegardées, puisqu'elles se recalculent.
+- **Modèle de « Proposer une série » :** `models/` n'est pas sauvegardé non plus. S'il manque, il est retéléchargé depuis huggingface.co (empreinte SHA-256 vérifiée), et les empreintes d'images, gardées dans la base, sont conservées.
 - **Originaux :** ceux qu'on supprime dans l'admin restent récupérables dans la sauvegarde pendant 90 jours (`BACKUP_DELETED_DAYS`), puis ils en sont effacés (droit à l'effacement). Garde-fou : si le dossier des originaux est vide ou absent (montage raté), rien n'est effacé.
 - **Hors de la machine :** copiez aussi `BACKUP_DIR` ailleurs (`rsync`, `restic`, disque externe). Une sauvegarde sur la même machine ne protège pas d'une panne de celle-ci.
 

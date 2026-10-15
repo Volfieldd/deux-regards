@@ -16,3 +16,20 @@ Series group the photos together (Street, Portrait…). They form the site's ind
   - Series with photos: **they are never deleted**. Choose the series to move them to, then **Move the *n* photos and delete**.
 
 To file photos in a series, the quickest way is the [multiple selection](photos#agir-sur-plusieurs-photos) on the Photos page. On the site, a series with no published photo is greyed out and cannot be clicked.
+
+## Suggested series
+
+At the bottom of the Series page, **Suggest a series** helps you file incoming photos. It is **off by default**.
+
+- **Switch on:** **Switch on suggestions**. The analysis model (about 90 MB, an open model called CLIP) is downloaded once into the data folder. Existing photos are then analysed in the background, with a progress bar; each imported photo is analysed straight away.
+- **What it suggests:** on import, each photo gets the series chosen in the form. Until you have chosen it yourself, the server compares the photo with the photos already filed (yours and the other photographer’s: likeness is worked out per series). If **another** series looks clearly more like it, that series is suggested, and two are suggested when they are almost as close. A series is only suggested once it holds **3 filed photos**. A published photo never gets a suggestion.
+- **Where to see it:** a **✦** star and a dotted outline mark it, without relying on colour.
+  - on the thumbnail in the [contact sheet](photos#la-planche-contact), and with the **✦ Suggested series** filter;
+  - in the [inspector](photos#linspecteur): **Move to “…”** applies it at once, **Keep “…”** confirms the current series;
+  - on the [photo’s details](photos#la-fiche-dune-photo): **Choose** fills in the Series field, and **Save** confirms; the small thumbnails show the photos of the series that look most like it;
+  - on an [outing](rencontres#les-sorties) page, under each photo;
+  - in **Today**, a line “*n* photos with a suggested series”.
+- **One photo at a time:** nothing is ever filed without your click, and there is no “accept all”. As soon as you choose a series (suggested or not, or by dragging the photo onto a series), the suggestion disappears and the photo becomes an example for the next ones.
+- **Switch off:** **Switch off and delete** removes the model and all image fingerprints.
+
+The analysis runs on your server: no image is sent anywhere else. A photo’s fingerprint (a series of numbers) is only used to compare images with each other. It cannot recognise a person, and it is deleted with the photo.
