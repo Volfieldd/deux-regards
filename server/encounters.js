@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import sharp from 'sharp';
 import { nearest } from './geo/cities.js';
-import { createVault } from './vault.js';
+import { createVault, LOCKED } from './vault.js';
 import { samePartSql, normTime } from './outings.js';
 
 // Rencontres : les personnes photographiées dans la rue.
@@ -89,6 +89,13 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     const h = crypto.createHmac('sha256', key()).update(ref).digest();
     return [0, 1, 2].map(i => CODE_CHARS[h[i] % CODE_CHARS.length]).join('');
   }
+  // Empreinte d'une adresse (rapprocher deux rencontres d'une même personne) : clé dérivée de DATA_KEY, sinon de la
+  // clé des codes de contrôle. L'adresse elle-même reste chiffrée.
+  const emailHash = email => {
+    const norm = String(email || '').trim().toLowerCase();
+    if (!norm) return null;
+    return vault.index(norm) ?? crypto.createHmac('sha256', key()).update(`email:${norm}`).digest('hex');
+  };
   const verify = (ref, code) => Boolean(code) && crypto.timingSafeEqual(Buffer.from(codeOf(ref)), Buffer.from(String(code).toUpperCase().padEnd(3).slice(0, 3)));
 
   // Carte (ou référence tapée) : la référence, l'auteur d'après le préfixe, et si le code de contrôle est bon.
@@ -157,7 +164,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
         e = { id, verified: 0 };
       }
       const set = { status: 'nouvelle', lang, updated_at: t, verified: e.verified || (c?.verified ? 1 : 0) };
-      if (email) set.email = S(email);
+      if (email) Object.assign(set, { email: S(email), email_hash: emailHash(email) });
       if (name) set.name = S(name);
       if (wantsPhoto) set.wants_photo = 1;
       // Le dernier choix exprimé l'emporte ; l'historique garde les précédents.
@@ -173,7 +180,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
 
   // ---------- admin ----------
   function list({ status } = {}) {
-    const rows = db.prepare(`SELECT e.id, e.ref, e.status, e.verified, e.email, e.name, e.wants_photo, e.consent, e.consent_source, e.refused,
+    const rows = db.prepare(`SELECT e.id, e.ref, e.person_id, e.status, e.verified, e.email, e.name, e.wants_photo, e.consent, e.consent_source, e.refused,
         e.met_on, e.session_day, e.place, e.created_at, e.updated_at, (e.portrait_jpeg IS NOT NULL) AS has_portrait, e.rights_request, e.rights_requested_at, e.rights_done_at, e.anonymized, a.name AS author,
         (SELECT COUNT(*) FROM encounter_photos ep WHERE ep.encounter_id = e.id) AS photos,
         (SELECT detail FROM encounter_events ev WHERE ev.encounter_id = e.id AND ev.kind = 'visiteur' ORDER BY ev.at DESC, ev.id DESC LIMIT 1) AS last
@@ -216,7 +223,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       if (!target) {
         target = { id: Number(db.prepare('INSERT INTO encounters (ref, author_id, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)').run(c?.ref ?? null, authorId, 'en_cours', t, t).lastInsertRowid) };
       }
-      const set = { ref: c?.ref ?? target.ref ?? null, author_id: authorId ?? target.author_id ?? null, name: S(text(body.name, 80)), email: S(email), met_on: metOn,
+      const set = { ref: c?.ref ?? target.ref ?? null, author_id: authorId ?? target.author_id ?? null, name: S(text(body.name, 80)), email: S(email), email_hash: emailHash(email), met_on: metOn,
         place: S(text(body.place, 120)), details: S(text(body.details, 500)), session_day: sessionDay, updated_at: t };
       if (signed) Object.assign(set, { consent: JSON.stringify(scopes), consent_source: 'carte', consent_at: t, refused: 0, verified: 1 });
       if (cardJpeg) set.card_jpeg = vault.sealBuf(cardJpeg);
@@ -307,6 +314,8 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   // La rencontre reçoit le numéro suivant du photographe (comme une carte) ; son code de contrôle sert au QR affiché.
   async function saveApp(body, { author, portrait = null }) {
     const errors = {};
+    // Personne déjà rencontrée (choisie dans l'app) : la nouvelle rencontre lui est rattachée.
+    const personId = Number(body.person_id) && db.prepare('SELECT 1 FROM people WHERE id = ?').get(Number(body.person_id)) ? Number(body.person_id) : null;
     if (!author) errors.author = 'Aucun photographe lié à votre compte : choisissez-le.';
     const decision = ['accord', 'refus'].includes(body.decision) ? body.decision : '';
     const scopes = scopesOf(body);
@@ -350,7 +359,8 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       const number = nextNumber(prefix);
       const ref = `${prefix}-${String(number).padStart(4, '0')}`;
       reserve(prefix, number);
-      const row = { ref, author_id: author.id, status: 'en_cours', verified: decision === 'accord' ? 1 : 0, email: S(email), name: S(name), lang, wants_photo: body.wants_photo === 'on' ? 1 : 0,
+      const row = { ref, author_id: author.id, status: 'en_cours', verified: decision === 'accord' ? 1 : 0, email: S(email), email_hash: emailHash(email), name: S(name), lang,
+        person_id: personId, wants_photo: body.wants_photo === 'on' ? 1 : 0,
         consent: decision === 'accord' ? JSON.stringify(scopes) : null, consent_source: decision === 'accord' ? 'signature' : null, consent_at: decision === 'accord' ? t : null,
         refused: decision === 'refus' ? 1 : 0, refused_at: decision === 'refus' ? t : null, met_on: parisDay, met_time: new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(t),
         place: S(text(body.place, 120) || (city ? city.label : '')), details: S(text(body.details, 500)), portrait_jpeg: vault.sealBuf(portraitJpeg), signature_png: vault.sealBuf(signature),
@@ -398,7 +408,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     const keepRefusal = Boolean(e.refused) && q.photos.all(id).length > 0;
     db.transaction(() => {
       if (!keepRefusal) { db.prepare('DELETE FROM encounters WHERE id = ?').run(id); return; }
-      db.prepare(`UPDATE encounters SET ref = NULL, email = '', name = '', details = '', place = '', met_time = '', consent = NULL, consent_source = NULL,
+      db.prepare(`UPDATE encounters SET ref = NULL, email = '', email_hash = NULL, person_id = NULL, name = '', details = '', place = '', met_time = '', consent = NULL, consent_source = NULL,
         consent_at = NULL, wants_photo = 0, card_jpeg = NULL, portrait_jpeg = NULL, signature_png = NULL, lat = NULL, lon = NULL, adult = NULL, guardian = '',
         rights_request = NULL, rights_done_at = ?, anonymized = 1, verified = 0, status = 'traitee', updated_at = ? WHERE id = ?`).run(now(), now(), id);
       db.prepare('DELETE FROM encounter_events WHERE encounter_id = ?').run(id);
@@ -482,6 +492,19 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       return n;
     },
     encrypted: vault.enabled,
+    emailHash,
+    // Empreintes des adresses recalculées (clé ajoutée ou changée) ; renvoie le nombre de rencontres mises à jour.
+    reindexEmails() {
+      let n = 0;
+      db.transaction(() => {
+        for (const e of db.prepare("SELECT id, email, email_hash FROM encounters WHERE email IS NOT NULL AND email <> ''").all()) {
+          const plain = O(e.email);
+          const h = plain === LOCKED ? null : emailHash(plain);
+          if (h !== e.email_hash) { db.prepare('UPDATE encounters SET email_hash = ? WHERE id = ?').run(h, e.id); n++; }
+        }
+      })();
+      return n;
+    },
     countNew: () => q.countNew.get(),
     // Accords et refus attachés à une photo (fiche photo) ; refus = publication impossible.
     forPhoto, session,

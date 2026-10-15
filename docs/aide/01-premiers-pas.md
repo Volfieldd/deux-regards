@@ -19,7 +19,7 @@ La **barre latérale**, à gauche, est toujours là. Elle est rangée par intent
 | | **Aujourd’hui** | ce qui reste à faire et l’état du site d’un coup d’œil |
 | **Travailler** | **Sorties** | une ligne par journée de prise de vue : ses photos et les personnes rencontrées, à trier ensemble (voir [Rencontres](rencontres#les-sorties)) |
 | | **Photothèque** | importer, voir, compléter, publier, ordonner, supprimer |
-| | **Personnes** | les personnes photographiées : demandes, accords, refus (voir [Rencontres](rencontres)) |
+| | **Personnes** | les personnes photographiées, avec toutes leurs rencontres : accords, refus, photos, droits (voir [Rencontres](rencontres#les-personnes)) |
 | **Publier** | **Site public** | nom du site, textes, photos de l’ouverture, carte du monde |
 | | **Séries** | créer, renommer, ordonner les séries ; sous l’entrée, *la liste des séries*, où l’on **dépose** des photos glissées depuis la photothèque |
 | | **Instagram** | la file des photos à publier sur Instagram, et ses réglages |
