@@ -22,7 +22,7 @@ async function photoFormat(buf) { try { return PHOTO_FORMATS.includes((await sha
 // Champs des formulaires multipart : noms simples seulement (rien comme « __proto__ »).
 const FIELD = /^[a-z_]{1,30}$/;
 
-export function registerEncounters(app, { repo, render, write, done, failed, withReady }) {
+export function registerEncounters(app, { repo, render, P, W, done, failed, withReady }) {
   const enc = app.encounters;
   const STATUS = { nouvelle: 'Nouvelle', en_cours: 'En cours', traitee: 'Traitée' };
   // Libellés et dates dans la langue de l'admin (t : request.t).
@@ -51,7 +51,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
 
   const page = (request, reply, view, data) => render(request, reply, view, { STATUS: statusOf(request.t), SCOPES, SCOPE_LABELS, fmt: fmtOf(request.t), ...data });
 
-  app.get('/admin/rencontres', async (request, reply) => {
+  app.get('/admin/rencontres', P('personnes.voir'), async (request, reply) => {
     const status = Object.hasOwn(STATUS, request.query.statut) ? request.query.statut : undefined;
     return page(request, reply, 'encounters', { title: request.t('Personnes photographiées'), list: enc.list({ status }), status, authors: repo.authors(), errors: {}, values: {} });
   });
@@ -79,7 +79,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
       return { ...s, url, mail, expired: s.expires_at <= Date.now(), until: fmt(s.expires_at) };
     });
   }
-  app.post('/admin/rencontres/:id/liens', write, async (request, reply) => {
+  app.post('/admin/rencontres/:id/liens', W('personnes.offrir'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!enc.get(id)) return reply.callNotFound();
     try {
@@ -90,13 +90,13 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     }
     return done(reply, `/admin/rencontres/${id}#liens`, request.t('Lien privé créé, valable 30 jours : envoyez-le à la personne.'));
   });
-  app.post('/admin/rencontres/:id/liens/:token/retirer', write, async (request, reply) => {
+  app.post('/admin/rencontres/:id/liens/:token/retirer', W('personnes.offrir'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!enc.revokeShare(id, String(request.params.token))) return reply.callNotFound();
     return done(reply, `/admin/rencontres/${id}#liens`, request.t('Lien retiré : il ne fonctionne plus.'));
   });
 
-  app.get('/admin/rencontres/:id', async (request, reply) => detail(request, reply, byId(request.params.id)));
+  app.get('/admin/rencontres/:id', P('personnes.voir'), async (request, reply) => detail(request, reply, byId(request.params.id)));
 
   // ---------- rencontre saisie sur le téléphone (web app installable) ----------
   const LOCALE = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' };
@@ -113,7 +113,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
       .map(r => ({ ...app.people.get(r.person_id), day: r.d })).filter(p => p.id) : [];
     return appView(reply, 'app', { title: request.t('Nouvelle rencontre'), host: app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, ''), author, authors, recent, csrf: request.session.csrf, errors: {}, values: { lang: 'fr', author_id: author?.id }, ...extra });
   }
-  app.get('/admin/rencontre', { config: { geolocation: true } }, async (request, reply) => appPage(request, reply));
+  app.get('/admin/rencontre', { config: { geolocation: true, perm: 'terrain.app' } }, async (request, reply) => appPage(request, reply));
 
   // ---------- accueil « Terrain » de l'app ----------
   // Ce qu'ouvre l'icône de l'app : nouvelle rencontre, mon QR (la composition des vêtements, à montrer), ma sortie
@@ -123,7 +123,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const authors = repo.authors();
     return { authors, author: authors.find(a => a.id === Number(request.query.photographe)) || authorOf(request) || null };
   };
-  app.get('/admin/rencontre/accueil', async (request, reply) => {
+  app.get('/admin/rencontre/accueil', P('terrain.app'), async (request, reply) => {
     const { authors, author } = fieldAuthor(request);
     const day = parisDay();
     const people = author ? app.db.prepare("SELECT id FROM encounters WHERE author_id = ? AND COALESCE(NULLIF(session_day, ''), NULLIF(met_on, '')) = ? AND anonymized = 0 ORDER BY id")
@@ -135,7 +135,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
       next: author ? `${prefixOf(author)}-${String(nextNumber(prefixOf(author))).padStart(4, '0')}` : null,
       place: outing?.place || '', outingUrl: author ? app.outings.urlOf(author.id, day, nowTime) : null, photos: outing ? outing.photos.length : 0 });
   });
-  app.get('/admin/rencontre/qr', async (request, reply) => {
+  app.get('/admin/rencontre/qr', P('terrain.app'), async (request, reply) => {
     const { authors, author } = fieldAuthor(request);
     if (!author) return reply.redirect('/admin/rencontre/accueil', 303);
     return appView(reply, 'app-qr', { title: request.t('Mon QR'), author, authors, letter: prefixOf(author), host: app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, '') });
@@ -156,7 +156,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     enc.markMailed(e.id);
   }
 
-  app.post('/admin/rencontre', { config: { geolocation: true } }, async (request, reply) => {
+  app.post('/admin/rencontre', { config: { geolocation: true, perm: 'terrain.app' } }, async (request, reply) => {
     const body = {};
     let checked = false; let portrait = null; let error = null;
     try {
@@ -194,7 +194,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
 
   // Écran « Merci » montré à la personne : QR vers sa page (/bonjour/J-0143-…), dans sa langue ; puis, pour le
   // photographe, le récapitulatif (envoyé par le serveur, ou prêt dans Mail).
-  app.get('/admin/rencontre/:id/merci', async (request, reply) => {
+  app.get('/admin/rencontre/:id/merci', P('terrain.app'), async (request, reply) => {
     const e = enc.get(byId(request.params.id));
     if (!e || !e.ref) return reply.callNotFound();
     const r = recap(e);
@@ -202,14 +202,14 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const mailto = e.email ? `mailto:${e.email}?${new URLSearchParams({ subject: r.subject, body: r.text }).toString().replace(/\+/g, '%20')}` : null;
     return appView(reply, 'app-merci', { title: request.t('Rencontre {ref}', { ref: e.ref }), e, A: UI[e.lang] ? UI[e.lang].app : UI.fr.app, qr, mailto, smtp: app.mailer.enabled, csrf: request.session.csrf, flash: request.query.envoi || null });
   });
-  app.post('/admin/rencontre/:id/envoyer', write, async (request, reply) => {
+  app.post('/admin/rencontre/:id/envoyer', W('terrain.app'), async (request, reply) => {
     const e = enc.get(byId(request.params.id));
     if (!e || !e.email) return reply.callNotFound();
     try { await sendRecap(e); } catch (err) { if (!(err instanceof MailError)) throw err; return reply.redirect(`/admin/rencontre/${e.id}/merci?envoi=echec`, 303); }
     return reply.redirect(`/admin/rencontre/${e.id}/merci?envoi=ok`, 303);
   });
   for (const [name, get, type] of [['portrait', id => enc.portraitJpeg(id), 'image/jpeg'], ['signature', id => enc.signaturePng(id), 'image/png']]) {
-    app.get(`/admin/rencontres/:id/${name}`, async (request, reply) => {
+    app.get(`/admin/rencontres/:id/${name}`, P('personnes.voir'), async (request, reply) => {
       const buf = get(byId(request.params.id));
       if (!buf) return reply.callNotFound();
       // Vignette ronde des listes (visage) : 160 px suffisent.
@@ -222,7 +222,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
 
   // ---------- QR générique d'un photographe (vêtements, accessoires) ----------
   // /bonjour/J : SVG vectoriel (texte en tracés) ou PNG transparent à 300 dpi (600 dpi pour le QR seul).
-  app.get('/admin/auteurs/:id/qr/:file', async (request, reply) => {
+  app.get('/admin/auteurs/:id/qr/:file', P('terrain.cartes'), async (request, reply) => {
     const author = repo.authors().find(a => a.id === byId(request.params.id));
     const m = /^(qr|vertical|carre|logo)-(noir|blanc)\.(svg|png)$/.exec(request.params.file);
     if (!author || !m) return reply.callNotFound();
@@ -244,7 +244,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
   // ---------- sur le terrain ----------
   // Ce qui part dans la rue : l'app sur le téléphone, les cartes d'accord, le QR des vêtements (une seule
   // composition, celle du dos avec le logo, à montrer telle quelle), et une liste de contrôle avant de partir.
-  app.get('/admin/terrain', async (request, reply) => {
+  app.get('/admin/terrain', P('terrain.app'), async (request, reply) => {
     const authors = repo.authors();
     const mine = authorOf(request);
     const chosen = authors.find(a => a.id === Number(request.query.photographe)) || mine || authors[0] || null;
@@ -266,8 +266,8 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const authors = repo.authors().map(a => ({ ...a, prefix: prefixOf(a), next: nextNumber(prefixOf(a)) }));
     return render(request, reply, 'cards', { title: request.t('Cartes d’accord'), authors, PER_SHEET, MAX_PAIRS, errors: {}, values: {}, ...extra });
   }
-  app.get('/admin/rencontres/cartes', async (request, reply) => cardsPage(request, reply));
-  app.post('/admin/rencontres/cartes', write, async (request, reply) => {
+  app.get('/admin/rencontres/cartes', P('terrain.cartes'), async (request, reply) => cardsPage(request, reply));
+  app.post('/admin/rencontres/cartes', W('terrain.cartes'), async (request, reply) => {
     const b = request.body || {};
     const author = repo.authors().find(a => a.id === Number(b.author_id));
     const generic = b.mode === 'generiques';
@@ -286,7 +286,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     return reply.redirect(`/admin/rencontres/cartes/planche?${qs}`, 303);
   });
   // Planche à imprimer : page autonome (sans l'habillage de l'admin), au format A4.
-  app.get('/admin/rencontres/cartes/planche', async (request, reply) => {
+  app.get('/admin/rencontres/cartes/planche', P('terrain.cartes'), async (request, reply) => {
     const author = repo.authors().find(a => a.id === Number(request.query.auteur));
     const count = Math.min(MAX_PAIRS, Math.max(1, Math.round(Number(request.query.nombre)) || PER_SHEET));
     const generic = request.query.generiques === '1';
@@ -339,20 +339,20 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
       return page(request, reply.code(422), 'encounters', { title: request.t('Personnes photographiées'), list: enc.list(), authors: repo.authors(), errors: err.errors, values: form.body });
     }
   }
-  app.post('/admin/rencontres', async (request, reply) => saveCard(request, reply, null));
-  app.post('/admin/rencontres/:id', async (request, reply) => {
+  app.post('/admin/rencontres', P('personnes.gerer'), async (request, reply) => saveCard(request, reply, null));
+  app.post('/admin/rencontres/:id', P('personnes.gerer'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!enc.get(id)) return reply.callNotFound();
     return saveCard(request, reply, id);
   });
 
-  app.get('/admin/rencontres/:id/carte', async (request, reply) => {
+  app.get('/admin/rencontres/:id/carte', P('personnes.voir'), async (request, reply) => {
     const jpeg = enc.cardJpeg(byId(request.params.id));
     if (!jpeg) return reply.callNotFound();
     return reply.header('cache-control', 'no-store').type('image/jpeg').send(jpeg);
   });
 
-  app.post('/admin/rencontres/:id/statut', write, async (request, reply) => {
+  app.post('/admin/rencontres/:id/statut', W('personnes.gerer'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!enc.get(id)) return reply.callNotFound();
     enc.setStatus(id, request.body?.status);
@@ -360,7 +360,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
   });
 
   // Accord par session : exclure (ou rétablir) une photo du jour que l'accord ne doit pas couvrir.
-  app.post('/admin/rencontres/:id/session/:pid', write, async (request, reply) => {
+  app.post('/admin/rencontres/:id/session/:pid', W('personnes.gerer'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!enc.get(id)) return reply.callNotFound();
     const out = request.body?.exclure === '1';
@@ -371,7 +371,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     return done(reply, back, out ? request.t('Photo exclue de l’accord de cette sortie : la personne n’y figure pas.') : request.t('Photo de nouveau couverte par l’accord de cette sortie.'));
   });
 
-  app.post('/admin/rencontres/:id/photos', write, async (request, reply) => {
+  app.post('/admin/rencontres/:id/photos', W('personnes.gerer'), async (request, reply) => {
     const id = byId(request.params.id);
     const e = enc.get(id);
     if (!e) return reply.callNotFound();
@@ -382,7 +382,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const linkedText = ids.length > 1 ? request.t('{n} photos liées à la rencontre.', { n: ids.length }) : request.t('1 photo liée à la rencontre.');
     return done(reply, `/admin/rencontres/${id}#photos`, `${linkedText}${refusal}`);
   });
-  app.post('/admin/rencontres/:id/photos/:pid/retirer', write, async (request, reply) => {
+  app.post('/admin/rencontres/:id/photos/:pid/retirer', W('personnes.gerer'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!enc.get(id)) return reply.callNotFound();
     enc.unlink(id, byId(request.params.pid));
@@ -390,7 +390,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
   });
 
   // Refus : les photos liées repassent en brouillon et quittent la file Instagram ; elles ne pourront plus être publiées.
-  app.post('/admin/rencontres/:id/refus', write, async (request, reply) => {
+  app.post('/admin/rencontres/:id/refus', W('personnes.refus'), async (request, reply) => {
     const id = byId(request.params.id);
     const e = enc.get(id);
     if (!e) return reply.callNotFound();
@@ -410,7 +410,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     en: (site, ref) => `Your data at ${site}${ref ? ` (meeting ${ref})` : ''}\n\ndonnees.json: everything we keep about you (meeting, choices, consent or refusal, history of your requests).\nsignature.png, photo-de-reperage.jpg, carte-signee.jpg: if they exist.\nphotos/: the photos you appear in.\n\nRetention periods and rights: the website's "Privacy" page.\n`,
     de: (site, ref) => `Ihre Daten bei ${site}${ref ? ` (Begegnung ${ref})` : ''}\n\ndonnees.json: alles, was wir über Sie speichern (Begegnung, Wahl, Einwilligung oder Ablehnung, Verlauf Ihrer Anfragen).\nsignature.png, photo-de-reperage.jpg, carte-signee.jpg: falls vorhanden.\nphotos/: die Fotos, auf denen Sie zu sehen sind.\n\nAufbewahrungsfristen und Rechte: Seite „Datenschutz“ der Website.\n`,
   };
-  app.get('/admin/rencontres/:id/export.zip', async (request, reply) => {
+  app.get('/admin/rencontres/:id/export.zip', P('personnes.exporter'), async (request, reply) => {
     const id = byId(request.params.id);
     const x = enc.exportData(id);
     if (!x) return reply.callNotFound();
@@ -451,18 +451,21 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const text = `${r.anonymized ? t('Données de la personne effacées ; son refus reste appliqué aux photos gardées (trace anonyme).') : t('Rencontre et données de la personne effacées.')}${withPhotos && linked.length ? ` ${removed}` : ''}`;
     return done(reply, r.anonymized ? `/admin/rencontres/${id}` : '/admin/rencontres', text, details);
   }
-  app.post('/admin/rencontres/:id/effacer', write, async (request, reply) => eraseEncounter(request, reply, { withPhotos: request.body?.photos === 'on' }));
-  app.post('/admin/rencontres/:id/supprimer', write, async (request, reply) => eraseEncounter(request, reply, { withPhotos: false }));
+  app.post('/admin/rencontres/:id/effacer', W('personnes.effacer'), async (request, reply) => {
+    if (request.body?.photos === 'on' && !request.can('photos.supprimer')) return app.forbid(request, reply);
+    return eraseEncounter(request, reply, { withPhotos: request.body?.photos === 'on' });
+  });
+  app.post('/admin/rencontres/:id/supprimer', W('personnes.effacer'), async (request, reply) => eraseEncounter(request, reply, { withPhotos: false }));
   // ---------- personnes ----------
   // Une personne et ses rencontres (une par sortie) : la liste, la fiche, et ce qu'on y fait (rapprocher, séparer,
   // ajouter à une sortie, lier des photos, exporter, effacer). La création passe d'abord par l'app (Nouvelle rencontre).
   const people = app.people;
   const personPage = (request, reply, view, data) => page(request, reply, view, { section: 'people', ...data });
-  app.get('/admin/personnes', async (request, reply) => {
+  app.get('/admin/personnes', P('personnes.voir'), async (request, reply) => {
     const search = String(request.query.q || '').slice(0, 100);
     return personPage(request, reply, 'people', { title: request.t('Personnes photographiées'), list: people.list({ search }), search });
   });
-  app.get('/admin/personnes/:id', async (request, reply) => {
+  app.get('/admin/personnes/:id', P('personnes.voir'), async (request, reply) => {
     const id = byId(request.params.id);
     const person = people.get(id);
     if (!person) return reply.callNotFound();
@@ -480,23 +483,23 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
   });
   const personOr404 = (request, reply) => { const p = people.get(byId(request.params.id)); if (!p) reply.callNotFound(); return p; };
   const toPerson = id => `/admin/personnes/${id}`;
-  app.post('/admin/personnes/:id/fusionner', write, async (request, reply) => {
+  app.post('/admin/personnes/:id/fusionner', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
     const other = Number(request.body?.autre);
     if (!people.merge(p.id, other)) return failed(reply, toPerson(p.id), request.t('Rapprochement impossible.'));
     return done(reply, toPerson(p.id), request.t('Rencontres réunies : c’est la même personne.'));
   });
-  app.post('/admin/personnes/:id/ecarter', write, async (request, reply) => {
+  app.post('/admin/personnes/:id/ecarter', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
     people.dismiss(p.id, Number(request.body?.autre));
     return done(reply, toPerson(p.id), request.t('Rapprochement écarté : ce sont deux personnes différentes.'));
   });
-  app.post('/admin/personnes/:id/rattacher', write, async (request, reply) => {
+  app.post('/admin/personnes/:id/rattacher', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
     if (!people.attach(p.id, Number(request.body?.rencontre))) return failed(reply, toPerson(p.id), request.t('Rencontre introuvable.'));
     return done(reply, toPerson(p.id), request.t('Rencontre rattachée à cette personne.'));
   });
-  app.post('/admin/personnes/:id/detacher', write, async (request, reply) => {
+  app.post('/admin/personnes/:id/detacher', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
     const eid = Number(request.body?.rencontre);
     if (!p.meetings.some(e => e.id === eid)) return failed(reply, toPerson(p.id), request.t('Rencontre introuvable.'));
@@ -504,7 +507,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     if (!pid) return failed(reply, toPerson(p.id), request.t('Une personne garde au moins une rencontre.'));
     return done(reply, toPerson(pid), request.t('Rencontre séparée : c’est une autre personne.'));
   });
-  app.post('/admin/personnes/:id/sortie', write, async (request, reply) => {
+  app.post('/admin/personnes/:id/sortie', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
     const [aid, d, t] = String(request.body?.sortie || '').split('|');
     const author = repo.authors().find(a => a.id === Number(aid));
@@ -512,7 +515,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     if (!id) return failed(reply, toPerson(p.id), request.t('Choisissez une sortie.'));
     return done(reply, toPerson(p.id), request.t('La personne est ajoutée à cette sortie (sans décision : demandez-lui son accord).'));
   });
-  app.post('/admin/personnes/:id/photos', write, async (request, reply) => {
+  app.post('/admin/personnes/:id/photos', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
     const ids = [].concat(request.body?.photo || []).map(Number).filter(Number.isInteger);
     if (!ids.length) return failed(reply, toPerson(p.id), request.t('Cochez au moins une photo.'));
@@ -520,7 +523,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     return done(reply, toPerson(p.id), n > 1 ? request.t('{n} photos liées à cette personne (à sa rencontre de la sortie de chaque photo).', { n }) : request.t('{n} photo liée à cette personne (à sa rencontre de la sortie de chaque photo).', { n }));
   });
   // Droits : tout ce qui concerne la personne, toutes rencontres confondues.
-  app.get('/admin/personnes/:id/export.zip', async (request, reply) => {
+  app.get('/admin/personnes/:id/export.zip', P('personnes.exporter'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
     const lang = p.meetings.find(e => e.lang)?.lang || 'fr';
     const entries = [{ name: 'LISEZMOI.txt', data: (README[lang] || README.fr)(app.siteName(), null) }];
@@ -545,9 +548,10 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     const name = `${app.siteName()}-donnees-personne-${p.id}`.toLowerCase().replace(/[^a-z0-9-]+/g, '-');
     return reply.header('cache-control', 'no-store').header('content-disposition', `attachment; filename="${name}.zip"`).type('application/zip').send(zip(entries));
   });
-  app.post('/admin/personnes/:id/effacer', write, async (request, reply) => {
+  app.post('/admin/personnes/:id/effacer', W('personnes.effacer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
     const withPhotos = request.body?.photos === 'on';
+    if (withPhotos && !request.can('photos.supprimer')) return app.forbid(request, reply);
     const linked = p.photos;
     const posts = linked.length ? app.db.prepare(`SELECT permalink FROM instagram_posts WHERE status = 'published' AND permalink IS NOT NULL
       AND photo_id IN (${linked.map(() => '?').join(',')})`).pluck().all(...linked.map(x => x.id)) : [];
@@ -565,7 +569,7 @@ export function registerEncounters(app, { repo, render, write, done, failed, wit
     return done(reply, '/admin/personnes', `${erased}${kept ? ` ${t('Son refus reste appliqué aux photos gardées (trace anonyme).')}` : ''}${withPhotos && linked.length ? ` ${removed}` : ''}`, details);
   });
 
-  app.post('/admin/rencontres/:id/droits-traites', write, async (request, reply) => {
+  app.post('/admin/rencontres/:id/droits-traites', W('personnes.effacer'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!enc.get(id)) return reply.callNotFound();
     enc.rightsDone(id);

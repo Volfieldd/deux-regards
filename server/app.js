@@ -98,7 +98,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Liste des routes (méthode, chemin) : les tests vérifient que chaque route d'admin est protégée.
   const routeList = [];
   app.decorate('routeList', routeList);
-  app.addHook('onRoute', r => { for (const m of [].concat(r.method)) routeList.push({ method: m, url: r.url }); });
+  app.addHook('onRoute', r => { for (const m of [].concat(r.method)) routeList.push({ method: m, url: r.url, perm: r.config?.perm || null }); });
   app.decorate('db', db);
   // Nom affiché : réglage de l'admin s'il existe, sinon SITE_NAME.
   const siteNameSetting = db.prepare("SELECT value FROM settings WHERE key = 'site_name'").pluck();

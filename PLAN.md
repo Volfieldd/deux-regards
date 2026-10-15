@@ -268,7 +268,14 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 - Impressum / mentions légales en pied de chaque page ; aide traduite ; ergonomie de la fiche ; « J'aime » et « Signaler » sur la page photo.
 - Série proposée (maquettes validées le 15 octobre 2026) : désactivée par défaut ; modèle CLIP (ONNX allégé, ≈ 90 Mo) téléchargé à l'allumage dans le dossier des données, empreinte SHA-256 vérifiée ; empreinte visuelle de chaque photo calculée sur le serveur. Pour un brouillon dont la série n'a pas été choisie à la main, chaque série d'au moins 3 photos rangées reçoit la moyenne des ressemblances de ses 3 photos les plus proches ; une autre série est proposée si elle ressemble nettement plus (deux si elles sont presque à égalité). Ressemblance par série, quel que soit le photographe. Vue rapide, fiche, sortie, filtre et Aujourd'hui ; une photo à la fois, jamais de « tout accepter ».
 - Partager (maquettes validées le 15 octobre 2026) : menu du téléphone sur téléphone (Signal, Instagram… y sont, faute de lien web), fenêtre avec réseaux, lien à copier et QR sur ordinateur ; pas de LinkedIn, Mastodon ni Telegram ; partages comptés anonymement.
-- Cadrage des rôles et permissions (RBAC) proposé le 15 octobre 2026 : rôles dans la base du site, permissions par domaine avec portée « les miennes », fermé par défaut, cinq étapes ; décisions en attente.
+- Rôles et permissions (RBAC), cadrage validé le 15 octobre 2026 :
+  - les rôles vivent dans la base du site, l'IdP ne fait que transporter l'identité ;
+  - un photographe ne voit que ses photos, ses sorties et ses personnes (accord par sortie et par photographe) ; il supprime ses photos (elles restent sa propriété) et voit les réclamations et demandes RGPD qui le concernent (droit à part) ; export et effacement restent à l'administrateur ;
+  - publier (site et Instagram) est un droit à part, donné pour l'instant à l'administrateur et au modérateur ;
+  - le modérateur publie, dépublie, traite les signalements et fait remonter au photographe les éléments à traiter, sans accès aux données personnelles ;
+  - quatre rôles au départ (Administrateur, Photographe, Modérateur, Relecteur), rôles sur mesure plus tard ;
+  - étape 1 (socle : permission déclarée par route, fermé par défaut) faite ; puis comptes et rôles en base, portée « les miennes », interface selon les droits, rôles sur mesure.
+- Circuit de publication (proposer, valider, renvoyer avec remarque, dépublier) : cadré le 15 octobre 2026, à construire après les rôles ; questions en attente.
 - Écarté : repérer les personnes de dos (pas d'obligation de consentement ; une personne de dos peut toujours être enregistrée si elle le souhaite).
 
 ## Côté Zitadel (à faire une fois)

@@ -76,7 +76,7 @@ Détail et autres refus de démarrage : [Configuration](Configuration), section 
 - **Rôle retiré dans Zitadel :** il cesse de valoir au plus tard 24 h après la dernière connexion de la personne.
 - **HSTS :** il est envoyé sans `includeSubDomains`. À ajouter une fois le domaine choisi, si tous ses sous-domaines sont en HTTPS.
 - **Cache des images publiées :** il dure un an. Une photo dépubliée cesse d'être servie par le site, mais un navigateur ou un proxy qui l'a déjà en cache peut la garder.
-- **Co-admins :** ils ont tous les mêmes droits (supprimer, changer le mode EXIF…). Le journal d'audit permet de savoir qui a fait quoi.
+- **Rôles et permissions :** chaque route de l'admin déclare une permission (`server/permissions.js`) ; une route qui n'en déclare pas empêche le démarrage, et une permission absente du compte est refusée (fermé par défaut). Les routes à plusieurs actions (actions groupées, fiche qui publie, effacement avec photos, réglages) vérifient aussi l'action précise. Quatre rôles existent (Administrateur, Photographe, Modérateur, Relecteur) ; pour l'instant, tous les comptes sont administrateurs : la page « Comptes et rôles » et la portée « mes photos » arrivent aux étapes suivantes. Le journal d'audit permet de savoir qui a fait quoi.
 
 ## Mesure d’audience
 
