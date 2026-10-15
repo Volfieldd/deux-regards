@@ -72,7 +72,8 @@ Every morning (after 6 am), the site collects the **likes** and **comments** of 
 ## If it fails
 
 - **Automatic retry:** the photo stays at the top of the queue, and the error message is shown in the queue and on the photo’s page. It goes again at the next slot, **3 attempts at most**.
-- **After 3 failures:** it moves to the **history**, with **Try again**.
+- **After 3 failures:** it moves to the **history**, with **Try again**. The photo’s page also offers **Repost (back to the front of the queue)**.
+- **The photographer** (who does not handle the queue) sees the failure in **Today** and on the photo’s page, with **Ask for a repost**. One request per failure. It then shows, marked ⚑ “Repost requested”, in the **Today** of those who handle the queue, in the history and on the photo’s page; they also get it by email if they chose to. It clears when the photo goes back into the queue. If the photo is already in the queue, there is nothing to request.
 - **Access expired:** the access token lasts 60 days and renews itself. If it has expired (more than 60 days without working), reconnect the account from the **Instagram** page: **Disconnect**, then **Connect the Instagram account**. If the admin shows **Reconnect the account** (encryption key changed, see step 6), simply click it.
 
 ---

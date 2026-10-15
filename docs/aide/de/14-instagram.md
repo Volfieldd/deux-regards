@@ -72,7 +72,8 @@ Jeden Morgen (nach 6 Uhr) erfasst die Website die **Likes** und **Kommentare** d
 ## Bei einem Fehler
 
 - **Automatischer neuer Versuch:** Das Foto bleibt an der Spitze der Warteschlange, und die Fehlermeldung erscheint in der Warteschlange und auf der Seite des Fotos. Es wird im nächsten Zeitfenster erneut gesendet, **höchstens 3 Versuche**.
-- **Nach 3 Fehlschlägen:** Es kommt in den **Verlauf**, mit **Erneut versuchen**.
+- **Nach 3 Fehlschlägen:** Es kommt in den **Verlauf**, mit **Erneut versuchen**. Die Seite des Fotos bietet auch **Erneut veröffentlichen (wieder an den Anfang der Warteschlange)**.
+- **Der Fotograf** (der die Warteschlange nicht verwaltet) sieht den Fehlschlag unter **Heute** und auf der Seite des Fotos, mit **Erneute Veröffentlichung anfragen**. Eine Anfrage pro Fehlschlag. Sie erscheint dann, markiert mit ⚑ „Erneute Veröffentlichung angefragt“, unter **Heute** bei denen, die die Warteschlange verwalten, im Verlauf und auf der Seite des Fotos; per E-Mail auch, wenn sie das gewählt haben. Sie verschwindet, sobald das Foto wieder in der Warteschlange ist. Ist das Foto schon in der Warteschlange, gibt es nichts anzufragen.
 - **Zugang abgelaufen:** Das Zugriffstoken gilt 60 Tage und erneuert sich selbst. Ist es abgelaufen (mehr als 60 Tage ohne Funktion), verbinden Sie das Konto über die Seite **Instagram** neu: **Trennen**, dann **Instagram-Konto verbinden**. Zeigt die Verwaltung **Konto erneut verbinden** an (Verschlüsselungsschlüssel geändert, siehe Schritt 6), klicken Sie einfach darauf.
 
 ---

@@ -72,7 +72,8 @@ Chaque matin (après 6 h), le site relève les **likes** et les **commentaires**
 ## En cas d’échec
 
 - **Nouvel essai automatique :** la photo reste en tête de file, et le message d’erreur s’affiche dans la file et dans la fiche. Elle repart au créneau suivant, **3 essais au plus**.
-- **Après 3 échecs :** elle passe dans l’**historique**, avec **Réessayer**.
+- **Après 3 échecs :** elle passe dans l’**historique**, avec **Réessayer**. La fiche de la photo propose aussi **Republier (remettre en tête de file)**.
+- **Le photographe** (qui ne gère pas la file) voit l’échec dans **Aujourd’hui** et sur la fiche, avec **Demander la republication**. Une seule demande par échec. Elle s’affiche ensuite, marquée ⚑ « Republication demandée », dans l’**Aujourd’hui** de ceux qui gèrent la file, dans l’historique et sur la fiche ; ils la reçoivent aussi par e-mail s’ils l’ont choisi. Elle s’efface quand la photo repart dans la file. Si la photo est déjà dans la file, il n’y a rien à demander.
 - **Accès expiré :** le jeton d’accès dure 60 jours et se renouvelle tout seul. S’il a expiré (plus de 60 jours sans fonctionner), reconnectez le compte depuis la page **Instagram** : **Déconnecter**, puis **Connecter le compte Instagram**. Si l’admin affiche **Reconnecter le compte** (clé de chiffrement changée, voir l’étape 6), cliquez simplement dessus.
 
 ---

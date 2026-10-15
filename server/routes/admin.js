@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { ROLES, PERMISSIONS } from '../permissions.js';
+import { ROLES, PERMISSIONS, grantsOf } from '../permissions.js';
 import { AccountError } from '../accounts.js';
 import { NoteError } from '../notes.js';
 import { ReviewError } from '../review.js';
@@ -625,6 +625,26 @@ export default async function adminRoutes(app) {
       return label ? done(reply, back, label(request.t)) : reply.redirect(back, 303);
     });
   }
+
+  // Publication Instagram en échec, vue du photographe qui n'a pas la main sur la file : il demande qu'elle soit
+  // republiée. Qui gère la file la voit dans « Aujourd'hui » et sur la page Instagram, et par e-mail s'il l'a choisi.
+  app.post('/admin/photos/:id/instagram/demande', W('photos.proposer'), async (request, reply) => {
+    const id = byId(request.params.id);
+    const photo = repo.photo(id);
+    const back = `/admin/photos/${id}#instagram`;
+    if (!photo) return reply.callNotFound();
+    if (!request.owns('photos.proposer', photo.author_id)) return app.forbid(request, reply);
+    const post = app.instagram.forPhoto(id);
+    if (post?.status !== 'failed') return failed(reply, back, request.t('Rien à demander : la photo n’est pas en échec sur Instagram (elle est peut-être déjà dans la file).'));
+    if (post.retry_requested_at) return done(reply, back, request.t('Republication déjà demandée.'));
+    app.instagram.requestRetry(post.id, request.session.name);
+    if (app.mailer.enabled) {
+      const to = new Set(app.accounts.list().filter(a => a.status === 'actif' && a.notify_email && (a.notify_to || a.email) && grantsOf(a.roles, a.adjust).has('instagram.file')).map(a => a.notify_to || a.email));
+      const text = [`${request.session.name || 'Un photographe'} demande que « ${photo.title} » soit republiée sur Instagram.`, `Dernière erreur : ${post.error || '—'}`, '', app.config.publicUrl ? `${app.config.publicUrl}/admin/photos/${id}#instagram` : ''].join('\n');
+      for (const addr of to) await app.mailer.send({ to: addr, subject: `${app.siteName()} · Republication Instagram demandée`, text }).catch(err => request.log.warn({ err: err.message }, 'instagram : e-mail de demande non envoyé'));
+    }
+    return done(reply, back, request.t('Republication demandée : l’équipe qui gère la file Instagram est prévenue.'));
+  });
 
   // Aperçu exact de l'image envoyée, et légende du modèle (bouton « Revenir au modèle »).
   app.get('/admin/instagram/apercu.jpg', P('instagram.voir'), async (request, reply) => {

@@ -33,6 +33,8 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
       AND ${samePartSql('p.author_id', 'p.taken_on', "COALESCE(p.taken_time, '')", 'e.met_time')}
       GROUP BY e.id ORDER BY e.id`),
     fresh: db.prepare("SELECT COUNT(*) FROM encounters WHERE status = 'nouvelle' AND (@author IS NULL OR author_id = @author)").pluck(),
+    igFailedMine: db.prepare(`SELECT p.photo_id, p.retry_requested_at, ph.title FROM instagram_posts p JOIN photos ph ON ph.id = p.photo_id WHERE p.status = 'failed' AND ph.author_id = ?
+      AND NOT EXISTS (SELECT 1 FROM instagram_posts b WHERE b.photo_id = p.photo_id AND b.id > p.id AND b.status <> 'cancelled') ORDER BY p.id DESC`),
     igFailed: db.prepare("SELECT COUNT(*) FROM instagram_posts WHERE status = 'failed' AND NOT EXISTS (SELECT 1 FROM instagram_posts b WHERE b.photo_id = instagram_posts.photo_id AND b.id > instagram_posts.id)").pluck(),
     // À finir : brouillons, ou titre provisoire (le nom du fichier), comme la photothèque.
     toFinish: db.prepare('SELECT status, title, source_name FROM photos WHERE (@author IS NULL OR author_id = @author)'),
@@ -126,6 +128,17 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
     const failed = a.all('instagram.voir') ? q.igFailed.get() : 0;
     if (failed) items.push({ level: 'bientot', title: failed > 1 ? t('Instagram : {n} publications en échec', { n: failed }) : t('Instagram : {n} publication en échec', { n: failed }),
       detail: t('bloquées par un accord, ou refusées par Instagram : la raison est dans l’historique'), href: '/admin/instagram', action: t('Voir') });
+    // Republications demandées par les photographes (qui gère la file) ; échecs sur ses photos (le photographe).
+    const asked = a.all('instagram.file') && instagram ? instagram.retryRequests() : [];
+    if (asked.length) items.push({ level: 'bientot', title: asked.length > 1 ? t('{n} republications Instagram demandées', { n: asked.length }) : t('{n} republication Instagram demandée', { n: asked.length }),
+      detail: t('par le photographe, après un échec : republiez depuis la fiche ou la page Instagram'), href: asked.length > 1 ? '/admin/instagram#ig-history' : `/admin/photos/${asked[0].photo_id}#instagram`, action: t('Voir') });
+    const ia = a.author('photos.proposer');
+    if (ia != null && !a.all('instagram.voir')) {
+      const mine = q.igFailedMine.all(ia);
+      const open_ = mine.filter(x => !x.retry_requested_at);
+      if (open_.length) items.push({ level: 'bientot', title: open_.length > 1 ? t('Instagram : {n} de vos photos en échec', { n: open_.length }) : t('Instagram : « {title} » en échec', { title: open_[0].title }),
+        detail: t('demandez la republication depuis la fiche de la photo'), href: `/admin/photos/${open_[0].photo_id}#instagram`, action: t('Voir') });
+    }
     const paused = a.all('instagram.voir') && instagram?.usage().paused;
     if (paused) items.push({ level: 'bientot', title: t('Instagram en pause'), detail: t('reprise {when} : {reason}', { when: paused.when, reason: paused.reason }), href: '/admin/instagram', action: t('Voir') });
     const pa = a.author('photos.voir'), ma = a.author('photos.modifier'), ta = a.author('photos.textes');
