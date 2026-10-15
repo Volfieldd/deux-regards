@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { ROLES, PERMISSIONS, SCOPES, grantsOf } from '../permissions.js';
 import { MailError } from '../mailer.js';
+import { DescribeError } from '../describe.js';
 import { CURRENT as RELEASE_CURRENT, RELEASES, unseen as unseenReleases, localize as localizeRelease } from '../releases.js';
 import { AccountError } from '../accounts.js';
 import { NoteError } from '../notes.js';
@@ -1610,7 +1611,13 @@ export default async function adminRoutes(app) {
       await app.describer.remove();
       return done(reply, '/admin/series#descriptions', request.t('Descriptions éteintes : modèle effacé (les descriptions déjà faites restent).'));
     }
-    const s = app.describer.save({ on: true, model: b.model, from: b.from, to: b.to });
+    let s;
+    try {
+      s = app.describer.save({ on: true, model: b.model, from: b.from, to: b.to });
+    } catch (err) {
+      if (!(err instanceof DescribeError)) throw err;
+      return failed(reply, '/admin/series#descriptions', request.t.msg(err.message));
+    }
     app.describer.run();
     return done(reply, '/admin/series#descriptions', request.t('Descriptions allumées : au premier calcul, le modèle se télécharge ; les photos sont décrites la nuit, de {from} h à {to} h.', { from: s.from, to: s.to }));
   });

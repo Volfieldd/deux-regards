@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.88.0",
+    "date": "2026-10-15",
+    "pr": 88,
+    "title": {
+      "fr": "Descriptions : « Léger » par défaut",
+      "en": "Descriptions: “Light” by default",
+      "de": "Beschreibungen: „Leicht“ als Standard"
+    },
+    "items": [
+      {
+        "fr": "Le modèle « Léger » est proposé par défaut : il tient dans la mémoire habituelle du site. « Précis » demande 6 Go (SITE_MEM_LIMIT=6g dans le .env) ; la page Séries montre la mémoire disponible et le refuse sinon.",
+        "en": "The “Light” model is the default: it fits in the site’s usual memory. “Precise” needs 6 GB (SITE_MEM_LIMIT=6g in the .env); the Series page shows the available memory and refuses it otherwise.",
+        "de": "Das Modell „Leicht“ ist voreingestellt: Es passt in den üblichen Speicher der Website. „Genau“ braucht 6 GB (SITE_MEM_LIMIT=6g in der .env); die Seite Serien zeigt den verfügbaren Speicher und lehnt es sonst ab.",
+        "perm": "series.propositions"
+      }
+    ]
+  },
+  {
     "version": "1.87.0",
     "date": "2026-10-15",
     "pr": 87,

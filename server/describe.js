@@ -1,5 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
+import os from 'node:os';
 import sharp from 'sharp';
 import { MAX_PIXELS } from './images.js';
 
@@ -9,11 +10,34 @@ import { MAX_PIXELS } from './images.js';
 // si le site en a un. Les photos sans description sont décrites la nuit (heures réglables), sur un seul cœur pour ne
 // pas gêner le reste du serveur ; une photo demandée depuis sa fiche passe tout de suite. Le modèle n'est chargé que
 // pendant le calcul. Jamais recopiée seule dans la légende : la fiche la propose, l'auteur choisit.
+// need : mémoire totale du conteneur conseillée pour ce modèle (le modèle et le reste du site), en octets.
 export const MODELS = {
-  base: { id: 'onnx-community/Florence-2-base-ft', revision: 'e88a44eaf3791a35eae0c5a47b3dbcd36e67eb6f', mb: 270, ram: 2 },
-  large: { id: 'onnx-community/Florence-2-large-ft', revision: '04ace74913c28d7ec94af32cee5c111a10126b6f', mb: 850, ram: 4 },
+  base: { id: 'onnx-community/Florence-2-base-ft', revision: 'e88a44eaf3791a35eae0c5a47b3dbcd36e67eb6f', mb: 270, ram: 2, need: 3 * 2 ** 30 },
+  large: { id: 'onnx-community/Florence-2-large-ft', revision: '04ace74913c28d7ec94af32cee5c111a10126b6f', mb: 850, ram: 4, need: 6 * 2 ** 30 },
 };
-export const DEFAULTS = { on: false, model: 'large', from: 1, to: 6 };
+// « Léger » par défaut : il tient dans la limite de mémoire par défaut du conteneur (3g) ; « Précis » demande
+// SITE_MEM_LIMIT=6g (compose).
+export const DEFAULTS = { on: false, model: 'base', from: 1, to: 6 };
+export class DescribeError extends Error {}
+
+// Mémoire dont dispose le processus : la limite du conteneur (cgroup v2, sinon v1), sinon la mémoire de la machine.
+export function memoryLimit() {
+  const read = f => { try { return fs.readFileSync(f, 'utf8').trim(); } catch { return null; } };
+  const v2 = read('/sys/fs/cgroup/memory.max');
+  if (v2 && v2 !== 'max' && Number(v2) > 0) return Math.min(Number(v2), os.totalmem());
+  const v1 = read('/sys/fs/cgroup/memory/memory.limit_in_bytes');
+  if (v1 && Number(v1) > 0 && Number(v1) < os.totalmem()) return Number(v1);
+  return os.totalmem();
+}
+// Un peu de marge : « 6g » dans compose vaut 6 Gio, à 5 % près selon les réglages.
+export const fits = (key, limit) => limit >= MODELS[key].need * 0.95;
+// Pourquoi un modèle ne tient pas : la machine elle-même (rien à régler dans le .env), ou la limite du conteneur.
+const tooSmall = (key, limit) => {
+  const gb = (limit / 2 ** 30).toFixed(1), need = MODELS[key].need / 2 ** 30, name = key === 'large' ? 'Précis' : 'Léger';
+  return fits(key, os.totalmem())
+    ? `Mémoire insuffisante pour « ${name} » : le site dispose de ${gb} Go, il en faut ${need}. Ajoutez SITE_MEM_LIMIT=${need}g au .env de la pile, puis Compose Up.`
+    : `Mémoire insuffisante pour « ${name} » : la machine n’a que ${gb} Go, il en faut ${need}.`;
+};
 const TASK = '<CAPTION>';
 const IDLE_MS = 2 * 60 * 1000;
 
@@ -59,7 +83,7 @@ export function createFlorence({ dir, threads = 1, log }) {
   };
 }
 
-export function createDescriber({ db, storageDir, model, translator, log, now = () => Date.now() }) {
+export function createDescriber({ db, storageDir, model, translator, log, now = () => Date.now(), memLimit = memoryLimit }) {
   const q = {
     setting: db.prepare("SELECT value FROM settings WHERE key = 'describe'").pluck(),
     save: db.prepare("INSERT INTO settings (key, value) VALUES ('describe', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"),
@@ -79,12 +103,17 @@ export function createDescriber({ db, storageDir, model, translator, log, now = 
   // Heures de nuit [from, to[ (heure de Paris), à cheval sur minuit si from > to.
   const night = (s = settings()) => { const h = hour(); return s.from <= s.to ? h >= s.from && h < s.to : h >= s.from || h < s.to; };
   let running = null, lastError = null;
+  // Modèle réellement utilisé : « Précis » seulement si la mémoire du conteneur le permet (la limite a pu baisser
+  // depuis le réglage) ; sinon « Léger », et la page Séries le dit ; null si même « Léger » ne tient pas.
+  const effective = s => { const l = memLimit(); const k = s.model === 'large' && !fits('large', l) ? 'base' : s.model; return fits(k, l) ? k : null; };
 
   async function one(row, s) {
     try {
-      const en = await model.describe(path.join(storageDir, 'originals', row.file), s.model);
+      const key = effective(s);
+      if (!key) throw new DescribeError(tooSmall('base', memLimit()));
+      const en = await model.describe(path.join(storageDir, 'originals', row.file), key);
       const tr = async l => { if (!translator?.enabled || !en) return ''; try { return await translator.translate(en, 'en', l); } catch (err) { log?.warn({ err: err.message }, 'descriptions : traduction impossible'); return ''; } };
-      q.store.run({ id: row.id, model: MODELS[s.model].id, en, fr: await tr('fr'), de: await tr('de'), at: now() });
+      q.store.run({ id: row.id, model: MODELS[key].id, en, fr: await tr('fr'), de: await tr('de'), at: now() });
       lastError = null;
     } catch (err) {
       lastError = err.message;
@@ -108,7 +137,12 @@ export function createDescriber({ db, storageDir, model, translator, log, now = 
     save(body) {
       const s = settings();
       const h = v => Math.min(23, Math.max(0, Number.parseInt(v, 10) || 0));
-      const next = { on: Boolean(body.on), model: Object.hasOwn(MODELS, body.model) ? body.model : s.model, from: 'from' in body ? h(body.from) : s.from, to: 'to' in body ? h(body.to) : s.to };
+      // Modèle choisi explicitement, sinon celui réellement utilisé (un « Précis » enregistré qui ne tient plus
+      // devient « Léger » : le formulaire n'est jamais bloqué par un ancien réglage).
+      const asked = Object.hasOwn(MODELS, body.model) ? body.model : null;
+      const next = { on: Boolean(body.on), model: asked || effective(s) || 'base', from: 'from' in body ? h(body.from) : s.from, to: 'to' in body ? h(body.to) : s.to };
+      // Un modèle qui ne tient pas dans la mémoire du conteneur est refusé : il serait arrêté au premier calcul.
+      if (next.on && !fits(next.model, memLimit())) throw new DescribeError(tooSmall(next.model, memLimit()));
       q.save.run(JSON.stringify(next));
       if (!next.on) model.unload?.();
       return next;
@@ -121,7 +155,7 @@ export function createDescriber({ db, storageDir, model, translator, log, now = 
       const text = (lang === 'fr' && r.text_fr) || (lang === 'de' && r.text_de) || r.text_en || '';
       return { text, en: r.text_en, translated: text !== r.text_en, pending: r.requested_at != null, error: r.error, at: r.created_at };
     },
-    state() { const c = q.counts.get(); return { ...settings(), ...c, busy: Boolean(running), error: lastError, night: night() }; },
+    state() { const c = q.counts.get(), s = settings(), limit = memLimit(); return { ...s, ...c, busy: Boolean(running), error: lastError, night: night(), memory: limit, fits: Object.fromEntries(Object.keys(MODELS).map(k => [k, fits(k, limit)])), hostFits: Object.fromEntries(Object.keys(MODELS).map(k => [k, fits(k, os.totalmem())])), effective: effective(s) }; },
     run,
     idle: () => running || Promise.resolve(0),
     async remove() { q.save.run(JSON.stringify({ ...settings(), on: false })); await model.remove?.(); },

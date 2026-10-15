@@ -114,8 +114,11 @@
   <form method="post" action="/admin/series/descriptions" class="form">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
     <fieldset class="row"><legend><%= t('Modèle') %></legend>
-<% Object.entries(DM).forEach(([k, m]) => { %>      <label class="inline"><input type="radio" name="model" value="<%= k %>"<%~ ds.model === k ? ' checked' : '' %>> <strong><%= k === 'large' ? t('Précis') : t('Léger') %></strong> <span class="mono"><%= t('Florence-2 {k} · ≈ {mb} Mo à télécharger · ≈ {ram} Go de mémoire pendant le calcul', { k, mb: m.mb, ram: m.ram }) %></span></label>
-<% }) %>    </fieldset>
+<% Object.entries(DM).forEach(([k, m]) => { const ok = ds.fits[k]; %>      <label class="inline"><input type="radio" name="model" value="<%= k %>"<%~ (ds.effective || 'base') === k && ok ? ' checked' : '' %><%~ ok ? '' : ' disabled' %>> <strong><%= k === 'large' ? t('Précis') : t('Léger') %></strong> <span class="mono"><%= t('Florence-2 {k} · ≈ {mb} Mo à télécharger · ≈ {ram} Go de mémoire pendant le calcul', { k, mb: m.mb, ram: m.ram }) %><%= ok ? '' : ` · ${t('mémoire insuffisante')}` %></span></label>
+<% }) %>      <p class="hint"><%= t('Mémoire du site : {x} Go.', { x: (ds.memory / 2 ** 30).toFixed(1) }) %> <%= ds.fits.large ? t('« Précis » est possible.') : ds.hostFits.large ? t('« Précis » demande 6 Go : ajoutez SITE_MEM_LIMIT=6g au .env de la pile, puis Compose Up.') : t('« Précis » demande 6 Go : la machine n’en a pas assez, gardez « Léger ».') %></p>
+<% if (ds.on && ds.effective && ds.effective !== ds.model) { %>      <p class="cellnote warn">▲ <%= t('« Précis » est choisi, mais la mémoire du site ne suffit plus : les descriptions utilisent « Léger ».') %></p>
+<% } else if (!ds.fits.base) { %>      <p class="cellnote warn">▲ <%= t('Même « Léger » demande 3 Go : les descriptions ne peuvent pas tourner avec cette mémoire.') %></p>
+<% } %>    </fieldset>
     <div class="row">
       <label><%= t('La nuit, de') %> <input type="number" name="from" min="0" max="23" value="<%= ds.from %>"> <%= t('h') %></label>
       <label><%= t('à') %> <input type="number" name="to" min="0" max="23" value="<%= ds.to %>"> <%= t('h') %></label>

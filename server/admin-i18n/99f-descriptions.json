@@ -118,5 +118,41 @@
  "Les descriptions suggérées sont éteintes (page Séries).": {
   "en": "Suggested descriptions are turned off (Series page).",
   "de": "Vorgeschlagene Beschreibungen sind ausgeschaltet (Seite Serien)."
+ },
+ "Mémoire du site : {x} Go.": {
+  "en": "Site memory: {x} GB.",
+  "de": "Speicher der Website: {x} GB."
+ },
+ "mémoire insuffisante": {
+  "en": "not enough memory",
+  "de": "zu wenig Speicher"
+ },
+ "« Précis » demande 6 Go : ajoutez SITE_MEM_LIMIT=6g au .env de la pile, puis Compose Up.": {
+  "en": "“Precise” needs 6 GB: add SITE_MEM_LIMIT=6g to the stack’s .env, then Compose Up.",
+  "de": "„Genau“ braucht 6 GB: Fügen Sie SITE_MEM_LIMIT=6g zur .env des Stacks hinzu, dann Compose Up."
+ },
+ "« Précis » est choisi, mais la mémoire du site ne suffit plus : les descriptions utilisent « Léger ».": {
+  "en": "“Precise” is chosen, but the site no longer has enough memory: descriptions use “Light”.",
+  "de": "„Genau“ ist gewählt, aber der Speicher der Website reicht nicht mehr: Die Beschreibungen nutzen „Leicht“."
+ },
+ "« Précis » est possible.": {
+  "en": "“Precise” is possible.",
+  "de": "„Genau“ ist möglich."
+ },
+ "Mémoire insuffisante pour « {name} » : le site dispose de {gb} Go, il en faut {need}. Ajoutez SITE_MEM_LIMIT={v} au .env de la pile, puis Compose Up.": {
+  "en": "Not enough memory for “{name}”: the site has {gb} GB, it needs {need}. Add SITE_MEM_LIMIT={v} to the stack’s .env, then Compose Up.",
+  "de": "Zu wenig Speicher für „{name}“: Die Website hat {gb} GB, nötig sind {need}. Fügen Sie SITE_MEM_LIMIT={v} zur .env des Stacks hinzu, dann Compose Up."
+ },
+ "Mémoire insuffisante pour « {name} » : la machine n’a que {gb} Go, il en faut {need}.": {
+  "en": "Not enough memory for “{name}”: the machine only has {gb} GB, it needs {need}.",
+  "de": "Zu wenig Speicher für „{name}“: Die Maschine hat nur {gb} GB, nötig sind {need}."
+ },
+ "« Précis » demande 6 Go : la machine n’en a pas assez, gardez « Léger ».": {
+  "en": "“Precise” needs 6 GB: the machine does not have enough, keep “Light”.",
+  "de": "„Genau“ braucht 6 GB: Die Maschine hat nicht genug, behalten Sie „Leicht“."
+ },
+ "Même « Léger » demande 3 Go : les descriptions ne peuvent pas tourner avec cette mémoire.": {
+  "en": "Even “Light” needs 3 GB: descriptions cannot run with this memory.",
+  "de": "Selbst „Leicht“ braucht 3 GB: Mit diesem Speicher können die Beschreibungen nicht laufen."
  }
 }

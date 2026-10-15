@@ -59,7 +59,7 @@ test('sans traducteur : la description reste en anglais ; fiche : bloc, bouton, 
   assert.equal(ctx.app.describer.forPhoto(id), null);
   // Réglages (page Séries) : allumer avec le modèle et les heures.
   const series = (await ctx.app.inject({ url: '/admin/series', cookies })).body;
-  assert.match(series, /id="descriptions"[\s\S]*name="model" value="large" checked[\s\S]*Allumer les descriptions/);
+  assert.match(series, /id="descriptions"[\s\S]*name="model" value="base" checked[\s\S]*Allumer les descriptions/);   // « Léger » par défaut
   await post('/admin/series/descriptions', { action: 'on', model: 'base', from: '2', to: '5' });
   assert.deepEqual(ctx.app.describer.settings(), { on: true, model: 'base', from: 2, to: 5 });
   // Fiche : bouton, demande, puis le texte en anglais (pas de traducteur ici) et « Reprendre comme légende ».
@@ -75,4 +75,43 @@ test('sans traducteur : la description reste en anglais ; fiche : bloc, bouton, 
   await post('/admin/series/descriptions', { action: 'off' });
   assert.equal(ctx.app.describer.settings().on, false);
   assert.ok(Object.keys(MODELS).includes('large'));
+});
+
+test('mémoire : « Léger » par défaut ; « Précis » refusé si le conteneur n’a pas 6 Go ; repli sur « Léger » si la limite baisse', async t => {
+  const ctx = await setup(t, { seeded: true });
+  const calls = [];
+  let limit = 3 * 2 ** 30;                                                                  // compose par défaut : 3g
+  const d = createDescriber({ db: ctx.db, storageDir: ctx.app.config.storageDir, model: fakeModel(calls), translator: null, memLimit: () => limit });
+  assert.equal(d.settings().model, 'base');
+  assert.deepEqual(d.state().fits, { base: true, large: false });
+  assert.throws(() => d.save({ on: true, model: 'large' }), /Mémoire insuffisante pour « Précis » : le site dispose de 3\.0 Go, il en faut 6\. Ajoutez SITE_MEM_LIMIT=6g/);
+  assert.equal(d.settings().on, false);                                                     // rien n'est enregistré
+  limit = 6 * 2 ** 30;                                                                      // SITE_MEM_LIMIT=6g
+  d.save({ on: true, model: 'large' });
+  const id = ctx.db.prepare('SELECT id FROM photos ORDER BY id LIMIT 1').pluck().get();
+  await d.request(id);
+  assert.equal(calls.at(-1)[1], 'large');
+  limit = 3 * 2 ** 30;                                                                      // limite redescendue
+  assert.equal(d.state().effective, 'base');
+  await d.request(id);
+  assert.equal(calls.at(-1)[1], 'base');
+  assert.equal(ctx.db.prepare('SELECT model FROM photo_descriptions WHERE photo_id = ?').pluck().get(id), MODELS.base.id);
+});
+
+test('ancien réglage « Précis » avec 3 Go : la page coche « Léger », le formulaire s’enregistre sans choisir ; sous 3 Go : refus, même « Léger »', async t => {
+  const ctx = await setup(t, { seeded: true });
+  let limit = 3 * 2 ** 30;
+  const d = createDescriber({ db: ctx.db, storageDir: ctx.app.config.storageDir, model: fakeModel(), translator: null, memLimit: () => limit });
+  ctx.db.prepare("INSERT INTO settings (key, value) VALUES ('describe', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(JSON.stringify({ on: false, model: 'large', from: 1, to: 6 }));
+  assert.equal(d.state().effective, 'base');
+  const s = d.save({ on: true, from: '2' });                                                // aucun modèle envoyé (radio grisé)
+  assert.deepEqual([s.on, s.model, s.from], [true, 'base', 2]);
+  limit = 2 * 2 ** 30;                                                                      // conteneur trop petit
+  assert.equal(d.state().effective, null);
+  assert.throws(() => d.save({ on: true, model: 'base' }), /Mémoire insuffisante pour « Léger » : le site dispose de 2\.0 Go, il en faut 3\. Ajoutez SITE_MEM_LIMIT=3g/);
+  assert.doesNotThrow(() => d.save({ on: false }));                                         // éteindre reste possible
+  // La page Séries (vraie application, mémoire de la machine) : le modèle utilisé est coché.
+  const t2 = (await import('../server/admin-i18n.js')).translator('en');
+  assert.equal(t2.msg('Mémoire insuffisante pour « Précis » : le site dispose de 3.0 Go, il en faut 6. Ajoutez SITE_MEM_LIMIT=6g au .env de la pile, puis Compose Up.'),
+    'Not enough memory for “Precise”: the site has 3.0 GB, it needs 6. Add SITE_MEM_LIMIT=6g to the stack’s .env, then Compose Up.');
 });
