@@ -34,3 +34,18 @@
 <% }) %>
 </ul>
 <p class="hint"><%= t('Qui a fait quoi :') %> <a class="more" href="/admin/journal"><%= t('Journal') %></a></p>
+
+<section class="panel" id="email" aria-labelledby="email-title">
+  <h2 id="email-title"><%= t('E-mails') %> <% if (it.mail.enabled) { %><span class="enc-tag ok"><%= t('configurés') %></span><% } else { %><span class="enc-tag no"><%= t('non configurés') %></span><% } %></h2>
+<% if (it.mail.enabled) { %>
+  <p class="prose"><%= t('Le serveur envoie les e-mails de l’admin (propositions, décisions, remarques, récapitulatifs, demandes RGPD et leurs relances) depuis {from}.', { from: it.mail.from || t('l’adresse de SMTP_URL') }) %></p>
+  <form method="post" action="/admin/comptes/test-email" class="form row-form">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <label><%= t('Envoyer un e-mail de test à') %> <input type="email" name="adresse" value="<%= it.mail.mine %>" maxlength="200" required></label>
+    <p class="actions"><button class="btn ghost" type="submit"><%= t('Envoyer le test') %></button></p>
+  </form>
+<% } else { %>
+  <p class="prose"><%= t('Renseignez SMTP_URL et MAIL_FROM dans la configuration du serveur : sans eux, seul « Aujourd’hui » prévient, et les relances RGPD ne partent pas.') %></p>
+<% } %>
+  <p class="hint"><%= t('Demandes RGPD : e-mail au photographe concerné dès l’arrivée, rappel au quart du délai d’un mois, puis à la moitié avec l’administrateur en copie, et un dernier e-mail prioritaire aux trois quarts. Sans photographe joignable, l’administrateur les reçoit directement.') %></p>
+</section>

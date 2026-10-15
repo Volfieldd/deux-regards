@@ -1,0 +1,142 @@
+{
+ "configurés": {
+  "en": "configured",
+  "de": "eingerichtet"
+ },
+ "non configurés": {
+  "en": "not configured",
+  "de": "nicht eingerichtet"
+ },
+ "Demandes RGPD : e-mail au photographe concerné dès l’arrivée, rappel au quart du délai d’un mois, puis à la moitié avec l’administrateur en copie, et un dernier e-mail prioritaire aux trois quarts. Sans photographe joignable, l’administrateur les reçoit directement.": {
+  "en": "GDPR requests: an email to the photographer concerned as soon as it arrives, a reminder at a quarter of the one-month deadline, then at half with the administrator in copy, and a last high-priority email at three quarters. If no photographer can be reached, the administrator receives them directly.",
+  "de": "DSGVO-Anfragen: eine E-Mail an den betroffenen Fotografen sofort bei Eingang, eine Erinnerung nach einem Viertel der Monatsfrist, dann zur Hälfte mit dem Administrator in Kopie und eine letzte E-Mail mit hoher Priorität nach drei Vierteln. Ist kein Fotograf erreichbar, erhält der Administrator sie direkt."
+ },
+ "E-mails": {
+  "en": "Emails",
+  "de": "E-Mails"
+ },
+ "Envoyer le test": {
+  "en": "Send the test",
+  "de": "Test senden"
+ },
+ "Envoyer un e-mail de test à": {
+  "en": "Send a test email to",
+  "de": "Test-E-Mail senden an"
+ },
+ "l’adresse de SMTP_URL": {
+  "en": "the SMTP_URL address",
+  "de": "der Adresse aus SMTP_URL"
+ },
+ "Le serveur envoie les e-mails de l’admin (propositions, décisions, remarques, récapitulatifs, demandes RGPD et leurs relances) depuis {from}.": {
+  "en": "The server sends the admin’s emails (proposals, decisions, notes, summaries, GDPR requests and their reminders) from {from}.",
+  "de": "Der Server sendet die E-Mails der Verwaltung (Vorschläge, Entscheidungen, Anmerkungen, Zusammenfassungen, DSGVO-Anfragen und ihre Erinnerungen) von {from}."
+ },
+ "Renseignez SMTP_URL et MAIL_FROM dans la configuration du serveur : sans eux, seul « Aujourd’hui » prévient, et les relances RGPD ne partent pas.": {
+  "en": "Set SMTP_URL and MAIL_FROM in the server configuration: without them, only “Today” notifies, and GDPR reminders are not sent.",
+  "de": "Tragen Sie SMTP_URL und MAIL_FROM in die Serverkonfiguration ein: Ohne sie benachrichtigt nur „Heute“, und DSGVO-Erinnerungen werden nicht gesendet."
+ },
+ "chaque jour": {
+  "en": "every day",
+  "de": "jeden Tag"
+ },
+ "chaque semaine (le lundi)": {
+  "en": "every week (on Monday)",
+  "de": "jede Woche (montags)"
+ },
+ "Les demandes RGPD (accès, effacement) vous sont toujours envoyées, avec des relances au fil du délai d’un mois.": {
+  "en": "GDPR requests (access, erasure) are always sent to you, with reminders over the one-month deadline.",
+  "de": "DSGVO-Anfragen (Auskunft, Löschung) werden Ihnen immer gesendet, mit Erinnerungen im Laufe der Monatsfrist."
+ },
+ "par e-mail, vers 8 h, seulement s’il y a quelque chose": {
+  "en": "by email, around 8 am, only if there is something",
+  "de": "per E-Mail, gegen 8 Uhr, nur wenn etwas ansteht"
+ },
+ "Récapitulatif de ce qui vous attend": {
+  "en": "Summary of what is waiting for you",
+  "de": "Zusammenfassung dessen, was ansteht"
+ },
+ "E-mail de test envoyé à {to} : vérifiez la boîte de réception (et les indésirables).": {
+  "en": "Test email sent to {to}: check the inbox (and the spam folder).",
+  "de": "Test-E-Mail an {to} gesendet: Prüfen Sie den Posteingang (und den Spam-Ordner)."
+ },
+ "L’envoi d’e-mails n’est pas configuré sur ce serveur (SMTP_URL).": {
+  "en": "Sending email is not configured on this server (SMTP_URL).",
+  "de": "Der E-Mail-Versand ist auf diesem Server nicht eingerichtet (SMTP_URL)."
+ },
+ "Ce qui vous attend ({n})": {
+  "en": "What is waiting for you ({n})",
+  "de": "Was ansteht ({n})"
+ },
+ "Cet e-mail confirme que le serveur sait envoyer des e-mails.": {
+  "en": "This email confirms that the server can send emails.",
+  "de": "Diese E-Mail bestätigt, dass der Server E-Mails senden kann."
+ },
+ "Demande RGPD reçue ({ref}) : à traiter avant le {date}": {
+  "en": "GDPR request received ({ref}): to handle before {date}",
+  "de": "DSGVO-Anfrage erhalten ({ref}): zu bearbeiten bis {date}"
+ },
+ "E-mail de test": {
+  "en": "Test email",
+  "de": "Test-E-Mail"
+ },
+ "Envoyé depuis l’admin, page « Comptes et rôles », le {date}.": {
+  "en": "Sent from the admin, “Accounts and roles” page, on {date}.",
+  "de": "Gesendet aus der Verwaltung, Seite „Konten und Rollen“, am {date}."
+ },
+ "hebdomadaire": {
+  "en": "weekly",
+  "de": "wöchentlich"
+ },
+ "quotidien": {
+  "en": "daily",
+  "de": "täglich"
+ },
+ "Il reste moins d’une semaine.": {
+  "en": "Less than a week remains.",
+  "de": "Es bleibt weniger als eine Woche."
+ },
+ "L’administrateur est en copie.": {
+  "en": "The administrator is in copy.",
+  "de": "Der Administrator ist in Kopie."
+ },
+ "La loi (RGPD) laisse un mois pour y répondre : au plus tard le {date}.": {
+  "en": "The law (GDPR) allows one month to respond: by {date} at the latest.",
+  "de": "Das Gesetz (DSGVO) lässt einen Monat für die Antwort: spätestens am {date}."
+ },
+ "{n} choses vous attendent :": {
+  "en": "{n} things are waiting for you:",
+  "de": "{n} Dinge stehen an:"
+ },
+ "{n} chose vous attend :": {
+  "en": "{n} thing is waiting for you:",
+  "de": "{n} Sache steht an:"
+ },
+ "Rappel : demande RGPD ({ref}) à traiter avant le {date}": {
+  "en": "Reminder: GDPR request ({ref}) to handle before {date}",
+  "de": "Erinnerung: DSGVO-Anfrage ({ref}) zu bearbeiten bis {date}"
+ },
+ "Récapitulatif {freq}, réglable dans l’admin (Aujourd’hui → Votre compte).": {
+  "en": "Summary sent {freq}, adjustable in the admin (Today → Your account).",
+  "de": "Zusammenfassung, {freq} gesendet, einstellbar in der Verwaltung (Heute → Ihr Konto)."
+ },
+ "Second rappel : demande RGPD ({ref}) à traiter avant le {date}": {
+  "en": "Second reminder: GDPR request ({ref}) to handle before {date}",
+  "de": "Zweite Erinnerung: DSGVO-Anfrage ({ref}) zu bearbeiten bis {date}"
+ },
+ "Une personne photographiée ({ref}) a demandé l’effacement de ses données le {date}.": {
+  "en": "A photographed person ({ref}) asked for their data to be erased on {date}.",
+  "de": "Eine fotografierte Person ({ref}) hat am {date} die Löschung ihrer Daten verlangt."
+ },
+ "Une personne photographiée ({ref}) a demandé l’accès à ses données le {date}.": {
+  "en": "A photographed person ({ref}) asked for access to their data on {date}.",
+  "de": "Eine fotografierte Person ({ref}) hat am {date} Auskunft über ihre Daten verlangt."
+ },
+ "URGENT : demande RGPD ({ref}) à traiter avant le {date}": {
+  "en": "URGENT: GDPR request ({ref}) to handle before {date}",
+  "de": "DRINGEND: DSGVO-Anfrage ({ref}) zu bearbeiten bis {date}"
+ },
+ "Vérifiez l’identité de la personne, puis traitez la demande depuis sa fiche :": {
+  "en": "Check the person’s identity, then handle the request from their page:",
+  "de": "Prüfen Sie die Identität der Person und bearbeiten Sie die Anfrage dann auf ihrer Seite:"
+ }
+}

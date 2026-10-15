@@ -11,10 +11,12 @@ export function createMailer({ url, from, log, transport = null } = {}) {
   const t = transport || (url ? nodemailer.createTransport(url, { connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 15000 }) : null);
   return {
     enabled: Boolean(t),
-    async send({ to, subject, text, replyTo }) {
+    from: from || '',
+    // cc : copie (relances RGPD à l'administrateur) ; priority : 'high' pour la dernière relance.
+    async send({ to, subject, text, replyTo, cc, priority }) {
       if (!t) throw new MailError('Envoi d’e-mails non configuré (SMTP_URL).');
       try {
-        await t.sendMail({ from, to, subject, text, ...(replyTo ? { replyTo } : {}) });
+        await t.sendMail({ from, to, subject, text, ...(replyTo ? { replyTo } : {}), ...(cc?.length ? { cc } : {}), ...(priority ? { priority } : {}) });
       } catch (err) {
         // Jamais le mot de passe dans un message : seulement le code et la réponse du serveur de messagerie.
         log?.warn({ code: err.code, response: err.response }, 'e-mail non envoyé');

@@ -67,6 +67,7 @@ Tant qu'il manque l'essentiel (noms, adresse, e-mail, responsable), « Aujourd'h
 - **Désactivé :** le compte ne peut plus se connecter, et sa session en cours perd l'accès aussitôt.
 - **Supprimer ce compte :** le compte et ses sessions sont effacés ; s'il se reconnecte, il repart « en attente ».
 - **Garde-fous :** il reste toujours au moins un administrateur actif ; on ne peut ni se désactiver ni se supprimer soi-même ; les comptes listés dans `ADMIN_SUBS` (configuration du serveur, marqués « protégé ») restent administrateurs quoi qu'il arrive. L'**identifiant (sub)** affiché sous chaque compte est celui à recopier dans `ADMIN_SUBS` (il se sélectionne d'un clic).
+- **E-mails** (en bas de la page) : indique si le serveur sait envoyer des e-mails (`SMTP_URL`, `MAIL_FROM`) et depuis quelle adresse. **Envoyer le test** envoie un e-mail à l'adresse choisie (la vôtre par défaut). En cas de refus, la raison s'affiche, par exemple des identifiants refusés ou un serveur injoignable.
 
 Le menu ne montre que les pages que le compte peut ouvrir.
 

@@ -87,11 +87,14 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
       return byId(id);
     },
     // Être prévenu par e-mail (circuit de publication) : choisi par chacun pour lui-même.
-    setNotify(sub, { on, to = '' }) {
+    // digest : récapitulatif de ce qui attend le compte ('off', 'daily', 'weekly' ; absent : inchangé).
+    setNotify(sub, { on, to = '', digest } = {}) {
       const addr = String(to || '').trim().slice(0, 200);
       if (addr && !/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(addr)) throw new AccountError('Cette adresse e-mail n’est pas valide.');
-      if (on && !addr && !bySub(sub)?.email) throw new AccountError('Indiquez l’adresse où vous prévenir.');
+      const recap = ['off', 'daily', 'weekly'].includes(digest) ? digest : undefined;
+      if ((on || (recap && recap !== 'off')) && !addr && !bySub(sub)?.email) throw new AccountError('Indiquez l’adresse où vous prévenir.');
       db.prepare('UPDATE accounts SET notify_email = ?, notify_to = ? WHERE sub = ?').run(on ? 1 : 0, addr, sub);
+      if (recap) db.prepare('UPDATE accounts SET digest = ? WHERE sub = ?').run(recap, sub);
       return bySub(sub);
     },
     // Photographe lié à une identité (valeurs par défaut, et plus tard la portée « les miennes »).

@@ -16,7 +16,10 @@ This is the **Today** page, the one you land on. At the top, **View site** and *
 - **Pace**: the number of photos imported each month, over a year.
 - **Recent changes**: the five most recently changed photos.
 - **Proofs of prior existence**: number of timestamped photos, and those pending after an error, with **Retry now**. See [Proofs of prior existence](preuves).
-- **Your account**: the name of the signed-in account, its roles, and the photographer it is linked to.
+- **Your account**: the name of the signed-in account, its roles, and the photographer it is linked to. Emails are set here too:
+  - **Also notify me by email**: proposals, decisions on your photos and notes, as they arrive;
+  - **Summary of what is waiting for you**: **never**, **every day** or **every week (on Monday)**. It goes out around 8 am, only if there is something, never more than once a day;
+  - **GDPR requests** are always sent to you, with their reminders (see the “People photographed” help).
   - **Account not linked:** an administrator links it to its photographer in [Accounts and roles](reglages#comptes-et-rôles).
   - **Account linked:** your imports are attributed to you by default.
 

@@ -153,7 +153,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       if (e && !c?.verified && (e.verified || ['carte', 'signature'].includes(e.consent_source))) {
         const held = { status: 'nouvelle', updated_at: t };
         if (decision === 'refus') Object.assign(held, { refused: 1, refused_at: t });
-        if (rights) Object.assign(held, { rights_request: rights, rights_requested_at: t, rights_done_at: null });
+        if (rights) Object.assign(held, { rights_request: rights, rights_requested_at: t, rights_done_at: null, rights_reminders: 0 });
         db.prepare(`UPDATE encounters SET ${Object.keys(held).map(k => `${k} = @${k}`).join(', ')} WHERE id = @id`).run({ ...held, id: e.id });
         log(e.id, 'visiteur', { ...detail, non_verifiee: true }, false);
         return { id: e.id, ref: c.ref, author: c.author?.name ?? null, verified: false, held: true };
@@ -170,7 +170,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       // Le dernier choix exprimé l'emporte ; l'historique garde les précédents.
       if (decision === 'refus') Object.assign(set, { refused: 1, refused_at: t });
       if (decision === 'accord') Object.assign(set, { refused: 0, consent: JSON.stringify(scopes), consent_source: 'en_ligne', consent_at: t });
-      if (rights) Object.assign(set, { rights_request: rights, rights_requested_at: t, rights_done_at: null });
+      if (rights) Object.assign(set, { rights_request: rights, rights_requested_at: t, rights_done_at: null, rights_reminders: 0 });
       const cols = Object.keys(set);
       db.prepare(`UPDATE encounters SET ${cols.map(k => `${k} = @${k}`).join(', ')} WHERE id = @id`).run({ ...set, id: e.id });
       log(e.id, 'visiteur', detail, c?.verified);
