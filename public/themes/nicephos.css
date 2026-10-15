@@ -50,7 +50,7 @@
 .theme-nicephos .who a[aria-current] .n { font-weight: 400; }
 
 /* Index des séries : capitales espacées plutôt que grand romain. */
-.theme-nicephos .idx { font-weight: 300; font-size: clamp(26px, 4.6vw, 58px); letter-spacing: .2em; text-transform: uppercase; line-height: 1.15; padding: 14px 0; }
+.theme-nicephos .idx { font-weight: 300; font-size: clamp(21px, 3.7vw, 46px); letter-spacing: .2em; text-transform: uppercase; line-height: 1.15; padding: 14px 0; }
 .theme-nicephos .idx[aria-current] { font-weight: 400; }
 
 /* Grille */

@@ -43,7 +43,7 @@ test('fenêtre : une seule fois, tout depuis la dernière visite, dans la langue
   // Depuis une version déjà vue : seulement les suivantes.
   ctx.db.prepare("UPDATE accounts SET seen_release = '1.81.0' WHERE sub = 'root'").run();
   const since = await admin('/admin', { admin_langue: 'en' });
-  assert.match(since, /New since your last visit: 2 versions/);
+  assert.match(since, new RegExp(`New since your last visit: ${RELEASES.filter(r => compare(r.version, '1.81.0') > 0).length} versions`));
   assert.match(since, /1\.82\.0<\/span> Trips on the site/);
   assert.doesNotMatch(since, /1\.81\.0<\/span>/);
   // Selon les droits : le relecteur ne voit pas les nouveautés des sorties.
@@ -54,6 +54,6 @@ test('fenêtre : une seule fois, tout depuis la dernière visite, dans la langue
   // Page et menu : la version installée.
   const page = await admin('/admin/nouveautes');
   assert.match(page, new RegExp(`Version installée : ${CURRENT.replace(/\./g, '\\.')}`));
-  assert.match(page, /href="\/admin\/nouveautes" aria-current="page">[\s\S]*class="nav-ver mono">1\.83\.0</);
-  assert.ok(page.indexOf('1.83.0</span> Les nouveautés') < page.indexOf('1.79.0</span> Des villes'));
+  assert.match(page, new RegExp(`href="/admin/nouveautes" aria-current="page">[\\s\\S]*class="nav-ver mono">${CURRENT.replace(/\./g, '\\.')}<`));
+  assert.ok(page.indexOf(`${CURRENT}</span>`) < page.indexOf('1.79.0</span> Des villes'));
 });

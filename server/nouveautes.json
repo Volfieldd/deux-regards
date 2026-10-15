@@ -1,43 +1,139 @@
 [
   {
-    "version": "1.83.0", "date": "2026-10-15", "pr": 83,
-    "title": { "fr": "Les nouveautés, à chaque version", "en": "What’s new, with every version", "de": "Neuigkeiten, bei jeder Version" },
+    "version": "1.84.0",
+    "date": "2026-10-15",
+    "pr": 84,
+    "title": {
+      "fr": "Des noms de séries plus discrets",
+      "en": "Quieter series names",
+      "de": "Dezentere Seriennamen"
+    },
     "items": [
-      { "fr": "Cette fenêtre : à la connexion qui suit une mise à jour, l’admin montre une seule fois tout ce qui est arrivé depuis votre dernière visite.", "en": "This window: at the first sign-in after an update, the admin shows once everything that arrived since your last visit.", "de": "Dieses Fenster: Bei der ersten Anmeldung nach einem Update zeigt die Verwaltung einmal alles, was seit Ihrem letzten Besuch neu ist." },
-      { "fr": "Menu Nouveautés : toutes les versions, la plus récente d’abord, et le numéro de la version installée.", "en": "What’s new menu: every version, newest first, and the number of the installed version.", "de": "Menü Neuigkeiten: alle Versionen, die neueste zuerst, und die Nummer der installierten Version." }
+      {
+        "fr": "Sur l’accueil du site, les noms des séries sont un peu plus petits (environ 20 %), dans tous les thèmes.",
+        "en": "On the site’s home page, series names are a little smaller (about 20%), in every theme.",
+        "de": "Auf der Startseite der Website sind die Seriennamen etwas kleiner (etwa 20 %), in allen Themes."
+      }
     ]
   },
   {
-    "version": "1.82.0", "date": "2026-10-15", "pr": 82,
-    "title": { "fr": "Les voyages sur le site", "en": "Trips on the site", "de": "Reisen auf der Website" },
+    "version": "1.83.0",
+    "date": "2026-10-15",
+    "pr": 83,
+    "title": {
+      "fr": "Les nouveautés, à chaque version",
+      "en": "What’s new, with every version",
+      "de": "Neuigkeiten, bei jeder Version"
+    },
     "items": [
-      { "fr": "Chaque voyage peut avoir sa page publique (case « Publier la page du voyage sur le site ») : grande photo, texte, puis le récit jour après jour.", "en": "Each trip can have its public page (box “Publish the trip’s page on the site”): large photo, text, then the day by day story.", "de": "Jede Reise kann ihre öffentliche Seite haben (Kästchen „Seite der Reise auf der Website veröffentlichen“): großes Foto, Text, dann die Erzählung Tag für Tag.", "perm": "sorties.voir" },
-      { "fr": "Une carte cadrée sur le voyage : l’itinéraire, une pastille par étape et un encart avec la date et la ville.", "en": "A map framed on the trip: the route, a marker per stop and a label with the date and the town.", "de": "Eine auf die Reise zugeschnittene Karte: die Route, eine Markierung pro Etappe und ein Kästchen mit Datum und Stadt." },
-      { "fr": "Le menu du site gagne un lien « Voyages » dès qu’un voyage est en ligne.", "en": "The site menu gains a “Trips” link as soon as a trip is online.", "de": "Das Menü der Website erhält einen Link „Reisen“, sobald eine Reise online ist." }
+      {
+        "fr": "Cette fenêtre : à la connexion qui suit une mise à jour, l’admin montre une seule fois tout ce qui est arrivé depuis votre dernière visite.",
+        "en": "This window: at the first sign-in after an update, the admin shows once everything that arrived since your last visit.",
+        "de": "Dieses Fenster: Bei der ersten Anmeldung nach einem Update zeigt die Verwaltung einmal alles, was seit Ihrem letzten Besuch neu ist."
+      },
+      {
+        "fr": "Menu Nouveautés : toutes les versions, la plus récente d’abord, et le numéro de la version installée.",
+        "en": "What’s new menu: every version, newest first, and the number of the installed version.",
+        "de": "Menü Neuigkeiten: alle Versionen, die neueste zuerst, und die Nummer der installierten Version."
+      }
     ]
   },
   {
-    "version": "1.81.0", "date": "2026-10-15", "pr": 81,
-    "title": { "fr": "Les voyages dans l’admin", "en": "Trips in the admin", "de": "Reisen in der Verwaltung" },
+    "version": "1.82.0",
+    "date": "2026-10-15",
+    "pr": 82,
+    "title": {
+      "fr": "Les voyages sur le site",
+      "en": "Trips on the site",
+      "de": "Reisen auf der Website"
+    },
     "items": [
-      { "fr": "Regroupez des sorties en voyages (Sorties → Voyages) : journées rattachées entre deux dates ou en cochant, photos et personnes du voyage réunies.", "en": "Group outings into trips (Outings → Trips): days attached between two dates or by ticking, the trip’s photos and people gathered.", "de": "Fassen Sie Ausflüge zu Reisen zusammen (Ausflüge → Reisen): Tage zwischen zwei Daten oder per Häkchen zuordnen, Fotos und Personen der Reise gesammelt.", "perm": "sorties.voir" },
-      { "fr": "Proposer ou publier d’un coup les photos prêtes d’un voyage.", "en": "Propose or publish a trip’s ready photos at once.", "de": "Die bereiten Fotos einer Reise auf einmal vorschlagen oder veröffentlichen.", "perm": "sorties.voir" }
+      {
+        "fr": "Chaque voyage peut avoir sa page publique (case « Publier la page du voyage sur le site ») : grande photo, texte, puis le récit jour après jour.",
+        "en": "Each trip can have its public page (box “Publish the trip’s page on the site”): large photo, text, then the day by day story.",
+        "de": "Jede Reise kann ihre öffentliche Seite haben (Kästchen „Seite der Reise auf der Website veröffentlichen“): großes Foto, Text, dann die Erzählung Tag für Tag.",
+        "perm": "sorties.voir"
+      },
+      {
+        "fr": "Une carte cadrée sur le voyage : l’itinéraire, une pastille par étape et un encart avec la date et la ville.",
+        "en": "A map framed on the trip: the route, a marker per stop and a label with the date and the town.",
+        "de": "Eine auf die Reise zugeschnittene Karte: die Route, eine Markierung pro Etappe und ein Kästchen mit Datum und Stadt."
+      },
+      {
+        "fr": "Le menu du site gagne un lien « Voyages » dès qu’un voyage est en ligne.",
+        "en": "The site menu gains a “Trips” link as soon as a trip is online.",
+        "de": "Das Menü der Website erhält einen Link „Reisen“, sobald eine Reise online ist."
+      }
     ]
   },
   {
-    "version": "1.80.0", "date": "2026-10-15", "pr": 80,
-    "title": { "fr": "La recherche sur le site", "en": "Search on the site", "de": "Suche auf der Website" },
+    "version": "1.81.0",
+    "date": "2026-10-15",
+    "pr": 81,
+    "title": {
+      "fr": "Les voyages dans l’admin",
+      "en": "Trips in the admin",
+      "de": "Reisen in der Verwaltung"
+    },
     "items": [
-      { "fr": "Les visiteurs cherchent parmi les photos publiées par mots-clés : titre, légende, lieu, ville, série, photographe, dans les trois langues.", "en": "Visitors search the published photos by keyword: title, caption, place, town, series, photographer, in all three languages.", "de": "Besucher durchsuchen die veröffentlichten Fotos nach Stichwörtern: Titel, Bildunterschrift, Ort, Stadt, Serie, Fotograf, in allen drei Sprachen." },
-      { "fr": "Un champ Mots-clés sur la fiche ; leur affichage sur la page de la photo se règle dans Site public.", "en": "A Keywords field on the photo page; showing them on the public photo page is set in Public site.", "de": "Ein Feld Stichwörter auf der Seite des Fotos; ihre Anzeige auf der öffentlichen Fotoseite wird unter Website eingestellt.", "perm": "photos.textes" }
+      {
+        "fr": "Regroupez des sorties en voyages (Sorties → Voyages) : journées rattachées entre deux dates ou en cochant, photos et personnes du voyage réunies.",
+        "en": "Group outings into trips (Outings → Trips): days attached between two dates or by ticking, the trip’s photos and people gathered.",
+        "de": "Fassen Sie Ausflüge zu Reisen zusammen (Ausflüge → Reisen): Tage zwischen zwei Daten oder per Häkchen zuordnen, Fotos und Personen der Reise gesammelt.",
+        "perm": "sorties.voir"
+      },
+      {
+        "fr": "Proposer ou publier d’un coup les photos prêtes d’un voyage.",
+        "en": "Propose or publish a trip’s ready photos at once.",
+        "de": "Die bereiten Fotos einer Reise auf einmal vorschlagen oder veröffentlichen.",
+        "perm": "sorties.voir"
+      }
     ]
   },
   {
-    "version": "1.79.0", "date": "2026-10-15", "pr": 79,
-    "title": { "fr": "Des villes mieux nommées", "en": "Better-named towns", "de": "Besser benannte Orte" },
+    "version": "1.80.0",
+    "date": "2026-10-15",
+    "pr": 80,
+    "title": {
+      "fr": "La recherche sur le site",
+      "en": "Search on the site",
+      "de": "Suche auf der Website"
+    },
     "items": [
-      { "fr": "La liste des villes donne la région ou l’État : « Monterey, Californie, États-Unis » ne se confond plus avec ses homonymes.", "en": "The town list gives the region or state: “Monterey, California, United States” is no longer mixed up with its namesakes.", "de": "Die Ortsliste nennt die Region oder den Bundesstaat: „Monterey, Kalifornien, Vereinigte Staaten“ wird nicht mehr mit gleichnamigen Orten verwechselt.", "perm": "photos.modifier" },
-      { "fr": "Les villes s’affichent dans la langue de l’admin (« München » en allemand), et sur la carte du site dans la langue de la page.", "en": "Towns are shown in the admin’s language (“München” in German), and on the site’s map in the page’s language.", "de": "Orte erscheinen in der Sprache der Verwaltung („München“ auf Deutsch) und auf der Karte der Website in der Sprache der Seite." }
+      {
+        "fr": "Les visiteurs cherchent parmi les photos publiées par mots-clés : titre, légende, lieu, ville, série, photographe, dans les trois langues.",
+        "en": "Visitors search the published photos by keyword: title, caption, place, town, series, photographer, in all three languages.",
+        "de": "Besucher durchsuchen die veröffentlichten Fotos nach Stichwörtern: Titel, Bildunterschrift, Ort, Stadt, Serie, Fotograf, in allen drei Sprachen."
+      },
+      {
+        "fr": "Un champ Mots-clés sur la fiche ; leur affichage sur la page de la photo se règle dans Site public.",
+        "en": "A Keywords field on the photo page; showing them on the public photo page is set in Public site.",
+        "de": "Ein Feld Stichwörter auf der Seite des Fotos; ihre Anzeige auf der öffentlichen Fotoseite wird unter Website eingestellt.",
+        "perm": "photos.textes"
+      }
+    ]
+  },
+  {
+    "version": "1.79.0",
+    "date": "2026-10-15",
+    "pr": 79,
+    "title": {
+      "fr": "Des villes mieux nommées",
+      "en": "Better-named towns",
+      "de": "Besser benannte Orte"
+    },
+    "items": [
+      {
+        "fr": "La liste des villes donne la région ou l’État : « Monterey, Californie, États-Unis » ne se confond plus avec ses homonymes.",
+        "en": "The town list gives the region or state: “Monterey, California, United States” is no longer mixed up with its namesakes.",
+        "de": "Die Ortsliste nennt die Region oder den Bundesstaat: „Monterey, Kalifornien, Vereinigte Staaten“ wird nicht mehr mit gleichnamigen Orten verwechselt.",
+        "perm": "photos.modifier"
+      },
+      {
+        "fr": "Les villes s’affichent dans la langue de l’admin (« München » en allemand), et sur la carte du site dans la langue de la page.",
+        "en": "Towns are shown in the admin’s language (“München” in German), and on the site’s map in the page’s language.",
+        "de": "Orte erscheinen in der Sprache der Verwaltung („München“ auf Deutsch) und auf der Karte der Website in der Sprache der Seite."
+      }
     ]
   }
 ]
