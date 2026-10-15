@@ -494,7 +494,7 @@ body.dropping .canvas { outline: 2px dashed var(--accent); outline-offset: -10px
 .pick img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: contain; background: var(--photo-bg); border-radius: 6px; }
 .pick:has(input:disabled) { cursor: not-allowed; } .pick:has(input:disabled) img { opacity: .45; }
 .edit { display: grid; gap: 22px; }
-@media (min-width: 1000px) { .edit { grid-template-columns: 5fr 7fr; align-items: start; } }
+@media (min-width: 1000px) { .edit { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; } }
 .preview { margin: 0; } .preview img { width: 100%; height: auto; border-radius: 10px; background: var(--photo-bg); }
 .preview figcaption { color: var(--ink3); margin-top: 8px; font-size: 12.5px; }
 .danger summary { cursor: pointer; color: var(--danger); }
@@ -772,7 +772,8 @@ code.mono, .mono code { color: var(--ink2); }
 .igq .acts { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .igq .acts form { margin: 0; }
 .cap-excerpt { color: var(--ink2); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ig-edit { display: grid; grid-template-columns: 260px 1fr; gap: 20px; align-items: start; }
+.ig-edit { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.ig-edit select, .ig-edit textarea { max-width: 100%; }
 .ig-preview { margin: 0; } .ig-preview img { width: 100%; border-radius: 8px; background: var(--s3); display: block; box-shadow: 0 0 0 1px var(--line2); }
 .ig-preview figcaption { margin-top: 6px; }
 .warn-list { margin: 0; padding-left: 18px; color: var(--warn); font-size: 13px; }
@@ -991,7 +992,9 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 /* Fiche photo : sur grand écran, les rubriques du bas (personnes, Instagram, audience, preuve) remplissent la colonne
    de l'aperçu, à côté du formulaire, au lieu de laisser un grand vide ; sur téléphone, l'ordre reste aperçu,
    formulaire, rubriques. */
-.edit-lower { display: grid; gap: 18px; min-width: 0; }
+.edit-lower { display: grid; gap: 18px; min-width: 0; container-type: inline-size; }
+/* Fiche photo : la colonne de gauche est étroite ; l'aperçu Instagram passe au-dessus de ses réglages. */
+@container (max-width: 620px) { .ig-edit { grid-template-columns: minmax(0, 1fr); } .ig-preview { max-width: 320px; } }
 .edit-lower > .panel { margin: 0; }
 @media (min-width: 1000px) {
   .edit { grid-template-areas: "preview form" "lower form"; grid-template-rows: auto 1fr; }
