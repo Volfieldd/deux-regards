@@ -10,6 +10,7 @@ import { project, MAP } from '../geo/projection.js';
 import { countryName, nameOf } from '../geo/cities.js';
 import { createSearch, MAX_QUERY } from '../search.js';
 import { tripStory } from '../trip-story.js';
+import { photoMap } from '../photo-map.js';
 import { LANGS, PREFIX, UI, pick, localize, splitLang, detectLang } from '../i18n.js';
 import { BOTS, countryOf } from '../stats.js';
 import path from 'node:path';
@@ -258,6 +259,9 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       bodyClass: 'dark', share: await shareOf(photo, siteName),
       // Mots-clés sous la légende, si le réglage le demande (Site public) ; chacun mène à la recherche.
       showKeywords: repo.settings().keywords_shown === true,
+      // Où la photo a été prise, et les photos prises à proximité (seulement celles qui sont sur la carte).
+      place: photoMap(photo, repo.publishedPhotos({ lang }), lang),
+      thumb: variantName(photo.file, widthsFor(photo.width)[0], 'webp', photo.variant_key),
     });
   });
 

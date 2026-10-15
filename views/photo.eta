@@ -24,6 +24,22 @@
         <a class="report mono" href="<%= it.u(`/photo/${p.slug}/signaler`) %>" rel="nofollow"><%= it.t.fb.report %></a>
       </div>
     </div>
+<% const pl = it.place, n = it.t.near, terre = it.asset('carte-terre.svg'), fine = it.asset('carte-terre-fine.svg'); if (pl) { const v = pl.view; %>
+    <figure class="vmap" data-zoom-map>
+      <svg viewBox="<%= v.x.toFixed(2) %> <%= v.y.toFixed(2) %> <%= v.w.toFixed(2) %> <%= v.h.toFixed(2) %>" data-tiles="<%= it.asset('carte-tuiles/index.json') %>" role="group" aria-labelledby="vmap-t" preserveAspectRatio="xMidYMid slice">
+        <title id="vmap-t"><%= n.map(pl.me.city) %></title>
+        <use class="terre" href="<%= fine %>#terre" width="1000" height="520" data-base/>
+        <g class="detail" data-detail display="none"></g>
+        <use class="frontieres" href="<%= fine %>#frontieres" width="1000" height="520"/>
+<% pl.others.forEach(o => { %>        <a class="vmap-o" href="<%= it.photoUrl(o.href) %>" aria-label="<%= n.others(o.city, o.photos.length) %> · <%= n.km(o.km) %>"><circle cx="<%= o.x.toFixed(2) %>" cy="<%= o.y.toFixed(2) %>" r="<%= pl.rs.toFixed(2) %>" vector-effect="non-scaling-stroke"/><text x="<%= (o.x + pl.rs * 1.6).toFixed(2) %>" y="<%= o.y.toFixed(2) %>" font-size="<%= (pl.fs * 0.85).toFixed(2) %>"><%= o.city %></text></a>
+<% }) %>        <defs><clipPath id="vmap-rond" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath></defs>
+        <g class="vmap-me"><circle class="vmap-halo" cx="<%= pl.me.x.toFixed(2) %>" cy="<%= pl.me.y.toFixed(2) %>" r="<%= (pl.r * 1.18).toFixed(2) %>" vector-effect="non-scaling-stroke"/>
+          <image href="<%= `/media/${it.thumb}` %>" x="<%= (pl.me.x - pl.r).toFixed(2) %>" y="<%= (pl.me.y - pl.r).toFixed(2) %>" width="<%= (pl.r * 2).toFixed(2) %>" height="<%= (pl.r * 2).toFixed(2) %>" preserveAspectRatio="xMidYMid slice" clip-path="url(#vmap-rond)"/>
+          <text class="vmap-me-t" x="<%= pl.me.x.toFixed(2) %>" y="<%= (pl.me.y + pl.r * 1.18 + pl.fs * 1.1).toFixed(2) %>" font-size="<%= pl.fs.toFixed(2) %>"><%= pl.me.city %></text></g>
+      </svg>
+      <figcaption class="mono"><%= n.here(pl.me.city) %><%= pl.count ? ` · ${n.more(pl.count)}` : '' %><% if (it.mapPage) { %> · <a href="<%= it.u('/carte') %>#lieu-<%= p.city_id %>"><%= n.world %></a><% } %></figcaption>
+    </figure>
+<% } %>
 <% if (it.count > 1) { %>
     <nav class="nav" aria-label="<%= it.t.photosNav %>">
       <a href="<%= it.photoUrl(it.prev.slug, it.filter) %>" rel="prev" aria-label="<%= it.t.prev(it.prev.title) %>"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>
@@ -32,6 +48,14 @@
 <% } %>
   </div>
 </main>
+<% if (pl && pl.list.length) { %>
+<section class="near wrap" aria-labelledby="near-t">
+  <h2 id="near-t" class="eyebrow"><%= n.title %></h2>
+  <ul>
+<% pl.list.forEach(x => { %>    <li><a href="<%= it.photoUrl(x.photo.slug) %>"><span class="im"><%~ it.picture(x.photo, { sizes: '(min-width: 900px) 15vw, 40vw', alt: '' }) %></span><span class="ttl"><%= x.photo.title %></span><span class="mono"><%= x.same ? `${x.city} · ${n.same}` : `${x.city} · ${n.km(x.km)}` %></span></a></li>
+<% }) %>  </ul>
+</section>
+<% } %>
 <dialog class="share-dialog" data-share-dialog aria-labelledby="share-title">
   <div class="share-h"><h2 id="share-title"><%= it.t.share.title %></h2><button type="button" class="share-x" data-share-close aria-label="<%= it.t.share.close %>">✕</button></div>
   <%~ include('./_share', { ...it, deferThumb: true }) %>

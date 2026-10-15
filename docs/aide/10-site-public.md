@@ -51,6 +51,8 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
 
 **Partager** : à côté du cœur. Sur téléphone, il ouvre le menu de partage du téléphone (Instagram, Signal, Messages, WhatsApp…). Sur ordinateur, une fenêtre montre l'aperçu (image, titre, photographe, site), les boutons WhatsApp, Facebook, Bluesky, X, Pinterest et E-mail, **Voir sur Instagram** si la photo a été postée depuis le site, le lien à copier et un QR pour ouvrir la photo sur un téléphone. On partage la page, jamais le fichier. Ce sont de simples liens : aucun script de ces services n'est chargé, aucun cookie n'est posé. Sans JavaScript, le bouton mène à une page qui contient les mêmes liens. Les partages sont comptés anonymement (voir [Statistiques](statistiques)).
 
+**Où et à proximité** : si la fiche de la photo coche **Afficher sur la carte du monde**, une petite carte est affichée à côté du texte, cadrée sur sa ville. La vignette de la photo y apparaît dans un cercle, et les autres photos prises à moins de 250 km en pastilles, avec le nom de leur ville ; chaque pastille mène à sa photo. Sous la photo, la rangée **À proximité** montre les plus proches, avec leur ville et leur distance. Seules les photos cochées « sur la carte » apparaissent, et seule la ville est connue, jamais la position exacte. Le lien **Voir la carte du monde** apparaît si la page Carte est publiée.
+
 ## Autres pages
 
 - **À propos :** logo complet, accroche, texte, biographies des auteurs.

@@ -522,9 +522,8 @@ document.querySelectorAll('[data-share]').forEach(btn => {
 
 // ----- carte d'un voyage : cadrage serré → tuiles détaillées (1:10m) de la zone, lues une fois -----
 // Sans ce script, le fond 1:50m reste : la carte est complète, seulement moins fine sur les côtes.
-(function () {
-  const fig = document.querySelector('[data-trip-map]');
-  if (!fig) return;
+// (Aussi la carte de la page d'une photo, data-zoom-map.)
+document.querySelectorAll('[data-trip-map], [data-zoom-map]').forEach(fig => {
   const svg = fig.querySelector('svg');
   const [x, y, w, h] = svg.getAttribute('viewBox').split(' ').map(Number);
   if (w > 1000 / 8) return;
@@ -547,7 +546,7 @@ document.querySelectorAll('[data-share]').forEach(btn => {
       base.setAttribute('display', 'none');
     });
   }).catch(() => {});
-})();
+});
 
 // Carte d'un voyage sur téléphone : le cadre glissant s'ouvre centré sur l'itinéraire.
 (function () {
