@@ -82,12 +82,12 @@
       <label class="inline"><input type="radio" name="watermark" value="default"<%~ v.watermark !== 0 ? ' checked' : '' %>> <%~ t('Selon les {link}', { link: `<a href="/admin/images">${esc(t('réglages'))}</a>` }) %></label>
       <label class="inline"><input type="radio" name="watermark" value="none"<%~ v.watermark === 0 ? ' checked' : '' %>> <%= t('Jamais sur cette photo') %></label>
     </fieldset>
-    <p class="hint"><%~ t('Instagram : rubrique {link}, plus bas.', { link: '<a class="more" href="#instagram">Instagram</a>' }) %></p>
+    <p class="hint"><%~ t('Instagram : voir la rubrique {link}.', { link: '<a class="more" href="#instagram">Instagram</a>' }) %></p>
       </div>
     </details>
     <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
   </form>
-</div>
+  <div class="edit-lower">
 <% if (it.encounters && it.encounters.length) { %>
 <details class="panel rub-panel" id="rencontres"<%~ R.site.level !== 'ok' || R.instagram.level !== 'ok' ? ' open' : '' %>>
   <summary><h2 id="enc-title"><%= t('Personnes & accords') %> <span class="sum"><%= it.encounters.length > 1 ? t('{n} personnes', { n: it.encounters.length }) : t('{n} personne', { n: it.encounters.length }) %> · <%= t('accords de la sortie et photos liées') %></span></h2></summary>
@@ -214,3 +214,5 @@
     <button class="btn danger" type="submit"><%= t('Supprimer définitivement') %></button>
   </form>
 </details>
+  </div>
+</div>

@@ -747,10 +747,6 @@
   "en": "Never on this photo",
   "de": "Nie auf diesem Foto"
  },
- "Instagram : rubrique {link}, plus bas.": {
-  "en": "Instagram: see the {link} section below.",
-  "de": "Instagram: siehe Abschnitt {link} weiter unten."
- },
  "Personnes & accords": {
   "en": "People & consents",
   "de": "Personen & Einwilligungen"
@@ -1230,5 +1226,13 @@
  "Supprimer {n} photo ?": {
   "en": "Delete {n} photo?",
   "de": "{n} Foto löschen?"
+ },
+ "Chaque champ s’enregistre tout seul dès que vous le quittez (sur la fiche complète, avec « Enregistrer »).": {
+  "en": "Each field saves itself as soon as you leave it (on the full page, with “Save”).",
+  "de": "Jedes Feld speichert sich, sobald Sie es verlassen (auf der vollständigen Seite mit „Speichern“)."
+ },
+ "Instagram : voir la rubrique {link}.": {
+  "en": "Instagram: see the {link} section.",
+  "de": "Instagram: siehe Abschnitt {link}."
  }
 }

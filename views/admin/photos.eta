@@ -136,6 +136,7 @@
     </div>
 
     <div data-insp-one hidden>
+      <p class="insp-autosave hint"><%= t('Chaque champ s’enregistre tout seul dès que vous le quittez (sur la fiche complète, avec « Enregistrer »).') %></p>
       <div class="preview-one" data-one-preview></div>
       <div class="insp-bd">
         <div class="fld"><span class="lb"><%= t('Titre') %> <span class="r" data-one-n></span></span><input class="big-title" data-one-field="title" maxlength="160" aria-label="<%= t('Titre') %>"><span class="note" data-one-prov hidden><%= t('Titre provisoire (nom du fichier)') %></span></div>
