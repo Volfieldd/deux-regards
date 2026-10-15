@@ -1,0 +1,38 @@
+{
+ "C’est noté": {
+  "en": "Got it",
+  "de": "Verstanden"
+ },
+ "Nouveau depuis votre dernière visite": {
+  "en": "New since your last visit",
+  "de": "Neu seit Ihrem letzten Besuch"
+ },
+ "Nouveau depuis votre dernière visite : {n} versions": {
+  "en": "New since your last visit: {n} versions",
+  "de": "Neu seit Ihrem letzten Besuch: {n} Versionen"
+ },
+ "Toutes les nouveautés": {
+  "en": "All that’s new",
+  "de": "Alle Neuigkeiten"
+ },
+ "Version {v}": {
+  "en": "Version {v}",
+  "de": "Version {v}"
+ },
+ "Chaque version apporte ce qui suit ; la plus récente d’abord.": {
+  "en": "Each version brings the following; newest first.",
+  "de": "Jede Version bringt Folgendes; die neueste zuerst."
+ },
+ "version installée": {
+  "en": "installed version",
+  "de": "installierte Version"
+ },
+ "Version installée : {v}.": {
+  "en": "Installed version: {v}.",
+  "de": "Installierte Version: {v}."
+ },
+ "Nouveautés": {
+  "en": "What’s new",
+  "de": "Neuigkeiten"
+ }
+}

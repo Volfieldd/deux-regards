@@ -34,6 +34,7 @@ Cette page est pour qui reprend le code : où sont les choses, quelles règles s
 
 1. **Branche** depuis `main`, nommée par nature : `feat/…`, `fix/…`, `docs/…`, `design/…`, `deploy/…`.
 2. **Code, tests, documentation** dans la même branche (voir le tableau ci-dessous).
+   - **Nouveautés** : une PR qui change ce que voit un utilisateur ajoute son entrée en tête de `server/nouveautes.json` (titre et lignes en français, anglais et allemand ; `perm` facultatif pour ne la montrer qu'à qui a ce droit) et passe la version de `package.json` (et `package-lock.json`) à **1.<numéro de la PR>.0**. `test/nouveautes.test.js` vérifie les trois langues, l'ordre, et que la version installée est la plus récente. Chaque compte voit la fenêtre « Nouveautés » une seule fois, à sa connexion suivante.
 3. **Vérifier** : `npm test` doit passer ; pour une modification d'interface, lancer aussi les tests navigateur contre un serveur de test (voir plus bas).
 4. **PR** vers `main` avec : le contexte (le problème), les changements, les vérifications faites, et un paragraphe **Sécurité** (ce qui est exposé, échappé, protégé).
 5. **Fusion** (commit de fusion). GitHub Actions construit l'image Docker et la publie sur `ghcr.io/volfieldd/deux-regards` avec les étiquettes `latest` et `sha-xxxxxxx` (suivi : `gh run list`).

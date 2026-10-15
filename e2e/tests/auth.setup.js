@@ -11,5 +11,13 @@ setup('connexion locale de test', async ({ page }) => {
   await page.getByRole('button', { name: 'Se connecter' }).click();
   await expect(page).toHaveURL(/\/admin$/);
   await expect(page.getByText('Connexion locale de test')).toBeVisible();
+  // Nouveautés : la fenêtre s'affiche à la première connexion (modale), se ferme, et ne revient pas.
+  const news = page.getByRole('dialog', { name: /Nouveau depuis votre dernière visite/ });
+  if (await news.isVisible()) {
+    await news.getByRole('button', { name: 'C’est noté' }).click();
+    await expect(news).toBeHidden();
+    await page.reload();
+    await expect(page.getByRole('dialog', { name: /Nouveau depuis votre dernière visite/ })).toHaveCount(0);
+  }
   await page.context().storageState({ path: STATE });
 });

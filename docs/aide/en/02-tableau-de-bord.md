@@ -16,6 +16,7 @@ This is the **Today** page, the one you land on. At the top, **View site** and *
 - **Pace**: the number of photos imported each month, over a year.
 - **Recent changes**: the five most recently changed photos.
 - **Proofs of prior existence**: number of timestamped photos, and those pending after an error, with **Retry now**. See [Proofs of prior existence](preuves).
+- **What’s new**: after an update, a window shows once, at your next sign-in, everything that arrived since your last visit (only what concerns your rights). **Got it** closes it. The **What’s new** menu (under Help) keeps every version, newest first, with the number of the installed version.
 - **Your account**: the name of the signed-in account, its roles, and the photographer it is linked to. Emails are set here too:
   - **Also notify me by email**: proposals, decisions on your photos and notes, as they arrive;
   - **Summary of what is waiting for you**: **never**, **every day** or **every week (on Monday)**. It goes out around 8 am, only if there is something, never more than once a day;

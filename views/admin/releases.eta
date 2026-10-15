@@ -1,0 +1,10 @@
+<% layout('./layout') %>
+<% const t = it.t; const day = d => new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T12:00:00Z`)); %>
+<h1><%= t('Nouveautés') %></h1>
+<p class="prose"><%= t('Version installée : {v}.', { v: it.releaseCurrent }) %> <%= t('Chaque version apporte ce qui suit ; la plus récente d’abord.') %></p>
+<ol class="releases">
+<% it.releases.forEach(r => { %>  <li class="panel release" id="v<%= r.version %>">
+    <h2><span class="rel-v mono"><%= r.version %></span> <%= r.title %> <span class="mono"><%= day(r.date) %><%= r.version === it.releaseCurrent ? ` · ${t('version installée')}` : '' %></span></h2>
+    <ul><% r.items.forEach(i => { %><li><%= i %></li><% }) %></ul>
+  </li>
+<% }) %></ol>

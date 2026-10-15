@@ -97,6 +97,8 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
       if (recap) db.prepare('UPDATE accounts SET digest = ? WHERE sub = ?').run(recap, sub);
       return bySub(sub);
     },
+    // Nouveautés : la dernière version vue dans la fenêtre « Nouveautés ».
+    setSeenRelease: (sub, version) => db.prepare('UPDATE accounts SET seen_release = ? WHERE sub = ?').run(String(version), sub).changes > 0,
     // Photographe lié à une identité (valeurs par défaut, et plus tard la portée « les miennes »).
     authorIdOf: sub => q.bySub.get(sub)?.author_id ?? null,
 
