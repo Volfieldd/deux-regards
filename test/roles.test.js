@@ -55,7 +55,7 @@ test('matrice : modérateur, relecteur, photographe et compte sans rôle n’att
   assert.deepEqual([denied.statusCode, denied.json().error], [403, 'Accès refusé : ce compte n’a pas ce droit.']);
   assert.equal(ctx.db.prepare('SELECT COUNT(*) FROM photos WHERE id = ?').pluck().get(p.id), 1);
   assert.notEqual(await code(m.json('/admin/photos/actions', { action: 'draft', ids: [p.id] })), 403);          // publier / dépublier : permis
-  assert.equal(await code(m.json(`/admin/photos/${p.id}/champs`, { title: 'Titre corrigé' })), 200);           // un texte : permis
+  assert.equal(await code(m.json(`/admin/photos/${p.id}/champs`, { title: 'Titre corrigé' })), 403);           // ne retouche pas : renvoie avec une remarque
   assert.equal(await code(m.json(`/admin/photos/${p.id}/champs`, { category_id: String(other) })), 403);        // la série : non
   assert.equal(await code(m.json('/admin/photos/actions', { action: 'category', category_id: String(other), ids: [p.id] })), 403);
   assert.equal(await code(m.post('/admin/reglages', { part: 'droits' })), 403);

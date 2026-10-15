@@ -76,7 +76,8 @@
 <% } %>  </nav>
   <p class="grp" id="nav-publish"><%= t('Publier') %></p>
   <nav class="nav" aria-labelledby="nav-publish">
-    <%~ item(['site', '/admin/site', 'Site public', 'globe', null, 'site.textes']) %>
+<% if (it.canAll && it.canAll('photos.publier')) { %>    <a href="/admin/a-valider"<%~ it.section === 'review' ? ' aria-current="page"' : '' %>><%~ ic('photos') %><%= t('À valider') %><% if (it.toValidate) { %><span class="nav-badge"><%= it.toValidate %></span><% } %></a>
+<% } %>    <%~ item(['site', '/admin/site', 'Site public', 'globe', null, 'site.textes']) %>
     <%~ item(['series', '/admin/series', 'Séries', 'series', null, 'series.gerer']) %>
   </nav>
 <% if (it.navSeries && it.navSeries.length && can('photos.voir')) { %>
@@ -99,6 +100,7 @@
   <nav class="nav" aria-labelledby="nav-settings">
     <%~ item(['authors', '/admin/auteurs', 'Photographes', 'authors', null, 'photographes.gerer']) %>
     <%~ item(['accounts', '/admin/comptes', 'Comptes et rôles', 'key', null, 'comptes.gerer']) %>
+    <%~ item(['circuit', '/admin/circuit', 'Circuit de publication', 'journal', null, 'circuit.regler']) %>
     <%~ item(['journal', '/admin/journal', 'Journal', 'journal', null, 'journal.voir']) %>
     <%~ item(['appearance', '/admin/apparence', 'Apparence', 'appearance', null, 'site.apparence']) %>
     <%~ item(['images', '/admin/images', 'Filigrane & EXIF', 'images', null, 'site.filigrane']) %>
@@ -131,7 +133,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% const HELP = { review: 'photos-le-circuit-de-publication', circuit: 'photos-le-circuit-de-publication', accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>"><%= t('Aide sur cette page') %></a></p>
 <% } %>

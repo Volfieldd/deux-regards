@@ -2,7 +2,10 @@
 <% const t = it.t, fr = !['en', 'de'].includes(it.lang), esc = __eta.e; %>
 <% const v = it.values, e = it.errors; %>
 <% // Droits du compte : la fiche complète, ou les textes seuls (modérateur, relecteur) ; le reste selon les droits.
-   const can = it.can, full = can('photos.modifier'), pubOk = can('photos.publier'), seePeople = can('personnes.voir'); %>
+   const can = it.can, pubOk = can('photos.publier'), seePeople = can('personnes.voir');
+   // Une photo publiée ne se modifie qu'avec « modifier ses photos publiées » (réglable par photographe).
+   const editableHere = it.photo.status !== 'published' || can('photos.publiees.modifier');
+   const full = can('photos.modifier') && editableHere; %>
 <% const inv = k => e[k] ? ` aria-invalid="true" aria-describedby="err-${k}"` : ''; %>
 <p class="mono"><a class="more eyebrow" href="/admin/photos">← <%= t('Photos') %></a></p>
 <h1><%= it.photo.title %></h1>
@@ -111,6 +114,7 @@
   </form>
 <% } else { %>
   <div class="panel form texts-only">
+<% if (can('photos.textes') && editableHere) { %>
     <form class="form" method="post" action="/admin/photos/<%= it.photo.id %>/textes">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
       <p class="hint"><%= t('Ce compte corrige les textes ; la série, la date, le lieu sur la carte et le reste sont réglés par le photographe ou un administrateur.') %></p>
@@ -123,18 +127,64 @@
       <p class="mono"><%= it.photo.category %> · <%= it.photo.author %><%= it.photo.taken_on ? ` · ${it.photo.taken_on}` : '' %></p>
       <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
     </form>
-<% if (pubOk) { %>
-    <form class="status-form" method="post" action="/admin/photos/<%= it.photo.id %>/status">
-      <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>">
-<% if (it.photo.status === 'published') { %>      <p><%= t('Publiée sur le site.') %> <button class="btn ghost" type="submit" name="status" value="draft"><%= t('Dépublier') %></button></p>
-<% } else if (R.site.level === 'ok') { %>      <p><%= t('Brouillon, prête à publier.') %> <button class="btn" type="submit" name="status" value="published"><%= t('Publier') %></button></p>
-<% } else if (R.site.level === 'warn') { %>      <p class="hint"><%= t('À vérifier : la confirmation des accords revient au photographe ou à un administrateur, qui voient les personnes.') %></p>
-<% } else { %>      <p class="hint"><%= t('Bloquée : elle ne peut pas être publiée.') %></p>
-<% } %>    </form>
+<% } else { %>
+    <dl class="facts"><dt><%= t('Titre') %></dt><dd><%= it.photo.title %></dd><dt><%= t('Légende') %></dt><dd><%= it.photo.legend || '—' %></dd><dt><%= t('Lieu') %></dt><dd><%= it.photo.place || '—' %></dd><dt><%= t('Série') %></dt><dd><%= it.photo.category %> · <%= it.photo.author %></dd></dl>
+    <p class="hint"><%= can('photos.modifier') && !editableHere ? t('Publiée sur le site. La modifier demande un droit que le modérateur peut vous donner.') : t('Pour une correction, écrivez une remarque au photographe (plus bas) ou renvoyez-lui la photo.') %></p>
 <% } %>
   </div>
 <% } %>
   <div class="edit-lower">
+<% const RV = it.review, propose = can('photos.proposer'), when = ms => new Intl.DateTimeFormat(it.locale, { dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ms);
+   const ACT = { proposee: t('proposée'), retiree: t('proposition retirée'), programmee: t('programmée'), deprogrammee: t('programmation annulée'), publiee: t('publiée'), renvoyee: t('renvoyée avec une remarque'), depubliee: t('dépubliée') }; %>
+<% if (propose || pubOk) { %>
+<section class="panel rub-panel publication" id="publication" aria-labelledby="pub-title">
+  <h2 id="pub-title"><%= t('Publication') %> <span class="sum"><%= it.photo.status === 'published' ? t('publiée') : RV.state === 'proposee' ? t('proposée, attend le modérateur') : RV.state === 'programmee' ? t('programmée le {date}', { date: when(RV.at) }) : RV.state === 'a_reprendre' ? t('à reprendre') : t('brouillon') %></span></h2>
+<% if (it.photo.status === 'published') { %>
+<% if (pubOk) { %>  <form class="form" method="post" action="/admin/photos/<%= it.photo.id %>/depublier">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <label><%= t('Dépublier : pourquoi ?') %> <span class="mono"><%= t('le photographe reçoit la raison') %></span><textarea name="raison" rows="2" maxlength="1000" required></textarea></label>
+    <p class="actions"><button class="btn ghost" type="submit"><%= t('Dépublier') %></button></p>
+  </form>
+<% } else { %>  <p class="hint"><%= can('photos.publiees.modifier') ? t('Publiée sur le site. Vos modifications y apparaissent tout de suite.') : t('Publiée sur le site. La modifier demande un droit que le modérateur peut vous donner.') %></p>
+<% } %>
+<% } else if (RV.state === 'programmee') { %>
+  <p><%= t('Validée : elle sera publiée le {date}.', { date: when(RV.at) }) %></p>
+  <form method="post" action="/admin/photos/<%= it.photo.id %>/<%= pubOk ? 'deprogrammer' : 'retirer-proposition' %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= pubOk ? t('Annuler la programmation') : t('Retirer la proposition') %></button></form>
+<% } else { %>
+<% if (RV.state === 'proposee' && propose && !pubOk) { %>  <p><%= t('Proposée : le modérateur va la publier, la programmer ou vous la renvoyer avec une remarque.') %></p>
+  <form method="post" action="/admin/photos/<%= it.photo.id %>/retirer-proposition"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Retirer la proposition') %></button></form>
+<% } else if (propose && !pubOk) { %>
+<% if (RV.state === 'a_reprendre') { %>  <p class="cellnote warn"><%= t('Renvoyée : voyez la remarque ci-dessous, corrigez, puis proposez-la de nouveau.') %></p><% } %>
+<% if (R.site.level === 'no') { %>  <p class="hint"><%= t('Bloquée par un refus : elle ne peut pas être proposée.') %></p>
+<% } else { %>  <form class="form" method="post" action="/admin/photos/<%= it.photo.id %>/proposer">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <label><%= t('Un mot pour le modérateur') %> <span class="mono"><%= t('facultatif') %></span><textarea name="message" rows="2" maxlength="1000"></textarea></label>
+<% if (R.site.level === 'warn' && !it.siteConfirmed) { %>    <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> <%= t('À vérifier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.') %></label>
+<% } %>    <p class="actions"><button class="btn" type="submit"><%= t('Proposer à la publication') %></button></p>
+  </form>
+<% } %>
+<% } %>
+<% if (pubOk) { %>
+<% if (RV.state === 'proposee') { const last = RV.history.find(h => h.action === 'proposee'); %>  <p><%= t('Proposée par {name} le {date}.', { name: last?.by_name || '?', date: last ? when(last.at) : '' }) %><% if (last?.message) { %> <q><%= last.message %></q><% } %></p><% } %>
+<% if (R.site.level === 'ok' || it.siteConfirmed) { %>  <form class="form row-form" method="post" action="/admin/photos/<%= it.photo.id %>/valider">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <label class="inline"><input type="radio" name="quand" value="maintenant" checked> <%= t('Publier maintenant') %></label>
+    <label class="inline"><input type="radio" name="quand" value="date"> <%= t('Programmer le') %> <input type="datetime-local" name="date" aria-label="<%= t('Jour et heure de publication') %>"></label>
+    <p class="actions"><button class="btn" type="submit"><%= t('Valider') %></button></p>
+  </form>
+<% } else { %>  <p class="hint"><%= R.site.level === 'no' ? t('Bloquée : elle ne peut pas être publiée.') : t('À vérifier : la confirmation des accords revient au photographe ou à un administrateur, qui voient les personnes.') %></p>
+<% } %><% if (RV.state === 'proposee') { %>  <form class="form" method="post" action="/admin/photos/<%= it.photo.id %>/renvoyer">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <label><%= t('Renvoyer au photographe avec une remarque') %><textarea name="message" rows="2" maxlength="1000" required></textarea></label>
+    <p class="actions"><button class="btn ghost" type="submit"><%= t('Renvoyer') %></button></p>
+  </form>
+<% } %>
+<% } %>
+<% } %>
+<% if (RV.history.length) { %>  <details class="pub-history"><summary><%= t('Historique') %></summary><ul class="rank plain"><% RV.history.forEach(h => { %><li><span class="t"><%= ACT[h.action] || h.action %> · <%= h.by_name || '—' %><%= h.publish_at ? ` · ${when(h.publish_at)}` : '' %><% if (h.message) { %> · <q><%= h.message %></q><% } %></span><span class="mono"><%= when(h.at) %></span></li><% }) %></ul></details>
+<% } %>
+</section>
+<% } %>
 <% if (it.notes.length || can('taches.adresser')) { %>
 <details class="panel rub-panel" id="remarques"<%~ it.notes.length ? ' open' : '' %>>
   <summary><h2><%= t('Remarques') %> <span class="sum"><%= it.notes.length ? (it.notes.length > 1 ? t('{n} à traiter', { n: it.notes.length }) : t('1 à traiter')) : t('aucune') %></span></h2></summary>

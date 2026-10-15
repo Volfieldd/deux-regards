@@ -69,6 +69,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     if (!request.session) { reply.clearCookie(SESSION_COOKIE, cookieBase); return; }
     accounts.ensure(request.session);                 // session ouverte avant les comptes : compte créé avec ses rôles
     request.session.roles = accounts.rolesOf(request.session.sub);
+    request.session.adjust = accounts.adjustOf(request.session.sub);
   });
 
   const pendingPage = { title: 'Compte en attente', message: 'Votre compte est bien enregistré. Un administrateur doit maintenant lui donner un rôle ; réessayez ensuite.' };

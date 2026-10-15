@@ -275,7 +275,9 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
   - le modérateur publie, dépublie, traite les signalements et fait remonter au photographe les éléments à traiter, sans accès aux données personnelles ;
   - quatre rôles au départ (Administrateur, Photographe, Modérateur, Relecteur), rôles sur mesure plus tard ;
   - étapes 1 (socle : permission déclarée par route, fermé par défaut), 2 (comptes et rôles en base, compte en attente, garde-fou `ADMIN_SUBS`, journal, menu selon les droits), 3 (portée « les miennes », rôle Photographe) et 4 (interface selon les droits, textes seuls pour modérateur et relecteur, remarques adressées au photographe) faites ; reste l'étape 5, rôles sur mesure, plus tard.
-- Circuit de publication (proposer, valider, renvoyer avec remarque, dépublier) : cadré le 15 octobre 2026, à construire après les rôles ; questions en attente.
+- Circuit de publication, décidé le 15 octobre 2026 : modifier une photo publiée relève du photographe (droit réglable par le modérateur) ; le modérateur ne retouche pas, il renvoie avec une remarque ; Instagram : le photographe propose, le modérateur valide (réglable : publier seul) ; programmer dès le départ ; « Aujourd'hui » et e-mail au choix de chacun ; proposer et valider par lot ; un signalement ne dépublie rien tout seul.
+  - site : fait (proposer, À valider, programmer, renvoyer, dépublier avec raison, réglages par photographe, e-mails) ;
+  - Instagram : à faire.
 - Écarté : repérer les personnes de dos (pas d'obligation de consentement ; une personne de dos peut toujours être enregistrée si elle le souhaite).
 
 ## Côté Zitadel (à faire une fois)

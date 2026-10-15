@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { createReview } from './review.js';
 import { createNotes } from './notes.js';
 import { createAccounts, createAudit } from './accounts.js';
 import { hasRole } from './permissions.js';
@@ -216,7 +217,21 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { setTimeout(() => app.outings.backfillAll(), 2000).unref(); });
   app.addHook('onClose', async () => { await app.outings.stop(); });
   // « Aujourd'hui » : ce qui demande votre attention (voir server/todo.js).
-  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes }));
+  // Circuit de publication (server/review.js) : publier une liste (et en dépublier une autre), comme un clic sur
+  // « Publier » : statut, file Instagram automatique, images.
+  const publishNow = (up = [], down = []) => {
+    const set = db.prepare("UPDATE photos SET status = ?, updated_at = datetime('now') WHERE id = ?");
+    db.transaction(() => { for (const id of up) set.run('published', id); for (const id of down) set.run('draft', id); })();
+    if (up.length) app.instagram.onPublished(up);
+    if (down.length) app.instagram.onUnpublished(down);
+    app.variants.schedule();
+  };
+  app.decorate('review', createReview({ db, readiness: app.readiness, notes: app.notes, accounts: app.accounts, mailer: app.mailer, siteName: app.siteName, publicUrl: config.publicUrl, publish: publishNow, log: app.log }));
+  // Publications programmées : vérifiées chaque minute.
+  let reviewTimer = null;
+  app.addHook('onReady', async () => { reviewTimer = setInterval(() => app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée')), 60 * 1000); reviewTimer.unref(); });
+  app.addHook('onClose', async () => clearInterval(reviewTimer));
+  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
 
   await setupAuth(app, oidc && { oidc });

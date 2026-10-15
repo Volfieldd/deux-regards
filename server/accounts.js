@@ -1,4 +1,4 @@
-import { ROLES } from './permissions.js';
+import { ROLES, ADJUSTABLE } from './permissions.js';
 
 // Comptes de l'admin : une ligne par identité (sub de l'IdP, ou « local:<photographe> » pour la connexion de test),
 // avec ses rôles, le photographe lié et son état. Les rôles vivent ici ; l'IdP ne fait que transporter l'identité
@@ -17,7 +17,8 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
     insert: db.prepare(`INSERT INTO accounts (sub, name, email, author_id, roles, status, created_at, last_login_at)
       VALUES (@sub, @name, @email, @author_id, @roles, @status, @created_at, @last_login_at)`),
   };
-  const parse = row => row && { ...row, roles: JSON.parse(row.roles || '[]').filter(r => Object.hasOwn(ROLES, r)), locked: adminSubs.includes(row.sub) };
+  const adjustOf = raw => { let a = {}; try { a = JSON.parse(raw || '{}'); } catch { a = {}; } const ok = l => [...new Set(l || [])].filter(p => Object.hasOwn(ADJUSTABLE, p)); return { add: ok(a.add), remove: ok(a.remove) }; };
+  const parse = row => row && { ...row, roles: JSON.parse(row.roles || '[]').filter(r => Object.hasOwn(ROLES, r)), adjust: adjustOf(row.adjust), notify_email: Boolean(row.notify_email), locked: adminSubs.includes(row.sub) };
   const bySub = sub => parse(q.bySub.get(sub));
   const byId = id => parse(q.byId.get(id));
   const create = ({ sub, name = '', email = '', authorId = null, roles = [], status }) => {
@@ -65,6 +66,24 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
       }
       if (roles) db.prepare('UPDATE accounts SET roles = ?, status = ? WHERE id = ?').run(JSON.stringify(roles), roles.length ? 'actif' : 'en_attente', a.id);
       db.prepare('UPDATE accounts SET last_login_at = ? WHERE id = ?').run(now(), a.id);
+      return bySub(sub);
+    },
+    // Droits réglés pour une identité (circuit de publication) : { add, remove }.
+    adjustOf(sub) { const a = bySub(sub); return a && a.status === 'actif' ? a.adjust : { add: [], remove: [] }; },
+    // Régler un droit de ADJUSTABLE pour un compte : on (true : donné, false : retiré, null : celui du rôle).
+    setAdjust(id, perm, on) {
+      const a = byId(id);
+      if (!a || !Object.hasOwn(ADJUSTABLE, perm)) throw new AccountError('Réglage inconnu.');
+      const add = a.adjust.add.filter(p => p !== perm), remove = a.adjust.remove.filter(p => p !== perm);
+      if (on === true) add.push(perm); else if (on === false) remove.push(perm);
+      db.prepare('UPDATE accounts SET adjust = ? WHERE id = ?').run(JSON.stringify({ add, remove }), id);
+      return byId(id);
+    },
+    // Être prévenu par e-mail (circuit de publication) : choisi par chacun pour lui-même.
+    setNotify(sub, { on, to = '' }) {
+      const addr = String(to || '').trim().slice(0, 200);
+      if (addr && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr)) throw new AccountError('Cette adresse e-mail n’est pas valide.');
+      db.prepare('UPDATE accounts SET notify_email = ?, notify_to = ? WHERE sub = ?').run(on ? 1 : 0, addr, sub);
       return bySub(sub);
     },
     // Photographe lié à une identité (valeurs par défaut, et plus tard la portée « les miennes »).

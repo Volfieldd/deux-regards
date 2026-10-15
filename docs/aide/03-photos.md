@@ -148,6 +148,20 @@ L'original, les images du site et la preuve d'antériorité sont effacés, et la
 
 **C'est irréversible depuis l'admin.** Téléchargez d'abord l'original et la preuve si vous voulez les garder. L'original reste par ailleurs dans les sauvegardes du serveur.
 
+## Le circuit de publication
+
+Un photographe ne publie pas lui-même : il **propose**, et un modérateur (ou un administrateur) **valide**.
+
+- **Proposer** : sur la fiche, rubrique **Publication**, avec un mot facultatif pour le modérateur ; ou plusieurs photos depuis la photothèque (bouton **Proposer à la publication**) ; ou toute une sortie (**Proposer les photos prêtes** sur la page de la sortie). Les accords sont vérifiés à ce moment-là, par le photographe, qui voit les personnes : une photo bloquée ne peut pas être proposée, une photo à vérifier demande sa confirmation. **Retirer la proposition** la remet en brouillon.
+- **Valider** : la page **À valider** (menu Publier, avec le nombre en attente) liste les propositions, la plus ancienne d'abord, avec le mot du photographe. On coche, puis **Publier maintenant** ou **Programmer le** (date et heure de Paris). Une photo programmée est publiée automatiquement à l'heure dite, si elle est toujours prête ; sinon elle revient au photographe avec la raison. **Annuler la programmation** la remet en attente.
+- **Renvoyer avec une remarque** (depuis la fiche) : le modérateur ne retouche pas la photo ; sa remarque arrive dans l'« Aujourd'hui » du photographe, qui corrige puis la propose de nouveau.
+- **Dépublier** : le modérateur dit pourquoi ; le photographe reçoit la raison.
+- **Prévenir** : « Aujourd'hui » dit à chacun ce qui l'attend (propositions à valider, photos proposées, programmées, renvoyées). Chacun peut aussi choisir d'être prévenu **par e-mail**, dans **Votre compte** sur la page Aujourd'hui (si l'envoi d'e-mails est configuré sur le serveur).
+- **Historique** : chaque fiche garde qui a proposé, validé, programmé, renvoyé ou dépublié, et quand.
+- **Réglages par photographe** (page **Circuit de publication**, modérateurs et administrateurs) : **Publier ses photos sans validation** (le photographe publie alors lui-même ses photos, sans passer par le circuit) et **Modifier ses photos une fois publiées** (oui par défaut ; retiré, une photo publiée ne change plus sans le modérateur).
+
+Un administrateur publie directement, comme avant. Un signalement de visiteur ne dépublie rien tout seul : c'est au modérateur de décider.
+
 ## Ville et carte du monde
 
 Chaque photo peut être rattachée à une **ville** : c’est ce qui la place sur la **carte du monde** (page « Carte », désactivée par défaut : voir [Site public](reglages#carte-du-monde)).
