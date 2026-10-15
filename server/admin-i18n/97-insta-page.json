@@ -1,0 +1,130 @@
+{
+ "attention": {
+  "en": "warning",
+  "de": "Achtung"
+ },
+ "automatique": {
+  "en": "automatic",
+  "de": "automatisch"
+ },
+ "Connecté": {
+  "en": "Connected",
+  "de": "Verbunden"
+ },
+ "Dernières publications": {
+  "en": "Latest posts",
+  "de": "Letzte Veröffentlichungen"
+ },
+ "échec": {
+  "en": "failed",
+  "de": "fehlgeschlagen"
+ },
+ "En échec": {
+  "en": "Failed",
+  "de": "Fehlgeschlagen"
+ },
+ "Événement": {
+  "en": "Event",
+  "de": "Ereignis"
+ },
+ "info": {
+  "en": "info",
+  "de": "Info"
+ },
+ "les {n} derniers événements · gardés 90 jours": {
+  "en": "the last {n} events · kept 90 days",
+  "de": "die letzten {n} Ereignisse · 90 Tage aufbewahrt"
+ },
+ "les {n} plus récentes": {
+  "en": "the {n} most recent",
+  "de": "die {n} neuesten"
+ },
+ "limites, mise en file automatique, heures, cadre, légende, hashtags": {
+  "en": "limits, automatic queueing, times, frame, caption, hashtags",
+  "de": "Limits, automatische Warteschlange, Uhrzeiten, Rahmen, Bildunterschrift, Hashtags"
+ },
+ "Par": {
+  "en": "By",
+  "de": "Von"
+ },
+ "réussi": {
+  "en": "success",
+  "de": "erfolgreich"
+ },
+ "Rien de publié sur Instagram pour l’instant.": {
+  "en": "Nothing posted on Instagram yet.",
+  "de": "Noch nichts auf Instagram veröffentlicht."
+ },
+ "Rien pour l’instant : chaque mise en file, envoi, publication ou échec s’inscrit ici.": {
+  "en": "Nothing yet: every queueing, sending, post or failure is recorded here.",
+  "de": "Noch nichts: Jedes Einreihen, Senden, Veröffentlichen oder Fehlschlagen wird hier eingetragen."
+ },
+ "Échec : {error}": {
+  "en": "Failed: {error}",
+  "de": "Fehlgeschlagen: {error}"
+ },
+ "Envoi en cours…": {
+  "en": "Sending…",
+  "de": "Wird gesendet…"
+ },
+ "Image envoyée à Instagram…": {
+  "en": "Image sent to Instagram…",
+  "de": "Bild an Instagram gesendet…"
+ },
+ "Instagram traite l’image (vérification {n} sur {of})…": {
+  "en": "Instagram is processing the image (check {n} of {of})…",
+  "de": "Instagram verarbeitet das Bild (Prüfung {n} von {of})…"
+ },
+ "Pas envoyée : {error}": {
+  "en": "Not sent: {error}",
+  "de": "Nicht gesendet: {error}"
+ },
+ "Publication du post…": {
+  "en": "Publishing the post…",
+  "de": "Beitrag wird veröffentlicht…"
+ },
+ "Vérifications (compte, accords, limites)…": {
+  "en": "Checks (account, consents, limits)…",
+  "de": "Prüfungen (Konto, Einwilligungen, Limits)…"
+ },
+ "Mise à jour dans la file": {
+  "en": "Updated in the queue",
+  "de": "In der Warteschlange aktualisiert"
+ },
+ "Mise en file automatique (série)": {
+  "en": "Queued automatically (series)",
+  "de": "Automatisch eingereiht (Serie)"
+ },
+ "Mise en file": {
+  "en": "Queued",
+  "de": "Eingereiht"
+ },
+ "Retirée de la file": {
+  "en": "Removed from the queue",
+  "de": "Aus der Warteschlange entfernt"
+ },
+ "File en pause : {reason}": {
+  "en": "Queue paused: {reason}",
+  "de": "Warteschlange pausiert: {reason}"
+ },
+ "Envoi à Instagram commencé": {
+  "en": "Sending to Instagram started",
+  "de": "Senden an Instagram begonnen"
+ },
+ "Remise en tête de file": {
+  "en": "Put back at the front of the queue",
+  "de": "Wieder an den Anfang der Warteschlange"
+ },
+ "Sortie de la file : {reason}": {
+  "en": "Taken out of the queue: {reason}",
+  "de": "Aus der Warteschlange genommen: {reason}"
+ },
+ "File reprise à la main": {
+  "en": "Queue resumed manually",
+  "de": "Warteschlange manuell fortgesetzt"
+ },
+ "{n} appels à l’API sur 24 h": {
+  "en": "{n} API calls over 24 h",
+  "de": "{n} API-Aufrufe in 24 h"
+ }
+}

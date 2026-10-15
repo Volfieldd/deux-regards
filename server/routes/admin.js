@@ -531,13 +531,14 @@ export default async function adminRoutes(app) {
       title: request.t('Instagram'), s, FRAMES, DEFAULT_TEMPLATE, categories: repo.categories(),
       conf: { configured: app.config.instagram.configured, https: app.config.instagram.https, redirectUri: app.config.instagram.redirectUri, apiVersion: app.config.instagram.apiVersion },
       account: ig.account.get(), connected: ig.account.connected(),
-      queue: withPhoto(ig.queue()), history: withPhoto(ig.history(20)).map(x => ({ ...x, engagement: x.status === 'published' ? ig.engagementOf(x.ig_media_id) : null })),
+      queue: withPhoto(ig.queue()), published: withPhoto(ig.published(10)).map(x => ({ ...x, engagement: ig.engagementOf(x.ig_media_id) })),
+      failed: withPhoto(ig.failedLatest(20)), events: ig.events(50),
       mostLiked: withPhoto(ig.mostLiked(10)), engagementState: ig.engagementState(), usage: ig.usage(), IG_PRESETS, IG_BOUNDS, ...extra,
     });
   };
   app.get('/admin/instagram', P('instagram.voir'), async (request, reply) => igPage(request, reply));
   // Lever une pause « limite atteinte » à la main (Meta a rendu l'accès plus tôt, réglage changé…).
-  app.post('/admin/instagram/reprendre', W('instagram.compte'), async (request, reply) => { app.instagram.resume(); return done(reply, '/admin/instagram', request.t('File Instagram reprise.')); });
+  app.post('/admin/instagram/reprendre', W('instagram.compte'), async (request, reply) => { app.instagram.resume(request.session.name); return done(reply, '/admin/instagram', request.t('File Instagram reprise.')); });
 
   // Likes et commentaires relevés à la demande (sinon une fois par jour) ; pas plus d'une fois toutes les 10 minutes.
   app.post('/admin/instagram/likes', W('instagram.compte'), async (request, reply) => {
@@ -614,12 +615,21 @@ export default async function adminRoutes(app) {
       const back = safeBack(request, '/admin/instagram');
       if (!app.instagram.post(id)) return reply.callNotFound();
       try {
-        if (act === 'annuler') app.instagram.cancel(id);
+        if (act === 'annuler') app.instagram.cancel(id, request.session.name);
         else if (act === 'monter' || act === 'descendre') app.instagram.move(id, act === 'monter' ? 'up' : 'down');
-        else if (act === 'reessayer') app.instagram.retry(id);
-        else await app.instagram.publish(id);
+        else if (act === 'reessayer') app.instagram.retry(id, request.session.name);
+        else if (!request.headers.accept?.includes('text/html')) {
+          // « Publier maintenant » depuis la page (JavaScript) : l'envoi part en arrière-plan, la page suit son
+          // avancement (GET …/etat) ; un refus immédiat (budget, compte, accords) est renvoyé tout de suite.
+          const run = app.instagram.publish(id, { byName: request.session.name });
+          const early = await Promise.race([run.then(() => ({}), err => ({ err })), new Promise(r => setTimeout(r, 300, null))]);
+          if (!early) run.catch(() => {});
+          if (early?.err) throw early.err;
+          return reply.code(202).send({ ok: true, state: igState(request, id) });
+        } else await app.instagram.publish(id, { byName: request.session.name });
       } catch (err) {
         if (!(err instanceof InstagramError)) throw err;
+        if (act === 'publier' && !request.headers.accept?.includes('text/html')) return reply.code(422).send({ error: request.t.msg(err.message), state: igState(request, id) });
         return failed(reply, back, request.t('Instagram : {error}.', { error: request.t.msg(err.message).replace(/\.$/, '') }));
       }
       return label ? done(reply, back, label(request.t)) : reply.redirect(back, 303);
@@ -645,6 +655,29 @@ export default async function adminRoutes(app) {
     }
     return done(reply, back, request.t('Republication demandée : l’équipe qui gère la file Instagram est prévenue.'));
   });
+
+  // Avancement d'un envoi (« Publier maintenant ») : étape, texte, pourcentage ; état final du post.
+  const IG_STEPS = {
+    controle: [5, t => t('Vérifications (compte, accords, limites)…')],
+    envoi: [20, t => t('Image envoyée à Instagram…')],
+    traitement: [null, (t, p) => t('Instagram traite l’image (vérification {n} sur {of})…', { n: p.n, of: p.of })],
+    publication: [85, t => t('Publication du post…')],
+    fini: [100, t => t('Publiée sur Instagram.')],
+  };
+  const igState = (request, id) => {
+    const post = app.instagram.post(id);
+    const p = app.instagram.progressOf(id);
+    const t = request.t;
+    const status = post?.status || 'removed';
+    const done = status === 'published' || status === 'failed' || status === 'removed' || (status === 'queued' && p?.step === 'erreur');
+    let percent = 0, label = '';
+    if (status === 'published') [percent, label] = [100, t('Publiée sur Instagram.')];
+    else if (p?.step === 'erreur' || status === 'failed') label = status === 'failed' ? t('Échec : {error}', { error: t.msg(post.error || p?.error || '') }) : t('Pas envoyée : {error}', { error: t.msg(p?.error || '') });
+    else if (p && IG_STEPS[p.step]) { const [pc, l] = IG_STEPS[p.step]; percent = pc ?? Math.round(20 + (60 * p.n) / p.of); label = l(t, p); }
+    else if (status === 'publishing') [percent, label] = [10, t('Envoi en cours…')];
+    return { id, status, step: p?.step || null, percent, label, done, ok: status === 'published', permalink: post?.permalink || null };
+  };
+  app.get('/admin/instagram/:id/etat', P('instagram.voir'), async request => igState(request, byId(request.params.id)));
 
   // Aperçu exact de l'image envoyée, et légende du modèle (bouton « Revenir au modèle »).
   app.get('/admin/instagram/apercu.jpg', P('instagram.voir'), async (request, reply) => {

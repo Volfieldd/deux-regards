@@ -10,8 +10,16 @@ Setting it up is done only once: a **professional Instagram account**, a **Meta 
 2. **At the times you choose** (6.30 pm by default, Paris time), the first photo in the queue goes out on Instagram. One per slot.
 3. **Until it goes out**, everything can be adjusted:
    - on the **photo’s page**, **Instagram** section: frame, watermark, caption, with an exact preview of the image sent, then **Update**; **Remove from the queue** takes it out;
-   - on the **Instagram** page: the order of the queue (↑ ↓), **Publish now**, **Remove**.
-4. Once published, the photo’s page gives the link **view the post ↗**, and the history on the Instagram page the link **View on Instagram ↗**.
+   - on the **Instagram** page: the order of the queue (↑ ↓), **Publish now**, **Remove**. After **Publish now**, a progress bar shows each step without reloading the page (checks, image sent, processing by Instagram, publishing). At the end it shows ✓ with the link to the post, or ✕ with the reason.
+4. Once published, the photo’s page gives the link **view the post ↗**, and the Instagram page the link **View ↗** under **Latest posts**.
+
+**The Instagram page** shows:
+- at the top, the account, the posting schedule and the usage;
+- on the left, the **queue**;
+- on the right, the **failed** photos (with **Try again**) and the **10 latest posts**;
+- at the bottom, the **log**: queueing, sending, steps, posts, failures, pauses, resumes, repost requests. For each event: the date, the status (✓ success, ✕ failed, ▲ warning, info), the photo and who triggered it (otherwise “automatic”). The log is kept 90 days.
+
+The **settings** are folded below the log.
 
 > A photo never enters the queue twice on its own: unpublished then republished, it is not offered again. To share it again, use **Republish (put back in the queue)** on its page.
 
@@ -72,8 +80,8 @@ Every morning (after 6 am), the site collects the **likes** and **comments** of 
 ## If it fails
 
 - **Automatic retry:** the photo stays at the top of the queue, and the error message is shown in the queue and on the photo’s page. It goes again at the next slot, **3 attempts at most**.
-- **After 3 failures:** it moves to the **history**, with **Try again**. The photo’s page also offers **Repost (back to the front of the queue)**.
-- **The photographer** (who does not handle the queue) sees the failure in **Today** and on the photo’s page, with **Ask for a repost**. One request per failure. It then shows, marked ⚑ “Repost requested”, in the **Today** of those who handle the queue, in the history and on the photo’s page; they also get it by email if they chose to. It clears when the photo goes back into the queue. If the photo is already in the queue, there is nothing to request.
+- **After 3 failures:** it moves to **Failed**, with **Try again**. The photo’s page also offers **Repost (back to the front of the queue)**.
+- **The photographer** (who does not handle the queue) sees the failure in **Today** and on the photo’s page, with **Ask for a repost**. One request per failure. It then shows, marked ▲ “Repost requested”, in the **Today** of those who handle the queue, under **Failed** on the Instagram page and on the photo’s page; they also get it by email if they chose to. It clears when the photo goes back into the queue. If the photo is already in the queue, there is nothing to request.
 - **Access expired:** the access token lasts 60 days and renews itself. If it has expired (more than 60 days without working), reconnect the account from the **Instagram** page: **Disconnect**, then **Connect the Instagram account**. If the admin shows **Reconnect the account** (encryption key changed, see step 6), simply click it.
 
 ---

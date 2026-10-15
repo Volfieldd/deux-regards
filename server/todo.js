@@ -131,7 +131,7 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
     // Republications demandées par les photographes (qui gère la file) ; échecs sur ses photos (le photographe).
     const asked = a.all('instagram.file') && instagram ? instagram.retryRequests() : [];
     if (asked.length) items.push({ level: 'bientot', title: asked.length > 1 ? t('{n} republications Instagram demandées', { n: asked.length }) : t('{n} republication Instagram demandée', { n: asked.length }),
-      detail: t('par le photographe, après un échec : republiez depuis la fiche ou la page Instagram'), href: asked.length > 1 ? '/admin/instagram#ig-history' : `/admin/photos/${asked[0].photo_id}#instagram`, action: t('Voir') });
+      detail: t('par le photographe, après un échec : republiez depuis la fiche ou la page Instagram'), href: asked.length > 1 ? '/admin/instagram#ig-echecs' : `/admin/photos/${asked[0].photo_id}#instagram`, action: t('Voir') });
     const ia = a.author('photos.proposer');
     if (ia != null && !a.all('instagram.voir')) {
       const mine = q.igFailedMine.all(ia);
