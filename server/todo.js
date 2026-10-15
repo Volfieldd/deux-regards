@@ -15,7 +15,7 @@ const MONTH = 30 * 864e5;
 const FR = translator('fr');
 const dayOf = t => ms => new Intl.DateTimeFormat(t.locale || 'fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
 
-export function createTodo({ db, encounters, instagram, proofs, readiness, feedback, seriesSuggest, accounts, now = () => Date.now() }) {
+export function createTodo({ db, encounters, instagram, proofs, readiness, feedback, seriesSuggest, accounts, notes, now = () => Date.now() }) {
   const q = {
     rights: db.prepare(`SELECT id FROM encounters WHERE rights_request IS NOT NULL AND rights_done_at IS NULL ORDER BY rights_requested_at`).pluck(),
     // Refus dont des photos liées sont encore publiées.
@@ -97,6 +97,14 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
     const legal = Object.fromEntries(db.prepare("SELECT key, value FROM settings WHERE key LIKE 'legal_%' OR key = 'privacy_contact'").all()
       .map(r => { try { return [r.key, JSON.parse(r.value)]; } catch { return [r.key, '']; } }));
     if (a.all('reglages.droits') && legalMissing(legal).length) items.push({ level: 'bientot', title: t('Mentions légales / Impressum à compléter'), detail: t('obligatoires en France et en Allemagne : éditeurs, adresse postale, responsable'), href: '/admin/droits#mentions', action: t('Compléter') });
+    // Remarques adressées : pour le photographe, chacune (jusqu'à 5) ; au-delà, ou pour qui voit tout, leur nombre.
+    const na = a.author('photos.voir');
+    const open = notes && na !== undefined ? notes.open({ authorId: na }) : [];
+    if (open.length && open.length <= 5 && na != null) {
+      for (const n of open) items.push({ level: 'bientot', title: t('Remarque de {name} sur « {title} »', { name: n.from_name || t('l’équipe'), title: n.title }), detail: n.message, href: `/admin/photos/${n.photo_id}#remarques`, action: t('Voir') });
+    } else if (open.length) {
+      items.push({ level: 'bientot', title: open.length > 1 ? t('{n} remarques sur des photos, pas encore traitées', { n: open.length }) : t('{n} remarque sur une photo, pas encore traitée', { n: open.length }), detail: t('adressées aux photographes'), href: `/admin/photos/${open[0].photo_id}#remarques`, action: t('Voir') });
+    }
     const waiting = accounts && a.all('comptes.gerer') ? accounts.pending() : 0;
     if (waiting) items.push({ level: 'bientot', title: waiting > 1 ? t('{n} comptes en attente d’un rôle', { n: waiting }) : t('{n} compte en attente d’un rôle', { n: waiting }), detail: t('connectés une fois, ils n’ont encore accès à rien'), href: '/admin/comptes', action: t('Voir') });
     const reports = feedback && a.all('signalements.traiter') ? feedback.pending() : 0;

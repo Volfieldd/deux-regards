@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
-import { ROLES } from '../permissions.js';
+import { ROLES, PERMISSIONS } from '../permissions.js';
 import { AccountError } from '../accounts.js';
+import { NoteError } from '../notes.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
@@ -184,7 +185,9 @@ export default async function adminRoutes(app) {
     return reply.render(`admin/${template}`, {
       // Retour après la bascule clair / sombre : la page affichée, si elle a été obtenue par GET.
       adminTheme: adminTheme(request), navSeries: navSeries(request), currentPath: request.method === 'GET' ? request.url : '/admin',
-      siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply), can: perm => Boolean(request.can(perm)),
+      siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply), can: perm => Boolean(request.can(perm)), canAll: perm => Boolean(request.scope(perm)?.all),
+      // Droits du compte, lus par admin.js (boutons, raccourcis, palette) ; le serveur reste seul juge.
+      grants: Object.keys(PERMISSIONS).filter(p => request.can(p)),
       section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
       translate: app.translator.enabled, encountersNew: newEncounters(request), urgent: app.todo.urgentCount(perm => request.scope(perm)), description: '',
@@ -635,6 +638,7 @@ export default async function adminRoutes(app) {
   const photoExtras = (photo, t) => ({
     proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), shares: app.shares.forPhoto(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
     outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
+    notes: app.notes.open({ photoId: photo.id }),
     suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(photo.id)), undefined, true),
     ready: app.readiness.state(photo.id, null, t), confirmations: app.readiness.confirmations(photo.id), igConfirmed: app.readiness.confirmed(photo.id, 'instagram'),
     siteConfirmed: app.readiness.confirmed(photo.id, 'site'),
@@ -791,7 +795,7 @@ export default async function adminRoutes(app) {
     reply.header('cache-control', 'no-store');
     return {
       photos: request.mine('photos.voir', repo.photos()).map(p => ({ id: p.id, title: p.title, category: p.category, place: p.place, status: p.status, thumb: rendered(p) ? thumb(p) : null })),
-      series: repo.categories().map(c => ({ id: c.id, name: c.name, slug: c.slug, count: c.count })),
+      series: navSeries(request).map(c => ({ id: c.id, name: c.name, slug: c.slug, count: c.count })),       // comptes selon la portée
     };
   });
 
@@ -1124,6 +1128,40 @@ export default async function adminRoutes(app) {
   app.post('/admin/preuves/reessayer', W('photos.modifier'), async (request, reply) => {
     app.proofs.schedule({ retryNow: true });
     return done(reply, safeBack(request, '/admin'), request.t('Horodatage relancé : les preuves en attente sont redemandées en arrière-plan.'));
+  });
+
+  // Textes seuls (titre, légende, lieu et leurs traductions) : la fiche d'un modérateur ou d'un relecteur.
+  app.post('/admin/photos/:id/textes', W('photos.textes'), async (request, reply) => {
+    const id = byId(request.params.id);
+    const body = request.body || {};
+    const fields = Object.fromEntries([...TEXT_FIELDS].filter(k => k in body).map(k => [k, body[k]]));
+    try {
+      repo.patchPhoto(id, fields);
+      app.variants.schedule();
+    } catch (err) {
+      if (!(err instanceof ValidationError)) throw err;
+      return failed(reply, `/admin/photos/${id}`, Object.values(err.errors).join(' '));
+    }
+    return done(reply, `/admin/photos/${id}`, request.t('Photo enregistrée.'));
+  });
+  // Remarque adressée au photographe de la photo : elle remonte dans son « Aujourd'hui ».
+  app.post('/admin/photos/:id/remarques', W('taches.adresser'), async (request, reply) => {
+    const id = byId(request.params.id);
+    try {
+      app.notes.add(id, request.body?.message, { sub: request.session.sub, name: request.session.name });
+    } catch (err) {
+      if (!(err instanceof NoteError)) throw err;
+      return failed(reply, `/admin/photos/${id}#remarques`, request.t(err.message));
+    }
+    return done(reply, `/admin/photos/${id}#remarques`, request.t('Remarque envoyée au photographe.'));
+  });
+  // Marquer une remarque faite : le photographe de la photo, ou qui peut en adresser.
+  app.post('/admin/remarques/:id/fait', W('photos.voir'), async (request, reply) => {
+    const n = app.notes.get(byId(request.params.id));
+    if (!n || !(request.owns('photos.voir', n.author_id))) return reply.callNotFound();
+    if (!request.can('taches.adresser') && app.accounts.authorIdOf(request.session.sub) !== n.author_id) return app.forbid(request, reply);
+    app.notes.done(n.id, request.session.name);
+    return done(reply, safeBack(request, `/admin/photos/${n.photo_id}#remarques`), request.t('Remarque marquée comme faite.'));
   });
 
   app.post('/admin/photos/:id/status', W('photos.publier'), async (request, reply) => {
@@ -1480,7 +1518,14 @@ export default async function adminRoutes(app) {
   // Aide dans la langue de l'admin (français si la traduction manque) ; gardée en mémoire en production.
   const helpCache = {};
   const helpIn = lang => (app.config.production ? (helpCache[lang] ??= loadHelp(lang)) : loadHelp(lang));
-  app.get('/admin/aide', P('admin.acceder'), async (request, reply) => render(request, reply, 'help', { title: request.t('Aide'), help: helpIn(request.t.lang) }));
+  // Chapitres de l'aide réservés : ils n'apparaissent qu'à qui peut ouvrir l'une des pages qu'ils décrivent.
+  const HELP_PERMS = { preuves: ['photos.voir'], series: ['series.gerer'], auteurs: ['photographes.gerer'], 'filigrane-exif': ['site.filigrane'], apparence: ['site.apparence'],
+    reglages: ['site.textes', 'reglages.droits', 'comptes.gerer', 'journal.voir'], statistiques: ['statistiques.voir'], instagram: ['instagram.voir'], rencontres: ['personnes.voir', 'terrain.app'] };
+  app.get('/admin/aide', P('admin.acceder'), async (request, reply) => {
+    const help = helpIn(request.t.lang);
+    const sections = help.sections.filter(sec => !HELP_PERMS[sec.id] || HELP_PERMS[sec.id].some(perm => request.can(perm)));
+    return render(request, reply, 'help', { title: request.t('Aide'), help: { ...help, sections } });
+  });
 
   // ---------- rencontres (page /bonjour, cartes) ----------
   registerEncounters(app, { repo, render, P, W, done, failed, withReady });

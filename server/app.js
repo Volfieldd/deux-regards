@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { createNotes } from './notes.js';
 import { createAccounts, createAudit } from './accounts.js';
 import { hasRole } from './permissions.js';
 import fs from 'node:fs';
@@ -164,6 +165,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Comptes de l'admin et journal (server/accounts.js), utilisés aussi par la connexion (server/auth.js).
   app.decorate('accounts', createAccounts({ db, adminSubs: config.adminSubs || [] }));
   app.decorate('audit', createAudit({ db }));
+  // Remarques adressées au photographe d'une photo (server/notes.js).
+  app.decorate('notes', createNotes({ db }));
   // Partages des photos, comptés anonymement (voir server/share.js).
   app.decorate('shares', createShares({ db }));
   app.encounters.onChange(() => app.people.sync());
@@ -213,7 +216,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { setTimeout(() => app.outings.backfillAll(), 2000).unref(); });
   app.addHook('onClose', async () => { await app.outings.stop(); });
   // « Aujourd'hui » : ce qui demande votre attention (voir server/todo.js).
-  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts }));
+  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
 
   await setupAuth(app, oidc && { oidc });

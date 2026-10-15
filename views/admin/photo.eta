@@ -1,6 +1,8 @@
 <% layout('./layout') %>
 <% const t = it.t, fr = !['en', 'de'].includes(it.lang), esc = __eta.e; %>
 <% const v = it.values, e = it.errors; %>
+<% // Droits du compte : la fiche complète, ou les textes seuls (modérateur, relecteur) ; le reste selon les droits.
+   const can = it.can, full = can('photos.modifier'), pubOk = can('photos.publier'), seePeople = can('personnes.voir'); %>
 <% const inv = k => e[k] ? ` aria-invalid="true" aria-describedby="err-${k}"` : ''; %>
 <p class="mono"><a class="more eyebrow" href="/admin/photos">← <%= t('Photos') %></a></p>
 <h1><%= it.photo.title %></h1>
@@ -9,14 +11,17 @@
   <span class="enc-tag <%= R.site.level %>"><%= t('Site : {state}', { state: LV[R.site.level] }) %></span>
   <span class="enc-tag <%= R.instagram.level %>"><%= t('Instagram : {state}', { state: LV[R.instagram.level] }) %></span>
   <span class="mono"><%= F.source === 'main' ? (F.has ? t('quelqu’un sur la photo (indiqué à la main)') : t('personne de reconnaissable (indiqué à la main)')) : F.source === 'attente' ? t('visages : examen en attente') : F.source === 'echec' ? t('visages : examen impossible') : F.n ? (F.n > 1 ? t('{n} visages détectés', { n: F.n }) : t('{n} visage détecté', { n: F.n })) : t('aucun visage détecté') %></span>
-  <form class="faces-fix" method="post" action="/admin/photos/<%= it.photo.id %>/visages">
+<% if (can('personnes.gerer')) { %>  <form class="faces-fix" method="post" action="/admin/photos/<%= it.photo.id %>/visages">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
 <% if (!(F.source === 'main' && F.has)) { %>    <button class="linkbtn" type="submit" name="valeur" value="oui"><%= t('Il y a quelqu’un') %></button>
 <% } %><% if (!(F.source === 'main' && !F.has)) { %>    <button class="linkbtn" type="submit" name="valeur" value="non"><%= t('Personne de reconnaissable') %></button>
 <% } %><% if (F.source === 'main') { %>    <button class="linkbtn" type="submit" name="valeur" value="auto"><%= t('Revenir à la détection') %></button>
 <% } %>  </form>
-<% const reasons = [...new Set([...R.site.reasons, ...R.instagram.reasons])]; if (reasons.length) { %>
+<% } %>
+<% const reasons = [...new Set([...R.site.reasons, ...R.instagram.reasons])]; if (reasons.length && seePeople) { %>
   <ul class="ready-reasons"><% reasons.forEach(r => { %><li><%= r %></li><% }) %></ul>
+<% } else if (reasons.length) { %>
+  <p class="hint"><%= t('Le détail (personnes et accords) est visible du photographe et des administrateurs.') %></p>
 <% } %>
 <% if (it.confirmations.length) { %>
   <p class="mono"><%= t('Confirmations :') %> <%= it.confirmations.map(c => t('{usage} par {name} le {date}', { usage: c.usage === 'site' ? t('site') : 'Instagram', name: c.by_name || '?', date: new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Paris' }).format(c.at) })).join(' · ') %></p>
@@ -27,6 +32,7 @@
     <%~ it.picture(it.photo, { sizes: '(min-width: 900px) 40vw, 92vw', alt: '' }) %>
     <figcaption class="mono"><%= it.photo.width %> × <%= it.photo.height %> px<% if (it.photo.status === 'published') { %> · <a href="/photo/<%= it.photo.slug %>" target="_blank" rel="noopener"><%= t('voir sur le site') %></a><% } %></figcaption>
   </figure>
+<% if (full) { %>
   <form class="panel form" method="post" action="/admin/photos/<%= it.photo.id %>" novalidate>
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
 <% if (Object.keys(e).length) { %><p class="err" role="alert"><%= t('Le formulaire contient des erreurs.') %></p><% } %>
@@ -79,13 +85,16 @@
       <summary><%= t('Diffusion') %> <span class="sum"><%= v.status === 'published' ? t('publiée') : t('brouillon') %> · <%= v.watermark === 0 ? t('filigrane jamais') : t('filigrane selon les réglages') %></span></summary>
       <div class="rub-body">
 <% if (e.status) { %>    <span class="err" id="err-status" role="alert"><%= e.status %></span>
-<% } %>    <fieldset class="row">
+<% } %><% if (pubOk) { %>    <fieldset class="row">
       <legend><%= t('Statut') %></legend>
 <% Object.entries(it.STATUSES).forEach(([k, label]) => { %>
       <label class="inline"><input type="radio" name="status" value="<%= k %>"<%~ v.status === k ? ' checked' : '' %>> <%= t(label) %></label>
 <% }) %>
     </fieldset>
-<% if (R.site.level === 'warn' && !it.siteConfirmed) { %>
+<% } else { %>    <input type="hidden" name="status" value="<%= it.photo.status %>">
+    <p class="hint"><%= t('Statut : {status}. La publication est faite par un administrateur ou un modérateur.', { status: it.photo.status === 'published' ? t('publiée') : t('brouillon') }) %></p>
+<% } %>
+<% if (!pubOk) { %><% } else if (R.site.level === 'warn' && !it.siteConfirmed) { %>
     <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> <%= it.photo.status === 'published' ? t('Photo en ligne à vérifier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.') : t('Pour publier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.') %></label>
 <% } else if (it.photo.status !== 'published' && R.site.level === 'no') { %>
     <p class="cellnote err"><%= t('Publication impossible : {reasons}.', { reasons: R.site.reasons.join(' ; ') }) %></p>
@@ -100,8 +109,45 @@
     </details>
     <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
   </form>
+<% } else { %>
+  <div class="panel form texts-only">
+    <form class="form" method="post" action="/admin/photos/<%= it.photo.id %>/textes">
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+      <p class="hint"><%= t('Ce compte corrige les textes ; la série, la date, le lieu sur la carte et le reste sont réglés par le photographe ou un administrateur.') %></p>
+      <label><%= t('Titre') %> <input name="title" value="<%= v.title %>" required maxlength="160"></label>
+      <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'title', label: t('Titre'), max: 160 }) %>
+      <label><%= t('Légende') %> <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
+      <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'legend', label: t('Légende'), max: 2000, rows: 3 }) %>
+      <label><%= t('Lieu affiché') %> <input name="place" value="<%= v.place %>" maxlength="120"></label>
+      <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'place', label: t('Lieu'), max: 120 }) %>
+      <p class="mono"><%= it.photo.category %> · <%= it.photo.author %><%= it.photo.taken_on ? ` · ${it.photo.taken_on}` : '' %></p>
+      <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
+    </form>
+<% if (pubOk) { %>
+    <form class="status-form" method="post" action="/admin/photos/<%= it.photo.id %>/status">
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>">
+<% if (it.photo.status === 'published') { %>      <p><%= t('Publiée sur le site.') %> <button class="btn ghost" type="submit" name="status" value="draft"><%= t('Dépublier') %></button></p>
+<% } else if (R.site.level === 'ok') { %>      <p><%= t('Brouillon, prête à publier.') %> <button class="btn" type="submit" name="status" value="published"><%= t('Publier') %></button></p>
+<% } else if (R.site.level === 'warn') { %>      <p class="hint"><%= t('À vérifier : la confirmation des accords revient au photographe ou à un administrateur, qui voient les personnes.') %></p>
+<% } else { %>      <p class="hint"><%= t('Bloquée : elle ne peut pas être publiée.') %></p>
+<% } %>    </form>
+<% } %>
+  </div>
+<% } %>
   <div class="edit-lower">
-<% if (it.encounters && it.encounters.length) { %>
+<% if (it.notes.length || can('taches.adresser')) { %>
+<details class="panel rub-panel" id="remarques"<%~ it.notes.length ? ' open' : '' %>>
+  <summary><h2><%= t('Remarques') %> <span class="sum"><%= it.notes.length ? (it.notes.length > 1 ? t('{n} à traiter', { n: it.notes.length }) : t('1 à traiter')) : t('aucune') %></span></h2></summary>
+<% it.notes.forEach(n => { %>  <div class="note-item"><p><strong><%= n.from_name || t('l’équipe') %></strong> <span class="mono"><%= new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).format(n.created_at) %></span></p><p><%= n.message %></p>
+    <form method="post" action="/admin/remarques/<%= n.id %>/fait"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>#remarques"><button class="btn ghost" type="submit"><%= t('Fait') %></button></form></div>
+<% }) %><% if (can('taches.adresser')) { %>  <form class="form" method="post" action="/admin/photos/<%= it.photo.id %>/remarques">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <label><%= t('Remarque pour le photographe') %> <span class="mono"><%= t('elle apparaît dans son « Aujourd’hui » ; parlez de la photo, jamais des personnes') %></span><textarea name="message" rows="2" maxlength="1000" required></textarea></label>
+    <p class="actions"><button class="btn ghost" type="submit"><%= t('Envoyer au photographe') %></button></p>
+  </form>
+<% } %></details>
+<% } %>
+<% if (seePeople && it.encounters && it.encounters.length) { %>
 <details class="panel rub-panel" id="rencontres"<%~ R.site.level !== 'ok' || R.instagram.level !== 'ok' ? ' open' : '' %>>
   <summary><h2 id="enc-title"><%= t('Personnes & accords') %> <span class="sum"><%= it.encounters.length > 1 ? t('{n} personnes', { n: it.encounters.length }) : t('{n} personne', { n: it.encounters.length }) %> · <%= t('accords de la sortie et photos liées') %></span></h2></summary>
 <% if (it.outingUrl) { %>  <p><a class="btn ghost" href="<%= it.outingUrl %>"><%= t('Ouvrir la sortie →') %></a></p><% } %>
@@ -114,6 +160,7 @@
 </details>
 <% } %>
 <% const au = it.audience; %>
+<% if (can('statistiques.voir')) { %>
 <details class="panel audience rub-panel" id="audience">
   <summary><h2 id="audience-title"><%= t('Audience') %> <span class="sum"><%= au && au.total ? (au.total > 1 ? t('{n} ouvertures en 30 jours', { n: au.total }) : t('{n} ouverture en 30 jours', { n: au.total })) : t('pas encore vue en grand') %><%= it.photo.likes ? ` · ${t('{n} j’aime sur le site', { n: it.photo.likes })}` : '' %><%= it.shares ? ` · ${it.shares > 1 ? t('{n} partages', { n: it.shares }) : t('{n} partage', { n: it.shares })}` : '' %></span></h2></summary>
 <% if (au && au.total) { %>
@@ -124,7 +171,9 @@
 <% } %>
   <p><a class="more" href="/admin/statistiques"><%= t('Toutes les statistiques') %></a></p>
 </details>
+<% } %>
 <% const ig = it.insta; %>
+<% if (can('instagram.file')) { %>
 <details class="panel ig rub-panel" id="instagram" data-ig<%~ ig.active || R.instagram.level !== 'ok' ? ' open' : '' %>>
   <summary><h2 id="ig-title">Instagram <span class="sum"><%= ig.post && ig.post.status === 'published' ? t('publiée sur Instagram') : ig.active ? t('dans la file') : ig.post && ig.post.status === 'failed' ? t('en échec') : R.instagram.level === 'no' ? t('bloquée') : R.instagram.level === 'warn' ? t('à vérifier') : t('pas encore partagée') %></span></h2></summary>
 <% if (ig.post && ig.post.status === 'published') { %>
@@ -180,6 +229,7 @@
   </div>
 <% } } %>
 </details>
+<% } %>
 <% const pf = it.proof; %>
 <details class="panel proof rub-panel" id="preuve">
   <summary><h2><%= t('Preuve d’antériorité') %> <span class="sum"><%= pf && pf.status === 'ok' && pf.sha256 === it.photo.sha256 ? t('horodatée') : it.photo.sha256 ? t('empreinte calculée') : t('en cours') %></span></h2></summary>
@@ -202,16 +252,18 @@
   </dl>
 <% if (pf && pf.status === 'ok') { %>
   <p class="actions downloads">
-    <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/original" download><%= t('Original') %></a>
+<% if (can('photos.original')) { %>    <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/original" download><%= t('Original') %></a>
+<% } %>
     <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/preuve.tsr" download><%= t('Jeton (.tsr)') %></a>
     <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/preuve.txt" download><%= t('Fiche de preuve') %></a>
 <% if (it.tsa.caFile) { %>    <a class="btn ghost" href="/admin/preuves/autorite.pem" download><%= t('Certificat de l’autorité') %></a><% } %>
   </p>
-  <form method="post" action="/admin/photos/<%= it.photo.id %>/verifier">
+<% if (full) { %>  <form method="post" action="/admin/photos/<%= it.photo.id %>/verifier">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
     <button class="btn" type="submit"><%= t('Vérifier la preuve') %></button>
   </form>
-<% } else if (pf && pf.status === 'error') { %>
+<% } %>
+<% } else if (pf && pf.status === 'error' && full) { %>
   <form method="post" action="/admin/preuves/reessayer">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>">
     <button class="btn ghost" type="submit"><%= t('Réessayer maintenant') %></button>
@@ -219,6 +271,7 @@
 <% } %>
 </details>
 
+<% if (can('photos.supprimer')) { %>
 <details class="danger panel">
   <summary><%= t('Supprimer cette photo') %></summary>
   <p><%= t('L’original, ses variantes et sa preuve d’antériorité seront effacés. Cette action est définitive : téléchargez d’abord l’original et la preuve si vous voulez les garder.') %></p>
@@ -227,5 +280,6 @@
     <button class="btn danger" type="submit"><%= t('Supprimer définitivement') %></button>
   </form>
 </details>
+<% } %>
   </div>
 </div>

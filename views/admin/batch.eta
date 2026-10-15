@@ -37,8 +37,8 @@
   </span>
   </div>
   <span class="spacer"></span>
-  <button class="btn" type="submit" name="action" value="publish" data-publish><%= t('Publier') %></button>
-</form>
+<% if (it.can('photos.publier')) { %>  <button class="btn" type="submit" name="action" value="publish" data-publish><%= t('Publier') %></button>
+<% } %></form>
 
 <form method="post" action="/admin/photos/lot" data-lot novalidate>
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
@@ -76,7 +76,8 @@
   </div>
   <p class="actions" data-nojs>
     <button class="btn ghost" type="submit"><%= t('Enregistrer') %></button>
-    <button class="btn" type="submit" name="publish" value="1"><%= t('Enregistrer et publier tout') %></button>
+<% if (it.can('photos.publier')) { %>    <button class="btn" type="submit" name="publish" value="1"><%= t('Enregistrer et publier tout') %></button>
+<% } %>
   </p>
   <p class="hint"><%= t('Légende, filigrane et preuve d’antériorité : depuis la fiche de chaque photo (Photos › titre).') %></p>
 </form>
