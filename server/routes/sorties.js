@@ -10,7 +10,7 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const hhmm = s => (s === '00:00' ? '' : s.replace(':', ''));
 export const outingUrl = o => `/admin/sorties/${o.author.slug}/${o.day}${o.starts && o.starts !== '00:00' ? `?depuis=${hhmm(o.starts)}` : ''}`;
 
-export function registerOutings(app, { repo, render, done, failed, write, withReady }) {
+export function registerOutings(app, { repo, render, done, failed, P, W, withReady }) {
   const out = app.outings;
   const startsOf = v => { const m = /^(\d{2})(\d{2})$/.exec(String(v || '')); return m && TIME.test(`${m[1]}:${m[2]}`) ? `${m[1]}:${m[2]}` : '00:00'; };
   const fmtDay = (day, t) => new Intl.DateTimeFormat(t.locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${day}T12:00:00Z`));
@@ -19,7 +19,7 @@ export function registerOutings(app, { repo, render, done, failed, write, withRe
   const hm = (time, t) => (t.lang === 'fr' ? time.replace(':', ' h ') : time);
   const range = (o, t) => (!o.split ? '' : o.starts === '00:00' ? t('jusqu’à {h}', { h: h(o.ends, t) }) : o.ends ? t('de {from} à {to}', { from: h(o.starts, t), to: h(o.ends, t) }) : t('à partir de {h}', { h: h(o.starts, t) }));
 
-  app.get('/admin/sorties', async (request, reply) => {
+  app.get('/admin/sorties', P('sorties.voir'), async (request, reply) => {
     const authors = repo.authors();
     const author = authors.find(a => a.slug === request.query.photographe) || null;
     const state = Object.hasOwn(STATES, request.query.etat) ? request.query.etat : '';
@@ -31,7 +31,7 @@ export function registerOutings(app, { repo, render, done, failed, write, withRe
   });
 
   const load = request => out.get(request.params.author, request.params.day, startsOf(request.query.depuis || request.body?.depuis));
-  app.get('/admin/sorties/:author/:day', async (request, reply) => {
+  app.get('/admin/sorties/:author/:day', P('sorties.voir'), async (request, reply) => {
     const o = load(request);
     if (!o) return reply.callNotFound();
     // Séries proposées (une photo à la fois, comme ailleurs).
@@ -44,7 +44,7 @@ export function registerOutings(app, { repo, render, done, failed, write, withRe
   });
 
   const back = o => outingUrl(o);
-  app.post('/admin/sorties/:author/:day/couper', write, async (request, reply) => {
+  app.post('/admin/sorties/:author/:day/couper', W('sorties.gerer'), async (request, reply) => {
     const o = load(request);
     if (!o) return reply.callNotFound();
     const time = String(request.body?.heure || '').trim();
@@ -52,20 +52,20 @@ export function registerOutings(app, { repo, render, done, failed, write, withRe
     if (!out.cut(o.author.id, o.day, time)) return failed(reply, back(o), request.t('La journée est déjà coupée à {time}.', { time: hm(time, request.t) }));
     return done(reply, outingUrl({ ...o, starts: time }), request.t('Sortie coupée à {time} : les photos et les rencontres d’après forment une nouvelle sortie.', { time: hm(time, request.t) }));
   });
-  app.post('/admin/sorties/:author/:day/reunir', write, async (request, reply) => {
+  app.post('/admin/sorties/:author/:day/reunir', W('sorties.gerer'), async (request, reply) => {
     const o = load(request);
     if (!o) return reply.callNotFound();
     out.join(o.author.id, o.day, o.starts);
     return done(reply, outingUrl({ ...o, starts: '00:00' }), request.t('Sorties réunies.'));
   });
-  app.post('/admin/sorties/:author/:day/lieu', write, async (request, reply) => {
+  app.post('/admin/sorties/:author/:day/lieu', W('sorties.gerer'), async (request, reply) => {
     const o = load(request);
     if (!o) return reply.callNotFound();
     out.setPlace(o.author.id, o.day, o.starts, request.body?.lieu);
     return done(reply, back(o), request.t('Lieu de la sortie enregistré.'));
   });
   // « Publier les photos prêtes » : les brouillons prêts de la sortie ; à vérifier et bloquées restent en brouillon.
-  app.post('/admin/sorties/:author/:day/publier', write, async (request, reply) => {
+  app.post('/admin/sorties/:author/:day/publier', W('photos.publier'), async (request, reply) => {
     const o = load(request);
     if (!o) return reply.callNotFound();
     const drafts = o.photos.filter(p => p.status === 'draft').map(p => p.id);
@@ -80,7 +80,7 @@ export function registerOutings(app, { repo, render, done, failed, write, withRe
   });
 
   // Photos choisies : liées à une personne de la sortie, ou exclues de la sortie (personne de la liste n'y figure).
-  app.post('/admin/sorties/:author/:day/photos', write, async (request, reply) => {
+  app.post('/admin/sorties/:author/:day/photos', W('sorties.gerer'), async (request, reply) => {
     const o = load(request);
     if (!o) return reply.callNotFound();
     const mine = new Set(o.photos.map(p => p.id));

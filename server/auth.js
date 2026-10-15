@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { registerPermissions, hasRole } from './permissions.js';
 import { createOidc } from './oidc.js';
 import { createSessionStore, IDLE_TTL } from './sessions.js';
 import { createRateLimiter } from './ratelimit.js';
@@ -67,6 +68,9 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     siteName: app.siteName(), pageTitle: `${data.title} · ${app.siteName()}`, description: '', ...data,
   });
 
+  // Permissions de chaque route (server/permissions.js).
+  registerPermissions(app, { renderError });
+
   // preHandler des pages d'admin : sans session, retour à la connexion (GET) ou 401.
   app.decorate('requireAdmin', async function (request, reply) {
     reply.header('cache-control', 'no-store').header('x-robots-tag', 'noindex');
@@ -76,7 +80,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       }
       return reply.code(401).send({ error: 'Session expirée, reconnectez-vous.' });
     }
-    if (!request.session.roles.includes('admin')) {
+    if (!hasRole(request.session.roles)) {
       return renderError(reply, 403, { title: 'Accès refusé', message: 'Ce compte n’a pas accès à l’administration.' });
     }
     // Expiration glissante : le cookie suit l'échéance de la session.

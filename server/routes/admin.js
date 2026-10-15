@@ -75,7 +75,11 @@ export default async function adminRoutes(app) {
   });
   app.addHook('onClose', async () => { await tracker.idle(); });
 
+  // Rôles et permissions (server/permissions.js) : chaque route déclare la sienne ; une route d'admin sans permission
+  // empêche le démarrage, et une permission absente du compte est refusée (fermé par défaut).
+  app.addHook('onRoute', r => { if (r.url.startsWith('/admin') && !r.config?.perm) throw new Error(`route d’admin sans permission : ${r.method} ${r.url}`); });
   app.addHook('preHandler', app.requireAdmin);
+  app.addHook('preHandler', app.requirePermission);
   // Langue de l'admin : celle du photographe lié au compte, sinon le cookie du compte, sinon le français.
   // request.t traduit (voir server/admin-i18n.js) ; elle sert aux pages et aux messages après redirection.
   const LANG_COOKIE = 'admin_langue';
@@ -86,13 +90,19 @@ export default async function adminRoutes(app) {
     const lang = ADMIN_LANGS.includes(author?.admin_lang) ? author.admin_lang : ADMIN_LANGS.includes(request.cookies[LANG_COOKIE]) ? request.cookies[LANG_COOKIE] : 'fr';
     request.t = translator(lang);
   });
-  // Journal d'audit : qui a modifié quoi (les co-admins ont tous les droits).
+  // Journal d'audit : qui a modifié quoi.
   app.addHook('onResponse', async (request, reply) => {
     if (request.method !== 'GET' && request.method !== 'HEAD' && request.session) {
       request.log.info({ audit: true, sub: request.session.sub, action: `${request.method} ${request.routeOptions.url}`, params: request.params, status: reply.statusCode }, 'action admin');
     }
   });
-  const write = { preHandler: app.verifyCsrf };
+  // Permission de la route (P), et pour une écriture le jeton CSRF en plus (W).
+  const P = perm => ({ config: { perm } });
+  const W = perm => ({ preHandler: app.verifyCsrf, config: { perm } });
+  // Routes qui font plusieurs choses : la permission de l'action précise est vérifiée en plus.
+  // Textes d'une photo (photos.textes) ; changer un autre champ demande photos.modifier.
+  const TEXT_FIELDS = new Set(['title', 'legend', 'place', 'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de']);
+  const touchesMore = (photo, fields) => Object.entries(fields).some(([k, v]) => !TEXT_FIELDS.has(k) && v !== undefined && String(v ?? '') !== String(photo?.[k] ?? ''));
 
   // ---------- messages après redirection (cookie signé, lu une fois) ----------
   const FLASH = 'flash';
@@ -159,7 +169,7 @@ export default async function adminRoutes(app) {
   const ratioClass = p => (p.width > 0 && p.height > 0 ? `ar-${Math.min(300, Math.max(40, Math.round((p.width / p.height) * 20) * 5))}` : 'ar-150');
 
   // ---------- accueil ----------
-  app.get('/admin', async (request, reply) => {
+  app.get('/admin', P('admin.acceder'), async (request, reply) => {
     // Les fichiers ne sont vérifiés (withReady) que pour les quelques photos affichées.
     const photos = repo.photos();
     const published = photos.filter(p => p.status === 'published');
@@ -184,7 +194,7 @@ export default async function adminRoutes(app) {
   });
 
   // ---------- photos ----------
-  app.get('/admin/photos', async (request, reply) => {
+  app.get('/admin/photos', P('photos.voir'), async (request, reply) => {
     const { q = '', auteur = '', serie = '', statut = '' } = request.query;
     // Ce qui manque (liens d'« Aujourd'hui ») : ville (carte du monde) ou traduction du titre, photos publiées.
     // État pour le site (server/readiness.js) : à vérifier, bloquée, sans visage.
@@ -226,7 +236,7 @@ export default async function adminRoutes(app) {
   });
 
   // Import multiple. Le jeton CSRF est le premier champ du formulaire : aucun fichier n'est lu avant lui.
-  app.post('/admin/photos/import', async (request, reply) => {
+  app.post('/admin/photos/import', P('photos.importer'), async (request, reply) => {
     const wantsJson = !request.headers.accept?.includes('text/html');
     const fields = {};
     const imported = [];
@@ -303,7 +313,7 @@ export default async function adminRoutes(app) {
 
   // Envoi d'une seule photo (page d'import, avec JavaScript) : réponse dès l'original rangé,
   // les variantes sont rendues ensuite (suivi : /admin/photos/traitement).
-  app.post('/admin/photos/envoi', async (request, reply) => {
+  app.post('/admin/photos/envoi', P('photos.importer'), async (request, reply) => {
     const fields = {};
     let checked = false;
     let result = null;
@@ -360,7 +370,7 @@ export default async function adminRoutes(app) {
   });
 
   // État du traitement : par photo (?ids=1,2) et nombre de photos encore en cours (indicateur d'en-tête).
-  app.get('/admin/photos/traitement', async request => {
+  app.get('/admin/photos/traitement', P('photos.voir'), async request => {
     const ids = String(request.query.ids || '').split(',').filter(Boolean).map(Number).filter(Number.isInteger).slice(0, 200);
     return {
       active: tracker.active(),
@@ -376,7 +386,7 @@ export default async function adminRoutes(app) {
   });
 
   // Une photo, pour l'inspecteur (photo arrivée par l'import, ou relue après une modification).
-  app.get('/admin/photos/:id/donnees', async (request, reply) => {
+  app.get('/admin/photos/:id/donnees', P('photos.voir'), async (request, reply) => {
     const p = repo.photoView(byId(request.params.id));
     if (!p) return reply.code(404).send({ error: request.t('Photo introuvable.') });
     return dataOf(withReady({ ...p, suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(p.id))) }));
@@ -384,7 +394,7 @@ export default async function adminRoutes(app) {
 
   // Série proposée : la prendre (category_id) ou garder la série actuelle (garder=1). JSON ou formulaire (fiche,
   // sortie) ; dans les deux cas, la série est désormais choisie et la proposition disparaît.
-  app.post('/admin/photos/:id/serie', write, async (request, reply) => {
+  app.post('/admin/photos/:id/serie', W('photos.modifier'), async (request, reply) => {
     const id = byId(request.params.id);
     const photo = repo.photo(id);
     const json = !request.headers.accept?.includes('text/html');
@@ -428,12 +438,12 @@ export default async function adminRoutes(app) {
       mostLiked: withPhoto(ig.mostLiked(10)), engagementState: ig.engagementState(), usage: ig.usage(), IG_PRESETS, IG_BOUNDS, ...extra,
     });
   };
-  app.get('/admin/instagram', async (request, reply) => igPage(request, reply));
+  app.get('/admin/instagram', P('instagram.voir'), async (request, reply) => igPage(request, reply));
   // Lever une pause « limite atteinte » à la main (Meta a rendu l'accès plus tôt, réglage changé…).
-  app.post('/admin/instagram/reprendre', write, async (request, reply) => { app.instagram.resume(); return done(reply, '/admin/instagram', request.t('File Instagram reprise.')); });
+  app.post('/admin/instagram/reprendre', W('instagram.compte'), async (request, reply) => { app.instagram.resume(); return done(reply, '/admin/instagram', request.t('File Instagram reprise.')); });
 
   // Likes et commentaires relevés à la demande (sinon une fois par jour) ; pas plus d'une fois toutes les 10 minutes.
-  app.post('/admin/instagram/likes', write, async (request, reply) => {
+  app.post('/admin/instagram/likes', W('instagram.compte'), async (request, reply) => {
     const ig = app.instagram;
     if (!ig.account.connected()) return failed(reply, '/admin/instagram#likes', request.t('Connectez d’abord le compte Instagram.'));
     if (!ig.canSyncNow()) return failed(reply, '/admin/instagram#likes', request.t('Relevé déjà demandé il y a moins de 10 minutes : réessayez un peu plus tard.'));
@@ -446,13 +456,13 @@ export default async function adminRoutes(app) {
     }
   });
 
-  app.post('/admin/instagram/reglages', write, async (request, reply) => {
+  app.post('/admin/instagram/reglages', W('instagram.compte'), async (request, reply) => {
     app.instagram.saveSettings(normalizeSettings(request.body || {}, repo.categories()));
     return done(reply, '/admin/instagram#reglages', request.t('Réglages Instagram enregistrés.'));
   });
 
   // Connexion : redirection vers Instagram, avec un « state » lié à ce navigateur (cookie signé).
-  app.get('/admin/instagram/connexion', async (request, reply) => {
+  app.get('/admin/instagram/connexion', P('instagram.compte'), async (request, reply) => {
     const c = app.config.instagram;
     if (!c.configured) return failed(reply, '/admin/instagram', request.t('INSTAGRAM_APP_ID et INSTAGRAM_APP_SECRET manquent dans la configuration du serveur.'));
     if (!c.https) return failed(reply, '/admin/instagram', request.t('La connexion à Instagram exige que le site soit en HTTPS (PUBLIC_URL).'));
@@ -460,7 +470,7 @@ export default async function adminRoutes(app) {
     reply.setCookie(IG_STATE, state, { path: '/admin/instagram', httpOnly: true, secure: secureCookies, sameSite: 'lax', signed: true, maxAge: 600 });
     return reply.redirect(app.instagram.authorizeUrl(state), 303);
   });
-  app.get('/admin/instagram/callback', async (request, reply) => {
+  app.get('/admin/instagram/callback', P('instagram.compte'), async (request, reply) => {
     const raw = request.cookies[IG_STATE];
     reply.clearCookie(IG_STATE, { path: '/admin/instagram' });
     const expected = raw && request.unsignCookie(raw);
@@ -475,13 +485,13 @@ export default async function adminRoutes(app) {
       return failed(reply, '/admin/instagram', request.t('Connexion impossible : {error}', { error: request.t(err.message) }));
     }
   });
-  app.post('/admin/instagram/deconnexion', write, async (request, reply) => {
+  app.post('/admin/instagram/deconnexion', W('instagram.compte'), async (request, reply) => {
     app.instagram.account.remove();
     return done(reply, '/admin/instagram', request.t('Compte Instagram déconnecté (le jeton est effacé ; retirez aussi l’accès dans Instagram si besoin).'));
   });
 
   // Une photo dans la file (ou ses options modifiées) : depuis la fiche ou l'inspecteur.
-  app.post('/admin/instagram/file', write, async (request, reply) => {
+  app.post('/admin/instagram/file', W('instagram.file'), async (request, reply) => {
     const body = request.body || {};
     const json = !request.headers.accept?.includes('text/html');
     const id = byId(body.photo_id);
@@ -501,7 +511,7 @@ export default async function adminRoutes(app) {
   });
 
   for (const [act, label] of [['annuler', t => t('Retirée de la file Instagram.')], ['monter', null], ['descendre', null], ['reessayer', t => t('Remise en tête de file.')], ['publier', t => t('Publiée sur Instagram.')]]) {
-    app.post(`/admin/instagram/:id/${act}`, write, async (request, reply) => {
+    app.post(`/admin/instagram/:id/${act}`, W(act === 'publier' ? 'instagram.publier' : 'instagram.file'), async (request, reply) => {
       const id = byId(request.params.id);
       const back = safeBack(request, '/admin/instagram');
       if (!app.instagram.post(id)) return reply.callNotFound();
@@ -519,14 +529,14 @@ export default async function adminRoutes(app) {
   }
 
   // Aperçu exact de l'image envoyée, et légende du modèle (bouton « Revenir au modèle »).
-  app.get('/admin/instagram/apercu.jpg', async (request, reply) => {
+  app.get('/admin/instagram/apercu.jpg', P('instagram.voir'), async (request, reply) => {
     const id = byId(request.query.photo);
     if (!repo.photo(id)) return reply.callNotFound();
     const frame = Object.hasOwn(FRAMES, request.query.cadre) ? request.query.cadre : app.instagram.settings().frame;
     const buf = await app.instagram.image(id, { frame, watermark: request.query.filigrane === '1' });
     return reply.header('cache-control', 'no-store').type('image/jpeg').send(buf);
   });
-  app.get('/admin/instagram/legende', async (request, reply) => {
+  app.get('/admin/instagram/legende', P('instagram.voir'), async (request, reply) => {
     const id = byId(request.query.photo);
     if (!repo.photo(id)) return reply.code(404).send({ error: request.t('Photo introuvable.') });
     const caption = app.instagram.caption(id);
@@ -578,19 +588,19 @@ export default async function adminRoutes(app) {
   };
 
   // ---------- signalements des visiteurs ----------
-  app.get('/admin/signalements', async (request, reply) => render(request, reply, 'reports', {
+  app.get('/admin/signalements', P('signalements.traiter'), async (request, reply) => render(request, reply, 'reports', {
     title: request.t('Signalements des visiteurs'), reports: app.feedback.reports().map(r => withReady({ ...r, id: r.pid, reportId: r.id })),
   }));
-  app.post('/admin/signalements/:id/traite', write, async (request, reply) => {
+  app.post('/admin/signalements/:id/traite', W('signalements.traiter'), async (request, reply) => {
     app.feedback.done(byId(request.params.id));
     return done(reply, '/admin/signalements', request.t('Signalement marqué comme traité.'));
   });
-  app.post('/admin/signalements/:id/supprimer', write, async (request, reply) => {
+  app.post('/admin/signalements/:id/supprimer', W('signalements.traiter'), async (request, reply) => {
     app.feedback.remove(byId(request.params.id));
     return done(reply, '/admin/signalements', request.t('Signalement supprimé.'));
   });
 
-  app.get('/admin/statistiques', async (request, reply) => {
+  app.get('/admin/statistiques', P('statistiques.voir'), async (request, reply) => {
     const days = PERIODS[request.query.periode] ? Number(request.query.periode) : 30;
     const { from, to } = app.stats.range(days);
     const prev = app.stats.range(days * 2);
@@ -635,7 +645,7 @@ export default async function adminRoutes(app) {
   });
 
   // Audience d'une photo (inspecteur de la photothèque) : 30 derniers jours.
-  app.get('/admin/photos/:id/statistiques', async (request, reply) => {
+  app.get('/admin/photos/:id/statistiques', P('statistiques.voir'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!repo.photo(id)) return reply.code(404).send({ error: request.t('Photo introuvable.') });
     const s = photoStats(id);
@@ -645,7 +655,7 @@ export default async function adminRoutes(app) {
   // ---------- apparence de l'admin (clair / sombre) ----------
   // Langue de l'admin : gardée sur le photographe lié au compte (elle le suit d'un appareil à l'autre), sinon dans un
   // cookie du compte.
-  app.post('/admin/langue', write, async (request, reply) => {
+  app.post('/admin/langue', W('admin.acceder'), async (request, reply) => {
     const lang = ADMIN_LANGS.includes(request.body?.lang) ? request.body.lang : 'fr';
     const author = repo.authorBySub(request.session.sub);
     if (author) app.db.prepare('UPDATE authors SET admin_lang = ? WHERE id = ?').run(lang, author.id);
@@ -653,7 +663,7 @@ export default async function adminRoutes(app) {
     return reply.redirect(safeBack(request, '/admin'), 303);
   });
 
-  app.post('/admin/theme', write, async (request, reply) => {
+  app.post('/admin/theme', W('admin.acceder'), async (request, reply) => {
     const theme = request.body?.theme;
     if (theme === 'dark' || theme === 'light') reply.setCookie(THEME_COOKIE, theme, { path: '/admin', httpOnly: true, sameSite: 'lax', secure: secureCookies, maxAge: 365 * 24 * 3600 });
     else reply.clearCookie(THEME_COOKIE, { path: '/admin' });
@@ -662,7 +672,7 @@ export default async function adminRoutes(app) {
   });
 
   // ---------- palette de commandes (⌘K) : photos et séries ----------
-  app.get('/admin/recherche.json', async (request, reply) => {
+  app.get('/admin/recherche.json', P('admin.acceder'), async (request, reply) => {
     reply.header('cache-control', 'no-store');
     return {
       photos: repo.photos().map(p => ({ id: p.id, title: p.title, category: p.category, place: p.place, status: p.status, thumb: rendered(p) ? thumb(p) : null })),
@@ -680,16 +690,18 @@ export default async function adminRoutes(app) {
       errors: {}, values: {}, ...extra,
     });
   };
-  app.get('/admin/photos/lot', async (request, reply) => {
+  app.get('/admin/photos/lot', P('photos.textes'), async (request, reply) => {
     const ids = lotIds(request.query.ids);
     if (!ids.length) return reply.redirect('/admin/photos?statut=draft', 303);
     return lotPage(request, reply, ids);
   });
 
   // Sans JavaScript : tout le tableau est envoyé d'un coup (champs titre_<id>, serie_<id>…).
-  app.post('/admin/photos/lot', write, async (request, reply) => {
+  app.post('/admin/photos/lot', W('photos.textes'), async (request, reply) => {
     const body = request.body || {};
     const ids = repo.existingIds(lotIds(body.ids));
+    if (body.publish === '1' && !request.can('photos.publier')) return app.forbid(request, reply);
+    if (!request.can('photos.modifier') && ids.some(id => touchesMore(repo.photo(id), { category_id: body[`category_id_${id}`], taken_on: body[`taken_on_${id}`] }))) return app.forbid(request, reply);
     const errors = {};
     const values = {};
     for (const id of ids) {
@@ -722,8 +734,9 @@ export default async function adminRoutes(app) {
   });
 
   // Un champ à la fois (enregistrement à la sortie du champ). Réponse : valeurs telles qu'enregistrées.
-  app.post('/admin/photos/:id/champs', write, async (request, reply) => {
+  app.post('/admin/photos/:id/champs', W('photos.textes'), async (request, reply) => {
     const id = byId(request.params.id);
+    if (touchesMore(repo.photo(id), request.body || {}) && !request.can('photos.modifier')) return app.forbid(request, reply);
     try {
       const p = repo.patchPhoto(id, request.body || {});
       if (!p) return reply.code(404).send({ error: request.t('Photo introuvable.') });
@@ -738,11 +751,11 @@ export default async function adminRoutes(app) {
   });
 
   // Villes proposées au fil de la frappe (fiche, photothèque) : liste embarquée, aucun service extérieur.
-  app.get('/admin/villes', async request => ({ villes: cities.search(String(request.query.q || '').slice(0, 60), 8).map(c => ({ id: c.id, label: c.label })) }));
+  app.get('/admin/villes', P('admin.acceder'), async request => ({ villes: cities.search(String(request.query.q || '').slice(0, 60), 8).map(c => ({ id: c.id, label: c.label })) }));
 
   // ---------- actions sur plusieurs photos ----------
   // JSON (barre de sélection) ou formulaire classique. Les réponses JSON portent de quoi annuler.
-  app.post('/admin/photos/actions', write, async (request, reply) => {
+  app.post('/admin/photos/actions', W('photos.voir'), async (request, reply) => {
     const body = request.body || {};
     const json = !request.headers.accept?.includes('text/html');
     const back = safeBack(request, '/admin/photos');
@@ -754,6 +767,9 @@ export default async function adminRoutes(app) {
     const ko = (code, text) => (json ? reply.code(code).send({ error: text }) : failed(reply, back, text));
     const each = value => Object.fromEntries(ids.map(id => [id, value]));
     const map = raw => { try { return typeof raw === 'string' ? JSON.parse(raw) : raw || {}; } catch { return {}; } };
+    // Chaque action a sa permission : publier ou dépublier, supprimer, sinon modifier.
+    const NEED = { publish: 'photos.publier', draft: 'photos.publier', statuses: 'photos.publier', delete: 'photos.supprimer' };
+    if (!request.can(NEED[body.action] || 'photos.modifier')) return app.forbid(request, reply);
 
     try {
       switch (body.action) {
@@ -871,7 +887,7 @@ export default async function adminRoutes(app) {
   });
 
   // Réordonnancement par glisser-déposer (fetch JSON, en-tête x-csrf-token).
-  app.post('/admin/photos/order', write, async (request, reply) => {
+  app.post('/admin/photos/order', W('photos.modifier'), async (request, reply) => {
     try {
       repo.orderPhotos(Array.isArray(request.body?.ids) ? request.body.ids : []);
     } catch (err) {
@@ -881,7 +897,7 @@ export default async function adminRoutes(app) {
     return { ok: true };
   });
 
-  app.get('/admin/photos/:id', async (request, reply) => {
+  app.get('/admin/photos/:id', P('photos.voir'), async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
     return render(request, reply, 'photo', {
@@ -890,10 +906,11 @@ export default async function adminRoutes(app) {
     });
   });
 
-  app.post('/admin/photos/:id', write, async (request, reply) => {
+  app.post('/admin/photos/:id', W('photos.modifier'), async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
     const body = request.body || {};
+    if ((body.status === 'published' ? 'published' : 'draft') !== photo.status && !request.can('photos.publier')) return app.forbid(request, reply);
     try {
       // Publier une photo à vérifier : confirmation explicite exigée, puis gardée (le blocage, lui, est refusé plus bas).
       const publishing = body.status === 'published' && photo.status !== 'published';
@@ -925,20 +942,20 @@ export default async function adminRoutes(app) {
   const ext = file => path.extname(file).slice(1);
   const attachment = (reply, name) => reply.header('cache-control', 'no-store').header('content-disposition', `attachment; filename="${name}"`);
 
-  app.get('/admin/photos/:id/original', async (request, reply) => {
+  app.get('/admin/photos/:id/original', P('photos.original'), async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
     return attachment(reply, `${photo.slug}.${ext(photo.file)}`).sendFile(photo.file, path.join(storageDir, 'originals'), { cacheControl: false });
   });
 
-  app.get('/admin/photos/:id/preuve.tsr', async (request, reply) => {
+  app.get('/admin/photos/:id/preuve.tsr', P('photos.voir'), async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     const t = photo && app.proofs.get(photo.id);
     if (!t || t.status !== 'ok') return reply.callNotFound();
     return attachment(reply, `${photo.slug}.tsr`).type('application/timestamp-reply').send(t.token);
   });
 
-  app.get('/admin/photos/:id/preuve.txt', async (request, reply) => {
+  app.get('/admin/photos/:id/preuve.txt', P('photos.voir'), async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     const t = photo && app.proofs.get(photo.id);
     if (!t || t.status !== 'ok') return reply.callNotFound();
@@ -967,12 +984,12 @@ export default async function adminRoutes(app) {
     return attachment(reply, `${photo.slug}-preuve.txt`).type('text/plain; charset=utf-8').send(text);
   });
 
-  app.get('/admin/preuves/autorite.pem', async (request, reply) => {
+  app.get('/admin/preuves/autorite.pem', P('photos.voir'), async (request, reply) => {
     if (!app.config.tsa.caFile) return reply.callNotFound();
     return attachment(reply, 'autorite-horodatage.pem').type('application/x-pem-file').send(fs.readFileSync(app.config.tsa.caFile));
   });
 
-  app.post('/admin/photos/:id/verifier', write, async (request, reply) => {
+  app.post('/admin/photos/:id/verifier', W('photos.modifier'), async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
     const r = await app.proofs.verify(photo.id);
@@ -984,12 +1001,12 @@ export default async function adminRoutes(app) {
     return done(reply, to, request.t('Preuve valide : original intact, horodaté le {when} UTC, signature vérifiée jusqu’à l’autorité racine.', { when }));
   });
 
-  app.post('/admin/preuves/reessayer', write, async (request, reply) => {
+  app.post('/admin/preuves/reessayer', W('photos.modifier'), async (request, reply) => {
     app.proofs.schedule({ retryNow: true });
     return done(reply, safeBack(request, '/admin'), request.t('Horodatage relancé : les preuves en attente sont redemandées en arrière-plan.'));
   });
 
-  app.post('/admin/photos/:id/status', write, async (request, reply) => {
+  app.post('/admin/photos/:id/status', W('photos.publier'), async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
     const published = request.body?.status === 'published';
@@ -1006,7 +1023,7 @@ export default async function adminRoutes(app) {
   });
 
   // Visages : correction à la main (il y a quelqu'un / personne de reconnaissable / revenir à la détection).
-  app.post('/admin/photos/:id/visages', write, async (request, reply) => {
+  app.post('/admin/photos/:id/visages', W('personnes.gerer'), async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
     const v = { oui: 1, non: 0 }[request.body?.valeur];
@@ -1015,12 +1032,12 @@ export default async function adminRoutes(app) {
     return done(reply, `/admin/photos/${photo.id}`, v === 1 ? request.t('Indiqué : quelqu’un est sur la photo.') : v === 0 ? request.t('Indiqué : personne de reconnaissable sur la photo.') : request.t('La détection des visages fait de nouveau foi.'));
   });
 
-  app.post('/admin/photos/:id/move', write, async (request, reply) => {
+  app.post('/admin/photos/:id/move', W('photos.modifier'), async (request, reply) => {
     repo.movePhoto(byId(request.params.id), request.body?.dir);
     return reply.redirect(`/admin/photos?vue=liste#photo-${byId(request.params.id)}`, 303);   // « Monter » et « Descendre » sont dans la vue liste
   });
 
-  app.post('/admin/photos/:id/delete', write, async (request, reply) => {
+  app.post('/admin/photos/:id/delete', W('photos.supprimer'), async (request, reply) => {
     const file = repo.deletePhoto(byId(request.params.id));
     if (!file) return reply.callNotFound();
     removePhotoFiles(storageDir, file);
@@ -1033,11 +1050,11 @@ export default async function adminRoutes(app) {
     boards: Object.fromEntries(Object.entries(repo.boards(3)).map(([k, list]) => [k, list.map(withReady).filter(p => p.ready)])), errors: {}, values: {},
     suggest: app.seriesSuggest.state(), ...extra,
   });
-  app.get('/admin/series', async (request, reply) => seriesPage(request, reply));
+  app.get('/admin/series', P('series.gerer'), async (request, reply) => seriesPage(request, reply));
 
   // Série proposée : allumer (téléchargement du modèle puis analyse, en arrière-plan) ou éteindre et tout effacer.
-  app.get('/admin/series/propositions', async () => app.seriesSuggest.state());
-  app.post('/admin/series/propositions', write, async (request, reply) => {
+  app.get('/admin/series/propositions', P('series.propositions'), async () => app.seriesSuggest.state());
+  app.post('/admin/series/propositions', W('series.propositions'), async (request, reply) => {
     if (request.body?.action === 'on') {
       app.seriesSuggest.enable();
       return done(reply, '/admin/series#propositions', request.t('Propositions de série allumées : le modèle se télécharge, puis les photos sont analysées.'));
@@ -1046,7 +1063,7 @@ export default async function adminRoutes(app) {
     return done(reply, '/admin/series#propositions', request.t('Propositions de série éteintes : modèle et empreintes effacés.'));
   });
 
-  app.post('/admin/series', write, async (request, reply) => {
+  app.post('/admin/series', W('series.gerer'), async (request, reply) => {
     try {
       const id = repo.saveCategory(null, request.body || {});
       return done(reply, `/admin/series#serie-${id}`, request.t('Série « {name} » créée.', { name: repo.categories().find(c => c.id === id).name }));
@@ -1056,7 +1073,7 @@ export default async function adminRoutes(app) {
     }
   });
 
-  app.post('/admin/series/:id', write, async (request, reply) => {
+  app.post('/admin/series/:id', W('series.gerer'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!repo.categories().some(c => c.id === id)) return reply.callNotFound();
     try {
@@ -1069,7 +1086,7 @@ export default async function adminRoutes(app) {
   });
 
   // Ordre des séries par glisser-déposer ou flèches du clavier (fetch JSON).
-  app.post('/admin/series/order', write, async (request, reply) => {
+  app.post('/admin/series/order', W('series.gerer'), async (request, reply) => {
     try {
       repo.orderCategories(Array.isArray(request.body?.ids) ? request.body.ids : []);
     } catch (err) {
@@ -1079,12 +1096,12 @@ export default async function adminRoutes(app) {
     return { ok: true };
   });
 
-  app.post('/admin/series/:id/move', write, async (request, reply) => {
+  app.post('/admin/series/:id/move', W('series.gerer'), async (request, reply) => {
     repo.moveCategory(byId(request.params.id), request.body?.dir);
     return reply.redirect(`/admin/series#serie-${byId(request.params.id)}`, 303);
   });
 
-  app.post('/admin/series/:id/delete', write, async (request, reply) => {
+  app.post('/admin/series/:id/delete', W('series.gerer'), async (request, reply) => {
     let r;
     try {
       r = repo.deleteCategory(byId(request.params.id), { moveTo: request.body?.move_to });
@@ -1105,9 +1122,9 @@ export default async function adminRoutes(app) {
   const authorsPage = (request, reply, extra = {}) => render(request, reply, 'authors', {
     title: request.t('Photographes'), authors: repo.authors(), errors: {}, values: {}, ...extra,
   });
-  app.get('/admin/auteurs', async (request, reply) => authorsPage(request, reply));
+  app.get('/admin/auteurs', P('photographes.gerer'), async (request, reply) => authorsPage(request, reply));
 
-  app.post('/admin/auteurs', write, async (request, reply) => {
+  app.post('/admin/auteurs', W('photographes.gerer'), async (request, reply) => {
     try {
       repo.saveAuthor(null, request.body || {});
     } catch (err) {
@@ -1117,7 +1134,7 @@ export default async function adminRoutes(app) {
     return done(reply, '/admin/auteurs', request.t('Auteur ajouté.'));
   });
 
-  app.post('/admin/auteurs/:id', write, async (request, reply) => {
+  app.post('/admin/auteurs/:id', W('photographes.gerer'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!repo.authors().some(a => a.id === id)) return reply.callNotFound();
     try {
@@ -1130,7 +1147,7 @@ export default async function adminRoutes(app) {
     return done(reply, '/admin/auteurs', request.t('Auteur enregistré.'));
   });
 
-  app.post('/admin/auteurs/:id/delete', write, async (request, reply) => {
+  app.post('/admin/auteurs/:id/delete', W('photographes.gerer'), async (request, reply) => {
     try {
       if (!repo.deleteAuthor(byId(request.params.id))) return reply.callNotFound();
     } catch (err) {
@@ -1149,9 +1166,9 @@ export default async function adminRoutes(app) {
       photos: repo.photos(), previewId: Number(request.query.photo) || firstPhotoId(),
     });
   };
-  app.get('/admin/images', imagesPage);
+  app.get('/admin/images', P('site.filigrane'), imagesPage);
 
-  app.post('/admin/images', write, async (request, reply) => {
+  app.post('/admin/images', W('site.filigrane'), async (request, reply) => {
     const { watermark: current } = app.variants.context();
     const watermark = normalizeWatermark(request.body || {}, current);
     repo.saveImageSettings(watermark, normalizeExif(request.body || {}));
@@ -1169,23 +1186,23 @@ export default async function adminRoutes(app) {
     return reply.header('cache-control', 'no-store').type('image/webp').send(buf);
   };
   // Aperçu des réglages enregistrés (affiché sur la page).
-  app.get('/admin/images/apercu.webp', async (request, reply) => sendPreview(reply, byId(request.query.photo || firstPhotoId())));
+  app.get('/admin/images/apercu.webp', P('site.filigrane'), async (request, reply) => sendPreview(reply, byId(request.query.photo || firstPhotoId())));
   // Aperçu des réglages du formulaire, sans les enregistrer (bouton « Aperçu »).
-  app.post('/admin/images/apercu', write, async (request, reply) => {
+  app.post('/admin/images/apercu', W('site.filigrane'), async (request, reply) => {
     const { watermark: current } = app.variants.context();
     return sendPreview(reply, byId(request.body?.preview_photo), { watermark: { ...normalizeWatermark(request.body || {}, current), enabled: true } });
   });
 
-  app.get('/admin/images/etat', async () => app.variants.status());
+  app.get('/admin/images/etat', P('site.filigrane'), async () => app.variants.status());
 
-  app.get('/admin/images/logo', async (request, reply) => {
+  app.get('/admin/images/logo', P('site.filigrane'), async (request, reply) => {
     const { watermark } = app.variants.context();
     if (!watermark.image) return reply.callNotFound();
     return reply.header('cache-control', 'no-store').sendFile(watermark.image, app.variants.watermarkDir);
   });
 
   // Logo : PNG ou WebP, réencodé en PNG (aucune donnée du fichier envoyé n'est servie telle quelle).
-  app.post('/admin/images/logo', async (request, reply) => {
+  app.post('/admin/images/logo', P('site.filigrane'), async (request, reply) => {
     let checked = false;
     let error = null;
     let saved = null;
@@ -1226,7 +1243,7 @@ export default async function adminRoutes(app) {
     return done(reply, '/admin/images', request.t('Logo enregistré.'));
   });
 
-  app.post('/admin/images/logo/delete', write, async (request, reply) => {
+  app.post('/admin/images/logo/delete', W('site.filigrane'), async (request, reply) => {
     const { watermark, exif } = app.variants.context();
     repo.saveImageSettings({ ...watermark, image: null }, exif);
     app.variants.schedule();
@@ -1238,11 +1255,11 @@ export default async function adminRoutes(app) {
   fs.mkdirSync(brandDir, { recursive: true });
   const saveBrand = brand => repo.saveSetting('brand', brand);
 
-  app.get('/admin/apparence', async (request, reply) => render(request, reply, 'appearance', {
+  app.get('/admin/apparence', P('site.apparence'), async (request, reply) => render(request, reply, 'appearance', {
     title: request.t('Apparence'), THEMES, BRAND_MODES, BRAND_SLOTS, themeId: app.appearance.themeId(), brand: app.appearance.brand(),
   }));
 
-  app.post('/admin/apparence', write, async (request, reply) => {
+  app.post('/admin/apparence', W('site.apparence'), async (request, reply) => {
     const body = request.body || {};
     if (THEMES[body.theme]) repo.saveSetting('theme', body.theme);
     const brand = app.appearance.brand();
@@ -1272,7 +1289,7 @@ export default async function adminRoutes(app) {
     return files;
   }
 
-  app.post('/admin/apparence/marque/:slot', async (request, reply) => {
+  app.post('/admin/apparence/marque/:slot', P('site.apparence'), async (request, reply) => {
     const slot = BRAND_SLOTS[request.params.slot];
     if (!slot) return reply.callNotFound();
     let checked = false;
@@ -1322,7 +1339,7 @@ export default async function adminRoutes(app) {
     return done(reply, '/admin/apparence', request.t('{label} enregistré.', { label: request.t(slot.label) }));
   });
 
-  app.post('/admin/apparence/marque/:slot/delete', write, async (request, reply) => {
+  app.post('/admin/apparence/marque/:slot/delete', W('site.apparence'), async (request, reply) => {
     const slot = BRAND_SLOTS[request.params.slot];
     if (!slot) return reply.callNotFound();
     let brand = { ...app.appearance.brand(), [slot.field]: null };
@@ -1342,15 +1359,15 @@ export default async function adminRoutes(app) {
   // Aide dans la langue de l'admin (français si la traduction manque) ; gardée en mémoire en production.
   const helpCache = {};
   const helpIn = lang => (app.config.production ? (helpCache[lang] ??= loadHelp(lang)) : loadHelp(lang));
-  app.get('/admin/aide', async (request, reply) => render(request, reply, 'help', { title: request.t('Aide'), help: helpIn(request.t.lang) }));
+  app.get('/admin/aide', P('admin.acceder'), async (request, reply) => render(request, reply, 'help', { title: request.t('Aide'), help: helpIn(request.t.lang) }));
 
   // ---------- rencontres (page /bonjour, cartes) ----------
-  registerEncounters(app, { repo, render, write, done, failed, withReady });
-  registerOutings(app, { repo, render, write, done, failed, withReady });
+  registerEncounters(app, { repo, render, P, W, done, failed, withReady });
+  registerOutings(app, { repo, render, P, W, done, failed, withReady });
 
   // ---------- traductions ----------
   // Proposition de traduction d'un champ (LibreTranslate du réseau local) : l'auteur la relit avant d'enregistrer.
-  app.post('/admin/traduction', write, async (request, reply) => {
+  app.post('/admin/traduction', W('admin.acceder'), async (request, reply) => {
     const { text, source, target } = request.body || {};
     try {
       return { text: await app.translator.translate(String(text || '').slice(0, 20000), String(source), String(target)) };
@@ -1371,14 +1388,15 @@ export default async function adminRoutes(app) {
     rights: LANGS.map(l => ({ lang: l, ...RIGHTS[l] })), rightsDefaults: defaultsNow(),
     ...mapCounts.get(), encrypted: app.encounters.encrypted, legalMissing: legalMissing(repo.settings()),
   });
-  app.get('/admin/site', async (request, reply) => settingsPage(request, reply, 'site'));
-  app.get('/admin/droits', async (request, reply) => settingsPage(request, reply, 'droits'));
+  app.get('/admin/site', P('site.textes'), async (request, reply) => settingsPage(request, reply, 'site'));
+  app.get('/admin/droits', P('reglages.droits'), async (request, reply) => settingsPage(request, reply, 'droits'));
   // Ancienne adresse : renvoie vers Site public (le #fragment ne parvient pas au serveur ; les liens de l'admin et de
   // l'aide pointent déjà vers /admin/site ou /admin/droits).
-  app.get('/admin/reglages', async (request, reply) => reply.redirect('/admin/site', 301));
+  app.get('/admin/reglages', P('site.textes'), async (request, reply) => reply.redirect('/admin/site', 301));
 
-  app.post('/admin/reglages', write, async (request, reply) => {
+  app.post('/admin/reglages', W('site.textes'), async (request, reply) => {
     const part = ['site', 'droits'].includes(request.body?.part) ? request.body.part : null;
+    if (part !== 'site' && !request.can('reglages.droits')) return app.forbid(request, reply);
     repo.saveSettings(withoutDefaults(request.body || {}, defaultsNow()), part);
     app.variants.schedule();            // {site} peut figurer dans le filigrane
     if (request.body?.hero_op || request.body?.hero_save) return done(reply, '/admin/site#ouverture', request.t('Ordre de l’ouverture enregistré.'));

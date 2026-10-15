@@ -22,7 +22,7 @@ export default async function mediaRoutes(app) {
     return reply.sendFile(request.params.name, dir, { maxAge: '365d', immutable: true });
   });
 
-  app.get('/admin/media/:name', { preHandler: app.requireAdmin }, async (request, reply) => {
+  app.get('/admin/media/:name', { preHandler: [app.requireAdmin, app.requirePermission], config: { perm: 'photos.voir' } }, async (request, reply) => {
     if (!lookup(request.params.name)) return reply.callNotFound();
     // Brouillons : jamais conservés par le navigateur après la session (ordinateur partagé).
     return reply.header('cache-control', 'no-store').sendFile(request.params.name, dir, { cacheControl: false });
