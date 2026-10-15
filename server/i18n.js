@@ -63,7 +63,7 @@ export function detectLang({ country = 'XX', acceptLanguage = '' } = {}) {
 const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 export const UI = {
   fr: {
-    nav: { series: 'Séries', gallery: 'Galerie', map: 'Carte', about: 'À propos', label: 'Navigation', lang: 'Langue', langCurrent: 'Langue : français' },
+    nav: { series: 'Séries', gallery: 'Galerie', map: 'Carte', about: 'À propos', search: 'Rechercher', label: 'Navigation', lang: 'Langue', langCurrent: 'Langue : français' },
     fb: {
       like: 'J’aime', unlike: 'Je n’aime plus', likes: n => `${n} j’aime`, report: 'Signaler',
       reportTitle: 'Signaler cette photo', reportIntro: title => `À propos de « ${title} ». Votre message nous arrive directement ; nous le lisons tous.`,
@@ -136,6 +136,12 @@ export const UI = {
       thanks: 'Merci, c’est noté.', thanksText: 'Le photographe vous répond par e-mail, en général sous quelques jours. Vous pouvez revenir sur cette page à tout moment pour changer d’avis.',
       thanksRef: ref => `Votre référence : ${ref}.`, back: 'Voir les photos du site',
     },
+    search: {
+      title: 'Rechercher', label: 'Mots-clés', placeholder: 'brume, Loire, portrait…', submit: 'Chercher',
+      hint: 'Dans les titres, légendes, lieux, villes, séries et photographes. Chaque mot doit être trouvé.',
+      results: (n, q) => `${n} photo${n > 1 ? 's' : ''} pour « ${q} »`, none: q => `Aucune photo pour « ${q} ». Essayez un autre mot, ou moins de mots.`,
+      description: 'Rechercher parmi les photos par mots-clés.', keywords: 'Mots-clés',
+    },
     map: {
       title: 'Carte', none: 'Aucune photo sur la carte pour l’instant', soon: 'Les lieux arrivent bientôt.',
       svgTitle: 'Carte du monde des lieux de prise de vue', zoomIn: 'Zoom avant', zoomOut: 'Zoom arrière', world: 'Monde',
@@ -146,7 +152,7 @@ export const UI = {
     },
   },
   en: {
-    nav: { series: 'Series', gallery: 'Gallery', map: 'Map', about: 'About', label: 'Navigation', lang: 'Language', langCurrent: 'Language: English' },
+    nav: { series: 'Series', gallery: 'Gallery', map: 'Map', about: 'About', search: 'Search', label: 'Navigation', lang: 'Language', langCurrent: 'Language: English' },
     fb: {
       like: 'Like', unlike: 'Unlike', likes: n => `${n} ${n === 1 ? 'like' : 'likes'}`, report: 'Report',
       reportTitle: 'Report this photo', reportIntro: title => `About “${title}”. Your message comes straight to us; we read every one.`,
@@ -219,6 +225,12 @@ export const UI = {
       thanks: 'Thank you, it’s noted.', thanksText: 'The photographer will reply by email, usually within a few days. You can come back to this page at any time to change your mind.',
       thanksRef: ref => `Your reference: ${ref}.`, back: 'See the photos',
     },
+    search: {
+      title: 'Search', label: 'Keywords', placeholder: 'mist, Loire, portrait…', submit: 'Search',
+      hint: 'In titles, captions, places, towns, series and photographers. Every word must be found.',
+      results: (n, q) => `${n} photo${n === 1 ? '' : 's'} for “${q}”`, none: q => `No photo for “${q}”. Try another word, or fewer words.`,
+      description: 'Search the photos by keyword.', keywords: 'Keywords',
+    },
     map: {
       title: 'Map', none: 'No photo on the map yet', soon: 'Places are coming soon.',
       svgTitle: 'World map of the places where the photos were taken', zoomIn: 'Zoom in', zoomOut: 'Zoom out', world: 'World',
@@ -229,7 +241,7 @@ export const UI = {
     },
   },
   de: {
-    nav: { series: 'Serien', gallery: 'Galerie', map: 'Karte', about: 'Über uns', label: 'Navigation', lang: 'Sprache', langCurrent: 'Sprache: Deutsch' },
+    nav: { series: 'Serien', gallery: 'Galerie', map: 'Karte', about: 'Über uns', search: 'Suchen', label: 'Navigation', lang: 'Sprache', langCurrent: 'Sprache: Deutsch' },
     fb: {
       like: 'Gefällt mir', unlike: 'Gefällt mir nicht mehr', likes: n => `Gefällt ${n} Mal`, report: 'Melden',
       reportTitle: 'Dieses Foto melden', reportIntro: title => `Zu „${title}“. Ihre Nachricht kommt direkt bei uns an; wir lesen jede.`,
@@ -301,6 +313,12 @@ export const UI = {
       },
       thanks: 'Danke, notiert.', thanksText: 'Der Fotograf antwortet Ihnen per E-Mail, meist innerhalb weniger Tage. Sie können jederzeit auf diese Seite zurückkehren, um Ihre Meinung zu ändern.',
       thanksRef: ref => `Ihre Referenz: ${ref}.`, back: 'Die Fotos ansehen',
+    },
+    search: {
+      title: 'Suchen', label: 'Stichwörter', placeholder: 'Nebel, Loire, Porträt…', submit: 'Suchen',
+      hint: 'In Titeln, Bildunterschriften, Orten, Städten, Serien und Fotografen. Jedes Wort muss gefunden werden.',
+      results: (n, q) => `${n} ${n === 1 ? 'Foto' : 'Fotos'} für „${q}“`, none: q => `Kein Foto für „${q}“. Versuchen Sie ein anderes Wort oder weniger Wörter.`,
+      description: 'Die Fotos nach Stichwörtern durchsuchen.', keywords: 'Stichwörter',
     },
     map: {
       title: 'Karte', none: 'Noch kein Foto auf der Karte', soon: 'Die Orte folgen in Kürze.',

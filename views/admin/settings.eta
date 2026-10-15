@@ -66,6 +66,12 @@
     <p class="hint"><%= t('Une carte du monde avec la vignette des photos à l’emplacement de leur ville, et la liste des lieux. Seules les photos publiées dont la fiche coche « Afficher sur la carte du monde » y figurent') %> (<%= t('{n} aujourd’hui', { n: it.mapCount }) %><%= it.mapCount ? (it.mapCities > 1 ? t(', {n} villes', { n: it.mapCities }) : t(', {n} ville', { n: it.mapCities })) : '' %>).</p>
     <label class="inline"><input type="checkbox" name="map_page"<%~ s.map_page ? ' checked' : '' %>> <%= t('Publier la carte du monde') %> <span class="mono"><%= t('lien « Carte » dans le menu du site') %></span></label>
   </section>
+  <section class="panel" id="recherche">
+    <h2><%= t('Recherche') %> <span class="mono"><a href="/recherche" target="_blank" rel="noopener">/recherche</a></span></h2>
+    <p class="hint"><%= t('Les visiteurs cherchent parmi les photos publiées par mots-clés : titre, légende, lieu, ville et région, série, photographe et mots-clés de la fiche, dans les trois langues.') %></p>
+    <label class="inline"><input type="checkbox" name="search_page"<%~ s.search_page !== false ? ' checked' : '' %>> <%= t('Proposer la recherche') %> <span class="mono"><%= t('lien « Rechercher » dans le menu du site') %></span></label>
+    <label class="inline"><input type="checkbox" name="keywords_shown"<%~ s.keywords_shown ? ' checked' : '' %>> <%= t('Afficher les mots-clés sur la page de la photo') %> <span class="mono"><%= t('sinon, ils servent seulement à la recherche') %></span></label>
+  </section>
   <fieldset class="panel hero-panel" id="ouverture" data-hero data-max="<%= it.heroMax %>">
     <legend><%= t('Photos de l’ouverture') %></legend>
     <p class="hint"><%= t('Le diaporama plein écran de l’accueil, dans cet ordre.') %> <%= t('{n} photos au plus ; sans choix, les 5 premières de la galerie.', { n: it.heroMax }) %></p>

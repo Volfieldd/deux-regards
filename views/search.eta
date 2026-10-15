@@ -1,0 +1,29 @@
+<% layout('./layout') %>
+<% const t = it.t, s = it.t.search; %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+  <%~ include('./nav', { ...it, current: 'search' }) %>
+</header>
+<main class="search-page wrap">
+  <h1><%= s.title %></h1>
+  <form class="search-form" method="get" action="<%= it.u('/recherche') %>" role="search">
+    <label for="q" class="sr-only"><%= s.label %></label>
+    <input id="q" name="q" type="search" value="<%= it.q %>" placeholder="<%= s.placeholder %>" maxlength="100" autocomplete="off" enterkeyhint="search"<%~ it.q ? '' : ' autofocus' %>>
+    <button type="submit"><%= s.submit %></button>
+  </form>
+  <p class="mono search-hint"><%= s.hint %></p>
+<% if (it.searched) { %>
+  <p class="mono search-count" role="status"><%= it.photos.length ? s.results(it.photos.length, it.q) : s.none(it.q) %></p>
+<% } %>
+</main>
+<% if (it.photos.length) { %>
+<section class="grid wrap" id="grid" aria-label="<%= s.title %>">
+<% it.photos.forEach(p => { %>
+  <a class="tile" href="<%= it.photoUrl(p.slug, {}) %>">
+    <div class="im"><%~ it.picture(p, { sizes: '(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw', alt: '' }) %></div>
+    <div class="t"><span class="ttl"><%= p.title %></span><span class="mono"><%= p.category %> · <%= p.author %><%= p.place ? ` · ${p.place}` : '' %></span></div>
+  </a>
+<% }) %>
+</section>
+<% } %>
+<%~ include('./footer', it) %>

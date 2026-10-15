@@ -13,11 +13,18 @@ Ce que voient les visiteurs. Accroche, introduction et « À propos » ont chacu
 | **Introduction** | texte sous l'accroche, à l'accueil |
 | **À propos** | page « À propos ». Séparez les paragraphes par une ligne vide. |
 | **Carte du monde** | voir ci-dessous |
+| **Recherche** | voir ci-dessous |
 | **Photos de l'ouverture** | le diaporama plein écran de l'accueil, dans l'ordre choisi (voir ci-dessous) |
 
 ### Carte du monde
 
 Case **Publier la carte du monde**, décochée par défaut. Cochée : la page `/carte` est ouverte aux visiteurs, un lien **Carte** apparaît dans le menu du site, et la page entre dans `sitemap.xml`. Décochée : les visiteurs reçoivent « page introuvable » ; connecté, vous la voyez en **aperçu** (bandeau en tête). Le panneau indique combien de photos sont sur la carte. Seules les photos **publiées** dont la fiche coche **Afficher sur la carte du monde** y figurent (voir [Photos](photos)).
+
+### Recherche
+
+Case **Proposer la recherche**, cochée par défaut : un lien **Rechercher** (une loupe sur téléphone) apparaît dans le menu du site et ouvre `/recherche`. Les visiteurs y cherchent parmi les photos publiées par mots-clés, dans les titres, légendes, lieux, villes et régions, séries, photographes et **mots-clés** des fiches, dans les trois langues. Décochée : la page n'existe plus pour les visiteurs.
+
+Case **Afficher les mots-clés sur la page de la photo**, décochée par défaut. Cochée : les mots-clés s'affichent sous la légende, et chacun mène à la recherche. Sinon, ils servent seulement à la recherche.
 
 ### Photos de l'ouverture
 

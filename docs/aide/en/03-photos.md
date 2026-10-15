@@ -123,7 +123,7 @@ The preview on the left shows the image as served (watermark included) and its d
 
 Further down:
 
-- **Sections**: the details read from top to bottom, in collapsible sections, each with its summary: **Details** (title and its translations FR · EN · DE, address, series, photographer, shooting date and time, caption), **Where** (displayed place, town, world map), **Distribution** (status, watermark), then **People & consents**, **Instagram**, **Audience**, **Proof of prior existence**. Sections worth looking at open by themselves (consents to check, Instagram queued); a link to one of them opens it.
+- **Sections**: the details read from top to bottom, in collapsible sections, each with its summary: **Details** (title and its translations FR · EN · DE, address, series, photographer, shooting date and time, caption, **keywords** — separated by commas, for the site search, in several languages if needed), **Where** (displayed place, town, world map), **Distribution** (status, watermark), then **People & consents**, **Instagram**, **Audience**, **Proof of prior existence**. Sections worth looking at open by themselves (consents to check, Instagram queued); a link to one of them opens it.
 - **Status band** (at the top): the state for the site and for Instagram (✓ ready, ▲ to check, ✕ blocked), the faces detected with **Someone is in it** / **No one recognisable** to correct, the reasons and the confirmations (see [Encounters](rencontres#visages-et-état-des-photos)). A photo to check can only be published by ticking the confirmation under **Status**.
 - **Photographed person**: the encounters linked to the photo, with the consent or refusal (see [Encounters](rencontres)). A refusal prevents the photo from being published;
 

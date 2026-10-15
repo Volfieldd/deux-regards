@@ -1,0 +1,38 @@
+{
+ "brume, Loire, matin": {
+  "en": "mist, Loire, morning",
+  "de": "Nebel, Loire, Morgen"
+ },
+ "Mots-clés": {
+  "en": "Keywords",
+  "de": "Stichwörter"
+ },
+ "séparés par des virgules · pour la recherche sur le site ; en plusieurs langues si besoin": {
+  "en": "separated by commas · for the site search; in several languages if needed",
+  "de": "durch Kommas getrennt · für die Suche auf der Website; bei Bedarf in mehreren Sprachen"
+ },
+ "Afficher les mots-clés sur la page de la photo": {
+  "en": "Show the keywords on the photo page",
+  "de": "Stichwörter auf der Seite des Fotos anzeigen"
+ },
+ "Les visiteurs cherchent parmi les photos publiées par mots-clés : titre, légende, lieu, ville et région, série, photographe et mots-clés de la fiche, dans les trois langues.": {
+  "en": "Visitors search the published photos by keyword: title, caption, place, town and region, series, photographer and the photo’s keywords, in all three languages.",
+  "de": "Besucher durchsuchen die veröffentlichten Fotos nach Stichwörtern: Titel, Bildunterschrift, Ort, Stadt und Region, Serie, Fotograf und die Stichwörter des Fotos, in allen drei Sprachen."
+ },
+ "lien « Rechercher » dans le menu du site": {
+  "en": "“Search” link in the site menu",
+  "de": "Link „Suchen“ im Menü der Website"
+ },
+ "Proposer la recherche": {
+  "en": "Offer the search",
+  "de": "Suche anbieten"
+ },
+ "Recherche": {
+  "en": "Search",
+  "de": "Suche"
+ },
+ "sinon, ils servent seulement à la recherche": {
+  "en": "otherwise, they are only used for the search",
+  "de": "sonst dienen sie nur der Suche"
+ }
+}

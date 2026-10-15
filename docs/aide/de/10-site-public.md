@@ -53,7 +53,7 @@ Das nächste Foto hängt vom aktiven Filter ab: In „Straße, von Julien“ ble
 
 ## Weitere Seiten
 
-- **Über uns:** vollständiges Logo, Slogan, Text, Biografien der Autoren.
+- **Suchen** (falls angeboten, siehe [Website](reglages#suche)): ein Feld, dann die gefundenen Fotos, die passendsten zuerst. Jedes Wort muss gefunden werden; ein Wortanfang genügt („Neb“ findet „Nebel“); Akzente und Großschreibung spielen keine Rolle. Ergebnisseiten werden von Suchmaschinen nicht indexiert.
 - **Nutzungsrechte:** Bedingungen, Kontakt und Information zur Reichweitenmessung, in drei Sprachen: `/droits` (Französisch), `/en/droits` (Englisch), `/de/droits` (Deutsch). Die Sprachauswahl im Menü wechselt zwischen ihnen (die alten Adressen `/droits/en` und `/droits/de` führen zu den neuen). Die Texte werden unter [Rechte & Datenschutz](reglages#droits-et-confidentialité) eingestellt.
 - **Karte** (wenn Sie sie unter [Öffentliche Website](reglages#carte-du-monde) veröffentlicht haben): eine Weltkarte in den Farben des Themes, mit dem runden Vorschaubild eines Fotos auf jeder Stadt und, als Plakette, der Zahl der Fotos aus dieser Stadt. Städte, die zu nah beieinander liegen, um unterschieden zu werden, werden gruppiert (Gesamtzahl); ein Klick auf die Gruppe vergrößert die Karte, bis sie sich trennen. Unter der Karte die Liste der Orte mit ihren Fotos; ein Klick auf ein Vorschaubild der Karte führt dorthin.
 

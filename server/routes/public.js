@@ -8,6 +8,7 @@ import { PRIVACY, UPDATED as PRIVACY_UPDATED } from '../privacy.js';
 import { LEGAL } from '../legal.js';
 import { project, MAP } from '../geo/projection.js';
 import { countryName, nameOf } from '../geo/cities.js';
+import { createSearch, MAX_QUERY } from '../search.js';
 import { LANGS, PREFIX, UI, pick, localize, splitLang, detectLang } from '../i18n.js';
 import { BOTS, countryOf } from '../stats.js';
 import path from 'node:path';
@@ -143,6 +144,7 @@ function helpers(lang) {
 }
 
 async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit }) {
+  const finder = createSearch({ db: app.db });
   const t = UI[lang];
   const base = helpers(lang);
   const trusted = Boolean(app.config.trustProxy);
@@ -251,6 +253,28 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       description: [photo.legend, [photo.author, [photo.place, photo.when].filter(Boolean).join(', ')].filter(Boolean).join(', ')].filter(Boolean).join(' '),
       ogImage: `/media/${variantName(photo.file, widthsFor(photo.width).at(-1), 'webp', photo.variant_key)}`,
       bodyClass: 'dark', share: await shareOf(photo, siteName),
+      // Mots-clés sous la légende, si le réglage le demande (Site public) ; chacun mène à la recherche.
+      showKeywords: repo.settings().keywords_shown === true,
+    });
+  });
+
+  // Recherche par mots-clés (server/search.js) : pages de résultats jamais indexées (contenu en double).
+  app.get('/recherche', async (request, reply) => {
+    if (repo.settings().search_page === false && !request.can('site.textes')) return reply.callNotFound();
+    const siteName = app.siteName();
+    const q = String(request.query.q || '').trim().slice(0, MAX_QUERY);
+    const terms = finder.terms(q);
+    let photos = [];
+    if (terms.length) {
+      const byId = new Map(repo.publishedPhotos({ lang }).map(p => [p.id, p]));
+      photos = finder.find(q).map(id => byId.get(id)).filter(Boolean);
+      app.stats.hit(request, { page: 'recherche' });
+    }
+    if (q) reply.header('x-robots-tag', 'noindex');
+    return reply.render('search', {
+      ...base, siteName, q, searched: terms.length > 0, photos,
+      pageTitle: q ? `${t.search.title} : ${q} · ${siteName}` : `${t.search.title} · ${siteName}`, canonical: '/recherche',
+      description: t.search.description,
     });
   });
 

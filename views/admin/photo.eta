@@ -66,6 +66,7 @@
     <label><%= t('Date') %> <span class="mono"><%= t('AAAA-MM ou AAAA-MM-JJ') %><%= it.photo.taken_time ? ' · ' + t('prise à {time}', { time: fr ? it.photo.taken_time.replace(':', ' h ') : it.photo.taken_time }) : '' %></span><input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="<%= t('AAAA-MM ou AAAA-MM-JJ') %>" inputmode="numeric"<%~ inv('taken_on') %>></label><% if (e.taken_on) { %><span class="err" id="err-taken_on"><%= e.taken_on %></span><% } %>
     <label><%= t('Légende') %> <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'legend', label: t('Légende'), max: 2000, rows: 3 }) %>
+    <label><%= t('Mots-clés') %> <span class="mono"><%= t('séparés par des virgules · pour la recherche sur le site ; en plusieurs langues si besoin') %></span><input name="keywords" value="<%= v.keywords || '' %>" maxlength="1200" placeholder="<%= t('brume, Loire, matin') %>"></label>
       </div>
     </details>
     <details class="rub" open>
@@ -124,6 +125,7 @@
       <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'legend', label: t('Légende'), max: 2000, rows: 3 }) %>
       <label><%= t('Lieu affiché') %> <input name="place" value="<%= v.place %>" maxlength="120"></label>
       <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'place', label: t('Lieu'), max: 120 }) %>
+      <label><%= t('Mots-clés') %> <span class="mono"><%= t('séparés par des virgules · pour la recherche sur le site ; en plusieurs langues si besoin') %></span><input name="keywords" value="<%= v.keywords || '' %>" maxlength="1200" placeholder="<%= t('brume, Loire, matin') %>"></label>
       <p class="mono"><%= it.photo.category %> · <%= it.photo.author %><%= it.photo.taken_on ? ` · ${it.photo.taken_on}` : '' %></p>
       <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
     </form>
