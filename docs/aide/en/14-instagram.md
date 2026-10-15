@@ -23,6 +23,15 @@ The **settings** are folded below the log.
 
 > A photo never enters the queue twice on its own: unpublished then republished, it is not offered again. To share it again, use **Republish (put back in the queue)** on its page.
 
+## Proposing for Instagram (photographers)
+
+A photographer does not put their photos in the queue themselves: they **propose** them, and the moderator (or an administrator) decides.
+
+- **Propose**: on the page of a photo published on the site, **Instagram** section, choose the frame, watermark, signature and caption (with the exact preview), add a note for the moderator if needed, then **Propose for Instagram**. Consents are checked at that moment: a blocked photo cannot be proposed, a photo to check needs your confirmation. Until a decision is made, **Update the proposal** and **Withdraw the proposal** remain possible.
+- **Decide**: the **To approve** page (**Instagram** section) lists the proposals with their choices and the photographer’s note. **Put in the Instagram queue** places it there as it is. **Send back with the note** returns it to the photographer: the note arrives in their “Today” and on the photo’s page, and they can propose again.
+- **Notifications**: “Today” shows pending proposals to both. Those who chose emails are notified at the proposal and at the decision.
+- **Without approval**: on the **Publishing workflow** page, the box **Put their photos in the Instagram queue without approval** gives a photographer control of the queue, for their photos only. They add, adjust or remove them themselves; the order of the queue and **Publish now** stay with the moderator.
+
 ## The image frame
 
 Instagram only accepts images between **4:5** (portrait) and **1.91:1** (landscape). Your 2:3 portrait photos do not fit as they are. Three choices, as a default in the settings (**Crop** if you have not chosen anything) and photo by photo on its page:

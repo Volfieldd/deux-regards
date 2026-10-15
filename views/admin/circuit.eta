@@ -1,7 +1,7 @@
 <% layout('./layout') %>
 <% const t = it.t; %>
 <h1><%= t('Circuit de publication') %></h1>
-<p class="prose"><%= t('Par défaut, un photographe propose ses photos et le modérateur les valide ; il peut modifier ses photos une fois publiées. Ces deux droits se règlent ici, photographe par photographe.') %></p>
+<p class="prose"><%= t('Par défaut, un photographe propose ses photos (pour le site et pour Instagram) et le modérateur les valide ; il peut modifier ses photos une fois publiées. Ces droits se règlent ici, photographe par photographe.') %></p>
 <% if (!it.list.length) { %><p class="empty"><%= t('Aucun compte Photographe.') %></p><% } else { %>
 <ul class="accounts">
 <% it.list.forEach(a => { %>  <li class="panel">
@@ -10,6 +10,7 @@
       <div class="acc-who"><strong><%= a.name || a.sub %></strong> <span class="mono"><%= a.author ? t('photographe lié : {name}', { name: a.author }) : t('aucun photographe lié') %></span></div>
       <label class="inline"><input type="checkbox" name="publier" value="1"<%~ a.publishAlone ? ' checked' : '' %>> <%= t('Publier ses photos sans validation') %> <span class="mono"><%= t('sinon, il les propose au modérateur') %></span></label>
       <label class="inline"><input type="checkbox" name="modifier" value="1"<%~ a.editPublished ? ' checked' : '' %>> <%= t('Modifier ses photos une fois publiées') %> <span class="mono"><%= t('sinon, une photo publiée ne change plus sans vous') %></span></label>
+      <label class="inline"><input type="checkbox" name="instagram" value="1"<%~ a.igAlone ? ' checked' : '' %>> <%= t('Mettre ses photos dans la file Instagram sans validation') %> <span class="mono"><%= t('sinon, il les propose pour Instagram au modérateur') %></span></label>
       <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
     </form>
   </li>

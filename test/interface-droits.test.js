@@ -58,10 +58,12 @@ test('fiche : le modérateur valide sans retoucher ni voir les personnes ; le re
   const rel = await c.rel.get(url);
   assert.match(rel, /\/textes"/);
   assert.doesNotMatch(rel, new RegExp(`action="/admin/photos/${c.photo.id}/(status|depublier|valider)"|id="instagram"|Remarque pour le photographe`));
-  // Photographe : la fiche complète, sans le choix du statut ni Instagram ; supprimer et l'original : permis.
+  // Photographe : la fiche complète, sans le choix du statut ; Instagram : il propose (sans la main sur la file) ;
+  // supprimer et l'original : permis.
   const ph = await c.ph.get(url);
   assert.match(ph, /name="status" value="(draft|published)">\s*<p class="hint">Statut :/);
-  assert.doesNotMatch(ph, /type="radio" name="status"|id="instagram"/);
+  assert.doesNotMatch(ph, /type="radio" name="status"|action="\/admin\/instagram\/file"/);
+  assert.match(ph, new RegExp(`id="instagram"[\\s\\S]*action="/admin/photos/${c.photo.id}/instagram/proposer"`));
   assert.match(ph, /Supprimer cette photo/);
 });
 

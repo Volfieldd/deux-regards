@@ -23,6 +23,15 @@ Les **réglages** sont repliés sous le journal.
 
 > Une photo n’entre jamais deux fois d’elle-même dans la file : dépubliée puis republiée, elle n’est pas reproposée. Pour la partager à nouveau, utilisez **Republier (remettre dans la file)** dans sa fiche.
 
+## Proposer pour Instagram (photographes)
+
+Un photographe ne met pas lui-même ses photos dans la file : il les **propose**, et le modérateur (ou un administrateur) décide.
+
+- **Proposer** : sur la fiche d’une photo publiée sur le site, section **Instagram**, choisissez le cadre, le filigrane, la signature et la légende (avec l’aperçu exact), ajoutez un mot pour le modérateur si besoin, puis **Proposer pour Instagram**. Les accords sont vérifiés à ce moment-là : une photo bloquée ne peut pas être proposée, une photo à vérifier demande votre confirmation. Tant que rien n’est décidé, **Mettre à jour la proposition** et **Retirer la proposition** restent possibles.
+- **Décider** : la page **À valider** (section **Instagram**) liste les propositions avec leurs choix et le mot du photographe. **Mettre dans la file Instagram** l’y place telle quelle. **Renvoyer avec la remarque** la rend au photographe : la remarque arrive dans son « Aujourd’hui » et sur la fiche, et il peut proposer de nouveau.
+- **Prévenir** : « Aujourd’hui » montre les propositions en attente, aux deux. Ceux qui ont choisi les e-mails sont prévenus à la proposition et à la décision.
+- **Sans validation** : sur la page **Circuit de publication**, la case **Mettre ses photos dans la file Instagram sans validation** donne à un photographe la main sur la file, pour ses photos seulement. Il les ajoute, les règle ou les retire lui-même ; l’ordre de la file et **Publier maintenant** restent au modérateur.
+
 ## Le cadre de l’image
 
 Instagram n’accepte que des images entre **4:5** (en hauteur) et **1,91:1** (en largeur). Vos photos 2:3 en hauteur n’y entrent pas telles quelles. Trois choix, par défaut dans les réglages (**Recadrage** si vous n'avez rien choisi) et photo par photo dans la fiche :

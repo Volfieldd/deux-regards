@@ -32,7 +32,8 @@ export const PERMISSIONS = {
   'terrain.app': { scoped: true },      // app Rencontre : les rencontres sont enregistrées pour son photographe
   'terrain.cartes': { scoped: true },   // cartes d'accord et QR de son photographe
   'instagram.voir': {},
-  'instagram.file': {},
+  'instagram.proposer': { scoped: true }, // proposer une photo pour Instagram (circuit : le modérateur la met dans la file)
+  'instagram.file': { scoped: true },  // mettre dans la file, la régler, la retirer ; « les miennes » : réglable par photographe
   'instagram.publier': {},             // publier maintenant (droit à part)
   'instagram.compte': {},
   'signalements.traiter': {},
@@ -59,7 +60,7 @@ export const ROLES = {
       ...all(['admin.acceder', 'photos.importer']),
       'terrain.app': OWN, 'terrain.cartes': OWN,
       'photos.voir': OWN, 'photos.textes': OWN, 'photos.modifier': OWN, 'photos.supprimer': OWN, 'photos.original': OWN,
-      'photos.proposer': OWN, 'photos.publiees.modifier': OWN,
+      'photos.proposer': OWN, 'photos.publiees.modifier': OWN, 'instagram.proposer': OWN,
       'sorties.voir': OWN, 'sorties.gerer': OWN,
       'personnes.voir': OWN, 'personnes.gerer': OWN, 'personnes.refus': OWN, 'personnes.demandes': OWN, 'personnes.offrir': OWN,
       'statistiques.voir': OWN,
@@ -81,6 +82,7 @@ export const SCOPES = { ALL, OWN };
 export const ADJUSTABLE = {
   'photos.publier': 'Publier ses photos sans validation',
   'photos.publiees.modifier': 'Modifier ses photos une fois publiées',
+  'instagram.file': 'Mettre ses photos dans la file Instagram sans validation',
 };
 // Droits d'un ensemble de rôles : permission → « tout » ou « les miennes » (la plus large l'emporte), puis les
 // réglages du compte (adjust : { add: [...], remove: [...] }, seulement des droits de ADJUSTABLE).

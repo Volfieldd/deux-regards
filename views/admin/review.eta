@@ -30,3 +30,28 @@
 <% it.scheduled.forEach(r => { %>  <li><span class="t"><a href="/admin/photos/<%= r.id %>#publication"><%= r.photo.title %></a> <span class="mono"><%= r.author %></span></span><span class="mono"><%= r.when %></span></li>
 <% }) %></ul>
 <% } %>
+<% if (it.instagram) { %>
+<section id="instagram" aria-labelledby="rv-ig">
+<h2 id="rv-ig"><%= t('Instagram') %> <span class="mono"><%= it.instagram.length > 1 ? t('{n} photos proposées', { n: it.instagram.length }) : t('{n} photo proposée', { n: it.instagram.length }) %></span></h2>
+<p class="prose"><%= t('Les photos que les photographes proposent pour Instagram, avec leurs choix (cadre, filigrane, légende). Mettez-les dans la file telles quelles, ou renvoyez-les avec une remarque.') %></p>
+<% if (!it.instagram.length) { %><p class="empty"><%= t('Aucune photo proposée pour Instagram.') %></p><% } else { %>
+<ul class="review-list">
+<% it.instagram.forEach(r => { const p = r.photo; %>  <li class="panel">
+    <a class="rv-pick" href="/admin/instagram/apercu.jpg?photo=<%= p.id %>&cadre=<%= r.frame %>&filigrane=<%= r.watermark ? 1 : 0 %>" target="_blank" rel="noopener" aria-label="<%= t('Aperçu exact de l’image envoyée (nouvel onglet)') %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></a>
+    <div class="rv-body">
+      <a class="o-title" href="/admin/photos/<%= p.id %>#instagram"><%= p.title %></a>
+      <span class="mono"><%= r.author %> · <%= t('proposée le {date}', { date: r.when }) %> · <%= t(r.frameLabel).toLowerCase() %><%= r.watermark ? ` · ${t('filigrane')}` : '' %></span>
+<% if (r.message) { %>      <q class="rv-msg"><%= r.message %></q>
+<% } %>      <details class="rv-cap"><summary><%= t('Légende') %> <span class="mono"><%= r.caption.length %> / 2200</span></summary><pre class="cap-full"><%= r.caption %></pre></details>
+      <div class="rv-ig-acts">
+        <form method="post" action="/admin/instagram/propositions/<%= r.id %>/valider"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn" type="submit"><%= t('Mettre dans la file Instagram') %></button></form>
+        <form method="post" action="/admin/instagram/propositions/<%= r.id %>/renvoyer" class="rv-back"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
+          <label><%= t('Remarque pour le photographe') %> <textarea name="message" rows="2" maxlength="1000" required></textarea></label>
+          <button class="btn ghost" type="submit"><%= t('Renvoyer avec la remarque') %></button></form>
+      </div>
+    </div>
+  </li>
+<% }) %></ul>
+<% } %>
+</section>
+<% } %>

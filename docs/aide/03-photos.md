@@ -158,7 +158,7 @@ Un photographe ne publie pas lui-même : il **propose**, et un modérateur (ou u
 - **Dépublier** : le modérateur dit pourquoi ; le photographe reçoit la raison.
 - **Prévenir** : « Aujourd'hui » dit à chacun ce qui l'attend (propositions à valider, photos proposées, programmées, renvoyées). Chacun peut aussi choisir d'être prévenu **par e-mail**, dans **Votre compte** sur la page Aujourd'hui (si l'envoi d'e-mails est configuré sur le serveur).
 - **Historique** : chaque fiche garde qui a proposé, validé, programmé, renvoyé ou dépublié, et quand.
-- **Réglages par photographe** (page **Circuit de publication**, modérateurs et administrateurs) : **Publier ses photos sans validation** (le photographe publie alors lui-même ses photos, sans passer par le circuit) et **Modifier ses photos une fois publiées** (oui par défaut ; retiré, une photo publiée ne change plus sans le modérateur).
+- **Réglages par photographe** (page **Circuit de publication**, modérateurs et administrateurs) : **Publier ses photos sans validation** (le photographe publie alors lui-même ses photos, sans passer par le circuit) **Modifier ses photos une fois publiées** (oui par défaut ; retiré, une photo publiée ne change plus sans le modérateur) et **Mettre ses photos dans la file Instagram sans validation** (voir l’aide « Instagram »).
 
 Un administrateur publie directement, comme avant. Un signalement de visiteur ne dépublie rien tout seul : c'est au modérateur de décider.
 

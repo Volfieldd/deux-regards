@@ -1101,3 +1101,10 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
   .ig-log td:nth-child(5) { grid-column: 1 / -1; }
   .ig-log .enc-tag { white-space: nowrap; }
 }
+.rv-cap summary { cursor: pointer; }
+.rv-cap .cap-full { white-space: pre-wrap; font: inherit; font-size: 13px; color: var(--ink2); margin: 6px 0 0; max-height: 18em; overflow: auto; }
+.rv-ig-acts { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-top: 6px; }
+.rv-ig-acts form { margin: 0; }
+.rv-back { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; flex: 1; min-width: 240px; }
+.rv-back label { flex: 1; min-width: 200px; display: grid; gap: 4px; }
+#instagram.review-ig, section#instagram { margin-top: 24px; }
