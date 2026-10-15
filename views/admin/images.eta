@@ -36,7 +36,7 @@
       </div>
       <div class="row">
         <label><%= t('Position') %> <select name="wm_position"><% Object.entries(it.POSITIONS).forEach(([k, label]) => { %><option value="<%= k %>"<%~ w.position === k ? ' selected' : '' %>><%= t(label) %></option><% }) %></select></label>
-        <label><%= t('Appliquer aux tailles') %> <select name="wm_min_width"><% Object.entries(it.MIN_WIDTHS).forEach(([k, label]) => { %><option value="<%= k %>"<%~ String(w.minWidth) === k ? ' selected' : '' %>><%= label %></option><% }) %></select></label>
+        <label><%= t('Appliquer aux tailles') %> <select name="wm_min_width"><% Object.entries(it.MIN_WIDTHS).forEach(([k, label]) => { %><option value="<%= k %>"<%~ String(w.minWidth) === k ? ' selected' : '' %>><%= t(label) %></option><% }) %></select></label>
       </div>
       <div class="row">
         <label><%= t('Opacité (%)') %> <input type="number" name="wm_opacity" min="5" max="100" value="<%= w.opacity %>"></label>

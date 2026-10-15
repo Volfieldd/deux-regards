@@ -239,9 +239,9 @@
 <% } else if (ig.post && ig.post.status === 'publishing') { %>
   <p><%= t('Envoi à Instagram en cours…') %></p>
 <% } else if (ig.active) { const slot = ig.slot || '', sp = slot.indexOf(' '); const when = sp < 0 ? (fr ? slot.replace(':', ' h ') : slot) : t('{date} à {time}', { date: slot.slice(0, sp), time: fr ? slot.slice(sp + 1).replace(':', ' h ') : slot.slice(sp + 1) }); %>
-  <p><%~ t('Dans la file : prévue le {slot}.', { slot: `<strong>${esc(when)}</strong>` }) %><% if (ig.post.error) { %> <span class="err"><%= t('Dernier essai : {error}', { error: ig.post.error }) %></span><% } %></p>
+  <p><%~ t('Dans la file : prévue le {slot}.', { slot: `<strong>${esc(when)}</strong>` }) %><% if (ig.post.error) { %> <span class="err"><%= t('Dernier essai : {error}', { error: t.msg(ig.post.error) }) %></span><% } %></p>
 <% } else if (ig.post && ig.post.status === 'failed') { %>
-  <p class="err"><%~ t('Échec de la publication : {error} (voir la page {link} pour réessayer).', { error: esc(ig.post.error), link: '<a href="/admin/instagram">Instagram</a>' }) %></p>
+  <p class="err"><%~ t('Échec de la publication : {error} (voir la page {link} pour réessayer).', { error: esc(t.msg(ig.post.error)), link: '<a href="/admin/instagram">Instagram</a>' }) %></p>
 <% } %>
 <% if (ig.blocked.length && !seePeople) { %>
   <p class="ig-blocked" role="note"><strong><%= t('Instagram bloqué') %></strong> · <%= t('Le détail (personnes et accords) est visible du photographe et des administrateurs.') %></p>
@@ -296,7 +296,7 @@
 <% } else if (!it.tsa.url) { %>
       <%~ t('Désactivé sur ce serveur ({code}).', { code: '<code>TSA_URL=off</code>' }) %>
 <% } else if (pf && pf.status === 'error') { %>
-      <span class="err"><%= t('En attente : {error} (essai n° {n}, nouvel essai automatique).', { error: pf.error, n: pf.attempts }) %></span>
+      <span class="err"><%= t('En attente : {error} (essai n° {n}, nouvel essai automatique).', { error: t.msg(pf.error), n: pf.attempts }) %></span>
 <% } else { %>
       <%= t('En attente (quelques secondes après l’import).') %>
 <% } %>

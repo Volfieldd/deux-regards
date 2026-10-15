@@ -90,7 +90,7 @@
 <% if (sg.status === 'off') { %>    <span class="enc-tag"><%= t('Éteint') %></span> <%= t('Au premier allumage, le modèle d’analyse (≈ {n} Mo) est téléchargé une seule fois, puis les photos existantes sont analysées en tâche de fond.', { n: Math.round(sg.modelBytes / 1e6) }) %>
 <% } else if (sg.status === 'downloading') { %>    <span class="enc-tag warn"><%= t('Téléchargement du modèle') %></span> <span data-suggest-n><%= t('{got} Mo sur {total}', { got: Math.round(sg.download.got / 1e6), total: Math.round(sg.download.total / 1e6) }) %></span> <progress max="100" value="<%= pct(sg.download.got, sg.download.total) %>"></progress>
 <% } else if (sg.status === 'analysing') { %>    <span class="enc-tag warn"><%= t('Analyse en cours') %></span> <span data-suggest-n><%= t('{done} photos sur {total}', { done: sg.done, total: sg.total }) %></span> <progress max="100" value="<%= pct(sg.done, sg.total) %>"></progress>
-<% } else if (sg.status === 'error') { %>    <span class="enc-tag no"><%= t('Modèle indisponible') %></span> <%= sg.error %> · <%= t('nouvel essai au prochain démarrage, ou éteignez puis rallumez.') %>
+<% } else if (sg.status === 'error') { %>    <span class="enc-tag no"><%= t('Modèle indisponible') %></span> <%= t.msg(sg.error) %> · <%= t('nouvel essai au prochain démarrage, ou éteignez puis rallumez.') %>
 <% } else { %>    <span class="enc-tag ok"><%= t('Prêt') %></span> <%= sg.total > 1 ? t('{n} photos analysées', { n: sg.done }) : t('{n} photo analysée', { n: sg.done }) %>
 <% } %>  </p>
   <form method="post" action="/admin/series/propositions" class="actions">

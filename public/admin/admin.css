@@ -1044,6 +1044,7 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .acc-form { display: grid; gap: 12px; }
 .acc-who { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
 .acc-who .mono { flex-basis: 100%; overflow-wrap: anywhere; }
+.acc-sub code { user-select: all; }
 .acc-roles { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
 .acc-roles legend { padding: 0; margin-bottom: 4px; font-size: 13px; color: var(--ink2); }
 .acc-roles label:has(input:disabled) { color: var(--ink3); }

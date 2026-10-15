@@ -39,7 +39,7 @@
     <p class="hint"><%= autoNames.length ? t('Mise en file automatique à la publication : {names}. Les autres séries seulement depuis la fiche de la photo.', { names: autoNames.join(', ') }) : t('Aucune mise en file automatique : une photo n’entre dans la file que si vous l’y ajoutez depuis sa fiche.') %> <a class="more" href="#auto"><%= t('Modifier') %></a></p>
 <% const u = it.usage; %>
     <h3><%= t('Consommation') %> <span class="mono"><%= t('limites « {name} »', { name: t(it.IG_PRESETS[u.preset].label) }) %></span></h3>
-<% if (u.paused) { %>    <p class="flash error" role="status"><%= t('File en pause jusqu’{when} : {reason}.', { when: u.paused.when.replace(/^à /, 'à ').replace(/^le /, 'au '), reason: u.paused.reason }) %></p>
+<% if (u.paused) { %>    <p class="flash error" role="status"><%= t('File en pause jusqu’{when} : {reason}.', { when: t.lang === 'fr' ? u.paused.when.replace(/^le /, 'au ') : t.msg(u.paused.when), reason: t.msg(u.paused.reason) }) %></p>
     <form method="post" action="/admin/instagram/reprendre"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Reprendre maintenant') %></button></form>
 <% } %>    <ul class="ig-usage">
       <li><%= t('Publications sur 24 h glissantes :') %> <strong><%= u.posts24h %> / <%= u.limits.postsPerDay %></strong></li>
@@ -47,7 +47,7 @@
 <% if (u.liveQuota) { %>      <li><%= t('Quota lu chez Instagram :') %> <strong><%= u.liveQuota.usage %> / <%= u.liveQuota.total || '?' %></strong> <span class="mono"><%= t('sur 24 h') %></span></li>
 <% } %><% if (u.limits.minGapMinutes) { %>      <li><%= t('Au moins') %> <strong><%= t('{n} min', { n: u.limits.minGapMinutes }) %></strong> <%= t('entre deux publications') %></li>
 <% } %>    </ul>
-<% if (!u.budget.ok && !u.paused) { %>    <p class="hint"><%= u.budget.reason %></p>
+<% if (!u.budget.ok && !u.paused) { %>    <p class="hint"><%= t.msg(u.budget.reason) %></p>
 <% } %>  </section>
 
   <section class="panel wide2" aria-labelledby="ig-queue">
@@ -63,7 +63,7 @@
           <a href="/admin/photos/<%= p.photo_id %>#instagram"><strong><%= p.photo.title %></strong></a>
           <span class="mono"><%= p.status === 'publishing' ? t('Envoi en cours') : t('Prévue le {date} à {time}', { date: p.slot.split(' ')[0], time: hm(p.slot.split(' ')[1] || '') }) %> · <%= t(it.FRAMES[p.frame]).toLowerCase() %><%= p.watermark ? ` · ${t('filigrane')}` : '' %></span>
           <span class="cap-excerpt"><%= p.caption.split('\n')[0] %>…</span>
-<% if (p.error) { %>          <span class="err"><%= t('Dernier essai : {error} (essai {n} sur 3)', { error: p.error, n: p.attempts }) %></span>
+<% if (p.error) { %>          <span class="err"><%= t('Dernier essai : {error} (essai {n} sur 3)', { error: t.msg(p.error), n: p.attempts }) %></span>
 <% } %>
         </div>
 <% if (p.status === 'queued') { %>
@@ -86,7 +86,7 @@
     <h2 id="ig-likes"><%= t('Les plus aimées sur Instagram') %></h2>
     <p class="hint"><%= t('Likes et commentaires des photos publiées depuis le site, relevés chaque matin (seulement des nombres : Instagram ne dit pas qui a aimé).') %>
       <%= es.at ? t('Dernier relevé : {date} à {time}.', { date: fmtDate(es.at), time: new Intl.DateTimeFormat(it.locale, { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(new Date(es.at)) }) : t('Pas encore de relevé.') %></p>
-<% if (es.error) { %>    <p class="cellnote warn"><%= t('Dernier essai sans succès : {error}', { error: es.error }) %></p>
+<% if (es.error) { %>    <p class="cellnote warn"><%= t('Dernier essai sans succès : {error}', { error: t.msg(es.error) }) %></p>
 <% } %>
 <% if (it.mostLiked.length) { %>
     <ol class="rank plain ig-top">
@@ -108,7 +108,7 @@
     <ul class="rank plain">
 <% it.history.forEach(p => { %>
       <li><span class="t"><a href="/admin/photos/<%= p.photo_id %>#instagram"><%= p.photo.title %></a>
-        <span class="mono"><%= p.status === 'published' ? `${t('publiée le {date}', { date: fmtDate(p.published_at) })}${p.engagement ? ` · ${p.engagement.likes > 1 ? t('{n} likes', { n: p.engagement.likes }) : t('{n} like', { n: p.engagement.likes })}, ${t('{n} comm.', { n: p.engagement.comments })}` : ''}` : t('échec : {error}', { error: p.error }) %></span></span>
+        <span class="mono"><%= p.status === 'published' ? `${t('publiée le {date}', { date: fmtDate(p.published_at) })}${p.engagement ? ` · ${p.engagement.likes > 1 ? t('{n} likes', { n: p.engagement.likes }) : t('{n} like', { n: p.engagement.likes })}, ${t('{n} comm.', { n: p.engagement.comments })}` : ''}` : t('échec : {error}', { error: t.msg(p.error) }) %></span></span>
 <% if (p.status === 'published' && p.permalink) { %>        <a class="more" href="<%= p.permalink %>" target="_blank" rel="noopener"><%= t('Voir sur Instagram') %> ↗</a>
 <% } else if (p.status === 'failed') { %>        <form method="post" action="/admin/instagram/<%= p.id %>/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Réessayer') %></button></form>
 <% } %></li>

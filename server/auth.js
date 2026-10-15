@@ -87,12 +87,13 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       if (request.method === 'GET' || request.method === 'HEAD') {
         return reply.redirect(`/auth/login?next=${encodeURIComponent(request.url)}`);
       }
-      return reply.code(401).send({ error: 'Session expirée, reconnectez-vous.' });
+      return reply.code(401).send({ error: (request.t || (x => x))('Session expirée, reconnectez-vous.') });
     }
     if (!hasRole(request.session.roles)) {
       const a = accounts.bySub(request.session.sub);
-      if (a?.status === 'en_attente') return renderError(reply, 403, pendingPage);
-      return renderError(reply, 403, { title: 'Accès refusé', message: 'Ce compte n’a pas accès à l’administration.' });
+      const t = request.t || (x => x);                                          // langue de l'admin, si elle est connue
+      if (a?.status === 'en_attente') return renderError(reply, 403, { title: t(pendingPage.title), message: t(pendingPage.message) });
+      return renderError(reply, 403, { title: t('Accès refusé'), message: t('Ce compte n’a pas accès à l’administration.') });
     }
     // Expiration glissante : le cookie suit l'échéance de la session.
     const maxAge = Math.floor((request.session.expires_at - Date.now()) / 1000);
