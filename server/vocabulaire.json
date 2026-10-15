@@ -1,0 +1,647 @@
+[
+ {
+  "en": "lighthouse",
+  "fr": "phare",
+  "de": "Leuchtturm"
+ },
+ {
+  "en": "sea",
+  "fr": "mer",
+  "de": "Meer"
+ },
+ {
+  "en": "ocean waves",
+  "fr": "vagues",
+  "de": "Wellen"
+ },
+ {
+  "en": "beach",
+  "fr": "plage",
+  "de": "Strand"
+ },
+ {
+  "en": "sand dunes",
+  "fr": "dunes",
+  "de": "Dünen"
+ },
+ {
+  "en": "coast",
+  "fr": "côte",
+  "de": "Küste"
+ },
+ {
+  "en": "cliff",
+  "fr": "falaise",
+  "de": "Klippe"
+ },
+ {
+  "en": "rocks",
+  "fr": "rochers",
+  "de": "Felsen"
+ },
+ {
+  "en": "island",
+  "fr": "île",
+  "de": "Insel"
+ },
+ {
+  "en": "harbour",
+  "fr": "port",
+  "de": "Hafen"
+ },
+ {
+  "en": "boat",
+  "fr": "bateau",
+  "de": "Boot"
+ },
+ {
+  "en": "sailing boat",
+  "fr": "voilier",
+  "de": "Segelboot"
+ },
+ {
+  "en": "fishermen",
+  "fr": "pêcheurs",
+  "de": "Fischer"
+ },
+ {
+  "en": "fishing net",
+  "fr": "filet de pêche",
+  "de": "Fischernetz"
+ },
+ {
+  "en": "pier",
+  "fr": "jetée",
+  "de": "Mole"
+ },
+ {
+  "en": "seagull",
+  "fr": "mouette",
+  "de": "Möwe"
+ },
+ {
+  "en": "birds",
+  "fr": "oiseaux",
+  "de": "Vögel"
+ },
+ {
+  "en": "mountain",
+  "fr": "montagne",
+  "de": "Berg"
+ },
+ {
+  "en": "mountain peak",
+  "fr": "sommet",
+  "de": "Gipfel"
+ },
+ {
+  "en": "valley",
+  "fr": "vallée",
+  "de": "Tal"
+ },
+ {
+  "en": "gorge",
+  "fr": "gorges",
+  "de": "Schlucht"
+ },
+ {
+  "en": "canyon",
+  "fr": "canyon",
+  "de": "Canyon"
+ },
+ {
+  "en": "hills",
+  "fr": "collines",
+  "de": "Hügel"
+ },
+ {
+  "en": "forest",
+  "fr": "forêt",
+  "de": "Wald"
+ },
+ {
+  "en": "trees",
+  "fr": "arbres",
+  "de": "Bäume"
+ },
+ {
+  "en": "undergrowth",
+  "fr": "sous-bois",
+  "de": "Unterholz"
+ },
+ {
+  "en": "autumn leaves",
+  "fr": "feuilles d’automne",
+  "de": "Herbstlaub"
+ },
+ {
+  "en": "flowers",
+  "fr": "fleurs",
+  "de": "Blumen"
+ },
+ {
+  "en": "field",
+  "fr": "champ",
+  "de": "Feld"
+ },
+ {
+  "en": "vineyard",
+  "fr": "vignes",
+  "de": "Weinberg"
+ },
+ {
+  "en": "countryside",
+  "fr": "campagne",
+  "de": "Landschaft"
+ },
+ {
+  "en": "river",
+  "fr": "rivière",
+  "de": "Fluss"
+ },
+ {
+  "en": "lake",
+  "fr": "lac",
+  "de": "See"
+ },
+ {
+  "en": "waterfall",
+  "fr": "cascade",
+  "de": "Wasserfall"
+ },
+ {
+  "en": "snow",
+  "fr": "neige",
+  "de": "Schnee"
+ },
+ {
+  "en": "ice",
+  "fr": "glace",
+  "de": "Eis"
+ },
+ {
+  "en": "desert",
+  "fr": "désert",
+  "de": "Wüste"
+ },
+ {
+  "en": "fog",
+  "fr": "brume",
+  "de": "Nebel"
+ },
+ {
+  "en": "mist over water",
+  "fr": "brume sur l’eau",
+  "de": "Dunst über dem Wasser"
+ },
+ {
+  "en": "clouds",
+  "fr": "nuages",
+  "de": "Wolken"
+ },
+ {
+  "en": "blue sky",
+  "fr": "ciel bleu",
+  "de": "blauer Himmel"
+ },
+ {
+  "en": "storm",
+  "fr": "orage",
+  "de": "Gewitter"
+ },
+ {
+  "en": "rain",
+  "fr": "pluie",
+  "de": "Regen"
+ },
+ {
+  "en": "rainbow",
+  "fr": "arc-en-ciel",
+  "de": "Regenbogen"
+ },
+ {
+  "en": "sunset",
+  "fr": "coucher de soleil",
+  "de": "Sonnenuntergang"
+ },
+ {
+  "en": "sunrise",
+  "fr": "lever de soleil",
+  "de": "Sonnenaufgang"
+ },
+ {
+  "en": "golden hour light",
+  "fr": "heure dorée",
+  "de": "goldene Stunde"
+ },
+ {
+  "en": "backlight",
+  "fr": "contre-jour",
+  "de": "Gegenlicht"
+ },
+ {
+  "en": "silhouette",
+  "fr": "silhouette",
+  "de": "Silhouette"
+ },
+ {
+  "en": "shadows",
+  "fr": "ombres",
+  "de": "Schatten"
+ },
+ {
+  "en": "reflection",
+  "fr": "reflet",
+  "de": "Spiegelung"
+ },
+ {
+  "en": "night",
+  "fr": "nuit",
+  "de": "Nacht"
+ },
+ {
+  "en": "stars",
+  "fr": "étoiles",
+  "de": "Sterne"
+ },
+ {
+  "en": "star trails",
+  "fr": "filé d’étoiles",
+  "de": "Sternspuren"
+ },
+ {
+  "en": "moon",
+  "fr": "lune",
+  "de": "Mond"
+ },
+ {
+  "en": "long exposure",
+  "fr": "pose longue",
+  "de": "Langzeitbelichtung"
+ },
+ {
+  "en": "city",
+  "fr": "ville",
+  "de": "Stadt"
+ },
+ {
+  "en": "skyline",
+  "fr": "ligne d’horizon",
+  "de": "Skyline"
+ },
+ {
+  "en": "skyscrapers",
+  "fr": "gratte-ciel",
+  "de": "Wolkenkratzer"
+ },
+ {
+  "en": "street",
+  "fr": "rue",
+  "de": "Straße"
+ },
+ {
+  "en": "alley",
+  "fr": "ruelle",
+  "de": "Gasse"
+ },
+ {
+  "en": "crossroads",
+  "fr": "carrefour",
+  "de": "Kreuzung"
+ },
+ {
+  "en": "bridge",
+  "fr": "pont",
+  "de": "Brücke"
+ },
+ {
+  "en": "river bank in a city",
+  "fr": "quai",
+  "de": "Kai"
+ },
+ {
+  "en": "square",
+  "fr": "place",
+  "de": "Platz"
+ },
+ {
+  "en": "market",
+  "fr": "marché",
+  "de": "Markt"
+ },
+ {
+  "en": "cafe terrace",
+  "fr": "terrasse de café",
+  "de": "Café-Terrasse"
+ },
+ {
+  "en": "shop window",
+  "fr": "vitrine",
+  "de": "Schaufenster"
+ },
+ {
+  "en": "building",
+  "fr": "immeuble",
+  "de": "Gebäude"
+ },
+ {
+  "en": "architecture",
+  "fr": "architecture",
+  "de": "Architektur"
+ },
+ {
+  "en": "facade",
+  "fr": "façade",
+  "de": "Fassade"
+ },
+ {
+  "en": "staircase",
+  "fr": "escalier",
+  "de": "Treppe"
+ },
+ {
+  "en": "window",
+  "fr": "fenêtre",
+  "de": "Fenster"
+ },
+ {
+  "en": "door",
+  "fr": "porte",
+  "de": "Tür"
+ },
+ {
+  "en": "church",
+  "fr": "église",
+  "de": "Kirche"
+ },
+ {
+  "en": "cathedral",
+  "fr": "cathédrale",
+  "de": "Kathedrale"
+ },
+ {
+  "en": "castle",
+  "fr": "château",
+  "de": "Burg"
+ },
+ {
+  "en": "ruins",
+  "fr": "ruines",
+  "de": "Ruinen"
+ },
+ {
+  "en": "monument",
+  "fr": "monument",
+  "de": "Denkmal"
+ },
+ {
+  "en": "statue",
+  "fr": "statue",
+  "de": "Statue"
+ },
+ {
+  "en": "sculpture",
+  "fr": "sculpture",
+  "de": "Skulptur"
+ },
+ {
+  "en": "fountain",
+  "fr": "fontaine",
+  "de": "Brunnen"
+ },
+ {
+  "en": "graffiti",
+  "fr": "graffiti",
+  "de": "Graffiti"
+ },
+ {
+  "en": "neon lights",
+  "fr": "néons",
+  "de": "Neonlichter"
+ },
+ {
+  "en": "train station",
+  "fr": "gare",
+  "de": "Bahnhof"
+ },
+ {
+  "en": "train",
+  "fr": "train",
+  "de": "Zug"
+ },
+ {
+  "en": "tram",
+  "fr": "tramway",
+  "de": "Straßenbahn"
+ },
+ {
+  "en": "metro",
+  "fr": "métro",
+  "de": "U-Bahn"
+ },
+ {
+  "en": "car",
+  "fr": "voiture",
+  "de": "Auto"
+ },
+ {
+  "en": "bicycle",
+  "fr": "vélo",
+  "de": "Fahrrad"
+ },
+ {
+  "en": "motorbike",
+  "fr": "moto",
+  "de": "Motorrad"
+ },
+ {
+  "en": "road",
+  "fr": "route",
+  "de": "Straße"
+ },
+ {
+  "en": "path",
+  "fr": "chemin",
+  "de": "Weg"
+ },
+ {
+  "en": "fence",
+  "fr": "clôture",
+  "de": "Zaun"
+ },
+ {
+  "en": "portrait",
+  "fr": "portrait",
+  "de": "Porträt"
+ },
+ {
+  "en": "face",
+  "fr": "visage",
+  "de": "Gesicht"
+ },
+ {
+  "en": "person walking",
+  "fr": "passant",
+  "de": "Passant"
+ },
+ {
+  "en": "people",
+  "fr": "gens",
+  "de": "Menschen"
+ },
+ {
+  "en": "crowd",
+  "fr": "foule",
+  "de": "Menschenmenge"
+ },
+ {
+  "en": "couple",
+  "fr": "couple",
+  "de": "Paar"
+ },
+ {
+  "en": "child",
+  "fr": "enfant",
+  "de": "Kind"
+ },
+ {
+  "en": "elderly person",
+  "fr": "personne âgée",
+  "de": "älterer Mensch"
+ },
+ {
+  "en": "hands",
+  "fr": "mains",
+  "de": "Hände"
+ },
+ {
+  "en": "musician",
+  "fr": "musicien",
+  "de": "Musiker"
+ },
+ {
+  "en": "dancer",
+  "fr": "danseur",
+  "de": "Tänzer"
+ },
+ {
+  "en": "worker",
+  "fr": "travailleur",
+  "de": "Arbeiter"
+ },
+ {
+  "en": "football",
+  "fr": "football",
+  "de": "Fußball"
+ },
+ {
+  "en": "sport",
+  "fr": "sport",
+  "de": "Sport"
+ },
+ {
+  "en": "stadium",
+  "fr": "stade",
+  "de": "Stadion"
+ },
+ {
+  "en": "festival",
+  "fr": "fête",
+  "de": "Fest"
+ },
+ {
+  "en": "dog",
+  "fr": "chien",
+  "de": "Hund"
+ },
+ {
+  "en": "cat",
+  "fr": "chat",
+  "de": "Katze"
+ },
+ {
+  "en": "horse",
+  "fr": "cheval",
+  "de": "Pferd"
+ },
+ {
+  "en": "cow",
+  "fr": "vache",
+  "de": "Kuh"
+ },
+ {
+  "en": "umbrella",
+  "fr": "parapluie",
+  "de": "Regenschirm"
+ },
+ {
+  "en": "food",
+  "fr": "nourriture",
+  "de": "Essen"
+ },
+ {
+  "en": "black and white photo",
+  "fr": "noir et blanc",
+  "de": "Schwarzweiß"
+ },
+ {
+  "en": "minimalism",
+  "fr": "minimalisme",
+  "de": "Minimalismus"
+ },
+ {
+  "en": "symmetry",
+  "fr": "symétrie",
+  "de": "Symmetrie"
+ },
+ {
+  "en": "aerial view",
+  "fr": "vue aérienne",
+  "de": "Luftaufnahme"
+ },
+ {
+  "en": "close-up",
+  "fr": "gros plan",
+  "de": "Nahaufnahme"
+ },
+ {
+  "en": "panorama",
+  "fr": "panorama",
+  "de": "Panorama"
+ },
+ {
+  "en": "summer",
+  "fr": "été",
+  "de": "Sommer"
+ },
+ {
+  "en": "winter",
+  "fr": "hiver",
+  "de": "Winter"
+ },
+ {
+  "en": "autumn",
+  "fr": "automne",
+  "de": "Herbst"
+ },
+ {
+  "en": "spring",
+  "fr": "printemps",
+  "de": "Frühling"
+ },
+ {
+  "en": "travel",
+  "fr": "voyage",
+  "de": "Reise"
+ },
+ {
+  "en": "interior",
+  "fr": "intérieur",
+  "de": "Innenraum"
+ },
+ {
+  "en": "light",
+  "fr": "lumière",
+  "de": "Licht"
+ }
+]

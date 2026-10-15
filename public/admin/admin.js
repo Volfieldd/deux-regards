@@ -2005,3 +2005,17 @@ window.addEventListener('hashchange', () => openFor(location.hash));
   d.close();
   d.showModal();
 })();
+
+// ----- mots-clés suggérés (fiche) : un clic ajoute le mot au champ Mots-clés, sans doublon ; à enregistrer -----
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-kw-add]');
+  if (!b) return;
+  const field = b.closest('form')?.querySelector('input[name="keywords"]');
+  if (!field) return;
+  const words = field.value.split(',').map(w => w.trim()).filter(Boolean);
+  if (!words.some(w => w.toLowerCase() === b.dataset.kwAdd.toLowerCase())) words.push(b.dataset.kwAdd);
+  field.value = words.join(', ');
+  field.dispatchEvent(new Event('input', { bubbles: true }));
+  b.remove();
+});
+document.querySelectorAll('[data-kw-add]').forEach(b => { b.hidden = false; });

@@ -1,5 +1,28 @@
 [
   {
+    "version": "1.86.0",
+    "date": "2026-10-15",
+    "pr": 86,
+    "title": {
+      "fr": "Des mots-clés suggérés",
+      "en": "Suggested keywords",
+      "de": "Vorgeschlagene Stichwörter"
+    },
+    "items": [
+      {
+        "fr": "Sous le champ Mots-clés de la fiche, des suggestions d’après l’image (phare, brume, pose longue…) : un clic ajoute le mot. Rien n’est ajouté sans vous.",
+        "en": "Under the photo’s Keywords field, suggestions based on the image (lighthouse, mist, long exposure…): a click adds the word. Nothing is added without you.",
+        "de": "Unter dem Feld Stichwörter Vorschläge nach dem Bild (Leuchtturm, Nebel, Langzeitbelichtung…): Ein Klick fügt das Wort hinzu. Nichts wird ohne Sie hinzugefügt.",
+        "perm": "photos.textes"
+      },
+      {
+        "fr": "La recherche du site trouve ces mots dans les trois langues : « phare » répond aussi à « lighthouse » et « Leuchtturm ».",
+        "en": "The site search finds these words in all three languages: “phare” also answers “lighthouse” and “Leuchtturm”.",
+        "de": "Die Suche der Website findet diese Wörter in allen drei Sprachen: „phare“ antwortet auch auf „lighthouse“ und „Leuchtturm“."
+      }
+    ]
+  },
+  {
     "version": "1.85.0",
     "date": "2026-10-15",
     "pr": 85,

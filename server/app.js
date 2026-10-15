@@ -27,6 +27,7 @@ import { createEncounters } from './encounters.js';
 import { createMailer } from './mailer.js';
 import { createReminders } from './reminders.js';
 import { createTrips } from './trips.js';
+import { createKeywordSuggester } from './keywords-suggest.js';
 import { createVault } from './vault.js';
 import { createInstagram } from './instagram.js';
 import { createTodo } from './todo.js';
@@ -239,6 +240,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { reviewTimer = setInterval(() => app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée')), 60 * 1000); reviewTimer.unref(); });
   app.addHook('onClose', async () => clearInterval(reviewTimer));
   app.decorate('trips', createTrips({ db }));
+  app.decorate('keywordSuggest', createKeywordSuggester({ db }));
   app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
   // Relances par e-mail (demandes RGPD par quarts du délai, récapitulatifs) : toutes les heures.
