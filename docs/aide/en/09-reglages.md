@@ -66,7 +66,7 @@ As long as the essentials are missing (names, address, email, person responsible
 - **Linked photographer:** used for defaults (import, Field app) and decides what a Photographer account sees; with no linked photographer, a Photographer account sees nothing. A photographer can only be linked to one account.
 - **Deactivated:** the account can no longer sign in, and its current session loses access at once.
 - **Delete this account:** the account and its sessions are erased; if it signs in again, it starts over as pending.
-- **Safeguards:** there is always at least one active administrator; you cannot deactivate or delete yourself; accounts listed in `ADMIN_SUBS` (server configuration, marked “protected”) remain administrators whatever happens.
+- **Safeguards:** there is always at least one active administrator; you cannot deactivate or delete yourself; accounts listed in `ADMIN_SUBS` (server configuration, marked “protected”) remain administrators whatever happens. The **identifier (sub)** shown under each account is the one to copy into `ADMIN_SUBS` (one click selects it).
 
 The menu only shows the pages the account can open.
 

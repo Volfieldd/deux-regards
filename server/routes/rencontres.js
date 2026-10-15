@@ -109,7 +109,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       enc.createShare(id, Number(request.body?.photo_id));
     } catch (err) {
       if (!(err instanceof EncounterError)) throw err;
-      return failed(reply, `/admin/rencontres/${id}#photos`, err.message);
+      return failed(reply, `/admin/rencontres/${id}#photos`, request.t.msg(err.message));
     }
     return done(reply, `/admin/rencontres/${id}#liens`, request.t('Lien privé créé, valable 30 jours : envoyez-le à la personne.'));
   });
@@ -123,7 +123,9 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
 
   // ---------- rencontre saisie sur le téléphone (web app installable) ----------
   const LOCALE = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' };
-  const appView = (reply, view, data) => reply.header('cache-control', 'no-store').render(`admin/${view}`, { siteName: app.siteName(), UI, t: reply.request.t, lang: reply.request.t.lang, locale: reply.request.t.locale, ...data });
+  // Erreurs de saisie de l'app : dans la langue de l'admin du photographe (la page de la personne, elle, a sa langue).
+  const appView = (reply, view, data) => reply.header('cache-control', 'no-store').render(`admin/${view}`, { siteName: app.siteName(), UI, t: reply.request.t, lang: reply.request.t.lang, locale: reply.request.t.locale, ...data,
+    errors: Object.fromEntries(Object.entries(data.errors || {}).map(([k, v]) => [k, typeof v === 'string' ? reply.request.t.msg(v) : v])) });
   const authorOf = request => repo.authorBySub(request.session.sub) || null;
   function appPage(request, reply, extra = {}) {
     // Photographe : celui choisi sur l'accueil Terrain (?photographe=), sinon celui du compte.

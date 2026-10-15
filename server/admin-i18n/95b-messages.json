@@ -1,0 +1,362 @@
+{
+ "Ville introuvable : choisissez-la dans la liste proposée (toutes les communes de France, localités de plus de 500 habitants ailleurs). Pour un lieu précis, utilisez le champ Lieu.": {
+  "en": "Town not found: choose it from the list (all French municipalities, places with over 500 inhabitants elsewhere). For a precise spot, use the Place field.",
+  "de": "Ort nicht gefunden: Wählen Sie ihn aus der Liste (alle französischen Gemeinden, anderswo Orte mit über 500 Einwohnern). Für eine genaue Stelle nutzen Sie das Feld Ort."
+ },
+ "Lettre des cartes : une seule lettre, de A à Z.": {
+  "en": "Card letter: a single letter, A to Z.",
+  "de": "Kartenbuchstabe: ein einzelner Buchstabe von A bis Z."
+ },
+ "Session expirée, reconnectez-vous.": {
+  "en": "Session expired, sign in again.",
+  "de": "Sitzung abgelaufen, bitte erneut anmelden."
+ },
+ "Accès refusé : ce compte n’a pas ce droit.": {
+  "en": "Access denied: this account does not have this right.",
+  "de": "Zugriff verweigert: Dieses Konto hat dieses Recht nicht."
+ },
+ "Accès refusé": {
+  "en": "Access denied",
+  "de": "Zugriff verweigert"
+ },
+ "Ce compte n’a pas le droit de faire cela.": {
+  "en": "This account is not allowed to do that.",
+  "de": "Dieses Konto darf das nicht."
+ },
+ "Ce compte n’a pas accès à l’administration.": {
+  "en": "This account has no access to the admin.",
+  "de": "Dieses Konto hat keinen Zugang zur Verwaltung."
+ },
+ "Compte en attente": {
+  "en": "Account pending",
+  "de": "Konto wartend"
+ },
+ "Votre compte est bien enregistré. Un administrateur doit maintenant lui donner un rôle ; réessayez ensuite.": {
+  "en": "Your account has been recorded. An administrator now needs to give it a role; try again afterwards.",
+  "de": "Ihr Konto ist angelegt. Ein Administrator muss ihm nun eine Rolle geben; versuchen Sie es danach erneut."
+ },
+ "Référence illisible : une lettre et un numéro, par exemple J-0142.": {
+  "en": "Unreadable reference: a letter and a number, e.g. J-0142.",
+  "de": "Unlesbare Referenz: ein Buchstabe und eine Zahl, z. B. J-0142."
+ },
+ "Cochez au moins un usage accepté sur la carte.": {
+  "en": "Tick at least one use accepted on the card.",
+  "de": "Kreuzen Sie mindestens eine auf der Karte akzeptierte Nutzung an."
+ },
+ "Instagram suppose le site : cochez aussi le site si la carte l’indique, sinon décochez Instagram.": {
+  "en": "Instagram requires the site: also tick the site if the card says so, otherwise untick Instagram.",
+  "de": "Instagram setzt die Website voraus: Kreuzen Sie auch die Website an, wenn die Karte es angibt, sonst entfernen Sie Instagram."
+ },
+ "Adresse e-mail invalide.": {
+  "en": "Invalid email address.",
+  "de": "Ungültige E-Mail-Adresse."
+ },
+ "Aucun photographe lié à votre compte : choisissez-le.": {
+  "en": "No photographer linked to your account: choose one.",
+  "de": "Kein Fotograf mit Ihrem Konto verknüpft: Wählen Sie ihn."
+ },
+ "Cochez au moins un usage accepté.": {
+  "en": "Tick at least one accepted use.",
+  "de": "Kreuzen Sie mindestens eine akzeptierte Nutzung an."
+ },
+ "Instagram suppose le site : cochez aussi le site, ou décochez Instagram.": {
+  "en": "Instagram requires the site: also tick the site, or untick Instagram.",
+  "de": "Instagram setzt die Website voraus: Kreuzen Sie auch die Website an oder entfernen Sie Instagram."
+ },
+ "Le nom de la personne est nécessaire avec son accord.": {
+  "en": "The person’s name is needed with their consent.",
+  "de": "Mit der Einwilligung ist der Name der Person nötig."
+ },
+ "Indiquez si la personne est majeure.": {
+  "en": "Say whether the person is an adult.",
+  "de": "Geben Sie an, ob die Person volljährig ist."
+ },
+ "Personne mineure : le nom du parent qui signe est nécessaire.": {
+  "en": "Minor: the name of the signing parent is needed.",
+  "de": "Minderjährige Person: Der Name des unterschreibenden Elternteils ist nötig."
+ },
+ "La signature manque.": {
+  "en": "The signature is missing.",
+  "de": "Die Unterschrift fehlt."
+ },
+ "Signature illisible : recommencez.": {
+  "en": "Unreadable signature: try again.",
+  "de": "Unterschrift unlesbar: Bitte erneut."
+ },
+ "Rien à enregistrer : un accord, un refus, ou au moins une adresse pour envoyer la photo.": {
+  "en": "Nothing to save: a consent, a refusal, or at least an address to send the photo.",
+  "de": "Nichts zu speichern: eine Einwilligung, eine Ablehnung oder mindestens eine Adresse zum Senden des Fotos."
+ },
+ "Liez d’abord la photo à la rencontre.": {
+  "en": "Link the photo to the encounter first.",
+  "de": "Verknüpfen Sie das Foto zuerst mit der Begegnung."
+ },
+ "Envoi d’e-mails non configuré (SMTP_URL).": {
+  "en": "Sending email is not configured (SMTP_URL).",
+  "de": "E-Mail-Versand nicht eingerichtet (SMTP_URL)."
+ },
+ "fichier du modèle trop gros : téléchargement interrompu": {
+  "en": "model file too large: download stopped",
+  "de": "Modelldatei zu groß: Download abgebrochen"
+ },
+ "fichier du modèle altéré (empreinte SHA-256 différente)": {
+  "en": "model file altered (different SHA-256 fingerprint)",
+  "de": "Modelldatei verändert (anderer SHA-256-Fingerabdruck)"
+ },
+ "Toutes les tailles": {
+  "en": "All sizes",
+  "de": "Alle Größen"
+ },
+ "1280 px et plus (vignettes épargnées)": {
+  "en": "1280 px and above (thumbnails spared)",
+  "de": "Ab 1280 px (Vorschaubilder ausgenommen)"
+ },
+ "2000 px seulement": {
+  "en": "2000 px only",
+  "de": "Nur 2000 px"
+ },
+ "DER trop imbriqué": {
+  "en": "DER nested too deeply",
+  "de": "DER zu tief verschachtelt"
+ },
+ "DER tronqué": {
+  "en": "truncated DER",
+  "de": "DER abgeschnitten"
+ },
+ "longueur DER non prise en charge": {
+  "en": "unsupported DER length",
+  "de": "DER-Länge nicht unterstützt"
+ },
+ "date du jeton illisible": {
+  "en": "unreadable token date",
+  "de": "Datum des Tokens unlesbar"
+ },
+ "empreinte SHA-256 invalide": {
+  "en": "invalid SHA-256 fingerprint",
+  "de": "ungültiger SHA-256-Fingerabdruck"
+ },
+ "réponse de la TSA trop volumineuse": {
+  "en": "TSA response too large",
+  "de": "Antwort der TSA zu groß"
+ },
+ "le jeton n’utilise pas SHA-256": {
+  "en": "the token does not use SHA-256",
+  "de": "das Token verwendet nicht SHA-256"
+ },
+ "nonce différent de celui demandé": {
+  "en": "nonce different from the one requested",
+  "de": "Nonce weicht von der angefragten ab"
+ },
+ "le jeton ne porte pas sur cette empreinte": {
+  "en": "the token is not for this fingerprint",
+  "de": "das Token gilt nicht für diesen Fingerabdruck"
+ },
+ "jeton mal formé": {
+  "en": "malformed token",
+  "de": "fehlerhaftes Token"
+ },
+ "octets en trop après la réponse": {
+  "en": "extra bytes after the response",
+  "de": "überzählige Bytes nach der Antwort"
+ },
+ "réponse sans jeton": {
+  "en": "response without a token",
+  "de": "Antwort ohne Token"
+ },
+ "jeton qui n’est pas un SignedData": {
+  "en": "token that is not a SignedData",
+  "de": "Token ist kein SignedData"
+ },
+ "contenu qui n’est pas un TSTInfo": {
+  "en": "content that is not a TSTInfo",
+  "de": "Inhalt ist kein TSTInfo"
+ },
+ "signature du jeton illisible": {
+  "en": "unreadable token signature",
+  "de": "Signatur des Tokens unlesbar"
+ },
+ "signature SHA-1 refusée": {
+  "en": "SHA-1 signature refused",
+  "de": "SHA-1-Signatur abgelehnt"
+ },
+ "le contenu signé n’est pas un jeton d’horodatage": {
+  "en": "the signed content is not a timestamp token",
+  "de": "der signierte Inhalt ist kein Zeitstempel-Token"
+ },
+ "le contenu signé ne correspond pas au jeton": {
+  "en": "the signed content does not match the token",
+  "de": "der signierte Inhalt passt nicht zum Token"
+ },
+ "signature invalide (ou certificat de la TSA absent du jeton)": {
+  "en": "invalid signature (or TSA certificate missing from the token)",
+  "de": "ungültige Signatur (oder TSA-Zertifikat fehlt im Token)"
+ },
+ "certificat de la TSA non désigné par le jeton": {
+  "en": "TSA certificate not designated by the token",
+  "de": "TSA-Zertifikat nicht vom Token bezeichnet"
+ },
+ "le certificat signataire n’est pas celui désigné par le jeton": {
+  "en": "the signing certificate is not the one designated by the token",
+  "de": "das Signaturzertifikat ist nicht das vom Token bezeichnete"
+ },
+ "le certificat signataire n’est pas un certificat d’horodatage": {
+  "en": "the signing certificate is not a timestamping certificate",
+  "de": "das Signaturzertifikat ist kein Zeitstempel-Zertifikat"
+ },
+ "certificat de la TSA hors validité à la date du jeton": {
+  "en": "TSA certificate not valid on the token date",
+  "de": "TSA-Zertifikat zum Datum des Tokens ungültig"
+ },
+ "certificat de la TSA non émis par l’autorité attendue": {
+  "en": "TSA certificate not issued by the expected authority",
+  "de": "TSA-Zertifikat nicht von der erwarteten Stelle ausgestellt"
+ },
+ "Identifiant (sub)": {
+  "en": "Identifier (sub)",
+  "de": "Kennung (sub)"
+ },
+ "à {h}": {
+  "en": "{h}",
+  "de": "{h}"
+ },
+ "le {d} à {h}": {
+  "en": "{d}, {h}",
+  "de": "{d}, {h}"
+ },
+ "Instagram injoignable : {error}": {
+  "en": "Instagram unreachable: {error}",
+  "de": "Instagram nicht erreichbar: {error}"
+ },
+ "image refusée par Instagram ({status})": {
+  "en": "image refused by Instagram ({status})",
+  "de": "Bild von Instagram abgelehnt ({status})"
+ },
+ "budget de {n} appels par heure du réglage atteint": {
+  "en": "budget of {n} calls per hour from the settings reached",
+  "de": "Budget von {n} Aufrufen pro Stunde aus den Einstellungen erreicht"
+ },
+ "Instagram n’a pas répondu à temps": {
+  "en": "Instagram did not answer in time",
+  "de": "Instagram hat nicht rechtzeitig geantwortet"
+ },
+ "{error} — la publication a peut-être abouti : vérifiez sur Instagram avant de réessayer": {
+  "en": "{error} — the post may have gone through: check on Instagram before retrying",
+  "de": "{error} — die Veröffentlichung ist vielleicht erfolgt: Prüfen Sie auf Instagram, bevor Sie es erneut versuchen"
+ },
+ "En attente : {error}. File en pause jusqu’à {h}.": {
+  "en": "Waiting: {error}. Queue paused until {h}.",
+  "de": "Wartend: {error}. Warteschlange pausiert bis {h}."
+ },
+ "En attente : {error}. File en pause jusqu’au {d} à {h}.": {
+  "en": "Waiting: {error}. Queue paused until {d}, {h}.",
+  "de": "Wartend: {error}. Warteschlange pausiert bis {d}, {h}."
+ },
+ "quota de publications d’Instagram atteint": {
+  "en": "Instagram posting quota reached",
+  "de": "Veröffentlichungskontingent von Instagram erreicht"
+ },
+ "trop d’appels à l’API Instagram": {
+  "en": "too many calls to the Instagram API",
+  "de": "zu viele Aufrufe der Instagram-API"
+ },
+ "limite atteinte": {
+  "en": "limit reached",
+  "de": "Limit erreicht"
+ },
+ "Instagram a signalé une limite ({reason}) : file en pause jusqu’à {h}.": {
+  "en": "Instagram reported a limit ({reason}): queue paused until {h}.",
+  "de": "Instagram hat ein Limit gemeldet ({reason}): Warteschlange pausiert bis {h}."
+ },
+ "Instagram a signalé une limite ({reason}) : file en pause jusqu’au {d} à {h}.": {
+  "en": "Instagram reported a limit ({reason}): queue paused until {d}, {h}.",
+  "de": "Instagram hat ein Limit gemeldet ({reason}): Warteschlange pausiert bis {d}, {h}."
+ },
+ "{n} publication sur les dernières 24 h (limite : {max}) : prochaine possible {when}.": {
+  "en": "{n} post in the last 24 h (limit: {max}): next one possible {when}.",
+  "de": "{n} Veröffentlichung in den letzten 24 h (Limit: {max}): nächste möglich {when}."
+ },
+ "{n} publications sur les dernières 24 h (limite : {max}) : prochaine possible {when}.": {
+  "en": "{n} posts in the last 24 h (limit: {max}): next one possible {when}.",
+  "de": "{n} Veröffentlichungen in den letzten 24 h (Limit: {max}): nächste möglich {when}."
+ },
+ "Dernière publication il y a {n} min ; {gap} min au moins entre deux publications : prochaine possible {when}.": {
+  "en": "Last post {n} min ago; at least {gap} min between two posts: next one possible {when}.",
+  "de": "Letzte Veröffentlichung vor {n} Min.; mindestens {gap} Min. zwischen zwei Veröffentlichungen: nächste möglich {when}."
+ },
+ "{n} appels à l’API sur la dernière heure (limite : {max}) : prochaine publication possible {when}.": {
+  "en": "{n} API calls in the last hour (limit: {max}): next post possible {when}.",
+  "de": "{n} API-Aufrufe in der letzten Stunde (Limit: {max}): nächste Veröffentlichung möglich {when}."
+ },
+ "Quota d’Instagram atteint ({used} / {total} sur 24 h) : nouvel essai dans une heure.": {
+  "en": "Instagram quota reached ({used} / {total} over 24 h): new attempt in an hour.",
+  "de": "Instagram-Kontingent erreicht ({used} / {total} in 24 h): neuer Versuch in einer Stunde."
+ },
+ "pas encore horodatée": {
+  "en": "not timestamped yet",
+  "de": "noch nicht mit Zeitstempel"
+ },
+ "l’original a été modifié depuis son import": {
+  "en": "the original has been modified since its import",
+  "de": "das Original wurde seit dem Import verändert"
+ },
+ "le jeton ne porte pas sur cet original": {
+  "en": "the token is not for this original",
+  "de": "das Token gilt nicht für dieses Original"
+ },
+ "service injoignable ({code})": {
+  "en": "service unreachable ({code})",
+  "de": "Dienst nicht erreichbar ({code})"
+ },
+ "la TSA a répondu {status}": {
+  "en": "the TSA answered {status}",
+  "de": "die TSA antwortete {status}"
+ },
+ "horodatage refusé par la TSA (statut {status})": {
+  "en": "timestamp refused by the TSA (status {status})",
+  "de": "Zeitstempel von der TSA abgelehnt (Status {status})"
+ },
+ "téléchargement refusé ({status})": {
+  "en": "download refused ({status})",
+  "de": "Download abgelehnt ({status})"
+ },
+ "image trop grande ({max} px de côté au plus)": {
+  "en": "image too large ({max} px per side at most)",
+  "de": "Bild zu groß (höchstens {max} px Seitenlänge)"
+ },
+ "format {format} non pris en charge (JPEG, PNG, WebP, TIFF, HEIF)": {
+  "en": "format {format} not supported (JPEG, PNG, WebP, TIFF, HEIF)",
+  "de": "Format {format} wird nicht unterstützt (JPEG, PNG, WebP, TIFF, HEIF)"
+ },
+ "Texte trop long ({max} caractères au plus).": {
+  "en": "Text too long ({max} characters at most).",
+  "de": "Text zu lang (höchstens {max} Zeichen)."
+ },
+ "Le traducteur a refusé la demande.": {
+  "en": "The translator refused the request.",
+  "de": "Der Übersetzer hat die Anfrage abgelehnt."
+ },
+ "Le traducteur a refusé la demande : {error}.": {
+  "en": "The translator refused the request: {error}.",
+  "de": "Der Übersetzer hat die Anfrage abgelehnt: {error}."
+ },
+ "E-mail non envoyé : {reason}.": {
+  "en": "Email not sent: {reason}.",
+  "de": "E-Mail nicht gesendet: {reason}."
+ },
+ "identifiants refusés par le serveur de messagerie": {
+  "en": "credentials refused by the mail server",
+  "de": "Zugangsdaten vom Mailserver abgelehnt"
+ },
+ "serveur de messagerie injoignable": {
+  "en": "mail server unreachable",
+  "de": "Mailserver nicht erreichbar"
+ },
+ "le serveur de messagerie a refusé le message": {
+  "en": "the mail server refused the message",
+  "de": "der Mailserver hat die Nachricht abgelehnt"
+ },
+ "images non calculées pour l’instant : la photo est gardée en brouillon, nouvel essai au prochain passage": {
+  "en": "images not computed yet: the photo is kept as a draft, new attempt on the next run",
+  "de": "Bilder noch nicht berechnet: Das Foto bleibt ein Entwurf, neuer Versuch beim nächsten Durchlauf"
+ }
+}

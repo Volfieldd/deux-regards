@@ -56,3 +56,35 @@ test('sélecteur de langue : préférence gardée sur le photographe, pages et m
   // CSRF exigé.
   assert.equal((await ctx.app.inject({ method: 'POST', url: '/admin/langue', cookies, payload: { lang: 'en' } })).statusCode, 403);
 });
+
+test('messages d’erreur dans la langue de l’admin : validations, refus, messages composés ; l’identifiant du compte', async t => {
+  const en = translator('en'), de = translator('de');
+  // Message levé par un module, ou composé avec des variables (erreurs Instagram, e-mail, preuves) : reconnu.
+  assert.equal(en.msg('Adresse e-mail invalide.'), 'Invalid email address.');
+  assert.equal(en.msg('E-mail non envoyé : serveur de messagerie injoignable.'), 'Email not sent: mail server unreachable.');
+  assert.equal(de.msg('En attente : trop d’appels à l’API Instagram. File en pause jusqu’à 14 h 30.'), 'Wartend: zu viele Aufrufe der Instagram-API. Warteschlange pausiert bis 14 h 30.');
+  assert.equal(en.msg('la TSA a répondu 503'), 'the TSA answered 503');
+  assert.equal(en.msg('Texte libre de l’utilisateur'), 'Texte libre de l’utilisateur');            // inconnu : tel quel
+  assert.equal(translator('fr').msg('Adresse e-mail invalide.'), 'Adresse e-mail invalide.');
+  // En situation : un compte en anglais.
+  const ctx = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: TOKEN } });
+  const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', payload: { token: TOKEN, author: 'julien', next: '/admin' } });
+  const cookies = cookiesOf(res);
+  const csrf = ctx.db.prepare('SELECT csrf FROM sessions').pluck().get();
+  await ctx.app.inject({ method: 'POST', url: '/admin/langue', cookies, payload: { _csrf: csrf, lang: 'en', back: '/admin' } });
+  const images = (await ctx.app.inject({ url: '/admin/images', cookies })).body;
+  assert.match(images, />All sizes</);
+  assert.doesNotMatch(images, /Toutes les tailles/);
+  const accounts = (await ctx.app.inject({ url: '/admin/comptes', cookies })).body;
+  const sub = ctx.db.prepare('SELECT sub FROM accounts LIMIT 1').pluck().get();
+  assert.match(accounts, new RegExp(`Identifier \\(sub\\) : <code class="sub-nolang">${sub}</code>`));
+  // Refus de droit, en anglais.
+  const { createSessionStore } = await import('../server/sessions.js');
+  ctx.app.accounts.ensure({ sub: 'rita', name: 'rita', roles: ['relecteur'] });
+  const token = createSessionStore(ctx.db).create({ sub: 'rita', name: 'rita', roles: [] });
+  ctx.db.prepare("UPDATE authors SET admin_lang = 'en'").run();
+  const r = await ctx.app.inject({ url: '/admin/comptes', cookies: { session: token, admin_langue: 'en' }, headers: { accept: 'text/html' } });
+  assert.equal(r.statusCode, 403);
+  assert.match(r.body, /Access denied/);
+  assert.doesNotMatch(r.body, /Accès refusé/);
+});

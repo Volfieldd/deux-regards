@@ -82,6 +82,16 @@ export default async function adminRoutes(app) {
   // Rôles et permissions (server/permissions.js) : chaque route déclare la sienne ; une route d'admin sans permission
   // empêche le démarrage, et une permission absente du compte est refusée (fermé par défaut).
   app.addHook('onRoute', r => { if (r.url.startsWith('/admin') && !r.config?.perm) throw new Error(`route d’admin sans permission : ${r.method} ${r.url}`); });
+  // Langue de l'admin : celle du photographe lié au compte, sinon le cookie du compte, sinon le français.
+  // request.t traduit (voir server/admin-i18n.js) ; elle sert aux pages et aux messages après redirection.
+  const LANG_COOKIE = 'admin_langue';
+  app.decorateRequest('t', null);
+  app.addHook('preHandler', async request => {
+    if (!request.session) return;
+    const author = repo.authorBySub(request.session.sub);
+    const lang = ADMIN_LANGS.includes(author?.admin_lang) ? author.admin_lang : ADMIN_LANGS.includes(request.cookies[LANG_COOKIE]) ? request.cookies[LANG_COOKIE] : 'fr';
+    request.t = translator(lang);
+  });
   app.addHook('preHandler', app.requireAdmin);
   app.addHook('preHandler', app.requirePermission);
   // Portée « les miennes » : une photo, une rencontre, une personne, une sortie ou un QR qui n'est pas au photographe du
@@ -123,16 +133,6 @@ export default async function adminRoutes(app) {
     }
     if (!visible) { reply.callNotFound(); return reply; }
     if (found && scoped && author !== undefined && !request.owns(perm, author)) return app.forbid(request, reply);
-  });
-  // Langue de l'admin : celle du photographe lié au compte, sinon le cookie du compte, sinon le français.
-  // request.t traduit (voir server/admin-i18n.js) ; elle sert aux pages et aux messages après redirection.
-  const LANG_COOKIE = 'admin_langue';
-  app.decorateRequest('t', null);
-  app.addHook('preHandler', async request => {
-    if (!request.session) return;
-    const author = repo.authorBySub(request.session.sub);
-    const lang = ADMIN_LANGS.includes(author?.admin_lang) ? author.admin_lang : ADMIN_LANGS.includes(request.cookies[LANG_COOKIE]) ? request.cookies[LANG_COOKIE] : 'fr';
-    request.t = translator(lang);
   });
   // Journal d'audit : qui a modifié quoi, dans le journal du serveur et dans la base (page « Journal »). Une action
   // déjà notée avec son détail par la route (request.audited) n'est pas notée deux fois ; la langue et le thème de
@@ -204,8 +204,12 @@ export default async function adminRoutes(app) {
     });
   };
 
+  // Messages de validation (écrits en français dans le code) : traduits dans la langue de l'admin à l'affichage.
+  const translateDeep = (t, v) => (typeof v === 'string' ? t.msg(v) : v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, k === 'values' ? x : translateDeep(t, x)])) : v);
   function render(request, reply, template, data) {
     const siteName = app.siteName();
+    if (data.errors) data = { ...data, errors: translateDeep(request.t, data.errors) };
+    if (data.editErrors) data = { ...data, editErrors: { ...data.editErrors, errors: translateDeep(request.t, data.editErrors.errors) } };
     return reply.render(`admin/${template}`, {
       // Retour après la bascule clair / sombre : la page affichée, si elle a été obtenue par GET.
       adminTheme: adminTheme(request), navSeries: navSeries(request), currentPath: request.method === 'GET' ? request.url : '/admin',
@@ -375,7 +379,7 @@ export default async function adminRoutes(app) {
           // Rien ne reste d'une image qui n'a pas pu être rendue : ni ligne, ni original, ni variante.
           if (id) repo.deletePhoto(id);
           if (original) removePhotoFiles(storageDir, original.file);
-          if (err instanceof ImportError) refused.push({ name: part.filename, reason: request.t(err.message) });
+          if (err instanceof ImportError) refused.push({ name: part.filename, reason: request.t.msg(err.message) });
           else {
             request.log.warn({ err, file: part.filename }, 'rendu impossible à l’import');
             refused.push({ name: part.filename, reason: request.t('image illisible ou format non pris en charge par le serveur') });
@@ -444,7 +448,7 @@ export default async function adminRoutes(app) {
           result = { code: 200, id, title };
         } catch (err) {
           if (!(err instanceof ImportError)) throw err;
-          refuse(422, request.t(err.message));
+          refuse(422, request.t.msg(err.message));
         }
       }
     } catch (err) {
@@ -467,7 +471,7 @@ export default async function adminRoutes(app) {
       active: tracker.active(),
       photos: ids.map(id => {
         const job = tracker.get(id);
-        if (job?.state === 'error') return { id, state: 'error', error: job.error };
+        if (job?.state === 'error') return { id, state: 'error', error: request.t.msg(job.error) };
         const p = repo.photo(id);
         if (!p) return { id, state: 'missing' };
         const ready = rendered(p);
@@ -545,7 +549,7 @@ export default async function adminRoutes(app) {
       return done(reply, '/admin/instagram#likes', r.skipped ? request.t('Aucun post publié depuis le site à relever pour l’instant.')
         : r.count > 1 ? request.t('Likes et commentaires relevés pour {n} posts.', { n: r.count }) : request.t('Likes et commentaires relevés pour {n} post.', { n: r.count }));
     } catch (err) {
-      return failed(reply, '/admin/instagram#likes', request.t('Relevé impossible : {error}', { error: request.t(err.message) }));
+      return failed(reply, '/admin/instagram#likes', request.t('Relevé impossible : {error}', { error: request.t.msg(err.message) }));
     }
   });
 
@@ -575,7 +579,7 @@ export default async function adminRoutes(app) {
       return done(reply, '/admin/instagram', request.t('Compte Instagram @{username} connecté.', { username }));
     } catch (err) {
       if (!(err instanceof InstagramError)) throw err;
-      return failed(reply, '/admin/instagram', request.t('Connexion impossible : {error}', { error: request.t(err.message) }));
+      return failed(reply, '/admin/instagram', request.t('Connexion impossible : {error}', { error: request.t.msg(err.message) }));
     }
   });
   app.post('/admin/instagram/deconnexion', W('instagram.compte'), async (request, reply) => {
@@ -599,7 +603,7 @@ export default async function adminRoutes(app) {
         confirmed: (body.confirmer === '1' || body.confirmer === true) && request.owns('personnes.voir', repo.photo(id)?.author_id), byName: request.session.name });
     } catch (err) {
       if (!(err instanceof InstagramError)) throw err;
-      return json ? reply.code(422).send({ error: request.t(err.message) }) : failed(reply, back, request.t('Instagram : {error}.', { error: request.t(err.message) }));
+      return json ? reply.code(422).send({ error: request.t.msg(err.message) }) : failed(reply, back, request.t('Instagram : {error}.', { error: request.t.msg(err.message) }));
     }
     return json ? reply.send({ ok: true, text: request.t('Dans la file Instagram.') }) : done(reply, back, request.t('Photo dans la file Instagram.'));
   });
@@ -616,7 +620,7 @@ export default async function adminRoutes(app) {
         else await app.instagram.publish(id);
       } catch (err) {
         if (!(err instanceof InstagramError)) throw err;
-        return failed(reply, back, request.t('Instagram : {error}.', { error: request.t(err.message).replace(/\.$/, '') }));
+        return failed(reply, back, request.t('Instagram : {error}.', { error: request.t.msg(err.message).replace(/\.$/, '') }));
       }
       return label ? done(reply, back, label(request.t)) : reply.redirect(back, 303);
     });
@@ -655,7 +659,7 @@ export default async function adminRoutes(app) {
     if (kind === 'auteur') return t('Regard de {name}', { name: authors.find(a => a.slug === slug)?.name || slug });
     return page;
   };
-  const instaOf = photo => {
+  const instaOf = (photo, t) => {
     const ig = app.instagram;
     const s = ig.settings();
     const post = ig.forPhoto(photo.id);
@@ -663,13 +667,14 @@ export default async function adminRoutes(app) {
     const caption = post?.caption || ig.caption(photo.id, s);
     const engagement = post?.status === 'published' ? ig.engagementOf(post.ig_media_id) : null;
     const signature = repo.authors().find(a => a.id === photo.author_id)?.ig_signature || '';
-    return { post, active, s, FRAMES, caption, signature, blocked: ig.blocked(photo.id), custom: Boolean(post?.caption), warnings: captionWarnings(caption), connected: ig.account.connected(),
+    return { post, active, s, FRAMES, caption, signature, blocked: (r => (r.level === 'no' ? r.reasons : []))(app.readiness.state(photo.id, null, t).instagram),     // dans la langue de l'admin
+      custom: Boolean(post?.caption), warnings: captionWarnings(caption), connected: ig.account.connected(),
       engagement, likesSpark: engagement && engagement.series.length > 1 ? sparkline(engagement.series.map(d => d.likes)) : '',
       slot: active ? ig.queue().find(x => x.id === post.id)?.slot : null };
   };
   // Ce que la fiche montre en plus du formulaire : audience, Instagram, personnes, sortie, état et confirmations.
   const photoExtras = (photo, t, request) => ({
-    proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), shares: app.shares.forPhoto(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
+    proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), shares: app.shares.forPhoto(photo.id), insta: instaOf(photo, t), encounters: app.encounters.forPhoto(photo.id),
     outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
     notes: app.notes.open({ photoId: photo.id }), ownPhoto: app.accounts.authorIdOf(request.session.sub) === photo.author_id,
     review: { state: repo.photo(photo.id)?.review || null, at: repo.photo(photo.id)?.publish_at || null, history: app.review.history(photo.id).slice(0, 10) },
@@ -782,7 +787,7 @@ export default async function adminRoutes(app) {
       return done(reply, '/admin/comptes', request.t('Compte « {name} » enregistré.', { name: after.name || after.sub }));
     } catch (err) {
       if (!(err instanceof AccountError)) throw err;
-      return failed(reply, '/admin/comptes', request.t(err.message));
+      return failed(reply, '/admin/comptes', request.t.msg(err.message));
     }
   });
   app.post('/admin/comptes/:id/supprimer', W('comptes.gerer'), async (request, reply) => {
@@ -793,7 +798,7 @@ export default async function adminRoutes(app) {
       return done(reply, '/admin/comptes', request.t('Compte « {name} » supprimé.', { name: a.name || a.sub }));
     } catch (err) {
       if (!(err instanceof AccountError)) throw err;
-      return failed(reply, '/admin/comptes', request.t(err.message));
+      return failed(reply, '/admin/comptes', request.t.msg(err.message));
     }
   });
   // Journal : les 300 dernières actions, filtrables par compte et par texte.
@@ -1193,7 +1198,7 @@ export default async function adminRoutes(app) {
       app.variants.schedule();
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
-      return failed(reply, `/admin/photos/${id}`, Object.values(err.errors).join(' '));
+      return failed(reply, `/admin/photos/${id}`, Object.values(err.errors).map(m => request.t(m)).join(' '));
     }
     return done(reply, `/admin/photos/${id}`, request.t('Photo enregistrée.'));
   });
@@ -1204,7 +1209,7 @@ export default async function adminRoutes(app) {
       app.notes.add(id, request.body?.message, { sub: request.session.sub, name: request.session.name });
     } catch (err) {
       if (!(err instanceof NoteError)) throw err;
-      return failed(reply, `/admin/photos/${id}#remarques`, request.t(err.message));
+      return failed(reply, `/admin/photos/${id}#remarques`, request.t.msg(err.message));
     }
     return done(reply, `/admin/photos/${id}#remarques`, request.t('Remarque envoyée au photographe.'));
   });
@@ -1263,7 +1268,7 @@ export default async function adminRoutes(app) {
       return (r.done.length ? done : failed)(reply, safeBack(request, `/admin/photos/${id}#publication`), approvedText(request.t, r, at));
     } catch (err) {
       if (!(err instanceof ReviewError)) throw err;
-      return failed(reply, safeBack(request, `/admin/photos/${id}#publication`), request.t(err.message));
+      return failed(reply, safeBack(request, `/admin/photos/${id}#publication`), request.t.msg(err.message));
     }
   });
   app.post('/admin/photos/:id/deprogrammer', W('photos.publier'), async (request, reply) => {
@@ -1277,7 +1282,7 @@ export default async function adminRoutes(app) {
       await app.review.sendBack(id, by(request), request.body?.message);
     } catch (err) {
       if (!(err instanceof ReviewError) && !(err instanceof NoteError)) throw err;
-      return failed(reply, safeBack(request, `/admin/photos/${id}#publication`), request.t(err.message));
+      return failed(reply, safeBack(request, `/admin/photos/${id}#publication`), request.t.msg(err.message));
     }
     return done(reply, safeBack(request, `/admin/photos/${id}#publication`), request.t('Photo renvoyée au photographe avec votre remarque.'));
   });
@@ -1287,7 +1292,7 @@ export default async function adminRoutes(app) {
       await app.review.unpublish(id, by(request), request.body?.raison);
     } catch (err) {
       if (!(err instanceof ReviewError) && !(err instanceof NoteError)) throw err;
-      return failed(reply, `/admin/photos/${id}#publication`, request.t(err.message));
+      return failed(reply, `/admin/photos/${id}#publication`, request.t.msg(err.message));
     }
     return done(reply, `/admin/photos/${id}#publication`, request.t('Photo dépubliée ; le photographe reçoit la raison.'));
   });
@@ -1317,7 +1322,7 @@ export default async function adminRoutes(app) {
       return done(reply, '/admin/a-valider', approvedText(request.t, r, at));
     } catch (err) {
       if (!(err instanceof ReviewError)) throw err;
-      return failed(reply, '/admin/a-valider', request.t(err.message));
+      return failed(reply, '/admin/a-valider', request.t.msg(err.message));
     }
   });
   // Réglages du circuit, photographe par photographe : publier sans validation, modifier ses photos publiées.
@@ -1344,7 +1349,7 @@ export default async function adminRoutes(app) {
       app.accounts.setNotify(request.session.sub, { on: request.body?.email === '1', to: request.body?.adresse });
     } catch (err) {
       if (!(err instanceof AccountError)) throw err;
-      return failed(reply, '/admin#compte', request.t(err.message));
+      return failed(reply, '/admin#compte', request.t.msg(err.message));
     }
     return done(reply, '/admin#compte', request.t('Préférence enregistrée.'));
   });
@@ -1662,7 +1667,7 @@ export default async function adminRoutes(app) {
         made = await PROCESS[slot.kind](upload);
       } catch (err) {
         if (!(err instanceof BrandError)) throw err;
-        error = request.t('{label} refusé : {error}.', { label: request.t(slot.label), error: request.t(err.message) });
+        error = request.t('{label} refusé : {error}.', { label: request.t(slot.label), error: request.t.msg(err.message) });
       }
     }
     if (!made) return failed(reply, '/admin/apparence', error || request.t('Aucun fichier reçu.'));
@@ -1724,7 +1729,7 @@ export default async function adminRoutes(app) {
       return { text: await app.translator.translate(String(text || '').slice(0, 20000), String(source), String(target)) };
     } catch (err) {
       if (!(err instanceof TranslateError)) throw err;
-      return reply.code(422).send({ error: request.t(err.message) });
+      return reply.code(422).send({ error: request.t.msg(err.message) });
     }
   });
 

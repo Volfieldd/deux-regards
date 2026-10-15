@@ -66,7 +66,7 @@ Tant qu'il manque l'essentiel (noms, adresse, e-mail, responsable), « Aujourd'h
 - **Photographe lié :** sert aux valeurs par défaut (import, app Terrain) et décide de ce que voit un compte Photographe ; sans photographe lié, un compte Photographe ne voit rien. Un photographe ne peut être lié qu'à un seul compte.
 - **Désactivé :** le compte ne peut plus se connecter, et sa session en cours perd l'accès aussitôt.
 - **Supprimer ce compte :** le compte et ses sessions sont effacés ; s'il se reconnecte, il repart « en attente ».
-- **Garde-fous :** il reste toujours au moins un administrateur actif ; on ne peut ni se désactiver ni se supprimer soi-même ; les comptes listés dans `ADMIN_SUBS` (configuration du serveur, marqués « protégé ») restent administrateurs quoi qu'il arrive.
+- **Garde-fous :** il reste toujours au moins un administrateur actif ; on ne peut ni se désactiver ni se supprimer soi-même ; les comptes listés dans `ADMIN_SUBS` (configuration du serveur, marqués « protégé ») restent administrateurs quoi qu'il arrive. L'**identifiant (sub)** affiché sous chaque compte est celui à recopier dans `ADMIN_SUBS` (il se sélectionne d'un clic).
 
 Le menu ne montre que les pages que le compte peut ouvrir.
 

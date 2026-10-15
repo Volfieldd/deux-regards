@@ -18,7 +18,8 @@
       <div class="acc-who">
         <strong><%= a.name || t('sans nom') %></strong><% if (self) { %> <span class="enc-tag"><%= t('vous') %></span><% } %><% if (a.locked) { %> <span class="enc-tag ok"><%= t('protégé') %></span><% } %>
         <span class="enc-tag <%= a.status === 'actif' ? 'ok' : a.status === 'en_attente' ? 'warn' : 'no' %>"><%= STATUS[a.status] %></span>
-        <span class="mono"><%= a.email || a.sub %> · <%= t('dernière connexion : {date}', { date: when(a.last_login_at) }) %></span>
+        <span class="mono"><% if (a.email) { %><%= a.email %> · <% } %><%= t('dernière connexion : {date}', { date: when(a.last_login_at) }) %></span>
+        <span class="mono acc-sub"><%= t('Identifiant (sub)') %> : <code class="sub-nolang"><%= a.sub %></code></span>
       </div>
       <fieldset class="acc-roles"><legend><%= t('Rôles') %></legend>
 <% it.roles.forEach(r => { const on = a.roles.includes(r.key); %>        <label class="inline"><input type="checkbox" name="roles" value="<%= r.key %>"<%~ on ? ' checked' : '' %><%~ !r.ready || (a.locked && r.key === 'admin') ? ' disabled' : '' %>> <%= t(r.label) %></label>

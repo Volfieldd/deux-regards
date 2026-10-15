@@ -66,7 +66,7 @@ Solange das Wesentliche fehlt (Namen, Adresse, E-Mail, Verantwortlicher), weist 
 - **Verknüpfter Fotograf:** dient für Voreinstellungen (Import, App Unterwegs) und bestimmt, was ein Fotografen-Konto sieht; ohne verknüpften Fotografen sieht ein Fotografen-Konto nichts. Ein Fotograf kann nur mit einem Konto verknüpft werden.
 - **Deaktiviert:** Das Konto kann sich nicht mehr anmelden, und seine laufende Sitzung verliert sofort den Zugriff.
 - **Dieses Konto löschen:** Konto und Sitzungen werden gelöscht; meldet es sich erneut an, beginnt es wieder wartend.
-- **Schutzmaßnahmen:** Es gibt immer mindestens einen aktiven Administrator; man kann sich nicht selbst deaktivieren oder löschen; die in `ADMIN_SUBS` aufgeführten Konten (Serverkonfiguration, als „geschützt“ markiert) bleiben in jedem Fall Administratoren.
+- **Schutzmaßnahmen:** Es gibt immer mindestens einen aktiven Administrator; man kann sich nicht selbst deaktivieren oder löschen; die in `ADMIN_SUBS` aufgeführten Konten (Serverkonfiguration, als „geschützt“ markiert) bleiben in jedem Fall Administratoren. Die unter jedem Konto angezeigte **Kennung (sub)** ist die, die in `ADMIN_SUBS` einzutragen ist (ein Klick markiert sie).
 
 Das Menü zeigt nur die Seiten, die das Konto öffnen darf.
 

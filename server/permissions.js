@@ -110,8 +110,9 @@ export function registerPermissions(app, { renderError }) {
   const forbid = (request, reply) => {
     const json = !String(request.headers.accept || '').includes('text/html');
     reply.code(403).header('cache-control', 'no-store');
-    return json ? reply.send({ error: 'Accès refusé : ce compte n’a pas ce droit.' })
-      : renderError(reply, 403, { title: 'Accès refusé', message: 'Ce compte n’a pas le droit de faire cela.' });
+    const t = request.t || (x => x);                                            // langue de l'admin (posée avant ce contrôle)
+    return json ? reply.send({ error: t('Accès refusé : ce compte n’a pas ce droit.') })
+      : renderError(reply, 403, { title: t('Accès refusé'), message: t('Ce compte n’a pas le droit de faire cela.') });
   };
   app.decorate('forbid', forbid);
   app.decorate('requirePermission', async function (request, reply) {
