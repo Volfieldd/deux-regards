@@ -26,8 +26,9 @@ export function registerOutings(app, { repo, render, done, failed, P, W, withRea
     const author = s.all ? authors.find(a => a.slug === request.query.photographe) || null : authors[0] || { id: -1 };
     const state = Object.hasOwn(STATES, request.query.etat) ? request.query.etat : '';
     const all = out.list({ author: author?.id ?? null });
+    const tripIndex = app.trips.dayIndex();
     const list = all.filter(o => !state || o.state === state).slice(0, 200)
-      .map(o => ({ ...o, url: outingUrl(o), when: fmtDay(o.day, request.t), range: range(o, request.t), strip: o.photos.slice(0, 4).map(withReady).filter(p => p.ready) }));
+      .map(o => ({ ...o, url: outingUrl(o), when: fmtDay(o.day, request.t), range: range(o, request.t), strip: o.photos.slice(0, 4).map(withReady).filter(p => p.ready), trip: tripIndex.get(`${o.author.id}:${o.day}`) || null }));
     return render(request, reply, 'outings', { title: request.t('Sorties'), list, authors, author, state, STATES: statesOf(request.t),
       counts: Object.fromEntries(Object.keys(STATES).map(k => [k, all.filter(o => o.state === k).length])), total: all.length });
   });
@@ -42,6 +43,9 @@ export function registerOutings(app, { repo, render, done, failed, P, W, withRea
     return render(request, reply, 'outing', {
       title: request.t('Sortie du {date}', { date: fmtDay(o.day, request.t) }), o: { ...o, photos: o.photos.map(p => ({ ...withReady(p), state: app.readiness.state(p, null, request.t), suggest: suggestOf(p) })), url: outingUrl(o), when: fmtDay(o.day, request.t), range: range(o, request.t) },
       partUrl: p => outingUrl({ ...o, starts: p.starts }), STATES: statesOf(request.t), hhmm,
+      // Voyage de la journée, et ceux qui peuvent la recevoir (ceux du photographe, ou communs pour qui gère tout).
+      trip: app.trips.tripOf(o.author.id, o.day),
+      trips: request.owns('sorties.gerer', o.author.id) ? app.trips.list().filter(tr => (tr.author_id === o.author.id || (tr.author_id == null && request.scope('sorties.gerer')?.all))).map(tr => ({ id: tr.id, name: tr.name })) : [],
     });
   });
 

@@ -1,0 +1,67 @@
+<% layout('./layout') %>
+<% const t = it.t, tr = it.tr; const LV = { ok: t('prête'), warn: t('à vérifier'), no: t('bloquée') }; %>
+<p class="mono"><a class="more eyebrow" href="/admin/voyages">← <%= t('Voyages') %></a></p>
+<div class="outing-head">
+  <h1><%= tr.name %><span class="sub"><%= tr.span %> · <%= tr.who %> · <%= tr.nDays > 1 ? t('{n} journées', { n: tr.nDays }) : t('{n} journée', { n: tr.nDays }) %> · <%= tr.nPhotos > 1 ? t('{n} photos', { n: tr.nPhotos }) : t('{n} photo', { n: tr.nPhotos }) %> · <%= tr.nPeople > 1 ? t('{n} personnes', { n: tr.nPeople }) : t('{n} personne', { n: tr.nPeople }) %></span></h1>
+<% if (it.readyDrafts && !it.can('photos.publier') && it.can('photos.proposer')) { %>  <form method="post" action="/admin/voyages/<%= tr.id %>/proposer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn" type="submit"><%= t('Proposer les photos prêtes · {n}', { n: it.readyDrafts }) %></button></form>
+<% } %><% if (it.readyDrafts && it.can('photos.publier')) { %>  <form method="post" action="/admin/voyages/<%= tr.id %>/publier"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn" type="submit"><%= t('Publier les photos prêtes · {n}', { n: it.readyDrafts }) %></button></form>
+<% } %></div>
+
+<section class="panel" id="journees" aria-labelledby="tr-days">
+  <h2 id="tr-days"><%= t('Journées du voyage') %> <span class="mono"><%= t('chacune est une sortie') %></span></h2>
+<% if (!it.days.length) { %>  <p class="empty"><%= t('Aucune journée : rattachez-en ci-dessous, ou depuis la page d’une sortie.') %></p>
+<% } else { %>  <ol class="trip-days">
+<% it.days.forEach((d, i) => { %>    <li class="outing-row">
+      <span class="trip-n mono"><%= t('J{n}', { n: i + 1 }) %></span>
+      <a class="o-main" href="<%= d.url %>"><strong><%= d.when %><%= d.place ? ` · ${d.place}` : '' %></strong><span class="mono"><%= d.author ? d.author.name : '' %> · <%= d.nPhotos > 1 ? t('{n} photos', { n: d.nPhotos }) : t('{n} photo', { n: d.nPhotos }) %> · <%= d.nPeople > 1 ? t('{n} personnes', { n: d.nPeople }) : t('{n} personne', { n: d.nPeople }) %></span></a>
+      <span class="o-strip" aria-hidden="true"><% d.strip.forEach(p => { %><%~ it.picture(p, { sizes: '48px', alt: '' }) %><% }) %></span>
+<% if (it.manage) { %>      <form method="post" action="/admin/voyages/<%= tr.id %>/journees/retirer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="jour" value="<%= d.author_id %>:<%= d.day %>"><button class="linkbtn" type="submit" aria-label="<%= t('Retirer la journée du {date} du voyage', { date: d.when }) %>"><%= t('Retirer') %></button></form>
+<% } %>    </li>
+<% }) %>  </ol>
+<% } %>
+<% if (it.manage) { %>
+  <form class="form trip-add" method="post" action="/admin/voyages/<%= tr.id %>/journees">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <h3><%= t('Rattacher des journées') %></h3>
+    <div class="row">
+      <label><%= t('Du') %> <input type="date" name="du"></label>
+      <label><%= t('Au') %> <input type="date" name="au"></label>
+<% if (tr.author_id == null && it.allTrips) { %>      <label><%= t('Photographe') %> <select name="photographe"><option value=""><%= t('les deux') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></label>
+<% } %>    </div>
+    <p class="hint"><%= t('Toutes les journées de prise de vue entre ces deux dates (photos datées par l’appareil, ou rencontres). Une journée déjà dans un autre voyage y est déplacée.') %></p>
+<% if (it.nearby.length) { %>    <details class="trip-pick"><summary><%= t('Ou cochez des sorties') %> <span class="mono"><%= t('les plus récentes d’abord') %></span></summary>
+      <ul class="plain trip-pick-list">
+<% it.nearby.forEach(o => { %>        <li><label class="inline"><input type="checkbox" name="jours" value="<%= o.author.id %>:<%= o.day %>"> <%= o.when %><%= o.place ? ` · ${o.place}` : '' %> <span class="mono"><%= o.author.name %><%= o.other ? ` · ${t('dans « {name} »', { name: o.other.name })}` : '' %></span></label></li>
+<% }) %>      </ul></details>
+<% } %>    <p class="actions"><button class="btn" type="submit"><%= t('Rattacher') %></button></p>
+  </form>
+<% } %>
+</section>
+
+<section class="panel" aria-labelledby="tr-photos">
+  <h2 id="tr-photos"><%= t('Photos du voyage') %> <span class="mono"><%= tr.nPublished > 1 ? t('{n} publiées', { n: tr.nPublished }) : t('{n} publiée', { n: tr.nPublished }) %></span></h2>
+<% if (!it.photos.length) { %>  <p class="empty"><%= t('Aucune photo : les photos d’un voyage sont celles de ses journées (date de l’appareil).') %></p>
+<% } else { %>  <ul class="trip-photos">
+<% it.photos.forEach(p => { %>    <li><a href="/admin/photos/<%= p.id %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '140px', alt: '' }) %><% } else { %><span class="ph"></span><% } %><span class="trip-ph-t"><%= p.title %></span></a>
+      <span class="enc-tag <%= p.status === 'published' ? 'ok' : p.level %>"><%= p.status === 'published' ? t('publiée') : LV[p.level] %></span></li>
+<% }) %>  </ul>
+<% } %>
+</section>
+
+<% if (it.manage) { %>
+<form class="panel form" method="post" action="/admin/voyages/<%= tr.id %>" id="reglages">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <h2><%= t('Nom et texte') %> <span class="mono"><%= t('pour la page publique du voyage, à venir') %></span></h2>
+  <label><%= t('Nom') %> <input name="name" value="<%= tr.name %>" maxlength="120" required></label>
+  <div class="row">
+    <label><%= t('Nom en anglais') %> <input name="name_en" value="<%= tr.name_en %>" maxlength="120" lang="en"></label>
+    <label><%= t('Nom en allemand') %> <input name="name_de" value="<%= tr.name_de %>" maxlength="120" lang="de"></label>
+  </div>
+  <label><%= t('Texte') %> <textarea name="intro" rows="4" maxlength="4000"><%= tr.intro %></textarea></label>
+  <label><%= t('Texte en anglais') %> <textarea name="intro_en" rows="3" maxlength="4000" lang="en"><%= tr.intro_en %></textarea></label>
+  <label><%= t('Texte en allemand') %> <textarea name="intro_de" rows="3" maxlength="4000" lang="de"><%= tr.intro_de %></textarea></label>
+<% if (it.allTrips) { %>  <label><%= t('Photographe') %> <select name="author_id"><option value=""><%= t('les deux photographes') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ tr.author_id === a.id ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label>
+<% } %>  <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
+</form>
+<form method="post" action="/admin/voyages/<%= tr.id %>/supprimer" class="acc-del"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit"><%= t('Supprimer ce voyage') %></button> <span class="hint"><%= t('ses sorties et ses photos restent') %></span></form>
+<% } %>
