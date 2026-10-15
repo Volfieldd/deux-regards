@@ -15,7 +15,7 @@ const MONTH = 30 * 864e5;
 const FR = translator('fr');
 const dayOf = t => ms => new Intl.DateTimeFormat(t.locale || 'fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
 
-export function createTodo({ db, encounters, instagram, proofs, readiness, feedback, now = () => Date.now() }) {
+export function createTodo({ db, encounters, instagram, proofs, readiness, feedback, seriesSuggest, now = () => Date.now() }) {
   const q = {
     rights: db.prepare(`SELECT id FROM encounters WHERE rights_request IS NOT NULL AND rights_done_at IS NULL ORDER BY rights_requested_at`).pluck(),
     // Refus dont des photos liées sont encore publiées.
@@ -94,6 +94,8 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
     const paused = instagram?.usage().paused;
     if (paused) items.push({ level: 'bientot', title: t('Instagram en pause'), detail: t('reprise {when} : {reason}', { when: paused.when, reason: paused.reason }), href: '/admin/instagram', action: t('Voir') });
     const toFinish = q.toFinish.all().filter(p => p.status === 'draft' || isProvisional(p)).length;
+    const proposed = seriesSuggest?.enabled() ? seriesSuggest.forPhotos(db.prepare("SELECT id, category_id, status, series_checked FROM photos WHERE status = 'draft' AND series_checked = 0").all()).size : 0;
+    if (proposed) items.push({ level: 'plus-tard', title: proposed > 1 ? t('{n} photos avec une série proposée', { n: proposed }) : t('{n} photo avec une série proposée', { n: proposed }), detail: t('une autre série leur ressemble davantage'), href: '/admin/photos?manque=proposee', action: t('Voir') });
     if (toFinish) items.push({ level: 'plus-tard', title: toFinish > 1 ? t('{n} photos à finir', { n: toFinish }) : t('{n} photo à finir', { n: toFinish }), detail: t('brouillons ou titres provisoires'), href: '/admin/photos?statut=afinir', action: t('Finir') });
     const noCity = q.noCity.get();
     if (noCity) items.push({ level: 'plus-tard', title: noCity > 1 ? t('{n} photos publiées sans ville', { n: noCity }) : t('{n} photo publiée sans ville', { n: noCity }), detail: t('elles ne peuvent pas apparaître sur la carte du monde'), href: '/admin/photos?manque=ville', action: t('Compléter') });

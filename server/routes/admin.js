@@ -149,8 +149,12 @@ export default async function adminRoutes(app) {
     category_id: p.category_id, category: p.category, author_id: p.author_id, author: p.author, place: p.place,
     taken_on: p.taken_on, when: p.when, width: p.width, height: p.height, ready: p.ready,
     city_id: p.city_id ?? null, city: p.city_name ? cities.label({ name: p.city_name, cc: p.city_cc }) : '', city_source: p.city_source ?? null, on_map: Boolean(p.on_map),
-    thumb: p.ready ? thumb(p) : null, large: p.ready ? large(p) : null,
+    thumb: p.ready ? thumb(p) : null, large: p.ready ? large(p) : null, suggest: p.suggest || [],
   });
+  // Séries proposées (server/series-suggest.js) avec leur nom ; thumbs : vignettes des photos voisines (fiche).
+  const catNames = () => new Map(repo.categories().map(c => [c.id, c.name]));
+  const suggestOf = (list, names = catNames(), thumbs = false) => (list || []).map(x => ({ id: x.category_id, name: names.get(x.category_id) || '', votes: x.votes, size: x.size,
+    ...(thumbs ? { like: x.like.map(id => withReady(repo.photo(id))).filter(q => q?.ready).map(q => ({ id: q.id, title: q.title, thumb: thumb(q) })) } : {}) }));
   // Classe de format (« ar-150 » = 3:2) : planche contact justifiée sans style en ligne (CSP).
   const ratioClass = p => (p.width > 0 && p.height > 0 ? `ar-${Math.min(300, Math.max(40, Math.round((p.width / p.height) * 20) * 5))}` : 'ar-150');
 
@@ -186,22 +190,24 @@ export default async function adminRoutes(app) {
     // État pour le site (server/readiness.js) : à vérifier, bloquée, sans visage.
     const stateOf = new Map(), people = new Map();
     const st = p => { if (!stateOf.has(p.id)) stateOf.set(p.id, app.readiness.state(p, people, request.t)); return stateOf.get(p.id); };
+    const all = repo.photos();
+    const sugg = app.seriesSuggest.forPhotos(all), names = catNames();
     const MISSING = { ville: { label: request.t('Publiées sans ville'), test: p => p.status === 'published' && p.city_id == null },
       traduction: { label: request.t('Titres sans traduction'), test: p => p.status === 'published' && (!p.title_en || !p.title_de) },
       verifier: { label: request.t('▲ À vérifier'), test: p => st(p).site.level === 'warn' && !app.readiness.confirmed(p.id, 'site', st(p)) },
       bloquee: { label: request.t('✕ Bloquées'), test: p => st(p).site.level === 'no' },
-      'sans-visage': { label: request.t('Sans visage'), test: p => !st(p).faces.has } };
+      'sans-visage': { label: request.t('Sans visage'), test: p => !st(p).faces.has },
+      proposee: { label: request.t('✦ Série proposée'), test: p => sugg.has(p.id) } };
     const missing = Object.hasOwn(MISSING, request.query.manque) ? request.query.manque : '';
     // « À finir » : brouillons et titres provisoires.
     const todo = statut === 'afinir';
     const filter = { q: String(q), author: String(auteur), category: String(serie), status: STATUSES[statut] ? statut : '' };
     const authors = repo.authors();
-    const all = repo.photos();
     // Mois de prise de vue dans la langue de l'admin (« oct. 2026 », « Oct 2026 », « Okt. 2026 »).
     let photos = repo.photos(filter).map(p => withReady({ ...p, when: monthYear(p.taken_on, request.t.lang) }));
     if (todo) photos = photos.filter(p => p.status === 'draft' || p.provisional);
     if (missing) photos = photos.filter(MISSING[missing].test);
-    photos = photos.map(p => ({ ...p, site: st(p).site }));
+    photos = photos.map(p => ({ ...p, site: st(p).site, suggest: suggestOf(sugg.get(p.id), names) }));
     // Données de l'inspecteur (une photo choisie) : lues par admin.js, jamais exécutées.
     const data = photos.map(dataOf);
     return render(request, reply, 'photos', {
@@ -211,7 +217,7 @@ export default async function adminRoutes(app) {
       missing: missing ? { key: missing, label: MISSING[missing].label } : null,
       totals: { all: all.length, published: all.filter(p => p.status === 'published').length, draft: all.filter(p => p.status === 'draft').length,
         todo: all.filter(p => p.status === 'draft' || p.provisional).length,
-        verifier: all.filter(MISSING.verifier.test).length, bloquee: all.filter(MISSING.bloquee.test).length, 'sans-visage': all.filter(MISSING['sans-visage'].test).length },
+        verifier: all.filter(MISSING.verifier.test).length, bloquee: all.filter(MISSING.bloquee.test).length, 'sans-visage': all.filter(MISSING['sans-visage'].test).length, proposee: sugg.size },
       view: request.query.vue === 'liste' ? 'liste' : 'planche', importer: 'importer' in request.query, wide: true,
       defaultAuthor: repo.authorBySub(request.session.sub)?.id ?? authors[0]?.id,
       defaultCategory: repo.categories().find(c => c.slug === filter.category)?.id ?? repo.categories()[0]?.id,
@@ -265,6 +271,7 @@ export default async function adminRoutes(app) {
           id = repo.addPhoto({ title: titleFromFilename(part.filename), categoryId, authorId, sourceName: part.filename, ...original });
           await app.variants.renderPhoto(id);
           await app.faces.examine(id);
+          app.seriesSuggest.examine(id);
           imported.push({ id, name: part.filename });
         } catch (err) {
           // Rien ne reste d'une image qui n'a pas pu être rendue : ni ligne, ni original, ni variante.
@@ -333,6 +340,7 @@ export default async function adminRoutes(app) {
           const title = titleFromFilename(part.filename);
           const id = repo.addPhoto({ title, categoryId, authorId, sourceName: part.filename, ...original });
           await app.faces.examine(id);
+          app.seriesSuggest.examine(id);
           tracker.add(id, part.filename);
           result = { code: 200, id, title };
         } catch (err) {
@@ -371,7 +379,29 @@ export default async function adminRoutes(app) {
   app.get('/admin/photos/:id/donnees', async (request, reply) => {
     const p = repo.photoView(byId(request.params.id));
     if (!p) return reply.code(404).send({ error: request.t('Photo introuvable.') });
-    return dataOf(withReady(p));
+    return dataOf(withReady({ ...p, suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(p.id))) }));
+  });
+
+  // Série proposée : la prendre (category_id) ou garder la série actuelle (garder=1). JSON ou formulaire (fiche,
+  // sortie) ; dans les deux cas, la série est désormais choisie et la proposition disparaît.
+  app.post('/admin/photos/:id/serie', write, async (request, reply) => {
+    const id = byId(request.params.id);
+    const photo = repo.photo(id);
+    const json = !request.headers.accept?.includes('text/html');
+    const back = safeBack(request, `/admin/photos/${id}`);
+    if (!photo) return json ? reply.code(404).send({ error: request.t('Photo introuvable.') }) : reply.callNotFound();
+    const body = request.body || {};
+    let text;
+    if (body.garder === '1') {
+      repo.keepSeries(id);
+      text = request.t('« {title} » reste dans « {name} ».', { title: photo.title, name: photo.category });
+    } else {
+      const target = repo.categories().find(c => c.id === Number(body.category_id));
+      if (!target) return json ? reply.code(422).send({ error: request.t('Série inconnue.') }) : failed(reply, back, request.t('Série inconnue.'));
+      repo.setCategories({ [id]: target.id });
+      text = request.t('« {title} » classée dans « {name} ».', { title: photo.title, name: target.name });
+    }
+    return json ? { ok: true, text, category_id: repo.photo(id).category_id } : done(reply, back, text);
   });
 
   // ---------- Instagram (voir server/instagram.js) ----------
@@ -537,6 +567,7 @@ export default async function adminRoutes(app) {
   const photoExtras = (photo, t) => ({
     proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), insta: instaOf(photo), encounters: app.encounters.forPhoto(photo.id),
     outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
+    suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(photo.id)), undefined, true),
     ready: app.readiness.state(photo.id, null, t), confirmations: app.readiness.confirmations(photo.id), igConfirmed: app.readiness.confirmed(photo.id, 'instagram'),
     siteConfirmed: app.readiness.confirmed(photo.id, 'site'),
   });
@@ -865,6 +896,7 @@ export default async function adminRoutes(app) {
         throw err;
       }
       repo.updatePhoto(photo.id, body);
+      if (body.serie_choisie === '1') repo.keepSeries(photo.id);          // série proposée : choix fait sur la fiche
       // Confirmation cochée (brouillon publié, ou photo déjà en ligne à vérifier) : gardée avec ses raisons.
       if (site.level === 'warn' && !covered && body.confirmer === '1' && body.status === 'published') app.readiness.confirm(photo.id, 'site', request.session.name, site.reasons);
       app.variants.schedule();          // auteur, date, titre ou option de filigrane ont pu changer
@@ -989,9 +1021,21 @@ export default async function adminRoutes(app) {
   // ---------- séries ----------
   const seriesPage = (request, reply, extra = {}) => render(request, reply, 'series', {
     title: request.t('Séries'), categories: repo.categories(), covers: Object.fromEntries(Object.entries(repo.covers()).map(([k, p]) => [k, withReady(p)])),
-    boards: Object.fromEntries(Object.entries(repo.boards(3)).map(([k, list]) => [k, list.map(withReady).filter(p => p.ready)])), errors: {}, values: {}, ...extra,
+    boards: Object.fromEntries(Object.entries(repo.boards(3)).map(([k, list]) => [k, list.map(withReady).filter(p => p.ready)])), errors: {}, values: {},
+    suggest: app.seriesSuggest.state(), ...extra,
   });
   app.get('/admin/series', async (request, reply) => seriesPage(request, reply));
+
+  // Série proposée : allumer (téléchargement du modèle puis analyse, en arrière-plan) ou éteindre et tout effacer.
+  app.get('/admin/series/propositions', async () => app.seriesSuggest.state());
+  app.post('/admin/series/propositions', write, async (request, reply) => {
+    if (request.body?.action === 'on') {
+      app.seriesSuggest.enable();
+      return done(reply, '/admin/series#propositions', request.t('Propositions de série allumées : le modèle se télécharge, puis les photos sont analysées.'));
+    }
+    await app.seriesSuggest.disable();
+    return done(reply, '/admin/series#propositions', request.t('Propositions de série éteintes : modèle et empreintes effacés.'));
+  });
 
   app.post('/admin/series', write, async (request, reply) => {
     try {

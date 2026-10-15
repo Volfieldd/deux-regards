@@ -183,6 +183,16 @@ const I18N = {
   "Proposition traduite de l’anglais : relisez-la avant d’enregistrer.": {"en": "Suggestion translated from English: review it before saving.", "de": "Vorschlag aus dem Englischen übersetzt: Prüfen Sie ihn vor dem Speichern."},
   "Proposition traduite de l’allemand : relisez-la avant d’enregistrer.": {"en": "Suggestion translated from German: review it before saving.", "de": "Vorschlag aus dem Deutschen übersetzt: Prüfen Sie ihn vor dem Speichern."},
   "Proposition retirée.": {"en": "Suggestion removed.", "de": "Vorschlag entfernt."},
+  "ou": {"en": "or", "de": "oder"},
+  "Série proposée :": {"en": "Suggested series:", "de": "Vorgeschlagene Serie:"},
+  "Série proposée": {"en": "Suggested series", "de": "Vorgeschlagene Serie"},
+  "ressemble à {n} de ses {total} photos": {"en": "looks like {n} of its {total} photos", "de": "ähnelt {n} ihrer {total} Fotos"},
+  "Classer dans « {name} »": {"en": "Move to “{name}”", "de": "In „{name}“ einordnen"},
+  "Garder « {name} »": {"en": "Keep “{name}”", "de": "„{name}“ behalten"},
+  "« {title} » reste dans « {name} ».": {"en": "“{title}” stays in “{name}”.", "de": "„{title}“ bleibt in „{name}“."},
+  "Série choisie : elle sera gardée à l’enregistrement.": {"en": "Series chosen: it will be kept when you save.", "de": "Serie gewählt: Sie wird beim Speichern übernommen."},
+  "{got} Mo sur {total}": {"en": "{got} MB of {total}", "de": "{got} MB von {total}"},
+  "{done} photos sur {total}": {"en": "{done} of {total} photos", "de": "{done} von {total} Fotos"},
 };
 function tr(s, params) {
   const e = I18N[s];
@@ -895,6 +905,32 @@ const activity = (() => {
 
 // ----- séries : glisser une carte, ou flèches du clavier sur sa poignée -----
 (function () {
+  // Fiche photo : « Choisir » une série proposée remplit le champ ; l'enregistrement vaudra choix (même pour « Garder »).
+  const fiche = $('[data-suggest-fiche]');
+  fiche?.addEventListener('click', e => {
+    const b = e.target.closest('[data-pick-series]');
+    if (!b) return;
+    const select = fiche.closest('form').querySelector('select[name="category_id"]');
+    select.value = b.dataset.pickSeries;
+    $('[data-series-chosen]', fiche).value = '1';
+    $$('[data-pick-series]', fiche).forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    toast.show(tr('Série choisie : elle sera gardée à l’enregistrement.'));
+  });
+  // Page Séries : téléchargement du modèle et analyse suivis sans recharger ; la page se recharge quand l'état change.
+  const sp = $('[data-suggest-state]');
+  if (sp && ['downloading', 'analysing'].includes(sp.dataset.suggestState)) {
+    const tick = async () => {
+      try {
+        const st = await (await fetch('/admin/series/propositions', { headers: { accept: 'application/json' } })).json();
+        if (st.status !== sp.dataset.suggestState) return location.reload();
+        const bar = $('progress', sp), n = $('[data-suggest-n]', sp);
+        if (st.status === 'downloading' && st.download) { bar.value = Math.round((st.download.got / st.download.total) * 100); n.textContent = tr('{got} Mo sur {total}', { got: Math.round(st.download.got / 1e6), total: Math.round(st.download.total / 1e6) }); }
+        if (st.status === 'analysing') { bar.value = Math.round((st.done / st.total) * 100); n.textContent = tr('{done} photos sur {total}', { done: st.done, total: st.total }); }
+      } catch { /* réseau : nouvel essai */ }
+      setTimeout(tick, 2500);
+    };
+    setTimeout(tick, 2500);
+  }
   const grid = $('[data-series-list]');
   if (!grid) return;
   const cards = () => $$('.scard[data-id]', grid);
@@ -1266,7 +1302,20 @@ const activity = (() => {
     const cityNote = $('[data-one-citynote]', insp);
     if (cityNote) cityNote.hidden = !(p.city_source === 'gps' && p.city);
     $('[data-one-open]', insp).href = `/admin/photos/${p.id}`;
-    $$('[data-one-series] .pill', insp).forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.category) === p.category_id)));
+    // Série proposée (au plus deux) : marquée parmi les séries, avec « Classer dans… » et « Garder… ».
+    const sugg = p.suggest || [];
+    $$('[data-one-series] .pill', insp).forEach(b => {
+      b.setAttribute('aria-pressed', String(Number(b.dataset.category) === p.category_id));
+      b.classList.toggle('sug', sugg.some(x => x.id === Number(b.dataset.category)));
+    });
+    const sugBox = $('[data-one-suggest]', insp);
+    if (sugBox) {
+      sugBox.hidden = !sugg.length;
+      sugBox.innerHTML = sugg.map((x, i) => `<div class="sugbox${i ? ' alt' : ''}"><span>${i ? esc(tr('ou')) : `✦ ${esc(tr('Série proposée :'))}`} <b>${esc(x.name)}</b></span>`
+        + `<span class="why">${esc(tr('ressemble à {n} de ses {total} photos', { n: x.votes, total: x.size }))}</span>`
+        + `<span class="acts"><button class="btn${i ? ' ghost' : ''} sm" type="button" data-category="${x.id}">${esc(tr('Classer dans « {name} »', { name: x.name }))}</button></span></div>`).join('')
+        + (sugg.length ? `<p class="hint"><button class="more" type="button" data-keep-series>${esc(tr('Garder « {name} »', { name: p.category }))}</button></p>` : '');
+    }
     $('[data-publish]', insp).textContent = p.status === 'published' ? tr('Déjà publiée') : tr('Publier');
     $('[data-publish]', insp).disabled = p.status === 'published';
     audience(id);
@@ -1303,6 +1352,10 @@ const activity = (() => {
     const want = p.status === 'draft' ? tr('○ Brouillon') : p.provisional ? tr('Titre provisoire') : '';
     if (!want && badge) badge.remove();
     if (want) { if (!badge) { badge = document.createElement('span'); t.querySelector('.img').after(badge); } badge.className = `badge${p.status !== 'draft' ? ' warn' : ''}`; badge.textContent = want; }
+    let sug = $('.badge.sug', t);
+    const first = (p.suggest || [])[0];
+    if (!first) sug?.remove();
+    else { if (!sug) { sug = document.createElement('span'); sug.className = 'badge sug'; sug.title = tr('Série proposée'); $('.cap', t).before(sug); } sug.textContent = `✦ ${first.name}`; }
   }
   async function reload(id) {
     try {
@@ -1343,6 +1396,19 @@ const activity = (() => {
     if (!b) return;
     const p = data.get(one.id);
     saveOne('category_id', b.dataset.category, String(p.category_id));
+  });
+  $('[data-one-suggest]', insp)?.addEventListener('click', async e => {
+    const id = one.id;
+    const p = data.get(id);
+    const b = e.target.closest('[data-category]');
+    if (b) return saveOne('category_id', b.dataset.category, String(p.category_id));
+    if (!e.target.closest('[data-keep-series]')) return;
+    try {
+      const r = await postJson(`/admin/photos/${id}/serie`, { garder: '1' });
+      await reload(id);
+      if (one.id === id) showOne(id);
+      toast.show(r.text);
+    } catch (err) { toast.show(err.message, { error: true }); }
   });
 
   // Ville et carte : enregistrées aussitôt (ville choisie dans la liste, effacée, ou tapée telle quelle).

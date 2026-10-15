@@ -22,10 +22,10 @@
 <% [['', t('Tout'), it.totals.all], ['published', t('Publiées'), it.totals.published], ['draft', t('Brouillons'), it.totals.draft], ['afinir', t('À finir'), it.totals.todo]].forEach(([k, label, n]) => { %>
       <a class="chip<%= k === 'afinir' ? ' warn' : '' %>" href="<%= params({ statut: k }) %>"<%~ status === k ? ' aria-current="true"' : '' %>><%= label %> <span class="n"><%= n %></span></a>
 <% }) %>
-<% ;[['verifier', '▲ ' + t('À vérifier')], ['bloquee', '✕ ' + t('Bloquées')], ['sans-visage', t('Sans visage')]].forEach(([k, label]) => { if (!it.totals[k] && !(it.missing && it.missing.key === k)) return; %>
+<% ;[['verifier', '▲ ' + t('À vérifier')], ['bloquee', '✕ ' + t('Bloquées')], ['sans-visage', t('Sans visage')], ['proposee', '✦ ' + t('Série proposée')]].forEach(([k, label]) => { if (!it.totals[k] && !(it.missing && it.missing.key === k)) return; %>
       <a class="chip" href="<%= params({ manque: it.missing && it.missing.key === k ? '' : k }) %>"<%~ it.missing && it.missing.key === k ? ' aria-current="true"' : '' %>><%= label %> <span class="n"><%= it.totals[k] %></span></a>
 <% }) %>
-<% if (it.missing && !['verifier', 'bloquee', 'sans-visage'].includes(it.missing.key)) { %>      <a class="chip" href="<%= params({ manque: '' }) %>" aria-current="true" title="<%= t('Retirer ce filtre') %>"><%= it.missing.label %> <span class="n"><%= it.photos.length %></span> ✕</a>
+<% if (it.missing && !['verifier', 'bloquee', 'sans-visage', 'proposee'].includes(it.missing.key)) { %>      <a class="chip" href="<%= params({ manque: '' }) %>" aria-current="true" title="<%= t('Retirer ce filtre') %>"><%= it.missing.label %> <span class="n"><%= it.photos.length %></span> ✕</a>
 <% } %>    </nav>
     <form class="filters" method="get" action="/admin/photos" role="search" data-filters>
 <% if (status) { %><input type="hidden" name="statut" value="<%= status %>"><% } %>
@@ -62,6 +62,7 @@
 <% if (p.status === 'draft') { %>        <span class="badge"><span aria-hidden="true">○</span> <%= t('Brouillon') %></span>
 <% } else if (p.provisional) { %>        <span class="badge warn"><%= t('Titre provisoire') %></span>
 <% } %><% if (p.site && p.site.level !== 'ok') { %>        <span class="badge state <%= p.site.level %>" title="<%= p.site.reasons.join(' ; ') %>"><span aria-hidden="true"><%= p.site.level === 'no' ? '✕' : '▲' %></span> <%= p.site.level === 'no' ? t('Bloquée') : t('À vérifier') %></span>
+<% } %><% if (p.suggest && p.suggest.length) { %>        <span class="badge sug" title="<%= t('Série proposée') %>"><span aria-hidden="true">✦</span> <%= p.suggest[0].name %></span>
 <% } %>
         <span class="cap"><a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.category %><%= p.when ? ' · ' + p.when : '' %><%= p.status === 'published' ? ' · ' + t('publiée') : '' %></small></span>
       </li>
@@ -141,7 +142,7 @@
       <div class="insp-bd">
         <div class="fld"><span class="lb"><%= t('Titre') %> <span class="r" data-one-n></span></span><input class="big-title" data-one-field="title" maxlength="160" aria-label="<%= t('Titre') %>"><span class="note" data-one-prov hidden><%= t('Titre provisoire (nom du fichier)') %></span></div>
         <div class="fld"><span class="lb"><%= t('Légende') %></span><textarea data-one-field="legend" rows="2" maxlength="2000" aria-label="<%= t('Légende') %>" placeholder="<%= t('Quelques mots pour le visiteur…') %>"></textarea></div>
-        <div class="fld"><span class="lb"><%= t('Série') %></span><div class="pills" data-one-series role="group" aria-label="<%= t('Série') %>"><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %></div></div>
+        <div class="fld"><span class="lb"><%= t('Série') %></span><div class="sug-list" data-one-suggest hidden></div><div class="pills" data-one-series role="group" aria-label="<%= t('Série') %>"><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %></div></div>
         <div class="fld" data-city><span class="lb"><%= t('Ville') %> <span class="r"><%= t('carte du site') %></span></span><input data-city-input data-one-city maxlength="120" aria-label="<%= t('Ville (carte du site)') %>" placeholder="<%= t('Angers, Lisbonne…') %>" autocomplete="off"><input type="hidden" data-city-id>
           <label class="inline"><input type="checkbox" data-one-onmap> <%= t('Afficher sur la carte') %></label><span class="note" data-one-citynote hidden><%= t('Proposée d’après le GPS de la photo : vérifiez-la.') %></span></div>
         <div class="fld"><span class="lb"><%= t('Lieu') %></span><input data-one-field="place" maxlength="120" aria-label="<%= t('Lieu') %>" placeholder="<%= t('Où ?') %>"></div>

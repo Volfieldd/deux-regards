@@ -28,6 +28,7 @@
     <form method="post" action="/admin/sorties/<%= o.author.slug %>/<%= o.day %>/photos" class="o-photos-form">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
       <input type="hidden" name="depuis" value="<%= it.hhmm(o.starts) %>">
+      <input type="hidden" name="back" value="<%= o.url %>">
       <ul class="o-photos">
 <% o.photos.forEach(p => { const who = peopleOf(p); const out = excludedAll(p); %>
         <li>
@@ -40,6 +41,9 @@
           <span class="enc-tag <%= p.state.site.level %>" title="<%= p.state.site.reasons.join(' ; ') %>"><%= LEVEL[p.state.site.level] %></span>
 <% if (who.length) { %>          <span class="o-who"><%= who.map(e => e.ref || e.name || t('rencontre')).join(', ') %></span>
 <% } else if (out) { %>          <span class="o-who hint"><%= t('personne de la sortie') %></span>
+<% } %><% if (p.suggest.length) { %>          <span class="o-sug"><span class="lbl">✦ <%= t('Série proposée :') %></span>
+<% p.suggest.forEach(x => { %>            <button class="btn ghost sm" type="submit" formaction="/admin/photos/<%= p.id %>/serie" formnovalidate name="category_id" value="<%= x.id %>" title="<%= t('ressemble à {n} de ses {total} photos', { n: x.votes, total: x.size }) %>"><%= t('Classer dans « {name} »', { name: x.name }) %></button>
+<% }) %>            <button class="more" type="submit" formaction="/admin/photos/<%= p.id %>/serie" formnovalidate name="garder" value="1"><%= t('Garder « {name} »', { name: p.category }) %></button></span>
 <% } %>        </li>
 <% }) %>
       </ul>

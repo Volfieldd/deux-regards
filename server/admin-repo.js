@@ -191,7 +191,8 @@ export function createAdminRepo(db) {
         city_label: 'city_label' in body ? text(body.city_label, 120) : (before?.city_name ? cities.label({ name: before.city_name, cc: before.city_cc }) : ''), on_map: loc.on_map };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
       db.transaction(() => {
-        db.prepare(`UPDATE photos SET title = @title, slug = @slug, category_id = @category_id, author_id = @author_id, place = @place,
+        // Série changée sur la fiche : choisie à la main (plus de proposition).
+        db.prepare(`UPDATE photos SET series_checked = CASE WHEN category_id = @category_id THEN series_checked ELSE 1 END, title = @title, slug = @slug, category_id = @category_id, author_id = @author_id, place = @place,
           taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark,
           title_en = @title_en, title_de = @title_de, legend_en = @legend_en, legend_de = @legend_de, place_en = @place_en, place_de = @place_de,
           updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
@@ -214,6 +215,8 @@ export function createAdminRepo(db) {
       // Brouillon dont l'adresse dérive encore du titre : elle suit le nouveau titre.
       merged.slug = 'title' in body && p.status === 'draft' && p.slug === uniqueSlug('photos', p.title, id) ? '' : p.slug;
       this.updatePhoto(id, merged);
+      // Vue rapide : un clic sur une série, même celle qu'elle a déjà, vaut choix.
+      if ('category_id' in body) db.prepare('UPDATE photos SET series_checked = 1 WHERE id = ?').run(id);
       return q.photo.get(id);
     },
 
@@ -245,12 +248,14 @@ export function createAdminRepo(db) {
       return before;
     },
     setCategories(map) {
-      const set = db.prepare("UPDATE photos SET category_id = ?, updated_at = datetime('now') WHERE id = ?");
+      const set = db.prepare("UPDATE photos SET category_id = ?, series_checked = 1, updated_at = datetime('now') WHERE id = ?");
       const before = {};
       for (const c of Object.values(map)) if (!exists('categories', Number(c))) throw new ValidationError({ category_id: 'Série inconnue.' });
       db.transaction(() => { for (const [id, c] of Object.entries(map)) { const p = q.photo.get(Number(id)); if (!p) continue; before[id] = p.category_id; set.run(Number(c), Number(id)); } })();
       return before;
     },
+    // « Garder » : la série actuelle est confirmée, la proposition disparaît.
+    keepSeries: id => db.prepare('UPDATE photos SET series_checked = 1 WHERE id = ?').run(id).changes > 0,
     // Même lieu ou même date pour plusieurs photos (champ vide : inchangé).
     setFields(ids, body) {
       const errors = {};
