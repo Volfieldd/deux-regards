@@ -7,7 +7,7 @@ import { RIGHTS, rightsText } from '../rights.js';
 import { PRIVACY, UPDATED as PRIVACY_UPDATED } from '../privacy.js';
 import { LEGAL } from '../legal.js';
 import { project, MAP } from '../geo/projection.js';
-import { countryName } from '../geo/cities.js';
+import { countryName, nameOf } from '../geo/cities.js';
 import { LANGS, PREFIX, UI, pick, localize, splitLang, detectLang } from '../i18n.js';
 import { BOTS, countryOf } from '../stats.js';
 import path from 'node:path';
@@ -276,7 +276,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     for (const p of repo.publishedPhotos({ lang }).filter(p => p.on_map && p.city_id)) {
       if (!byCity.has(p.city_id)) {
         const [x, y] = project(p.city_lat, p.city_lon);
-        byCity.set(p.city_id, { id: p.city_id, name: p.city_name, country: countryName(p.city_cc, lang), x, y, photos: [] });
+        byCity.set(p.city_id, { id: p.city_id, name: nameOf(p, lang), country: countryName(p.city_cc, lang), x, y, photos: [] });
       }
       byCity.get(p.city_id).photos.push(p);
     }

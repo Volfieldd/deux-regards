@@ -1,12 +1,15 @@
 import fs from 'node:fs';
 
 // Localités de plus de 500 habitants et toutes les communes de France (GeoNames, CC BY 4.0 : server/geo/villes.tsv,
-// généré par scripts/villes.mjs). Sert à localiser les photos à la ville près, sans service extérieur :
+// généré par scripts/villes.mjs, avec la région, l'État ou la province de chacune — server/geo/regions.tsv — et
+// leurs noms en français, anglais et allemand). Sert à localiser les photos à la ville près, sans service extérieur :
 //   - search(q) : propositions au fil de la frappe (sans accents, début de mot, noms alternatifs des grandes villes) ;
 //   - nearest(lat, lon) : ville la plus proche d'une position GPS (on ne garde que la ville, jamais la position).
 // Chargée à la première utilisation (~250 000 lieux) : colonnes compactes et index des débuts de mots, pour tenir en
 // peu de mémoire et répondre en quelques millisecondes.
 const FILE = new URL('./villes.tsv', import.meta.url);
+const REGION_FILE = new URL('./regions.tsv', import.meta.url);
+const LANGS = ['fr', 'en', 'de'];
 export const ATTRIBUTION = 'Villes : GeoNames (geonames.org), licence CC BY 4.0';
 const REGIONS = Object.fromEntries(['fr', 'en', 'de'].map(l => [l, new Intl.DisplayNames([l], { type: 'region' })]));
 export const countryName = (cc, lang = 'fr') => { try { return (REGIONS[lang] || REGIONS.fr).of(cc) || cc; } catch { return cc; } };
@@ -24,7 +27,13 @@ function load() {
   }
   const n = rows.length;
   const id = new Uint32Array(n), pop = new Uint32Array(n), lat = new Float32Array(n), lon = new Float32Array(n);
-  const name = new Array(n), cc = new Array(n), key = new Array(n), alt = new Map();
+  const name = new Array(n), cc = new Array(n), key = new Array(n), alt = new Map(), region = new Array(n), local = new Map();
+  const regions = new Map();                         // « US.CA » → { name, fr, en, de }
+  for (const line of fs.readFileSync(REGION_FILE, 'utf8').split('\n')) {
+    if (!line || line.startsWith('#')) continue;
+    const r = line.split('\t');
+    regions.set(r[0], { name: r[1], fr: r[2] || '', en: r[3] || '', de: r[4] || '' });
+  }
   const byId = new Map();
   const grid = new Map();                            // cellules de 1° × 1° → lieux, pour nearest()
   const words = new Map();                           // 2 premières lettres d'un mot d'un nom → lieux
@@ -45,8 +54,11 @@ function load() {
     const ascii = r[2] ? fold(r[2]) : main;
     key[i] = ascii === main ? main : [main, ascii];
     index(main, i); if (ascii !== main) index(ascii, i);
-    if (r[7]) {
-      const others = [...new Set(r[7].split(',').map(norm))];
+    region[i] = r[8] ? `${r[3]}.${r[8]}` : '';
+    // Noms dans les langues de l'admin (« München ») : affichés selon la langue, et trouvés par la recherche.
+    if (r[9] || r[10] || r[11]) local.set(i, { fr: r[9] || '', en: r[10] || '', de: r[11] || '', keys: [r[9], r[10], r[11]].filter(Boolean).map(norm) });
+    const others = [...new Set([...(r[7] ? r[7].split(',') : []), r[9], r[10], r[11]].filter(Boolean).map(norm))].filter(o => o !== main && o !== ascii);
+    if (others.length) {
       alt.set(i, others);
       for (const o of others) index(o, i);
     }
@@ -58,24 +70,42 @@ function load() {
   }
   for (const [p, l] of words) words.set(p, Int32Array.from(l));
   for (const [g, l] of grid) grid.set(g, Int32Array.from(l));
-  data = { n, id, pop, lat, lon, name, cc, key, alt, byId, grid, words };
+  data = { n, id, pop, lat, lon, name, cc, key, alt, byId, grid, words, region, regions, local };
   return data;
 }
 
-export const label = c => `${c.name}, ${countryName(c.cc)}`;
-function view(i) {
+// Libellé sans la région (anciens libellés, et villes sans région connue).
+export const label = (c, lang = 'fr') => `${c.name}, ${countryName(c.cc, lang)}`;
+// « Monterey, Californie, États-Unis » : la région lève les homonymes ; omise si elle porte le nom de la ville.
+function parts(d, i, lang) {
+  const nm = d.local.get(i)?.[lang] || d.name[i];
+  const r = d.regions.get(d.region[i]);
+  const rn = r ? r[lang] || r.name : '';
+  return { name: nm, region: rn && norm(rn) !== norm(nm) ? rn : '', country: countryName(d.cc[i], lang) };
+}
+function view(i, lang = 'fr') {
   const d = load();
-  const c = { id: d.id[i], name: d.name[i], cc: d.cc[i], lat: Math.round(d.lat[i] * 100) / 100, lon: Math.round(d.lon[i] * 100) / 100, pop: d.pop[i] };
-  return { ...c, country: countryName(c.cc), label: label(c) };
+  const c = { id: d.id[i], cc: d.cc[i], lat: Math.round(d.lat[i] * 100) / 100, lon: Math.round(d.lon[i] * 100) / 100, pop: d.pop[i] };
+  const p = parts(d, i, LANGS.includes(lang) ? lang : 'fr');
+  // labels : tous les libellés acceptés quand on tape la ville sans la choisir (trois langues, avec ou sans région).
+  const labels = LANGS.flatMap(l => { const q = parts(d, i, l); return [[q.name, q.region, q.country].filter(Boolean).join(', '), `${q.name}, ${q.country}`, q.name]; });
+  return { ...c, name: d.name[i], localName: p.name, region: p.region, country: p.country, label: [p.name, p.region, p.country].filter(Boolean).join(', '), labels: [...new Set(labels.concat(`${d.name[i]}, ${countryName(d.cc[i])}`))] };
 }
 
-export const byId = id => { const i = load().byId.get(Number(id)); return i === undefined ? null : view(i); };
+export const byId = (id, lang = 'fr') => { const i = load().byId.get(Number(id)); return i === undefined ? null : view(i, lang); };
+// Libellé d'une ville enregistrée sur une photo (city_id, city_name, city_cc), dans la langue voulue.
+export const labelOf = (p, lang = 'fr') => (p?.city_id ? byId(p.city_id, lang)?.label : null) || (p?.city_name ? label({ name: p.city_name, cc: p.city_cc }, lang) : '');
+// Nom d'une ville dans la langue voulue (carte du site).
+export const nameOf = (p, lang = 'fr') => (p?.city_id ? byId(p.city_id, lang)?.localName : null) || p?.city_name || '';
+// Une saisie correspond-elle à cette ville (un de ses libellés, dans l'une des langues) ?
+export const matches = (c, typed) => { const n = norm(typed); return c.labels.some(l => norm(l) === n); };
 
-// Pertinence : nom exact (ou nom alternatif exact : « Londres » donne London), début du nom, début d'un nom
-// alternatif, début d'un mot du nom ; pondérée par la population, pour qu'un hameau homonyme ne passe pas devant une
-// grande ville (« ange » : Angers avant Angé).
-const BONUS = [2.5, 2, 0, 0.5];
-export function search(q, limit = 8) {
+// Pertinence : nom exact (le nom, ou son nom en français, anglais ou allemand : « Londres » donne London), nom
+// alternatif exact, début du nom, début d'un nom alternatif, début d'un mot du nom ; pondérée par la population, pour
+// qu'un hameau homonyme ne passe pas devant une grande ville (« ange » : Angers avant Angé), mais qu'un nom exact passe
+// devant un simple nom alternatif (« Monterey » avant Monterrey).
+const BONUS = [3.5, 1.5, 2, 0, 0.5];
+export function search(q, limit = 8, lang = 'fr') {
   const n = norm(q);
   if (n.length < 2) return [];
   const d = load();
@@ -84,11 +114,12 @@ export function search(q, limit = 8) {
     const k = d.key[i];
     const names = typeof k === 'string' ? [k] : k;
     const others = d.alt.get(i) || [];
-    const tier = names.includes(n) || others.includes(n) ? 0 : names.some(m => m.startsWith(n)) ? 1
-      : others.some(m => m.startsWith(n)) ? 2 : n.length >= 3 && names.some(m => m.includes(` ${n}`)) ? 3 : -1;
+    const own = d.local.get(i)?.keys || [];
+    const tier = names.includes(n) || own.includes(n) ? 0 : others.includes(n) ? 1 : names.some(m => m.startsWith(n)) || own.some(m => m.startsWith(n)) ? 2
+      : others.some(m => m.startsWith(n)) ? 3 : n.length >= 3 && names.some(m => m.includes(` ${n}`)) ? 4 : -1;
     if (tier >= 0) found.push({ i, score: BONUS[tier] + Math.log10(d.pop[i] + 10) });
   }
-  return found.sort((a, b) => b.score - a.score).slice(0, limit).map(f => view(f.i));
+  return found.sort((a, b) => b.score - a.score).slice(0, limit).map(f => view(f.i, lang));
 }
 
 // Ville d'une position GPS : parmi les villes à moins de 5 km, la plus peuplée (le centre de Paris donne « Paris »,

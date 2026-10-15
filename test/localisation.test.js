@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 import { setup } from './helpers.js';
-import { search, nearest, byId } from '../server/geo/cities.js';
+import { search, nearest, byId, nameOf } from '../server/geo/cities.js';
 import { gpsFromExif } from '../server/media.js';
 
 // Localisation des photos pour la carte du site : ville (jamais la position exacte), proposée d'après le GPS,
@@ -48,22 +48,28 @@ const send = (ctx, filename, value) => {
 // ---------- villes ----------
 
 test('villes : recherche au fil de la frappe, noms alternatifs, ville d’une position GPS', () => {
-  assert.ok(search('ange').slice(0, 2).some(c => c.label === 'Angers, France'));
-  assert.equal(search('Angers')[0].label, 'Angers, France');
-  assert.equal(search('Londres')[0].label, 'London, Royaume-Uni');
-  assert.equal(search('munich')[0].label, 'Munich, Allemagne');
+  assert.ok(search('ange').slice(0, 2).some(c => c.label === 'Angers, Pays de la Loire, France'));
+  assert.equal(search('Angers')[0].label, 'Angers, Pays de la Loire, France');
+  assert.equal(search('Londres')[0].label, 'Londres, Angleterre, Royaume-Uni');                // nom français
+  assert.equal(search('munich')[0].label, 'Munich, Bavière, Allemagne');
+  assert.equal(search('München', 8, 'de')[0].label, 'München, Bayern, Deutschland');                // langue de l'admin
+  assert.equal(search('münchen')[0].label, 'Munich, Bavière, Allemagne');
+  // Homonymes : la région les distingue.
+  assert.equal(search('Monterey')[0].label, 'Monterey, Californie, États-Unis');               // nom exact avant Monterrey (nom alternatif)
+  assert.deepEqual(search('Monterey').filter(c => c.localName === 'Monterey').slice(0, 3).map(c => c.region), ['Californie', 'Tennessee', 'Massachusetts']);
+  assert.equal(search('Monterey', 8, 'de').find(c => c.region === 'Kalifornien')?.label, 'Monterey, Kalifornien, Vereinigte Staaten');
   assert.equal(search('saint denis').length > 0, true);
   assert.deepEqual(search('a'), []);
-  assert.equal(nearest(48.8566, 2.3522).label, 'Paris, France');                      // pas un arrondissement
-  assert.equal(nearest(48.8352, 2.2410).label, 'Boulogne-Billancourt, France');        // une voisine garde son nom
+  assert.equal(nearest(48.8566, 2.3522).label, 'Paris, Île-de-France, France');                      // pas un arrondissement
+  assert.equal(nearest(48.8352, 2.2410).label, 'Boulogne-Billancourt, Île-de-France, France');        // une voisine garde son nom
   assert.equal(nearest(47.0, -30.0), null);                                            // en plein Atlantique
   assert.equal(byId(search('Angers')[0].id).name, 'Angers');
   // Petites communes (toutes les communes de France, localités de plus de 500 habitants ailleurs) et noms français.
-  assert.equal(search('ars en re')[0].label, 'Ars-en-Ré, France');
-  assert.equal(search('Saint-Clément-des-Baleines')[0].label, 'Saint-Clément-des-Baleines, France');
-  assert.equal(nearest(46.2066, -1.5167).label, 'Ars-en-Ré, France');
-  assert.equal(search('venise')[0].label, 'Venice, Italie');                           // pas le hameau homonyme
-  assert.equal(search('anvers')[0].label, 'Antwerp, Belgique');
+  assert.equal(search('ars en re')[0].label, 'Ars-en-Ré, Nouvelle-Aquitaine, France');
+  assert.equal(search('Saint-Clément-des-Baleines')[0].label, 'Saint-Clément-des-Baleines, Nouvelle-Aquitaine, France');
+  assert.equal(nearest(46.2066, -1.5167).label, 'Ars-en-Ré, Nouvelle-Aquitaine, France');
+  assert.equal(search('venise')[0].label, 'Venise, Vénétie, Italie');                           // pas le hameau homonyme
+  assert.equal(search('anvers')[0].label, 'Anvers, Flandre, Belgique');
 });
 
 test('GPS de l’original : lu en degrés décimaux, hémisphères, valeurs absurdes écartées', async () => {
@@ -86,7 +92,7 @@ test('import : ville proposée d’après le GPS, jamais la position exacte, pas
   assert.equal(p.on_map, 0);
   assert.deepEqual([p.city_lat, p.city_lon], [47.47, -0.55]);                          // centre de la ville, pas 47.48 / -0.56
   const fiche = (await ctx.as({ url: `/admin/photos/${id}` })).body;
-  assert.match(fiche, /value="Angers, France"/);
+  assert.match(fiche, /value="Angers, Pays de la Loire, France"/);
   assert.match(fiche, /Proposée d’après le GPS de la photo/);
 });
 
@@ -139,7 +145,7 @@ test('panneau : ville et carte champ par champ ; un autre champ ne les change pa
   const pid = ctx.id('photos', 'quai-7h12');
   const angers = search('Angers')[0];
   let r = (await ctx.json(`/admin/photos/${pid}/champs`, { city_id: angers.id, city_label: angers.label })).json();
-  assert.deepEqual([r.photo.city, r.photo.on_map], ['Angers, France', false]);
+  assert.deepEqual([r.photo.city, r.photo.on_map], ['Angers, Pays de la Loire, France', false]);
   r = (await ctx.json(`/admin/photos/${pid}/champs`, { on_map: '1' })).json();
   assert.equal(r.photo.on_map, true);
   await ctx.json(`/admin/photos/${pid}/champs`, { title: 'Quai, 7h13' });
@@ -148,7 +154,7 @@ test('panneau : ville et carte champ par champ ; un autre champ ne les change pa
   assert.equal(refused.statusCode, 422);
   // Données de la photothèque : ville et case.
   const data = (await ctx.as({ url: `/admin/photos/${pid}/donnees` })).json();
-  assert.deepEqual([data.city, data.on_map, data.city_source], ['Angers, France', true, 'manuel']);
+  assert.deepEqual([data.city, data.on_map, data.city_source], ['Angers, Pays de la Loire, France', true, 'manuel']);
 });
 
 test('plusieurs photos : sur la carte (celles qui ont une ville), retirer, annuler ; villes réservées aux admins', async t => {
@@ -164,7 +170,7 @@ test('plusieurs photos : sur la carte (celles qui ont une ville), retirer, annul
   const off = (await ctx.json('/admin/photos/actions', { ids: [a, b], action: 'map_off' })).json();
   assert.equal(off.text, '1 photo retirée de la carte.');
   // Propositions de villes : admin seulement.
-  assert.deepEqual((await ctx.as({ url: '/admin/villes?q=lisbo' })).json().villes[0], { id: search('Lisbon')[0].id, label: 'Lisbon, Portugal' });
+  assert.deepEqual((await ctx.as({ url: '/admin/villes?q=lisbo' })).json().villes[0], { id: search('Lisbon')[0].id, label: 'Lisbonne, District de Lisbonne, Portugal' });
   assert.notEqual((await ctx.app.inject('/admin/villes?q=lisbo')).statusCode, 200);
   const page = (await ctx.as({ url: '/admin/photos' })).body;
   assert.match(page, /data-many-map="map_on"/);
@@ -237,4 +243,29 @@ test('page Carte : photos publiées cochées, groupées par ville, à leur place
   assert.doesNotMatch(body, /style="/);                                                // CSP : aucun style en ligne
   const visits = ctx.db.prepare("SELECT SUM(views) FROM stats_pages WHERE page = 'carte'").pluck();
   assert.equal(visits.get(), 1);
+});
+
+test('villes dans la langue de l’admin, avec la région : liste, fiche, saisie en allemand, carte du site', async t => {
+  const ctx = await admin(t);
+  const de = { admin_langue: 'de' };
+  // Liste proposée : noms et région en allemand ; « München » est Munich.
+  const list = (await ctx.as({ url: `/admin/villes?q=${encodeURIComponent('München')}`, cookies: de })).json().villes;
+  assert.equal(list[0].label, 'München, Bayern, Deutschland');
+  const monterey = (await ctx.as({ url: '/admin/villes?q=Monterey' })).json().villes.map(v => v.label);
+  assert.ok(monterey.includes('Monterey, Californie, États-Unis') && monterey.includes('Monterey, Tennessee, États-Unis'));
+  // Le libellé allemand, choisi ou tapé, est reconnu ; la fiche le montre dans la langue de chacun.
+  const a = ctx.id('photos', 'quai-7h12');
+  await ctx.as({ method: 'POST', url: `/admin/photos/${a}/champs`, cookies: de, headers: { accept: 'application/json', 'x-csrf-token': ctx.csrf }, payload: { city_label: 'München, Bayern, Deutschland', on_map: true } });
+  assert.deepEqual([ctx.row(a).city_name, ctx.row(a).on_map], ['Munich', 1]);
+  assert.match((await ctx.as({ url: `/admin/photos/${a}`, cookies: de })).body, /value="München, Bayern, Deutschland"/);
+  assert.match((await ctx.as({ url: `/admin/photos/${a}` })).body, /value="Munich, Bavière, Allemagne"/);
+  // Une ville homonyme choisie par sa région.
+  const tn = search('Monterey').find(c => c.region === 'Tennessee');
+  await ctx.json(`/admin/photos/${a}/champs`, { city_label: tn.label, city_id: tn.id });
+  assert.equal(ctx.row(a).city_id, tn.id);
+  await ctx.json(`/admin/photos/${a}/champs`, { city_label: 'Munich, Allemagne' });                // ancien libellé : toujours compris
+  assert.equal(ctx.row(a).city_name, 'Munich');
+  // Carte du site : le nom de la ville dans la langue de la page.
+  assert.equal(nameOf(ctx.row(a), 'de'), 'München');
+  assert.equal(nameOf(ctx.row(a), 'fr'), 'Munich');
 });

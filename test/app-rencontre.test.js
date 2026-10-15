@@ -64,7 +64,7 @@ test('accord signé sur le téléphone : validations (signature, majorité, pare
   assert.equal(r.statusCode, 303);
   const e = c.db.prepare('SELECT * FROM encounters').get();
   assert.equal(r.headers.location, `/admin/rencontre/${e.id}/merci`);
-  assert.deepEqual([e.ref, e.consent_source, e.verified, e.adult, e.lat, e.lon, e.place, e.lang, e.status], ['J-0001', 'signature', 1, 1, 47.473, -0.552, 'Angers, France', 'en', 'en_cours']);
+  assert.deepEqual([e.ref, e.consent_source, e.verified, e.adult, e.lat, e.lon, e.place, e.lang, e.status], ['J-0001', 'signature', 1, 1, 47.473, -0.552, 'Angers, Pays de la Loire, France', 'en', 'en_cours']);
   assert.deepEqual(JSON.parse(e.consent), { site: true, instagram: true, print: false, name: false });
   assert.ok(e.signature_png.length > 100 && e.portrait_jpeg.length > 100);
   assert.equal((await sharp(e.portrait_jpeg).metadata()).format, 'jpeg');
