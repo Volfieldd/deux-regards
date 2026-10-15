@@ -61,7 +61,7 @@ Bildunterschrift, Wasserzeichen und Nachweis werden in den Details jedes Fotos e
 - **Suche** (Titel, Ort, Bildunterschrift, Adresse), **Fotograf**, **Serie**: Der Kontaktbogen aktualisiert sich sofort.
 - **Größe**: Der Schieberegler vergrößert oder verkleinert die Miniaturen (wird für das nächste Mal gespeichert).
 - **Kontaktbogen / Liste**: Die Liste zeigt die Fotos in Zeilen, mit Ordnungsnummer, Fotograf, Ort und dem Menü **⋯** (**Details bearbeiten**, **Veröffentlichen** oder **Veröffentlichung zurückziehen**, **Eine Position nach oben**, **Eine Position nach unten**).
-- Beim Überfahren einer Miniatur: ihr Titel, ihre Serie, ihr Datum. Ein Klick auf den Titel öffnet die Details. Entwürfe tragen den Chip **○ Entwurf**, vorläufige Titel **Vorläufiger Titel**.
+- Beim Überfahren einer Miniatur: ihr Titel, ihre Serie, ihr Datum. Ein Klick auf den Titel öffnet die Details. Entwürfe tragen den Chip **○ Entwurf**, vorläufige Titel **Vorläufiger Titel**. Diese Chips stapeln sich oben rechts auf der Miniatur, zusammen mit dem Zustand (**▲ Zu prüfen**, **✕ Gesperrt**) und der vorgeschlagenen Serie (**✦**); auf einer schmalen Miniatur rücken sie unter das Kontrollkästchen. Auf einer kleinen Miniatur blenden sie sich aus, solange der Titel angezeigt wird (Überfahren oder gewähltes Foto): Der Inspektor zeigt dann alles.
 - **Auf dem Telefon:** Tippen Sie auf eine Miniatur, um sie auszuwählen; ihr Titel erscheint unterstrichen: Tippen Sie darauf, um die Details zu öffnen. Der Bereich des Fotos öffnet sich unten am Bildschirm.
 
 > Die Nr. in der Verwaltung ist die Position in der **gesamten** Liste, Entwürfe eingeschlossen. Auf der Website werden die veröffentlichten Fotos lückenlos nummeriert (N°01, N°02…).

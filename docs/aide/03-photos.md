@@ -61,7 +61,7 @@ Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir pl
 - **Recherche** (titre, lieu, légende, adresse), **photographe**, **série** : la planche se met à jour aussitôt.
 - **Taille** : le curseur agrandit ou réduit les vignettes (gardé pour la prochaine fois).
 - **Planche / Liste** : la liste montre les photos en lignes, avec le numéro d’ordre, le photographe, le lieu et le menu **⋯** (**Modifier la fiche**, **Publier** ou **Dépublier**, **Monter d’une place**, **Descendre d’une place**).
-- Au survol d’une vignette : son titre, sa série, sa date. Un clic sur le titre ouvre la fiche. Les brouillons portent la pastille **○ Brouillon**, les titres provisoires **Titre provisoire**.
+- Au survol d’une vignette : son titre, sa série, sa date. Un clic sur le titre ouvre la fiche. Les brouillons portent la pastille **○ Brouillon**, les titres provisoires **Titre provisoire**. Ces pastilles s'empilent en haut à droite de la vignette, avec l'état (**▲ À vérifier**, **✕ Bloquée**) et la série proposée (**✦**) ; sur une vignette étroite, elles passent sous la case à cocher. Sur une petite vignette, elles s'effacent le temps d'afficher le titre (survol ou photo choisie) : l'inspecteur montre alors tout.
 - **Sur téléphone :** touchez une vignette pour la choisir ; son titre apparaît, souligné : touchez-le pour ouvrir la fiche. Le panneau de la photo s’ouvre en bas de l’écran.
 
 > Le N° de l’admin est la place dans **toute** la liste, brouillons compris. Sur le site, les photos publiées sont numérotées sans trou (N°01, N°02…).
