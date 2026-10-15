@@ -110,7 +110,8 @@
       <li><span class="t"><a href="/admin/photos/<%= p.photo_id %>#instagram"><%= p.photo.title %></a>
         <span class="mono"><%= p.status === 'published' ? `${t('publiée le {date}', { date: fmtDate(p.published_at) })}${p.engagement ? ` · ${p.engagement.likes > 1 ? t('{n} likes', { n: p.engagement.likes }) : t('{n} like', { n: p.engagement.likes })}, ${t('{n} comm.', { n: p.engagement.comments })}` : ''}` : t('échec : {error}', { error: t.msg(p.error) }) %></span></span>
 <% if (p.status === 'published' && p.permalink) { %>        <a class="more" href="<%= p.permalink %>" target="_blank" rel="noopener"><%= t('Voir sur Instagram') %> ↗</a>
-<% } else if (p.status === 'failed') { %>        <form method="post" action="/admin/instagram/<%= p.id %>/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Réessayer') %></button></form>
+<% } else if (p.status === 'failed') { %><% if (p.retry_requested_at) { %>        <span class="enc-tag warn">⚑ <%= t('Republication demandée') %><%= p.retry_requested_by ? ` · ${p.retry_requested_by}` : '' %></span>
+<% } %>        <form method="post" action="/admin/instagram/<%= p.id %>/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Réessayer') %></button></form>
 <% } %></li>
 <% }) %>
     </ul>

@@ -919,10 +919,6 @@
   "en": "Last attempt: {error}",
   "de": "Letzter Versuch: {error}"
  },
- "Échec de la publication : {error} (voir la page {link} pour réessayer).": {
-  "en": "Publishing failed: {error} (see the {link} page to retry).",
-  "de": "Veröffentlichung fehlgeschlagen: {error} (siehe Seite {link}, um es erneut zu versuchen)."
- },
  "{title} : {reasons}. Aucune confirmation ne lève ce blocage : si la personne n’est pas sur cette photo, indiquez-le dans {link}.": {
   "en": "{title}: {reasons}. No confirmation lifts this block: if the person is not in this photo, say so in {link}.",
   "de": "{title}: {reasons}. Keine Bestätigung hebt diese Sperre auf: Ist die Person nicht auf diesem Foto, geben Sie das unter {link} an."

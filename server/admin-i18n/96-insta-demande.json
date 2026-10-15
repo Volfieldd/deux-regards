@@ -1,0 +1,70 @@
+{
+ "Demander la republication": {
+  "en": "Ask for a repost",
+  "de": "Erneute Veröffentlichung anfragen"
+ },
+ "Échec de la publication : {error}": {
+  "en": "Posting failed: {error}",
+  "de": "Veröffentlichung fehlgeschlagen: {error}"
+ },
+ "la file Instagram est gérée par le modérateur : il sera prévenu": {
+  "en": "the Instagram queue is handled by the moderator: they will be notified",
+  "de": "die Instagram-Warteschlange wird vom Moderator verwaltet: Er wird benachrichtigt"
+ },
+ "l’équipe qui gère la file Instagram est prévenue": {
+  "en": "the team handling the Instagram queue has been notified",
+  "de": "das Team der Instagram-Warteschlange ist benachrichtigt"
+ },
+ "ou modifiez le cadre et la légende ci-dessous puis remettez-la dans la file": {
+  "en": "or change the frame and caption below, then put it back in the queue",
+  "de": "oder ändern Sie Rahmen und Bildunterschrift unten und stellen Sie es wieder in die Warteschlange"
+ },
+ "par {name}, le {date}": {
+  "en": "by {name}, on {date}",
+  "de": "von {name}, am {date}"
+ },
+ "Republication demandée": {
+  "en": "Repost requested",
+  "de": "Erneute Veröffentlichung angefragt"
+ },
+ "Republier (remettre en tête de file)": {
+  "en": "Repost (back to the front of the queue)",
+  "de": "Erneut veröffentlichen (wieder an den Anfang der Warteschlange)"
+ },
+ "Republication déjà demandée.": {
+  "en": "Repost already requested.",
+  "de": "Erneute Veröffentlichung bereits angefragt."
+ },
+ "Republication demandée : l’équipe qui gère la file Instagram est prévenue.": {
+  "en": "Repost requested: the team handling the Instagram queue has been notified.",
+  "de": "Erneute Veröffentlichung angefragt: Das Team der Instagram-Warteschlange ist benachrichtigt."
+ },
+ "Rien à demander : la photo n’est pas en échec sur Instagram (elle est peut-être déjà dans la file).": {
+  "en": "Nothing to request: the photo has not failed on Instagram (it may already be in the queue).",
+  "de": "Nichts anzufragen: Das Foto ist auf Instagram nicht fehlgeschlagen (vielleicht ist es schon in der Warteschlange)."
+ },
+ "demandez la republication depuis la fiche de la photo": {
+  "en": "ask for a repost from the photo’s page",
+  "de": "fragen Sie die erneute Veröffentlichung auf der Seite des Fotos an"
+ },
+ "Instagram : {n} de vos photos en échec": {
+  "en": "Instagram: {n} of your photos failed",
+  "de": "Instagram: {n} Ihrer Fotos fehlgeschlagen"
+ },
+ "Instagram : « {title} » en échec": {
+  "en": "Instagram: “{title}” failed",
+  "de": "Instagram: „{title}“ fehlgeschlagen"
+ },
+ "{n} republication Instagram demandée": {
+  "en": "{n} Instagram repost requested",
+  "de": "{n} erneute Instagram-Veröffentlichung angefragt"
+ },
+ "{n} republications Instagram demandées": {
+  "en": "{n} Instagram reposts requested",
+  "de": "{n} erneute Instagram-Veröffentlichungen angefragt"
+ },
+ "par le photographe, après un échec : republiez depuis la fiche ou la page Instagram": {
+  "en": "by the photographer, after a failure: repost from the photo’s page or the Instagram page",
+  "de": "vom Fotografen, nach einem Fehlschlag: erneut veröffentlichen auf der Seite des Fotos oder der Instagram-Seite"
+ }
+}

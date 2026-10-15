@@ -241,7 +241,9 @@
 <% } else if (ig.active) { const slot = ig.slot || '', sp = slot.indexOf(' '); const when = sp < 0 ? (fr ? slot.replace(':', ' h ') : slot) : t('{date} à {time}', { date: slot.slice(0, sp), time: fr ? slot.slice(sp + 1).replace(':', ' h ') : slot.slice(sp + 1) }); %>
   <p><%~ t('Dans la file : prévue le {slot}.', { slot: `<strong>${esc(when)}</strong>` }) %><% if (ig.post.error) { %> <span class="err"><%= t('Dernier essai : {error}', { error: t.msg(ig.post.error) }) %></span><% } %></p>
 <% } else if (ig.post && ig.post.status === 'failed') { %>
-  <p class="err"><%~ t('Échec de la publication : {error} (voir la page {link} pour réessayer).', { error: esc(t.msg(ig.post.error)), link: '<a href="/admin/instagram">Instagram</a>' }) %></p>
+  <p class="err"><%= t('Échec de la publication : {error}', { error: t.msg(ig.post.error) }) %></p>
+<% if (ig.post.retry_requested_at) { %>  <p><span class="enc-tag warn">⚑ <%= t('Republication demandée') %></span> <span class="mono"><%= t('par {name}, le {date}', { name: ig.post.retry_requested_by || t('le photographe'), date: new Intl.DateTimeFormat(it.locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ig.post.retry_requested_at) }) %></span></p>
+<% } %>  <form method="post" action="/admin/instagram/<%= ig.post.id %>/reessayer" class="actions"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>#instagram"><button class="btn" type="submit"><%= t('Republier (remettre en tête de file)') %></button> <span class="hint"><%= t('ou modifiez le cadre et la légende ci-dessous puis remettez-la dans la file') %></span></form>
 <% } %>
 <% if (ig.blocked.length && !seePeople) { %>
   <p class="ig-blocked" role="note"><strong><%= t('Instagram bloqué') %></strong> · <%= t('Le détail (personnes et accords) est visible du photographe et des administrateurs.') %></p>
@@ -281,6 +283,13 @@
   </div>
 <% } } %>
 </details>
+<% } else if ((it.ownPhoto || it.canAll('photos.proposer')) && can('photos.proposer') && ig.post && ig.post.status === 'failed') { %>
+<details class="panel ig rub-panel" id="instagram" open>
+  <summary><h2 id="ig-title">Instagram <span class="sum"><%= t('en échec') %></span></h2></summary>
+  <p class="err"><%= t('Échec de la publication : {error}', { error: t.msg(ig.post.error) }) %></p>
+<% if (ig.post.retry_requested_at) { %>  <p><span class="enc-tag ok">✓ <%= t('Republication demandée') %></span> <span class="mono"><%= t('l’équipe qui gère la file Instagram est prévenue') %></span></p>
+<% } else { %>  <form method="post" action="/admin/photos/<%= it.photo.id %>/instagram/demande" class="actions"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn" type="submit"><%= t('Demander la republication') %></button> <span class="hint"><%= t('la file Instagram est gérée par le modérateur : il sera prévenu') %></span></form>
+<% } %></details>
 <% } %>
 <% const pf = it.proof; %>
 <details class="panel proof rub-panel" id="preuve">

@@ -456,8 +456,18 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     const held = post ? hold(post.photo_id) : null;
     if (held) throw new InstagramError(held);
     const pos = db.prepare("SELECT COALESCE(MIN(position), 1) - 1 FROM instagram_posts WHERE status = 'queued'").pluck().get();
-    return db.prepare("UPDATE instagram_posts SET status = 'queued', attempts = 0, error = NULL, position = ? WHERE id = ? AND status = 'failed'").run(pos, postId).changes > 0;
+    return db.prepare("UPDATE instagram_posts SET status = 'queued', attempts = 0, error = NULL, position = ?, retry_requested_at = NULL, retry_requested_by = NULL WHERE id = ? AND status = 'failed'").run(pos, postId).changes > 0;
   }
+  // Demande de republication (photographe sans la main sur la file) : seulement pour le dernier envoi de la photo,
+  // en échec, et pas déjà demandée. Renvoie true si la demande est nouvelle.
+  function requestRetry(postId, byName = '') {
+    const post = q.post.get(postId);
+    if (!post || post.status !== 'failed' || post.retry_requested_at || q.latest.get(post.photo_id)?.id !== post.id) return false;
+    return db.prepare('UPDATE instagram_posts SET retry_requested_at = ?, retry_requested_by = ? WHERE id = ?').run(now().getTime(), String(byName || '').slice(0, 200), postId).changes > 0;
+  }
+  // Demandes en attente : envois en échec, toujours les derniers de leur photo.
+  const retryRequests = () => db.prepare(`SELECT p.* FROM instagram_posts p WHERE p.status = 'failed' AND p.retry_requested_at IS NOT NULL
+    AND NOT EXISTS (SELECT 1 FROM instagram_posts n WHERE n.photo_id = p.photo_id AND n.id > p.id AND n.status <> 'cancelled') ORDER BY p.retry_requested_at`).all();
 
   // ---------- connexion (OAuth) ----------
   function authorizeUrl(state) {
@@ -588,7 +598,7 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     },
     account: { get: account.get, remove: account.remove, state: () => account.state(), connected: () => account.state() === 'ok' },
     isPublic: photoId => q.photo.get(photoId)?.status === 'published',
-    image, enqueue, cancel, move, onPublished, publish, retry, captionOf, optionsOf, dropBlocked,
+    image, enqueue, cancel, move, onPublished, publish, retry, requestRetry, retryRequests, captionOf, optionsOf, dropBlocked,
     blocked: photoId => { const r = readinessOf(photoId) || OK; return r.level === 'no' ? r.reasons : []; },
     readiness: photoId => readinessOf(photoId) || OK,
     caption: (photoId, s = settings()) => { const p = q.photo.get(photoId); return p ? renderCaption(s.template, p, s, siteName()) : ''; },
