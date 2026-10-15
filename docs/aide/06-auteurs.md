@@ -10,7 +10,6 @@ Une fiche par photographe.
 | **Signature des posts Instagram** | ajoutée sous la légende des posts Instagram de ses photos qui ont une légende, retirable photo par photo (voir [Instagram](instagram#la-légende)) |
 | **Lettre des cartes** | la lettre des cartes d’accord (J-0142) ; vide : la première lettre de l'adresse. Une lettre par photographe (voir [Rencontres](rencontres)). |
 | **Sur le terrain** | lien vers ses cartes d’accord et le QR de ses vêtements (voir [Rencontres](rencontres#sur-le-terrain)) |
-| **Compte de connexion** | identifiant du compte qui se connecte à l'admin (voir ci-dessous) |
 
 - **Enregistrer** : sous chaque fiche.
 - **Ajouter un photographe** : formulaire « Nouveau photographe », en bas.
@@ -19,10 +18,4 @@ Une fiche par photographe.
 
 ## Lier un compte à un photographe
 
-Une fois le compte lié, ses imports lui sont attribués par défaut, et le tableau de bord indique « Ce compte est lié à l'auteur … ».
-
-1. La personne se connecte : son tableau de bord affiche son identifiant de compte.
-2. Copiez-le dans le champ **Compte de connexion** de sa fiche.
-3. Cliquez sur **Enregistrer**.
-
-Un compte ne peut être lié qu'à un seul photographe.
+Le compte qui se connecte et le photographe se relient dans [Comptes et rôles](reglages#comptes-et-rôles), réservé aux administrateurs : choisissez le photographe dans **Photographe lié**, puis **Enregistrer**. Une fois relié, ses imports lui sont attribués par défaut, et le tableau de bord indique « Ce compte est lié au photographe … ». Un photographe ne peut être lié qu'à un seul compte.

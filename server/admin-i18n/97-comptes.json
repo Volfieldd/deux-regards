@@ -1,0 +1,278 @@
+{
+ "Comptes et rôles": {
+  "en": "Accounts and roles",
+  "de": "Konten und Rollen"
+ },
+ "Journal": {
+  "en": "Log",
+  "de": "Protokoll"
+ },
+ "Un compte est créé à la première connexion. Il reste « en attente » tant qu’aucun rôle ne lui est donné ; un rôle s’applique tout de suite, et le retirer aussi. Le photographe lié sert aux valeurs par défaut (import, app Terrain) et, bientôt, à ne montrer que ses propres photos.": {
+  "en": "An account is created at first sign-in. It stays “pending” until it is given a role; a role takes effect at once, and so does removing it. The linked photographer is used for defaults (import, Field app) and, soon, to show only their own photos.",
+  "de": "Ein Konto wird bei der ersten Anmeldung angelegt. Es bleibt „wartend“, bis es eine Rolle erhält; eine Rolle gilt sofort, ebenso ihr Entzug. Der verknüpfte Fotograf dient für Voreinstellungen (Import, App Unterwegs) und bald dazu, nur seine eigenen Fotos zu zeigen."
+ },
+ "Rôles": {
+  "en": "Roles",
+  "de": "Rollen"
+ },
+ "tout, y compris les comptes et le journal": {
+  "en": "everything, including accounts and the log",
+  "de": "alles, auch Konten und Protokoll"
+ },
+ "Modérateur": {
+  "en": "Moderator",
+  "de": "Moderator"
+ },
+ "publie et dépublie, signalements, textes ; aucune donnée personnelle": {
+  "en": "publishes and unpublishes, reports, texts; no personal data",
+  "de": "veröffentlicht und zieht zurück, Meldungen, Texte; keine personenbezogenen Daten"
+ },
+ "Relecteur": {
+  "en": "Proofreader",
+  "de": "Korrektor"
+ },
+ "relit et traduit les textes": {
+  "en": "proofreads and translates texts",
+  "de": "liest Texte Korrektur und übersetzt sie"
+ },
+ "ses photos, ses sorties, ses personnes : disponible à la prochaine étape": {
+  "en": "their photos, outings and people: available in the next step",
+  "de": "eigene Fotos, Ausflüge und Personen: im nächsten Schritt verfügbar"
+ },
+ "Garde-fou ADMIN_SUBS : les comptes marqués « protégé » restent toujours administrateurs.": {
+  "en": "ADMIN_SUBS safeguard: accounts marked “protected” always remain administrators.",
+  "de": "Schutz durch ADMIN_SUBS: als „geschützt“ markierte Konten bleiben immer Administratoren."
+ },
+ "sans nom": {
+  "en": "no name",
+  "de": "ohne Namen"
+ },
+ "vous": {
+  "en": "you",
+  "de": "Sie"
+ },
+ "protégé": {
+  "en": "protected",
+  "de": "geschützt"
+ },
+ "actif": {
+  "en": "active",
+  "de": "aktiv"
+ },
+ "désactivé": {
+  "en": "deactivated",
+  "de": "deaktiviert"
+ },
+ "dernière connexion : {date}": {
+  "en": "last sign-in: {date}",
+  "de": "letzte Anmeldung: {date}"
+ },
+ "jamais": {
+  "en": "never",
+  "de": "nie"
+ },
+ "Photographe lié": {
+  "en": "Linked photographer",
+  "de": "Verknüpfter Fotograf"
+ },
+ "aucun": {
+  "en": "none",
+  "de": "keiner"
+ },
+ "Désactivé (ne peut plus se connecter)": {
+  "en": "Deactivated (can no longer sign in)",
+  "de": "Deaktiviert (kann sich nicht mehr anmelden)"
+ },
+ "Donner ce rôle": {
+  "en": "Give this role",
+  "de": "Diese Rolle vergeben"
+ },
+ "Supprimer ce compte": {
+  "en": "Delete this account",
+  "de": "Dieses Konto löschen"
+ },
+ "Qui a fait quoi :": {
+  "en": "Who did what:",
+  "de": "Wer hat was getan:"
+ },
+ "Compte « {name} » enregistré.": {
+  "en": "Account “{name}” saved.",
+  "de": "Konto „{name}“ gespeichert."
+ },
+ "Compte « {name} » supprimé.": {
+  "en": "Account “{name}” deleted.",
+  "de": "Konto „{name}“ gelöscht."
+ },
+ "Compte introuvable.": {
+  "en": "Account not found.",
+  "de": "Konto nicht gefunden."
+ },
+ "État inconnu.": {
+  "en": "Unknown status.",
+  "de": "Unbekannter Zustand."
+ },
+ "Ce compte est protégé par ADMIN_SUBS : il reste administrateur.": {
+  "en": "This account is protected by ADMIN_SUBS: it remains an administrator.",
+  "de": "Dieses Konto ist durch ADMIN_SUBS geschützt: Es bleibt Administrator."
+ },
+ "Vous ne pouvez pas désactiver votre propre compte.": {
+  "en": "You cannot deactivate your own account.",
+  "de": "Sie können Ihr eigenes Konto nicht deaktivieren."
+ },
+ "Vous ne pouvez pas supprimer votre propre compte.": {
+  "en": "You cannot delete your own account.",
+  "de": "Sie können Ihr eigenes Konto nicht löschen."
+ },
+ "Il faut au moins un administrateur actif.": {
+  "en": "There must be at least one active administrator.",
+  "de": "Es muss mindestens einen aktiven Administrator geben."
+ },
+ "Ce photographe est déjà lié à un autre compte.": {
+  "en": "This photographer is already linked to another account.",
+  "de": "Dieser Fotograf ist bereits mit einem anderen Konto verknüpft."
+ },
+ "Photographe inconnu.": {
+  "en": "Unknown photographer.",
+  "de": "Unbekannter Fotograf."
+ },
+ "Le compte de connexion du photographe et ses droits se règlent dans": {
+  "en": "The photographer’s sign-in account and rights are set in",
+  "de": "Das Anmeldekonto des Fotografen und seine Rechte werden eingestellt unter"
+ },
+ "{n} compte en attente d’un rôle": {
+  "en": "{n} account waiting for a role",
+  "de": "{n} Konto wartet auf eine Rolle"
+ },
+ "{n} comptes en attente d’un rôle": {
+  "en": "{n} accounts waiting for a role",
+  "de": "{n} Konten warten auf eine Rolle"
+ },
+ "connectés une fois, ils n’ont encore accès à rien": {
+  "en": "signed in once, they cannot access anything yet",
+  "de": "einmal angemeldet, haben sie noch auf nichts Zugriff"
+ },
+ "Qui a fait quoi dans l’admin : connexions, modifications, publications, comptes. Gardé 13 mois.": {
+  "en": "Who did what in the admin: sign-ins, changes, publishing, accounts. Kept for 13 months.",
+  "de": "Wer hat was in der Verwaltung getan: Anmeldungen, Änderungen, Veröffentlichungen, Konten. 13 Monate aufbewahrt."
+ },
+ "Tous les comptes": {
+  "en": "All accounts",
+  "de": "Alle Konten"
+ },
+ "Action, cible…": {
+  "en": "Action, target…",
+  "de": "Aktion, Ziel…"
+ },
+ "Rien dans le journal pour ces filtres.": {
+  "en": "Nothing in the log for these filters.",
+  "de": "Für diese Filter steht nichts im Protokoll."
+ },
+ "Quand": {
+  "en": "When",
+  "de": "Wann"
+ },
+ "Qui": {
+  "en": "Who",
+  "de": "Wer"
+ },
+ "Action": {
+  "en": "Action",
+  "de": "Aktion"
+ },
+ "Cible": {
+  "en": "Target",
+  "de": "Ziel"
+ },
+ "Résultat": {
+  "en": "Result",
+  "de": "Ergebnis"
+ },
+ "fait": {
+  "en": "done",
+  "de": "erledigt"
+ },
+ "refusé": {
+  "en": "refused",
+  "de": "abgelehnt"
+ },
+ "Connexion": {
+  "en": "Sign-in",
+  "de": "Anmeldung"
+ },
+ "Connexion (test)": {
+  "en": "Sign-in (test)",
+  "de": "Anmeldung (Test)"
+ },
+ "Connexion en attente d’un rôle": {
+  "en": "Sign-in waiting for a role",
+  "de": "Anmeldung wartet auf eine Rolle"
+ },
+ "Connexion refusée (compte désactivé)": {
+  "en": "Sign-in refused (account deactivated)",
+  "de": "Anmeldung abgelehnt (Konto deaktiviert)"
+ },
+ "Compte modifié": {
+  "en": "Account changed",
+  "de": "Konto geändert"
+ },
+ "Compte supprimé": {
+  "en": "Account deleted",
+  "de": "Konto gelöscht"
+ },
+ "Photos importées": {
+  "en": "Photos imported",
+  "de": "Fotos importiert"
+ },
+ "Fiche photo enregistrée": {
+  "en": "Photo details saved",
+  "de": "Fotodetails gespeichert"
+ },
+ "Photo modifiée": {
+  "en": "Photo changed",
+  "de": "Foto geändert"
+ },
+ "Statut de la photo changé": {
+  "en": "Photo status changed",
+  "de": "Fotostatus geändert"
+ },
+ "Action sur plusieurs photos": {
+  "en": "Action on several photos",
+  "de": "Aktion für mehrere Fotos"
+ },
+ "Photo supprimée": {
+  "en": "Photo deleted",
+  "de": "Foto gelöscht"
+ },
+ "Réglages enregistrés": {
+  "en": "Settings saved",
+  "de": "Einstellungen gespeichert"
+ },
+ "Mise en file Instagram": {
+  "en": "Added to the Instagram queue",
+  "de": "In die Instagram-Warteschlange gestellt"
+ },
+ "Refus appliqué": {
+  "en": "Refusal applied",
+  "de": "Ablehnung angewendet"
+ },
+ "Rencontre effacée": {
+  "en": "Encounter erased",
+  "de": "Begegnung gelöscht"
+ },
+ "Personne effacée": {
+  "en": "Person erased",
+  "de": "Person gelöscht"
+ },
+ "Signalement traité": {
+  "en": "Report handled",
+  "de": "Meldung bearbeitet"
+ },
+ "Ce compte n’est lié à aucun photographe : un administrateur peut le relier dans « Comptes et rôles ».": {
+  "en": "This account is not linked to any photographer: an administrator can link it in “Accounts and roles”.",
+  "de": "Dieses Konto ist mit keinem Fotografen verknüpft: Ein Administrator kann es unter „Konten und Rollen“ verknüpfen."
+ },
+ "Rôles : {roles}": {
+  "en": "Roles: {roles}",
+  "de": "Rollen: {roles}"
+ }
+}

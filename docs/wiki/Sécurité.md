@@ -73,10 +73,10 @@ Détail et autres refus de démarrage : [Configuration](Configuration), section 
 ## Points d'attention
 
 - **Mode EXIF « Tout l'EXIF de l'original » :** il publie la position GPS des photos.
-- **Rôle retiré dans Zitadel :** il cesse de valoir au plus tard 24 h après la dernière connexion de la personne.
+- **Rôles :** ils vivent dans la base du site et sont relus à chaque requête ; un rôle retiré dans **Comptes et rôles** s'applique tout de suite. Le rôle `admin` de Zitadel ne sert qu'à la première connexion.
 - **HSTS :** il est envoyé sans `includeSubDomains`. À ajouter une fois le domaine choisi, si tous ses sous-domaines sont en HTTPS.
 - **Cache des images publiées :** il dure un an. Une photo dépubliée cesse d'être servie par le site, mais un navigateur ou un proxy qui l'a déjà en cache peut la garder.
-- **Rôles et permissions :** chaque route de l'admin déclare une permission (`server/permissions.js`) ; une route qui n'en déclare pas empêche le démarrage, et une permission absente du compte est refusée (fermé par défaut). Les routes à plusieurs actions (actions groupées, fiche qui publie, effacement avec photos, réglages) vérifient aussi l'action précise. Quatre rôles existent (Administrateur, Photographe, Modérateur, Relecteur) ; pour l'instant, tous les comptes sont administrateurs : la page « Comptes et rôles » et la portée « mes photos » arrivent aux étapes suivantes. Le journal d'audit permet de savoir qui a fait quoi.
+- **Rôles et permissions :** chaque route de l'admin déclare une permission (`server/permissions.js`) ; une route qui n'en déclare pas empêche le démarrage, et une permission absente du compte est refusée (fermé par défaut). Les routes à plusieurs actions (actions groupées, fiche qui publie, effacement avec photos, réglages) vérifient aussi l'action précise. Quatre rôles existent (Administrateur, Photographe, Modérateur, Relecteur), donnés dans **Comptes et rôles** ; un compte inconnu arrive « en attente », sans accès. Garde-fous : au moins un administrateur actif, pas de désactivation de soi-même, `ADMIN_SUBS` toujours administrateurs. Le lien compte ↔ photographe ne se règle plus dans la fiche Photographe (porte d'escalade fermée). Le rôle Photographe attend la portée « mes photos » (étape 3). Le **Journal** (en base, 13 mois) dit qui a fait quoi.
 
 ## Mesure d’audience
 

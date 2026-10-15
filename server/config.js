@@ -112,5 +112,7 @@ export function loadConfig(env = process.env) {
       adminRole: env.OIDC_ADMIN_ROLE || 'admin',
       allowedSubs: list(env.OIDC_ALLOWED_SUBS),
     },
+    // Garde-fou : identités (sub) toujours administratrices, quoi qu'il arrive aux comptes dans l'admin.
+    adminSubs: list(env.ADMIN_SUBS),
   };
 }

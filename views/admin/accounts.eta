@@ -1,0 +1,34 @@
+<% layout('./layout') %>
+<% const t = it.t; const STATUS = { actif: t('actif'), en_attente: t('en attente'), desactive: t('désactivé') };
+   const when = ms => (ms ? new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Paris' }).format(ms) : t('jamais')); %>
+<h1><%= t('Comptes et rôles') %></h1>
+<p class="prose"><%= t('Un compte est créé à la première connexion. Il reste « en attente » tant qu’aucun rôle ne lui est donné ; un rôle s’applique tout de suite, et le retirer aussi. Le photographe lié sert aux valeurs par défaut (import, app Terrain) et, bientôt, à ne montrer que ses propres photos.') %></p>
+<ul class="role-legend" aria-label="<%= t('Rôles') %>">
+  <li><strong><%= t('Administrateur') %></strong> <%= t('tout, y compris les comptes et le journal') %></li>
+  <li><strong><%= t('Modérateur') %></strong> <%= t('publie et dépublie, signalements, textes ; aucune donnée personnelle') %></li>
+  <li><strong><%= t('Relecteur') %></strong> <%= t('relit et traduit les textes') %></li>
+  <li><strong><%= t('Photographe') %></strong> <%= t('ses photos, ses sorties, ses personnes : disponible à la prochaine étape') %></li>
+</ul>
+<% if (it.guarded) { %><p class="hint"><%= t('Garde-fou ADMIN_SUBS : les comptes marqués « protégé » restent toujours administrateurs.') %></p><% } %>
+<ul class="accounts">
+<% it.accounts.forEach(a => { const self = a.sub === it.me; %>
+  <li class="panel<%= a.status === 'en_attente' ? ' fresh' : '' %>">
+    <form method="post" action="/admin/comptes/<%= a.id %>" class="acc-form">
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+      <div class="acc-who">
+        <strong><%= a.name || t('sans nom') %></strong><% if (self) { %> <span class="enc-tag"><%= t('vous') %></span><% } %><% if (a.locked) { %> <span class="enc-tag ok"><%= t('protégé') %></span><% } %>
+        <span class="enc-tag <%= a.status === 'actif' ? 'ok' : a.status === 'en_attente' ? 'warn' : 'no' %>"><%= STATUS[a.status] %></span>
+        <span class="mono"><%= a.email || a.sub %> · <%= t('dernière connexion : {date}', { date: when(a.last_login_at) }) %></span>
+      </div>
+      <fieldset class="acc-roles"><legend><%= t('Rôles') %></legend>
+<% it.roles.forEach(r => { const on = a.roles.includes(r.key); %>        <label class="inline"><input type="checkbox" name="roles" value="<%= r.key %>"<%~ on ? ' checked' : '' %><%~ !r.ready || (a.locked && r.key === 'admin') ? ' disabled' : '' %>> <%= t(r.label) %></label>
+<% }) %>      </fieldset>
+      <label><%= t('Photographe lié') %> <select name="author_id"><option value=""><%= t('aucun') %></option><% it.authors.forEach(au => { %><option value="<%= au.id %>"<%~ au.id === a.author_id ? ' selected' : '' %>><%= au.name %></option><% }) %></select></label>
+<% if (!self && !a.locked) { %>      <label class="inline"><input type="checkbox" name="status" value="desactive"<%~ a.status === 'desactive' ? ' checked' : '' %>> <%= t('Désactivé (ne peut plus se connecter)') %></label>
+<% } %>      <p class="actions"><button class="btn" type="submit"><%= a.status === 'en_attente' ? t('Donner ce rôle') : t('Enregistrer') %></button></p>
+    </form>
+<% if (!self && !a.locked) { %>    <form method="post" action="/admin/comptes/<%= a.id %>/supprimer" class="acc-del"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit"><%= t('Supprimer ce compte') %></button></form>
+<% } %>  </li>
+<% }) %>
+</ul>
+<p class="hint"><%= t('Qui a fait quoi :') %> <a class="more" href="/admin/journal"><%= t('Journal') %></a></p>

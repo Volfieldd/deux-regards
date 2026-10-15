@@ -1035,3 +1035,20 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .insp .sugbox { grid-template-columns: minmax(0, 1fr); }
 .insp .sugbox .acts { grid-row: auto; grid-column: 1; margin-top: 6px; }
 @media (max-width: 640px) { .sugbox { grid-template-columns: minmax(0, 1fr); } .sugbox .acts { grid-row: auto; grid-column: 1; margin-top: 6px; } }
+
+/* ---------- comptes et rôles, journal ---------- */
+.role-legend { list-style: none; margin: 12px 0; padding: 0; display: grid; gap: 4px; font-size: 13px; color: var(--ink2); }
+.accounts { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px; }
+.accounts > li { margin: 0; display: grid; gap: 8px; }
+.accounts > li.fresh { box-shadow: inset 3px 0 0 var(--warn); }
+.acc-form { display: grid; gap: 12px; }
+.acc-who { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+.acc-who .mono { flex-basis: 100%; overflow-wrap: anywhere; }
+.acc-roles { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.acc-roles legend { padding: 0; margin-bottom: 4px; font-size: 13px; color: var(--ink2); }
+.acc-roles label:has(input:disabled) { color: var(--ink3); }
+.table-wrap { overflow-x: auto; }
+.journal { width: 100%; border-collapse: collapse; font-size: 13px; }
+.journal th, .journal td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.journal th { font-weight: 500; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); }
+.journal td .mono { overflow-wrap: anywhere; }

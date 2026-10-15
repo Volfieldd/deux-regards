@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { registerPermissions, hasRole } from './permissions.js';
+import { createAccounts, createAudit } from './accounts.js';
 import { createOidc } from './oidc.js';
 import { createSessionStore, IDLE_TTL } from './sessions.js';
 import { createRateLimiter } from './ratelimit.js';
@@ -56,14 +57,21 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
 
   app.decorate('oidc', oidc);
   app.decorateRequest('session', null);
+  // Comptes et journal (server/accounts.js) : les rôles d'une session sont ceux de son compte, relus à chaque requête.
+  if (!app.hasDecorator('accounts')) app.decorate('accounts', createAccounts({ db: app.db, adminSubs: config.adminSubs || [] }));
+  if (!app.hasDecorator('audit')) app.decorate('audit', createAudit({ db: app.db }));
+  const { accounts, audit } = app;
 
   app.addHook('onRequest', async (request, reply) => {
     const token = request.cookies[SESSION_COOKIE];
     if (!token) return;
     request.session = sessions.load(token);
-    if (!request.session) reply.clearCookie(SESSION_COOKIE, cookieBase);
+    if (!request.session) { reply.clearCookie(SESSION_COOKIE, cookieBase); return; }
+    accounts.ensure(request.session);                 // session ouverte avant les comptes : compte créé avec ses rôles
+    request.session.roles = accounts.rolesOf(request.session.sub);
   });
 
+  const pendingPage = { title: 'Compte en attente', message: 'Votre compte est bien enregistré. Un administrateur doit maintenant lui donner un rôle ; réessayez ensuite.' };
   const renderError = (reply, code, data) => reply.code(code).header('cache-control', 'no-store').render('auth-error', {
     siteName: app.siteName(), pageTitle: `${data.title} · ${app.siteName()}`, description: '', ...data,
   });
@@ -81,6 +89,8 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       return reply.code(401).send({ error: 'Session expirée, reconnectez-vous.' });
     }
     if (!hasRole(request.session.roles)) {
+      const a = accounts.bySub(request.session.sub);
+      if (a?.status === 'en_attente') return renderError(reply, 403, pendingPage);
       return renderError(reply, 403, { title: 'Accès refusé', message: 'Ce compte n’a pas accès à l’administration.' });
     }
     // Expiration glissante : le cookie suit l'échéance de la session.
@@ -153,20 +163,22 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     }
 
     const { claims } = result;
-    if (!result.admin) {
-      request.log.warn({ sub: claims.sub }, 'connexion sans le rôle admin');
-      return renderError(reply, 403, {
-        title: 'Accès refusé', message: 'Ce compte n’a pas accès à l’administration.', switchAccount: true,
-      });
+    const who = { sub: claims.sub, name: claims.name || claims.preferred_username || claims.email || '', email: claims.email || '' };
+    // Compte créé à la première connexion : administrateur si l'IdP transporte le rôle « admin », sinon en attente
+    // qu'un administrateur lui donne un rôle. Ensuite, seuls comptent les rôles réglés dans l'admin.
+    const account = accounts.login({ ...who, idpAdmin: result.admin });
+    if (account.status === 'desactive') {
+      audit.log({ ...who, action: 'connexion refusée (compte désactivé)' });
+      return renderError(reply, 403, { title: 'Accès refusé', message: 'Ce compte a été désactivé.', switchAccount: true });
+    }
+    if (!hasRole(accounts.rolesOf(who.sub))) {
+      audit.log({ ...who, action: 'connexion en attente d’un rôle' });
+      request.log.warn({ sub: claims.sub }, 'connexion sans rôle : compte en attente');
+      return renderError(reply, 403, { ...pendingPage, switchAccount: true });
     }
 
-    openSession(request, reply, {
-      sub: claims.sub,
-      name: claims.name || claims.preferred_username || claims.email || '',
-      email: claims.email || '',
-      roles: [...new Set([...result.roles, 'admin'])],
-      idToken: result.idToken,
-    });
+    openSession(request, reply, { ...who, roles: accounts.rolesOf(who.sub), idToken: result.idToken });
+    audit.log({ ...who, action: 'connexion' });
     return reply.header('cache-control', 'no-store').redirect(safeNext(tx.next));
   });
 
@@ -181,7 +193,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // loadConfig la refuse dès que le site est en ligne (HTTPS ou production).
   if (config.localAuthToken) {
     app.log.warn('authentification locale de test active (LOCAL_AUTH_TOKEN) : jamais en production');
-    const authors = app.db.prepare('SELECT slug, name, oidc_sub FROM authors ORDER BY id');
+    const authors = app.db.prepare('SELECT a.id, a.slug, a.name, c.sub AS linked FROM authors a LEFT JOIN accounts c ON c.author_id = a.id ORDER BY a.id');
     const renderLocal = (reply, code, data) => reply.code(code).header('cache-control', 'no-store').render('local-login', {
       siteName: app.siteName(), pageTitle: `Connexion de test · ${app.siteName()}`, description: '', authors: authors.all(), ...data,
     });
@@ -193,13 +205,18 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     });
 
     app.post('/auth/local', async (request, reply) => {
-      const { token, author, next } = request.body || {};
+      const { token, author, next, role } = request.body || {};
       const who = authors.all().find(a => a.slug === author);
       if (!sameToken(token, config.localAuthToken) || !who) {
         return renderLocal(reply, 401, { next: safeNext(next), error: 'Jeton ou compte invalide.' });
       }
-      // Le sub est celui lié à l'auteur s'il existe, pour tester le lien compte ↔ auteur.
-      openSession(request, reply, { sub: who.oidc_sub || `local:${who.slug}`, name: `${who.name} (test)`, roles: ['admin'] });
+      // Le compte est celui lié au photographe s'il existe (pour tester le lien compte ↔ photographe), sinon
+      // « local:<photographe> », administrateur ; role (tests) : un autre rôle pour ce compte.
+      const sub = who.linked || `local:${who.slug}`;
+      const roles = typeof role === 'string' && role ? [role] : (accounts.bySub(sub) ? undefined : ['admin']);
+      accounts.ensureLocal({ sub, name: `${who.name} (test)`, authorId: who.id, roles });
+      openSession(request, reply, { sub, name: `${who.name} (test)`, roles: accounts.rolesOf(sub) });
+      audit.log({ sub, name: `${who.name} (test)`, action: 'connexion (test)' });
       return reply.header('cache-control', 'no-store').redirect(safeNext(next), 303);
     });
   }

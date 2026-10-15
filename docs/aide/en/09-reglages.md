@@ -52,3 +52,24 @@ As long as the essentials are missing (names, address, email, person responsible
 | **Usage rights: English, Deutsch** | pages `/en/droits` (English) and `/de/droits` (German), offered to visitors through the language selector at the top of the page (Français, English, Deutsch). Same badges and same button. If the French text is customised and this one is not a translation of it, a warning says so: adapt it, otherwise foreign visitors read the translation of the default text. |
 | **Usage rights: contact** | email address or `https://` link, shown as a link on `/droits` |
 | **Privacy** | the controllers’ **contact** shown on the `/confidentialite` page (GDPR, in three languages) and two boxes to tick **only when it is true**: two-factor authentication for all admin accounts, and encrypted disks for data and backups (the page then states it). The page also shows whether encryption of personal data in the database (`DATA_KEY`) is active. The rest of the page follows the site automatically. |
+
+## Accounts and roles
+
+**Accounts and roles** (Settings group, administrators only) lists the accounts that have signed in.
+
+- **First sign-in:** the account is created. If Zitadel gives it the “admin” role, it is an administrator; otherwise it stays **pending**, with no access, and “Today” says so. An account left pending for 90 days is deleted.
+- **Give a role:** tick it, then **Give this role** (or **Save**). It takes effect at once, without signing in again; removing it too.
+  - **Administrator**: everything, including accounts and the log.
+  - **Moderator**: publishes and unpublishes (site and Instagram), handles reports, corrects texts; never personal data.
+  - **Proofreader**: proofreads and translates texts.
+  - **Photographer**: their photos, outings and people; offered in the next step, when the admin shows each person only what is theirs.
+- **Linked photographer:** used for defaults (import, Field app). A photographer can only be linked to one account.
+- **Deactivated:** the account can no longer sign in, and its current session loses access at once.
+- **Delete this account:** the account and its sessions are erased; if it signs in again, it starts over as pending.
+- **Safeguards:** there is always at least one active administrator; you cannot deactivate or delete yourself; accounts listed in `ADMIN_SUBS` (server configuration, marked “protected”) remain administrators whatever happens.
+
+The menu only shows the pages the account can open.
+
+## Log
+
+**Log** (administrators): who did what in the admin, most recent first: sign-ins (successful, pending, refused), changes, publishing, actions on several photos, changed accounts (with the detail: roles, status, linked photographer). Filter by account or by word. Choosing the language and theme is not recorded. The log is kept for 13 months.

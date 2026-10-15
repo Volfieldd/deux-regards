@@ -123,9 +123,9 @@
 <% if (it.me) { %>
       <%~ t('Ce compte est lié au photographe {name} : vos imports lui sont attribués par défaut.', { name: `<strong>${__eta.e(it.me.name)}</strong>` }) %></p>
 <% } else { %>
-      <%= t('Ce compte n’est lié à aucun photographe. Pour qu’il le soit, copiez son identifiant dans la fiche du photographe :') %></p>
-      <p><code><%= it.session.sub %></code> · <a class="more" href="/admin/auteurs"><%= t('Photographes') %></a></p>
+      <%= t('Ce compte n’est lié à aucun photographe : un administrateur peut le relier dans « Comptes et rôles ».') %></p>
 <% } %>
+      <p class="mono"><%= t('Rôles : {roles}', { roles: (it.session.roles || []).map(r => t(it.roleLabels[r] || r)).join(', ') || '—' }) %><% if (it.can('comptes.gerer')) { %> · <a class="more" href="/admin/comptes"><%= t('Comptes et rôles') %></a><% } %></p>
     </section>
   </div>
 </div>

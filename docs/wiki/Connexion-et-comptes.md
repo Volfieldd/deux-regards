@@ -1,14 +1,17 @@
 # Connexion et comptes
 
-L'administration est réservée aux auteurs. L'application **ne stocke et ne gère aucun mot de passe** : la connexion passe par OpenID Connect, avec Zitadel Cloud comme fournisseur. Google peut y être branché comme fournisseur externe.
+L'administration est réservée aux comptes qui ont un rôle (Administrateur, Modérateur, Relecteur ; Photographe à venir). L'application **ne stocke et ne gère aucun mot de passe** : la connexion passe par OpenID Connect, avec Zitadel Cloud comme fournisseur. Google peut y être branché comme fournisseur externe.
 
 ## Parcours de connexion
 
 1. On ouvre `/admin`. Sans session, le site redirige vers `/auth/login`, puis vers Zitadel.
 2. On se connecte sur Zitadel (compte local ou « Continuer avec Google »). La double authentification se règle dans Zitadel.
 3. Zitadel renvoie vers `/auth/callback`. Le site vérifie la réponse (`state`, `nonce`, PKCE, signature, émetteur, audience), puis lit les rôles.
-4. **Avec le rôle `admin`** (clé réglable par `OIDC_ADMIN_ROLE`, donné dans l'organisation `OIDC_ORG_ID`), une session est ouverte et l'on arrive sur la page demandée.
-5. **Sans ce rôle**, la page « Accès refusé » s'affiche, avec un lien « Utiliser un autre compte ». Aucune session n'est créée.
+4. Le site cherche le **compte** de cette identité (`sub`) dans sa base, ou le crée à la première connexion. Les rôles vivent dans la base du site : Zitadel ne fait que transporter l'identité.
+   - **Première connexion avec le rôle `admin`** dans Zitadel (clé réglable par `OIDC_ADMIN_ROLE`, donné dans l'organisation `OIDC_ORG_ID`) : le compte est créé administrateur. Ce rôle Zitadel ne sert qu'à cette amorce.
+   - **Sinon** : le compte est créé **en attente**, et la page « Compte en attente » s'affiche ; aucune session n'est ouverte. Un administrateur lui donne un rôle dans **Comptes et rôles** ; la connexion suivante passe.
+   - **Compte désactivé** : « Accès refusé ».
+5. Avec un rôle, une session est ouverte et l'on arrive sur la page demandée. Les rôles sont relus **à chaque requête** : un rôle retiré, un compte désactivé ou supprimé perd l'accès tout de suite.
 
 **Déconnexion :** bouton « Se déconnecter » de l'admin. La session est supprimée sur le site **et** chez Zitadel.
 
@@ -25,16 +28,15 @@ Pas à pas détaillé, avec les écrans de la console : [`deploy/unraid/README.m
 4. Donner le rôle `admin` à Sébastien et Julien, puis désactiver l'inscription libre.
 5. Reporter dans `.env` : `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_PROJECT_ID` (identifiant du projet) et `OIDC_ORG_ID` (identifiant de l'organisation).
 
-**Retirer l'accès** à quelqu'un : retirer son rôle dans Zitadel. Sa session sur le site expire au plus tard 24 h après sa connexion ; pour un effet immédiat, supprimer ses sessions en base (voir [Exploitation](Exploitation#opérations-courantes)).
+**Retirer l'accès** à quelqu'un : dans l'admin, **Comptes et rôles**, retirer ses rôles, le désactiver ou supprimer son compte. L'effet est immédiat. Retirer son rôle dans Zitadel ne suffit plus (le rôle Zitadel ne sert qu'à la première connexion) ; le bloquer dans Zitadel l'empêche en revanche de se connecter.
 
-## Lier un compte à un auteur
+**Garde-fou :** les identités listées dans `ADMIN_SUBS` (variable d'environnement, `sub` séparés par des virgules) sont toujours administratrices, même si leur compte a été modifié dans l'admin. Il reste aussi toujours au moins un administrateur actif.
 
-Le tableau de bord de l'admin affiche l'identifiant `sub` du compte connecté. Pour lier ce compte à un auteur :
+## Lier un compte à un photographe
 
-1. Copiez le `sub` affiché sur le tableau de bord.
-2. Collez-le dans le champ « Compte de connexion » de la fiche de l'auteur (**Auteurs**).
+Dans **Comptes et rôles**, choisir le photographe dans « Photographe lié » (un photographe par compte). Une fois lié, il est proposé par défaut à l'import et dans l'app Terrain. Les anciens liens (champ « Compte de connexion » des fiches Photographes) sont devenus des comptes administrateurs lors de la mise à jour.
 
-Une fois lié, l'auteur est proposé par défaut à l'import des photos.
+Toutes les connexions et les actions de l'admin sont notées dans le **Journal** (gardé 13 mois).
 
 ## Sessions
 
@@ -65,6 +67,6 @@ Elle sert à essayer l'admin sans Zitadel, sur un poste de développement ou un 
 - le jeton est exigé : un serveur de test exposé sur le réseau local n'est pas ouvert à tous ;
 - les tentatives de connexion sont limitées (`AUTH_RATE_LIMIT`).
 
-Si l'auteur choisi est lié à un compte OIDC, la session reprend ce `sub` ; sinon elle utilise `local:<slug>`.
+Si le photographe choisi est lié à un compte, la session reprend ce compte ; sinon elle utilise un compte `local:<slug>`, administrateur à sa création.
 
 Générer un jeton : `node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"`.

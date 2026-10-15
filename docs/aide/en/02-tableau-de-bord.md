@@ -16,8 +16,8 @@ This is the **Today** page, the one you land on. At the top, **View site** and *
 - **Pace**: the number of photos imported each month, over a year.
 - **Recent changes**: the five most recently changed photos.
 - **Proofs of prior existence**: number of timestamped photos, and those pending after an error, with **Retry now**. See [Proofs of prior existence](preuves).
-- **Your account**: the name of the signed-in account, and the photographer it is linked to.
-  - **Account not linked:** the account identifier is shown. Copy it into the “Sign-in account” field of your record, in [Photographers](auteurs).
+- **Your account**: the name of the signed-in account, its roles, and the photographer it is linked to.
+  - **Account not linked:** an administrator links it to its photographer in [Accounts and roles](reglages#comptes-et-rôles).
   - **Account linked:** your imports are attributed to you by default.
 
 **“Updating images” banner**: it appears after a change of watermark, EXIF, author name… The counter moves on by itself; see [Watermark and EXIF](filigrane-exif#mise-à-jour-des-images).

@@ -15,7 +15,7 @@ const MONTH = 30 * 864e5;
 const FR = translator('fr');
 const dayOf = t => ms => new Intl.DateTimeFormat(t.locale || 'fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
 
-export function createTodo({ db, encounters, instagram, proofs, readiness, feedback, seriesSuggest, now = () => Date.now() }) {
+export function createTodo({ db, encounters, instagram, proofs, readiness, feedback, seriesSuggest, accounts, now = () => Date.now() }) {
   const q = {
     rights: db.prepare(`SELECT id FROM encounters WHERE rights_request IS NOT NULL AND rights_done_at IS NULL ORDER BY rights_requested_at`).pluck(),
     // Refus dont des photos liées sont encore publiées.
@@ -82,6 +82,8 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
     const legal = Object.fromEntries(db.prepare("SELECT key, value FROM settings WHERE key LIKE 'legal_%' OR key = 'privacy_contact'").all()
       .map(r => { try { return [r.key, JSON.parse(r.value)]; } catch { return [r.key, '']; } }));
     if (legalMissing(legal).length) items.push({ level: 'bientot', title: t('Mentions légales / Impressum à compléter'), detail: t('obligatoires en France et en Allemagne : éditeurs, adresse postale, responsable'), href: '/admin/droits#mentions', action: t('Compléter') });
+    const waiting = accounts ? accounts.pending() : 0;
+    if (waiting) items.push({ level: 'bientot', title: waiting > 1 ? t('{n} comptes en attente d’un rôle', { n: waiting }) : t('{n} compte en attente d’un rôle', { n: waiting }), detail: t('connectés une fois, ils n’ont encore accès à rien'), href: '/admin/comptes', action: t('Voir') });
     const reports = feedback ? feedback.pending() : 0;
     if (reports) items.push({ level: 'bientot', title: reports > 1 ? t('{n} signalements de visiteurs', { n: reports }) : t('{n} signalement de visiteur', { n: reports }),
       detail: t('photo à retirer, suggestion pour le texte ou autre'), href: '/admin/signalements', action: t('Voir') });
