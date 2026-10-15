@@ -1,11 +1,11 @@
 <% layout('./layout') %>
 <% const t = it.t; %>
 <h1><%= t('Aide') %></h1>
-<% if (it.lang !== 'fr') { %><p class="prose"><%= t('L’aide est rédigée en français.') %></p>
+<% if (it.help.lang !== it.lang) { %><p class="prose"><%= t('L’aide est rédigée en français.') %></p>
 <% } %><div class="help">
   <nav class="help-toc" aria-label="<%= t('Sommaire de l’aide') %>">
     <label class="help-search" data-js-only hidden><%= t('Rechercher dans l’aide') %> <input type="search" data-help-search placeholder="<%= t('ex. filigrane, ordre, supprimer') %>"></label>
-    <ol<%~ it.lang !== 'fr' ? ' lang="fr"' : '' %>>
+    <ol<%~ it.help.lang !== it.lang ? ' lang="fr"' : '' %>>
 <% it.help.sections.forEach(s => { %>
       <li><a href="#<%= s.id %>"><%= s.title %></a>
 <% if (s.headings.length) { %>
@@ -18,7 +18,7 @@
   <div class="help-body">
     <p class="help-empty" data-help-empty hidden role="status"><%= t('Aucune section ne contient ce texte.') %></p>
 <% it.help.sections.forEach(s => { %>
-    <section class="panel help-section" id="<%= s.id %>" data-help-section<%~ it.lang !== 'fr' ? ' lang="fr"' : '' %>>
+    <section class="panel help-section" id="<%= s.id %>" data-help-section<%~ it.help.lang !== it.lang ? ' lang="fr"' : '' %>>
       <h2><%= s.title %></h2>
       <%~ s.html %>
       <p class="mono"><a href="#contenu">↑ <%= t('Haut de l’aide') %></a></p>

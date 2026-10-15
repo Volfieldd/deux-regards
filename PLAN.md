@@ -262,7 +262,7 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 ### 32. Personnes, signature Instagram, admin en trois langues (fait)
 - Fiche Personne (plusieurs rencontres, refus étendu, rapprochement par adresse, export et effacement de la personne).
 - Signature Instagram du photographe, sous la légende, retirable par photo.
-- Admin en français, anglais, allemand ; préférence par photographe ; l'aide reste en français (traduction à faire plus tard).
+- Admin en français, anglais, allemand ; préférence par photographe ; aide traduite en anglais et en allemand (docs/aide/en, docs/aide/de).
 
 ## Côté Zitadel (à faire une fois)
 

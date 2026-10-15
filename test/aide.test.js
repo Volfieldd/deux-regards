@@ -47,3 +47,23 @@ test('chaque écran de l’admin mène à sa section d’aide', async t => {
   }
   assert.match((await c.as('/admin')).body, /<a href="\/admin\/aide"><svg[^]*?<\/svg>Aide<\/a>/);
 });
+
+test('aide traduite : mêmes titres dans le même ordre que le français, ancres françaises gardées', async () => {
+  const fs = await import('node:fs');
+  const { loadHelp } = await import('../server/help.js');
+  const dir = new URL('../docs/aide/', import.meta.url);
+  const files = fs.readdirSync(dir).filter(f => /^\d+-[a-z0-9-]+\.md$/.test(f)).sort();
+  const levels = md => md.split('\n').filter(l => /^#{1,6} /.test(l)).map(l => l.match(/^#+/)[0].length);
+  const fr = loadHelp('fr');
+  for (const lang of ['en', 'de']) {
+    if (!fs.existsSync(new URL(`${lang}/`, dir))) continue;
+    for (const f of files) {
+      const t = new URL(`${lang}/${f}`, dir);
+      assert.ok(fs.existsSync(t), `${lang}/${f} manquant`);
+      assert.deepEqual(levels(fs.readFileSync(t, 'utf8')), levels(fs.readFileSync(new URL(f, dir), 'utf8')), `${lang}/${f} : titres`);
+    }
+    const tr = loadHelp(lang);
+    assert.equal(tr.lang, lang);
+    assert.deepEqual(tr.sections.map(s => s.headings.map(h => h.id)), fr.sections.map(s => s.headings.map(h => h.id)), `${lang} : ancres`);
+  }
+});
