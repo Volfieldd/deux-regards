@@ -242,11 +242,11 @@ export default async function adminRoutes(app) {
   const thumb = p => `/admin/media/${variantName(p.file, widthsFor(p.width)[0], 'webp', p.variant_key)}`;
   const large = p => { const ws = widthsFor(p.width); return `/admin/media/${variantName(p.file, ws.filter(w => w <= 1280).at(-1) ?? ws[0], 'webp', p.variant_key)}`; };
   // Données d'une photo pour l'inspecteur de la photothèque.
-  const dataOf = p => ({
+  const dataOf = (p, lang = 'fr') => ({
     id: p.id, n: p.n, title: p.title, slug: p.slug, legend: p.legend, status: p.status, provisional: p.provisional,
     category_id: p.category_id, category: p.category, author_id: p.author_id, author: p.author, place: p.place,
     taken_on: p.taken_on, when: p.when, width: p.width, height: p.height, ready: p.ready,
-    city_id: p.city_id ?? null, city: p.city_name ? cities.label({ name: p.city_name, cc: p.city_cc }) : '', city_source: p.city_source ?? null, on_map: Boolean(p.on_map),
+    city_id: p.city_id ?? null, city: cities.labelOf(p, lang), city_source: p.city_source ?? null, on_map: Boolean(p.on_map),
     thumb: p.ready ? thumb(p) : null, large: p.ready ? large(p) : null, suggest: p.suggest || [],
   });
   // Séries proposées (server/series-suggest.js) avec leur nom ; thumbs : vignettes des photos voisines (fiche).
@@ -315,7 +315,7 @@ export default async function adminRoutes(app) {
     if (missing) photos = photos.filter(MISSING[missing].test);
     photos = photos.map(p => ({ ...p, site: st(p).site, suggest: suggestOf(sugg.get(p.id), names) }));
     // Données de l'inspecteur (une photo choisie) : lues par admin.js, jamais exécutées.
-    const data = photos.map(dataOf);
+    const data = photos.map(p => dataOf(p, request.t.lang));
     return render(request, reply, 'photos', {
       title: request.t('Photothèque'), photos, filter, authors, categories: repo.categories(), ratioClass,
       json: JSON.stringify(data).replace(/</g, '\\u003c'),
@@ -490,7 +490,7 @@ export default async function adminRoutes(app) {
   app.get('/admin/photos/:id/donnees', P('photos.voir'), async (request, reply) => {
     const p = repo.photoView(byId(request.params.id));
     if (!p) return reply.code(404).send({ error: request.t('Photo introuvable.') });
-    return dataOf(withReady({ ...p, suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(p.id))) }));
+    return dataOf(withReady({ ...p, suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(p.id))) }), request.t.lang);
   });
 
   // Série proposée : la prendre (category_id) ou garder la série actuelle (garder=1). JSON ou formulaire (fiche,
@@ -1065,7 +1065,7 @@ export default async function adminRoutes(app) {
       app.variants.schedule();
       const shown = repo.photoView(id);
       return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, author_id: p.author_id, place: p.place, legend: p.legend, taken_on: p.taken_on, when: shown?.when || '', provisional: shown?.provisional || false,
-        city_id: p.city_id ?? null, city: p.city_name ? cities.label({ name: p.city_name, cc: p.city_cc }) : '', city_source: p.city_source ?? null, on_map: Boolean(p.on_map) } };
+        city_id: p.city_id ?? null, city: cities.labelOf(p, request.t.lang), city_source: p.city_source ?? null, on_map: Boolean(p.on_map) } };
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
       return reply.code(422).send({ errors: err.errors });
@@ -1073,7 +1073,7 @@ export default async function adminRoutes(app) {
   });
 
   // Villes proposées au fil de la frappe (fiche, photothèque) : liste embarquée, aucun service extérieur.
-  app.get('/admin/villes', P('admin.acceder'), async request => ({ villes: cities.search(String(request.query.q || '').slice(0, 60), 8).map(c => ({ id: c.id, label: c.label })) }));
+  app.get('/admin/villes', P('admin.acceder'), async request => ({ villes: cities.search(String(request.query.q || '').slice(0, 60), 8, request.t.lang).map(c => ({ id: c.id, label: c.label })) }));
 
   // ---------- actions sur plusieurs photos ----------
   // JSON (barre de sélection) ou formulaire classique. Les réponses JSON portent de quoi annuler.
@@ -1236,7 +1236,7 @@ export default async function adminRoutes(app) {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
     return render(request, reply, 'photo', {
-      title: photo.title, photo, values: { ...photo, city_label: photo.city_name ? cities.label({ name: photo.city_name, cc: photo.city_cc }) : '' }, errors: {}, categories: repo.categories(), authors: request.mine('photos.modifier', repo.authors(), 'id'),
+      title: photo.title, photo, values: { ...photo, city_label: cities.labelOf(photo, request.t.lang) }, errors: {}, categories: repo.categories(), authors: request.mine('photos.modifier', repo.authors(), 'id'),
       ...photoExtras(photo, request.t, request),
     });
   });

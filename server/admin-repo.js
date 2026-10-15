@@ -61,10 +61,10 @@ function resolveLocation(body, before, errors) {
     const typed = String(body.city_label ?? '').trim().slice(0, 120);
     if (!typed) loc = { city_id: null, city_name: null, city_cc: null, city_lat: null, city_lon: null, city_source: null };
     else {
-      const n = cities.norm(typed);
+      // Libellé de la liste dans la langue de l'admin, avec ou sans région, ou simple nom de ville.
       const chosen = Number(body.city_id) ? cities.byId(body.city_id) : null;
-      const city = chosen && (cities.norm(chosen.label) === n || cities.norm(chosen.name) === n) ? chosen
-        : cities.search(typed, 10).find(c => cities.norm(c.label) === n || cities.norm(c.name) === n);
+      const city = chosen && cities.matches(chosen, typed) ? chosen
+        : cities.search(typed.split(',')[0], 30).find(c => cities.matches(c, typed));
       if (!city) errors.city = 'Ville introuvable : choisissez-la dans la liste proposée (toutes les communes de France, localités de plus de 500 habitants ailleurs). Pour un lieu précis, utilisez le champ Lieu.';
       else if (city.id === before?.city_id) loc = keep;
       else loc = { city_id: city.id, city_name: city.name, city_cc: city.cc, city_lat: city.lat, city_lon: city.lon, city_source: 'manuel' };
@@ -188,7 +188,7 @@ export function createAdminRepo(db) {
       const tr = (field, max) => Object.fromEntries(['en', 'de'].map(l => [`${field}_${l}`, `${field}_${l}` in body ? text(body[`${field}_${l}`], max) : (before?.[`${field}_${l}`] ?? '')]));
       const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn === undefined ? text(body.taken_on, 40) : takenOn, legend: text(body.legend, 2000), status, watermark,
         ...tr('title', 160), ...tr('legend', 2000), ...tr('place', 120),
-        city_label: 'city_label' in body ? text(body.city_label, 120) : (before?.city_name ? cities.label({ name: before.city_name, cc: before.city_cc }) : ''), on_map: loc.on_map };
+        city_label: 'city_label' in body ? text(body.city_label, 120) : cities.labelOf(before), on_map: loc.on_map };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
       db.transaction(() => {
         // Série changée sur la fiche : choisie à la main (plus de proposition).
