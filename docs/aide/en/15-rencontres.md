@@ -103,7 +103,7 @@ A **trip** groups outings: “Morocco 2025”, ten shooting days. It is optional
 - **Create**: **Trips** page (under Outings in the menu, or the **Trips** button on the Outings page), a name, then **Create the trip**. An administrator chooses whether it belongs to one photographer or to **both photographers**; a photographer creates their own.
 - **Attach days**: on the trip’s page, **From … To …** attaches every shooting day between these two dates (photos dated by the camera, or encounters); or tick outings in the list. From an outing’s page, the **Trip** menu attaches it, moves it to another trip or detaches it. A day already in another trip is moved.
 - **The trip’s page**: its days in order (D1, D2…), each with its place, photos, people and a link to the outing; all the trip’s photos with their status; **Propose the ready photos** (or **Publish the ready photos**) at once, as for an outing.
-- **Name and text**, in three languages: they will be used for the trip’s public page, coming soon.
+- **Public page**: name and text in three languages, and the box **Publish the trip’s page on the site**. Once ticked, and as soon as one of the trip’s photos is published, the trip has its page (`/voyage/…`) and the site menu gains a **Trips** link. Before that, the team sees it as a preview. See [Public site](site-public).
 - **Remove** a day, or **Delete this trip**: the outings and photos remain.
 - **Photographer**: sees only their own trips and attaches only their own days.
 

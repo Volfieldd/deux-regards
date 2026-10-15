@@ -122,13 +122,16 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   const mapSetting = db.prepare("SELECT value FROM settings WHERE key = 'map_page'").pluck();
   // Recherche (activée par défaut : lien « Rechercher » dans le menu) ; mots-clés affichés sur la page photo (non par défaut).
   const searchSetting = db.prepare("SELECT value FROM settings WHERE key = 'search_page'").pluck();
+  // Lien « Voyages » du menu : au moins un voyage publié qui a une photo publiée.
+  const tripsOpen = db.prepare(`SELECT EXISTS (SELECT 1 FROM trips t JOIN trip_days d ON d.trip_id = t.id JOIN photos p ON p.author_id = d.author_id AND p.taken_on = d.day
+    WHERE t.public = 1 AND p.status = 'published')`).pluck();
   const asset = assetUrls(path.join(ROOT, 'public'), config.production);
   app.decorate('appearance', createAppearance(app));
   app.decorateReply('render', function (template, data) {
     const names = authorNames.all();
     const brand = app.appearance.brand();
     const theme = app.appearance.forRequest(this.request, this);
-    const common = { asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false',
+    const common = { asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
       // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
       here: splitLang(this.request.url).path, langs: LANGS, langNames: NAMES, locales: LOCALES, localize,
       authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '' };

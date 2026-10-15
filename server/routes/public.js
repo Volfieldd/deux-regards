@@ -9,6 +9,7 @@ import { LEGAL } from '../legal.js';
 import { project, MAP } from '../geo/projection.js';
 import { countryName, nameOf } from '../geo/cities.js';
 import { createSearch, MAX_QUERY } from '../search.js';
+import { tripStory } from '../trip-story.js';
 import { LANGS, PREFIX, UI, pick, localize, splitLang, detectLang } from '../i18n.js';
 import { BOTS, countryOf } from '../stats.js';
 import path from 'node:path';
@@ -119,6 +120,8 @@ export default async function publicRoutes(app) {
       ...repo.authors().filter(a => photos.some(p => p.author_slug === a.slug)).map(a => ({ loc: galleryUrl({ regard: a.slug }) })),
       ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at) })),
       ...(mapEnabled() ? [{ loc: '/carte' }] : []),
+      // Voyages publiés (avec au moins une photo publiée).
+      ...(() => { const ids = new Set(photos.map(p => p.id)); const open = app.trips.list().filter(tr => tr.public && app.trips.photos(tr.id).some(p => ids.has(p.id))); return open.length ? [{ loc: '/voyages' }, ...open.map(tr => ({ loc: `/voyage/${tr.slug}` }))] : []; })(),
       { loc: '/a-propos' }, { loc: '/droits' }, { loc: '/confidentialite' }, { loc: '/mentions-legales' },
     ];
     const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -255,6 +258,52 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       bodyClass: 'dark', share: await shareOf(photo, siteName),
       // Mots-clés sous la légende, si le réglage le demande (Site public) ; chacun mène à la recherche.
       showKeywords: repo.settings().keywords_shown === true,
+    });
+  });
+
+  // ---------- voyages (server/trips.js, server/trip-story.js) ----------
+  // Visible si le voyage est publié (case de l'admin) et a au moins une photo publiée ; sinon aperçu pour qui voit les
+  // sorties, introuvable pour les autres.
+  const LOC = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang];
+  const tripView = trip => {
+    const ids = new Set(app.trips.photos(trip.id).map(p => p.id));
+    const photos = repo.publishedPhotos({ lang }).filter(p => ids.has(p.id));
+    const names = new Map(repo.authors().map(a => [a.id, a.name]));
+    const who = trip.authors.map(id => names.get(id)).filter(Boolean);
+    return { ...trip, name: pick(trip, 'name', lang), intro: pick(trip, 'intro', lang), photos, who, cover: photos[0] || null };
+  };
+  const visibleTrips = () => app.trips.list().filter(tr => tr.public).map(tripView).filter(tr => tr.photos.length);
+  const span = tr => {
+    const f = (d, o) => new Intl.DateTimeFormat(LOC, { ...o, timeZone: 'UTC' }).format(new Date(`${d}T12:00:00Z`));
+    const days = [...new Set(tr.photos.map(p => p.taken_on))].sort();
+    if (!days.length) return '';
+    return days[0] === days.at(-1) ? f(days[0], { day: 'numeric', month: 'long', year: 'numeric' }) : t.trips.span(f(days[0], { day: 'numeric', month: 'long' }), f(days.at(-1), { day: 'numeric', month: 'long', year: 'numeric' }));
+  };
+  app.get('/voyages', async (request, reply) => {
+    const list = visibleTrips();
+    if (!list.length) return reply.callNotFound();
+    const siteName = app.siteName();
+    app.stats.hit(request, { page: 'voyages' });
+    return reply.render('trips', {
+      ...base, siteName, list: list.map(tr => ({ ...tr, span: span(tr), days: new Set(tr.photos.map(p => p.taken_on)).size })),
+      pageTitle: `${t.trips.title} · ${siteName}`, canonical: '/voyages', description: t.trips.description(list.map(tr => tr.name).slice(0, 5).join(', ')),
+    });
+  });
+  app.get('/voyage/:slug', async (request, reply) => {
+    const raw = app.trips.bySlug(request.params.slug);
+    if (!raw) return reply.callNotFound();
+    const tr = tripView(raw);
+    const open = raw.public && tr.photos.length > 0;
+    if (!open && !request.can('sorties.voir')) return reply.callNotFound();          // aperçu pour l'équipe
+    if (!open) reply.header('x-robots-tag', 'noindex');
+    else app.stats.hit(request, { page: `voyage:${raw.slug}` });
+    const siteName = app.siteName();
+    const story = tripStory({ trip: tr, photos: tr.photos, lang, locale: LOC });
+    return reply.render('trip', {
+      ...base, siteName, tr: { ...tr, span: span(tr) }, story, preview: !open, map: MAP,
+      pageTitle: `${tr.name} · ${siteName}`, canonical: `/voyage/${raw.slug}`,
+      description: tr.intro ? tr.intro.slice(0, 200) : t.trips.descriptionOne(tr.name, span(tr)),
+      ogImage: tr.cover && `/media/${variantName(tr.cover.file, widthsFor(tr.cover.width).at(-1), 'webp', tr.cover.variant_key)}`,
     });
   });
 

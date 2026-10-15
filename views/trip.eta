@@ -1,0 +1,58 @@
+<% layout('./layout') %>
+<% const t = it.t, v = it.t.trips, tr = it.tr, st = it.story, vw = st.view; const terre = it.asset('carte-terre.svg'), fine = it.asset('carte-terre-fine.svg'); %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+  <%~ include('./nav', { ...it, current: 'trips' }) %>
+</header>
+<main class="trip-page">
+<% if (it.preview) { %>
+  <p class="apercu mono wrap" role="note">Aperçu réservé à l’équipe : ce voyage n’est pas publié (ou n’a pas encore de photo publiée). Les visiteurs ne le voient pas. <a href="/admin/voyages/<%= tr.id %>">Régler le voyage</a></p>
+<% } %>
+  <section class="trip-hero">
+<% if (tr.cover) { %>    <div class="trip-hero-im"><%~ it.picture(tr.cover, { sizes: '100vw', eager: true, alt: '' }) %></div>
+<% } %>    <div class="trip-hero-t wrap">
+      <p class="eyebrow"><a href="<%= it.u('/voyages') %>"><%= v.title %></a></p>
+      <h1><%= tr.name %></h1>
+      <p class="mono"><%= tr.span %> · <%= v.days(st.days.length) %> · <%= t.photos(tr.photos.length) %><%= tr.who.length ? ` · ${v.by(tr.who.join(' & '))}` : '' %></p>
+    </div>
+  </section>
+<% if (tr.intro) { %>  <div class="trip-intro wrap"><% tr.intro.split(/\n{2,}/).forEach(par => { %><p><%= par %></p><% }) %></div>
+<% } %>
+<% if (vw) { %>
+  <figure class="trip-map wrap" data-trip-map>
+    <div class="trip-map-scroll" data-trip-scroll tabindex="0" aria-label="<%= v.map(tr.name) %>">
+    <svg class="trip-svg" viewBox="<%= vw.x.toFixed(2) %> <%= vw.y.toFixed(2) %> <%= vw.w.toFixed(2) %> <%= vw.h.toFixed(2) %>" data-tiles="<%= it.asset('carte-tuiles/index.json') %>" role="group" aria-labelledby="trip-map-t" preserveAspectRatio="xMidYMid slice">
+      <title id="trip-map-t"><%= v.map(tr.name) %></title>
+      <use class="globe" href="<%= terre %>#globe" width="<%= it.map.width %>" height="<%= it.map.height %>"/>
+      <use class="terre" href="<%= fine %>#terre" width="<%= it.map.width %>" height="<%= it.map.height %>" data-base/>
+      <g class="detail" data-detail display="none"></g>
+      <use class="frontieres" href="<%= fine %>#frontieres" width="<%= it.map.width %>" height="<%= it.map.height %>"/>
+<% if (st.stops.length > 1) { %>      <path class="trip-route" d="<%= st.path %>" vector-effect="non-scaling-stroke"/>
+<% } %><% st.stops.forEach(s => { %>      <a class="trip-stop" href="<%= s.href %>" aria-label="<%= v.stop(s.n, s.when, s.city) %>">
+<% if (s.leader) { %>        <line class="trip-leader" x1="<%= s.leader.x1.toFixed(2) %>" y1="<%= s.leader.y1.toFixed(2) %>" x2="<%= s.leader.x2.toFixed(2) %>" y2="<%= s.leader.y2.toFixed(2) %>" vector-effect="non-scaling-stroke"/>
+<% } %>        <g class="trip-tag"><rect x="<%= s.box.x.toFixed(2) %>" y="<%= s.box.y.toFixed(2) %>" width="<%= s.box.w.toFixed(2) %>" height="<%= s.box.h.toFixed(2) %>" rx="<%= (st.u * 0.5).toFixed(2) %>" vector-effect="non-scaling-stroke"/>
+          <text x="<%= (s.box.x + st.u).toFixed(2) %>" y="<%= (s.box.y + st.fs * 1.15).toFixed(2) %>" font-size="<%= st.fs.toFixed(2) %>"><tspan class="trip-tag-n"><%= v.short(s.n) %></tspan> · <%= s.when %></text>
+          <text class="trip-tag-city" x="<%= (s.box.x + st.u).toFixed(2) %>" y="<%= (s.box.y + st.fs * 2.4).toFixed(2) %>" font-size="<%= (st.fs * 0.95).toFixed(2) %>"><%= s.city %></text></g>
+        <circle class="trip-dot" cx="<%= s.x.toFixed(2) %>" cy="<%= s.y.toFixed(2) %>" r="<%= st.r.toFixed(2) %>" vector-effect="non-scaling-stroke"/>
+        <text class="trip-dot-n" x="<%= s.x.toFixed(2) %>" y="<%= s.y.toFixed(2) %>" font-size="<%= (st.fs * (String(s.n).length > 2 ? 0.7 : 0.95)).toFixed(2) %>"><%= s.n %></text>
+      </a>
+<% }) %>    </svg>
+    </div>
+    <figcaption class="mono"><%= t.map.base %> · <%= t.map.credit %></figcaption>
+  </figure>
+<% } %>
+  <h2 class="trip-story-h wrap"><%= v.story %></h2>
+  <ol class="trip-story">
+<% st.days.forEach(d => { %>    <li class="trip-day" id="<%= d.id %>">
+      <header class="trip-day-h wrap"><span class="trip-day-n" aria-hidden="true"><%= String(d.n).padStart(2, '0') %></span><h3><span class="sr-only"><%= v.day(d.n) %> · </span><%= d.long %><% if (d.place) { %> <span class="trip-day-place"><%= d.place %></span><% } %></h3></header>
+      <div class="grid wrap">
+<% d.photos.forEach(p => { %>        <a class="tile" href="<%= it.photoUrl(p.slug, {}) %>">
+          <div class="im"><%~ it.picture(p, { sizes: '(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw', alt: '' }) %></div>
+          <div class="t"><span class="ttl"><%= p.title %></span><span class="mono"><%= p.author %><%= p.place ? ` · ${p.place}` : '' %></span></div>
+        </a>
+<% }) %>      </div>
+    </li>
+<% }) %>  </ol>
+  <p class="trip-back wrap"><a class="eyebrow" href="<%= it.u('/voyages') %>">← <%= v.back %></a></p>
+</main>
+<%~ include('./footer', it) %>

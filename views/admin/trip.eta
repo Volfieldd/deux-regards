@@ -51,7 +51,9 @@
 <% if (it.manage) { %>
 <form class="panel form" method="post" action="/admin/voyages/<%= tr.id %>" id="reglages">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-  <h2><%= t('Nom et texte') %> <span class="mono"><%= t('pour la page publique du voyage, à venir') %></span></h2>
+  <h2><%= t('Nom et texte') %> <span class="mono"><%= t('pour la page publique du voyage') %></span></h2>
+  <input type="hidden" name="public_set" value="1">
+  <label class="inline"><input type="checkbox" name="public"<%~ tr.public ? ' checked' : '' %>> <%= t('Publier la page du voyage sur le site') %> <span class="mono"><a href="/voyage/<%= tr.slug %>" target="_blank" rel="noopener">/voyage/<%= tr.slug %></a> · <%= tr.public ? (tr.nPublished ? t('en ligne') : t('en attente d’une photo publiée')) : t('aperçu réservé à l’équipe') %></span></label>
   <label><%= t('Nom') %> <input name="name" value="<%= tr.name %>" maxlength="120" required></label>
   <div class="row">
     <label><%= t('Nom en anglais') %> <input name="name_en" value="<%= tr.name_en %>" maxlength="120" lang="en"></label>
