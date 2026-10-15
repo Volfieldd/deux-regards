@@ -56,7 +56,7 @@
 <%
   // Menu rangé par intention : travailler les photos et les personnes, publier, préparer le terrain, régler.
   const item = ([key, href, label, icon, extra]) => `<a href="${href}"${(extra || cur(key)) ? ' aria-current="page"' : ''}>${ic(icon)}${label}</a>`;
-  const people = it.section === 'encounters' || it.section === 'encounter';
+  const people = it.section === 'encounters' || it.section === 'encounter' || it.section === 'people' || it.section === 'person';
 %>
   <nav class="nav" aria-label="Administration">
     <a href="/admin"<%~ cur('home') ? ' aria-current="page"' : '' %>><%~ ic('home') %>Aujourd’hui<% if (it.urgent) { %><span class="nav-badge urgent" aria-label="<%= it.urgent %> urgence<%= it.urgent > 1 ? 's' : '' %>">✕ <%= it.urgent %></span><% } %></a>
@@ -65,7 +65,7 @@
   <nav class="nav" aria-labelledby="nav-work">
     <a href="/admin/sorties"<%~ it.section === 'outings' || it.section === 'outing' ? ' aria-current="page"' : '' %>><%~ ic('outing') %>Sorties</a>
     <%~ item(['photos', '/admin/photos', 'Photothèque', 'photos']) %>
-    <a href="/admin/rencontres"<%~ people ? ' aria-current="page"' : '' %>><%~ ic('people') %>Personnes<% if (it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew %> nouvelle<%= it.encountersNew > 1 ? 's' : '' %>"><%= it.encountersNew %></span><% } %></a>
+    <a href="/admin/personnes"<%~ people ? ' aria-current="page"' : '' %>><%~ ic('people') %>Personnes<% if (it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew %> nouvelle<%= it.encountersNew > 1 ? 's' : '' %>"><%= it.encountersNew %></span><% } %></a>
   </nav>
   <p class="grp" id="nav-publish">Publier</p>
   <nav class="nav" aria-labelledby="nav-publish">
@@ -115,7 +115,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% const HELP = { people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>">Aide sur cette page</a></p>
 <% } %>

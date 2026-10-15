@@ -24,10 +24,13 @@ export function createVault(secret) {
     d.setAuthTag(buf.subarray(12, 28));
     return Buffer.concat([d.update(buf.subarray(28)), d.final()]);
   };
+  // Empreinte d'une valeur (adresse e-mail) pour la retrouver sans la stocker en clair ; sans clé : null.
+  const indexKey = key ? Buffer.from(crypto.hkdfSync('sha256', secret, 'deux-regards', 'index-v1', 32)) : null;
   const isText = v => typeof v === 'string' && v.startsWith(TEXT);
   const isBuf = v => Buffer.isBuffer(v) && v.length > 32 && v.subarray(0, 4).equals(MAGIC);
   return {
     enabled: Boolean(key),
+    index: v => (indexKey ? crypto.createHmac('sha256', indexKey).update(String(v)).digest('hex') : null),
     sealed: v => isText(v) || isBuf(v),
     // Texte : vide et null restent tels quels (rien à protéger, et les requêtes « = '' » fonctionnent toujours).
     seal: v => (key && typeof v === 'string' && v !== '' && !isText(v) ? TEXT + encrypt(Buffer.from(v, 'utf8')).toString('base64') : v),
