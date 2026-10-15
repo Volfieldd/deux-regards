@@ -51,6 +51,24 @@
 <% } %>
   </section>
 
+  <section class="panel" aria-labelledby="shares-title">
+<% const sh = it.shares; const shmax = Math.max(1, ...sh.byVia.map(r => r.n)); %>
+    <h2 id="shares-title"><%= t('Partages') %> <span class="mono"><%= t('{n} sur la période', { n: fmt(sh.total) }) %></span></h2>
+<% if (!sh.total) { %>    <p class="hint"><%= t('Aucun partage sur la période.') %></p>
+<% } else { %>
+    <ul class="rank plain">
+<% sh.byVia.forEach(r => { %>      <li><span class="t"><%= r.label %><span class="meter" aria-hidden="true"><i class="w<%= Math.max(1, Math.round((r.n / shmax) * 20)) %>"></i></span></span><b><%= fmt(r.n) %></b></li>
+<% }) %>
+    </ul>
+    <h2 class="mt"><%= t('Photos les plus partagées') %></h2>
+    <ol class="rank">
+<% sh.top.forEach((r, i) => { %>      <li><span class="pos"><%= i + 1 %></span><% if (r.photo.ready) { %><%~ it.picture(r.photo, { sizes: '56px', alt: '' }) %><% } %><span class="t"><a href="/admin/photos/<%= r.photo.id %>"><%= r.photo.title %></a></span><b><%= fmt(r.n) %></b></li>
+<% }) %>
+    </ol>
+<% } %>
+    <p class="hint"><%= t('Comptés sans rien savoir du visiteur : un nombre par photo, par moyen et par jour. Sur téléphone, le menu du téléphone ne dit pas quelle app a été choisie.') %></p>
+  </section>
+
   <section class="panel" aria-labelledby="pages-title">
     <h2 id="pages-title"><%= t('Pages') %></h2>
 <% if (!it.pages.length) { %>    <p class="hint"><%= t('Aucune page vue sur la période.') %></p>

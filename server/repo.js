@@ -23,6 +23,8 @@ export function createRepo(db) {
   };
 
   return {
+    // Post Instagram publié depuis le site pour cette photo (le plus récent) : lien « Voir sur Instagram ».
+    instagramPermalink: id => db.prepare("SELECT permalink FROM instagram_posts WHERE photo_id = ? AND status = 'published' AND permalink IS NOT NULL ORDER BY published_at DESC LIMIT 1").pluck().get(id) || null,
     // ordre : « recentes » = date de première publication, la plus récente d'abord ; sinon l'ordre de la galerie.
     publishedPhotos({ author, category, ordre, lang = 'fr' } = {}) {
       const list = q.published.all().map(decorate(lang))

@@ -30,8 +30,9 @@ export const PRIVACY = {
         'Base légale : votre consentement, que vous pouvez retirer à tout moment sur la même page, sans justification.',
         'Nous ne vous envoyons rien d’autre que ce que vous avez demandé : votre photo, une réponse, le récapitulatif de votre accord.',
       ]],
-      ['« J’aime » et signalements', [
+      ['« J’aime », partages et signalements', [
         'Le bouton « J’aime » sous une photo est anonyme : ni compte, ni cookie. Votre navigateur retient la photo aimée (stockage local, sur votre appareil) ; notre serveur garde seulement en mémoire, quelques heures, que votre adresse IP a aimé cette photo, pour éviter les doublons, sans jamais l’enregistrer.',
+        'Le bouton « Partager » ouvre le menu de partage de votre téléphone, ou de simples liens vers WhatsApp, Facebook, Bluesky, X, Pinterest ou votre messagerie : aucun script de ces services n’est chargé sur notre site, et rien n’est transmis avant que vous ne choisissiez. Nous comptons seulement le nombre de partages par photo et par moyen, chaque jour, sans rien garder sur vous.',
         'Le lien « Signaler » nous envoie votre message et, si vous le souhaitez, votre adresse e-mail pour vous répondre : ils ne servent qu’à traiter le signalement et sont effacés au bout de 12 mois.',
       ]],
       ['Combien de temps', [
@@ -82,8 +83,9 @@ export const PRIVACY = {
         'Legal basis: your consent, which you can withdraw at any time on the same page, without giving a reason.',
         'We send you nothing other than what you asked for: your photo, a reply, a summary of your consent.',
       ]],
-      ['“Like” and reports', [
+      ['“Like”, sharing and reports', [
         'The “Like” button under a photo is anonymous: no account, no cookie. Your browser remembers the photo you liked (local storage, on your device); our server only keeps in memory, for a few hours, that your IP address liked this photo, to avoid duplicates, and never records it.',
+        'The “Share” button opens your phone’s share menu, or plain links to WhatsApp, Facebook, Bluesky, X, Pinterest or your email: no script from these services is loaded on our site, and nothing is sent before you choose. We only count the number of shares per photo and per channel, each day, keeping nothing about you.',
         'The “Report” link sends us your message and, if you wish, your email address so that we can reply: they are only used to deal with the report and are deleted after 12 months.',
       ]],
       ['For how long', [
@@ -134,8 +136,9 @@ export const PRIVACY = {
         'Rechtsgrundlage: Ihre Einwilligung, die Sie jederzeit auf derselben Seite ohne Begründung widerrufen können.',
         'Wir schicken Ihnen nur, was Sie angefragt haben: Ihr Foto, eine Antwort, eine Zusammenfassung Ihrer Einwilligung.',
       ]],
-      ['„Gefällt mir“ und Meldungen', [
+      ['„Gefällt mir“, Teilen und Meldungen', [
         'Die Schaltfläche „Gefällt mir“ unter einem Foto ist anonym: kein Konto, kein Cookie. Ihr Browser merkt sich das Foto (lokaler Speicher auf Ihrem Gerät); unser Server behält nur einige Stunden im Arbeitsspeicher, dass Ihre IP-Adresse dieses Foto mag, um Doppelungen zu vermeiden, und speichert sie nie.',
+        'Die Schaltfläche „Teilen“ öffnet das Teilen-Menü Ihres Telefons oder einfache Links zu WhatsApp, Facebook, Bluesky, X, Pinterest oder Ihrem E-Mail-Programm: kein Skript dieser Dienste wird auf unserer Website geladen, und nichts wird übertragen, bevor Sie wählen. Wir zählen nur die Anzahl der Teilungen pro Foto und Kanal und Tag, ohne etwas über Sie zu speichern.',
         'Der Link „Melden“ schickt uns Ihre Nachricht und, wenn Sie möchten, Ihre E-Mail-Adresse für eine Antwort: Sie dienen nur der Bearbeitung der Meldung und werden nach 12 Monaten gelöscht.',
       ]],
       ['Wie lange', [

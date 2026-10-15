@@ -30,6 +30,7 @@ import { createFeedback } from './feedback.js';
 import { createReadiness } from './readiness.js';
 import { createFaceDetector, createFaceService } from './faces.js';
 import { createImageModel, createSeriesSuggest } from './series-suggest.js';
+import { createShares } from './share.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -158,6 +159,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('people', createPeople({ db, encounters: app.encounters }));
   // J'aime et signalements des visiteurs (voir server/feedback.js).
   app.decorate('feedback', createFeedback({ db, vault: createVault(config.dataKey) }));
+  // Partages des photos, comptés anonymement (voir server/share.js).
+  app.decorate('shares', createShares({ db }));
   app.encounters.onChange(() => app.people.sync());
   let purgeTimer = null;
   app.addHook('onReady', async () => {

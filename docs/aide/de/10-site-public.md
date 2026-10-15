@@ -49,6 +49,8 @@ Das nächste Foto hängt vom aktiven Filter ab: In „Straße, von Julien“ ble
 
 **Gefällt mir und Melden**: unter dem Text jedes Fotos ein Herz **Gefällt mir** (anonym: kein Konto, kein Cookie; Besucher können es zurücknehmen, die Zahl steht daneben) und ein Link **Melden**: Foto, das nicht online sein sollte, Vorschlag zum Text, etwas anderes, mit einer Nachricht und einer optionalen Adresse. Wer sich erkennt, wird zu `/bonjour` geleitet. Meldungen erscheinen in „Heute“ und auf der Seite **Meldungen von Besuchern**; die Zahl der „Gefällt mir“ steht im Abschnitt Publikum der Fotoseite.
 
+**Teilen**: neben dem Herz. Auf dem Telefon öffnet es das Teilen-Menü des Telefons (Instagram, Signal, Nachrichten, WhatsApp…). Am Computer zeigt ein Fenster die Vorschau (Bild, Titel, Fotograf, Website), die Schaltflächen WhatsApp, Facebook, Bluesky, X, Pinterest und E-Mail, **Auf Instagram ansehen**, wenn das Foto von der Website aus gepostet wurde, den Link zum Kopieren und einen QR-Code, um das Foto auf einem Telefon zu öffnen. Geteilt wird die Seite, nie die Datei. Es sind einfache Links: kein Skript dieser Dienste wird geladen, kein Cookie gesetzt. Ohne JavaScript führt die Schaltfläche zu einer Seite mit denselben Links. Geteilte Fotos werden anonym gezählt (siehe [Statistiken](statistiques)).
+
 ## Weitere Seiten
 
 - **Über uns:** vollständiges Logo, Slogan, Text, Biografien der Autoren.

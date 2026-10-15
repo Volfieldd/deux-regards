@@ -14,6 +14,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import { createRateLimiter, clientKey } from '../ratelimit.js';
 import { FeedbackError } from '../feedback.js';
+import { shareLinks, shareQr } from '../share.js';
 import { EncounterError } from '../encounters.js';
 
 const HERO_COUNT = 5;
@@ -29,8 +30,9 @@ export default async function publicRoutes(app) {
   // J'aime : 120 par heure et par adresse au plus ; signalements : 5 par heure.
   const likeLimit = createRateLimiter({ limit: 120, windowMs: 3600 * 1000 });
   const reportLimit = createRateLimiter({ limit: 5, windowMs: 3600 * 1000 });
+  const shareLimit = createRateLimiter({ limit: 60, windowMs: 3600 * 1000 });
   // Mêmes pages en français (racine), en anglais (/en) et en allemand (/de).
-  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit });
+  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit });
 
   // Sélecteur de langue : retient le choix (seul cookie du site, posé à ce moment-là) puis ouvre la page demandée.
   // Adresses habituelles des mentions légales en Allemagne et en anglais.
@@ -140,7 +142,7 @@ function helpers(lang) {
   return { picture, pad, lang, t: UI[lang], u, galleryUrl: f => u(galleryUrl(f)), photoUrl: (slug, f) => u(photoUrl(slug, f)) };
 }
 
-async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit }) {
+async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit }) {
   const t = UI[lang];
   const base = helpers(lang);
   const trusted = Boolean(app.config.trustProxy);
@@ -237,6 +239,8 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     if (i === -1) return reply.callNotFound();
     const photo = list[i];
     app.stats.hit(request, { photoId: photo.id });
+    // Arrivée par le QR de la fenêtre « Partager » : comptée comme un partage.
+    if (request.query.partage === 'qr' && !BOTS.test(request.headers['user-agent'] || '') && shareLimit(request.ip)) app.shares.record(photo.id, 'qr');
     const prev = list[(i - 1 + list.length) % list.length];
     const next = list[(i + 1) % list.length];
     return reply.render('photo', {
@@ -246,7 +250,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       canonical: photoUrl(photo.slug),
       description: [photo.legend, [photo.author, [photo.place, photo.when].filter(Boolean).join(', ')].filter(Boolean).join(', ')].filter(Boolean).join(' '),
       ogImage: `/media/${variantName(photo.file, widthsFor(photo.width).at(-1), 'webp', photo.variant_key)}`,
-      bodyClass: 'dark',
+      bodyClass: 'dark', share: await shareOf(photo, siteName),
     });
   });
 
@@ -297,10 +301,39 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     });
   });
 
+  // Envoyé depuis le site lui-même (un autre site ne peut pas faire aimer, signaler ou compter un partage à la place du visiteur).
+  const sameSite = request => { const o = request.headers.origin; return !o || o === new URL(app.config.publicUrl).origin || o === `${request.protocol}://${request.headers.host}`; };
+
+  // ---------- partager ----------
+  // Ce que montre la fenêtre « Partager » : aperçu, liens des réseaux, lien à copier, QR, post Instagram s'il existe.
+  async function shareOf(photo, siteName) {
+    const url = app.config.publicUrl + localize(photoUrl(photo.slug), lang);
+    const ws = widthsFor(photo.width);
+    const image = app.config.publicUrl + `/media/${variantName(photo.file, ws.at(-1), 'webp', photo.variant_key)}`;
+    const title = `${photo.title} · ${siteName}`;
+    return { url, title, host: new URL(app.config.publicUrl).host, links: shareLinks({ url, title, image }), qr: await shareQr(url),
+      instagram: repo.instagramPermalink(photo.id), thumb: `/media/${variantName(photo.file, ws[0], 'webp', photo.variant_key)}`, s: t.share };
+  }
+  // Sans JavaScript : la même fenêtre, en page.
+  app.get('/photo/:slug/partager', async (request, reply) => {
+    const photo = repo.publishedPhotos({ lang }).find(p => p.slug === request.params.slug);
+    if (!photo) return reply.callNotFound();
+    const siteName = app.siteName();
+    reply.header('x-robots-tag', 'noindex');
+    return reply.render('share', { ...base, siteName, photo, share: await shareOf(photo, siteName),
+      pageTitle: `${t.share.title} · ${photo.title} · ${siteName}`, canonical: `/photo/${photo.slug}/partager`, description: '', bodyClass: 'dark' });
+  });
+  // Un partage (lien d'un réseau, lien copié, menu du téléphone) : compté, rien d'autre n'est gardé.
+  app.post('/photo/:slug/partage', async (request, reply) => {
+    const photo = repo.publishedPhotos({ lang }).find(p => p.slug === request.params.slug);
+    if (!photo) return reply.callNotFound();
+    const via = String(request.body?.via || '');
+    if (!sameSite(request) || !shareLimit(request.ip)) return reply.code(429).send({ error: 'limit' });
+    return app.shares.record(photo.id, via) ? reply.code(204).send() : reply.code(422).send({ error: 'via' });
+  });
+
   // ---------- j'aime et signalements ----------
   const publishedBySlug = slug => repo.publishedPhotos({ lang }).find(p => p.slug === slug) || null;
-  // Envoyé depuis le site lui-même (un autre site ne peut pas faire aimer ou signaler à la place du visiteur).
-  const sameSite = request => { const o = request.headers.origin; return !o || o === new URL(app.config.publicUrl).origin || o === `${request.protocol}://${request.headers.host}`; };
   app.post('/photo/:slug/aime', async (request, reply) => {
     const photo = publishedBySlug(request.params.slug);
     if (!photo) return reply.callNotFound();

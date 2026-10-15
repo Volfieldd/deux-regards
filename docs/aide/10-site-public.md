@@ -49,6 +49,8 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
 
 **J'aime et Signaler** : sous le texte de chaque photo, un cœur **J'aime** (anonyme : ni compte ni cookie ; le visiteur peut retirer son « j'aime », et le compteur s'affiche à côté) et un lien **Signaler** : photo qui ne devrait pas être en ligne, suggestion pour le texte, autre chose, avec un message et une adresse facultative. Une personne qui se reconnaît est renvoyée vers `/bonjour`. Les signalements arrivent dans « Aujourd'hui » et dans la page **Signalements des visiteurs** ; le nombre de « j'aime » s'affiche dans la rubrique Audience de la fiche.
 
+**Partager** : à côté du cœur. Sur téléphone, il ouvre le menu de partage du téléphone (Instagram, Signal, Messages, WhatsApp…). Sur ordinateur, une fenêtre montre l'aperçu (image, titre, photographe, site), les boutons WhatsApp, Facebook, Bluesky, X, Pinterest et E-mail, **Voir sur Instagram** si la photo a été postée depuis le site, le lien à copier et un QR pour ouvrir la photo sur un téléphone. On partage la page, jamais le fichier. Ce sont de simples liens : aucun script de ces services n'est chargé, aucun cookie n'est posé. Sans JavaScript, le bouton mène à une page qui contient les mêmes liens. Les partages sont comptés anonymement (voir [Statistiques](statistiques)).
+
 ## Autres pages
 
 - **À propos :** logo complet, accroche, texte, biographies des auteurs.

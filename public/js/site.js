@@ -241,7 +241,7 @@
     });
     const several = viewer.dataset.prev !== viewer.dataset.next || viewer.querySelector('.nav');
     document.addEventListener('keydown', e => {
-      if (e.altKey || e.ctrlKey || e.metaKey || e.target.closest('input, textarea, select, [contenteditable]')) return;
+      if (e.altKey || e.ctrlKey || e.metaKey || e.target.closest('input, textarea, select, [contenteditable]') || document.querySelector('dialog[open]')) return;
       if (e.key === 'Escape') close();
       else if (several && e.key === 'ArrowLeft') go('prev');
       else if (several && e.key === 'ArrowRight') go('next');
@@ -466,4 +466,54 @@ document.querySelectorAll('[data-like]').forEach(form => {
       try { if (liked) localStorage.setItem(key, '1'); else localStorage.removeItem(key); } catch { /* stockage indisponible */ }
     } catch { liked = undo; show(); }
   });
+});
+
+// Partager (page photo). Sur téléphone : le menu de partage du téléphone (Instagram, Signal, Messages, WhatsApp…). Sur
+// ordinateur, ou si ce menu n'existe pas : la fenêtre « Partager » (réseaux, lien à copier, QR). Sans ce script, le
+// bouton mène à une page qui contient les mêmes liens. Chaque partage est compté, sans rien savoir du visiteur.
+document.querySelectorAll('[data-share]').forEach(btn => {
+  const dialog = document.querySelector('[data-share-dialog]');
+  if (!dialog || typeof dialog.showModal !== 'function') return;          // très vieux navigateur : la page de partage
+  const { shareTitle: title, shareUrl: url, shareCount: countUrl } = btn.dataset;
+  const count = via => {
+    const body = new URLSearchParams({ via });
+    try { if (navigator.sendBeacon && navigator.sendBeacon(countUrl, body)) return; } catch { /* repli ci-dessous */ }
+    fetch(countUrl, { method: 'POST', body, keepalive: true }).catch(() => {});
+  };
+  const native = async () => {
+    try { await navigator.share({ title, url }); count('telephone'); return true; } catch (err) { return err && err.name === 'AbortError'; }
+  };
+  const canNative = typeof navigator.share === 'function';
+  const phone = matchMedia('(pointer: coarse)').matches;
+  const more = dialog.querySelector('[data-share-more-item]');
+  if (more) more.hidden = !canNative;
+  btn.addEventListener('click', async e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    if (canNative && phone && await native()) return;
+    // Miniature chargée à l'ouverture seulement (pas de requête pour rien en passant d'une photo à l'autre).
+    dialog.querySelectorAll('img[data-src]').forEach(img => { img.src = img.dataset.src; img.removeAttribute('data-src'); });
+    dialog.showModal();
+  });
+  dialog.querySelector('[data-share-close]')?.addEventListener('click', () => dialog.close());
+  // Un clic à côté de la fenêtre la ferme.
+  dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+  dialog.querySelector('[data-share-nets]')?.addEventListener('click', async e => {
+    const a = e.target.closest('[data-via]');
+    if (a) { count(a.dataset.via); return; }
+    if (e.target.closest('[data-share-more]') && await native()) dialog.close();
+  });
+  const copy = dialog.querySelector('[data-share-copy]');
+  const field = dialog.querySelector('[data-share-url]');
+  const label = copy?.textContent;
+  let timer = null;
+  copy?.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(url); } catch { field.select(); document.execCommand?.('copy'); }
+    copy.textContent = copy.dataset.copied;
+    copy.classList.add('done');
+    count('copie');
+    clearTimeout(timer);
+    timer = setTimeout(() => { copy.textContent = label; copy.classList.remove('done'); }, 2500);
+  });
+  field?.addEventListener('focus', () => field.select());
 });

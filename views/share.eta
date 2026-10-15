@@ -1,0 +1,8 @@
+<% layout('./layout') %>
+<main class="share-page wrap">
+  <div class="share-box">
+    <div class="share-h"><h1><%= it.share.s.title %></h1><a class="share-x" href="<%= it.photoUrl(it.photo.slug) %>" aria-label="<%= it.share.s.back %>">✕</a></div>
+    <%~ include('./_share', it) %>
+    <p><a class="more" href="<%= it.photoUrl(it.photo.slug) %>"><%= it.share.s.back %></a></p>
+  </div>
+</main>
