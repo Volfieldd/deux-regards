@@ -104,8 +104,8 @@
   "de": "Rechte & Datenschutz"
  },
  "Aide": {
-  "en": "Help (in French)",
-  "de": "Hilfe (auf Französisch)"
+  "en": "Help",
+  "de": "Hilfe"
  },
  "Voir le site": {
   "en": "View site",
@@ -144,8 +144,8 @@
   "de": "Abmelden"
  },
  "Aide sur cette page": {
-  "en": "Help for this page (in French)",
-  "de": "Hilfe zu dieser Seite (auf Französisch)"
+  "en": "Help for this page",
+  "de": "Hilfe zu dieser Seite"
  },
  "Mise à jour des images en cours :": {
   "en": "Updating images:",

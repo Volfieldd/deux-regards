@@ -1273,8 +1273,10 @@ export default async function adminRoutes(app) {
 
   // ---------- aide en ligne ----------
   // Relue à chaque affichage en développement (édition de docs/aide), une fois pour toutes en production.
-  let help = app.config.production ? loadHelp() : null;
-  app.get('/admin/aide', async (request, reply) => render(request, reply, 'help', { title: request.t('Aide'), help: help || loadHelp() }));
+  // Aide dans la langue de l'admin (français si la traduction manque) ; gardée en mémoire en production.
+  const helpCache = {};
+  const helpIn = lang => (app.config.production ? (helpCache[lang] ??= loadHelp(lang)) : loadHelp(lang));
+  app.get('/admin/aide', async (request, reply) => render(request, reply, 'help', { title: request.t('Aide'), help: helpIn(request.t.lang) }));
 
   // ---------- rencontres (page /bonjour, cartes) ----------
   registerEncounters(app, { repo, render, write, done, failed, withReady });
