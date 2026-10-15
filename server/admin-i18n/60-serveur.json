@@ -1,0 +1,494 @@
+{
+ "Rencontre du {date}": {
+  "en": "Encounter of {date}",
+  "de": "Begegnung vom {date}"
+ },
+ "Lien privé créé, valable 30 jours : envoyez-le à la personne.": {
+  "en": "Private link created, valid for 30 days: send it to the person.",
+  "de": "Privater Link erstellt, 30 Tage gültig: Senden Sie ihn der Person."
+ },
+ "Lien retiré : il ne fonctionne plus.": {
+  "en": "Link withdrawn: it no longer works.",
+  "de": "Link zurückgezogen: Er funktioniert nicht mehr."
+ },
+ "Photo trop lourde (15 Mo au plus).": {
+  "en": "Photo too large (15 MB max.).",
+  "de": "Foto zu groß (höchstens 15 MB)."
+ },
+ "La photo doit être une image JPEG, PNG ou WebP.": {
+  "en": "The photo must be a JPEG, PNG or WebP image.",
+  "de": "Das Foto muss ein JPEG-, PNG- oder WebP-Bild sein."
+ },
+ "Choisissez le photographe.": {
+  "en": "Choose the photographer.",
+  "de": "Wählen Sie den Fotografen."
+ },
+ "De 1 à {max} paires de cartes.": {
+  "en": "From 1 to {max} pairs of cards.",
+  "de": "1 bis {max} Kartenpaare."
+ },
+ "Numéro de départ entre 1 et 9999.": {
+  "en": "Starting number between 1 and 9999.",
+  "de": "Startnummer zwischen 1 und 9999."
+ },
+ "Cartes génériques · {name}": {
+  "en": "Generic cards · {name}",
+  "de": "Allgemeine Karten · {name}"
+ },
+ "Cartes {from} à {to} · {name}": {
+  "en": "Cards {from} to {to} · {name}",
+  "de": "Karten {from} bis {to} · {name}"
+ },
+ "La photo de la carte est trop lourde (15 Mo au plus).": {
+  "en": "The photo of the card is too large (15 MB max.).",
+  "de": "Das Foto der Karte ist zu groß (höchstens 15 MB)."
+ },
+ "La photo de la personne est trop lourde (15 Mo au plus).": {
+  "en": "The photo of the person is too large (15 MB max.).",
+  "de": "Das Foto der Person ist zu groß (höchstens 15 MB)."
+ },
+ "La photo de la carte doit être une image JPEG, PNG ou WebP (sur iPhone, l’appareil photo la convertit tout seul).": {
+  "en": "The photo of the card must be a JPEG, PNG or WebP image (on iPhone, the camera converts it automatically).",
+  "de": "Das Foto der Karte muss ein JPEG-, PNG- oder WebP-Bild sein (auf dem iPhone wandelt die Kamera es automatisch um)."
+ },
+ "La photo de la personne doit être une image JPEG, PNG ou WebP (sur iPhone, l’appareil photo la convertit tout seul).": {
+  "en": "The photo of the person must be a JPEG, PNG or WebP image (on iPhone, the camera converts it automatically).",
+  "de": "Das Foto der Person muss ein JPEG-, PNG- oder WebP-Bild sein (auf dem iPhone wandelt die Kamera es automatisch um)."
+ },
+ "Accord signé enregistré.": {
+  "en": "Signed consent saved.",
+  "de": "Unterschriebene Einwilligung gespeichert."
+ },
+ "Rencontre enregistrée.": {
+  "en": "Encounter saved.",
+  "de": "Begegnung gespeichert."
+ },
+ "Rencontre marquée « {status} ».": {
+  "en": "Encounter marked “{status}”.",
+  "de": "Begegnung als „{status}“ markiert."
+ },
+ "Photo exclue de l’accord de cette sortie : la personne n’y figure pas.": {
+  "en": "Photo excluded from this outing’s consent: the person is not in it.",
+  "de": "Foto von der Einwilligung dieses Ausflugs ausgenommen: Die Person ist nicht darauf."
+ },
+ "Photo de nouveau couverte par l’accord de cette sortie.": {
+  "en": "Photo covered again by this outing’s consent.",
+  "de": "Foto wieder von der Einwilligung dieses Ausflugs abgedeckt."
+ },
+ "Cochez au moins une photo.": {
+  "en": "Tick at least one photo.",
+  "de": "Wählen Sie mindestens ein Foto aus."
+ },
+ "La personne refuse la publication : appliquez le refus pour dépublier les photos liées.": {
+  "en": "The person refuses publication: apply the refusal to unpublish the linked photos.",
+  "de": "Die Person lehnt die Veröffentlichung ab: Wenden Sie die Ablehnung an, um die verknüpften Fotos zurückzuziehen."
+ },
+ "{n} photos liées à la rencontre.": {
+  "en": "{n} photos linked to the encounter.",
+  "de": "{n} Fotos mit der Begegnung verknüpft."
+ },
+ "1 photo liée à la rencontre.": {
+  "en": "1 photo linked to the encounter.",
+  "de": "1 Foto mit der Begegnung verknüpft."
+ },
+ "Photo retirée de la rencontre.": {
+  "en": "Photo removed from the encounter.",
+  "de": "Foto von der Begegnung entfernt."
+ },
+ "Cette personne n’a pas refusé la publication.": {
+  "en": "This person has not refused publication.",
+  "de": "Diese Person hat die Veröffentlichung nicht abgelehnt."
+ },
+ "{n} photos repassées en brouillon et retirées de la file Instagram.": {
+  "en": "{n} photos set back to draft and removed from the Instagram queue.",
+  "de": "{n} Fotos wieder als Entwurf gesetzt und aus der Instagram-Warteschlange entfernt."
+ },
+ "1 photo repassée en brouillon et retirée de la file Instagram.": {
+  "en": "1 photo set back to draft and removed from the Instagram queue.",
+  "de": "1 Foto wieder als Entwurf gesetzt und aus der Instagram-Warteschlange entfernt."
+ },
+ "Aucune photo publiée : les photos liées restent en brouillon et ne pourront pas être publiées.": {
+  "en": "No published photos: the linked photos stay as drafts and cannot be published.",
+  "de": "Keine veröffentlichten Fotos: Die verknüpften Fotos bleiben Entwürfe und können nicht veröffentlicht werden."
+ },
+ "Encore sur Instagram, à supprimer dans l’application :": {
+  "en": "Still on Instagram, to delete in the app:",
+  "de": "Noch auf Instagram, in der App zu löschen:"
+ },
+ "{n} photos supprimées (effacées des sauvegardes sous 90 jours).": {
+  "en": "{n} photos deleted (erased from backups within 90 days).",
+  "de": "{n} Fotos gelöscht (innerhalb von 90 Tagen aus den Sicherungen entfernt)."
+ },
+ "1 photo supprimée (effacée des sauvegardes sous 90 jours).": {
+  "en": "1 photo deleted (erased from backups within 90 days).",
+  "de": "1 Foto gelöscht (innerhalb von 90 Tagen aus den Sicherungen entfernt)."
+ },
+ "Données de la personne effacées ; son refus reste appliqué aux photos gardées (trace anonyme).": {
+  "en": "The person’s data erased; their refusal still applies to the photos kept (anonymous record).",
+  "de": "Daten der Person gelöscht; ihre Ablehnung gilt weiter für die behaltenen Fotos (anonymer Eintrag)."
+ },
+ "Rencontre et données de la personne effacées.": {
+  "en": "Encounter and the person’s data erased.",
+  "de": "Begegnung und Daten der Person gelöscht."
+ },
+ "Rapprochement impossible.": {
+  "en": "Could not merge.",
+  "de": "Zusammenführen nicht möglich."
+ },
+ "Rencontres réunies : c’est la même personne.": {
+  "en": "Encounters merged: it is the same person.",
+  "de": "Begegnungen zusammengeführt: Es ist dieselbe Person."
+ },
+ "Rapprochement écarté : ce sont deux personnes différentes.": {
+  "en": "Match dismissed: these are two different people.",
+  "de": "Zuordnung verworfen: Es sind zwei verschiedene Personen."
+ },
+ "Rencontre introuvable.": {
+  "en": "Encounter not found.",
+  "de": "Begegnung nicht gefunden."
+ },
+ "Rencontre rattachée à cette personne.": {
+  "en": "Encounter attached to this person.",
+  "de": "Begegnung dieser Person zugeordnet."
+ },
+ "Une personne garde au moins une rencontre.": {
+  "en": "A person keeps at least one encounter.",
+  "de": "Eine Person behält mindestens eine Begegnung."
+ },
+ "Rencontre séparée : c’est une autre personne.": {
+  "en": "Encounter separated: it is another person.",
+  "de": "Begegnung getrennt: Es ist eine andere Person."
+ },
+ "Choisissez une sortie.": {
+  "en": "Choose an outing.",
+  "de": "Wählen Sie einen Ausflug."
+ },
+ "La personne est ajoutée à cette sortie (sans décision : demandez-lui son accord).": {
+  "en": "The person is added to this outing (no decision: ask for their consent).",
+  "de": "Die Person wurde diesem Ausflug hinzugefügt (ohne Entscheidung: Bitten Sie sie um ihre Einwilligung)."
+ },
+ "{n} photos liées à cette personne (à sa rencontre de la sortie de chaque photo).": {
+  "en": "{n} photos linked to this person (to their encounter on each photo’s outing).",
+  "de": "{n} Fotos mit dieser Person verknüpft (mit ihrer Begegnung beim Ausflug jedes Fotos)."
+ },
+ "{n} photo liée à cette personne (à sa rencontre de la sortie de chaque photo).": {
+  "en": "{n} photo linked to this person (to their encounter on the photo’s outing).",
+  "de": "{n} Foto mit dieser Person verknüpft (mit ihrer Begegnung beim Ausflug des Fotos)."
+ },
+ "Personne effacée ({n} rencontres).": {
+  "en": "Person erased ({n} encounters).",
+  "de": "Person gelöscht ({n} Begegnungen)."
+ },
+ "Personne effacée ({n} rencontre).": {
+  "en": "Person erased ({n} encounter).",
+  "de": "Person gelöscht ({n} Begegnung)."
+ },
+ "1 photo supprimée.": {
+  "en": "1 photo deleted.",
+  "de": "1 Foto gelöscht."
+ },
+ "Son refus reste appliqué aux photos gardées (trace anonyme).": {
+  "en": "Their refusal still applies to the photos kept (anonymous record).",
+  "de": "Ihre Ablehnung gilt weiter für die behaltenen Fotos (anonymer Eintrag)."
+ },
+ "Demande sur les données marquée comme traitée.": {
+  "en": "Data request marked as handled.",
+  "de": "Datenanfrage als erledigt markiert."
+ },
+ "refus à appliquer": {
+  "en": "refusal to apply",
+  "de": "Ablehnung anzuwenden"
+ },
+ "à trier": {
+  "en": "to sort",
+  "de": "zu sortieren"
+ },
+ "terminée": {
+  "en": "done",
+  "de": "abgeschlossen"
+ },
+ "jusqu’à {h}": {
+  "en": "until {h}",
+  "de": "bis {h}"
+ },
+ "de {from} à {to}": {
+  "en": "from {from} to {to}",
+  "de": "von {from} bis {to}"
+ },
+ "à partir de {h}": {
+  "en": "from {h}",
+  "de": "ab {h}"
+ },
+ "Sortie du {date}": {
+  "en": "Outing on {date}",
+  "de": "Ausflug vom {date}"
+ },
+ "Heure de coupure invalide : une heure comme 13:00.": {
+  "en": "Invalid split time: a time such as 13:00.",
+  "de": "Ungültige Trennzeit: eine Uhrzeit wie 13:00."
+ },
+ "La journée est déjà coupée à {time}.": {
+  "en": "The day is already split at {time}.",
+  "de": "Der Tag ist bereits um {time} getrennt."
+ },
+ "Sortie coupée à {time} : les photos et les rencontres d’après forment une nouvelle sortie.": {
+  "en": "Outing split at {time}: the photos and encounters after it form a new outing.",
+  "de": "Ausflug um {time} getrennt: Die Fotos und Begegnungen danach bilden einen neuen Ausflug."
+ },
+ "Sorties réunies.": {
+  "en": "Outings joined.",
+  "de": "Ausflüge zusammengeführt."
+ },
+ "Lieu de la sortie enregistré.": {
+  "en": "Outing place saved.",
+  "de": "Ort des Ausflugs gespeichert."
+ },
+ "1 photo publiée.": {
+  "en": "1 photo published.",
+  "de": "1 Foto veröffentlicht."
+ },
+ "0 photo publiée.": {
+  "en": "No photos published.",
+  "de": "Keine Fotos veröffentlicht."
+ },
+ "{n} restent en brouillon (à vérifier ou bloquées) : ouvrez leur fiche.": {
+  "en": "{n} remain drafts (to check or blocked): open their page.",
+  "de": "{n} bleiben Entwürfe (zu prüfen oder gesperrt): Öffnen Sie ihre Seite."
+ },
+ "1 reste en brouillon (à vérifier ou bloquée) : ouvrez leur fiche.": {
+  "en": "1 remains a draft (to check or blocked): open its page.",
+  "de": "1 bleibt Entwurf (zu prüfen oder gesperrt): Öffnen Sie seine Seite."
+ },
+ "Choisissez la personne qui figure sur ces photos.": {
+  "en": "Choose the person who appears in these photos.",
+  "de": "Wählen Sie die Person, die auf diesen Fotos zu sehen ist."
+ },
+ "la rencontre": {
+  "en": "the encounter",
+  "de": "die Begegnung"
+ },
+ "{n} photos liées à {who}.": {
+  "en": "{n} photos linked to {who}.",
+  "de": "{n} Fotos mit {who} verknüpft."
+ },
+ "1 photo liée à {who}.": {
+  "en": "1 photo linked to {who}.",
+  "de": "1 Foto mit {who} verknüpft."
+ },
+ "{n} photos : personne de la sortie n’y figure (photos liées à la main gardées).": {
+  "en": "{n} photos: nobody from the outing appears in them (photos linked by hand kept).",
+  "de": "{n} Fotos: Niemand vom Ausflug ist darauf zu sehen (von Hand verknüpfte Fotos bleiben)."
+ },
+ "1 photo : personne de la sortie n’y figure (photos liées à la main gardées).": {
+  "en": "1 photo: nobody from the outing appears in it (photos linked by hand kept).",
+  "de": "1 Foto: Niemand vom Ausflug ist darauf zu sehen (von Hand verknüpfte Fotos bleiben)."
+ },
+ "{n} photos de nouveau couvertes par les accords de la sortie.": {
+  "en": "{n} photos covered again by the outing’s consents.",
+  "de": "{n} Fotos wieder von den Einwilligungen des Ausflugs abgedeckt."
+ },
+ "1 photo de nouveau couverte par les accords de la sortie.": {
+  "en": "1 photo covered again by the outing’s consents.",
+  "de": "1 Foto wieder von den Einwilligungen des Ausflugs abgedeckt."
+ },
+ "Demande d’effacement de {who}": {
+  "en": "Erasure request from {who}",
+  "de": "Löschanfrage von {who}"
+ },
+ "Demande d’accès de {who}": {
+  "en": "Access request from {who}",
+  "de": "Auskunftsanfrage von {who}"
+ },
+ "en retard : à traiter depuis le {date}": {
+  "en": "overdue: due since {date}",
+  "de": "überfällig: fällig seit {date}"
+ },
+ "à traiter avant le {date}": {
+  "en": "to handle by {date}",
+  "de": "zu bearbeiten bis {date}"
+ },
+ "Traiter": {
+  "en": "Handle",
+  "de": "Bearbeiten"
+ },
+ "Refus de {who} : {n} photos encore publiées": {
+  "en": "Refusal from {who}: {n} photos still published",
+  "de": "Ablehnung von {who}: {n} Fotos noch veröffentlicht"
+ },
+ "Refus de {who} : {n} photo encore publiée": {
+  "en": "Refusal from {who}: {n} photo still published",
+  "de": "Ablehnung von {who}: {n} Foto noch veröffentlicht"
+ },
+ "la personne refuse la publication des photos liées": {
+  "en": "the person refuses publication of the linked photos",
+  "de": "die Person lehnt die Veröffentlichung der verknüpften Fotos ab"
+ },
+ "Appliquer le refus": {
+  "en": "Apply the refusal",
+  "de": "Ablehnung anwenden"
+ },
+ "{who} a refusé : {n} photos publiées de sa sortie à vérifier": {
+  "en": "{who} refused: {n} published photos from their outing to check",
+  "de": "{who} hat abgelehnt: {n} veröffentlichte Fotos des Ausflugs zu prüfen"
+ },
+ "{who} a refusé : {n} photo publiée de sa sortie à vérifier": {
+  "en": "{who} refused: {n} published photo from their outing to check",
+  "de": "{who} hat abgelehnt: {n} veröffentlichtes Foto des Ausflugs zu prüfen"
+ },
+ "{author} · {day} : liez au refus celles où la personne figure, excluez les autres": {
+  "en": "{author} · {day}: link those showing the person to the refusal, exclude the others",
+  "de": "{author} · {day}: Verknüpfen Sie die Fotos mit der Person mit der Ablehnung, schließen Sie die anderen aus"
+ },
+ "Vérifier": {
+  "en": "Check",
+  "de": "Prüfen"
+ },
+ "{n} photos publiées à vérifier": {
+  "en": "{n} published photos to check",
+  "de": "{n} veröffentlichte Fotos zu prüfen"
+ },
+ "{n} photo publiée à vérifier": {
+  "en": "{n} published photo to check",
+  "de": "{n} veröffentlichtes Foto zu prüfen"
+ },
+ "un visage, et un accord manque : confirmez, liez la personne, ou dépubliez": {
+  "en": "a face, and a consent is missing: confirm, link the person, or unpublish",
+  "de": "ein Gesicht, und eine Einwilligung fehlt: bestätigen, Person verknüpfen oder zurückziehen"
+ },
+ "{n} nouvelles personnes photographiées": {
+  "en": "{n} new photographed people",
+  "de": "{n} neue fotografierte Personen"
+ },
+ "{n} nouvelle personne photographiée": {
+  "en": "{n} new photographed person",
+  "de": "{n} neue fotografierte Person"
+ },
+ "demandes reçues sur /bonjour ou rencontres à traiter": {
+  "en": "requests received on /bonjour or encounters to handle",
+  "de": "Anfragen über /bonjour oder zu bearbeitende Begegnungen"
+ },
+ "Instagram : {n} publications en échec": {
+  "en": "Instagram: {n} failed posts",
+  "de": "Instagram: {n} fehlgeschlagene Beiträge"
+ },
+ "Instagram : {n} publication en échec": {
+  "en": "Instagram: {n} failed post",
+  "de": "Instagram: {n} fehlgeschlagener Beitrag"
+ },
+ "bloquées par un accord, ou refusées par Instagram : la raison est dans l’historique": {
+  "en": "blocked by a consent, or rejected by Instagram: the reason is in the history",
+  "de": "durch eine Einwilligung gesperrt oder von Instagram abgelehnt: Der Grund steht im Verlauf"
+ },
+ "Instagram en pause": {
+  "en": "Instagram paused",
+  "de": "Instagram pausiert"
+ },
+ "reprise {when} : {reason}": {
+  "en": "resumes {when}: {reason}",
+  "de": "Fortsetzung {when}: {reason}"
+ },
+ "{n} photos à finir": {
+  "en": "{n} photos to finish",
+  "de": "{n} Fotos fertigzustellen"
+ },
+ "{n} photo à finir": {
+  "en": "{n} photo to finish",
+  "de": "{n} Foto fertigzustellen"
+ },
+ "brouillons ou titres provisoires": {
+  "en": "drafts or provisional titles",
+  "de": "Entwürfe oder vorläufige Titel"
+ },
+ "Finir": {
+  "en": "Finish",
+  "de": "Fertigstellen"
+ },
+ "{n} photos publiées sans ville": {
+  "en": "{n} published photos without a town",
+  "de": "{n} veröffentlichte Fotos ohne Ort"
+ },
+ "{n} photo publiée sans ville": {
+  "en": "{n} published photo without a town",
+  "de": "{n} veröffentlichtes Foto ohne Ort"
+ },
+ "elles ne peuvent pas apparaître sur la carte du monde": {
+  "en": "they cannot appear on the world map",
+  "de": "sie können nicht auf der Weltkarte erscheinen"
+ },
+ "Compléter": {
+  "en": "Complete",
+  "de": "Ergänzen"
+ },
+ "{n} titres sans traduction": {
+  "en": "{n} titles without translation",
+  "de": "{n} Titel ohne Übersetzung"
+ },
+ "{n} titre sans traduction": {
+  "en": "{n} title without translation",
+  "de": "{n} Titel ohne Übersetzung"
+ },
+ "en anglais ou en allemand : le site montre alors le français": {
+  "en": "in English or German: the site then shows the French",
+  "de": "auf Englisch oder Deutsch: Die Website zeigt dann das Französische"
+ },
+ "Traduire": {
+  "en": "Translate",
+  "de": "Übersetzen"
+ },
+ "{n} preuves d’antériorité en attente après une erreur": {
+  "en": "{n} proofs of prior existence pending after an error",
+  "de": "{n} Prioritätsnachweise nach einem Fehler ausstehend"
+ },
+ "{n} preuve d’antériorité en attente après une erreur": {
+  "en": "{n} proof of prior existence pending after an error",
+  "de": "{n} Prioritätsnachweis nach einem Fehler ausstehend"
+ },
+ "l’horodatage sera retenté": {
+  "en": "timestamping will be retried",
+  "de": "der Zeitstempel wird erneut versucht"
+ },
+ "rencontre sans carte n°{id}": {
+  "en": "encounter without card no. {id}",
+  "de": "Begegnung ohne Karte Nr. {id}"
+ },
+ "{who} refuse la publication": {
+  "en": "{who} refuses publication",
+  "de": "{who} lehnt die Veröffentlichung ab"
+ },
+ "{who} n’a pas accepté Instagram": {
+  "en": "{who} has not accepted Instagram",
+  "de": "{who} hat Instagram nicht zugestimmt"
+ },
+ "quelqu’un est sur la photo, sans accord": {
+  "en": "someone is in the photo, without consent",
+  "de": "jemand ist auf dem Foto, ohne Einwilligung"
+ },
+ "visages pas encore examinés": {
+  "en": "faces not yet examined",
+  "de": "Gesichter noch nicht geprüft"
+ },
+ "{n} visages, personne rencontrée": {
+  "en": "{n} faces, no encounter recorded",
+  "de": "{n} Gesichter, keine Begegnung erfasst"
+ },
+ "1 visage, personne rencontrée": {
+  "en": "1 face, no encounter recorded",
+  "de": "1 Gesicht, keine Begegnung erfasst"
+ },
+ "{who} a refusé (même sortie) : est-elle sur la photo ?": {
+  "en": "{who} refused (same outing): are they in the photo?",
+  "de": "{who} hat abgelehnt (gleicher Ausflug): Ist die Person auf dem Foto?"
+ },
+ "{who} n’a pas encore décidé": {
+  "en": "{who} has not decided yet",
+  "de": "{who} hat sich noch nicht entschieden"
+ },
+ "{who} n’a pas accepté le site": {
+  "en": "{who} has not accepted the site",
+  "de": "{who} hat der Website nicht zugestimmt"
+ },
+ "{who} : accord en ligne non vérifié (sans code de carte)": {
+  "en": "{who}: online consent not verified (no card code)",
+  "de": "{who}: Online-Einwilligung nicht verifiziert (ohne Kartencode)"
+ }
+}

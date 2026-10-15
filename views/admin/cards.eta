@@ -1,23 +1,23 @@
 <% layout('./layout') %>
-<% const v = it.values || {}, e = it.errors || {}; %>
-<p class="mono"><a class="more eyebrow" href="/admin/terrain">← Sur le terrain</a></p>
-<h1>Cartes d’accord</h1>
-<p class="sub">Des paires de cartes au format carte de visite (85 × 55 mm) : à gauche la carte <strong>« pour nous »</strong> (l’accord, signé, que vous gardez), à droite la carte <strong>« pour eux »</strong> (le merci, la référence et le QR vers <code>/bonjour</code>). Cinq paires par feuille A4, d’un seul côté : rien à aligner au recto et au verso.</p>
+<% const t = it.t; const v = it.values || {}, e = it.errors || {}; %>
+<p class="mono"><a class="more eyebrow" href="/admin/terrain">← <%= t('Sur le terrain') %></a></p>
+<h1><%= t('Cartes d’accord') %></h1>
+<p class="sub"><%~ t('Des paires de cartes au format carte de visite (85 × 55 mm) : à gauche la carte <strong>« pour nous »</strong> (l’accord, signé, que vous gardez), à droite la carte <strong>« pour eux »</strong> (le merci, la référence et le QR vers <code>/bonjour</code>). Cinq paires par feuille A4, d’un seul côté : rien à aligner au recto et au verso.') %></p>
 <form class="panel form" method="post" action="/admin/rencontres/cartes">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
 <% if (Object.keys(e).length) { %>  <p class="err" role="alert"><%= Object.values(e).join(' ') %></p>
-<% } %>  <label>Photographe <select name="author_id" data-cards-author>
-<% it.authors.forEach(a => { %>    <option value="<%= a.id %>" data-next="<%= a.next %>"<%~ Number(v.author_id) === a.id ? ' selected' : '' %>><%= a.name %> (lettre <%= a.prefix %>, prochaine carte <%= a.prefix %>-<%= String(a.next).padStart(4, '0') %>)</option>
+<% } %>  <label><%= t('Photographe') %> <select name="author_id" data-cards-author>
+<% it.authors.forEach(a => { %>    <option value="<%= a.id %>" data-next="<%= a.next %>"<%~ Number(v.author_id) === a.id ? ' selected' : '' %>><%= t('{name} (lettre {prefix}, prochaine carte {card})', { name: a.name, prefix: a.prefix, card: `${a.prefix}-${String(a.next).padStart(4, '0')}` }) %></option>
 <% }) %>  </select></label>
   <fieldset>
-    <legend>Cartes</legend>
-    <label class="inline"><input type="radio" name="mode" value="numerotees"<%~ v.mode !== 'generiques' ? ' checked' : '' %>> <strong>Numérotées</strong> — référence et QR propres à chaque paire, avec le code de contrôle (la demande arrive « carte vérifiée ») ; à imprimer chez vous ou en boutique</label>
-    <label class="inline"><input type="radio" name="mode" value="generiques"<%~ v.mode === 'generiques' ? ' checked' : '' %>> <strong>Génériques</strong> — sans numéro, QR vers <code>/bonjour</code> : le modèle à confier à un imprimeur ; numérotez ensuite les deux cartes de chaque paire au tampon numéroteur</label>
+    <legend><%= t('Cartes') %></legend>
+    <label class="inline"><input type="radio" name="mode" value="numerotees"<%~ v.mode !== 'generiques' ? ' checked' : '' %>> <%~ t('<strong>Numérotées</strong> — référence et QR propres à chaque paire, avec le code de contrôle (la demande arrive « carte vérifiée ») ; à imprimer chez vous ou en boutique') %></label>
+    <label class="inline"><input type="radio" name="mode" value="generiques"<%~ v.mode === 'generiques' ? ' checked' : '' %>> <%~ t('<strong>Génériques</strong> — sans numéro, QR vers <code>/bonjour</code> : le modèle à confier à un imprimeur ; numérotez ensuite les deux cartes de chaque paire au tampon numéroteur') %></label>
   </fieldset>
   <div class="row">
-    <label>Premier numéro <span class="mono">cartes numérotées</span><input type="number" name="from" min="1" max="9999" value="<%= v.from || (it.authors[0] ? it.authors[0].next : 1) %>" data-cards-from<%~ e.from ? ' aria-invalid="true"' : '' %>></label>
-    <label>Nombre de paires <span class="mono"><%= it.PER_SHEET %> par feuille</span><input type="number" name="count" min="1" max="<%= it.MAX_PAIRS %>" step="1" value="<%= v.count || 10 %>"<%~ e.count ? ' aria-invalid="true"' : '' %>></label>
+    <label><%= t('Premier numéro') %> <span class="mono"><%= t('cartes numérotées') %></span><input type="number" name="from" min="1" max="9999" value="<%= v.from || (it.authors[0] ? it.authors[0].next : 1) %>" data-cards-from<%~ e.from ? ' aria-invalid="true"' : '' %>></label>
+    <label><%= t('Nombre de paires') %> <span class="mono"><%= t('{n} par feuille', { n: it.PER_SHEET }) %></span><input type="number" name="count" min="1" max="<%= it.MAX_PAIRS %>" step="1" value="<%= v.count || 10 %>"<%~ e.count ? ' aria-invalid="true"' : '' %>></label>
   </div>
-  <p class="hint">Les numéros imprimés sont retenus : la planche suivante commence après. Imprimez à <strong>100 %</strong> (« taille réelle », sans « ajuster à la page »), de préférence sur du papier épais (250 à 350 g/m²), puis découpez le long des traits.</p>
-  <p class="actions"><button class="btn" type="submit">Préparer la planche</button></p>
+  <p class="hint"><%~ t('Les numéros imprimés sont retenus : la planche suivante commence après. Imprimez à <strong>100 %</strong> (« taille réelle », sans « ajuster à la page »), de préférence sur du papier épais (250 à 350 g/m²), puis découpez le long des traits.') %></p>
+  <p class="actions"><button class="btn" type="submit"><%= t('Préparer la planche') %></button></p>
 </form>

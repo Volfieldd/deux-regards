@@ -971,3 +971,10 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .admin-lang button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 34px; padding: 0 10px; border-radius: 7px; color: var(--ink2); text-align: left; }
 .admin-lang button:hover { background: var(--s3); color: var(--ink); }
 .admin-lang button[aria-current] { color: var(--ink); font-weight: 500; }
+/* Libellés plus longs en anglais et en allemand : titres de panneau et boutons passent à la ligne sur téléphone. */
+.panel h2 { flex-wrap: wrap; }
+@media (max-width: 700px) {
+  .panel h2 .btn, .todo .btn, .task-list .btn { white-space: normal; text-align: center; }
+  .enc-tag { white-space: normal; }
+  .panel, .panel * { min-width: 0; }
+}

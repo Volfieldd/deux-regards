@@ -1,0 +1,738 @@
+{
+ "Pays inconnu": {
+  "en": "Unknown country",
+  "de": "Unbekanntes Land"
+ },
+ "Publiées sans ville": {
+  "en": "Published without a town",
+  "de": "Veröffentlicht ohne Ort"
+ },
+ "Titres sans traduction": {
+  "en": "Titles without translation",
+  "de": "Titel ohne Übersetzung"
+ },
+ "▲ À vérifier": {
+  "en": "▲ To check",
+  "de": "▲ Zu prüfen"
+ },
+ "✕ Bloquées": {
+  "en": "✕ Blocked",
+  "de": "✕ Gesperrt"
+ },
+ "Sans visage": {
+  "en": "No face",
+  "de": "Ohne Gesicht"
+ },
+ "Jeton CSRF invalide.": {
+  "en": "Invalid CSRF token.",
+  "de": "Ungültiges CSRF-Token."
+ },
+ "série ou auteur invalide": {
+  "en": "invalid series or author",
+  "de": "ungültige Serie oder ungültiger Autor"
+ },
+ "fichier trop lourd ({n} Mo au plus)": {
+  "en": "file too large ({n} MB max.)",
+  "de": "Datei zu groß (höchstens {n} MB)"
+ },
+ "image illisible ou format non pris en charge par le serveur": {
+  "en": "unreadable image or format not supported by the server",
+  "de": "Bild nicht lesbar oder Format vom Server nicht unterstützt"
+ },
+ "Envoi multipart attendu.": {
+  "en": "Multipart upload expected.",
+  "de": "Multipart-Upload erwartet."
+ },
+ "{n} fichiers au plus par envoi": {
+  "en": "{n} files max. per upload",
+  "de": "höchstens {n} Dateien pro Upload"
+ },
+ "{name} : {reason}": {
+  "en": "{name}: {reason}",
+  "de": "{name}: {reason}"
+ },
+ "{n} photo(s) importée(s) en brouillon, {r} refusée(s).": {
+  "en": "{n} photo(s) imported as drafts, {r} refused.",
+  "de": "{n} Foto(s) als Entwurf importiert, {r} abgelehnt."
+ },
+ "{n} photo(s) importée(s) en brouillon.": {
+  "en": "{n} photo(s) imported as drafts.",
+  "de": "{n} Foto(s) als Entwurf importiert."
+ },
+ "trop lourde ({n} Mo au plus)": {
+  "en": "too large ({n} MB max.)",
+  "de": "zu groß (höchstens {n} MB)"
+ },
+ "Aucun fichier reçu.": {
+  "en": "No file received.",
+  "de": "Keine Datei empfangen."
+ },
+ "Photo introuvable.": {
+  "en": "Photo not found.",
+  "de": "Foto nicht gefunden."
+ },
+ "File Instagram reprise.": {
+  "en": "Instagram queue resumed.",
+  "de": "Instagram-Warteschlange fortgesetzt."
+ },
+ "Connectez d’abord le compte Instagram.": {
+  "en": "Connect the Instagram account first.",
+  "de": "Verbinden Sie zuerst das Instagram-Konto."
+ },
+ "Relevé déjà demandé il y a moins de 10 minutes : réessayez un peu plus tard.": {
+  "en": "Already fetched less than 10 minutes ago: try again a little later.",
+  "de": "Bereits vor weniger als 10 Minuten abgerufen: Versuchen Sie es etwas später erneut."
+ },
+ "Aucun post publié depuis le site à relever pour l’instant.": {
+  "en": "No post published from the site to fetch yet.",
+  "de": "Noch kein von der Website veröffentlichter Beitrag abzurufen."
+ },
+ "Likes et commentaires relevés pour {n} posts.": {
+  "en": "Likes and comments fetched for {n} posts.",
+  "de": "Likes und Kommentare für {n} Beiträge abgerufen."
+ },
+ "Likes et commentaires relevés pour {n} post.": {
+  "en": "Likes and comments fetched for {n} post.",
+  "de": "Likes und Kommentare für {n} Beitrag abgerufen."
+ },
+ "Relevé impossible : {error}": {
+  "en": "Fetch failed: {error}",
+  "de": "Abruf nicht möglich: {error}"
+ },
+ "Réglages Instagram enregistrés.": {
+  "en": "Instagram settings saved.",
+  "de": "Instagram-Einstellungen gespeichert."
+ },
+ "INSTAGRAM_APP_ID et INSTAGRAM_APP_SECRET manquent dans la configuration du serveur.": {
+  "en": "INSTAGRAM_APP_ID and INSTAGRAM_APP_SECRET are missing from the server configuration.",
+  "de": "INSTAGRAM_APP_ID und INSTAGRAM_APP_SECRET fehlen in der Serverkonfiguration."
+ },
+ "La connexion à Instagram exige que le site soit en HTTPS (PUBLIC_URL).": {
+  "en": "Connecting to Instagram requires the site to use HTTPS (PUBLIC_URL).",
+  "de": "Die Verbindung mit Instagram erfordert, dass die Website HTTPS nutzt (PUBLIC_URL)."
+ },
+ "Connexion refusée : la demande ne vient pas de cet écran ou a expiré. Recommencez.": {
+  "en": "Connection refused: the request did not come from this screen or has expired. Please try again.",
+  "de": "Verbindung abgelehnt: Die Anfrage kam nicht von diesem Bildschirm oder ist abgelaufen. Bitte erneut versuchen."
+ },
+ "Connexion annulée : {reason}.": {
+  "en": "Connection cancelled: {reason}.",
+  "de": "Verbindung abgebrochen: {reason}."
+ },
+ "Connexion annulée.": {
+  "en": "Connection cancelled.",
+  "de": "Verbindung abgebrochen."
+ },
+ "Compte Instagram @{username} connecté.": {
+  "en": "Instagram account @{username} connected.",
+  "de": "Instagram-Konto @{username} verbunden."
+ },
+ "Connexion impossible : {error}": {
+  "en": "Connection failed: {error}",
+  "de": "Verbindung nicht möglich: {error}"
+ },
+ "Compte Instagram déconnecté (le jeton est effacé ; retirez aussi l’accès dans Instagram si besoin).": {
+  "en": "Instagram account disconnected (the token is deleted; also revoke access in Instagram if needed).",
+  "de": "Instagram-Konto getrennt (das Token ist gelöscht; entziehen Sie bei Bedarf auch den Zugriff in Instagram)."
+ },
+ "Instagram : {error}.": {
+  "en": "Instagram: {error}.",
+  "de": "Instagram: {error}."
+ },
+ "Dans la file Instagram.": {
+  "en": "In the Instagram queue.",
+  "de": "In der Instagram-Warteschlange."
+ },
+ "Photo dans la file Instagram.": {
+  "en": "Photo added to the Instagram queue.",
+  "de": "Foto in der Instagram-Warteschlange."
+ },
+ "Retirée de la file Instagram.": {
+  "en": "Removed from the Instagram queue.",
+  "de": "Aus der Instagram-Warteschlange entfernt."
+ },
+ "Remise en tête de file.": {
+  "en": "Moved back to the front of the queue.",
+  "de": "Wieder an den Anfang der Warteschlange gesetzt."
+ },
+ "Publiée sur Instagram.": {
+  "en": "Published on Instagram.",
+  "de": "Auf Instagram veröffentlicht."
+ },
+ "janv.": {
+  "en": "Jan",
+  "de": "Jan."
+ },
+ "févr.": {
+  "en": "Feb",
+  "de": "Feb."
+ },
+ "mars": {
+  "en": "Mar",
+  "de": "März"
+ },
+ "avr.": {
+  "en": "Apr",
+  "de": "Apr."
+ },
+ "mai": {
+  "en": "May",
+  "de": "Mai"
+ },
+ "juin": {
+  "en": "Jun",
+  "de": "Juni"
+ },
+ "juil.": {
+  "en": "Jul",
+  "de": "Juli"
+ },
+ "août": {
+  "en": "Aug",
+  "de": "Aug."
+ },
+ "sept.": {
+  "en": "Sep",
+  "de": "Sept."
+ },
+ "oct.": {
+  "en": "Oct",
+  "de": "Okt."
+ },
+ "nov.": {
+  "en": "Nov",
+  "de": "Nov."
+ },
+ "déc.": {
+  "en": "Dec",
+  "de": "Dez."
+ },
+ "{day} {month}": {
+  "en": "{day} {month}",
+  "de": "{day}. {month}"
+ },
+ "30 jours": {
+  "en": "30 days",
+  "de": "30 Tage"
+ },
+ "3 mois": {
+  "en": "3 months",
+  "de": "3 Monate"
+ },
+ "12 mois": {
+  "en": "12 months",
+  "de": "12 Monate"
+ },
+ "Accueil": {
+  "en": "Home",
+  "de": "Startseite"
+ },
+ "À propos": {
+  "en": "About",
+  "de": "Über"
+ },
+ "Droits d’utilisation": {
+  "en": "Usage rights",
+  "de": "Nutzungsrechte"
+ },
+ "Carte": {
+  "en": "Map",
+  "de": "Karte"
+ },
+ "Confidentialité": {
+  "en": "Privacy",
+  "de": "Datenschutz"
+ },
+ "Je vous ai photographié (/bonjour)": {
+  "en": "I photographed you (/bonjour)",
+  "de": "Ich habe Sie fotografiert (/bonjour)"
+ },
+ "Série « {name} »": {
+  "en": "Series “{name}”",
+  "de": "Serie „{name}“"
+ },
+ "Regard de {name}": {
+  "en": "{name}’s view",
+  "de": "Blick von {name}"
+ },
+ "Compléter et publier": {
+  "en": "Complete and publish",
+  "de": "Vervollständigen und veröffentlichen"
+ },
+ "{n} photos publiées.": {
+  "en": "{n} photos published.",
+  "de": "{n} Fotos veröffentlicht."
+ },
+ "{n} photo publiée.": {
+  "en": "{n} photo published.",
+  "de": "{n} Foto veröffentlicht."
+ },
+ "{n} à vérifier (confirmez dans leur fiche)": {
+  "en": "{n} to check (confirm on their page)",
+  "de": "{n} zu prüfen (bestätigen Sie auf ihrer Seite)"
+ },
+ "{n} bloquées par un refus": {
+  "en": "{n} blocked by a refusal",
+  "de": "{n} durch eine Ablehnung gesperrt"
+ },
+ "{n} bloquée par un refus": {
+  "en": "{n} blocked by a refusal",
+  "de": "{n} durch eine Ablehnung gesperrt"
+ },
+ "{n} restent en brouillon :": {
+  "en": "{n} remain drafts:",
+  "de": "{n} bleiben Entwürfe:"
+ },
+ "{n} reste en brouillon :": {
+  "en": "{n} remains a draft:",
+  "de": "{n} bleibt Entwurf:"
+ },
+ "Modifications enregistrées.": {
+  "en": "Changes saved.",
+  "de": "Änderungen gespeichert."
+ },
+ "{n} photos": {
+  "en": "{n} photos",
+  "de": "{n} Fotos"
+ },
+ "{n} photo": {
+  "en": "{n} photo",
+  "de": "{n} Foto"
+ },
+ "Aucune photo sélectionnée.": {
+  "en": "No photo selected.",
+  "de": "Kein Foto ausgewählt."
+ },
+ "Ces photos ne peuvent pas être publiées : la personne photographiée refuse la publication (voir Personnes) ; déjà en ligne : appliquez le refus.": {
+  "en": "These photos cannot be published: the photographed person refuses publication (see People); already online: apply the refusal.",
+  "de": "Diese Fotos können nicht veröffentlicht werden: Die fotografierte Person lehnt die Veröffentlichung ab (siehe Personen); bereits online: Wenden Sie die Ablehnung an."
+ },
+ "Ces photos ne peuvent pas être publiées : la personne photographiée refuse la publication (voir Personnes).": {
+  "en": "These photos cannot be published: the photographed person refuses publication (see People).",
+  "de": "Diese Fotos können nicht veröffentlicht werden: Die fotografierte Person lehnt die Veröffentlichung ab (siehe Personen)."
+ },
+ "Cette photo ne peut pas être publiée : la personne photographiée refuse la publication (voir Personnes) ; déjà en ligne : appliquez le refus.": {
+  "en": "This photo cannot be published: the photographed person refuses publication (see People); already online: apply the refusal.",
+  "de": "Dieses Foto kann nicht veröffentlicht werden: Die fotografierte Person lehnt die Veröffentlichung ab (siehe Personen); bereits online: Wenden Sie die Ablehnung an."
+ },
+ "Cette photo ne peut pas être publiée : la personne photographiée refuse la publication (voir Personnes).": {
+  "en": "This photo cannot be published: the photographed person refuses publication (see People).",
+  "de": "Dieses Foto kann nicht veröffentlicht werden: Die fotografierte Person lehnt die Veröffentlichung ab (siehe Personen)."
+ },
+ "Ces photos sont à vérifier ({reason}) : confirmez dans leur fiche pour publier.": {
+  "en": "These photos need checking ({reason}): confirm on their page to publish.",
+  "de": "Diese Fotos sind zu prüfen ({reason}): Bestätigen Sie auf ihrer Seite, um sie zu veröffentlichen."
+ },
+ "Cette photo est à vérifier ({reason}) : confirmez dans sa fiche pour publier.": {
+  "en": "This photo needs checking ({reason}): confirm on its page to publish.",
+  "de": "Dieses Foto ist zu prüfen ({reason}): Bestätigen Sie auf seiner Seite, um es zu veröffentlichen."
+ },
+ "Elles gardent le nom du fichier comme titre : corrigez-le dans la photothèque.": {
+  "en": "They keep the file name as title: correct it in the photo library.",
+  "de": "Sie behalten den Dateinamen als Titel: Korrigieren Sie ihn in der Fotothek."
+ },
+ "Elle garde le nom du fichier comme titre : corrigez-le dans la photothèque.": {
+  "en": "It keeps the file name as title: correct it in the photo library.",
+  "de": "Es behält den Dateinamen als Titel: Korrigieren Sie ihn in der Fotothek."
+ },
+ "{n} gardent le nom du fichier comme titre : corrigez-le dans la photothèque.": {
+  "en": "{n} keep the file name as title: correct it in the photo library.",
+  "de": "{n} behalten den Dateinamen als Titel: Korrigieren Sie ihn in der Fotothek."
+ },
+ "{n} garde le nom du fichier comme titre : corrigez-le dans la photothèque.": {
+  "en": "{n} keeps the file name as title: correct it in the photo library.",
+  "de": "{n} behält den Dateinamen als Titel: Korrigieren Sie ihn in der Fotothek."
+ },
+ "{n} photos restent en brouillon : la personne photographiée refuse la publication (voir Personnes).": {
+  "en": "{n} photos remain drafts: the photographed person refuses publication (see People).",
+  "de": "{n} Fotos bleiben Entwürfe: Die fotografierte Person lehnt die Veröffentlichung ab (siehe Personen)."
+ },
+ "{n} photo reste en brouillon : la personne photographiée refuse la publication (voir Personnes).": {
+  "en": "{n} photo remains a draft: the photographed person refuses publication (see People).",
+  "de": "{n} Foto bleibt Entwurf: Die fotografierte Person lehnt die Veröffentlichung ab (siehe Personen)."
+ },
+ "{n} photos à vérifier restent en brouillon : confirmez dans leur fiche.": {
+  "en": "{n} photos to check remain drafts: confirm on their page.",
+  "de": "{n} zu prüfende Fotos bleiben Entwürfe: Bestätigen Sie auf ihrer Seite."
+ },
+ "{n} photo à vérifier reste en brouillon : confirmez dans sa fiche.": {
+  "en": "{n} photo to check remains a draft: confirm on its page.",
+  "de": "{n} zu prüfendes Foto bleibt Entwurf: Bestätigen Sie auf seiner Seite."
+ },
+ "{n} photos repassées en brouillon.": {
+  "en": "{n} photos set back to draft.",
+  "de": "{n} Fotos wieder als Entwurf."
+ },
+ "{n} photo repassée en brouillon.": {
+  "en": "{n} photo set back to draft.",
+  "de": "{n} Foto wieder als Entwurf."
+ },
+ "{photos} sur la carte.": {
+  "en": "{photos} on the map.",
+  "de": "{photos} auf der Karte."
+ },
+ "{photos} sans ville : choisissez sa ville dans la fiche.": {
+  "en": "{photos} without a town: choose the town on the photo page.",
+  "de": "{photos} ohne Ort: Wählen Sie den Ort auf der Fotoseite."
+ },
+ "{n} photos retirées de la carte.": {
+  "en": "{n} photos removed from the map.",
+  "de": "{n} Fotos von der Karte entfernt."
+ },
+ "{n} photo retirée de la carte.": {
+  "en": "{n} photo removed from the map.",
+  "de": "{n} Foto von der Karte entfernt."
+ },
+ "Carte rétablie.": {
+  "en": "Map restored.",
+  "de": "Karte wiederhergestellt."
+ },
+ "Choisissez une série.": {
+  "en": "Choose a series.",
+  "de": "Wählen Sie eine Serie."
+ },
+ "{n} photos déplacées vers « {name} ».": {
+  "en": "{n} photos moved to “{name}”.",
+  "de": "{n} Fotos nach „{name}“ verschoben."
+ },
+ "{n} photo déplacée vers « {name} ».": {
+  "en": "{n} photo moved to “{name}”.",
+  "de": "{n} Foto nach „{name}“ verschoben."
+ },
+ "Lieu « {place} » et date appliqués à {photos}.": {
+  "en": "Place “{place}” and date applied to {photos}.",
+  "de": "Ort „{place}“ und Datum auf {photos} angewendet."
+ },
+ "Lieu « {place} » appliqué à {photos}.": {
+  "en": "Place “{place}” applied to {photos}.",
+  "de": "Ort „{place}“ auf {photos} angewendet."
+ },
+ "Rien à changer pour {photos}.": {
+  "en": "Nothing to change for {photos}.",
+  "de": "Nichts zu ändern für {photos}."
+ },
+ "Modification annulée.": {
+  "en": "Change undone.",
+  "de": "Änderung rückgängig gemacht."
+ },
+ "Action annulée.": {
+  "en": "Action undone.",
+  "de": "Aktion rückgängig gemacht."
+ },
+ "Déplacement annulé.": {
+  "en": "Move undone.",
+  "de": "Verschieben rückgängig gemacht."
+ },
+ "Confirmation requise.": {
+  "en": "Confirmation required.",
+  "de": "Bestätigung erforderlich."
+ },
+ "Supprimer des photos": {
+  "en": "Delete photos",
+  "de": "Fotos löschen"
+ },
+ "{n} photos supprimées.": {
+  "en": "{n} photos deleted.",
+  "de": "{n} Fotos gelöscht."
+ },
+ "{n} photo supprimée.": {
+  "en": "{n} photo deleted.",
+  "de": "{n} Foto gelöscht."
+ },
+ "Action inconnue.": {
+  "en": "Unknown action.",
+  "de": "Unbekannte Aktion."
+ },
+ "Photo à vérifier ({reasons}) : cochez la confirmation pour la publier.": {
+  "en": "Photo to check ({reasons}): tick the confirmation to publish it.",
+  "de": "Foto zu prüfen ({reasons}): Setzen Sie das Häkchen zur Bestätigung, um es zu veröffentlichen."
+ },
+ "Photo enregistrée.": {
+  "en": "Photo saved.",
+  "de": "Foto gespeichert."
+ },
+ "Preuve non valide : {reason}.": {
+  "en": "Invalid proof: {reason}.",
+  "de": "Ungültiger Nachweis: {reason}."
+ },
+ "{date} à {time}": {
+  "en": "{date} at {time}",
+  "de": "{date} um {time}"
+ },
+ "Signature valide (original intact, horodaté le {when} UTC), mais autorité non vérifiée : aucun certificat racine configuré (TSA_CA_FILE).": {
+  "en": "Valid signature (original intact, timestamped on {when} UTC), but authority not verified: no root certificate configured (TSA_CA_FILE).",
+  "de": "Gültige Signatur (Original unverändert, mit Zeitstempel vom {when} UTC), aber Zertifizierungsstelle nicht geprüft: kein Stammzertifikat konfiguriert (TSA_CA_FILE)."
+ },
+ "Preuve valide : original intact, horodaté le {when} UTC, signature vérifiée jusqu’à l’autorité racine.": {
+  "en": "Valid proof: original intact, timestamped on {when} UTC, signature verified up to the root authority.",
+  "de": "Gültiger Nachweis: Original unverändert, mit Zeitstempel vom {when} UTC, Signatur bis zur Stammzertifizierungsstelle geprüft."
+ },
+ "Horodatage relancé : les preuves en attente sont redemandées en arrière-plan.": {
+  "en": "Timestamping restarted: pending proofs are being requested again in the background.",
+  "de": "Zeitstempel neu gestartet: Ausstehende Nachweise werden im Hintergrund erneut angefordert."
+ },
+ "« {title} » ne peut pas être publiée : {reasons}.": {
+  "en": "“{title}” cannot be published: {reasons}.",
+  "de": "„{title}“ kann nicht veröffentlicht werden: {reasons}."
+ },
+ "« {title} » est à vérifier ({reasons}) : confirmez dans la fiche pour la publier.": {
+  "en": "“{title}” needs checking ({reasons}): confirm on its page to publish it.",
+  "de": "„{title}“ ist zu prüfen ({reasons}): Bestätigen Sie auf der Fotoseite, um es zu veröffentlichen."
+ },
+ "« {title} » publiée.": {
+  "en": "“{title}” published.",
+  "de": "„{title}“ veröffentlicht."
+ },
+ "« {title} » repassée en brouillon.": {
+  "en": "“{title}” set back to draft.",
+  "de": "„{title}“ wieder als Entwurf."
+ },
+ "Indiqué : quelqu’un est sur la photo.": {
+  "en": "Noted: someone is in the photo.",
+  "de": "Vermerkt: Jemand ist auf dem Foto."
+ },
+ "Indiqué : personne de reconnaissable sur la photo.": {
+  "en": "Noted: no recognisable person in the photo.",
+  "de": "Vermerkt: Keine erkennbare Person auf dem Foto."
+ },
+ "La détection des visages fait de nouveau foi.": {
+  "en": "Face detection applies again.",
+  "de": "Die Gesichtserkennung gilt wieder."
+ },
+ "Photo supprimée.": {
+  "en": "Photo deleted.",
+  "de": "Foto gelöscht."
+ },
+ "Série « {name} » créée.": {
+  "en": "Series “{name}” created.",
+  "de": "Serie „{name}“ erstellt."
+ },
+ "Série enregistrée.": {
+  "en": "Series saved.",
+  "de": "Serie gespeichert."
+ },
+ "Série « {name} » supprimée ; {n} photos déplacées vers « {target} ».": {
+  "en": "Series “{name}” deleted; {n} photos moved to “{target}”.",
+  "de": "Serie „{name}“ gelöscht; {n} Fotos nach „{target}“ verschoben."
+ },
+ "Série « {name} » supprimée ; {n} photo déplacée vers « {target} ».": {
+  "en": "Series “{name}” deleted; {n} photo moved to “{target}”.",
+  "de": "Serie „{name}“ gelöscht; {n} Foto nach „{target}“ verschoben."
+ },
+ "Série « {name} » supprimée.": {
+  "en": "Series “{name}” deleted.",
+  "de": "Serie „{name}“ gelöscht."
+ },
+ "Auteur ajouté.": {
+  "en": "Author added.",
+  "de": "Autor hinzugefügt."
+ },
+ "Auteur enregistré.": {
+  "en": "Author saved.",
+  "de": "Autor gespeichert."
+ },
+ "Auteur supprimé.": {
+  "en": "Author deleted.",
+  "de": "Autor gelöscht."
+ },
+ "Filigrane et métadonnées": {
+  "en": "Watermark and metadata",
+  "de": "Wasserzeichen und Metadaten"
+ },
+ "Aucun logo envoyé : pas de filigrane pour l’instant.": {
+  "en": "No logo uploaded: no watermark for now.",
+  "de": "Kein Logo hochgeladen: vorerst kein Wasserzeichen."
+ },
+ "Ce dessin n’est pas encore envoyé dans Apparence : pas de filigrane pour l’instant.": {
+  "en": "This design has not been uploaded in Appearance yet: no watermark for now.",
+  "de": "Diese Grafik wurde noch nicht unter Erscheinungsbild hochgeladen: vorerst kein Wasserzeichen."
+ },
+ "Réglages enregistrés, images en cours de mise à jour.": {
+  "en": "Settings saved, images are being updated.",
+  "de": "Einstellungen gespeichert, Bilder werden aktualisiert."
+ },
+ "Logo trop lourd (5 Mo au plus).": {
+  "en": "Logo too large (5 MB max.).",
+  "de": "Logo zu groß (höchstens 5 MB)."
+ },
+ "Le logo doit être une image PNG ou WebP (de préférence à fond transparent).": {
+  "en": "The logo must be a PNG or WebP image (preferably with a transparent background).",
+  "de": "Das Logo muss ein PNG- oder WebP-Bild sein (vorzugsweise mit transparentem Hintergrund)."
+ },
+ "Logo trop grand ({n} px de côté au plus).": {
+  "en": "Logo too big ({n} px per side max.).",
+  "de": "Logo zu groß (höchstens {n} px Seitenlänge)."
+ },
+ "Logo trop étiré ou trop petit (8 px de côté au moins, rapport largeur/hauteur de 10 au plus).": {
+  "en": "Logo too stretched or too small (at least 8 px per side, width/height ratio of 10 max.).",
+  "de": "Logo zu gestreckt oder zu klein (mindestens 8 px Seitenlänge, Seitenverhältnis höchstens 10)."
+ },
+ "Envoi invalide.": {
+  "en": "Invalid upload.",
+  "de": "Ungültiger Upload."
+ },
+ "Logo enregistré.": {
+  "en": "Logo saved.",
+  "de": "Logo gespeichert."
+ },
+ "Logo supprimé.": {
+  "en": "Logo deleted.",
+  "de": "Logo gelöscht."
+ },
+ "Apparence enregistrée.": {
+  "en": "Appearance saved.",
+  "de": "Erscheinungsbild gespeichert."
+ },
+ "Image trop lourde ({n} Mo au plus).": {
+  "en": "Image too large ({n} MB max.).",
+  "de": "Bild zu groß (höchstens {n} MB)."
+ },
+ "{label} refusé : {error}.": {
+  "en": "{label} refused: {error}.",
+  "de": "{label} abgelehnt: {error}."
+ },
+ "{label} enregistré.": {
+  "en": "{label} saved.",
+  "de": "{label} gespeichert."
+ },
+ "{label} retiré.": {
+  "en": "{label} removed.",
+  "de": "{label} entfernt."
+ },
+ "Ordre de l’ouverture enregistré.": {
+  "en": "Opening slideshow order saved.",
+  "de": "Reihenfolge der Start-Diashow gespeichert."
+ },
+ "Réglages enregistrés.": {
+  "en": "Settings saved.",
+  "de": "Einstellungen gespeichert."
+ },
+ "ce fichier n’est pas une image lisible": {
+  "en": "this file is not a readable image",
+  "de": "diese Datei ist kein lesbares Bild"
+ },
+ "image trop grande (120 mégapixels au plus)": {
+  "en": "image too big (120 megapixels max.)",
+  "de": "Bild zu groß (höchstens 120 Megapixel)"
+ },
+ "emblème en PNG, WebP ou JPEG": {
+  "en": "emblem in PNG, WebP or JPEG",
+  "de": "Emblem als PNG, WebP oder JPEG"
+ },
+ "image en PNG, WebP ou JPEG": {
+  "en": "image in PNG, WebP or JPEG",
+  "de": "Bild als PNG, WebP oder JPEG"
+ },
+ "aucun dessin trouvé dans l’image (fond uni ?)": {
+  "en": "no design found in the image (plain background?)",
+  "de": "keine Grafik im Bild gefunden (einfarbiger Hintergrund?)"
+ },
+ "Emblème (dessin)": {
+  "en": "Emblem (design)",
+  "de": "Emblem (Grafik)"
+ },
+ "Icône (version simplifiée)": {
+  "en": "Icon (simplified version)",
+  "de": "Symbol (vereinfachte Version)"
+ },
+ "Logo complet": {
+  "en": "Full logo",
+  "de": "Vollständiges Logo"
+ },
+ "Image de partage": {
+  "en": "Sharing image",
+  "de": "Teilen-Bild"
+ },
+ "photo introuvable": {
+  "en": "photo not found",
+  "de": "Foto nicht gefunden"
+ },
+ "seules les photos publiées sur le site partent sur Instagram": {
+  "en": "only photos published on the site go to Instagram",
+  "de": "nur auf der Website veröffentlichte Fotos gehen auf Instagram"
+ },
+ "envoi en cours : modification impossible": {
+  "en": "upload in progress: cannot be changed",
+  "de": "Upload läuft: Änderung nicht möglich"
+ },
+ "un envoi est déjà en cours": {
+  "en": "an upload is already in progress",
+  "de": "ein Upload läuft bereits"
+ },
+ "compte Instagram non connecté": {
+  "en": "Instagram account not connected",
+  "de": "Instagram-Konto nicht verbunden"
+ },
+ "Instagram ne peut récupérer l’image que si le site est en HTTPS (PUBLIC_URL)": {
+  "en": "Instagram can only fetch the image if the site uses HTTPS (PUBLIC_URL)",
+  "de": "Instagram kann das Bild nur abrufen, wenn die Website HTTPS nutzt (PUBLIC_URL)"
+ },
+ "publication introuvable dans la file": {
+  "en": "post not found in the queue",
+  "de": "Beitrag nicht in der Warteschlange gefunden"
+ },
+ "photo dépubliée sur le site": {
+  "en": "photo unpublished on the site",
+  "de": "Foto auf der Website nicht mehr veröffentlicht"
+ },
+ "Instagram n’a pas fini de traiter l’image": {
+  "en": "Instagram has not finished processing the image",
+  "de": "Instagram hat die Bildverarbeitung nicht abgeschlossen"
+ },
+ "réponse inattendue d’Instagram (jeton absent)": {
+  "en": "unexpected response from Instagram (no token)",
+  "de": "unerwartete Antwort von Instagram (kein Token)"
+ },
+ "Ordre incomplet ou invalide.": {
+  "en": "Incomplete or invalid order.",
+  "de": "Unvollständige oder ungültige Reihenfolge."
+ },
+ "Série inconnue.": {
+  "en": "Unknown series.",
+  "de": "Unbekannte Serie."
+ },
+ "Auteur inconnu.": {
+  "en": "Unknown author.",
+  "de": "Unbekannter Autor."
+ },
+ "Le titre est obligatoire.": {
+  "en": "The title is required.",
+  "de": "Der Titel ist erforderlich."
+ },
+ "Le nom est obligatoire.": {
+  "en": "The name is required.",
+  "de": "Der Name ist erforderlich."
+ },
+ "Minuscules, chiffres et tirets uniquement.": {
+  "en": "Lowercase letters, digits and hyphens only.",
+  "de": "Nur Kleinbuchstaben, Ziffern und Bindestriche."
+ },
+ "Déjà utilisé.": {
+  "en": "Already in use.",
+  "de": "Bereits verwendet."
+ },
+ "Date non comprise : essayez « oct. 2026 », « 10/2026 » ou « 2026-10 ».": {
+  "en": "Date not understood: try “oct. 2026”, “10/2026” or “2026-10”.",
+  "de": "Datum nicht verstanden: Versuchen Sie „oct. 2026“, „10/2026“ oder „2026-10“."
+ },
+ "Choisissez d’abord une ville pour afficher la photo sur la carte.": {
+  "en": "First choose a town to show the photo on the map.",
+  "de": "Wählen Sie zuerst einen Ort, um das Foto auf der Karte anzuzeigen."
+ },
+ "Traduction non configurée (TRANSLATE_URL).": {
+  "en": "Translation not configured (TRANSLATE_URL).",
+  "de": "Übersetzung nicht konfiguriert (TRANSLATE_URL)."
+ },
+ "Langues inconnues.": {
+  "en": "Unknown languages.",
+  "de": "Unbekannte Sprachen."
+ },
+ "Rien à traduire : remplissez d’abord le texte dans une autre langue.": {
+  "en": "Nothing to translate: first fill in the text in another language.",
+  "de": "Nichts zu übersetzen: Füllen Sie zuerst den Text in einer anderen Sprache aus."
+ },
+ "Date appliquée à {photos}.": {
+  "en": "Date applied to {photos}.",
+  "de": "Datum auf {photos} angewendet."
+ }
+}

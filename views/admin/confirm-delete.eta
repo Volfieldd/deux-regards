@@ -1,5 +1,6 @@
 <% layout('./layout') %>
-<h1>Supprimer <%= it.photos.length %> photo<%= it.photos.length > 1 ? 's' : '' %> ?</h1>
+<% const t = it.t; %>
+<h1><%= it.photos.length > 1 ? t('Supprimer {n} photos ?', { n: it.photos.length }) : t('Supprimer {n} photo ?', { n: it.photos.length }) %></h1>
 <form class="panel form" method="post" action="/admin/photos/actions">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
   <input type="hidden" name="back" value="<%= it.back %>">
@@ -8,6 +9,6 @@
   <ul>
 <% it.photos.forEach(p => { %>    <li><input type="hidden" name="ids" value="<%= p.id %>"><%= p.title %></li>
 <% }) %>  </ul>
-  <p>Les originaux et toutes leurs images seront effacés. Cette action est définitive.</p>
-  <p class="actions"><button class="btn danger" type="submit">Supprimer définitivement</button> <a class="btn ghost" href="<%= it.back %>">Annuler</a></p>
+  <p><%= t('Les originaux et toutes leurs images seront effacés. Cette action est définitive.') %></p>
+  <p class="actions"><button class="btn danger" type="submit"><%= t('Supprimer définitivement') %></button> <a class="btn ghost" href="<%= it.back %>"><%= t('Annuler') %></a></p>
 </form>

@@ -1,0 +1,1262 @@
+{
+ "site": {
+  "en": "site",
+  "de": "Website"
+ },
+ "expositions et tirages": {
+  "en": "exhibitions and prints",
+  "de": "Ausstellungen und Abzüge"
+ },
+ "Nouvelle": {
+  "en": "New",
+  "de": "Neu"
+ },
+ "En cours": {
+  "en": "In progress",
+  "de": "In Bearbeitung"
+ },
+ "Traitée": {
+  "en": "Done",
+  "de": "Erledigt"
+ },
+ "Nouvelles": {
+  "en": "New",
+  "de": "Neu"
+ },
+ "Traitées": {
+  "en": "Done",
+  "de": "Erledigt"
+ },
+ "Refus de publication": {
+  "en": "Publication refused",
+  "de": "Veröffentlichung abgelehnt"
+ },
+ "Accord signé : {scopes}": {
+  "en": "Signed consent: {scopes}",
+  "de": "Unterschriebene Einwilligung: {scopes}"
+ },
+ "Accord en ligne : {scopes}": {
+  "en": "Online consent: {scopes}",
+  "de": "Online-Einwilligung: {scopes}"
+ },
+ "Personnes photographiées": {
+  "en": "Photographed people",
+  "de": "Fotografierte Personen"
+ },
+ "Les personnes photographiées dans la rue : demandes reçues par la page <a href=\"/bonjour\" target=\"_blank\" rel=\"noopener\">/bonjour</a> (QR des cartes) et accords signés sur les cartes.": {
+  "en": "People photographed in the street: requests received through the <a href=\"/bonjour\" target=\"_blank\" rel=\"noopener\">/bonjour</a> page (QR on the cards) and consents signed on the cards.",
+  "de": "Auf der Straße fotografierte Personen: Anfragen über die Seite <a href=\"/bonjour\" target=\"_blank\" rel=\"noopener\">/bonjour</a> (QR der Karten) und auf den Karten unterschriebene Einwilligungen."
+ },
+ "Nouvelle rencontre": {
+  "en": "New encounter",
+  "de": "Neue Begegnung"
+ },
+ "Filtrer les rencontres": {
+  "en": "Filter encounters",
+  "de": "Begegnungen filtern"
+ },
+ "Toutes": {
+  "en": "All",
+  "de": "Alle"
+ },
+ "Refus anonymisé": {
+  "en": "Anonymised refusal",
+  "de": "Anonymisierte Ablehnung"
+ },
+ "Sans carte": {
+  "en": "No card",
+  "de": "Ohne Karte"
+ },
+ "Référence tapée sans le code de contrôle de la carte": {
+  "en": "Reference typed without the card’s check code",
+  "de": "Referenz ohne den Prüfcode der Karte eingegeben"
+ },
+ "non vérifiée": {
+  "en": "not verified",
+  "de": "nicht geprüft"
+ },
+ "veut la photo": {
+  "en": "wants the photo",
+  "de": "möchte das Foto"
+ },
+ "{n} photos liées": {
+  "en": "{n} linked photos",
+  "de": "{n} verknüpfte Fotos"
+ },
+ "{n} photo liée": {
+  "en": "{n} linked photo",
+  "de": "{n} verknüpftes Foto"
+ },
+ "Demande d’accès · avant le {date}": {
+  "en": "Access request · before {date}",
+  "de": "Auskunftsanfrage · vor dem {date}"
+ },
+ "Demande d’effacement · avant le {date}": {
+  "en": "Erasure request · before {date}",
+  "de": "Löschanfrage · vor dem {date}"
+ },
+ "refus anonymisé": {
+  "en": "anonymised refusal",
+  "de": "anonymisierte Ablehnung"
+ },
+ "Aucune rencontre dans cette catégorie. Les demandes envoyées depuis <a href=\"/bonjour\" target=\"_blank\" rel=\"noopener\">/bonjour</a> arrivent ici.": {
+  "en": "No encounters in this category. Requests sent from <a href=\"/bonjour\" target=\"_blank\" rel=\"noopener\">/bonjour</a> arrive here.",
+  "de": "Keine Begegnungen in dieser Kategorie. Über <a href=\"/bonjour\" target=\"_blank\" rel=\"noopener\">/bonjour</a> gesendete Anfragen landen hier."
+ },
+ "Aucune rencontre pour l’instant. Les demandes envoyées depuis <a href=\"/bonjour\" target=\"_blank\" rel=\"noopener\">/bonjour</a> arrivent ici.": {
+  "en": "No encounters yet. Requests sent from <a href=\"/bonjour\" target=\"_blank\" rel=\"noopener\">/bonjour</a> arrive here.",
+  "de": "Noch keine Begegnungen. Über <a href=\"/bonjour\" target=\"_blank\" rel=\"noopener\">/bonjour</a> gesendete Anfragen landen hier."
+ },
+ "Saisir une carte signée": {
+  "en": "Enter a signed card",
+  "de": "Unterschriebene Karte erfassen"
+ },
+ "accord papier (carte « pour nous »)": {
+  "en": "paper consent (“for us” card)",
+  "de": "Einwilligung auf Papier (Karte „für uns“)"
+ },
+ "publiée": {
+  "en": "published",
+  "de": "veröffentlicht"
+ },
+ "brouillon": {
+  "en": "draft",
+  "de": "Entwurf"
+ },
+ "Fiche de la personne": {
+  "en": "Person’s record",
+  "de": "Personenakte"
+ },
+ "toutes ses rencontres, ses photos, ses droits": {
+  "en": "all their encounters, photos and rights",
+  "de": "alle Begegnungen, Fotos und Rechte der Person"
+ },
+ "Les données de cette personne ont été effacées à sa demande. Il ne reste que son refus, pour que les photos liées ne soient jamais publiées.": {
+  "en": "This person’s data was erased at their request. Only their refusal remains, so that the linked photos are never published.",
+  "de": "Die Daten dieser Person wurden auf ihren Wunsch gelöscht. Nur ihre Ablehnung bleibt, damit die verknüpften Fotos nie veröffentlicht werden."
+ },
+ "carte vérifiée": {
+  "en": "card verified",
+  "de": "Karte geprüft"
+ },
+ "référence non vérifiée": {
+  "en": "reference not verified",
+  "de": "Referenz nicht geprüft"
+ },
+ "veut recevoir la photo": {
+  "en": "wants to receive the photo",
+  "de": "möchte das Foto erhalten"
+ },
+ "Refuse la publication": {
+  "en": "Refuses publication",
+  "de": "Lehnt die Veröffentlichung ab"
+ },
+ "Accord donné en ligne : {scopes}": {
+  "en": "Consent given online: {scopes}",
+  "de": "Online erteilte Einwilligung: {scopes}"
+ },
+ "La personne": {
+  "en": "The person",
+  "de": "Die Person"
+ },
+ "E-mail": {
+  "en": "Email",
+  "de": "E-Mail"
+ },
+ "Écrire": {
+  "en": "Write",
+  "de": "Schreiben"
+ },
+ "Rencontre": {
+  "en": "Encounter",
+  "de": "Begegnung"
+ },
+ "Détails": {
+  "en": "Details",
+  "de": "Details"
+ },
+ "Langue": {
+  "en": "Language",
+  "de": "Sprache"
+ },
+ "français": {
+  "en": "French",
+  "de": "Französisch"
+ },
+ "anglais": {
+  "en": "English",
+  "de": "Englisch"
+ },
+ "allemand": {
+  "en": "German",
+  "de": "Deutsch"
+ },
+ "Position": {
+  "en": "Position",
+  "de": "Position"
+ },
+ "(à 100 m près)": {
+  "en": "(to within 100 m)",
+  "de": "(auf 100 m genau)"
+ },
+ "Âge": {
+  "en": "Age",
+  "de": "Alter"
+ },
+ "majeure": {
+  "en": "adult",
+  "de": "volljährig"
+ },
+ "mineure · parent : {guardian}": {
+  "en": "minor · parent: {guardian}",
+  "de": "minderjährig · Elternteil: {guardian}"
+ },
+ "Récapitulatif": {
+  "en": "Summary",
+  "de": "Zusammenfassung"
+ },
+ "envoyé le {date}": {
+  "en": "sent on {date}",
+  "de": "gesendet am {date}"
+ },
+ "Code de la carte": {
+  "en": "Card code",
+  "de": "Kartencode"
+ },
+ "Photo de repère de la personne": {
+  "en": "Reference photo of the person",
+  "de": "Erkennungsfoto der Person"
+ },
+ "photo de repère": {
+  "en": "reference photo",
+  "de": "Erkennungsfoto"
+ },
+ "Signature de la personne": {
+  "en": "Signature of the person",
+  "de": "Unterschrift der Person"
+ },
+ "signature (avec le parent)": {
+  "en": "signature (with the parent)",
+  "de": "Unterschrift (mit dem Elternteil)"
+ },
+ "signature": {
+  "en": "signature",
+  "de": "Unterschrift"
+ },
+ "Accord donné en ligne avec la carte en main : moins sûr qu’une carte signée. Pour une exposition ou un tirage, demandez une signature.": {
+  "en": "Consent given online with the card in hand: less reliable than a signed card. For an exhibition or a print, ask for a signature.",
+  "de": "Online erteilte Einwilligung mit der Karte in der Hand: weniger sicher als eine unterschriebene Karte. Bitten Sie für eine Ausstellung oder einen Abzug um eine Unterschrift."
+ },
+ "Accord donné en ligne, sans le code de la carte : moins sûr qu’une carte signée. Pour une exposition ou un tirage, demandez une signature.": {
+  "en": "Consent given online, without the card code: less reliable than a signed card. For an exhibition or a print, ask for a signature.",
+  "de": "Online erteilte Einwilligung ohne den Kartencode: weniger sicher als eine unterschriebene Karte. Bitten Sie für eine Ausstellung oder einen Abzug um eine Unterschrift."
+ },
+ "Marquer « {label} »": {
+  "en": "Mark “{label}”",
+  "de": "Als „{label}“ markieren"
+ },
+ "Historique": {
+  "en": "History",
+  "de": "Verlauf"
+ },
+ "Demande sur la page /bonjour (carte vérifiée) :": {
+  "en": "Request on the /bonjour page (card verified):",
+  "de": "Anfrage über die Seite /bonjour (Karte geprüft):"
+ },
+ "Demande sur la page /bonjour :": {
+  "en": "Request on the /bonjour page:",
+  "de": "Anfrage über die Seite /bonjour:"
+ },
+ "accepte ({scopes})": {
+  "en": "consents ({scopes})",
+  "de": "willigt ein ({scopes})"
+ },
+ "refuse la publication": {
+  "en": "refuses publication",
+  "de": "lehnt die Veröffentlichung ab"
+ },
+ "demande une copie de ses données": {
+  "en": "asks for a copy of their data",
+  "de": "bittet um eine Kopie ihrer Daten"
+ },
+ "demande l’effacement de ses données": {
+  "en": "asks for their data to be erased",
+  "de": "bittet um Löschung ihrer Daten"
+ },
+ "message": {
+  "en": "message",
+  "de": "Nachricht"
+ },
+ "Saisie de la carte : accord signé ({scopes}), photo de la carte jointe": {
+  "en": "Card entered: signed consent ({scopes}), photo of the card attached",
+  "de": "Karte erfasst: unterschriebene Einwilligung ({scopes}), Foto der Karte beigefügt"
+ },
+ "Saisie de la carte : accord signé ({scopes})": {
+  "en": "Card entered: signed consent ({scopes})",
+  "de": "Karte erfasst: unterschriebene Einwilligung ({scopes})"
+ },
+ "Saisie de la carte, photo de la carte jointe": {
+  "en": "Card entered, photo of the card attached",
+  "de": "Karte erfasst, Foto der Karte beigefügt"
+ },
+ "Saisie de la carte": {
+  "en": "Card entered",
+  "de": "Karte erfasst"
+ },
+ "Photo retirée": {
+  "en": "Photo removed",
+  "de": "Foto entfernt"
+ },
+ "{n} photo(s) liée(s)": {
+  "en": "{n} photo(s) linked",
+  "de": "{n} Foto(s) verknüpft"
+ },
+ "accord signé ({scopes})": {
+  "en": "signed consent ({scopes})",
+  "de": "unterschriebene Einwilligung ({scopes})"
+ },
+ "refus de publication": {
+  "en": "publication refused",
+  "de": "Veröffentlichung abgelehnt"
+ },
+ "sans décision": {
+  "en": "no decision",
+  "de": "ohne Entscheidung"
+ },
+ "Saisie avec la personne sur le téléphone : {what}, position notée": {
+  "en": "Entered with the person on the phone: {what}, position noted",
+  "de": "Mit der Person am Telefon erfasst: {what}, Position notiert"
+ },
+ "Saisie avec la personne sur le téléphone : {what}": {
+  "en": "Entered with the person on the phone: {what}",
+  "de": "Mit der Person am Telefon erfasst: {what}"
+ },
+ "Récapitulatif envoyé par e-mail": {
+  "en": "Summary sent by email",
+  "de": "Zusammenfassung per E-Mail gesendet"
+ },
+ "Données exportées (archive remise à la personne)": {
+  "en": "Data exported (archive handed to the person)",
+  "de": "Daten exportiert (Archiv an die Person übergeben)"
+ },
+ "Demande sur les données traitée": {
+  "en": "Data request handled",
+  "de": "Datenanfrage bearbeitet"
+ },
+ "Données effacées ; refus gardé sans identité": {
+  "en": "Data erased; refusal kept without identity",
+  "de": "Daten gelöscht; Ablehnung ohne Identität aufbewahrt"
+ },
+ "Lien privé créé (photo offerte)": {
+  "en": "Private link created (photo given)",
+  "de": "Privater Link erstellt (Foto geschenkt)"
+ },
+ "Refus appliqué : {n} photo(s) dépubliée(s)": {
+  "en": "Refusal applied: {n} photo(s) unpublished",
+  "de": "Ablehnung angewendet: {n} Foto(s) zurückgezogen"
+ },
+ "Droits de la personne": {
+  "en": "The person’s rights",
+  "de": "Rechte der Person"
+ },
+ "RGPD": {
+  "en": "GDPR",
+  "de": "DSGVO"
+ },
+ "Demande <strong>d’accès (copie de ses données)</strong> le {date} : à traiter avant le <strong>{due}</strong>.": {
+  "en": "<strong>Access</strong> request (copy of their data) on {date}: to be handled before <strong>{due}</strong>.",
+  "de": "<strong>Auskunftsanfrage</strong> (Kopie ihrer Daten) vom {date}: zu bearbeiten vor dem <strong>{due}</strong>."
+ },
+ "Demande <strong>d’effacement</strong> le {date} : à traiter avant le <strong>{due}</strong>.": {
+  "en": "<strong>Erasure</strong> request on {date}: to be handled before <strong>{due}</strong>.",
+  "de": "<strong>Löschanfrage</strong> vom {date}: zu bearbeiten vor dem <strong>{due}</strong>."
+ },
+ "Référence non vérifiée : assurez-vous que la demande vient bien de cette personne (même adresse e-mail, ou réponse à votre message).": {
+  "en": "Reference not verified: make sure the request really comes from this person (same email address, or a reply to your message).",
+  "de": "Referenz nicht geprüft: Vergewissern Sie sich, dass die Anfrage wirklich von dieser Person stammt (gleiche E-Mail-Adresse oder Antwort auf Ihre Nachricht)."
+ },
+ "Dernière demande sur les données traitée le {date}.": {
+  "en": "Last data request handled on {date}.",
+  "de": "Letzte Datenanfrage bearbeitet am {date}."
+ },
+ "Exporter ses données (.zip)": {
+  "en": "Export their data (.zip)",
+  "de": "Ihre Daten exportieren (.zip)"
+ },
+ "Marquer la demande comme traitée": {
+  "en": "Mark the request as handled",
+  "de": "Anfrage als bearbeitet markieren"
+ },
+ "L’archive contient tout ce que le site garde sur elle (rencontre, choix, accord ou refus, historique), la signature, les photos de repère et de carte, et les photos liées en JPEG : envoyez-la-lui (en pièce jointe ou par votre messagerie).": {
+  "en": "The archive contains everything the site keeps about them (encounter, choices, consent or refusal, history), the signature, the reference and card photos, and the linked photos as JPEG: send it to them (as an attachment or through your mail app).",
+  "de": "Das Archiv enthält alles, was die Website über die Person speichert (Begegnung, Auswahl, Einwilligung oder Ablehnung, Verlauf), die Unterschrift, die Erkennungs- und Kartenfotos sowie die verknüpften Fotos als JPEG: Senden Sie es ihr (als Anhang oder über Ihr E-Mail-Programm)."
+ },
+ "Les photos liées à cette rencontre <strong>ne peuvent plus être publiées</strong>.": {
+  "en": "The photos linked to this encounter <strong>can no longer be published</strong>.",
+  "de": "Die mit dieser Begegnung verknüpften Fotos <strong>dürfen nicht mehr veröffentlicht werden</strong>."
+ },
+ "Certaines le sont encore :": {
+  "en": "Some still are:",
+  "de": "Einige sind es noch:"
+ },
+ "Aucune n’est publiée.": {
+  "en": "None is published.",
+  "de": "Keines ist veröffentlicht."
+ },
+ "Appliquer le refus : dépublier et retirer de la file Instagram": {
+  "en": "Apply the refusal: unpublish and remove from the Instagram queue",
+  "de": "Ablehnung anwenden: Veröffentlichung zurückziehen und aus der Instagram-Warteschlange entfernen"
+ },
+ "Les posts déjà publiés sur Instagram ne sont pas touchés : supprimez-les dans l’application Instagram.": {
+  "en": "Posts already published on Instagram are not affected: delete them in the Instagram app.",
+  "de": "Bereits auf Instagram veröffentlichte Beiträge bleiben unberührt: Löschen Sie sie in der Instagram-App."
+ },
+ "Photos de la sortie": {
+  "en": "Photos from the outing",
+  "de": "Fotos des Ausflugs"
+ },
+ "photographe": {
+  "en": "photographer",
+  "de": "Fotograf"
+ },
+ "date inconnue": {
+  "en": "unknown date",
+  "de": "Datum unbekannt"
+ },
+ "Ouvrir la sortie →": {
+  "en": "Open the outing →",
+  "de": "Ausflug öffnen →"
+ },
+ "Indiquez le photographe et la date de la rencontre (ou de la sortie, ci-dessous) : l’accord couvrira alors toutes ses photos de ce jour-là.": {
+  "en": "Enter the photographer and the date of the encounter (or of the outing, below): the consent will then cover all their photos from that day.",
+  "de": "Geben Sie den Fotografen und das Datum der Begegnung (oder des Ausflugs, unten) an: Die Einwilligung gilt dann für alle seine Fotos dieses Tages."
+ },
+ "Aucune photo de {author} datée du {day} pour l’instant (date EXIF). Elles seront couvertes dès leur import. Si l’horloge de l’appareil était décalée, corrigez la « date de la sortie ».": {
+  "en": "No photos by {author} dated {day} yet (EXIF date). They will be covered as soon as they are imported. If the camera clock was off, correct the “outing date”.",
+  "de": "Noch keine Fotos von {author} vom {day} (EXIF-Datum). Sie werden ab dem Import abgedeckt. Falls die Kamerauhr falsch ging, korrigieren Sie das „Datum des Ausflugs“."
+ },
+ "L’accord de cette personne couvre": {
+  "en": "This person’s consent covers",
+  "de": "Die Einwilligung dieser Person gilt für"
+ },
+ "Son refus ne bloque que les photos liées (plus bas) : cochez celles où elle apparaît. Photos du jour": {
+  "en": "Their refusal only blocks the linked photos (below): tick those they appear in. Photos of the day:",
+  "de": "Ihre Ablehnung sperrt nur die verknüpften Fotos (weiter unten): Haken Sie die an, auf denen sie zu sehen ist. Fotos des Tages:"
+ },
+ "Pas encore de décision ; quand elle en prendra une, elle couvrira": {
+  "en": "No decision yet; when they make one, it will cover",
+  "de": "Noch keine Entscheidung; sobald sie eine trifft, gilt sie für"
+ },
+ "les {n} photos de {author} prises ce jour-là.": {
+  "en": "the {n} photos by {author} taken that day.",
+  "de": "die {n} Fotos von {author}, die an diesem Tag aufgenommen wurden."
+ },
+ "les {n} photo de {author} prises ce jour-là.": {
+  "en": "the {n} photo by {author} taken that day.",
+  "de": "das {n} Foto von {author}, das an diesem Tag aufgenommen wurde."
+ },
+ "Excluez celles qui ne la concernent pas (une autre sortie le même jour, par exemple).": {
+  "en": "Exclude those that do not concern them (another outing the same day, for example).",
+  "de": "Schließen Sie die aus, die sie nicht betreffen (zum Beispiel ein anderer Ausflug am selben Tag)."
+ },
+ "exclue": {
+  "en": "excluded",
+  "de": "ausgeschlossen"
+ },
+ "couverte": {
+  "en": "covered",
+  "de": "abgedeckt"
+ },
+ "Rétablir": {
+  "en": "Restore",
+  "de": "Wiederherstellen"
+ },
+ "Exclure": {
+  "en": "Exclude",
+  "de": "Ausschließen"
+ },
+ "Photos liées": {
+  "en": "Linked photos",
+  "de": "Verknüpfte Fotos"
+ },
+ "refus, photo offerte, ou photo hors sortie": {
+  "en": "refusal, photo given, or photo outside an outing",
+  "de": "Ablehnung, geschenktes Foto oder Foto außerhalb eines Ausflugs"
+ },
+ "Offrir cette photo": {
+  "en": "Give this photo",
+  "de": "Dieses Foto schenken"
+ },
+ "Retirer": {
+  "en": "Remove",
+  "de": "Entfernen"
+ },
+ "Photos offertes": {
+  "en": "Photos given",
+  "de": "Geschenkte Fotos"
+ },
+ "Un lien privé vers une version JPEG (2048 px, jamais l’original), valable 30 jours. « Envoyer » prépare le message dans votre messagerie, dans la langue de la personne.": {
+  "en": "A private link to a JPEG version (2048 px, never the original), valid for 30 days. “Send” prepares the message in your mail app, in the person’s language.",
+  "de": "Ein privater Link zu einer JPEG-Version (2048 px, nie das Original), 30 Tage gültig. „Senden“ bereitet die Nachricht in Ihrem E-Mail-Programm vor, in der Sprache der Person."
+ },
+ "Photo": {
+  "en": "Photo",
+  "de": "Foto"
+ },
+ "expiré": {
+  "en": "expired",
+  "de": "abgelaufen"
+ },
+ "jusqu’au {until}": {
+  "en": "until {until}",
+  "de": "bis {until}"
+ },
+ "vu {views} fois · téléchargé {downloads} fois": {
+  "en": "viewed {views} times · downloaded {downloads} times",
+  "de": "{views}-mal angesehen · {downloads}-mal heruntergeladen"
+ },
+ "Lien privé": {
+  "en": "Private link",
+  "de": "Privater Link"
+ },
+ "Envoyer": {
+  "en": "Send",
+  "de": "Senden"
+ },
+ "Retirer le lien": {
+  "en": "Remove the link",
+  "de": "Link entfernen"
+ },
+ "Aucune photo liée : choisissez-la ci-dessous.": {
+  "en": "No linked photos: choose them below.",
+  "de": "Keine verknüpften Fotos: Wählen Sie sie unten aus."
+ },
+ "Lier des photos": {
+  "en": "Link photos",
+  "de": "Fotos verknüpfen"
+ },
+ "Chercher": {
+  "en": "Search",
+  "de": "Suchen"
+ },
+ "titre, lieu, adresse…": {
+  "en": "title, place, address…",
+  "de": "Titel, Ort, Adresse…"
+ },
+ "Résultats de la recherche.": {
+  "en": "Search results.",
+  "de": "Suchergebnisse."
+ },
+ "Photos de {author} prises ou importées vers le {day} d’abord.": {
+  "en": "Photos by {author} taken or imported around {day} first.",
+  "de": "Fotos von {author}, zuerst die um den {day} aufgenommenen oder importierten."
+ },
+ "Photos de {author} les plus récentes.": {
+  "en": "Most recent photos by {author}.",
+  "de": "Neueste Fotos von {author}."
+ },
+ "Photos prises ou importées vers le {day} d’abord.": {
+  "en": "Photos taken or imported around {day} first.",
+  "de": "Fotos, zuerst die um den {day} aufgenommenen oder importierten."
+ },
+ "Photos les plus récentes.": {
+  "en": "Most recent photos.",
+  "de": "Neueste Fotos."
+ },
+ "Aucune photo trouvée.": {
+  "en": "No photos found.",
+  "de": "Keine Fotos gefunden."
+ },
+ "Lier les photos cochées": {
+  "en": "Link the ticked photos",
+  "de": "Angehakte Fotos verknüpfen"
+ },
+ "Carte signée": {
+  "en": "Signed card",
+  "de": "Unterschriebene Karte"
+ },
+ "Photo de la carte signée": {
+  "en": "Photo of the signed card",
+  "de": "Foto der unterschriebenen Karte"
+ },
+ "Effacer les données de cette personne": {
+  "en": "Erase this person’s data",
+  "de": "Daten dieser Person löschen"
+ },
+ "Efface son nom, son adresse, ses messages, sa signature, les photos de repère et de carte, et l’historique.": {
+  "en": "Erases their name, address, messages, signature, reference and card photos, and the history.",
+  "de": "Löscht Namen, Adresse, Nachrichten, Unterschrift, Erkennungs- und Kartenfotos sowie den Verlauf."
+ },
+ "Son refus reste appliqué, sans aucune donnée sur elle, tant que des photos liées sont gardées.": {
+  "en": "Their refusal remains applied, with no data about them, as long as linked photos are kept.",
+  "de": "Ihre Ablehnung bleibt ohne jegliche Daten über sie wirksam, solange verknüpfte Fotos aufbewahrt werden."
+ },
+ "Son accord disparaît aussi : les photos liées ne pourront plus être publiées en s’en prévalant.": {
+  "en": "Their consent disappears too: the linked photos can no longer be published on the strength of it.",
+  "de": "Auch ihre Einwilligung entfällt: Die verknüpften Fotos können nicht mehr auf dieser Grundlage veröffentlicht werden."
+ },
+ "Supprimer aussi les {n} photos où elle apparaît (originaux et images ; effacées des sauvegardes sous 90 jours)": {
+  "en": "Also delete the {n} photos they appear in (originals and images; erased from backups within 90 days)",
+  "de": "Auch die {n} Fotos löschen, auf denen sie zu sehen ist (Originale und Bilder; innerhalb von 90 Tagen aus den Sicherungen gelöscht)"
+ },
+ "Supprimer aussi les {n} photo où elle apparaît (originaux et images ; effacées des sauvegardes sous 90 jours)": {
+  "en": "Also delete the {n} photo they appear in (original and images; erased from backups within 90 days)",
+  "de": "Auch das {n} Foto löschen, auf dem sie zu sehen ist (Original und Bilder; innerhalb von 90 Tagen aus den Sicherungen gelöscht)"
+ },
+ "Effacer définitivement": {
+  "en": "Erase permanently",
+  "de": "Endgültig löschen"
+ },
+ "Référence": {
+  "en": "Reference",
+  "de": "Referenz"
+ },
+ "Photographe": {
+  "en": "Photographer",
+  "de": "Fotograf"
+ },
+ "d’après la référence": {
+  "en": "from the reference",
+  "de": "laut Referenz"
+ },
+ "Nom": {
+  "en": "Name",
+  "de": "Name"
+ },
+ "Date": {
+  "en": "Date",
+  "de": "Datum"
+ },
+ "Lieu": {
+  "en": "Place",
+  "de": "Ort"
+ },
+ "Date de la sortie": {
+  "en": "Outing date",
+  "de": "Datum des Ausflugs"
+ },
+ "facultatif : si l’horloge de l’appareil photo était décalée, la date que portent les photos": {
+  "en": "optional: if the camera clock was off, the date the photos carry",
+  "de": "optional: falls die Kamerauhr falsch ging, das Datum, das die Fotos tragen"
+ },
+ "tenue, scène…": {
+  "en": "outfit, scene…",
+  "de": "Kleidung, Szene…"
+ },
+ "Accord signé sur la carte": {
+  "en": "Consent signed on the card",
+  "de": "Auf der Karte unterschriebene Einwilligung"
+ },
+ "La carte « pour nous » est signée": {
+  "en": "The “for us” card is signed",
+  "de": "Die Karte „für uns“ ist unterschrieben"
+ },
+ "(avec le site)": {
+  "en": "(with the site)",
+  "de": "(mit der Website)"
+ },
+ "Photo de la personne": {
+  "en": "Photo of the person",
+  "de": "Foto der Person"
+ },
+ "visage, pour mettre un nom sur un visage · gardée en privé, avec son accord": {
+  "en": "face, to put a name to a face · kept private, with their consent",
+  "de": "Gesicht, um einem Gesicht einen Namen zuzuordnen · privat aufbewahrt, mit ihrer Einwilligung"
+ },
+ "preuve, gardée en privé · JPEG, PNG ou WebP": {
+  "en": "proof, kept private · JPEG, PNG or WebP",
+  "de": "Nachweis, privat aufbewahrt · JPEG, PNG oder WebP"
+ },
+ "Enregistrer la rencontre": {
+  "en": "Save the encounter",
+  "de": "Begegnung speichern"
+ },
+ "Enregistrer": {
+  "en": "Save",
+  "de": "Speichern"
+ },
+ "tirages": {
+  "en": "prints",
+  "de": "Abzüge"
+ },
+ "prénom": {
+  "en": "first name",
+  "de": "Vorname"
+ },
+ "Une personne peut avoir été rencontrée lors de plusieurs sorties : une rencontre par sortie, chacune avec son accord ; un refus vaut pour toutes.": {
+  "en": "A person may have been met on several outings: one encounter per outing, each with its own consent; a refusal applies to all.",
+  "de": "Eine Person kann bei mehreren Ausflügen getroffen worden sein: eine Begegnung pro Ausflug, jede mit eigener Einwilligung; eine Ablehnung gilt für alle."
+ },
+ "Demandes et rencontres": {
+  "en": "Requests and encounters",
+  "de": "Anfragen und Begegnungen"
+ },
+ "Nom, référence, adresse…": {
+  "en": "Name, reference, address…",
+  "de": "Name, Referenz, Adresse…"
+ },
+ "Rechercher une personne": {
+  "en": "Search for a person",
+  "de": "Eine Person suchen"
+ },
+ "Aucune personne pour cette recherche. Elles apparaissent à chaque rencontre : sur le téléphone (Nouvelle rencontre), par une carte signée saisie, ou par une demande sur /bonjour.": {
+  "en": "No people for this search. They appear with each encounter: on the phone (New encounter), from an entered signed card, or from a request on /bonjour.",
+  "de": "Keine Personen für diese Suche. Sie erscheinen mit jeder Begegnung: am Telefon (Neue Begegnung), über eine erfasste unterschriebene Karte oder über eine Anfrage auf /bonjour."
+ },
+ "Aucune personne. Elles apparaissent à chaque rencontre : sur le téléphone (Nouvelle rencontre), par une carte signée saisie, ou par une demande sur /bonjour.": {
+  "en": "No people yet. They appear with each encounter: on the phone (New encounter), from an entered signed card, or from a request on /bonjour.",
+  "de": "Noch keine Personen. Sie erscheinen mit jeder Begegnung: am Telefon (Neue Begegnung), über eine erfasste unterschriebene Karte oder über eine Anfrage auf /bonjour."
+ },
+ "Sans nom": {
+  "en": "No name",
+  "de": "Ohne Namen"
+ },
+ "sans carte": {
+  "en": "no card",
+  "de": "ohne Karte"
+ },
+ "0 rencontre": {
+  "en": "0 encounters",
+  "de": "0 Begegnungen"
+ },
+ "1 rencontre": {
+  "en": "1 encounter",
+  "de": "1 Begegnung"
+ },
+ "{n} rencontres": {
+  "en": "{n} encounters",
+  "de": "{n} Begegnungen"
+ },
+ "0 photo": {
+  "en": "0 photos",
+  "de": "0 Fotos"
+ },
+ "1 photo": {
+  "en": "1 photo",
+  "de": "1 Foto"
+ },
+ "{n} photos": {
+  "en": "{n} photos",
+  "de": "{n} Fotos"
+ },
+ "dernier accord : {usages}": {
+  "en": "latest consent: {usages}",
+  "de": "letzte Einwilligung: {usages}"
+ },
+ "nouvelle demande": {
+  "en": "new request",
+  "de": "neue Anfrage"
+ },
+ "droits : effacement": {
+  "en": "rights: erasure",
+  "de": "Rechte: Löschung"
+ },
+ "droits : accès": {
+  "en": "rights: access",
+  "de": "Rechte: Auskunft"
+ },
+ "rapprochement proposé": {
+  "en": "possible match",
+  "de": "mögliche Zuordnung"
+ },
+ "Décision de la personne": {
+  "en": "Person’s decision",
+  "de": "Entscheidung der Person"
+ },
+ "un refus vaut pour toutes ses rencontres et toutes ses photos": {
+  "en": "a refusal applies to all their encounters and all their photos",
+  "de": "eine Ablehnung gilt für alle ihre Begegnungen und alle ihre Fotos"
+ },
+ "un accord ne vaut que pour la sortie où il a été donné": {
+  "en": "a consent only applies to the outing where it was given",
+  "de": "eine Einwilligung gilt nur für den Ausflug, bei dem sie erteilt wurde"
+ },
+ "Rapprochement proposé": {
+  "en": "Possible match",
+  "de": "Mögliche Zuordnung"
+ },
+ "même adresse e-mail": {
+  "en": "same email address",
+  "de": "gleiche E-Mail-Adresse"
+ },
+ "C’est la même personne": {
+  "en": "It’s the same person",
+  "de": "Es ist dieselbe Person"
+ },
+ "Ce n’est pas elle": {
+  "en": "It’s not them",
+  "de": "Das ist sie nicht"
+ },
+ "Jamais d’après le visage : seulement une adresse identique, à confirmer.": {
+  "en": "Never based on the face: only an identical address, to be confirmed.",
+  "de": "Nie anhand des Gesichts: nur bei identischer Adresse, zu bestätigen."
+ },
+ "Rencontres": {
+  "en": "Encounters",
+  "de": "Begegnungen"
+ },
+ "une par sortie, chacune avec son accord": {
+  "en": "one per outing, each with its own consent",
+  "de": "eine pro Ausflug, jede mit eigener Einwilligung"
+ },
+ "sortie": {
+  "en": "outing",
+  "de": "Ausflug"
+ },
+ "refus": {
+  "en": "refusal",
+  "de": "Ablehnung"
+ },
+ "en ligne, non vérifié : {usages}": {
+  "en": "online, not verified: {usages}",
+  "de": "online, nicht geprüft: {usages}"
+ },
+ "accord : {usages}": {
+  "en": "consent: {usages}",
+  "de": "Einwilligung: {usages}"
+ },
+ "Nouvelle rencontre sur le téléphone": {
+  "en": "New encounter on the phone",
+  "de": "Neue Begegnung am Telefon"
+ },
+ "Était aussi là lors de la sortie": {
+  "en": "Was also there during the outing",
+  "de": "War auch bei diesem Ausflug dabei"
+ },
+ "à partir de {time}": {
+  "en": "from {time}",
+  "de": "ab {time}"
+ },
+ "Ajouter la rencontre": {
+  "en": "Add the encounter",
+  "de": "Begegnung hinzufügen"
+ },
+ "Rattacher une rencontre existante": {
+  "en": "Attach an existing encounter",
+  "de": "Bestehende Begegnung zuordnen"
+ },
+ "la même personne, saisie à part": {
+  "en": "the same person, entered separately",
+  "de": "dieselbe Person, separat erfasst"
+ },
+ "Référence, nom, adresse…": {
+  "en": "Reference, name, address…",
+  "de": "Referenz, Name, Adresse…"
+ },
+ "Chercher une rencontre": {
+  "en": "Search for an encounter",
+  "de": "Eine Begegnung suchen"
+ },
+ "Rattacher": {
+  "en": "Attach",
+  "de": "Zuordnen"
+ },
+ "Aucune autre rencontre pour cette recherche.": {
+  "en": "No other encounters for this search.",
+  "de": "Keine weiteren Begegnungen für diese Suche."
+ },
+ "Aucune autre rencontre.": {
+  "en": "No other encounters.",
+  "de": "Keine weiteren Begegnungen."
+ },
+ "liées à l’une de ses rencontres": {
+  "en": "linked to one of their encounters",
+  "de": "mit einer ihrer Begegnungen verknüpft"
+ },
+ "Aucune photo liée : les photos de ses sorties la concernent déjà si elles ont un visage ; liez celles où elle figure.": {
+  "en": "No linked photos: photos from their outings already concern them if they show a face; link those they appear in.",
+  "de": "Keine verknüpften Fotos: Die Fotos ihrer Ausflüge betreffen sie bereits, wenn sie ein Gesicht zeigen; verknüpfen Sie die, auf denen sie zu sehen ist."
+ },
+ "Lier des photos où elle figure": {
+  "en": "Link photos they appear in",
+  "de": "Fotos verknüpfen, auf denen sie zu sehen ist"
+ },
+ "rattachées à sa rencontre de la sortie de chaque photo (créée sans décision si besoin)": {
+  "en": "attached to their encounter from each photo’s outing (created with no decision if needed)",
+  "de": "der Begegnung vom Ausflug des jeweiligen Fotos zugeordnet (bei Bedarf ohne Entscheidung angelegt)"
+ },
+ "Titre, lieu…": {
+  "en": "Title, place…",
+  "de": "Titel, Ort…"
+ },
+ "Chercher une photo": {
+  "en": "Search for a photo",
+  "de": "Ein Foto suchen"
+ },
+ "Lier « {title} »": {
+  "en": "Link “{title}”",
+  "de": "„{title}“ verknüpfen"
+ },
+ "RGPD, toutes rencontres confondues": {
+  "en": "GDPR, across all encounters",
+  "de": "DSGVO, über alle Begegnungen hinweg"
+ },
+ "Demande d’effacement en cours (rencontre {ref}) : traitez-la sur la fiche de la rencontre.": {
+  "en": "Erasure request pending (encounter {ref}): handle it on the encounter’s page.",
+  "de": "Löschanfrage offen (Begegnung {ref}): Bearbeiten Sie sie auf der Seite der Begegnung."
+ },
+ "Demande d’accès en cours (rencontre {ref}) : traitez-la sur la fiche de la rencontre.": {
+  "en": "Access request pending (encounter {ref}): handle it on the encounter’s page.",
+  "de": "Auskunftsanfrage offen (Begegnung {ref}): Bearbeiten Sie sie auf der Seite der Begegnung."
+ },
+ "Effacer cette personne": {
+  "en": "Erase this person",
+  "de": "Diese Person löschen"
+ },
+ "Ses {n} rencontres et leurs données (adresse, messages, signature, visage, cartes) seront effacées. Si elle refusait la publication et que des photos liées restent, une trace anonyme garde le refus.": {
+  "en": "Their {n} encounters and the related data (address, messages, signature, face, cards) will be erased. If they refused publication and linked photos remain, an anonymous record keeps the refusal.",
+  "de": "Ihre {n} Begegnungen und die zugehörigen Daten (Adresse, Nachrichten, Unterschrift, Gesicht, Karten) werden gelöscht. Hat sie die Veröffentlichung abgelehnt und bleiben verknüpfte Fotos, bewahrt ein anonymer Eintrag die Ablehnung."
+ },
+ "Supprimer aussi les {n} photos liées": {
+  "en": "Also delete the {n} linked photos",
+  "de": "Auch die {n} verknüpften Fotos löschen"
+ },
+ "Cartes d’accord": {
+  "en": "Consent cards",
+  "de": "Einwilligungskarten"
+ },
+ "Des paires de cartes au format carte de visite (85 × 55 mm) : à gauche la carte <strong>« pour nous »</strong> (l’accord, signé, que vous gardez), à droite la carte <strong>« pour eux »</strong> (le merci, la référence et le QR vers <code>/bonjour</code>). Cinq paires par feuille A4, d’un seul côté : rien à aligner au recto et au verso.": {
+  "en": "Pairs of business-card-sized cards (85 × 55 mm): on the left the <strong>“for us”</strong> card (the signed consent, which you keep), on the right the <strong>“for them”</strong> card (the thank-you, the reference and the QR code to <code>/bonjour</code>). Five pairs per A4 sheet, single-sided: nothing to align front and back.",
+  "de": "Kartenpaare im Visitenkartenformat (85 × 55 mm): links die Karte <strong>„für uns“</strong> (die unterschriebene Einwilligung, die Sie behalten), rechts die Karte <strong>„für sie“</strong> (der Dank, die Referenz und der QR-Code zu <code>/bonjour</code>). Fünf Paare pro A4-Blatt, einseitig: Vorder- und Rückseite müssen nicht ausgerichtet werden."
+ },
+ "{name} (lettre {prefix}, prochaine carte {card})": {
+  "en": "{name} (letter {prefix}, next card {card})",
+  "de": "{name} (Buchstabe {prefix}, nächste Karte {card})"
+ },
+ "Cartes": {
+  "en": "Cards",
+  "de": "Karten"
+ },
+ "<strong>Numérotées</strong> — référence et QR propres à chaque paire, avec le code de contrôle (la demande arrive « carte vérifiée ») ; à imprimer chez vous ou en boutique": {
+  "en": "<strong>Numbered</strong> — a reference and QR code unique to each pair, with the check code (the request arrives as “card verified”); to print at home or in a print shop",
+  "de": "<strong>Nummeriert</strong> — Referenz und QR-Code für jedes Paar, mit Prüfcode (die Anfrage kommt als „Karte geprüft“ an); zu Hause oder im Copyshop zu drucken"
+ },
+ "<strong>Génériques</strong> — sans numéro, QR vers <code>/bonjour</code> : le modèle à confier à un imprimeur ; numérotez ensuite les deux cartes de chaque paire au tampon numéroteur": {
+  "en": "<strong>Generic</strong> — no number, QR code to <code>/bonjour</code>: the template to give to a printer; then number both cards of each pair with a numbering stamp",
+  "de": "<strong>Generisch</strong> — ohne Nummer, QR-Code zu <code>/bonjour</code>: die Vorlage für eine Druckerei; nummerieren Sie danach beide Karten jedes Paares mit einem Nummerierstempel"
+ },
+ "Premier numéro": {
+  "en": "First number",
+  "de": "Erste Nummer"
+ },
+ "cartes numérotées": {
+  "en": "numbered cards",
+  "de": "nummerierte Karten"
+ },
+ "Nombre de paires": {
+  "en": "Number of pairs",
+  "de": "Anzahl der Paare"
+ },
+ "{n} par feuille": {
+  "en": "{n} per sheet",
+  "de": "{n} pro Blatt"
+ },
+ "Les numéros imprimés sont retenus : la planche suivante commence après. Imprimez à <strong>100 %</strong> (« taille réelle », sans « ajuster à la page »), de préférence sur du papier épais (250 à 350 g/m²), puis découpez le long des traits.": {
+  "en": "Printed numbers are remembered: the next sheet starts after them. Print at <strong>100%</strong> (“actual size”, without “fit to page”), preferably on thick paper (250 to 350 g/m²), then cut along the lines.",
+  "de": "Gedruckte Nummern werden gespeichert: Der nächste Bogen beginnt danach. Drucken Sie mit <strong>100 %</strong> („tatsächliche Größe“, ohne „an Seite anpassen“), am besten auf dickem Papier (250 bis 350 g/m²), und schneiden Sie dann entlang der Linien."
+ },
+ "Préparer la planche": {
+  "en": "Prepare the sheet",
+  "de": "Bogen vorbereiten"
+ },
+ "Ce qui part dans la rue avec vous : l’app sur le téléphone, les cartes d’accord à faire signer, et le QR à porter sur vos vêtements.": {
+  "en": "What goes out into the street with you: the app on your phone, the consent cards to have signed, and the QR code to wear on your clothes.",
+  "de": "Was mit Ihnen auf die Straße geht: die App auf dem Telefon, die Einwilligungskarten zum Unterschreiben und der QR-Code auf Ihrer Kleidung."
+ },
+ "Ajoutez d’abord un photographe dans <a class=\"more\" href=\"/admin/auteurs\">Photographes</a>.": {
+  "en": "First add a photographer in <a class=\"more\" href=\"/admin/auteurs\">Photographers</a>.",
+  "de": "Fügen Sie zuerst einen Fotografen unter <a class=\"more\" href=\"/admin/auteurs\">Fotografen</a> hinzu."
+ },
+ "L’app Rencontre": {
+  "en": "The Encounter app",
+  "de": "Die Begegnungs-App"
+ },
+ "Sur l’iPhone : nouvelle rencontre, accord signé au doigt, visage, position arrondie. Prochaine carte de {name} :": {
+  "en": "On the iPhone: new encounter, consent signed with a finger, face, rounded position. Next card for {name}:",
+  "de": "Auf dem iPhone: neue Begegnung, mit dem Finger unterschriebene Einwilligung, Gesicht, gerundete Position. Nächste Karte von {name}:"
+ },
+ "À installer une fois : dans Safari, ouvrez": {
+  "en": "To install once: in Safari, open",
+  "de": "Einmalig zu installieren: Öffnen Sie in Safari"
+ },
+ ", puis Partager → Sur l’écran d’accueil.": {
+  "en": ", then Share → Add to Home Screen.",
+  "de": " und dann Teilen → Zum Home-Bildschirm."
+ },
+ "Paires « à signer » (pour vous) et « à remettre » (pour la personne, avec son QR), numérotées ou génériques pour un imprimeur.": {
+  "en": "Pairs “to sign” (for you) and “to hand over” (for the person, with their QR code), numbered or generic for a printer.",
+  "de": "Paare „zum Unterschreiben“ (für Sie) und „zum Übergeben“ (für die Person, mit ihrem QR-Code), nummeriert oder generisch für eine Druckerei."
+ },
+ "{n} cartes numérotées imprimées pas encore utilisées.": {
+  "en": "{n} printed numbered cards not used yet.",
+  "de": "{n} gedruckte nummerierte Karten noch nicht verwendet."
+ },
+ "{n} carte numérotée imprimée pas encore utilisée.": {
+  "en": "{n} printed numbered card not used yet.",
+  "de": "{n} gedruckte nummerierte Karte noch nicht verwendet."
+ },
+ "Aucune carte numérotée en réserve.": {
+  "en": "No numbered cards in stock.",
+  "de": "Keine nummerierten Karten vorrätig."
+ },
+ "Préparer une planche": {
+  "en": "Prepare a sheet",
+  "de": "Einen Bogen vorbereiten"
+ },
+ "QR des vêtements": {
+  "en": "QR code for clothing",
+  "de": "QR-Code für Kleidung"
+ },
+ "QR de {name} avec le logo, vers {url}": {
+  "en": "QR code of {name} with the logo, to {url}",
+  "de": "QR-Code von {name} mit Logo, zu {url}"
+ },
+ "dos de tee-shirt ou sac, 12 × 19,8 cm": {
+  "en": "back of a T-shirt or bag, 12 × 19.8 cm",
+  "de": "Rücken eines T-Shirts oder einer Tasche, 12 × 19,8 cm"
+ },
+ "À montrer tel quel : la personne le scanne et arrive sur la page de {name}, sans numéro de carte. QR de 8 à 10 cm au moins, marge blanche gardée.": {
+  "en": "Show it as it is: the person scans it and lands on {name}’s page, without a card number. QR code at least 8 to 10 cm, keep the white margin.",
+  "de": "So zeigen, wie es ist: Die Person scannt ihn und gelangt auf die Seite von {name}, ohne Kartennummer. QR-Code mindestens 8 bis 10 cm groß, weißen Rand beibehalten."
+ },
+ "SVG pour l’imprimeur": {
+  "en": "SVG for the printer",
+  "de": "SVG für die Druckerei"
+ },
+ "Encre blanche (textile foncé)": {
+  "en": "White ink (dark fabric)",
+  "de": "Weiße Farbe (dunkler Stoff)"
+ },
+ "Avant de partir": {
+  "en": "Before you go",
+  "de": "Vor dem Aufbruch"
+ },
+ "Votre connexion reste valable jusqu’à {until} : reconnectez-vous avant une longue sortie.": {
+  "en": "Your sign-in remains valid until {until}: sign in again before a long outing.",
+  "de": "Ihre Anmeldung bleibt gültig bis {until}: Melden Sie sich vor einem langen Ausflug neu an."
+ },
+ "Connexion : durée inconnue, reconnectez-vous en début de sortie.": {
+  "en": "Sign-in: unknown duration, sign in again at the start of the outing.",
+  "de": "Anmeldung: Dauer unbekannt, melden Sie sich zu Beginn des Ausflugs neu an."
+ },
+ "{n} cartes numérotées en réserve.": {
+  "en": "{n} numbered cards in stock.",
+  "de": "{n} nummerierte Karten vorrätig."
+ },
+ "{n} carte numérotée en réserve.": {
+  "en": "{n} numbered card in stock.",
+  "de": "{n} nummerierte Karte vorrätig."
+ },
+ "Plus de cartes numérotées : imprimez une planche, ou utilisez l’app.": {
+  "en": "No numbered cards left: print a sheet, or use the app.",
+  "de": "Keine nummerierten Karten mehr: Drucken Sie einen Bogen oder nutzen Sie die App."
+ },
+ "Récapitulatif envoyé automatiquement par e-mail après une rencontre.": {
+  "en": "Summary sent automatically by email after an encounter.",
+  "de": "Zusammenfassung wird nach einer Begegnung automatisch per E-Mail gesendet."
+ },
+ "Récapitulatif par e-mail : préparé dans l’app Mail (envoi automatique non configuré).": {
+  "en": "Email summary: prepared in the Mail app (automatic sending not configured).",
+  "de": "Zusammenfassung per E-Mail: in der Mail-App vorbereitet (automatischer Versand nicht eingerichtet)."
+ },
+ "Une sortie, c’est une journée de prise de vue d’un photographe : ses photos de ce jour-là (date de l’appareil) et les personnes rencontrées. Elles se créent toutes seules, à l’import des photos ou à la première rencontre du jour ; une sortie se coupe en deux (matin, soir) depuis sa fiche.": {
+  "en": "An outing is a photographer’s day of shooting: their photos from that day (camera date) and the people met. Outings are created automatically, when photos are imported or at the first encounter of the day; an outing can be split in two (morning, evening) from its page.",
+  "de": "Ein Ausflug ist ein Aufnahmetag eines Fotografen: seine Fotos dieses Tages (Kameradatum) und die getroffenen Personen. Ausflüge entstehen von selbst, beim Import der Fotos oder bei der ersten Begegnung des Tages; ein Ausflug lässt sich auf seiner Seite in zwei teilen (Morgen, Abend)."
+ },
+ "Les deux": {
+  "en": "Both",
+  "de": "Beide"
+ },
+ "Aucune sortie dans cet état : importez des photos datées par l’appareil, ou enregistrez une rencontre.": {
+  "en": "No outings in this state: import photos dated by the camera, or record an encounter.",
+  "de": "Keine Ausflüge in diesem Status: Importieren Sie von der Kamera datierte Fotos oder erfassen Sie eine Begegnung."
+ },
+ "Aucune sortie : importez des photos datées par l’appareil, ou enregistrez une rencontre.": {
+  "en": "No outings: import photos dated by the camera, or record an encounter.",
+  "de": "Keine Ausflüge: Importieren Sie von der Kamera datierte Fotos oder erfassen Sie eine Begegnung."
+ },
+ "{n} publiées": {
+  "en": "{n} published",
+  "de": "{n} veröffentlicht"
+ },
+ "{n} publiée": {
+  "en": "{n} published",
+  "de": "{n} veröffentlicht"
+ },
+ "personne": {
+  "en": "nobody",
+  "de": "niemand"
+ },
+ "{n} accords": {
+  "en": "{n} consents",
+  "de": "{n} Einwilligungen"
+ },
+ "{n} accord": {
+  "en": "{n} consent",
+  "de": "{n} Einwilligung"
+ },
+ "{n} refus": {
+  "en": "{n} refusal(s)",
+  "de": "{n} Ablehnung(en)"
+ },
+ "{n} sans décision": {
+  "en": "{n} undecided",
+  "de": "{n} ohne Entscheidung"
+ },
+ "prête": {
+  "en": "ready",
+  "de": "bereit"
+ },
+ "à vérifier": {
+  "en": "to check",
+  "de": "zu prüfen"
+ },
+ "bloquée": {
+  "en": "blocked",
+  "de": "gesperrt"
+ },
+ "0 personne": {
+  "en": "0 people",
+  "de": "0 Personen"
+ },
+ "1 personne": {
+  "en": "1 person",
+  "de": "1 Person"
+ },
+ "{n} personnes": {
+  "en": "{n} people",
+  "de": "{n} Personen"
+ },
+ "Publier les photos prêtes · {n}": {
+  "en": "Publish the ready photos · {n}",
+  "de": "Bereite Fotos veröffentlichen · {n}"
+ },
+ "Parties de la journée": {
+  "en": "Parts of the day",
+  "de": "Teile des Tages"
+ },
+ "Début de journée": {
+  "en": "Start of the day",
+  "de": "Tagesbeginn"
+ },
+ "À partir de {time}": {
+  "en": "From {time}",
+  "de": "Ab {time}"
+ },
+ "prises ce jour-là, {range} (heure de l’appareil)": {
+  "en": "taken that day, {range} (camera time)",
+  "de": "an diesem Tag aufgenommen, {range} (Kamerazeit)"
+ },
+ "prises ce jour-là (heure de l’appareil)": {
+  "en": "taken that day (camera time)",
+  "de": "an diesem Tag aufgenommen (Kamerazeit)"
+ },
+ "Aucune photo de {name} datée de ce jour à ces heures pour l’instant : elles apparaîtront dès leur import.": {
+  "en": "No photos by {name} dated that day at these times yet: they will appear as soon as they are imported.",
+  "de": "Noch keine Fotos von {name} von diesem Tag zu diesen Uhrzeiten: Sie erscheinen, sobald sie importiert sind."
+ },
+ "Aucune photo de {name} datée de ce jour pour l’instant : elles apparaîtront dès leur import.": {
+  "en": "No photos by {name} dated that day yet: they will appear as soon as they are imported.",
+  "de": "Noch keine Fotos von {name} von diesem Tag: Sie erscheinen, sobald sie importiert sind."
+ },
+ "Choisir « {title} »": {
+  "en": "Select “{title}”",
+  "de": "„{title}“ auswählen"
+ },
+ "heure inconnue": {
+  "en": "unknown time",
+  "de": "Uhrzeit unbekannt"
+ },
+ "visage ?": {
+  "en": "face?",
+  "de": "Gesicht?"
+ },
+ "{n} visages": {
+  "en": "{n} faces",
+  "de": "{n} Gesichter"
+ },
+ "{n} visage": {
+  "en": "{n} face",
+  "de": "{n} Gesicht"
+ },
+ "sans visage": {
+  "en": "no face",
+  "de": "kein Gesicht"
+ },
+ "rencontre": {
+  "en": "encounter",
+  "de": "Begegnung"
+ },
+ "personne de la sortie": {
+  "en": "nobody from the outing",
+  "de": "niemand vom Ausflug"
+ },
+ "Personne": {
+  "en": "Person",
+  "de": "Person"
+ },
+ "Lier à cette personne": {
+  "en": "Link to this person",
+  "de": "Mit dieser Person verknüpfen"
+ },
+ "Personne de la sortie n’y figure": {
+  "en": "Nobody from the outing is in it",
+  "de": "Niemand vom Ausflug ist darauf"
+ },
+ "Les accords de la sortie couvrent toutes ses photos. Liez une photo à la personne qui y figure ; si personne de la liste n’y figure (un paysage, une autre scène), indiquez-le : ses accords et refus ne la concernent plus.": {
+  "en": "The outing’s consents cover all its photos. Link a photo to the person who appears in it; if nobody on the list appears in it (a landscape, another scene), say so: their consents and refusals no longer concern it.",
+  "de": "Die Einwilligungen des Ausflugs gelten für alle seine Fotos. Verknüpfen Sie ein Foto mit der Person, die darauf zu sehen ist; ist niemand aus der Liste darauf (eine Landschaft, eine andere Szene), geben Sie es an: Ihre Einwilligungen und Ablehnungen betreffen es dann nicht mehr."
+ },
+ "Personnes rencontrées": {
+  "en": "People met",
+  "de": "Getroffene Personen"
+ },
+ "Personne n’a été rencontré pendant cette sortie.": {
+  "en": "Nobody was met during this outing.",
+  "de": "Bei diesem Ausflug wurde niemand getroffen."
+ },
+ "La sortie": {
+  "en": "The outing",
+  "de": "Der Ausflug"
+ },
+ "choisi": {
+  "en": "chosen",
+  "de": "gewählt"
+ },
+ "proposé d’après les rencontres et les photos": {
+  "en": "suggested from the encounters and photos",
+  "de": "aus den Begegnungen und Fotos vorgeschlagen"
+ },
+ "Enregistrer le lieu": {
+  "en": "Save the place",
+  "de": "Ort speichern"
+ },
+ "Couper la sortie à": {
+  "en": "Split the outing at",
+  "de": "Ausflug teilen um"
+ },
+ "les photos et rencontres d’après forment une autre sortie": {
+  "en": "later photos and encounters form another outing",
+  "de": "spätere Fotos und Begegnungen bilden einen weiteren Ausflug"
+ },
+ "Couper": {
+  "en": "Split",
+  "de": "Teilen"
+ },
+ "Réunir avec la sortie précédente": {
+  "en": "Merge with the previous outing",
+  "de": "Mit dem vorherigen Ausflug zusammenführen"
+ },
+ "Une photo ou une rencontre sans heure connue compte dans toutes les parties de la journée.": {
+  "en": "A photo or encounter with no known time counts in every part of the day.",
+  "de": "Ein Foto oder eine Begegnung ohne bekannte Uhrzeit zählt in allen Teilen des Tages."
+ },
+ "Sa rencontre et ses données (adresse, messages, signature, visage, cartes) seront effacées. Si elle refusait la publication et que des photos liées restent, une trace anonyme garde le refus.": {
+  "en": "Their encounter and the related data (address, messages, signature, face, cards) will be erased. If they refused publication and linked photos remain, an anonymous record keeps the refusal.",
+  "de": "Ihre Begegnung und die zugehörigen Daten (Adresse, Nachrichten, Unterschrift, Gesicht, Karten) werden gelöscht. Hat sie die Veröffentlichung abgelehnt und bleiben verknüpfte Fotos, bewahrt ein anonymer Eintrag die Ablehnung."
+ },
+ "Supprimer aussi la photo liée": {
+  "en": "Also delete the linked photo",
+  "de": "Auch das verknüpfte Foto löschen"
+ }
+}

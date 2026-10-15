@@ -1,43 +1,44 @@
 <%/* Import : choisir et vérifier (1), envoi et traitement (2). Sans JavaScript : formulaire classique. */%>
+<% const t = it.t || (s => s); %>
 <section class="importer" id="import" aria-labelledby="import-title" data-importer data-max-bytes="<%= it.maxFileBytes %>"<%~ it.importer ? '' : ' hidden' %>>
   <div class="toolbar">
     <div>
-      <h2 id="import-title">Importer des photos</h2>
-      <p class="sub" data-import-sub>Les photos partent dès que vous les choisissez et arrivent en brouillon : rien n’est publié sans vous. Les fichiers invalides sont écartés avant l’envoi.</p>
+      <h2 id="import-title"><%= t('Importer des photos') %></h2>
+      <p class="sub" data-import-sub><%= t('Les photos partent dès que vous les choisissez et arrivent en brouillon : rien n’est publié sans vous. Les fichiers invalides sont écartés avant l’envoi.') %></p>
     </div>
-    <div class="acts"><a class="btn ghost" href="/admin/photos" data-import-close>Fermer</a></div>
+    <div class="acts"><a class="btn ghost" href="/admin/photos" data-import-close><%= t('Fermer') %></a></div>
   </div>
-  <ol class="steps" aria-label="Étapes de l’import">
-    <li data-step="1" aria-current="step"><span class="n">1.</span> Choisir et vérifier</li>
-    <li data-step="2"><span class="n">2.</span> Envoi et traitement</li>
-    <li data-step="3"><span class="n">3.</span> Compléter et publier</li>
+  <ol class="steps" aria-label="<%= t('Étapes de l’import') %>">
+    <li data-step="1" aria-current="step"><span class="n">1.</span> <%= t('Choisir et vérifier') %></li>
+    <li data-step="2"><span class="n">2.</span> <%= t('Envoi et traitement') %></li>
+    <li data-step="3"><span class="n">3.</span> <%= t('Compléter et publier') %></li>
   </ol>
   <form method="post" action="/admin/photos/import" enctype="multipart/form-data" data-import>
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
     <div class="defaults" data-defaults>
-      <label class="inline">Photographe
+      <label class="inline"><%= t('Photographe') %>
         <select name="author_id"><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === it.defaultAuthor ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
       </label>
-      <label class="inline">Série
+      <label class="inline"><%= t('Série') %>
         <select name="category_id"><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === it.defaultCategory ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
       </label>
-      <span class="hint">Pour tout le lot ; modifiables photo par photo à l’étape 3.</span>
+      <span class="hint"><%= t('Pour tout le lot ; modifiables photo par photo à l’étape 3.') %></span>
     </div>
     <label class="drop" data-drop>
       <span class="drop-icon" aria-hidden="true">⇪</span>
-      <span class="drop-text"><strong data-drop-title>Glissez vos photos ici</strong>
-        <span>ou <u>choisissez des fichiers</u> · JPEG, PNG, WebP, TIFF, HEIF · <%= it.maxFileBytes / 1024 / 1024 %> Mo et 120 mégapixels au plus</span></span>
+      <span class="drop-text"><strong data-drop-title><%= t('Glissez vos photos ici') %></strong>
+        <span><%~ t('ou {choose} · JPEG, PNG, WebP, TIFF, HEIF · {mb} Mo et 120 mégapixels au plus', { choose: `<u>${__eta.e(t('choisissez des fichiers'))}</u>`, mb: __eta.e(it.maxFileBytes / 1024 / 1024) }) %></span></span>
       <input type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/tiff,image/heif,image/avif" multiple required>
     </label>
     <div class="sumbar" data-summary hidden>
       <div class="sum-text"><strong data-sum-title></strong> <span data-sum-detail></span>
         <div class="bar" aria-hidden="true"><i data-sum-bar></i></div></div>
-      <a class="btn" href="#" data-sum-next hidden>Compléter et publier →</a>
+      <a class="btn" href="#" data-sum-next hidden><%= t('Compléter et publier') %> →</a>
     </div>
-    <ul class="files" data-files aria-label="Photos choisies" hidden></ul>
+    <ul class="files" data-files aria-label="<%= t('Photos choisies') %>" hidden></ul>
     <p class="actions">
-      <button class="btn" type="submit" data-send data-nojs>Importer</button>
-      <button class="btn ghost" type="button" data-cancel hidden>Annuler le reste</button>
+      <button class="btn" type="submit" data-send data-nojs><%= t('Importer') %></button>
+      <button class="btn ghost" type="button" data-cancel hidden><%= t('Annuler le reste') %></button>
       <span class="hint" data-import-note role="status"></span>
     </p>
   </form>

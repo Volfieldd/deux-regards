@@ -1,0 +1,1234 @@
+{
+ "il y a {n} min": {
+  "en": "{n} min ago",
+  "de": "vor {n} Min."
+ },
+ "il y a {n} h": {
+  "en": "{n} h ago",
+  "de": "vor {n} Std."
+ },
+ "hier": {
+  "en": "yesterday",
+  "de": "gestern"
+ },
+ "il y a {n} j": {
+  "en": "{n} days ago",
+  "de": "vor {n} Tagen"
+ },
+ "{weekday} {day} {month}": {
+  "en": "{weekday} {day} {month}",
+  "de": "{weekday}, {day}. {month}"
+ },
+ "Bonsoir": {
+  "en": "Good evening",
+  "de": "Guten Abend"
+ },
+ "Bonjour": {
+  "en": "Hello",
+  "de": "Guten Tag"
+ },
+ "À faire": {
+  "en": "To do",
+  "de": "Zu erledigen"
+ },
+ "{n} choses, les plus urgentes d’abord": {
+  "en": "{n} items, most urgent first",
+  "de": "{n} Punkte, die dringendsten zuerst"
+ },
+ "1 chose, les plus urgentes d’abord": {
+  "en": "1 item, most urgent first",
+  "de": "1 Punkt, die dringendsten zuerst"
+ },
+ "rien pour l’instant": {
+  "en": "nothing for now",
+  "de": "derzeit nichts"
+ },
+ "Rien ne demande votre attention : ni demande à traiter, ni refus en attente, ni photo à finir.": {
+  "en": "Nothing needs your attention: no request to handle, no pending refusal, no photo to finish.",
+  "de": "Nichts erfordert Ihre Aufmerksamkeit: keine offene Anfrage, keine ausstehende Ablehnung, kein Foto zu vervollständigen."
+ },
+ "Urgent": {
+  "en": "Urgent",
+  "de": "Dringend"
+ },
+ "Bientôt": {
+  "en": "Soon",
+  "de": "Bald"
+ },
+ "Quand vous avez le temps": {
+  "en": "When you have time",
+  "de": "Wenn Sie Zeit haben"
+ },
+ "{level} :": {
+  "en": "{level}:",
+  "de": "{level}:"
+ },
+ "urgent": {
+  "en": "urgent",
+  "de": "dringend"
+ },
+ "bientôt": {
+  "en": "soon",
+  "de": "bald"
+ },
+ "quand vous avez le temps": {
+  "en": "when you have time",
+  "de": "wenn Sie Zeit haben"
+ },
+ "À finir": {
+  "en": "To finish",
+  "de": "Zu vervollständigen"
+ },
+ "rien": {
+  "en": "nothing",
+  "de": "nichts"
+ },
+ "Tout finir en un écran →": {
+  "en": "Finish everything on one screen →",
+  "de": "Alles auf einer Seite vervollständigen →"
+ },
+ "Tout est publié et titré. Belle journée.": {
+  "en": "Everything is published and titled. Have a nice day.",
+  "de": "Alles ist veröffentlicht und betitelt. Einen schönen Tag noch."
+ },
+ "titre provisoire": {
+  "en": "provisional title",
+  "de": "vorläufiger Titel"
+ },
+ "brouillon, prêt à publier": {
+  "en": "draft, ready to publish",
+  "de": "Entwurf, bereit zur Veröffentlichung"
+ },
+ "sans lieu": {
+  "en": "no place",
+  "de": "ohne Ort"
+ },
+ "Titrer": {
+  "en": "Add title",
+  "de": "Betiteln"
+ },
+ "Le site, en ce moment": {
+  "en": "The site right now",
+  "de": "Die Website im Moment"
+ },
+ "Ouverture : {photos}, dans l’ordre choisi": {
+  "en": "Opening slideshow: {photos}, in the chosen order",
+  "de": "Start-Diashow: {photos}, in der gewählten Reihenfolge"
+ },
+ "Ouverture : {photos} (les premières de la galerie)": {
+  "en": "Opening slideshow: {photos} (the first in the gallery)",
+  "de": "Start-Diashow: {photos} (die ersten der Galerie)"
+ },
+ "thème {theme}": {
+  "en": "theme {theme}",
+  "de": "Thema {theme}"
+ },
+ "modifier": {
+  "en": "edit",
+  "de": "ändern"
+ },
+ "Chiffres": {
+  "en": "Figures",
+  "de": "Zahlen"
+ },
+ "visiteurs aujourd’hui": {
+  "en": "visitors today",
+  "de": "Besucher heute"
+ },
+ "visiteur aujourd’hui": {
+  "en": "visitor today",
+  "de": "Besucher heute"
+ },
+ "photos publiées": {
+  "en": "published photos",
+  "de": "veröffentlichte Fotos"
+ },
+ "brouillons": {
+  "en": "drafts",
+  "de": "Entwürfe"
+ },
+ "séries": {
+  "en": "series",
+  "de": "Serien"
+ },
+ "photographes": {
+  "en": "photographers",
+  "de": "Fotografen"
+ },
+ "photographe": {
+  "en": "photographer",
+  "de": "Fotograf"
+ },
+ "La photo du moment": {
+  "en": "Photo of the moment",
+  "de": "Foto des Moments"
+ },
+ "{n} ouvertures en 30 jours": {
+  "en": "{n} views in 30 days",
+  "de": "{n} Aufrufe in 30 Tagen"
+ },
+ "{n} ouverture en 30 jours": {
+  "en": "{n} view in 30 days",
+  "de": "{n} Aufruf in 30 Tagen"
+ },
+ "Rythme": {
+  "en": "Pace",
+  "de": "Rhythmus"
+ },
+ "photos importées par mois": {
+  "en": "photos imported per month",
+  "de": "importierte Fotos pro Monat"
+ },
+ "{month} : {n}": {
+  "en": "{month}: {n}",
+  "de": "{month}: {n}"
+ },
+ "Dernières modifications": {
+  "en": "Recent changes",
+  "de": "Letzte Änderungen"
+ },
+ "publiée": {
+  "en": "published",
+  "de": "veröffentlicht"
+ },
+ "brouillon": {
+  "en": "draft",
+  "de": "Entwurf"
+ },
+ "Preuves d’antériorité": {
+  "en": "Proofs of prior existence",
+  "de": "Prioritätsnachweise"
+ },
+ "Horodatage désactivé sur ce serveur ({code}) : seules les empreintes des originaux sont calculées.": {
+  "en": "Timestamping is disabled on this server ({code}): only the fingerprints of the originals are computed.",
+  "de": "Zeitstempel sind auf diesem Server deaktiviert ({code}): Es werden nur die Prüfsummen der Originale berechnet."
+ },
+ "{ok} photo(s) sur {total} horodatée(s), {errors} en attente après une erreur.": {
+  "en": "{ok} of {total} photo(s) timestamped, {errors} pending after an error.",
+  "de": "{ok} von {total} Foto(s) mit Zeitstempel, {errors} nach einem Fehler ausstehend."
+ },
+ "{ok} photo(s) sur {total} horodatée(s).": {
+  "en": "{ok} of {total} photo(s) timestamped.",
+  "de": "{ok} von {total} Foto(s) mit Zeitstempel."
+ },
+ "Autorité : {name}": {
+  "en": "Authority: {name}",
+  "de": "Stelle: {name}"
+ },
+ "Réessayer maintenant": {
+  "en": "Retry now",
+  "de": "Jetzt erneut versuchen"
+ },
+ "Votre compte": {
+  "en": "Your account",
+  "de": "Ihr Konto"
+ },
+ "Connecté en tant que {name}.": {
+  "en": "Signed in as {name}.",
+  "de": "Angemeldet als {name}."
+ },
+ "Ce compte est lié au photographe {name} : vos imports lui sont attribués par défaut.": {
+  "en": "This account is linked to the photographer {name}: your imports are credited to them by default.",
+  "de": "Dieses Konto ist mit dem Fotografen {name} verknüpft: Ihre Importe werden ihm standardmäßig zugeordnet."
+ },
+ "Ce compte n’est lié à aucun photographe. Pour qu’il le soit, copiez son identifiant dans la fiche du photographe :": {
+  "en": "This account is not linked to any photographer. To link it, copy its identifier into the photographer’s record:",
+  "de": "Dieses Konto ist mit keinem Fotografen verknüpft. Kopieren Sie dazu seine Kennung in das Profil des Fotografen:"
+ },
+ "sur {n}": {
+  "en": "of {n}",
+  "de": "von {n}"
+ },
+ "Statut": {
+  "en": "Status",
+  "de": "Status"
+ },
+ "Tout": {
+  "en": "All",
+  "de": "Alle"
+ },
+ "Publiées": {
+  "en": "Published",
+  "de": "Veröffentlicht"
+ },
+ "Brouillons": {
+  "en": "Drafts",
+  "de": "Entwürfe"
+ },
+ "À vérifier": {
+  "en": "To check",
+  "de": "Zu prüfen"
+ },
+ "Bloquées": {
+  "en": "Blocked",
+  "de": "Gesperrt"
+ },
+ "Retirer ce filtre": {
+  "en": "Remove this filter",
+  "de": "Diesen Filter entfernen"
+ },
+ "Titre, lieu, légende…": {
+  "en": "Title, place, caption…",
+  "de": "Titel, Ort, Bildunterschrift…"
+ },
+ "Tous les photographes": {
+  "en": "All photographers",
+  "de": "Alle Fotografen"
+ },
+ "Série": {
+  "en": "Series",
+  "de": "Serie"
+ },
+ "Toutes les séries": {
+  "en": "All series",
+  "de": "Alle Serien"
+ },
+ "Filtrer": {
+  "en": "Filter",
+  "de": "Filtern"
+ },
+ "Effacer": {
+  "en": "Clear",
+  "de": "Zurücksetzen"
+ },
+ "Taille": {
+  "en": "Size",
+  "de": "Größe"
+ },
+ "Taille des vignettes": {
+  "en": "Thumbnail size",
+  "de": "Größe der Vorschaubilder"
+ },
+ "Affichage": {
+  "en": "View",
+  "de": "Ansicht"
+ },
+ "Planche": {
+  "en": "Contact sheet",
+  "de": "Kontaktbogen"
+ },
+ "Liste": {
+  "en": "List",
+  "de": "Liste"
+ },
+ "Tout sélectionner": {
+  "en": "Select all",
+  "de": "Alle auswählen"
+ },
+ "Clic : voir · Maj ou ⌘ + clic : plusieurs · L : loupe · ⌘K : rechercher, agir": {
+  "en": "Click: view · Shift or ⌘ + click: several · L: loupe · ⌘K: search, act",
+  "de": "Klick: ansehen · Umschalt oder ⌘ + Klick: mehrere · L: Lupe · ⌘K: suchen, handeln"
+ },
+ "glisser : ordre, ou vers une série": {
+  "en": "drag: order, or onto a series",
+  "de": "ziehen: Reihenfolge, oder auf eine Serie"
+ },
+ "Cochez des photos, puis agissez dans le panneau de droite.": {
+  "en": "Tick photos, then act in the right-hand panel.",
+  "de": "Fotos ankreuzen, dann im rechten Bereich handeln."
+ },
+ "Sélectionner « {title} »": {
+  "en": "Select “{title}”",
+  "de": "„{title}“ auswählen"
+ },
+ "Traitement…": {
+  "en": "Processing…",
+  "de": "Verarbeitung…"
+ },
+ "Brouillon": {
+  "en": "Draft",
+  "de": "Entwurf"
+ },
+ "Titre provisoire": {
+  "en": "Provisional title",
+  "de": "Vorläufiger Titel"
+ },
+ "Bloquée": {
+  "en": "Blocked",
+  "de": "Gesperrt"
+ },
+ "Titre provisoire (nom du fichier)": {
+  "en": "Provisional title (file name)",
+  "de": "Vorläufiger Titel (Dateiname)"
+ },
+ "Actions pour « {title} »": {
+  "en": "Actions for “{title}”",
+  "de": "Aktionen für „{title}“"
+ },
+ "Modifier la fiche": {
+  "en": "Edit details",
+  "de": "Details bearbeiten"
+ },
+ "Dépublier": {
+  "en": "Unpublish",
+  "de": "Veröffentlichung zurückziehen"
+ },
+ "Monter d’une place": {
+  "en": "Move up one place",
+  "de": "Eine Position nach oben"
+ },
+ "Descendre d’une place": {
+  "en": "Move down one place",
+  "de": "Eine Position nach unten"
+ },
+ "Aucune photo pour ces filtres.": {
+  "en": "No photos for these filters.",
+  "de": "Keine Fotos für diese Filter."
+ },
+ "Aucune photo.": {
+  "en": "No photos.",
+  "de": "Keine Fotos."
+ },
+ "Inspecteur": {
+  "en": "Inspector",
+  "de": "Inspektor"
+ },
+ "Sélection": {
+  "en": "Selection",
+  "de": "Auswahl"
+ },
+ "Pour les photos cochées :": {
+  "en": "For the ticked photos:",
+  "de": "Für die angekreuzten Fotos:"
+ },
+ "Ouvrir la fiche": {
+  "en": "Open details",
+  "de": "Details öffnen"
+ },
+ "Tout désélectionner (Échap)": {
+  "en": "Deselect all (Esc)",
+  "de": "Auswahl aufheben (Esc)"
+ },
+ "Cliquez une photo pour la voir ici. Maj + clic ou ⌘ + clic pour en choisir plusieurs : série, lieu, date et publication s’appliquent alors à toutes.": {
+  "en": "Click a photo to see it here. Shift + click or ⌘ + click to choose several: series, place, date and publishing then apply to all of them.",
+  "de": "Klicken Sie auf ein Foto, um es hier zu sehen. Umschalt + Klick oder ⌘ + Klick, um mehrere auszuwählen: Serie, Ort, Datum und Veröffentlichung gelten dann für alle."
+ },
+ "Raccourcis": {
+  "en": "Shortcuts",
+  "de": "Tastenkürzel"
+ },
+ "Rechercher, agir": {
+  "en": "Search, act",
+  "de": "Suchen, handeln"
+ },
+ "Publier la sélection": {
+  "en": "Publish the selection",
+  "de": "Auswahl veröffentlichen"
+ },
+ "Loupe": {
+  "en": "Loupe",
+  "de": "Lupe"
+ },
+ "Annuler la dernière action": {
+  "en": "Undo the last action",
+  "de": "Letzte Aktion rückgängig machen"
+ },
+ "Titre": {
+  "en": "Title",
+  "de": "Titel"
+ },
+ "Légende": {
+  "en": "Caption",
+  "de": "Bildunterschrift"
+ },
+ "Quelques mots pour le visiteur…": {
+  "en": "A few words for the visitor…",
+  "de": "Ein paar Worte für die Besucher…"
+ },
+ "Ville": {
+  "en": "Town",
+  "de": "Ort"
+ },
+ "carte du site": {
+  "en": "site map",
+  "de": "Karte der Website"
+ },
+ "Ville (carte du site)": {
+  "en": "Town (site map)",
+  "de": "Ort (Karte der Website)"
+ },
+ "Angers, Lisbonne…": {
+  "en": "Angers, Lisbon…",
+  "de": "Angers, Lissabon…"
+ },
+ "Afficher sur la carte": {
+  "en": "Show on the map",
+  "de": "Auf der Karte anzeigen"
+ },
+ "Proposée d’après le GPS de la photo : vérifiez-la.": {
+  "en": "Suggested from the photo’s GPS: please check it.",
+  "de": "Aus den GPS-Daten des Fotos vorgeschlagen: bitte prüfen."
+ },
+ "Où ?": {
+  "en": "Where?",
+  "de": "Wo?"
+ },
+ "Date": {
+  "en": "Date",
+  "de": "Datum"
+ },
+ "oct. 2026, 10/2026…": {
+  "en": "10/2026, 2026-10…",
+  "de": "10/2026, 2026-10…"
+ },
+ "Audience": {
+  "en": "Audience",
+  "de": "Publikum"
+ },
+ "Fiche complète : filigrane, preuve d’antériorité, suppression →": {
+  "en": "Full details: watermark, proof of prior existence, deletion →",
+  "de": "Alle Details: Wasserzeichen, Prioritätsnachweis, Löschen →"
+ },
+ "Série de la sélection": {
+  "en": "Series of the selection",
+  "de": "Serie der Auswahl"
+ },
+ "Nouvelle": {
+  "en": "New",
+  "de": "Neu"
+ },
+ "Série de destination": {
+  "en": "Target series",
+  "de": "Zielserie"
+ },
+ "Série…": {
+  "en": "Series…",
+  "de": "Serie…"
+ },
+ "Nouvelle série…": {
+  "en": "New series…",
+  "de": "Neue Serie…"
+ },
+ "Nom de la nouvelle série": {
+  "en": "Name of the new series",
+  "de": "Name der neuen Serie"
+ },
+ "Changer de série": {
+  "en": "Change series",
+  "de": "Serie ändern"
+ },
+ "Lieu et date": {
+  "en": "Place and date",
+  "de": "Ort und Datum"
+ },
+ "appliqués dès la sortie du champ": {
+  "en": "applied as soon as you leave the field",
+  "de": "beim Verlassen des Feldes übernommen"
+ },
+ "Lieu pour la sélection": {
+  "en": "Place for the selection",
+  "de": "Ort für die Auswahl"
+ },
+ "Date : oct. 2026": {
+  "en": "Date: 10/2026",
+  "de": "Datum: 10/2026"
+ },
+ "Date pour la sélection": {
+  "en": "Date for the selection",
+  "de": "Datum für die Auswahl"
+ },
+ "Appliquer lieu et date": {
+  "en": "Apply place and date",
+  "de": "Ort und Datum übernehmen"
+ },
+ "Carte du site": {
+  "en": "Site map",
+  "de": "Karte der Website"
+ },
+ "photos qui ont une ville": {
+  "en": "photos that have a town",
+  "de": "Fotos mit Ort"
+ },
+ "Sur la carte": {
+  "en": "On the map",
+  "de": "Auf die Karte"
+ },
+ "Retirer de la carte": {
+  "en": "Remove from the map",
+  "de": "Von der Karte entfernen"
+ },
+ "Titres provisoires": {
+  "en": "Provisional titles",
+  "de": "Vorläufige Titel"
+ },
+ "Supprimer…": {
+  "en": "Delete…",
+  "de": "Löschen…"
+ },
+ "Supprimer {n} ?": {
+  "en": "Delete {n}?",
+  "de": "{n} löschen?"
+ },
+ "Les originaux et toutes leurs images seront effacés. Cette action est définitive.": {
+  "en": "The originals and all their images will be erased. This cannot be undone.",
+  "de": "Die Originale und alle ihre Bilder werden gelöscht. Dies ist endgültig."
+ },
+ "Supprimer définitivement": {
+  "en": "Delete permanently",
+  "de": "Endgültig löschen"
+ },
+ "Annuler": {
+  "en": "Cancel",
+  "de": "Abbrechen"
+ },
+ "prête": {
+  "en": "ready",
+  "de": "bereit"
+ },
+ "à vérifier": {
+  "en": "to check",
+  "de": "zu prüfen"
+ },
+ "bloquée": {
+  "en": "blocked",
+  "de": "gesperrt"
+ },
+ "État de la photo": {
+  "en": "Photo status",
+  "de": "Status des Fotos"
+ },
+ "Site : {state}": {
+  "en": "Site: {state}",
+  "de": "Website: {state}"
+ },
+ "Instagram : {state}": {
+  "en": "Instagram: {state}",
+  "de": "Instagram: {state}"
+ },
+ "quelqu’un sur la photo (indiqué à la main)": {
+  "en": "someone in the photo (set by hand)",
+  "de": "jemand auf dem Foto (manuell angegeben)"
+ },
+ "personne de reconnaissable (indiqué à la main)": {
+  "en": "no one recognisable (set by hand)",
+  "de": "niemand erkennbar (manuell angegeben)"
+ },
+ "visages : examen en attente": {
+  "en": "faces: check pending",
+  "de": "Gesichter: Prüfung ausstehend"
+ },
+ "visages : examen impossible": {
+  "en": "faces: check failed",
+  "de": "Gesichter: Prüfung nicht möglich"
+ },
+ "{n} visages détectés": {
+  "en": "{n} faces detected",
+  "de": "{n} Gesichter erkannt"
+ },
+ "{n} visage détecté": {
+  "en": "{n} face detected",
+  "de": "{n} Gesicht erkannt"
+ },
+ "aucun visage détecté": {
+  "en": "no face detected",
+  "de": "kein Gesicht erkannt"
+ },
+ "Il y a quelqu’un": {
+  "en": "Someone is in it",
+  "de": "Jemand ist darauf"
+ },
+ "Personne de reconnaissable": {
+  "en": "No one recognisable",
+  "de": "Niemand erkennbar"
+ },
+ "Revenir à la détection": {
+  "en": "Back to detection",
+  "de": "Zurück zur Erkennung"
+ },
+ "Confirmations :": {
+  "en": "Confirmations:",
+  "de": "Bestätigungen:"
+ },
+ "{usage} par {name} le {date}": {
+  "en": "{usage} by {name} on {date}",
+  "de": "{usage} von {name} am {date}"
+ },
+ "voir sur le site": {
+  "en": "view on the site",
+  "de": "auf der Website ansehen"
+ },
+ "Le formulaire contient des erreurs.": {
+  "en": "The form contains errors.",
+  "de": "Das Formular enthält Fehler."
+ },
+ "{lang} : manquant": {
+  "en": "{lang}: missing",
+  "de": "{lang}: fehlt"
+ },
+ "Infos": {
+  "en": "Details",
+  "de": "Angaben"
+ },
+ "Adresse": {
+  "en": "Address",
+  "de": "Adresse"
+ },
+ "AAAA-MM ou AAAA-MM-JJ": {
+  "en": "YYYY-MM or YYYY-MM-DD",
+  "de": "JJJJ-MM oder JJJJ-MM-TT"
+ },
+ "prise à {time}": {
+  "en": "taken at {time}",
+  "de": "aufgenommen um {time}"
+ },
+ "Où": {
+  "en": "Where",
+  "de": "Wo"
+ },
+ "sans ville": {
+  "en": "no town",
+  "de": "ohne Ort"
+ },
+ "sur la carte du monde": {
+  "en": "on the world map",
+  "de": "auf der Weltkarte"
+ },
+ "Lieu affiché": {
+  "en": "Displayed place",
+  "de": "Angezeigter Ort"
+ },
+ "texte libre, avec la photo": {
+  "en": "free text, shown with the photo",
+  "de": "freier Text, mit dem Foto"
+ },
+ "pour la carte du monde · toutes les communes de France, plus de 500 habitants ailleurs": {
+  "en": "for the world map · every municipality in France, over 500 inhabitants elsewhere",
+  "de": "für die Weltkarte · alle Gemeinden Frankreichs, anderswo über 500 Einwohner"
+ },
+ "Commencez à taper : Angers, Lisbonne…": {
+  "en": "Start typing: Angers, Lisbon…",
+  "de": "Tippen Sie los: Angers, Lissabon…"
+ },
+ "Proposée d’après le GPS de la photo : vérifiez-la. Seule la ville est gardée, jamais la position exacte.": {
+  "en": "Suggested from the photo’s GPS: please check it. Only the town is kept, never the exact position.",
+  "de": "Aus den GPS-Daten des Fotos vorgeschlagen: bitte prüfen. Nur der Ort wird gespeichert, nie die genaue Position."
+ },
+ "Villes : {link}, licence CC BY 4.0.": {
+  "en": "Towns: {link}, CC BY 4.0 licence.",
+  "de": "Orte: {link}, Lizenz CC BY 4.0."
+ },
+ "Afficher sur la carte du monde": {
+  "en": "Show on the world map",
+  "de": "Auf der Weltkarte anzeigen"
+ },
+ "filigrane jamais": {
+  "en": "watermark never",
+  "de": "Wasserzeichen nie"
+ },
+ "filigrane selon les réglages": {
+  "en": "watermark as per settings",
+  "de": "Wasserzeichen laut Einstellungen"
+ },
+ "Photo en ligne à vérifier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.": {
+  "en": "Online photo to check: I confirm that the recognisable people in this photo have agreed to the site, or are not recognisable in it.",
+  "de": "Online-Foto zu prüfen: Ich bestätige, dass die erkennbaren Personen auf diesem Foto der Website zugestimmt haben oder darauf nicht erkennbar sind."
+ },
+ "Pour publier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.": {
+  "en": "To publish: I confirm that the recognisable people in this photo have agreed to the site, or are not recognisable in it.",
+  "de": "Zum Veröffentlichen: Ich bestätige, dass die erkennbaren Personen auf diesem Foto der Website zugestimmt haben oder darauf nicht erkennbar sind."
+ },
+ "Publication impossible : {reasons}.": {
+  "en": "Cannot publish: {reasons}.",
+  "de": "Veröffentlichung nicht möglich: {reasons}."
+ },
+ "Filigrane": {
+  "en": "Watermark",
+  "de": "Wasserzeichen"
+ },
+ "Selon les {link}": {
+  "en": "As per the {link}",
+  "de": "Laut den {link}"
+ },
+ "réglages": {
+  "en": "settings",
+  "de": "Einstellungen"
+ },
+ "Jamais sur cette photo": {
+  "en": "Never on this photo",
+  "de": "Nie auf diesem Foto"
+ },
+ "Instagram : rubrique {link}, plus bas.": {
+  "en": "Instagram: see the {link} section below.",
+  "de": "Instagram: siehe Abschnitt {link} weiter unten."
+ },
+ "Personnes & accords": {
+  "en": "People & consents",
+  "de": "Personen & Einwilligungen"
+ },
+ "{n} personnes": {
+  "en": "{n} people",
+  "de": "{n} Personen"
+ },
+ "{n} personne": {
+  "en": "{n} person",
+  "de": "{n} Person"
+ },
+ "accords de la sortie et photos liées": {
+  "en": "consents from the outing and linked photos",
+  "de": "Einwilligungen des Ausflugs und verknüpfte Fotos"
+ },
+ "Ouvrir la sortie →": {
+  "en": "Open the outing →",
+  "de": "Ausflug öffnen →"
+ },
+ "Les personnes rencontrées par {author} le jour de cette photo (date EXIF), et celles liées à la photo. Vérifiez que celles qui y apparaissent ont accepté l’usage prévu.": {
+  "en": "People met by {author} on the day of this photo (EXIF date), and those linked to the photo. Check that those who appear in it have agreed to the intended use.",
+  "de": "Personen, denen {author} am Tag dieses Fotos begegnet ist (EXIF-Datum), und die mit dem Foto verknüpften. Prüfen Sie, ob die darauf Abgebildeten der vorgesehenen Nutzung zugestimmt haben."
+ },
+ "le photographe": {
+  "en": "the photographer",
+  "de": "der Fotograf"
+ },
+ "Rencontre {ref}": {
+  "en": "Encounter {ref}",
+  "de": "Begegnung {ref}"
+ },
+ "sans carte": {
+  "en": "no card",
+  "de": "ohne Karte"
+ },
+ "même sortie": {
+  "en": "same outing",
+  "de": "gleicher Ausflug"
+ },
+ "liée à la photo": {
+  "en": "linked to the photo",
+  "de": "mit dem Foto verknüpft"
+ },
+ "Pas sur cette photo": {
+  "en": "Not in this photo",
+  "de": "Nicht auf diesem Foto"
+ },
+ "Refuse la publication : la photo ne peut pas être publiée": {
+  "en": "Refuses publication: the photo cannot be published",
+  "de": "Lehnt die Veröffentlichung ab: Das Foto kann nicht veröffentlicht werden"
+ },
+ "A refusé : si elle est sur cette photo, liez-la au refus (fiche de la rencontre)": {
+  "en": "Refused: if this person is in the photo, link it to the refusal (encounter record)",
+  "de": "Hat abgelehnt: Ist die Person auf diesem Foto, verknüpfen Sie es mit der Ablehnung (Begegnungsprofil)"
+ },
+ "expositions et tirages": {
+  "en": "exhibitions and prints",
+  "de": "Ausstellungen und Abzüge"
+ },
+ "avec son prénom": {
+  "en": "with their first name",
+  "de": "mit Vornamen"
+ },
+ "Accord signé : {uses}": {
+  "en": "Signed consent: {uses}",
+  "de": "Unterschriebene Einwilligung: {uses}"
+ },
+ "Accord en ligne : {uses}": {
+  "en": "Online consent: {uses}",
+  "de": "Online-Einwilligung: {uses}"
+ },
+ "Ni accord ni refus pour l’instant": {
+  "en": "No consent or refusal yet",
+  "de": "Bisher weder Einwilligung noch Ablehnung"
+ },
+ "pas encore vue en grand": {
+  "en": "not yet viewed full size",
+  "de": "noch nicht groß angesehen"
+ },
+ "{n} ouvertures en grand": {
+  "en": "{n} full-size views",
+  "de": "{n} Großansichten"
+ },
+ "{n} ouverture en grand": {
+  "en": "{n} full-size view",
+  "de": "{n} Großansicht"
+ },
+ "1ʳᵉ photo la plus vue": {
+  "en": "most viewed photo",
+  "de": "meistgesehenes Foto"
+ },
+ "{rank}ᵉ photo la plus vue": {
+  "en": "no. {rank} most viewed photo",
+  "de": "{rank}. meistgesehenes Foto"
+ },
+ "Pas encore ouverte en grand ces 30 derniers jours (brouillon : invisible sur le site).": {
+  "en": "Not opened full size in the last 30 days (draft: not visible on the site).",
+  "de": "In den letzten 30 Tagen nicht groß geöffnet (Entwurf: auf der Website nicht sichtbar)."
+ },
+ "Pas encore ouverte en grand ces 30 derniers jours.": {
+  "en": "Not opened full size in the last 30 days.",
+  "de": "In den letzten 30 Tagen nicht groß geöffnet."
+ },
+ "Toutes les statistiques": {
+  "en": "All statistics",
+  "de": "Alle Statistiken"
+ },
+ "publiée sur Instagram": {
+  "en": "published on Instagram",
+  "de": "auf Instagram veröffentlicht"
+ },
+ "dans la file": {
+  "en": "in the queue",
+  "de": "in der Warteschlange"
+ },
+ "en échec": {
+  "en": "failed",
+  "de": "fehlgeschlagen"
+ },
+ "pas encore partagée": {
+  "en": "not shared yet",
+  "de": "noch nicht geteilt"
+ },
+ "Publiée sur Instagram": {
+  "en": "Published on Instagram",
+  "de": "Auf Instagram veröffentlicht"
+ },
+ "voir le post ↗": {
+  "en": "view the post ↗",
+  "de": "Beitrag ansehen ↗"
+ },
+ "likes": {
+  "en": "likes",
+  "de": "Likes"
+ },
+ "like": {
+  "en": "like",
+  "de": "Like"
+ },
+ "commentaires": {
+  "en": "comments",
+  "de": "Kommentare"
+ },
+ "commentaire": {
+  "en": "comment",
+  "de": "Kommentar"
+ },
+ "relevé le {date}": {
+  "en": "recorded on {date}",
+  "de": "erfasst am {date}"
+ },
+ "likes, {n} derniers relevés": {
+  "en": "likes, last {n} readings",
+  "de": "Likes, letzte {n} Erfassungen"
+ },
+ "Likes et commentaires : relevés chaque matin (voir {link}).": {
+  "en": "Likes and comments: recorded every morning (see {link}).",
+  "de": "Likes und Kommentare: jeden Morgen erfasst (siehe {link})."
+ },
+ "Envoi à Instagram en cours…": {
+  "en": "Sending to Instagram…",
+  "de": "Wird an Instagram gesendet…"
+ },
+ "Dans la file : prévue le {slot}.": {
+  "en": "In the queue: scheduled for {slot}.",
+  "de": "In der Warteschlange: geplant für {slot}."
+ },
+ "Dernier essai : {error}": {
+  "en": "Last attempt: {error}",
+  "de": "Letzter Versuch: {error}"
+ },
+ "Échec de la publication : {error} (voir la page {link} pour réessayer).": {
+  "en": "Publishing failed: {error} (see the {link} page to retry).",
+  "de": "Veröffentlichung fehlgeschlagen: {error} (siehe Seite {link}, um es erneut zu versuchen)."
+ },
+ "{title} : {reasons}. Aucune confirmation ne lève ce blocage : si la personne n’est pas sur cette photo, indiquez-le dans {link}.": {
+  "en": "{title}: {reasons}. No confirmation lifts this block: if the person is not in this photo, say so in {link}.",
+  "de": "{title}: {reasons}. Keine Bestätigung hebt diese Sperre auf: Ist die Person nicht auf diesem Foto, geben Sie das unter {link} an."
+ },
+ "Instagram bloqué": {
+  "en": "Instagram blocked",
+  "de": "Instagram gesperrt"
+ },
+ "Publiez d’abord la photo sur le site pour la partager sur Instagram.": {
+  "en": "Publish the photo on the site first to share it on Instagram.",
+  "de": "Veröffentlichen Sie das Foto zuerst auf der Website, um es auf Instagram zu teilen."
+ },
+ "Aperçu de l’image envoyée à Instagram": {
+  "en": "Preview of the image sent to Instagram",
+  "de": "Vorschau des an Instagram gesendeten Bildes"
+ },
+ "L’image telle qu’elle partira (1080 px, JPEG, sans métadonnées)": {
+  "en": "The image as it will be sent (1080 px, JPEG, no metadata)",
+  "de": "Das Bild, wie es gesendet wird (1080 px, JPEG, ohne Metadaten)"
+ },
+ "Cadre": {
+  "en": "Frame",
+  "de": "Rahmen"
+ },
+ "Avec le filigrane": {
+  "en": "With the watermark",
+  "de": "Mit Wasserzeichen"
+ },
+ "Instagram à vérifier ({reasons}) : je confirme que les personnes reconnaissables ont accepté Instagram, ou n’y sont pas reconnaissables.": {
+  "en": "Instagram to check ({reasons}): I confirm that the recognisable people have agreed to Instagram, or are not recognisable.",
+  "de": "Instagram zu prüfen ({reasons}): Ich bestätige, dass die erkennbaren Personen Instagram zugestimmt haben oder nicht erkennbar sind."
+ },
+ "Ajouter ma signature": {
+  "en": "Add my signature",
+  "de": "Meine Signatur hinzufügen"
+ },
+ "seulement si la photo a une légende": {
+  "en": "only if the photo has a caption",
+  "de": "nur wenn das Foto eine Bildunterschrift hat"
+ },
+ "Légende personnalisée pour cette photo": {
+  "en": "Custom caption for this photo",
+  "de": "Eigene Bildunterschrift für dieses Foto"
+ },
+ "sinon, celle du modèle": {
+  "en": "otherwise, the template’s",
+  "de": "sonst die der Vorlage"
+ },
+ "Mettre à jour": {
+  "en": "Update",
+  "de": "Aktualisieren"
+ },
+ "Republier (remettre dans la file)": {
+  "en": "Republish (put back in the queue)",
+  "de": "Erneut veröffentlichen (wieder in die Warteschlange)"
+ },
+ "Ajouter à la file Instagram": {
+  "en": "Add to the Instagram queue",
+  "de": "Zur Instagram-Warteschlange hinzufügen"
+ },
+ "Revenir au modèle": {
+  "en": "Back to the template",
+  "de": "Zurück zur Vorlage"
+ },
+ "Aucun compte connecté : la photo attendra dans la file ({link}).": {
+  "en": "No account connected: the photo will wait in the queue ({link}).",
+  "de": "Kein Konto verbunden: Das Foto wartet in der Warteschlange ({link})."
+ },
+ "Retirer de la file": {
+  "en": "Remove from the queue",
+  "de": "Aus der Warteschlange entfernen"
+ },
+ "Preuve d’antériorité": {
+  "en": "Proof of prior existence",
+  "de": "Prioritätsnachweis"
+ },
+ "horodatée": {
+  "en": "timestamped",
+  "de": "mit Zeitstempel"
+ },
+ "empreinte calculée": {
+  "en": "fingerprint computed",
+  "de": "Prüfsumme berechnet"
+ },
+ "en cours": {
+  "en": "in progress",
+  "de": "in Bearbeitung"
+ },
+ "Empreinte SHA-256 de l’original": {
+  "en": "SHA-256 fingerprint of the original",
+  "de": "SHA-256-Prüfsumme des Originals"
+ },
+ "en cours de calcul": {
+  "en": "being computed",
+  "de": "wird berechnet"
+ },
+ "Horodatage RFC 3161": {
+  "en": "RFC 3161 timestamp",
+  "de": "Zeitstempel nach RFC 3161"
+ },
+ "Horodatée le {date} UTC": {
+  "en": "Timestamped on {date} UTC",
+  "de": "Zeitstempel vom {date} UTC"
+ },
+ "n° {n}": {
+  "en": "no. {n}",
+  "de": "Nr. {n}"
+ },
+ "Désactivé sur ce serveur ({code}).": {
+  "en": "Disabled on this server ({code}).",
+  "de": "Auf diesem Server deaktiviert ({code})."
+ },
+ "En attente : {error} (essai n° {n}, nouvel essai automatique).": {
+  "en": "Pending: {error} (attempt no. {n}, will retry automatically).",
+  "de": "Ausstehend: {error} (Versuch Nr. {n}, automatischer neuer Versuch)."
+ },
+ "En attente (quelques secondes après l’import).": {
+  "en": "Pending (a few seconds after import).",
+  "de": "Ausstehend (einige Sekunden nach dem Import)."
+ },
+ "Original": {
+  "en": "Original",
+  "de": "Original"
+ },
+ "Jeton (.tsr)": {
+  "en": "Token (.tsr)",
+  "de": "Token (.tsr)"
+ },
+ "Fiche de preuve": {
+  "en": "Proof sheet",
+  "de": "Nachweisblatt"
+ },
+ "Certificat de l’autorité": {
+  "en": "Authority certificate",
+  "de": "Zertifikat der Stelle"
+ },
+ "Vérifier la preuve": {
+  "en": "Verify the proof",
+  "de": "Nachweis prüfen"
+ },
+ "Supprimer cette photo": {
+  "en": "Delete this photo",
+  "de": "Dieses Foto löschen"
+ },
+ "L’original, ses variantes et sa preuve d’antériorité seront effacés. Cette action est définitive : téléchargez d’abord l’original et la preuve si vous voulez les garder.": {
+  "en": "The original, its variants and its proof of prior existence will be erased. This cannot be undone: download the original and the proof first if you want to keep them.",
+  "de": "Das Original, seine Varianten und sein Prioritätsnachweis werden gelöscht. Dies ist endgültig: Laden Sie zuerst das Original und den Nachweis herunter, wenn Sie sie behalten möchten."
+ },
+ "chaque champ s’enregistre quand vous le quittez": {
+  "en": "each field is saved when you leave it",
+  "de": "jedes Feld wird beim Verlassen gespeichert"
+ },
+ "enregistrez avec le bouton en bas du tableau": {
+  "en": "save with the button below the table",
+  "de": "speichern Sie mit der Schaltfläche unter der Tabelle"
+ },
+ "Toutes les photos": {
+  "en": "All photos",
+  "de": "Alle Fotos"
+ },
+ "Étapes de l’import": {
+  "en": "Import steps",
+  "de": "Importschritte"
+ },
+ "Choisir et vérifier": {
+  "en": "Choose and check",
+  "de": "Auswählen und prüfen"
+ },
+ "Envoi et traitement": {
+  "en": "Upload and processing",
+  "de": "Hochladen und Verarbeitung"
+ },
+ "Appliquer à la sélection": {
+  "en": "Apply to the selection",
+  "de": "Auf die Auswahl anwenden"
+ },
+ "série, lieu et date s’appliquent dès que vous les changez": {
+  "en": "series, place and date apply as soon as you change them",
+  "de": "Serie, Ort und Datum gelten, sobald Sie sie ändern"
+ },
+ "Série, lieu ou date pour toutes les cochées…": {
+  "en": "Series, place or date for all ticked…",
+  "de": "Serie, Ort oder Datum für alle angekreuzten…"
+ },
+ "Appliquer la série": {
+  "en": "Apply the series",
+  "de": "Serie übernehmen"
+ },
+ "Certaines photos n’ont pas été enregistrées : corrigez les champs signalés.": {
+  "en": "Some photos were not saved: correct the flagged fields.",
+  "de": "Einige Fotos wurden nicht gespeichert: Korrigieren Sie die markierten Felder."
+ },
+ "Aperçu": {
+  "en": "Preview",
+  "de": "Vorschau"
+ },
+ "État": {
+  "en": "Status",
+  "de": "Status"
+ },
+ "Titre de la photo {id}": {
+  "en": "Title of photo {id}",
+  "de": "Titel von Foto {id}"
+ },
+ "Série de la photo {id}": {
+  "en": "Series of photo {id}",
+  "de": "Serie von Foto {id}"
+ },
+ "Lieu de la photo {id}": {
+  "en": "Place of photo {id}",
+  "de": "Ort von Foto {id}"
+ },
+ "oct. 2026": {
+  "en": "10/2026",
+  "de": "10/2026"
+ },
+ "Date de la photo {id}": {
+  "en": "Date of photo {id}",
+  "de": "Datum von Foto {id}"
+ },
+ "compris : {date}": {
+  "en": "understood: {date}",
+  "de": "verstanden: {date}"
+ },
+ "Publiée": {
+  "en": "Published",
+  "de": "Veröffentlicht"
+ },
+ "Enregistrer et publier tout": {
+  "en": "Save and publish all",
+  "de": "Speichern und alle veröffentlichen"
+ },
+ "Légende, filigrane et preuve d’antériorité : depuis la fiche de chaque photo (Photos › titre).": {
+  "en": "Caption, watermark and proof of prior existence: from each photo’s details (Photos › title).",
+  "de": "Bildunterschrift, Wasserzeichen und Prioritätsnachweis: in den Details jedes Fotos (Fotos › Titel)."
+ },
+ "Les photos partent dès que vous les choisissez et arrivent en brouillon : rien n’est publié sans vous. Les fichiers invalides sont écartés avant l’envoi.": {
+  "en": "Photos upload as soon as you choose them and arrive as drafts: nothing is published without you. Invalid files are set aside before upload.",
+  "de": "Die Fotos werden hochgeladen, sobald Sie sie auswählen, und kommen als Entwurf an: Nichts wird ohne Sie veröffentlicht. Ungültige Dateien werden vor dem Hochladen aussortiert."
+ },
+ "Fermer": {
+  "en": "Close",
+  "de": "Schließen"
+ },
+ "Pour tout le lot ; modifiables photo par photo à l’étape 3.": {
+  "en": "For the whole batch; can be changed photo by photo in step 3.",
+  "de": "Für den ganzen Stapel; in Schritt 3 für jedes Foto änderbar."
+ },
+ "Glissez vos photos ici": {
+  "en": "Drop your photos here",
+  "de": "Fotos hierher ziehen"
+ },
+ "ou {choose} · JPEG, PNG, WebP, TIFF, HEIF · {mb} Mo et 120 mégapixels au plus": {
+  "en": "or {choose} · JPEG, PNG, WebP, TIFF, HEIF · up to {mb} MB and 120 megapixels",
+  "de": "oder {choose} · JPEG, PNG, WebP, TIFF, HEIF · höchstens {mb} MB und 120 Megapixel"
+ },
+ "choisissez des fichiers": {
+  "en": "choose files",
+  "de": "Dateien auswählen"
+ },
+ "Photos choisies": {
+  "en": "Chosen photos",
+  "de": "Ausgewählte Fotos"
+ },
+ "Importer": {
+  "en": "Import",
+  "de": "Importieren"
+ },
+ "Annuler le reste": {
+  "en": "Cancel the rest",
+  "de": "Rest abbrechen"
+ },
+ "{label} en anglais et en allemand": {
+  "en": "{label} in English and German",
+  "de": "{label} auf Englisch und Deutsch"
+ },
+ "traduit": {
+  "en": "translated",
+  "de": "übersetzt"
+ },
+ "1 langue sur 2": {
+  "en": "1 of 2 languages",
+  "de": "1 von 2 Sprachen"
+ },
+ "facultatif": {
+  "en": "optional",
+  "de": "optional"
+ },
+ "Proposer une traduction": {
+  "en": "Suggest a translation",
+  "de": "Übersetzung vorschlagen"
+ },
+ "Vide : la version française s’affiche (sur la page allemande comme sur la page anglaise).": {
+  "en": "Empty: the French version is shown (on both the German and the English page).",
+  "de": "Leer: Die französische Version wird angezeigt (auf der deutschen wie auf der englischen Seite)."
+ },
+ "Supprimer {n} photos ?": {
+  "en": "Delete {n} photos?",
+  "de": "{n} Fotos löschen?"
+ },
+ "Supprimer {n} photo ?": {
+  "en": "Delete {n} photo?",
+  "de": "{n} Foto löschen?"
+ }
+}

@@ -1,4 +1,5 @@
 <!doctype html>
+<% const t = it.t; %>
 <% const e = it.e, A = it.A, b = it.brand || {}; %>
 <html lang="<%= e.lang || 'fr' %>">
 <head>
@@ -19,21 +20,21 @@
   <p class="app-scan"><%= A.scan %></p>
   <p class="mono app-ref"><%= e.ref %></p>
 </main>
-<section class="app-after" lang="fr">
-  <h2>Pour vous</h2>
-<% if (it.flash === 'ok') { %>  <p class="ok">Récapitulatif envoyé à <%= e.email %>.</p>
-<% } else if (it.flash === 'echec') { %>  <p class="ko">L’e-mail n’est pas parti (voir la fiche de la rencontre) : envoyez-le depuis Mail.</p>
+<section class="app-after" lang="<%= it.lang %>">
+  <h2><%= t('Pour vous') %></h2>
+<% if (it.flash === 'ok') { %>  <p class="ok"><%= t('Récapitulatif envoyé à {email}.', { email: e.email }) %></p>
+<% } else if (it.flash === 'echec') { %>  <p class="ko"><%= t('L’e-mail n’est pas parti (voir la fiche de la rencontre) : envoyez-le depuis Mail.') %></p>
 <% } %>
 <% if (e.email) { %>
-<% if (e.mailed_at && it.flash !== 'ok') { %>  <p class="ok">Récapitulatif envoyé à <%= e.email %>.</p>
+<% if (e.mailed_at && it.flash !== 'ok') { %>  <p class="ok"><%= t('Récapitulatif envoyé à {email}.', { email: e.email }) %></p>
 <% } else if (!e.mailed_at) { %>
-<% if (it.smtp) { %>  <form method="post" action="/admin/rencontre/<%= e.id %>/envoyer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="app-btn" type="submit">Envoyer le récapitulatif à <%= e.email %></button></form>
-<% } %>  <p><a class="app-btn<%= it.smtp ? ' ghost' : '' %>" href="<%= it.mailto %>">Envoyer le récapitulatif depuis Mail</a></p>
+<% if (it.smtp) { %>  <form method="post" action="/admin/rencontre/<%= e.id %>/envoyer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="app-btn" type="submit"><%= t('Envoyer le récapitulatif à {email}', { email: e.email }) %></button></form>
+<% } %>  <p><a class="app-btn<%= it.smtp ? ' ghost' : '' %>" href="<%= it.mailto %>"><%= t('Envoyer le récapitulatif depuis Mail') %></a></p>
 <% } %>
-<% } else { %>  <p class="hint">Pas d’e-mail : la personne garde son lien en scannant le QR.</p>
+<% } else { %>  <p class="hint"><%= t('Pas d’e-mail : la personne garde son lien en scannant le QR.') %></p>
 <% } %>
-  <p class="app-row"><a class="app-btn" href="/admin/rencontre">Nouvelle rencontre</a> <a class="app-btn ghost" href="/admin/rencontre/accueil">Accueil Terrain</a></p>
-  <p><a class="app-link" href="/admin/rencontres/<%= e.id %>">Voir la fiche de la rencontre</a></p>
+  <p class="app-row"><a class="app-btn" href="/admin/rencontre"><%= t('Nouvelle rencontre') %></a> <a class="app-btn ghost" href="/admin/rencontre/accueil"><%= t('Accueil Terrain') %></a></p>
+  <p><a class="app-link" href="/admin/rencontres/<%= e.id %>"><%= t('Voir la fiche de la rencontre') %></a></p>
 </section>
 </body>
 </html>

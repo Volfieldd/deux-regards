@@ -1,66 +1,66 @@
 <% layout('./layout') %>
 <% const s = it.settings; const hero = Array.isArray(s.hero) ? s.hero : []; const chosen = hero.map(slug => it.published.find(p => p.slug === slug)).filter(Boolean); %>
-<% const site = it.part === 'site'; %>
+<% const site = it.part === 'site'; const t = it.t; %>
 <h1><%= it.title %></h1>
 <% if (site) { %>
-<p class="prose">Ce que voient les visiteurs : les textes, l’ouverture de l’accueil et la carte du monde. Les thèmes se règlent dans <a class="more" href="/admin/series">Séries</a>, l’allure dans <a class="more" href="/admin/apparence">Apparence</a>.</p>
+<p class="prose"><%= t('Ce que voient les visiteurs : les textes, l’ouverture de l’accueil et la carte du monde. Les thèmes se règlent dans') %> <a class="more" href="/admin/series"><%= t('Séries') %></a>, <%= t('l’allure dans') %> <a class="more" href="/admin/apparence"><%= t('Apparence') %></a>.</p>
 <% } else { %>
-<p class="prose">Les pages légales du site : les droits d’utilisation des images (<a class="more" href="/droits" target="_blank" rel="noopener">/droits</a>) et la confidentialité des données (<a class="more" href="/confidentialite" target="_blank" rel="noopener">/confidentialite</a>).</p>
+<p class="prose"><%= t('Les pages légales du site : les droits d’utilisation des images') %> (<a class="more" href="/droits" target="_blank" rel="noopener">/droits</a>) <%= t('et la confidentialité des données') %> (<a class="more" href="/confidentialite" target="_blank" rel="noopener">/confidentialite</a>).</p>
 <% } %>
 <form class="form" method="post" action="/admin/reglages">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
   <input type="hidden" name="part" value="<%= it.part %>">
-  <button class="sr-only" type="submit" tabindex="-1" aria-hidden="true">Enregistrer</button>
+  <button class="sr-only" type="submit" tabindex="-1" aria-hidden="true"><%= t('Enregistrer') %></button>
 <% if (site) { %>
   <section class="panel">
-    <h2>Textes</h2>
-    <label>Nom du site <input name="site_name" value="<%= s.site_name || '' %>" maxlength="60" placeholder="<%= it.defaultName %>"></label>
-    <p class="hint">Le site est en français, anglais et allemand : chaque texte a sa version anglaise et allemande, facultative (vide : la version française s’affiche).</p>
-    <label>Accroche <input name="tagline" value="<%= s.tagline || '' %>" maxlength="200"></label>
-    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v: s, name: 'tagline', label: 'Accroche', max: 200 }) %>
-    <label>Introduction (accueil) <textarea name="intro" rows="3" maxlength="1000"><%= s.intro || '' %></textarea></label>
-    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v: s, name: 'intro', label: 'Introduction', max: 1000, rows: 3 }) %>
-    <label>À propos <span class="mono">paragraphes séparés par une ligne vide</span><textarea name="about" rows="8" maxlength="10000"><%= s.about || '' %></textarea></label>
-    <%~ include('./_tr', { asset: it.asset, translate: it.translate, v: s, name: 'about', label: 'À propos', max: 10000, rows: 8 }) %>
+    <h2><%= t('Textes') %></h2>
+    <label><%= t('Nom du site') %> <input name="site_name" value="<%= s.site_name || '' %>" maxlength="60" placeholder="<%= it.defaultName %>"></label>
+    <p class="hint"><%= t('Le site est en français, anglais et allemand : chaque texte a sa version anglaise et allemande, facultative (vide : la version française s’affiche).') %></p>
+    <label><%= t('Accroche') %> <input name="tagline" value="<%= s.tagline || '' %>" maxlength="200"></label>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v: s, name: 'tagline', label: t('Accroche'), max: 200 }) %>
+    <label><%= t('Introduction (accueil)') %> <textarea name="intro" rows="3" maxlength="1000"><%= s.intro || '' %></textarea></label>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v: s, name: 'intro', label: t('Introduction'), max: 1000, rows: 3 }) %>
+    <label><%= t('À propos') %> <span class="mono"><%= t('paragraphes séparés par une ligne vide') %></span><textarea name="about" rows="8" maxlength="10000"><%= s.about || '' %></textarea></label>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v: s, name: 'about', label: t('À propos'), max: 10000, rows: 8 }) %>
   </section>
 <% } else { %>
   <section class="panel">
-    <h2>Droits d’utilisation <span class="mono">page <a href="/droits" target="_blank" rel="noopener">/droits</a>, liée aux mentions IPTC des images</span></h2>
-    <p class="hint">Le texte affiché ci-dessous est celui que lisent les visiteurs. Tant que vous gardez le texte par défaut, il suit les noms des auteurs ; modifié, il est enregistré tel quel.</p>
+    <h2><%= t('Droits d’utilisation') %> <span class="mono"><%= t('page') %> <a href="/droits" target="_blank" rel="noopener">/droits</a>, <%= t('liée aux mentions IPTC des images') %></span></h2>
+    <p class="hint"><%= t('Le texte affiché ci-dessous est celui que lisent les visiteurs. Tant que vous gardez le texte par défaut, il suit les noms des auteurs ; modifié, il est enregistré tel quel.') %></p>
 <% const frOwn = Boolean(String(s.rights_text || '').trim()); %>
 <% it.rights.forEach(r => { const own = Boolean(String(s[r.setting] || '').trim()); %>
     <div class="rights-field">
       <label for="<%= r.setting %>"><%= r.name %> <a class="mono" href="<%= r.path %>" target="_blank" rel="noopener"><%= r.path %></a>
-        <span class="badge-text<%= own ? ' own' : '' %>"><%= own ? 'Texte personnalisé' : 'Texte par défaut' %></span></label>
-<% if (r.lang !== 'fr' && frOwn && !own) { %>      <p class="cellnote warn">Le texte français a été modifié : adaptez aussi cette traduction, sinon les visiteurs lisent la traduction du texte par défaut.</p>
+        <span class="badge-text<%= own ? ' own' : '' %>"><%= own ? t('Texte personnalisé') : t('Texte par défaut') %></span></label>
+<% if (r.lang !== 'fr' && frOwn && !own) { %>      <p class="cellnote warn"><%= t('Le texte français a été modifié : adaptez aussi cette traduction, sinon les visiteurs lisent la traduction du texte par défaut.') %></p>
 <% } %>      <textarea id="<%= r.setting %>" name="<%= r.setting %>" rows="<%= r.lang === 'fr' ? 7 : 6 %>" maxlength="10000" lang="<%= r.lang %>" data-default="<%= it.rightsDefaults[r.lang] %>"><%= own ? s[r.setting] : it.rightsDefaults[r.lang] %></textarea>
-      <p class="actions" data-js-only hidden><button class="btn ghost" type="button" data-reset-default="<%= r.setting %>">Rétablir le texte par défaut</button></p>
+      <p class="actions" data-js-only hidden><button class="btn ghost" type="button" data-reset-default="<%= r.setting %>"><%= t('Rétablir le texte par défaut') %></button></p>
     </div>
 <% }) %>
-    <label>Contact pour les demandes d’utilisation <span class="mono">adresse e-mail ou lien https://</span><input name="rights_contact" value="<%= s.rights_contact || '' %>" maxlength="200"></label>
+    <label><%= t('Contact pour les demandes d’utilisation') %> <span class="mono"><%= t('adresse e-mail ou lien https://') %></span><input name="rights_contact" value="<%= s.rights_contact || '' %>" maxlength="200"></label>
   </section>
   <section class="panel" id="confidentialite">
-    <h2>Confidentialité <span class="mono">page <a href="/confidentialite" target="_blank" rel="noopener">/confidentialite</a> (RGPD), en trois langues</span></h2>
-    <p class="hint">La page décrit ce que le site fait des données : responsables (les auteurs), données, durées, destinataires, droits. Elle suit le code : rien à rédiger ici, sauf le contact et deux cases qui ne doivent être cochées que lorsque c’est vrai.</p>
-    <label>Contact des responsables <span class="mono">adresse e-mail</span><input name="privacy_contact" value="<%= s.privacy_contact || '' %>" maxlength="200" placeholder="info@nicephos.art"></label>
-    <label class="inline"><input type="checkbox" name="privacy_mfa"<%~ s.privacy_mfa ? ' checked' : '' %>> L’authentification à deux facteurs est activée pour tous les comptes de l’admin (Zitadel)</label>
-    <label class="inline"><input type="checkbox" name="privacy_encrypted"<%~ s.privacy_encrypted ? ' checked' : '' %>> Les données et les sauvegardes sont sur des disques chiffrés</label>
-    <p class="<%= it.encrypted ? 'cellnote' : 'cellnote warn' %>"><strong>Chiffrement des données personnelles dans la base</strong> (noms, adresses, signatures, photos de repère et de carte, messages, positions) : <%= it.encrypted ? 'actif (clé DATA_KEY du serveur). Gardez une copie de la clé hors du serveur : perdue, ces données sont illisibles.' : 'inactif. Ajoutez DATA_KEY au fichier .env du serveur (voir le guide Unraid) : les données existantes seront chiffrées au redémarrage.' %></p>
+    <h2><%= t('Confidentialité') %> <span class="mono"><%= t('page') %> <a href="/confidentialite" target="_blank" rel="noopener">/confidentialite</a> <%= t('(RGPD), en trois langues') %></span></h2>
+    <p class="hint"><%= t('La page décrit ce que le site fait des données : responsables (les auteurs), données, durées, destinataires, droits. Elle suit le code : rien à rédiger ici, sauf le contact et deux cases qui ne doivent être cochées que lorsque c’est vrai.') %></p>
+    <label><%= t('Contact des responsables') %> <span class="mono"><%= t('adresse e-mail') %></span><input name="privacy_contact" value="<%= s.privacy_contact || '' %>" maxlength="200" placeholder="info@nicephos.art"></label>
+    <label class="inline"><input type="checkbox" name="privacy_mfa"<%~ s.privacy_mfa ? ' checked' : '' %>> <%= t('L’authentification à deux facteurs est activée pour tous les comptes de l’admin (Zitadel)') %></label>
+    <label class="inline"><input type="checkbox" name="privacy_encrypted"<%~ s.privacy_encrypted ? ' checked' : '' %>> <%= t('Les données et les sauvegardes sont sur des disques chiffrés') %></label>
+    <p class="<%= it.encrypted ? 'cellnote' : 'cellnote warn' %>"><strong><%= t('Chiffrement des données personnelles dans la base') %></strong> <%= t('(noms, adresses, signatures, photos de repère et de carte, messages, positions) :') %> <%= it.encrypted ? t('actif (clé DATA_KEY du serveur). Gardez une copie de la clé hors du serveur : perdue, ces données sont illisibles.') : t('inactif. Ajoutez DATA_KEY au fichier .env du serveur (voir le guide Unraid) : les données existantes seront chiffrées au redémarrage.') %></p>
   </section>
 <% } %>
 <% if (site) { %>
   <section class="panel" id="carte">
-    <h2>Carte du monde <span class="mono"><a href="/carte" target="_blank" rel="noopener">/carte</a><%= s.map_page ? '' : ' · aperçu réservé aux photographes' %></span></h2>
-    <p class="hint">Une carte du monde avec la vignette des photos à l’emplacement de leur ville, et la liste des lieux. Seules les photos publiées dont la fiche coche « Afficher sur la carte du monde » y figurent (<%= it.mapCount %> aujourd’hui<%= it.mapCount ? `, ${it.mapCities} ville${it.mapCities > 1 ? 's' : ''}` : '' %>).</p>
-    <label class="inline"><input type="checkbox" name="map_page"<%~ s.map_page ? ' checked' : '' %>> Publier la carte du monde <span class="mono">lien « Carte » dans le menu du site</span></label>
+    <h2><%= t('Carte du monde') %> <span class="mono"><a href="/carte" target="_blank" rel="noopener">/carte</a><%= s.map_page ? '' : ` · ${t('aperçu réservé aux photographes')}` %></span></h2>
+    <p class="hint"><%= t('Une carte du monde avec la vignette des photos à l’emplacement de leur ville, et la liste des lieux. Seules les photos publiées dont la fiche coche « Afficher sur la carte du monde » y figurent') %> (<%= t('{n} aujourd’hui', { n: it.mapCount }) %><%= it.mapCount ? (it.mapCities > 1 ? t(', {n} villes', { n: it.mapCities }) : t(', {n} ville', { n: it.mapCities })) : '' %>).</p>
+    <label class="inline"><input type="checkbox" name="map_page"<%~ s.map_page ? ' checked' : '' %>> <%= t('Publier la carte du monde') %> <span class="mono"><%= t('lien « Carte » dans le menu du site') %></span></label>
   </section>
   <fieldset class="panel hero-panel" id="ouverture" data-hero data-max="<%= it.heroMax %>">
-    <legend>Photos de l’ouverture</legend>
-    <p class="hint">Le diaporama plein écran de l’accueil, dans cet ordre. <%= it.heroMax %> photos au plus ; sans choix, les 5 premières de la galerie.</p>
-    <p class="actions"><span class="counter" role="status" data-hero-count><%= chosen.length %> / <%= it.heroMax %> choisie<%= chosen.length > 1 ? 's' : '' %></span>
-      <button class="btn" type="submit" name="hero_save" value="1">Enregistrer l’ouverture</button></p>
-    <h3>Ordre du diaporama</h3>
-    <p class="hint"><span data-js-only hidden>Glissez une vignette, ou utilisez ← → ; ✕ la retire.</span><span data-nojs>← → changent l’ordre, ✕ retire la photo (les réglages sont enregistrés en même temps).</span></p>
+    <legend><%= t('Photos de l’ouverture') %></legend>
+    <p class="hint"><%= t('Le diaporama plein écran de l’accueil, dans cet ordre.') %> <%= t('{n} photos au plus ; sans choix, les 5 premières de la galerie.', { n: it.heroMax }) %></p>
+    <p class="actions"><span class="counter" role="status" data-hero-count><%= chosen.length > 1 ? t('{n} / {max} choisies', { n: chosen.length, max: it.heroMax }) : t('{n} / {max} choisie', { n: chosen.length, max: it.heroMax }) %></span>
+      <button class="btn" type="submit" name="hero_save" value="1"><%= t('Enregistrer l’ouverture') %></button></p>
+    <h3><%= t('Ordre du diaporama') %></h3>
+    <p class="hint"><span data-js-only hidden><%= t('Glissez une vignette, ou utilisez ← → ; ✕ la retire.') %></span><span data-nojs><%= t('← → changent l’ordre, ✕ retire la photo (les réglages sont enregistrés en même temps).') %></span></p>
     <ol class="chosen" data-hero-chosen>
 <% chosen.forEach((p, i) => { %>
       <li class="it" data-slug="<%= p.slug %>">
@@ -69,25 +69,25 @@
         <%~ it.picture(p, { sizes: '120px', alt: '' }) %>
         <span class="t"><%= p.title %></span>
         <span class="mv">
-          <button type="submit" name="hero_op" value="left:<%= p.slug %>" aria-label="Avancer « <%= p.title %> »" data-hero-left>←</button>
-          <button type="submit" name="hero_op" value="right:<%= p.slug %>" aria-label="Reculer « <%= p.title %> »" data-hero-right>→</button>
-          <button type="submit" name="hero_op" value="remove:<%= p.slug %>" aria-label="Retirer « <%= p.title %> » de l’ouverture" data-hero-remove>✕</button>
+          <button type="submit" name="hero_op" value="left:<%= p.slug %>" aria-label="<%= t('Avancer « {title} »', { title: p.title }) %>" data-hero-left>←</button>
+          <button type="submit" name="hero_op" value="right:<%= p.slug %>" aria-label="<%= t('Reculer « {title} »', { title: p.title }) %>" data-hero-right>→</button>
+          <button type="submit" name="hero_op" value="remove:<%= p.slug %>" aria-label="<%= t('Retirer « {title} » de l’ouverture', { title: p.title }) %>" data-hero-remove>✕</button>
         </span>
       </li>
 <% }) %>
     </ol>
-<% if (!chosen.length) { %>    <p class="hint" data-hero-empty>Aucune photo choisie : l’ouverture montre les 5 premières photos de la galerie.</p>
+<% if (!chosen.length) { %>    <p class="hint" data-hero-empty><%= t('Aucune photo choisie : l’ouverture montre les 5 premières photos de la galerie.') %></p>
 <% } %>
-    <h3>Ajouter des photos publiées</h3>
-    <p class="hint">Une case cochée ajoute la photo en fin de diaporama. <span data-hero-full<%~ chosen.length >= it.heroMax ? '' : ' hidden' %>><strong>Le diaporama est complet (<%= it.heroMax %> photos) : retirez-en une pour en ajouter une autre.</strong></span></p>
+    <h3><%= t('Ajouter des photos publiées') %></h3>
+    <p class="hint"><%= t('Une case cochée ajoute la photo en fin de diaporama.') %> <span data-hero-full<%~ chosen.length >= it.heroMax ? '' : ' hidden' %>><strong><%= t('Le diaporama est complet ({n} photos) : retirez-en une pour en ajouter une autre.', { n: it.heroMax }) %></strong></span></p>
     <div class="herogrid" data-hero-pool>
 <% it.published.forEach(p => { const on = hero.includes(p.slug); %>
       <label class="pick" data-slug="<%= p.slug %>" data-title="<%= p.title %>"<%~ on ? ' hidden' : '' %>><input type="checkbox" name="hero" value="<%= p.slug %>"<%~ on ? ' disabled' : '' %><%~ !on && chosen.length >= it.heroMax ? ' disabled' : '' %>>
         <%~ it.picture(p, { sizes: '160px', alt: '' }) %><span><%= p.title %></span></label>
 <% }) %>
     </div>
-<% if (!it.published.length) { %><p>Aucune photo publiée pour l’instant.</p><% } %>
+<% if (!it.published.length) { %><p><%= t('Aucune photo publiée pour l’instant.') %></p><% } %>
   </fieldset>
 <% } %>
-  <p class="actions"><button class="btn" type="submit"><%= site ? 'Enregistrer le site public' : 'Enregistrer' %></button></p>
+  <p class="actions"><button class="btn" type="submit"><%= site ? t('Enregistrer le site public') : t('Enregistrer') %></button></p>
 </form>

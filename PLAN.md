@@ -259,6 +259,11 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
    - (fait) Fiche Personne pour plusieurs rencontres (un accord par sortie, un refus vaut pour tout, rapprochement par e-mail confirmé à la main, jamais par le visage).
 4. (fait) Fiche photo en rubriques, accueil « Terrain » sur le téléphone (nouvelle rencontre, montrer mon QR, ma sortie du jour).
 
+### 32. Personnes, signature Instagram, admin en trois langues (fait)
+- Fiche Personne (plusieurs rencontres, refus étendu, rapprochement par adresse, export et effacement de la personne).
+- Signature Instagram du photographe, sous la légende, retirable par photo.
+- Admin en français, anglais, allemand ; préférence par photographe ; l'aide reste en français (traduction à faire plus tard).
+
 ## Côté Zitadel (à faire une fois)
 
 1. Créer une organisation et un projet « site photo » avec un rôle `admin`.

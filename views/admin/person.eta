@@ -1,91 +1,92 @@
 <% layout('./layout') %>
-<% const p = it.person; const L = p.latest; const LABELS = { site: 'site', instagram: 'Instagram', print: 'tirages', name: 'prénom' };
+<% const t = it.t; const p = it.person; const L = p.latest; const LABELS = { site: t('site'), instagram: t('Instagram'), print: t('tirages'), name: t('prénom') };
+   const pl = (n, zero, one, many) => n > 1 ? many : n === 1 ? one : zero;
    const usages = c => Object.keys(LABELS).filter(s => c && c[s]).map(s => LABELS[s]).join(', ');
    const dayOf = e => e.session_day || e.met_on || ''; %>
-<p class="mono"><a class="more eyebrow" href="/admin/personnes">← Personnes</a></p>
-<h1 class="enc-title"><% if (p.faceFrom) { %><img class="enc-face big" src="/admin/rencontres/<%= p.faceFrom %>/portrait?mini=1" alt="" width="64" height="64"><% } %><%= p.name || p.ref || 'Sans nom' %></h1>
-<div class="ready-band" aria-label="Décision de la personne">
-<% if (p.refused) { %>  <span class="enc-tag no">refuse la publication</span><span class="mono">un refus vaut pour toutes ses rencontres et toutes ses photos</span>
-<% } else if (L && L.consent) { %>  <span class="enc-tag ok">dernier accord : <%= usages(L.consent) %></span><span class="mono">un accord ne vaut que pour la sortie où il a été donné</span>
-<% } else { %>  <span class="enc-tag">sans décision</span>
-<% } %>  <span class="mono"><%= p.meetings.length %> rencontre<%= p.meetings.length > 1 ? 's' : '' %> · <%= p.photos.length %> photo<%= p.photos.length > 1 ? 's' : '' %></span>
+<p class="mono"><a class="more eyebrow" href="/admin/personnes">← <%= t('Personnes') %></a></p>
+<h1 class="enc-title"><% if (p.faceFrom) { %><img class="enc-face big" src="/admin/rencontres/<%= p.faceFrom %>/portrait?mini=1" alt="" width="64" height="64"><% } %><%= p.name || p.ref || t('Sans nom') %></h1>
+<div class="ready-band" aria-label="<%= t('Décision de la personne') %>">
+<% if (p.refused) { %>  <span class="enc-tag no"><%= t('refuse la publication') %></span><span class="mono"><%= t('un refus vaut pour toutes ses rencontres et toutes ses photos') %></span>
+<% } else if (L && L.consent) { %>  <span class="enc-tag ok"><%= t('dernier accord : {usages}', { usages: usages(L.consent) }) %></span><span class="mono"><%= t('un accord ne vaut que pour la sortie où il a été donné') %></span>
+<% } else { %>  <span class="enc-tag"><%= t('sans décision') %></span>
+<% } %>  <span class="mono"><%= pl(p.meetings.length, t('0 rencontre'), t('1 rencontre'), t('{n} rencontres', { n: p.meetings.length })) %> · <%= pl(p.photos.length, t('0 photo'), t('1 photo'), t('{n} photos', { n: p.photos.length })) %></span>
 </div>
 
 <% if (it.others.length) { %>
 <section class="panel" aria-labelledby="pp-same">
-  <h2 id="pp-same">Rapprochement proposé <span class="mono">même adresse e-mail</span></h2>
+  <h2 id="pp-same"><%= t('Rapprochement proposé') %> <span class="mono"><%= t('même adresse e-mail') %></span></h2>
 <% it.others.forEach(o => { %>
   <div class="row pp-merge">
-    <span><a href="/admin/personnes/<%= o.id %>"><%= o.name || o.ref || 'Sans nom' %></a> <span class="mono"><%= o.meetings.map(e => e.ref).filter(Boolean).join(' · ') %></span></span>
-    <form method="post" action="/admin/personnes/<%= p.id %>/fusionner"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="autre" value="<%= o.id %>"><button class="btn" type="submit">C’est la même personne</button></form>
-    <form method="post" action="/admin/personnes/<%= p.id %>/ecarter"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="autre" value="<%= o.id %>"><button class="btn ghost" type="submit">Ce n’est pas elle</button></form>
+    <span><a href="/admin/personnes/<%= o.id %>"><%= o.name || o.ref || t('Sans nom') %></a> <span class="mono"><%= o.meetings.map(e => e.ref).filter(Boolean).join(' · ') %></span></span>
+    <form method="post" action="/admin/personnes/<%= p.id %>/fusionner"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="autre" value="<%= o.id %>"><button class="btn" type="submit"><%= t('C’est la même personne') %></button></form>
+    <form method="post" action="/admin/personnes/<%= p.id %>/ecarter"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="autre" value="<%= o.id %>"><button class="btn ghost" type="submit"><%= t('Ce n’est pas elle') %></button></form>
   </div>
 <% }) %>
-  <p class="hint">Jamais d’après le visage : seulement une adresse identique, à confirmer.</p>
+  <p class="hint"><%= t('Jamais d’après le visage : seulement une adresse identique, à confirmer.') %></p>
 </section>
 <% } %>
 
 <section class="panel" aria-labelledby="pp-meet">
-  <h2 id="pp-meet">Rencontres <span class="mono">une par sortie, chacune avec son accord</span></h2>
+  <h2 id="pp-meet"><%= t('Rencontres') %> <span class="mono"><%= t('une par sortie, chacune avec son accord') %></span></h2>
   <ul class="rank plain">
 <% p.meetings.forEach(e => { const url = e.author_id && dayOf(e) ? it.outingUrl(e.author_id, dayOf(e), e.met_time) : null; %>
-    <li><span class="t"><span class="enc-who"><a href="/admin/rencontres/<%= e.id %>"><%= e.ref || 'Sans carte' %></a> <span class="mono"><%= e.author || '' %><%= dayOf(e) ? ` · ${dayOf(e)}` : '' %><%= e.met_time ? ` · ${e.met_time}` : '' %></span><% if (url) { %> <a class="more" href="<%= url %>">sortie</a><% } %></span></span>
-      <% if (e.refused) { %><span class="enc-tag no">refus</span><% } else if (e.consent) { %><span class="enc-tag ok"><%= e.consent_source === 'en_ligne' && !e.verified ? 'en ligne, non vérifié' : 'accord' %> : <%= usages(e.consent) %></span><% } else { %><span class="enc-tag">sans décision</span><% } %>
-<% if (p.meetings.length > 1) { %>      <form method="post" action="/admin/personnes/<%= p.id %>/detacher"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="rencontre" value="<%= e.id %>"><button class="linkbtn" type="submit">Ce n’est pas elle</button></form>
+    <li><span class="t"><span class="enc-who"><a href="/admin/rencontres/<%= e.id %>"><%= e.ref || t('Sans carte') %></a> <span class="mono"><%= e.author || '' %><%= dayOf(e) ? ` · ${dayOf(e)}` : '' %><%= e.met_time ? ` · ${e.met_time}` : '' %></span><% if (url) { %> <a class="more" href="<%= url %>"><%= t('sortie') %></a><% } %></span></span>
+      <% if (e.refused) { %><span class="enc-tag no"><%= t('refus') %></span><% } else if (e.consent) { %><span class="enc-tag ok"><%= e.consent_source === 'en_ligne' && !e.verified ? t('en ligne, non vérifié : {usages}', { usages: usages(e.consent) }) : t('accord : {usages}', { usages: usages(e.consent) }) %></span><% } else { %><span class="enc-tag"><%= t('sans décision') %></span><% } %>
+<% if (p.meetings.length > 1) { %>      <form method="post" action="/admin/personnes/<%= p.id %>/detacher"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="rencontre" value="<%= e.id %>"><button class="linkbtn" type="submit"><%= t('Ce n’est pas elle') %></button></form>
 <% } %>    </li>
 <% }) %>
   </ul>
   <div class="pp-actions">
-    <a class="btn" href="/admin/rencontre">＋ Nouvelle rencontre sur le téléphone</a>
+    <a class="btn" href="/admin/rencontre">＋ <%= t('Nouvelle rencontre sur le téléphone') %></a>
     <form class="row" method="post" action="/admin/personnes/<%= p.id %>/sortie">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-      <label>Était aussi là lors de la sortie <select name="sortie"><% it.outings.forEach(o => { %><option value="<%= o.author.id %>|<%= o.day %>|<%= o.starts %>"><%= o.day %> · <%= o.author.name %><%= o.place ? ` · ${o.place}` : '' %><%= o.starts !== '00:00' ? ` · à partir de ${o.starts}` : '' %></option><% }) %></select></label>
-      <button class="btn ghost" type="submit">Ajouter la rencontre</button>
+      <label><%= t('Était aussi là lors de la sortie') %> <select name="sortie"><% it.outings.forEach(o => { %><option value="<%= o.author.id %>|<%= o.day %>|<%= o.starts %>"><%= o.day %> · <%= o.author.name %><%= o.place ? ` · ${o.place}` : '' %><%= o.starts !== '00:00' ? ` · ${t('à partir de {time}', { time: o.starts })}` : '' %></option><% }) %></select></label>
+      <button class="btn ghost" type="submit"><%= t('Ajouter la rencontre') %></button>
     </form>
   </div>
   <details class="pp-attach">
-    <summary>Rattacher une rencontre existante <span class="mono">la même personne, saisie à part</span></summary>
-    <form method="get" action="/admin/personnes/<%= p.id %>" role="search" class="row"><input type="search" name="q" value="<%= it.search %>" placeholder="Référence, nom, adresse…" aria-label="Chercher une rencontre"> <button class="btn ghost" type="submit">Chercher</button></form>
+    <summary><%= t('Rattacher une rencontre existante') %> <span class="mono"><%= t('la même personne, saisie à part') %></span></summary>
+    <form method="get" action="/admin/personnes/<%= p.id %>" role="search" class="row"><input type="search" name="q" value="<%= it.search %>" placeholder="<%= t('Référence, nom, adresse…') %>" aria-label="<%= t('Chercher une rencontre') %>"> <button class="btn ghost" type="submit"><%= t('Chercher') %></button></form>
 <% if (it.attachable.length) { %>
     <ul class="rank plain">
-<% it.attachable.forEach(e => { %>      <li><span class="t"><%= e.ref || 'Sans carte' %><%= e.name ? ` · ${e.name}` : '' %> <span class="mono"><%= e.author || '' %> · <%= e.met_on || '' %></span></span>
-        <form method="post" action="/admin/personnes/<%= p.id %>/rattacher"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="rencontre" value="<%= e.id %>"><button class="btn ghost" type="submit">Rattacher</button></form></li>
+<% it.attachable.forEach(e => { %>      <li><span class="t"><%= e.ref || t('Sans carte') %><%= e.name ? ` · ${e.name}` : '' %> <span class="mono"><%= e.author || '' %> · <%= e.met_on || '' %></span></span>
+        <form method="post" action="/admin/personnes/<%= p.id %>/rattacher"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="rencontre" value="<%= e.id %>"><button class="btn ghost" type="submit"><%= t('Rattacher') %></button></form></li>
 <% }) %>    </ul>
-<% } else { %>    <p class="hint">Aucune autre rencontre<%= it.search ? ' pour cette recherche' : '' %>.</p><% } %>
+<% } else { %>    <p class="hint"><%= it.search ? t('Aucune autre rencontre pour cette recherche.') : t('Aucune autre rencontre.') %></p><% } %>
   </details>
 </section>
 
 <section class="panel" aria-labelledby="pp-photos">
-  <h2 id="pp-photos">Photos <span class="mono">liées à l’une de ses rencontres</span></h2>
+  <h2 id="pp-photos"><%= t('Photos') %> <span class="mono"><%= t('liées à l’une de ses rencontres') %></span></h2>
 <% if (p.photos.length) { %>
   <ul class="o-photos">
-<% p.photos.forEach(ph => { %>    <li><a class="o-photo" href="/admin/photos/<%= ph.id %>"><% if (ph.ready) { %><%~ it.picture(ph, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></a><a class="o-title" href="/admin/photos/<%= ph.id %>"><%= ph.title %></a><span class="mono"><%= ph.status === 'published' ? 'publiée' : 'brouillon' %></span></li>
+<% p.photos.forEach(ph => { %>    <li><a class="o-photo" href="/admin/photos/<%= ph.id %>"><% if (ph.ready) { %><%~ it.picture(ph, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></a><a class="o-title" href="/admin/photos/<%= ph.id %>"><%= ph.title %></a><span class="mono"><%= ph.status === 'published' ? t('publiée') : t('brouillon') %></span></li>
 <% }) %>  </ul>
-<% } else { %>  <p class="hint">Aucune photo liée : les photos de ses sorties la concernent déjà si elles ont un visage ; liez celles où elle figure.</p><% } %>
+<% } else { %>  <p class="hint"><%= t('Aucune photo liée : les photos de ses sorties la concernent déjà si elles ont un visage ; liez celles où elle figure.') %></p><% } %>
   <details class="pp-attach">
-    <summary>Lier des photos où elle figure <span class="mono">rattachées à sa rencontre de la sortie de chaque photo (créée sans décision si besoin)</span></summary>
-    <form method="get" action="/admin/personnes/<%= p.id %>" role="search" class="row"><input type="search" name="q" value="<%= it.search %>" placeholder="Titre, lieu…" aria-label="Chercher une photo"> <button class="btn ghost" type="submit">Chercher</button></form>
+    <summary><%= t('Lier des photos où elle figure') %> <span class="mono"><%= t('rattachées à sa rencontre de la sortie de chaque photo (créée sans décision si besoin)') %></span></summary>
+    <form method="get" action="/admin/personnes/<%= p.id %>" role="search" class="row"><input type="search" name="q" value="<%= it.search %>" placeholder="<%= t('Titre, lieu…') %>" aria-label="<%= t('Chercher une photo') %>"> <button class="btn ghost" type="submit"><%= t('Chercher') %></button></form>
     <form method="post" action="/admin/personnes/<%= p.id %>/photos">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
       <ul class="o-photos">
-<% it.photoCandidates.forEach(ph => { %>        <li><label class="o-photo"><input type="checkbox" name="photo" value="<%= ph.id %>" aria-label="Lier « <%= ph.title %> »"><% if (ph.ready) { %><%~ it.picture(ph, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></label><span class="o-title"><%= ph.title %></span><span class="mono"><%= ph.taken_on %> · <%= ph.author %></span></li>
+<% it.photoCandidates.forEach(ph => { %>        <li><label class="o-photo"><input type="checkbox" name="photo" value="<%= ph.id %>" aria-label="<%= t('Lier « {title} »', { title: ph.title }) %>"><% if (ph.ready) { %><%~ it.picture(ph, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></label><span class="o-title"><%= ph.title %></span><span class="mono"><%= ph.taken_on %> · <%= ph.author %></span></li>
 <% }) %>      </ul>
-      <p class="actions"><button class="btn ghost" type="submit">Lier les photos cochées</button></p>
+      <p class="actions"><button class="btn ghost" type="submit"><%= t('Lier les photos cochées') %></button></p>
     </form>
   </details>
 </section>
 
 <section class="panel" id="droits" aria-labelledby="pp-rights">
-  <h2 id="pp-rights">Droits de la personne <span class="mono">RGPD, toutes rencontres confondues</span></h2>
-<% if (p.rights) { %>  <p class="enc-tag no">Demande <%= p.rights.rights_request === 'effacement' ? 'd’effacement' : 'd’accès' %> en cours (rencontre <%= p.rights.ref || 'sans carte' %>) : traitez-la sur la fiche de la rencontre.</p><% } %>
-  <p class="actions"><a class="btn ghost" href="/admin/personnes/<%= p.id %>/export.zip">Exporter ses données (.zip)</a></p>
+  <h2 id="pp-rights"><%= t('Droits de la personne') %> <span class="mono"><%= t('RGPD, toutes rencontres confondues') %></span></h2>
+<% if (p.rights) { %>  <p class="enc-tag no"><%= p.rights.rights_request === 'effacement' ? t('Demande d’effacement en cours (rencontre {ref}) : traitez-la sur la fiche de la rencontre.', { ref: p.rights.ref || t('sans carte') }) : t('Demande d’accès en cours (rencontre {ref}) : traitez-la sur la fiche de la rencontre.', { ref: p.rights.ref || t('sans carte') }) %></p><% } %>
+  <p class="actions"><a class="btn ghost" href="/admin/personnes/<%= p.id %>/export.zip"><%= t('Exporter ses données (.zip)') %></a></p>
   <details class="danger">
-    <summary>Effacer cette personne</summary>
+    <summary><%= t('Effacer cette personne') %></summary>
     <form method="post" action="/admin/personnes/<%= p.id %>/effacer">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-      <p>Ses <%= p.meetings.length %> rencontre<%= p.meetings.length > 1 ? 's' : '' %> et leurs données (adresse, messages, signature, visage, cartes) seront effacées. Si elle refusait la publication et que des photos liées restent, une trace anonyme garde le refus.</p>
-      <label class="inline"><input type="checkbox" name="photos"> Supprimer aussi les <%= p.photos.length %> photo<%= p.photos.length > 1 ? 's' : '' %> liée<%= p.photos.length > 1 ? 's' : '' %></label>
-      <p class="actions"><button class="btn danger" type="submit">Effacer définitivement</button></p>
+      <p><%= p.meetings.length > 1 ? t('Ses {n} rencontres et leurs données (adresse, messages, signature, visage, cartes) seront effacées. Si elle refusait la publication et que des photos liées restent, une trace anonyme garde le refus.', { n: p.meetings.length }) : t('Sa rencontre et ses données (adresse, messages, signature, visage, cartes) seront effacées. Si elle refusait la publication et que des photos liées restent, une trace anonyme garde le refus.', { n: p.meetings.length }) %></p>
+      <label class="inline"><input type="checkbox" name="photos"> <%= p.photos.length > 1 ? t('Supprimer aussi les {n} photos liées', { n: p.photos.length }) : t('Supprimer aussi la photo liée', { n: p.photos.length }) %></label>
+      <p class="actions"><button class="btn danger" type="submit"><%= t('Effacer définitivement') %></button></p>
     </form>
   </details>
 </section>
