@@ -14,7 +14,8 @@ async function admin(t) {
   const cookies = cookiesOf(res);
   const csrf = ctx.db.prepare("SELECT csrf FROM sessions WHERE sub = 'local:julien'").pluck().get();
   const post = (url, payload = {}) => ctx.app.inject({ method: 'POST', url, cookies, headers: { accept: 'text/html' }, payload: { ...payload, _csrf: csrf } });
-  const flash = async res => decodeURIComponent((await ctx.app.inject({ url: res.headers.location, cookies: { ...cookies, ...cookiesOf(res) } })).body);
+  // Page qui suit la redirection (le message y est affiché) ; décodée si possible (un « % » isolé reste tel quel).
+  const flash = async res => { const body = (await ctx.app.inject({ url: res.headers.location, cookies: { ...cookies, ...cookiesOf(res) } })).body; try { return decodeURIComponent(body); } catch { return body; } };
   return { ...ctx, cookies, post, flash, get: url => ctx.app.inject({ url, cookies }) };
 }
 // Session pour une autre identité (comme après une connexion OIDC).

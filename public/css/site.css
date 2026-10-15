@@ -145,7 +145,7 @@ picture { display: block; }
 /* ---------- séries · C ---------- */
 .series { display: grid; grid-template-columns: 1fr; gap: 32px; padding-block: clamp(48px, 8vw, 104px) 0; }
 @media (min-width: 900px) { .series { grid-template-columns: 7fr 5fr; gap: 64px; align-items: start; } }
-.idx { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 6px 0 8px; border-bottom: 1px solid var(--rule); font-family: var(--serif); font-size: clamp(46px, 8.4vw, 104px); line-height: .96; letter-spacing: -0.02em; transition: padding .3s; }
+.idx { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 6px 0 8px; border-bottom: 1px solid var(--rule); font-family: var(--serif); font-size: clamp(38px, 6.8vw, 84px); line-height: .96; letter-spacing: -0.02em; transition: padding .3s; }
 .idx .mono { color: var(--mute); }
 a.idx:hover { padding-left: 10px; }
 .idx[aria-current] { font-style: var(--display-style); }
