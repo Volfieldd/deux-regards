@@ -1997,3 +1997,11 @@ function openFor(hash) {
 }
 openFor(location.hash);
 window.addEventListener('hashchange', () => openFor(location.hash));
+
+// ----- nouveautés : la fenêtre (ouverte sans script) devient modale, avec le fond assombri et le focus gardé -----
+(function () {
+  const d = $('[data-release-pop]');
+  if (!d || typeof d.showModal !== 'function') return;
+  d.close();
+  d.showModal();
+})();

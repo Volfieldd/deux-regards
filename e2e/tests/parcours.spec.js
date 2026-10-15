@@ -264,6 +264,9 @@ test.describe('parcours d’une photo', () => {
     await page.goto('/auth/local?next=/admin');
     await page.getByLabel('Jeton de test').fill(process.env.E2E_LOCAL_AUTH);
     await page.getByRole('button', { name: 'Se connecter' }).click();
+    // Un autre compte (photographe par défaut) : sa fenêtre des nouveautés s'affiche une fois.
+    const news = page.getByRole('dialog', { name: /Nouveau depuis votre dernière visite/ });
+    if (await news.isVisible()) await news.getByRole('button', { name: 'C’est noté' }).click();
     await page.getByRole('button', { name: 'Se déconnecter' }).click();
     await expect(page).toHaveURL(/\/$/);
     await page.goto('/admin');

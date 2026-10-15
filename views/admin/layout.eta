@@ -38,6 +38,7 @@
     stats: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
     people: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/>',
     trip: '<path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/>',
+    star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
     globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/>',
     outing: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/>',
     pin: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
@@ -108,6 +109,7 @@
     <%~ item(['images', '/admin/images', 'Filigrane & EXIF', 'images', null, 'site.filigrane']) %>
     <%~ item(['droits', '/admin/droits', 'Droits & confidentialité', 'shield', null, 'reglages.droits']) %>
     <%~ item(['help', '/admin/aide', 'Aide', 'help']) %>
+    <a href="/admin/nouveautes"<%~ it.section === 'releases' ? ' aria-current="page"' : '' %>><%~ ic('star') %><%= t('Nouveautés') %><span class="nav-ver mono"><%= it.releaseCurrent %></span></a>
     <a href="/" target="_blank" rel="noopener"><%~ ic('site') %><%= t('Voir le site') %></a>
   </nav>
   <details class="lang-pick admin-lang">
@@ -135,7 +137,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { review: 'photos-le-circuit-de-publication', circuit: 'photos-le-circuit-de-publication', accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', trips: 'rencontres-les-voyages', trip: 'rencontres-les-voyages', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% const HELP = { review: 'photos-le-circuit-de-publication', circuit: 'photos-le-circuit-de-publication', accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', trips: 'rencontres-les-voyages', trip: 'rencontres-les-voyages', releases: 'tableau-de-bord', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>"><%= t('Aide sur cette page') %></a></p>
 <% } %>
@@ -168,6 +170,18 @@
   <button type="button" data-menu aria-expanded="false" aria-controls="admin-nav"><%~ ic('menu', 22) %><%= t('Menu') %></button>
 </nav>
 
+<% if (it.releasePopup) { const rp = it.releasePopup; %>
+<dialog class="release-pop" open data-release-pop aria-labelledby="rel-pop-t">
+  <form method="dialog" class="rel-pop-in">
+    <p class="eyebrow"><%= t('Version {v}', { v: it.releaseCurrent }) %></p>
+    <h2 id="rel-pop-t"><%= rp.length > 1 ? t('Nouveau depuis votre dernière visite : {n} versions', { n: rp.length }) : t('Nouveau depuis votre dernière visite') %></h2>
+    <div class="rel-pop-list">
+<% rp.forEach(r => { %>      <section><h3><span class="rel-v mono"><%= r.version %></span> <%= r.title %></h3><ul><% r.items.forEach(i => { %><li><%= i %></li><% }) %></ul></section>
+<% }) %>    </div>
+    <p class="actions"><button class="btn" type="submit" autofocus><%= t('C’est noté') %></button> <a class="more" href="/admin/nouveautes"><%= t('Toutes les nouveautés') %></a></p>
+  </form>
+</dialog>
+<% } %>
 <div class="toast" role="status" aria-live="polite" data-toast hidden></div>
 <dialog class="palette" data-cmdk aria-label="<%= t('Rechercher et agir') %>">
   <div class="pal-in"><%~ ic('search', 20) %><input type="text" data-cmdk-input placeholder="<%= t('Rechercher une photo, une série, une action…') %>" aria-label="<%= t('Rechercher') %>" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="cmdk-list"><kbd><%= t('Échap') %></kbd></div>

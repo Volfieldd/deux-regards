@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { ROLES, PERMISSIONS, SCOPES, grantsOf } from '../permissions.js';
 import { MailError } from '../mailer.js';
+import { CURRENT as RELEASE_CURRENT, RELEASES, unseen as unseenReleases, localize as localizeRelease } from '../releases.js';
 import { AccountError } from '../accounts.js';
 import { NoteError } from '../notes.js';
 import { ReviewError } from '../review.js';
@@ -217,7 +218,16 @@ export default async function adminRoutes(app) {
     const siteName = app.siteName();
     if (data.errors) data = { ...data, errors: translateDeep(request.t, data.errors) };
     if (data.editErrors) data = { ...data, editErrors: { ...data.editErrors, errors: translateDeep(request.t, data.editErrors.errors) } };
+    // Nouveautés pas encore vues par ce compte : une seule fois, sur la première page affichée (puis marquées vues).
+    let releasePopup = null;
+    const account = request.method === 'GET' ? app.accounts.bySub(request.session.sub) : null;
+    if (account && account.seen_release !== RELEASE_CURRENT) {
+      const list = unseenReleases(account.seen_release).map(r => localizeRelease(r, request.t.lang, perm => Boolean(request.can(perm)))).filter(r => r.items.length);
+      if (list.length && template !== 'releases') releasePopup = list;     // sur la page Nouveautés, déjà sous les yeux
+      app.accounts.setSeenRelease(request.session.sub, RELEASE_CURRENT);
+    }
     return reply.render(`admin/${template}`, {
+      releasePopup, releaseCurrent: RELEASE_CURRENT,
       // Retour après la bascule clair / sombre : la page affichée, si elle a été obtenue par GET.
       adminTheme: adminTheme(request), navSeries: navSeries(request), currentPath: request.method === 'GET' ? request.url : '/admin',
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply), can: perm => Boolean(request.can(perm)), canAll: perm => Boolean(request.scope(perm)?.all),
@@ -911,6 +921,10 @@ export default async function adminRoutes(app) {
     title: request.t('Comptes et rôles'), accounts: app.accounts.list(), authors: repo.authors(), me: request.session.sub,
     roles: ROLE_ORDER.map(key => ({ key, label: ROLES[key].label, ready: READY_ROLES.has(key) })), guarded: (app.config.adminSubs || []).length > 0,
     mail: { enabled: app.mailer.enabled, from: app.mailer.from, mine: (a => a?.notify_to || a?.email || request.session.email || '')(app.accounts.bySub(request.session.sub)) },
+  }));
+  // Nouveautés : toutes les versions, la plus récente d'abord, et la version installée.
+  app.get('/admin/nouveautes', P('admin.acceder'), async (request, reply) => render(request, reply, 'releases', {
+    title: request.t('Nouveautés'), releases: RELEASES.map(r => localizeRelease(r, request.t.lang, perm => Boolean(request.can(perm)))).filter(r => r.items.length),
   }));
   // Tester l'envoi d'e-mails : à l'adresse choisie (la sienne par défaut) ; l'erreur du serveur de messagerie sinon.
   app.post('/admin/comptes/test-email', W('comptes.gerer'), async (request, reply) => {

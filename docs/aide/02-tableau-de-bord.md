@@ -16,6 +16,7 @@ C’est la page **Aujourd’hui**, celle où l’on arrive. En haut, **Voir le s
 - **Rythme** : le nombre de photos importées chaque mois, sur un an.
 - **Dernières modifications** : les cinq photos modifiées le plus récemment.
 - **Preuves d’antériorité** : nombre de photos horodatées, et celles en attente après une erreur, avec **Réessayer maintenant**. Voir [Preuves d’antériorité](preuves).
+- **Nouveautés** : après une mise à jour, une fenêtre montre une seule fois, à votre connexion suivante, tout ce qui est arrivé depuis votre dernière visite (seulement ce qui concerne vos droits). **C’est noté** la ferme. Le menu **Nouveautés** (sous Aide) garde toutes les versions, la plus récente d’abord, avec le numéro de la version installée.
 - **Votre compte** : le nom du compte connecté, ses rôles, et le photographe auquel il est lié. On y règle aussi les e-mails :
   - **Me prévenir aussi par e-mail** : les propositions, les décisions sur vos photos et les remarques, au moment où elles arrivent ;
   - **Récapitulatif de ce qui vous attend** : **jamais**, **chaque jour** ou **chaque semaine (le lundi)**. Il part vers 8 h, seulement s'il y a quelque chose, jamais plus d'une fois par jour ;
