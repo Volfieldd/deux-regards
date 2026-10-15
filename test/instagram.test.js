@@ -70,7 +70,7 @@ test('légende : variables, lignes vides retirées, hashtags dédoublonnés', ()
 test('réglages : heures valides, cadre connu, hashtags nettoyés', () => {
   const s = normalizeSettings({ times: '18:30, 07:05 25:00 abc, 18:30', frame: 'rouge', hashtags: 'photo #ok #très_bien !', hashtags_2: '#portrait', auto_2: 'on', auto_9: 'on' }, [{ id: 2 }, { id: 3 }]);
   assert.deepEqual(s.times, ['07:05', '18:30']);
-  assert.equal(s.frame, 'white');
+  assert.equal(s.frame, 'crop');                                                   // cadre inconnu : le défaut (recadrage)
   assert.equal(s.hashtags, '#ok #très_bien');
   assert.deepEqual(s.seriesHashtags, { 2: '#portrait' });
   assert.deepEqual(s.autoSeries, [2]);                                       // série inconnue (9) ignorée

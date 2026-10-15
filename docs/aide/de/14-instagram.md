@@ -17,7 +17,7 @@ Die Einrichtung erfolgt nur einmal: ein **professionelles Instagram-Konto**, ein
 
 ## Der Bildrahmen
 
-Instagram akzeptiert nur Bilder zwischen **4:5** (Hochformat) und **1,91:1** (Querformat). Ihre Hochformatfotos im Format 2:3 passen so nicht hinein. Drei Möglichkeiten, als Standard in den Einstellungen und Foto für Foto auf seiner Seite:
+Instagram akzeptiert nur Bilder zwischen **4:5** (Hochformat) und **1,91:1** (Querformat). Ihre Hochformatfotos im Format 2:3 passen so nicht hinein. Drei Möglichkeiten, als Standard in den Einstellungen (**Zuschnitt**, wenn Sie nichts gewählt haben) und Foto für Foto auf seiner Seite:
 
 | Rahmen | Ergebnis |
 |---|---|

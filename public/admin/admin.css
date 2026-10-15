@@ -978,3 +978,16 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
   .enc-tag { white-space: normal; }
   .panel, .panel * { min-width: 0; }
 }
+
+/* Fiche photo : sur grand écran, les rubriques du bas (personnes, Instagram, audience, preuve) remplissent la colonne
+   de l'aperçu, à côté du formulaire, au lieu de laisser un grand vide ; sur téléphone, l'ordre reste aperçu,
+   formulaire, rubriques. */
+.edit-lower { display: grid; gap: 18px; min-width: 0; }
+.edit-lower > .panel { margin: 0; }
+@media (min-width: 1000px) {
+  .edit { grid-template-areas: "preview form" "lower form"; grid-template-rows: auto 1fr; }
+  .edit > .preview { grid-area: preview; }
+  .edit > form { grid-area: form; }
+  .edit > .edit-lower { grid-area: lower; align-self: start; }
+}
+.insp-autosave { margin: 10px 20px 0; font-size: 12px; }

@@ -17,7 +17,7 @@ Setting it up is done only once: a **professional Instagram account**, a **Meta 
 
 ## The image frame
 
-Instagram only accepts images between **4:5** (portrait) and **1.91:1** (landscape). Your 2:3 portrait photos do not fit as they are. Three choices, as a default in the settings and photo by photo on its page:
+Instagram only accepts images between **4:5** (portrait) and **1.91:1** (landscape). Your 2:3 portrait photos do not fit as they are. Three choices, as a default in the settings (**Crop** if you have not chosen anything) and photo by photo on its page:
 
 | Frame | Result |
 |---|---|
