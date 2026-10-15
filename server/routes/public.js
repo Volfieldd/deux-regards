@@ -12,7 +12,8 @@ import { LANGS, PREFIX, UI, pick, localize, splitLang, detectLang } from '../i18
 import { BOTS, countryOf } from '../stats.js';
 import path from 'node:path';
 import sharp from 'sharp';
-import { createRateLimiter } from '../ratelimit.js';
+import { createRateLimiter, clientKey } from '../ratelimit.js';
+import { FeedbackError } from '../feedback.js';
 import { EncounterError } from '../encounters.js';
 
 const HERO_COUNT = 5;
@@ -25,8 +26,11 @@ export default async function publicRoutes(app) {
 
   // Page /bonjour : 8 demandes par heure et par adresse au plus (partagé entre les trois langues).
   const helloLimit = createRateLimiter({ limit: 8, windowMs: 3600 * 1000 });
+  // J'aime : 120 par heure et par adresse au plus ; signalements : 5 par heure.
+  const likeLimit = createRateLimiter({ limit: 120, windowMs: 3600 * 1000 });
+  const reportLimit = createRateLimiter({ limit: 5, windowMs: 3600 * 1000 });
   // Mêmes pages en français (racine), en anglais (/en) et en allemand (/de).
-  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit });
+  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit });
 
   // Sélecteur de langue : retient le choix (seul cookie du site, posé à ce moment-là) puis ouvre la page demandée.
   // Adresses habituelles des mentions légales en Allemagne et en anglais.
@@ -136,7 +140,7 @@ function helpers(lang) {
   return { picture, pad, lang, t: UI[lang], u, galleryUrl: f => u(galleryUrl(f)), photoUrl: (slug, f) => u(photoUrl(slug, f)) };
 }
 
-async function pages(app, { lang, repo, mapEnabled, helloLimit }) {
+async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit }) {
   const t = UI[lang];
   const base = helpers(lang);
   const trusted = Boolean(app.config.trustProxy);
@@ -291,6 +295,45 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit }) {
       pageTitle: `${t.map.title} · ${siteName}`, canonical: '/carte',
       description: places.length ? t.map.description(names) : pick(settings, 'tagline', lang),
     });
+  });
+
+  // ---------- j'aime et signalements ----------
+  const publishedBySlug = slug => repo.publishedPhotos({ lang }).find(p => p.slug === slug) || null;
+  // Envoyé depuis le site lui-même (un autre site ne peut pas faire aimer ou signaler à la place du visiteur).
+  const sameSite = request => { const o = request.headers.origin; return !o || o === new URL(app.config.publicUrl).origin || o === `${request.protocol}://${request.headers.host}`; };
+  app.post('/photo/:slug/aime', async (request, reply) => {
+    const photo = publishedBySlug(request.params.slug);
+    if (!photo) return reply.callNotFound();
+    const json = String(request.headers.accept || '').includes('application/json');
+    if (!sameSite(request) || !likeLimit(request.ip)) return json ? reply.code(429).send({ error: 'limit' }) : reply.redirect(base.photoUrl(photo.slug), 303);
+    const r = app.feedback.like(photo.id, clientKey(request.ip), { undo: request.body?.retirer === '1' || request.body?.retirer === true });
+    return json ? reply.header('cache-control', 'no-store').send({ ...r, label: t.fb.likes(r.likes) }) : reply.redirect(base.photoUrl(photo.slug), 303);
+  });
+  function reportPage(request, reply, photo, { values = {}, errors = {}, sent = false, status = 200 } = {}) {
+    const siteName = app.siteName();
+    reply.code(status).header('x-robots-tag', 'noindex').header('cache-control', 'no-store');
+    return reply.render('report', { ...base, siteName, photo, values, errors, sent, f: t.fb,
+      pageTitle: `${t.fb.reportTitle} · ${siteName}`, canonical: `/photo/${photo.slug}/signaler`, description: '' });
+  }
+  app.get('/photo/:slug/signaler', async (request, reply) => {
+    const photo = publishedBySlug(request.params.slug);
+    if (!photo) return reply.callNotFound();
+    return reportPage(request, reply, photo, { sent: request.query.envoye === '1' });
+  });
+  app.post('/photo/:slug/signaler', async (request, reply) => {
+    const photo = publishedBySlug(request.params.slug);
+    if (!photo) return reply.callNotFound();
+    const body = request.body || {};
+    const done = `${base.u(`/photo/${photo.slug}/signaler`)}?envoye=1`;
+    if (String(body.website || '').trim() || !sameSite(request)) return reply.redirect(done, 303);     // piège à robots
+    if (!reportLimit(request.ip)) return reportPage(request, reply, photo, { values: body, errors: { limit: 'limit' }, status: 429 });
+    try {
+      app.feedback.report(photo.id, body, { lang });
+    } catch (err) {
+      if (!(err instanceof FeedbackError)) throw err;
+      return reportPage(request, reply, photo, { values: body, errors: err.errors, status: 422 });
+    }
+    return reply.redirect(done, 303);
   });
 
   // « Je vous ai photographié » : page du QR des cartes « pour eux » (référence dans l'adresse) ou tapée à la main.

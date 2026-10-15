@@ -991,3 +991,14 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
   .edit > .edit-lower { grid-area: lower; align-self: start; }
 }
 .insp-autosave { margin: 10px 20px 0; font-size: 12px; }
+
+/* ---------- Signalements des visiteurs ---------- */
+.reports { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px; }
+.reports > li { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; margin: 0; }
+.reports > li.fresh { box-shadow: inset 3px 0 0 var(--warn); }
+.rp-photo { display: grid; gap: 6px; width: 120px; font-size: 12.5px; }
+.rp-photo img { width: 120px; height: 80px; object-fit: cover; border-radius: 6px; display: block; }
+.rp-body { flex: 1 1 260px; min-width: 0; display: grid; gap: 8px; }
+.rp-msg { white-space: pre-wrap; }
+.rp-acts { display: flex; gap: 12px; align-items: center; }
+.rp-acts form { margin: 0; }

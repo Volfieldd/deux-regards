@@ -47,6 +47,8 @@ The next photo depends on the active filter: in “Street, by Julien”, you sta
 
 **Back to the series:** moving from one photo to the previous or next one does not pile up in the browser history. After viewing ten photos, **a single** Back (or **Close**, or **Esc**) returns to the series, at the height where you left it, and the last photo viewed is brought back into view.
 
+**Like and Report**: under each photo’s text, a **Like** heart (anonymous: no account, no cookie; visitors can take their like back, and the count is shown next to it) and a **Report** link: a photo that should not be online, a suggestion for the text, something else, with a message and an optional address. Someone who recognises themselves is sent to `/bonjour`. Reports arrive in “Today” and on the **Visitor reports** page; the number of likes is shown in the Audience section of the photo’s page.
+
 ## Other pages
 
 - **About:** full logo, tagline, text, authors’ biographies.

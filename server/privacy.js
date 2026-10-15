@@ -3,7 +3,7 @@
 // le code fait réellement : toute évolution d'un traitement ou d'une durée se reporte ici dans la même modification.
 // Responsables conjoints : les auteurs du site ; contact réglable dans l'admin (privacy_contact).
 
-export const UPDATED = '2026-10-14';
+export const UPDATED = '2026-10-15';
 
 const list = (names, and) => (names.length > 1 ? `${names.slice(0, -1).join(', ')}${and}${names.at(-1)}` : names[0] || '');
 
@@ -28,6 +28,10 @@ export const PRIVACY = {
         'Votre accord couvre les photos que le photographe a prises ce jour-là (la sortie ; si la journée est partagée en deux, la partie de la journée où il vous a rencontré) ; votre refus s’applique aux photos où vous apparaissez.',
         'Base légale : votre consentement, que vous pouvez retirer à tout moment sur la même page, sans justification.',
         'Nous ne vous envoyons rien d’autre que ce que vous avez demandé : votre photo, une réponse, le récapitulatif de votre accord.',
+      ]],
+      ['« J’aime » et signalements', [
+        'Le bouton « J’aime » sous une photo est anonyme : ni compte, ni cookie. Votre navigateur retient la photo aimée (stockage local, sur votre appareil) ; notre serveur garde seulement en mémoire, quelques heures, que votre adresse IP a aimé cette photo, pour éviter les doublons, sans jamais l’enregistrer.',
+        'Le lien « Signaler » nous envoie votre message et, si vous le souhaitez, votre adresse e-mail pour vous répondre : ils ne servent qu’à traiter le signalement et sont effacés au bout de 12 mois.',
       ]],
       ['Combien de temps', [
         'Demande sans accord ni refus : effacée après 12 mois sans nouvelle.',
@@ -76,6 +80,10 @@ export const PRIVACY = {
         'Legal basis: your consent, which you can withdraw at any time on the same page, without giving a reason.',
         'We send you nothing other than what you asked for: your photo, a reply, a summary of your consent.',
       ]],
+      ['“Like” and reports', [
+        'The “Like” button under a photo is anonymous: no account, no cookie. Your browser remembers the photo you liked (local storage, on your device); our server only keeps in memory, for a few hours, that your IP address liked this photo, to avoid duplicates, and never records it.',
+        'The “Report” link sends us your message and, if you wish, your email address so that we can reply: they are only used to deal with the report and are deleted after 12 months.',
+      ]],
       ['For how long', [
         'Request without consent or refusal: deleted after 12 months without news.',
         'Photo of you attached to your consent: kept with the consent; without consent, deleted after 6 months.',
@@ -122,6 +130,10 @@ export const PRIVACY = {
         'Ihre Einwilligung gilt für die Fotos, die der Fotograf an diesem Tag gemacht hat (der Ausflug; ist der Tag geteilt, der Teil des Tages, an dem Sie sich begegnet sind); Ihre Ablehnung gilt für die Fotos, auf denen Sie zu sehen sind.',
         'Rechtsgrundlage: Ihre Einwilligung, die Sie jederzeit auf derselben Seite ohne Begründung widerrufen können.',
         'Wir schicken Ihnen nur, was Sie angefragt haben: Ihr Foto, eine Antwort, eine Zusammenfassung Ihrer Einwilligung.',
+      ]],
+      ['„Gefällt mir“ und Meldungen', [
+        'Die Schaltfläche „Gefällt mir“ unter einem Foto ist anonym: kein Konto, kein Cookie. Ihr Browser merkt sich das Foto (lokaler Speicher auf Ihrem Gerät); unser Server behält nur einige Stunden im Arbeitsspeicher, dass Ihre IP-Adresse dieses Foto mag, um Doppelungen zu vermeiden, und speichert sie nie.',
+        'Der Link „Melden“ schickt uns Ihre Nachricht und, wenn Sie möchten, Ihre E-Mail-Adresse für eine Antwort: Sie dienen nur der Bearbeitung der Meldung und werden nach 12 Monaten gelöscht.',
       ]],
       ['Wie lange', [
         'Anfrage ohne Einwilligung oder Ablehnung: nach 12 Monaten ohne Nachricht gelöscht.',

@@ -64,6 +64,16 @@ const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 export const UI = {
   fr: {
     nav: { series: 'Séries', gallery: 'Galerie', map: 'Carte', about: 'À propos', label: 'Navigation', lang: 'Langue', langCurrent: 'Langue : français' },
+    fb: {
+      like: 'J’aime', unlike: 'Je n’aime plus', likes: n => `${n} j’aime`, report: 'Signaler',
+      reportTitle: 'Signaler cette photo', reportIntro: title => `À propos de « ${title} ». Votre message nous arrive directement ; nous le lisons tous.`,
+      me: 'Vous êtes sur cette photo ? Pour la recevoir, donner ou refuser votre accord :', meLink: 'Je vous ai photographié',
+      kind: 'Que voulez-vous nous dire ?', kinds: { inapproprie: 'Cette photo ne devrait pas être en ligne', texte: 'Une suggestion pour le texte (titre, légende, lieu)', autre: 'Autre chose' },
+      message: 'Votre message', messageHint: 'nécessaire pour une suggestion', email: 'Votre e-mail', emailHint: 'facultatif, seulement si vous voulez une réponse',
+      send: 'Envoyer', back: 'Retour à la photo', thanks: 'Merci, votre message est bien arrivé.',
+      privacy: 'Votre message et votre adresse ne servent qu’à traiter ce signalement ; ils sont effacés au bout de 12 mois.',
+      errors: { kind: 'Choisissez ce que vous voulez nous dire.', message: 'Écrivez quelques mots.', email: 'Cette adresse e-mail n’est pas valide.', limit: 'Trop de messages : réessayez dans une heure.' },
+    },
     footer: { photos: 'Photographies', noRepro: 'reproduction interdite', rights: 'Droits d’utilisation', privacy: 'Confidentialité', legal: 'Mentions légales' },
     both: 'Les deux', colon: ' :',
     photos: n => plural(n, 'photo', 'photos'),
@@ -135,6 +145,16 @@ export const UI = {
   },
   en: {
     nav: { series: 'Series', gallery: 'Gallery', map: 'Map', about: 'About', label: 'Navigation', lang: 'Language', langCurrent: 'Language: English' },
+    fb: {
+      like: 'Like', unlike: 'Unlike', likes: n => `${n} ${n === 1 ? 'like' : 'likes'}`, report: 'Report',
+      reportTitle: 'Report this photo', reportIntro: title => `About “${title}”. Your message comes straight to us; we read every one.`,
+      me: 'Are you in this photo? To receive it, or to give or refuse your consent:', meLink: 'I took your photo',
+      kind: 'What would you like to tell us?', kinds: { inapproprie: 'This photo should not be online', texte: 'A suggestion for the text (title, caption, place)', autre: 'Something else' },
+      message: 'Your message', messageHint: 'needed for a suggestion', email: 'Your email', emailHint: 'optional, only if you would like a reply',
+      send: 'Send', back: 'Back to the photo', thanks: 'Thank you, your message has arrived.',
+      privacy: 'Your message and your address are only used to deal with this report; they are deleted after 12 months.',
+      errors: { kind: 'Choose what you would like to tell us.', message: 'Write a few words.', email: 'This email address is not valid.', limit: 'Too many messages: try again in an hour.' },
+    },
     footer: { photos: 'Photographs', noRepro: 'all rights reserved', rights: 'Terms of use', privacy: 'Privacy', legal: 'Legal notice' },
     both: 'Both', colon: ':',
     photos: n => plural(n, 'photo', 'photos'),
@@ -206,6 +226,16 @@ export const UI = {
   },
   de: {
     nav: { series: 'Serien', gallery: 'Galerie', map: 'Karte', about: 'Über uns', label: 'Navigation', lang: 'Sprache', langCurrent: 'Sprache: Deutsch' },
+    fb: {
+      like: 'Gefällt mir', unlike: 'Gefällt mir nicht mehr', likes: n => `Gefällt ${n} Mal`, report: 'Melden',
+      reportTitle: 'Dieses Foto melden', reportIntro: title => `Zu „${title}“. Ihre Nachricht kommt direkt bei uns an; wir lesen jede.`,
+      me: 'Sind Sie auf diesem Foto? Um es zu erhalten oder Ihre Einwilligung zu geben oder abzulehnen:', meLink: 'Ich habe Sie fotografiert',
+      kind: 'Was möchten Sie uns mitteilen?', kinds: { inapproprie: 'Dieses Foto sollte nicht online sein', texte: 'Ein Vorschlag zum Text (Titel, Bildunterschrift, Ort)', autre: 'Etwas anderes' },
+      message: 'Ihre Nachricht', messageHint: 'für einen Vorschlag nötig', email: 'Ihre E-Mail', emailHint: 'optional, nur wenn Sie eine Antwort möchten',
+      send: 'Senden', back: 'Zurück zum Foto', thanks: 'Danke, Ihre Nachricht ist angekommen.',
+      privacy: 'Ihre Nachricht und Ihre Adresse dienen nur der Bearbeitung dieser Meldung; sie werden nach 12 Monaten gelöscht.',
+      errors: { kind: 'Wählen Sie, was Sie uns mitteilen möchten.', message: 'Schreiben Sie ein paar Worte.', email: 'Diese E-Mail-Adresse ist ungültig.', limit: 'Zu viele Nachrichten: Versuchen Sie es in einer Stunde erneut.' },
+    },
     footer: { photos: 'Fotografien', noRepro: 'alle Rechte vorbehalten', rights: 'Nutzungsrechte', privacy: 'Datenschutz', legal: 'Impressum' },
     both: 'Beide', colon: ':',
     photos: n => plural(n, 'Foto', 'Fotos'),

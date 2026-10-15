@@ -102,7 +102,7 @@
 <% } %>
 <% const au = it.audience; %>
 <details class="panel audience rub-panel" id="audience">
-  <summary><h2 id="audience-title"><%= t('Audience') %> <span class="sum"><%= au && au.total ? (au.total > 1 ? t('{n} ouvertures en 30 jours', { n: au.total }) : t('{n} ouverture en 30 jours', { n: au.total })) : t('pas encore vue en grand') %></span></h2></summary>
+  <summary><h2 id="audience-title"><%= t('Audience') %> <span class="sum"><%= au && au.total ? (au.total > 1 ? t('{n} ouvertures en 30 jours', { n: au.total }) : t('{n} ouverture en 30 jours', { n: au.total })) : t('pas encore vue en grand') %><%= it.photo.likes ? ` · ${t('{n} j’aime sur le site', { n: it.photo.likes })}` : '' %></span></h2></summary>
 <% if (au && au.total) { %>
   <p><%~ au.total > 1 ? t('{n} ouvertures en grand', { n: `<strong>${esc(au.total)}</strong>` }) : t('{n} ouverture en grand', { n: `<strong>${esc(au.total)}</strong>` }) %><%= au.rank ? ' · ' + (au.rank === 1 ? t('1ʳᵉ photo la plus vue') : t('{rank}ᵉ photo la plus vue', { rank: au.rank })) : '' %></p>
   <%~ au.spark %>

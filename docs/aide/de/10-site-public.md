@@ -47,6 +47,8 @@ Das nächste Foto hängt vom aktiven Filter ab: In „Straße, von Julien“ ble
 
 **Zurück zur Serie:** Der Wechsel zum vorherigen oder nächsten Foto stapelt sich nicht im Verlauf des Browsers. Nach zehn angesehenen Fotos führt **ein einziges** Zurück (oder **Schließen**, oder **Esc**) zur Serie zurück, an die Stelle, an der man sie verlassen hat, und das zuletzt angesehene Foto wird wieder ins Bild gerückt.
 
+**Gefällt mir und Melden**: unter dem Text jedes Fotos ein Herz **Gefällt mir** (anonym: kein Konto, kein Cookie; Besucher können es zurücknehmen, die Zahl steht daneben) und ein Link **Melden**: Foto, das nicht online sein sollte, Vorschlag zum Text, etwas anderes, mit einer Nachricht und einer optionalen Adresse. Wer sich erkennt, wird zu `/bonjour` geleitet. Meldungen erscheinen in „Heute“ und auf der Seite **Meldungen von Besuchern**; die Zahl der „Gefällt mir“ steht im Abschnitt Publikum der Fotoseite.
+
 ## Weitere Seiten
 
 - **Über uns:** vollständiges Logo, Slogan, Text, Biografien der Autoren.
