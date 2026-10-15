@@ -1348,14 +1348,17 @@ const activity = (() => {
     t.toggleAttribute('data-provisional', p.provisional);
     const box = $('.chk', t);
     if (box) box.setAttribute('aria-label', tr('Sélectionner « {title} »', { title: p.title }));
-    let badge = $('.badge', t);
+    // Badges empilés en haut à droite (statut, état, série proposée) : la légende du bas n'est jamais couverte.
+    let badges = $('.badges', t);
+    if (!badges) { badges = document.createElement('span'); badges.className = 'badges'; t.querySelector('.img').after(badges); }
+    let badge = $('.badge.status', badges);
     const want = p.status === 'draft' ? tr('○ Brouillon') : p.provisional ? tr('Titre provisoire') : '';
     if (!want && badge) badge.remove();
-    if (want) { if (!badge) { badge = document.createElement('span'); t.querySelector('.img').after(badge); } badge.className = `badge${p.status !== 'draft' ? ' warn' : ''}`; badge.textContent = want; }
-    let sug = $('.badge.sug', t);
+    if (want) { if (!badge) { badge = document.createElement('span'); badges.prepend(badge); } badge.className = `badge status${p.status !== 'draft' ? ' warn' : ''}`; badge.textContent = want; }
+    let sug = $('.badge.sug', badges);
     const first = (p.suggest || [])[0];
     if (!first) sug?.remove();
-    else { if (!sug) { sug = document.createElement('span'); sug.className = 'badge sug'; sug.title = tr('Série proposée'); $('.cap', t).before(sug); } sug.textContent = `✦ ${first.name}`; }
+    else { if (!sug) { sug = document.createElement('span'); sug.className = 'badge sug'; sug.title = tr('Série proposée'); badges.append(sug); } sug.textContent = `✦ ${first.name}`; }
   }
   async function reload(id) {
     try {
@@ -1639,7 +1642,7 @@ const activity = (() => {
       li.setAttribute('data-provisional', '');
       li.innerHTML = `<input class="chk" type="checkbox" name="ids" value="${i.photoId}" form="bulk" aria-label="${tr('Sélectionner « {title} »', { title: esc(i.title) })}">
         <a class="img" href="/admin/photos/${i.photoId}" tabindex="-1" aria-hidden="true">${i.url ? `<img src="${i.url}" alt="">` : `<span class="ph">${tr('Développement…')}</span>`}</a>
-        <span class="badge">${tr('Développement')}</span><span class="dev"><i></i></span>
+        <span class="badges"><span class="badge status">${tr('Développement')}</span></span><span class="dev"><i></i></span>
         <span class="cap"><a class="ttl" href="/admin/photos/${i.photoId}">${esc(i.title)}</a><small>${tr('brouillon')}</small></span>`;
       contact.appendChild(li);
       window.__prepareTile?.(li);
@@ -1653,7 +1656,7 @@ const activity = (() => {
       const img = $('img', t);
       if (img) img.style.filter = `blur(${((1 - f) * 12).toFixed(1)}px) grayscale(${(1 - f).toFixed(2)}) brightness(${(0.6 + 0.4 * f).toFixed(2)})`;
       $('.dev i', t).style.width = `${Math.round(f * 100)}%`;
-      $('.badge', t).textContent = i.total ? tr('Développement · {done} / {total}', { done: i.done, total: i.total }) : tr('En file');
+      $('.badge.status', t).textContent = i.total ? tr('Développement · {done} / {total}', { done: i.done, total: i.total }) : tr('En file');
     },
     async ready(i) {
       const t = tileOf(i.photoId);

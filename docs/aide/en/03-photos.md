@@ -61,7 +61,7 @@ Caption, watermark and proof are set in each photo's details (see below).
 - **Search** (title, place, caption, address), **photographer**, **series**: the contact sheet updates straight away.
 - **Size**: the slider enlarges or shrinks the thumbnails (kept for next time).
 - **Contact sheet / List**: the list shows the photos in rows, with the order number, the photographer, the place and the **⋯** menu (**Edit details**, **Publish** or **Unpublish**, **Move up one place**, **Move down one place**).
-- When hovering over a thumbnail: its title, series and date. A click on the title opens the details. Drafts carry the **○ Draft** chip, provisional titles **Provisional title**.
+- When hovering over a thumbnail: its title, series and date. A click on the title opens the details. Drafts carry the **○ Draft** chip, provisional titles **Provisional title**. These chips stack at the top right of the thumbnail, with the state (**▲ To check**, **✕ Blocked**) and the suggested series (**✦**); on a narrow thumbnail they move below the checkbox. On a small thumbnail they fade out while the title is shown (hover or selected photo): the inspector then shows everything.
 - **On a phone:** tap a thumbnail to choose it; its title appears, underlined: tap it to open the details. The photo panel opens at the bottom of the screen.
 
 > The No. in the admin is the position in the **whole** list, drafts included. On the site, published photos are numbered without gaps (N°01, N°02…).
