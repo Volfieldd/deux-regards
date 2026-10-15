@@ -441,6 +441,8 @@ export default async function adminRoutes(app) {
     try {
       // Case « filigrane » : absente du formulaire quand elle est décochée, d'où le champ témoin watermark_set.
       const watermark = body.watermark_set ? body.watermark === 'on' || body.watermark === true : undefined;
+      // Signature du photographe : gardée sur la photo (la légende du post est recalculée à l'envoi).
+      if (body.signature_set) app.db.prepare('UPDATE photos SET ig_signature = ? WHERE id = ?').run(body.signature === 'on' || body.signature === true ? 1 : 0, id);
       app.instagram.enqueue(id, { frame: body.frame, watermark, caption: body.custom === 'on' || body.custom === true ? body.caption : null,
         confirmed: body.confirmer === '1' || body.confirmer === true, byName: request.session.name });
     } catch (err) {
@@ -507,7 +509,8 @@ export default async function adminRoutes(app) {
     const active = post && (post.status === 'queued' || post.status === 'publishing');
     const caption = post?.caption || ig.caption(photo.id, s);
     const engagement = post?.status === 'published' ? ig.engagementOf(post.ig_media_id) : null;
-    return { post, active, s, FRAMES, caption, blocked: ig.blocked(photo.id), custom: Boolean(post?.caption), warnings: captionWarnings(caption), connected: ig.account.connected(),
+    const signature = repo.authors().find(a => a.id === photo.author_id)?.ig_signature || '';
+    return { post, active, s, FRAMES, caption, signature, blocked: ig.blocked(photo.id), custom: Boolean(post?.caption), warnings: captionWarnings(caption), connected: ig.account.connected(),
       engagement, likesSpark: engagement && engagement.series.length > 1 ? sparkline(engagement.series.map(d => d.likes)) : '',
       slot: active ? ig.queue().find(x => x.id === post.id)?.slot : null };
   };

@@ -37,6 +37,9 @@ Le **modèle** (Instagram → Réglages) s’applique à toutes les photos, avec
 | `{auteur}` · `{serie}` | son auteur, sa série |
 | `{site}` | le nom du site |
 | `{hashtags}` | les hashtags « pour toutes les photos », puis ceux de sa série, sans doublon, 30 au plus |
+| `{signature}` | la signature du photographe (voir ci-dessous) ; sans cette variable dans le modèle, elle se place juste sous la légende |
+
+**Signature du photographe** : chaque photographe règle la sienne dans [Photographes](auteurs) (par exemple « — Julien · @julien.photo »). Elle s'ajoute au post **seulement quand la photo a une légende**. Pour une photo, décochez **Ajouter ma signature** dans la section Instagram de sa fiche, puis **Ajouter à la file** ou **Mettre à jour** : elle n'y figurera pas. Le site, lui, n'affiche pas la signature.
 
 **Une ligne dont toutes les variables sont vides disparaît**, et une virgule restée seule est retirée : une photo sans lieu ni date ne laisse pas de « , » dans sa légende.
 

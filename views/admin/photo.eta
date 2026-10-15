@@ -148,6 +148,8 @@
         <label class="inline"><input type="checkbox" name="watermark" data-ig-watermark<%~ (ig.post ? ig.post.watermark : ig.s.watermark) ? ' checked' : '' %>> Avec le filigrane</label>
       </div>
 <% if (R.instagram.level === 'warn' && !it.igConfirmed) { %>      <label class="inline confirm-box"><input type="checkbox" name="confirmer" value="1"> Instagram à vérifier (<%= R.instagram.reasons.join(' ; ') %>) : je confirme que les personnes reconnaissables ont accepté Instagram, ou n’y sont pas reconnaissables.</label>
+<% } %><% if (ig.signature) { %>      <input type="hidden" name="signature_set" value="1">
+      <label class="inline"><input type="checkbox" name="signature"<%~ it.photo.ig_signature !== 0 ? ' checked' : '' %>> Ajouter ma signature <span class="mono">« <%= ig.signature %> »<%= String(it.photo.legend || '').trim() ? '' : ' · seulement si la photo a une légende' %></span></label>
 <% } %>      <label class="inline"><input type="checkbox" name="custom" data-ig-custom<%~ ig.custom ? ' checked' : '' %>> Légende personnalisée pour cette photo <span class="mono">sinon, celle du modèle</span></label>
       <label>Légende <span class="mono" data-ig-count><%= ig.caption.length %> / 2200</span><textarea name="caption" rows="9" maxlength="2200" data-ig-caption><%= ig.caption %></textarea></label>
 <% if (ig.warnings.length) { %>      <ul class="warn-list" data-ig-warnings><% ig.warnings.forEach(w => { %><li><%= w %></li><% }) %></ul>

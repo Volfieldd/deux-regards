@@ -372,10 +372,10 @@ export function createAdminRepo(db) {
       const prefix = text(body.card_prefix, 1).toUpperCase();
       if (prefix && !/^[A-Z]$/.test(prefix)) errors.card_prefix = 'Lettre des cartes : une seule lettre, de A à Z.';
       else if (prefix && q.authors.all().some(a => a.id !== Number(id) && (a.card_prefix || a.slug.charAt(0).toUpperCase()) === prefix)) errors.card_prefix = `La lettre ${prefix} est déjà celle d’un autre auteur.`;
-      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), oidc_sub: sub, card_prefix: prefix };
+      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), oidc_sub: sub, card_prefix: prefix, ig_signature: text(body.ig_signature, 200) };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
-      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, oidc_sub = @oidc_sub, card_prefix = @card_prefix WHERE id = @id').run({ ...values, id });
-      db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, oidc_sub, card_prefix) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @oidc_sub, @card_prefix)').run(values);
+      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, oidc_sub = @oidc_sub, card_prefix = @card_prefix, ig_signature = @ig_signature WHERE id = @id').run({ ...values, id });
+      db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, oidc_sub, card_prefix, ig_signature) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @oidc_sub, @card_prefix, @ig_signature)').run(values);
     },
     deleteAuthor(id) {
       const a = q.authors.all().find(r => r.id === Number(id));

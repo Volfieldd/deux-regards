@@ -29,7 +29,7 @@ Lien en bio · {site}
 // rien ne part sur Instagram sans un choix explicite (série cochée, ou ajout depuis la fiche).
 export const DEFAULTS = { limits: LIMIT_DEFAULTS, autoSeries: [], times: ['18:30'], frame: 'white', watermark: false, template: DEFAULT_TEMPLATE, hashtags: '#photographie', seriesHashtags: {} };
 export const LIMITS = { caption: 2200, hashtags: 30, times: 4, attempts: 3 };
-const VARIABLES = ['titre', 'legende', 'lieu', 'date', 'auteur', 'serie', 'site', 'hashtags'];
+const VARIABLES = ['titre', 'legende', 'signature', 'lieu', 'date', 'auteur', 'serie', 'site', 'hashtags'];
 const GRAPH = 'https://graph.instagram.com';
 const SCOPES = 'instagram_business_basic,instagram_business_content_publish';
 const SIZE = 1080;
@@ -64,9 +64,14 @@ export function hashtagsFor(photo, settings) {
 
 // Remplit le modèle ; une ligne dont toutes les variables sont vides disparaît, et les séparateurs
 // orphelins (« , », « · », « — ») d'une variable vide sont retirés.
+// Signature du photographe : seulement quand la photo a une légende, et sauf si elle est retirée pour cette photo ;
+// placée par {signature}, sinon juste sous la légende.
 export function renderCaption(template, photo, settings, siteName) {
+  const legend = String(photo.legend || '').trim();
+  const signature = legend && photo.ig_signature !== 0 ? String(photo.author_signature || '').trim() : '';
+  const placed = String(template).includes('{signature}');
   const values = {
-    titre: photo.title || '', legende: photo.legend || '', lieu: photo.place || '', date: monthYear(photo.taken_on) || '',
+    titre: photo.title || '', legende: placed || !signature ? legend : `${legend}\n${signature}`, signature: placed ? signature : '', lieu: photo.place || '', date: monthYear(photo.taken_on) || '',
     auteur: photo.author || '', serie: photo.category || '', site: siteName || '', hashtags: hashtagsFor(photo, settings).join(' '),
   };
   const lines = String(template).split('\n').map(line => {
@@ -158,7 +163,7 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
   const q = {
     setting: db.prepare('SELECT value FROM settings WHERE key = ?').pluck(),
     save: db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value'),
-    photo: db.prepare(`SELECT p.*, a.name AS author, c.name AS category FROM photos p
+    photo: db.prepare(`SELECT p.*, a.name AS author, a.ig_signature AS author_signature, c.name AS category FROM photos p
       JOIN authors a ON a.id = p.author_id JOIN categories c ON c.id = p.category_id WHERE p.id = ?`),
     post: db.prepare('SELECT * FROM instagram_posts WHERE id = ?'),
     active: db.prepare("SELECT * FROM instagram_posts WHERE photo_id = ? AND status IN ('queued', 'publishing') ORDER BY id DESC LIMIT 1"),

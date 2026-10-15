@@ -8,6 +8,8 @@
       <label>Biographie <textarea name="bio" rows="3" maxlength="2000"><%= v.bio || '' %></textarea></label>
       <%~ include('./_tr', { asset: it.asset, translate: it.translate, v, name: 'bio', label: 'Biographie', max: 2000, rows: 3 }) %>
       <label>Lettre des cartes d’accord <span class="mono">J-0142 ; vide : <%= v.slug ? v.slug.charAt(0).toUpperCase() : 'première lettre de l’adresse' %></span><input name="card_prefix" value="<%= v.card_prefix || '' %>" maxlength="1" autocapitalize="characters" class="mono" size="2"<%~ bad('card_prefix') %>></label>
+      <label>Signature des posts Instagram <span class="mono">ajoutée sous la légende des photos qui en ont une, retirable photo par photo · ex. « — <%= v.name || 'Julien' %> · @compte »</span>
+        <input name="ig_signature" value="<%= v.ig_signature || '' %>" maxlength="200"></label>
       <label>Compte de connexion (identifiant OIDC « sub »)
         <input name="oidc_sub" value="<%= v.oidc_sub || '' %>" maxlength="255" class="mono" placeholder="affiché sur le tableau de bord après connexion"<%~ bad('oidc_sub') %>></label>
 <% if (errs) { %>      <p class="err" role="alert" id="err-auteur-<%= v.id || 'nouveau' %>"><%= Object.values(errs).join(' ') %></p><% } %>
