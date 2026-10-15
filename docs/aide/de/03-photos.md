@@ -158,7 +158,7 @@ Ein Fotograf veröffentlicht nicht selbst: Er **schlägt vor**, und ein Moderato
 - **Zurückziehen**: Der Moderator nennt den Grund; der Fotograf erhält ihn.
 - **Benachrichtigungen**: „Heute“ zeigt jedem, was auf ihn wartet (zu bestätigende Vorschläge, vorgeschlagene, geplante, zurückgeschickte Fotos). Jeder kann sich auch **per E-Mail** benachrichtigen lassen, unter **Ihr Konto** auf der Seite Heute (wenn der E-Mail-Versand auf dem Server eingerichtet ist).
 - **Verlauf**: Jedes Foto behält, wer es vorgeschlagen, bestätigt, geplant, zurückgeschickt oder zurückgezogen hat, und wann.
-- **Einstellungen pro Fotograf** (Seite **Veröffentlichungsablauf**, Moderatoren und Administratoren): **Eigene Fotos ohne Bestätigung veröffentlichen** (der Fotograf veröffentlicht seine Fotos dann selbst, außerhalb des Ablaufs) und **Eigene Fotos nach der Veröffentlichung bearbeiten** (standardmäßig ja; entzogen, ändert sich ein veröffentlichtes Foto nicht mehr ohne den Moderator).
+- **Einstellungen pro Fotograf** (Seite **Veröffentlichungsablauf**, Moderatoren und Administratoren): **Eigene Fotos ohne Bestätigung veröffentlichen** (der Fotograf veröffentlicht seine Fotos dann selbst, außerhalb des Ablaufs) **Eigene Fotos nach der Veröffentlichung bearbeiten** (standardmäßig ja; entzogen, ändert sich ein veröffentlichtes Foto nicht mehr ohne den Moderator) und **Eigene Fotos ohne Freigabe in die Instagram-Warteschlange stellen** (siehe die Hilfe „Instagram“).
 
 Ein Administrator veröffentlicht wie bisher direkt. Eine Besuchermeldung zieht nie etwas von selbst zurück: Der Moderator entscheidet.
 

@@ -33,6 +33,7 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
       AND ${samePartSql('p.author_id', 'p.taken_on', "COALESCE(p.taken_time, '')", 'e.met_time')}
       GROUP BY e.id ORDER BY e.id`),
     fresh: db.prepare("SELECT COUNT(*) FROM encounters WHERE status = 'nouvelle' AND (@author IS NULL OR author_id = @author)").pluck(),
+    authorOf: db.prepare('SELECT author_id FROM photos WHERE id = ?').pluck(),
     igFailedMine: db.prepare(`SELECT p.photo_id, p.retry_requested_at, ph.title FROM instagram_posts p JOIN photos ph ON ph.id = p.photo_id WHERE p.status = 'failed' AND ph.author_id = ?
       AND NOT EXISTS (SELECT 1 FROM instagram_posts b WHERE b.photo_id = p.photo_id AND b.id > p.id AND b.status <> 'cancelled') ORDER BY p.id DESC`),
     igFailed: db.prepare("SELECT COUNT(*) FROM instagram_posts WHERE status = 'failed' AND NOT EXISTS (SELECT 1 FROM instagram_posts b WHERE b.photo_id = instagram_posts.photo_id AND b.id > instagram_posts.id)").pluck(),
@@ -128,6 +129,16 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
     const failed = a.all('instagram.voir') ? q.igFailed.get() : 0;
     if (failed) items.push({ level: 'bientot', title: failed > 1 ? t('Instagram : {n} publications en échec', { n: failed }) : t('Instagram : {n} publication en échec', { n: failed }),
       detail: t('bloquées par un accord, ou refusées par Instagram : la raison est dans l’historique'), href: '/admin/instagram', action: t('Voir') });
+    // Circuit Instagram : propositions à mettre dans la file (qui gère toute la file) ; les siennes en attente.
+    const igProposed = a.all('instagram.file') && instagram ? instagram.proposals().length : 0;
+    if (igProposed) items.push({ level: 'bientot', title: igProposed > 1 ? t('{n} photos proposées pour Instagram', { n: igProposed }) : t('{n} photo proposée pour Instagram', { n: igProposed }),
+      detail: t('mettre dans la file ou renvoyer avec une remarque'), href: '/admin/a-valider#instagram', action: t('Valider') });
+    const ip = a.author('instagram.proposer');
+    if (ip != null && instagram && !a.all('instagram.file')) {
+      const mineIg = instagram.proposals().filter(pr => q.authorOf.get(pr.photo_id) === ip).length;
+      if (mineIg) items.push({ level: 'plus-tard', title: mineIg > 1 ? t('{n} photos proposées pour Instagram, en attente du modérateur', { n: mineIg }) : t('{n} photo proposée pour Instagram, en attente du modérateur', { n: mineIg }),
+        detail: t('vous serez prévenu de sa décision'), href: '/admin/photos?statut=published', action: t('Voir') });
+    }
     // Republications demandées par les photographes (qui gère la file) ; échecs sur ses photos (le photographe).
     const asked = a.all('instagram.file') && instagram ? instagram.retryRequests() : [];
     if (asked.length) items.push({ level: 'bientot', title: asked.length > 1 ? t('{n} republications Instagram demandées', { n: asked.length }) : t('{n} republication Instagram demandée', { n: asked.length }),

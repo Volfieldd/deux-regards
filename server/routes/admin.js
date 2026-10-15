@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { ROLES, PERMISSIONS, grantsOf } from '../permissions.js';
+import { ROLES, PERMISSIONS, SCOPES, grantsOf } from '../permissions.js';
 import { MailError } from '../mailer.js';
 import { AccountError } from '../accounts.js';
 import { NoteError } from '../notes.js';
@@ -126,6 +126,11 @@ export default async function adminRoutes(app) {
       const a = repo.authors().find(x => x.slug === request.params.author);
       author = a?.id;
       visible = Boolean(a) && request.owns('sorties.voir', a.id);
+    } else if (url.startsWith('/admin/instagram/:id/')) {
+      // Un envoi de la file : celui de la photo (portée de instagram.file pour qui la règle sur ses photos seulement).
+      const post = app.instagram.post(id);
+      found = Boolean(post); author = post ? repo.photo(post.photo_id)?.author_id : undefined;
+      visible = !post || request.can('instagram.voir') || request.owns('photos.voir', author);
     } else if (url === '/admin/auteurs/:id/qr/:file') {
       author = id;
       visible = request.owns('terrain.cartes', id);
@@ -219,7 +224,7 @@ export default async function adminRoutes(app) {
       grants: Object.keys(PERMISSIONS).filter(p => request.can(p)),
       section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
-      translate: app.translator.enabled, encountersNew: newEncounters(request), urgent: app.todo.urgentCount(perm => request.scope(perm)), toValidate: request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0, description: '',
+      translate: app.translator.enabled, encountersNew: newEncounters(request), urgent: app.todo.urgentCount(perm => request.scope(perm)), toValidate: (request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0) + (request.scope('instagram.file')?.all ? app.instagram.proposals().length : 0), description: '',
       t: request.t, lang: request.t.lang, locale: request.t.locale, adminLangs: ADMIN_LANGS, langNames: ADMIN_LANG_NAMES,
       ...data, pageTitle: `${data.title} · ${request.t('Administration')} · ${siteName}`,
     });
@@ -595,6 +600,9 @@ export default async function adminRoutes(app) {
     const json = !request.headers.accept?.includes('text/html');
     const id = byId(body.photo_id);
     const back = safeBack(request, `/admin/photos/${id}#instagram`);
+    const photo = repo.photo(id);
+    if (!photo) return reply.callNotFound();
+    if (!request.owns('instagram.file', photo.author_id)) return app.forbid(request, reply);   // sans validation : ses photos seulement
     try {
       // Case « filigrane » : absente du formulaire quand elle est décochée, d'où le champ témoin watermark_set.
       const watermark = body.watermark_set ? body.watermark === 'on' || body.watermark === true : undefined;
@@ -615,6 +623,8 @@ export default async function adminRoutes(app) {
       const id = byId(request.params.id);
       const back = safeBack(request, '/admin/instagram');
       if (!app.instagram.post(id)) return reply.callNotFound();
+      // L'ordre de la file touche toutes les photos : réservé à qui la gère en entier.
+      if ((act === 'monter' || act === 'descendre') && !request.scope('instagram.file')?.all) return app.forbid(request, reply);
       try {
         if (act === 'annuler') app.instagram.cancel(id, request.session.name);
         else if (act === 'monter' || act === 'descendre') app.instagram.move(id, act === 'monter' ? 'up' : 'down');
@@ -637,6 +647,79 @@ export default async function adminRoutes(app) {
     });
   }
 
+  // ---------- circuit Instagram : le photographe propose, le modérateur met dans la file ou renvoie ----------
+  // E-mails (best effort) : à qui gère toute la file et l'a choisi ; au photographe de la photo s'il l'a choisi.
+  const teamMail = perm => app.accounts.list().filter(a => a.status === 'actif' && a.notify_email && (a.notify_to || a.email) && grantsOf(a.roles, a.adjust).get(perm) === SCOPES.ALL).map(a => a.notify_to || a.email);
+  const authorMail = authorId => app.accounts.list().filter(a => a.status === 'actif' && a.notify_email && (a.notify_to || a.email) && a.author_id === authorId).map(a => a.notify_to || a.email);
+  const mailTo = async (to, subject, lines, request) => {
+    if (!app.mailer.enabled) return;
+    const text = [...lines, '', app.config.publicUrl ? `${app.config.publicUrl}/admin` : ''].join('\n');
+    for (const addr of new Set(to)) await app.mailer.send({ to: addr, subject: `${app.siteName()} · ${subject}`, text }).catch(err => request.log.warn({ err: err.message }, 'instagram : e-mail non envoyé'));
+  };
+  const igForm = body => ({
+    frame: body.frame, watermark: body.watermark_set ? body.watermark === 'on' || body.watermark === true : undefined,
+    caption: body.custom === 'on' || body.custom === true ? body.caption : null,
+  });
+  app.post('/admin/photos/:id/instagram/proposer', W('instagram.proposer'), async (request, reply) => {
+    const id = byId(request.params.id);
+    const photo = repo.photo(id);
+    const body = request.body || {};
+    const back = `/admin/photos/${id}#instagram`;
+    if (body.signature_set) app.db.prepare('UPDATE photos SET ig_signature = ? WHERE id = ?').run(body.signature === 'on' || body.signature === true ? 1 : 0, id);
+    let r;
+    try {
+      r = app.instagram.propose(id, { ...igForm(body), message: body.message, byName: request.session.name, bySub: request.session.sub,
+        confirmed: (body.confirmer === '1' || body.confirmer === true) && request.owns('personnes.voir', photo.author_id) });
+    } catch (err) {
+      if (!(err instanceof InstagramError)) throw err;
+      return failed(reply, back, request.t('Instagram : {error}.', { error: request.t.msg(err.message).replace(/\.$/, '') }));
+    }
+    if (r.created) await mailTo(teamMail('instagram.file'), 'Photo proposée pour Instagram', [`${request.session.name || 'Un photographe'} propose « ${photo.title} » pour Instagram.`, String(body.message || '').trim() ? `Son mot : ${String(body.message).trim()}` : ''], request);
+    return done(reply, back, r.created ? request.t('Photo proposée pour Instagram : le modérateur est prévenu.') : request.t('Proposition mise à jour.'));
+  });
+  app.post('/admin/photos/:id/instagram/retirer-proposition', W('instagram.proposer'), async (request, reply) => {
+    const id = byId(request.params.id);
+    if (!app.instagram.withdrawProposal(id, request.session.name)) return failed(reply, `/admin/photos/${id}#instagram`, request.t('Rien à retirer : la photo n’est pas proposée pour Instagram.'));
+    return done(reply, `/admin/photos/${id}#instagram`, request.t('Proposition pour Instagram retirée.'));
+  });
+  const proposalOf = request => {
+    const pr = app.instagram.proposal(byId(request.params.pid));
+    return pr && repo.photo(pr.photo_id) ? pr : null;
+  };
+  app.post('/admin/instagram/propositions/:pid/valider', W('instagram.file'), async (request, reply) => {
+    const back = safeBack(request, '/admin/a-valider#instagram');
+    if (!request.scope('instagram.file')?.all) return app.forbid(request, reply);
+    const pr = proposalOf(request);
+    if (!pr) return reply.callNotFound();
+    try {
+      app.instagram.approveProposal(pr.id, request.session.name);
+    } catch (err) {
+      if (!(err instanceof InstagramError)) throw err;
+      return failed(reply, back, request.t('Instagram : {error}.', { error: request.t.msg(err.message).replace(/\.$/, '') }));
+    }
+    const photo = repo.photo(pr.photo_id);
+    await mailTo(authorMail(photo.author_id), 'Photo acceptée pour Instagram', [`« ${photo.title} » est dans la file Instagram (validé par ${request.session.name || 'le modérateur'}).`], request);
+    return done(reply, back, request.t('« {title} » est dans la file Instagram.', { title: photo.title }));
+  });
+  app.post('/admin/instagram/propositions/:pid/renvoyer', W('instagram.file'), async (request, reply) => {
+    const back = safeBack(request, '/admin/a-valider#instagram');
+    if (!request.scope('instagram.file')?.all) return app.forbid(request, reply);
+    const pr = proposalOf(request);
+    if (!pr) return reply.callNotFound();
+    const remark = String(request.body?.message || '').trim();
+    try {
+      app.instagram.sendBackProposal(pr.id, request.session.name, remark);
+    } catch (err) {
+      if (!(err instanceof InstagramError)) throw err;
+      return failed(reply, back, request.t.msg(err.message));
+    }
+    // La remarque arrive dans l'« Aujourd'hui » du photographe et sur la fiche (Remarques).
+    app.notes.add(pr.photo_id, `Instagram : ${remark}`, { sub: request.session.sub, name: request.session.name });
+    const photo = repo.photo(pr.photo_id);
+    await mailTo(authorMail(photo.author_id), 'Proposition Instagram à reprendre', [`« ${photo.title} » ne part pas sur Instagram pour l’instant ; ${request.session.name || 'le modérateur'} vous écrit :`, remark], request);
+    return done(reply, back, request.t('Proposition renvoyée au photographe avec votre remarque.'));
+  });
+
   // Publication Instagram en échec, vue du photographe qui n'a pas la main sur la file : il demande qu'elle soit
   // republiée. Qui gère la file la voit dans « Aujourd'hui » et sur la page Instagram, et par e-mail s'il l'a choisi.
   app.post('/admin/photos/:id/instagram/demande', W('photos.proposer'), async (request, reply) => {
@@ -650,7 +733,7 @@ export default async function adminRoutes(app) {
     if (post.retry_requested_at) return done(reply, back, request.t('Republication déjà demandée.'));
     app.instagram.requestRetry(post.id, request.session.name);
     if (app.mailer.enabled) {
-      const to = new Set(app.accounts.list().filter(a => a.status === 'actif' && a.notify_email && (a.notify_to || a.email) && grantsOf(a.roles, a.adjust).has('instagram.file')).map(a => a.notify_to || a.email));
+      const to = new Set(app.accounts.list().filter(a => a.status === 'actif' && a.notify_email && (a.notify_to || a.email) && grantsOf(a.roles, a.adjust).get('instagram.file') === SCOPES.ALL).map(a => a.notify_to || a.email));
       const text = [`${request.session.name || 'Un photographe'} demande que « ${photo.title} » soit republiée sur Instagram.`, `Dernière erreur : ${post.error || '—'}`, '', app.config.publicUrl ? `${app.config.publicUrl}/admin/photos/${id}#instagram` : ''].join('\n');
       for (const addr of to) await app.mailer.send({ to: addr, subject: `${app.siteName()} · Republication Instagram demandée`, text }).catch(err => request.log.warn({ err: err.message }, 'instagram : e-mail de demande non envoyé'));
     }
@@ -681,16 +764,20 @@ export default async function adminRoutes(app) {
   app.get('/admin/instagram/:id/etat', P('instagram.voir'), async request => igState(request, byId(request.params.id)));
 
   // Aperçu exact de l'image envoyée, et légende du modèle (bouton « Revenir au modèle »).
-  app.get('/admin/instagram/apercu.jpg', P('instagram.voir'), async (request, reply) => {
+  // Aperçu et légende du modèle : pour qui voit la file, et pour le photographe qui propose ou règle sa photo.
+  const igSees = (request, photo) => request.can('instagram.voir') || request.owns('instagram.proposer', photo.author_id) || request.owns('instagram.file', photo.author_id);
+  app.get('/admin/instagram/apercu.jpg', P('admin.acceder'), async (request, reply) => {
     const id = byId(request.query.photo);
-    if (!repo.photo(id)) return reply.callNotFound();
+    const photo = repo.photo(id);
+    if (!photo || !igSees(request, photo)) return reply.callNotFound();
     const frame = Object.hasOwn(FRAMES, request.query.cadre) ? request.query.cadre : app.instagram.settings().frame;
     const buf = await app.instagram.image(id, { frame, watermark: request.query.filigrane === '1' });
     return reply.header('cache-control', 'no-store').type('image/jpeg').send(buf);
   });
-  app.get('/admin/instagram/legende', P('instagram.voir'), async (request, reply) => {
+  app.get('/admin/instagram/legende', P('admin.acceder'), async (request, reply) => {
     const id = byId(request.query.photo);
-    if (!repo.photo(id)) return reply.code(404).send({ error: request.t('Photo introuvable.') });
+    const photo = repo.photo(id);
+    if (!photo || !igSees(request, photo)) return reply.code(404).send({ error: request.t('Photo introuvable.') });
     const caption = app.instagram.caption(id);
     return { caption, warnings: captionWarnings(caption) };
   });
@@ -731,6 +818,8 @@ export default async function adminRoutes(app) {
     proof: app.proofs.get(photo.id), tsa: app.config.tsa, audience: photoStats(photo.id), shares: app.shares.forPhoto(photo.id), insta: instaOf(photo, t), encounters: app.encounters.forPhoto(photo.id),
     outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
     notes: app.notes.open({ photoId: photo.id }), ownPhoto: app.accounts.authorIdOf(request.session.sub) === photo.author_id,
+    // Instagram : la main sur la file pour cette photo, ou seulement la proposer (circuit) ; sa proposition en cours.
+    igFile: request.owns('instagram.file', photo.author_id), igPropose: request.owns('instagram.proposer', photo.author_id), igProposal: app.instagram.openProposal(photo.id),
     review: { state: repo.photo(photo.id)?.review || null, at: repo.photo(photo.id)?.publish_at || null, history: app.review.history(photo.id).slice(0, 10) },
     suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(photo.id)), undefined, true, request),
     ready: app.readiness.state(photo.id, null, t), confirmations: app.readiness.confirmations(photo.id), igConfirmed: app.readiness.confirmed(photo.id, 'instagram'),
@@ -1378,6 +1467,9 @@ export default async function adminRoutes(app) {
         // « À vérifier » déjà confirmée par le photographe à la proposition : validable comme une photo prête.
         ready: photo.site.level === 'ok' || (photo.site.level === 'warn' && app.readiness.confirmed(photo.id, 'site')) }; }),
       scheduled: app.review.scheduled().filter(r => all.has(r.id)).map(r => ({ ...r, photo: withReady(all.get(r.id)), author: names.get(r.author_id) || '', when: when(r.publish_at) })),
+      // Propositions Instagram : pour qui gère toute la file.
+      instagram: request.scope('instagram.file')?.all ? app.instagram.proposals().map(pr => { const photo = repo.photo(pr.photo_id); return photo && { ...pr, photo: withReady(photo), author: names.get(photo.author_id) || '', when: when(pr.at),
+        caption: app.instagram.captionOf({ photo_id: pr.photo_id, caption: pr.caption }), frameLabel: FRAMES[pr.frame] || pr.frame }; }).filter(Boolean) : null,
     });
   });
   // Valider plusieurs propositions d'un coup : publier ou programmer la sélection.
@@ -1398,17 +1490,18 @@ export default async function adminRoutes(app) {
   app.get('/admin/circuit', P('circuit.regler'), async (request, reply) => {
     const authors = new Map(repo.authors().map(a => [a.id, a.name]));
     const list = app.accounts.list().filter(a => a.roles.includes('photographe') && !a.roles.includes('admin'))
-      .map(a => ({ ...a, author: authors.get(a.author_id) || '', publishAlone: a.adjust.add.includes('photos.publier'), editPublished: !a.adjust.remove.includes('photos.publiees.modifier') }));
+      .map(a => ({ ...a, author: authors.get(a.author_id) || '', publishAlone: a.adjust.add.includes('photos.publier'), editPublished: !a.adjust.remove.includes('photos.publiees.modifier'), igAlone: a.adjust.add.includes('instagram.file') }));
     return render(request, reply, 'circuit', { title: request.t('Circuit de publication'), list });
   });
   app.post('/admin/circuit/:id', W('circuit.regler'), async (request, reply) => {
     const a = app.accounts.byId(byId(request.params.id));
     if (!a || !a.roles.includes('photographe') || a.roles.includes('admin')) return reply.callNotFound();
-    const alone = request.body?.publier === '1', edit = request.body?.modifier === '1';
+    const alone = request.body?.publier === '1', edit = request.body?.modifier === '1', igAlone = request.body?.instagram === '1';
     app.accounts.setAdjust(a.id, 'photos.publier', alone ? true : null);
     app.accounts.setAdjust(a.id, 'photos.publiees.modifier', edit ? null : false);
+    app.accounts.setAdjust(a.id, 'instagram.file', igAlone ? true : null);
     app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'circuit réglé', target: a.name || a.sub, status: 303,
-      detail: `publier sans validation : ${alone ? 'oui' : 'non'} ; modifier ses photos publiées : ${edit ? 'oui' : 'non'}` });
+      detail: `publier sans validation : ${alone ? 'oui' : 'non'} ; modifier ses photos publiées : ${edit ? 'oui' : 'non'} ; Instagram sans validation : ${igAlone ? 'oui' : 'non'}` });
     request.audited = true;
     return done(reply, '/admin/circuit', request.t('Réglages de {name} enregistrés.', { name: a.name || a.sub }));
   });

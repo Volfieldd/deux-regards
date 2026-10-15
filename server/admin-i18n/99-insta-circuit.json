@@ -1,0 +1,134 @@
+{
+ "Mettre ses photos dans la file Instagram sans validation": {
+  "en": "Put their photos in the Instagram queue without approval",
+  "de": "Eigene Fotos ohne Freigabe in die Instagram-Warteschlange stellen"
+ },
+ "Par défaut, un photographe propose ses photos (pour le site et pour Instagram) et le modérateur les valide ; il peut modifier ses photos une fois publiées. Ces droits se règlent ici, photographe par photographe.": {
+  "en": "By default, a photographer proposes their photos (for the site and for Instagram) and the moderator approves them; they can edit their photos once published. These rights are set here, photographer by photographer.",
+  "de": "Standardmäßig schlägt ein Fotograf seine Fotos vor (für die Website und für Instagram), und der Moderator gibt sie frei; veröffentlichte Fotos kann er bearbeiten. Diese Rechte werden hier pro Fotograf eingestellt."
+ },
+ "sinon, il les propose pour Instagram au modérateur": {
+  "en": "otherwise, they propose them for Instagram to the moderator",
+  "de": "sonst schlägt er sie dem Moderator für Instagram vor"
+ },
+ "La file Instagram est réglée par le modérateur.": {
+  "en": "The Instagram queue is handled by the moderator.",
+  "de": "Die Instagram-Warteschlange verwaltet der Moderator."
+ },
+ "le {date}, en attente du modérateur": {
+  "en": "on {date}, waiting for the moderator",
+  "de": "am {date}, wartet auf den Moderator"
+ },
+ "Mettre à jour la proposition": {
+  "en": "Update the proposal",
+  "de": "Vorschlag aktualisieren"
+ },
+ "Proposée pour Instagram": {
+  "en": "Proposed for Instagram",
+  "de": "Für Instagram vorgeschlagen"
+ },
+ "Proposer de nouveau pour Instagram": {
+  "en": "Propose again for Instagram",
+  "de": "Erneut für Instagram vorschlagen"
+ },
+ "Proposer pour Instagram": {
+  "en": "Propose for Instagram",
+  "de": "Für Instagram vorschlagen"
+ },
+ "Proposez la photo : le modérateur la met dans la file Instagram, ou vous la renvoie avec une remarque.": {
+  "en": "Propose the photo: the moderator puts it in the Instagram queue, or sends it back to you with a note.",
+  "de": "Schlagen Sie das Foto vor: Der Moderator stellt es in die Instagram-Warteschlange oder schickt es Ihnen mit einer Anmerkung zurück."
+ },
+ "Aucune photo proposée pour Instagram.": {
+  "en": "No photo proposed for Instagram.",
+  "de": "Kein Foto für Instagram vorgeschlagen."
+ },
+ "Les photos que les photographes proposent pour Instagram, avec leurs choix (cadre, filigrane, légende). Mettez-les dans la file telles quelles, ou renvoyez-les avec une remarque.": {
+  "en": "The photos photographers propose for Instagram, with their choices (frame, watermark, caption). Put them in the queue as they are, or send them back with a note.",
+  "de": "Die Fotos, die die Fotografen für Instagram vorschlagen, mit ihrer Auswahl (Rahmen, Wasserzeichen, Bildunterschrift). Stellen Sie sie unverändert in die Warteschlange oder schicken Sie sie mit einer Anmerkung zurück."
+ },
+ "Mettre dans la file Instagram": {
+  "en": "Put in the Instagram queue",
+  "de": "In die Instagram-Warteschlange stellen"
+ },
+ "{n} photo proposée": {
+  "en": "{n} photo proposed",
+  "de": "{n} Foto vorgeschlagen"
+ },
+ "{n} photos proposées": {
+  "en": "{n} photos proposed",
+  "de": "{n} Fotos vorgeschlagen"
+ },
+ "Renvoyer avec la remarque": {
+  "en": "Send back with the note",
+  "de": "Mit der Anmerkung zurückschicken"
+ },
+ "Photo proposée pour Instagram : le modérateur est prévenu.": {
+  "en": "Photo proposed for Instagram: the moderator has been notified.",
+  "de": "Foto für Instagram vorgeschlagen: Der Moderator ist benachrichtigt."
+ },
+ "Proposition mise à jour.": {
+  "en": "Proposal updated.",
+  "de": "Vorschlag aktualisiert."
+ },
+ "Proposition pour Instagram retirée.": {
+  "en": "Instagram proposal withdrawn.",
+  "de": "Instagram-Vorschlag zurückgezogen."
+ },
+ "Proposition renvoyée au photographe avec votre remarque.": {
+  "en": "Proposal sent back to the photographer with your note.",
+  "de": "Vorschlag mit Ihrer Anmerkung an den Fotografen zurückgeschickt."
+ },
+ "Rien à retirer : la photo n’est pas proposée pour Instagram.": {
+  "en": "Nothing to withdraw: the photo is not proposed for Instagram.",
+  "de": "Nichts zurückzuziehen: Das Foto ist nicht für Instagram vorgeschlagen."
+ },
+ "« {title} » est dans la file Instagram.": {
+  "en": "“{title}” is in the Instagram queue.",
+  "de": "„{title}“ ist in der Instagram-Warteschlange."
+ },
+ "mettre dans la file ou renvoyer avec une remarque": {
+  "en": "put in the queue or send back with a note",
+  "de": "in die Warteschlange stellen oder mit einer Anmerkung zurückschicken"
+ },
+ "{n} photo proposée pour Instagram": {
+  "en": "{n} photo proposed for Instagram",
+  "de": "{n} Foto für Instagram vorgeschlagen"
+ },
+ "{n} photos proposées pour Instagram": {
+  "en": "{n} photos proposed for Instagram",
+  "de": "{n} Fotos für Instagram vorgeschlagen"
+ },
+ "{n} photo proposée pour Instagram, en attente du modérateur": {
+  "en": "{n} photo proposed for Instagram, waiting for the moderator",
+  "de": "{n} Foto für Instagram vorgeschlagen, wartet auf den Moderator"
+ },
+ "{n} photos proposées pour Instagram, en attente du modérateur": {
+  "en": "{n} photos proposed for Instagram, waiting for the moderator",
+  "de": "{n} Fotos für Instagram vorgeschlagen, warten auf den Moderator"
+ },
+ "la photo est déjà dans la file Instagram": {
+  "en": "the photo is already in the Instagram queue",
+  "de": "das Foto ist bereits in der Instagram-Warteschlange"
+ },
+ "proposition introuvable ou déjà traitée": {
+  "en": "proposal not found or already handled",
+  "de": "Vorschlag nicht gefunden oder bereits bearbeitet"
+ },
+ "Proposition pour Instagram mise à jour": {
+  "en": "Instagram proposal updated",
+  "de": "Instagram-Vorschlag aktualisiert"
+ },
+ "Proposition pour Instagram retirée": {
+  "en": "Instagram proposal withdrawn",
+  "de": "Instagram-Vorschlag zurückgezogen"
+ },
+ "Proposition renvoyée au photographe : {remark}": {
+  "en": "Proposal sent back to the photographer: {remark}",
+  "de": "Vorschlag an den Fotografen zurückgeschickt: {remark}"
+ },
+ "Instagram : {remark}": {
+  "en": "Instagram: {remark}",
+  "de": "Instagram: {remark}"
+ }
+}

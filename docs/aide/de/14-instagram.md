@@ -23,6 +23,15 @@ Die **Einstellungen** sind unter dem Protokoll eingeklappt.
 
 > Ein Foto kommt nie von selbst zweimal in die Warteschlange: Zurückgezogen und erneut veröffentlicht, wird es nicht wieder vorgeschlagen. Um es noch einmal zu teilen, verwenden Sie **Erneut veröffentlichen (wieder in die Warteschlange)** auf seiner Seite.
 
+## Für Instagram vorschlagen (Fotografen)
+
+Ein Fotograf stellt seine Fotos nicht selbst in die Warteschlange: Er **schlägt** sie **vor**, und der Moderator (oder ein Administrator) entscheidet.
+
+- **Vorschlagen**: Wählen Sie auf der Seite eines auf der Website veröffentlichten Fotos im Abschnitt **Instagram** Rahmen, Wasserzeichen, Signatur und Bildunterschrift (mit genauer Vorschau), fügen Sie bei Bedarf eine Nachricht für den Moderator hinzu, dann **Für Instagram vorschlagen**. Die Einwilligungen werden in diesem Moment geprüft: Ein gesperrtes Foto kann nicht vorgeschlagen werden, ein zu prüfendes Foto braucht Ihre Bestätigung. Solange nichts entschieden ist, bleiben **Vorschlag aktualisieren** und **Vorschlag zurückziehen** möglich.
+- **Entscheiden**: Die Seite **Zu bestätigen** (Abschnitt **Instagram**) listet die Vorschläge mit ihrer Auswahl und der Nachricht des Fotografen. **In die Instagram-Warteschlange stellen** übernimmt den Vorschlag unverändert. **Mit der Anmerkung zurückschicken** gibt ihn dem Fotografen zurück: Die Anmerkung erscheint unter seinem „Heute“ und auf der Seite des Fotos, und er kann erneut vorschlagen.
+- **Benachrichtigen**: „Heute“ zeigt beiden die offenen Vorschläge. Wer E-Mails gewählt hat, wird beim Vorschlag und bei der Entscheidung benachrichtigt.
+- **Ohne Freigabe**: Auf der Seite **Veröffentlichungsablauf** gibt das Kästchen **Eigene Fotos ohne Freigabe in die Instagram-Warteschlange stellen** einem Fotografen die Hand über die Warteschlange, nur für seine Fotos. Er fügt sie selbst hinzu, stellt sie ein oder entfernt sie; die Reihenfolge der Warteschlange und **Jetzt veröffentlichen** bleiben beim Moderator.
+
 ## Der Bildrahmen
 
 Instagram akzeptiert nur Bilder zwischen **4:5** (Hochformat) und **1,91:1** (Querformat). Ihre Hochformatfotos im Format 2:3 passen so nicht hinein. Drei Möglichkeiten, als Standard in den Einstellungen (**Zuschnitt**, wenn Sie nichts gewählt haben) und Foto für Foto auf seiner Seite:

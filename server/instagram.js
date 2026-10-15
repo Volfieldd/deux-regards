@@ -325,10 +325,13 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     const existing = q.active.get(photoId);
     const id = enqueueRaw(photoId, opts);
     event({ id, photo_id: photoId }, 'info', existing ? 'Mise à jour dans la file' : opts.auto ? 'Mise en file automatique (série)' : 'Mise en file', opts.byName);
+    // Une proposition ouverte pour cette photo est satisfaite : la photo est dans la file.
+    db.prepare("UPDATE instagram_proposals SET status = 'validee', decided_by = ?, decided_at = ? WHERE photo_id = ? AND status = 'proposee'").run(String(opts.byName || ''), now().getTime(), photoId);
     return id;
   }
-  function enqueueRaw(photoId, { frame, watermark, caption, confirmed = false, byName = '' } = {}) {
-    const s = settings();
+  // Une photo peut-elle partir sur Instagram ? Publiée sur le site, pas bloquée par un accord ; « à vérifier » :
+  // seulement avec la confirmation de qui voit les personnes (gardée, elle vaut ensuite pour la file).
+  function check(photoId, { confirmed = false, byName = '' } = {}) {
     const p = q.photo.get(photoId);
     if (!p) throw new InstagramError('photo introuvable');
     if (p.status !== 'published') throw new InstagramError('seules les photos publiées sur le site partent sur Instagram');
@@ -338,11 +341,17 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
       if (!confirmed) throw new InstagramError(verifyReason(r.reasons));
       onConfirm(photoId, r.reasons, byName);
     }
-    const fields = {
-      frame: Object.hasOwn(FRAMES, frame) ? frame : s.frame,
-      watermark: watermark === undefined ? (s.watermark ? 1 : 0) : (watermark ? 1 : 0),
-      caption: typeof caption === 'string' && caption.trim() ? caption.replace(/\r\n/g, '\n').trim().slice(0, LIMITS.caption) : null,
-    };
+    return p;
+  }
+  const fieldsOf = ({ frame, watermark, caption }, s = settings()) => ({
+    frame: Object.hasOwn(FRAMES, frame) ? frame : s.frame,
+    watermark: watermark === undefined ? (s.watermark ? 1 : 0) : (watermark ? 1 : 0),
+    caption: typeof caption === 'string' && caption.trim() ? caption.replace(/\r\n/g, '\n').trim().slice(0, LIMITS.caption) : null,
+  });
+  function enqueueRaw(photoId, { frame, watermark, caption, confirmed = false, byName = '' } = {}) {
+    const s = settings();
+    check(photoId, { confirmed, byName });
+    const fields = fieldsOf({ frame, watermark, caption }, s);
     const existing = q.active.get(photoId);
     if (existing) {
       if (existing.status === 'publishing') throw new InstagramError('envoi en cours : modification impossible');
@@ -353,6 +362,53 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     return Number(db.prepare(`INSERT INTO instagram_posts (photo_id, status, position, frame, watermark, caption, created_at)
       VALUES (?, 'queued', ?, ?, ?, ?, ?)`).run(photoId, pos, fields.frame, fields.watermark, fields.caption, now().getTime()).lastInsertRowid);
   }
+  // ---------- circuit : propositions du photographe ----------
+  const openProposal = photoId => db.prepare("SELECT * FROM instagram_proposals WHERE photo_id = ? AND status = 'proposee' ORDER BY id DESC LIMIT 1").get(photoId) || null;
+  // Proposer (ou mettre à jour sa proposition) : mêmes contrôles que la mise en file ; refusé si la photo y est déjà.
+  function propose(photoId, { frame, watermark, caption, confirmed = false, byName = '', bySub = null, message = '' } = {}) {
+    check(photoId, { confirmed, byName });
+    if (q.active.get(photoId)) throw new InstagramError('la photo est déjà dans la file Instagram');
+    const f = fieldsOf({ frame, watermark, caption });
+    const msg = String(message || '').trim().slice(0, 1000);
+    const open = openProposal(photoId);
+    if (open) {
+      db.prepare('UPDATE instagram_proposals SET frame = ?, watermark = ?, caption = ?, message = ? WHERE id = ?').run(f.frame, f.watermark, f.caption, msg || open.message, open.id);
+      event({ photo_id: photoId }, 'info', 'Proposition pour Instagram mise à jour', byName);
+      return { id: open.id, created: false };
+    }
+    const id = Number(db.prepare('INSERT INTO instagram_proposals (photo_id, frame, watermark, caption, message, by_sub, by_name, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+      .run(photoId, f.frame, f.watermark, f.caption, msg, bySub, String(byName || '').slice(0, 200), now().getTime()).lastInsertRowid);
+    event({ photo_id: photoId }, 'info', 'Proposée pour Instagram', byName);
+    return { id, created: true };
+  }
+  const proposal = id => db.prepare('SELECT * FROM instagram_proposals WHERE id = ?').get(id) || null;
+  // Valider : la photo entre dans la file avec les choix du photographe.
+  function approveProposal(id, byName = '') {
+    const pr = proposal(id);
+    if (!pr || pr.status !== 'proposee') throw new InstagramError('proposition introuvable ou déjà traitée');
+    const postId = enqueue(pr.photo_id, { frame: pr.frame, watermark: Boolean(pr.watermark), caption: pr.caption, byName });
+    return { postId, proposal: pr };
+  }
+  function sendBackProposal(id, byName = '', remark = '') {
+    const pr = proposal(id);
+    if (!pr || pr.status !== 'proposee') throw new InstagramError('proposition introuvable ou déjà traitée');
+    const text = String(remark || '').trim();
+    if (!text) throw new InstagramError('Écrivez la remarque.');
+    db.prepare("UPDATE instagram_proposals SET status = 'renvoyee', decided_by = ?, decided_at = ?, remark = ? WHERE id = ?").run(String(byName || ''), now().getTime(), text.slice(0, 1000), id);
+    event({ photo_id: pr.photo_id }, 'warn', `Proposition renvoyée au photographe : ${text.slice(0, 200)}`, byName);
+    return pr;
+  }
+  function withdrawProposal(photoId, byName = '') {
+    const open = openProposal(photoId);
+    if (!open) return false;
+    db.prepare("UPDATE instagram_proposals SET status = 'retiree', decided_at = ? WHERE id = ?").run(now().getTime(), open.id);
+    event({ photo_id: photoId }, 'info', 'Proposition pour Instagram retirée', byName);
+    return true;
+  }
+  // Propositions qui attendent (la plus ancienne d'abord), encore valables : photo publiée, pas dans la file.
+  const proposals = () => db.prepare(`SELECT pr.* FROM instagram_proposals pr JOIN photos p ON p.id = pr.photo_id
+    WHERE pr.status = 'proposee' AND p.status = 'published'
+      AND NOT EXISTS (SELECT 1 FROM instagram_posts x WHERE x.photo_id = pr.photo_id AND x.status IN ('queued', 'publishing')) ORDER BY pr.at, pr.id`).all();
   function cancel(postId, byName = '') {
     const post = q.post.get(postId);
     const ok = db.prepare("DELETE FROM instagram_posts WHERE id = ? AND status = 'queued'").run(postId).changes > 0;
@@ -673,6 +729,8 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     },
     resume(byName = '') { setState({ pausedUntil: 0, pauseReason: '', pauseLevel: 0 }); event(null, 'info', 'File reprise à la main', byName); },
     events: (n = 50) => q.events.all(n),
+    propose, approveProposal, sendBackProposal, withdrawProposal, proposals, proposal, openProposal,
+    lastProposal: photoId => db.prepare('SELECT * FROM instagram_proposals WHERE photo_id = ? ORDER BY id DESC LIMIT 1').get(photoId) || null,
     published: (n = 10) => q.published.all(n),
     failedLatest: (n = 20) => q.failedLatest.all(n),
     progressOf: postId => progress.get(postId) || null,
