@@ -141,7 +141,7 @@
     </div>
     <label class="inline"><input type="checkbox" name="watermark"<%~ s.watermark ? ' checked' : '' %>> Filigrane par défaut (celui des réglages <a href="/admin/images">Filigrane & EXIF</a>)</label>
     <label>Modèle de légende
-      <span class="mono">Variables : {titre} {legende} {lieu} {date} {auteur} {serie} {site} {hashtags} · une ligne dont les variables sont vides disparaît</span>
+      <span class="mono">Variables : {titre} {legende} {signature} {lieu} {date} {auteur} {serie} {site} {hashtags} · une ligne dont les variables sont vides disparaît ; sans {signature}, la signature du photographe se place sous la légende</span>
       <textarea name="template" rows="9" maxlength="2200"><%= s.template %></textarea></label>
     <label>Hashtags pour toutes les photos <input name="hashtags" value="<%= s.hashtags %>" maxlength="600" placeholder="#photographie #nicephos"></label>
     <fieldset class="row">

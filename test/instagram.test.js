@@ -359,3 +359,25 @@ test('mise en file automatique : rien par défaut, seulement les séries cochée
   assert.match(page, new RegExp(`name="auto_${catOf(b)}" checked`));
   assert.match(page, /Mise en file automatique à la publication : /);
 });
+
+test('signature du photographe : sous la légende si la photo en a une, retirable par photo, placée par {signature}', async t => {
+  const s = { ...DEFAULTS };
+  const photo = { title: 'Deux, minuit', legend: 'Une phrase.', place: 'Nantes', taken_on: '2023-11', author: 'Julien', author_signature: '— Julien · @julien.photo', category: 'Rue', ig_signature: 1 };
+  assert.match(renderCaption(DEFAULTS.template, photo, s, 'N'), /Une phrase\.\n— Julien · @julien\.photo\n/);
+  assert.doesNotMatch(renderCaption(DEFAULTS.template, { ...photo, legend: '' }, s, 'N'), /@julien/);        // pas de légende : pas de signature
+  assert.doesNotMatch(renderCaption(DEFAULTS.template, { ...photo, ig_signature: 0 }, s, 'N'), /@julien/);   // retirée pour cette photo
+  assert.equal(renderCaption('{titre}\n{legende}\n\n{signature}', photo, s, 'N'), 'Deux, minuit\nUne phrase.\n\n— Julien · @julien.photo');
+  // Dans l'admin : la signature se règle sur le photographe, la case de la fiche la retire.
+  const ctx = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: 'jeton-de-test-0123456789' } });
+  const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', payload: { token: 'jeton-de-test-0123456789', author: 'julien', next: '/admin' } });
+  const cookies = Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
+  const csrf = ctx.db.prepare('SELECT csrf FROM sessions').pluck().get();
+  const julien = ctx.db.prepare("SELECT * FROM authors WHERE slug = 'julien'").get();
+  await ctx.app.inject({ method: 'POST', url: `/admin/auteurs/${julien.id}`, cookies, payload: { _csrf: csrf, name: julien.name, slug: julien.slug, ig_signature: '— Julien · @julien.photo' }, headers: { accept: 'text/html' } });
+  const p = ctx.db.prepare("SELECT id FROM photos WHERE author_id = ? AND status = 'published' AND legend <> '' LIMIT 1").pluck().get(julien.id);
+  assert.match(ctx.app.instagram.caption(p), /— Julien · @julien\.photo/);
+  assert.match((await ctx.app.inject({ url: `/admin/photos/${p}`, cookies })).body, /name="signature" checked> Ajouter ma signature/);
+  await ctx.app.inject({ method: 'POST', url: '/admin/instagram/file', cookies, payload: { _csrf: csrf, photo_id: String(p), signature_set: '1' }, headers: { accept: 'text/html' } });
+  assert.equal(ctx.db.prepare('SELECT ig_signature FROM photos WHERE id = ?').pluck().get(p), 0);
+  assert.doesNotMatch(ctx.app.instagram.caption(p), /@julien/);
+});

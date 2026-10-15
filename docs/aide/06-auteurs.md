@@ -7,6 +7,7 @@ Une fiche par photographe.
 | **Nom** | affiché sur le site (filtre « deux regards », légendes, À propos) |
 | **Adresse** | `/auteur/<adresse>` (fiches existantes seulement) |
 | **Biographie** | affichée sur la page « À propos » ; version anglaise et allemande facultative, repliée dessous (vide : la biographie française) |
+| **Signature des posts Instagram** | ajoutée sous la légende des posts Instagram de ses photos qui ont une légende, retirable photo par photo (voir [Instagram](instagram#la-légende)) |
 | **Lettre des cartes** | la lettre des cartes d’accord (J-0142) ; vide : la première lettre de l'adresse. Une lettre par photographe (voir [Rencontres](rencontres)). |
 | **Sur le terrain** | lien vers ses cartes d’accord et le QR de ses vêtements (voir [Rencontres](rencontres#sur-le-terrain)) |
 | **Compte de connexion** | identifiant du compte qui se connecte à l'admin (voir ci-dessous) |
