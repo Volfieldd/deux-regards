@@ -103,7 +103,7 @@ Eine **Reise** fasst Ausflüge zusammen: „Marokko 2025“, zehn Aufnahmetage. 
 - **Anlegen**: Seite **Reisen** (unter Ausflüge im Menü oder über die Schaltfläche **Reisen** auf der Seite Ausflüge), ein Name, dann **Reise anlegen**. Ein Administrator wählt, ob sie einem Fotografen oder **beiden Fotografen** gehört; ein Fotograf legt seine eigenen an.
 - **Tage zuordnen**: Auf der Seite der Reise ordnet **Vom … Bis …** alle Aufnahmetage zwischen diesen beiden Daten zu (von der Kamera datierte Fotos oder Begegnungen); oder kreuzen Sie Ausflüge in der Liste an. Auf der Seite eines Ausflugs ordnet das Menü **Reise** ihn zu, verschiebt ihn in eine andere Reise oder löst ihn. Ein Tag, der schon zu einer anderen Reise gehört, wird verschoben.
 - **Die Seite der Reise**: ihre Tage der Reihe nach (T1, T2…), jeder mit Ort, Fotos, Personen und einem Link zum Ausflug; alle Fotos der Reise mit ihrem Status; **Bereite Fotos vorschlagen** (oder **Bereite Fotos veröffentlichen**) auf einmal, wie bei einem Ausflug.
-- **Name und Text**, in drei Sprachen: Sie dienen der öffentlichen Seite der Reise, die in Vorbereitung ist.
+- **Öffentliche Seite**: Name und Text in drei Sprachen und das Kästchen **Seite der Reise auf der Website veröffentlichen**. Sobald es aktiviert ist und ein Foto der Reise veröffentlicht ist, hat die Reise ihre Seite (`/voyage/…`), und das Menü der Website erhält einen Link **Reisen**. Vorher sieht das Team sie als Vorschau. Siehe [Website](site-public).
 - Einen Tag **entfernen** oder **Diese Reise löschen**: Die Ausflüge und Fotos bleiben.
 - **Fotograf**: sieht nur seine eigenen Reisen und ordnet nur seine eigenen Tage zu.
 

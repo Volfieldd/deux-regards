@@ -1,0 +1,16 @@
+<% layout('./layout') %>
+<% const t = it.t, v = it.t.trips; %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+  <%~ include('./nav', { ...it, current: 'trips' }) %>
+</header>
+<main class="trips-page wrap">
+  <h1><%= v.title %></h1>
+  <ul class="trips-list">
+<% it.list.forEach(tr => { %>    <li><a class="trip-card" href="<%= it.u(`/voyage/${tr.slug}`) %>">
+      <span class="im"><% if (tr.cover) { %><%~ it.picture(tr.cover, { sizes: '(min-width: 900px) 45vw, 92vw', alt: '' }) %><% } %></span>
+      <span class="trip-card-t"><span class="ttl"><%= tr.name %></span><span class="mono"><%= tr.span %> · <%= v.days(tr.days) %> · <%= t.photos(tr.photos.length) %></span></span>
+    </a></li>
+<% }) %>  </ul>
+</main>
+<%~ include('./footer', it) %>

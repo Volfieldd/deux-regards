@@ -519,3 +519,38 @@ document.querySelectorAll('[data-share]').forEach(btn => {
   });
   field?.addEventListener('focus', () => field.select());
 });
+
+// ----- carte d'un voyage : cadrage serré → tuiles détaillées (1:10m) de la zone, lues une fois -----
+// Sans ce script, le fond 1:50m reste : la carte est complète, seulement moins fine sur les côtes.
+(function () {
+  const fig = document.querySelector('[data-trip-map]');
+  if (!fig) return;
+  const svg = fig.querySelector('svg');
+  const [x, y, w, h] = svg.getAttribute('viewBox').split(' ').map(Number);
+  if (w > 1000 / 8) return;
+  const detail = svg.querySelector('[data-detail]');
+  const base = svg.querySelector('[data-base]');
+  const index = new URL(svg.dataset.tiles, location.href);
+  const dir = new URL('./', index).pathname;
+  fetch(index).then(r => r.json()).then(ix => {
+    const set = new Set(ix.tiles), need = [];
+    for (let i = Math.floor(x / ix.w); i <= Math.floor((x + w) / ix.w); i++) {
+      for (let j = Math.floor(y / ix.h); j <= Math.floor((y + h) / ix.h); j++) if (set.has(`${i}-${j}`)) need.push(`${i}-${j}`);
+    }
+    if (!need.length) return null;
+    return Promise.all(need.map(t => fetch(`${dir}${t}.svg${index.search}`).then(r => (r.ok ? r.text() : '')))).then(texts => {
+      for (const text of texts) {
+        const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+        doc.querySelectorAll('path').forEach(p => detail.appendChild(document.importNode(p, true)));
+      }
+      detail.setAttribute('display', 'inline');
+      base.setAttribute('display', 'none');
+    });
+  }).catch(() => {});
+})();
+
+// Carte d'un voyage sur téléphone : le cadre glissant s'ouvre centré sur l'itinéraire.
+(function () {
+  const box = document.querySelector('[data-trip-scroll]');
+  if (box && box.scrollWidth > box.clientWidth) box.scrollLeft = (box.scrollWidth - box.clientWidth) / 2;
+})();

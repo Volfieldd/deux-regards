@@ -87,10 +87,6 @@
   "en": "Photos of the trip",
   "de": "Fotos der Reise"
  },
- "pour la page publique du voyage, à venir": {
-  "en": "for the trip’s public page, coming soon",
-  "de": "für die öffentliche Seite der Reise, in Vorbereitung"
- },
  "Rattacher des journées": {
   "en": "Attach days",
   "de": "Tage zuordnen"
@@ -214,5 +210,25 @@
  "Indiquez deux dates (AAAA-MM-JJ).": {
   "en": "Give two dates (YYYY-MM-DD).",
   "de": "Geben Sie zwei Daten an (JJJJ-MM-TT)."
+ },
+ "pour la page publique du voyage": {
+  "en": "for the trip’s public page",
+  "de": "für die öffentliche Seite der Reise"
+ },
+ "Publier la page du voyage sur le site": {
+  "en": "Publish the trip’s page on the site",
+  "de": "Seite der Reise auf der Website veröffentlichen"
+ },
+ "en ligne": {
+  "en": "online",
+  "de": "online"
+ },
+ "en attente d’une photo publiée": {
+  "en": "waiting for a published photo",
+  "de": "wartet auf ein veröffentlichtes Foto"
+ },
+ "aperçu réservé à l’équipe": {
+  "en": "preview for the team only",
+  "de": "Vorschau nur für das Team"
  }
 }

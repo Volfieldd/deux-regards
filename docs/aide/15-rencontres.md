@@ -103,7 +103,7 @@ Un **voyage** regroupe des sorties : « Maroc 2025 », dix journées de prise de
 - **Créer** : page **Voyages** (sous Sorties dans le menu, ou le bouton **Voyages** de la page Sorties), un nom, puis **Créer le voyage**. Un administrateur choisit s’il est celui d’un photographe ou **des deux photographes** ; un photographe crée les siens.
 - **Rattacher des journées** : sur la page du voyage, **Du … Au …** rattache toutes les journées de prise de vue entre ces deux dates (photos datées par l’appareil, ou rencontres) ; ou cochez des sorties dans la liste. Depuis la page d’une sortie, le menu **Voyage** la rattache, la change de voyage ou l’en détache. Une journée déjà dans un autre voyage y est déplacée.
 - **La page du voyage** : ses journées dans l’ordre (J1, J2…), chacune avec son lieu, ses photos, ses personnes et un lien vers la sortie ; toutes les photos du voyage avec leur état ; **Proposer les photos prêtes** (ou **Publier les photos prêtes**) d’un coup, comme pour une sortie.
-- **Nom et texte**, en trois langues : ils serviront à la page publique du voyage, à venir.
+- **Page publique** : nom et texte en trois langues, et la case **Publier la page du voyage sur le site**. Une fois cochée, et dès qu’une photo du voyage est publiée, le voyage a sa page (`/voyage/…`) et le menu du site gagne un lien **Voyages**. Avant cela, l’équipe la voit en aperçu. Voir [Site public](site-public).
 - **Retirer** une journée, ou **Supprimer ce voyage** : les sorties et les photos restent.
 - **Photographe** : il ne voit que ses voyages et n’y rattache que ses journées.
 

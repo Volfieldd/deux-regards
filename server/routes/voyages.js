@@ -68,8 +68,10 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
     const tr = load(request);
     if (!tr) return reply.callNotFound();
     if (!manages(request, tr)) return app.forbid(request, reply);
+    // Page publique : case à cocher (absente du formulaire quand elle est décochée, d'où le champ témoin public_set).
     const body = { ...request.body };
-    delete body.public;                                                    // page publique : réglée à part (plus tard)
+    if (body.public_set) body.public = body.public === 'on' || body.public === true;
+    else delete body.public;
     if ('author_id' in body) {
       if (!request.scope('sorties.gerer')?.all) delete body.author_id;
       else body.author_id = Number(body.author_id) || null;
