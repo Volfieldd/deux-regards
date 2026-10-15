@@ -14,6 +14,12 @@
 <% if (p.legend) { %>
       <p class="legend" id="legende"><%= p.legend %></p>
 <% } %>
+      <div class="vact">
+        <form method="post" action="<%= it.u(`/photo/${p.slug}/aime`) %>" data-like data-slug="<%= p.slug %>" data-like-label="<%= it.t.fb.like %>" data-unlike-label="<%= it.t.fb.unlike %>">
+          <button type="submit" class="like" aria-pressed="false" aria-label="<%= it.t.fb.like %>"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg><span class="mono" data-like-n><%= it.t.fb.likes(p.likes || 0) %></span></button>
+        </form>
+        <a class="report mono" href="<%= it.u(`/photo/${p.slug}/signaler`) %>" rel="nofollow"><%= it.t.fb.report %></a>
+      </div>
     </div>
 <% if (it.count > 1) { %>
     <nav class="nav" aria-label="<%= it.t.photosNav %>">

@@ -27,7 +27,7 @@ Lien en bio · {site}
 {hashtags}`;
 // autoSeries : séries dont les photos entrent seules dans la file à leur publication. Vide par défaut :
 // rien ne part sur Instagram sans un choix explicite (série cochée, ou ajout depuis la fiche).
-export const DEFAULTS = { limits: LIMIT_DEFAULTS, autoSeries: [], times: ['18:30'], frame: 'white', watermark: false, template: DEFAULT_TEMPLATE, hashtags: '#photographie', seriesHashtags: {} };
+export const DEFAULTS = { limits: LIMIT_DEFAULTS, autoSeries: [], times: ['18:30'], frame: 'crop', watermark: false, template: DEFAULT_TEMPLATE, hashtags: '#photographie', seriesHashtags: {} };
 export const LIMITS = { caption: 2200, hashtags: 30, times: 4, attempts: 3 };
 const VARIABLES = ['titre', 'legende', 'signature', 'lieu', 'date', 'auteur', 'serie', 'site', 'hashtags'];
 const GRAPH = 'https://graph.instagram.com';

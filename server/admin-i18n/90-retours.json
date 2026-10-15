@@ -1,0 +1,58 @@
+{
+ "Signalements des visiteurs": {
+  "en": "Visitor reports",
+  "de": "Meldungen von Besuchern"
+ },
+ "Signalement marqué comme traité.": {
+  "en": "Report marked as dealt with.",
+  "de": "Meldung als erledigt markiert."
+ },
+ "Signalement supprimé.": {
+  "en": "Report deleted.",
+  "de": "Meldung gelöscht."
+ },
+ "Ne devrait pas être en ligne": {
+  "en": "Should not be online",
+  "de": "Sollte nicht online sein"
+ },
+ "Suggestion pour le texte": {
+  "en": "Suggestion for the text",
+  "de": "Vorschlag zum Text"
+ },
+ "Autre chose": {
+  "en": "Something else",
+  "de": "Etwas anderes"
+ },
+ "Envoyés depuis le lien « Signaler » sous chaque photo du site. Message et adresse chiffrés, effacés au bout de 12 mois. Une personne qui se reconnaît est renvoyée vers la page /bonjour (accord ou refus).": {
+  "en": "Sent from the “Report” link under each photo on the site. Message and address encrypted, deleted after 12 months. Someone who recognises themselves is sent to the /bonjour page (consent or refusal).",
+  "de": "Gesendet über den Link „Melden“ unter jedem Foto der Website. Nachricht und Adresse verschlüsselt, nach 12 Monaten gelöscht. Wer sich erkennt, wird auf die Seite /bonjour geleitet (Einwilligung oder Ablehnung)."
+ },
+ "Aucun signalement.": {
+  "en": "No reports.",
+  "de": "Keine Meldungen."
+ },
+ "traité": {
+  "en": "dealt with",
+  "de": "erledigt"
+ },
+ "Traité": {
+  "en": "Dealt with",
+  "de": "Erledigt"
+ },
+ "{n} signalements de visiteurs": {
+  "en": "{n} visitor reports",
+  "de": "{n} Meldungen von Besuchern"
+ },
+ "{n} signalement de visiteur": {
+  "en": "{n} visitor report",
+  "de": "{n} Meldung eines Besuchers"
+ },
+ "photo à retirer, suggestion pour le texte ou autre": {
+  "en": "photo to remove, suggestion for the text, or other",
+  "de": "Foto entfernen, Vorschlag zum Text oder anderes"
+ },
+ "{n} j’aime sur le site": {
+  "en": "{n} likes on the site",
+  "de": "Gefällt {n} Mal auf der Website"
+ }
+}

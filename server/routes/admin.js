@@ -546,6 +546,19 @@ export default async function adminRoutes(app) {
     return { ...s, spark: sparkline(s.days.map(d => d.views)) };
   };
 
+  // ---------- signalements des visiteurs ----------
+  app.get('/admin/signalements', async (request, reply) => render(request, reply, 'reports', {
+    title: request.t('Signalements des visiteurs'), reports: app.feedback.reports().map(r => withReady({ ...r, id: r.pid, reportId: r.id })),
+  }));
+  app.post('/admin/signalements/:id/traite', write, async (request, reply) => {
+    app.feedback.done(byId(request.params.id));
+    return done(reply, '/admin/signalements', request.t('Signalement marqué comme traité.'));
+  });
+  app.post('/admin/signalements/:id/supprimer', write, async (request, reply) => {
+    app.feedback.remove(byId(request.params.id));
+    return done(reply, '/admin/signalements', request.t('Signalement supprimé.'));
+  });
+
   app.get('/admin/statistiques', async (request, reply) => {
     const days = PERIODS[request.query.periode] ? Number(request.query.periode) : 30;
     const { from, to } = app.stats.range(days);
@@ -1273,8 +1286,10 @@ export default async function adminRoutes(app) {
 
   // ---------- aide en ligne ----------
   // Relue à chaque affichage en développement (édition de docs/aide), une fois pour toutes en production.
-  let help = app.config.production ? loadHelp() : null;
-  app.get('/admin/aide', async (request, reply) => render(request, reply, 'help', { title: request.t('Aide'), help: help || loadHelp() }));
+  // Aide dans la langue de l'admin (français si la traduction manque) ; gardée en mémoire en production.
+  const helpCache = {};
+  const helpIn = lang => (app.config.production ? (helpCache[lang] ??= loadHelp(lang)) : loadHelp(lang));
+  app.get('/admin/aide', async (request, reply) => render(request, reply, 'help', { title: request.t('Aide'), help: helpIn(request.t.lang) }));
 
   // ---------- rencontres (page /bonjour, cartes) ----------
   registerEncounters(app, { repo, render, write, done, failed, withReady });

@@ -17,7 +17,7 @@ La mise en place se fait une seule fois : un **compte Instagram professionnel**,
 
 ## Le cadre de l’image
 
-Instagram n’accepte que des images entre **4:5** (en hauteur) et **1,91:1** (en largeur). Vos photos 2:3 en hauteur n’y entrent pas telles quelles. Trois choix, par défaut dans les réglages et photo par photo dans la fiche :
+Instagram n’accepte que des images entre **4:5** (en hauteur) et **1,91:1** (en largeur). Vos photos 2:3 en hauteur n’y entrent pas telles quelles. Trois choix, par défaut dans les réglages (**Recadrage** si vous n'avez rien choisi) et photo par photo dans la fiche :
 
 | Cadre | Résultat |
 |---|---|

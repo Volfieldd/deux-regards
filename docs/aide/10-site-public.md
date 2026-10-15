@@ -47,6 +47,8 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
 
 **Retour à la série :** passer d'une photo à la précédente ou à la suivante ne s'empile pas dans l'historique du navigateur. Après avoir vu dix photos, **un seul** Retour (ou **Fermer**, ou **Échap**) ramène à la série, à la hauteur où on l'avait quittée, et la dernière photo vue est remise à l'écran.
 
+**J'aime et Signaler** : sous le texte de chaque photo, un cœur **J'aime** (anonyme : ni compte ni cookie ; le visiteur peut retirer son « j'aime », et le compteur s'affiche à côté) et un lien **Signaler** : photo qui ne devrait pas être en ligne, suggestion pour le texte, autre chose, avec un message et une adresse facultative. Une personne qui se reconnaît est renvoyée vers `/bonjour`. Les signalements arrivent dans « Aujourd'hui » et dans la page **Signalements des visiteurs** ; le nombre de « j'aime » s'affiche dans la rubrique Audience de la fiche.
+
 ## Autres pages
 
 - **À propos :** logo complet, accroche, texte, biographies des auteurs.

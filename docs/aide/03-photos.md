@@ -71,7 +71,7 @@ Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir pl
 Il change selon la sélection :
 
 - **Rien de sélectionné** : les chiffres de la photothèque et les raccourcis.
-- **Une photo** (un clic dessus) : en tête du panneau, le bouton **Ouvrir la fiche** ; puis l’image en grand, **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **photographe** et son **audience** sur 30 jours. Chaque champ s’enregistre quand vous le quittez (ou Entrée) ; le message en bas propose **Annuler**. **Ouvrir la fiche**, ou le lien **Fiche complète** en bas du panneau, mène à la fiche (filigrane, Instagram, preuve d’antériorité, suppression).
+- **Une photo** (un clic dessus) : en tête du panneau, le bouton **Ouvrir la fiche** ; puis l’image en grand, **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **photographe** et son **audience** sur 30 jours. Chaque champ s’enregistre tout seul quand vous le quittez (ou Entrée), comme le rappelle le panneau — la fiche complète, elle, s’enregistre avec **Enregistrer** ; le message en bas propose **Annuler**. **Ouvrir la fiche**, ou le lien **Fiche complète** en bas du panneau, mène à la fiche (filigrane, Instagram, preuve d’antériorité, suppression).
 - **Plusieurs photos** : voir ci-dessous.
 
 En bas, toujours : **Publier**, **Dépublier**, **Supprimer…**.

@@ -1,7 +1,7 @@
 import { monthYear } from './format.js';
 import { pick } from './i18n.js';
 
-const PHOTO_COLUMNS = `p.id, p.slug, p.title, p.place, p.taken_on, p.legend, p.status, p.position, p.file, p.width, p.height, p.variant_key, p.updated_at, p.published_at, p.on_map, p.city_id, p.city_name, p.city_cc, p.city_lat, p.city_lon,
+const PHOTO_COLUMNS = `p.id, p.likes, p.slug, p.title, p.place, p.taken_on, p.legend, p.status, p.position, p.file, p.width, p.height, p.variant_key, p.updated_at, p.published_at, p.on_map, p.city_id, p.city_name, p.city_cc, p.city_lat, p.city_lon,
   p.title_en, p.title_de, p.legend_en, p.legend_de, p.place_en, p.place_de,
   c.slug AS category_slug, c.name AS category, c.name_en AS category_en, c.name_de AS category_de, a.slug AS author_slug, a.name AS author`;
 
