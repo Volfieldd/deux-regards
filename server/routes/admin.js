@@ -25,7 +25,7 @@ import { processEmblem, processIcon, processShare, BrandError, EMBLEM_MAX_BYTES 
 import { loadHelp } from '../help.js';
 import { barsAndLine, sparkline } from '../charts.js';
 import { RIGHTS, LANGS, rightsDefaults, withoutDefaults } from '../rights.js';
-import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, captionWarnings, InstagramError } from '../instagram.js';
+import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, parseTimes, captionWarnings, InstagramError } from '../instagram.js';
 import { PRESETS as IG_PRESETS, BOUNDS as IG_BOUNDS } from '../instagram-limits.js';
 import * as cities from '../geo/cities.js';
 import { TranslateError } from '../translate.js';
@@ -623,7 +623,10 @@ export default async function adminRoutes(app) {
 
   app.post('/admin/instagram/reglages', W('instagram.compte'), async (request, reply) => {
     app.instagram.saveSettings(normalizeSettings(request.body || {}, repo.categories()));
-    return done(reply, '/admin/instagram#reglages', request.t('Réglages Instagram enregistrés.'));
+    // Une heure illisible est écartée : on le dit (sinon la file publierait à 18:30 sans prévenir).
+    const { rejected } = parseTimes(request.body?.times);
+    const ignored = rejected.length ? ` ${request.t('Heures ignorées (format HH:MM attendu) : {times}.', { times: rejected.join(', ') })}` : '';
+    return done(reply, '/admin/instagram#reglages', `${request.t('Réglages Instagram enregistrés.')}${ignored}`);
   });
 
   // Connexion : redirection vers Instagram, avec un « state » lié à ce navigateur (cookie signé).
@@ -844,7 +847,13 @@ export default async function adminRoutes(app) {
     const photo = repo.photo(id);
     if (!photo || !igSees(request, photo)) return reply.callNotFound();
     const frame = Object.hasOwn(FRAMES, request.query.cadre) ? request.query.cadre : app.instagram.settings().frame;
-    const buf = await app.instagram.image(id, { frame, watermark: request.query.filigrane === '1' });
+    let buf;
+    try {
+      buf = await app.instagram.image(id, { frame, watermark: request.query.filigrane === '1' }, { preview: true });
+    } catch (err) {
+      if (!err.busy) throw err;
+      return reply.code(429).header('retry-after', '5').header('cache-control', 'no-store').send({ error: request.t.msg(err.message) });   // aperçus en attente : plus tard
+    }
     return reply.header('cache-control', 'no-store').type('image/jpeg').send(buf);
   });
   app.get('/admin/instagram/legende', P('admin.acceder'), async (request, reply) => {

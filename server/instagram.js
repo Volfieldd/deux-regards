@@ -5,7 +5,7 @@ import { MAX_PIXELS } from './images.js';
 import { specFor } from './variants.js';
 import { overlayFor, resolveTone } from './watermark.js';
 import { monthYear } from './format.js';
-import { LIMIT_DEFAULTS, normalizeLimits, effectiveLimits, checkBudget, rateLimitFrom, RateLimitError, backoffMs, whenText } from './instagram-limits.js';
+import { LIMIT_DEFAULTS, normalizeLimits, effectiveLimits, checkBudget, rateLimitFrom, RateLimitError, backoffMs, whenText, MAX_PAUSE } from './instagram-limits.js';
 
 // Partage des photos publiées sur un compte Instagram professionnel, par l'API officielle de Meta
 // (« Instagram API with Instagram Login », graph.instagram.com) :
@@ -33,13 +33,23 @@ const VARIABLES = ['titre', 'legende', 'signature', 'lieu', 'date', 'auteur', 's
 const GRAPH = 'https://graph.instagram.com';
 const SCOPES = 'instagram_business_basic,instagram_business_content_publish';
 const SIZE = 1080;
+const MAX_REPLY = 1024 * 1024;                        // réponse de l'API : quelques ko ; au-delà, refusée
+const MAX_PREVIEWS = 3;                               // aperçus en attente de rendu ; au-delà, « réessayez »
 
 export class InstagramError extends Error {}
 
 // ---------- réglages ----------
 const tag = s => String(s || '').match(/#[\p{L}\p{N}_]+/gu) || [];
+// Heures de publication saisies : « 18:30 », « 9:00 », « 18h30 », « 18 h 30 », « 18 h », séparées par des virgules
+// (ou des espaces entre heures complètes). Renvoie les heures retenues (HH:MM) et celles qui ne se lisent pas.
+const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+const clock = s => { const m = /^(\d{1,2})\s*[:hH]\s*(\d{2})?$/.exec(s.trim()); return m ? `${m[1].padStart(2, '0')}:${m[2] || '00'}` : s.trim(); };
+export function parseTimes(raw) {
+  const tokens = String(raw ?? '').split(/[,;]+/).flatMap(part => (HHMM.test(clock(part)) ? [clock(part)] : part.trim().split(/\s+/).map(clock))).filter(Boolean);
+  return { times: [...new Set(tokens.filter(t => HHMM.test(t)))].sort().slice(0, LIMITS.times), rejected: tokens.filter(t => !HHMM.test(t)) };
+}
 export function normalizeSettings(body = {}, categories = []) {
-  const times = [...new Set(String(body.times ?? '').split(/[,;\s]+/).filter(t => /^([01]\d|2[0-3]):[0-5]\d$/.test(t)))].sort().slice(0, LIMITS.times);
+  const { times } = parseTimes(body.times);
   const series = {};
   for (const c of categories) { const h = tag(body[`hashtags_${c.id}`]).join(' '); if (h) series[c.id] = h; }
   const on = v => v === 'on' || v === true;
@@ -77,11 +87,15 @@ export function renderCaption(template, photo, settings, siteName) {
   const lines = String(template).split('\n').map(line => {
     const vars = [...line.matchAll(/\{(\w+)\}/g)].map(m => m[1]).filter(v => VARIABLES.includes(v));
     if (vars.length && vars.every(v => !values[v])) return null;
-    let out = line.replace(/\{(\w+)\}/g, (m, v) => (VARIABLES.includes(v) ? (values[v] ? `\u0000${values[v]}\u0000` : '\u0001') : m));
+    // Séparateurs orphelins retirés sur la ligne du modèle (texte de l'admin), AVANT d'y mettre les valeurs : un texte
+    // du photographe (légende de 2 000 espaces…) ne passe jamais dans ces expressions, dont le retour arrière gelait
+    // le serveur. Espaces horizontaux, séparateur d'un côté puis de l'autre : une seule façon de lire une suite d'espaces.
+    let out = line.replace(/\{(\w+)\}/g, (m, v) => (VARIABLES.includes(v) && !values[v] ? '\u0001' : m));
     if (out.includes('\u0001')) {
-      out = out.replace(/\s*[,·—–-]?\s*\u0001\s*([,·—–-](?=\s))?/g, ' ').replace(/^\s*[,·—–-]\s+/, '').replace(/\s+[,·—–-]\s*$/, '');
+      out = out.replace(/(?:[ \t]*[,·—–-])?[ \t]*\u0001(?:[ \t]*[,·—–-](?=\s))?/g, ' ').replace(/^\s*[,·—–-]\s+/, '').replace(/\s+[,·—–-]\s*$/, '');
     }
-    return out.replace(/\u0000/g, '').replace(/[ \t]{2,}/g, ' ').trim();
+    out = out.replace(/\{(\w+)\}/g, (m, v) => (VARIABLES.includes(v) ? values[v] : m));
+    return out.replace(/[ \t]{2,}/g, ' ').trim();
   }).filter(l => l !== null);
   return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim().slice(0, LIMITS.caption);
 }
@@ -168,8 +182,8 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     post: db.prepare('SELECT * FROM instagram_posts WHERE id = ?'),
     active: db.prepare("SELECT * FROM instagram_posts WHERE photo_id = ? AND status IN ('queued', 'publishing') ORDER BY id DESC LIMIT 1"),
     latest: db.prepare("SELECT * FROM instagram_posts WHERE photo_id = ? AND status <> 'cancelled' ORDER BY id DESC LIMIT 1"),
+    any: db.prepare('SELECT 1 FROM instagram_posts WHERE photo_id = ? LIMIT 1').pluck(),
     queue: db.prepare("SELECT * FROM instagram_posts WHERE status IN ('queued', 'publishing') ORDER BY status = 'publishing' DESC, position, id"),
-    history: db.prepare("SELECT * FROM instagram_posts WHERE status IN ('published', 'failed') ORDER BY COALESCE(published_at, created_at) DESC, id DESC LIMIT ?"),
     byToken: db.prepare("SELECT * FROM instagram_posts WHERE media_token = ? AND status = 'publishing' AND media_token_at > ?"),
     account: db.prepare('SELECT * FROM instagram_account WHERE id = 1'),
     logCall: db.prepare('INSERT INTO instagram_calls (at, kind) VALUES (?, ?)'),
@@ -223,8 +237,9 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
         ON CONFLICT(id) DO UPDATE SET ig_user_id = excluded.ig_user_id, username = excluded.username, token = excluded.token,
           expires_at = excluded.expires_at, refreshed_at = excluded.refreshed_at, connected_at = excluded.connected_at`)
         .run(String(igUserId), String(username), vault.seal(token), t + expiresIn * 1000, t, t);
+      setState({ liveQuota: null });                      // quota d'un autre compte, peut-être
     },
-    remove: () => db.prepare('DELETE FROM instagram_account').run(),
+    remove: () => { db.prepare('DELETE FROM instagram_account').run(); setState({ liveQuota: null }); },
     // « none » : pas de compte ; « unreadable » : jeton indéchiffrable (clé changée, base restaurée ailleurs).
     state() { const a = q.account.get(); if (!a) return 'none'; return this.token() ? 'ok' : 'unreadable'; },
   };
@@ -232,21 +247,22 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
   // Appel à l'API : erreurs Meta traduites, jamais de jeton dans un message.
   // Appel à l'API : journalisé (date et type), refusé au-delà du budget horaire du réglage ; une limite signalée
   // par Meta lève RateLimitError (la file se met alors en pause, sans consommer d'essai).
-  async function call(url, { method = 'GET', form, kind = 'autre' } = {}) {
+  async function call(url, { method = 'GET', form, kind = 'autre', metered = true } = {}) {
     const t = now().getTime();
     const callsPerHour = effectiveLimits(settings().limits, state().liveQuota).callsPerHour;
     const hour = q.callsSince.all(t - 3600 * 1000);
-    if (hour.length >= callsPerHour) throw new RateLimitError(`budget de ${callsPerHour} appels par heure du réglage atteint`, hour[0] + 3600 * 1000 - t);
+    if (metered && hour.length >= callsPerHour) throw new RateLimitError(`budget de ${callsPerHour} appels par heure du réglage atteint`, hour[0] + 3600 * 1000 - t);
     q.logCall.run(t, kind);
     let res;
     try {
       const signal = AbortSignal.timeout(timeoutMs);               // Meta muette : l'envoi échoue au lieu de bloquer la file
-      res = await fetchImpl(url, form ? { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(form), signal } : { method, signal });
+      // Jamais de redirection suivie : sur 307/308, le formulaire (secret de l'application, jeton) serait renvoyé ailleurs.
+      res = await fetchImpl(url, form ? { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(form), redirect: 'error', signal } : { method, redirect: 'error', signal });
     } catch (err) {
       throw new InstagramError(`Instagram injoignable : ${scrub(err.message, secrets())}`);
     }
     let data = {};
-    try { data = await res.json(); } catch { /* réponse vide */ }
+    try { data = await readJson(res); } catch (err) { if (err instanceof InstagramError) throw err; /* réponse vide */ }
     const limit = rateLimitFrom(res.status, res.headers, data);
     if (limit) throw new RateLimitError(limit.reason, limit.retryAfterMs);
     if (!res.ok || data.error) {
@@ -256,21 +272,45 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     return data;
   }
   const api = (p, params = {}) => `${GRAPH}/${ig.apiVersion}/${p}?${new URLSearchParams(params)}`;
+  // Corps de la réponse, 1 Mo au plus (Meta répond quelques ko) ; sans flux lisible (doubles des tests) : json().
+  async function readJson(res) {
+    if (!res.body || typeof res.body[Symbol.asyncIterator] !== 'function') return res.json();
+    const chunks = [];
+    let size = 0;
+    for await (const chunk of res.body) {
+      size += chunk.length;
+      if (size > MAX_REPLY) throw new InstagramError('réponse d’Instagram trop volumineuse');
+      chunks.push(chunk);
+    }
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  }
 
   // ---------- image envoyée à Instagram ----------
   // Rendu coûteux (original décodé, recadrage, mozjpeg) : un seul à la fois, et les derniers gardés en mémoire.
+  // Une même image demandée deux fois pendant son rendu n'est rendue qu'une fois. Les aperçus (preview) sont refusés
+  // quand plusieurs attendent déjà ; l'image d'un envoi en cours est rendue avant d'appeler Meta et gardée à part
+  // (pinned) : Instagram la télécharge sans attendre derrière des aperçus.
   const cache = new Map();
+  const pending = new Map();
+  const pinned = new Map();
   let renderQueue = Promise.resolve();
-  function image(photoId, options) {
+  let waiting = 0;
+  const keyOf = (p, options) => JSON.stringify([p.id, p.file, p.variant_key, p.updated_at, p.watermark, options.frame, Boolean(options.watermark), options.watermark ? variants.context().watermark : null]);
+  function image(photoId, options, { preview = false } = {}) {
     const p = q.photo.get(photoId);
     if (!p) return Promise.reject(new InstagramError('photo introuvable'));
-    const key = JSON.stringify([p.id, p.file, p.variant_key, p.updated_at, p.watermark, options.frame, Boolean(options.watermark), options.watermark ? variants.context().watermark : null]);
+    const key = keyOf(p, options);
+    if (pinned.has(key)) return Promise.resolve(pinned.get(key));
     if (cache.has(key)) return Promise.resolve(cache.get(key));
-    const job = renderQueue.then(() => cache.get(key) || renderImage(p, options)).then(buf => {
+    if (pending.has(key)) return pending.get(key);
+    if (preview && waiting >= MAX_PREVIEWS) return Promise.reject(Object.assign(new InstagramError('trop d’aperçus en préparation : réessayez dans un instant'), { busy: true }));
+    waiting++;
+    const job = renderQueue.then(() => { waiting--; return cache.get(key) || renderImage(p, options); }).then(buf => {
       cache.set(key, buf);
       if (cache.size > 24) cache.delete(cache.keys().next().value);
       return buf;
-    });
+    }).finally(() => pending.delete(key));
+    pending.set(key, job);
     renderQueue = job.catch(() => {});
     return job;
   }
@@ -409,9 +449,11 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
   const proposals = () => db.prepare(`SELECT pr.* FROM instagram_proposals pr JOIN photos p ON p.id = pr.photo_id
     WHERE pr.status = 'proposee' AND p.status = 'published'
       AND NOT EXISTS (SELECT 1 FROM instagram_posts x WHERE x.photo_id = pr.photo_id AND x.status IN ('queued', 'publishing')) ORDER BY pr.at, pr.id`).all();
+  // « Retirer » : l'envoi reste, annulé (la mise en file automatique ne remet pas la photo dans la file à une
+  // republication ; la remettre à la main reste possible).
   function cancel(postId, byName = '') {
     const post = q.post.get(postId);
-    const ok = db.prepare("DELETE FROM instagram_posts WHERE id = ? AND status = 'queued'").run(postId).changes > 0;
+    const ok = db.prepare("UPDATE instagram_posts SET status = 'cancelled', media_token = NULL WHERE id = ? AND status = 'queued'").run(postId).changes > 0;
     if (ok) event(post, 'info', 'Retirée de la file', byName);
     return ok;
   }
@@ -425,13 +467,13 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     db.transaction(() => list.forEach((id, k) => set.run(k, id)))();
   }
   // Photos qui viennent d'être publiées sur le site : dans la file si leur série est en mise en file
-  // automatique (jamais une photo déjà partagée ou déjà dans la file).
+  // automatique (jamais une photo déjà partagée, déjà dans la file, ou retirée de la file).
   function onPublished(ids) {
     const auto = new Set(settings().autoSeries);
     if (!auto.size) return [];
     const added = [];
     for (const id of ids) {
-      if (!auto.has(q.photo.get(id)?.category_id) || q.latest.get(id)) continue;
+      if (!auto.has(q.photo.get(id)?.category_id) || q.any.get(id)) continue;
       // Bloquée, à vérifier sans confirmation, ou dépubliée entre-temps : pas de mise en file, la raison est notée.
       try { added.push(enqueue(id, { auto: true })); } catch (err) { log?.info({ photo: id, raison: err.message }, 'instagram : pas de mise en file automatique'); }
     }
@@ -443,12 +485,12 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
   function pause(err) {
     const st = state();
     const t = now().getTime();
-    const wait = err.retryAfterMs > 0 ? err.retryAfterMs : backoffMs(st.pauseLevel);
-    const until = Math.max(st.pausedUntil || 0, t + wait);
+    const wait = Math.min(Number.isFinite(err.retryAfterMs) && err.retryAfterMs > 0 ? err.retryAfterMs : backoffMs(st.pauseLevel), MAX_PAUSE);
+    const until = Math.min(Math.max(st.pausedUntil || 0, t + wait), t + MAX_PAUSE);
     setState({ pausedUntil: until, pauseReason: err.message, pauseLevel: (st.pauseLevel || 0) + 1 });
     log?.warn({ until: new Date(until).toISOString(), reason: err.message }, 'file Instagram en pause');
     event(null, 'warn', `File en pause : ${err.message}`);
-    return new InstagramError(`En attente : ${err.message}. File en pause jusqu’${whenText(until, t).replace(/^à /, 'à ').replace(/^le /, 'au ')}.`);
+    return new InstagramError(`En attente : ${err.message}. File en pause jusqu’${whenText(until, t).replace(/^le /, 'au ')}.`);
   }
 
   // ---------- envoi ----------
@@ -499,7 +541,12 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     db.prepare("UPDATE instagram_posts SET status = 'publishing', media_token = ?, media_token_at = ?, attempts = attempts + 1, error = NULL WHERE id = ?").run(mediaToken, now().getTime(), postId);
     event(post, 'info', 'Envoi à Instagram commencé', byName);
     step(postId, 'envoi');
+    let pin = null;
     try {
+      // Image rendue avant d'appeler Meta et gardée le temps de l'envoi : son téléchargement n'attend pas derrière
+      // des aperçus demandés dans l'admin.
+      pin = keyOf(photo, optionsOf(post));
+      pinned.set(pin, await image(photo.id, optionsOf(post)));
       const container = await call(api(`${a.ig_user_id}/media`), { kind: 'media', form: { image_url: `${config.publicUrl}/partage/instagram/${mediaToken}.jpg`, caption: captionOf(post), access_token: token } });
       // Traitement de l'image chez Instagram : vérifications espacées (2, 3, 5, 8… s), 8 au plus, ~1 min 30 en tout.
       const delays = [0, 2, 3, 5, 8, 13, 21, 34];
@@ -529,8 +576,10 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
       // Limite (appels ou quota) : rien n'a été publié (media_publish refuse au-delà du quota) ; pause, la photo
       // reste en tête de file et l'essai n'est pas compté.
       if (err instanceof RateLimitError) {
+        // D'abord remise en file (même si la suite échouait, l'envoi ne reste pas « en cours »), puis la pause.
+        db.prepare('UPDATE instagram_posts SET status = \'queued\', media_token = NULL, attempts = MAX(attempts - 1, 0) WHERE id = ?').run(postId);
         const e = pause(err);
-        db.prepare('UPDATE instagram_posts SET status = \'queued\', media_token = NULL, attempts = MAX(attempts - 1, 0), error = ? WHERE id = ?').run(e.message, postId);
+        db.prepare('UPDATE instagram_posts SET error = ? WHERE id = ?').run(e.message, postId);
         throw e;
       }
       let msg = err instanceof InstagramError ? err.message : scrub(err.message, secrets());
@@ -545,11 +594,17 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
       throw new InstagramError(msg);
     } finally {
       busy = false;
+      if (pin) pinned.delete(pin);
     }
   }
+  // Seulement le dernier envoi de la photo, en échec, pour une photo encore publiée : un ancien échec relancé alors
+  // que la photo est déjà de nouveau dans la file la publierait deux fois.
   function retry(postId, byName = '') {
     const post = q.post.get(postId);
-    const held = post ? hold(post.photo_id) : null;
+    if (!post || post.status !== 'failed') return false;
+    if (q.active.get(post.photo_id) || q.latest.get(post.photo_id)?.id !== post.id) throw new InstagramError('la photo est déjà dans la file Instagram');
+    if (q.photo.get(post.photo_id)?.status !== 'published') throw new InstagramError('photo dépubliée sur le site');
+    const held = hold(post.photo_id);
     if (held) throw new InstagramError(held);
     const pos = db.prepare("SELECT COALESCE(MIN(position), 1) - 1 FROM instagram_posts WHERE status = 'queued'").pluck().get();
     const ok = db.prepare("UPDATE instagram_posts SET status = 'queued', attempts = 0, error = NULL, position = ?, retry_requested_at = NULL, retry_requested_by = NULL WHERE id = ? AND status = 'failed'").run(pos, postId).changes > 0;
@@ -573,15 +628,22 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
   function authorizeUrl(state) {
     return `https://www.instagram.com/oauth/authorize?${new URLSearchParams({ client_id: ig.appId, redirect_uri: ig.redirectUri, response_type: 'code', scope: SCOPES, state })}`;
   }
+  // Le code d'autorisation ne sert qu'une fois, quelques minutes : ses trois appels passent hors du budget horaire du
+  // réglage (ils restent comptés) ; une limite signalée par Meta devient un message, pas une erreur 500.
   async function connect(code) {
     const clean = String(code || '').replace(/#_$/, '');
-    const short = await call('https://api.instagram.com/oauth/access_token', { kind: 'token', form: { client_id: ig.appId, client_secret: ig.appSecret, grant_type: 'authorization_code', redirect_uri: ig.redirectUri, code: clean } });
-    const shortToken = short.access_token || short.data?.[0]?.access_token;
-    if (!shortToken) throw new InstagramError('réponse inattendue d’Instagram (jeton absent)');
-    const long = await call(`${GRAPH}/access_token?${new URLSearchParams({ grant_type: 'ig_exchange_token', client_secret: ig.appSecret, access_token: shortToken })}`);
-    const me = await call(api('me', { fields: 'user_id,username', access_token: long.access_token }), { kind: 'me' });
-    account.save({ igUserId: me.user_id || me.id, username: me.username, token: long.access_token, expiresIn: Number(long.expires_in) || 60 * 24 * 3600 });
-    return me.username;
+    try {
+      const short = await call('https://api.instagram.com/oauth/access_token', { kind: 'token', metered: false, form: { client_id: ig.appId, client_secret: ig.appSecret, grant_type: 'authorization_code', redirect_uri: ig.redirectUri, code: clean } });
+      const shortToken = short.access_token || short.data?.[0]?.access_token;
+      if (!shortToken) throw new InstagramError('réponse inattendue d’Instagram (jeton absent)');
+      const long = await call(`${GRAPH}/access_token?${new URLSearchParams({ grant_type: 'ig_exchange_token', client_secret: ig.appSecret, access_token: shortToken })}`, { kind: 'token', metered: false });
+      const me = await call(api('me', { fields: 'user_id,username', access_token: long.access_token }), { kind: 'me', metered: false });
+      account.save({ igUserId: me.user_id || me.id, username: me.username, token: long.access_token, expiresIn: Number(long.expires_in) || 60 * 24 * 3600 });
+      return me.username;
+    } catch (err) {
+      if (err instanceof RateLimitError) throw new InstagramError(`Instagram limite les appels (${err.message}) : réessayez plus tard`);
+      throw err;
+    }
   }
   async function refresh(force = false) {
     const a = account.get();
@@ -701,7 +763,6 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     isPublic: photoId => q.photo.get(photoId)?.status === 'published',
     image, enqueue, cancel, move, onPublished, publish, retry, requestRetry, retryRequests, captionOf, optionsOf, dropBlocked,
     blocked: photoId => { const r = readinessOf(photoId) || OK; return r.level === 'no' ? r.reasons : []; },
-    readiness: photoId => readinessOf(photoId) || OK,
     caption: (photoId, s = settings()) => { const p = q.photo.get(photoId); return p ? renderCaption(s.template, p, s, siteName()) : ''; },
     post: id => q.post.get(id),
     forPhoto: photoId => q.latest.get(photoId) || null,
@@ -712,7 +773,6 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
       let k = 0;
       return list.map(p => ({ ...p, slot: p.status === 'publishing' ? 'maintenant' : slots[k++] }));
     },
-    history: (n = 20) => q.history.all(n),
     // Consommation et limites, pour la page Instagram.
     usage() {
       const t = now().getTime();
@@ -725,12 +785,13 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
         calls24h: q.callsSince.all(t - 24 * 3600 * 1000).length,
         paused: st.pausedUntil > t ? { until: st.pausedUntil, when: whenText(st.pausedUntil, t), reason: st.pauseReason } : null,
         budget: budget(),
+        // Heure de reprise dans la langue de l'admin (locale : request.t.locale).
+        whenText: (ms, locale) => whenText(ms, t, locale),
       };
     },
-    resume(byName = '') { setState({ pausedUntil: 0, pauseReason: '', pauseLevel: 0 }); event(null, 'info', 'File reprise à la main', byName); },
+    resume(byName = '') { setState({ pausedUntil: 0, pauseReason: '', pauseLevel: 0, liveQuota: null }); event(null, 'info', 'File reprise à la main', byName); },
     events: (n = 50) => q.events.all(n),
     propose, approveProposal, sendBackProposal, withdrawProposal, proposals, proposal, openProposal,
-    lastProposal: photoId => db.prepare('SELECT * FROM instagram_proposals WHERE photo_id = ? ORDER BY id DESC LIMIT 1').get(photoId) || null,
     published: (n = 10) => q.published.all(n),
     failedLatest: (n = 20) => q.failedLatest.all(n),
     progressOf: postId => progress.get(postId) || null,
@@ -745,7 +806,7 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     start() {
       if (timer) return;
       timer = setInterval(() => {
-        tick().catch(err => log?.error({ err }, 'file Instagram')).then(() => maybeSyncEngagement());
+        tick().catch(err => log?.error({ err }, 'file Instagram')).then(() => maybeSyncEngagement()).catch(err => log?.error({ err }, 'likes Instagram'));
       }, 60 * 1000);
       timer.unref();
     },

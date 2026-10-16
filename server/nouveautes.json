@@ -171,7 +171,7 @@
       },
       {
         "fr": "Proposer ou publier d’un coup les photos prêtes d’un voyage.",
-        "en": "Propose or publish a trip’s ready photos at once.",
+        "en": "Submit or publish a trip’s ready photos at once.",
         "de": "Die bereiten Fotos einer Reise auf einmal vorschlagen oder veröffentlichen.",
         "perm": "sorties.voir"
       }
@@ -195,7 +195,7 @@
       {
         "fr": "Un champ Mots-clés sur la fiche ; leur affichage sur la page de la photo se règle dans Site public.",
         "en": "A Keywords field on the photo page; showing them on the public photo page is set in Public site.",
-        "de": "Ein Feld Stichwörter auf der Seite des Fotos; ihre Anzeige auf der öffentlichen Fotoseite wird unter Website eingestellt.",
+        "de": "Ein Feld Stichwörter auf der Seite des Fotos; ihre Anzeige auf der öffentlichen Fotoseite wird unter Öffentliche Website eingestellt.",
         "perm": "photos.textes"
       }
     ]

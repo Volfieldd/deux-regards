@@ -7,7 +7,7 @@ La mise en place se fait une seule fois : un **compte Instagram professionnel**,
 ## Au quotidien
 
 1. **Choisissez ce qui part sur Instagram.** Par défaut, rien n’y entre seul : ouvrez la fiche d’une photo publiée sur le site et, dans la section **Instagram**, cliquez sur **Ajouter à la file Instagram**. (Une photo en brouillon doit d’abord être publiée sur le site.) Pour qu’une série entière parte automatiquement, cochez-la dans **Instagram → Réglages → Mise en file automatique** : chaque photo publiée dans cette série entrera alors dans la **file Instagram**.
-2. **Aux heures choisies** (18 h 30 par défaut, heure de Paris), la première photo de la file part sur Instagram. Une par créneau.
+2. **Aux heures choisies** (18 h 30 par défaut, heure de Paris), la première photo de la file part sur Instagram. Une par créneau. Dans les réglages, écrivez les heures séparées par des virgules : « 18:30 », « 9:00 » ou « 18 h 30 » conviennent ; une heure illisible est ignorée, et le message après l’enregistrement le dit.
 3. **Jusqu’au départ**, tout se règle :
    - dans la **fiche de la photo**, section **Instagram** : cadre, filigrane, légende, avec l’aperçu exact de l’image envoyée, puis **Mettre à jour** ; **Retirer de la file** l’en sort ;
    - dans la page **Instagram** : l’ordre de la file (↑ ↓), **Publier maintenant**, **Retirer**. Après **Publier maintenant**, une barre d’avancement montre chaque étape sans recharger la page (vérifications, image envoyée, traitement par Instagram, publication). À la fin, elle affiche ✓ avec le lien du post, ou ✕ avec la raison.
@@ -23,7 +23,7 @@ Les **réglages** sont repliés sous le journal. Le compte (connexion, déconnex
 
 Une photo bloquée par un accord affiche sa raison (« bloquée : J-0042 refuse la publication ») au photographe et aux administrateurs ; le modérateur, qui ne voit pas les personnes, lit seulement « bloquée par un accord » (ou « à vérifier : un accord manque »), ici comme sur la fiche.
 
-> Une photo n’entre jamais deux fois d’elle-même dans la file : dépubliée puis republiée, elle n’est pas reproposée. Pour la partager à nouveau, utilisez **Republier (remettre dans la file)** dans sa fiche.
+> Une photo n’entre jamais deux fois d’elle-même dans la file : dépubliée puis republiée, ou **retirée** de la file, elle n’est pas reproposée. Pour la partager à nouveau, utilisez **Republier (remettre dans la file)** dans sa fiche.
 
 ## Proposer pour Instagram (photographes)
 
@@ -72,11 +72,13 @@ Il n’existe pas d’offre payante de l’API d’Instagram : Meta autorise **1
 |---|---|---|---|
 | **Prudent** (par défaut) | 25 | 60 min | 100 |
 | **Limites de Meta** | le quota lu chez Instagram (100 aujourd’hui) | aucun | 200 |
-| **Personnalisé** | 1 à 100 | 0 à 1 440 min | 10 à 1 000 |
+| **Personnalisé** | 1 à 100 | 0 à 1 440 min | 20 à 1 000 |
 
 - **Hors budget**, la photo attend dans la file. **Publier maintenant** refuse en expliquant pourquoi et quand ce sera possible (« Dernière publication il y a 20 min ; 60 min au moins entre deux publications : prochaine possible à 14 h 30 »).
-- **Si Instagram signale une limite**, la file se met **en pause** le temps qu’il indique (sinon 1 h, puis 2 h, 4 h, 8 h, 24 h). La photo reste en tête de file et **l’essai n’est pas compté**. Un bandeau l’annonce sur la page **Instagram**, avec **Reprendre maintenant** pour lever la pause à la main. À la reprise, une photo par créneau, jamais de rafale.
-- La page **Instagram** affiche la **consommation** : publications sur 24 h, appels sur la dernière heure, quota lu chez Instagram.
+- En **Personnalisé**, un champ laissé vide reprend la valeur par défaut (celle de **Prudent**). Une publication demande jusqu’à 12 appels : d’où 20 appels par heure au moins.
+- **Si Instagram signale une limite**, la file se met **en pause** le temps qu’il indique (7 jours au plus ; sinon 1 h, puis 2 h, 4 h, 8 h, 24 h). La photo reste en tête de file et **l’essai n’est pas compté**. Un bandeau l’annonce sur la page **Instagram**, avec **Reprendre maintenant** pour lever la pause à la main. À la reprise, une photo par créneau, jamais de rafale.
+- La page **Instagram** affiche la **consommation** : publications sur 24 h, appels sur la dernière heure, quota lu chez Instagram. Ce quota est relu avant chaque envoi ; lu plein, il retient la file une heure, puis il est relu (**Reprendre maintenant** et une nouvelle connexion l’oublient aussi).
+- Les heures de pause et de reprise s’affichent dans la langue de l’admin (« 14:30 » en anglais et en allemand).
 
 ## Likes et commentaires
 
@@ -91,7 +93,7 @@ Chaque matin (après 6 h), le site relève les **likes** et les **commentaires**
 ## En cas d’échec
 
 - **Nouvel essai automatique :** la photo reste en tête de file, et le message d’erreur s’affiche dans la file et dans la fiche. Elle repart au créneau suivant, **3 essais au plus**.
-- **Après 3 échecs :** elle passe dans **En échec**, avec **Réessayer**. La fiche de la photo propose aussi **Republier (remettre en tête de file)**.
+- **Après 3 échecs :** elle passe dans **En échec**, avec **Réessayer**. La fiche de la photo propose aussi **Republier (remettre en tête de file)**. **Réessayer** ne vaut que pour le dernier envoi de la photo, encore publiée sur le site : si elle est déjà de nouveau dans la file, il est refusé (elle partirait deux fois).
 - **Le photographe** (qui ne gère pas la file) voit l’échec dans **Aujourd’hui** et sur la fiche, avec **Demander la republication**. Une seule demande par échec. Elle s’affiche ensuite, marquée ▲ « Republication demandée », dans l’**Aujourd’hui** de ceux qui gèrent la file, dans **En échec** sur la page Instagram et sur la fiche ; ils la reçoivent aussi par e-mail s’ils l’ont choisi. Elle s’efface quand la photo repart dans la file. Si la photo est déjà dans la file, il n’y a rien à demander.
 - **Accès expiré :** le jeton d’accès dure 60 jours et se renouvelle tout seul. S’il a expiré (plus de 60 jours sans fonctionner), reconnectez le compte depuis la page **Instagram** : **Déconnecter**, puis **Connecter le compte Instagram**. Si l’admin affiche **Reconnecter le compte** (clé de chiffrement changée, voir l’étape 6), cliquez simplement dessus.
 

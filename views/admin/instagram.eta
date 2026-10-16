@@ -2,8 +2,8 @@
 <% const s = it.s, a = it.account, t = it.t;
    const hm = x => (it.lang === 'fr' ? x.replace(/:/g, ' h ') : x);
    const fmtDate = ms => new Intl.DateTimeFormat(it.locale, { timeZone: 'Europe/Paris', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(ms));
-   // Jour d'un créneau (« 2026-10-16 », heure de Paris) : écrit dans la langue de l'admin.
-   const slotDay = d => (/^\d{4}-\d{2}-\d{2}$/.test(d) ? new Intl.DateTimeFormat(it.locale, { timeZone: 'UTC', day: 'numeric', month: 'long' }).format(new Date(`${d}T12:00:00Z`)) : d);
+   // Jour d'un créneau (« 2026-10-16 », heure de Paris) : écrit dans la langue de l'admin (« 16 octobre »).
+   const slotDay = d => (/^\d{4}-\d{2}-\d{2}$/.test(d || '') ? new Intl.DateTimeFormat(it.locale, { timeZone: 'UTC', day: 'numeric', month: 'long' }).format(new Date(`${d}T12:00:00Z`)) : d);
    const days = a ? Math.round((a.expires_at - Date.now()) / 86400000) : 0;
    // Erreurs et journal : les raisons des accords (« bloquée : J-0042 refuse la publication ») ne sont lues que par qui
    // voit toutes les personnes ; les autres n'en lisent que la nature (le détail est sur la fiche, pour qui y a droit).
@@ -17,7 +17,7 @@
 </div>
 
 <% const u = it.usage; %>
-<% if (u.paused) { %><p class="flash error" role="status">⏸ <%= t('File en pause jusqu’{when} : {reason}.', { when: t.lang === 'fr' ? u.paused.when.replace(/^le /, 'au ') : t.msg(u.paused.when), reason: t.msg(u.paused.reason) }) %></p>
+<% if (u.paused) { %><p class="flash error" role="status">⏸ <%= t('File en pause jusqu’{when} : {reason}.', { when: t.lang === 'fr' ? u.paused.when.replace(/^le /, 'au ') : u.whenText(u.paused.until, it.locale), reason: t.msg(u.paused.reason) }) %></p>
 <% if (it.can('instagram.compte')) { %><form method="post" action="/admin/instagram/reprendre" class="actions"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Reprendre maintenant') %></button></form><% } %>
 <% } %>
 <div class="ig-status">
@@ -57,13 +57,13 @@
   <section class="panel" aria-labelledby="ig-usage">
     <h2 id="ig-usage"><%= t('Consommation') %> <span class="mono"><%= t('limites « {name} »', { name: t(it.IG_PRESETS[u.preset].label) }) %></span></h2>
     <ul class="ig-meters">
-      <li><span><%= t('Publications sur 24 h glissantes :') %></span> <strong><%= u.posts24h %> / <%= u.limits.postsPerDay %></strong><meter min="0" max="<%= u.limits.postsPerDay %>" value="<%= u.posts24h %>" high="<%= Math.max(1, u.limits.postsPerDay - 1) %>"></meter></li>
-      <li><span><%= t('Appels à l’API sur la dernière heure :') %></span> <strong><%= u.callsHour %> / <%= u.limits.callsPerHour %></strong><meter min="0" max="<%= u.limits.callsPerHour %>" value="<%= u.callsHour %>" high="<%= Math.round(u.limits.callsPerHour * 0.8) %>"></meter></li>
+      <li><span id="ig-m-posts"><%= t('Publications sur 24 h glissantes :') %></span> <strong><%= u.posts24h %> / <%= u.limits.postsPerDay %></strong><meter aria-labelledby="ig-m-posts" min="0" max="<%= u.limits.postsPerDay %>" value="<%= u.posts24h %>" high="<%= Math.max(1, u.limits.postsPerDay - 1) %>"></meter></li>
+      <li><span id="ig-m-calls"><%= t('Appels à l’API sur la dernière heure :') %></span> <strong><%= u.callsHour %> / <%= u.limits.callsPerHour %></strong><meter aria-labelledby="ig-m-calls" min="0" max="<%= u.limits.callsPerHour %>" value="<%= u.callsHour %>" high="<%= Math.round(u.limits.callsPerHour * 0.8) %>"></meter></li>
 <% if (u.liveQuota) { %>      <li><span><%= t('Quota lu chez Instagram :') %></span> <strong><%= u.liveQuota.usage %> / <%= u.liveQuota.total || '?' %></strong> <span class="mono"><%= t('sur 24 h') %></span></li>
 <% } %><% if (u.limits.minGapMinutes) { %>      <li><span><%= t('Au moins') %> <strong><%= t('{n} min', { n: u.limits.minGapMinutes }) %></strong> <%= t('entre deux publications') %></span></li>
 <% } %>    </ul>
     <p class="mono"><%= t('{n} appels à l’API sur 24 h', { n: u.calls24h }) %></p>
-<% if (!u.budget.ok && !u.paused) { %>    <p class="cellnote warn">⚠ <%= t.msg(u.budget.reason) %></p>
+<% if (!u.budget.ok && !u.paused) { %>    <p class="cellnote warn">⚠ <%= u.budget.key ? t(u.budget.key, { ...u.budget.params, when: u.whenText(u.budget.until, it.locale) }) : t.msg(u.budget.reason) %></p>
 <% } %>  </section>
 </div>
 
@@ -90,8 +90,8 @@
 <% [['monter', '↑', t('Avancer « {title} »', { title: p.photo.title }), i === 0], ['descendre', '↓', t('Reculer « {title} »', { title: p.photo.title }), i === it.queue.length - 1]].forEach(([act, sign, label, off]) => { %>
           <form method="post" action="/admin/instagram/<%= p.id %>/<%= act %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="iconbtn" type="submit" aria-label="<%= label %>"<%~ off ? ' disabled' : '' %>><%= sign %></button></form>
 <% }) %>
-<% if (it.can('instagram.publier')) { %>          <form method="post" action="/admin/instagram/<%= p.id %>/publier" data-ig-publish="<%= p.id %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn" type="submit"<%~ it.connected ? '' : ' disabled' %>><%= t('Publier maintenant') %></button></form>
-<% } %>          <form method="post" action="/admin/instagram/<%= p.id %>/annuler"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Retirer') %></button></form>
+<% if (it.can('instagram.publier')) { %>          <form method="post" action="/admin/instagram/<%= p.id %>/publier" data-ig-publish="<%= p.id %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn" type="submit" aria-label="<%= t('Publier maintenant « {title} »', { title: p.photo.title }) %>"<%~ it.connected ? '' : ' disabled' %>><%= t('Publier maintenant') %></button></form>
+<% } %>          <form method="post" action="/admin/instagram/<%= p.id %>/annuler"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit" aria-label="<%= t('Retirer « {title} » de la file', { title: p.photo.title }) %>"><%= t('Retirer') %></button></form>
         </div>
 <% } %>
       </li>
@@ -112,7 +112,7 @@
           <span class="err"><%= igErr(p.error) %></span>
 <% if (p.retry_requested_at) { %>          <span class="enc-tag warn"><%= t('Republication demandée') %><%= p.retry_requested_by ? ` · ${p.retry_requested_by}` : '' %></span>
 <% } %>        </span>
-<% if (it.can('instagram.file')) { %>        <form method="post" action="/admin/instagram/<%= p.id %>/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Réessayer') %></button></form>
+<% if (it.can('instagram.file')) { %>        <form method="post" action="/admin/instagram/<%= p.id %>/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit" aria-label="<%= t('Réessayer « {title} »', { title: p.photo.title }) %>"><%= t('Réessayer') %></button></form>
 <% } %>      </li>
 <% }) %>
     </ul>
@@ -127,7 +127,7 @@
         <a class="igthumb sm" href="/admin/photos/<%= p.photo_id %>#instagram" tabindex="-1" aria-hidden="true"><% if (p.photo.ready) { %><%~ it.picture(p.photo, { sizes: '48px', alt: '' }) %><% } %></a>
         <span class="t"><a href="/admin/photos/<%= p.photo_id %>#instagram"><%= p.photo.title %></a>
           <span class="mono"><%= t('publiée le {date}', { date: fmtDate(p.published_at) }) %><%= p.engagement ? ` · ${p.engagement.likes > 1 ? t('{n} likes', { n: p.engagement.likes }) : t('{n} like', { n: p.engagement.likes })}, ${t('{n} comm.', { n: p.engagement.comments })}` : '' %></span></span>
-<% if (p.permalink) { %>        <a class="more" href="<%= p.permalink %>" target="_blank" rel="noopener"><%= t('Voir') %> ↗</a>
+<% if (p.permalink) { %>        <a class="more" href="<%= p.permalink %>" target="_blank" rel="noopener" aria-label="<%= t('Voir « {title} » sur Instagram (nouvel onglet)', { title: p.photo.title }) %>"><%= t('Voir') %> ↗</a>
 <% } %>      </li>
 <% }) %>
     </ul>
@@ -162,7 +162,7 @@
 <% it.mostLiked.forEach(m => { %>    <li><span class="t"><a href="/admin/photos/<%= m.photo_id %>#instagram"><%= m.photo.title %></a>
       <span class="mono"><%= t('publiée le {date}', { date: fmtDate(m.published_at) }) %></span></span>
       <span class="ig-n"><strong><%= m.likes %></strong> <%= m.likes > 1 ? t('likes') : t('like') %> · <%= t('{n} comm.', { n: m.comments }) %></span>
-<% if (m.permalink) { %>      <a class="more" href="<%= m.permalink %>" target="_blank" rel="noopener"><%= t('Voir') %> ↗</a>
+<% if (m.permalink) { %>      <a class="more" href="<%= m.permalink %>" target="_blank" rel="noopener" aria-label="<%= t('Voir « {title} » sur Instagram (nouvel onglet)', { title: m.photo.title }) %>"><%= t('Voir') %> ↗</a>
 <% } %></li>
 <% }) %>  </ol>
 <% } %>

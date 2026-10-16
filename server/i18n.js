@@ -141,6 +141,7 @@ export const UI = {
       span: (a, b) => `du ${a} au ${b}`, days: n => `${n} jour${n > 1 ? 's' : ''}`, day: n => `Jour ${n}`, short: n => `J${n}`,
       map: name => `Itinéraire du voyage « ${name} »`, stop: (n, when, city) => `Étape ${n}, ${when} : ${city}`, open: 'Voir le voyage',
       by: names => `par ${names}`, story: 'Jour après jour', back: 'Tous les voyages',
+      preview: 'Aperçu réservé à l’équipe : ce voyage n’est pas publié (ou n’a pas encore de photo publiée). Les visiteurs ne le voient pas.', settings: 'Régler le voyage',
     },
     near: {
       title: 'À proximité', map: city => `Carte : la photo a été prise à ${city}`, here: city => `Prise à ${city}`, same: 'même ville',
@@ -240,6 +241,7 @@ export const UI = {
       span: (a, b) => `${a} – ${b}`, days: n => `${n} day${n === 1 ? '' : 's'}`, day: n => `Day ${n}`, short: n => `D${n}`,
       map: name => `Route of the trip “${name}”`, stop: (n, when, city) => `Stop ${n}, ${when}: ${city}`, open: 'See the trip',
       by: names => `by ${names}`, story: 'Day by day', back: 'All trips',
+      preview: 'Team-only preview: this trip is not published (or has no published photo yet). Visitors cannot see it.', settings: 'Trip settings',
     },
     near: {
       title: 'Nearby', map: city => `Map: the photo was taken in ${city}`, here: city => `Taken in ${city}`, same: 'same town',
@@ -339,6 +341,7 @@ export const UI = {
       span: (a, b) => `${a} – ${b}`, days: n => `${n} ${n === 1 ? 'Tag' : 'Tage'}`, day: n => `Tag ${n}`, short: n => `T${n}`,
       map: name => `Route der Reise „${name}“`, stop: (n, when, city) => `Etappe ${n}, ${when}: ${city}`, open: 'Reise ansehen',
       by: names => `von ${names}`, story: 'Tag für Tag', back: 'Alle Reisen',
+      preview: 'Vorschau nur für das Team: Diese Reise ist nicht veröffentlicht (oder hat noch kein veröffentlichtes Foto). Besucher sehen sie nicht.', settings: 'Reise einstellen',
     },
     near: {
       title: 'In der Nähe', map: city => `Karte: Das Foto wurde in ${city} aufgenommen`, here: city => `Aufgenommen in ${city}`, same: 'selber Ort',

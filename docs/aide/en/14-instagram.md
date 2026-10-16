@@ -7,7 +7,7 @@ Setting it up is done only once: a **professional Instagram account**, a **Meta 
 ## Day to day
 
 1. **Choose what goes out on Instagram.** By default, nothing gets in by itself: open the page of a photo published on the site and, in the **Instagram** section, click **Add to the Instagram queue**. (A draft photo must first be published on the site.) To have a whole series go out automatically, tick it in **Instagram → Settings → Automatic queueing**: every photo published in that series will then enter the **Instagram queue**.
-2. **At the times you choose** (6.30 pm by default, Paris time), the first photo in the queue goes out on Instagram. One per slot.
+2. **At the times you choose** (6.30 pm by default, Paris time), the first photo in the queue goes out on Instagram. One per slot. In the settings, write the times separated by commas: “18:30”, “9:00” or “18 h 30” all work; an unreadable time is ignored, and the message after saving says so.
 3. **Until it goes out**, everything can be adjusted:
    - on the **photo’s page**, **Instagram** section: frame, watermark, caption, with an exact preview of the image sent, then **Update**; **Remove from the queue** takes it out;
    - on the **Instagram** page: the order of the queue (↑ ↓), **Publish now**, **Remove**. After **Publish now**, a progress bar shows each step without reloading the page (checks, image sent, processing by Instagram, publishing). At the end it shows ✓ with the link to the post, or ✕ with the reason.
@@ -23,7 +23,7 @@ The **settings** are folded below the log. The account (connect, disconnect), **
 
 A photo blocked by a consent shows its reason (“blocked: J-0042 refuses publication”) to the photographer and administrators; the moderator, who does not see people, only reads “blocked by a consent” (or “to check: a consent is missing”), here as on the photo’s page.
 
-> A photo never enters the queue twice on its own: unpublished then republished, it is not offered again. To share it again, use **Republish (put back in the queue)** on its page.
+> A photo never enters the queue twice on its own: unpublished then republished, or **removed** from the queue, it is not offered again. To share it again, use **Republish (put back in the queue)** on its page.
 
 ## Proposing for Instagram (photographers)
 
@@ -72,11 +72,13 @@ There is no paid tier of the Instagram API: Meta allows **100 posts per account 
 |---|---|---|---|
 | **Cautious** (default) | 25 | 60 min | 100 |
 | **Meta’s limits** | the quota read from Instagram (100 today) | none | 200 |
-| **Custom** | 1 to 100 | 0 to 1,440 min | 10 to 1,000 |
+| **Custom** | 1 to 100 | 0 to 1,440 min | 20 to 1,000 |
 
 - **Over budget**, the photo waits in the queue. **Publish now** refuses, explaining why and when it will be possible (“Last post 20 min ago; at least 60 min between two posts: next possible at 2.30 pm”).
-- **If Instagram reports a limit**, the queue is **paused** for the time it gives (otherwise 1 h, then 2 h, 4 h, 8 h, 24 h). The photo stays at the top of the queue and **the attempt is not counted**. A banner announces it on the **Instagram** page, with **Resume now** to lift the pause by hand. When it resumes, one photo per slot, never a burst.
-- The **Instagram** page shows the **usage**: posts over 24 h, calls in the last hour, quota read from Instagram.
+- In **Custom**, a field left empty takes the default value (that of **Cautious**). A post needs up to 12 calls: hence at least 20 calls per hour.
+- **If Instagram reports a limit**, the queue is **paused** for the time it gives (7 days at most; otherwise 1 h, then 2 h, 4 h, 8 h, 24 h). The photo stays at the top of the queue and **the attempt is not counted**. A banner announces it on the **Instagram** page, with **Resume now** to lift the pause by hand. When it resumes, one photo per slot, never a burst.
+- The **Instagram** page shows the **usage**: posts over 24 h, calls in the last hour, quota read from Instagram. This quota is read again before each sending; read as full, it holds the queue for an hour, then it is read again (**Resume now** and a new connection also forget it).
+- Pause and resume times are shown in the admin’s language (“14:30” in English and German).
 
 ## Likes and comments
 
@@ -91,7 +93,7 @@ Every morning (after 6 am), the site collects the **likes** and **comments** of 
 ## If it fails
 
 - **Automatic retry:** the photo stays at the top of the queue, and the error message is shown in the queue and on the photo’s page. It goes again at the next slot, **3 attempts at most**.
-- **After 3 failures:** it moves to **Failed**, with **Try again**. The photo’s page also offers **Repost (back to the front of the queue)**.
+- **After 3 failures:** it moves to **Failed**, with **Try again**. The photo’s page also offers **Repost (back to the front of the queue)**. **Try again** only applies to the photo’s latest sending, while it is still published on the site: if it is already back in the queue, it is refused (it would go out twice).
 - **The photographer** (who does not handle the queue) sees the failure in **Today** and on the photo’s page, with **Ask for a repost**. One request per failure. It then shows, marked ▲ “Repost requested”, in the **Today** of those who handle the queue, under **Failed** on the Instagram page and on the photo’s page; they also get it by email if they chose to. It clears when the photo goes back into the queue. If the photo is already in the queue, there is nothing to request.
 - **Access expired:** the access token lasts 60 days and renews itself. If it has expired (more than 60 days without working), reconnect the account from the **Instagram** page: **Disconnect**, then **Connect the Instagram account**. If the admin shows **Reconnect the account** (encryption key changed, see step 6), simply click it.
 

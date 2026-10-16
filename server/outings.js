@@ -75,14 +75,29 @@ export function createOutings({ db, encounters, storageDir, log, now = () => Dat
     };
   }
 
-  function list({ author = null } = {}) {
+  // skip(authorId, day) : journées à ne pas construire ; max : nombre de journées au plus (page d'un voyage : ses
+  // propositions, sans construire tout l'historique).
+  function list({ author = null, skip = null, max = Infinity } = {}) {
     const authors = new Map(q.authors.all().map(a => [a.id, a]));
     const cache = { excluded: new Set(q.excluded.all().map(x => `${x.encounter_id}:${x.photo_id}`)), linked: new Set(q.linked.all().map(x => `${x.encounter_id}:${x.photo_id}`)) };
     const out = [];
+    let n = 0;
     for (const d of q.days.all({ author })) {
       const a = authors.get(d.author_id);
-      if (!a) continue;
+      if (!a || skip?.(d.author_id, d.day)) continue;
+      if (n++ >= max) break;
       for (const part of partsOf(a.id, d.day).reverse()) out.push(build(a, d.day, part, cache));
+    }
+    return out;
+  }
+  // Sorties de journées choisies ([{ author_id, day }], celles d'un voyage), dans cet ordre.
+  function ofDays(days) {
+    const authors = new Map(q.authors.all().map(a => [a.id, a]));
+    const cache = { excluded: new Set(q.excluded.all().map(x => `${x.encounter_id}:${x.photo_id}`)), linked: new Set(q.linked.all().map(x => `${x.encounter_id}:${x.photo_id}`)) };
+    const out = [];
+    for (const d of days) {
+      const a = authors.get(d.author_id);
+      if (a && DAY.test(d.day)) for (const part of partsOf(a.id, d.day).reverse()) out.push(build(a, d.day, part, cache));
     }
     return out;
   }
@@ -158,5 +173,5 @@ export function createOutings({ db, encounters, storageDir, log, now = () => Dat
     return get(authorSlug, day, p.starts);
   }
 
-  return { list, get, partAt, cut, join, setPlace, partsOf, urlOf, backfillAll, stop: () => { stopped = true; return running || Promise.resolve(0); } };
+  return { list, ofDays, get, partAt, cut, join, setPlace, partsOf, urlOf, backfillAll, stop: () => { stopped = true; return running || Promise.resolve(0); } };
 }

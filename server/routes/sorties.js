@@ -83,13 +83,13 @@ export function registerOutings(app, { repo, render, done, failed, P, W, withRea
   app.post('/admin/sorties/:author/:day/publier', W('photos.publier'), async (request, reply) => {
     const o = load(request);
     if (!o) return reply.callNotFound();
-    const drafts = o.photos.filter(p => p.status === 'draft').map(p => p.id);
+    // Jamais une photo programmée par le modérateur (sa date compte) ni une photo renvoyée, qui attend sa correction.
+    const drafts = o.photos.filter(p => p.status === 'draft' && !['programmee', 'a_reprendre'].includes(p.review)).map(p => p.id);
     const g = app.readiness.gate(drafts);
     const before = repo.setStatuses(Object.fromEntries(g.ok.map(id => [id, 'published'])));
     app.instagram.onPublished(Object.keys(before).map(Number));
     for (const id of Object.keys(before).map(Number)) app.review.clear(id);   // publiée directement : hors circuit
-    const rest = g.verify.length + g.blocked.length;
-    const t = request.t, n = g.ok.length;
+    const t = request.t, n = Object.keys(before).length, rest = drafts.length - n;
     const published = n > 1 ? t('{n} photos publiées.', { n }) : n === 1 ? t('1 photo publiée.') : t('0 photo publiée.');
     const left = rest > 1 ? t('{n} restent en brouillon (à vérifier ou bloquées) : ouvrez leur fiche.', { n: rest }) : t('1 reste en brouillon (à vérifier ou bloquée) : ouvrez leur fiche.');
     return done(reply, back(o), `${published}${rest ? ` ${left}` : ''}`);

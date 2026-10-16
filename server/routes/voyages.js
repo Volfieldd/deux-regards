@@ -1,4 +1,4 @@
-import { TripError } from '../trips.js';
+import { TripError, isDay } from '../trips.js';
 import { outingUrl } from './sorties.js';
 
 // Admin « Voyages » : des sorties regroupées (journées entières). Un voyage est celui d'un photographe, ou commun aux
@@ -6,7 +6,8 @@ import { outingUrl } from './sorties.js';
 // Enregistré dans le plugin d'administration (session d'admin exigée, comme le reste de /admin).
 export function registerTrips(app, { repo, render, done, failed, P, W, withReady }) {
   const trips = app.trips;
-  const fmtDay = (day, t, opts = { day: 'numeric', month: 'long', year: 'numeric' }) => new Intl.DateTimeFormat(t.locale, { ...opts, timeZone: 'UTC' }).format(new Date(`${day}T12:00:00Z`));
+  // Date d'une journée ; impossible à écrire (enregistrée avant le contrôle des dates) : telle quelle, jamais d'erreur.
+  const fmtDay = (day, t, opts = { day: 'numeric', month: 'long', year: 'numeric' }) => (isDay(day) ? new Intl.DateTimeFormat(t.locale, { ...opts, timeZone: 'UTC' }).format(new Date(`${day}T12:00:00Z`)) : String(day));
   const span = (tr, t) => (!tr.from ? t('aucune journée') : tr.from === tr.to ? fmtDay(tr.from, t) : t('du {from} au {to}', { from: fmtDay(tr.from, t), to: fmtDay(tr.to, t) }));
   const sees = (request, tr) => { const s = request.scope('sorties.voir'); return Boolean(s && (s.all || (tr.author_id != null && tr.author_id === s.authorId))); };
   const manages = (request, tr) => request.owns('sorties.gerer', tr.author_id ?? -2);
@@ -15,6 +16,14 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
   const names = () => new Map(repo.authors().map(a => [a.id, a]));
   // Voyage commun : « les deux photographes » quand il y en a deux, sinon « tous les photographes ».
   const everyone = (t, n = repo.authors().length) => (n === 2 ? t('les deux photographes') : t('tous les photographes'));
+  // Page publique : la mettre en ligne demande le droit de publier sur le site (comme une photo) ; modifier les
+  // textes d'une page déjà en ligne, celui de modifier les photos publiées. Voyage commun : portée « tout ».
+  const canPublish = (request, tr) => request.owns('photos.publier', tr.author_id ?? -2);
+  const canEditPublic = (request, tr) => request.owns('photos.publiees.modifier', tr.author_id ?? -2);
+  const TEXTS = ['name', 'name_en', 'name_de', 'intro', 'intro_en', 'intro_de'];
+  // Publier les photos prêtes d'un coup : jamais une photo programmée par le modérateur (sa date compte) ni une photo
+  // renvoyée au photographe (elle attend sa correction). Une photo proposée, elle, est validée en la publiant.
+  const HELD = ['programmee', 'a_reprendre'];
 
   app.get('/admin/voyages', P('sorties.voir'), async (request, reply) => {
     const authors = names();
@@ -42,8 +51,9 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
     const tr = load(request);
     if (!tr) return reply.callNotFound();
     const authors = names();
-    const outings = app.outings.list({ author: tr.author_id ?? null });
     const inTrip = new Set(tr.days.map(d => `${d.author_id}:${d.day}`));
+    // Seulement les sorties des journées du voyage, et les 60 journées les plus récentes à proposer : pas tout l'historique.
+    const outings = app.outings.ofDays(tr.days);
     // Journées du voyage (avec leur sortie : lieu, photos, personnes, état), dans l'ordre du voyage.
     const days = tr.days.map(d => {
       const parts = outings.filter(o => o.author.id === d.author_id && o.day === d.day);
@@ -54,14 +64,18 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
     });
     // Journées proches à proposer : celles du photographe du voyage (ou des deux), pas encore rattachées ailleurs.
     const index = trips.dayIndex();
-    const nearby = outings.filter(o => !inTrip.has(`${o.author.id}:${o.day}`) && request.owns('sorties.gerer', o.author.id))
+    const nearby = app.outings.list({ author: tr.author_id ?? null, skip: (a, day) => inTrip.has(`${a}:${day}`) || !request.owns('sorties.gerer', a), max: 60 })
       .filter((o, i, all) => all.findIndex(x => x.author.id === o.author.id && x.day === o.day) === i).slice(0, 60)
       .map(o => ({ author: o.author, day: o.day, when: fmtDay(o.day, request.t), place: o.place, other: index.get(`${o.author.id}:${o.day}`) || null }));
-    const photos = trips.photos(tr.id).filter(p => request.owns('photos.voir', p.author_id)).map(p => ({ ...withReady(p), level: app.readiness.state(p, null, request.t).site.level }));
+    const people = new Map();                      // rencontres déchiffrées une fois pour toutes les photos
+    const photos = trips.photos(tr.id).filter(p => request.owns('photos.voir', p.author_id)).map(p => ({ ...withReady(p), level: app.readiness.state(p, people, request.t).site.level }));
+    const publishing = Boolean(request.can('photos.publier'));
     return render(request, reply, 'trip', {
       title: tr.name, tr: { ...tr, span: span(tr, request.t), who: tr.author_id ? authors.get(tr.author_id)?.name || '' : everyone(request.t) },
       days, nearby, photos, manage: manages(request, tr), authors: request.mine('sorties.gerer', repo.authors(), 'id'), allTrips: Boolean(request.scope('sorties.gerer')?.all),
-      readyDrafts: photos.filter(p => p.status === 'draft' && !p.review && p.level === 'ok').length,
+      // Le bouton compte ce que sa route enverra : publier (hors programmées et renvoyées), ou proposer (hors circuit).
+      readyDrafts: photos.filter(p => p.status === 'draft' && p.level === 'ok' && (publishing ? !HELD.includes(p.review) : !p.review)).length,
+      pagePublish: canPublish(request, tr),
     });
   });
 
@@ -78,6 +92,12 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
       if (!request.scope('sorties.gerer')?.all) delete body.author_id;
       else body.author_id = Number(body.author_id) || null;
     }
+    // Mettre la page en ligne, ou changer les textes d'une page en ligne : le circuit de publication s'applique (un
+    // photographe sans « publier sans validation » ne met rien en ligne seul). La retirer du site reste possible.
+    const t = request.t;
+    if (body.public === true && !tr.public && !canPublish(request, tr)) return failed(reply, back(tr.id), t('Mettre la page du voyage en ligne demande le droit de publier sur le site : demandez-le à un administrateur.'));
+    const changes = TEXTS.some(k => k in body && String(body[k] ?? '').replace(/\r\n/g, '\n').trim() !== String(tr[k] ?? ''));
+    if (tr.public && body.public !== false && changes && !canEditPublic(request, tr)) return failed(reply, back(tr.id), t('La page du voyage est en ligne : ses textes ne se modifient qu’avec le droit de modifier les photos publiées.'));
     try {
       trips.update(tr.id, body);
     } catch (err) {
@@ -110,7 +130,12 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
       return failed(reply, back(tr.id), request.t.msg(err.message));
     }
     days = days.filter(d => request.owns('sorties.gerer', d.author_id) && (tr.author_id == null || d.author_id === tr.author_id));
-    if (!days.length) return failed(reply, back(tr.id), request.t('Aucune journée de prise de vue à rattacher.'));
+    // Une journée déjà dans un autre voyage y est déplacée : seulement si le compte gère aussi cet autre voyage (un
+    // photographe ne vide pas un voyage commun en rattachant ses journées au sien).
+    const index = trips.dayIndex();
+    const before = days.length;
+    days = days.filter(d => { const o = index.get(`${d.author_id}:${d.day}`); return !o || o.id === tr.id || manages(request, trips.get(o.id)); });
+    if (!days.length) return failed(reply, back(tr.id), before ? request.t('Ces journées sont dans un voyage que vous ne gérez pas.') : request.t('Aucune journée de prise de vue à rattacher.'));
     const n = trips.addDays(tr.id, days);
     return done(reply, back(tr.id), n > 1 ? request.t('{n} journées rattachées au voyage.', { n }) : request.t('{n} journée rattachée au voyage.', { n }));
   });
@@ -119,6 +144,7 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
     if (!tr) return reply.callNotFound();
     if (!manages(request, tr)) return app.forbid(request, reply);
     const [a, d] = String(request.body?.jour || '').split(':');
+    if (!request.owns('sorties.gerer', Number(a))) return app.forbid(request, reply);     // ses journées seulement
     trips.removeDay(tr.id, Number(a), d);
     return done(reply, back(tr.id), request.t('Journée retirée du voyage (la sortie reste).'));
   });
@@ -127,11 +153,13 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
   app.post('/admin/sorties/:author/:day/voyage', W('sorties.gerer'), async (request, reply) => {
     const a = repo.authors().find(x => x.slug === request.params.author);
     const to = `/admin/sorties/${request.params.author}/${request.params.day}`;
-    if (!a || !/^\d{4}-\d{2}-\d{2}$/.test(request.params.day)) return reply.callNotFound();
+    if (!a || !isDay(request.params.day)) return reply.callNotFound();
     const current = trips.tripOf(a.id, request.params.day);
     const id = Number(request.body?.voyage) || 0;
+    // La sortie est dans un voyage que le compte ne gère pas (voyage commun) : ni détachée, ni déplacée.
+    if (current && current.id !== id && !manages(request, current)) return failed(reply, to, request.t('Cette sortie est dans un voyage que vous ne gérez pas.'));
     if (!id) {
-      if (current && manages(request, current)) trips.removeDay(current.id, a.id, request.params.day);
+      if (current) trips.removeDay(current.id, a.id, request.params.day);
       return done(reply, to, request.t('Sortie détachée de son voyage.'));
     }
     const tr = trips.get(id);
@@ -152,12 +180,13 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
   app.post('/admin/voyages/:id/publier', W('photos.publier'), async (request, reply) => {
     const tr = load(request);
     if (!tr) return reply.callNotFound();
-    const drafts = trips.photos(tr.id).filter(p => p.status === 'draft' && request.owns('photos.publier', p.author_id)).map(p => p.id);
+    const drafts = trips.photos(tr.id).filter(p => p.status === 'draft' && !HELD.includes(p.review) && request.owns('photos.publier', p.author_id)).map(p => p.id);
     const g = app.readiness.gate(drafts);
     const before = repo.setStatuses(Object.fromEntries(g.ok.map(id => [id, 'published'])));
     app.instagram.onPublished(Object.keys(before).map(Number));
     for (const id of Object.keys(before).map(Number)) app.review.clear(id);
-    const n = g.ok.length, rest = g.verify.length + g.blocked.length, t = request.t;
+    // Compte réel : setStatuses écarte encore une photo refusée par la personne photographiée.
+    const n = Object.keys(before).length, rest = drafts.length - n, t = request.t;
     const published = n > 1 ? t('{n} photos publiées.', { n }) : n === 1 ? t('1 photo publiée.') : t('0 photo publiée.');
     const left = rest > 1 ? t('{n} restent en brouillon (à vérifier ou bloquées) : ouvrez leur fiche.', { n: rest }) : t('1 reste en brouillon (à vérifier ou bloquée) : ouvrez leur fiche.');
     return done(reply, back(tr.id), `${published}${rest ? ` ${left}` : ''}`);

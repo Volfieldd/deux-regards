@@ -7,7 +7,7 @@
    const peopleOf = p => o.people.filter(e => o.linked.has(`${e.id}:${p.id}`));
    const excludedAll = p => o.people.length > 0 && o.people.every(e => o.excluded.has(`${e.id}:${p.id}`) && !o.linked.has(`${e.id}:${p.id}`)); %>
 <p class="mono"><a class="more eyebrow" href="/admin/sorties">← <%= t('Sorties') %></a></p>
-<% const readyDrafts = o.photos.filter(p => p.status === 'draft' && p.state.site.level === 'ok').length; %>
+<% const readyDrafts = o.photos.filter(p => p.status === 'draft' && !['programmee', 'a_reprendre'].includes(p.review) && p.state.site.level === 'ok').length; %>
 <div class="outing-head">
   <h1><%= o.place || o.author.name %><span class="sub"><%= o.when %><%= o.range ? ` · ${o.range}` : '' %> · <%= o.author.name %> · <%= pl(o.counts.photos, t('0 photo'), t('1 photo'), t('{n} photos', { n: o.counts.photos })) %> · <%= pl(o.people.length, t('0 personne'), t('1 personne'), t('{n} personnes', { n: o.people.length })) %></span></h1>
   <span class="enc-tag <%= TAG[o.state] %>"><%= it.STATES[o.state] %></span>
