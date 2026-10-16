@@ -31,12 +31,14 @@ x-logging: &logging
     max-file: "3"
 
 # Réseau dédié à adresses fixes : le site ne fait confiance à X-Forwarded-For que venant du tunnel
-# (un poste du réseau local ne peut donc pas se faire passer pour un autre visiteur).
+# (un poste du réseau local ne peut donc pas se faire passer pour un autre visiteur). Les autres conteneurs reçoivent
+# une adresse de la moitié haute (ip_range) : aucun ne peut prendre celle du tunnel (TUNNEL_IP, hors de cette plage).
 networks:
   nicephos:
     ipam:
       config:
         - subnet: ${NET_SUBNET:-172.29.42.0/24}
+          ip_range: ${NET_IP_RANGE:-172.29.42.128/25}
 
 services:
   site:
@@ -52,6 +54,8 @@ services:
       DATABASE_PATH: /data/site.db
       REQUIRE_PERSISTENT_STORAGE: "1"
       TRUST_PROXY: ${TUNNEL_IP:-172.29.42.10}
+      # Le jeton du tunnel ne sert qu'à cloudflared : jamais transmis au site, qui traite des fichiers reçus.
+      TUNNEL_TOKEN: ""
       # Traducteur de la pile (vide dans le .env pour retirer le bouton « Proposer une traduction »).
       TRANSLATE_URL: ${TRANSLATE_URL-http://libretranslate:5000}
     user: "${PUID:-99}:${PGID:-100}"
@@ -90,8 +94,14 @@ services:
       REQUIRE_PERSISTENT_STORAGE: "1"
     user: "${PUID:-99}:${PGID:-100}"
     command: ["node", "server/db/backup.js", "--loop"]
+    # Santé : « unhealthy » dans l'onglet Docker si la dernière sauvegarde date de plus de deux intervalles, a échoué,
+    # ou a trouvé une base sans photo (voir last.json).
     healthcheck:
-      disable: true
+      test: ["CMD", "node", "server/db/backup.js", "--etat"]
+      interval: 15m
+      timeout: 30s
+      start_period: 2h
+      retries: 2
     networks: [nicephos]
     logging: *logging
     mem_limit: 512m

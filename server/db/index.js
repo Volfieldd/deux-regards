@@ -10,7 +10,20 @@ export function openDb(file) {
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
   db.pragma('busy_timeout = 5000');
+  // Une donnée effacée (droit à l'effacement, purges) est mise à zéro dans le fichier, au lieu de rester lisible dans
+  // l'espace libre des pages jusqu'à ce qu'il soit réutilisé.
+  db.pragma('secure_delete = ON');
   return db;
+}
+
+// Restes des données effacées avant secure_delete (16 octobre 2026) : la base est reconstruite une fois par un VACUUM
+// (hors transaction, donc pas dans une migration), puis le journal WAL est vidé.
+export function vacuumOnce(db) {
+  if (db.prepare("SELECT 1 FROM settings WHERE key = 'base_nettoyee'").get()) return false;
+  db.exec('VACUUM');
+  db.pragma('wal_checkpoint(TRUNCATE)');
+  db.prepare("INSERT INTO settings (key, value) VALUES ('base_nettoyee', ?)").run(JSON.stringify(new Date().toISOString()));
+  return true;
 }
 
 // Applique dans l'ordre les fichiers NNN_nom.sql pas encore passés.

@@ -86,7 +86,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     return page(request, reply, 'encounter', {
       title: e.ref ? request.t('Rencontre {ref}', { ref: e.ref }) : request.t('Rencontre du {date}', { date: fmtOf(request.t)(e.created_at) }), e, events: enc.events(id),
       photos: enc.photos(id).map(withReady), session: (s => ({ ...s, photos: s.photos.map(withReady) }))(enc.session(id)), candidates: request.mine('photos.voir', candidates(e, search)), search, authors: request.mine('personnes.voir', repo.authors(), 'id'),
-      code: e.ref ? enc.codeOf(e.ref) : null, shares: sharesOf(e, fmtOf(request.t)), errors: {}, values: null,
+      code: e.ref ? enc.codeOrNull(e.ref) : null, shares: sharesOf(e, fmtOf(request.t)), errors: {}, values: null,
       outingUrl: e.author_id ? app.outings.urlOf(e.author_id, e.session_day || e.met_on, e.met_time) : null, ...extra,
     });
   }

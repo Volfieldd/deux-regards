@@ -1,5 +1,5 @@
 import { loadConfig } from './config.js';
-import { openDb, migrate } from './db/index.js';
+import { openDb, migrate, vacuumOnce } from './db/index.js';
 import { buildApp } from './app.js';
 import { assertPersistentStorage } from './storage-guard.js';
 
@@ -14,8 +14,12 @@ try {
 }
 const db = openDb(config.databasePath);
 migrate(db);
+const cleaned = vacuumOnce(db);
 
 const app = await buildApp({ config, db });
+if (cleaned) app.log.info('base reconstruite une fois : restes des données effacées retirés');
+// En ligne sans DATA_KEY : noms, e-mails et signatures sont en clair dans la base et dans chaque sauvegarde.
+if (config.production && !config.dataKey) app.log.warn('DATA_KEY non défini : données personnelles des rencontres en clair dans la base et les sauvegardes');
 
 for (const signal of ['SIGINT', 'SIGTERM']) {
   process.once(signal, async () => {

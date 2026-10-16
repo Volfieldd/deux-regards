@@ -108,7 +108,9 @@ export function createStats({ db, publicUrl, now = () => new Date(), log, trustC
             // Au-delà de 60 provenances différentes dans la journée : regroupées sous « autres ».
             if (source && !sourcesToday.has(source)) { if (sourcesToday.size >= LIMITS.sources) source = 'autres'; else sourcesToday.add(source); }
             if (source) q.source.run(today, source);
-            q.country.run(today, countryOf(request.headers, trustCountry));
+            // Pays : seulement pour une requête qui a vraiment traversé le proxy de confiance (son adresse puis celle du
+            // visiteur), pas pour un poste du réseau local qui joint le port du site directement.
+            q.country.run(today, countryOf(request.headers, trustCountry && request.ips?.length > 1));
           }
         })();
         return true;

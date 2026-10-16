@@ -32,10 +32,13 @@ services:
       PORT: 3000
       STORAGE_DIR: /data
       DATABASE_PATH: /data/site.db
+      # Le jeton du tunnel ne sert qu'à cloudflared : jamais transmis au site, qui traite des fichiers reçus.
+      TUNNEL_TOKEN: ""
     user: "${APP_UID:-1000}:${APP_GID:-1000}"
     volumes:
       - *data
-    # Par défaut, le site n'écoute que sur la machine : cloudflared le joint par le réseau Docker.
+    # Par défaut, le site n'écoute que sur la machine : cloudflared le joint par le réseau Docker. Port ouvert sur le
+    # réseau local (BIND_ADDR) et site en ligne : fixez TRUST_PROXY (voir docs/wiki/Déploiement.md).
     ports:
       - "${BIND_ADDR:-127.0.0.1}:${HOST_PORT:-3000}:3000"
     stop_grace_period: 60s
@@ -68,8 +71,14 @@ services:
       REQUIRE_PERSISTENT_STORAGE: "1"
     user: "${APP_UID:-1000}:${APP_GID:-1000}"
     command: ["node", "server/db/backup.js", "--loop"]
+    # Santé : « unhealthy » si la dernière sauvegarde date de plus de deux intervalles, a échoué, ou a trouvé une base
+    # sans photo (voir last.json).
     healthcheck:
-      disable: true
+      test: ["CMD", "node", "server/db/backup.js", "--etat"]
+      interval: 15m
+      timeout: 30s
+      start_period: 2h
+      retries: 2
     logging: *logging
     mem_limit: 512m
     volumes:
@@ -80,6 +89,9 @@ services:
         bind:
           create_host_path: false
     read_only: true
+    # Fichiers temporaires de SQLite pendant la copie de la base.
+    tmpfs:
+      - /tmp
     security_opt:
       - no-new-privileges:true
     cap_drop: [ALL]

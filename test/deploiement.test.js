@@ -40,13 +40,14 @@ test('sauvegarde : instantané intègre, fichiers copiés une fois, rotation, ja
   assert.equal(stored().length, 12);
   assert.ok(JSON.parse(fs.readFileSync(path.join(backups, 'last.json'))).snapshot);
 
-  // Original supprimé dans l'admin : gardé 90 jours dans la sauvegarde, puis effacé (droit à l'effacement).
+  // Original supprimé dans l'admin : gardé 90 jours dans la sauvegarde (supprimes/, hors de files/ que recopie une
+  // restauration), puis effacé (droit à l'effacement).
   const gone = fs.readdirSync(path.join(dir, 'originals'))[0];
   fs.rmSync(path.join(dir, 'originals', gone));
   const day = 864e5;
   const t0 = Date.now();
   assert.equal(run({ ...env, BACKUP_NOW_MS: String(t0) }).pruned.originals, 0);
-  assert.ok(stored().includes(gone));
+  assert.ok(!stored().includes(gone) && fs.existsSync(path.join(backups, 'supprimes', 'originals', gone)));
   assert.equal(run({ ...env, BACKUP_NOW_MS: String(t0 + 89 * day) }).pruned.originals, 0);
   assert.equal(run({ ...env, BACKUP_NOW_MS: String(t0 + 91 * day) }).pruned.originals, 1);
   assert.equal(stored().length, 11);

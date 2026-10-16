@@ -1,0 +1,7 @@
+# Mises à jour proposées (PR à relire) des actions du workflow de l'image, épinglées sur un commit.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
