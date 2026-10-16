@@ -17,7 +17,7 @@ Bei einem Fehler (Netzwerk, Dienst nicht erreichbar) versucht es die Website sel
 | SHA-256-Fingerabdruck | die „DNA“ des Originals |
 | **Zeitstempel vom … UTC** | das garantierte Datum (Weltzeit: +1 h im Winter, +2 h im Sommer für Paris) |
 | Stelle, Nr. | wer das Token signiert hat, und seine Nummer |
-| Ausstehend | Anfrage noch nicht abgeschlossen: Schaltfläche **Jetzt erneut versuchen** |
+| Ausstehend | Anfrage noch nicht abgeschlossen: Schaltfläche **Jetzt erneut versuchen** (höchstens ein neuer Versuch alle 5 Minuten, um die Zeitstempelstelle nicht zu überlasten) |
 
 Schaltflächen:
 

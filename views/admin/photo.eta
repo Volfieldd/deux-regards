@@ -2,7 +2,7 @@
 <% const t = it.t, fr = !['en', 'de'].includes(it.lang), esc = __eta.e; %>
 <% const v = it.values, e = it.errors; %>
 <% // Droits du compte : la fiche complète, ou les textes seuls (modérateur, relecteur) ; le reste selon les droits.
-   const can = it.can, pubOk = can('photos.publier'), seePeople = can('personnes.voir');
+   const can = it.can, pubOk = can('photos.publier'), seePeople = it.seePeople;      // personnes : celles du photographe de la photo
    // Une photo publiée ne se modifie qu'avec « modifier ses photos publiées » (réglable par photographe).
    const editableHere = it.photo.status !== 'published' || can('photos.publiees.modifier');
    const full = can('photos.modifier') && editableHere; %>
@@ -230,7 +230,7 @@
 </details>
 <% } %>
 <% const au = it.audience; %>
-<% if (can('statistiques.voir')) { %>
+<% if (it.seeStats) { %>
 <details class="panel audience rub-panel" id="audience">
   <summary><h2 id="audience-title"><%= t('Audience') %> <span class="sum"><%= au && au.total ? (au.total > 1 ? t('{n} ouvertures en 30 jours', { n: au.total }) : t('{n} ouverture en 30 jours', { n: au.total })) : t('pas encore vue en grand') %><%= it.photo.likes ? ` · ${t('{n} j’aime sur le site', { n: it.photo.likes })}` : '' %><%= it.shares ? ` · ${it.shares > 1 ? t('{n} partages', { n: it.shares }) : t('{n} partage', { n: it.shares })}` : '' %></span></h2></summary>
 <% if (au && au.total) { %>

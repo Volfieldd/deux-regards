@@ -19,6 +19,12 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
   - IPv6 par bloc /64, mémoire bornée ;
   - `TRUST_PROXY=true` refusé.
 - **Journal d'audit :** chaque action d'écriture de l'admin est journalisée (`action admin`), avec le compte (`sub`), la route et le résultat.
+- **Routes de l'admin (revue du 16 octobre 2026) :**
+  - sur la fiche ou dans la photothèque, un compte qui voit toutes les photos (relecteur, modérateur) sans avoir les personnes ou les statistiques de tous ne voit, pour la photo d'un autre photographe, ni ses personnes, ni le détail des accords, ni son audience ;
+  - toute modification d'une photo programmée par son photographe (annulations, série, carte comprises) la renvoie devant le modérateur ;
+  - actions groupées : droit de l'action vérifié avant de lire la liste, bornée à 5 000 photos (413 au-delà) ;
+  - relance forcée de l'horodatage : une toutes les 5 minutes au plus ;
+  - une valeur reçue n'est lue dans une table (thème, période, emplacement de marque, action) que si elle en est une clé propre, jamais `constructor` ni `__proto__`.
 - **Journaux :** le code et le `state` OIDC, et le jeton de l'adresse d'image Instagram, sont masqués dans les URL, même encodés dans un paramètre ; les adresses IP sont tronquées (/24 en IPv4, /48 en IPv6).
 
 ## Site public

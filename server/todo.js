@@ -36,7 +36,8 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
     authorOf: db.prepare('SELECT author_id FROM photos WHERE id = ?').pluck(),
     igFailedMine: db.prepare(`SELECT p.photo_id, p.retry_requested_at, ph.title FROM instagram_posts p JOIN photos ph ON ph.id = p.photo_id WHERE p.status = 'failed' AND ph.author_id = ?
       AND NOT EXISTS (SELECT 1 FROM instagram_posts b WHERE b.photo_id = p.photo_id AND b.id > p.id AND b.status <> 'cancelled') ORDER BY p.id DESC`),
-    igFailed: db.prepare("SELECT COUNT(*) FROM instagram_posts WHERE status = 'failed' AND NOT EXISTS (SELECT 1 FROM instagram_posts b WHERE b.photo_id = instagram_posts.photo_id AND b.id > instagram_posts.id)").pluck(),
+    // Comme igFailedMine et la page Instagram : un envoi plus récent mais annulé ne fait pas oublier l'échec.
+    igFailed: db.prepare("SELECT COUNT(*) FROM instagram_posts WHERE status = 'failed' AND NOT EXISTS (SELECT 1 FROM instagram_posts b WHERE b.photo_id = instagram_posts.photo_id AND b.id > instagram_posts.id AND b.status <> 'cancelled')").pluck(),
     // À finir : brouillons, ou titre provisoire (le nom du fichier), comme la photothèque.
     toFinish: db.prepare('SELECT status, title, source_name FROM photos WHERE (@author IS NULL OR author_id = @author)'),
     noCity: db.prepare("SELECT COUNT(*) FROM photos WHERE status = 'published' AND city_id IS NULL AND (@author IS NULL OR author_id = @author)").pluck(),

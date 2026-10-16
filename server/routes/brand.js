@@ -2,6 +2,8 @@ import path from 'node:path';
 import { THEMES, DEFAULT_THEME, BRAND_DEFAULTS } from '../themes.js';
 
 const PREVIEW_COOKIE = 'apercu_theme';
+// Thème connu : une clé propre de THEMES (pas « constructor » ni « __proto__ », ni un tableau).
+const known = id => typeof id === 'string' && Object.hasOwn(THEMES, id);
 
 // Apparence : thème et marque (emblème, favicon) lus dans les réglages, aperçu d'un thème pour les admins.
 export function createAppearance(app) {
@@ -10,7 +12,7 @@ export function createAppearance(app) {
 
   return {
     brand: () => ({ ...BRAND_DEFAULTS, ...read('brand', {}) }),
-    themeId: () => { const id = read('theme', DEFAULT_THEME); return THEMES[id] ? id : DEFAULT_THEME; },
+    themeId: () => { const id = read('theme', DEFAULT_THEME); return known(id) ? id : DEFAULT_THEME; },
 
     // Thème de la page : celui des réglages, ou celui en aperçu (?theme=…, mémorisé une heure) pour un admin.
     forRequest(request, reply) {
@@ -18,10 +20,10 @@ export function createAppearance(app) {
       if (request.can?.('site.apparence')) {
         const asked = typeof request.query?.theme === 'string' ? request.query.theme : null;
         if (asked === 'off') reply.clearCookie(PREVIEW_COOKIE, { path: '/' });
-        else if (asked && THEMES[asked]) {
+        else if (asked && known(asked)) {
           preview = asked;
           reply.setCookie(PREVIEW_COOKIE, asked, { path: '/', httpOnly: true, sameSite: 'lax', secure: app.config.secureCookies, maxAge: 3600 });
-        } else if (!asked && THEMES[request.cookies[PREVIEW_COOKIE]]) preview = request.cookies[PREVIEW_COOKIE];
+        } else if (!asked && known(request.cookies[PREVIEW_COOKIE])) preview = request.cookies[PREVIEW_COOKIE];
       }
       const id = preview || this.themeId();
       return { id, ...THEMES[id], preview: Boolean(preview) && preview !== this.themeId() };

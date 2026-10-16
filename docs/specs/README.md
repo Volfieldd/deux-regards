@@ -48,7 +48,7 @@
 | A4 | **Import** : envoi photo par photo avec suivi du traitement, photos en brouillon, date de prise de vue reprise de l'EXIF, titre provisoire tiré du nom de fichier ; puis **Compléter et publier** le lot (champ par champ ou d'un coup, sans JS aussi). |
 | A5 | **Fiche photo** : édition validée, publication, ordre, filigrane par photo, preuve d'antériorité, Instagram, audience de la photo. |
 | A6 | **Séries** : cartes avec couverture, création en tête, renommage, adresse, ordre (glisser ou clavier) ; supprimer une série non vide déplace ses photos vers une autre. |
-| A7 | **Photographes** (`/admin/auteurs`) : nom, adresse, bio, lettre des cartes, lien avec le compte de connexion. |
+| A7 | **Photographes** (`/admin/auteurs`) : nom, adresse, bio, lettre des cartes (unique, saisie ou non ; enregistrée, elle ne suit plus l'adresse), lien avec le compte de connexion ; suppression refusée tant qu'il reste des photos, des rencontres, des voyages à lui ou un compte lié. |
 | A8 | **Site public** (`/admin/site` : nom du site, textes, ouverture, carte du monde) et **Droits & confidentialité** (`/admin/droits`), chaque page n'enregistrant que ses champs ; `/admin/reglages` redirige vers Site public : nom du site, accroche, textes, à propos ; textes des droits en FR / EN / DE (le texte par défaut est affiché, « Rétablir le texte par défaut », un texte inchangé reste « par défaut ») et contact ; photos de l'ouverture (ordre, 8 au plus, vignettes en cadre 3:2, photo entière). |
 | A9 | **Filigrane et EXIF** : voir [`filigrane-et-exif.md`](filigrane-et-exif.md). |
 | A10 | **Preuves d'antériorité** : empreinte et horodatage de chaque original, téléchargement et vérification de la preuve. |
