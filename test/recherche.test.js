@@ -25,7 +25,7 @@ test('moteur : début de mot, sans accents, tous les mots, toutes les langues, b
   // Mots-clés et traductions ; la ville, dans toutes les langues, avec sa région.
   const quai = idOf(db, 'Quai, 7h12');
   const munich = cities('München', 1, 'de')[0];
-  db.prepare("UPDATE photos SET keywords = 'tramway, matin', title_de = 'Kai um sieben', city_id = ?, city_name = 'Munich', city_cc = 'DE' WHERE id = ?").run(munich.id, quai);
+  db.prepare("UPDATE photos SET keywords = 'tramway, matin', title_de = 'Kai um sieben', city_id = ?, city_name = 'Munich', city_cc = 'DE', on_map = 1 WHERE id = ?").run(munich.id, quai);
   assert.deepEqual(s.find('tramway'), [quai]);
   assert.deepEqual(s.find('kai'), [quai]);
   assert.deepEqual(s.find('München'), [quai]);

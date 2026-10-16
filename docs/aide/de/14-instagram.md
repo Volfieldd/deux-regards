@@ -7,7 +7,7 @@ Die Einrichtung erfolgt nur einmal: ein **professionelles Instagram-Konto**, ein
 ## Im Alltag
 
 1. **Wählen Sie, was auf Instagram erscheint.** Standardmäßig kommt nichts von selbst hinein: Öffnen Sie die Seite eines auf der Website veröffentlichten Fotos und klicken Sie im Abschnitt **Instagram** auf **Zur Instagram-Warteschlange hinzufügen**. (Ein Foto im Entwurf muss zuerst auf der Website veröffentlicht werden.) Damit eine ganze Serie automatisch erscheint, kreuzen Sie sie unter **Instagram → Einstellungen → Automatische Warteschlange** an: Jedes in dieser Serie veröffentlichte Foto kommt dann in die **Instagram-Warteschlange**.
-2. **Zu den gewählten Zeiten** (standardmäßig 18:30 Uhr, Pariser Zeit) geht das erste Foto der Warteschlange auf Instagram. Eines pro Zeitfenster.
+2. **Zu den gewählten Zeiten** (standardmäßig 18:30 Uhr, Pariser Zeit) geht das erste Foto der Warteschlange auf Instagram. Eines pro Zeitfenster. In den Einstellungen schreiben Sie die Uhrzeiten durch Kommas getrennt: „18:30“, „9:00“ oder „18 h 30“ gehen alle; eine unlesbare Uhrzeit wird ignoriert, und die Meldung nach dem Speichern sagt es.
 3. **Bis zum Versand** lässt sich alles einstellen:
    - auf der **Seite des Fotos**, Abschnitt **Instagram**: Rahmen, Wasserzeichen, Bildunterschrift, mit genauer Vorschau des gesendeten Bildes, dann **Aktualisieren**; **Aus der Warteschlange entfernen** nimmt es heraus;
    - auf der Seite **Instagram**: die Reihenfolge der Warteschlange (↑ ↓), **Jetzt veröffentlichen**, **Entfernen**. Nach **Jetzt veröffentlichen** zeigt ein Fortschrittsbalken jeden Schritt, ohne die Seite neu zu laden (Prüfungen, Bild gesendet, Verarbeitung durch Instagram, Veröffentlichung). Am Ende erscheint ✓ mit dem Link zum Beitrag oder ✕ mit dem Grund.
@@ -21,7 +21,7 @@ Die Einrichtung erfolgt nur einmal: ein **professionelles Instagram-Konto**, ein
 
 Die **Einstellungen** sind unter dem Protokoll eingeklappt.
 
-> Ein Foto kommt nie von selbst zweimal in die Warteschlange: Zurückgezogen und erneut veröffentlicht, wird es nicht wieder vorgeschlagen. Um es noch einmal zu teilen, verwenden Sie **Erneut veröffentlichen (wieder in die Warteschlange)** auf seiner Seite.
+> Ein Foto kommt nie von selbst zweimal in die Warteschlange: Zurückgezogen und erneut veröffentlicht, oder aus der Warteschlange **entfernt**, wird es nicht wieder vorgeschlagen. Um es noch einmal zu teilen, verwenden Sie **Erneut veröffentlichen (wieder in die Warteschlange)** auf seiner Seite.
 
 ## Für Instagram vorschlagen (Fotografen)
 
@@ -70,11 +70,13 @@ Es gibt kein kostenpflichtiges Angebot der Instagram-API: Meta erlaubt **100 Bei
 |---|---|---|---|
 | **Vorsichtig** (Standard) | 25 | 60 Min. | 100 |
 | **Grenzen von Meta** | das bei Instagram gelesene Kontingent (derzeit 100) | keiner | 200 |
-| **Benutzerdefiniert** | 1 bis 100 | 0 bis 1.440 Min. | 10 bis 1.000 |
+| **Benutzerdefiniert** | 1 bis 100 | 0 bis 1.440 Min. | 20 bis 1.000 |
 
 - **Außerhalb des Budgets** wartet das Foto in der Warteschlange. **Jetzt veröffentlichen** lehnt ab und erklärt, warum und wann es möglich sein wird („Letzte Veröffentlichung vor 20 Min.; mindestens 60 Min. zwischen zwei Veröffentlichungen: nächste möglich um 14:30 Uhr“).
-- **Meldet Instagram ein Limit**, wird die Warteschlange für die angegebene Zeit **pausiert** (sonst 1 Std., dann 2 Std., 4 Std., 8 Std., 24 Std.). Das Foto bleibt an der Spitze der Warteschlange und **der Versuch wird nicht gezählt**. Ein Banner kündigt dies auf der Seite **Instagram** an, mit **Jetzt fortsetzen**, um die Pause von Hand aufzuheben. Bei der Fortsetzung ein Foto pro Zeitfenster, nie eine Serie auf einmal.
-- Die Seite **Instagram** zeigt den **Verbrauch**: Beiträge in 24 Stunden, Aufrufe in der letzten Stunde, bei Instagram gelesenes Kontingent.
+- Bei **Benutzerdefiniert** übernimmt ein leer gelassenes Feld den Standardwert (den von **Vorsichtig**). Eine Veröffentlichung braucht bis zu 12 Aufrufe: daher mindestens 20 Aufrufe pro Stunde.
+- **Meldet Instagram ein Limit**, wird die Warteschlange für die angegebene Zeit **pausiert** (höchstens 7 Tage; sonst 1 Std., dann 2 Std., 4 Std., 8 Std., 24 Std.). Das Foto bleibt an der Spitze der Warteschlange und **der Versuch wird nicht gezählt**. Ein Banner kündigt dies auf der Seite **Instagram** an, mit **Jetzt fortsetzen**, um die Pause von Hand aufzuheben. Bei der Fortsetzung ein Foto pro Zeitfenster, nie eine Serie auf einmal.
+- Die Seite **Instagram** zeigt den **Verbrauch**: Beiträge in 24 Stunden, Aufrufe in der letzten Stunde, bei Instagram gelesenes Kontingent. Dieses Kontingent wird vor jedem Senden neu gelesen; als voll gelesen, hält es die Warteschlange eine Stunde an, dann wird es neu gelesen (**Jetzt fortsetzen** und eine neue Verbindung vergessen es ebenfalls).
+- Uhrzeiten von Pause und Fortsetzung erscheinen in der Sprache der Verwaltung („14:30“ auf Englisch und Deutsch).
 
 ## Likes und Kommentare
 
@@ -89,7 +91,7 @@ Jeden Morgen (nach 6 Uhr) erfasst die Website die **Likes** und **Kommentare** d
 ## Bei einem Fehler
 
 - **Automatischer neuer Versuch:** Das Foto bleibt an der Spitze der Warteschlange, und die Fehlermeldung erscheint in der Warteschlange und auf der Seite des Fotos. Es wird im nächsten Zeitfenster erneut gesendet, **höchstens 3 Versuche**.
-- **Nach 3 Fehlschlägen:** Es kommt zu **Fehlgeschlagen**, mit **Erneut versuchen**. Die Seite des Fotos bietet auch **Erneut veröffentlichen (wieder an den Anfang der Warteschlange)**.
+- **Nach 3 Fehlschlägen:** Es kommt zu **Fehlgeschlagen**, mit **Erneut versuchen**. Die Seite des Fotos bietet auch **Erneut veröffentlichen (wieder an den Anfang der Warteschlange)**. **Erneut versuchen** gilt nur für die letzte Sendung des Fotos, solange es auf der Website veröffentlicht ist: Ist es schon wieder in der Warteschlange, wird es abgelehnt (es ginge zweimal hinaus).
 - **Der Fotograf** (der die Warteschlange nicht verwaltet) sieht den Fehlschlag unter **Heute** und auf der Seite des Fotos, mit **Erneute Veröffentlichung anfragen**. Eine Anfrage pro Fehlschlag. Sie erscheint dann, markiert mit ▲ „Erneute Veröffentlichung angefragt“, unter **Heute** bei denen, die die Warteschlange verwalten, unter **Fehlgeschlagen** auf der Instagram-Seite und auf der Seite des Fotos; per E-Mail auch, wenn sie das gewählt haben. Sie verschwindet, sobald das Foto wieder in der Warteschlange ist. Ist das Foto schon in der Warteschlange, gibt es nichts anzufragen.
 - **Zugang abgelaufen:** Das Zugriffstoken gilt 60 Tage und erneuert sich selbst. Ist es abgelaufen (mehr als 60 Tage ohne Funktion), verbinden Sie das Konto über die Seite **Instagram** neu: **Trennen**, dann **Instagram-Konto verbinden**. Zeigt die Verwaltung **Konto erneut verbinden** an (Verschlüsselungsschlüssel geändert, siehe Schritt 6), klicken Sie einfach darauf.
 

@@ -150,8 +150,9 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
       if (open_.length) items.push({ level: 'bientot', title: open_.length > 1 ? t('Instagram : {n} de vos photos en échec', { n: open_.length }) : t('Instagram : « {title} » en échec', { title: open_[0].title }),
         detail: t('demandez la republication depuis la fiche de la photo'), href: `/admin/photos/${open_[0].photo_id}#instagram`, action: t('Voir') });
     }
-    const paused = a.all('instagram.voir') && instagram?.usage().paused;
-    if (paused) items.push({ level: 'bientot', title: t('Instagram en pause'), detail: t('reprise {when} : {reason}', { when: paused.when, reason: paused.reason }), href: '/admin/instagram', action: t('Voir') });
+    const igUsage = a.all('instagram.voir') && instagram?.usage(), paused = igUsage?.paused;
+    // Heure de reprise et motif dans la langue de l'admin.
+    if (paused) items.push({ level: 'bientot', title: t('Instagram en pause'), detail: t('reprise {when} : {reason}', { when: t.lang === 'fr' ? paused.when : igUsage.whenText(paused.until, t.locale), reason: t.msg(paused.reason) }), href: '/admin/instagram', action: t('Voir') });
     const pa = a.author('photos.voir'), ma = a.author('photos.modifier'), ta = a.author('photos.textes');
     const toFinish = pa === undefined ? 0 : q.toFinish.all({ author: pa }).filter(p => p.status === 'draft' || isProvisional(p)).length;
     const proposed = seriesSuggest?.enabled() && ma !== undefined ? seriesSuggest.forPhotos(db.prepare("SELECT id, category_id, status, series_checked FROM photos WHERE status = 'draft' AND series_checked = 0 AND (@author IS NULL OR author_id = @author)").all({ author: ma })).size : 0;

@@ -18,7 +18,7 @@ export const MAX_QUERY = 100;
 
 export function createSearch({ db }) {
   const rows = db.prepare(`SELECT p.id, p.title, p.title_en, p.title_de, p.legend, p.legend_en, p.legend_de, p.place, p.place_en, p.place_de,
-      p.keywords, p.city_id, p.city_name, c.name AS category, c.name_en AS category_en, c.name_de AS category_de, a.name AS author
+      p.keywords, p.on_map, p.city_id, p.city_name, c.name AS category, c.name_en AS category_en, c.name_de AS category_de, a.name AS author
     FROM photos p JOIN categories c ON c.id = p.category_id JOIN authors a ON a.id = p.author_id WHERE p.status = 'published'`);
   const words = s => norm(s).split(' ').filter(Boolean);
   // Mots de chaque champ d'une photo, une fois par champ (pondération).
@@ -26,7 +26,9 @@ export function createSearch({ db }) {
     const city = r.city_id ? cityById(r.city_id) : null;
     // Un mot-clé du vocabulaire est cherchable dans les trois langues (« phare » : aussi lighthouse, Leuchtturm).
     const keywords = String(r.keywords || '').split(',').flatMap(k => formsOf(k) || [k]).join(' ');
-    const v = { ...r, keywords, city: city ? city.labels.join(' ') : r.city_name || '' };
+    // La ville seulement si la photo est sur la carte (« Afficher sur la carte du monde ») : sinon la recherche
+    // révélerait la ville déduite du GPS, que la page de la photo ne montre pas.
+    const v = { ...r, keywords, city: !r.on_map ? '' : city ? city.labels.join(' ') : r.city_name || '' };
     return FIELDS.map(([cols, w]) => [new Set(cols.flatMap(k => words(v[k] || ''))), w]);
   };
   return {

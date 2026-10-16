@@ -227,7 +227,7 @@ test('admin : file automatique à la publication, réglages, fiche, aperçu, act
   const pub = await c.post(`/admin/instagram/${row.id}/publier`);
   assert.match(decodeURIComponent(cookiesOf(pub).flash || ''), /HTTPS|connecté/);                  // pas de compte, pas d'HTTPS : refusé
   await c.post(`/admin/instagram/${row.id}/annuler`);
-  assert.equal(c.db.prepare('SELECT COUNT(*) FROM instagram_posts WHERE id = ?').pluck().get(row.id), 0);
+  assert.equal(c.db.prepare('SELECT status FROM instagram_posts WHERE id = ?').pluck().get(row.id), 'cancelled');     // retirée : gardée, annulée
   // Brouillon : refusé.
   const r = await c.post('/admin/instagram/file', { photo_id: draft, frame: 'white' });
   c.db.prepare("UPDATE photos SET status = 'draft' WHERE id = ?").run(other);

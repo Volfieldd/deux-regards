@@ -122,7 +122,7 @@ export default async function publicRoutes(app) {
       ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at) })),
       ...(mapEnabled() ? [{ loc: '/carte' }] : []),
       // Voyages publiés (avec au moins une photo publiée).
-      ...(() => { const ids = new Set(photos.map(p => p.id)); const open = app.trips.list().filter(tr => tr.public && app.trips.photos(tr.id).some(p => ids.has(p.id))); return open.length ? [{ loc: '/voyages' }, ...open.map(tr => ({ loc: `/voyage/${tr.slug}` }))] : []; })(),
+      ...(() => { const ids = new Set(photos.map(p => p.id)); const open = app.trips.listPublic().filter(tr => app.trips.photos(tr.id).some(p => ids.has(p.id))); return open.length ? [{ loc: '/voyages' }, ...open.map(tr => ({ loc: `/voyage/${tr.slug}` }))] : []; })(),
       { loc: '/a-propos' }, { loc: '/droits' }, { loc: '/confidentialite' }, { loc: '/mentions-legales' },
     ];
     const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -269,14 +269,15 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   // Visible si le voyage est publié (case de l'admin) et a au moins une photo publiée ; sinon aperçu pour qui voit les
   // sorties, introuvable pour les autres.
   const LOC = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang];
-  const tripView = trip => {
+  // published : photos publiées de la page, lues une fois pour tous les voyages de la liste.
+  const tripView = (trip, published = repo.publishedPhotos({ lang })) => {
     const ids = new Set(app.trips.photos(trip.id).map(p => p.id));
-    const photos = repo.publishedPhotos({ lang }).filter(p => ids.has(p.id));
+    const photos = published.filter(p => ids.has(p.id));
     const names = new Map(repo.authors().map(a => [a.id, a.name]));
     const who = trip.authors.map(id => names.get(id)).filter(Boolean);
     return { ...trip, name: pick(trip, 'name', lang), intro: pick(trip, 'intro', lang), photos, who, cover: photos[0] || null };
   };
-  const visibleTrips = () => app.trips.list().filter(tr => tr.public).map(tripView).filter(tr => tr.photos.length);
+  const visibleTrips = () => { const published = repo.publishedPhotos({ lang }); return app.trips.listPublic().map(tr => tripView(tr, published)).filter(tr => tr.photos.length); };
   const span = tr => {
     const f = (d, o) => new Intl.DateTimeFormat(LOC, { ...o, timeZone: 'UTC' }).format(new Date(`${d}T12:00:00Z`));
     const days = [...new Set(tr.photos.map(p => p.taken_on))].sort();
@@ -298,8 +299,10 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     if (!raw) return reply.callNotFound();
     const tr = tripView(raw);
     const open = raw.public && tr.photos.length > 0;
-    if (!open && !request.can('sorties.voir')) return reply.callNotFound();          // aperçu pour l'équipe
-    if (!open) reply.header('x-robots-tag', 'noindex');
+    // Aperçu pour l'équipe : les mêmes voyages que dans l'admin (portée « les miennes » : ses voyages seulement).
+    const s = request.scope('sorties.voir');
+    if (!open && !(s && (s.all || (raw.author_id != null && raw.author_id === s.authorId)))) return reply.callNotFound();
+    if (!open) reply.header('x-robots-tag', 'noindex').header('cache-control', 'private, no-store');
     else app.stats.hit(request, { page: `voyage:${raw.slug}` });
     const siteName = app.siteName();
     const story = tripStory({ trip: tr, photos: tr.photos, lang, locale: LOC });

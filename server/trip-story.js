@@ -18,9 +18,11 @@ export function tripStory({ trip, photos, lang, locale }) {
   const fmt = (day, opts) => new Intl.DateTimeFormat(locale, { ...opts, timeZone: 'UTC' }).format(new Date(`${day}T12:00:00Z`));
   const days = [...byDay.keys()].sort().map((day, i) => {
     const list = byDay.get(day);
-    // Lieu du jour : la ville la plus fréquente de ses photos (sinon, le lieu affiché d'une photo).
+    // Lieu du jour : la ville la plus fréquente de ses photos (sinon, le lieu affiché d'une photo). Seulement les photos
+    // dont la fiche coche « Afficher sur la carte du monde » (même règle que photo-map.js) : la ville déduite du GPS
+    // d'une photo hors carte n'est jamais montrée.
     const counts = new Map();
-    for (const p of list) if (p.city_id && Number.isFinite(p.city_lat)) counts.set(p.city_id, (counts.get(p.city_id) || 0) + 1);
+    for (const p of list) if (p.on_map && p.city_id && Number.isFinite(p.city_lat) && Number.isFinite(p.city_lon)) counts.set(p.city_id, (counts.get(p.city_id) || 0) + 1);
     const cityId = [...counts].sort((a, b) => b[1] - a[1])[0]?.[0];
     const ref = cityId ? list.find(p => p.city_id === cityId) : null;
     const [x, y] = ref ? project(ref.city_lat, ref.city_lon) : [null, null];
