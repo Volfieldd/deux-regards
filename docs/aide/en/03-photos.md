@@ -26,8 +26,9 @@ In the photo library, each uploaded photo **appears straight away on the contact
 
 | | |
 |---|---|
-| Formats | JPEG, PNG, WebP, TIFF, HEIF |
-| Size | 90 MB and 120 megapixels per file at most |
+| Formats | JPEG, PNG, WebP, TIFF, AVIF. iPhone **HEIC** is not supported: export the photo as JPEG (or set the camera to “Most Compatible”) |
+| Size | 90 MB and 120 megapixels per file at most (less in 16 bits or with transparency); a vertical panorama must not be taller than about 8 times its width |
+| Check | each file is **decoded** on upload: a truncated or damaged file is refused straight away, with the reason |
 | Status | **draft**: nothing is visible on the site before publication |
 | Title | **provisional**, taken from the file name (`IMG_2041 quai-nord.jpg` → “IMG 2041 quai nord”) |
 | Date | **taken from the camera** (shooting date in the EXIF metadata), when it exists |

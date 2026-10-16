@@ -1,0 +1,38 @@
+{
+ "format {format} non pris en charge (JPEG, PNG, WebP, TIFF, AVIF)": {
+  "en": "format {format} not supported (JPEG, PNG, WebP, TIFF, AVIF)",
+  "de": "Format {format} wird nicht unterstützt (JPEG, PNG, WebP, TIFF, AVIF)"
+ },
+ "HEIC (iPhone) non pris en charge : exportez la photo en JPEG": {
+  "en": "HEIC (iPhone) not supported: export the photo as JPEG",
+  "de": "HEIC (iPhone) wird nicht unterstützt: Foto als JPEG exportieren"
+ },
+ "image trop lourde à décoder (en 16 bits ou avec transparence, moins de 120 mégapixels sont admis)": {
+  "en": "image too heavy to decode (in 16 bits or with transparency, fewer than 120 megapixels are allowed)",
+  "de": "Bild zu schwer zu dekodieren (bei 16 Bit oder mit Transparenz sind weniger als 120 Megapixel erlaubt)"
+ },
+ "image trop haute pour le site (panorama vertical) : la version affichée dépasserait 16 383 px de haut": {
+  "en": "image too tall for the site (vertical panorama): the displayed version would exceed 16,383 px in height",
+  "de": "Bild zu hoch für die Website (Hochformat-Panorama): Die angezeigte Version wäre höher als 16.383 px"
+ },
+ "image incomplète ou abîmée : elle ne se décode pas": {
+  "en": "incomplete or damaged image: it cannot be decoded",
+  "de": "Unvollständiges oder beschädigtes Bild: Es lässt sich nicht dekodieren"
+ },
+ "original introuvable": {
+  "en": "original not found",
+  "de": "Original nicht gefunden"
+ },
+ "original introuvable ou illisible": {
+  "en": "original not found or unreadable",
+  "de": "Original nicht gefunden oder unlesbar"
+ },
+ "ou {choose} · JPEG, PNG, WebP, TIFF, AVIF · {mb} Mo et 120 mégapixels au plus": {
+  "en": "or {choose} · JPEG, PNG, WebP, TIFF, AVIF · up to {mb} MB and 120 megapixels",
+  "de": "oder {choose} · JPEG, PNG, WebP, TIFF, AVIF · höchstens {mb} MB und 120 Megapixel"
+ },
+ "Aperçu quand une page sans photo (À propos, Droits…) est partagée sur un réseau social. Carré 1080 px ou 1200 × 630, réencodé en JPEG (1200 px au plus) ; une transparence devient un fond blanc derrière un dessin sombre, noir derrière un dessin clair.": {
+  "en": "Preview when a page without a photo (About, Rights…) is shared on a social network. 1080 px square or 1200 × 630, re-encoded as JPEG (1200 px at most); transparency becomes a white background behind a dark drawing, black behind a light one.",
+  "de": "Vorschau, wenn eine Seite ohne Foto (Über uns, Rechte…) in einem sozialen Netzwerk geteilt wird. Quadrat 1080 px oder 1200 × 630, als JPEG neu kodiert (höchstens 1200 px); Transparenz wird hinter einer dunklen Zeichnung zu weißem, hinter einer hellen zu schwarzem Hintergrund."
+ }
+}

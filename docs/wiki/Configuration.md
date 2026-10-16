@@ -23,7 +23,7 @@ Le serveur lit presque tout dans [`server/config.js`](https://github.com/Volfiel
 | `STORAGE_DIR` | `./storage` (`/data` dans l'image) | `config.js`, `db/backup.js` | Dossier des originaux, variantes, logos, marque et fichiers temporaires ; la base y est aussi par défaut. |
 | `DATABASE_PATH` | `STORAGE_DIR/site.db` | `config.js`, `db/backup.js` | Base SQLite. |
 | `IMAGE_THREADS` | `4` (ou le nombre de cœurs s'il est plus petit) | `server/images.js` | Threads de libvips (sharp) par opération d'image, de 1 à 16. Sous Linux glibc, sharp n'en prend qu'**un** par défaut : ce réglage accélère fortement le calcul des variantes. L'image Docker charge jemalloc pour que la mémoire ne se fragmente pas. |
-| `IMPORT_CONCURRENCY` | `2` | `server/imports.js` | Photos importées traitées en même temps (1 à 8). Mémoire : environ 100 Mo par photo de 24 Mpx en cours. |
+| `IMPORT_CONCURRENCY` | `2` | `server/imports.js` | Photos importées traitées en même temps (1 à 8), toutes pages d'import confondues. Mémoire : environ 100 Mo par photo de 24 Mpx en cours. |
 | `AVIF_EFFORT` | `4` | `server/images.js` | Effort d'encodage AVIF des variantes, de 0 (rapide) à 9 (plus compact) ; hors bornes, ramené dans 0–9. `npm test` le met à `0` pour accélérer les tests. |
 | `REQUIRE_PERSISTENT_STORAGE` | — (`1` dans l'image Docker) | `server/storage-guard.js`, `db/backup.js` | `1` : refus de démarrer si `STORAGE_DIR` n'est pas un point de montage (données perdues à la recréation du conteneur) ou n'est pas inscriptible. Le service de sauvegarde vérifie aussi `BACKUP_DIR`. |
 
@@ -70,9 +70,9 @@ Facultatif : publication des photos sur un compte Instagram professionnel. Voir 
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `TSA_URL` | `https://freetsa.org/tsr` | Autorité d'horodatage RFC 3161. `off` : pas d'horodatage (les empreintes restent calculées). **HTTPS obligatoire en ligne.** |
-| `TSA_CA_FILE` | certificat FreeTSA fourni (`assets/tsa/freetsa-cacert.pem`) si `TSA_URL` est la valeur par défaut ; sinon aucun | Certificat racine de l'autorité, au format PEM : la chaîne de chaque jeton est vérifiée jusqu'à lui. Sans lui, la vérification affiche « autorité non vérifiée ». |
+| `TSA_CA_FILE` | certificat FreeTSA fourni (`assets/tsa/freetsa-cacert.pem`) si `TSA_URL` est la valeur par défaut ; sinon aucun | Certificat racine de l'autorité, au format PEM : la chaîne de chaque jeton est vérifiée jusqu'à lui, en passant par les certificats d'AC intermédiaire que la TSA joint à ses jetons (cinq au plus). Si elle ne les joint pas, ajoutez-les dans le même fichier, à la suite de la racine. Sans ce fichier, la vérification affiche « autorité non vérifiée ». |
 
-Pour une présomption d'exactitude de la date (eIDAS), choisissez une **autorité qualifiée** figurant sur la liste de confiance européenne. Reportez alors son URL RFC 3161 dans `TSA_URL` et son certificat racine dans `TSA_CA_FILE`. Le serveur doit pouvoir joindre cette URL en sortie.
+Pour une présomption d'exactitude de la date (eIDAS), choisissez une **autorité qualifiée** figurant sur la liste de confiance européenne. Reportez alors son URL RFC 3161 dans `TSA_URL` et son certificat racine dans `TSA_CA_FILE` : ces autorités signent presque toujours avec un certificat émis par une AC intermédiaire, que la vérification sait remonter. Le serveur doit pouvoir joindre cette URL en sortie.
 
 ## Site « en ligne »
 

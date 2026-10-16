@@ -302,6 +302,8 @@ export function createAdminRepo(db) {
       if (!photo) return null;
       db.transaction(() => {
         db.prepare('DELETE FROM photos WHERE id = ?').run(id);
+        // Journal Instagram (sans clé étrangère) : l'identifiant pourra être repris par une autre photo.
+        db.prepare('UPDATE instagram_events SET photo_id = NULL WHERE photo_id = ?').run(id);
         const hero = settings().hero;
         if (Array.isArray(hero) && hero.includes(photo.slug)) q.setSetting.run('hero', JSON.stringify(hero.filter(s => s !== photo.slug)));
       })();

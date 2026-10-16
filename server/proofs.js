@@ -41,7 +41,9 @@ export function createProofService({ db, storageDir, tsa, log, fetchImpl = fetch
       (SELECT COUNT(*) FROM timestamps t JOIN photos p ON p.id = t.photo_id WHERE t.status = 'ok' AND t.sha256 = p.sha256) AS ok,
       (SELECT COUNT(*) FROM timestamps WHERE status = 'error') AS errors`),
   };
-  const setHash = db.prepare('UPDATE photos SET sha256 = ? WHERE id = ?');
+  // L'identifiant d'une photo supprimée peut être repris par la suivante (pas d'AUTOINCREMENT) : on écrit seulement
+  // sur la photo dont on a lu le fichier (nom aléatoire, unique), et seulement si son empreinte manque encore.
+  const setHash = db.prepare('UPDATE photos SET sha256 = ? WHERE id = ? AND file = ? AND sha256 IS NULL');
 
   // File unique qui ne rejette jamais : une erreur est journalisée, jamais propagée (pas de rejet non géré).
   let queue = Promise.resolve();
@@ -51,14 +53,15 @@ export function createProofService({ db, storageDir, tsa, log, fetchImpl = fetch
   let stopping = false;
   let aborter = new AbortController();
   const enqueue = job => (queue = queue.then(job).catch(err => log?.error({ err }, 'passage d’horodatage interrompu')));
-  const exists = id => Boolean(q.photo.get(id));
+  // Toujours la même photo, avec le même original ? (pas seulement le même identifiant)
+  const same = p => q.photo.get(p.id)?.sha256 === p.sha256;
 
   // Empreintes manquantes (photos antérieures à cette fonction, seed).
   async function fillHashes() {
     for (const p of q.missingHash.all()) {
       if (stopping) return;
       try {
-        setHash.run(await sha256File(path.join(storageDir, 'originals', p.file)), p.id);
+        setHash.run(await sha256File(path.join(storageDir, 'originals', p.file)), p.id, p.file);
       } catch (err) {
         log?.error({ err, photo: p.id }, 'empreinte de l’original impossible');
       }
@@ -75,8 +78,8 @@ export function createProofService({ db, storageDir, tsa, log, fetchImpl = fetch
     } catch (err) {
       result = { ok: false, err, row: { ...base, error: err instanceof TimestampError ? err.message : `service injoignable (${err.cause?.code || err.name})` } };
     }
-    // La photo a pu être supprimée pendant la requête : rien à enregistrer.
-    if (!exists(p.id) || stopping) return false;
+    // La photo a pu être supprimée (voire remplacée sous le même identifiant) pendant la requête : rien à enregistrer.
+    if (!same(p) || stopping) return false;
     if (result.ok) { q.ok.run(result.row); return true; }
     q.error.run(result.row);
     log?.warn({ err: result.err.message, photo: p.id }, 'horodatage impossible, nouvel essai plus tard');
@@ -141,7 +144,10 @@ export function createProofService({ db, storageDir, tsa, log, fetchImpl = fetch
         const v = verifyToken(parsed, { caPem });
         return { ok: true, genTime: parsed.genTime, signer: v.signer, chained: v.chained };
       } catch (err) {
-        return { ok: false, reason: err.message };
+        // Original absent ou illisible : message fixe (le message système porte le chemin absolu de l'original).
+        if (err instanceof TimestampError) return { ok: false, reason: err.message };
+        log?.error({ err, photo: id }, 'vérification de la preuve impossible');
+        return { ok: false, reason: 'original introuvable ou illisible' };
       }
     },
   };

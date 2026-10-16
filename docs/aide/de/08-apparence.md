@@ -37,4 +37,6 @@ Jedes Theme wird mit seinen drei Farben (Hintergrund, Tinte, Akzent) und einer B
 - **Entfernen:** eine Schaltfläche unter jedem Platz.
 - **Automatische Farbe:** Emblem, Symbol und vollständiges Logo übernehmen **die Farbe des Themes** (weiß auf schwarzem Hintergrund, schwarz auf hellem Hintergrund). Eine einzige Version genügt, schwarz oder weiß: Die Richtung der Linie wird erkannt. Der Rand wird automatisch beschnitten.
 - **Tab-Symbol:** Ein quadratisches Symbol auf deckendem Hintergrund wird unverändert übernommen. Andernfalls wird es automatisch zusammengesetzt.
+- **Foto einer Zeichnung:** Die Ausrichtung des Telefons wird angewendet; eine fotografierte Zeichnung erscheint nicht verdreht.
+- **Teilen-Bild:** als JPEG neu kodiert, höchstens 1200 px. Transparenz wird hinter einer dunklen Zeichnung (freigestelltes schwarzes Logo) zu **weißem**, hinter einer hellen zu **schwarzem** Hintergrund.
 - **SVG:** beim Hochladen abgelehnt.

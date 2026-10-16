@@ -23,7 +23,7 @@ Le droit d'auteur naît de la création, sans dépôt. Ces mesures ne créent pa
 | P1 | À l'import, l'empreinte **SHA-256 de l'original tel que reçu** est calculée et conservée (`photos.sha256`). Les photos plus anciennes reçoivent la leur au démarrage. |
 | P2 | Chaque empreinte est envoyée à une **autorité d'horodatage RFC 3161** (TSA). Le jeton signé qu'elle renvoie est conservé en entier (`timestamps.token`). **Seule l'empreinte quitte le serveur**, jamais l'image. |
 | P3 | Autorité par défaut : FreeTSA (gratuite, sans compte). On peut la remplacer par n'importe quelle TSA RFC 3161, par exemple une autorité qualifiée eIDAS, via `TSA_URL` et `TSA_CA_FILE`. `TSA_URL=off` désactive l'horodatage (les empreintes restent calculées). |
-| P4 | Chaque jeton reçu est contrôlé avant d'être conservé : statut accordé, SHA-256, empreinte et nonce identiques à la demande, attribut `contentType` = TSTInfo, `messageDigest` correct, signature valide (SHA-1 refusé), certificat signataire désigné par `SigningCertificate(V2)` et d'usage « horodatage » (EKU), valide à la date du jeton, chaîne jusqu'au certificat racine attendu (si `TSA_CA_FILE`). Réponse bornée à 64 ko, sans redirection ; tout jeton mal formé est refusé proprement. |
+| P4 | Chaque jeton reçu est contrôlé avant d'être conservé : statut accordé, SHA-256, empreinte et nonce identiques à la demande, attribut `contentType` = TSTInfo, `messageDigest` correct, signature valide (SHA-1 refusé), certificat signataire désigné par `SigningCertificate(V2)` et d'usage « horodatage » (EKU), valide à la date du jeton, chaîne jusqu'au certificat racine attendu (si `TSA_CA_FILE`), au besoin par les certificats d'AC intermédiaire joints au jeton (valides à sa date, cinq au plus) ou placés dans le fichier. Réponse bornée à 64 ko, sans redirection ; tout jeton mal formé est refusé proprement. |
 | P5 | En cas d'échec (réseau, TSA indisponible, jeton refusé), l'erreur est notée et la demande **reprise automatiquement** : après 2, 4, 8… minutes, au plus une fois par jour, avec un passage toutes les heures. L'admin peut relancer tout de suite. L'import n'est jamais bloqué. |
 | P6 | La fiche photo affiche l'empreinte, la date certifiée (UTC), l'autorité et le numéro de série. Elle propose le téléchargement de l'**original**, du **jeton** (`.tsr`), d'une **fiche de preuve** (`.txt`, avec les commandes de vérification) et du **certificat de l'autorité**. |
 | P7 | Le bouton **Vérifier la preuve** refait tous les contrôles, y compris que l'original sur le disque a toujours la même empreinte. Sans certificat racine configuré, il l'indique (« autorité non vérifiée ») au lieu de conclure « preuve valide ». |
@@ -47,7 +47,7 @@ openssl ts -verify -in photo.tsr -data photo.jpg -CAfile autorite-horodatage.pem
   - l'attribut `messageDigest` égale l'empreinte du `TSTInfo` ;
   - la signature des attributs signés est vérifiée avec le certificat du jeton ;
   - la date du jeton tombe dans la période de validité du certificat ;
-  - le certificat est bien émis par la racine attendue.
+  - le certificat remonte à la racine attendue : émis par un certificat de `TSA_CA_FILE`, ou par une AC intermédiaire jointe au jeton (certificat d'AC valide à la date du jeton), elle-même émise par la suite jusqu'au fichier ; cinq intermédiaires au plus.
 
   Le module n'a aucune dépendance : seul le sous-ensemble DER nécessaire est implémenté.
 - `server/proofs.js` : file unique comme pour les variantes ; passage au démarrage, après chaque import, puis toutes les heures.
@@ -101,6 +101,7 @@ La version du rendu (`PIPELINE`) passe à 2 : les images déjà signées sont re
 
 - Requête conforme : relue par `openssl ts -query`, et la structure est testée.
 - Un jeton FreeTSA réel est analysé et vérifié jusqu'à la racine ; un jeton altéré ou une autre racine sont refusés.
+- Un jeton signé par une TSA dont le certificat est émis par une AC intermédiaire (chaîne à trois niveaux, intermédiaire joint au jeton) est vérifié jusqu'à la racine seule.
 - Une réponse portant sur une autre empreinte, ou avec un autre nonce, est refusée.
 - Au démarrage, les empreintes manquantes sont calculées, puis horodatées. Après une erreur, la reprise est espacée, et la relance manuelle fonctionne.
 - La fiche affiche la preuve, et les téléchargements contiennent exactement l'original et le jeton. La vérification réussit, puis échoue si l'original est modifié.

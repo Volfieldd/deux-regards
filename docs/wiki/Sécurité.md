@@ -47,16 +47,17 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
   - attributs signés désignant un jeton d'horodatage ;
   - signature valide (SHA-1 refusé) ;
   - certificat signataire désigné par le jeton (`SigningCertificate`), d'usage « horodatage », valide à la date ;
-  - chaîne jusqu'au certificat racine attendu.
+  - chaîne jusqu'au certificat racine attendu, au besoin par les AC intermédiaires jointes au jeton (certificats d'AC valides à sa date, cinq au plus).
 - **Réponse de la TSA :** 64 ko au plus, sans redirection suivie ; un jeton mal formé est refusé proprement.
 - **Sans certificat racine configuré :** la vérification le dit (« autorité non vérifiée ») au lieu de conclure « preuve valide ».
 - **Téléchargement des originaux :** réservé à l'admin, pour constituer un dossier de preuve.
 
 ## Fichiers reçus
 
-- **Photos :** formats JPEG, PNG, WebP, TIFF et HEIF, vérifiés par décodage. Limites : 90 Mo (sous le plafond de 100 Mo par requête de Cloudflare), 120 mégapixels (aussi imposées au décodage, contre les bombes de décompression) et 50 fichiers par envoi.
+- **Photos :** formats JPEG, PNG, WebP, TIFF et AVIF, vérifiés par un décodage réel (à petite taille) dès l'import : un fichier tronqué ou un HEIC d'iPhone (HEVC, que le serveur ne sait pas décoder) est refusé avec un message clair. Limites : 90 Mo (sous le plafond de 100 Mo par requête de Cloudflare), 120 mégapixels (aussi imposées au décodage, contre les bombes de décompression), mémoire décodée d'une image RVB 8 bits de 120 mégapixels au plus (une image 16 bits ou avec transparence a donc moins de pixels admis), hauteur des versions affichées sous 16 383 px (panoramas verticaux) et 50 fichiers par envoi. Les rendus d'import tournent `IMPORT_CONCURRENCY` à la fois, quelle que soit la page d'import.
+- **EXIF des photos :** lu une seule fois par import ou par rendu, après un parcours borné du bloc (balises et IFD comptés sans rien construire) ; un EXIF trop coûteux à lire (bloc piégé qui figeait le serveur) est ignoré.
 - **Logo du filigrane :** PNG ou WebP seulement (le SVG est refusé), 5 Mo, 4000 px de côté. Il est réencodé avant usage.
-- **Fichiers de marque (Apparence) :** PNG, WebP ou JPEG (SVG refusé), 5 Mo, 6000 px de côté ; réencodés, sans métadonnées.
+- **Fichiers de marque (Apparence) :** PNG, WebP ou JPEG (SVG refusé), 5 Mo, 6000 px de côté ; réencodés, sans métadonnées, orientation de l'appareil appliquée ; l'emblème est analysé sur une image réduite à 2000 px.
 - **Stockage :** les noms de fichiers sont toujours générés par le site (UUID) ; le nom envoyé ne sert qu'à proposer un titre.
 
 ## Configuration en ligne
@@ -75,7 +76,7 @@ Détail et autres refus de démarrage : [Configuration](Configuration), section 
 - **Mode EXIF « Tout l'EXIF de l'original » :** il publie la position GPS des photos.
 - **Rôles :** ils vivent dans la base du site et sont relus à chaque requête ; un rôle retiré dans **Comptes et rôles** s'applique tout de suite. Le rôle `admin` de Zitadel ne sert qu'à la première connexion.
 - **HSTS :** il est envoyé sans `includeSubDomains`. À ajouter une fois le domaine choisi, si tous ses sous-domaines sont en HTTPS.
-- **Cache des images publiées :** il dure un an. Une photo dépubliée cesse d'être servie par le site, mais un navigateur ou un proxy qui l'a déjà en cache peut la garder.
+- **Cache des images publiées :** il dure un an dans le navigateur, mais un jour au plus dans un cache partagé (`CDN-Cache-Control: max-age=86400`, suivi par Cloudflare). Une photo dépubliée, refusée ou effacée cesse d'être servie par le site ; Cloudflare peut encore la servir à qui a son adresse exacte pendant au plus un jour, et un navigateur qui l'a déjà en cache peut la garder. Pour un retrait immédiat (demande RGPD pressante), purgez l'adresse dans Cloudflare (**Caching → Purge Cache**).
 - **Rôles et permissions :** chaque route de l'admin déclare une permission (`server/permissions.js`) ; une route qui n'en déclare pas empêche le démarrage, et une permission absente du compte est refusée (fermé par défaut). Les routes à plusieurs actions (actions groupées, fiche qui publie, effacement avec photos, réglages) vérifient aussi l'action précise. Quatre rôles existent (Administrateur, Photographe, Modérateur, Relecteur), donnés dans **Comptes et rôles** ; un compte inconnu arrive « en attente », sans accès. Garde-fous : au moins un administrateur actif, pas de désactivation de soi-même, `ADMIN_SUBS` toujours administrateurs. Le lien compte ↔ photographe ne se règle plus dans la fiche Photographe (porte d'escalade fermée). Portée « les miennes » (rôle Photographe) : ce qui n'est pas au photographe lié au compte n'existe pas pour lui (404 sur les photos, images de l'admin, rencontres, personnes, sorties, QR), les listes, la recherche, « Aujourd'hui » et les statistiques sont filtrées à la source, et une personne partagée entre photographes ne se modifie que par un administrateur. Le **Journal** (en base, 13 mois) dit qui a fait quoi. Revue de sécurité et de code du 15 octobre 2026 : la permission de chaque route est vérifiée sur le photographe de la chose visée (et pas seulement sa visibilité), les annulations et les identifiants envoyés dans un formulaire suivent la même portée, une session sans compte n'apporte aucun rôle, et retirer les rôles ou désactiver un compte ferme ses sessions.
 
 ## Mesure d’audience

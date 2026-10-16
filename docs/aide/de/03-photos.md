@@ -26,8 +26,9 @@ In der Fotothek **erscheint jedes hochgeladene Foto sofort auf dem Kontaktbogen*
 
 | | |
 |---|---|
-| Formate | JPEG, PNG, WebP, TIFF, HEIF |
-| Größe | höchstens 90 MB und 120 Megapixel pro Datei |
+| Formate | JPEG, PNG, WebP, TIFF, AVIF. **HEIC** vom iPhone wird nicht unterstützt: Foto als JPEG exportieren (oder die Kamera auf „Maximale Kompatibilität“ stellen) |
+| Größe | höchstens 90 MB und 120 Megapixel pro Datei (weniger bei 16 Bit oder mit Transparenz); ein Hochformat-Panorama darf höchstens etwa 8-mal so hoch wie breit sein |
+| Prüfung | jede Datei wird beim Hochladen **dekodiert**: Eine abgeschnittene oder beschädigte Datei wird sofort abgelehnt, mit Begründung |
 | Status | **Entwurf**: Vor der Veröffentlichung ist nichts auf der Website sichtbar |
 | Titel | **vorläufig**, aus dem Dateinamen gebildet (`IMG_2041 quai-nord.jpg` → „IMG 2041 quai nord“) |
 | Datum | **von der Kamera übernommen** (Aufnahmedatum aus den EXIF-Metadaten), sofern vorhanden |

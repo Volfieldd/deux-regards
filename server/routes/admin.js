@@ -1319,14 +1319,14 @@ export default async function adminRoutes(app) {
   app.get('/admin/photos/:id/preuve.tsr', P('photos.voir'), async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     const t = photo && app.proofs.get(photo.id);
-    if (!t || t.status !== 'ok') return reply.callNotFound();
+    if (!t || t.status !== 'ok' || t.sha256 !== photo.sha256) return reply.callNotFound();   // jeton d'un autre original
     return attachment(reply, `${photo.slug}.tsr`).type('application/timestamp-reply').send(t.token);
   });
 
   app.get('/admin/photos/:id/preuve.txt', P('photos.voir'), async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     const t = photo && app.proofs.get(photo.id);
-    if (!t || t.status !== 'ok') return reply.callNotFound();
+    if (!t || t.status !== 'ok' || t.sha256 !== photo.sha256) return reply.callNotFound();   // jeton d'un autre original
     const name = `${photo.slug}.${ext(photo.file)}`;
     const ca = app.config.tsa.caFile ? 'autorite-horodatage.pem' : '<certificat racine de l’autorité>';
     const text = [

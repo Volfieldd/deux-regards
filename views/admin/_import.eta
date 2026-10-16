@@ -27,8 +27,8 @@
     <label class="drop" data-drop>
       <span class="drop-icon" aria-hidden="true">⇪</span>
       <span class="drop-text"><strong data-drop-title><%= t('Glissez vos photos ici') %></strong>
-        <span><%~ t('ou {choose} · JPEG, PNG, WebP, TIFF, HEIF · {mb} Mo et 120 mégapixels au plus', { choose: `<u>${__eta.e(t('choisissez des fichiers'))}</u>`, mb: __eta.e(it.maxFileBytes / 1024 / 1024) }) %></span></span>
-      <input type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/tiff,image/heif,image/avif" multiple required>
+        <span><%~ t('ou {choose} · JPEG, PNG, WebP, TIFF, AVIF · {mb} Mo et 120 mégapixels au plus', { choose: `<u>${__eta.e(t('choisissez des fichiers'))}</u>`, mb: __eta.e(it.maxFileBytes / 1024 / 1024) }) %></span></span>
+      <input type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/tiff,image/avif" multiple required>
     </label>
     <div class="sumbar" data-summary hidden>
       <div class="sum-text"><strong data-sum-title></strong> <span data-sum-detail></span>

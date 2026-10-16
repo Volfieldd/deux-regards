@@ -74,7 +74,7 @@ Les variantes sont mises en cache un an (`immutable`) par les navigateurs. Pour 
 
 ### 3.2 Recalcul
 
-`createVariantService` (`server/variants.js`) gère une **file unique** : jamais deux rendus en parallèle, et des demandes rapprochées ne produisent qu'un seul passage complet. Pour chaque photo :
+`createVariantService` (`server/variants.js`) gère une **file unique pour les passages complets** : jamais deux passages en parallèle, et des demandes rapprochées n'en produisent qu'un seul. Les imports sont rendus **hors file**, `IMPORT_CONCURRENCY` photos à la fois (toutes pages d'import confondues), en parallèle d'un passage éventuel ; un **verrou par photo** garantit qu'une même image n'est jamais rendue deux fois en même temps. Pour chaque photo :
 
 1. calcul des réglages effectifs et de l'empreinte (`specFor`) ;
 2. si l'empreinte est identique et que tous les fichiers existent, rien à faire ;
@@ -83,10 +83,11 @@ Les variantes sont mises en cache un an (`immutable`) par les navigateurs. Pour 
 ### 3.3 Rendu
 
 - Un seul pipeline `sharp` par variante : `rotate()` (orientation EXIF), `resize()`, `composite()` (le filigrane, posé à la taille finale), puis métadonnées et encodage. Il n'y a pas de réencodage intermédiaire.
-- Filigrane texte : rendu par Pango (inclus dans `sharp`) avec les polices du site converties en TTF dans `assets/fonts/` (familles « Filigrane Sans/Serif/Mono », licence SIL OFL). La conversion est nécessaire car le Pango de `sharp` ne lit pas WOFF/WOFF2. Les caractères spéciaux sont échappés (balisage Pango).
+- Filigrane texte : rendu par Pango (inclus dans `sharp`) avec les polices du site converties en TTF dans `assets/fonts/` (familles « Filigrane Sans/Serif/Mono », licence SIL OFL). La conversion est nécessaire car le Pango de `sharp` ne lit pas WOFF/WOFF2. Les caractères spéciaux sont échappés (balisage Pango). Le texte est dessiné à la taille de sa boîte (un premier rendu à 72 dpi le mesure, le second est fait à la résolution voulue) : jamais agrandi en image, il reste net en plein cadre et en grande largeur.
 - Opacité : la couche alpha du filigrane est multipliée (`dest-in`).
 - Mosaïque : le motif est tourné de -30°, espacé d'une demi-largeur et répété (`tile`).
-- Métadonnées « prise de vue » : l'EXIF de l'original est lu avec `exif-reader`, et seule la liste blanche de balises est réécrite (`withExif`). « Tout » utilise `keepExif()`.
+- Métadonnées « prise de vue » : l'EXIF de l'original est lu une fois par rendu avec `exif-reader`, après un parcours borné (`server/exif.js` : un bloc trop coûteux à lire est ignoré), et seule la liste blanche de balises est réécrite (`withExif`). « Tout » utilise `keepExif()`, en relisant l'original pour chaque fichier, deux à la fois.
+- Variable `{annee}` et année du copyright : celle de la prise de vue, sinon celle de l'import en heure de Paris.
 
 ### 3.4 Données
 
