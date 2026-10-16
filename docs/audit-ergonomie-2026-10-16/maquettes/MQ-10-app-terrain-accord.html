@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Nouvelle rencontre · J-0009 · Erreur : 1 point à corriger · Nicephos (maquette MQ-10)</title>
+<link rel="stylesheet" href="_commun/app.css">
+<style>
+/* ===== Couche « maquette » : ruban, repères numérotés, planches d'états, encart « Ce qui change » ===== */
+:root { --mq: #3a2fd0; --mq-ink: #2f27b8; }
+.mq-ribbon { display: flex; flex-wrap: wrap; gap: 2px 18px; align-items: center; justify-content: space-between; margin: 0; padding: 7px 16px; background: var(--mq); color: #fff; font: 400 12.5px/1.45 Jost, Arial, sans-serif; letter-spacing: .02em; }
+.mq-ribbon strong { font-weight: 600; letter-spacing: .06em; }
+.mq-pin { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--mq); color: #fff; font: 600 12px/1 Jost, Arial, sans-serif; box-shadow: 0 0 0 2px #fff; vertical-align: middle; flex: none; margin: 0 4px; font-style: normal; letter-spacing: 0; text-transform: none; text-decoration: none; }
+.mq-fold { position: absolute; left: 0; right: 0; top: 900px; border-top: 2px dashed var(--mq); z-index: 6; pointer-events: none; }
+.mq-fold span { position: absolute; right: 16px; top: -24px; background: var(--mq); color: #fff; font: 500 11.5px/1.5 Jost, Arial, sans-serif; padding: 1px 8px; border-radius: 6px; }
+.mq-boards { background: #e4e0d7; color: #1b1a17; padding: 40px 36px 48px; border-top: 1px solid rgba(20,18,14,.15); }
+.mq-boards > h2, .mq-notes > h2 { font: 300 30px/1.15 Jost, Arial, sans-serif; margin: 0 0 6px; color: #1b1a17; }
+.mq-lead { color: #4a463f; max-width: 86ch; margin: 0 0 24px; font-size: 14.5px; }
+.mq-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.mq-board { background: var(--bg); color: var(--ink); border-radius: 16px; padding: 20px 22px 24px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(60,40,10,.10); min-width: 0; }
+.mq-board.wide { grid-column: 1 / -1; }
+.mq-board > h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 4px; margin: 0 0 4px; font-weight: 500; font-size: 17px; }
+.mq-board > .mq-cap { color: var(--ink2); font-size: 13px; margin: 0 0 16px; max-width: 76ch; }
+.mq-scrim { background: rgba(30,26,20,.46); border-radius: 12px; padding: 32px 24px; display: grid; place-items: center; }
+.mq-notes { background: #fff; color: #1b1a17; padding: 40px 36px 56px; border-top: 4px solid var(--mq); }
+.mq-notes > p { max-width: 90ch; color: #4a463f; margin: 0 0 6px; font-size: 14.5px; }
+.mq-notes ol { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 44px; }
+.mq-notes li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 4px 10px; align-items: start; font-size: 14px; line-height: 1.5; }
+.mq-notes li .mq-pin { margin: 0; }
+.mq-notes li strong { font-weight: 600; }
+.mq-ref { display: block; margin-top: 4px; font-size: 12.5px; line-height: 1.5; color: #4a463f; }
+.mq-ref b { font-weight: 600; color: var(--mq-ink); }
+.mq-measures { margin: 26px 0 0; padding: 14px 18px; border-radius: 12px; background: #f6f4ef; font-size: 13.5px; color: #33302b; max-width: 1100px; }
+.mq-measures h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+.mq-measures ul { margin: 0; padding-left: 18px; display: block; }
+.mq-measures li { display: list-item; font-size: 13.5px; }
+@media (max-width: 720px) {
+  .mq-boards { padding: 28px 14px 32px; }
+  .mq-boards > h2, .mq-notes > h2 { font-size: 26px; }
+  .mq-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .mq-board { padding: 16px 14px 18px; }
+  .mq-desk { display: none !important; }
+  .mq-scrim { padding: 18px 10px; }
+  .mq-notes { padding: 28px 16px 40px; }
+  .mq-notes ol { grid-template-columns: minmax(0, 1fr); }
+}
+@media (min-width: 721px) { .mq-mob { display: none !important; } }
+
+/* ===== MQ-10 : app de terrain, un accord qui ne se perd jamais ===== */
+:root { --bg: #f6f4ef; --s1: #fff; --s2: #efebe3; --line: #dcd7cd; --line2: #c9c3b7; --ink2: #4f4b44; --ink3: #6b665d; --warn: #6e6000; --danger: #b2410a; --ok: #0067a3; }
+body { padding-bottom: 0; }
+.skip { position: absolute; left: 12px; top: -80px; z-index: 100; background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 8px; }
+.skip:focus { top: 8px; }
+.app-bar h1 { flex: 1; margin: 0; font-size: 17px; font-weight: 500; line-height: 1.25; }
+.app-bar h1 .mono { font-size: 14px; color: #cfc8bb; }
+.mq-apphead { position: sticky; top: 0; z-index: 3; }
+.mq-apphead .app-bar { position: static; }
+.app-session { margin: 0; padding: 7px 16px; background: #2b2a27; color: #e7e2d8; font-size: 13.5px; display: flex; justify-content: space-between; gap: 10px; }
+.app-session a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.app-form { padding-bottom: 0; }
+.mq-kept { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 4px 14px; align-items: center; padding: 12px; border-radius: 12px; background: #fff; border: 1px solid var(--line); }
+.mq-kept img { width: 96px; height: 128px; object-fit: cover; border-radius: 8px; grid-row: span 3; }
+.mq-kept p { margin: 0; }
+.mq-kept .ok { font-weight: 500; }
+.mq-kept .ok::before, .sign-ok::before { content: "✓ "; color: var(--ok); }
+.app-langs label { position: relative; }
+.app-langs label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+.app-l10n h3 { margin: 0; font-size: 18px; font-weight: 500; }
+.app-person fieldset { border: 0; margin: 0; padding: 0; }
+.app-person legend { padding: 0; margin: 0 0 4px; font-size: 16px; font-weight: 500; }
+.app-scopes { border-left: 2px solid var(--line) !important; margin-left: 11px !important; padding-left: 22px !important; }
+.app-scopes legend { font-size: 15px; font-weight: 500; color: var(--ink); }
+.mq-err-field { border-radius: 12px; padding: 10px 12px 6px !important; box-shadow: inset 0 0 0 2px var(--ko); background: #fff7f2; }
+.mq-err-field legend { float: left; width: 100%; margin-bottom: 2px; }
+.mq-err-field legend + * { clear: both; }
+.mq-err { display: flex; gap: 8px; align-items: baseline; margin: 2px 0 6px; color: var(--ko); font-weight: 500; font-size: 15.5px; }
+.mq-focus-r { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 50%; }
+.app-sign .pad { position: relative; display: block; width: 100%; height: 170px; background: #fbfaf7; border: 1.5px solid var(--ink); border-radius: 12px; }
+.app-sign .pad svg { position: absolute; inset: 10px 18px; width: calc(100% - 36px); height: calc(100% - 20px); }
+.app-sign .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.sign-ok { margin: 0; font-size: 15px; font-weight: 500; }
+.app-actions { position: relative; display: grid; gap: 8px; background: var(--paper); border-top: 1px solid var(--line); margin-top: 6px; }
+.app-actions .left { margin: 0; font-size: 14px; color: var(--ko); font-weight: 500; text-align: center; }
+/* États d'envoi */
+.mq-phone { width: 100%; max-width: 412px; margin: 0 auto; background: var(--paper); border-radius: 18px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 14px 34px rgba(60,40,10,.14); border: 1px solid var(--line); }
+.mq-phone .app-bar { position: static; }
+.mq-phone .body { padding: 16px; display: grid; gap: 12px; }
+.mq-phone p { margin: 0; }
+.mq-send { display: grid; gap: 8px; padding: 14px; border-radius: 12px; background: #fff; border: 1px solid var(--line); }
+.mq-send .t { font-weight: 500; font-size: 17px; }
+.mq-bar { height: 10px; border-radius: 999px; background: var(--rule); overflow: hidden; }
+.mq-bar span { display: block; height: 100%; width: 62%; background: var(--ink); }
+.mq-state { display: grid; gap: 10px; padding: 14px; border-radius: 12px; background: #fff; border: 1.5px solid var(--ink); }
+.mq-state.ko { border-color: var(--ko); }
+.mq-state .app-btn { padding: 10px 16px; text-align: center; }
+.mq-state .t { font-weight: 500; font-size: 17px; display: flex; gap: 8px; align-items: baseline; }
+.mq-state .t .sy { color: var(--ko); }
+.mq-local { font-size: 13.5px; color: var(--mute); }
+.app-merci { min-height: 0; padding: 24px 16px 16px; gap: 14px; }
+.app-merci .h { margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: 52px; line-height: 1; }
+.app-qr { width: 230px; }
+.app-after { padding: 14px 16px 18px; }
+/* Carte d'accord (85 × 55 mm, ×2 : 1 pt imprimé ≈ 2,67 px ici) */
+.mq-card { width: 100%; max-width: 340px; aspect-ratio: 85 / 55; padding: 14px 16px; background: #fff; color: #1d1c1a; border: 1px solid var(--line2); border-radius: 6px; display: grid; align-content: space-between; gap: 4px; font-family: Jost, sans-serif; }
+.mq-card p { margin: 0; }
+.mq-card .c1 { font-size: 11.5px; line-height: 1.35; }
+.mq-card .c1 span { display: block; margin-top: 2px; }
+.mq-card .c2 { font-size: 10.5px; letter-spacing: .01em; white-space: nowrap; overflow: hidden; }
+.mq-card .c3 { font-size: 10.5px; font-weight: 500; }
+/* Planches */
+.mq-boards { background: #e4e0d7; }
+.mq-board { background: var(--bg); }
+.mq-board > h3 { color: var(--ink); }
+.mq-grid { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+@media (min-width: 721px) {
+  .mq-app { max-width: 460px; margin: 0 auto; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+}
+</style>
+</head>
+<body class="admin">
+<aside class="mq-ribbon" aria-label="Maquette"><p style="margin:0"><strong>Maquette MQ-10</strong> · App de terrain — un accord qui ne se perd jamais</p><p style="margin:0">Cible proposée par l’audit du 16 octobre 2026 · données et photos fictives</p></aside><div class="mq-app">
+<a class="skip" href="#app-form">Aller au formulaire</a>
+<header class="mq-apphead"><div class="app-bar">
+  <a href="#" aria-label="Retour à l’accueil Terrain">←</a>
+  <h1>Nouvelle rencontre · <span class="mono">J-0009</span><span class="mq-pin" aria-hidden="true">1</span></h1>
+</div>
+<p class="app-session"><span>Connecté jusqu’à 14 h 20</span><span>Julien</span></p></header>
+<main class="mq-app-main">
+<form class="app-form" id="app-form" action="#" method="post" data-lang="en" novalidate aria-describedby="left">
+  <section class="app-step" aria-labelledby="s-vous">
+    <h2 id="s-vous">Vous</h2>
+    <label>Photographe <select><option>Julien</option><option>Sébastien</option></select></label>
+    <p class="app-pos ok" role="status">Position : Graça, Lisbonne (à 12 m près)</p>
+    <div class="mq-kept" role="group" aria-labelledby="kept-t">
+      <img src="_commun/photos/portrait.webp" alt="Photo de repère de la personne" width="96" height="128">
+      <p class="ok" id="kept-t">Photo de repère gardée<span class="mq-pin" aria-hidden="true">4</span></p>
+      <p class="hint">jointe à son accord, en privé ; rien à refaire après une erreur</p>
+      <p><button class="linkbtn" type="button">Reprendre la photo</button></p>
+    </div>
+    <label>Notes <span class="hint">facultatif</span><input value="veste jaune, devant le kiosque"></label>
+  </section>
+
+  <section class="app-step app-person" aria-labelledby="s-pers">
+    <h2 id="s-pers">La personne <span class="hint">à lui tendre</span></h2>
+    <fieldset class="app-langs"><legend class="sr-only">Langue de la personne</legend>
+      <label lang="fr"><input type="radio" name="lang"> Français</label>
+      <label lang="en"><input type="radio" name="lang" checked> English</label>
+      <label lang="de"><input type="radio" name="lang"> Deutsch</label>
+    </fieldset>
+    <div lang="en" class="mq-en" style="display:grid;gap:14px">
+      <div class="app-l10n"><h3>Your consent<span class="mq-pin" aria-hidden="true">2</span></h3>
+        <p class="app-consent">I agree to the artistic use and publication of the photos Julien took of me today. A photo of me may be attached to this consent. I can change my mind at any time.</p></div>
+      <fieldset class="app-decision"><legend>Your decision</legend>
+        <label class="check big"><input type="radio" name="decision" checked> I agree</label>
+        <fieldset class="app-scopes"><legend>I agree, for:</legend>
+          <label class="check"><input type="checkbox" name="scope_site" checked> on the website</label><label class="check"><input type="checkbox" name="scope_instagram" checked> on Instagram (with the website)</label><label class="check"><input type="checkbox" name="scope_print"> in exhibitions and prints</label><label class="check"><input type="checkbox" name="scope_name" checked> with my first name</label>
+        </fieldset>
+        <label class="check big"><input type="radio" name="decision"> I do not want these photos to be published</label>
+        <label class="check big"><input type="radio" name="decision"> I won’t decide now</label>
+      </fieldset>
+      <label>First and last name <input value="Maria Santos" autocomplete="name"></label>
+      <label>Email (optional) <input type="email" value="maria.santos@example.pt" autocomplete="email" inputmode="email"></label>
+      <label class="check"><input type="checkbox" checked> Receive the photo by email</label>
+      <fieldset class="mq-err-field" aria-describedby="age-err"><legend id="age-l">Age</legend>
+        <p class="mq-err" id="age-err"><span aria-hidden="true">⚠</span><span>Please tell us whether you are 18 or older.</span><span class="mq-pin" aria-hidden="true">3</span></p>
+        <label class="check"><input type="radio" name="adult" class="mq-focus-r" aria-invalid="true" aria-describedby="age-err"> I am 18 or older</label>
+        <label class="check"><input type="radio" name="adult" aria-invalid="true" aria-describedby="age-err"> I am under 18: a parent signs with me</label>
+      </fieldset>
+      <label>Parent’s name <span class="hint">only if you are under 18</span><input autocomplete="off"></label>
+      <p class="hint app-privacy">Your data (name, email, signature, photo of you, place) is only used to manage your consent and send you your photo. Retention and rights: nicephos.art/en/confidentialite.</p>
+      <div class="app-sign" role="group" aria-labelledby="sg-t">
+        <p id="sg-t">Sign here with your finger</p>
+        <span class="pad" role="img" aria-label="Signature kept"><svg viewBox="0 0 300 120" aria-hidden="true" focusable="false"><path d="M14 86c18-40 30-62 40-58 9 4-14 60-6 62 10 2 22-44 34-42 9 2-4 34 4 36 9 2 16-26 26-24 8 2 2 18 10 20 12 3 20-30 34-28 10 1 6 22 16 22 14 0 22-24 34-20 8 3 4 14 12 16 18 4 40-8 60-14" fill="none" stroke="#1d1c1a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M60 100c50-6 120-8 200-6" fill="none" stroke="#1d1c1a" stroke-width="2" stroke-linecap="round" opacity=".6"/></svg></span>
+        <div class="row"><p class="sign-ok">Signature kept<span class="mq-pin" aria-hidden="true">5</span></p><button type="button" class="linkbtn">Clear</button></div>
+      </div>
+    </div>
+  </section>
+  <div class="app-actions">
+    <p class="left" id="left" role="alert">1 point à corriger : l’âge (dans la langue de la personne).</p>
+    <button class="app-save" type="submit">Enregistrer</button><span class="mq-pin" aria-hidden="true">6</span>
+  </div>
+</form>
+</main></div>
+<section class="mq-boards" aria-labelledby="mq-boards-t">
+  <h2 id="mq-boards-t">États d’envoi</h2>
+  <p class="mq-lead">L’accord est gardé sur le téléphone (brouillon local) dès « Enregistrer », et effacé seulement quand le serveur a répondu « reçu ».</p>
+  <div class="mq-grid">
+    <article class="mq-board" aria-labelledby="b1"><h3 id="b1">Envoi visible <span class="mq-pin" aria-hidden="true">7</span></h3><p class="mq-cap">Une progression, une photo réduite avant l’envoi.</p><div class="mq-phone" role="group" aria-label="Écran du téléphone : envoi en cours">
+  <div class="body" lang="en">
+    <div class="mq-send" role="status"><p class="t">Sending… 62%</p><div class="mq-bar" aria-hidden="true"><span></span></div>
+      <p class="mq-local">Photo reduced to 1,600 px (310 KB) on this phone before sending.</p></div>
+  </div></div></article>
+    <article class="mq-board" aria-labelledby="b2"><h3 id="b2">Réseau coupé <span class="mq-pin" aria-hidden="true">8</span></h3><p class="mq-cap">Dans la langue de la personne, qui tient le téléphone.</p><div class="mq-phone" role="group" aria-label="Écran du téléphone : pas de réseau">
+  <div class="body" lang="en">
+    <div class="mq-state ko" role="alert"><p class="t"><span class="sy" aria-hidden="true">⚠</span>No network: the consent is kept on this phone.</p>
+      <p class="mq-local">Nothing is lost: signature, photo and answers stay here until the server confirms.</p>
+      <button class="app-btn" type="button">Try again</button></div>
+  </div></div></article>
+    <article class="mq-board" aria-labelledby="b3"><h3 id="b3">Session expirée <span class="mq-pin" aria-hidden="true">9</span></h3><p class="mq-cap">Pour le photographe, en français.</p><div class="mq-phone" role="group" aria-label="Écran du téléphone : session expirée">
+  <div class="body">
+    <div class="mq-state ko" role="alert"><p class="t"><span class="sy" aria-hidden="true">⚠</span>Votre session a expiré.</p>
+      <p>L’accord est gardé sur ce téléphone. Reconnectez-vous, puis revenez à cet onglet : « Enregistrer » renverra l’accord tel quel.</p>
+      <a class="app-btn" href="#" target="_blank" rel="noopener">Se reconnecter dans un nouvel onglet<span class="sr-only"> (nouvel onglet)</span></a></div>
+    <p class="mq-local">Plus de message technique (« Jeton CSRF invalide », texte JSON) : une page lisible qui garde la saisie.</p>
+  </div></div></article>
+    <article class="mq-board" aria-labelledby="b4"><h3 id="b4">« Thank you! » et le QR <span class="mq-pin" aria-hidden="true">10</span></h3><p class="mq-cap">La personne repart avec sa page ; le photographe voit ce qui est parti.</p><div class="mq-phone" role="group" aria-label="Écran du téléphone : merci et QR de la personne">
+  <div class="app-merci" lang="en">
+    <p class="h">Thank you!</p>
+    <div class="app-qr"><svg viewBox="-2 -2 29 29" role="img" aria-label="Code QR de la page de Maria (factice, pour la maquette)" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><rect x="-2" y="-2" width="29" height="29" fill="#fff"/><g fill="#1d1c1a"><rect x="0" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="1" y="0" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="0" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/><rect x="18" y="0" width="1" height="1"/><rect x="18" y="1" width="1" height="1"/><rect x="18" y="2" width="1" height="1"/><rect x="18" y="3" width="1" height="1"/><rect x="18" y="4" width="1" height="1"/><rect x="18" y="5" width="1" height="1"/><rect x="18" y="6" width="1" height="1"/><rect x="19" y="0" width="1" height="1"/><rect x="19" y="6" width="1" height="1"/><rect x="20" y="0" width="1" height="1"/><rect x="20" y="2" width="1" height="1"/><rect x="20" y="3" width="1" height="1"/><rect x="20" y="4" width="1" height="1"/><rect x="20" y="6" width="1" height="1"/><rect x="21" y="0" width="1" height="1"/><rect x="21" y="2" width="1" height="1"/><rect x="21" y="3" width="1" height="1"/><rect x="21" y="4" width="1" height="1"/><rect x="21" y="6" width="1" height="1"/><rect x="22" y="0" width="1" height="1"/><rect x="22" y="2" width="1" height="1"/><rect x="22" y="3" width="1" height="1"/><rect x="22" y="4" width="1" height="1"/><rect x="22" y="6" width="1" height="1"/><rect x="23" y="0" width="1" height="1"/><rect x="23" y="6" width="1" height="1"/><rect x="24" y="0" width="1" height="1"/><rect x="24" y="1" width="1" height="1"/><rect x="24" y="2" width="1" height="1"/><rect x="24" y="3" width="1" height="1"/><rect x="24" y="4" width="1" height="1"/><rect x="24" y="5" width="1" height="1"/><rect x="24" y="6" width="1" height="1"/><rect x="0" y="18" width="1" height="1"/><rect x="0" y="19" width="1" height="1"/><rect x="0" y="20" width="1" height="1"/><rect x="0" y="21" width="1" height="1"/><rect x="0" y="22" width="1" height="1"/><rect x="0" y="23" width="1" height="1"/><rect x="0" y="24" width="1" height="1"/><rect x="1" y="18" width="1" height="1"/><rect x="1" y="24" width="1" height="1"/><rect x="2" y="18" width="1" height="1"/><rect x="2" y="20" width="1" height="1"/><rect x="2" y="21" width="1" height="1"/><rect x="2" y="22" width="1" height="1"/><rect x="2" y="24" width="1" height="1"/><rect x="3" y="18" width="1" height="1"/><rect x="3" y="20" width="1" height="1"/><rect x="3" y="21" width="1" height="1"/><rect x="3" y="22" width="1" height="1"/><rect x="3" y="24" width="1" height="1"/><rect x="4" y="18" width="1" height="1"/><rect x="4" y="20" width="1" height="1"/><rect x="4" y="21" width="1" height="1"/><rect x="4" y="22" width="1" height="1"/><rect x="4" y="24" width="1" height="1"/><rect x="5" y="18" width="1" height="1"/><rect x="5" y="24" width="1" height="1"/><rect x="6" y="18" width="1" height="1"/><rect x="6" y="19" width="1" height="1"/><rect x="6" y="20" width="1" height="1"/><rect x="6" y="21" width="1" height="1"/><rect x="6" y="22" width="1" height="1"/><rect x="6" y="23" width="1" height="1"/><rect x="6" y="24" width="1" height="1"/><rect x="0" y="8" width="1" height="1"/><rect x="0" y="9" width="1" height="1"/><rect x="0" y="10" width="1" height="1"/><rect x="0" y="12" width="1" height="1"/><rect x="0" y="15" width="1" height="1"/><rect x="1" y="9" width="1" height="1"/><rect x="1" y="10" width="1" height="1"/><rect x="1" y="12" width="1" height="1"/><rect x="1" y="14" width="1" height="1"/><rect x="1" y="15" width="1" height="1"/><rect x="1" y="16" width="1" height="1"/><rect x="2" y="12" width="1" height="1"/><rect x="2" y="14" width="1" height="1"/><rect x="2" y="15" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="3" y="11" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="3" y="13" width="1" height="1"/><rect x="3" y="15" width="1" height="1"/><rect x="4" y="9" width="1" height="1"/><rect x="4" y="10" width="1" height="1"/><rect x="4" y="12" width="1" height="1"/><rect x="4" y="13" width="1" height="1"/><rect x="4" y="15" width="1" height="1"/><rect x="5" y="8" width="1" height="1"/><rect x="5" y="11" width="1" height="1"/><rect x="5" y="12" width="1" height="1"/><rect x="5" y="13" width="1" height="1"/><rect x="5" y="15" width="1" height="1"/><rect x="5" y="16" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="6" y="11" width="1" height="1"/><rect x="6" y="13" width="1" height="1"/><rect x="6" y="15" width="1" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="7" y="12" width="1" height="1"/><rect x="7" y="13" width="1" height="1"/><rect x="7" y="16" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="8" y="9" width="1" height="1"/><rect x="8" y="10" width="1" height="1"/><rect x="8" y="13" width="1" height="1"/><rect x="8" y="14" width="1" height="1"/><rect x="8" y="17" width="1" height="1"/><rect x="8" y="19" width="1" height="1"/><rect x="8" y="20" width="1" height="1"/><rect x="8" y="21" width="1" height="1"/><rect x="8" y="22" width="1" height="1"/><rect x="8" y="23" width="1" height="1"/><rect x="8" y="24" width="1" height="1"/><rect x="9" y="1" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="9" y="8" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="9" y="11" width="1" height="1"/><rect x="9" y="13" width="1" height="1"/><rect x="9" y="14" width="1" height="1"/><rect x="9" y="16" width="1" height="1"/><rect x="9" y="18" width="1" height="1"/><rect x="9" y="20" width="1" height="1"/><rect x="9" y="21" width="1" height="1"/><rect x="9" y="23" width="1" height="1"/><rect x="10" y="2" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="10" y="4" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="10" y="11" width="1" height="1"/><rect x="10" y="12" width="1" height="1"/><rect x="10" y="15" width="1" height="1"/><rect x="10" y="16" width="1" height="1"/><rect x="10" y="19" width="1" height="1"/><rect x="10" y="21" width="1" height="1"/><rect x="11" y="1" width="1" height="1"/><rect x="11" y="2" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="11" y="10" width="1" height="1"/><rect x="11" y="11" width="1" height="1"/><rect x="11" y="13" width="1" height="1"/><rect x="11" y="14" width="1" height="1"/><rect x="11" y="19" width="1" height="1"/><rect x="12" y="1" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="12" y="7" width="1" height="1"/><rect x="12" y="9" width="1" height="1"/><rect x="12" y="12" width="1" height="1"/><rect x="12" y="14" width="1" height="1"/><rect x="12" y="16" width="1" height="1"/><rect x="12" y="21" width="1" height="1"/><rect x="13" y="0" width="1" height="1"/><rect x="13" y="1" width="1" height="1"/><rect x="13" y="2" width="1" height="1"/><rect x="13" y="4" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/><rect x="13" y="6" width="1" height="1"/><rect x="13" y="7" width="1" height="1"/><rect x="13" y="9" width="1" height="1"/><rect x="13" y="11" width="1" height="1"/><rect x="13" y="13" width="1" height="1"/><rect x="13" y="19" width="1" height="1"/><rect x="13" y="20" width="1" height="1"/><rect x="13" y="21" width="1" height="1"/><rect x="13" y="23" width="1" height="1"/><rect x="13" y="24" width="1" height="1"/><rect x="14" y="0" width="1" height="1"/><rect x="14" y="1" width="1" height="1"/><rect x="14" y="4" width="1" height="1"/><rect x="14" y="6" width="1" height="1"/><rect x="14" y="8" width="1" height="1"/><rect x="14" y="10" width="1" height="1"/><rect x="14" y="11" width="1" height="1"/><rect x="14" y="13" width="1" height="1"/><rect x="14" y="14" width="1" height="1"/><rect x="14" y="16" width="1" height="1"/><rect x="14" y="17" width="1" height="1"/><rect x="14" y="19" width="1" height="1"/><rect x="14" y="20" width="1" height="1"/><rect x="14" y="23" width="1" height="1"/><rect x="14" y="24" width="1" height="1"/><rect x="15" y="0" width="1" height="1"/><rect x="15" y="1" width="1" height="1"/><rect x="15" y="10" width="1" height="1"/><rect x="15" y="11" width="1" height="1"/><rect x="15" y="12" width="1" height="1"/><rect x="15" y="15" width="1" height="1"/><rect x="15" y="17" width="1" height="1"/><rect x="15" y="18" width="1" height="1"/><rect x="15" y="19" width="1" height="1"/><rect x="15" y="20" width="1" height="1"/><rect x="15" y="23" width="1" height="1"/><rect x="15" y="24" width="1" height="1"/><rect x="16" y="0" width="1" height="1"/><rect x="16" y="1" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="16" y="4" width="1" height="1"/><rect x="16" y="7" width="1" height="1"/><rect x="16" y="9" width="1" height="1"/><rect x="16" y="10" width="1" height="1"/><rect x="16" y="15" width="1" height="1"/><rect x="16" y="17" width="1" height="1"/><rect x="16" y="18" width="1" height="1"/><rect x="16" y="20" width="1" height="1"/><rect x="16" y="22" width="1" height="1"/><rect x="17" y="8" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="17" y="12" width="1" height="1"/><rect x="17" y="13" width="1" height="1"/><rect x="17" y="15" width="1" height="1"/><rect x="17" y="16" width="1" height="1"/><rect x="17" y="17" width="1" height="1"/><rect x="17" y="18" width="1" height="1"/><rect x="17" y="22" width="1" height="1"/><rect x="18" y="8" width="1" height="1"/><rect x="18" y="10" width="1" height="1"/><rect x="18" y="11" width="1" height="1"/><rect x="18" y="12" width="1" height="1"/><rect x="18" y="13" width="1" height="1"/><rect x="18" y="14" width="1" height="1"/><rect x="18" y="18" width="1" height="1"/><rect x="18" y="20" width="1" height="1"/><rect x="18" y="21" width="1" height="1"/><rect x="19" y="9" width="1" height="1"/><rect x="19" y="10" width="1" height="1"/><rect x="19" y="11" width="1" height="1"/><rect x="19" y="13" width="1" height="1"/><rect x="19" y="14" width="1" height="1"/><rect x="19" y="16" width="1" height="1"/><rect x="19" y="20" width="1" height="1"/><rect x="19" y="21" width="1" height="1"/><rect x="19" y="24" width="1" height="1"/><rect x="20" y="8" width="1" height="1"/><rect x="20" y="9" width="1" height="1"/><rect x="20" y="12" width="1" height="1"/><rect x="20" y="13" width="1" height="1"/><rect x="20" y="15" width="1" height="1"/><rect x="20" y="21" width="1" height="1"/><rect x="20" y="23" width="1" height="1"/><rect x="20" y="24" width="1" height="1"/><rect x="21" y="13" width="1" height="1"/><rect x="21" y="14" width="1" height="1"/><rect x="21" y="18" width="1" height="1"/><rect x="21" y="24" width="1" height="1"/><rect x="22" y="8" width="1" height="1"/><rect x="22" y="11" width="1" height="1"/><rect x="22" y="13" width="1" height="1"/><rect x="22" y="14" width="1" height="1"/><rect x="22" y="15" width="1" height="1"/><rect x="22" y="16" width="1" height="1"/><rect x="22" y="17" width="1" height="1"/><rect x="22" y="19" width="1" height="1"/><rect x="22" y="21" width="1" height="1"/><rect x="22" y="22" width="1" height="1"/><rect x="22" y="23" width="1" height="1"/><rect x="23" y="8" width="1" height="1"/><rect x="23" y="15" width="1" height="1"/><rect x="23" y="16" width="1" height="1"/><rect x="23" y="18" width="1" height="1"/><rect x="23" y="19" width="1" height="1"/><rect x="23" y="21" width="1" height="1"/><rect x="23" y="24" width="1" height="1"/><rect x="24" y="10" width="1" height="1"/><rect x="24" y="13" width="1" height="1"/><rect x="24" y="14" width="1" height="1"/><rect x="24" y="15" width="1" height="1"/><rect x="24" y="16" width="1" height="1"/><rect x="24" y="18" width="1" height="1"/><rect x="24" y="20" width="1" height="1"/><rect x="24" y="21" width="1" height="1"/><rect x="24" y="22" width="1" height="1"/><rect x="24" y="23" width="1" height="1"/><rect x="24" y="24" width="1" height="1"/></g></svg></div>
+    <p class="app-scan">Scan this code with your phone: you will find your page to receive your photo, change your mind or write to us.</p>
+    <p class="mono app-ref">J-0009</p>
+  </div>
+  <div class="app-after">
+    <h4 style="margin:0;font-size:15px;font-weight:500;color:var(--mute);text-transform:uppercase;letter-spacing:.12em">Pour vous</h4>
+    <p class="ok">Accord enregistré à 11 h 52 · récapitulatif envoyé à maria.santos@example.pt.</p>
+    <p class="app-row"><a class="app-btn" href="#">Nouvelle rencontre</a> <a class="app-btn ghost" href="#">Accueil Terrain</a></p>
+  </div></div></article>
+    <article class="mq-board" aria-labelledby="b5"><h3 id="b5">La carte papier, lisible à bout de bras <span class="mq-pin" aria-hidden="true">11</span></h3><p class="mq-cap">La même promesse que l’écran : âge et parent, et où changer d’avis.</p><div class="mq-card" role="img" aria-label="Carte d’accord « pour nous », 85 × 55 mm, agrandie : textes à 6,5 pt au moins, ligne pour un parent, adresse pour retirer l’accord.">
+  <p class="c1">J’autorise l’usage artistique et la publication des photos que Julien a prises de moi aujourd’hui. <span lang="en">I agree to the artistic use and publication of the photos taken of me today.</span></p>
+  <p class="c2">Nom ________________ Date ________ Lieu ____________</p>
+  <p class="c2">E-mail __________________ Signature ______________</p>
+  <p class="c2"><strong>Si mineur·e :</strong> nom et signature d’un parent ____________________</p>
+  <p class="c3">Pour retirer cet accord : nicephos.art/bonjour + J-0009</p>
+</div>
+<p class="hint" style="margin-top:8px">Agrandie 2 fois. Plus aucun texte sous 6,5 pt (contre 5,3 pt pour les traductions aujourd’hui) ; traductions en noir.</p></article>
+  </div>
+</section><section class="mq-notes" aria-labelledby="mq-notes-t"><h2 id="mq-notes-t">Ce qui change</h2><p>Les repères numérotés renvoient à cette liste. Personne, lieu et adresse sont fictifs ; la photo de repère est une image de démonstration.</p><ol><li><span class="mq-pin" aria-hidden="true">1</span><div><strong>Une page structurée.</strong> h1 « Nouvelle rencontre · J-0009 », main, lien d’évitement ; l’heure de fin de session est écrite (« Connecté jusqu’à 14 h 20 »).<span class="mq-ref"><b>UX-A-12</b> · <b>UX-A-01</b> · RGAA 9.1, 12.7 et 8.5 · WCAG 2.2.1 · Opquast 172</span></div></li><li><span class="mq-pin" aria-hidden="true">2</span><div><strong>La section de la personne dans sa langue.</strong> Rendue en anglais seulement, dans un conteneur lang="en", légendes comprises (« Your decision », « Age ») ; langues en texte, sans drapeau.<span class="mq-ref"><b>UX-A-12</b> · RGAA 8.7 · WCAG 3.1.2 · B&amp;S 8 Compatibilité</span></div></li><li><span class="mq-pin" aria-hidden="true">3</span><div><strong>L’erreur à côté du champ.</strong> « Please tell us whether you are 18 or older. », dans la langue de la personne, reliée par aria-describedby, aria-invalid, défilement et focus sur le premier bouton. Vérifiée avant l’envoi ; « Nom du parent » est sorti du groupe Âge.<span class="mq-ref"><b>UX-A-01</b> · <b>UX-A-12</b> · <b>UX-T-02</b> · RGAA 11.10 et 11.5 · WCAG 3.3.1 · B&amp;S 5.2</span></div></li><li><span class="mq-pin" aria-hidden="true">4</span><div><strong>La photo de repère gardée.</strong> Vignette, « Photo de repère gardée » et « Reprendre la photo » : rien à refaire devant la personne.<span class="mq-ref"><b>UX-A-01</b> · WCAG 3.3.7 Saisie redondante · B&amp;S 5.3 Correction des erreurs</span></div></li><li><span class="mq-pin" aria-hidden="true">5</span><div><strong>La signature gardée.</strong> Le trait reste visible après l’erreur, « Signature kept — Clear ».<span class="mq-ref"><b>UX-A-01</b> · WCAG 3.3.7 · ISO 9241-110 Robustesse</span></div></li><li><span class="mq-pin" aria-hidden="true">6</span><div><strong>« Enregistrer » ne cache rien.</strong> La barre ne masque pas le champ focalisé (scroll-padding-bottom) ; le nombre de points à corriger est dit en role="alert". Les 4 usages sont groupés dans « I agree, for: ».<span class="mq-ref"><b>UX-A-09</b> · <b>UX-A-12</b> · WCAG 2.4.11 · RGAA 10.7 et 11.5</span></div></li><li><span class="mq-pin" aria-hidden="true">7</span><div><strong>L’envoi se voit.</strong> « Sending… 62% » ; photo réduite à 1 600 px dans le navigateur (≈ 300 ko au lieu de 15 Mo).<span class="mq-ref"><b>UX-A-01</b> · B&amp;S 1.3 Feed-back · RGESN 6.2 et 6.4 · Nielsen #1</span></div></li><li><span class="mq-pin" aria-hidden="true">8</span><div><strong>Réseau coupé : rien n’est perdu.</strong> Brouillon local jusqu’à l’accusé du serveur, « Try again » ; à écrire dans la page Confidentialité.<span class="mq-ref"><b>UX-A-01</b> · B&amp;S 5.1 · ISO 9241-110 Robustesse · Opquast 224</span></div></li><li><span class="mq-pin" aria-hidden="true">9</span><div><strong>Session expirée : une page, pas un JSON.</strong> « Votre session a expiré. L’accord est gardé sur ce téléphone. [Se reconnecter dans un nouvel onglet] ».<span class="mq-ref"><b>UX-A-01</b> · WCAG 2.2.1 et 2.2.5 · Nielsen #9 · B&amp;S 5.2</span></div></li><li><span class="mq-pin" aria-hidden="true">10</span><div><strong>Le merci et le QR.</strong> Pour la personne, en anglais ; en dessous, pour le photographe, ce qui est enregistré et envoyé.<span class="mq-ref"><b>UX-A-12</b> · B&amp;S 1.3 · RGPD art. 7 (preuve du consentement)</span></div></li><li><span class="mq-pin" aria-hidden="true">11</span><div><strong>La carte papier lisible.</strong> Aucun texte sous 6,5 pt, traductions en noir, ligne « Si mineur·e : nom et signature d’un parent », adresse pour retirer l’accord.<span class="mq-ref"><b>UX-A-13</b> · <b>UX-T-02</b> · B&amp;S 1.4 Lisibilité · RGPD art. 4.11 et 7</span></div></li></ol><div class="mq-measures"><h3>Mesures sur cette maquette</h3><ul><li>Axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation sur téléphone (Pixel 7, 412 px) ; aucun débordement horizontal ; aucune cible sous 24 px (cases, boutons radio et boutons de 44 à 54 px). Structure : un h1, un main, un lien d’évitement, la section de la personne en lang="en".</li></ul></div></section>
+</body>
+</html>

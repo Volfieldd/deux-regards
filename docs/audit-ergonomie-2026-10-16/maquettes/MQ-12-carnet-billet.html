@@ -49,6 +49,7 @@
     .wide { max-width: 1120px; margin-inline: auto; }
     .crumbs { padding-top: 26px; }
     .crumbs ol { display: flex; flex-wrap: wrap; gap: 0 10px; margin: 0; padding: 0; list-style: none; font-family: var(--mono); font-size: 12.5px; letter-spacing: .03em; color: var(--mute); }
+    .crumbs li { display: flex; align-items: center; min-height: 32px; }
     .crumbs li + li::before { content: '›'; margin-right: 10px; color: var(--mute); }
     .crumbs a { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink); text-decoration: underline 1px var(--mute); text-underline-offset: 4px; }
 
@@ -66,6 +67,7 @@
     .ph a { display: block; background: var(--frame); }
     .ph img { width: 100%; height: auto; }
     .ph.full { margin-inline: auto; }
+    article > .ph.full { margin-bottom: 56px; }
     .ph.vert { max-width: 30rem; margin-inline: auto; }
     .flow .ph.full, .flow .dip, .flow .ph.vert { clear: both; }
     .cartel { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; padding-top: 12px; }

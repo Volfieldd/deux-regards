@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="fr" class="theme-nicephos mode-nuit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Galerie, par Julien (12 photos) · Nicephos</title>
+<meta name="description" content="Maquette MQ-02 (audit du 16 octobre 2026) : grille en rangées justifiées et barre de filtres collante, avec photos de démonstration.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="_commun/site.css">
+<style>
+/* ===== Thème « Nicephos » (repris de public/themes/nicephos.css) + corrections proposées ===== */
+.theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
+  --display-style: normal; --dark: #050505; --dark-ink: #f0efeb; --dark-mute: #b4b2ac; --dark-rule: rgba(240,239,235,.28); }
+.mode-nuit { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
+  --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
+.mode-jour, .mode-auto { color-scheme: light; --paper: #fbfbf9; --ink: #111111; --mute: #5e5d59; --prose: #3a3936; --rule: #dddcd7;
+  --frame: #efeeea; --safelight: #7d6532; --on-accent: #fbfbf9; --field: #5e5d59; --error: #a8412b; --ok: #2f6b3a; }
+@media (prefers-color-scheme: dark) {
+  .mode-auto { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
+    --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
+}
+/* Thème Atelier (valeurs par défaut de site.css) : seules les couleurs d'erreur et de champ sont ajoutées. */
+.mode-atelier { --field: #6b665d; --error: #9e3a22; --ok: #2f6b3a; --on-accent: #f6f4ef; }
+
+/* Corrections typographiques (UX-F-29) et de comportement (UX-F-34) appliquées à toutes les maquettes */
+body { font-weight: 400; position: relative; }
+.theme-nicephos body { font-weight: 400; }
+.mono { font-size: 12px; }
+.eyebrow { font-size: 12px; }
+img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; -webkit-user-drag: auto; }
+:focus-visible, .is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.u, .prose a, .txt a { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.u:hover, .prose a:hover, .txt a:hover { text-decoration-thickness: 2px; }
+.arrow { display: inline-block; }
+.wrap { padding-inline: max(var(--gut), env(safe-area-inset-left)) max(var(--gut), env(safe-area-inset-right)); }
+
+/* Lien d'évitement (UX-F-06) : hors écran, révélé au focus, premier élément de la page */
+.skip { position: absolute; left: -9999px; top: 0; }
+.skip:focus, .skip.is-focus { position: static; display: inline-flex; align-items: center; min-height: 44px; margin: 10px 0 0 var(--gut);
+  padding: 0 18px; background: var(--ink); color: var(--paper); font: 500 14px/1 var(--sans); letter-spacing: .02em;
+  outline: 2px solid var(--ink); outline-offset: 3px; }
+
+/* En-tête sur une ligne (UX-F-36, UX-T-16) : marque, menu, filet, Tirages, recherche, langue */
+.site-h { display: flex; align-items: center; gap: 12px 28px; min-height: 72px; position: relative; z-index: 20; }
+.site-h .wordmark { display: inline-flex; align-items: center; min-height: 44px; margin-right: auto; color: var(--ink);
+  font: 300 15px/1 var(--sans); letter-spacing: .42em; text-transform: uppercase; white-space: nowrap; }
+.site-nav ul, .site-tools { display: flex; align-items: center; list-style: none; margin: 0; padding: 0; }
+.site-nav ul { gap: 0 clamp(14px, 2vw, 30px); }
+.site-nav a, .site-tools .tool, .lang > summary { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 12px; font-weight: 400;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--ink); white-space: nowrap; }
+.site-nav a:hover { text-decoration: underline; text-underline-offset: 8px; }
+.site-nav a[aria-current] { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
+.site-nav .soft { display: flex; align-items: center; gap: clamp(14px, 2vw, 30px); }
+.site-nav .soft::before { content: ''; width: 1px; height: 18px; background: var(--mute); }
+.site-nav .soft a { color: var(--mute); }
+.site-tools { gap: 6px 18px; }
+.site-tools .tool { color: var(--ink); }
+.lang { position: relative; }
+.lang > summary { list-style: none; cursor: pointer; padding-inline: 4px; }
+.lang > summary::-webkit-details-marker { display: none; }
+.lang > summary svg { transition: transform .2s; }
+.lang[open] > summary svg { transform: rotate(180deg); }
+.lang ul { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 184px; margin: 0; padding: 6px 0; list-style: none;
+  background: var(--paper); border: 1px solid var(--field); box-shadow: 0 12px 32px rgba(0,0,0,.35); }
+.lang li a { display: flex; align-items: center; min-height: 44px; padding: 0 18px; color: var(--ink); font-size: 15px; letter-spacing: .02em; }
+.lang li a:hover { background: var(--frame); }
+.lang li a[aria-current] span { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.lang li a[aria-current]::after { content: '✓'; display: inline-block; margin-left: auto; padding-left: 14px; color: var(--mute); text-decoration: none; }
+.menu-btn { display: none; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--field); color: var(--ink);
+  font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
+.cart-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); }
+@media (max-width: 760px) {
+  .site-h { min-height: 64px; gap: 4px 10px; }
+  .site-h .wordmark { font-size: 13px; letter-spacing: .34em; }
+  .site-nav { display: none; }
+  .site-tools { gap: 2px 8px; }
+  .site-tools .tool-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .site-tools .tool { min-width: 44px; justify-content: center; }
+  .menu-btn { display: inline-flex; }
+}
+
+/* Pied de page cible (UX-F-34, UX-F-23, UX-T-03) : liens soulignés, cibles de 44 px, liste verticale sur téléphone */
+.site-f { display: flex; justify-content: space-between; align-items: center; gap: 4px 24px; flex-wrap: wrap; margin-top: 72px;
+  padding-block: 28px calc(env(safe-area-inset-bottom, 0px) + 36px); border-top: 1px solid var(--rule); color: var(--mute);
+  font: 400 12px/1.5 var(--mono); letter-spacing: .04em; }
+.site-f p { margin: 0; }
+.site-f ul { display: flex; flex-wrap: wrap; gap: 0 20px; list-style: none; margin: 0; padding: 0; }
+.site-f a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 4px;
+  text-decoration-color: var(--mute); }
+.site-f a:hover { text-decoration-color: var(--ink); }
+@media (max-width: 640px) { .site-f { flex-direction: column; align-items: flex-start; } .site-f ul { flex-direction: column; } }
+
+/* ===== Annotations de la maquette (hors produit) ===== */
+.pin { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex: none; border-radius: 50%;
+  background: #f5c84c; color: #111; box-shadow: 0 0 0 2px #111; font: 600 12px/1 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: 0; text-transform: none; font-style: normal; vertical-align: middle; text-decoration: none; }
+.pin-abs { position: absolute; z-index: 45; }
+.pin-in { margin-left: 8px; }
+.site-tools li, .site-nav li { display: flex; align-items: center; }
+@media (min-width: 761px) { .menu-btn + .pin { display: none; } }
+.ord { position: absolute; z-index: 5; top: 8px; left: 8px; padding: 3px 7px; background: #f5c84c; color: #111;
+  font: 600 12px/1.2 'IBM Plex Mono', ui-monospace, monospace; box-shadow: 0 0 0 2px #111; }
+.mq-fold { position: absolute; left: 0; right: 0; top: 900px; height: 0; border-top: 2px dashed #f5c84c; z-index: 60; pointer-events: none; }
+.mq-fold span { position: absolute; right: 12px; top: -28px; padding: 4px 8px; background: #f5c84c; color: #111; font: 500 12px/1.2 'IBM Plex Mono', monospace; }
+@media (max-width: 760px) { .mq-fold { top: 839px; } }
+.mq-state { position: relative; margin: 56px var(--gut) 0; border: 1px dashed var(--field); padding: 0; }
+.mq-state > .mq-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0; padding: 12px 16px; border-bottom: 1px dashed var(--field);
+  font: 500 12px/1.4 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
+.mq-state > .mq-label span { text-transform: none; letter-spacing: .02em; font-weight: 400; color: var(--mute); }
+.mq-notes { margin-top: 72px; padding: 40px var(--gut) 56px; background: #f3efe6; color: #1d1c1a; border-top: 6px solid #f5c84c;
+  font: 400 15px/1.55 Jost, 'Helvetica Neue', Arial, sans-serif; color-scheme: light; }
+.mq-notes :focus-visible { outline-color: #1d1c1a; }
+.mq-notes .mq-id { margin: 0; font: 400 12px/1.5 'IBM Plex Mono', monospace; color: #5c574e; letter-spacing: .04em; }
+.mq-notes h2 { margin: 6px 0 4px; font: 500 22px/1.25 Jost, sans-serif; letter-spacing: .01em; }
+.mq-notes .mq-lead { margin: 0; max-width: 90ch; color: #3a3936; }
+.mq-notes ol { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 18px 44px; }
+.mq-notes li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; align-items: start; }
+.mq-notes li p { margin: 0; }
+.mq-notes .ref { display: block; margin-top: 4px; font: 400 12px/1.5 'IBM Plex Mono', monospace; color: #5c574e; }
+.mq-notes .mq-measures { margin: 28px 0 0; padding-top: 16px; border-top: 1px solid #cfc8b8; font: 400 12.5px/1.6 'IBM Plex Mono', monospace; color: #3a3936; max-width: 120ch; }
+.mq-notes a { text-decoration: underline; text-underline-offset: 3px; }
+@media print { .mq-fold, .pin, .ord { display: none !important; } }
+
+/* ===== Composants communs des maquettes correctives du site public (MQ-02 à MQ-06, MQ-15) ===== */
+html { background: var(--paper); }
+body { background: var(--paper); color: var(--ink); }
+.mode-nuit, .mode-jour, .mode-atelier { --err: var(--error); }
+/* Fil d'Ariane en mono, au-dessus du H1 (UX-F-06, Opquast 156) */
+.ariane ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; margin: 0; padding: 8px 0 0; list-style: none; font: 400 13px/1.4 var(--mono); color: var(--mute); }
+.ariane li + li::before { content: '›' / ''; margin-right: 10px; }
+.ariane a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
+.ariane [aria-current] { color: var(--mute); }
+/* Boutons : un seul bouton plein par écran (B&S 1.2.2) */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 26px; border: 1px solid var(--ink);
+  background: var(--ink); color: var(--paper); font: 500 15px/1.2 var(--sans); letter-spacing: .03em; cursor: pointer; text-align: center; }
+.btn-2 { background: transparent; color: var(--ink); font-weight: 400; border-color: var(--field); }
+.btn-s { min-height: 44px; padding: 0 16px; font-size: 14px; }
+/* Champs : filet en --field (5,2:1 en Atelier, 7,4:1 en nuit), 2 px au focus et en erreur (UX-F-04) */
+.f-champ { display: grid; gap: 6px; align-content: start; }
+.f-champ > label, .f-l { font: 500 15px/1.4 var(--sans); color: var(--ink); }
+.f-q { font-weight: 400; color: var(--mute); }
+.f-aide { margin: 0; font-size: 14px; line-height: 1.5; color: var(--mute); }
+.f-input { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--field); border-radius: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.4 var(--sans); }
+textarea.f-input { min-height: 120px; resize: vertical; }
+.f-input:focus, .f-input.is-focus { outline: 2px solid var(--ink); outline-offset: 2px; }
+.f-input[aria-invalid="true"] { border: 2px solid var(--err); }
+.f-err { display: flex; gap: 8px; margin: 0; color: var(--err); font: 500 14.5px/1.45 var(--sans); }
+.f-err::before { content: '⚠' / ''; }
+fieldset.f-grp { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 10px; }
+fieldset.f-grp > legend { padding: 0; margin-bottom: 8px; font: 500 15px/1.4 var(--sans); color: var(--ink); }
+.f-opt { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 10px 0; color: var(--ink); font-size: 15.5px; line-height: 1.4; cursor: pointer; }
+.f-opt input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--ink); }
+.f-opt input:focus-visible, .f-opt input.is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.f-opt small { display: block; color: var(--mute); font-size: 14px; }
+.f-resume { margin: 0 0 28px; padding: 18px 20px; border: 2px solid var(--err); background: var(--paper); }
+.f-resume:focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.f-resume h2 { margin: 0 0 8px; font: 500 18px/1.3 var(--sans); color: var(--ink); }
+.f-resume ul { margin: 0; padding-left: 20px; }
+.f-resume a { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* Cartel : titre, auteur, lieu, date ; mono pour les références */
+.cartel-t { margin: 0; font: 400 22px/1.3 var(--sans); color: var(--ink); }
+.cartel-m { margin: 0; font: 400 13px/1.6 var(--mono); color: var(--mute); }
+.cartel-m a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
+.eyb { margin: 0; font: 400 12px/1.4 var(--sans); letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
+.pin-in2 { margin-left: 6px; }
+.mq-state > .mq-label .pin { color: #111; letter-spacing: 0; text-transform: none; font-weight: 600; }
+
+/* ===== MQ-02 : galerie ===== */
+.g-tete { padding-top: 24px; }
+.g-tete h1 { margin: 0; font: 300 clamp(30px, 2.8vw, 40px)/1.15 var(--sans); }
+.g-tete p { margin: 8px 0 0; max-width: 62ch; color: var(--prose); font-size: 16.5px; }
+/* Barre de filtres collante : l'état se voit là où il agit (UX-F-12) */
+.fbar { position: sticky; top: 0; z-index: 15; margin-top: 28px; background: var(--paper); border-block: 1px solid var(--rule); }
+.fbar-in { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 22px; min-height: 64px; padding-block: 8px; }
+.fbar .grp { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 0; padding: 0; list-style: none; flex: none; }
+.fbar .lab { font: 400 12px/1 var(--mono); color: var(--mute); margin-right: 6px; white-space: nowrap; }
+.rg a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; font-size: 15px; color: var(--ink); white-space: nowrap; }
+.rg a[aria-current] { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 9px; font-weight: 500; }
+.fbar .sep { width: 1px; height: 28px; background: var(--rule); flex: none; }
+.pills li { flex: none; }
+.pills a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px 0 6px; border: 1px solid var(--field); border-radius: 999px; color: var(--ink); font-size: 14.5px; white-space: nowrap; }
+.pills a img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: var(--frame); }
+.pills a .n { color: var(--mute); }
+.ordre { margin-left: auto; }
+.ordre a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; font-size: 14.5px; color: var(--mute); white-space: nowrap; }
+.ordre a[aria-current] { color: var(--ink); text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
+/* En-tête de grille : ce qu'on voit, combien, et le filtre actif retirable (UX-F-28) */
+.ghead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding-block: 36px 22px; }
+.ghead h2 { margin: 0; font: 400 22px/1.3 var(--sans); }
+.ghead h2 .c { color: var(--prose); font-weight: 300; }
+.tag { display: inline-flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 6px 0 14px; border: 1px solid var(--safelight); color: var(--ink); font-size: 14px; }
+.tag b { font-weight: 400; }
+.tag span[aria-hidden] { display: inline-grid; place-items: center; width: 28px; height: 28px; font-size: 13px; }
+/* Planche contact en rangées justifiées, sans script (UX-F-13) : l'ordre se lit de gauche à droite */
+.jr { display: flex; flex-wrap: wrap; gap: 30px 12px; margin: 0; padding: 0; list-style: none; }
+.jr::after { content: ''; flex-grow: 9999; }
+.jr > li { position: relative; flex-grow: calc(var(--r) * 100); flex-basis: calc(var(--r) * 260px); min-width: 0; }
+.jr a { display: grid; gap: 10px; color: var(--ink); }
+.jr img { display: block; width: 100%; height: auto; background: var(--frame); }
+.jr .t { display: grid; gap: 2px; }
+.jr .t b { font: 400 15.5px/1.35 var(--sans); }
+.jr .t span { font: 400 13px/1.45 var(--mono); color: var(--mute); }
+.jr a.is-focus { outline: 2px solid var(--ink); outline-offset: 5px; }
+.jr a:hover b { text-decoration: underline; text-underline-offset: 4px; }
+.gmore { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-top: 44px; color: var(--prose); }
+/* Diptyque « même lieu, deux regards » (UX-F-45) */
+.dip h3 { margin: 0; font: 400 12px/1.3 var(--sans); letter-spacing: .3em; text-transform: uppercase; color: var(--safelight); }
+.dip .lead { margin: 8px 0 22px; font: 300 24px/1.3 var(--sans); }
+.pair { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pair a { display: grid; gap: 10px; color: var(--ink); }
+.pair img { width: 100%; height: auto; display: block; }
+.pair .qui { font: 400 13px/1.4 var(--mono); color: var(--mute); }
+.pair b { font: 400 15.5px/1.35 var(--sans); }
+.mq-state .in { padding: 24px 20px 28px; }
+/* Index des séries : une couverture à droite de chaque nom (UX-F-30) */
+.sidx { margin-top: 72px; }
+.sidx h2 { margin: 0 0 14px; font: 400 13px/1.3 var(--sans); letter-spacing: .26em; text-transform: uppercase; color: var(--ink); }
+.sidx ul { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 48px; }
+.sidx li { border-bottom: 1px solid var(--rule); }
+.sidx a { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; min-height: 88px; padding: 12px 0; color: var(--ink); }
+.sidx a b { display: block; font: 300 26px/1.2 var(--sans); }
+.sidx a span span { display: block; margin-top: 2px; font-size: 14.5px; color: var(--prose); }
+.sidx img { width: 64px; height: 64px; object-fit: cover; display: block; }
+.pin-r { position: absolute; z-index: 5; top: -12px; right: -12px; }
+@media (max-width: 760px) {
+  .fbar-in { overflow-x: auto; scrollbar-width: thin; flex-wrap: nowrap; gap: 8px 16px; min-height: 60px; }
+  .ordre { margin-left: 0; }
+  .fbar nav { flex: none; }
+  .fbar .grp { flex-wrap: nowrap; }
+  .jr { gap: 24px 8px; }
+  .jr > li { flex-basis: calc(var(--r) * 160px); }
+  .jr .t span { font-size: 12.5px; }
+  .ghead h2 { font-size: 19px; }
+  .pair { grid-template-columns: 1fr; gap: 20px; }
+  .sidx ul { grid-template-columns: 1fr; }
+  .sidx a b { font-size: 23px; }
+  .ord { font-size: 11.5px; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-h wrap">
+  <a class="wordmark" href="#">Nicephos</a>
+  <nav class="site-nav" id="menu-principal" aria-label="Menu principal"><ul role="list"><li><a href="#">Séries</a></li><li><a href="#" aria-current="page">Galerie</a></li><li><a href="#">Carte</a></li><li><a href="#">Carnets</a></li><li><a href="#">À propos</a></li><li class="soft"><a href="#">Tirages</a></li></ul></nav>
+  <ul class="site-tools" role="list">
+    <li><a class="tool" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="tool-t">Rechercher</span></a></li>
+    <li><details class="lang"><summary><span class="sr-only">Langue : </span>FR <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <ul role="list"><li><a href="#" lang="fr" hreflang="fr" aria-current="true"><span>Français</span></a></li><li><a href="#" lang="en" hreflang="en">English</a></li><li><a href="#" lang="de" hreflang="de">Deutsch</a></li></ul></details></li>
+    <li><button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-principal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button></li>
+  </ul>
+</header>
+<main id="contenu">
+  <div class="g-tete wrap">
+    <h1>Galerie</h1>
+    <p>Choisissez un regard, ou une série&#8239;: la grille se met à jour sous vos yeux.</p>
+  </div>
+
+  <div class="fbar">
+    <div class="fbar-in wrap">
+      <nav aria-label="Regard"><ul class="grp rg" role="list"><li class="lab" aria-hidden="true">Regard</li><li><a href="#">Les deux</a></li><li><a href="#">Sébastien</a></li><li style="position:relative"><a href="#" aria-current="page" class="is-focus" style="outline:2px solid var(--ink);outline-offset:2px">Julien</a></li><li><span class="pin pin-in" aria-hidden="true">1</span></li></ul></nav>
+      <span class="sep" aria-hidden="true"></span>
+      <nav aria-label="Séries"><ul class="grp pills" role="list">
+        <li><a href="#"><img src="_commun/photos/ruelle.webp" width="600" height="900" alt="">Rue <span class="n">· 8 photos</span></a></li>
+        <li><a href="#"><img src="_commun/photos/mer.webp" width="900" height="600" alt="">Atlantique <span class="n">· 3 photos</span></a></li>
+        <li><a href="#"><img src="_commun/photos/ciel.webp" width="900" height="600" alt="">Voyage <span class="n">· 23 photos</span></a></li>
+        <li><a href="#"><img src="_commun/photos/nuit.webp" width="600" height="900" alt="">Nuit <span class="n">· 10 photos</span></a></li>
+        <li><span class="pin pin-in" aria-hidden="true">2</span></li>
+      </ul></nav>
+      <nav class="ordre" aria-label="Ordre"><ul class="grp" role="list"><li class="lab" aria-hidden="true">Ordre</li><li><a href="#" aria-current="true">Choisi par nous</a></li><li aria-hidden="true" style="color:var(--mute)">·</li><li><a href="#">Plus récentes d’abord</a></li><li><span class="pin pin-in" aria-hidden="true">3</span></li></ul></nav>
+    </div>
+  </div>
+
+  <section class="wrap" aria-labelledby="g-h">
+    <div class="ghead">
+      <h2 id="g-h" tabindex="-1">Toutes les photos <span class="c">— 12 photos sur 44, par Julien</span></h2>
+      <a class="tag" href="#"><b>Julien</b><span class="sr-only">, retirer ce filtre</span><span aria-hidden="true">✕</span></a>
+      <span class="pin" aria-hidden="true">4</span>
+    </div>
+    <ul class="jr" role="list">
+      <li style="--r:1.5"><span class="ord" aria-hidden="true">01</span><span class="pin pin-r" aria-hidden="true">5</span><a href="#"><img src="_commun/photos/ciel.webp" width="900" height="600" alt="" fetchpriority="high"><span class="t"><b>Miradouro, l’heure dorée</b><span>Voyage · Julien · Lisbonne</span></span></a></li>
+      <li style="--r:.6667"><span class="ord" aria-hidden="true">02</span><a href="#"><img src="_commun/photos/ruelle.webp" width="600" height="900" alt=""><span class="t"><b>Alfama, premier tram</b><span>Voyage · Julien · Lisbonne</span></span></a></li>
+      <li style="--r:1.5"><span class="ord" aria-hidden="true">03</span><a href="#"><img src="_commun/photos/brume.webp" width="900" height="600" alt=""><span class="t"><b>Ribeira, brume du fleuve</b><span>Voyage · Julien · Porto</span></span></a></li>
+      <li style="--r:.6667"><span class="ord" aria-hidden="true">04</span><span class="pin pin-r" aria-hidden="true">6</span><a href="#"><img src="_commun/photos/portrait.webp" width="600" height="900" alt="" loading="lazy"><span class="t"><b>Passante, rue Saint-Vincent</b><span>Rue · Julien · Saint-Malo</span></span></a></li>
+      <li style="--r:1.5"><a href="#" class="is-focus"><img src="_commun/photos/mer.webp" width="900" height="600" alt="" loading="lazy"><span class="t"><b>Le Sillon à marée basse</b><span>Atlantique · Julien · Saint-Malo</span></span></a><span class="pin pin-r" aria-hidden="true">7</span></li>
+      <li style="--r:1.5"><a href="#"><img src="_commun/photos/ombre.webp" width="900" height="600" alt="" loading="lazy"><span class="t"><b>Vitrine, boulevard Voltaire</b><span>Rue · Julien · Paris</span></span></a></li>
+      <li style="--r:1.5"><a href="#"><img src="_commun/photos/quai.webp" width="900" height="600" alt="" loading="lazy"><span class="t"><b>Quai des Indes, 6 h</b><span>Rue · Julien · Lorient</span></span></a></li>
+      <li style="--r:1.5"><a href="#"><img src="_commun/photos/dune.webp" width="900" height="600" alt="" loading="lazy"><span class="t"><b>Crête du Pilat</b><span>Voyage · Julien · La Teste-de-Buch</span></span></a></li>
+      <li style="--r:.6667"><a href="#"><img src="_commun/photos/foret.webp" width="600" height="900" alt="" loading="lazy"><span class="t"><b>Pins de la Coubre</b><span>Voyage · Julien · La Tremblade</span></span></a></li>
+      <li style="--r:1.5"><a href="#"><img src="_commun/photos/lac.webp" width="900" height="600" alt="" loading="lazy"><span class="t"><b>Guerlédan, eau basse</b><span>Voyage · Julien · Mûr-de-Bretagne</span></span></a></li>
+      <li style="--r:.6667"><a href="#"><img src="_commun/photos/nuit.webp" width="600" height="900" alt="" loading="lazy"><span class="t"><b>Néons, Belleville</b><span>Nuit · Julien · Paris</span></span></a></li>
+      <li style="--r:1.5"><a href="#"><img src="_commun/photos/neige.webp" width="900" height="600" alt="" loading="lazy"><span class="t"><b>Premier givre, les Lices</b><span>Rue · Julien · Rennes</span></span></a></li>
+    </ul>
+    <p class="gmore">Les 12 photos de Julien sont affichées. <a class="u" href="#">Voir aussi les 32 photos de Sébastien</a></p>
+  </section>
+
+  <div class="mq-state">
+    <p class="mq-label">Autre état <span>Regard « Les deux » : un diptyque s’insère entre deux rangées de la Sélection</span><span class="pin" aria-hidden="true">8</span></p>
+    <div class="in dip">
+      <h3>Même lieu, deux regards</h3>
+      <p class="lead">Lisbonne, le même belvédère à une heure d’écart.</p>
+      <ul class="pair" role="list">
+        <li><a href="#"><img src="_commun/photos/lac.webp" width="900" height="600" alt="" loading="lazy"><b>Graça, le fleuve à midi</b><span class="qui">Sébastien · Lisbonne</span></a></li>
+        <li><a href="#"><img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy"><b>Miradouro, l’heure dorée</b><span class="qui">Julien · Lisbonne</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <section class="sidx wrap" aria-labelledby="idx-h">
+    <h2 id="idx-h">Les séries <span class="pin pin-in" aria-hidden="true">9</span></h2>
+    <ul role="list">
+      <li><a href="#"><span><b>Rue</b><span>Passants, seuils et vitrines · 8 photos</span></span><img src="_commun/photos/ruelle.webp" width="600" height="900" alt="" loading="lazy"></a></li>
+      <li><a href="#"><span><b>Atlantique</b><span>La côte de Saint-Malo à Biarritz · 3 photos</span></span><img src="_commun/photos/mer.webp" width="900" height="600" alt="" loading="lazy"></a></li>
+      <li><a href="#"><span><b>Voyage</b><span>Lisbonne, Porto, Californie · 23 photos</span></span><img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy"></a></li>
+      <li><a href="#"><span><b>Nuit</b><span>Néons, quais et fenêtres · 10 photos</span></span><img src="_commun/photos/nuit.webp" width="600" height="900" alt="" loading="lazy"></a></li>
+    </ul>
+  </section>
+</main>
+<footer class="site-f wrap">
+  <p>© 2026 Sébastien &amp; Julien</p>
+  <ul role="list" aria-label="Pied de page"><li><a href="#">Tirages et licences</a></li><li><a href="#">Contact</a></li><li><a href="#" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="#">Flux RSS</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Mentions légales</a></li></ul>
+</footer>
+
+<aside class="mq-notes" aria-labelledby="mq-h">
+  <p class="mq-id">Maquette MQ-02 · site public · thème « Nicephos — nuit » · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
+  <h2 id="mq-h">Ce qui change</h2>
+  <p class="mq-lead">La grille se lit enfin comme une planche contact, dans l’ordre que vous avez composé, et chaque filtre se voit là où il agit. Le titre de la page suit le filtre : « Galerie, par Julien (12 photos) · Nicephos ».</p>
+  <ol>
+    <li><span class="pin">1</span><p>Le choix du regard monte dans une barre collante, juste au-dessus de la grille. L’état actif est souligné en sable, en graisse 500 et porte aria-current : il ne repose plus sur un point de 6 px. Après « Julien », le focus reste sur « Julien », qui reste à l’écran puisque la barre est collante (montré ici).<span class="ref">UX-F-12 · UX-F-07 · RGAA 10.7 et 12.8 · WCAG 1.4.1, 2.4.3 et 2.4.7 · B&amp;S 1.3 Feedback immédiat</span></p></li>
+    <li><span class="pin">2</span><p>Les séries en pastilles de 44 px avec leur couverture de 32 px et un compte en clair (« 3 photos » au lieu de « 03 ») : on voit ce que l’on choisit avant de cliquer.<span class="ref">UX-F-30 · UX-F-28 · Nielsen #6 · B&amp;S 1.1 Incitation</span></p></li>
+    <li><span class="pin">3</span><p>« Ordre : Choisi par nous · Plus récentes d’abord » remplace « Sélection / Récentes » : la dénomination dit qui a choisi.<span class="ref">UX-F-28 · B&amp;S 7 Signifiance des dénominations · Opquast 99</span></p></li>
+    <li><span class="pin">4</span><p>L’en-tête de la grille dit ce qu’on voit (« Toutes les photos — 12 photos sur 44, par Julien »), en photos et non plus en « vues ». Le filtre actif est une étiquette « Julien ✕ » qui le retire d’un geste ; le titre reçoit le focus quand aucun lien ne peut le garder.<span class="ref">UX-F-28 · UX-F-12 · Nielsen #1 et #3 · ISO 9241-110 Autodescriptivité</span></p></li>
+    <li><span class="pin">5</span><p>Rangées justifiées, sans script : chaque vignette prend une largeur proportionnelle à son format (flex-grow = largeur ÷ hauteur), à environ 280 px de haut au bureau. Les numéros 01 à 04 posés sur la première rangée (annotation) montrent le sens de lecture : de gauche à droite, comme vous l’avez composé, au clavier comme à l’œil.<span class="ref">UX-F-13 · RGAA 12.8 · WCAG 2.4.3 · B&amp;S 1.2.1 · Loi de proximité</span></p></li>
+    <li><span class="pin">6</span><p>Les verticales restent verticales, les horizontales horizontales : aucune photo n’est recadrée. La règle nth-child(3n+2) qui décalait une vignette sur trois disparaît.<span class="ref">UX-F-13 · UX-F-17 · B&amp;S 1.2.2</span></p></li>
+    <li><span class="pin">7</span><p>Sous chaque vignette, un cartel identique partout : « Titre » puis « Série · Julien · Lieu », avec le nom complet au lieu de l’initiale de 11 px, en Plex Mono 13 px. Vignette en état focus : contour de 2 px décalé de 5 px, visible sur la photo comme sur le noir.<span class="ref">UX-F-28 · UX-F-29 · UX-F-45 · RGAA 10.7 · WCAG 2.4.7</span></p></li>
+    <li><span class="pin">8</span><p>Dans la vue « Les deux », un diptyque « Même lieu, deux regards » s’insère après la deuxième rangée : Sébastien à gauche, Julien à droite. C’est le concept du site, enfin montré.<span class="ref">UX-F-45 · Effet de position sérielle</span></p></li>
+    <li><span class="pin">9</span><p>L’index des séries montre une couverture de 64 px à droite de chaque nom, sur téléphone aussi, et une phrase qui dit ce qu’on va voir.<span class="ref">UX-F-30 · Nielsen #6 · B&amp;S 1.1</span></p></li>
+  </ol>
+  <p class="mq-measures">Mesures sur cette maquette : barre de filtres 64 px de haut, toutes les cibles à 44 px ; textes de cartel 13 px (7,4:1) et 15,5 px (17,1:1) sur #0b0b0b ; soulignement sable 9,9:1. Sur téléphone (Pixel 7, 380 px utiles), la hauteur cible est ramenée à environ 165 px : à 240 px, une seule photo tiendrait par rangée et les verticales occuperaient deux écrans. Images : 3 chargées d’emblée (la première rangée), les autres en chargement différé ; sur le site, les variantes de 320 et 640 px en srcset (UX-T-07, RGESN 6.4).</p>
+</aside>
+</body>
+</html>

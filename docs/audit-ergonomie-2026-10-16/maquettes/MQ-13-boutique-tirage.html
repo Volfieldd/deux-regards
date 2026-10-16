@@ -113,7 +113,11 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
 .mq-ref { display: block; margin-top: 4px; font-family: var(--mono); font-size: 12.5px; color: var(--mute); }
 .mq-socle { margin: 32px 0 0; padding-top: 18px; border-top: 1px solid var(--rule); max-width: 110ch; color: var(--prose); font-size: 14px; }
 @media print { .mq-pin, .mq-notes { display: none !important; } }
-@media (max-width: 760px) { .mq-pin[data-p8] { right: 4px !important; top: -30px !important; } }
+/* Sur téléphone, les repères ne débordent jamais de l'écran (pas de défilement horizontal) */
+@media (max-width: 960px) {
+  .mq-pin[style*="right:-"] { right: 0 !important; }
+  .mq-pin[style*="left:-"] { left: 0 !important; }
+}
 
 
 /* ===== MQ-13 : page d'un tirage ===== */
@@ -338,14 +342,14 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
         <div class="tx-achat mq-a">
           <p class="tx-prix"><span class="sr-only">Prix : </span><span data-p="30-sans">180 €</span><span data-p="40-sans">290 €</span><span data-p="60-sans">520 €</span><span data-p="30-chene">300 €</span><span data-p="40-chene">410 €</span><span data-p="60-chene">640 €</span> <small>TTC</small></p>
           <button type="submit" class="nx-btn">Ajouter au panier</button>
-          <span class="mq-pin" aria-hidden="true" style="right:-13px;top:-13px" data-p8>8</span>
+          <span class="mq-pin" aria-hidden="true" style="right:-13px;top:-13px">8</span>
         </div>
       </form>
 
       <ul class="tx-apres mq-a">
         <li><a href="/contact?photo=J-2026-019&amp;objet=tirage">Une question ? Nous écrire</a></li>
         <li class="tx-legal nx-mono">Prix TTC · <a class="nx-u" href="/conditions-de-vente#retractation">Rétractation 14 jours</a> · <a class="nx-u" href="/conditions-de-vente">CGV</a></li>
-        <li>Vendu, signé et expédié par Julien, entrepreneur individuel.<span class="mq-pin" aria-hidden="true" style="right:-13px;top:4px">9</span></li>
+        <li>Vendu, signé et expédié par Julien, artiste-auteur, en son nom.<span class="mq-pin" aria-hidden="true" style="right:-13px;top:4px">9</span></li>
       </ul>
     </div>
   </div>
@@ -414,7 +418,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
         <div>
           <p class="nx-sur">Tirage d’art · édition limitée</p>
           <p class="t">Le quai, 6 h</p>
-          <p class="nx-mono" style="color:var(--mute)">Julien · Porto, 2026 · Inventaire J-2026-007</p>
+          <p class="nx-mono" style="color:var(--mute)">Julien · Porto, 2026 · <span class="nw">Inventaire J-2026-007</span></p>
           <p class="tx-epuise"><span aria-hidden="true">○</span> Épuisé — 15 exemplaires sur 15 vendus</p>
           <p style="margin-top:12px">L’édition est close : cette photo ne sera plus tirée, dans aucun format.</p>
           <p class="nx-u"><a href="/tirages">Voir les 11 tirages disponibles</a> · <a href="/photo/le-quai-6-h">Voir la photo</a></p>
@@ -430,12 +434,12 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
     <li><span class="mq-pin" aria-hidden="true">2</span><span><strong>La photo entière,</strong> non recadrée, signée « © Julien » en coin (10 % de la largeur, 40 % d’opacité) ; la légende rassure : la signature n’est qu’à l’écran.<span class="mq-ref">UX-F-15 · Nielsen 8 · B&amp;S 1.4 Lisibilité</span></span></li>
     <li><span class="mq-pin" aria-hidden="true">3</span><span><strong>« Voir au mur »,</strong> à l’échelle d’une console de 120 cm, suit le format et le cadre choisis. Deux boutons radio et du CSS : ni script, ni image de plus.<span class="mq-ref">B&amp;S 1.1 Incitation · ISO 9241-110 Adéquation aux tâches · RGESN 4.5, 6.5</span></span></li>
     <li><span class="mq-pin" aria-hidden="true">4</span><span><strong>Un numéro d’inventaire stable,</strong> J-2026-019 : la référence que reprendront le certificat, la facture et le formulaire de contact.<span class="mq-ref">UX-T-05 · Opquast 39</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">5</span><span><strong>Une édition honnête :</strong> 15 exemplaires tous formats, « 9 disponibles », le chiffre exact. Ni compte à rebours, ni « derniers exemplaires », ni promotion.<span class="mq-ref">UX-T-17 · RGESN 4.14 · Opquast 34 · CGI ann. III art. 98 A</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">6</span><span><strong>Formats en boutons radio groupés,</strong> prix TTC en face de chacun, taille de la feuille et mode d’envoi ; cadre « Sans » par défaut. Le prix total suit le choix, sans script.<span class="mq-ref">RGAA 11.5, 11.6 · WCAG 1.3.1 · Opquast 39, 56 · Code de la consommation L112-1</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">7</span><span><strong>Délai et frais avant le panier,</strong> le délai en dates plutôt qu’en vitesse.<span class="mq-ref">UX-T-17 · Opquast 35, 36 · étude S25</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">8</span><span><strong>Un seul bouton plein, « Ajouter au panier »,</strong> large de 52 px ; il envoie un formulaire ordinaire (POST puis 303 vers le panier), qui marche sans JavaScript.<span class="mq-ref">UX-F-11 · B&amp;S 2.1.2 Actions minimales · étude S20</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">9</span><span><strong>« Une question ? Nous écrire »</strong> ouvre le formulaire prérempli avec J-2026-019 (MQ-06), au même endroit sur chaque page de la boutique ; prix TTC, rétractation, CGV et vendeur nommé sous le bouton.<span class="mq-ref">UX-F-11 · WCAG 3.2.6 · Opquast 46, 52 · Code de la consommation L221-5 · étude S1</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">10</span><span><strong>Épuisé, dit en texte</strong> et par un cadre, l’image intacte : l’édition close ne rouvre jamais, et l’on propose la suite sans insister.<span class="mq-ref">Opquast 65 · RGAA 3.1 · WCAG 1.4.1</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">5</span><span><strong>Une édition honnête :</strong> 15 exemplaires tous formats, « 9 disponibles », le chiffre exact. Ni compte à rebours, ni « derniers exemplaires », ni promotion.<span class="mq-ref">UX-T-17 · RGESN 4.14 · Opquast 30 à 68 (commerce) · CGI ann. III art. 98 A</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">6</span><span><strong>Formats en boutons radio groupés,</strong> prix TTC en face de chacun, taille de la feuille et mode d’envoi ; cadre « Sans » par défaut. Le prix total suit le choix, sans script.<span class="mq-ref">RGAA 11.5, 11.6 · WCAG 1.3.1 · Opquast 39 · Opquast 30 à 68 (commerce) · Code de la consommation L112-1</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">7</span><span><strong>Délai et frais avant le panier,</strong> le délai en dates plutôt qu’en vitesse.<span class="mq-ref">UX-T-17 · Opquast 30 à 68 (commerce) · étude S25</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">8</span><span><strong>Un seul bouton plein, « Ajouter au panier »,</strong> haut de 52 px ; il envoie un formulaire ordinaire (POST puis 303 vers le panier), qui marche sans JavaScript.<span class="mq-ref">UX-F-11 · B&amp;S 2.1.2 Actions minimales · étude S20</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">9</span><span><strong>« Une question ? Nous écrire »</strong> ouvre le formulaire prérempli avec J-2026-019 (MQ-06), au même endroit sur chaque page de la boutique ; prix TTC, rétractation, CGV et vendeur nommé sous le bouton.<span class="mq-ref">UX-F-11 · WCAG 3.2.6 · Opquast 30 à 68 (commerce) · Code de la consommation L221-5 · étude S1</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">10</span><span><strong>Épuisé, dit en texte</strong> et par un cadre, l’image intacte : l’édition close ne rouvre jamais, et l’on propose la suite sans insister.<span class="mq-ref">Opquast 30 à 68 (commerce) · RGAA 3.1 · WCAG 1.4.1</span></span></li>
   </ol>
   <p class="mq-socle"><strong>Sur téléphone :</strong> en-tête de 64 px avec « Menu » (élément details natif, sans script), photo pleine largeur, formats en liste de 56 px, prix et bouton collants en bas ; html { scroll-padding-bottom } empêche la barre de masquer le champ qui a le focus (WCAG 2.4.11, 2.5.8 ; UX-F-36). <strong>Socle commun aux trois maquettes de la boutique :</strong> lien « Aller au contenu » (UX-F-06), liens soulignés (UX-F-23), focus de 2 px, cibles de 44 px au moins, textes de 13 px au moins en graisse 400 (UX-F-29), aucune ressource chargée depuis un autre site, aucun script.</p>
 </aside>

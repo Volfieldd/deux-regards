@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="dark light">
+  <title>Nouvel accès privé · Galeries privées · Administration · Nicephos — maquette MQ-18</title>
+  <link rel="stylesheet" href="_commun/admin.css">
+  <style>
+    /* MQ-18 — composants nouveaux. Tout passe par les variables d'admin.css : « Chambre noire » ou clair selon le système. */
+
+    /* Maquette : la barre latérale garde sa hauteur naturelle pour la capture pleine page. */
+    .side { height: auto; align-self: start; }
+    .side .foot { margin-top: 18px; }
+    .nav-sub { list-style: none; margin: 0 0 2px; padding: 0 0 0 30px; display: grid; gap: 2px; }
+    .nav-sub a { min-height: 30px; font-size: 13.5px; }
+    .nav-badge .sr-only { position: absolute; }
+    .me-link { display: flex; align-items: center; gap: 10px; padding: 4px 6px; border-radius: 8px; }
+    .me-link:hover { background: var(--s2); }
+    .who small.zit { display: block; margin-top: 1px; }
+    .side .foot .nav a { min-height: 30px; }
+
+    /* Repères d'annotation ①②③ (la légende est en bas de page). */
+    .mq-n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font: 600 12px/1 var(--font); letter-spacing: 0; text-transform: none; vertical-align: middle; flex: none; box-shadow: 0 0 0 2px var(--bg); }
+    .mq-screen { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 18px; padding-top: 10px; border-top: 1px dashed var(--line2); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink2); }
+    .mq-screen b { color: var(--accent-ink); font-weight: 600; }
+    .mq-screen code { text-transform: none; letter-spacing: 0; }
+    .mq-first { border-top: 0; padding-top: 0; padding-right: 160px; }
+    .mq-focus { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
+    .mq-sec { margin-top: 60px; }
+
+    /* Fil d'Ariane, en-tête */
+    .crumbs ol { list-style: none; margin: 0 0 6px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; font-size: 12.5px; color: var(--ink3); }
+    .crumbs li + li::before { content: "›"; margin-right: 8px; color: var(--ink3); }
+    .crumbs a { color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; }
+    .a-top { margin: 0 0 22px; }
+    .a-top h1 { margin: 0 0 6px; }
+    .a-top .sub { font-size: 13.5px; color: var(--ink2); max-width: 78ch; }
+    .main h2.big { font-weight: 300; font-size: 30px; line-height: 1.15; margin: 0 0 6px; }
+    .main h2.big .mq-n { margin: -4px 10px 0 0; }
+
+    /* Écran A : formulaire et aperçu de l'invitation */
+    .a-grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 22px; align-items: start; }
+    .a-form { display: grid; gap: 18px; }
+    .a-form fieldset.panel { margin: 0; display: grid; gap: 14px; }
+    .a-form legend { display: flex; align-items: center; gap: 10px; }
+    .a-form .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; align-items: start; }
+    .a-form label > .hint { display: block; line-height: 1.45; }
+    .acc time { white-space: nowrap; }
+    .acc td:first-of-type { min-width: 120px; }
+    .mq-toast p .mq-n { margin-right: 8px; }
+    .a-form label .opt { color: var(--ink3); }
+    .a-form .hint { margin: -6px 0 0; }
+    .a-form .hint.after { margin: 6px 0 0; }
+    .lbl { color: var(--ink); font-weight: 500; font-size: 13.5px; }
+
+    .thumbs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+    .thumbs li { position: relative; }
+    .thumbs img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 6px; display: block; background: var(--photo-bg); }
+    .thumbs .more-ph { display: grid; place-items: center; aspect-ratio: 1; border-radius: 6px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); font-size: 13px; color: var(--ink2); text-align: center; line-height: 1.25; }
+    .thumbs .flag { position: absolute; left: 4px; top: 4px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--warn); color: var(--s1); font-size: 11px; font-weight: 600; box-shadow: 0 0 0 2px var(--bg); }
+    .ph-count { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; font-size: 13.5px; }
+    .ph-count strong { font-weight: 500; }
+    .check { display: grid; gap: 8px; padding: 12px 14px; border-radius: 10px; background: var(--s2); box-shadow: inset 3px 0 0 var(--warn), inset 0 0 0 1px var(--line); font-size: 13.5px; }
+    .check p { margin: 0; }
+    .check .t { font-weight: 500; }
+    .check .t .sym { color: var(--warn); }
+
+    .rights { display: grid; gap: 8px; }
+    .opt-card { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 2px 12px; align-items: start; padding: 11px 14px; border-radius: 10px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font-size: 14px; cursor: pointer; }
+    .opt-card input { margin-top: 2px; }
+    .opt-card .d { grid-column: 2; font-size: 12.5px; color: var(--ink2); }
+    .opt-card:has(input:checked) { box-shadow: inset 0 0 0 1.5px var(--accent-ink); background: var(--accent-soft); }
+    .opt-card .tag { font-size: 11.5px; color: var(--ink3); margin-left: 6px; }
+    .opt-card:has(input:checked) .sel { display: inline; }
+    .sel { display: none; font-size: 12px; color: var(--accent-ink); margin-left: 6px; font-weight: 500; }
+
+    .quick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 2px; }
+    .quick .chip { cursor: pointer; background: none; }
+    .date-row { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 14px; align-items: start; }
+    .date-say { font-size: 13.5px; color: var(--ink); padding-top: 30px; }
+    .date-say .mono { display: block; }
+
+    .pw { display: flex; gap: 8px; align-items: stretch; }
+    .pw input { font-family: ui-monospace, 'IBM Plex Mono', Menlo, Consolas, monospace; font-size: 16px; letter-spacing: .04em; }
+    .pw .btn { min-height: 40px; }
+    .btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); box-shadow: none; }
+    .lock-note { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--ink2); }
+    .lock-note svg { margin-top: 2px; }
+
+    .send { display: grid; gap: 10px; }
+    .a-submit { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; padding: 16px 20px; border-radius: 14px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+    .a-submit .hint { margin: 0; flex: 1 1 260px; }
+
+    /* Aperçu de l'e-mail */
+    .mail-prev { position: sticky; top: 20px; }
+    .mail-prev .panel { margin: 0; padding: 0; overflow: hidden; }
+    .mail-hd { padding: 14px 18px 12px; border-bottom: 1px solid var(--line); }
+    .mail-hd h2 { margin: 0 0 10px; font-size: 15px; display: flex; align-items: center; gap: 10px; }
+    .mail-hd dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 12px; margin: 0; font-size: 12.5px; }
+    .mail-hd dt { color: var(--ink3); }
+    .mail-hd dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+    .mail-body { padding: 18px; display: grid; gap: 12px; font-size: 13.5px; line-height: 1.6; color: var(--ink); }
+    .mail-body p { margin: 0; }
+    .mail-body .m-link { display: block; padding: 10px 12px; border-radius: 8px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); font-family: ui-monospace, 'IBM Plex Mono', Menlo, Consolas, monospace; font-size: 12.5px; color: var(--accent-ink); overflow-wrap: anywhere; }
+    .mail-body .until { padding: 8px 12px; border-radius: 8px; box-shadow: inset 3px 0 0 var(--accent); background: var(--accent-soft); }
+    .mail-body .until strong { font-weight: 500; }
+    .mail-body ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
+    .mail-body .small { font-size: 12px; color: var(--ink2); line-height: 1.5; padding-top: 10px; border-top: 1px solid var(--line); }
+    .mail-body .small a, .mail-body a.u { text-decoration: underline; text-underline-offset: 3px; }
+    .mail-foot { padding: 10px 18px 14px; font-size: 12px; color: var(--ink3); border-top: 1px solid var(--line); }
+
+    /* Écran B : accès créé, secrets affichés une fois */
+    .flash-ok { display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border-radius: 12px; background: var(--s1); box-shadow: inset 3px 0 0 var(--ok), inset 0 0 0 1px var(--line); margin: 0 0 16px; font-size: 14px; }
+    .flash-ok .sym { color: var(--ok); font-weight: 600; }
+    .secrets { display: grid; gap: 14px; }
+    .secret { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 8px 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .secret:last-of-type { border-bottom: 0; }
+    .secret .k { color: var(--ink2); font-size: 13px; }
+    .secret output { font-family: ui-monospace, 'IBM Plex Mono', Menlo, Consolas, monospace; font-size: 15px; color: var(--ink); overflow-wrap: anywhere; letter-spacing: .02em; }
+    .secret .copied { font-size: 12.5px; color: var(--ok); white-space: nowrap; }
+    .once { display: flex; gap: 10px; padding: 10px 14px; border-radius: 10px; background: var(--s2); box-shadow: inset 3px 0 0 var(--warn); font-size: 13.5px; }
+    .once .sym { color: var(--warn); }
+    .sms { margin: 0; padding: 10px 14px; border-radius: 12px 12px 12px 4px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); font-size: 13.5px; max-width: 46ch; }
+
+    /* Écran C : liste des accès */
+    .chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip[aria-current] .n { color: inherit; }
+    .chip[aria-current]::before { content: "✓"; font-size: 12px; }
+    .l-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 14px 0 20px; }
+    .f-lb { font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); }
+    .acc { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .acc caption { caption-side: top; text-align: left; padding: 0 0 10px; font-size: 15px; font-weight: 500; color: var(--ink); }
+    .acc caption .mono { font-weight: 400; margin-left: 6px; }
+    .acc th, .acc td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .acc thead th { padding-top: 8px; padding-bottom: 8px; font-weight: 500; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); border-bottom-color: var(--line2); }
+    .acc tbody th { font-weight: 500; }
+    .acc tbody th a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
+    .acc tr.soon th { box-shadow: inset 3px 0 0 var(--warn); }
+    .acc tr.ended { color: var(--ink2); }
+    .acc .gal { display: flex; gap: 10px; align-items: center; margin-top: 4px; font-weight: 400; color: var(--ink2); font-size: 12.5px; }
+    .acc .gal img { width: 48px; height: 32px; object-fit: cover; border-radius: 4px; display: block; flex: none; background: var(--photo-bg); }
+    .acc td .mono { display: block; margin-top: 3px; }
+    .acc .acts { display: flex; flex-wrap: wrap; gap: 6px; }
+    .acc .acts .btn { min-height: 32px; padding: 0 12px; font-size: 13px; }
+    .act { display: grid; gap: 2px; }
+    .act strong { font-weight: 500; color: var(--ink); }
+
+    .etat { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 999px; font-size: 12.5px; line-height: 1.3; color: var(--ink); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); white-space: nowrap; }
+    .etat .sym { font-size: 13px; line-height: 1; color: var(--ink2); }
+    .etat.done .sym { color: var(--ok); }
+    .etat.warn { box-shadow: inset 0 0 0 1.5px var(--warn); }
+    .etat.warn .sym { color: var(--warn); }
+    .etat.stop .sym { color: var(--danger); }
+    .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 14px 0 0; font-size: 12.5px; color: var(--ink2); }
+    .legend .f-lb { margin-right: 2px; }
+
+    /* Activité d'un accès, prolonger */
+    .c-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; margin-top: 22px; }
+    .c-grid .panel { margin: 0; }
+    .panel h3 { margin: 0 0 12px; font-size: 17px; font-weight: 500; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .hist { list-style: none; margin: 0; padding: 0; }
+    .hist li { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 14px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+    .hist li:last-child { border-bottom: 0; }
+    .hist time { color: var(--ink3); font-size: 12.5px; white-space: nowrap; }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 14px; }
+    .stats div { padding: 10px 12px; border-radius: 10px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); }
+    .stats dt { font-size: 12px; color: var(--ink3); }
+    .stats dd { margin: 2px 0 0; font-size: 20px; font-weight: 300; }
+    .stats dd small { font-size: 12px; color: var(--ink2); margin-left: 4px; }
+    .side-acts { display: grid; gap: 16px; }
+    .side-acts form { display: grid; gap: 10px; }
+    .side-acts .hint { margin: 0; }
+    .side-acts hr { border: 0; border-top: 1px solid var(--line2); margin: 2px 0; width: 100%; }
+    .btn.ghost.risk { color: var(--danger); box-shadow: inset 0 0 0 1px currentColor; }
+    .btn.danger { color: var(--on-danger); }
+
+    /* Écran D : dialogue de révocation, puis message d'annulation */
+    .mq-scrim { padding: 44px 24px; border-radius: 16px; background: color-mix(in srgb, var(--bg) 35%, #000 65%); display: grid; place-items: center; gap: 28px; box-shadow: inset 0 0 0 1px var(--line2); }
+    .mq-scrim .dialog { position: static; margin: 0; width: min(580px, 100%); }
+    .dialog h2 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .revoke .sub { margin: -4px 0 4px; color: var(--ink2); font-size: 13px; }
+    .revoke h3 { margin: 4px 0 6px; font-size: 13px; font-weight: 500; color: var(--ink2); }
+    .conseq { margin: 0 0 4px; padding-left: 20px; display: grid; gap: 7px; font-size: 13.5px; }
+    .conseq li::marker { color: var(--ink3); }
+    .mq-toast { position: static; transform: none; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; max-width: 580px; width: 100%; background: var(--ink); color: var(--bg); border-radius: 12px; padding: 10px 10px 10px 16px; box-shadow: var(--shadow); font-size: 13.5px; }
+    .mq-toast p { margin: 0; flex: 1 1 220px; }
+    .mq-toast .left { display: block; font-size: 12px; opacity: .85; }
+    .mq-toast button { background: var(--bg); color: var(--ink); border-radius: 8px; min-height: 36px; padding: 0 14px; font-size: 13px; font-weight: 500; outline: 2px solid var(--bg); outline-offset: 2px; }
+    .timer { display: block; height: 3px; width: 100%; border-radius: 2px; background: color-mix(in srgb, var(--bg) 30%, transparent); overflow: hidden; }
+    .timer i { display: block; height: 100%; width: 80%; background: var(--bg); }
+    .mq-cap { margin: 0; font-size: 12px; color: #eeece7; text-align: center; letter-spacing: .06em; text-transform: uppercase; }
+
+    /* Annotations */
+    .mq-notes { padding: 34px 36px 56px calc(var(--side) + 36px); background: var(--s1); border-top: 1px solid var(--line2); }
+    .mq-notes > * { max-width: 1120px; }
+    .mq-notes h2 { margin: 0 0 6px; font-weight: 300; font-size: 28px; }
+    .mq-notes .intro { margin: 0 0 22px; color: var(--ink2); max-width: 90ch; }
+    .mq-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 36px; }
+    .mq-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 2px 12px; font-size: 13.5px; line-height: 1.55; }
+    .mq-list li > .mq-n { grid-row: span 2; margin-top: 1px; }
+    .mq-list strong { font-weight: 500; }
+    .mq-list .refs { grid-column: 2; font-size: 12px; color: var(--ink3); }
+    .mq-notes .after { margin: 24px 0 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--ink2); font-size: 13px; max-width: 110ch; }
+
+    @media (max-width: 1180px) {
+      .a-grid, .c-grid { grid-template-columns: minmax(0, 1fr); }
+      .mail-prev { position: static; }
+      .mq-list { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .mq-first { padding-right: 0; }
+      .tabbar { position: relative; }
+      .help-link a { border-bottom: 0; text-decoration: underline; text-underline-offset: 4px; }
+      .crumbs a { display: inline-flex; align-items: center; min-height: 44px; }
+      .crumbs ol { align-items: center; }
+      .main h2.big { font-size: 26px; }
+      .mq-sec { margin-top: 44px; }
+      .a-form fieldset.panel { padding: 16px 14px; }
+      .a-form .two, .date-row { grid-template-columns: minmax(0, 1fr); }
+      .date-say { padding-top: 0; }
+      .thumbs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .thumbs li:nth-child(n+8):not(:last-child) { display: none; }
+      .opt-card { padding: 12px; min-height: 44px; }
+      .opt-card input, .a-form input[type="checkbox"] { width: 22px; height: 22px; }
+      .opt-card { grid-template-columns: 22px minmax(0, 1fr); }
+      .quick .chip, .btn, .acc .acts .btn { min-height: 44px; }
+      .pw { flex-wrap: wrap; }
+      .pw input { flex: 1 1 100%; min-height: 44px; }
+      .pw .btn { flex: 1 1 0; }
+      .a-submit { padding: 14px; }
+      .a-submit .btn { width: 100%; }
+      .check .actions .btn { flex: 1 1 100%; }
+      .secret { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+      .secret .btn { justify-self: start; }
+      .l-filters .f-lb { flex: 1 1 100%; }
+      /* Une carte par accès. */
+      .acc thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+      .acc, .acc tbody { display: block; }
+      .acc caption { display: block; }
+      .acc tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; margin: 0 0 12px; padding: 14px; border-radius: 14px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+      .acc tr.soon { box-shadow: inset 3px 0 0 var(--warn), inset 0 0 0 1px var(--line); }
+      .acc tr.soon th { box-shadow: none; }
+      .acc th, .acc td { display: block; padding: 0; border: 0; }
+      .acc tbody th, .acc td:last-child { grid-column: 1 / -1; }
+      .acc td[data-k]::before { content: attr(data-k); display: block; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); margin-bottom: 2px; }
+      .acc tbody th a { min-height: 44px; font-size: 16px; }
+      .acc .acts .btn { flex: 1 1 auto; }
+      .hist li { grid-template-columns: minmax(0, 1fr); }
+      .stats dd { font-size: 18px; }
+      .stats dd small { display: block; margin: 0; }
+      .mq-scrim { padding: 20px 8px; }
+      .mq-scrim .dialog { padding: 20px 16px; }
+      .dialog .actions .btn { flex: 1 1 100%; }
+      .mq-notes { padding: 26px 16px 32px; }
+    }
+    .quick .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); box-shadow: none; }
+    .quick .chip[aria-pressed="true"]::before { content: "✓"; font-size: 12px; }
+  </style>
+</head>
+<body class="admin">
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="shell">
+
+<aside class="side" id="admin-nav" aria-label="Menu de l’administration">
+  <a class="word" href="#">Nicephos</a>
+  <button class="cmdk" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
+  <nav class="nav" aria-label="Accueil de l’administration">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
+  </nav>
+  <p class="grp" id="nav-photos">Photos</p>
+  <nav class="nav" aria-labelledby="nav-photos">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Sorties</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg>Voyages</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a>
+  </nav>
+  <p class="grp" id="nav-people">Personnes</p>
+  <nav class="nav" aria-labelledby="nav-people">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/></svg>Personnes</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>App de terrain</a>
+  </nav>
+  <p class="grp" id="nav-publish">Publier</p>
+  <nav class="nav" aria-labelledby="nav-publish">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>À valider<span class="nav-badge">5<span class="sr-only"> photos</span></span></a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>Site public</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>Instagram</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>Galeries privées <span class="mq-n" aria-hidden="true">1</span></a>
+    <ul class="nav-sub">
+      <li><a href="#" aria-current="page">Accès<span class="nav-badge">1<span class="sr-only"> accès expire bientôt</span></span></a></li>
+      <li><a href="#">Galeries</a></li>
+    </ul>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>Boutique</a>
+  </nav>
+  <p class="grp" id="nav-team">Équipe</p>
+  <nav class="nav" aria-labelledby="nav-team">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg>Comptes et rôles</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.5"/></svg>Circuit de publication</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Journal</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
+  </nav>
+  <nav class="nav" aria-label="Réglages">
+    <a href="#" style="margin-top:10px"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Réglages</a>
+  </nav>
+  <div class="foot">
+    <a class="me-link" href="#"><span class="av" aria-hidden="true">J</span><span class="who">Julien<small>Administrateur · Mon compte</small><small class="zit">Connexion via Zitadel</small></span></a>
+    <nav class="nav" aria-label="Aide et nouveautés">
+      <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg>Aide</a>
+      <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>Nouveautés</a>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" id="contenu" tabindex="-1">
+  <p class="help-link"><a href="#">Aide sur cette page</a></p>
+  <p class="mq-screen mq-first"><b>Écran A</b> Créer un accès · vendredi 16 octobre 2026, 10 h 40 <code>/admin/prive/acces/nouveau</code></p>
+
+  <nav class="crumbs" aria-label="Fil d’Ariane">
+    <ol><li><a href="#">Galeries privées</a></li><li><a href="#">Accès</a></li><li><span aria-current="page">Nouvel accès</span></li></ol>
+  </nav>
+  <div class="a-top">
+    <h1>Nouvel accès privé</h1>
+    <p class="sub">Un accès, c’est une personne, ses photos, ses droits et une date de fin. Elle reçoit un lien personnel ; vous lui donnez le mot de passe à part.</p>
+  </div>
+
+  <div class="a-grid">
+    <form class="a-form" action="#" method="post" aria-label="Créer l’accès privé">
+      <fieldset class="panel">
+        <legend><span class="mq-n" aria-hidden="true">2</span> Pour qui</legend>
+        <div class="two">
+          <label for="qui">Nom de la personne
+            <input type="text" id="qui" name="qui" value="Marie Le Goff" autocomplete="off" aria-describedby="qui-h">
+            <span class="hint" id="qui-h">La galerie s’appellera « Galerie de Marie » : c’est le titre qu’elle verra, après le mot de passe.</span>
+          </label>
+          <label for="mail"><span>E-mail pour l’invitation <span class="opt">(facultatif)</span></span>
+            <input type="email" id="mail" name="mail" value="marie.legoff@exemple.fr" autocomplete="off" aria-describedby="mail-h">
+            <span class="hint" id="mail-h">Sans e-mail, vous copierez le lien vous-même. L’adresse est chiffrée, et effacée six mois après la fin de l’accès.</span>
+          </label>
+        </div>
+        <label for="langue" style="max-width:260px">Langue de l’invitation et de la galerie
+          <select id="langue" name="langue"><option selected>Français</option><option>English</option><option>Deutsch</option></select>
+        </label>
+      </fieldset>
+
+      <fieldset class="panel">
+        <legend><span class="mq-n" aria-hidden="true">3</span> Photos</legend>
+        <div class="ph-count"><span><strong>24 photos choisies</strong> · séance du 12 septembre 2026, plage du Sillon</span><span class="actions"><a class="btn ghost" href="#">Choisir dans la photothèque</a></span></div>
+        <ul class="thumbs" aria-label="Photos de la galerie (8 premières sur 24)">
+          <li><img src="_commun/photos/ciel.webp" width="900" height="600" alt="Le soleil derrière Cézembre"></li>
+          <li><img src="_commun/photos/portrait.webp" width="600" height="900" alt="Marie, contre-jour"></li>
+          <li><img src="_commun/photos/dune.webp" width="900" height="600" alt="Sable chaud, 17 h"></li>
+          <li><img src="_commun/photos/ruelle.webp" width="600" height="900" alt="Seule sur la cale"></li>
+          <li><img src="_commun/photos/brume.webp" width="900" height="600" alt="Brume sur le Grand Bé"></li>
+          <li><img src="_commun/photos/mer.webp" width="900" height="600" alt="Marée montante"></li>
+          <li><span class="flag" aria-hidden="true">▲</span><img src="_commun/photos/quai.webp" width="900" height="600" alt="Les brise-lames, à trois — à vérifier"></li>
+          <li><span class="more-ph">+ 17<br>autres</span></li>
+        </ul>
+        <div class="check" role="group" aria-labelledby="chk-t">
+          <p class="t" id="chk-t"><span class="sym" aria-hidden="true">▲</span> 1 photo à vérifier avant l’envoi</p>
+          <p>« Les brise-lames, à trois » montre une personne reconnaissable qui n’a pas donné son accord pour un usage privé (Paul Riou, accord « site » seulement).</p>
+          <p class="actions"><a class="btn sec" href="#">Retirer cette photo</a> <a class="btn ghost" href="#">Voir l’accord de Paul Riou</a></p>
+        </div>
+      </fieldset>
+
+      <fieldset class="panel">
+        <legend><span class="mq-n" aria-hidden="true">4</span> Droits de Marie</legend>
+        <div class="rights">
+          <label class="opt-card"><input type="radio" name="droits" value="voir"><span>Voir seulement <span class="tag">(choix par défaut)</span></span><span class="d">Les photos s’affichent avec le filigrane du site ; rien à télécharger.</span></label>
+          <label class="opt-card"><input type="radio" name="droits" value="telecharger"><span>Voir et télécharger en 2 000 px</span><span class="d">JPEG de 1 à 1,5 Mo, sans GPS, marqué « usage personnel ». Jamais l’original.</span></label>
+          <label class="opt-card"><input type="radio" name="droits" value="tirages" checked><span>Voir, télécharger et choisir des tirages <span class="sel">— choisi</span></span><span class="d">En plus : ses favoris vous sont envoyés comme sélection, et elle peut commander un tirage au prix de la boutique.</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="panel">
+        <legend><span class="mq-n" aria-hidden="true">5</span> Durée</legend>
+        <div class="date-row">
+          <label for="fin">Expire le
+            <input type="text" id="fin" name="fin" value="15/11/2026" inputmode="numeric" aria-describedby="fin-f fin-h">
+            <span class="hint" id="fin-f">jour/mois/année, ou « 15 nov. »</span>
+          </label>
+          <p class="date-say" aria-live="polite">Dimanche 15 novembre 2026, à minuit<span class="mono">dans 30 jours</span></p>
+        </div>
+        <div class="quick" role="group" aria-label="Durées courantes">
+          <button class="chip" type="button">7 jours</button>
+          <button class="chip" type="button" aria-pressed="true">30 jours</button>
+          <button class="chip" type="button">3 mois</button>
+        </div>
+        <p class="hint after" id="fin-h">30 jours par défaut, 12 mois au plus. Vous pourrez prolonger sans changer le lien. Passé cette date, Marie voit une page qui donne la date et votre adresse.</p>
+      </fieldset>
+
+      <fieldset class="panel">
+        <legend><span class="mq-n" aria-hidden="true">6</span> Mot de passe</legend>
+        <label for="mdp" class="lbl">Mot de passe, généré : 4 mots reliés par des tirets</label>
+        <div class="pw">
+          <input type="text" id="mdp" name="mdp" value="olive-pont-marée-sept" readonly aria-describedby="mdp-h" spellcheck="false">
+          <button class="btn sec" type="button" aria-pressed="true" aria-controls="mdp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>Afficher</button>
+          <button class="btn ghost" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg>Régénérer</button>
+        </div>
+        <p class="hint after" id="mdp-h">Facile à dicter au téléphone. Marie peut le taper sans accents ni majuscules : « olive pont maree sept » marche aussi.</p>
+        <p class="lock-note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg><span>Il n’est jamais écrit dans l’e-mail. Il s’affiche une dernière fois après la création, puis seule son empreinte est gardée.</span></p>
+      </fieldset>
+
+      <div class="a-submit">
+        <label class="inline"><input type="checkbox" name="envoyer" checked> Envoyer l’invitation par e-mail à Marie</label>
+        <p class="hint">Rien n’est envoyé avant le bouton ci-dessous.</p>
+        <p class="actions" style="width:100%"><button class="btn big" type="submit">Créer l’accès et envoyer l’invitation</button> <a class="btn ghost" href="#">Annuler</a></p>
+      </div>
+    </form>
+
+    <aside class="mail-prev" aria-labelledby="prev-t">
+      <div class="panel">
+        <div class="mail-hd">
+          <h2 id="prev-t"><span class="mq-n" aria-hidden="true">7</span> Aperçu de l’e-mail d’invitation</h2>
+          <dl>
+            <dt>De</dt><dd>Julien · Nicephos &lt;julien@nicephos.art&gt;</dd>
+            <dt>À</dt><dd>marie.legoff@exemple.fr</dd>
+            <dt>Objet</dt><dd>Julien vous a préparé une galerie privée</dd>
+          </dl>
+        </div>
+        <div class="mail-body">
+          <p>Bonjour Marie,</p>
+          <p>Voici les 24 photos de notre séance du 12 septembre, sur la plage du Sillon. Elles sont dans une galerie privée, rien que pour vous :</p>
+          <span class="m-link">https://www.nicephos.art/g/•••••••• <span class="sr-only">(lien personnel, inséré à l’envoi)</span></span>
+          <p class="until">Accès valable jusqu’au <strong>dimanche 15 novembre 2026</strong>.</p>
+          <p>Le mot de passe, je vous le donne à part, par SMS. Vous pourrez :</p>
+          <ul>
+            <li>marquer d’un cœur vos préférées et me les envoyer ;</li>
+            <li>télécharger les photos (2 000 px, pour votre usage personnel) ;</li>
+            <li>choisir celles à tirer.</li>
+          </ul>
+          <p>Ce lien est à vous seule : merci de ne pas le transférer.<br>À bientôt, Julien</p>
+          <p class="small">Nicephos note la date de vos visites, vos favoris et vos téléchargements, pour savoir si les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Un seul cookie, nécessaire, garde la galerie ouverte. <a href="#">Confidentialité</a></p>
+        </div>
+        <p class="mail-foot">Texte seul, sans image ni pixel de suivi · environ 2 ko · en français, langue choisie plus haut</p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ================= Écran B ================= -->
+  <section class="mq-sec" aria-labelledby="ecran-b">
+    <p class="mq-screen" id="ecran-b"><b>Écran B</b> Juste après « Créer l’accès » · page affichée une seule fois <code>/admin/prive/acces/31/cree</code></p>
+    <p class="flash-ok" role="status"><span class="sym" aria-hidden="true">✓</span><span>Accès créé pour <strong>Marie Le Goff</strong>. L’invitation est partie à marie.legoff@exemple.fr à 10 h 42.</span></p>
+    <h2 class="big"><span class="mq-n" aria-hidden="true">8</span> À transmettre à Marie, par un autre canal</h2>
+    <div class="panel secrets">
+      <p class="once"><span class="sym" aria-hidden="true">▲</span><span><strong>Notez-les maintenant :</strong> en quittant cette page, ni le lien ni le mot de passe ne pourront être relus. Perdus, ils se remplacent (« Nouveau mot de passe » garde le lien).</span></p>
+      <div class="secret">
+        <span class="k" id="k-lien">Lien personnel</span>
+        <output aria-labelledby="k-lien">https://www.nicephos.art/g/k3Rf9vQ2TzL8wYp1mNc4bHsJ7dXa0eUq</output>
+        <button class="btn sec" type="button">Copier le lien</button>
+      </div>
+      <div class="secret">
+        <span class="k" id="k-mdp">Mot de passe</span>
+        <output aria-labelledby="k-mdp">olive-pont-marée-sept</output>
+        <span class="copied" role="status"><span aria-hidden="true">✓ </span>Copié</span>
+      </div>
+      <div class="secret">
+        <span class="k" id="k-sms">SMS prêt à envoyer</span>
+        <p class="sms" id="sms">Bonjour Marie, le mot de passe de votre galerie : olive-pont-marée-sept. Le lien est dans mon e-mail de ce matin. Julien</p>
+        <button class="btn sec" type="button">Copier le SMS</button>
+      </div>
+      <p class="actions"><a class="btn" href="#ecran-c">J’ai noté, voir les accès</a> <a class="btn ghost" href="#">Voir la galerie comme Marie</a></p>
+    </div>
+  </section>
+
+  <!-- ================= Écran C ================= -->
+  <section class="mq-sec" aria-labelledby="ecran-c-t">
+    <p class="mq-screen" id="ecran-c"><b>Écran C</b> La liste des accès, quatre semaines plus tard · jeudi 12 novembre 2026 <code>/admin/prive/acces</code></p>
+    <h2 class="big" id="ecran-c-t">Accès privés</h2>
+    <p class="sub" style="font-size:13.5px;color:var(--ink2)"><strong style="color:var(--ink);font-weight:500">1 accès expire dans 3 jours</strong> · 2 actifs · ouvertures comptées quand le mot de passe est accepté, pas quand le lien est seulement chargé.</p>
+
+    <div class="l-filters">
+      <span class="f-lb" id="f-etat">Afficher</span>
+      <ul class="chips" aria-labelledby="f-etat">
+        <li><a class="chip" href="#">Actifs <span class="n">(2)</span></a></li>
+        <li><a class="chip" href="#">Expirent bientôt <span class="n">(1)</span></a></li>
+        <li><a class="chip" href="#">Terminés <span class="n">(2)</span></a></li>
+        <li><a class="chip" href="#" aria-current="true">Tous <span class="n">(5)</span></a></li>
+      </ul>
+      <a class="btn" href="#" style="margin-left:auto">Nouvel accès</a>
+    </div>
+
+    <table class="acc">
+      <caption><span class="mq-n" aria-hidden="true">9</span> Tous les accès <span class="mono">5 accès, les plus proches de leur fin d’abord · heure de Paris</span></caption>
+      <thead>
+        <tr><th scope="col">Pour qui</th><th scope="col">Droits</th><th scope="col">Fin de l’accès</th><th scope="col">État</th><th scope="col">Activité</th><th scope="col">Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr class="soon">
+          <th scope="row"><a href="#activite">Marie Le Goff</a><span class="gal"><img src="_commun/photos/ciel.webp" width="900" height="600" alt="">Galerie de Marie · 24 photos</span></th>
+          <td data-k="Droits">Voir, télécharger, tirages</td>
+          <td data-k="Fin de l’accès"><time datetime="2026-11-15">15 nov. 2026</time><span class="mono">créé le 16 oct. par Julien</span></td>
+          <td data-k="État"><span class="etat warn"><span class="sym" aria-hidden="true">▲</span>Expire dans 3 jours</span></td>
+          <td data-k="Activité"><span class="act"><strong>Ouvert 4 fois</strong><span>dernière ouverture le <time datetime="2026-10-18T21:10+02:00">18 oct. à 21 h 10</time></span><span>6 favoris · sélection envoyée</span></span></td>
+          <td><span class="acts"><a class="btn sec" href="#prolonger">Prolonger…</a> <a class="btn ghost risk" href="#ecran-d">Révoquer…</a></span></td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="#">Claire et Antoine Dubreuil</a><span class="gal"><img src="_commun/photos/mer.webp" width="900" height="600" alt="">Mariage à Dinard · 86 photos</span></th>
+          <td data-k="Droits">Voir et télécharger</td>
+          <td data-k="Fin de l’accès"><time datetime="2026-12-31">31 déc. 2026</time><span class="mono">créé le 2 nov. par Sébastien</span></td>
+          <td data-k="État"><span class="etat done"><span class="sym" aria-hidden="true">●</span>Actif</span></td>
+          <td data-k="Activité"><span class="act"><strong>Ouvert 11 fois</strong><span>dernière ouverture le <time datetime="2026-11-09T14:02+01:00">9 nov. à 14 h 02</time></span><span>3 appareils · 52 téléchargements</span></span></td>
+          <td><span class="acts"><a class="btn sec" href="#">Prolonger…</a> <a class="btn ghost risk" href="#">Révoquer…</a></span></td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="#">Hugo Lambert</a><span class="gal"><img src="_commun/photos/dune.webp" width="900" height="600" alt="">Portraits d’atelier · 9 photos</span></th>
+          <td data-k="Droits">Voir seulement</td>
+          <td data-k="Fin de l’accès"><time datetime="2026-12-12">12 déc. 2026</time><span class="mono">créé le 12 nov. par Julien</span></td>
+          <td data-k="État"><span class="etat done"><span class="sym" aria-hidden="true">●</span>Actif</span></td>
+          <td data-k="Activité"><span class="act"><strong>Jamais ouvert</strong><span>invitation copiée, sans e-mail</span></span></td>
+          <td><span class="acts"><a class="btn sec" href="#">Prolonger…</a> <a class="btn ghost risk" href="#">Révoquer…</a></span></td>
+        </tr>
+        <tr class="ended">
+          <th scope="row"><a href="#">Agence Littoral</a><span class="gal"><img src="_commun/photos/quai.webp" width="900" height="600" alt="">Repérages à Cancale · 12 photos</span></th>
+          <td data-k="Droits">Voir seulement</td>
+          <td data-k="Fin de l’accès"><time datetime="2026-11-01">1<sup>er</sup> nov. 2026</time><span class="mono">créé le 2 oct. par Sébastien</span></td>
+          <td data-k="État"><span class="etat stop"><span class="sym" aria-hidden="true">✕</span>Expiré</span></td>
+          <td data-k="Activité"><span class="act"><strong>Ouvert 2 fois</strong><span>dernière ouverture le <time datetime="2026-10-05T09:31+02:00">5 oct. à 9 h 31</time></span></span></td>
+          <td><span class="acts"><a class="btn sec" href="#">Rouvrir…</a></span></td>
+        </tr>
+        <tr class="ended">
+          <th scope="row"><a href="#">Thomas Keller</a><span class="gal"><img src="_commun/photos/lac.webp" width="900" height="600" alt="">Fribourg, portraits · 15 photos</span></th>
+          <td data-k="Droits">Voir et télécharger</td>
+          <td data-k="Fin de l’accès"><time datetime="2026-11-03">révoqué le 3 nov.</time><span class="mono">par Julien : lien transféré</span></td>
+          <td data-k="État"><span class="etat stop"><span class="sym" aria-hidden="true">✕</span>Révoqué</span></td>
+          <td data-k="Activité"><span class="act"><strong>Ouvert 7 fois</strong><span>5 appareils, alerte à partir de 3</span></span></td>
+          <td><span class="acts"><a class="btn sec" href="#">Nouvel accès…</a></span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="legend"><span class="f-lb">États</span>
+      <span class="etat"><span class="sym" aria-hidden="true">○</span>Brouillon, pas encore envoyé</span>
+      <span class="etat done"><span class="sym" aria-hidden="true">●</span>Actif</span>
+      <span class="etat warn"><span class="sym" aria-hidden="true">▲</span>Expire dans 7 jours ou moins</span>
+      <span class="etat stop"><span class="sym" aria-hidden="true">✕</span>Expiré ou révoqué : le lien ne marche plus</span>
+    </p>
+
+    <div class="c-grid" id="activite">
+      <section class="panel" aria-labelledby="act-t">
+        <h3 id="act-t"><span class="mq-n" aria-hidden="true">10</span> Accès de Marie Le Goff : activité</h3>
+        <dl class="stats">
+          <div><dt>Ouvertures</dt><dd>4<small>sur 2 appareils</small></dd></div>
+          <div><dt>Favoris</dt><dd>6<small>sur 24</small></dd></div>
+          <div><dt>Téléchargements</dt><dd>9<small>photos</small></dd></div>
+        </dl>
+        <ol class="hist" reversed>
+          <li><time datetime="2026-10-18T21:14+02:00">18 oct., 21 h 14</time><span>Marie a envoyé sa sélection : 6 photos. <a class="more" href="#">Voir la sélection</a></span></li>
+          <li><time datetime="2026-10-18T21:10+02:00">18 oct., 21 h 10</time><span>Mot de passe accepté, sur un deuxième appareil.</span></li>
+          <li><time datetime="2026-10-17T08:05+02:00">17 oct., 8 h 05</time><span>9 photos téléchargées en 2 000 px.</span></li>
+          <li><time datetime="2026-10-16T19:02+02:00">16 oct., 19 h 02</time><span>Mot de passe accepté. Première ouverture.</span></li>
+          <li><time datetime="2026-10-16T10:42+02:00">16 oct., 10 h 42</time><span>Accès créé par Julien ; invitation envoyée.</span></li>
+        </ol>
+      </section>
+      <section class="panel side-acts" aria-labelledby="pro-t" id="prolonger">
+        <h3 id="pro-t">Prolonger, remplacer, révoquer</h3>
+        <form action="#" method="post">
+          <label for="fin2">Prolonger jusqu’au
+            <input type="text" id="fin2" name="fin2" value="15/12/2026" inputmode="numeric" aria-describedby="fin2-h">
+          </label>
+          <p class="hint" id="fin2-h">Le lien et le mot de passe restent les mêmes.</p>
+          <label class="inline"><input type="checkbox" checked> Prévenir Marie par e-mail</label>
+          <p class="actions"><button class="btn" type="submit">Prolonger l’accès</button></p>
+        </form>
+        <hr>
+        <p class="actions"><a class="btn ghost" href="#">Nouveau mot de passe…</a> <a class="btn ghost" href="#">Voir comme Marie</a></p>
+        <p class="hint">Un nouveau mot de passe remplace l’ancien ; le lien ne change pas.</p>
+        <hr>
+        <p class="actions"><a class="btn ghost risk" href="#ecran-d">Révoquer l’accès…</a></p>
+        <p class="hint">Demandera confirmation. Utile si le lien a été transféré.</p>
+      </section>
+    </div>
+  </section>
+
+  <!-- ================= Écran D ================= -->
+  <section class="mq-sec" aria-labelledby="ecran-d">
+    <p class="mq-screen" id="ecran-d"><b>Écran D</b> « Révoquer… » : le dialogue s’ouvre, le focus est sur « Annuler » ; puis le message qui permet d’annuler</p>
+    <div class="mq-scrim">
+      <dialog open class="dialog revoke" aria-labelledby="rv-t" aria-describedby="rv-d">
+        <form method="dialog">
+          <h2 id="rv-t"><span class="mq-n" aria-hidden="true">11</span> Révoquer l’accès de Marie ?</h2>
+          <p class="sub" id="rv-d">Le lien cessera de fonctionner immédiatement.</p>
+          <h3>Ce qui va se passer</h3>
+          <ul class="conseq">
+            <li>Si Marie a la galerie ouverte, la page suivante lui dira « Cet accès a été fermé » avec votre adresse, sans montrer les photos.</li>
+            <li>Ses 6 favoris, sa sélection et l’historique restent ici, pour vous.</li>
+            <li>Les 24 photos ne sont ni supprimées ni dépubliées.</li>
+            <li>Pour lui rendre l’accès ensuite, il faudra un nouveau lien.</li>
+          </ul>
+          <label class="inline"><input type="checkbox"> Prévenir Marie par e-mail</label>
+          <p class="actions"><button class="btn ghost mq-focus" type="submit" value="annuler">Annuler</button> <button class="btn danger" type="submit" value="revoquer">Révoquer</button></p>
+        </form>
+      </dialog>
+      <p class="mq-cap">puis, en bas de l’écran</p>
+      <div class="mq-toast" role="status">
+        <p><span class="mq-n" aria-hidden="true">12</span> Accès de Marie révoqué.<span class="left">Annulable encore 7 s · le délai s’arrête tant que la souris ou le focus est ici</span></p>
+        <button type="button">Annuler</button>
+        <span class="timer" aria-hidden="true"><i></i></span>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<aside class="mq-notes" aria-labelledby="mq-notes-t">
+  <h2 id="mq-notes-t">Ce qui change</h2>
+  <p class="intro">Maquette MQ-18 · Administration › Galeries privées › Accès. Le mode suit le système : « Chambre noire » sur la capture de bureau, clair sur celle du téléphone. Données fictives, photos de démonstration, aucun script : les états sont figés pour la démonstration. Les repères renvoient aux numéros ci-dessous ; Marie retrouve ces réglages dans les maquettes MQ-16 (accès) et MQ-17 (galerie).</p>
+  <ol class="mq-list">
+    <li><span class="mq-n">1</span><span><strong>Les galeries privées trouvent leur place sans rallonger le menu.</strong> Rangées dans « Publier » (MQ-07), avec « Accès » et « Galeries » ; le compteur se lit en entier (« 1 accès expire bientôt »). L’administration reste réservée à l’équipe, connectée via Zitadel, ce que rappelle le pied du menu. Modérateur et Relecteur n’y ont pas accès.</span><span class="refs">UX-A-32, UX-A-11 · loi de Hick · B&amp;S 1.2.1 · RGAA 12.2 · étude G55</span></li>
+    <li><span class="mq-n">2</span><span><strong>Un accès, une personne nommée.</strong> Le nom donne le titre que verra l’invitée (« Galerie de Marie ») ; l’e-mail est facultatif et sa durée de conservation est dite ; la langue de l’invitation se choisit ici. Chaque champ a son étiquette visible et son aide reliée.</span><span class="refs">UX-T-18 · étude G5, G37, G70 · RGAA 11.1, 11.2 · WCAG 3.3.2 · Opquast 69</span></li>
+    <li><span class="mq-n">3</span><span><strong>Les photos, et leurs accords, avant l’envoi.</strong> On voit les 8 premières et le total ; une photo dont une personne reconnaissable n’a pas d’accord pour un usage privé est signalée par un symbole, un mot et deux issues, sans bloquer le reste.</span><span class="refs">UX-T-18, UX-A-16 · étude G61 · B&amp;S 1.1 Incitation · WCAG 1.4.1 · Nielsen 5</span></li>
+    <li><span class="mq-n">4</span><span><strong>Les droits en trois phrases, pas en cases à combiner.</strong> Groupe de boutons radio dans un fieldset ; chaque option dit ce que la personne pourra faire, et le poids d’un téléchargement. Le choix par défaut est le plus prudent (« Voir seulement ») ; le choix fait est marqué par un cadre ET le mot « choisi ».</span><span class="refs">UX-T-18 · étude G44, G45 · RGAA 11.5, 11.6 · B&amp;S 3.1 · WCAG 1.4.1</span></li>
+    <li><span class="mq-n">5</span><span><strong>La fin de l’accès, en date et en mots.</strong> 30 jours par défaut, raccourcis 7 jours / 30 jours / 3 mois, et la date relue en toutes lettres (« dimanche 15 novembre 2026, à minuit »). L’aide annonce qu’on pourra prolonger sans changer le lien.</span><span class="refs">UX-T-18 · étude G8, G10 · WCAG 2.2.1 · Opquast 172 · ISO 9241-110 autodescriptivité</span></li>
+    <li><span class="mq-n">6</span><span><strong>Un mot de passe qu’on peut dicter.</strong> Généré, jamais saisi à la main ; « Afficher » est un vrai bouton bascule (aria-pressed), « Régénérer » à côté ; la saisie tolère accents, majuscules et espaces. Il ne voyage jamais dans l’e-mail.</span><span class="refs">UX-T-18 · WCAG 3.3.8 · étude G14, G15, G22 · RGAA 7.1 · Opquast 76</span></li>
+    <li><span class="mq-n">7</span><span><strong>L’e-mail se relit avant de partir.</strong> Expéditeur nommé, objet humain, date de fin mise en évidence, ce que Marie pourra faire, information sur ses données et le cookie. Texte seul, environ 2 ko, sans pixel de suivi.</span><span class="refs">UX-T-18 · étude G58, G72 · RGPD art. 13 · RGESN 4.4 · Nielsen 1</span></li>
+    <li><span class="mq-n">8</span><span><strong>Le lien et le mot de passe, une seule fois.</strong> La page le dit avant de les montrer, propose de les copier un par un et un SMS prêt à envoyer ; « Copié » est annoncé comme message de statut. Un rechargement ne crée pas un second accès.</span><span class="refs">UX-T-18 · étude G7, G57 · RGAA 7.5 · WCAG 4.1.3 · B&amp;S 1.4 Feedback immédiat</span></li>
+    <li><span class="mq-n">9</span><span><strong>La liste parle la langue commune des états.</strong> Même pastille (forme et mot) que les photos et les commandes, avec sa légende ; « Ouvert » veut dire « mot de passe accepté », jamais « lien chargé » (un antivirus ouvre aussi les liens). Vrai tableau de données sur bureau, une carte par accès sur téléphone, cibles de 44 px.</span><span class="refs">UX-A-16, UX-A-32 · étude G12, G59 · RGAA 5.4, 5.6, 5.7, 3.1 · WCAG 1.4.1, 2.5.8</span></li>
+    <li><span class="mq-n">10</span><span><strong>L’activité se lit comme un récit, et les gestes sont à côté.</strong> Une phrase par événement, heure de Paris, aucune adresse IP ; « Prolonger » garde le lien et le dit ; « Nouveau mot de passe » aussi ; « Révoquer » est isolé en bas, en couleur de danger ET annoncé comme demandant confirmation.</span><span class="refs">UX-T-18, UX-A-19 · étude G9, G10, G31, G60 · B&amp;S 1.2.1 · ISO 9241-110 conformité aux attentes</span></li>
+    <li><span class="mq-n">11</span><span><strong>Révoquer : une confirmation qui nomme la personne et les conséquences.</strong> Ce que verra Marie, ce qui reste (favoris, historique), ce qui ne bouge pas (les photos) ; « Annuler » vient en premier et reçoit le focus ; le texte du bouton de danger est sombre en mode sombre (6,5:1).</span><span class="refs">UX-A-07, UX-A-32 · WCAG 3.3.4 · RGAA 7.1, 12.8 · B&amp;S 3.1, 5.1 · Nielsen 3, 5</span></li>
+    <li><span class="mq-n">12</span><span><strong>Et dix secondes pour changer d’avis.</strong> Le message dit ce qui vient d’arriver, offre « Annuler » et montre le temps restant ; le délai s’arrête au survol et au focus, le message est annoncé et « Annuler » s’atteint d’une tabulation.</span><span class="refs">UX-A-08, UX-A-07 · WCAG 2.2.1, 4.1.3 · RGAA 7.5 · B&amp;S 3.2 Contrôle utilisateur</span></li>
+  </ol>
+  <p class="after">À trancher avant de coder : l’étude (G14) prévoit un mot de passe de 12 caractères groupés par 4 ; je propose quatre mots, plus faciles à dicter, à condition de les tirer d’une liste d’au moins 7 776 mots sans homonymes (51,7 bits, au-dessus des 50 bits demandés par la CNIL). Et le seuil d’alerte d’appareils (G31) : 3, comme dans l’étude, mais seulement signalé dans la liste, jamais bloquant pour une famille qui regarde à plusieurs.</p>
+</aside>
+
+<nav class="tabbar" aria-label="Navigation rapide">
+  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
+  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photos</a>
+  <a class="imp" href="#" aria-label="Importer des photos"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></a>
+  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
+  <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
+</nav>
+</body>
+</html>

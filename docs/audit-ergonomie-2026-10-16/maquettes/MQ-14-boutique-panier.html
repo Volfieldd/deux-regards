@@ -114,6 +114,11 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
 .mq-ref { display: block; margin-top: 4px; font-family: var(--mono); font-size: 12.5px; color: var(--mute); }
 .mq-socle { margin: 32px 0 0; padding-top: 18px; border-top: 1px solid var(--rule); max-width: 110ch; color: var(--prose); font-size: 14px; }
 @media print { .mq-pin, .mq-notes { display: none !important; } }
+/* Sur téléphone, les repères ne débordent jamais de l'écran (pas de défilement horizontal) */
+@media (max-width: 960px) {
+  .mq-pin[style*="right:-"] { right: 0 !important; }
+  .mq-pin[style*="left:-"] { left: 0 !important; }
+}
 
 
 /* ===== MQ-14 : panier ===== */
@@ -157,13 +162,16 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
 .pn-dl .tva dt, .pn-dl .tva dd { color: var(--mute); font-size: 14px; }
 .pn-pays { display: grid; gap: 6px; }
 .pn-pays .ligne { display: flex; gap: 8px; }
-.pn-pays select { flex: 1; }
+.pn-pays select { flex: 1 1 auto; min-width: 0; width: auto; }
+.pn-recap .pn-pays .nx-btn { width: auto; flex: none; }
 .pn-delai { margin: 0; color: var(--prose); font-size: 14.5px; }
 .pn-delai strong { color: var(--ink); font-weight: 500; }
 .pn-recap .nx-btn { width: 100%; }
 .pn-suite { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; color: var(--prose); font-size: 14.5px; }
-.pn-suite li { display: flex; gap: 10px; align-items: baseline; }
+.pn-suite li { display: block; padding-left: 26px; text-indent: -26px; }
+.pn-suite li::before { display: inline-block; width: 26px; text-indent: 0; }
 .pn-suite li::before { content: '—' / ''; color: var(--mute); }
+.pn-suite li > a { text-indent: 0; }
 .pn-continuer { justify-self: center; }
 /* États dans les notes */
 .pn-vide { display: grid; gap: 14px; justify-items: start; padding: 28px 4px; }
@@ -175,12 +183,20 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
 .mq-entete + .mq-entete { margin-top: 12px; }
 .mq-cap2 { margin: 18px 0 8px; font-family: var(--mono); font-size: 13px; color: var(--mute); }
 
+.mq-large { grid-column: 1 / -1; }
+.pn-mixte-intro { margin: 0 0 18px; max-width: 70ch; color: var(--prose); }
+.pn-blocs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; }
+.pn-bloc { display: grid; gap: 12px; align-content: start; padding: 20px; border: 1px solid var(--field); }
+.pn-bloc h3 { margin: 0; font-weight: 400; font-size: 19px; }
+.pn-bloc p { margin: 0; color: var(--prose); }
+.pn-bloc .nx-btn { width: 100%; }
+
 @media (max-width: 960px) {
   .pn-grille { grid-template-columns: 1fr; margin-top: 16px; }
   .pn-ligne { grid-template-columns: 112px minmax(0, 1fr); gap: 6px 16px; }
   .pn-ligne img { width: 112px; }
   .pn-prix { grid-column: 2; text-align: left; }
-  .pn-recap { position: static; padding: 22px 18px; margin-inline: calc(-1 * var(--gut)); border-inline: 0; }
+  .pn-recap { position: relative; padding: 22px 18px; margin-inline: calc(-1 * var(--gut)); border-inline: 0; }
   .pn-actions { margin-top: 8px; }
   .nx-panier { letter-spacing: .12em; }
   /* La commande reste à portée du pouce, sans masquer le focus (WCAG 2.4.11) */
@@ -262,7 +278,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
             <h2><a href="/tirages/miradouro-l-heure-doree">Miradouro, l’heure dorée</a></h2>
             <p class="nx-mono">Julien · Lisbonne, 2026 · <span class="nw">J-2026-019</span></p>
             <p>40 × 60 cm · Hahnemühle Photo Rag · sans cadre</p>
-            <p>Exemplaire 7/15, signé et numéroté</p>
+            <p>Signé et numéroté sur 15 ; numéro attribué au paiement</p>
             <div class="pn-actions">
               <div class="pn-qte">
                 <label for="q1">Quantité <span class="nx-q">(9 disponibles)</span></label>
@@ -280,23 +296,23 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
           <span class="mq-pin" aria-hidden="true" style="left:-13px;top:14px">3</span>
         </li>
         <li class="pn-ligne">
-          <img src="_commun/photos/mer.webp" width="900" height="600" alt="">
+          <img src="_commun/photos/ciel.webp" width="900" height="600" alt="">
           <div class="pn-info">
-            <h2><a href="/tirages/le-phare-maree-basse">Le phare, marée basse</a></h2>
-            <p class="nx-mono">Sébastien · Saint-Malo, 2025 · <span class="nw">S-2025-031</span></p>
+            <h2><a href="/tirages/rua-da-bica-tram-28">Rua da Bica, le 28</a></h2>
+            <p class="nx-mono">Julien · Lisbonne, 2026 · <span class="nw">J-2026-023</span></p>
             <p>40 × 60 cm · Hahnemühle Photo Rag · sans cadre</p>
-            <p>Exemplaire 3/15, signé et numéroté</p>
+            <p>Signé et numéroté sur 15 ; numéro attribué au paiement</p>
             <div class="pn-actions mq-a">
               <div class="pn-qte">
                 <label for="q2">Quantité <span class="nx-q">(1 disponible)</span></label>
                 <div class="ligne">
-                  <select class="nx-input" id="q2" name="q[S-2025-031-40]">
+                  <select class="nx-input" id="q2" name="q[J-2026-023-40]">
                     <option selected>1</option>
                   </select>
-                  <button class="nx-btn nx-btn-2 nx-btn-s" type="submit" name="maj" value="S-2025-031-40" aria-label="Mettre à jour la quantité de Le phare, marée basse">Mettre à jour</button>
+                  <button class="nx-btn nx-btn-2 nx-btn-s" type="submit" name="maj" value="J-2026-023-40" aria-label="Mettre à jour la quantité de Rua da Bica, le 28">Mettre à jour</button>
                 </div>
               </div>
-              <button class="pn-retirer" type="submit" name="retirer" value="S-2025-031-40">Retirer<span class="sr-only"> « Le phare, marée basse » du panier</span></button>
+              <button class="pn-retirer" type="submit" name="retirer" value="J-2026-023-40">Retirer<span class="sr-only"> « Rua da Bica, le 28 » du panier</span></button>
               <span class="mq-pin" aria-hidden="true" style="right:-40px;top:24px">4</span>
             </div>
           </div>
@@ -329,7 +345,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
         <div><dt>Sous-total (2 tirages)</dt><dd>580,00 €</dd></div>
         <div><dt>Livraison France</dt><dd>15,00 €</dd></div>
         <div class="total"><dt>Total TTC</dt><dd>595,00 €</dd></div>
-        <div class="tva"><dt>dont TVA à 5,5 % (œuvres d’art)</dt><dd>31,02 €</dd></div>
+        <div class="tva"><dt>TVA non applicable, art. 293 B du CGI</dt><dd></dd></div>
       </dl>
       <p class="pn-delai"><strong>Délai : 10 à 15 jours ouvrés</strong>, soit une livraison entre le 30 octobre et le 6 novembre. Colissimo suivi, remis contre signature.</p>
       <a class="nx-btn" href="MQ-15-boutique-commande-paiement.html">Commander</a>
@@ -364,7 +380,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
 
 <aside class="mq-notes wrap" aria-labelledby="mq-notes-t">
   <h2 id="mq-notes-t">Maquette MQ-14 — notes de l’auditrice</h2>
-  <p class="mq-intro">Boutique, panier. Thème « Nicephos — nuit ». Deux tirages fictifs ; montants calculés (2 × 290 € + 15 €). Le taux de TVA réduit des œuvres d’art est à confirmer avec votre comptable : s’il ne s’applique pas, la ligne « dont TVA » change, pas le prix affiché.</p>
+  <p class="mq-intro">Boutique, panier. Thème « Nicephos — nuit ». Deux tirages fictifs de Julien ; montants calculés (2 × 290 € + 15 €). Comme le recommande l’étude (arbitrages 6 et 7, S1), chacun vend ses œuvres en son nom : un panier qui mêle les deux auteurs s’affiche en un bloc par vendeur (état ⑨). Mention de franchise de TVA reprise de l’étude, à confirmer avec votre comptable ; le numéro d’exemplaire n’est attribué qu’au paiement (S36).</p>
   <div class="mq-etats">
     <section class="mq-etat mq-a" aria-labelledby="etat-vide">
       <p class="mq-cap" id="etat-vide">Autre état · panier vide</p>
@@ -389,23 +405,51 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
       </div>
       <p class="mq-cap2">Après « Retirer »</p>
       <div class="pn-statut" style="margin:0">
-        <span>« Le phare, marée basse » a été retiré du panier.</span>
+        <span>« Rua da Bica, le 28 » a été retiré du panier.</span>
         <button type="button">Le remettre</button>
       </div>
       <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">8</span>
+    </section>
+    <section class="mq-etat mq-a mq-large" aria-labelledby="etat-mixte">
+      <p class="mq-cap" id="etat-mixte">Autre état · panier qui mêle les deux auteurs : un bloc par vendeur</p>
+      <p class="pn-mixte-intro">Sébastien et Julien vendent chacun leurs tirages, en leur nom : vous passerez deux commandes, avec deux paiements et deux factures. Nous vous le disons ici, pas au moment de payer.</p>
+      <div class="pn-blocs">
+        <section class="pn-bloc" aria-labelledby="bloc-j">
+          <h3 id="bloc-j">Tirages de Julien <span class="nx-q">(2)</span></h3>
+          <p>Miradouro, l’heure dorée · 40 × 60 cm · 290,00 €<br>Rua da Bica, le 28 · 40 × 60 cm · 290,00 €</p>
+          <dl class="pn-dl">
+            <div><dt>Livraison France</dt><dd>15,00 €</dd></div>
+            <div class="total"><dt>Total TTC</dt><dd>595,00 €</dd></div>
+          </dl>
+          <p class="pn-delai">Livré entre le 30 octobre et le 6 novembre.</p>
+          <a class="nx-btn nx-btn-2" href="MQ-15-boutique-commande-paiement.html">Commander les tirages de Julien</a>
+        </section>
+        <section class="pn-bloc" aria-labelledby="bloc-s">
+          <h3 id="bloc-s">Tirages de Sébastien <span class="nx-q">(1)</span></h3>
+          <p>Le phare, marée basse · 30 × 45 cm · 180,00 €</p>
+          <dl class="pn-dl">
+            <div><dt>Livraison France</dt><dd>15,00 €</dd></div>
+            <div class="total"><dt>Total TTC</dt><dd>195,00 €</dd></div>
+          </dl>
+          <p class="pn-delai">Livré entre le 3 et le 10 novembre.</p>
+          <a class="nx-btn nx-btn-2" href="MQ-15-boutique-commande-paiement.html">Commander les tirages de Sébastien</a>
+        </section>
+      </div>
+      <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">9</span>
     </section>
   </div>
 
   <h3>Ce qui change</h3>
   <ol class="mq-leg">
-    <li><span class="mq-pin" aria-hidden="true">1</span><span><strong>« Panier (2) » en toutes lettres</strong> dans l’en-tête, seulement quand il y a quelque chose dedans ; le nombre est lu « 2 tirages ».<span class="mq-ref">UX-T-17 · Opquast 46 · RGAA 6.1 · Nielsen 1, 8</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">2</span><span><strong>Chaque action se confirme</strong> dans un message d’état annoncé (role=status) qui dit ce qui a changé ; après « Retirer », on peut remettre l’article d’un geste.<span class="mq-ref">RGAA 7.5 · WCAG 4.1.3 · B&amp;S 1.1.3 Feedback immédiat · Nielsen 3</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">1</span><span><strong>« Panier (2) » en toutes lettres</strong> dans l’en-tête, seulement quand il y a quelque chose dedans ; le nombre est lu « 2 tirages ».<span class="mq-ref">UX-T-17 · Opquast 30 à 68 (commerce) · RGAA 6.1 · Nielsen 1, 8</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">2</span><span><strong>Chaque action se confirme</strong> dans un message d’état annoncé (role=status) qui dit ce qui a changé ; après « Retirer », on peut remettre l’article d’un geste.<span class="mq-ref">RGAA 7.5 · WCAG 4.1.3 · B&amp;S 1.3 Feedback immédiat · Nielsen 3</span></span></li>
     <li><span class="mq-pin" aria-hidden="true">3</span><span><strong>Une ligne qui dit tout :</strong> titre lié à sa fiche, auteur, inventaire, format, papier, cadre, numéro d’exemplaire et prix TTC. La vignette est décorative (alt vide) : le titre suit.<span class="mq-ref">UX-T-17 · UX-T-05 · Opquast 39 · RGAA 1.2</span></span></li>
     <li><span class="mq-pin" aria-hidden="true">4</span><span><strong>Quantité limitée par la disponibilité,</strong> annoncée dans le libellé ; un bouton « Mettre à jour » envoie le formulaire : rien ne change au simple choix dans la liste, et tout marche sans JavaScript. Boutons nommés par l’article.<span class="mq-ref">UX-F-05 · RGAA 7.5, 11.1, 11.9 · WCAG 3.2.2, 2.4.6 · RGESN 4.4</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">5</span><span><strong>Le total avant de s’engager :</strong> sous-total, livraison selon le pays, total TTC, TVA, et le délai en dates. Un seul bouton plein, « Commander » ; « Continuer la visite » en second. Aucun produit suggéré, aucune case cochée d’avance.<span class="mq-ref">UX-T-17 · Opquast 35, 36, 47 · Code de la consommation L112-1, L221-5 · loi de Hick · B&amp;S 2.2 Densité</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">5</span><span><strong>Le total avant de s’engager :</strong> sous-total, livraison selon le pays, total TTC, mention de TVA, et le délai en dates. Un seul bouton plein, « Commander » ; « Continuer la visite » en second. Aucun produit suggéré, aucune case cochée d’avance.<span class="mq-ref">UX-T-17 · Opquast 30 à 68 (commerce) · Code de la consommation L112-1, L221-5 · loi de Hick · B&amp;S 2.2 Densité</span></span></li>
     <li><span class="mq-pin" aria-hidden="true">6</span><span><strong>Sur téléphone, le total et « Commander »</strong> restent collés en bas (52 px de haut), et html { scroll-padding-bottom } garde le champ actif visible au-dessus.<span class="mq-ref">WCAG 2.4.11, 2.5.8 · UX-F-36 · loi de Fitts</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">7</span><span><strong>Panier vide : une phrase et une porte,</strong> « Voir les tirages disponibles », sans culpabiliser ni pousser.<span class="mq-ref">Opquast 65 · Nielsen 9</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">8</span><span><strong>Pas d’icône de panier tant qu’il est vide,</strong> ni de pastille de couleur : un mot et un chiffre, lisibles sans la couleur. Annulation de « Retirer » à la place d’une confirmation.<span class="mq-ref">UX-T-17 · RGAA 3.1 · WCAG 1.4.1 · Nielsen 3 · B&amp;S 4.2 Contrôle utilisateur</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">7</span><span><strong>Panier vide : une phrase et une porte,</strong> « Voir les tirages disponibles », sans culpabiliser ni pousser.<span class="mq-ref">Opquast 30 à 68 (commerce) · Nielsen 9</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">8</span><span><strong>Pas d’icône de panier tant qu’il est vide,</strong> ni de pastille de couleur : un mot et un chiffre, lisibles sans la couleur. Annulation de « Retirer » à la place d’une confirmation.<span class="mq-ref">UX-T-17 · RGAA 3.1 · WCAG 1.4.1 · Nielsen 3 · B&amp;S 3.2 Contrôle utilisateur</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">9</span><span><strong>Deux auteurs, deux blocs, dit d’avance :</strong> un sous-total, un port, une date et un bouton nommé par vendeur ; boutons secondaires de même poids, pour ne favoriser personne. Le visiteur sait avant de payer qu’il y aura deux paiements.<span class="mq-ref">UX-T-17 · étude S1, arbitrage 7 · Nielsen 1 · B&amp;S 1.1 Incitation · Opquast 30 à 68 (commerce)</span></span></li>
   </ol>
   <p class="mq-socle"><strong>Sobriété :</strong> deux vignettes de 168 px (en production, servies en 336 px, moins de 20 ko chacune), aucun script, aucun traceur ; le panier vit dans une session côté serveur, sans compte. <strong>Socle commun aux maquettes de la boutique :</strong> lien « Aller au contenu » (UX-F-06), liens soulignés (UX-F-23), focus de 2 px, cibles de 44 px au moins, filets de champs à 7,4:1 en nuit (UX-F-04), page en noindex.</p>
 </aside>

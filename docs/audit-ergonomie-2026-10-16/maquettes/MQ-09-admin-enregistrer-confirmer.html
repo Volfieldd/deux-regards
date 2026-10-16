@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Miradouro, l’heure dorée · Photothèque · Administration Nicephos (maquette MQ-09)</title>
+<link rel="stylesheet" href="_commun/admin.css">
+<style>
+/* ===== Barre latérale cible (UX-A-11) : 5 groupes, une seule liste par groupe, tient dans 900 px ===== */
+.side { padding: 12px 12px 10px; }
+.side .word { padding: 2px 10px 6px; }
+.cmdk-row { position: relative; display: flex; align-items: center; margin-bottom: 6px; }
+.cmdk-row .mq-pin { position: absolute; right: -10px; top: -9px; }
+.side .cmdk { height: 34px; margin: 0; color: var(--ink2); flex: 1; min-width: 0; }
+.side .cmdk kbd { white-space: nowrap; font-size: 11px; }
+.mqnav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.mqnav .grp { display: flex; align-items: center; margin: 0; padding: 5px 10px 0; }
+.mqnav .it, .mqlinks .it { display: flex; align-items: center; gap: 11px; min-height: 25px; padding: 0 10px; border-radius: 8px; color: var(--ink2); }
+.mqnav a.it:hover, .mqlinks a.it:hover { background: var(--s2); color: var(--ink); }
+.mqnav .it[aria-current], .mqnav .it.cur { background: var(--s3); color: var(--ink); font-weight: 500; }
+.mqnav .it[aria-current] .ic, .mqnav .it.cur .ic { color: var(--accent-ink); }
+.mqnav .it .l { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mqnav .n { font-size: 12px; color: var(--ink3); }
+.mqser .it { min-height: 24px; padding-left: 39px; gap: 9px; font-size: 13px; }
+.mqser .sw { width: 16px; height: 16px; border-radius: 3px; overflow: hidden; flex: none; box-shadow: 0 0 0 1px var(--line2); }
+.mqser .sw img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mqser .all .l { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+.mqsoon { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 3px 4px 3px 12px; }
+.mqsoon .soon-l { display: inline-flex; align-items: center; font-size: 11.5px; color: var(--ink3); letter-spacing: .04em; margin-right: 2px; }
+.mqsoon ul { display: flex !important; flex-wrap: wrap; gap: 4px; }
+.mqsoon ul li { font-size: 11.5px; line-height: 1.35; color: var(--ink3); padding: 0 6px; border-radius: 6px; border: 1px dashed var(--ink3); }
+.mqsep { border: 0; border-top: 1px solid var(--line); margin: 6px 4px 4px; }
+.mqfoot { margin-top: auto; border-top: 1px solid var(--line); padding-top: 6px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+.mqme { position: relative; display: flex; align-items: center; gap: 6px; }
+.mqme > .mq-pin { position: absolute; right: 38px; top: -8px; }
+.mqme .who { min-width: 0; white-space: normal; overflow: visible; }
+.mqme .who small { white-space: nowrap; line-height: 1.3; }
+.mqme .who small .ml { display: block; }
+.mqme form { margin: 0; }
+.mqme .who-l { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; padding: 4px 6px; border-radius: 9px; }
+.mqme a.who-l:hover { background: var(--s2); }
+.mqme .who small .ml { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; }
+.mqlinks { display: flex; gap: 2px; margin: 0; }
+.mqlinks .it { font-size: 13.5px; }
+@media (max-width: 720px) {
+  .mqnav .it, .mqlinks .it, .mqser .it { min-height: 44px; }
+  .mqsoon ul li { padding: 4px 8px; }
+}
+
+/* ===== Composants communs proposés ===== */
+/* Pastille d'état unique (UX-A-16) : symbole + mot ; la couleur ne fait que doubler. */
+.mq-st { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; line-height: 1.2; padding: 3px 10px 3px 8px; border-radius: 999px; white-space: nowrap; color: var(--ink); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2); }
+.mq-st .sy { font-size: 12px; width: 12px; text-align: center; }
+.mq-st.draft .sy { color: var(--ink2); }
+.mq-st.prop { box-shadow: inset 0 0 0 1.5px var(--ok); } .mq-st.prop .sy { color: var(--ok); }
+.mq-st.pub { box-shadow: inset 0 0 0 1.5px var(--ink2); } .mq-st.pub .sy { color: var(--ink); }
+.mq-st.warn { box-shadow: inset 0 0 0 1.5px var(--warn); } .mq-st.warn .sy { color: var(--warn); }
+.mq-st.no { box-shadow: inset 0 0 0 1.5px var(--danger); } .mq-st.no .sy { color: var(--danger); }
+/* Champs : filet lisible (WCAG 1.4.11) et focus en contour de 2 px (UX-A-27). */
+input:not([type]), input[type="text"], input[type="search"], input[type="email"], select, textarea { box-shadow: inset 0 0 0 1px #8c8578; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, .mq-focus { outline: 2px solid var(--accent-ink) !important; outline-offset: 1px; box-shadow: inset 0 0 0 1px #8c8578, 0 0 0 5px var(--accent-soft) !important; }
+.mq-focus-btn { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+.mq-alert { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 11px 14px; margin: 0 0 16px; border-radius: 12px; background: var(--s1); box-shadow: inset 4px 0 0 var(--warn), inset 0 0 0 1px var(--line2); font-size: 14px; }
+.mq-alert .sy { color: var(--warn); }
+.mq-alert.err { box-shadow: inset 4px 0 0 var(--danger), inset 0 0 0 1px var(--line2); } .mq-alert.err .sy { color: var(--danger); }
+.mq-alert.ok { box-shadow: inset 4px 0 0 var(--ok), inset 0 0 0 1px var(--line2); } .mq-alert.ok .sy { color: var(--ok); }
+.mq-alert .t { flex: 1 1 320px; min-width: 0; }
+.mq-alert .t strong { font-weight: 500; }
+.mq-alert .acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.mq-dialog { width: min(540px, 100%); background: var(--s1); color: var(--ink); border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+.mq-dialog .dt { margin: 0 0 10px; font-weight: 300; font-size: 23px; line-height: 1.2; }
+.mq-dialog p { margin: 0 0 10px; color: var(--ink2); }
+.mq-dialog .actions { margin-top: 18px; }
+.btn.danger-o { background: transparent; color: var(--danger); box-shadow: inset 0 0 0 1.5px var(--danger); }
+.btn.danger { background: var(--danger); color: var(--on-danger); }
+.err-msg { display: flex; gap: 6px; align-items: baseline; margin: 6px 0 0; color: var(--danger); font-size: 13px; font-weight: 500; }
+.mq-kbd { font: 500 11px var(--font); color: var(--ink2); border: 1px solid var(--line2); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; background: var(--s3); white-space: nowrap; }
+.mq-switch { position: relative; display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--ink); }
+.mq-switch input[role="switch"] { appearance: none; -webkit-appearance: none; width: 46px; height: 26px; margin: 0; border-radius: 999px; background: var(--s3); box-shadow: inset 0 0 0 1.5px #8c8578; position: relative; cursor: pointer; flex: none; }
+.mq-switch input[role="switch"]::after { content: ""; position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; border-radius: 50%; background: #6b665d; transition: left .15s; }
+.mq-switch input[role="switch"]:checked { background: var(--ink); box-shadow: none; }
+.mq-switch input[role="switch"]:checked::after { left: 24px; background: var(--accent); }
+.mq-switch input[role="switch"]:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+
+/* ===== Couche « maquette » : ruban, repères numérotés, planches d'états, encart « Ce qui change » ===== */
+:root { --mq: #3a2fd0; --mq-ink: #2f27b8; }
+.mq-ribbon { display: flex; flex-wrap: wrap; gap: 2px 18px; align-items: center; justify-content: space-between; margin: 0; padding: 7px 16px; background: var(--mq); color: #fff; font: 400 12.5px/1.45 Jost, Arial, sans-serif; letter-spacing: .02em; }
+.mq-ribbon strong { font-weight: 600; letter-spacing: .06em; }
+.mq-pin { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--mq); color: #fff; font: 600 12px/1 Jost, Arial, sans-serif; box-shadow: 0 0 0 2px #fff; vertical-align: middle; flex: none; margin: 0 4px; font-style: normal; letter-spacing: 0; text-transform: none; text-decoration: none; }
+.mq-fold { position: absolute; left: 0; right: 0; top: 900px; border-top: 2px dashed var(--mq); z-index: 6; pointer-events: none; }
+.mq-fold span { position: absolute; right: 16px; top: -24px; background: var(--mq); color: #fff; font: 500 11.5px/1.5 Jost, Arial, sans-serif; padding: 1px 8px; border-radius: 6px; }
+.mq-boards { background: #e4e0d7; color: #1b1a17; padding: 40px 36px 48px; border-top: 1px solid rgba(20,18,14,.15); }
+.mq-boards > h2, .mq-notes > h2 { font: 300 30px/1.15 Jost, Arial, sans-serif; margin: 0 0 6px; color: #1b1a17; }
+.mq-lead { color: #4a463f; max-width: 86ch; margin: 0 0 24px; font-size: 14.5px; }
+.mq-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.mq-board { background: var(--bg); color: var(--ink); border-radius: 16px; padding: 20px 22px 24px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(60,40,10,.10); min-width: 0; }
+.mq-board.wide { grid-column: 1 / -1; }
+.mq-board > h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 4px; margin: 0 0 4px; font-weight: 500; font-size: 17px; }
+.mq-board > .mq-cap { color: var(--ink2); font-size: 13px; margin: 0 0 16px; max-width: 76ch; }
+.mq-scrim { background: rgba(30,26,20,.46); border-radius: 12px; padding: 32px 24px; display: grid; place-items: center; }
+.mq-notes { background: #fff; color: #1b1a17; padding: 40px 36px 56px; border-top: 4px solid var(--mq); }
+.mq-notes > p { max-width: 90ch; color: #4a463f; margin: 0 0 6px; font-size: 14.5px; }
+.mq-notes ol { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 44px; }
+.mq-notes li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 4px 10px; align-items: start; font-size: 14px; line-height: 1.5; }
+.mq-notes li .mq-pin { margin: 0; }
+.mq-notes li strong { font-weight: 600; }
+.mq-ref { display: block; margin-top: 4px; font-size: 12.5px; line-height: 1.5; color: #4a463f; }
+.mq-ref b { font-weight: 600; color: var(--mq-ink); }
+.mq-measures { margin: 26px 0 0; padding: 14px 18px; border-radius: 12px; background: #f6f4ef; font-size: 13.5px; color: #33302b; max-width: 1100px; }
+.mq-measures h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+.mq-measures ul { margin: 0; padding-left: 18px; display: block; }
+.mq-measures li { display: list-item; font-size: 13.5px; }
+@media (max-width: 720px) {
+  .mq-boards { padding: 28px 14px 32px; }
+  .mq-boards > h2, .mq-notes > h2 { font-size: 26px; }
+  .mq-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .mq-board { padding: 16px 14px 18px; }
+  .mq-desk { display: none !important; }
+  .mq-scrim { padding: 18px 10px; }
+  .mq-notes { padding: 28px 16px 40px; }
+  .mq-notes ol { grid-template-columns: minmax(0, 1fr); }
+}
+@media (min-width: 721px) { .mq-mob { display: none !important; } }
+
+/* L'écran tel qu'au premier affichage : barre latérale non collante pour la capture, colonne continue. */
+@media (min-width: 721px) {
+  .shell { position: relative; background: linear-gradient(90deg, var(--s1) 0 var(--side), var(--bg) var(--side)); }
+  .shell::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--side) - 1px); border-left: 1px solid var(--line); }
+  .side { position: relative; height: auto; min-height: 900px; overflow: visible; border-right: 0; align-self: start; }
+}
+@media (max-width: 720px) {
+  /* Capture pleine page : la barre d'onglets (fixée en bas de l'écran) est posée à la fin de l'écran. */
+  .tabbar { position: relative; }
+  .main { padding-bottom: 24px; }
+  .mq-fold { display: none; }
+}
+
+/* ===== MQ-09 : enregistrer, confirmer, annuler ===== */
+html { scroll-padding-bottom: 96px; }
+.crumbs { font-size: 13px; color: var(--ink2); margin: 0 0 8px; }
+.crumbs ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.crumbs li + li::before { content: "›"; margin: 0 6px 0 2px; color: var(--ink3); }
+.crumbs a { text-decoration: underline; text-underline-offset: 3px; }
+.mq-ph-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 0 0 20px; }
+.mq-ph-head h1 { margin: 0 !important; }
+.mq-ph-head .stat { display: flex; align-items: center; gap: 10px; }
+.mq-fiche { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 28px; align-items: start; }
+.mq-fig { margin: 0; position: sticky; top: 16px; }
+.mq-fig img { display: block; width: 100%; height: auto; border-radius: 8px; background: var(--photo-bg); }
+.mq-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 16px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); font-size: 13px; }
+.mq-facts dt { color: var(--ink2); }
+.mq-facts dd { margin: 0; }
+.mq-facts a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+.mq-fig figcaption { margin-top: 8px; font-size: 12.5px; color: var(--ink2); }
+.mq-form { display: grid; gap: 16px; margin: 0; }
+.mq-form .panel { margin: 0; display: grid; gap: 14px; }
+.mq-form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.lbl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; color: var(--ink); font-size: 13.5px; font-weight: 500; }
+.lbl .req, .lbl .opt { font-weight: 400; color: var(--ink2); font-size: 12.5px; }
+.lbl .ex { font-weight: 400; color: var(--ink2); font-size: 12.5px; }
+.mod { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink); font-weight: 500; }
+.mod::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent-ink); }
+input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--danger) !important; }
+.err-msg .sy { flex: none; }
+/* Bandeau « Description prête » (UX-A-05) : en role="status", aucun rechargement */
+.mq-ready { display: grid; gap: 8px; padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--ok) 8%, var(--s1)); box-shadow: inset 3px 0 0 var(--ok), inset 0 0 0 1px var(--line2); font-size: 13.5px; }
+.mq-ready .h { display: flex; align-items: center; gap: 4px; font-weight: 500; margin: 0; }
+.mq-ready .h::before { content: "✦"; color: var(--ok); margin-right: 4px; }
+.mq-ready blockquote { margin: 0; color: var(--ink2); font-style: italic; }
+.mq-ready .acts { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Barre d'enregistrement unique (UX-A-06) */
+.mq-savebar { position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 16px; border-radius: 14px; background: var(--s1); box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+.mq-savebar .acts { display: flex; gap: 10px; flex-wrap: wrap; }
+.mq-savebar .what { flex: 1 1 160px; font-size: 13.5px; color: var(--ink2); }
+.mq-savebar .what b { color: var(--ink); font-weight: 500; }
+.mq-savebar .btn { min-height: 42px; padding: 0 22px; font-size: 14.5px; }
+/* Planches */
+.mq-toastdemo { display: grid; gap: 12px; justify-items: center; padding: 28px 12px; border-radius: 12px; background: var(--s2); }
+.mq-toast { position: static; transform: none; display: flex; align-items: center; gap: 14px; padding: 10px 10px 10px 16px; border-radius: 12px; background: var(--ink); color: var(--bg); font-size: 14px; box-shadow: var(--shadow); }
+.mq-toast .cd { font-size: 12px; color: #c9c4ba; display: inline-flex; align-items: center; gap: 6px; }
+.mq-toast .ring { width: 18px; height: 18px; border-radius: 50%; background: conic-gradient(#f0a94c 0 70%, #55514a 70% 100%); }
+.mq-toast button { min-height: 32px; padding: 0 14px; border-radius: 8px; background: var(--bg); color: var(--ink); font-weight: 500; font-size: 13px; outline: 2px solid #f0a94c; outline-offset: 2px; }
+.mq-legend { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.mq-legend > div { display: grid; gap: 6px; align-content: start; padding: 12px; border-radius: 10px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.mq-legend dt { margin: 0; }
+.mq-legend dd { margin: 0; font-size: 12.5px; color: var(--ink2); }
+.mq-dialog .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.mq-dialog .actions .btn { min-height: 40px; }
+.mq-dialog ul { margin: 0 0 10px; padding-left: 18px; color: var(--ink2); }
+.mq-dialog label { margin-top: 4px; }
+.mq-focusdemo { display: grid; gap: 10px; max-width: 420px; }
+.swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
+@media (max-width: 720px) {
+  .main { padding: 18px 14px 18px; }
+  .main h1 { font-size: 27px; }
+  .mq-fiche { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .mq-fig { position: static; }
+  .mq-form .two { grid-template-columns: minmax(0, 1fr); }
+  .mq-form input:not([type]), .mq-form select, .mq-form textarea { min-height: 44px; }
+  .mq-savebar { position: relative; border-radius: 0; margin: 0 -14px; box-shadow: 0 -8px 24px rgba(60,40,10,.12), inset 0 1px 0 var(--line2); }
+  .mq-savebar .btn { flex: 1; min-height: 48px; }
+  .mq-ready .btn, .mq-dialog .actions .btn { min-height: 44px; }
+  .mq-legend { grid-template-columns: minmax(0, 1fr); }
+  .mq-toast { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body class="admin">
+<a class="skip" href="#contenu">Aller au contenu</a><header class="mq-ribbon"><p style="margin:0"><strong>Maquette MQ-09</strong> · Administration — enregistrer, confirmer, annuler (composants communs)</p><p style="margin:0">Cible proposée par l’audit du 16 octobre 2026 · données et photos fictives</p></header><div class="shell"><aside class="side" id="admin-nav" aria-label="Menu"><a class="word" href="#"><span>Nicephos</span></a><div class="cmdk-row"><button class="cmdk" type="button" aria-keyshortcuts="Control+K"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button></div><nav class="mqnav" aria-label="Administration"><ul class="" aria-labelledby="g-top"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span class="l">Aujourd’hui</span></a></li></ul><p class="grp" id="g-photos">Photos</p><ul class="" aria-labelledby="g-photos"><li><a class="it cur" href="#" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg><span class="l">Photothèque</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/></svg><span class="l">Sorties</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg><span class="l">Voyages</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg><span class="l">Séries</span></a></li><li class="sub"><ul class="mqser" aria-label="Séries les plus utilisées"><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/ciel.webp" alt="" width="16" height="16"></span><span class="l">Voyage</span><span class="n">23</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/ruelle.webp" alt="" width="16" height="16"></span><span class="l">Rue</span><span class="n">8</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/dune.webp" alt="" width="16" height="16"></span><span class="l">Paysage</span><span class="n">7</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/portrait.webp" alt="" width="16" height="16"></span><span class="l">Portrait</span><span class="n">3</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/mer.webp" alt="" width="16" height="16"></span><span class="l">Atlantique</span><span class="n">3</span></a></li><li><a class="it all" href="#"><span class="l">Toutes les séries (7)</span></a></li></ul></li></ul><p class="grp" id="g-personnes">Personnes</p><ul class="" aria-labelledby="g-personnes"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg><span class="l">Personnes</span><span class="nav-badge" aria-hidden="true">1</span><span class="sr-only">, 1 nouvelle</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><span class="l">App de terrain</span></a></li></ul><p class="grp" id="g-publier">Publier</p><ul class="" aria-labelledby="g-publier"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 10.5l2.5 2.5L16 8"/></svg><span class="l">À valider</span><span class="nav-badge" aria-hidden="true">5</span><span class="sr-only">, 5 photos à valider</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg><span class="l">Site public</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg><span class="l">Instagram</span></a></li><li class="mqsoon"><span class="soon-l">Bientôt</span><ul aria-label="Bientôt dans Publier"><li>Carnets</li><li>Galeries privées</li><li>Boutique</li></ul></li></ul><p class="grp" id="g-equipe">Équipe</p><ul class="" aria-labelledby="g-equipe"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg><span class="l">Comptes et rôles</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 3 3v6.5M6 8.5V15a3 3 0 0 0 3 3h6.5"/></svg><span class="l">Circuit de publication</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span class="l">Journal</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="l">Statistiques</span></a></li></ul><hr class="mqsep"><ul class="" aria-labelledby="g-reglages"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span class="l">Réglages</span></a></li></ul></nav><div class="mqfoot"><div class="mqme"><a class="who-l" href="#"><span class="av" aria-hidden="true">J</span><span class="who">Julien<small>Administrateur<span class="sr-only"> · </span><span class="ml">Mon compte</span></small></span></a><form action="#" method="post"><button class="iconbtn" type="submit" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button></form></div><p class="mqlinks"><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg><span class="l">Aide</span></a><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><span class="l">Nouveautés</span></a></p></div></aside><div class="mq-fold" aria-hidden="true"><span>bas de l’écran · 900 px</span></div><main class="main" id="contenu" tabindex="-1">
+<p class="help-link"><a href="#">Aide sur cette page</a></p>
+<nav class="crumbs" aria-label="Fil d’Ariane"><ol><li><a href="#">Photothèque</a></li><li><a href="#">Voyage</a></li><li><span aria-current="page">Miradouro, l’heure dorée</span></li></ol></nav>
+<div class="mq-ph-head">
+  <h1>Miradouro, l’heure dorée</h1>
+  <p class="stat" style="margin:0"><span class="mq-st pub"><span class="sy" aria-hidden="true">●</span>Publiée</span><span class="hint">depuis le 12 oct., par Julien</span><a class="btn ghost" href="#unpub">Dépublier…</a><span class="mq-pin" aria-hidden="true">7</span></p>
+</div>
+<div class="mq-fiche">
+  <figure class="mq-fig"><img src="_commun/photos/ciel.webp" alt="Aperçu de la photo : ciel rose au-dessus des collines, soleil bas." width="900" height="600"><figcaption>R0004008.jpg · 6 000 × 4 000 px · Julien · Nikon Z 7II</figcaption>
+    <dl class="mq-facts"><dt>Sur le site</dt><dd><a href="#">/photo/miradouro-l-heure-doree</a></dd><dt>Série</dt><dd>Voyage · carnet « Lisbonne et Porto »</dd><dt>Dernier enregistrement</dt><dd>aujourd’hui à 10 h 42, par Julien · <a href="#">Journal</a></dd></dl></figure>
+  <form class="mq-form" action="#" method="post" aria-labelledby="f-t" novalidate>
+    <h2 id="f-t" class="sr-only">Fiche de la photo</h2>
+    <section class="panel" aria-labelledby="s1">
+      <h3 id="s1" style="margin:0;font-weight:500;font-size:16px">Ce que voit le visiteur</h3>
+      <div><label for="ti" class="lbl">Titre <span class="req">(obligatoire)</span> <span class="mod" id="ti-m">Modifié</span></label><input id="ti" value="Miradouro, l’heure dorée" required aria-describedby="ti-m"></div>
+      <div><label for="le" class="lbl">Légende <span class="opt">(facultatif)</span> <span class="mod" id="le-m">Modifié</span></label><textarea id="le" rows="3" aria-describedby="le-m">Depuis le belvédère de la Graça, les toits d’Alfama prennent la dernière lumière.</textarea></div>
+      <div class="mq-ready" role="status">
+        <p class="h">Description prête<span class="mq-pin" aria-hidden="true">3</span></p>
+        <blockquote lang="fr">« Une ville aux toits de tuiles sous un ciel rose, le soleil bas au-dessus des collines. »</blockquote>
+        <p class="hint" style="margin:0">Proposée par l’assistant, à relire. La page ne s’est pas rechargée : votre saisie est intacte.</p>
+        <span class="acts"><button class="btn ghost" type="button">Reprendre comme légende</button><button class="btn ghost" type="button">Ignorer</button></span>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="s2">
+      <h3 id="s2" style="margin:0;font-weight:500;font-size:16px">Où et quand</h3>
+      <div class="two">
+        <div><label for="da" class="lbl">Date <span class="ex" id="da-ex">ex. oct. 2026, 10/2026, 2026-10-16</span></label>
+          <input id="da" value="demain matin" aria-invalid="true" aria-describedby="da-err da-ex" class="mq-focus">
+          <p class="err-msg" id="da-err" role="alert"><span class="sy" aria-hidden="true">⚠</span><span>Erreur : date non comprise, essayez « oct. 2026 » ou « 2026-10-16 ».</span><span class="mq-pin" aria-hidden="true">5</span></p></div>
+        <div><label for="vi" class="lbl">Ville <span class="opt">(facultatif)</span></label><input id="vi" value="Lisbonne, Portugal"><span class="cap">pour la carte du monde · d’après le GPS</span></div>
+      </div>
+    </section>
+    <div class="mq-savebar" role="group" aria-label="Enregistrement">
+      <p class="what" style="margin:0" id="sv"><b class="mod">Modifié :</b> titre et légende<span class="mq-pin" aria-hidden="true">1</span></p>
+      <span class="acts"><button class="btn ghost" type="reset">Annuler les modifications</button><button class="btn" type="submit" aria-describedby="sv">Enregistrer</button></span>
+    </div>
+  </form>
+</div>
+</main></div><nav class="tabbar" aria-label="Navigation rapide"><a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a><a href="#" aria-current="page"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photos</a><a class="imp" href="#" aria-label="Importer des photos"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></a><a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a><button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button></nav>
+<section class="mq-boards" aria-labelledby="mq-boards-t">
+  <h2 id="mq-boards-t">Composants communs</h2>
+  <p class="mq-lead">Une seule façon d’enregistrer, de confirmer et d’annuler, réutilisée sur toutes les pages : fiche, voyage, ouverture, comptes, séries.</p>
+  <div class="mq-grid">
+    <article class="mq-board" aria-labelledby="b1">
+      <h3 id="b1">Quitter une page modifiée <span class="mq-pin" aria-hidden="true">2</span></h3>
+      <p class="mq-cap">Sur un lien interne comme à la fermeture de l’onglet. Le dialogue nomme ce qui serait perdu.</p>
+      <div class="mq-scrim"><div class="mq-dialog" role="dialog" aria-modal="false" aria-labelledby="d1t" aria-describedby="d1d">
+  <h3 class="dt" id="d1t">Modifications non enregistrées</h3>
+  <p id="d1d">Le titre et la légende ont changé. Si vous quittez maintenant, ces deux changements sont perdus.</p>
+  <p class="actions"><button class="btn" type="button">Enregistrer</button><button class="btn danger-o" type="button">Quitter sans enregistrer</button><button class="btn ghost mq-focus-btn" type="button">Rester</button></p>
+</div></div>
+    </article>
+    <article class="mq-board" aria-labelledby="b2">
+      <h3 id="b2">Supprimer : l’objet nommé, la conséquence dite <span class="mq-pin" aria-hidden="true">4</span></h3>
+      <p class="mq-cap">Le même dialogue que la photothèque, pour un voyage comme pour un compte. « Annuler » est le choix par défaut.</p>
+      <div class="mq-scrim"><div class="mq-dialog" role="alertdialog" aria-modal="false" aria-labelledby="d2t" aria-describedby="d2d">
+  <h3 class="dt" id="d2t">Supprimer le voyage « Lisbonne, octobre 2026 » ?</h3>
+  <div id="d2d"><p>La page publique <span class="mono">/voyage/lisbonne-octobre-2026</span> disparaîtra : les liens déjà partagés ne mèneront plus nulle part.</p>
+  <p>Ses 2 sorties et ses 20 photos restent dans la photothèque.</p></div>
+  <p class="actions"><button class="btn ghost mq-focus-btn" type="button">Annuler</button><button class="btn danger-o" type="button">Supprimer le voyage</button></p>
+  <p class="hint" style="margin:8px 0 0">Le focus arrive sur « Annuler ». Après suppression : « Voyage supprimé · Annuler » pendant 10 s, puis dans le Journal.</p>
+</div></div>
+    </article>
+    <article class="mq-board" aria-labelledby="b3">
+      <h3 id="b3">« Annuler » qui attend <span class="mq-pin" aria-hidden="true">6</span></h3>
+      <p class="mq-cap">Message d’action dans une région toujours présente, atteignable et durable.</p>
+      <div class="mq-toastdemo">
+  <div class="mq-toast" role="status"><span>5 photos publiées</span><span class="cd"><span class="ring" aria-hidden="true"></span>en pause</span><button type="button">Annuler</button></div>
+  <p class="hint" style="margin:0;text-align:center;max-width:52ch">Le délai de 10 s s’arrête tant que la souris ou le focus est sur le message ; « Ctrl Z » l’atteint d’un geste. Après l’action, le focus revient sur le bouton qui l’a lancée.</p>
+</div>
+    </article>
+    <article class="mq-board" aria-labelledby="b4">
+      <h3 id="b4">Un seul chemin pour dépublier <span class="mq-pin" aria-hidden="true">7</span></h3>
+      <p class="mq-cap">Plus de boutons radio « Brouillon / Publiée » : la raison est toujours demandée.</p>
+      <div class="mq-scrim"><div class="mq-dialog" role="dialog" aria-modal="false" aria-labelledby="d3t" id="unpub">
+  <h3 class="dt" id="d3t">Dépublier « Miradouro, l’heure dorée »</h3>
+  <p>La photo quitte le site et la série Voyage ; elle redevient un brouillon. Julien reçoit la raison.</p>
+  <label for="rs" class="lbl">Pourquoi ? <span class="req">(obligatoire)</span></label>
+  <textarea id="rs" rows="2" required>Une personne reconnaissable au premier plan a retiré son accord.</textarea>
+  <p class="actions" style="margin-top:14px"><button class="btn ghost" type="button">Annuler</button><button class="btn" type="button">Dépublier</button></p>
+</div></div>
+    </article>
+    <article class="mq-board wide" aria-labelledby="b5">
+      <h3 id="b5">La pastille d’état commune et sa légende <span class="mq-pin" aria-hidden="true">8</span></h3>
+      <p class="mq-cap">Un symbole et un mot, la couleur ne fait que doubler : lisible en noir et blanc et par un daltonien. La même dans la photothèque, le lot, À valider, les voyages et Instagram.</p>
+      <dl class="mq-legend">
+  <div><dt><span class="mq-st draft"><span class="sy" aria-hidden="true">○</span>Brouillon</span></dt><dd>visible de l’équipe seulement</dd></div>
+  <div><dt><span class="mq-st prop"><span class="sy" aria-hidden="true">◐</span>Proposée</span></dt><dd>attend le modérateur</dd></div>
+  <div><dt><span class="mq-st pub"><span class="sy" aria-hidden="true">●</span>Publiée</span></dt><dd>en ligne sur le site</dd></div>
+  <div><dt><span class="mq-st warn"><span class="sy" aria-hidden="true">▲</span>À vérifier</span></dt><dd>un accord ou un titre manque</dd></div>
+  <div><dt><span class="mq-st no"><span class="sy" aria-hidden="true">✕</span>Bloquée</span></dt><dd>refus d’une personne : non publiable</dd></div>
+</dl>
+    </article>
+    <article class="mq-board wide" aria-labelledby="b6">
+      <h3 id="b6">Le focus des champs en mode clair <span class="mq-pin" aria-hidden="true">9</span></h3>
+      <p class="mq-cap">Comme pour les boutons depuis la revue d’octobre.</p>
+      <div class="mq-focusdemo">
+  <label for="fx" class="lbl">Lieu affiché <span class="opt">(facultatif)</span></label><input id="fx" value="Miradouro da Graça" class="mq-focus">
+  <p class="hint" style="margin:0"><span class="swatch" style="background:#9a5b0c"></span>contour de 2 px #9A5B0C : 4,7:1 sur le champ (#F1EEE8), 5,2:1 sur le blanc ; le halo orange reste en complément. Avant : 1,7:1.</p>
+</div>
+    </article>
+  </div>
+</section><section class="mq-notes" aria-labelledby="mq-notes-t"><h2 id="mq-notes-t">Ce qui change</h2><p>Les repères numérotés renvoient à cette liste. Les composants sont dessinés sur la fiche photo ; ils valent pour toute l’administration.</p><ol><li><span class="mq-pin" aria-hidden="true">1</span><div><strong>Un seul bouton « Enregistrer », et « Modifié » à côté.</strong> La barre dit ce qui a changé (« titre et légende ») ; chaque champ modifié porte « Modifié » en texte. Sur téléphone, elle est collée en bas de l’écran (posée ici en fin de formulaire pour la capture), et scroll-padding-bottom garde le champ focalisé au-dessus d’elle.<span class="mq-ref"><b>UX-A-06</b> · <b>UX-A-09</b> · B&amp;S 1.3 Feed-back · B&amp;S 6 Homogénéité · WCAG 2.4.11 · Nielsen #1</span></div></li><li><span class="mq-pin" aria-hidden="true">2</span><div><strong>Rien ne se perd en partant.</strong> Un lien interne ou la fermeture de l’onglet ouvrent « Modifications non enregistrées » ; le focus est sur « Rester ».<span class="mq-ref"><b>UX-A-06</b> · B&amp;S 5.1 Protection contre les erreurs · ISO 9241-110 Robustesse · Nielsen #3</span></div></li><li><span class="mq-pin" aria-hidden="true">3</span><div><strong>La description arrive sans recharger.</strong> Annoncée en role="status" ; « Reprendre » remplit le champ, la saisie en cours reste.<span class="mq-ref"><b>UX-A-05</b> · RGAA 13.1 · WCAG 2.2.1 et 3.2.5 · Opquast 239 · B&amp;S 3.2</span></div></li><li><span class="mq-pin" aria-hidden="true">4</span><div><strong>Supprimer, c’est nommer et prévenir.</strong> Titre du voyage, adresse publique qui disparaît, ce qui reste ; « Annuler » par défaut, puis 10 s pour revenir en arrière.<span class="mq-ref"><b>UX-A-07</b> · B&amp;S 3.1 Actions explicites · WCAG 3.3.4 · Nielsen #5</span></div></li><li><span class="mq-pin" aria-hidden="true">5</span><div><strong>L’erreur sous le champ.</strong> « ⚠ Erreur : date non comprise… », reliée par aria-describedby et annoncée en role="alert" ; le format est dans le libellé visible, plus dans un placeholder.<span class="mq-ref"><b>UX-A-14</b> · <b>UX-A-23</b> · RGAA 11.10 · WCAG 3.3.1 et 3.3.3 · B&amp;S 5.2</span></div></li><li><span class="mq-pin" aria-hidden="true">6</span><div><strong>« Annuler » attend qu’on l’atteigne.</strong> Le minuteur se met en pause au survol et au focus ; le focus revient sur le déclencheur ; Ctrl Z annule la dernière action.<span class="mq-ref"><b>UX-A-08</b> · RGAA 7.3 et 12.8 · WCAG 2.2.1 et 2.4.3 · Nielsen #3</span></div></li><li><span class="mq-pin" aria-hidden="true">7</span><div><strong>Un statut, une commande.</strong> « Publiée · Dépublier… » avec la raison obligatoire ; « (obligatoire) » et « (facultatif) » écrits dans les libellés.<span class="mq-ref"><b>UX-A-23</b> · <b>UX-A-16</b> · B&amp;S 6 · RGAA 11.10 · WCAG 3.3.2</span></div></li><li><span class="mq-pin" aria-hidden="true">8</span><div><strong>Une pastille d’état pour toute l’admin.</strong> ○ Brouillon · ◐ Proposée · ● Publiée · ▲ À vérifier · ✕ Bloquée, symbole et mot, avec sa légende dans l’aide.<span class="mq-ref"><b>UX-A-16</b> · RGAA 3.1 · WCAG 1.4.1 · B&amp;S 7 Signifiance des codes · Nielsen #2</span></div></li><li><span class="mq-pin" aria-hidden="true">9</span><div><strong>Le focus visible des champs.</strong> Contour de 2 px #9A5B0C, 4,7:1, sur les champs, listes et cases en mode clair.<span class="mq-ref"><b>UX-A-27</b> · RGAA 10.7 · WCAG 1.4.11 et 2.4.7</span></div></li></ol><div class="mq-measures"><h3>Mesures sur cette maquette</h3><ul><li>Axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation sur bureau (1 440 px) et sur téléphone (412 px) ; aucun débordement horizontal. Au premier écran de bureau : photo, titre, légende, description prête, erreur de date et barre « Enregistrer » tiennent au-dessus de 900 px. Focus des champs en mode clair : contour #9A5B0C à 4,7:1 (avant : 1,7:1).</li></ul></div></section>
+</body>
+</html>
