@@ -146,7 +146,7 @@ In der Fotothek ebenso: Die Schaltflächen Veröffentlichen, Zurückziehen, Lös
 
 Das Original, die Bilder der Website und der Prioritätsnachweis werden gelöscht, und das Foto wird aus der Start-Diashow entfernt.
 
-**Das lässt sich in der Verwaltung nicht rückgängig machen.** Laden Sie vorher das Original und den Nachweis herunter, wenn Sie sie behalten möchten. Das Original bleibt außerdem in den Sicherungen des Servers erhalten.
+**Das lässt sich in der Verwaltung nicht rückgängig machen.** Laden Sie vorher das Original und den Nachweis herunter, wenn Sie sie behalten möchten. Das Original bleibt außerdem 90 Tage in den Sicherungen des Servers erhalten (siehe [Häufige Fragen](questions)).
 
 ## Der Veröffentlichungsablauf
 

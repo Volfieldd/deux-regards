@@ -146,7 +146,7 @@ Dans la photothèque, de même : les boutons Publier, Dépublier, Supprimer, Imp
 
 L'original, les images du site et la preuve d'antériorité sont effacés, et la photo est retirée de l'ouverture.
 
-**C'est irréversible depuis l'admin.** Téléchargez d'abord l'original et la preuve si vous voulez les garder. L'original reste par ailleurs dans les sauvegardes du serveur.
+**C'est irréversible depuis l'admin.** Téléchargez d'abord l'original et la preuve si vous voulez les garder. L'original reste par ailleurs 90 jours dans les sauvegardes du serveur (voir [Questions fréquentes](questions)).
 
 ## Le circuit de publication
 
