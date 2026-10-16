@@ -1,0 +1,46 @@
+{
+ "Le traducteur met trop de temps à répondre (premier lancement : il charge ses modèles). Réessayez dans un instant.": {
+  "en": "The translator is taking too long to answer (first start: it is loading its models). Try again in a moment.",
+  "de": "Der Übersetzer braucht zu lange für die Antwort (erster Start: Er lädt seine Modelle). Versuchen Sie es gleich noch einmal."
+ },
+ "Traducteur injoignable : vérifiez que le conteneur LibreTranslate tourne.": {
+  "en": "Translator unreachable: check that the LibreTranslate container is running.",
+  "de": "Übersetzer nicht erreichbar: Prüfen Sie, ob der LibreTranslate-Container läuft."
+ },
+ "Trop de descriptions demandées attendent déjà : réessayez dans quelques minutes.": {
+  "en": "Too many requested descriptions are already waiting: try again in a few minutes.",
+  "de": "Zu viele angeforderte Beschreibungen warten bereits: Versuchen Sie es in einigen Minuten erneut."
+ },
+ "en anglais : traduction pas encore faite, nouvel essai dans quelques minutes": {
+  "en": "in English: not translated yet, new attempt in a few minutes",
+  "de": "auf Englisch: noch nicht übersetzt, neuer Versuch in einigen Minuten"
+ },
+ "Heures de nuit : la fin doit être différente du début (par exemple de 1 h à 6 h).": {
+  "en": "Night hours: the end must differ from the start (for example from 1 am to 6 am).",
+  "de": "Nachtstunden: Das Ende muss sich vom Anfang unterscheiden (zum Beispiel von 1 bis 6 Uhr)."
+ },
+ "le calcul s’est arrêté : mémoire insuffisante ?": {
+  "en": "the computation stopped: not enough memory?",
+  "de": "die Berechnung wurde abgebrochen: zu wenig Speicher?"
+ },
+ "le calcul s’est arrêté ({reason})": {
+  "en": "the computation stopped ({reason})",
+  "de": "die Berechnung wurde abgebrochen ({reason})"
+ },
+ "le calcul a duré trop longtemps : processus arrêté": {
+  "en": "the computation took too long: process stopped",
+  "de": "die Berechnung hat zu lange gedauert: Prozess beendet"
+ },
+ "le calcul n’a pas démarré : {error}": {
+  "en": "the computation did not start: {error}",
+  "de": "die Berechnung ist nicht gestartet: {error}"
+ },
+ "téléchargement du modèle bloqué : le réseau ne répond plus": {
+  "en": "model download stalled: the network is no longer responding",
+  "de": "Herunterladen des Modells blockiert: Das Netzwerk antwortet nicht mehr"
+ },
+ "téléchargement du modèle impossible : {error}": {
+  "en": "model download failed: {error}",
+  "de": "Herunterladen des Modells nicht möglich: {error}"
+ }
+}

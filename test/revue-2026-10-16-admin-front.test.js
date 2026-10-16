@@ -94,9 +94,12 @@ test('fiche photo : « Décrire cette photo » dans son propre formulaire ; éch
   assert.match(texts, /type="submit" form="desc-form">Décrire cette photo/);
   assert.match(texts, /<form id="desc-form"/);
   assert.doesNotMatch(texts, /formaction="\/admin\/photos\/\d+\/description"/);
-  // Échec du modèle : la raison est affichée (et non « pas encore calculée » seule).
+  // Échec du modèle : la raison est affichée (et non « pas encore calculée » seule), avec les mots de la revue ml-geo ;
+  // un nouvel essai raté sous une description déjà faite est signalé à côté d'elle.
   c.db.prepare('INSERT INTO photo_descriptions (photo_id, requested_at, error) VALUES (?, NULL, ?)').run(p.id, 'image illisible');
-  assert.match((await admin.get(`/admin/photos/${p.id}`)).body, /<span class="err">Échec : image illisible<\/span>/);
+  assert.match((await admin.get(`/admin/photos/${p.id}`)).body, /<span data-desc-text>Dernier essai sans succès : image illisible<\/span>/);
+  c.db.prepare("UPDATE photo_descriptions SET text_en = 'A test photo.' WHERE photo_id = ?").run(p.id);
+  assert.match((await admin.get(`/admin/photos/${p.id}`)).body, /« A test photo\. »<\/span>[^\n]*<span class="err">Dernier essai sans succès : image illisible<\/span>/);
   // Sans traducteur : la phrase anglaise va dans la légende anglaise, jamais dans la française.
   c.db.prepare("UPDATE photo_descriptions SET text_en = 'A test photo.', error = NULL WHERE photo_id = ?").run(p.id);
   const en = (await admin.get(`/admin/photos/${p.id}`)).body;
