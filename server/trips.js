@@ -5,6 +5,9 @@ import { slugify } from './slug.js';
 // personnes, celles rencontrées ces jours-là.
 export class TripError extends Error {}
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
+// Jour qui existe au calendrier (« 2025-13-01 » ou « 2025-02-30 » refusés : leur date ne s'écrit pas, et les pages
+// Voyages tombaient en erreur).
+export const isDay = s => { if (!DAY.test(String(s))) return false; const d = new Date(`${s}T12:00:00Z`); return !Number.isNaN(d.getTime()) && d.toISOString().startsWith(s); };
 const text = (v, max) => String(v ?? '').replace(/\r\n/g, '\n').trim().slice(0, max);
 
 export function createTrips({ db, now = () => Date.now() }) {
@@ -26,7 +29,11 @@ export function createTrips({ db, now = () => Date.now() }) {
       WHERE day BETWEEN @from AND @to AND (@author IS NULL OR author_id = @author) ORDER BY day`),
     addDay: db.prepare('INSERT INTO trip_days (trip_id, author_id, day) VALUES (?, ?, ?) ON CONFLICT(author_id, day) DO UPDATE SET trip_id = excluded.trip_id'),
     removeDay: db.prepare('DELETE FROM trip_days WHERE trip_id = ? AND author_id = ? AND day = ?'),
+    author: db.prepare('SELECT 1 FROM authors WHERE id = ?').pluck(),
+    published: db.prepare('SELECT * FROM trips WHERE public = 1 ORDER BY id DESC'),
   };
+  // Photographe d'un voyage : null (commun), ou un photographe qui existe (sinon la clé étrangère lèverait une erreur).
+  const checkAuthor = id => { if (id != null && !q.author.get(id)) throw new TripError('Photographe inconnu.'); };
   const uniqueSlug = (name, id = null) => {
     const base = slugify(name) || 'voyage';
     for (let i = 1; ; i++) {
@@ -44,6 +51,8 @@ export function createTrips({ db, now = () => Date.now() }) {
   }
   return {
     list: () => q.all.all().map(summary),
+    // Voyages publiés, sans leur résumé (pages publiques : ni les voyages privés, ni le compte des personnes).
+    listPublic: () => q.published.all().map(t => { const days = q.days.all(t.id); return { ...t, public: true, days, authors: [...new Set(days.map(d => d.author_id))] }; }),
     get: id => { const t = q.get.get(id); return t ? summary(t) : null; },
     bySlug: slug => { const t = q.bySlug.get(slug); return t ? summary(t) : null; },
     photos: id => q.photos.all(id),
@@ -53,6 +62,7 @@ export function createTrips({ db, now = () => Date.now() }) {
     create({ name, authorId = null }) {
       const n = text(name, 120);
       if (!n) throw new TripError('Donnez un nom au voyage.');
+      checkAuthor(authorId);
       return Number(db.prepare('INSERT INTO trips (slug, name, author_id, created_at) VALUES (?, ?, ?, ?)').run(uniqueSlug(n), n, authorId, now()).lastInsertRowid);
     },
     update(id, body) {
@@ -60,11 +70,19 @@ export function createTrips({ db, now = () => Date.now() }) {
       if (!t) return null;
       const name = 'name' in body ? text(body.name, 120) : t.name;
       if (!name) throw new TripError('Donnez un nom au voyage.');
-      const v = { name, slug: name === t.name ? t.slug : uniqueSlug(name, id) };
+      // Adresse : elle suit le nom tant que la page n'est pas en ligne ; publiée, elle ne change plus (liens partagés,
+      // référencement), comme celle d'une photo.
+      const v = { name, slug: name === t.name || t.public ? t.slug : uniqueSlug(name, id) };
       for (const k of ['name_en', 'name_de']) v[k] = k in body ? text(body[k], 120) : t[k];
       for (const k of ['intro', 'intro_en', 'intro_de']) v[k] = k in body ? text(body[k], 4000) : t[k];
       v.public = 'public' in body ? (body.public ? 1 : 0) : t.public;
-      v.author_id = 'author_id' in body ? body.author_id : t.author_id;
+      v.author_id = 'author_id' in body ? body.author_id ?? null : t.author_id;
+      // Changer de photographe : il doit exister, et le voyage ne doit pas garder des journées d'un autre (elles
+      // resteraient hors de sa portée, comptées à 0, et le photographe d'origine perdrait l'accès). Commun : toujours.
+      if (v.author_id !== t.author_id) {
+        checkAuthor(v.author_id);
+        if (v.author_id != null && q.days.all(id).some(d => d.author_id !== v.author_id)) throw new TripError('Ce voyage a des journées de l’autre photographe : retirez-les d’abord.');
+      }
       db.prepare(`UPDATE trips SET name = @name, slug = @slug, name_en = @name_en, name_de = @name_de, intro = @intro, intro_en = @intro_en, intro_de = @intro_de,
         public = @public, author_id = @author_id WHERE id = @id`).run({ ...v, id });
       return this.get(id);
@@ -73,12 +91,12 @@ export function createTrips({ db, now = () => Date.now() }) {
     // Rattacher des journées (déplacées si elles étaient dans un autre voyage) ; renvoie le nombre ajouté.
     addDays(id, days) {
       let n = 0;
-      db.transaction(() => { for (const d of days) if (DAY.test(d.day) && Number(d.author_id)) n += q.addDay.run(id, Number(d.author_id), d.day).changes; })();
+      db.transaction(() => { for (const d of days) if (isDay(d.day) && q.author.get(Number(d.author_id))) n += q.addDay.run(id, Number(d.author_id), d.day).changes; })();
       return n;
     },
     // Journées de prise de vue entre deux dates (d'un photographe, ou des deux).
     daysBetween(from, to, authorId = null) {
-      if (!DAY.test(from) || !DAY.test(to)) throw new TripError('Indiquez deux dates (AAAA-MM-JJ).');
+      if (!isDay(from) || !isDay(to)) throw new TripError('Indiquez deux dates (AAAA-MM-JJ).');
       if (from > to) [from, to] = [to, from];
       return q.span.all({ from, to, author: authorId });
     },

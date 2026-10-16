@@ -6,7 +6,7 @@
 </header>
 <main class="trip-page">
 <% if (it.preview) { %>
-  <p class="apercu mono wrap" role="note">Aperçu réservé à l’équipe : ce voyage n’est pas publié (ou n’a pas encore de photo publiée). Les visiteurs ne le voient pas. <a href="/admin/voyages/<%= tr.id %>">Régler le voyage</a></p>
+  <p class="apercu mono wrap" role="note"><%= v.preview %> <a href="/admin/voyages/<%= tr.id %>"><%= v.settings %></a></p>
 <% } %>
   <section class="trip-hero">
 <% if (tr.cover) { %>    <div class="trip-hero-im"><%~ it.picture(tr.cover, { sizes: '100vw', eager: true, alt: '' }) %></div>
@@ -20,7 +20,7 @@
 <% } %>
 <% if (vw) { %>
   <figure class="trip-map wrap" data-trip-map>
-    <div class="trip-map-scroll" data-trip-scroll tabindex="0" aria-label="<%= v.map(tr.name) %>">
+    <div class="trip-map-scroll" data-trip-scroll tabindex="0" role="region" aria-label="<%= v.map(tr.name) %>">
     <svg class="trip-svg" viewBox="<%= vw.x.toFixed(2) %> <%= vw.y.toFixed(2) %> <%= vw.w.toFixed(2) %> <%= vw.h.toFixed(2) %>" data-tiles="<%= it.asset('carte-tuiles/index.json') %>" role="group" aria-labelledby="trip-map-t" preserveAspectRatio="xMidYMid slice">
       <title id="trip-map-t"><%= v.map(tr.name) %></title>
       <use class="globe" href="<%= terre %>#globe" width="<%= it.map.width %>" height="<%= it.map.height %>"/>

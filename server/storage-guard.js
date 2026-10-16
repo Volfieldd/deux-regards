@@ -20,3 +20,13 @@ export function assertPersistentStorage(dir, env = process.env) {
   }
   fs.accessSync(dir, fs.constants.W_OK);
 }
+
+// En conteneur, la base doit être dans le dossier des données (DATABASE_PATH dans STORAGE_DIR) : ailleurs, elle serait
+// écrite dans la couche jetable du conteneur (ou un tmpfs) et perdue à sa recréation, comptes, accords et journal compris.
+export function assertDatabaseInStorage(dbPath, storageDir, env = process.env) {
+  if (env.REQUIRE_PERSISTENT_STORAGE !== '1') return;
+  const rel = path.relative(path.resolve(storageDir), path.resolve(dbPath));
+  if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) {
+    throw new Error(`DATABASE_PATH (${dbPath}) doit être dans le dossier des données (${storageDir}) : sinon la base serait perdue à la recréation du conteneur ; refus de démarrer.`);
+  }
+}

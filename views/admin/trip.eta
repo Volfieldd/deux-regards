@@ -26,7 +26,7 @@
     <div class="row">
       <label><%= t('Du') %> <input type="date" name="du"></label>
       <label><%= t('Au') %> <input type="date" name="au"></label>
-<% if (tr.author_id == null && it.allTrips) { %>      <label><%= t('Photographe') %> <select name="photographe"><option value=""><%= t('les deux') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></label>
+<% if (tr.author_id == null && it.allTrips) { %>      <label><%= t('Photographe') %> <select name="photographe"><option value=""><%= it.authors.length === 2 ? t('les deux') : t('tous') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></label>
 <% } %>    </div>
     <p class="hint"><%= t('Toutes les journées de prise de vue entre ces deux dates (photos datées par l’appareil, ou rencontres). Une journée déjà dans un autre voyage y est déplacée.') %></p>
 <% if (it.nearby.length) { %>    <details class="trip-pick"><summary><%= t('Ou cochez des sorties') %> <span class="mono"><%= t('les plus récentes d’abord') %></span></summary>
@@ -53,7 +53,8 @@
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
   <h2><%= t('Nom et texte') %> <span class="mono"><%= t('pour la page publique du voyage') %></span></h2>
   <input type="hidden" name="public_set" value="1">
-  <label class="inline"><input type="checkbox" name="public"<%~ tr.public ? ' checked' : '' %>> <%= t('Publier la page du voyage sur le site') %> <span class="mono"><a href="/voyage/<%= tr.slug %>" target="_blank" rel="noopener">/voyage/<%= tr.slug %></a> · <%= tr.public ? (tr.nPublished ? t('en ligne') : t('en attente d’une photo publiée')) : t('aperçu réservé à l’équipe') %></span></label>
+<% const locked = !tr.public && !it.pagePublish; %>  <label class="inline"><input type="checkbox" name="public"<%~ tr.public ? ' checked' : '' %><%~ locked ? ' disabled aria-describedby="tr-public-hint"' : '' %>> <%= t('Publier la page du voyage sur le site') %> <span class="mono"><a href="/voyage/<%= tr.slug %>" target="_blank" rel="noopener">/voyage/<%= tr.slug %></a> · <%= tr.public ? (tr.nPublished ? t('en ligne') : t('en attente d’une photo publiée')) : t('aperçu réservé à l’équipe') %></span></label>
+  <p class="hint" id="tr-public-hint"><%= locked ? `${t('La mise en ligne de la page revient à qui publie sur le site : un administrateur, ou un photographe qui publie sans validation.')} ` : '' %><%= t('Sur la page publique, la carte ne situe que les photos cochées « Afficher sur la carte du monde », et chaque jour porte sa date.') %></p>
   <label><%= t('Nom') %> <input name="name" value="<%= tr.name %>" maxlength="120" required></label>
   <div class="row">
     <label><%= t('Nom en anglais') %> <input name="name_en" value="<%= tr.name_en %>" maxlength="120" lang="en"></label>
@@ -62,8 +63,12 @@
   <label><%= t('Texte') %> <textarea name="intro" rows="4" maxlength="4000"><%= tr.intro %></textarea></label>
   <label><%= t('Texte en anglais') %> <textarea name="intro_en" rows="3" maxlength="4000" lang="en"><%= tr.intro_en %></textarea></label>
   <label><%= t('Texte en allemand') %> <textarea name="intro_de" rows="3" maxlength="4000" lang="de"><%= tr.intro_de %></textarea></label>
-<% if (it.allTrips) { %>  <label><%= t('Photographe') %> <select name="author_id"><option value=""><%= t('les deux photographes') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ tr.author_id === a.id ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label>
+<% if (it.allTrips) { %>  <label><%= t('Photographe') %> <select name="author_id"><option value=""><%= it.authors.length === 2 ? t('les deux photographes') : t('tous les photographes') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ tr.author_id === a.id ? ' selected' : '' %>><%= a.name %></option><% }) %></select></label>
 <% } %>  <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
 </form>
-<form method="post" action="/admin/voyages/<%= tr.id %>/supprimer" class="acc-del"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit"><%= t('Supprimer ce voyage') %></button> <span class="hint"><%= t('ses sorties et ses photos restent') %></span></form>
+<details class="danger">
+  <summary><%= t('Supprimer ce voyage') %></summary>
+  <p class="hint"><%= t('Ses sorties et ses photos restent ; son nom, ses textes et sa page publique sont effacés.') %></p>
+  <form method="post" action="/admin/voyages/<%= tr.id %>/supprimer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn danger" type="submit"><%= t('Supprimer « {name} »', { name: tr.name }) %></button></form>
+</details>
 <% } %>

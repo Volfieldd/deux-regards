@@ -60,7 +60,10 @@ export function detectLang({ country = 'XX', acceptLanguage = '' } = {}) {
 }
 
 // ---------- textes de l'interface ----------
-const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
+// Pluriel : en français, 0 et 1 au singulier ; en anglais et en allemand, 1 seulement (« 0 photos », « 0 Fotos »).
+// n peut être complété par des zéros (« 05 ») : lu comme un nombre.
+const plural = (n, one, many) => `${n} ${Number(n) >= 2 ? many : one}`;
+const pluralOne = (n, one, many) => `${n} ${Number(n) === 1 ? one : many}`;
 export const UI = {
   fr: {
     nav: { series: 'Séries', gallery: 'Galerie', map: 'Carte', trips: 'Voyages', about: 'À propos', search: 'Rechercher', label: 'Navigation', lang: 'Langue', langCurrent: 'Langue : français' },
@@ -74,7 +77,7 @@ export const UI = {
       privacy: 'Votre message et votre adresse ne servent qu’à traiter ce signalement ; ils sont effacés au bout de 12 mois.',
       errors: { kind: 'Choisissez ce que vous voulez nous dire.', message: 'Écrivez quelques mots.', email: 'Cette adresse e-mail n’est pas valide.', limit: 'Trop de messages : réessayez dans une heure.' },
     },
-    share: { button: 'Partager', title: 'Partager', close: 'Fermer', copy: 'Copier', copyLink: 'Copier le lien', copied: '✓ Lien copié', instagram: 'Voir sur Instagram', more: 'Plus…', email: 'E-mail', link: 'Lien de la photo', back: 'Retour à la photo',
+    share: { button: 'Partager', title: 'Partager', close: 'Fermer', copy: 'Copier', copyLink: 'Copier le lien', copied: '✓ Lien copié', instagram: 'Voir sur Instagram', more: 'Plus…', newWindow: ' (nouvelle fenêtre)', email: 'E-mail', link: 'Lien de la photo', back: 'Retour à la photo',
       qr: 'Scannez pour l’ouvrir sur votre téléphone, ou montrez-le à quelqu’un à côté de vous.' },
     footer: { photos: 'Photographies', noRepro: 'reproduction interdite', rights: 'Droits d’utilisation', privacy: 'Confidentialité', legal: 'Mentions légales' },
     both: 'Les deux', colon: ' :',
@@ -141,6 +144,7 @@ export const UI = {
       span: (a, b) => `du ${a} au ${b}`, days: n => `${n} jour${n > 1 ? 's' : ''}`, day: n => `Jour ${n}`, short: n => `J${n}`,
       map: name => `Itinéraire du voyage « ${name} »`, stop: (n, when, city) => `Étape ${n}, ${when} : ${city}`, open: 'Voir le voyage',
       by: names => `par ${names}`, story: 'Jour après jour', back: 'Tous les voyages',
+      preview: 'Aperçu réservé à l’équipe : ce voyage n’est pas publié (ou n’a pas encore de photo publiée). Les visiteurs ne le voient pas.', settings: 'Régler le voyage',
     },
     near: {
       title: 'À proximité', map: city => `Carte : la photo a été prise à ${city}`, here: city => `Prise à ${city}`, same: 'même ville',
@@ -148,7 +152,7 @@ export const UI = {
     },
     search: {
       title: 'Rechercher', label: 'Mots-clés', placeholder: 'brume, Loire, portrait…', submit: 'Chercher',
-      hint: 'Dans les titres, légendes, lieux, villes, séries et photographes. Chaque mot doit être trouvé.',
+      hint: 'Dans les titres, légendes, lieux, villes et régions, séries, photographes et mots-clés. Chaque mot doit être trouvé.', short: 'Tapez au moins deux lettres.',
       results: (n, q) => `${n} photo${n > 1 ? 's' : ''} pour « ${q} »`, none: q => `Aucune photo pour « ${q} ». Essayez un autre mot, ou moins de mots.`,
       description: 'Rechercher parmi les photos par mots-clés.', keywords: 'Mots-clés',
     },
@@ -173,12 +177,12 @@ export const UI = {
       privacy: 'Your message and your address are only used to deal with this report; they are deleted after 12 months.',
       errors: { kind: 'Choose what you would like to tell us.', message: 'Write a few words.', email: 'This email address is not valid.', limit: 'Too many messages: try again in an hour.' },
     },
-    share: { button: 'Share', title: 'Share', close: 'Close', copy: 'Copy', copyLink: 'Copy link', copied: '✓ Link copied', instagram: 'View on Instagram', more: 'More…', email: 'Email', link: 'Photo link', back: 'Back to the photo',
+    share: { button: 'Share', title: 'Share', close: 'Close', copy: 'Copy', copyLink: 'Copy link', copied: '✓ Link copied', instagram: 'View on Instagram', more: 'More…', newWindow: ' (new window)', email: 'Email', link: 'Photo link', back: 'Back to the photo',
       qr: 'Scan to open it on your phone, or show it to someone next to you.' },
     footer: { photos: 'Photographs', noRepro: 'all rights reserved', rights: 'Terms of use', privacy: 'Privacy', legal: 'Legal notice' },
     both: 'Both', colon: ':',
-    photos: n => plural(n, 'photo', 'photos'),
-    places: n => plural(n, 'place', 'places'),
+    photos: n => pluralOne(n, 'photo', 'photos'),
+    places: n => pluralOne(n, 'place', 'places'),
     by: name => `by ${name}`,
     photographer: 'Photographer',
     removeFilter: '(remove filter)',
@@ -240,6 +244,7 @@ export const UI = {
       span: (a, b) => `${a} – ${b}`, days: n => `${n} day${n === 1 ? '' : 's'}`, day: n => `Day ${n}`, short: n => `D${n}`,
       map: name => `Route of the trip “${name}”`, stop: (n, when, city) => `Stop ${n}, ${when}: ${city}`, open: 'See the trip',
       by: names => `by ${names}`, story: 'Day by day', back: 'All trips',
+      preview: 'Team-only preview: this trip is not published (or has no published photo yet). Visitors cannot see it.', settings: 'Trip settings',
     },
     near: {
       title: 'Nearby', map: city => `Map: the photo was taken in ${city}`, here: city => `Taken in ${city}`, same: 'same town',
@@ -247,7 +252,7 @@ export const UI = {
     },
     search: {
       title: 'Search', label: 'Keywords', placeholder: 'mist, Loire, portrait…', submit: 'Search',
-      hint: 'In titles, captions, places, towns, series and photographers. Every word must be found.',
+      hint: 'In titles, captions, places, towns and regions, series, photographers and keywords. Every word must be found.', short: 'Type at least two letters.',
       results: (n, q) => `${n} photo${n === 1 ? '' : 's'} for “${q}”`, none: q => `No photo for “${q}”. Try another word, or fewer words.`,
       description: 'Search the photos by keyword.', keywords: 'Keywords',
     },
@@ -272,12 +277,12 @@ export const UI = {
       privacy: 'Ihre Nachricht und Ihre Adresse dienen nur der Bearbeitung dieser Meldung; sie werden nach 12 Monaten gelöscht.',
       errors: { kind: 'Wählen Sie, was Sie uns mitteilen möchten.', message: 'Schreiben Sie ein paar Worte.', email: 'Diese E-Mail-Adresse ist ungültig.', limit: 'Zu viele Nachrichten: Versuchen Sie es in einer Stunde erneut.' },
     },
-    share: { button: 'Teilen', title: 'Teilen', close: 'Schließen', copy: 'Kopieren', copyLink: 'Link kopieren', copied: '✓ Link kopiert', instagram: 'Auf Instagram ansehen', more: 'Mehr…', email: 'E-Mail', link: 'Link zum Foto', back: 'Zurück zum Foto',
+    share: { button: 'Teilen', title: 'Teilen', close: 'Schließen', copy: 'Kopieren', copyLink: 'Link kopieren', copied: '✓ Link kopiert', instagram: 'Auf Instagram ansehen', more: 'Mehr…', newWindow: ' (neues Fenster)', email: 'E-Mail', link: 'Link zum Foto', back: 'Zurück zum Foto',
       qr: 'Scannen, um es auf Ihrem Telefon zu öffnen, oder zeigen Sie es jemandem neben Ihnen.' },
     footer: { photos: 'Fotografien', noRepro: 'alle Rechte vorbehalten', rights: 'Nutzungsrechte', privacy: 'Datenschutz', legal: 'Impressum' },
     both: 'Beide', colon: ':',
-    photos: n => plural(n, 'Foto', 'Fotos'),
-    places: n => plural(n, 'Ort', 'Orte'),
+    photos: n => pluralOne(n, 'Foto', 'Fotos'),
+    places: n => pluralOne(n, 'Ort', 'Orte'),
     by: name => `von ${name}`,
     photographer: 'Fotograf',
     removeFilter: '(Filter entfernen)',
@@ -339,6 +344,7 @@ export const UI = {
       span: (a, b) => `${a} – ${b}`, days: n => `${n} ${n === 1 ? 'Tag' : 'Tage'}`, day: n => `Tag ${n}`, short: n => `T${n}`,
       map: name => `Route der Reise „${name}“`, stop: (n, when, city) => `Etappe ${n}, ${when}: ${city}`, open: 'Reise ansehen',
       by: names => `von ${names}`, story: 'Tag für Tag', back: 'Alle Reisen',
+      preview: 'Vorschau nur für das Team: Diese Reise ist nicht veröffentlicht (oder hat noch kein veröffentlichtes Foto). Besucher sehen sie nicht.', settings: 'Reise einstellen',
     },
     near: {
       title: 'In der Nähe', map: city => `Karte: Das Foto wurde in ${city} aufgenommen`, here: city => `Aufgenommen in ${city}`, same: 'selber Ort',
@@ -346,7 +352,7 @@ export const UI = {
     },
     search: {
       title: 'Suchen', label: 'Stichwörter', placeholder: 'Nebel, Loire, Porträt…', submit: 'Suchen',
-      hint: 'In Titeln, Bildunterschriften, Orten, Städten, Serien und Fotografen. Jedes Wort muss gefunden werden.',
+      hint: 'In Titeln, Bildunterschriften, Orten, Städten und Regionen, Serien, Fotografen und Stichwörtern. Jedes Wort muss gefunden werden.', short: 'Geben Sie mindestens zwei Buchstaben ein.',
       results: (n, q) => `${n} ${n === 1 ? 'Foto' : 'Fotos'} für „${q}“`, none: q => `Kein Foto für „${q}“. Versuchen Sie ein anderes Wort oder weniger Wörter.`,
       description: 'Die Fotos nach Stichwörtern durchsuchen.', keywords: 'Stichwörter',
     },

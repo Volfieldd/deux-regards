@@ -44,11 +44,15 @@ test('compléter et publier : changer la série d’une photo depuis sa carte', 
   const sel = page.locator(`select[name="category_id_${id}"]`);
   const before = await sel.inputValue();
   const other = await sel.locator('option').evaluateAll((os, v) => os.map(o => o.value).find(x => x !== v), before);
+  await sel.focus();
   await sel.selectOption(other);
+  await sel.blur();                                                 // au clavier ou par programme, la liste agit en la quittant (WCAG 3.2.2)
   await expect(page.locator(`tr[data-id="${id}"] [data-state]`)).toHaveText('✓ Enregistré');
   await page.reload();
   await expect(sel).toHaveValue(other);
+  await sel.focus();
   await sel.selectOption(before);                                   // remise en état
+  await sel.blur();
   await expect(page.locator(`tr[data-id="${id}"] [data-state]`)).toHaveText('✓ Enregistré');
 });
 

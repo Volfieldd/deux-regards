@@ -17,8 +17,10 @@ export function rolesFrom(claims, { projectId, orgId } = {}) {
 // dans la liste blanche et l'e-mail vérifié par l'IdP.
 export function isAdmin(claims, roles, oidc) {
   if (roles.includes(oidc.adminRole)) return true;
-  return oidc.allowedSubs.includes(claims.sub) && claims.email_verified === true;
+  return listedAdmin(claims, oidc);
 }
+// Repli OIDC_ALLOWED_SUBS seul (liste explicite de sub, indépendante de toute organisation Zitadel).
+export const listedAdmin = (claims, oidc) => oidc.allowedSubs.includes(claims.sub) && claims.email_verified === true;
 
 export function scopesFor(oidc) {
   const scopes = ['openid', 'profile', 'email'];
@@ -80,7 +82,7 @@ export function createOidc(config) {
       }
       const claims = { ...userinfo, ...idClaims };
       const roles = rolesFrom(claims, oidc);
-      return { claims, roles, admin: isAdmin(claims, roles, oidc), idToken: tokens.id_token };
+      return { claims, roles, admin: isAdmin(claims, roles, oidc), listed: listedAdmin(claims, oidc), idToken: tokens.id_token };
     },
 
     // URL de déconnexion côté IdP (RP-initiated logout), ou null si l'IdP n'en propose pas.

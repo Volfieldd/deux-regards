@@ -25,8 +25,8 @@
     <p class="hint"><%= t('Cartes d’accord et QR des vêtements de {name} :', { name: a.name }) %> <a class="more" href="/admin/terrain?photographe=<%= a.id %>"><%= t('Sur le terrain') %></a>.</p>
     <details class="danger">
       <summary><%= t('Supprimer') %></summary>
-<% if (a.count) { %>
-      <p><%= t('Impossible : {name} a encore {n} photo(s).', { name: a.name, n: a.count }) %></p>
+<% if (a.holds.length) { %>
+      <p><%= t('Impossible pour l’instant :') %> <%= a.holds.join(' ') %></p>
 <% } else { %>
       <form method="post" action="/admin/auteurs/<%= a.id %>/delete"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
         <button class="btn danger" type="submit"><%= t('Supprimer « {name} »', { name: a.name }) %></button></form>

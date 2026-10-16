@@ -81,6 +81,8 @@ Nach **Speichern und Bilder aktualisieren**:
 - wechselt jedes Foto zu den neuen, sobald sie bereit sind, ohne defektes Bild;
 - zeigt das Banner am Ende „Bilder sind aktuell“ oder die Liste der Fotos mit Fehlern.
 
+Dieses Banner sehen nur Konten, die das Wasserzeichen einstellen (Administratoren): Die Liste der Fotos mit Fehlern nennt Fotos aller Fotografen.
+
 Rechnen Sie mit einigen Sekunden pro Foto.
 
 Dieselbe Neuberechnung wird ausgelöst, wenn Sie einen Autor umbenennen, den Namen der Website ändern oder Titel, Datum, Autor oder Wasserzeichen-Option eines Fotos ändern.

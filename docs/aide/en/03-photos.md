@@ -22,12 +22,13 @@ In the photo library, each uploaded photo **appears straight away on the contact
 - **Connection interrupted:** only the photo concerned fails; **Try again** sends it again without touching the rest.
 - **Cancel the rest:** stops the uploads not yet finished. Photos already uploaded stay as drafts.
 - **During the upload**, keep the page open (the browser warns you if you leave it). **Processing**, on the other hand, carries on on the server even if you change page: the **Processing: *n* photos** indicator stays at the bottom of the sidebar, on every page.
-- As soon as the upload is finished, **Complete and publish the *n* photos →** (or **the photo**) appears (and receives focus): it leads to step 3, even if processing is not finished.
+- As soon as the upload is finished, **Complete and publish the *n* photos →** (or **the photo**) appears (and receives focus, unless you are typing or working elsewhere on the page): it leads to step 3, even if processing is not finished. The imported photos are also selected on the contact sheet, except while you are typing or if a selection is already in progress.
 
 | | |
 |---|---|
-| Formats | JPEG, PNG, WebP, TIFF, HEIF |
-| Size | 90 MB and 120 megapixels per file at most |
+| Formats | JPEG, PNG, WebP, TIFF, AVIF. iPhone **HEIC** is not supported: export the photo as JPEG (or set the camera to “Most Compatible”) |
+| Size | 90 MB and 120 megapixels per file at most (less in 16 bits or with transparency); a vertical panorama must not be taller than about 8 times its width |
+| Check | each file is **decoded** on upload: a truncated or damaged file is refused straight away, with the reason |
 | Status | **draft**: nothing is visible on the site before publication |
 | Title | **provisional**, taken from the file name (`IMG_2041 quai-nord.jpg` → “IMG 2041 quai nord”) |
 | Date | **taken from the camera** (shooting date in the EXIF metadata), when it exists |
@@ -38,7 +39,7 @@ During processing, the site applies the camera orientation, computes the served 
 
 ### 3. Complete and publish
 
-All the photos in the batch are gathered on a single screen: title, series, place and date.
+All the photos in the batch are gathered on a single screen: title, series, place and date. A screen shows 200 at most: beyond that (a large memory card), it says so at the top and leads to the next ones.
 
 - **On a computer:** a table, one row per photo.
 - **On a phone:** **one card per photo**, with its checkbox, thumbnail and state, then the Title, Series, Place and Date fields one below the other.
@@ -58,7 +59,7 @@ Caption, watermark and proof are set in each photo's details (see below).
 ## The contact sheet
 
 - **Chips** at the top: **All**, **Published**, **Drafts**, **To finish** (drafts and provisional titles).
-- **Search** (title, place, caption, address), **photographer**, **series**: the contact sheet updates straight away.
+- **Search** (title, place, caption, address, keywords and translations, ignoring accents and case), **photographer**, **series**: the contact sheet updates straight away.
 - **Size**: the slider enlarges or shrinks the thumbnails (kept for next time).
 - **Contact sheet / List**: the list shows the photos in rows, with the order number, the photographer, the place and the **⋯** menu (**Edit details**, **Publish** or **Unpublish**, **Move up one place**, **Move down one place**).
 - When hovering over a thumbnail: its title, series and date. A click on the title opens the details. Drafts carry the **○ Draft** chip, provisional titles **Provisional title**. These chips stack at the top right of the thumbnail, with the state (**▲ To check**, **✕ Blocked**) and the suggested series (**✦**); on a narrow thumbnail they move below the checkbox. On a small thumbnail they fade out while the title is shown (hover or selected photo): the inspector then shows everything.
@@ -71,7 +72,7 @@ Caption, watermark and proof are set in each photo's details (see below).
 It changes with the selection:
 
 - **Nothing selected**: the photo library figures and the shortcuts.
-- **One photo** (a click on it): at the top of the panel, the **Open details** button; then the large image, **title**, **caption**, **series** (chips), **place**, **date**, **photographer** and its **audience** over 30 days. Each field is saved when you leave it (or Enter); the message at the bottom offers **Undo**. **Open details**, or the **Full details** link at the bottom of the panel, leads to the details page (watermark, Instagram, proof of prior existence, deletion).
+- **One photo** (a click on it): at the top of the panel, the **Open details** button; then the large image, **title**, **caption**, **series** (chips), **place**, **date**, **photographer** and its **audience** over 30 days (for accounts that see statistics). Each field is saved when you leave it (or Enter); the message at the bottom offers **Undo**. **Open details**, or the **Full details** link at the bottom of the panel, leads to the details page (watermark, Instagram, proof of prior existence, deletion).
 - **Several photos**: see below.
 
 At the bottom, always: **Publish**, **Unpublish**, **Delete…**.
@@ -146,19 +147,20 @@ In the photo library likewise: the Publish, Unpublish, Delete and Import buttons
 
 The original, the site images and the proof of prior existence are erased, and the photo is removed from the opening slideshow.
 
-**This cannot be undone from the admin.** Download the original and the proof first if you want to keep them. The original also remains in the server backups.
+**This cannot be undone from the admin.** Download the original and the proof first if you want to keep them. The original also remains in the server backups for 90 days (see [Frequently asked questions](questions)).
 
 ## The publishing workflow
 
 A photographer does not publish on their own: they **submit**, and a moderator (or an administrator) **approves**.
 
 - **Submit**: on the photo’s page, **Publishing** section, with an optional word for the moderator; or several photos from the library (**Submit for publishing** button); or a whole outing (**Submit the ready photos** on the outing page). Consents are checked at that moment, by the photographer, who can see the people: a blocked photo cannot be submitted, a photo to check asks for their confirmation. **Withdraw the submission** puts it back as a draft.
-- **Approve**: the **To approve** page (Publish menu, with the number waiting) lists the submissions, oldest first, with the photographer’s word. Tick, then **Publish now** or **Schedule for** (Paris date and time). A scheduled photo is published automatically at that time if it is still ready; otherwise it goes back to the photographer with the reason. **Cancel the schedule** puts it back in waiting.
+- **Approve**: the **To approve** page (Publish menu, with the number waiting) lists the submissions, oldest first, with the photographer’s word. Tick, then **Publish now** or **Schedule for** (Paris date and time; a date that does not exist, such as 31 April, is refused). A scheduled photo is published automatically at that time if it is still ready; otherwise it goes back to the photographer with the reason. **Cancel the schedule** puts it back in waiting. A photo ticked on a page left open, but no longer submitted (submission withdrawn, photo sent back or already approved by another moderator), is left as it is, and the message says so.
+- **Editing a scheduled photo**: if the photographer edits it (texts, series, place, date, map, including by undoing a change), it goes back to submitted, so that the moderator reviews what will go online. Saving a form without changing anything leaves the schedule alone.
 - **Send back with a note** (from the photo’s page): the moderator does not edit the photo; the note reaches the photographer’s “Today”, who corrects it and submits it again.
 - **Unpublish**: the moderator says why; the photographer receives the reason.
-- **Notifications**: “Today” tells everyone what is waiting for them (submissions to approve, submitted, scheduled, sent-back photos). Everyone can also choose to be notified **by email**, in **Your account** on the Today page (if sending email is configured on the server).
+- **Notifications**: “Today” tells everyone what is waiting for them (submissions to approve, submitted, scheduled, sent-back photos). Everyone can also choose to be notified **by email**, in **Your account** on the Today page (if sending email is configured on the server); the email is written in the admin language of the photographer linked to the account (otherwise in French).
 - **History**: each photo keeps who submitted, approved, scheduled, sent back or unpublished it, and when.
-- **Per-photographer settings** (**Publishing workflow** page, moderators and administrators): **Publish their photos without approval** (the photographer then publishes their own photos directly, outside the workflow) **Edit their photos once published** (yes by default; removed, a published photo no longer changes without the moderator) and **Put their photos in the Instagram queue without approval** (see the “Instagram” help).
+- **Per-photographer settings** (**Publishing workflow** page, moderators and administrators): **Publish their photos without approval** (the photographer then publishes their own photos directly, outside the workflow) **Edit their photos once published** (yes by default; removed, a published photo no longer changes without the moderator) and **Put their photos in the Instagram queue without approval** (see the “Instagram” help). These settings only apply to the Photographer role: they are reset when the account loses that role, and a right that another role of the account already gives (Proofreader, Moderator) cannot be removed here (the page says so).
 
 An administrator publishes directly, as before. A visitor report never unpublishes anything on its own: the moderator decides.
 
@@ -169,5 +171,5 @@ Each photo can be attached to a **town**: this is what places it on the **world 
 - **Town field** (photo details, and photo library panel): start typing (“Ang…”), choose from the list (↑ ↓ then Enter, or a click). **Every municipality in France**, even the smallest (“Ars-en-Ré”, “Loix”), and elsewhere places with more than 500 inhabitants; a town can be found under its French, English or German names (“Londres”, “München”, “Antwerp”). The list shows it in the admin’s language, with its **region, state or province**, to tell namesakes apart: “Monterey, California, United States” is not “Monterey, Tennessee, United States”. The site’s map also gives the town’s name in the page’s language (“München” in German). For a precise spot (“Baie de Monterey”), keep the **Place** field: it stays free and it is what is shown on the site.
 - **Suggested from GPS**: if the original contains the shooting position (phones, recent cameras), the nearest town is filled in at import, with the note “Suggested from the photo's GPS: please check it.” Photos imported before this feature also receive their suggestion. A town chosen by hand is never replaced.
 - **Only the town is kept**, never the exact position: a photo taken at home will appear on your municipality, not on your house.
-- **Show on the world map**: checkbox, **unticked by default**. Nothing appears on the map without your consent. A town is required; clearing the town removes the photo from the map.
+- **Show on the world map**: checkbox, **unticked by default**. Nothing appears on the map without your consent: neither on the world map nor on a trip’s map, and the site search does not find the photo by its town. A town is required; clearing the town removes the photo from the map.
 - **Several photos**: select them in the photo library, then **On the map** or **Remove from the map** (only those that have a town are affected; **Undo** in the message).

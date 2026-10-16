@@ -8,12 +8,12 @@ Ein Datenblatt pro Fotograf.
 | **Adresse** | `/auteur/<adresse>` (nur bestehende Datenblätter) |
 | **Biografie** | auf der Seite „Über uns“ angezeigt; englische und deutsche Fassung optional, darunter eingeklappt (leer: die französische Biografie) |
 | **Signatur der Instagram-Beiträge** | wird unter der Bildunterschrift der Instagram-Beiträge seiner Fotos angefügt, die eine Bildunterschrift haben; Foto für Foto entfernbar (siehe [Instagram](instagram#la-légende)) |
-| **Buchstabe der Einwilligungskarten** | der Buchstabe der Einwilligungskarten (J-0142); leer: der erste Buchstabe der Adresse. Ein Buchstabe pro Fotograf (siehe [Begegnungen](rencontres)). |
+| **Buchstabe der Einwilligungskarten** | der Buchstabe der Einwilligungskarten (J-0142); leer: der erste Buchstabe der Adresse. Er wird mit dem Datenblatt gespeichert: Eine spätere Änderung der Adresse ändert den Buchstaben nicht mehr (gedruckte Karten und QR-Codes bleiben gültig). Ein Buchstabe pro Fotograf: Ein bereits vergebener Buchstabe, eingegeben oder nicht, wird abgelehnt (siehe [Begegnungen](rencontres)). |
 | **Unterwegs** | Link zu seinen Einwilligungskarten und dem QR-Code für seine Kleidung (siehe [Begegnungen](rencontres#sur-le-terrain)) |
 
 - **Speichern**: unter jedem Datenblatt.
 - **Fotograf hinzufügen**: Formular „Neuer Fotograf“, ganz unten.
-- **Löschen**: Öffnen Sie **Löschen** und bestätigen Sie. Das ist nicht möglich, solange der Fotograf Fotos hat.
+- **Löschen**: Öffnen Sie **Löschen** und bestätigen Sie. Das ist nicht möglich, solange der Fotograf Fotos, Begegnungen (ein Administrator ordnet sie über ihr Datenblatt einem anderen Fotografen zu, ihre Referenz bleibt), eigene Reisen oder ein verknüpftes Konto hat; das Datenblatt nennt, was ihn noch hält.
 - **Umbenennen** eines Fotografen aktualisiert seine Bilder, wenn sein Name im Wasserzeichen oder in den Metadaten steht.
 
 ## Ein Konto mit einem Fotografen verknüpfen

@@ -10,6 +10,7 @@ export function createImportTracker({ render, onReady = () => {}, onFailed = () 
   const waiting = [];                // tâches en attente d'une place, dans l'ordre d'arrivée
   const running = new Set();         // promesses des rendus en cours
   let idleResolvers = [];
+  let stopping = false;              // arrêt du serveur : plus rien ne démarre
 
   const prune = () => {
     const old = Date.now() - KEEP_MS;
@@ -22,7 +23,7 @@ export function createImportTracker({ render, onReady = () => {}, onFailed = () 
   };
   // Lance les tâches en attente tant qu'il reste des places.
   const pump = () => {
-    while (running.size < concurrency && waiting.length) {
+    while (!stopping && running.size < concurrency && waiting.length) {
       const { run, resolve } = waiting.shift();
       // Une erreur dans un rappel ne doit jamais bloquer les imports suivants.
       const p = run().catch(err => log?.error({ err }, 'suivi d’import'));
@@ -57,5 +58,12 @@ export function createImportTracker({ render, onReady = () => {}, onFailed = () 
     // Photos en attente ou en cours de traitement.
     active: () => [...jobs.values()].filter(j => j.state === 'waiting' || j.state === 'processing').length,
     idle: () => (running.size || waiting.length ? new Promise(r => idleResolvers.push(r)) : Promise.resolve()),
+    // Arrêt du serveur : les rendus en cours finissent, ceux en attente ne démarrent pas (leur photo reste en
+    // brouillon, sans images : le passage complet du prochain démarrage les rend). idle() n'attend plus qu'eux.
+    stop() {
+      stopping = true;
+      for (const { resolve } of waiting.splice(0)) resolve();
+      settleIdle();
+    },
   };
 }

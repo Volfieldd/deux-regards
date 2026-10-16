@@ -1,5 +1,6 @@
 import { byId as cityById, norm } from './geo/cities.js';
 import { formsOf } from './keywords-suggest.js';
+import { foldLetters } from './slug.js';
 
 // Recherche par mots-clés sur le site public : parmi les photos publiées, dans le titre, la légende, le lieu, les
 // mots-clés, la ville (et sa région), la série et le photographe, dans toutes les langues (« München » trouve une photo
@@ -17,17 +18,38 @@ const FIELDS = [
 export const MAX_QUERY = 100;
 
 export function createSearch({ db }) {
+  // Dans l'ordre de la galerie : à score égal, l'ordre choisi par les auteurs.
   const rows = db.prepare(`SELECT p.id, p.title, p.title_en, p.title_de, p.legend, p.legend_en, p.legend_de, p.place, p.place_en, p.place_de,
-      p.keywords, p.city_id, p.city_name, c.name AS category, c.name_en AS category_en, c.name_de AS category_de, a.name AS author
-    FROM photos p JOIN categories c ON c.id = p.category_id JOIN authors a ON a.id = p.author_id WHERE p.status = 'published'`);
-  const words = s => norm(s).split(' ').filter(Boolean);
+      p.keywords, p.on_map, p.city_id, p.city_name, c.name AS category, c.name_en AS category_en, c.name_de AS category_de, a.name AS author
+    FROM photos p JOIN categories c ON c.id = p.category_id JOIN authors a ON a.id = p.author_id WHERE p.status = 'published'
+    ORDER BY p.position, p.id`);
+  const COLS = rows.columns().map(c => c.name);
+  // Sans accents ni majuscules, ß, œ, æ, ø… repliés (« strasse » trouve « Straße », « coeur » trouve « cœur »).
+  const words = s => foldLetters(norm(s)).split(' ').filter(Boolean);
   // Mots de chaque champ d'une photo, une fois par champ (pondération).
   const docOf = r => {
     const city = r.city_id ? cityById(r.city_id) : null;
     // Un mot-clé du vocabulaire est cherchable dans les trois langues (« phare » : aussi lighthouse, Leuchtturm).
     const keywords = String(r.keywords || '').split(',').flatMap(k => formsOf(k) || [k]).join(' ');
-    const v = { ...r, keywords, city: city ? city.labels.join(' ') : r.city_name || '' };
+    // La ville seulement si la photo est sur la carte (« Afficher sur la carte du monde ») : sinon la recherche
+    // révélerait la ville déduite du GPS, que la page de la photo ne montre pas.
+    const v = { ...r, keywords, city: !r.on_map ? '' : city ? city.labels.join(' ') : r.city_name || '' };
     return FIELDS.map(([cols, w]) => [new Set(cols.flatMap(k => words(v[k] || ''))), w]);
+  };
+  // Mots de chaque photo gardés d'une recherche à l'autre (le calcul coûte bien plus que la lecture des lignes) :
+  // recalculés seulement pour une photo dont un champ lu a changé ; les photos qui ne sont plus publiées sont oubliées.
+  let cache = new Map();
+  const docs = () => {
+    const next = new Map();
+    const list = rows.all().map(r => {
+      const key = COLS.map(k => r[k] ?? '').join('\u0001');
+      const hit = cache.get(r.id);
+      const doc = hit && hit.key === key ? hit.doc : docOf(r);
+      next.set(r.id, { key, doc });
+      return { id: r.id, doc };
+    });
+    cache = next;
+    return list;
   };
   return {
     // Mots retenus d'une requête (2 lettres au moins, 8 au plus).
@@ -37,8 +59,7 @@ export function createSearch({ db }) {
       const terms = this.terms(q);
       if (!terms.length) return [];
       const found = [];
-      for (const r of rows.all()) {
-        const doc = docOf(r);
+      for (const { id, doc } of docs()) {
         let score = 0;
         const all = terms.every(t => {
           let best = 0;
@@ -51,7 +72,7 @@ export function createSearch({ db }) {
           score += best;
           return best > 0;
         });
-        if (all) found.push({ id: r.id, score });
+        if (all) found.push({ id, score });
       }
       return found.sort((a, b) => b.score - a.score).map(f => f.id);
     },

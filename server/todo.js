@@ -8,9 +8,9 @@ import { isProvisional } from './admin-repo.js';
 import { samePartSql } from './outings.js';
 import { legalMissing } from './legal.js';
 import { translator } from './admin-i18n.js';
+import { rightsDue } from './reminders.js';
 
 export const LEVELS = ['urgent', 'bientot', 'plus-tard'];
-const MONTH = 30 * 864e5;
 
 const FR = translator('fr');
 const dayOf = t => ms => new Intl.DateTimeFormat(t.locale || 'fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
@@ -36,7 +36,8 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
     authorOf: db.prepare('SELECT author_id FROM photos WHERE id = ?').pluck(),
     igFailedMine: db.prepare(`SELECT p.photo_id, p.retry_requested_at, ph.title FROM instagram_posts p JOIN photos ph ON ph.id = p.photo_id WHERE p.status = 'failed' AND ph.author_id = ?
       AND NOT EXISTS (SELECT 1 FROM instagram_posts b WHERE b.photo_id = p.photo_id AND b.id > p.id AND b.status <> 'cancelled') ORDER BY p.id DESC`),
-    igFailed: db.prepare("SELECT COUNT(*) FROM instagram_posts WHERE status = 'failed' AND NOT EXISTS (SELECT 1 FROM instagram_posts b WHERE b.photo_id = instagram_posts.photo_id AND b.id > instagram_posts.id)").pluck(),
+    // Comme igFailedMine et la page Instagram : un envoi plus récent mais annulé ne fait pas oublier l'échec.
+    igFailed: db.prepare("SELECT COUNT(*) FROM instagram_posts WHERE status = 'failed' AND NOT EXISTS (SELECT 1 FROM instagram_posts b WHERE b.photo_id = instagram_posts.photo_id AND b.id > instagram_posts.id AND b.status <> 'cancelled')").pluck(),
     // À finir : brouillons, ou titre provisoire (le nom du fichier), comme la photothèque.
     toFinish: db.prepare('SELECT status, title, source_name FROM photos WHERE (@author IS NULL OR author_id = @author)'),
     noCity: db.prepare("SELECT COUNT(*) FROM photos WHERE status = 'published' AND city_id IS NULL AND (@author IS NULL OR author_id = @author)").pluck(),
@@ -55,38 +56,39 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
       all: perm => Boolean(sc(perm)?.all),
     };
   };
-  const who = (e, t) => (e.anonymized ? t('refus anonymisé') : `${e.ref || t('sans carte')}${e.name ? ` · ${e.name}` : ''}`);
+  // mail : pour le récapitulatif par e-mail, la référence seulement, jamais le nom de la personne.
+  const who = (e, t, mail = false) => (e.anonymized ? t('refus anonymisé') : `${e.ref || t('sans carte')}${e.name && !mail ? ` · ${e.name}` : ''}`);
 
-  function urgent(t = FR, scope = null) {
+  function urgent(t = FR, scope = null, { mail = false } = {}) {
     const day = dayOf(t);
     const a = access(scope);
     const items = [];
     for (const id of q.rights.all()) {
       const e = encounters.get(id);
       if (!e || !a.can('personnes.demandes', e.author_id)) continue;
-      const due = (e.rights_requested_at || 0) + MONTH;
+      const due = rightsDue(e.rights_requested_at || 0);
       const late = due < now();
-      const w = who(e, t);
+      const w = who(e, t, mail);
       items.push({ level: 'urgent', title: e.rights_request === 'effacement' ? t('Demande d’effacement de {who}', { who: w }) : t('Demande d’accès de {who}', { who: w }),
         detail: late ? t('en retard : à traiter depuis le {date}', { date: day(due) }) : t('à traiter avant le {date}', { date: day(due) }), href: `/admin/rencontres/${id}#droits`, action: t('Traiter') });
     }
     for (const r of q.refusedOnline.all()) {
       const e = encounters.get(r.id);
       if (!e || !a.can('personnes.refus', e.author_id)) continue;
-      const w = who(e, t);
+      const w = who(e, t, mail);
       items.push({ level: 'urgent', title: r.n > 1 ? t('Refus de {who} : {n} photos encore publiées', { who: w, n: r.n }) : t('Refus de {who} : {n} photo encore publiée', { who: w, n: r.n }),
         detail: t('la personne refuse la publication des photos liées'), href: `/admin/rencontres/${r.id}#refus`, action: t('Appliquer le refus') });
     }
     return items;
   }
 
-  function list(t = FR, scope = null) {
+  function list(t = FR, scope = null, { mail = false } = {}) {
     const a = access(scope);
-    const items = urgent(t, scope);
+    const items = urgent(t, scope, { mail });
     for (const r of q.refusedSession.all()) {
       const e = encounters.get(r.id);
       if (!e || !a.can('personnes.refus', e.author_id)) continue;
-      const w = who(e, t);
+      const w = who(e, t, mail);
       items.push({ level: 'bientot', title: r.n > 1 ? t('{who} a refusé : {n} photos publiées de sa sortie à vérifier', { who: w, n: r.n }) : t('{who} a refusé : {n} photo publiée de sa sortie à vérifier', { who: w, n: r.n }),
         detail: t('{author} · {day} : liez au refus celles où la personne figure, excluez les autres', { author: e.author || t('photographe'), day: e.session_day || e.met_on }), href: `/admin/rencontres/${r.id}#session`, action: t('Vérifier') });
     }
@@ -150,8 +152,9 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
       if (open_.length) items.push({ level: 'bientot', title: open_.length > 1 ? t('Instagram : {n} de vos photos en échec', { n: open_.length }) : t('Instagram : « {title} » en échec', { title: open_[0].title }),
         detail: t('demandez la republication depuis la fiche de la photo'), href: `/admin/photos/${open_[0].photo_id}#instagram`, action: t('Voir') });
     }
-    const paused = a.all('instagram.voir') && instagram?.usage().paused;
-    if (paused) items.push({ level: 'bientot', title: t('Instagram en pause'), detail: t('reprise {when} : {reason}', { when: paused.when, reason: paused.reason }), href: '/admin/instagram', action: t('Voir') });
+    const igUsage = a.all('instagram.voir') && instagram?.usage(), paused = igUsage?.paused;
+    // Heure de reprise et motif dans la langue de l'admin.
+    if (paused) items.push({ level: 'bientot', title: t('Instagram en pause'), detail: t('reprise {when} : {reason}', { when: t.lang === 'fr' ? paused.when : igUsage.whenText(paused.until, t.locale), reason: t.msg(paused.reason) }), href: '/admin/instagram', action: t('Voir') });
     const pa = a.author('photos.voir'), ma = a.author('photos.modifier'), ta = a.author('photos.textes');
     const toFinish = pa === undefined ? 0 : q.toFinish.all({ author: pa }).filter(p => p.status === 'draft' || isProvisional(p)).length;
     const proposed = seriesSuggest?.enabled() && ma !== undefined ? seriesSuggest.forPhotos(db.prepare("SELECT id, category_id, status, series_checked FROM photos WHERE status = 'draft' AND series_checked = 0 AND (@author IS NULL OR author_id = @author)").all({ author: ma })).size : 0;

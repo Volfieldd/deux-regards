@@ -1,4 +1,4 @@
-import { samePartSql } from './outings.js';
+import { samePartSql, isDay } from './outings.js';
 
 // Personnes : une personne photographiée et ses rencontres (une par sortie, chacune avec sa carte et son accord).
 //   - Un accord vaut pour sa sortie (rien ne couvre les sorties suivantes) ; un refus vaut pour tout : le refus le
@@ -63,11 +63,17 @@ export function createPeople({ db, encounters, now = () => Date.now() }) {
     };
   }
 
-  function list({ search = '' } = {}) {
-    const ids = db.prepare(`SELECT p.id FROM people p ORDER BY (SELECT MAX(e.updated_at) FROM encounters e WHERE e.person_id = p.id) DESC LIMIT 500`).pluck().all();
+  // Les plus récentes d'abord (500 au plus). authorId (portée « les miennes ») : seulement les personnes que ce
+  // photographe a rencontrées, et la recherche ne lit que ses rencontres (un nom ou une adresse notés par l'autre
+  // photographe ne se devinent pas). La recherche passe avant la limite : une personne ancienne se retrouve.
+  function list({ search = '', authorId = null } = {}) {
     const needle = String(search || '').trim().toLowerCase();
+    const ids = db.prepare(`SELECT p.id FROM people p WHERE (@author IS NULL OR EXISTS (SELECT 1 FROM encounters e WHERE e.person_id = p.id AND e.author_id = @author))
+      ORDER BY (SELECT MAX(e.updated_at) FROM encounters e WHERE e.person_id = p.id) DESC ${needle ? '' : 'LIMIT 500'}`).pluck().all({ author: authorId });
+    const own = p => (authorId == null ? p.meetings : p.meetings.filter(e => e.author_id === authorId));
     return ids.map(get).filter(Boolean)
-      .filter(p => !needle || [p.name, ...p.meetings.map(e => e.ref || ''), ...p.meetings.map(e => e.email || '')].some(v => String(v).toLowerCase().includes(needle)))
+      .filter(p => !needle || own(p).some(e => [e.name, e.ref, e.email].some(v => String(v || '').toLowerCase().includes(needle))))
+      .slice(0, 500)
       .map(p => ({ ...p, suggestions: suggestions(p.id).length }));
   }
 
@@ -99,14 +105,38 @@ export function createPeople({ db, encounters, now = () => Date.now() }) {
     sync();
     return true;
   }
-  // « Ce n'est pas elle » : la rencontre redevient une personne à part.
+  // Refus d'une rencontre venu seulement du rapprochement (« refus étendu » par sync depuis une autre rencontre), sans
+  // refus à elle depuis sa dernière décision (page /bonjour, téléphone, carte signée). Un refus d'origine inconnue
+  // compte comme le sien (gardé).
+  function extendedOnly(encounterId) {
+    let own = null, extended = false;
+    for (const ev of encounters.events(encounterId)) {
+      const d = ev.detail || {};
+      if ((ev.kind === 'visiteur' || ev.kind === 'app') && d.decision === 'refus') { own = 'refus'; extended = false; }
+      else if ((ev.kind === 'visiteur' && d.decision === 'accord' && !d.non_verifiee) || (ev.kind === 'app' && d.decision === 'accord') || (ev.kind === 'carte' && d.signed)) { own = 'accord'; extended = false; }
+      else if (ev.kind === 'refus_personne' && !d.leve) extended = true;
+    }
+    return extended && own !== 'refus';
+  }
+  // « Ce n'est pas elle » : la rencontre redevient une personne à part. Chaque côté qui n'a plus de refus à lui perd
+  // le refus étendu depuis l'autre (ce n'était pas le sien) ; un refus à elle reste étendu à toute sa personne.
   function detach(encounterId) {
     const e = encounters.get(encounterId);
     if (!e || !e.person_id || q.of.all(e.person_id).length < 2) return null;
     const t = now();
     const pid = Number(q.newPerson.run(t, t).lastInsertRowid);
-    q.setPerson.run(pid, encounterId);
-    dismiss(pid, e.person_id);
+    db.transaction(() => {
+      q.setPerson.run(pid, encounterId);
+      dismiss(pid, e.person_id);
+      for (const group of [pid, e.person_id]) {
+        const refused = q.of.all(group).map(id => encounters.get(id)).filter(x => x?.refused && !x.anonymized);
+        if (refused.some(x => !extendedOnly(x.id))) continue;
+        for (const x of refused) {
+          db.prepare('UPDATE encounters SET refused = 0, refused_at = NULL, updated_at = ? WHERE id = ?').run(t, x.id);
+          db.prepare('INSERT INTO encounter_events (encounter_id, at, kind, verified, detail) VALUES (?, ?, ?, 0, ?)').run(x.id, t, 'refus_personne', '{"leve":true}');
+        }
+      }
+    })();
     return pid;
   }
 
@@ -123,7 +153,7 @@ export function createPeople({ db, encounters, now = () => Date.now() }) {
   }
   // Nouvelle rencontre de la personne lors d'une sortie (sans décision : l'accord se demande à part).
   function addMeeting(personId, { authorId, day: d, time = '' }) {
-    if (!q.exists.get(personId) || !/^\d{4}-\d{2}-\d{2}$/.test(d || '')) return null;
+    if (!q.exists.get(personId) || !isDay(d)) return null;
     const t = now();
     const id = Number(db.prepare(`INSERT INTO encounters (author_id, status, met_on, met_time, person_id, created_at, updated_at)
       VALUES (?, 'en_cours', ?, ?, ?, ?, ?)`).run(authorId, d, /^\d{2}:\d{2}$/.test(time) ? time : '', personId, t, t).lastInsertRowid);
@@ -142,5 +172,5 @@ export function createPeople({ db, encounters, now = () => Date.now() }) {
     return n;
   }
 
-  return { sync, get, list, suggestions, dismiss, merge, attach, detach, addMeeting, linkPhotos, meetingFor, ids: id => q.of.all(id) };
+  return { sync, get, list, suggestions, dismiss, merge, attach, detach, addMeeting, linkPhotos, meetingFor };
 }

@@ -5,8 +5,8 @@ import fs from 'node:fs';
 // leurs noms en français, anglais et allemand). Sert à localiser les photos à la ville près, sans service extérieur :
 //   - search(q) : propositions au fil de la frappe (sans accents, début de mot, noms alternatifs des grandes villes) ;
 //   - nearest(lat, lon) : ville la plus proche d'une position GPS (on ne garde que la ville, jamais la position).
-// Chargée à la première utilisation (~250 000 lieux) : colonnes compactes et index des débuts de mots, pour tenir en
-// peu de mémoire et répondre en quelques millisecondes.
+// Chargée juste après le démarrage en production, sinon à la première utilisation (~250 000 lieux, 2 à 5 s de calcul,
+// environ 75 Mo de mémoire) : colonnes compactes et index des débuts de mots, pour répondre en quelques millisecondes.
 const FILE = new URL('./villes.tsv', import.meta.url);
 const REGION_FILE = new URL('./regions.tsv', import.meta.url);
 const LANGS = ['fr', 'en', 'de'];
@@ -17,15 +17,29 @@ const fold = s => s.toLowerCase().replace(/[’'`.\-_/]/g, ' ').replace(/\s+/g, 
 export const norm = s => fold(String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
 const NON_ASCII = /[^\x00-\x7f]/;
 
-let data = null;
-function load() {
-  if (data) return data;
-  const rows = [];
-  for (const line of fs.readFileSync(FILE, 'utf8').split('\n')) {
-    if (!line || line.startsWith('#')) continue;
-    rows.push(line.split('\t'));
+let data = null, building = null;
+const SLICE_MS = 20;                                 // durée d'une tranche de preload() avant de rendre la main
+// Construction de l'index, par tranches (un générateur) : load() la mène d'un trait (appel synchrone), preload() rend
+// la main au serveur entre deux tranches ; l'un peut finir ce que l'autre a commencé. L'index n'est publié qu'une fois
+// complet. Les lignes sont lues une à une (pas de tableau de toutes les lignes découpées : 50 Mo de moins au pic).
+function* build() {
+  const text = fs.readFileSync(FILE, 'utf8');
+  const lines = function* () {
+    for (let p = 0; p < text.length;) {
+      let e = text.indexOf('\n', p);
+      if (e < 0) e = text.length;
+      if (e > p && text.charCodeAt(p) !== 35) yield text.slice(p, e);
+      p = e + 1;
+    }
+  };
+  let n = 0;
+  for (let p = 0; p < text.length;) {
+    let e = text.indexOf('\n', p);
+    if (e < 0) e = text.length;
+    if (e > p && text.charCodeAt(p) !== 35) n++;    // 35 : « # »
+    p = e + 1;
   }
-  const n = rows.length;
+  yield;
   const id = new Uint32Array(n), pop = new Uint32Array(n), lat = new Float32Array(n), lon = new Float32Array(n);
   const name = new Array(n), cc = new Array(n), key = new Array(n), alt = new Map(), region = new Array(n), local = new Map();
   const regions = new Map();                         // « US.CA » → { name, fr, en, de }
@@ -46,8 +60,9 @@ function load() {
       if (l.at(-1) !== i) l.push(i);
     }
   };
-  for (let i = 0; i < n; i++) {
-    const r = rows[i];
+  let i = 0, since = performance.now();
+  for (const line of lines()) {
+    const r = line.split('\t');
     id[i] = Number(r[0]); name[i] = r[1]; cc[i] = r[3]; lat[i] = Number(r[4]); lon[i] = Number(r[5]); pop[i] = Number(r[6]) || 0;
     // Clé de recherche : le nom sans accents (le nom ASCII de GeoNames quand il diffère, par exemple pour « Ærøskøbing »).
     const main = NON_ASCII.test(r[1]) ? norm(r[1]) : fold(r[1]);
@@ -67,11 +82,29 @@ function load() {
     let cell = grid.get(g);
     if (!cell) grid.set(g, (cell = []));
     cell.push(i);
+    if (++i % 100 === 0 && performance.now() - since > SLICE_MS) { yield; since = performance.now(); }
   }
+  yield;
   for (const [p, l] of words) words.set(p, Int32Array.from(l));
+  yield;
   for (const [g, l] of grid) grid.set(g, Int32Array.from(l));
   data = { n, id, pop, lat, lon, name, cc, key, alt, byId, grid, words, region, regions, local };
+}
+function load() {
+  if (data) return data;
+  building ??= build();
+  try { for (const _ of building); } catch (err) { building = null; throw err; }
   return data;
+}
+// Chargement en arrière-plan (production, juste après le démarrage) : environ 250 000 lieux, 2 à 5 s de calcul au
+// total, par tranches d'environ SLICE_MS entre lesquelles le serveur répond. Un appel synchrone entre-temps finit le
+// travail d'un coup.
+export async function preload() {
+  building ??= data ? null : build();
+  while (!data && building) {
+    try { if (building.next().done) break; } catch (err) { building = null; throw err; }
+    await new Promise(r => setImmediate(r));
+  }
 }
 
 // Libellé sans la région (anciens libellés, et villes sans région connue).
@@ -108,9 +141,13 @@ const BONUS = [3.5, 1.5, 2, 0, 0.5];
 export function search(q, limit = 8, lang = 'fr') {
   const n = norm(q);
   if (n.length < 2) return [];
+  // Candidats : les lieux dont un mot commence comme le premier mot d'au moins deux lettres de la saisie (« L'Aquila »,
+  // « A Coruña », « 's-Hertogenbosch » : l'élision ou l'article d'une lettre n'est pas une clé de l'index).
+  const w = n.split(' ').find(x => x.length >= 2);
+  if (!w) return [];
   const d = load();
   const found = [];
-  for (const i of d.words.get(n.slice(0, 2)) || []) {
+  for (const i of d.words.get(w.slice(0, 2)) || []) {
     const k = d.key[i];
     const names = typeof k === 'string' ? [k] : k;
     const others = d.alt.get(i) || [];

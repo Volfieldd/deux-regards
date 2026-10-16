@@ -22,12 +22,13 @@ Dans la photothèque, chaque photo envoyée **apparaît aussitôt dans la planch
 - **Connexion interrompue :** seule la photo concernée échoue ; **Réessayer** la renvoie sans toucher au reste.
 - **Annuler le reste :** arrête les envois pas encore terminés. Les photos déjà envoyées restent en brouillon.
 - **Pendant l'envoi**, gardez la page ouverte (le navigateur vous prévient si vous la quittez). **Le traitement**, lui, continue sur le serveur même si vous changez de page : l'indicateur **Traitement : *n* photos** reste affiché en bas de la barre latérale, sur toutes les pages.
-- Dès que l'envoi est terminé, **Compléter et publier les *n* photos →** (ou **la photo**) apparaît (et reçoit le focus) : il mène à l'étape 3, même si le traitement n'est pas fini.
+- Dès que l'envoi est terminé, **Compléter et publier les *n* photos →** (ou **la photo**) apparaît (et reçoit le focus, sauf si vous êtes en train de saisir ou de travailler ailleurs dans la page) : il mène à l'étape 3, même si le traitement n'est pas fini. Les photos importées sont aussi choisies dans la planche, sauf pendant une saisie ou si une sélection est déjà en cours.
 
 | | |
 |---|---|
-| Formats | JPEG, PNG, WebP, TIFF, HEIF |
-| Taille | 90 Mo et 120 mégapixels par fichier au plus |
+| Formats | JPEG, PNG, WebP, TIFF, AVIF. Le **HEIC** de l'iPhone n'est pas pris en charge : exportez la photo en JPEG (ou réglez l'appareil sur « Le plus compatible ») |
+| Taille | 90 Mo et 120 mégapixels par fichier au plus (moins en 16 bits ou avec transparence) ; un panorama vertical ne doit pas être plus haut qu’environ 8 fois sa largeur |
+| Contrôle | chaque fichier est **décodé** à l'envoi : un fichier tronqué ou abîmé est refusé tout de suite, avec la raison |
 | Statut | **brouillon** : rien n'est visible sur le site avant publication |
 | Titre | **provisoire**, tiré du nom du fichier (`IMG_2041 quai-nord.jpg` → « IMG 2041 quai nord ») |
 | Date | **reprise de l'appareil photo** (date de prise de vue des métadonnées EXIF), quand elle existe |
@@ -38,7 +39,7 @@ Au traitement, le site applique l'orientation de l'appareil, calcule les images 
 
 ### 3. Compléter et publier
 
-Toutes les photos du lot sont réunies sur un seul écran : titre, série, lieu et date.
+Toutes les photos du lot sont réunies sur un seul écran : titre, série, lieu et date. Un écran en montre 200 au plus : au-delà (une grosse carte mémoire), il l'indique en haut et mène aux suivantes.
 
 - **Sur ordinateur :** un tableau, une ligne par photo.
 - **Sur téléphone :** une **carte par photo**, avec sa case, sa vignette, son état, puis les champs Titre, Série, Lieu et Date les uns sous les autres.
@@ -58,7 +59,7 @@ Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir pl
 ## La planche contact
 
 - **Pastilles** en haut : **Tout**, **Publiées**, **Brouillons**, **À finir** (brouillons et titres provisoires).
-- **Recherche** (titre, lieu, légende, adresse), **photographe**, **série** : la planche se met à jour aussitôt.
+- **Recherche** (titre, lieu, légende, adresse, mots-clés et traductions, sans tenir compte des accents ni des majuscules), **photographe**, **série** : la planche se met à jour aussitôt.
 - **Taille** : le curseur agrandit ou réduit les vignettes (gardé pour la prochaine fois).
 - **Planche / Liste** : la liste montre les photos en lignes, avec le numéro d’ordre, le photographe, le lieu et le menu **⋯** (**Modifier la fiche**, **Publier** ou **Dépublier**, **Monter d’une place**, **Descendre d’une place**).
 - Au survol d’une vignette : son titre, sa série, sa date. Un clic sur le titre ouvre la fiche. Les brouillons portent la pastille **○ Brouillon**, les titres provisoires **Titre provisoire**. Ces pastilles s'empilent en haut à droite de la vignette, avec l'état (**▲ À vérifier**, **✕ Bloquée**) et la série proposée (**✦**) ; sur une vignette étroite, elles passent sous la case à cocher. Sur une petite vignette, elles s'effacent le temps d'afficher le titre (survol ou photo choisie) : l'inspecteur montre alors tout.
@@ -71,7 +72,7 @@ Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir pl
 Il change selon la sélection :
 
 - **Rien de sélectionné** : les chiffres de la photothèque et les raccourcis.
-- **Une photo** (un clic dessus) : en tête du panneau, le bouton **Ouvrir la fiche** ; puis l’image en grand, **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **photographe** et son **audience** sur 30 jours. Chaque champ s’enregistre tout seul quand vous le quittez (ou Entrée), comme le rappelle le panneau — la fiche complète, elle, s’enregistre avec **Enregistrer** ; le message en bas propose **Annuler**. **Ouvrir la fiche**, ou le lien **Fiche complète** en bas du panneau, mène à la fiche (filigrane, Instagram, preuve d’antériorité, suppression).
+- **Une photo** (un clic dessus) : en tête du panneau, le bouton **Ouvrir la fiche** ; puis l’image en grand, **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **photographe** et son **audience** sur 30 jours (pour les comptes qui voient les statistiques). Chaque champ s’enregistre tout seul quand vous le quittez (ou Entrée), comme le rappelle le panneau — la fiche complète, elle, s’enregistre avec **Enregistrer** ; le message en bas propose **Annuler**. **Ouvrir la fiche**, ou le lien **Fiche complète** en bas du panneau, mène à la fiche (filigrane, Instagram, preuve d’antériorité, suppression).
 - **Plusieurs photos** : voir ci-dessous.
 
 En bas, toujours : **Publier**, **Dépublier**, **Supprimer…**.
@@ -146,19 +147,20 @@ Dans la photothèque, de même : les boutons Publier, Dépublier, Supprimer, Imp
 
 L'original, les images du site et la preuve d'antériorité sont effacés, et la photo est retirée de l'ouverture.
 
-**C'est irréversible depuis l'admin.** Téléchargez d'abord l'original et la preuve si vous voulez les garder. L'original reste par ailleurs dans les sauvegardes du serveur.
+**C'est irréversible depuis l'admin.** Téléchargez d'abord l'original et la preuve si vous voulez les garder. L'original reste par ailleurs 90 jours dans les sauvegardes du serveur (voir [Questions fréquentes](questions)).
 
 ## Le circuit de publication
 
 Un photographe ne publie pas lui-même : il **propose**, et un modérateur (ou un administrateur) **valide**.
 
 - **Proposer** : sur la fiche, rubrique **Publication**, avec un mot facultatif pour le modérateur ; ou plusieurs photos depuis la photothèque (bouton **Proposer à la publication**) ; ou toute une sortie (**Proposer les photos prêtes** sur la page de la sortie). Les accords sont vérifiés à ce moment-là, par le photographe, qui voit les personnes : une photo bloquée ne peut pas être proposée, une photo à vérifier demande sa confirmation. **Retirer la proposition** la remet en brouillon.
-- **Valider** : la page **À valider** (menu Publier, avec le nombre en attente) liste les propositions, la plus ancienne d'abord, avec le mot du photographe. On coche, puis **Publier maintenant** ou **Programmer le** (date et heure de Paris). Une photo programmée est publiée automatiquement à l'heure dite, si elle est toujours prête ; sinon elle revient au photographe avec la raison. **Annuler la programmation** la remet en attente.
+- **Valider** : la page **À valider** (menu Publier, avec le nombre en attente) liste les propositions, la plus ancienne d'abord, avec le mot du photographe. On coche, puis **Publier maintenant** ou **Programmer le** (date et heure de Paris ; une date qui n'existe pas, comme un 31 avril, est refusée). Une photo programmée est publiée automatiquement à l'heure dite, si elle est toujours prête ; sinon elle revient au photographe avec la raison. **Annuler la programmation** la remet en attente. Une photo cochée sur une page restée ouverte, mais qui n'est plus proposée (proposition retirée, photo renvoyée ou déjà validée par un autre modérateur), est laissée telle quelle, et le message le dit.
+- **Modifier une photo programmée** : si le photographe la modifie (textes, série, lieu, date, carte, y compris en annulant une modification), elle repasse en proposition, pour que le modérateur revoie ce qui partira en ligne. Enregistrer un formulaire sans rien y changer ne touche pas à la programmation.
 - **Renvoyer avec une remarque** (depuis la fiche) : le modérateur ne retouche pas la photo ; sa remarque arrive dans l'« Aujourd'hui » du photographe, qui corrige puis la propose de nouveau.
 - **Dépublier** : le modérateur dit pourquoi ; le photographe reçoit la raison.
-- **Prévenir** : « Aujourd'hui » dit à chacun ce qui l'attend (propositions à valider, photos proposées, programmées, renvoyées). Chacun peut aussi choisir d'être prévenu **par e-mail**, dans **Votre compte** sur la page Aujourd'hui (si l'envoi d'e-mails est configuré sur le serveur).
+- **Prévenir** : « Aujourd'hui » dit à chacun ce qui l'attend (propositions à valider, photos proposées, programmées, renvoyées). Chacun peut aussi choisir d'être prévenu **par e-mail**, dans **Votre compte** sur la page Aujourd'hui (si l'envoi d'e-mails est configuré sur le serveur) ; l'e-mail est écrit dans la langue de l'admin du photographe lié au compte (sinon en français).
 - **Historique** : chaque fiche garde qui a proposé, validé, programmé, renvoyé ou dépublié, et quand.
-- **Réglages par photographe** (page **Circuit de publication**, modérateurs et administrateurs) : **Publier ses photos sans validation** (le photographe publie alors lui-même ses photos, sans passer par le circuit) **Modifier ses photos une fois publiées** (oui par défaut ; retiré, une photo publiée ne change plus sans le modérateur) et **Mettre ses photos dans la file Instagram sans validation** (voir l’aide « Instagram »).
+- **Réglages par photographe** (page **Circuit de publication**, modérateurs et administrateurs) : **Publier ses photos sans validation** (le photographe publie alors lui-même ses photos, sans passer par le circuit) **Modifier ses photos une fois publiées** (oui par défaut ; retiré, une photo publiée ne change plus sans le modérateur) et **Mettre ses photos dans la file Instagram sans validation** (voir l’aide « Instagram »). Ces réglages ne valent que pour le rôle Photographe : ils sont remis à zéro quand le compte perd ce rôle, et un droit qu’un autre rôle du compte donne déjà (Relecteur, Modérateur) ne se retire pas ici (la page l’indique).
 
 Un administrateur publie directement, comme avant. Un signalement de visiteur ne dépublie rien tout seul : c'est au modérateur de décider.
 
@@ -169,5 +171,5 @@ Chaque photo peut être rattachée à une **ville** : c’est ce qui la place su
 - **Champ Ville** (fiche de la photo, et panneau de la photothèque) : commencez à taper (« Ang… »), choisissez dans la liste (↑ ↓ puis Entrée, ou un clic). **Toutes les communes de France**, même les plus petites (« Ars-en-Ré », « Loix »), et ailleurs les localités de plus de 500 habitants ; on trouve une ville sous ses noms en français, en anglais ou en allemand (« Londres », « München », « Anvers »). La liste l’affiche dans la langue de l’admin, avec sa **région, son État ou sa province**, pour distinguer les homonymes : « Monterey, Californie, États-Unis » n’est pas « Monterey, Tennessee, États-Unis ». La carte du site donne aussi le nom de la ville dans la langue de la page (« München » en allemand). Pour un lieu précis (« Baie de Monterey »), gardez le champ **Lieu** : il reste libre et c’est lui qui s’affiche sur le site.
 - **Proposée d’après le GPS** : si l’original contient la position de la prise de vue (téléphones, boîtiers récents), la ville la plus proche est remplie à l’import, avec la mention « Proposée d’après le GPS de la photo : vérifiez-la ». Les photos importées avant cette fonction reçoivent aussi leur proposition. Une ville choisie à la main n’est jamais remplacée.
 - **Seule la ville est gardée**, jamais la position exacte : une photo prise chez vous apparaîtra sur votre commune, pas sur votre maison.
-- **Afficher sur la carte du monde** : case à cocher, **décochée par défaut**. Rien n’apparaît sur la carte sans votre accord. Il faut une ville ; effacer la ville retire la photo de la carte.
+- **Afficher sur la carte du monde** : case à cocher, **décochée par défaut**. Rien n’apparaît sur la carte sans votre accord : ni sur la carte du monde, ni sur celle d’un voyage, et la recherche du site ne trouve pas la photo par sa ville. Il faut une ville ; effacer la ville retire la photo de la carte.
 - **Plusieurs photos** : sélectionnez-les dans la photothèque, puis **Sur la carte** ou **Retirer de la carte** (seules celles qui ont une ville sont concernées ; **Annuler** dans le message).

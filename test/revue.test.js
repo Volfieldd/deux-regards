@@ -193,6 +193,10 @@ test('rendu interrompu : restes .tmp et variantes sans photo effacés au démarr
   const dir = path.join(c.config.storageDir, 'variants');
   const any = fs.readdirSync(dir)[0];
   fs.writeFileSync(path.join(dir, `${any}.dead.tmp`), 'x');
+  // Reste d'un rendu interrompu il y a plus d'une heure (un .tmp récent peut être en cours d'écriture : voir
+  // revue-2026-10-16-media.test.js).
+  const old = (Date.now() - 2 * 3600 * 1000) / 1000;
+  fs.utimesSync(path.join(dir, `${any}.dead.tmp`), old, old);
   fs.writeFileSync(path.join(dir, '99999999-9999-9999-9999-999999999999-640.webp'), 'x');
   await c.app.ready();
   await c.app.variants.idle();

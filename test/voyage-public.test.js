@@ -13,7 +13,7 @@ async function world(t) {
   const plan = [['2026-09-01', 'Lisbonne'], ['2026-09-02', 'Lisbonne'], ['2026-09-03', 'Sintra'], ['2026-09-04', 'Coimbra'], ['2026-09-05', 'Porto'], ['2026-09-05', 'Porto']];
   plan.forEach(([day, city], i) => {
     const c = pt(city);
-    ctx.db.prepare("UPDATE photos SET taken_on = ?, status = 'published', city_id = ?, city_name = ?, city_cc = ?, city_lat = ?, city_lon = ? WHERE id = ?").run(day, c.id, c.name, c.cc, c.lat, c.lon, ids[i].id);
+    ctx.db.prepare("UPDATE photos SET taken_on = ?, status = 'published', on_map = 1, city_id = ?, city_name = ?, city_cc = ?, city_lat = ?, city_lon = ? WHERE id = ?").run(day, c.id, c.name, c.cc, c.lat, c.lon, ids[i].id);
   });
   // Un brouillon du même voyage : jamais montré.
   ctx.db.prepare("UPDATE photos SET taken_on = '2026-09-06', status = 'draft' WHERE id = ?").run(ids[6].id);

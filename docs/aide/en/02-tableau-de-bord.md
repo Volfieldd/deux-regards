@@ -9,7 +9,7 @@ This is the **Today** page, the one you land on. At the top, **View site** and *
 
   Urgent items are also counted in the sidebar, next to **Today** (✕ and their number). The “without a town” and “without a translation” links open the filtered photo library; the filter chip, with ✕, removes it.
 
-- **To finish**: drafts and photos that still have their provisional title, each with its direct action: **Publish**, or **Add title** (opens the details). **Finish everything on one screen** opens the photo library filtered on “To finish”.
+- **To finish**: drafts and photos that still have their provisional title, each with its direct action: **Publish** (photo ready, for those who publish), **Add title** (opens the details), **Check** (consents to check: the details ask for confirmation), **Propose** (for those who propose to the moderator) or **View** (photo blocked by a consent). The small text gives the state: “ready to publish”, “consents to check” or “blocked by a consent”. **Finish everything on one screen** opens the photo library filtered on “To finish”.
 - **The site right now**: the opening slideshow photos, in order, and the site theme. **edit** leads to [Public site](reglages#photos-de-louverture).
 - **Figures**: today's visitors, published photos, drafts, series, photographers; a click opens the matching page.
 - **Photo of the moment**: the photo most often opened full size over 30 days, with its number of openings. **Statistics →** opens the [Statistics](statistiques). This box only appears if photos have been viewed.
@@ -19,9 +19,9 @@ This is the **Today** page, the one you land on. At the top, **View site** and *
 - **What’s new**: after an update, a window shows once, at your next sign-in, everything that arrived since your last visit (only what concerns your rights). **Got it** closes it. The **What’s new** menu (under Help) keeps every version, newest first, with the number of the installed version.
 - **Your account**: the name of the signed-in account, its roles, and the photographer it is linked to. Emails are set here too:
   - **Also notify me by email**: proposals, decisions on your photos and notes, as they arrive;
-  - **Summary of what is waiting for you**: **never**, **every day** or **every week (on Monday)**. It goes out around 8 am, only if there is something, never more than once a day;
+  - **Summary of what is waiting for you**: **never**, **every day** or **every week (on Monday)**. It goes out around 8 am, only if there is something, never more than once a day, and never names the people photographed (their reference only);
   - **GDPR requests** are always sent to you, with their reminders (see the “Photographed people” help).
   - **Account not linked:** an administrator links it to its photographer in [Accounts and roles](reglages#comptes-et-rôles).
   - **Account linked:** your imports are attributed to you by default.
 
-**“Updating images” banner**: it appears after a change of watermark, EXIF, author name… The counter moves on by itself; see [Watermark and EXIF](filigrane-exif#mise-à-jour-des-images).
+**“Updating images” banner**: it appears after a change of watermark, EXIF, author name… The counter moves on by itself; see [Watermark and EXIF](filigrane-exif#mise-à-jour-des-images). Only accounts that set the watermark see it.

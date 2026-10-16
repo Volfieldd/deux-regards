@@ -22,7 +22,7 @@ Le dépôt s'appelle `deux-regards`, le nom de travail du projet. Le nom affich�
 | Savoir ce que fait le site, fonction par fonction | [Spécifications](docs/wiki/Spécifications.md) et [`docs/specs/`](docs/specs/) |
 | Comprendre les choix et l'historique, voir ce qui reste à faire | [PLAN.md](PLAN.md) |
 | Connaître les protections en place | [Sécurité](docs/wiki/Sécurité.md) |
-| Relire les audits d'ergonomie et de design | [`docs/audit-ergonomie-2026-10/`](docs/audit-ergonomie-2026-10/README.md), [`docs/audit-iphone-2026-10/`](docs/audit-iphone-2026-10/README.md), [`docs/design-2026-10/`](docs/design-2026-10/README.md), [revue de code](docs/revue-2026-10.md) |
+| Relire les audits d'ergonomie et de design | [`docs/audit-ergonomie-2026-10/`](docs/audit-ergonomie-2026-10/README.md), [`docs/audit-iphone-2026-10/`](docs/audit-iphone-2026-10/README.md), [`docs/design-2026-10/`](docs/design-2026-10/README.md), [revue de code](docs/revue-2026-10.md), [revue du 16 octobre](docs/revue-2026-10-16.md) |
 
 Règle : **une modification visible met à jour sa documentation dans la même PR** (aide si cela change un geste, wiki si cela change l'installation, l'exploitation ou une spécification, `PLAN.md` pour une étape ou la feuille de route).
 
@@ -54,7 +54,7 @@ Pour entrer dans l'admin sans Zitadel, laissez les variables `OIDC_*` vides et m
 
 ## Connexion à l'admin
 
-L'admin n'accepte que des comptes OIDC portant le rôle de projet `admin` (Zitadel), ou, en repli, un `sub` listé dans `OIDC_ALLOWED_SUBS` avec un e-mail vérifié. Renseigner `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_PROJECT_ID` et `OIDC_ORG_ID`, et déclarer `PUBLIC_URL/auth/callback` comme URL de redirection dans Zitadel. Sans ces variables, le site public fonctionne et `/auth/login` répond 503. Pas à pas : [Connexion et comptes](docs/wiki/Connexion-et-comptes.md).
+L'admin n'accepte que des comptes qui ont un rôle, donné dans **Comptes et rôles** (Administrateur, Photographe, Modérateur, Relecteur) ; un compte inconnu arrive « en attente ». Le rôle de projet `admin` (Zitadel), ou, en repli, un `sub` listé dans `OIDC_ALLOWED_SUBS` avec un e-mail vérifié, ne sert qu'à créer un administrateur à sa première connexion. Renseigner `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_PROJECT_ID` et `OIDC_ORG_ID`, et déclarer `PUBLIC_URL/auth/callback` comme URL de redirection dans Zitadel. Sans ces variables, le site public fonctionne et `/auth/login` répond 503. Pas à pas : [Connexion et comptes](docs/wiki/Connexion-et-comptes.md).
 
 Le serveur refuse de démarrer sans `COOKIE_SECRET` (32 caractères ou plus) dès que `PUBLIC_URL` est en HTTPS, que `NODE_ENV=production` ou qu'il écoute ailleurs qu'en local (`HOST` autre qu'une adresse de bouclage) ; il refuse aussi un émetteur OIDC en HTTP une fois en ligne.
 

@@ -1,0 +1,130 @@
+{
+ "Reprendre comme légende anglaise": {
+  "en": "Use as English caption",
+  "de": "Als englische Bildunterschrift übernehmen"
+ },
+ "Faites signer de nouveau la personne et reprenez sa photo : elles ne sont pas gardées après une erreur.": {
+  "en": "Have the person sign again and retake their photo: they are not kept after an error.",
+  "de": "Lassen Sie die Person erneut unterschreiben und machen Sie ihr Foto noch einmal: Beides wird nach einem Fehler nicht aufbewahrt."
+ },
+ "Faites signer de nouveau la personne : la signature n’est pas gardée après une erreur.": {
+  "en": "Have the person sign again: the signature is not kept after an error.",
+  "de": "Lassen Sie die Person erneut unterschreiben: Die Unterschrift wird nach einem Fehler nicht aufbewahrt."
+ },
+ "Reprenez la photo de la personne : elle n’est pas gardée après une erreur.": {
+  "en": "Retake the person’s photo: it is not kept after an error.",
+  "de": "Machen Sie das Foto der Person noch einmal: Es wird nach einem Fehler nicht aufbewahrt."
+ },
+ "Ses sorties et ses photos restent ; son nom, ses textes et sa page publique sont effacés.": {
+  "en": "Its outings and photos stay; its name, texts and public page are deleted.",
+  "de": "Ihre Ausflüge und Fotos bleiben; ihr Name, ihre Texte und ihre öffentliche Seite werden gelöscht."
+ },
+ "Ses rôles, son photographe lié et ses réglages sont effacés ; s’il se reconnecte, il repart « en attente ».": {
+  "en": "Its roles, linked photographer and settings are deleted; if it signs in again, it starts over as “pending”.",
+  "de": "Seine Rollen, der verknüpfte Fotograf und seine Einstellungen werden gelöscht; meldet es sich erneut an, ist es wieder „ausstehend“."
+ },
+ "Supprimer le compte « {name} »": {
+  "en": "Delete the account “{name}”",
+  "de": "Konto „{name}“ löschen"
+ },
+ "bloquée par un accord (détail réservé au photographe et aux administrateurs)": {
+  "en": "blocked by a consent (details for the photographer and administrators only)",
+  "de": "durch eine Einwilligung gesperrt (Details nur für den Fotografen und die Administratoren)"
+ },
+ "à vérifier : un accord manque (détail réservé au photographe et aux administrateurs)": {
+  "en": "to check: a consent is missing (details for the photographer and administrators only)",
+  "de": "zu prüfen: eine Einwilligung fehlt (Details nur für den Fotografen und die Administratoren)"
+ },
+ "Proposer": {
+  "en": "Propose",
+  "de": "Vorschlagen"
+ },
+ "brouillon, bloqué par un accord": {
+  "en": "draft, blocked by a consent",
+  "de": "Entwurf, durch eine Einwilligung gesperrt"
+ },
+ "brouillon, accords à vérifier": {
+  "en": "draft, consents to check",
+  "de": "Entwurf, Einwilligungen zu prüfen"
+ },
+ "Le compte et les réglages Instagram sont gérés par un administrateur.": {
+  "en": "The Instagram account and settings are managed by an administrator.",
+  "de": "Das Instagram-Konto und die Einstellungen werden von einem Administrator verwaltet."
+ },
+ "{n} photos sur {total} : une page en montre 200 au plus.": {
+  "en": "{n} of {total} photos: a page shows 200 at most.",
+  "de": "{n} von {total} Fotos: Eine Seite zeigt höchstens 200."
+ },
+ "Les {n} suivantes →": {
+  "en": "The next {n} →",
+  "de": "Die nächsten {n} →"
+ },
+ "La suivante →": {
+  "en": "The next one →",
+  "de": "Das nächste →"
+ },
+ "Signature": {
+  "en": "Signature",
+  "de": "Unterschrift"
+ },
+ "Imprimer": {
+  "en": "Print",
+  "de": "Drucken"
+ },
+ "Retour": {
+  "en": "Back",
+  "de": "Zurück"
+ },
+ "Imprimez à 100 % (taille réelle), puis découpez le long des traits.": {
+  "en": "Print at 100% (actual size), then cut along the lines.",
+  "de": "Drucken Sie mit 100 % (Originalgröße) und schneiden Sie dann entlang der Linien."
+ },
+ "{n} feuilles A4.": {
+  "en": "{n} A4 sheets.",
+  "de": "{n} A4-Blätter."
+ },
+ "{n} feuille A4.": {
+  "en": "{n} A4 sheet.",
+  "de": "{n} A4-Blatt."
+ },
+ "Décision": {
+  "en": "Decision",
+  "de": "Entscheidung"
+ },
+ "Claire": {
+  "en": "Light",
+  "de": "Hell"
+ },
+ "Sombre": {
+  "en": "Dark",
+  "de": "Dunkel"
+ },
+ "Automatique (claire sur photo sombre, sombre sur photo claire)": {
+  "en": "Automatic (light on dark photos, dark on light photos)",
+  "de": "Automatisch (hell auf dunklen Fotos, dunkel auf hellen Fotos)"
+ },
+ "tous les photographes": {
+  "en": "all photographers",
+  "de": "alle Fotografen"
+ },
+ "tous": {
+  "en": "all",
+  "de": "alle"
+ },
+ "Tous": {
+  "en": "All",
+  "de": "Alle"
+ },
+ "Signalements": {
+  "en": "Reports",
+  "de": "Meldungen"
+ },
+ "{n} nouveaux": {
+  "en": "{n} new",
+  "de": "{n} neue"
+ },
+ "1 nouveau": {
+  "en": "1 new",
+  "de": "1 neue"
+ }
+}

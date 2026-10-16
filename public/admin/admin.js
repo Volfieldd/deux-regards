@@ -155,6 +155,7 @@ const I18N = {
   "Photos de l’ouverture": {"en": "Opening slideshow photos", "de": "Fotos der Start-Diashow"},
   "Carte du monde": {"en": "World map", "de": "Weltkarte"},
   "Statistiques": {"en": "Statistics", "de": "Statistiken"},
+  "Signalements": {"en": "Reports", "de": "Meldungen"},
   "Sur le terrain": {"en": "In the field", "de": "Unterwegs"},
   "Cartes d’accord": {"en": "Consent cards", "de": "Einwilligungskarten"},
   "Photographes": {"en": "Photographers", "de": "Fotografen"},
@@ -194,7 +195,6 @@ const I18N = {
   "ressemble à {n} de ses {total} photos": {"en": "looks like {n} of its {total} photos", "de": "ähnelt {n} ihrer {total} Fotos"},
   "Classer dans « {name} »": {"en": "Move to “{name}”", "de": "In „{name}“ einordnen"},
   "Garder « {name} »": {"en": "Keep “{name}”", "de": "„{name}“ behalten"},
-  "« {title} » reste dans « {name} ».": {"en": "“{title}” stays in “{name}”.", "de": "„{title}“ bleibt in „{name}“."},
   "Série choisie : elle sera gardée à l’enregistrement.": {"en": "Series chosen: it will be kept when you save.", "de": "Serie gewählt: Sie wird beim Speichern übernommen."},
   "{got} Mo sur {total}": {"en": "{got} MB of {total}", "de": "{got} MB von {total}"},
   "{done} photos sur {total}": {"en": "{done} of {total} photos", "de": "{done} von {total} Fotos"},
@@ -202,6 +202,8 @@ const I18N = {
   "Voir le post ↗": {"en": "See the post ↗", "de": "Beitrag ansehen ↗"},
   "Mettre à jour la page": {"en": "Refresh the page", "de": "Seite aktualisieren"},
   "Suivi interrompu : rechargez la page pour voir où en est l’envoi.": {"en": "Tracking interrupted: reload the page to see how the sending is going.", "de": "Verfolgung unterbrochen: Laden Sie die Seite neu, um den Stand der Sendung zu sehen."},
+  "Dernier essai sans succès : {error}": {"en": "Last attempt failed: {error}", "de": "Letzter Versuch fehlgeschlagen: {error}"},
+  "Description prête : enregistrez vos modifications, puis rechargez la page pour la reprendre.": {"en": "Description ready: save your changes, then reload the page to use it.", "de": "Beschreibung bereit: Speichern Sie Ihre Änderungen und laden Sie dann die Seite neu, um sie zu übernehmen."},
 };
 function tr(s, params) {
   const e = I18N[s];
@@ -223,29 +225,71 @@ async function postJson(url, body) {
   return data;
 }
 
+// ----- liste déroulante qui agit (enregistre, applique) -----
+// Au pointeur (souris, doigt), dès le choix ; au clavier, les flèches parcourent les options sans rien déclencher
+// (sous Windows, chaque flèche émet « change » : WCAG 3.2.2). Entrée applique ; quitter la liste aussi, sauf
+// onBlur: false (ce qui recharge la page ne se déclenche pas en quittant un champ).
+function onPick(select, act, { onBlur = true } = {}) {
+  let pointer = false;
+  let start = select.value;
+  const fire = () => { start = select.value; act(); };
+  select.addEventListener('focus', () => { start = select.value; });
+  select.addEventListener('pointerdown', () => { pointer = true; });
+  select.addEventListener('keydown', e => {
+    pointer = false;
+    if (e.key === 'Enter' && select.value !== start) { e.preventDefault(); fire(); }
+  });
+  select.addEventListener('change', () => { if (pointer && select.value !== start) fire(); });
+  select.addEventListener('blur', () => { pointer = false; if (onBlur && select.value !== start) fire(); });
+}
+
 // ----- message de confirmation, avec « Annuler » pendant 10 s -----
 // Il survit à un rechargement de page (sessionStorage) : les actions groupées rechargent la liste.
+// La région live reste rendue (vide, hors de la vue) : vidée, puis écrite au tour suivant, le message est annoncé.
+// Le délai s'arrête tant que la souris ou le focus est dessus (« Annuler » reste atteignable) ; à la fermeture, le
+// focus qui y était revient où il était avant.
 const toast = (() => {
   const box = $('[data-toast]');
-  let timer = null;
+  let timer = null, fill = null, delay = 6000, before = null, hover = false;
+  const restore = () => { if (box.contains(document.activeElement)) (before && document.contains(before) ? before : $('#contenu'))?.focus({ preventScroll: true }); };
+  const hide = () => {
+    clearTimeout(timer);
+    restore();
+    box.replaceChildren();
+    window.__lastUndo = null;
+  };
+  const arm = () => { clearTimeout(timer); timer = setTimeout(hide, delay); };
+  if (box) {
+    box.addEventListener('mouseenter', () => { hover = true; clearTimeout(timer); });
+    box.addEventListener('mouseleave', () => { hover = false; if (box.firstChild && !box.contains(document.activeElement)) arm(); });
+    box.addEventListener('focusin', () => clearTimeout(timer));
+    box.addEventListener('focusout', e => { if (!box.contains(e.relatedTarget) && !hover && box.firstChild) arm(); });
+  }
   function show(text, { undo = null, error = false } = {}) {
     if (!box) return;
     clearTimeout(timer);
+    clearTimeout(fill);
     window.__lastUndo = undo;              // ⌘Z rejoue la dernière annulation proposée
-    box.classList.toggle('error', error);
-    box.innerHTML = `<span>${esc(text)}</span>`;
-    if (undo) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = tr('annuler-action');
-      b.addEventListener('click', async () => {
-        b.disabled = true;
-        try { await undo(); } catch (err) { show(tr('Annulation impossible : {msg}', { msg: err.message }), { error: true }); }
-      });
-      box.appendChild(b);
-    }
-    box.hidden = false;
-    timer = setTimeout(() => { box.hidden = true; window.__lastUndo = null; }, undo ? 10000 : 6000);
+    if (!box.contains(document.activeElement)) before = document.activeElement;
+    restore();                             // « Annuler » qui affiche un nouveau message : le focus n'est pas perdu
+    box.replaceChildren();
+    fill = setTimeout(() => {
+      box.classList.toggle('error', error);
+      box.innerHTML = `<span>${esc(text)}</span>`;
+      if (undo) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = tr('annuler-action');
+        b.addEventListener('click', async () => {
+          b.disabled = true;
+          try { await undo(); } catch (err) { show(tr('Annulation impossible : {msg}', { msg: err.message }), { error: true }); }
+        });
+        box.appendChild(b);
+      }
+      delay = undo ? 10000 : 6000;
+      hover = box.matches(':hover');
+      if (!hover) arm();
+    }, 50);
   }
   // Après rechargement : message (et annulation d'action groupée) mis de côté avant.
   const saved = sessionStorage.getItem('toast');
@@ -311,11 +355,17 @@ $$('[data-js-only]').forEach(el => { el.hidden = false; });
   });
 })();
 
-// ----- filtres : appliqués dès qu'une liste change -----
+// ----- filtres : appliqués dès qu'une liste change (au pointeur) ; au clavier, Entrée ou « Filtrer » -----
 (function () {
   const form = $('[data-filters]');
   if (!form) return;
-  $$('select', form).forEach(s => s.addEventListener('change', () => form.requestSubmit()));
+  const button = $('[data-filter-submit]', form);
+  $$('select', form).forEach(s => {
+    onPick(s, () => form.requestSubmit(), { onBlur: false });
+    // Choix au clavier : le bouton « Filtrer » (masqué avec JavaScript) réapparaît pour appliquer.
+    s.addEventListener('change', () => { if (s.value !== s.dataset.applied) button?.removeAttribute('data-nojs'); });
+    s.dataset.applied = s.value;
+  });
   const hint = $('[data-drop-hint]');
   if (hint) hint.hidden = false;
 })();
@@ -529,7 +579,13 @@ const activity = (() => {
     next.hidden = sending || !ids.length;
     next.href = `/admin/photos/lot?ids=${ids.join(',')}`;
     next.textContent = ids.length > 1 ? tr('Compléter et publier les {n} photos →', { n: ids.length }) : tr('Compléter et publier la photo →');
-    if (!next.hidden && !next.dataset.focused) { next.dataset.focused = '1'; next.focus(); }
+    // Le focus va sur « Compléter… » seulement s'il n'est pas ailleurs (saisie dans l'inspecteur, autre champ) : sinon
+    // la saisie serait coupée, et les lettres suivantes déclencheraient des raccourcis.
+    if (!next.hidden && !next.dataset.focused) {
+      next.dataset.focused = '1';
+      const at = document.activeElement;
+      if (!at || at === document.body || section.contains(at)) next.focus();
+    }
     cancel.hidden = !up;
     send.hidden = true;
     defaults.hidden = true;
@@ -711,11 +767,8 @@ const activity = (() => {
   });
   allBox?.addEventListener('change', () => { boxes().forEach(b => { b.checked = allBox.checked; }); update(); });
   clear?.addEventListener('click', () => { boxes().forEach(b => { b.checked = false; }); update(); boxes()[0]?.focus(); });
-  catSelect?.addEventListener('change', () => {
-    const isNew = catSelect.value === 'new';
-    newName.classList.toggle('on', isNew);
-    if (isNew) newName.focus();
-  });
+  catSelect?.addEventListener('change', () => newName.classList.toggle('on', catSelect.value === 'new'));
+  if (catSelect) onPick(catSelect, () => { if (catSelect.value === 'new') newName.focus(); });   // pas à chaque flèche
   update();
 
   // Confirmation avant suppression. La publication, elle, se fait en un clic : le titre provisoire est
@@ -744,10 +797,12 @@ const activity = (() => {
       });
     }
     const apply = (action, extra) => run(action, extra, null);
-    catSelect.addEventListener('change', () => { if (catSelect.value && catSelect.value !== 'new') apply('category', { category_id: catSelect.value }); });
+    onPick(catSelect, () => { if (catSelect.value && catSelect.value !== 'new') apply('category', { category_id: catSelect.value }); });
     newName.addEventListener('change', () => { if (newName.value.trim()) apply('category', { category_id: 'new', new_category: newName.value }); });
     bar.elements.place.addEventListener('change', () => { if (bar.elements.place.value.trim()) apply('fields', { place: bar.elements.place.value }); });
     bar.elements.taken_on.addEventListener('change', () => { if (bar.elements.taken_on.value.trim()) apply('fields', { taken_on: bar.elements.taken_on.value }); });
+    // Entrée : applique le champ (comme le quitter), sans envoyer le formulaire.
+    [bar.elements.place, bar.elements.taken_on].forEach(f => f.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); f.blur(); f.focus(); } }));
   }
 
   async function run(action, extra, button) {
@@ -791,6 +846,9 @@ const activity = (() => {
 
   bar.addEventListener('submit', async e => {
     e.preventDefault();
+    // Entrée dans un champ (envoi implicite) prend le premier bouton du formulaire, celui de la version sans script
+    // (« Changer de série », masqué) : ignoré ; les champs s'enregistrent d'eux-mêmes.
+    if (e.submitter?.matches('[data-nojs]')) return;
     const action = e.submitter?.value;
     const ids = checked().map(b => Number(b.value));
     if (!action || !ids.length) return;
@@ -808,7 +866,6 @@ const activity = (() => {
   const lot = $('[data-lot]');
   if (!lot) return;
   const stateOf = row => $('[data-state]', row);
-  const status = row => (row.dataset.status ??= stateOf(row).textContent);
 
   lot.addEventListener('submit', e => e.preventDefault());       // Entrée : le champ s'enregistre au change
   lot.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) { e.preventDefault(); e.target.blur(); e.target.focus(); } });
@@ -819,7 +876,6 @@ const activity = (() => {
     const key = field.dataset.field;
     const cell = field.closest('td');
     const note = key === 'taken_on' ? $('.cellnote', cell) : null;
-    status(row);
     stateOf(row).textContent = tr('● Enregistrement…');
     try {
       const { photo } = await postJson(`/admin/photos/${id}/champs`, { [key]: value });
@@ -846,25 +902,34 @@ const activity = (() => {
   }
   $$('[data-field]', lot).forEach(f => {
     f.dataset.saved = f.value;
-    f.addEventListener('change', () => { const prev = f.dataset.saved; save(f, f.value, prev); });
+    const commit = () => { const prev = f.dataset.saved; if (f.value !== prev) save(f, f.value, prev); };
+    if (f.matches('select')) onPick(f, commit); else f.addEventListener('change', commit);
   });
 
   // Vignettes des photos encore en traitement.
+  // Une photo en échec ou supprimée sort du suivi (son état est affiché) ; refus ou session expirée : le suivi
+  // s'arrête ; 20 minutes au plus.
   const pending = () => $$('[data-processing]', lot).map(ph => ph.closest('tr'));
   if (pending().length) {
+    let tries = 0;
     const timer = setInterval(async () => {
       const rows = pending();
-      if (!rows.length) return clearInterval(timer);
+      if (!rows.length || ++tries > 800) return clearInterval(timer);
       try {
-        const res = await fetch(`/admin/photos/traitement?ids=${rows.map(r => r.dataset.id).join(',')}`, { headers: { accept: 'application/json' } });
+        const res = await fetch(`/admin/photos/traitement?ids=${rows.map(r => r.dataset.id).join(',')}`, { headers: { accept: 'application/json' }, redirect: 'manual' });
+        if (!res.ok) return clearInterval(timer);
         const data = await res.json();
         for (const p of data.photos) {
           const row = rows.find(r => Number(r.dataset.id) === p.id);
-          const ph = $('[data-processing]', row);
+          const ph = row && $('[data-processing]', row);
+          if (!ph) continue;
           if (p.state === 'ready') ph.outerHTML = `<img src="${p.thumb}" alt="" width="84" height="56">`;
-          else if (p.total) ph.textContent = tr('Images {done} / {total}', { done: p.done, total: p.total });
+          else if (p.state === 'error' || p.state === 'missing') {
+            ph.removeAttribute('data-processing');
+            ph.textContent = p.state === 'missing' ? tr('photo supprimée entre-temps') : `${tr('! Échec')} · ${p.error || ''}`;
+          } else if (p.total) ph.textContent = tr('Images {done} / {total}', { done: p.done, total: p.total });
         }
-      } catch { /* prochain tour */ }
+      } catch { /* réseau : prochain tour */ }
     }, 1500);
   }
 })();
@@ -930,7 +995,11 @@ const activity = (() => {
   if (sp && ['downloading', 'analysing'].includes(sp.dataset.suggestState)) {
     const tick = async () => {
       try {
-        const st = await (await fetch('/admin/series/propositions', { headers: { accept: 'application/json' } })).json();
+        const res = await fetch('/admin/series/propositions', { headers: { accept: 'application/json' }, redirect: 'manual' });
+        if (res.status >= 500) throw new Error(String(res.status));  // erreur passagère du serveur : nouvel essai
+        if (!res.ok) return;                                         // refus, session expirée : le suivi s'arrête, sans recharger
+        const st = await res.json();
+        if (typeof st.status !== 'string') return;
         if (st.status !== sp.dataset.suggestState) return location.reload();
         const bar = $('progress', sp), n = $('[data-suggest-n]', sp);
         if (st.status === 'downloading' && st.download) { bar.value = Math.round((st.download.got / st.download.total) * 100); n.textContent = tr('{got} Mo sur {total}', { got: Math.round(st.download.got / 1e6), total: Math.round(st.download.total / 1e6) }); }
@@ -1214,10 +1283,12 @@ const activity = (() => {
   }
 
   // ---------- sélection ----------
+  // Sélection posée par le script : l'événement « change » (qui met la barre à jour) est marqué, pour ne pas
+  // déplacer l'ancre de Maj + clic sur la première vignette.
   function select(ids, { add = false } = {}) {
     if (!add) boxes().forEach(b => { b.checked = false; });
     ids.forEach(id => { const b = boxOf(id); if (b) b.checked = true; });
-    boxes()[0]?.dispatchEvent(new Event('change', { bubbles: true }));
+    boxes()[0]?.dispatchEvent(Object.assign(new Event('change', { bubbles: true }), { scripted: true }));
   }
   if (contact) {
     contact.addEventListener('click', e => {
@@ -1241,7 +1312,7 @@ const activity = (() => {
       box.focus({ preventScroll: true });
     });
     contact.addEventListener('dblclick', e => { const t = e.target.closest('.tile'); if (t) loupe.open(Number(t.dataset.id)); });
-    contact.addEventListener('change', e => { if (e.target.matches('.chk')) anchor = Number(e.target.value); });
+    contact.addEventListener('change', e => { if (e.target.matches('.chk') && !e.scripted) anchor = Number(e.target.value); });
   }
 
   // ---------- inspecteur ----------
@@ -1281,7 +1352,9 @@ const activity = (() => {
     // Titres provisoires de la sélection : à saisir ici (lot qui vient d'arriver).
     const prov = list.filter(p => p.provisional).slice(0, 12);
     $('[data-many-titles]', insp).hidden = !prov.length;
-    $('[data-titles]', insp).innerHTML = prov.map(p => `<label>${p.thumb ? `<img src="${esc(p.thumb)}" alt="">` : '<span class="ph"></span>'}<input value="${esc(p.title)}" data-title-of="${p.id}" aria-label="${tr('Titre de la photo {title}', { title: esc(p.title) })}"></label>`).join('');
+    const titles = $('[data-titles]', insp);
+    // Un titre en cours de frappe n'est jamais détruit (une photo du lot devient prête pendant la saisie).
+    if (!titles.contains(document.activeElement)) titles.innerHTML = prov.map(p => `<label>${p.thumb ? `<img src="${esc(p.thumb)}" alt="">` : '<span class="ph"></span>'}<input value="${esc(p.title)}" data-title-of="${p.id}" aria-label="${tr('Titre de la photo {title}', { title: esc(p.title) })}"></label>`).join('');
     const pub = $('[data-publish]', insp);
     pub.textContent = drafts ? (n === drafts ? tr('Publier les {n}', { n }) : drafts > 1 ? tr('Publier {n} brouillons', { n: drafts }) : tr('Publier {n} brouillon', { n: drafts })) : tr('Déjà publiées');
     pub.disabled = !drafts;
@@ -1332,10 +1405,12 @@ const activity = (() => {
   // Audience de la photo (30 jours) : chiffre, rang, petite courbe rendue par le serveur.
   async function audience(id) {
     const box = $('[data-one-aud]', insp);
+    if (!box) return;                          // compte sans statistiques : pas de rubrique Audience
     box.innerHTML = '<span class="hint">…</span>';
     try {
       const res = await fetch(`/admin/photos/${id}/statistiques`, { headers: { accept: 'application/json' } });
-      if (!res.ok || one.id !== id) return;
+      if (one.id !== id) return;
+      if (!res.ok) { box.innerHTML = ''; return; }
       const s = await res.json();
       if (one.id !== id) return;
       box.innerHTML = s.total
@@ -1376,6 +1451,14 @@ const activity = (() => {
     } catch { /* réseau */ }
     return null;
   }
+  // Plusieurs photos (après une action groupée) : une seule requête.
+  async function reloadMany(ids) {
+    try {
+      const res = await fetch(`/admin/photos/donnees?ids=${ids.join(',')}`, { headers: { accept: 'application/json' } });
+      if (!res.ok) return;
+      for (const p of (await res.json()).photos) { data.set(p.id, { ...data.get(p.id), ...p }); refreshTile(data.get(p.id)); }
+    } catch { /* réseau */ }
+  }
 
   // Une photo : enregistrement champ par champ.
   async function saveOne(key, value, previous) {
@@ -1400,7 +1483,8 @@ const activity = (() => {
   ['title', 'legend', 'place', 'taken_on', 'author_id'].forEach(k => {
     const f = one.field(k);
     f.addEventListener('focus', () => { f.dataset.before = f.value; });
-    f.addEventListener('change', () => saveOne(k, f.value, f.dataset.before));
+    if (f.matches('select')) onPick(f, () => saveOne(k, f.value, f.dataset.before));
+    else f.addEventListener('change', () => saveOne(k, f.value, f.dataset.before));
     if (f.matches('input')) f.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); f.blur(); } });
   });
   $('[data-one-series]', insp).addEventListener('click', e => {
@@ -1446,6 +1530,8 @@ const activity = (() => {
       saveLocation({ city_label: v }, before());
     });
     $('[data-one-onmap]', insp).addEventListener('change', e => saveLocation({ on_map: e.target.checked ? '1' : '0' }, { on_map: e.target.checked ? '0' : '1' }));
+    // Entrée sans ville proposée choisie : enregistre la saisie (comme quitter le champ), sans envoyer le formulaire.
+    $('[data-one-city]', insp).addEventListener('keydown', e => { if (e.key === 'Enter' && !e.defaultPrevented) { e.preventDefault(); e.target.blur(); e.target.focus(); } });
   }
 
   // Plusieurs photos : série, lieu et date appliqués aussitôt.
@@ -1455,12 +1541,18 @@ const activity = (() => {
     try {
       const before = ids.map(id => data.get(id)?.category_id);
       const r = await postJson('/admin/photos/actions', { ids, action, ...extra });
-      await Promise.all(ids.map(reload));
-      if (action === 'category' && r.category) { before.forEach(c => bump(c, -1)); bump(r.category.id, ids.length); }
+      // Nouvelle série : la barre latérale doit l'afficher ; le message (et « Annuler ») survit au rechargement.
+      if (r.category && !$(`[data-many-series] [data-category="${r.category.id}"]`, insp)) { toast.keep(r.text, r.undo || null); location.reload(); return; }
+      await reloadMany(ids);
+      const moved = action === 'category' && r.category;
+      if (moved) { before.forEach(c => bump(c, -1)); bump(r.category.id, ids.length); }
       window.__paletteReset?.();
       render();
-      toast.show(r.text, r.undo ? { undo: async () => { await postJson('/admin/photos/actions', r.undo); await Promise.all(ids.map(reload)); render(); toast.show(tr('Annulé.')); } } : {});
-      if (r.category && !$(`[data-many-series] [data-category="${r.category.id}"]`, insp)) location.reload();   // nouvelle série : la barre latérale doit l'afficher
+      toast.show(r.text, r.undo ? { undo: async () => {
+        await postJson('/admin/photos/actions', r.undo);
+        if (moved) { bump(r.category.id, -ids.length); before.forEach(c => bump(c, 1)); }   // compteurs de la barre latérale
+        await reloadMany(ids); render(); toast.show(tr('Annulé.'));
+      } } : {});
     } catch (err) { toast.show(err.message, { error: true }); }
   }
   const newName = $('[data-bulk-new]', insp);
@@ -1500,6 +1592,7 @@ const activity = (() => {
       $$('.strip button', el).forEach(b => b.toggleAttribute('aria-current', Number(b.dataset.id) === current));
       $(`.strip button[data-id="${current}"]`, el)?.scrollIntoView({ block: 'nearest', inline: 'center' });
       select([current]);
+      anchor = current;                        // la photo regardée devient le point de départ de Maj + clic
     }
     function open(id) {
       if (!contact || !data.get(id)?.large) return;
@@ -1556,6 +1649,9 @@ const activity = (() => {
     else if (mod && e.key.toLowerCase() === 'z' && window.__lastUndo) { e.preventDefault(); const u = window.__lastUndo; window.__lastUndo = null; u(); }
     else if (mod) return;
     else if (e.key === 'Escape' && selIds().length) { e.preventDefault(); select([]); }
+    // Touches d'une seule lettre (P, I, L, Espace) : seulement quand le focus est dans la planche ou l'inspecteur
+    // (WCAG 2.1.4), jamais sur un lien de la barre latérale ou ailleurs dans la page (dictée, faute de frappe).
+    else if (!document.activeElement?.closest?.('[data-contact], [data-inspector]')) return;
     else if (e.key.toLowerCase() === 'p' && selIds().length && can('photos.publier')) { e.preventDefault(); $('[data-publish]', insp).click(); }
     else if (e.key.toLowerCase() === 'i') { e.preventDefault(); $('[data-import-open]')?.click(); }
     else if (contact && (e.key.toLowerCase() === 'l' || (e.key === ' ' && !document.activeElement?.matches('button, a, input')))) {
@@ -1565,6 +1661,9 @@ const activity = (() => {
   });
 
   // ---------- glisser : ordre de la planche, ou vers une série ----------
+  // Photos glissées depuis cette page : gardées ici, jamais relues dans les données du glisser (qu'une autre page
+  // peut remplir à l'identique).
+  let dragIds = null;
   if (contact) {
     let dragged = null;
     const sortable = contact.hasAttribute('data-sortable');
@@ -1580,11 +1679,12 @@ const activity = (() => {
       t.classList.add('dragging');
       const id = Number(t.dataset.id);
       const ids = boxOf(id)?.checked ? selIds() : [id];
+      dragIds = ids;
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('application/x-nicephos-photos', JSON.stringify(ids));
       e.dataTransfer.setData('text/plain', ids.join(','));
     });
-    contact.addEventListener('dragend', () => { dragged?.classList.remove('dragging'); clear(); dragged = null; });
+    contact.addEventListener('dragend', () => { dragged?.classList.remove('dragging'); clear(); dragged = null; dragIds = null; });
     contact.addEventListener('dragover', e => {
       const t = e.target.closest('.tile');
       if (!sortable || !dragged || !t || t === dragged) return;
@@ -1612,24 +1712,28 @@ const activity = (() => {
   // Dépôt sur une série de la barre latérale : les photos glissées y sont classées.
   // Glisser vers une série du menu : seulement avec le droit de changer la série.
   if (can('photos.modifier')) $$('[data-drop-series]').forEach(a => {
-    a.addEventListener('dragover', e => { if ([...e.dataTransfer.types].includes('application/x-nicephos-photos')) { e.preventDefault(); a.classList.add('over'); } });
+    a.addEventListener('dragover', e => { if (dragIds) { e.preventDefault(); a.classList.add('over'); } });
     a.addEventListener('dragleave', () => a.classList.remove('over'));
     a.addEventListener('drop', async e => {
       a.classList.remove('over');
-      const raw = e.dataTransfer.getData('application/x-nicephos-photos');
-      if (!raw) return;
+      const ids = (dragIds || []).filter(id => data.has(id));
+      dragIds = null;
+      if (!ids.length) return;
       e.preventDefault();
       e.stopPropagation();
-      const ids = JSON.parse(raw);
       try {
         const before = ids.map(id => data.get(id)?.category_id);
         const r = await postJson('/admin/photos/actions', { ids, action: 'category', category_id: a.dataset.dropSeries });
         before.forEach(c => bump(c, -1));
         bump(Number(a.dataset.dropSeries), ids.length);
         window.__paletteReset?.();
-        await Promise.all(ids.map(reload));
+        await reloadMany(ids);
         render();
-        toast.show(r.text, { undo: async () => { await postJson('/admin/photos/actions', r.undo); await Promise.all(ids.map(reload)); render(); toast.show(tr('Annulé.')); } });
+        toast.show(r.text, { undo: async () => {
+          await postJson('/admin/photos/actions', r.undo);
+          bump(Number(a.dataset.dropSeries), -ids.length); before.forEach(c => bump(c, 1));
+          await reloadMany(ids); render(); toast.show(tr('Annulé.'));
+        } });
       } catch (err) { toast.show(err.message, { error: true }); }
     });
   });
@@ -1679,11 +1783,12 @@ const activity = (() => {
       if (selIds().includes(i.photoId)) render();
     },
     gone(i) { tileOf(i.photoId)?.remove(); data.delete(i.photoId); if (anchor === i.photoId) anchor = null; },
+    // Import terminé : les photos importées sont choisies, sauf pendant une saisie ou si une sélection est en cours
+    // (le lien « Compléter et publier… » de l'import reste là).
     finished(ids) {
-      if (!ids.length) return;
-      const busy = typing(document.activeElement);
+      if (!ids.length || typing(document.activeElement) || selIds().length) return;
       select(ids);
-      if (!busy) ($('[data-titles] input') || one.field('title'))?.focus();
+      ($('[data-titles] input') || one.field('title'))?.focus();
     },
   };
 
@@ -1708,14 +1813,15 @@ const activity = (() => {
   const click = sel => () => $(sel)?.click();
   const go = href => () => { location.href = href; };
   // Pages proposées, avec la permission qu'il faut pour les ouvrir.
-  const PAGES = [[tr('Aujourd’hui'), '/admin', 'admin.acceder'], [tr('Photothèque'), '/admin/photos', 'photos.voir'], [tr('Photos à finir'), '/admin/photos?statut=afinir', 'photos.voir'], [tr('Brouillons'), '/admin/photos?statut=draft', 'photos.voir'], [tr('Sorties'), '/admin/sorties', 'sorties.voir'], [tr('Personnes photographiées'), '/admin/rencontres', 'personnes.voir'], [tr('Nouvelle rencontre'), '/admin/rencontre', 'terrain.app'], [tr('Séries'), '/admin/series', 'series.gerer'], [tr('Site public'), '/admin/site', 'site.textes'], [tr('Photos de l’ouverture'), '/admin/site#ouverture', 'site.textes'], [tr('Carte du monde'), '/admin/site#carte', 'site.textes'], ['Instagram', '/admin/instagram', 'instagram.voir'], [tr('Statistiques'), '/admin/statistiques', 'statistiques.voir'], [tr('Sur le terrain'), '/admin/terrain', 'terrain.app'], [tr('Cartes d’accord'), '/admin/rencontres/cartes', 'terrain.cartes'], [tr('Photographes'), '/admin/auteurs', 'photographes.gerer'], [tr('Comptes et rôles'), '/admin/comptes', 'comptes.gerer'], [tr('Journal'), '/admin/journal', 'journal.voir'], [tr('Apparence'), '/admin/apparence', 'site.apparence'], [tr('Filigrane & EXIF'), '/admin/images', 'site.filigrane'], [tr('Droits & confidentialité'), '/admin/droits', 'reglages.droits'], [tr('Aide'), '/admin/aide', 'admin.acceder']].filter(([, , perm]) => can(perm));
+  const PAGES = [[tr('Aujourd’hui'), '/admin', 'admin.acceder'], [tr('Photothèque'), '/admin/photos', 'photos.voir'], [tr('Photos à finir'), '/admin/photos?statut=afinir', 'photos.voir'], [tr('Brouillons'), '/admin/photos?statut=draft', 'photos.voir'], [tr('Sorties'), '/admin/sorties', 'sorties.voir'], [tr('Personnes photographiées'), '/admin/rencontres', 'personnes.voir'], [tr('Nouvelle rencontre'), '/admin/rencontre', 'terrain.app'], [tr('Séries'), '/admin/series', 'series.gerer'], [tr('Site public'), '/admin/site', 'site.textes'], [tr('Photos de l’ouverture'), '/admin/site#ouverture', 'site.textes'], [tr('Carte du monde'), '/admin/site#carte', 'site.textes'], ['Instagram', '/admin/instagram', 'instagram.voir'], [tr('Statistiques'), '/admin/statistiques', 'statistiques.voir'], [tr('Signalements'), '/admin/signalements', 'signalements.traiter'], [tr('Sur le terrain'), '/admin/terrain', 'terrain.app'], [tr('Cartes d’accord'), '/admin/rencontres/cartes', 'terrain.cartes'], [tr('Photographes'), '/admin/auteurs', 'photographes.gerer'], [tr('Comptes et rôles'), '/admin/comptes', 'comptes.gerer'], [tr('Journal'), '/admin/journal', 'journal.voir'], [tr('Apparence'), '/admin/apparence', 'site.apparence'], [tr('Filigrane & EXIF'), '/admin/images', 'site.filigrane'], [tr('Droits & confidentialité'), '/admin/droits', 'reglages.droits'], [tr('Aide'), '/admin/aide', 'admin.acceder']].filter(([, , perm]) => can(perm));
   function actions() {
     const n = selection();
     const a = [];
+    // Actions sur la sélection : seulement là où leur bouton existe (photothèque ; pas « Compléter le lot »).
     if (n) {
-      if (can('photos.publier')) a.push({ label: tr('<b>Publier</b> la sélection'), r: nPhotos(n), key: 'P', run: click('[data-publish]') });
-      if (can('photos.publier')) a.push({ label: tr('<b>Dépublier</b> la sélection'), r: nPhotos(n), run: click('[data-inspector] button[value=draft]') });
-      if (can('photos.supprimer')) a.push({ label: tr('<b>Supprimer</b> la sélection…'), r: nPhotos(n), run: click('[data-bulk-delete]') });
+      if (can('photos.publier') && $('[data-publish]')) a.push({ label: tr('<b>Publier</b> la sélection'), r: nPhotos(n), key: 'P', run: click('[data-publish]') });
+      if (can('photos.publier') && $('[data-inspector] button[value=draft]')) a.push({ label: tr('<b>Dépublier</b> la sélection'), r: nPhotos(n), run: click('[data-inspector] button[value=draft]') });
+      if (can('photos.supprimer') && $('[data-bulk-delete]')) a.push({ label: tr('<b>Supprimer</b> la sélection…'), r: nPhotos(n), run: click('[data-bulk-delete]') });
     }
     if (can('photos.importer')) a.push({ label: tr('<b>Importer</b> des photos'), key: 'I', run: $('[data-import-open]') && location.pathname === '/admin/photos' ? click('[data-import-open]') : go('/admin/photos?importer#import') });
     if (can('series.gerer')) a.push({ label: tr('<b>Nouvelle série</b>'), run: go('/admin/series#nouvelle-serie') });
@@ -1885,6 +1991,8 @@ const activity = (() => {
   const timer = setInterval(async () => {
     try {
       const res = await fetch('/admin/images/etat', { headers: { accept: 'application/json' }, redirect: 'manual' });
+      // 403 : ce compte ne suit pas les images (droit retiré entre-temps) ; on s'arrête sans fausse alerte.
+      if (res.status === 403) { clearInterval(timer); box.hidden = true; return; }
       if (!res.ok) return finish(tr('Suivi interrompu : session expirée ? Rechargez la page.'), true);
       const s = await res.json();
       done.textContent = s.done;
@@ -1916,7 +2024,9 @@ const activity = (() => {
       s.hidden = !hit;
       if (hit) shown++;
     }
-    empty.hidden = shown > 0;
+    // Région live toujours rendue : son texte change (une région révélée par hidden n'est pas annoncée).
+    const text = shown ? '' : empty.dataset.text;
+    if (empty.textContent !== text) empty.textContent = text;
   });
 })();
 
@@ -2024,19 +2134,37 @@ document.querySelectorAll('[data-kw-add]').forEach(b => { b.hidden = false; });
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-desc-use]');
   if (!b) return;
-  const legend = b.closest('form')?.querySelector('textarea[name="legend"]');
+  // La légende de la langue de la description : française (traduite), sinon anglaise (rubrique des traductions).
+  const legend = b.closest('form')?.querySelector(`textarea[name="${b.dataset.descField === 'legend_en' ? 'legend_en' : 'legend'}"]`);
   if (!legend) return;
+  const fold = legend.closest('details');
+  if (fold) fold.open = true;
   legend.value = b.dataset.descUse;
   legend.dispatchEvent(new Event('input', { bubbles: true }));
   legend.focus();
 });
 document.querySelectorAll('[data-desc-pending]').forEach(box => {
+  // Saisie en cours dans la fiche (valeur différente de celle de la page) : on ne recharge pas, elle serait perdue.
+  const form = box.closest('form');
+  const dirty = () => Boolean(form) && [...form.elements].some(el => (el.type === 'checkbox' || el.type === 'radio' ? el.checked !== el.defaultChecked
+    : el.tagName === 'SELECT' ? [...el.options].some(o => o.selected !== o.defaultSelected) : 'defaultValue' in el && el.value !== el.defaultValue));
   let n = 0;
   const poll = async () => {
     if (++n > 120) return;
     try {
       const d = await (await fetch(box.dataset.descUrl, { headers: { accept: 'application/json' } })).json();
-      if (!d.pending) { location.reload(); return; }
+      if (!d.pending) {
+        if (!dirty()) { location.reload(); return; }
+        const text = $('[data-desc-text]', box);
+        text.textContent = d.text ? `« ${d.text} »` : d.error ? tr('Dernier essai sans succès : {error}', { error: d.error }) : '';   // mêmes mots que la fiche
+        box.removeAttribute('data-desc-pending');
+        const note = document.createElement('span');
+        note.className = 'hint';
+        note.setAttribute('role', 'status');
+        note.textContent = ` ${tr('Description prête : enregistrez vos modifications, puis rechargez la page pour la reprendre.')}`;
+        text.after(note);
+        return;
+      }
     } catch { /* réseau : on réessaie */ }
     setTimeout(poll, 5000);
   };

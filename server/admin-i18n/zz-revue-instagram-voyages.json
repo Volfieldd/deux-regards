@@ -1,0 +1,62 @@
+{
+ "Ce voyage a des journées de l’autre photographe : retirez-les d’abord.": {
+  "en": "This trip has days of the other photographer: remove them first.",
+  "de": "Diese Reise enthält Tage des anderen Fotografen: Entfernen Sie sie zuerst."
+ },
+ "Mettre la page du voyage en ligne demande le droit de publier sur le site : demandez-le à un administrateur.": {
+  "en": "Putting the trip page online requires the right to publish on the site: ask an administrator.",
+  "de": "Um die Seite der Reise online zu stellen, braucht es das Recht, auf der Website zu veröffentlichen: Fragen Sie einen Administrator."
+ },
+ "La page du voyage est en ligne : ses textes ne se modifient qu’avec le droit de modifier les photos publiées.": {
+  "en": "The trip page is online: its texts can only be changed with the right to edit published photos.",
+  "de": "Die Seite der Reise ist online: Ihre Texte lassen sich nur mit dem Recht ändern, veröffentlichte Fotos zu bearbeiten."
+ },
+ "Ces journées sont dans un voyage que vous ne gérez pas.": {
+  "en": "These days belong to a trip you do not manage.",
+  "de": "Diese Tage gehören zu einer Reise, die Sie nicht verwalten."
+ },
+ "Cette sortie est dans un voyage que vous ne gérez pas.": {
+  "en": "This outing belongs to a trip you do not manage.",
+  "de": "Dieser Ausflug gehört zu einer Reise, die Sie nicht verwalten."
+ },
+ "La mise en ligne de la page revient à qui publie sur le site : un administrateur, ou un photographe qui publie sans validation.": {
+  "en": "Putting the page online is up to whoever publishes on the site: an administrator, or a photographer who publishes without approval.",
+  "de": "Die Seite stellt online, wer auf der Website veröffentlicht: ein Administrator oder ein Fotograf, der ohne Freigabe veröffentlicht."
+ },
+ "Sur la page publique, la carte ne situe que les photos cochées « Afficher sur la carte du monde », et chaque jour porte sa date.": {
+  "en": "On the public page, the map only places photos ticked “Show on the world map”, and each day shows its date.",
+  "de": "Auf der öffentlichen Seite verortet die Karte nur Fotos mit Häkchen bei „Auf der Weltkarte anzeigen“, und jeder Tag trägt sein Datum."
+ },
+ "Instagram limite les appels ({reason}) : réessayez plus tard": {
+  "en": "Instagram is limiting calls ({reason}): try again later",
+  "de": "Instagram begrenzt die Aufrufe ({reason}): Versuchen Sie es später erneut"
+ },
+ "réponse d’Instagram trop volumineuse": {
+  "en": "Instagram’s reply is too large",
+  "de": "Antwort von Instagram zu groß"
+ },
+ "trop d’aperçus en préparation : réessayez dans un instant": {
+  "en": "too many previews being prepared: try again in a moment",
+  "de": "zu viele Vorschauen in Vorbereitung: Versuchen Sie es gleich noch einmal"
+ },
+ "Heures ignorées (format HH:MM attendu) : {times}.": {
+  "en": "Times ignored (HH:MM expected): {times}.",
+  "de": "Ignorierte Uhrzeiten (HH:MM erwartet): {times}."
+ },
+ "Publier maintenant « {title} »": {
+  "en": "Publish now “{title}”",
+  "de": "Jetzt veröffentlichen: „{title}“"
+ },
+ "Retirer « {title} » de la file": {
+  "en": "Remove “{title}” from the queue",
+  "de": "„{title}“ aus der Warteschlange entfernen"
+ },
+ "Réessayer « {title} »": {
+  "en": "Try again “{title}”",
+  "de": "„{title}“ erneut versuchen"
+ },
+ "Voir « {title} » sur Instagram (nouvel onglet)": {
+  "en": "View “{title}” on Instagram (new tab)",
+  "de": "„{title}“ auf Instagram ansehen (neuer Tab)"
+ }
+}

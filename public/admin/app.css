@@ -4,7 +4,8 @@
 @font-face { font-family: Jost; font-weight: 400; src: url(/fonts/jost/files/jost-latin-400-normal.woff2) format('woff2'); }
 @font-face { font-family: Jost; font-weight: 500; src: url(/fonts/jost/files/jost-latin-500-normal.woff2) format('woff2'); }
 @font-face { font-family: 'IBM Plex Mono'; font-weight: 400; src: url(/fonts/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2) format('woff2'); }
-:root { color-scheme: light; --paper: #f6f4ef; --ink: #1d1c1a; --mute: #6b665d; --rule: #dcd7cd; --accent: #f0a94c; --ok: #0067a3; --ko: #b2410a; }
+/* --field : bord des champs et boutons de langue, ≥ 3:1 sur le blanc et sur le papier (WCAG 1.4.11) ; --rule : filets. */
+:root { color-scheme: light; --paper: #f6f4ef; --ink: #1d1c1a; --mute: #6b665d; --rule: #dcd7cd; --field: #8a857c; --accent: #f0a94c; --ok: #0067a3; --ko: #b2410a; }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.45 Jost, -apple-system, sans-serif; padding-bottom: env(safe-area-inset-bottom); }
@@ -20,7 +21,7 @@ body { margin: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.
 .app-person { background: #fff; margin: 0 -16px; padding: 18px 16px 22px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
 .app-person h3 { margin: 0; font-size: 18px; font-weight: 500; }
 label { display: grid; gap: 6px; font-size: 15px; }
-input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select { font: inherit; font-size: 17px; min-height: 48px; padding: 8px 12px; border: 1px solid var(--rule); border-radius: 10px; background: #fff; color: var(--ink); width: 100%; }
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select { font: inherit; font-size: 17px; min-height: 48px; padding: 8px 12px; border: 1px solid var(--field); border-radius: 10px; background: #fff; color: var(--ink); width: 100%; }
 input:focus, select:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
 fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: 4px; }
 label.check { display: flex; align-items: center; gap: 12px; min-height: 48px; font-size: 16px; }
@@ -28,11 +29,11 @@ label.check.big { font-weight: 500; }
 input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; margin: 0; accent-color: var(--ink); flex: none; }
 .app-scopes { display: grid; padding-left: 36px; }
 .app-langs { display: flex; gap: 8px; }
-.app-langs label { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border: 1px solid var(--rule); border-radius: 10px; font-weight: 500; }
+.app-langs label { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border: 1px solid var(--field); border-radius: 10px; font-weight: 500; }
 .app-langs label:has(input:checked) { border-color: var(--ink); background: var(--ink); color: var(--paper); }
 .app-langs input { position: absolute; opacity: 0; }
 .flag { box-shadow: 0 0 0 1px rgba(0,0,0,.18); }
-/* Textes de la personne : seulement sa langue (sans JavaScript, toutes). */
+/* Textes de la personne : seulement sa langue (posée par le serveur, data-lang ; le script la change au choix). */
 .app-form[data-lang="fr"] [data-l]:not([data-l="fr"]), .app-form[data-lang="en"] [data-l]:not([data-l="en"]), .app-form[data-lang="de"] [data-l]:not([data-l="de"]) { display: none; }
 .app-consent { margin: 4px 0 0; font-size: 17px; line-height: 1.5; }
 .app-photo { padding: 14px; border: 1px dashed var(--mute); border-radius: 12px; text-align: center; }
@@ -47,6 +48,10 @@ input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; margin:
 .linkbtn { background: none; border: 0; padding: 8px 0; font: inherit; font-size: 15px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 44px; }
 .app-errors { margin-top: 14px; padding: 12px 14px; border: 1.5px solid var(--ko); border-radius: 10px; color: var(--ko); }
 .app-errors ul { margin: 0; padding-left: 18px; }
+.app-redo { margin: 8px 0 0; font-weight: 500; }
+/* Photo et signature à refaire après une erreur (elles ne sont pas gardées entre deux envois). */
+.app-photo.redo { border: 2px solid var(--ko); }
+.app-sign.redo canvas { border-color: var(--ko); border-width: 2px; }
 .app-actions { position: sticky; bottom: 0; margin: 0 -16px; padding: 12px 16px calc(env(safe-area-inset-bottom) + 12px); background: linear-gradient(transparent, var(--paper) 30%); }
 .app-save, .app-btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 54px; border: 0; border-radius: 12px; background: var(--ink); color: var(--paper); font: inherit; font-size: 18px; font-weight: 500; text-decoration: none; cursor: pointer; }
 .app-btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
@@ -62,6 +67,8 @@ input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; margin:
 .app-after h2 { margin: 0; font-size: 15px; font-weight: 500; color: var(--mute); text-transform: uppercase; letter-spacing: .12em; }
 .app-after p { margin: 0; }
 .app-after .ok { color: var(--ok); } .app-after .ko { color: var(--ko); }
+.app-next summary { cursor: pointer; padding: 8px 0; color: var(--mute); }
+.app-next[open] { display: grid; gap: 12px; }
 .app-row { display: grid; gap: 10px; }
 
 /* ---------- accueil Terrain ---------- */

@@ -72,7 +72,8 @@ export function createReadiness({ db, encounters }) {
   }
 
   // Confirmations explicites (publication d'une photo à vérifier), les plus récentes d'abord.
-  const confirmations = photoId => db.prepare('SELECT * FROM photo_confirmations WHERE photo_id = ? ORDER BY at DESC, id DESC').all(photoId)
+  const confirmationRows = db.prepare('SELECT * FROM photo_confirmations WHERE photo_id = ? ORDER BY at DESC, id DESC');
+  const confirmations = photoId => confirmationRows.all(photoId)
     .map(c => ({ ...c, reasons: (() => { try { return JSON.parse(c.reasons); } catch { return []; } })() }));
   function confirm(photoId, usage, byName, reasons) {
     db.prepare('INSERT INTO photo_confirmations (photo_id, usage, at, by_name, reasons) VALUES (?, ?, ?, ?, ?)').run(photoId, usage, Date.now(), String(byName || '').slice(0, 120), JSON.stringify(reasons || []));
@@ -86,7 +87,7 @@ export function createReadiness({ db, encounters }) {
       const s = state(Number(id));
       if (!s) continue;
       if (s.site.level === 'no') blocked.push({ id: Number(id), reasons: s.site.reasons });
-      else if (s.site.level === 'warn' && !confirmed(Number(id), 'site')) verify.push({ id: Number(id), reasons: s.site.reasons });
+      else if (s.site.level === 'warn' && !confirmed(Number(id), 'site', s)) verify.push({ id: Number(id), reasons: s.site.reasons });
       else ok.push(Number(id));
     }
     return { ok, verify, blocked };

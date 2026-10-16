@@ -1,0 +1,14 @@
+{
+ "vue": {
+  "en": "view",
+  "de": "Aufruf"
+ },
+ "vues": {
+  "en": "views",
+  "de": "Aufrufe"
+ },
+ "visiteur": {
+  "en": "visitor",
+  "de": "Besucher"
+ }
+}

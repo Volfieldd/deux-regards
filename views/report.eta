@@ -1,5 +1,7 @@
 <% layout('./layout') %>
 <% const f = it.f, v = it.values || {}, e = it.errors || {}, p = it.photo; %>
+<% /* Champ en erreur : marqué, et relié à son message (liste en tête, qui prend le focus au retour du formulaire). */ %>
+<% const bad = (...keys) => { const ids = keys.filter(k => e[k]).map(k => `err-${k}`); return ids.length ? ` aria-invalid="true" aria-describedby="${ids.join(' ')}"` : ''; }; %>
 <header class="top wrap">
   <%~ include('./brand', it) %>
   <%~ include('./nav', it) %>
@@ -12,17 +14,17 @@
 <% } else { %>
   <p class="prose"><%= f.reportIntro(p.title) %></p>
   <p class="prose"><%= f.me %> <a class="more" href="<%= it.u('/bonjour') %>"><%= f.meLink %></a></p>
-<% if (Object.keys(e).length) { %>  <div class="hello-errors" role="alert"><ul><% Object.values(e).forEach(code => { %><li><%= f.errors[code] || code %></li><% }) %></ul></div>
+<% if (Object.keys(e).length) { %>  <div class="hello-errors" id="erreurs" role="alert" tabindex="-1" autofocus><ul><% Object.entries(e).forEach(([k, code]) => { %><li id="err-<%= k %>"><%= f.errors[code] || code %></li><% }) %></ul></div>
 <% } %>
   <form class="hello-form" method="post" action="<%= it.u(`/photo/${p.slug}/signaler`) %>" novalidate>
-    <fieldset<%~ e.kind ? ' aria-invalid="true"' : '' %>>
+    <fieldset<%~ bad('kind') %>>
       <legend><%= f.kind %></legend>
 <% Object.entries(f.kinds).forEach(([k, label]) => { %>      <label class="check"><input type="radio" name="kind" value="<%= k %>"<%~ v.kind === k ? ' checked' : '' %>> <%= label %></label>
 <% }) %>    </fieldset>
-    <label><%= f.message %> <span class="hint"><%= f.messageHint %></span><textarea name="message" rows="4" maxlength="2000"<%~ e.message ? ' aria-invalid="true"' : '' %>><%= v.message || '' %></textarea></label>
-    <label><%= f.email %> <span class="hint"><%= f.emailHint %></span><input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ e.email ? ' aria-invalid="true"' : '' %>></label>
+    <label><%= f.message %> <span class="hint"><%= f.messageHint %></span><textarea name="message" rows="4" maxlength="2000"<%~ bad('message') %>><%= v.message || '' %></textarea></label>
+    <label><%= f.email %> <span class="hint"><%= f.emailHint %></span><input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ bad('email') %>></label>
     <div class="hello-trap" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
-    <p><button class="btn" type="submit"><%= f.send %></button> <a class="more" href="<%= it.photoUrl(p.slug) %>"><%= f.back %></a></p>
+    <p class="report-actions"><button class="hello-send eyebrow" type="submit"><%= f.send %></button> <a class="more" href="<%= it.photoUrl(p.slug) %>"><%= f.back %></a></p>
     <p class="hint"><%= f.privacy %></p>
   </form>
 <% } %>

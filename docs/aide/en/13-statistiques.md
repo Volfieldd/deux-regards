@@ -13,7 +13,7 @@ Choose the period: **30 days**, **3 months** or **12 months** (by month).
 - The trend (“+12 %”) compares with the previous period of the same length.
 - **Traffic**: bars for page views, a line for visitors; hover over a bar for details, or open **View the data** for the table.
 - **Most viewed photos**, **Pages**, **Sources**: the name of the site visitors come from (instagram.com, google.fr…) or “Direct”.
-- **Shares**: shares in the period by channel (WhatsApp, Facebook, Bluesky, X, Pinterest, Email, link copied, Instagram post opened, phone share menu, QR scanned), and the most shared photos. One number per photo, per channel and per day, nothing about the visitor. On a phone, the phone’s share menu does not say which app was chosen.
+- **Shares**: shares in the period by channel (WhatsApp, Facebook, Bluesky, X, Pinterest, Email, link copied, Instagram post opened, phone share menu, QR scanned), and the most shared photos. One number per photo, per channel and per day (Paris day, like the rest of the page), nothing about the visitor. A scanned QR code counts once: reloading the page or sending the address shown does not count it again. On a phone, the phone’s share menu does not say which app was chosen.
 - **Countries**: a world map with one bubble per country (its area follows the number of visitors; on hover, “France · 124 visitors”), and the list of the top 10. The country is the one passed on by Cloudflare: the site does not work it out and keeps no address. Nothing more precise than the country. “Unknown country”: Cloudflare did not give it. Countries are counted from the October 2026 update onwards.
 
 ## Elsewhere in the admin

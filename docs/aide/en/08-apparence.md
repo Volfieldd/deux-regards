@@ -37,4 +37,6 @@ Each theme is shown with its three colours (background, ink, accent) and a descr
 - **Removing:** a button below each slot.
 - **Automatic colour:** emblem, icon and full logo take on **the theme’s colour** (white on a black background, black on a light background). A single version is enough, black or white: the direction of the line is detected. The edges are cropped automatically.
 - **Tab icon:** a square icon on an opaque background is used as it is. Otherwise, it is composed automatically.
+- **Photo of a drawing:** the phone’s orientation is applied; a photographed drawing is not shown sideways.
+- **Sharing image:** re-encoded as JPEG, 1200 px at most. Transparency becomes a **white** background behind a dark drawing (cut-out black logo), **black** behind a light one.
 - **SVG:** refused on upload.

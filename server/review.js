@@ -8,6 +8,8 @@
 // Les accords sont vérifiés à la proposition, par le photographe (lui voit les personnes) : une photo bloquée ne peut
 // pas être proposée, une photo à vérifier exige sa confirmation. Ils sont revérifiés au moment de publier.
 // Prévenir : « Aujourd'hui » toujours ; par e-mail pour qui l'a choisi (compte : notify_email).
+import { translator } from './admin-i18n.js';
+
 export const STATES = ['proposee', 'programmee', 'a_reprendre'];
 
 export class ReviewError extends Error {}
@@ -17,16 +19,26 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
   const setReview = db.prepare('UPDATE photos SET review = ?, publish_at = ? WHERE id = ?');
   const history = db.prepare('INSERT INTO photo_reviews (photo_id, action, by_sub, by_name, at, message, publish_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
   const log_ = (id, action, by = {}, message = '', at = null) => history.run(id, action, by.sub || null, by.name || '', now(), String(message || '').slice(0, 1000), at);
-  const fmt = ms => new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ms);
+  const fmt = (ms, t) => new Intl.DateTimeFormat(t.locale, { dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ms);
+  // Langue des e-mails : celle de l'admin du photographe lié au compte destinataire (comme les relances), sinon le français.
+  const langOf = authorId => (authorId ? db.prepare('SELECT admin_lang FROM authors WHERE id = ?').pluck().get(authorId) : null) || 'fr';
 
-  // E-mails (best effort) : au photographe de la photo, ou aux comptes qui valident.
-  async function mail(to, subject, lines) {
+  // E-mails (best effort) : au photographe de la photo, ou aux comptes qui valident ; compose(t) → { subject, lines }
+  // dans la langue de chaque destinataire.
+  async function mail(to, compose) {
     if (!mailer?.enabled || !to.length) return;
-    const text = [...lines, '', publicUrl ? `${publicUrl}/admin` : ''].join('\n');
-    for (const addr of new Set(to)) await mailer.send({ to: addr, subject: `${siteName()} · ${subject}`, text }).catch(err => log?.warn({ err: err.message }, 'circuit : e-mail non envoyé'));
+    const seen = new Set();
+    for (const { addr, lang } of to) {
+      if (seen.has(addr)) continue;
+      seen.add(addr);
+      const t = translator(lang);
+      const { subject, lines } = compose(t);
+      const text = [...lines, '', publicUrl ? `${publicUrl}/admin` : ''].join('\n');
+      await mailer.send({ to: addr, subject: `${siteName()} · ${subject}`, text }).catch(err => log?.warn({ err: err.message }, 'circuit : e-mail non envoyé'));
+    }
   }
-  const photographerMail = authorId => accounts.list().filter(a => a.author_id === authorId && a.status === 'actif' && a.notify_email && (a.notify_to || a.email)).map(a => a.notify_to || a.email);
-  const moderatorMail = () => accounts.list().filter(a => a.status === 'actif' && a.notify_email && (a.notify_to || a.email) && (a.roles.includes('moderateur') || a.roles.includes('admin'))).map(a => a.notify_to || a.email);
+  const photographerMail = authorId => accounts.list().filter(a => a.author_id === authorId && a.status === 'actif' && a.notify_email && (a.notify_to || a.email)).map(a => ({ addr: a.notify_to || a.email, lang: langOf(authorId) }));
+  const moderatorMail = () => accounts.list().filter(a => a.status === 'actif' && a.notify_email && (a.notify_to || a.email) && (a.roles.includes('moderateur') || a.roles.includes('admin'))).map(a => ({ addr: a.notify_to || a.email, lang: langOf(a.author_id) }));
 
   return {
     STATES,
@@ -43,8 +55,10 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
       }
       db.transaction(() => { for (const id of ok) { setReview.run('proposee', null, id); log_(id, 'proposee', by, message); } })();
       if (ok.length) {
-        await mail(moderatorMail(), ok.length > 1 ? `${ok.length} photos proposées à la publication` : 'Une photo proposée à la publication',
-          [`${by.name || 'Un photographe'} propose ${ok.length > 1 ? `${ok.length} photos` : `« ${photo(ok[0]).title} »`} à la publication.`, message ? `Son mot : ${message}` : '']);
+        const title = photo(ok[0]).title;
+        await mail(moderatorMail(), t => ({ subject: ok.length > 1 ? t('{n} photos proposées à la publication', { n: ok.length }) : t('Une photo proposée à la publication'),
+          lines: [ok.length > 1 ? t('{name} propose {n} photos à la publication.', { name: by.name || t('Un photographe'), n: ok.length }) : t('{name} propose « {title} » à la publication.', { name: by.name || t('Un photographe'), title }),
+            message ? t('Son mot : {message}', { message }) : ''] }));
       }
       return { proposed: ok, verify, blocked: g.blocked, skipped };
     },
@@ -66,8 +80,13 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
       }
       for (const authorId of new Set(g.ok.map(id => photo(id).author_id))) {
         const mine = g.ok.filter(id => photo(id).author_id === authorId);
-        await mail(photographerMail(authorId), at != null ? 'Photos programmées' : 'Photos publiées',
-          [`${mine.length > 1 ? `${mine.length} de vos photos` : `« ${photo(mine[0]).title} »`} ${at != null ? `${mine.length > 1 ? 'seront publiées' : 'sera publiée'} le ${fmt(at)}` : mine.length > 1 ? 'sont publiées' : 'est publiée'} (validé par ${by.name || 'le modérateur'}).`]);
+        const title = photo(mine[0]).title;
+        await mail(photographerMail(authorId), t => {
+          const p = { n: mine.length, title, name: by.name || t('le modérateur'), date: at != null ? fmt(at, t) : '' };
+          return { subject: at != null ? t('Photos programmées') : t('Photos publiées'),
+            lines: [at != null ? (mine.length > 1 ? t('{n} de vos photos seront publiées le {date} (validé par {name}).', p) : t('« {title} » sera publiée le {date} (validé par {name}).', p))
+              : mine.length > 1 ? t('{n} de vos photos sont publiées (validé par {name}).', p) : t('« {title} » est publiée (validé par {name}).', p)] };
+        });
       }
       return { done: g.ok, verify: g.verify, blocked: g.blocked };
     },
@@ -78,7 +97,7 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
       if (!String(message || '').trim()) throw new ReviewError('Écrivez la remarque.');
       notes.add(id, message, by);
       setReview.run('a_reprendre', null, id); log_(id, 'renvoyee', by, message);
-      await mail(photographerMail(p.author_id), 'Photo à reprendre', [`« ${p.title} » vous est renvoyée par ${by.name || 'le modérateur'} :`, String(message).trim()]);
+      await mail(photographerMail(p.author_id), t => ({ subject: t('Photo à reprendre'), lines: [t('« {title} » vous est renvoyée par {name} :', { title: p.title, name: by.name || t('le modérateur') }), String(message).trim()] }));
       return true;
     },
     // Dépublier en disant pourquoi (remarque au photographe).
@@ -89,7 +108,7 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
       notes.add(id, `Dépubliée : ${String(reason).trim()}`, by);
       setReview.run(null, null, id); log_(id, 'depubliee', by, reason);
       publish([], [id]);
-      await mail(photographerMail(p.author_id), 'Photo dépubliée', [`« ${p.title} » a été dépubliée par ${by.name || 'le modérateur'} :`, String(reason).trim()]);
+      await mail(photographerMail(p.author_id), t => ({ subject: t('Photo dépubliée'), lines: [t('« {title} » a été dépubliée par {name} :', { title: p.title, name: by.name || t('le modérateur') }), String(reason).trim()] }));
       return true;
     },
     // Annuler une programmation : la photo attend de nouveau le modérateur si elle avait été proposée, sinon elle
@@ -124,7 +143,8 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
       }
       for (const authorId of new Set(g.ok.map(id => photo(id).author_id))) {
         const mine = g.ok.filter(id => photo(id).author_id === authorId);
-        await mail(photographerMail(authorId), 'Photos publiées', [`${mine.length > 1 ? `${mine.length} de vos photos programmées sont publiées` : `« ${photo(mine[0]).title} », programmée, est publiée`}.`]);
+        const title = photo(mine[0]).title;
+        await mail(photographerMail(authorId), t => ({ subject: t('Photos publiées'), lines: [mine.length > 1 ? t('{n} de vos photos programmées sont publiées.', { n: mine.length }) : t('« {title} », programmée, est publiée.', { title })] }));
       }
       return g.ok.length;
     },

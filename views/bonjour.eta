@@ -1,5 +1,7 @@
 <% layout('./layout') %>
 <% const h = it.h, v = it.values || {}, e = it.errors || {}; const on = k => v[k] === 'on' || v[k] === true; %>
+<% /* Champ en erreur : marqué, et relié à son message (liste en tête, qui prend le focus au retour du formulaire). */ %>
+<% const bad = (...keys) => { const ids = keys.filter(k => e[k]).map(k => `err-${k}`); return ids.length ? ` aria-invalid="true" aria-describedby="${ids.join(' ')}"` : ''; }; %>
 <header class="top wrap">
   <%~ include('./brand', it) %>
   <%~ include('./nav', it) %>
@@ -16,9 +18,9 @@
   <h1><%= h.title %></h1>
   <p class="prose lead"><%= it.who ? h.introWho(it.who.name) : h.intro.replace('{site}', it.siteName) %></p>
 <% if (Object.keys(e).length) { %>
-  <div class="hello-errors" role="alert">
+  <div class="hello-errors" id="erreurs" role="alert" tabindex="-1" autofocus>
     <p><%= h.errorsTitle %></p>
-    <ul><% Object.values(e).forEach(code => { %><li><%= h.errors[code] || code %></li><% }) %></ul>
+    <ul><% Object.entries(e).forEach(([k, code]) => { %><li id="err-<%= k %>"><%= h.errors[code] || code %></li><% }) %></ul>
   </div>
 <% } %>
   <form class="hello-form" method="post" action="<%= it.u('/bonjour') %>" novalidate>
@@ -26,23 +28,23 @@
 <% } %>
     <fieldset>
       <legend><%= h.card %></legend>
-<% if (it.card && it.card.author) { %>      <p class="hello-card mono"><%= it.card.ref %> · <%= it.card.verified ? h.cardOk(it.card.author.name) : h.cardUnverified %></p>
+<% if (it.card && it.card.author) { %>      <p class="hello-card mono"><%= it.card.ref %> · <%= it.card.code ? h.cardOk(it.card.author.name) : h.cardUnverified %></p>
 <% } %>      <label><%= h.refLabel %> <span class="hint"><%= h.refHint %></span>
-        <input name="ref" value="<%= v.ref || '' %>" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false"<%~ e.ref ? ' aria-invalid="true"' : '' %>></label>
+        <input name="ref" value="<%= v.ref || '' %>" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false"<%~ bad('ref') %>></label>
       <details class="hello-nocard"<%~ (it.who || (!v.ref && (v.met_on || v.place || e.where))) ? ' open' : '' %>>
         <summary><%= h.noCard %></summary>
         <div class="hello-row">
-          <label><%= h.metOn %> <input type="date" name="met_on" value="<%= v.met_on || '' %>"<%~ e.where ? ' aria-invalid="true"' : '' %>></label>
+          <label><%= h.metOn %> <input type="date" name="met_on" value="<%= v.met_on || '' %>"<%~ bad('where') %>></label>
           <label><%= h.metTime %> <input name="met_time" value="<%= v.met_time || '' %>" maxlength="20" placeholder="16 h"></label>
         </div>
-        <label><%= h.place %> <input name="place" value="<%= v.place || '' %>" maxlength="120" placeholder="<%= h.placeHint %>"<%~ e.where ? ' aria-invalid="true"' : '' %>></label>
+        <label><%= h.place %> <input name="place" value="<%= v.place || '' %>" maxlength="120" placeholder="<%= h.placeHint %>"<%~ bad('where') %>></label>
         <label><%= h.details %> <input name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="<%= h.detailsHint %>"></label>
       </details>
     </fieldset>
-    <fieldset>
+    <fieldset<%~ bad('what') %>>
       <legend><%= h.wish %></legend>
       <label class="check"><input type="checkbox" name="wants_photo"<%~ on('wants_photo') ? ' checked' : '' %>> <%= h.wantsPhoto %></label>
-      <fieldset class="hello-decision"<%~ e.scopes ? ' aria-invalid="true"' : '' %>>
+      <fieldset class="hello-decision"<%~ bad('scopes') %>>
         <legend><%= h.decision %></legend>
         <label class="check"><input type="radio" name="decision" value=""<%~ !v.decision ? ' checked' : '' %>> <%= h.undecided %></label>
         <label class="check"><input type="radio" name="decision" value="accord"<%~ v.decision === 'accord' ? ' checked' : '' %>> <%= h.agree %></label>
@@ -62,8 +64,8 @@
     <fieldset>
       <legend><%= h.contact %></legend>
       <div class="hello-row">
-        <label><%= h.email %> <input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ e.email ? ' aria-invalid="true"' : '' %>></label>
-        <label><%= h.name %> <input name="name" value="<%= v.name || '' %>" maxlength="80" autocomplete="name"<%~ e.name ? ' aria-invalid="true"' : '' %>></label>
+        <label><%= h.email %> <input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ bad('email') %>></label>
+        <label><%= h.name %> <input name="name" value="<%= v.name || '' %>" maxlength="80" autocomplete="name"<%~ bad('name') %>></label>
       </div>
       <p class="hint"><%= h.privacy %> <a href="<%= it.u('/confidentialite') %>"><%= it.t.footer.privacy %></a></p>
     </fieldset>

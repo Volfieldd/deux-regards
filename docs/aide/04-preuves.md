@@ -17,7 +17,7 @@ En cas d'échec (réseau, service indisponible), le site réessaie seul : quelqu
 | Empreinte SHA-256 | l'« ADN » de l'original |
 | **Horodatée le … UTC** | la date garantie (heure universelle : +1 h en hiver, +2 h en été pour Paris) |
 | Autorité, n° | qui a signé le jeton, et son numéro |
-| En attente | demande pas encore aboutie : bouton **Réessayer maintenant** |
+| En attente | demande pas encore aboutie : bouton **Réessayer maintenant** (une relance toutes les 5 minutes au plus, pour ne pas surcharger l'autorité) |
 
 Boutons :
 

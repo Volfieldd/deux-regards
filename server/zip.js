@@ -1,10 +1,15 @@
 import zlib from 'node:zlib';
 
+// Les dates DOS n'ont pas de fuseau : elles sont lues comme une heure locale. On écrit donc l'heure de Paris, celle
+// de qui ouvre l'archive (le serveur, lui, tourne en UTC).
+const PARIS = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23' });
+
 // Archive ZIP minimale, sans compression (« stored »), noms en UTF-8 : pour l'export des données d'une personne.
 // entries : [{ name, data (Buffer ou texte) }] → Buffer.
 export function zip(entries, date = new Date()) {
-  const dosTime = (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2);
-  const dosDate = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+  const t = Object.fromEntries(PARIS.formatToParts(date).filter(p => p.type !== 'literal').map(p => [p.type, Number(p.value)]));
+  const dosTime = (t.hour << 11) | (t.minute << 5) | Math.floor(t.second / 2);
+  const dosDate = ((t.year - 1980) << 9) | (t.month << 5) | t.day;
   const locals = []; const centrals = []; let offset = 0;
   for (const e of entries) {
     const name = Buffer.from(e.name, 'utf8');

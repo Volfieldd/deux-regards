@@ -303,5 +303,16 @@ Fait côté nom et domaine : **Nicephos**, en ligne sur `https://www.nicephos.ar
    - Instagram : jeton expiré mais lisible, la page affiche « Connecté » sans bouton pour se reconnecter directement ;
    - Instagram : un seul libellé pour le lien vers le post (« voir le post ↗ » sur la fiche, « Voir sur Instagram ↗ » dans l'historique) ;
    - photothèque : deux liens d'aide (« Aide sur cette page » et « Aide »).
+6. Revue du 16 octobre 2026 ([docs/revue-2026-10-16.md](docs/revue-2026-10-16.md)), décisions à prendre :
+   - avant la mise à jour : vérifier dans le `.env` de production `OIDC_ORG_ID` (puis refuser le démarrage sans lui), `PUBLIC_URL` (désormais obligatoire) et `SMTP_URL` (STARTTLS exigé hors relais local, sinon `?requireTLS=false`) ; prévoir l'espace du `VACUUM` unique au premier démarrage ;
+   - dépôt et image : épinglage des images de base par digest, protection de `main`, `sha_pinning_required`, cosign ; onnxruntime-node ≥ 1.30 après revalidation de YuNet, CLIP et Florence-2 ; `UV_THREADPOOL_SIZE` à mesurer ;
+   - Unraid : UID dédié à la place de 99:100 ; healthcheck du modèle de sauvegarde ;
+   - YuNet et CLIP dans un processus à part, comme Florence-2 ; valider les réglages (20 descriptions en attente, 5 min par calcul, visages à 1 600 px et tolérance 0,8) ;
+   - cartes : codes à 5 caractères pour les nouvelles cartes, et ne pas lever un refus signé même avec un bon code ;
+   - modérateur : moyen de dépublier une page de voyage (route sous `photos.publier` ou état « proposé ») ;
+   - page tendue à la personne : mode kiosque ou flèche « ← » ;
+   - RGPD : administrateur en copie dès la première relance ; trace anonyme d'un refus qui garde sa partie de la journée ; chiffrés liés à leur colonne (AAD, `enc2`) ;
+   - purge de Cloudflare par API (jeton) lors d'une dépublication ou d'un refus ; script de restauration d'une seule photo ;
+   - import lancé dès le dépôt de fichiers, ou après un clic sur « Envoyer » ; `<h2>` dans `<summary>` dans tout l'admin.
 
 Écarté pour l'instant : suggestions de titres et légendes par IA (contrainte de coût nul ; l'offre gratuite de Gemini exige le payant pour des utilisateurs dans l'EEE ; piste possible : modèle local via Ollama).

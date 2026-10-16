@@ -17,7 +17,7 @@ If it fails (network, service unavailable), the site retries by itself: a few mi
 | SHA-256 fingerprint | the “DNA” of the original |
 | **Timestamped on … UTC** | the guaranteed date (universal time: +1 h in winter, +2 h in summer for Paris) |
 | Authority, no. | who signed the token, and its number |
-| Pending | request not yet completed: **Retry now** button |
+| Pending | request not yet completed: **Retry now** button (one retry every 5 minutes at most, so as not to overload the authority) |
 
 Buttons:
 

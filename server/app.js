@@ -23,7 +23,7 @@ import { createVariantService } from './variants.js';
 import { createProofService } from './proofs.js';
 import { createStats } from './stats.js';
 import { createTranslator } from './translate.js';
-import { createEncounters } from './encounters.js';
+import { createEncounters, parseRef } from './encounters.js';
 import { createMailer } from './mailer.js';
 import { createReminders } from './reminders.js';
 import { createTrips } from './trips.js';
@@ -64,12 +64,15 @@ const SECURITY_HEADERS = {
   'permissions-policy': 'camera=(), microphone=(), geolocation=()',
 };
 
-// Le code d'autorisation, le state OAuth et le jeton d'image Instagram n'ont rien à faire dans les journaux,
-// même encodés dans un paramètre (« next=…%3Fcode%3D… »).
+// Le code d'autorisation, le state OAuth, le jeton d'image Instagram, celui d'une photo offerte (/pour-vous/…) et le
+// code de contrôle d'une carte (/bonjour/J-0042-K7Q : la référence reste, le code non) n'ont rien à faire dans les
+// journaux, même encodés dans un paramètre (« next=…%3Fcode%3D… »).
 export function redactUrl(url) {
   let u = String(url);
   try { u = decodeURIComponent(u); } catch { /* URL mal encodée : telle quelle */ }
-  return u.replace(/([?&](?:code|state)=)[^&#]*/g, '$1[masqué]').replace(/(\/partage\/instagram\/)[^/?#]+/, '$1[masqué]');
+  return u.replace(/([?&](?:code|state)=)[^&#]*/g, '$1[masqué]').replace(/(\/partage\/instagram\/)[^/?#]+/, '$1[masqué]')
+    .replace(/(\/pour-vous\/)[^/?#]+/, '$1[masqué]')
+    .replace(/(\/bonjour\/)([^/?#]+)/, (m, p, seg) => { const r = parseRef(seg); return r?.code ? `${p}${r.ref}-[masqué]` : m; });
 }
 // Adresse IP tronquée dans les journaux (/24 en IPv4, /48 en IPv6) : assez pour diagnostiquer, pas pour identifier.
 export function truncateIp(ip) {
@@ -103,6 +106,11 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   const app = Fastify({ logger: loggerOptions(logger), trustProxy: config.trustProxy });
 
   app.decorate('config', config);
+  // TRUST_PROXY laissé par défaut (toutes les adresses privées) sur un serveur joignable du réseau : un poste du réseau
+  // local pourrait se faire passer pour le proxy (X-Forwarded-For) et contourner les limites de débit.
+  if (config.trustProxyDefault && !['127.0.0.1', '::1', 'localhost'].includes(config.host)) {
+    app.log.warn('TRUST_PROXY non défini : X-Forwarded-For est accepté de toute adresse privée ; fixez TRUST_PROXY à l’adresse du tunnel (cloudflared)');
+  }
   // Liste des routes (méthode, chemin) : les tests vérifient que chaque route d'admin est protégée.
   const routeList = [];
   app.decorate('routeList', routeList);
@@ -156,9 +164,9 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Villes proposées d'après le GPS des originaux importés avant la carte (une seule lecture par photo).
   app.decorate('locator', createLocator({ db, storageDir: config.storageDir, log: app.log }));
   app.addHook('onReady', async () => { app.locator.schedule(); });
-  // Liste des villes (~250 000 lieux, 1 à 2 s de lecture) : chargée juste après le démarrage en production, pas à la
-  // première frappe dans le champ Ville.
-  if (config.production) app.addHook('onReady', async () => { setTimeout(() => cities.byId(0), 1000).unref(); });
+  // Liste des villes (~250 000 lieux, 2 à 5 s de calcul) : chargée juste après le démarrage en production, par tranches
+  // entre lesquelles le site répond, pas à la première frappe dans le champ Ville.
+  if (config.production) app.addHook('onReady', async () => { setTimeout(() => cities.preload().catch(err => app.log.error({ err }, 'villes')), 1000).unref(); });
   app.addHook('onClose', async () => { await app.locator.stop(); });
   app.addHook('onClose', async () => { await app.variants.stop(); });
   // Preuves d'antériorité : empreintes et horodatage RFC 3161, repris en arrière-plan.
@@ -202,13 +210,13 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Visages : détectés (jamais reconnus) sur le serveur, à l'import et une fois pour les anciennes photos.
   // faceOptions.manual (tests) : rien ne démarre seul ; faceOptions.detector remplace le modèle.
   app.decorate('faces', createFaceService({ db, storageDir: config.storageDir, detector: faceOptions.detector || createFaceDetector({ log: app.log }), log: app.log }));
-  if (!faceOptions.manual) app.addHook('onReady', async () => { app.faces.retryFailed(); setTimeout(() => app.faces.run(), 3000).unref(); });
+  if (!faceOptions.manual) app.addHook('onReady', async () => { app.faces.retryFailed(); app.faces.recheckOnce(); setTimeout(() => app.faces.run(), 3000).unref(); });
   app.addHook('onClose', async () => { app.faces.stop(); await app.faces.idle(); });
   // Série proposée (désactivée par défaut) : empreintes d'images calculées sur le serveur, modèle téléchargé à
   // l'allumage dans le dossier de données. seriesOptions.model (tests) remplace le modèle ; manual : rien ne démarre seul.
   app.decorate('seriesSuggest', createSeriesSuggest({ db, storageDir: config.storageDir, log: app.log,
     model: seriesOptions.model || createImageModel({ dir: path.join(config.storageDir, 'models'), log: app.log }) }));
-  if (!seriesOptions.manual) app.addHook('onReady', async () => { app.seriesSuggest.retryFailed(); setTimeout(() => app.seriesSuggest.run(), 5000).unref(); });
+  if (!seriesOptions.manual) app.addHook('onReady', async () => { app.seriesSuggest.retryFailed(); setTimeout(() => app.seriesSuggest.run(), 5000).unref(); setTimeout(() => app.seriesSuggest.warm().catch(err => app.log.warn({ err }, 'séries : propositions')), 15000).unref(); });
   app.addHook('onClose', async () => { app.seriesSuggest.stop(); await app.seriesSuggest.idle(); });
   // Instagram suit les accords : une photo bloquée ne part pas, une photo à vérifier seulement sur confirmation ; la
   // file est revue dès qu'un accord change.
@@ -241,14 +249,15 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { reviewTimer = setInterval(() => app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée')), 60 * 1000); reviewTimer.unref(); });
   app.addHook('onClose', async () => clearInterval(reviewTimer));
   app.decorate('trips', createTrips({ db }));
-  app.decorate('keywordSuggest', createKeywordSuggester({ db }));
+  app.decorate('keywordSuggest', createKeywordSuggester({ db, log: app.log }));
   // Descriptions suggérées (Florence-2, désactivées par défaut) : demandes depuis la fiche tout de suite, file de nuit
   // vérifiée toutes les 10 minutes. describeOptions.model (tests) remplace le modèle ; manual : rien ne démarre seul.
   app.decorate('describer', createDescriber({ db, storageDir: config.storageDir, translator: app.translator, log: app.log,
     model: describeOptions.model || createFlorence({ dir: path.join(config.storageDir, 'models', 'florence'), log: app.log }) }));
   let describeTimer = null;
-  if (!describeOptions.manual) app.addHook('onReady', async () => { describeTimer = setInterval(() => app.describer.run(), 10 * 60 * 1000); describeTimer.unref(); });
-  app.addHook('onClose', async () => clearInterval(describeTimer));
+  // Au démarrage, les photos en échec sont reprises une fois (réseau rétabli, modèle réparé…).
+  if (!describeOptions.manual) app.addHook('onReady', async () => { app.describer.retryFailed(); describeTimer = setInterval(() => app.describer.run(), 10 * 60 * 1000); describeTimer.unref(); });
+  app.addHook('onClose', async () => { clearInterval(describeTimer); await app.describer.close(); });
   app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
   // Relances par e-mail (demandes RGPD par quarts du délai, récapitulatifs) : toutes les heures.
@@ -262,6 +271,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
 
   app.addHook('onSend', async (request, reply) => {
     reply.headers(headers);
+    // Rien de l'admin ne se garde en cache, quel que soit le gestionnaire (fichier envoyé par sendFile compris).
+    if (/^\/admin(?:[/?#]|$)/.test(request.url)) reply.header('cache-control', 'no-store');
     // Seul l'écran « Rencontre » de l'admin (sur le téléphone) peut demander la position, au site lui-même.
     if (request.routeOptions?.config?.geolocation) reply.header('permissions-policy', 'camera=(), microphone=(), geolocation=(self)');
     // Sans includeSubDomains : à ajouter quand tous les sous-domaines de nicephos.art seront servis en HTTPS (PLAN.md, feuille de route).
@@ -273,11 +284,12 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.setErrorHandler((err, request, reply) => {
     const status = err.statusCode >= 400 && err.statusCode < 500 ? err.statusCode : 500;
     if (status >= 500) request.log.error({ err }, 'erreur inattendue');
-    const message = status < 500 ? err.message : 'Une erreur inattendue est survenue. Réessayez dans un instant.';
+    const t = request.t || (x => x);                                            // langue de l'admin si elle est connue
+    const message = status < 500 ? err.message : t('Une erreur inattendue est survenue. Réessayez dans un instant.');
     reply.code(status).header('cache-control', 'no-store');
     if (!request.headers.accept?.includes('text/html')) return reply.send({ error: message });
     const siteName = app.siteName();
-    return reply.render('auth-error', { siteName, pageTitle: `Erreur · ${siteName}`, description: '', title: status < 500 ? 'Requête refusée' : 'Erreur', message });
+    return reply.render('auth-error', { siteName, pageTitle: `${t('Erreur')} · ${siteName}`, description: '', t: request.t, lang: request.t?.lang || 'fr', title: status < 500 ? t('Requête refusée') : t('Erreur'), message });
   });
 
   app.get('/healthz', async (request, reply) => {

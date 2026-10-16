@@ -11,6 +11,8 @@ import { composition } from '../textile.js';
 import { MailError } from '../mailer.js';
 import { removePhotoFiles } from '../media.js';
 import { zip } from '../zip.js';
+import { rightsDue } from '../reminders.js';
+import { isDay } from '../outings.js';
 
 // Admin « Rencontres » : demandes reçues par la page /bonjour, accords papier (carte « pour nous ») et refus.
 // Enregistré dans le plugin d'administration (session d'admin exigée, comme le reste de /admin).
@@ -19,8 +21,8 @@ const CARD_MAX_BYTES = 15 * 1024 * 1024;
 // aussi lire (contenu actif, ressources externes).
 const PHOTO_FORMATS = ['jpeg', 'png', 'webp'];
 async function photoFormat(buf) { try { return PHOTO_FORMATS.includes((await sharp(buf).metadata()).format); } catch { return false; } }
-// Champs des formulaires multipart : noms simples seulement (rien comme « __proto__ »).
-const FIELD = /^[a-z_]{1,30}$/;
+// Champs des formulaires multipart : noms simples seulement, qui commencent par une lettre (rien comme « __proto__ »).
+const FIELD = /^[a-z][a-z_]{0,29}$/;
 
 export function registerEncounters(app, { repo, render, P, W, done, failed, withReady }) {
   // ---------- portée « les miennes » ----------
@@ -54,10 +56,11 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   const byId = id => (Number.isInteger(Number(id)) ? Number(id) : -1);
 
   // Photos à proposer pour une rencontre : celles de l'auteur de la carte, prises (ou importées) ce jour-là d'abord.
-  function candidates(e, search) {
+  // Portée « les miennes » appliquée avant la limite (une recherche ne revient pas vide à cause des photos des autres).
+  function candidates(e, search, request) {
     const linked = new Set(enc.photos(e.id).map(p => p.id));
     const author = e.author_id ? repo.authors().find(a => a.id === e.author_id)?.slug : undefined;
-    const day = e.met_on || '';
+    const day = isDay(e.met_on) ? e.met_on : '';
     const score = p => {
       if (!day) return 0;
       if (p.taken_on === day) return 3;
@@ -65,18 +68,21 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       if (imported >= day && imported <= new Date(Date.parse(day) + 14 * 864e5).toISOString().slice(0, 10)) return 2;
       return p.taken_on && day.startsWith(p.taken_on.slice(0, 7)) ? 1 : 0;
     };
-    return repo.photos({ q: search, author: search ? undefined : author })
+    return request.mine('photos.voir', repo.photos({ q: search, author: search ? undefined : author }))
       .filter(p => !linked.has(p.id))
       .map(p => ({ ...p, score: score(p) }))
       .sort((a, b) => b.score - a.score || String(b.created_at).localeCompare(String(a.created_at)))
       .slice(0, 30).map(withReady);
   }
 
-  const page = (request, reply, view, data) => render(request, reply, view, { STATUS: statusOf(request.t), SCOPES, SCOPE_LABELS, fmt: fmtOf(request.t), ...data });
+  // rightsDue : échéance légale d'une demande de droits (un mois, de date à date).
+  const page = (request, reply, view, data) => render(request, reply, view, { STATUS: statusOf(request.t), SCOPES, SCOPE_LABELS, fmt: fmtOf(request.t), rightsDue, ...data });
+  // Photographe de la portée « les miennes » (null : tous) : les listes sont filtrées avant leur limite.
+  const scopeAuthor = (request, perm) => { const s = request.scope(perm); return s && !s.all ? s.authorId : null; };
 
   app.get('/admin/rencontres', P('personnes.voir'), async (request, reply) => {
     const status = Object.hasOwn(STATUS, request.query.statut) ? request.query.statut : undefined;
-    return page(request, reply, 'encounters', { title: request.t('Personnes photographiées'), list: request.mine('personnes.voir', enc.list({ status })), status, authors: request.mine('personnes.voir', repo.authors(), 'id'), errors: {}, values: {} });
+    return page(request, reply, 'encounters', { title: request.t('Personnes photographiées'), list: request.mine('personnes.voir', enc.list({ status, authorId: scopeAuthor(request, 'personnes.voir') })), status, authors: request.mine('personnes.voir', repo.authors(), 'id'), errors: {}, values: {} });
   });
 
   function detail(request, reply, id, extra = {}) {
@@ -85,11 +91,17 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const search = String(request.query.q || '').slice(0, 100);
     return page(request, reply, 'encounter', {
       title: e.ref ? request.t('Rencontre {ref}', { ref: e.ref }) : request.t('Rencontre du {date}', { date: fmtOf(request.t)(e.created_at) }), e, events: enc.events(id),
-      photos: enc.photos(id).map(withReady), session: (s => ({ ...s, photos: s.photos.map(withReady) }))(enc.session(id)), candidates: request.mine('photos.voir', candidates(e, search)), search, authors: request.mine('personnes.voir', repo.authors(), 'id'),
-      code: e.ref ? enc.codeOf(e.ref) : null, shares: sharesOf(e, fmtOf(request.t)), errors: {}, values: null,
+      photos: enc.photos(id).map(withReady), session: (s => ({ ...s, photos: s.photos.map(withReady) }))(enc.session(id)), candidates: candidates(e, search, request), search, authors: request.mine('personnes.voir', repo.authors(), 'id'),
+      code: e.ref ? enc.codeOrNull(e.ref) : null, shares: sharesOf(e, fmtOf(request.t)), errors: {}, values: null,
+      // « Écrire » : l'objet du message dans la langue de la personne, comme le lien « photo offerte » (« Your photo
+      // (J-0142) · site »).
+      mailSubject: (([what, ...rest]) => [`${what}${e.ref ? ` (${e.ref})` : ''}`, ...rest].join(' · '))((UI[e.lang] || UI.fr).gift.mailSubject(app.siteName()).split(' · ')),
       outingUrl: e.author_id ? app.outings.urlOf(e.author_id, e.session_day || e.met_on, e.met_time) : null, ...extra,
     });
   }
+  // Adresse d'un lien mailto : encodée (une adresse saisie par un visiteur pourrait contenir « ?bcc=… » ou « &body=… »,
+  // que la validation laisse passer : RFC 6068), l'arobase gardée lisible.
+  const mailtoOf = email => `mailto:${encodeURIComponent(email).replace(/%40/g, '@')}`;
   // Liens « photo offerte » : adresse, et message prêt à envoyer dans la langue de la personne (mailto).
   function sharesOf(e, fmt) {
     const g = UI[e.lang] ? UI[e.lang].gift : UI.fr.gift;
@@ -98,7 +110,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       const url = `${app.config.publicUrl}/pour-vous/${s.token}`;
       const date = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(s.expires_at);
       const author = repo.photo(s.photo_id) && repo.authors().find(a => a.id === repo.photo(s.photo_id).author_id)?.name;
-      const mail = e.email ? `mailto:${e.email}?${new URLSearchParams({ subject: g.mailSubject(app.siteName()), body: g.mail({ name: e.name, link: url, date, author: author || app.siteName() }) }).toString().replace(/\+/g, '%20')}` : null;
+      const mail = e.email ? `${mailtoOf(e.email)}?${new URLSearchParams({ subject: g.mailSubject(app.siteName()), body: g.mail({ name: e.name, link: url, date, author: author || app.siteName() }) }).toString().replace(/\+/g, '%20')}` : null;
       return { ...s, url, mail, expired: s.expires_at <= Date.now(), until: fmt(s.expires_at) };
     });
   }
@@ -134,11 +146,16 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const own = authorOf(request);
     const author = allowed.find(a => a.id === Number(request.query?.photographe)) || allowed.find(a => a.id === own?.id) || (request.scope('terrain.app').all ? null : allowed[0]) || null;
     const authors = allowed.map(a => ({ ...a, prefix: prefixOf(a), next: `${prefixOf(a)}-${String(nextNumber(prefixOf(a))).padStart(4, '0')}` }));
-    // « Déjà rencontrée ? » : les personnes vues par ce photographe ces 30 derniers jours.
+    // « Déjà rencontrée ? » : les personnes vues par ce photographe ces 30 derniers jours, avec ce qu'il en sait
+    // lui-même (nom, référence et refus de ses rencontres, jamais ceux notés par l'autre photographe). La page est
+    // tendue à la personne photographiée : seulement les initiales, la référence et le jour.
     const since = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(Date.now() - 30 * 864e5);
+    const initials = name => String(name || '').split(/[\s-]+/).filter(Boolean).slice(0, 3).map(w => `${[...w][0].toUpperCase()}.`).join(' ');
     const recent = author ? app.db.prepare(`SELECT person_id, MAX(COALESCE(NULLIF(session_day, ''), met_on)) AS d FROM encounters WHERE author_id = ? AND person_id IS NOT NULL
       AND COALESCE(NULLIF(session_day, ''), met_on) >= ? AND anonymized = 0 GROUP BY person_id ORDER BY d DESC LIMIT 40`).all(author.id, since)
-      .map(r => ({ ...app.people.get(r.person_id), day: r.d })).filter(p => p.id) : [];
+      .map(r => { const p = app.people.get(r.person_id); const mine = (p?.meetings || []).filter(e => e.author_id === author.id);
+        return mine.length ? { id: p.id, initials: initials(mine.find(e => e.name)?.name), ref: mine.find(e => e.ref)?.ref || '', refused: mine.some(e => e.refused), day: r.d } : null; })
+      .filter(Boolean) : [];
     return appView(reply, 'app', { title: request.t('Nouvelle rencontre'), host: app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, ''), author, authors, recent, csrf: request.session.csrf, errors: {}, values: { lang: 'fr', author_id: author?.id }, ...extra });
   }
   app.get('/admin/rencontre', { config: { geolocation: true, perm: 'terrain.app' } }, async (request, reply) => appPage(request, reply));
@@ -219,7 +236,8 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       return reply.redirect(`/admin/rencontre/${r.id}/merci`, 303);
     } catch (err) {
       if (!(err instanceof EncounterError)) throw err;
-      return appPage(request, reply.code(422), { errors: err.errors, values: { ...body, signature: '' } });
+      // La photo et la signature ne sont pas gardées entre deux envois : l'écran le dit (à refaire).
+      return appPage(request, reply.code(422), { errors: err.errors, values: { ...body, signature: '' }, redo: { portrait: Boolean(portrait), signature: body.decision === 'accord' && Boolean(body.signature) } });
     }
   });
 
@@ -230,7 +248,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     if (!e || !e.ref || !request.owns('terrain.app', e.author_id)) return reply.callNotFound();
     const r = recap(e);
     const qr = await QRCode.toString(r.link, { type: 'svg', errorCorrectionLevel: 'Q', margin: 2 });
-    const mailto = e.email ? `mailto:${e.email}?${new URLSearchParams({ subject: r.subject, body: r.text }).toString().replace(/\+/g, '%20')}` : null;
+    const mailto = e.email ? `${mailtoOf(e.email)}?${new URLSearchParams({ subject: r.subject, body: r.text }).toString().replace(/\+/g, '%20')}` : null;
     return appView(reply, 'app-merci', { title: request.t('Rencontre {ref}', { ref: e.ref }), e, A: UI[e.lang] ? UI[e.lang].app : UI.fr.app, qr, mailto, smtp: app.mailer.enabled, csrf: request.session.csrf, flash: request.query.envoi || null });
   });
   app.post('/admin/rencontre/:id/envoyer', W('terrain.app'), async (request, reply) => {
@@ -308,6 +326,10 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     if (!author) errors.author = request.t('Choisissez le photographe.');
     if (!(count >= 1 && count <= MAX_PAIRS)) errors.count = request.t('De 1 à {max} paires de cartes.', { max: MAX_PAIRS });
     if (!generic && !(from >= 1 && from + count - 1 <= 9999)) errors.from = request.t('Numéro de départ entre 1 et 9999.');
+    // Plage qui contient une référence déjà prise (demande reçue sur /bonjour, rencontre saisie) : refusée, deux
+    // personnes auraient la même carte.
+    const taken = !generic && author && !errors.from ? enc.takenIn(prefixOf(author), from, from + count - 1) : [];
+    if (taken.length) errors.from = request.t('Numéros déjà pris dans cette plage ({refs}) : commencez à {next}.', { refs: taken.slice(0, 5).map(n => `${prefixOf(author)}-${String(n).padStart(4, '0')}`).join(', '), next: enc.nextNumber(prefixOf(author)) });
     if (Object.keys(errors).length) return cardsPage(request, reply.code(422), { errors, values: b });
     const qs = new URLSearchParams({ auteur: author.id, nombre: count, ...(generic ? { generiques: '1' } : { de: from }) });
     if (!generic) {
@@ -325,7 +347,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     if (!author || (!generic && from + count - 1 > 9999)) return reply.callNotFound();
     const { host, pairs } = await buildPairs({ publicUrl: app.config.publicUrl, prefix: prefixOf(author), from, count, generic, codeOf: ref => enc.codeOf(ref) });
     return reply.header('cache-control', 'no-store').render('admin/cards-sheet', {
-      title: generic ? request.t('Cartes génériques · {name}', { name: author.name }) : request.t('Cartes {from} à {to} · {name}', { from: pairs[0].ref, to: pairs.at(-1).ref, name: author.name }), author, T: TEXTS, host, sheets: sheets(pairs), generic, siteName: app.siteName(),
+      title: generic ? request.t('Cartes génériques · {name}', { name: author.name }) : request.t('Cartes {from} à {to} · {name}', { from: pairs[0].ref, to: pairs.at(-1).ref, name: author.name }), author, T: TEXTS, host, sheets: sheets(pairs), generic, siteName: app.siteName(), t: request.t, lang: request.t.lang,
     });
   });
 
@@ -367,7 +389,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     } catch (err) {
       if (!(err instanceof EncounterError)) throw err;
       if (id) return detail(request, reply.code(422), id, { errors: err.errors, values: form.body });
-      return page(request, reply.code(422), 'encounters', { title: request.t('Personnes photographiées'), list: request.mine('personnes.voir', enc.list()), authors: request.mine('personnes.gerer', repo.authors(), 'id'), errors: err.errors, values: form.body });
+      return page(request, reply.code(422), 'encounters', { title: request.t('Personnes photographiées'), list: request.mine('personnes.voir', enc.list({ authorId: scopeAuthor(request, 'personnes.voir') })), authors: request.mine('personnes.gerer', repo.authors(), 'id'), errors: err.errors, values: form.body });
     }
   }
   app.post('/admin/rencontres', P('personnes.gerer'), async (request, reply) => saveCard(request, reply, null));
@@ -444,7 +466,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     en: (site, ref) => `Your data at ${site}${ref ? ` (meeting ${ref})` : ''}\n\ndonnees.json: everything we keep about you (meeting, choices, consent or refusal, history of your requests).\nsignature.png, photo-de-reperage.jpg, carte-signee.jpg: if they exist.\nphotos/: the photos you appear in.\n\nRetention periods and rights: the website's "Privacy" page.\n`,
     de: (site, ref) => `Ihre Daten bei ${site}${ref ? ` (Begegnung ${ref})` : ''}\n\ndonnees.json: alles, was wir über Sie speichern (Begegnung, Wahl, Einwilligung oder Ablehnung, Verlauf Ihrer Anfragen).\nsignature.png, photo-de-reperage.jpg, carte-signee.jpg: falls vorhanden.\nphotos/: die Fotos, auf denen Sie zu sehen sind.\n\nAufbewahrungsfristen und Rechte: Seite „Datenschutz“ der Website.\n`,
   };
-  app.get('/admin/rencontres/:id/export.zip', P('personnes.exporter'), async (request, reply) => {
+  app.get('/admin/rencontres/:id/export.zip', { config: { perm: 'personnes.exporter', audit: true } }, async (request, reply) => {   // au Journal
     const id = byId(request.params.id);
     const x = enc.exportData(id);
     if (!x) return reply.callNotFound();
@@ -497,7 +519,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   const personPage = (request, reply, view, data) => page(request, reply, view, { section: 'people', ...data });
   app.get('/admin/personnes', P('personnes.voir'), async (request, reply) => {
     const search = String(request.query.q || '').slice(0, 100);
-    return personPage(request, reply, 'people', { title: request.t('Personnes photographiées'), list: people.list({ search }).map(p => ownPerson(request, p)).filter(Boolean), search });
+    return personPage(request, reply, 'people', { title: request.t('Personnes photographiées'), list: people.list({ search, authorId: scopeAuthor(request, 'personnes.voir') }).map(p => ownPerson(request, p)).filter(Boolean), search });
   });
   app.get('/admin/personnes/:id', P('personnes.voir'), async (request, reply) => {
     const id = byId(request.params.id);
@@ -508,7 +530,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const others = all ? people.suggestions(id).map(o => people.get(o)).filter(Boolean) : [];
     // Rencontres d'autres personnes à rattacher (les plus récentes, ou cherchées par référence ou nom).
     const needle = search.toLowerCase();
-    const attachable = (exclusive(request, people.get(id)) ? request.mine('personnes.gerer', enc.list()) : []).filter(e => e.person_id !== id && !e.anonymized)
+    const attachable = (exclusive(request, people.get(id)) ? request.mine('personnes.gerer', enc.list({ authorId: scopeAuthor(request, 'personnes.gerer') })) : []).filter(e => e.person_id !== id && !e.anonymized)
       .filter(e => !needle || [e.ref, e.name, e.email].some(v => String(v || '').toLowerCase().includes(needle))).slice(0, 20);
     const linked = new Set(person.photos.map(p => p.id));
     const photoCandidates = request.mine('photos.voir', repo.photos({ q: search })).filter(p => !linked.has(p.id) && /^\d{4}-\d{2}-\d{2}$/.test(p.taken_on || '')).slice(0, 24).map(withReady);
@@ -529,6 +551,8 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   app.post('/admin/personnes/:id/ecarter', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
     if (!exclusive(request, p)) return app.forbid(request, reply);                // personne partagée : l'administrateur s'en charge
+    // L'autre personne aussi doit être à lui (comme pour « C'est la même personne »).
+    if (!exclusive(request, people.get(Number(request.body?.autre)))) return app.forbid(request, reply);
     people.dismiss(p.id, Number(request.body?.autre));
     return done(reply, toPerson(p.id), request.t('Rapprochement écarté : ce sont deux personnes différentes.'));
   });
@@ -566,7 +590,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     return done(reply, toPerson(p.id), n > 1 ? request.t('{n} photos liées à cette personne (à sa rencontre de la sortie de chaque photo).', { n }) : request.t('{n} photo liée à cette personne (à sa rencontre de la sortie de chaque photo).', { n }));
   });
   // Droits : tout ce qui concerne la personne, toutes rencontres confondues.
-  app.get('/admin/personnes/:id/export.zip', P('personnes.exporter'), async (request, reply) => {
+  app.get('/admin/personnes/:id/export.zip', { config: { perm: 'personnes.exporter', audit: true } }, async (request, reply) => {   // au Journal
     const p = personOr404(request, reply); if (!p) return reply;
     const lang = p.meetings.find(e => e.lang)?.lang || 'fr';
     const entries = [{ name: 'LISEZMOI.txt', data: (README[lang] || README.fr)(app.siteName(), null) }];

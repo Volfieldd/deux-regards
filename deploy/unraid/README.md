@@ -51,6 +51,7 @@ chown -R 99:100 /mnt/cache/appdata/nicephos /mnt/user/backups/nicephos
 - **Sauvegardes sur le tableau**, donc sur d'autres disques que les données. Ajoutez-y une copie hors de la machine (plugin de sauvegarde, disque externe, cloud).
 - **Disques chiffrés (recommandé, RGPD)** : la base contient des noms, des e-mails, des signatures. Voir « Chiffrer les données » plus bas.
 - **99:100**, c'est-à-dire `nobody:users` : l'utilisateur standard des conteneurs Unraid. Les conteneurs tournent sous cet utilisateur, sans aucun privilège.
+- **Partages réseau fermés (obligatoire)** : `mkdir /mnt/user/backups` crée le partage `backups`, et un partage d'Unraid peut être exporté sur le réseau local sans mot de passe (sécurité *Public*). Or l'invité SMB d'Unraid est justement `nobody` (99), le propriétaire de la base, des originaux et des sauvegardes : les droits des fichiers ne protègent alors rien. Dans **Shares**, ouvrez `backups` puis `appdata` : **SMB Security Settings → Export : No**, et **NFS Security Settings → Export : No** (ou, si vous devez y accéder, sécurité *Private* avec un utilisateur nommé, jamais *Public* ni *Secure*). Vérifiez depuis un autre ordinateur que `\\unraid\backups` n'apparaît plus.
 
 ## 3. Zitadel : la connexion à l'admin
 
@@ -133,9 +134,15 @@ Au premier lancement sans données reprises, le site part d'une base vide : pas 
 
 **Autre méthode : modèles Unraid** (sans plugin).
 
-1. Créez le réseau commun, une fois, dans le terminal : `docker network create nicephos`.
+1. Créez le réseau commun, une fois, dans le terminal :
+
+   ```bash
+   docker network create --subnet 172.29.42.0/24 --ip-range 172.29.42.128/25 nicephos
+   ```
+
+   Le tunnel y a l'adresse fixe `172.29.42.10` (hors de la plage donnée aux autres conteneurs), et le site ne croit `X-Forwarded-For` que venant d'elle (`TRUST_PROXY`) : un poste du réseau local ne peut pas se faire passer pour un autre visiteur. Un réseau `nicephos` créé avant, sans `--subnet` : arrêtez les conteneurs, `docker network rm nicephos`, puis recréez-le ainsi. N'utilisez pas les modèles et la pile Compose en même temps (même sous-réseau).
 2. Copiez les trois fichiers de `modeles/` dans `/boot/config/plugins/dockerMan/templates-user/`.
-3. Docker → **Add Container** → *Template* → `nicephos`. Remplissez les champs (mêmes valeurs que `env.example`), puis **Apply**. Faites de même pour `nicephos-sauvegarde` (mêmes dossiers) et pour `nicephos-tunnel`.
+3. Docker → **Add Container** → *Template* → `nicephos`. Remplissez les champs (mêmes valeurs que `env.example`), puis **Apply**. Faites de même pour `nicephos-sauvegarde` (mêmes dossiers) et pour `nicephos-tunnel`. Les paramètres supplémentaires gardent les protections de la pile : système en lecture seule, aucun privilège, mémoire limitée (`--memory 3g` pour le site ; `6g` pour les descriptions « Précis »).
 
 ## 6. Reprendre les données du serveur de test
 
@@ -146,13 +153,20 @@ deploy/unraid/exporter-donnees.sh            # → nicephos-donnees-AAAA-MM-JJ.t
 scp nicephos-donnees-*.tar.gz root@unraid:/mnt/cache/appdata/nicephos/
 ```
 
+L'archive n'est lisible que par vous (elle contient les données personnelles, en clair si le serveur de test n'a pas de `DATA_KEY`).
+
 Sur Unraid, **avant** le premier `Compose Up` (ou après avoir arrêté la pile) :
 
 ```bash
 cd /mnt/cache/appdata/nicephos
 tar -xzf nicephos-donnees-*.tar.gz -C data
+rm -f data/site.db-wal data/site.db-shm
 chown -R 99:100 data
 ```
+
+- **`rm -f …-wal …-shm`** : un journal resté d'un premier lancement à vide serait sinon rejoué sur la base importée, qui repartirait vide. À ne faire que pile arrêtée.
+- **Mêmes clés** : si le serveur de test a une `DATA_KEY` (ou une `INSTAGRAM_TOKEN_KEY`), reprenez la même dans le `.env` de la pile, sinon les données chiffrées sont illisibles. Sans `INSTAGRAM_TOKEN_KEY`, un `COOKIE_SECRET` différent impose de reconnecter Instagram.
+- **Une fois le site vérifié**, effacez l'archive sur les deux machines : elle échappe à la rotation des sauvegardes et à l'effacement des 90 jours.
 
 L'archive contient :
 
@@ -171,11 +185,29 @@ Les images servies ne sont pas dans l'archive : elles sont recalculées au déma
 
 `nicephos-sauvegarde` fait une sauvegarde au démarrage, puis toutes les 24 h, dans `/mnt/user/backups/nicephos` :
 
-- `db/` : instantanés de la base, les 14 derniers ;
-- `files/` : originaux, logos et marque. Un original supprimé dans l'admin y reste récupérable **90 jours**, puis il est effacé (droit à l'effacement ; `BACKUP_DELETED_DAYS` pour changer ce délai). Si le dossier des originaux est vide (montage raté), rien n'est effacé ;
+- `db/` : instantanés de la base, les 14 derniers. Chacun est une copie compacte, contrôlée, sans les restes des données effacées ;
+- `files/` : originaux, logos et marque, tels qu'ils sont dans les données ;
+- `supprimes/` : un original supprimé dans l'admin y reste récupérable **90 jours**, puis il est effacé (droit à l'effacement ; `BACKUP_DELETED_DAYS` pour changer ce délai). Si le dossier des originaux est vide (montage raté), rien n'y passe ;
 - `last.json` : compte rendu de la dernière sauvegarde.
 
-**Restaurer :** arrêtez la pile et gardez une copie de `data/`. Copiez `db/site-<date>.db` en `data/site.db` et supprimez `data/site.db-wal` et `data/site.db-shm` s'ils existent ; recopiez `files/*` dans `data/`, puis `chown -R 99:100 data` et relancez la pile. Les images servies se recalculent au démarrage.
+**Santé :** l'onglet Docker affiche `healthy` pour `nicephos-sauvegarde` tant que la dernière sauvegarde a moins de deux jours et rien d'anormal ; sinon `unhealthy` : lisez `last.json` et les journaux du conteneur.
+
+**Garde-fou :** si la base n'a plus aucune photo alors que la sauvegarde précédente en avait (dossier des données vide ou mal indiqué après un déplacement), l'instantané est nommé `site-…-suspect.db`, le conteneur passe `unhealthy`, et les vrais instantanés ne sont plus effacés à chaque passage : ils restent 14 jours. Corrigez `DATA_DIR`. Si vous avez vraiment supprimé toutes les photos, effacez `last.json` pour lever l'alerte.
+
+**Restaurer** (instantané au choix, le plus récent en général) :
+
+1. Arrêtez la pile (**Compose Down**).
+2. Dans le terminal Unraid, avec vos dossiers et le nom de l'instantané :
+
+   ```bash
+   docker run --rm --user 99:100 --network none \
+     -v /mnt/cache/appdata/nicephos/data:/data -v /mnt/user/backups/nicephos:/backups -e BACKUP_DIR=/backups \
+     ghcr.io/volfieldd/deux-regards:latest node server/db/restore.js site-AAAA-MM-JJTHHMMSS.db
+   ```
+
+   Prenez l'image de votre pile (`IMAGE` du `.env` si vous l'avez fixée). Le script refuse si le site tourne. Il garde la base actuelle dans `data/site-avant-restauration-<date>.db`, met l'instantané en place, ferme toutes les sessions, et ne recopie que les originaux que cite l'instantané (depuis `files/`, sinon `supprimes/`) : un original effacé depuis ne revient pas. Il affiche ensuite les actions faites **après** l'instantané, d'après le journal de la base gardée.
+3. **Compose Up.** Les images servies se recalculent au démarrage.
+4. **Refaites** les actions marquées « ! » que l'instantané a défaites : effacements de personnes (droit à l'effacement), suppressions de photos, rôles retirés et comptes désactivés (voir **Comptes et rôles**). Notez la restauration dans le registre ([RGPD](../../docs/wiki/RGPD.md)), puis effacez `site-avant-restauration-…` une fois tout vérifié.
 
 ### Instagram (facultatif)
 
@@ -194,7 +226,7 @@ Le conteneur `nicephos-traduction` (LibreTranslate, logiciel libre) propose les 
 
 ### Mettre à jour
 
-Dans Compose Manager : **Update Stack** (ou **Compose Pull**, puis **Compose Up**). Pour revenir à une version précise : `IMAGE=ghcr.io/volfieldd/deux-regards:sha-xxxxxxx` dans le `.env` de la pile (une migration de base déjà appliquée n'est pas défaite : restaurez alors aussi la base). Les données ne bougent pas : elles sont dans `data/`, jamais dans l'image. Une mise à jour qui modifie la base l'applique toute seule au démarrage. Prenez quand même l'habitude de vérifier la date de `last.json` avant.
+Dans Compose Manager : **Update Stack** (ou **Compose Pull**, puis **Compose Up**). Si le fichier de la pile a changé le réseau (plage `ip_range`, octobre 2026) et que Compose refuse de le réutiliser : **Compose Down**, puis **Compose Up** (les données ne bougent pas). Pour revenir à une version précise : `IMAGE=ghcr.io/volfieldd/deux-regards:sha-xxxxxxx` dans le `.env` de la pile (une migration de base déjà appliquée n'est pas défaite : restaurez alors aussi la base). Les données ne bougent pas : elles sont dans `data/`, jamais dans l'image. Une mise à jour qui modifie la base l'applique toute seule au démarrage. Prenez quand même l'habitude de vérifier la date de `last.json` avant.
 
 ### Chiffrer les données (disque volé, disque jeté)
 
@@ -215,4 +247,8 @@ Pensez aussi à **l'authentification à deux facteurs** dans Zitadel (*Settings 
 - **Dossier absent :** Compose refuse de démarrer au lieu d'en créer un vide.
 - **Conteneurs :** système de fichiers en lecture seule, sans privilège, utilisateur 99:100.
 - **Connexion de test :** jamais en ligne ; le serveur refuse `LOCAL_AUTH_TOKEN` en production.
-- **Adresse des visiteurs :** réseau Docker dédié ; le site ne croit `X-Forwarded-For` que venant du tunnel (`TRUST_PROXY` = `TUNNEL_IP`), pas d'un poste du réseau local.
+- **Adresse des visiteurs :** réseau Docker dédié ; le site ne croit `X-Forwarded-For` (ni le pays de Cloudflare) que venant du tunnel (`TRUST_PROXY` = `TUNNEL_IP`, adresse que les autres conteneurs ne peuvent pas prendre), pas d'un poste du réseau local.
+- **Partages réseau :** `appdata` et `backups` non exportés (étape 2).
+- **Secrets :** le jeton du tunnel ne va qu'à `nicephos-tunnel`, jamais au site.
+- **Effacements :** une donnée effacée est mise à zéro dans la base, et les instantanés ne gardent pas ses restes ; une restauration ne ramène pas un original effacé que la base restaurée ne connaît plus.
+- **Base vide par erreur :** les vrais instantanés sont gardés, et `nicephos-sauvegarde` passe `unhealthy`.

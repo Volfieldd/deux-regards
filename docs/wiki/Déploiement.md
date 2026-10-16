@@ -44,11 +44,11 @@ Variables propres au déploiement, dans `.env` :
 | `BACKUP_DIR` | `/srv/site-photo/sauvegardes` | Dossier des sauvegardes sur l'hôte. **Obligatoire**, et pas à l'intérieur de `DATA_DIR`. |
 | `APP_UID`, `APP_GID` | `1000` | Utilisateur du conteneur, qui doit posséder les deux dossiers. |
 | `BIND_ADDR`, `HOST_PORT` | `127.0.0.1`, `3000` | Port local du site, utile pour un contrôle ; cloudflared n'en a pas besoin. |
-| `TUNNEL_TOKEN` | — | Jeton du tunnel Cloudflare (profil `tunnel`). |
+| `TUNNEL_TOKEN` | — | Jeton du tunnel Cloudflare (profil `tunnel`). Transmis à `cloudflared` seulement : le service `site` le reçoit vide. |
 | `BACKUP_KEEP` | `14` | Nombre d'instantanés de base conservés. |
-| `BACKUP_INTERVAL_HOURS` | `24` | Fréquence des sauvegardes. |
+| `BACKUP_INTERVAL_HOURS` | `24` | Fréquence des sauvegardes, de 1 à 168 heures. |
 | `BACKUP_DELETED_DAYS` | `90` | Jours pendant lesquels un fichier supprimé (original, logo) reste dans la sauvegarde ; transmise au conteneur de sauvegarde. |
-| `SITE_MEM_LIMIT` | `3g` (`6g` pour « Précis ») | Mémoire du conteneur du site (`mem_limit`). Les descriptions « Précis » (Florence-2 large, page Séries) demandent `6g` ; « Léger » tient dans `3g`. Le site lit la limite réelle et refuse un modèle qui ne tient pas. |
+| `SITE_MEM_LIMIT` | `3g` (`6g` pour « Précis ») | Mémoire du conteneur du site (`mem_limit`). Les descriptions « Précis » (Florence-2 large, page Séries) demandent `6g` ; « Léger » tient dans `3g`. Le site lit la limite réelle et refuse un modèle qui ne tient pas. Le calcul tourne dans un processus à part, le premier arrêté si la mémoire manque : le site reste debout. |
 
 Et pour le site en ligne :
 
@@ -68,7 +68,7 @@ OIDC_ISSUER=… OIDC_CLIENT_ID=… OIDC_CLIENT_SECRET=… OIDC_PROJECT_ID=… OI
 4. Lancer `docker compose --profile tunnel up -d`.
 5. Dans Zitadel, déclarer `https://<domaine>/auth/callback` et `https://<domaine>/`.
 
-L'adresse réelle des visiteurs arrive par `X-Forwarded-For`. Le site fait confiance aux adresses privées (`TRUST_PROXY` par défaut en ligne : `loopback,uniquelocal`), donc à `cloudflared` sur le réseau Docker : la limite de connexions s'applique par visiteur, pas au tunnel entier. Si le port du site est ouvert sur le réseau local (`BIND_ADDR`), un poste de ce réseau peut lui aussi se faire passer pour un autre visiteur : fixez alors `TRUST_PROXY` à l'adresse exacte de `cloudflared`, comme le fait la pile Unraid (réseau dédié, `TUNNEL_IP`).
+L'adresse réelle des visiteurs arrive par `X-Forwarded-For`. Le site fait confiance aux adresses privées (`TRUST_PROXY` par défaut en ligne : `loopback,uniquelocal`), donc à `cloudflared` sur le réseau Docker : la limite de connexions s'applique par visiteur, pas au tunnel entier. Si le port du site est ouvert sur le réseau local (`BIND_ADDR`), un poste de ce réseau peut lui aussi se faire passer pour un autre visiteur : fixez alors `TRUST_PROXY` à l'adresse exacte de `cloudflared`, comme le font la pile et les modèles Unraid (réseau dédié à adresses fixes, `TUNNEL_IP` hors de la plage `ip_range` des autres conteneurs), ou au moins au sous-réseau du réseau Docker de la pile (`docker network inspect`). Tant que `TRUST_PROXY` reste par défaut, le serveur l'écrit dans ses journaux au démarrage. Le pays transmis par Cloudflare (`CF-IPCountry`) n'est compté que pour une requête passée par ce proxy.
 
 ## Cloudflare : une seule adresse publique
 
@@ -96,15 +96,20 @@ Le service `backup` fait une sauvegarde au démarrage, puis toutes les 24 h :
 
 ```
 BACKUP_DIR/
-  db/site-2026-10-10T130335.db     instantané cohérent de la base, contrôlé (14 derniers gardés)
-  files/originals/…                originaux : ajoutés ; un original supprimé est effacé 90 jours après
+  db/site-2026-10-10T130335.db     copie cohérente et compacte de la base, contrôlée (14 dernières gardées)
+  files/originals/…                originaux, tels qu'ils sont dans les données
   files/watermarks/…, files/brand/…
+  supprimes/originals/…            fichiers supprimés des données : gardés 90 jours, puis effacés
   last.json                        compte rendu de la dernière sauvegarde
 ```
 
+- **Base :** copiée en une seule lecture (`VACUUM INTO`), même pendant que le site écrit, puis contrôlée (`integrity_check`). La copie ne garde pas les restes des données effacées (pages libres de la base).
+
 - **Variantes :** elles ne sont pas sauvegardées, puisqu'elles se recalculent.
 - **Modèle de « Proposer une série » :** `models/` n'est pas sauvegardé non plus. S'il manque, il est retéléchargé depuis huggingface.co (empreinte SHA-256 vérifiée), et les empreintes d'images, gardées dans la base, sont conservées.
-- **Originaux :** ceux qu'on supprime dans l'admin restent récupérables dans la sauvegarde pendant 90 jours (`BACKUP_DELETED_DAYS`), puis ils en sont effacés (droit à l'effacement). Garde-fou : si le dossier des originaux est vide ou absent (montage raté), rien n'est effacé.
+- **Originaux :** ceux qu'on supprime dans l'admin passent de `files/` à `supprimes/`, où ils restent récupérables pendant 90 jours (`BACKUP_DELETED_DAYS`), puis ils en sont effacés (droit à l'effacement). `files/` reste ainsi le reflet exact des données. Garde-fou : si le dossier des originaux est vide ou absent (montage raté), rien ne quitte `files/`.
+- **Base vide par erreur :** une base sans aucune photo alors que la sauvegarde précédente en avait (`DATA_DIR` vers un dossier vide, base pas recopiée) donne un instantané `site-…-suspect.db` et une alerte (`warning` dans `last.json`, journal « sauvegarde suspecte ») ; les vrais instantanés ne sont plus effacés à chaque passage, seulement à l'âge qu'ils auraient atteint en temps normal (14 jours). Pour une base vraiment vidée, effacez `last.json`.
+- **Santé :** le service `backup` est `unhealthy` si la dernière sauvegarde date de plus de deux intervalles, a échoué ou a donné l'alerte ci-dessus (`node server/db/backup.js --etat`).
 - **Hors de la machine :** copiez aussi `BACKUP_DIR` ailleurs (`rsync`, `restic`, disque externe). Une sauvegarde sur la même machine ne protège pas d'une panne de celle-ci.
 
 Vérifier : `cat $BACKUP_DIR/last.json` ou `docker compose logs backup`.
@@ -115,11 +120,17 @@ Sauvegarde manuelle : `docker compose run --rm backup node server/db/backup.js`.
 
 ```bash
 docker compose down
-cp -a "$DATA_DIR" "$DATA_DIR.avant-restauration"                    # toujours garder l'état actuel
-cp "$BACKUP_DIR/db/site-<date>.db" "$DATA_DIR/site.db" && rm -f "$DATA_DIR"/site.db-wal "$DATA_DIR"/site.db-shm
-rsync -a "$BACKUP_DIR/files/" "$DATA_DIR/"                          # originaux, logos
+docker compose run --rm --no-deps backup node server/db/restore.js site-<date>.db
 docker compose up -d                                                 # les variantes se recalculent seules
 ```
+
+Le script ([`server/db/restore.js`](https://github.com/Volfieldd/deux-regards/blob/main/server/db/restore.js)) :
+
+- refuse si la base est ouverte (site en marche) ;
+- garde la base actuelle dans le dossier des données (`site-avant-restauration-<date>.db`) ;
+- met l'instantané en place, sans journal `-wal` ni `-shm`, et ferme toutes les sessions : les comptes et les rôles de l'instantané ne valent qu'à la prochaine connexion ;
+- ne recopie que les originaux que cite l'instantané (depuis `files/`, sinon `supprimes/`), et les logos et la marque manquants : un original effacé que la base restaurée ne connaît plus ne revient jamais ; les originaux inconnus de la base sont listés, pas effacés ;
+- liste les actions du journal faites après l'instantané, lues dans la base gardée. Celles marquées « ! » (effacements de personnes, suppressions, comptes et rôles) sont à refaire : la restauration les a défaites. Voir [Procédures](Procédures#10-restaurer-une-sauvegarde).
 
 Les preuves d'antériorité restent valides : elles portent sur les originaux, restaurés à l'identique.
 
@@ -129,10 +140,12 @@ Le workflow [`.github/workflows/image.yml`](https://github.com/Volfieldd/deux-re
 
 | Étiquette | Usage |
 |---|---|
-| `latest` | dernière version de `main` |
+| `latest` | dernière version de `main` (jamais posée depuis une autre branche) |
 | `sha-xxxxxxx` | version d'un commit précis (7 premiers caractères) : pour revenir en arrière ou figer une version |
 
-L'image ([`Dockerfile`](https://github.com/Volfieldd/deux-regards/blob/main/Dockerfile)) part de `node:22-bookworm-slim`, tourne sous l'utilisateur `node`, sans compilateur, et contient seulement le code, les gabarits, les fichiers publics, `assets/`, `seed/` et `docs/aide/`. Elle fixe `NODE_ENV=production`, `HOST=0.0.0.0`, `PORT=3000`, `STORAGE_DIR=/data`, `DATABASE_PATH=/data/site.db` et `REQUIRE_PERSISTENT_STORAGE=1`, et vérifie sa santé sur `/healthz`. Elle n'a pas d'instruction `VOLUME` : sans montage de `/data`, le serveur refuse de démarrer.
+Les constructions passent une à une, dans l'ordre des fusions : `latest` désigne toujours la dernière. Les actions GitHub sont épinglées sur un commit (une étiquette déplacée en amont ne change rien), et Dependabot ([`.github/dependabot.yml`](https://github.com/Volfieldd/deux-regards/blob/main/.github/dependabot.yml)) en propose les mises à jour, à relire comme toute PR.
+
+L'image ([`Dockerfile`](https://github.com/Volfieldd/deux-regards/blob/main/Dockerfile)) part de `node:22-bookworm-slim`, tourne sous l'utilisateur `node`, sans compilateur, et contient seulement le code, les gabarits, les fichiers publics, `assets/`, `seed/` et `docs/aide/` (sans le script d'installation d'ONNX Runtime, déjà passé, ni ses dépendances). Elle fixe `NODE_ENV=production`, `HOST=0.0.0.0`, `PORT=3000`, `STORAGE_DIR=/data`, `DATABASE_PATH=/data/site.db` et `REQUIRE_PERSISTENT_STORAGE=1`, et vérifie sa santé sur `/healthz`. Elle n'a pas d'instruction `VOLUME` : sans montage de `/data`, le serveur refuse de démarrer.
 
 ## E-mails (facultatif)
 

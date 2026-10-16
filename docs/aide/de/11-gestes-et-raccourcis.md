@@ -26,6 +26,9 @@
 | Serien → neue Serie | **Eingabe** / **Esc** | erstellt / löscht die Eingabe |
 | Öffentliche Website → Start-Diashow | **←** / **→** / **✕** | ordnet ein Foto der Diashow neu an oder entfernt es |
 | Menüs ⋯, Fenster, Lupe, Palette | **Esc** | schließt sie |
+| Auswahllisten, die etwas auslösen (Filter, Fotograf, Serie) | mit der Tastatur: **↑ ↓**, dann **Eingabe** (oder die Liste verlassen) | die Pfeile blättern, ohne etwas anzuwenden; Eingabe oder Verlassen wendet an (Filter: Eingabe oder **Filtern**) |
+
+Tasten mit einem einzigen Buchstaben (**P**, **I**, **L**, **Leertaste**) wirken nur, wenn der Fokus im Kontaktbogen oder im rechten Bereich liegt (nach einem Klick auf ein Foto): nie aus der Seitenleiste oder von einem anderen Link aus, damit kein Tippfehler und kein Diktat etwas veröffentlicht.
 
 Alles funktioniert mit der Tastatur: Für jedes Ziehen und Ablegen gibt es eine Entsprechung mit Schaltflächen oder Pfeiltasten. Auf dem Smartphone ersetzt die Tab-Leiste unten die Seitenleiste (**Menü** öffnet sie).
 

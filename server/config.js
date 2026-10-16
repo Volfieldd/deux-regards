@@ -22,10 +22,18 @@ function parseTrustProxy(value, deployed) {
 
 const list = value => (value ? value.split(',').map(s => s.trim()).filter(Boolean) : []);
 
+// URL publique : analysée (« HTTPS://Exemple.fr/ » devient « https://exemple.fr »), http ou https seulement.
+function parsePublicUrl(value) {
+  let u;
+  try { u = new URL(value); } catch { throw new Error(`PUBLIC_URL n’est pas une adresse valide : ${value}`); }
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') throw new Error('PUBLIC_URL doit commencer par https:// (ou http:// en développement)');
+  return `${u.origin}${u.pathname}`.replace(/\/+$/, '');
+}
+
 export function loadConfig(env = process.env) {
   const production = env.NODE_ENV === 'production';
   const storageDir = path.resolve(env.STORAGE_DIR || './storage');
-  const publicUrl = (env.PUBLIC_URL || `http://localhost:${env.PORT || 3000}`).replace(/\/+$/, '');
+  const publicUrl = env.PUBLIC_URL ? parsePublicUrl(env.PUBLIC_URL) : `http://localhost:${env.PORT || 3000}`;
   const https = publicUrl.startsWith('https://');
   // Site en ligne : NODE_ENV=production ou URL publique en HTTPS. Les protections ne dépendent
   // pas d'une seule variable qu'on pourrait oublier au déploiement.
@@ -44,6 +52,9 @@ export function loadConfig(env = process.env) {
   const localAuthToken = env.LOCAL_AUTH_TOKEN || null;
   if (localAuthToken && deployed) throw new Error('LOCAL_AUTH_TOKEN est réservé aux tests : interdit en HTTPS ou en production');
   if (localAuthToken && localAuthToken.length < 16) throw new Error('LOCAL_AUTH_TOKEN doit faire au moins 16 caractères');
+  // En production, l'adresse publique est obligatoire : sans elle, le site se croirait en HTTP sur localhost (cookies
+  // sans Secure, URL canoniques, liens des e-mails et retour OIDC faux).
+  if (production && !env.PUBLIC_URL) throw new Error('PUBLIC_URL est obligatoire en production (ex. https://www.nicephos.art)');
 
   // Horodatage RFC 3161 des originaux : FreeTSA par défaut, « off » pour désactiver.
   const tsaUrl = env.TSA_URL === 'off' ? null : (env.TSA_URL || DEFAULT_TSA);
@@ -92,6 +103,8 @@ export function loadConfig(env = process.env) {
     secureCookies: https,
     // Proxys dont on accepte X-Forwarded-* : par défaut cloudflared en local ou sur le réseau Docker.
     trustProxy: parseTrustProxy(env.TRUST_PROXY, deployed),
+    // Valeur par défaut (toutes les adresses privées) : le serveur avertit au démarrage s'il écoute sur le réseau.
+    trustProxyDefault: deployed && (env.TRUST_PROXY === undefined || env.TRUST_PROXY === ''),
     databasePath: path.resolve(env.DATABASE_PATH || path.join(storageDir, 'site.db')),
     storageDir,
     cookieSecret,

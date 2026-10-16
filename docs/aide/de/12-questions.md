@@ -43,4 +43,4 @@ Der Zeitstempeldienst antwortet nicht. Die Website versucht es selbst erneut; **
 Das sollte nicht passieren: Logos übernehmen die Farbe des Themes. Prüfen Sie, ob Sie es in den richtigen Platz auf der Seite [Erscheinungsbild](apparence) hochgeladen haben, und laden Sie die Seite neu.
 
 **Ich habe ein Foto versehentlich gelöscht.**
-Die Verwaltung kann das nicht rückgängig machen. Das Original liegt in den Sicherungen des Servers: Bitten Sie um eine Wiederherstellung.
+Die Verwaltung kann das nicht rückgängig machen. Das Original bleibt 90 Tage in den Sicherungen des Servers: Bitten Sie die Person, die den Server betreut, darum, und importieren Sie es erneut. Titel, Bildunterschriften, Schlagwörter und Serie müssen neu eingegeben werden, und der Prioritätsnachweis wird mit dem Datum des neuen Imports neu erstellt (ein vorher heruntergeladener Nachweis bleibt für genau diese Datei gültig). Bitten Sie nicht um eine vollständige Wiederherstellung: Sie würde die ganze Website auf den Stand der letzten Sicherung zurücksetzen, und alles, was seitdem von Ihnen oder anderen getan wurde, ginge verloren.

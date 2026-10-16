@@ -18,9 +18,11 @@ export default async function mediaRoutes(app) {
   }
   const lookup = name => find(name)?.status;
 
+  // Cache d'un an chez le visiteur (le nom change avec les réglages), mais d'un jour au plus dans un cache partagé
+  // (Cloudflare suit CDN-Cache-Control) : une photo dépubliée, refusée ou effacée n'y reste pas servie un an.
   app.get('/media/:name', async (request, reply) => {
     if (lookup(request.params.name) !== 'published') return reply.callNotFound();
-    return reply.sendFile(request.params.name, dir, { maxAge: '365d', immutable: true });
+    return reply.header('cdn-cache-control', 'public, max-age=86400').sendFile(request.params.name, dir, { maxAge: '365d', immutable: true });
   });
 
   app.get('/admin/media/:name', { preHandler: [app.requireAdmin, app.requirePermission], config: { perm: 'photos.voir' } }, async (request, reply) => {

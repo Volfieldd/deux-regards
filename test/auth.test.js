@@ -329,7 +329,7 @@ test('redactUrl ne touche qu’aux paramètres code et state', () => {
 test('comptes : inconnu en attente sans session, rôle donné dans l’admin, désactivé refusé, garde-fou ADMIN_SUBS', async t => {
   const { app, provider, db } = await withProvider(t, { ADMIN_SUBS: 'secours-1' });
   // Sans rôle dans l'IdP : compte créé « en attente », aucune session.
-  provider.user = { sub: 'invite-1', name: 'Invité', email: 'invite@example.org' };
+  provider.user = { sub: 'invite-1', name: 'Invité', email: 'invite@example.org', email_verified: true };
   const first = await login(app, provider);
   assert.equal(first.res.statusCode, 403);
   assert.match(first.res.body, /Compte en attente/);

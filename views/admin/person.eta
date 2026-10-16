@@ -61,7 +61,7 @@
   <h2 id="pp-photos"><%= t('Photos') %> <span class="mono"><%= t('liées à l’une de ses rencontres') %></span></h2>
 <% if (p.photos.length) { %>
   <ul class="o-photos">
-<% p.photos.forEach(ph => { %>    <li><a class="o-photo" href="/admin/photos/<%= ph.id %>"><% if (ph.ready) { %><%~ it.picture(ph, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></a><a class="o-title" href="/admin/photos/<%= ph.id %>"><%= ph.title %></a><span class="mono"><%= ph.status === 'published' ? t('publiée') : t('brouillon') %></span></li>
+<% p.photos.forEach(ph => { %>    <li><a class="o-photo" href="/admin/photos/<%= ph.id %>" tabindex="-1" aria-hidden="true"><% if (ph.ready) { %><%~ it.picture(ph, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></a><a class="o-title" href="/admin/photos/<%= ph.id %>"><%= ph.title %></a><span class="mono"><%= ph.status === 'published' ? t('publiée') : t('brouillon') %></span></li>
 <% }) %>  </ul>
 <% } else { %>  <p class="hint"><%= t('Aucune photo liée : les photos de ses sorties la concernent déjà si elles ont un visage ; liez celles où elle figure.') %></p><% } %>
 <% if (it.canManage) { %>  <details class="pp-attach">
@@ -86,7 +86,8 @@
     <form method="post" action="/admin/personnes/<%= p.id %>/effacer">
       <input type="hidden" name="_csrf" value="<%= it.csrf %>">
       <p><%= p.meetings.length > 1 ? t('Ses {n} rencontres et leurs données (adresse, messages, signature, visage, cartes) seront effacées. Si elle refusait la publication et que des photos liées restent, une trace anonyme garde le refus.', { n: p.meetings.length }) : t('Sa rencontre et ses données (adresse, messages, signature, visage, cartes) seront effacées. Si elle refusait la publication et que des photos liées restent, une trace anonyme garde le refus.', { n: p.meetings.length }) %></p>
-      <label class="inline"><input type="checkbox" name="photos"> <%= p.photos.length > 1 ? t('Supprimer aussi les {n} photos liées', { n: p.photos.length }) : t('Supprimer aussi la photo liée', { n: p.photos.length }) %></label>
+<% if (p.photos.length) { %>      <label class="inline"><input type="checkbox" name="photos"> <%= p.photos.length > 1 ? t('Supprimer aussi les {n} photos liées', { n: p.photos.length }) : t('Supprimer aussi la photo liée', { n: p.photos.length }) %></label>
+<% } %>
       <p class="actions"><button class="btn danger" type="submit"><%= t('Effacer définitivement') %></button></p>
     </form>
   </details>

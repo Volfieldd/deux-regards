@@ -66,12 +66,18 @@ async function stamp(mark, targetWidth, maxHeight) {
     src = await sharp(shape).composite([{ input: await color.toBuffer(), raw: { width: 1, height: 1, channels: 4 }, tile: true, blend: 'in' }]).png().toBuffer();
   } else {
     const font = FONTS[mark.font] || FONTS.sans;
-    src = await sharp({
+    const render = dpi => sharp({
       text: {
         text: `<span foreground="${TONES[mark.tone] || TONES.light}">${markup(mark.text)}</span>`,
-        font: `${font.family}, 160`, fontfile: path.join(FONTS_DIR, font.file), rgba: true, dpi: 72,
+        font: `${font.family}, 160`, fontfile: path.join(FONTS_DIR, font.file), rgba: true, dpi,
       },
-    }).png().toBuffer();
+    }).png({ compressionLevel: 0 }).toBuffer();           // intermédiaire : pas de compression
+    // Le texte est dessiné à la taille de la boîte : agrandi en image, il serait flou (plein cadre, grande largeur).
+    // Un premier rendu à 72 dpi le mesure ; s'il est plus petit que la boîte, on le redessine à la résolution voulue.
+    src = await render(72);
+    const { width: tw, height: th } = await sharp(src).metadata();
+    const dpi = Math.min(Math.floor(72 * Math.min(box.width / tw, box.height / th)), 2400);
+    if (dpi > 72) src = await render(dpi);
     src = await sharp(src).resize(box).png().toBuffer();
   }
   return withOpacity(src, mark.opacity);

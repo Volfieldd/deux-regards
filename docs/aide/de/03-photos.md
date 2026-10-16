@@ -22,12 +22,13 @@ In der Fotothek **erscheint jedes hochgeladene Foto sofort auf dem Kontaktbogen*
 - **Verbindung unterbrochen:** Nur das betroffene Foto schlägt fehl; **Erneut versuchen** sendet es erneut, ohne den Rest zu berühren.
 - **Rest abbrechen:** stoppt die noch nicht abgeschlossenen Uploads. Bereits hochgeladene Fotos bleiben als Entwurf erhalten.
 - **Während des Hochladens** lassen Sie die Seite geöffnet (der Browser warnt Sie, wenn Sie sie verlassen). **Die Verarbeitung** dagegen läuft auf dem Server weiter, auch wenn Sie die Seite wechseln: Die Anzeige **Verarbeitung: *n* Fotos** bleibt unten in der Seitenleiste sichtbar, auf allen Seiten.
-- Sobald das Hochladen beendet ist, erscheint **Die *n* Fotos vervollständigen und veröffentlichen →** (oder **Das Foto…**) und erhält den Fokus: Es führt zu Schritt 3, auch wenn die Verarbeitung noch nicht fertig ist.
+- Sobald das Hochladen beendet ist, erscheint **Die *n* Fotos vervollständigen und veröffentlichen →** (oder **Das Foto…**) und erhält den Fokus (außer wenn Sie gerade tippen oder anderswo auf der Seite arbeiten): Es führt zu Schritt 3, auch wenn die Verarbeitung noch nicht fertig ist. Die importierten Fotos werden auch im Kontaktbogen ausgewählt, außer während einer Eingabe oder wenn schon eine Auswahl besteht.
 
 | | |
 |---|---|
-| Formate | JPEG, PNG, WebP, TIFF, HEIF |
-| Größe | höchstens 90 MB und 120 Megapixel pro Datei |
+| Formate | JPEG, PNG, WebP, TIFF, AVIF. **HEIC** vom iPhone wird nicht unterstützt: Foto als JPEG exportieren (oder die Kamera auf „Maximale Kompatibilität“ stellen) |
+| Größe | höchstens 90 MB und 120 Megapixel pro Datei (weniger bei 16 Bit oder mit Transparenz); ein Hochformat-Panorama darf höchstens etwa 8-mal so hoch wie breit sein |
+| Prüfung | jede Datei wird beim Hochladen **dekodiert**: Eine abgeschnittene oder beschädigte Datei wird sofort abgelehnt, mit Begründung |
 | Status | **Entwurf**: Vor der Veröffentlichung ist nichts auf der Website sichtbar |
 | Titel | **vorläufig**, aus dem Dateinamen gebildet (`IMG_2041 quai-nord.jpg` → „IMG 2041 quai nord“) |
 | Datum | **von der Kamera übernommen** (Aufnahmedatum aus den EXIF-Metadaten), sofern vorhanden |
@@ -38,7 +39,7 @@ Bei der Verarbeitung wendet die Website die Ausrichtung der Kamera an, berechnet
 
 ### 3. Vervollständigen und veröffentlichen
 
-Alle Fotos des Stapels sind auf einem einzigen Bildschirm versammelt: Titel, Serie, Ort und Datum.
+Alle Fotos des Stapels sind auf einem einzigen Bildschirm versammelt: Titel, Serie, Ort und Datum. Ein Bildschirm zeigt höchstens 200: darüber hinaus (eine große Speicherkarte) steht es oben, mit einem Link zu den nächsten.
 
 - **Am Computer:** eine Tabelle, eine Zeile pro Foto.
 - **Auf dem Telefon:** **eine Karte pro Foto**, mit Kästchen, Miniatur und Zustand, darunter die Felder Titel, Serie, Ort und Datum untereinander.
@@ -58,7 +59,7 @@ Bildunterschrift, Wasserzeichen und Nachweis werden in den Details jedes Fotos e
 ## Der Kontaktbogen
 
 - **Chips** oben: **Alle**, **Veröffentlicht**, **Entwürfe**, **Zu vervollständigen** (Entwürfe und vorläufige Titel).
-- **Suche** (Titel, Ort, Bildunterschrift, Adresse), **Fotograf**, **Serie**: Der Kontaktbogen aktualisiert sich sofort.
+- **Suche** (Titel, Ort, Bildunterschrift, Adresse, Stichwörter und Übersetzungen, ohne Rücksicht auf Akzente und Groß-/Kleinschreibung), **Fotograf**, **Serie**: Der Kontaktbogen aktualisiert sich sofort.
 - **Größe**: Der Schieberegler vergrößert oder verkleinert die Miniaturen (wird für das nächste Mal gespeichert).
 - **Kontaktbogen / Liste**: Die Liste zeigt die Fotos in Zeilen, mit Ordnungsnummer, Fotograf, Ort und dem Menü **⋯** (**Details bearbeiten**, **Veröffentlichen** oder **Veröffentlichung zurückziehen**, **Eine Position nach oben**, **Eine Position nach unten**).
 - Beim Überfahren einer Miniatur: ihr Titel, ihre Serie, ihr Datum. Ein Klick auf den Titel öffnet die Details. Entwürfe tragen den Chip **○ Entwurf**, vorläufige Titel **Vorläufiger Titel**. Diese Chips stapeln sich oben rechts auf der Miniatur, zusammen mit dem Zustand (**▲ Zu prüfen**, **✕ Gesperrt**) und der vorgeschlagenen Serie (**✦**); auf einer schmalen Miniatur rücken sie unter das Kontrollkästchen. Auf einer kleinen Miniatur blenden sie sich aus, solange der Titel angezeigt wird (Überfahren oder gewähltes Foto): Der Inspektor zeigt dann alles.
@@ -71,7 +72,7 @@ Bildunterschrift, Wasserzeichen und Nachweis werden in den Details jedes Fotos e
 Er ändert sich je nach Auswahl:
 
 - **Nichts ausgewählt**: die Zahlen der Fotothek und die Tastenkürzel.
-- **Ein Foto** (ein Klick darauf): oben im Bereich die Schaltfläche **Details öffnen**; dann das große Bild, **Titel**, **Bildunterschrift**, **Serie** (Chips), **Ort**, **Datum**, **Fotograf** und sein **Publikum** über 30 Tage. Jedes Feld wird gespeichert, wenn Sie es verlassen (oder Eingabe); die Meldung unten bietet **Rückgängig** an. **Details öffnen** oder der Link **Alle Details** unten im Bereich führt zu den Details (Wasserzeichen, Instagram, Prioritätsnachweis, Löschen).
+- **Ein Foto** (ein Klick darauf): oben im Bereich die Schaltfläche **Details öffnen**; dann das große Bild, **Titel**, **Bildunterschrift**, **Serie** (Chips), **Ort**, **Datum**, **Fotograf** und sein **Publikum** über 30 Tage (für Konten, die die Statistiken sehen). Jedes Feld wird gespeichert, wenn Sie es verlassen (oder Eingabe); die Meldung unten bietet **Rückgängig** an. **Details öffnen** oder der Link **Alle Details** unten im Bereich führt zu den Details (Wasserzeichen, Instagram, Prioritätsnachweis, Löschen).
 - **Mehrere Fotos**: siehe unten.
 
 Unten immer: **Veröffentlichen**, **Veröffentlichung zurückziehen**, **Löschen…**.
@@ -146,19 +147,20 @@ In der Fotothek ebenso: Die Schaltflächen Veröffentlichen, Zurückziehen, Lös
 
 Das Original, die Bilder der Website und der Prioritätsnachweis werden gelöscht, und das Foto wird aus der Start-Diashow entfernt.
 
-**Das lässt sich in der Verwaltung nicht rückgängig machen.** Laden Sie vorher das Original und den Nachweis herunter, wenn Sie sie behalten möchten. Das Original bleibt außerdem in den Sicherungen des Servers erhalten.
+**Das lässt sich in der Verwaltung nicht rückgängig machen.** Laden Sie vorher das Original und den Nachweis herunter, wenn Sie sie behalten möchten. Das Original bleibt außerdem 90 Tage in den Sicherungen des Servers erhalten (siehe [Häufige Fragen](questions)).
 
 ## Der Veröffentlichungsablauf
 
 Ein Fotograf veröffentlicht nicht selbst: Er **schlägt vor**, und ein Moderator (oder Administrator) **bestätigt**.
 
 - **Vorschlagen**: auf der Fotoseite, Abschnitt **Veröffentlichung**, mit einem optionalen Wort für den Moderator; oder mehrere Fotos aus der Fotothek (Schaltfläche **Zur Veröffentlichung vorschlagen**); oder einen ganzen Ausflug (**Bereite Fotos vorschlagen** auf der Seite des Ausflugs). Die Einwilligungen werden in diesem Moment vom Fotografen geprüft, der die Personen sieht: Ein gesperrtes Foto kann nicht vorgeschlagen werden, ein zu prüfendes verlangt seine Bestätigung. **Vorschlag zurückziehen** macht es wieder zum Entwurf.
-- **Bestätigen**: Die Seite **Zu bestätigen** (Menü Veröffentlichen, mit der Zahl der wartenden) listet die Vorschläge, das älteste zuerst, mit dem Wort des Fotografen. Ankreuzen, dann **Veröffentlichen** oder **Planen für** (Datum und Uhrzeit, Pariser Zeit). Ein geplantes Foto wird zur angegebenen Zeit automatisch veröffentlicht, wenn es noch bereit ist; sonst geht es mit dem Grund an den Fotografen zurück. **Planung aufheben** setzt es wieder auf wartend.
+- **Bestätigen**: Die Seite **Zu bestätigen** (Menü Veröffentlichen, mit der Zahl der wartenden) listet die Vorschläge, das älteste zuerst, mit dem Wort des Fotografen. Ankreuzen, dann **Veröffentlichen** oder **Planen für** (Datum und Uhrzeit, Pariser Zeit; ein Datum, das es nicht gibt, etwa der 31. April, wird abgelehnt). Ein geplantes Foto wird zur angegebenen Zeit automatisch veröffentlicht, wenn es noch bereit ist; sonst geht es mit dem Grund an den Fotografen zurück. **Planung aufheben** setzt es wieder auf wartend. Ein Foto, das auf einer offen gebliebenen Seite angekreuzt ist, aber nicht mehr vorgeschlagen ist (Vorschlag zurückgezogen, Foto zurückgeschickt oder bereits von einem anderen Moderator bestätigt), bleibt unverändert, und die Meldung sagt es.
+- **Ein geplantes Foto ändern**: Ändert der Fotograf es (Texte, Serie, Ort, Datum, Karte, auch durch Rückgängigmachen einer Änderung), wird es wieder zum Vorschlag, damit der Moderator prüft, was online gehen wird. Ein Formular ohne Änderung zu speichern, lässt die Planung unberührt.
 - **Mit Hinweis zurückschicken** (auf der Fotoseite): Der Moderator bearbeitet das Foto nicht; sein Hinweis erscheint unter „Heute“ des Fotografen, der korrigiert und erneut vorschlägt.
 - **Zurückziehen**: Der Moderator nennt den Grund; der Fotograf erhält ihn.
-- **Benachrichtigungen**: „Heute“ zeigt jedem, was auf ihn wartet (zu bestätigende Vorschläge, vorgeschlagene, geplante, zurückgeschickte Fotos). Jeder kann sich auch **per E-Mail** benachrichtigen lassen, unter **Ihr Konto** auf der Seite Heute (wenn der E-Mail-Versand auf dem Server eingerichtet ist).
+- **Benachrichtigungen**: „Heute“ zeigt jedem, was auf ihn wartet (zu bestätigende Vorschläge, vorgeschlagene, geplante, zurückgeschickte Fotos). Jeder kann sich auch **per E-Mail** benachrichtigen lassen, unter **Ihr Konto** auf der Seite Heute (wenn der E-Mail-Versand auf dem Server eingerichtet ist); die E-Mail ist in der Admin-Sprache des mit dem Konto verknüpften Fotografen geschrieben (sonst auf Französisch).
 - **Verlauf**: Jedes Foto behält, wer es vorgeschlagen, bestätigt, geplant, zurückgeschickt oder zurückgezogen hat, und wann.
-- **Einstellungen pro Fotograf** (Seite **Veröffentlichungsablauf**, Moderatoren und Administratoren): **Eigene Fotos ohne Bestätigung veröffentlichen** (der Fotograf veröffentlicht seine Fotos dann selbst, außerhalb des Ablaufs) **Eigene Fotos nach der Veröffentlichung bearbeiten** (standardmäßig ja; entzogen, ändert sich ein veröffentlichtes Foto nicht mehr ohne den Moderator) und **Eigene Fotos ohne Freigabe in die Instagram-Warteschlange stellen** (siehe die Hilfe „Instagram“).
+- **Einstellungen pro Fotograf** (Seite **Veröffentlichungsablauf**, Moderatoren und Administratoren): **Eigene Fotos ohne Bestätigung veröffentlichen** (der Fotograf veröffentlicht seine Fotos dann selbst, außerhalb des Ablaufs) **Eigene Fotos nach der Veröffentlichung bearbeiten** (standardmäßig ja; entzogen, ändert sich ein veröffentlichtes Foto nicht mehr ohne den Moderator) und **Eigene Fotos ohne Freigabe in die Instagram-Warteschlange stellen** (siehe die Hilfe „Instagram“). Diese Einstellungen gelten nur für die Rolle Fotograf: Sie werden zurückgesetzt, wenn das Konto diese Rolle verliert, und ein Recht, das eine andere Rolle des Kontos bereits gibt (Korrektor, Moderator), lässt sich hier nicht entziehen (die Seite weist darauf hin).
 
 Ein Administrator veröffentlicht wie bisher direkt. Eine Besuchermeldung zieht nie etwas von selbst zurück: Der Moderator entscheidet.
 
@@ -169,5 +171,5 @@ Jedes Foto kann einem **Ort** (Stadt oder Gemeinde) zugeordnet werden: Das platz
 - **Feld Ort (Karte der Website)** (Details des Fotos und Bereich der Fotothek): Beginnen Sie zu tippen („Ang…“), wählen Sie aus der Liste (↑ ↓ dann Eingabe, oder ein Klick). **Alle Gemeinden Frankreichs**, auch die kleinsten („Ars-en-Ré“, „Loix“), anderswo Orte mit mehr als 500 Einwohnern; eine Stadt findet man unter ihren französischen, englischen oder deutschen Namen („Londres“, „München“, „Antwerpen“). Die Liste zeigt sie in der Sprache der Verwaltung, mit ihrer **Region, ihrem Bundesstaat oder ihrer Provinz**, um gleichnamige Orte zu unterscheiden: „Monterey, Kalifornien, Vereinigte Staaten“ ist nicht „Monterey, Tennessee, Vereinigte Staaten“. Die Karte der Website zeigt den Namen der Stadt ebenfalls in der Sprache der Seite („München“ auf Deutsch). Für eine genaue Stelle („Baie de Monterey“) behalten Sie das Feld **Ort** des Fotos: Es bleibt frei, und es wird auf der Website angezeigt.
 - **Aus den GPS-Daten vorgeschlagen**: Enthält das Original die Aufnahmeposition (Telefone, neuere Kameras), wird beim Import der nächstgelegene Ort ausgefüllt, mit dem Hinweis „Aus den GPS-Daten des Fotos vorgeschlagen: bitte prüfen.“ Auch vor dieser Funktion importierte Fotos erhalten ihren Vorschlag. Ein von Hand gewählter Ort wird nie ersetzt.
 - **Nur der Ort wird gespeichert**, nie die genaue Position: Ein bei Ihnen zu Hause aufgenommenes Foto erscheint auf Ihrer Gemeinde, nicht auf Ihrem Haus.
-- **Auf der Weltkarte anzeigen**: Kästchen, **standardmäßig nicht angekreuzt**. Ohne Ihre Zustimmung erscheint nichts auf der Karte. Ein Ort ist erforderlich; wird er gelöscht, verschwindet das Foto von der Karte.
+- **Auf der Weltkarte anzeigen**: Kästchen, **standardmäßig nicht angekreuzt**. Ohne Ihre Zustimmung erscheint nichts auf der Karte: weder auf der Weltkarte noch auf der Karte einer Reise, und die Suche der Website findet das Foto nicht über seinen Ort. Ein Ort ist erforderlich; wird er gelöscht, verschwindet das Foto von der Karte.
 - **Mehrere Fotos**: Wählen Sie sie in der Fotothek aus, dann **Auf die Karte** oder **Von der Karte entfernen** (nur die mit einem Ort sind betroffen; **Rückgängig** in der Meldung).

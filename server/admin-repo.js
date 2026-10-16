@@ -13,6 +13,11 @@ export class ValidationError extends Error {
 }
 
 const text = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
+// Mois d'un instant à l'heure de Paris (« 2026-11 »).
+const PARIS_MONTH = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit' });
+const parisMonth = d => PARIS_MONTH.format(d).slice(0, 7);
+// Texte de recherche : minuscules, sans accents.
+const fold = v => String(v ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
 // « IMG_2041 quai-nord.jpg » → « IMG 2041 quai nord »
 export const titleFromFilename = name => path.parse(String(name || '')).name.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160) || 'Sans titre';
@@ -101,6 +106,9 @@ export function createAdminRepo(db) {
       FROM categories c ORDER BY c.position, c.id`),
     authors: db.prepare(`SELECT a.*, (SELECT COUNT(*) FROM photos p WHERE p.author_id = a.id) AS count
       FROM authors a ORDER BY a.id`),
+    covers: db.prepare(`SELECT * FROM (SELECT p.*, ROW_NUMBER() OVER (PARTITION BY p.category_id ORDER BY (p.status = 'published') DESC, p.position, p.id) AS rn
+      FROM photos p) WHERE rn = 1`),
+    existing: db.prepare('SELECT id FROM photos WHERE id IN (SELECT value FROM json_each(?))').pluck(),
     settings: db.prepare('SELECT key, value FROM settings'),
     setSetting: db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value'),
   };
@@ -148,11 +156,13 @@ export function createAdminRepo(db) {
 
   return {
     // ---------- photos ----------
+    // Recherche : sans tenir compte des accents ni des majuscules (« eglise » trouve « Église »), dans le titre, le
+    // lieu, la légende, l'adresse, les mots-clés et les traductions, comme la palette ⌘K.
     photos({ q: search, author, category, status } = {}) {
-      const needle = text(search, 100).toLowerCase();
+      const needle = fold(text(search, 100));
       return q.photos.all()
         .filter(p => (!author || p.author_slug === author) && (!category || p.category_slug === category) && (!status || p.status === status))
-        .filter(p => !needle || [p.title, p.place, p.legend, p.slug].some(v => v.toLowerCase().includes(needle)))
+        .filter(p => !needle || [p.title, p.place, p.legend, p.slug, p.keywords, p.title_en, p.title_de, p.legend_en, p.legend_de, p.place_en, p.place_de].some(v => fold(v).includes(needle)))
         .map(p => ({ ...p, n: p.position + 1, when: monthYear(p.taken_on), provisional: isProvisional(p) }));
     },
     photo: id => q.photo.get(id),
@@ -218,12 +228,14 @@ export function createAdminRepo(db) {
       })();
     },
 
-    // Modification champ par champ (page « Compléter le lot ») : seuls les champs fournis sont relus.
+    // Modification champ par champ (page « Compléter le lot », textes seuls du relecteur) : seuls les champs fournis
+    // sont relus, traductions comprises ; un champ absent garde sa valeur.
     patchPhoto(id, body) {
       const p = q.photo.get(id);
       if (!p) return null;
       const merged = { ...p, taken_on: p.taken_on || '', watermark: p.watermark === 0 ? 'none' : 'default' };
-      for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend', 'keywords', 'city_id', 'city_label', 'on_map']) if (k in body) merged[k] = body[k];
+      for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend', 'keywords', 'city_id', 'city_label', 'on_map',
+        'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de']) if (k in body) merged[k] = body[k];
       // Brouillon dont l'adresse dérive encore du titre : elle suit le nouveau titre.
       merged.slug = 'title' in body && p.status === 'draft' && p.slug === uniqueSlug('photos', p.title, id) ? '' : p.slug;
       this.updatePhoto(id, merged);
@@ -246,7 +258,13 @@ export function createAdminRepo(db) {
     },
 
     // Actions groupées. Renvoient l'état précédent pour pouvoir annuler.
-    existingIds: ids => [...new Set([].concat(ids || []).map(Number))].filter(id => q.photo.get(id)),
+    // Identifiants reçus qui désignent une photo (dans l'ordre reçu, sans doublon) : une seule requête.
+    existingIds(ids) {
+      const wanted = [...new Set([].concat(ids || []).map(Number))].filter(Number.isInteger);
+      if (!wanted.length) return [];
+      const found = new Set(q.existing.all(JSON.stringify(wanted)));
+      return wanted.filter(id => found.has(id));
+    },
     setStatuses(map) {
       const set = db.prepare("UPDATE photos SET status = ?, updated_at = datetime('now') WHERE id = ?");
       const before = {};
@@ -302,6 +320,8 @@ export function createAdminRepo(db) {
       if (!photo) return null;
       db.transaction(() => {
         db.prepare('DELETE FROM photos WHERE id = ?').run(id);
+        // Journal Instagram (sans clé étrangère) : l'identifiant pourra être repris par une autre photo.
+        db.prepare('UPDATE instagram_events SET photo_id = NULL WHERE photo_id = ?').run(id);
         const hero = settings().hero;
         if (Array.isArray(hero) && hero.includes(photo.slug)) q.setSetting.run('hero', JSON.stringify(hero.filter(s => s !== photo.slug)));
       })();
@@ -330,11 +350,11 @@ export function createAdminRepo(db) {
       })();
     },
     orderCategories: ids => writeOrder('categories', ids),
-    // Première photo de chaque série (couverture des cartes).
+    // Première photo de chaque série (couverture des cartes). Appelée à chaque page de l'admin (menu des séries) : un
+    // seul parcours trié de la table (fonction de fenêtre), pas une sous-requête par photo.
     covers() {
-      const rows = db.prepare(`SELECT * FROM photos p WHERE p.id = (SELECT id FROM photos WHERE category_id = p.category_id
-        ORDER BY (status = 'published') DESC, position, id LIMIT 1)`).all();
-      return Object.fromEntries(rows.map(r => [r.category_id, r]));
+      const rows = q.covers.all();
+      return Object.fromEntries(rows.map(({ rn, ...r }) => [r.category_id, r]));
     },
     // Les n premières photos de chaque série (planches : publiées d'abord, dans l'ordre du site).
     boards(n = 3) {
@@ -345,14 +365,19 @@ export function createAdminRepo(db) {
       }
       return map;
     },
-    // Photos importées par mois, sur les `months` derniers mois (le plus ancien d'abord).
-    importsByMonth(months = 12, authorId = null) {
-      const rows = db.prepare("SELECT substr(created_at, 1, 7) AS m, COUNT(*) AS n FROM photos WHERE (? IS NULL OR author_id = ?) GROUP BY m").all(authorId, authorId);
-      const count = Object.fromEntries(rows.map(r => [r.m, r.n]));
-      const now = new Date();
+    // Photos importées par mois, sur les `months` derniers mois (le plus ancien d'abord), à l'heure de Paris :
+    // created_at est en UTC ; regroupées par heure (les décalages de Paris sont des heures entières), puis par mois.
+    importsByMonth(months = 12, authorId = null, now = new Date()) {
+      const count = {};
+      for (const r of db.prepare("SELECT substr(created_at, 1, 13) AS h, COUNT(*) AS n FROM photos WHERE (? IS NULL OR author_id = ?) AND created_at IS NOT NULL GROUP BY h").all(authorId, authorId)) {
+        const at = new Date(`${r.h.replace(' ', 'T')}:00:00Z`);
+        if (Number.isNaN(at.getTime())) continue;
+        const m = parisMonth(at);
+        count[m] = (count[m] || 0) + r.n;
+      }
+      const [y, mo] = parisMonth(now).split('-').map(Number);
       return Array.from({ length: months }, (_, i) => {
-        const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (months - 1 - i), 1));
-        const m = d.toISOString().slice(0, 7);
+        const m = new Date(Date.UTC(y, mo - 1 - (months - 1 - i), 1)).toISOString().slice(0, 7);
         return { month: m, n: count[m] || 0 };
       });
     },
@@ -386,19 +411,45 @@ export function createAdminRepo(db) {
       const name = text(body.name, 80);
       if (!name) errors.name = 'Le nom est obligatoire.';
       const slug = checkedSlug('authors', id ? body.slug : '', name, id, errors);
-      // Lettre des cartes de rencontre (J-0142) : une lettre, propre à chaque auteur.
-      const prefix = text(body.card_prefix, 1).toUpperCase();
-      if (prefix && !/^[A-Z]$/.test(prefix)) errors.card_prefix = 'Lettre des cartes : une seule lettre, de A à Z.';
-      else if (prefix && q.authors.all().some(a => a.id !== Number(id) && (a.card_prefix || a.slug.charAt(0).toUpperCase()) === prefix)) errors.card_prefix = `La lettre ${prefix} est déjà celle d’un autre auteur.`;
-      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), card_prefix: prefix, ig_signature: text(body.ig_signature, 200) };
+      // Lettre des cartes de rencontre (J-0142) : une lettre, propre à chaque auteur (les cartes, le QR /bonjour/J et
+      // les rencontres saisies avec elles vont à son photographe). Vide : la lettre actuelle, à défaut la première de
+      // l'adresse ; elle est enregistrée, si bien qu'un changement d'adresse ne la change plus. Unique, saisie ou non.
+      const typed = text(body.card_prefix, 1).toUpperCase();
+      const current = id ? q.authors.all().find(a => a.id === Number(id)) : null;
+      const prefix = typed || (current ? current.card_prefix || current.slug.charAt(0).toUpperCase() : slug.charAt(0).toUpperCase());
+      // Celui à qui la lettre revient déjà (même ordre que encounters.authorByPrefix : lettre enregistrée d'abord) ;
+      // deux anciens auteurs sans lettre enregistrée et de même initiale : le plus ancien la garde.
+      const owner = q.authors.all().filter(a => (a.card_prefix || a.slug.charAt(0).toUpperCase()) === prefix)
+        .sort((a, b) => (b.card_prefix === prefix) - (a.card_prefix === prefix) || a.id - b.id)[0];
+      const holder = /^[A-Z]$/.test(prefix) && owner && owner.id !== Number(id) ? owner : null;
+      if (typed && !/^[A-Z]$/.test(typed)) errors.card_prefix = 'Lettre des cartes : une seule lettre, de A à Z.';
+      else if (holder) errors.card_prefix = `La lettre ${prefix} est déjà celle de ${holder.name} : choisissez-en une autre.`;
+      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), card_prefix: /^[A-Z]$/.test(prefix) ? prefix : '', ig_signature: text(body.ig_signature, 200) };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
       if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, card_prefix = @card_prefix, ig_signature = @ig_signature WHERE id = @id').run({ ...values, id });
       db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, card_prefix, ig_signature) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @card_prefix, @ig_signature)').run(values);
     },
+    // Ce qui retient un photographe (phrases en français, une par cause) : ses photos, ses rencontres (données
+    // personnelles, qui ne seraient plus visibles que des administrateurs), ses voyages (devenus « communs ») et le
+    // compte qui lui est lié. Ses sorties et ses journées de voyage n'existent que par ses photos et ses rencontres.
+    authorHolds(id) {
+      const a = q.authors.all().find(r => r.id === Number(id));
+      if (!a) return [];
+      const encounters = db.prepare('SELECT COUNT(*) FROM encounters WHERE author_id = ?').pluck().get(a.id);
+      const trips = db.prepare('SELECT COUNT(*) FROM trips WHERE author_id = ?').pluck().get(a.id);
+      const accounts = db.prepare("SELECT COALESCE(NULLIF(name, ''), sub) FROM accounts WHERE author_id = ?").pluck().all(a.id);
+      return [
+        a.count && `${a.name} a encore ${a.count} photo(s).`,
+        encounters && `${a.name} a encore ${encounters} rencontre(s) : rattachez-les à un autre photographe (fiche de chaque rencontre).`,
+        trips && `${a.name} a encore ${trips} voyage(s) : rattachez-les à un autre photographe ou supprimez-les (page Voyages).`,
+        ...accounts.map(account => `Le compte « ${account} » est lié à ${a.name} : changez son photographe dans Comptes et rôles.`),
+      ].filter(Boolean);
+    },
     deleteAuthor(id) {
       const a = q.authors.all().find(r => r.id === Number(id));
       if (!a) return false;
-      if (a.count) throw new ValidationError({ delete: `${a.name} a encore ${a.count} photo(s).` });
+      const holds = this.authorHolds(a.id);
+      if (holds.length) throw Object.assign(new ValidationError({ delete: holds.join(' ') }), { messages: holds });
       db.prepare('DELETE FROM authors WHERE id = ?').run(id);
       return true;
     },

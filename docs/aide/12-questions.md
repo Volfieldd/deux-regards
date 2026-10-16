@@ -43,4 +43,4 @@ Le service d'horodatage ne répond pas. Le site réessaie tout seul ; **Réessay
 Il ne devrait pas : les logos prennent la couleur du thème. Vérifiez que vous l'avez envoyé dans l'emplacement voulu de la page [Apparence](apparence), puis rechargez la page.
 
 **J'ai supprimé une photo par erreur.**
-L'admin ne peut pas l'annuler. L'original est dans les sauvegardes du serveur : demandez une restauration.
+L'admin ne peut pas l'annuler. L'original reste 90 jours dans les sauvegardes du serveur : demandez-le à la personne qui gère le serveur, puis réimportez-le. Titre, légendes, mots-clés et série sont à ressaisir, et la preuve d'antériorité est refaite à la date du nouvel import (une preuve téléchargée avant reste valable pour ce même fichier). Ne demandez pas une restauration complète : elle remettrait tout le site à l'heure de la dernière sauvegarde, et ce qui a été fait depuis, par vous ou par d'autres, serait perdu.

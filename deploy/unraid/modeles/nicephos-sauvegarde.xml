@@ -10,7 +10,7 @@
   <Project>https://github.com/Volfieldd/deux-regards</Project>
   <Overview>Sauvegarde quotidienne de Nicephos : instantané cohérent de la base et copie des originaux, logos et marque. Mêmes données que le conteneur nicephos.</Overview>
   <Category>Backup:</Category>
-  <ExtraParams>--user 99:100 --read-only --tmpfs /tmp --security-opt no-new-privileges:true --cap-drop ALL --no-healthcheck</ExtraParams>
+  <ExtraParams>--user 99:100 --read-only --tmpfs /tmp --security-opt no-new-privileges:true --cap-drop ALL --no-healthcheck --memory 512m</ExtraParams>
   <PostArgs>node server/db/backup.js --loop</PostArgs>
   <Config Name="Données" Target="/data" Default="/mnt/cache/appdata/nicephos/data" Mode="rw" Description="Le même dossier que le conteneur nicephos." Type="Path" Display="always" Required="true" Mask="false">/mnt/cache/appdata/nicephos/data</Config>
   <Config Name="Sauvegardes" Target="/backups" Default="/mnt/user/backups/nicephos" Mode="rw" Description="Sur d'autres disques que les données ; propriétaire 99:100, à créer avant." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/backups/nicephos</Config>

@@ -8,14 +8,14 @@
   <Privileged>false</Privileged>
   <Support>https://github.com/Volfieldd/deux-regards/wiki</Support>
   <Project>https://github.com/Volfieldd/deux-regards</Project>
-  <Overview>Nicephos : galerie photo de Sébastien et Julien, avec administration (connexion Zitadel). Données dans /data (dossier de l'hôte, obligatoire). Guide : deploy/unraid/README.md du dépôt.</Overview>
+  <Overview>Nicephos : galerie photo de Sébastien et Julien, avec administration (connexion Zitadel). Données dans /data (dossier de l'hôte, obligatoire). Mémoire : 3g (--memory dans les paramètres supplémentaires) ; 6g pour les descriptions « Précis ». Guide : deploy/unraid/README.md du dépôt.</Overview>
   <Category>MediaApp:Photos</Category>
   <WebUI>http://[IP]:[PORT:3000]/</WebUI>
-  <ExtraParams>--user 99:100 --read-only --tmpfs /tmp --security-opt no-new-privileges:true --cap-drop ALL --stop-timeout 60</ExtraParams>
+  <ExtraParams>--user 99:100 --read-only --tmpfs /tmp --security-opt no-new-privileges:true --cap-drop ALL --stop-timeout 60 --memory 3g --pids-limit 256</ExtraParams>
   <PostArgs/>
   <Config Name="Données" Target="/data" Default="/mnt/cache/appdata/nicephos/data" Mode="rw" Description="Base, originaux, preuves, logos. Chemin direct du pool (/mnt/cache/…), propriétaire 99:100, à créer avant." Type="Path" Display="always" Required="true" Mask="false">/mnt/cache/appdata/nicephos/data</Config>
   <Config Name="Port réseau local" Target="3000" Default="3080" Mode="tcp" Description="Contrôle depuis le réseau local ; Internet passe par le tunnel." Type="Port" Display="always" Required="false" Mask="false">3080</Config>
-    <Config Name="Adresse publique" Target="PUBLIC_URL" Default="https://www.nicephos.art" Mode="" Description="Domaine principal, en HTTPS." Type="Variable" Display="always" Required="true" Mask="false">https://nicephos.com</Config>
+    <Config Name="Adresse publique" Target="PUBLIC_URL" Default="https://www.nicephos.art" Mode="" Description="Domaine principal, en HTTPS." Type="Variable" Display="always" Required="true" Mask="false">https://www.nicephos.art</Config>
     <Config Name="Secret des cookies" Target="COOKIE_SECRET" Default="" Mode="" Description="32+ caractères aléatoires : openssl rand -base64 32" Type="Variable" Display="always" Required="true" Mask="true"></Config>
     <Config Name="Nom du site" Target="SITE_NAME" Default="Nicephos" Mode="" Description="Nom affiché (modifiable dans l'admin)." Type="Variable" Display="always" Required="false" Mask="false">Nicephos</Config>
     <Config Name="Zitadel : émetteur" Target="OIDC_ISSUER" Default="https://INSTANCE.zitadel.cloud" Mode="" Description="Adresse de l'instance Zitadel." Type="Variable" Display="always" Required="true" Mask="false">https://INSTANCE.zitadel.cloud</Config>
@@ -23,11 +23,12 @@
     <Config Name="Zitadel : Client Secret" Target="OIDC_CLIENT_SECRET" Default="" Mode="" Description="Application Web du projet." Type="Variable" Display="always" Required="true" Mask="true"></Config>
     <Config Name="Zitadel : ID du projet" Target="OIDC_PROJECT_ID" Default="" Mode="" Description="Resource Id du projet." Type="Variable" Display="always" Required="true" Mask="false"></Config>
     <Config Name="Zitadel : ID de l'organisation" Target="OIDC_ORG_ID" Default="" Mode="" Description="Resource Id de l'organisation." Type="Variable" Display="always" Required="true" Mask="false"></Config>
-    <Config Name="Zitadel : rôle admin" Target="OIDC_ADMIN_ROLE" Default="admin" Mode="" Description="Clé du rôle donnant accès à l'admin." Type="Variable" Display="advanced" Required="false" Mask="false">admin</Config>
+    <Config Name="Zitadel : rôle admin" Target="OIDC_ADMIN_ROLE" Default="admin" Mode="" Description="Clé du rôle Zitadel qui crée un administrateur à sa première connexion." Type="Variable" Display="advanced" Required="false" Mask="false">admin</Config>
     <Config Name="Instagram : ID de l'application" Target="INSTAGRAM_APP_ID" Default="" Mode="" Description="Facultatif : publication sur Instagram (aide de l'admin, « Instagram »)." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
   <Config Name="Instagram : clé secrète" Target="INSTAGRAM_APP_SECRET" Default="" Mode="" Description="Clé secrète de l'application Instagram." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
   <Config Name="Mode" Target="NODE_ENV" Default="production" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">production</Config>
     <Config Name="Dossier des données (interne)" Target="STORAGE_DIR" Default="/data" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">/data</Config>
     <Config Name="Base (interne)" Target="DATABASE_PATH" Default="/data/site.db" Mode="" Description="Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">/data/site.db</Config>
+    <Config Name="Proxy de confiance" Target="TRUST_PROXY" Default="172.29.42.10" Mode="" Description="Adresse fixe du conteneur nicephos-tunnel : le site ne croit X-Forwarded-For que venant de lui. Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">172.29.42.10</Config>
     <Config Name="Garde-fou de persistance" Target="REQUIRE_PERSISTENT_STORAGE" Default="1" Mode="" Description="Refuse de démarrer si /data n'est pas monté. Ne pas changer." Type="Variable" Display="advanced" Required="true" Mask="false">1</Config>
 </Container>

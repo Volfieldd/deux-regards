@@ -2,7 +2,7 @@
 <% const t = it.t, fr = !['en', 'de'].includes(it.lang), esc = __eta.e; %>
 <% const v = it.values, e = it.errors; %>
 <% // Droits du compte : la fiche complète, ou les textes seuls (modérateur, relecteur) ; le reste selon les droits.
-   const can = it.can, pubOk = can('photos.publier'), seePeople = can('personnes.voir');
+   const can = it.can, pubOk = can('photos.publier'), seePeople = it.seePeople;      // personnes : celles du photographe de la photo
    // Une photo publiée ne se modifie qu'avec « modifier ses photos publiées » (réglable par photographe).
    const editableHere = it.photo.status !== 'published' || can('photos.publiees.modifier');
    const full = can('photos.modifier') && editableHere; %>
@@ -67,8 +67,8 @@
     <label><%= t('Légende') %> <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'legend', label: t('Légende'), max: 2000, rows: 3 }) %>
 <% if (it.description) { const d = it.description; %>    <div class="desc-sugg" id="description" data-desc data-desc-url="/admin/photos/<%= it.photo.id %>/description"<%~ d.pending ? ' data-desc-pending' : '' %>>
-      <p><span class="mono"><%= t('Description suggérée') %> :</span> <span data-desc-text><%= d.pending ? t('en cours de calcul…') : d.text ? `« ${d.text} »` : t('pas encore calculée') %></span><% if (d.text && !d.translated && it.lang !== 'en') { %> <span class="mono">(<%= t('en anglais : aucun traducteur configuré') %>)</span><% } %></p>
-      <p class="actions"><% if (d.text) { %><button class="btn ghost sm" type="button" data-desc-use="<%= d.text %>" data-js-only hidden><%= t('Reprendre comme légende') %></button> <% } %><button class="btn ghost sm" type="submit" formaction="/admin/photos/<%= it.photo.id %>/description" formmethod="post" formnovalidate><%= d.text ? t('Décrire de nouveau') : t('Décrire cette photo') %></button>
+      <p><span class="mono"><%= t('Description suggérée') %> :</span> <span data-desc-text><%= d.pending ? t('en cours de calcul…') : d.text ? `« ${d.text} »` : d.error ? t('Dernier essai sans succès : {error}', { error: t.msg(d.error) }) : t('pas encore calculée') %></span><% if (d.text && !d.translated && it.lang !== 'en') { %> <span class="mono">(<%= it.translate ? t('en anglais : traduction pas encore faite, nouvel essai dans quelques minutes') : t('en anglais : aucun traducteur configuré') %>)</span><% } %><% if (d.text && d.error && !d.pending) { %> <span class="err"><%= t('Dernier essai sans succès : {error}', { error: t.msg(d.error) }) %></span><% } %></p>
+      <p class="actions"><% if (d.text && d.use && d.use.text) { %><button class="btn ghost sm" type="button" data-desc-use="<%= d.use.text %>" data-desc-field="<%= d.use.field %>" data-js-only hidden><%= d.use.field === 'legend' ? t('Reprendre comme légende') : t('Reprendre comme légende anglaise') %></button> <% } %><button class="btn ghost sm" type="submit" form="desc-form"><%= d.text ? t('Décrire de nouveau') : t('Décrire cette photo') %></button>
         <span class="hint"><%= t('Florence-2, sur ce serveur : une phrase factuelle, à relire et à réécrire à votre façon.') %></span></p>
     </div>
 <% } %>
@@ -133,8 +133,8 @@
       <label><%= t('Légende') %> <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
       <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'legend', label: t('Légende'), max: 2000, rows: 3 }) %>
 <% if (it.description) { const d = it.description; %>    <div class="desc-sugg" id="description" data-desc data-desc-url="/admin/photos/<%= it.photo.id %>/description"<%~ d.pending ? ' data-desc-pending' : '' %>>
-      <p><span class="mono"><%= t('Description suggérée') %> :</span> <span data-desc-text><%= d.pending ? t('en cours de calcul…') : d.text ? `« ${d.text} »` : t('pas encore calculée') %></span><% if (d.text && !d.translated && it.lang !== 'en') { %> <span class="mono">(<%= t('en anglais : aucun traducteur configuré') %>)</span><% } %></p>
-      <p class="actions"><% if (d.text) { %><button class="btn ghost sm" type="button" data-desc-use="<%= d.text %>" data-js-only hidden><%= t('Reprendre comme légende') %></button> <% } %><button class="btn ghost sm" type="submit" formaction="/admin/photos/<%= it.photo.id %>/description" formmethod="post" formnovalidate><%= d.text ? t('Décrire de nouveau') : t('Décrire cette photo') %></button>
+      <p><span class="mono"><%= t('Description suggérée') %> :</span> <span data-desc-text><%= d.pending ? t('en cours de calcul…') : d.text ? `« ${d.text} »` : d.error ? t('Dernier essai sans succès : {error}', { error: t.msg(d.error) }) : t('pas encore calculée') %></span><% if (d.text && !d.translated && it.lang !== 'en') { %> <span class="mono">(<%= it.translate ? t('en anglais : traduction pas encore faite, nouvel essai dans quelques minutes') : t('en anglais : aucun traducteur configuré') %>)</span><% } %><% if (d.text && d.error && !d.pending) { %> <span class="err"><%= t('Dernier essai sans succès : {error}', { error: t.msg(d.error) }) %></span><% } %></p>
+      <p class="actions"><% if (d.text && d.use && d.use.text) { %><button class="btn ghost sm" type="button" data-desc-use="<%= d.use.text %>" data-desc-field="<%= d.use.field %>" data-js-only hidden><%= d.use.field === 'legend' ? t('Reprendre comme légende') : t('Reprendre comme légende anglaise') %></button> <% } %><button class="btn ghost sm" type="submit" form="desc-form"><%= d.text ? t('Décrire de nouveau') : t('Décrire cette photo') %></button>
         <span class="hint"><%= t('Florence-2, sur ce serveur : une phrase factuelle, à relire et à réécrire à votre façon.') %></span></p>
     </div>
 <% } %>
@@ -152,6 +152,10 @@
     <p class="hint"><%= can('photos.modifier') && !editableHere ? t('Publiée sur le site. La modifier demande un droit que le modérateur peut vous donner.') : t('Pour une correction, écrivez une remarque au photographe (plus bas) ou renvoyez-lui la photo.') %></p>
 <% } %>
   </div>
+<% } %>
+<% if (it.description) { /* « Décrire cette photo » : son propre formulaire (form="desc-form"), hors du formulaire d'édition : il
+     n'emporte pas la saisie en cours, et Entrée dans un champ enregistre la fiche au lieu de demander une description. */ %>
+  <form id="desc-form" method="post" action="/admin/photos/<%= it.photo.id %>/description" hidden><input type="hidden" name="_csrf" value="<%= it.csrf %>"></form>
 <% } %>
   <div class="edit-lower">
 <% const RV = it.review, propose = can('photos.proposer'), when = ms => new Intl.DateTimeFormat(it.locale, { dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ms);
@@ -230,7 +234,7 @@
 </details>
 <% } %>
 <% const au = it.audience; %>
-<% if (can('statistiques.voir')) { %>
+<% if (it.seeStats) { %>
 <details class="panel audience rub-panel" id="audience">
   <summary><h2 id="audience-title"><%= t('Audience') %> <span class="sum"><%= au && au.total ? (au.total > 1 ? t('{n} ouvertures en 30 jours', { n: au.total }) : t('{n} ouverture en 30 jours', { n: au.total })) : t('pas encore vue en grand') %><%= it.photo.likes ? ` · ${t('{n} j’aime sur le site', { n: it.photo.likes })}` : '' %><%= it.shares ? ` · ${it.shares > 1 ? t('{n} partages', { n: it.shares }) : t('{n} partage', { n: it.shares })}` : '' %></span></h2></summary>
 <% if (au && au.total) { %>
@@ -242,7 +246,11 @@
   <p><a class="more" href="/admin/statistiques"><%= t('Toutes les statistiques') %></a></p>
 </details>
 <% } %>
-<% const ig = it.insta, igFile = it.igFile, pr = it.igProposal; %>
+<% const ig = it.insta, igFile = it.igFile, pr = it.igProposal;
+   // Erreur Instagram : ses raisons (« bloquée : J-0042 refuse la publication ») nomment les accords ; qui ne voit
+   // pas les personnes n'en lit que la nature, comme pour le bandeau d'état.
+   const IG_HIDE = { 'bloquée': 'bloquée par un accord (détail réservé au photographe et aux administrateurs)', 'à vérifier': 'à vérifier : un accord manque (détail réservé au photographe et aux administrateurs)' };
+   const igErr = m => t.msg(seePeople ? m : String(m || '').replace(/(^|: )(bloquée|à vérifier) : [\s\S]*$/, (x, pre, k) => pre + IG_HIDE[k])); %>
 <% if (igFile || it.igPropose) { %>
 <details class="panel ig rub-panel" id="instagram" data-ig<%~ ig.active || R.instagram.level !== 'ok' ? ' open' : '' %>>
   <summary><h2 id="ig-title">Instagram <span class="sum"><%= ig.post && ig.post.status === 'published' ? t('publiée sur Instagram') : ig.active ? t('dans la file') : ig.post && ig.post.status === 'failed' ? t('en échec') : R.instagram.level === 'no' ? t('bloquée') : R.instagram.level === 'warn' ? t('à vérifier') : t('pas encore partagée') %></span></h2></summary>
@@ -258,15 +266,16 @@
 <% } %>
 <% } else if (ig.post && ig.post.status === 'publishing') { %>
   <p><%= t('Envoi à Instagram en cours…') %></p>
-<% } else if (ig.active) { const slot = ig.slot || '', sp = slot.indexOf(' '); const when = sp < 0 ? (fr ? slot.replace(':', ' h ') : slot) : t('{date} à {time}', { date: slot.slice(0, sp), time: fr ? slot.slice(sp + 1).replace(':', ' h ') : slot.slice(sp + 1) }); %>
-  <p><%~ t('Dans la file : prévue le {slot}.', { slot: `<strong>${esc(when)}</strong>` }) %><% if (ig.post.error) { %> <span class="err"><%= t('Dernier essai : {error}', { error: t.msg(ig.post.error) }) %></span><% } %></p>
+<% } else if (ig.active) { const slot = ig.slot || '', sp = slot.indexOf(' '); const day = d => (/^\d{4}-\d{2}-\d{2}$/.test(d) ? new Intl.DateTimeFormat(it.locale, { timeZone: 'UTC', day: 'numeric', month: 'long' }).format(new Date(`${d}T12:00:00Z`)) : d);
+   const when = sp < 0 ? (fr ? slot.replace(':', ' h ') : slot) : t('{date} à {time}', { date: day(slot.slice(0, sp)), time: fr ? slot.slice(sp + 1).replace(':', ' h ') : slot.slice(sp + 1) }); %>
+  <p><%~ t('Dans la file : prévue le {slot}.', { slot: `<strong>${esc(when)}</strong>` }) %><% if (ig.post.error) { %> <span class="err"><%= t('Dernier essai : {error}', { error: igErr(ig.post.error) }) %></span><% } %></p>
 <% } else if (ig.post && ig.post.status === 'failed' && !igFile) { %>
-  <p class="err"><%= t('Échec de la publication : {error}', { error: t.msg(ig.post.error) }) %></p>
+  <p class="err"><%= t('Échec de la publication : {error}', { error: igErr(ig.post.error) }) %></p>
 <% if (ig.post.retry_requested_at) { %>  <p><span class="enc-tag ok"><%= t('Republication demandée') %></span> <span class="mono"><%= t('l’équipe qui gère la file Instagram est prévenue') %></span></p>
 <% } else { %>  <form method="post" action="/admin/photos/<%= it.photo.id %>/instagram/demande" class="actions"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn" type="submit"><%= t('Demander la republication') %></button> <span class="hint"><%= t('la file Instagram est gérée par le modérateur : il sera prévenu') %></span></form>
 <% } %>
 <% } else if (ig.post && ig.post.status === 'failed') { %>
-  <p class="err"><%= t('Échec de la publication : {error}', { error: t.msg(ig.post.error) }) %></p>
+  <p class="err"><%= t('Échec de la publication : {error}', { error: igErr(ig.post.error) }) %></p>
 <% if (ig.post.retry_requested_at) { %>  <p><span class="enc-tag warn"><%= t('Republication demandée') %></span> <span class="mono"><%= t('par {name}, le {date}', { name: ig.post.retry_requested_by || t('le photographe'), date: new Intl.DateTimeFormat(it.locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ig.post.retry_requested_at) }) %></span></p>
 <% } %>  <form method="post" action="/admin/instagram/<%= ig.post.id %>/reessayer" class="actions"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/photos/<%= it.photo.id %>#instagram"><button class="btn" type="submit"><%= t('Republier (remettre en tête de file)') %></button> <span class="hint"><%= t('ou modifiez le cadre et la légende ci-dessous puis remettez-la dans la file') %></span></form>
 <% } %>
@@ -319,7 +328,7 @@
 <% } else if ((it.ownPhoto || it.canAll('photos.proposer')) && can('photos.proposer') && ig.post && ig.post.status === 'failed') { %>
 <details class="panel ig rub-panel" id="instagram" open>
   <summary><h2 id="ig-title">Instagram <span class="sum"><%= t('en échec') %></span></h2></summary>
-  <p class="err"><%= t('Échec de la publication : {error}', { error: t.msg(ig.post.error) }) %></p>
+  <p class="err"><%= t('Échec de la publication : {error}', { error: igErr(ig.post.error) }) %></p>
 <% if (ig.post.retry_requested_at) { %>  <p><span class="enc-tag ok"><%= t('Republication demandée') %></span> <span class="mono"><%= t('l’équipe qui gère la file Instagram est prévenue') %></span></p>
 <% } else { %>  <form method="post" action="/admin/photos/<%= it.photo.id %>/instagram/demande" class="actions"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn" type="submit"><%= t('Demander la republication') %></button> <span class="hint"><%= t('la file Instagram est gérée par le modérateur : il sera prévenu') %></span></form>
 <% } %></details>
@@ -344,7 +353,7 @@
 <% } %>
     </dd>
   </dl>
-<% if (pf && pf.status === 'ok') { %>
+<% if (pf && pf.status === 'ok' && pf.sha256 === it.photo.sha256) { %>
   <p class="actions downloads">
 <% if (can('photos.original')) { %>    <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/original" download><%= t('Original') %></a>
 <% } %>
