@@ -28,6 +28,9 @@
 .form .groupe + .groupe, .form .champ + .groupe { margin-top: 0; }
 /* Autres états : la page de remerciement dans un cadre de téléphone */
 .mq-ecran-in > .titre-page { justify-self: start; font-size: var(--t-titre-2); }
+/* Passe 4 (jury v2, WCAG 1.4.12) : avec l'espacement du texte agrandi, l'adresse e-mail du message « Envoyé » (un seul mot de
+   250 px à 320 px) élargissait le cadre de 34 px ; elle passe à la ligne au lieu de pousser la colonne. Proposé pour public.css § 10. */
+.msg p { min-width: 0; overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
@@ -170,14 +173,14 @@
     <header lang="de" class="sh sh--site">
   <div class="sh-bar">
     <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
-    <nav class="sh-nav" aria-label="Hauptmenü (Beispiel)">
+    <nav class="sh-nav" aria-label="Navigation">
       <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-sep"><a href="/de/tirages">Kunstdrucke</a></li></ul>
     </nav>
     <div class="sh-outils">
       <a class="sh-outil sh-recherche" href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suchen</span></a>
       <details class="lang-pick">
-        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
-        <ul aria-label="Sprache wählen">
+        <summary><span>DE</span><span class="sr-only"> – Sprache: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache">
           <li><a href="/langue/fr?vers=%2Fde%2Fbonjour" hreflang="fr" lang="fr">Français</a></li>
           <li><a href="/langue/en?vers=%2Fde%2Fbonjour" hreflang="en" lang="en">English</a></li>
           <li><a href="/langue/de?vers=%2Fde%2Fbonjour" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
@@ -185,7 +188,7 @@
       </details>
       <details class="sh-menu">
         <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
-        <nav class="sh-panneau" aria-label="Hauptmenü, Telefon (Beispiel)">
+        <nav class="sh-panneau" aria-label="Navigation (Telefon)">
           <ul>
             <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/tirages">Kunstdrucke</a></li>
             <li><a href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suchen</a></li>
@@ -296,7 +299,7 @@
 
 
 <aside class="mq-notes" aria-labelledby="mq-t">
-  <p class="mq-id">MQ-05 · site public · /bonjour (fr, en, de) · thème Nicephos nuit, celui de la production · état principal : le 15 oct. 2026, après un envoi incomplet de Claire Exemple, photographiée la veille à 18 h 10 quai Ligny, avec Hugo (elle écrit « vers 18 h 15 »)</p>
+  <p class="mq-id">MQ-05 · site public · /bonjour (fr, en, de) · thème Nicephos nuit, celui de la production · état principal : le 15 oct. 2026, après un envoi incomplet de Claire Exemple, photographiée la veille à 18 h 10 quai Ligny, avec Hugo (elle écrit « vers 18 h 15 ») · v2, passe 4 du 16 oct. 2026, sur la planche MQ-00</p>
   <h2 id="mq-t">Ce qui change</h2>
   <p class="mq-lead">Le formulaire qui décide du droit à l’image d’une personne devient lisible, honnête sur ce qu’il exige, et utilisable au clavier, au toucher et sans script ; l’étiquette dit « Votre photo » (trois mots au plus en capitales), le titre de l’onglet garde « Je vous ai photographié ». Il passe du thème Atelier au thème de production, sur une seule colonne, et reprend tous les champs de <code>views/bonjour.eta</code>.</p>
   <ol class="mq-reperes">
@@ -308,7 +311,7 @@
     <li><span class="mq-num" aria-hidden="true">6</span><b>Prévenir plutôt que corriger</b><p>« Je ne sais pas encore » est présélectionné ; les usages sont rattachés à « J’accepte » (indentés, nommés par le groupe) ; « sur Instagram (avec le site) » dit la règle avant l’erreur.</p><span class="mq-ref">B&amp;S 5.1 · jury v0 : présélection</span></li>
     <li><span class="mq-num" aria-hidden="true">7</span><b>Vos droits, sur place</b><p>Copie ou effacement des données, et un lien direct « Vos droits sur vos données » vers la rubrique de Confidentialité.</p><span class="mq-ref">UX-T-04 · RGPD art. 12 à 17</span></li>
     <li><span class="mq-num" aria-hidden="true">8</span><b>Accusé de réception et délai promis</b><p>Un accusé part dès l’envoi ; « Nous répondons sous 7 jours » est écrit à côté du bouton ; liens soulignés.</p><span class="mq-ref">UX-T-04 · UX-F-23 · RGAA 10.6 · Opquast 107</span></li>
-    <li><span class="mq-num" aria-hidden="true">9</span><b>Allemand, longueur tenue</b><p>La même page en allemand (« Ihr Foto », « Alle Felder sind Pflichtfelder, außer „optional“ »), en-tête compris, de 320 à 1 440 px : rien ne déborde. Focus sur la case « Das Foto per E-Mail erhalten ».</p><span class="mq-ref">Jury v0 : aucun état EN ni DE · B&amp;S 4</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Allemand, longueur tenue</b><p>La même page en allemand (« Ihr Foto », « Alle Felder sind Pflichtfelder, außer „optional“ »), en-tête compris (« Suchen », comme le code), de 320 à 1 440 px : rien ne déborde ; les noms lus par un lecteur d’écran sont ceux du code (<code>server/i18n.js</code> : « Navigation », « Sprache: Deutsch », « Sprache »). Focus sur la case « Das Foto per E-Mail erhalten ».</p><span class="mq-ref">Jury v0 : aucun état EN ni DE · jury v2 : « Suche » · B&amp;S 4</span></li>
     <li><span class="mq-num" aria-hidden="true">10</span><b>Le focus sur un champ en erreur</b><p>Le lien « Votre e-mail » du résumé pose le focus sur le champ : l’anneau de focus s’ajoute au filet rouge de 2 px, l’un ne cache pas l’autre, et le message reste dessous.</p><span class="mq-ref">WCAG 2.4.7, 3.3.1 · planche, Formulaires (passe 2) · jury v1</span></li>
     <li><span class="mq-num" aria-hidden="true">11</span><b>Parent révélé</b><p>Le champ suit la radio cochée, sous elle, avec son aide.</p><span class="mq-ref">UX-T-02</span></li>
     <li><span class="mq-num" aria-hidden="true">12</span><b>Le quota n’est pas une erreur de saisie</b><p>Un message à part, l’heure de reprise et un recours par e-mail ; seuls les envois acceptés comptent, plus une heure de blocage.</p><span class="mq-ref">UX-F-27 · WCAG 2.2.1</span></li>
@@ -319,7 +322,7 @@
   <h3>Écarts avec le code</h3>
   <p>Mêmes champs et mêmes noms que <code>views/bonjour.eta</code> (ref, met_on, met_time, place, details, wants_photo, decision, scope_*, rights, message, email, name) ; ajoutés : adult et guardian, déjà lus par <code>server/encounters.js</code> pour l’app. Le champ piège (<code>website</code>) reste, invisible et hors des tabulations. La date de la rencontre devient un champ libre (« 14/10/2026 »), relue en toutes lettres par le serveur comme dans l’admin : le calendrier natif de <code>type="date"</code> suit la langue du navigateur, pas celle de la page. Les classes <code>.hello-form</code> de <code>site.css</code> cèdent la place à <code>.form</code>.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (passe 3, 16 oct. 2026 ; Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, p3-images.mjs, p3-sombres.mjs, radios-cadres.py, insecables.py) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7 · débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête du site en allemand : aucun · annotations à 1 440, 412 et 320 px : rien à redire (pastilles dans l’écran, hors des photos et des textes ; étiquettes entières ; cadres inert ; pied de page avant les états ; un seul bloc de mesures ; sans annotations, 0 élément déplacé) · sans annotations : 0 pixel changé hors du magenta, au bureau comme sur Pixel 7 · images : toutes à la taille d’affichage, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px (fichier chargé = le plus petit du srcset qui couvre l’écran, à 12 % près) · scènes de nuit et de contre-jour : aucune dans une première rangée, à 9 largeurs · radios : un nom de groupe par cadre · insécables : 0 à poser · poids après défilement complet : 200 ko au bureau, 200 ko au téléphone ; aucun script, aucune ressource tierce · les commandes, les couleurs et l’ordre du clavier ne changent pas à la passe 3 : les mesures de clavier, de cibles et de contraste de la passe 2 restent valables.</p>
+  <p class="mq-mesures"><b>Mesures</b> (passe 4, 16 oct. 2026 ; Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, p3-images.mjs, focus-colle.mjs, p3-sombres.mjs, radios-cadres.py, insecables.py, et l’espacement du texte du jury v2) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7, et 0 encore une fois tous les <code>inert</code> et <code>.is-focus</code> retirés (chaque état sans défaut une fois actif) · débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête du site en allemand (libellés du code, « Suchen ») : aucun · texte coupé d’une ellipse : aucun, à toutes ces largeurs · lignes qui défilent : aucune · focus caché par un élément collant (WCAG 2.4.11), au clavier en avant et en arrière, au bureau, sur Pixel 7 et à 320 × 640 : 0 sur 43 éléments au bureau, 37 sur Pixel 7 et à 320 px · espacement du texte agrandi (WCAG 1.4.12) à 1 440, 412 et 320 px : rien ne sort ni n’est coupé · annotations à 1 440, 412 et 320 px : rien à redire (pastilles dans l’écran, hors des photos et des textes ; étiquettes entières ; cadres inert ; pied de page avant les états ; un seul bloc de mesures ; sans annotations, 0 élément déplacé) · sans annotations : 0 pixel changé hors du magenta, au bureau comme sur Pixel 7 · images, avec ou sans <code>srcset</code>, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px : toutes à la taille d’affichage · aucune rangée de photos · scènes de nuit et de contre-jour : aucune dans une première rangée, à 9 largeurs · radios : un nom de groupe par cadre · insécables : 0 à poser · poids après défilement complet : 206 ko au bureau, 206 ko au téléphone ; aucun script, aucune ressource tierce.</p>
 </aside>
 
 </body>

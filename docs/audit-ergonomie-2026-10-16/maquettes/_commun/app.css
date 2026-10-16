@@ -119,3 +119,14 @@ input[type="radio"][aria-invalid="true"] { border-radius: 50%; }
 :is(input[type="radio"], input[type="checkbox"])[aria-invalid="true"]:is(:focus-visible, .is-focus) { outline: 2px solid var(--ink) !important; outline-offset: 4px; box-shadow: 0 0 0 2px var(--error, var(--ko)); }
 /* Passe 4 (jury v2) : l'en-tête de l'app (.app-bar, collant) ne cache jamais le champ qui reçoit le focus (WCAG 2.4.11). */
 html:has(.app-bar) { scroll-padding-top: 88px; }
+/* Passe 4 (jury v2, MQ-10) : la langue de la personne change SANS script. Main ne la change que par app.js
+   (form.dataset.lang = r.value) ; sans script, la section restait dans la langue posée par le serveur (data-lang). Ici, la
+   case cochée décide, par :has() : la règle de main (ligne 37) est neutralisée là où :has() existe, et reste celle des autres
+   navigateurs. Les éléments [data-l] n'ont pas d'affichage propre (des span, et le div .app-l10n de main) : revert leur rend
+   celui du navigateur. À reporter dans main (dr-work/mq2-correctifs-main.md). */
+@supports selector(:has(*)) {
+  .app-form[data-lang] [data-l]:not([data-l=""]) { display: revert; }
+  .app-form:has([data-lang-pick][value="fr"]:checked) [data-l]:not([data-l="fr"]),
+  .app-form:has([data-lang-pick][value="en"]:checked) [data-l]:not([data-l="en"]),
+  .app-form:has([data-lang-pick][value="de"]:checked) [data-l]:not([data-l="de"]) { display: none; }
+}
