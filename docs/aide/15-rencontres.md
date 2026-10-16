@@ -7,10 +7,10 @@ Quand vous photographiez quelqu'un dans la rue, la page **Personnes** (barre lat
 La page **Personnes** (barre latérale, groupe « Travailler ») montre une ligne par **personne photographiée**, qu'elle ait été rencontrée une fois ou lors de plusieurs sorties : son visage, son nom, ses références de cartes, ses rencontres et ses photos, sa décision (dernier accord, ou refus), et les signaux à traiter (nouvelle demande, demande de droits, rapprochement proposé). **Demandes et rencontres** ouvre la liste détaillée des rencontres.
 
 - **Une rencontre par sortie** : chaque rencontre a sa carte et son accord. **Un accord ne vaut que pour la sortie** où il a été donné ; **un refus vaut pour tout** : le refus le plus récent d'une personne s'étend à toutes ses rencontres (noté « refus étendu » dans leur historique). Un accord donné plus tard, avec le code de la carte, vaut pour sa sortie ; il ne défait pas les autres refus, à lever à la main si la personne le demande.
-- **Créer** : d'abord sur le téléphone, avec **Nouvelle rencontre** ; dans l'app, **Déjà rencontrée ?** propose les personnes vues ces 30 derniers jours par ce photographe, pour ajouter la rencontre du jour à sa fiche (un nouvel accord reste à signer). Une carte signée saisie ou une demande sur `/bonjour` créent aussi une personne.
-- **Rapprocher** : quand deux personnes ont la **même adresse e-mail**, la fiche propose **C'est la même personne** (leurs rencontres sont réunies) ou **Ce n'est pas elle** (la proposition disparaît). Jamais d'après le visage. **Rattacher une rencontre existante** réunit à la main ; **Ce n'est pas elle**, sur une rencontre, la sépare.
+- **Créer** : d'abord sur le téléphone, avec **Nouvelle rencontre** ; dans l'app, **Déjà rencontrée ?** propose les personnes vues ces 30 derniers jours par ce photographe (initiales, référence et jour seulement : la page est tendue à la personne), pour ajouter la rencontre du jour à sa fiche (un nouvel accord reste à signer). Seules les personnes que ce photographe a lui-même rencontrées y figurent. Une carte signée saisie ou une demande sur `/bonjour` créent aussi une personne.
+- **Rapprocher** : quand deux personnes ont la **même adresse e-mail**, la fiche propose **C'est la même personne** (leurs rencontres sont réunies) ou **Ce n'est pas elle** (la proposition disparaît). Jamais d'après le visage. **Rattacher une rencontre existante** réunit à la main ; **Ce n'est pas elle**, sur une rencontre, la sépare, et lève le refus qu'elle ne tenait que du rapprochement (« refus étendu levé » dans son historique). Un photographe ne rapproche ou n'écarte que ses propres personnes.
 - **Sorties et photos** : **Était aussi là lors de la sortie** ajoute une rencontre sans décision ; **Lier des photos où elle figure** rattache chaque photo à sa rencontre de la sortie de la photo (créée sans décision si besoin) : la photo reste à vérifier tant que l'accord de cette sortie manque.
-- **Droits** : **Exporter ses données** réunit toutes ses rencontres dans une archive ; **Effacer cette personne** efface toutes ses rencontres (photos comprises sur demande ; un refus reste appliqué sous forme anonyme si des photos liées restent).
+- **Droits** : **Exporter ses données** réunit toutes ses rencontres dans une archive ; **Effacer cette personne** efface toutes ses rencontres (photos comprises sur demande ; un refus reste appliqué sous forme anonyme si des photos liées ou de ses sorties restent).
 
 ## Sur le terrain
 
@@ -23,7 +23,7 @@ La page **Sur le terrain** (barre latérale, « App, cartes, QR ») réunit ce q
 
 ## Les cartes
 
-Chaque photographe a sa **lettre** (J pour Julien, S pour Sébastien, réglable dans [Photographes](auteurs)) et numérote ses cartes : **J-0142**. Une rencontre, c'est une paire de cartes avec le même numéro :
+Chaque photographe a sa **lettre** (J pour Julien, S pour Sébastien, réglable dans [Photographes](auteurs)) et numérote ses cartes, de 1 à 9999 : **J-0142**. La lettre d'une référence désigne toujours son photographe : une rencontre ne peut pas porter la lettre d'un autre. Une rencontre, c'est une paire de cartes avec le même numéro :
 
 - **la carte « pour nous »** : l'accord signé (site, Instagram, expositions et tirages, avec ou sans le prénom), le nom, la date, le lieu ; vous la gardez ;
 - **la carte « pour eux »** : un merci, la référence et un QR vers `nicephos.art/bonjour/J-0142` ; la personne la garde.
@@ -35,9 +35,9 @@ Astuce : juste après la photo, photographiez la carte que vous tendez. Elle mar
 - **Numérotées** : chaque paire a sa référence et son propre QR ; la série continue d'une planche à l'autre (le prochain numéro est proposé) ;
 - **Génériques** : sans numéro, avec un QR vers `/bonjour` : le modèle à confier à un imprimeur, puis numérotez les deux cartes de chaque paire au tampon numéroteur.
 
-La planche s'ouvre prête à imprimer : cinq paires par feuille A4, d'un seul côté. Imprimez à **100 %** (taille réelle, sans « ajuster à la page »), sur du papier épais (250 à 350 g/m²), et découpez le long des pointillés. Pour changer les textes des cartes, demandez-le : ils sont réunis au même endroit.
+La planche s'ouvre prête à imprimer : cinq paires par feuille A4, d'un seul côté. Le texte d'accord nomme le site de cette installation (son adresse publique). Imprimez à **100 %** (taille réelle, sans « ajuster à la page »), sur du papier épais (250 à 350 g/m²), et découpez le long des pointillés. Pour changer les textes des cartes, demandez-le : ils sont réunis au même endroit.
 
-Les cartes imprimées par le site portent un **code de contrôle** (J-0142-K7Q) : la demande arrive alors marquée **carte vérifiée**. Une référence tapée sans le code (cartes numérotées au tampon) est acceptée, marquée **non vérifiée**. Sur une rencontre déjà établie (carte signée, accord signé sur le téléphone, ou demande déjà vérifiée), une demande **sans code** ne change ni l'accord, ni l'adresse, ni le nom : un **refus** est appliqué (il protège la personne), une demande de droits est signalée (vérifiez l'identité), et le reste est seulement noté dans l'historique, marqué non vérifié.
+Les cartes imprimées par le site portent un **code de contrôle** (J-0142-K7Q) : la demande arrive alors marquée **carte vérifiée**. Une référence tapée sans le code (cartes numérotées au tampon) est acceptée, marquée **non vérifiée**. Sur une rencontre déjà établie (carte signée, rencontre saisie sur le téléphone — accord, refus ou « plus tard » : l'app montre toujours son QR avec le code —, ou demande déjà vérifiée), une demande **sans code** ne change ni l'accord, ni l'adresse, ni le nom : un **refus** est appliqué (il protège la personne), une demande de droits est signalée (vérifiez l'identité), et le reste est seulement noté dans l'historique, marqué « sans le code de la carte ». Sur les autres rencontres aussi, une demande sans code ne remplace jamais une adresse ou un nom déjà notés et ne lève pas un refus. Une référence tapée sans code ne décale jamais la numérotation des cartes ni celle de l'app (un numéro déjà pris est sauté).
 
 ## Le QR des vêtements
 
@@ -76,7 +76,7 @@ Pour remplir **avec la personne**, au moment de la photo, sans carte papier : **
 
 1. **Vous** : le photographe (celui de votre compte), la **position** (demandée au téléphone, gardée à 100 m près ; la ville en est déduite), une **photo de repère** de la personne (gardée en privé, pour retrouver les bonnes images), des notes.
 2. **Tendez le téléphone** : la personne choisit sa langue (FR · EN · DE), lit le consentement, coche ce qu'elle accepte (ou refuse, ou ne décide pas), indique son nom, son e-mail si elle veut recevoir la photo, son âge (**moins de 18 ans : un parent signe avec elle**, son nom est demandé) et **signe avec le doigt**.
-3. **Enregistrer** : la rencontre reçoit le numéro suivant de vos cartes (J-0143). L'écran **Merci** s'affiche dans sa langue avec un **QR** : en le scannant, elle retrouve sa page `/bonjour/J-0143-…` pour recevoir sa photo, changer d'avis ou vous écrire.
+3. **Enregistrer** : la rencontre reçoit le numéro suivant de vos cartes (J-0143). L'écran **Merci** s'affiche dans sa langue avec un **QR** : en le scannant, elle retrouve sa page `/bonjour/J-0143-…` pour recevoir sa photo, changer d'avis ou vous écrire. Les liens vers l'admin (nouvelle rencontre, accueil Terrain, fiche) sont repliés sous **Photographe : reprendre le téléphone** : la personne qui tient encore le téléphone ne tombe pas sur les autres personnes du jour.
 4. **Récapitulatif** : si l'envoi d'e-mails est configuré sur le serveur, il part tout seul (son accord, ce qu'elle a coché, le lien vers sa page) ; sinon, **Envoyer le récapitulatif depuis Mail** ouvre le message tout prêt, dans sa langue, à envoyer depuis votre adresse.
 
 Il faut du réseau (la 4G suffit) : sans réseau, l'enregistrement échoue sans rien perdre à l'écran ; réessayez un peu plus loin. Un accord signé sur le téléphone vaut une carte signée : la fiche montre la signature et la photo de repère.
@@ -145,15 +145,15 @@ Un accord vaut pour **la sortie** : toutes les photos que le photographe a prise
 
 ## Un visage sur le nom
 
-La **photo de la personne** (son visage) aide à savoir qui a signé et à retrouver les bonnes images : prise dans l'app sur le téléphone (« Photographier la personne »), ou ajoutée dans le formulaire de la fiche (carte papier, photo de votre téléphone). Elle apparaît en rond dans la liste, sur la fiche et dans « Personnes & accords » de la fiche photo. Gardée en privé, **aussi longtemps que l'accord** ; sans accord, effacée après 6 mois. Le texte du consentement (app et cartes) le dit à la personne.
+La **photo de la personne** (son visage) aide à savoir qui a signé et à retrouver les bonnes images : prise dans l'app sur le téléphone (« Photographier la personne »), ou ajoutée dans le formulaire de la fiche (carte papier, photo de votre téléphone). Elle apparaît en rond dans la liste, sur la fiche et dans « Personnes & accords » de la fiche photo. Gardée en privé, **aussi longtemps que l'accord** ; sans accord, ou après un refus, effacée après 6 mois. Le texte du consentement (app et cartes) le dit à la personne.
 
 ## Traiter une rencontre
 
 Les nouvelles demandes s'affichent en tête, avec un compteur dans la barre latérale. Dans la fiche d'une rencontre :
 
-- **Écrire** ouvre votre messagerie avec l'adresse de la personne : le site n'envoie aucun e-mail.
+- **Écrire** ouvre votre messagerie avec l'adresse de la personne, l'objet du message dans sa langue. Le serveur, lui, n'envoie que le récapitulatif d'une rencontre saisie sur le téléphone et les relances des demandes de droits, et seulement si l'envoi d'e-mails est configuré.
 - **Lier des photos** (pour un refus, une photo offerte, ou une photo hors sortie) : les photos du photographe prises ou importées ce jour-là sont proposées en premier ; une recherche permet d'en trouver d'autres.
-- **Carte signée** : cochez « La carte « pour nous » est signée » et les usages acceptés, puis joignez la **photo de la carte** (preuve, visible seulement dans l'admin). **Saisir une carte signée**, en bas de la liste, crée une rencontre directement depuis la carte papier.
+- **Carte signée** : cochez « La carte « pour nous » est signée » et les usages acceptés, puis joignez la **photo de la carte** (preuve, visible seulement dans l'admin). **Saisir une carte signée**, en bas de la liste, crée une rencontre directement depuis la carte papier ; sur une référence déjà reçue par `/bonjour`, elle complète la rencontre sans effacer ce que la personne a donné. Décocher la case retire un accord papier saisi par erreur ; réenregistrer la fiche ne lève jamais un refus exprimé depuis. Une trace anonyme (refus anonymisé) ne se modifie plus.
 - **Marquer « En cours » / « Traitée »** pour suivre où vous en êtes.
 
 Un accord donné en ligne est moins sûr qu'une carte signée (la fiche le rappelle) : pour une exposition ou une vente de tirages, demandez une signature.
@@ -175,22 +175,22 @@ Dès qu'une personne refuse, **les photos liées ne peuvent plus être publiées
 
 ## Droits des personnes (RGPD)
 
-Une personne peut demander **une copie de ses données** ou **leur effacement** : sur `/bonjour` (« Vos données »), par e-mail, ou de vive voix. La loi laisse **un mois** pour répondre.
+Une personne peut demander **une copie de ses données** ou **leur effacement** : sur `/bonjour` (« Vos données »), par e-mail, ou de vive voix. La loi laisse **un mois** pour répondre, compté de date à date (demande du 1er février : avant le 1er mars ; du 31 janvier : avant le dernier jour de février).
 
-- **Demande reçue sur `/bonjour`** : la rencontre porte un badge rouge « Demande d’accès / d’effacement · avant le … » (liste et fiche). Si la référence n'est pas vérifiée, assurez-vous que la demande vient bien de cette personne (même adresse, réponse à votre message) avant de lui envoyer quoi que ce soit.
-- **Exporter ses données (.zip)** (fiche, « Droits de la personne ») : une archive avec tout ce que le site garde sur elle (rencontre, choix, accord ou refus, historique de ses demandes), sa signature, les photos de repère et de carte, et les photos où elle apparaît (JPEG 2048 px, jamais l'original), avec un mode d'emploi dans sa langue. Envoyez-la-lui en pièce jointe.
-- **Effacer les données de cette personne** (en bas de la fiche) : nom, adresse, messages, signature, images et historique disparaissent. Cochez **Supprimer aussi les photos où elle apparaît** si elle le demande : originaux et images sont supprimés, et effacés des sauvegardes sous 90 jours. Si elle avait **refusé** la publication et que vous gardez des photos, une **trace anonyme** garde ce refus (sans aucune donnée sur elle) : ces photos restent impossibles à publier.
+- **Demande reçue sur `/bonjour`** : la rencontre porte un badge rouge « Demande d’accès / d’effacement · avant le … » (liste et fiche). Si la référence n'est pas vérifiée, assurez-vous que la demande vient bien de cette personne (même adresse, réponse à votre message) avant de lui envoyer quoi que ce soit. Une demande en cours garde son type et son échéance : une nouvelle demande sur la même rencontre est seulement notée dans l'historique (avec le code de la carte, la personne peut en changer le type).
+- **Exporter ses données (.zip)** (fiche, « Droits de la personne ») : une archive avec tout ce que le site garde sur elle (rencontre, choix, accord ou refus, historique de ses demandes), sa signature, les photos de repère et de carte, et les photos où elle apparaît (JPEG 2048 px, jamais l'original), avec un mode d'emploi dans sa langue. Une demande faite sans le code de la carte et non appliquée (elle peut venir de quelqu'un d'autre) n'y apporte que ses choix, sans adresse, nom ni message. Envoyez-la-lui en pièce jointe.
+- **Effacer les données de cette personne** (en bas de la fiche) : nom, adresse, messages, signature, images et historique disparaissent. Cochez **Supprimer aussi les photos où elle apparaît** si elle le demande : originaux et images sont supprimés, et effacés des sauvegardes sous 90 jours. Si elle avait **refusé** la publication et que vous gardez des photos liées ou des photos de sa sortie, une **trace anonyme** garde ce refus (sans aucune donnée sur elle ; le photographe et le jour restent) : ces photos restent impossibles à publier, ou à vérifier.
 - Les **posts déjà publiés sur Instagram** sont rappelés après l'effacement : supprimez-les dans l'application.
 - **Marquer la demande comme traitée** une fois la réponse envoyée.
-- **Relances par e-mail** (si l'envoi d'e-mails est configuré) : dès l'arrivée de la demande, un e-mail part au photographe concerné, même s'il n'a pas choisi les e-mails. Un rappel suit au quart du délai (environ 8 jours), puis un autre à la moitié avec l'administrateur en copie, et un dernier e-mail **prioritaire** aux trois quarts (il reste moins d'une semaine). Sans photographe joignable, l'administrateur les reçoit directement. Les e-mails ne donnent que la référence de la carte, jamais le nom ni l'adresse de la personne. Tout s'arrête quand la demande est marquée traitée.
+- **Relances par e-mail** (si l'envoi d'e-mails est configuré) : dès l'arrivée de la demande, un e-mail part au photographe concerné, même s'il n'a pas choisi les e-mails. Un rappel suit au quart du délai (environ 8 jours), puis un autre à la moitié avec l'administrateur en copie, et un dernier e-mail **prioritaire** aux trois quarts (il reste environ une semaine). Sans photographe joignable, l'administrateur les reçoit directement ; si le compte du photographe ne peut pas traiter la demande (rôle Photographe : ni export ni effacement), l'e-mail lui demande de prévenir l'administrateur tout de suite. Les demandes sur une rencontre non vérifiée (sans carte, ou référence tapée sans code) ne font pas partir plus de 30 e-mails par jour : au-delà (afflux de fausses demandes), elles attendent le lendemain et restent signalées dans « Aujourd'hui ». Les e-mails ne donnent que la référence de la carte, jamais le nom ni l'adresse de la personne. Tout s'arrête quand la demande est marquée traitée.
 
 ## Données
 
-- Seul ce que la personne écrit est gardé : référence, adresse, nom, choix, messages, et la photo de la carte signée.
+- Seul ce que la personne donne est gardé : référence, adresse, nom, choix, messages et la photo de la carte signée ; sur le téléphone s'y ajoutent sa signature, sa photo de repère, la position arrondie à 100 m, sa majorité et le nom du parent.
 - **Supprimer cette rencontre** efface tout, à la demande de la personne.
 - Durées, automatiques et annoncées sur la page `/confidentialite` :
   - demande sans accord ni refus : effacée après **12 mois** sans nouvelle ;
-  - photo de la personne (visage) : gardée avec l'accord ; sans accord, effacée après **6 mois** ;
-  - accord ou refus (avec la signature) : gardé tant qu'une photo liée existe, puis **5 ans** (délai pour agir en justice) ;
+  - photo de la personne (visage) : gardée avec l'accord ; sans accord, effacée après **6 mois** (après un refus : 6 mois après le refus) ;
+  - accord ou refus (avec la signature) : gardé tant qu'une photo liée ou de sa sortie existe, puis **5 ans** après la disparition de la dernière (délai pour agir en justice) ;
   - photo supprimée : effacée des sauvegardes après **90 jours**.
 - La photo de la carte est rangée dans la base de données, dont les sauvegardes tournent sur 14 jours : une suppression disparaît aussi des sauvegardes au bout de deux semaines.
