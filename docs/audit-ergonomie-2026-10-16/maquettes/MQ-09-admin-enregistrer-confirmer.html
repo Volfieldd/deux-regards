@@ -12,54 +12,9 @@
 <link rel="stylesheet" href="_commun/admin-plus.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* Locaux, communs à MQ-07, MQ-08 et MQ-09 (absents de la planche, à y verser : voir l'encart).
-   L1 « Fermer » du menu au téléphone · L2 lien « Mon compte » sur le nom · L3 planche des autres états
-   · L4 dialogue montré ouvert · L5 bascule des annotations. Aucun jeton redéclaré. */
-.side-haut { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.side-fermer { display: none; }
-@media (max-width: 720px) {
-  .side-fermer { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; margin: -6px 0 0; border-radius: var(--r-admin); color: var(--ink); font-size: 14px; box-shadow: inset 0 0 0 1px var(--line2); }
-}
-.me-lien { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; min-height: 40px; padding: 0 4px; border-radius: 8px; }
-.me-lien:hover { background: var(--s2); }
-.cmdk kbd { white-space: nowrap; }
-/* Barre de 220 px (sous 1 180 px) : le thème se règle dans Mon compte, le nom et le rôle restent entiers. */
-@media (max-width: 1180px) and (min-width: 721px) { .me .btn-theme { display: none; } }
-.me-lien[aria-current] { background: var(--s3); }
-.me-lien .me-nom { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field-line); }
-@media (max-width: 720px), (pointer: coarse) { .me-lien { min-height: 44px; } }
-/* L3. Autres états : sous la coquille, pleine largeur, un cadre par état. */
-.resume-a li a { display: inline-flex; align-items: center; min-height: 24px; }
-@media (max-width: 720px), (pointer: coarse) { .resume-a li a { min-height: 44px; } }
-.etats-a { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 560px), 1fr)); gap: 112px 48px; align-items: start; padding: 128px max(var(--gut), 16px) 0; }
-.etats-a > * { min-width: 0; }
-.etats-a > .large { grid-column: 1 / -1; }
-.ecran-a { min-width: 0; padding: 24px; border-radius: var(--r-admin-panneau); background: var(--bg); box-shadow: inset 0 0 0 1px var(--line2); }
-.ecran-a > :first-child:not(.mq-pin) { margin-top: 0; } .ecran-a > :last-child { margin-bottom: 0; }
-.ecran-a h2 { margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
-.ecran-a h3 { margin: 0 0 8px; font-size: var(--at-h3); font-weight: 500; }
-.ecran-a .titre-ecran { margin: 0 0 16px; font-size: 28px; font-weight: 300; line-height: 1.15; }
-@media (max-width: 720px) { .ecran-a { padding: 16px; } .etats-a { gap: 96px; padding-top: 112px; } }
-/* L4. Un dialogue montré ouvert, sur le voile de la page. */
-.voile-a { display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 40px 24px; border-radius: var(--r-admin-panneau); background: linear-gradient(var(--scrim), var(--scrim)), var(--bg); }
-.voile-a .confirm { position: static; display: block; margin: 0; max-width: 100%; }
-@media (max-width: 720px) { .voile-a { padding: 24px 12px; } }
-.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
-.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
-/* En-tête de page au téléphone : une ligne de méta par élément, sans « · » orphelin en début de ligne. */
-@media (max-width: 720px) { .ep-meta { display: grid; justify-items: start; gap: 2px; } .ep-meta > * + *::before { content: none; } }
-/* Erreur hors d'un .champ-a (groupe de choix, dialogue) : même dessin que le formulaire type. */
-.err { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--danger); font-size: 13px; line-height: 1.45; }
-.err .ic { flex: none; margin-top: 2px; } .err b { font-weight: 600; }
-.confirm p.err { color: var(--danger); margin: 0 0 8px; }
-/* Symboles d'état dans une phrase : alignés sur le texte. */
-.confirm p .ic, .att .ic, .enreg .ic, .ecran-a p > .ic { display: inline-block; vertical-align: -1px; }
-/* Champs : focus simulé pour la capture (même dessin que :focus d'admin.css). */
-.is-focus { box-shadow: inset 0 0 0 2px var(--accent-ink), 0 0 0 4px var(--accent-soft) !important; }
-.btn.is-focus, a.is-focus, button.is-focus { box-shadow: none !important; outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-
-/* MQ-09, locaux : L6 fiche photo (grille photo + formulaire) · L7 suggestion de description · L8 liste de la photothèque avec légende des états · L9 messages d'action montrés côte à côte. */
-.help-link a { border-bottom: 0; text-decoration: underline; text-underline-offset: 3px; }
+/* MQ-09, locaux (propres aux pages montrées ici ; le reste est dans admin-plus.css, voir l'encart) :
+   L1 fiche photo (grille photo + formulaire) · L2 dialogue de dépublication · L3 comptes · L4 séries et Instagram sans rechargement
+   · L5 liste de la photothèque avec ses pastilles. Aucun jeton redéclaré. */
 .fiche { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; align-items: start; }
 .fiche-photo { position: sticky; top: 24px; margin: 0; border-radius: 8px; overflow: hidden; background: var(--photo-bg); }
 .fiche-photo img { display: block; width: 100%; height: auto; }
@@ -70,24 +25,10 @@
 .fiche-form .row > .champ-a { flex: 1 1 200px; }
 @media (max-width: 720px) { .fiche-photo { max-width: 260px; } }
 @media (max-width: 960px) { .fiche-photo { position: static; } .fiche { grid-template-columns: minmax(0, 1fr); gap: 16px; } .fiche-photo { max-width: 420px; } }
-.sugg-d { display: grid; gap: 8px; margin-top: 2px; padding: 12px 14px; border-radius: var(--r); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2); }
-.sugg-d p { margin: 0; }
-.sugg-d .t { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--ink); }
-.sugg-d .t .s { color: var(--accent-ink); }
-.sugg-d q { color: var(--ink); }
-.sugg-d .hint { color: var(--ink2); }
-.sugg-d .actions .btn { min-height: 32px; }
-@media (max-width: 720px), (pointer: coarse) { .sugg-d .actions .btn { min-height: 44px; } }
+.sugg-bloc .actions .btn { min-height: 32px; }
+@media (max-width: 720px), (pointer: coarse) { .sugg-bloc .actions .btn { min-height: 44px; } }
 .err .btn { margin-top: 6px; }
-.err-l { display: grid; gap: 6px; justify-items: start; }
-.toasts { display: grid; gap: 16px; justify-items: start; }
-.toast-ech { position: relative !important; z-index: auto !important; left: auto !important; bottom: auto !important; transform: none !important; display: inline-flex; max-width: 100%; }
-.toast-ech.pause .toast-temps { background: var(--ink2); }
-.toast-ech button.is-focus { outline: 2px solid var(--accent); outline-offset: 2px; }
-.confirm fieldset { margin: 12px 0 0; padding: 0; border: 0; display: grid; gap: 2px; }
-.confirm legend { padding: 0; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--ink); }
-.confirm label.inline { min-height: 32px; }
-@media (max-width: 720px), (pointer: coarse) { .confirm label.inline, .choix-v label.inline { min-height: 44px; } }
+.confirm .choix-a { margin: 12px 0 0; }
 .confirm .champ-a { margin-top: 12px; }
 .confirm textarea { min-height: 64px; }
 .confirm .actions { flex-wrap: wrap; }
@@ -106,8 +47,6 @@
 .statut-l { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0; padding: 10px 14px; border-radius: var(--r); background: var(--s1); box-shadow: inset 3px 0 0 var(--ok), inset 0 0 0 1px var(--line); }
 .statut-l .s { color: var(--accent-ink); }
 .statut-l .more, .ligne-s .more { display: inline-flex; align-items: center; min-height: 24px; }
-
-.duo-m { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
 .liste-p { list-style: none; margin: 12px 0 0; padding: 0; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
 .liste-p li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); }
 .liste-p li:first-child { border-top: 0; }
@@ -119,12 +58,6 @@
 @media (max-width: 540px) { .liste-p li { grid-template-columns: 56px minmax(0, 1fr); } .liste-p .ets { grid-column: 2; justify-content: flex-start; } .liste-p img { width: 56px; height: 37px; } }
 .chips .n { margin-left: 4px; }
 @media (max-width: 720px), (pointer: coarse) { .statut-l .more, .ligne-s .more, .liste-p .t a { min-height: 44px; } }
-.lex { width: 100%; border-collapse: collapse; font-size: 13px; }
-.lex caption { text-align: left; font-size: var(--at-h3); font-weight: 500; padding-bottom: 8px; }
-.lex th, .lex td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
-.lex thead th { color: var(--ink2); font-weight: 500; }
-.lex tbody th { font-weight: 500; white-space: nowrap; }
-@media (max-width: 540px) { .lex, .lex tbody, .lex tr, .lex td, .lex th { display: block; } .lex thead { display: none; } .lex tr { padding: 8px 0; border-bottom: 1px solid var(--line); } .lex th, .lex td { padding: 2px 0; border: 0; } }
 </style>
 </head>
 <body class="admin">
@@ -162,7 +95,7 @@
   <nav class="nav" aria-labelledby="nav-publier">
     <a href="/admin/a-valider"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg>À valider<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 photo</span></span></a>
     <a href="/admin/site"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>Site public</a>
-    <a href="/admin/carnets"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <a href="/admin/carnet"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
     <a href="/admin/galeries"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Galeries privées</a>
     <a href="/admin/boutique"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 commande à préparer</span></span></a>
     <a href="/admin/instagram"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>Instagram</a>
@@ -190,7 +123,7 @@
     </nav>
     <div class="me">
       <a class="me-lien" href="/admin/compte"><span class="av" aria-hidden="true">J</span><span class="who"><span class="me-nom">Julien</span><span class="sr-only">, mon compte</span><small>Administrateur</small></span></a>
-      <button class="iconbtn btn-theme" type="button" aria-label="Passer en mode sombre" title="Passer en mode sombre"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+      <button class="iconbtn btn-theme" type="button"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button>
       <button class="iconbtn" type="button" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button>
     </div>
   </div>
@@ -215,7 +148,7 @@
       <div class="champ-a"><label for="titre">Titre</label><p class="aide" id="titre-a">Sous la photo. L’adresse de sa page, /photo/foz-la-barre, ne change plus.</p><input id="titre" value="Foz, la barre" aria-describedby="titre-a"></div>
       <div class="champ-a"><label for="leg" class="mq-a"><span class="mq-pin" aria-hidden="true">4</span>Légende <span class="facultatif">(facultatif)</span></label><textarea id="leg" class="is-focus" rows="2">Là où le fleuve devient l’océan, ça cogne. Le vent tient la mer debout.</textarea></div>
       <div class="champ-a"><label for="alt">Texte de remplacement</label><p class="aide" id="alt-a">Lu par les personnes aveugles à la place de la photo : ce qu’on y voit, en une phrase.</p><textarea id="alt" rows="2" aria-describedby="alt-a">La houle de l’Atlantique roule vers un petit phare allumé.</textarea>
-        <div class="sugg-d mq-a" role="status"><span class="mq-pin" aria-hidden="true">5</span><p class="t"><span class="s" aria-hidden="true">✦</span>Suggestion de description, arrivée à 22 h 56</p><p><q>Des vagues roulent vers un petit phare au bout d’une jetée, sous un ciel gris.</q></p><p class="hint">Traduite de l’anglais. À relire : elle ne remplace rien d’elle-même.</p>
+        <div class="sugg-bloc mq-a" role="status"><span class="mq-pin" aria-hidden="true">5</span><p class="t"><span class="s" aria-hidden="true">✦</span>Suggestion de description, arrivée à 22 h 56</p><p><q>Des vagues roulent vers un petit phare au bout d’une jetée, sous un ciel gris.</q></p><p class="hint">Traduite de l’anglais. À relire : elle ne remplace rien d’elle-même.</p>
           <div class="actions"><button class="btn ghost" type="button">Reprendre ce texte</button><button class="btn ghost" type="button">Ignorer</button></div></div></div>
       <h2>Où et quand</h2>
       <div class="row">
@@ -235,27 +168,27 @@
   <a href="/admin/rencontre/accueil"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
   <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
 </nav>
-<div class="etats-a" role="region" aria-label="Autres états de l’écran">
-<div class="mq-ecran"><p class="mq-etat">État · Quitter la fiche avec une date refusée</p>
+<div class="mq-etats mq-etats--grille" role="region" aria-label="Autres états de l’écran">
+<section class="mq-ecran" aria-labelledby="etat-1"><p class="mq-etat" id="etat-1">État · Quitter la fiche avec une date refusée</p>
   <div class="voile-a">
     <div class="confirm mq-a" role="dialog" aria-modal="false" aria-labelledby="dq-t" aria-describedby="dq-d"><span class="mq-pin" aria-hidden="true">7</span>
       <h2 id="dq-t">Quitter sans enregistrer la date ?</h2>
       <p id="dq-d">« 11 oct. 2062 » n’est pas enregistrée : elle est dans le futur. Le titre, la légende et le texte de remplacement le sont déjà.</p>
       <div class="actions"><button class="btn ghost is-focus" type="button">Annuler</button><button class="btn" type="button">Quitter sans la date</button></div>
     </div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Message d’action : en pause, défait, en erreur</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-2"><p class="mq-etat" id="etat-2">État · Message d’action : en pause, défait, en erreur</p>
   <div class="ecran-a mq-a"><span class="mq-pin" aria-hidden="true">8</span><div class="toasts">
     <div class="toast toast-ech pause" role="status"><p><b>Légende</b> enregistrée.</p><button type="button" class="is-focus">Défaire</button><span class="toast-temps" style="--reste: 70%"></span></div>
-    <div class="toast toast-ech " role="status"><p><b>Légende</b> rétablie, comme à 22 h 51.</p></div>
+    <div class="toast toast-ech" role="status"><p><b>Légende</b> rétablie, comme à 22 h 51.</p></div>
     <div class="toast toast-ech error" role="alert"><p><b>Erreur :</b> légende non enregistrée, réseau coupé.</p><button type="button">Réessayer</button></div>
-  </div></div></div>
-<div class="mq-ecran large"><p class="mq-etat">État · Dépublier : la raison est demandée</p>
+  </div></div></section>
+<section class="mq-ecran large" aria-labelledby="etat-3"><p class="mq-etat" id="etat-3">État · Dépublier : la raison est demandée</p>
   <div class="voile-a">
     <div class="confirm mq-a" role="dialog" aria-modal="false" aria-labelledby="dd-t" aria-describedby="dd-d"><span class="mq-pin" aria-hidden="true">9</span><form action="/admin/photos/16/depublier" method="post" novalidate>
       <h2 id="dd-t">Dépublier « Foz, la barre » ?</h2>
       <p id="dd-d">La photo quitte la galerie, la série Atlantique et la carte ; son adresse mène à la galerie. Sébastien reçoit la raison. « Republier » la remettra en ligne.</p>
-      <fieldset aria-describedby="dd-e" class="choix-v"><legend id="dd-r">Raison</legend>
+      <fieldset aria-describedby="dd-e" class="choix-a"><legend id="dd-r">Raison</legend>
         <p class="err" id="dd-e"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> choisissez une raison : Sébastien la recevra.</span></p>
         <label class="inline"><input type="radio" name="raison" aria-invalid="true"> Une personne photographiée a retiré son accord</label>
         <label class="inline"><input type="radio" name="raison" aria-invalid="true"> Titre, légende ou lieu à revoir</label>
@@ -264,8 +197,8 @@
       <div class="champ-a"><label for="dd-m">Message pour Sébastien <span class="facultatif">(facultatif)</span></label><textarea id="dd-m" rows="2">On en parle demain ?</textarea></div>
       <div class="actions"><button class="btn ghost" type="button">Annuler</button><button class="btn danger" type="submit">Dépublier la photo</button></div>
     </form></div>
-  </div></div>
-<div class="mq-ecran large"><p class="mq-etat">État · Comptes : désactiver avant de supprimer</p>
+  </div></section>
+<section class="mq-ecran large" aria-labelledby="etat-4"><p class="mq-etat" id="etat-4">État · Comptes : désactiver avant de supprimer</p>
   <div class="ecran-a">
     <h2 class="titre-ecran">Comptes et rôles</h2>
     <div class="comptes mq-a"><span class="mq-pin" aria-hidden="true">10</span>
@@ -279,18 +212,18 @@
         <div class="actions"><button class="btn ghost is-focus" type="button">Annuler</button><button class="btn danger" type="button">Supprimer le compte de Camille</button></div>
       </div>
     </div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Séries et Instagram : rien ne se recharge</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-5"><p class="mq-etat" id="etat-5">État · Séries et Instagram : rien ne se recharge</p>
   <div class="ecran-a mini">
     <h2 class="titre-ecran" style="margin:0">Séries</h2>
     <p class="statut-l mq-a" role="status"><span class="mq-pin" aria-hidden="true">11</span><span class="s" aria-hidden="true">✦</span><span>2 nouvelles suggestions de série sont prêtes.</span><a class="more" href="/admin/photos?serie=suggeree">Les voir</a></p>
     <div class="panel"><div class="champ-a"><label for="ren">Nom de la série</label><input id="ren" class="is-focus" value="Atlantique, de Lisbonne à Porto"></div></div>
     <h2 class="titre-ecran" style="margin:8px 0 0">Instagram</h2>
     <div class="panel ligne-s"><img src="_commun/photos/160/cais.webp" alt="" width="64" height="43" style="border-radius:5px;object-fit:cover"><p><b>Cais do Sodré, marée basse</b><br><span class="hint">Publiée sur Instagram à 22 h 50</span></p><a class="more" href="https://www.instagram.com/" target="_blank" rel="noopener">Voir le post<span class="sr-only"> (nouvel onglet)</span></a></div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Aide : les mots de l’administration</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-6"><p class="mq-etat" id="etat-6">État · Aide : les mots de l’administration</p>
   <div class="ecran-a mq-a"><span class="mq-pin" aria-hidden="true">12</span>
-    <table class="lex"><caption>Un mot, un seul sens</caption>
+    <table class="etats-table"><caption>Un mot, un seul sens</caption>
       <thead><tr><th scope="col">Mot</th><th scope="col">Ce qu’il fait</th></tr></thead>
       <tbody>
         <tr><th scope="row">Annuler</th><td>Ne rien faire : ferme un dialogue sans rien changer.</td></tr>
@@ -301,8 +234,8 @@
         <tr><th scope="row">prête</th><td>Le traitement des images est fini, et rien d’autre.</td></tr>
       </tbody>
     </table>
-  </div></div>
-<div class="mq-ecran large"><p class="mq-etat">État · Photothèque : pastilles et filtres</p>
+  </div></section>
+<section class="mq-ecran large" aria-labelledby="etat-7"><p class="mq-etat" id="etat-7">État · Photothèque : pastilles et filtres</p>
   <div class="ecran-a">
     <nav class="chips mq-a" aria-label="Filtrer par état"><span class="mq-pin" aria-hidden="true">13</span><a class="chip" href="/admin/photos">Toutes<span class="n">26</span></a><a class="chip" href="/admin/photos?etat=brouillon" aria-current="page">Brouillons<span class="n">3</span></a><a class="chip" href="/admin/photos?etat=proposee">Proposées<span class="n">1</span></a><a class="chip" href="/admin/photos?etat=publiee">Publiées<span class="n">22</span></a><a class="chip warn" href="/admin/photos?etat=accord">Accord à vérifier<span class="n">1</span></a><a class="chip" href="/admin/photos?etat=depubliee">Dépubliées<span class="n">0</span></a></nav>
     <ul class="liste-p" aria-label="Photos non publiées">
@@ -312,12 +245,12 @@
       <li><img src="_commun/photos/160/reverberes.webp" alt="" width="64" height="43"><span class="t"><a href="/admin/photos/x">R0004057</a><small>Sébastien · titre provisoire</small></span><span class="ets"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</span></span></li>
     </ul>
     <ul class="etats-legende" aria-label="Légende des états">
-      <li><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</li><li><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Proposée, attend le modérateur</li><li><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Publiée</li><li><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Accord à vérifier</li><li><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg>Dépubliée ou refusée</li>
+      <li class="etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</li><li class="etat--encours"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Proposée, attend le modérateur</li><li class="etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Publiée</li><li class="etat--attention"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Accord à vérifier</li><li class="etat--arret"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg>Dépubliée ou refusée</li>
     </ul>
-  </div></div>
-<div class="mq-ecran large" lang="de"><p class="mq-etat" lang="fr">État · En allemand : quitter, Rückgängig</p>
+  </div></section>
+<section class="mq-ecran large" lang="de" aria-labelledby="etat-8"><p class="mq-etat" id="etat-8" lang="fr">État · En allemand : quitter, Rückgängig</p>
   <div class="ecran-a">
-    <div class="ep mq-a" style="margin-bottom:16px"><span class="mq-pin" aria-hidden="true">14</span><a class="ep-retour" href="/admin/photos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Fotothek</a><div class="ep-titre"><h2 class="titre-ecran" style="margin:0">Foz, die Brandung</h2><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Veröffentlicht</span></div>
+    <div class="ep mq-a" style="margin-bottom:16px"><span class="mq-pin" aria-hidden="true">14</span><a class="ep-retour" href="/admin/photos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Fotothek</a><div class="ep-titre"><h2 class="titre-ecran" style="margin:0" lang="fr">Foz, la barre</h2><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Veröffentlicht</span></div>
       <p class="ep-meta"><span>Sébastien</span><span><a class="enreg enreg--attente" href="#de-q"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>1 Feld nicht gespeichert: Datum</a></span></p></div>
     <div class="voile-a">
       <div class="confirm" role="dialog" aria-modal="false" aria-labelledby="de-q" aria-describedby="de-d">
@@ -326,8 +259,8 @@
         <div class="actions"><button class="btn ghost is-focus" type="button">Abbrechen</button><button class="btn" type="button">Ohne das Datum verlassen</button></div>
       </div>
     </div>
-    <div style="margin-top:24px" class="toast toast-ech " role="status"><p><b>Bildunterschrift</b> gespeichert.</p><button type="button">Rückgängig</button><span class="toast-temps" style="--reste: 55%"></span></div>
-  </div></div>
+    <div style="margin-top:24px" class="toast toast-ech" role="status"><p><b>Bildunterschrift</b> gespeichert.</p><button type="button">Rückgängig</button><span class="toast-temps" style="--reste: 55%"></span></div>
+  </div></section>
 </div>
 <aside class="mq-notes" aria-labelledby="mq-t">
   <p class="mq-id">MQ-09 · administration · thème clair · bureau 1 440 × 900 et Pixel 7 · Julien, administrateur, vendredi 16 oct. 2026, 22 h 58</p>
@@ -349,8 +282,10 @@
     <li><span class="mq-num" aria-hidden="true">13</span><b>Une seule pastille, une légende, des filtres aux noms des états</b><p>○ ◐ ● ▲ ✕, une couleur fixe par symbole, le mot toujours écrit ; la légende sur une ligne sous la liste ; les filtres disent « Brouillons », « Proposées », « Accord à vérifier ».</p><span class="mq-ref">UX-A-16 · RGAA 3.1 · WCAG 1.4.1</span></li>
     <li><span class="mq-num" aria-hidden="true">14</span><b>L’allemand tient</b><p>« 1 Feld nicht gespeichert: Datum », « Ohne das Datum verlassen? », « Rückgängig » : rien n’est coupé, les boutons passent à la ligne au téléphone.</p><span class="mq-ref">Grille, critère 4</span></li>
   </ol>
+  <h3>Composants</h3>
+  <p>Depuis la consolidation du 16 oct., ils sont dans <code>admin-plus.css</code> (planche MQ-00, section Administration) : suggestion longue d’un assistant (<code>.sugg-bloc</code>) · erreur avec sa correction (<code>.err</code>, <code>.err-l</code>) · choix expliqués, ici dans un dialogue (<code>.choix-a</code>) · tableau des mots, le même que celui des états (<code>.etats-table</code>) · légende des états, symbole en couleur (<code>.etats-legende</code>) · messages d’action montrés (<code>.toast-ech</code>, en pause : <code>.pause</code>). Restent locaux : la fiche (photo et formulaire), les comptes, la ligne d’état des séries et la liste de la photothèque.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur, outils/inspect.sh) · axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation au bureau, au téléphone et à 320, 820 et 1 024 px · Débordement horizontal : 0 à 320, 412, 820, 1 024 et 1 440 px · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (outils/mq00-cibles.mjs, liens dans une phrase exemptés) · Poids : 253 ko, 21 requêtes (photo de la fiche en 480 px, 13 ko d’images en tout) ; aucun script, aucune ressource tierce · Focus des champs en clair : 2 px --accent-ink, 4,7:1 (main, 0d1925c) · Sans annotations : 14 pastilles, 8 étiquettes et cadres retirés ; 0 pixel déplacé hors de leur emprise sur 4 512 px au bureau et 6 908 px au téléphone (1 px d’anticrénelage).</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>consolidation du 16 oct. 2026</b> (outils/consol-admin.mjs, consol-sans-admin.py, Chromium de Playwright 1.64 en conteneur) : axe-core 0 violation au bureau (1 440 × 900, clair) et au téléphone (Pixel 7, clair) ; 0 débordement ni texte coupé à 320, 412, 820, 1 024 et 1 440 px ; 0 cible sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px ; sans annotations, 0 pixel changé hors des pastilles, étiquettes et cadres, au bureau comme au téléphone ; 218 ko et 15 ressources, images différées chargées, polices comprises ; barre latérale dans 900 px · <b>refonte</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur, outils/inspect.sh) · axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation au bureau, au téléphone et à 320, 820 et 1 024 px · Débordement horizontal : 0 à 320, 412, 820, 1 024 et 1 440 px · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (outils/mq00-cibles.mjs, liens dans une phrase exemptés) · Poids : 253 ko, 21 requêtes (photo de la fiche en 480 px, 13 ko d’images en tout) ; aucun script, aucune ressource tierce · Focus des champs en clair : 2 px --accent-ink, 4,7:1 (main, 0d1925c) · Sans annotations : 14 pastilles, 8 étiquettes et cadres retirés ; 0 pixel déplacé hors de leur emprise sur 4 512 px au bureau et 6 908 px au téléphone (1 px d’anticrénelage).</p>
 </aside>
 </body>
 </html>

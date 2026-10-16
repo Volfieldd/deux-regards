@@ -3,7 +3,11 @@
    et tokens.css. N'ajoute que ce qui manque à admin.css, avec ses jetons ; ne redessine pas ce qui marche.
    1 barre latérale unique · 2 en-tête de page type (+ barre basse au téléphone) · 3 trois boutons
    4 pastille d'état et tableau des états · 5 enregistrement · 6 message d'action · 7 formulaire type
-   8 dialogue de confirmation
+   8 dialogue de confirmation · 9 listes et objets · 10 panneaux, signalements, secrets, suggestions
+   11 Réglages : onglets, interrupteur, carte d'assistant · 12 éditeur de billet · 13 aperçu « comme sur le site »
+   14 montrer un état dans une maquette (hors produit)
+   Consolidation du 16 oct. 2026 : les composants que MQ-07 à MQ-09 et MQ-18 à MQ-20 avaient ajoutés passent ici,
+   un seul par besoin (voir MQ-00, section Administration).
    ===================================================================================================== */
 
 /* ---------- 1. Barre latérale unique ----------
@@ -51,6 +55,33 @@
 .admin .pied-liens .admin-lang li [aria-current] { font-weight: 500; }
 .admin .me { min-height: 40px; }
 .admin .me .who small { font-size: 12px; }
+/* Haut de la barre : le nom du site et, au téléphone, « Fermer » (44 px) : le panneau se ferme sans chercher l'onglet Menu. */
+.admin .side-haut { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.admin .side-fermer { display: none; }
+@media (max-width: 720px) { .admin .side-fermer { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; margin: -6px 0 0;
+  border-radius: var(--r-admin); color: var(--ink); font-size: 14px; box-shadow: inset 0 0 0 1px var(--line2); } }
+/* Le nom du compte ouvre « Mon compte » (langue, thème, raccourcis, e-mail des avis) : souligné, sa ligne entière est la cible. */
+.admin .me-lien { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; min-height: 40px; padding: 0 4px; border-radius: 8px; }
+.admin .me-lien:hover { background: var(--s2); }
+.admin .me-lien[aria-current] { background: var(--s3); }
+.admin .me-lien .me-nom { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field-line); }
+@media (max-width: 720px), (pointer: coarse) { .admin .me-lien { min-height: 44px; } }
+/* Bouton de thème : une icône par mode (admin.css .when-dark / .when-light), le nom lu suit le mode affiché. */
+.admin .btn-theme > span { display: none; } .admin .btn-theme > .when-dark { display: contents; }
+[data-theme="light"] .admin .btn-theme > .when-dark { display: none; } [data-theme="light"] .admin .btn-theme > .when-light { display: contents; }
+.admin[data-theme="light"] .btn-theme > .when-dark { display: none; } .admin[data-theme="light"] .btn-theme > .when-light { display: contents; }
+@media (prefers-color-scheme: light) { :root:not([data-theme]) .admin .btn-theme > .when-dark { display: none; } :root:not([data-theme]) .admin .btn-theme > .when-light { display: contents; } }
+/* Barre de 220 px (tablette, 721 à 1 180 px) : « Ctrl K » se masque au lieu de passer à la ligne ; le thème se règle
+   dans Mon compte, pour que le nom et le rôle restent entiers. */
+.admin .cmdk span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin .cmdk kbd { white-space: nowrap; }
+/* Palette Ctrl K (admin.css) : intitulés de groupe et touches à 12 px. */
+.admin .pal-list .sec, .admin .palette kbd { font-size: 12px; }
+@media (max-width: 1180px) and (min-width: 721px) { .admin .cmdk kbd, .admin .me .btn-theme { display: none; } .admin .me { gap: 4px; } }
+/* Variante du rôle Photographe (MQ-00) : les mêmes groupes, filtrés par les permissions (server/permissions.js) ; aucun
+   groupe vide. Photos (ses séries, comptées sur ses photos) · Personnes (sans Signalements) · Publier : Mes propositions,
+   Carnets, Galeries privées, Boutique · Équipe : Statistiques seules ; au pied, Aide et Voir le site, sans Réglages.
+   Icônes : Carnets, une page ; Journal, une horloge (UX-A-11). */
 
 /* ---------- 2. En-tête de page type ----------
    Retour (« ← Photothèque » sur une fiche) · H1 Jost 300 · pastille d'état · une ligne de méta (dont l'enregistrement)
@@ -78,6 +109,15 @@
   .ep-actions .menu { flex: 0 0 auto; }
 }
 @media (min-width: 721px) { .ep-actions .ep-plus { display: none; } }
+/* Barre d'onglets du téléphone (admin.css) : ses libellés à 12 px, comme tout le texte de l'admin. */
+@media (max-width: 720px) { .admin .tabbar a, .admin .tabbar button { font-size: 12px; } }
+/* Titre d'un autre écran montré dans la même page : le dessin du H1, au niveau 2 du plan. */
+.main .ep .h1 { margin: 0; font-size: var(--at-h1); font-weight: 300; line-height: 1.12; overflow-wrap: anywhere; }
+@media (max-width: 720px) { .main .ep .h1 { font-size: 28px; } }
+/* Méta au téléphone : un élément par ligne, sans « · » orphelin en début de ligne. */
+@media (max-width: 720px) { .ep-meta { display: grid; justify-items: start; gap: 2px; } .ep-meta > * + *::before { content: none; } }
+/* « Aide sur cette page » : le texte est souligné, pas le bas de sa cible de 44 px (admin.css). */
+.admin .help-link a { border-bottom: 0; text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---------- 3. Trois boutons : plein (une fois par écran, toujours le dernier), contour, danger ----------
    Danger : en contour dans les pages ; plein seulement pour l'action finale d'un dialogue de confirmation.
@@ -101,12 +141,20 @@
 .etat--arret { color: var(--st-arret); }
 /* Légende sous une liste : une ligne, les symboles et les mots du domaine. */
 .etats-legende { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 12px 0 0; padding: 0; list-style: none; color: var(--ink3); font-size: 12px; }
-.etats-legende li { display: inline-flex; align-items: center; gap: 6px; }
+.etats-legende li { display: inline-flex; align-items: center; gap: 6px; color: var(--ink3); }
+/* Le symbole garde la couleur de son état, le mot reste en --ink3 : <li class="etat--encours">. */
+.etats-legende li.etat--afaire .ic { color: var(--st-afaire); } .etats-legende li.etat--encours .ic { color: var(--st-encours); }
+.etats-legende li.etat--abouti .ic { color: var(--st-abouti); } .etats-legende li.etat--attention .ic { color: var(--st-attention); }
+.etats-legende li.etat--arret .ic { color: var(--st-arret); }
 /* Tableau des états (référence, page Aide) */
 .etats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .etats-table th, .etats-table td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
 .etats-table thead th { color: var(--ink2); font-weight: 500; }
 .etats-table tbody th { color: var(--ink); font-weight: 500; white-space: nowrap; }
+/* Le même tableau sert aux mots de l'administration (« Un mot, un seul sens », page Aide) ; sous 540 px, une ligne par entrée. */
+.etats-table caption { padding-bottom: 8px; text-align: left; color: var(--ink); font-size: var(--at-h3); font-weight: 500; }
+@media (max-width: 540px) { .etats-table, .etats-table tbody, .etats-table tr, .etats-table td, .etats-table th { display: block; } .etats-table thead { display: none; }
+  .etats-table tr { padding: 8px 0; border-bottom: 1px solid var(--line); } .etats-table th, .etats-table td { padding: 2px 0; border: 0; } .etats-table tbody th { white-space: normal; } }
 
 /* ---------- 5. Enregistrement : une règle, un témoin ----------
    Ce qui se défait s'enregistre seul, champ par champ, à la sortie du champ ; le témoin le dit dans la méta
@@ -145,15 +193,66 @@ a.enreg { text-decoration: underline; text-underline-offset: 3px; text-decoratio
 .champ-a > label, .champ-a > .lb { display: block; color: var(--ink); font-size: 13px; font-weight: 500; }
 .champ-a .facultatif { color: var(--ink3); font-weight: 400; }
 .champ-a .aide { margin: 0; color: var(--ink3); font-size: 12px; line-height: 1.45; }
-.champ-a .err { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--danger); font-size: 13px; line-height: 1.45; }
-.champ-a .err .ic { width: 14px; height: 14px; margin-top: 2px; }
-.champ-a .err b { font-weight: 600; }
+/* Erreur : sous le champ, et de même dessin hors d'un champ (groupe de choix, dialogue, photo d'un billet, choix de fichier). */
+.err { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--danger); font-size: 13px; line-height: 1.45; }
+.err .ic { flex: none; width: 14px; height: 14px; margin-top: 2px; }
+.err b { font-weight: 600; }
+.confirm p.err, .dialog p.err { color: var(--danger); margin: 0 0 8px; }
+.err-l { display: grid; gap: 6px; justify-items: start; }
 .champ-a [aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--danger) !important; }
 .resume-a { display: grid; gap: 6px; margin: 0 0 18px; padding: 12px 16px; border-radius: var(--r); background: var(--danger-soft); box-shadow: inset 3px 0 0 var(--danger); }
 .resume-a h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px; font-weight: 500; }
 .resume-a h2 .ic { color: var(--danger); }
 .resume-a ul { margin: 0; padding-left: 20px; }
-.resume-a a { text-decoration: underline; text-underline-offset: 3px; }
+.resume-a a { display: inline-flex; align-items: center; min-height: 24px; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .resume-a a { min-height: 44px; } }
+/* Champs : 16 px au téléphone (pas de zoom forcé sur iOS). */
+@media (max-width: 720px) { .admin input:not([type="checkbox"]):not([type="radio"]), .admin select, .admin textarea { font-size: 16px; } }
+/* Relecture d'une saisie libre (date, ville d'après le GPS) : la machine dit ce qu'elle a compris, sous le champ. */
+.lu { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.lu .ic { flex: none; color: var(--ok); }
+/* Point d'attention dans une ligne (▲ Accord à vérifier, titre provisoire) : symbole et mot, en --warn. */
+.att { display: inline-flex; align-items: center; gap: 4px; color: var(--warn); font-size: 12px; font-weight: 500; }
+a.att { min-height: 24px; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { a.att { min-height: 44px; } }
+/* Symboles d'état dans une phrase : alignés sur le texte. */
+.confirm p .ic, .att .ic, .enreg .ic, .ecran-a p > .ic { display: inline-block; vertical-align: -1px; }
+/* Libellé avec, à droite, un compteur ou un choix d'affichage ; compteur de signes ; signalement d'un champ (▲ sans erreur). */
+.champ-a .lb-l { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.champ-a .lb-l label { color: var(--ink); font-size: 13px; font-weight: 500; }
+.compteur { color: var(--ink3); font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 400; }
+.compteur.trop { color: var(--warn); }
+.avert { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.avert .ic { flex: none; color: var(--warn); margin-top: 3px; }
+/* Choix (cases et boutons radio) avec leur explication : 32 px au bureau, 44 au toucher ; --ligne : côte à côte. */
+.choix-a { display: grid; gap: 4px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.choix-a > legend { padding: 0; margin: 0 0 6px; color: var(--ink); font-size: var(--at-petit); font-weight: 500; }
+.choix-a > .aide { margin: -2px 0 6px; color: var(--ink3); font-size: 12px; }
+.choix-a > .err { margin: 0 0 4px; }
+.choix-a label { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 0 8px; align-items: start; min-height: 32px; padding: 4px 0; color: var(--ink); font-size: var(--at-texte); font-weight: 400; cursor: pointer; }
+.choix-a label input { margin: 1px 3px 0; }
+.choix-a label .sec { grid-column: 2; color: var(--ink3); font-size: 12px; line-height: 1.45; }
+.choix-a label.inactif { color: var(--ink3); cursor: default; }
+.choix-a--ligne { display: flex; flex-wrap: wrap; gap: 0 24px; }
+.choix-a--ligne > legend { flex-basis: 100%; }
+.choix-a--ligne > :is(.aide, .hint, .err) { flex-basis: 100%; }
+@media (max-width: 720px), (pointer: coarse) { .choix-a label { min-height: 44px; padding: 10px 0; } .choix-a label input { width: 22px; height: 22px; margin: 0 1px; } }
+/* Pied de formulaire : ce qui n'est pas encore enregistré à gauche, puis [Annuler] et l'action, le seul bouton plein, en dernier. */
+.form-pied { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px 12px; padding-top: 16px; border-top: 1px solid var(--line); }
+.form-pied .hint, .form-pied .mod { margin-right: auto; }
+.mod { display: inline-flex; align-items: center; gap: 6px; color: var(--ink2); font-size: 13px; }
+.mod::before { content: ''; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-ink); }
+@media (max-width: 720px) { .form-pied { flex-direction: column; align-items: stretch; } .form-pied .hint, .form-pied .mod { margin: 0; } }
+/* Choix de fichier : un bouton en contour qui dit ce qu'il fait ; le champ natif le recouvre (clavier, lecteur d'écran) ;
+   refusé, le bouton prend le filet de l'erreur et l'erreur s'écrit dessous. */
+.fichier-w { position: relative; display: inline-flex; }
+.fichier { display: inline-flex; align-items: center; gap: 8px; }
+.fichier-i { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; }
+.fichier-w:has(.fichier-i:focus-visible) .fichier { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+.fichier-w:has([aria-invalid="true"]) .fichier { box-shadow: inset 0 0 0 1.5px var(--danger); }
+/* Case d'une ligne de tableau : son libellé fait la cible, 32 px au bureau, 44 au toucher. */
+.chk-l { display: inline-grid; place-items: center; width: 32px; height: 32px; margin: 4px 0 0 -7px; cursor: pointer; }
+@media (max-width: 720px), (pointer: coarse) { .chk-l { width: 44px; height: 44px; margin: 0; } }
 
 /* ---------- 8. Dialogue de confirmation ----------
    Titre = la question avec l'objet ; une phrase qui dit les conséquences ; [Annuler] puis [action qui répète
@@ -165,3 +264,275 @@ a.enreg { text-decoration: underline; text-underline-offset: 3px; text-decoratio
 .confirm p { margin: 0 0 12px; color: var(--ink2); }
 .confirm .actions { justify-content: flex-end; margin-top: 20px; }
 @media (max-width: 720px) { .confirm .actions { flex-direction: column; align-items: stretch; } }
+
+/* ---------- 9. Listes et objets ----------
+   Une liste de l'admin est un tableau (.liste-a), en cartes sous 1 100 px ; un objet avec sa vignette et son état
+   (.objets-a : photo d'un billet, favori) ; les lignes d'une commande (.lignes-a, .total-a) ; des paires clé-valeur (.kv-a) ;
+   une chronologie (.chrono, du plus récent au plus ancien) ; des étapes (.etapes-a, ✓ fait · ● maintenant · ○ ensuite) ;
+   le registre d'une édition (.registre, une case par numéro). Les filtres au-dessus d'une liste : .filtres-l. */
+.tablewrap, .onglets ul { position: relative; }
+@media (max-width: 720px), (pointer: coarse) { .chips .chip { min-height: 44px; } }
+.filtres-l { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin: 0 0 14px; }
+.btns-ligne { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.lien-a { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink2); font-size: var(--at-petit); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .lien-a { min-height: 44px; } }
+.liste-a { width: 100%; border-collapse: collapse; background: var(--s1); font-size: var(--at-texte); }
+.liste-a caption { padding: 12px 14px; text-align: left; color: var(--ink2); font-size: var(--at-petit); caption-side: top; }
+.liste-a th, .liste-a td { padding: 12px 14px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+.liste-a thead th { color: var(--ink2); font-size: var(--at-min); font-weight: 500; letter-spacing: .04em; white-space: nowrap; }
+.liste-a tbody th { font-weight: 500; }
+.liste-a .sec { display: block; margin-top: 2px; color: var(--ink3); font-size: var(--at-petit); font-weight: 400; }
+.liste-a .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.liste-a tr.choisie { background: var(--accent-soft); }
+.liste-a a.ligne-lien { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; }
+.liste-a a.ligne-lien:hover { text-decoration-color: currentColor; }
+.ref { font-family: var(--mono); font-size: 13px; font-weight: 400; letter-spacing: 0; white-space: nowrap; }
+.liste-a .langue { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--line2); color: var(--ink2); font-size: 12px; font-weight: 500; line-height: 18px; text-decoration: none; }
+@media (max-width: 1100px) {
+  .liste-wrap { overflow: visible; box-shadow: none; border-radius: 0; }
+  .liste-a, .liste-a tbody { display: block; background: transparent; }
+  .liste-a caption { display: block; padding: 0 0 10px; }
+  .liste-a thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  /* Une carte par ligne : en tête l'objet (et le montant), puis l'état, puis le reste ; les données courtes vont par deux. */
+  .liste-a tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 16px; margin: 0 0 12px; padding: 14px 16px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+  .liste-a td, .liste-a th { display: block; padding: 0; border: 0; min-width: 0; grid-column: 1 / -1; }
+  .liste-a th[scope="row"] { grid-column: 1; }
+  .liste-a .c-haut { grid-column: 2; grid-row: 1; text-align: right; }
+  .liste-a .c-etat { grid-row: 2; }
+  .liste-a .c-demi { grid-column: auto; }
+  .liste-a .c-demi[data-label]::before { content: attr(data-label); display: block; color: var(--ink3); font-size: var(--at-min); }
+  .liste-a .num { text-align: right; }
+}
+@media (max-width: 1100px) and (min-width: 721px) { .liste-a tbody { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; } .liste-a tr { margin: 0; } }
+@media (max-width: 720px), (pointer: coarse) { .liste-a a.ligne-lien { min-height: 44px; } }
+/* Sous une liste : sa légende, une phrase, un lien. */
+.pied-liste { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; margin: 12px 0 0; color: var(--ink3); font-size: 12px; }
+.pied-liste .etats-legende { margin: 0; }
+/* Pastilles de photos d'une galerie ou d'un billet (160 px), dans l'ordre. */
+.vignettes-a { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.vignettes-a li { margin: 0; }
+.vignettes-a img { display: block; height: 56px; width: auto; border-radius: 4px; background: var(--photo-bg); }
+/* Objet avec sa vignette, son état, sa phrase et ses issues. */
+.objets-a { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.objets-a > li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 4px 14px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
+.objets-a > li:first-child { border-top: 0; padding-top: 0; }
+.objets-a img { width: 64px; height: auto; border-radius: 4px; background: var(--photo-bg); grid-row: span 3; }
+.objets-a .t { font-weight: 500; }
+.objets-a .t .sec { display: block; color: var(--ink3); font-size: var(--at-petit); font-weight: 400; }
+.objets-a .n { margin-right: 4px; color: var(--ink3); font-variant-numeric: tabular-nums; }
+.objets-a .etat { justify-self: start; }
+.objets-a > li > :is(.detail, .err, .actions) { grid-column: 2; }
+.objets-a .detail { margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.objets-a .actions { gap: 6px 8px; }
+.objets-a .actions .btn, .signal .actions .btn, .sugg-bloc .btn { min-height: 32px; padding: 0 12px; font-size: 13px; }
+@media (max-width: 720px), (pointer: coarse) { .objets-a .actions .btn, .signal .actions .btn, .sugg-bloc .btn { min-height: 44px; } }
+/* Lignes d'une commande : vignette, tirage, prix ; total sous un filet. */
+.lignes-a { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.lignes-a li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 2px 14px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
+.lignes-a li:first-child { border-top: 0; padding-top: 0; }
+.lignes-a li.sans-img { grid-template-columns: minmax(0, 1fr) auto; }
+.lignes-a img { width: 64px; height: auto; border-radius: 4px; background: var(--photo-bg); }
+.lignes-a .t { font-weight: 500; } .lignes-a .sec { display: block; color: var(--ink3); font-size: var(--at-petit); }
+.lignes-a .prix { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.lignes-a .ex { font-family: var(--mono); font-size: 13px; color: var(--ink2); letter-spacing: 0; }
+.total-a { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 4px 0 0; padding-top: 12px; border-top: 1px solid var(--line2); font-size: var(--at-h3); font-weight: 500; }
+.total-a + .hint { margin: 6px 0 0; }
+.kv-a { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 0; font-size: var(--at-texte); }
+.kv-a dt { color: var(--ink3); } .kv-a dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.kv-a .sec { display: block; color: var(--ink3); font-size: var(--at-petit); }
+.chrono { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; font-size: var(--at-texte); }
+.chrono li { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 2px 14px; padding: 9px 0; border-top: 1px solid var(--line); }
+.chrono li:first-child { border-top: 0; }
+.chrono time { color: var(--ink3); font-size: var(--at-petit); font-variant-numeric: tabular-nums; }
+.chrono .sec { color: var(--ink3); font-size: var(--at-petit); }
+@media (max-width: 720px) { .chrono li { grid-template-columns: 1fr; } }
+.etapes-a { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.etapes-a li { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 2px 10px; padding: 0 0 16px; }
+.etapes-a li::before { content: ''; position: absolute; left: 11px; top: 24px; bottom: 0; width: 2px; background: var(--line2); }
+.etapes-a li:last-child { padding-bottom: 0; } .etapes-a li:last-child::before { display: none; }
+.etapes-a .m { position: relative; z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink3); background: var(--s1); }
+.etapes-a .fait .m { box-shadow: none; background: var(--s3); color: var(--ok); }
+.etapes-a .maintenant .m { box-shadow: inset 0 0 0 2px var(--accent-ink); color: var(--accent-ink); }
+.etapes-a .t { font-weight: 500; } .etapes-a .ensuite .t { color: var(--ink2); font-weight: 400; }
+.etapes-a .sec { grid-column: 2; color: var(--ink3); font-size: var(--at-petit); }
+.etapes-a .maintenant .t::before { content: 'Maintenant · '; color: var(--accent-ink); }
+.etapes-a .maintenant .t:lang(de)::before { content: 'Jetzt · '; } .etapes-a .maintenant .t:lang(en)::before { content: 'Now · '; }
+.registre { display: grid; grid-template-columns: repeat(15, minmax(0, 18px)); gap: 3px; margin: 0; }
+.registre span { height: 18px; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--line2); }
+.registre span.v { background: var(--ink3); box-shadow: none; }
+.registre span.ici { background: var(--accent); box-shadow: none; }
+
+/* ---------- 10. Panneaux, signalements, secrets, suggestions ----------
+   .deux-col : le formulaire, puis sa colonne d'appui (une colonne sous 1 180 px). .signal : non bloquant, ▲, une phrase,
+   deux issues. .note-a : une note grise avec son icône (ce que fait un bouton, ce que permet votre rôle). .secret : affiché
+   une seule fois, en Plex Mono. .courriel : un e-mail en texte seul. .sugg : la pastille « ✦ Suggestion : Rue », qu'un clic
+   accepte ; .sugg-bloc : une suggestion longue (description, traduction), toujours à relire. .plier : des réglages repliés
+   dont la ligne dit le contenu. .bar.jauge : une jauge (poids d'une page), la barre de progression d'admin.css. */
+.deux-col { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 24px; align-items: start; }
+@media (max-width: 1180px) { .deux-col { grid-template-columns: minmax(0, 1fr); } }
+.cote { display: grid; gap: 0; min-width: 0; }
+.main .panel > h2, .main .panel > h3, .main .panel > .panel-t { margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
+.panel > .aide-panel { margin: -6px 0 14px; color: var(--ink3); font-size: var(--at-petit); }
+.signal { display: grid; gap: 8px; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 3px 0 0 var(--warn); }
+.signal p { margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.signal .signal-t { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: var(--at-texte); font-weight: 500; }
+.signal .signal-t .ic { flex: none; color: var(--warn); }
+.note-a { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 0 10px; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s2); color: var(--ink2); font-size: var(--at-petit); }
+.note-a > .ic { color: var(--ink2); margin-top: 2px; }
+.note-a p { margin: 0; } .note-a b { color: var(--ink); font-weight: 500; }
+.secrets { display: grid; gap: 12px; }
+.secret { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; padding: 14px 16px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); }
+.secret .lb { grid-column: 1 / -1; color: var(--ink2); font-size: var(--at-petit); font-weight: 500; }
+.secret output { font-family: var(--mono); font-size: 15px; letter-spacing: .02em; color: var(--ink); overflow-wrap: anywhere; }
+.secret output.mdp { font-size: 26px; letter-spacing: .08em; }
+.secret .aide { grid-column: 1 / -1; margin: 0; color: var(--ink3); font-size: 12px; }
+@media (max-width: 720px) { .secret { grid-template-columns: 1fr; } .secret output.mdp { font-size: 22px; } }
+.courriel { margin: 0; padding: 18px 20px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); font-size: var(--at-texte); line-height: 1.6; }
+.courriel dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px 12px; margin: 0 0 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line2); font-size: var(--at-petit); }
+.courriel dt { color: var(--ink3); } .courriel dd { margin: 0; overflow-wrap: anywhere; }
+.courriel p { margin: 0 0 10px; max-width: 64ch; } .courriel p:last-child { margin-bottom: 0; }
+.courriel .bas { color: var(--ink3); font-size: var(--at-petit); }
+.donnee { font-family: var(--mono); font-size: 13px; letter-spacing: 0; overflow-wrap: anywhere; }
+.sugg { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 12px 0 10px; border: 0; border-radius: 999px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2);
+  color: var(--ink); font: inherit; font-size: 12.5px; cursor: pointer; white-space: nowrap; }
+.sugg .s, .sugg-bloc .s { color: var(--accent-ink); }
+.sugg .acc { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; font-weight: 500; }
+.sugg:hover { background: var(--s2); }
+@media (max-width: 720px), (pointer: coarse) { .sugg { min-height: 44px; } }
+.sugg-bloc { display: grid; gap: 8px; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2); color: var(--ink); font-size: var(--at-petit); }
+.sugg-bloc p { margin: 0; }
+.sugg-bloc .t { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.sugg-bloc .hint { color: var(--ink2); }
+.sugg-bloc .actions, .sugg-bloc > .btn { justify-self: start; }
+.plier > summary { display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; list-style: none; font-weight: 500; }
+.plier > summary::-webkit-details-marker { display: none; }
+.plier > summary .ic { flex: none; transition: transform .15s; }
+.plier[open] > summary .ic { transform: rotate(90deg); }
+.plier > summary .sec { display: block; color: var(--ink3); font-size: 12px; font-weight: 400; }
+@media (max-width: 720px), (pointer: coarse) { .plier > summary { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .plier > summary .ic { transition: none; } }
+.bar.jauge { margin: 6px 0 4px; }
+.bar.jauge i { background: var(--ok); }
+.dlg-cons { margin: 0 0 12px; padding-left: 20px; color: var(--ink2); font-size: var(--at-petit); }
+.dlg-cons li { margin: 3px 0; }
+
+/* ---------- 11. Réglages : onglets, interrupteur, carte d'assistant ----------
+   Onglets : des liens vers des sous-pages (/admin/reglages/assistants), utilisables sans JavaScript ; l'onglet courant
+   porte aria-current et un trait ; au téléphone, la rangée défile et s'ouvre sur l'onglet courant.
+   Interrupteur : <input type="checkbox" role="switch">, le mot (Allumé, Éteint) à côté, 44 px de cible ; il s'enregistre au geste.
+   Carte d'assistant : titre et interrupteur sur une ligne, une phrase d'effet, son état ; le jargon replié pour l'administrateur. */
+.onglets { margin: 0 -16px 32px; }
+.onglets ul { display: flex; gap: 0 28px; margin: 0; list-style: none; overflow-x: auto; scrollbar-width: none; box-shadow: inset 0 -1px 0 var(--line2); scroll-padding-inline: 32px; padding-inline: 16px;
+  mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent); }
+.onglets ul::-webkit-scrollbar { display: none; }
+.onglets li { flex: none; }
+.onglets a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; border-bottom: 2px solid transparent; color: var(--ink2); font-size: 14px; white-space: nowrap; }
+.onglets a:hover { color: var(--ink); }
+.onglets a[aria-current] { color: var(--ink); font-weight: 500; border-bottom-color: var(--accent-ink); scroll-initial-target: nearest; }
+.onglet-alerte { display: inline-flex; align-items: center; gap: 4px; color: var(--warn); font-size: 12px; font-weight: 500; }
+@media (max-width: 720px) { .onglets { margin-bottom: 24px; } .onglets ul { gap: 0 22px; } }
+.inter { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--ink); font-size: 14px; font-weight: 500; cursor: pointer; flex: none; }
+.inter input { position: absolute; right: 0; top: 50%; translate: 0 -50%; width: 44px; height: 24px; margin: 0; opacity: 0; cursor: pointer; }
+.inter-piste { position: relative; flex: none; width: 44px; height: 24px; border-radius: 999px; background: var(--s2); box-shadow: inset 0 0 0 1.5px var(--field-line); }
+.inter-piste::after { content: ''; position: absolute; top: 4px; left: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--field-line); transition: transform .15s; }
+.inter input:checked + .inter-piste { background: var(--accent-ink); box-shadow: none; }
+.inter input:checked + .inter-piste::after { transform: translateX(20px); background: var(--s1); }
+.inter input:focus-visible + .inter-piste { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .inter-piste::after { transition: none; } }
+.assist { display: grid; gap: 10px; }
+.assist-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 44px; }
+.assist-tete h3 { margin: 0; font-size: 17px; font-weight: 500; }
+.assist p { margin: 0; }
+.assist-effet { color: var(--ink2); max-width: 62ch; }
+.assist-etat { color: var(--ink2); font-size: 13px; }
+.assist-etat .ic { display: inline-block; vertical-align: -1px; margin-right: 6px; }
+.assist-etat b { color: var(--ink); font-weight: 500; }
+.assist-etat .ok { color: var(--ok); } .assist-etat .cours { color: var(--accent-ink); } .assist-etat .af { color: var(--ink2); }
+.assist-serveur > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; color: var(--ink2); font-size: 13px; cursor: pointer; list-style: none; }
+.assist-serveur > summary::-webkit-details-marker { display: none; }
+.assist-serveur > summary .ic { transition: transform .15s; } .assist-serveur[open] > summary .ic { transform: rotate(90deg); }
+@media (max-width: 720px), (pointer: coarse) { .assist-serveur > summary { min-height: 44px; } }
+.assist-serveur dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 8px 0 12px; padding: 12px 16px; border-radius: var(--r); background: var(--s2); font-size: 13px; }
+.assist-serveur dt { color: var(--ink2); } .assist-serveur dd { margin: 0; color: var(--ink); }
+.assist-serveur code { font: 400 12px var(--mono); }
+@media (max-width: 540px) { .assist-serveur dl { grid-template-columns: minmax(0, 1fr); } .assist-serveur dd { margin-bottom: 6px; } }
+
+/* ---------- 12. Éditeur de billet ----------
+   Corps en Markdown restreint (étude B17) : une barre de vrais boutons, la source, une ligne d'aide et de compte ;
+   les langues en onglets avec leur état ; la colonne d'appui à droite (photos du billet, publication, réglages repliés). */
+.editeur-grille { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
+@media (max-width: 1180px) { .editeur-grille { grid-template-columns: minmax(0, 1fr); } }
+.edit-langues { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
+.edit-langues .seg a { gap: 8px; }
+.edit-langues .seg .st-l { color: var(--ink3); font-size: 12px; }
+.edit-langues .seg a[aria-current] .st-l { color: var(--ink2); }
+@media (max-width: 720px), (pointer: coarse) { .edit-langues .seg a { min-height: 44px; } }
+@media (max-width: 360px) { .edit-langues .seg a { padding: 0 7px; gap: 4px; } }
+.admin textarea.auto { field-sizing: content; min-height: 0; }
+.barre-outils { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px; border-radius: var(--r-admin) var(--r-admin) 0 0; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); }
+.barre-outils button { min-height: 32px; min-width: 32px; padding: 0 10px; border-radius: 7px; color: var(--ink); font-size: 13px; }
+.barre-outils button:hover { background: var(--s3); }
+.barre-outils .sep { width: 1px; margin: 4px; background: var(--line2); }
+@media (max-width: 720px), (pointer: coarse) { .barre-outils button { min-height: 44px; min-width: 44px; } }
+.source { min-height: 420px; border-radius: 0 0 var(--r-admin) var(--r-admin) !important; font-size: 15px; line-height: 1.7; }
+.source.court { min-height: 0; border-radius: var(--r-admin) !important; }
+.sous-source { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; margin: 0; color: var(--ink3); font-size: 12px; }
+.sous-source a { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .sous-source a { min-height: 44px; } }
+
+/* ---------- 13. Aperçu « comme sur le site » ----------
+   Dans l'admin, une page montrée avec les jetons du site (tokens.css : .mode-nuit ou .mode-jour, .theme-nicephos), à la
+   taille de lecture ; un bandeau dit qu'elle n'est pas publiée ; une photo non publiée y est signalée. */
+.apercu-site { padding: 0 0 40px; border-radius: var(--r-admin-panneau); overflow: hidden; font-family: var(--sans); }
+.apercu-site .bandeau { margin: 0; padding: 8px 16px; background: var(--safelight); color: var(--on-accent); font-size: 13px; font-weight: 500; }
+.apercu-site .corps { max-width: 640px; margin: 0 auto; padding: 32px 24px 0; }
+.apercu-site .rub { margin: 0; color: var(--mute); font-size: 13px; letter-spacing: var(--capitales); text-transform: uppercase; }
+.apercu-site .tt { margin: 8px 0; font-size: 40px; font-weight: 300; line-height: var(--i-serre); color: var(--ink); }
+.apercu-site .par { margin: 0 0 20px; color: var(--mute); font-size: 14px; }
+.apercu-site .chapo { margin: 0 0 24px; color: var(--ink); font-size: 20px; line-height: 1.5; font-weight: 400; }
+.apercu-site p.prose { margin: 0 0 18px; color: var(--prose); font-size: var(--t-prose); line-height: 1.7; }
+.apercu-site .h4 { margin: 28px 0 12px; color: var(--ink); font-size: 24px; font-weight: 400; }
+.apercu-site figure { margin: 24px 0; }
+.apercu-site figure img { display: block; width: 100%; height: auto; }
+.apercu-site figcaption { margin-top: 8px; color: var(--mute); font-size: 13px; }
+.apercu-site .np img { outline: 2px dashed var(--safelight); outline-offset: -2px; }
+.apercu-site .np b { color: var(--safelight); font-weight: 500; }
+@media (max-width: 720px) { .apercu-site .tt { font-size: 32px; } .apercu-site .corps { padding: 24px 16px 0; } }
+
+/* ---------- 14. Montrer un état dans une maquette (hors produit) ----------
+   Les autres états d'un écran vont dans la zone .mq-etats d'annotations.css (sous la coquille ou dans .main), un cadre
+   <section class="mq-ecran" aria-labelledby="…"> par état, nommé par son étiquette .mq-etat. Ce qui suit fige, pour la
+   capture, ce qui dans l'interface est en bas de l'écran, en modal ou au focus : rien de ceci n'est livré. */
+.admin > .mq-etats { padding-inline: max(var(--gut), 16px); }
+.admin .mq-etats--grille { grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr)); }
+.mq-etats .mq-etats { padding-top: 0; }
+.ecran-a { min-width: 0; padding: 24px; border-radius: var(--r-admin-panneau); background: var(--bg); box-shadow: inset 0 0 0 1px var(--line2); }
+.ecran-a > :first-child:not(.mq-pin) { margin-top: 0; } .ecran-a > :last-child { margin-bottom: 0; }
+.ecran-a h2 { margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
+.ecran-a h3 { margin: 0 0 8px; font-size: var(--at-h3); font-weight: 500; }
+.ecran-a .titre-ecran { margin: 0 0 16px; font-size: 28px; font-weight: 300; line-height: 1.15; }
+@media (max-width: 720px) { .ecran-a { padding: 16px; } }
+/* Un dialogue montré ouvert, sur le voile de la page (la colonne ne déborde jamais : minmax(0, 1fr)). */
+.voile-a { display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; min-width: 0; padding: 40px 24px; border-radius: var(--r-admin-panneau); background: linear-gradient(var(--scrim), var(--scrim)), var(--bg); }
+.voile-a > :is(.confirm, .dialog) { position: static; display: block; margin: 0; width: min(560px, 100%); max-width: 100%; }
+.voile-a > .dialog { width: min(640px, 100%); }
+.voile-a > .dialog h2 { margin: 0 0 4px; font-size: 20px; font-weight: 500; }
+.voile-a > .dialog .actions { justify-content: flex-end; margin-top: 18px; }
+@media (max-width: 720px) { .voile-a { padding: 24px 12px; } .voile-a > .dialog .actions { flex-direction: column; align-items: stretch; } }
+/* Un message d'action montré dans la page : statique, sans z-index (il ne passe sur rien). */
+.admin .toast.toast-ech { position: relative; z-index: auto; left: auto; bottom: auto; transform: none; display: inline-flex; max-width: 100%; margin: 0; }
+.toast-ech.pause .toast-temps { background: var(--ink2); }
+.toasts { display: grid; gap: 16px; justify-items: start; }
+.admin .ecran-a > .toast.toast-ech:not(:first-child) { margin-top: 24px; }
+/* Dans un état montré, la barre basse du téléphone reste dans son cadre (un seul écran de téléphone est réel). */
+@media (max-width: 720px) { .mq-ecran .ep-actions { position: static; grid-area: auto; padding: 0; border: 0; background: none; margin-top: 12px; } }
+/* Un menu montré ouvert dans un cadre (rôle Photographe, téléphone). */
+.ecran-a .side, .tel-cadre .side { position: static; height: auto; width: 100%; transform: none; visibility: visible; box-shadow: none; z-index: auto; border-right: 0; border-radius: 12px; }
+/* Focus figé pour la capture : le même dessin que :focus et :focus-visible d'admin.css. */
+.is-focus { box-shadow: inset 0 0 0 2px var(--accent-ink), 0 0 0 4px var(--accent-soft) !important; }
+:is(.btn, a, button, .inter-piste).is-focus { box-shadow: none !important; outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+.toast-ech button.is-focus { outline-color: var(--accent); }
+/* Pastilles de marge droite au téléphone : sur un panneau ou un en-tête, qui va jusqu'au bord, elles se posent dans son
+   coin (aucun débordement horizontal) ; sur un mot (span, titre, légende), elles restent juste après lui, hors du texte. */
+@media (max-width: 767px) { .admin :is(section, header, article, div, form).mq-a > .mq-pin.d { left: auto; right: 4px; top: 4px; } }
+.admin .mq-notes code { color: var(--mq-encre); word-break: normal; overflow-wrap: anywhere; }

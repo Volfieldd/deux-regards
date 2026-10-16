@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="fr" data-theme="light">
+<html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <title>MQ-07 — Admin : menu rangé, Réglages à onglets, assistants d’analyse — Nicephos</title>
 <meta name="description" content="Maquette de l’administration de Nicephos : barre latérale à quatre groupes, une page Réglages à onglets, des assistants d’analyse réglés par un interrupteur.">
 <link rel="stylesheet" href="_commun/admin.css">
@@ -12,123 +12,29 @@
 <link rel="stylesheet" href="_commun/admin-plus.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* Locaux, communs à MQ-07, MQ-08 et MQ-09 (absents de la planche, à y verser : voir l'encart).
-   L1 « Fermer » du menu au téléphone · L2 lien « Mon compte » sur le nom · L3 planche des autres états
-   · L4 dialogue montré ouvert · L5 bascule des annotations. Aucun jeton redéclaré. */
-.side-haut { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.side-fermer { display: none; }
-@media (max-width: 720px) {
-  .side-fermer { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; margin: -6px 0 0; border-radius: var(--r-admin); color: var(--ink); font-size: 14px; box-shadow: inset 0 0 0 1px var(--line2); }
-}
-.me-lien { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; min-height: 40px; padding: 0 4px; border-radius: 8px; }
-.me-lien:hover { background: var(--s2); }
-.cmdk kbd { white-space: nowrap; }
-/* Barre de 220 px (sous 1 180 px) : le thème se règle dans Mon compte, le nom et le rôle restent entiers. */
-@media (max-width: 1180px) and (min-width: 721px) { .me .btn-theme { display: none; } }
-.me-lien[aria-current] { background: var(--s3); }
-.me-lien .me-nom { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field-line); }
-@media (max-width: 720px), (pointer: coarse) { .me-lien { min-height: 44px; } }
-/* L3. Autres états : sous la coquille, pleine largeur, un cadre par état. */
-.resume-a li a { display: inline-flex; align-items: center; min-height: 24px; }
-@media (max-width: 720px), (pointer: coarse) { .resume-a li a { min-height: 44px; } }
-.etats-a { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 560px), 1fr)); gap: 112px 48px; align-items: start; padding: 128px max(var(--gut), 16px) 0; }
-.etats-a > * { min-width: 0; }
-.etats-a > .large { grid-column: 1 / -1; }
-.ecran-a { min-width: 0; padding: 24px; border-radius: var(--r-admin-panneau); background: var(--bg); box-shadow: inset 0 0 0 1px var(--line2); }
-.ecran-a > :first-child:not(.mq-pin) { margin-top: 0; } .ecran-a > :last-child { margin-bottom: 0; }
-.ecran-a h2 { margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
-.ecran-a h3 { margin: 0 0 8px; font-size: var(--at-h3); font-weight: 500; }
-.ecran-a .titre-ecran { margin: 0 0 16px; font-size: 28px; font-weight: 300; line-height: 1.15; }
-@media (max-width: 720px) { .ecran-a { padding: 16px; } .etats-a { gap: 96px; padding-top: 112px; } }
-/* L4. Un dialogue montré ouvert, sur le voile de la page. */
-.voile-a { display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 40px 24px; border-radius: var(--r-admin-panneau); background: linear-gradient(var(--scrim), var(--scrim)), var(--bg); }
-.voile-a .confirm { position: static; display: block; margin: 0; max-width: 100%; }
-@media (max-width: 720px) { .voile-a { padding: 24px 12px; } }
-.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
-.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
-/* En-tête de page au téléphone : une ligne de méta par élément, sans « · » orphelin en début de ligne. */
-@media (max-width: 720px) { .ep-meta { display: grid; justify-items: start; gap: 2px; } .ep-meta > * + *::before { content: none; } }
-/* Erreur hors d'un .champ-a (groupe de choix, dialogue) : même dessin que le formulaire type. */
-.err { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--danger); font-size: 13px; line-height: 1.45; }
-.err .ic { flex: none; margin-top: 2px; } .err b { font-weight: 600; }
-.confirm p.err { color: var(--danger); margin: 0 0 8px; }
-/* Symboles d'état dans une phrase : alignés sur le texte. */
-.confirm p .ic, .att .ic, .enreg .ic, .ecran-a p > .ic { display: inline-block; vertical-align: -1px; }
-/* Champs : focus simulé pour la capture (même dessin que :focus d'admin.css). */
-.is-focus { box-shadow: inset 0 0 0 2px var(--accent-ink), 0 0 0 4px var(--accent-soft) !important; }
-.btn.is-focus, a.is-focus, button.is-focus { box-shadow: none !important; outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-
-/* Lien « Aide sur cette page » : souligné du texte, pas du bas de la cible de 44 px (admin.css). */
-.help-link a { border-bottom: 0; text-decoration: underline; text-underline-offset: 3px; }
-/* MQ-07, locaux : L6 onglets des Réglages · L7 interrupteur · L8 carte d'assistant · L9 palette montrée ouverte. */
-.onglets { margin: 0 -16px 32px; }
-.onglets ul { position: relative; display: flex; gap: 0 28px; margin: 0; list-style: none; overflow-x: auto; scrollbar-width: none; box-shadow: inset 0 -1px 0 var(--line2); scroll-padding-inline: 32px; padding-inline: 16px; mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent); }
-.onglets ul::-webkit-scrollbar { display: none; }
-.onglets li { flex: none; }
-.onglets a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; border-bottom: 2px solid transparent; color: var(--ink2); font-size: 14px; white-space: nowrap; }
-.onglets a:hover { color: var(--ink); }
-.onglets a[aria-current] { color: var(--ink); font-weight: 500; border-bottom-color: var(--accent-ink); scroll-initial-target: nearest; }
-.onglet-alerte { display: inline-flex; align-items: center; gap: 4px; color: var(--warn); font-size: 12px; font-weight: 500; }
-@media (max-width: 720px) { .onglets { margin-bottom: 24px; } .onglets ul { gap: 0 22px; } }
+/* MQ-07, locaux (propres aux pages montrées ici ; le reste est dans admin-plus.css, voir l'encart) :
+   L1 mise en page d'une rubrique des Réglages · L2 identité : emplacements de la marque, thème du site · L3 palette montrée ouverte
+   · L4 menu montré ouvert (rôle Photographe, téléphone) · L5 Aujourd'hui, Photographes. Aucun jeton redéclaré. */
 .rub { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 40px; align-items: start; }
 @media (min-width: 1200px) { .rub { grid-template-columns: minmax(0, 720px) 320px; } .rub-cote { grid-column: 2; grid-row: 1 / span 3; position: sticky; top: 24px; } }
 .rub-titre { margin: 0 0 6px !important; font-size: 22px !important; font-weight: 400 !important; }
 .rub-intro { margin: 0 0 24px; color: var(--ink2); max-width: 64ch; }
 .rub-cote .panel { margin: 0; }
 .rub-cote legend { font-size: 15px; }
-.choix-l { display: flex; flex-wrap: wrap; gap: 0 20px; }
-.choix-l label.inline { min-height: 32px; }
-@media (max-width: 720px), (pointer: coarse) { .choix-l label.inline { min-height: 44px; } }
-.inter { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--ink); font-size: 14px; font-weight: 500; cursor: pointer; flex: none; }
-.inter input { position: absolute; right: 0; top: 50%; translate: 0 -50%; width: 44px; height: 24px; margin: 0; opacity: 0; cursor: pointer; }
-.inter-piste { position: relative; flex: none; width: 44px; height: 24px; border-radius: 999px; background: var(--s2); box-shadow: inset 0 0 0 1.5px var(--field-line); }
-.inter-piste::after { content: ''; position: absolute; top: 4px; left: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--field-line); transition: transform .15s; }
-.inter input:checked + .inter-piste { background: var(--accent-ink); box-shadow: none; }
-.inter input:checked + .inter-piste::after { transform: translateX(20px); background: var(--s1); }
-.inter input:focus-visible + .inter-piste, .inter-piste.is-focus { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .inter-piste::after { transition: none; } }
-.assist { display: grid; gap: 10px; }
-.assist-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 44px; }
-.assist-tete h3 { margin: 0; font-size: 17px; font-weight: 500; }
-.assist p { margin: 0; }
-.assist-effet { color: var(--ink2); max-width: 62ch; }
-.assist-etat { font-size: 13px; color: var(--ink2); }
-.assist-etat .ic { display: inline-block; vertical-align: -1px; margin-right: 6px; }
-.assist-etat b { font-weight: 500; color: var(--ink); }
-.assist-etat .ok { color: var(--ok); } .assist-etat .cours { color: var(--accent-ink); } .assist-etat .af { color: var(--ink2); }
-.serveur > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; color: var(--ink2); font-size: 13px; cursor: pointer; list-style: none; }
-.serveur > summary::-webkit-details-marker { display: none; }
-.serveur > summary .ic { transition: transform .15s; } .serveur[open] > summary .ic { transform: rotate(90deg); }
-@media (max-width: 720px), (pointer: coarse) { .serveur > summary { min-height: 44px; } }
-.serveur dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 8px 0 12px; padding: 12px 16px; border-radius: var(--r); background: var(--s2); font-size: 13px; }
-.serveur dt { color: var(--ink2); } .serveur dd { margin: 0; color: var(--ink); }
-.serveur code { font: 400 12px var(--mono); }
-@media (max-width: 540px) { .serveur dl { grid-template-columns: minmax(0, 1fr); } .serveur dd { margin-bottom: 6px; } }
 .avancement { width: min(320px, 100%); }
-/* Identité : emplacements de la marque. */
 .marque { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; }
 .emplacement { display: grid; gap: 8px; align-content: start; justify-items: start; }
 .emplacement > .lb { font-size: 13px; font-weight: 500; color: var(--ink); }
 .emplacement > .apercu-m { justify-self: stretch; }
-.emplacement .err { display: flex; gap: 6px; margin: 0; }
 .apercu-m { display: grid; place-items: center; height: 72px; border-radius: var(--r); box-shadow: inset 0 0 0 1px var(--line2); font-size: 14px; font-weight: 500; letter-spacing: .32em; text-transform: uppercase; }
+/* Les aperçus montrent le logo sur le fond où il servira, quel que soit le thème de l'admin. */
+.apercu-m { background: #f6f4ef; color: #1b1a17; }
 .apercu-m.sombre-m { background: #0b0b0c; color: #eeece7; }
-.apercu-m.vide { color: var(--ink2); font-size: 13px; font-weight: 400; letter-spacing: 0; text-transform: none; }
-.fichier { display: inline-flex; align-items: center; gap: 8px; }
-.fichier-w { position: relative; display: inline-flex; }
-.fichier-i { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; }
-.fichier-w:has(.fichier-i:focus-visible) .fichier { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-.fichier-w:has([aria-invalid="true"]) .fichier { box-shadow: inset 0 0 0 1.5px var(--danger); }
+.apercu-m.vide { background: transparent; color: var(--ink2); font-size: 13px; font-weight: 400; letter-spacing: 0; text-transform: none; }
 .theme-c { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; }
 .theme-c label.inline { align-items: flex-start; padding: 12px 14px; border-radius: var(--r); box-shadow: inset 0 0 0 1px var(--line2); }
 .theme-c label.inline:has(:checked) { box-shadow: inset 0 0 0 1.5px var(--accent-ink); }
 .theme-c small { display: block; color: var(--ink2); font-size: 12px; }
-.toast-ech { position: relative !important; z-index: auto !important; left: auto !important; bottom: auto !important; transform: none !important; display: inline-flex; max-width: 100%; margin-top: 24px; }
-.mod { display: inline-flex; align-items: center; gap: 6px; color: var(--ink2); font-size: 13px; }
-.mod::before { content: ''; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-ink); }
-.pied-form { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 8px; }
-.pied-form .mod { margin-right: auto; }
-/* Palette montrée ouverte (admin.css .palette, sans <dialog> modal). */
 .pal-ech { position: static; display: block; width: 100%; max-width: 640px; margin: 0; }
 .pal-ech .pal-in input { font-size: 17px; }
 .pal-statut { margin: 0; padding: 8px 18px 0; color: var(--ink2); font-size: 12px; }
@@ -140,8 +46,6 @@
 .pal-vide p { margin: 0; }
 .pal-vide .btn { white-space: normal; text-align: left; padding-block: 8px; }
 @media (max-width: 720px), (pointer: coarse) { .pal-ft .touches { display: none; } }
-/* Menu montré ouvert (rôle Photographe ; téléphone). */
-.ecran-a .side, .tel-cadre .side { position: static; height: auto; width: 100%; transform: none; visibility: visible; box-shadow: none; z-index: auto; border-right: 0; border-radius: 12px; }
 .duo { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 24px; align-items: start; }
 .duo .side { box-shadow: inset 0 0 0 1px var(--line2); }
 @media (max-width: 720px) { .duo { grid-template-columns: minmax(0, 1fr); } }
@@ -163,7 +67,7 @@
 .taches .vign li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
 .taches .vign img { width: 64px; height: 43px; object-fit: cover; border-radius: 5px; display: block; }
 .taches .vign small { display: block; color: var(--ink2); font-size: 12px; }
-.taches .vign small.att { display: flex; align-items: center; gap: 4px; } .taches .vign small.att .ic { color: var(--warn); }
+.taches .vign small.att { display: flex; }
 @media (max-width: 540px) { .taches > li { grid-template-columns: 20px minmax(0, 1fr); } .taches > li > .btn { grid-column: 2; justify-self: start; } .taches .vign li { grid-template-columns: 56px minmax(0, 1fr); } .taches .vign li .btn { grid-column: 2; justify-self: start; } .taches .vign img { width: 56px; height: 37px; } }
 .cartes-p { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
 .cartes-p .panel { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: center; }
@@ -207,7 +111,7 @@
   <nav class="nav" aria-labelledby="nav-publier">
     <a href="/admin/a-valider"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg>À valider<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 photo</span></span></a>
     <a href="/admin/site"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>Site public</a>
-    <a href="/admin/carnets"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <a href="/admin/carnet"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
     <a href="/admin/galeries"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Galeries privées</a>
     <a href="/admin/boutique"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 commande à préparer</span></span></a>
     <a href="/admin/instagram"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>Instagram</a>
@@ -235,7 +139,7 @@
     </nav>
     <div class="me">
       <a class="me-lien" href="/admin/compte"><span class="av" aria-hidden="true">J</span><span class="who"><span class="me-nom">Julien</span><span class="sr-only">, mon compte</span><small>Administrateur</small></span></a>
-      <button class="iconbtn btn-theme" type="button" aria-label="Passer en mode sombre" title="Passer en mode sombre"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+      <button class="iconbtn btn-theme" type="button"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button>
       <button class="iconbtn" type="button" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button>
     </div>
   </div>
@@ -244,7 +148,7 @@
   <p class="help-link"><a href="/admin/aide/reglages#assistants">Aide sur cette page</a></p>
   <header class="ep">
     <div class="ep-titre"><h1 class="mq-a">Réglages<span class="mq-pin d" aria-hidden="true">3</span></h1></div>
-    <p class="ep-meta"><span role="status" class="mq-a"><span class="mq-pin d" aria-hidden="true">4</span><span class="enreg enreg--ok"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Enregistré à 22 h 42</span></span></p>
+    <p class="ep-meta"><span role="status" class="mq-a"><span class="mq-pin d" aria-hidden="true">4</span><span class="enreg enreg--ok"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Enregistré à 22 h 40</span></span></p>
   </header>
   <nav class="onglets" aria-label="Rubriques des réglages"><ul>
     <li><a href="/admin/reglages/identite">Identité et apparence</a></li>
@@ -260,7 +164,7 @@
     </div>
     <div class="rub-cote"><fieldset class="panel form" aria-describedby="quand-aide">
       <legend class="mq-a">Quand calculer<span class="mq-pin d" aria-hidden="true">5</span></legend>
-      <div class="choix-l">
+      <div class="choix-a choix-a--ligne">
         <label class="inline"><input type="radio" name="quand" checked> La nuit, de 1 h à 6 h</label>
         <label class="inline"><input type="radio" name="quand"> Dès l’import</label>
       </div>
@@ -271,7 +175,7 @@
         <span class="mq-pin" aria-hidden="true">6</span><div class="assist-tete"><h3 id="a1-t">Proposer une série</h3><label class="inter"><span class="inter-mot" aria-hidden="true">Allumé</span><input type="checkbox" role="switch" checked aria-labelledby="a1-t" aria-describedby="a1-e"><span class="inter-piste" aria-hidden="true"></span></label></div>
         <p class="assist-effet" id="a1-e">Pour une photo pas encore rangée, suggère la série dont les photos lui ressemblent le plus : « ✦ Suggestion : Rue » dans le lot, l’inspecteur et la fiche. Il faut au moins 3 photos rangées dans une série.</p>
         <p class="assist-etat"><svg class="ic ok" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg><b>Analyse faite :</b> 26 photos sur 26, la dernière cette nuit à 1 h 12.</p>
-        <details class="serveur"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg><span class="mq-pin" aria-hidden="true">7</span>Pour l’administrateur du serveur</summary>
+        <details class="assist-serveur"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg><span class="mq-pin" aria-hidden="true">7</span>Pour l’administrateur du serveur</summary>
           <dl><dt>Modèle</dt><dd>CLIP, libre, sur ce serveur ; ≈ 350 Mo téléchargés une fois</dd><dt>Mémoire</dt><dd>≈ 1 Go pendant le calcul</dd><dt>Empreintes</dt><dd>26 photos, 52 ko dans la base</dd></dl>
           <button class="btn danger-c" type="button">Effacer le modèle et les empreintes…</button>
         </details>
@@ -286,7 +190,7 @@
         <p class="assist-effet" id="a3-e">Écrit une phrase courte et factuelle par photo (« un phare rouge sur une petite île »), proposée sous le texte de remplacement de la fiche, que lisent les personnes aveugles. À relire et à réécrire ; jamais publiée seule.</p>
         <p class="assist-etat"><svg class="ic af" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg><b>Éteint :</b> rien n’est téléchargé ni calculé.</p>
         <p class="hint mq-a" style="margin:0"><span class="mq-pin" aria-hidden="true">8</span>Tant qu’il est éteint, la fiche de chaque photo le signale à cet endroit, avec un lien vers ce réglage.</p>
-        <details class="serveur"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Pour l’administrateur du serveur</summary>
+        <details class="assist-serveur"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Pour l’administrateur du serveur</summary>
           <dl><dt>Modèle</dt><dd>Florence-2, libre, sur ce serveur. « Léger » : ≈ 270 Mo et 3 Go de mémoire pendant le calcul. « Précis » : ≈ 850 Mo et 6 Go, impossible ici (le site dispose de 4 Go).</dd><dt>Langue</dt><dd>Le modèle écrit en anglais ; le traducteur du site (<code>TRANSLATE_URL</code>) donne le français et l’allemand.</dd></dl>
         </details>
       </article>
@@ -301,8 +205,8 @@
   <a href="/admin/rencontre/accueil"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
   <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
 </nav>
-<div class="etats-a" role="region" aria-label="Autres états de l’écran">
-<div class="mq-ecran large"><p class="mq-etat">État · Identité et apparence : un logo refusé</p>
+<div class="mq-etats mq-etats--grille" role="region" aria-label="Autres états de l’écran">
+<section class="mq-ecran large" aria-labelledby="etat-1"><p class="mq-etat" id="etat-1">État · Identité et apparence : un logo refusé</p>
   <div class="ecran-a">
     <nav class="onglets" aria-label="Rubriques des réglages (Identité)"><ul>
     <li><a href="/admin/reglages/identite" aria-current="page">Identité et apparence</a></li>
@@ -334,8 +238,8 @@
       </fieldset>
     </div>
     <div class="toast toast-ech" role="status"><p><b>Logotype, fond clair</b> remplacé.</p><button type="button">Défaire</button><span class="toast-temps" style="--reste: 62%"></span></div>
-  </div></div>
-<div class="mq-ecran large"><p class="mq-etat">État · Mentions : mise en ligne refusée</p>
+  </div></section>
+<section class="mq-ecran large" aria-labelledby="etat-2"><p class="mq-etat" id="etat-2">État · Mentions : mise en ligne refusée</p>
   <div class="ecran-a">
     <nav class="onglets" aria-label="Rubriques des réglages (Mentions)"><ul>
     <li><a href="/admin/reglages/identite">Identité et apparence</a></li>
@@ -356,11 +260,11 @@
         <div class="champ-a" style="flex:1 1 220px"><label for="ml-tel">Téléphone <span class="facultatif">(facultatif)</span></label><input id="ml-tel" inputmode="tel" autocomplete="tel" value="+33 1 99 00 12 34"></div>
       </div>
       <div class="champ-a"><label for="ml-dir">Responsable de la publication</label><p class="aide" id="ml-dir-a">Une personne. En Allemagne : « Verantwortlich nach § 18 MStV ».</p><input id="ml-dir" value="" aria-invalid="true" aria-describedby="ml-dir-a ml-dir-e"><p class="err" id="ml-dir-e"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> indiquez la personne responsable, par exemple Julien Exemple.</span></p></div>
-      <div class="pied-form"><span class="mod" role="status">Modifié, pas encore en ligne : adresse postale</span><button class="btn ghost" type="button">Revenir à la version enregistrée</button><button class="btn" type="submit">Mettre en ligne les mentions</button></div>
+      <div class="form-pied"><span class="mod" role="status">Modifié, pas encore en ligne : adresse postale</span><button class="btn ghost" type="button">Revenir à la version enregistrée</button><button class="btn" type="submit">Mettre en ligne les mentions</button></div>
     </form>
     </div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Décrire les photos : allumage</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-3"><p class="mq-etat" id="etat-3">État · Décrire les photos : allumage</p>
   <div class="ecran-a">
     <article class="panel assist" aria-labelledby="a3b-t" style="margin:0">
       <span class="mq-pin" aria-hidden="true">11</span><div class="assist-tete"><h3 id="a3b-t">Décrire les photos</h3><label class="inter"><span class="inter-mot" aria-hidden="true">Allumé</span><input type="checkbox" role="switch" checked aria-labelledby="a3b-t" aria-describedby="a3b-e"><span class="inter-piste is-focus" aria-hidden="true"></span></label></div>
@@ -370,8 +274,8 @@
       <p class="hint" style="margin:0">Ensuite, les 26 photos sont décrites la nuit, de 1 h à 6 h. Vous pouvez quitter la page.</p>
     </article>
     <div class="toast toast-ech" role="status"><p><b>Décrire les photos</b> allumé.</p><button type="button">Défaire</button><span class="toast-temps" style="--reste: 80%"></span></div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Palette Ctrl K : « impressum »</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-4"><p class="mq-etat" id="etat-4">État · Palette Ctrl K : « impressum »</p>
   <div class="voile-a">
     <div class="palette pal-ech mq-a" role="dialog" aria-label="Rechercher, agir"><span class="mq-pin" aria-hidden="true">12</span>
       <div class="pal-in"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input role="combobox" aria-expanded="true" aria-controls="pal-l" aria-autocomplete="list" aria-activedescendant="po1" aria-label="Rechercher une page, une photo ou une action" value="impressum"></div>
@@ -387,32 +291,32 @@
       </div>
       <p class="pal-ft"><span class="touches"><kbd>↑</kbd> <kbd>↓</kbd> choisir · <kbd>Entrée</kbd> ouvrir · <kbd>Échap</kbd> fermer</span></p>
     </div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Palette : aucun résultat</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-5"><p class="mq-etat" id="etat-5">État · Palette : aucun résultat</p>
   <div class="voile-a">
     <div class="palette pal-ech mq-a" role="dialog" aria-label="Rechercher, agir"><span class="mq-pin" aria-hidden="true">13</span>
       <div class="pal-in"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input role="combobox" aria-expanded="false" aria-autocomplete="list" aria-label="Rechercher une page, une photo ou une action" value="sauvegarde"></div>
       <div class="pal-vide"><p role="status"><b>Aucun résultat pour « sauvegarde ».</b> Les réglages, les pages et les photos ont été cherchés.</p><a class="btn ghost" href="/admin/aide?q=sauvegarde">Chercher « sauvegarde » dans l’aide</a></div>
     </div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Mon compte, ouvert depuis le nom</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-6"><p class="mq-etat" id="etat-6">État · Mon compte, ouvert depuis le nom</p>
   <div class="ecran-a">
     <h2 class="titre-ecran">Mon compte</h2>
     <p class="hint" style="margin:-8px 0 16px" role="status"><span class="enreg enreg--ok"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Enregistré à 22 h 40</span></p>
     <div class="form">
-      <fieldset class="row" style="display:grid;gap:4px"><legend>Langue de l’administration</legend><div class="choix-l"><label class="inline"><input type="radio" name="lg" checked> Français</label><label class="inline" lang="en"><input type="radio" name="lg"> English</label><label class="inline" lang="de"><input type="radio" name="lg"> Deutsch</label></div></fieldset>
-      <fieldset class="row" style="display:grid;gap:4px"><legend>Thème</legend><div class="choix-l"><label class="inline"><input type="radio" name="th" checked> Clair</label><label class="inline"><input type="radio" name="th"> Chambre noire</label><label class="inline"><input type="radio" name="th"> Comme le système</label></div></fieldset>
+      <fieldset class="row" style="display:grid;gap:4px"><legend>Langue de l’administration</legend><div class="choix-a choix-a--ligne"><label class="inline"><input type="radio" name="lg" checked> Français</label><label class="inline" lang="en"><input type="radio" name="lg"> English</label><label class="inline" lang="de"><input type="radio" name="lg"> Deutsch</label></div></fieldset>
+      <fieldset class="row" style="display:grid;gap:4px"><legend>Thème</legend><div class="choix-a choix-a--ligne"><label class="inline"><input type="radio" name="th"> Clair</label><label class="inline"><input type="radio" name="th"> Chambre noire</label><label class="inline"><input type="radio" name="th" checked> Comme le système</label></div></fieldset>
       <div class="panel assist mq-a" style="margin:0"><span class="mq-pin" aria-hidden="true">14</span>
         <div class="assist-tete"><h3 id="rc-t">Raccourcis d’une touche</h3><label class="inter"><span class="inter-mot" aria-hidden="true">Éteints</span><input type="checkbox" role="switch" aria-labelledby="rc-t" aria-describedby="rc-e"><span class="inter-piste" aria-hidden="true"></span></label></div>
         <p class="assist-effet" id="rc-e">P publie (ou propose) la sélection, I importe, L ouvre la loupe, seulement quand la planche a le focus. Éteints, il reste Ctrl K, Ctrl A et Ctrl Z.</p>
       </div>
-      <div class="champ-a"><label for="mail-avis">E-mail des avis</label><p class="aide" id="mail-a">Propositions à valider, signalements, commandes à préparer.</p><input id="mail-avis" type="email" value="julien.exemple@example.org" aria-describedby="mail-a"></div>
+      <div class="champ-a"><label for="mail-avis">E-mail des avis</label><p class="aide" id="mail-a">Photos proposées à valider, signalements, commandes à préparer.</p><input id="mail-avis" type="email" value="julien.exemple@example.org" aria-describedby="mail-a"></div>
     </div>
-  </div></div>
-<div class="mq-ecran large"><p class="mq-etat">État · Rôle Photographe : le menu de Sébastien</p>
+  </div></section>
+<section class="mq-ecran large" aria-labelledby="etat-7"><p class="mq-etat" id="etat-7">État · Rôle Photographe : le menu de Sébastien</p>
   <div class="ecran-a"><div class="duo">
     <aside class="side" id="nav-s" aria-label="Menu de l’administration, rôle Photographe">
-  <a class="word" href="/admin"><span>Nicephos</span></a>
+  <div class="side-haut"><a class="word" href="/admin"><span>Nicephos</span></a><button class="side-fermer" type="button" aria-controls="nav-s" aria-expanded="true"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Fermer</button></div>
   <button class="cmdk" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
   <nav class="nav" aria-label="Aujourd’hui, rôle Photographe">
     <a href="/admin"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
@@ -420,35 +324,35 @@
   <p class="grp" id="nav-photos-s">Photos</p>
   <nav class="nav" aria-label="Photos, rôle Photographe">
     <a href="/admin/photos" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
-    <div class="nav-ser"><a href="/admin/series"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a><details class="ser-plier"><summary aria-label="Afficher les 5 séries"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>5</summary>
-      <ul class="ser" aria-label="Séries">
+    <div class="nav-ser"><a href="/admin/series"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a><details class="ser-plier"><summary aria-label="Afficher vos 5 séries"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>5</summary>
+      <ul class="ser" aria-label="Séries, vos photos">
         <li><a href="/admin/photos?serie=atlantique"><span class="sw"><img src="_commun/photos/160/cais.webp" alt="" width="18" height="18"></span><span class="t">Atlantique</span><span class="n">3</span></a></li>
-        <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">5</span></a></li>
-        <li><a href="/admin/photos?serie=portrait"><span class="sw"><img src="_commun/photos/160/ines.webp" alt="" width="18" height="18"></span><span class="t">Portrait</span><span class="n">3</span></a></li>
-        <li><a href="/admin/photos?serie=rue"><span class="sw"><img src="_commun/photos/160/linge.webp" alt="" width="18" height="18"></span><span class="t">Rue</span><span class="n">7</span></a></li>
-        <li><a href="/admin/photos?serie=voyage"><span class="sw"><img src="_commun/photos/160/miradouro.webp" alt="" width="18" height="18"></span><span class="t">Voyage</span><span class="n">4</span></a></li>
+        <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">4</span></a></li>
+        <li><a href="/admin/photos?serie=portrait"><span class="sw"><img src="_commun/photos/160/tiago.webp" alt="" width="18" height="18"></span><span class="t">Portrait</span><span class="n">1</span></a></li>
+        <li><a href="/admin/photos?serie=rue"><span class="sw"><img src="_commun/photos/160/quai.webp" alt="" width="18" height="18"></span><span class="t">Rue</span><span class="n">2</span></a></li>
+        <li><a href="/admin/photos?serie=voyage"><span class="sw"><img src="_commun/photos/160/dune.webp" alt="" width="18" height="18"></span><span class="t">Voyage</span><span class="n">2</span></a></li>
       </ul></details></div>
     <a href="/admin/sorties"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/></svg>Sorties</a>
     <a href="/admin/voyages"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg>Voyages</a>
   </nav>
   <p class="grp" id="nav-personnes-s">Personnes</p>
   <nav class="nav" aria-label="Personnes, rôle Photographe">
-    <a href="/admin/personnes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg>Personnes</a>
-    
+    <a href="/admin/personnes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg>Personnes<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 nouvelle</span></span></a>
     <a href="/admin/terrain"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>App de terrain</a>
   </nav>
   <p class="grp" id="nav-publier-s"><span class="mq-a">Publier<span class="mq-pin d" aria-hidden="true">15</span></span></p>
   <nav class="nav" aria-label="Publier, rôle Photographe">
     <a href="/admin/photos?statut=proposee&amp;auteur=sebastien"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg>Mes propositions</a>
-    
-    <a href="/admin/carnets"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <a href="/admin/carnet"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
     <a href="/admin/galeries"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Galeries privées</a>
     <a href="/admin/boutique"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique</a>
-    
+  </nav>
+  <p class="grp" id="nav-equipe-s">Équipe</p>
+  <nav class="nav" aria-label="Équipe, rôle Photographe">
+    <a href="/admin/statistiques"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
   </nav>
   <div class="foot">
-    <nav class="pied-liens" aria-label="Réglages et aide, rôle Photographe">
-      
+    <nav class="pied-liens" aria-label="Aide et site, rôle Photographe">
       <a href="/admin/aide"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg>Aide</a>
       <a href="/" target="_blank" rel="noopener"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Voir le site<span class="sr-only"> (nouvel onglet)</span></a>
       <details class="lang-pick admin-lang">
@@ -462,7 +366,7 @@
     </nav>
     <div class="me">
       <a class="me-lien" href="/admin/compte"><span class="av" aria-hidden="true">S</span><span class="who"><span class="me-nom">Sébastien</span><span class="sr-only">, mon compte</span><small>Photographe</small></span></a>
-      <button class="iconbtn btn-theme" type="button" aria-label="Passer en mode sombre" title="Passer en mode sombre"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+      <button class="iconbtn btn-theme" type="button"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button>
       <button class="iconbtn" type="button" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button>
     </div>
   </div>
@@ -472,8 +376,8 @@
       <div class="champ-a"><label for="leg-s">Texte de remplacement</label><textarea id="leg-s" rows="2" aria-describedby="leg-s-a">Une minoterie à six cheminées sur la Maine, à demi noyée dans la brume bleue.</textarea>
         <p class="legende-aide" id="leg-s-a"><span class="s" aria-hidden="true">✦</span><span>Suggestion de description : assistant éteint. Julien peut l’allumer dans les Réglages.</span></p></div>
     </div>
-  </div></div></div>
-<div class="mq-ecran large"><p class="mq-etat">État · Aujourd’hui : une seule liste À faire</p>
+  </div></div></section>
+<section class="mq-ecran large" aria-labelledby="etat-8"><p class="mq-etat" id="etat-8">État · Aujourd’hui : une seule liste À faire</p>
   <div class="ecran-a">
     <h2 class="titre-ecran">Bonjour, Julien.</h2>
     <section class="panel mq-a" style="margin:0" aria-labelledby="af-t"><span class="mq-pin" aria-hidden="true">16</span>
@@ -490,8 +394,8 @@
         <li><span class="u-temps" aria-hidden="true"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg></span><span>12 photos publiées sans ville<span class="q">quand vous avez le temps · absentes de la carte du monde</span></span><a class="btn ghost" href="/admin/photos?sans-ville">Compléter</a></li>
       </ul>
     </section>
-  </div></div>
-<div class="mq-ecran large"><p class="mq-etat">État · Photographes : une carte par auteur</p>
+  </div></section>
+<section class="mq-ecran large" aria-labelledby="etat-9"><p class="mq-etat" id="etat-9">État · Photographes : une carte par auteur</p>
   <div class="ecran-a">
     <nav class="onglets" aria-label="Rubriques des réglages (Photographes)"><ul>
     <li><a href="/admin/reglages/identite">Identité et apparence</a></li>
@@ -504,11 +408,11 @@
       <article class="panel"><span class="av" aria-hidden="true">S</span><h3 style="margin:0">Sébastien Exemple</h3><p>Préfixe S · 10 photos publiées · Angers</p><a class="btn ghost" href="/admin/reglages/photographes/sebastien">Modifier<span class="sr-only"> Sébastien Exemple</span></a></article>
       <article class="panel"><span class="av" aria-hidden="true">J</span><h3 style="margin:0">Julien Exemple</h3><p>Préfixe J · 12 photos publiées · directeur de la publication</p><a class="btn ghost" href="/admin/reglages/photographes/julien">Modifier<span class="sr-only"> Julien Exemple</span></a></article>
     </div>
-  </div></div>
-<div class="mq-ecran large" lang="de"><p class="mq-etat" lang="fr">État · En allemand : Analyse-Assistenten</p>
+  </div></section>
+<section class="mq-ecran large" lang="de" aria-labelledby="etat-10"><p class="mq-etat" id="etat-10" lang="fr">État · En allemand : Analyse-Assistenten</p>
   <div class="ecran-a">
     <div class="ep" style="margin-bottom:16px"><div class="ep-titre"><h2 class="titre-ecran" style="margin:0">Einstellungen</h2></div>
-      <p class="ep-meta"><span>Für Website und Team</span><span><span class="enreg enreg--ok"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Gespeichert um 22:42 Uhr</span></span></p></div>
+      <p class="ep-meta"><span>Für Website und Team</span><span><span class="enreg enreg--ok"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Gespeichert um 22:40 Uhr</span></span></p></div>
     <div><span class="mq-pin" aria-hidden="true">18</span><nav class="onglets" aria-label="Bereiche der Einstellungen"><ul>
     <li><a href="/admin/reglages/identite">Identität und Erscheinungsbild</a></li>
     <li><a href="/admin/reglages/filigrane">Wasserzeichen und EXIF</a></li>
@@ -521,11 +425,11 @@
       <div class="assist-tete"><h3 id="d1-t">Eine Serie vorschlagen</h3><label class="inter"><span class="inter-mot" aria-hidden="true">Ein</span><input type="checkbox" role="switch" checked aria-labelledby="d1-t" aria-describedby="d1-e"><span class="inter-piste" aria-hidden="true"></span></label></div>
       <p class="assist-effet" id="d1-e">Für ein noch nicht eingeordnetes Foto schlägt der Assistent die Serie vor, deren Fotos ihm am ähnlichsten sind: „✦ Vorschlag: Straße“ in der Stapelbearbeitung, im Inspektor und auf der Fotoseite.</p>
       <p class="assist-etat"><svg class="ic ok" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg><b>Analyse abgeschlossen:</b> 26 von 26 Fotos, das letzte heute Nacht um 1:12 Uhr.</p>
-      <details class="serveur"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Für die Serververwaltung</summary></details>
+      <details class="assist-serveur"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Für die Serververwaltung</summary></details>
     </article>
     </div>
-  </div></div>
-<div class="mq-ecran tel-menu large"><p class="mq-etat">État · Téléphone : le menu ouvert</p>
+  </div></section>
+<section class="mq-ecran tel-menu large" aria-labelledby="etat-11"><p class="mq-etat" id="etat-11">État · Téléphone : le menu ouvert</p>
   <div class="mq-a"><span class="mq-pin" aria-hidden="true">19</span><div class="tel-cadre">
     <aside class="side" id="nav-t" aria-label="Menu de l’administration, au téléphone">
   <div class="side-haut"><a class="word" href="/admin"><span>Nicephos</span></a><button class="side-fermer" type="button" aria-controls="nav-t" aria-expanded="true"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Fermer</button></div>
@@ -557,7 +461,7 @@
   <nav class="nav" aria-label="Publier, au téléphone">
     <a href="/admin/a-valider"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg>À valider<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 photo</span></span></a>
     <a href="/admin/site"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>Site public</a>
-    <a href="/admin/carnets"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <a href="/admin/carnet"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
     <a href="/admin/galeries"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Galeries privées</a>
     <a href="/admin/boutique"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 commande à préparer</span></span></a>
     <a href="/admin/instagram"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>Instagram</a>
@@ -585,16 +489,16 @@
     </nav>
     <div class="me">
       <a class="me-lien" href="/admin/compte"><span class="av" aria-hidden="true">J</span><span class="who"><span class="me-nom">Julien</span><span class="sr-only">, mon compte</span><small>Administrateur</small></span></a>
-      <button class="iconbtn btn-theme" type="button" aria-label="Passer en mode sombre" title="Passer en mode sombre"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+      <button class="iconbtn btn-theme" type="button"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button>
       <button class="iconbtn" type="button" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button>
     </div>
   </div>
 </aside>
     <div class="tel-voile" aria-hidden="true"></div>
-  </div></div></div>
+  </div></div></section>
 </div>
 <aside class="mq-notes" aria-labelledby="mq-t">
-  <p class="mq-id">MQ-07 · administration · thème clair · bureau 1 440 × 900 et Pixel 7 · Julien, administrateur, vendredi 16 oct. 2026, 22 h 42</p>
+  <p class="mq-id">MQ-07 · administration · « Chambre noire » au bureau (1 440 × 900), clair au téléphone (Pixel 7) : le mode suit le système · Julien, administrateur, vendredi 16 oct. 2026, 22 h 40</p>
   <h2 id="mq-t">Ce qui change</h2>
   <p class="mq-lead">Un menu de quatre groupes qui tient dans un écran, une seule page de Réglages à onglets, et des assistants d’analyse qu’on règle par un interrupteur dont on lit l’effet. Tout est construit avec la coquille et les composants de MQ-00 ; ce qui s’enregistre seul le dit, ce qui engage a son bouton. Comparé à l’admin de main (layout.eta, series.eta, settings.eta, appearance.eta).</p>
   <ol class="mq-reperes">
@@ -612,14 +516,16 @@
     <li><span class="mq-num" aria-hidden="true">12</span><b>La palette trouve les rubriques par leurs synonymes</b><p>Impressum, légales, éditeur, thème, logo… mènent à la rubrique ; « 3 résultats » est annoncé (role="status") ; les touches sont masquées au toucher.</p><span class="mq-ref">UX-A-15 · UX-A-26 · RGAA 7.5 · WCAG 4.1.3</span></li>
     <li><span class="mq-num" aria-hidden="true">13</span><b>« Aucun résultat » annoncé, avec une issue</b><p>La liste vide se ferme (aria-expanded="false") ; la phrase est lue ; un bouton cherche le mot dans l’aide.</p><span class="mq-ref">UX-A-15 · UX-A-22 · Nielsen #9</span></li>
     <li><span class="mq-num" aria-hidden="true">14</span><b>Mon compte existe, ouvert depuis le nom</b><p>Le nom souligné du pied ouvre le compte : langue, thème, e-mail des avis, et l’interrupteur « Raccourcis d’une touche », qui coupe P, I et L. Au pied, un seul lien « Réglages », à côté de l’Aide.</p><span class="mq-ref">UX-A-25 · UX-A-11 · UX-A-02 · WCAG 2.1.4</span></li>
-    <li><span class="mq-num" aria-hidden="true">15</span><b>Rôle Photographe : aucun groupe vide</b><p>Sébastien ne voit que ses pages : « Publier » contient « Mes propositions », Carnets, Galeries privées et Boutique ; ni Équipe ni Réglages ; son rôle réel s’affiche.</p><span class="mq-ref">UX-A-11 · UX-A-04 · B&S 2.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">15</span><b>Rôle Photographe : aucun groupe vide</b><p>Sébastien ne voit que ses pages : « Publier » contient « Mes propositions », Carnets, Galeries privées et Boutique ; « Équipe » ne garde que ses Statistiques ; ni Signalements ni Réglages ; ses séries comptent ses seules photos (12) ; son rôle réel s’affiche. La même variante sert dans MQ-08 et MQ-20 (planche MQ-00).</p><span class="mq-ref">UX-A-11 · UX-A-04 · B&S 2.2</span></li>
     <li><span class="mq-num" aria-hidden="true">16</span><b>Aujourd’hui : « À faire » et « À finir » réunis</b><p>Une liste par urgence ; la tâche « 3 photos à finir » se déplie en vignettes avec l’action de chacune : plus de doublon.</p><span class="mq-ref">UX-A-25 · UX-A-16 (« prête ») · B&S 2.2</span></li>
     <li><span class="mq-num" aria-hidden="true">17</span><b>Photographes en cartes résumées</b><p>Le nom, le préfixe, ce qui compte, et « Modifier » : plus de formulaires toujours ouverts ni d’adresse technique au premier plan.</p><span class="mq-ref">UX-A-25 · UX-A-18</span></li>
     <li><span class="mq-num" aria-hidden="true">18</span><b>L’allemand tient</b><p>« Identität und Erscheinungsbild », « Impressum und Datenschutz », « Analyse-Assistenten » : une rangée au bureau, défilante au téléphone ; le titre et l’interrupteur restent sur une ligne.</p><span class="mq-ref">Grille, critère 4 · UX-A-30</span></li>
     <li><span class="mq-num" aria-hidden="true">19</span><b>Au téléphone, « Fermer » en tête du menu</b><p>Un bouton de 44 px à côté du nom ; menu ouvert, la page et la barre d’onglets sont inertes (inert) : la tabulation ne sort plus du panneau. (Rendu téléphone seulement.)</p><span class="mq-ref">UX-A-09 · WCAG 2.4.11 · RGAA 12.8</span></li>
   </ol>
+  <h3>Composants et rendu</h3>
+  <p>Depuis la consolidation du 16 oct., la coquille et les composants de la page sont dans <code>admin-plus.css</code> (planche MQ-00, section Administration) : « Fermer » du menu au téléphone, nom du compte qui ouvre « Mon compte », bouton de thème à deux icônes, « Ctrl K » et thème masqués dans la barre de 220 px · onglets des Réglages (<code>.onglets</code>) · interrupteur (<code>.inter</code>, role="switch") · carte d’assistant (<code>.assist</code>, jargon replié dans <code>.assist-serveur</code>) · choix de fichier avec son erreur (<code>.fichier-w</code>) · choix expliqués, ici côte à côte (<code>.choix-a--ligne</code>) · pied de formulaire avec « Modifié, pas encore en ligne » (<code>.form-pied</code>, <code>.mod</code>) · erreur hors d’un champ (<code>.err</code>) · dialogue et message d’action montrés (<code>.voile-a</code>, <code>.toast-ech</code>) · cadres d’état nommés par leur étiquette. Restent locaux : la mise en page d’une rubrique, les emplacements de la marque, la palette montrée ouverte, la liste « À faire » et les cartes des photographes. Le bureau est rendu en Chambre noire (le mode suit le système), le téléphone en clair.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur, outils/inspect.sh) · axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation au bureau (1 440 × 900), au téléphone (Pixel 7) et à 320, 820 et 1 024 px · Débordement horizontal : 0 à 320, 412, 820, 1 024 et 1 440 px · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (outils/mq00-cibles.mjs, liens dans une phrase exemptés) · Barre latérale : 18 entrées et 4 au pied, lignes de 32 px, contenu dans 900 px sans défilement · Poids : 288 ko, 19 requêtes (CSS 123 ko, polices 68 ko, 8 vignettes de 160 px : 8 ko) ; aucun script, aucune ressource tierce · Allemand : rangée d’onglets et carte « Analyse-Assistenten » sans coupure ni débordement de 320 à 1 440 px · Sans annotations (#sans-annotations) : 19 pastilles, 11 étiquettes et cadres retirés ; 0 pixel déplacé hors de leur emprise sur 6 408 px de haut au bureau et 10 748 px au téléphone (5 px d’anticrénelage, écart ≤ 5/255, outils/mq2a-sans.mjs) · Onglet courant visible au téléphone sans script : scroll-initial-target (Chromium 133 et plus).</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>consolidation du 16 oct. 2026</b> (outils/consol-admin.mjs, consol-sans-admin.py, Chromium de Playwright 1.64 en conteneur) : axe-core 0 violation au bureau (1 440 × 900, Chambre noire) et au téléphone (Pixel 7, clair) ; 0 débordement ni texte coupé à 320, 412, 820, 1 024 et 1 440 px ; 0 cible sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px ; sans annotations, 0 pixel changé hors des pastilles, étiquettes et cadres, au bureau comme au téléphone ; 255 ko et 16 ressources, images différées chargées, polices comprises ; barre latérale dans 900 px · <b>refonte</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur, outils/inspect.sh) · axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation au bureau (1 440 × 900), au téléphone (Pixel 7) et à 320, 820 et 1 024 px · Débordement horizontal : 0 à 320, 412, 820, 1 024 et 1 440 px · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (outils/mq00-cibles.mjs, liens dans une phrase exemptés) · Barre latérale : 18 entrées et 4 au pied, lignes de 32 px, contenu dans 900 px sans défilement · Poids : 288 ko, 19 requêtes (CSS 123 ko, polices 68 ko, 8 vignettes de 160 px : 8 ko) ; aucun script, aucune ressource tierce · Allemand : rangée d’onglets et carte « Analyse-Assistenten » sans coupure ni débordement de 320 à 1 440 px · Sans annotations (#sans-annotations) : 19 pastilles, 11 étiquettes et cadres retirés ; 0 pixel déplacé hors de leur emprise sur 6 408 px de haut au bureau et 10 748 px au téléphone (5 px d’anticrénelage, écart ≤ 5/255, outils/mq2a-sans.mjs) · Onglet courant visible au téléphone sans script : scroll-initial-target (Chromium 133 et plus).</p>
 </aside>
 </body>
 </html>

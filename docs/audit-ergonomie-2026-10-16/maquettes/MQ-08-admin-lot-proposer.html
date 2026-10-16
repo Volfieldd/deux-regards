@@ -12,58 +12,15 @@
 <link rel="stylesheet" href="_commun/admin-plus.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* Locaux, communs à MQ-07, MQ-08 et MQ-09 (absents de la planche, à y verser : voir l'encart).
-   L1 « Fermer » du menu au téléphone · L2 lien « Mon compte » sur le nom · L3 planche des autres états
-   · L4 dialogue montré ouvert · L5 bascule des annotations. Aucun jeton redéclaré. */
-.side-haut { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.side-fermer { display: none; }
-@media (max-width: 720px) {
-  .side-fermer { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; margin: -6px 0 0; border-radius: var(--r-admin); color: var(--ink); font-size: 14px; box-shadow: inset 0 0 0 1px var(--line2); }
-}
-.me-lien { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; min-height: 40px; padding: 0 4px; border-radius: 8px; }
-.me-lien:hover { background: var(--s2); }
-.cmdk kbd { white-space: nowrap; }
-/* Barre de 220 px (sous 1 180 px) : le thème se règle dans Mon compte, le nom et le rôle restent entiers. */
-@media (max-width: 1180px) and (min-width: 721px) { .me .btn-theme { display: none; } }
-.me-lien[aria-current] { background: var(--s3); }
-.me-lien .me-nom { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field-line); }
-@media (max-width: 720px), (pointer: coarse) { .me-lien { min-height: 44px; } }
-/* L3. Autres états : sous la coquille, pleine largeur, un cadre par état. */
-.resume-a li a { display: inline-flex; align-items: center; min-height: 24px; }
-@media (max-width: 720px), (pointer: coarse) { .resume-a li a { min-height: 44px; } }
-.etats-a { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 560px), 1fr)); gap: 112px 48px; align-items: start; padding: 128px max(var(--gut), 16px) 0; }
-.etats-a > * { min-width: 0; }
-.etats-a > .large { grid-column: 1 / -1; }
-.ecran-a { min-width: 0; padding: 24px; border-radius: var(--r-admin-panneau); background: var(--bg); box-shadow: inset 0 0 0 1px var(--line2); }
-.ecran-a > :first-child:not(.mq-pin) { margin-top: 0; } .ecran-a > :last-child { margin-bottom: 0; }
-.ecran-a h2 { margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
-.ecran-a h3 { margin: 0 0 8px; font-size: var(--at-h3); font-weight: 500; }
-.ecran-a .titre-ecran { margin: 0 0 16px; font-size: 28px; font-weight: 300; line-height: 1.15; }
-@media (max-width: 720px) { .ecran-a { padding: 16px; } .etats-a { gap: 96px; padding-top: 112px; } }
-/* L4. Un dialogue montré ouvert, sur le voile de la page. */
-.voile-a { display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 40px 24px; border-radius: var(--r-admin-panneau); background: linear-gradient(var(--scrim), var(--scrim)), var(--bg); }
-.voile-a .confirm { position: static; display: block; margin: 0; max-width: 100%; }
-@media (max-width: 720px) { .voile-a { padding: 24px 12px; } }
-.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
-.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
-/* En-tête de page au téléphone : une ligne de méta par élément, sans « · » orphelin en début de ligne. */
-@media (max-width: 720px) { .ep-meta { display: grid; justify-items: start; gap: 2px; } .ep-meta > * + *::before { content: none; } }
-/* Erreur hors d'un .champ-a (groupe de choix, dialogue) : même dessin que le formulaire type. */
-.err { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--danger); font-size: 13px; line-height: 1.45; }
-.err .ic { flex: none; margin-top: 2px; } .err b { font-weight: 600; }
-.confirm p.err { color: var(--danger); margin: 0 0 8px; }
-/* Symboles d'état dans une phrase : alignés sur le texte. */
-.confirm p .ic, .att .ic, .enreg .ic, .ecran-a p > .ic { display: inline-block; vertical-align: -1px; }
-/* Champs : focus simulé pour la capture (même dessin que :focus d'admin.css). */
-.is-focus { box-shadow: inset 0 0 0 2px var(--accent-ink), 0 0 0 4px var(--accent-soft) !important; }
-.btn.is-focus, a.is-focus, button.is-focus { box-shadow: none !important; outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-
-/* MQ-08, locaux : L6 étapes compactes au téléphone · L7 pastille de suggestion ✦ · L8 lignes du lot nommées par la photo. */
-.help-link a { border-bottom: 0; text-decoration: underline; text-underline-offset: 3px; }
+/* MQ-08, locaux (propres au lot ; le reste est dans admin-plus.css, voir l'encart) :
+   L1 étapes compactes au téléphone · L2 barre « Pour les photos cochées » · L3 lot, une ligne par photo nommée par sa vignette
+   · L4 dialogue de proposition · L5 liste des villes · L6 page refusée. Aucun jeton redéclaré. */
 .steps .et-sur { display: none; }
 @media (max-width: 720px) { .steps { flex-direction: row; } .steps li.done { display: none; } .steps .et-sur { display: inline; } .steps li .n { display: none; } }
 .flash .btn { margin-left: 8px; }
 .flash p { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.flash .more { display: inline-flex; align-items: center; min-height: 24px; }
+@media (max-width: 720px), (pointer: coarse) { .flash .more { min-height: 44px; } }
 .bulk-l { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 14px; }
 .bulk-l .champ-a { min-width: 200px; }
 @media (max-width: 720px) { .bulk-l .champ-a { min-width: 0; flex: 1 1 100%; } }
@@ -71,11 +28,6 @@
 .bulk-l strong { align-self: center; font-weight: 500; }
 .bulk-l .hint { flex-basis: 100%; margin: 0; color: var(--ink2); }
 .main:not(.wide) .bulk.bulk-l { align-items: end; }
-.sugg { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 12px 0 10px; border: 0; border-radius: 999px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2); color: var(--ink); font: inherit; font-size: 12.5px; cursor: pointer; white-space: nowrap; }
-.sugg .s { color: var(--accent-ink); }
-.sugg .acc { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; font-weight: 500; }
-.sugg:hover { background: var(--s2); }
-@media (max-width: 720px), (pointer: coarse) { .sugg { min-height: 44px; } }
 .lot { table-layout: fixed; }
 .lot td, .lot th { vertical-align: top; }
 .lot thead th { vertical-align: bottom; }
@@ -85,8 +37,7 @@
 .lot .cell { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
 .lot .sugg { white-space: normal; justify-self: start; text-align: left; padding-block: 4px; }
 .lot .cell p { margin: 0; }
-.lot .lu { font-size: 12px; color: var(--ink2); }
-.lot .att { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: var(--warn); }
+.lot .lu { font-size: 12px; }
 .lot .etat-c { display: grid; gap: 6px; justify-items: start; }
 .lot .etat-c .enreg { font-size: 12px; }
 .lot .tr > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; color: var(--ink2); font-size: 12.5px; cursor: pointer; list-style: none; }
@@ -94,10 +45,6 @@
 .lot .tr[open] > summary .ic { transform: rotate(90deg); }
 .lot .tr .cell { margin-top: 4px; }
 .lot .tr label { font-size: 12px; }
-.chk-l { display: inline-grid; place-items: center; width: 32px; height: 32px; margin: 4px 0 0 -7px; cursor: pointer; }
-@media (max-width: 720px), (pointer: coarse) { .chk-l { width: 44px; height: 44px; margin: 0; } }
-.flash .more, .lot a.att { display: inline-flex; align-items: center; min-height: 24px; }
-@media (max-width: 720px), (pointer: coarse) { .flash .more, .lot a.att { min-height: 44px; } }
 .col-chk { width: 44px; } .col-photo { width: 124px; } .col-titre { width: 25%; } .col-serie { width: 15%; } .col-ville { width: 15%; } .col-date { width: 17%; } .col-etat { width: 136px; }
 @media (max-width: 720px), (pointer: coarse) { .lot .tr > summary { min-height: 44px; } }
 @media (max-width: 720px) {
@@ -115,10 +62,8 @@
 .confirm .liste-c img { width: 64px; height: 43px; object-fit: cover; border-radius: 5px; display: block; }
 .confirm .liste-c p { margin: 0; color: var(--ink); font-size: 14px; }
 .confirm .liste-c .champ-a { margin-top: 6px; }
-.confirm .att { color: var(--warn); }
 .confirm textarea { min-height: 64px; }
 .confirm .actions { flex-wrap: wrap; }
-.toast-ech { position: relative !important; z-index: auto !important; left: auto !important; bottom: auto !important; transform: none !important; display: inline-flex; max-width: 100%; margin-top: 24px; }
 .ville-l { position: relative; max-width: 420px; }
 .ville-pop { margin: 4px 0 0; padding: 6px; list-style: none; border-radius: 12px; background: var(--s1); box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
 .ville-pop li { display: grid; gap: 2px; min-height: 44px; align-content: center; padding: 4px 10px; border-radius: 8px; }
@@ -142,35 +87,35 @@
   <p class="grp" id="nav-photos">Photos</p>
   <nav class="nav" aria-labelledby="nav-photos">
     <a href="/admin/photos" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
-    <div class="nav-ser"><a href="/admin/series"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a><details class="ser-plier"><summary aria-label="Afficher les 5 séries"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>5</summary>
-      <ul class="ser" aria-label="Séries">
+    <div class="nav-ser"><a href="/admin/series"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a><details class="ser-plier"><summary aria-label="Afficher vos 5 séries"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>5</summary>
+      <ul class="ser" aria-label="Séries, vos photos">
         <li><a href="/admin/photos?serie=atlantique"><span class="sw"><img src="_commun/photos/160/cais.webp" alt="" width="18" height="18"></span><span class="t">Atlantique</span><span class="n">3</span></a></li>
-        <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">5</span></a></li>
-        <li><a href="/admin/photos?serie=portrait"><span class="sw"><img src="_commun/photos/160/ines.webp" alt="" width="18" height="18"></span><span class="t">Portrait</span><span class="n">3</span></a></li>
-        <li><a href="/admin/photos?serie=rue"><span class="sw"><img src="_commun/photos/160/linge.webp" alt="" width="18" height="18"></span><span class="t">Rue</span><span class="n">7</span></a></li>
-        <li><a href="/admin/photos?serie=voyage"><span class="sw"><img src="_commun/photos/160/miradouro.webp" alt="" width="18" height="18"></span><span class="t">Voyage</span><span class="n">4</span></a></li>
+        <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">4</span></a></li>
+        <li><a href="/admin/photos?serie=portrait"><span class="sw"><img src="_commun/photos/160/tiago.webp" alt="" width="18" height="18"></span><span class="t">Portrait</span><span class="n">1</span></a></li>
+        <li><a href="/admin/photos?serie=rue"><span class="sw"><img src="_commun/photos/160/quai.webp" alt="" width="18" height="18"></span><span class="t">Rue</span><span class="n">2</span></a></li>
+        <li><a href="/admin/photos?serie=voyage"><span class="sw"><img src="_commun/photos/160/dune.webp" alt="" width="18" height="18"></span><span class="t">Voyage</span><span class="n">2</span></a></li>
       </ul></details></div>
     <a href="/admin/sorties"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/></svg>Sorties</a>
     <a href="/admin/voyages"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg>Voyages</a>
   </nav>
   <p class="grp" id="nav-personnes">Personnes</p>
   <nav class="nav" aria-labelledby="nav-personnes">
-    <a href="/admin/personnes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg>Personnes</a>
-    
+    <a href="/admin/personnes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg>Personnes<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 nouvelle</span></span></a>
     <a href="/admin/terrain"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>App de terrain</a>
   </nav>
   <p class="grp" id="nav-publier"><span class="mq-a">Publier<span class="mq-pin d" aria-hidden="true">1</span></span></p>
   <nav class="nav" aria-labelledby="nav-publier">
     <a href="/admin/photos?statut=proposee&amp;auteur=sebastien"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg>Mes propositions</a>
-    
-    <a href="/admin/carnets"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <a href="/admin/carnet"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
     <a href="/admin/galeries"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Galeries privées</a>
     <a href="/admin/boutique"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique</a>
-    
+  </nav>
+  <p class="grp" id="nav-equipe">Équipe</p>
+  <nav class="nav" aria-labelledby="nav-equipe">
+    <a href="/admin/statistiques"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
   </nav>
   <div class="foot">
-    <nav class="pied-liens" aria-label="Réglages et aide">
-      
+    <nav class="pied-liens" aria-label="Aide et site">
       <a href="/admin/aide"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg>Aide</a>
       <a href="/" target="_blank" rel="noopener"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Voir le site<span class="sr-only"> (nouvel onglet)</span></a>
       <details class="lang-pick admin-lang">
@@ -184,7 +129,7 @@
     </nav>
     <div class="me">
       <a class="me-lien" href="/admin/compte"><span class="av" aria-hidden="true">S</span><span class="who"><span class="me-nom">Sébastien</span><span class="sr-only">, mon compte</span><small>Photographe</small></span></a>
-      <button class="iconbtn btn-theme" type="button" aria-label="Passer en mode sombre" title="Passer en mode sombre"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+      <button class="iconbtn btn-theme" type="button"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button>
       <button class="iconbtn" type="button" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button>
     </div>
   </div>
@@ -201,11 +146,11 @@
       <button class="btn" type="button">Proposer les 3 photos</button>
     </div>
   </header>
-  <ol class="steps mq-a" aria-label="Étapes de l’import"><span class="mq-pin" aria-hidden="true">4</span>
+  <div class="mq-a"><span class="mq-pin" aria-hidden="true">4</span><ol class="steps" aria-label="Étapes de l’import">
     <li class="done"><span class="n">1.</span> Choisir et vérifier</li>
     <li class="done"><span class="n">2.</span> Envoi et traitement</li>
     <li aria-current="step"><span class="n">3.</span> <span class="et-sur">Étape 3 sur 3 : </span>Compléter et proposer</li>
-  </ol>
+  </ol></div>
   <div class="flash mq-a" role="note"><span class="mq-pin" aria-hidden="true">5</span><p><span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/></svg></span><span>La carte contenait aussi 2 fichiers déjà importés le 14 oct. (même contenu) : ils ont été écartés.</span><a class="more" href="/admin/photos?import=dernier&amp;doublons">Voir les 2 fichiers</a></p></div>
   <div class="mq-a"><span class="mq-pin" aria-hidden="true">6</span><form class="bulk bulk-l" action="/admin/photos/actions" method="post" aria-label="Changer plusieurs photos à la fois">
     <strong role="status">Pour les 2 photos cochées :</strong>
@@ -223,9 +168,9 @@
     <tbody>
       <tr>
         <td class="c-chk"><label class="chk-l"><input class="chk" type="checkbox" aria-labelledby="p1"></label></td>
-        <th scope="row" class="c-thumb" id="p1"><img src="_commun/photos/160/maine.webp" alt="" width="96" height="64"><span class="fic">R0004012.jpg</span><span class="sr-only">, Minoterie, brume du matin</span></th>
+        <th scope="row" class="c-thumb" id="p1"><img src="_commun/photos/160/maine.webp" alt="" width="96" height="64"><span class="fic">R0004012.JPG</span><span class="sr-only">, Minoterie, brume du matin</span></th>
         <td class="c-title"><div class="cell"><span class="lb-cell" aria-hidden="true">Titre</span><input value="Minoterie, brume du matin" aria-labelledby="h-titre p1">
-          <details class="tr mq-a" open><span class="mq-pin" aria-hidden="true">11</span><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Anglais et allemand <span class="hint">· 2 sur 2</span></summary><div class="cell">
+          <details class="tr" open><summary class="mq-a"><span class="mq-pin" aria-hidden="true">11</span><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Anglais et allemand <span class="hint">· 2 sur 2</span></summary><div class="cell">
             <label>Anglais <input lang="en" value="Mill, morning mist"></label>
             <label>Allemand <input lang="de" value="Mühle im Morgennebel"></label></div></details></div></td>
         <td class="c-cat"><div class="cell"><span class="lb-cell" aria-hidden="true">Série</span><select aria-labelledby="h-serie p1"><option>Choisir une série</option><option>Atlantique</option><option selected>Paysage</option><option>Portrait</option><option>Rue</option><option>Voyage</option></select></div></td>
@@ -235,7 +180,7 @@
       </tr>
       <tr>
         <td class="c-chk"><label class="chk-l"><input class="chk" type="checkbox" checked aria-labelledby="p2"></label></td>
-        <th scope="row" class="c-thumb" id="p2"><img src="_commun/photos/160/ligny.webp" alt="" width="96" height="64"><span class="fic">R0004049.jpg</span><span class="sr-only">, Quai Ligny, soir</span></th>
+        <th scope="row" class="c-thumb" id="p2"><img src="_commun/photos/160/ligny.webp" alt="" width="96" height="64"><span class="fic">R0004046.JPG</span><span class="sr-only">, Quai Ligny, soir</span></th>
         <td class="c-title"><div class="cell"><span class="lb-cell" aria-hidden="true">Titre</span><input value="Quai Ligny, soir" aria-labelledby="h-titre p2">
           <details class="tr"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Anglais et allemand <span class="hint">· à traduire</span></summary></details></div></td>
         <td class="c-cat"><div class="cell"><span class="lb-cell" aria-hidden="true">Série</span><select aria-labelledby="h-serie p2"><option>Choisir une série</option><option>Atlantique</option><option>Paysage</option><option>Portrait</option><option selected>Rue</option><option>Voyage</option></select></div></td>
@@ -245,7 +190,7 @@
       </tr>
       <tr>
         <td class="c-chk"><label class="chk-l"><input class="chk" type="checkbox" checked aria-labelledby="p3"></label></td>
-        <th scope="row" class="c-thumb" id="p3"><img src="_commun/photos/160/reverberes.webp" alt="" width="96" height="64"><span class="fic">R0004057.jpg</span></th>
+        <th scope="row" class="c-thumb" id="p3"><img src="_commun/photos/160/reverberes.webp" alt="" width="96" height="64"><span class="fic">R0004057.JPG</span></th>
         <td class="c-title"><div class="cell"><span class="lb-cell" aria-hidden="true">Titre</span><input value="R0004057" aria-labelledby="h-titre p3" aria-describedby="t3">
           <p class="att mq-a" id="t3"><span class="mq-pin" aria-hidden="true">12</span><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Titre provisoire (nom du fichier)</p>
           <details class="tr"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Anglais et allemand <span class="hint">· à traduire</span></summary></details></div></td>
@@ -268,14 +213,14 @@
   <a href="/admin/rencontre/accueil"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
   <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
 </nav>
-<div class="etats-a" role="region" aria-label="Autres états de l’écran">
-<div class="mq-ecran large"><p class="mq-etat">État · Proposer : deux points à corriger d’abord</p>
+<div class="mq-etats mq-etats--grille" role="region" aria-label="Autres états de l’écran">
+<section class="mq-ecran large" aria-labelledby="etat-1"><p class="mq-etat" id="etat-1">État · Proposer : deux points à corriger d’abord</p>
   <div class="voile-a">
     <div class="confirm mq-a" role="dialog" aria-modal="false" aria-labelledby="dp-t" aria-describedby="dp-d"><span class="mq-pin" aria-hidden="true">13</span>
       <h2 id="dp-t">Proposer les 3 photos à Julien ?</h2>
       <p id="dp-d">Julien les publie ou vous les renvoie avec une remarque. Deux points d’abord, corrigés ici :</p>
       <ul class="liste-c">
-        <li><img src="_commun/photos/160/reverberes.webp" alt="" width="64" height="43"><div><p><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg> <b>R0004057</b> a un titre provisoire.</p>
+        <li><img src="_commun/photos/160/reverberes.webp" alt="" width="64" height="43"><div><p><span class="att"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg></span> <b>R0004057</b> a un titre provisoire.</p>
           <div class="champ-a"><label for="dp-titre">Titre</label><input id="dp-titre" class="is-focus" value="Réverbères, quai Ligny"></div>
           <div class="champ-a"><label for="dp-date">Date</label><input id="dp-date" value="14 oct. 2026" aria-describedby="dp-date-l"><p class="aide" id="dp-date-l">Lu : mercredi 14 octobre 2026</p></div></div></li>
         <li><img src="_commun/photos/160/ligny.webp" alt="" width="64" height="43"><div><p><span class="att"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg></span> <b>Quai Ligny, soir</b> : accord à vérifier. Julien ne pourra la publier qu’après.</p></div></li>
@@ -283,8 +228,8 @@
       <div class="champ-a" style="margin-top:16px"><label for="dp-mot">Un mot pour Julien <span class="facultatif">(facultatif)</span></label><textarea id="dp-mot" rows="2">Claire a répondu en ligne pour le quai Ligny ; Hugo, pas encore.</textarea></div>
       <div class="actions"><button class="btn ghost" type="button">Annuler</button><button class="btn ghost" type="button">Proposer sans corriger</button><button class="btn" type="button">Proposer les 3 photos</button></div>
     </div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Administrateur : publier le lot</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-2"><p class="mq-etat" id="etat-2">État · Administrateur : publier le lot</p>
   <div class="ecran-a">
     <div class="ep" style="margin-bottom:16px"><a class="ep-retour" href="/admin/photos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Photothèque</a><div class="ep-titre"><h2 class="titre-ecran" style="margin:0">Compléter et publier</h2></div><p class="ep-meta"><span>3 photos de Sébastien, importées le 14 oct.</span></p></div>
     <div class="confirm mq-a" role="dialog" aria-modal="false" aria-labelledby="da-t" aria-describedby="da-d" style="position:static;display:block;margin:0;width:100%"><span class="mq-pin" aria-hidden="true">14</span>
@@ -292,8 +237,8 @@
       <p id="da-d">« Minoterie, brume du matin » et « Réverbères, quai Ligny » seront en ligne. « Quai Ligny, soir » reste en brouillon tant que son accord n’est pas vérifié.</p>
       <div class="actions"><button class="btn ghost" type="button">Annuler</button><button class="btn" type="button">Publier les 2 photos</button></div>
     </div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Touche P dans la planche, titre provisoire</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-3"><p class="mq-etat" id="etat-3">État · Touche P dans la planche, titre provisoire</p>
   <div class="voile-a">
     <div class="confirm mq-a" role="dialog" aria-modal="false" aria-labelledby="dk-t" aria-describedby="dk-d"><span class="mq-pin" aria-hidden="true">15</span>
       <h2 id="dk-t">Publier les 2 photos choisies ?</h2>
@@ -301,8 +246,8 @@
       <p class="hint" style="margin:0">Les raccourcis d’une touche se coupent dans Mon compte.</p>
       <div class="actions"><button class="btn ghost is-focus" type="button">Annuler</button><button class="btn" type="button">Publier les 2 photos</button></div>
     </div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Après « Appliquer » : Défaire</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-4"><p class="mq-etat" id="etat-4">État · Après « Appliquer » : Défaire</p>
   <div class="ecran-a">
     <form class="bulk bulk-l" action="/admin/photos/actions" method="post" aria-label="Changer plusieurs photos à la fois (après Appliquer)" style="position:static;margin:0">
       <strong>Pour les 2 photos cochées :</strong>
@@ -310,8 +255,8 @@
       <button class="btn ghost" type="submit">Appliquer aux 2 photos</button>
     </form>
     <div class="mq-a"><span class="mq-pin" aria-hidden="true">16</span><div class="toast toast-ech" role="status"><p>Série <b>Rue</b> appliquée à 2 photos.</p><button type="button">Défaire</button><span class="toast-temps" style="--reste: 62%"></span></div></div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Ville : la plus probable d’abord</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-5"><p class="mq-etat" id="etat-5">État · Ville : la plus probable d’abord</p>
   <div class="ecran-a">
     <div class="ville-l champ-a mq-a"><span class="mq-pin" aria-hidden="true">17</span><label for="vi">Ville de « Réverbères, quai Ligny »</label>
       <input id="vi" class="is-focus" value="An" role="combobox" aria-expanded="true" aria-controls="vi-l" aria-activedescendant="vi1" aria-autocomplete="list">
@@ -322,16 +267,16 @@
       </ul>
       <p class="aide" role="status">3 villes, la plus proche du GPS d’abord.</p>
     </div>
-  </div></div>
-<div class="mq-ecran"><p class="mq-etat">État · Page réservée, dans l’administration</p>
+  </div></section>
+<section class="mq-ecran" aria-labelledby="etat-6"><p class="mq-etat" id="etat-6">État · Page réservée, dans l’administration</p>
   <div class="ecran-a">
     <div class="refus mq-a"><span class="mq-pin" aria-hidden="true">18</span>
       <h2 class="titre-ecran" style="margin:0">Page réservée à l’administrateur</h2>
       <p>« À valider » est la page de Julien. Vos photos proposées sont dans « Mes propositions », avec leur état.</p>
       <div class="actions"><a class="btn ghost" href="/admin/photos/lot?ids=24,25,26"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Revenir au lot</a><a class="btn" href="/admin/photos?statut=proposee&amp;auteur=sebastien">Mes propositions</a></div>
     </div>
-  </div></div>
-<div class="mq-ecran large" lang="de"><p class="mq-etat" lang="fr">État · En allemand : Ergänzen und vorschlagen</p>
+  </div></section>
+<section class="mq-ecran large" lang="de" aria-labelledby="etat-7"><p class="mq-etat" id="etat-7" lang="fr">État · En allemand : Ergänzen und vorschlagen</p>
   <div class="ecran-a">
     <div class="ep mq-a" style="margin-bottom:16px"><span class="mq-pin" aria-hidden="true">19</span><a class="ep-retour" href="/admin/photos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Fotothek</a><div class="ep-titre"><h2 class="titre-ecran" style="margin:0">Ergänzen und vorschlagen</h2></div>
       <p class="ep-meta"><span>3 Fotos, importiert am 14. Okt.</span></p>
@@ -344,7 +289,7 @@
       <p class="hint">Nichts ändert sich vor „Anwenden“.</p>
     </form>
     <div class="champ-a" style="max-width:420px"><label for="de-datum">Datum von R0004057</label><input id="de-datum" value="14/15/2026" aria-invalid="true" aria-describedby="de-datum-e"><p class="err" id="de-datum-e"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Fehler:</b> Es gibt keinen 15. Monat. Schreiben Sie zum Beispiel „14. Okt. 2026“.</span></p></div>
-  </div></div>
+  </div></section>
 </div>
 <aside class="mq-notes" aria-labelledby="mq-t">
   <p class="mq-id">MQ-08 · administration · thème clair · bureau 1 440 × 900 et Pixel 7 · Sébastien, photographe, vendredi 16 oct. 2026, 21 h 34</p>
@@ -357,7 +302,7 @@
     <li><span class="mq-num" aria-hidden="true">4</span><b>Les étapes restent visibles au téléphone</b><p>Au bureau, les trois étapes ; au téléphone, une ligne : « Étape 3 sur 3 : Compléter et proposer ».</p><span class="mq-ref">Jury v0 · B&S 1.3 · WCAG 1.3.1</span></li>
     <li><span class="mq-num" aria-hidden="true">5</span><b>Les doublons sont écartés, et on le dit</b><p>Repérés par leur contenu, les 2 fichiers déjà importés le 14 oct. ne recréent pas de photos ; un lien les montre.</p><span class="mq-ref">UX-A-20 · B&S 5.1</span></li>
     <li><span class="mq-num" aria-hidden="true">6</span><b>Rien ne change avant « Appliquer »</b><p>Série, ville et date pour les cochées ; « Celle de chaque photo » par défaut, donc aucun écrasement d’un clic ; une liste ne s’applique jamais à la flèche.</p><span class="mq-ref">UX-A-10 · UX-A-21 · WCAG 3.2.2 · B&S 3.1</span></li>
-    <li><span class="mq-num" aria-hidden="true">7</span><b>Chaque ligne a pour en-tête sa photo</b><p>Vignette (160 px) et nom de fichier en th scope="row" ; les champs se lisent « Titre, R0004012.jpg, Minoterie… » au lieu de « Titre de la photo 24 ».</p><span class="mq-ref">UX-A-10 · RGAA 5.7 · RGAA 11.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Chaque ligne a pour en-tête sa photo</b><p>Vignette (160 px) et nom de fichier en th scope="row" ; les champs se lisent « Titre, R0004012.JPG, Minoterie… » au lieu de « Titre de la photo 24 ».</p><span class="mq-ref">UX-A-10 · RGAA 5.7 · RGAA 11.1</span></li>
     <li><span class="mq-num" aria-hidden="true">8</span><b>« ✦ Suggestion », jamais « Proposée »</b><p>L’assistant suggère « Rue » ; le mot « Proposée » reste le statut. Pastille à filet plein, seul le ✦ en couleur ; un clic accepte.</p><span class="mq-ref">UX-A-16 · UX-A-17 · lexique MQ-00</span></li>
     <li><span class="mq-num" aria-hidden="true">9</span><b>Une date refusée, dite sous le champ</b><p>Le même message que la fiche (MQ-09) : ce qui ne va pas, puis un exemple ; la saisie reste, la date n’est pas enregistrée, le témoin le dit.</p><span class="mq-ref">UX-A-14 · RGAA 11.10 · WCAG 3.3.1, 3.3.3</span></li>
     <li><span class="mq-num" aria-hidden="true">10</span><b>L’accord à vérifier se voit dans le lot</b><p>Un lien vers la rubrique Accords de la fiche ; la photo peut être proposée, pas publiée.</p><span class="mq-ref">UX-A-03 · UX-T-01</span></li>
@@ -371,8 +316,10 @@
     <li><span class="mq-num" aria-hidden="true">18</span><b>Une page refusée reste dans l’admin</b><p>Le menu, un titre clair, et deux issues : revenir au lot, ou « Mes propositions ». Plus de 403 au thème du site public.</p><span class="mq-ref">UX-A-04 · UX-A-30 · Nielsen #9</span></li>
     <li><span class="mq-num" aria-hidden="true">19</span><b>L’allemand tient</b><p>« Ergänzen und vorschlagen », « Wie bei jedem Foto », « Auf 2 Fotos anwenden » : la barre passe sur deux lignes sans rien couper.</p><span class="mq-ref">Grille, critère 4</span></li>
   </ol>
+  <h3>Composants</h3>
+  <p>Depuis la consolidation du 16 oct., ils sont dans <code>admin-plus.css</code> (planche MQ-00, section Administration) : la barre latérale du rôle Photographe (ses séries comptées sur ses photos) · « ✦ Suggestion : Rue », pastille qu’un clic accepte (<code>.sugg</code>) · case d’une ligne dont le libellé fait la cible de 32 et 44 px (<code>.chk-l</code>) · relecture d’une saisie (<code>.lu</code>) · point d’attention (<code>.att</code>) · dialogue et message d’action montrés (<code>.voile-a</code>, <code>.toast-ech</code>). Restent locaux : les étapes compactes, la barre « Pour les photos cochées », le tableau du lot, la liste des villes et la page refusée.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur, outils/inspect.sh) · axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation au bureau, au téléphone et à 320, 820 et 1 024 px · Débordement horizontal : 0 à 320, 412, 820, 1 024 et 1 440 px · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (outils/mq00-cibles.mjs, liens dans une phrase exemptés) · Poids : 248 ko, 19 requêtes (3 vignettes de 160 px dans le lot) ; aucun script, aucune ressource tierce · Barre latérale du rôle Photographe : 11 entrées et 3 au pied · Allemand : barre « Für die 2 markierten Fotos » sur deux lignes, sans coupure · Sans annotations : 19 pastilles, 7 étiquettes et cadres retirés ; 0 pixel déplacé hors de leur emprise sur 3 458 px au bureau et 6 526 px au téléphone (3 px d’anticrénelage, écart ≤ 7/255).</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>consolidation du 16 oct. 2026</b> (outils/consol-admin.mjs, consol-sans-admin.py, Chromium de Playwright 1.64 en conteneur) : axe-core 0 violation au bureau (1 440 × 900, clair) et au téléphone (Pixel 7, clair) ; 0 débordement ni texte coupé à 320, 412, 820, 1 024 et 1 440 px ; 0 cible sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px ; sans annotations, 0 pixel changé hors des pastilles, étiquettes et cadres, au bureau comme au téléphone ; 213 ko et 13 ressources, images différées chargées, polices comprises ; barre latérale dans 900 px · <b>refonte</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur, outils/inspect.sh) · axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation au bureau, au téléphone et à 320, 820 et 1 024 px · Débordement horizontal : 0 à 320, 412, 820, 1 024 et 1 440 px · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (outils/mq00-cibles.mjs, liens dans une phrase exemptés) · Poids : 248 ko, 19 requêtes (3 vignettes de 160 px dans le lot) ; aucun script, aucune ressource tierce · Barre latérale du rôle Photographe (variante de la planche) : 12 entrées et 3 au pied · Allemand : barre « Für die 2 markierten Fotos » sur deux lignes, sans coupure · Sans annotations : 19 pastilles, 7 étiquettes et cadres retirés ; 0 pixel déplacé hors de leur emprise sur 3 458 px au bureau et 6 526 px au téléphone (3 px d’anticrénelage, écart ≤ 7/255).</p>
 </aside>
 </body>
 </html>

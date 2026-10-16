@@ -228,8 +228,8 @@
     <li><span class="mq-num" aria-hidden="true">11</span><b>Qui édite le site</b><p>Noms, adresse et téléphone des éditeurs et responsables de la publication, à côté du contact, et le lien vers les mentions légales.</p><span class="mq-ref">UX-T-03 · LCEN art. 1-1</span></li>
     <li><span class="mq-num" aria-hidden="true">12</span><b>Instagram et le site se répondent</b><p>Le lien en bio mène à /instagram : chaque publication renvoie à sa page photo. Seules les photos dont les personnes ont accepté Instagram y figurent (Inês oui, Tiago non).</p><span class="mq-ref">UX-T-06 · UX-F-34 · jury v0 : constat non montré</span></li>
   </ol>
-  <h3>Composants proposés à la planche</h3>
-  <p><b>Photo de référence</b> (<code>.photo-ref</code>) : vignette de 160 px et cartel, dans un formulaire. <b>Écrire à</b> (<code>.ecrire</code>) : une colonne par personne, photo au format, nom, phrase, adresse. <b>Bloc de formulaire</b> (<code>.bloc</code>), commun avec MQ-05.</p>
+  <h3>Composants de la planche</h3>
+  <p>Tous dans <code>_commun/public.css</code> et montrés dans MQ-00 : <b>photo dont on parle</b> (<code>.photo-ref</code>, § 22 : vignette de 160 px et cartel, dans un formulaire), <b>écrire à</b> (<code>.ecrire</code>, § 24 : une colonne par personne, photo au format, nom, phrase, adresse), <b>bloc de formulaire</b> (<code>.bloc</code>, § 22), commun avec MQ-05. La page n’ajoute que sa mise en page.</p>
   <h3>Ce que le code doit ajouter</h3>
   <p>Une route <code>/droits/demande</code> (GET préremplie par <code>?photo=</code>, POST avec le même champ piège et la même limite que <code>/bonjour</code>, qui ne compte que les envois acceptés) ; une page <code>/instagram</code> ; les coordonnées des éditeurs, déjà dans les réglages de l’admin (<code>legal.js</code>).</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>

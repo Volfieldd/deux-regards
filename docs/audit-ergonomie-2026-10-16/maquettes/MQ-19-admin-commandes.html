@@ -12,177 +12,15 @@
 <link rel="stylesheet" href="_commun/admin-plus.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* --- Composants ajoutés (proposés pour admin-plus.css, voir l'encart « Ce qui change ») --- */
-/* A. Autres états : espace au-dessus de chaque cadre pour son étiquette (hors du flux). */
-.ecrans-suite { display: grid; gap: 88px; margin-top: 112px; }
-.ecran-bloc { min-width: 0; }
-.ecran-bloc > .ep { margin-top: 0; }
-/* Titre d'un autre écran : même dessin que le H1 de l'en-tête de page, mais niveau 2 dans le plan de la maquette. */
-.main .ep .h1 { margin: 0; font-size: var(--at-h1); font-weight: 300; line-height: 1.12; overflow-wrap: anywhere; }
-@media (max-width: 720px) { .main .ep .h1 { font-size: 28px; } .ecrans-suite { gap: 80px; margin-top: 96px; } }
-/* Dans un autre état, la barre basse du téléphone reste dans son cadre (un seul écran de téléphone est réel). */
-@media (max-width: 720px) { .ecran-bloc .ep-actions { position: static; grid-area: auto; padding: 0; border: 0; background: none; margin-top: 12px; } }
-/* B. Message d'action et dialogue montrés dans la page (dans l'interface, ils sont en bas de l'écran ou en modal). */
-.admin .toast.toast-ech { position: relative; left: auto; bottom: auto; transform: none; display: inline-flex; max-width: 100%; margin: 0; }
-.confirm.confirm-ech[open], .dialog.confirm-ech[open] { position: static; display: block; margin: 0; max-width: 100%; }
-.confirm.confirm-ech { width: min(560px, 100%); }
-.voile-ech { padding: 32px; border-radius: var(--r-admin-panneau); background: var(--scrim); }
-@media (max-width: 720px) { .voile-ech { padding: 12px; } }
-/* C. Panneau en deux colonnes : formulaire, puis colonne d'appui. */
-.deux-col { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 24px; align-items: start; }
-@media (max-width: 1180px) { .deux-col { grid-template-columns: minmax(0, 1fr); } }
-.main .panel > h2, .main .panel > h3, .main .panel > .panel-t { margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
-.panel > .aide-panel { margin: -6px 0 14px; color: var(--ink3); font-size: var(--at-petit); }
-/* D. Liste en tableau, en cartes au téléphone (modèle : .lot de main). */
-.liste-a { width: 100%; border-collapse: collapse; background: var(--s1); font-size: var(--at-texte); }
-.liste-a caption { padding: 12px 14px; text-align: left; color: var(--ink2); font-size: var(--at-petit); caption-side: top; }
-.liste-a th, .liste-a td { padding: 12px 14px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
-.liste-a thead th { color: var(--ink2); font-size: var(--at-min); font-weight: 500; letter-spacing: .04em; white-space: nowrap; }
-.liste-a tbody th { font-weight: 500; }
-.liste-a .sec { display: block; margin-top: 2px; color: var(--ink3); font-size: var(--at-petit); font-weight: 400; }
-.liste-a .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.liste-a tr.choisie { background: var(--accent-soft); }
-.liste-a a.ligne-lien { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
-.liste-a a.ligne-lien:hover { text-decoration-color: currentColor; }
-.liste-a .ref { font-family: var(--mono); font-size: 13px; font-weight: 400; letter-spacing: 0; }
-@media (max-width: 1100px) {
-  .liste-wrap { overflow: visible; box-shadow: none; border-radius: 0; }
-  .liste-a, .liste-a tbody { display: block; background: transparent; }
-  .liste-a caption { display: block; padding: 0 0 10px; }
-  .liste-a thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  /* Une carte par ligne : en tête la référence (et le montant), puis l'état, puis le reste ; les données courtes vont par deux. */
-  .liste-a tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 16px; margin: 0 0 12px; padding: 14px 16px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
-  .liste-a td, .liste-a th { display: block; padding: 0; border: 0; min-width: 0; grid-column: 1 / -1; }
-  .liste-a th[scope="row"] { grid-column: 1; }
-  .liste-a .c-haut { grid-column: 2; grid-row: 1; text-align: right; }
-  .liste-a .c-demi { grid-column: auto; }
-  .liste-a .c-demi[data-label]::before { content: attr(data-label); display: block; color: var(--ink3); font-size: var(--at-min); }
-  .liste-a .num { text-align: right; }
-}
-@media (max-width: 1100px) and (min-width: 721px) { .liste-a tbody { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; } .liste-a tr { margin: 0; } }
-@media (max-width: 720px), (pointer: coarse) { .liste-a a.ligne-lien { min-height: 44px; } }
-/* E. Vignettes d'une galerie ou d'un billet (pastilles de 160 px). */
-.vignettes-a { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
-.vignettes-a li { margin: 0; }
-.vignettes-a img { display: block; height: 56px; width: auto; border-radius: 4px; background: var(--photo-bg); }
-/* F. Ligne d'objet avec son état (photo d'un billet, favori) */
-.objets-a { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-.objets-a > li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 4px 14px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
-.objets-a > li:first-child { border-top: 0; padding-top: 0; }
-.objets-a img { width: 64px; height: auto; border-radius: 4px; background: var(--photo-bg); grid-row: span 3; }
-.objets-a .t { font-weight: 500; }
-.objets-a .t .sec { display: block; color: var(--ink3); font-size: var(--at-petit); font-weight: 400; }
-.objets-a .actions { gap: 6px 8px; }
-.objets-a .actions .btn { min-height: 32px; padding: 0 12px; font-size: 13px; }
-@media (max-width: 720px), (pointer: coarse) { .objets-a .actions .btn { min-height: 44px; } }
-/* G. Chronologie (événements datés, du plus récent au plus ancien) */
-.chrono { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; font-size: var(--at-texte); }
-.chrono li { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 2px 14px; padding: 9px 0; border-top: 1px solid var(--line); }
-.chrono li:first-child { border-top: 0; }
-.chrono time { color: var(--ink3); font-size: var(--at-petit); font-variant-numeric: tabular-nums; }
-.chrono .sec { color: var(--ink3); font-size: var(--at-petit); }
-@media (max-width: 720px) { .chrono li { grid-template-columns: 1fr; } }
-/* H. Aperçu d'un e-mail en texte seul */
-.courriel { margin: 0; padding: 18px 20px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); font-size: var(--at-texte); line-height: 1.6; }
-.courriel dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px 12px; margin: 0 0 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line2); font-size: var(--at-petit); }
-.courriel dt { color: var(--ink3); } .courriel dd { margin: 0; overflow-wrap: anywhere; }
-.courriel p { margin: 0 0 10px; max-width: 64ch; } .courriel p:last-child { margin-bottom: 0; }
-.courriel .bas { color: var(--ink3); font-size: var(--at-petit); }
-.courriel .donnee, .donnee { font-family: var(--mono); font-size: 13px; letter-spacing: 0; overflow-wrap: anywhere; }
-/* I. Signalement (non bloquant) dans un panneau : symbole, mot, deux issues */
-.signal { display: grid; gap: 8px; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 3px 0 0 var(--warn); }
-.signal p { margin: 0; color: var(--ink2); font-size: var(--at-petit); }
-.signal .signal-t { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: var(--at-texte); font-weight: 500; }
-.signal .signal-t .ic { color: var(--warn); }
-.signal .actions .btn { min-height: 32px; padding: 0 12px; font-size: 13px; }
-@media (max-width: 720px), (pointer: coarse) { .signal .actions .btn { min-height: 44px; } }
-/* J. Choix (cases et boutons radio) avec leur explication, cibles de 24 et 44 px */
-.choix-a { display: grid; gap: 4px; margin: 0; padding: 0; border: 0; min-width: 0; }
-.choix-a > legend { padding: 0; margin: 0 0 6px; color: var(--ink); font-size: var(--at-petit); font-weight: 500; }
-.choix-a > .aide { margin: -2px 0 6px; color: var(--ink3); font-size: 12px; }
-.choix-a label { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 0 8px; align-items: start; min-height: 32px; padding: 4px 0; color: var(--ink); font-size: var(--at-texte); cursor: pointer; }
-.choix-a label input { margin: 1px 3px 0; }
-.choix-a label .sec { grid-column: 2; color: var(--ink3); font-size: 12px; line-height: 1.45; }
-.choix-a label.inactif { color: var(--ink3); cursor: default; }
-@media (max-width: 720px), (pointer: coarse) { .choix-a label { min-height: 44px; padding: 10px 0; } .choix-a label input { width: 22px; height: 22px; margin: 0 1px; } }
-/* K. Pied de formulaire : [Annuler] puis l'action, le seul bouton plein, en dernier */
-.form-pied { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px 12px; padding-top: 16px; border-top: 1px solid var(--line); }
-.form-pied .hint { margin-right: auto; }
-@media (max-width: 720px) { .form-pied { flex-direction: column; align-items: stretch; } .form-pied .hint { margin: 0; } }
-/* L. Annotations : lien de bascule dans l'encart (comme MQ-00) */
-.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
-.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
-/* Résumé d'erreurs : liens de 24 px (44 au toucher) ; barre d'onglets à 12 px (rien sous 12 px). */
-.resume-a a { display: inline-flex; align-items: center; min-height: 24px; }
-@media (max-width: 720px), (pointer: coarse) { .resume-a a { min-height: 44px; } }
-@media (max-width: 720px) { .admin .tabbar a, .admin .tabbar button { font-size: 12px; } }
-/* M. Petits communs : focus figé pour la maquette, liens d'action, conséquences d'un dialogue, deux états côte à côte */
-.btn.is-focus { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-.mq-notes code { color: var(--mq-encre); }
-.filtres-l { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin: 0 0 14px; }
-@media (max-width: 720px), (pointer: coarse) { .chips .chip { min-height: 44px; } }
-.btns-ligne { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
-.voile-ech { display: grid; place-items: center; }
-.dlg-cons { margin: 0 0 12px; padding-left: 20px; color: var(--ink2); font-size: var(--at-petit); }
-.dlg-cons li { margin: 3px 0; }
-.deux-etats { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 88px 40px; align-items: start; }
-@media (max-width: 1180px) { .deux-etats { grid-template-columns: minmax(0, 1fr) !important; } }
-.champ-a .lu { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--ink2); font-size: var(--at-petit); }
-.champ-a .lu .ic { color: var(--ok); }
-.cote { display: grid; gap: 0; min-width: 0; }
-/* Pastilles de marge droite : au téléphone, dans le coin du panneau (aucun débordement horizontal). */
-@media (max-width: 767px) { .mq-pin.d { left: auto; right: 4px; top: 4px; } }
-/* Barre latérale à 220 px (tablette) : la recherche et le compte tiennent sur une ligne. */
-.admin .cmdk span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.admin .cmdk kbd { white-space: nowrap; }
-@media (max-width: 1180px) and (min-width: 721px) { .admin .cmdk kbd { display: none; } .admin .me { gap: 4px; } .admin .me .iconbtn { width: 32px; height: 32px; } }
-/* Champs : 16 px au téléphone (pas de zoom forcé sur iOS) */
-@media (max-width: 720px) { .admin input:not([type="checkbox"]):not([type="radio"]), .admin select, .admin textarea { font-size: 16px; } }
-/* --- MQ-19 : composants locaux --- */
-.liste-a .langue { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--line2); color: var(--ink2); font-size: 12px; font-weight: 500; line-height: 18px; }
-.pied-liste { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; margin: 12px 0 0; color: var(--ink3); font-size: 12px; }
-.pied-liste .etats-legende { margin: 0; }
-.lien-a { color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; font-size: var(--at-petit); }
-@media (max-width: 720px), (pointer: coarse) { .lien-a { min-height: 44px; } }
-@media (max-width: 1100px) { .liste-a .c-etat { grid-row: 2; } }
-/* Étapes d'une commande : ✓ fait, ● maintenant, ○ ensuite. Une seule étape courante. */
-.etapes-a { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; counter-reset: none; }
-.etapes-a li { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 2px 10px; padding: 0 0 16px; }
-.etapes-a li::before { content: ''; position: absolute; left: 11px; top: 24px; bottom: 0; width: 2px; background: var(--line2); }
-.etapes-a li:last-child { padding-bottom: 0; } .etapes-a li:last-child::before { display: none; }
-.etapes-a .m { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink3); background: var(--s1); position: relative; z-index: 1; }
-.etapes-a .fait .m { box-shadow: none; background: var(--s3); color: var(--ok); }
-.etapes-a .maintenant .m { box-shadow: inset 0 0 0 2px var(--accent-ink); color: var(--accent-ink); }
-.etapes-a .t { font-weight: 500; } .etapes-a .ensuite .t { color: var(--ink2); font-weight: 400; }
-.etapes-a .sec { grid-column: 2; color: var(--ink3); font-size: var(--at-petit); }
-.etapes-a .maintenant .t::before { content: 'Maintenant · '; color: var(--accent-ink); }
-.lignes-a { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-.lignes-a li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 2px 14px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
-.lignes-a li:first-child { border-top: 0; padding-top: 0; }
-.lignes-a li.sans-img { grid-template-columns: minmax(0, 1fr) auto; }
-.lignes-a img { width: 64px; height: auto; border-radius: 4px; background: var(--photo-bg); }
-.lignes-a .t { font-weight: 500; } .lignes-a .sec { display: block; color: var(--ink3); font-size: var(--at-petit); }
-.lignes-a .prix { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
-.lignes-a .ex { font-family: var(--mono); font-size: 13px; color: var(--ink2); letter-spacing: 0; }
-.total-a { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 4px 0 0; padding-top: 12px; border-top: 1px solid var(--line2); font-size: var(--at-h3); font-weight: 500; }
-.total-a + .hint { margin: 6px 0 0; }
-.kv-a { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 0; font-size: var(--at-texte); }
-.kv-a dt { color: var(--ink3); } .kv-a dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+/* MQ-19, locaux (propres aux commandes ; le reste est dans admin-plus.css, voir l'encart) :
+   L1 éditions d'une commande · L2 formulaire d'un dialogue · L3 facture montrée en extrait. Aucun jeton redéclaré. */
 .stock-a { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .stock-a li { display: grid; gap: 6px; }
 .stock-a .t { font-weight: 500; } .stock-a .sec { color: var(--ink3); font-size: var(--at-petit); }
-/* Registre d'une édition : 15 cases, une par numéro ; vendu plein, celui de la commande cerclé, libre vide. */
-.registre { display: grid; grid-template-columns: repeat(15, minmax(0, 18px)); gap: 3px; margin: 0; }
-.registre span { height: 18px; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--line2); }
-.registre span.v { background: var(--ink3); box-shadow: none; }
-.registre span.ici { background: var(--accent); box-shadow: none; }
-.note-role { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 0 10px; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s2); color: var(--ink2); font-size: var(--at-petit); }
-.note-role b { color: var(--ink); font-weight: 500; }
 .dialog-form { display: grid; gap: 14px; margin: 0 0 4px; }
 .facture-ech { padding: 18px 20px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); font-size: var(--at-petit); }
 .facture-ech .tt { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 10px; font-size: var(--at-h3); font-weight: 500; }
 .facture-ech p { margin: 0 0 6px; color: var(--ink2); }
-
 </style>
 </head>
 <body class="admin">
@@ -191,7 +29,7 @@
 <a class="skip" href="#contenu">Aller au contenu</a>
 <div class="shell">
 <aside class="side" id="admin-nav" aria-label="Menu de l’administration">
-  <a class="word" href="/admin"><span>Nicephos</span></a>
+  <div class="side-haut"><a class="word" href="/admin"><span>Nicephos</span></a><button class="side-fermer" type="button" aria-controls="admin-nav" aria-expanded="true"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Fermer</button></div>
   <button class="cmdk" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
   <nav class="nav" aria-label="Aujourd’hui">
     <a href="/admin"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui<span class="nav-badge urgent"><span aria-hidden="true">✕ 1</span><span class="sr-only">, 1 urgence</span></span></a>
@@ -220,7 +58,7 @@
   <nav class="nav" aria-labelledby="nav-publier-fr">
     <a href="/admin/a-valider"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg>À valider<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 photo</span></span></a>
     <a href="/admin/site"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>Site public</a>
-    <a href="/admin/carnets"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <a href="/admin/carnet"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
     <a href="/admin/galeries"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Galeries privées</a>
     <a href="/admin/boutique" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 commande à préparer</span></span></a>
     <a href="/admin/instagram"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>Instagram</a>
@@ -229,7 +67,7 @@
   <nav class="nav" aria-labelledby="nav-equipe-fr">
     <a href="/admin/comptes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg>Comptes et rôles</a>
     <a href="/admin/circuit"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 3 3v6.5M6 8.5V15a3 3 0 0 0 3 3h6.5"/></svg>Circuit de publication</a>
-    <a href="/admin/journal"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Journal</a>
+    <a href="/admin/journal"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Journal</a>
     <a href="/admin/statistiques"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
   </nav>
   <div class="foot">
@@ -247,9 +85,8 @@
       </details>
     </nav>
     <div class="me">
-      <span class="av" aria-hidden="true">J</span>
-      <span class="who">Julien<small>Administrateur</small></span>
-      <button class="iconbtn" type="button" aria-label="Mode clair / sombre" title="Mode clair / sombre"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span></button>
+      <a class="me-lien" href="/admin/compte"><span class="av" aria-hidden="true">J</span><span class="who"><span class="me-nom">Julien</span><span class="sr-only">, mon compte</span><small>Administrateur</small></span></a>
+      <button class="iconbtn btn-theme" type="button"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button>
       <button class="iconbtn" type="button" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button>
     </div>
   </div>
@@ -286,11 +123,11 @@
 <td class="num c-haut">195,00 €</td><td class="c-demi" data-label="Vendeur">Sébastien</td><td class="c-etat"><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Livrée</span><span class="sec">le 10 oct.</span></td><td class="c-demi" data-label="Facture"><span class="ref">S-2026-0001</span></td></tr>
 </tbody></table></div>
 <div class="pied-liste"><span class="mq-pin" aria-hidden="true">4</span><ul class="etats-legende" aria-label="États d’une commande">
-<li style="color:var(--st-afaire)"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg><span style="color:var(--ink3)">En attente de paiement</span></li><li style="color:var(--st-encours)"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg><span style="color:var(--ink3)">Payée, à préparer · Tirage lancé · Expédiée</span></li><li style="color:var(--st-abouti)"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg><span style="color:var(--ink3)">Livrée</span></li><li style="color:var(--st-attention)"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg><span style="color:var(--ink3)">À vérifier (litige, ou date promise dépassée)</span></li><li style="color:var(--st-arret)"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg><span style="color:var(--ink3)">Annulée · Remboursée</span></li></ul>
+<li class="etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>En attente de paiement</li><li class="etat--encours"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Payée, à préparer · Tirage lancé · Expédiée</li><li class="etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Livrée</li><li class="etat--attention"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>À vérifier (litige, ou date promise dépassée)</li><li class="etat--arret"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg>Annulée · Remboursée</li></ul>
 <p style="margin:0">TVA non applicable, art. 293 B du CGI. Factures émises à l’expédition, une série par vendeur : S-2026-… et J-2026-….</p>
 <a class="lien-a" href="/admin/boutique/livre-des-recettes.csv"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>&nbsp;Exporter le livre des recettes d’octobre (CSV)</a></div>
-<div class="ecrans-suite">
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-1"><p class="mq-etat" id="etat-1">État · Commande C-2026-0005, ouverte</p>
+<div class="mq-etats">
+<section class="mq-ecran" aria-labelledby="etat-1"><p class="mq-etat" id="etat-1">État · Commande C-2026-0005, ouverte</p>
 <header class="ep mq-a"><span class="mq-pin d" aria-hidden="true" style="top:70px">6</span>
   <a class="ep-retour" href="/admin/boutique/commandes"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Commandes</a>
   <div class="ep-titre"><h2 class="h1" id="t-cmd">Commande <span class="ref" style="font-size:.8em">C-2026-0005</span></h2><span class="etat etat--encours"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Payée, à préparer</span></div>
@@ -322,7 +159,7 @@
 <p style="margin:0">Émise à l’expédition, au numéro suivant de la série de Julien (aujourd’hui <span class="ref">J-2026-0002</span>), en allemand, jointe à l’e-mail d’expédition.</p>
 <p class="hint" style="margin:8px 0 0">Le paiement a déjà sa ligne au livre des recettes de Julien.</p></section>
 <section class="panel" aria-labelledby="t-pay"><h3 class="panel-t" id="t-pay">Paiement</h3>
-<dl class="kv-a"><dt>Encaissé par</dt><dd>Stripe, compte de Julien</dd><dt>Moyen</dt><dd>carte</dd><dt>Montant</dt><dd>605,00 €</dd><dt>Référence</dt><dd><span class="ref">pi_3QF8sA2eZvKYlo2C</span></dd></dl>
+<dl class="kv-a"><dt>Encaissé par</dt><dd>Stripe, compte de Julien</dd><dt>Moyen</dt><dd>carte</dd><dt>Montant</dt><dd>605,00 €</dd><dt>Référence</dt><dd><span class="ref">pi_3QF8sA2eZvKYlo2C</span></dd><dt>Suivi d’Anna</dt><dd>lien personnel envoyé le 15 oct. à 21 h 04<span class="sec">un jeton aléatoire de 128 bits ; le numéro C-2026-0005 seul n’ouvre rien</span></dd></dl>
 <p style="margin:10px 0 0"><a class="enreg" href="/admin/boutique/commandes/C-2026-0005/verifier">Vérifier auprès de Stripe</a></p></section>
 <section class="panel" aria-labelledby="t-liv"><h3 class="panel-t" id="t-liv">Livraison</h3>
 <address style="font-style:normal">Anna Beispiel<br>Beispielstraße 12<br>79098 Freiburg im Breisgau<br>Allemagne</address>
@@ -341,22 +178,22 @@
 </div>
 </div>
 </section>
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-2"><p class="mq-etat" id="etat-2">État · Après « Tirage lancé » : Défaire</p><span class="mq-pin" aria-hidden="true">14</span>
+<section class="mq-ecran" aria-labelledby="etat-2"><p class="mq-etat" id="etat-2">État · Après « Tirage lancé » : Défaire</p><span class="mq-pin" aria-hidden="true">14</span>
 <div class="toast toast-ech" role="status"><p><b>C-2026-0005</b> : tirage lancé.</p><button type="button">Défaire</button><span class="toast-temps" style="--reste: 62%"></span></div>
 </section>
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-3"><p class="mq-etat" id="etat-3">État · Plus tard : expédier, suivi incomplet</p>
+<section class="mq-ecran" aria-labelledby="etat-3"><p class="mq-etat" id="etat-3">État · Plus tard : expédier, suivi incomplet</p>
 <form class="panel form" action="/admin/boutique/commandes/C-2026-0005/expedier" method="post" novalidate aria-labelledby="t-exp"><span class="mq-pin" aria-hidden="true">10</span>
 <h3 class="panel-t" id="t-exp">Expédier C-2026-0005</h3>
 <div class="row" style="align-items:start"><div class="champ-a" style="flex:1 1 220px"><label for="transp">Transporteur</label><select id="transp"><option selected>Colissimo International</option><option>La Poste, Lettre suivie</option><option>Autre transporteur</option></select></div>
 <div class="champ-a" style="flex:2 1 280px"><label for="suivi">Numéro de suivi</label><p class="aide" id="suivi-aide">Espaces permis. Il part dans l’e-mail à Anna.</p><input id="suivi" value="CB12345678FR" spellcheck="false" autocomplete="off" aria-invalid="true" aria-describedby="suivi-aide suivi-err"><p class="err" id="suivi-err"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> il manque un caractère : un numéro Colissimo International en a 13, deux lettres, neuf chiffres, puis FR (par exemple CB123456789FR).</span></p></div></div>
 <fieldset class="choix-a"><legend>Remise</legend><label class="inactif"><input type="checkbox" checked disabled><span>Contre signature, assurée</span><span class="sec">Obligatoire au-delà de 150 €.</span></label></fieldset>
-<div class="note-role"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><p style="margin:0"><b>En marquant la commande expédiée</b>, la facture est émise au numéro suivant de la série de Julien, en allemand, et Anna reçoit l’e-mail d’expédition avec le suivi et la facture. Une facture émise ne change plus : une erreur se corrige par un avoir.</p></div>
+<div class="note-a"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><p style="margin:0"><b>En marquant la commande expédiée</b>, la facture est émise au numéro suivant de la série de Julien, en allemand, et Anna reçoit l’e-mail d’expédition avec le suivi et la facture. Une facture émise ne change plus : une erreur se corrige par un avoir.</p></div>
 <div class="form-pied"><button class="btn ghost" type="button">Annuler</button><button class="btn" type="submit">Marquer comme expédiée</button></div>
 </form>
 </section>
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-4"><p class="mq-etat" id="etat-4">État · « Rembourser… » : motif manquant</p>
-<div class="voile-ech">
-<dialog class="confirm confirm-ech" open aria-labelledby="dlg-remb" aria-describedby="dlg-remb-d"><span class="mq-pin" aria-hidden="true">11</span>
+<section class="mq-ecran" aria-labelledby="etat-4"><p class="mq-etat" id="etat-4">État · « Rembourser… » : motif manquant</p>
+<div class="voile-a">
+<dialog class="confirm" open aria-labelledby="dlg-remb" aria-describedby="dlg-remb-d"><span class="mq-pin" aria-hidden="true">11</span>
   <h2 id="dlg-remb">Rembourser Léa Exemple ?</h2>
   <p id="dlg-remb-d">Commande <span class="ref">C-2026-0003</span> · Escaliers des Guindais, petit format, ex. 5/15 · facture <span class="ref">J-2026-0001</span>. Léa renonce à sa commande : elle a 14 jours après réception ; vous, 14 jours après sa demande pour rembourser.</p>
   <form class="dialog-form" method="post" action="/admin/boutique/commandes/C-2026-0003/rembourser" novalidate>
@@ -371,21 +208,21 @@
 </dialog>
 </div>
 </section>
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-5"><p class="mq-etat" id="etat-5">État · Une commande de Sébastien, vue par Julien</p>
+<section class="mq-ecran" aria-labelledby="etat-5"><p class="mq-etat" id="etat-5">État · Une commande de Sébastien, vue par Julien</p>
 <header class="ep"><span class="mq-pin" aria-hidden="true">12</span>
   <a class="ep-retour" href="/admin/boutique/commandes"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Commandes</a>
   <div class="ep-titre"><h2 class="h1" id="t-seb">Commande <span class="ref" style="font-size:.8em">C-2026-0006</span></h2><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>En attente de paiement</span></div>
   <p class="ep-meta"><span>Marc Exemple</span><span>Nantes</span><span>16 oct., 9 h 12</span><span>vendeur : Sébastien</span></p>
 </header>
 <div class="deux-col"><div class="panel">
-<div class="note-role"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><p style="margin:0"><b>Vente de Sébastien.</b> Lui seul la prépare, l’expédie et la rembourse, sur son compte Stripe et dans sa série de factures (S). Vous la voyez pour suivre la boutique.</p></div>
+<div class="note-a"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><p style="margin:0"><b>Vente de Sébastien.</b> Lui seul la prépare, l’expédie et la rembourse, sur son compte Stripe et dans sa série de factures (S). Vous la voyez pour suivre la boutique.</p></div>
 <ul class="lignes-a" style="margin-top:14px"><li><img src="_commun/photos/160/foz.webp" width="160" height="107" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><span><span class="t">Foz, la barre</span><span class="sec">Sébastien · grand format, image 40 × 60 cm, feuille 50 × 70</span><span class="sec">exemplaire <span class="ex">2/15</span>, réservé jusqu’à 9 h 47</span></span><span class="prix">290,00 €</span></li>
 <li class="sans-img"><span><span class="t">Livraison en France métropolitaine</span><span class="sec">à plat, suivie, contre signature et assurée</span></span><span class="prix">15,00 €</span></li></ul>
 <p class="total-a"><span>À payer</span><span>305,00 €</span></p>
 <p class="hint">Sans paiement à 9 h 47, l’exemplaire 2/15 est libéré dès que Stripe confirme l’expiration ; Marc ne voit son numéro qu’après paiement.</p>
 </div><div></div></div>
 </section>
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-6"><p class="mq-etat" id="etat-6">État · Ce que reçoit Anna, en allemand</p>
+<section class="mq-ecran" aria-labelledby="etat-6"><p class="mq-etat" id="etat-6">État · Ce que reçoit Anna, en allemand</p>
 <div class="deux-col"><span class="mq-pin" aria-hidden="true">13</span>
 <section class="panel" aria-labelledby="t-de"><h3 class="panel-t" id="t-de">E-mail d’expédition (aperçu)</h3>
 <div class="courriel" lang="de">
@@ -393,7 +230,8 @@
   <p>Guten Tag Frau Beispiel,</p>
   <p>Ihre zwei Abzüge sind unterwegs: <span lang="fr">„Ribeira, brume du fleuve“</span>, Exemplar 4/15, und <span lang="fr">„Miradouro, l’heure dorée“</span>, Exemplar 7/15, beide signiert, mit Echtheitszertifikat.</p>
   <p>Versand mit Colissimo International, Sendungsnummer CB123456789FR, gegen Unterschrift. Zustellung voraussichtlich zwischen dem 2. und 9. November 2026.</p>
-  <p>Sie können innerhalb von 14 Tagen nach Erhalt widerrufen: Der Link steht auf der Seite Ihrer Bestellung.</p>
+  <p>Ihre Bestellung verfolgen: <span class="donnee">https://www.nicephos.art/de/commande/suivi/<span aria-hidden="true">••••••••••••</span><span class="sr-only">(persönlicher Link, beim Versand eingefügt)</span></span></p>
+  <p>Sie können innerhalb von 14 Tagen nach Erhalt widerrufen: Der Link dazu steht auf dieser Seite.</p>
   <p>Viele Grüße<br>Julien</p>
 </div></section>
 <section class="panel" aria-labelledby="t-de-f"><h3 class="panel-t" id="t-de-f">Facture, intitulés en allemand (extrait)</h3>
@@ -437,12 +275,12 @@
     <li><span class="mq-num" aria-hidden="true">13</span><b>La cliente lit dans sa langue</b><p>E-mail en texte et intitulés de facture en allemand ; les titres des photos restent en français, balisés comme tels.</p><span class="mq-ref">étude S30, S52, F8 · WCAG 3.1.2 · B&S 4</span></li>
     <li><span class="mq-num" aria-hidden="true">14</span><b>Un geste réversible se défait</b><p>Après « Tirage lancé », le message d’action propose « Défaire » pendant 10 s, en pause au survol et au focus.</p><span class="mq-ref">UX-A-08 · planche, message d’action</span></li>
   </ol>
-  <h3>Composants ajoutés, proposés pour la planche</h3>
-  <p>Outre ceux de MQ-18 (<code>.liste-a</code>, <code>.choix-a</code>, <code>.form-pied</code>, <code>.courriel</code>, <code>.chrono</code>) : <b>étapes d’un suivi</b> (<code>.etapes-a</code> : ✓ fait, une seule étape « Maintenant », ○ ensuite) · <b>lignes d’une commande</b> (<code>.lignes-a</code>) · <b>registre d’une édition</b> (<code>.registre</code>, 15 cases, image nommée) · <b>note de rôle</b> (<code>.note-role</code>).</p>
+  <h3>Composants</h3>
+  <p>Depuis la consolidation du 16 oct., tous ceux de la page sont dans <code>admin-plus.css</code> (planche MQ-00, section Administration) : liste en tableau, en cartes sous 1 100 px (<code>.liste-a</code>) · filtres (<code>.filtres-l</code>) · étapes d’un suivi (<code>.etapes-a</code> : ✓ fait, une seule étape « Maintenant », ○ ensuite) · lignes d’une commande et total (<code>.lignes-a</code>, <code>.total-a</code>) · registre d’une édition (<code>.registre</code>, 15 cases, image nommée) · paires (<code>.kv-a</code>) · chronologie (<code>.chrono</code>) · note grise (<code>.note-a</code>, qui réunit l’ancienne « note de rôle » et l’information sur le mot de passe de MQ-18) · choix expliqués (<code>.choix-a</code>) · pied de formulaire (<code>.form-pied</code>) · aperçu d’e-mail (<code>.courriel</code>). Restent locaux : les éditions d’une commande, le formulaire du dialogue, l’extrait de facture.</p>
   <h3>Écarts avec l’étude, tranchés ici</h3>
-  <p>Portée de l’administrateur sur les ventes de l’autre (D16, à trancher) : la maquette retient la lecture seule. Motif de remboursement : texte libre obligatoire, avec un exemple (l’étude ne fixe pas de liste). Format du numéro de suivi : celui de Colissimo International (13 signes), contrôlé à la saisie. Exemplaire retourné intact : de nouveau disponible sous son numéro (S49 ; S7 à aligner). Écran figé à 9 h 30, avant la fin de la réservation de C-2026-0006 (9 h 47). Données : LEXIQUE-ET-DONNEES.md § 4.4 et 4.5.</p>
+  <p>Portée de l’administrateur sur les ventes de l’autre (D16, à trancher) : la maquette retient la lecture seule. Motif de remboursement : texte libre obligatoire, avec un exemple (l’étude ne fixe pas de liste). Format du numéro de suivi : celui de Colissimo International (13 signes), contrôlé à la saisie. Exemplaire retourné intact : de nouveau disponible sous son numéro (S49 ; S7 à aligner). Référence et suivi : le numéro lisible <span class="donnee">C-2026-0005</span> reste celui qu’on affiche et qu’on dit au téléphone ; le lien de suivi envoyé au client porte un jeton aléatoire d’au moins 128 bits, seul à ouvrir la commande (concilie S55 ; lexique § 4.10). Écran figé à 9 h 30, avant la fin de la réservation de C-2026-0006 (9 h 47). Données : LEXIQUE-ET-DONNEES.md § 4.4 et 4.5.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur ; outils/inspect.sh, outils/mq1820-rendu.mjs) · <b>axe-core</b> : 0 violation au bureau (1 440 × 900) en Chambre noire et en clair, et au téléphone (Pixel 7) · <b>Poids au chargement</b> : 262 ko et 17 requêtes (polices 68 ko, CSS 123 ko, 6 images 5 ko), aucun script, aucune ressource tierce ; photos en pastilles de 160 px, grands formats en 480/900 px selon l’écran, chargement différé sous la ligne de flottaison · <b>Largeurs</b> 320, 412, 820, 1 024 et 1 440 px : 0 débordement horizontal, 0 texte coupé dans l’interface (à 320 px, seules des étiquettes « État · … » de la maquette sont abrégées) ; listes en cartes sous 1 100 px · <b>Cibles</b> : 0 sous 24 px au bureau, 0 sous 44 px au téléphone · <b>Texte</b> : rien sous 12 px · <b>Sans annotations</b> : 0 pixel changé au téléphone ; au bureau, 15 pixels d’anticrénelage sous un message d’action, aucun écart visible (aucun au-dessus de 48/765) · Barre latérale : celle de la planche (Administrateur).</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>consolidation du 16 oct. 2026</b> (outils/consol-admin.mjs, consol-sans-admin.py, Chromium de Playwright 1.64 en conteneur) : axe-core 0 violation au bureau (1 440 × 900, Chambre noire) et au téléphone (Pixel 7, clair) ; 0 débordement ni texte coupé à 320, 412, 820, 1 024 et 1 440 px ; 0 cible sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px ; sans annotations, 0 pixel changé hors des pastilles, étiquettes et cadres, au bureau comme au téléphone ; 219 ko et 12 ressources, images différées chargées, polices comprises ; barre latérale dans 900 px · <b>refonte</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur ; outils/inspect.sh, outils/mq1820-rendu.mjs) · <b>axe-core</b> : 0 violation au bureau (1 440 × 900) en Chambre noire et en clair, et au téléphone (Pixel 7) · <b>Poids au chargement</b> : 262 ko et 17 requêtes (polices 68 ko, CSS 123 ko, 6 images 5 ko), aucun script, aucune ressource tierce ; photos en pastilles de 160 px, grands formats en 480/900 px selon l’écran, chargement différé sous la ligne de flottaison · <b>Largeurs</b> 320, 412, 820, 1 024 et 1 440 px : 0 débordement horizontal, 0 texte coupé dans l’interface (à 320 px, seules des étiquettes « État · … » de la maquette sont abrégées) ; listes en cartes sous 1 100 px · <b>Cibles</b> : 0 sous 24 px au bureau, 0 sous 44 px au téléphone · <b>Texte</b> : rien sous 12 px · <b>Sans annotations</b> : 0 pixel changé au téléphone ; au bureau, 15 pixels d’anticrénelage sous un message d’action, aucun écart visible (aucun au-dessus de 48/765) · Barre latérale : celle de la planche (Administrateur).</p>
 </aside>
 
 </body>

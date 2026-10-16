@@ -12,146 +12,11 @@
 <link rel="stylesheet" href="_commun/admin-plus.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* --- Composants ajoutés (proposés pour admin-plus.css, voir l'encart « Ce qui change ») --- */
-/* A. Autres états : espace au-dessus de chaque cadre pour son étiquette (hors du flux). */
-.ecrans-suite { display: grid; gap: 88px; margin-top: 112px; }
-.ecran-bloc { min-width: 0; }
-.ecran-bloc > .ep { margin-top: 0; }
-/* Titre d'un autre écran : même dessin que le H1 de l'en-tête de page, mais niveau 2 dans le plan de la maquette. */
-.main .ep .h1 { margin: 0; font-size: var(--at-h1); font-weight: 300; line-height: 1.12; overflow-wrap: anywhere; }
-@media (max-width: 720px) { .main .ep .h1 { font-size: 28px; } .ecrans-suite { gap: 80px; margin-top: 96px; } }
-/* Dans un autre état, la barre basse du téléphone reste dans son cadre (un seul écran de téléphone est réel). */
-@media (max-width: 720px) { .ecran-bloc .ep-actions { position: static; grid-area: auto; padding: 0; border: 0; background: none; margin-top: 12px; } }
-/* B. Message d'action et dialogue montrés dans la page (dans l'interface, ils sont en bas de l'écran ou en modal). */
-.admin .toast.toast-ech { position: relative; left: auto; bottom: auto; transform: none; display: inline-flex; max-width: 100%; margin: 0; }
-.confirm.confirm-ech[open], .dialog.confirm-ech[open] { position: static; display: block; margin: 0; max-width: 100%; }
-.confirm.confirm-ech { width: min(560px, 100%); }
-.voile-ech { padding: 32px; border-radius: var(--r-admin-panneau); background: var(--scrim); }
-@media (max-width: 720px) { .voile-ech { padding: 12px; } }
-/* C. Panneau en deux colonnes : formulaire, puis colonne d'appui. */
-.deux-col { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 24px; align-items: start; }
-@media (max-width: 1180px) { .deux-col { grid-template-columns: minmax(0, 1fr); } }
-.main .panel > h2, .main .panel > h3, .main .panel > .panel-t { margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
-.panel > .aide-panel { margin: -6px 0 14px; color: var(--ink3); font-size: var(--at-petit); }
-/* D. Liste en tableau, en cartes au téléphone (modèle : .lot de main). */
-.liste-a { width: 100%; border-collapse: collapse; background: var(--s1); font-size: var(--at-texte); }
-.liste-a caption { padding: 12px 14px; text-align: left; color: var(--ink2); font-size: var(--at-petit); caption-side: top; }
-.liste-a th, .liste-a td { padding: 12px 14px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
-.liste-a thead th { color: var(--ink2); font-size: var(--at-min); font-weight: 500; letter-spacing: .04em; white-space: nowrap; }
-.liste-a tbody th { font-weight: 500; }
-.liste-a .sec { display: block; margin-top: 2px; color: var(--ink3); font-size: var(--at-petit); font-weight: 400; }
-.liste-a .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.liste-a tr.choisie { background: var(--accent-soft); }
-.liste-a a.ligne-lien { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
-.liste-a a.ligne-lien:hover { text-decoration-color: currentColor; }
-.liste-a .ref { font-family: var(--mono); font-size: 13px; font-weight: 400; letter-spacing: 0; }
-@media (max-width: 1100px) {
-  .liste-wrap { overflow: visible; box-shadow: none; border-radius: 0; }
-  .liste-a, .liste-a tbody { display: block; background: transparent; }
-  .liste-a caption { display: block; padding: 0 0 10px; }
-  .liste-a thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  /* Une carte par ligne : en tête la référence (et le montant), puis l'état, puis le reste ; les données courtes vont par deux. */
-  .liste-a tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 16px; margin: 0 0 12px; padding: 14px 16px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
-  .liste-a td, .liste-a th { display: block; padding: 0; border: 0; min-width: 0; grid-column: 1 / -1; }
-  .liste-a th[scope="row"] { grid-column: 1; }
-  .liste-a .c-haut { grid-column: 2; grid-row: 1; text-align: right; }
-  .liste-a .c-demi { grid-column: auto; }
-  .liste-a .c-demi[data-label]::before { content: attr(data-label); display: block; color: var(--ink3); font-size: var(--at-min); }
-  .liste-a .num { text-align: right; }
-}
-@media (max-width: 1100px) and (min-width: 721px) { .liste-a tbody { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; } .liste-a tr { margin: 0; } }
-@media (max-width: 720px), (pointer: coarse) { .liste-a a.ligne-lien { min-height: 44px; } }
-/* E. Vignettes d'une galerie ou d'un billet (pastilles de 160 px). */
-.vignettes-a { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
-.vignettes-a li { margin: 0; }
-.vignettes-a img { display: block; height: 56px; width: auto; border-radius: 4px; background: var(--photo-bg); }
-/* F. Ligne d'objet avec son état (photo d'un billet, favori) */
-.objets-a { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-.objets-a > li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 4px 14px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
-.objets-a > li:first-child { border-top: 0; padding-top: 0; }
-.objets-a img { width: 64px; height: auto; border-radius: 4px; background: var(--photo-bg); grid-row: span 3; }
-.objets-a .t { font-weight: 500; }
-.objets-a .t .sec { display: block; color: var(--ink3); font-size: var(--at-petit); font-weight: 400; }
-.objets-a .actions { gap: 6px 8px; }
-.objets-a .actions .btn { min-height: 32px; padding: 0 12px; font-size: 13px; }
-@media (max-width: 720px), (pointer: coarse) { .objets-a .actions .btn { min-height: 44px; } }
-/* G. Chronologie (événements datés, du plus récent au plus ancien) */
-.chrono { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; font-size: var(--at-texte); }
-.chrono li { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 2px 14px; padding: 9px 0; border-top: 1px solid var(--line); }
-.chrono li:first-child { border-top: 0; }
-.chrono time { color: var(--ink3); font-size: var(--at-petit); font-variant-numeric: tabular-nums; }
-.chrono .sec { color: var(--ink3); font-size: var(--at-petit); }
-@media (max-width: 720px) { .chrono li { grid-template-columns: 1fr; } }
-/* H. Aperçu d'un e-mail en texte seul */
-.courriel { margin: 0; padding: 18px 20px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); font-size: var(--at-texte); line-height: 1.6; }
-.courriel dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px 12px; margin: 0 0 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line2); font-size: var(--at-petit); }
-.courriel dt { color: var(--ink3); } .courriel dd { margin: 0; overflow-wrap: anywhere; }
-.courriel p { margin: 0 0 10px; max-width: 64ch; } .courriel p:last-child { margin-bottom: 0; }
-.courriel .bas { color: var(--ink3); font-size: var(--at-petit); }
-.courriel .donnee, .donnee { font-family: var(--mono); font-size: 13px; letter-spacing: 0; overflow-wrap: anywhere; }
-/* I. Signalement (non bloquant) dans un panneau : symbole, mot, deux issues */
-.signal { display: grid; gap: 8px; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 3px 0 0 var(--warn); }
-.signal p { margin: 0; color: var(--ink2); font-size: var(--at-petit); }
-.signal .signal-t { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: var(--at-texte); font-weight: 500; }
-.signal .signal-t .ic { color: var(--warn); }
-.signal .actions .btn { min-height: 32px; padding: 0 12px; font-size: 13px; }
-@media (max-width: 720px), (pointer: coarse) { .signal .actions .btn { min-height: 44px; } }
-/* J. Choix (cases et boutons radio) avec leur explication, cibles de 24 et 44 px */
-.choix-a { display: grid; gap: 4px; margin: 0; padding: 0; border: 0; min-width: 0; }
-.choix-a > legend { padding: 0; margin: 0 0 6px; color: var(--ink); font-size: var(--at-petit); font-weight: 500; }
-.choix-a > .aide { margin: -2px 0 6px; color: var(--ink3); font-size: 12px; }
-.choix-a label { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 0 8px; align-items: start; min-height: 32px; padding: 4px 0; color: var(--ink); font-size: var(--at-texte); cursor: pointer; }
-.choix-a label input { margin: 1px 3px 0; }
-.choix-a label .sec { grid-column: 2; color: var(--ink3); font-size: 12px; line-height: 1.45; }
-.choix-a label.inactif { color: var(--ink3); cursor: default; }
-@media (max-width: 720px), (pointer: coarse) { .choix-a label { min-height: 44px; padding: 10px 0; } .choix-a label input { width: 22px; height: 22px; margin: 0 1px; } }
-/* K. Pied de formulaire : [Annuler] puis l'action, le seul bouton plein, en dernier */
-.form-pied { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px 12px; padding-top: 16px; border-top: 1px solid var(--line); }
-.form-pied .hint { margin-right: auto; }
-@media (max-width: 720px) { .form-pied { flex-direction: column; align-items: stretch; } .form-pied .hint { margin: 0; } }
-/* L. Annotations : lien de bascule dans l'encart (comme MQ-00) */
-.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
-.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
-/* Résumé d'erreurs : liens de 24 px (44 au toucher) ; barre d'onglets à 12 px (rien sous 12 px). */
-.resume-a a { display: inline-flex; align-items: center; min-height: 24px; }
-@media (max-width: 720px), (pointer: coarse) { .resume-a a { min-height: 44px; } }
-@media (max-width: 720px) { .admin .tabbar a, .admin .tabbar button { font-size: 12px; } }
-/* M. Petits communs : focus figé pour la maquette, liens d'action, conséquences d'un dialogue, deux états côte à côte */
-.btn.is-focus { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-.mq-notes code { color: var(--mq-encre); }
-.filtres-l { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin: 0 0 14px; }
-@media (max-width: 720px), (pointer: coarse) { .chips .chip { min-height: 44px; } }
-.btns-ligne { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
-.voile-ech { display: grid; place-items: center; }
-.dlg-cons { margin: 0 0 12px; padding-left: 20px; color: var(--ink2); font-size: var(--at-petit); }
-.dlg-cons li { margin: 3px 0; }
-.deux-etats { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 88px 40px; align-items: start; }
-@media (max-width: 1180px) { .deux-etats { grid-template-columns: minmax(0, 1fr) !important; } }
-.champ-a .lu { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--ink2); font-size: var(--at-petit); }
-.champ-a .lu .ic { color: var(--ok); }
-.cote { display: grid; gap: 0; min-width: 0; }
-/* Pastilles de marge droite : au téléphone, dans le coin du panneau (aucun débordement horizontal). */
-@media (max-width: 767px) { .mq-pin.d { left: auto; right: 4px; top: 4px; } }
-/* Barre latérale à 220 px (tablette) : la recherche et le compte tiennent sur une ligne. */
-.admin .cmdk span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.admin .cmdk kbd { white-space: nowrap; }
-@media (max-width: 1180px) and (min-width: 721px) { .admin .cmdk kbd { display: none; } .admin .me { gap: 4px; } .admin .me .iconbtn { width: 32px; height: 32px; } }
-/* Champs : 16 px au téléphone (pas de zoom forcé sur iOS) */
-@media (max-width: 720px) { .admin input:not([type="checkbox"]):not([type="radio"]), .admin select, .admin textarea { font-size: 16px; } }
-/* --- MQ-18 : composants locaux --- */
-/* Lecture d'une date saisie librement : la machine la relit en toutes lettres (formulaire type). */
+/* MQ-18, locaux (propres aux accès privés ; le reste est dans admin-plus.css, voir l'encart) :
+   L1 choix rapides d'une date · L2 chiffres d'un accès · L3 favoris de l'invitée · L4 photos de la galerie et leur lien. Aucun jeton redéclaré. */
 .champ-a .pills { margin-top: 2px; }
 .champ-a .pills .pill { min-height: 32px; }
 @media (max-width: 720px), (pointer: coarse) { .champ-a .pills .pill { min-height: 44px; } }
-/* Le secret affiché une seule fois : grand, en Plex Mono, groupé par quatre ; copie à côté. */
-.secret { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; padding: 14px 16px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); }
-.secret .lb { grid-column: 1 / -1; color: var(--ink2); font-size: var(--at-petit); font-weight: 500; }
-.secret output { font-family: var(--mono); font-size: 15px; letter-spacing: .02em; color: var(--ink); overflow-wrap: anywhere; }
-.secret output.mdp { font-size: 26px; letter-spacing: .08em; }
-.secret .aide { grid-column: 1 / -1; margin: 0; color: var(--ink3); font-size: 12px; }
-@media (max-width: 720px) { .secret { grid-template-columns: 1fr; } .secret output.mdp { font-size: 22px; } }
-.secrets { display: grid; gap: 12px; }
-/* Chiffres d'un accès */
 .chiffres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 18px; }
 .chiffres > div { padding: 14px 16px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
 .chiffres dt { color: var(--ink3); font-size: var(--at-petit); }
@@ -164,13 +29,9 @@
 .favoris-a .ic { color: var(--accent-ink); width: 12px; height: 12px; vertical-align: -1px; }
 .galerie-resume { display: grid; gap: 10px; }
 .galerie-resume .lb-l { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; align-items: baseline; }
+.galerie-resume .lb-l .lb { color: var(--ink); font-size: 13px; font-weight: 500; }
 .galerie-resume .lb-l a { color: var(--ink2); font-size: var(--at-petit); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
 @media (max-width: 720px), (pointer: coarse) { .galerie-resume .lb-l a { min-height: 44px; } }
-.info-mdp { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 0 10px; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s2); color: var(--ink2); font-size: var(--at-petit); }
-.info-mdp .ic { color: var(--ink2); margin-top: 2px; }
-.info-mdp b { color: var(--ink); font-weight: 500; }
-@media (max-width: 1100px) { .liste-a .c-etat { grid-row: 2; } }
-
 </style>
 </head>
 <body class="admin">
@@ -179,7 +40,7 @@
 <a class="skip" href="#contenu">Aller au contenu</a>
 <div class="shell">
 <aside class="side" id="admin-nav" aria-label="Menu de l’administration">
-  <a class="word" href="/admin"><span>Nicephos</span></a>
+  <div class="side-haut"><a class="word" href="/admin"><span>Nicephos</span></a><button class="side-fermer" type="button" aria-controls="admin-nav" aria-expanded="true"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Fermer</button></div>
   <button class="cmdk" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
   <nav class="nav" aria-label="Aujourd’hui">
     <a href="/admin"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui<span class="nav-badge urgent"><span aria-hidden="true">✕ 1</span><span class="sr-only">, 1 urgence</span></span></a>
@@ -208,7 +69,7 @@
   <nav class="nav" aria-labelledby="nav-publier-fr">
     <a href="/admin/a-valider"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg>À valider<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 photo</span></span></a>
     <a href="/admin/site"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>Site public</a>
-    <a href="/admin/carnets"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <a href="/admin/carnet"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
     <a href="/admin/galeries" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Galeries privées</a>
     <a href="/admin/boutique"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 commande à préparer</span></span></a>
     <a href="/admin/instagram"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>Instagram</a>
@@ -217,7 +78,7 @@
   <nav class="nav" aria-labelledby="nav-equipe-fr">
     <a href="/admin/comptes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg>Comptes et rôles</a>
     <a href="/admin/circuit"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 3 3v6.5M6 8.5V15a3 3 0 0 0 3 3h6.5"/></svg>Circuit de publication</a>
-    <a href="/admin/journal"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Journal</a>
+    <a href="/admin/journal"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Journal</a>
     <a href="/admin/statistiques"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
   </nav>
   <div class="foot">
@@ -235,9 +96,8 @@
       </details>
     </nav>
     <div class="me">
-      <span class="av" aria-hidden="true">J</span>
-      <span class="who">Julien<small>Administrateur</small></span>
-      <button class="iconbtn" type="button" aria-label="Mode clair / sombre" title="Mode clair / sombre"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span></button>
+      <a class="me-lien" href="/admin/compte"><span class="av" aria-hidden="true">J</span><span class="who"><span class="me-nom">Julien</span><span class="sr-only">, mon compte</span><small>Administrateur</small></span></a>
+      <button class="iconbtn btn-theme" type="button"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button>
       <button class="iconbtn" type="button" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button>
     </div>
   </div>
@@ -265,16 +125,16 @@
   <div class="champ-a"><span class="mq-pin" aria-hidden="true">4</span><label for="fin">Fin de l’accès</label><p class="aide" id="fin-aide">Écrivez-la comme vous voulez : « 30/11/2026 », « 30 nov. ». 30 jours par défaut ; au plus tard le jour où la galerie ferme. Prolonger garde le même lien.</p>
     <div class="pills" role="group" aria-label="Choix rapides"><button class="pill" type="button" aria-pressed="false">Dans 30 jours, le 15 nov.</button><button class="pill" type="button" aria-pressed="true">À la fermeture de la galerie, le 30 nov.</button></div>
     <input id="fin" name="expires" value="30 nov. 2026" aria-describedby="fin-aide fin-lu"><p class="lu" id="fin-lu" aria-live="polite"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Lundi 30 novembre 2026, jusqu’à 23 h 59</p></div>
-  <fieldset class="choix-a"><span class="mq-pin" aria-hidden="true">5</span><legend>Ce que Lucie peut faire</legend><p class="aide">Elle voit toujours les 11 photos de la galerie, avec le filigrane du site. Jamais l’original, jamais le GPS.</p>
+  <fieldset class="choix-a"><legend><span class="mq-pin" aria-hidden="true">5</span>Ce que Lucie peut faire</legend><p class="aide">Elle voit toujours les 11 photos de la galerie, avec le filigrane du site. Jamais l’original, jamais le GPS.</p>
     <label><input type="checkbox" name="favoris" checked><span>Choisir ses favoris</span><span class="sec">Une étoile sur chaque photo ; vous voyez sa sélection ici.</span></label>
     <label><input type="checkbox" name="telecharger"><span>Télécharger les photos en 2 048 px</span><span class="sec">JPEG marqué « usage personnel », sans GPS.</span></label>
   </fieldset>
-  <div class="galerie-resume"><span class="mq-pin" aria-hidden="true">6</span><div class="lb-l"><span class="lb" style="font-size:13px;font-weight:500;color:var(--ink)">Photos de la galerie : 11</span><a href="/admin/galeries/12#photos">Modifier les photos de la galerie</a></div>
+  <div class="galerie-resume"><span class="mq-pin" aria-hidden="true">6</span><div class="lb-l"><span class="lb">Photos de la galerie : 11</span><a href="/admin/galeries/12#photos">Modifier les photos de la galerie</a></div>
     <ul class="vignettes-a" aria-label="Photos de la galerie, dans l’ordre"><li><img src="_commun/photos/160/tram.webp" width="107" height="160" alt="Alfama, premier tram" loading="lazy" decoding="async"></li><li><img src="_commun/photos/160/linge.webp" width="160" height="107" alt="Linge au balcon" loading="lazy" decoding="async"></li><li><img src="_commun/photos/160/cais.webp" width="160" height="107" alt="Cais do Sodré, marée basse" loading="lazy" decoding="async"></li><li><img src="_commun/photos/160/miradouro.webp" width="160" height="107" alt="Miradouro, l’heure dorée" loading="lazy" decoding="async"></li><li><img src="_commun/photos/160/belem.webp" width="160" height="107" alt="Belém, contre-jour" loading="lazy" decoding="async"></li><li><img src="_commun/photos/160/ines.webp" width="107" height="160" alt="Inês, rua dos Remédios" loading="lazy" decoding="async"></li><li><img src="_commun/photos/160/tiago.webp" width="107" height="160" alt="Tiago, marché do Bolhão" loading="lazy" decoding="async"></li><li><img src="_commun/photos/160/ribeira.webp" width="160" height="107" alt="Ribeira, brume du fleuve" loading="lazy" decoding="async"></li><li><img src="_commun/photos/160/escaliers.webp" width="107" height="160" alt="Escaliers des Guindais" loading="lazy" decoding="async"></li><li><img src="_commun/photos/160/foz.webp" width="160" height="107" alt="Foz, la barre" loading="lazy" decoding="async"></li><li><img src="_commun/photos/160/pont.webp" width="160" height="107" alt="Pont Dom-Luís, le soir" loading="lazy" decoding="async"></li></ul>
     <div class="signal" role="note"><p class="signal-t"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>1 photo à vérifier avant d’envoyer</p><p>« Tiago, marché do Bolhão » : l’accord de Tiago Exemplo couvre le site seulement. La montrer à une éditrice sort de cet accord. Rien ne bloque l’envoi.</p>
       <div class="actions"><a class="btn ghost" href="/admin/rencontres/S-0001">Ouvrir l’accord de Tiago</a><button class="btn ghost" type="button">Retirer de la galerie</button></div></div>
   </div>
-  <div class="info-mdp"><span class="mq-pin" aria-hidden="true">7</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg><p style="margin:0"><b>Mot de passe : créé à l’étape suivante.</b> 12 caractères faciles à dicter, groupés par quatre, sans 0, O, 1, I ni L. Il s’affiche une seule fois, pour que vous le donniez à Lucie par un autre moyen (SMS, appel). Il n’est jamais écrit dans l’e-mail.</p></div>
+  <div class="note-a"><span class="mq-pin" aria-hidden="true">7</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg><p style="margin:0"><b>Mot de passe : créé à l’étape suivante.</b> 12 caractères faciles à dicter, en trois groupes de quatre, sans 0, O, 1, I ni L. Il s’affiche une seule fois, pour que vous le donniez à Lucie par un autre moyen (SMS, appel). Il n’est jamais écrit dans l’e-mail.</p></div>
   <div><span class="mq-pin" aria-hidden="true">8</span><div class="form-pied"><a class="btn ghost" href="/admin/galeries/12">Annuler</a><button class="btn" type="submit">Créer l’accès et envoyer l’invitation</button></div></div>
 </form>
 <section class="panel mq-a" aria-labelledby="apercu-t"><span class="mq-pin d" aria-hidden="true">9</span>
@@ -284,7 +144,7 @@
   <dl><dt>De</dt><dd>Julien · Nicephos &lt;contact@example.org&gt;</dd><dt>À</dt><dd>lucie.exemple@example.org</dd><dt>Objet</dt><dd>Vos photos : « Lisbonne et Porto, planche de travail » (Nicephos)</dd></dl>
   <p>Bonjour Lucie,</p>
   <p>Voici les onze photos de Lisbonne et de Porto dont nous avons parlé, dans une galerie privée, pour vous seule :</p>
-  <p class="donnee">https://www.nicephos.art/g/<span aria-label="lien personnel, ajouté à l’envoi">••••••••••••</span></p>
+  <p class="donnee">https://www.nicephos.art/g/<span aria-hidden="true">••••••••••••</span><span class="sr-only">(lien personnel, ajouté à l’envoi)</span></p>
   <p>Le mot de passe, je vous le donne à part, par SMS. Marquez d’une étoile celles qui vous intéressent : je verrai vos favoris. Le lien marche jusqu’au lundi 30 novembre 2026 inclus.</p>
   <p>Ce lien est personnel : merci de ne pas le transférer.<br>Julien</p>
   <p class="bas">Nicephos note la date de vos visites et vos favoris, pour savoir si les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Confidentialité : www.nicephos.art/confidentialite</p>
@@ -292,8 +152,8 @@
   <div class="btns-ligne" style="margin-top:14px"><a class="btn ghost" href="/admin/galeries/12/voir-comme-invite"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Voir la galerie comme Lucie</a></div>
 </section>
 </div>
-<div class="ecrans-suite">
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-1"><p class="mq-etat" id="etat-1">État · Envoi refusé : 2 erreurs (extrait)</p>
+<div class="mq-etats">
+<section class="mq-ecran" aria-labelledby="etat-1"><p class="mq-etat" id="etat-1">État · Envoi refusé : 2 erreurs (extrait)</p>
 <span class="mq-pin" aria-hidden="true">10</span><header class="ep"><a class="ep-retour" href="/admin/galeries/12"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Lisbonne et Porto, planche de travail</a><div class="ep-titre"><h2 class="h1" id="t-err">Nouvel accès</h2></div><p class="ep-meta"><span>Galerie de Julien</span><span>11 photos</span><span>ouverte jusqu’au 30 nov. 2026</span></p></header>
 <div class="deux-col"><form class="panel form" action="/admin/galeries/12/acces" method="post" novalidate aria-labelledby="f-t-e">
   <h3 class="panel-t" id="f-t-e">Pour qui · Durée et droits</h3>
@@ -304,7 +164,7 @@
   <div class="form-pied"><a class="btn ghost" href="/admin/galeries/12">Annuler</a><button class="btn" type="submit">Créer l’accès et envoyer l’invitation</button></div>
 </form><div></div></div>
 </section>
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-2"><p class="mq-etat" id="etat-2">État · Lien et mot de passe, une seule fois</p>
+<section class="mq-ecran" aria-labelledby="etat-2"><p class="mq-etat" id="etat-2">État · Lien et mot de passe, une seule fois</p>
 <header class="ep">
   <a class="ep-retour" href="/admin/galeries/12"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Lisbonne et Porto, planche de travail</a>
   <div class="ep-titre"><h2 class="h1" id="t-sec">Accès de Lucie Exemple</h2><span class="etat etat--encours"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Envoyé, pas ouvert</span></div>
@@ -316,18 +176,18 @@
   <h3 class="panel-t" id="t-sec-a"><span class="mq-pin" aria-hidden="true">11</span>À donner à Lucie par un autre moyen</h3>
   <div class="signal" role="note" style="margin-bottom:14px"><p class="signal-t"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Notez-les maintenant</p><p>En quittant cette page, ni le lien ni le mot de passe ne pourront être relus : seule leur empreinte est gardée. Perdus, ils se remplacent par « Nouveau mot de passe » ou « Nouveau lien ».</p></div>
   <div class="secrets">
-    <div class="secret"><span class="lb" id="mdp-l">Mot de passe</span><output class="mdp" aria-labelledby="mdp-l">K7QM-P3XW-9TRA</output><button class="btn ghost" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>Copier le mot de passe</button><p class="aide">Lucie peut le taper sans tirets ni majuscules.</p></div>
+    <div class="secret"><span class="lb" id="mdp-l">Mot de passe</span><output class="mdp" aria-labelledby="mdp-l">k7qm p3xw 9tra</output><button class="btn ghost" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>Copier le mot de passe</button><p class="aide">Lucie peut le taper avec ou sans espaces, en minuscules ou en majuscules.</p></div>
     <div class="secret"><span class="lb" id="lien-l">Lien personnel (déjà dans l’e-mail)</span><output aria-labelledby="lien-l">https://www.nicephos.art/g/6Me5pScUZIQhW-wezlKchJ9h3k7EDpzm</output><button class="btn ghost" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>Copier le lien</button></div>
   </div>
 </section>
 <section class="panel" aria-labelledby="t-sms">
   <h3 class="panel-t" id="t-sms">Message prêt à envoyer par SMS</h3>
-  <div class="courriel"><p>Bonjour Lucie, voici le mot de passe de la galerie Nicephos : K7QM-P3XW-9TRA (sans tirets ni majuscules, ça marche aussi). Le lien est dans mon e-mail de ce matin. Julien</p></div>
+  <div class="courriel"><p>Bonjour Lucie, voici le mot de passe de la galerie Nicephos : k7qm p3xw 9tra (avec ou sans espaces). Le lien est dans mon e-mail de ce matin. Julien</p></div>
   <div class="form-pied" style="margin-top:14px;border:0;padding-top:0"><button class="btn ghost" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>Copier le message</button><a class="btn" href="/admin/galeries/12/acces/31">J’ai transmis le mot de passe</a></div>
 </section>
 </div>
 </section>
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-3"><p class="mq-etat" id="etat-3">État · Galeries privées, à 17 h 30</p>
+<section class="mq-ecran" aria-labelledby="etat-3"><p class="mq-etat" id="etat-3">État · Galeries privées, à 17 h 30</p>
 <header class="ep">
   <div class="ep-titre"><h2 class="h1" id="t-liste">Galeries privées</h2></div>
   <p class="ep-meta"><span>3 galeries</span><span>3 accès</span><span>heure de Paris</span></p>
@@ -350,17 +210,17 @@
 <td class="c-etat"><span class="etat etat--arret"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg>Expiré</span><span class="sec">le 30 sept. · données gardées jusqu’au 30 mars 2027</span></td></tr>
 </tbody></table></div>
 <ul class="etats-legende" aria-label="États d’un accès">
-<li><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Pas encore envoyé</li><li style="color:var(--st-encours)"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg><span style="color:var(--ink3)">Envoyé, pas ouvert</span></li><li style="color:var(--st-abouti)"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg><span style="color:var(--ink3)">Ouvert</span></li><li style="color:var(--st-attention)"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg><span style="color:var(--ink3)">Expire dans 3 jours</span></li><li style="color:var(--st-arret)"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg><span style="color:var(--ink3)">Expiré · Révoqué</span></li></ul>
+<li class="etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Pas encore envoyé</li><li class="etat--encours"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Envoyé, pas ouvert</li><li class="etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Ouvert</li><li class="etat--attention"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Expire dans 3 jours</li><li class="etat--arret"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg>Expiré · Révoqué</li></ul>
 <p class="hint" style="margin:8px 0 0">Galeries de l’équipe : chaque photographe gère les siennes, l’administrateur toutes ; Modérateur et Relecteur n’y ont pas accès.</p>
 </section>
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-4"><p class="mq-etat" id="etat-4">État · Accès de Lucie : suivi, 17 h 32</p>
+<section class="mq-ecran" aria-labelledby="etat-4"><p class="mq-etat" id="etat-4">État · Accès de Lucie : suivi, 17 h 32</p>
 <header class="ep">
   <a class="ep-retour" href="/admin/galeries/12"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Lisbonne et Porto, planche de travail</a>
   <div class="ep-titre"><h2 class="h1" id="t-suivi">Accès de Lucie Exemple</h2><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Ouvert</span></div>
   <p class="ep-meta"><span>Éditions du Fleuve</span><span>lien personnel</span><span>créé par Julien le 16 oct. à 11 h 24</span><span role="status"><span class="enreg enreg--ok"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Enregistré à 11 h 24</span></span></p>
   <div class="ep-actions"><a class="btn ghost ep-secondaire" href="/admin/galeries/12/voir-comme-invite"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Voir comme Lucie</a><details class="menu ep-plus"><summary class="btn ghost" aria-label="Plus d’actions"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></summary><div class="menu-pop"><a href="/admin/galeries/12/voir-comme-invite">Voir comme Lucie</a></div></details><button class="btn danger-c" type="button" aria-haspopup="dialog">Révoquer l’accès…</button></div>
 </header>
-<dl class="chiffres"><span class="mq-pin" aria-hidden="true">13</span><div><dt>Ouvert</dt><dd>16 oct., 14 h 05<span class="sec">mot de passe accepté · France</span></dd></div><div><dt>Appareils</dt><dd>1<span class="sec">alerte au-delà de 3</span></dd></div><div><dt>Favoris</dt><dd>4 sur 11<span class="sec">sélection en cours</span></dd></div></dl>
+<dl class="chiffres"><div><dt><span class="mq-pin" aria-hidden="true">13</span>Ouvert</dt><dd>16 oct., 14 h 05<span class="sec">mot de passe accepté · France</span></dd></div><div><dt>Appareils</dt><dd>1<span class="sec">alerte au-delà de 3</span></dd></div><div><dt>Favoris</dt><dd>4 sur 11<span class="sec">sélection en cours</span></dd></div></dl>
 <div class="deux-col">
 <div>
 <section class="panel" aria-labelledby="t-fav"><h3 class="panel-t" id="t-fav">Ses favoris</h3>
@@ -385,10 +245,10 @@
 </form></section>
 </div>
 </section>
-<div class="deux-etats" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr)">
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-5"><p class="mq-etat" id="etat-5">État · « Révoquer… » : focus sur Annuler</p>
-<div class="voile-ech">
-<dialog class="confirm confirm-ech" open aria-labelledby="dlg-rev" aria-describedby="dlg-rev-d"><span class="mq-pin" aria-hidden="true">14</span>
+<div class="mq-etats mq-etats--grille large">
+<section class="mq-ecran" aria-labelledby="etat-5"><p class="mq-etat" id="etat-5">État · « Révoquer… » : focus sur Annuler</p>
+<div class="voile-a">
+<dialog class="confirm" open aria-labelledby="dlg-rev" aria-describedby="dlg-rev-d"><span class="mq-pin" aria-hidden="true">14</span>
   <h2 id="dlg-rev">Révoquer l’accès de Lucie Exemple ?</h2>
   <p id="dlg-rev-d">Son lien et son mot de passe cessent de marcher tout de suite. Ses 4 favoris restent visibles ici. Pour lui rendre l’accès, il faudra en créer un nouveau.</p>
   <ul class="dlg-cons"><li>Si la galerie est ouverte chez elle, la page suivante lui dira « Ce lien n’est plus valable », avec votre adresse.</li><li>Les 11 photos ne sont ni supprimées ni dépubliées.</li></ul>
@@ -396,11 +256,11 @@
 </dialog>
 </div>
 </section>
-<section class="ecran-bloc mq-ecran" aria-labelledby="etat-6"><p class="mq-etat" id="etat-6">État · Après : message sans « Défaire »</p>
+<section class="mq-ecran" aria-labelledby="etat-6"><p class="mq-etat" id="etat-6">État · Après : message sans « Défaire »</p>
 <div class="toast toast-ech" role="status"><p><b>Accès de Lucie Exemple</b> révoqué.</p></div>
 </section>
 </div>
-<section class="ecran-bloc mq-ecran" lang="de" aria-labelledby="etat-7"><p class="mq-etat" id="etat-7" lang="fr">État · Administration en allemand</p>
+<section class="mq-ecran" lang="de" aria-labelledby="etat-7"><p class="mq-etat" id="etat-7" lang="fr">État · Administration en allemand</p>
 <span class="mq-pin" aria-hidden="true">15</span><header class="ep">
   <a class="ep-retour" href="/admin/galeries/12"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span lang="fr">Lisbonne et Porto, planche de travail</span></a>
   <div class="ep-titre"><h2 class="h1" id="t-de">Neuer Zugang</h2></div>
@@ -426,7 +286,7 @@
   <dl><dt>De</dt><dd>Julien · Nicephos &lt;contact@example.org&gt;</dd><dt>À</dt><dd>lucie.exemple@example.org</dd><dt>Objet</dt><dd>Vos photos : « Lisbonne et Porto, planche de travail » (Nicephos)</dd></dl>
   <p>Bonjour Lucie,</p>
   <p>Voici les onze photos de Lisbonne et de Porto dont nous avons parlé, dans une galerie privée, pour vous seule :</p>
-  <p class="donnee">https://www.nicephos.art/g/<span aria-label="lien personnel, ajouté à l’envoi">••••••••••••</span></p>
+  <p class="donnee">https://www.nicephos.art/g/<span aria-hidden="true">••••••••••••</span><span class="sr-only">(lien personnel, ajouté à l’envoi)</span></p>
   <p>Le mot de passe, je vous le donne à part, par SMS. Marquez d’une étoile celles qui vous intéressent : je verrai vos favoris. Le lien marche jusqu’au lundi 30 novembre 2026 inclus.</p>
   <p>Ce lien est personnel : merci de ne pas le transférer.<br>Julien</p>
   <p class="bas">Nicephos note la date de vos visites et vos favoris, pour savoir si les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Confidentialité : www.nicephos.art/confidentialite</p>
@@ -464,12 +324,12 @@
     <li><span class="mq-num" aria-hidden="true">14</span><b>Révoquer : un dialogue, pas de surprise</b><p>La question nomme Lucie ; ce qui change est dit ; Annuler a le focus ; le message final n’offre pas de « Défaire », puisque rien ne se défait.</p><span class="mq-ref">UX-A-07, UX-A-08 · planche, dialogue · WCAG 3.3.4</span></li>
     <li><span class="mq-num" aria-hidden="true">15</span><b>Les libellés allemands tiennent</b><p>« Zugang anlegen und Einladung senden » tient sur une ligne au bureau et passe pleine largeur au téléphone.</p><span class="mq-ref">B&S 4 · grille, critère 4</span></li>
   </ol>
-  <h3>Composants ajoutés, proposés pour la planche</h3>
-  <p>Construits avec les jetons, dans le &lt;style&gt; de la page : <b>liste en tableau, en cartes au téléphone</b> (<code>.liste-a</code>, d’après <code>.lot</code> de main) · <b>secret affiché une fois</b> (<code>.secret</code>) · <b>signalement non bloquant</b> (<code>.signal</code> : ▲, une phrase, deux issues) · <b>choix expliqués</b> (<code>.choix-a</code>, 32 px au bureau, 44 au toucher) · <b>pied de formulaire</b> (<code>.form-pied</code> : Annuler, puis l’action pleine) · <b>relecture d’une date</b> (<code>.lu</code>) · <b>aperçu d’e-mail</b> (<code>.courriel</code>) · <b>chronologie</b> (<code>.chrono</code>) · <b>pastilles de photos</b> (<code>.vignettes-a</code>).</p>
+  <h3>Composants</h3>
+  <p>Depuis la consolidation du 16 oct., tous ceux de la page sont dans <code>admin-plus.css</code> (planche MQ-00, section Administration) : liste en tableau, en cartes sous 1 100 px (<code>.liste-a</code>) · secret affiché une fois (<code>.secret</code>) · signalement non bloquant (<code>.signal</code> : ▲, une phrase, deux issues) · choix expliqués (<code>.choix-a</code>) · pied de formulaire (<code>.form-pied</code>) · relecture d’une date (<code>.lu</code>) · aperçu d’e-mail (<code>.courriel</code>) · chronologie (<code>.chrono</code>) · pastilles de photos (<code>.vignettes-a</code>) · note grise (<code>.note-a</code>) · deux colonnes (<code>.deux-col</code>). Restent locaux : les choix rapides de date, les chiffres d’un accès, les favoris et le résumé des photos de la galerie.</p>
   <h3>Écarts avec l’étude, tranchés ici</h3>
   <p>« Accès » (lexique) plutôt qu’« invitation » (étude) ; « favoris » (lexique) plutôt que « sélection ». L’invitation part à la création, seul moment où le lien existe en clair (le jeton n’est pas gardé, G7) : l’envoi après coup de l’étude (A l.375) devient « Nouveau lien ». Données : LEXIQUE-ET-DONNEES.md § 4.6.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur ; outils/inspect.sh, outils/mq1820-rendu.mjs) · <b>axe-core</b> : 0 violation au bureau (1 440 × 900) en Chambre noire et en clair, et au téléphone (Pixel 7) · <b>Poids au chargement</b> : 274 ko et 23 requêtes (polices 68 ko, CSS 123 ko, 12 images 13 ko), aucun script, aucune ressource tierce ; photos en pastilles de 160 px, grands formats en 480/900 px selon l’écran, chargement différé sous la ligne de flottaison · <b>Largeurs</b> 320, 412, 820, 1 024 et 1 440 px : 0 débordement horizontal, 0 texte coupé dans l’interface (à 320 px, seules des étiquettes « État · … » de la maquette sont abrégées) ; listes en cartes sous 1 100 px · <b>Cibles</b> : 0 sous 24 px au bureau, 0 sous 44 px au téléphone · <b>Texte</b> : rien sous 12 px · <b>Sans annotations</b> : 0 pixel changé hors des pastilles, étiquettes et cadres, au bureau comme au téléphone (comparaison pixel à pixel) · Barre latérale : celle de la planche (Administrateur, Carnets, Galeries privées et Boutique actifs).</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>consolidation du 16 oct. 2026</b> (outils/consol-admin.mjs, consol-sans-admin.py, Chromium de Playwright 1.64 en conteneur) : axe-core 0 violation au bureau (1 440 × 900, Chambre noire) et au téléphone (Pixel 7, clair) ; 0 débordement ni texte coupé à 320, 412, 820, 1 024 et 1 440 px ; 0 cible sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px ; sans annotations, 0 pixel changé hors des pastilles, étiquettes et cadres, au bureau comme au téléphone ; 250 ko et 21 ressources, images différées chargées, polices comprises ; barre latérale dans 900 px · <b>refonte</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur ; outils/inspect.sh, outils/mq1820-rendu.mjs) · <b>axe-core</b> : 0 violation au bureau (1 440 × 900) en Chambre noire et en clair, et au téléphone (Pixel 7) · <b>Poids au chargement</b> : 274 ko et 23 requêtes (polices 68 ko, CSS 123 ko, 12 images 13 ko), aucun script, aucune ressource tierce ; photos en pastilles de 160 px, grands formats en 480/900 px selon l’écran, chargement différé sous la ligne de flottaison · <b>Largeurs</b> 320, 412, 820, 1 024 et 1 440 px : 0 débordement horizontal, 0 texte coupé dans l’interface (à 320 px, seules des étiquettes « État · … » de la maquette sont abrégées) ; listes en cartes sous 1 100 px · <b>Cibles</b> : 0 sous 24 px au bureau, 0 sous 44 px au téléphone · <b>Texte</b> : rien sous 12 px · <b>Sans annotations</b> : 0 pixel changé hors des pastilles, étiquettes et cadres, au bureau comme au téléphone (comparaison pixel à pixel) · Barre latérale : celle de la planche (Administrateur, Carnets, Galeries privées et Boutique actifs).</p>
 </aside>
 
 </body>

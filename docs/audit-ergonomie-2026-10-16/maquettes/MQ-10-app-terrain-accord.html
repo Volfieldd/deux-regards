@@ -80,7 +80,8 @@ html { scroll-padding-bottom: 104px; }
 .etats-t > * { min-width: 0; }
 .app-ecran { overflow: hidden; border-radius: 16px; background: var(--paper); box-shadow: 0 0 0 1px var(--rule); }
 .app-ecran .app-bar { position: static; padding-top: 10px; }
-.app-ecran .corps { display: grid; gap: 14px; padding: 18px 16px 22px; }
+.app-ecran .corps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 18px 16px 22px; }
+@media (max-width: 360px) { .app-people .app-tag { white-space: normal; } }
 .app-ecran .corps.blanc { background: #fff; }
 .app-ecran .corps > * { margin: 0; }
 .app-ecran h2.sec { margin: 0; font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 26px; }
@@ -93,7 +94,7 @@ html { scroll-padding-bottom: 104px; }
 .qr-txt { display: grid; gap: 4px; justify-items: center; text-align: center; color: var(--prose); font-size: 14px; }
 .qr-txt p { margin: 0; }
 /* Carte papier : 85 × 55 mm, montrée à l'échelle 1,13 (8 pt ≥ 12 px à l'écran). */
-.cartes { --u: min(1.13mm, calc((100vw - 64px) / 85)); display: grid; gap: 20px; justify-items: center; padding: 20px 0; }
+.cartes { --u: min(1.13mm, calc((100vw - 48px) / 85)); display: grid; gap: 20px; justify-items: center; padding: 20px 0; }
 .carte { position: relative; box-sizing: border-box; width: calc(85 * var(--u)); height: calc(55 * var(--u)); padding: calc(3.6 * var(--u)) calc(4 * var(--u)); background: #fff; color: #1d1c1a; box-shadow: 0 1px 3px rgba(0,0,0,.18), 0 0 0 1px #d8d3c9; font-family: var(--sans); overflow: hidden; }
 .carte p { margin: 0; }
 .carte .lab { display: flex; justify-content: space-between; font: 500 calc(2.82 * var(--u))/1.25 var(--mono); letter-spacing: .04em; color: #4f4a43; }
@@ -119,14 +120,12 @@ html { scroll-padding-bottom: 104px; }
 .app-next > summary { min-height: 44px; display: flex; align-items: center; }
 .face { display: grid; gap: 6px; justify-items: center; }
 .face figcaption { color: var(--prose); font-size: 13px; }
-.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
-.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
 .is-focus { outline: 2px solid var(--ink) !important; outline-offset: 2px; }
 </style>
 </head>
 <body>
 <i id="sans-annotations" hidden></i>
-<div class="mq-fold" aria-hidden="true"></div>
+<div class="mq-fold sous" aria-hidden="true"></div>
 <a class="skip" href="#contenu">Aller au formulaire</a>
 <header class="app-bar">
   <a href="/admin/rencontre/accueil" aria-label="Retour à l’accueil Terrain">←</a>
@@ -289,7 +288,7 @@ html { scroll-padding-bottom: 104px; }
     <li><span class="mq-num" aria-hidden="true">7</span><b>L’erreur sous le champ, dans la langue choisie</b><p>« Error: tell us whether you are 18 or older. » relié par aria-describedby, boutons marqués aria-invalid, filet d’erreur sur le groupe ; le focus clavier y arrive.</p><span class="mq-ref">UX-A-01 · RGAA 11.10 · WCAG 3.3.1, 1.3.1</span></li>
     <li><span class="mq-num" aria-hidden="true">8</span><b>Le nom du parent, hors du groupe Âge</b><p>Un champ à part, « (only if you are under 18) » ; s’il manque quand la personne a moins de 18 ans, l’erreur le dit (état 17).</p><span class="mq-ref">UX-A-12 · UX-T-02</span></li>
     <li><span class="mq-num" aria-hidden="true">9</span><b>La signature est gardée, « Clear » fait 44 px</b><p>Renvoyée par le serveur après une erreur, elle reste à l’écran avec « Signature kept » ; « Clear » est un vrai bouton de 44 × 44 px, suivi d’un « Undo » (état 16).</p><span class="mq-ref">UX-A-01 · WCAG 2.5.8 · B&S 3</span></li>
-    <li><span class="mq-num" aria-hidden="true">10</span><b>« Save » dans la langue de la personne, sans cacher le focus</b><p>La barre collante parle la langue de la section qu’elle termine ; scroll-padding-bottom de 104 px : un champ focalisé ne passe jamais dessous. Le brouillon reste sur le téléphone jusqu’à l’accusé du serveur.</p><span class="mq-ref">UX-A-09 · UX-A-01 · WCAG 2.4.11 · B&S 6</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>« Save » dans la langue de la personne, sans cacher le focus</b><p>La barre collante parle la langue de la section qu’elle termine ; scroll-padding-bottom de 104 px : un champ focalisé ne passe jamais dessous. Le brouillon reste sur le téléphone jusqu’à l’accusé du serveur. (Maquette : la barre finit au bas du premier écran ; son repère magenta se pose juste dessous, sans la toucher.)</p><span class="mq-ref">UX-A-09 · UX-A-01 · WCAG 2.4.11 · B&S 6</span></li>
     <li><span class="mq-num" aria-hidden="true">11</span><b>Vous, déplié : la photo de repère est gardée</b><p>Après une erreur, elle reste (fichier temporaire côté serveur), avec « Reprendre la photo » ; réduite à 1 600 px dans le navigateur avant l’envoi. Main (0d1925c) vérifie déjà avant l’envoi, mais dit encore « photo et signature à refaire ».</p><span class="mq-ref">UX-A-01 · WCAG 3.3.7 · RGESN 5.2</span></li>
     <li><span class="mq-num" aria-hidden="true">12</span><b>L’accueil dit ce qui s’est passé</b><p>La sortie du jour, Inês et ses usages, la prochaine carte, et « aucun accord en attente d’envoi ».</p><span class="mq-ref">UX-A-01 · UX-A-12 · Nielsen #1</span></li>
     <li><span class="mq-num" aria-hidden="true">13</span><b>L’envoi se voit</b><p>Barre de progression et pourcentage, photo réduite à 310 Ko au lieu de 15 Mo, bouton inactif « Sending… ».</p><span class="mq-ref">UX-A-01 · RGESN 5.2 · WCAG 4.1.3</span></li>
@@ -302,7 +301,7 @@ html { scroll-padding-bottom: 104px; }
     <li><span class="mq-num" aria-hidden="true">20</span><b>La carte se lit à bout de bras, en trois langues</b><p>Recto : l’accord en français en 9 pt, les usages, les lignes en 8 pt et une ligne pour un parent. Verso : l’anglais et l’allemand en 9 pt, et où retirer son accord. Carte « Merci » sans italique décoratif. Plus rien sous 8 pt (5,3 pt aujourd’hui).</p><span class="mq-ref">UX-A-13 · UX-T-02 · RGPD art. 4 (11) et 7</span></li>
   </ol>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur, outils/inspect.sh) · axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation au téléphone (Pixel 7) et à 320 et 820 px · Débordement horizontal : 0 à 320, 412, 820, 1 024 et 1 440 px · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (outils/mq00-cibles.mjs, liens dans une phrase exemptés) · Poids : 190 ko, 12 requêtes (app.css, jetons, composants du site, une vignette de 160 px) ; aucun script, aucune ressource tierce ; QR de démonstration en SVG dans la page · Carte papier à l’échelle 1,13 : accord en 9 pt (13,6 px), plus rien sous 8 pt (12 px) ; 85 × 55 mm tenus sans débordement · Sans annotations : 20 pastilles, 10 étiquettes et cadres retirés ; 0 pixel changé hors de leur emprise sur 8 166 px.</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>consolidation du 16 oct. 2026</b> (outils/consol-admin.mjs, consol-sans-admin.py, Chromium de Playwright 1.64 en conteneur) : axe-core 0 violation au téléphone (Pixel 7) ; 0 débordement ni texte coupé à 320, 412, 820, 1 024 et 1 440 px ; 0 cible sous 44 px au toucher ; rien sous 12 px au téléphone (carte papier comprise, à l’échelle 1,13) ; sans annotations, 0 pixel changé hors des pastilles, étiquettes et cadres ; 156 ko et 6 ressources · <b>refonte</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur, outils/inspect.sh) · axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation au téléphone (Pixel 7) et à 320 et 820 px · Débordement horizontal : 0 à 320, 412, 820, 1 024 et 1 440 px · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (outils/mq00-cibles.mjs, liens dans une phrase exemptés) · Poids : 190 ko, 12 requêtes (app.css, jetons, composants du site, une vignette de 160 px) ; aucun script, aucune ressource tierce ; QR de démonstration en SVG dans la page · Carte papier à l’échelle 1,13 : accord en 9 pt (13,6 px), plus rien sous 8 pt (12 px) ; 85 × 55 mm tenus sans débordement · Sans annotations : 20 pastilles, 10 étiquettes et cadres retirés ; 0 pixel changé hors de leur emprise sur 8 166 px.</p>
 </aside>
 </body>
 </html>

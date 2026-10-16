@@ -2,7 +2,7 @@
 
 Référence commune des vingt maquettes (MQ-01 à MQ-20), avec la planche [MQ-00](MQ-00-direction-artistique.html). Une maquette n'invente ni un mot ni une donnée : elle prend ici ce dont elle a besoin. Ce qui manque s'ajoute ici d'abord.
 
-Les données suivent l'instance de démonstration (http://127.0.0.1:3091) quand elle les a : mêmes photos, mêmes titres, mêmes comptes de séries. Les écarts avec la démo (§ 4.8) et les arbitrages faits avec l'étude des projets (§ 4.9) sont listés à la fin. Mise à jour du 16 oct. 2026, après la refonte des vingt maquettes : adresses du carnet, numéro d'inventaire, ordre « choisi par nous », données des boutiques, des galeries privées et de l'administration.
+Les données suivent l'instance de démonstration (http://127.0.0.1:3091) quand elle les a : mêmes photos, mêmes titres, mêmes comptes de séries. Les écarts avec la démo (§ 4.8) et les arbitrages faits avec l'étude des projets (§ 4.9) sont listés à la fin. Mise à jour du 16 oct. 2026, après la refonte des vingt maquettes : adresses du carnet, numéro d'inventaire, ordre « choisi par nous », données des boutiques, des galeries privées et de l'administration. Consolidation de l'administration (même jour) : barre latérale du rôle Photographe, `/admin/carnet`, entrée Voyages gardée, noms de fichiers de la démo (`R0004046.JPG`), référence de commande et jeton de suivi, adresse `/tirages` (§ 1, § 4.9, § 4.10).
 
 ## 1. Lexique
 
@@ -44,6 +44,8 @@ Les données suivent l'instance de démonstration (http://127.0.0.1:3091) quand 
 | **Boutique** | Le module de l'admin : Commandes, Éditions. (Le public dit « Tirages ».) | « Shop » en français |
 | **Accès** | Une invitation à une galerie privée : un lien, un mot de passe, une échéance, des droits. | « Partage », « Lien privé » |
 | **App de terrain** | L'app du téléphone pour les accords sur le terrain (DE « Unterwegs-App »). | « App, cartes, QR » dans le menu |
+| **Voyages** | L'entrée de l'administration pour les voyages du code (`/admin/voyages`, groupe Photos) ; elle coexiste avec Carnets (étude B9, B64). | « Voyages » comme entrée du menu public |
+| **Carnets** | Le module de l'admin pour les billets : `/admin/carnet` (étude B1), groupe Publier ; icône d'une page (le Journal a une horloge). | `/admin/carnets` |
 | **Réglages** | Une seule entrée de menu, vers une page à onglets (Identité et apparence, Filigrane et EXIF, Mentions et confidentialité, Photographes, Assistants d'analyse). | dix entrées « Réglages » |
 
 ### Le sens unique des mots d'action
@@ -71,7 +73,7 @@ Les données suivent l'instance de démonstration (http://127.0.0.1:3091) quand 
 | Saisie d'une date (admin, et date de rencontre de `/bonjour`) | libre (« 14/10/2026 », « 14 oct. 2026 », « octobre 2026 »), relue en toutes lettres ; jamais `type=date` | — |
 | Nombres | espace insécable des milliers | 1 280 px · 15 000 € |
 | Formats de tirage | image puis feuille, en cm, signe × | image 40 × 60 cm · feuille 50 × 70 |
-| Références (Plex Mono) | commande `C-2026-0007` ; facture par vendeur `S-2026-0002`, `J-2026-0001` ; exemplaire `6/15` ; inventaire `J26-003` ; fichier `R0004012.jpg` ; personne (carte « Bonjour ») `J-0001` | — |
+| Références (Plex Mono) | commande `C-2026-0007` ; facture par vendeur `S-2026-0002`, `J-2026-0001` ; exemplaire `6/15` ; inventaire `J26-003` ; fichier `R0004012.JPG` ; personne (carte « Bonjour ») `J-0001` | — |
 | Numéro d'inventaire (UX-T-05) | donné à la première publication et jamais changé : initiale de l'auteur, deux chiffres de l'année de publication, rang de l'auteur dans l'année sur trois chiffres. Il se lit dans les données de la visionneuse (« Inventaire J26-003 ») et sur le certificat ; la position « 4 / 10 » sert à la navigation. Il ne se confond ni avec une facture (`J-2026-0001` : tiret, quatre chiffres d'année, quatre chiffres), ni avec une carte (`J-0001`) | `J26-003` · `S25-001` |
 | Adresses publiques | slug du titre entier, en minuscules sans accents ; langue en préfixe (`/en`, `/de`), slug français partout | `/photo/miradouro-l-heure-doree` · `/photo/quai-7-h-12` · `/tirages/brume-sur-la-loire` · `/series/rue` · `/carnet/lisbonne-et-porto` · `/de/photo/belem-contre-jour` · `/galerie?regard=julien&serie=rue&ordre=recentes` |
 
@@ -125,8 +127,8 @@ Règles :
 | `escaliers.webp` | `J26-006` | 21 | Escaliers des Guindais | Julien | Porto | 11 oct. 2026 | Rue | Publiée | verticale 2:3 | toutes |
 | `pont.webp` | — | — | Pont Dom-Luís, le soir | Julien | Porto | 11 oct. 2026 | Voyage | Proposée | horizontale 3:2 | toutes |
 | `ligny.webp` | — | — | Quai Ligny, soir | Sébastien | Angers | 14 oct. 2026 | Rue | Brouillon, accord à vérifier | horizontale 3:2 | toutes |
-| `maine.webp` | — | — | Minoterie, brume du matin (titre en cours de saisie) | Sébastien | Angers | 14 oct. 2026 | — (Paysage en cours de saisie) | Brouillon (R0004012.jpg) | horizontale 3:2 | toutes |
-| `reverberes.webp` | — | — | Réverbères, quai Ligny (titre prévu) | Sébastien | Angers | 14 oct. 2026 | — | Brouillon (R0004057.jpg) | horizontale 3:2 | toutes |
+| `maine.webp` | — | — | Minoterie, brume du matin (titre en cours de saisie) | Sébastien | Angers | 14 oct. 2026 | — (Paysage en cours de saisie) | Brouillon (R0004012.JPG) | horizontale 3:2 | toutes |
+| `reverberes.webp` | — | — | Réverbères, quai Ligny (titre prévu) | Sébastien | Angers | 14 oct. 2026 | — | Brouillon (R0004057.JPG) | horizontale 3:2 | toutes |
 
 
 Inventaire : les douze photos de la démo ont été publiées en 2025, numérotées dans l'ordre de la démo (`S25-001` Brume sur la Loire … `J25-006` Deux ombres) ; les dix d'octobre 2026 dans l'ordre de prise de vue (`S26-001` Cais do Sodré … `J26-006` Escaliers des Guindais). Pont Dom-Luís recevra le sien à sa publication (`J26-007`). Rang : la place dans l'ordre « choisi par nous » (§ 4.2).
@@ -158,7 +160,7 @@ Légendes connues (démo) : Brume sur la Loire « Six heures, le fleuve fume enc
 
 ### 4.2 Comptes, séries, regards
 
-- **Photos publiées : 22** (inventaire `S25-001` à `S26-004` et `J25-001` à `J26-006`) — Sébastien 10, Julien 12. Non publiées : 4 (Pont Dom-Luís ◐ Proposée ; Quai Ligny ○ Brouillon ▲ Accord à vérifier ; R0004012.jpg et R0004057.jpg ○ Brouillons à trier).
+- **Photos publiées : 22** (inventaire `S25-001` à `S26-004` et `J25-001` à `J26-006`) — Sébastien 10, Julien 12. Non publiées : 4 (Pont Dom-Luís ◐ Proposée ; Quai Ligny ○ Brouillon ▲ Accord à vérifier ; R0004012.JPG et R0004057.JPG ○ Brouillons à trier).
 - **Séries** (couverture entre parenthèses) :
 
 | Série | Photos | Sébastien | Julien | Couverture |
@@ -257,7 +259,7 @@ Camille Exemple, relectrice : compte désactivé le 2 oct. 2026 ; ses 14 traduct
 
 - « Quai, 7h12 » s'écrit « Quai, 7 h 12 ».
 - Élise, contre-jour : la démo donne le lieu « Atelier », qui se confond avec le thème et la rubrique « Notes d'atelier » ; le référentiel dit « Nantes ».
-- La démo n'a pas de titre pour R0004012.jpg ni R0004057.jpg (brouillons à trier) ; le référentiel fixe les titres que les maquettes saisissent.
+- La démo n'a pas de titre pour R0004012.JPG ni R0004057.JPG (brouillons à trier) ; le référentiel fixe les titres que les maquettes saisissent.
 - La démo a un voyage « Lisbonne et Porto » ; les maquettes en font un billet des Carnets.
 - La démo ne sert ni la boutique, ni les galeries privées, ni les carnets : leurs données sont propres au référentiel.
 - La démo numérote les photos par leur rang (« N°11 »), qui change à chaque réordonnancement ; les maquettes donnent un numéro d'inventaire stable (UX-T-05, § 2).
@@ -267,7 +269,8 @@ Camille Exemple, relectrice : compte désactivé le 2 oct. 2026 ; ses 14 traduct
 ### 4.9 Administration : données des maquettes MQ-07 à MQ-10 et MQ-18 à MQ-20
 
 - Journée de référence : vendredi 16 oct. 2026, compte de Julien (administrateur) ; le soir, Sébastien (photographe) travaille sur son brouillon. Heures montrées : lot de trois brouillons enregistré à 21 h 34 (MQ-08) ; « Mon compte » enregistré à 22 h 40 (MQ-07) ; billet « Angers, un soir d'octobre » enregistré à 22 h 42, traduction proposée à 22 h 44 (MQ-20) ; publication Instagram de « Cais do Sodré » à 22 h 50, légende rétablie « comme à 22 h 51 », suggestion de description demandée à 22 h 55 et arrivée à 22 h 56, capture de MQ-09 à 22 h 58.
-- Fichiers des brouillons d'Angers (EXIF de la démo) : `R0004012.jpg` Minoterie, brume du matin (14 oct., 6 h 55) · `R0004046.jpg` Quai Ligny, soir (18 h 10) · `R0004057.jpg` Réverbères, quai Ligny (18 h 40).
+- Barre latérale du rôle Photographe (Sébastien, MQ-07, MQ-08, MQ-20 et planche) : Aujourd'hui · Photos (Photothèque ; Séries comptées sur ses 12 photos : Atlantique 3, Paysage 4 avec Minoterie, Portrait 1, Rue 2 avec Quai Ligny, Voyage 2, vignettes Cais do Sodré, Brume sur la Loire, Tiago, Quai 7 h 12, Dernière heure ; Sorties ; Voyages) · Personnes (Personnes 1, la demande de Claire ; App de terrain) · Publier (Mes propositions, Carnets, Galeries privées, Boutique) · Équipe (Statistiques) ; au pied, Aide, Voir le site, langue ; ni Signalements, ni Instagram, ni Réglages (`server/permissions.js`).
+- Fichiers des brouillons d'Angers (EXIF de la démo) : `R0004012.JPG` Minoterie, brume du matin (14 oct., 6 h 55) · `R0004046.JPG` Quai Ligny, soir (18 h 10) · `R0004057.JPG` Réverbères, quai Ligny (18 h 40).
 - App de terrain (MQ-10) : rencontre d'Inês, carte `J-0001`, à 19 h 20 ; prochaine carte `J-0002` ; adresse imprimée sur la carte : `nicephos.art/bonjour/j` (puis le numéro) ; session de terrain ouverte jusqu'à 3 h 24.
 - Galeries privées (MQ-18) et commandes (MQ-19) : les données du § 4.5 et du § 4.6.
 
@@ -278,5 +281,6 @@ Camille Exemple, relectrice : compte désactivé le 2 oct. 2026 ; ses 14 traduct
 - **Boutique** : motif de remboursement libre ; le suivi Colissimo est un numéro de 13 signes ; un exemplaire revenu (remboursement, annulation) redevient disponible (S7 aligné sur S49) ; D16 en lecture seule.
 - **Formulaires** : la date de rencontre de `/bonjour` se saisit en champ libre (comme dans l'admin), et non en `type=date` : écart voulu avec le code actuel.
 - **Routes à créer** : `/droits/demande?photo=<slug>` (demande de licence préremplie) et `/instagram` (MQ-06).
-- **Références de commande** : les maquettes écrivent `C-2026-0007` pour la lisibilité ; l'étude (S55) veut une référence aléatoire d'au moins 50 bits (`C-` et 11 caractères). À trancher avant le lot boutique : soit une référence lisible et un jeton séparé, soit la référence aléatoire partout.
-- **Adresse de la boutique** : les maquettes et ce lexique écrivent `/tirages` (le mot public) ; l'étude écrit `/boutique` (annexe des routes). À aligner dans l'étude.
+- **Références de commande** (tranché le 16 oct.) : la référence lisible `C-2026-0007` reste le numéro affiché (page de suivi, e-mails, factures, admin, téléphone) ; le lien de suivi envoyé au client porte un jeton aléatoire d'au moins 128 bits (22 caractères en base64url, `https://www.nicephos.art/commande/suivi/<jeton>`, préfixe de langue au besoin), seul à ouvrir la commande : la référence seule n'ouvre rien. Cela concilie S55 (référence d'au moins 50 bits) : l'aléa est porté par le jeton, pas par le numéro. MQ-19 le montre (e-mail d'Anna, lien masqué ; paiement : « Suivi d'Anna »). À reporter dans l'étude (S55, annexe des routes).
+- **Adresse de la boutique** (tranché le 16 oct.) : l'adresse publique est `/tirages` (`/tirages/<slug>`), le mot du menu ; l'étude écrivait `/boutique` (S10, schéma du parcours, annexe des routes) : à corriger dans l'étude. L'administration garde « Boutique » (`/admin/boutique`).
+- **Voyages** : l'entrée « Voyages » reste dans la barre latérale de l'administration (groupe Photos) : les voyages existent dans le code et coexistent avec le Carnet (étude B9, B64) ; le billet « Lisbonne et Porto » ne remplace que la page publique du voyage.

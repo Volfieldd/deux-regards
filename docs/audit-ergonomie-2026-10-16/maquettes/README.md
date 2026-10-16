@@ -34,7 +34,7 @@ Les vignettes du tableau du rapport sont dans `vignettes/` (premier écran au bu
 
 - Ouvrez directement un fichier `MQ-xx-….html` dans votre navigateur (double-clic, ou glisser dans une fenêtre). Ce sont des fichiers locaux : aucun serveur n'est nécessaire.
 - Gardez le dossier entier : les fichiers HTML chargent `_commun/` par un chemin relatif. Aucune ressource externe : polices (Jost, IBM Plex Mono, Cormorant Garamond), feuilles de style et photos sont dans `_commun/` ; les pages marchent hors ligne et n'envoient aucune requête vers Internet. Les liens internes (`/tirages`, `/carnet/…`) ne mènent nulle part : ce sont ceux du futur site.
-- Pour voir la version téléphone, réduisez la fenêtre sous 768 px ou utilisez le mode « appareil » des outils de développement (Pixel 7, 412 × 839). Les maquettes de l'administration MQ-18 à MQ-20 suivent le mode du système (« Chambre noire » en mode sombre, clair sinon) ; MQ-07 à MQ-10 sont en mode clair.
+- Pour voir la version téléphone, réduisez la fenêtre sous 768 px ou utilisez le mode « appareil » des outils de développement (Pixel 7, 412 × 839). Les maquettes de l'administration MQ-07 et MQ-18 à MQ-20 suivent le mode du système (« Chambre noire » en mode sombre, clair sinon) : leurs rendus sont en Chambre noire au bureau, en clair au téléphone ; MQ-08, MQ-09 et l'app de terrain MQ-10 sont en mode clair.
 
 ## MQ-00, la planche
 
@@ -45,7 +45,7 @@ MQ-00 n'est pas un écran du site : c'est la référence que les vingt maquettes
 - `-bureau.webp` : capture pleine page à 1 440 × 900, densité 1. `-mobile.webp` : Pixel 7 (412 × 839), densité 2. Les images différées sont chargées avant la capture.
 - **Rendus en bandes.** Le WebP plafonne à 16 383 px de haut. Une capture plus haute est coupée en bandes posées côte à côte sur un fond gris, **à lire de gauche à droite**, coupées entre deux blocs (jamais dans une image ni dans un texte) ; elle garde sa densité au lieu d'être réduite. C'est le cas des rendus téléphone de MQ-01, 02, 04, 05, 06, 11, 13, 15, 16 et 17 (deux bandes), de MQ-12 (trois bandes) et de l'administration (MQ-07 à MQ-10, MQ-18 à MQ-20). MQ-00, très longue, est rendue en trois bandes au bureau (densité 1) et en six au téléphone (densité 1,5).
 - Le bas du premier écran est marqué dans les marges par un trait magenta (à 900 px au bureau, 839 px au téléphone).
-- Contrôles faits sur MQ-00 et sur chaque maquette du site (16 oct. 2026) : axe-core au bureau et au téléphone ; largeurs 320, 412, 820, 1 024 et 1 440 px, en français et avec l'en-tête du site en allemand ; comparaison pixel à pixel avec et sans annotations. Outils : `outils/consol-final.mjs`, `consol-sans.py`, `consol-bandes.py`.
+- Contrôles faits sur MQ-00 et sur chaque maquette du site (16 oct. 2026) : axe-core au bureau et au téléphone ; largeurs 320, 412, 820, 1 024 et 1 440 px, en français et avec l'en-tête du site en allemand ; comparaison pixel à pixel avec et sans annotations. Outils : `outils/consol-final.mjs`, `consol-sans.py`, `consol-bandes.py`. Administration (MQ-07 à MQ-10, MQ-18 à MQ-20, échantillons de MQ-00) : `outils/consol-admin.mjs` (en plus : cibles, texte sous 12 px, barre latérale), `consol-sans-admin.py`, `consol-bandes-admin.py`, `mq00-admin-rendu.mjs`.
 
 ## Ce qui est annotation, et ce qui est interface
 
@@ -59,7 +59,7 @@ Tout ce qui est magenta appartient à la maquette, jamais à l'interface propos�
 | `tokens.css` | jetons uniques : couleurs des thèmes nuit, jour, Atelier, admin clair et Chambre noire ; états ; échelle typographique ; espaces (grille de 8 px) ; rayons ; focus. Aucune maquette ne les redéclare |
 | `public.css` | composants du site public. § 0 à 14 : en-têtes Site, Contexte, Tunnel ; langue et listes déroulantes ; menu du téléphone ; pieds de page ; cartel ; rangées ; diptyque ; boutons ; bascules ; formulaires ; prix ; étapes ; messages ; fil d'Ariane et données. § 15 à 26, les composants des pages versés depuis les maquettes : têtes de page et de partie, listes de liens, filtres, variantes des rangées, ouverture de l'accueil, visionneuse, carnet, compléments de formulaire, galerie privée, contact, tirages et panier, aperçu d'impression |
 | `admin.css`, `app.css` | styles de l'administration et de l'app de terrain, copies de `main` |
-| `admin-plus.css` | ce qui manque à `admin.css` : barre latérale unique, en-tête de page, trois boutons, états, témoin d'enregistrement, message d'action, formulaire type, dialogue |
+| `admin-plus.css` | ce qui manque à `admin.css` : barre latérale unique (et sa variante Photographe), en-tête de page, trois boutons, états, témoin d'enregistrement, message d'action, formulaire type, dialogue ; puis listes et objets, panneaux et signalements, Réglages (onglets, interrupteur, carte d'assistant), éditeur de billet, aperçu « comme sur le site », et de quoi montrer un état dans une maquette — un composant par besoin (MQ-00, section Administration) |
 | `annotations.css` | gabarit commun des annotations (magenta), interrupteur « sans annotations », et mise en page des zones d'autres états (`.mq-etats`, `.mq-ecran-in`) |
 | `site-entete.css` | ancien en-tête des maquettes v0, remplacé par `public.css` |
 | `fonts/` | polices WOFF2 |
