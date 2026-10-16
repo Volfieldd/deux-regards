@@ -5,28 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="robots" content="noindex">
-<title>Panier (2) · Tirages · Nicephos</title>
-<meta name="description" content="Votre panier : deux tirages de deux photographes, deux commandes réglées à la suite.">
+<title>Panier (2) · Nicephos (maquette MQ-14)</title>
+<meta name="description" content="Votre panier : deux tirages de deux photographes, deux commandes réglées à la suite.">
 <link rel="stylesheet" href="_commun/site.css">
 <link rel="stylesheet" href="_commun/tokens.css">
 <link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
 /* MQ-14 · panier. Composants de la planche (_commun/public.css, § 25 : une commande par photographe .bloc-vendeur, un tirage
-   .ligne, sous-total, récapitulatif .recap, enchaînement des paiements .suite, montants, dépliant) ; ci-dessous, la mise en page
-   de la page. Aucun jeton redéclaré. */
+   .ligne, .sous-total, récapitulatif .recap, enchaînement des paiements .suite ; § 11 .montants ; § 22 .depliant) ; ci-dessous,
+   la mise en page de la page, le résumé du haut au téléphone (.p-haut), des vignettes plus grandes, et la présentation des états.
+   Aucun jeton redéclaré. */
 .panier { display: grid; gap: var(--esp-6) var(--esp-8); grid-template-columns: minmax(0, 1fr); align-items: start; }
 @media (min-width: 1024px) { .panier { grid-template-columns: minmax(0, 7fr) minmax(340px, 5fr); } }
 .blocs { display: grid; gap: var(--esp-6); }
-.pl-h2b { margin: 0; font: 400 var(--t-titre-3)/1.3 var(--sans); }
+/* Au téléphone et sur tablette (une colonne), le total et le bouton plein sont aussi en haut, sous le chapô (Baymard :
+   résumé et bouton en tête et en pied d'un panier long) ; au bureau, le récapitulatif collant de droite suffit. */
+.p-haut { display: none; }
+@media (max-width: 1023px) { .p-haut { display: grid; gap: var(--esp-2); padding-top: var(--esp-2); border-top: 1px solid var(--rule); } }
+.p-haut-t { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0 var(--esp-2); margin: 0; }
+.p-haut-n { font-size: var(--t-titre-3); font-variant-numeric: tabular-nums; }
+.p-haut-n b { font-weight: 500; }
+.p-haut-d { color: var(--mute); font-size: var(--t-petit); }
+/* La photo d'abord (jury v1, critère 11) : vignettes de 120 px de haut au bureau, 80 px au téléphone (96 et 72 dans la planche),
+   dans une colonne de largeur fixe (celle d'une horizontale) : les titres des lignes s'alignent, verticale ou horizontale. */
+.ligne { grid-template-columns: 180px minmax(0, 1fr) auto; }
+.ligne-img, .ligne-img img { height: 120px; }
+@media (max-width: 599px) { .ligne { grid-template-columns: 120px minmax(0, 1fr); } .ligne-img, .ligne-img img { height: 80px; } }
 /* Changer de pays de livraison : un formulaire à un seul champ, dans un dépliant */
 .pays form { display: grid; gap: var(--esp-2); padding-top: var(--esp-1); }
 .pays-l { margin: 0; font-size: var(--t-petit); color: var(--prose); }
-/* Autres états */
-.etat-sh { background: none; border: 0; z-index: auto; }
-.etat-outils { display: flex; justify-content: flex-end; min-height: 44px; padding-bottom: var(--esp-2); border-bottom: 1px solid var(--rule); }
-.etat-court { display: grid; gap: var(--esp-3); max-width: 620px; }
-.etat-court > * { margin: 0; }
+.recap-sous { display: grid; gap: var(--esp-2); }
+.recap-sous > * { margin: 0; }
+/* Autres états : la page entière dans un cadre qui touche les bords de l'écran (en-tête compris). */
+.e-plein { margin-inline: calc(10px - var(--gut)); padding-bottom: var(--esp-5); outline-offset: 6px; }
+.e-msg { max-width: 640px; padding-top: var(--esp-3); }
+.e-msg + .tete-page { padding-top: var(--esp-3); }
 </style>
 </head>
 <body>
@@ -46,7 +60,7 @@
       <details class="lang-pick">
         <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
         <ul aria-label="Choisir la langue">
-          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li><li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li><li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+          <li><a href="/langue/fr?vers=%2Fpanier" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li><li><a href="/langue/en?vers=%2Fpanier" hreflang="en" lang="en">English</a></li><li><a href="/langue/de?vers=%2Fpanier" hreflang="de" lang="de">Deutsch</a></li>
         </ul>
       </details>
       <details class="sh-menu">
@@ -65,53 +79,55 @@
 <main id="contenu" class="wrap">
   <div class="tete-page">
     <h1 class="titre-page mq-a"><span class="mq-pin" aria-hidden="true">1</span>Panier</h1>
-    <p class="chapo chapo--texte">2 tirages, de deux photographes. Chacun vend ses photos en son nom : deux commandes, que vous réglez à la suite.</p>
+    <p class="chapo chapo--texte">2 tirages, de deux photographes. Chacun signe ses tirages, les expédie depuis Angers et encaisse son propre paiement : deux commandes, que vous réglez à la suite.</p>
+    <div class="p-haut mq-a"><span class="mq-pin" aria-hidden="true">2</span>
+      <p class="p-haut-t"><span class="p-haut-n">Total <b>500,00&nbsp;€</b></span><span class="p-haut-d">2 commandes, livraison comprise</span></p>
+      <a class="btn btn--large" href="/commande">Commander les 2 tirages</a>
+    </div>
   </div>
 
   <div class="panier">
     <div class="blocs">
-      <section class="bloc-vendeur mq-a" aria-labelledby="b1-h"><span class="mq-pin" aria-hidden="true">2</span>
-        <header><p class="etiquette">Commande 1 sur 2</p><h2 id="b1-h">Vendu et expédié par Julien Exemple</h2><p>Il signe ses tirages, les expédie depuis Angers et encaisse son paiement.</p></header>
-        <article class="ligne" aria-labelledby="l-esc-t">
-          <a class="ligne-img" href="/tirages/escaliers-des-guindais" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/escaliers.webp" width="64" height="96" alt="" loading="lazy" decoding="async"></a>
-          <div>
-            <h3 id="l-esc-t"><a href="/tirages/escaliers-des-guindais">Escaliers des Guindais</a></h3>
-            <p class="ligne-d">Julien · Grand format · image 40 × 60 cm, feuille 50 × 70</p>
-            <p class="ligne-d" id="l-esc-n">Exemplaire numéroté sur 15 ; son numéro vous est donné après le paiement.</p>
-            
-            <form method="post" action="/panier/retirer"><input type="hidden" name="ligne" value="l-esc"><button class="lien" type="submit">Retirer<span class="sr-only"> « Escaliers des Guindais »</span></button></form>
-          </div>
-          <p class="prix">290,00&nbsp;€</p>
-        </article>
-        <dl class="montants sous-total">
-          <dt>Livraison, France métropolitaine<span class="liv-d">À plat, suivi ; reçu du 30 oct. au 6 nov.</span></dt><dd>15,00&nbsp;€</dd>
-          <dt class="total">Total de la commande 1</dt><dd class="total">305,00&nbsp;€</dd>
-        </dl>
-      </section>
-      <section class="bloc-vendeur mq-a" aria-labelledby="b2-h">
-        <header><p class="etiquette">Commande 2 sur 2</p><h2 id="b2-h">Vendu et expédié par Sébastien Exemple</h2><p>Il signe ses tirages, les expédie depuis Angers et encaisse son paiement.</p></header>
-        <article class="ligne" aria-labelledby="l-bru-t">
-          <a class="ligne-img" href="/tirages/brume-sur-la-loire" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/brume.webp" width="144" height="96" alt="" loading="lazy" decoding="async"></a>
-          <div>
-            <h3 id="l-bru-t"><a href="/tirages/brume-sur-la-loire">Brume sur la Loire</a></h3>
-            <p class="ligne-d">Sébastien · Petit format · image 24 × 36 cm, feuille 30 × 40</p>
-            <p class="ligne-d" id="l-bru-n">Exemplaire numéroté sur 15 ; son numéro vous est donné après le paiement.</p>
-            
-            <form method="post" action="/panier/retirer"><input type="hidden" name="ligne" value="l-bru"><button class="lien" type="submit">Retirer<span class="sr-only"> « Brume sur la Loire »</span></button></form>
-          </div>
-          <p class="prix">180,00&nbsp;€</p>
-        </article>
-        <dl class="montants sous-total">
-          <dt>Livraison, France métropolitaine<span class="liv-d">À plat, suivi ; reçu du 30 oct. au 6 nov.</span></dt><dd>15,00&nbsp;€</dd>
-          <dt class="total">Total de la commande 2</dt><dd class="total">195,00&nbsp;€</dd>
-        </dl>
-      </section>
+      <section class="bloc-vendeur mq-a" aria-labelledby="b1-h"><span class="mq-pin" aria-hidden="true">3</span>
+      <header><p class="etiquette">Commande 1 sur 2</p><h2 id="b1-h">Vendu et expédié par Julien Exemple</h2></header>
+      <article class="ligne" aria-labelledby="l-esc-t">
+        <a class="ligne-img" href="/tirages/escaliers-des-guindais" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/escaliers.webp" srcset="_commun/photos/160/escaliers.webp 107w, _commun/photos/480/escaliers.webp 320w" sizes="(min-width: 600px) 80px, 54px" width="80" height="120" alt="" loading="lazy" decoding="async"></a>
+        <div>
+          <h3 id="l-esc-t"><a href="/tirages/escaliers-des-guindais">Escaliers des Guindais</a></h3>
+          <p class="ligne-d">Julien · Grand format · image 40 × 60 cm, feuille 50 × 70</p>
+          <p class="ligne-d">Exemplaire numéroté sur 15 ; son numéro vous est donné après le paiement.</p>
+          <form method="post" action="/panier/retirer"><input type="hidden" name="ligne" value="l-esc"><button class="lien" type="submit">Retirer<span class="sr-only"> « Escaliers des Guindais »</span></button></form>
+        </div>
+        <p class="prix">290,00&nbsp;€</p>
+      </article>
+      <dl class="montants sous-total">
+        <dt>Livraison, France métropolitaine<span class="liv-d">À plat, suivi ; reçu du 30 oct. au 6 nov.</span></dt><dd>15,00&nbsp;€</dd>
+        <dt class="total">Total de la commande 1</dt><dd class="total">305,00&nbsp;€</dd>
+      </dl>
+    </section>
+      <section class="bloc-vendeur" aria-labelledby="b2-h">
+      <header><p class="etiquette">Commande 2 sur 2</p><h2 id="b2-h">Vendu et expédié par Sébastien Exemple</h2></header>
+      <article class="ligne" aria-labelledby="l-bru-t">
+        <a class="ligne-img" href="/tirages/brume-sur-la-loire" tabindex="-1" aria-hidden="true"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/160/brume.webp 160w, _commun/photos/480/brume.webp 480w" sizes="(min-width: 600px) 180px, 120px" width="180" height="120" alt="" loading="lazy" decoding="async"></a>
+        <div>
+          <h3 id="l-bru-t"><a href="/tirages/brume-sur-la-loire">Brume sur la Loire</a></h3>
+          <p class="ligne-d">Sébastien · Petit format · image 24 × 36 cm, feuille 30 × 40</p>
+          <p class="ligne-d">Exemplaire numéroté sur 15 ; son numéro vous est donné après le paiement.</p>
+          <form method="post" action="/panier/retirer"><input type="hidden" name="ligne" value="l-bru"><button class="lien" type="submit">Retirer<span class="sr-only"> « Brume sur la Loire »</span></button></form>
+        </div>
+        <p class="prix">180,00&nbsp;€</p>
+      </article>
+      <dl class="montants sous-total">
+        <dt>Livraison, France métropolitaine<span class="liv-d">À plat, suivi ; reçu du 30 oct. au 6 nov.</span></dt><dd>15,00&nbsp;€</dd>
+        <dt class="total">Total de la commande 2</dt><dd class="total">195,00&nbsp;€</dd>
+      </dl>
+    </section>
     </div>
 
-    <section class="recap mq-a" aria-labelledby="recap-h"><span class="mq-pin" aria-hidden="true">3</span>
+    <section class="recap mq-a" aria-labelledby="recap-h"><span class="mq-pin" aria-hidden="true">4</span>
       <h2 id="recap-h">Récapitulatif</h2>
-      <div class="mq-a" style="display:grid;gap:var(--esp-2)"><span class="mq-pin" aria-hidden="true">4</span>
-        <p class="suite-t" style="margin:0">Vos coordonnées une seule fois, puis deux paiements à la suite :</p>
+      <div class="recap-sous mq-a"><span class="mq-pin" aria-hidden="true">5</span>
+        <p class="suite-t">Vos coordonnées une seule fois, puis deux paiements à la suite :</p>
         <ol class="suite" aria-label="Déroulé de la commande">
           <li><span class="suite-t"><b>Paiement à Julien</b> · commande 1, Escaliers des Guindais</span><span class="m">305,00&nbsp;€</span></li>
           <li><span class="suite-t"><b>Paiement à Sébastien</b> · commande 2, Brume sur la Loire</span><span class="m">195,00&nbsp;€</span></li>
@@ -120,9 +136,9 @@
           <dl class="montants"><dt class="total">Total</dt><dd class="total prix--total">500,00&nbsp;€</dd></dl>
           <p class="tva" style="margin-top:var(--esp-1)">Livraison comprise. TVA non applicable, art. 293 B du CGI.</p>
         </div>
-        <p class="suite-n" style="margin:0">Chaque photographe a son propre compte de paiement : deux lignes sur votre relevé. Les deux exemplaires vous sont réservés dès le premier paiement.</p>
+        <p class="suite-n">Chaque photographe a son propre compte de paiement : deux lignes sur votre relevé. Les deux exemplaires vous sont réservés 35 minutes dès votre premier « Payer ».</p>
       </div>
-      <div class="mq-a"><span class="mq-pin" aria-hidden="true">5</span>
+      <div class="mq-a"><span class="mq-pin" aria-hidden="true">6</span>
         <p class="pays-l">Livraison en France métropolitaine.</p>
         <details class="depliant pays">
           <summary>Livrer dans un autre pays<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
@@ -133,93 +149,16 @@
           </form>
         </details>
       </div>
-      <div class="mq-a"><span class="mq-pin" aria-hidden="true">6</span><a class="btn btn--large" href="/commande">Commander les 2 tirages</a></div>
+      <div class="mq-a"><span class="mq-pin" aria-hidden="true">7</span><a class="btn btn--large" href="/commande">Commander les 2 tirages</a></div>
       <div class="recap-note">
         <p>Sans compte. Carte bancaire, sur la page sécurisée de notre prestataire de paiement.</p>
-        <p>14 jours pour changer d’avis après réception · <a class="lien" style="display:inline;min-height:0" href="/conditions-de-vente">Conditions de vente</a></p>
-        <p style="margin-top:var(--esp-1)"><a class="lien" href="/tirages">Voir les autres tirages</a></p>
-        <p class="mq-a"><span class="mq-pin" aria-hidden="true">7</span>Votre panier est gardé 30 jours sur cet appareil, par un seul cookie, posé à votre premier ajout.</p>
+        <p>14 jours pour changer d’avis après réception.</p>
+        <p class="actions"><a class="lien" href="/conditions-de-vente">Conditions de vente</a><a class="lien" href="/tirages">Voir les autres tirages</a></p>
+        <p class="mq-a"><span class="mq-pin" aria-hidden="true">8</span>Votre panier est gardé 30 jours sur cet appareil, par un seul cookie, posé à votre premier ajout.</p>
       </div>
     </section>
   </div>
-
-  <div class="mq-etats">
-    <div class="mq-ecran">
-      <p class="mq-etat">État · après « Retirer »</p>
-      <div class="etat-court mq-a"><span class="mq-pin" aria-hidden="true">8</span>
-        <div class="sh etat-sh"><div class="etat-outils"><a class="sh-outil sh-panier" href="/panier" aria-current="page"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Panier</span><span class="sh-compte"><span class="sh-par">(</span>1<span class="sh-par">)</span></span><span class="sr-only"> tirage</span></a></div></div>
-        <div class="msg msg--ok" role="status" tabindex="-1"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><div><p><b>« Brume sur la Loire » est retiré du panier.</b></p><form method="post" action="/panier/remettre"><input type="hidden" name="ligne" value="l-bru"><button class="lien" type="submit">Le remettre dans le panier</button></form></div></div>
-        <p class="chapo" style="font-size:var(--t-texte)">1 tirage, de Julien : une seule commande, un seul paiement.</p>
-        <dl class="montants"><dt>Commande · Julien</dt><dd>305,00&nbsp;€</dd><dt class="total">Total</dt><dd class="total prix--total">305,00&nbsp;€</dd></dl>
-        <a class="btn btn--large" href="/commande">Commander le tirage</a>
-      </div>
-    </div>
-
-    <div class="mq-ecran">
-      <p class="mq-etat">État · l’édition s’épuise entre-temps</p>
-      <div class="etat-court mq-a" style="max-width:760px"><span class="mq-pin" aria-hidden="true">9</span>
-        <div class="msg msg--erreur" role="alert" tabindex="-1" id="ciel-msg"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><p><b>Erreur :</b> « Le ciel s’est ouvert » s’est épuisé depuis votre ajout : son dernier exemplaire vient d’être vendu. Il n’est plus compté ; rien ne vous a été débité.</p></div>
-        <div class="bloc-vendeur">
-          <header><p class="etiquette">Commande 2 sur 2</p><p class="pl-h2b">Vendu et expédié par Sébastien Exemple</p></header>
-          <article class="ligne" aria-labelledby="l9-bru-t">
-          <a class="ligne-img" href="/tirages/brume-sur-la-loire" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/brume.webp" width="144" height="96" alt="" loading="lazy" decoding="async"></a>
-          <div>
-            <h3 id="l9-bru-t"><a href="/tirages/brume-sur-la-loire">Brume sur la Loire</a></h3>
-            <p class="ligne-d">Sébastien · Petit format · image 24 × 36 cm, feuille 30 × 40</p>
-            <p class="ligne-d" id="l9-bru-n">Exemplaire numéroté sur 15 ; son numéro vous est donné après le paiement.</p>
-            
-            <form method="post" action="/panier/retirer"><input type="hidden" name="ligne" value="l9-bru"><button class="lien" type="submit">Retirer<span class="sr-only"> « Brume sur la Loire »</span></button></form>
-          </div>
-          <p class="prix">180,00&nbsp;€</p>
-        </article>
-          <article class="ligne ligne--epuise" aria-labelledby="l9-ciel-t" aria-describedby="l9-ciel-err">
-          <a class="ligne-img" href="/tirages/le-ciel-s-est-ouvert" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/ciel.webp" width="144" height="96" alt="" loading="lazy" decoding="async"></a>
-          <div>
-            <h3 id="l9-ciel-t"><a href="/tirages/le-ciel-s-est-ouvert">Le ciel s’est ouvert</a></h3>
-            <p class="ligne-d">Sébastien · Petit format · image 24 × 36 cm, feuille 30 × 40</p>
-            
-            <p class="champ-err ligne-err" id="l9-ciel-err"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Épuisé :</b> les 15 exemplaires sont vendus. Cette ligne n’est plus comptée.</span></p>
-            <form method="post" action="/panier/retirer"><input type="hidden" name="ligne" value="l9-ciel"><button class="lien" type="submit">Retirer la ligne<span class="sr-only"> « Le ciel s’est ouvert »</span></button></form>
-          </div>
-          <p class="prix">180,00&nbsp;€</p>
-        </article>
-          <dl class="montants sous-total"><dt>Livraison, France métropolitaine</dt><dd>15,00&nbsp;€</dd><dt class="total">Total de la commande 2</dt><dd class="total">195,00&nbsp;€</dd></dl>
-        </div>
-        <p class="suite-n">Le panier relit les prix et les stocks à chaque affichage ; un tirage épuisé reste visible, barré, jusqu’à ce que vous retiriez la ligne. Exemple : le panier de Claire, s’il avait aussi compté ce tirage.</p>
-      </div>
-    </div>
-
-    <div class="mq-ecran">
-      <p class="mq-etat">État · panier vide</p>
-      <div class="etat-court">
-        <div class="sh etat-sh"><div class="etat-outils"><a class="sh-outil sh-recherche" style="display:inline-flex" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a></div></div>
-        <p class="titre-page">Panier</p>
-        <p class="chapo" style="font-size:var(--t-texte)">Votre panier est vide.</p>
-        <p style="margin:0"><a class="lien" href="/tirages">Voir les tirages</a> <span class="suite-n">· 9 photos, de 180&nbsp;€ à 290&nbsp;€</span></p>
-        <p class="suite-n">Panier vide : l’en-tête n’affiche plus de panier, et le cookie est effacé.</p>
-      </div>
-    </div>
-  </div>
 </main>
-<aside class="mq-notes" aria-labelledby="mq-t">
-  <p class="mq-id">MQ-14 · site public · panier · thème Nicephos nuit (production) · bureau 1 440 × 900 et Pixel 7</p>
-  <h2 id="mq-t">Ce qui change</h2>
-  <p class="mq-lead">Le panier de Claire Exemple, le vendredi 16 octobre 2026 vers 10 h : « Escaliers des Guindais » de Julien, ajouté le premier, puis « Brume sur la Loire » de Sébastien. Les blocs suivent l’ordre des ajouts ; les paiements, celui des blocs. Données : LEXIQUE-ET-DONNEES.md, § 4.4 et 4.5.</p>
-  <ol class="mq-reperes">
-    <li><span class="mq-num" aria-hidden="true">1</span><b>« Panier » nommé, compté, à sa place</b><p>L’en-tête Site de la planche : « Panier (2) » en mots au bureau, l’icône et le nombre au téléphone (lu « Panier, 2 tirages ») ; plus rien ne sort de l’écran, allemand compris.</p><span class="mq-ref">Jury v0 critères 4 et 9 (T1, 320 px, « Warenkorb (2) ») · WCAG 1.4.10</span></li>
-    <li><span class="mq-num" aria-hidden="true">2</span><b>Un bloc par vendeur</b><p>Chaque photographe vend en son nom : un bloc par commande, avec son vendeur, ses lignes, son envoi, sa date et son total. « Commande 1 sur 2 » dit d’emblée qu’il y en a deux.</p><span class="mq-ref">Étude S1, arbitrage 7, § 6.1 · jury v0 critères 7 et 12</span></li>
-    <li><span class="mq-num" aria-hidden="true">3</span><b>Un récapitulatif sans doublon</b><p>Les deux paiements, dans leur ordre, puis « Total 500,00 € », livraison comprise, et la seule mention de TVA de la page ; sans cadre ni fond, sur le papier.</p><span class="mq-ref">LEXIQUE § 2 · jury v0 critères 7 et 11</span></li>
-    <li><span class="mq-num" aria-hidden="true">4</span><b>L’enchaînement des deux paiements, annoncé</b><p>Coordonnées une fois, puis 305,00 € à Julien, puis 195,00 € à Sébastien : on sait avant de commencer qu’il y aura deux paiements et deux lignes sur le relevé.</p><span class="mq-ref">Jury v0 critères 2 et 8 · Baymard (coût total, étapes annoncées) · étude S36</span></li>
-    <li><span class="mq-num" aria-hidden="true">5</span><b>Le pays, sans deviner</b><p>France par défaut ; un autre pays se choisit dans un repli, avec un bouton qui dit ce qu’il fait (« Recalculer la livraison »). Les zones non servies sont dites avant le choix : pas d’erreur possible.</p><span class="mq-ref">Étude S25, S28 · jury v0 critère 7 · B&S 5.1</span></li>
-    <li><span class="mq-num" aria-hidden="true">6</span><b>Un seul bouton plein</b><p>« Commander les 2 tirages » : un lien vers la commande, aucun script. Ni compte, ni produit suggéré, ni case cochée d’avance.</p><span class="mq-ref">Étude S20, S26 · Baymard (achat sans compte)</span></li>
-    <li><span class="mq-num" aria-hidden="true">7</span><b>Le cookie dit en une phrase</b><p>Ce que garde le panier, combien de temps, et quand le cookie est posé.</p><span class="mq-ref">Étude S21 · RGPD (information sur les traceurs)</span></li>
-    <li><span class="mq-num" aria-hidden="true">8</span><b>Retirer se rattrape</b><p>« Retirer » envoie un formulaire ; la page revient avec un message au focus et « Le remettre dans le panier ». Le panier n’a plus qu’une commande, et un paiement.</p><span class="mq-ref">B&S 3 Contrôle explicite · WCAG 4.1.3</span></li>
-    <li><span class="mq-num" aria-hidden="true">9</span><b>L’édition s’épuise entre-temps</b><p>Le panier relit le stock : la ligne épuisée reste visible, barrée, avec son message relié ; elle sort du total, rien n’est débité.</p><span class="mq-ref">Jury v0 critère 5 · étude S24 · UX-F-05 (message relié à son objet)</span></li>
-  </ol>
-  <p style="margin-top:24px"><b>Sans JavaScript :</b> « Retirer » et « Le remettre » sont des formulaires POST suivis d’un retour au panier ; le pays, un formulaire GET ; rien ne se met à jour tout seul, donc aucun bouton à deviner. <b>Un exemplaire par ligne :</b> plus de liste de quantités pour une œuvre numérotée ; un second exemplaire s’ajoute depuis la page du tirage (deux au plus). <b>Côté code :</b> « Commander » ouvre une seule page de coordonnées ; le premier « Payer » crée les deux commandes (une par vendeur) et réserve les deux exemplaires dans la même transaction, puis ouvre la première session de paiement ; la seconde s’ouvre au second clic (étude S36, P3). <b>Composants de la planche</b> (<code>_commun/public.css</code>, § 25, montrés dans MQ-00) : .bloc-vendeur, .ligne, .sous-total, .recap, .suite ; la page n’ajoute que sa mise en page.</p>
-  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium 1.64 en conteneur, outils/mqb-rendu.mjs) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et au téléphone (Pixel 7) · Largeurs 320, 820 et 1 024 px, et en-tête en allemand à 320, 412, 820, 1 024 et 1 280 px, menu ouvert compris : 0 débordement, 0 texte coupé · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au téléphone (liens dans une phrase exemptés) · Sans annotations : pastilles et étiquettes retirées, 0 pixel changé dans l’interface, au bureau comme au téléphone ; aucune pastille ne touche un texte, un champ ni une image · Poids : 179 ko en 13 fichiers au bureau (dont 3 images, 2 ko), 179 ko au téléphone ; aucun script ; vignettes du panier en 160 px · Contrastes : jetons de tokens.css (--mute 7,4:1, --error 8,2:1, --ok 11,6:1).</p>
-</aside>
 <footer class="sf sf--complet wrap">
   <div class="sf-in">
     <div>
@@ -249,5 +188,234 @@
     </nav>
   </div>
 </footer>
+<aside class="mq-etats wrap" aria-label="Autres états de l’écran (maquette)">
+<section class="mq-ecran mq-fond e-plein" inert aria-labelledby="e-retirer">
+  <p class="mq-etat" id="e-retirer"><span class="mq-pin" aria-hidden="true">9</span>État · après « Retirer » : la page revient, le message a le focus, l’en-tête compte 1 tirage</p>
+  <div class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <div class="sh-nav">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </div>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <a class="sh-outil sh-panier" href="/panier" aria-current="page"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Panier</span><span class="sh-compte"><span class="sh-par">(</span>1<span class="sh-par">)</span></span><span class="sr-only"> tirage</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2Fpanier" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li><li><a href="/langue/en?vers=%2Fpanier" hreflang="en" lang="en">English</a></li><li><a href="/langue/de?vers=%2Fpanier" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <div class="sh-panneau">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+  <div class="wrap">
+    <div class="e-msg"><div class="msg msg--ok is-focus" role="status" tabindex="-1"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><div><p><b>« Brume sur la Loire » est retiré du panier.</b></p><form method="post" action="/panier/remettre"><input type="hidden" name="ligne" value="l-bru"><button class="lien" type="submit">Le remettre dans le panier</button></form></div></div></div>
+    <div class="tete-page">
+      <p class="titre-page">Panier</p>
+      <p class="chapo chapo--texte">1 tirage, de Julien : une seule commande, un seul paiement.</p>
+      <div class="p-haut">
+      <p class="p-haut-t"><span class="p-haut-n">Total <b>305,00&nbsp;€</b></span><span class="p-haut-d">1 commande, livraison comprise</span></p>
+      <a class="btn btn--large" href="/commande">Commander le tirage</a>
+    </div>
+    </div>
+    <div class="panier">
+      <div class="blocs"><section class="bloc-vendeur" aria-labelledby="eA-b1-h">
+      <header><p class="etiquette">Une commande</p><h2 id="eA-b1-h">Vendu et expédié par Julien Exemple</h2></header>
+      <article class="ligne" aria-labelledby="eA-esc-t">
+        <a class="ligne-img" href="/tirages/escaliers-des-guindais" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/escaliers.webp" srcset="_commun/photos/160/escaliers.webp 107w, _commun/photos/480/escaliers.webp 320w" sizes="(min-width: 600px) 80px, 54px" width="80" height="120" alt="" loading="lazy" decoding="async"></a>
+        <div>
+          <h3 id="eA-esc-t"><a href="/tirages/escaliers-des-guindais">Escaliers des Guindais</a></h3>
+          <p class="ligne-d">Julien · Grand format · image 40 × 60 cm, feuille 50 × 70</p>
+          <p class="ligne-d">Exemplaire numéroté sur 15 ; son numéro vous est donné après le paiement.</p>
+          <form method="post" action="/panier/retirer"><input type="hidden" name="ligne" value="eA-esc"><button class="lien" type="submit">Retirer<span class="sr-only"> « Escaliers des Guindais »</span></button></form>
+        </div>
+        <p class="prix">290,00&nbsp;€</p>
+      </article>
+      <dl class="montants sous-total">
+        <dt>Livraison, France métropolitaine<span class="liv-d">À plat, suivi ; reçu du 30 oct. au 6 nov.</span></dt><dd>15,00&nbsp;€</dd>
+        <dt class="total">Total de la commande</dt><dd class="total">305,00&nbsp;€</dd>
+      </dl>
+    </section></div>
+      <section class="recap" aria-labelledby="eA-recap-h">
+      <h2 id="eA-recap-h">Récapitulatif</h2>
+      <p class="suite-t">Vos coordonnées, puis un paiement : 305,00 € à Julien.</p>
+      <div><dl class="montants"><dt class="total">Total</dt><dd class="total prix--total">305,00&nbsp;€</dd></dl>
+        <p class="tva" style="margin-top:var(--esp-1)">Livraison comprise. TVA non applicable, art. 293 B du CGI.</p></div>
+      <a class="btn btn--large" href="/commande">Commander le tirage</a>
+    </section>
+    </div>
+  </div>
+</section>
+
+<section class="mq-ecran mq-fond e-plein" inert aria-labelledby="e-epuise">
+  <p class="mq-etat" id="e-epuise"><span class="mq-pin" aria-hidden="true">10</span>État · l’édition s’épuise entre-temps (si le panier avait aussi compté « Le ciel s’est ouvert ») : la ligne reste, barrée, hors du total</p>
+  <div class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <div class="sh-nav">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </div>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <a class="sh-outil sh-panier" href="/panier" aria-current="page"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Panier</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> tirages</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2Fpanier" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li><li><a href="/langue/en?vers=%2Fpanier" hreflang="en" lang="en">English</a></li><li><a href="/langue/de?vers=%2Fpanier" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <div class="sh-panneau">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+  <div class="wrap">
+    <div class="e-msg"><div class="msg msg--erreur is-focus" role="alert" tabindex="-1"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><p><b>Erreur :</b> « Le ciel s’est ouvert » s’est épuisé depuis votre ajout : son dernier exemplaire vient d’être vendu. Il n’est plus compté ; rien ne vous a été débité.</p></div></div>
+    <div class="tete-page">
+      <p class="titre-page">Panier</p>
+      <p class="chapo chapo--texte">2 tirages, de deux photographes. Chacun signe ses tirages, les expédie depuis Angers et encaisse son propre paiement : deux commandes, que vous réglez à la suite.</p>
+      <div class="p-haut">
+      <p class="p-haut-t"><span class="p-haut-n">Total <b>500,00&nbsp;€</b></span><span class="p-haut-d">2 commandes, livraison comprise</span></p>
+      <a class="btn btn--large" href="/commande">Commander les 2 tirages</a>
+    </div>
+    </div>
+    <div class="panier">
+      <div class="blocs">
+        <section class="bloc-vendeur" aria-labelledby="eB-b1-h">
+      <header><p class="etiquette">Commande 1 sur 2</p><h2 id="eB-b1-h">Vendu et expédié par Julien Exemple</h2></header>
+      <article class="ligne" aria-labelledby="eB-esc-t">
+        <a class="ligne-img" href="/tirages/escaliers-des-guindais" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/escaliers.webp" srcset="_commun/photos/160/escaliers.webp 107w, _commun/photos/480/escaliers.webp 320w" sizes="(min-width: 600px) 80px, 54px" width="80" height="120" alt="" loading="lazy" decoding="async"></a>
+        <div>
+          <h3 id="eB-esc-t"><a href="/tirages/escaliers-des-guindais">Escaliers des Guindais</a></h3>
+          <p class="ligne-d">Julien · Grand format · image 40 × 60 cm, feuille 50 × 70</p>
+          <p class="ligne-d">Exemplaire numéroté sur 15 ; son numéro vous est donné après le paiement.</p>
+          <form method="post" action="/panier/retirer"><input type="hidden" name="ligne" value="eB-esc"><button class="lien" type="submit">Retirer<span class="sr-only"> « Escaliers des Guindais »</span></button></form>
+        </div>
+        <p class="prix">290,00&nbsp;€</p>
+      </article>
+      <dl class="montants sous-total">
+        <dt>Livraison, France métropolitaine<span class="liv-d">À plat, suivi ; reçu du 30 oct. au 6 nov.</span></dt><dd>15,00&nbsp;€</dd>
+        <dt class="total">Total de la commande 1</dt><dd class="total">305,00&nbsp;€</dd>
+      </dl>
+    </section>
+        <section class="bloc-vendeur" aria-labelledby="eB-b2-h">
+      <header><p class="etiquette">Commande 2 sur 2</p><h2 id="eB-b2-h">Vendu et expédié par Sébastien Exemple</h2></header>
+      <article class="ligne" aria-labelledby="eB-bru-t">
+        <a class="ligne-img" href="/tirages/brume-sur-la-loire" tabindex="-1" aria-hidden="true"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/160/brume.webp 160w, _commun/photos/480/brume.webp 480w" sizes="(min-width: 600px) 180px, 120px" width="180" height="120" alt="" loading="lazy" decoding="async"></a>
+        <div>
+          <h3 id="eB-bru-t"><a href="/tirages/brume-sur-la-loire">Brume sur la Loire</a></h3>
+          <p class="ligne-d">Sébastien · Petit format · image 24 × 36 cm, feuille 30 × 40</p>
+          <p class="ligne-d">Exemplaire numéroté sur 15 ; son numéro vous est donné après le paiement.</p>
+          <form method="post" action="/panier/retirer"><input type="hidden" name="ligne" value="eB-bru"><button class="lien" type="submit">Retirer<span class="sr-only"> « Brume sur la Loire »</span></button></form>
+        </div>
+        <p class="prix">180,00&nbsp;€</p>
+      </article>
+      <article class="ligne ligne--epuise" aria-labelledby="eB-ciel-t" aria-describedby="eB-ciel-err">
+        <a class="ligne-img" href="/tirages/le-ciel-s-est-ouvert" tabindex="-1" aria-hidden="true"><img src="_commun/photos/480/ciel.webp" srcset="_commun/photos/160/ciel.webp 160w, _commun/photos/480/ciel.webp 480w" sizes="(min-width: 600px) 180px, 120px" width="180" height="120" alt="" loading="lazy" decoding="async"></a>
+        <div>
+          <h3 id="eB-ciel-t"><a href="/tirages/le-ciel-s-est-ouvert">Le ciel s’est ouvert</a></h3>
+          <p class="ligne-d">Sébastien · Petit format · image 24 × 36 cm, feuille 30 × 40</p>
+          <p class="champ-err ligne-err" id="eB-ciel-err"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Épuisé :</b> les 15 exemplaires sont vendus. Cette ligne n’est plus comptée.</span></p>
+          <form method="post" action="/panier/retirer"><input type="hidden" name="ligne" value="eB-ciel"><button class="lien" type="submit">Retirer la ligne<span class="sr-only"> « Le ciel s’est ouvert »</span></button></form>
+        </div>
+        <p class="prix">180,00&nbsp;€</p>
+      </article>
+      <dl class="montants sous-total">
+        <dt>Livraison, France métropolitaine<span class="liv-d">À plat, suivi ; reçu du 30 oct. au 6 nov.</span></dt><dd>15,00&nbsp;€</dd>
+        <dt class="total">Total de la commande 2</dt><dd class="total">195,00&nbsp;€</dd>
+      </dl>
+    </section>
+      </div>
+      <section class="recap" aria-labelledby="eB-recap-h">
+      <h2 id="eB-recap-h">Récapitulatif</h2>
+      <ol class="suite" aria-label="Déroulé de la commande">
+          <li><span class="suite-t"><b>Paiement à Julien</b> · commande 1, Escaliers des Guindais</span><span class="m">305,00&nbsp;€</span></li>
+          <li><span class="suite-t"><b>Paiement à Sébastien</b> · commande 2, Brume sur la Loire</span><span class="m">195,00&nbsp;€</span></li>
+        </ol>
+      <div><dl class="montants"><dt class="total">Total</dt><dd class="total prix--total">500,00&nbsp;€</dd></dl>
+        <p class="tva" style="margin-top:var(--esp-1)">Livraison comprise. TVA non applicable, art. 293 B du CGI.</p></div>
+      <a class="btn btn--large" href="/commande">Commander les 2 tirages</a>
+    </section>
+    </div>
+  </div>
+</section>
+
+<section class="mq-ecran mq-fond e-plein" inert aria-labelledby="e-vide">
+  <p class="mq-etat" id="e-vide"><span class="mq-pin" aria-hidden="true">11</span>État · panier vide : l’en-tête n’a plus de panier, le cookie est effacé</p>
+  <div class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <div class="sh-nav">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </div>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2Fpanier" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li><li><a href="/langue/en?vers=%2Fpanier" hreflang="en" lang="en">English</a></li><li><a href="/langue/de?vers=%2Fpanier" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <div class="sh-panneau">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+  <div class="wrap">
+    <div class="tete-page">
+      <p class="titre-page">Panier</p>
+      <p class="chapo chapo--texte">Votre panier est vide.</p>
+      <p><a class="lien" href="/tirages">Voir les tirages</a> <span class="suite-n">· 9 photos, de 180&nbsp;€ à 290&nbsp;€</span></p>
+    </div>
+  </div>
+</section>
+</aside>
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MQ-14 · site public · Tirages, le panier · thème Nicephos nuit (production) · bureau 1 440 × 900 et Pixel 7</p>
+  <h2 id="mq-t">Ce qui change</h2>
+  <p class="mq-lead">Le panier de Claire Exemple, le vendredi 16 oct. 2026 vers 10 h : « Escaliers des Guindais » de Julien, ajouté le premier, puis « Brume sur la Loire » de Sébastien (MQ-13). Les blocs suivent l’ordre des ajouts ; les paiements, celui des blocs. Elle passera aux coordonnées à 10 h 12 (MQ-15). Données : LEXIQUE-ET-DONNEES.md, § 4.4, 4.5 et 4.9.</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>« Panier » nommé, compté, à sa place</b><p>L’en-tête Site de la planche : « Panier (2) » en mots au bureau, l’icône et le nombre au téléphone (lu « Panier, 2 tirages ») ; rien ne sort de l’écran, allemand compris.</p><span class="mq-ref">MQ-00 § 1 · WCAG 1.4.10</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>Au téléphone, le total et le bouton en haut</b><p>Sous le chapô : « Total 500,00 € · 2 commandes, livraison comprise » et « Commander les 2 tirages », dans le premier écran ; le récapitulatif complet et le même bouton restent en bas. Au bureau, le récapitulatif collant de droite suffit (ce bloc n’existe qu’en une colonne, sous 1 024 px).</p><span class="mq-ref">Jury v1 critère 2 · Baymard : résumé et bouton en tête et en pied du panier sur mobile</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Un bloc par vendeur, la règle dite une fois</b><p>« Chacun signe ses tirages, les expédie depuis Angers et encaisse son propre paiement » : une fois, dans le chapô, plus dans chaque bloc. Chaque bloc a son vendeur, ses lignes, son envoi, sa date et son total ; « Commande 1 sur 2 » dit qu’il y en a deux. Vignettes de 120 px de haut au bureau, 80 au téléphone, chargées à leur taille, dans une colonne fixe : les titres s’alignent.</p><span class="mq-ref">Étude S1, § 6.1 · jury v1 critères 2, 10 et 11</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Un récapitulatif sans doublon</b><p>Les deux paiements, dans leur ordre, puis « Total 500,00 € », livraison comprise, et la seule mention de TVA de la page ; sans cadre ni fond, collant au bureau.</p><span class="mq-ref">LEXIQUE § 2</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>L’enchaînement des deux paiements, annoncé</b><p>Coordonnées une fois, puis 305,00 € à Julien, puis 195,00 € à Sébastien, deux lignes sur le relevé ; les exemplaires réservés 35 minutes dès le premier « Payer ».</p><span class="mq-ref">Baymard (coût total, étapes annoncées) · étude S36</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Le pays, sans deviner</b><p>France par défaut ; un autre pays se choisit dans un repli, avec un bouton qui dit ce qu’il fait (« Recalculer la livraison »). Les zones non servies sont dites avant le choix.</p><span class="mq-ref">Étude S25, S28 · B&amp;S 5.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Un seul bouton plein par écran</b><p>« Commander les 2 tirages » : un lien vers la commande, aucun script. Ni compte, ni produit suggéré, ni case cochée d’avance. Au téléphone, le même bouton en haut et en bas, deux écrans plus loin.</p><span class="mq-ref">Étude S20, S26 · Baymard (achat sans compte)</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Le cookie dit en une phrase</b><p>Ce que garde le panier, combien de temps, et quand le cookie est posé.</p><span class="mq-ref">Étude S21 · RGPD (information sur les traceurs)</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Retirer se rattrape</b><p>« Retirer » envoie un formulaire ; la page revient entière, l’en-tête dit « Panier (1) », le message a le focus et propose « Le remettre dans le panier ». Une commande, un paiement.</p><span class="mq-ref">B&amp;S 3 · WCAG 4.1.3</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>L’édition s’épuise entre-temps</b><p>Le panier relit les prix et les stocks à chaque affichage (exemple : le panier de Claire, s’il avait aussi compté ce tirage) : la ligne épuisée reste visible, barrée, avec son message relié ; elle sort du total et du compte de l’en-tête, rien n’est débité.</p><span class="mq-ref">Étude S24 · UX-F-05</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>Panier vide</b><p>La page le dit et propose les tirages, avec leur nombre et leurs prix ; l’en-tête n’a plus de panier (plus de cookie), « Tirages » reste au menu.</p><span class="mq-ref">B&amp;S 1.1 Incitation</span></li>
+  </ol>
+  <p style="margin-top:24px"><b>Sans JavaScript :</b> « Retirer » et « Le remettre » sont des formulaires POST suivis d’un retour au panier ; le pays, un formulaire GET ; rien ne se met à jour tout seul. <b>Un exemplaire par ligne :</b> pas de liste de quantités pour une œuvre numérotée ; un second exemplaire s’ajoute depuis la page du tirage (deux au plus). <b>Côté code :</b> « Commander » ouvre une seule page de coordonnées ; le premier « Payer » crée les deux commandes (une par vendeur) et réserve les deux exemplaires dans la même transaction, puis ouvre la première session de paiement ; la seconde s’ouvre au second clic (étude S36, P3). <b>Composants de la planche</b> (<code>_commun/public.css</code>, § 25, montrés dans MQ-00) : .bloc-vendeur, .ligne, .sous-total, .recap, .suite. <b>Styles locaux</b>, construits avec les jetons : la mise en page, .p-haut (résumé du haut, une colonne seulement), la colonne et la hauteur des vignettes (120 et 80 px), et .e-plein pour les états en page entière. À verser à la planche : .p-haut, les vignettes de 120 px, et le bloc vendeur sans sa phrase répétée.</p>
+  <p style="margin-top:12px"><b>Passe 2 (jury v1)</b> : la phrase du vendeur dite une fois ; total et bouton en haut au téléphone ; vignettes plus grandes, en <code>srcset</code> 160 et 480 px avec un <code>sizes</code> par format ; titres des lignes en cibles de 44 px (planche, § 25) ; états en page entière, en-tête complet ; pied de page avant les états et l’encart ; cadres <code>inert</code> ; insécables.</p>
+  <p style="margin-top:12px"><b>Adresses</b> (lexique, § 2) : <code>/panier</code> (et <code>?pays=</code>), <code>POST /panier/retirer</code>, <code>POST /panier/remettre</code>, <code>/commande</code>, <code>/tirages</code>, <code>/tirages/&lt;slug&gt;</code>, <code>/conditions-de-vente</code>, <code>/livraison</code>, <code>/renoncer</code>, <code>/carnet</code>, <code>/galerie</code> et <code>/series</code> (à créer) ; <code>/a-propos</code>, <code>/recherche</code>, <code>/carte</code>, <code>/droits</code> et <code>/langue/:lang</code> existent.</p>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, passe 2 ; Chromium de Playwright 1.64 en conteneur ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, mq1315-focus.mjs, insecables.py) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7 · Débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête allemand : aucun · Annotations à 1 440, 412 et 320 px : rien à redire · Sans annotations : 0 pixel changé dans l’interface · Bouton « Commander les 2 tirages » : au bureau, de 810 à 858 px du haut (premier écran de 900 px) ; sur Pixel 7, de 337 à 385 px (premier écran de 839 px), puis de nouveau à 1 914 px, sous le récapitulatif (1 600 px environ en v1, une seule fois) · Clavier : 29 arrêts au bureau, 24 au téléphone, tous avec un contour de 2 px ; aucun dans les cadres d’état · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au téléphone (titres des lignes compris) · Images : vignettes à leur taille (horizontale de 180 px : fichier de 480 ; verticale de 80 px : 107 ; au téléphone, 120 et 53 px : 480 et 320) · Poids : 195 ko au bureau, 196 ko au téléphone ; aucun script.</p>
+</aside>
 </body>
 </html>

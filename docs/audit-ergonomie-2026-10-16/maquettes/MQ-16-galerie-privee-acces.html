@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="fr" class="theme-nicephos mode-nuit">
+<html lang="fr" class="theme-nicephos mode-nuit js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Galerie privée · Nicephos</title>
+<title>Galerie privée · Nicephos (maquette MQ-16)</title>
 <meta name="robots" content="noindex">
 <meta name="referrer" content="no-referrer">
 <link rel="stylesheet" href="_commun/site.css">
@@ -12,14 +12,15 @@
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
 /* MQ-16 : la page du lien d'une galerie privée (/g/<jeton>). Composants de la planche (_commun/public.css : en-tête Tunnel avec
-   la marque en texte, page d'accès .acces, mot de passe .mdp, formulaire, bascule, messages, pied réduit). Aucun jeton redéclaré. */
-.form .btn { justify-self: start; }
-@media (max-width: 767px) { .form .btn { justify-self: stretch; } }
-.note-donnees { padding-top: var(--esp-2); border-top: 1px solid var(--rule); }
+   la marque en texte, page d'accès .acces, mot de passe .mdp, formulaire, bascule .js-seul, messages, pied réduit). Aucun jeton
+   redéclaré. La page montre l'état avec script (class="js" sur <html>) ; le cadre 12 la montre sans (.sans-js). */
 .mq-ecran-in .form { gap: var(--esp-3); }
+.mq-ecran-in .form .btn { justify-self: start; }
+@media (max-width: 767px) { .mq-ecran-in .form .btn { justify-self: stretch; } }
+.mq-ecran-in .note-donnees { padding-top: var(--esp-2); border-top: 1px solid var(--rule); }
 .mq-ecran-in h2 { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); }
-.ecran-titre { margin: 0; font-size: var(--t-meta); color: var(--mute); }
-.ecran-titre code { font: 400 var(--t-meta)/1.4 var(--mono); color: var(--ink); }
+.mq-ecran-in .acces-t .titre-page { font-size: var(--t-titre-1); }
+.pv-p { margin: 0; color: var(--prose); }
 </style>
 </head>
 <body>
@@ -38,135 +39,18 @@
       <p class="etiquette">Sur invitation</p>
       <h1 class="titre-page"><span class="mq-pin" aria-hidden="true">2</span>Galerie privée</h1>
       <p class="chapo">Julien a préparé ces photos pour vous.</p>
-      <p class="echeance"><span class="mq-pin" aria-hidden="true">3</span>Accès valable jusqu’au <time datetime="2026-11-30">30 nov. 2026</time></p>
+      <p class="echeance"><span class="mq-pin" aria-hidden="true">3</span>Accès valable jusqu’au <time datetime="2026-11-30">30 nov. 2026</time></p>
     </div>
-    <form class="form" action="/g/Xq3…" method="post" novalidate>
-      <div class="champ"><span class="mq-pin" aria-hidden="true">4</span><label for="mdp">Mot de passe</label><p class="champ-aide" id="mdp-aide">Julien vous l’a donné à part, dans un autre message : 12 lettres et chiffres, en trois groupes. Majuscules, espaces et tirets ne comptent pas ; vous pouvez le coller.</p>
-        <div class="mdp mq-a"><span class="mq-pin d" aria-hidden="true">5</span><input id="mdp" class="is-focus" name="password" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" aria-describedby="mdp-aide">
-          <button class="bascule" type="button" aria-pressed="false" aria-controls="mdp"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg>Afficher<span class="sr-only"> le mot de passe</span></button></div>
+    <form class="form" action="/g/6Me5pScUZIQhW-wezlKchJ9h3k7EDpzm" method="post" novalidate>
+      <div class="champ"><span class="mq-pin" aria-hidden="true">4</span><label for="mdp">Mot de passe</label><p class="champ-aide" id="mdp-aide">Julien vous l’a donné à part, dans un autre message : 12 lettres et chiffres, en trois groupes. Majuscules, espaces et tirets ne comptent pas ; vous pouvez le coller.</p>
+        <div class="mdp mq-a"><span class="mq-pin" aria-hidden="true">5</span><input id="mdp" class="is-focus" name="password" type="password" autocomplete="current-password" spellcheck="false" aria-describedby="mdp-aide">
+          <button class="bascule js-seul" type="button" aria-pressed="false" aria-controls="mdp"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg>Afficher<span class="sr-only"> le mot de passe</span></button></div>
         </div>
       <label class="choix"><span class="mq-pin" aria-hidden="true">6</span><input type="checkbox" name="remember"><span>Se souvenir de cet appareil pendant 30 jours<span class="choix-d">Sinon, la galerie se referme après 12 h sans visite. À laisser décoché sur un ordinateur partagé.</span></span></label>
       <button class="btn" type="submit">Ouvrir la galerie</button>
-      <p class="secours"><span class="mq-pin" aria-hidden="true">7</span>Mot de passe perdu ? <a href="mailto:julien.exemple@example.org">Écrivez à Julien</a> : il vous en donnera un nouveau, et votre lien restera le même.</p>
-      <p class="note-donnees"><span class="mq-pin" aria-hidden="true">8</span>Cette galerie n’est visible que des personnes invitées. Nous notons vos visites et vos favoris, pour que Julien sache que les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Un cookie, nécessaire, garde la galerie ouverte sur ce navigateur. <a href="/confidentialite">Confidentialité</a></p>
+      <p class="secours"><span class="mq-pin" aria-hidden="true">7</span>Mot de passe perdu ? <a href="mailto:julien.exemple@example.org">Écrivez à Julien</a> : il vous en donnera un nouveau, et votre lien restera le même.</p>
+      <p class="note-donnees"><span class="mq-pin" aria-hidden="true">8</span>Cette galerie n’est visible que des personnes invitées. Nous notons vos visites et vos favoris, pour que Julien sache que les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Un cookie, nécessaire, garde la galerie ouverte sur ce navigateur. <a href="/confidentialite">Confidentialité</a></p>
     </form>
-  </div>
-  <div class="mq-etats mq-etats--grille">
-  <section class="mq-ecran mq-fond" aria-label="Mot de passe collé, puis affiché"><span class="mq-pin" aria-hidden="true">9</span><p class="mq-etat" aria-hidden="true">État · Mot de passe collé, puis affiché</p>
-    <header class="sh sh--tunnel">
-  <div class="sh-bar">
-    <span class="sh-marque">Nicephos</span>
-    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
-  </div>
-</header>
-    <div class="mq-ecran-in">
-      <form class="form" action="/g/Xq3…" method="post" novalidate>
-      <div class="champ"><label for="a-mdp">Mot de passe</label><p class="champ-aide" id="a-mdp-aide">Julien vous l’a donné à part, dans un autre message : 12 lettres et chiffres, en trois groupes. Majuscules, espaces et tirets ne comptent pas ; vous pouvez le coller.</p>
-        <div class="mdp mq-a"><input id="a-mdp" name="password" type="text" autocomplete="current-password" autocapitalize="none" spellcheck="false" aria-describedby="a-mdp-aide" value="k7qm p3xw 9tra">
-          <button class="bascule" type="button" aria-pressed="true" aria-controls="a-mdp"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg>Afficher<span class="sr-only"> le mot de passe</span></button></div>
-        </div>
-      <label class="choix"><input type="checkbox" name="remember"><span>Se souvenir de cet appareil pendant 30 jours<span class="choix-d">Sinon, la galerie se referme après 12 h sans visite. À laisser décoché sur un ordinateur partagé.</span></span></label>
-      <button class="btn" type="submit">Ouvrir la galerie</button>
-      <p class="secours">Mot de passe perdu ? <a href="mailto:julien.exemple@example.org">Écrivez à Julien</a> : il vous en donnera un nouveau, et votre lien restera le même.</p>
-      <p class="note-donnees">Cette galerie n’est visible que des personnes invitées. Nous notons vos visites et vos favoris, pour que Julien sache que les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Un cookie, nécessaire, garde la galerie ouverte sur ce navigateur. <a href="/confidentialite">Confidentialité</a></p>
-    </form>
-    </div>
-  </section><section class="mq-ecran mq-fond" aria-label="Mot de passe refusé (1er essai)"><span class="mq-pin" aria-hidden="true">10</span><p class="mq-etat" aria-hidden="true">État · Mot de passe refusé (1er essai)</p>
-    <header class="sh sh--tunnel">
-  <div class="sh-bar">
-    <span class="sh-marque">Nicephos</span>
-    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
-  </div>
-</header>
-    <div class="mq-ecran-in">
-      <form class="form" action="/g/Xq3…" method="post" novalidate>
-      <div class="champ"><label for="e-mdp">Mot de passe</label><p class="champ-aide" id="e-mdp-aide">Julien vous l’a donné à part, dans un autre message : 12 lettres et chiffres, en trois groupes. Majuscules, espaces et tirets ne comptent pas ; vous pouvez le coller.</p>
-        <div class="mdp mq-a"><input id="e-mdp" class="is-focus" name="password" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" aria-describedby="e-mdp-err e-mdp-aide" aria-invalid="true">
-          <button class="bascule" type="button" aria-pressed="false" aria-controls="e-mdp"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg>Afficher<span class="sr-only"> le mot de passe</span></button></div>
-        <p class="champ-err" id="e-mdp-err"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> ce mot de passe ne correspond pas. Vérifiez-le dans le message de Julien, puis saisissez-le de nouveau. Encore 4 essais avant une pause d’une minute.</span></p></div>
-      <label class="choix"><input type="checkbox" name="remember"><span>Se souvenir de cet appareil pendant 30 jours<span class="choix-d">Sinon, la galerie se referme après 12 h sans visite. À laisser décoché sur un ordinateur partagé.</span></span></label>
-      <button class="btn" type="submit">Ouvrir la galerie</button>
-      <p class="secours">Mot de passe perdu ? <a href="mailto:julien.exemple@example.org">Écrivez à Julien</a> : il vous en donnera un nouveau, et votre lien restera le même.</p>
-      <p class="note-donnees">Cette galerie n’est visible que des personnes invitées. Nous notons vos visites et vos favoris, pour que Julien sache que les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Un cookie, nécessaire, garde la galerie ouverte sur ce navigateur. <a href="/confidentialite">Confidentialité</a></p>
-    </form>
-    </div>
-  </section><section class="mq-ecran mq-fond" aria-label="Pause après 5 refus"><span class="mq-pin" aria-hidden="true">11</span><p class="mq-etat" aria-hidden="true">État · Pause après 5 refus</p>
-    <header class="sh sh--tunnel">
-  <div class="sh-bar">
-    <span class="sh-marque">Nicephos</span>
-    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
-  </div>
-</header>
-    <div class="mq-ecran-in">
-      <form class="form" action="/g/Xq3…" method="post" novalidate>
-      <div class="msg" role="status" id="p-pause"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg><p><b>Pause de sécurité après 5 essais refusés : réessayez à 13 h 58.</b> Les essais pendant la pause ne comptent pas ; après 10 refus, elle dure 15 minutes. Votre lien reste valable.</p></div><div class="champ"><label for="p-mdp">Mot de passe</label><p class="champ-aide" id="p-mdp-aide">Julien vous l’a donné à part, dans un autre message : 12 lettres et chiffres, en trois groupes. Majuscules, espaces et tirets ne comptent pas ; vous pouvez le coller.</p>
-        <div class="mdp mq-a"><input id="p-mdp" name="password" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" aria-describedby="p-pause p-mdp-aide">
-          <button class="bascule" type="button" aria-pressed="false" aria-controls="p-mdp"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg>Afficher<span class="sr-only"> le mot de passe</span></button></div>
-        </div>
-      <label class="choix"><input type="checkbox" name="remember"><span>Se souvenir de cet appareil pendant 30 jours<span class="choix-d">Sinon, la galerie se referme après 12 h sans visite. À laisser décoché sur un ordinateur partagé.</span></span></label>
-      <button class="btn" type="submit">Ouvrir la galerie</button>
-      <p class="secours">Mot de passe perdu ? <a href="mailto:julien.exemple@example.org">Écrivez à Julien</a> : il vous en donnera un nouveau, et votre lien restera le même.</p>
-      <p class="note-donnees">Cette galerie n’est visible que des personnes invitées. Nous notons vos visites et vos favoris, pour que Julien sache que les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Un cookie, nécessaire, garde la galerie ouverte sur ce navigateur. <a href="/confidentialite">Confidentialité</a></p>
-    </form>
-    </div>
-  </section>
-  <section class="mq-ecran mq-fond" aria-labelledby="de-t" lang="de"><span class="mq-pin" aria-hidden="true">15</span><p class="mq-etat" aria-hidden="true" lang="fr">État · Invitation rédigée en allemand</p>
-    <header class="sh sh--tunnel" lang="de">
-  <div class="sh-bar">
-    <span class="sh-marque">Nicephos</span>
-    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Private Galerie</span></p></div>
-  </div>
-</header>
-    <div class="mq-ecran-in">
-      <div class="acces-t">
-      <p class="etiquette">Auf Einladung</p>
-      <h2 class="titre-page" id="de-t">Private Galerie</h2>
-      <p class="chapo">Julien hat diese Fotos für Sie vorbereitet.</p>
-      <p class="echeance">Zugang gültig bis <time datetime="2026-11-30">30. Nov. 2026</time></p>
-    </div>
-      <form class="form" action="/g/Xq3…" method="post" novalidate lang="de">
-      <div class="champ"><label for="de-mdp">Passwort</label><p class="champ-aide" id="de-mdp-aide">Julien hat es Ihnen getrennt geschickt, in einer anderen Nachricht: 12 Buchstaben und Ziffern in drei Gruppen. Groß- und Kleinschreibung, Leerzeichen und Bindestriche zählen nicht; Sie können es einfügen.</p>
-        <div class="mdp mq-a"><input id="de-mdp" class="is-focus" name="password" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" aria-describedby="de-mdp-aide">
-          <button class="bascule" type="button" aria-pressed="false" aria-controls="de-mdp"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg>Anzeigen<span class="sr-only"> das Passwort</span></button></div>
-        </div>
-      <label class="choix"><input type="checkbox" name="remember"><span>Auf diesem Gerät 30 Tage angemeldet bleiben<span class="choix-d">Sonst schließt sich die Galerie nach 12 Stunden ohne Besuch. Auf einem gemeinsam genutzten Computer nicht ankreuzen.</span></span></label>
-      <button class="btn" type="submit">Galerie öffnen</button>
-      <p class="secours">Passwort verloren? <a href="mailto:julien.exemple@example.org">Schreiben Sie Julien</a>: Er gibt Ihnen ein neues, Ihr Link bleibt derselbe.</p>
-      <p class="note-donnees">Diese Galerie sehen nur eingeladene Personen. Wir speichern Ihre Besuche und Favoriten, damit Julien weiß, dass die Fotos angekommen sind; alles wird sechs Monate nach Ende des Zugangs gelöscht. Ein notwendiges Cookie hält die Galerie in diesem Browser geöffnet. <a href="/de/confidentialite">Datenschutz</a></p>
-    </form>
-    </div>
-  </section>
-  <section class="mq-ecran mq-fond" aria-label="Serveur occupé (503)"><span class="mq-pin" aria-hidden="true">12</span><p class="mq-etat" aria-hidden="true">État · Serveur occupé (503)</p>
-    <header class="sh sh--tunnel">
-  <div class="sh-bar">
-    <span class="sh-marque">Nicephos</span>
-    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
-  </div>
-</header>
-    <div class="mq-ecran-in">
-      <div class="msg" role="status"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg><p><b>Beaucoup de demandes en ce moment.</b> Réessayez dans quelques secondes : votre lien et votre mot de passe n’ont pas changé.</p></div>
-    </div>
-  </section><section class="mq-ecran mq-fond" aria-label="Accès suspendu après 30 refus"><span class="mq-pin" aria-hidden="true">13</span><p class="mq-etat" aria-hidden="true">État · Accès suspendu après 30 refus</p>
-    <header class="sh sh--tunnel">
-  <div class="sh-bar">
-    <span class="sh-marque">Nicephos</span>
-    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
-  </div>
-</header>
-    <div class="mq-ecran-in">
-      <h2>Accès suspendu</h2><div class="msg msg--erreur" role="alert"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><p><b>Erreur :</b> trop de mots de passe refusés ; par sécurité, cet accès est suspendu. Julien est prévenu : <a href="mailto:julien.exemple@example.org">écrivez-lui</a> pour le rouvrir.</p></div>
-    </div>
-  </section><section class="mq-ecran mq-fond" aria-label="Accès terminé (410), sans titre de galerie"><span class="mq-pin" aria-hidden="true">14</span><p class="mq-etat" aria-hidden="true">État · Accès terminé (410), sans titre de galerie</p>
-    <header class="sh sh--tunnel">
-  <div class="sh-bar">
-    <span class="sh-marque">Nicephos</span>
-    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
-  </div>
-</header>
-    <div class="mq-ecran-in">
-      <h2>Cet accès a pris fin le <time datetime="2026-09-30">30 sept. 2026</time>.</h2><p style="margin:0;color:var(--prose)">Les photos ne sont plus visibles avec ce lien. Sébastien peut vous ouvrir un nouvel accès.</p><p style="margin:0"><a class="btn btn--filet" href="mailto:sebastien.exemple@example.org">Écrire à Sébastien</a></p>
-    </div>
-  </section>
   </div>
 </main>
 <footer class="sf sf--reduit wrap">
@@ -179,33 +63,181 @@
   </div>
 </footer>
 
+<section class="wrap mq-etats mq-etats--grille" aria-labelledby="etats-t">
+  <h2 class="sr-only" id="etats-t">Autres états de la page, dans l’ordre de la journée de Lucie, puis les cas rares</h2>
+  <section class="mq-ecran mq-fond" inert aria-labelledby="et-refus"><p class="mq-etat" id="et-refus"><span class="mq-pin" aria-hidden="true">9</span>État · 13 h 49 : premier refus ; le champ est vidé et garde le focus</p>
+    <header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <span class="sh-marque">Nicephos</span>
+    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
+  </div>
+</header>
+    <div class="mq-ecran-in">
+      <form class="form" action="/g/6Me5pScUZIQhW-wezlKchJ9h3k7EDpzm" method="post" novalidate>
+      <div class="champ"><label for="e-mdp">Mot de passe</label><p class="champ-aide" id="e-mdp-aide">Julien vous l’a donné à part, dans un autre message : 12 lettres et chiffres, en trois groupes. Majuscules, espaces et tirets ne comptent pas ; vous pouvez le coller.</p>
+        <div class="mdp mq-a"><input id="e-mdp" class="is-focus" name="password" type="password" autocomplete="current-password" spellcheck="false" aria-describedby="e-mdp-err e-mdp-aide" aria-invalid="true">
+          <button class="bascule js-seul" type="button" aria-pressed="false" aria-controls="e-mdp"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg>Afficher<span class="sr-only"> le mot de passe</span></button></div>
+        <p class="champ-err" id="e-mdp-err"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> ce mot de passe ne correspond pas. Vérifiez-le dans le message de Julien, puis saisissez-le de nouveau. Encore 4 essais avant une pause d’une minute.</span></p></div>
+      <label class="choix"><input type="checkbox" name="remember"><span>Se souvenir de cet appareil pendant 30 jours<span class="choix-d">Sinon, la galerie se referme après 12 h sans visite. À laisser décoché sur un ordinateur partagé.</span></span></label>
+      <button class="btn" type="submit">Ouvrir la galerie</button>
+      <p class="secours">Mot de passe perdu ? <a href="mailto:julien.exemple@example.org">Écrivez à Julien</a> : il vous en donnera un nouveau, et votre lien restera le même.</p>
+      <p class="note-donnees">Cette galerie n’est visible que des personnes invitées. Nous notons vos visites et vos favoris, pour que Julien sache que les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Un cookie, nécessaire, garde la galerie ouverte sur ce navigateur. <a href="/confidentialite">Confidentialité</a></p>
+    </form>
+    </div>
+  </section>
+  <section class="mq-ecran mq-fond" inert aria-labelledby="et-pause"><p class="mq-etat" id="et-pause"><span class="mq-pin" aria-hidden="true">10</span>État · 13 h 57 : cinquième refus, une pause d’une minute</p>
+    <header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <span class="sh-marque">Nicephos</span>
+    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
+  </div>
+</header>
+    <div class="mq-ecran-in">
+      <form class="form" action="/g/6Me5pScUZIQhW-wezlKchJ9h3k7EDpzm" method="post" novalidate>
+      <div class="msg" role="status" id="p-pause"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg><p><b>Pause de sécurité après 5 essais refusés : réessayez à 13 h 58.</b> Les essais pendant la pause ne comptent pas ; après 10 refus, elle dure 15 minutes. Votre lien reste valable.</p></div><div class="champ"><label for="p-mdp">Mot de passe</label><p class="champ-aide" id="p-mdp-aide">Julien vous l’a donné à part, dans un autre message : 12 lettres et chiffres, en trois groupes. Majuscules, espaces et tirets ne comptent pas ; vous pouvez le coller.</p>
+        <div class="mdp mq-a"><input id="p-mdp" name="password" type="password" autocomplete="current-password" spellcheck="false" aria-describedby="p-pause p-mdp-aide">
+          <button class="bascule js-seul" type="button" aria-pressed="false" aria-controls="p-mdp"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg>Afficher<span class="sr-only"> le mot de passe</span></button></div>
+        </div>
+      <label class="choix"><input type="checkbox" name="remember"><span>Se souvenir de cet appareil pendant 30 jours<span class="choix-d">Sinon, la galerie se referme après 12 h sans visite. À laisser décoché sur un ordinateur partagé.</span></span></label>
+      <button class="btn" type="submit">Ouvrir la galerie</button>
+      <p class="secours">Mot de passe perdu ? <a href="mailto:julien.exemple@example.org">Écrivez à Julien</a> : il vous en donnera un nouveau, et votre lien restera le même.</p>
+      <p class="note-donnees">Cette galerie n’est visible que des personnes invitées. Nous notons vos visites et vos favoris, pour que Julien sache que les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Un cookie, nécessaire, garde la galerie ouverte sur ce navigateur. <a href="/confidentialite">Confidentialité</a></p>
+    </form>
+    </div>
+  </section>
+  <section class="mq-ecran mq-fond" inert aria-labelledby="et-colle"><p class="mq-etat" id="et-colle"><span class="mq-pin" aria-hidden="true">11</span>État · 14 h 05 : mot de passe collé depuis le SMS, puis affiché ; il est accepté</p>
+    <header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <span class="sh-marque">Nicephos</span>
+    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
+  </div>
+</header>
+    <div class="mq-ecran-in">
+      <form class="form" action="/g/6Me5pScUZIQhW-wezlKchJ9h3k7EDpzm" method="post" novalidate>
+      <div class="champ"><label for="a-mdp">Mot de passe</label><p class="champ-aide" id="a-mdp-aide">Julien vous l’a donné à part, dans un autre message : 12 lettres et chiffres, en trois groupes. Majuscules, espaces et tirets ne comptent pas ; vous pouvez le coller.</p>
+        <div class="mdp mq-a"><input id="a-mdp" name="password" type="text" autocomplete="current-password" autocapitalize="none" spellcheck="false" aria-describedby="a-mdp-aide" value="k7qm p3xw 9tra">
+          <button class="bascule js-seul" type="button" aria-pressed="true" aria-controls="a-mdp"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg>Afficher<span class="sr-only"> le mot de passe</span></button></div>
+        </div>
+      <label class="choix"><input type="checkbox" name="remember"><span>Se souvenir de cet appareil pendant 30 jours<span class="choix-d">Sinon, la galerie se referme après 12 h sans visite. À laisser décoché sur un ordinateur partagé.</span></span></label>
+      <button class="btn" type="submit">Ouvrir la galerie</button>
+      <p class="secours">Mot de passe perdu ? <a href="mailto:julien.exemple@example.org">Écrivez à Julien</a> : il vous en donnera un nouveau, et votre lien restera le même.</p>
+      <p class="note-donnees">Cette galerie n’est visible que des personnes invitées. Nous notons vos visites et vos favoris, pour que Julien sache que les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Un cookie, nécessaire, garde la galerie ouverte sur ce navigateur. <a href="/confidentialite">Confidentialité</a></p>
+    </form>
+    </div>
+  </section>
+  <section class="mq-ecran mq-fond sans-js" inert aria-labelledby="et-sansjs"><p class="mq-etat" id="et-sansjs"><span class="mq-pin" aria-hidden="true">12</span>État · Sans JavaScript : pas de bouton « Afficher », le reste ne change pas</p>
+    <header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <span class="sh-marque">Nicephos</span>
+    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
+  </div>
+</header>
+    <div class="mq-ecran-in">
+      <form class="form" action="/g/6Me5pScUZIQhW-wezlKchJ9h3k7EDpzm" method="post" novalidate>
+      <div class="champ"><label for="s-mdp">Mot de passe</label><p class="champ-aide" id="s-mdp-aide">Julien vous l’a donné à part, dans un autre message : 12 lettres et chiffres, en trois groupes. Majuscules, espaces et tirets ne comptent pas ; vous pouvez le coller.</p>
+        <div class="mdp mq-a"><input id="s-mdp" name="password" type="password" autocomplete="current-password" spellcheck="false" aria-describedby="s-mdp-aide">
+          <button class="bascule js-seul" type="button" aria-pressed="false" aria-controls="s-mdp"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg>Afficher<span class="sr-only"> le mot de passe</span></button></div>
+        </div>
+      <label class="choix"><input type="checkbox" name="remember"><span>Se souvenir de cet appareil pendant 30 jours<span class="choix-d">Sinon, la galerie se referme après 12 h sans visite. À laisser décoché sur un ordinateur partagé.</span></span></label>
+      <button class="btn" type="submit">Ouvrir la galerie</button>
+      <p class="secours">Mot de passe perdu ? <a href="mailto:julien.exemple@example.org">Écrivez à Julien</a> : il vous en donnera un nouveau, et votre lien restera le même.</p>
+      <p class="note-donnees">Cette galerie n’est visible que des personnes invitées. Nous notons vos visites et vos favoris, pour que Julien sache que les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Un cookie, nécessaire, garde la galerie ouverte sur ce navigateur. <a href="/confidentialite">Confidentialité</a></p>
+    </form>
+    </div>
+  </section>
+  <section class="mq-ecran mq-fond" inert aria-labelledby="et-de" lang="de"><p class="mq-etat" id="et-de" lang="fr"><span class="mq-pin" aria-hidden="true">13</span>État · Invitation rédigée en allemand : la page parle sa langue</p>
+    <header class="sh sh--tunnel" lang="de">
+  <div class="sh-bar">
+    <span class="sh-marque">Nicephos</span>
+    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Private Galerie</span></p></div>
+  </div>
+</header>
+    <div class="mq-ecran-in">
+      <div class="acces-t">
+        <p class="etiquette">Auf Einladung</p>
+        <h2 class="titre-page">Private Galerie</h2>
+        <p class="chapo">Julien hat diese Fotos für Sie vorbereitet.</p>
+        <p class="echeance">Zugang gültig bis <time datetime="2026-11-30">30. Nov. 2026</time></p>
+      </div>
+      <form class="form" action="/g/6Me5pScUZIQhW-wezlKchJ9h3k7EDpzm" method="post" novalidate lang="de">
+      <div class="champ"><label for="de-mdp">Passwort</label><p class="champ-aide" id="de-mdp-aide">Julien hat es Ihnen getrennt geschickt, in einer anderen Nachricht: 12 Buchstaben und Ziffern in drei Gruppen. Groß- und Kleinschreibung, Leerzeichen und Bindestriche zählen nicht; Sie können es einfügen.</p>
+        <div class="mdp mq-a"><input id="de-mdp" class="is-focus" name="password" type="password" autocomplete="current-password" spellcheck="false" aria-describedby="de-mdp-aide">
+          <button class="bascule js-seul" type="button" aria-pressed="false" aria-controls="de-mdp"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg><span class="sr-only">Passwort </span>Anzeigen</button></div>
+        </div>
+      <label class="choix"><input type="checkbox" name="remember"><span>Auf diesem Gerät 30 Tage angemeldet bleiben<span class="choix-d">Sonst schließt sich die Galerie nach 12 Stunden ohne Besuch. Auf einem gemeinsam genutzten Computer nicht ankreuzen.</span></span></label>
+      <button class="btn" type="submit">Galerie öffnen</button>
+      <p class="secours">Passwort verloren? <a href="mailto:julien.exemple@example.org">Schreiben Sie Julien</a>: Er gibt Ihnen ein neues, Ihr Link bleibt derselbe.</p>
+      <p class="note-donnees">Diese Galerie sehen nur eingeladene Personen. Wir speichern Ihre Besuche und Favoriten, damit Julien weiß, dass die Fotos angekommen sind; alles wird sechs Monate nach Ende des Zugangs gelöscht. Ein notwendiges Cookie hält die Galerie in diesem Browser geöffnet. <a href="/de/confidentialite">Datenschutz</a></p>
+    </form>
+    </div>
+  </section>
+  <section class="mq-ecran mq-fond" inert aria-labelledby="et-503"><p class="mq-etat" id="et-503"><span class="mq-pin" aria-hidden="true">14</span>État · Serveur occupé (503)</p>
+    <header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <span class="sh-marque">Nicephos</span>
+    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
+  </div>
+</header>
+    <div class="mq-ecran-in">
+      <h2>Un instant</h2>
+      <div class="msg" role="status"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg><p><b>Beaucoup de demandes en ce moment.</b> Réessayez dans quelques secondes : votre lien et votre mot de passe n’ont pas changé.</p></div>
+    </div>
+  </section>
+  <section class="mq-ecran mq-fond" inert aria-labelledby="et-30"><p class="mq-etat" id="et-30"><span class="mq-pin" aria-hidden="true">15</span>État · Accès suspendu après 30 refus</p>
+    <header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <span class="sh-marque">Nicephos</span>
+    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
+  </div>
+</header>
+    <div class="mq-ecran-in">
+      <h2>Accès suspendu</h2>
+      <div class="msg msg--erreur" role="alert"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><p><b>Erreur :</b> trop de mots de passe refusés ; par sécurité, cet accès est suspendu. Julien est prévenu : <a href="mailto:julien.exemple@example.org">écrivez-lui</a> pour le rouvrir.</p></div>
+    </div>
+  </section>
+  <section class="mq-ecran mq-fond" inert aria-labelledby="et-410"><p class="mq-etat" id="et-410"><span class="mq-pin" aria-hidden="true">16</span>État · Accès terminé (410), sans titre de galerie</p>
+    <header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <span class="sh-marque">Nicephos</span>
+    <div class="sh-outils"><p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Galerie privée</span></p></div>
+  </div>
+</header>
+    <div class="mq-ecran-in">
+      <h2>Cet accès a pris fin le <time datetime="2026-09-30">30 sept. 2026</time>.</h2>
+      <p class="pv-p">Les photos ne sont plus visibles avec ce lien. Sébastien peut vous ouvrir un nouvel accès.</p>
+      <p class="pv-p"><a class="btn btn--filet" href="mailto:sebastien.exemple@example.org">Écrire à Sébastien</a></p>
+    </div>
+  </section>
+</section>
+
 <aside class="mq-notes" aria-labelledby="mq-t">
-  <p class="mq-id">MQ-16 · site public · /g/&lt;jeton&gt; : la page du lien d’une galerie privée, avant le mot de passe · thème Nicephos nuit (production) · état principal : Lucie Exemple ouvre le lien reçu de Julien pour « Lisbonne et Porto, planche de travail » (accès jusqu’au 30 nov. 2026)</p>
+  <p class="mq-id">MQ-16 · site public · /g/6Me5pScUZIQhW-wezlKchJ9h3k7EDpzm : la page du lien d’une galerie privée, avant le mot de passe · thème Nicephos nuit (production), avec script · état principal : vendredi 16 oct. 2026, 13 h 49, Lucie Exemple ouvre le lien reçu de Julien pour « Lisbonne et Porto, planche de travail » (accès jusqu’au 30 nov. 2026) ; à 11 h 31, l’antivirus de sa messagerie l’avait déjà ouvert, sans rien compter</p>
   <h2 id="mq-t">Ce qui change</h2>
-  <p class="mq-lead">Une page neutre, conforme à l’annexe de sécurité (<code>docs/etudes/annexe-galeries-privees-securite.md</code>) : elle ne révèle rien de la galerie à qui n’a que le lien, mais dit à l’invité qui l’attend, jusqu’à quand, où trouver le mot de passe et qui appeler. Une photographe y lira un carton d’invitation plutôt qu’une page de banque.</p>
+  <p class="mq-lead">Une page neutre, conforme à l’annexe de sécurité (<code>docs/etudes/annexe-galeries-privees-securite.md</code>) : elle ne révèle rien de la galerie à qui n’a que le lien, mais dit à l’invité qui l’attend, jusqu’à quand, où trouver le mot de passe et qui appeler. Une photographe y lira un carton d’invitation plutôt qu’une page de banque. Les états suivent la journée de Lucie (lexique, § 4.9) : cinq refus de 13 h 49 à 13 h 57, une pause, puis l’entrée à 14 h 05 (la suite est dans MQ-17).</p>
   <ol class="mq-reperes">
-    <li><span class="mq-num" aria-hidden="true">1</span><b>Une page à part, sans sortie</b><p>En-tête Tunnel réduit à la marque (en texte, sans lien) et à « Galerie privée » ; ni menu, ni recherche, ni sélecteur <code>/langue/</code> (il mettrait le jeton dans le journal, G37) ; aucun lien vers un autre site (G34). <code>noindex</code>, <code>no-referrer</code>, <code>no-store</code> (G32).</p><span class="mq-ref">UX-T-16 · UX-T-18 · annexe G32, G33, G34, G37 · M5, M7, M14</span></li>
-    <li><span class="mq-num" aria-hidden="true">2</span><b>Neutre jusqu’au mot de passe</b><p>Titre d’onglet « Galerie privée · Nicephos », ni titre de galerie, ni nom de l’invité, ni photo, ni Open Graph (G33) : un aperçu de lien dans une messagerie ne montre rien. Le seul nom écrit est celui du photographe, à qui écrire (G23). Le vide est assumé : la typographie fait l’invitation.</p><span class="mq-ref">Annexe G33, M1, M13 · jury v0 : « page de banque », nom de l’invitée affiché</span></li>
-    <li><span class="mq-num" aria-hidden="true">3</span><b>L’échéance avant d’entrer</b><p>« Accès valable jusqu’au 30 nov. 2026 », dans une balise <code>time</code> ; la même date figure dans l’invitation.</p><span class="mq-ref">UX-T-18 · WCAG 2.2.1 · Opquast 172 · annexe G8</span></li>
-    <li><span class="mq-num" aria-hidden="true">4</span><b>Où trouver le mot de passe, et la tolérance</b><p>Libellé visible, aide reliée : un autre message, 12 caractères en trois groupes ; casse, espaces et tirets ignorés (G15) ; collage permis, <code>autocomplete="current-password"</code>, aucun CAPTCHA ni test cognitif.</p><span class="mq-ref">WCAG 3.3.8 · RGAA 11.1, 11.2, 11.13 · annexe G14, G15</span></li>
-    <li><span class="mq-num" aria-hidden="true">5</span><b>« Afficher », une vraie bascule</b><p>Bascule de la planche (<code>aria-pressed</code>, œil plein et fond encre quand elle est enfoncée) ; sans script, l’attribut <code>hidden</code> n’est pas retiré et le champ reste masqué.</p><span class="mq-ref">Opquast 76 · RGAA 7.1 · jury v0 : bouton rempli de sable</span></li>
-    <li><span class="mq-num" aria-hidden="true">6</span><b>Se souvenir, décoché par défaut</b><p>12 h sans visite et 7 jours au plus ; 30 jours si la case est cochée ; jamais au-delà de l’échéance (G26). L’aide dit quand la laisser vide.</p><span class="mq-ref">Annexe G26, § 3.4 · B&amp;S 3</span></li>
-    <li><span class="mq-num" aria-hidden="true">7</span><b>Une issue humaine</b><p>Pas de récupération automatique (G23) : un nom et une adresse ; « Nouveau mot de passe » garde le lien (G10).</p><span class="mq-ref">Nielsen 9 · annexe G10, G23</span></li>
-    <li><span class="mq-num" aria-hidden="true">8</span><b>Ce qui est noté, dit avant d’entrer</b><p>Visites, favoris, durée de conservation et cookie, en trois phrases, avec le lien Confidentialité.</p><span class="mq-ref">RGPD art. 13 · annexe G72, G75</span></li>
-    <li><span class="mq-num" aria-hidden="true">9</span><b>Collé, puis affiché</b><p>L’invité vérifie ce qu’il a collé ; la casse et les espaces n’y changent rien.</p><span class="mq-ref">WCAG 3.3.8 · annexe G15</span></li>
-    <li><span class="mq-num" aria-hidden="true">10</span><b>Un refus, relié au champ</b><p>Titre d’onglet « Erreur — … », message sous le champ, essais restants (G21) ; le champ est vidé (on ne renvoie jamais un mot de passe dans la page) et reçoit le focus. Le lien étant valide, le message parle du seul mot de passe.</p><span class="mq-ref">UX-F-05 · RGAA 11.10, 8.6 · WCAG 3.3.1, 3.3.3 · annexe G19, G21</span></li>
-    <li><span class="mq-num" aria-hidden="true">11</span><b>Une pause d’une minute, pas une heure</b><p>Après 5 refus, l’heure de reprise en clair ; les essais pendant la pause ne comptent pas ; seuls les vrais refus comptent (le simple GET du lien, ouvert par un antivirus, ne compte rien, G12).</p><span class="mq-ref">UX-F-27 · WCAG 2.2.1 · annexe G12, G19</span></li>
-    <li><span class="mq-num" aria-hidden="true">12</span><b>Serveur occupé</b><p>Au-delà de 2 calculs de mot de passe à la fois et d’une file de 10, le serveur répond 503 : la page le dit sans parler d’erreur de l’invité.</p><span class="mq-ref">Annexe G18, M16</span></li>
-    <li><span class="mq-num" aria-hidden="true">13</span><b>Suspendu après 30 refus</b><p>Plus de champ : la raison, le fait que Julien est prévenu, et comment rouvrir.</p><span class="mq-ref">Annexe G19 · § 3.3</span></li>
-    <li><span class="mq-num" aria-hidden="true">14</span><b>Accès terminé : 410, et qui écrire</b><p>Exemple réel du référentiel : la galerie « Angers, juin 2026 » de Marc Exemple, expirée le 30 sept. 2026. Ni titre de galerie, ni photo ; le contact de Sébastien (G11). Un jeton inconnu ou mal formé donne la 404 ordinaire, identique à toute page absente.</p><span class="mq-ref">Annexe G11, T2, T3 · Opquast 172</span></li>
-    <li><span class="mq-num" aria-hidden="true">15</span><b>Dans la langue de l’invitation</b><p>Sans sélecteur, la page parle la langue choisie à l’envoi (<code>space_invites.lang</code>) ; libellés allemands plus longs tenus à 400 px (« Auf diesem Gerät 30 Tage angemeldet bleiben »).</p><span class="mq-ref">Annexe G37 · jury v0 : pas d’état allemand</span></li>
+    <li><span class="mq-num" aria-hidden="true">1</span><b>Une page à part, sans sortie</b><p>En-tête Tunnel réduit à la marque (en texte, sans lien) et à « Galerie privée » ; ni menu, ni recherche, ni sélecteur <code>/langue/:lang</code> (il mettrait le jeton dans le journal, G37) ; aucun lien vers un autre site (G34). <code>noindex</code>, <code>no-referrer</code>, <code>no-store</code> (G32). Adresse <code>/g/:jeton</code> (à créer).</p><span class="mq-ref">UX-T-16 · UX-T-18 · annexe G32, G33, G34, G37 · M5, M7, M14</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>Neutre jusqu’au mot de passe</b><p>Titre d’onglet « Galerie privée · Nicephos », ni titre de galerie, ni nom de l’invité, ni photo, ni Open Graph (G33) : un aperçu de lien dans une messagerie ne montre rien. Le seul nom écrit est celui du photographe, à qui écrire (G23). Le vide est assumé : la typographie fait l’invitation.</p><span class="mq-ref">Annexe G33, M1, M13 · jury v0 : « page de banque », nom de l’invitée affiché</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>L’échéance avant d’entrer</b><p>« Accès valable jusqu’au 30 nov. 2026 », dans une balise <code>time</code> ; la même date figure dans l’invitation.</p><span class="mq-ref">UX-T-18 · WCAG 2.2.1 · Opquast 172 · annexe G8</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Où trouver le mot de passe, et la tolérance</b><p>Libellé visible, aide reliée : un autre message, 12 caractères en trois groupes ; casse, espaces et tirets ignorés (G15) ; collage permis, <code>autocomplete="current-password"</code>, aucun CAPTCHA ni test cognitif. Formulaire à un seul champ : pas de phrase d’obligation (règle de la planche).</p><span class="mq-ref">WCAG 3.3.8 · RGAA 11.1, 11.2, 11.13 · annexe G14, G15</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>« Afficher », une vraie bascule, et seulement avec script</b><p>Bascule de la planche (<code>aria-pressed</code>, œil plein et fond encre quand elle est enfoncée). Elle est <code>.js-seul</code> : sans script, elle n’apparaît pas, et le champ reste un champ de mot de passe ordinaire (cadre 12).</p><span class="mq-ref">Opquast 76 · RGAA 7.1 · planche, § 0 (.js-seul)</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Se souvenir, décoché par défaut</b><p>12 h sans visite et 7 jours au plus ; 30 jours si la case est cochée ; jamais au-delà de l’échéance (G26). L’aide dit quand la laisser vide.</p><span class="mq-ref">Annexe G26, § 3.4 · B&amp;S 3</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Une issue humaine</b><p>Pas de récupération automatique (G23) : un nom et une adresse ; un nouveau mot de passe garde le lien (G10).</p><span class="mq-ref">Nielsen 9 · annexe G10, G23</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Ce qui est noté, dit avant d’entrer</b><p>Visites, favoris, durée de conservation et cookie, en trois phrases, avec le lien Confidentialité.</p><span class="mq-ref">RGPD art. 13 · annexe G72, G75</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>13 h 49 : un refus, relié au champ</b><p>Titre d’onglet « Erreur : mot de passe refusé · Galerie privée · Nicephos », message sous le champ, essais restants (G21) ; le champ est vidé (on ne renvoie jamais un mot de passe dans la page) et garde le focus : le filet rouge et l’anneau de focus se voient ensemble. Le lien étant valide, le message parle du seul mot de passe.</p><span class="mq-ref">UX-F-05 · RGAA 11.10, 8.6 · WCAG 3.3.1, 3.3.3, 2.4.7 · annexe G19, G21</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>13 h 57 : une pause d’une minute, pas une heure</b><p>Après 5 refus, l’heure de reprise en clair, reliée au champ ; les essais pendant la pause ne comptent pas ; seuls les vrais refus comptent (le simple GET du lien, ouvert à 11 h 31 par l’antivirus, ne compte rien, G12).</p><span class="mq-ref">UX-F-27 · WCAG 2.2.1 · annexe G12, G19</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>14 h 05 : collé, puis affiché</b><p>Lucie colle le mot de passe du SMS et le vérifie ; la casse et les espaces n’y changent rien. Il est accepté : la galerie s’ouvre (MQ-17).</p><span class="mq-ref">WCAG 3.3.8 · annexe G15</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>Sans script</b><p>Le même formulaire, sans « Afficher » : la page ne promet rien qu’elle ne peut tenir.</p><span class="mq-ref">B&amp;S 4 · RGESN 6.1 · planche, § 0</span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>Dans la langue de l’invitation</b><p>Sans sélecteur, la page parle la langue choisie à l’envoi (<code>space_invites.lang</code>) ; libellés allemands plus longs tenus à 320 px (« Auf diesem Gerät 30 Tage angemeldet bleiben »).</p><span class="mq-ref">Annexe G37 · jury v0 : pas d’état allemand</span></li>
+    <li><span class="mq-num" aria-hidden="true">14</span><b>Serveur occupé</b><p>Au-delà de 2 calculs de mot de passe à la fois et d’une file de 10, le serveur répond 503 : la page le dit sans parler d’erreur de l’invité.</p><span class="mq-ref">Annexe G18, M16</span></li>
+    <li><span class="mq-num" aria-hidden="true">15</span><b>Suspendu après 30 refus</b><p>Plus de champ : la raison, le fait que Julien est prévenu, et comment rouvrir.</p><span class="mq-ref">Annexe G19 · § 3.3</span></li>
+    <li><span class="mq-num" aria-hidden="true">16</span><b>Accès terminé : 410, et qui écrire</b><p>Exemple du référentiel : la galerie « Angers, juin 2026 » de Marc Exemple, expirée le 30 sept. 2026. Ni titre de galerie, ni photo ; le contact de Sébastien (G11). Un jeton inconnu ou mal formé donne la 404 ordinaire, identique à toute page absente.</p><span class="mq-ref">Annexe G11, T2, T3 · Opquast 172</span></li>
   </ol>
   <h3>Composants de la planche</h3>
-  <p>Sur <code>/g/</code>, l’annexe de sécurité interdit le sélecteur <code>/langue/?vers=</code> et demande une page sans issue : la planche prévoit pour cela l’en-tête Tunnel sans langue ni retour, la marque en texte et « Galerie privée » (<code>_commun/public.css</code>, § 23). Formulaire à un seul champ : pas de phrase d’obligation, le champ suffit (règle de la planche, section Formulaires). Composants, tous dans <code>_commun/public.css</code> et montrés dans MQ-00 : <b>accès</b> (<code>.acces</code>, § 23 : titre d’affiche à gauche, formulaire à droite), <b>mot de passe</b> (<code>.mdp</code>, § 22 : champ et bascule « Afficher » sur une ligne), <b>sans mot de passe</b> (<code>.secours</code>, § 23).</p>
+  <p>Sur <code>/g/</code>, l’annexe de sécurité interdit le sélecteur <code>/langue/:lang</code> et demande une page sans issue : la planche prévoit pour cela l’en-tête Tunnel sans langue ni retour, la marque en texte et « Galerie privée » (<code>_commun/public.css</code>, § 23). Composants, tous dans <code>_commun/public.css</code> et montrés dans MQ-00 : <b>accès</b> (<code>.acces</code>, § 23 : titre d’affiche à gauche, formulaire à droite), <b>mot de passe</b> (<code>.mdp</code>, § 22 : champ et bascule « Afficher » sur une ligne), <b>sans mot de passe</b> (<code>.secours</code>, § 23), <b>commande à script</b> (<code>.js-seul</code>, § 0).</p>
   <h3>À confirmer (annexe, § 9)</h3>
-  <p>Un champ « nom d’utilisateur » caché, pour que les gestionnaires de mots de passe distinguent plusieurs galeries (point 9) : s’il est retenu, sa valeur ne doit pas être le titre de la galerie (G33).</p>
+  <p>Un champ « nom d’utilisateur » caché, pour que les gestionnaires de mots de passe distinguent plusieurs galeries (point 9) : s’il est retenu, sa valeur ne doit pas être le titre de la galerie (G33).</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium 1.64 en conteneur, outils/inspect.sh) · axe-core : 0 violation au bureau (1 440 × 900) et au téléphone (Pixel 7) · Poids : 179 ko et 10 requêtes (page 32 ko, feuilles de style 93 ko, polices 59 ko) ; aucune image, aucun script dans la maquette (en production, 0,3 ko pour « Afficher »), rien de tiers, aucune balise Open Graph, <code>noindex</code> et <code>no-referrer</code> · Largeurs 320 à 1 440 px : 0 débordement · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au téléphone ; champ et bouton de 48 px · Contrastes sur #0b0b0b : texte 17,1:1, aides 7,4:1, erreur 8,2:1, bord du champ 3,8:1 · Sans annotations : 15 pastilles et 7 étiquettes retirées, 0 pixel changé ailleurs.</p>
+  <p class="mq-mesures"><b>Mesures</b> (passe 2, 16 oct. 2026, Chromium 1.64 en conteneur ; outils/consol-final.mjs, controle-annotations.mjs, consol-sans.py, insecables.py, et le controle.mjs du jury v1) · axe-core : 0 violation au bureau (1 440 × 900) et sur Pixel 7 · Poids : 239 ko et 10 requêtes (page 34 ko, 4 feuilles de style 146 ko, 5 polices 59 ko) ; aucune image ; aucun script dans la maquette (en production, 0,3 ko pour « Afficher », qui disparaît sans lui) ; rien de tiers, aucune balise Open Graph, <code>noindex</code> et <code>no-referrer</code> · Largeurs 320 à 1 440 px : 0 débordement, 0 texte coupé ; l’aide ne commence jamais une ligne par « : » · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au téléphone ; champ et bouton de 48 px · Focus : visible, y compris sur le champ refusé (filet rouge et anneau ensemble) · html-validate : 0 erreur hors règles de style · Contrastes sur #0b0b0b : texte 17,1:1, aides 7,4:1, erreur 8,2:1, bord du champ 3,8:1 · Annotations : controle-annotations.mjs « rien à redire » à 1 440, 412 et 320 px (pastilles dans l’écran, hors des photos et des textes ; étiquettes entières ; cadres inert ; pied de page avant l’encart) ; sans annotations, 0 élément déplacé, 0 pixel changé hors des pastilles · Ponctuation : insecables.py, 0 espace à remplacer.</p>
 </aside>
 
 </body>

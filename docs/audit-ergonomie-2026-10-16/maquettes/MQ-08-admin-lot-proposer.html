@@ -1,33 +1,39 @@
 <!doctype html>
-<html lang="fr" data-theme="light">
+<html lang="fr" data-theme="light" class="js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="light">
-<title>MQ-08 — Admin : compléter et proposer un lot — Nicephos</title>
-<meta name="description" content="Maquette de l’administration de Nicephos : compléter les trois photos d’un import et les proposer à la publication, sans titre provisoire ni date refusée.">
+<title>Compléter et proposer · Nicephos (maquette MQ-08)</title>
+<meta name="description" content="Maquette de l’administration de Nicephos : compléter les trois photos d’un import et les proposer à la publication, sans titre provisoire ni date refusée.">
 <link rel="stylesheet" href="_commun/admin.css">
 <link rel="stylesheet" href="_commun/tokens.css">
 <link rel="stylesheet" href="_commun/admin-plus.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* MQ-08, locaux (propres au lot ; le reste est dans admin-plus.css, voir l'encart) :
-   L1 étapes compactes au téléphone · L2 barre « Pour les photos cochées » · L3 lot, une ligne par photo nommée par sa vignette
-   · L4 dialogue de proposition · L5 liste des villes · L6 page refusée. Aucun jeton redéclaré. */
+/* MQ-08, locaux (propres au lot ; le reste est dans admin-plus.css, voir l'encart). Aucun jeton redéclaré.
+   L0 commandes à script (.js-seul, la classe de public.css ; proposée pour la planche) · L1 étapes compactes au téléphone
+   · L2 barre « Pour les photos cochées » (repliée au téléphone, comme main : .bulk-toggle) · L3 lot, une ligne par photo
+   nommée par sa vignette, erreur sur toute la largeur · L4 dialogue de proposition · L5 liste des villes · L6 page refusée. */
+html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
+/* Texte lu seulement : clip-path en plus du clip d'admin.css (la forme actuelle de la règle, celle de public.css). */
+.sr-only { clip-path: inset(50%); }
+/* Contenu d’un <details> fermé : rien à mettre en page (le navigateur ne le montre pas ; ainsi, aucune mesure ne le trouve). */
+.admin details:not([open]) > :not(summary) { display: none !important; }
 .steps .et-sur { display: none; }
 @media (max-width: 720px) { .steps { flex-direction: row; } .steps li.done { display: none; } .steps .et-sur { display: inline; } .steps li .n { display: none; } }
-.flash .btn { margin-left: 8px; }
 .flash p { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
 .flash .more { display: inline-flex; align-items: center; min-height: 24px; }
 @media (max-width: 720px), (pointer: coarse) { .flash .more { min-height: 44px; } }
 .bulk-l { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 14px; }
-.bulk-l .champ-a { min-width: 200px; }
-@media (max-width: 720px) { .bulk-l .champ-a { min-width: 0; flex: 1 1 100%; } }
+.bulk-l .bulk-groups .champ-a { min-width: 200px; }
 .bulk-l .champ-a > label { font-size: 12.5px; }
 .bulk-l strong { align-self: center; font-weight: 500; }
 .bulk-l .hint { flex-basis: 100%; margin: 0; color: var(--ink2); }
+@media (max-width: 720px) { .bulk-l .bulk-groups .champ-a { min-width: 0; flex: 1 1 100%; } .bulk-l .bulk-groups { display: grid; gap: 10px; flex-basis: 100%; } .bulk-l .bulk-toggle { justify-content: space-between; } }
 .main:not(.wide) .bulk.bulk-l { align-items: end; }
+.filtre-lot { margin: 0 0 12px; }
 .lot { table-layout: fixed; }
 .lot td, .lot th { vertical-align: top; }
 .lot thead th { vertical-align: bottom; }
@@ -35,17 +41,24 @@
 .lot .c-thumb img { width: 96px; height: 64px; object-fit: cover; border-radius: 5px; display: block; }
 .lot .fic { display: block; margin-top: 6px; font: 400 12px var(--mono); color: var(--ink2); }
 .lot .cell { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
-.lot .sugg { white-space: normal; justify-self: start; text-align: left; padding-block: 4px; }
+.lot .sugg { justify-self: start; }
 .lot .cell p { margin: 0; }
+.lot .cell > .att { justify-self: start; }
+/* Barre « Pour les cochées » montrée dans un cadre d’état (hors de .main) : le même dessin. */
+.ecran-a .bulk { padding: 10px 14px; margin: 0 0 16px; border-radius: 12px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2); }
 .lot .lu { font-size: 12px; }
 .lot .etat-c { display: grid; gap: 6px; justify-items: start; }
-.lot .etat-c .enreg { font-size: 12px; }
+.lot .etat-c .enreg { font-size: 12px; white-space: nowrap; }
 .lot .tr > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; color: var(--ink2); font-size: 12.5px; cursor: pointer; list-style: none; }
 .lot .tr > summary::-webkit-details-marker { display: none; }
 .lot .tr[open] > summary .ic { transform: rotate(90deg); }
 .lot .tr .cell { margin-top: 4px; }
 .lot .tr label { font-size: 12px; }
-.col-chk { width: 44px; } .col-photo { width: 124px; } .col-titre { width: 25%; } .col-serie { width: 15%; } .col-ville { width: 15%; } .col-date { width: 17%; } .col-etat { width: 136px; }
+/* Une erreur prend toute la largeur de la ligne, sous elle : plus de message de quatre lignes dans une demi-colonne. */
+.lot tr.a-erreur > td, .lot tr.a-erreur > th { border-bottom: 0; }
+.lot tr.err-ligne td { padding: 0 10px 12px 178px; }
+.lot tr.err-ligne .err { margin: 0; }
+.col-chk { width: 44px; } .col-photo { width: 124px; } .col-titre { width: 26%; } .col-serie { width: 16%; } .col-ville { width: 15%; } .col-date { width: 15%; } .col-etat { width: 168px; }
 @media (max-width: 720px), (pointer: coarse) { .lot .tr > summary { min-height: 44px; } }
 @media (max-width: 720px) {
   .lot { table-layout: auto; }
@@ -53,6 +66,9 @@
   .lot .c-thumb img { width: 96px; height: 64px; }
   .lot td[data-label]::before { content: none; }
   .lot th, .lot td { border: 0; }
+  .lot tr.a-erreur { margin-bottom: 0; border-radius: 14px 14px 0 0; padding-bottom: 4px; }
+  .lot tr.err-ligne { display: block; margin: 0 0 12px; padding: 0 12px 12px; border-radius: 0 0 14px 14px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); clip-path: inset(0 0 -1px 0); }
+  .lot tr.err-ligne td { padding: 0; }
 }
 .lb-cell { display: none; }
 @media (max-width: 720px) { .lb-cell { display: block; margin-bottom: 4px; color: var(--ink2); font-size: 12.5px; } }
@@ -71,6 +87,16 @@
 .ville-pop [aria-selected="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
 .refus { display: grid; gap: 12px; justify-items: start; max-width: 560px; }
 .refus p { margin: 0; color: var(--ink2); }
+.sj-ligne { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px 16px; align-items: start; }
+.sj-ligne img { width: 96px; height: 64px; object-fit: cover; border-radius: 5px; display: block; }
+.sj-ligne .form { gap: 12px; }
+.sj-ligne .more { display: inline-flex; align-items: center; min-height: 24px; justify-self: start; }
+@media (max-width: 720px), (pointer: coarse) { .sj-ligne .more { min-height: 44px; } }
+.sj-ligne .chk-ligne { display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: 13px; }
+@media (max-width: 720px), (pointer: coarse) { .sj-ligne .more { display: inline-flex; align-items: center; min-height: 24px; justify-self: start; }
+@media (max-width: 720px), (pointer: coarse) { .sj-ligne .more { min-height: 44px; } }
+.sj-ligne .chk-ligne { min-height: 44px; } }
+@media (max-width: 540px) { .sj-ligne { grid-template-columns: minmax(0, 1fr); } }
 </style>
 </head>
 <body class="admin">
@@ -80,21 +106,21 @@
 <div class="shell">
 <aside class="side" id="admin-nav" aria-label="Menu de l’administration">
   <div class="side-haut"><a class="word" href="/admin"><span>Nicephos</span></a><button class="side-fermer" type="button" aria-controls="admin-nav" aria-expanded="true"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Fermer</button></div>
-  <button class="cmdk" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
+  <button class="cmdk js-seul" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
   <nav class="nav" aria-label="Aujourd’hui">
     <a href="/admin"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
   </nav>
   <p class="grp" id="nav-photos">Photos</p>
   <nav class="nav" aria-labelledby="nav-photos">
     <a href="/admin/photos" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
-    <div class="nav-ser"><a href="/admin/series"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a><details class="ser-plier"><summary aria-label="Afficher vos 5 séries"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>5</summary>
+    <details class="ser-titre"><summary><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries<span class="sr-only"> : vos 5 séries</span><svg class="ic chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></summary>
       <ul class="ser" aria-label="Séries, vos photos">
         <li><a href="/admin/photos?serie=atlantique"><span class="sw"><img src="_commun/photos/160/cais.webp" alt="" width="18" height="18"></span><span class="t">Atlantique</span><span class="n">3</span></a></li>
         <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">4</span></a></li>
         <li><a href="/admin/photos?serie=portrait"><span class="sw"><img src="_commun/photos/160/tiago.webp" alt="" width="18" height="18"></span><span class="t">Portrait</span><span class="n">1</span></a></li>
         <li><a href="/admin/photos?serie=rue"><span class="sw"><img src="_commun/photos/160/quai.webp" alt="" width="18" height="18"></span><span class="t">Rue</span><span class="n">2</span></a></li>
         <li><a href="/admin/photos?serie=voyage"><span class="sw"><img src="_commun/photos/160/dune.webp" alt="" width="18" height="18"></span><span class="t">Voyage</span><span class="n">2</span></a></li>
-      </ul></details></div>
+      </ul></details>
     <a href="/admin/sorties"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/></svg>Sorties</a>
     <a href="/admin/voyages"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg>Voyages</a>
   </nav>
@@ -103,14 +129,14 @@
     <a href="/admin/personnes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg>Personnes<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 nouvelle</span></span></a>
     <a href="/admin/terrain"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>App de terrain</a>
   </nav>
-  <p class="grp" id="nav-publier"><span class="mq-a">Publier<span class="mq-pin d" aria-hidden="true">1</span></span></p>
+  <p class="grp" id="nav-publier">Publier</p>
   <nav class="nav" aria-labelledby="nav-publier">
     <a href="/admin/photos?statut=proposee&amp;auteur=sebastien"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg>Mes propositions</a>
     <a href="/admin/carnet"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
     <a href="/admin/galeries"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Galeries privées</a>
-    <a href="/admin/boutique"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique</a>
+    <a href="/admin/boutique"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique<span class="nav-badge"><span aria-hidden="true">2</span><span class="sr-only">, 2 commandes à préparer</span></span></a>
   </nav>
-  <p class="grp" id="nav-equipe">Équipe</p>
+  <p class="grp" id="nav-equipe"><span class="mq-a">Équipe<span class="mq-pin d" aria-hidden="true" style="top:-6px">1</span></span></p>
   <nav class="nav" aria-labelledby="nav-equipe">
     <a href="/admin/statistiques"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
   </nav>
@@ -119,91 +145,100 @@
       <a href="/admin/aide"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg>Aide</a>
       <a href="/" target="_blank" rel="noopener"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Voir le site<span class="sr-only"> (nouvel onglet)</span></a>
       <details class="lang-pick admin-lang">
-        <summary><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h9M8.5 3v2M6 5c.8 3.5 3 6 6 7.5M11 5c-.9 3.8-3.6 6.8-7 8"/><path d="M13 21l4-10 4 10M14.5 17.5h5"/></svg><span>FR</span><span class="sr-only"> – Langue de l’administration : français</span></summary>
-        <ul aria-label="Langue de l’administration : français">
-          <li><a href="/admin/langue?l=fr" lang="fr" aria-current="true">Français</a></li>
-          <li><a href="/admin/langue?l=en" lang="en">English</a></li>
-          <li><a href="/admin/langue?l=de" lang="de">Deutsch</a></li>
+        <summary><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h9M8.5 3v2M6 5c.8 3.5 3 6 6 7.5M11 5c-.9 3.8-3.6 6.8-7 8"/><path d="M13 21l4-10 4 10M14.5 17.5h5"/></svg><span>FR</span><span class="sr-only"> – Langue de l’administration : français</span></summary>
+        <ul aria-label="Langue de l’administration">
+          <li><form method="post" action="/admin/langue"><input type="hidden" name="_csrf" value="c5f0…"><input type="hidden" name="back" value="/admin/photos/lot?ids=24,25,26"><button type="submit" name="lang" value="fr" lang="fr" aria-current="true">Français</button></form></li>
+          <li><form method="post" action="/admin/langue"><input type="hidden" name="_csrf" value="c5f0…"><input type="hidden" name="back" value="/admin/photos/lot?ids=24,25,26"><button type="submit" name="lang" value="en" lang="en">English</button></form></li>
+          <li><form method="post" action="/admin/langue"><input type="hidden" name="_csrf" value="c5f0…"><input type="hidden" name="back" value="/admin/photos/lot?ids=24,25,26"><button type="submit" name="lang" value="de" lang="de">Deutsch</button></form></li>
         </ul>
       </details>
+      <a class="pied-large" href="/admin/nouveautes"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>Nouveautés<span class="nav-ver">1.90.0</span></a>
     </nav>
+    <a class="job" href="/admin/photos?statut=draft" data-activity hidden><span class="spin" aria-hidden="true"></span><span data-activity-text>Traitement : 0 photo</span></a>
     <div class="me">
       <a class="me-lien" href="/admin/compte"><span class="av" aria-hidden="true">S</span><span class="who"><span class="me-nom">Sébastien</span><span class="sr-only">, mon compte</span><small>Photographe</small></span></a>
-      <button class="iconbtn btn-theme" type="button"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button>
-      <button class="iconbtn" type="button" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button>
+      <form method="post" action="/admin/theme"><input type="hidden" name="_csrf" value="c5f0…"><input type="hidden" name="back" value="/admin/photos/lot?ids=24,25,26"><button class="iconbtn btn-theme" type="submit" name="theme" value="dark" title="Mode clair / sombre"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button></form>
+      <form method="post" action="/auth/logout"><input type="hidden" name="_csrf" value="c5f0…"><button class="iconbtn" type="submit" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button></form>
     </div>
   </div>
 </aside>
 <main class="main" id="contenu" tabindex="-1">
-  <p class="help-link"><a href="/admin/aide/photos#completer-un-lot">Aide sur cette page</a></p>
+  <p class="help-link"><a href="/admin/aide#photos-3-compléter-et-publier">Aide sur cette page</a></p>
   <header class="ep">
     <a class="ep-retour" href="/admin/photos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Photothèque</a>
     <div class="ep-titre"><h1 class="mq-a">Compléter et proposer<span class="mq-pin d" aria-hidden="true">2</span></h1></div>
-    <p class="ep-meta"><span>3 photos importées le 14 oct.</span><span role="status" class="mq-a"><a class="enreg enreg--attente" href="#date-c"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>1 champ non enregistré : date de R0004057</a><span class="mq-pin d" aria-hidden="true">3</span></span></p>
+    <p class="ep-meta"><span>3 photos importées le 14 oct.</span><span role="status" class="mq-a"><a class="enreg enreg--attente" href="#date-c"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>1 champ non enregistré : date de R0004057</a><span class="mq-pin d" aria-hidden="true">3</span></span></p>
     <div class="ep-actions">
       <a class="btn ghost ep-secondaire" href="/admin/photos?import=dernier">Voir le dernier import</a>
       <details class="menu ep-plus"><summary class="btn ghost" aria-label="Plus d’actions"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></summary><div class="menu-pop"><a href="/admin/photos?import=dernier">Voir le dernier import</a></div></details>
-      <button class="btn" type="button">Proposer les 3 photos</button>
+      <button class="btn" type="submit" form="lot-f">Proposer les 3 photos</button>
     </div>
   </header>
-  <div class="mq-a"><span class="mq-pin" aria-hidden="true">4</span><ol class="steps" aria-label="Étapes de l’import">
+  <ol class="steps" aria-label="Étapes de l’import">
     <li class="done"><span class="n">1.</span> Choisir et vérifier</li>
     <li class="done"><span class="n">2.</span> Envoi et traitement</li>
-    <li aria-current="step"><span class="n">3.</span> <span class="et-sur">Étape 3 sur 3 : </span>Compléter et proposer</li>
-  </ol></div>
-  <div class="flash mq-a" role="note"><span class="mq-pin" aria-hidden="true">5</span><p><span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/></svg></span><span>La carte contenait aussi 2 fichiers déjà importés le 14 oct. (même contenu) : ils ont été écartés.</span><a class="more" href="/admin/photos?import=dernier&amp;doublons">Voir les 2 fichiers</a></p></div>
-  <div class="mq-a"><span class="mq-pin" aria-hidden="true">6</span><form class="bulk bulk-l" action="/admin/photos/actions" method="post" aria-label="Changer plusieurs photos à la fois">
-    <strong role="status">Pour les 2 photos cochées :</strong>
-    <div class="champ-a"><label for="b-serie">Série</label><select id="b-serie"><option>Celle de chaque photo</option><option>Atlantique</option><option>Paysage</option><option>Portrait</option><option selected>Rue</option><option>Voyage</option></select></div>
-    <div class="champ-a"><label for="b-ville">Ville</label><input id="b-ville" placeholder="Celle de chaque photo" autocomplete="off"></div>
-    <div class="champ-a"><label for="b-date">Date</label><input id="b-date" placeholder="Celle de chaque photo"></div>
-    <button class="btn ghost" type="submit">Appliquer aux 2 photos</button>
-    <p class="hint">Rien ne change avant « Appliquer ».</p>
-  </form></div>
+    <li aria-current="step" class="mq-a"><span class="mq-pin" aria-hidden="true">4</span><span class="n">3.</span> <span class="et-sur">Étape 3 sur 3 : </span>Compléter et proposer</li>
+  </ol>
+  <div class="flash" role="note"><p class="mq-a"><span class="mq-pin" aria-hidden="true">5</span><span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/></svg></span><span>La carte contenait aussi 2 fichiers déjà importés le 14 oct. (même contenu) : ils ont été écartés.</span><a class="more" href="/admin/photos?import=dernier&amp;doublons">Voir les 2 fichiers</a></p></div>
+  <form class="bulk bulk-l" action="/admin/photos/actions" method="post" aria-labelledby="b-t">
+    <strong id="b-t" role="status" class="mq-a"><span class="mq-pin" aria-hidden="true">6</span>Pour les 2 photos cochées :</strong>
+    <button class="btn ghost bulk-toggle js-seul" type="button" aria-expanded="false" aria-controls="bulk-g">Changer la série, la ville ou la date<svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></button>
+    <div class="bulk-groups" id="bulk-g">
+      <div class="champ-a"><label for="b-serie">Série</label><select id="b-serie"><option>Celle de chaque photo</option><option>Atlantique</option><option>Paysage</option><option>Portrait</option><option selected>Rue</option><option>Voyage</option></select></div>
+      <div class="champ-a"><label for="b-ville">Ville</label><input id="b-ville" placeholder="Celle de chaque photo" autocomplete="off"></div>
+      <div class="champ-a"><label for="b-date">Date</label><input id="b-date" placeholder="Celle de chaque photo"></div>
+      <button class="btn ghost" type="submit">Appliquer aux 2 photos</button>
+      <p class="hint">Rien ne change avant « Appliquer ».</p>
+    </div>
+  </form>
+  <nav class="chips filtre-lot" aria-label="Filtrer le lot"><a class="chip" href="/admin/photos/lot?ids=24,25,26" aria-current="page">Les 3 photos</a><a class="chip" href="/admin/photos/lot?ids=24,25,26&amp;a-corriger">À corriger<span class="n">1</span></a><a class="chip warn mq-a" href="/admin/photos/lot?ids=24,25,26&amp;accord">Accord à vérifier<span class="n">1</span><span class="mq-pin d" aria-hidden="true">7</span></a></nav>
+  <form id="lot-f" action="/admin/photos/lot" method="post">
   <div class="tablewrap">
   <table class="lot">
     <caption class="sr-only">Les 3 photos du lot, une ligne par photo</caption>
     <colgroup><col class="col-chk"><col class="col-photo"><col class="col-titre"><col class="col-serie"><col class="col-ville"><col class="col-date"><col class="col-etat"></colgroup>
-    <thead><tr><th scope="col"><label class="chk-l"><input class="chk" type="checkbox" aria-label="Cocher les 3 photos"></label></th><th scope="col"><span class="mq-a">Photo<span class="mq-pin d" aria-hidden="true">7</span></span></th><th scope="col" id="h-titre">Titre</th><th scope="col" id="h-serie"><span class="mq-a">Série<span class="mq-pin d" aria-hidden="true">8</span></span></th><th scope="col" id="h-ville">Ville</th><th scope="col" id="h-date"><span class="mq-a">Date<span class="mq-pin d" aria-hidden="true">9</span></span></th><th scope="col"><span class="mq-a">État<span class="mq-pin d" aria-hidden="true">10</span></span></th></tr></thead>
+    <thead><tr><th scope="col"><label class="chk-l js-seul"><input class="chk" id="tout" type="checkbox" aria-label="Cocher les 3 photos"></label><script>document.getElementById('tout').indeterminate = true;</script></th><th scope="col"><span class="mq-a">Photo<span class="mq-pin d" aria-hidden="true">8</span></span></th><th scope="col" id="h-titre">Titre</th><th scope="col" id="h-serie"><span class="mq-a">Série<span class="mq-pin d" aria-hidden="true">9</span></span></th><th scope="col" id="h-ville">Ville</th><th scope="col" id="h-date"><span class="mq-a">Date<span class="mq-pin d" aria-hidden="true">10</span></span></th><th scope="col"><span class="mq-a">État<span class="mq-pin d" aria-hidden="true">11</span></span></th></tr></thead>
     <tbody>
       <tr>
-        <td class="c-chk"><label class="chk-l"><input class="chk" type="checkbox" aria-labelledby="p1"></label></td>
+        <td class="c-chk"><label class="chk-l"><input class="chk" type="checkbox" name="ids" value="24" aria-labelledby="p1"></label></td>
         <th scope="row" class="c-thumb" id="p1"><img src="_commun/photos/160/maine.webp" alt="" width="96" height="64"><span class="fic">R0004012.JPG</span><span class="sr-only">, Minoterie, brume du matin</span></th>
         <td class="c-title"><div class="cell"><span class="lb-cell" aria-hidden="true">Titre</span><input value="Minoterie, brume du matin" aria-labelledby="h-titre p1">
-          <details class="tr" open><summary class="mq-a"><span class="mq-pin" aria-hidden="true">11</span><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Anglais et allemand <span class="hint">· 2 sur 2</span></summary><div class="cell">
-            <label>Anglais <input lang="en" value="Mill, morning mist"></label>
+          <details class="tr" open><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Anglais et allemand <span class="hint">· 2 sur 2</span></summary><div class="cell">
+            <label><span class="mq-a">Anglais<span class="mq-pin d" aria-hidden="true">12</span></span> <input lang="en" value="Mill, morning mist"></label>
             <label>Allemand <input lang="de" value="Mühle im Morgennebel"></label></div></details></div></td>
         <td class="c-cat"><div class="cell"><span class="lb-cell" aria-hidden="true">Série</span><select aria-labelledby="h-serie p1"><option>Choisir une série</option><option>Atlantique</option><option selected>Paysage</option><option>Portrait</option><option>Rue</option><option>Voyage</option></select></div></td>
         <td class="c-place"><div class="cell"><span class="lb-cell" aria-hidden="true">Ville</span><input value="Angers, France" aria-labelledby="h-ville p1" aria-describedby="v1"><p class="lu" id="v1">d’après le GPS de la photo</p></div></td>
-        <td class="c-date"><div class="cell"><span class="lb-cell" aria-hidden="true">Date</span><input value="14 oct. 2026" aria-labelledby="h-date p1" aria-describedby="d1"><p class="lu" id="d1">Lu : mercredi 14 octobre 2026, 6 h 55</p></div></td>
+        <td class="c-date"><div class="cell"><span class="lb-cell" aria-hidden="true">Date</span><input value="14 oct. 2026" aria-labelledby="h-date p1" aria-describedby="d1"><p class="lu" id="d1">Lu : mercredi 14 octobre 2026, 6 h 55</p></div></td>
         <td class="c-state"><div class="etat-c"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</span><span class="enreg enreg--ok"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Enregistré à 21 h 34</span></div></td>
       </tr>
       <tr>
-        <td class="c-chk"><label class="chk-l"><input class="chk" type="checkbox" checked aria-labelledby="p2"></label></td>
+        <td class="c-chk"><label class="chk-l"><input class="chk" type="checkbox" name="ids" value="25" checked aria-labelledby="p2"></label></td>
         <th scope="row" class="c-thumb" id="p2"><img src="_commun/photos/160/ligny.webp" alt="" width="96" height="64"><span class="fic">R0004046.JPG</span><span class="sr-only">, Quai Ligny, soir</span></th>
         <td class="c-title"><div class="cell"><span class="lb-cell" aria-hidden="true">Titre</span><input value="Quai Ligny, soir" aria-labelledby="h-titre p2">
-          <details class="tr"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Anglais et allemand <span class="hint">· à traduire</span></summary></details></div></td>
+          <details class="tr"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Anglais et allemand <span class="hint">· à traduire</span></summary><div class="cell"><label>Anglais <input lang="en" value=""></label><label>Allemand <input lang="de" value=""></label></div></details></div></td>
         <td class="c-cat"><div class="cell"><span class="lb-cell" aria-hidden="true">Série</span><select aria-labelledby="h-serie p2"><option>Choisir une série</option><option>Atlantique</option><option>Paysage</option><option>Portrait</option><option selected>Rue</option><option>Voyage</option></select></div></td>
         <td class="c-place"><div class="cell"><span class="lb-cell" aria-hidden="true">Ville</span><input value="Angers, France" aria-labelledby="h-ville p2"></div></td>
-        <td class="c-date"><div class="cell"><span class="lb-cell" aria-hidden="true">Date</span><input value="14 oct. 2026" aria-labelledby="h-date p2" aria-describedby="d2"><p class="lu" id="d2">Lu : mercredi 14 octobre 2026, 18 h 10</p></div></td>
+        <td class="c-date"><div class="cell"><span class="lb-cell" aria-hidden="true">Date</span><input value="14 oct. 2026" aria-labelledby="h-date p2" aria-describedby="d2"><p class="lu" id="d2">Lu : mercredi 14 octobre 2026, 18 h 10</p></div></td>
         <td class="c-state"><div class="etat-c"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</span><a class="att" href="/admin/photos/25#accords"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Accord à vérifier</a></div></td>
       </tr>
-      <tr>
-        <td class="c-chk"><label class="chk-l"><input class="chk" type="checkbox" checked aria-labelledby="p3"></label></td>
+      <tr class="a-erreur">
+        <td class="c-chk"><label class="chk-l"><input class="chk" type="checkbox" name="ids" value="26" checked aria-labelledby="p3"></label></td>
         <th scope="row" class="c-thumb" id="p3"><img src="_commun/photos/160/reverberes.webp" alt="" width="96" height="64"><span class="fic">R0004057.JPG</span></th>
         <td class="c-title"><div class="cell"><span class="lb-cell" aria-hidden="true">Titre</span><input value="R0004057" aria-labelledby="h-titre p3" aria-describedby="t3">
-          <p class="att mq-a" id="t3"><span class="mq-pin" aria-hidden="true">12</span><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Titre provisoire (nom du fichier)</p>
-          <details class="tr"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Anglais et allemand <span class="hint">· à traduire</span></summary></details></div></td>
+          <p class="att mq-a" id="t3"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Titre provisoire (nom du fichier)<span class="mq-pin d" aria-hidden="true">13</span></p>
+          <details class="tr"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Anglais et allemand <span class="hint">· à traduire</span></summary><div class="cell"><label>Anglais <input lang="en" value=""></label><label>Allemand <input lang="de" value=""></label></div></details></div></td>
         <td class="c-cat"><div class="cell"><span class="lb-cell" aria-hidden="true">Série</span><select aria-labelledby="h-serie p3"><option selected>Choisir une série</option><option>Atlantique</option><option>Paysage</option><option>Portrait</option><option>Rue</option><option>Voyage</option></select>
-          <span><button class="sugg" type="button" aria-label="Accepter la suggestion : série Rue"><span class="s" aria-hidden="true">✦</span>Suggestion : Rue<span class="acc" aria-hidden="true">Accepter</span></button></span></div></td>
+          <button class="sugg" type="button"><span class="s" aria-hidden="true">✦</span>Suggestion : Rue<span class="sr-only">,</span> <span class="acc">Accepter</span></button></div></td>
         <td class="c-place"><div class="cell"><span class="lb-cell" aria-hidden="true">Ville</span><input value="Angers, France" aria-labelledby="h-ville p3"></div></td>
-        <td class="c-date"><div class="cell champ-a"><span class="lb-cell" aria-hidden="true">Date</span><input id="date-c" value="14/15/2026" aria-labelledby="h-date p3" aria-invalid="true" aria-describedby="d3e"><p class="err" id="d3e"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> il n’y a pas de 15ᵉ mois. Écrivez par exemple « 14 oct. 2026 ».</span></p></div></td>
+        <td class="c-date"><div class="cell champ-a"><span class="lb-cell" aria-hidden="true">Date</span><input id="date-c" class="is-focus" value="14/15/2026" aria-labelledby="h-date p3" aria-invalid="true" aria-describedby="d3e"></div></td>
         <td class="c-state"><div class="etat-c"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</span><span class="enreg enreg--attente"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Date non enregistrée</span></div></td>
       </tr>
+      <tr class="err-ligne"><td colspan="7"><p class="err" id="d3e"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur, date de R0004057 :</b> il n’y a pas de 15ᵉ mois. Écrivez par exemple « 14 oct. 2026 » ; la date n’est pas enregistrée.</span></p></td></tr>
     </tbody>
   </table>
   </div>
-  <p class="suite">Légende, filigrane et texte de remplacement : dans la fiche de chaque photo (clic sur la vignette depuis la Photothèque).</p>
+  </form>
+  <p class="suite">Légende, filigrane et texte de remplacement : dans la fiche de chaque photo (clic sur la vignette depuis la Photothèque).</p>
 </main>
 </div>
 <nav class="tabbar" aria-label="Navigation rapide">
@@ -214,112 +249,145 @@
   <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
 </nav>
 <div class="mq-etats mq-etats--grille" role="region" aria-label="Autres états de l’écran">
-<section class="mq-ecran large" aria-labelledby="etat-1"><p class="mq-etat" id="etat-1">État · Proposer : deux points à corriger d’abord</p>
+<section class="mq-ecran large sans-js" inert aria-labelledby="etat-1"><p class="mq-etat" id="etat-1"><span class="mq-pin" aria-hidden="true">14</span>État · Sans JavaScript : le lot s’enregistre par un bouton</p>
+  <div class="ecran-a">
+    <section class="resume-a" tabindex="-1" aria-labelledby="sj-t"><h2 id="sj-t"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg>Lot enregistré, sauf 1 champ</h2>
+      <ul><li><a href="#sj-date">Date de R0004057 : il n’y a pas de 15ᵉ mois.</a></li></ul></section>
+    <form class="sj-ligne" action="/admin/photos/lot" method="post" aria-label="R0004057, sans JavaScript" style="max-width:760px">
+      <div><img src="_commun/photos/160/reverberes.webp" alt="" width="96" height="64"><span class="fic" style="display:block;margin-top:6px;font:400 12px var(--mono);color:var(--ink2)">R0004057.JPG</span></div>
+      <div class="form">
+        <div class="champ-a"><label for="sj-titre">Titre</label><input id="sj-titre" value="R0004057" aria-describedby="sj-titre-a"><p class="att" id="sj-titre-a"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Titre provisoire (nom du fichier)</p></div>
+        <div class="row" style="align-items:flex-start">
+          <div class="champ-a" style="flex:1 1 180px"><label for="sj-serie">Série</label><select id="sj-serie"><option selected>Choisir une série</option><option>Atlantique</option><option>Paysage</option><option>Portrait</option><option>Rue</option><option>Voyage</option></select>
+            <label class="chk-ligne"><input class="chk" type="checkbox" name="sugg" value="rue"><span><span aria-hidden="true">✦ </span>Accepter la suggestion : Rue</span></label></div>
+          <div class="champ-a" style="flex:1 1 180px"><label for="sj-ville">Ville</label><input id="sj-ville" list="sj-villes" value="Angers, France"><datalist id="sj-villes"><option value="Angers, France"></option><option value="Ancenis, France"></option><option value="Anvers, Belgique"></option></datalist></div>
+        </div>
+        <div class="champ-a"><label for="sj-date">Date</label><input id="sj-date" value="14/15/2026" aria-invalid="true" aria-describedby="sj-date-e"><p class="err" id="sj-date-e"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> il n’y a pas de 15ᵉ mois. Écrivez par exemple « 14 oct. 2026 ».</span></p></div>
+        <p class="sans-script"><button class="btn ghost" type="submit">Enregistrer le lot</button></p>
+      </div>
+    </form>
+  </div></section>
+<section class="mq-ecran large" inert aria-labelledby="etat-2"><p class="mq-etat" id="etat-2"><span class="mq-pin" aria-hidden="true">15</span>État · Proposer : deux points à corriger d’abord</p>
   <div class="voile-a">
-    <div class="confirm mq-a" role="dialog" aria-modal="false" aria-labelledby="dp-t" aria-describedby="dp-d"><span class="mq-pin" aria-hidden="true">13</span>
-      <h2 id="dp-t">Proposer les 3 photos à Julien ?</h2>
-      <p id="dp-d">Julien les publie ou vous les renvoie avec une remarque. Deux points d’abord, corrigés ici :</p>
+    <div class="confirm" role="dialog" aria-modal="false" aria-labelledby="dp-t" aria-describedby="dp-d"><form action="/admin/photos/proposer" method="post">
+      <h2 id="dp-t">Proposer les 3 photos à Julien ?</h2>
+      <p id="dp-d">Julien les publie ou vous les renvoie avec une remarque. Deux points d’abord, corrigés ici :</p>
       <ul class="liste-c">
-        <li><img src="_commun/photos/160/reverberes.webp" alt="" width="64" height="43"><div><p><span class="att"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg></span> <b>R0004057</b> a un titre provisoire.</p>
+        <li><img src="_commun/photos/160/reverberes.webp" alt="" width="64" height="43"><div><p><span class="att"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg></span> <b>R0004057</b> a un titre provisoire et une date refusée.</p>
           <div class="champ-a"><label for="dp-titre">Titre</label><input id="dp-titre" class="is-focus" value="Réverbères, quai Ligny"></div>
-          <div class="champ-a"><label for="dp-date">Date</label><input id="dp-date" value="14 oct. 2026" aria-describedby="dp-date-l"><p class="aide" id="dp-date-l">Lu : mercredi 14 octobre 2026</p></div></div></li>
-        <li><img src="_commun/photos/160/ligny.webp" alt="" width="64" height="43"><div><p><span class="att"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg></span> <b>Quai Ligny, soir</b> : accord à vérifier. Julien ne pourra la publier qu’après.</p></div></li>
+          <div class="champ-a"><label for="dp-date">Date</label><input id="dp-date" value="14 oct. 2026" aria-describedby="dp-date-l"><p class="aide" id="dp-date-l">Lu : mercredi 14 octobre 2026</p></div></div></li>
+        <li><img src="_commun/photos/160/ligny.webp" alt="" width="64" height="43"><div><p><span class="att"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg></span> <b>Quai Ligny, soir</b> : accord à vérifier. Julien ne pourra la publier qu’après.</p></div></li>
       </ul>
       <div class="champ-a" style="margin-top:16px"><label for="dp-mot">Un mot pour Julien <span class="facultatif">(facultatif)</span></label><textarea id="dp-mot" rows="2">Claire a répondu en ligne pour le quai Ligny ; Hugo, pas encore.</textarea></div>
-      <div class="actions"><button class="btn ghost" type="button">Annuler</button><button class="btn ghost" type="button">Proposer sans corriger</button><button class="btn" type="button">Proposer les 3 photos</button></div>
-    </div>
+      <div class="actions"><button class="btn ghost" type="button">Annuler</button><button class="btn ghost" type="submit" name="corriger" value="non">Proposer sans corriger</button><button class="btn" type="submit">Proposer les 3 photos</button></div>
+    </form></div>
   </div></section>
-<section class="mq-ecran" aria-labelledby="etat-2"><p class="mq-etat" id="etat-2">État · Administrateur : publier le lot</p>
+<section class="mq-ecran" inert aria-labelledby="etat-3"><p class="mq-etat" id="etat-3"><span class="mq-pin" aria-hidden="true">16</span>État · Administrateur : publier le lot</p>
   <div class="ecran-a">
-    <div class="ep" style="margin-bottom:16px"><a class="ep-retour" href="/admin/photos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Photothèque</a><div class="ep-titre"><h2 class="titre-ecran" style="margin:0">Compléter et publier</h2></div><p class="ep-meta"><span>3 photos de Sébastien, importées le 14 oct.</span></p></div>
-    <div class="confirm mq-a" role="dialog" aria-modal="false" aria-labelledby="da-t" aria-describedby="da-d" style="position:static;display:block;margin:0;width:100%"><span class="mq-pin" aria-hidden="true">14</span>
-      <h2 id="da-t">Publier 2 des 3 photos ?</h2>
-      <p id="da-d">« Minoterie, brume du matin » et « Réverbères, quai Ligny » seront en ligne. « Quai Ligny, soir » reste en brouillon tant que son accord n’est pas vérifié.</p>
-      <div class="actions"><button class="btn ghost" type="button">Annuler</button><button class="btn" type="button">Publier les 2 photos</button></div>
-    </div>
+    <div class="ep" style="margin-bottom:16px"><a class="ep-retour" href="/admin/photos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Photothèque</a><div class="ep-titre"><h2 class="titre-ecran" style="margin:0">Compléter et publier</h2></div><p class="ep-meta"><span>3 photos de Sébastien, importées le 14 oct.</span></p></div>
+    <div class="confirm" role="dialog" aria-modal="false" aria-labelledby="da-t" aria-describedby="da-d" style="position:static;display:block;margin:0;width:100%"><form action="/admin/photos/publier" method="post">
+      <h2 id="da-t">Publier 2 des 3 photos ?</h2>
+      <p id="da-d">« Minoterie, brume du matin » et « Réverbères, quai Ligny » seront en ligne. « Quai Ligny, soir » reste en brouillon tant que son accord n’est pas vérifié.</p>
+      <div class="actions"><button class="btn ghost" type="button">Annuler</button><button class="btn" type="submit">Publier les 2 photos</button></div>
+    </form></div>
   </div></section>
-<section class="mq-ecran" aria-labelledby="etat-3"><p class="mq-etat" id="etat-3">État · Touche P dans la planche, titre provisoire</p>
+<section class="mq-ecran" inert aria-labelledby="etat-4"><p class="mq-etat" id="etat-4"><span class="mq-pin" aria-hidden="true">17</span>État · Touche P dans la planche, titre provisoire</p>
   <div class="voile-a">
-    <div class="confirm mq-a" role="dialog" aria-modal="false" aria-labelledby="dk-t" aria-describedby="dk-d"><span class="mq-pin" aria-hidden="true">15</span>
-      <h2 id="dk-t">Publier les 2 photos choisies ?</h2>
-      <p id="dk-d">Vous avez appuyé sur P. L’une a encore un titre provisoire : R0004057.</p>
+    <div class="confirm" role="dialog" aria-modal="false" aria-labelledby="dk-t" aria-describedby="dk-d"><form action="/admin/photos/proposer" method="post">
+      <h2 id="dk-t">Proposer les 2 photos choisies ?</h2>
+      <p id="dk-d">Vous avez appuyé sur P. L’une a encore un titre provisoire : R0004057.</p>
       <p class="hint" style="margin:0">Les raccourcis d’une touche se coupent dans Mon compte.</p>
-      <div class="actions"><button class="btn ghost is-focus" type="button">Annuler</button><button class="btn" type="button">Publier les 2 photos</button></div>
-    </div>
+      <div class="actions"><button class="btn ghost is-focus" type="button">Annuler</button><button class="btn" type="submit">Proposer les 2 photos</button></div>
+    </form></div>
   </div></section>
-<section class="mq-ecran" aria-labelledby="etat-4"><p class="mq-etat" id="etat-4">État · Après « Appliquer » : Défaire</p>
+<section class="mq-ecran" inert aria-labelledby="etat-5"><p class="mq-etat" id="etat-5"><span class="mq-pin" aria-hidden="true">18</span>État · Après « Appliquer » : Défaire</p>
   <div class="ecran-a">
-    <form class="bulk bulk-l" action="/admin/photos/actions" method="post" aria-label="Changer plusieurs photos à la fois (après Appliquer)" style="position:static;margin:0">
-      <strong>Pour les 2 photos cochées :</strong>
+    <form class="bulk bulk-l" action="/admin/photos/actions" method="post" aria-label="Changer plusieurs photos à la fois (après Appliquer)" style="position:static;margin:0 0 16px">
+      <strong>Pour les 2 photos cochées :</strong>
       <div class="champ-a"><label for="b2-serie">Série</label><select id="b2-serie"><option selected>Celle de chaque photo</option><option>Rue</option></select></div>
       <button class="btn ghost" type="submit">Appliquer aux 2 photos</button>
     </form>
-    <div class="mq-a"><span class="mq-pin" aria-hidden="true">16</span><div class="toast toast-ech" role="status"><p>Série <b>Rue</b> appliquée à 2 photos.</p><button type="button">Défaire</button><span class="toast-temps" style="--reste: 62%"></span></div></div>
+    <div class="toast toast-ech" role="status"><p>Série <b>Rue</b> appliquée à 2 photos.</p><button type="button">Défaire</button><span class="toast-temps" style="--reste: 62%"></span></div>
   </div></section>
-<section class="mq-ecran" aria-labelledby="etat-5"><p class="mq-etat" id="etat-5">État · Ville : la plus probable d’abord</p>
+<section class="mq-ecran" inert aria-labelledby="etat-6"><p class="mq-etat" id="etat-6"><span class="mq-pin" aria-hidden="true">19</span>État · Ville : la plus probable d’abord</p>
   <div class="ecran-a">
-    <div class="ville-l champ-a mq-a"><span class="mq-pin" aria-hidden="true">17</span><label for="vi">Ville de « Réverbères, quai Ligny »</label>
+    <div class="ville-l champ-a"><label for="vi">Ville de R0004057</label>
       <input id="vi" class="is-focus" value="An" role="combobox" aria-expanded="true" aria-controls="vi-l" aria-activedescendant="vi1" aria-autocomplete="list">
       <ul class="ville-pop" id="vi-l" role="listbox" aria-label="Villes proposées">
-        <li role="option" id="vi1" aria-selected="true"><span>Angers, France</span><small>déjà utilisée · à 0,3 km du GPS de la photo</small></li>
+        <li role="option" id="vi1" aria-selected="true"><span>Angers, France</span><small>déjà utilisée · à 0,3 km du GPS de la photo</small></li>
         <li role="option" id="vi2" aria-selected="false"><span>Ancenis, France</span><small>à 48 km</small></li>
         <li role="option" id="vi3" aria-selected="false"><span>Anvers, Belgique</span><small>à 580 km</small></li>
       </ul>
       <p class="aide" role="status">3 villes, la plus proche du GPS d’abord.</p>
     </div>
   </div></section>
-<section class="mq-ecran" aria-labelledby="etat-6"><p class="mq-etat" id="etat-6">État · Page réservée, dans l’administration</p>
+<section class="mq-ecran" inert aria-labelledby="etat-7"><p class="mq-etat" id="etat-7"><span class="mq-pin" aria-hidden="true">20</span>État · Filtre « À corriger » : ce qui reste à faire</p>
   <div class="ecran-a">
-    <div class="refus mq-a"><span class="mq-pin" aria-hidden="true">18</span>
-      <h2 class="titre-ecran" style="margin:0">Page réservée à l’administrateur</h2>
-      <p>« À valider » est la page de Julien. Vos photos proposées sont dans « Mes propositions », avec leur état.</p>
+    <nav class="chips filtre-lot" aria-label="Filtrer le lot (À corriger)"><a class="chip" href="/admin/photos/lot?ids=24,25,26">Les 3 photos</a><a class="chip" href="/admin/photos/lot?ids=24,25,26&amp;a-corriger" aria-current="page">À corriger<span class="n">1</span></a><a class="chip warn" href="/admin/photos/lot?ids=24,25,26&amp;accord">Accord à vérifier<span class="n">1</span></a></nav>
+    <div class="sj-ligne" style="padding:12px;border-radius:14px;background:var(--s1);box-shadow:inset 0 0 0 1px var(--line)">
+      <img src="_commun/photos/160/reverberes.webp" alt="" width="96" height="64">
+      <div style="display:grid;gap:6px"><p style="margin:0"><b>R0004057</b> <span class="fic" style="font:400 12px var(--mono);color:var(--ink2)">R0004057.JPG</span></p>
+        <p class="att" style="margin:0"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Titre provisoire · date refusée</p>
+        <a class="more" href="/admin/photos/lot?ids=24,25,26#p3">Corriger dans le lot</a></div>
+    </div>
+    <p class="hint" style="margin:12px 0 0">Les 2 autres photos sont complètes. À 20 photos, ce filtre ne garde que les lignes à reprendre ; « Accord à vérifier » celles qui attendent une personne.</p>
+  </div></section>
+<section class="mq-ecran" inert aria-labelledby="etat-8"><p class="mq-etat" id="etat-8"><span class="mq-pin" aria-hidden="true">21</span>État · Page réservée, dans l’administration</p>
+  <div class="ecran-a">
+    <div class="refus">
+      <h2 class="titre-ecran" style="margin:0">Page réservée</h2>
+      <p>« À valider » est réservée aux personnes qui valident les publications. Vos photos proposées sont dans « Mes propositions », avec leur état.</p>
       <div class="actions"><a class="btn ghost" href="/admin/photos/lot?ids=24,25,26"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Revenir au lot</a><a class="btn" href="/admin/photos?statut=proposee&amp;auteur=sebastien">Mes propositions</a></div>
     </div>
   </div></section>
-<section class="mq-ecran large" lang="de" aria-labelledby="etat-7"><p class="mq-etat" id="etat-7" lang="fr">État · En allemand : Ergänzen und vorschlagen</p>
+<section class="mq-ecran large" lang="de" inert aria-labelledby="etat-9"><p class="mq-etat" id="etat-9" lang="fr"><span class="mq-pin" aria-hidden="true">22</span>État · En allemand : Vervollständigen und vorschlagen</p>
   <div class="ecran-a">
-    <div class="ep mq-a" style="margin-bottom:16px"><span class="mq-pin" aria-hidden="true">19</span><a class="ep-retour" href="/admin/photos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Fotothek</a><div class="ep-titre"><h2 class="titre-ecran" style="margin:0">Ergänzen und vorschlagen</h2></div>
-      <p class="ep-meta"><span>3 Fotos, importiert am 14. Okt.</span></p>
-      <div class="ep-actions" style="position:static;padding:0;border:0;background:none"><button class="btn" type="button">3 Fotos vorschlagen</button></div></div>
+    <div class="ep" style="margin-bottom:16px"><a class="ep-retour" href="/admin/photos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Fotothek</a><div class="ep-titre"><h2 class="titre-ecran" style="margin:0">Vervollständigen und vorschlagen</h2></div>
+      <p class="ep-meta"><span>3 Fotos, importiert am 14. Okt.</span><span><a class="enreg enreg--attente" href="#de-datum"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>1 Feld nicht gespeichert: Datum von R0004057</a></span></p>
+      <div class="ep-actions" style="position:static;padding:0;border:0;background:none"><button class="btn" type="button">Die 3 Fotos vorschlagen</button></div></div>
     <form class="bulk bulk-l" action="/admin/photos/actions" method="post" aria-label="Mehrere Fotos auf einmal ändern" style="position:static">
-      <strong>Für die 2 markierten Fotos:</strong>
-      <div class="champ-a"><label for="de-serie">Serie</label><select id="de-serie"><option>Wie bei jedem Foto</option><option selected>Straße</option></select></div>
-      <div class="champ-a"><label for="de-ort">Stadt</label><input id="de-ort" placeholder="Wie bei jedem Foto"></div>
-      <button class="btn ghost" type="submit">Auf 2 Fotos anwenden</button>
-      <p class="hint">Nichts ändert sich vor „Anwenden“.</p>
+      <strong>Für die 2 angekreuzten Fotos:</strong>
+      <div class="champ-a"><label for="de-serie">Serie</label><select id="de-serie"><option>Wie bei jedem Foto</option><option selected lang="fr">Rue</option></select></div>
+      <div class="champ-a"><label for="de-ort">Ort</label><input id="de-ort" placeholder="Wie bei jedem Foto"></div>
+      <button class="btn ghost" type="submit">Auf die 2 Fotos anwenden</button>
+      <p class="hint">Nichts ändert sich, bevor Sie „Anwenden“ wählen.</p>
     </form>
     <div class="champ-a" style="max-width:420px"><label for="de-datum">Datum von R0004057</label><input id="de-datum" value="14/15/2026" aria-invalid="true" aria-describedby="de-datum-e"><p class="err" id="de-datum-e"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Fehler:</b> Es gibt keinen 15. Monat. Schreiben Sie zum Beispiel „14. Okt. 2026“.</span></p></div>
+    <p style="margin:12px 0 0"><button class="sugg" type="button"><span class="s" aria-hidden="true">✦</span>Vorschlag: <span lang="fr">Rue</span><span class="sr-only">,</span> <span class="acc">Übernehmen</span></button></p>
   </div></section>
 </div>
 <aside class="mq-notes" aria-labelledby="mq-t">
-  <p class="mq-id">MQ-08 · administration · thème clair · bureau 1 440 × 900 et Pixel 7 · Sébastien, photographe, vendredi 16 oct. 2026, 21 h 34</p>
+  <p class="mq-id">MQ-08 · administration · thème clair · bureau 1 440 × 900 et Pixel 7 · Sébastien, photographe, vendredi 16 oct. 2026, 21 h 34</p>
   <h2 id="mq-t">Ce qui change</h2>
-  <p class="mq-lead">Sébastien complète les trois photos qu’il a importées le 14 octobre (quai Ligny et la Maine, à Angers) et les propose à Julien sans quitter la page. Ce qui pourrait partir de travers — titre provisoire, date refusée, accord à vérifier, liste qui écrase d’un clic — est dit à sa place et se corrige sur place. Comparé à batch.eta et _import.eta de main.</p>
+  <p class="mq-lead">Sébastien complète les trois photos qu’il a importées le 14 octobre (quai Ligny et la Maine, à Angers) et les propose à Julien sans quitter la page. Ce qui pourrait partir de travers — titre provisoire, date refusée, accord à vérifier, liste qui écrase d’un clic — est dit à sa place et se corrige sur place. Avec ou sans JavaScript. Comparé à batch.eta, _import.eta et layout.eta de main.</p>
   <ol class="mq-reperes">
-    <li><span class="mq-num" aria-hidden="true">1</span><b>Le menu de Sébastien a une issue</b><p>« Publier » contient « Mes propositions » : le rôle Photographe n’a plus de groupe vide.</p><span class="mq-ref">UX-A-04 · UX-A-11</span></li>
-    <li><span class="mq-num" aria-hidden="true">2</span><b>Le titre et l’action suivent le droit du compte</b><p>« Compléter et proposer » et « Proposer les 3 photos », seul bouton plein, pour Sébastien ; « Compléter et publier » pour Julien (état 14). « Voir le dernier import » ouvre la Photothèque filtrée sur ce lot. Au téléphone, l’action passe dans la barre basse, au-dessus des onglets.</p><span class="mq-ref">UX-A-04 · UX-A-20 · UX-A-24 · B&S 1.1 · Nielsen #4</span></li>
-    <li><span class="mq-num" aria-hidden="true">3</span><b>Chaque champ s’enregistre en le quittant</b><p>Une seule règle, celle de MQ-00 : le témoin dit « Enregistré à 21 h 34 » ligne par ligne, et « 1 champ non enregistré : date de R0004057 » en tête, avec un lien vers le champ. Plus d’« Enregistrer en brouillon ». Sans JavaScript : un bouton « Enregistrer » en bas du tableau, la ville en liste <code>&lt;datalist&gt;</code>, la suggestion en case à cocher.</p><span class="mq-ref">UX-A-06 · règle MQ-00 § 12</span></li>
-    <li><span class="mq-num" aria-hidden="true">4</span><b>Les étapes restent visibles au téléphone</b><p>Au bureau, les trois étapes ; au téléphone, une ligne : « Étape 3 sur 3 : Compléter et proposer ».</p><span class="mq-ref">Jury v0 · B&S 1.3 · WCAG 1.3.1</span></li>
-    <li><span class="mq-num" aria-hidden="true">5</span><b>Les doublons sont écartés, et on le dit</b><p>Repérés par leur contenu, les 2 fichiers déjà importés le 14 oct. ne recréent pas de photos ; un lien les montre.</p><span class="mq-ref">UX-A-20 · B&S 5.1</span></li>
-    <li><span class="mq-num" aria-hidden="true">6</span><b>Rien ne change avant « Appliquer »</b><p>Série, ville et date pour les cochées ; « Celle de chaque photo » par défaut, donc aucun écrasement d’un clic ; une liste ne s’applique jamais à la flèche.</p><span class="mq-ref">UX-A-10 · UX-A-21 · WCAG 3.2.2 · B&S 3.1</span></li>
-    <li><span class="mq-num" aria-hidden="true">7</span><b>Chaque ligne a pour en-tête sa photo</b><p>Vignette (160 px) et nom de fichier en th scope="row" ; les champs se lisent « Titre, R0004012.JPG, Minoterie… » au lieu de « Titre de la photo 24 ».</p><span class="mq-ref">UX-A-10 · RGAA 5.7 · RGAA 11.1</span></li>
-    <li><span class="mq-num" aria-hidden="true">8</span><b>« ✦ Suggestion », jamais « Proposée »</b><p>L’assistant suggère « Rue » ; le mot « Proposée » reste le statut. Pastille à filet plein, seul le ✦ en couleur ; un clic accepte.</p><span class="mq-ref">UX-A-16 · UX-A-17 · lexique MQ-00</span></li>
-    <li><span class="mq-num" aria-hidden="true">9</span><b>Une date refusée, dite sous le champ</b><p>Le même message que la fiche (MQ-09) : ce qui ne va pas, puis un exemple ; la saisie reste, la date n’est pas enregistrée, le témoin le dit.</p><span class="mq-ref">UX-A-14 · RGAA 11.10 · WCAG 3.3.1, 3.3.3</span></li>
-    <li><span class="mq-num" aria-hidden="true">10</span><b>L’accord à vérifier se voit dans le lot</b><p>Un lien vers la rubrique Accords de la fiche ; la photo peut être proposée, pas publiée.</p><span class="mq-ref">UX-A-03 · UX-T-01</span></li>
-    <li><span class="mq-num" aria-hidden="true">11</span><b>Ville et traductions dans le lot</b><p>La ville d’après le GPS, et les titres anglais et allemands repliés sous chaque titre (ouverts ici sur la première ligne) : à 20 photos, chaque ligne garde sa hauteur, et il n’est plus besoin d’ouvrir chaque fiche.</p><span class="mq-ref">UX-A-21 · B&S 2.1.2</span></li>
-    <li><span class="mq-num" aria-hidden="true">12</span><b>Le titre provisoire signalé sous le champ</b><p>Le nom de fichier reste visible comme titre provisoire, relié au champ (aria-describedby).</p><span class="mq-ref">UX-A-03 · B&S 1.1</span></li>
-    <li><span class="mq-num" aria-hidden="true">13</span><b>Avant de proposer, corriger sur place</b><p>Le dialogue nomme les photos à corriger et donne les champs ; « Un mot pour Julien » ; [Annuler] [Proposer sans corriger] [Proposer les 3 photos].</p><span class="mq-ref">UX-A-03 · UX-A-04 · B&S 5.1</span></li>
-    <li><span class="mq-num" aria-hidden="true">14</span><b>Publier n’emporte pas une photo sans accord</b><p>Côté administrateur, le dialogue compte ce qui partira (2 sur 3) et dit pourquoi la troisième reste.</p><span class="mq-ref">UX-A-03 · UX-T-01 · B&S 3</span></li>
-    <li><span class="mq-num" aria-hidden="true">15</span><b>La touche P demande confirmation</b><p>Main (0d1925c) limite déjà P à la planche et à l’inspecteur. En plus : un dialogue quand la sélection contient un titre provisoire ou plus de 10 photos, focus sur « Annuler » ; les raccourcis se coupent dans Mon compte (MQ-07).</p><span class="mq-ref">UX-A-02 · WCAG 2.1.4 · B&S 3.1</span></li>
-    <li><span class="mq-num" aria-hidden="true">16</span><b>« Défaire » après « Appliquer »</b><p>Le message d’action de MQ-00 : 10 s, en pause au survol et au focus, la liste revient à « Celle de chaque photo ».</p><span class="mq-ref">UX-A-08 · UX-A-10</span></li>
-    <li><span class="mq-num" aria-hidden="true">17</span><b>La ville la plus probable d’abord</b><p>Villes déjà utilisées, puis distance au GPS de la photo : « Angers » avant « Anvers » (l’essai d’audit plaçait Porto à Port Harcourt).</p><span class="mq-ref">UX-A-21 · B&S 2.1</span></li>
-    <li><span class="mq-num" aria-hidden="true">18</span><b>Une page refusée reste dans l’admin</b><p>Le menu, un titre clair, et deux issues : revenir au lot, ou « Mes propositions ». Plus de 403 au thème du site public.</p><span class="mq-ref">UX-A-04 · UX-A-30 · Nielsen #9</span></li>
-    <li><span class="mq-num" aria-hidden="true">19</span><b>L’allemand tient</b><p>« Ergänzen und vorschlagen », « Wie bei jedem Foto », « Auf 2 Fotos anwenden » : la barre passe sur deux lignes sans rien couper.</p><span class="mq-ref">Grille, critère 4</span></li>
+    <li><span class="mq-num" aria-hidden="true">1</span><b>Le menu de Sébastien n’a ni groupe vide ni page interdite</b><p>« Publier » contient « Mes propositions » ; « Séries » est un intitulé qui se déplie, pas un lien (sans series.gerer, /admin/series répondrait 403) ; ses séries comptent ses photos, tous statuts : 3, 4, 1, 2, 2 ; Boutique 2 (ses commandes à préparer depuis 10 h 17) ; au pied, Nouveautés 1.90.0, la langue et le thème en formulaires POST, comme layout.eta.</p><span class="mq-ref">UX-A-04 · UX-A-11 · B&S 2.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>Le titre et l’action suivent le droit du compte</b><p>« Compléter et proposer » et « Proposer les 3 photos », seul bouton plein, pour Sébastien ; « Compléter et publier » pour Julien (pastille 16). « Voir le dernier import » ouvre la Photothèque filtrée sur ce lot. Au téléphone, l’action passe dans la barre basse.</p><span class="mq-ref">UX-A-04 · UX-A-20 · UX-A-24 · B&S 1.1 · Nielsen #4</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Chaque champ s’enregistre en le quittant</b><p>La règle de MQ-00 : « Enregistré à 21 h 34 » ligne par ligne, et « 1 champ non enregistré : date de R0004057 » en tête, avec un lien vers le champ, qui garde son focus visible malgré son filet d’erreur.</p><span class="mq-ref">UX-A-06 · règle MQ-00 § 12 · RGAA 10.7 · WCAG 2.4.7</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Les étapes restent visibles au téléphone</b><p>Au bureau, les trois étapes ; au téléphone, une ligne : « Étape 3 sur 3 : Compléter et proposer ».</p><span class="mq-ref">B&S 1.3 · WCAG 1.3.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>Les doublons sont écartés, et on le dit</b><p>Repérés par leur contenu, les 2 fichiers déjà importés le 14 oct. ne recréent pas de photos ; un lien les montre.</p><span class="mq-ref">UX-A-20 · B&S 5.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Rien ne change avant « Appliquer »</b><p>Série, ville et date pour les cochées ; « Celle de chaque photo » par défaut, aucun écrasement d’un clic. Au téléphone, la barre se replie derrière un bouton (le .bulk-toggle de main) : les photos viennent d’abord. La case d’en-tête montre l’état mixte (2 sur 3) ; c’est la seule ligne de script de la maquette, l’état mixte ne s’écrivant pas en HTML.</p><span class="mq-ref">UX-A-10 · UX-A-21 · WCAG 3.2.2 · B&S 3.1, 2.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>À 20 photos, ne garder que ce qui reste à faire</b><p>« Les 3 photos · À corriger 1 · Accord à vérifier 1 » : des liens de filtre, sans script ; « À corriger » ne garde que les lignes à reprendre (pastille 20).</p><span class="mq-ref">UX-A-21 · B&S 2.1.2 · B&S 1.1.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Chaque ligne a pour en-tête sa photo</b><p>Vignette (160 px) et nom de fichier en th scope="row" ; les champs se lisent « Titre, R0004012.JPG, Minoterie… » au lieu de « Titre de la photo 24 ».</p><span class="mq-ref">UX-A-10 · RGAA 5.7 · RGAA 11.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>« ✦ Suggestion », jamais « Proposée »</b><p>L’assistant suggère « Rue » ; « Proposée » reste le statut. Le bouton se nomme comme il se lit : « Suggestion : Rue, Accepter ». Sur une ligne.</p><span class="mq-ref">UX-A-16 · UX-A-17 · WCAG 2.5.3 · lexique MQ-00</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>Une date refusée, dite sous la ligne</b><p>Le message prend toute la largeur, sous la ligne de la photo : ce qui ne va pas, un exemple, et que la date n’est pas enregistrée. La saisie reste.</p><span class="mq-ref">UX-A-14 · RGAA 11.10 · WCAG 3.3.1, 3.3.3</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>L’accord à vérifier se voit dans le lot</b><p>Un lien vers la rubrique Accords de la fiche ; la photo peut être proposée, pas publiée.</p><span class="mq-ref">UX-A-03 · UX-T-01</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>Ville et traductions dans le lot</b><p>La ville d’après le GPS, et les titres anglais et allemands repliés sous chaque titre (ouverts ici sur la première ligne) : il n’est plus besoin d’ouvrir chaque fiche.</p><span class="mq-ref">UX-A-21 · B&S 2.1.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>Le titre provisoire signalé sous le champ</b><p>Le nom de fichier reste visible comme titre provisoire, relié au champ (aria-describedby). À 21 h 34, R0004057 n’est pas encore titré : il le sera à 22 h 41 (MQ-20).</p><span class="mq-ref">UX-A-03 · B&S 1.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">14</span><b>Sans JavaScript, le lot marche encore</b><p>« Enregistrer le lot » apparaît (.sans-script) ; la ville se choisit dans une &lt;datalist&gt;, la suggestion devient une case ; le serveur renvoie la page avec un résumé titré et l’erreur sous le champ. La case d’en-tête et le repli de la barre, qui exigent un script, disparaissent (.js-seul).</p><span class="mq-ref">UX-A-06 · RGESN 6.4 · RGAA 11.10</span></li>
+    <li><span class="mq-num" aria-hidden="true">15</span><b>Avant de proposer, corriger sur place</b><p>Le dialogue nomme les photos à corriger et donne les champs ; « Un mot pour Julien » ; [Annuler] [Proposer sans corriger] [Proposer les 3 photos], les deux derniers dans le formulaire (envoi sans script).</p><span class="mq-ref">UX-A-03 · UX-A-04 · B&S 5.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">16</span><b>Publier n’emporte pas une photo sans accord</b><p>Côté administrateur, le dialogue compte ce qui partira (2 sur 3) et dit pourquoi la troisième reste.</p><span class="mq-ref">UX-A-03 · UX-T-01 · B&S 3</span></li>
+    <li><span class="mq-num" aria-hidden="true">17</span><b>La touche P demande confirmation</b><p>Main limite déjà P à la planche et à l’inspecteur. En plus : un dialogue quand la sélection contient un titre provisoire ou plus de 10 photos, focus sur « Annuler » ; les raccourcis se coupent dans Mon compte (MQ-07).</p><span class="mq-ref">UX-A-02 · WCAG 2.1.4 · B&S 3.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">18</span><b>« Défaire » après « Appliquer »</b><p>Le message d’action de MQ-00 : 10 s, en pause au survol et au focus, la liste revient à « Celle de chaque photo ».</p><span class="mq-ref">UX-A-08 · UX-A-10</span></li>
+    <li><span class="mq-num" aria-hidden="true">19</span><b>La ville la plus probable d’abord</b><p>Villes déjà utilisées, puis distance au GPS de la photo : « Angers » avant « Anvers » (l’essai d’audit plaçait Porto à Port Harcourt).</p><span class="mq-ref">UX-A-21 · B&S 2.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">20</span><b>Le filtre « À corriger »</b><p>La seule photo à reprendre, avec ce qui manque et un lien vers sa ligne ; les autres sont dites complètes.</p><span class="mq-ref">UX-A-21 · B&S 2.1.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">21</span><b>Une page refusée reste dans l’administration</b><p>Le menu, un titre clair, une phrase qui parle d’un droit et non d’une personne, et deux issues : revenir au lot, ou « Mes propositions ». Plus de 403 au thème du site public.</p><span class="mq-ref">UX-A-04 · UX-A-30 · Nielsen #9</span></li>
+    <li><span class="mq-num" aria-hidden="true">22</span><b>L’allemand tient</b><p>« Vervollständigen und vorschlagen », « Für die 2 angekreuzten Fotos: », « Auf die 2 Fotos anwenden » (libellés de server/admin-i18n) : la barre passe sur deux lignes, les boutons à la ligne au téléphone, rien n’est coupé ; la série garde son nom français.</p><span class="mq-ref">Grille, critère 4</span></li>
   </ol>
   <h3>Composants</h3>
-  <p>Depuis la consolidation du 16 oct., ils sont dans <code>admin-plus.css</code> (planche MQ-00, section Administration) : la barre latérale du rôle Photographe (ses séries comptées sur ses photos) · « ✦ Suggestion : Rue », pastille qu’un clic accepte (<code>.sugg</code>) · case d’une ligne dont le libellé fait la cible de 32 et 44 px (<code>.chk-l</code>) · relecture d’une saisie (<code>.lu</code>) · point d’attention (<code>.att</code>) · dialogue et message d’action montrés (<code>.voile-a</code>, <code>.toast-ech</code>). Restent locaux : les étapes compactes, la barre « Pour les photos cochées », le tableau du lot, la liste des villes et la page refusée.</p>
+  <p>Tout vient d’<code>admin-plus.css</code> (planche MQ-00, section Administration) : barre latérale du rôle Photographe · « ✦ Suggestion : Rue », pastille qu’un clic accepte (<code>.sugg</code>) · case d’une ligne (<code>.chk-l</code>) · relecture d’une saisie (<code>.lu</code>) · point d’attention (<code>.att</code>) · filtres (<code>.chips</code>) · résumé d’erreurs titré (<code>section.resume-a</code>) · focus d’un champ en erreur · dialogue et message d’action montrés (<code>.voile-a</code>, <code>.toast-ech</code>) · <code>.sans-script</code> ; de <code>admin.css</code> (main) : la barre repliée au téléphone (<code>.bulk-toggle</code>, <code>.bulk-groups</code>). Restent locaux : <code>.js-seul</code> (proposé pour la planche), les étapes compactes, le tableau du lot et sa ligne d’erreur, la liste des villes, la page refusée.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> · <b>consolidation du 16 oct. 2026</b> (outils/consol-admin.mjs, consol-sans-admin.py, Chromium de Playwright 1.64 en conteneur) : axe-core 0 violation au bureau (1 440 × 900, clair) et au téléphone (Pixel 7, clair) ; 0 débordement ni texte coupé à 320, 412, 820, 1 024 et 1 440 px ; 0 cible sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px ; sans annotations, 0 pixel changé hors des pastilles, étiquettes et cadres, au bureau comme au téléphone ; 213 ko et 13 ressources, images différées chargées, polices comprises ; barre latérale dans 900 px · <b>refonte</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur, outils/inspect.sh) · axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation au bureau, au téléphone et à 320, 820 et 1 024 px · Débordement horizontal : 0 à 320, 412, 820, 1 024 et 1 440 px · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (outils/mq00-cibles.mjs, liens dans une phrase exemptés) · Poids : 248 ko, 19 requêtes (3 vignettes de 160 px dans le lot) ; aucun script, aucune ressource tierce · Barre latérale du rôle Photographe (variante de la planche) : 12 entrées et 3 au pied · Allemand : barre « Für die 2 markierten Fotos » sur deux lignes, sans coupure · Sans annotations : 19 pastilles, 7 étiquettes et cadres retirés ; 0 pixel déplacé hors de leur emprise sur 3 458 px au bureau et 6 526 px au téléphone (3 px d’anticrénelage, écart ≤ 7/255).</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>passe 2 du 16 oct. 2026</b> (Chromium de Playwright 1.64 en conteneur ; outils consol-admin.mjs, controle-annotations.mjs, insecables.py, et, écrits pour cette passe, p2adm-de.mjs (allemand), p2adm-focus.mjs (focus), p2adm-img.mjs (images)) : axe-core 0 violation au bureau (1 440 × 900) et au téléphone (Pixel 7), en clair ; 0 débordement ni texte coupé à 320, 412, 820, 1 024 et 1 440 px, en français et en allemand (95 libellés traduits d’après server/admin-i18n, 125 allongés de 35 %) ; focus visible sur les 58 éléments focalisables, la date en erreur comprise ; 0 cible sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px ; barre latérale du rôle Photographe sans défilement dans 900 px ; annotations : rien à redire à 1 440, 412 et 320 px ; 234 ko et 13 ressources, polices et CSS compris (vignettes de 160 px) ; une ligne de script dans la page (l’état mixte de la case d’en-tête), aucune ressource tierce.</p>
 </aside>
 </body>
 </html>

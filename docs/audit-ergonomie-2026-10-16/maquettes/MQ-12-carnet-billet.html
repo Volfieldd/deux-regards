@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>Lisbonne et Porto · Nicephos</title>
-<meta name="description" content="Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : du premier tram de l’Alfama à la barre de Foz, là où le Douro rencontre l’Atlantique.">
+<title>Lisbonne et Porto · Carnets · Nicephos (maquette MQ-12)</title>
+<meta name="description" content="Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : du premier tram de l’Alfama à la barre de Foz, là où le Douro rencontre l’Atlantique.">
 <link rel="canonical" href="https://www.nicephos.art/carnet/lisbonne-et-porto">
 <link rel="alternate" hreflang="fr" href="https://www.nicephos.art/carnet/lisbonne-et-porto">
 <link rel="alternate" hreflang="de" href="https://www.nicephos.art/de/carnet/lisbonne-et-porto">
@@ -28,13 +28,37 @@
 .fin-actions { margin-block: var(--esp-4) 0; }
 .fin { margin-top: var(--esp-12); display: grid; gap: var(--esp-10); }
 .fin h2 { margin: 0 0 var(--esp-3); font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); color: var(--ink); }
-.fin .rangees { --h: 112px; }
-@media (min-width: 768px) { .fin .rangees { --h: 150px; } }
-@media (min-width: 1280px) { .fin .rangees { --h: 168px; } }
+/* Ouverture : en double page au bureau, le titre et le chapô en haut de la colonne de gauche, calés sur le milieu de la photo ;
+   les auteurs, la méta et le sommaire juste dessous (plus de vide entre la méta et le sommaire). Au téléphone, l'ordre du
+   document : titre, chapô, la photo (dans le premier écran), puis auteurs et sommaire ; l'ordre de lecture et de tabulation
+   est le même partout. */
+.billet-ouv-suite { display: flex; flex-direction: column; gap: var(--esp-2); }
+.billet-ouv-suite > * { margin-block: 0; }
+@media (max-width: 899px) { .billet-ouv { gap: var(--esp-3); } }
+@media (min-width: 900px) {
+  .billet-ouv { grid-template-rows: 1fr 1fr; row-gap: var(--esp-3); }
+  .billet-ouv-t { grid-column: 1; grid-row: 1; align-self: end; padding-top: 0; }
+  .billet-ouv-photo { grid-column: 2; grid-row: 1 / span 2; }
+  .billet-ouv-suite { grid-column: 1; grid-row: 2; align-self: start; }
+  .billet-ouv-suite .sommaire { margin-top: var(--esp-3); }
+}
 .tir { display: grid; gap: var(--esp-3); max-width: 640px; }
 .tir h2 { margin: 0; }
 .tir p { margin: 0; color: var(--prose); }
-@media print { .mq-etats { display: none !important; } }
+/* Au téléphone, chaque tirage sur deux lignes (titre, puis auteur et prix) : les cinq lignes ont la même forme. */
+@media (max-width: 599px) { .tir .liste-liens--compacte a { flex-direction: column; align-items: flex-start; justify-content: center; } }
+/* Les noms des auteurs sous le titre : cible de 44 px de haut sans déplacer la ligne (le remplissage d'un lien en ligne
+   n'agrandit pas la ligne). */
+.billet-ouv-suite .auteurs a { padding-block: 11px; }
+/* Carte au trait : 116 px de large au moins au téléphone (la planche la réduit à 92 px sous 480 px), pour que ses noms de ville
+   (17 unités sur 150) restent à 13 px. */
+@media (max-width: 479px) { .sommaire .carte { width: 116px; } }
+/* Impression : l'adresse sous chaque cartel et en fin de billet passe de 9 à 10 pt (13,3 px) : rien sous 13 px, même sur papier.
+   À reporter dans public.css § 21 (une valeur). */
+@media print {
+  .mq-etats { display: none !important; }
+  .cartel[data-adresse]::after, main[data-adresse]::after { font-size: 10pt; }
+}
 /* Zone des autres états (maquette) */
 .mq-etats { padding-top: var(--esp-12); }
 .etat-in { padding: var(--esp-4) var(--gut) var(--esp-5); }
@@ -45,15 +69,19 @@
 .etat-in .billet-ext { margin-top: var(--esp-3); font-size: var(--t-prose); line-height: 1.7; color: var(--prose); max-width: 62ch; }
 .etat-in .billet-ext p { margin: 0 0 1em; }
 .vu .photo img { max-height: min(52vh, 420px); }
-/* Feuille imprimée (aperçu) : les valeurs du mode jour, sur une page A4 réduite */
-.feuille { margin: var(--esp-4) auto; width: min(100%, 560px); font-size: 12px; }
-.feuille .f-tete, .feuille .f-pied { font-size: 10px; color: var(--mute); }
-.feuille .f-pied { margin-top: 20px; padding-top: 8px; border-top: 1px solid var(--rule); }
-.feuille .f-h1 { margin: 18px 0 4px; font: 300 28px/1.1 var(--sans); }
-.feuille p { margin: 0 0 8px; color: var(--prose); }
-.feuille img { width: 100%; height: auto; margin-top: 10px; }
-.feuille .f-cartel { margin: 4px 0 12px; font-size: 10px; color: var(--mute); }
-.feuille .f-cartel b { display: block; font-weight: 500; font-size: 11px; color: var(--ink); }
+/* Aperçu d'impression : la feuille de la planche (§ 26) à l'échelle 1 (A4 = 794 px de large, 11 pt = 14,7 px), le haut de la
+   page 1 tel que le produit la feuille @media print ; au téléphone, la même feuille, sur la largeur de l'écran. Rien sous 13 px. */
+.mq-etats .feuille { max-width: 794px; margin-inline: auto; padding: var(--esp-6) var(--esp-6) var(--esp-5); font-size: 14.7px; line-height: 1.55; display: grid; gap: var(--esp-2); }
+@media (max-width: 767px) { .mq-etats .feuille { padding: var(--esp-3) var(--esp-2) var(--esp-4); } }
+.feuille .f-et { font: 500 13.3px/1.3 var(--sans); letter-spacing: var(--capitales); text-transform: uppercase; color: var(--mute); }
+.feuille .f-h1 { font: 300 32px/1.12 var(--sans); }
+.feuille .f-chapo { font-size: 16px; color: var(--prose); max-width: 60ch; }
+.feuille .f-meta, .feuille .f-adr, .feuille .f-pied { font-size: 13.3px; color: var(--mute); }
+.feuille figure { margin: var(--esp-1) 0 0; }
+.feuille img { display: block; width: auto; height: auto; max-width: 100%; max-height: 453px; }
+.feuille figcaption { display: grid; gap: 2px; padding-top: var(--esp-1); }
+.feuille .f-ct { font-size: 14.7px; }
+.feuille .f-pied { margin-top: var(--esp-2); padding-top: var(--esp-1); border-top: 1px solid var(--rule); }
 </style>
 </head>
 <body>
@@ -70,7 +98,7 @@
     <div class="sh-outils">
       <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
       <details class="lang-pick">
-        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
         <ul aria-label="Choisir la langue">
           <li><a href="/langue/fr?vers=%2Fcarnet%2Flisbonne-et-porto" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
           <li><a href="/langue/en?vers=%2Fcarnet%2Flisbonne-et-porto" hreflang="en" lang="en">English</a></li>
@@ -100,85 +128,87 @@
     <div class="billet-ouv-t">
       <p class="etiquette">Voyages</p>
       <h1 class="titre-page" id="titre">Lisbonne et Porto</h1>
-      <p class="chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : du premier tram de l’Alfama à la barre de Foz, là où le Douro rencontre l’Atlantique.</p>
-      <div><span class="mq-pin" aria-hidden="true">2</span>
-        <p class="auteurs">Par <a href="/a-propos#sebastien">Sébastien</a> et <a href="/a-propos#julien">Julien</a></p>
-        <p class="billet-meta">Publié le <time datetime="2026-10-14">14 oct. 2026</time> · mis à jour le <time datetime="2026-10-15">15 oct. 2026</time> · 4 min de lecture · 10 photos</p>
-      </div>
-      <nav class="sommaire" aria-labelledby="som-t"><span class="mq-pin" aria-hidden="true">3</span>
-        <svg class="carte" viewBox="0 0 150 214" role="img" aria-label="Itinéraire : Lisbonne le samedi, puis Porto le dimanche, plus au nord sur la même côte atlantique." focusable="false">
-          <polyline class="cote" points="46.7,9.0 48.6,23.8 52.4,38.1 53.9,48.6 49.1,69.7 43.4,100.1 37.7,124.9 33.4,134.2 18.2,149.1 17.3,173.9 13.5,185.0 17.3,190.0 25.4,190.6 30.6,189.4 33.4,186.3 35.8,180.1 38.2,187.5 34.4,192.5 26.8,193.1 27.3,199.3 26.8,207.4"/>
-          <path class="trajet" d="M31.5 186 C 44 150, 52 110, 55.5 41"/>
-          <circle class="pt" cx="30.6" cy="188.8" r="3.2"/><circle class="pt" cx="55.8" cy="38.1" r="3.2"/>
-          <text x="46" y="200">1 Lisbonne</text><text x="64" y="44">2 Porto</text>
-        </svg>
-        <div>
-          <p class="sommaire-t" id="som-t">Dans ce billet</p>
-          <ol>
-            <li><a href="#samedi"><span class="s-n" aria-hidden="true">1</span><span><span class="s-nom">Samedi 10 octobre, Lisbonne</span> <span class="s-d">· 6 photos</span></span></a></li>
-            <li><a href="#dimanche"><span class="s-n" aria-hidden="true">2</span><span><span class="s-nom">Dimanche 11 octobre, Porto</span> <span class="s-d">· 4 photos</span></span></a></li>
-          </ol>
-        </div>
-      </nav>
+      <p class="chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : du premier tram de l’Alfama à la barre de Foz, là où le Douro rencontre l’Atlantique.</p>
     </div>
     <figure class="billet-ouv-photo photo"><span class="mq-pin" aria-hidden="true">4</span>
       <a href="/photo/alfama-premier-tram?carnet=lisbonne-et-porto"><img src="_commun/photos/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 900px) 460px, calc(100vw - 48px)" width="600" height="900" alt="Un tram jaune grimpe une pente devant les façades de l’Alfama." fetchpriority="high"><span class="sr-only"> – voir en grand, photo 1 sur 10</span></a>
-      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/alfama-premier-tram"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Alfama, Lisbonne · sam. 10 oct., 7 h 42</span></figcaption>
+      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/alfama-premier-tram"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Alfama, Lisbonne · sam. 10 oct., 7 h 42</span></figcaption>
     </figure>
+    <div class="billet-ouv-suite">
+        <div><span class="mq-pin" aria-hidden="true">2</span>
+          <p class="auteurs">Par <a href="/a-propos#sebastien">Sébastien</a> et <a href="/a-propos#julien">Julien</a></p>
+          <p class="billet-meta">Publié le <time datetime="2026-10-14">14 oct. 2026</time> · mis à jour le <time datetime="2026-10-15">15 oct. 2026</time> · 4 min de lecture · 10 photos</p>
+        </div>
+        <nav class="sommaire" aria-labelledby="som-t"><span class="mq-pin" aria-hidden="true">3</span>
+          <svg class="carte" viewBox="0 0 150 214" role="img" aria-label="Itinéraire : Lisbonne le samedi, puis Porto le dimanche, plus au nord sur la même côte atlantique." focusable="false">
+            <polyline class="cote" points="46.7,9.0 48.6,23.8 52.4,38.1 53.9,48.6 49.1,69.7 43.4,100.1 37.7,124.9 33.4,134.2 18.2,149.1 17.3,173.9 13.5,185.0 17.3,190.0 25.4,190.6 30.6,189.4 33.4,186.3 35.8,180.1 38.2,187.5 34.4,192.5 26.8,193.1 27.3,199.3 26.8,207.4"/>
+            <path class="trajet" d="M31.5 186 C 44 150, 52 110, 55.5 41"/>
+            <circle class="pt" cx="30.6" cy="188.8" r="3.2"/><circle class="pt" cx="55.8" cy="38.1" r="3.2"/>
+            <text x="46" y="200">1 Lisbonne</text><text x="64" y="44">2 Porto</text>
+          </svg>
+          <div>
+            <p class="sommaire-t" id="som-t">Dans ce billet</p>
+            <ol>
+              <li><a href="#samedi"><span class="s-n" aria-hidden="true">1</span><span><span class="s-nom">Samedi 10 octobre, Lisbonne</span> <span class="s-d">· 6 photos</span></span></a></li>
+              <li><a href="#dimanche"><span class="s-n" aria-hidden="true">2</span><span><span class="s-nom">Dimanche 11 octobre, Porto</span> <span class="s-d">· 4 photos</span></span></a></li>
+            </ol>
+          </div>
+        </nav>
+    </div>
   </div>
 
   <div class="billet">
-    <p><span class="mq-pin" aria-hidden="true">5</span>Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une journée.</p>
+    <p><span class="mq-pin" aria-hidden="true">5</span>Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une journée.</p>
 
-    <h2 class="jour" id="samedi"><span class="s-n" aria-hidden="true">1</span>Samedi 10 octobre, Lisbonne</h2>
-    <p>Levés avant le premier tram, quand l’Alfama sent encore le café et le linge mouillé. Julien a attendu le 28 dans la montée : il passe toutes les douze minutes, et il en a fallu quatre pour que la lumière tombe au bon endroit. Le tram est monté à vide ; la ville dormait encore.</p>
+    <h2 class="jour" id="samedi"><span class="s-n" aria-hidden="true">1</span>Samedi 10 octobre, Lisbonne</h2>
+    <p>Levés avant le premier tram, quand l’Alfama sent encore le café et le linge mouillé. Julien a attendu le 28 dans la montée : il passe toutes les douze minutes, et il en a fallu quatre pour que la lumière tombe au bon endroit. Le tram est monté à vide ; la ville dormait encore.</p>
     <p>Une rue plus haut, toute une façade séchait au même fil. Julien n’a eu qu’à lever les yeux.</p>
     <figure class="photo"><span class="mq-pin" aria-hidden="true">6</span>
       <a href="/photo/linge-au-balcon?carnet=lisbonne-et-porto"><img src="_commun/photos/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w, _commun/photos/1600/linge.webp 1600w" sizes="(min-width: 1024px) 640px, calc(100vw - 48px)" width="900" height="600" alt="Façade rose, six fenêtres, un fil de linge de couleurs." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 2 sur 10</span></a>
-      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/linge-au-balcon"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · Alfama, Lisbonne · sam. 10 oct., 8 h 15</span></figcaption>
+      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/linge-au-balcon"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · Alfama, Lisbonne · sam. 10 oct., 8 h 15</span></figcaption>
     </figure>
     <p>Sébastien, lui, était descendu vers le Tage. Au Cais do Sodré, la marée basse découvre une rangée de pieux que personne ne regarde. Il y est resté une heure, le temps qu’un pêcheur entre dans le cadre et en ressorte.</p>
     <figure class="photo f-large"><span class="mq-pin" aria-hidden="true">7</span>
       <a href="/photo/cais-do-sodre-maree-basse?carnet=lisbonne-et-porto"><img src="_commun/photos/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w, _commun/photos/1600/cais.webp 1600w" sizes="(min-width: 1024px) 1080px, calc(100vw - 48px)" width="900" height="600" alt="Une rangée de pieux dans l’eau grise du Tage, un pêcheur seul au loin." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 3 sur 10</span></a>
-      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/cais-do-sodre-maree-basse"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · Cais do Sodré, Lisbonne · sam. 10 oct., 10 h 20</span></figcaption>
+      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/cais-do-sodre-maree-basse"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · Cais do Sodré, Lisbonne · sam. 10 oct., 10 h 20</span></figcaption>
     </figure>
-    <p>Le soir, nous nous sommes encore séparés : Julien sur le miradouro da Graça, Sébastien au bord de l’eau, à Belém. Treize minutes d’écart, sept kilomètres, et le même soleil. En comparant nos cartes mémoire, nous avons compris que la règle venait de céder, et que c’était tant mieux.</p>
-    <figure class="diptyque f-ecran"><span class="mq-pin" aria-hidden="true">8</span>
-      <figcaption class="diptyque-t"><p class="etiquette">Même soir, deux regards</p><p class="cartel-m">Lisbonne, samedi 10 octobre 2026, entre 18 h 52 et 19 h 05</p></figcaption>
+    <p>Le soir, nous nous sommes encore séparés : Julien sur le miradouro da Graça, Sébastien au bord de l’eau, à Belém. Treize minutes d’écart, sept kilomètres, et le même soleil. En comparant nos cartes mémoire, nous avons compris que la règle venait de céder, et que c’était tant mieux.</p>
+    <figure class="diptyque f-ecran">
+      <figcaption class="diptyque-t"><span class="mq-pin" aria-hidden="true">8</span><p class="etiquette">Même soir</p><p class="cartel-m">deux regards, à 18 h 52 puis à 19 h 05</p></figcaption>
       <div class="diptyque-paire">
-        <figure class="photo" style="--r:1.5"><a href="/photo/miradouro-l-heure-doree?carnet=lisbonne-et-porto"><img src="_commun/photos/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w, _commun/photos/1600/miradouro.webp 1600w" sizes="(min-width: 1024px) 640px, calc(100vw - 48px)" width="900" height="600" alt="Deux silhouettes sur un belvédère, la ville et le Tage dans le soleil couchant." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 4 sur 10</span></a><figcaption class="cartel" data-adresse="nicephos.art/photo/miradouro-l-heure-doree"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Julien · Miradouro da Graça, Lisbonne · sam. 10 oct., 18 h 52</span></figcaption></figure>
-        <figure class="photo" style="--r:1.5"><a href="/photo/belem-contre-jour?carnet=lisbonne-et-porto"><img src="_commun/photos/belem.webp" srcset="_commun/photos/480/belem.webp 480w, _commun/photos/belem.webp 900w, _commun/photos/1600/belem.webp 1600w" sizes="(min-width: 1024px) 640px, calc(100vw - 48px)" width="900" height="600" alt="La tour de Belém en ombre chinoise devant un soleil couchant sur le fleuve." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 5 sur 10</span></a><figcaption class="cartel" data-adresse="nicephos.art/photo/belem-contre-jour"><span class="cartel-t">Belém, contre-jour</span><span class="cartel-m">Sébastien · Belém, Lisbonne · sam. 10 oct., 19 h 05</span></figcaption></figure>
+        <figure class="photo" style="--r:1.5"><a href="/photo/miradouro-l-heure-doree?carnet=lisbonne-et-porto"><img src="_commun/photos/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w, _commun/photos/1600/miradouro.webp 1600w" sizes="(min-width: 1024px) calc(50vw - 88px), (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="900" height="600" alt="Deux silhouettes sur un belvédère, la ville et le Tage dans le soleil couchant." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 4 sur 10</span></a><figcaption class="cartel" data-adresse="nicephos.art/photo/miradouro-l-heure-doree"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Julien · Miradouro da Graça, Lisbonne · sam. 10 oct., 18 h 52</span></figcaption></figure>
+        <figure class="photo" style="--r:1.5"><a href="/photo/belem-contre-jour?carnet=lisbonne-et-porto"><img src="_commun/photos/belem.webp" srcset="_commun/photos/480/belem.webp 480w, _commun/photos/belem.webp 900w, _commun/photos/1600/belem.webp 1600w" sizes="(min-width: 1024px) calc(50vw - 88px), (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="900" height="600" alt="La tour de Belém en ombre chinoise devant un soleil couchant sur le fleuve." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 5 sur 10</span></a><figcaption class="cartel" data-adresse="nicephos.art/photo/belem-contre-jour"><span class="cartel-t">Belém, contre-jour</span><span class="cartel-m">Sébastien · Belém, Lisbonne · sam. 10 oct., 19 h 05</span></figcaption></figure>
       </div>
     </figure>
-    <p><span class="mq-pin" aria-hidden="true">9</span>En remontant par la rua dos Remédios, Julien s’est arrêté devant Inês. Elle vend des fleurs depuis trente ans au même coin de rue. Il lui a tendu la carte « Bonjour », qui dit en portugais ce que nous faisons de nos photos ; elle l’a lue, a souri, et a répondu :</p>
+    <p><span class="mq-pin" aria-hidden="true">9</span>En remontant par la rua dos Remédios, Julien s’est arrêté devant Inês. Elle vend des fleurs depuis trente ans au même coin de rue. Il lui a tendu la carte « Bonjour », qui dit en portugais ce que nous faisons de nos photos ; elle l’a lue, a souri, et a répondu :</p>
     <figure class="citation">
       <blockquote lang="pt-PT"><p>«Fotografe à vontade. As flores não fogem, e eu também não.»</p></blockquote>
-      <p class="trad">« Photographiez tant que vous voulez. Les fleurs ne s’en vont pas, et moi non plus. »</p>
+      <p class="trad">« Photographiez tant que vous voulez. Les fleurs ne s’en vont pas, et moi non plus. »</p>
       <figcaption>Inês, fleuriste, rua dos Remédios</figcaption>
     </figure>
     <figure class="photo photo--cote f-cote" style="--photo-h:min(70vh, 600px)">
       <a href="/photo/ines-rua-dos-remedios?carnet=lisbonne-et-porto"><img src="_commun/photos/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 900px) 400px, calc(100vw - 48px)" width="600" height="900" alt="Une fleuriste de trois quarts, un bouquet de fleurs claires contre elle." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 6 sur 10</span></a>
-      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/ines-rua-dos-remedios"><span class="cartel-t">Inês, rua dos Remédios</span><span class="cartel-m">Julien · Rua dos Remédios, Lisbonne · sam. 10 oct., 19 h 20</span></figcaption>
+      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/ines-rua-dos-remedios"><span class="cartel-t">Inês, rua dos Remédios</span><span class="cartel-m">Julien · Rua dos Remédios, Lisbonne · sam. 10 oct., 19 h 20</span></figcaption>
     </figure>
     <p><span class="mq-pin" aria-hidden="true">10</span>Julien raconte cette rencontre, et ce qu’elle nous a appris sur la façon de demander, dans <a href="/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a>.</p>
 
-    <h2 class="jour" id="dimanche"><span class="s-n" aria-hidden="true">2</span>Dimanche 11 octobre, Porto</h2>
-    <p>À Porto, le Douro garde sa brume jusqu’à dix heures. Au marché do Bolhão, Tiago a laissé Sébastien photographier son étal à une condition : que les oranges soient dans le cadre. Pendant ce temps, Julien attendait sur les quais de la Ribeira que le pont sorte du blanc.</p>
+    <h2 class="jour" id="dimanche"><span class="s-n" aria-hidden="true">2</span>Dimanche 11 octobre, Porto</h2>
+    <p>À Porto, le Douro garde sa brume jusqu’à dix heures. Au marché do Bolhão, Tiago a laissé Sébastien photographier son étal à une condition : que les oranges soient dans le cadre. Pendant ce temps, Julien attendait sur les quais de la Ribeira que le pont sorte du blanc.</p>
     <div class="paire f-large"><span class="mq-pin" aria-hidden="true">11</span>
-      <figure class="photo" style="--r:0.6667"><a href="/photo/tiago-marche-do-bolhao?carnet=lisbonne-et-porto"><img src="_commun/photos/tiago.webp" srcset="_commun/photos/480/tiago.webp 320w, _commun/photos/tiago.webp 600w, _commun/photos/1600/tiago.webp 1067w" sizes="(min-width: 1024px) 220px, 34vw" width="600" height="900" alt="Un marchand en silhouette derrière un étal d’oranges et de fruits." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 7 sur 10</span></a><figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/tiago-marche-do-bolhao"><span class="cartel-t">Tiago, marché do Bolhão</span><span class="cartel-m">Sébastien · Mercado do Bolhão, Porto · dim. 11 oct., 8 h 30</span></figcaption></figure>
-      <figure class="photo" style="--r:1.5"><a href="/photo/ribeira-brume-du-fleuve?carnet=lisbonne-et-porto"><img src="_commun/photos/ribeira.webp" srcset="_commun/photos/480/ribeira.webp 480w, _commun/photos/ribeira.webp 900w, _commun/photos/1600/ribeira.webp 1600w" sizes="(min-width: 1024px) 480px, 60vw" width="900" height="600" alt="Les quais de la Ribeira et l’arche du pont presque effacés par la brume." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 8 sur 10</span></a><figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/ribeira-brume-du-fleuve"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Julien · Ribeira, Porto · dim. 11 oct., 9 h 10</span></figcaption></figure>
+      <figure class="photo" style="--r:0.6667"><a href="/photo/tiago-marche-do-bolhao?carnet=lisbonne-et-porto"><img src="_commun/photos/tiago.webp" srcset="_commun/photos/480/tiago.webp 320w, _commun/photos/tiago.webp 600w, _commun/photos/1600/tiago.webp 1067w" sizes="(min-width: 1280px) calc(25vw - 33px), (min-width: 1024px) calc(25vw - 28px), (min-width: 768px) 230px, calc(100vw - 48px)" width="600" height="900" alt="Un marchand en silhouette derrière un étal d’oranges et de fruits." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 7 sur 10</span></a><figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/tiago-marche-do-bolhao"><span class="cartel-t">Tiago, marché do Bolhão</span><span class="cartel-m">Sébastien · Mercado do Bolhão, Porto · dim. 11 oct., 8 h 30</span></figcaption></figure>
+      <figure class="photo" style="--r:1.5"><a href="/photo/ribeira-brume-du-fleuve?carnet=lisbonne-et-porto"><img src="_commun/photos/ribeira.webp" srcset="_commun/photos/480/ribeira.webp 480w, _commun/photos/ribeira.webp 900w, _commun/photos/1600/ribeira.webp 1600w" sizes="(min-width: 1280px) calc(56vw - 72px), (min-width: 1024px) calc(56vw - 61px), (min-width: 768px) 405px, calc(100vw - 48px)" width="900" height="600" alt="Les quais de la Ribeira et l’arche du pont presque effacés par la brume." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 8 sur 10</span></a><figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/ribeira-brume-du-fleuve"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Julien · Ribeira, Porto · dim. 11 oct., 9 h 10</span></figcaption></figure>
     </div>
-    <p>À midi, Julien a compté les marches des escaliers des Guindais : deux cent soixante. Il les a montées deux fois, la seconde pour attendre quelqu’un qui les monterait à sa place.</p>
+    <p>À midi, Julien a compté les marches des escaliers des Guindais : deux cent soixante. Il les a montées deux fois, la seconde pour attendre quelqu’un qui les monterait à sa place.</p>
     <figure class="photo photo--cote f-cote">
       <a href="/photo/escaliers-des-guindais?carnet=lisbonne-et-porto"><img src="_commun/photos/escaliers.webp" srcset="_commun/photos/480/escaliers.webp 320w, _commun/photos/escaliers.webp 600w, _commun/photos/1600/escaliers.webp 1067w" sizes="(min-width: 900px) 400px, calc(100vw - 48px)" width="600" height="900" alt="Une silhouette au milieu d’un long escalier en diagonale, mur clair." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 9 sur 10</span></a>
-      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/escaliers-des-guindais"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · Escadas dos Guindais, Porto · dim. 11 oct., 12 h 30</span></figcaption>
+      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/escaliers-des-guindais"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · Escadas dos Guindais, Porto · dim. 11 oct., 12 h 30</span></figcaption>
     </figure>
-    <p>L’après-midi, Sébastien est parti vers l’embouchure. À Foz, là où le fleuve devient l’océan, la barre cogne contre la jetée et le phare s’allume avant la nuit. C’est la dernière photo du voyage, et la plus simple : une ligne d’eau, une lumière.</p>
+    <p>L’après-midi, Sébastien est parti vers l’embouchure. À Foz, là où le fleuve devient l’océan, la barre cogne contre la jetée et le phare s’allume avant la nuit. C’est la dernière photo du voyage, et la plus simple : une ligne d’eau, une lumière.</p>
     <figure class="photo f-large">
       <a href="/photo/foz-la-barre?carnet=lisbonne-et-porto"><img src="_commun/photos/foz.webp" srcset="_commun/photos/480/foz.webp 480w, _commun/photos/foz.webp 900w, _commun/photos/1600/foz.webp 1600w" sizes="(min-width: 1024px) 1080px, calc(100vw - 48px)" width="900" height="600" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><span class="sr-only"> – voir en grand, photo 10 sur 10</span></a>
-      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/foz-la-barre"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Sébastien · Foz do Douro, Porto · dim. 11 oct., 17 h 20</span></figcaption>
+      <figcaption class="cartel cartel--grand" data-adresse="nicephos.art/photo/foz-la-barre"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Sébastien · Foz do Douro, Porto · dim. 11 oct., 17 h 20</span></figcaption>
     </figure>
-    <p>Sébastien a cherché la mer, Julien les gens. Inês nous a vendu des fleurs, Tiago nous a laissé photographier son étal : merci à eux.</p>
+    <p>Sébastien a cherché la mer, Julien les gens. Inês nous a vendu des fleurs, Tiago nous a laissé photographier son étal : merci à eux.</p>
     <p class="fin-signe">Sébastien et Julien</p>
     <div class="actions fin-actions"><span class="mq-pin" aria-hidden="true">12</span>
       <a class="btn btn--filet" href="mailto:contact@example.org?subject=%C3%80%20propos%20de%20%C2%AB%20Lisbonne%20et%20Porto%20%C2%BB">Écrire à Sébastien et Julien</a>
@@ -190,37 +220,38 @@
 <div class="fin">
   <section aria-labelledby="planche-t"><span class="mq-pin" aria-hidden="true">13</span>
     <h2 id="planche-t">Les 10 photos de ce billet</h2>
-    <ul class="rangees">
-      <li style="--r:0.6667"><a class="vignette" href="/photo/alfama-premier-tram?carnet=lisbonne-et-porto"><img src="_commun/photos/480/tram.webp" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · 10 oct.</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/linge-au-balcon?carnet=lisbonne-et-porto"><img src="_commun/photos/480/linge.webp" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · 10 oct.</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/cais-do-sodre-maree-basse?carnet=lisbonne-et-porto"><img src="_commun/photos/480/cais.webp" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · 10 oct.</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/miradouro-l-heure-doree?carnet=lisbonne-et-porto"><img src="_commun/photos/480/miradouro.webp" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Julien · 10 oct.</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/belem-contre-jour?carnet=lisbonne-et-porto"><img src="_commun/photos/480/belem.webp" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Belém, contre-jour</span><span class="cartel-m">Sébastien · 10 oct.</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/ines-rua-dos-remedios?carnet=lisbonne-et-porto"><img src="_commun/photos/480/ines.webp" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Inês, rua dos Remédios</span><span class="cartel-m">Julien · 10 oct.</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/tiago-marche-do-bolhao?carnet=lisbonne-et-porto"><img src="_commun/photos/480/tiago.webp" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Tiago, marché do Bolhão</span><span class="cartel-m">Sébastien · 11 oct.</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/ribeira-brume-du-fleuve?carnet=lisbonne-et-porto"><img src="_commun/photos/480/ribeira.webp" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Julien · 11 oct.</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/escaliers-des-guindais?carnet=lisbonne-et-porto"><img src="_commun/photos/480/escaliers.webp" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · 11 oct.</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/foz-la-barre?carnet=lisbonne-et-porto"><img src="_commun/photos/480/foz.webp" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Sébastien · 11 oct.</span></span></a></li>
+    <ul class="rangees" aria-label="Les 10 photos, dans l’ordre du billet">
+      <li style="--r:0.6667"><a class="vignette" href="/photo/alfama-premier-tram?carnet=lisbonne-et-porto"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w" sizes="(min-width: 1280px) 210px, (min-width: 768px) 175px, calc(50vw - 28px)" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/linge-au-balcon?carnet=lisbonne-et-porto"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w" sizes="(min-width: 1280px) 470px, (min-width: 768px) 390px, calc(100vw - 48px)" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/cais-do-sodre-maree-basse?carnet=lisbonne-et-porto"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w" sizes="(min-width: 1280px) 470px, (min-width: 768px) 390px, calc(100vw - 48px)" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/miradouro-l-heure-doree?carnet=lisbonne-et-porto"><img src="_commun/photos/480/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w" sizes="(min-width: 1280px) 470px, (min-width: 768px) 390px, calc(100vw - 48px)" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/belem-contre-jour?carnet=lisbonne-et-porto"><img src="_commun/photos/480/belem.webp" srcset="_commun/photos/480/belem.webp 480w, _commun/photos/belem.webp 900w" sizes="(min-width: 1280px) 470px, (min-width: 768px) 390px, calc(100vw - 48px)" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Belém, contre-jour</span><span class="cartel-m">Sébastien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/ines-rua-dos-remedios?carnet=lisbonne-et-porto"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w" sizes="(min-width: 1280px) 210px, (min-width: 768px) 175px, calc(50vw - 28px)" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Inês, rua dos Remédios</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/tiago-marche-do-bolhao?carnet=lisbonne-et-porto"><img src="_commun/photos/480/tiago.webp" srcset="_commun/photos/480/tiago.webp 320w, _commun/photos/tiago.webp 600w" sizes="(min-width: 1280px) 210px, (min-width: 768px) 175px, calc(50vw - 28px)" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Tiago, marché do Bolhão</span><span class="cartel-m">Sébastien · Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/ribeira-brume-du-fleuve?carnet=lisbonne-et-porto"><img src="_commun/photos/480/ribeira.webp" srcset="_commun/photos/480/ribeira.webp 480w, _commun/photos/ribeira.webp 900w" sizes="(min-width: 1280px) 470px, (min-width: 768px) 390px, calc(100vw - 48px)" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/escaliers-des-guindais?carnet=lisbonne-et-porto"><img src="_commun/photos/480/escaliers.webp" srcset="_commun/photos/480/escaliers.webp 320w, _commun/photos/escaliers.webp 600w" sizes="(min-width: 1280px) 210px, (min-width: 768px) 175px, calc(50vw - 28px)" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/foz-la-barre?carnet=lisbonne-et-porto"><img src="_commun/photos/480/foz.webp" srcset="_commun/photos/480/foz.webp 480w, _commun/photos/foz.webp 900w" sizes="(min-width: 1280px) 470px, (min-width: 768px) 390px, calc(100vw - 48px)" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Sébastien · Porto · 11 oct. 2026</span></span></a></li>
     </ul>
   </section>
 
   <section class="tir" aria-labelledby="tir-t"><span class="mq-pin" aria-hidden="true">14</span>
     <h2 class="titre-2" id="tir-t">Cinq de ces photos existent en tirage</h2>
-    <p>Signés et numérotés, en édition de 15 exemplaires, sur Hahnemühle Photo Rag : à partir de 180 €.<span class="tva" style="display:block;margin-top:var(--esp-demi)">TVA non applicable, art. 293 B du CGI.</span></p>
+    <p>Signés et numérotés, en édition de 15 exemplaires, sur Hahnemühle Photo Rag, en deux formats.</p>
     <ul class="liste-liens liste-liens--compacte">
-      <li><a href="/tirages/cais-do-sodre-maree-basse"><span class="liste-liens-n">Cais do Sodré, marée basse</span><span class="liste-liens-d">Sébastien</span></a></li>
-      <li><a href="/tirages/miradouro-l-heure-doree"><span class="liste-liens-n">Miradouro, l’heure dorée</span><span class="liste-liens-d">Julien</span></a></li>
-      <li><a href="/tirages/ribeira-brume-du-fleuve"><span class="liste-liens-n">Ribeira, brume du fleuve</span><span class="liste-liens-d">Julien</span></a></li>
-      <li><a href="/tirages/escaliers-des-guindais"><span class="liste-liens-n">Escaliers des Guindais</span><span class="liste-liens-d">Julien</span></a></li>
-      <li><a href="/tirages/foz-la-barre"><span class="liste-liens-n">Foz, la barre</span><span class="liste-liens-d">Sébastien</span></a></li>
+      <li><a href="/tirages/cais-do-sodre-maree-basse"><span class="liste-liens-n">Cais do Sodré, marée basse</span><span class="liste-liens-d">Sébastien · à partir de 180 €</span></a></li>
+      <li><a href="/tirages/miradouro-l-heure-doree"><span class="liste-liens-n">Miradouro, l’heure dorée</span><span class="liste-liens-d">Julien · à partir de 180 €</span></a></li>
+      <li><a href="/tirages/ribeira-brume-du-fleuve"><span class="liste-liens-n">Ribeira, brume du fleuve</span><span class="liste-liens-d">Julien · à partir de 180 €</span></a></li>
+      <li><a href="/tirages/escaliers-des-guindais"><span class="liste-liens-n">Escaliers des Guindais</span><span class="liste-liens-d">Julien · à partir de 180 €</span></a></li>
+      <li><a href="/tirages/foz-la-barre"><span class="liste-liens-n">Foz, la barre</span><span class="liste-liens-d">Sébastien · à partir de 180 €</span></a></li>
     </ul>
+    <p class="tva">TVA non applicable, art. 293 B du CGI.</p>
   </section>
 
   <section aria-labelledby="voisins-t"><span class="mq-pin" aria-hidden="true">15</span>
     <h2 id="voisins-t" class="sr-only">Autres billets</h2>
     <nav class="voisins" aria-labelledby="voisins-t">
-      <a href="/carnet/pourquoi-nous-ne-recadrons-pas" class="prec"><span class="sens">← Billet précédent</span><span class="t">Pourquoi nous ne recadrons pas</span><span class="m">Sébastien · 2 oct. 2026</span></a>
-      <a href="/carnet/ines-ou-comment-demander-une-photo" class="suiv"><span class="sens">Billet suivant →</span><span class="t">Inês, ou comment demander une photo</span><span class="m">Julien · 15 oct. 2026</span></a>
+      <a href="/carnet/pourquoi-nous-ne-recadrons-pas" class="prec"><span class="sens">← Billet précédent</span><span class="t">Pourquoi nous ne recadrons pas</span><span class="m">Sébastien · 2 oct. 2026</span></a>
+      <a href="/carnet/ines-ou-comment-demander-une-photo" class="suiv"><span class="sens">Billet suivant →</span><span class="t">Inês, ou comment demander une photo</span><span class="m">Julien · 15 oct. 2026</span></a>
     </nav>
     <p class="actions" style="margin-top:var(--esp-4)"><a class="lien" href="/carnet/flux.xml" type="application/atom+xml"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.4" fill="currentColor" stroke="none"/></svg>S’abonner au flux RSS des carnets</a><a class="lien" href="/carnet">Tous les billets</a></p>
   </section>
@@ -231,7 +262,7 @@
   <div class="sf-in">
     <div>
       <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
-      <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage, un tirage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
+      <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage, un tirage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
     </div>
     <nav class="sf-groupes" aria-label="Pied de page">
       <div>
@@ -257,61 +288,68 @@
   </div>
 </footer>
 
-<!-- ================= Autres états (maquette) : des écrans réels, inertes, chacun sous son étiquette ================= -->
+<!-- ================= Autres états (maquette) : des écrans réels, inertes, chacun nommé par son étiquette ================= -->
 <aside class="mq-etats wrap" aria-label="Autres états de l’écran (maquette)">
   <div class="etat-deux">
-    <div class="mq-ecran mq-fond sombre" inert><p class="mq-etat">État · une photo ouverte depuis le billet</p>
+    <section class="mq-ecran mq-fond sombre" inert aria-labelledby="e-vu"><p class="mq-etat" id="e-vu"><span class="mq-pin" aria-hidden="true">16</span>État · une photo ouverte depuis le billet (/photo/miradouro-l-heure-doree?carnet=lisbonne-et-porto)</p>
       <header class="sh sh--contexte">
         <div class="sh-bar">
-          <a class="sh-retour" href="/carnet/lisbonne-et-porto#samedi"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Retour au billet : </span>Lisbonne et Porto</span></a>
+          <a class="sh-retour" href="/carnet/lisbonne-et-porto#samedi"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Retour au billet : </span>Lisbonne et Porto</span></a>
           <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
           <div class="sh-outils">
-            <details class="lang-pick"><summary><span>FR</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary></details>
-            <details class="sh-menu"><summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span></summary></details>
+            <details class="lang-pick"><summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary><ul aria-label="Choisir la langue"><li><a href="/langue/fr" hreflang="fr" aria-current="true">Français</a></li><li><a href="/langue/en" hreflang="en" lang="en">English</a></li><li><a href="/langue/de" hreflang="de" lang="de">Deutsch</a></li></ul></details>
           </div>
         </div>
       </header>
       <div class="vu">
-        <nav class="vu-nav" aria-label="Photos du billet"><a class="lien" href="/photo/cais-do-sodre-maree-basse?carnet=lisbonne-et-porto">← Cais do Sodré, marée basse</a><span class="pos">4 / 10</span><a class="lien" href="/photo/belem-contre-jour?carnet=lisbonne-et-porto">Belém, contre-jour →</a></nav>
-        <figure class="photo"><img src="_commun/photos/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w, _commun/photos/1600/miradouro.webp 1600w" sizes="min(100vw, 630px)" width="900" height="600" alt="Deux silhouettes sur un belvédère, la ville et le Tage dans le soleil couchant." loading="lazy" decoding="async"><figcaption class="cartel cartel--grand"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Julien · Miradouro da Graça, Lisbonne · sam. 10 oct., 18 h 52</span><span class="cartel-m">Photo 4 sur 10 · Lisbonne et Porto, samedi 10 octobre</span></figcaption></figure>
+        <nav class="vu-nav" aria-label="Photos du billet">
+          <a class="lien" href="/photo/cais-do-sodre-maree-basse?carnet=lisbonne-et-porto"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span><span class="sr-only">Photo précédente : </span>Cais do Sodré, marée basse</span></a>
+          <span class="pos">4 / 10</span>
+          <a class="lien" href="/photo/belem-contre-jour?carnet=lisbonne-et-porto"><span><span class="sr-only">Photo suivante : </span>Belém, contre-jour</span><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </nav>
+        <figure class="photo"><img src="_commun/photos/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w, _commun/photos/1600/miradouro.webp 1600w" sizes="(min-width: 1280px) 630px, (min-width: 1024px) calc(58vw - 120px), calc(100vw - 96px)" width="900" height="600" alt="Deux silhouettes sur un belvédère, la ville et le Tage dans le soleil couchant." loading="lazy" decoding="async"><figcaption class="cartel cartel--grand"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Julien · Miradouro da Graça, Lisbonne · sam. 10 oct., 18 h 52</span><span class="cartel-l">On attendait le soleil ; il a pris son temps, et nous aussi.</span></figcaption></figure>
+        <div class="vu-actions">
+          <form class="bascule-form" method="post" action="/photo/miradouro-l-heure-doree/aime"><button class="bascule" type="submit" aria-pressed="false"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>J’aime <span class="bascule-n">12</span></button></form>
+          <a class="lien" href="/tirages/miradouro-l-heure-doree">Tirage : à partir de 180 €</a>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="mq-ecran mq-fond mode-jour" inert><p class="mq-etat">État · mode jour, au choix du système</p>
+    <section class="mq-ecran mq-fond mode-jour" inert aria-labelledby="e-jour"><p class="mq-etat" id="e-jour"><span class="mq-pin" aria-hidden="true">17</span>État · nouveauté à créer : le mode automatique, ici sur un téléphone réglé en clair (le site passe en Nicephos jour)</p>
       <div class="etat-in">
         <p class="etiquette">Voyages</p>
         <p class="titre-page">Lisbonne et Porto</p>
         <p class="chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens.</p>
-        <p class="billet-meta" style="margin-top:var(--esp-2)">Publié le <time datetime="2026-10-14">14 oct. 2026</time> · mis à jour le <time datetime="2026-10-15">15 oct. 2026</time></p>
+        <p class="billet-meta" style="margin-top:var(--esp-2)">Publié le <time datetime="2026-10-14">14 oct. 2026</time> · mis à jour le <time datetime="2026-10-15">15 oct. 2026</time></p>
         <div class="billet-ext"><p>Sébastien, lui, était descendu vers le Tage. Au Cais do Sodré, la marée basse découvre une rangée de pieux que personne ne regarde.</p></div>
-        <figure class="photo" style="margin:0"><img src="_commun/photos/480/cais.webp" width="480" height="320" alt="" loading="lazy" decoding="async"><figcaption class="cartel cartel--grand"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · Cais do Sodré, Lisbonne · sam. 10 oct., 10 h 20</span></figcaption></figure>
+        <figure class="photo" style="margin:0"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w, _commun/photos/1600/cais.webp 1600w" sizes="(min-width: 1024px) calc(42vw - 140px), calc(100vw - 96px)" width="480" height="320" alt="" loading="lazy" decoding="async"><figcaption class="cartel cartel--grand"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · Cais do Sodré, Lisbonne · sam. 10 oct., 10 h 20</span></figcaption></figure>
       </div>
-    </div>
+    </section>
   </div>
 
-  <div class="etat-deux">
-    <div class="mq-ecran mq-fond mode-jour" inert><p class="mq-etat">État · aperçu d’impression (Ctrl+P), page 1</p>
-      <div class="feuille">
-        <p class="f-tete">Nicephos · Carnets</p>
-        <p class="f-h1">Lisbonne et Porto</p>
-        <p>Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens.</p>
-        <p class="f-tete">Par Sébastien et Julien · publié le 14 oct. 2026 · mis à jour le 15 oct. 2026</p>
-        <img src="_commun/photos/480/tram.webp" width="320" height="480" alt="" loading="lazy" decoding="async" style="width:46%">
-        <p class="f-cartel"><b>Alfama, premier tram</b>Julien · Alfama, Lisbonne · sam. 10 oct., 7 h 42 · nicephos.art/photo/alfama-premier-tram</p>
-        <p>Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une journée.</p>
-        <p class="f-pied">Nicephos · www.nicephos.art/carnet/lisbonne-et-porto · © 2026 Sébastien et Julien · 1/4</p>
+  <section class="mq-ecran mq-fond" inert aria-labelledby="e-imp"><p class="mq-etat" id="e-imp"><span class="mq-pin" aria-hidden="true">18</span>État · aperçu d’impression (Ctrl+P), haut de la page 1 sur 4, à l’échelle 1</p>
+      <div class="etat-in">
+        <div class="feuille mode-jour" role="img" aria-label="Aperçu de la page 1 imprimée : noir sur blanc, sans menu ni bouton ; rubrique, titre, chapô, auteurs et dates, la photo du tram et son cartel suivi de son adresse.">
+          <p class="f-et">Voyages</p>
+          <p class="f-h1">Lisbonne et Porto</p>
+          <p class="f-chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : du premier tram de l’Alfama à la barre de Foz, là où le Douro rencontre l’Atlantique.</p>
+          <p>Par Sébastien et Julien</p>
+          <p class="f-meta">Publié le 14 oct. 2026 · mis à jour le 15 oct. 2026 · 4 min de lecture · 10 photos</p>
+          <figure><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="min(302px, calc(100vw - 112px))" width="320" height="480" alt="" loading="lazy" decoding="async"><figcaption><span class="f-ct">Alfama, premier tram</span><span class="f-meta">Julien · Alfama, Lisbonne · sam. 10 oct., 7 h 42</span><span class="f-adr">nicephos.art/photo/alfama-premier-tram</span></figcaption></figure>
+          <p class="f-pied">Page 1 sur 4 · en fin de billet : Nicephos · www.nicephos.art/carnet/lisbonne-et-porto · © 2026 Sébastien et Julien</p>
+        </div>
       </div>
-    </div>
+  </section>
 
-    <div class="mq-ecran mq-fond" inert lang="de"><p class="mq-etat" lang="fr">État · page en allemand (/de/carnet/…)</p>
+    <section class="mq-ecran mq-fond" inert lang="de" aria-labelledby="e-de"><p class="mq-etat" id="e-de" lang="fr"><span class="mq-pin" aria-hidden="true">19</span>État · la page en allemand (/de/carnet/lisbonne-et-porto)</p>
       <header class="sh sh--site">
         <div class="sh-bar">
           <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
           <nav class="sh-nav" aria-label="Hauptmenü"><ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet" aria-current="true">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-sep"><a href="/de/tirages">Kunstdrucke</a></li></ul></nav>
           <div class="sh-outils">
             <a class="sh-outil sh-recherche" href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
-            <details class="lang-pick"><summary><span>DE</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary></details>
-            <details class="sh-menu"><summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span></summary></details>
+            <details class="lang-pick"><summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary><ul aria-label="Sprache wählen"><li><a href="/langue/fr?vers=%2Fcarnet%2Flisbonne-et-porto" hreflang="fr" lang="fr">Français</a></li><li><a href="/langue/en?vers=%2Fcarnet%2Flisbonne-et-porto" hreflang="en" lang="en">English</a></li><li><a href="/langue/de?vers=%2Fcarnet%2Flisbonne-et-porto" hreflang="de" aria-current="true">Deutsch</a></li></ul></details>
+            <details class="sh-menu"><summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary><nav class="sh-panneau" aria-label="Hauptmenü"><ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet" aria-current="true">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/tirages">Kunstdrucke</a></li></ul></nav></details>
           </div>
         </div>
       </header>
@@ -320,42 +358,45 @@
         <p class="etiquette" style="margin-top:var(--esp-2)">Reisen</p>
         <p class="titre-page">Lissabon und Porto</p>
         <p class="chapo">Zwei Tage, zwei Blicke, ein Ozean. Sébastien suchte das Meer, Julien die Menschen.</p>
-        <p class="billet-meta" style="margin-top:var(--esp-2)">Von Sébastien und Julien · veröffentlicht am <time datetime="2026-10-14">14. Okt. 2026</time> · aktualisiert am <time datetime="2026-10-15">15. Okt. 2026</time> · 4 Min. Lesezeit</p>
-        <figure class="photo" style="margin-top:var(--esp-3)"><img src="_commun/photos/480/linge.webp" width="480" height="320" alt="" loading="lazy" decoding="async" style="width:min(100%,360px)"><figcaption class="cartel cartel--grand"><span class="cartel-t" lang="fr">Linge au balcon</span><span class="cartel-m">Julien · Alfama, Lissabon · Sa. 10. Okt., 8.15 Uhr</span></figcaption></figure>
+        <p class="billet-meta" style="margin-top:var(--esp-2)">Von Sébastien und Julien · veröffentlicht am <time datetime="2026-10-14">14. Okt. 2026</time> · aktualisiert am <time datetime="2026-10-15">15. Okt. 2026</time> · 4 Min. Lesezeit</p>
+        <figure class="photo" style="margin-top:var(--esp-3)"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w" sizes="(min-width: 768px) 360px, calc(100vw - 96px)" width="480" height="320" alt="" loading="lazy" decoding="async" style="width:min(100%,360px)"><figcaption class="cartel cartel--grand"><span class="cartel-t" lang="fr">Linge au balcon</span><span class="cartel-m">Julien · Alfama, Lissabon · Sa. 10. Okt., 8:15 Uhr</span></figcaption></figure>
       </div>
-    </div>
-  </div>
+    </section>
 </aside>
 
 <aside class="mq-notes" aria-labelledby="mq-t">
-  <p class="mq-id">MQ-12 · Carnets, le billet « Lisbonne et Porto » · site public, thème Nicephos nuit (jour en état) · v2 du 16 oct. 2026, sur la planche MQ-00</p>
+  <p class="mq-id">MQ-12 · Carnets, le billet « Lisbonne et Porto » · site public, thème Nicephos nuit (jour en état) · v2, passe 2 du 16 oct. 2026, sur la planche MQ-00</p>
   <h2 id="mq-t">Ce qui change</h2>
-  <p class="mq-lead">Sur la démo, « Lisbonne et Porto » est une page Voyage : titre posé sur la photo, ni signature ni date de publication, photos qui renvoient à la galerie entière, rien pour l’impression. Le billet la remplace (LEXIQUE § 4.3) et se met en page comme un livre : une ouverture en double page, un texte de 65 signes, dix photos dans l’ordre fixé, chacune à l’une des trois tailles de l’éditeur, puis une fin qui ouvre sans pousser.</p>
+  <p class="mq-lead">Sur la démo, « Lisbonne et Porto » est une page Voyage : titre posé sur la photo, ni signature ni date de publication, photos qui renvoient à la galerie entière, rien pour l’impression. Le billet la remplace (lexique § 4.3) et se met en page comme un livre : une ouverture en double page, un texte de 65 signes, dix photos dans l’ordre fixé, chacune à l’une des trois tailles de l’éditeur, puis une fin qui ouvre sans pousser.</p>
   <ol class="mq-reperes">
-    <li><span class="mq-num" aria-hidden="true">1</span><b>On sait où l’on est</b><p>En-tête Site de la planche, « Carnets » actif ; fil d’Ariane « Carnets / Lisbonne et Porto » (liste ordonnée, page en aria-current).</p><span class="mq-ref">UX-T-16 · jury T1, T2 · RGAA 12.1 · WCAG 2.4.8</span></li>
-    <li><span class="mq-num" aria-hidden="true">2</span><b>Qui, quand</b><p>Auteurs nommés sous le titre ; « publié le 14 oct. » et « mis à jour le 15 oct. » en &lt;time&gt;, repris en JSON-LD (datePublished, dateModified) et en article:modified_time.</p><span class="mq-ref">UX-T-18 · étude B48, B56, B66, B68 · Opquast 6</span></li>
-    <li><span class="mq-num" aria-hidden="true">3</span><b>Un sommaire et une carte au trait</b><p>Les deux journées, leur nombre de photos, deux ancres. La carte est un tracé de côte en SVG (moins de 1 ko, aucune tuile, aucun tiers), au même trait que le texte.</p><span class="mq-ref">Jury MQ-12 crit. 2 et 11 · UX-F-20 · RGESN 4.7</span></li>
-    <li><span class="mq-num" aria-hidden="true">4</span><b>La couverture est la photo 1</b><p>Par défaut, la première photo du billet (B8) : la verticale du tram ouvre le récit à droite du titre, entière, sans texte posé dessus. Seule image prioritaire de la page.</p><span class="mq-ref">Étude B8, B25 · UX-F-01, UX-F-17 (même principe)</span></li>
-    <li><span class="mq-num" aria-hidden="true">5</span><b>Mode lecture</b><p>Jost 400, 18 px (17 au téléphone), interlignage 1,7, environ 65 signes ; intertitres en 300, sans faux gras. Contraste 12,4:1 en nuit, 11,1:1 en jour.</p><span class="mq-ref">UX-F-29 · UX-T-18 · WCAG 1.4.8, 1.4.12</span></li>
-    <li><span class="mq-num" aria-hidden="true">6</span><b>Trois tailles de photo, pas une de plus</b><p>Normale (colonnes du texte, ici Linge au balcon), large (Cais do Sodré, Foz) et écran (le diptyque) : celles de l’éditeur (?taille=large, ecran). Les verticales gardent leur cartel à côté (Inês, Escaliers).</p><span class="mq-ref">Étude § 1.4 · planche § Cartel</span></li>
-    <li><span class="mq-num" aria-hidden="true">7</span><b>Chaque photo garde le fil</b><p>Lien vers /photo/…?carnet=lisbonne-et-porto : la visionneuse dit « ← Lisbonne et Porto », « Photo 4 sur 10 », suit l’ordre du billet et y ramène (premier état). Le nom du lien ajoute « voir en grand, photo n sur 10 ».</p><span class="mq-ref">UX-F-09 · UX-T-16 · MQ-04 · B&amp;S 3.2</span></li>
-    <li><span class="mq-num" aria-hidden="true">8</span><b>Même soir, deux regards</b><p>Photos 4 et 5, Julien puis Sébastien, à la même hauteur ; titre commun en étiquette, chacune son cartel : le diptyque de la planche, tel quel.</p><span class="mq-ref">UX-F-45 · jury MQ-12 crit. 6 · planche § Diptyque</span></li>
-    <li><span class="mq-num" aria-hidden="true">9</span><b>La langue de la citation est dite</b><p>Portugais balisé lang="pt-PT", guillemets portugais, puis la traduction et la source.</p><span class="mq-ref">UX-F-22 · RGAA 8.7 · WCAG 3.1.2</span></li>
-    <li><span class="mq-num" aria-hidden="true">10</span><b>La mise à jour se voit</b><p>Le 15 oct., un lien vers le billet d’Inês ; la case « mise à jour signalée » de l’éditeur fait apparaître la date. Les liens du texte sont soulignés.</p><span class="mq-ref">Étude B48, B9 · UX-F-23</span></li>
-    <li><span class="mq-num" aria-hidden="true">11</span><b>Une paire sans titre commun</b><p>Tiago et Ribeira, même matin : deux photos à hauteur commune, la « galerie » de deux photos de l’éditeur. Le diptyque reste réservé à « même lieu ou même moment, deux regards ».</p><span class="mq-ref">Étude § 1.4 · jury MQ-12 crit. 11</span></li>
-    <li><span class="mq-num" aria-hidden="true">12</span><b>Écrire, partager</b><p>« Écrire à Sébastien et Julien » ouvre un message déjà titré (B79, rien n’est stocké) ; « Partager ce billet » mène à une page sans script (B57). Pas de commentaires.</p><span class="mq-ref">Étude B57, B78, B79 · UX-F-34</span></li>
-    <li><span class="mq-num" aria-hidden="true">13</span><b>La planche des dix</b><p>En rangées à hauteur commune, cartel standard, sans fond gris ni numéro : la table des planches du livre, et un accès direct à la visionneuse.</p><span class="mq-ref">Jury MQ-12 crit. 6, 10 et 11 · vignettes de 480 px</span></li>
-    <li><span class="mq-num" aria-hidden="true">14</span><b>Les tirages, sans insister</b><p>Les cinq photos du billet qui sont au catalogue, une ligne chacune, un prix de départ et une seule mention de TVA ; ni badge, ni stock, ni urgence.</p><span class="mq-ref">UX-F-11 · UX-T-17 · LEXIQUE § 4.4</span></li>
-    <li><span class="mq-num" aria-hidden="true">15</span><b>Une fin qui ouvre</b><p>Billet précédent et suivant, datés pour lever l’ambiguïté du sens ; le flux RSS et la liste. Le lien « voyage jour par jour » de la v0 disparaît : le billet est le récit.</p><span class="mq-ref">Étude B56 · jury MQ-12 crit. 7</span></li>
+    <li><span class="mq-num" aria-hidden="true">1</span><b>On sait où l’on est</b><p>En-tête Site de la planche, « Carnets » actif ; fil d’Ariane « Carnets / Lisbonne et Porto », celui de la planche (liste ordonnée, page en aria-current, liens de 44 × 44 px).</p><span class="mq-ref">UX-T-16 · RGAA 12.1 · WCAG 2.4.8 · planche § 9</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>Qui, quand</b><p>Auteurs nommés sous le titre ; « Publié le 14 oct. 2026 · mis à jour le 15 oct. 2026 » en &lt;time&gt;, repris en JSON-LD (datePublished, dateModified) et en article:modified_time.</p><span class="mq-ref">UX-T-18 · étude B48, B56, B66, B68 · Opquast 6</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Un sommaire et une carte au trait, sous la méta</b><p>Les deux journées, leur nombre de photos, deux ancres. La carte est un tracé de côte en SVG (moins de 1 ko, aucune tuile, aucun tiers). Le sommaire suit la méta, et tout le texte se centre en hauteur face à la photo : plus de vide entre les deux.</p><span class="mq-ref">Jury v1 MQ-12 crit. 11 · UX-F-20 · RGESN 4.7</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>La couverture est la photo 1</b><p>Par défaut, la première photo du billet (B8) : la verticale du tram ouvre le récit à droite du titre, entière, sans texte posé dessus. Seule image prioritaire de la page.</p><span class="mq-ref">Étude B8, B25 · UX-F-01, UX-F-17</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>Mode lecture</b><p>Jost 400, 18 px (17 au téléphone), interlignage 1,7, environ 65 signes ; intertitres en 300, sans faux gras. Contraste 12,4:1 en nuit, 11,1:1 en jour.</p><span class="mq-ref">UX-F-29 · UX-T-18 · WCAG 1.4.8, 1.4.12</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Trois tailles de photo, et le cartel du récit</b><p>Normale (Linge au balcon), large (Cais do Sodré, Foz) et écran (le diptyque) : celles de l’éditeur ; les verticales gardent leur cartel à côté (Inês, Escaliers). Dans le texte, chaque cartel suit la variante « récit » de la planche (§ 6) : l’auteur, le lieu précis et l’heure (« Julien · Alfama, Lisbonne · sam. 10 oct., 7 h 42 ») ; dans un billet à deux voix, l’auteur reste en tête, comme dans la visionneuse compacte de la planche.</p><span class="mq-ref">Étude § 1.4 · planche § 6 et § 10 · lexique § 0.4</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Chaque photo garde le fil</b><p>Lien vers /photo/…?carnet=lisbonne-et-porto : la visionneuse dit « ← Lisbonne et Porto », « 4 / 10 », suit l’ordre du billet et y ramène (premier état). Le nom du lien ajoute « voir en grand, photo n sur 10 ».</p><span class="mq-ref">UX-F-09 · UX-T-16 · MQ-04 · B&amp;S 3.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Même soir</b><p>Photos 4 et 5, Miradouro (Julien, 18 h 52) puis Belém (Sébastien, 19 h 05), dans l’ordre des heures, comme partout ; l’étiquette « Même soir », puis « deux regards, à 18 h 52 puis à 19 h 05 » en casse normale : le diptyque de la planche, tel quel.</p><span class="mq-ref">UX-F-45 · lexique § 0.5 et § 4.2 · planche § 6</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>La langue de la citation est dite</b><p>Portugais balisé lang="pt-PT", guillemets portugais, puis la traduction et la source.</p><span class="mq-ref">UX-F-22 · RGAA 8.7 · WCAG 3.1.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>La mise à jour se voit</b><p>Le 15 oct., un lien vers le billet d’Inês ; la case « mise à jour signalée » de l’éditeur fait apparaître la date. Les liens du texte sont soulignés.</p><span class="mq-ref">Étude B48, B9 · UX-F-23</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>Une paire sans titre commun</b><p>Tiago et Ribeira, même matin : deux photos à hauteur commune, la « galerie » de deux photos de l’éditeur. Le diptyque reste réservé à « même lieu ou même moment, deux regards ».</p><span class="mq-ref">Étude § 1.4</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>Écrire, partager</b><p>« Écrire à Sébastien et Julien » ouvre un message déjà titré (B79, rien n’est stocké) ; « Partager ce billet » mène à une page sans script (B57). Pas de commentaires.</p><span class="mq-ref">Étude B57, B78, B79 · UX-F-34</span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>La planche des dix</b><p>Les rangées de la planche, telles quelles (hauteur, deux photos au plus par rangée au téléphone, <code>sizes</code> selon le format), et le cartel de vignette standard « Auteur · Lieu · date » : une seule forme en rangée.</p><span class="mq-ref">Jury v1 MQ-12 crit. 6 et 10 · public.css § 5 et 6</span></li>
+    <li><span class="mq-num" aria-hidden="true">14</span><b>Les tirages, sans insister</b><p>Les cinq photos du billet qui sont au catalogue, une ligne chacune avec son prix de départ (« à partir de 180 € »), une seule mention de TVA ; ni badge, ni stock, ni urgence.</p><span class="mq-ref">Jury v1 MQ-12 crit. 7 · UX-F-11 · UX-T-17 · lexique § 2 et 4.4</span></li>
+    <li><span class="mq-num" aria-hidden="true">15</span><b>Une fin qui ouvre</b><p>Billet précédent et suivant, datés pour lever l’ambiguïté du sens ; le flux RSS et la liste.</p><span class="mq-ref">Étude B56</span></li>
+    <li><span class="mq-num" aria-hidden="true">16</span><b>La visionneuse ouverte depuis le billet</b><p>En-tête Contexte : « ← Lisbonne et Porto » ramène à la journée (#samedi). Précédente, position, suivante dans l’ordre du billet ; le cartel du récit et la légende ; « J’aime 12 » et « Tirage : à partir de 180 € ». Son dessin entier est celui de MQ-04.</p><span class="mq-ref">UX-F-09 · MQ-04 · planche § 10 (visionneuse compacte)</span></li>
+    <li><span class="mq-num" aria-hidden="true">17</span><b>Nouveauté : le mode automatique</b><p>Le visiteur dont le système est réglé en clair lit le billet en Nicephos jour ; en sombre, en Nicephos nuit. <b>Ce mode n’existe pas</b> : <code>server/themes.js</code> n’a que deux thèmes fixes, nicephos-nuit et nicephos-jour, choisis dans les réglages pour tout le site, sans <code>prefers-color-scheme</code>.</p><span class="mq-ref">UX-F-29 · WCAG 1.4.3 · évolution du code, voir plus bas</span></li>
+    <li><span class="mq-num" aria-hidden="true">18</span><b>Il s’imprime, lisible</b><p>La feuille @media print du fichier : noir sur blanc, sans menu, fil d’Ariane, sommaire ni actions ; chaque cartel suivi de son adresse ; 4 pages A4. L’aperçu est à l’échelle 1 (texte en 11 pt, soit 14,7 px ; rien sous 10 pt, soit 13,3 px) : l’adresse sous un cartel passe de 9 à 10 pt.</p><span class="mq-ref">UX-F-35 · jury v1 MQ-12 crit. 9 et 14 · RGESN 4.8</span></li>
+    <li><span class="mq-num" aria-hidden="true">19</span><b>En allemand</b><p>En-tête « Reisetagebücher », billet traduit, titres des photos gardés en français et balisés lang="fr", heure à l’allemande (« 8:15 Uhr ») ; même adresse, préfixe /de.</p><span class="mq-ref">Étude B54, B73 · RGAA 8.7 · lexique § 2</span></li>
   </ol>
-  <h3>États montrés</h3>
-  <p>La visionneuse ouverte depuis le billet (aperçu ; son dessin est celui de MQ-04) ; le mode jour, choisi par le système, sur le même appareil que le mode nuit ; l’aperçu d’impression produit par la feuille @media print du fichier (noir sur blanc, sans menu ni actions, cartel suivi de l’adresse, 4 pages A4) ; la page en allemand : en-tête « Reisetagebücher », billet traduit, titres des photos gardés en français et balisés lang="fr".</p>
-  <h3>Nouveautés à annoncer</h3>
-  <p>Le mode « auto » (nuit ou jour selon le système) n’existe pas dans <code>server/themes.js</code>, qui n’a que nicephos-nuit et nicephos-jour : c’est un ajout (UX-F-29). Le contexte <code>?carnet=</code> de la visionneuse est à créer avec <code>?voyage=</code> (V1-05). La mise à jour du 15 oct. 2026 (lien vers « Inês, ou comment demander une photo ») est celle du lexique (§ 4.3).</p>
+  <h3>Nouveautés à annoncer (évolutions du code)</h3>
+  <p><b>Mode automatique</b> (repère 17), à créer : un troisième thème <code>nicephos-auto</code> dans <code>server/themes.js</code> (classes <code>theme-nicephos mode-auto</code>, <code>scheme: 'dark light'</code>, donc <code>&lt;meta name="color-scheme" content="dark light"&gt;</code> dans <code>views/layout.eta</code>) ; dans <code>public/themes/nicephos.css</code>, <code>.mode-auto</code> reprend les valeurs de nuit, et <code>@media (prefers-color-scheme: light)</code> celles de jour (une vingtaine de lignes, sans script ni cookie) ; le choix « Automatique » s’ajoute aux thèmes des Réglages. Coût estimé : une demi-journée, tests de contraste des deux modes compris. <b>Contexte <code>?carnet=</code></b> de la visionneuse, à créer avec <code>?voyage=</code> (V1-05). <b>Adresses</b> à créer (lexique § 2) : <code>/carnet/:slug</code>, <code>/carnet/:slug/partager</code>, <code>/tirages/:slug</code>. <b>Impression</b> : l’adresse sous un cartel en 10 pt au lieu de 9 (style local de ce fichier, à reporter dans <code>public.css</code> § 21).</p>
+  <h3>Ce que la passe 2 a corrigé (jury v1)</h3>
+  <p><b>Homogénéité</b> : une seule forme de cartel par usage (récit dans le texte, vignette standard en rangée), le diptyque dans l’ordre des heures et sous l’étiquette du lexique, le fil d’Ariane de la planche, les espaces insécables. <b>Signifiance</b> : un prix de départ par tirage ; dates abrégées dans l’interface (les titres de journée restent du texte, en toutes lettres). <b>Accessibilité</b> : la pastille du diptyque passe dans sa légende, qui redevient le premier enfant de la figure ; aperçu d’impression lisible. <b>Sobriété</b> : <code>srcset</code> et <code>sizes</code> justes partout, états compris ; plus de hauteur de rangée locale. <b>Direction artistique</b> : l’ouverture sans vide entre la méta et le sommaire. <b>Fidélité</b> : le mode automatique déclaré comme nouveauté, avec son coût. <b>Lisibilité</b> : cadres d’état <code>inert</code> et nommés, mesures faites.</p>
   <h3>Composants de la planche</h3>
-  <p>Tous dans <code>_commun/public.css</code> (§ 21, sauf mention) et montrés dans MQ-00 : <code>.billet</code> grille de lecture (texte en colonnes 4 à 9, tailles <code>.f-large</code>, <code>.f-ecran</code>, <code>.f-cote</code>) · <code>.billet-ouv</code> ouverture en double page · <code>.sommaire</code> avec carte au trait · <code>.jour</code> intertitre · <code>.citation</code> citation et traduction · <code>.paire</code> deux photos sans titre commun · <code>.voisins</code> billets précédent et suivant · feuille d’impression du billet · tirages d’un billet en liste de liens compacte (<code>.liste-liens--compacte</code>, § 16). La page n’ajoute que sa mise en page (<code>.tir</code>, <code>.fin</code>).</p>
+  <p>Tous dans <code>_commun/public.css</code> (§ 21, sauf mention) et montrés dans MQ-00 : <code>.billet</code> grille de lecture (<code>.f-large</code>, <code>.f-ecran</code>, <code>.f-cote</code>) · <code>.billet-ouv</code> · <code>.sommaire</code> et sa carte au trait · <code>.jour</code> · <code>.citation</code> · <code>.paire</code> · <code>.diptyque</code> (§ 7) · <code>.rangees</code> (§ 6) · <code>.voisins</code> · <code>.liste-liens--compacte</code> (§ 16) · <code>.vu</code> (§ 20) · <code>.feuille</code> (§ 26). La page n’ajoute que sa mise en page (<code>.tir</code>, <code>.fin</code>, l’ouverture centrée) et l’échelle de l’aperçu d’impression. <b>À verser dans la planche</b> : la variante « récit » du cartel pour un billet à deux voix (l’auteur en tête) ; l’aperçu d’impression à l’échelle 1 et l’adresse des cartels en 10 pt.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures" id="mesures"><b>Mesures</b> (16 oct. 2026, Chromium 1.64 en conteneur, outils/inspect.sh) · à compléter</p>
+  <p class="mq-mesures" id="mesures"><b>Mesures</b> (passe 2, 16 oct. 2026, Chromium de Playwright 1.64 en conteneur ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, passe2-rangees.mjs, mq1112-images.mjs, mq1112-focus.mjs, mq1112-petits.mjs, insecables.py, html-validate) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7 · largeurs 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête en allemand : 0 débordement, 0 texte coupé · gabarit des annotations à 1 440, 412 et 320 px : rien à redire · sans annotations : 0 pixel changé dans l’interface · rangées : deux photos au plus par rangée au téléphone (412 et 320 px) ; 23 images sur 24 à la taille d’affichage à 320, 412, 820, 1 024 et 1 440 px ; la 24e, Escaliers des Guindais dans la planche finale au téléphone (97 px affichés à côté d’une horizontale), reçoit le fichier de 600 px que donne la règle <code>sizes</code> commune des verticales : 4 ko de trop, gardés pour ne pas déroger à public.css § 6 · focus : 57 arrêts au bureau, 51 au téléphone, tous visibles, 0 cible sous 24 px au bureau ni sous 44 px au téléphone · 0 texte sous 13 px, aperçu d’impression compris (10 pt, soit 13,3 px, au plus petit) · html-validate : seule remarque, les deux menus « Menu principal » de l’en-tête de la planche, dont un seul est affiché à la fois · insécables : 0 espace à corriger · poids : 320 ko en 17 fichiers au bureau (12 images), 361 ko en 19 fichiers sur Pixel 7 ; aucun script hors JSON-LD, aucune ressource tierce.</p>
 </aside>
 </body>
 </html>
