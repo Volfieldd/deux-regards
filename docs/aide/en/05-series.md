@@ -13,7 +13,7 @@ Series group the photos together (Street, Portrait…). They form the site's ind
   The order is saved straight away, and a message gives the new place.
 - **Delete:** **⋯** menu, **Delete…**. A window opens.
   - Empty series: confirm.
-  - Series with photos: **they are never deleted**. Choose the series to move them to, then **Move the *n* photos and delete**.
+  - Series with photos: **they are never deleted**. Choose the series to move them to, then **Move the *n* photos and delete**. This changes the series of all its photos: it is reserved for an account that can edit all photos (administrator); the moderator only deletes an empty series.
 
 To file photos in a series, the quickest way is the [multiple selection](photos#agir-sur-plusieurs-photos) on the Photos page. On the site, a series with no published photo is greyed out and cannot be clicked.
 

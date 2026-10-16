@@ -158,7 +158,7 @@ A photographer does not publish on their own: they **submit**, and a moderator (
 - **Unpublish**: the moderator says why; the photographer receives the reason.
 - **Notifications**: “Today” tells everyone what is waiting for them (submissions to approve, submitted, scheduled, sent-back photos). Everyone can also choose to be notified **by email**, in **Your account** on the Today page (if sending email is configured on the server).
 - **History**: each photo keeps who submitted, approved, scheduled, sent back or unpublished it, and when.
-- **Per-photographer settings** (**Publishing workflow** page, moderators and administrators): **Publish their photos without approval** (the photographer then publishes their own photos directly, outside the workflow) **Edit their photos once published** (yes by default; removed, a published photo no longer changes without the moderator) and **Put their photos in the Instagram queue without approval** (see the “Instagram” help).
+- **Per-photographer settings** (**Publishing workflow** page, moderators and administrators): **Publish their photos without approval** (the photographer then publishes their own photos directly, outside the workflow) **Edit their photos once published** (yes by default; removed, a published photo no longer changes without the moderator) and **Put their photos in the Instagram queue without approval** (see the “Instagram” help). These settings only apply to the Photographer role: they are reset when the account loses that role, and a right that another role of the account already gives (Proofreader, Moderator) cannot be removed here (the page says so).
 
 An administrator publishes directly, as before. A visitor report never unpublishes anything on its own: the moderator decides.
 

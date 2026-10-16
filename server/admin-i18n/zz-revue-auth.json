@@ -1,0 +1,78 @@
+{
+ "Revenir au site": {
+  "en": "Back to the site",
+  "de": "Zurück zur Website"
+ },
+ "Revenir à l’administration": {
+  "en": "Back to the admin",
+  "de": "Zurück zur Verwaltung"
+ },
+ "Utiliser un autre compte": {
+  "en": "Use another account",
+  "de": "Anderes Konto verwenden"
+ },
+ "Formulaire expiré": {
+  "en": "Form expired",
+  "de": "Formular abgelaufen"
+ },
+ "Ce formulaire n’est plus valide. Rechargez la page et recommencez.": {
+  "en": "This form is no longer valid. Reload the page and try again.",
+  "de": "Dieses Formular ist nicht mehr gültig. Laden Sie die Seite neu und versuchen Sie es noch einmal."
+ },
+ "Erreur": {
+  "en": "Error",
+  "de": "Fehler"
+ },
+ "Requête refusée": {
+  "en": "Request refused",
+  "de": "Anfrage abgelehnt"
+ },
+ "Une erreur inattendue est survenue. Réessayez dans un instant.": {
+  "en": "An unexpected error occurred. Try again in a moment.",
+  "de": "Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie es gleich noch einmal."
+ },
+ "déjà donné par un autre rôle du compte": {
+  "en": "already given by another role of the account",
+  "de": "bereits durch eine andere Rolle des Kontos gegeben"
+ },
+ "Compte rétabli par ADMIN_SUBS": {
+  "en": "Account restored by ADMIN_SUBS",
+  "de": "Konto durch ADMIN_SUBS wiederhergestellt"
+ },
+ "Compte créé le {date}.": {
+  "en": "Account created on {date}.",
+  "de": "Konto angelegt am {date}."
+ },
+ "Nom et adresse viennent du fournisseur d’identité : avant de donner un rôle, vérifiez cet identifiant avec la personne (sa page « Compte en attente » l’affiche).": {
+  "en": "Name and address come from the identity provider: before giving a role, check this identifier with the person (their “Account pending” page shows it).",
+  "de": "Name und Adresse stammen vom Identitätsanbieter: Prüfen Sie vor der Vergabe einer Rolle diese Kennung mit der Person (ihre Seite „Konto wartend“ zeigt sie an)."
+ },
+ "Un compte supprimé qui se reconnecte revient « en attente », sans rôle, même avec le rôle « admin » de Zitadel. Pour couper l’accès en gardant la trace du compte, cochez plutôt « Désactivé ».": {
+  "en": "A deleted account that signs in again comes back “pending”, with no role, even with the Zitadel “admin” role. To cut access while keeping a record of the account, tick “Deactivated” instead.",
+  "de": "Ein gelöschtes Konto, das sich erneut anmeldet, kommt „ausstehend“ und ohne Rolle zurück, auch mit der Zitadel-Rolle „admin“. Um den Zugang zu sperren und das Konto nachvollziehbar zu behalten, kreuzen Sie besser „Deaktiviert“ an."
+ },
+ "Adresse laissée pour une réponse : seul un administrateur la voit.": {
+  "en": "Address left for a reply: only an administrator sees it.",
+  "de": "Für eine Antwort hinterlassene Adresse: Nur ein Administrator sieht sie."
+ },
+ "Seul un compte qui peut modifier toutes les photos peut la vider ; une série vide se supprime ici.": {
+  "en": "Only an account that can edit all photos can empty it; an empty series can be deleted here.",
+  "de": "Nur ein Konto, das alle Fotos bearbeiten darf, kann sie leeren; eine leere Serie lässt sich hier löschen."
+ },
+ "Rencontre exportée": {
+  "en": "Encounter exported",
+  "de": "Begegnung exportiert"
+ },
+ "Personne exportée": {
+  "en": "Person exported",
+  "de": "Person exportiert"
+ },
+ "Original téléchargé": {
+  "en": "Original downloaded",
+  "de": "Original heruntergeladen"
+ },
+ "Compte Instagram connecté": {
+  "en": "Instagram account connected",
+  "de": "Instagram-Konto verbunden"
+ }
+}

@@ -133,7 +133,7 @@ Au premier lancement sans données reprises, le site part d'une base vide : pas 
 
 **Autre méthode : modèles Unraid** (sans plugin).
 
-1. Créez le réseau commun, une fois, dans le terminal : `docker network create nicephos`.
+1. Créez le réseau commun, une fois, dans le terminal : `docker network create --subnet 172.29.42.0/24 nicephos`. Le tunnel y a une adresse fixe (`172.29.42.10`, dans `nicephos-tunnel`), la seule dont le site croit `X-Forwarded-For` (`TRUST_PROXY` dans `nicephos`) : un poste du réseau local ne peut pas se faire passer pour un autre visiteur. Un réseau `nicephos` créé sans `--subnet` est à recréer (`docker network rm nicephos`, conteneurs arrêtés).
 2. Copiez les trois fichiers de `modeles/` dans `/boot/config/plugins/dockerMan/templates-user/`.
 3. Docker → **Add Container** → *Template* → `nicephos`. Remplissez les champs (mêmes valeurs que `env.example`), puis **Apply**. Faites de même pour `nicephos-sauvegarde` (mêmes dossiers) et pour `nicephos-tunnel`.
 

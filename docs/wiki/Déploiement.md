@@ -68,7 +68,7 @@ OIDC_ISSUER=… OIDC_CLIENT_ID=… OIDC_CLIENT_SECRET=… OIDC_PROJECT_ID=… OI
 4. Lancer `docker compose --profile tunnel up -d`.
 5. Dans Zitadel, déclarer `https://<domaine>/auth/callback` et `https://<domaine>/`.
 
-L'adresse réelle des visiteurs arrive par `X-Forwarded-For`. Le site fait confiance aux adresses privées (`TRUST_PROXY` par défaut en ligne : `loopback,uniquelocal`), donc à `cloudflared` sur le réseau Docker : la limite de connexions s'applique par visiteur, pas au tunnel entier. Si le port du site est ouvert sur le réseau local (`BIND_ADDR`), un poste de ce réseau peut lui aussi se faire passer pour un autre visiteur : fixez alors `TRUST_PROXY` à l'adresse exacte de `cloudflared`, comme le fait la pile Unraid (réseau dédié, `TUNNEL_IP`).
+L'adresse réelle des visiteurs arrive par `X-Forwarded-For`. Le site fait confiance aux adresses privées (`TRUST_PROXY` par défaut en ligne : `loopback,uniquelocal`), donc à `cloudflared` sur le réseau Docker : la limite de connexions s'applique par visiteur, pas au tunnel entier. Si le port du site est ouvert sur le réseau local (`BIND_ADDR`), un poste de ce réseau peut lui aussi se faire passer pour un autre visiteur : fixez alors `TRUST_PROXY` à l'adresse exacte de `cloudflared`, comme le font la pile et les modèles Unraid (réseau dédié, `TUNNEL_IP`). Tant que `TRUST_PROXY` reste par défaut, le serveur l'écrit dans ses journaux au démarrage.
 
 ## Cloudflare : une seule adresse publique
 

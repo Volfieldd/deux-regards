@@ -13,7 +13,7 @@ Les séries regroupent les photos (Rue, Portrait…). Elles forment l'index du s
   L'ordre est enregistré aussitôt, et un message indique la nouvelle place.
 - **Supprimer :** menu **⋯**, **Supprimer…**. Une fenêtre s'ouvre.
   - Série vide : confirmez.
-  - Série avec des photos : **elles ne sont jamais supprimées**. Choisissez la série où les déplacer, puis **Déplacer les *n* photos et supprimer**.
+  - Série avec des photos : **elles ne sont jamais supprimées**. Choisissez la série où les déplacer, puis **Déplacer les *n* photos et supprimer**. Cela change la série de toutes ses photos : c’est réservé à un compte qui peut modifier toutes les photos (administrateur) ; le modérateur ne supprime qu’une série vide.
 
 Pour classer des photos dans une série, le plus rapide est la [sélection multiple](photos#agir-sur-plusieurs-photos) de la page Photos. Sur le site, une série sans photo publiée est grisée et n'est pas cliquable.
 

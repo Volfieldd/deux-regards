@@ -5,12 +5,13 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
 ## Accès à l'admin
 
 - **Connexion OIDC uniquement**, sans aucun mot de passe dans l'application. Le site vérifie `state`, `nonce`, PKCE (S256), la signature, l'émetteur et l'audience.
-- **Autorisation :** rôle de projet `admin`, lié à l'organisation `OIDC_ORG_ID`. Sans ce rôle : 403 et aucune session.
+- **Autorisation :** rôles du site, donnés dans **Comptes et rôles** et relus à chaque requête. Sans rôle : 403 et aucune session. Le rôle de projet `admin` de Zitadel, lié à l'organisation `OIDC_ORG_ID`, ne sert qu'à l'amorce d'un compte à sa première connexion ; une fois en ligne, sans `OIDC_ORG_ID`, il est ignoré.
 - **Sessions côté serveur :**
   - seule l'empreinte du jeton est en base ;
   - 8 h sans activité, 24 h au plus ;
   - régénérées à chaque connexion.
-- **Cookies :** `httpOnly`, `SameSite=Lax`, et en HTTPS `Secure` avec le préfixe `__Host-`.
+- **Cookies :** `httpOnly`, `SameSite=Lax`, et en HTTPS `Secure` avec le préfixe `__Host-`. Quatre cookies de transaction OIDC au plus, et la page demandée n'y est gardée que si elle est courte : une page tierce ne peut pas gonfler l'en-tête `Cookie` jusqu'au refus (431) du site.
+- **Cache :** aucune réponse de l'admin n'est gardée en cache (`no-store`, fichiers compris).
 - **CSRF :** jeton synchronisé sur toute écriture (champ `_csrf` ou en-tête `x-csrf-token` pour les appels JSON de l'admin : envoi photo par photo, actions groupées, enregistrement champ par champ, ordre des séries). Pour un import, il doit précéder le premier fichier : aucun fichier n'est lu avant sa vérification.
 - **Suppressions groupées :** jamais sans confirmation explicite (`confirm`) ; sans elle, l'admin affiche une page de confirmation.
 - **Redirections :** le paramètre `next` est normalisé par l'analyseur d'URL. Une adresse qui mène hors du site est refusée, y compris avec des caractères de contrôle ou des segments `/./` ou `/../` qui, une fois normalisés, donneraient `//autre-site`.
@@ -18,8 +19,8 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
   - tentatives de connexion limitées par adresse (`AUTH_RATE_LIMIT`, 30 par 10 minutes par défaut) ;
   - IPv6 par bloc /64, mémoire bornée ;
   - `TRUST_PROXY=true` refusé.
-- **Journal d'audit :** chaque action d'écriture de l'admin est journalisée (`action admin`), avec le compte (`sub`), la route et le résultat.
-- **Journaux :** le code et le `state` OIDC, et le jeton de l'adresse d'image Instagram, sont masqués dans les URL, même encodés dans un paramètre ; les adresses IP sont tronquées (/24 en IPv4, /48 en IPv6).
+- **Journal d'audit :** chaque action d'écriture de l'admin est journalisée (`action admin`), avec le compte (`sub`), la route et le résultat, ainsi que les lectures les plus sensibles : exports RGPD (rencontre, personne), téléchargement d'un original, connexion du compte Instagram.
+- **Journaux :** le code et le `state` OIDC, le jeton de l'adresse d'image Instagram, celui d'une photo offerte (`/pour-vous/…`) et le code de contrôle d'une carte (`/bonjour/J-0042-…`) sont masqués dans les URL, même encodés dans un paramètre ; les adresses IP sont tronquées (/24 en IPv4, /48 en IPv6).
 
 ## Site public
 
@@ -50,7 +51,7 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
   - chaîne jusqu'au certificat racine attendu.
 - **Réponse de la TSA :** 64 ko au plus, sans redirection suivie ; un jeton mal formé est refusé proprement.
 - **Sans certificat racine configuré :** la vérification le dit (« autorité non vérifiée ») au lieu de conclure « preuve valide ».
-- **Téléchargement des originaux :** réservé à l'admin, pour constituer un dossier de preuve.
+- **Téléchargement des originaux :** réservé aux comptes qui en ont le droit (Administrateur ; Photographe pour ses photos), pour constituer un dossier de preuve ; chaque téléchargement est noté au Journal.
 
 ## Fichiers reçus
 
@@ -66,17 +67,20 @@ Dès que `PUBLIC_URL` est en HTTPS ou que `NODE_ENV=production`, le serveur refu
 - sans `COOKIE_SECRET` ;
 - avec un émetteur OIDC en HTTP ;
 - avec la connexion locale de test (`LOCAL_AUTH_TOKEN`) ;
-- avec une autorité d'horodatage en HTTP (`TSA_URL`).
+- avec une autorité d'horodatage en HTTP (`TSA_URL`) ;
+- en production (`NODE_ENV=production`) sans `PUBLIC_URL`.
+
+En conteneur (`REQUIRE_PERSISTENT_STORAGE=1`), il refuse aussi une base (`DATABASE_PATH`) hors du dossier des données. Avec `TRUST_PROXY` laissé par défaut sur un serveur joignable du réseau, il l'écrit dans ses journaux au démarrage.
 
 Détail et autres refus de démarrage : [Configuration](Configuration), section « Site en ligne ».
 
 ## Points d'attention
 
 - **Mode EXIF « Tout l'EXIF de l'original » :** il publie la position GPS des photos.
-- **Rôles :** ils vivent dans la base du site et sont relus à chaque requête ; un rôle retiré dans **Comptes et rôles** s'applique tout de suite. Le rôle `admin` de Zitadel ne sert qu'à la première connexion.
+- **Rôles :** ils vivent dans la base du site et sont relus à chaque requête ; un rôle retiré dans **Comptes et rôles** s'applique tout de suite. Le rôle `admin` de Zitadel ne sert qu'à la première connexion : un compte supprimé qui se reconnecte revient « en attente », sans rôle (seul son `sub` est gardé, table `accounts_removed`, le temps qu'il revienne). L'e-mail d'un compte n'est retenu que s'il est vérifié par le fournisseur.
 - **HSTS :** il est envoyé sans `includeSubDomains`. À ajouter une fois le domaine choisi, si tous ses sous-domaines sont en HTTPS.
 - **Cache des images publiées :** il dure un an. Une photo dépubliée cesse d'être servie par le site, mais un navigateur ou un proxy qui l'a déjà en cache peut la garder.
-- **Rôles et permissions :** chaque route de l'admin déclare une permission (`server/permissions.js`) ; une route qui n'en déclare pas empêche le démarrage, et une permission absente du compte est refusée (fermé par défaut). Les routes à plusieurs actions (actions groupées, fiche qui publie, effacement avec photos, réglages) vérifient aussi l'action précise. Quatre rôles existent (Administrateur, Photographe, Modérateur, Relecteur), donnés dans **Comptes et rôles** ; un compte inconnu arrive « en attente », sans accès. Garde-fous : au moins un administrateur actif, pas de désactivation de soi-même, `ADMIN_SUBS` toujours administrateurs. Le lien compte ↔ photographe ne se règle plus dans la fiche Photographe (porte d'escalade fermée). Portée « les miennes » (rôle Photographe) : ce qui n'est pas au photographe lié au compte n'existe pas pour lui (404 sur les photos, images de l'admin, rencontres, personnes, sorties, QR), les listes, la recherche, « Aujourd'hui » et les statistiques sont filtrées à la source, et une personne partagée entre photographes ne se modifie que par un administrateur. Le **Journal** (en base, 13 mois) dit qui a fait quoi. Revue de sécurité et de code du 15 octobre 2026 : la permission de chaque route est vérifiée sur le photographe de la chose visée (et pas seulement sa visibilité), les annulations et les identifiants envoyés dans un formulaire suivent la même portée, une session sans compte n'apporte aucun rôle, et retirer les rôles ou désactiver un compte ferme ses sessions.
+- **Rôles et permissions :** chaque route de l'admin déclare une permission (`server/permissions.js`) ; une route qui n'en déclare pas empêche le démarrage, et une permission absente du compte est refusée (fermé par défaut). Les routes à plusieurs actions (actions groupées, fiche qui publie, effacement avec photos, réglages) vérifient aussi l'action précise. Quatre rôles existent (Administrateur, Photographe, Modérateur, Relecteur), donnés dans **Comptes et rôles** ; un compte inconnu arrive « en attente », sans accès. Garde-fous : au moins un administrateur actif, pas de désactivation de soi-même, `ADMIN_SUBS` toujours administrateurs. Le lien compte ↔ photographe ne se règle plus dans la fiche Photographe (porte d'escalade fermée). Portée « les miennes » (rôle Photographe) : ce qui n'est pas au photographe lié au compte n'existe pas pour lui (404 sur les photos, images de l'admin, rencontres, personnes, sorties, QR), les listes, la recherche, « Aujourd'hui » et les statistiques sont filtrées à la source, et une personne partagée entre photographes ne se modifie que par un administrateur. Le **Journal** (en base, 13 mois) dit qui a fait quoi. Revue de sécurité et de code du 15 octobre 2026 : la permission de chaque route est vérifiée sur le photographe de la chose visée (et pas seulement sa visibilité), les annulations et les identifiants envoyés dans un formulaire suivent la même portée, une session sans compte n'apporte aucun rôle, et retirer les rôles ou désactiver un compte ferme ses sessions. Revue du 16 octobre 2026 : un compte supprimé ne redevient pas administrateur par le rôle de Zitadel, `ADMIN_SUBS` rétablit aussi un compte désactivé, la connexion de test ne change plus les rôles, le modérateur ne voit pas l'adresse laissée avec un signalement et ne vide pas une série qui a des photos, les réglages du circuit ne valent que pour le rôle Photographe (sans ôter ce qu'un autre rôle donne), et une session sans rôle a une sortie.
 
 ## Mesure d’audience
 

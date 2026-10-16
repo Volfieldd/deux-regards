@@ -64,20 +64,20 @@ As long as the essentials are missing (names, address, email, person responsible
 
 **Accounts and roles** (Settings group, administrators only) lists the accounts that have signed in.
 
-- **First sign-in:** the account is created. If Zitadel gives it the “admin” role, it is an administrator; otherwise it stays **pending**, with no access, and “Today” says so. An account never dealt with and left pending for 90 days is deleted (an account whose roles an administrator removed is kept, and the IdP cannot give it the “admin” role back).
+- **First sign-in:** the account is created. If Zitadel gives it the “admin” role, it is an administrator; otherwise it stays **pending**, with no access, and “Today” says so. Name and address come from the identity provider (the address only if it verified it): before giving a role, check with the person the **identifier (sub)** shown under the account, which they also see on their “Account pending” page. An account never dealt with and left pending for 90 days is deleted (an account whose roles an administrator removed is kept, and the IdP cannot give it the “admin” role back).
 - **Give a role:** tick it, then **Give this role** (or **Save**). It takes effect at once, without signing in again; removing it too.
   - **Administrator**: everything, including accounts and the log.
-  - **Moderator**: approves, schedules, publishes and unpublishes (site and Instagram), handles reports, sends photos back or writes notes to the photographer, sets the publishing workflow; does not edit photos and never sees personal data.
+  - **Moderator**: approves, schedules, publishes and unpublishes (site and Instagram), handles reports, sends photos back or writes notes to the photographer, sets the publishing workflow; does not edit photos and never sees personal data (of a report, they read the message, never the address left).
   - **Proofreader**: proofreads and translates texts.
   - **Photographer**: only **their own** photos, outings and the people they met (consent is given per outing and per photographer). They import, edit and delete their photos (which remain their property), see the GDPR requests that concern them, use the Field app and their cards; they do not publish (they propose, for the site as for Instagram), and see neither the Instagram queue, nor settings, nor site traffic (their Statistics show only their photos). What belongs to the other photographer does not exist for them, even by typing the address. A person met by both only appears with their own encounters; merging, splitting, exporting or erasing them is left to the administrator.
 - **Linked photographer:** used for defaults (import, Field app) and decides what a Photographer account sees; with no linked photographer, a Photographer account sees nothing. A photographer can only be linked to one account.
-- **Deactivated:** the account can no longer sign in, and its current session loses access at once.
-- **Delete this account:** the account and its sessions are erased; if it signs in again, it starts over as pending.
-- **Safeguards:** there is always at least one active administrator; you cannot deactivate or delete yourself; accounts listed in `ADMIN_SUBS` (server configuration, marked “protected”) remain administrators whatever happens. The **identifier (sub)** shown under each account is the one to copy into `ADMIN_SUBS` (one click selects it).
+- **Deactivated:** the account can no longer sign in, and its current session loses access at once; a refused attempt does not change its “last sign-in” (the Log keeps it).
+- **Delete this account:** the account and its sessions are erased; if it signs in again, it starts over as pending, with no role, even if Zitadel gives it the “admin” role.
+- **Safeguards:** there is always at least one active administrator; you cannot deactivate or delete yourself; accounts listed in `ADMIN_SUBS` (server configuration, marked “protected”) remain administrators whatever happens (a deactivated or role-less account added to the list becomes an active administrator again when it signs in). The **identifier (sub)** shown under each account is the one to copy into `ADMIN_SUBS` (one click selects it).
 - **Emails** (bottom of the page): shows whether the server can send emails (`SMTP_URL`, `MAIL_FROM`) and from which address. **Send the test** sends an email to the chosen address (yours by default). If it is refused, the reason is shown, for example credentials refused or server unreachable.
 
 The menu only shows the pages the account can open.
 
 ## Log
 
-**Log** (administrators): who did what in the admin, most recent first: sign-ins (successful, pending, refused), changes, publishing, actions on several photos, changed accounts (with the detail: roles, status, linked photographer). Filter by account or by word. Choosing the language and theme is not recorded. The log is kept for 13 months.
+**Log** (administrators): who did what in the admin, most recent first: sign-ins (successful, pending, refused), changes, publishing, actions on several photos, changed accounts (with the detail: roles, status, linked photographer), GDPR exports and downloaded originals. Filter by account or by word. Choosing the language and theme is not recorded. The log is kept for 13 months.

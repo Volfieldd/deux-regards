@@ -63,7 +63,9 @@
             <summary><%= t('Supprimer…') %></summary>
             <form method="post" action="/admin/series/<%= c.id %>/delete" data-delete-series>
               <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-<% if (c.count && others(c).length) { %>
+<% if (c.count && !(it.canAll('photos.modifier') && it.canAll('photos.publiees.modifier'))) { %>
+              <p><%= t('« {name} » contient', { name: c.name }) %> <strong><%= c.count > 1 ? t('{n} photos', { n: c.count }) : t('{n} photo', { n: c.count }) %></strong>. <%= t('Seul un compte qui peut modifier toutes les photos peut la vider ; une série vide se supprime ici.') %></p>
+<% } else if (c.count && others(c).length) { %>
               <p><%= t('« {name} » contient', { name: c.name }) %> <strong><%= c.count > 1 ? t('{n} photos', { n: c.count }) : t('{n} photo', { n: c.count }) %></strong>. <%= t('Elles ne seront pas supprimées : choisissez où les déplacer.') %></p>
               <label><%= t('Déplacer vers') %> <select name="move_to"><% others(c).forEach(o => { %><option value="<%= o.id %>"><%= o.name %></option><% }) %></select></label>
               <button class="btn danger" type="submit"><%= c.count > 1 ? t('Déplacer les {n} photos et supprimer', { n: c.count }) : t('Déplacer la photo et supprimer') %></button>
