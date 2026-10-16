@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { setup } from './helpers.js';
 import { createSessionStore } from '../server/sessions.js';
-import { createReminders, RIGHTS_DELAY } from '../server/reminders.js';
+import { createReminders } from '../server/reminders.js';
 
 // Relances par e-mail : demandes RGPD par quarts du délai d'un mois (photographe, puis administrateur en copie, puis
 // prioritaire), récapitulatif réglable (jamais plus d'un par jour), e-mail de test depuis « Comptes et rôles ».
@@ -45,12 +45,12 @@ test('demande RGPD : photographe tout de suite, rappel au quart, administrateur 
   await c.app.reminders.rights();
   assert.match(c.sent[2].subject, /Second rappel/);
   assert.deepEqual([c.sent[2].to, c.sent[2].cc], ['seb@example.org', ['root@example.org']]);
-  at(Date.now() - 23 * DAY);
+  at(Date.now() - 24 * DAY);                                                              // trois quarts d'un mois de 28 à 31 jours
   await c.app.reminders.rights();
   assert.match(c.sent[3].subject, /URGENT/);
   assert.equal(c.sent[3].priority, 'high');
   assert.deepEqual(c.sent[3].cc, ['root@example.org']);
-  assert.match(c.sent[3].text, /moins d’une semaine/);
+  assert.match(c.sent[3].text, /environ une semaine/);
   // Traitée : plus rien.
   c.app.encounters.rightsDone(id);
   await c.app.reminders.rights();
@@ -67,8 +67,10 @@ test('demande RGPD : serveur arrêté longtemps, une seule relance (l’étape d
   assert.equal(c.sent[0].to, 'root@example.org');                                        // aucun compte photographe joignable
   assert.match(c.sent[0].subject, /Second rappel/);
   assert.match(c.sent[0].text, /a demandé l’accès/);
-  assert.equal(c.app.reminders.stageOf(Date.now() - RIGHTS_DELAY), 4);
-  // Demande depuis /bonjour : remise à zéro, e-mail tout de suite.
+  assert.equal(c.app.reminders.stageOf(Date.now() - 31 * DAY), 4);
+  // Demande traitée, puis nouvelle demande depuis /bonjour : on repart, e-mail tout de suite (une demande en cours,
+  // elle, garde son échéance : voir revue-2026-10-16-rencontres-rgpd.test.js).
+  c.app.encounters.rightsDone(id);
   const r = await c.app.inject({ method: 'POST', url: '/bonjour', payload: { ref: 'S-0043', rights: 'effacement', email: 'x@example.org' } });
   assert.equal(r.statusCode, 303);
   await new Promise(res => setTimeout(res, 50));

@@ -8,9 +8,9 @@ import { isProvisional } from './admin-repo.js';
 import { samePartSql } from './outings.js';
 import { legalMissing } from './legal.js';
 import { translator } from './admin-i18n.js';
+import { rightsDue } from './reminders.js';
 
 export const LEVELS = ['urgent', 'bientot', 'plus-tard'];
-const MONTH = 30 * 864e5;
 
 const FR = translator('fr');
 const dayOf = t => ms => new Intl.DateTimeFormat(t.locale || 'fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
@@ -56,38 +56,39 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
       all: perm => Boolean(sc(perm)?.all),
     };
   };
-  const who = (e, t) => (e.anonymized ? t('refus anonymisé') : `${e.ref || t('sans carte')}${e.name ? ` · ${e.name}` : ''}`);
+  // mail : pour le récapitulatif par e-mail, la référence seulement, jamais le nom de la personne.
+  const who = (e, t, mail = false) => (e.anonymized ? t('refus anonymisé') : `${e.ref || t('sans carte')}${e.name && !mail ? ` · ${e.name}` : ''}`);
 
-  function urgent(t = FR, scope = null) {
+  function urgent(t = FR, scope = null, { mail = false } = {}) {
     const day = dayOf(t);
     const a = access(scope);
     const items = [];
     for (const id of q.rights.all()) {
       const e = encounters.get(id);
       if (!e || !a.can('personnes.demandes', e.author_id)) continue;
-      const due = (e.rights_requested_at || 0) + MONTH;
+      const due = rightsDue(e.rights_requested_at || 0);
       const late = due < now();
-      const w = who(e, t);
+      const w = who(e, t, mail);
       items.push({ level: 'urgent', title: e.rights_request === 'effacement' ? t('Demande d’effacement de {who}', { who: w }) : t('Demande d’accès de {who}', { who: w }),
         detail: late ? t('en retard : à traiter depuis le {date}', { date: day(due) }) : t('à traiter avant le {date}', { date: day(due) }), href: `/admin/rencontres/${id}#droits`, action: t('Traiter') });
     }
     for (const r of q.refusedOnline.all()) {
       const e = encounters.get(r.id);
       if (!e || !a.can('personnes.refus', e.author_id)) continue;
-      const w = who(e, t);
+      const w = who(e, t, mail);
       items.push({ level: 'urgent', title: r.n > 1 ? t('Refus de {who} : {n} photos encore publiées', { who: w, n: r.n }) : t('Refus de {who} : {n} photo encore publiée', { who: w, n: r.n }),
         detail: t('la personne refuse la publication des photos liées'), href: `/admin/rencontres/${r.id}#refus`, action: t('Appliquer le refus') });
     }
     return items;
   }
 
-  function list(t = FR, scope = null) {
+  function list(t = FR, scope = null, { mail = false } = {}) {
     const a = access(scope);
-    const items = urgent(t, scope);
+    const items = urgent(t, scope, { mail });
     for (const r of q.refusedSession.all()) {
       const e = encounters.get(r.id);
       if (!e || !a.can('personnes.refus', e.author_id)) continue;
-      const w = who(e, t);
+      const w = who(e, t, mail);
       items.push({ level: 'bientot', title: r.n > 1 ? t('{who} a refusé : {n} photos publiées de sa sortie à vérifier', { who: w, n: r.n }) : t('{who} a refusé : {n} photo publiée de sa sortie à vérifier', { who: w, n: r.n }),
         detail: t('{author} · {day} : liez au refus celles où la personne figure, excluez les autres', { author: e.author || t('photographe'), day: e.session_day || e.met_on }), href: `/admin/rencontres/${r.id}#session`, action: t('Vérifier') });
     }

@@ -3,7 +3,7 @@
 // le code fait réellement : toute évolution d'un traitement ou d'une durée se reporte ici dans la même modification.
 // Responsables conjoints : les auteurs du site ; contact réglable dans l'admin (privacy_contact).
 
-export const UPDATED = '2026-10-15';
+export const UPDATED = '2026-10-16';
 
 const list = (names, and) => (names.length > 1 ? `${names.slice(0, -1).join(', ')}${and}${names.at(-1)}` : names[0] || '');
 
@@ -37,13 +37,13 @@ export const PRIVACY = {
       ]],
       ['Combien de temps', [
         'Demande sans accord ni refus : effacée après 12 mois sans nouvelle.',
-        'Photo de vous jointe à votre accord : conservée avec l’accord ; sans accord, effacée après 6 mois.',
-        'Accord ou refus (avec la signature) : conservé tant qu’une photo qui vous concerne existe chez nous, puis 5 ans, le temps pendant lequel une action en justice reste possible.',
+        'Photo de vous jointe à votre accord : conservée avec l’accord ; sans accord, effacée après 6 mois (si vous refusez après avoir accepté : 6 mois après votre refus).',
+        'Accord ou refus (avec la signature) : conservé tant qu’une photo qui vous concerne existe chez nous, puis 5 ans après la suppression de la dernière, le temps pendant lequel une action en justice reste possible.',
         'Lien privé pour télécharger votre photo : valable 30 jours, effacé un mois après.',
         'Sauvegardes : la base de données est sauvegardée chaque jour et chaque sauvegarde est effacée au bout de 14 jours ; une photo que nous supprimons disparaît de nos sauvegardes au bout de 90 jours.',
       ]],
       ['Qui reçoit vos données', [
-        'Nous deux uniquement. Nous ne vendons ni ne cédons aucune donnée.',
+        'Nous deux, et les personnes à qui nous confions la modération ou la relecture des photos (chacune avec son compte) : elles voient les photos, jamais vos coordonnées, votre signature ni votre accord. Nous ne vendons ni ne cédons aucune donnée.',
         'Cloudflare achemine les connexions vers notre serveur (il assure le chiffrement HTTPS) ; il agit pour notre compte, sous ses conditions de protection des données, avec des transferts encadrés hors de l’Union européenne (Data Privacy Framework et clauses contractuelles types).',
         'Instagram (Meta) reçoit une photo seulement si vous avez accepté cet usage, qui suppose aussi le site. Si vous refusez Instagram, aucune photo de ce jour-là où vous pourriez figurer n’y est envoyée.',
         'Si nous vous écrivons par e-mail, le message passe par notre fournisseur de messagerie.',
@@ -53,11 +53,11 @@ export const PRIVACY = {
         'Le seul cookie du site public retient la langue que vous choisissez avec le sélecteur de langue. Nos journaux techniques, destinés à la sécurité, ne gardent que des adresses IP tronquées.',
       ]],
       ['Sécurité', [
-        `Accès réservé à nous deux${mfa ? ', avec une authentification à deux facteurs' : ''} ; connexions chiffrées (HTTPS) ; signatures, photos de repère et cartes signées visibles seulement de nous ; données ${encrypted ? 'stockées sur un disque chiffré et ' : ''}sauvegardées chaque jour sur un autre disque${fields ? ' ; vos nom, adresse, signature et messages sont en plus chiffrés dans notre base, avec une clé conservée à part' : ''}.`,
+        `Accès réservé à nous deux et aux personnes que nous autorisons, chacune avec son compte${mfa ? ', avec une authentification à deux facteurs' : ''} ; connexions chiffrées (HTTPS) ; signatures, photos de repère et cartes signées visibles seulement de nous deux ; données ${encrypted ? 'stockées sur un disque chiffré et ' : ''}sauvegardées chaque jour sur un autre disque${fields ? ' ; vos nom, adresse, signature et messages sont en plus chiffrés dans notre base, avec une clé conservée à part' : ''}.`,
       ]],
       ['Vos droits', [
         `Vous pouvez à tout moment demander à accéder à vos données (nous vous en envoyons une copie complète), les faire corriger ou effacer (photos comprises si vous le souhaitez), vous opposer à leur utilisation ou retirer votre accord : sur la page ${host}/bonjour, rubrique « Vos données » (avec la référence de votre carte si vous l’avez), ou à ${contact}. Nous répondons dans un délai d’un mois.`,
-        'Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL (www.cnil.fr/plaintes).',
+        'Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL (www.cnil.fr/plaintes), ou à l’autorité de protection des données de votre pays.',
       ]],
     ],
   },
@@ -90,13 +90,13 @@ export const PRIVACY = {
       ]],
       ['For how long', [
         'Request without consent or refusal: deleted after 12 months without news.',
-        'Photo of you attached to your consent: kept with the consent; without consent, deleted after 6 months.',
-        'Consent or refusal (with the signature): kept as long as a photo concerning you exists with us, then 5 years, the period during which legal action remains possible.',
+        'Photo of you attached to your consent: kept with the consent; without consent, deleted after 6 months (if you refuse after agreeing: 6 months after your refusal).',
+        'Consent or refusal (with the signature): kept as long as a photo concerning you exists with us, then 5 years after the last one is deleted, the period during which legal action remains possible.',
         'Private link to download your photo: valid for 30 days, deleted one month later.',
         'Backups: the database is backed up every day and each backup is deleted after 14 days; a photo we delete disappears from our backups after 90 days.',
       ]],
       ['Who receives your data', [
-        'Only the two of us. We never sell or pass on any data.',
+        'The two of us, and the people we entrust with moderating or proofreading the photos (each with their own account): they see the photos, never your contact details, your signature or your consent. We never sell or pass on any data.',
         'Cloudflare routes connections to our server (it provides HTTPS encryption); it acts on our behalf, under its data protection terms, with safeguarded transfers outside the European Union (Data Privacy Framework and standard contractual clauses).',
         'Instagram (Meta) only receives a photo if you agreed to that use, which also requires the website. If you refuse Instagram, no photo from that day in which you might appear is sent there.',
         'If we email you, the message goes through our email provider.',
@@ -106,7 +106,7 @@ export const PRIVACY = {
         'The only cookie on the public website remembers the language you choose with the language selector. Our technical logs, used for security, only keep truncated IP addresses.',
       ]],
       ['Security', [
-        `Access restricted to the two of us${mfa ? ', with two-factor authentication' : ''}; encrypted connections (HTTPS); signatures, reference photos and signed cards visible only to us; data ${encrypted ? 'stored on an encrypted disk and ' : ''}backed up daily on another disk${fields ? '; your name, address, signature and messages are also encrypted in our database, with a key kept separately' : ''}.`,
+        `Access restricted to the two of us and the people we authorise, each with their own account${mfa ? ', with two-factor authentication' : ''}; encrypted connections (HTTPS); signatures, reference photos and signed cards visible only to the two of us; data ${encrypted ? 'stored on an encrypted disk and ' : ''}backed up daily on another disk${fields ? '; your name, address, signature and messages are also encrypted in our database, with a key kept separately' : ''}.`,
       ]],
       ['Your rights', [
         `You can at any time ask to access your data (we send you a full copy), have it corrected or deleted (photos included if you wish), object to its use or withdraw your consent: on the page ${host}/bonjour, section “Your data” (with your card reference if you have it), or at ${contact}. We reply within one month.`,
@@ -143,13 +143,13 @@ export const PRIVACY = {
       ]],
       ['Wie lange', [
         'Anfrage ohne Einwilligung oder Ablehnung: nach 12 Monaten ohne Nachricht gelöscht.',
-        'Foto von Ihnen zu Ihrer Einwilligung: zusammen mit der Einwilligung aufbewahrt; ohne Einwilligung nach 6 Monaten gelöscht.',
-        'Einwilligung oder Ablehnung (mit der Unterschrift): so lange aufbewahrt, wie ein Foto von Ihnen bei uns existiert, danach 5 Jahre, solange rechtliche Schritte möglich sind.',
+        'Foto von Ihnen zu Ihrer Einwilligung: zusammen mit der Einwilligung aufbewahrt; ohne Einwilligung nach 6 Monaten gelöscht (wenn Sie nach einer Einwilligung ablehnen: 6 Monate nach Ihrer Ablehnung).',
+        'Einwilligung oder Ablehnung (mit der Unterschrift): so lange aufbewahrt, wie ein Foto von Ihnen bei uns existiert, danach 5 Jahre ab dem Löschen des letzten, solange rechtliche Schritte möglich sind.',
         'Privater Link zum Herunterladen Ihres Fotos: 30 Tage gültig, einen Monat danach gelöscht.',
         'Sicherungen: Die Datenbank wird täglich gesichert, jede Sicherung wird nach 14 Tagen gelöscht; ein von uns gelöschtes Foto verschwindet nach 90 Tagen aus unseren Sicherungen.',
       ]],
       ['Wer Ihre Daten erhält', [
-        'Nur wir beide. Wir verkaufen oder übermitteln keine Daten.',
+        'Wir beide und die Personen, die wir mit der Moderation oder dem Korrekturlesen der Fotos betrauen (jede mit eigenem Konto): Sie sehen die Fotos, nie Ihre Kontaktdaten, Ihre Unterschrift oder Ihre Einwilligung. Wir verkaufen oder übermitteln keine Daten.',
         'Cloudflare leitet die Verbindungen zu unserem Server (und sorgt für die HTTPS-Verschlüsselung); es handelt in unserem Auftrag, nach seinen Datenschutzbedingungen, mit abgesicherten Übermittlungen außerhalb der Europäischen Union (Data Privacy Framework und Standardvertragsklauseln).',
         'Instagram (Meta) erhält ein Foto nur, wenn Sie dieser Nutzung zugestimmt haben, die auch die Website voraussetzt. Wenn Sie Instagram ablehnen, wird kein Foto dieses Tages, auf dem Sie zu sehen sein könnten, dorthin gesendet.',
         'Wenn wir Ihnen eine E-Mail schreiben, läuft sie über unseren E-Mail-Anbieter.',
@@ -159,7 +159,7 @@ export const PRIVACY = {
         'Das einzige Cookie der öffentlichen Website speichert die Sprache, die Sie mit der Sprachauswahl wählen. Unsere technischen Protokolle dienen der Sicherheit und enthalten nur gekürzte IP-Adressen.',
       ]],
       ['Sicherheit', [
-        `Zugang nur für uns beide${mfa ? ', mit Zwei-Faktor-Authentifizierung' : ''}; verschlüsselte Verbindungen (HTTPS); Unterschriften, Erinnerungsfotos und unterschriebene Karten nur für uns sichtbar; Daten ${encrypted ? 'auf einer verschlüsselten Festplatte gespeichert und ' : ''}täglich auf einer anderen Festplatte gesichert${fields ? '; Ihr Name, Ihre Adresse, Ihre Unterschrift und Ihre Nachrichten sind zusätzlich in unserer Datenbank verschlüsselt, mit einem separat aufbewahrten Schlüssel' : ''}.`,
+        `Zugang nur für uns beide und die Personen, die wir dazu berechtigen, jede mit eigenem Konto${mfa ? ', mit Zwei-Faktor-Authentifizierung' : ''}; verschlüsselte Verbindungen (HTTPS); Unterschriften, Erinnerungsfotos und unterschriebene Karten nur für uns beide sichtbar; Daten ${encrypted ? 'auf einer verschlüsselten Festplatte gespeichert und ' : ''}täglich auf einer anderen Festplatte gesichert${fields ? '; Ihr Name, Ihre Adresse, Ihre Unterschrift und Ihre Nachrichten sind zusätzlich in unserer Datenbank verschlüsselt, mit einem separat aufbewahrten Schlüssel' : ''}.`,
       ]],
       ['Ihre Rechte', [
         `Sie können jederzeit Auskunft über Ihre Daten verlangen (wir schicken Ihnen eine vollständige Kopie), sie berichtigen oder löschen lassen (auf Wunsch einschließlich der Fotos), der Nutzung widersprechen oder Ihre Einwilligung widerrufen: auf der Seite ${host}/bonjour, Abschnitt „Ihre Daten“ (mit der Referenz Ihrer Karte, falls vorhanden), oder unter ${contact}. Wir antworten innerhalb eines Monats.`,

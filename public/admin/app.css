@@ -67,6 +67,8 @@ input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; margin:
 .app-after h2 { margin: 0; font-size: 15px; font-weight: 500; color: var(--mute); text-transform: uppercase; letter-spacing: .12em; }
 .app-after p { margin: 0; }
 .app-after .ok { color: var(--ok); } .app-after .ko { color: var(--ko); }
+.app-next summary { cursor: pointer; padding: 8px 0; color: var(--mute); }
+.app-next[open] { display: grid; gap: 12px; }
 .app-row { display: grid; gap: 10px; }
 
 /* ---------- accueil Terrain ---------- */

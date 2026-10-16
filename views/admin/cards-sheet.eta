@@ -22,7 +22,7 @@
       <div class="lab"><%= T.consentLabel %></div>
       <h2><%= T.consent(a.name) %></h2>
       <p class="tr"><%= T.consentTr %></p>
-      <div class="box"><% T.scopes.forEach(s => { %><span><%= s %></span><% }) %></div>
+      <div class="box"><% T.scopes(it.host).forEach(s => { %><span><%= s %></span><% }) %></div>
       <div class="f"><% T.fields.forEach(f => { %><div><%= f %></div><% }) %></div>
       <div class="sig"><%= T.signature %></div>
       <div class="ref"><% if (p.ref) { %>Réf. <b><%= p.ref %></b><% } else { %>Réf. <span class="blank"></span><% } %></div>

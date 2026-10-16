@@ -18,7 +18,8 @@ test('coffre : aller-retour texte et binaire, mauvaise clé ou clé absente sans
   assert.notEqual(v.seal('alice@exemple.fr'), sealed);                                     // nonce aléatoire
   assert.equal(v.open(sealed), 'alice@exemple.fr');
   assert.equal(v.seal(''), '');
-  assert.equal(v.seal(sealed), sealed);                                                    // jamais chiffré deux fois
+  assert.notEqual(v.seal(sealed), sealed);                                                 // une saisie qui ressemble à un chiffré est chiffrée
+  assert.equal(v.open(v.seal(sealed)), sealed);                                            // (jamais déchiffrée pour l'admin)
   const buf = Buffer.from('\x89PNG signature');
   const sb = v.sealBuf(buf);
   assert.equal(sb.subarray(0, 4).toString(), 'NCE1');
@@ -53,7 +54,7 @@ test('avec DATA_KEY : demandes et rencontres chiffrées dans la base, en clair d
   const payload = Buffer.concat([...Object.entries(fields).map(([k, v]) => Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${k}"\r\n\r\n${v}\r\n`)), Buffer.from(`--${boundary}--\r\n`)]);
   const saved = await ctx.app.inject({ method: 'POST', url: '/admin/rencontre', payload, cookies, headers: { 'content-type': `multipart/form-data; boundary=${boundary}` } });
   assert.equal(saved.statusCode, 303);
-  const app = ctx.db.prepare("SELECT * FROM encounters WHERE ref = 'J-0143'").get();
+  const app = ctx.db.prepare('SELECT * FROM encounters WHERE id = (SELECT MAX(id) FROM encounters)').get();
   assert.equal(app.signature_png.subarray(0, 4).toString(), 'NCE1');
   assert.match(String(app.lat), /^enc1:/);
   const img = await ctx.app.inject({ url: `/admin/rencontres/${app.id}/signature`, cookies });

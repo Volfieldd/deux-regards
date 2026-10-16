@@ -61,7 +61,7 @@
   <h2 id="pp-photos"><%= t('Photos') %> <span class="mono"><%= t('liées à l’une de ses rencontres') %></span></h2>
 <% if (p.photos.length) { %>
   <ul class="o-photos">
-<% p.photos.forEach(ph => { %>    <li><a class="o-photo" href="/admin/photos/<%= ph.id %>"><% if (ph.ready) { %><%~ it.picture(ph, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></a><a class="o-title" href="/admin/photos/<%= ph.id %>"><%= ph.title %></a><span class="mono"><%= ph.status === 'published' ? t('publiée') : t('brouillon') %></span></li>
+<% p.photos.forEach(ph => { %>    <li><a class="o-photo" href="/admin/photos/<%= ph.id %>" tabindex="-1" aria-hidden="true"><% if (ph.ready) { %><%~ it.picture(ph, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></a><a class="o-title" href="/admin/photos/<%= ph.id %>"><%= ph.title %></a><span class="mono"><%= ph.status === 'published' ? t('publiée') : t('brouillon') %></span></li>
 <% }) %>  </ul>
 <% } else { %>  <p class="hint"><%= t('Aucune photo liée : les photos de ses sorties la concernent déjà si elles ont un visage ; liez celles où elle figure.') %></p><% } %>
 <% if (it.canManage) { %>  <details class="pp-attach">

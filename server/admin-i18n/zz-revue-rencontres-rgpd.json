@@ -1,0 +1,66 @@
+{
+ "Photographe : reprendre le téléphone": {
+  "en": "Photographer: take the phone back",
+  "de": "Fotograf: Handy wieder übernehmen"
+ },
+ "Sans le code de la carte : pas appliquée telle quelle (accord, adresse, nom ou demande en cours gardés), à vérifier.": {
+  "en": "Without the card code: not applied as is (consent, address, name or pending request kept), to be checked.",
+  "de": "Ohne den Code der Karte: nicht so übernommen (Einwilligung, Adresse, Name oder laufende Anfrage beibehalten), bitte prüfen."
+ },
+ "Accord papier retiré (case « carte signée » décochée)": {
+  "en": "Paper consent withdrawn (“signed card” box unticked)",
+  "de": "Einwilligung auf Papier zurückgenommen (Feld „Karte unterschrieben“ abgewählt)"
+ },
+ "Refus étendu levé : rencontre séparée de la personne qui avait refusé": {
+  "en": "Extended refusal lifted: meeting separated from the person who had refused",
+  "de": "Erweiterte Ablehnung aufgehoben: Begegnung von der Person getrennt, die abgelehnt hatte"
+ },
+ "Refus étendu (refus de la même personne lors d’une autre rencontre)": {
+  "en": "Extended refusal (refusal by the same person at another meeting)",
+  "de": "Erweiterte Ablehnung (Ablehnung derselben Person bei einer anderen Begegnung)"
+ },
+ "Photo {id} exclue de l’accord de la sortie": {
+  "en": "Photo {id} excluded from the outing’s consent",
+  "de": "Foto {id} von der Einwilligung des Ausflugs ausgenommen"
+ },
+ "Photo {id} de nouveau couverte par l’accord de la sortie": {
+  "en": "Photo {id} covered again by the outing’s consent",
+  "de": "Foto {id} wieder von der Einwilligung des Ausflugs abgedeckt"
+ },
+ "Rencontre ajoutée depuis la fiche de la personne": {
+  "en": "Meeting added from the person’s record",
+  "de": "Begegnung aus der Personenakte hinzugefügt"
+ },
+ "Son refus reste appliqué, sans aucune donnée sur elle, tant que des photos liées ou de sa sortie sont gardées.": {
+  "en": "Their refusal stays in force, with no data about them, as long as linked photos or photos from their outing are kept.",
+  "de": "Ihre Ablehnung bleibt bestehen, ohne Daten über sie, solange verknüpfte Fotos oder Fotos ihres Ausflugs aufbewahrt werden."
+ },
+ "Décision": {
+  "en": "Decision",
+  "de": "Entscheidung"
+ },
+ "Signature": {
+  "en": "Signature",
+  "de": "Unterschrift"
+ },
+ "Il reste environ une semaine.": {
+  "en": "About one week is left.",
+  "de": "Es bleibt etwa eine Woche."
+ },
+ "La lettre de la référence désigne un autre photographe.": {
+  "en": "The letter of the reference designates another photographer.",
+  "de": "Der Buchstabe der Referenz steht für einen anderen Fotografen."
+ },
+ "Refus anonymisé : cette trace ne se modifie pas.": {
+  "en": "Anonymised refusal: this record cannot be changed.",
+  "de": "Anonymisierte Ablehnung: Dieser Eintrag kann nicht geändert werden."
+ },
+ "Plus aucun numéro libre pour cette lettre (9999 au plus) : changez la lettre des cartes dans Photographes.": {
+  "en": "No free number left for this letter (9999 at most): change the card letter in Photographers.",
+  "de": "Keine freie Nummer mehr für diesen Buchstaben (höchstens 9999): Ändern Sie den Kartenbuchstaben unter Fotografen."
+ },
+ "Votre compte ne peut ni exporter ni effacer ces données : prévenez dès maintenant l’administrateur, qui traitera la demande depuis sa fiche :": {
+  "en": "Your account can neither export nor erase this data: tell the administrator now, who will handle the request from the person’s page:",
+  "de": "Ihr Konto kann diese Daten weder exportieren noch löschen: Benachrichtigen Sie jetzt den Administrator, der die Anfrage auf der Seite der Person bearbeitet:"
+ }
+}

@@ -10,7 +10,7 @@
   <strong><%= t('Mon QR') %></strong>
 </header>
 <main class="app-qr-show">
-  <p class="hint"><span lang="fr">Scannez pour retrouver la photo, donner ou refuser votre accord.</span><br><span lang="en">Scan to find the photo, give or refuse your consent.</span></p>
+  <p class="hint"><span lang="fr">Scannez pour retrouver la photo, donner ou refuser votre accord.</span><br><span lang="en">Scan to find the photo, give or refuse your consent.</span><br><span lang="de">Scannen Sie, um das Foto zu finden und Ihre Einwilligung zu geben oder zu verweigern.</span></p>
   <img src="/admin/auteurs/<%= it.author.id %>/qr/vertical-noir.svg?apercu=1" alt="<%= t('QR de {name}, vers {url}', { name: it.author.name, url: `${it.host}/bonjour/${it.letter}` }) %>">
   <p class="mono"><%= it.host %>/bonjour/<%= it.letter %></p>
 </main>

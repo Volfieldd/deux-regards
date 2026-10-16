@@ -19,7 +19,7 @@ This is the **Today** page, the one you land on. At the top, **View site** and *
 - **What’s new**: after an update, a window shows once, at your next sign-in, everything that arrived since your last visit (only what concerns your rights). **Got it** closes it. The **What’s new** menu (under Help) keeps every version, newest first, with the number of the installed version.
 - **Your account**: the name of the signed-in account, its roles, and the photographer it is linked to. Emails are set here too:
   - **Also notify me by email**: proposals, decisions on your photos and notes, as they arrive;
-  - **Summary of what is waiting for you**: **never**, **every day** or **every week (on Monday)**. It goes out around 8 am, only if there is something, never more than once a day;
+  - **Summary of what is waiting for you**: **never**, **every day** or **every week (on Monday)**. It goes out around 8 am, only if there is something, never more than once a day, and never names the people photographed (their reference only);
   - **GDPR requests** are always sent to you, with their reminders (see the “Photographed people” help).
   - **Account not linked:** an administrator links it to its photographer in [Accounts and roles](reglages#comptes-et-rôles).
   - **Account linked:** your imports are attributed to you by default.

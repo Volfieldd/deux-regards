@@ -8,14 +8,17 @@ import { facesOf } from './readiness.js';
 // partie va de son heure de début à la suivante. Une photo ou une rencontre sans heure connue compte dans toutes
 // les parties du jour (prudence : ses accords et refus valent partout).
 export const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
-// « 15:10 », « 9h05 », « 15 h » → HH:MM ; sinon null.
+// « 15:10 », « 9h05 », « 15 h » → HH:MM ; sinon null. Longueur vérifiée avant l'expression (champ du formulaire public :
+// jamais de retour arrière sur une longue chaîne).
 export function normTime(v) {
-  const m = /^\s*(\d{1,2})\s*(?:[h:]\s*([0-5]\d)?)\s*$/i.exec(String(v || ''));
+  const s = String(v || '').trim();
+  const m = s.length <= 16 ? /^(\d{1,2})\s*(?:[h:]\s*([0-5]\d)?)$/i.exec(s) : null;
   if (!m || Number(m[1]) > 23) return null;
   return `${m[1].padStart(2, '0')}:${m[2] || '00'}`;
 }
 // Jour valide (AAAA-MM-JJ qui existe au calendrier).
 const DAY = { test: d => { if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false; const t = new Date(`${d}T12:00:00Z`); return !Number.isNaN(t.getTime()) && t.toISOString().startsWith(d); } };
+export const isDay = d => DAY.test(String(d ?? ''));
 
 // Condition SQL « même partie de journée » : aucune coupure entre les deux heures (heure inconnue : même partie).
 export const samePartSql = (author, day, t1, t2) => `NOT EXISTS (SELECT 1 FROM outings o WHERE o.author_id = ${author} AND o.day = ${day}

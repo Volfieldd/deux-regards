@@ -10,9 +10,27 @@ import { grantsOf, SCOPES } from './permissions.js';
 // - Récapitulatif de ce qui attend chaque compte (« Aujourd'hui ») : réglé par chacun, jamais, chaque jour ou chaque
 //   semaine (le lundi), vers 8 h (heure de Paris), jamais plus d'un par jour, et seulement s'il y a quelque chose.
 // - Tester l'envoi (Comptes et rôles) : un e-mail à l'adresse choisie, l'erreur du serveur de messagerie sinon.
-export const RIGHTS_DELAY = 30 * 864e5;
 export const DIGESTS = ['off', 'daily', 'weekly'];
 const DIGEST_HOUR = 8;
+// Demandes de droits sur une rencontre non vérifiée (sans carte, ou référence tapée sans le code) : 30 e-mails par
+// jour au plus, tous comptes confondus. Au-delà (afflux de fausses demandes), elles attendent le lendemain : elles
+// restent signalées dans « Aujourd'hui » et sur leur fiche, et le quota de la messagerie reste aux personnes.
+const UNVERIFIED_PER_DAY = 30;
+
+// Échéance légale d'une demande (RGPD, art. 12-3 : « un mois », compté de date à date, heure de Paris) : le même
+// quantième le mois suivant, à la même heure, ou le dernier jour de ce mois s'il est plus court (31 janvier → 28 ou
+// 29 février).
+const PARTS = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23' });
+const wallOf = ms => { const p = Object.fromEntries(PARTS.formatToParts(ms).filter(x => x.type !== 'literal').map(x => [x.type, Number(x.value)])); return p; };
+export function rightsDue(at) {
+  const p = wallOf(at);
+  const days = new Date(Date.UTC(p.year, p.month + 1, 0)).getUTCDate();                 // jours du mois suivant
+  const wall = Date.UTC(p.year, p.month, Math.min(p.day, days), p.hour, p.minute, p.second);   // mois suivant (index 0)
+  // Heure de Paris → instant : on retire le décalage de Paris (deux passes, juste autour d'un changement d'heure).
+  const offset = ms => { const w = wallOf(ms); return Date.UTC(w.year, w.month - 1, w.day, w.hour, w.minute, w.second) - Math.floor(ms / 1000) * 1000; };
+  const first = wall - offset(wall);
+  return wall - offset(first);
+}
 
 export function createReminders({ db, accounts, todo, mailer, siteName = () => '', publicUrl = '', log, now = Date.now }) {
   const langOf = authorId => (authorId ? db.prepare('SELECT admin_lang FROM authors WHERE id = ?').pluck().get(authorId) : null) || 'fr';
@@ -35,22 +53,31 @@ export function createReminders({ db, accounts, todo, mailer, siteName = () => '
   }
 
   // Étape due pour une demande arrivée à `at` : 1 (arrivée) à 4 (trois quarts du délai).
-  const stageOf = at => 1 + Math.min(3, Math.floor(Math.max(0, now() - at) / (RIGHTS_DELAY / 4)));
+  const stageOf = at => 1 + Math.min(3, Math.floor(Math.max(0, now() - at) / ((rightsDue(at) - at) / 4)));
+  // E-mails envoyés aujourd'hui (heure de Paris) pour des demandes non vérifiées.
+  const unverifiedSent = { day: '', n: 0 };
 
   async function rights() {
-    const pending = db.prepare(`SELECT id, ref, author_id, rights_request, rights_requested_at, rights_reminders FROM encounters
+    const pending = db.prepare(`SELECT id, ref, author_id, verified, rights_request, rights_requested_at, rights_reminders FROM encounters
       WHERE rights_request IS NOT NULL AND rights_done_at IS NULL AND rights_requested_at IS NOT NULL`).all();
     let sent = 0;
+    const today = paris(now(), { dateStyle: 'short' });
+    if (unverifiedSent.day !== today) Object.assign(unverifiedSent, { day: today, n: 0 });
     for (const e of pending) {
       const stage = stageOf(e.rights_requested_at);
       if (stage <= e.rights_reminders) continue;
-      const photographers = e.author_id ? active().filter(a => a.author_id === e.author_id).map(addr) : [];
+      if (!e.verified && unverifiedSent.n >= UNVERIFIED_PER_DAY) continue;
+      const accounts = e.author_id ? active().filter(a => a.author_id === e.author_id) : [];
+      const photographers = accounts.map(addr);
       const adm = admins().map(addr);
       // Personne côté photographe : l'administrateur la reçoit directement.
       const to = photographers.length ? photographers : adm;
       const cc = photographers.length && stage >= 3 ? adm.filter(x => !to.includes(x)) : [];
+      // Aucun compte du photographe ne peut traiter la demande (exporter, effacer, marquer traitée : le rôle
+      // Photographe ne le peut pas) : l'e-mail lui demande de prévenir l'administrateur tout de suite.
+      const canHandle = !photographers.length || accounts.some(a => { const sc = scopeOf(a)('personnes.effacer'); return Boolean(sc && (sc.all || sc.authorId === e.author_id)); });
       const t = translator(langOf(e.author_id));
-      const due = e.rights_requested_at + RIGHTS_DELAY;
+      const due = rightsDue(e.rights_requested_at);
       const ref = e.ref || t('sans carte');
       const subject = [
         t('Demande RGPD reçue ({ref}) : à traiter avant le {date}', { ref, date: day(due, t) }),
@@ -63,15 +90,17 @@ export function createReminders({ db, accounts, todo, mailer, siteName = () => '
           : t('Une personne photographiée ({ref}) a demandé l’accès à ses données le {date}.', { ref, date: day(e.rights_requested_at, t) }),
         t('La loi (RGPD) laisse un mois pour y répondre : au plus tard le {date}.', { date: day(due, t) }),
         stage >= 3 && cc.length ? t('L’administrateur est en copie.') : null,
-        stage === 4 ? t('Il reste moins d’une semaine.') : null,
+        stage === 4 ? t('Il reste environ une semaine.') : null,
         '',
-        t('Vérifiez l’identité de la personne, puis traitez la demande depuis sa fiche :'),
+        canHandle ? t('Vérifiez l’identité de la personne, puis traitez la demande depuis sa fiche :')
+          : t('Votre compte ne peut ni exporter ni effacer ces données : prévenez dès maintenant l’administrateur, qui traitera la demande depuis sa fiche :'),
         link(`/admin/rencontres/${e.id}#droits`),
       ].filter(l => l !== null).join('\n');
       const ok = await send({ to, cc, subject, text, priority: stage === 4 ? 'high' : undefined });
       // Envoyé (ou impossible faute d'adresse) : l'étape est notée, pour ne pas renvoyer à chaque passage.
       if (ok || !to.length) db.prepare('UPDATE encounters SET rights_reminders = ? WHERE id = ?').run(stage, e.id);
       if (ok) sent++;
+      if (ok && !e.verified) unverifiedSent.n++;
     }
     return sent;
   }
@@ -95,7 +124,8 @@ export function createReminders({ db, accounts, todo, mailer, siteName = () => '
       if (a.digest_sent_at && paris(a.digest_sent_at, { dateStyle: 'short' }) === today) continue;
       db.prepare('UPDATE accounts SET digest_sent_at = ? WHERE id = ?').run(t0, a.id);
       const t = translator(langOf(a.author_id));
-      const items = todo.list(t, scopeOf(a));
+      // Sans le nom des personnes (chiffré dans la base) : la référence seulement, comme les relances.
+      const items = todo.list(t, scopeOf(a), { mail: true });
       if (!items.length) continue;
       const text = [
         items.length > 1 ? t('{n} choses vous attendent :', { n: items.length }) : t('{n} chose vous attend :', { n: items.length }),

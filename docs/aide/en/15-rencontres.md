@@ -7,10 +7,10 @@ When you photograph someone in the street, the **People** page (sidebar, “Work
 The **People** page (sidebar, “Work” group) shows one row per **photographed person**, whether they were met once or during several outings: their face, their name, their card references, their encounters and photos, their decision (latest consent, or refusal), and the signals to deal with (new request, rights request, suggested match). **Requests and encounters** opens the detailed list of encounters.
 
 - **One encounter per outing**: each encounter has its card and its consent. **A consent only applies to the outing** where it was given; **a refusal applies to everything**: a person’s most recent refusal extends to all their encounters (noted “refusal extended” in their history). A consent given later, with the card’s code, applies to its outing; it does not undo the other refusals, which must be lifted by hand if the person asks.
-- **Create**: first on the phone, with **New encounter**; in the app, **Met before?** offers the people seen by this photographer in the last 30 days, to add today’s encounter to their record (a new consent still has to be signed). A signed card entered by hand or a request on `/bonjour` also creates a person.
-- **Match**: when two people have the **same email address**, the page offers **It’s the same person** (their encounters are merged) or **It’s not them** (the suggestion disappears). Never based on the face. **Attach an existing encounter** merges by hand; **It’s not them**, on an encounter, separates it.
+- **Create**: first on the phone, with **New encounter**; in the app, **Met before?** offers the people seen by this photographer in the last 30 days (initials, reference and day only: the screen is handed to the person), to add today’s encounter to their record (a new consent still has to be signed). Only people this photographer met themselves are listed. A signed card entered by hand or a request on `/bonjour` also creates a person.
+- **Match**: when two people have the **same email address**, the page offers **It’s the same person** (their encounters are merged) or **It’s not them** (the suggestion disappears). Never based on the face. **Attach an existing encounter** merges by hand; **It’s not them**, on an encounter, separates it and lifts the refusal it only had through the match (“extended refusal lifted” in its history). A photographer only matches or dismisses their own people.
 - **Outings and photos**: **Was also there during the outing** adds an encounter with no decision; **Link photos they appear in** attaches each photo to their encounter from the photo’s outing (created with no decision if needed): the photo stays to check as long as that outing’s consent is missing.
-- **Rights**: **Export their data** gathers all their encounters in an archive; **Erase this person** erases all their encounters (photos included on request; a refusal stays applied in anonymous form if linked photos remain).
+- **Rights**: **Export their data** gathers all their encounters in an archive; **Erase this person** erases all their encounters (photos included on request; a refusal stays applied in anonymous form if linked photos or photos from their outings remain).
 
 ## In the field
 
@@ -23,7 +23,7 @@ The **In the field** page (sidebar, “App, cards, QR”) brings together what g
 
 ## The cards
 
-Each photographer has their **letter** (J for Julien, S for Sébastien, set in [Photographers](auteurs)) and numbers their cards: **J-0142**. An encounter is a pair of cards with the same number:
+Each photographer has their **letter** (J for Julien, S for Sébastien, set in [Photographers](auteurs)) and numbers their cards, from 1 to 9999: **J-0142**. The letter of a reference always designates its photographer: an encounter cannot carry another photographer’s letter. An encounter is a pair of cards with the same number:
 
 - **the “for us” card**: the signed consent (site, Instagram, exhibitions and prints, with or without the first name), the name, the date, the place; you keep it;
 - **the “for them” card**: a thank-you, the reference and a QR code to `nicephos.art/bonjour/J-0142`; the person keeps it.
@@ -35,9 +35,9 @@ Tip: just after the photo, photograph the card you are handing over. It marks th
 - **Numbered**: each pair has its own reference and its own QR code; the series continues from one sheet to the next (the next number is suggested);
 - **Generic**: no number, with a QR code to `/bonjour`: the template to give to a printer, then number both cards of each pair with a numbering stamp.
 
-The sheet opens ready to print: five pairs per A4 sheet, single-sided. Print at **100 %** (actual size, without “fit to page”), on thick paper (250 to 350 g/m²), and cut along the dotted lines. To change the text on the cards, just ask: it is all kept in one place.
+The sheet opens ready to print: five pairs per A4 sheet, single-sided. The consent text names the site of this installation (its public address). Print at **100 %** (actual size, without “fit to page”), on thick paper (250 to 350 g/m²), and cut along the dotted lines. To change the text on the cards, just ask: it is all kept in one place.
 
-Cards printed by the site carry a **check code** (J-0142-K7Q): the request then arrives marked **card verified**. A reference typed without the code (cards numbered with a stamp) is accepted, marked **not verified**. On an encounter that is already established (signed card, consent signed on the phone, or request already verified), a request **without a code** changes neither the consent, nor the address, nor the name: a **refusal** is applied (it protects the person), a rights request is flagged (check their identity), and the rest is only noted in the history, marked not verified.
+Cards printed by the site carry a **check code** (J-0142-K7Q): the request then arrives marked **card verified**. A reference typed without the code (cards numbered with a stamp) is accepted, marked **not verified**. On an encounter that is already established (signed card, encounter entered on the phone — consent, refusal or “later”: the app always shows its QR code with the code —, or request already verified), a request **without a code** changes neither the consent, nor the address, nor the name: a **refusal** is applied (it protects the person), a rights request is flagged (check their identity), and the rest is only noted in the history, marked “without the card code”. On other encounters too, a request without a code never replaces an address or a name already noted and never lifts a refusal. A reference typed without a code never shifts the numbering of the cards or of the app (a number already taken is skipped).
 
 ## The clothing QR code
 
@@ -76,7 +76,7 @@ To fill it in **with the person**, at the moment of the photo, with no paper car
 
 1. **You**: the photographer (the one on your account), the **position** (asked for by the phone, kept to within 100 m; the town is worked out from it), a **reference photo** of the person (kept private, to find the right images), notes.
 2. **Hand over the phone**: the person chooses their language (FR · EN · DE), reads the consent, ticks what they accept (or refuses, or does not decide), gives their name, their email if they want to receive the photo, their age (**under 18: a parent signs with them**, the parent’s name is requested) and **signs with their finger**.
-3. **Save**: the encounter gets the next number of your cards (J-0143). The **Thank you** screen appears in their language with a **QR code**: by scanning it, they find their page `/bonjour/J-0143-…` to receive their photo, change their mind or write to you.
+3. **Save**: the encounter gets the next number of your cards (J-0143). The **Thank you** screen appears in their language with a **QR code**: by scanning it, they find their page `/bonjour/J-0143-…` to receive their photo, change their mind or write to you. The links to the admin (new encounter, Field home, record) are folded under **Photographer: take the phone back**: the person still holding the phone does not come across the other people of the day.
 4. **Summary**: if email sending is configured on the server, it goes out automatically (their consent, what they ticked, the link to their page); otherwise, **Send the summary from Mail** opens the ready-made message, in their language, to send from your address.
 
 You need a network connection (4G is enough): without one, saving fails without losing anything on screen; try again a little further on. A consent signed on the phone is worth a signed card: the page shows the signature and the reference photo.
@@ -147,15 +147,15 @@ A consent applies to **the outing**: all the photos the photographer took **that
 
 ## A face to go with the name
 
-The **photo of the person** (their face) helps you know who signed and find the right images: taken in the app on the phone (“Photograph the person”), or added in the form on the page (paper card, photo from your phone). It appears as a circle in the list, on the page and in “People & consents” on the photo’s page. Kept private, **for as long as the consent**; without consent, deleted after 6 months. The consent text (app and cards) tells the person so.
+The **photo of the person** (their face) helps you know who signed and find the right images: taken in the app on the phone (“Photograph the person”), or added in the form on the page (paper card, photo from your phone). It appears as a circle in the list, on the page and in “People & consents” on the photo’s page. Kept private, **for as long as the consent**; without consent, or after a refusal, deleted after 6 months. The consent text (app and cards) tells the person so.
 
 ## Handling an encounter
 
 New requests are shown at the top, with a counter in the sidebar. On an encounter’s page:
 
-- **Write** opens your mail app with the person’s address: the site sends no email.
+- **Write** opens your mail app with the person’s address, the subject in their language. The server itself only sends the summary of an encounter entered on the phone and the reminders of rights requests, and only if sending email is configured.
 - **Link photos** (for a refusal, a photo given as a gift, or a photo outside the outing): the photographer’s photos taken or imported that day are offered first; a search lets you find others.
-- **Signed card**: tick “The “for us” card is signed” and the accepted uses, then attach the **photo of the card** (proof, visible only in the admin). **Enter a signed card**, at the bottom of the list, creates an encounter directly from the paper card.
+- **Signed card**: tick “The “for us” card is signed” and the accepted uses, then attach the **photo of the card** (proof, visible only in the admin). **Enter a signed card**, at the bottom of the list, creates an encounter directly from the paper card; on a reference already received through `/bonjour`, it completes the encounter without erasing what the person gave. Unticking the box withdraws a paper consent entered by mistake; saving the page again never lifts a refusal expressed since. An anonymous record (anonymised refusal) can no longer be changed.
 - **Mark as “In progress” / “Done”** to keep track of where you are.
 
 A consent given online is less secure than a signed card (the page reminds you): for an exhibition or a sale of prints, ask for a signature.
@@ -177,22 +177,22 @@ As soon as a person refuses, **the linked photos can no longer be published**: n
 
 ## People’s rights (GDPR)
 
-A person can ask for **a copy of their data** or **for it to be erased**: on `/bonjour` (“Your data”), by email, or in person. The law allows **one month** to reply.
+A person can ask for **a copy of their data** or **for it to be erased**: on `/bonjour` (“Your data”), by email, or in person. The law allows **one month** to reply, counted from date to date (request on 1 February: before 1 March; on 31 January: before the last day of February).
 
-- **Request received on `/bonjour`**: the encounter carries a red badge “Access / Erasure request · before …” (list and page). If the reference is not verified, make sure the request really comes from that person (same address, reply to your message) before sending them anything.
-- **Export their data (.zip)** (page, “The person’s rights”): an archive with everything the site keeps about them (encounter, choices, consent or refusal, history of their requests), their signature, the reference and card photos, and the photos they appear in (JPEG 2048 px, never the original), with instructions in their language. Send it to them as an attachment.
-- **Erase this person’s data** (at the bottom of the page): name, address, messages, signature, images and history disappear. Tick **Also delete the photos they appear in** if they ask: originals and images are deleted, and erased from backups within 90 days. If they had **refused** publication and you keep photos, an **anonymous record** keeps that refusal (with no data about them): those photos remain impossible to publish.
+- **Request received on `/bonjour`**: the encounter carries a red badge “Access / Erasure request · before …” (list and page). If the reference is not verified, make sure the request really comes from that person (same address, reply to your message) before sending them anything. A pending request keeps its type and its deadline: a new request on the same encounter is only noted in the history (with the card code, the person can change its type).
+- **Export their data (.zip)** (page, “The person’s rights”): an archive with everything the site keeps about them (encounter, choices, consent or refusal, history of their requests), their signature, the reference and card photos, and the photos they appear in (JPEG 2048 px, never the original), with instructions in their language. A request made without the card code and not applied (it may come from someone else) only adds its choices, without address, name or message. Send it to them as an attachment.
+- **Erase this person’s data** (at the bottom of the page): name, address, messages, signature, images and history disappear. Tick **Also delete the photos they appear in** if they ask: originals and images are deleted, and erased from backups within 90 days. If they had **refused** publication and you keep linked photos or photos from their outing, an **anonymous record** keeps that refusal (with no data about them; the photographer and the day remain): those photos remain impossible to publish, or to be checked.
 - **Posts already published on Instagram** are listed as a reminder after the erasure: delete them in the app.
 - **Mark the request as handled** once the reply has been sent.
-- **Email reminders** (if sending email is configured): as soon as the request arrives, an email goes to the photographer concerned, even if they have not chosen emails. A reminder follows at a quarter of the deadline (about 8 days), then another at half with the administrator in copy, and a last **high-priority** email at three quarters (less than a week left). If no photographer can be reached, the administrator receives them directly. The emails only give the card reference, never the person’s name or address. Everything stops once the request is marked as handled.
+- **Email reminders** (if sending email is configured): as soon as the request arrives, an email goes to the photographer concerned, even if they have not chosen emails. A reminder follows at a quarter of the deadline (about 8 days), then another at half with the administrator in copy, and a last **high-priority** email at three quarters (about a week left). If no photographer can be reached, the administrator receives them directly; if the photographer’s account cannot handle the request (Photographer role: no export or erasure), the email asks them to tell the administrator right away. Requests on an unverified encounter (no card, or reference typed without the code) send no more than 30 emails a day: beyond that (a flood of fake requests), they wait for the next day and stay flagged in “Today”. The emails only give the card reference, never the person’s name or address. Everything stops once the request is marked as handled.
 
 ## Data
 
-- Only what the person writes is kept: reference, address, name, choices, messages, and the photo of the signed card.
+- Only what the person gives is kept: reference, address, name, choices, messages and the photo of the signed card; on the phone, their signature, their reference photo, the position rounded to 100 m, whether they are an adult and the parent’s name are added.
 - **Delete this encounter** erases everything, at the person’s request.
 - Retention periods, automatic and stated on the `/confidentialite` page:
   - request with neither consent nor refusal: deleted after **12 months** without news;
-  - photo of the person (face): kept with the consent; without consent, deleted after **6 months**;
-  - consent or refusal (with the signature): kept as long as a linked photo exists, then **5 years** (the time limit for legal action);
+  - photo of the person (face): kept with the consent; without consent, deleted after **6 months** (after a refusal: 6 months after the refusal);
+  - consent or refusal (with the signature): kept as long as a linked photo or a photo from their outing exists, then **5 years** after the last one disappears (the time limit for legal action);
   - deleted photo: erased from backups after **90 days**.
 - The photo of the card is stored in the database, whose backups rotate over 14 days: a deletion also disappears from the backups after two weeks.
