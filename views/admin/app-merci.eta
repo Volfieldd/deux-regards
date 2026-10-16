@@ -33,8 +33,13 @@
 <% } %>
 <% } else { %>  <p class="hint"><%= t('Pas d’e-mail : la personne garde son lien en scannant le QR.') %></p>
 <% } %>
-  <p class="app-row"><a class="app-btn" href="/admin/rencontre"><%= t('Nouvelle rencontre') %></a> <a class="app-btn ghost" href="/admin/rencontre/accueil"><%= t('Accueil Terrain') %></a></p>
-  <p><a class="app-link" href="/admin/rencontres/<%= e.id %>"><%= t('Voir la fiche de la rencontre') %></a></p>
+<%/* L'écran est tendu à la personne (QR) : les liens vers l'admin (sortie du jour, autres personnes) attendent que le
+     photographe reprenne le téléphone. */%>
+  <details class="app-next">
+    <summary><%= t('Photographe : reprendre le téléphone') %></summary>
+    <p class="app-row"><a class="app-btn" href="/admin/rencontre"><%= t('Nouvelle rencontre') %></a> <a class="app-btn ghost" href="/admin/rencontre/accueil"><%= t('Accueil Terrain') %></a></p>
+    <p><a class="app-link" href="/admin/rencontres/<%= e.id %>"><%= t('Voir la fiche de la rencontre') %></a></p>
+  </details>
 </section>
 </body>
 </html>

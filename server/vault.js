@@ -32,14 +32,17 @@ export function createVault(secret) {
     enabled: Boolean(key),
     index: v => (indexKey ? crypto.createHmac('sha256', indexKey).update(String(v)).digest('hex') : null),
     sealed: v => isText(v) || isBuf(v),
-    // Texte : vide et null restent tels quels (rien à protéger, et les requêtes « = '' » fonctionnent toujours).
-    seal: v => (key && typeof v === 'string' && v !== '' && !isText(v) ? TEXT + encrypt(Buffer.from(v, 'utf8')).toString('base64') : v),
+    // Texte : vide et null restent tels quels (rien à protéger, et les requêtes « = '' » fonctionnent toujours). Une
+    // valeur qui ressemble déjà à un chiffré est chiffrée elle aussi : elle vient d'une saisie (page /bonjour,
+    // signalement), et la garder telle quelle ferait déchiffrer par l'admin un chiffré tiré d'une sauvegarde volée.
+    // Ne pas chiffrer deux fois une valeur de la base : c'est à l'appelant de vérifier sealed() (sealExisting).
+    seal: v => (key && typeof v === 'string' && v !== '' ? TEXT + encrypt(Buffer.from(v, 'utf8')).toString('base64') : v),
     open(v) {
       if (!isText(v)) return v;
       if (!key) return LOCKED;
       try { return decrypt(Buffer.from(v.slice(TEXT.length), 'base64')).toString('utf8'); } catch { return LOCKED; }
     },
-    sealBuf: b => (key && Buffer.isBuffer(b) && !isBuf(b) ? Buffer.concat([MAGIC, encrypt(b)]) : b),
+    sealBuf: b => (key && Buffer.isBuffer(b) ? Buffer.concat([MAGIC, encrypt(b)]) : b),
     openBuf(b) {
       if (!isBuf(b)) return b;
       if (!key) return null;
