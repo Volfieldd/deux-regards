@@ -8,6 +8,8 @@ export const THEMES = {
     stylesheet: null,
     classes: '',
     scheme: 'light',
+    // Police chargée en priorité (celle des titres de l'ouverture) ; aucune si le thème n'en déclare pas.
+    preload: '/fonts/cormorant-garamond/files/cormorant-garamond-latin-400-italic.woff2',
   },
   'nicephos-nuit': {
     label: 'Nicephos — nuit',
@@ -15,6 +17,7 @@ export const THEMES = {
     stylesheet: 'themes/nicephos.css',
     classes: 'theme-nicephos mode-nuit',
     scheme: 'dark',
+    preload: '/fonts/jost/files/jost-latin-300-normal.woff2',   // Jost léger : texte et titres (aucune italique)
   },
   'nicephos-jour': {
     label: 'Nicephos — jour',
@@ -22,6 +25,7 @@ export const THEMES = {
     stylesheet: 'themes/nicephos.css',
     classes: 'theme-nicephos mode-jour',
     scheme: 'light',
+    preload: '/fonts/jost/files/jost-latin-300-normal.woff2',
   },
 };
 export const DEFAULT_THEME = 'atelier';

@@ -114,6 +114,9 @@
         const next = doc.getElementById(sid), now = document.getElementById(sid);
         if (next && now) now.replaceWith(document.importNode(next, true));
       }
+      // Sélecteur de langue : ses liens suivent la page affichée (filtres compris).
+      const fresh = doc.querySelectorAll('[data-lang-pick] ul');
+      document.querySelectorAll('[data-lang-pick] ul').forEach((ul, i) => { if (fresh[i]) ul.replaceWith(document.importNode(fresh[i], true)); });
       document.title = doc.title;
       stagger(document.getElementById('grid'));
       if (push) history.pushState({ swap: true }, '', url);
@@ -122,7 +125,7 @@
       const head = document.querySelector('#galerie h3');
       const count = document.querySelector('#galerie > span.mono');
       const announce = document.querySelector('[data-announce]');
-      if (announce && head) announce.textContent = `${head.textContent.trim()} : ${count ? count.textContent.trim().split(' · ')[0] : ''}`;
+      if (announce && head) announce.textContent = `${head.textContent.trim()}${announce.dataset.colon ?? ' :'} ${count ? count.textContent.trim().split(' · ')[0] : ''}`;
       const target = focusHref && [...document.querySelectorAll('a[data-filter]')].find(a => a.getAttribute('href') === focusHref);
       if (scroll) document.getElementById('galerie').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
       (target || (focusHref ? head : null))?.focus({ preventScroll: true });
@@ -247,6 +250,16 @@
       else if (several && e.key === 'ArrowRight') go('next');
     });
     if (several) onSwipe(viewer.querySelector('.vimg'), step => go(step > 0 ? 'next' : 'prev'));
+    // Photo suivante : son image est chargée d'avance une fois la page affichée (même taille et même format que sur sa
+    // page). Pas la page elle-même : servie ensuite sans requête, sa vue ne serait jamais comptée.
+    const nextImage = viewer.querySelector('template[data-next-image]');
+    const warm = () => setTimeout(() => {
+      const box = document.createElement('div');
+      box.hidden = true;
+      box.append(document.importNode(nextImage.content, true));
+      document.body.append(box);
+    }, 300);
+    if (nextImage) { if (document.readyState === 'complete') warm(); else addEventListener('load', warm, { once: true }); }
   }
 
   // ----- carte : zoom (boutons, pincement, Ctrl + molette), déplacement, vignettes regroupées -----
@@ -445,24 +458,32 @@ document.addEventListener('change', e => {
 });
 
 // J'aime (page photo) : sans rechargement ; le navigateur retient ce qu'il a aimé (aucun cookie, aucun compte),
-// et le serveur ignore un second « j'aime » de la même adresse.
+// et le serveur ignore un second « j'aime » de la même adresse. L'état passe par aria-pressed seul (le nom du bouton
+// reste « J'aime » suivi du compteur visible) ; le nouveau total est annoncé (data-like-live).
 document.querySelectorAll('[data-like]').forEach(form => {
   const btn = form.querySelector('button');
   const n = form.querySelector('[data-like-n]');
+  const live = form.querySelector('[data-like-live]');
   const key = `aime:${form.dataset.slug}`;
   let liked = false;
+  // « J'aime » déjà compté pour cette connexion par un autre navigateur (même box) : affiché ici, mais rien n'est
+  // retenu ni retiré au serveur (ce navigateur retirerait sinon le « j'aime » de l'autre).
+  let uncounted = false;
   try { liked = localStorage.getItem(key) === '1'; } catch { liked = false; }
-  const show = () => { btn.setAttribute('aria-pressed', String(liked)); btn.setAttribute('aria-label', liked ? form.dataset.unlikeLabel : form.dataset.likeLabel); };
+  const show = () => btn.setAttribute('aria-pressed', String(liked));
   show();
   form.addEventListener('submit', async e => {
     e.preventDefault();
     const undo = liked;
     liked = !liked; show();
+    if (undo && uncounted) { uncounted = false; return; }
     try {
       const res = await fetch(form.action, { method: 'POST', headers: { accept: 'application/json', 'content-type': 'application/x-www-form-urlencoded' }, body: undo ? 'retirer=1' : '' });
       if (!res.ok) throw new Error(String(res.status));
       const r = await res.json();
       n.textContent = r.label;
+      if (live) live.textContent = r.label;
+      if (!undo && r.counted === false) { uncounted = true; return; }
       try { if (liked) localStorage.setItem(key, '1'); else localStorage.removeItem(key); } catch { /* stockage indisponible */ }
     } catch { liked = undo; show(); }
   });

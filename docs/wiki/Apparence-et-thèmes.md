@@ -60,6 +60,7 @@ La mise en page, elle, ne change pas.
   --mute: #63605a;           /* texte secondaire : ≥ 4,5:1 sur --paper */
   --prose: #45423d;          /* paragraphes */
   --rule: #e3e0d9;           /* filets */
+  --field: #8a867e;          /* bordure des champs de formulaire : ≥ 3:1 sur --paper */
   --frame: #efece6;          /* fond des images pendant leur chargement */
   --safelight: #2f5d50;      /* accent : états actifs, pastilles */
   --on-accent: #ffffff;      /* texte posé sur l'accent */
@@ -81,6 +82,7 @@ Variables disponibles :
 | `--mute` | texte secondaire (compteurs, pied de page, navigation) |
 | `--prose` | paragraphes |
 | `--rule` | filets |
+| `--field` | bordure des champs des formulaires (« Je vous ai photographié », « Signaler ») : au moins 3:1 sur `--paper` (WCAG 1.4.11) |
 | `--frame` | fond des images avant leur chargement |
 | `--safelight` | accent (sélection, pastille, liens actifs) |
 | `--on-accent` | texte posé sur l'accent |
@@ -101,8 +103,11 @@ Polices disponibles, auto-hébergées : Cormorant Garamond (400 et 500, droit et
   stylesheet: 'themes/mon-theme.css',
   classes: 'theme-mon-theme',      // classes posées sur <html>
   scheme: 'light',                  // ou 'dark'
+  preload: '/fonts/jost/files/jost-latin-300-normal.woff2',   // facultatif : police chargée en priorité
 },
 ```
+
+`preload` : la police la plus visible du thème (celle du texte ou des titres de l'ouverture), chargée en priorité dès le début de la page. Sans `preload`, aucune police n'est préchargée : n'en déclarez pas une que le thème n'utilise pas (le navigateur la téléchargerait pour rien).
 
 Plusieurs variantes peuvent partager une feuille : c'est le cas de Nicephos (`theme-nicephos mode-nuit` et `theme-nicephos mode-jour`).
 

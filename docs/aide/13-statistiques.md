@@ -13,7 +13,7 @@ Choisissez la période : **30 jours**, **3 mois** ou **12 mois** (par mois).
 - L’évolution (« +12 % ») compare à la période précédente de même durée.
 - **Fréquentation** : barres des pages vues, courbe des visiteurs ; survolez une barre pour le détail, ou ouvrez **Voir les données** pour le tableau.
 - **Photos les plus vues**, **Pages**, **Provenance** : le nom du site d’où viennent les visiteurs (instagram.com, google.fr…) ou « Accès direct ».
-- **Partages** : les partages de la période par moyen (WhatsApp, Facebook, Bluesky, X, Pinterest, E-mail, lien copié, post Instagram ouvert, menu du téléphone, QR scanné), et les photos les plus partagées. Un nombre par photo, par moyen et par jour, rien sur le visiteur. Sur téléphone, le menu du téléphone ne dit pas quelle app a été choisie.
+- **Partages** : les partages de la période par moyen (WhatsApp, Facebook, Bluesky, X, Pinterest, E-mail, lien copié, post Instagram ouvert, menu du téléphone, QR scanné), et les photos les plus partagées. Un nombre par photo, par moyen et par jour (jour de Paris, comme le reste de la page), rien sur le visiteur. Un QR scanné compte une fois : recharger la page ou envoyer l'adresse affichée ne le compte pas de nouveau. Sur téléphone, le menu du téléphone ne dit pas quelle app a été choisie.
 - **Pays** : une mappemonde avec une bulle par pays (sa surface suit le nombre de visiteurs ; au survol, « France · 124 visiteurs »), et la liste des 10 premiers. Le pays est celui que transmet Cloudflare : le site ne le calcule pas et ne garde aucune adresse. Rien de plus précis que le pays. « Pays inconnu » : Cloudflare ne l’a pas indiqué. Les pays sont comptés à partir de la mise à jour d’octobre 2026.
 
 ## Ailleurs dans l’admin

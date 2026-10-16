@@ -19,6 +19,7 @@ import { createRateLimiter, clientKey } from '../ratelimit.js';
 import { FeedbackError } from '../feedback.js';
 import { shareLinks, shareQr } from '../share.js';
 import { EncounterError } from '../encounters.js';
+import { safeNext } from '../auth.js';
 
 const HERO_COUNT = 5;
 const YEAR = 365 * 24 * 3600;
@@ -34,8 +35,22 @@ export default async function publicRoutes(app) {
   const likeLimit = createRateLimiter({ limit: 120, windowMs: 3600 * 1000 });
   const reportLimit = createRateLimiter({ limit: 5, windowMs: 3600 * 1000 });
   const shareLimit = createRateLimiter({ limit: 60, windowMs: 3600 * 1000 });
+  // Codes de contrôle des cartes (3 caractères) : au plus 5 codes faux par référence en 24 h, d'où que viennent les
+  // essais (en base, partagé entre les langues). Au-delà, tout code de cette référence est ignoré : la demande est
+  // traitée comme une référence tapée sans code (non vérifiée ; sur une rencontre établie, seul un refus s'applique).
+  const CODE_TRIES = 5, CODE_WINDOW = 24 * 3600 * 1000;
+  const cq = {
+    count: app.db.prepare('SELECT COUNT(*) FROM card_code_failures WHERE ref = ? AND at > ?').pluck(),
+    forget: app.db.prepare('DELETE FROM card_code_failures WHERE at <= ?'),
+    add: app.db.prepare('INSERT INTO card_code_failures (ref, at) VALUES (?, ?)'),
+  };
+  const codeGuard = {
+    locked: ref => cq.count.get(ref, Date.now() - CODE_WINDOW) >= CODE_TRIES,
+    // Renvoie vrai quand cet essai bloque la référence.
+    fail: ref => { cq.forget.run(Date.now() - CODE_WINDOW); cq.add.run(ref, Date.now()); return cq.count.get(ref, Date.now() - CODE_WINDOW) === CODE_TRIES; },
+  };
   // Mêmes pages en français (racine), en anglais (/en) et en allemand (/de).
-  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit });
+  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, codeGuard });
 
   // Sélecteur de langue : retient le choix (seul cookie du site, posé à ce moment-là) puis ouvre la page demandée.
   // Adresses habituelles des mentions légales en Allemagne et en anglais.
@@ -44,11 +59,12 @@ export default async function publicRoutes(app) {
 
   app.get('/langue/:lang', async (request, reply) => {
     const lang = LANGS.includes(request.params.lang) ? request.params.lang : null;
-    const to = String(request.query.vers || '');
-    const target = /^\/(?![/\\])/.test(to) ? to : '/';
     if (!lang) return reply.callNotFound();
+    // Chemin local seulement, vérifié avant ET après le retrait du préfixe de langue (« /en//hôte » deviendrait
+    // « //hôte ») et normalisé par l'analyseur d'URL (tabulation, saut de ligne, barre inverse, caractères non ASCII).
+    const target = safeNext(splitLang(safeNext(String(request.query.vers || ''), '/')).path, '/');
     reply.setCookie('langue', lang, { path: '/', maxAge: YEAR, sameSite: 'lax', httpOnly: true, secure: app.config.publicUrl.startsWith('https://') });
-    return reply.header('x-robots-tag', 'noindex').redirect(localize(splitLang(target).path, lang), 303);
+    return reply.header('x-robots-tag', 'noindex').redirect(localize(target, lang), 303);
   });
   // Photo offerte à une personne photographiée : lien privé de la fiche Rencontre (30 jours), dans sa langue.
   // Une version JPEG (2048 px, ou 1200 px pour l'aperçu), jamais l'original ; aucune indexation, aucun cache.
@@ -56,6 +72,18 @@ export default async function publicRoutes(app) {
   const giftJpeg = (s, width) => sharp(path.join(app.config.storageDir, 'originals', s.file)).rotate()
     .resize({ width, height: width, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 88, mozjpeg: true })
     .withExif({ IFD0: { Artist: ascii(s.author), Copyright: `(C) ${ascii(s.author)} - ${ascii(app.siteName())} - usage personnel / personal use` } }).toBuffer();
+  // Rendus récents gardés en mémoire (originaux aux noms uniques, jamais remplacés) : un lien ouvert par des proches ne
+  // décode pas l'original à chaque fois, et des demandes simultanées attendent le même rendu.
+  const gifts = new Map();
+  const giftOf = (s, width) => {
+    const key = [s.file, width, s.author, app.siteName()].join('|');
+    let job = gifts.get(key);
+    if (job) gifts.delete(key);
+    else job = giftJpeg(s, width).catch(err => { gifts.delete(key); throw err; });
+    gifts.set(key, job);
+    while (gifts.size > 6) gifts.delete(gifts.keys().next().value);
+    return job;
+  };
   const giftHeaders = reply => reply.header('x-robots-tag', 'noindex').header('cache-control', 'no-store').header('referrer-policy', 'no-referrer');
   app.get('/pour-vous/:token', async (request, reply) => {
     const s = app.encounters.share(request.params.token);
@@ -73,9 +101,10 @@ export default async function publicRoutes(app) {
     app.get(`/pour-vous/:token/${name}`, async (request, reply) => {
       const s = app.encounters.share(request.params.token);
       if (!s || s.expired) return reply.callNotFound();
-      const buf = await giftJpeg(s, width);
+      const buf = await giftOf(s, width);
       if (kind === 'download') {
-        app.encounters.countShare(s.token, 'download');
+        // Un HEAD (vérification d'un lien, gestionnaire de téléchargements) n'est pas un téléchargement.
+        if (request.method === 'GET') app.encounters.countShare(s.token, 'download');
         reply.header('content-disposition', `attachment; filename="${ascii(app.siteName()).replace(/\W+/g, '-').toLowerCase() || 'photo'}${s.ref ? `-${s.ref}` : ''}.jpg"`);
       }
       return giftHeaders(reply).type('image/jpeg').send(buf);
@@ -141,13 +170,19 @@ export default async function publicRoutes(app) {
   });
 }
 
+// Contact réglé dans l'admin (droits, confidentialité) : lien e-mail ou page web en https ; sinon du texte.
+const contactLink = c => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c) ? `mailto:${c}` : /^https:\/\/\S+$/.test(c) ? c : null);
+
+// Texte coupé à max caractères au plus, à la fin d'un mot, avec « … ».
+const clip = (text, max) => { const s = String(text || '').trim(); return s.length > max ? `${s.slice(0, max - 1).replace(/\s+\S*$/, '')}…` : s; };
+
 // Aides des gabarits pour une langue : textes, adresses préfixées, photos et vignettes.
 function helpers(lang) {
   const u = path => localize(path, lang);
   return { picture, pad, lang, t: UI[lang], u, galleryUrl: f => u(galleryUrl(f)), photoUrl: (slug, f) => u(photoUrl(slug, f)) };
 }
 
-async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit }) {
+async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, codeGuard }) {
   const finder = createSearch({ db: app.db });
   const t = UI[lang];
   const base = helpers(lang);
@@ -244,9 +279,13 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     }
     if (i === -1) return reply.callNotFound();
     const photo = list[i];
+    // Arrivée par le QR de la fenêtre « Partager » : comptée comme un partage, puis l'adresse est nettoyée (recharger
+    // la page ou envoyer l'adresse affichée ne compte pas un nouveau scan ; la vue est comptée sur l'adresse propre).
+    if (request.query.partage === 'qr') {
+      if (!BOTS.test(request.headers['user-agent'] || '') && shareLimit(request.ip)) app.shares.record(photo.id, 'qr');
+      return reply.redirect(base.photoUrl(photo.slug, filter), 303);
+    }
     app.stats.hit(request, { photoId: photo.id });
-    // Arrivée par le QR de la fenêtre « Partager » : comptée comme un partage.
-    if (request.query.partage === 'qr' && !BOTS.test(request.headers['user-agent'] || '') && shareLimit(request.ip)) app.shares.record(photo.id, 'qr');
     const prev = list[(i - 1 + list.length) % list.length];
     const next = list[(i + 1) % list.length];
     return reply.render('photo', {
@@ -254,7 +293,8 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       backUrl: `${base.galleryUrl(filter)}#galerie`,
       pageTitle: `${photo.title} · ${siteName}`,
       canonical: photoUrl(photo.slug),
-      description: [photo.legend, [photo.author, [photo.place, photo.when].filter(Boolean).join(', ')].filter(Boolean).join(', ')].filter(Boolean).join(' '),
+      // Légende coupée à 160 caractères (au mot près) : l'auteur, le lieu et la date restent dans les aperçus de liens.
+      description: [clip(photo.legend, 160), [photo.author, [photo.place, photo.when].filter(Boolean).join(', ')].filter(Boolean).join(', ')].filter(Boolean).join(' '),
       ogImage: `/media/${variantName(photo.file, widthsFor(photo.width).at(-1), 'webp', photo.variant_key)}`,
       bodyClass: 'dark', share: await shareOf(photo, siteName),
       // Mots-clés sous la légende, si le réglage le demande (Site public) ; chacun mène à la recherche.
@@ -270,8 +310,9 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   // sorties, introuvable pour les autres.
   const LOC = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang];
   const tripView = trip => {
-    const ids = new Set(app.trips.photos(trip.id).map(p => p.id));
-    const photos = repo.publishedPhotos({ lang }).filter(p => ids.has(p.id));
+    // Ordre du voyage (jour, heure de prise de vue) : le récit suit la journée, la couverture est celle de l'admin.
+    const pub = new Map(repo.publishedPhotos({ lang }).map(p => [p.id, p]));
+    const photos = app.trips.photos(trip.id).map(p => pub.get(p.id)).filter(Boolean);
     const names = new Map(repo.authors().map(a => [a.id, a.name]));
     const who = trip.authors.map(id => names.get(id)).filter(Boolean);
     return { ...trip, name: pick(trip, 'name', lang), intro: pick(trip, 'intro', lang), photos, who, cover: photos[0] || null };
@@ -325,8 +366,8 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     }
     if (q) reply.header('x-robots-tag', 'noindex');
     return reply.render('search', {
-      ...base, siteName, q, searched: terms.length > 0, photos,
-      pageTitle: q ? `${t.search.title} : ${q} · ${siteName}` : `${t.search.title} · ${siteName}`, canonical: '/recherche',
+      ...base, siteName, q, searched: terms.length > 0, tooShort: Boolean(q) && !terms.length, photos,
+      pageTitle: q ? `${t.search.title}${t.colon} ${q} · ${siteName}` : `${t.search.title} · ${siteName}`, canonical: '/recherche',
       description: t.search.description,
     });
   });
@@ -464,28 +505,42 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     return reply.render('bonjour', { ...base, siteName, h: t.hello, sent: true, sentRef: c?.ref || null, values: {}, errors: {},
       pageTitle: `${t.hello.thanks} · ${siteName}`, canonical: '/bonjour', description: '' });
   });
+  // Carte affichée en tête du formulaire : d'après la référence seule (lettre du photographe, publique), jamais d'après
+  // le résultat du code de contrôle (la page deviendrait un oracle pour le deviner).
+  const shownCard = input => {
+    const r = app.encounters.parseRef(String(input || '').slice(0, 40));
+    return r && { ref: r.ref, code: r.code, author: app.encounters.photographer(r.prefix) };
+  };
   app.get('/bonjour/:ref', async (request, reply) => {
     // QR générique d'un photographe (tee-shirt, sac…) : /bonjour/J, sans numéro de carte.
     const who = app.encounters.photographer(request.params.ref);
     if (who) { app.stats.hit(request, { page: 'bonjour' }); return hello(request, reply, { values: { photographer: request.params.ref.toUpperCase() }, who }); }
-    const card = app.encounters.card(request.params.ref);
+    // QR d'une carte : référence et code préremplis tels quels ; le code n'est vérifié qu'à l'envoi (essais comptés).
+    const card = shownCard(request.params.ref);
     app.stats.hit(request, { page: 'bonjour' });
-    return hello(request, reply, { card: card && !card.badCode ? card : null, values: { ref: card && !card.badCode ? request.params.ref.toUpperCase() : '' } });
+    return hello(request, reply, { card, values: { ref: card ? `${card.ref}${card.code ? `-${card.code}` : ''}` : '' } });
   });
   app.post('/bonjour', async (request, reply) => {
     const body = request.body || {};
-    // Piège à robots : un champ invisible rempli. Réponse « merci » sans rien enregistrer.
-    if (String(body.website || '').trim()) return reply.redirect(localize('/bonjour/merci', lang), 303);
-    const card = body.ref ? app.encounters.card(body.ref) : null;
-    if (!helloLimit(request.ip)) return hello(request, reply, { values: body, errors: { limit: 'limit' }, card: card?.badCode ? null : card, status: 429 });
+    // Piège à robots (un champ invisible rempli), ou formulaire envoyé depuis un autre site : réponse « merci » sans rien
+    // enregistrer.
+    if (String(body.website || '').trim() || !sameSite(request)) return reply.redirect(localize('/bonjour/merci', lang), 303);
+    const card = body.ref ? shownCard(body.ref) : null;
+    if (!helloLimit(request.ip)) return hello(request, reply, { values: body, errors: { limit: 'limit' }, card, status: 429 });
+    // Code de contrôle : un code faux est compté pour sa référence ; référence bloquée (trop de codes faux), le code
+    // est ignoré, qu'il soit bon ou faux (même réponse dans les deux cas).
+    let sent = body;
+    const c = card?.code ? app.encounters.card(String(body.ref).slice(0, 40)) : null;
+    if (c && codeGuard.locked(c.ref)) sent = { ...body, ref: c.ref };
+    else if (c?.badCode && codeGuard.fail(c.ref)) request.log.warn({ ref: c.ref }, 'codes de carte faux : référence bloquée 24 h');
     try {
-      const r = app.encounters.submit(body, { lang });
+      const r = app.encounters.submit(sent, { lang });
       // Demande RGPD : le photographe est prévenu tout de suite (relances ensuite, voir server/reminders.js).
       if (body.rights) app.reminders?.rights().catch(err => request.log.warn({ err: err.message }, 'relance RGPD'));
       return reply.redirect(`${localize('/bonjour/merci', lang)}${r.ref ? `?ref=${encodeURIComponent(r.ref)}` : ''}`, 303);
     } catch (err) {
       if (!(err instanceof EncounterError)) throw err;
-      return hello(request, reply, { values: body, errors: err.errors, card: card?.badCode ? null : card, status: 422 });
+      return hello(request, reply, { values: body, errors: err.errors, card: err.errors.ref ? null : card, status: 422 });
     }
   });
 
@@ -496,13 +551,12 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const P = PRIVACY[lang];
     const contact = String(settings.privacy_contact || settings.rights_contact || '').trim();
     const host = app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, '');
-    const sections = P.sections({ site: siteName, authors: repo.authors().map(a => a.name), contact: contact || `${host}/bonjour`, host,
+    const sections = P.sections({ site: siteName, authors: repo.authors().map(a => a.name), contact: contact || `${host}${localize('/bonjour', lang)}`, host,
       mfa: settings.privacy_mfa === true, encrypted: settings.privacy_encrypted === true, fields: app.encounters.encrypted });
     const date = new Intl.DateTimeFormat({ fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(PRIVACY_UPDATED));
     app.stats.hit(request, { page: 'confidentialite' });
     return reply.render('privacy', {
-      ...base, siteName, P, sections, updated: P.updated(date), contact,
-      contactHref: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) ? `mailto:${contact}` : null,
+      ...base, siteName, P, sections, updated: P.updated(date), contact, contactHref: contactLink(contact),
       pageTitle: `${P.title} · ${siteName}`, canonical: '/confidentialite', description: P.description(siteName),
     });
   });
@@ -513,7 +567,10 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const s = repo.settings();
     const L = LEGAL[lang];
     const host = app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, '');
-    const sections = L.sections({ site: siteName, names: String(s.legal_names || '').trim(), address: s.legal_address, email: String(s.legal_email || s.privacy_contact || '').trim(),
+    // E-mail : celui des mentions légales, sinon le contact de la page Confidentialité s'il s'agit d'une adresse e-mail.
+    const privacyMail = String(s.privacy_contact || '').trim();
+    const sections = L.sections({ site: siteName, names: String(s.legal_names || '').trim(), address: s.legal_address,
+      email: String(s.legal_email || '').trim() || (contactLink(privacyMail)?.startsWith('mailto:') ? privacyMail : ''),
       phone: String(s.legal_phone || '').trim(), director: String(s.legal_director || '').trim(), host });
     app.stats.hit(request, { page: 'mentions-legales' });
     return reply.render('legal', { ...base, siteName, L, sections, pageTitle: `${L.title} · ${siteName}`, canonical: '/mentions-legales', description: L.description(siteName) });
@@ -529,7 +586,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     app.stats.hit(request, { page: 'droits' });
     return reply.render('rights', {
       ...base, siteName, r, paragraphs: text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean),
-      contact, contactHref: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) ? `mailto:${contact}` : /^https:\/\/\S+$/.test(contact) ? contact : null,
+      contact, contactHref: contactLink(contact),
       pageTitle: `${r.title} · ${siteName}`, canonical: '/droits', description: r.description(siteName),
     });
   });

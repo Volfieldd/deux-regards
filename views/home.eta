@@ -90,5 +90,5 @@
 </section>
 
 </main>
-<p class="sr-only" aria-live="polite" data-announce></p>
+<p class="sr-only" aria-live="polite" data-announce data-colon="<%= it.t.colon %>"></p>
 <%~ include('./footer', it) %>

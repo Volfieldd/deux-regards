@@ -19,6 +19,7 @@
   --mute: #6b665d;      /* 5,2:1 sur --paper (WCAG AA) */
   --prose: #5f5a52;
   --rule: #dcd7cd;
+  --field: #8a847a;     /* bordure des champs : 3,4:1 sur --paper (WCAG 1.4.11) */
   --frame: #e7e3da;
   --dark: #0d0d0e;
   --dark-ink: #ecebe6;
@@ -240,9 +241,10 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .hello-form label { display: grid; gap: 6px; font-size: 14px; }
 .hello-form .hint { color: var(--mute); font-size: 12.5px; line-height: 1.5; }
 .hello-form input:not([type="checkbox"]):not([type="radio"]), .hello-form textarea {
-  font: inherit; font-size: 16px; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 10px 2px; border-radius: 0; min-height: 44px; }
-.hello-form textarea { border: 1px solid var(--rule); padding: 10px; resize: vertical; }
-.hello-form input:focus, .hello-form textarea:focus { outline: none; border-color: var(--ink); }
+  font: inherit; font-size: 16px; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--field); padding: 10px 2px; border-radius: 0; min-height: 44px; }
+.hello-form textarea { border: 1px solid var(--field); padding: 10px; resize: vertical; }
+/* Focus : le contour commun (:focus-visible), et la bordure à l'encre. */
+.hello-form input:focus, .hello-form textarea:focus { border-color: var(--ink); }
 .hello-form [aria-invalid="true"] { border-color: var(--safelight) !important; }
 .hello-form label.check { display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 15px; }
 .hello-form input[type="checkbox"], .hello-form input[type="radio"] { width: 20px; height: 20px; margin: 0; accent-color: var(--ink); flex: none; }
@@ -260,6 +262,7 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .hello-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .hello-send { min-height: 48px; padding: 0 28px; background: var(--ink); color: var(--paper); border-radius: 0; }
 .hello-send:hover { opacity: .88; }
+.report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; margin: 0; }
 
 /* ---------- photo offerte (/pour-vous/…) ---------- */
 .gift { padding-block: clamp(40px, 7vw, 96px) 0; display: grid; gap: 24px; max-width: 980px; }
@@ -344,12 +347,12 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .share-dialog::backdrop { background: rgba(5,5,6,.62); backdrop-filter: blur(3px); }
 @keyframes share-in { from { opacity: 0; transform: translateY(8px) scale(.98); } }
 .share-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.share-h h1, .share-h h2 { margin: 0; font: italic 400 28px/1 var(--serif); }
+.share-h h1, .share-h h2 { margin: 0; font: 400 28px/1 var(--serif); font-style: var(--display-style); }
 .share-x { width: 36px; height: 36px; flex: none; border-radius: 50%; border: 0; background: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); color: var(--dark-mute); display: grid; place-items: center; font-size: 15px; cursor: pointer; }
 .share-x:hover { color: var(--dark-ink); }
 .share-card { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px; border-radius: 12px; background: var(--sh-s2); }
 .share-card img { width: 92px; height: 61px; object-fit: cover; border-radius: 6px; display: block; }
-.share-card b { display: block; font: italic 400 21px/1.15 var(--serif); overflow-wrap: anywhere; }
+.share-card b { display: block; font: 400 21px/1.15 var(--serif); font-style: var(--display-style); overflow-wrap: anywhere; }
 .share-card small { font-size: 11px; color: var(--dark-mute); }
 .share-nets { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 6px; }
 .share-nets .net { display: grid; justify-items: center; gap: 7px; width: 100%; padding: 2px 0; background: none; border: 0; color: var(--dark-mute); font: 400 12px/1.25 var(--sans); text-align: center; cursor: pointer; }

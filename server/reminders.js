@@ -76,6 +76,17 @@ export function createReminders({ db, accounts, todo, mailer, siteName = () => '
     return sent;
   }
 
+  // Un seul passage des demandes RGPD à la fois (passage horaire, demandes arrivées ensemble sur /bonjour) : l'étape
+  // n'est notée qu'après l'envoi, deux passages simultanés enverraient les mêmes e-mails. Un appel pendant un passage
+  // en relance un seul autre, à sa fin.
+  let rightsRun = null, rightsAgain = false;
+  function rightsOnce() {
+    if (rightsRun) { rightsAgain = true; return rightsRun; }
+    rightsRun = (async () => { let n = 0; do { rightsAgain = false; n += await rights(); } while (rightsAgain); return n; })()
+      .finally(() => { rightsRun = null; });
+    return rightsRun;
+  }
+
   // Portée d'un compte hors requête (comme request.scope).
   const scopeOf = a => {
     const g = grantsOf(a.roles, a.adjust);
@@ -113,9 +124,9 @@ export function createReminders({ db, accounts, todo, mailer, siteName = () => '
     stageOf,
     // Toutes les heures (et juste après une demande reçue).
     async run() {
-      try { return { rights: await rights(), digests: await digests() }; } catch (err) { log?.error({ err }, 'relances'); return null; }
+      try { return { rights: await rightsOnce(), digests: await digests() }; } catch (err) { log?.error({ err }, 'relances'); return null; }
     },
-    rights,
+    rights: rightsOnce,
     digests,
     // E-mail de test : lève l'erreur du serveur de messagerie (MailError) pour l'afficher.
     async test(to, t) {

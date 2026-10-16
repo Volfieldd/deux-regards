@@ -20,10 +20,12 @@ export function photoMap(photo, published, lang, { pins = 12, list = 6 } = {}) {
   // Autres photos situées, de la plus proche à la plus lointaine (même ville d'abord), dans le rayon.
   const near = published.filter(p => p.id !== photo.id && located(p)).map(p => ({ p, km: km(photo, p) }))
     .filter(n => n.km <= NEAR_KM).sort((a, b) => a.km - b.km || a.p.id - b.p.id);
-  // Une pastille par ville ; celle de la photo regroupe les autres photos de la même ville.
+  // Une pastille par ville ; celle de la photo regroupe les autres photos de la même ville. Toutes les photos proches
+  // sont parcourues (une ville très fournie ne cache pas ses voisines) ; au-delà de pins + 1 villes, plus de nouvelle.
   const byCity = new Map();
-  for (const n of near.slice(0, 60)) {
+  for (const n of near) {
     if (!byCity.has(n.p.city_id)) {
+      if (byCity.size > pins) continue;
       const [px, py] = project(n.p.city_lat, n.p.city_lon);
       byCity.set(n.p.city_id, { cityId: n.p.city_id, city: nameOf(n.p, lang), x: px, y: py, km: n.km, photos: [] });
     }
