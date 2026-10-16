@@ -139,9 +139,13 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
 
   // ---------- page /bonjour ----------
   // Une demande : retrouver la personne (carte, ou date et lieu), ce qu'elle veut, et de quoi lui répondre.
-  function submit(body, { lang = 'fr' } = {}) {
+  // codeGuard (site public) : compte les codes faux par référence ; référence bloquée, le code est ignoré, bon ou faux
+  // (même réponse dans les deux cas). La garde porte sur la carte décodée ici même, jamais sur une autre lecture.
+  function submit(body, { lang = 'fr', codeGuard = null, onLock = null } = {}) {
     const errors = {};
-    const c = text(body.ref, 20) ? card(body.ref) : null;
+    let c = text(body.ref, 20) ? card(body.ref) : null;
+    if (c?.code && codeGuard?.locked(c.ref)) c = { ...c, code: null, verified: false, badCode: false };
+    else if (c?.badCode && codeGuard?.fail(c.ref)) onLock?.(c.ref);
     if (text(body.ref, 20) && !c) errors.ref = 'ref';
     if (c?.badCode) errors.ref = 'code';
     // Date qui existe au calendrier (une date impossible cassait ensuite les Sorties et la fiche).
@@ -260,8 +264,9 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     const metOn = isDay(body.met_on) ? String(body.met_on) : '';
     const authorId = Number(body.author_id) || c?.author?.id || null;
     // La lettre de la référence désigne le photographe (la page /bonjour l'annonce : « carte de Julien ») : une
-    // rencontre ne porte jamais la lettre d'un autre photographe.
-    if (c?.author && authorId && c.author.id !== authorId) errors.ref = 'La lettre de la référence désigne un autre photographe.';
+    // rencontre ne prend jamais la lettre d'un autre photographe (contrôle dans la transaction : une rencontre existante
+    // peut être rattachée à un autre photographe en gardant sa référence, par un compte de portée « tout »).
+    const otherLetter = Boolean(c?.author && authorId && c.author.id !== authorId);
     // Date de la session si l'horloge de l'appareil photo était décalée (vide : la date de la rencontre).
     const sessionDay = isDay(body.session_day) ? String(body.session_day) : null;
     if (Object.keys(errors).length) throw new EncounterError(errors);
@@ -269,6 +274,9 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     return db.transaction(() => {
       let target = id ? q.byId.get(id) : (c ? q.byRef.get(c.ref) : null);
       if (c && target && target.ref !== c.ref && q.byRef.get(c.ref)) throw new EncounterError({ ref: `La référence ${c.ref} est déjà une autre rencontre.` });
+      // Rattacher à un autre photographe une rencontre qui garde sa référence (avant de supprimer un photographe) :
+      // permis au seul compte de portée « tout » ; prendre une nouvelle référence à la lettre d'un autre, jamais.
+      if (otherLetter && !(target && target.ref === c.ref && canTouch(null))) throw new EncounterError({ ref: 'La lettre de la référence désigne un autre photographe.' });
       // Une référence qui désigne la rencontre d'un autre photographe, ou une rencontre attribuée à un autre : refusé.
       if ((target && !canTouch(target.author_id)) || (authorId && !canTouch(authorId))) throw new EncounterError({ ref: `La référence ${c?.ref || ''} n’est pas l’une de vos rencontres.`.replace('  ', ' ') });
       // Compte limité à ses rencontres : jamais de rencontre sans photographe (elle lui échapperait aussitôt).
@@ -370,13 +378,22 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   const trustedRefs = db.prepare(`SELECT ref FROM encounters e WHERE ref LIKE ? || '-%' AND NOT (verified = 0 AND COALESCE(consent_source, '') NOT IN ('carte', 'signature')
     AND EXISTS (SELECT 1 FROM encounter_events ev WHERE ev.encounter_id = e.id AND ev.kind = 'visiteur')
     AND NOT EXISTS (SELECT 1 FROM encounter_events ev WHERE ev.encounter_id = e.id AND ev.kind IN ('app', 'carte')))`).pluck();
-  const used = prefix => trustedRefs.all(prefix).map(r => Number(r.split('-')[1]) || 0);
+  const allRefs = db.prepare("SELECT ref FROM encounters WHERE ref LIKE ? || '-%'").pluck();
+  const numbers = refs => refs.map(r => Number(r.split('-')[1]) || 0);
+  const used = prefix => numbers(trustedRefs.all(prefix));
   const refOf = (prefix, n) => `${prefix}-${String(n).padStart(4, '0')}`;
+  // Une référence non confirmée proche de la série (moins de ROOM numéros après le dernier numéro sûr) compte quand
+  // même : sinon la planche suivante la réimprimerait, et la vraie personne de cette carte se fondrait dans la demande
+  // d'un tiers. Seule une référence lancée loin devant (J-9999) est négligée.
+  const ROOM = 100;
   function nextNumber(prefix) {
-    let n = Math.max(Number(printed()[prefix]) || 0, Number(settingJson('cards_app')[prefix]) || 0, ...used(prefix), 0) + 1;
+    const safe = Math.max(Number(printed()[prefix]) || 0, Number(settingJson('cards_app')[prefix]) || 0, ...used(prefix), 0);
+    let n = Math.max(safe, ...numbers(allRefs.all(prefix)).filter(k => k <= safe + ROOM)) + 1;
     while (q.byRef.get(refOf(prefix, n))) n++;
     return n;
   }
+  // Numéros d'une plage déjà portés par une rencontre (une planche ne réimprime jamais une référence prise).
+  const takenIn = (prefix, from, to) => numbers(allRefs.all(prefix)).filter(k => k >= from && k <= to).sort((a, b) => a - b);
   // Cartes numérotées imprimées mais pas encore utilisées (après la dernière carte utilisée de cette lettre ; les
   // numéros pris par l'app, jamais imprimés, ne comptent pas).
   function cardsLeft(prefix) {
@@ -563,7 +580,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
 
   return {
     onChange: fn => listeners.push(fn),
-    createShare, shares, share, countShare, revokeShare, photographer, nextNumber, reserve, cardsLeft, markMailed,
+    createShare, shares, share, countShare, revokeShare, photographer, nextNumber, takenIn, reserve, cardsLeft, markMailed,
     saveApp: async (...args) => { const r = await saveApp(...args); changed(); return r; }, exportData, erase, rightsDone,
     portraitJpeg: id => vault.openBuf(db.prepare('SELECT portrait_jpeg FROM encounters WHERE id = ?').pluck().get(id)) || null,
     signaturePng: id => vault.openBuf(db.prepare('SELECT signature_png FROM encounters WHERE id = ?').pluck().get(id)) || null,

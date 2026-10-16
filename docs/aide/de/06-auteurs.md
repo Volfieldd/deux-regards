@@ -13,7 +13,7 @@ Ein Datenblatt pro Fotograf.
 
 - **Speichern**: unter jedem Datenblatt.
 - **Fotograf hinzufügen**: Formular „Neuer Fotograf“, ganz unten.
-- **Löschen**: Öffnen Sie **Löschen** und bestätigen Sie. Das ist nicht möglich, solange der Fotograf Fotos, Begegnungen (ordnen Sie sie über ihr Datenblatt einem anderen Fotografen zu), eigene Reisen oder ein verknüpftes Konto hat; das Datenblatt nennt, was ihn noch hält.
+- **Löschen**: Öffnen Sie **Löschen** und bestätigen Sie. Das ist nicht möglich, solange der Fotograf Fotos, Begegnungen (ein Administrator ordnet sie über ihr Datenblatt einem anderen Fotografen zu, ihre Referenz bleibt), eigene Reisen oder ein verknüpftes Konto hat; das Datenblatt nennt, was ihn noch hält.
 - **Umbenennen** eines Fotografen aktualisiert seine Bilder, wenn sein Name im Wasserzeichen oder in den Metadaten steht.
 
 ## Ein Konto mit einem Fotografen verknüpfen

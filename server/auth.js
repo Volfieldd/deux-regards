@@ -56,11 +56,12 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     || (request.routeOptions.url === '/auth/local' && request.method === 'POST');
 
   // Sans OIDC_ORG_ID, un rôle « admin » donné dans une autre organisation Zitadel (projet partagé) serait accepté :
-  // en ligne, le rôle de l'IdP ne crée alors aucun administrateur (ADMIN_SUBS reste la voie d'amorce).
+  // en ligne, le rôle de l'IdP ne crée alors aucun administrateur (ADMIN_SUBS et OIDC_ALLOWED_SUBS, listes explicites de
+  // sub, restent les voies d'amorce).
   const idpRoleTrusted = !(config.oidc.projectId && !config.oidc.orgId && config.deployed);
   if (config.oidc.projectId && !config.oidc.orgId) {
     app.log.warn(idpRoleTrusted ? 'OIDC_ORG_ID non défini : un rôle admin donné dans une autre organisation Zitadel serait accepté'
-      : 'OIDC_ORG_ID non défini : le rôle admin de Zitadel est ignoré (amorce par ADMIN_SUBS seulement) ; renseignez OIDC_ORG_ID');
+      : 'OIDC_ORG_ID non défini : le rôle admin de Zitadel est ignoré (amorce par ADMIN_SUBS ou OIDC_ALLOWED_SUBS) ; renseignez OIDC_ORG_ID');
   }
 
   app.decorate('oidc', oidc);
@@ -197,10 +198,10 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     const verified = claims.email_verified === true || claims.email_verified === 'true';
     const email = verified && typeof claims.email === 'string' ? claims.email : '';
     const who = { sub: claims.sub, name: claims.name || claims.preferred_username || email || '', email };
-    if (result.admin && !idpRoleTrusted) request.log.warn({ sub: claims.sub }, 'rôle admin de l’IdP ignoré : OIDC_ORG_ID non défini');
+    if (result.admin && !result.listed && !idpRoleTrusted) request.log.warn({ sub: claims.sub }, 'rôle admin de l’IdP ignoré : OIDC_ORG_ID non défini');
     // Compte créé à la première connexion : administrateur si l'IdP transporte le rôle « admin », sinon en attente
     // qu'un administrateur lui donne un rôle. Ensuite, seuls comptent les rôles réglés dans l'admin.
-    const account = accounts.login({ ...who, idpAdmin: idpRoleTrusted && result.admin });
+    const account = accounts.login({ ...who, idpAdmin: (idpRoleTrusted && result.admin) || Boolean(result.listed) });
     if (account.rescued) audit.log({ ...who, action: 'compte rétabli par ADMIN_SUBS' });
     if (account.status === 'desactive') {
       audit.log({ ...who, action: 'connexion refusée (compte désactivé)' });

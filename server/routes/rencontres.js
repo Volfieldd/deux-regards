@@ -326,6 +326,10 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     if (!author) errors.author = request.t('Choisissez le photographe.');
     if (!(count >= 1 && count <= MAX_PAIRS)) errors.count = request.t('De 1 à {max} paires de cartes.', { max: MAX_PAIRS });
     if (!generic && !(from >= 1 && from + count - 1 <= 9999)) errors.from = request.t('Numéro de départ entre 1 et 9999.');
+    // Plage qui contient une référence déjà prise (demande reçue sur /bonjour, rencontre saisie) : refusée, deux
+    // personnes auraient la même carte.
+    const taken = !generic && author && !errors.from ? enc.takenIn(prefixOf(author), from, from + count - 1) : [];
+    if (taken.length) errors.from = request.t('Numéros déjà pris dans cette plage ({refs}) : commencez à {next}.', { refs: taken.slice(0, 5).map(n => `${prefixOf(author)}-${String(n).padStart(4, '0')}`).join(', '), next: enc.nextNumber(prefixOf(author)) });
     if (Object.keys(errors).length) return cardsPage(request, reply.code(422), { errors, values: b });
     const qs = new URLSearchParams({ auteur: author.id, nombre: count, ...(generic ? { generiques: '1' } : { de: from }) });
     if (!generic) {

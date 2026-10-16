@@ -13,7 +13,7 @@ One record per photographer.
 
 - **Save**: below each record.
 - **Add a photographer**: the “New photographer” form, at the bottom.
-- **Delete**: open **Delete**, then confirm. This is not possible while the photographer still has photos, encounters (move them to another photographer from their record), trips of their own or a linked account; the record says what is still holding them.
+- **Delete**: open **Delete**, then confirm. This is not possible while the photographer still has photos, encounters (an administrator moves them to another photographer from their record, keeping their reference), trips of their own or a linked account; the record says what is still holding them.
 - **Renaming** a photographer updates their images if their name appears in the watermark or in the metadata.
 
 ## Linking an account to a photographer

@@ -5,6 +5,7 @@ import sharp from 'sharp';
 import { removeVariants, MAX_PIXELS, WIDTHS } from './images.js';
 import { readExif } from './exif.js';
 import { sha256File } from './proofs.js';
+import { IMPORT_CONCURRENCY } from './imports.js';
 
 // Garde-fous de l'import : poids du fichier, nombre de pixels, formats réellement décodés.
 // 90 Mio par fichier : chaque photo part dans sa propre requête, et Cloudflare refuse les requêtes de plus de
@@ -18,6 +19,15 @@ const BYTES = { uchar: 1, char: 1, ushort: 2, short: 2, uint: 4, int: 4, float: 
 const MAX_DECODED = MAX_PIXELS * 3;
 // Hauteur au plus d'une variante : WebP plafonne à 16 383 px (AVIF : 16 384).
 const MAX_VARIANT_HEIGHT = 16_383;
+// Décodages de contrôle de l'import (PNG, TIFF : image entière décodée, jusqu'à ~360 Mo) : IMPORT_CONCURRENCY à la
+// fois, toutes requêtes confondues, comme les rendus (des envois parallèles ne s'additionnent pas sans limite).
+let checking = 0;
+const checkWaiters = [];
+export async function withCheckSlot(fn) {
+  while (checking >= IMPORT_CONCURRENCY) await new Promise(resolve => checkWaiters.push(resolve));
+  checking++;
+  try { return await fn(); } finally { checking--; checkWaiters.shift()?.(); }
+}
 
 export class ImportError extends Error {}
 
@@ -102,7 +112,7 @@ export async function importOriginal(storageDir, tmpFile) {
     // Décodage réel, à petite taille (en JPEG, l'image est réduite dès la lecture) : l'en-tête seul ne dit rien
     // d'un fichier tronqué ou d'une compression que le serveur ne sait pas lire, qui échoueraient ensuite au rendu.
     try {
-      await sharp(tmpFile, { limitInputPixels: MAX_PIXELS }).resize(64, 64, { fit: 'inside' }).raw().toBuffer();
+      await withCheckSlot(() => sharp(tmpFile, { limitInputPixels: MAX_PIXELS }).resize(64, 64, { fit: 'inside' }).raw().toBuffer());
     } catch {
       throw new ImportError('image incomplète ou abîmée : elle ne se décode pas');
     }

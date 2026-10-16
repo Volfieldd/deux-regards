@@ -511,7 +511,8 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   // Carte affichée en tête du formulaire : d'après la référence seule (lettre du photographe, publique), jamais d'après
   // le résultat du code de contrôle (la page deviendrait un oracle pour le deviner).
   const shownCard = input => {
-    const r = app.encounters.parseRef(String(input || '').slice(0, 40));
+    // parseRef coupe les espaces puis refuse au-delà de 32 caractères (même lecture qu'à l'envoi, voir A019).
+    const r = app.encounters.parseRef(input);
     return r && { ref: r.ref, code: r.code, author: app.encounters.photographer(r.prefix) };
   };
   app.get('/bonjour/:ref', async (request, reply) => {
@@ -530,14 +531,11 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     if (String(body.website || '').trim() || !sameSite(request)) return reply.redirect(localize('/bonjour/merci', lang), 303);
     const card = body.ref ? shownCard(body.ref) : null;
     if (!helloLimit(request.ip)) return hello(request, reply, { values: body, errors: { limit: 'limit' }, card, status: 429 });
-    // Code de contrôle : un code faux est compté pour sa référence ; référence bloquée (trop de codes faux), le code
-    // est ignoré, qu'il soit bon ou faux (même réponse dans les deux cas).
-    let sent = body;
-    const c = card?.code ? app.encounters.card(String(body.ref).slice(0, 40)) : null;
-    if (c && codeGuard.locked(c.ref)) sent = { ...body, ref: c.ref };
-    else if (c?.badCode && codeGuard.fail(c.ref)) request.log.warn({ ref: c.ref }, 'codes de carte faux : référence bloquée 24 h');
+    // Code de contrôle : compté et ignoré dans submit, sur la référence qu'il décode lui-même (une garde posée ici sur
+    // une autre lecture de la saisie se contournait avec des espaces en tête).
+    const onLock = ref => request.log.warn({ ref }, 'codes de carte faux : référence bloquée 24 h');
     try {
-      const r = app.encounters.submit(sent, { lang });
+      const r = app.encounters.submit(body, { lang, codeGuard, onLock });
       // Demande RGPD : le photographe est prévenu tout de suite (relances ensuite, voir server/reminders.js).
       if (body.rights) app.reminders?.rights().catch(err => request.log.warn({ err: err.message }, 'relance RGPD'));
       return reply.redirect(`${localize('/bonjour/merci', lang)}${r.ref ? `?ref=${encodeURIComponent(r.ref)}` : ''}`, 303);

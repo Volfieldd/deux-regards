@@ -32,7 +32,7 @@ Tipp: Fotografieren Sie direkt nach dem Foto die Karte, die Sie überreichen. Si
 
 **Die Karten drucken**: **Unterwegs → Einwilligungskarten → Einen Bogen vorbereiten**. Wählen Sie den Fotografen, dann:
 
-- **Nummeriert**: Jedes Paar hat seine eigene Referenz und seinen eigenen QR-Code; die Nummerierung läuft von einem Bogen zum nächsten weiter (die nächste Nummer wird vorgeschlagen);
+- **Nummeriert**: Jedes Paar hat seine eigene Referenz und seinen eigenen QR-Code; die Nummerierung läuft von einem Bogen zum nächsten weiter (die nächste Nummer wird vorgeschlagen). Ein Bereich mit einer bereits vergebenen Nummer (Anfrage über die Seite „Ich habe Sie fotografiert“, erfasste Begegnung) wird abgelehnt, mit der Nummer, bei der Sie beginnen können;
 - **Generisch**: ohne Nummer, mit einem QR-Code zu `/bonjour`: die Vorlage für eine Druckerei; nummerieren Sie danach beide Karten jedes Paares mit einem Nummerierstempel.
 
 Der Bogen öffnet sich druckfertig: fünf Paare pro A4-Blatt, einseitig. Der Einwilligungstext nennt die Website dieser Installation (ihre öffentliche Adresse). Drucken Sie mit **100 %** (tatsächliche Größe, ohne „An Seite anpassen“), auf dickem Papier (250 bis 350 g/m²), und schneiden Sie entlang der gestrichelten Linien. Wenn die Texte der Karten geändert werden sollen, sagen Sie Bescheid: Sie stehen alle an einer Stelle.

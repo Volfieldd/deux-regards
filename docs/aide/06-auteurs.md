@@ -13,7 +13,7 @@ Une fiche par photographe.
 
 - **Enregistrer** : sous chaque fiche.
 - **Ajouter un photographe** : formulaire « Nouveau photographe », en bas.
-- **Supprimer** : ouvrez **Supprimer**, puis confirmez. C'est impossible tant que le photographe a des photos, des rencontres (rattachez-les à un autre photographe depuis leur fiche), des voyages à lui ou un compte lié ; la fiche dit ce qui le retient encore.
+- **Supprimer** : ouvrez **Supprimer**, puis confirmez. C'est impossible tant que le photographe a des photos, des rencontres (un administrateur les rattache à un autre photographe depuis leur fiche, en gardant leur référence), des voyages à lui ou un compte lié ; la fiche dit ce qui le retient encore.
 - **Renommer** un photographe met à jour ses images si son nom figure dans le filigrane ou dans les métadonnées.
 
 ## Lier un compte à un photographe

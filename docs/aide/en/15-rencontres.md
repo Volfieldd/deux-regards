@@ -32,7 +32,7 @@ Tip: just after the photo, photograph the card you are handing over. It marks th
 
 **Printing the cards**: **In the field → Consent cards → Prepare a sheet**. Choose the photographer, then:
 
-- **Numbered**: each pair has its own reference and its own QR code; the series continues from one sheet to the next (the next number is suggested);
+- **Numbered**: each pair has its own reference and its own QR code; the series continues from one sheet to the next (the next number is suggested). A range that contains a number already taken (a request received on the “I photographed you” page, an encounter entered) is refused, with the number to start at;
 - **Generic**: no number, with a QR code to `/bonjour`: the template to give to a printer, then number both cards of each pair with a numbering stamp.
 
 The sheet opens ready to print: five pairs per A4 sheet, single-sided. The consent text names the site of this installation (its public address). Print at **100 %** (actual size, without “fit to page”), on thick paper (250 to 350 g/m²), and cut along the dotted lines. To change the text on the cards, just ask: it is all kept in one place.

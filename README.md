@@ -22,7 +22,7 @@ Le dépôt s'appelle `deux-regards`, le nom de travail du projet. Le nom affich�
 | Savoir ce que fait le site, fonction par fonction | [Spécifications](docs/wiki/Spécifications.md) et [`docs/specs/`](docs/specs/) |
 | Comprendre les choix et l'historique, voir ce qui reste à faire | [PLAN.md](PLAN.md) |
 | Connaître les protections en place | [Sécurité](docs/wiki/Sécurité.md) |
-| Relire les audits d'ergonomie et de design | [`docs/audit-ergonomie-2026-10/`](docs/audit-ergonomie-2026-10/README.md), [`docs/audit-iphone-2026-10/`](docs/audit-iphone-2026-10/README.md), [`docs/design-2026-10/`](docs/design-2026-10/README.md), [revue de code](docs/revue-2026-10.md) |
+| Relire les audits d'ergonomie et de design | [`docs/audit-ergonomie-2026-10/`](docs/audit-ergonomie-2026-10/README.md), [`docs/audit-iphone-2026-10/`](docs/audit-iphone-2026-10/README.md), [`docs/design-2026-10/`](docs/design-2026-10/README.md), [revue de code](docs/revue-2026-10.md), [revue du 16 octobre](docs/revue-2026-10-16.md) |
 
 Règle : **une modification visible met à jour sa documentation dans la même PR** (aide si cela change un geste, wiki si cela change l'installation, l'exploitation ou une spécification, `PLAN.md` pour une étape ou la feuille de route).
 

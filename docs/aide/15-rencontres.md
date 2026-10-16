@@ -32,7 +32,7 @@ Astuce : juste après la photo, photographiez la carte que vous tendez. Elle mar
 
 **Imprimer les cartes** : **Sur le terrain → Cartes d'accord → Préparer une planche**. Choisissez le photographe, puis :
 
-- **Numérotées** : chaque paire a sa référence et son propre QR ; la série continue d'une planche à l'autre (le prochain numéro est proposé) ;
+- **Numérotées** : chaque paire a sa référence et son propre QR ; la série continue d'une planche à l'autre (le prochain numéro est proposé). Une plage qui contient un numéro déjà pris (demande reçue sur la page « Je vous ai photographié », rencontre saisie) est refusée, avec le numéro où commencer ;
 - **Génériques** : sans numéro, avec un QR vers `/bonjour` : le modèle à confier à un imprimeur, puis numérotez les deux cartes de chaque paire au tampon numéroteur.
 
 La planche s'ouvre prête à imprimer : cinq paires par feuille A4, d'un seul côté. Le texte d'accord nomme le site de cette installation (son adresse publique). Imprimez à **100 %** (taille réelle, sans « ajuster à la page »), sur du papier épais (250 à 350 g/m²), et découpez le long des pointillés. Pour changer les textes des cartes, demandez-le : ils sont réunis au même endroit.

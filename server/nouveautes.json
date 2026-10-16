@@ -1,5 +1,63 @@
 [
   {
+    "version": "1.90.0",
+    "date": "2026-10-16",
+    "pr": 90,
+    "title": {
+      "fr": "Revue complète du 16 octobre : sécurité, données personnelles, accessibilité",
+      "en": "Full review of 16 October: security, personal data, accessibility",
+      "de": "Vollständige Prüfung vom 16. Oktober: Sicherheit, personenbezogene Daten, Barrierefreiheit"
+    },
+    "items": [
+      {
+        "fr": "Raccourcis d’une touche (P, I, L, Espace) actifs seulement quand le focus est sur la planche ou l’inspecteur. Les listes déroulantes à effet immédiat n’agissent plus à chaque flèche du clavier : Entrée ou la sortie de la liste appliquent.",
+        "en": "One-key shortcuts (P, I, L, Space) only work when the focus is on the contact sheet or the inspector. Drop-down lists that act at once no longer act on every arrow key: Enter, or leaving the list, applies.",
+        "de": "Ein-Tasten-Kürzel (P, I, L, Leertaste) wirken nur, wenn der Fokus auf dem Kontaktbogen oder im Inspektor liegt. Sofort wirkende Auswahllisten reagieren nicht mehr auf jede Pfeiltaste: Eingabe oder das Verlassen der Liste übernimmt."
+      },
+      {
+        "fr": "Import : un HEIC d’iPhone ou un fichier abîmé est refusé tout de suite, avec sa raison ; l’AVIF est accepté.",
+        "en": "Import: an iPhone HEIC or a damaged file is refused at once, with its reason; AVIF is accepted.",
+        "de": "Import: Ein HEIC vom iPhone oder eine beschädigte Datei wird sofort mit Begründung abgelehnt; AVIF wird angenommen.",
+        "perm": "photos.importer"
+      },
+      {
+        "fr": "Supprimer un voyage ou un compte passe par une étape de confirmation qui nomme sa cible.",
+        "en": "Deleting a trip or an account goes through a confirmation step that names it.",
+        "de": "Das Löschen einer Reise oder eines Kontos verlangt eine Bestätigung, die das Ziel nennt."
+      },
+      {
+        "fr": "Barre latérale : entrée « Signalements », avec le nombre de nouveaux.",
+        "en": "Sidebar: a “Reports” entry, with the number of new ones.",
+        "de": "Seitenleiste: Eintrag „Meldungen“ mit der Zahl der neuen.",
+        "perm": "signalements.traiter"
+      },
+      {
+        "fr": "Instagram : les heures saisies « 9:00 » ou « 18 h 30 » sont comprises ; une heure illisible est signalée.",
+        "en": "Instagram: times typed as “9:00” or “18 h 30” are understood; an unreadable time is reported.",
+        "de": "Instagram: Uhrzeiten wie „9:00“ oder „18 h 30“ werden verstanden; eine unlesbare Uhrzeit wird gemeldet.",
+        "perm": "instagram.compte"
+      },
+      {
+        "fr": "Voyages : mettre une page en ligne demande le droit de publier ; la ville d’une photo hors carte n’est plus montrée.",
+        "en": "Trips: putting a page online needs the right to publish; the town of a photo kept off the map is no longer shown.",
+        "de": "Reisen: Eine Seite online zu stellen erfordert das Recht zu veröffentlichen; der Ort eines Fotos außerhalb der Karte wird nicht mehr gezeigt.",
+        "perm": "sorties.voir"
+      },
+      {
+        "fr": "Visages : les petits visages d’un grand original sont maintenant vus ; les photos déjà notées « sans visage » sont réexaminées une fois.",
+        "en": "Faces: small faces in a large original are now detected; photos already marked “no face” are checked again once.",
+        "de": "Gesichter: Kleine Gesichter in einem großen Original werden jetzt erkannt; als „ohne Gesicht“ markierte Fotos werden einmal neu geprüft.",
+        "perm": "photos.voir"
+      },
+      {
+        "fr": "Cartes d’accord : une planche ne réimprime jamais un numéro déjà pris ; une rencontre peut être rattachée à un autre photographe en gardant sa référence (avant de supprimer un photographe).",
+        "en": "Consent cards: a sheet never reprints a number already taken; an encounter can be moved to another photographer while keeping its reference (before deleting a photographer).",
+        "de": "Einwilligungskarten: Ein Bogen druckt nie eine bereits vergebene Nummer; eine Begegnung kann unter Beibehaltung ihrer Referenz einem anderen Fotografen zugeordnet werden (vor dem Löschen eines Fotografen).",
+        "perm": "terrain.cartes"
+      }
+    ]
+  },
+  {
     "version": "1.88.0",
     "date": "2026-10-15",
     "pr": 88,

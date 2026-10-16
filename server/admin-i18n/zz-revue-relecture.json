@@ -1,0 +1,6 @@
+{
+ "Numéros déjà pris dans cette plage ({refs}) : commencez à {next}.": {
+  "en": "Numbers already taken in this range ({refs}): start at {next}.",
+  "de": "Bereits vergebene Nummern in diesem Bereich ({refs}): beginnen Sie bei {next}."
+ }
+}
