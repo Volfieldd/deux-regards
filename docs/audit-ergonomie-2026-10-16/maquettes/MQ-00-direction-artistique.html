@@ -1,0 +1,1493 @@
+<!doctype html>
+<html lang="fr" class="theme-nicephos mode-jour">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>MQ-00 — Direction artistique commune des maquettes — Nicephos</title>
+<meta name="description" content="La planche de direction artistique des vingt maquettes de l’audit d’ergonomie : jetons, typographie, en-têtes, cartel, vignettes, boutons, formulaires, administration, annotations.">
+<link rel="stylesheet" href="_commun/site.css">
+<link rel="stylesheet" href="_commun/tokens.css">
+<link rel="stylesheet" href="_commun/public.css">
+<link rel="stylesheet" href="_commun/annotations.css">
+<style>
+/* Mise en page de la planche, et d'elle seule. Aucun jeton n'est redéclaré : tailles, couleurs et espaces viennent de tokens.css. */
+.pl { position: relative; }
+.pl-band { padding-block: var(--esp-10) var(--esp-12); }
+.pl-band + .pl-band { padding-top: var(--esp-2); }
+.pl-sec { padding-top: var(--esp-12); }
+.pl .pl-sec > * + * { margin-top: var(--esp-4); }
+.pl .pl-sec > .pl-h2 + * { margin-top: var(--esp-2); }
+.pl-h2 { position: relative; margin: 0; font: 300 var(--t-titre-1)/var(--i-serre) var(--sans); letter-spacing: -.005em; }
+.pl-h3 { margin: 0; font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.pl-intro { margin: 0; max-width: 66ch; font-size: var(--t-prose); line-height: 1.6; color: var(--prose); text-wrap: pretty; }
+.pl-texte { margin: 0; max-width: 72ch; color: var(--prose); }
+.pl-regles { margin: 0; padding-left: 20px; max-width: 80ch; color: var(--prose); display: grid; gap: var(--esp-1); }
+.pl-regles b { color: var(--ink); font-weight: 500; }
+.raisons { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--esp-3) var(--esp-4); margin: 0; padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+.raisons dt { font: 500 var(--t-meta)/1.3 var(--sans); letter-spacing: var(--capitales); text-transform: uppercase; color: var(--mute); }
+.raisons dd { margin: var(--esp-1) 0 0; color: var(--prose); font-size: 15px; line-height: 1.55; }
+.pl-plaque { margin-inline: calc(-1 * var(--gut)); padding: var(--esp-6) var(--gut); }
+.pl-deux { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: var(--esp-6) var(--esp-8); align-items: start; }
+.pl-trois { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: var(--esp-5); align-items: start; }
+.pl-legende { margin: var(--esp-1) 0 0; font-size: var(--t-meta); color: var(--mute); }
+.pl-sommaire { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 0 var(--esp-4); }
+.pl-sommaire a { display: flex; align-items: baseline; gap: var(--esp-1); min-height: var(--cible); padding-block: 10px; border-bottom: 1px solid var(--rule); color: var(--ink); }
+.pl-sommaire a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.pl-sommaire .n { color: var(--mute); font-variant-numeric: tabular-nums; min-width: 2.2em; }
+.principes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 228px), 1fr)); gap: var(--esp-4) var(--esp-4); counter-reset: p; }
+.principes li { counter-increment: p; padding-top: var(--esp-2); border-top: 1px solid var(--field); }
+.principes li::before { content: counter(p) / ''; display: block; font: 300 var(--t-titre-2)/1 var(--sans); color: var(--safelight); margin-bottom: var(--esp-1); }
+.principes b { display: block; font-weight: 500; margin-bottom: var(--esp-1); color: var(--ink); }
+.principes span { color: var(--prose); font-size: 15px; line-height: 1.55; }
+/* Ouverture */
+.ouv { display: grid; gap: var(--esp-6); padding-block: var(--esp-8) var(--esp-6); }
+@media (max-width: 767px) { .pl-band:first-of-type { padding-top: var(--esp-2); } .ouv { padding-block: var(--esp-3); gap: var(--esp-4); } }
+.ouv-t { display: grid; gap: var(--esp-2); max-width: 900px; }
+@media (min-width: 1024px) { .ouv { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); align-items: end; gap: var(--esp-8); } }
+/* Nuanciers */
+.nuanciers { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 232px), 1fr)); gap: var(--esp-2); }
+.usages dt { font: 500 var(--t-meta)/1.3 var(--sans); letter-spacing: var(--capitales); text-transform: uppercase; color: var(--mute); }
+.usages dd { margin: var(--esp-1) 0 0; color: var(--prose); font-size: 15px; line-height: 1.7; }
+.usages code, .pl-regles code, .pl-texte code, .pl-intro code { font: 400 .86em var(--mono); }
+.usages .ic, .syms .ic { display: inline-block; vertical-align: -1px; }
+.nuancier { padding: var(--esp-3) var(--esp-3) var(--esp-2); }
+.mode-jour.nuancier { box-shadow: inset 0 0 0 1px var(--rule); }
+.nuancier-t { margin: 0 0 var(--esp-2); font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.nuances { width: 100%; border-collapse: collapse; font-size: var(--t-petit); }
+.nuances th, .nuances td { padding: 5px var(--esp-1) 5px 0; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--line, var(--rule)); }
+.nuances thead th { font-weight: 500; color: var(--ink2, var(--mute)); font-size: var(--t-meta); }
+.nuances tbody th { font-weight: 400; white-space: nowrap; display: flex; align-items: center; gap: var(--esp-1); }
+.nuances .jt { display: grid; line-height: 1.25; } .nuances .jt .donnee { font-size: 12px; color: var(--ink2, var(--mute)); }
+.nuances code { font: 400 var(--t-meta)/1 var(--mono); }
+.nuances .ratio { white-space: nowrap; text-align: right; }
+.nuances .ratio b { font-weight: 500; font-variant-numeric: tabular-nums; }
+.nuances .ratio span { color: var(--ink2, var(--mute)); font-size: var(--t-meta); }
+.puce { display: inline-block; flex: none; width: 24px; height: 24px; vertical-align: middle; box-shadow: inset 0 0 0 1px rgba(127,127,127,.45); }
+.nuancier.admin { background: var(--s1); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line2); }
+/* Typographie */
+.echelle { display: grid; gap: 0; }
+.echelle > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); gap: var(--esp-1) var(--esp-4); align-items: baseline; padding-block: 8px; border-bottom: 1px solid var(--rule); }
+.echelle .spec { color: var(--mute); }
+@media (max-width: 767px) { .echelle > div { grid-template-columns: 1fr; } }
+.ex-affiche { font: 300 var(--t-affiche)/1.05 var(--sans); }
+.ex-t1 { font: 300 var(--t-titre-1)/var(--i-serre) var(--sans); }
+.ex-t2 { font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); }
+.ex-t3 { font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.ex-prose { font-size: var(--t-prose); line-height: 1.65; color: var(--prose); max-width: 60ch; }
+.ex-petit { font-size: var(--t-petit); }
+.ex-meta { font-size: var(--t-meta); color: var(--mute); }
+.ex-marque { font: 300 15px/1 var(--sans); letter-spacing: var(--marque); text-transform: uppercase; }
+.ex-atelier { font: italic 400 var(--t-titre-1)/1.12 'Cormorant Garamond', Georgia, serif; }
+/* Espaces */
+.regle8 { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--esp-2) 12px; }
+.regle8 li { display: grid; justify-items: center; gap: 4px; color: var(--mute); }
+.regle8 i { display: block; background: var(--ink); }
+.gouttieres { width: 100%; border-collapse: collapse; font-size: var(--t-petit); }
+.gouttieres th, .gouttieres td { padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule); text-align: left; }
+.gouttieres th { font-weight: 500; }
+.focus-demo { display: flex; flex-wrap: wrap; gap: var(--esp-3); align-items: center; padding: var(--esp-3); }
+.focus-demo .vignette { width: 160px; }
+/* Échantillons d'en-tête : vrais, à leur largeur (l'en-tête suit son conteneur). */
+.ech { margin: 0; min-width: 0; }
+.ech-zone { width: calc(var(--w) * 1px); zoom: var(--z); box-shadow: 0 0 0 1px var(--rule); }
+.ech-zone > * + * { margin-top: var(--esp-1); }
+.ech-etapes { padding: var(--esp-1) 24px 0; }
+.ech figcaption { margin-top: var(--esp-1); font-size: var(--t-meta); color: var(--mute); }
+.ech-rangee { display: flex; flex-wrap: wrap; gap: var(--esp-4); align-items: flex-start; }
+.ech-pile { display: grid; gap: var(--esp-4); }
+.que-tel { display: none; }
+@media (max-width: 767px) { .ech { --z: var(--zm) !important; } .que-bureau { display: none !important; } .que-tel { display: block; } }
+.adm { margin: 0; min-width: 0; }
+.adm img { display: block; width: 100%; height: auto; box-shadow: 0 0 0 1px var(--rule); }
+.adm figcaption { margin-top: var(--esp-1); font-size: var(--t-meta); color: var(--mute); }
+.adm-tel { width: min(100%, 340px); }
+.adm-grille { display: grid; gap: var(--esp-4); grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 1024px) { .adm-grille { grid-template-columns: 632px minmax(0, 1fr) minmax(0, 1fr); } .adm-grille .adm-tel { width: 100%; } }
+.regle-enreg { padding: var(--esp-3); box-shadow: inset 0 0 0 1px var(--rule); }
+/* Démonstrations */
+.demo-ligne { display: flex; flex-wrap: wrap; gap: var(--esp-2) var(--esp-3); align-items: center; }
+.demo-ligne + .demo-ligne { margin-top: var(--esp-3); }
+.demo-ligne .note { color: var(--mute); font-size: var(--t-meta); }
+.cartel-schema { display: grid; gap: var(--esp-4); }
+@media (min-width: 900px) { .cartel-schema { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); align-items: end; } }
+.cartel-schema .photo img { max-width: 560px; }
+.cartel-schema .photo--cote img { --photo-h: 400px; max-width: none; }
+.legende-cote { list-style: none; margin: var(--esp-2) 0 0; padding: 0; display: grid; gap: 6px; font-size: var(--t-meta); color: var(--mute); }
+.legende-cote b { color: var(--ink); font-weight: 500; }
+.rangees--ref { --h: 92px; }
+@media (min-width: 768px) { .rangees--ref { --h: 140px; } }
+@media (min-width: 1280px) { .rangees--ref { --h: 150px; } }
+.statut { display: inline-block; margin-top: 2px; font-size: var(--t-meta); color: var(--safelight); }
+.vitrine { display: grid; gap: var(--esp-2); max-width: 520px; }
+.vitrine .groupe { gap: 0; }
+.vitrine .choix { justify-content: space-between; border-bottom: 1px solid var(--rule); }
+.vitrine .choix > span:first-of-type { flex: 1; }
+.lex { width: 100%; border-collapse: collapse; font-size: 15px; }
+.lex th, .lex td { padding: 7px 16px 7px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+.lex thead th { font: 500 var(--t-meta)/1.3 var(--sans); letter-spacing: var(--capitales); text-transform: uppercase; color: var(--mute); }
+.lex tbody th { font-weight: 500; white-space: nowrap; }
+.lex td:nth-child(3) { color: var(--mute); }
+.lex s { color: var(--mute); }
+@media (max-width: 767px) { .lex, .lex tbody, .lex tr, .lex th, .lex td { display: block; } .lex thead { display: none; } .lex tr { padding-block: 10px; border-bottom: 1px solid var(--rule); } .lex th, .lex td { border: 0; padding: 2px 0; } }
+.anno-demo { display: grid; gap: var(--esp-8); grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); padding-top: var(--esp-6); }
+.anno-demo .carte { position: relative; padding: var(--esp-3); background: var(--paper); box-shadow: 0 0 0 1px var(--rule); }
+.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
+.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
+.tableau-donnees { width: 100%; border-collapse: collapse; font-size: var(--t-petit); }
+.tableau-donnees th, .tableau-donnees td { padding: 8px 12px 8px 0; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.tableau-donnees thead th { color: var(--mute); font-weight: 500; font-size: var(--t-meta); }
+.tableau-donnees td.nb { text-align: right; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="mode-nuit">
+<header class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Menu principal">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <a class="sh-outil sh-panier" href="/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Panier</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> tirages</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+</div>
+<main id="contenu" class="pl">
+
+<!-- ================= Ouverture (thème nuit, le thème de production) ================= -->
+<section class="mode-nuit pl-band" aria-labelledby="t-ouv">
+  <div class="wrap">
+    <div class="ouv">
+      <div class="ouv-t">
+        <p class="etiquette">MQ-00 · audit d’ergonomie du 16 octobre 2026</p>
+        <h1 class="titre-page" id="t-ouv">Une seule direction artistique pour vingt écrans</h1>
+        <p class="chapo">La photo d’abord, une seule voix typographique, du silence plutôt que des boîtes. Chaque composant a un nom, une forme et une place : les vingt maquettes les assemblent sans les redessiner.</p>
+      </div>
+      <figure class="diptyque">
+        <figcaption class="diptyque-t"><p class="etiquette">Même soir, deux regards</p><p class="cartel-m">Lisbonne, samedi 10 octobre 2026, entre 18 h 52 et 19 h 05</p></figcaption>
+        <div class="diptyque-paire">
+          <figure class="photo" style="--r:1.5"><img src="_commun/photos/belem.webp" width="900" height="600" alt="La tour de Belém en ombre chinoise devant un soleil couchant sur le fleuve." fetchpriority="high"><figcaption class="cartel"><span class="cartel-t">Belém, contre-jour</span><span class="cartel-m">Sébastien · Lisbonne · 10 oct. 2026</span></figcaption></figure>
+          <figure class="photo" style="--r:1.5"><img src="_commun/photos/miradouro.webp" width="900" height="600" alt="Deux silhouettes sur un belvédère, la ville et le Tage dans le soleil couchant."><figcaption class="cartel"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></figcaption></figure>
+        </div>
+      </figure>
+    </div>
+    <h2 class="sr-only">Cinq principes</h2>
+    <ol class="principes">
+      <li><b>La photo d’abord</b><span>Rien sur l’image, rien autour : ni voile, ni passe-partout gris, ni cercle, ni recadrage. Le cartel vient dessous, ou à côté d’une verticale.</span></li>
+      <li><b>Une seule voix</b><span>Jost partout, en 400 pour lire. Plex Mono pour les seules données ; Cormorant pour le seul thème Atelier ; des capitales pour la marque et les étiquettes courtes.</span></li>
+      <li><b>Le silence plutôt que les boîtes</b><span>De l’espace sur une grille de 8 px et des filets. Un cadre seulement s’il porte une information : un champ, un menu ouvert, un dialogue.</span></li>
+      <li><b>Un nom, une forme, une place</b><span>Trois en-têtes, deux pieds de page, un cartel, trois boutons, une pastille d’état, un message d’action. Les mêmes mots partout.</span></li>
+      <li><b>Tout se lit, tout se fait sans script</b><span>Menus et langues en <code>&lt;details&gt;</code>, bascules dans des formulaires, cibles de 44 px, focus visible, erreurs écrites près du champ.</span></li>
+    </ol>
+  </div>
+</section>
+
+<div class="wrap">
+<nav class="pl-sec" aria-labelledby="t-som">
+  <h2 class="pl-h3" id="t-som">Sommaire</h2>
+  <ol class="pl-sommaire">
+    <li><a href="#couleurs"><span class="n">1</span>Couleurs et contrastes</a></li>
+    <li><a href="#typo"><span class="n">2</span>Typographie</a></li>
+    <li><a href="#espaces"><span class="n">3</span>Espaces, rayons, focus</a></li>
+    <li><a href="#entetes"><span class="n">4</span>En-têtes et langue</a></li>
+    <li><a href="#pieds"><span class="n">5</span>Pieds de page</a></li>
+    <li><a href="#photos"><span class="n">6</span>Cartel, vignettes, diptyque</a></li>
+    <li><a href="#actions"><span class="n">7</span>Boutons et bascules</a></li>
+    <li><a href="#formulaires"><span class="n">8</span>Formulaires et erreurs</a></li>
+    <li><a href="#tirages"><span class="n">9</span>Prix, tunnel, messages</a></li>
+    <li><a href="#admin"><span class="n">10</span>Administration</a></li>
+    <li><a href="#annotations"><span class="n">11</span>Annotations</a></li>
+    <li><a href="#lexique"><span class="n">12</span>Lexique et données</a></li>
+  </ol>
+</nav>
+
+<!-- ================= 1. Couleurs ================= -->
+<section class="pl-sec" id="couleurs" aria-labelledby="t-coul">
+  <h2 class="pl-h2" id="t-coul"><span class="mq-pin" aria-hidden="true">1</span>Couleurs et contrastes</h2>
+  <p class="pl-intro">Cinq jeux de couleurs, une même grammaire : un fond, une encre, deux gris de texte, un bord de champ, un accent réservé à l’état actif, une couleur d’erreur, une de réussite. Les valeurs sont lues dans <code>_commun/tokens.css</code> ; chaque contraste est mesuré sur le fond du thème (WCAG 2.2 : 4,5:1 pour un texte, 3:1 pour un bord de composant).</p>
+  <div class="nuanciers">
+    <div class="nuancier mode-nuit">
+      <h3 class="nuancier-t">Nicephos nuit · production</h3>
+      <table class="nuances">
+        <caption class="sr-only">Nicephos nuit · production : jetons, valeurs et contrastes mesurés sur le fond nuit (#0b0b0b)</caption>
+        <thead><tr><th scope="col">Jeton</th><th scope="col">Contraste</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><span class="puce" style="background:#0b0b0b"></span><span class="jt"><code>--paper</code><span class="donnee">#0b0b0b</span></span></th><td class="ratio"><span>fond</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#f0efeb"></span><span class="jt"><code>--ink</code><span class="donnee">#f0efeb</span></span></th><td class="ratio"><b>17,1:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#cfcdc7"></span><span class="jt"><code>--prose</code><span class="donnee">#cfcdc7</span></span></th><td class="ratio"><b>12,4:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#a19f99"></span><span class="jt"><code>--mute</code><span class="donnee">#a19f99</span></span></th><td class="ratio"><b>7,4:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#6e6c67"></span><span class="jt"><code>--field</code><span class="donnee">#6e6c67</span></span></th><td class="ratio"><b>3,8:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#cbb68b"></span><span class="jt"><code>--safelight</code><span class="donnee">#cbb68b</span></span></th><td class="ratio"><b>9,9:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#f08c78"></span><span class="jt"><code>--error</code><span class="donnee">#f08c78</span></span></th><td class="ratio"><b>8,2:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#9fd3a8"></span><span class="jt"><code>--ok</code><span class="donnee">#9fd3a8</span></span></th><td class="ratio"><b>11,6:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#2c2c2b"></span><span class="jt"><code>--rule</code><span class="donnee">#2c2c2b</span></span></th><td class="ratio"><span>filet</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="nuancier mode-jour">
+      <h3 class="nuancier-t">Nicephos jour</h3>
+      <table class="nuances">
+        <caption class="sr-only">Nicephos jour : jetons, valeurs et contrastes mesurés sur le fond jour (#fbfbf9)</caption>
+        <thead><tr><th scope="col">Jeton</th><th scope="col">Contraste</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><span class="puce" style="background:#fbfbf9"></span><span class="jt"><code>--paper</code><span class="donnee">#fbfbf9</span></span></th><td class="ratio"><span>fond</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#111111"></span><span class="jt"><code>--ink</code><span class="donnee">#111111</span></span></th><td class="ratio"><b>18,2:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#3a3936"></span><span class="jt"><code>--prose</code><span class="donnee">#3a3936</span></span></th><td class="ratio"><b>11,1:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#5e5d59"></span><span class="jt"><code>--mute</code><span class="donnee">#5e5d59</span></span></th><td class="ratio"><b>6,4:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#8a8985"></span><span class="jt"><code>--field</code><span class="donnee">#8a8985</span></span></th><td class="ratio"><b>3,4:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#7d6532"></span><span class="jt"><code>--safelight</code><span class="donnee">#7d6532</span></span></th><td class="ratio"><b>5,4:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#a8412b"></span><span class="jt"><code>--error</code><span class="donnee">#a8412b</span></span></th><td class="ratio"><b>5,9:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#2f6b3a"></span><span class="jt"><code>--ok</code><span class="donnee">#2f6b3a</span></span></th><td class="ratio"><b>6,2:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#dddcd7"></span><span class="jt"><code>--rule</code><span class="donnee">#dddcd7</span></span></th><td class="ratio"><span>filet</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="nuancier theme-atelier">
+      <h3 class="nuancier-t">Atelier · thème d’origine</h3>
+      <table class="nuances">
+        <caption class="sr-only">Atelier · thème d’origine : jetons, valeurs et contrastes mesurés sur le papier Atelier (#f6f4ef)</caption>
+        <thead><tr><th scope="col">Jeton</th><th scope="col">Contraste</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><span class="puce" style="background:#f6f4ef"></span><span class="jt"><code>--paper</code><span class="donnee">#f6f4ef</span></span></th><td class="ratio"><span>fond</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#1d1c1a"></span><span class="jt"><code>--ink</code><span class="donnee">#1d1c1a</span></span></th><td class="ratio"><b>15,5:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#5f5a52"></span><span class="jt"><code>--prose</code><span class="donnee">#5f5a52</span></span></th><td class="ratio"><b>6,2:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#6b665d"></span><span class="jt"><code>--mute</code><span class="donnee">#6b665d</span></span></th><td class="ratio"><b>5,2:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#8a847a"></span><span class="jt"><code>--field</code><span class="donnee">#8a847a</span></span></th><td class="ratio"><b>3,4:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#b5523b"></span><span class="jt"><code>--safelight</code><span class="donnee">#b5523b</span></span></th><td class="ratio"><b>4,5:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#a12a2a"></span><span class="jt"><code>--error</code><span class="donnee">#a12a2a</span></span></th><td class="ratio"><b>6,6:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#2f6b3a"></span><span class="jt"><code>--ok</code><span class="donnee">#2f6b3a</span></span></th><td class="ratio"><b>5,8:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#dcd7cd"></span><span class="jt"><code>--rule</code><span class="donnee">#dcd7cd</span></span></th><td class="ratio"><span>filet</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="nuancier admin" data-theme="dark">
+      <h3 class="nuancier-t">Administration · Chambre noire</h3>
+      <table class="nuances">
+        <caption class="sr-only">Administration · Chambre noire : jetons, valeurs et contrastes mesurés sur le panneau sombre (#121214)</caption>
+        <thead><tr><th scope="col">Jeton</th><th scope="col">Contraste</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><span class="puce" style="background:#0b0b0c"></span><span class="jt"><code>--bg</code><span class="donnee">#0b0b0c</span></span></th><td class="ratio"><span>fond</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#121214"></span><span class="jt"><code>--s1</code><span class="donnee">#121214</span></span></th><td class="ratio"><span>fond</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#eeece7"></span><span class="jt"><code>--ink</code><span class="donnee">#eeece7</span></span></th><td class="ratio"><b>15,8:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#a9a59c"></span><span class="jt"><code>--ink2</code><span class="donnee">#a9a59c</span></span></th><td class="ratio"><b>7,6:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#8a857c"></span><span class="jt"><code>--ink3</code><span class="donnee">#8a857c</span></span></th><td class="ratio"><b>5,1:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#7a766e"></span><span class="jt"><code>--field-line</code><span class="donnee">#7a766e</span></span></th><td class="ratio"><b>3,9:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#f0a94c"></span><span class="jt"><code>--accent</code><span class="donnee">#f0a94c</span></span></th><td class="ratio"><b>9,2:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#f0a94c"></span><span class="jt"><code>--accent-ink</code><span class="donnee">#f0a94c</span></span></th><td class="ratio"><b>9,3:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#56b4e9"></span><span class="jt"><code>--ok</code><span class="donnee">#56b4e9</span></span></th><td class="ratio"><b>8,1:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#f0e442"></span><span class="jt"><code>--warn</code><span class="donnee">#f0e442</span></span></th><td class="ratio"><b>14,1:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#e8743b"></span><span class="jt"><code>--danger</code><span class="donnee">#e8743b</span></span></th><td class="ratio"><b>6,2:1</b> <span>AA</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="nuancier admin" data-theme="light">
+      <h3 class="nuancier-t">Administration · clair</h3>
+      <table class="nuances">
+        <caption class="sr-only">Administration · clair : jetons, valeurs et contrastes mesurés sur le panneau clair (#ffffff)</caption>
+        <thead><tr><th scope="col">Jeton</th><th scope="col">Contraste</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><span class="puce" style="background:#f6f4ef"></span><span class="jt"><code>--bg</code><span class="donnee">#f6f4ef</span></span></th><td class="ratio"><span>fond</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#ffffff"></span><span class="jt"><code>--s1</code><span class="donnee">#ffffff</span></span></th><td class="ratio"><span>fond</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#1b1a17"></span><span class="jt"><code>--ink</code><span class="donnee">#1b1a17</span></span></th><td class="ratio"><b>17,4:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#55514a"></span><span class="jt"><code>--ink2</code><span class="donnee">#55514a</span></span></th><td class="ratio"><b>7,9:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#6b665d"></span><span class="jt"><code>--ink3</code><span class="donnee">#6b665d</span></span></th><td class="ratio"><b>5,7:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#857f75"></span><span class="jt"><code>--field-line</code><span class="donnee">#857f75</span></span></th><td class="ratio"><b>3,4:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#f0a94c"></span><span class="jt"><code>--accent</code><span class="donnee">#f0a94c</span></span></th><td class="ratio"><b>9,2:1</b> <span>AAA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#9a5b0c"></span><span class="jt"><code>--accent-ink</code><span class="donnee">#9a5b0c</span></span></th><td class="ratio"><b>5,4:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#0067a3"></span><span class="jt"><code>--ok</code><span class="donnee">#0067a3</span></span></th><td class="ratio"><b>6,1:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#6e6000"></span><span class="jt"><code>--warn</code><span class="donnee">#6e6000</span></span></th><td class="ratio"><b>6,3:1</b> <span>AA</span></td></tr>
+          <tr><th scope="row"><span class="puce" style="background:#b2410a"></span><span class="jt"><code>--danger</code><span class="donnee">#b2410a</span></span></th><td class="ratio"><b>5,7:1</b> <span>AA</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="pl-deux usages">
+    <dl><dt>Site public</dt>
+      <dd><code>--paper</code> fond · <code>--ink</code> texte, titres, bouton plein · <code>--prose</code> texte long · <code>--mute</code> méta du cartel, aide, pied de page · <code>--field</code> bord des champs, cases et radios (3:1) · <code>--safelight</code> état actif seulement (3:1) · <code>--error</code> erreur · <code>--ok</code> réussite · <code>--rule</code> filet, jamais seul porteur d’information.</dd></dl>
+    <dl><dt>Administration</dt>
+      <dd><code>--bg</code> fond · <code>--s1</code> panneaux et barre latérale (fond des mesures) · <code>--ink</code>, <code>--ink2</code>, <code>--ink3</code> trois niveaux de texte · <code>--field-line</code> bord des champs (mesuré sur <code>--s2</code>) · <code>--accent</code> bouton plein et compteurs (mesuré avec son texte <code>--on-accent</code>) · <code>--accent-ink</code> <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg> en cours, focus · <code>--ok</code> <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg> abouti · <code>--warn</code> <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg> attention · <code>--danger</code> <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg> arrêté et bouton danger.</dd></dl>
+  </div>
+  <ul class="pl-regles">
+    <li><b>Sable (nuit, jour) et lampe inactinique (Atelier) : l’état actif, et lui seul.</b> Entrée de menu, langue choisie, étape en cours. Jamais une erreur, jamais un bouton.</li>
+    <li><b>Erreur : corail en nuit, brique en jour et en Atelier.</b> Toujours avec ⚠ et le mot « Erreur : » ; la couleur double, elle ne porte pas seule.</li>
+    <li><b>Administration : l’ambre pour agir et avancer ; bleu, jaune et vermillon pour les états</b> (palette Okabe-Ito, lisible par un daltonien). Chaque couleur d’état double un symbole et un mot.</li>
+    <li><b>Annotations : magenta</b> (<code>#ff2e93</code>), hors de tous les thèmes. Ce qui est magenta n’appartient jamais à l’interface.</li>
+  </ul>
+  <dl class="raisons">
+      <div><dt>La photo</dt><dd>Des fonds neutres, sans teinte : rien ne colore la photo. Le seul accent du site public (sable) est assez discret pour ne pas lui disputer l’œil.</dd></div>
+      <div><dt>L’ergonomie</dt><dd>Une couleur, un sens : l’accent dit « vous êtes ici », le corail dit « à corriger ». On apprend la règle une fois.</dd></div>
+      <div><dt>L’accessibilité</dt><dd>Tous les textes à 4,5:1 au moins, les bords de champ à 3:1 ; aucune information par la couleur seule.</dd></div>
+      <div><dt>La sobriété</dt><dd>Neuf jetons par thème, mêmes noms partout : une maquette ne redéclare rien, un thème se change en une ligne.</dd></div>
+    </dl>
+</section>
+
+<!-- ================= 2. Typographie ================= -->
+<section class="pl-sec" id="typo" aria-labelledby="t-typo">
+  <h2 class="pl-h2" id="t-typo"><span class="mq-pin" aria-hidden="true">2</span>Typographie</h2>
+  <p class="pl-intro">Jost porte tout le site : le logo, les titres, le texte. Le 300 est réservé aux grands titres ; tout ce qui se lit est en 400, parce que le trait léger « bave » sur le noir. Rien sous 13 px sur le site, rien sous 12 px dans l’admin.</p>
+  <div class="echelle">
+    <div><span class="ex-affiche">Deux regards, une même lumière.</span><span class="spec donnee">Affiche · 36→72 px · 300 · 1,05</span></div>
+    <div><span class="ex-t1">Lisbonne et Porto</span><span class="spec donnee">Titre 1 · 32→52 px · 300 · 1,12</span></div>
+    <div><span class="ex-t2">Même soir, deux regards</span><span class="spec donnee">Titre 2 · 24→32 px · 300 · 1,12</span></div>
+    <div><span class="ex-t3">Samedi 10 octobre, l’Alfama avant le café</span><span class="spec donnee">Titre 3 · 20 px · 400 · 1,3</span></div>
+    <div><span class="ex-prose">Levés avant le premier tram, quand l’Alfama sent encore le café et le linge mouillé. Le soir, on se retrouvait sur les miradouros pour comparer nos cartes mémoire.</span><span class="spec donnee">Prose · 18 px · 400 · 1,65 · 60 signes</span></div>
+    <div><span>Sébastien et Julien photographient chacun de leur côté, puis mettent leurs images en commun.</span><span class="spec donnee">Texte · 16 px · 400 · 1,6</span></div>
+    <div><span class="ex-petit">Galerie · Séries · Carnets · Contact · Mentions légales</span><span class="spec donnee">Petit · 14 px · menus, pied de page</span></div>
+    <div><span class="ex-meta">Julien · Lisbonne · 10 oct. 2026</span><span class="spec donnee">Méta · 13 px · 400 · cartel, aide</span></div>
+    <div><span class="etiquette">Notes d’atelier</span><span class="spec donnee">Étiquette · 13 px · 500 · capitales 0,2 em · 3 mots au plus</span></div>
+    <div><span class="donnee">C-2026-0007 · exemplaire 4/15 · 1,2 Mo</span><span class="spec donnee">Donnée · Plex Mono 13 px · jamais une phrase</span></div>
+    <div><span class="ex-marque">Nicephos</span><span class="spec donnee">Marque · 15 px · 300 · capitales 0,42 em</span></div>
+    <div class="theme-atelier" style="padding-inline:var(--esp-2)"><span class="ex-atelier">Lisbonne et Porto</span><span class="spec donnee">Atelier seulement · Cormorant italique 400</span></div>
+  </div>
+  <ul class="pl-regles">
+    <li><b>Capitales espacées :</b> la marque, et les étiquettes de trois mots au plus (rubrique, série, groupe du menu de l’admin). Plus jamais un titre, un bouton ou un retour (« ← RETOUR AU PANIER » devient « ← Retour au panier »).</li>
+    <li><b>Plex Mono :</b> références (C-2026-0007, J-2026-0003, R0004012.jpg), numéros d’exemplaire, poids de fichier, données EXIF. Ni les dates, ni les prix, ni les étapes, ni le pied de page : Jost a des chiffres tabulaires.</li>
+    <li><b>Admin :</b> H1 34 px en 300 (28 au téléphone), H2 18 px en 500, texte 14 px, aide 12-13 px.</li>
+  </ul>
+  <dl class="raisons">
+      <div><dt>La photo</dt><dd>Une seule famille, fine et ronde comme le trait du logo : la typographie se tait, l’image parle.</dd></div>
+      <div><dt>L’ergonomie</dt><dd>Casse normale pour tout ce qui se lit ; un mot se reconnaît d’un coup d’œil, même long et en allemand.</dd></div>
+      <div><dt>L’accessibilité</dt><dd>Corps de 13 px au moins, graisse 400 sur fond noir, interlignage de 1,12 sur les titres : les accents ne touchent plus la ligne du dessus (UX-F-29).</dd></div>
+      <div><dt>La sobriété</dt><dd>Jost 300, 400 et 500, Plex Mono 400 : 4 fichiers de 10 à 15 ko. Cormorant n’est chargée qu’en Atelier (UX-F-37).</dd></div>
+    </dl>
+</section>
+
+<!-- ================= 3. Espaces ================= -->
+<section class="pl-sec" id="espaces" aria-labelledby="t-esp">
+  <h2 class="pl-h2" id="t-esp">Espaces, rayons, focus</h2>
+  <div class="pl-deux">
+    <div>
+      <h3 class="pl-h3">Grille de 8 px</h3>
+      <ul class="regle8" style="margin-top:var(--esp-2)" aria-label="Pas d’espacement, de 4 à 128 px">
+        <li><i style="width:4px;height:4px"></i><span class="donnee">4</span><span class="sr-only"> px : --esp-demi</span></li>
+        <li><i style="width:8px;height:8px"></i><span class="donnee">8</span><span class="sr-only"> px : --esp-1</span></li>
+        <li><i style="width:16px;height:16px"></i><span class="donnee">16</span><span class="sr-only"> px : --esp-2</span></li>
+        <li><i style="width:24px;height:24px"></i><span class="donnee">24</span><span class="sr-only"> px : --esp-3</span></li>
+        <li><i style="width:32px;height:32px"></i><span class="donnee">32</span><span class="sr-only"> px : --esp-4</span></li>
+        <li><i style="width:40px;height:40px"></i><span class="donnee">40</span><span class="sr-only"> px : --esp-5</span></li>
+        <li><i style="width:48px;height:48px"></i><span class="donnee">48</span><span class="sr-only"> px : --esp-6</span></li>
+        <li><i style="width:64px;height:64px"></i><span class="donnee">64</span><span class="sr-only"> px : --esp-8</span></li>
+        <li><i style="width:80px;height:80px"></i><span class="donnee">80</span><span class="sr-only"> px : --esp-10</span></li>
+        <li><i style="width:96px;height:96px"></i><span class="donnee">96</span><span class="sr-only"> px : --esp-12</span></li>
+        <li><i style="width:128px;height:128px"></i><span class="donnee">128</span><span class="sr-only"> px : --esp-16</span></li>
+      </ul>
+      <p class="pl-legende">Jetons <code>--esp-demi</code> (4), <code>--esp-1</code> (8) … <code>--esp-16</code> (128).</p>
+      <p class="pl-legende">Le demi-pas (4 px) n’aligne qu’une icône sur un texte. Hauteurs : barre de l’en-tête 64 px, puis 72 ; bouton 48 ; cible 44.</p>
+    </div>
+    <div>
+      <h3 class="pl-h3">Marges latérales du site</h3>
+      <table class="gouttieres" style="margin-top:var(--esp-2)">
+        <caption class="sr-only">Marge latérale selon la largeur de l’écran</caption>
+        <thead><tr><th scope="col">Largeur</th><th scope="col">Marge</th><th scope="col">Exemple</th></tr></thead>
+        <tbody>
+          <tr><td>moins de 360 px</td><td>16 px</td><td>iPhone SE, zoom 200 %</td></tr>
+          <tr><td>360 à 767 px</td><td>24 px</td><td>Pixel 7 (412 px)</td></tr>
+          <tr><td>768 à 1 023 px</td><td>40 px</td><td>iPad portrait (820 px)</td></tr>
+          <tr><td>1 024 à 1 279 px</td><td>56 px</td><td>iPad paysage, bureau zoomé</td></tr>
+          <tr><td>1 280 px et plus</td><td>72 px</td><td>bureau (1 440 px)</td></tr>
+        </tbody>
+      </table>
+      <h3 class="pl-h3" style="margin-top:var(--esp-5)">Rayons</h3>
+      <p class="pl-texte" style="margin-top:var(--esp-1)">Site public : angles vifs, partout (<code>--r-site: 0</code>), comme le trait du logo. Administration : 9 px pour les contrôles, 14 px pour les panneaux et le dialogue, pastilles rondes : le dessin d’<code>admin.css</code> ne change pas.</p>
+    </div>
+  </div>
+  <div class="pl-deux">
+    <div class="mode-nuit pl-plaque" style="margin:0">
+      <h3 class="pl-h3">Focus, thème nuit</h3>
+      <div class="focus-demo"><a class="lien is-focus" href="/carnets">Lire le carnet</a><button class="btn is-focus" type="button">Ajouter au panier</button><a class="vignette is-focus" href="/photo/linge-au-balcon"><img src="_commun/photos/160/linge.webp" width="160" height="107" alt="Façade rose, six fenêtres, un fil de linge de couleurs." loading="lazy"><span class="cartel cartel--ligne"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></div>
+    </div>
+    <div class="mode-jour pl-plaque" style="margin:0;box-shadow:inset 0 0 0 1px var(--rule)">
+      <h3 class="pl-h3">Focus, thème jour</h3>
+      <div class="focus-demo"><a class="lien is-focus" href="/carnets">Lire le carnet</a><button class="btn btn--filet is-focus" type="button">Écrire aux auteurs</button><label class="choix"><input type="checkbox" class="is-focus" checked><span>Case au focus</span></label></div>
+    </div>
+  </div>
+  <p class="pl-texte">Un seul dessin de focus : un trait de 2 px de la couleur de l’encre, à 3 px du bord (0 px dans un champ, 2 px autour d’une case). Il entoure la vignette entière, image et cartel. Cibles : 24 px au moins à la souris, 44 px au toucher, 48 px pour les boutons.</p>
+</section>
+
+<!-- ================= 4. En-têtes ================= -->
+<section class="pl-sec" id="entetes" aria-labelledby="t-ent">
+  <h2 class="pl-h2" id="t-ent"><span class="mq-pin" aria-hidden="true">3</span>En-têtes et langue</h2>
+  <p class="pl-intro">Trois variantes nommées, une seule structure. Elles ne débordent jamais : la mise en page change avant que le texte allemand, le plus long, ne manque de place. Les en-têtes ci-dessous sont vrais : ils suivent leur propre largeur (requêtes de conteneur), comme ils suivront celle de l’écran ; sans JavaScript.</p>
+  <dl class="raisons" style="border-top:0;padding-top:0">
+    <div><dt>Site</dt><dd>Toutes les pages. Marque, Galerie, Séries, Carnets, Carte, À propos, puis Tirages (la boutique) après un filet ; Rechercher, Panier (2), langue.</dd></div>
+    <div><dt>Contexte</dt><dd>Visionneuse et galerie privée. Retour nommé (« ← Lisbonne et Porto ») ou « Galerie privée », marque au centre, langue, Menu.</dd></div>
+    <div><dt>Tunnel</dt><dd>Commande et accès à une galerie privée. Marque, « ← Retour au panier », langue : ni menu ni recherche pour ne pas perdre l’acheteur.</dd></div>
+    <div><dt>Trois mises en page</dt><dd><b>L</b> ≥ 1 280 px : une ligne. <b>M</b> 768 à 1 279 px : deux lignes, le menu sous la marque. <b>S</b> &lt; 768 px : marque, panier, langue, Menu (le mot devient une icône sous 360 px).</dd></div>
+  </dl>
+  <h3 class="pl-h3">Site, français puis allemand</h3>
+  <p class="pl-texte que-tel">Au téléphone, cette planche montre les largeurs de 320 et 412 px ; les largeurs de 768 à 1 440 px se voient sur le rendu du bureau.</p>
+  <div class="ech-pile">
+    <figure class="ech que-bureau" style="--w:1280;--z:1;--zm:0.284">
+        <div class="ech-zone mode-nuit"><header class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Menu principal (exemple 1)">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <a class="sh-outil sh-panier" href="/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Panier</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> tirages</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal (exemple 1)">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header><header lang="de" class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <nav class="sh-nav" aria-label="Hauptmenü (Beispiel 2)">
+      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien" aria-current="page">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
+      <a class="sh-outil sh-panier" href="/de/warenkorb"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Warenkorb</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> Kunstdrucke</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <nav class="sh-panneau" aria-label="Hauptmenü (Beispiel 2)">
+          <ul>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien" aria-current="page">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
+            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header></div>
+        <figcaption>1 280 px · L · une ligne ; « Reisetagebücher », « Kunstdrucke » et « Warenkorb (2) » tiennent (1 440 px : l’en-tête de cette page)</figcaption>
+      </figure>
+    <figure class="ech que-bureau" style="--w:1024;--z:1;--zm:0.355">
+        <div class="ech-zone mode-nuit"><header class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Menu principal (exemple 3)">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <a class="sh-outil sh-panier" href="/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Panier</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> tirages</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal (exemple 3)">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header><header lang="de" class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <nav class="sh-nav" aria-label="Hauptmenü (Beispiel 4)">
+      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien" aria-current="page">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
+      <a class="sh-outil sh-panier" href="/de/warenkorb"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Warenkorb</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> Kunstdrucke</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <nav class="sh-panneau" aria-label="Hauptmenü (Beispiel 4)">
+          <ul>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien" aria-current="page">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
+            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header></div>
+        <figcaption>1 024 px · M · deux lignes de 768 à 1 279 px (iPad portrait à 820 px, bureau zoomé à 175 %) : le menu passe sous la marque, en entier</figcaption>
+      </figure>
+    <div class="ech-rangee">
+      <figure class="ech " style="--w:412;--z:1;--zm:0.883">
+        <div class="ech-zone mode-nuit"><header class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Menu principal (exemple 5)">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <a class="sh-outil sh-panier" href="/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Panier</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> tirages</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal (exemple 5)">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header><header lang="de" class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <nav class="sh-nav" aria-label="Hauptmenü (Beispiel 6)">
+      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien" aria-current="page">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
+      <a class="sh-outil sh-panier" href="/de/warenkorb"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Warenkorb</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> Kunstdrucke</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <nav class="sh-panneau" aria-label="Hauptmenü (Beispiel 6)">
+          <ul>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien" aria-current="page">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
+            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header></div>
+        <figcaption>412 px · S · Pixel 7</figcaption>
+      </figure>
+      <figure class="ech " style="--w:320;--z:1;--zm:1">
+        <div class="ech-zone mode-nuit"><header class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Menu principal (exemple 7)">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <a class="sh-outil sh-panier" href="/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Panier</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> tirages</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal (exemple 7)">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header><header lang="de" class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <nav class="sh-nav" aria-label="Hauptmenü (Beispiel 8)">
+      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien" aria-current="page">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
+      <a class="sh-outil sh-panier" href="/de/warenkorb"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Warenkorb</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> Kunstdrucke</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <nav class="sh-panneau" aria-label="Hauptmenü (Beispiel 8)">
+          <ul>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien" aria-current="page">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
+            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header></div>
+        <figcaption>320 px · S · « Menu » en icône, son nom reste lu</figcaption>
+      </figure>
+      <figure class="ech " style="--w:412;--z:1;--zm:0.883">
+        <div class="ech-zone mode-nuit" style="min-height:470px"><header lang="de" class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <nav class="sh-nav" aria-label="Hauptmenü (Beispiel 9)">
+      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher" aria-current="page">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
+      <a class="sh-outil sh-panier" href="/de/warenkorb"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Warenkorb</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> Kunstdrucke</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu" open>
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <nav class="sh-panneau" aria-label="Hauptmenü (Beispiel 9)">
+          <ul>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher" aria-current="page">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
+            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header></div>
+        <figcaption>412 px · « Menü » ouvert : un &lt;details&gt;, sans script</figcaption>
+      </figure>
+    </div>
+  </div>
+  <h3 class="pl-h3"><span class="mq-pin" aria-hidden="true">4</span>Contexte (nuit) et Tunnel (jour), français puis allemand</h3>
+  <div class="ech-pile">
+    <figure class="ech que-bureau" style="--w:1280;--z:1;--zm:0.284">
+        <div class="ech-zone mode-nuit"><header class="sh sh--contexte">
+  <div class="sh-bar">
+    <a class="sh-retour" href="/carnets/lisbonne-et-porto"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Retour au carnet : </span>Lisbonne et Porto</span></a>
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <div class="sh-outils">
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal (exemple 10)">
+          <ul>
+            <li><a href="/">Accueil<span class="sh-panneau-marque">Nicephos</span></a></li>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+<header lang="de" class="sh sh--contexte">
+  <div class="sh-bar">
+    <a class="sh-retour" href="/de/reisetagebuecher/lissabon-und-porto"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Zurück zum Reisetagebuch: </span>Lissabon und Porto</span></a>
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <div class="sh-outils">
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <nav class="sh-panneau" aria-label="Hauptmenü (Beispiel 11)">
+          <ul>
+            <li><a href="/">Startseite<span class="sh-panneau-marque">Nicephos</span></a></li>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
+            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+<header lang="de" class="sh sh--contexte">
+  <div class="sh-bar">
+    <p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Private Galerie</span></p>
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <div class="sh-outils">
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <a class="sh-outil" href="/prive/quitter"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg><span class="sh-outil-t sh-court">Verlassen</span><span class="sh-outil-t sh-long">Galerie verlassen</span></a>
+    </div>
+  </div>
+</header>
+<div class="mode-jour"><header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <div class="sh-outils">
+      <a class="sh-retour" href="/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t sh-retour-court">Panier</span><span class="sh-retour-t sh-retour-long">Retour au panier</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</header><div class="ech-etapes"><ol class="etapes" aria-label="Étapes de la commande">
+  <li class="fait"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><a href="/panier"><span class="n">1.</span> Panier</a></li>
+  <li aria-current="step"><span class="etapes-court">Étape 2 sur 4 · </span><span class="n">2.</span> <span class="etapes-nom">Coordonnées</span></li>
+  <li><span class="n">3.</span> Paiement</li>
+  <li><span class="n">4.</span> Confirmation</li>
+</ol></div></div>
+<div class="mode-jour" lang="de"><header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <div class="sh-outils">
+      <a class="sh-retour" href="/de/warenkorb"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t sh-retour-court">Warenkorb</span><span class="sh-retour-t sh-retour-long">Zurück zum Warenkorb</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</header><div class="ech-etapes"><ol class="etapes" aria-label="Bestellschritte">
+  <li class="fait"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><a href="/de/warenkorb"><span class="n">1.</span> Warenkorb</a></li>
+  <li aria-current="step"><span class="etapes-court">Schritt 2 von 4 · </span><span class="n">2.</span> <span class="etapes-nom">Adresse</span></li>
+  <li><span class="n">3.</span> Zahlung</li>
+  <li><span class="n">4.</span> Bestätigung</li>
+</ol></div></div></div>
+        <figcaption>1 280 px · visionneuse, galerie privée, commande avec ses étapes</figcaption>
+      </figure>
+    <div class="ech-rangee">
+      <figure class="ech " style="--w:412;--z:1;--zm:0.883">
+        <div class="ech-zone mode-nuit"><header class="sh sh--contexte">
+  <div class="sh-bar">
+    <a class="sh-retour" href="/carnets/lisbonne-et-porto"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Retour au carnet : </span>Lisbonne et Porto</span></a>
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <div class="sh-outils">
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal (exemple 12)">
+          <ul>
+            <li><a href="/">Accueil<span class="sh-panneau-marque">Nicephos</span></a></li>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+<header lang="de" class="sh sh--contexte">
+  <div class="sh-bar">
+    <a class="sh-retour" href="/de/reisetagebuecher/lissabon-und-porto"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Zurück zum Reisetagebuch: </span>Lissabon und Porto</span></a>
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <div class="sh-outils">
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <nav class="sh-panneau" aria-label="Hauptmenü (Beispiel 13)">
+          <ul>
+            <li><a href="/">Startseite<span class="sh-panneau-marque">Nicephos</span></a></li>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
+            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+<header lang="de" class="sh sh--contexte">
+  <div class="sh-bar">
+    <p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Private Galerie</span></p>
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <div class="sh-outils">
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <a class="sh-outil" href="/prive/quitter"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg><span class="sh-outil-t sh-court">Verlassen</span><span class="sh-outil-t sh-long">Galerie verlassen</span></a>
+    </div>
+  </div>
+</header>
+<div class="mode-jour"><header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <div class="sh-outils">
+      <a class="sh-retour" href="/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t sh-retour-court">Panier</span><span class="sh-retour-t sh-retour-long">Retour au panier</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</header><div class="ech-etapes"><ol class="etapes" aria-label="Étapes de la commande">
+  <li class="fait"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><a href="/panier"><span class="n">1.</span> Panier</a></li>
+  <li aria-current="step"><span class="etapes-court">Étape 2 sur 4 · </span><span class="n">2.</span> <span class="etapes-nom">Coordonnées</span></li>
+  <li><span class="n">3.</span> Paiement</li>
+  <li><span class="n">4.</span> Confirmation</li>
+</ol></div></div>
+<div class="mode-jour" lang="de"><header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <div class="sh-outils">
+      <a class="sh-retour" href="/de/warenkorb"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t sh-retour-court">Warenkorb</span><span class="sh-retour-t sh-retour-long">Zurück zum Warenkorb</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</header><div class="ech-etapes"><ol class="etapes" aria-label="Bestellschritte">
+  <li class="fait"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><a href="/de/warenkorb"><span class="n">1.</span> Warenkorb</a></li>
+  <li aria-current="step"><span class="etapes-court">Schritt 2 von 4 · </span><span class="n">2.</span> <span class="etapes-nom">Adresse</span></li>
+  <li><span class="n">3.</span> Zahlung</li>
+  <li><span class="n">4.</span> Bestätigung</li>
+</ol></div></div></div>
+        <figcaption>412 px · le retour garde sa flèche ; « Étape 2 sur 4 · Coordonnées »</figcaption>
+      </figure>
+      <figure class="ech " style="--w:320;--z:1;--zm:1">
+        <div class="ech-zone mode-nuit"><header class="sh sh--contexte">
+  <div class="sh-bar">
+    <a class="sh-retour" href="/carnets/lisbonne-et-porto"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Retour au carnet : </span>Lisbonne et Porto</span></a>
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <div class="sh-outils">
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal (exemple 14)">
+          <ul>
+            <li><a href="/">Accueil<span class="sh-panneau-marque">Nicephos</span></a></li>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+<header lang="de" class="sh sh--contexte">
+  <div class="sh-bar">
+    <a class="sh-retour" href="/de/reisetagebuecher/lissabon-und-porto"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Zurück zum Reisetagebuch: </span>Lissabon und Porto</span></a>
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <div class="sh-outils">
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <nav class="sh-panneau" aria-label="Hauptmenü (Beispiel 15)">
+          <ul>
+            <li><a href="/">Startseite<span class="sh-panneau-marque">Nicephos</span></a></li>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
+            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+<header lang="de" class="sh sh--contexte">
+  <div class="sh-bar">
+    <p class="sh-contexte-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Private Galerie</span></p>
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <div class="sh-outils">
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <a class="sh-outil" href="/prive/quitter"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg><span class="sh-outil-t sh-court">Verlassen</span><span class="sh-outil-t sh-long">Galerie verlassen</span></a>
+    </div>
+  </div>
+</header>
+<div class="mode-jour"><header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <div class="sh-outils">
+      <a class="sh-retour" href="/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t sh-retour-court">Panier</span><span class="sh-retour-t sh-retour-long">Retour au panier</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</header><div class="ech-etapes"><ol class="etapes" aria-label="Étapes de la commande">
+  <li class="fait"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><a href="/panier"><span class="n">1.</span> Panier</a></li>
+  <li aria-current="step"><span class="etapes-court">Étape 2 sur 4 · </span><span class="n">2.</span> <span class="etapes-nom">Coordonnées</span></li>
+  <li><span class="n">3.</span> Paiement</li>
+  <li><span class="n">4.</span> Confirmation</li>
+</ol></div></div>
+<div class="mode-jour" lang="de"><header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <div class="sh-outils">
+      <a class="sh-retour" href="/de/warenkorb"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t sh-retour-court">Warenkorb</span><span class="sh-retour-t sh-retour-long">Zurück zum Warenkorb</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</header><div class="ech-etapes"><ol class="etapes" aria-label="Bestellschritte">
+  <li class="fait"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><a href="/de/warenkorb"><span class="n">1.</span> Warenkorb</a></li>
+  <li aria-current="step"><span class="etapes-court">Schritt 2 von 4 · </span><span class="n">2.</span> <span class="etapes-nom">Adresse</span></li>
+  <li><span class="n">3.</span> Zahlung</li>
+  <li><span class="n">4.</span> Bestätigung</li>
+</ol></div></div></div>
+        <figcaption>320 px · rien ne sort de l’écran, allemand compris</figcaption>
+      </figure>
+      <figure class="ech " style="--w:412;--z:1;--zm:0.883">
+        <div class="ech-zone mode-nuit" style="min-height:260px"><header class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Menu principal (exemple 16)">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <a class="sh-outil sh-panier" href="/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Panier</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> tirages</span></a>
+      <details class="lang-pick" open>
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal (exemple 16)">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header></div>
+        <figcaption>412 px · langues écrites dans leur langue, sans drapeau</figcaption>
+      </figure>
+    </div>
+  </div>
+  <ul class="pl-regles">
+    <li><b>Vérifié</b> à 320, 360, 412, 560, 767, 768, 820, 1 024, 1 279, 1 280 et 1 440 px, en français et en allemand, menus fermés et ouverts : aucun débordement, aucun chevauchement, aucun texte coupé.</li>
+    <li><b>Langue : un seul composant</b> (<code>views/langs.eta</code>), toujours le dernier outil à droite. Le code de la langue, puis la liste « Français · English · Deutsch », chaque nom dans sa langue (<code>lang</code>), la langue choisie en 500 et cochée. Plus de drapeau (UX-F-32).</li>
+    <li><b>Panier :</b> présent dès qu’il contient un tirage, sur toutes les pages ; au téléphone, l’icône et le nombre, le mot reste lu (« Panier, 2 tirages »).</li>
+    <li><b>Menu du téléphone :</b> <code>&lt;details class="sh-menu"&gt;</code>. Le panneau reprend le même menu, puis Tirages et Rechercher ; l’entrée active est soulignée de sable comme au bureau.</li>
+  </ul>
+  <dl class="raisons">
+      <div><dt>La photo</dt><dd>Une barre de 64 à 72 px, sans fond propre ni ombre : elle se fond dans le mur de la galerie et laisse le premier écran à l’image.</dd></div>
+      <div><dt>L’ergonomie</dt><dd>Les mêmes places partout : la marque à gauche, la langue toujours dernière, le retour toujours nommé. Le tunnel ferme les sorties sans enfermer.</dd></div>
+      <div><dt>L’accessibilité</dt><dd>Plus rien ne sort de l’écran à 320 px ni à 200 % de zoom (WCAG 1.4.4, 1.4.10) ; noms accessibles qui contiennent le texte visible (2.5.3).</dd></div>
+      <div><dt>La sobriété</dt><dd>Aucun script : deux &lt;details&gt;. Le même gabarit Eta (nav.eta, langs.eta) sert les trois variantes.</dd></div>
+    </dl>
+</section>
+
+<!-- ================= 5. Pieds de page ================= -->
+<section class="pl-sec" id="pieds" aria-labelledby="t-pied">
+  <h2 class="pl-h2" id="t-pied">Pieds de page</h2>
+  <p class="pl-intro">Deux variantes, une classe. Le complet range ses liens en deux groupes nommés ; les liens de la boutique (conditions, livraison, renoncer à une commande) y ont leur place fixe. Le réduit sert le tunnel et la galerie privée. Le pied complet de cette page est en bas.</p>
+  <div class="mode-nuit pl-plaque">
+    <p class="etiquette">Variante réduite · tunnel, galerie privée</p>
+    <footer class="sf sf--reduit" style="margin-top:var(--esp-2)">
+  <div class="sf-in">
+    <p class="sf-marque"><b>Nicephos</b></p>
+    <ul>
+      <li><a href="/conditions-de-vente">Conditions de vente</a></li>
+      <li><a href="/mentions-legales">Mentions légales</a></li>
+      <li><a href="/confidentialite">Confidentialité</a></li>
+      <li><a href="/a-propos#contact">Contact</a></li>
+    </ul>
+  </div>
+</footer>
+  </div>
+  <dl class="raisons">
+      <div><dt>L’ergonomie</dt><dd>Des liens nommés par ce qu’ils ouvrent, soulignés, de 44 px au toucher ; « Renoncer à une commande » reste trouvable pendant tout le délai de rétractation.</dd></div>
+      <div><dt>L’accessibilité</dt><dd>Une seule liste par groupe, un titre par groupe ; liste verticale sous 768 px.</dd></div>
+      <div><dt>La sobriété</dt><dd>Plus de « reproduction interdite » répété sur chaque page (UX-F-34) : une phrase, une adresse.</dd></div>
+    </dl>
+</section>
+
+<!-- ================= 6. Photos ================= -->
+<section class="pl-sec" id="photos" aria-labelledby="t-photos">
+  <h2 class="pl-h2" id="t-photos"><span class="mq-pin" aria-hidden="true">5</span>Cartel, vignettes, diptyque</h2>
+  <p class="pl-intro">Un seul cartel : le titre, puis « Auteur · Lieu · date ». Il se place sous les horizontales et à côté des verticales en grand format. Les vignettes gardent le format de la photo, en rangées à hauteur commune : ni fond gris, ni cercle, ni recadrage.</p>
+  <div class="cartel-schema">
+    <div>
+      <figure class="photo"><img src="_commun/photos/cais.webp" width="900" height="600" alt="Une rangée de pieux dans l’eau grise du Tage, un pêcheur seul au loin." loading="lazy"><figcaption class="cartel cartel--grand"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · Lisbonne · 10 oct. 2026</span><span class="cartel-l">Les pieux comptent les heures à la place de l’eau.</span></figcaption></figure>
+      <ul class="legende-cote"><li><b>Horizontale : le cartel dessous,</b> aligné sur le bord gauche de l’image.</li><li><b>Titre</b> Jost 400 · 20 px en grand, 16 px en vignette · <b>méta</b> 14 ou 13 px, gris · <b>légende</b> 16 px, facultative.</li></ul>
+    </div>
+    <div>
+      <figure class="photo photo--cote"><img src="_commun/photos/escaliers.webp" width="600" height="900" alt="Une silhouette au milieu d’un long escalier en diagonale, mur clair." loading="lazy"><figcaption class="cartel cartel--grand"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span><span class="cartel-l">Deux cent soixante marches, et quelqu’un les monte toujours.</span></figcaption></figure>
+      <ul class="legende-cote"><li><b>Verticale, 900 px de large et plus : le cartel à côté,</b> aligné sur le bas de l’image ; dessous sinon.</li></ul>
+    </div>
+  </div>
+  <div class="mode-nuit pl-plaque">
+    <div class="demo-ligne" style="justify-content:space-between;align-items:baseline"><h3 class="pl-h3" id="t-ref">Les 22 photos publiées, en rangées justifiées</h3><p class="cartel-m">Les deux · 22 photos · Sébastien 10 · Julien 12</p></div>
+    <ul class="rangees rangees--ref" aria-labelledby="t-ref" style="margin-top:var(--esp-3)">
+      <li style="--r:1.5"><a class="vignette" href="/photo/brume"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Collines grises sous un ciel de brume, le fleuve invisible au pied." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Brume sur la Loire</span><span class="cartel-m">Sébastien · Anjou · mars 2024</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/nuit"><img src="_commun/photos/480/nuit.webp" srcset="_commun/photos/480/nuit.webp 320w, _commun/photos/nuit.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Deux silhouettes minuscules au bas d’une nuit violette." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux, minuit</span><span class="cartel-m">Julien · Nantes · nov. 2023</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/dune"><img src="_commun/photos/480/dune.webp" srcset="_commun/photos/480/dune.webp 480w, _commun/photos/dune.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Dunes ocre sous un soleil bas et pâle." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Dernière heure</span><span class="cartel-m">Sébastien · Erg Chebbi · avr. 2023</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/portrait"><img src="_commun/photos/480/portrait.webp" srcset="_commun/photos/480/portrait.webp 320w, _commun/photos/portrait.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Pénombre brune et taches de lumière floues." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Élise, contre-jour</span><span class="cartel-m">Julien · Nantes · janv. 2025</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/quai"><img src="_commun/photos/480/quai.webp" srcset="_commun/photos/480/quai.webp 480w, _commun/photos/quai.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Quai désert sous un ciel gris, trois silhouettes au loin." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Quai, 7 h 12</span><span class="cartel-m">Sébastien · Angers · oct. 2024</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/mer"><img src="_commun/photos/480/mer.webp" srcset="_commun/photos/480/mer.webp 480w, _commun/photos/mer.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Une ligne d’horizon bleu-vert, la mer sombre dessous." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Ligne d’eau</span><span class="cartel-m">Julien · Finistère · août 2024</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/ciel"><img src="_commun/photos/480/ciel.webp" srcset="_commun/photos/480/ciel.webp 480w, _commun/photos/ciel.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Ciel rose et mauve, soleil rond posé sur des collines violettes." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Le ciel s’est ouvert</span><span class="cartel-m">Sébastien · Anjou · oct. 2025</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/ruelle"><img src="_commun/photos/480/ruelle.webp" srcset="_commun/photos/480/ruelle.webp 320w, _commun/photos/ruelle.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Lumière brune d’une ruelle, un passant seul tout en bas." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Passage, fin d’après-midi</span><span class="cartel-m">Julien · Lisbonne · mai 2024</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/neige"><img src="_commun/photos/480/neige.webp" srcset="_commun/photos/480/neige.webp 480w, _commun/photos/neige.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Ciel blanc au-dessus de crêtes grises enneigées." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Silence blanc</span><span class="cartel-m">Sébastien · Vercors · févr. 2025</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/foret"><img src="_commun/photos/480/foret.webp" srcset="_commun/photos/480/foret.webp 320w, _commun/photos/foret.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Vert profond d’un sous-bois, cercles de lumière floue." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Sous-bois</span><span class="cartel-m">Julien · Chandelais · juin 2025</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/lac"><img src="_commun/photos/480/lac.webp" srcset="_commun/photos/480/lac.webp 480w, _commun/photos/lac.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Lune blanche au-dessus d’un lac bleu, rive sombre." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Le lac ne dit rien</span><span class="cartel-m">Sébastien · La Réunion · sept. 2024</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/ombre"><img src="_commun/photos/480/ombre.webp" srcset="_commun/photos/480/ombre.webp 480w, _commun/photos/ombre.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Presque noir : deux ombres à peine visibles." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux ombres</span><span class="cartel-m">Julien · Paris · déc. 2023</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/cais"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Une rangée de pieux dans l’eau grise du Tage, un pêcheur seul au loin." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/belem"><img src="_commun/photos/480/belem.webp" srcset="_commun/photos/480/belem.webp 480w, _commun/photos/belem.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="La tour de Belém en ombre chinoise devant un soleil couchant sur le fleuve." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Belém, contre-jour</span><span class="cartel-m">Sébastien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/tiago"><img src="_commun/photos/480/tiago.webp" srcset="_commun/photos/480/tiago.webp 320w, _commun/photos/tiago.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Un marchand en silhouette derrière un étal d’oranges et de fruits." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Tiago, marché do Bolhão</span><span class="cartel-m">Sébastien · Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/foz"><img src="_commun/photos/480/foz.webp" srcset="_commun/photos/480/foz.webp 480w, _commun/photos/foz.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Sébastien · Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/tram"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Un tram jaune grimpe une pente devant les façades de l’Alfama." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/linge"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Façade rose, six fenêtres, un fil de linge de couleurs." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/miradouro"><img src="_commun/photos/480/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Deux silhouettes sur un belvédère, la ville et le Tage dans le soleil couchant." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/ines"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Une fleuriste de trois quarts, un bouquet de fleurs claires contre elle." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Inês, rua dos Remédios</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/ribeira"><img src="_commun/photos/480/ribeira.webp" srcset="_commun/photos/480/ribeira.webp 480w, _commun/photos/ribeira.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Les quais de la Ribeira et l’arche du pont presque effacés par la brume." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/escaliers"><img src="_commun/photos/480/escaliers.webp" srcset="_commun/photos/480/escaliers.webp 320w, _commun/photos/escaliers.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Une silhouette au milieu d’un long escalier en diagonale, mur clair." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></span></a></li>
+    </ul>
+    <h3 class="pl-h3" id="t-nonpub" style="margin-top:var(--esp-6)">Les 4 photos non publiées de la démo</h3>
+    <ul class="rangees rangees--ref" aria-labelledby="t-nonpub" style="margin-top:var(--esp-3)">
+      <li style="--r:1.5"><a class="vignette" href="/admin/photos/pont"><img src="_commun/photos/480/pont.webp" srcset="_commun/photos/480/pont.webp 480w, _commun/photos/pont.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="L’arche du pont Dom-Luís au-dessus du Douro, lumières de la ville la nuit." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Pont Dom-Luís, le soir</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span><span class="statut">Proposée</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/admin/photos/ligny"><img src="_commun/photos/480/ligny.webp" srcset="_commun/photos/480/ligny.webp 480w, _commun/photos/ligny.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Deux personnes sur un quai au coucher du soleil, une rangée de réverbères." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Quai Ligny, soir</span><span class="cartel-m">Sébastien · Angers · 14 oct. 2026</span><span class="statut">Brouillon, accord à vérifier</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/admin/photos/maine"><img src="_commun/photos/480/maine.webp" srcset="_commun/photos/480/maine.webp 480w, _commun/photos/maine.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Une minoterie à six cheminées sur la Maine, à demi noyée dans la brume bleue." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Minoterie, brume du matin</span><span class="cartel-m">Sébastien · Angers · 14 oct. 2026</span><span class="statut">Brouillon (R0004012.jpg)</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/admin/photos/reverberes"><img src="_commun/photos/480/reverberes.webp" srcset="_commun/photos/480/reverberes.webp 480w, _commun/photos/reverberes.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="La ville la nuit, fenêtres allumées et halos de réverbères." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Réverbères, quai Ligny</span><span class="cartel-m">Sébastien · Angers · 14 oct. 2026</span><span class="statut">Brouillon (R0004057.jpg)</span></span></a></li>
+    </ul>
+  </div>
+  <ul class="pl-regles">
+    <li><b>Rangées :</b> chaque <code>&lt;li&gt;</code> porte son rapport (<code>style="--r: 1.5"</code>) ; hauteur visée 240 px au bureau, 200 px sur tablette, 112 px au téléphone, soit deux photos par rangée. La dernière rangée n’est pas étirée.</li>
+    <li><b>En vignette, deux lignes au plus,</b> coupées d’une ellipse ; le texte entier reste le nom du lien. Le numéro « N°19 » ne s’écrit que dans la visionneuse.</li>
+    <li><b>Images réservées aux grands formats :</b> Deux ombres, Deux, minuit et Élise, contre-jour sont trop sombres pour une couverture ou une vignette isolée ; dans la galerie, elles restent à leur place.</li>
+    <li><b>Diptyque :</b> deux photos de même hauteur, un titre commun en étiquette (« Même soir, deux regards »), chacune son cartel complet (voir l’ouverture de cette page).</li>
+  </ul>
+  <dl class="raisons">
+      <div><dt>La photo</dt><dd>Le format de chaque prise est respecté, au bord près : les verticales ne nagent plus dans un carré gris, les rangées ont le rythme d’une planche contact.</dd></div>
+      <div><dt>L’ergonomie</dt><dd>Le sens de lecture est celui des lignes : l’ordre « Sélection » choisi par les auteurs se lit enfin (UX-F-13).</dd></div>
+      <div><dt>L’accessibilité</dt><dd>Chaque vignette est un lien unique (image et cartel), au focus entier ; chaque image a son texte de remplacement.</dd></div>
+      <div><dt>La sobriété</dt><dd>Des variantes de 480 px pour les vignettes, 160 px pour les pastilles, 900 px pour les grands formats : 71 ko pour les 26 vignettes.</dd></div>
+    </dl>
+</section>
+
+<!-- ================= 7. Actions ================= -->
+<section class="pl-sec" id="actions" aria-labelledby="t-act">
+  <h2 class="pl-h2" id="t-act"><span class="mq-pin" aria-hidden="true">6</span>Boutons et bascules</h2>
+  <p class="pl-intro">Trois niveaux. Le bouton plein est l’action principale, et il n’y en a qu’un par écran ; le filet est secondaire ; le lien souligné, tertiaire. Casse de phrase, un verbe et son objet, 48 px de haut.</p>
+  <div class="pl-deux">
+    <div class="mode-nuit pl-plaque" style="margin:0">
+      <div class="demo-ligne"><button class="btn" type="button">Ajouter au panier</button><a class="btn btn--filet" href="/droits">Demander une licence</a><a class="lien" href="/conditions-de-vente">Conditions de vente</a></div>
+      <div class="demo-ligne" lang="de"><button class="btn" type="button">In den Warenkorb</button><a class="btn btn--filet" href="/de/rechte">Lizenz anfragen</a><a class="lien" href="/de/verkaufsbedingungen">Verkaufsbedingungen</a></div>
+      <div class="demo-ligne"><button class="btn is-hover" type="button">Survol</button><button class="btn is-focus" type="button">Focus</button><button class="btn" type="button" aria-disabled="true" aria-describedby="indispo">Ajouter au panier</button><span class="note" id="indispo">« Le ciel s’est ouvert » est épuisé : les 15 exemplaires sont vendus.</span></div>
+    </div>
+    <div class="mode-nuit pl-plaque" style="margin:0">
+      <h3 class="pl-h3">Bascules : deux gestes, deux signes</h3>
+      <div class="demo-ligne" style="margin-top:var(--esp-2)">
+        <form class="bascule-form" method="post" action="/photo/foz-la-barre/aime"><button class="bascule" type="submit" aria-pressed="false"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>J’aime</button></form>
+        <form class="bascule-form" method="post" action="/photo/miradouro/aime"><button class="bascule" type="submit" aria-pressed="true"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>J’aime <span class="bascule-n">13</span></button></form>
+        <span class="note">Public · cœur · compteur dès 1</span>
+      </div>
+      <div class="demo-ligne">
+        <form class="bascule-form" method="post" action="/prive/favori/1"><button class="bascule" type="submit" aria-pressed="false"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>Favori</button></form>
+        <form class="bascule-form" method="post" action="/prive/favori/2"><button class="bascule" type="submit" aria-pressed="true"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>Favori</button></form>
+        <span class="note">Galerie privée · étoile · la sélection de l’invité</span>
+      </div>
+    </div>
+  </div>
+  <dl class="raisons">
+      <div><dt>La photo</dt><dd>Un seul aplat clair par écran : l’œil va à la photo, puis à l’action.</dd></div>
+      <div><dt>L’ergonomie</dt><dd>« J’aime » dit au public qu’il apprécie ; « Favori » range une photo dans la sélection d’un invité. Deux gestes, deux mots, deux icônes (cœur, étoile).</dd></div>
+      <div><dt>L’accessibilité</dt><dd>Bascules en &lt;button aria-pressed&gt; : l’état est lu, et vu (icône pleine, fond encre). Un bouton indisponible dit pourquoi, à côté, relié par aria-describedby.</dd></div>
+      <div><dt>La sobriété</dt><dd>Chaque bascule est un petit formulaire POST : elle marche sans script, et le script ne fait que l’accélérer.</dd></div>
+    </dl>
+</section>
+
+<!-- ================= 8. Formulaires ================= -->
+<section class="pl-sec" id="formulaires" aria-labelledby="t-form">
+  <h2 class="pl-h2" id="t-form"><span class="mq-pin" aria-hidden="true">7</span>Formulaires et erreurs</h2>
+  <p class="pl-intro">Une phrase en tête : « Tous les champs sont obligatoires, sauf mention « facultatif » ». Puis, pour chaque champ : le libellé, l’aide, le champ, et l’erreur dessous (sous la légende pour un groupe). Après un envoi incomplet, un résumé en tête reçoit le focus ; la saisie est gardée.</p>
+  <div class="pl-deux">
+    <div class="mode-nuit pl-plaque" style="margin:0">
+      <p class="etiquette">Nuit · après un envoi incomplet</p>
+      <form class="form" style="margin-top:var(--esp-3)" action="/commande" method="post" novalidate>
+        <div class="resume" tabindex="-1" aria-labelledby="resume-t"><p class="resume-t" id="resume-t"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg>2 points à corriger</p><ul><li><a href="#nom">Nom complet : indiquez le nom à écrire sur le colis.</a></li><li><a href="#cgv">Conditions de vente : cochez la case pour continuer.</a></li></ul></div>
+        <p class="form-oblig">Tous les champs sont obligatoires, sauf mention « facultatif ».</p>
+        <div class="champ"><label for="email">Adresse e-mail</label><p class="champ-aide" id="email-aide">Pour la confirmation et le suivi ; jamais pour autre chose.</p><input id="email" type="email" autocomplete="email" value="claire.exemple@example.org" aria-describedby="email-aide"></div>
+        <div class="champ"><label for="nom">Nom complet</label><input id="nom" autocomplete="name" value="" aria-invalid="true" aria-describedby="nom-err"><p class="champ-err" id="nom-err"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> indiquez le nom à écrire sur le colis.</span></p></div>
+        <fieldset class="groupe"><legend>Livraison</legend>
+          <label class="choix"><input type="radio" name="liv" checked><span>France métropolitaine · 15,00 €<span class="choix-d">Du 30 oct. au 6 nov., à plat, suivi</span></span></label>
+          <label class="choix"><input type="radio" name="liv"><span>Union européenne · 25,00 €<span class="choix-d">Du 3 au 10 nov.</span></span></label>
+        </fieldset>
+        <fieldset class="groupe groupe--erreur" aria-describedby="cgv-err"><legend id="cgv">Conditions de vente</legend><p class="champ-err" id="cgv-err"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> cochez la case pour continuer.</span></p>
+          <label class="choix"><input type="checkbox" aria-invalid="true"><span>J’ai lu les <a class="lien" style="min-height:0;display:inline" href="/conditions-de-vente">conditions de vente</a> et le droit de rétractation.</span></label>
+        </fieldset>
+      </form>
+    </div>
+    <div class="mode-jour pl-plaque" style="margin:0;box-shadow:inset 0 0 0 1px var(--rule)">
+      <p class="etiquette">Jour · en cours de saisie, allemand</p>
+      <form class="form" style="margin-top:var(--esp-3)" lang="de" action="/de/bestellung" method="post" novalidate>
+        <p class="form-oblig">Alle Felder sind Pflichtfelder, außer „optional“.</p>
+        <div class="champ"><label for="de-email">E-Mail-Adresse</label><p class="champ-aide" id="de-email-aide">Für die Bestätigung und die Sendungsverfolgung; für nichts anderes.</p><input id="de-email" type="email" value="anna.beispiel@example.org" aria-describedby="de-email-aide"></div>
+        <div class="champ"><label for="de-nom">Vollständiger Name</label><input id="de-nom" class="is-focus" value="Anna Beisp"></div>
+        <div class="champ"><label for="de-pays">Land</label><select id="de-pays"><option>Deutschland</option><option>Frankreich</option><option>Belgien</option></select></div>
+        <div class="champ"><label for="de-tel">Telefon <span class="facultatif">(optional)</span></label><p class="champ-aide" id="de-tel-aide">Nur für den Paketdienst.</p><input id="de-tel" type="tel" aria-describedby="de-tel-aide"></div>
+        <fieldset class="groupe"><legend>Lieferung</legend>
+          <label class="choix"><input type="radio" name="de-liv" checked><span>Europäische Union · 25,00 €</span></label>
+          <label class="choix"><input type="checkbox" checked><span>Rechnungsadresse wie Lieferadresse</span></label>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+  <ul class="pl-regles">
+    <li><b>Message d’erreur :</b> ⚠, « Erreur : » en 500, puis comment corriger, en une phrase. Le champ fautif prend un bord de 2 px ; la couleur ne vient qu’en plus.</li>
+    <li><b>Résumé :</b> dès deux points à corriger ; un lien par point ; focus posé dessus au rechargement (<code>autofocus</code> sur <code>tabindex="-1"</code>), sans script.</li>
+    <li><b>Cases et radios dessinées :</b> vides et cerclées à 3:1, pleines quand elles sont cochées, dans les trois thèmes (plus de disque gris natif en nuit).</li>
+  </ul>
+  <dl class="raisons">
+      <div><dt>L’ergonomie</dt><dd>Une seule règle d’obligation, une seule place pour l’aide et pour l’erreur, d’un formulaire à l’autre : on ne cherche plus.</dd></div>
+      <div><dt>L’accessibilité</dt><dd>Libellés visibles et reliés, aide et erreur par aria-describedby, aria-invalid, résumé focalisé (RGAA 11.10, 11.11 ; WCAG 3.3.1, 3.3.3).</dd></div>
+      <div><dt>La sobriété</dt><dd>La validation se fait au serveur ; le navigateur n’est pas sollicité (novalidate), la page revient avec la saisie.</dd></div>
+    </dl>
+</section>
+
+<!-- ================= 9. Tirages ================= -->
+<section class="pl-sec" id="tirages" aria-labelledby="t-tir">
+  <h2 class="pl-h2" id="t-tir"><span class="mq-pin" aria-hidden="true">8</span>Prix, tunnel, messages</h2>
+  <div class="pl-trois">
+    <div class="mode-nuit pl-plaque" style="margin:0">
+      <p class="etiquette">Vitrine · page d’un tirage</p>
+      <div class="vitrine" style="margin-top:var(--esp-2)">
+        <h3 class="pl-h3">Miradouro, l’heure dorée<span class="cartel-m" style="display:block">Julien · Lisbonne · 10 oct. 2026</span></h3>
+        <fieldset class="groupe"><legend class="sr-only">Format</legend>
+          <label class="choix"><input type="radio" name="fmt"><span>Petit format<span class="choix-d">image 24 × 36 cm · feuille 30 × 40</span></span><span class="prix">180 €</span></label>
+          <label class="choix"><input type="radio" name="fmt" checked><span>Grand format<span class="choix-d">image 40 × 60 cm · feuille 50 × 70</span></span><span class="prix">290 €</span></label>
+        </fieldset>
+        <p class="tva">Édition de 15 exemplaires, tous formats confondus : 8 disponibles. Livraison en France : 15 €. TVA non applicable, art. 293 B du CGI.</p>
+        <button class="btn btn--large" type="button">Ajouter au panier</button>
+      </div>
+    </div>
+    <div class="mode-nuit pl-plaque" style="margin:0">
+      <p class="etiquette">Panier, commande, facture</p>
+      <dl class="montants" style="margin-top:var(--esp-2)">
+        <dt>Escaliers des Guindais, grand format</dt><dd>290,00 €</dd>
+        <dt>Livraison, France métropolitaine</dt><dd>15,00 €</dd>
+        <dt class="total">Total</dt><dd class="total prix--total">305,00 €</dd>
+      </dl>
+      <p class="tva" style="margin-top:var(--esp-1)">TVA non applicable, art. 293 B du CGI.</p>
+      <p class="etiquette" style="margin-top:var(--esp-5)">Étapes du tunnel</p>
+      <div style="margin-top:var(--esp-1)"><ol class="etapes" aria-label="Étapes de la commande">
+  <li class="fait"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><a href="/panier"><span class="n">1.</span> Panier</a></li>
+  <li aria-current="step"><span class="etapes-court">Étape 2 sur 4 · </span><span class="n">2.</span> <span class="etapes-nom">Coordonnées</span></li>
+  <li><span class="n">3.</span> Paiement</li>
+  <li><span class="n">4.</span> Confirmation</li>
+</ol></div>
+      <p class="pl-legende">Sous 600 px de large, seule l’étape en cours reste, comme ici ; en entier dans l’en-tête Tunnel à 1 280 px, plus haut.</p>
+    </div>
+    <div class="mode-nuit pl-plaque" style="margin:0">
+      <p class="etiquette">Messages</p>
+      <div style="display:grid;gap:var(--esp-2);margin-top:var(--esp-2)">
+        <div class="msg msg--ok" role="status"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><p><b>Ajouté au panier.</b> Miradouro, l’heure dorée, grand format. <a href="/panier">Voir le panier (2)</a></p></div>
+        <div class="msg msg--erreur" role="alert"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><p><b>Erreur :</b> un autre acheteur vient de réserver un exemplaire de cette photo ; il en reste 7. Votre panier est à jour.</p></div>
+        <div class="msg"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.2"/></svg><p>Le numéro de votre exemplaire vous sera donné après le paiement.</p></div>
+      </div>
+      <p class="etiquette" style="margin-top:var(--esp-5)">Fil d’Ariane</p>
+      <nav class="ariane" aria-label="Fil d’Ariane (exemple)"><ol><li><a href="/carnets">Carnets</a></li><li><a href="/carnets/voyages">Voyages</a></li><li aria-current="page">Lisbonne et Porto</li></ol></nav>
+    </div>
+  </div>
+  <ul class="pl-regles">
+    <li><b>Prix :</b> « 290 € » en vitrine ; « 290,00 € » au panier, dans la commande et sur la facture. Espace insécable avant €. Jamais « TTC » ni « HT ».</li>
+    <li><b>TVA :</b> une seule mention, une fois par page qui montre un prix, près du premier prix ou du total : « TVA non applicable, art. 293 B du CGI » (franchise ; « art. L. 233-3 du CIBS » à partir du 1<sup>er</sup> janvier 2027).</li>
+    <li><b>Tunnel :</b> Panier · Coordonnées · Paiement · Confirmation. Le bouton final dit le montant : « Payer 305,00 € ».</li>
+  </ul>
+</section>
+
+<!-- ================= 10. Administration ================= -->
+<section class="pl-sec" id="admin" aria-labelledby="t-adm">
+  <h2 class="pl-h2" id="t-adm"><span class="mq-pin" aria-hidden="true">9</span>Administration</h2>
+  <p class="pl-intro">Un seul kit, celui d’<code>admin.css</code> (main), complété par <code>admin-plus.css</code> : une barre latérale, un en-tête de page, trois boutons, une pastille d’état, un message d’action, un formulaire, un dialogue. Ci-dessous, une vraie fiche de photo en « Chambre noire », à 90 %.</p>
+  <figure class="adm "><img src="MQ-00-echantillons/admin-bureau-sombre.webp" width="1440" height="900" alt="Fiche d’une photo dans l’administration, thème Chambre noire : barre latérale à quatre groupes, en-tête de page avec retour, titre « Minoterie, brume du matin », pastille Brouillon et trois boutons, formulaire avec une erreur de date, message d’action « Titre enregistré · Défaire »." loading="lazy" decoding="async"><figcaption>Chambre noire · 1 440 × 900 · Julien, administrateur, complète un brouillon de Sébastien ; la date est refusée, le titre s’est enregistré seul · <a class="lien" style="display:inline;min-height:0" href="MQ-00-echantillons/admin-bureau-sombre.html">ouvrir la page</a></figcaption></figure>
+  <div class="pl-deux">
+    <figure class="adm "><img src="MQ-00-echantillons/admin-bureau-clair-de.webp" width="1440" height="900" alt="La même fiche en thème clair et en allemand ; « Veröffentlichungsablauf » tient dans la barre latérale." loading="lazy" decoding="async"><figcaption>Clair et allemand · les libellés les plus longs tiennent dans 248 px · <a class="lien" style="display:inline;min-height:0" href="MQ-00-echantillons/admin-bureau-clair-de.html">ouvrir la page</a></figcaption></figure>
+    <div>
+      <h3 class="pl-h3"><span class="mq-pin" aria-hidden="true">10</span>Barre latérale unique</h3>
+      <ul class="pl-regles" style="margin-top:var(--esp-2)">
+        <li><b>Structure de layout.eta :</b> une <code>&lt;nav&gt;</code> par groupe, nommée par son intitulé. « Aujourd’hui », puis Photos · Personnes · Publier · Équipe (UX-A-11).</li>
+        <li><b>Places fixes :</b> Signalements dans Personnes ; Carnets, Galeries privées et Boutique dans Publier ; Réglages, Aide, Voir le site et la langue au pied ; le compte, le thème et la déconnexion tout en bas.</li>
+        <li><b>Lignes de 32 px au bureau, 44 px au toucher.</b> Avec les trois modules : 889 px de haut, dans une fenêtre de 900. Les séries se déplient sous « Séries » et restent des cibles de dépôt.</li>
+        <li><b>Compteurs :</b> pastilles rondes ambre (vermillon pour l’urgence), jamais carrées : les repères de maquette sont carrés et magenta.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="adm-grille">
+    <figure class="adm "><img src="MQ-00-echantillons/admin-composants.webp" width="632" height="1276" alt="Les composants de l’administration en Chambre noire : trois boutons, les cinq états avec leurs mots par domaine, le témoin d’enregistrement, le message d’action et sa variante d’erreur, le dialogue de confirmation." loading="lazy" decoding="async"><figcaption>Composants · Chambre noire (le clair est dans la même page) · <a class="lien" style="display:inline;min-height:0" href="MQ-00-echantillons/admin-composants.html">ouvrir la page</a></figcaption></figure>
+    <figure class="adm adm-tel"><img src="MQ-00-echantillons/admin-telephone-clair.webp" width="680" height="1384" alt="La fiche au téléphone : actions dans une barre basse au-dessus des onglets, message d’action au-dessus." loading="lazy" decoding="async"><figcaption>Téléphone · barre basse : « Plus » et « Publier » · <a class="lien" style="display:inline;min-height:0" href="MQ-00-echantillons/admin-telephone-clair.html">ouvrir la page</a></figcaption></figure>
+    <figure class="adm adm-tel"><img src="MQ-00-echantillons/admin-menu-telephone.webp" width="680" height="1384" alt="Le menu de l’administration ouvert au téléphone, lignes de 44 px, séries dépliées." loading="lazy" decoding="async"><figcaption>Téléphone · menu ouvert, lignes de 44 px · <a class="lien" style="display:inline;min-height:0" href="MQ-00-echantillons/admin-menu-telephone.html">ouvrir la page</a></figcaption></figure>
+  </div>
+  <div class="pl-deux">
+    <div>
+      <h3 class="pl-h3"><span class="mq-pin" aria-hidden="true">11</span>En-tête de page, boutons, états</h3>
+      <ul class="pl-regles" style="margin-top:var(--esp-2)">
+        <li><b>En-tête :</b> « ← Photothèque », le titre, sa pastille, une ligne de méta (avec le témoin d’enregistrement), puis les actions ; le seul bouton plein est le dernier. Au téléphone, les actions passent en barre basse.</li>
+        <li><b>Trois boutons :</b> plein (ambre), contour, danger (en contour dans les pages, plein seulement pour l’action finale d’un dialogue). Plus de gris plein.</li>
+        <li><b>États :</b> <span class="syms"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg> à faire · <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg> en cours, attend quelqu’un · <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg> abouti · <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg> attention · <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg> arrêté</span>. Symbole, couleur et mot, toujours ensemble ; les filtres portent les noms des états.</li>
+        <li><b>Dialogue :</b> la question nomme l’objet ; une phrase dit les conséquences ; [Annuler] puis l’action qui répète l’objet (« Révoquer l’accès de Lucie ») ; focus sur Annuler si l’action ne se défait pas.</li>
+      </ul>
+    </div>
+    <div class="mode-jour regle-enreg">
+    <h3 class="pl-h3"><span class="mq-pin" aria-hidden="true">12</span>Règle d’enregistrement (une seule)</h3>
+    <ol class="pl-regles" style="margin-top:var(--esp-2)">
+      <li><b>Ce qui se défait s’enregistre seul,</b> champ par champ, quand on le quitte : fiche, lot, inspecteur, ordre des séries, ouverture, brouillon de billet, réglages d’un accès. Le témoin de l’en-tête dit « ✓ Enregistré à 22 h 42 » ; le message d’action propose « Défaire » pendant 10 s.</li>
+      <li><b>Ce qui a un effet public, légal ou financier passe par un bouton qui nomme cet effet :</b> « Publier », « Proposer », « Programmer pour le 12 oct., 8 h », « Mettre en ligne les mentions », « Rembourser 290,00 € », « Révoquer l’accès ». Jamais « Enregistrer ».</li>
+      <li><b>Un champ refusé n’est pas enregistré :</b> l’erreur s’écrit dessous, le témoin devient « ▲ 1 champ non enregistré : date », et quitter la page demande confirmation.</li>
+      <li><b>Sans JavaScript,</b> chaque formulaire garde un bouton « Enregistrer », que le script retire.</li>
+    </ol>
+  </div>
+  </div>
+  <dl class="raisons">
+      <div><dt>La photo</dt><dd>La photo garde la plus grande place de la fiche ; l’admin reste sombre et neutre autour, comme une table lumineuse.</dd></div>
+      <div><dt>L’ergonomie</dt><dd>Les mêmes places d’un écran à l’autre : on sait où est l’action principale, où se lit l’état, où se défait un geste. Une seule façon d’enregistrer (UX-A-06).</dd></div>
+      <div><dt>L’accessibilité</dt><dd>États lisibles par un daltonien (symbole et mot), message d’action en pause au survol et au focus, cibles de 44 px au toucher, rien sous 12 px.</dd></div>
+      <div><dt>La sobriété</dt><dd>Aucun nouveau fichier de script : le kit existant, plus 9 ko de CSS.</dd></div>
+    </dl>
+</section>
+
+<!-- ================= 11. Annotations ================= -->
+<section class="pl-sec" id="annotations" aria-labelledby="t-ann">
+  <h2 class="pl-h2" id="t-ann"><span class="mq-pin" aria-hidden="true">13</span>Annotations</h2>
+  <p class="pl-intro">Tout ce qui est magenta appartient à la maquette, jamais à l’interface. Pastilles, étiquettes d’état et repère du premier écran sont hors du flux : les retirer ne déplace aucun pixel.</p>
+  <div class="anno-demo">
+    <div>
+      <p class="etiquette">Pastille, en marge</p>
+      <div style="margin-top:var(--esp-2)"><span class="mq-pin" aria-hidden="true">4</span><div class="carte mode-nuit"><p style="margin:0"><a class="lien" href="/tirages">Tirage : à partir de 180 €</a></p></div></div>
+      <p class="pl-legende">Carrée, magenta, cerclée de noir, <code>aria-hidden="true"</code> ; premier enfant de l’élément commenté, elle glisse dans la marge. Jamais sur une photo, jamais sur un texte.</p>
+    </div>
+    <div>
+      <p class="etiquette">Autre état d’un écran</p>
+      <div class="mq-ecran" style="margin-top:var(--esp-6)"><p class="mq-etat">État · Panier vide</p><div class="carte mode-nuit"><p style="margin:0">Votre panier est vide. <a class="lien" href="/tirages">Voir les tirages</a></p></div></div>
+      <p class="pl-legende" style="margin-top:var(--esp-3)">Un contour pointillé, une étiquette « État · … » au-dessus ; une seule rédaction pour les vingt maquettes.</p>
+    </div>
+    <div>
+      <p class="etiquette">Bas du premier écran</p>
+      <p class="pl-texte" style="margin-top:var(--esp-2)">Un trait magenta de 16 px dans chaque marge, à 900 px au bureau et 839 px sur Pixel 7 : il ne recouvre aucun texte. (Il est en place en haut de cette page.)</p>
+    </div>
+  </div>
+  <p class="pl-texte"><b>Voir sans annotations :</b> ajouter <code>#sans-annotations</code> à l’adresse, ou poser la classe <code>sans-annotations</code> sur <code>&lt;html&gt;</code>, ou imprimer. Le contrôle « interface identique avec et sans pastilles » compare les deux rendus pixel à pixel (bloc Mesures, en bas).</p>
+</section>
+
+<!-- ================= 12. Lexique ================= -->
+<section class="pl-sec" id="lexique" aria-labelledby="t-lex">
+  <h2 class="pl-h2" id="t-lex"><span class="mq-pin" aria-hidden="true">14</span>Lexique et données</h2>
+  <p class="pl-intro">Les mêmes mots partout, et les mêmes données fictives d’une maquette à l’autre, calées sur la démo. Le détail est dans <a class="lien" style="display:inline;min-height:0" href="LEXIQUE-ET-DONNEES.md">LEXIQUE-ET-DONNEES.md</a>.</p>
+  <table class="lex">
+    <caption class="sr-only">Lexique fixé</caption>
+    <thead><tr><th scope="col">On écrit</th><th scope="col">Ce que cela désigne</th><th scope="col">On n’écrit plus</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Tirages</th><td>La boutique : menu, pages, pied de page.</td><td><s>Boutique</s> côté public, <s>Tirages et licences</s></td></tr>
+      <tr><th scope="row">Droits et licences</th><td>La page des droits et la demande de licence (usage presse, entreprise, hors catalogue).</td><td><s>Droits, tirages et licences</s></td></tr>
+      <tr><th scope="row">Les deux · Sébastien · Julien</th><td>Le choix du regard, dans cet ordre, partout.</td><td><s>Tous</s>, <s>Les 2</s></td></tr>
+      <tr><th scope="row">J’aime</th><td>Public : un visiteur apprécie une photo (cœur, compteur dès 1).</td><td><s>Favori</s> sur le site public</td></tr>
+      <tr><th scope="row">Favori</th><td>Galerie privée : l’invité met une photo dans sa sélection (étoile).</td><td><s>J’aime</s> en galerie privée</td></tr>
+      <tr><th scope="row">Proposée</th><td>Un statut : la photo attend le modérateur.</td><td>« ✦ Proposée : Rue » pour un assistant</td></tr>
+      <tr><th scope="row">Suggestion</th><td>Ce que proposent les assistants d’analyse (« ✦ Suggestion : Rue »).</td><td><s>Proposition</s></td></tr>
+      <tr><th scope="row">Annuler</th><td>Ne pas faire : fermer un dialogue ou abandonner sans rien changer.</td><td>« Annuler » pour revenir sur un geste fait</td></tr>
+      <tr><th scope="row">Défaire</th><td>Revenir sur un geste fait, dans le message d’action (10 s).</td><td><s>Annuler</s> dans un message d’action</td></tr>
+      <tr><th scope="row">290 € · 290,00 €</th><td>Vitrine · panier, commande, facture.</td><td><s>Prix TTC</s>, <s>HT</s></td></tr>
+      <tr><th scope="row">16 oct. 2026 · 22 h 42</th><td>Dates et heures dans l’interface ; « vendredi 16 octobre 2026 » dans une confirmation.</td><td><s>16/10/2026</s>, <s>22:42</s>, <s>2026-10-16</s></td></tr>
+      <tr><th scope="row">Carnets · billet</th><td>La rubrique, et chacun de ses textes.</td><td><s>Blog</s>, <s>Voyages</s> (devenus des billets)</td></tr>
+    </tbody>
+  </table>
+  <table class="tableau-donnees">
+    <caption class="sr-only">Données fictives de référence</caption>
+    <thead><tr><th scope="col">Donnée</th><th scope="col">Valeur fixée</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Photos publiées</th><td>22 : Sébastien 10, Julien 12 (N°01 à N°22, comme la démo) ; 4 non publiées (1 proposée, 3 brouillons).</td></tr>
+      <tr><th scope="row">Séries</th><td>Atlantique 3 · Paysage 5 · Portrait 3 · Rue 7 · Voyage 4.</td></tr>
+      <tr><th scope="row">Carnets</th><td>4 billets publiés : Lisbonne et Porto (10 photos), Inês, ou comment demander une photo, Pourquoi nous ne recadrons pas, Tirer sur Photo Rag ; 1 brouillon.</td></tr>
+      <tr><th scope="row">Tirages</th><td>9 photos en édition de 15 exemplaires ; petit format 180 €, grand format 290 € ; livraison 15 € (France), 25 € (UE).</td></tr>
+      <tr><th scope="row">Personnes</th><td>Inês Exemplo, Tiago Exemplo (photographiés), Claire Exemple (demande /bonjour), Anna Beispiel et Marc Exemple (clients), Lucie Exemple (invitée).</td></tr>
+    </tbody>
+  </table>
+</section>
+</div>
+
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MQ-00 · direction artistique commune · planche de référence des maquettes MQ-01 à MQ-20</p>
+  <h2 id="mq-t">Ce qui change</h2>
+  <p class="mq-lead">Les vingt maquettes v0 avaient cinq en-têtes, deux kits de composants d’admin et des annotations dans le flux. Cette planche fixe un seul système ; chaque repère ci-dessous renvoie au défaut du jury qu’il corrige.</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>Des jetons uniques</b><p>Couleurs des cinq thèmes, états, échelle, espaces, rayons et focus dans <code>_commun/tokens.css</code> ; aucune maquette ne les redéclare.</p><span class="mq-ref">Jury : variables redéclarées (MQ-01, MQ-11), « --field » manquant</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>Une typographie qui se lit</b><p>Jost 400 pour le texte, 300 pour les seuls grands titres ; capitales et Plex Mono à leur place.</p><span class="mq-ref">UX-F-29, UX-F-37 · jury : capitales espacées et mono partout</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Trois en-têtes qui ne débordent jamais</b><p>Site, Contexte, Tunnel ; trois mises en page calées sur l’allemand ; mesurées de 320 à 1 440 px.</p><span class="mq-ref">Jury T1 · UX-F-36, UX-F-02 · WCAG 1.4.4, 1.4.10</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Menu du téléphone sans script, langue unique</b><p>Un <code>&lt;details&gt;</code> ; le sélecteur de langue est le même partout, sans drapeau.</p><span class="mq-ref">Jury T2 · UX-F-32 · jury : langue en menu ici, en ligne ailleurs</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>Un cartel, des rangées sans passe-partout</b><p>Titre puis « Auteur · Lieu · date » ; sous les horizontales, à côté des verticales ; vignettes au format de la photo.</p><span class="mq-ref">Jury : cartels de 5 formes, passe-partout gris, couvertures rondes</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Trois niveaux d’action, deux bascules distinctes</b><p>Un seul plein par écran ; J’aime (cœur) et Favori (étoile) ne se confondent plus.</p><span class="mq-ref">Jury : 4 styles de boutons, cœur encre ou sable, MQ-16 en capitales</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Un formulaire, une règle d’erreur</b><p>Obligations en tête, aide puis champ puis erreur, résumé focalisé, cases dessinées.</p><span class="mq-ref">UX-F-03, UX-F-04, UX-F-05 · jury : MQ-05, MQ-06, MQ-15, MQ-16</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Prix et TVA dits une fois, de la même façon</b><p>« 290 € » en vitrine, « 290,00 € » ensuite ; « TVA non applicable, art. 293 B du CGI » ; plus de « TTC ».</p><span class="mq-ref">Jury : MQ-13, MQ-14, MQ-15</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Un seul kit d’administration</b><p>admin.css de main, plus admin-plus.css ; les deux familles <code>.mq-st</code> et <code>.etat</code> disparaissent.</p><span class="mq-ref">Jury admin : deux kits, CSS antérieure à main</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>Une barre latérale qui tient en 900 px</b><p>Quatre groupes nommés par tâche ; Signalements, Voir le site, langue et thème à place fixe ; 32 px au bureau, 44 au toucher.</p><span class="mq-ref">UX-A-11, UX-A-32 · jury : trois barres latérales</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>Un tableau des états</b><p><span class="syms"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg> <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg> <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg> <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg> <svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg></span>, une couleur fixe par symbole, un mot par domaine ; un message d’action, un dialogue.</p><span class="mq-ref">UX-A-16, UX-A-07, UX-A-08 · jury : « en cours » bleu ici, ambre là</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>Une règle d’enregistrement</b><p>Ce qui se défait s’enregistre seul ; ce qui engage passe par un bouton nommé par son effet.</p><span class="mq-ref">UX-A-06 · jury : quatre façons d’enregistrer</span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>Des annotations hors de l’interface</b><p>Magenta, carrées, en marge, aria-hidden ; état et encart d’un seul modèle ; « sans annotations » par l’adresse.</p><span class="mq-ref">Jury T3 · jury admin : repères confondus avec les compteurs</span></li>
+    <li><span class="mq-num" aria-hidden="true">14</span><b>Un lexique et des données fixés</b><p>Une image, un titre ; les comptes de la démo ; stocks, numéros d’exemplaire et commandes cohérents.</p><span class="mq-ref">Jury : vocabulaire et données incohérents</span></li>
+  </ol>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium 1.64 en conteneur, outils/inspect.sh) · axe-core : 0 violation sur MQ-00 au bureau (1 440 × 900) et au téléphone (Pixel 7), et sur les 9 pages d’échantillons de MQ-00-echantillons/ · Poids : 767 ko et 44 requêtes au bureau, 915 ko au téléphone (photos en 900 px pour la densité 2,6) ; aucun script, aucune ressource tierce ; vignettes de 480 px, pastilles de 160 px · En-têtes : 3 variantes × français et allemand × 11 largeurs (320 à 1 440 px), menus fermés et ouverts : 0 débordement, 0 chevauchement, 0 texte coupé (outils/mq00-entetes.mjs) · Barre latérale de l’admin : 889 px de contenu dans 900 px, rôle Administrateur, Carnets, Galeries privées et Boutique actifs · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (liens dans une phrase exemptés ; outils/mq00-cibles.mjs) · Contrastes : calculés par la formule WCAG 2.2 sur les valeurs de tokens.css (tableaux de la section 1) · Sans annotations : 16 pastilles retirées, 0 pixel changé hors de leur emprise sur 20 670 px de haut au bureau et 37 589 px au téléphone (outils/mq00-sans-annotations.mjs).
+</p>
+</aside>
+
+<footer class="sf sf--complet wrap">
+  <div class="sf-in">
+    <div>
+      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
+      <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage, un tirage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
+    </div>
+    <nav class="sf-groupes" aria-label="Pied de page">
+      <div>
+        <h2 id="sf-site">Le site</h2>
+        <ul aria-labelledby="sf-site">
+          <li><a href="/a-propos#contact">Contact</a></li>
+          <li><a href="/droits">Droits et licences</a></li>
+          <li><a href="/carnets/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
+          <li><a href="/confidentialite">Confidentialité</a></li>
+          <li><a href="/mentions-legales">Mentions légales</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 id="sf-tirages">Tirages</h2>
+        <ul aria-labelledby="sf-tirages">
+          <li><a href="/conditions-de-vente">Conditions de vente</a></li>
+          <li><a href="/livraison">Livraison et retours</a></li>
+          <li><a href="/renoncer">Renoncer à une commande</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

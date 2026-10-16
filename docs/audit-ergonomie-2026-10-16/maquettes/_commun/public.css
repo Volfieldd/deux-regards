@@ -1,0 +1,361 @@
+/* =====================================================================================================
+   Composants du site public (direction artistique commune, MQ-00).
+   Chargé après site.css (copie de main) et tokens.css. Chaque composant a un nom, une forme et une place ;
+   une maquette les assemble sans les redessiner. Aucune couleur ni taille en dur : tout vient de tokens.css.
+   Rien ici n'exige JavaScript : menus et listes de langues sont des <details>, les bascules des formulaires.
+   Sommaire :  0 socle · 1 en-tête (Site, Contexte, Tunnel) · 2 langue · 3 menu du téléphone · 4 pied de page
+               5 cartel · 6 vignettes en rangées · 7 diptyque · 8 boutons · 9 bascules · 10 formulaires
+               11 prix · 12 étapes du tunnel · 13 messages · 14 fil d'Ariane, étiquettes, données
+   ===================================================================================================== */
+
+/* ---------- 0. Socle : corrections de lisibilité (UX-F-29) et de comportement (UX-F-34) ---------- */
+body { font: 400 var(--t-texte)/var(--i-texte) var(--sans); background: var(--paper); color: var(--ink); }
+img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; -webkit-user-drag: auto; }
+.mono { font-size: var(--t-meta); letter-spacing: .02em; }
+:focus-visible { outline: var(--focus-l) solid var(--ink); outline-offset: var(--focus-o); }
+.wrap { padding-inline: max(var(--gut), env(safe-area-inset-left)) max(var(--gut), env(safe-area-inset-right)); }
+.ic { flex: none; display: block; }
+/* Liens dans un texte : toujours soulignés (UX-F-23). */
+.prose a, .txt a, a.lien { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.prose a:hover, .txt a:hover, a.lien:hover { text-decoration-thickness: 2px; }
+
+/* États simulés dans les maquettes (une capture ne survole ni ne tabule) : même dessin que :hover et :focus-visible. */
+.is-focus { outline: var(--focus-l) solid var(--ink); outline-offset: var(--focus-o); }
+.champ input.is-focus, .champ select.is-focus, .champ textarea.is-focus { outline-offset: 0; border-color: var(--ink); }
+.choix input.is-focus { outline-offset: 2px; }
+.btn.is-hover { background: color-mix(in srgb, var(--ink) 84%, var(--paper)); }
+.btn--filet.is-hover { background: color-mix(in srgb, var(--ink) 10%, var(--paper)); }
+
+/* Lien d'évitement (UX-F-06) : premier élément de la page, visible au focus. */
+.skip { position: absolute; left: -9999px; top: 0; z-index: 100; }
+.skip:focus { left: var(--gut); top: var(--esp-1); display: inline-flex; align-items: center; min-height: var(--cible);
+  padding: 0 var(--esp-3); background: var(--ink); color: var(--paper); font: 500 var(--t-petit)/1 var(--sans); }
+
+/* ---------- 1. En-tête : trois variantes nommées, une seule structure ----------
+   .sh--site      toutes les pages du site : marque, menu, Tirages, outils (recherche, panier, langue)
+   .sh--contexte  visionneuse, galerie privée : retour (ou titre du contexte), marque, langue, Menu
+   .sh--tunnel    commande, accès à une galerie privée : marque, retour, langue ; ni menu ni recherche
+   Trois mises en page selon la largeur, calées sur l'allemand (« Reisetagebücher », « Kunstdrucke »,
+   « Warenkorb (2) ») et vérifiées à 320, 412, 768, 820, 1024, 1280 et 1440 px :
+   L (≥ 1280) une ligne · M (768-1279) deux lignes, le menu sous la marque · S (< 768) marque, panier, langue, Menu.
+   Requêtes de conteneur (@container sh) : l'en-tête suit sa propre largeur. En page, c'est celle de l'écran (même effet
+   qu'une requête média) ; dans MQ-00, l'en-tête se montre à 320 ou 1 280 px dans la même page. Sans prise en charge
+   (navigateurs d'avant 2023), il reste en mise en page S, qui tient à toutes les largeurs. Sa marge suit les paliers de --gut. */
+.sh { container: sh / inline-size; position: relative; z-index: 20; background: var(--paper); color: var(--ink); border-bottom: 1px solid var(--rule); }
+.sh-bar { --gut: 16px; display: flex; align-items: center; gap: var(--esp-1); min-height: 64px;
+  padding-inline: max(var(--gut), env(safe-area-inset-left)) max(var(--gut), env(safe-area-inset-right)); }
+.sh-marque { display: inline-flex; align-items: center; min-height: var(--cible); flex: none; margin-right: auto;
+  font: 300 13px/1 var(--sans); letter-spacing: .34em; text-transform: uppercase; white-space: nowrap; color: var(--ink); }
+.sh-marque:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+
+/* Menu principal (L et M) : casse normale, 15 px. L'entrée active : soulignée de sable et en 500. */
+.sh-nav { display: none; }
+.sh-nav ul { display: flex; flex-wrap: nowrap; align-items: center; gap: 0 var(--esp-3); list-style: none; margin: 0; padding: 0; }
+.sh-nav li { display: flex; align-items: center; }
+.sh-nav a { display: inline-flex; align-items: center; min-height: var(--cible); font-size: 15px; letter-spacing: .01em; white-space: nowrap; color: var(--ink); }
+.sh-nav a:hover { text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 1px; }
+.sh-nav a[aria-current] { font-weight: 500; text-decoration: underline; text-decoration-color: var(--safelight);
+  text-decoration-thickness: 2px; text-underline-offset: 8px; }
+/* « Tirages » : la boutique, séparée du reste par un filet, même graisse (elle n'est ni désactivée ni secondaire). */
+.sh-nav .sh-sep { padding-left: var(--esp-3); border-left: 1px solid var(--field); }
+
+/* Outils : recherche, panier, langue, Menu. Une icône ne vient jamais seule : son mot est visible, ou lu (S). */
+.sh-outils { display: flex; align-items: center; gap: var(--esp-1); flex: none; }
+.sh-outil { display: inline-flex; align-items: center; justify-content: center; gap: var(--esp-1); min-height: var(--cible);
+  min-width: var(--cible); padding-inline: var(--esp-1); font-size: 15px; white-space: nowrap; color: var(--ink); }
+.sh-outil:hover .sh-outil-t { text-decoration: underline; text-underline-offset: 6px; }
+.sh-outil[aria-current] .sh-outil-t { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.sh-outil-t { white-space: nowrap; }
+.sh-compte { font-variant-numeric: tabular-nums; }
+/* S : la recherche passe dans le Menu ; le panier garde son icône et son nombre, le mot est lu. */
+.sh-recherche { display: none; }
+.sh-panier .sh-outil-t, .sh-panier .sh-par { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Retour (Contexte, Tunnel) : la flèche ne disparaît jamais, le texte se coupe d'une ellipse. */
+.sh-retour { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); min-width: 0; max-width: 100%; color: var(--ink); font-size: 15px; }
+.sh-retour .ic { flex: none; }
+.sh-retour-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sh-retour:hover .sh-retour-t { text-decoration: underline; text-underline-offset: 6px; }
+.sh-retour-long, .sh-long { display: none; }
+.sh-contexte-t { display: inline-flex; align-items: center; gap: var(--esp-1); margin: 0; min-width: 0; white-space: nowrap; font-size: 15px; color: var(--mute); }
+.sh-contexte-t b { font-weight: 400; color: var(--ink); }
+
+/* Variante Contexte : retour | marque | outils. La marque s'efface sous 560 px (elle reste en tête du Menu). */
+.sh--contexte .sh-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+.sh--contexte .sh-marque { display: none; margin: 0; }
+/* Variante Tunnel : marque | retour | langue. */
+.sh--tunnel .sh-marque { margin-right: auto; }
+.sh--tunnel .sh-outils { gap: var(--esp-2); }
+
+@container sh (max-width: 359px) {
+  .sh-bar { gap: var(--esp-1) var(--esp-1); }
+  .sh-marque { font-size: 12px; letter-spacing: .3em; }
+  .sh-menu > summary .sh-menu-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+@container sh (min-width: 360px) { .sh-bar { --gut: 24px; } }
+@container sh (min-width: 560px) {
+  .sh--contexte .sh-bar { grid-template-columns: minmax(0, 1fr) auto minmax(max-content, 1fr); column-gap: var(--esp-3); }
+  .sh-court { display: none; } .sh-long { display: inline; }
+  .sh--contexte .sh-marque { display: inline-flex; }
+  .sh--contexte .sh-outils { justify-self: end; }
+  .sh--tunnel .sh-retour-court { display: none; }
+  .sh--tunnel .sh-retour-long { display: inline; }
+}
+/* M : deux lignes. Ligne 1 marque et outils ; ligne 2 le menu entier. */
+@container sh (min-width: 768px) {
+  .sh-bar { --gut: 40px; min-height: 72px; flex-wrap: wrap; column-gap: var(--esp-3); }
+  .sh--site .sh-bar { row-gap: 0; padding-top: var(--esp-1); }
+  .sh--site .sh-nav { display: block; order: 3; flex: 1 0 100%; margin-left: -2px; }
+  .sh--site .sh-menu { display: none; }
+  .sh-recherche { display: inline-flex; }
+  .sh-panier .sh-outil-t, .sh-panier .sh-par { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+  .sh-marque { font-size: 15px; letter-spacing: var(--marque); }
+}
+/* L : une seule ligne. */
+@container sh (min-width: 1024px) { .sh-bar { --gut: 56px; } }
+@container sh (min-width: 1280px) {
+  .sh-bar { --gut: 72px; }
+  .sh--site .sh-bar { flex-wrap: nowrap; padding-top: 0; column-gap: var(--esp-4); }
+  .sh--site .sh-nav { order: 0; flex: 0 1 auto; margin-left: 0; }
+  .sh--site .sh-marque { margin-right: auto; }
+}
+
+/* ---------- 2. Langue : un seul sélecteur, partout le même (views/langs.eta, sans drapeau : UX-F-32) ---------- */
+.lang-pick { position: relative; flex: none; }
+.lang-pick > summary { list-style: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--cible);
+  min-width: var(--cible); padding-inline: var(--esp-1); cursor: pointer; color: var(--ink); font-size: 15px; letter-spacing: .04em; }
+.lang-pick > summary::-webkit-details-marker { display: none; }
+.lang-pick > summary .ic { transition: transform .2s; }
+.lang-pick[open] > summary .ic { transform: rotate(180deg); }
+.lang-pick > summary:hover > span:first-child { text-decoration: underline; text-underline-offset: 6px; }
+.lang-pick ul { position: absolute; right: 0; top: calc(100% + 4px); z-index: 40; min-width: 192px; margin: 0; padding: var(--esp-1) 0;
+  list-style: none; background: var(--paper); border: 1px solid var(--field); box-shadow: 0 12px 32px rgba(0, 0, 0, .28); }
+.lang-pick li a { display: flex; align-items: center; gap: var(--esp-2); min-height: var(--cible); padding: 0 var(--esp-2); color: var(--ink); font-size: 16px; white-space: nowrap; }
+.lang-pick li a:hover { background: color-mix(in srgb, var(--ink) 8%, var(--paper)); }
+.lang-pick li a[aria-current] { font-weight: 500; }
+.lang-pick li a .ic { margin-left: auto; color: var(--safelight); }
+
+/* ---------- 3. Menu du téléphone : <details>, sans script ----------
+   Le mot reste « Menu » ouvert comme fermé (l'état ouvert est dit par <details> et par l'icône ✕) : la largeur ne bouge pas. */
+.sh-menu { flex: none; }
+.sh-menu > summary { list-style: none; display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); min-width: var(--cible);
+  padding: 0 12px 0 var(--esp-1); border: 1px solid var(--field); cursor: pointer; color: var(--ink); font-size: 15px; white-space: nowrap; justify-content: center; }
+.sh-menu > summary::-webkit-details-marker { display: none; }
+.sh-menu > summary:hover { border-color: var(--ink); }
+.sh-menu .sh-fermer, .sh-menu[open] .sh-ouvrir { display: none; }
+.sh-menu[open] .sh-fermer { display: inline-flex; align-items: center; gap: var(--esp-1); }
+.sh-menu .sh-ouvrir { display: inline-flex; align-items: center; gap: var(--esp-1); }
+.sh-panneau { position: absolute; left: 0; right: 0; top: 100%; z-index: 30; background: var(--paper); border-bottom: 1px solid var(--field);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, .3); padding: var(--esp-1) max(var(--gut), env(safe-area-inset-right)) var(--esp-3) max(var(--gut), env(safe-area-inset-left)); }
+.sh-panneau ul { list-style: none; margin: 0; padding: 0; }
+.sh-panneau li a { display: flex; align-items: center; gap: var(--esp-2); min-height: var(--esp-6); font-size: 18px; color: var(--ink); border-bottom: 1px solid var(--rule); }
+.sh-panneau li a[aria-current] { font-weight: 500; text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
+.sh-panneau .sh-panneau-sep { margin-top: var(--esp-2); }
+.sh-panneau .sh-panneau-marque { font-size: var(--t-petit); color: var(--mute); }
+@container sh (min-width: 560px) { .sh--contexte .sh-panneau { left: auto; width: 400px; border-left: 1px solid var(--field); } }
+
+/* ---------- 4. Pied de page : deux variantes, une classe ----------
+   .sf--complet : marque et deux groupes de liens (Le site, Tirages) ; .sf--reduit : une ligne (tunnel, galerie privée). */
+footer.sf { display: block; margin: var(--esp-12) 0 0; padding-block: var(--esp-5) calc(env(safe-area-inset-bottom, 0px) + var(--esp-6));
+  border-top: 1px solid var(--rule); color: var(--mute); font-size: var(--t-petit); }
+.sf-in { display: grid; gap: var(--esp-3) var(--esp-8); grid-template-columns: minmax(0, 1fr); }
+.sf p { margin: 0; }
+.sf-marque { color: var(--ink); font-size: var(--t-texte); }
+.sf-marque b { font-weight: 300; letter-spacing: .34em; text-transform: uppercase; font-size: var(--t-petit); }
+.sf-note { margin-top: var(--esp-1) !important; max-width: 46ch; }
+.sf-groupes { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--esp-3); }
+.sf h2 { margin: 0 0 var(--esp-1); font: 500 var(--t-meta)/1.3 var(--sans); letter-spacing: var(--capitales); text-transform: uppercase; color: var(--mute); }
+.sf ul { list-style: none; margin: 0; padding: 0; }
+.sf a { display: inline-flex; align-items: center; min-height: var(--cible); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
+.sf a:hover { text-decoration-color: var(--ink); }
+@media (min-width: 768px) {
+  .sf--complet .sf-in { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; }
+  .sf-groupes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sf a { min-height: 32px; }
+}
+footer.sf--reduit { margin-top: var(--esp-8); padding-top: var(--esp-3); }
+.sf--reduit .sf-in { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-3); }
+.sf--reduit ul { display: flex; flex-wrap: wrap; gap: 0 var(--esp-3); }
+
+/* ---------- 5. Cartel : un seul objet. Titre (Jost) puis méta « Auteur · Lieu · date » ----------
+   Règle de place : sous les horizontales et les carrés ; à côté des verticales en grand format (≥ 900 px de large).
+   En vignette : le titre sur deux lignes au plus, la méta sur une ; coupés d'une ellipse ; le texte entier reste le nom du lien. */
+.cartel { display: grid; gap: 2px; min-width: 0; margin: 0; padding-top: var(--esp-1); }
+.cartel-t { font-size: 16px; line-height: 1.35; color: var(--ink); font-weight: 400; }
+.cartel-m { font-size: var(--t-meta); line-height: 1.45; color: var(--mute); }
+.cartel--ligne .cartel-m { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cartel--ligne .cartel-t { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.cartel--grand { gap: var(--esp-demi); padding-top: var(--esp-2); }
+.cartel--grand .cartel-t { font-size: var(--t-titre-3); line-height: 1.3; }
+.cartel--grand .cartel-m { font-size: var(--t-petit); }
+.cartel--grand .cartel-l { margin: var(--esp-1) 0 0; max-width: 60ch; font-size: var(--t-texte); line-height: 1.6; color: var(--prose); }
+.photo { margin: 0; min-width: 0; }
+.photo img { display: block; width: 100%; height: auto; background: var(--frame); }
+@media (min-width: 900px) {
+  .photo--cote { display: grid; grid-template-columns: auto minmax(220px, 300px); align-items: end; gap: var(--esp-4); }
+  .photo--cote img { width: auto; max-height: var(--photo-h, 80vh); }
+  .photo--cote .cartel { padding-top: 0; }
+}
+
+/* ---------- 6. Vignettes en rangées justifiées : le format de chaque photo, à hauteur commune ----------
+   Ni fond gris, ni cercle, ni recadrage. Chaque <li> porte son rapport largeur/hauteur : style="--r: 1.5".
+   Hauteur visée --h : 240 px au bureau, 112 px au téléphone (deux photos par rangée). */
+.rangees { --h: 112px; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--esp-3) var(--esp-1); }
+.rangees::after { content: ''; flex: 999999 1 0; }
+.rangees > li { flex: var(--r) 1 calc(var(--r) * var(--h)); min-width: 0; }
+.rangees img { display: block; width: 100%; height: auto; aspect-ratio: var(--r); background: var(--frame); }
+@media (min-width: 768px) { .rangees { --h: 200px; column-gap: var(--esp-2); } }
+@media (min-width: 1280px) { .rangees { --h: 240px; } }
+.vignette { display: block; color: inherit; }
+.vignette:hover .cartel-t { text-decoration: underline; text-underline-offset: 4px; }
+.vignette:focus-visible { outline-offset: 4px; }
+
+/* ---------- 7. Diptyque : deux regards, même hauteur, un titre commun ---------- */
+.diptyque { margin: 0; display: grid; gap: var(--esp-2); }
+.diptyque-t { display: grid; gap: var(--esp-demi); }
+.diptyque-t h2, .diptyque-t h3, .diptyque-t p { margin: 0; }
+.diptyque-t .titre { font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); }
+.diptyque-paire { display: flex; flex-wrap: wrap; gap: var(--esp-3) var(--esp-4); }
+.diptyque-paire > .photo { flex: var(--r) 1 calc(var(--r) * 160px); }
+.diptyque-paire img { aspect-ratio: var(--r); }
+
+/* ---------- 8. Boutons : trois niveaux ----------
+   .btn          plein : l'action principale, une seule par écran
+   .btn--filet   filet : action secondaire
+   .lien         lien souligné : action tertiaire, ou navigation
+   Casse de phrase, Jost 500 15 px, 48 px de haut, angles vifs. Un bouton dit ce qu'il fait (verbe + objet). */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--esp-1); min-height: var(--esp-6); padding: 0 var(--esp-3);
+  border: 1px solid var(--ink); border-radius: var(--r-site); background: var(--ink); color: var(--paper);
+  font: 500 15px/1.2 var(--sans); letter-spacing: .01em; text-align: center; text-decoration: none; cursor: pointer; }
+.btn:hover { background: color-mix(in srgb, var(--ink) 84%, var(--paper)); }
+.btn--filet { background: transparent; color: var(--ink); }
+.btn--filet:hover { background: color-mix(in srgb, var(--ink) 10%, var(--paper)); }
+.btn--large { width: 100%; }
+/* Indisponible : jamais grisé sans raison ; la raison est écrite à côté et reliée (aria-describedby). */
+.btn[aria-disabled="true"] { background: transparent; color: var(--mute); border-color: var(--field); cursor: not-allowed; }
+a.lien, button.lien { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); padding: 0; background: none; border: 0;
+  color: var(--ink); font: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; cursor: pointer; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--esp-2) var(--esp-3); }
+
+/* ---------- 9. Bascules : J'aime (cœur, public) et Favori (étoile, galerie privée) ----------
+   <button aria-pressed>, dans un formulaire POST : marche sans script. Libellé fixe ; l'état se lit à l'icône pleine,
+   au fond encre et à aria-pressed. Le compteur de J'aime ne s'affiche qu'à partir de 1 (UX-F-39). */
+.bascule { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); padding: 0 var(--esp-2) 0 12px;
+  border: 1px solid var(--field); border-radius: var(--r-site); background: transparent; color: var(--ink); font: 400 15px/1 var(--sans); cursor: pointer; }
+.bascule:hover { border-color: var(--ink); }
+.bascule .ic-plein { display: none; }
+.bascule[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.bascule[aria-pressed="true"] .ic-plein { display: block; }
+.bascule[aria-pressed="true"] .ic-vide { display: none; }
+.bascule-n { font-variant-numeric: tabular-nums; color: inherit; opacity: .85; }
+.bascule-form { display: inline; margin: 0; }
+
+/* ---------- 10. Formulaires ----------
+   Une phrase en tête : « Tous les champs sont obligatoires, sauf mention « facultatif ». »
+   Ordre : libellé · aide · champ · erreur (sous le champ ; sous la légende pour un groupe).
+   Erreur : ⚠ + « Erreur : » en gras + une phrase qui dit comment corriger ; bord de 2 px ; saisie gardée.
+   Résumé en tête au-delà d'un point : « 2 points à corriger », liens vers les champs, focus posé dessus (autofocus). */
+.form { display: grid; gap: var(--esp-4); max-width: 640px; }
+.form-oblig { margin: 0; color: var(--mute); font-size: var(--t-petit); }
+.champ { display: grid; gap: var(--esp-1); min-width: 0; }
+.champ > label, .groupe > legend { font-weight: 500; font-size: var(--t-texte); color: var(--ink); }
+.facultatif { font-weight: 400; color: var(--mute); }
+.champ-aide { margin: 0; color: var(--mute); font-size: var(--t-meta); line-height: 1.5; }
+.champ input:not([type="radio"]):not([type="checkbox"]), .champ select, .champ textarea {
+  width: 100%; min-height: var(--esp-6); padding: 11px 14px; border: 1px solid var(--field); border-radius: var(--r-site);
+  background: var(--paper); color: var(--ink); font: 400 var(--t-texte)/1.4 var(--sans); }
+.champ textarea { min-height: 128px; resize: vertical; }
+.champ select { appearance: none; padding-right: 40px; background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%), linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position: calc(100% - 21px) 50%, calc(100% - 15px) 50%; background-size: 6px 6px; background-repeat: no-repeat; }
+.champ input:focus, .champ select:focus, .champ textarea:focus { outline: var(--focus-l) solid var(--ink); outline-offset: 0; border-color: var(--ink); }
+.champ--court input { max-width: 12ch; }
+.champ [aria-invalid="true"] { border: 2px solid var(--error) !important; padding: 10px 13px; }
+.champ-err { display: flex; align-items: flex-start; gap: var(--esp-1); margin: 0; color: var(--error); font-size: var(--t-petit); line-height: 1.5; }
+.champ-err .ic { margin-top: 2px; }
+.champ-err b { font-weight: 500; }
+.groupe { display: grid; gap: var(--esp-demi); margin: 0; padding: 0; border: 0; min-width: 0; }
+.groupe > legend { padding: 0; margin-bottom: var(--esp-1); }
+.groupe > .champ-aide, .groupe > .champ-err { margin-bottom: var(--esp-1); }
+/* Cases et boutons radio dessinés : vides et cerclés à 3:1, pleins quand cochés, dans les trois thèmes. */
+.choix { display: flex; align-items: flex-start; gap: 12px; min-height: var(--cible); padding-block: 10px; cursor: pointer; font-size: var(--t-texte); line-height: 1.5; }
+.choix input { appearance: none; -webkit-appearance: none; flex: none; display: grid; place-content: center; width: 22px; height: 22px; margin: 1px 0 0;
+  border: 2px solid var(--field); border-radius: 50%; background: var(--paper); cursor: pointer; }
+.choix input[type="checkbox"] { border-radius: 0; }
+.choix input::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); transform: scale(0); }
+.choix input[type="checkbox"]::before { width: 12px; height: 12px; border-radius: 0; background: var(--paper); clip-path: polygon(14% 52%, 0 66%, 38% 100%, 100% 22%, 86% 8%, 38% 72%); }
+.choix input:checked { border-color: var(--ink); }
+.choix input:checked::before { transform: scale(1); }
+.choix input[type="checkbox"]:checked { background: var(--ink); }
+.choix input:focus-visible { outline: var(--focus-l) solid var(--ink); outline-offset: 2px; }
+.choix:hover input { border-color: var(--ink); }
+.choix-d { display: block; color: var(--mute); font-size: var(--t-meta); }
+.groupe--erreur .choix input { border-color: var(--error); }
+@media (forced-colors: active) { .choix input::before { background: CanvasText; } .choix input[type="checkbox"]:checked { background: Highlight; } }
+/* Résumé des erreurs */
+.resume { display: grid; gap: var(--esp-1); padding: var(--esp-2) 0 var(--esp-2) var(--esp-3); border-left: 3px solid var(--error); }
+.resume:focus-visible { outline-offset: 4px; }
+.resume-t { display: flex; align-items: center; gap: var(--esp-1); margin: 0; font: 500 var(--t-titre-3)/1.3 var(--sans); color: var(--ink); }
+.resume-t .ic { color: var(--error); }
+.resume ul { margin: 0; padding-left: 20px; }
+.resume a { display: block; padding-block: 10px; color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+
+/* ---------- 11. Prix ----------
+   Vitrine (pages Tirages) : « 290 € ». Panier, commande, facture : « 290,00 € ». Espace insécable avant €.
+   Une seule mention, une fois par page qui affiche un prix : « TVA non applicable, art. 293 B du CGI ». */
+.prix { font: 400 var(--t-titre-3)/1.2 var(--sans); font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+.prix--detail { font-size: var(--t-texte); }
+.prix--total { font-size: var(--t-titre-3); font-weight: 500; }
+.tva { margin: 0; font-size: var(--t-meta); color: var(--mute); }
+.montants { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--esp-1) var(--esp-3); margin: 0; }
+.montants dt { color: var(--prose); }
+.montants dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.montants .total { padding-top: var(--esp-1); border-top: 1px solid var(--rule); font-weight: 500; color: var(--ink); }
+
+/* ---------- 12. Étapes du tunnel ----------
+   Quatre étapes nommées : Panier · Coordonnées · Paiement · Confirmation. Fait : ✓ et lien ; en cours : encre,
+   500, soulignée de sable, aria-current="step" ; à venir : gris. Étroit : « Étape 2 sur 4 · Coordonnées ». */
+.etapes { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--esp-1) var(--esp-4); font-size: var(--t-petit); }
+.etapes li { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); color: var(--mute); }
+.etapes .n { font-variant-numeric: tabular-nums; }
+.etapes li.fait { color: var(--ink); }
+.etapes li.fait a { display: inline-flex; align-items: center; min-height: var(--cible); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.etapes li[aria-current] { color: var(--ink); font-weight: 500; }
+.etapes li[aria-current] .etapes-nom { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
+.etapes-court { display: none; }
+/* L'ol est son propre conteneur : sous 600 px de large, seule l'étape en cours reste, précédée de « Étape 2 sur 4 · ». */
+.etapes { container-type: inline-size; }
+@container (max-width: 599px) {
+  .etapes li:not([aria-current]) { display: none; }
+  .etapes-court { display: inline; font-weight: 400; color: var(--mute); }
+  .etapes li[aria-current] .n { display: none; }
+}
+
+/* ---------- 13. Messages : succès, erreur, information ----------
+   Un filet de couleur à gauche, une icône, un texte qui commence par ce qui vient de se passer. Pas d'aplat. */
+.msg { display: flex; align-items: flex-start; gap: 12px; padding: 12px var(--esp-2); border-left: 3px solid var(--mute); color: var(--ink); }
+.msg p { margin: 0; line-height: 1.5; }
+.msg .ic { margin-top: 3px; color: var(--mute); }
+.msg b { font-weight: 500; }
+.msg a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.msg--ok { border-left-color: var(--ok); } .msg--ok .ic { color: var(--ok); }
+.msg--erreur { border-left-color: var(--error); } .msg--erreur .ic { color: var(--error); }
+
+/* ---------- 14. Fil d'Ariane, étiquettes, données ---------- */
+.ariane ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; font-size: var(--t-petit); color: var(--mute); }
+.ariane li { display: inline-flex; align-items: center; }
+.ariane li + li::before { content: '/' / ''; padding-inline: var(--esp-1); color: var(--field); }
+.ariane a { display: inline-flex; align-items: center; min-height: var(--cible); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
+.ariane [aria-current] { color: var(--mute); }
+/* Étiquette en capitales espacées : trois mots au plus (nom de série, rubrique). */
+.etiquette { margin: 0; font: 500 var(--t-meta)/1.3 var(--sans); letter-spacing: var(--capitales); text-transform: uppercase; color: var(--mute); }
+/* Données : la seule place de Plex Mono. Références, numéros d'exemplaire, poids, EXIF. Jamais une phrase. */
+.donnee { font: 400 var(--t-meta)/1.45 var(--mono); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+/* Titres de page */
+.titre-page { margin: 0; font: 300 var(--t-titre-1)/var(--i-serre) var(--sans); letter-spacing: -.005em; text-wrap: balance; }
+:root:not(.theme-nicephos) .titre-page, .theme-atelier .titre-page { font-family: var(--serif); font-style: var(--display-style); font-weight: 400; }
+.chapo { margin: 0; max-width: 60ch; font-size: var(--t-prose); line-height: 1.55; color: var(--prose); text-wrap: pretty; }
+
+@media print {
+  .sh-outils, .sh-nav, .skip, .bascule, .sh-menu { display: none !important; }
+  .mode-nuit, .theme-nicephos.mode-nuit { --paper: #fff; --ink: #111; --mute: #555; --prose: #222; }
+}

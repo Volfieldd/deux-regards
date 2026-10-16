@@ -1,0 +1,167 @@
+/* =====================================================================================================
+   Administration : composants communs (direction artistique MQ-00). Chargé après admin.css (copie de main)
+   et tokens.css. N'ajoute que ce qui manque à admin.css, avec ses jetons ; ne redessine pas ce qui marche.
+   1 barre latérale unique · 2 en-tête de page type (+ barre basse au téléphone) · 3 trois boutons
+   4 pastille d'état et tableau des états · 5 enregistrement · 6 message d'action · 7 formulaire type
+   8 dialogue de confirmation
+   ===================================================================================================== */
+
+/* ---------- 1. Barre latérale unique ----------
+   Structure de views/admin/layout.eta : une <nav> par groupe, nommée par son intitulé (aria-labelledby).
+   Quatre groupes nommés par tâche (UX-A-11) : Photos · Personnes · Publier · Équipe ; « Aujourd'hui » en tête.
+   Places fixes : Signalements (Personnes), Réglages et Aide (pied), Voir le site, langue, thème, compte (pied).
+   Lignes de 32 px au bureau, 44 px au toucher. Tient dans 900 px avec Carnets, Galeries privées et Boutique.
+   Les séries sont repliées sous « Séries » (<details>) : la liste reste une cible de glisser-déposer. */
+.admin .side { padding: 16px 12px 12px; }
+.admin .word { min-height: 40px; padding: 0 10px 8px; }
+.admin .cmdk { height: 32px; margin-bottom: 8px; font-size: 13px; }
+.admin .cmdk kbd { font-size: 12px; }
+@media (max-width: 720px), (pointer: coarse) { .admin .word { min-height: 44px; } .admin .cmdk { height: 44px; } .admin .cmdk kbd { display: none; } }
+.admin .nav { gap: 0; }
+.admin .nav a { min-height: var(--ligne-menu); gap: 10px; font-size: 14px; }
+.admin .nav .ic { width: 18px; height: 18px; }
+.admin .grp { margin: 0; padding: 8px 10px 2px; min-height: 24px; font-size: 12px; line-height: 14px; letter-spacing: .14em; }
+.admin .nav-badge { font-size: 12px; }
+/* Compteur de l'interface : pastille pleine, ronde, ambre, sans cercle noir. (Les repères de maquette sont carrés et magenta.) */
+.admin .nav-badge.urgent { background: var(--danger); color: var(--on-danger); }
+/* Séries : le lien mène à la page Séries ; le bouton replie la liste (fermée par défaut). */
+.admin .nav-ser { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.admin .ser-plier > summary { list-style: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: var(--ligne-menu);
+  min-height: var(--ligne-menu); padding: 0 6px; border-radius: 8px; color: var(--ink3); font-size: 12px; cursor: pointer; }
+.admin .ser-plier > summary::-webkit-details-marker { display: none; }
+.admin .ser-plier > summary:hover { background: var(--s2); color: var(--ink); }
+.admin .ser-plier > summary .ic { transition: transform .15s; }
+.admin .ser-plier[open] > summary .ic { transform: rotate(90deg); }
+.admin .nav-ser > .ser-plier[open] { display: contents; }
+.admin .nav-ser .ser { grid-column: 1 / -1; padding-left: 28px; }
+.admin .ser a { min-height: var(--ligne-menu); }
+/* Pied : Réglages et Aide, puis Voir le site et la langue, puis le compte, le thème et la déconnexion. */
+.admin .side .foot { padding-top: 8px; gap: 4px; }
+.admin .pied-liens { display: grid; grid-template-columns: 1fr 1fr; gap: 0 4px; }
+.admin .pied-liens a { display: flex; align-items: center; gap: 8px; min-height: var(--ligne-menu); padding: 0 10px; border-radius: 8px; color: var(--ink2); font-size: 13px; white-space: nowrap; }
+.admin .pied-liens a:hover { background: var(--s2); color: var(--ink); }
+.admin .pied-liens a[aria-current] { background: var(--s3); color: var(--ink); font-weight: 500; }
+.admin .pied-liens .admin-lang > summary { display: flex; align-items: center; gap: 8px; min-height: var(--ligne-menu); padding: 0 10px; border-radius: 8px; color: var(--ink2); font-size: 13px; cursor: pointer; list-style: none; }
+.admin .pied-liens .admin-lang > summary::-webkit-details-marker { display: none; }
+.admin .pied-liens .admin-lang > summary:hover { background: var(--s2); color: var(--ink); }
+.admin .pied-liens .admin-lang { position: relative; margin: 0; }
+.admin .pied-liens .admin-lang ul { position: absolute; bottom: calc(100% + 4px); left: 0; z-index: 30; min-width: 180px; margin: 0; padding: 6px; list-style: none; display: grid; gap: 0;
+  background: var(--s1); border-radius: 12px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+.admin .pied-liens .admin-lang li button, .admin .pied-liens .admin-lang li a { display: flex; width: 100%; align-items: center; min-height: var(--ligne-menu); padding: 0 10px; border-radius: 8px; color: var(--ink); text-align: left; }
+.admin .pied-liens .admin-lang li [aria-current] { font-weight: 500; }
+.admin .me { min-height: 40px; }
+.admin .me .who small { font-size: 12px; }
+
+/* ---------- 2. En-tête de page type ----------
+   Retour (« ← Photothèque » sur une fiche) · H1 Jost 300 · pastille d'état · une ligne de méta (dont l'enregistrement)
+   · actions à droite, le seul bouton plein en dernier. Au téléphone, les actions passent dans une barre basse,
+   au-dessus des onglets : l'action principale y prend la place, les autres vont dans « Plus ». */
+.ep { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "retour retour" "titre actions" "meta actions"; gap: 4px 24px; align-items: end; margin: 0 0 24px; }
+.ep-retour { grid-area: retour; display: inline-flex; align-items: center; gap: 6px; justify-self: start; min-height: 32px; color: var(--ink2); font-size: 13px; }
+.ep-retour:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .ep-retour { min-height: 44px; } }
+@media (min-width: 721px) and (pointer: fine) { .admin .help-link a { display: inline-flex; align-items: center; min-height: 24px; } }
+.ep-titre { grid-area: titre; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; min-width: 0; }
+.main .ep h1 { margin: 0; font-size: var(--at-h1); font-weight: 300; line-height: 1.12; overflow-wrap: anywhere; }
+.ep-meta { grid-area: meta; margin: 0; color: var(--ink3); font-size: 13px; }
+.ep-meta { display: flex; flex-wrap: wrap; align-items: center; row-gap: 2px; }
+.ep-meta > * { display: inline-flex; align-items: center; }
+.ep-meta > * + *::before { content: '·'; margin: 0 8px; color: var(--ink3); }
+.ep-actions { grid-area: actions; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; align-self: end; }
+@media (max-width: 720px) {
+  .ep { grid-template-columns: minmax(0, 1fr); grid-template-areas: "retour" "titre" "meta"; }
+  .main .ep h1 { font-size: 28px; }
+  .ep-actions { position: fixed; left: 0; right: 0; bottom: var(--barre-basse); z-index: 39; justify-content: stretch; flex-wrap: nowrap;
+    padding: 10px 16px; background: var(--s1); border-top: 1px solid var(--line2); }
+  .ep-actions > * { flex: 1 1 0; }
+  .ep-actions .ep-secondaire { display: none; }
+  .ep-actions .menu { flex: 0 0 auto; }
+}
+@media (min-width: 721px) { .ep-actions .ep-plus { display: none; } }
+
+/* ---------- 3. Trois boutons : plein (une fois par écran, toujours le dernier), contour, danger ----------
+   Danger : en contour dans les pages ; plein seulement pour l'action finale d'un dialogue de confirmation.
+   Plus de bouton gris plein (.btn.sec). 40 px au bureau, 44 au toucher. */
+.admin .btn { min-height: 40px; padding: 0 16px; font-size: 14px; border-radius: var(--r-admin); }
+.admin .btn.danger-c { background: transparent; color: var(--danger); box-shadow: inset 0 0 0 1px currentColor; filter: none; }
+.admin .btn.danger-c:hover { background: var(--danger-soft); }
+.admin .btn.danger { background: var(--danger); color: var(--on-danger); }
+.admin .btn .ic { width: 16px; height: 16px; }
+@media (max-width: 720px), (pointer: coarse) { .admin .btn { min-height: 44px; } }
+
+/* ---------- 4. Pastille d'état : symbole + mot, couleur fixe par symbole ----------
+   ○ à faire · ◐ en cours, attend quelqu'un · ● abouti · ▲ demande votre attention · ✕ arrêté. */
+.etat { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 2px 10px 2px 8px; border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--line2); font-size: 13px; font-weight: 500; line-height: 1.2; white-space: nowrap; color: var(--ink2); }
+.etat .ic { width: 12px; height: 12px; }
+.etat--afaire { color: var(--st-afaire); }
+.etat--encours { color: var(--st-encours); }
+.etat--abouti { color: var(--st-abouti); }
+.etat--attention { color: var(--st-attention); }
+.etat--arret { color: var(--st-arret); }
+/* Légende sous une liste : une ligne, les symboles et les mots du domaine. */
+.etats-legende { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 12px 0 0; padding: 0; list-style: none; color: var(--ink3); font-size: 12px; }
+.etats-legende li { display: inline-flex; align-items: center; gap: 6px; }
+/* Tableau des états (référence, page Aide) */
+.etats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.etats-table th, .etats-table td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.etats-table thead th { color: var(--ink2); font-weight: 500; }
+.etats-table tbody th { color: var(--ink); font-weight: 500; white-space: nowrap; }
+
+/* ---------- 5. Enregistrement : une règle, un témoin ----------
+   Ce qui se défait s'enregistre seul, champ par champ, à la sortie du champ ; le témoin le dit dans la méta
+   de l'en-tête (role="status") et le message d'action propose « Défaire ». Ce qui a un effet public, légal ou
+   financier passe par un bouton qui nomme cet effet (Publier, Mettre en ligne, Rembourser 290,00 €). */
+.enreg { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; color: var(--ink3); }
+a.enreg { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line2); }
+@media (max-width: 720px), (pointer: coarse) { a.enreg { min-height: 44px; } }
+.enreg .ic { width: 14px; height: 14px; }
+.enreg--ok { color: var(--ink2); }
+.enreg--ok .ic { color: var(--ok); }
+.enreg--attente .ic { color: var(--warn); }
+
+/* ---------- 6. Message d'action (toast) : en bas au centre, inversé, une seule forme ----------
+   « [Objet] [verbe]. · Défaire » ; barre de temps de 10 s, en pause au survol et au focus ; 44 px au toucher.
+   Variante d'erreur : role="alert", fond danger, sans minuteur (elle reste jusqu'à « Fermer »). */
+.admin .toast { min-height: 48px; padding: 6px 6px 6px 16px; gap: 12px; border-radius: 12px; font-size: 14px; overflow: hidden; }
+.admin .toast p { margin: 0; }
+.admin .toast b { font-weight: 500; }
+/* Variante d'erreur : texte --on-danger (main écrit #fff sur --danger, 3,0:1 en sombre ; ici 6,3:1 et 5,8:1). */
+.admin .toast.error { color: var(--on-danger); }
+.admin .toast button { min-height: 36px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 500; }
+.admin .toast .toast-temps { position: absolute; left: 0; bottom: 0; height: 3px; width: var(--reste, 100%); background: var(--accent); }
+.admin .toast { position: fixed; }
+.admin .toast:hover .toast-temps, .admin .toast:focus-within .toast-temps { animation-play-state: paused; }
+@media (max-width: 720px) {
+  .admin .toast { bottom: calc(var(--barre-basse) + 12px); } .admin .toast button { min-height: 44px; }
+  /* Au-dessus de la barre basse d'actions quand la page en a une. */
+  .admin:has(.ep-actions) .toast { bottom: calc(var(--barre-basse) + 76px); }
+}
+
+/* ---------- 7. Formulaire type ----------
+   Libellé au-dessus · aide entre libellé et champ · « (facultatif) » sur les seuls champs facultatifs
+   · erreur sous le champ : ⚠ « Erreur : » + comment corriger ; résumé en tête au-delà de trois champs. */
+.champ-a { display: grid; gap: 6px; min-width: 0; }
+.champ-a > label, .champ-a > .lb { display: block; color: var(--ink); font-size: 13px; font-weight: 500; }
+.champ-a .facultatif { color: var(--ink3); font-weight: 400; }
+.champ-a .aide { margin: 0; color: var(--ink3); font-size: 12px; line-height: 1.45; }
+.champ-a .err { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--danger); font-size: 13px; line-height: 1.45; }
+.champ-a .err .ic { width: 14px; height: 14px; margin-top: 2px; }
+.champ-a .err b { font-weight: 600; }
+.champ-a [aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--danger) !important; }
+.resume-a { display: grid; gap: 6px; margin: 0 0 18px; padding: 12px 16px; border-radius: var(--r); background: var(--danger-soft); box-shadow: inset 3px 0 0 var(--danger); }
+.resume-a h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px; font-weight: 500; }
+.resume-a h2 .ic { color: var(--danger); }
+.resume-a ul { margin: 0; padding-left: 20px; }
+.resume-a a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- 8. Dialogue de confirmation ----------
+   Titre = la question avec l'objet ; une phrase qui dit les conséquences ; [Annuler] puis [action qui répète
+   l'objet] ; focus sur Annuler quand l'action ne se défait pas ; Échap = Annuler ; le focus revient au déclencheur. */
+.confirm { width: min(560px, calc(100vw - 32px)); padding: 24px; border: 0; border-radius: var(--r-admin-panneau); background: var(--s1); color: var(--ink);
+  box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+.confirm::backdrop { background: var(--scrim); }
+.confirm h2 { margin: 0 0 8px; font-size: 20px; font-weight: 500; line-height: 1.3; }
+.confirm p { margin: 0 0 12px; color: var(--ink2); }
+.confirm .actions { justify-content: flex-end; margin-top: 20px; }
+@media (max-width: 720px) { .confirm .actions { flex-direction: column; align-items: stretch; } }
