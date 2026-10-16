@@ -14,6 +14,11 @@
    par format (§ 6) ; cibles de 44 px (fil d'Ariane, points du diaporama, titres des lignes du panier, lien de la sélection) ;
    rien sous 13 px (marque à 320 px, signature) ; commandes qui exigent un script : .js-seul (§ 0) ; insécables (§ 0) ;
    résumé d'erreurs en <section> titrée (§ 10) ; en-tête Contexte : 16 px entre le titre et la langue (§ 1).
+   Passe 3 (16 oct., composants versés depuis les maquettes) : titre de l'en-tête Contexte sur deux lignes (§ 1) ; cartel du
+   récit à deux voix (§ 5) ; sizes au téléphone selon la place réelle (§ 6, outils/sizes-tel.py) ; .rangees--par-deux (§ 18) ;
+   .billet-e--cote en liste, adresses imprimées en 10 pt (§ 21) ; .choix-sous (§ 22) ; étoile de .favorisable sous le cartel
+   (§ 23) ; grille du contact (§ 24) ; mur sans aplat et réduit au petit format, .p-haut, vignettes de .ligne, .rc-l et
+   .commandes qui suivent le format (§ 25) ; aperçu d'impression à l'échelle 1 et .f-date (§ 26).
    ===================================================================================================== */
 
 /* ---------- 0. Socle : corrections de lisibilité (UX-F-29) et de comportement (UX-F-34) ---------- */
@@ -105,7 +110,7 @@ button.sh-outil { border: 0; background: none; font: inherit; font-size: 15px; c
 .sh-retour-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sh-retour:hover .sh-retour-t { text-decoration: underline; text-underline-offset: 6px; }
 .sh-retour-long, .sh-long { display: none; }
-.sh-contexte-t { display: inline-flex; align-items: center; gap: var(--esp-1); margin: 0; min-width: 0; white-space: nowrap; font-size: 15px; color: var(--mute); }
+.sh-contexte-t { display: inline-flex; align-items: center; gap: var(--esp-1); margin: 0; min-width: 0; font-size: 15px; line-height: 1.2; color: var(--mute); }
 .sh-contexte-t b { font-weight: 400; color: var(--ink); }
 
 /* Variante Contexte : retour | marque | outils. La marque s'efface sous 560 px (elle reste en tête du Menu). */
@@ -126,9 +131,11 @@ button.sh-outil { border: 0; background: none; font: inherit; font-size: 15px; c
   .sh-marque { font-size: 13px; letter-spacing: .26em; }
   .sh-menu > summary .sh-menu-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
-/* Contexte : 16 px au moins entre le titre (« Private Galerie ») et la langue, qui ne se lisent jamais comme un seul libellé. */
+/* Contexte : 16 px au moins entre le titre (« Private Galerie ») et la langue, qui ne se lisent jamais comme un seul libellé.
+   Quand la place manque (320 px, allemand, cadre étroit), le titre passe sur deux lignes au lieu d'être coupé d'une ellipse
+   (« Private G… ») : rien n'est caché, rien n'est coupé (passe 3, d'après MQ-17). */
 .sh--contexte .sh-bar { column-gap: var(--esp-2); }
-.sh-contexte-t > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.sh-contexte-t > span { min-width: 0; overflow-wrap: normal; }
 @container sh (min-width: 360px) { .sh-bar { --gut: 24px; } }
 @container sh (min-width: 560px) {
   .sh--contexte .sh-bar { grid-template-columns: minmax(0, 1fr) auto minmax(max-content, 1fr); column-gap: var(--esp-3); }
@@ -233,7 +240,8 @@ footer.sf--reduit { margin-top: var(--esp-8); padding-top: var(--esp-3); }
    (« Julien&nbsp;· Lisbonne&nbsp;· mai&nbsp;2024 ») ; une ligne ne commence jamais par « · » et une date ne se coupe pas.
    Variantes de méta, déclarées : vignette « Auteur · Lieu · date » ; « À proximité » « 600 m · Alfama » (la distance
    d'abord, c'est la raison d'être de la liste) ; récit d'un billet « Alfama, Lisbonne · sam. 10 oct., 7 h 42 » (lieu précis
-   et heure ; l'auteur est dit une fois par le billet). */
+   et heure ; l'auteur est dit une fois par le billet) ; récit d'un billet à deux voix (Sébastien et Julien signent ensemble) :
+   l'auteur reste en tête, « Julien · Alfama, Lisbonne · sam. 10 oct., 7 h 42 », comme dans la visionneuse compacte (§ 20). */
 .cartel { display: grid; gap: 2px; min-width: 0; margin: 0; padding-top: var(--esp-1); }
 .cartel-t { font-size: 16px; line-height: 1.35; color: var(--ink); font-weight: 400; }
 .cartel-m { font-size: var(--t-meta); line-height: 1.45; color: var(--mute); }
@@ -261,12 +269,23 @@ footer.sf--reduit { margin-top: var(--esp-8); padding-top: var(--esp-3); }
      horizontale (--r: 1.5)   sizes="(min-width: 1280px) 470px, (min-width: 768px) 390px, calc(100vw - 48px)"
      verticale (--r: 0.6667)  sizes="(min-width: 1280px) 210px, (min-width: 768px) 175px, calc(50vw - 28px)"
      carrée (--r: 1)          sizes="(min-width: 1280px) 312px, (min-width: 768px) 260px, calc(60vw - 30px)"
-   (largeur de base r × h, plus 30 % d'étirement au plus au bureau ; au téléphone, la place réelle : une horizontale seule ou
+   (largeur de base r × h, plus 30 % d'étirement au plus au bureau ; sur tablette, la place d'une photo
+   varie du simple au double selon l'écran et la rangée : le sizes en prend le haut, pour n'être jamais trop petit (un cran de
+   trop, au plus, sur un écran de densité 2) ; l'étirée, qui tient sur une ligne, à 210 px (passe 3 : 260 px chargeait un cran
+   de trop) ; au téléphone, la place réelle : une horizontale seule ou
    aux deux tiers, une verticale à la moitié). Variante étirée (.rangees--etiree, h 140/180) : horizontale
-   "(min-width: 1280px) 330px, (min-width: 768px) 260px, calc(100vw - 48px)", verticale "(min-width: 1280px) 150px,
+   "(min-width: 1280px) 330px, (min-width: 768px) 210px, calc(100vw - 48px)", verticale "(min-width: 1280px) 150px,
    (min-width: 768px) 120px, calc(50vw - 28px)". Résultat : au bureau (densité 1), une horizontale prend le fichier de 480 px,
    une verticale celui de 480/ (320 px de large) ; sur un Pixel 7 (densité 2,6), une verticale de 178 px prend le 600 px de
    large et une horizontale en pleine largeur le 900 px : chaque image est à la taille où elle s'affiche, ni plus ni moins.
+   Au téléphone (< 768 px), la dernière partie du sizes est la PLACE RÉELLE de la photo dans sa rangée. La rangée y a pour
+   hauteur 40 % de sa largeur : sa composition ne dépend pas de l'écran, on la calcule une fois (outils/sizes-tel.py, d'après
+   le générateur de MQ-01 à MQ-04) :
+     horizontale seule, étirée          calc(100vw - 48px)      deux verticales           calc(50vw - 28px)
+     horizontale à côté d'une verticale calc(69.2vw - 39px)     verticale à côté d'une H  calc(30.8vw - 17px)
+     dernière rangée, non étirée : horizontale calc(60vw - 29px), verticale calc(26.7vw - 13px)
+   (les deux valeurs de la règle ci-dessus, calc(100vw - 48px) et calc(50vw - 28px), sont les cas les plus larges : à défaut
+   de calcul, elles chargent au plus un cran de trop, jamais trop petit).
    Hors des rangées, même principe : srcset partout (une vignette de panier de 64 à 108 px : 160/ et 480/), sizes = la
    largeur réelle (diptyque : (largeur du bloc − écart) × r / somme des r). */
 .rangees { --h: 112px; container-type: inline-size; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--esp-3) var(--esp-1); }
@@ -287,7 +306,9 @@ footer.sf--reduit { margin-top: var(--esp-8); padding-top: var(--esp-3); }
 .diptyque-t h2, .diptyque-t h3, .diptyque-t p { margin: 0; }
 .diptyque-t .titre { font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); }
 .diptyque-paire { display: flex; flex-wrap: wrap; gap: var(--esp-3) var(--esp-4); }
-.diptyque-paire > .photo { flex: var(--r) 1 calc(var(--r) * 160px); }
+/* Côte à côte dès que deux horizontales de 210 px tiennent (bloc de 452 px et plus), l'une sous l'autre en dessous (téléphone) ;
+   passe 3 : la base de 240 px empilait le diptyque de l'accueil à 1 024 px, dans sa colonne de 495 px. */
+.diptyque-paire > .photo { flex: var(--r) 1 calc(var(--r) * 140px); }
 .diptyque-paire img { aspect-ratio: var(--r); }
 
 /* ---------- 8. Boutons : trois niveaux ----------
@@ -518,8 +539,17 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
    .diptyque--rangee : dans la Galerie, le diptyque prend toute une rangée, à la place de sa première photo. */
 .rangees--etiree { --h: 112px; }
 @supports (width: 1cqi) { @media (max-width: 767px) { .rangees--etiree { --h: 40cqi; } } }
-@media (min-width: 768px) { .rangees--etiree { --h: 140px; } .rangees--etiree::after { content: none; } }
+/* Au-delà du téléphone, une rangée étirée tient sur UNE ligne : si ses photos ne tiennent pas à la hauteur visée, elles
+   rapetissent ensemble (même hauteur, chacune à son format) au lieu de laisser la dernière seule sur une ligne, étirée sur toute
+   la largeur (passe 3 : « Voyage » à 912 px à 1 024 px dans l'accueil, « À proximité » sur deux lignes à 820 px). */
+@media (min-width: 768px) { .rangees--etiree { --h: 140px; flex-wrap: nowrap; } .rangees--etiree::after { content: none; } }
 @media (min-width: 1280px) { .rangees--etiree { --h: 180px; } }
+/* .rangees--par-deux : une rangée étirée de quatre horizontales (« Les autres tirages de… », MQ-13). Sur tablette (768 à
+   1 023 px), quatre ne tiennent pas sur une ligne : deux par rangée, plutôt qu'une dernière photo seule étirée sur toute la
+   largeur ; au téléphone, une par rangée, la dernière aussi. sizes : "(min-width: 1280px) 330px, (min-width: 1024px) 260px,
+   (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" (passe 3). */
+@media (max-width: 767px) { .rangees--par-deux::after { content: none; } }
+@media (min-width: 768px) and (max-width: 1023px) { .rangees--par-deux { flex-wrap: wrap; } .rangees--par-deux > li { flex: 1 1 calc(50% - var(--esp-2)); } }
 .diptyque--rangee { display: block; }
 .diptyque--rangee .diptyque-paire { flex-wrap: nowrap; gap: var(--esp-2); }
 .diptyque--rangee .diptyque-paire > a { flex: 1 1 0; min-width: 0; }
@@ -636,7 +666,11 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 /* ---------- 21. Carnet ----------
    Liste : .billets, une planche de deux colonnes ; .billet-e, la couverture d'abord, au format de la photo et à hauteur
    commune (règle des rangées), jamais recadrée, puis le texte ; tout l'encart est le lien (titre étendu).
-   .billet-e--cote : la couverture à côté du texte (accueil). Abonnement : .abo ; pagination : .pages.
+   .billet-e--cote : la couverture verticale à côté du texte (liste des carnets, accueil), jamais seule en haut d'une colonne
+   avec un vide à sa droite ; dans une liste .billets, le titre garde la taille des autres billets (titre 2) et le texte se
+   cale en bas de la photo ; au téléphone, la photo prend 5/12 de la largeur, la rubrique et le titre à sa droite, le chapô
+   et la méta dessous, sur toute la largeur. sizes : "(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 42px),
+   (min-width: 768px) calc(40vw - 45px), calc(42vw - 27px)". Abonnement : .abo ; pagination : .pages.
    Billet : .billet, grille de 12 colonnes au-delà de 1 024 px ; le texte tient les colonnes 4 à 9 (environ 65 signes) ;
    une photo prend l'une des trois tailles de l'éditeur : normale, .f-large (2 à 11), .f-ecran (1 à 12) ; .f-cote (4 à 12).
    Ouverture (.billet-ouv), signature (.auteurs), méta (.billet-meta), sommaire et carte au trait (.sommaire), journée (.jour),
@@ -664,6 +698,23 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .billet-e--cote .billet-e-img img { width: 100%; }
 .billet-e--cote .billet-e-titre { font: 400 var(--t-titre-3)/1.3 var(--sans); letter-spacing: 0; }
 .billet-e--cote .billet-e-titre a:hover, .billet-e--cote:hover .billet-e-titre a { text-underline-offset: 5px; }
+/* En liste (passe 3, d'après MQ-11) */
+.billets .billet-e--cote .billet-e-titre { font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); letter-spacing: -.003em; }
+@media (min-width: 768px) { .billets .billet-e--cote { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); column-gap: var(--esp-4); } }
+/* De 768 à 899 px, une liste qui a des couvertures verticales passe sur une colonne : une couverture horizontale y prend
+   toute la largeur. Au bureau, la verticale a la hauteur commune des couvertures (380 px) : 253 px de large. */
+@media (min-width: 768px) and (max-width: 899px) { .billets:has(.billet-e--cote) .billet-e:not(.billet-e--cote) { --h: 520px; } }
+@media (min-width: 1280px) { .billets .billet-e--cote { grid-template-columns: calc(380px * 2 / 3) minmax(0, 1fr); } }
+@media (max-width: 767px) {
+  .billets .billet-e--cote { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-rows: 1fr auto auto auto auto auto; gap: var(--esp-1) var(--esp-2); align-items: end; }
+  .billets .billet-e--cote .billet-e-txt { display: contents; }
+  .billets .billet-e--cote .billet-e-img { grid-column: 1; grid-row: 1 / span 3; }
+  .billets .billet-e--cote .etiquette { grid-column: 2; grid-row: 2; }
+  .billets .billet-e--cote .billet-e-titre { grid-column: 2; grid-row: 3; }
+  .billets .billet-e--cote .billet-e-chapo { grid-column: 1 / -1; grid-row: 4; margin-top: var(--esp-1); }
+  .billets .billet-e--cote .billet-e-meta { grid-column: 1 / -1; grid-row: 5; }
+  .billets .billet-e--cote .billet-e-txt > :nth-child(n+5) { grid-column: 1 / -1; grid-row: 6; }
+}
 .abo { display: grid; gap: var(--esp-1); margin-top: var(--esp-10); padding-top: var(--esp-4); border-top: 1px solid var(--rule); max-width: 60ch; }
 .abo p { margin: 0; color: var(--prose); }
 .abo .lien { font-size: var(--t-texte); }
@@ -742,7 +793,8 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .voisins a:hover .t { text-decoration: underline; text-underline-offset: 5px; }
 .voisins .m { font-size: var(--t-petit); color: var(--mute); }
 /* Impression d'un billet (UX-F-35) : noir sur blanc quel que soit le thème, sans menu ni actions ; chaque cartel suivi de
-   son adresse (data-adresse) ; l'adresse du billet en pied (à poser par la page : main[data-adresse]). */
+   son adresse (data-adresse) ; l'adresse du billet en pied (à poser par la page : main[data-adresse]). Les adresses en 10 pt
+   (13,3 px) : rien sous 13 px, même sur papier (passe 3). */
 @media print {
   @page { margin: 16mm 18mm; }
   body:has(.billet) { background: #fff; color: #111; }
@@ -751,9 +803,9 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
   .billet > * { max-width: none; }
   .billet figure, .billet-ouv-photo, .citation { break-inside: avoid; }
   .billet img, .billet-ouv-photo img { max-height: 120mm !important; width: auto !important; }
-  .cartel[data-adresse]::after { content: attr(data-adresse); font-size: 9pt; color: #444; }
+  .cartel[data-adresse]::after { content: attr(data-adresse); font-size: 10pt; color: #444; }
   .billet-ouv { display: block; padding: 0; }
-  main[data-adresse]::after { content: attr(data-adresse); display: block; margin-top: 8mm; font-size: 9pt; }
+  main[data-adresse]::after { content: attr(data-adresse); display: block; margin-top: 8mm; font-size: 10pt; }
 }
 
 /* ---------- 22. Formulaires : compléments ----------
@@ -762,7 +814,9 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
    à un choix ; .revele : un champ révélé par un choix (:has ; toujours visible sans prise en charge) ; .duo : deux champs
    côte à côte s'il y a la place ; .champ-ligne : libellé court à gauche (tunnel) ; .envoi : le bouton et ce qui suit ;
    .note-donnees : ce qu'on fait des données ; .piege : champ anti-robots ; .photo-ref : la photo dont on parle ;
-   .mdp : mot de passe et bascule « Afficher » sur une ligne ; .def : relevé de données (dt/dd) ; .fiche : caractéristiques. */
+   .mdp : mot de passe et bascule « Afficher » sur une ligne ; .def : relevé de données (dt/dd) ; .fiche : caractéristiques ;
+   .choix-sous : la description d'un choix posée HORS de son <label> quand elle porte un lien (un lien dans un label rend le nom
+   du bouton interminable et le clic ambigu), reliée au bouton par aria-describedby, à la place de .choix-d (passe 3, MQ-06). */
 .bloc { display: grid; gap: var(--esp-3); margin: 0; padding: var(--esp-3) 0 0; border: 0; border-top: 1px solid var(--rule); min-width: 0; }
 .bloc > legend { float: left; width: 100%; padding: 0; margin: 0 0 var(--esp-1); font: 400 var(--t-titre-3)/1.3 var(--sans); color: var(--ink); }
 .bloc > legend + * { clear: left; }
@@ -779,6 +833,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .depliant--suite[open] > summary { display: none; }
 .depliant--suite > div, .depliant--suite > p { margin-top: 0; padding-left: 0; border: 0; }
 .sous-choix { display: grid; margin: 0 0 0 34px; padding: 0; list-style: none; }
+.choix + .choix-sous { margin: -10px 0 0 34px; padding-bottom: var(--esp-1); }
 .revele { margin: var(--esp-1) 0 0 34px; }
 @supports selector(:has(*)) { .revele-si:not(:has(input[data-revele]:checked)) .revele { display: none; } }
 .duo { display: grid; gap: var(--esp-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
@@ -787,7 +842,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .envoi { display: flex; flex-wrap: wrap; align-items: center; gap: var(--esp-2) var(--esp-3); }
 .envoi p { margin: 0; color: var(--mute); font-size: var(--t-petit); }
 .note-donnees { margin: 0; color: var(--mute); font-size: var(--t-meta); line-height: 1.55; max-width: 60ch; }
-.note-donnees a, .champ-aide a, .choix-d a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.note-donnees a, .champ-aide a, .choix-d a, .choix-sous a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .piege { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .photo-ref { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: var(--esp-1) var(--esp-3); align-items: end; }
 .photo-ref img { display: block; width: 160px; height: auto; background: var(--frame); }
@@ -815,7 +870,9 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
    En-tête : Contexte (titre de la galerie, langue en boutons POST, « Quitter la galerie » en bouton) ; page du mot de passe :
    Tunnel sans langue ni retour, la marque en texte. .acces : la page du lien, à deux temps (ce qui vous attend · le mot de
    passe) ; .secours : que faire sans mot de passe. Vues : des .filtres. .favorisable : une vignette avec son étoile (.fav,
-   44 px, nom lu « Favori : titre ») à droite du cartel, ou dessous si la vignette est étroite. .selection : la barre de la
+   44 px, nom lu « Favori : titre ») toujours à la même place, sous le cartel, à gauche, posée sur le bas de sa rangée (les
+   vignettes d'une rangée ont la même hauteur : les étoiles s'alignent), quelle que soit la largeur de la vignette (passe 3,
+   MQ-17 ; avant : à droite du cartel, ou dessous sous 150 px, deux places pour un geste). .selection : la barre de la
    sélection, une seule action principale. .telecharger : tout, ou une photo (.dl-une) avec son poids en Plex Mono. */
 .acces { display: grid; gap: var(--esp-6); padding-block: var(--esp-8) var(--esp-4); }
 .acces-t { display: grid; gap: var(--esp-2); align-content: start; }
@@ -831,11 +888,9 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .acces .note-donnees { padding-top: var(--esp-2); border-top: 1px solid var(--rule); }
 .secours { margin: 0; color: var(--prose); font-size: var(--t-petit); line-height: 1.6; }
 .secours a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-.rangees > li.favorisable { position: relative; container-type: inline-size; scroll-margin-top: var(--esp-3); }
-.favorisable .cartel { padding-right: 52px; }
-.favorisable .fav { position: absolute; right: 0; top: calc(100cqw / var(--r) + 4px); margin: 0; }
+.rangees > li.favorisable { position: relative; display: flex; flex-direction: column; scroll-margin-top: var(--esp-3); }
+.favorisable .fav, .favorisable .dl-une { position: static; margin: auto 0 0; padding-top: var(--esp-1); }
 .fav .bascule { width: var(--cible); padding: 0; justify-content: center; }
-@container (max-width: 150px) { .favorisable .cartel { padding-right: 0; } .favorisable .fav { position: static; margin-top: var(--esp-demi); } }
 .selection { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--esp-1) var(--esp-3);
   margin-top: var(--esp-6); padding: var(--esp-2) 0 calc(var(--esp-2) + env(safe-area-inset-bottom, 0px)); background: var(--paper); border-top: 1px solid var(--field); }
 .selection-n { display: inline-flex; align-items: center; gap: var(--esp-1); margin: 0; }
@@ -847,22 +902,40 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .dl-une { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-2); margin: 0; }
 .dl-une .donnee { color: var(--mute); }
 
-/* ---------- 24. Contact : une colonne par personne, une photo de chacun, sans cadre ---------- */
-.ecrire { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--esp-5) var(--esp-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+/* ---------- 24. Contact : une colonne par personne, une photo de chacun, sans cadre ----------
+   Trois blocs dont les photos ont la même hauteur (passe 3, d'après MQ-06) : grille de 4 colonnes au bureau, 2 sur tablette,
+   1 au téléphone ; les deux portraits prennent une colonne, le diptyque « Même soir » des deux (.les-deux) en prend deux, et
+   l'écart de ses photos est celui des colonnes : chaque photo a la largeur d'une colonne, donc la même hauteur. Chaque photo
+   est une <figure> ; sa légende, un cartel court (titre · date) ou, pour le diptyque, l'étiquette « Même soir » et sa phrase. */
+.ecrire { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--esp-5) var(--esp-3); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 768px) { .ecrire { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ecrire > .les-deux { grid-column: 1 / -1; } }
+@media (min-width: 1024px) { .ecrire { grid-template-columns: repeat(4, minmax(0, 1fr)); } .ecrire > .les-deux { grid-column: span 2; } }
 .ecrire li { display: grid; gap: var(--esp-1); align-content: start; }
+.ecrire figure { margin: 0; display: grid; gap: var(--esp-1); align-content: start; }
 .ecrire img { display: block; width: 100%; height: auto; aspect-ratio: 1.5; background: var(--frame); }
+.ecrire figcaption { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--esp-1); font-size: var(--t-meta); line-height: 1.45; }
+.ecrire figcaption .etiquette { line-height: 1.45; }
 .ecrire h3 { margin: var(--esp-1) 0 0; font: 400 var(--t-titre-3)/1.3 var(--sans); }
 .ecrire p { margin: 0; color: var(--prose); }
-.ecrire .deux-photos { display: grid; grid-template-columns: 1fr 1fr; gap: var(--esp-1); align-content: end; aspect-ratio: 1.5; }
+.ecrire .deux-photos { display: grid; grid-template-columns: 1fr 1fr; gap: var(--esp-3); align-content: start; }
 .ecrire .deux-photos img { aspect-ratio: 1.5; }
 
 /* ---------- 25. Tirages, panier, commande ----------
    .formats : un format par ligne, prix en face (le papier, commun, est dit une fois dans l'aide). .signature : la signature
-   d'écran sur la photo (simulée en CSS). .mur : le tirage au mur, à l'échelle (1 cm = 0,625 cqi d'un pan de 160 × 95 cm),
-   .mur--grand pour le grand format (la page peut aussi le suivre par :has sur le format coché).
-   Panier : .bloc-vendeur (une commande par photographe), .ligne (un tirage), .sous-total ; .recap (récapitulatif, collant
-   au bureau ; .rc, un bloc par vendeur dans le tunnel) ; .suite (l'enchaînement des paiements) ; .paiement (le bouton final :
-   à qui, combien, ce qui suit) ; .commandes (les commandes confirmées). */
+   d'écran sur la photo (simulée en CSS). .mur : le tirage au mur, à l'échelle, dessiné sur le papier de la page (ni aplat ni
+   cadre : un trait de sol). Petit format : un pan de 120 × 80 cm (la console entière), la scène prend les trois quarts de la
+   largeur ; grand format (.mur--grand, ou une page .suit-format dont le bouton value="grand" est coché, par :has) : un pan de
+   160 × 95 cm, toute la largeur.   L'échelle (px par cm) est la même dans les deux : le tirage grandit, le vide ne grandit pas. L'image du tirage change de taille
+   sans changer de fichier : son sizes est celui du grand format (data-taille="plus-grand-etat", compté à part par le contrôle).
+   Panier : .bloc-vendeur (une commande par photographe : l'étiquette « Commande 1 sur 2 » et « Vendu et expédié par … »,
+   rien de plus ; ce que fait le vendeur est dit une fois, près du bouton), .ligne (un tirage), .sous-total ; .p-haut (le
+   total et le bouton plein aussi en tête du panier, quand il est sur une colonne) ; .recap (récapitulatif, collant au bureau ;
+   .rc, un bloc par vendeur dans le tunnel) ; .suite (l'enchaînement des paiements) ; .paiement (le bouton final : à qui,
+   combien, ce qui suit) ; .commandes (les commandes confirmées).
+   Vignettes de .ligne, .rc-l et .commandes : la colonne d'image SUIT LE FORMAT (passe 3). La photo garde son côté long
+   (.ligne 180 px au bureau et 120 au téléphone ; .rc-l 84 px ; .commandes 120 et 72) : une horizontale 180 × 120, une
+   verticale 120 × 180 ; plus de verticale étroite dans une colonne d'horizontale. La ligne porte le rapport de sa photo,
+   comme une rangée : style="--r: 0.6667" pour une verticale (1,5 par défaut) ; sizes = la largeur affichée. */
 .formats { gap: 0; }
 .formats .choix { align-items: center; gap: var(--esp-2); min-height: 64px; border-bottom: 1px solid var(--rule); }
 .formats .choix:first-of-type { border-top: 1px solid var(--rule); }
@@ -871,28 +944,43 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .formats .choix:has(input:checked) > span:first-of-type { font-weight: 500; }
 .formats .choix-d { font-weight: 400; }
 .signature { position: absolute; right: 3%; bottom: 3.5%; font: 300 clamp(13px, 1.15vw, 17px)/1 var(--sans); letter-spacing: .04em; color: var(--ink); opacity: .42; pointer-events: none; }
-.mur { margin: 0; display: grid; gap: var(--esp-1); }
+.mur { margin: 0; display: grid; gap: var(--esp-1);
+  /* petit format : pan de 120 × 80 cm, 1 cm = 0,833 cqi ; feuille 40 × 30 cm à 25 cm du haut du mur, 20 cm au-dessus de la console */
+  --mur-l: 75%; --mur-ar: 120 / 80; --f-l: 33.33cqi; --f-h: 8.33cqi; --f-p: 2.5cqi 1.667cqi; --om: 1.07cqi 2.67cqi;
+  --co-g: 0cqi; --co-l: 100cqi; --co-h: 50cqi; --co-e: 2.5cqi; --pi-l: 2.13cqi; --pi-h: 18.3cqi; --pi-x: 5.33cqi; --cote-h: 56.7cqi; }
+/* grand format : pan de 160 × 95 cm, 1 cm = 0,625 cqi ; feuille 70 × 50 cm */
+.mur--grand, .suit-format:has(input[value="grand"]:checked) .mur {
+  --mur-l: 100%; --mur-ar: 160 / 95; --f-l: 43.75cqi; --f-h: 3.15cqi; --f-p: 3.125cqi; --om: .8cqi 2cqi;
+  --co-g: 12.5cqi; --co-l: 75cqi; --co-h: 46.9cqi; --co-e: 1.9cqi; --pi-l: 1.6cqi; --pi-h: 14cqi; --pi-x: 4cqi; --cote-h: 52cqi; }
 .mur figcaption { font-size: var(--t-meta); color: var(--mute); }
 .mur figcaption b { font-weight: 500; color: var(--ink); }
-.mur-scene { position: relative; aspect-ratio: 160 / 95; container-type: inline-size; overflow: hidden; background: color-mix(in srgb, var(--ink) 13%, var(--paper)); }
+.mur-scene { position: relative; width: var(--mur-l); margin-inline: auto; aspect-ratio: var(--mur-ar); container-type: inline-size; overflow: hidden;
+  background: none; border-bottom: 1px solid var(--field); }
 .mur-feuille { position: absolute; left: 50%; translate: -50% 0; box-sizing: border-box; background: var(--ink);
-  box-shadow: 0 .8cqi 2cqi rgba(0, 0, 0, .4); width: 25cqi; top: 15.6cqi; padding: 1.875cqi 1.25cqi; }
+  box-shadow: 0 var(--om) rgba(0, 0, 0, .4); width: var(--f-l); top: var(--f-h); padding: var(--f-p); }
 .mur-feuille img { width: 100%; height: auto; }
-.mur-console { position: absolute; left: 12.5cqi; width: 75cqi; top: 46.9cqi; height: 1.9cqi; background: var(--field); }
-.mur-console::before, .mur-console::after { content: ''; position: absolute; top: 100%; width: 1.6cqi; height: 14cqi; background: var(--field); }
-.mur-console::before { left: 4cqi; } .mur-console::after { right: 4cqi; }
-.mur-cote { position: absolute; left: 12.5cqi; width: 75cqi; top: 52cqi; margin: 0; text-align: center; font-size: 13px; line-height: 1; color: var(--prose); }
+/* La console donne l'échelle sans prendre la vedette : un gris à mi-chemin du filet des champs et du papier. */
+.mur-console { --mur-meuble: color-mix(in srgb, var(--field) 55%, var(--paper));
+  position: absolute; left: var(--co-g); width: var(--co-l); top: var(--co-h); height: var(--co-e); background: var(--mur-meuble); }
+.mur-console::before, .mur-console::after { content: ''; position: absolute; top: 100%; width: var(--pi-l); height: var(--pi-h); background: var(--mur-meuble); }
+.mur-console::before { left: var(--pi-x); } .mur-console::after { right: var(--pi-x); }
+.mur-cote { position: absolute; left: var(--co-g); width: var(--co-l); top: var(--cote-h); margin: 0; text-align: center; font-size: 13px; line-height: 1; color: var(--prose); }
 .mur .si-grand { display: none; }
-.mur--grand .mur-feuille { width: 43.75cqi; top: 3.15cqi; padding: 3.125cqi; }
-.mur--grand .si-grand { display: inline; }
-.mur--grand .si-petit { display: none; }
+.mur--grand .si-grand, .suit-format:has(input[value="grand"]:checked) .mur .si-grand { display: inline; }
+.mur--grand .si-petit, .suit-format:has(input[value="grand"]:checked) .mur .si-petit { display: none; }
 .bloc-vendeur { display: grid; gap: 0; }
 .bloc-vendeur > header { display: grid; gap: var(--esp-demi); padding-bottom: var(--esp-2); }
 .bloc-vendeur h2 { margin: 0; font: 400 var(--t-titre-3)/1.3 var(--sans); }
 .bloc-vendeur > header p:not(.etiquette) { margin: 0; font-size: var(--t-meta); color: var(--mute); }
-.ligne { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--esp-1) var(--esp-3); padding-block: var(--esp-3); border-top: 1px solid var(--rule); align-items: start; }
-.ligne-img { display: block; height: 96px; width: auto; }
-.ligne-img img { height: 96px; width: auto; }
+.p-haut { display: none; }
+@media (max-width: 1023px) { .p-haut { display: grid; gap: var(--esp-2); padding-top: var(--esp-2); border-top: 1px solid var(--rule); } }
+.p-haut-t { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0 var(--esp-2); margin: 0; }
+.p-haut-n { font-size: var(--t-titre-3); font-variant-numeric: tabular-nums; }
+.p-haut-n b { font-weight: 500; }
+.p-haut-d { color: var(--mute); font-size: var(--t-petit); }
+.ligne { --r: 1.5; --ligne-l: 180px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--esp-1) var(--esp-3); padding-block: var(--esp-3); border-top: 1px solid var(--rule); align-items: start; }
+.ligne-img { display: block; }
+.ligne-img img { display: block; width: calc(var(--ligne-l) * min(1, var(--r))); height: auto; aspect-ratio: var(--r); background: var(--frame); }
 .ligne h3 { margin: 0; font: 400 var(--t-texte)/1.4 var(--sans); }
 .ligne h3 a { display: inline-flex; align-items: center; min-height: var(--cible); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
 .ligne-d { margin: 2px 0 0; font-size: var(--t-meta); color: var(--mute); }
@@ -907,7 +995,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
   .ligne > div > *, .ligne .prix { grid-column: 2; }
   .ligne .prix { order: 1; text-align: left; margin: var(--esp-1) 0 0; }
   .ligne form { order: 2; }
-  .ligne-img, .ligne-img img { height: 72px; }
+  .ligne { --ligne-l: 120px; }
 }
 .ligne--epuise .ligne-img img { opacity: .45; }
 .ligne--epuise .prix { text-decoration: line-through; color: var(--mute); }
@@ -928,8 +1016,8 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .rc > * { margin: 0; }
 .rc-t { display: flex; justify-content: space-between; gap: var(--esp-2); font-size: var(--t-petit); }
 .rc-t b { font-weight: 500; }
-.rc-l { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: var(--esp-2); align-items: start; font-size: var(--t-petit); color: var(--prose); }
-.rc-l img { height: 56px; width: auto; }
+.rc-l { --r: 1.5; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--esp-2); align-items: start; font-size: var(--t-petit); color: var(--prose); }
+.rc-l img { display: block; width: calc(84px * min(1, var(--r))); height: auto; aspect-ratio: var(--r); }
 .rc-l .m, .rc-s .m { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); }
 .rc-s { display: flex; justify-content: space-between; gap: var(--esp-2); font-size: var(--t-petit); color: var(--prose); }
 .rc-s.total { color: var(--ink); font-weight: 500; }
@@ -949,17 +1037,38 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .paiement-suite p { margin: 0; display: flex; gap: var(--esp-1); align-items: flex-start; }
 .paiement-suite .ic { margin-top: 2px; flex: none; }
 .commandes { list-style: none; margin: 0; padding: 0; display: grid; }
-.commandes > li { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; gap: var(--esp-1) var(--esp-3); padding-block: var(--esp-3); border-top: 1px solid var(--rule); align-items: start; }
-.commandes img { height: 80px; width: auto; }
-@media (max-width: 599px) { .commandes > li { grid-template-columns: 72px minmax(0, 1fr); } .commandes .prix { grid-column: 2; } .commandes img { height: 48px; } }
+.commandes > li { --r: 1.5; --cmd-l: 120px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--esp-1) var(--esp-3); padding-block: var(--esp-3); border-top: 1px solid var(--rule); align-items: start; }
+.commandes img { display: block; width: calc(var(--cmd-l) * min(1, var(--r))); height: auto; aspect-ratio: var(--r); }
+@media (max-width: 599px) { .commandes > li { --cmd-l: 72px; grid-template-columns: auto minmax(0, 1fr); } .commandes .prix { grid-column: 2; } }
 .commandes p { margin: 0; }
 .commandes .ref { color: var(--mute); }
 .commandes .ex { color: var(--ink); }
 
-/* ---------- 26. Aperçu d'impression (dans une maquette) : la feuille, noir sur blanc, ni en-tête ni bouton ---------- */
-.feuille { margin: 0; max-width: 640px; padding: var(--esp-5) var(--esp-5) var(--esp-6); font-size: 14px; line-height: 1.5; color: var(--ink); background: var(--paper);
-  box-shadow: 0 0 0 1px var(--rule), 0 12px 32px rgba(0, 0, 0, .45); }
+/* ---------- 26. Aperçu d'impression (dans une maquette) : la feuille, noir sur blanc, ni en-tête ni bouton ----------
+   À l'échelle 1 (passe 3, d'après MQ-12) : une feuille A4 fait 794 px de large, le texte de 11 pt 14,7 px, les petites
+   mentions de 10 pt 13,3 px (rien sous 13 px, même sur papier) ; c'est le haut de la page 1 tel que le produit la feuille
+   @media print de la page. Au téléphone, la même feuille, sur la largeur de l'écran. Contenu : .f-m la marque, .f-et la
+   rubrique, .f-h1 ou h2 le titre, .f-date la date sous le titre, .f-chapo, .f-meta, une figure et son cartel (.f-ct, .f-adr
+   l'adresse de la photo), un tableau (td.m : un montant), .f-pied (adresses et contacts, en bas, sous un filet). */
+.feuille { display: grid; gap: var(--esp-2); margin: 0; max-width: 794px; padding: var(--esp-6) var(--esp-6) var(--esp-5); font-size: 14.7px; line-height: 1.55;
+  color: var(--ink); background: var(--paper); box-shadow: 0 0 0 1px var(--rule), 0 12px 32px rgba(0, 0, 0, .45); }
+@media (max-width: 767px) { .feuille { padding: var(--esp-3) var(--esp-2) var(--esp-4); } }
 .feuille > * { margin: 0; }
+.feuille .f-m { font: 300 13.3px/1 var(--sans); letter-spacing: .34em; text-transform: uppercase; }
+.feuille .f-et { font: 500 13.3px/1.3 var(--sans); letter-spacing: var(--capitales); text-transform: uppercase; color: var(--mute); }
+.feuille .f-h1 { font: 300 32px/1.12 var(--sans); }
+.feuille h2 { font: 400 20px/1.3 var(--sans); }
+.feuille .f-date { margin-top: calc(-1 * var(--esp-1)); }
+.feuille .f-chapo { font-size: 16px; color: var(--prose); max-width: 60ch; }
+.feuille .f-meta, .feuille .f-adr, .feuille .f-pied { font-size: 13.3px; color: var(--mute); }
+.feuille figure { margin: var(--esp-1) 0 0; }
+.feuille img { display: block; width: auto; height: auto; max-width: 100%; max-height: 453px; }
+.feuille figcaption { display: grid; gap: 2px; padding-top: var(--esp-1); }
+.feuille .f-ct { font-size: 14.7px; }
+.feuille table { width: 100%; border-collapse: collapse; }
+.feuille th, .feuille td { text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--rule); vertical-align: top; font-weight: 400; }
+.feuille td.m { text-align: right; white-space: nowrap; }
+.feuille .f-pied { margin-top: var(--esp-2); padding-top: var(--esp-1); border-top: 1px solid var(--rule); overflow-wrap: anywhere; }
 
 @media print {
   .sh-outils, .sh-nav, .skip, .bascule, .sh-menu { display: none !important; }

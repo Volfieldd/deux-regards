@@ -12,9 +12,9 @@
 <link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* MQ-13 · page d'un tirage. Composants de la planche (_commun/public.css : § 25 .formats, .signature, .mur ; § 22 .fiche, .def ;
-   § 18 .rangees--etiree) ; ci-dessous, la mise en page de la page, le lien entre le format coché et le mur (:has), le mur sans
-   aplat, et deux classes de présentation des états. Aucun jeton redéclaré, aucune --h locale. */
+/* MQ-13 · page d'un tirage. Composants de la planche (_commun/public.css : § 25 .formats, .signature, .mur, qui suit le format
+   coché dans une page .suit-format ; § 22 .fiche, .def ; § 18 .rangees--etiree et .rangees--par-deux) ; ci-dessous, la mise en
+   page de la page et deux classes de présentation des états. Aucun jeton redéclaré, aucune --h locale. */
 .t-ariane { padding-top: var(--esp-2); }
 .tirage { display: grid; gap: var(--esp-3) var(--esp-8); grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "achat" "note" "mur"; padding-top: var(--esp-2); }
 .t-photo { grid-area: photo; } .t-achat { grid-area: achat; } .t-mur { grid-area: mur; } .t-note { grid-area: note; }
@@ -37,12 +37,6 @@
 .t-vendeur { display: grid; gap: 0; font-size: var(--t-petit); color: var(--prose); }
 .t-vendeur p { margin: 0; }
 .t-vendeur .actions { gap: 0 var(--esp-3); }
-/* Le mur suit le format coché (:has) ; sans prise en charge, il reste au petit format, que la légende nomme. */
-.tirage:has(input[value="grand"]:checked) .mur-feuille { width: 43.75cqi; top: 3.15cqi; padding: 3.125cqi; }
-.tirage:has(input[value="grand"]:checked) .mur .si-grand { display: inline; }
-.tirage:has(input[value="grand"]:checked) .mur .si-petit { display: none; }
-/* Jury v1 : plus d'aplat gris derrière le mur. Le dessin seul, sur le papier de la page, posé sur un trait de sol. */
-.mur .mur-scene { background: none; border-bottom: 1px solid var(--field); }
 /* Bas de page */
 .t-recit { display: grid; gap: var(--esp-2) var(--esp-8); grid-template-columns: minmax(0, 1fr); padding-top: var(--esp-12); align-items: end; }
 @media (min-width: 1024px) { .t-recit { grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr); } }
@@ -53,15 +47,8 @@
 .t-legende { margin: 0; font: 300 var(--t-titre-1)/var(--i-serre) var(--sans); color: var(--ink); max-width: 20ch; text-wrap: balance; }
 .t-recit .pl-texte { margin: 0 0 var(--esp-1); color: var(--prose); max-width: 56ch; }
 .t-autres { padding-top: var(--esp-10); }
-/* Au téléphone, une photo par rangée : la dernière aussi pleine largeur. Dès 768 px, la rangée garde sa cale (planche, § 6) :
-   une photo seule en fin de rangée reste à sa largeur de base, et à la taille de son sizes. */
-@media (max-width: 767px) { .t-autres .rangees::after { content: none; } }
-/* Sur tablette (768-1 023 px), quatre horizontales ne tiennent pas sur une ligne : deux par rangée, plutôt qu'une dernière
-   photo seule étirée sur toute la largeur. Le sizes des vignettes le dit (calc(50vw - 56px) dans cette plage). */
-@media (min-width: 768px) and (max-width: 1023px) { .t-autres .rangees > li { flex: 1 1 calc(50% - var(--esp-2)); } }
 .t-autres .prix-v { font-size: var(--t-meta); color: var(--prose); }
-/* Autres états : un cadre « page entière » (.e-plein, il touche les bords de l'écran, en-tête compris) ou deux colonnes. */
-.e-plein { margin-inline: calc(10px - var(--gut)); padding-bottom: var(--esp-5); outline-offset: 6px; }
+/* Autres états : un cadre « page entière » (.e-plein, annotations.css) ou deux colonnes. */
 .e-msg { max-width: 640px; padding-block: var(--esp-2) var(--esp-1); }
 .etat-deux { display: grid; gap: var(--esp-4); grid-template-columns: minmax(0, 1fr); align-items: start; }
 @media (min-width: 900px) { .etat-deux { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } }
@@ -105,7 +92,7 @@
 <main id="contenu" class="wrap">
   <nav class="ariane t-ariane mq-a" aria-label="Fil d’Ariane"><span class="mq-pin" aria-hidden="true">1</span><ol><li><a href="/tirages">Tirages</a></li><li aria-current="page">Brume sur la Loire</li></ol></nav>
 
-  <div class="tirage">
+  <div class="tirage suit-format">
     <div class="t-photo"><figure class="photo"><span class="mq-pin" aria-hidden="true">2</span><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 720px, (min-width: 1024px) 56vw, calc(100vw - 48px)" width="900" height="600" alt="Collines grises sous un ciel de brume, le fleuve invisible au pied." fetchpriority="high"><span class="signature" aria-hidden="true">© Sébastien</span></figure></div>
     <p class="t-note">La photo entière, telle qu’elle sera tirée. La signature « ©&nbsp;Sébastien » n’existe qu’à l’écran : le tirage n’en porte aucune, Sébastien le signe au crayon dans la marge.</p>
 
@@ -139,10 +126,10 @@
     <div class="t-mur mq-a"><span class="mq-pin" aria-hidden="true">7</span>
       <figure class="mur" aria-labelledby="mur-t">
         <div class="mur-scene" role="img" aria-labelledby="mur-t">
-          <div class="mur-feuille"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/160/brume.webp 160w, _commun/photos/480/brume.webp 480w" sizes="(min-width: 1024px) 320px, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"></div>
+          <div class="mur-feuille"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/160/brume.webp 160w, _commun/photos/480/brume.webp 480w" sizes="(min-width: 1024px) 270px, 38vw" data-taille="plus-grand-etat" width="480" height="320" alt="" loading="lazy" decoding="async"></div>
           <div class="mur-console"></div><p class="mur-cote" aria-hidden="true">console de 120 cm</p>
         </div>
-        <figcaption id="mur-t"><b>À l’échelle</b> · <span class="si-petit">petit format, feuille de 30 × 40 cm</span><span class="si-grand">grand format, feuille de 50 × 70 cm</span>, accroché 20 cm au-dessus d’une console de 120 cm. Le dessin suit le format choisi.</figcaption>
+        <figcaption id="mur-t"><b>À l’échelle</b> · <span class="si-petit">petit format, feuille de 30 × 40 cm</span><span class="si-grand">grand format, feuille de 50 × 70 cm</span>, accroché 20 cm au-dessus d’une console de 120 cm. Le dessin suit le format choisi.</figcaption>
       </figure>
     </div>
   </div>
@@ -182,13 +169,13 @@
 
   <section class="t-autres mq-a" aria-labelledby="t-autres-h"><span class="mq-pin" aria-hidden="true">9</span>
     <div class="partie-tete"><h2 id="t-autres-h" class="titre-3">Les autres tirages de Sébastien</h2><a class="lien" href="/tirages">Voir les 9 tirages</a></div>
-    <ul class="rangees rangees--etiree"><li style="--r:1.5"><a class="vignette" href="/tirages/cais-do-sodre-maree-basse"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="Une rangée de pieux dans l’eau grise du Tage, un pêcheur seul au loin." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/foz-la-barre"><img src="_commun/photos/480/foz.webp" srcset="_commun/photos/480/foz.webp 480w, _commun/photos/foz.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Porto · 11 oct. 2026</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/silence-blanc"><img src="_commun/photos/480/neige.webp" srcset="_commun/photos/480/neige.webp 480w, _commun/photos/neige.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="Ciel blanc au-dessus de crêtes grises enneigées." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Silence blanc</span><span class="cartel-m">Vercors · févr. 2025</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/le-ciel-s-est-ouvert"><img src="_commun/photos/480/ciel.webp" srcset="_commun/photos/480/ciel.webp 480w, _commun/photos/ciel.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="Ciel rose et mauve, soleil rond posé sur des collines violettes." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Le ciel s’est ouvert</span><span class="cartel-m">Anjou · oct. 2025</span><span class="prix-v">Épuisé : 15 sur 15 vendus</span></span></a></li></ul>
+    <ul class="rangees rangees--etiree rangees--par-deux"><li style="--r:1.5"><a class="vignette" href="/tirages/cais-do-sodre-maree-basse"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="Une rangée de pieux dans l’eau grise du Tage, un pêcheur seul au loin." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/foz-la-barre"><img src="_commun/photos/480/foz.webp" srcset="_commun/photos/480/foz.webp 480w, _commun/photos/foz.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Porto · 11 oct. 2026</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/silence-blanc"><img src="_commun/photos/480/neige.webp" srcset="_commun/photos/480/neige.webp 480w, _commun/photos/neige.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="Ciel blanc au-dessus de crêtes grises enneigées." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Silence blanc</span><span class="cartel-m">Vercors · févr. 2025</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/le-ciel-s-est-ouvert"><img src="_commun/photos/480/ciel.webp" srcset="_commun/photos/480/ciel.webp 480w, _commun/photos/ciel.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="Ciel rose et mauve, soleil rond posé sur des collines violettes." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Le ciel s’est ouvert</span><span class="cartel-m">Anjou · oct. 2025</span><span class="prix-v">Épuisé : 15 sur 15 vendus</span></span></a></li></ul>
   </section>
 </main>
 <footer class="sf sf--complet wrap">
   <div class="sf-in">
     <div>
-      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
+      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
       <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage, un tirage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
     </div>
     <nav class="sf-groupes" aria-label="Pied de page">
@@ -247,7 +234,7 @@
   <div class="wrap">
     <div class="ariane t-ariane"><ol><li><a href="/tirages">Tirages</a></li><li aria-current="page">Brume sur la Loire</li></ol></div>
     <div class="e-msg"><div class="msg msg--ok is-focus" role="status" tabindex="-1"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><p><b>Ajouté au panier :</b> Brume sur la Loire, petit format, 180&nbsp;€. <a href="/panier">Voir le panier (2)</a></p></div></div>
-    <div class="tirage">
+    <div class="tirage suit-format">
       <div class="t-photo"><figure class="photo"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 720px, (min-width: 1024px) 56vw, calc(100vw - 48px)" width="900" height="600" alt="Collines grises sous un ciel de brume, le fleuve invisible au pied." loading="lazy" decoding="async"><span class="signature" aria-hidden="true">© Sébastien</span></figure></div>
       <div class="t-achat">
         <div class="t-tete"><p class="etiquette">Tirage d’art</p><p class="titre-page">Brume sur la Loire</p><p class="cartel-m">Sébastien · Anjou · mars 2024</p></div>
@@ -277,7 +264,7 @@
     <div class="t-achat">
       <div class="t-tete"><p class="etiquette">Tirage d’art</p><p class="titre-page">Le ciel s’est ouvert</p><p class="cartel-m">Sébastien · Anjou · oct. 2025</p></div>
       <div class="msg msg--erreur" role="alert" tabindex="-1"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><p><b>Erreur :</b> le dernier exemplaire vient d’être vendu, pendant que vous choisissiez. Rien n’a été ajouté à votre panier.</p></div>
-      <div class="t-edition"><p class="dispo"><b>Épuisé</b> : 15 sur 15 vendus</p><p class="prov">L’édition est close : cette photo ne sera plus tirée, dans aucun format.</p></div>
+      <div class="t-edition"><p class="dispo"><b>Épuisé</b> : 15 sur 15 vendus</p><p class="prov">L’édition est close : cette photo ne sera plus tirée, dans aucun format.</p></div>
       <div><button class="btn btn--large" type="button" aria-disabled="true" aria-describedby="ciel-note">Ajouter au panier</button><p class="btn-note" id="ciel-note">Indisponible : les 15 exemplaires sont vendus.</p></div>
       <div class="actions"><a class="lien" href="/tirages">Voir les 8 tirages disponibles</a><a class="lien" href="/photo/le-ciel-s-est-ouvert">Voir la photo dans la galerie</a></div>
     </div>
@@ -295,10 +282,10 @@
           </fieldset></div>
     <div><figure class="mur mur--grand" aria-labelledby="mur3-t">
         <div class="mur-scene" role="img" aria-labelledby="mur3-t">
-          <div class="mur-feuille"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/160/brume.webp 160w, _commun/photos/480/brume.webp 480w" sizes="(min-width: 1024px) 320px, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"></div>
+          <div class="mur-feuille"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/160/brume.webp 160w, _commun/photos/480/brume.webp 480w" sizes="(min-width: 1024px) 270px, 38vw" data-taille="plus-grand-etat" width="480" height="320" alt="" loading="lazy" decoding="async"></div>
           <div class="mur-console"></div><p class="mur-cote" aria-hidden="true">console de 120 cm</p>
         </div>
-        <figcaption id="mur3-t"><b>À l’échelle</b> · <span class="si-petit">petit format, feuille de 30 × 40 cm</span><span class="si-grand">grand format, feuille de 50 × 70 cm</span>, accroché 20 cm au-dessus d’une console de 120 cm. Le dessin suit le format choisi.</figcaption>
+        <figcaption id="mur3-t"><b>À l’échelle</b> · <span class="si-petit">petit format, feuille de 30 × 40 cm</span><span class="si-grand">grand format, feuille de 50 × 70 cm</span>, accroché 20 cm au-dessus d’une console de 120 cm. Le dessin suit le format choisi.</figcaption>
       </figure></div>
   </div>
 </section>
@@ -334,7 +321,7 @@
 </div>
   <div class="wrap">
     <div class="ariane t-ariane"><ol><li><a href="/de/tirages">Kunstdrucke</a></li><li aria-current="page">Nebel über der Loire</li></ol></div>
-    <div class="tirage">
+    <div class="tirage suit-format">
       <div class="t-photo"><figure class="photo"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 720px, (min-width: 1024px) 56vw, calc(100vw - 48px)" width="900" height="600" alt="Collines grises sous un ciel de brume, le fleuve invisible au pied." loading="lazy" decoding="async"><span class="signature" aria-hidden="true">© Sébastien</span></figure></div>
       <div class="t-achat">
         <div class="t-tete"><p class="etiquette">Kunstdruck</p><p class="titre-page">Nebel über der Loire</p><p class="cartel-m">Sébastien · Anjou · März 2024</p></div>
@@ -375,11 +362,11 @@
     <li><span class="mq-num" aria-hidden="true">12</span><b>Grand format coché</b><p>La feuille de 50 × 70 cm remplace celle de 30 × 40 au-dessus de la console, et la légende le dit.</p><span class="mq-ref">B&amp;S 1.3 Retour d’information</span></li>
     <li><span class="mq-num" aria-hidden="true">13</span><b>En allemand</b><p>« Kunstdrucke », « Warenkorb (1) », « Nebel über der Loire », « Großes Format », « In den Warenkorb » : tout tient, au bureau comme au téléphone.</p><span class="mq-ref">Critère 4 · LEXIQUE § 4.1 (titres allemands)</span></li>
   </ol>
-  <p style="margin-top:24px"><b>Au téléphone</b>, même ordre : la photo, le titre, l’édition, puis les formats ; la livraison et le bouton suivent aussitôt ; la note sur la signature et le dessin à l’échelle viennent après. <b>Sans JavaScript</b>, tout marche : formulaire POST, dessin en CSS, menu et langue en <code>details</code>. <b>Composants de la planche</b> (<code>_commun/public.css</code>, montrés dans MQ-00) : .formats, .signature, .mur (§ 25), .fiche, .def (§ 22), .rangees--etiree (§ 18). <b>Styles locaux</b>, tous construits avec les jetons : la mise en page (.tirage, .t-achat, .t-edition, .t-recit, .t-bas), le mur suivi par <code>:has</code>, le mur sans aplat (<code>background: none</code> et un filet <code>--field</code> en guise de sol, à verser au § 25 de la planche), et deux classes de présentation des états (.e-plein, .etat-deux).</p>
-  <p style="margin-top:12px"><b>Passe 2 (jury v1)</b> : pied de page avant les états et l’encart, cadres <code>inert</code> ; état « après l’ajout » en page entière ; mur sans aplat ; <code>/serie/paysage</code> ; images en <code>srcset</code> partout (photo épuisée en 480 et 900 px, vignettes selon le format) ; la signature passe à 13 px dans la planche ; titre allemand du lexique ; insécables. Relecture : de 768 à 1 023 px, les autres tirages vont deux par rangée, avec un <code>sizes</code> qui le dit (à 820 px, la dernière vignette, seule et étirée sur 740 px, chargeait un fichier de 480 px) ; la langue renvoie à la page du tirage ; « Écrire à Sébastien » mène au contact du site (<code>/a-propos#contact</code>).</p>
+  <p style="margin-top:24px"><b>Au téléphone</b>, même ordre : la photo, le titre, l’édition, puis les formats ; la livraison et le bouton suivent aussitôt ; la note sur la signature et le dessin à l’échelle viennent après. <b>Sans JavaScript</b>, tout marche : formulaire POST, dessin en CSS, menu et langue en <code>details</code>. <b>Composants de la planche</b> (<code>_commun/public.css</code>, montrés dans MQ-00) : .formats, .signature, .mur (§ 25), .fiche, .def (§ 22), .rangees--etiree et .rangees--par-deux (§ 18) ; .e-plein (<code>annotations.css</code>). Versés dans la planche à la passe 3 : le mur sans aplat, posé sur un trait de sol, réduit au pan de la console au petit format et qui suit le format coché (<code>.suit-format</code>, § 25) ; deux photos par rangée sur tablette pour « Les autres tirages » (<code>.rangees--par-deux</code>). <b>Styles locaux</b>, construits avec les jetons : la mise en page (.tirage, .t-achat, .t-edition, .t-recit, .t-bas) et une classe de présentation des états (.etat-deux).</p>
+  <p style="margin-top:12px"><b>Passe 2 (jury v1)</b> : pied de page avant les états et l’encart, cadres <code>inert</code> ; état « après l’ajout » en page entière ; mur sans aplat ; <code>/serie/paysage</code> ; images en <code>srcset</code> partout (photo épuisée en 480 et 900 px, vignettes selon le format) ; la signature passe à 13 px dans la planche ; titre allemand du lexique ; insécables. Relecture : de 768 à 1 023 px, les autres tirages vont deux par rangée, avec un <code>sizes</code> qui le dit (à 820 px, la dernière vignette, seule et étirée sur 740 px, chargeait un fichier de 480 px) ; la langue renvoie à la page du tirage ; « Écrire à Sébastien » mène au contact du site (<code>/a-propos#contact</code>).</p>
   <p style="margin-top:12px"><b>Adresses</b> (lexique, § 2) : <code>/tirages</code>, <code>/tirages/brume-sur-la-loire</code> et son <code>POST …/ajouter</code>, <code>/panier</code>, <code>/conditions-de-vente</code>, <code>/livraison</code>, <code>/renoncer</code>, <code>/carnet/…</code>, <code>/galerie</code> et <code>/series</code> (à créer) ; <code>/photo/brume-sur-la-loire</code>, <code>/serie/paysage</code>, <code>/a-propos</code>, <code>/recherche</code>, <code>/carte</code> et <code>/langue/:lang</code> existent.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, passe 2 ; Chromium de Playwright 1.64 en conteneur ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, passe2-rangees.mjs, mq1315-focus.mjs, insecables.py) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7 · Débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête allemand : aucun · Annotations à 1 440, 412 et 320 px : rien à redire (pastilles dans l’écran, ni sur une photo ni sur un texte ; étiquettes entières ; cadres inert ; pied de page avant l’encart) · Sans annotations : 0 pixel changé dans l’interface, au bureau comme au téléphone · Clavier : 37 arrêts au bureau, 31 au téléphone, tous avec un contour de 2 px ; aucun dans les cadres d’état · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au téléphone, hors liens dans une phrase · Images : chacune à sa taille (photo de 719 px au bureau : fichier de 900 ; vignettes de 312 px : 480, de 336 à 464 px sur tablette, deux par rangée : 480 ; au téléphone, 364 px à la densité 2,625 : 900, le plus grand fichier d’un dégradé) · Poids : 217 ko au bureau, 243 ko au téléphone ; aucun script, aucune ressource tierce.</p>
+  <p class="mq-mesures"><b>Mesures</b> (passe 3, 16 oct. 2026 ; Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, p3-images.mjs, p3-sombres.mjs, radios-cadres.py, insecables.py) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7 · débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête du site en allemand : aucun · annotations à 1 440, 412 et 320 px : rien à redire (pastilles dans l’écran, hors des photos et des textes ; étiquettes entières ; cadres inert ; pied de page avant les états ; un seul bloc de mesures ; sans annotations, 0 élément déplacé) · sans annotations : 0 pixel changé hors du magenta, au bureau comme sur Pixel 7 · images : toutes à la taille d’affichage, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px (fichier chargé = le plus petit du srcset qui couvre l’écran, à 12 % près) · scènes de nuit et de contre-jour : aucune dans une première rangée, à 9 largeurs · radios : un nom de groupe par cadre · insécables : 0 à poser · poids après défilement complet : 230 ko au bureau, 256 ko au téléphone ; aucun script, aucune ressource tierce · les commandes, les couleurs et l’ordre du clavier ne changent pas à la passe 3 : les mesures de clavier, de cibles et de contraste de la passe 2 restent valables.</p>
 </aside>
 </body>
 </html>

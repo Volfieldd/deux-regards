@@ -18,31 +18,9 @@
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
 /* MQ-11 · liste des carnets. Composants de la planche (_commun/public.css : tête de page § 15, filtres § 17, planche de billets
-   .billets et carte .billet-e, sa variante .billet-e--cote, abonnement .abo, pagination .pages § 21). Ci-dessous, la mise en page
-   de la page seulement.
-   Couverture verticale : à côté du texte (.billet-e--cote), jamais seule en haut d'une colonne de 600 px avec un vide à sa droite
-   (jury v1, MQ-11 crit. 11). Dans la liste, le titre garde la taille des autres billets (titre 2), et le texte se cale en bas
-   de la photo, comme une légende de livre. Au téléphone, la photo prend 5/12 de la largeur, la rubrique et le titre se posent
-   à sa droite, le chapô et la méta passent dessous, sur toute la largeur. */
+   .billets et carte .billet-e, sa variante .billet-e--cote en liste, abonnement .abo, pagination .pages § 21). Ci-dessous, la
+   mise en page de la page seulement. */
 .compte { margin: var(--esp-3) 0 0; font-size: var(--t-petit); color: var(--mute); }
-.billets .billet-e--cote .billet-e-titre { font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); letter-spacing: -.003em; }
-@media (min-width: 768px) {
-  .billets .billet-e--cote { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); column-gap: var(--esp-4); }
-}
-/* De 768 à 899 px, la planche passe la liste sur une colonne : la couverture horizontale y prend toute la largeur. */
-@media (min-width: 768px) and (max-width: 899px) { .billets .billet-e:not(.billet-e--cote) { --h: 520px; } }
-/* Au bureau, la couverture verticale a la hauteur commune des couvertures (380 px) : 253 px de large. */
-@media (min-width: 1280px) { .billets .billet-e--cote { grid-template-columns: calc(380px * 2 / 3) minmax(0, 1fr); } }
-@media (max-width: 767px) {
-  .billets .billet-e--cote { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-rows: 1fr auto auto auto auto auto; gap: var(--esp-1) var(--esp-2); align-items: end; }
-  .billets .billet-e--cote .billet-e-txt { display: contents; }
-  .billets .billet-e--cote .billet-e-img { grid-column: 1; grid-row: 1 / span 3; }
-  .billets .billet-e--cote .etiquette { grid-column: 2; grid-row: 2; }
-  .billets .billet-e--cote .billet-e-titre { grid-column: 2; grid-row: 3; }
-  .billets .billet-e--cote .billet-e-chapo { grid-column: 1 / -1; grid-row: 4; margin-top: var(--esp-1); }
-  .billets .billet-e--cote .billet-e-meta { grid-column: 1 / -1; grid-row: 5; }
-  .billets .billet-e--cote .nur-fr { grid-column: 1 / -1; grid-row: 6; }
-}
 /* Autres états (maquette) */
 .etat-in { padding: var(--esp-4) var(--gut) var(--esp-5); }
 .etat-in .billets { margin-top: var(--esp-4); }
@@ -119,7 +97,7 @@
           <p class="etiquette">Notes d’atelier</p>
           <h2 class="billet-e-titre" id="b1"><a href="/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></h2>
           <p class="billet-e-chapo">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte « Bonjour » : voici ce qu’elle a répondu, et ce que nous en avons appris.</p>
-          <p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15 oct. 2026</time> · 1 photo · 3 min de lecture</p>
+          <p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15 oct. 2026</time> · 1 photo · 3 min de lecture</p>
         </div>
         <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 42px), (min-width: 768px) calc(40vw - 45px), calc(42vw - 27px)" width="320" height="480" alt="" fetchpriority="high" decoding="async"></figure>
       </article>
@@ -130,7 +108,7 @@
           <p class="etiquette">Voyages</p>
           <h2 class="billet-e-titre" id="b2"><a href="/carnet/lisbonne-et-porto">Lisbonne et Porto</a></h2>
           <p class="billet-e-chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : du premier tram de l’Alfama à la barre de Foz, là où le Douro rencontre l’Atlantique.</p>
-          <p class="billet-e-meta"><b>Sébastien et Julien</b> · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos · 4 min de lecture</p>
+          <p class="billet-e-meta"><b>Sébastien et Julien</b> · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos · 4 min de lecture</p>
         </div>
         <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 42px), (min-width: 768px) calc(40vw - 45px), calc(42vw - 27px)" width="320" height="480" alt="" fetchpriority="high" decoding="async"></figure>
       </article>
@@ -141,7 +119,7 @@
           <p class="etiquette">Notes d’atelier</p>
           <h2 class="billet-e-titre" id="b3"><a href="/carnet/pourquoi-nous-ne-recadrons-pas">Pourquoi nous ne recadrons pas</a></h2>
           <p class="billet-e-chapo">Le cadre se décide au viseur, pas à l’écran. Deux photographes, une même règle, et les rares fois où nous y avons dérogé.</p>
-          <p class="billet-e-meta"><b>Sébastien</b> · <time datetime="2026-10-02">2 oct. 2026</time> · 2 photos · 4 min de lecture</p>
+          <p class="billet-e-meta"><b>Sébastien</b> · <time datetime="2026-10-02">2 oct. 2026</time> · 2 photos · 4 min de lecture</p>
         </div>
         <figure class="billet-e-img" style="--r:1.5"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) min(570px, calc(50vw - 104px)), (min-width: 900px) calc(50vw - 72px), (min-width: 768px) calc(100vw - 80px), min(450px, calc(100vw - 48px))" width="480" height="320" alt="" loading="lazy" decoding="async"></figure>
       </article>
@@ -152,7 +130,7 @@
           <p class="etiquette">Notes d’atelier</p>
           <h2 class="billet-e-titre" id="b4"><a href="/carnet/tirer-sur-photo-rag">Tirer sur Photo Rag</a></h2>
           <p class="billet-e-chapo">Un papier coton mat de 308 g, une marge blanche de 3 cm et trois essais avant le bon : ce que nos premières épreuves nous ont appris.</p>
-          <p class="billet-e-meta"><b>Sébastien</b> · <time datetime="2026-09-25">25 sept. 2026</time> · 1 photo · 4 min de lecture</p>
+          <p class="billet-e-meta"><b>Sébastien</b> · <time datetime="2026-09-25">25 sept. 2026</time> · 1 photo · 4 min de lecture</p>
         </div>
         <figure class="billet-e-img" style="--r:1.5"><img src="_commun/photos/480/neige.webp" srcset="_commun/photos/480/neige.webp 480w, _commun/photos/neige.webp 900w" sizes="(min-width: 1280px) min(570px, calc(50vw - 104px)), (min-width: 900px) calc(50vw - 72px), (min-width: 768px) calc(100vw - 80px), min(450px, calc(100vw - 48px))" width="480" height="320" alt="" loading="lazy" decoding="async"></figure>
       </article>
@@ -168,7 +146,7 @@
 <footer class="sf sf--complet wrap">
   <div class="sf-in"><span class="mq-pin" aria-hidden="true">8</span>
     <div>
-      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
+      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
       <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage, un tirage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
     </div>
     <nav class="sf-groupes" aria-label="Pied de page">
@@ -206,8 +184,8 @@
       </nav>
       <p class="compte">2 billets signés par Julien, dont un à deux voix. <a class="lien" href="/carnet">Voir les 4 billets</a></p>
       <ol class="billets" aria-label="Billets de Julien">
-        <li><article class="billet-e billet-e--cote is-focus" aria-labelledby="e1-b1"><div class="billet-e-txt"><p class="etiquette">Notes d’atelier</p><p class="billet-e-titre" id="e1-b1"><a href="/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></p><p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15 oct. 2026</time> · 1 photo · 3 min de lecture</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 58px), (min-width: 768px) calc(40vw - 77px), calc(42vw - 47px)" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
-        <li><article class="billet-e billet-e--cote" aria-labelledby="e1-b2"><div class="billet-e-txt"><p class="etiquette">Voyages</p><p class="billet-e-titre" id="e1-b2"><a href="/carnet/lisbonne-et-porto">Lisbonne et Porto</a></p><p class="billet-e-meta"><b>Sébastien et Julien</b> · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos · 4 min de lecture</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 58px), (min-width: 768px) calc(40vw - 77px), calc(42vw - 47px)" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
+        <li><article class="billet-e billet-e--cote is-focus" aria-labelledby="e1-b1"><div class="billet-e-txt"><p class="etiquette">Notes d’atelier</p><p class="billet-e-titre" id="e1-b1"><a href="/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></p><p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15 oct. 2026</time> · 1 photo · 3 min de lecture</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 58px), (min-width: 768px) calc(40vw - 77px), calc(42vw - 47px)" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
+        <li><article class="billet-e billet-e--cote" aria-labelledby="e1-b2"><div class="billet-e-txt"><p class="etiquette">Voyages</p><p class="billet-e-titre" id="e1-b2"><a href="/carnet/lisbonne-et-porto">Lisbonne et Porto</a></p><p class="billet-e-meta"><b>Sébastien et Julien</b> · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos · 4 min de lecture</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 58px), (min-width: 768px) calc(40vw - 77px), calc(42vw - 47px)" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
       </ol>
     </div>
   </section>
@@ -260,17 +238,17 @@
     <li><span class="mq-num" aria-hidden="true">7</span><b>S’abonner sans compte</b><p>Un flux Atom par langue, nommé « flux RSS » (le mot connu, lexique § 1), expliqué en une phrase, déclaré par &lt;link rel="alternate"&gt; et repris au pied de page.</p><span class="mq-ref">UX-F-34 · étude B58, B84 · Opquast 1</span></li>
     <li><span class="mq-num" aria-hidden="true">8</span><b>Le pied de page complet de la planche</b><p>Deux groupes nommés, « Flux RSS des carnets » à sa place fixe.</p><span class="mq-ref">Planche MQ-00 § 5 · UX-T-03</span></li>
     <li><span class="mq-num" aria-hidden="true">9</span><b>Filtrer par regard</b><p>« Julien » : 2 billets, le nombre de chaque rubrique recalculé, une phrase qui dit pourquoi « Lisbonne et Porto » y figure (deux voix), et le retour à la liste entière. Focus au clavier : un cadre de 2 px autour de toute la carte.</p><span class="mq-ref">B&amp;S 1.1.2 · WCAG 2.4.7, 2.4.11</span></li>
-    <li><span class="mq-num" aria-hidden="true">10</span><b>En allemand</b><p>« Reisetagebücher » tient dans l’en-tête de 320 à 1 440 px ; le billet traduit est en allemand, l’autre garde son titre et son chapô en français, balisés lang="fr", et le dit : « Nur auf Französisch ». L’adresse garde le slug français.</p><span class="mq-ref">Étude B54, B73 · RGAA 8.7 · critère 4</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>En allemand</b><p>« Reisetagebücher » tient dans l’en-tête de 320 à 1 440 px ; le billet traduit est en allemand, l’autre garde son titre et son chapô en français, balisés lang="fr", et le dit : « Nur auf Französisch ». L’adresse garde le slug français.</p><span class="mq-ref">Étude B54, B73 · RGAA 8.7 · critère 4</span></li>
     <li><span class="mq-num" aria-hidden="true">11</span><b>Une pagination qui dit où l’on est</b><p>« Page 1 sur 2 · billets 1 à 12 sur 15 », un lien « Billets plus anciens » à adresse propre (?page=2) ; jamais de défilement infini.</p><span class="mq-ref">UX-T-16 · RGESN 4.2 · Opquast 131</span></li>
   </ol>
   <h3>Ce que la passe 2 a corrigé (jury v1)</h3>
-  <p><b>Direction artistique</b> : les deux couvertures verticales ne laissent plus de vide de 350 px à leur droite (repère 5). Les couvertures de « Pourquoi nous ne recadrons pas » (Brume sur la Loire) et de « Tirer sur Photo Rag » (Silence blanc) restent celles du lexique (§ 4.3) : elles se ressemblent parce que les douze dégradés de démonstration du dépôt dessinent tous un ciel et des collines ; de vraies photos ne se confondraient pas, et changer la couverture changerait une donnée fixée. Leur luminance moyenne diffère d’ailleurs nettement (Brume 0,45, Silence blanc 0,66). <b>Sobriété</b> : <code>srcset</code> et <code>sizes</code> justes sur toutes les couvertures, états compris (verticale de 125 à 283 px affichés selon la largeur : 480/ au bureau, 600 px sur Pixel 7 ; horizontale de 288 à 740 px, jusqu’au fichier de 900 px). <b>Homogénéité</b> : espaces fines insécables avant « : ; ! ? » et dans les guillemets (outil insecables.py). <b>Lisibilité de la maquette</b> : étiquettes d’état sur deux lignes au besoin, jamais coupées ; cadres d’état <code>inert</code> et nommés ; pied de page avant les états ; mesures faites.</p>
+  <p><b>Direction artistique</b> : les deux couvertures verticales ne laissent plus de vide de 350 px à leur droite (repère 5). Les couvertures de « Pourquoi nous ne recadrons pas » (Brume sur la Loire) et de « Tirer sur Photo Rag » (Silence blanc) restent celles du lexique (§ 4.3) : elles se ressemblent parce que les douze dégradés de démonstration du dépôt dessinent tous un ciel et des collines ; de vraies photos ne se confondraient pas, et changer la couverture changerait une donnée fixée. Leur luminance moyenne diffère d’ailleurs nettement (Brume 0,45, Silence blanc 0,66). <b>Sobriété</b> : <code>srcset</code> et <code>sizes</code> justes sur toutes les couvertures, états compris (verticale de 125 à 283 px affichés selon la largeur : 480/ au bureau, 600 px sur Pixel 7 ; horizontale de 288 à 740 px, jusqu’au fichier de 900 px). <b>Homogénéité</b> : espaces fines insécables avant « : ; ! ? » et dans les guillemets (outil insecables.py). <b>Lisibilité de la maquette</b> : étiquettes d’état sur deux lignes au besoin, jamais coupées ; cadres d’état <code>inert</code> et nommés ; pied de page avant les états ; mesures faites.</p>
   <h3>Composants de la planche</h3>
-  <p>Tous dans <code>_commun/public.css</code> et montrés dans MQ-00 : <code>.tete-page</code> (§ 15) · <code>.filtres</code> et <code>.filtre</code> (§ 17), les mêmes que la Galerie (MQ-02) · <code>.billets</code>, <code>.billet-e</code> et <code>.billet-e--cote</code> (§ 21), repris de l’accueil (MQ-01) · <code>.abo</code> et <code>.pages</code> (§ 21). La page n’ajoute que sa mise en page : dans la liste, le titre d’une carte <code>--cote</code> reste en titre 2, et au téléphone la carte <code>--cote</code> pose le titre à côté de la photo et le chapô dessous. <b>À verser dans la planche</b> : cette disposition de la carte <code>--cote</code> en liste (une dizaine de lignes).</p>
+  <p>Tous dans <code>_commun/public.css</code> et montrés dans MQ-00 : <code>.tete-page</code> (§ 15) · <code>.filtres</code> et <code>.filtre</code> (§ 17), les mêmes que la Galerie (MQ-02) · <code>.billets</code>, <code>.billet-e</code> et <code>.billet-e--cote</code> (§ 21), repris de l’accueil (MQ-01) · <code>.abo</code> et <code>.pages</code> (§ 21). La disposition de la carte <code>--cote</code> en liste (titre 2 ; au téléphone, le titre à côté de la photo et le chapô dessous), proposée par cette page à la passe 2, est versée dans la planche (§ 21) à la passe 3 : la page n’ajoute plus que sa mise en page.</p>
   <h3>Adresses et données</h3>
   <p>Adresses à créer (lexique § 2) : <code>/carnet</code>, <code>/carnet/:slug</code>, <code>/carnet/flux.xml</code>, <code>?rubrique=</code>, <code>?par=</code>, <code>?page=</code> ; le slug reste français dans toutes les langues (<code>/de/carnet/lisbonne-et-porto</code>). Temps de lecture (Inês 3 min, les trois autres 4 min) et dates : lexique § 4.3.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures" id="mesures"><b>Mesures</b> (passe 2, 16 oct. 2026, Chromium de Playwright 1.64 en conteneur ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, mq1112-images.mjs, mq1112-focus.mjs, mq1112-petits.mjs, insecables.py, html-validate) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7 · largeurs 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête en allemand : 0 débordement, 0 texte coupé · gabarit des annotations à 1 440, 412 et 320 px : rien à redire (pastilles dans l’écran, hors des photos et des textes ; étiquettes entières ; cadres inert ; pied de page avant les états) · sans annotations : 0 pixel changé dans l’interface, au bureau comme au téléphone · images : les 8 couvertures (états compris) à la taille d’affichage à 320, 412 (densité 2,6), 820, 1 024 et 1 440 px · focus : 32 arrêts de tabulation au bureau, 26 au téléphone, tous avec un contour visible ; au téléphone, chaque titre de billet est un lien étendu à toute la carte (cible de 300 px et plus) · 0 texte sous 13 px · html-validate : seule remarque, les deux menus « Menu principal » de l’en-tête de la planche, dont un seul est affiché à la fois · insécables : 0 espace à corriger · poids : 208 ko en 9 fichiers (4 images), au bureau comme au téléphone ; aucun script, aucune ressource tierce.</p>
+  <p class="mq-mesures" id="mesures"><b>Mesures</b> (passe 3, 16 oct. 2026 ; Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, p3-images.mjs, p3-sombres.mjs, radios-cadres.py, insecables.py) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7 · débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête du site en allemand : aucun · annotations à 1 440, 412 et 320 px : rien à redire (pastilles dans l’écran, hors des photos et des textes ; étiquettes entières ; cadres inert ; pied de page avant les états ; un seul bloc de mesures ; sans annotations, 0 élément déplacé) · sans annotations : 0 pixel changé hors du magenta, au bureau comme sur Pixel 7 · images : toutes à la taille d’affichage, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px (fichier chargé = le plus petit du srcset qui couvre l’écran, à 12 % près) · scènes de nuit et de contre-jour : aucune dans une première rangée, à 9 largeurs · radios : un nom de groupe par cadre · insécables : 0 à poser · poids après défilement complet : 219 ko au bureau, 219 ko au téléphone ; aucun script, aucune ressource tierce · les commandes, les couleurs et l’ordre du clavier ne changent pas à la passe 3 : les mesures de clavier, de cibles et de contraste de la passe 2 restent valables.</p>
 </aside>
 </body>
 </html>

@@ -22,6 +22,12 @@
    - chaque cadre d'autre état est inert (<section class="mq-ecran" inert aria-labelledby="…">) : on n'y tabule pas, ses
      liens d'exemple ne sont pas des liens de la page ; seul l'écran principal est vivant ;
    - un seul bloc « Mesures » par encart (.mq-mesures), celui de la dernière passe, daté, sans « à compléter ».
+   Règles de la passe 3 (16 oct.) :
+   - un nom de groupe de boutons radio par cadre : un cadre d'état qui montre un formulaire nomme ses radios à part
+     (name="format-e2"), ou les met dans leur propre <form> ; sinon le navigateur les lie à ceux de l'écran principal, ne coche
+     qu'un bouton pour toute la page, et l'état montré ment (contrôle : dr-work/outils/radios-cadres.py) ;
+   - le contour d'un cadre pleine largeur passe au-dessus de ce qu'il contient (en-tête, barre de filtres collante) : § 2 ;
+   - un cadre « page entière » posé dans la marge du site : .e-plein (§ 2).
    ===================================================================================================== */
 @font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/ibm-plex-mono-latin-400-normal.woff2) format('woff2'); }
 @font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/ibm-plex-mono-latin-500-normal.woff2) format('woff2'); }
@@ -68,6 +74,12 @@
    gouttière ; sa pastille va dans l'étiquette. Rien ne sort de l'écran. */
 .mq-ecran--plein { outline-offset: -1px; }
 .mq-ecran--plein > .mq-etat { left: max(8px, var(--gut, 16px)); max-width: calc(100vw - 2 * max(8px, var(--gut, 16px))); }
+/* Le contour d'un cadre pleine largeur passe au-dessus de l'en-tête (z-index 20) et de la barre de filtres collante (15)
+   qu'il contient, qui le cachaient (passe 3, d'après MQ-01 à MQ-04) ; retiré avec les autres annotations (§ « Interrupteur »). */
+.mq-ecran--plein::after { content: ''; position: absolute; inset: 0; z-index: 59; outline: 1px dashed var(--mq); outline-offset: -1px; pointer-events: none; }
+/* Cadre « page entière » posé dans la marge du site (.wrap) : il s'élargit jusqu'à 10 px des bords de l'écran, en-tête du site
+   compris ; son contour (à 6 px) et son étiquette restent dans l'écran (passe 3, d'après MQ-13 à MQ-15). */
+.e-plein { margin-inline: calc(10px - var(--gut)); padding-bottom: var(--esp-5); outline-offset: 6px; }
 
 /* 3. Encart « Ce qui change » : toujours en fin de page, toujours le même dessin, indépendant du thème. */
 .mq-notes { margin-top: 96px; padding: 40px max(var(--gut, 24px), 16px) 56px; background: var(--mq-fond); color: var(--mq-encre);
@@ -120,7 +132,8 @@ html.sans-annotations .mq-pin, html.sans-annotations .mq-etat, html.sans-annotat
 html:has(#sans-annotations:target) .mq-pin, html:has(#sans-annotations:target) .mq-etat,
 html:has(#sans-annotations:target) .mq-fold, html:has(#sans-annotations:target) .mq-notes { display: none !important; }
 html.sans-annotations .mq-ecran, html:has(#sans-annotations:target) .mq-ecran { outline-color: transparent; }
-@media print { .mq-pin, .mq-etat, .mq-fold, .pin, .ord, .mq-band { display: none !important; } .mq-ecran { outline: 0; } }
+html.sans-annotations .mq-ecran--plein::after, html:has(#sans-annotations:target) .mq-ecran--plein::after { display: none; }
+@media print { .mq-pin, .mq-etat, .mq-fold, .pin, .ord, .mq-band, .mq-ecran--plein::after { display: none !important; } .mq-ecran { outline: 0; } }
 
 /* ----- Ancien gabarit (maquettes v0) : gardé pour que les fichiers v0 restent lisibles jusqu'à leur reprise.
    Ne pas l'employer dans une nouvelle maquette ; à retirer quand les vingt maquettes auront été refaites. ----- */

@@ -26,6 +26,7 @@ Les critères ne changent pas. Une partie de leurs vérifications est outillée,
 | Critère | Contrôle |
 |---|---|
 | 4, 9 | axe-core au bureau et sur Pixel 7 ; débordement de 320 à 1 440 px, en allemand compris (`consol-final.mjs`, `consol-admin.mjs`) ; focus visible sur chaque champ, en erreur compris |
-| 10 | `passe2-rangees.mjs` : le fichier chargé par chaque vignette, à comparer à sa largeur d'affichage |
+| 10 | `passe2-rangees.mjs` : le fichier chargé par chaque vignette, à comparer à sa largeur d'affichage ; passe 3 : `p3-images.mjs`, toutes les images (états compris) à 1 440, 1 024, 820, Pixel 7 et 320 px, le fichier chargé comparé au plus petit du `srcset` qui couvre l'écran (12 % d'agrandissement admis ; un cran de trop admis dans une rangée justifiée sur tablette) ; `sizes-tel.py` et `sizes-tel-ecrire.py` (place réelle au téléphone) |
 | 6, 7 | `insecables.py` (ponctuation) ; lexique, § 0 et § 4.9 (mots, données, chronologie du 16 oct.) |
-| 14 | `controle-annotations.mjs` : pastilles dans l'écran et hors des photos et des textes, étiquettes entières, cadres `inert`, pied de page avant l'encart, un seul bloc Mesures, interface identique sans annotations |
+| 11 | `p3-sombres.mjs` : les trois scènes de nuit et de contre-jour jamais dans la première rangée d'une vue filtrée, à 9 largeurs |
+| 14 | `controle-annotations.mjs` : pastilles dans l'écran et hors des photos et des textes, étiquettes entières, cadres `inert`, pied de page avant l'encart, un seul bloc Mesures, interface identique sans annotations (géométrie) ; `consol-sans.py` (pixels, magenta masqué ; `p3-sans-ecrans.mjs` et `.py` écran par écran pour une page trop haute) ; `radios-cadres.py` (un nom de groupe de radios par cadre) |

@@ -13,32 +13,20 @@
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
 /* MQ-14 · panier. Composants de la planche (_commun/public.css, § 25 : une commande par photographe .bloc-vendeur, un tirage
-   .ligne, .sous-total, récapitulatif .recap, enchaînement des paiements .suite ; § 11 .montants ; § 22 .depliant) ; ci-dessous,
-   la mise en page de la page, le résumé du haut au téléphone (.p-haut), des vignettes plus grandes, et la présentation des états.
+   .ligne, .sous-total, le résumé du haut .p-haut, récapitulatif .recap, enchaînement des paiements .suite ; § 11 .montants ;
+   § 22 .depliant) ; ci-dessous, la mise en page de la page et la présentation des états.
    Aucun jeton redéclaré. */
 .panier { display: grid; gap: var(--esp-6) var(--esp-8); grid-template-columns: minmax(0, 1fr); align-items: start; }
 @media (min-width: 1024px) { .panier { grid-template-columns: minmax(0, 7fr) minmax(340px, 5fr); } }
 .blocs { display: grid; gap: var(--esp-6); }
-/* Au téléphone et sur tablette (une colonne), le total et le bouton plein sont aussi en haut, sous le chapô (Baymard :
-   résumé et bouton en tête et en pied d'un panier long) ; au bureau, le récapitulatif collant de droite suffit. */
-.p-haut { display: none; }
-@media (max-width: 1023px) { .p-haut { display: grid; gap: var(--esp-2); padding-top: var(--esp-2); border-top: 1px solid var(--rule); } }
-.p-haut-t { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0 var(--esp-2); margin: 0; }
-.p-haut-n { font-size: var(--t-titre-3); font-variant-numeric: tabular-nums; }
-.p-haut-n b { font-weight: 500; }
-.p-haut-d { color: var(--mute); font-size: var(--t-petit); }
-/* La photo d'abord (jury v1, critère 11) : vignettes de 120 px de haut au bureau, 80 px au téléphone (96 et 72 dans la planche),
-   dans une colonne de largeur fixe (celle d'une horizontale) : les titres des lignes s'alignent, verticale ou horizontale. */
-.ligne { grid-template-columns: 180px minmax(0, 1fr) auto; }
-.ligne-img, .ligne-img img { height: 120px; }
-@media (max-width: 599px) { .ligne { grid-template-columns: 120px minmax(0, 1fr); } .ligne-img, .ligne-img img { height: 80px; } }
+/* Au téléphone et sur tablette (une colonne), le total et le bouton plein sont aussi en haut (.p-haut, planche § 25) ; les
+   vignettes des lignes suivent le format de la photo (planche § 25). */
 /* Changer de pays de livraison : un formulaire à un seul champ, dans un dépliant */
 .pays form { display: grid; gap: var(--esp-2); padding-top: var(--esp-1); }
 .pays-l { margin: 0; font-size: var(--t-petit); color: var(--prose); }
 .recap-sous { display: grid; gap: var(--esp-2); }
 .recap-sous > * { margin: 0; }
-/* Autres états : la page entière dans un cadre qui touche les bords de l'écran (en-tête compris). */
-.e-plein { margin-inline: calc(10px - var(--gut)); padding-bottom: var(--esp-5); outline-offset: 6px; }
+/* Autres états : la page entière dans un cadre .e-plein (annotations.css), en-tête compris. */
 .e-msg { max-width: 640px; padding-top: var(--esp-3); }
 .e-msg + .tete-page { padding-top: var(--esp-3); }
 </style>
@@ -90,8 +78,8 @@
     <div class="blocs">
       <section class="bloc-vendeur mq-a" aria-labelledby="b1-h"><span class="mq-pin" aria-hidden="true">3</span>
       <header><p class="etiquette">Commande 1 sur 2</p><h2 id="b1-h">Vendu et expédié par Julien Exemple</h2></header>
-      <article class="ligne" aria-labelledby="l-esc-t">
-        <a class="ligne-img" href="/tirages/escaliers-des-guindais" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/escaliers.webp" srcset="_commun/photos/160/escaliers.webp 107w, _commun/photos/480/escaliers.webp 320w" sizes="(min-width: 600px) 80px, 54px" width="80" height="120" alt="" loading="lazy" decoding="async"></a>
+      <article class="ligne" style="--r:0.6667" aria-labelledby="l-esc-t">
+        <a class="ligne-img" href="/tirages/escaliers-des-guindais" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/escaliers.webp" srcset="_commun/photos/160/escaliers.webp 107w, _commun/photos/480/escaliers.webp 320w" sizes="(min-width: 600px) 120px, 80px" width="120" height="180" alt="" loading="lazy" decoding="async"></a>
         <div>
           <h3 id="l-esc-t"><a href="/tirages/escaliers-des-guindais">Escaliers des Guindais</a></h3>
           <p class="ligne-d">Julien · Grand format · image 40 × 60 cm, feuille 50 × 70</p>
@@ -129,8 +117,8 @@
       <div class="recap-sous mq-a"><span class="mq-pin" aria-hidden="true">5</span>
         <p class="suite-t">Vos coordonnées une seule fois, puis deux paiements à la suite :</p>
         <ol class="suite" aria-label="Déroulé de la commande">
-          <li><span class="suite-t"><b>Paiement à Julien</b> · commande 1, Escaliers des Guindais</span><span class="m">305,00&nbsp;€</span></li>
-          <li><span class="suite-t"><b>Paiement à Sébastien</b> · commande 2, Brume sur la Loire</span><span class="m">195,00&nbsp;€</span></li>
+          <li><span class="suite-t"><b>Paiement à Julien</b> · commande 1, Escaliers des Guindais</span><span class="m">305,00&nbsp;€</span></li>
+          <li><span class="suite-t"><b>Paiement à Sébastien</b> · commande 2, Brume sur la Loire</span><span class="m">195,00&nbsp;€</span></li>
         </ol>
         <div>
           <dl class="montants"><dt class="total">Total</dt><dd class="total prix--total">500,00&nbsp;€</dd></dl>
@@ -162,7 +150,7 @@
 <footer class="sf sf--complet wrap">
   <div class="sf-in">
     <div>
-      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
+      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
       <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage, un tirage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
     </div>
     <nav class="sf-groupes" aria-label="Pied de page">
@@ -231,8 +219,8 @@
     <div class="panier">
       <div class="blocs"><section class="bloc-vendeur" aria-labelledby="eA-b1-h">
       <header><p class="etiquette">Une commande</p><h2 id="eA-b1-h">Vendu et expédié par Julien Exemple</h2></header>
-      <article class="ligne" aria-labelledby="eA-esc-t">
-        <a class="ligne-img" href="/tirages/escaliers-des-guindais" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/escaliers.webp" srcset="_commun/photos/160/escaliers.webp 107w, _commun/photos/480/escaliers.webp 320w" sizes="(min-width: 600px) 80px, 54px" width="80" height="120" alt="" loading="lazy" decoding="async"></a>
+      <article class="ligne" style="--r:0.6667" aria-labelledby="eA-esc-t">
+        <a class="ligne-img" href="/tirages/escaliers-des-guindais" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/escaliers.webp" srcset="_commun/photos/160/escaliers.webp 107w, _commun/photos/480/escaliers.webp 320w" sizes="(min-width: 600px) 120px, 80px" width="120" height="180" alt="" loading="lazy" decoding="async"></a>
         <div>
           <h3 id="eA-esc-t"><a href="/tirages/escaliers-des-guindais">Escaliers des Guindais</a></h3>
           <p class="ligne-d">Julien · Grand format · image 40 × 60 cm, feuille 50 × 70</p>
@@ -300,8 +288,8 @@
       <div class="blocs">
         <section class="bloc-vendeur" aria-labelledby="eB-b1-h">
       <header><p class="etiquette">Commande 1 sur 2</p><h2 id="eB-b1-h">Vendu et expédié par Julien Exemple</h2></header>
-      <article class="ligne" aria-labelledby="eB-esc-t">
-        <a class="ligne-img" href="/tirages/escaliers-des-guindais" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/escaliers.webp" srcset="_commun/photos/160/escaliers.webp 107w, _commun/photos/480/escaliers.webp 320w" sizes="(min-width: 600px) 80px, 54px" width="80" height="120" alt="" loading="lazy" decoding="async"></a>
+      <article class="ligne" style="--r:0.6667" aria-labelledby="eB-esc-t">
+        <a class="ligne-img" href="/tirages/escaliers-des-guindais" tabindex="-1" aria-hidden="true"><img src="_commun/photos/160/escaliers.webp" srcset="_commun/photos/160/escaliers.webp 107w, _commun/photos/480/escaliers.webp 320w" sizes="(min-width: 600px) 120px, 80px" width="120" height="180" alt="" loading="lazy" decoding="async"></a>
         <div>
           <h3 id="eB-esc-t"><a href="/tirages/escaliers-des-guindais">Escaliers des Guindais</a></h3>
           <p class="ligne-d">Julien · Grand format · image 40 × 60 cm, feuille 50 × 70</p>
@@ -346,8 +334,8 @@
       <section class="recap" aria-labelledby="eB-recap-h">
       <h2 id="eB-recap-h">Récapitulatif</h2>
       <ol class="suite" aria-label="Déroulé de la commande">
-          <li><span class="suite-t"><b>Paiement à Julien</b> · commande 1, Escaliers des Guindais</span><span class="m">305,00&nbsp;€</span></li>
-          <li><span class="suite-t"><b>Paiement à Sébastien</b> · commande 2, Brume sur la Loire</span><span class="m">195,00&nbsp;€</span></li>
+          <li><span class="suite-t"><b>Paiement à Julien</b> · commande 1, Escaliers des Guindais</span><span class="m">305,00&nbsp;€</span></li>
+          <li><span class="suite-t"><b>Paiement à Sébastien</b> · commande 2, Brume sur la Loire</span><span class="m">195,00&nbsp;€</span></li>
         </ol>
       <div><dl class="montants"><dt class="total">Total</dt><dd class="total prix--total">500,00&nbsp;€</dd></dl>
         <p class="tva" style="margin-top:var(--esp-1)">Livraison comprise. TVA non applicable, art. 293 B du CGI.</p></div>
@@ -401,7 +389,7 @@
   <ol class="mq-reperes">
     <li><span class="mq-num" aria-hidden="true">1</span><b>« Panier » nommé, compté, à sa place</b><p>L’en-tête Site de la planche : « Panier (2) » en mots au bureau, l’icône et le nombre au téléphone (lu « Panier, 2 tirages ») ; rien ne sort de l’écran, allemand compris.</p><span class="mq-ref">MQ-00 § 1 · WCAG 1.4.10</span></li>
     <li><span class="mq-num" aria-hidden="true">2</span><b>Au téléphone, le total et le bouton en haut</b><p>Sous le chapô : « Total 500,00 € · 2 commandes, livraison comprise » et « Commander les 2 tirages », dans le premier écran ; le récapitulatif complet et le même bouton restent en bas. Au bureau, le récapitulatif collant de droite suffit (ce bloc n’existe qu’en une colonne, sous 1 024 px).</p><span class="mq-ref">Jury v1 critère 2 · Baymard : résumé et bouton en tête et en pied du panier sur mobile</span></li>
-    <li><span class="mq-num" aria-hidden="true">3</span><b>Un bloc par vendeur, la règle dite une fois</b><p>« Chacun signe ses tirages, les expédie depuis Angers et encaisse son propre paiement » : une fois, dans le chapô, plus dans chaque bloc. Chaque bloc a son vendeur, ses lignes, son envoi, sa date et son total ; « Commande 1 sur 2 » dit qu’il y en a deux. Vignettes de 120 px de haut au bureau, 80 au téléphone, chargées à leur taille, dans une colonne fixe : les titres s’alignent.</p><span class="mq-ref">Étude S1, § 6.1 · jury v1 critères 2, 10 et 11</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Un bloc par vendeur, la règle dite une fois</b><p>« Chacun signe ses tirages, les expédie depuis Angers et encaisse son propre paiement » : une fois, dans le chapô, plus dans chaque bloc. Chaque bloc a son vendeur, ses lignes, son envoi, sa date et son total ; « Commande 1 sur 2 » dit qu’il y en a deux. Vignettes au format de la photo, chargées à leur taille : la photo garde son côté long (180 px au bureau, 120 au téléphone), une horizontale fait 180 × 120, la verticale d’« Escaliers des Guindais » 120 × 180 ; plus de bande étroite de 53 px dans une colonne d’horizontale (planche § 25, passe 3).</p><span class="mq-ref">UX-T-17 · étude S1, § 6.1 · jury v1 critères 2, 10 et 11</span></li>
     <li><span class="mq-num" aria-hidden="true">4</span><b>Un récapitulatif sans doublon</b><p>Les deux paiements, dans leur ordre, puis « Total 500,00 € », livraison comprise, et la seule mention de TVA de la page ; sans cadre ni fond, collant au bureau.</p><span class="mq-ref">LEXIQUE § 2</span></li>
     <li><span class="mq-num" aria-hidden="true">5</span><b>L’enchaînement des deux paiements, annoncé</b><p>Coordonnées une fois, puis 305,00 € à Julien, puis 195,00 € à Sébastien, deux lignes sur le relevé ; les exemplaires réservés 35 minutes dès le premier « Payer ».</p><span class="mq-ref">Baymard (coût total, étapes annoncées) · étude S36</span></li>
     <li><span class="mq-num" aria-hidden="true">6</span><b>Le pays, sans deviner</b><p>France par défaut ; un autre pays se choisit dans un repli, avec un bouton qui dit ce qu’il fait (« Recalculer la livraison »). Les zones non servies sont dites avant le choix.</p><span class="mq-ref">Étude S25, S28 · B&amp;S 5.1</span></li>
@@ -411,11 +399,11 @@
     <li><span class="mq-num" aria-hidden="true">10</span><b>L’édition s’épuise entre-temps</b><p>Le panier relit les prix et les stocks à chaque affichage (exemple : le panier de Claire, s’il avait aussi compté ce tirage) : la ligne épuisée reste visible, barrée, avec son message relié ; elle sort du total et du compte de l’en-tête, rien n’est débité.</p><span class="mq-ref">Étude S24 · UX-F-05</span></li>
     <li><span class="mq-num" aria-hidden="true">11</span><b>Panier vide</b><p>La page le dit et propose les tirages, avec leur nombre et leurs prix ; l’en-tête n’a plus de panier (plus de cookie), « Tirages » reste au menu.</p><span class="mq-ref">B&amp;S 1.1 Incitation</span></li>
   </ol>
-  <p style="margin-top:24px"><b>Sans JavaScript :</b> « Retirer » et « Le remettre » sont des formulaires POST suivis d’un retour au panier ; le pays, un formulaire GET ; rien ne se met à jour tout seul. <b>Un exemplaire par ligne :</b> pas de liste de quantités pour une œuvre numérotée ; un second exemplaire s’ajoute depuis la page du tirage (deux au plus). <b>Côté code :</b> « Commander » ouvre une seule page de coordonnées ; le premier « Payer » crée les deux commandes (une par vendeur) et réserve les deux exemplaires dans la même transaction, puis ouvre la première session de paiement ; la seconde s’ouvre au second clic (étude S36, P3). <b>Composants de la planche</b> (<code>_commun/public.css</code>, § 25, montrés dans MQ-00) : .bloc-vendeur, .ligne, .sous-total, .recap, .suite. <b>Styles locaux</b>, construits avec les jetons : la mise en page, .p-haut (résumé du haut, une colonne seulement), la colonne et la hauteur des vignettes (120 et 80 px), et .e-plein pour les états en page entière. À verser à la planche : .p-haut, les vignettes de 120 px, et le bloc vendeur sans sa phrase répétée.</p>
-  <p style="margin-top:12px"><b>Passe 2 (jury v1)</b> : la phrase du vendeur dite une fois ; total et bouton en haut au téléphone ; vignettes plus grandes, en <code>srcset</code> 160 et 480 px avec un <code>sizes</code> par format ; titres des lignes en cibles de 44 px (planche, § 25) ; états en page entière, en-tête complet ; pied de page avant les états et l’encart ; cadres <code>inert</code> ; insécables.</p>
+  <p style="margin-top:24px"><b>Sans JavaScript :</b> « Retirer » et « Le remettre » sont des formulaires POST suivis d’un retour au panier ; le pays, un formulaire GET ; rien ne se met à jour tout seul. <b>Un exemplaire par ligne :</b> pas de liste de quantités pour une œuvre numérotée ; un second exemplaire s’ajoute depuis la page du tirage (deux au plus). <b>Côté code :</b> « Commander » ouvre une seule page de coordonnées ; le premier « Payer » crée les deux commandes (une par vendeur) et réserve les deux exemplaires dans la même transaction, puis ouvre la première session de paiement ; la seconde s’ouvre au second clic (étude S36, P3). <b>Composants de la planche</b> (<code>_commun/public.css</code>, § 25, montrés dans MQ-00) : .bloc-vendeur (sans phrase répétée), .ligne (vignette au format de la photo), .p-haut, .sous-total, .recap, .suite ; .e-plein (<code>annotations.css</code>) pour les états en page entière. Proposés par cette page à la passe 2, versés dans la planche à la passe 3. <b>Styles locaux</b> : la mise en page seulement.</p>
+  <p style="margin-top:12px"><b>Passe 2 (jury v1)</b> : la phrase du vendeur dite une fois ; total et bouton en haut au téléphone ; vignettes plus grandes, en <code>srcset</code> 160 et 480 px avec un <code>sizes</code> par format ; titres des lignes en cibles de 44 px (planche, § 25) ; états en page entière, en-tête complet ; pied de page avant les états et l’encart ; cadres <code>inert</code> ; insécables.</p>
   <p style="margin-top:12px"><b>Adresses</b> (lexique, § 2) : <code>/panier</code> (et <code>?pays=</code>), <code>POST /panier/retirer</code>, <code>POST /panier/remettre</code>, <code>/commande</code>, <code>/tirages</code>, <code>/tirages/&lt;slug&gt;</code>, <code>/conditions-de-vente</code>, <code>/livraison</code>, <code>/renoncer</code>, <code>/carnet</code>, <code>/galerie</code> et <code>/series</code> (à créer) ; <code>/a-propos</code>, <code>/recherche</code>, <code>/carte</code>, <code>/droits</code> et <code>/langue/:lang</code> existent.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, passe 2 ; Chromium de Playwright 1.64 en conteneur ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, mq1315-focus.mjs, insecables.py) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7 · Débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête allemand : aucun · Annotations à 1 440, 412 et 320 px : rien à redire · Sans annotations : 0 pixel changé dans l’interface · Bouton « Commander les 2 tirages » : au bureau, de 810 à 858 px du haut (premier écran de 900 px) ; sur Pixel 7, de 337 à 385 px (premier écran de 839 px), puis de nouveau à 1 914 px, sous le récapitulatif (1 600 px environ en v1, une seule fois) · Clavier : 29 arrêts au bureau, 24 au téléphone, tous avec un contour de 2 px ; aucun dans les cadres d’état · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au téléphone (titres des lignes compris) · Images : vignettes à leur taille (horizontale de 180 px : fichier de 480 ; verticale de 80 px : 107 ; au téléphone, 120 et 53 px : 480 et 320) · Poids : 195 ko au bureau, 196 ko au téléphone ; aucun script.</p>
+  <p class="mq-mesures"><b>Mesures</b> (passe 3, 16 oct. 2026 ; Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, p3-images.mjs, p3-sombres.mjs, radios-cadres.py, insecables.py) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7 · débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête du site en allemand : aucun · annotations à 1 440, 412 et 320 px : rien à redire (pastilles dans l’écran, hors des photos et des textes ; étiquettes entières ; cadres inert ; pied de page avant les états ; un seul bloc de mesures ; sans annotations, 0 élément déplacé) · sans annotations : 0 pixel changé hors du magenta, au bureau comme sur Pixel 7 · images : toutes à la taille d’affichage, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px (fichier chargé = le plus petit du srcset qui couvre l’écran, à 12 % près) · scènes de nuit et de contre-jour : aucune dans une première rangée, à 9 largeurs · radios : un nom de groupe par cadre · insécables : 0 à poser · poids après défilement complet : 209 ko au bureau, 209 ko au téléphone ; aucun script, aucune ressource tierce · les commandes, les couleurs et l’ordre du clavier ne changent pas à la passe 3 : les mesures de clavier, de cibles et de contraste de la passe 2 restent valables.</p>
 </aside>
 </body>
 </html>
