@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="light">
-<title>Fiche d’une photo · Nicephos (maquette MQ-09)</title>
+<title>Foz, la barre · Administration · Nicephos (maquette MQ-09)</title>
 <meta name="description" content="Maquette de l’administration de Nicephos : la fiche d’une photo publiée avec la règle d’enregistrement unique, le message d’action et les dialogues de confirmation communs, avec et sans JavaScript.">
 <link rel="stylesheet" href="_commun/admin.css">
 <link rel="stylesheet" href="_commun/tokens.css">
@@ -13,14 +13,9 @@
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
 /* MQ-09, locaux (propres aux pages montrées ici ; le reste est dans admin-plus.css, voir l'encart). Aucun jeton redéclaré.
-   L0 commandes à script (.js-seul, la classe de public.css ; proposée pour la planche) · L1 fiche photo (grille photo +
-   formulaire) · L2 dialogue de dépublication · L3 comptes · L4 séries et Instagram sans rechargement · L5 liste de la
-   photothèque avec ses pastilles. */
-html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
-/* Texte lu seulement : clip-path en plus du clip d'admin.css (la forme actuelle de la règle, celle de public.css). */
-.sr-only { clip-path: inset(50%); }
-/* Contenu d’un <details> fermé : rien à mettre en page (le navigateur ne le montre pas ; ainsi, aucune mesure ne le trouve). */
-.admin details:not([open]) > :not(summary) { display: none !important; }
+   L1 fiche photo (grille photo + formulaire) · L2 dialogue de dépublication · L3 comptes · L4 séries et Instagram sans
+   rechargement · L5 liste de la photothèque avec ses pastilles. Passe 3 : .js-seul, .sr-only en clip-path et <details>
+   fermés sont dans admin-plus.css. */
 .fiche { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; align-items: start; }
 .fiche-photo { position: sticky; top: 24px; margin: 0; border-radius: 8px; overflow: hidden; background: var(--photo-bg); }
 .fiche-photo img { display: block; width: 100%; height: auto; }
@@ -132,7 +127,7 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
     <a class="job" href="/admin/photos?statut=draft" data-activity hidden><span class="spin" aria-hidden="true"></span><span data-activity-text>Traitement : 0 photo</span></a>
     <div class="me">
       <a class="me-lien" href="/admin/compte"><span class="av" aria-hidden="true">J</span><span class="who"><span class="me-nom">Julien</span><span class="sr-only">, mon compte</span><small>Administrateur</small></span></a>
-      <form method="post" action="/admin/theme"><input type="hidden" name="_csrf" value="c5f0…"><input type="hidden" name="back" value="/admin/photos/16"><button class="iconbtn btn-theme" type="submit" name="theme" value="light" title="Mode clair / sombre"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button></form>
+      <form method="post" action="/admin/theme"><input type="hidden" name="_csrf" value="c5f0…"><input type="hidden" name="back" value="/admin/photos/16"><button class="iconbtn btn-theme" type="submit" name="theme" value="dark" title="Mode clair / sombre"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button></form>
       <form method="post" action="/auth/logout"><input type="hidden" name="_csrf" value="c5f0…"><button class="iconbtn" type="submit" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button></form>
     </div>
   </div>
@@ -288,7 +283,7 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
   </div></section>
 </div>
 <aside class="mq-notes" aria-labelledby="mq-t">
-  <p class="mq-id">MQ-09 · administration · thème clair · bureau 1 440 × 900 et Pixel 7 · Julien, administrateur, vendredi 16 oct. 2026, 22 h 58</p>
+  <p class="mq-id">MQ-09 · administration · thème clair · bureau 1 440 × 900 et Pixel 7 · Julien, administrateur, vendredi 16 oct. 2026, 22 h 58</p>
   <h2 id="mq-t">Ce qui change</h2>
   <p class="mq-lead">Julien revoit la fiche de « Foz, la barre », photo publiée de Sébastien. Une seule règle d’enregistrement, un seul message d’action, un seul dialogue de confirmation, une seule pastille : ceux de la planche MQ-00, assemblés ici dans leur usage, avec et sans JavaScript. Comparé à photo.eta, accounts.eta et admin.js de main ; le commit 0d1925c a déjà corrigé une partie de UX-A-05, 07, 08 et 27, ce que chaque repère précise.</p>
   <ol class="mq-reperes">
@@ -309,9 +304,9 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
     <li><span class="mq-num" aria-hidden="true">15</span><b>L’allemand tient</b><p>« 1 Feld nicht gespeichert: Datum », « Ohne das Datum verlassen? », « Rückgängig machen » : rien n’est coupé, les boutons passent à la ligne au téléphone ; le titre de la photo reste en français.</p><span class="mq-ref">Grille, critère 4</span></li>
   </ol>
   <h3>Composants</h3>
-  <p>Tout vient d’<code>admin-plus.css</code> (planche MQ-00, section Administration) : barre latérale et son pied · suggestion longue d’un assistant (<code>.sugg-bloc</code>) · erreur avec sa correction (<code>.err</code>, <code>.err-l</code>) · focus d’un champ et d’un bouton radio en erreur · résumé d’erreurs titré (<code>section.resume-a</code>) · choix expliqués, ici dans un dialogue (<code>.choix-a</code>) · bouton danger plein avec son icône · tableau des mots (<code>.etats-table</code>) · légende des états (<code>.etats-legende</code>) · messages d’action montrés (<code>.toast-ech</code>, en pause : <code>.pause</code>) · <code>.sans-script</code>. Restent locaux : <code>.js-seul</code> (proposé pour la planche), la fiche (photo et formulaire), les comptes, la ligne d’état des séries et la liste de la photothèque.</p>
+  <p>Tout vient d’<code>admin-plus.css</code> (planche MQ-00, section Administration) : barre latérale et son pied · suggestion longue d’un assistant (<code>.sugg-bloc</code>) · erreur avec sa correction (<code>.err</code>, <code>.err-l</code>) · focus d’un champ et d’un bouton radio en erreur · résumé d’erreurs titré (<code>section.resume-a</code>) · choix expliqués, ici dans un dialogue (<code>.choix-a</code>) · bouton danger plein avec son icône · tableau des mots (<code>.etats-table</code>) · légende des états (<code>.etats-legende</code>) · messages d’action montrés (<code>.toast-ech</code>, en pause : <code>.pause</code>) · <code>.sans-script</code>. <code>.js-seul</code> est versé dans la planche (passe 3). Restent propres à la page : la fiche (photo et formulaire), les comptes, la ligne d’état des séries et la liste de la photothèque.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> · <b>passe 2 du 16 oct. 2026</b> (Chromium de Playwright 1.64 en conteneur ; outils consol-admin.mjs, controle-annotations.mjs, insecables.py, et, écrits pour cette passe, p2adm-de.mjs (allemand), p2adm-focus.mjs (focus), p2adm-img.mjs (images)) : axe-core 0 violation au bureau (1 440 × 900) et au téléphone (Pixel 7), en clair ; 0 débordement ni texte coupé à 320, 412, 820, 1 024 et 1 440 px, en français et en allemand (85 libellés traduits d’après server/admin-i18n, 118 allongés de 35 %) ; focus visible sur les 44 éléments focalisables, la date en erreur comprise ; 0 cible sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px ; photo de la fiche : fichier de 480 px pour 453 px affichés au bureau, 387 à 1 280 px, 292 à 1 024 px (srcset 480, 900, 1 600 et sizes mesurés), 900 px au téléphone (260 px en densité 2,6) ; annotations : rien à redire à 1 440, 412 et 320 px ; 238 ko et 14 ressources, polices et CSS compris ; aucun script, aucune ressource tierce.</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>passe 3 du 16 oct. 2026</b> (Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-admin.mjs, consol-sans-admin.py, controle-annotations.mjs, p2-1820-de.mjs, p2adm-side.mjs, p3-images.mjs, insecables.py) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7, en clair · débordement : aucun à 320, 412, 820, 1 024 et 1 440 px en français, ni à 320, 360, 412, 820, 1 024 et 1 440 px en allemand réel sur toute la page (62 libellés de server/admin-i18n et des nouveaux boutons) ; les boutons longs passent à la ligne, aucun n’est coupé · focus visible sur les 44 éléments focalisables, en clair et en sombre, et sur les champs en erreur (#date (montré au focus), #sj-date et les trois boutons radio de la raison : filet rouge et anneau ensemble) · cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px · barre latérale (la même dans les sept maquettes de l’administration) : sans défilement, le bas du compte à 888 px dans une fenêtre de 900, à 820, 1 024 et 1 440 px · annotations : rien à redire à 1 440, 412 et 320 px ; sans annotations, 0 pixel changé hors du magenta et des contours des cadres d’état, au bureau et au téléphone · images : toutes à la taille d’affichage, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px · insécables : 0 à poser · poids après défilement complet : 252 ko au bureau comme au téléphone, polices et CSS compris ; aucun script, aucune ressource tierce.</p>
 </aside>
 </body>
 </html>

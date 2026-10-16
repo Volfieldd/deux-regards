@@ -99,3 +99,21 @@ input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; margin:
 .app-qr-show { padding: 20px 16px 32px; display: grid; justify-items: center; gap: 14px; text-align: center; }
 .app-qr-show img { width: min(92vw, 420px); height: auto; background: #f5f2ec; border-radius: 16px; padding: 10px; }
 .app-qr-show .hint { margin: 0; }
+
+/* =====================================================================================================
+   Ajouts des maquettes (passe 3 du 16 oct. 2026). Tout ce qui précède est la copie de public/admin/app.css de main
+   (polices en relatif) ; ce bloc est ce que la maquette MQ-10 gardait en local et qui vaut pour toute l'app de terrain,
+   à reporter dans main (dr-work/mq2-correctifs-main.md, § 5). Couleurs d'app.css ; --error, quand la page charge les
+   jetons du site (tokens.css), sinon --ko.
+   ===================================================================================================== */
+/* Texte lu seulement : clip-path, la forme actuelle (clip est déprécié). */
+.sr-only { clip-path: inset(50%); }
+/* Bouton inactif pendant l'envoi (« Envoi… ») : en contour, comme .btn[aria-disabled] du site ; jamais un aplat pâli
+   (opacity .6 de main, qui ressemble encore au bouton plein). */
+.app-save[aria-disabled="true"], .app-save[disabled] { opacity: 1; background: transparent; color: var(--mute); box-shadow: inset 0 0 0 1.5px var(--field); cursor: progress; }
+/* Boutons radio et cases en erreur (aria-invalid, groupe « Âge », « Décision ») : un filet rouge collé au contrôle ; au
+   focus, l'anneau du focus (encre, 2 px) s'ajoute dehors, à 4 px, et le filet rouge reste : l'erreur et le focus se voient
+   ensemble (RGAA 10.7, WCAG 2.4.7), comme le correctif d'admin-plus.css pour les champs de l'administration. */
+:is(input[type="radio"], input[type="checkbox"])[aria-invalid="true"] { outline: 2px solid var(--error, var(--ko)); outline-offset: 1px; }
+input[type="radio"][aria-invalid="true"] { border-radius: 50%; }
+:is(input[type="radio"], input[type="checkbox"])[aria-invalid="true"]:is(:focus-visible, .is-focus) { outline: 2px solid var(--ink) !important; outline-offset: 4px; box-shadow: 0 0 0 2px var(--error, var(--ko)); }

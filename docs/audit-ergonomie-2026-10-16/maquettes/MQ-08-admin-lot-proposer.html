@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="light">
-<title>Compléter et proposer · Nicephos (maquette MQ-08)</title>
+<title>Compléter et proposer · Administration · Nicephos (maquette MQ-08)</title>
 <meta name="description" content="Maquette de l’administration de Nicephos : compléter les trois photos d’un import et les proposer à la publication, sans titre provisoire ni date refusée.">
 <link rel="stylesheet" href="_commun/admin.css">
 <link rel="stylesheet" href="_commun/tokens.css">
@@ -13,14 +13,10 @@
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
 /* MQ-08, locaux (propres au lot ; le reste est dans admin-plus.css, voir l'encart). Aucun jeton redéclaré.
-   L0 commandes à script (.js-seul, la classe de public.css ; proposée pour la planche) · L1 étapes compactes au téléphone
-   · L2 barre « Pour les photos cochées » (repliée au téléphone, comme main : .bulk-toggle) · L3 lot, une ligne par photo
-   nommée par sa vignette, erreur sur toute la largeur · L4 dialogue de proposition · L5 liste des villes · L6 page refusée. */
-html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
-/* Texte lu seulement : clip-path en plus du clip d'admin.css (la forme actuelle de la règle, celle de public.css). */
-.sr-only { clip-path: inset(50%); }
-/* Contenu d’un <details> fermé : rien à mettre en page (le navigateur ne le montre pas ; ainsi, aucune mesure ne le trouve). */
-.admin details:not([open]) > :not(summary) { display: none !important; }
+   L1 étapes compactes au téléphone · L2 barre « Pour les photos cochées » (repliée au téléphone, comme main : .bulk-toggle)
+   · L3 lot, une ligne par photo nommée par sa vignette ; colonnes, et retrait de la ligne d'erreur (--lot-retrait) · L4 dialogue
+   de proposition · L5 liste des villes · L6 page refusée. Passe 3 : .js-seul, .sr-only, <details> fermés, ligne d'erreur
+   pleine largeur du lot et barre « Pour les cochées » dans un cadre d'état (.ecran-a .bulk) sont dans admin-plus.css. */
 .steps .et-sur { display: none; }
 @media (max-width: 720px) { .steps { flex-direction: row; } .steps li.done { display: none; } .steps .et-sur { display: inline; } .steps li .n { display: none; } }
 .flash p { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
@@ -44,8 +40,6 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
 .lot .sugg { justify-self: start; }
 .lot .cell p { margin: 0; }
 .lot .cell > .att { justify-self: start; }
-/* Barre « Pour les cochées » montrée dans un cadre d’état (hors de .main) : le même dessin. */
-.ecran-a .bulk { padding: 10px 14px; margin: 0 0 16px; border-radius: 12px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2); }
 .lot .lu { font-size: 12px; }
 .lot .etat-c { display: grid; gap: 6px; justify-items: start; }
 .lot .etat-c .enreg { font-size: 12px; white-space: nowrap; }
@@ -54,10 +48,8 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
 .lot .tr[open] > summary .ic { transform: rotate(90deg); }
 .lot .tr .cell { margin-top: 4px; }
 .lot .tr label { font-size: 12px; }
-/* Une erreur prend toute la largeur de la ligne, sous elle : plus de message de quatre lignes dans une demi-colonne. */
-.lot tr.a-erreur > td, .lot tr.a-erreur > th { border-bottom: 0; }
-.lot tr.err-ligne td { padding: 0 10px 12px 178px; }
-.lot tr.err-ligne .err { margin: 0; }
+/* La ligne d'erreur s'aligne sur la colonne du titre : case 44 + vignette 124 + 10. */
+.lot { --lot-retrait: 178px; }
 .col-chk { width: 44px; } .col-photo { width: 124px; } .col-titre { width: 26%; } .col-serie { width: 16%; } .col-ville { width: 15%; } .col-date { width: 15%; } .col-etat { width: 168px; }
 @media (max-width: 720px), (pointer: coarse) { .lot .tr > summary { min-height: 44px; } }
 @media (max-width: 720px) {
@@ -66,9 +58,6 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
   .lot .c-thumb img { width: 96px; height: 64px; }
   .lot td[data-label]::before { content: none; }
   .lot th, .lot td { border: 0; }
-  .lot tr.a-erreur { margin-bottom: 0; border-radius: 14px 14px 0 0; padding-bottom: 4px; }
-  .lot tr.err-ligne { display: block; margin: 0 0 12px; padding: 0 12px 12px; border-radius: 0 0 14px 14px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); clip-path: inset(0 0 -1px 0); }
-  .lot tr.err-ligne td { padding: 0; }
 }
 .lb-cell { display: none; }
 @media (max-width: 720px) { .lb-cell { display: block; margin-bottom: 4px; color: var(--ink2); font-size: 12.5px; } }
@@ -113,7 +102,7 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
   <p class="grp" id="nav-photos">Photos</p>
   <nav class="nav" aria-labelledby="nav-photos">
     <a href="/admin/photos" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
-    <details class="ser-titre"><summary><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries<span class="sr-only"> : vos 5 séries</span><svg class="ic chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></summary>
+    <details class="ser-titre"><summary><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries<span class="sr-only"> : vos 5 séries</span><svg class="ic chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></summary>
       <ul class="ser" aria-label="Séries, vos photos">
         <li><a href="/admin/photos?serie=atlantique"><span class="sw"><img src="_commun/photos/160/cais.webp" alt="" width="18" height="18"></span><span class="t">Atlantique</span><span class="n">3</span></a></li>
         <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">4</span></a></li>
@@ -276,7 +265,7 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
         <li><img src="_commun/photos/160/reverberes.webp" alt="" width="64" height="43"><div><p><span class="att"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg></span> <b>R0004057</b> a un titre provisoire et une date refusée.</p>
           <div class="champ-a"><label for="dp-titre">Titre</label><input id="dp-titre" class="is-focus" value="Réverbères, quai Ligny"></div>
           <div class="champ-a"><label for="dp-date">Date</label><input id="dp-date" value="14 oct. 2026" aria-describedby="dp-date-l"><p class="aide" id="dp-date-l">Lu : mercredi 14 octobre 2026</p></div></div></li>
-        <li><img src="_commun/photos/160/ligny.webp" alt="" width="64" height="43"><div><p><span class="att"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg></span> <b>Quai Ligny, soir</b> : accord à vérifier. Julien ne pourra la publier qu’après.</p></div></li>
+        <li><img src="_commun/photos/160/ligny.webp" alt="" width="64" height="43"><div><p><span class="att"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg></span> <b>Quai Ligny, soir</b> : accord à vérifier. Julien ne pourra la publier qu’après.</p></div></li>
       </ul>
       <div class="champ-a" style="margin-top:16px"><label for="dp-mot">Un mot pour Julien <span class="facultatif">(facultatif)</span></label><textarea id="dp-mot" rows="2">Claire a répondu en ligne pour le quai Ligny ; Hugo, pas encore.</textarea></div>
       <div class="actions"><button class="btn ghost" type="button">Annuler</button><button class="btn ghost" type="submit" name="corriger" value="non">Proposer sans corriger</button><button class="btn" type="submit">Proposer les 3 photos</button></div>
@@ -357,7 +346,7 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
   </div></section>
 </div>
 <aside class="mq-notes" aria-labelledby="mq-t">
-  <p class="mq-id">MQ-08 · administration · thème clair · bureau 1 440 × 900 et Pixel 7 · Sébastien, photographe, vendredi 16 oct. 2026, 21 h 34</p>
+  <p class="mq-id">MQ-08 · administration · thème clair · bureau 1 440 × 900 et Pixel 7 · Sébastien, photographe, vendredi 16 oct. 2026, 21 h 34</p>
   <h2 id="mq-t">Ce qui change</h2>
   <p class="mq-lead">Sébastien complète les trois photos qu’il a importées le 14 octobre (quai Ligny et la Maine, à Angers) et les propose à Julien sans quitter la page. Ce qui pourrait partir de travers — titre provisoire, date refusée, accord à vérifier, liste qui écrase d’un clic — est dit à sa place et se corrige sur place. Avec ou sans JavaScript. Comparé à batch.eta, _import.eta et layout.eta de main.</p>
   <ol class="mq-reperes">
@@ -385,9 +374,9 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
     <li><span class="mq-num" aria-hidden="true">22</span><b>L’allemand tient</b><p>« Vervollständigen und vorschlagen », « Für die 2 angekreuzten Fotos: », « Auf die 2 Fotos anwenden » (libellés de server/admin-i18n) : la barre passe sur deux lignes, les boutons à la ligne au téléphone, rien n’est coupé ; la série garde son nom français.</p><span class="mq-ref">Grille, critère 4</span></li>
   </ol>
   <h3>Composants</h3>
-  <p>Tout vient d’<code>admin-plus.css</code> (planche MQ-00, section Administration) : barre latérale du rôle Photographe · « ✦ Suggestion : Rue », pastille qu’un clic accepte (<code>.sugg</code>) · case d’une ligne (<code>.chk-l</code>) · relecture d’une saisie (<code>.lu</code>) · point d’attention (<code>.att</code>) · filtres (<code>.chips</code>) · résumé d’erreurs titré (<code>section.resume-a</code>) · focus d’un champ en erreur · dialogue et message d’action montrés (<code>.voile-a</code>, <code>.toast-ech</code>) · <code>.sans-script</code> ; de <code>admin.css</code> (main) : la barre repliée au téléphone (<code>.bulk-toggle</code>, <code>.bulk-groups</code>). Restent locaux : <code>.js-seul</code> (proposé pour la planche), les étapes compactes, le tableau du lot et sa ligne d’erreur, la liste des villes, la page refusée.</p>
+  <p>Tout vient d’<code>admin-plus.css</code> (planche MQ-00, section Administration) : barre latérale du rôle Photographe · « ✦ Suggestion : Rue », pastille qu’un clic accepte (<code>.sugg</code>) · case d’une ligne (<code>.chk-l</code>) · relecture d’une saisie (<code>.lu</code>) · point d’attention (<code>.att</code>) · filtres (<code>.chips</code>) · résumé d’erreurs titré (<code>section.resume-a</code>) · focus d’un champ en erreur · dialogue et message d’action montrés (<code>.voile-a</code>, <code>.toast-ech</code>) · <code>.sans-script</code> ; de <code>admin.css</code> (main) : la barre repliée au téléphone (<code>.bulk-toggle</code>, <code>.bulk-groups</code>). Versés dans la planche à la passe 3 : <code>.js-seul</code>, la ligne d’erreur pleine largeur du lot (<code>tr.err-ligne</code>), la barre « Pour les cochées » montrée dans un cadre d’état. Restent propres à la page : les étapes compactes, les colonnes du lot, la liste des villes, la page refusée.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> · <b>passe 2 du 16 oct. 2026</b> (Chromium de Playwright 1.64 en conteneur ; outils consol-admin.mjs, controle-annotations.mjs, insecables.py, et, écrits pour cette passe, p2adm-de.mjs (allemand), p2adm-focus.mjs (focus), p2adm-img.mjs (images)) : axe-core 0 violation au bureau (1 440 × 900) et au téléphone (Pixel 7), en clair ; 0 débordement ni texte coupé à 320, 412, 820, 1 024 et 1 440 px, en français et en allemand (95 libellés traduits d’après server/admin-i18n, 125 allongés de 35 %) ; focus visible sur les 58 éléments focalisables, la date en erreur comprise ; 0 cible sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px ; barre latérale du rôle Photographe sans défilement dans 900 px ; annotations : rien à redire à 1 440, 412 et 320 px ; 234 ko et 13 ressources, polices et CSS compris (vignettes de 160 px) ; une ligne de script dans la page (l’état mixte de la case d’en-tête), aucune ressource tierce.</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>passe 3 du 16 oct. 2026</b> (Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-admin.mjs, consol-sans-admin.py, controle-annotations.mjs, p2-1820-de.mjs, p2adm-side.mjs, p3-images.mjs, insecables.py) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7, en clair · débordement : aucun à 320, 412, 820, 1 024 et 1 440 px en français, ni à 320, 360, 412, 820, 1 024 et 1 440 px en allemand réel sur toute la page (51 libellés de server/admin-i18n et des nouveaux boutons) ; les boutons longs passent à la ligne, aucun n’est coupé · focus visible sur les 58 éléments focalisables, en clair et en sombre, et sur les champs en erreur (#date-c (montré au focus), #sj-date, #de-datum : filet rouge et anneau ensemble) · cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px · barre latérale (la même dans les sept maquettes de l’administration) : sans défilement, le bas du compte à 888 px dans une fenêtre de 900, à 820, 1 024 et 1 440 px · annotations : rien à redire à 1 440, 412 et 320 px ; sans annotations, 0 pixel changé hors du magenta et des contours des cadres d’état, au bureau et au téléphone · images : toutes à la taille d’affichage, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px · insécables : 0 à poser · poids après défilement complet : 247 ko au bureau comme au téléphone, polices et CSS compris ; aucun script, aucune ressource tierce.</p>
 </aside>
 </body>
 </html>

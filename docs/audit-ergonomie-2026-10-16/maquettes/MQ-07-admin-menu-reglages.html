@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="light dark">
-<title>Assistants d’analyse · Réglages · Nicephos (maquette MQ-07)</title>
+<title>Assistants d’analyse · Réglages · Administration · Nicephos (maquette MQ-07)</title>
 <meta name="description" content="Maquette de l’administration de Nicephos : barre latérale à quatre groupes, une page Réglages à onglets, des mentions légales complètes et des assistants d’analyse réglés par un interrupteur.">
 <link rel="stylesheet" href="_commun/admin.css">
 <link rel="stylesheet" href="_commun/tokens.css">
@@ -13,34 +13,19 @@
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
 /* MQ-07, locaux (propres aux pages montrées ici ; le reste est dans admin-plus.css, voir l'encart). Aucun jeton redéclaré.
-   L0 commandes à script (.js-seul : la classe de public.css, absente d'admin-plus.css ; proposée pour la planche)
-   L1 mise en page d'une rubrique des Réglages · L2 « Quand calculer » titré dans son panneau · L3 onglets au téléphone : une
-   rangée qui passe à la ligne (proposée pour la planche) · L4 identité : emplacements de la marque, thème du site · L5 mentions :
-   sommaire de l'onglet, hébergement · L6 palette montrée ouverte · L7 menu montré ouvert (téléphone), deux barres côte à côte
-   · L8 Aujourd'hui, Photographes. */
-html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
-/* Texte lu seulement : clip-path en plus du clip d'admin.css (la forme actuelle de la règle, celle de public.css). */
-.sr-only { clip-path: inset(50%); }
-/* Contenu d’un <details> fermé : rien à mettre en page (le navigateur ne le montre pas ; ainsi, aucune mesure ne le trouve). */
-.admin details:not([open]) > :not(summary) { display: none !important; }
+   L1 mise en page d'une rubrique des Réglages · L4 identité : emplacements de la marque, thème du site · L5 mentions :
+   titres, hébergement et compléments repliés · L6 palette montrée
+   ouverte · L7 menu montré ouvert (téléphone), deux barres côte à côte · L8 Aujourd'hui, Photographes. Passe 3 : .js-seul,
+   .sr-only en clip-path, <details> fermés, légende dans le panneau (.titre-dedans), onglets qui passent à la ligne au
+   téléphone et phrase sous les onglets (.sur-onglet) sont dans admin-plus.css. */
 .rub { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 40px; align-items: start; }
 @media (min-width: 1200px) { .rub { grid-template-columns: minmax(0, 720px) 320px; } .rub-cote { grid-column: 2; grid-row: 1 / span 3; position: sticky; top: 24px; } }
 .rub-titre { margin: 0 0 6px !important; font-size: 22px !important; font-weight: 400 !important; }
 .rub-intro { margin: 0 0 24px; color: var(--ink2); max-width: 64ch; }
 .rub-cote .panel { margin: 0 0 24px; }
-/* La légende d'un panneau-fieldset se pose DANS le panneau (et non sur son filet) : flottante sur toute la largeur. */
-fieldset.panel.titre-dedans { display: block; }
-fieldset.panel.titre-dedans > legend { float: left; width: 100%; margin: 0 0 10px; padding: 0; font-size: 17px; }
-fieldset.panel.titre-dedans > legend + * { clear: both; }
 .assist-form { display: grid; gap: 16px; }
 .assist-effet { text-wrap: pretty; }
 .avancement { width: min(320px, 100%); }
-@media (max-width: 720px) {
-  .onglets { margin: 0 0 24px; }
-  .onglets ul { flex-wrap: wrap; gap: 8px; overflow: visible; padding-inline: 0; box-shadow: none; }
-  .onglets a { padding: 0 14px; border: 1px solid var(--line2); border-radius: 999px; white-space: normal; }
-  .onglets a[aria-current] { border-color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent-ink); }
-}
 .marque { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; }
 .emplacement { display: grid; gap: 8px; align-content: start; justify-items: start; }
 .emplacement > .lb { font-size: 13px; font-weight: 500; color: var(--ink); }
@@ -54,9 +39,6 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
 .theme-c label.inline { align-items: flex-start; padding: 12px 14px; border-radius: var(--r); box-shadow: inset 0 0 0 1px var(--line2); }
 .theme-c label.inline:has(:checked) { box-shadow: inset 0 0 0 1.5px var(--accent-ink); }
 .theme-c small { display: block; color: var(--ink2); font-size: 12px; }
-.sur-onglet { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; margin: 0 0 20px; color: var(--ink2); font-size: 13px; }
-.sur-onglet a { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line2); }
-@media (max-width: 720px), (pointer: coarse) { .sur-onglet a { min-height: 44px; } }
 .ml-titre { margin: 0; font-size: 17px; font-weight: 500; }
 .ml-titre .hint { font-weight: 400; }
 .ml-plus { display: grid; gap: 12px; margin-top: 24px; }
@@ -186,7 +168,7 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
   <nav class="onglets" aria-label="Rubriques des réglages"><ul>
     <li><a href="/admin/reglages/identite">Identité et apparence</a></li>
     <li><a href="/admin/reglages/filigrane">Filigrane et EXIF</a></li>
-    <li><a href="/admin/reglages/mentions">Mentions et confidentialité<span class="onglet-alerte"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>2<span class="sr-only"> : 2 rubriques obligatoires à remplir</span></span></a></li>
+    <li><a href="/admin/reglages/mentions">Mentions et confidentialité<span class="onglet-alerte"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>2<span class="sr-only"> : 2 rubriques obligatoires à remplir</span></span></a></li>
     <li><a href="/admin/reglages/photographes">Photographes</a></li>
     <li><a href="/admin/reglages/assistants" aria-current="page">Assistants d’analyse</a></li>
   </ul></nav>
@@ -249,7 +231,7 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
     <nav class="onglets" aria-label="Rubriques des réglages (Mentions)"><ul>
     <li><a href="/admin/reglages/identite">Identité et apparence</a></li>
     <li><a href="/admin/reglages/filigrane">Filigrane et EXIF</a></li>
-    <li><a href="/admin/reglages/mentions" aria-current="page">Mentions et confidentialité<span class="onglet-alerte"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>2<span class="sr-only"> : 2 rubriques obligatoires à remplir</span></span></a></li>
+    <li><a href="/admin/reglages/mentions" aria-current="page">Mentions et confidentialité<span class="onglet-alerte"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>2<span class="sr-only"> : 2 rubriques obligatoires à remplir</span></span></a></li>
     <li><a href="/admin/reglages/photographes">Photographes</a></li>
     <li><a href="/admin/reglages/assistants">Assistants d’analyse</a></li>
   </ul></nav>
@@ -386,7 +368,7 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
     <nav class="onglets" aria-label="Rubriques des réglages (Identité)"><ul>
     <li><a href="/admin/reglages/identite" aria-current="page">Identité et apparence</a></li>
     <li><a href="/admin/reglages/filigrane">Filigrane et EXIF</a></li>
-    <li><a href="/admin/reglages/mentions">Mentions et confidentialité<span class="onglet-alerte"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>2<span class="sr-only"> : 2 rubriques obligatoires à remplir</span></span></a></li>
+    <li><a href="/admin/reglages/mentions">Mentions et confidentialité<span class="onglet-alerte"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>2<span class="sr-only"> : 2 rubriques obligatoires à remplir</span></span></a></li>
     <li><a href="/admin/reglages/photographes">Photographes</a></li>
     <li><a href="/admin/reglages/assistants">Assistants d’analyse</a></li>
   </ul></nav>
@@ -400,7 +382,7 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
           <label class="inline"><input type="radio" name="theme" checked><span>Nicephos <small>Jost, noir ou blanc au choix du visiteur. Actuel.</small></span></label>
           <label class="inline"><input type="radio" name="theme"><span>Atelier <small>Papier chaud, titres en italique.</small></span></label>
         </div>
-        <p class="hint" style="margin:0"><a class="more" href="/?theme=atelier" target="_blank" rel="noopener">Voir le site en Atelier<span class="sr-only"> (nouvel onglet)</span></a> : vous seul le voyez, pendant une heure.</p>
+        <p class="hint" style="margin:0"><a class="more" href="/?theme=atelier" target="_blank" rel="noopener">Voir le site en Atelier<span class="sr-only"> (nouvel onglet)</span></a> : vous seul le voyez, pendant une heure.</p>
       </fieldset>
       <fieldset class="row" style="display:grid;gap:12px" aria-describedby="marque-aide"><legend>Marque</legend>
         <p class="aide" id="marque-aide" style="margin:0;color:var(--ink2);font-size:12.5px">PNG, WebP ou JPEG, 5 Mo au plus. Le fichier choisi s’enregistre tout de suite ; « Défaire » remet l’ancien pendant 10 s.</p>
@@ -473,7 +455,7 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
   <p class="grp">Photos</p>
   <nav class="nav" aria-label="Photos, rôle Photographe">
     <a href="/admin/photos" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
-    <details class="ser-titre" open><summary><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries<span class="sr-only"> : vos 5 séries</span><svg class="ic chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></summary>
+    <details class="ser-titre" open><summary><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries<span class="sr-only"> : vos 5 séries</span><svg class="ic chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></summary>
       <ul class="ser" aria-label="Séries, vos photos">
         <li><a href="/admin/photos?serie=atlantique"><span class="sw"><img src="_commun/photos/160/cais.webp" alt="" width="18" height="18"></span><span class="t">Atlantique</span><span class="n">3</span></a></li>
         <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">4</span></a></li>
@@ -630,7 +612,7 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
   </div></section>
 </div>
 <aside class="mq-notes" aria-labelledby="mq-t">
-  <p class="mq-id">MQ-07 · administration · « Chambre noire » au bureau (1 440 × 900), clair au téléphone (Pixel 7) : le mode suit le système · Julien, administrateur, vendredi 16 oct. 2026, 22 h 40</p>
+  <p class="mq-id">MQ-07 · administration · « Chambre noire » au bureau (1 440 × 900), clair au téléphone (Pixel 7) : le mode suit le système · Julien, administrateur, vendredi 16 oct. 2026, 22 h 40</p>
   <h2 id="mq-t">Ce qui change</h2>
   <p class="mq-lead">Un menu de quatre groupes qui tient dans un écran, une seule page de Réglages à onglets, des mentions légales complètes avant d’être mises en ligne, et des assistants d’analyse qu’on règle par un interrupteur dont on lit l’effet. Tout est construit avec la coquille et les composants de MQ-00 ; ce qui s’enregistre seul le dit, ce qui engage a son bouton, et chaque formulaire marche sans JavaScript. Comparé à l’admin de main (layout.eta, settings.eta, appearance.eta, server/legal.js).</p>
   <ol class="mq-reperes">
@@ -658,9 +640,9 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
     <li><span class="mq-num" aria-hidden="true">22</span><b>Au téléphone, « Fermer » en tête du menu</b><p>Un bouton de 44 px à côté du nom ; menu ouvert, la page et la barre d’onglets sont inertes : la tabulation ne sort plus du panneau. (Rendu téléphone seulement.)</p><span class="mq-ref">UX-A-09 · WCAG 2.4.11 · RGAA 12.8</span></li>
   </ol>
   <h3>Composants et rendu</h3>
-  <p>Tout vient d’<code>admin-plus.css</code> (planche MQ-00, section Administration) : barre latérale et son pied, ses deux variantes · onglets (<code>.onglets</code>) · interrupteur (<code>.inter</code>) · carte d’assistant (<code>.assist</code>, <code>.assist-serveur</code>) · choix de fichier (<code>.fichier-w</code>) · choix expliqués (<code>.choix-a</code>) · résumé d’erreurs titré (<code>section.resume-a</code>) · focus d’un champ en erreur · pied de formulaire (<code>.form-pied</code>, <code>.mod</code>) · repliés (<code>.plier</code>) · <code>.sans-script</code>. Restent locaux, et proposés pour la planche : <code>.js-seul</code> (la règle de public.css, absente d’admin-plus.css) ; les onglets qui passent à la ligne au téléphone (au lieu de défiler sur <code>scroll-initial-target</code>, propre à Chromium) ; la légende d’un panneau posée dedans (<code>.titre-dedans</code>) ; le sommaire d’un onglet (<code>.sur-onglet</code>). Restent propres à la page : la rubrique, la marque, la palette montrée ouverte, la liste « À faire », les cartes des photographes.</p>
+  <p>Tout vient d’<code>admin-plus.css</code> (planche MQ-00, section Administration) : barre latérale et son pied, ses deux variantes · onglets (<code>.onglets</code>) · interrupteur (<code>.inter</code>) · carte d’assistant (<code>.assist</code>, <code>.assist-serveur</code>) · choix de fichier (<code>.fichier-w</code>) · choix expliqués (<code>.choix-a</code>) · résumé d’erreurs titré (<code>section.resume-a</code>) · focus d’un champ en erreur · pied de formulaire (<code>.form-pied</code>, <code>.mod</code>) · repliés (<code>.plier</code>) · <code>.sans-script</code>. Versés dans la planche à la passe 3 (<code>admin-plus.css</code>) : <code>.js-seul</code> ; les onglets qui passent à la ligne au téléphone (au lieu de défiler sur <code>scroll-initial-target</code>, propre à Chromium) ; la légende d’un panneau posée dedans (<code>.titre-dedans</code>) ; le sommaire d’un onglet (<code>.sur-onglet</code>). Restent propres à la page : la rubrique, la marque, la palette montrée ouverte, la liste « À faire », les cartes des photographes.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> · <b>passe 2 du 16 oct. 2026</b> (Chromium de Playwright 1.64 en conteneur ; outils consol-admin.mjs, controle-annotations.mjs, insecables.py, et, écrits pour cette passe, p2adm-de.mjs (allemand), p2adm-focus.mjs (focus), p2adm-img.mjs (images)) : axe-core 0 violation au bureau (1 440 × 900, Chambre noire) et au téléphone (Pixel 7, clair) ; 0 débordement ni texte coupé à 320, 412, 820, 1 024 et 1 440 px, en français et en allemand (163 libellés remplacés par leur traduction de server/admin-i18n, les 210 autres allongés de 35 %) ; focus visible sur les 44 éléments focalisables, champs en erreur compris, en clair et en sombre ; 0 cible sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px ; barre latérale : 18 entrées et 5 au pied, sans défilement dans 900 px, à 820, 1 024 et 1 440 px ; annotations : rien à redire à 1 440, 412 et 320 px (pastilles dans l’écran, hors des photos et des textes, cadres inert, interface identique sans annotations) ; 291 ko et 16 ressources, polices et CSS compris (11 vignettes de 160 px) ; aucun script, aucune ressource tierce.</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>passe 3 du 16 oct. 2026</b> (Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-admin.mjs, consol-sans-admin.py, controle-annotations.mjs, p2-1820-de.mjs, p2adm-side.mjs, p3-images.mjs, insecables.py) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900, Chambre noire) et sur Pixel 7 (clair) · débordement : aucun à 320, 412, 820, 1 024 et 1 440 px en français, ni à 320, 360, 412, 820, 1 024 et 1 440 px en allemand réel sur toute la page (75 libellés de server/admin-i18n et des nouveaux boutons) ; les boutons longs passent à la ligne, aucun n’est coupé · focus visible sur les 44 éléments focalisables, en clair et en sombre, et sur les champs en erreur (#ml-ed, #ml-dir, #de-an, #de-ve et le choix de fichier refusé #f3 : filet rouge et anneau ensemble) · cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px · barre latérale (la même dans les sept maquettes de l’administration) : sans défilement, le bas du compte à 888 px dans une fenêtre de 900, à 820, 1 024 et 1 440 px · annotations : rien à redire à 1 440, 412 et 320 px ; sans annotations, 0 pixel changé hors du magenta et des contours des cadres d’état, au bureau et au téléphone · images : toutes à la taille d’affichage, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px · insécables : 0 à poser · poids après défilement complet : 304 ko au bureau comme au téléphone, polices et CSS compris ; aucun script, aucune ressource tierce.</p>
 </aside>
 </body>
 </html>

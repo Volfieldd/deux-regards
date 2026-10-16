@@ -6,37 +6,16 @@
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="Maquette MQ-20 : éditeur de billet du Carnet (brouillon, langues, photos et accords, proposition et publication).">
-<title>Erreur : 2 points à corriger · Angers, un soir d’octobre · Nicephos (maquette MQ-20)</title>
+<title>Erreur : 2 points à corriger · Angers, un soir d’octobre · Administration · Nicephos (maquette MQ-20)</title>
 <link rel="stylesheet" href="_commun/admin.css">
 <link rel="stylesheet" href="_commun/tokens.css">
 <link rel="stylesheet" href="_commun/admin-plus.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* MQ-20, locaux (le reste vient d'admin-plus.css, voir l'encart) : L1 formulaire du dialogue · L2 commandes à script (.js-seul),
-   que public.css a et pas admin-plus.css · L3 visionneuse du billet dans l'aperçu (photo, compteur, cartel, voisines), dessinée
-   avec les jetons du site (.mode-nuit) comme .apercu-site. Aucun jeton redéclaré. */
+/* MQ-20, locaux (le reste vient d'admin-plus.css, voir l'encart) : L1 formulaire du dialogue. Aucun jeton redéclaré. Passe 3 :
+   .js-seul, <details> fermés, onglets de langue sur deux lignes sous 420 px, pastille de la barre d'actions fixe et
+   visionneuse du billet dans l'aperçu (.vis-b) sont dans admin-plus.css. */
 .dialog-form { display: grid; gap: 14px; margin: 0 0 4px; }
-html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
-/* L4 contenu d'un <details> fermé : rien n'est mis en page (Chromium le garde en page sous content-visibility, ce qui fausse les mesures). */
-/* L5 pastille de la barre d'actions du téléphone (barre fixe) : dans sa marge gauche, jamais hors de l'écran. */
-@media (min-width: 721px) { .ep-actions { position: relative; } }
-@media (max-width: 720px) { .ep-actions > .mq-pin.d { translate: none; left: 0; top: calc(50% - var(--mq-pin) / 2); } }
-@media (max-width: 420px) { .edit-langues .seg a { flex-direction: column; justify-content: center; gap: 0; padding: 4px 10px; line-height: 1.2; } }
-.admin details:not([open]) > :not(summary), .admin .pied-liens .admin-lang:not([open]) > ul { display: none; }
-.vis-b { border-radius: var(--r-admin-panneau); overflow: hidden; background: var(--paper); color: var(--ink); font-family: var(--sans); }
-.vis-b .bandeau { margin: 0; padding: 8px 16px; background: var(--safelight); color: var(--on-accent); font-size: 13px; font-weight: 500; }
-.vis-b .haut { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 16px; padding: 10px 20px; }
-.vis-b .haut a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
-.vis-b .pos { color: var(--mute); font-size: 13px; font-variant-numeric: tabular-nums; }
-.vis-b figure { margin: 0; padding: 0 20px; }
-.vis-b img { display: block; width: 100%; max-width: 900px; height: auto; margin: 0 auto; }
-.vis-b figcaption { max-width: 900px; margin: 12px auto 0; }
-.vis-b .t { margin: 0; font-size: 18px; font-weight: 400; }
-.vis-b .m { margin: 2px 0 0; color: var(--mute); font-size: 13px; }
-.vis-b .np { margin: 6px 0 0; color: var(--safelight); font-size: 13px; font-weight: 500; }
-.vis-b .voisines { display: flex; justify-content: space-between; gap: 12px; max-width: 900px; margin: 12px auto 0; padding: 0 20px 20px; }
-.vis-b .voisines a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--ink); font-size: 14px; }
-@media (max-width: 720px) { .vis-b figure { padding: 0; } .vis-b figcaption, .vis-b .haut, .vis-b .voisines { padding-inline: 16px; } }
 </style>
 </head>
 <body class="admin">
@@ -46,14 +25,14 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
 <div class="shell">
 <aside class="side" id="admin-nav" aria-label="Menu de l’administration">
   <div class="side-haut"><a class="word" href="/admin"><span>Nicephos</span></a><button class="side-fermer" type="button" aria-controls="admin-nav" aria-expanded="true"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Fermer</button></div>
-  <button class="cmdk" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
+  <button class="cmdk js-seul" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
   <nav class="nav" aria-label="Aujourd’hui">
     <a href="/admin"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
   </nav>
-  <p class="grp" id="nav-photos-ph">Photos</p>
-  <nav class="nav" aria-labelledby="nav-photos-ph">
+  <p class="grp" id="nav-photos">Photos</p>
+  <nav class="nav" aria-labelledby="nav-photos">
     <a href="/admin/photos"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
-    <details class="ser-titre"><summary><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries<span class="sr-only"> : vos 5 séries</span><svg class="ic chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></summary>
+    <details class="ser-titre"><summary><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries<span class="sr-only"> : vos 5 séries</span><svg class="ic chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></summary>
       <ul class="ser" aria-label="Séries, vos photos">
         <li><a href="/admin/photos?serie=atlantique"><span class="sw"><img src="_commun/photos/160/cais.webp" alt="" width="18" height="18"></span><span class="t">Atlantique</span><span class="n">3</span></a></li>
         <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">4</span></a></li>
@@ -64,20 +43,20 @@ html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
     <a href="/admin/sorties"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/></svg>Sorties</a>
     <a href="/admin/voyages"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg>Voyages</a>
   </nav>
-  <p class="grp" id="nav-personnes-ph">Personnes</p>
-  <nav class="nav" aria-labelledby="nav-personnes-ph">
+  <p class="grp" id="nav-personnes">Personnes</p>
+  <nav class="nav" aria-labelledby="nav-personnes">
     <a href="/admin/personnes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg>Personnes<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 nouvelle</span></span></a>
     <a href="/admin/terrain"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>App de terrain</a>
   </nav>
-  <p class="grp" id="nav-publier-ph">Publier</p>
-  <nav class="nav" aria-labelledby="nav-publier-ph">
+  <p class="grp" id="nav-publier">Publier</p>
+  <nav class="nav" aria-labelledby="nav-publier">
     <a href="/admin/photos?statut=proposee&amp;auteur=sebastien"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg>Mes propositions</a>
     <a href="/admin/carnet" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
     <a href="/admin/galeries"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Galeries privées</a>
     <a href="/admin/boutique"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique<span class="nav-badge"><span aria-hidden="true">2</span><span class="sr-only">, 2 commandes à préparer</span></span></a>
   </nav>
-  <p class="grp" id="nav-equipe-ph">Équipe</p>
-  <nav class="nav" aria-labelledby="nav-equipe-ph">
+  <p class="grp" id="nav-equipe">Équipe</p>
+  <nav class="nav" aria-labelledby="nav-equipe">
     <a href="/admin/statistiques"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
   </nav>
   <div class="foot">
@@ -216,7 +195,7 @@ photo:quai-7-h-12
 <div class="apercu-site mode-nuit theme-nicephos"><p class="bandeau">Aperçu · non publié · visible de l’équipe seulement</p>
 <div class="corps"><h2 class="sr-only" id="t-ap">Angers, un soir d’octobre, aperçu</h2><h3 class="h4" style="margin-top:0">Puis le soir</h3>
 <p class="prose">Mercredi, j’y suis revenu à la tombée du jour. À 18 h 10, Claire et Hugo marchaient devant moi, au bord de l’eau. Je leur ai tendu la carte « Bonjour » ; ils ont ri, puis ont continué comme si je n’étais pas là.</p>
-<figure class="np"><a href="/admin/carnet/18/apercu/photo/quai-ligny-soir"><img src="_commun/photos/480/ligny.webp" srcset="_commun/photos/480/ligny.webp 480w, _commun/photos/ligny.webp 900w" sizes="(max-width: 720px) calc(100vw - 64px), (max-width: 1180px) 592px, 488px" width="480" height="320" alt="Deux personnes sur un quai au coucher du soleil, une rangée de réverbères." loading="lazy" decoding="async"></a><figcaption>Quai Ligny, soir · <b>non publiée</b> : absente du site tant qu’elle ne l’est pas</figcaption></figure>
+<figure class="np"><a href="/admin/carnet/18/apercu/photo/quai-ligny-soir"><img src="_commun/photos/480/ligny.webp" srcset="_commun/photos/480/ligny.webp 480w, _commun/photos/ligny.webp 900w" sizes="(max-width: 720px) calc(100vw - 64px), (max-width: 1180px) 592px, 488px" width="480" height="320" alt="Deux personnes sur un quai au coucher du soleil, une rangée de réverbères." loading="lazy" decoding="async"></a><figcaption>Quai Ligny, soir · <b>non publiée</b> : absente du site tant qu’elle ne l’est pas</figcaption></figure>
 <p class="prose">Une demi-heure plus tard, il ne restait que les réverbères.</p>
 <figure class="np"><a href="/admin/carnet/18/apercu/photo/reverberes-quai-ligny"><img src="_commun/photos/480/reverberes.webp" srcset="_commun/photos/480/reverberes.webp 480w, _commun/photos/reverberes.webp 900w" sizes="(max-width: 720px) calc(100vw - 64px), (max-width: 1180px) 592px, 488px" width="480" height="320" alt="" loading="lazy" decoding="async"></a><figcaption>Réverbères, quai Ligny · <b>non publiée, texte de remplacement à écrire</b></figcaption></figure>
 </div></div>
@@ -225,7 +204,7 @@ photo:quai-7-h-12
 <section class="mq-ecran" inert aria-labelledby="etat-9"><p class="mq-etat" id="etat-9"><span class="mq-pin" aria-hidden="true">15</span>État · Une photo ouverte depuis l’aperçu : la visionneuse du billet</p>
 <div class="vis-b mode-nuit theme-nicephos"><p class="bandeau">Aperçu · non publié</p>
 <div class="haut"><a href="/admin/carnet/18/apercu#puis-le-soir"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Angers, un soir d’octobre</a><span class="pos">2 / 3 · photos du billet</span></div>
-<figure><img src="_commun/photos/480/ligny.webp" srcset="_commun/photos/480/ligny.webp 480w, _commun/photos/ligny.webp 900w, _commun/photos/1600/ligny.webp 1600w" sizes="(max-width: 720px) 100vw, (max-width: 1180px) calc(100vw - 80px), 560px" width="900" height="600" alt="Deux personnes sur un quai au coucher du soleil, une rangée de réverbères." loading="lazy" decoding="async">
+<figure><img src="_commun/photos/480/ligny.webp" srcset="_commun/photos/480/ligny.webp 480w, _commun/photos/ligny.webp 900w, _commun/photos/1600/ligny.webp 1600w" sizes="(max-width: 720px) 100vw, (max-width: 1180px) calc(100vw - 332px), 560px" width="900" height="600" alt="Deux personnes sur un quai au coucher du soleil, une rangée de réverbères." loading="lazy" decoding="async">
 <figcaption><p class="t">Quai Ligny, soir</p><p class="m">Sébastien · quai Ligny, Angers · 14 oct. 2026, 18 h 10</p><p class="np">Non publiée : la visionneuse publique ne la montrera qu’une fois publiée.</p></figcaption></figure>
 <nav class="voisines" aria-label="Photos voisines du billet"><a href="/admin/carnet/18/apercu/photo/quai-7-h-12" rel="prev"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg>Quai, 7 h 12</a><a href="/admin/carnet/18/apercu/photo/reverberes-quai-ligny" rel="next">Réverbères, quai Ligny<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></a></nav>
 </div>
@@ -277,11 +256,11 @@ photo:quai-7-h-12
     <li><span class="mq-num" aria-hidden="true">16</span><b>Un geste se défait</b><p>« Retirer du billet » a son message d’action et « Défaire » pendant 10 s.</p><span class="mq-ref">UX-A-08 · planche, message d’action</span></li>
   </ol>
   <h3>Composants</h3>
-  <p>Depuis la consolidation du 16 oct., tous ceux de la page sont dans <code>admin-plus.css</code> (planche MQ-00, section Administration) : éditeur Markdown (<code>.editeur-grille</code>, <code>.barre-outils</code> en vrais boutons, <code>.source</code>, <code>.sous-source</code>, langues en onglets <code>.edit-langues</code>) · compteur et signalement d’un champ (<code>.compteur</code>, <code>.avert</code> : ▲ sans erreur) · photos d’un billet avec leur état (<code>.objets-a</code>) · suggestion longue d’un assistant (<code>.sugg-bloc</code>, ✦ ; la pastille courte « ✦ Suggestion : Rue » est <code>.sugg</code>) · réglages repliés (<code>.plier</code>) · aperçu « comme sur le site » (<code>.apercu-site</code>) · jauge de poids (<code>.bar.jauge</code>, la barre de progression d’admin.css) · relecture d’une date (<code>.lu</code>), choix (<code>.choix-a</code>), pied de formulaire (<code>.form-pied</code>). Barre latérale : la variante Photographe de la planche (« Séries » sans lien, ses séries comptées sur ses 13 photos, tous statuts ; Boutique 2 depuis 10 h 17). Restent locaux, à verser dans la planche : les onglets de langue sur deux lignes sous 420 px (l’allemand « Français Entwurf » débordait à 320 px), la visionneuse du billet dans l’aperçu (<code>.vis-b</code>), <code>.js-seul</code> pour l’administration, le formulaire d’un dialogue.</p>
+  <p>Depuis la consolidation du 16 oct., tous ceux de la page sont dans <code>admin-plus.css</code> (planche MQ-00, section Administration) : éditeur Markdown (<code>.editeur-grille</code>, <code>.barre-outils</code> en vrais boutons, <code>.source</code>, <code>.sous-source</code>, langues en onglets <code>.edit-langues</code>) · compteur et signalement d’un champ (<code>.compteur</code>, <code>.avert</code> : ▲ sans erreur) · photos d’un billet avec leur état (<code>.objets-a</code>) · suggestion longue d’un assistant (<code>.sugg-bloc</code>, ✦ ; la pastille courte « ✦ Suggestion : Rue » est <code>.sugg</code>) · réglages repliés (<code>.plier</code>) · aperçu « comme sur le site » (<code>.apercu-site</code>) · jauge de poids (<code>.bar.jauge</code>, la barre de progression d’admin.css) · relecture d’une date (<code>.lu</code>), choix (<code>.choix-a</code>), pied de formulaire (<code>.form-pied</code>). Barre latérale : la variante Photographe de la planche (« Séries » sans lien, ses séries comptées sur ses 13 photos, tous statuts ; Boutique 2 depuis 10 h 17). Versés dans la planche à la passe 3 : les onglets de langue sur deux lignes sous 420 px (l’allemand « Français Entwurf » débordait à 320 px), la visionneuse du billet dans l’aperçu (<code>.vis-b</code>), <code>.js-seul</code>, la pastille de la barre d’actions fixe. Reste propre à la page : le formulaire du dialogue.</p>
   <h3>Écarts avec l’étude, tranchés ici</h3>
   <p>Corps en Markdown restreint, comme l’étude (B17). Une photo s’écrit d’une ligne seule, son adresse (photo:quai-ligny-soir), et non <code>![texte](photo:123 "légende")</code> (§ 1.4) : texte de remplacement et légende sont des réglages de la photo dans le billet, par langue, ce qui allège la source et la traduction (B36 n’a plus de syntaxe à protéger) ; le serveur garde la photo par identifiant (B9). Adresses : rencontre <code>/admin/rencontres/31</code> (main, par numéro) ; à créer : <code>/admin/carnet/18</code>, <code>/apercu</code>, <code>/apercu/photo/:slug</code>, <code>/photos/:n</code>, <code>/supprimer</code>, <code>/renvoyer</code>, <code>/publier</code>. Pas de bouton « Enregistrer » à côté de l’enregistrement automatique (B31, B34) : règle unique de la planche ; l’historique garde les versions. Rubrique « Voyages » (lexique), l’étude parlant d’étiquettes et de formats. Écran du vendredi 16 oct. à 22 h 42, le brouillon commencé la veille ; R0004057 titré à 22 h 41, traduction allemande à 22 h 44 (LEXIQUE-ET-DONNEES.md § 4.3 et § 4.9).</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> · passe 2 du 16 oct. 2026 (Chromium de Playwright 1.64 en conteneur ; outils/consol-admin.mjs, controle-annotations.mjs, consol-sans-admin.py, p2-1820-de.mjs, p2-1820-img.mjs ; html-validate 11) · axe-core : 0 violation au bureau (1 440 × 900, Chambre noire) et sur Pixel 7 (clair) · débordement : aucun à 320, 360, 412, 820, 1 024 et 1 440 px, en français et en allemand réel sur toute la page (56 libellés de server/admin-i18n et des nouveaux boutons) ; à 320 px, les boutons longs passent sur deux lignes, aucun n’est coupé · focus visible sur les 52 éléments focalisables de l’écran, en clair et en sombre, et sur les champs en erreur (#alt, #quand-b : filet rouge et anneau) · cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px · annotations : rien à redire à 1 440, 412 et 320 px (pastilles, étiquettes, cadres inert, un seul bloc) ; sans annotations, 0 pixel changé hors des pastilles · images : chaque vignette charge le fichier de sa largeur d’affichage (srcset, sizes) · html-validate : 0 erreur de structure · poids : 276 ko au bureau (15 ressources), 276 ko sur Pixel 7 (15), polices comprises, aucun script, rien de tiers · barre latérale : variante Photographe, contenu dans 900 px.</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>passe 3 du 16 oct. 2026</b> (Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-admin.mjs, consol-sans-admin.py, controle-annotations.mjs, p2-1820-de.mjs, p2adm-side.mjs, p3-images.mjs, insecables.py) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900, Chambre noire) et sur Pixel 7 (clair) · débordement : aucun à 320, 412, 820, 1 024 et 1 440 px en français, ni à 320, 360, 412, 820, 1 024 et 1 440 px en allemand réel sur toute la page (58 libellés de server/admin-i18n et des nouveaux boutons) ; les boutons longs passent à la ligne, aucun n’est coupé · focus visible sur les 52 éléments focalisables, en clair et en sombre, et sur les champs en erreur (#alt (montré au focus), #quand-b : filet rouge et anneau ensemble) · cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px · barre latérale (la même dans les sept maquettes de l’administration) : sans défilement, le bas du compte à 888 px dans une fenêtre de 900, à 820, 1 024 et 1 440 px · annotations : rien à redire à 1 440, 412 et 320 px ; sans annotations, 0 pixel changé hors du magenta et des contours des cadres d’état, au bureau et au téléphone · images : toutes à la taille d’affichage, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px · insécables : 0 à poser · poids après défilement complet : 286 ko au bureau comme au téléphone, polices et CSS compris ; aucun script, aucune ressource tierce.</p>
 </aside>
 
 </body>
