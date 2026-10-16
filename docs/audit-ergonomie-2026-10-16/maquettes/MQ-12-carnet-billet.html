@@ -1,0 +1,469 @@
+<!doctype html>
+<!-- MQ-12 — Carnet : un billet avec photos. Maquette de l'audit du 16 octobre 2026 (Camille Arnaud).
+     Thème « Nicephos — auto » : nuit par défaut, jour si le système le préfère (prefers-color-scheme: light).
+     Feuille d'impression incluse (Ctrl+P). Aucun script. Photos de démonstration seulement. -->
+<html lang="fr" class="theme-nicephos mode-auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <title>Lisbonne et Porto · Carnets · Nicephos</title>
+  <meta name="description" content="Deux jours, deux regards, un même océan : Lisbonne et Porto, par Sébastien et Julien.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-12T08:00:00+02:00">
+  <meta property="article:modified_time" content="2026-10-14T18:20:00+02:00">
+  <link rel="canonical" href="https://www.nicephos.art/carnet/lisbonne-et-porto">
+  <link rel="alternate" type="application/atom+xml" title="Nicephos — les carnets (flux Atom)" href="/carnet/flux.xml">
+  <link rel="stylesheet" href="_commun/site.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Lisbonne et Porto","alternativeHeadline":"Deux jours, deux regards, un même océan","datePublished":"2026-10-12T08:00:00+02:00","dateModified":"2026-10-14T18:20:00+02:00","author":[{"@type":"Person","name":"Sébastien"},{"@type":"Person","name":"Julien"}],"inLanguage":"fr"}</script>
+  <style>
+    /* ---------- Thème Nicephos « auto » (variables de public/themes/nicephos.css) ---------- */
+    .theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif; --display-style: normal; }
+    .mode-auto { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b; --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --land: #1f1f1e; }
+    @media (prefers-color-scheme: light) {
+      .mode-auto { color-scheme: light; --paper: #fbfbf9; --ink: #111111; --mute: #5e5d59; --prose: #3a3936; --rule: #dddcd7; --frame: #efeeea; --safelight: #7d6532; --on-accent: #fbfbf9; --land: #e6e4de; }
+    }
+    body { font-weight: 300; }
+
+    .skip { position: absolute; left: 12px; top: -120px; z-index: 100; padding: 12px 16px; background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 400; }
+    .skip:focus { top: 10px; }
+
+    /* ---------- En-tête cible (MQ-01), identique à MQ-11 ---------- */
+    .site-h { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 76px; border-bottom: 1px solid var(--rule); }
+    .wordmark { display: inline-flex; align-items: center; min-height: 44px; font-weight: 300; font-size: 15px; letter-spacing: .42em; text-transform: uppercase; white-space: nowrap; }
+    .menu { display: flex; align-items: center; gap: clamp(16px, 2.2vw, 34px); margin: 0; padding: 0; list-style: none; }
+    .menu a, .tools a, .tools summary { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 12px; font-weight: 400; letter-spacing: .16em; text-transform: uppercase; color: var(--mute); }
+    .menu a:hover, .tools a:hover, .tools summary:hover { color: var(--ink); }
+    .menu a[aria-current] { color: var(--ink); text-decoration: underline 2px var(--safelight); text-underline-offset: 9px; }
+    .menu .apart { padding-left: clamp(16px, 2.2vw, 34px); border-left: 1px solid var(--rule); }
+    .tools { display: flex; align-items: center; gap: 22px; }
+    .lang { position: relative; }
+    .lang summary, .menu-m summary { list-style: none; cursor: pointer; }
+    .lang summary::-webkit-details-marker, .menu-m summary::-webkit-details-marker { display: none; }
+    .lang ul { position: absolute; right: 0; top: 100%; z-index: 30; min-width: 180px; margin: 0; padding: 6px 0; list-style: none; background: var(--paper); border: 1px solid var(--rule); }
+    .lang li a { display: flex; min-height: 44px; padding: 0 16px; align-items: center; color: var(--ink); font-size: 14px; letter-spacing: .02em; text-transform: none; }
+    .menu-m { display: none; }
+
+    /* ---------- Colonne de lecture et figures ---------- */
+    .col { max-width: 37rem; margin-inline: auto; position: relative; }
+    .wide { max-width: 1120px; margin-inline: auto; }
+    .crumbs { padding-top: 26px; }
+    .crumbs ol { display: flex; flex-wrap: wrap; gap: 0 10px; margin: 0; padding: 0; list-style: none; font-family: var(--mono); font-size: 12.5px; letter-spacing: .03em; color: var(--mute); }
+    .crumbs li + li::before { content: '›'; margin-right: 10px; color: var(--mute); }
+    .crumbs a { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink); text-decoration: underline 1px var(--mute); text-underline-offset: 4px; }
+
+    .b-head { padding-block: clamp(28px, 4vw, 56px) clamp(28px, 3vw, 40px); }
+    .b-head .kicker { margin: 0 0 14px; font-family: var(--mono); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; }
+    .b-head .kicker a { color: var(--mute); text-decoration: underline 1px var(--rule); text-underline-offset: 4px; }
+    .b-head h1 { margin: 0; font-weight: 300; font-size: clamp(44px, 6vw, 80px); line-height: 1.05; letter-spacing: .003em; }
+    .b-head .sub { margin: 14px 0 0; font-weight: 400; font-size: clamp(20px, 2vw, 25px); line-height: 1.4; color: var(--prose); }
+    .b-head .by { margin: 26px 0 0; font-weight: 400; font-size: 17px; }
+    .b-head .by a, .prose-b a { text-decoration: underline 1px var(--mute); text-underline-offset: 4px; }
+    .b-head .by a:hover, .prose-b a:hover { text-decoration-color: var(--ink); }
+    .b-head .meta { margin: 6px 0 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; letter-spacing: .02em; color: var(--mute); }
+
+    .ph { margin: 0; }
+    .ph a { display: block; background: var(--frame); }
+    .ph img { width: 100%; height: auto; }
+    .ph.full { margin-inline: auto; }
+    .ph.vert { max-width: 30rem; margin-inline: auto; }
+    .flow .ph.full, .flow .dip, .flow .ph.vert { clear: both; }
+    .cartel { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; padding-top: 12px; }
+    .cartel .t { font-weight: 400; font-size: 16px; color: var(--ink); }
+    .cartel .m { font-family: var(--mono); font-size: 12.5px; letter-spacing: .02em; color: var(--mute); }
+
+    .prose-b { font-weight: 400; font-size: 18px; line-height: 1.7; color: var(--prose); }
+    .prose-b p { margin: 0 0 1.15em; }
+    .prose-b h2 { margin: 2.2em 0 .7em; font-weight: 500; font-size: 22px; line-height: 1.3; color: var(--ink); }
+    .prose-b h2 .d { display: block; margin-top: 4px; font-family: var(--mono); font-weight: 400; font-size: 12.5px; letter-spacing: .04em; color: var(--mute); }
+    .flow > * + * { margin-top: 0; }
+    .flow .ph, .flow .dip, .flow .quote { margin-block: 56px; }
+
+    .quote { margin-inline: 0; padding-left: 26px; border-left: 2px solid var(--safelight); }
+    .quote blockquote { margin: 0; }
+    .quote blockquote p { margin: 0; font-weight: 300; font-size: clamp(24px, 2.4vw, 30px); line-height: 1.35; color: var(--ink); }
+    .quote figcaption { margin-top: 14px; font-weight: 400; font-size: 16px; line-height: 1.6; color: var(--prose); }
+    .quote .src { display: block; margin-top: 4px; font-family: var(--mono); font-size: 12.5px; color: var(--mute); }
+
+    .dip-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 24px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+    .dip-h h2 { margin: 0; text-wrap: balance; font-weight: 300; font-size: clamp(24px, 2.4vw, 30px); line-height: 1.2; color: var(--ink); }
+    .dip-h p { margin: 0; font-family: var(--mono); font-size: 12.5px; color: var(--mute); }
+    .dip .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .flow .dip .pair .ph { margin-block: 0; }
+    .dip .who-l { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 400; letter-spacing: .16em; text-transform: uppercase; color: var(--mute); }
+
+    /* Carte d'itinéraire dessinée (SVG, ~2 ko) : dans la marge sur grand écran. */
+    .itin { margin: 0 0 32px; display: grid; gap: 12px; }
+    .itin svg { width: 100%; max-width: 230px; height: auto; display: block; }
+    .itin .land { fill: var(--land); }
+    .itin .route { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: 2 5; stroke-linecap: round; }
+    .itin .dot { fill: var(--ink); }
+    .itin .num { fill: var(--paper); font: 500 9px var(--sans); text-anchor: middle; dominant-baseline: central; }
+    .itin .lab { fill: var(--ink); font: 400 10px var(--sans); }
+    .itin figcaption { font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: var(--mute); }
+    .itin ol { margin: 0; padding: 0; list-style: none; }
+    .itin a { color: var(--ink); text-decoration: underline 1px var(--mute); text-underline-offset: 4px; }
+    @media (min-width: 1300px) { .itin { float: right; width: 230px; margin: 6px -290px 0 0; } }
+
+    /* ---------- Fin du billet ---------- */
+    .end { margin-top: 72px; }
+    .acts { display: flex; flex-wrap: wrap; gap: 12px 28px; padding-block: 20px; border-block: 1px solid var(--rule); }
+    .acts a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 400; font-size: 16px; color: var(--ink); text-decoration: underline 1px var(--mute); text-underline-offset: 5px; }
+    .sec-h { margin: 64px 0 20px; font-weight: 300; font-size: clamp(24px, 2.4vw, 30px); line-height: 1.2; }
+    .sec-h .n { font-family: var(--mono); font-size: 12.5px; font-weight: 400; color: var(--mute); margin-left: 10px; }
+    /* Planche contact : cadres 3:2 identiques, photo entière en passe-partout (jamais recadrée) */
+    .planche { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: 26px 16px; margin: 0; padding: 0; list-style: none; }
+    .planche a { display: grid; gap: 10px; align-content: start; }
+    .planche img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: contain; background: var(--frame); }
+    .planche .c { font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--mute); }
+    .planche .c b { font-weight: 500; color: var(--ink); margin-right: 6px; }
+    .planche a:hover .c span { text-decoration: underline; }
+
+    .tirages { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 20px 40px; margin: 0; padding: 0; list-style: none; }
+    .tirages li { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 18px; align-items: center; }
+    .tirages img { width: 132px; height: 88px; object-fit: contain; background: var(--frame); }
+    .tirages p { margin: 0; font-weight: 400; font-size: 15px; line-height: 1.6; color: var(--prose); }
+    .tirages .t { color: var(--ink); }
+    .tirages a { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink); text-decoration: underline 1px var(--mute); text-underline-offset: 4px; }
+
+    .prevnext { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 64px; padding-top: 22px; border-top: 1px solid var(--rule); }
+    .prevnext a, .prevnext div { display: grid; gap: 4px; min-height: 44px; }
+    .prevnext .l { font-family: var(--mono); font-size: 12.5px; color: var(--mute); }
+    .prevnext .t { font-weight: 300; font-size: 22px; line-height: 1.3; color: var(--ink); }
+    .prevnext a:hover .t { text-decoration: underline 1px var(--mute); text-underline-offset: 5px; }
+    .prevnext .next { text-align: right; justify-items: end; }
+    .prevnext .next p { margin: 0; font-weight: 400; font-size: 15px; color: var(--prose); }
+    .prevnext .next p a { display: inline; color: var(--ink); text-decoration: underline 1px var(--mute); text-underline-offset: 4px; }
+
+    .site-f { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 40px; margin-top: 72px; padding-block: 36px 40px; border-top: 1px solid var(--rule); color: var(--mute); font-family: var(--mono); font-size: 12.5px; }
+    .site-f p { margin: 0; }
+    .site-f ul { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 0; padding: 0; list-style: none; }
+    .site-f a { display: inline-flex; align-items: center; min-height: 32px; color: var(--mute); text-decoration: underline 1px var(--rule); text-underline-offset: 4px; }
+    .site-f a:hover { color: var(--ink); text-decoration-color: var(--ink); }
+
+    /* ---------- Annotations de la maquette (hors page) ---------- */
+    .pin { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 22px; height: 22px; margin-inline: 8px; border-radius: 50%; background: var(--safelight); color: var(--on-accent); font: 500 12px/1 var(--sans); letter-spacing: 0; text-transform: none; vertical-align: middle; }
+    .annot { margin: 40px var(--gut) 0; padding: 36px 0 64px; border-top: 2px dashed var(--safelight); }
+    .annot .tag { margin: 0; font-family: var(--mono); font-size: 12.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--safelight); }
+    .annot h2 { margin: 10px 0 8px; font-weight: 300; font-size: 30px; }
+    .annot .intro { margin: 0; max-width: 92ch; font-weight: 400; font-size: 15px; line-height: 1.6; color: var(--prose); }
+    .annot ol { counter-reset: n; list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 20px 48px; }
+    .annot li { counter-increment: n; position: relative; padding-left: 38px; font-weight: 400; font-size: 15px; line-height: 1.6; color: var(--prose); }
+    .annot li::before { content: counter(n); position: absolute; left: 0; top: 1px; width: 24px; height: 24px; border-radius: 50%; background: var(--safelight); color: var(--on-accent); font: 500 12px/24px var(--sans); text-align: center; }
+    .annot li strong { font-weight: 500; color: var(--ink); }
+    .annot .ref { display: block; margin-top: 4px; font-family: var(--mono); font-size: 12px; line-height: 1.6; color: var(--mute); }
+    .demos { display: flex; flex-wrap: wrap; gap: 40px 56px; align-items: flex-start; margin-top: 44px; }
+    .demos figure { margin: 0; display: grid; gap: 12px; }
+    .demos figcaption { max-width: 46ch; font-weight: 400; font-size: 14px; line-height: 1.55; color: var(--prose); }
+    .demos figcaption b { font-weight: 500; color: var(--ink); }
+    /* Barre de la visionneuse ouverte depuis le billet (voir MQ-04) */
+    .vbar { display: flex; align-items: center; gap: 22px; width: min(640px, 100%); min-height: 56px; padding: 0 18px; background: #050505; color: #f0efeb; border: 1px solid #2c2c2b; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+    .vbar .w { font-weight: 300; letter-spacing: .42em; }
+    .vbar .bk { flex: 1; text-transform: none; letter-spacing: .02em; font-size: 14px; font-weight: 400; }
+    .vbar .ct { font-family: var(--mono); letter-spacing: .02em; text-transform: none; font-size: 12.5px; color: #b4b2ac; }
+    .vbar .ar { display: inline-flex; width: 30px; height: 30px; border: 1px solid #555; border-radius: 50%; align-items: center; justify-content: center; letter-spacing: 0; }
+    /* Aperçu d'impression : feuille A4 réduite, rendu des règles @media print ci-dessous */
+    .sheet { width: 340px; aspect-ratio: 210 / 297; padding: 24px 26px; background: #fff; color: #111; box-shadow: 0 0 0 1px #2c2c2b, 0 18px 40px rgba(0,0,0,.35); font: 400 7.2px/1.5 Jost, Arial, sans-serif; overflow: hidden; }
+    .sheet .s-site { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 6px; color: #444; border-bottom: .5px solid #999; padding-bottom: 4px; }
+    .sheet .s-h { margin: 12px 0 2px; font-weight: 400; font-size: 17px; line-height: 1.1; }
+    .sheet .s-sub { margin: 0; font-size: 8.5px; color: #222; }
+    .sheet .s-meta { margin: 4px 0 8px; font-family: var(--mono); font-size: 6px; color: #333; }
+    .sheet img { width: 100%; height: auto; }
+    .sheet .s-cap { margin: 3px 0 7px; font-family: var(--mono); font-size: 5.6px; color: #222; }
+    .sheet p { margin: 0 0 5px; }
+    .sheet .s-foot { margin-top: 8px; padding-top: 4px; border-top: .5px solid #999; font-family: var(--mono); font-size: 5.6px; color: #333; }
+
+    /* ---------- Téléphone ---------- */
+    @media (max-width: 900px) {
+      .menu-d { display: none; }
+      .menu-m { display: block; position: relative; }
+      .site-h { min-height: 64px; gap: 10px; }
+      .menu-m > ul { position: absolute; left: 0; top: 100%; z-index: 30; min-width: 230px; margin: 0; padding: 8px 0; list-style: none; background: var(--paper); border: 1px solid var(--rule); }
+      .menu-m > ul a { display: flex; min-height: 48px; padding: 0 18px; align-items: center; }
+      .tools { gap: 6px; }
+      .tools .t-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+      .tools a, .tools summary { min-width: 44px; justify-content: center; }
+    }
+    @media (max-width: 760px) {
+      .ph.full, .dip .pair figure { margin-inline: calc(-1 * var(--gut)); }
+      .ph.full .cartel, .dip .pair .cartel, .dip .pair .who-l { padding-inline: var(--gut); }
+      .dip .pair { grid-template-columns: 1fr; gap: 36px; }
+      .prose-b { font-size: 17px; }
+      .itin { grid-template-columns: 120px minmax(0, 1fr); align-items: center; gap: 18px; }
+      .prevnext { grid-template-columns: 1fr; }
+      .prevnext .next { text-align: left; justify-items: start; }
+      .planche { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; }
+      .tirages li { grid-template-columns: 104px minmax(0, 1fr); }
+      .tirages img { width: 104px; height: 70px; }
+      .sheet { width: 100%; max-width: 340px; }
+      .vbar { gap: 12px; padding: 0 12px; } .vbar .w { display: none; } .vbar .ct { white-space: nowrap; } .vbar .ctx { display: none; }
+      .wordmark { font-size: 14px; letter-spacing: .34em; }
+    }
+
+    /* ---------- Impression (UX-F-35) : noir sur blanc, sans navigation, cartels et adresses ---------- */
+    @media print {
+      @page { margin: 16mm 15mm 18mm; }
+      .mode-auto { --paper: #fff; --ink: #111; --mute: #333; --prose: #111; --rule: #999; --frame: #fff; --land: #ddd; }
+      html, body { background: #fff !important; color: #111 !important; }
+      .skip, .site-h, .crumbs, .acts, .planche-s, .tirages-s, .prevnext, .site-f, .annot, .pin { display: none !important; }
+      .b-head { padding-top: 0; }
+      .b-head h1 { font-size: 26pt; }
+      .b-head .kicker a, .b-head .by a, .prose-b a { text-decoration: none; }
+      .prose-b { font-size: 11pt; line-height: 1.55; }
+      .col { max-width: none; }
+      .itin { float: right; width: 42mm; margin: 0 0 4mm 6mm; }
+      .ph, .dip, .quote, .itin { break-inside: avoid; }
+      .ph img { max-height: 150mm; width: auto; max-width: 100%; margin-inline: auto; }
+      .flow .ph, .flow .dip, .flow .quote { margin-block: 8mm; }
+      .cartel[data-url]::after { content: "nicephos.art" attr(data-url); flex-basis: 100%; font-family: var(--mono); font-size: 8pt; }
+      .prose-b a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; }
+      .end::before { content: "Nicephos — www.nicephos.art/carnet/lisbonne-et-porto · © 2026 Sébastien & Julien, reproduction soumise à autorisation"; display: block; padding-top: 4mm; border-top: .5pt solid #999; font: 8pt var(--mono); }
+    }
+  </style>
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+
+<header class="site-h wrap">
+  <a class="wordmark" href="/">Nicephos</a>
+  <nav class="menu-d" aria-label="Menu principal">
+    <ul class="menu">
+      <li><a href="/series">Séries</a></li>
+      <li><a href="/#galerie">Galerie</a></li>
+      <li><a href="/carte">Carte</a></li>
+      <li><a href="MQ-11-carnets-liste.html" aria-current="true">Carnets</a></li>
+      <li><a href="/a-propos">À propos</a></li>
+      <li class="apart"><a href="MQ-13-boutique-tirage.html">Tirages</a></li>
+    </ul>
+  </nav>
+  <div class="tools">
+    <details class="menu-m">
+      <summary aria-label="Menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Menu</span></summary>
+      <ul aria-label="Menu principal">
+        <li><a href="/series">Séries</a></li>
+        <li><a href="/#galerie">Galerie</a></li>
+        <li><a href="/carte">Carte</a></li>
+        <li><a href="MQ-11-carnets-liste.html" aria-current="true">Carnets</a></li>
+        <li><a href="/a-propos">À propos</a></li>
+        <li><a href="MQ-13-boutique-tirage.html">Tirages</a></li>
+      </ul>
+    </details>
+    <a href="/recherche"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="t-label">Rechercher</span></a>
+    <details class="lang">
+      <summary aria-label="Langue : FR, français">FR</summary>
+      <ul>
+        <li><a href="/langue/fr?vers=%2Fcarnet%2Flisbonne-et-porto" hreflang="fr" lang="fr" aria-current="true">Français</a></li>
+        <li><a href="/langue/en?vers=%2Fcarnet%2Flisbonne-et-porto" hreflang="en" lang="en">English</a></li>
+        <li><a href="/langue/de?vers=%2Fcarnet%2Flisbonne-et-porto" hreflang="de" lang="de">Deutsch</a></li>
+      </ul>
+    </details>
+  </div>
+</header>
+
+<main id="contenu" class="wrap" tabindex="-1">
+  <nav class="crumbs wide" aria-label="Fil d’Ariane">
+    <ol>
+      <li><a href="MQ-11-carnets-liste.html">Carnets</a></li>
+      <li><span aria-current="page">Lisbonne et Porto</span><span class="pin" aria-hidden="true">1</span></li>
+    </ol>
+  </nav>
+
+  <article aria-labelledby="titre">
+    <header class="b-head wide">
+      <p class="kicker"><a href="/carnet?type=voyages">Voyage</a></p>
+      <h1 id="titre">Lisbonne et Porto</h1>
+      <p class="sub">Deux jours, deux regards, un même océan</p>
+      <p class="by">Par <a href="/photographes/sebastien">Sébastien</a> et <a href="/photographes/julien">Julien</a><span class="pin" aria-hidden="true">2</span></p>
+      <p class="meta">Publié le <time datetime="2026-10-12T08:00+02:00">12 octobre 2026</time> · mis à jour le <time datetime="2026-10-14T18:20+02:00">14 octobre 2026</time> · 10 photos · 6 min de lecture</p>
+    </header>
+
+    <figure class="ph full wide" role="figure" aria-label="Miradouro, l’heure dorée — Julien · Miradouro da Graça, Lisbonne · 10 octobre 2026">
+      <a href="/photo/miradouro-l-heure-doree?carnet=lisbonne-et-porto"><img src="_commun/photos/ciel.webp" width="900" height="600" fetchpriority="high" alt="Les toits de la Graça au soleil couchant ; au loin, le Tage et la colline du château, dans une lumière rose et dorée."><span class="sr-only"> — ouvrir la photo, 3 sur 10 dans ce carnet</span></a>
+      <figcaption class="cartel" data-url="/photo/miradouro-l-heure-doree"><span class="t">Miradouro, l’heure dorée</span> <span class="m">— Julien · Miradouro da Graça, Lisbonne · 10 octobre 2026<span class="pin" aria-hidden="true">4</span></span></figcaption>
+    </figure>
+
+    <div class="flow">
+      <div class="col prose-b">
+        <figure class="itin" role="figure" aria-labelledby="itin-c">
+          <svg viewBox="0 0 160 240" role="img" aria-labelledby="itin-t"><title id="itin-t">Carte de l’itinéraire : Lisbonne, puis Porto, au nord, le long de la côte atlantique.</title>
+            <path class="land" d="M62 6 L58 30 L55 52 L52 74 L49 96 L45 118 L40 140 L34 158 L27 170 L24 178 L30 182 L37 181 L35 190 L39 200 L35 212 L38 224 L46 232 L150 232 L150 6 Z"/>
+            <path class="route" d="M37 180 C 44 150, 50 110, 51 78"/>
+            <circle class="dot" cx="37" cy="180" r="7"/><text class="num" x="37" y="180">1</text>
+            <circle class="dot" cx="51" cy="76" r="7"/><text class="num" x="51" y="76">2</text>
+            <text class="lab" x="50" y="183">Lisbonne</text>
+            <text class="lab" x="64" y="79">Porto</text>
+          </svg>
+          <figcaption id="itin-c">
+            <ol>
+              <li>1 · <a href="#samedi">Lisbonne, samedi 10</a></li>
+              <li>2 · <a href="#dimanche">Porto, dimanche 11</a></li>
+            </ol>
+            313 km en train · <a href="/voyage/lisbonne-et-porto">le voyage jour par jour</a><span class="pin" aria-hidden="true">8</span>
+          </figcaption>
+        </figure>
+
+        <p>Nous étions partis avec une seule règle&#8239;: ne pas photographier la même chose. Elle n’a pas tenu une matinée. Le samedi, à Lisbonne, nous nous sommes levés avant le premier tram, quand l’Alfama sent encore le café et le linge mouillé. Sébastien est descendu vers le Tage, Julien est monté dans les ruelles.<span class="pin" aria-hidden="true">3</span></p>
+
+        <h2 id="samedi">Lisbonne, du Tage à la Graça <span class="d"><time datetime="2026-10-10">samedi 10 octobre</time></span></h2>
+        <p>Au Cais do Sodré, la marée basse découvre une rangée de pieux que personne ne regarde. Sébastien y est resté une heure, le temps qu’un pêcheur entre dans le cadre et en ressorte. Plus haut, Julien a attendu le 28 dans la montée de l’Alfama&#8239;: le tram passe toutes les douze minutes, et il en a fallu quatre pour que la lumière tombe au bon endroit.</p>
+      </div>
+
+      <figure class="ph full wide" role="figure" aria-label="Cais do Sodré, marée basse — Sébastien · Cais do Sodré, Lisbonne · 10 octobre 2026">
+        <a href="/photo/cais-do-sodre-maree-basse?carnet=lisbonne-et-porto"><img src="_commun/photos/quai.webp" width="900" height="600" loading="lazy" alt="Une rangée de pieux sombres dans l’eau grise du Tage à marée basse ; un pêcheur, de dos, au bord du cadre."><span class="sr-only"> — ouvrir la photo, 1 sur 10 dans ce carnet</span></a>
+        <figcaption class="cartel" data-url="/photo/cais-do-sodre-maree-basse"><span class="t">Cais do Sodré, marée basse</span> <span class="m">— Sébastien · Cais do Sodré, Lisbonne · 10 octobre 2026<span class="pin" aria-hidden="true">5</span></span></figcaption>
+      </figure>
+
+      <div class="col prose-b">
+        <p>Le soir, nous nous retrouvions sur les miradouros pour comparer nos cartes mémoire. C’est là, sur celui de la Graça, que la règle a cédé&#8239;: nous avions tous les deux photographié la même ville dorée, chacun à sa façon.</p>
+        <p>Rua dos Remédios, Inês vend des fleurs depuis trente ans au même coin de rue. Julien lui a tendu la <a href="/bonjour">carte «&#8239;Bonjour&#8239;»</a>&#8239;; elle l’a lue, a souri, et a répondu&#8239;:</p>
+
+        <figure class="quote">
+          <blockquote lang="pt-PT"><p>«Fotografe à vontade. As flores não fogem, e eu também não.»</p></blockquote>
+          <figcaption>«&#8239;Photographiez tant que vous voulez. Les fleurs ne s’en vont pas, et moi non plus.&#8239;»<span class="src">Inês, fleuriste, rua dos Remédios<span class="pin" aria-hidden="true">6</span></span></figcaption>
+        </figure>
+      </div>
+
+      <figure class="ph vert" role="figure" aria-label="Inês, rua dos Remédios — Julien · Rua dos Remédios, Lisbonne · 10 octobre 2026">
+        <a href="/photo/ines-rua-dos-remedios?carnet=lisbonne-et-porto"><img src="_commun/photos/portrait.webp" width="600" height="900" loading="lazy" alt="Inês, de trois quarts, devant la porte de sa boutique, un bouquet de fleurs rouges et blanches dans les bras."><span class="sr-only"> — ouvrir la photo, 4 sur 10 dans ce carnet</span></a>
+        <figcaption class="cartel" data-url="/photo/ines-rua-dos-remedios"><span class="t">Inês, rua dos Remédios</span> <span class="m">— Julien · Rua dos Remédios, Lisbonne</span></figcaption>
+      </figure>
+
+      <div class="col prose-b">
+        <h2 id="dimanche">Porto, la brume et la barre <span class="d"><time datetime="2026-10-11">dimanche 11 octobre</time></span></h2>
+        <p>À Porto, la brume remonte le Douro jusqu’aux escaliers des Guindais. Au marché do Bolhão, Tiago a laissé Sébastien photographier son étal à condition de goûter ses sardines d’abord&#8239;; il n’a pas eu à insister.</p>
+        <p>L’après-midi, nous nous sommes séparés au bord du fleuve, Sébastien vers l’embouchure, Julien vers les quais. Nous ne nous sommes revus qu’au soir, et nous avions rapporté la même eau.</p>
+      </div>
+
+      <section class="dip wide" aria-labelledby="dip-t">
+        <div class="dip-h">
+          <h2 id="dip-t">Même lieu, deux regards&#8239;: le Douro<span class="pin" aria-hidden="true">7</span></h2>
+          <p>dimanche 11 octobre · à gauche Sébastien, à droite Julien</p>
+        </div>
+        <div class="pair">
+          <figure class="ph" role="figure" aria-label="Foz, la barre — Sébastien · Foz do Douro, Porto">
+            <span class="who-l" aria-hidden="true">Sébastien</span>
+            <a href="/photo/foz-la-barre?carnet=lisbonne-et-porto"><img src="_commun/photos/mer.webp" width="900" height="600" loading="lazy" alt="L’embouchure du Douro au crépuscule : la houle de l’Atlantique bute sur la barre, sous un ciel bleu sombre."><span class="sr-only"> — ouvrir la photo, 8 sur 10 dans ce carnet</span></a>
+            <figcaption class="cartel" data-url="/photo/foz-la-barre"><span class="t">Foz, la barre</span> <span class="m">— Sébastien · Foz do Douro, Porto</span></figcaption>
+          </figure>
+          <figure class="ph" role="figure" aria-label="Ribeira, brume du fleuve — Julien · Ribeira, Porto">
+            <span class="who-l" aria-hidden="true">Julien</span>
+            <a href="/photo/ribeira-brume-du-fleuve?carnet=lisbonne-et-porto"><img src="_commun/photos/brume.webp" width="900" height="600" loading="lazy" alt="Les quais de la Ribeira noyés dans la brume ; les façades et le pont ne sont plus que des silhouettes grises."><span class="sr-only"> — ouvrir la photo, 9 sur 10 dans ce carnet</span></a>
+            <figcaption class="cartel" data-url="/photo/ribeira-brume-du-fleuve"><span class="t">Ribeira, brume du fleuve</span> <span class="m">— Julien · Ribeira, Porto</span></figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <div class="col prose-b">
+        <p>Sébastien a cherché la mer, Julien les gens. Inês nous a vendu des fleurs, Tiago nous a laissé photographier son étal&#8239;: merci à eux. L’itinéraire et les dix photos, dans l’ordre de la prise de vue, sont dans <a href="/voyage/lisbonne-et-porto">le voyage jour par jour</a>.</p>
+      </div>
+    </div>
+
+    <div class="end wide">
+      <p class="acts">
+        <a href="/carnet/lisbonne-et-porto/partager"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg>Partager ce carnet</a>
+        <a href="MQ-06-contact-tirage.html">Écrire à Sébastien et Julien</a>
+      </p>
+
+      <section class="planche-s" aria-labelledby="planche-t">
+        <h2 class="sec-h" id="planche-t">Les 10 photos de ce carnet<span class="pin" aria-hidden="true">9</span></h2>
+        <ol class="planche">
+          <li style="--r:1.5"><a href="/photo/cais-do-sodre-maree-basse?carnet=lisbonne-et-porto"><img src="_commun/photos/quai.webp" width="900" height="600" loading="lazy" alt=""><span class="c"><b>01</b><span>Cais do Sodré, marée basse</span> · Sébastien</span></a></li>
+          <li style="--r:.667"><a href="/photo/alfama-premier-tram?carnet=lisbonne-et-porto"><img src="_commun/photos/ruelle.webp" width="600" height="900" loading="lazy" alt=""><span class="c"><b>02</b><span>Alfama, premier tram</span> · Julien</span></a></li>
+          <li style="--r:1.5"><a href="/photo/miradouro-l-heure-doree?carnet=lisbonne-et-porto"><img src="_commun/photos/ciel.webp" width="900" height="600" loading="lazy" alt=""><span class="c"><b>03</b><span>Miradouro, l’heure dorée</span> · Julien</span></a></li>
+          <li style="--r:.667"><a href="/photo/ines-rua-dos-remedios?carnet=lisbonne-et-porto"><img src="_commun/photos/portrait.webp" width="600" height="900" loading="lazy" alt=""><span class="c"><b>04</b><span>Inês, rua dos Remédios</span> · Julien</span></a></li>
+          <li style="--r:.667"><a href="/photo/linge-au-balcon?carnet=lisbonne-et-porto"><img src="_commun/photos/foret.webp" width="600" height="900" loading="lazy" alt=""><span class="c"><b>05</b><span>Linge au balcon</span> · Julien</span></a></li>
+          <li style="--r:1.5"><a href="/photo/belem-contre-jour?carnet=lisbonne-et-porto"><img src="_commun/photos/dune.webp" width="900" height="600" loading="lazy" alt=""><span class="c"><b>06</b><span>Belém, contre-jour</span> · Sébastien</span></a></li>
+          <li style="--r:1.5"><a href="/photo/tiago-marche-do-bolhao?carnet=lisbonne-et-porto"><img src="_commun/photos/ombre.webp" width="900" height="600" loading="lazy" alt=""><span class="c"><b>07</b><span>Tiago, marché do Bolhão</span> · Sébastien</span></a></li>
+          <li style="--r:1.5"><a href="/photo/foz-la-barre?carnet=lisbonne-et-porto"><img src="_commun/photos/mer.webp" width="900" height="600" loading="lazy" alt=""><span class="c"><b>08</b><span>Foz, la barre</span> · Sébastien</span></a></li>
+          <li style="--r:1.5"><a href="/photo/ribeira-brume-du-fleuve?carnet=lisbonne-et-porto"><img src="_commun/photos/brume.webp" width="900" height="600" loading="lazy" alt=""><span class="c"><b>09</b><span>Ribeira, brume du fleuve</span> · Julien</span></a></li>
+          <li style="--r:.667"><a href="/photo/escaliers-des-guindais?carnet=lisbonne-et-porto"><img src="_commun/photos/nuit.webp" width="600" height="900" loading="lazy" alt=""><span class="c"><b>10</b><span>Escaliers des Guindais</span> · Julien</span></a></li>
+        </ol>
+      </section>
+
+      <section class="tirages-s" aria-labelledby="tirages-t">
+        <h2 class="sec-h" id="tirages-t">Tirages disponibles de ce carnet</h2>
+        <ul class="tirages">
+          <li><img src="_commun/photos/ciel.webp" width="900" height="600" loading="lazy" alt="">
+            <p><span class="t">Miradouro, l’heure dorée</span> — Julien<br>Tirage pigmentaire sur Photo Rag, édition de 15, à partir de 180&#8239;€<br><a href="MQ-13-boutique-tirage.html">Voir le tirage <span class="sr-only">Miradouro, l’heure dorée</span></a></p></li>
+          <li><img src="_commun/photos/mer.webp" width="900" height="600" loading="lazy" alt="">
+            <p><span class="t">Foz, la barre</span> — Sébastien<br>Tirage pigmentaire sur Photo Rag, édition de 15, à partir de 180&#8239;€<br><a href="/tirages/foz-la-barre">Voir le tirage <span class="sr-only">Foz, la barre</span></a></p></li>
+        </ul>
+      </section>
+
+      <nav class="prevnext" aria-label="Autres carnets">
+        <a href="/carnet/tirer-sur-hahnemuhle-photo-rag" rel="prev"><span class="l">← Carnet précédent · 5 octobre 2026</span><span class="t">Notes d’atelier&#8239;: tirer sur Hahnemühle Photo Rag</span></a>
+        <div class="next"><span class="l">Carnet suivant →</span><p>C’est le plus récent. <a href="/carnet/flux.xml" type="application/atom+xml">S’abonner (flux RSS)</a> pour lire le prochain.</p></div>
+      </nav>
+    </div>
+  </article>
+</main>
+
+<footer class="site-f wrap">
+  <p>© 2026 Sébastien &amp; Julien</p>
+  <nav aria-label="Pied de page">
+    <ul>
+      <li><a href="/droits">Tirages et licences</a></li>
+      <li><a href="MQ-06-contact-tirage.html">Contact</a></li>
+      <li><a href="https://www.instagram.com/nicephos.art/">Instagram</a></li>
+      <li><a href="/carnet/flux.xml" type="application/atom+xml">Flux RSS</a></li>
+      <li><a href="/confidentialite">Confidentialité</a></li>
+      <li><a href="/mentions-legales">Mentions légales</a></li>
+    </ul>
+  </nav>
+</footer>
+
+<aside class="annot" aria-labelledby="annot-t">
+  <p class="tag">Maquette MQ-12 · audit du 16 octobre 2026 · Camille Arnaud</p>
+  <h2 id="annot-t">Ce qui change</h2>
+  <p class="intro">Aujourd’hui, le récit «&#8239;Lisbonne et Porto&#8239;» existe sur la démo comme page de voyage&#8239;: titre posé sur la photo, ni signature ni date de publication, photos qui renvoient vers la galerie entière, rien pour l’impression. Ce billet garde le ton et le texte du voyage, et le met en page comme un livre. La page suit la préférence du système&#8239;: <b>capture bureau en nuit, capture mobile en jour</b>.</p>
+  <ol>
+    <li><strong>Fil d’Ariane «&#8239;Carnets › Lisbonne et Porto&#8239;»</strong> (liste ordonnée, page courante en aria-current) et menu cible avec «&#8239;Carnets&#8239;» actif.
+      <span class="ref">UX-T-16 · RGAA 12.1 · WCAG 2.4.8 · Nielsen n°3</span></li>
+    <li><strong>Qui, quand</strong>&#8239;: auteurs nommés sous le titre, publié le … et «&#8239;mis à jour le 14 octobre 2026&#8239;» en &lt;time&gt;, repris en JSON-LD (datePublished, dateModified). Le titre n’est plus posé sur la photo.
+      <span class="ref">UX-T-18 · UX-F-01 · Opquast 6, 101 et 231 · étude B48 et B56</span></li>
+    <li><strong>Mode lecture</strong>&#8239;: Jost 400 à 18&#8239;px (17 sur téléphone), interlignage 1,7, environ 65 signes par ligne, intertitres en 500 et non en faux gras. Contraste 12:1 en nuit, 11:1 en jour.
+      <span class="ref">UX-F-29 · UX-T-18 · WCAG 1.4.8 et 1.4.12 · B&amp;S 1.4 Lisibilité</span></li>
+    <li><strong>Photo pleine largeur, entière, avec son cartel</strong>&#8239;: titre, auteur, lieu, date. Figure reliée à sa légende (role="figure", aria-label identique), alternative qui décrit la photo.
+      <span class="ref">UX-F-45 · RGAA 1.1, 1.3 et 1.9 · Opquast 118</span></li>
+    <li><strong>Chaque photo ouvre la visionneuse dans le contexte du billet</strong>&#8239;: /photo/…?carnet=lisbonne-et-porto. La visionneuse affiche «&#8239;← Lisbonne et Porto&#8239;» et «&#8239;3 / 10&#8239;» dans l’ordre du billet&#8239;; Échap revient ici (voir l’aperçu ci-dessous et MQ-04).
+      <span class="ref">UX-F-09 · UX-T-16 · B&amp;S 3.2 Contrôle utilisateur · ISO 9241-110 Contrôlabilité</span></li>
+    <li><strong>La citation en portugais est balisée lang="pt-PT"</strong>, avec les guillemets portugais sans espace, puis sa traduction en français et sa source.
+      <span class="ref">UX-F-22 · UX-T-18 · RGAA 8.7 · WCAG 3.1.2 · Opquast 132</span></li>
+    <li><strong>Diptyque «&#8239;Même lieu, deux regards&#8239;»</strong>&#8239;: Sébastien à gauche, Julien à droite, mêmes dimensions, chacun son cartel&#8239;; sur téléphone, l’un sous l’autre, nom en tête.
+      <span class="ref">UX-F-45 · loi de Prägnanz · effet de Von Restorff</span></li>
+    <li><strong>Une carte d’itinéraire dessinée</strong> en SVG (environ 2&#8239;ko, aucune tuile, aucun tiers), dans la marge sur grand écran, avec les étapes en texte et leurs liens.
+      <span class="ref">UX-F-20 · RGESN 4.7 et 6.5 · RGAA 1.1 · Opquast 12</span></li>
+    <li><strong>Une fin qui ouvre sans pousser</strong>&#8239;: les 10 photos dans l’ordre du billet, deux tirages en vignette sans badge ni urgence, «&#8239;Écrire à Sébastien et Julien&#8239;», carnet précédent, et pour le suivant, un abonnement.
+      <span class="ref">UX-F-11 · UX-T-17 · RGESN 4.14 · étude B56 et B64</span></li>
+    <li><strong>Impression</strong>&#8239;: noir sur blanc quel que soit le thème, sans menu ni boutons, figures insécables, cartel suivi de l’adresse de la photo, crédit et adresse du billet en fin.
+      <span class="ref">UX-F-35 · Opquast 195 et 196 · WCAG 1.4.3 sur papier</span></li>
+    <li><strong>Nuit ou jour, au choix du système</strong>&#8239;: thème «&#8239;Nicephos — auto&#8239;» pour les pages de lecture, mêmes contrastes vérifiés dans les deux modes.
+      <span class="ref">UX-F-29 · ISO 9241-110 Adaptabilité à l’individualisation · WCAG 1.4.3</span></li>
+  </ol>
+
+  <div class="demos">
+    <figure>
+      <div class="vbar" role="img" aria-label="Aperçu de la barre de la visionneuse ouverte depuis ce carnet : retour « Lisbonne et Porto », photo 3 sur 10.">
+        <span class="w">Nicephos</span><span class="bk">← Lisbonne et Porto</span><span class="ct">3 / 10<span class="ctx"> · Lisbonne et Porto</span></span><span class="ar">‹</span><span class="ar">›</span>
+      </div>
+      <figcaption><b>Repère 5 — la visionneuse garde le fil.</b> Ouverte depuis le billet, elle nomme son retour, compte dans l’ordre du billet et y ramène (même mécanisme que ?voyage= et ?q=, MQ-04).</figcaption>
+    </figure>
+    <figure>
+      <div class="sheet" role="img" aria-label="Aperçu d’impression de la première page : texte noir sur fond blanc, sans menu, photo avec son cartel et son adresse.">
+        <div class="s-site"><span>Nicephos — Carnets</span><span>1 / 4</span></div>
+        <p class="s-h">Lisbonne et Porto</p>
+        <p class="s-sub">Deux jours, deux regards, un même océan</p>
+        <p class="s-meta">Par Sébastien et Julien · publié le 12 octobre 2026 · mis à jour le 14 octobre 2026</p>
+        <img src="_commun/photos/ciel.webp" width="900" height="600" loading="lazy" alt="">
+        <p class="s-cap">Miradouro, l’heure dorée — Julien · Miradouro da Graça, Lisbonne · 10 octobre 2026<br>nicephos.art/photo/miradouro-l-heure-doree</p>
+        <p>Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une matinée. Le samedi, à Lisbonne, nous nous sommes levés avant le premier tram, quand l’Alfama sent encore le café et le linge mouillé.</p>
+        <p><b>Lisbonne, du Tage à la Graça</b> — samedi 10 octobre</p>
+        <p>Au Cais do Sodré, la marée basse découvre une rangée de pieux que personne ne regarde. Sébastien y est resté une heure, le temps qu’un pêcheur entre dans le cadre et en ressorte…</p>
+        <p class="s-foot">Nicephos — www.nicephos.art/carnet/lisbonne-et-porto · © 2026 Sébastien &amp; Julien</p>
+      </div>
+      <figcaption><b>Repère 10 — Ctrl+P sur cette maquette.</b> La feuille @media print du fichier produit cette page&#8239;: 4 pages A4 au lieu de 5, aucune encre gaspillée sur un fond noir.</figcaption>
+    </figure>
+  </div>
+</aside>
+</body>
+</html>

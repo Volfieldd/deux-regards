@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="fr" class="theme-nicephos mode-nuit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<!-- Sur le site : en-têtes X-Robots-Tag: noindex, Referrer-Policy: no-referrer, Cache-Control: no-store (étude, G32). -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Galerie privée · Nicephos</title>
+<link rel="stylesheet" href="_commun/site.css">
+<style>
+/* Maquette MQ-16 — Camille Arnaud, 16 octobre 2026.
+   Jetons du thème « Nicephos — nuit » (public/themes/nicephos.css), recopiés ici : la feuille du thème n'est pas dans _commun. */
+.theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif; --display-style: normal; }
+.theme-nicephos.mode-nuit {
+  color-scheme: dark;
+  --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b; --frame: #171717;
+  --safelight: #cbb68b; --on-accent: #0b0b0b;
+  --error: #ff8a70;       /* corail : 8,6:1 sur le fond, distinct du sable des états actifs (UX-F-04) */
+  --annot: #56b4e9; --on-annot: #071621;  /* repères de la maquette, hors interface */
+}
+body { font-weight: 300; }
+
+/* Lien d'évitement (UX-F-06) */
+.skip { position: absolute; left: 16px; top: -80px; z-index: 20; padding: 12px 16px; background: var(--ink); color: var(--paper); font-size: 14px; }
+.skip:focus { top: 12px; }
+
+/* Bandeau de maquette (ne fait pas partie de la page) */
+.mq-band { margin: 0; padding: 8px var(--gut); border-bottom: 1px dashed var(--annot); color: var(--annot); font: 12px/1.5 var(--mono); letter-spacing: .03em; }
+.mq-band b { font-weight: 500; }
+.pin { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--annot); color: var(--on-annot); font: 500 12px/1 var(--sans); letter-spacing: 0; text-transform: none; vertical-align: middle; margin-left: 8px; flex: none; }
+
+/* En-tête discret : la marque en texte, la langue ; aucun menu public. */
+.pg-top { display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap; padding-block: 14px; border-bottom: 1px solid var(--rule); }
+.pg-brand { margin: 0; font-size: 14px; font-weight: 300; letter-spacing: .42em; text-transform: uppercase; color: var(--mute); }
+.pg-top .langs { gap: 0 18px; font-size: 13px; }
+.pg-top .langs a { letter-spacing: .04em; }
+
+/* Le carton d'invitation */
+.pg-main { display: grid; justify-items: center; padding: clamp(32px, 8vh, 96px) var(--gut) 24px; }
+.pg-card { width: min(100%, 560px); padding: 48px 56px 44px; border: 1px solid var(--rule); display: grid; gap: 22px; }
+.pg-kicker { margin: 0; color: var(--mute); font-size: 12px; letter-spacing: .24em; text-transform: uppercase; font-weight: 400; }
+.pg-card h1, .pg-h { margin: 0; font-weight: 300; font-size: clamp(30px, 4vw, 40px); line-height: 1.12; letter-spacing: .01em; text-wrap: balance; }
+.pg-by { margin: -10px 0 0; color: var(--prose); font-size: 17px; }
+.pg-until { margin: 0; color: var(--ink); font: 13px/1.5 var(--mono); letter-spacing: .03em; padding-top: 14px; border-top: 1px solid var(--rule); }
+.pg-until svg { vertical-align: -3px; margin-right: 8px; }
+
+/* Formulaire : filets à 7,4:1, focus de 2 px visible partout (UX-F-03, UX-F-04). */
+.pg-form { display: grid; gap: 18px; margin: 4px 0 0; }
+.pg-field { display: grid; gap: 8px; }
+.pg-field > label { font-size: 16px; font-weight: 400; color: var(--ink); }
+.pg-field > label span { font-weight: 300; color: var(--prose); }
+.pg-hint { margin: 0; color: var(--mute); font-size: 14px; line-height: 1.55; }
+.pw { position: relative; display: flex; align-items: stretch; gap: 8px; }
+.pw > .pin { position: absolute; right: -11px; top: -11px; margin: 0; }
+.pw input { flex: 1; min-width: 0; width: 100%; height: 52px; padding: 0 14px; border: 1px solid var(--mute); border-radius: 0; background: #121212; color: var(--ink); font: 400 18px/1 var(--mono); letter-spacing: .04em; }
+.pw input::placeholder { color: var(--mute); }
+.pw input:focus-visible, .pw input.demo-focus { outline: 2px solid var(--ink); outline-offset: 3px; border-color: var(--ink); }
+.pw input[aria-invalid="true"] { border: 2px solid var(--error); }
+.pw-show { display: inline-flex; align-items: center; gap: 8px; min-width: 120px; justify-content: center; height: 52px; padding: 0 16px; border: 1px solid var(--mute); color: var(--ink); font-size: 15px; font-weight: 400; }
+.pw-show[aria-pressed="true"] { background: var(--safelight); border-color: var(--safelight); color: var(--on-accent); font-weight: 500; }
+.pw-show .on { display: none; }
+.pw-show[aria-pressed="true"] .on { display: block; } .pw-show[aria-pressed="true"] .off { display: none; }
+.pw-show:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.pg-check { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding-top: 2px; font-size: 15px; color: var(--ink); cursor: pointer; }
+.pg-check input { width: 22px; height: 22px; margin: 0; accent-color: var(--ink); flex: none; }
+.pg-check input:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.pg-check small { display: block; color: var(--mute); font-size: 13.5px; }
+.pg-submit { justify-self: start; display: inline-flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 30px; background: var(--ink); color: var(--paper); font-size: 13px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; }
+.pg-submit:hover { background: #fff; }
+.pg-help { margin: 0; color: var(--prose); font-size: 15px; line-height: 1.6; }
+.pg-help a, .pg-legal a, .pg-err a, .pg-pause a, .pg-foot a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.pg-legal { width: min(100%, 560px); margin: 22px 0 0; color: var(--mute); font-size: 13.5px; line-height: 1.6; }
+
+/* Messages : symbole + mot + couleur, jamais la couleur seule (RGAA 3.1). */
+.pg-err { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; padding: 12px 14px; border-left: 3px solid var(--error); background: rgba(255, 138, 112, .08); color: var(--ink); font-size: 15px; line-height: 1.5; }
+.pg-err .sy { color: var(--error); font-weight: 500; }
+.pg-err b { font-weight: 500; color: var(--error); }
+.pg-err .more-t { grid-column: 2; color: var(--prose); font-size: 14px; }
+.pg-pause { margin: 0; padding: 14px 16px; border: 1px solid var(--mute); font-size: 15px; line-height: 1.55; display: grid; gap: 6px; }
+.pg-pause strong { font-weight: 500; }
+
+.pg-foot { display: flex; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; padding-block: 28px 32px; margin-top: 48px; border-top: 1px solid var(--rule); color: var(--mute); }
+.pg-foot span { display: flex; gap: 6px 18px; flex-wrap: wrap; }
+.pg-foot { align-items: center; padding-block: 14px 18px; }
+.pg-foot a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* Planche des autres états (maquette) */
+.mq-states { padding: 56px var(--gut) 8px; border-top: 1px dashed var(--annot); margin-top: 24px; }
+.mq-states > h2, .legend-box h2 { margin: 0 0 8px; font-weight: 400; font-size: 13px; letter-spacing: .3em; text-transform: uppercase; color: var(--annot); }
+.mq-states > p { margin: 0 0 28px; color: var(--prose); max-width: 80ch; font-size: 15px; }
+.mq-grid > *, .mq-screen > div { min-width: 0; }
+.mq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 32px; align-items: start; }
+.mq-screen { margin: 0; display: grid; gap: 10px; }
+.mq-screen > figcaption { color: var(--annot); font: 12px/1.5 var(--mono); letter-spacing: .03em; }
+.mq-tab { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #1c1c1c; border: 1px solid var(--rule); border-bottom: 0; border-radius: 8px 8px 0 0; color: var(--prose); font: 12px/1.4 var(--mono); }
+.mq-tab::before { content: ''; width: 10px; height: 10px; border: 1px solid var(--mute); border-radius: 2px; flex: none; }
+.mq-page { border: 1px solid var(--rule); background: var(--paper); padding: 28px 26px 30px; display: grid; gap: 18px; }
+.mq-page .pg-brand { font-size: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+.mq-page .pg-h { font-size: 28px; }
+.pg-gone { display: inline-flex; align-items: center; gap: 10px; justify-self: start; min-height: 48px; padding: 0 22px; border: 1px solid var(--ink); color: var(--ink); font-size: 15px; font-weight: 400; }
+.pg-gone:hover { background: var(--ink); color: var(--paper); }
+.mq-code { margin: 0; padding: 18px 20px; border: 1px dashed var(--rule); color: var(--prose); font: 12.5px/1.75 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.mq-code b { color: var(--ink); font-weight: 500; }
+
+.mq-back { margin-top: 40px; padding: 22px 24px; border: 1px dashed var(--rule); }
+.mq-back h3 { margin: 0 0 14px; color: var(--annot); font: 12px/1.5 var(--mono); letter-spacing: .03em; font-weight: 400; }
+.mq-back dl { margin: 0; display: grid; grid-template-columns: 130px 1fr; gap: 8px 24px; }
+.mq-back dt { color: var(--ink); font: 500 12.5px/1.6 var(--mono); }
+.mq-back dd { margin: 0; color: var(--prose); font-size: 14.5px; line-height: 1.6; }
+
+/* Encart « Ce qui change » */
+.legend-box { margin: 48px var(--gut) 0; padding: 32px 0 8px; border-top: 1px dashed var(--annot); }
+.legend-box ol { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 16px 48px; }
+.legend-box li { display: flex; gap: 12px; color: var(--prose); font-size: 14.5px; line-height: 1.6; }
+.legend-box li .pin { margin: 1px 0 0; }
+.legend-box li b { color: var(--ink); font-weight: 500; }
+.legend-box .ref { color: var(--mute); font: 12px/1.6 var(--mono); display: block; margin-top: 2px; }
+.mq-foot { margin: 32px 0 0; padding: 0 0 40px; color: var(--mute); }
+
+@media (max-width: 640px) {
+  .pg-top { padding-block: 8px; }
+  .pg-brand { font-size: 12px; letter-spacing: .34em; }
+  .pg-top .langs { gap: 0 14px; font-size: 12.5px; }
+  .pg-main { padding-top: 28px; }
+  .pg-card { padding: 0; border: 0; gap: 20px; }
+  .pw input { font-size: 16px; letter-spacing: .01em; padding: 0 12px; }
+  .pw-show { min-width: 0; padding: 0 12px; }
+  .mq-back dl { grid-template-columns: 1fr; }
+  .pg-submit { justify-self: stretch; justify-content: center; }
+  .mq-page { padding: 22px 18px 24px; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#acces">Aller au contenu</a>
+<aside class="mq-band" aria-label="Note de maquette"><b>Maquette MQ-16</b> · Galerie privée : la page du lien · état montré : mot de passe collé puis affiché, focus dans le champ · autres états plus bas</aside>
+
+<header class="pg-top wrap">
+  <p class="pg-brand">Nicephos<span class="pin"><span class="sr-only">Repère </span>1</span></p>
+  <nav class="langs" aria-label="Langue de la page">
+    <a href="?lang=fr" lang="fr" hreflang="fr" aria-current="true">Français</a>
+    <a href="?lang=en" lang="en" hreflang="en">English</a>
+    <a href="?lang=de" lang="de" hreflang="de">Deutsch</a>
+  </nav>
+</header>
+
+<main class="pg-main" id="acces" tabindex="-1">
+  <section class="pg-card" aria-labelledby="titre">
+    <p class="pg-kicker">Galerie privée · sur invitation</p>
+    <h1 id="titre">Galerie privée de Marie<span class="pin"><span class="sr-only">Repère </span>2</span></h1>
+    <p class="pg-by">préparée par Julien</p>
+    <p class="pg-until"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Accès valable jusqu’au <time datetime="2026-11-15">15 novembre 2026</time><span class="pin"><span class="sr-only">Repère </span>3</span></p>
+
+    <form class="pg-form" method="post" action="#" novalidate>
+      <div class="pg-field">
+        <label for="mdp">Mot de passe <span>(dans le message que vous avez reçu)</span></label>
+        <p class="pg-hint" id="mdp-aide">Quatre mots reliés par des tirets. Majuscules, accents et espaces ne comptent pas. Vous pouvez le coller.<span class="pin"><span class="sr-only">Repère </span>4</span></p>
+        <div class="pw">
+          <input class="demo-focus" id="mdp" name="mot_de_passe" type="text" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required aria-describedby="mdp-aide" value="galet-phare-brume-onze">
+          <button class="pw-show" type="button" aria-pressed="true" aria-controls="mdp" data-pw-toggle>
+            <svg class="off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M4 21 20 3" stroke-width="0"/></svg>
+            Afficher
+          </button>
+          <span class="pin"><span class="sr-only">Repère </span>5</span>
+        </div>
+      </div>
+      <label class="pg-check"><input type="checkbox" name="souvenir"><span>Se souvenir de cet appareil pendant 30 jours<small>À éviter sur un ordinateur partagé.</small></span></label>
+      <button class="pg-submit" type="submit">Ouvrir la galerie<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </form>
+
+    <p class="pg-help">Mot de passe perdu ? <a href="mailto:julien@nicephos.art?subject=Galerie%20priv%C3%A9e%20%3A%20nouveau%20mot%20de%20passe">Écrire à Julien</a> : il vous en donnera un nouveau, votre lien reste le même.<span class="pin"><span class="sr-only">Repère </span>6</span></p>
+  </section>
+
+  <p class="pg-legal">Galerie réservée aux personnes invitées par Nicephos. Nous notons la date de vos visites, vos téléchargements et vos favoris, pour savoir si les photos vous sont parvenues. Tout est effacé six mois après la fin de votre invitation. Un seul cookie, nécessaire, garde votre accès ouvert. <a href="#">Confidentialité</a><span class="pin"><span class="sr-only">Repère </span>7</span></p>
+</main>
+
+<footer class="pg-foot wrap mono">
+  <span>Nicephos · Sébastien &amp; Julien</span>
+  <span><a href="#">Confidentialité</a><a href="#">Mentions légales</a></span>
+</footer>
+
+<section class="mq-states" aria-labelledby="etats">
+  <h2 id="etats">Les autres états de la page</h2>
+  <p>Même page, même adresse /g/… ; seuls le message et le titre de l’onglet changent. Les écrans sont montrés à largeur de téléphone.</p>
+  <div class="mq-grid">
+
+    <figure class="mq-screen">
+      <figcaption>État 2 · mauvais mot de passe (1er échec) — focus remis dans le champ</figcaption>
+      <div>
+        <div class="mq-tab">Erreur — Galerie privée · Nicephos<span class="pin"><span class="sr-only">Repère </span>8</span></div>
+        <div class="mq-page">
+          <p class="pg-brand">Nicephos</p>
+          <h3 class="pg-h">Galerie privée de Marie</h3>
+          <p class="pg-by" style="margin-top:-8px">préparée par Julien</p>
+          <form class="pg-form" method="post" action="#" novalidate>
+            <div class="pg-field">
+              <label for="mdp2">Mot de passe <span>(dans le message que vous avez reçu)</span></label>
+              <p class="pg-err" id="mdp2-err"><span class="sy" aria-hidden="true">⚠</span><span><b>Erreur :</b> lien ou mot de passe incorrect. Vérifiez le message reçu, ou <a href="mailto:julien@nicephos.art?subject=Galerie%20priv%C3%A9e">écrivez à Julien</a>.</span><span class="more-t">Encore 4 essais avant une pause d’une minute.</span></p>
+              <div class="pw">
+                <input class="demo-focus" id="mdp2" name="mot_de_passe" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" required aria-invalid="true" aria-describedby="mdp2-err mdp2-aide">
+                <button class="pw-show" type="button" aria-pressed="false" aria-controls="mdp2">
+                  <svg class="off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                  Afficher
+                </button>
+              </div>
+              <p class="pg-hint" id="mdp2-aide">Quatre mots reliés par des tirets. Majuscules, accents et espaces ne comptent pas.</p>
+            </div>
+            <button class="pg-submit" type="submit">Ouvrir la galerie</button>
+          </form>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="mq-screen">
+      <figcaption>État 3 · après 5 échecs — pause courte, heure de reprise en clair</figcaption>
+      <div>
+        <div class="mq-tab">Pause de sécurité — Galerie privée · Nicephos</div>
+        <div class="mq-page">
+          <p class="pg-brand">Nicephos</p>
+          <h3 class="pg-h">Galerie privée de Marie</h3>
+          <p class="pg-pause" role="status"><strong>Pause de sécurité : réessayez à 15 h 41, dans une minute.<span class="pin"><span class="sr-only">Repère </span>9</span></strong><span>Seuls les mots de passe refusés comptent ; votre lien reste valable. Plus de mot de passe ? <a href="mailto:julien@nicephos.art?subject=Galerie%20priv%C3%A9e%20%3A%20nouveau%20mot%20de%20passe">Écrivez à Julien</a>.</span></p>
+          <form class="pg-form" method="post" action="#" novalidate>
+            <div class="pg-field">
+              <label for="mdp3">Mot de passe <span>(dans le message que vous avez reçu)</span></label>
+              <div class="pw">
+                <input id="mdp3" name="mot_de_passe" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" required>
+                <button class="pw-show" type="button" aria-pressed="false" aria-controls="mdp3">
+                  <svg class="off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                  Afficher
+                </button>
+              </div>
+            </div>
+            <button class="pg-submit" type="submit">Ouvrir la galerie</button>
+          </form>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="mq-screen">
+      <figcaption>État 4 · accès expiré — réponse HTTP 410, sans titre de galerie</figcaption>
+      <div>
+        <div class="mq-tab">Accès expiré · Nicephos</div>
+        <div class="mq-page">
+          <p class="pg-brand">Nicephos</p>
+          <h3 class="pg-h">Cet accès a expiré le <time datetime="2026-11-15">15 novembre 2026</time>.<span class="pin"><span class="sr-only">Repère </span>10</span></h3>
+          <p class="pg-help">Les photos ne sont plus visibles avec ce lien. Julien peut vous ouvrir un nouvel accès, avec un nouveau lien.</p>
+          <a class="pg-gone" href="mailto:julien@nicephos.art?subject=Demande%20de%20nouvel%20acc%C3%A8s">Demander un nouvel accès à Julien<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg></a>
+          <p class="pg-hint">Le lien ouvre votre messagerie (julien@nicephos.art).</p>
+        </div>
+      </div>
+    </figure>
+
+
+  </div>
+  <div class="mq-back">
+    <h3>Ce que la page envoie, et qui ne se voit pas</h3>
+    <dl>
+      <dt>&lt;title&gt;</dt><dd>« Galerie privée · Nicephos » : ni nom, ni titre de galerie, ni Open Graph ; l’aperçu d’un lien collé dans une messagerie ne révèle rien.</dd>
+      <dt>En-têtes</dt><dd>X-Robots-Tag: noindex · Referrer-Policy: no-referrer · Cache-Control: no-store</dd>
+      <dt>Champ</dt><dd>type="password", autocomplete="current-password", sans maxlength, sans blocage du collage, sans CAPTCHA</dd>
+      <dt>Réponses</dt><dd>mauvais mot de passe : la même page, avec le message ; accès expiré ou révoqué : 410 ; lien inconnu : 404 ordinaire</dd>
+      <dt>Poids</dt><dd>une famille de polices (Jost), aucune image, un script de 0,3 ko pour « Afficher » ; sans JavaScript, tout fonctionne</dd>
+    </dl>
+  </div>
+</section>
+
+<section class="legend-box" aria-labelledby="change">
+  <h2 id="change">Ce qui change</h2>
+  <ol>
+    <li><span class="pin" aria-hidden="true">1</span><span><b>Une page sobre, à part.</b> La marque en texte, sans menu public ni lien vers la galerie publique : rien ne détourne de l’essentiel. Titre d’onglet neutre, noindex, aucun référent transmis.<span class="ref">UX-T-18 · UX-T-16 · étude G32-G34 · Opquast 25 et 28 · RGAA 8.6</span></span></li>
+    <li><span class="pin" aria-hidden="true">2</span><span><b>Dire à qui c’est destiné, et par qui.</b> « Galerie privée de Marie, préparée par Julien » : la bonne personne se sait au bon endroit. Le titre de la galerie et les photos restent cachés jusqu’au mot de passe (arbitrage à valider avec G33).<span class="ref">B&amp;S 1.1 Incitation · Opquast 100 · ISO 9241-110 Autodescriptivité</span></span></li>
+    <li><span class="pin" aria-hidden="true">3</span><span><b>La limite de temps est annoncée avant d’entrer</b>, en toutes lettres et dans une balise time ; la même date figure dans l’invitation.<span class="ref">Opquast 172 · WCAG 2.2.1 · UX-T-18</span></span></li>
+    <li><span class="pin" aria-hidden="true">4</span><span><b>Une étiquette qui dit où trouver le mot de passe</b>, une aide reliée au champ (aria-describedby) qui annonce le format et la tolérance à la casse et aux accents ; le collage reste permis, autocomplete="current-password" laisse faire le gestionnaire de mots de passe. Aucun CAPTCHA, aucun test cognitif.<span class="ref">WCAG 2.2 3.3.8 · RGAA 11.1, 11.2, 11.13 · Opquast 70, 72, 73, 92, 95, 97 · RGESN 4.10</span></span></li>
+    <li><span class="pin" aria-hidden="true">5</span><span><b>« Afficher », un vrai bouton bascule</b> (aria-pressed) : enfoncé, il se remplit (fond plein, pupille pleine) : l’état ne tient pas qu’à la couleur. Le champ garde un contour de 2 px au focus et un filet à 7,4:1 au repos. Sans JavaScript, le bouton n’apparaît pas et le champ reste masqué.<span class="ref">Opquast 76 · RGAA 7.1, 3.1, 3.3, 10.7 · WCAG 1.4.11, 2.4.7 · UX-F-03 · UX-F-04</span></span></li>
+    <li><span class="pin" aria-hidden="true">6</span><span><b>Une issue humaine</b> : pas de récupération automatique, mais un nom et une adresse cliquable, et la promesse que le lien reste le même.<span class="ref">Nielsen #9 · B&amp;S 5.2 · étude G23 · UX-F-23</span></span></li>
+    <li><span class="pin" aria-hidden="true">7</span><span><b>L’information due aux invités</b>, en quatre phrases : ce qui est noté, pourquoi, combien de temps, et le cookie.<span class="ref">RGPD art. 13 et 14 · Opquast 29 · RGESN 7.2 · étude G72</span></span></li>
+    <li><span class="pin" aria-hidden="true">8</span><span><b>Une erreur unique et reliée</b> : elle ne dit pas lequel du lien ou du mot de passe est faux, commence par « Erreur : », a un symbole, est reliée au champ (aria-invalid, aria-describedby), donne les essais restants et un contact ; le titre de l’onglet commence par « Erreur » et le focus revient dans le champ, vidé.<span class="ref">UX-F-05 · RGAA 11.10, 11.11, 8.6 · WCAG 3.3.1, 3.3.3 · Opquast 26, 79, 80, 82 · étude G21</span></span></li>
+    <li><span class="pin" aria-hidden="true">9</span><span><b>Une pause courte, pas une heure de blocage</b> : 1 minute après 5 échecs, l’heure de reprise en clair, et seuls les vrais refus comptent (pas les ouvertures du lien par un antivirus).<span class="ref">UX-F-27 · UX-T-18 · étude G12, G19 · RGAA 7.5 (role="status") · WCAG 2.2.1</span></span></li>
+    <li><span class="pin" aria-hidden="true">10</span><span><b>Après l’échéance, une réponse 410</b> qui donne la date et qui contacter, sans rien révéler de la galerie.<span class="ref">Étude G11 · Opquast 172 · Nielsen #9</span></span></li>
+  </ol>
+  <p class="mq-foot mono">Maquette MQ-16 · audit d’ergonomie du 16 octobre 2026 · styles et polices du site (_commun/site.css), thème « Nicephos — nuit ». Données fictives.</p>
+</section>
+
+<script>
+/* Démonstration de l’état du bouton « Afficher » (le seul script de la page). */
+document.querySelectorAll('[data-pw-toggle]').forEach(b => b.addEventListener('click', () => {
+  const f = document.getElementById(b.getAttribute('aria-controls'));
+  const on = b.getAttribute('aria-pressed') !== 'true';
+  b.setAttribute('aria-pressed', String(on)); f.type = on ? 'text' : 'password';
+}));
+</script>
+</body>
+</html>

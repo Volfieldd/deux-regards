@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="fr" class="theme-nicephos mode-nuit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Miradouro, l’heure dorée — tirage d’art de Julien · Tirages · Nicephos</title>
+<meta name="description" content="Maquette MQ-13 (audit du 16 octobre 2026) : page d’un tirage d’art en édition limitée, avec photos de démonstration.">
+<link rel="stylesheet" href="_commun/site.css">
+<style>
+/* ===== Socle commun des maquettes de la boutique (MQ-13, MQ-14, MQ-15) =====
+   Jetons : copie de public/themes/nicephos.css (thème de production), complétée des recommandations
+   de l'audit : filets de champs à 6,4:1 et 7,4:1 (UX-F-04), couleur d'erreur propre (corail en nuit),
+   textes de 13 px au moins et prose en 400 (UX-F-29), liens soulignés (UX-F-23), cibles de 44 px (UX-F-36). */
+.theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif; --display-style: normal; }
+.mode-nuit { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b; --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --err: #f28b7a; }
+.mode-jour, .mode-auto { color-scheme: light; --paper: #fbfbf9; --ink: #111111; --mute: #5e5d59; --prose: #3a3936; --rule: #dddcd7; --frame: #efeeea; --safelight: #7d6532; --on-accent: #fbfbf9; --field: #5e5d59; --err: #b42318; }
+/* « Nicephos — auto » (UX-F-29) : les pages de formulaire suivent la préférence du système. */
+@media (prefers-color-scheme: dark) {
+  .mode-auto { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b; --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --err: #f28b7a; }
+}
+html { background: var(--paper); scroll-padding-top: 16px; }
+body { background: var(--paper); color: var(--ink); font: 400 15px/1.6 var(--sans); }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.nx-mono { font-family: var(--mono); font-size: 13px; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.nx-sur { margin: 0; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--mute); }
+.nx-u a, a.nx-u { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.nx-u a:hover, a.nx-u:hover { text-decoration-thickness: 2px; }
+.nx-ext::after { content: ' ↗' / ''; }
+
+/* Lien d'évitement (UX-F-06) */
+.nx-skip { position: absolute; left: var(--gut); top: -120px; z-index: 60; display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; background: var(--ink); color: var(--paper); font-weight: 500; }
+.nx-skip:focus { top: 12px; }
+
+/* En-tête sur une ligne : marque, menu, filet, Tirages, outils (UX-T-16, UX-F-36) */
+.nx-top { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 72px; border-bottom: 1px solid var(--rule); }
+.nx-brand { display: inline-flex; align-items: center; min-height: 44px; font-weight: 300; font-size: 15px; letter-spacing: .42em; text-transform: uppercase; white-space: nowrap; }
+.nx-nav ul { display: flex; align-items: center; gap: clamp(12px, 1.8vw, 28px); margin: 0; padding: 0; list-style: none; }
+.nx-nav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--mute); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
+.nx-nav a:hover { color: var(--ink); }
+.nx-nav a[aria-current] { color: var(--ink); text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 9px; }
+.nx-nav .nx-filet { display: flex; align-items: center; gap: clamp(12px, 1.8vw, 28px); }
+.nx-nav .nx-filet::before { content: ''; width: 1px; height: 18px; background: var(--mute); opacity: .6; }
+.nx-outils { display: flex; align-items: center; gap: 6px; }
+.nx-outil, .nx-lang summary, .nx-menu summary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 44px; min-height: 44px; padding: 0 6px; color: var(--mute); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; list-style: none; }
+.nx-outil:hover, .nx-lang summary:hover, .nx-menu summary:hover { color: var(--ink); }
+.nx-lang summary::-webkit-details-marker, .nx-menu summary::-webkit-details-marker { display: none; }
+.nx-lang, .nx-menu { position: relative; }
+.nx-lang ul, .nx-menu .nx-menu-panneau { position: absolute; right: 0; top: 100%; z-index: 40; min-width: 190px; margin: 0; padding: 6px 0; list-style: none; background: var(--paper); border: 1px solid var(--field); }
+.nx-lang a { display: flex; align-items: center; min-height: 44px; padding: 0 16px; color: var(--ink); }
+.nx-lang a[aria-current] { text-decoration: underline; text-underline-offset: 5px; }
+.nx-menu { display: none; }
+.nx-menu .nx-menu-panneau ul { margin: 0; padding: 0; list-style: none; }
+.nx-menu .nx-menu-panneau a { display: flex; align-items: center; min-height: 48px; padding: 0 18px; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; }
+.nx-menu .nx-menu-panneau a[aria-current] { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 7px; }
+.nx-menu .nx-menu-panneau li.nx-filet { border-top: 1px solid var(--rule); margin-top: 6px; padding-top: 6px; }
+.nx-outil-t { }
+@media (max-width: 960px) {
+  .nx-top { min-height: 64px; gap: 8px; }
+  .nx-top > .nx-nav { display: none; }
+  .nx-menu { display: block; }
+  .nx-outil-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+@media (max-width: 380px) { .nx-brand { letter-spacing: .3em; font-size: 14px; } }
+
+/* Fil d'Ariane en mono (Opquast 156) */
+.nx-ariane ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; margin: 0; padding: 14px 0 0; list-style: none; font-family: var(--mono); font-size: 13px; color: var(--mute); }
+.nx-ariane li + li::before { content: '›' / ''; margin-right: 10px; }
+.nx-ariane a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.nx-ariane [aria-current] { color: var(--mute); }
+
+/* Boutons : un seul bouton plein par écran (B&S 1.2.2) */
+.nx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 28px; border: 1px solid var(--ink); border-radius: 0; background: var(--ink); color: var(--paper); font: 500 15px/1.2 var(--sans); letter-spacing: .04em; text-align: center; cursor: pointer; }
+.nx-btn:hover { background: color-mix(in srgb, var(--ink) 86%, var(--paper)); }
+.nx-btn-2 { background: transparent; color: var(--ink); font-weight: 400; }
+.nx-btn-2:hover { background: var(--frame); }
+.nx-btn-s { min-height: 44px; padding: 0 16px; font-size: 14px; font-weight: 400; }
+
+/* Champs : filet en --field (6,4:1 en jour, 7,4:1 en nuit), 2 px au focus et en erreur (UX-F-04) */
+.nx-champ { display: grid; gap: 6px; align-content: start; }
+.nx-champ > label, .nx-l { font-size: 15px; font-weight: 500; color: var(--ink); }
+.nx-champ > label .nx-q { font-weight: 400; color: var(--mute); }
+.nx-aide { margin: 0; font-size: 14px; line-height: 1.5; color: var(--mute); }
+.nx-input { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--field); border-radius: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.4 var(--sans); }
+select.nx-input { padding-right: 8px; }
+.nx-input:focus { outline: 2px solid var(--ink); outline-offset: 2px; }
+.nx-input[aria-invalid="true"] { border: 2px solid var(--err); }
+.nx-err { display: flex; gap: 8px; margin: 0; color: var(--err); font-size: 14.5px; font-weight: 500; line-height: 1.45; }
+input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--ink); }
+
+/* Pied de page complet, liens soulignés (UX-F-23, UX-F-34) */
+.nx-pied { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 40px; margin-top: 72px; padding-block: 36px 48px; border-top: 1px solid var(--rule); color: var(--mute); font-size: 14px; }
+.nx-pied p { margin: 0; display: flex; align-items: center; min-height: 44px; }
+.nx-pied ul { display: flex; flex-wrap: wrap; gap: 0 22px; margin: 0; padding: 0; list-style: none; }
+.nx-pied a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+@media (max-width: 640px) { .nx-pied ul { flex-direction: column; } }
+
+/* ===== Calque d'annotation (maquette seulement) ===== */
+.mq-a { position: relative; }
+.mq-pin { position: absolute; z-index: 20; display: block; width: 26px; height: 26px; border-radius: 50%; background: #cbb68b; color: #0b0b0b; box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px #0b0b0b; font: 500 13px/26px Jost, Arial, sans-serif; letter-spacing: 0; text-align: center; text-transform: none; text-decoration: none; pointer-events: none; }
+.mq-pin.in { position: static; display: inline-block; vertical-align: middle; margin-left: 8px; }
+.mq-notes { margin-top: 0; padding-block: 48px 64px; background: var(--frame); border-top: 6px solid #cbb68b; color: var(--ink); }
+.mq-notes > h2 { margin: 0 0 6px; font-weight: 400; font-size: 13px; letter-spacing: .26em; text-transform: uppercase; color: var(--ink); }
+.mq-notes .mq-intro { margin: 0 0 28px; max-width: 90ch; color: var(--prose); }
+.mq-notes h3 { margin: 0 0 14px; font-weight: 400; font-size: 20px; letter-spacing: .01em; }
+.mq-etats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 28px; margin-bottom: 44px; }
+.mq-etat { padding: 22px; background: var(--paper); border: 1px solid var(--rule); min-width: 0; }
+.mq-etat > .mq-cap { margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px dashed var(--mute); font-family: var(--mono); font-size: 13px; color: var(--mute); }
+.mq-leg { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 16px 40px; margin: 0; padding: 0; list-style: none; }
+.mq-leg li { display: grid; grid-template-columns: 26px 1fr; gap: 14px; align-items: start; color: var(--prose); line-height: 1.55; }
+.mq-leg li .mq-pin { position: static; margin-top: 1px; }
+.mq-leg strong { color: var(--ink); font-weight: 500; }
+.mq-ref { display: block; margin-top: 4px; font-family: var(--mono); font-size: 12.5px; color: var(--mute); }
+.mq-socle { margin: 32px 0 0; padding-top: 18px; border-top: 1px solid var(--rule); max-width: 110ch; color: var(--prose); font-size: 14px; }
+@media print { .mq-pin, .mq-notes { display: none !important; } }
+@media (max-width: 760px) { .mq-pin[data-p8] { right: 4px !important; top: -30px !important; } }
+
+
+/* ===== MQ-13 : page d'un tirage ===== */
+.tx-grille { display: grid; grid-template-columns: minmax(0, 7fr) minmax(360px, 5fr); gap: 32px clamp(32px, 4.5vw, 72px); align-items: start; padding-top: 18px; }
+.tx-visuel { display: grid; gap: 14px; min-width: 0; position: sticky; top: 16px; }
+.nw { white-space: nowrap; }
+/* La photo entière, sur le noir, sans recadrage (UX-F-17) ; signature d'angle seulement (UX-F-15). */
+.tx-photo, .tx-mur { margin: 0; display: grid; gap: 10px; }
+.tx-photo-cadre { position: relative; justify-self: center; }
+.tx-photo-cadre img { display: block; width: auto; max-width: 100%; height: auto; max-height: calc(100vh - 230px); }
+.tx-signe { position: absolute; right: 3%; bottom: 3.5%; font: 300 clamp(11px, 1.05vw, 15px)/1 var(--sans); letter-spacing: .08em; color: #fff; opacity: .4; }
+.tx-photo figcaption, .tx-mur figcaption { color: var(--mute); }
+/* « Voir au mur » : bascule en CSS seul ; la même image, à l'échelle du format choisi. */
+.tx-vue { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; border: 0; }
+.tx-vue legend { float: left; margin-right: 10px; display: flex; align-items: center; min-height: 44px; color: var(--mute); font-size: 14px; }
+.tx-vue label { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px 0 12px; border: 1px solid var(--field); cursor: pointer; font-size: 14px; }
+.tx-vue label:has(:checked) { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.tx-vue input { width: 18px; height: 18px; accent-color: var(--paper); }
+.tx-vue label:has(:focus-visible) { outline: 2px solid var(--ink); outline-offset: 3px; }
+.tx-mur { display: none; }
+.tx-visuel:has(#vue-mur:checked) .tx-photo { display: none; }
+.tx-visuel:has(#vue-mur:checked) .tx-mur { display: grid; }
+.mur { container-type: inline-size; position: relative; aspect-ratio: 200 / 133; overflow: hidden; background: linear-gradient(#dedbd5, #d2cec7); }
+/* Mur de 200 cm de large vu de 60 à 193 cm du sol : 1 cm = 0,5 cqw. Centre du tirage à 150 cm. */
+.mur-tirage { --w: 66; --h: 46; position: absolute; left: 50%; top: calc((43 - var(--h) / 2) * .5cqw); width: calc(var(--w) * .5cqw); transform: translateX(-50%); padding: 1.5cqw; background: #fbfbf9; box-shadow: 0 .5cqw 1.4cqw rgba(30, 24, 16, .28); }
+.mur-tirage img { display: block; width: 100%; height: auto; }
+.mur-console { position: absolute; left: 20cqw; width: 60cqw; top: 56.5cqw; height: 1.5cqw; background: #6e5b45; }
+.mur-console::before, .mur-console::after { content: ''; position: absolute; top: 100%; width: 1.2cqw; height: 12cqw; background: #6e5b45; left: 3cqw; }
+.mur-console::after { left: auto; right: 3cqw; }
+.mur-cote { position: absolute; left: 20cqw; width: 60cqw; top: 59.5cqw; border-top: 1px solid #4a4843; font: 400 max(11px, 1.6cqw)/1.3 var(--mono); color: #3a3936; text-align: center; padding-top: .4cqw; }
+.tx-page:has(#f-30:checked) .tx-mur .mur-tirage { --w: 51; --h: 36; }
+.tx-page:has(#f-60:checked) .tx-mur .mur-tirage { --w: 96; --h: 66; }
+.tx-page:has(#c-chene:checked) .tx-mur .mur-tirage { border: 1cqw solid #8a6a48; top: calc((43 - var(--h) / 2 - 2) * .5cqw); width: calc((var(--w) + 4) * .5cqw); }
+
+/* Fiche : titre en casse normale (UX-F-29), cartel en mono, inventaire stable (UX-T-05). */
+.tx-fiche { display: grid; gap: 22px; min-width: 0; }
+.tx-fiche h1 { margin: 6px 0 0; font-weight: 300; font-size: clamp(30px, 2.6vw, 38px); line-height: 1.15; letter-spacing: .01em; }
+.tx-cartel { margin: 0; color: var(--mute); }
+.tx-cartel a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.tx-edition { display: grid; gap: 6px; padding: 16px 18px; border: 1px solid var(--field); }
+.tx-edition p { margin: 0; color: var(--prose); }
+.tx-edition strong { color: var(--ink); font-weight: 500; }
+.tx-form { display: grid; gap: 22px; }
+.tx-form fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.tx-form legend { padding: 0 0 8px; font-size: 15px; font-weight: 500; }
+.tx-form legend .nx-q { font-weight: 400; color: var(--mute); }
+.tx-opt { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 4px 14px; min-height: 60px; padding: 8px 14px; border: 1px solid var(--rule); border-top-width: 0; cursor: pointer; }
+.tx-opt:first-of-type { border-top-width: 1px; }
+.tx-opt:has(:checked) { border: 2px solid var(--ink); padding: 7px 13px; }
+.tx-opt:has(:checked) + .tx-opt { border-top-width: 0; }
+.tx-opt-t { display: grid; font-size: 16px; }
+.tx-opt-t small { font-size: 13.5px; color: var(--mute); }
+.tx-opt-p { font-size: 17px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tx-papier { margin: 0; display: grid; gap: 2px; }
+.tx-papier span:last-child { color: var(--prose); }
+.tx-cadre { display: grid; gap: 4px; }
+.tx-cadre label { display: flex; align-items: center; gap: 12px; min-height: 44px; cursor: pointer; }
+.tx-cadre label span.p { margin-left: auto; color: var(--prose); font-variant-numeric: tabular-nums; }
+.tx-livraison { margin: 0; display: grid; gap: 4px; color: var(--prose); font-size: 14.5px; }
+.tx-livraison strong { color: var(--ink); font-weight: 500; }
+.tx-achat { display: grid; gap: 12px; }
+.tx-prix { margin: 0; display: flex; align-items: baseline; gap: 10px; font-size: 30px; font-weight: 300; font-variant-numeric: tabular-nums; }
+.tx-prix small { font-size: 14px; color: var(--mute); letter-spacing: .04em; }
+.tx-prix [data-p] { display: none; }
+.tx-page:has(#f-30:checked):has(#c-sans:checked) [data-p="30-sans"],
+.tx-page:has(#f-40:checked):has(#c-sans:checked) [data-p="40-sans"],
+.tx-page:has(#f-60:checked):has(#c-sans:checked) [data-p="60-sans"],
+.tx-page:has(#f-30:checked):has(#c-chene:checked) [data-p="30-chene"],
+.tx-page:has(#f-40:checked):has(#c-chene:checked) [data-p="40-chene"],
+.tx-page:has(#f-60:checked):has(#c-chene:checked) [data-p="60-chene"] { display: inline; }
+.tx-achat .nx-btn { width: 100%; }
+.tx-apres { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 14.5px; color: var(--prose); }
+.tx-apres a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.tx-legal { display: flex; flex-wrap: wrap; align-items: center; gap: 0 8px; color: var(--mute); }
+.tx-legal a { color: var(--ink); }
+/* Ce que vous recevez, livraison, la photo */
+.tx-details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px clamp(32px, 4vw, 64px); margin-top: 72px; padding-top: 36px; border-top: 1px solid var(--rule); }
+.tx-details h2 { margin: 0 0 16px; font-weight: 400; font-size: 13px; letter-spacing: .26em; text-transform: uppercase; color: var(--ink); }
+.tx-dl { display: grid; gap: 12px; margin: 0; }
+.tx-dl div { display: grid; gap: 2px; }
+.tx-dl dt { font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); }
+.tx-dl dd { margin: 0; color: var(--prose); line-height: 1.6; }
+.tx-legende { margin: 0 0 14px; font-size: 18px; line-height: 1.6; color: var(--ink); max-width: 40ch; }
+.tx-details p { color: var(--prose); }
+/* État épuisé (dans les notes) */
+.tx-epuise { display: inline-flex; align-items: center; gap: 10px; margin: 0; padding: 8px 14px; border: 1px solid var(--ink); font-weight: 500; }
+.mq-mini { display: grid; grid-template-columns: 160px 1fr; gap: 18px; align-items: start; }
+.mq-mini img { width: 160px; height: auto; }
+.mq-mini .t { margin: 2px 0 6px; font-size: 22px; font-weight: 300; }
+.mq-mini p { margin: 0 0 10px; color: var(--prose); }
+
+@media (max-width: 960px) {
+  .tx-grille { grid-template-columns: 1fr; padding-top: 6px; }
+  .tx-visuel { position: static; }
+  .tx-livraison, .tx-apres { padding-right: 30px; }
+  .tx-edition { padding-right: 34px; }
+  .tx-visuel { margin-inline: calc(-1 * var(--gut)); }
+  .tx-photo-cadre img { max-height: none; width: 100%; }
+  .tx-photo figcaption, .tx-mur figcaption, .tx-vue { padding-inline: var(--gut); }
+  .tx-details { grid-template-columns: 1fr; margin-top: 48px; }
+  /* Téléphone : prix et bouton collants en bas ; le focus n'est jamais masqué (WCAG 2.4.11). */
+  html { scroll-padding-bottom: 96px; }
+  .tx-achat { position: sticky; bottom: 0; z-index: 10; grid-template-columns: auto 1fr; align-items: center; gap: 14px; margin-inline: calc(-1 * var(--gut)); padding: 12px var(--gut) calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--paper); border-top: 1px solid var(--field); }
+  .tx-prix { font-size: 24px; flex-direction: column; gap: 0; line-height: 1.1; }
+  .tx-opt { min-height: 56px; }
+  .mq-mini { grid-template-columns: 1fr; }
+}
+@media print { .nx-top, .tx-vue, .tx-form, .nx-pied, .nx-skip { display: none !important; } body { background: #fff; color: #111; } }
+</style>
+</head>
+<body class="tx-page">
+<a class="nx-skip" href="#contenu">Aller au contenu</a>
+<header class="nx-top wrap mq-a">
+  <a class="nx-brand" href="/">Nicephos</a>
+  <nav class="nx-nav mq-a" aria-label="Menu principal">
+    <ul>
+      <li><a href="/series">Séries</a></li>
+      <li><a href="/galerie">Galerie</a></li>
+      <li><a href="/carte">Carte</a></li>
+      <li><a href="/carnets">Carnets</a></li>
+      <li><a href="/a-propos">À propos</a></li>
+      <li class="nx-filet"><a href="/tirages" aria-current="true">Tirages</a></li>
+    </ul>
+    <span class="mq-pin" aria-hidden="true" style="right:-30px;top:-6px">1</span>
+  </nav>
+  <div class="nx-outils">
+    <a class="nx-outil" href="/recherche"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="nx-outil-t">Rechercher</span></a>
+    <details class="nx-lang">
+      <summary><span class="sr-only">Langue : </span>FR</summary>
+      <ul>
+        <li><a href="/tirages/miradouro-l-heure-doree" lang="fr" hreflang="fr" aria-current="true">Français</a></li>
+        <li><a href="/en/prints/miradouro-l-heure-doree" lang="en" hreflang="en">English</a></li>
+        <li><a href="/de/abzuege/miradouro-l-heure-doree" lang="de" hreflang="de">Deutsch</a></li>
+      </ul>
+    </details>
+    <details class="nx-menu">
+      <summary>Menu</summary>
+      <nav class="nx-menu-panneau" aria-label="Menu principal">
+        <ul>
+          <li><a href="/series">Séries</a></li>
+          <li><a href="/galerie">Galerie</a></li>
+          <li><a href="/carte">Carte</a></li>
+          <li><a href="/carnets">Carnets</a></li>
+          <li><a href="/a-propos">À propos</a></li>
+          <li class="nx-filet"><a href="/tirages" aria-current="true">Tirages</a></li>
+        </ul>
+      </nav>
+    </details>
+  </div>
+</header>
+
+<main id="contenu" class="wrap" tabindex="-1">
+  <nav class="nx-ariane" aria-label="Fil d’Ariane">
+    <ol>
+      <li><a href="/tirages">Tirages</a></li>
+      <li><span aria-current="page">Miradouro, l’heure dorée</span></li>
+    </ol>
+  </nav>
+
+  <div class="tx-grille">
+    <div class="tx-visuel">
+      <figure class="tx-photo mq-a">
+        <div class="tx-photo-cadre">
+          <img src="_commun/photos/dune.webp" width="900" height="600" alt="Soleil bas dans un ciel doré, au-dessus de trois lignes de collines brunes (photo de démonstration).">
+          <span class="tx-signe" aria-hidden="true">© Julien</span>
+        </div>
+        <figcaption class="nx-mono">Photo entière, telle qu’elle sera tirée. La signature « © Julien » ne s’affiche qu’à l’écran : le tirage n’en porte aucune.</figcaption>
+        <span class="mq-pin" aria-hidden="true" style="left:10px;top:10px">2</span>
+      </figure>
+      <figure class="tx-mur">
+        <div class="mur" role="img" aria-label="Simulation à l’échelle : le tirage au format choisi, accroché au-dessus d’une console de 120 cm, son centre à 1,50 m du sol.">
+          <div class="mur-tirage"><img src="_commun/photos/dune.webp" width="900" height="600" alt=""></div>
+          <div class="mur-console"></div>
+          <div class="mur-cote" aria-hidden="true">console de 120 cm</div>
+        </div>
+        <figcaption class="nx-mono">À l’échelle : console de 120 cm, centre du tirage à 1,50 m du sol. Le tirage suit le format et le cadre choisis.</figcaption>
+      </figure>
+      <fieldset class="tx-vue mq-a">
+        <legend>Afficher</legend>
+        <label><input type="radio" name="vue" id="vue-photo" checked> La photo</label>
+        <label><input type="radio" name="vue" id="vue-mur"> Voir au mur</label>
+        <span class="mq-pin in" aria-hidden="true" style="align-self:center">3</span>
+      </fieldset>
+    </div>
+
+    <div class="tx-fiche">
+      <div>
+        <p class="nx-sur">Tirage d’art · édition limitée</p>
+        <h1>Miradouro, l’heure dorée</h1>
+        <p class="tx-cartel nx-mono mq-a"><a href="/photographes/julien">Julien</a> · Lisbonne, 2026 · <span class="nw">Inventaire J-2026-019</span><span class="mq-pin in" aria-hidden="true">4</span></p>
+      </div>
+
+      <div class="tx-edition mq-a">
+        <p><strong>Édition limitée à 15 exemplaires</strong>, tous formats confondus — <strong>9 disponibles</strong></p>
+        <p>Signé et numéroté au crayon par Julien, certificat d’authenticité vérifiable. <a class="nx-u" href="#certificat">Ce que dit le certificat</a></p>
+        <span class="mq-pin" aria-hidden="true" style="right:-13px;top:-13px">5</span>
+      </div>
+
+      <form id="tx-form" class="tx-form" action="MQ-14-boutique-panier.html" method="get">
+        <fieldset class="mq-a">
+          <legend>Format de l’image <span class="nx-q">(la marge blanche s’ajoute autour)</span></legend>
+          <label class="tx-opt"><input type="radio" name="format" id="f-30" value="30x45"><span class="tx-opt-t">30 × 45 cm <small>feuille 36 × 51 cm · envoyé à plat</small></span><span class="tx-opt-p">180 €</span></label>
+          <label class="tx-opt"><input type="radio" name="format" id="f-40" value="40x60" checked><span class="tx-opt-t">40 × 60 cm <small>feuille 46 × 66 cm · envoyé à plat</small></span><span class="tx-opt-p">290 €</span></label>
+          <label class="tx-opt"><input type="radio" name="format" id="f-60" value="60x90"><span class="tx-opt-t">60 × 90 cm <small>feuille 66 × 96 cm · roulé en tube</small></span><span class="tx-opt-p">520 €</span></label>
+          <span class="mq-pin" aria-hidden="true" style="right:-13px;top:-8px">6</span>
+        </fieldset>
+
+        <p class="tx-papier"><span class="nx-l">Papier</span><span>Hahnemühle Photo Rag 308 g, 100 % coton, tirage pigmentaire, marge blanche de 3 cm</span></p>
+
+        <fieldset class="tx-cadre">
+          <legend>Encadrement</legend>
+          <label><input type="radio" name="cadre" id="c-sans" value="sans" checked> Sans (par défaut)</label>
+          <label><input type="radio" name="cadre" id="c-chene" value="chene"> Cadre chêne naturel, verre anti-reflet <span class="p">+ 120 €</span></label>
+        </fieldset>
+
+        <div class="tx-livraison mq-a">
+          <p style="margin:0"><strong>Livré en 10 à 15 jours ouvrés</strong>, à plat ou roulé en tube : entre le 30 octobre et le 6 novembre pour une commande passée aujourd’hui.</p>
+          <p style="margin:0">Frais : 15 € en France, 25 € dans l’Union européenne, affichés avant le paiement.</p>
+          <span class="mq-pin" aria-hidden="true" style="right:-13px;top:-8px">7</span>
+        </div>
+
+        <div class="tx-achat mq-a">
+          <p class="tx-prix"><span class="sr-only">Prix : </span><span data-p="30-sans">180 €</span><span data-p="40-sans">290 €</span><span data-p="60-sans">520 €</span><span data-p="30-chene">300 €</span><span data-p="40-chene">410 €</span><span data-p="60-chene">640 €</span> <small>TTC</small></p>
+          <button type="submit" class="nx-btn">Ajouter au panier</button>
+          <span class="mq-pin" aria-hidden="true" style="right:-13px;top:-13px" data-p8>8</span>
+        </div>
+      </form>
+
+      <ul class="tx-apres mq-a">
+        <li><a href="/contact?photo=J-2026-019&amp;objet=tirage">Une question ? Nous écrire</a></li>
+        <li class="tx-legal nx-mono">Prix TTC · <a class="nx-u" href="/conditions-de-vente#retractation">Rétractation 14 jours</a> · <a class="nx-u" href="/conditions-de-vente">CGV</a></li>
+        <li>Vendu, signé et expédié par Julien, entrepreneur individuel.<span class="mq-pin" aria-hidden="true" style="right:-13px;top:4px">9</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tx-details">
+    <section aria-labelledby="recu-t" id="certificat">
+      <h2 id="recu-t">Ce que vous recevez</h2>
+      <dl class="tx-dl">
+        <div><dt>Le tirage</dt><dd>Pigmentaire, sur Hahnemühle Photo Rag 308 g/m², 100 % coton, mat. L’image entière, au rapport 3:2, jamais recadrée.</dd></div>
+        <div><dt>La marge</dt><dd>Blanche, 3 cm de chaque côté. Julien y signe et y inscrit le numéro, au crayon.</dd></div>
+        <div><dt>Le certificat</dt><dd>Titre, auteur, inventaire J-2026-019, numéro de l’exemplaire, dates de prise de vue et de tirage, format, papier, laboratoire ; empreinte SHA-256 de l’original et jeton d’horodatage, vérifiables.</dd></div>
+        <div><dt>Le tirage est fait</dt><dd>Par un laboratoire d’art en France, sous le contrôle de Julien, qui reçoit chaque épreuve, la vérifie et la signe avant de vous l’envoyer.</dd></div>
+        <div><dt>Entretien</dt><dd>À l’abri du soleil direct ; encadrer sous verre anti-UV, avec un passe-partout sans acide.</dd></div>
+      </dl>
+    </section>
+    <section aria-labelledby="livr-t">
+      <h2 id="livr-t">Livraison et retours</h2>
+      <dl class="tx-dl">
+        <div><dt>Où</dt><dd>France métropolitaine, Monaco et Union européenne.</dd></div>
+        <div><dt>Frais</dt><dd>15 € en France, 25 € dans l’Union européenne, pour toute la commande.</dd></div>
+        <div><dt>Délai</dt><dd>10 à 15 jours ouvrés : tirage, contrôle, signature, puis transport.</dd></div>
+        <div><dt>Emballage</dt><dd>À plat entre deux cartons rigides jusqu’au 40 × 60 cm ; dans un tube épais au-delà.</dd></div>
+        <div><dt>Transport</dt><dd>Colissimo suivi et assuré, remis contre signature.</dd></div>
+        <div><dt>Changer d’avis</dt><dd>14 jours après la réception, sans avoir à vous justifier ; frais de retour à votre charge. <a class="nx-u" href="/renoncer">Renoncer à un achat</a></dd></div>
+      </dl>
+    </section>
+    <section aria-labelledby="photo-t">
+      <h2 id="photo-t">La photo</h2>
+      <p class="tx-legende">On attendait le soleil ; il a pris son temps, et nous aussi.</p>
+      <p>Prise le 10 octobre 2026 au Miradouro da Graça, à Lisbonne. Série Voyage, carnet « Lisbonne et Porto », jour 1.</p>
+      <p class="nx-u"><a href="/photo/miradouro-l-heure-doree">Voir la photo dans la galerie</a> · <a href="/carnets/lisbonne-et-porto">Lire le carnet</a></p>
+    </section>
+  </div>
+</main>
+
+<footer class="nx-pied wrap">
+  <p>© 2026 Sébastien &amp; Julien · Nicephos</p>
+  <ul>
+    <li><a href="/tirages">Tirages et licences</a></li>
+    <li><a href="/conditions-de-vente">Conditions de vente</a></li>
+    <li><a href="/renoncer">Renoncer à un achat</a></li>
+    <li><a href="/contact">Contact</a></li>
+    <li><a class="nx-ext" href="https://www.instagram.com/">Instagram<span class="sr-only"> (site externe)</span></a></li>
+    <li><a href="/flux.xml">Flux RSS</a></li>
+    <li><a href="/confidentialite">Confidentialité</a></li>
+    <li><a href="/mentions-legales">Mentions légales</a></li>
+  </ul>
+</footer>
+
+<aside class="mq-notes wrap" aria-labelledby="mq-notes-t">
+  <h2 id="mq-notes-t">Maquette MQ-13 — notes de l’auditrice</h2>
+  <p class="mq-intro">Boutique, page d’un tirage. Thème « Nicephos — nuit », comme la visionneuse dont on arrive. Photos de démonstration ; textes plausibles mais fictifs. Les prix, l’édition et les délais sont ceux de l’exemple de l’étude, à confirmer par vous deux.</p>
+  <div class="mq-etats">
+    <section class="mq-etat" aria-labelledby="etat-mur">
+      <p class="mq-cap" id="etat-mur">Autre état · « Voir au mur », format 40 × 60 cm</p>
+      <div class="mur" role="img" aria-label="Simulation : le tirage 40 × 60 cm, feuille de 46 × 66 cm, au-dessus d’une console de 120 cm.">
+        <div class="mur-tirage" style="--w:66;--h:46"><img src="_commun/photos/dune.webp" width="900" height="600" alt=""></div>
+        <div class="mur-console"></div>
+        <div class="mur-cote" aria-hidden="true">console de 120 cm</div>
+      </div>
+    </section>
+    <section class="mq-etat mq-a" aria-labelledby="etat-epuise">
+      <p class="mq-cap" id="etat-epuise">Autre état · édition épuisée</p>
+      <div class="mq-mini">
+        <img src="_commun/photos/quai.webp" width="900" height="600" alt="Quai désert sous un ciel gris, trois silhouettes au loin (photo de démonstration).">
+        <div>
+          <p class="nx-sur">Tirage d’art · édition limitée</p>
+          <p class="t">Le quai, 6 h</p>
+          <p class="nx-mono" style="color:var(--mute)">Julien · Porto, 2026 · Inventaire J-2026-007</p>
+          <p class="tx-epuise"><span aria-hidden="true">○</span> Épuisé — 15 exemplaires sur 15 vendus</p>
+          <p style="margin-top:12px">L’édition est close : cette photo ne sera plus tirée, dans aucun format.</p>
+          <p class="nx-u"><a href="/tirages">Voir les 11 tirages disponibles</a> · <a href="/photo/le-quai-6-h">Voir la photo</a></p>
+        </div>
+      </div>
+      <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">10</span>
+    </section>
+  </div>
+
+  <h3>Ce qui change</h3>
+  <ol class="mq-leg">
+    <li><span class="mq-pin" aria-hidden="true">1</span><span><strong>« Tirages » en retrait, après un filet,</strong> et souligné en sable quand on y est (aria-current) ; aucun panier dans le menu tant qu’il est vide ; fil d’Ariane « Tirages › … ».<span class="mq-ref">UX-T-16 · Opquast 156, 157 · RGAA 12.6 · loi de Hick</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">2</span><span><strong>La photo entière,</strong> non recadrée, signée « © Julien » en coin (10 % de la largeur, 40 % d’opacité) ; la légende rassure : la signature n’est qu’à l’écran.<span class="mq-ref">UX-F-15 · Nielsen 8 · B&amp;S 1.4 Lisibilité</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">3</span><span><strong>« Voir au mur »,</strong> à l’échelle d’une console de 120 cm, suit le format et le cadre choisis. Deux boutons radio et du CSS : ni script, ni image de plus.<span class="mq-ref">B&amp;S 1.1 Incitation · ISO 9241-110 Adéquation aux tâches · RGESN 4.5, 6.5</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">4</span><span><strong>Un numéro d’inventaire stable,</strong> J-2026-019 : la référence que reprendront le certificat, la facture et le formulaire de contact.<span class="mq-ref">UX-T-05 · Opquast 39</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">5</span><span><strong>Une édition honnête :</strong> 15 exemplaires tous formats, « 9 disponibles », le chiffre exact. Ni compte à rebours, ni « derniers exemplaires », ni promotion.<span class="mq-ref">UX-T-17 · RGESN 4.14 · Opquast 34 · CGI ann. III art. 98 A</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">6</span><span><strong>Formats en boutons radio groupés,</strong> prix TTC en face de chacun, taille de la feuille et mode d’envoi ; cadre « Sans » par défaut. Le prix total suit le choix, sans script.<span class="mq-ref">RGAA 11.5, 11.6 · WCAG 1.3.1 · Opquast 39, 56 · Code de la consommation L112-1</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">7</span><span><strong>Délai et frais avant le panier,</strong> le délai en dates plutôt qu’en vitesse.<span class="mq-ref">UX-T-17 · Opquast 35, 36 · étude S25</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">8</span><span><strong>Un seul bouton plein, « Ajouter au panier »,</strong> large de 52 px ; il envoie un formulaire ordinaire (POST puis 303 vers le panier), qui marche sans JavaScript.<span class="mq-ref">UX-F-11 · B&amp;S 2.1.2 Actions minimales · étude S20</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">9</span><span><strong>« Une question ? Nous écrire »</strong> ouvre le formulaire prérempli avec J-2026-019 (MQ-06), au même endroit sur chaque page de la boutique ; prix TTC, rétractation, CGV et vendeur nommé sous le bouton.<span class="mq-ref">UX-F-11 · WCAG 3.2.6 · Opquast 46, 52 · Code de la consommation L221-5 · étude S1</span></span></li>
+    <li><span class="mq-pin" aria-hidden="true">10</span><span><strong>Épuisé, dit en texte</strong> et par un cadre, l’image intacte : l’édition close ne rouvre jamais, et l’on propose la suite sans insister.<span class="mq-ref">Opquast 65 · RGAA 3.1 · WCAG 1.4.1</span></span></li>
+  </ol>
+  <p class="mq-socle"><strong>Sur téléphone :</strong> en-tête de 64 px avec « Menu » (élément details natif, sans script), photo pleine largeur, formats en liste de 56 px, prix et bouton collants en bas ; html { scroll-padding-bottom } empêche la barre de masquer le champ qui a le focus (WCAG 2.4.11, 2.5.8 ; UX-F-36). <strong>Socle commun aux trois maquettes de la boutique :</strong> lien « Aller au contenu » (UX-F-06), liens soulignés (UX-F-23), focus de 2 px, cibles de 44 px au moins, textes de 13 px au moins en graisse 400 (UX-F-29), aucune ressource chargée depuis un autre site, aucun script.</p>
+</aside>
+</body>
+</html>
