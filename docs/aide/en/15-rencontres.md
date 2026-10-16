@@ -81,6 +81,8 @@ To fill it in **with the person**, at the moment of the photo, with no paper car
 
 You need a network connection (4G is enough): without one, saving fails without losing anything on screen; try again a little further on. A consent signed on the phone is worth a signed card: the page shows the signature and the reference photo.
 
+**Before sending**, the screen checks what the server will require: with a consent, the name, adult or minor (and the signing parent), at least one use and the signature; a well-formed email address. Anything missing is shown at the top, without sending anything. If the server still refuses, the person’s photo and the signature are not kept: the screen says so at the top (**Have the person sign again and retake their photo**), and both areas are outlined.
+
 ## Outings
 
 The **Outings** page (sidebar, “Work” group) shows one row per **shooting day** of a photographer: the date and place, a few thumbnails, the number of photos (and of published ones), the faces of the people met with their consents and refusals, and a **status** readable without colour: **✕ refusal to apply** (someone refused and published photos from the outing are not excluded for them), **▲ to sort** (drafts, or a person with no decision), **✓ done**. The chips filter by status and by photographer.
@@ -104,7 +106,7 @@ A **trip** groups outings: “Morocco 2025”, ten shooting days. It is optional
 - **Attach days**: on the trip’s page, **From … To …** attaches every shooting day between these two dates (photos dated by the camera, or encounters); or tick outings in the list. From an outing’s page, the **Trip** menu attaches it, moves it to another trip or detaches it. A day already in another trip is moved.
 - **The trip’s page**: its days in order (D1, D2…), each with its place, photos, people and a link to the outing; all the trip’s photos with their status; **Propose the ready photos** (or **Publish the ready photos**) at once, as for an outing.
 - **Public page**: name and text in three languages, and the box **Publish the trip’s page on the site**. Once ticked, and as soon as one of the trip’s photos is published, the trip has its page (`/voyage/…`) and the site menu gains a **Trips** link. Before that, the team sees it as a preview. See [Public site](site-public).
-- **Remove** a day, or **Delete this trip**: the outings and photos remain.
+- **Remove** a day, or **Delete this trip** (a click unfolds the confirmation, then **Delete “…”**): the outings and photos remain; the trip’s name, texts and public page are deleted.
 - **Photographer**: sees only their own trips and attaches only their own days.
 
 ## Faces and photo status

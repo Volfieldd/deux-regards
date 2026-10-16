@@ -81,6 +81,8 @@ Pour remplir **avec la personne**, au moment de la photo, sans carte papier : **
 
 Il faut du réseau (la 4G suffit) : sans réseau, l'enregistrement échoue sans rien perdre à l'écran ; réessayez un peu plus loin. Un accord signé sur le téléphone vaut une carte signée : la fiche montre la signature et la photo de repère.
 
+**Avant l'envoi**, l'écran vérifie ce que le serveur exigera : avec un accord, le nom, majeure ou mineure (et le parent qui signe), au moins un usage et la signature ; une adresse e-mail bien formée. Ce qui manque s'affiche en haut, sans rien envoyer. Si le serveur refuse quand même l'envoi, la photo de la personne et la signature ne sont pas gardées : l'écran le dit en haut (**Faites signer de nouveau la personne et reprenez sa photo**), et les deux zones sont encadrées.
+
 ## Les sorties
 
 La page **Sorties** (barre latérale, groupe « Travailler ») montre une ligne par **journée de prise de vue** d'un photographe : la date et le lieu, quelques vignettes, le nombre de photos (et de publiées), les visages des personnes rencontrées avec leurs accords et refus, et un **état** lisible sans la couleur : **✕ refus à appliquer** (une personne a refusé et des photos publiées de la sortie ne sont pas exclues pour elle), **▲ à trier** (brouillons, ou personne sans décision), **✓ terminée**. Les pastilles filtrent par état et par photographe.
@@ -104,7 +106,7 @@ Un **voyage** regroupe des sorties : « Maroc 2025 », dix journées de prise de
 - **Rattacher des journées** : sur la page du voyage, **Du … Au …** rattache toutes les journées de prise de vue entre ces deux dates (photos datées par l’appareil, ou rencontres) ; ou cochez des sorties dans la liste. Depuis la page d’une sortie, le menu **Voyage** la rattache, la change de voyage ou l’en détache. Une journée déjà dans un autre voyage y est déplacée.
 - **La page du voyage** : ses journées dans l’ordre (J1, J2…), chacune avec son lieu, ses photos, ses personnes et un lien vers la sortie ; toutes les photos du voyage avec leur état ; **Proposer les photos prêtes** (ou **Publier les photos prêtes**) d’un coup, comme pour une sortie.
 - **Page publique** : nom et texte en trois langues, et la case **Publier la page du voyage sur le site**. Une fois cochée, et dès qu’une photo du voyage est publiée, le voyage a sa page (`/voyage/…`) et le menu du site gagne un lien **Voyages**. Avant cela, l’équipe la voit en aperçu. Voir [Site public](site-public).
-- **Retirer** une journée, ou **Supprimer ce voyage** : les sorties et les photos restent.
+- **Retirer** une journée, ou **Supprimer ce voyage** (un clic déplie la confirmation, puis **Supprimer « … »**) : les sorties et les photos restent ; le nom, les textes et la page publique du voyage sont effacés.
 - **Photographe** : il ne voit que ses voyages et n’y rattache que ses journées.
 
 ## Visages et état des photos

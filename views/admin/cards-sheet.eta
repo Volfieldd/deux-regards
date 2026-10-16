@@ -1,5 +1,5 @@
 <!doctype html>
-<% const T = it.T, a = it.author; %>
+<% const T = it.T, a = it.author, t = it.t || (s => s); %>
 <html lang="fr">
 <head>
   <meta charset="utf-8">
@@ -10,9 +10,9 @@
   <script src="<%= it.asset('admin/print.js') %>" defer></script>
 </head>
 <body>
-<div class="bar">
-  <p><strong><%= it.title %></strong> · <%= it.sheets.length %> feuille<%= it.sheets.length > 1 ? 's' : '' %> A4. Imprimez à 100 % (taille réelle), puis découpez le long des traits.</p>
-  <p><button type="button" data-print>Imprimer</button> <a href="/admin/rencontres/cartes">Retour</a></p>
+<div class="bar"<%~ it.lang && it.lang !== 'fr' ? ` lang="${it.lang}"` : '' %>>
+  <p><strong><%= it.title %></strong> · <%= it.sheets.length > 1 ? t('{n} feuilles A4.', { n: it.sheets.length }) : t('{n} feuille A4.', { n: it.sheets.length }) %> <%= t('Imprimez à 100 % (taille réelle), puis découpez le long des traits.') %></p>
+  <p><button type="button" data-print><%= t('Imprimer') %></button> <a href="/admin/rencontres/cartes"><%= t('Retour') %></a></p>
 </div>
 <% it.sheets.forEach(sheet => { %>
 <section class="sheet">

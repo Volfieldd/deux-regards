@@ -81,6 +81,8 @@ After **Save and update images**:
 - each photo switches to the new ones as soon as they are ready, with no broken image;
 - at the end, the banner says “Images up to date”, or lists the photos with errors.
 
+Only accounts that set the watermark (administrators) see this banner: the list of photos with errors names photos of every photographer.
+
 Allow a few seconds per photo.
 
 The same recalculation is triggered when you rename an author, change the site name, or modify a photo’s title, date, author or watermark option.

@@ -13,10 +13,12 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
   const load = request => { const tr = trips.get(Number(request.params.id)); return tr && sees(request, tr) ? tr : null; };
   const back = id => `/admin/voyages/${id}`;
   const names = () => new Map(repo.authors().map(a => [a.id, a]));
+  // Voyage commun : « les deux photographes » quand il y en a deux, sinon « tous les photographes ».
+  const everyone = (t, n = repo.authors().length) => (n === 2 ? t('les deux photographes') : t('tous les photographes'));
 
   app.get('/admin/voyages', P('sorties.voir'), async (request, reply) => {
     const authors = names();
-    const list = trips.list().filter(tr => sees(request, tr)).map(tr => ({ ...tr, span: span(tr, request.t), who: tr.author_id ? authors.get(tr.author_id)?.name || '' : request.t('les deux photographes'),
+    const list = trips.list().filter(tr => sees(request, tr)).map(tr => ({ ...tr, span: span(tr, request.t), who: tr.author_id ? authors.get(tr.author_id)?.name || '' : everyone(request.t),
       cover: tr.cover && withReady(tr.cover) }));
     return render(request, reply, 'trips', { title: request.t('Voyages'), list, authors: request.mine('sorties.gerer', repo.authors(), 'id'), allTrips: Boolean(request.scope('sorties.gerer')?.all) });
   });
@@ -57,7 +59,7 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
       .map(o => ({ author: o.author, day: o.day, when: fmtDay(o.day, request.t), place: o.place, other: index.get(`${o.author.id}:${o.day}`) || null }));
     const photos = trips.photos(tr.id).filter(p => request.owns('photos.voir', p.author_id)).map(p => ({ ...withReady(p), level: app.readiness.state(p, null, request.t).site.level }));
     return render(request, reply, 'trip', {
-      title: tr.name, tr: { ...tr, span: span(tr, request.t), who: tr.author_id ? authors.get(tr.author_id)?.name || '' : request.t('les deux photographes') },
+      title: tr.name, tr: { ...tr, span: span(tr, request.t), who: tr.author_id ? authors.get(tr.author_id)?.name || '' : everyone(request.t) },
       days, nearby, photos, manage: manages(request, tr), authors: request.mine('sorties.gerer', repo.authors(), 'id'), allTrips: Boolean(request.scope('sorties.gerer')?.all),
       readyDrafts: photos.filter(p => p.status === 'draft' && !p.review && p.level === 'ok').length,
     });

@@ -102,7 +102,7 @@ test('Aujourd’hui : choses à faire triées par urgence, lien vers l’écran 
   assert.match(tasks, /J-0139 a refusé : 1 photo publiée de sa sortie à vérifier/);   // p2 : ni liée ni exclue
   assert.match(tasks, /nouvelles personnes photographiées|nouvelle personne photographiée/);
   assert.match(tasks, /photos? publiées? sans ville[\s\S]*href="\/admin\/photos\?manque=ville"/);
-  assert.match(body, /class="nav-badge urgent" aria-label="2 urgences">✕ 2</);
+  assert.match(body, /class="nav-badge urgent"><span aria-hidden="true">✕ 2<\/span><span class="sr-only">2 urgences</);
   // Le lien « sans ville » filtre la photothèque.
   const lib = (await c.get('/admin/photos?manque=ville')).body;
   assert.match(lib, /Publiées sans ville <span class="n">/);
@@ -111,7 +111,7 @@ test('Aujourd’hui : choses à faire triées par urgence, lien vers l’écran 
   enc.applyRefusal(refus);
   const after = (await c.get('/admin')).body;
   assert.doesNotMatch(after, /J-0139 a refusé|Refus de J-0139/);
-  assert.match(after, /aria-label="1 urgence">✕ 1</);
+  assert.match(after, /<span aria-hidden="true">✕ 1<\/span><span class="sr-only">1 urgence</);
 });
 
 test('accueil Terrain : nouvelle rencontre, mon QR, ma sortie du jour ; onglet Terrain ; départ de l’app', async t => {

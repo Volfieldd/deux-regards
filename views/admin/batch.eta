@@ -8,6 +8,9 @@
   </div>
   <div class="acts"><a class="btn ghost" href="/admin/photos"><%= t('Toutes les photos') %></a></div>
 </div>
+<% if (it.rest && it.rest.length) { %>
+<p class="flash" role="note"><%= t('{n} photos sur {total} : une page en montre 200 au plus.', { n: it.photos.length, total: it.total }) %> <a class="more" href="/admin/photos/lot?ids=<%= it.rest.join(',') %>"><%= it.rest.length > 1 ? t('Les {n} suivantes →', { n: it.rest.length }) : t('La suivante →') %></a></p>
+<% } %>
 <ol class="steps" aria-label="<%= t('Étapes de l’import') %>">
   <li class="done"><span class="n">1.</span> <%= t('Choisir et vérifier') %></li>
   <li class="done"><span class="n">2.</span> <%= t('Envoi et traitement') %></li>

@@ -19,7 +19,7 @@ To file photos in a series, the quickest way is the [multiple selection](photos#
 
 ## Suggested series
 
-At the bottom of the Series page, **Suggest a series** helps you file incoming photos. It is **off by default**.
+At the bottom of the Series page, **Suggest a series** helps you file incoming photos. It is **off by default**. This panel (like **Describe the photos**) is only shown to accounts that set up suggestions: administrators.
 
 - **Switch on:** **Switch on suggestions**. The analysis model (about 90 MB, an open model called CLIP) is downloaded once into the data folder. Existing photos are then analysed in the background, with a progress bar; each imported photo is analysed straight away.
 - **What it suggests:** on import, each photo gets the series chosen in the form. Until you have chosen it yourself, the server compares the photo with the photos already filed (yours and the other photographer’s: likeness is worked out per series). If **another** series looks clearly more like it, that series is suggested, and two are suggested when they are almost as close. A series is only suggested once it holds **3 filed photos**. A published photo never gets a suggestion.
@@ -40,7 +40,7 @@ Below **Suggest a series**, the **Describe the photos** panel suggests a short, 
 
 - **Turn on:** choose the model, **Light** (Florence-2 base, the default: about 270 MB to download, 2 GB of memory while computing, about 10 seconds per photo) or **Precise** (Florence-2 large: about 850 MB, 4 GB, a little more detailed). **Precise** needs the site to have 6 GB: add `SITE_MEM_LIMIT=6g` to the stack’s `.env`, then **Compose Up**. The panel shows the available memory and refuses **Precise** if it is not enough. Also choose the **night hours** (1 am to 6 am by default, Paris time), then **Turn on descriptions**. The model downloads once, at the first computation.
 - **When:** photos without a description are described during the night hours, one at a time, on a single processor core, so as not to slow the rest of the server. The model only takes memory while computing.
-- **On the photo’s page:** **Describe this photo** puts it first, right away (about a minute). Then **Use as caption** copies the sentence into the Caption field, to review, rewrite and save. **Describe again** recomputes it. Nothing is ever copied by itself.
+- **On the photo’s page:** **Describe this photo** puts it first, right away (about a minute). This button does not save the page: save your changes first (pressing Enter in a field does save the page). Then **Use as caption** copies the French sentence into the Caption field, to review, rewrite and save; without a translator, **Use as English caption** puts the English sentence into the English caption. **Describe again** recomputes it. Nothing is ever copied by itself. If the computation fails, the page gives the reason. If you edit the page during the computation, it does not reload: it says the description is ready.
 - **Language:** the model writes in English. If the site has a translator (LibreTranslate), the sentence is translated into French and German; otherwise it stays in English.
 - **Turn off:** **Turn off and delete the model** removes the model from disk; existing descriptions remain.
 

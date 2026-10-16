@@ -90,6 +90,9 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       outingUrl: e.author_id ? app.outings.urlOf(e.author_id, e.session_day || e.met_on, e.met_time) : null, ...extra,
     });
   }
+  // Adresse d'un lien mailto : encodée (une adresse saisie par un visiteur pourrait contenir « ?bcc=… » ou « &body=… »,
+  // que la validation laisse passer : RFC 6068), l'arobase gardée lisible.
+  const mailtoOf = email => `mailto:${encodeURIComponent(email).replace(/%40/g, '@')}`;
   // Liens « photo offerte » : adresse, et message prêt à envoyer dans la langue de la personne (mailto).
   function sharesOf(e, fmt) {
     const g = UI[e.lang] ? UI[e.lang].gift : UI.fr.gift;
@@ -98,7 +101,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       const url = `${app.config.publicUrl}/pour-vous/${s.token}`;
       const date = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(s.expires_at);
       const author = repo.photo(s.photo_id) && repo.authors().find(a => a.id === repo.photo(s.photo_id).author_id)?.name;
-      const mail = e.email ? `mailto:${e.email}?${new URLSearchParams({ subject: g.mailSubject(app.siteName()), body: g.mail({ name: e.name, link: url, date, author: author || app.siteName() }) }).toString().replace(/\+/g, '%20')}` : null;
+      const mail = e.email ? `${mailtoOf(e.email)}?${new URLSearchParams({ subject: g.mailSubject(app.siteName()), body: g.mail({ name: e.name, link: url, date, author: author || app.siteName() }) }).toString().replace(/\+/g, '%20')}` : null;
       return { ...s, url, mail, expired: s.expires_at <= Date.now(), until: fmt(s.expires_at) };
     });
   }
@@ -219,7 +222,8 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       return reply.redirect(`/admin/rencontre/${r.id}/merci`, 303);
     } catch (err) {
       if (!(err instanceof EncounterError)) throw err;
-      return appPage(request, reply.code(422), { errors: err.errors, values: { ...body, signature: '' } });
+      // La photo et la signature ne sont pas gardées entre deux envois : l'écran le dit (à refaire).
+      return appPage(request, reply.code(422), { errors: err.errors, values: { ...body, signature: '' }, redo: { portrait: Boolean(portrait), signature: body.decision === 'accord' && Boolean(body.signature) } });
     }
   });
 
@@ -230,7 +234,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     if (!e || !e.ref || !request.owns('terrain.app', e.author_id)) return reply.callNotFound();
     const r = recap(e);
     const qr = await QRCode.toString(r.link, { type: 'svg', errorCorrectionLevel: 'Q', margin: 2 });
-    const mailto = e.email ? `mailto:${e.email}?${new URLSearchParams({ subject: r.subject, body: r.text }).toString().replace(/\+/g, '%20')}` : null;
+    const mailto = e.email ? `${mailtoOf(e.email)}?${new URLSearchParams({ subject: r.subject, body: r.text }).toString().replace(/\+/g, '%20')}` : null;
     return appView(reply, 'app-merci', { title: request.t('Rencontre {ref}', { ref: e.ref }), e, A: UI[e.lang] ? UI[e.lang].app : UI.fr.app, qr, mailto, smtp: app.mailer.enabled, csrf: request.session.csrf, flash: request.query.envoi || null });
   });
   app.post('/admin/rencontre/:id/envoyer', W('terrain.app'), async (request, reply) => {
@@ -325,7 +329,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     if (!author || (!generic && from + count - 1 > 9999)) return reply.callNotFound();
     const { host, pairs } = await buildPairs({ publicUrl: app.config.publicUrl, prefix: prefixOf(author), from, count, generic, codeOf: ref => enc.codeOf(ref) });
     return reply.header('cache-control', 'no-store').render('admin/cards-sheet', {
-      title: generic ? request.t('Cartes génériques · {name}', { name: author.name }) : request.t('Cartes {from} à {to} · {name}', { from: pairs[0].ref, to: pairs.at(-1).ref, name: author.name }), author, T: TEXTS, host, sheets: sheets(pairs), generic, siteName: app.siteName(),
+      title: generic ? request.t('Cartes génériques · {name}', { name: author.name }) : request.t('Cartes {from} à {to} · {name}', { from: pairs[0].ref, to: pairs.at(-1).ref, name: author.name }), author, T: TEXTS, host, sheets: sheets(pairs), generic, siteName: app.siteName(), t: request.t, lang: request.t.lang,
     });
   });
 

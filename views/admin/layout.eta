@@ -43,6 +43,7 @@
     outing: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/>',
     pin: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
     shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/>',
+    flag: '<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>',
     key: '<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/>',
     journal: '<path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
@@ -67,7 +68,7 @@
   const people = it.section === 'encounters' || it.section === 'encounter' || it.section === 'people' || it.section === 'person';
 %>
   <nav class="nav" aria-label="<%= t('Administration') %>">
-    <a href="/admin"<%~ cur('home') ? ' aria-current="page"' : '' %>><%~ ic('home') %><%= t('Aujourd’hui') %><% if (it.urgent) { %><span class="nav-badge urgent" aria-label="<%= it.urgent > 1 ? t('{n} urgences', { n: it.urgent }) : t('1 urgence') %>">✕ <%= it.urgent %></span><% } %></a>
+    <a href="/admin"<%~ cur('home') ? ' aria-current="page"' : '' %>><%~ ic('home') %><%= t('Aujourd’hui') %><% if (it.urgent) { /* nombre lu par un texte masqué : aria-label ne nomme pas un simple span */ %><span class="nav-badge urgent"><span aria-hidden="true">✕ <%= it.urgent %></span><span class="sr-only"><%= it.urgent > 1 ? t('{n} urgences', { n: it.urgent }) : t('1 urgence') %></span></span><% } %></a>
   </nav>
   <p class="grp" id="nav-work"><%= t('Travailler') %></p>
   <nav class="nav" aria-labelledby="nav-work">
@@ -75,7 +76,7 @@
     <a href="/admin/voyages"<%~ it.section === 'trips' || it.section === 'trip' ? ' aria-current="page"' : '' %>><%~ ic('trip') %><%= t('Voyages') %></a>
 <% } %>
     <%~ item(['photos', '/admin/photos', 'Photothèque', 'photos', null, 'photos.voir']) %>
-<% if (can('personnes.voir')) { %>    <a href="/admin/personnes"<%~ people ? ' aria-current="page"' : '' %>><%~ ic('people') %><%= t('Personnes') %><% if (it.encountersNew) { %><span class="nav-badge" aria-label="<%= it.encountersNew > 1 ? t('{n} nouvelles', { n: it.encountersNew }) : t('1 nouvelle') %>"><%= it.encountersNew %></span><% } %></a>
+<% if (can('personnes.voir')) { %>    <a href="/admin/personnes"<%~ people ? ' aria-current="page"' : '' %>><%~ ic('people') %><%= t('Personnes') %><% if (it.encountersNew) { %><span class="nav-badge"><span aria-hidden="true"><%= it.encountersNew %></span><span class="sr-only"><%= it.encountersNew > 1 ? t('{n} nouvelles', { n: it.encountersNew }) : t('1 nouvelle') %></span></span><% } %></a>
 <% } %>  </nav>
   <p class="grp" id="nav-publish"><%= t('Publier') %></p>
   <nav class="nav" aria-labelledby="nav-publish">
@@ -93,7 +94,8 @@
   <nav class="nav" aria-label="<%= t('Diffusion') %>">
     <%~ item(['instagram', '/admin/instagram', 'Instagram', 'instagram', null, 'instagram.voir']) %>
     <%~ item(['stats', '/admin/statistiques', 'Statistiques', 'stats', null, 'statistiques.voir']) %>
-  </nav>
+<% if (can('signalements.traiter')) { %>    <a href="/admin/signalements"<%~ it.section === 'reports' ? ' aria-current="page"' : '' %>><%~ ic('flag') %><%= t('Signalements') %><% if (it.reportsNew) { %><span class="nav-badge"><span aria-hidden="true"><%= it.reportsNew %></span><span class="sr-only"><%= it.reportsNew > 1 ? t('{n} nouveaux', { n: it.reportsNew }) : t('1 nouveau') %></span></span><% } %></a>
+<% } %>  </nav>
 <% if (can('terrain.app')) { %>  <p class="grp" id="nav-field"><%= t('Sur le terrain') %></p>
   <nav class="nav" aria-labelledby="nav-field">
     <a href="/admin/terrain"<%~ it.section === 'terrain' || it.section === 'cards' ? ' aria-current="page"' : '' %>><%~ ic('pin') %><%= t('App, cartes, QR') %></a>
@@ -137,7 +139,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { review: 'photos-le-circuit-de-publication', circuit: 'photos-le-circuit-de-publication', accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', trips: 'rencontres-les-voyages', trip: 'rencontres-les-voyages', releases: 'tableau-de-bord', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% const HELP = { review: 'photos-le-circuit-de-publication', circuit: 'photos-le-circuit-de-publication', accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', trips: 'rencontres-les-voyages', trip: 'rencontres-les-voyages', releases: 'tableau-de-bord', reports: 'site-public-visionneuse-page-dune-photo', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>"><%= t('Aide sur cette page') %></a></p>
 <% } %>
@@ -182,7 +184,7 @@
   </form>
 </dialog>
 <% } %>
-<div class="toast" role="status" aria-live="polite" data-toast hidden></div>
+<div class="toast" role="status" aria-live="polite" data-toast></div>
 <dialog class="palette" data-cmdk aria-label="<%= t('Rechercher et agir') %>">
   <div class="pal-in"><%~ ic('search', 20) %><input type="text" data-cmdk-input placeholder="<%= t('Rechercher une photo, une série, une action…') %>" aria-label="<%= t('Rechercher') %>" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="cmdk-list"><kbd><%= t('Échap') %></kbd></div>
   <ul class="pal-list" id="cmdk-list" role="listbox" data-cmdk-list></ul>

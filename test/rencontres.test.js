@@ -128,7 +128,7 @@ test('admin : liste, fiche, photos liées ; un refus empêche toute publication 
   assert.match(list, /J-0142/);
   assert.match(list, /non vérifiée/);
   assert.match(list, /« Merci pour la photo ! »/);
-  assert.match((await c.as({ url: '/admin' })).body, /class="nav-badge"[^>]*>1</);
+  assert.match((await c.as({ url: '/admin' })).body, /class="nav-badge"><span aria-hidden="true">1</);
   const quai = c.photo('quai-7h12'), deux = c.photo('deux-minuit');
   assert.equal((await c.post(`/admin/rencontres/${id}/photos`, { photo: [String(quai.id), String(deux.id)] })).statusCode, 303);
   const detail = (await c.as({ url: `/admin/rencontres/${id}` })).body;

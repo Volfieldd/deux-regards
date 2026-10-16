@@ -7,7 +7,7 @@
 <form class="panel form row-form trip-new" method="post" action="/admin/voyages">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
   <label><%= t('Nouveau voyage') %> <input name="name" maxlength="120" required placeholder="<%= t('Maroc 2025') %>"></label>
-<% if (it.allTrips) { %>  <label><%= t('Photographe') %> <select name="author_id"><option value=""><%= t('les deux photographes') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></label>
+<% if (it.allTrips) { %>  <label><%= t('Photographe') %> <select name="author_id"><option value=""><%= it.authors.length === 2 ? t('les deux photographes') : t('tous les photographes') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></label>
 <% } %>  <p class="actions"><button class="btn" type="submit"><%= t('Créer le voyage') %></button></p>
 </form>
 <% } %>

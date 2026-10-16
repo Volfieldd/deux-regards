@@ -84,6 +84,7 @@
 <% }) %>
 </div>
 <% const sg = it.suggest; const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0); %>
+<% if (it.can('series.propositions')) { /* réglage et suivi réservés à ce droit : sans lui, le suivi recevrait un refus */ %>
 <section class="panel suggest-panel" id="propositions" aria-labelledby="propositions-titre" data-suggest-state="<%= sg.status %>">
   <h2 id="propositions-titre"><%= t('Proposer une série') %> <span class="mono"><%= t('désactivé par défaut') %></span></h2>
   <p class="hint"><%= t('Pour une photo dont vous n’avez pas encore choisi la série, le serveur cherche la série dont les photos lui ressemblent le plus, et la propose (vue rapide, fiche, sortie, filtre « Série proposée »). Rien n’est jamais classé sans votre clic.') %></p>
@@ -93,7 +94,7 @@
 <% } else if (sg.status === 'downloading') { %>    <span class="enc-tag warn"><%= t('Téléchargement du modèle') %></span> <span data-suggest-n><%= t('{got} Mo sur {total}', { got: Math.round(sg.download.got / 1e6), total: Math.round(sg.download.total / 1e6) }) %></span> <progress max="100" value="<%= pct(sg.download.got, sg.download.total) %>"></progress>
 <% } else if (sg.status === 'analysing') { %>    <span class="enc-tag warn"><%= t('Analyse en cours') %></span> <span data-suggest-n><%= t('{done} photos sur {total}', { done: sg.done, total: sg.total }) %></span> <progress max="100" value="<%= pct(sg.done, sg.total) %>"></progress>
 <% } else if (sg.status === 'error') { %>    <span class="enc-tag no"><%= t('Modèle indisponible') %></span> <%= t.msg(sg.error) %> · <%= t('nouvel essai au prochain démarrage, ou éteignez puis rallumez.') %>
-<% } else { %>    <span class="enc-tag ok"><%= t('Prêt') %></span> <%= sg.total > 1 ? t('{n} photos analysées', { n: sg.done }) : t('{n} photo analysée', { n: sg.done }) %>
+<% } else { %>    <span class="enc-tag ok"><%= t('Prêt') %></span> <%= sg.done > 1 ? t('{n} photos analysées', { n: sg.done }) : t('{n} photo analysée', { n: sg.done }) %>
 <% } %>  </p>
   <form method="post" action="/admin/series/propositions" class="actions">
     <input type="hidden" name="_csrf" value="<%= it.csrf %>">
@@ -102,6 +103,7 @@
 <% } else { %>    <button class="btn" type="submit" name="action" value="on"><%= t('Allumer les propositions') %></button>
 <% } %>  </form>
 </section>
+<% } %>
 <% const ds = it.describe, DM = it.describeModels; if (ds && it.can('series.propositions')) { %>
 <section class="panel suggest-panel" id="descriptions" aria-labelledby="descriptions-titre">
   <h2 id="descriptions-titre"><%= t('Décrire les photos') %> <span class="mono"><%= t('désactivé par défaut') %></span></h2>

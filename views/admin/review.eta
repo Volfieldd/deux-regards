@@ -40,7 +40,7 @@
     <a class="rv-pick" href="/admin/instagram/apercu.jpg?photo=<%= p.id %>&cadre=<%= r.frame %>&filigrane=<%= r.watermark ? 1 : 0 %>" target="_blank" rel="noopener" aria-label="<%= t('Aperçu exact de l’image envoyée (nouvel onglet)') %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></a>
     <div class="rv-body">
       <a class="o-title" href="/admin/photos/<%= p.id %>#instagram"><%= p.title %></a>
-      <span class="mono"><%= r.author %> · <%= t('proposée le {date}', { date: r.when }) %> · <%= t(r.frameLabel).toLowerCase() %><%= r.watermark ? ` · ${t('filigrane')}` : '' %></span>
+      <span class="mono"><%= r.author %> · <%= t('proposée le {date}', { date: r.when }) %> · <%= it.lang === 'de' ? t(r.frameLabel) : t(r.frameLabel).toLowerCase() %><%= r.watermark ? ` · ${t('filigrane')}` : '' %></span>
 <% if (r.message) { %>      <q class="rv-msg"><%= r.message %></q>
 <% } %>      <details class="rv-cap"><summary><%= t('Légende') %> <span class="mono"><%= r.caption.length %> / 2200</span></summary><pre class="cap-full"><%= r.caption %></pre></details>
       <div class="rv-ig-acts">

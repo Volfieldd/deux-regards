@@ -11,7 +11,7 @@
 </nav>
 <% if (it.authors.length > 1) { %>
 <nav class="chips" aria-label="<%= t('Photographe') %>">
-  <a class="chip" href="<%= q({ photographe: '' }) %>"<%~ !it.author ? ' aria-current="true"' : '' %>><%= t('Les deux') %></a>
+  <a class="chip" href="<%= q({ photographe: '' }) %>"<%~ !it.author ? ' aria-current="true"' : '' %>><%= it.authors.length === 2 ? t('Les deux') : t('Tous') %></a>
 <% it.authors.forEach(a => { %>  <a class="chip" href="<%= q({ photographe: a.slug }) %>"<%~ it.author && it.author.id === a.id ? ' aria-current="true"' : '' %>><%= a.name %></a>
 <% }) %></nav>
 <% } %>
