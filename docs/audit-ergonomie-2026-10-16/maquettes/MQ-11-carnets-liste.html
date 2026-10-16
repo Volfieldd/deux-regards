@@ -1,262 +1,302 @@
 <!doctype html>
-<!-- MQ-11 — Carnets : liste des billets. Maquette de l'audit du 16 octobre 2026 (Camille Arnaud).
-     Thème « Nicephos — nuit » (production), styles du site (_commun/site.css), photos de démonstration.
-     Aucun script : les filtres et la pagination sont de simples liens, comme sur le site actuel. -->
 <html lang="fr" class="theme-nicephos mode-nuit">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="color-scheme" content="dark">
-  <title>Carnets · Nicephos</title>
-  <meta name="description" content="Voyages et récits, à deux voix : les carnets de Sébastien et Julien, photographes.">
-  <link rel="alternate" type="application/atom+xml" title="Nicephos — les carnets (flux Atom)" href="/carnet/flux.xml">
-  <link rel="stylesheet" href="_commun/site.css">
-  <link rel="stylesheet" href="_commun/site-entete.css">
-  <style>
-    /* ---------- Thème Nicephos (repris de public/themes/nicephos.css) ---------- */
-    .theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif; --display-style: normal; }
-    .theme-nicephos.mode-nuit { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b; --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; }
-    body { font-weight: 400; }
-
-    /* ---------- Lien d'évitement (UX-F-06) ---------- */
-    
-    
-
-    /* ---------- En-tête cible (MQ-01) : une ligne, « Tirages » après un filet ---------- */
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    /* ---------- En-tête de la rubrique ---------- */
-    .c-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px 40px; padding-block: clamp(40px, 6vw, 80px) 28px; border-bottom: 1px solid var(--rule); }
-    .c-head h1 { margin: 0; font-weight: 300; font-size: clamp(44px, 6vw, 76px); line-height: 1.05; letter-spacing: .005em; }
-    .c-head .lede { grid-column: 1; margin: 6px 0 0; font-weight: 400; font-size: clamp(19px, 1.8vw, 23px); line-height: 1.45; color: var(--prose); }
-    .rss { grid-column: 2; grid-row: 1 / span 2; align-self: end; display: grid; gap: 2px; justify-items: start; max-width: 300px; margin: 0; }
-    .rss a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; font-weight: 400; color: var(--ink); text-decoration: underline 1px var(--mute); text-underline-offset: 5px; }
-    .rss a:hover { text-decoration-color: var(--ink); }
-    .rss small { max-width: 34ch; font-size: 13px; line-height: 1.45; color: var(--mute); font-weight: 400; }
-
-    /* ---------- Filtres : de simples liens, état actif souligné ---------- */
-    .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 28px; padding-block: 14px; border-bottom: 1px solid var(--rule); }
-    .filters ul { display: flex; flex-wrap: wrap; gap: 0 26px; margin: 0; padding: 0; list-style: none; }
-    .filters a { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; font-weight: 400; color: var(--mute); }
-    .filters a:hover { color: var(--ink); }
-    .filters a[aria-current] { color: var(--ink); text-decoration: underline 2px var(--safelight); text-underline-offset: 8px; }
-    .filters .by { padding-left: 28px; border-left: 1px solid var(--rule); }
-    .filters .by-l { font-family: var(--mono); font-size: 13px; color: var(--mute); margin-right: 18px; }
-    .count { margin: 22px 0 0; font-family: var(--mono); font-size: 13px; letter-spacing: .03em; color: var(--mute); }
-
-    /* ---------- Billets ---------- */
-    .posts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 72px 48px; padding-block: 36px 0; }
-    .posts > li:first-child { grid-column: 1 / -1; }
-    .post { position: relative; display: grid; gap: 18px; align-content: start; }
-    .post .cover { display: flex; justify-content: center; aspect-ratio: 3 / 2; background: var(--frame); overflow: hidden; }
-    .post .cover img { width: auto; height: 100%; max-width: 100%; object-fit: contain; }
-    .post .cover.v { padding-block: 18px; }                 /* verticale : entière, sur passe-partout */
-    .post .kicker { margin: 0; font-family: var(--mono); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
-    .post h2 { margin: 0; font-weight: 300; font-size: clamp(28px, 2.6vw, 36px); line-height: 1.15; }
-    .post h2 a::after { content: ''; position: absolute; inset: 0; }   /* toute la carte est cliquable : un seul arrêt de tabulation */
-    .post h2 a:focus-visible { outline: none; }
-    .post:has(h2 a:focus-visible) { outline: 2px solid var(--ink); outline-offset: 8px; }
-    .post:hover h2 a { text-decoration: underline 1px var(--mute); text-underline-offset: 6px; }
-    .post .chapo { margin: 0; max-width: 58ch; font-weight: 400; font-size: 17px; line-height: 1.6; color: var(--prose); }
-    .post .meta { margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.7; letter-spacing: .02em; color: var(--mute); }
-    .post .meta .sig { color: var(--ink); }
-    .post .txt { display: grid; gap: 12px; align-content: start; }
-    .post.lead { grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); column-gap: 56px; align-items: end; }
-    .post.lead .txt { gap: 18px; padding-bottom: 6px; }
-    .post.lead h2 { font-size: clamp(36px, 4vw, 54px); line-height: 1.08; }
-    .post.lead .chapo { font-size: 18px; }
-
-    /* ---------- Pagination ---------- */
-    .pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-top: 80px; padding-top: 22px; border-top: 1px solid var(--rule); }
-    .pager p { margin: 0; font-family: var(--mono); font-size: 13px; color: var(--mute); }
-    .pager a { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; border: 1px solid var(--mute); font-size: 15px; font-weight: 400; letter-spacing: .04em; }
-    .pager a:hover { border-color: var(--ink); }
-    .pager a small { font-size: 13px; color: var(--mute); }
-
-    /* ---------- Pied de page cible ---------- */
-    
-    
-    
-    
-    
-
-    /* ---------- Annotations de la maquette (hors page) ---------- */
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    /* ---------- Téléphone ---------- */
-    
-    @media (max-width: 760px) {
-      .c-head { grid-template-columns: 1fr; }
-      .rss { grid-column: 1; grid-row: auto; }
-      .posts { grid-template-columns: 1fr; gap: 56px; }
-      .post.lead { grid-template-columns: 1fr; }
-      .post .cover { margin-inline: calc(-1 * var(--gut)); }      /* couverture pleine largeur */
-      .post.lead h2 { font-size: 34px; }
-      .filters .by { padding-left: 0; border-left: 0; }
-      .pager a { width: 100%; justify-content: space-between; }
-      
-    }
-    @media (prefers-reduced-motion: no-preference) { .post .cover img { transition: opacity .3s; } }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Carnets · Nicephos</title>
+<meta name="description" content="Les carnets de Sébastien et Julien : récits de voyage et notes d’atelier, à deux voix. Quatre billets, datés et signés.">
+<link rel="canonical" href="https://www.nicephos.art/carnet">
+<link rel="alternate" hreflang="fr" href="https://www.nicephos.art/carnet">
+<link rel="alternate" hreflang="en" href="https://www.nicephos.art/en/carnet">
+<link rel="alternate" hreflang="de" href="https://www.nicephos.art/de/carnet">
+<link rel="alternate" hreflang="x-default" href="https://www.nicephos.art/carnet">
+<link rel="alternate" type="application/atom+xml" title="Carnets de Nicephos (flux RSS)" href="/carnet/flux.xml">
+<link rel="stylesheet" href="_commun/site.css">
+<link rel="stylesheet" href="_commun/tokens.css">
+<link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
+<style>
+/* Composants propres aux Carnets, absents de la planche MQ-00 (documentés dans l'encart, « Composants locaux »).
+   Construits avec les jetons de tokens.css ; aucun jeton n'est redéclaré. Les mêmes servent à MQ-12. */
+
+/* En-tête de rubrique */
+.rub { display: grid; gap: var(--esp-2); padding-block: var(--esp-8) var(--esp-5); }
+.rub .chapo { max-width: 46ch; }
+.rub .chapo a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: var(--field); }
+.rub .chapo a:hover { text-decoration-color: var(--ink); }
+@media (max-width: 767px) { .rub { padding-block: var(--esp-5) var(--esp-4); } }
+
+/* Filtres : des liens (adresse partageable, sans script), l'entrée active comme dans le menu (500, soulignée de sable).
+   Chaque choix annonce son nombre de billets : on ne tombe jamais sur une liste vide. */
+.filtres { display: flex; flex-wrap: wrap; gap: 0 var(--esp-6); padding-block: var(--esp-1); border-block: 1px solid var(--rule); }
+.filtre { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-3); min-width: 0; }
+.filtre-t { margin: 0; font-size: var(--t-petit); color: var(--mute); }
+.filtre ul { display: flex; flex-wrap: wrap; gap: 0 var(--esp-3); list-style: none; margin: 0; padding: 0; }
+.filtre a { display: inline-flex; align-items: center; gap: 6px; min-height: var(--cible); font-size: 15px; color: var(--ink); white-space: nowrap; }
+.filtre a:hover .filtre-nom { text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 1px; }
+.filtre a[aria-current] { font-weight: 500; }
+.filtre a[aria-current] .filtre-nom { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
+.filtre-n { font-size: var(--t-meta); color: var(--mute); font-weight: 400; font-variant-numeric: tabular-nums; }
+@media (max-width: 767px) { .filtres { display: grid; gap: 0; } .filtre { gap: 0 var(--esp-2); } .filtre ul { gap: 0 var(--esp-2); } }
+.compte { margin: var(--esp-3) 0 0; font-size: var(--t-petit); color: var(--mute); }
+
+/* Liste des billets : une planche de deux colonnes, comme une double page. La couverture d'abord, au format de la photo
+   et à hauteur commune (règle des rangées de la planche), jamais recadrée ni posée sur un fond ; puis le texte.
+   Les couvertures d'une rangée ont la même hauteur : les titres d'une rangée tombent sur la même ligne. */
+.billets { list-style: none; margin: var(--esp-5) 0 0; padding: 0; display: grid; gap: var(--esp-8) var(--esp-8); }
+.billet-e { --h: 300px; position: relative; display: grid; gap: var(--esp-2); align-content: start; }
+.billet-e-txt { display: grid; gap: var(--esp-1); align-content: start; max-width: 60ch; }
+.billet-e-titre { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); letter-spacing: -.003em; text-wrap: balance; }
+.billet-e-titre a { color: var(--ink); }
+.billet-e-titre a::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+.billet-e:hover .billet-e-titre a { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+.billet-e-titre a:focus-visible { outline: 0; }
+.billet-e:has(.billet-e-titre a:focus-visible), .billet-e.is-focus { outline: var(--focus-l) solid var(--ink); outline-offset: 12px; }
+.billet-e-chapo { margin: 0; font-size: var(--t-texte); line-height: 1.6; color: var(--prose); text-wrap: pretty; }
+.billet-e-meta { margin: var(--esp-1) 0 0; font-size: var(--t-petit); color: var(--mute); }
+.billet-e-meta b { font-weight: 400; color: var(--ink); }
+.billet-e-img { margin: 0 0 var(--esp-1); order: -1; }
+.billet-e-img img { display: block; width: min(100%, calc(var(--h) * var(--r))); height: auto; aspect-ratio: var(--r); background: var(--frame); }
+@media (min-width: 768px) { .billets { grid-template-columns: repeat(2, minmax(0, 1fr)); } .billet-e { --h: 300px; } }
+@media (min-width: 1280px) { .billets { gap: var(--esp-10) var(--esp-8); } .billet-e { --h: 380px; } }
+
+/* Abonnement : une phrase, un lien, rien à remplir. */
+.abo { display: grid; gap: var(--esp-1); margin-top: var(--esp-10); padding-top: var(--esp-4); border-top: 1px solid var(--rule); max-width: 60ch; }
+.abo p { margin: 0; color: var(--prose); }
+.abo .lien { font-size: var(--t-texte); }
+.abo .ic { color: var(--mute); }
+
+/* Pagination (au-delà de 12 billets) */
+.pages { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--esp-1) var(--esp-4); padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+.pages p { margin: 0; color: var(--mute); font-size: var(--t-petit); }
+
+/* Zone des autres états (maquette) */
+.mq-etats { padding-block: var(--esp-12) 0; display: grid; gap: var(--esp-16); }
+.mq-etats .mq-ecran { background: var(--paper); }
+.etat-mini { padding: var(--esp-4) var(--gut) var(--esp-5); }
+.etat-mini .billets { gap: var(--esp-6); margin-top: var(--esp-4); }
+.etat-mini .billet-e { --h: 220px; }
+.etat-de { max-width: 1100px; }
+.nur-fr { margin: var(--esp-1) 0 0; font-size: var(--t-meta); color: var(--mute); }
+</style>
 </head>
 <body>
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
 <a class="skip" href="#contenu">Aller au contenu</a>
 
-<header class="site-h wrap">
-  <a class="wordmark" href="#">Nicephos</a>
-  <nav class="site-nav" id="menu-principal" aria-label="Menu principal"><ul role="list"><li><a href="#">Séries</a></li><li><a href="#">Galerie</a></li><li><a href="#">Carte</a></li><li><a href="MQ-11-carnets-liste.html" aria-current="page">Carnets</a><span class="pin pin-in" aria-hidden="true">1</span></li><li><a href="#">À propos</a></li><li class="soft"><a href="MQ-13-boutique-tirage.html">Tirages</a></li></ul></nav>
-  <ul class="site-tools" role="list">
-    <li><a class="tool" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="tool-t">Rechercher</span></a></li>
-    <li><details class="lang"><summary><span class="sr-only">Langue : </span>FR <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
-      <ul role="list"><li><a href="#" lang="fr" hreflang="fr" aria-current="true"><span>Français</span></a></li><li><a href="#" lang="en" hreflang="en">English</a></li><li><a href="#" lang="de" hreflang="de">Deutsch</a></li></ul></details></li>
-    <li><button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-principal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button></li>
-  </ul>
+<header class="sh sh--site">
+  <div class="sh-bar"><span class="mq-pin" aria-hidden="true">1</span>
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Menu principal">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet" aria-current="page">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2Fcarnet" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2Fcarnet" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2Fcarnet" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet" aria-current="page">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
 </header>
 
-<main id="contenu" class="wrap" tabindex="-1">
-  <div class="c-head">
-    <h1>Carnets</h1>
-    <p class="lede">Voyages et récits, à deux voix.<span class="pin" aria-hidden="true">2</span></p>
-    <p class="rss">
-      <span><a href="/carnet/flux.xml" type="application/atom+xml"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 11a8 8 0 0 1 8 8M5 4a15 15 0 0 1 15 15"/><circle cx="6" cy="18" r="1.3" fill="currentColor"/></svg>S’abonner (flux RSS)</a><span class="pin" aria-hidden="true">7</span></span>
-      <small>Votre lecteur de flux vous prévient à chaque nouveau carnet. Ni e-mail, ni compte.</small>
-    </p>
+<main id="contenu" class="wrap">
+  <div class="rub">
+    <h1 class="titre-page"><span class="mq-pin" aria-hidden="true">2</span>Carnets</h1>
+    <p class="chapo">Nos voyages et nos notes d’atelier, à deux voix : Sébastien cherche la mer, Julien les gens. <a href="/a-propos">Qui sommes-nous ?</a></p>
   </div>
 
-  <nav class="filters" aria-label="Filtrer les carnets">
-    <ul>
-      <li><a href="MQ-11-carnets-liste.html" aria-current="page">Tous</a></li>
-      <li><a href="/carnet?type=voyages">Voyages</a></li>
-      <li><a href="/carnet?type=atelier">Notes d’atelier</a></li>
-    </ul>
-    <ul class="by" aria-label="Par photographe">
-      <li><a href="/carnet?par=sebastien">Sébastien</a></li>
-      <li><a href="/carnet?par=julien">Julien</a></li>
-    </ul>
-    <span class="pin" aria-hidden="true">3</span>
+  <nav class="filtres" aria-label="Filtrer les billets"><span class="mq-pin" aria-hidden="true">3</span>
+    <div class="filtre">
+      <p class="filtre-t" id="f-rub">Rubrique</p>
+      <ul aria-labelledby="f-rub">
+        <li><a href="/carnet" aria-current="page"><span class="filtre-nom">Toutes</span> <span class="filtre-n">4</span></a></li>
+        <li><a href="/carnet?rubrique=voyages"><span class="filtre-nom">Voyages</span> <span class="filtre-n">1</span></a></li>
+        <li><a href="/carnet?rubrique=atelier"><span class="filtre-nom">Notes d’atelier</span> <span class="filtre-n">3</span></a></li>
+      </ul>
+    </div>
+    <div class="filtre">
+      <p class="filtre-t" id="f-reg">Regard</p>
+      <ul aria-labelledby="f-reg">
+        <li><a href="/carnet" aria-current="page"><span class="filtre-nom">Les deux</span> <span class="filtre-n">4</span></a></li>
+        <li><a href="/carnet?par=sebastien"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">3</span></a></li>
+        <li><a href="/carnet?par=julien"><span class="filtre-nom">Julien</span> <span class="filtre-n">2</span></a></li>
+      </ul>
+    </div>
   </nav>
-  <p class="count">31 carnets, du plus récent au plus ancien · page 1 sur 3</p>
+  <p class="compte"><span class="mq-pin" aria-hidden="true">4</span>4 billets, du plus récent au plus ancien.</p>
 
-  <ul class="posts">
+  <ol class="billets" aria-label="Billets">
     <li>
-      <article class="post lead" aria-labelledby="p1">
-        <div class="cover"><img src="_commun/photos/ciel.webp" alt="" width="900" height="600" fetchpriority="high"></div>
-        <div class="txt">
-        <p class="kicker">Voyage · Lisbonne et Porto</p>
-        <h2 id="p1"><a href="MQ-12-carnet-billet.html">Lisbonne et Porto</a></h2>
-        <p class="chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens&#8239;: de l’Alfama au premier tram jusqu’à la barre de Foz, là où le Douro rencontre l’Atlantique.</p>
-        <p class="meta"><span class="sig">par Sébastien &amp; Julien</span> · <time datetime="2026-10-12">12 octobre 2026</time> · 10 photos · 6 min de lecture<span class="pin" aria-hidden="true">5</span></p>
-      </div>
+      <article class="billet-e" aria-labelledby="b1"><span class="mq-pin" aria-hidden="true">5</span>
+        <div class="billet-e-txt">
+          <p class="etiquette">Notes d’atelier</p>
+          <h2 class="billet-e-titre" id="b1"><a href="/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></h2>
+          <p class="billet-e-chapo">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte « Bonjour » : voici ce qu’elle a répondu, et ce que nous en avons appris.</p>
+          <p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15 oct. 2026</time> · 1 photo · 3 min de lecture</p>
+        </div>
+        <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w" sizes="(min-width: 1280px) 253px, 200px" width="320" height="480" alt="" fetchpriority="high" decoding="async"></figure>
       </article>
     </li>
     <li>
-      <article class="post" aria-labelledby="p2">
-        <div class="cover"><img src="_commun/photos/neige.webp" alt="" width="900" height="600" loading="lazy"></div>
-        <div class="txt">
-        <p class="kicker">Notes d’atelier</p>
-        <h2 id="p2"><a href="/carnet/tirer-sur-hahnemuhle-photo-rag">Tirer sur Hahnemühle Photo Rag</a></h2>
-        <p class="chapo">Un papier coton mat de 308&#8239;g, une marge blanche de 3&#8239;cm et trois essais avant le bon&#8239;: ce que nos premières épreuves nous ont appris.</p>
-        <p class="meta"><span class="sig">par Julien</span> · <time datetime="2026-10-05">5 octobre 2026</time> · 4 photos · 4 min de lecture</p>
-      </div>
+      <article class="billet-e" aria-labelledby="b2">
+        <div class="billet-e-txt">
+          <p class="etiquette">Voyages</p>
+          <h2 class="billet-e-titre" id="b2"><a href="/carnet/lisbonne-et-porto">Lisbonne et Porto</a></h2>
+          <p class="billet-e-chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : du premier tram de l’Alfama à la barre de Foz, là où le Douro rencontre l’Atlantique.</p>
+          <p class="billet-e-meta"><b>Sébastien et Julien</b> · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos · 4 min de lecture</p>
+        </div>
+        <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w" sizes="(min-width: 1280px) 253px, 200px" width="320" height="480" alt="" loading="lazy" decoding="async"></figure>
       </article>
     </li>
     <li>
-      <article class="post" aria-labelledby="p3">
-        <div class="cover v"><img src="_commun/photos/portrait.webp" alt="" width="600" height="900" loading="lazy"><span class="pin" aria-hidden="true" style="align-self:flex-start;margin-left:-30px;margin-top:-6px">4</span></div>
-        <div class="txt">
-        <p class="kicker">Notes d’atelier</p>
-        <h2 id="p3"><a href="/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></h2>
-        <p class="chapo">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte «&#8239;Bonjour&#8239;»&#8239;: voici ce qu’elle a répondu.</p>
-        <p class="meta"><span class="sig">par Julien</span> · <time datetime="2026-09-28">28 septembre 2026</time> · 3 photos · 3 min de lecture</p>
-      </div>
+      <article class="billet-e" aria-labelledby="b3"><span class="mq-pin" aria-hidden="true">6</span>
+        <div class="billet-e-txt">
+          <p class="etiquette">Notes d’atelier</p>
+          <h2 class="billet-e-titre" id="b3"><a href="/carnet/pourquoi-nous-ne-recadrons-pas">Pourquoi nous ne recadrons pas</a></h2>
+          <p class="billet-e-chapo">Le cadre se décide au viseur, pas à l’écran. Deux photographes, une même règle, et les rares fois où nous y avons dérogé.</p>
+          <p class="billet-e-meta"><b>Sébastien</b> · <time datetime="2026-10-02">2 oct. 2026</time> · 2 photos · 4 min de lecture</p>
+        </div>
+        <figure class="billet-e-img" style="--r:1.5"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 570px, (min-width: 768px) 450px, 100vw" width="480" height="320" alt="" loading="lazy" decoding="async"></figure>
       </article>
     </li>
     <li>
-      <article class="post" aria-labelledby="p4">
-        <div class="cover"><img src="_commun/photos/lac.webp" alt="" width="900" height="600" loading="lazy"></div>
-        <div class="txt">
-        <p class="kicker">Voyage · Saint-Malo</p>
-        <h2 id="p4"><a href="/carnet/saint-malo-grandes-marees">Saint-Malo, grandes marées</a></h2>
-        <p class="chapo">Coefficient 117&#8239;: la mer monte jusqu’au pied du Sillon. Sébastien y est retourné trois matins de suite, avant les premiers promeneurs.</p>
-        <p class="meta"><span class="sig">par Sébastien</span> · <time datetime="2026-09-21">21 septembre 2026</time> · 14 photos · 5 min de lecture</p>
-      </div>
+      <article class="billet-e" aria-labelledby="b4">
+        <div class="billet-e-txt">
+          <p class="etiquette">Notes d’atelier</p>
+          <h2 class="billet-e-titre" id="b4"><a href="/carnet/tirer-sur-photo-rag">Tirer sur Photo Rag</a></h2>
+          <p class="billet-e-chapo">Un papier coton mat de 308 g, une marge blanche de 3 cm et trois essais avant le bon : ce que nos premières épreuves nous ont appris.</p>
+          <p class="billet-e-meta"><b>Sébastien</b> · <time datetime="2026-09-25">25 sept. 2026</time> · 1 photo · 4 min de lecture</p>
+        </div>
+        <figure class="billet-e-img" style="--r:1.5"><img src="_commun/photos/480/neige.webp" srcset="_commun/photos/480/neige.webp 480w, _commun/photos/neige.webp 900w" sizes="(min-width: 1280px) 570px, (min-width: 768px) 450px, 100vw" width="480" height="320" alt="" loading="lazy" decoding="async"></figure>
       </article>
     </li>
-    <li>
-      <article class="post" aria-labelledby="p5">
-        <div class="cover"><img src="_commun/photos/dune.webp" alt="" width="900" height="600" loading="lazy"></div>
-        <div class="txt">
-        <p class="kicker">Notes d’atelier</p>
-        <h2 id="p5"><a href="/carnet/pourquoi-nous-ne-recadrons-pas">Pourquoi nous ne recadrons pas</a></h2>
-        <p class="chapo">Le cadre se décide au viseur, pas à l’écran. Deux photographes, une même règle, et les rares fois où nous y avons dérogé.</p>
-        <p class="meta"><span class="sig">par Sébastien &amp; Julien</span> · <time datetime="2026-09-07">7 septembre 2026</time> · 6 photos · 4 min de lecture</p>
-      </div>
-      </article>
-    </li>
-  </ul>
+  </ol>
 
-  <nav class="pager" aria-label="Pages des carnets">
-    <p>Page 1 sur 3<span class="pin" aria-hidden="true">6</span></p>
-    <a href="/carnet?page=2" rel="next"><span>Suivante <small>· carnets plus anciens</small></span> <span aria-hidden="true">→</span></a>
-  </nav>
+  <div class="abo"><span class="mq-pin" aria-hidden="true">7</span>
+    <p>Pour lire le prochain billet sans revenir ici, ajoutez ce flux à votre lecteur : il vous prévient à chaque publication. Ni compte, ni adresse e-mail.</p>
+    <a class="lien" href="/carnet/flux.xml" type="application/atom+xml"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.4" fill="currentColor" stroke="none"/></svg>S’abonner au flux RSS des carnets</a>
+  </div>
 </main>
 
-<footer class="site-f wrap">
-  <p>© 2026 Sébastien &amp; Julien</p>
-  <ul role="list" aria-label="Pied de page"><li><a href="#">Tirages et licences</a></li><li><a href="MQ-06-contact-tirage.html">Contact</a></li><li><a href="https://www.instagram.com/nicephos.art/" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="/carnet/flux.xml" type="application/atom+xml">Flux RSS</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Mentions légales</a><span class="pin pin-in" aria-hidden="true">8</span></li></ul>
+<footer class="sf sf--complet wrap">
+  <div class="sf-in"><span class="mq-pin" aria-hidden="true">8</span>
+    <div>
+      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
+      <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage, un tirage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
+    </div>
+    <nav class="sf-groupes" aria-label="Pied de page">
+      <div>
+        <h2 id="sf-site">Le site</h2>
+        <ul aria-labelledby="sf-site">
+          <li><a href="/a-propos#contact">Contact</a></li>
+          <li><a href="/droits">Droits et licences</a></li>
+          <li><a href="/carnet/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
+          <li><a href="/confidentialite">Confidentialité</a></li>
+          <li><a href="/mentions-legales">Mentions légales</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 id="sf-tirages">Tirages</h2>
+        <ul aria-labelledby="sf-tirages">
+          <li><a href="/conditions-de-vente">Conditions de vente</a></li>
+          <li><a href="/livraison">Livraison et retours</a></li>
+          <li><a href="/renoncer">Renoncer à une commande</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
 </footer>
 
-<aside class="mq-notes" aria-labelledby="annot-t">
-  <p class="mq-id">Maquette MQ-11 · site public · thème « Nicephos — nuit » · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
-  <h2 id="annot-t">Ce qui change</h2>
-  <p class="mq-lead">Aujourd’hui, la rubrique n’existe pas&#8239;: en production, /voyages répond 404, et sur la démo la liste des voyages n’a ni signature, ni date de publication, ni moyen d’être suivie. Ici, «&#8239;Carnets&#8239;» réunit les voyages et les billets, datés, signés et paginés. Thème «&#8239;Nicephos — nuit&#8239;» de la production, aucun script.</p>
-  <ol>
-    <li><span class="pin">1</span><p><strong>Le menu cible, avec «&#8239;Carnets&#8239;» actif</strong>&#8239;: aria-current="page" et un soulignement sable, pas seulement une couleur&#8239;; «&#8239;Tirages&#8239;» en retrait après un filet&#8239;; sur téléphone, un bouton «&#8239;Menu&#8239;» et un en-tête de 64&#8239;px.
-      <span class="ref">UX-T-16 · UX-F-36 · RGAA 3.1 et 12.2 · WCAG 1.4.1 · Opquast 158 · loi de Jakob</span></p></li>
-    <li><span class="pin">2</span><p><strong>Une promesse en une ligne</strong>&#8239;: «&#8239;Voyages et récits, à deux voix.&#8239;» dit ce qu’on va lire et qui écrit, sous un titre de niveau 1 unique.
-      <span class="ref">UX-F-33 · UX-F-45 · RGAA 9.1 · Nielsen n°2 · B&amp;S 1.1 Incitation</span></p></li>
-    <li><span class="pin">3</span><p><strong>Des filtres qui sont des liens</strong> (?type=, ?par=)&#8239;: ils marchent sans JavaScript, se partagent, et l’état actif est souligné et annoncé. Cibles de 44&#8239;px. Les pages filtrées sont en noindex (étude, B53).
-      <span class="ref">UX-T-16 · B&amp;S 1.2.1 Groupement par la localisation · RGAA 7.1 · WCAG 2.5.8</span></p></li>
-    <li><span class="pin">4</span><p><strong>Couverture 3:2, jamais recadrée</strong>&#8239;: une verticale est montrée entière sur un passe-partout. L’image est décorative (alt=""), car le titre nomme déjà le carnet&#8239;: la carte entière est cliquable mais ne compte qu’un arrêt de tabulation.
-      <span class="ref">UX-T-16 · UX-F-17 (même principe) · RGAA 1.2 et 6.1 · Opquast 119</span></p></li>
-    <li><span class="pin">5</span><p><strong>Signé et daté</strong>&#8239;: «&#8239;par Sébastien &amp; Julien&#8239;», &lt;time datetime="2026-10-12"&gt;, le nombre de photos et le temps de lecture. Les métadonnées passent de 11 à 13&#8239;px (Plex Mono, comme tous les cartels), le chapô en Jost 400.
-      <span class="ref">UX-T-18 · UX-F-29 · Opquast 6, 101 et 231</span></p></li>
-    <li><span class="pin">6</span><p><strong>Une pagination, pas un défilement infini</strong>&#8239;: 12 carnets par page (la maquette en montre 5), une adresse par page, «&#8239;Suivante&#8239;» nommée par ce qu’elle contient. Le pied de page reste atteignable.
-      <span class="ref">UX-T-16 · RGESN 4.2 · Nielsen n°3 · étude B53</span></p></li>
-    <li><span class="pin">7</span><p><strong>S’abonner sans compte</strong>&#8239;: un flux Atom visible, expliqué en une phrase, déclaré aussi par &lt;link rel="alternate"&gt; dans l’en-tête, et repris au pied de page.
-      <span class="ref">UX-F-34 · UX-T-16 · Opquast 1 · étude B58</span></p></li>
-    <li><span class="pin">8</span><p><strong>Un pied de page complet</strong>&#8239;: tirages et licences, contact, Instagram, flux, confidentialité, mentions légales, sur chaque page.
-      <span class="ref">UX-F-34 · UX-T-03 · RGAA 12.1 · Opquast 2 et 15</span></p></li>
-    <li><span class="pin">9</span><p><strong>Sobriété</strong>&#8239;: 5 images à leur taille, dimensions déclarées (aucun saut de mise en page), la première prioritaire, les suivantes en chargement différé&#8239;; aucun script, aucun tiers. Couvertures servies en 640 et 1280&#8239;px avec srcset sur le site.
-      <span class="ref">RGESN 4.2, 5.1, 6.4 et 6.5 · UX-T-07</span></p></li>
+<!-- ================= Autres états (maquette) : des écrans réels, inertes, chacun sous son étiquette ================= -->
+<aside class="mq-etats wrap" aria-label="Autres états de l’écran (maquette)">
+
+  <div class="mq-ecran" inert><p class="mq-etat">État · filtre « Julien », focus au clavier</p>
+    <div class="etat-mini">
+      <div class="filtres">
+        <div class="filtre"><p class="filtre-t">Rubrique</p><ul><li><a href="/carnet?par=julien" aria-current="page"><span class="filtre-nom">Toutes</span> <span class="filtre-n">2</span></a></li><li><a href="/carnet?rubrique=voyages&amp;par=julien"><span class="filtre-nom">Voyages</span> <span class="filtre-n">1</span></a></li><li><a href="/carnet?rubrique=atelier&amp;par=julien"><span class="filtre-nom">Notes d’atelier</span> <span class="filtre-n">1</span></a></li></ul></div>
+        <div class="filtre"><p class="filtre-t">Regard</p><ul><li><a href="/carnet"><span class="filtre-nom">Les deux</span> <span class="filtre-n">4</span></a></li><li><a href="/carnet?par=sebastien"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">3</span></a></li><li><a href="/carnet?par=julien" aria-current="page"><span class="filtre-nom">Julien</span> <span class="filtre-n">2</span></a></li></ul></div>
+      </div>
+      <p class="compte">2 billets signés par Julien, dont un à deux voix. <a class="lien" style="display:inline;min-height:0" href="/carnet">Voir les 4 billets</a></p>
+      <ol class="billets">
+        <li><article class="billet-e is-focus"><div class="billet-e-txt"><p class="etiquette">Notes d’atelier</p><p class="billet-e-titre"><a href="/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></p><p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15 oct. 2026</time> · 1 photo · 3 min de lecture</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
+        <li><article class="billet-e"><div class="billet-e-txt"><p class="etiquette">Voyages</p><p class="billet-e-titre"><a href="/carnet/lisbonne-et-porto">Lisbonne et Porto</a></p><p class="billet-e-meta"><b>Sébastien et Julien</b> · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos · 4 min de lecture</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="mq-ecran etat-de" inert lang="de"><p class="mq-etat" lang="fr">État · page en allemand (/de/carnet)</p>
+    <header class="sh sh--site">
+      <div class="sh-bar">
+        <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+        <nav class="sh-nav" aria-label="Hauptmenü">
+          <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet" aria-current="page">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-sep"><a href="/de/tirages">Kunstdrucke</a></li></ul>
+        </nav>
+        <div class="sh-outils">
+          <a class="sh-outil sh-recherche" href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
+          <details class="lang-pick"><summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary><ul aria-label="Sprache wählen"><li><a href="/langue/fr?vers=%2Fcarnet" hreflang="fr" lang="fr">Français</a></li><li><a href="/langue/en?vers=%2Fcarnet" hreflang="en" lang="en">English</a></li><li><a href="/langue/de?vers=%2Fcarnet" hreflang="de" aria-current="true">Deutsch</a></li></ul></details>
+          <details class="sh-menu"><summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary><nav class="sh-panneau" aria-label="Hauptmenü"><ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet" aria-current="page">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/tirages">Kunstdrucke</a></li></ul></nav></details>
+        </div>
+      </div>
+    </header>
+    <div class="etat-mini">
+      <p class="titre-page">Reisetagebücher</p>
+      <p class="chapo" style="margin-top:var(--esp-2)">Unsere Reisen und Werkstattnotizen, mit zwei Stimmen: Sébastien sucht das Meer, Julien die Menschen.</p>
+      <ol class="billets">
+        <li><article class="billet-e"><div class="billet-e-txt"><p class="etiquette">Werkstattnotizen</p><p class="billet-e-titre" lang="fr"><a href="/de/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></p><p class="billet-e-chapo" lang="fr">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte « Bonjour » : voici ce qu’elle a répondu.</p><p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15. Okt. 2026</time> · 1 Foto · 3 Min. Lesezeit</p><p class="nur-fr">Nur auf Französisch</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
+        <li><article class="billet-e"><div class="billet-e-txt"><p class="etiquette">Reisen</p><p class="billet-e-titre"><a href="/de/carnet/lisbonne-et-porto">Lissabon und Porto</a></p><p class="billet-e-chapo">Zwei Tage, zwei Blicke, ein Ozean. Sébastien suchte das Meer, Julien die Menschen: von der ersten Straßenbahn der Alfama bis zur Brandung von Foz, wo der Douro auf den Atlantik trifft.</p><p class="billet-e-meta"><b>Sébastien und Julien</b> · <time datetime="2026-10-14">14. Okt. 2026</time> · 10 Fotos · 6 Min. Lesezeit</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="mq-ecran" inert><p class="mq-etat">État · plus tard, au-delà de 12 billets : la page 1 sur 2</p>
+    <div class="etat-mini">
+      <nav class="pages" aria-label="Pages des billets">
+        <p>Page 1 sur 2 · billets 1 à 12 sur 15</p>
+        <a class="lien" href="/carnet?page=2">Billets plus anciens<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </nav>
+    </div>
+  </div>
+</aside>
+
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MQ-11 · Carnets, la liste des billets · site public, thème Nicephos nuit · v2 du 16 oct. 2026, sur la planche MQ-00</p>
+  <h2 id="mq-t">Ce qui change</h2>
+  <p class="mq-lead">En production, /voyages répond 404 ; sur la démo, la liste des voyages n’a ni signature, ni date, ni moyen d’être suivie. « Carnets » réunit les récits de voyage et les notes d’atelier : quatre billets, datés et signés, dans l’ordre de publication, avec leur couverture au format de la photo. La page reprend tels quels l’en-tête Site, le pied complet, l’étiquette et le titre de la planche ; ses données sont celles de LEXIQUE-ET-DONNEES.md (§ 4.3).</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>« Carnets » dans le menu cible</b><p>En-tête Site de la planche, « Carnets » actif (aria-current et soulignement sable) ; pas de panier tant qu’il est vide ; au téléphone, Menu en &lt;details&gt;, sans script.</p><span class="mq-ref">UX-T-16 · jury T1, T2 · étude B52 · RGAA 12.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>Qui écrit, en une phrase</b><p>Un seul H1, une promesse qui nomme les deux voix, et un lien « Qui sommes-nous ? » vers À propos : le nom de la rubrique n’est plus inexpliqué.</p><span class="mq-ref">UX-F-33 · UX-F-45 · jury MQ-11 crit. 13 · Nielsen n°2</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Des filtres qui sont des liens, et qui comptent</b><p>« Rubrique : Toutes · Voyages · Notes d’atelier » puis « Regard : Les deux · Sébastien · Julien », les mots du lexique. Chaque choix dit son nombre de billets : aucune combinaison ne mène à une liste vide. Pages filtrées en noindex.</p><span class="mq-ref">Jury MQ-11 crit. 6 · étude B53 · B&amp;S 1.1.1 · WCAG 2.5.8</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Des données vraies</b><p>4 billets publiés, page 1 sur 1 : pas de pagination à vide. Elle n’apparaît qu’au-delà de 12 billets, avec une adresse par page (dernier état).</p><span class="mq-ref">Jury MQ-11 crit. 12 (31 carnets, 37 photos) · UX-T-16 · RGESN 4.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>Un billet, un lien, une ligne de titres</b><p>Rubrique, titre, chapô (B4), puis « Auteur · date · photos · lecture » avec &lt;time&gt;. Les titres s’alignent sur une même verticale : on parcourt la liste d’un coup d’œil. Le titre est le seul lien, étendu à toute la carte : un arrêt de tabulation, un focus qui entoure le billet.</p><span class="mq-ref">UX-T-18 · étude B56 · RGAA 6.1 · Opquast 101</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>La couverture au format de la photo</b><p>Hauteur commune, largeur selon le format, comme les rangées de la planche : ni passe-partout gris, ni recadrage. Image décorative (alt="") : le titre nomme déjà le billet. Couverture par défaut : la première photo du billet.</p><span class="mq-ref">Jury MQ-11 crit. 11 (« Inês » sur passe-partout) · étude B8 · RGAA 1.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>S’abonner sans compte</b><p>Un flux Atom par langue, nommé « flux RSS », expliqué en une phrase, déclaré par &lt;link rel="alternate"&gt; et repris au pied de page.</p><span class="mq-ref">UX-F-34 · étude B58, B84 · Opquast 1</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Le pied de page complet de la planche</b><p>Deux groupes nommés, « Flux RSS des carnets » à sa place fixe.</p><span class="mq-ref">Planche MQ-00 § Pieds de page · UX-T-03</span></li>
   </ol>
-  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette, hors encart et pastilles) — <b>bureau 1440 × 900</b> : en-tête de 72 px, H1 à 152 px ; contraste le plus faible du texte 7,4:1 (« Tirages » et métadonnées, #a19f99 sur #0b0b0b) ; métadonnées en Plex Mono 13 px ; aucun texte sous 12 px ; 5 images, la première prioritaire, les 4 autres en chargement différé. <b>Pixel 7 (412 × 839, densité 2)</b> : en-tête de 64 px, H1 à 104 px, filtres et pagination en cibles de 44 px, aucun défilement horizontal. Axe-core (WCAG 2.2 A et AA) : 0 violation sur les deux rendus.</p>
+  <h3>États montrés</h3>
+  <p>Filtre « Regard : Julien » avec focus clavier ; page en allemand (en-tête « Reisetagebücher », le billet traduit en allemand, l’autre marqué « Nur auf Französisch » et lang="fr", étude B54) ; pagination au-delà de 12 billets. Aucun état vide n’existe : les nombres affichés près des filtres l’évitent.</p>
+  <h3>Composants locaux, à verser dans la planche</h3>
+  <p><code>.rub</code> en-tête de rubrique · <code>.filtres</code> et <code>.filtre</code> (liens, nombre, état actif du menu) · <code>.billets</code> et <code>.billet-e</code> (texte, couverture à hauteur commune, lien étendu) · <code>.abo</code> abonnement · <code>.pages</code> pagination. Tous faits de jetons ; les mêmes servent à MQ-12, et les filtres conviennent à MQ-02.</p>
+  <h3>À trancher ailleurs</h3>
+  <p>Adresses : l’étude (B1, B73) dit <code>/carnet</code> et garde le slug français dans toutes les langues ; la planche MQ-00 écrit <code>/carnets</code> et <code>/de/reisetagebuecher/lissabon-und-porto</code>. Cette maquette suit l’étude. Temps de lecture (Inês 3 min, les trois autres 4 min, calculés sur le texte et les photos) : à ajouter au lexique, comme la mise à jour du billet « Lisbonne et Porto » le 15 oct.</p>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures" id="mesures"><b>Mesures</b> (16 oct. 2026, Chromium 1.64 en conteneur, outils/inspect.sh) · à compléter</p>
 </aside>
 </body>
 </html>

@@ -2,242 +2,307 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Nouvelle rencontre · J-0009 · Erreur : 1 point à corriger · Nicephos (maquette MQ-10)</title>
+<meta name="theme-color" content="#1d1c1a">
+<title>MQ-10 — App de terrain : un accord qui ne se perd jamais — Nicephos</title>
+<meta name="description" content="Maquette de l’app de terrain de Nicephos : un accord de droit à l’image signé dans la rue, gardé malgré un oubli, une coupure de réseau ou une session expirée, en trois langues.">
 <link rel="stylesheet" href="_commun/app.css">
-<style>
-/* ===== Couche « maquette » : ruban, repères numérotés, planches d'états, encart « Ce qui change » ===== */
-:root { --mq: #3a2fd0; --mq-ink: #2f27b8; }
-
-
-
-
-
-.mq-boards { background: #e4e0d7; color: #1b1a17; padding: 40px 36px 48px; border-top: 1px solid rgba(20,18,14,.15); }
-.mq-boards > h2 { font: 300 30px/1.15 Jost, Arial, sans-serif; margin: 0 0 6px; color: #1b1a17; }
-
-.mq-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
-.mq-board { background: var(--bg); color: var(--ink); border-radius: 16px; padding: 20px 22px 24px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(60,40,10,.10); min-width: 0; }
-.mq-board.wide { grid-column: 1 / -1; }
-.mq-board > h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 4px; margin: 0 0 4px; font-weight: 500; font-size: 17px; }
-.mq-board > .mq-cap { color: var(--ink2); font-size: 13px; margin: 0 0 16px; max-width: 76ch; }
-.mq-scrim { background: rgba(30,26,20,.46); border-radius: 12px; padding: 32px 24px; display: grid; place-items: center; }
-
-
-
-
-
-
-
-
-
-
-
-
-@media (max-width: 720px) {
-  .mq-boards { padding: 28px 14px 32px; }
-  .mq-boards > h2 { font-size: 26px; }
-  .mq-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
-  .mq-board { padding: 16px 14px 18px; }
-  .mq-desk { display: none !important; }
-  .mq-scrim { padding: 18px 10px; }
-  
-  
-}
-@media (min-width: 721px) { .mq-mob { display: none !important; } }
-
-/* ===== MQ-10 : app de terrain, un accord qui ne se perd jamais ===== */
-:root { --bg: #f6f4ef; --s1: #fff; --s2: #efebe3; --line: #dcd7cd; --line2: #c9c3b7; --ink2: #4f4b44; --ink3: #6b665d; --warn: #6e6000; --danger: #b2410a; --ok: #0067a3; }
-body { padding-bottom: 0; }
-.skip { position: absolute; left: 12px; top: -80px; z-index: 100; background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 8px; }
-.skip:focus { top: 8px; }
-.app-bar h1 { flex: 1; margin: 0; font-size: 17px; font-weight: 500; line-height: 1.25; }
-.app-bar h1 .mono { font-size: 14px; color: #cfc8bb; }
-.mq-apphead { position: sticky; top: 0; z-index: 3; }
-.mq-apphead .app-bar { position: static; }
-.app-session { margin: 0; padding: 7px 16px; background: #2b2a27; color: #e7e2d8; font-size: 13.5px; display: flex; justify-content: space-between; gap: 10px; }
-.app-session a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
-.app-form { padding-bottom: 0; }
-.mq-kept { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 4px 14px; align-items: center; padding: 12px; border-radius: 12px; background: #fff; border: 1px solid var(--line); }
-.mq-kept img { width: 96px; height: 128px; object-fit: cover; border-radius: 8px; grid-row: span 3; }
-.mq-kept p { margin: 0; }
-.mq-kept .ok { font-weight: 500; }
-.mq-kept .ok::before, .sign-ok::before { content: "✓ "; color: var(--ok); }
-.app-langs label { position: relative; }
-.app-langs label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
-.app-l10n h3 { margin: 0; font-size: 18px; font-weight: 500; }
-.app-person fieldset { border: 0; margin: 0; padding: 0; }
-.app-person legend { padding: 0; margin: 0 0 4px; font-size: 16px; font-weight: 500; }
-.app-scopes { border-left: 2px solid var(--line) !important; margin-left: 11px !important; padding-left: 22px !important; }
-.app-scopes legend { font-size: 15px; font-weight: 500; color: var(--ink); }
-.mq-err-field { border-radius: 12px; padding: 10px 12px 6px !important; box-shadow: inset 0 0 0 2px var(--ko); background: #fff7f2; }
-.mq-err-field legend { float: left; width: 100%; margin-bottom: 2px; }
-.mq-err-field legend + * { clear: both; }
-.mq-err { display: flex; gap: 8px; align-items: baseline; margin: 2px 0 6px; color: var(--ko); font-weight: 500; font-size: 15.5px; }
-.mq-focus-r { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 50%; }
-.app-sign .pad { position: relative; display: block; width: 100%; height: 170px; background: #fbfaf7; border: 1.5px solid var(--ink); border-radius: 12px; }
-.app-sign .pad svg { position: absolute; inset: 10px 18px; width: calc(100% - 36px); height: calc(100% - 20px); }
-.app-sign .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.sign-ok { margin: 0; font-size: 15px; font-weight: 500; }
-.app-actions { position: relative; display: grid; gap: 8px; background: var(--paper); border-top: 1px solid var(--line); margin-top: 6px; }
-.app-actions .left { margin: 0; font-size: 14px; color: var(--ko); font-weight: 500; text-align: center; }
-/* États d'envoi */
-.mq-phone { width: 100%; max-width: 412px; margin: 0 auto; background: var(--paper); border-radius: 18px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 14px 34px rgba(60,40,10,.14); border: 1px solid var(--line); }
-.mq-phone .app-bar { position: static; }
-.mq-phone .body { padding: 16px; display: grid; gap: 12px; }
-.mq-phone p { margin: 0; }
-.mq-send { display: grid; gap: 8px; padding: 14px; border-radius: 12px; background: #fff; border: 1px solid var(--line); }
-.mq-send .t { font-weight: 500; font-size: 17px; }
-.mq-bar { height: 10px; border-radius: 999px; background: var(--rule); overflow: hidden; }
-.mq-bar span { display: block; height: 100%; width: 62%; background: var(--ink); }
-.mq-state { display: grid; gap: 10px; padding: 14px; border-radius: 12px; background: #fff; border: 1.5px solid var(--ink); }
-.mq-state.ko { border-color: var(--ko); }
-.mq-state .app-btn { padding: 10px 16px; text-align: center; }
-.mq-state .t { font-weight: 500; font-size: 17px; display: flex; gap: 8px; align-items: baseline; }
-.mq-state .t .sy { color: var(--ko); }
-.mq-local { font-size: 13.5px; color: var(--mute); }
-.app-merci { min-height: 0; padding: 24px 16px 16px; gap: 14px; }
-.app-merci .h { margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: 52px; line-height: 1; }
-.app-qr { width: 230px; }
-.app-after { padding: 14px 16px 18px; }
-/* Carte d'accord (85 × 55 mm, ×2 : 1 pt imprimé ≈ 2,67 px ici) */
-.mq-card { width: 100%; max-width: 340px; aspect-ratio: 85 / 55; padding: 14px 16px; background: #fff; color: #1d1c1a; border: 1px solid var(--line2); border-radius: 6px; display: grid; align-content: space-between; gap: 4px; font-family: Jost, sans-serif; }
-.mq-card p { margin: 0; }
-.mq-cards { display: grid; gap: 14px; }
-.mq-card { position: relative; }
-.mq-face { position: absolute; top: -9px; right: 10px; padding: 0 6px; background: #fff; font: 500 11px/18px Jost, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #5c574e; }
-.mq-card .c1 { font-size: 12.8px; line-height: 1.3; }
-.mq-card .c1 span { display: block; margin-top: 2px; }
-.mq-card .c2 { font-size: 11.4px; letter-spacing: .01em; }
-.mq-card .c3 { font-size: 11.4px; font-weight: 500; }
-/* Planches */
-.mq-boards { background: #e4e0d7; }
-.mq-board { background: var(--bg); }
-.mq-board > h3 { color: var(--ink); }
-.mq-grid { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
-@media (min-width: 721px) {
-  .mq-app { max-width: 460px; margin: 0 auto; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
-}
-</style>
+<link rel="stylesheet" href="_commun/tokens.css">
+<link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
+<style>
+/* MQ-10, locaux (app de terrain : app.css de main + jetons Atelier + composants du site public pour la section de la personne).
+   L1 titre de la barre · L2 ligne de session · L3 photo de repère gardée · L4 choix de langue sans drapeau · L5 signature gardée
+   · L6 « Défaire » de la signature · L7 envoi, réseau, session · L8 cadres d'états · L9 carte papier à l'échelle. */
+html { scroll-padding-bottom: 104px; }
+.app-bar h1 { flex: 1; margin: 0; font: 500 16px/1.3 var(--sans); }
+.app-bar .mono { font-size: 13px; }
+.app-session { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 16px; background: var(--frame); color: var(--prose); font-size: 14px; }
+.app-session .ic { color: var(--ok); }
+.app-step h2 { display: flex; align-items: baseline; gap: 10px; }
+.app-step h2 .hint { font-family: var(--sans); font-style: normal; font-size: 14px; }
+.app-pos { display: flex; align-items: center; gap: 6px; color: var(--ink) !important; font-size: 15px; }
+.app-pos .ic { color: var(--mute); }
+.vous-plie > summary { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 4px 14px; padding-bottom: 8px; border-bottom: 1px solid var(--ink); cursor: pointer; list-style: none; }
+.vous-plie > summary::-webkit-details-marker { display: none; }
+.vous-plie > summary h2 { margin: 0; padding: 0; border: 0; font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 28px; }
+.vous-r { display: grid; gap: 2px; min-width: 0; font-size: 14px; color: var(--prose); }
+.vous-r .ok { display: flex; align-items: center; gap: 4px; color: var(--ok); font-weight: 500; }
+.vous-r .mq-a { justify-self: start; }
+.vous-m { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; text-decoration: underline; text-underline-offset: 3px; font-weight: 500; }
+.repere { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper); }
+.repere img { width: 96px; height: 96px; object-fit: cover; border-radius: 8px; display: block; }
+.repere p { margin: 0; font-size: 15px; }
+.repere .ok { display: flex; align-items: center; gap: 6px; color: var(--ok); font-weight: 500; }
+.repere button { justify-self: start; }
+.btn-app { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 0 16px; border: 1.5px solid var(--ink); border-radius: 10px; background: transparent; color: var(--ink); font: 500 15px/1 var(--sans); cursor: pointer; }
+.langues { display: flex; gap: 8px; }
+.langues label { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 48px; border: 1px solid var(--field); border-radius: 10px; font-weight: 500; }
+.langues label:has(input:checked) { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.langues input { position: absolute; opacity: 0; }
+.langues label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 3px; }
+.app-person .resume { margin: 4px 0 0; }
+.app-person .resume-t { font-size: 17px; }
+.app-person .resume a { padding-block: 6px; min-height: 44px; display: flex; align-items: center; }
+.app-person fieldset { display: grid; gap: 2px; }
+.app-person legend { padding: 0; margin-bottom: 4px; font-size: 15px; font-weight: 500; }
+.app-person .sous { margin: 0 0 0 36px; padding: 0 0 0 0; }
+.app-person .sous legend { font-weight: 400; color: var(--prose); font-size: 14px; }
+.app-person .groupe-err { padding-left: 12px; border-left: 3px solid var(--error); }
+.app-person .groupe-err input[type="radio"] { outline: 2px solid var(--error); outline-offset: 1px; border-radius: 50%; }
+.app-person .champ-err { margin: 0 0 4px; font-size: 15px; }
+.app-person label.champ-l { display: grid; gap: 6px; }
+.champ-l > .mq-a { justify-self: start; }
+.app-person label .facultatif { color: var(--mute); font-weight: 400; }
+.app-person .aide-l { margin: -2px 0 0; color: var(--mute); font-size: 14px; }
+.sig { display: grid; gap: 8px; }
+.sig p { margin: 0; font-weight: 500; }
+.sig .zone { position: relative; height: 150px; border: 1.5px solid var(--ink); border-radius: 12px; background: #fbfaf7; overflow: hidden; }
+.sig .zone .sig-svg { position: absolute; inset: 10px 14px; width: calc(100% - 28px); height: calc(100% - 20px); }
+.sig .zone.vide::after { content: ''; position: absolute; left: 24px; right: 24px; bottom: 34px; border-bottom: 1px dashed var(--field); }
+.sig .ligne { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sig .ok { display: flex; align-items: center; gap: 6px; color: var(--ok); font-size: 14px; font-weight: 500; }
+.app-actions { display: grid; gap: 4px; }
+.app-actions .hint { text-align: center; margin: 0; color: var(--prose); }
+.defaire { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 4px 4px 4px 16px; border-radius: 12px; background: var(--ink); color: var(--paper); font-size: 15px; }
+.defaire button { min-height: 44px; padding: 0 16px; border: 0; border-radius: 9px; background: var(--paper); color: var(--ink); font: 500 15px/1 var(--sans); cursor: pointer; }
+.envoi { display: grid; gap: 8px; }
+.envoi .barre { height: 8px; border-radius: 8px; background: var(--frame); overflow: hidden; box-shadow: inset 0 0 0 1px var(--rule); }
+.envoi .barre i { display: block; height: 100%; width: 62%; background: var(--ink); }
+.app-save[aria-disabled="true"] { opacity: 1; background: var(--prose); }
+.msg .btn-app { margin-top: 10px; }
+.msg a.btn-app { justify-self: start; text-decoration: none; line-height: 1.25; padding-block: 8px; text-align: center; }
+.msg-c { display: grid; gap: 4px; }
+.msg-c p { margin: 0; }
+/* Cadres des autres états : un écran de téléphone par cadre. */
+.etats-t { display: grid; grid-template-columns: minmax(0, 1fr); gap: 104px; padding: 120px max(var(--gut), 16px) 0; max-width: 640px; margin: 0 auto; }
+.etats-t > * { min-width: 0; }
+.app-ecran { overflow: hidden; border-radius: 16px; background: var(--paper); box-shadow: 0 0 0 1px var(--rule); }
+.app-ecran .app-bar { position: static; padding-top: 10px; }
+.app-ecran .corps { display: grid; gap: 14px; padding: 18px 16px 22px; }
+.app-ecran .corps.blanc { background: #fff; }
+.app-ecran .corps > * { margin: 0; }
+.app-ecran h2.sec { margin: 0; font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 26px; }
+.app-ecran .app-big strong { font-size: 19px; }
+.app-merci-m { display: grid; justify-items: center; gap: 14px; padding: 28px 20px; text-align: center; }
+.app-merci-m h2 { margin: 0; font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 48px; line-height: 1; }
+.app-merci-m p { margin: 0; max-width: 32ch; font-size: 17px; }
+.qr-cadre { padding: 12px; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px var(--rule); }
+.qr-svg { display: block; width: min(64vw, 240px); height: auto; }
+.qr-txt { display: grid; gap: 4px; justify-items: center; text-align: center; color: var(--prose); font-size: 14px; }
+.qr-txt p { margin: 0; }
+/* Carte papier : 85 × 55 mm, montrée à l'échelle 1,13 (8 pt ≥ 12 px à l'écran). */
+.cartes { --u: min(1.13mm, calc((100vw - 64px) / 85)); display: grid; gap: 20px; justify-items: center; padding: 20px 0; }
+.carte { position: relative; box-sizing: border-box; width: calc(85 * var(--u)); height: calc(55 * var(--u)); padding: calc(3.6 * var(--u)) calc(4 * var(--u)); background: #fff; color: #1d1c1a; box-shadow: 0 1px 3px rgba(0,0,0,.18), 0 0 0 1px #d8d3c9; font-family: var(--sans); overflow: hidden; }
+.carte p { margin: 0; }
+.carte .lab { display: flex; justify-content: space-between; font: 500 calc(2.82 * var(--u))/1.25 var(--mono); letter-spacing: .04em; color: #4f4a43; }
+.carte .acc { margin-top: calc(1.2 * var(--u)); font-size: calc(3.18 * var(--u)); line-height: 1.24; font-weight: 500; }
+.carte .usages { display: grid; grid-template-columns: 1fr 1fr; gap: calc(.6 * var(--u)) calc(3 * var(--u)); margin-top: calc(1.4 * var(--u)); font-size: calc(2.82 * var(--u)); line-height: 1.2; }
+.carte .usages span::before { content: ''; display: inline-block; width: calc(2.6 * var(--u)); height: calc(2.6 * var(--u)); margin-right: calc(1.2 * var(--u)); border: calc(.25 * var(--u)) solid #1d1c1a; vertical-align: calc(-.5 * var(--u)); }
+.carte .lignes { display: grid; grid-template-columns: 1fr 1fr; gap: 0 calc(4 * var(--u)); margin-top: calc(1 * var(--u)); }
+.carte .lignes span { display: flex; align-items: flex-end; height: calc(5.6 * var(--u)); border-bottom: calc(.25 * var(--u)) solid #8a847a; font-size: calc(2.82 * var(--u)); color: #4f4a43; }
+.carte .lignes .l2 { grid-column: 1 / -1; }
+.carte .tr { font-size: calc(3.18 * var(--u)); line-height: 1.24; }
+.carte .tr + .tr { margin-top: calc(1.6 * var(--u)); }
+.carte .tr b { font: 500 calc(2.82 * var(--u)) var(--mono); margin-right: calc(1 * var(--u)); }
+.carte .retrait { position: absolute; left: calc(4 * var(--u)); right: calc(4 * var(--u)); bottom: calc(3.4 * var(--u)); font-size: calc(2.82 * var(--u)); line-height: 1.25; color: #3a3631; }
+.carte .retrait b { font-family: var(--mono); font-weight: 500; }
+.carte.eux h3 { margin: 0; font: 500 calc(5.6 * var(--u))/1 var(--sans); }
+.carte.eux .msg-m { width: calc(46 * var(--u)); margin-top: calc(1.6 * var(--u)); font-size: calc(3 * var(--u)); line-height: 1.25; }
+.carte.eux .tr { width: calc(46 * var(--u)); margin-top: calc(1.2 * var(--u)); font-size: calc(2.82 * var(--u)); color: #3a3631; }
+.carte.eux .qr { position: absolute; right: calc(4 * var(--u)); top: calc(3.6 * var(--u)); width: calc(21 * var(--u)); }
+.carte.eux .qr .qr-svg { width: 100%; }
+.carte.eux .qrt { position: absolute; right: calc(4 * var(--u)); top: calc(26 * var(--u)); width: calc(24 * var(--u)); text-align: right; font-size: calc(2.82 * var(--u)); line-height: 1.2; color: #3a3631; }
+.carte.eux .url { position: absolute; left: calc(4 * var(--u)); bottom: calc(3.4 * var(--u)); font: 500 calc(2.82 * var(--u)) var(--mono); }
+.carte.eux .ref { position: absolute; right: calc(4 * var(--u)); bottom: calc(3.4 * var(--u)); font: 500 calc(3.18 * var(--u)) var(--mono); }
+.app-next > summary { min-height: 44px; display: flex; align-items: center; }
+.face { display: grid; gap: 6px; justify-items: center; }
+.face figcaption { color: var(--prose); font-size: 13px; }
+.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
+.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
+.is-focus { outline: 2px solid var(--ink) !important; outline-offset: 2px; }
+</style>
 </head>
-<body class="admin">
-<div class="mq-app">
-<a class="skip" href="#app-form">Aller au formulaire</a>
-<header class="mq-apphead"><div class="app-bar">
-  <a href="#" aria-label="Retour à l’accueil Terrain">←</a>
-  <h1>Nouvelle rencontre · <span class="mono">J-0009</span><span class="pin" aria-hidden="true">1</span></h1>
-</div>
-<p class="app-session"><span>Connecté jusqu’à 14 h 20</span><span>Julien</span></p></header>
-<main class="mq-app-main">
-<form class="app-form" id="app-form" action="#" method="post" data-lang="en" novalidate aria-describedby="left">
-  <section class="app-step" aria-labelledby="s-vous">
-    <h2 id="s-vous">Vous</h2>
-    <label>Photographe <select><option>Julien</option><option>Sébastien</option></select></label>
-    <p class="app-pos ok" role="status">Position : Graça, Lisbonne (à 12 m près)</p>
-    <div class="mq-kept" role="group" aria-labelledby="kept-t">
-      <img src="_commun/photos/portrait.webp" alt="Photo de repère de la personne" width="96" height="128">
-      <p class="ok" id="kept-t">Photo de repère gardée<span class="pin" aria-hidden="true">4</span></p>
-      <p class="hint">jointe à son accord, en privé ; rien à refaire après une erreur</p>
-      <p><button class="linkbtn" type="button">Reprendre la photo</button></p>
-    </div>
-    <label>Notes <span class="hint">facultatif</span><input value="veste jaune, devant le kiosque"></label>
+<body>
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
+<a class="skip" href="#contenu">Aller au formulaire</a>
+<header class="app-bar">
+  <a href="/admin/rencontre/accueil" aria-label="Retour à l’accueil Terrain">←</a>
+  <h1><span class="mq-a">Nouvelle rencontre<span class="mq-pin d" aria-hidden="true">1</span></span></h1>
+  <span class="mono">J-0001</span>
+</header>
+<main id="contenu" tabindex="-1">
+<p class="app-session"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span class="mq-a">Julien · connecté jusqu’à 3 h 24<span class="mq-pin d" aria-hidden="true">2</span></span></p>
+<form class="app-form" method="post" action="/admin/rencontre" enctype="multipart/form-data" novalidate>
+  <section class="app-step vous-s" aria-labelledby="s-vous">
+    <details class="vous-plie"><summary><h2 id="s-vous">Vous</h2><span class="vous-r"><span class="mq-a">Julien · Rua dos Remédios, Lisbonne<span class="mq-pin d" aria-hidden="true">3</span></span><span class="ok"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>photo de repère gardée</span></span><span class="vous-m">Modifier</span></summary>
+    </details>
   </section>
 
   <section class="app-step app-person" aria-labelledby="s-pers">
     <h2 id="s-pers">La personne <span class="hint">à lui tendre</span></h2>
-    <fieldset class="app-langs"><legend class="sr-only">Langue de la personne</legend>
-      <label lang="fr"><input type="radio" name="lang"> Français</label>
-      <label lang="en"><input type="radio" name="lang" checked> English</label>
-      <label lang="de"><input type="radio" name="lang"> Deutsch</label>
+    <fieldset aria-label="Langue · Language · Sprache">
+      <div class="langues"><label lang="fr"><input type="radio" name="lang" value="fr">Français</label><label lang="en"><input type="radio" name="lang" value="en" checked>English</label><label lang="de"><input type="radio" name="lang" value="de">Deutsch</label></div>
     </fieldset>
-    <div lang="en" class="mq-en" style="display:grid;gap:14px">
-      <div class="app-l10n"><h3>Your consent<span class="pin" aria-hidden="true">2</span></h3>
-        <p class="app-consent">I agree to the artistic use and publication of the photos Julien took of me today. A photo of me may be attached to this consent. I can change my mind at any time.</p></div>
-      <fieldset class="app-decision"><legend>Your decision</legend>
-        <label class="check big"><input type="radio" name="decision" checked> I agree</label>
-        <fieldset class="app-scopes"><legend>I agree, for:</legend>
-          <label class="check"><input type="checkbox" name="scope_site" checked> on the website</label><label class="check"><input type="checkbox" name="scope_instagram" checked> on Instagram (with the website)</label><label class="check"><input type="checkbox" name="scope_print"> in exhibitions and prints</label><label class="check"><input type="checkbox" name="scope_name" checked> with my first name</label>
+    <div lang="en" style="display:grid;gap:14px">
+      <div class="resume" tabindex="-1" aria-labelledby="res-en"><p class="resume-t" id="res-en"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span class="mq-a">1 point to fix<span class="mq-pin d" aria-hidden="true">4</span></span></p><ul><li><a href="#age-en">Age: tell us whether you are 18 or older.</a></li></ul></div>
+      <h3><span class="mq-a">Your consent<span class="mq-pin d" aria-hidden="true">5</span></span></h3>
+      <p class="app-consent">I agree to the artistic use and publication of the photos Julien took of me today. A photo of me may be attached to this consent. I can change my mind at any time.</p>
+      <fieldset><legend><span class="mq-a">Your decision<span class="mq-pin d" aria-hidden="true">6</span></span></legend>
+        <label class="check big"><input type="radio" name="decision" value="accord" checked> I agree</label>
+        <fieldset class="sous"><legend>I agree, for:</legend>
+          <label class="check"><input type="checkbox" checked> on the website</label>
+          <label class="check"><input type="checkbox" checked> on Instagram (with the website)</label>
+          <label class="check"><input type="checkbox" checked> in exhibitions and prints</label>
+          <label class="check"><input type="checkbox" checked> with my first name</label>
         </fieldset>
-        <label class="check big"><input type="radio" name="decision"> I do not want these photos to be published</label>
-        <label class="check big"><input type="radio" name="decision"> I won’t decide now</label>
+        <label class="check big"><input type="radio" name="decision" value="refus"> I do not want these photos to be published</label>
+        <label class="check big"><input type="radio" name="decision" value=""> I won’t decide now</label>
       </fieldset>
-      <label>First and last name <input value="Maria Santos" autocomplete="name"></label>
-      <label>Email (optional) <input type="email" value="maria.santos@example.pt" autocomplete="email" inputmode="email"></label>
-      <label class="check"><input type="checkbox" checked> Receive the photo by email</label>
-      <fieldset class="mq-err-field" aria-describedby="age-err"><legend id="age-l">Age</legend>
-        <p class="mq-err" id="age-err"><span aria-hidden="true">⚠</span><span>Please tell us whether you are 18 or older.</span><span class="pin" aria-hidden="true">3</span></p>
-        <label class="check"><input type="radio" name="adult" class="mq-focus-r" aria-invalid="true" aria-describedby="age-err"> I am 18 or older</label>
-        <label class="check"><input type="radio" name="adult" aria-invalid="true" aria-describedby="age-err"> I am under 18: a parent signs with me</label>
+      <label class="champ-l">First and last name<input name="name" value="Inês Exemplo" autocomplete="off"></label>
+      <label class="champ-l"><span>Email <span class="facultatif">(optional)</span></span><input type="email" name="email" value="ines.exemplo@example.org" autocomplete="off" inputmode="email"></label>
+      <label class="check"><input type="checkbox" name="wants_photo" checked> Receive the photo by email</label>
+      <fieldset class="groupe-err" id="age-en" aria-describedby="age-en-e"><legend><span class="mq-a">Age<span class="mq-pin d" aria-hidden="true">7</span></span></legend>
+        <p class="champ-err" id="age-en-e"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Error:</b> tell us whether you are 18 or older.</span></p>
+        <label class="check"><input type="radio" name="adult" value="oui" aria-invalid="true" class="is-focus"> I am 18 or older</label>
+        <label class="check"><input type="radio" name="adult" value="non" aria-invalid="true"> I am under 18: a parent signs with me</label>
       </fieldset>
-      <label>Parent’s name <span class="hint">only if you are under 18</span><input autocomplete="off"></label>
+      <label class="champ-l"><span><span class="mq-a">Parent’s name<span class="mq-pin d" aria-hidden="true">8</span></span> <span class="facultatif">(only if you are under 18)</span></span><input name="guardian" autocomplete="off"></label>
       <p class="hint app-privacy">Your data (name, email, signature, photo of you, place) is only used to manage your consent and send you your photo. Retention and rights: nicephos.art/en/confidentialite.</p>
-      <div class="app-sign" role="group" aria-labelledby="sg-t">
-        <p id="sg-t">Sign here with your finger</p>
-        <span class="pad" role="img" aria-label="Signature kept"><svg viewBox="0 0 300 120" aria-hidden="true" focusable="false"><path d="M14 86c18-40 30-62 40-58 9 4-14 60-6 62 10 2 22-44 34-42 9 2-4 34 4 36 9 2 16-26 26-24 8 2 2 18 10 20 12 3 20-30 34-28 10 1 6 22 16 22 14 0 22-24 34-20 8 3 4 14 12 16 18 4 40-8 60-14" fill="none" stroke="#1d1c1a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M60 100c50-6 120-8 200-6" fill="none" stroke="#1d1c1a" stroke-width="2" stroke-linecap="round" opacity=".6"/></svg></span>
-        <div class="row"><p class="sign-ok">Signature kept<span class="pin" aria-hidden="true">5</span></p><button type="button" class="linkbtn">Clear</button></div>
-      </div>
+      <div class="sig"><p id="sig-l"><span class="mq-a">Sign here with your finger<span class="mq-pin d" aria-hidden="true">9</span></span></p><div class="zone" role="img" aria-labelledby="sig-l sig-ok"><svg class="sig-svg" viewBox="0 0 320 120" aria-hidden="true" focusable="false"><path d="M18 82c14-30 26-52 34-50 9 2-6 44 2 46 9 2 18-34 27-33 8 1 2 27 11 28 10 1 14-20 23-20 7 0 3 15 11 16 12 1 20-25 33-25 10 0 8 14 18 14 14 0 25-18 40-18 11 0 9 12 20 12 16 0 30-10 52-14" fill="none" stroke="#1d1c1a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M60 98c60-6 120-8 210-6" fill="none" stroke="#1d1c1a" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="ligne"><span class="ok" id="sig-ok"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Signature kept</span><button class="btn-app" type="button">Clear</button></div></div>
     </div>
   </section>
-  <div class="app-actions">
-    <p class="left" id="left" role="alert" lang="en">1 thing to fix: please tell us whether you are 18 or older.</p>
-    <button class="app-save" type="submit">Enregistrer</button><span class="pin" aria-hidden="true">6</span>
-  </div>
+  <div class="app-actions" lang="en"><button class="app-save" type="submit">Save</button><p class="hint"><span class="mq-a">Kept on this phone until it is sent.<span class="mq-pin d" aria-hidden="true">10</span></span></p></div>
 </form>
-</main></div>
-<section class="mq-boards" aria-labelledby="mq-boards-t">
-  <h2 id="mq-boards-t">États d’envoi</h2>
-  <p class="mq-lead">L’accord est gardé sur le téléphone (brouillon local) dès « Enregistrer », et effacé seulement quand le serveur a répondu « reçu ».</p>
-  <div class="mq-grid">
-    <article class="mq-board" aria-labelledby="b1"><h3 id="b1">Envoi visible <span class="pin" aria-hidden="true">7</span></h3><p class="mq-cap">Une progression, une photo réduite avant l’envoi.</p><div class="mq-phone" role="group" aria-label="Écran du téléphone : envoi en cours">
-  <div class="body" lang="en">
-    <div class="mq-send" role="status"><p class="t">Sending… 62%</p><div class="mq-bar" aria-hidden="true"><span></span></div>
-      <p class="mq-local">Photo reduced to 1,600 px (310 KB) on this phone before sending.</p></div>
-  </div></div></article>
-    <article class="mq-board" aria-labelledby="b2"><h3 id="b2">Réseau coupé <span class="pin" aria-hidden="true">8</span></h3><p class="mq-cap">Dans la langue de la personne, qui tient le téléphone.</p><div class="mq-phone" role="group" aria-label="Écran du téléphone : pas de réseau">
-  <div class="body" lang="en">
-    <div class="mq-state ko" role="alert"><p class="t"><span class="sy" aria-hidden="true">⚠</span>No network: the consent is kept on this phone.</p>
-      <p class="mq-local">Nothing is lost: signature, photo and answers stay here until the server confirms.</p>
-      <button class="app-btn" type="button">Try again</button></div>
-  </div></div></article>
-    <article class="mq-board" aria-labelledby="b3"><h3 id="b3">Session expirée <span class="pin" aria-hidden="true">9</span></h3><p class="mq-cap">Pour le photographe, en français.</p><div class="mq-phone" role="group" aria-label="Écran du téléphone : session expirée">
-  <div class="body">
-    <div class="mq-state ko" role="alert"><p class="t"><span class="sy" aria-hidden="true">⚠</span>Votre session a expiré.</p>
-      <p>L’accord est gardé sur ce téléphone. Reconnectez-vous, puis revenez à cet onglet : « Enregistrer » renverra l’accord tel quel.</p>
-      <a class="app-btn" href="#" target="_blank" rel="noopener">Se reconnecter dans un nouvel onglet<span class="sr-only"> (nouvel onglet)</span></a></div>
-    <p class="mq-local">Plus de message technique (« Jeton CSRF invalide », texte JSON) : une page lisible qui garde la saisie.</p>
-  </div></div></article>
-    <article class="mq-board" aria-labelledby="b4"><h3 id="b4">« Thank you! » et le QR <span class="pin" aria-hidden="true">10</span></h3><p class="mq-cap">La personne repart avec sa page ; le photographe voit ce qui est parti.</p><div class="mq-phone" role="group" aria-label="Écran du téléphone : merci et QR de la personne">
-  <div class="app-merci" lang="en">
-    <p class="h">Thank you!</p>
-    <div class="app-qr"><svg viewBox="-2 -2 29 29" role="img" aria-label="Code QR de la page de Maria (factice, pour la maquette)" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><rect x="-2" y="-2" width="29" height="29" fill="#fff"/><g fill="#1d1c1a"><rect x="0" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="1" y="0" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="0" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/><rect x="18" y="0" width="1" height="1"/><rect x="18" y="1" width="1" height="1"/><rect x="18" y="2" width="1" height="1"/><rect x="18" y="3" width="1" height="1"/><rect x="18" y="4" width="1" height="1"/><rect x="18" y="5" width="1" height="1"/><rect x="18" y="6" width="1" height="1"/><rect x="19" y="0" width="1" height="1"/><rect x="19" y="6" width="1" height="1"/><rect x="20" y="0" width="1" height="1"/><rect x="20" y="2" width="1" height="1"/><rect x="20" y="3" width="1" height="1"/><rect x="20" y="4" width="1" height="1"/><rect x="20" y="6" width="1" height="1"/><rect x="21" y="0" width="1" height="1"/><rect x="21" y="2" width="1" height="1"/><rect x="21" y="3" width="1" height="1"/><rect x="21" y="4" width="1" height="1"/><rect x="21" y="6" width="1" height="1"/><rect x="22" y="0" width="1" height="1"/><rect x="22" y="2" width="1" height="1"/><rect x="22" y="3" width="1" height="1"/><rect x="22" y="4" width="1" height="1"/><rect x="22" y="6" width="1" height="1"/><rect x="23" y="0" width="1" height="1"/><rect x="23" y="6" width="1" height="1"/><rect x="24" y="0" width="1" height="1"/><rect x="24" y="1" width="1" height="1"/><rect x="24" y="2" width="1" height="1"/><rect x="24" y="3" width="1" height="1"/><rect x="24" y="4" width="1" height="1"/><rect x="24" y="5" width="1" height="1"/><rect x="24" y="6" width="1" height="1"/><rect x="0" y="18" width="1" height="1"/><rect x="0" y="19" width="1" height="1"/><rect x="0" y="20" width="1" height="1"/><rect x="0" y="21" width="1" height="1"/><rect x="0" y="22" width="1" height="1"/><rect x="0" y="23" width="1" height="1"/><rect x="0" y="24" width="1" height="1"/><rect x="1" y="18" width="1" height="1"/><rect x="1" y="24" width="1" height="1"/><rect x="2" y="18" width="1" height="1"/><rect x="2" y="20" width="1" height="1"/><rect x="2" y="21" width="1" height="1"/><rect x="2" y="22" width="1" height="1"/><rect x="2" y="24" width="1" height="1"/><rect x="3" y="18" width="1" height="1"/><rect x="3" y="20" width="1" height="1"/><rect x="3" y="21" width="1" height="1"/><rect x="3" y="22" width="1" height="1"/><rect x="3" y="24" width="1" height="1"/><rect x="4" y="18" width="1" height="1"/><rect x="4" y="20" width="1" height="1"/><rect x="4" y="21" width="1" height="1"/><rect x="4" y="22" width="1" height="1"/><rect x="4" y="24" width="1" height="1"/><rect x="5" y="18" width="1" height="1"/><rect x="5" y="24" width="1" height="1"/><rect x="6" y="18" width="1" height="1"/><rect x="6" y="19" width="1" height="1"/><rect x="6" y="20" width="1" height="1"/><rect x="6" y="21" width="1" height="1"/><rect x="6" y="22" width="1" height="1"/><rect x="6" y="23" width="1" height="1"/><rect x="6" y="24" width="1" height="1"/><rect x="0" y="8" width="1" height="1"/><rect x="0" y="9" width="1" height="1"/><rect x="0" y="10" width="1" height="1"/><rect x="0" y="12" width="1" height="1"/><rect x="0" y="15" width="1" height="1"/><rect x="1" y="9" width="1" height="1"/><rect x="1" y="10" width="1" height="1"/><rect x="1" y="12" width="1" height="1"/><rect x="1" y="14" width="1" height="1"/><rect x="1" y="15" width="1" height="1"/><rect x="1" y="16" width="1" height="1"/><rect x="2" y="12" width="1" height="1"/><rect x="2" y="14" width="1" height="1"/><rect x="2" y="15" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="3" y="11" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="3" y="13" width="1" height="1"/><rect x="3" y="15" width="1" height="1"/><rect x="4" y="9" width="1" height="1"/><rect x="4" y="10" width="1" height="1"/><rect x="4" y="12" width="1" height="1"/><rect x="4" y="13" width="1" height="1"/><rect x="4" y="15" width="1" height="1"/><rect x="5" y="8" width="1" height="1"/><rect x="5" y="11" width="1" height="1"/><rect x="5" y="12" width="1" height="1"/><rect x="5" y="13" width="1" height="1"/><rect x="5" y="15" width="1" height="1"/><rect x="5" y="16" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="6" y="11" width="1" height="1"/><rect x="6" y="13" width="1" height="1"/><rect x="6" y="15" width="1" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="7" y="12" width="1" height="1"/><rect x="7" y="13" width="1" height="1"/><rect x="7" y="16" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="8" y="9" width="1" height="1"/><rect x="8" y="10" width="1" height="1"/><rect x="8" y="13" width="1" height="1"/><rect x="8" y="14" width="1" height="1"/><rect x="8" y="17" width="1" height="1"/><rect x="8" y="19" width="1" height="1"/><rect x="8" y="20" width="1" height="1"/><rect x="8" y="21" width="1" height="1"/><rect x="8" y="22" width="1" height="1"/><rect x="8" y="23" width="1" height="1"/><rect x="8" y="24" width="1" height="1"/><rect x="9" y="1" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="9" y="8" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="9" y="11" width="1" height="1"/><rect x="9" y="13" width="1" height="1"/><rect x="9" y="14" width="1" height="1"/><rect x="9" y="16" width="1" height="1"/><rect x="9" y="18" width="1" height="1"/><rect x="9" y="20" width="1" height="1"/><rect x="9" y="21" width="1" height="1"/><rect x="9" y="23" width="1" height="1"/><rect x="10" y="2" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="10" y="4" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="10" y="11" width="1" height="1"/><rect x="10" y="12" width="1" height="1"/><rect x="10" y="15" width="1" height="1"/><rect x="10" y="16" width="1" height="1"/><rect x="10" y="19" width="1" height="1"/><rect x="10" y="21" width="1" height="1"/><rect x="11" y="1" width="1" height="1"/><rect x="11" y="2" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="11" y="10" width="1" height="1"/><rect x="11" y="11" width="1" height="1"/><rect x="11" y="13" width="1" height="1"/><rect x="11" y="14" width="1" height="1"/><rect x="11" y="19" width="1" height="1"/><rect x="12" y="1" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="12" y="7" width="1" height="1"/><rect x="12" y="9" width="1" height="1"/><rect x="12" y="12" width="1" height="1"/><rect x="12" y="14" width="1" height="1"/><rect x="12" y="16" width="1" height="1"/><rect x="12" y="21" width="1" height="1"/><rect x="13" y="0" width="1" height="1"/><rect x="13" y="1" width="1" height="1"/><rect x="13" y="2" width="1" height="1"/><rect x="13" y="4" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/><rect x="13" y="6" width="1" height="1"/><rect x="13" y="7" width="1" height="1"/><rect x="13" y="9" width="1" height="1"/><rect x="13" y="11" width="1" height="1"/><rect x="13" y="13" width="1" height="1"/><rect x="13" y="19" width="1" height="1"/><rect x="13" y="20" width="1" height="1"/><rect x="13" y="21" width="1" height="1"/><rect x="13" y="23" width="1" height="1"/><rect x="13" y="24" width="1" height="1"/><rect x="14" y="0" width="1" height="1"/><rect x="14" y="1" width="1" height="1"/><rect x="14" y="4" width="1" height="1"/><rect x="14" y="6" width="1" height="1"/><rect x="14" y="8" width="1" height="1"/><rect x="14" y="10" width="1" height="1"/><rect x="14" y="11" width="1" height="1"/><rect x="14" y="13" width="1" height="1"/><rect x="14" y="14" width="1" height="1"/><rect x="14" y="16" width="1" height="1"/><rect x="14" y="17" width="1" height="1"/><rect x="14" y="19" width="1" height="1"/><rect x="14" y="20" width="1" height="1"/><rect x="14" y="23" width="1" height="1"/><rect x="14" y="24" width="1" height="1"/><rect x="15" y="0" width="1" height="1"/><rect x="15" y="1" width="1" height="1"/><rect x="15" y="10" width="1" height="1"/><rect x="15" y="11" width="1" height="1"/><rect x="15" y="12" width="1" height="1"/><rect x="15" y="15" width="1" height="1"/><rect x="15" y="17" width="1" height="1"/><rect x="15" y="18" width="1" height="1"/><rect x="15" y="19" width="1" height="1"/><rect x="15" y="20" width="1" height="1"/><rect x="15" y="23" width="1" height="1"/><rect x="15" y="24" width="1" height="1"/><rect x="16" y="0" width="1" height="1"/><rect x="16" y="1" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="16" y="4" width="1" height="1"/><rect x="16" y="7" width="1" height="1"/><rect x="16" y="9" width="1" height="1"/><rect x="16" y="10" width="1" height="1"/><rect x="16" y="15" width="1" height="1"/><rect x="16" y="17" width="1" height="1"/><rect x="16" y="18" width="1" height="1"/><rect x="16" y="20" width="1" height="1"/><rect x="16" y="22" width="1" height="1"/><rect x="17" y="8" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="17" y="12" width="1" height="1"/><rect x="17" y="13" width="1" height="1"/><rect x="17" y="15" width="1" height="1"/><rect x="17" y="16" width="1" height="1"/><rect x="17" y="17" width="1" height="1"/><rect x="17" y="18" width="1" height="1"/><rect x="17" y="22" width="1" height="1"/><rect x="18" y="8" width="1" height="1"/><rect x="18" y="10" width="1" height="1"/><rect x="18" y="11" width="1" height="1"/><rect x="18" y="12" width="1" height="1"/><rect x="18" y="13" width="1" height="1"/><rect x="18" y="14" width="1" height="1"/><rect x="18" y="18" width="1" height="1"/><rect x="18" y="20" width="1" height="1"/><rect x="18" y="21" width="1" height="1"/><rect x="19" y="9" width="1" height="1"/><rect x="19" y="10" width="1" height="1"/><rect x="19" y="11" width="1" height="1"/><rect x="19" y="13" width="1" height="1"/><rect x="19" y="14" width="1" height="1"/><rect x="19" y="16" width="1" height="1"/><rect x="19" y="20" width="1" height="1"/><rect x="19" y="21" width="1" height="1"/><rect x="19" y="24" width="1" height="1"/><rect x="20" y="8" width="1" height="1"/><rect x="20" y="9" width="1" height="1"/><rect x="20" y="12" width="1" height="1"/><rect x="20" y="13" width="1" height="1"/><rect x="20" y="15" width="1" height="1"/><rect x="20" y="21" width="1" height="1"/><rect x="20" y="23" width="1" height="1"/><rect x="20" y="24" width="1" height="1"/><rect x="21" y="13" width="1" height="1"/><rect x="21" y="14" width="1" height="1"/><rect x="21" y="18" width="1" height="1"/><rect x="21" y="24" width="1" height="1"/><rect x="22" y="8" width="1" height="1"/><rect x="22" y="11" width="1" height="1"/><rect x="22" y="13" width="1" height="1"/><rect x="22" y="14" width="1" height="1"/><rect x="22" y="15" width="1" height="1"/><rect x="22" y="16" width="1" height="1"/><rect x="22" y="17" width="1" height="1"/><rect x="22" y="19" width="1" height="1"/><rect x="22" y="21" width="1" height="1"/><rect x="22" y="22" width="1" height="1"/><rect x="22" y="23" width="1" height="1"/><rect x="23" y="8" width="1" height="1"/><rect x="23" y="15" width="1" height="1"/><rect x="23" y="16" width="1" height="1"/><rect x="23" y="18" width="1" height="1"/><rect x="23" y="19" width="1" height="1"/><rect x="23" y="21" width="1" height="1"/><rect x="23" y="24" width="1" height="1"/><rect x="24" y="10" width="1" height="1"/><rect x="24" y="13" width="1" height="1"/><rect x="24" y="14" width="1" height="1"/><rect x="24" y="15" width="1" height="1"/><rect x="24" y="16" width="1" height="1"/><rect x="24" y="18" width="1" height="1"/><rect x="24" y="20" width="1" height="1"/><rect x="24" y="21" width="1" height="1"/><rect x="24" y="22" width="1" height="1"/><rect x="24" y="23" width="1" height="1"/><rect x="24" y="24" width="1" height="1"/></g></svg></div>
-    <p class="app-scan">Scan this code with your phone: you will find your page to receive your photo, change your mind or write to us.</p>
-    <p class="mono app-ref">J-0009</p>
+</main>
+<div class="etats-t" role="region" aria-label="Autres états de l’écran">
+<div class="mq-ecran"><p class="mq-etat">État · Vous, avant de tendre le téléphone</p><span class="mq-pin" aria-hidden="true">11</span>
+  <div class="app-ecran"><div class="corps" style="gap:14px">
+    <h2 class="sec">Vous</h2>
+    <label>Photographe <select name="author_id"><option selected>Julien</option><option>Sébastien</option></select></label>
+    <p class="app-pos" role="status"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Position : Rua dos Remédios, Lisbonne</p>
+    <label>Lieu <span class="hint">facultatif : la ville est déduite de la position</span><input name="place" value="Alfama, devant la fleuriste"></label>
+    <div class="repere"><img src="_commun/photos/160/ines.webp" alt="Photo de repère d’Inês" width="96" height="96"><div style="display:grid;gap:8px"><p class="ok"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="mq-a">Photo de repère gardée</span></p><p class="hint" style="margin:0">Gardée en privé avec l’accord, réduite à 1 600 px.</p><button class="btn-app" type="button">Reprendre la photo</button></div></div>
+    <label>Notes <span class="hint">facultatif</span><input name="details" value="fleurs blanches, tablier vert"></label>
+    <button class="app-save" type="button">Tendre le téléphone à la personne</button>
+  </div></div></div>
+<div class="mq-ecran"><p class="mq-etat">État · Accueil Terrain, de retour à 19 h 26</p><span class="mq-pin" aria-hidden="true">12</span>
+  <div class="app-ecran">
+    <div class="app-bar"><span class="app-face" aria-hidden="true">J</span><h2 style="flex:1;margin:0;font:500 16px/1.3 var(--sans)">Terrain</h2><a class="app-bar-link" href="/admin">Admin complet</a></div>
+    <p class="app-session"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Julien · connecté jusqu’à 3 h 24</p>
+    <div class="corps mq-a">
+      <a class="app-big primary" href="/admin/rencontre"><strong>＋ Nouvelle rencontre</strong><span>prochaine carte : <span class="mono">J-0002</span></span></a>
+      <a class="app-big" href="/admin/rencontre/qr"><strong>Montrer mon QR</strong><span>la personne le scanne sur votre écran, sans carte</span></a>
+      <h3 class="sec" style="margin:4px 0 0;font-family:var(--serif);font-style:italic;font-weight:500;font-size:26px">Ma sortie du jour <span class="hint" style="font-family:var(--sans);font-style:normal">· Lisbonne</span></h3>
+      <p class="hint">1 personne rencontrée · 4 photos importées · aucun accord en attente d’envoi</p>
+      <ul class="app-people"><li><img src="_commun/photos/160/ines.webp" alt="" width="40" height="40"><span class="who">Inês Exemplo<small class="mono">J-0001 · 19 h 20</small></span><span class="app-tag ok">✓ site, Instagram, tirages, prénom</span></li></ul>
+    </div>
+  </div></div>
+<div class="mq-ecran" lang="en"><p class="mq-etat" lang="fr">État · Envoi en cours</p><span class="mq-pin" aria-hidden="true">13</span>
+  <div class="app-ecran"><div class="corps">
+    <div class="envoi mq-a" role="status"><p><b>Sending your consent…</b> 62 %</p><div class="barre"><i></i></div><p class="hint">The photo has been reduced to 310 KB. Your consent stays on this phone until the server confirms it.</p></div>
+    <button class="app-save" type="button" aria-disabled="true">Sending…</button>
+  </div></div></div>
+<div class="mq-ecran" lang="en"><p class="mq-etat" lang="fr">État · Réseau coupé</p><span class="mq-pin" aria-hidden="true">14</span>
+  <div class="app-ecran"><div class="corps">
+    <div class="msg msg--erreur mq-a" role="alert"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><div class="msg-c"><p><b>No network.</b> Your consent is kept on this phone since 19 h 24 and will be sent as soon as the network is back.</p><button class="btn-app" type="button">Try again</button></div></div>
+    <p class="hint" lang="fr">Photographe : l’accord gardé apparaît aussi sur l’accueil Terrain, « 1 accord en attente d’envoi ».</p>
+  </div></div></div>
+<div class="mq-ecran"><p class="mq-etat">État · Session expirée</p><span class="mq-pin" aria-hidden="true">15</span>
+  <div class="app-ecran"><div class="corps">
+    <div class="msg msg--erreur mq-a" role="alert"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><div class="msg-c"><p><b>Votre session a expiré</b> (8 h sans activité). L’accord d’Inês est gardé sur ce téléphone : rien n’est perdu.</p><a class="btn-app" href="/admin/connexion" target="_blank" rel="noopener">Se reconnecter dans un nouvel onglet</a></div></div>
+    <p class="hint">Une fois reconnecté, revenez ici : « Envoyer l’accord gardé » apparaît à la place de « Save ».</p>
+  </div></div></div>
+<div class="mq-ecran" lang="en"><p class="mq-etat" lang="fr">État · Signature effacée : Undo</p><span class="mq-pin" aria-hidden="true">16</span>
+  <div class="app-ecran"><div class="corps blanc">
+    <div class="sig mq-a"><p id="sig2-l">Sign here with your finger</p><div class="zone vide" role="img" aria-label="Signature area, empty"></div></div>
+    <div class="defaire" role="status"><span>Signature cleared.</span><button type="button" class="is-focus">Undo</button></div>
+  </div></div></div>
+<div class="mq-ecran" lang="de"><p class="mq-etat" lang="fr">État · En allemand : nom du parent manquant</p><span class="mq-pin" aria-hidden="true">17</span>
+  <div class="app-ecran"><div class="corps blanc app-person" style="margin:0;border:0">
+    <div class="langues"><label lang="fr"><input type="radio" name="lang2" value="fr">Français</label><label lang="en"><input type="radio" name="lang2" value="en">English</label><label lang="de"><input type="radio" name="lang2" value="de" checked>Deutsch</label></div>
+    <div class="resume mq-a" tabindex="-1" aria-labelledby="res-de"><p class="resume-t" id="res-de"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg>1 Punkt zu korrigieren</p><ul><li><a href="#gu-de">Name des Elternteils: Bitte angeben, wer mit unterschreibt.</a></li></ul></div>
+    <h3>Ihre Einwilligung</h3>
+    <p class="app-consent">Ich willige in die künstlerische Nutzung und Veröffentlichung der Fotos ein, die Julien heute von mir gemacht hat. Ein Foto von mir kann dieser Einwilligung beigefügt werden. Ich kann meine Meinung jederzeit ändern.</p>
+    <fieldset><legend>Alter</legend>
+      <label class="check"><input type="radio" name="adult2"> Ich bin 18 Jahre oder älter</label>
+      <label class="check"><input type="radio" name="adult2" checked> Ich bin unter 18: Ein Elternteil unterschreibt mit mir</label>
+    </fieldset>
+    <div class="groupe-err" style="display:grid;gap:6px"><label class="champ-l" for="gu-de">Name des Elternteils</label><p class="champ-err" id="gu-de-e"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Fehler:</b> Bitte geben Sie den Namen des Elternteils an, der mit unterschreibt.</span></p><input id="gu-de" name="guardian2" aria-invalid="true" aria-describedby="gu-de-e" autocomplete="off"></div>
+    <button class="app-save" type="submit">Speichern</button>
+  </div></div></div>
+<div class="mq-ecran" lang="en"><p class="mq-etat" lang="fr">État · « Thank you! » et le QR d’Inês</p><span class="mq-pin" aria-hidden="true">18</span>
+  <div class="app-ecran"><div class="app-merci-m">
+    <h2 class="mq-a">Thank you!</h2>
+    <div class="qr-cadre"><svg class="qr-svg" width="240" height="240" viewBox="-2 -2 29 29" role="img" aria-label="QR code of your page, reference J-0001"><rect x="-2" y="-2" width="29" height="29" fill="#fff"/><path d="M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM9 0h1v1h-1zM12 0h1v1h-1zM18 0h1v1h-1zM19 0h1v1h-1zM20 0h1v1h-1zM21 0h1v1h-1zM22 0h1v1h-1zM23 0h1v1h-1zM24 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM9 1h1v1h-1zM10 1h1v1h-1zM14 1h1v1h-1zM18 1h1v1h-1zM24 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM10 2h1v1h-1zM11 2h1v1h-1zM16 2h1v1h-1zM18 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM24 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM8 3h1v1h-1zM9 3h1v1h-1zM15 3h1v1h-1zM18 3h1v1h-1zM20 3h1v1h-1zM21 3h1v1h-1zM22 3h1v1h-1zM24 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM9 4h1v1h-1zM10 4h1v1h-1zM11 4h1v1h-1zM12 4h1v1h-1zM13 4h1v1h-1zM18 4h1v1h-1zM20 4h1v1h-1zM21 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM12 5h1v1h-1zM13 5h1v1h-1zM15 5h1v1h-1zM18 5h1v1h-1zM24 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM19 6h1v1h-1zM20 6h1v1h-1zM21 6h1v1h-1zM22 6h1v1h-1zM23 6h1v1h-1zM24 6h1v1h-1zM8 7h1v1h-1zM9 7h1v1h-1zM10 7h1v1h-1zM13 7h1v1h-1zM0 8h1v1h-1zM4 8h1v1h-1zM6 8h1v1h-1zM13 8h1v1h-1zM20 8h1v1h-1zM21 8h1v1h-1zM22 8h1v1h-1zM0 9h1v1h-1zM1 9h1v1h-1zM4 9h1v1h-1zM5 9h1v1h-1zM11 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM14 9h1v1h-1zM15 9h1v1h-1zM18 9h1v1h-1zM20 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM24 9h1v1h-1zM0 10h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM10 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM17 10h1v1h-1zM1 11h1v1h-1zM2 11h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM9 11h1v1h-1zM10 11h1v1h-1zM17 11h1v1h-1zM18 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM22 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM0 12h1v1h-1zM4 12h1v1h-1zM5 12h1v1h-1zM6 12h1v1h-1zM8 12h1v1h-1zM9 12h1v1h-1zM10 12h1v1h-1zM11 12h1v1h-1zM15 12h1v1h-1zM16 12h1v1h-1zM18 12h1v1h-1zM22 12h1v1h-1zM23 12h1v1h-1zM2 13h1v1h-1zM3 13h1v1h-1zM7 13h1v1h-1zM10 13h1v1h-1zM12 13h1v1h-1zM13 13h1v1h-1zM14 13h1v1h-1zM15 13h1v1h-1zM16 13h1v1h-1zM17 13h1v1h-1zM18 13h1v1h-1zM19 13h1v1h-1zM20 13h1v1h-1zM21 13h1v1h-1zM0 14h1v1h-1zM1 14h1v1h-1zM2 14h1v1h-1zM3 14h1v1h-1zM5 14h1v1h-1zM6 14h1v1h-1zM7 14h1v1h-1zM8 14h1v1h-1zM10 14h1v1h-1zM13 14h1v1h-1zM17 14h1v1h-1zM18 14h1v1h-1zM20 14h1v1h-1zM21 14h1v1h-1zM22 14h1v1h-1zM2 15h1v1h-1zM8 15h1v1h-1zM9 15h1v1h-1zM10 15h1v1h-1zM12 15h1v1h-1zM16 15h1v1h-1zM21 15h1v1h-1zM22 15h1v1h-1zM23 15h1v1h-1zM0 16h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM7 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM16 16h1v1h-1zM20 16h1v1h-1zM24 16h1v1h-1zM9 17h1v1h-1zM10 17h1v1h-1zM11 17h1v1h-1zM12 17h1v1h-1zM13 17h1v1h-1zM15 17h1v1h-1zM18 17h1v1h-1zM19 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM0 18h1v1h-1zM1 18h1v1h-1zM2 18h1v1h-1zM3 18h1v1h-1zM4 18h1v1h-1zM5 18h1v1h-1zM6 18h1v1h-1zM8 18h1v1h-1zM13 18h1v1h-1zM14 18h1v1h-1zM15 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM19 18h1v1h-1zM20 18h1v1h-1zM0 19h1v1h-1zM6 19h1v1h-1zM10 19h1v1h-1zM13 19h1v1h-1zM15 19h1v1h-1zM16 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM23 19h1v1h-1zM24 19h1v1h-1zM0 20h1v1h-1zM2 20h1v1h-1zM3 20h1v1h-1zM4 20h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM10 20h1v1h-1zM13 20h1v1h-1zM14 20h1v1h-1zM15 20h1v1h-1zM16 20h1v1h-1zM21 20h1v1h-1zM24 20h1v1h-1zM0 21h1v1h-1zM2 21h1v1h-1zM3 21h1v1h-1zM4 21h1v1h-1zM6 21h1v1h-1zM12 21h1v1h-1zM13 21h1v1h-1zM18 21h1v1h-1zM19 21h1v1h-1zM20 21h1v1h-1zM22 21h1v1h-1zM0 22h1v1h-1zM2 22h1v1h-1zM3 22h1v1h-1zM4 22h1v1h-1zM6 22h1v1h-1zM12 22h1v1h-1zM13 22h1v1h-1zM14 22h1v1h-1zM17 22h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM22 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM9 23h1v1h-1zM10 23h1v1h-1zM11 23h1v1h-1zM13 23h1v1h-1zM19 23h1v1h-1zM20 23h1v1h-1zM22 23h1v1h-1zM23 23h1v1h-1zM24 23h1v1h-1zM0 24h1v1h-1zM1 24h1v1h-1zM2 24h1v1h-1zM3 24h1v1h-1zM4 24h1v1h-1zM5 24h1v1h-1zM6 24h1v1h-1zM8 24h1v1h-1zM23 24h1v1h-1z" fill="#1d1c1a"/></svg></div>
+    <p>Scan this code with your phone: you will find your page to receive your photo, change your mind or write to us.</p>
+    <p class="mono" style="color:var(--mute)">J-0001</p>
   </div>
-  <div class="app-after">
-    <h4 style="margin:0;font-size:15px;font-weight:500;color:var(--mute);text-transform:uppercase;letter-spacing:.12em">Pour vous</h4>
-    <p class="ok">Accord enregistré à 11 h 52 · récapitulatif envoyé à maria.santos@example.pt.</p>
-    <p class="app-row"><a class="app-btn" href="#">Nouvelle rencontre</a> <a class="app-btn ghost" href="#">Accueil Terrain</a></p>
-  </div></div></article>
-    <article class="mq-board" aria-labelledby="b5"><h3 id="b5">La carte papier, lisible à bout de bras <span class="pin" aria-hidden="true">11</span></h3><p class="mq-cap">La même promesse que l’écran : âge et parent, et où changer d’avis.</p><div class="mq-cards">
-<div class="mq-card" role="img" aria-label="Carte d’accord « pour nous », recto, 85 × 55 mm : la phrase d’accord en français et en anglais en 9 points, la ligne pour un parent en 8 points.">
-  <p class="mq-face" aria-hidden="true">Recto</p>
-  <p class="c1">J’autorise l’usage artistique et la publication des photos que Julien a prises de moi aujourd’hui. <span lang="en">I agree to the artistic use and publication of the photos taken of me today.</span></p>
-  <p class="c2"><strong>Si mineur·e :</strong> nom et signature d’un parent</p>
-  <p class="c2">Signature ____________________</p>
+  <div class="corps" lang="fr" style="border-top:1px solid var(--rule)"><details class="app-next"><summary>Photographe : reprendre le téléphone</summary></details></div></div></div>
+<div class="mq-ecran"><p class="mq-etat">État · Mon QR, sans carte</p><span class="mq-pin" aria-hidden="true">19</span>
+  <div class="app-ecran">
+    <div class="app-bar"><a href="/admin/rencontre/accueil" aria-label="Retour à l’accueil Terrain">←</a><h2 style="flex:1;margin:0;font:500 16px/1.3 var(--sans)"><span class="mq-a">Mon QR</span></h2></div>
+    <div class="corps" style="justify-items:center">
+      <div class="qr-txt"><p lang="fr">Scannez pour retrouver la photo, donner ou refuser votre accord.</p><p lang="en">Scan to find the photo, give or refuse your consent.</p><p lang="de">Scannen Sie, um das Foto zu finden und Ihre Einwilligung zu geben oder zu verweigern.</p></div>
+      <div class="qr-cadre"><svg class="qr-svg" width="240" height="240" viewBox="-2 -2 29 29" role="img" aria-label="QR de Julien, vers nicephos.art/bonjour/j"><rect x="-2" y="-2" width="29" height="29" fill="#fff"/><path d="M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM9 0h1v1h-1zM12 0h1v1h-1zM18 0h1v1h-1zM19 0h1v1h-1zM20 0h1v1h-1zM21 0h1v1h-1zM22 0h1v1h-1zM23 0h1v1h-1zM24 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM9 1h1v1h-1zM10 1h1v1h-1zM14 1h1v1h-1zM18 1h1v1h-1zM24 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM10 2h1v1h-1zM11 2h1v1h-1zM16 2h1v1h-1zM18 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM24 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM8 3h1v1h-1zM9 3h1v1h-1zM15 3h1v1h-1zM18 3h1v1h-1zM20 3h1v1h-1zM21 3h1v1h-1zM22 3h1v1h-1zM24 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM9 4h1v1h-1zM10 4h1v1h-1zM11 4h1v1h-1zM12 4h1v1h-1zM13 4h1v1h-1zM18 4h1v1h-1zM20 4h1v1h-1zM21 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM12 5h1v1h-1zM13 5h1v1h-1zM15 5h1v1h-1zM18 5h1v1h-1zM24 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM19 6h1v1h-1zM20 6h1v1h-1zM21 6h1v1h-1zM22 6h1v1h-1zM23 6h1v1h-1zM24 6h1v1h-1zM8 7h1v1h-1zM9 7h1v1h-1zM10 7h1v1h-1zM13 7h1v1h-1zM0 8h1v1h-1zM4 8h1v1h-1zM6 8h1v1h-1zM13 8h1v1h-1zM20 8h1v1h-1zM21 8h1v1h-1zM22 8h1v1h-1zM0 9h1v1h-1zM1 9h1v1h-1zM4 9h1v1h-1zM5 9h1v1h-1zM11 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM14 9h1v1h-1zM15 9h1v1h-1zM18 9h1v1h-1zM20 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM24 9h1v1h-1zM0 10h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM10 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM17 10h1v1h-1zM1 11h1v1h-1zM2 11h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM9 11h1v1h-1zM10 11h1v1h-1zM17 11h1v1h-1zM18 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM22 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM0 12h1v1h-1zM4 12h1v1h-1zM5 12h1v1h-1zM6 12h1v1h-1zM8 12h1v1h-1zM9 12h1v1h-1zM10 12h1v1h-1zM11 12h1v1h-1zM15 12h1v1h-1zM16 12h1v1h-1zM18 12h1v1h-1zM22 12h1v1h-1zM23 12h1v1h-1zM2 13h1v1h-1zM3 13h1v1h-1zM7 13h1v1h-1zM10 13h1v1h-1zM12 13h1v1h-1zM13 13h1v1h-1zM14 13h1v1h-1zM15 13h1v1h-1zM16 13h1v1h-1zM17 13h1v1h-1zM18 13h1v1h-1zM19 13h1v1h-1zM20 13h1v1h-1zM21 13h1v1h-1zM0 14h1v1h-1zM1 14h1v1h-1zM2 14h1v1h-1zM3 14h1v1h-1zM5 14h1v1h-1zM6 14h1v1h-1zM7 14h1v1h-1zM8 14h1v1h-1zM10 14h1v1h-1zM13 14h1v1h-1zM17 14h1v1h-1zM18 14h1v1h-1zM20 14h1v1h-1zM21 14h1v1h-1zM22 14h1v1h-1zM2 15h1v1h-1zM8 15h1v1h-1zM9 15h1v1h-1zM10 15h1v1h-1zM12 15h1v1h-1zM16 15h1v1h-1zM21 15h1v1h-1zM22 15h1v1h-1zM23 15h1v1h-1zM0 16h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM7 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM16 16h1v1h-1zM20 16h1v1h-1zM24 16h1v1h-1zM9 17h1v1h-1zM10 17h1v1h-1zM11 17h1v1h-1zM12 17h1v1h-1zM13 17h1v1h-1zM15 17h1v1h-1zM18 17h1v1h-1zM19 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM0 18h1v1h-1zM1 18h1v1h-1zM2 18h1v1h-1zM3 18h1v1h-1zM4 18h1v1h-1zM5 18h1v1h-1zM6 18h1v1h-1zM8 18h1v1h-1zM13 18h1v1h-1zM14 18h1v1h-1zM15 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM19 18h1v1h-1zM20 18h1v1h-1zM0 19h1v1h-1zM6 19h1v1h-1zM10 19h1v1h-1zM13 19h1v1h-1zM15 19h1v1h-1zM16 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM23 19h1v1h-1zM24 19h1v1h-1zM0 20h1v1h-1zM2 20h1v1h-1zM3 20h1v1h-1zM4 20h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM10 20h1v1h-1zM13 20h1v1h-1zM14 20h1v1h-1zM15 20h1v1h-1zM16 20h1v1h-1zM21 20h1v1h-1zM24 20h1v1h-1zM0 21h1v1h-1zM2 21h1v1h-1zM3 21h1v1h-1zM4 21h1v1h-1zM6 21h1v1h-1zM12 21h1v1h-1zM13 21h1v1h-1zM18 21h1v1h-1zM19 21h1v1h-1zM20 21h1v1h-1zM22 21h1v1h-1zM0 22h1v1h-1zM2 22h1v1h-1zM3 22h1v1h-1zM4 22h1v1h-1zM6 22h1v1h-1zM12 22h1v1h-1zM13 22h1v1h-1zM14 22h1v1h-1zM17 22h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM22 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM9 23h1v1h-1zM10 23h1v1h-1zM11 23h1v1h-1zM13 23h1v1h-1zM19 23h1v1h-1zM20 23h1v1h-1zM22 23h1v1h-1zM23 23h1v1h-1zM24 23h1v1h-1zM0 24h1v1h-1zM1 24h1v1h-1zM2 24h1v1h-1zM3 24h1v1h-1zM4 24h1v1h-1zM5 24h1v1h-1zM6 24h1v1h-1zM8 24h1v1h-1zM23 24h1v1h-1z" fill="#1d1c1a"/></svg></div>
+      <p class="mono">nicephos.art/bonjour/j</p>
+    </div>
+  </div></div>
+<div class="mq-ecran"><p class="mq-etat">État · Carte papier, recto verso, échelle 1,13</p><span class="mq-pin" aria-hidden="true">20</span>
+  <div class="app-ecran"><div class="cartes">
+    <figure class="face" style="margin:0"><div class="carte nous" lang="fr">
+      <p class="lab"><span>VOTRE ACCORD</span><span>J-0001</span></p>
+      <p class="acc">J’autorise l’usage artistique et la publication des photos que Julien a prises de moi aujourd’hui. Je peux changer d’avis à tout moment.</p>
+      <p class="usages"><span>sur nicephos.art</span><span>sur Instagram</span><span>en tirage</span><span>avec mon prénom</span></p>
+      <p class="lignes"><span>Nom</span><span>Date</span><span>E-mail (facultatif)</span><span>Signature</span><span class="l2">Si mineur·e : nom et signature d’un parent</span></p>
+    </div><figcaption class="mq-a">Pour nous · recto</figcaption></figure>
+    <figure class="face" style="margin:0"><div class="carte nous">
+      <p class="lab"><span>CONSENT · EINWILLIGUNG</span><span>J-0001</span></p>
+      <p class="tr" lang="en" style="margin-top:calc(1.4 * var(--u))"><b>EN</b>I agree to the artistic use and publication of the photos Julien took of me today. I can change my mind at any time. Website · Instagram · prints · first name.</p>
+      <p class="tr" lang="de"><b>DE</b>Ich willige in die künstlerische Nutzung und Veröffentlichung der Fotos ein, die Julien heute von mir gemacht hat. Widerruf jederzeit. Website · Instagram · Drucke · Vorname.</p>
+      <p class="retrait"><span lang="fr">Pour le retirer</span> · <span lang="en">To withdraw</span> · <span lang="de">Widerrufen</span> : <b>nicephos.art/bonjour</b> + J-0001</p>
+    </div><figcaption>Pour nous · verso</figcaption></figure>
+    <figure class="face" style="margin:0"><div class="carte eux" lang="fr">
+      <h3>Merci !</h3>
+      <p class="msg-m">Merci de m’avoir laissé saisir ce moment. Je vous enverrai une photo, rien que pour vous. — Julien</p>
+      <p class="tr"><span lang="en">Thank you: I’ll send you a photo.</span> <span lang="de">Danke: Ich schicke Ihnen ein Foto.</span></p>
+      <div class="qr"><svg class="qr-svg" width="80" height="80" viewBox="-2 -2 29 29" role="img" aria-label="QR vers la page Bonjour, référence J-0001"><rect x="-2" y="-2" width="29" height="29" fill="#fff"/><path d="M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM9 0h1v1h-1zM12 0h1v1h-1zM18 0h1v1h-1zM19 0h1v1h-1zM20 0h1v1h-1zM21 0h1v1h-1zM22 0h1v1h-1zM23 0h1v1h-1zM24 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM9 1h1v1h-1zM10 1h1v1h-1zM14 1h1v1h-1zM18 1h1v1h-1zM24 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM10 2h1v1h-1zM11 2h1v1h-1zM16 2h1v1h-1zM18 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM24 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM8 3h1v1h-1zM9 3h1v1h-1zM15 3h1v1h-1zM18 3h1v1h-1zM20 3h1v1h-1zM21 3h1v1h-1zM22 3h1v1h-1zM24 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM9 4h1v1h-1zM10 4h1v1h-1zM11 4h1v1h-1zM12 4h1v1h-1zM13 4h1v1h-1zM18 4h1v1h-1zM20 4h1v1h-1zM21 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM12 5h1v1h-1zM13 5h1v1h-1zM15 5h1v1h-1zM18 5h1v1h-1zM24 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM19 6h1v1h-1zM20 6h1v1h-1zM21 6h1v1h-1zM22 6h1v1h-1zM23 6h1v1h-1zM24 6h1v1h-1zM8 7h1v1h-1zM9 7h1v1h-1zM10 7h1v1h-1zM13 7h1v1h-1zM0 8h1v1h-1zM4 8h1v1h-1zM6 8h1v1h-1zM13 8h1v1h-1zM20 8h1v1h-1zM21 8h1v1h-1zM22 8h1v1h-1zM0 9h1v1h-1zM1 9h1v1h-1zM4 9h1v1h-1zM5 9h1v1h-1zM11 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM14 9h1v1h-1zM15 9h1v1h-1zM18 9h1v1h-1zM20 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM24 9h1v1h-1zM0 10h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM10 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM17 10h1v1h-1zM1 11h1v1h-1zM2 11h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM9 11h1v1h-1zM10 11h1v1h-1zM17 11h1v1h-1zM18 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM22 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM0 12h1v1h-1zM4 12h1v1h-1zM5 12h1v1h-1zM6 12h1v1h-1zM8 12h1v1h-1zM9 12h1v1h-1zM10 12h1v1h-1zM11 12h1v1h-1zM15 12h1v1h-1zM16 12h1v1h-1zM18 12h1v1h-1zM22 12h1v1h-1zM23 12h1v1h-1zM2 13h1v1h-1zM3 13h1v1h-1zM7 13h1v1h-1zM10 13h1v1h-1zM12 13h1v1h-1zM13 13h1v1h-1zM14 13h1v1h-1zM15 13h1v1h-1zM16 13h1v1h-1zM17 13h1v1h-1zM18 13h1v1h-1zM19 13h1v1h-1zM20 13h1v1h-1zM21 13h1v1h-1zM0 14h1v1h-1zM1 14h1v1h-1zM2 14h1v1h-1zM3 14h1v1h-1zM5 14h1v1h-1zM6 14h1v1h-1zM7 14h1v1h-1zM8 14h1v1h-1zM10 14h1v1h-1zM13 14h1v1h-1zM17 14h1v1h-1zM18 14h1v1h-1zM20 14h1v1h-1zM21 14h1v1h-1zM22 14h1v1h-1zM2 15h1v1h-1zM8 15h1v1h-1zM9 15h1v1h-1zM10 15h1v1h-1zM12 15h1v1h-1zM16 15h1v1h-1zM21 15h1v1h-1zM22 15h1v1h-1zM23 15h1v1h-1zM0 16h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM7 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM16 16h1v1h-1zM20 16h1v1h-1zM24 16h1v1h-1zM9 17h1v1h-1zM10 17h1v1h-1zM11 17h1v1h-1zM12 17h1v1h-1zM13 17h1v1h-1zM15 17h1v1h-1zM18 17h1v1h-1zM19 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM0 18h1v1h-1zM1 18h1v1h-1zM2 18h1v1h-1zM3 18h1v1h-1zM4 18h1v1h-1zM5 18h1v1h-1zM6 18h1v1h-1zM8 18h1v1h-1zM13 18h1v1h-1zM14 18h1v1h-1zM15 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM19 18h1v1h-1zM20 18h1v1h-1zM0 19h1v1h-1zM6 19h1v1h-1zM10 19h1v1h-1zM13 19h1v1h-1zM15 19h1v1h-1zM16 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM23 19h1v1h-1zM24 19h1v1h-1zM0 20h1v1h-1zM2 20h1v1h-1zM3 20h1v1h-1zM4 20h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM10 20h1v1h-1zM13 20h1v1h-1zM14 20h1v1h-1zM15 20h1v1h-1zM16 20h1v1h-1zM21 20h1v1h-1zM24 20h1v1h-1zM0 21h1v1h-1zM2 21h1v1h-1zM3 21h1v1h-1zM4 21h1v1h-1zM6 21h1v1h-1zM12 21h1v1h-1zM13 21h1v1h-1zM18 21h1v1h-1zM19 21h1v1h-1zM20 21h1v1h-1zM22 21h1v1h-1zM0 22h1v1h-1zM2 22h1v1h-1zM3 22h1v1h-1zM4 22h1v1h-1zM6 22h1v1h-1zM12 22h1v1h-1zM13 22h1v1h-1zM14 22h1v1h-1zM17 22h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM22 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM9 23h1v1h-1zM10 23h1v1h-1zM11 23h1v1h-1zM13 23h1v1h-1zM19 23h1v1h-1zM20 23h1v1h-1zM22 23h1v1h-1zM23 23h1v1h-1zM24 23h1v1h-1zM0 24h1v1h-1zM1 24h1v1h-1zM2 24h1v1h-1zM3 24h1v1h-1zM4 24h1v1h-1zM5 24h1v1h-1zM6 24h1v1h-1zM8 24h1v1h-1zM23 24h1v1h-1z" fill="#1d1c1a"/></svg></div>
+      <p class="qrt">Votre photo, votre accord · <span lang="en">Your photo</span> · <span lang="de">Ihr Foto</span></p>
+      <p class="url">nicephos.art/bonjour</p><p class="ref">J-0001</p>
+    </div><figcaption>Pour eux · recto (verso blanc)</figcaption></figure>
+  </div></div></div>
 </div>
-<div class="mq-card" role="img" aria-label="Carte d’accord, verso : nom, date, lieu et e-mail en 8 points, et l’adresse pour retirer l’accord.">
-  <p class="mq-face" aria-hidden="true">Verso</p>
-  <p class="c2">Nom ______________ Date ________</p>
-  <p class="c2">Lieu ______________________</p>
-  <p class="c2">E-mail ____________________</p>
-  <p class="c3">Pour retirer cet accord : nicephos.art/bonjour + J-0009</p>
-</div>
-</div>
-<p class="hint" style="margin-top:8px">À l’échelle 1 mm = 4 px (85 × 55 mm). La phrase d’accord en 9 pt, tout le reste en 8 pt au moins (5,3 pt pour les traductions aujourd’hui), traductions en noir ; recto verso pour que tout tienne sans réduire.</p></article>
-  </div>
-</section>
-<aside class="mq-notes" aria-labelledby="mq-notes-t"><p class="mq-id">Maquette MQ-10 · app de terrain · Pixel 7 (téléphone seulement) · Camille Arnaud, 16 octobre 2026</p><h2 id="mq-notes-t">Ce qui change</h2><p class="mq-lead">Les repères numérotés renvoient à cette liste. Personne, lieu et adresse sont fictifs ; la photo de repère est une image de démonstration.</p><ol><li><span class="pin" aria-hidden="true">1</span><div><strong>Une page structurée.</strong> h1 « Nouvelle rencontre · J-0009 », main, lien d’évitement ; l’heure de fin de session est écrite (« Connecté jusqu’à 14 h 20 »).<span class="ref"><b>UX-A-12</b> · <b>UX-A-01</b> · RGAA 9.1, 12.7 et 8.5 · WCAG 2.2.1 · Opquast 172</span></div></li><li><span class="pin" aria-hidden="true">2</span><div><strong>La section de la personne dans sa langue.</strong> Rendue en anglais seulement, dans un conteneur lang="en", légendes comprises (« Your decision », « Age ») ; langues en texte, sans drapeau.<span class="ref"><b>UX-A-12</b> · RGAA 8.7 · WCAG 3.1.2 · B&amp;S 8 Compatibilité</span></div></li><li><span class="pin" aria-hidden="true">3</span><div><strong>L’erreur à côté du champ.</strong> « Please tell us whether you are 18 or older. », dans la langue de la personne, reliée par aria-describedby, aria-invalid, défilement et focus sur le premier bouton. Vérifiée avant l’envoi ; « Nom du parent » est sorti du groupe Âge.<span class="ref"><b>UX-A-01</b> · <b>UX-A-12</b> · <b>UX-T-02</b> · RGAA 11.10 et 11.5 · WCAG 3.3.1 · B&amp;S 5.2</span></div></li><li><span class="pin" aria-hidden="true">4</span><div><strong>La photo de repère gardée.</strong> Vignette, « Photo de repère gardée » et « Reprendre la photo » : rien à refaire devant la personne.<span class="ref"><b>UX-A-01</b> · WCAG 3.3.7 Saisie redondante · B&amp;S 5.3 Correction des erreurs</span></div></li><li><span class="pin" aria-hidden="true">5</span><div><strong>La signature gardée.</strong> Le trait reste visible après l’erreur, « Signature kept — Clear ».<span class="ref"><b>UX-A-01</b> · WCAG 3.3.7 · ISO 9241-110 Robustesse</span></div></li><li><span class="pin" aria-hidden="true">6</span><div><strong>« Enregistrer » ne cache rien.</strong> La barre ne masque pas le champ focalisé (scroll-padding-bottom) ; le point à corriger est dit en role="alert", dans la langue de la personne (« 1 thing to fix: please tell us whether you are 18 or older. »), au-dessus de « Enregistrer ». Les 4 usages sont groupés dans « I agree, for: ».<span class="ref"><b>UX-A-09</b> · <b>UX-A-12</b> · WCAG 2.4.11 · RGAA 10.7 et 11.5</span></div></li><li><span class="pin" aria-hidden="true">7</span><div><strong>L’envoi se voit.</strong> « Sending… 62% » ; photo réduite à 1 600 px dans le navigateur (≈ 300 ko au lieu de 15 Mo).<span class="ref"><b>UX-A-01</b> · B&amp;S 1.3 Feedback immédiat · RGESN 5.2 et 6.4 · Nielsen #1</span></div></li><li><span class="pin" aria-hidden="true">8</span><div><strong>Réseau coupé : rien n’est perdu.</strong> Brouillon local jusqu’à l’accusé du serveur, « Try again » ; à écrire dans la page Confidentialité.<span class="ref"><b>UX-A-01</b> · B&amp;S 5.1 · ISO 9241-110 Robustesse · Opquast 224</span></div></li><li><span class="pin" aria-hidden="true">9</span><div><strong>Session expirée : une page, pas un JSON.</strong> « Votre session a expiré. L’accord est gardé sur ce téléphone. [Se reconnecter dans un nouvel onglet] ».<span class="ref"><b>UX-A-01</b> · WCAG 2.2.1 et 2.2.5 · Nielsen #9 · B&amp;S 5.2</span></div></li><li><span class="pin" aria-hidden="true">10</span><div><strong>Le merci et le QR.</strong> Pour la personne, en anglais ; en dessous, pour le photographe, ce qui est enregistré et envoyé.<span class="ref"><b>UX-A-12</b> · B&amp;S 1.3 · RGPD art. 7 (preuve du consentement)</span></div></li><li><span class="pin" aria-hidden="true">11</span><div><strong>La carte papier lisible, debout dans la rue.</strong> La phrase d’accord en 9 pt, aucun autre texte sous 8 pt, traductions en noir, recto verso pour que tout tienne, ligne « Si mineur·e : nom et signature d’un parent », adresse pour retirer l’accord.<span class="ref"><b>UX-A-13</b> · <b>UX-T-02</b> · B&amp;S 1.4 Lisibilité · RGPD art. 4, point 11, et art. 7</span></div></li></ol><p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette) — Axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation sur téléphone (Pixel 7, 412 px) ; aucun débordement horizontal ; aucune cible sous 24 px (cases, boutons radio et boutons de 44 à 54 px). Structure : un h1, un main, un lien d’évitement, la section de la personne en lang="en".</p></aside>
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MQ-10 · app de terrain · téléphone (Pixel 7, 412 × 839) · Julien et Inês Exemplo, rua dos Remédios, Lisbonne, samedi 10 oct. 2026, 19 h 24</p>
+  <h2 id="mq-t">Ce qui change</h2>
+  <p class="mq-lead">Julien tend son téléphone à Inês, qui passe l’écran en anglais, signe et oublie de dire son âge. L’envoi est arrêté avant de partir, le point à corriger est dit dans sa langue, et rien n’est perdu : ni la signature, ni la photo de repère, ni l’accord si le réseau ou la session lâchent. Construit sur app.css et app.eta de main, avec les composants d’erreur du site (MQ-00) pour la section tenue par la personne.</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>Un titre, une page, un évitement</b><p>h1 « Nouvelle rencontre » dans la barre, un main autour du formulaire, un lien « Aller au formulaire » ; l’accueil et Mon QR ont aussi leur titre (états 12 et 19).</p><span class="mq-ref">UX-A-12 · RGAA 9.1, 12.6, 12.7 · axe page-has-heading-one</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>La session se lit avant de commencer</b><p>« connecté jusqu’à 3 h 24 » (8 h sans activité) : le photographe sait s’il doit se reconnecter avant de tendre le téléphone.</p><span class="mq-ref">UX-A-01 · WCAG 2.2.1 · B&S 1.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Le photographe replie sa partie avant de tendre le téléphone</b><p>« Tendre le téléphone à la personne » replie « Vous » en une ligne (photographe, lieu, photo de repère) : la personne ne voit que ce qui la concerne, l’erreur et son accord dès le premier écran.</p><span class="mq-ref">UX-A-12 · B&S 2.2 · B&S 1.2.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Ce qu’il manque, en tête de la section</b><p>Le résumé du site (MQ-00) dans la langue de la personne, focalisé, avec un lien vers le champ ; le défilement y conduit.</p><span class="mq-ref">UX-A-01 · RGAA 11.10 · WCAG 3.3.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>La langue de la personne, sans drapeau</b><p>Trois mots, « Français · English · Deutsch » ; la section entière passe dans la langue choisie, avec son attribut lang, légendes comprises.</p><span class="mq-ref">UX-A-12 · UX-F-32 · RGAA 8.7 · WCAG 3.1.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>« I agree, for: » regroupe les usages</b><p>Un fieldset pour la décision, un autre, imbriqué, pour les quatre usages : on ne mêle plus cases et boutons radio.</p><span class="mq-ref">UX-A-12 · RGAA 11.5, 11.6</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>L’erreur sous le champ, dans la langue choisie</b><p>« Error: tell us whether you are 18 or older. » relié par aria-describedby, boutons marqués aria-invalid, filet d’erreur sur le groupe ; le focus clavier y arrive.</p><span class="mq-ref">UX-A-01 · RGAA 11.10 · WCAG 3.3.1, 1.3.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Le nom du parent, hors du groupe Âge</b><p>Un champ à part, « (only if you are under 18) » ; s’il manque quand la personne a moins de 18 ans, l’erreur le dit (état 17).</p><span class="mq-ref">UX-A-12 · UX-T-02</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>La signature est gardée, « Clear » fait 44 px</b><p>Renvoyée par le serveur après une erreur, elle reste à l’écran avec « Signature kept » ; « Clear » est un vrai bouton de 44 × 44 px, suivi d’un « Undo » (état 16).</p><span class="mq-ref">UX-A-01 · WCAG 2.5.8 · B&S 3</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>« Save » dans la langue de la personne, sans cacher le focus</b><p>La barre collante parle la langue de la section qu’elle termine ; scroll-padding-bottom de 104 px : un champ focalisé ne passe jamais dessous. Le brouillon reste sur le téléphone jusqu’à l’accusé du serveur.</p><span class="mq-ref">UX-A-09 · UX-A-01 · WCAG 2.4.11 · B&S 6</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>Vous, déplié : la photo de repère est gardée</b><p>Après une erreur, elle reste (fichier temporaire côté serveur), avec « Reprendre la photo » ; réduite à 1 600 px dans le navigateur avant l’envoi. Main (0d1925c) vérifie déjà avant l’envoi, mais dit encore « photo et signature à refaire ».</p><span class="mq-ref">UX-A-01 · WCAG 3.3.7 · RGESN 5.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>L’accueil dit ce qui s’est passé</b><p>La sortie du jour, Inês et ses usages, la prochaine carte, et « aucun accord en attente d’envoi ».</p><span class="mq-ref">UX-A-01 · UX-A-12 · Nielsen #1</span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>L’envoi se voit</b><p>Barre de progression et pourcentage, photo réduite à 310 Ko au lieu de 15 Mo, bouton inactif « Sending… ».</p><span class="mq-ref">UX-A-01 · RGESN 5.2 · WCAG 4.1.3</span></li>
+    <li><span class="mq-num" aria-hidden="true">14</span><b>Réseau coupé : rien n’est perdu</b><p>Message d’erreur du site (role="alert"), dans la langue de la personne, et « Try again » ; l’accord attend sur le téléphone.</p><span class="mq-ref">UX-A-01 · WCAG 3.3.7</span></li>
+    <li><span class="mq-num" aria-hidden="true">15</span><b>Session expirée : une page, pas un JSON</b><p>En français, pour le photographe : l’accord d’Inês est gardé ; se reconnecter dans un nouvel onglet, puis « Envoyer l’accord gardé ». Plus de {"error": …} ni de « Jeton CSRF invalide ».</p><span class="mq-ref">UX-A-01 · UX-A-18 · Nielsen #9</span></li>
+    <li><span class="mq-num" aria-hidden="true">16</span><b>Effacer une signature se défait</b><p>« Signature cleared. · Undo » pendant 10 s, focus sur « Undo » : un geste malheureux ne fait pas re-signer une inconnue.</p><span class="mq-ref">UX-A-01 · B&S 3 · lexique MQ-00 (Défaire)</span></li>
+    <li><span class="mq-num" aria-hidden="true">17</span><b>L’allemand tient, erreurs comprises</b><p>Section en allemand, mineure : « Fehler: Bitte geben Sie den Namen des Elternteils an… », résumé en tête ; « Speichern ».</p><span class="mq-ref">UX-A-12 · UX-T-02 · grille, critère 4</span></li>
+    <li><span class="mq-num" aria-hidden="true">18</span><b>« Thank you! » tourné vers la personne</b><p>Le QR de sa page et sa référence ; les liens de l’admin attendent sous « Photographe : reprendre le téléphone ».</p><span class="mq-ref">UX-A-12 · RGPD art. 7</span></li>
+    <li><span class="mq-num" aria-hidden="true">19</span><b>Mon QR a un titre et trois langues</b><p>h2 « Mon QR », l’invitation en français, anglais et allemand, l’adresse en clair.</p><span class="mq-ref">UX-A-12 · RGAA 9.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">20</span><b>La carte se lit à bout de bras, en trois langues</b><p>Recto : l’accord en français en 9 pt, les usages, les lignes en 8 pt et une ligne pour un parent. Verso : l’anglais et l’allemand en 9 pt, et où retirer son accord. Carte « Merci » sans italique décoratif. Plus rien sous 8 pt (5,3 pt aujourd’hui).</p><span class="mq-ref">UX-A-13 · UX-T-02 · RGPD art. 4 (11) et 7</span></li>
+  </ol>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur, outils/inspect.sh) · axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation au téléphone (Pixel 7) et à 320 et 820 px · Débordement horizontal : 0 à 320, 412, 820, 1 024 et 1 440 px · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (outils/mq00-cibles.mjs, liens dans une phrase exemptés) · Poids : 190 ko, 12 requêtes (app.css, jetons, composants du site, une vignette de 160 px) ; aucun script, aucune ressource tierce ; QR de démonstration en SVG dans la page · Carte papier à l’échelle 1,13 : accord en 9 pt (13,6 px), plus rien sous 8 pt (12 px) ; 85 × 55 mm tenus sans débordement · Sans annotations : 20 pastilles, 10 étiquettes et cadres retirés ; 0 pixel changé hors de leur emprise sur 8 166 px.</p>
+</aside>
 </body>
 </html>

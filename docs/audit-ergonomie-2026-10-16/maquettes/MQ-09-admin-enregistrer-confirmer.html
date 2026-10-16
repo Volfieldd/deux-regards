@@ -2,316 +2,355 @@
 <html lang="fr" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Miradouro, l’heure dorée · Photothèque · Administration Nicephos (maquette MQ-09)</title>
+<meta name="color-scheme" content="light">
+<title>MQ-09 — Admin : enregistrer, confirmer, défaire — Nicephos</title>
+<meta name="description" content="Maquette de l’administration de Nicephos : la fiche d’une photo publiée avec la règle d’enregistrement unique, le message d’action et les dialogues de confirmation communs.">
 <link rel="stylesheet" href="_commun/admin.css">
-<style>
-/* ===== Barre latérale cible (UX-A-11) : 5 groupes, une seule liste par groupe, tient dans 900 px ===== */
-.side { padding: 12px 12px 10px; }
-.side .word { padding: 2px 10px 6px; }
-.cmdk-row { position: relative; display: flex; align-items: center; margin-bottom: 6px; }
-.cmdk-row .pin { position: absolute; right: -10px; top: -9px; }
-.side .cmdk { height: 34px; margin: 0; color: var(--ink2); flex: 1; min-width: 0; }
-.side .cmdk kbd { white-space: nowrap; font-size: 11px; }
-.mqnav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
-.mqnav .grp { display: flex; align-items: center; margin: 0; padding: 5px 10px 0; }
-.mqnav .it, .mqlinks .it { display: flex; align-items: center; gap: 11px; min-height: 25px; padding: 0 10px; border-radius: 8px; color: var(--ink2); }
-.mqnav a.it:hover, .mqlinks a.it:hover { background: var(--s2); color: var(--ink); }
-.mqnav .it[aria-current], .mqnav .it.cur { background: var(--s3); color: var(--ink); font-weight: 500; }
-.mqnav .it[aria-current] .ic, .mqnav .it.cur .ic { color: var(--accent-ink); }
-.mqnav .it .l { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mqnav .n { font-size: 12px; color: var(--ink3); }
-.mqser .it { min-height: 24px; padding-left: 39px; gap: 9px; font-size: 13px; }
-.mqser .sw { width: 16px; height: 16px; border-radius: 3px; overflow: hidden; flex: none; box-shadow: 0 0 0 1px var(--line2); }
-.mqser .sw img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.mqser .all .l { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
-.mqsoon { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 3px 4px 3px 12px; }
-.mqsoon .soon-l { display: inline-flex; align-items: center; font-size: 11.5px; color: var(--ink3); letter-spacing: .04em; margin-right: 2px; }
-.mqsoon ul { display: flex !important; flex-wrap: wrap; gap: 4px; }
-.mqsoon ul li { font-size: 11.5px; line-height: 1.35; color: var(--ink3); padding: 0 6px; border-radius: 6px; border: 1px dashed var(--ink3); }
-.mqsep { border: 0; border-top: 1px solid var(--line); margin: 6px 4px 4px; }
-.mqfoot { margin-top: auto; border-top: 1px solid var(--line); padding-top: 6px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
-.mqme { position: relative; display: flex; align-items: center; gap: 6px; }
-.mqme > .pin { position: absolute; right: 38px; top: -8px; }
-.mqme .who { min-width: 0; white-space: normal; overflow: visible; }
-.mqme .who small { white-space: nowrap; line-height: 1.3; }
-.mqme .who small .ml { display: block; }
-.mqme form { margin: 0; }
-.mqme .who-l { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; padding: 4px 6px; border-radius: 9px; }
-.mqme a.who-l:hover { background: var(--s2); }
-.mqme .who small .ml { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; }
-.mqlinks { display: flex; gap: 2px; margin: 0; }
-.mqlinks .it { font-size: 13.5px; }
-@media (max-width: 720px) {
-  .mqnav .it, .mqlinks .it, .mqser .it { min-height: 44px; }
-  .mqsoon ul li { padding: 4px 8px; }
-}
-
-/* ===== Composants communs proposés ===== */
-/* Pastille d'état unique (UX-A-16) : symbole + mot ; la couleur ne fait que doubler. */
-.mq-st { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; line-height: 1.2; padding: 3px 10px 3px 8px; border-radius: 999px; white-space: nowrap; color: var(--ink); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2); }
-.mq-st .sy { font-size: 12px; width: 12px; text-align: center; }
-.mq-st.draft .sy { color: var(--ink2); }
-.mq-st.prop { box-shadow: inset 0 0 0 1.5px var(--ok); } .mq-st.prop .sy { color: var(--ok); }
-.mq-st.pub { box-shadow: inset 0 0 0 1.5px var(--ink2); } .mq-st.pub .sy { color: var(--ink); }
-.mq-st.warn { box-shadow: inset 0 0 0 1.5px var(--warn); } .mq-st.warn .sy { color: var(--warn); }
-.mq-st.no { box-shadow: inset 0 0 0 1.5px var(--danger); } .mq-st.no .sy { color: var(--danger); }
-/* Champs : filet lisible (WCAG 1.4.11) et focus en contour de 2 px (UX-A-27). */
-input:not([type]), input[type="text"], input[type="search"], input[type="email"], select, textarea { box-shadow: inset 0 0 0 1px #8c8578; }
-input:focus-visible, select:focus-visible, textarea:focus-visible, .mq-focus { outline: 2px solid var(--accent-ink) !important; outline-offset: 1px; box-shadow: inset 0 0 0 1px #8c8578, 0 0 0 5px var(--accent-soft) !important; }
-.mq-focus-btn { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-.mq-alert { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 11px 14px; margin: 0 0 16px; border-radius: 12px; background: var(--s1); box-shadow: inset 4px 0 0 var(--warn), inset 0 0 0 1px var(--line2); font-size: 14px; }
-.mq-alert .sy { color: var(--warn); }
-.mq-alert.err { box-shadow: inset 4px 0 0 var(--danger), inset 0 0 0 1px var(--line2); } .mq-alert.err .sy { color: var(--danger); }
-.mq-alert.ok { box-shadow: inset 4px 0 0 var(--ok), inset 0 0 0 1px var(--line2); } .mq-alert.ok .sy { color: var(--ok); }
-.mq-alert .t { flex: 1 1 320px; min-width: 0; }
-.mq-alert .t strong { font-weight: 500; }
-.mq-alert .acts { display: flex; flex-wrap: wrap; gap: 8px; }
-.mq-dialog { width: min(540px, 100%); background: var(--s1); color: var(--ink); border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
-.mq-dialog .dt { margin: 0 0 10px; font-weight: 300; font-size: 23px; line-height: 1.2; }
-.mq-dialog p { margin: 0 0 10px; color: var(--ink2); }
-.mq-dialog .actions { margin-top: 18px; }
-.btn.danger-o { background: transparent; color: var(--danger); box-shadow: inset 0 0 0 1.5px var(--danger); }
-.btn.danger { background: var(--danger); color: var(--on-danger); }
-.err-msg { display: flex; gap: 6px; align-items: baseline; margin: 6px 0 0; color: var(--danger); font-size: 13px; font-weight: 500; }
-.mq-kbd { font: 500 11px var(--font); color: var(--ink2); border: 1px solid var(--line2); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; background: var(--s3); white-space: nowrap; }
-.mq-switch { position: relative; display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--ink); }
-.mq-switch input[role="switch"] { appearance: none; -webkit-appearance: none; width: 46px; height: 26px; margin: 0; border-radius: 999px; background: var(--s3); box-shadow: inset 0 0 0 1.5px #8c8578; position: relative; cursor: pointer; flex: none; }
-.mq-switch input[role="switch"]::after { content: ""; position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; border-radius: 50%; background: #6b665d; transition: left .15s; }
-.mq-switch input[role="switch"]:checked { background: var(--ink); box-shadow: none; }
-.mq-switch input[role="switch"]:checked::after { left: 24px; background: var(--accent); }
-.mq-switch input[role="switch"]:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-
-/* ===== Couche « maquette » : ruban, repères numérotés, planches d'états, encart « Ce qui change » ===== */
-:root { --mq: #3a2fd0; --mq-ink: #2f27b8; }
-
-
-
-
-
-.mq-boards { background: #e4e0d7; color: #1b1a17; padding: 40px 36px 48px; border-top: 1px solid rgba(20,18,14,.15); }
-.mq-boards > h2 { font: 300 30px/1.15 Jost, Arial, sans-serif; margin: 0 0 6px; color: #1b1a17; }
-
-.mq-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
-.mq-board { background: var(--bg); color: var(--ink); border-radius: 16px; padding: 20px 22px 24px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(60,40,10,.10); min-width: 0; }
-.mq-board.wide { grid-column: 1 / -1; }
-.mq-board > h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 4px; margin: 0 0 4px; font-weight: 500; font-size: 17px; }
-.mq-board > .mq-cap { color: var(--ink2); font-size: 13px; margin: 0 0 16px; max-width: 76ch; }
-.mq-scrim { background: rgba(30,26,20,.46); border-radius: 12px; padding: 32px 24px; display: grid; place-items: center; }
-
-
-
-
-
-
-
-
-
-
-
-
-@media (max-width: 720px) {
-  .mq-boards { padding: 28px 14px 32px; }
-  .mq-boards > h2 { font-size: 26px; }
-  .mq-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
-  .mq-board { padding: 16px 14px 18px; }
-  .mq-desk { display: none !important; }
-  .mq-scrim { padding: 18px 10px; }
-  
-  
-}
-@media (min-width: 721px) { .mq-mob { display: none !important; } }
-
-/* L'écran tel qu'au premier affichage : barre latérale non collante pour la capture, colonne continue. */
-@media (min-width: 721px) {
-  .shell { position: relative; background: linear-gradient(90deg, var(--s1) 0 var(--side), var(--bg) var(--side)); }
-  .shell::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--side) - 1px); border-left: 1px solid var(--line); }
-  .side { position: relative; height: auto; min-height: 900px; overflow: visible; border-right: 0; align-self: start; }
-}
-@media (max-width: 720px) {
-  /* Capture pleine page : la barre d'onglets (fixée en bas de l'écran) est posée à la fin de l'écran. */
-  .tabbar { position: relative; }
-  .main { padding-bottom: 24px; }
-  
-}
-
-/* ===== MQ-09 : enregistrer, confirmer, annuler ===== */
-html { scroll-padding-bottom: 96px; }
-.crumbs { font-size: 13px; color: var(--ink2); margin: 0 0 8px; }
-.crumbs ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
-.crumbs li + li::before { content: "›"; margin: 0 6px 0 2px; color: var(--ink3); }
-.crumbs a { text-decoration: underline; text-underline-offset: 3px; }
-.mq-ph-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 0 0 20px; }
-.mq-ph-head h1 { margin: 0 !important; }
-.mq-ph-head .stat { display: flex; align-items: center; gap: 10px; }
-.mq-fiche { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 28px; align-items: start; }
-.mq-fig { margin: 0; position: sticky; top: 16px; }
-.mq-fig img { display: block; width: 100%; height: auto; border-radius: 8px; background: var(--photo-bg); }
-.mq-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 16px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); font-size: 13px; }
-.mq-facts dt { color: var(--ink2); }
-.mq-facts dd { margin: 0; }
-.mq-facts a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
-.mq-fig figcaption { margin-top: 8px; font-size: 12.5px; color: var(--ink2); }
-.mq-form { display: grid; gap: 16px; margin: 0; }
-.mq-form .panel { margin: 0; display: grid; gap: 14px; }
-.mq-form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.lbl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; color: var(--ink); font-size: 13.5px; font-weight: 500; }
-.lbl .req, .lbl .opt { font-weight: 400; color: var(--ink2); font-size: 12.5px; }
-.lbl .ex { font-weight: 400; color: var(--ink2); font-size: 12.5px; }
-.mod { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink); font-weight: 500; }
-.mod::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent-ink); }
-input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--danger) !important; }
-.err-msg .sy { flex: none; }
-/* Bandeau « Description prête » (UX-A-05) : en role="status", aucun rechargement */
-.mq-ready { display: grid; gap: 8px; padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--ok) 8%, var(--s1)); box-shadow: inset 3px 0 0 var(--ok), inset 0 0 0 1px var(--line2); font-size: 13.5px; }
-.mq-ready .h { display: flex; align-items: center; gap: 4px; font-weight: 500; margin: 0; }
-.mq-ready .h::before { content: "✦"; color: var(--ok); margin-right: 4px; }
-.mq-ready blockquote { margin: 0; color: var(--ink2); font-style: italic; }
-.mq-ready .acts { display: flex; flex-wrap: wrap; gap: 8px; }
-/* Barre d'enregistrement unique (UX-A-06) */
-.mq-savebar { position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 16px; border-radius: 14px; background: var(--s1); box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
-.mq-savebar .acts { display: flex; gap: 10px; flex-wrap: wrap; }
-.mq-savebar .what { flex: 1 1 160px; font-size: 13.5px; color: var(--ink2); }
-.mq-savebar .what b { color: var(--ink); font-weight: 500; }
-.mq-savebar .btn { min-height: 42px; padding: 0 22px; font-size: 14.5px; }
-/* Planches */
-.mq-toastdemo { display: grid; gap: 12px; justify-items: center; padding: 28px 12px; border-radius: 12px; background: var(--s2); }
-.mq-toast { position: static; transform: none; display: flex; align-items: center; gap: 14px; padding: 10px 10px 10px 16px; border-radius: 12px; background: var(--ink); color: var(--bg); font-size: 14px; box-shadow: var(--shadow); }
-.mq-toast .cd { font-size: 12px; color: #c9c4ba; display: inline-flex; align-items: center; gap: 6px; }
-.mq-toast .ring { width: 18px; height: 18px; border-radius: 50%; background: conic-gradient(#f0a94c 0 70%, #55514a 70% 100%); }
-.mq-toast button { min-height: 32px; padding: 0 14px; border-radius: 8px; background: var(--bg); color: var(--ink); font-weight: 500; font-size: 13px; outline: 2px solid #f0a94c; outline-offset: 2px; }
-
-
-
-
-.mq-dialog .actions { display: flex; flex-wrap: wrap; gap: 10px; }
-.mq-dialog .actions .btn { min-height: 40px; }
-.mq-dialog ul { margin: 0 0 10px; padding-left: 18px; color: var(--ink2); }
-.mq-dialog label { margin-top: 4px; }
-.mq-focusdemo { display: grid; gap: 10px; max-width: 420px; }
-.swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
-@media (max-width: 720px) {
-  .main { padding: 18px 14px 18px; }
-  .main h1 { font-size: 27px; }
-  .mq-fiche { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .mq-fig { position: static; }
-  .mq-form .two { grid-template-columns: minmax(0, 1fr); }
-  .mq-form input:not([type]), .mq-form select, .mq-form textarea { min-height: 44px; }
-  .mq-savebar { position: relative; border-radius: 0; margin: 0 -14px; box-shadow: 0 -8px 24px rgba(60,40,10,.12), inset 0 1px 0 var(--line2); }
-  .mq-savebar .btn { flex: 1; min-height: 48px; }
-  .mq-ready .btn, .mq-dialog .actions .btn { min-height: 44px; }
-  
-  .mq-toast { flex-wrap: wrap; }
-}
-.nw { white-space: nowrap; }
-</style>
+<link rel="stylesheet" href="_commun/tokens.css">
+<link rel="stylesheet" href="_commun/admin-plus.css">
 <link rel="stylesheet" href="_commun/annotations.css">
+<style>
+/* Locaux, communs à MQ-07, MQ-08 et MQ-09 (absents de la planche, à y verser : voir l'encart).
+   L1 « Fermer » du menu au téléphone · L2 lien « Mon compte » sur le nom · L3 planche des autres états
+   · L4 dialogue montré ouvert · L5 bascule des annotations. Aucun jeton redéclaré. */
+.side-haut { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.side-fermer { display: none; }
+@media (max-width: 720px) {
+  .side-fermer { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; margin: -6px 0 0; border-radius: var(--r-admin); color: var(--ink); font-size: 14px; box-shadow: inset 0 0 0 1px var(--line2); }
+}
+.me-lien { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; min-height: 40px; padding: 0 4px; border-radius: 8px; }
+.me-lien:hover { background: var(--s2); }
+.cmdk kbd { white-space: nowrap; }
+/* Barre de 220 px (sous 1 180 px) : le thème se règle dans Mon compte, le nom et le rôle restent entiers. */
+@media (max-width: 1180px) and (min-width: 721px) { .me .btn-theme { display: none; } }
+.me-lien[aria-current] { background: var(--s3); }
+.me-lien .me-nom { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field-line); }
+@media (max-width: 720px), (pointer: coarse) { .me-lien { min-height: 44px; } }
+/* L3. Autres états : sous la coquille, pleine largeur, un cadre par état. */
+.resume-a li a { display: inline-flex; align-items: center; min-height: 24px; }
+@media (max-width: 720px), (pointer: coarse) { .resume-a li a { min-height: 44px; } }
+.etats-a { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 560px), 1fr)); gap: 112px 48px; align-items: start; padding: 128px max(var(--gut), 16px) 0; }
+.etats-a > * { min-width: 0; }
+.etats-a > .large { grid-column: 1 / -1; }
+.ecran-a { min-width: 0; padding: 24px; border-radius: var(--r-admin-panneau); background: var(--bg); box-shadow: inset 0 0 0 1px var(--line2); }
+.ecran-a > :first-child:not(.mq-pin) { margin-top: 0; } .ecran-a > :last-child { margin-bottom: 0; }
+.ecran-a h2 { margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
+.ecran-a h3 { margin: 0 0 8px; font-size: var(--at-h3); font-weight: 500; }
+.ecran-a .titre-ecran { margin: 0 0 16px; font-size: 28px; font-weight: 300; line-height: 1.15; }
+@media (max-width: 720px) { .ecran-a { padding: 16px; } .etats-a { gap: 96px; padding-top: 112px; } }
+/* L4. Un dialogue montré ouvert, sur le voile de la page. */
+.voile-a { display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 40px 24px; border-radius: var(--r-admin-panneau); background: linear-gradient(var(--scrim), var(--scrim)), var(--bg); }
+.voile-a .confirm { position: static; display: block; margin: 0; max-width: 100%; }
+@media (max-width: 720px) { .voile-a { padding: 24px 12px; } }
+.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
+.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
+/* En-tête de page au téléphone : une ligne de méta par élément, sans « · » orphelin en début de ligne. */
+@media (max-width: 720px) { .ep-meta { display: grid; justify-items: start; gap: 2px; } .ep-meta > * + *::before { content: none; } }
+/* Erreur hors d'un .champ-a (groupe de choix, dialogue) : même dessin que le formulaire type. */
+.err { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--danger); font-size: 13px; line-height: 1.45; }
+.err .ic { flex: none; margin-top: 2px; } .err b { font-weight: 600; }
+.confirm p.err { color: var(--danger); margin: 0 0 8px; }
+/* Symboles d'état dans une phrase : alignés sur le texte. */
+.confirm p .ic, .att .ic, .enreg .ic, .ecran-a p > .ic { display: inline-block; vertical-align: -1px; }
+/* Champs : focus simulé pour la capture (même dessin que :focus d'admin.css). */
+.is-focus { box-shadow: inset 0 0 0 2px var(--accent-ink), 0 0 0 4px var(--accent-soft) !important; }
+.btn.is-focus, a.is-focus, button.is-focus { box-shadow: none !important; outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+
+/* MQ-09, locaux : L6 fiche photo (grille photo + formulaire) · L7 suggestion de description · L8 liste de la photothèque avec légende des états · L9 messages d'action montrés côte à côte. */
+.help-link a { border-bottom: 0; text-decoration: underline; text-underline-offset: 3px; }
+.fiche { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; align-items: start; }
+.fiche-photo { position: sticky; top: 24px; margin: 0; border-radius: 8px; overflow: hidden; background: var(--photo-bg); }
+.fiche-photo img { display: block; width: 100%; height: auto; }
+.fiche-photo figcaption { padding: 8px 2px 0; background: var(--bg); color: var(--ink2); font-size: 12px; }
+.fiche-form { display: grid; gap: 18px; }
+.fiche-form h2 { margin: 8px 0 0; font-size: var(--at-h3); font-weight: 500; color: var(--ink2); }
+.fiche-form .hint { margin: 0; }
+.fiche-form .row > .champ-a { flex: 1 1 200px; }
+@media (max-width: 720px) { .fiche-photo { max-width: 260px; } }
+@media (max-width: 960px) { .fiche-photo { position: static; } .fiche { grid-template-columns: minmax(0, 1fr); gap: 16px; } .fiche-photo { max-width: 420px; } }
+.sugg-d { display: grid; gap: 8px; margin-top: 2px; padding: 12px 14px; border-radius: var(--r); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2); }
+.sugg-d p { margin: 0; }
+.sugg-d .t { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--ink); }
+.sugg-d .t .s { color: var(--accent-ink); }
+.sugg-d q { color: var(--ink); }
+.sugg-d .hint { color: var(--ink2); }
+.sugg-d .actions .btn { min-height: 32px; }
+@media (max-width: 720px), (pointer: coarse) { .sugg-d .actions .btn { min-height: 44px; } }
+.err .btn { margin-top: 6px; }
+.err-l { display: grid; gap: 6px; justify-items: start; }
+.toasts { display: grid; gap: 16px; justify-items: start; }
+.toast-ech { position: relative !important; z-index: auto !important; left: auto !important; bottom: auto !important; transform: none !important; display: inline-flex; max-width: 100%; }
+.toast-ech.pause .toast-temps { background: var(--ink2); }
+.toast-ech button.is-focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.confirm fieldset { margin: 12px 0 0; padding: 0; border: 0; display: grid; gap: 2px; }
+.confirm legend { padding: 0; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--ink); }
+.confirm label.inline { min-height: 32px; }
+@media (max-width: 720px), (pointer: coarse) { .confirm label.inline, .choix-v label.inline { min-height: 44px; } }
+.confirm .champ-a { margin-top: 12px; }
+.confirm textarea { min-height: 64px; }
+.confirm .actions { flex-wrap: wrap; }
+.comptes { display: grid; gap: 12px; }
+.comptes .panel { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; }
+.comptes .panel p { margin: 0; color: var(--ink2); font-size: 13px; }
+.comptes .av { width: 40px; height: 40px; }
+.comptes .who-c { display: grid; gap: 2px; }
+.comptes .who-c b { font-weight: 500; }
+.comptes .acts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+@media (max-width: 540px) { .comptes .panel { grid-template-columns: auto minmax(0, 1fr); } .comptes .acts { grid-column: 1 / -1; justify-content: flex-start; } }
+.mini { display: grid; gap: 12px; }
+.mini .panel { margin: 0; }
+.mini .ligne-s { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.mini .ligne-s p { margin: 0; }
+.statut-l { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0; padding: 10px 14px; border-radius: var(--r); background: var(--s1); box-shadow: inset 3px 0 0 var(--ok), inset 0 0 0 1px var(--line); }
+.statut-l .s { color: var(--accent-ink); }
+.statut-l .more, .ligne-s .more { display: inline-flex; align-items: center; min-height: 24px; }
+
+.duo-m { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+.liste-p { list-style: none; margin: 12px 0 0; padding: 0; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.liste-p li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); }
+.liste-p li:first-child { border-top: 0; }
+.liste-p img { width: 64px; height: 43px; object-fit: cover; border-radius: 5px; display: block; }
+.liste-p .t { display: grid; gap: 2px; min-width: 0; }
+.liste-p .t a { display: inline-flex; align-items: center; min-height: 24px; justify-self: start; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line2); }
+.liste-p .t small { color: var(--ink2); font-size: 12px; }
+.liste-p .ets { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+@media (max-width: 540px) { .liste-p li { grid-template-columns: 56px minmax(0, 1fr); } .liste-p .ets { grid-column: 2; justify-content: flex-start; } .liste-p img { width: 56px; height: 37px; } }
+.chips .n { margin-left: 4px; }
+@media (max-width: 720px), (pointer: coarse) { .statut-l .more, .ligne-s .more, .liste-p .t a { min-height: 44px; } }
+.lex { width: 100%; border-collapse: collapse; font-size: 13px; }
+.lex caption { text-align: left; font-size: var(--at-h3); font-weight: 500; padding-bottom: 8px; }
+.lex th, .lex td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.lex thead th { color: var(--ink2); font-weight: 500; }
+.lex tbody th { font-weight: 500; white-space: nowrap; }
+@media (max-width: 540px) { .lex, .lex tbody, .lex tr, .lex td, .lex th { display: block; } .lex thead { display: none; } .lex tr { padding: 8px 0; border-bottom: 1px solid var(--line); } .lex th, .lex td { padding: 2px 0; border: 0; } }
+</style>
 </head>
 <body class="admin">
-<a class="skip" href="#contenu">Aller au contenu</a><div class="shell"><aside class="side" id="admin-nav" aria-label="Menu"><a class="word" href="#"><span>Nicephos</span></a><div class="cmdk-row"><button class="cmdk" type="button" aria-keyshortcuts="Control+K"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button></div><nav class="mqnav" aria-label="Administration"><ul class="" aria-labelledby="g-top"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span class="l">Aujourd’hui</span></a></li></ul><p class="grp" id="g-photos">Photos</p><ul class="" aria-labelledby="g-photos"><li><a class="it cur" href="#" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg><span class="l">Photothèque</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/></svg><span class="l">Sorties</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg><span class="l">Voyages</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg><span class="l">Séries</span></a></li><li class="sub"><ul class="mqser" aria-label="Séries les plus utilisées"><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/ciel.webp" alt="" width="16" height="16"></span><span class="l">Voyage</span><span class="n">23</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/ruelle.webp" alt="" width="16" height="16"></span><span class="l">Rue</span><span class="n">8</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/dune.webp" alt="" width="16" height="16"></span><span class="l">Paysage</span><span class="n">7</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/portrait.webp" alt="" width="16" height="16"></span><span class="l">Portrait</span><span class="n">3</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/mer.webp" alt="" width="16" height="16"></span><span class="l">Atlantique</span><span class="n">2</span></a></li><li><a class="it all" href="#"><span class="l">Toutes les séries (7)</span></a></li></ul></li></ul><p class="grp" id="g-personnes">Personnes</p><ul class="" aria-labelledby="g-personnes"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg><span class="l">Personnes</span><span class="nav-badge" aria-hidden="true">1</span><span class="sr-only">, 1 nouvelle</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><span class="l">App de terrain</span></a></li></ul><p class="grp" id="g-publier">Publier</p><ul class="" aria-labelledby="g-publier"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 10.5l2.5 2.5L16 8"/></svg><span class="l">À valider</span><span class="nav-badge" aria-hidden="true">5</span><span class="sr-only">, 5 photos à valider</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg><span class="l">Site public</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg><span class="l">Instagram</span></a></li><li class="mqsoon"><span class="soon-l">Bientôt</span><ul aria-label="Bientôt dans Publier"><li>Carnets</li><li>Galeries privées</li><li>Boutique</li></ul></li></ul><p class="grp" id="g-equipe">Équipe</p><ul class="" aria-labelledby="g-equipe"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg><span class="l">Comptes et rôles</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 3 3v6.5M6 8.5V15a3 3 0 0 0 3 3h6.5"/></svg><span class="l">Circuit de publication</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span class="l">Journal</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="l">Statistiques</span></a></li></ul><hr class="mqsep"><ul class="" aria-labelledby="g-reglages"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span class="l">Réglages</span></a></li></ul></nav><div class="mqfoot"><div class="mqme"><a class="who-l" href="#"><span class="av" aria-hidden="true">J</span><span class="who">Julien<small>Administrateur<span class="sr-only"> · </span><span class="ml">Mon compte</span></small></span></a><form action="#" method="post"><button class="iconbtn" type="submit" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button></form></div><p class="mqlinks"><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg><span class="l">Aide</span></a><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><span class="l">Nouveautés</span></a></p></div></aside><div class="mq-fold" aria-hidden="true"><span>bas du premier écran</span></div><main class="main" id="contenu" tabindex="-1">
-<p class="help-link"><a href="#">Aide sur cette page</a></p>
-<nav class="crumbs" aria-label="Fil d’Ariane"><ol><li><a href="#">Photothèque</a></li><li><a href="#">Voyage</a></li><li><span aria-current="page">Miradouro, l’heure dorée</span></li></ol></nav>
-<div class="mq-ph-head">
-  <h1>Miradouro, l’heure dorée</h1>
-  <p class="stat" style="margin:0"><span class="mq-st pub"><svg class="sy" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Publiée</span><span class="hint">depuis le 12 oct., par Julien</span><a class="btn ghost" href="#unpub">Dépublier…</a><span class="pin" aria-hidden="true">7</span></p>
-</div>
-<div class="mq-fiche">
-  <figure class="mq-fig"><img src="_commun/photos/ciel.webp" alt="Aperçu de la photo : ciel rose au-dessus des collines, soleil bas." width="900" height="600"><figcaption>DSC_2117.jpg · 8 256 × 5 504 px · Julien · Nikon Z 7II</figcaption>
-    <dl class="mq-facts"><dt>Sur le site</dt><dd><a href="#">/photo/miradouro-l-heure-doree</a></dd><dt>Série</dt><dd>Voyage · carnet « Lisbonne et Porto »</dd><dt>Dernier enregistrement</dt><dd>aujourd’hui à 10 h 42, par Julien · <a href="#">Journal</a></dd></dl></figure>
-  <form class="mq-form" action="#" method="post" aria-labelledby="f-t" novalidate>
-    <h2 id="f-t" class="sr-only">Fiche de la photo</h2>
-    <section class="panel" aria-labelledby="s1">
-      <h3 id="s1" style="margin:0;font-weight:500;font-size:16px">Ce que voit le visiteur</h3>
-      <div><label for="ti" class="lbl">Titre <span class="req">(obligatoire)</span> <span class="mod" id="ti-m">Modifié</span></label><input id="ti" value="Miradouro, l’heure dorée" required aria-describedby="ti-m"></div>
-      <div><label for="le" class="lbl">Légende <span class="opt">(facultatif)</span> <span class="mod" id="le-m">Modifié</span></label><textarea id="le" rows="3" aria-describedby="le-m">Depuis le belvédère de la Graça, les toits d’Alfama prennent la dernière lumière.</textarea></div>
-      <div class="mq-ready" role="status">
-        <p class="h">Description prête<span class="pin" aria-hidden="true">3</span></p>
-        <blockquote lang="fr">« Une ville aux toits de tuiles sous un ciel rose, le soleil bas au-dessus des collines. »</blockquote>
-        <p class="hint" style="margin:0">Proposée par l’assistant, à relire. La page ne s’est pas rechargée : votre saisie est intacte.</p>
-        <span class="acts"><button class="btn ghost" type="button">Reprendre comme légende</button><button class="btn ghost" type="button">Ignorer</button></span>
-      </div>
-    </section>
-    <section class="panel" aria-labelledby="s2">
-      <h3 id="s2" style="margin:0;font-weight:500;font-size:16px">Où et quand</h3>
-      <div class="two">
-        <div><label for="da" class="lbl">Date <span class="ex" id="da-ex">ex. <span class="nw">oct. 2026</span>, 10/2026, <span class="nw">2026-10-16</span></span></label>
-          <input id="da" value="demain matin" aria-invalid="true" aria-describedby="da-err da-ex" class="mq-focus">
-          <p class="err-msg" id="da-err" role="alert"><span class="sy" aria-hidden="true">⚠</span><span>Erreur : date non comprise, essayez « <span class="nw">oct. 2026</span> » ou « <span class="nw">2026-10-16</span> ».</span><span class="pin" aria-hidden="true">5</span></p></div>
-        <div><label for="vi" class="lbl">Ville <span class="opt">(facultatif)</span></label><input id="vi" value="Lisbonne, Portugal"><span class="cap">pour la carte du monde · d’après le GPS</span></div>
-      </div>
-    </section>
-    <div class="mq-savebar" role="group" aria-label="Enregistrement">
-      <p class="what" style="margin:0" id="sv"><b class="mod">Modifié :</b> titre et légende<span class="pin" aria-hidden="true">1</span></p>
-      <span class="acts"><button class="btn ghost" type="reset">Annuler les modifications</button><button class="btn" type="submit" aria-describedby="sv">Enregistrer</button></span>
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="shell">
+<aside class="side" id="admin-nav" aria-label="Menu de l’administration">
+  <div class="side-haut"><a class="word" href="/admin"><span>Nicephos</span></a><button class="side-fermer" type="button" aria-controls="admin-nav" aria-expanded="true"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Fermer</button></div>
+  <button class="cmdk" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
+  <nav class="nav" aria-label="Aujourd’hui">
+    <a href="/admin"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui<span class="nav-badge urgent"><span aria-hidden="true">✕ 1</span><span class="sr-only">, 1 urgence</span></span></a>
+  </nav>
+  <p class="grp" id="nav-photos">Photos</p>
+  <nav class="nav" aria-labelledby="nav-photos">
+    <a href="/admin/photos" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
+    <div class="nav-ser"><a href="/admin/series"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a><details class="ser-plier"><summary aria-label="Afficher les 5 séries"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>5</summary>
+      <ul class="ser" aria-label="Séries">
+        <li><a href="/admin/photos?serie=atlantique"><span class="sw"><img src="_commun/photos/160/cais.webp" alt="" width="18" height="18"></span><span class="t">Atlantique</span><span class="n">3</span></a></li>
+        <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">5</span></a></li>
+        <li><a href="/admin/photos?serie=portrait"><span class="sw"><img src="_commun/photos/160/ines.webp" alt="" width="18" height="18"></span><span class="t">Portrait</span><span class="n">3</span></a></li>
+        <li><a href="/admin/photos?serie=rue"><span class="sw"><img src="_commun/photos/160/linge.webp" alt="" width="18" height="18"></span><span class="t">Rue</span><span class="n">7</span></a></li>
+        <li><a href="/admin/photos?serie=voyage"><span class="sw"><img src="_commun/photos/160/miradouro.webp" alt="" width="18" height="18"></span><span class="t">Voyage</span><span class="n">4</span></a></li>
+      </ul></details></div>
+    <a href="/admin/sorties"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/></svg>Sorties</a>
+    <a href="/admin/voyages"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg>Voyages</a>
+  </nav>
+  <p class="grp" id="nav-personnes">Personnes</p>
+  <nav class="nav" aria-labelledby="nav-personnes">
+    <a href="/admin/personnes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg>Personnes<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 nouvelle</span></span></a>
+    <a href="/admin/signalements"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg>Signalements<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 nouveau</span></span></a>
+    <a href="/admin/terrain"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>App de terrain</a>
+  </nav>
+  <p class="grp" id="nav-publier">Publier</p>
+  <nav class="nav" aria-labelledby="nav-publier">
+    <a href="/admin/a-valider"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg>À valider<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 photo</span></span></a>
+    <a href="/admin/site"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>Site public</a>
+    <a href="/admin/carnets"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <a href="/admin/galeries"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Galeries privées</a>
+    <a href="/admin/boutique"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 commande à préparer</span></span></a>
+    <a href="/admin/instagram"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>Instagram</a>
+  </nav>
+  <p class="grp" id="nav-equipe">Équipe</p>
+  <nav class="nav" aria-labelledby="nav-equipe">
+    <a href="/admin/comptes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg>Comptes et rôles</a>
+    <a href="/admin/circuit"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 3 3v6.5M6 8.5V15a3 3 0 0 0 3 3h6.5"/></svg>Circuit de publication</a>
+    <a href="/admin/journal"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Journal</a>
+    <a href="/admin/statistiques"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
+  </nav>
+  <div class="foot">
+    <nav class="pied-liens" aria-label="Réglages et aide">
+      <a href="/admin/reglages"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Réglages</a>
+      <a href="/admin/aide"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg>Aide</a>
+      <a href="/" target="_blank" rel="noopener"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Voir le site<span class="sr-only"> (nouvel onglet)</span></a>
+      <details class="lang-pick admin-lang">
+        <summary><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h9M8.5 3v2M6 5c.8 3.5 3 6 6 7.5M11 5c-.9 3.8-3.6 6.8-7 8"/><path d="M13 21l4-10 4 10M14.5 17.5h5"/></svg><span>FR</span><span class="sr-only"> – Langue de l’administration : français</span></summary>
+        <ul aria-label="Langue de l’administration : français">
+          <li><a href="/admin/langue?l=fr" lang="fr" aria-current="true">Français</a></li>
+          <li><a href="/admin/langue?l=en" lang="en">English</a></li>
+          <li><a href="/admin/langue?l=de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+    </nav>
+    <div class="me">
+      <a class="me-lien" href="/admin/compte"><span class="av" aria-hidden="true">J</span><span class="who"><span class="me-nom">Julien</span><span class="sr-only">, mon compte</span><small>Administrateur</small></span></a>
+      <button class="iconbtn btn-theme" type="button" aria-label="Passer en mode sombre" title="Passer en mode sombre"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+      <button class="iconbtn" type="button" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button>
     </div>
-  </form>
-</div>
-</main></div><nav class="tabbar" aria-label="Navigation rapide"><a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a><a href="#" aria-current="page"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photos</a><a class="imp" href="#" aria-label="Importer des photos"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></a><a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a><button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button></nav>
-<section class="mq-boards" aria-labelledby="mq-boards-t">
-  <h2 id="mq-boards-t">Composants communs</h2>
-  <p class="mq-lead">Une seule façon d’enregistrer, de confirmer et d’annuler, réutilisée sur toutes les pages : fiche, voyage, ouverture, comptes, séries.</p>
-  <div class="mq-grid">
-    <article class="mq-board" aria-labelledby="b1">
-      <h3 id="b1">Quitter une page modifiée <span class="pin" aria-hidden="true">2</span></h3>
-      <p class="mq-cap">Sur un lien interne comme à la fermeture de l’onglet. Le dialogue nomme ce qui serait perdu.</p>
-      <div class="mq-scrim"><div class="mq-dialog" role="dialog" aria-modal="false" aria-labelledby="d1t" aria-describedby="d1d">
-  <h3 class="dt" id="d1t">Modifications non enregistrées</h3>
-  <p id="d1d">Le titre et la légende ont changé. Si vous quittez maintenant, ces deux changements sont perdus.</p>
-  <p class="actions"><button class="btn" type="button">Enregistrer</button><button class="btn danger-o" type="button">Quitter sans enregistrer</button><button class="btn ghost mq-focus-btn" type="button">Rester</button></p>
-</div></div>
-    </article>
-    <article class="mq-board" aria-labelledby="b2">
-      <h3 id="b2">Supprimer : l’objet nommé, la conséquence dite <span class="pin" aria-hidden="true">4</span></h3>
-      <p class="mq-cap">Le même dialogue que la photothèque, pour un voyage comme pour un compte. « Annuler » est le choix par défaut.</p>
-      <div class="mq-scrim"><div class="mq-dialog" role="alertdialog" aria-modal="false" aria-labelledby="d2t" aria-describedby="d2d">
-  <h3 class="dt" id="d2t">Supprimer le voyage « Lisbonne, octobre 2026 » ?</h3>
-  <div id="d2d"><p>La page publique <span class="mono">/voyage/lisbonne-octobre-2026</span> disparaîtra : les liens déjà partagés ne mèneront plus nulle part.</p>
-  <p>Ses 2 sorties et ses 20 photos restent dans la photothèque.</p></div>
-  <p class="actions"><button class="btn ghost mq-focus-btn" type="button">Annuler</button><button class="btn danger-o" type="button">Supprimer le voyage</button></p>
-  <p class="hint" style="margin:8px 0 0">Le focus arrive sur « Annuler ». Après suppression : « Voyage supprimé · Annuler » pendant 10 s, puis dans le Journal.</p>
-</div></div>
-    </article>
-    <article class="mq-board" aria-labelledby="b3">
-      <h3 id="b3">« Annuler » qui attend <span class="pin" aria-hidden="true">6</span></h3>
-      <p class="mq-cap">Message d’action dans une région toujours présente, atteignable et durable.</p>
-      <div class="mq-toastdemo">
-  <div class="mq-toast" role="status"><span>5 photos publiées</span><span class="cd"><span class="ring" aria-hidden="true"></span>en pause</span><button type="button">Annuler</button></div>
-  <p class="hint" style="margin:0;text-align:center;max-width:52ch">Le délai de 10 s s’arrête tant que la souris ou le focus est sur le message ; « Ctrl Z » l’atteint d’un geste. Après l’action, le focus revient sur le bouton qui l’a lancée.</p>
-</div>
-    </article>
-    <article class="mq-board" aria-labelledby="b4">
-      <h3 id="b4">Un seul chemin pour dépublier <span class="pin" aria-hidden="true">7</span></h3>
-      <p class="mq-cap">Plus de boutons radio « Brouillon / Publiée » : la raison est toujours demandée.</p>
-      <div class="mq-scrim"><div class="mq-dialog" role="dialog" aria-modal="false" aria-labelledby="d3t" id="unpub">
-  <h3 class="dt" id="d3t">Dépublier « Miradouro, l’heure dorée »</h3>
-  <p>La photo quitte le site et la série Voyage ; elle redevient un brouillon. Julien reçoit la raison.</p>
-  <label for="rs" class="lbl">Pourquoi ? <span class="req">(obligatoire)</span></label>
-  <textarea id="rs" rows="2" required>Une personne reconnaissable au premier plan a retiré son accord.</textarea>
-  <p class="actions" style="margin-top:14px"><button class="btn ghost" type="button">Annuler</button><button class="btn" type="button">Dépublier</button></p>
-</div></div>
-    </article>
-    <article class="mq-board wide" aria-labelledby="b5">
-      <h3 id="b5">La pastille d’état commune et sa légende <span class="pin" aria-hidden="true">8</span></h3>
-      <p class="mq-cap">Un symbole et un mot, la couleur ne fait que doubler : lisible en noir et blanc et par un daltonien. La même dans la photothèque, le lot, À valider, les voyages et Instagram.</p>
-      <dl class="mq-legend">
-  <div><dt><span class="mq-st draft"><svg class="sy" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Brouillon</span></dt><dd>visible de l’équipe seulement</dd></div>
-  <div><dt><span class="mq-st prop"><svg class="sy" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 1.6a4.4 4.4 0 0 0 0 8.8z" fill="currentColor"/></svg>Proposée</span></dt><dd>attend le modérateur</dd></div>
-  <div><dt><span class="mq-st pub"><svg class="sy" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Publiée</span></dt><dd>en ligne sur le site</dd></div>
-  <div><dt><span class="mq-st warn"><span class="sy" aria-hidden="true">▲</span>À vérifier</span></dt><dd>un accord ou un titre manque</dd></div>
-  <div><dt><span class="mq-st no"><span class="sy" aria-hidden="true">✕</span>Bloquée</span></dt><dd>refus d’une personne : non publiable</dd></div>
-</dl>
-    </article>
-    <article class="mq-board wide" aria-labelledby="b6">
-      <h3 id="b6">Le focus des champs en mode clair <span class="pin" aria-hidden="true">9</span></h3>
-      <p class="mq-cap">Comme pour les boutons depuis la revue d’octobre.</p>
-      <div class="mq-focusdemo">
-  <label for="fx" class="lbl">Lieu affiché <span class="opt">(facultatif)</span></label><input id="fx" value="Miradouro da Graça" class="mq-focus">
-  <p class="hint" style="margin:0"><span class="swatch" style="background:#9a5b0c"></span>contour de 2 px #9A5B0C : 4,7:1 sur le champ (#F1EEE8), 5,2:1 sur le blanc ; le halo orange reste en complément. Avant : 1,7:1.</p>
-</div>
-    </article>
   </div>
-</section>
-<aside class="mq-notes" aria-labelledby="mq-notes-t"><p class="mq-id">Maquette MQ-09 · administration · thème clair · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p><h2 id="mq-notes-t">Ce qui change</h2><p class="mq-lead">Les repères numérotés renvoient à cette liste. Les composants sont dessinés sur la fiche photo ; ils valent pour toute l’administration.</p><ol><li><span class="pin" aria-hidden="true">1</span><div><strong>Un seul bouton « Enregistrer », et « Modifié » à côté.</strong> La barre dit ce qui a changé (« titre et légende ») ; chaque champ modifié porte « Modifié » en texte. Sur téléphone, elle est collée en bas de l’écran (posée ici en fin de formulaire pour la capture), et scroll-padding-bottom garde le champ focalisé au-dessus d’elle.<span class="ref"><b>UX-A-06</b> · <b>UX-A-09</b> · B&amp;S 1.3 Feedback immédiat · B&amp;S 6 Homogénéité · WCAG 2.4.11 · Nielsen #1</span></div></li><li><span class="pin" aria-hidden="true">2</span><div><strong>Rien ne se perd en partant.</strong> Un lien interne ou la fermeture de l’onglet ouvrent « Modifications non enregistrées » ; le focus est sur « Rester ».<span class="ref"><b>UX-A-06</b> · B&amp;S 5.1 Protection contre les erreurs · ISO 9241-110 Robustesse · Nielsen #3</span></div></li><li><span class="pin" aria-hidden="true">3</span><div><strong>La description arrive sans recharger.</strong> Annoncée en role="status" ; « Reprendre » remplit le champ, la saisie en cours reste.<span class="ref"><b>UX-A-05</b> · RGAA 13.1 · WCAG 2.2.1 et 3.2.5 · Opquast 239 · B&amp;S 3.2</span></div></li><li><span class="pin" aria-hidden="true">4</span><div><strong>Supprimer, c’est nommer et prévenir.</strong> Titre du voyage, adresse publique qui disparaît, ce qui reste ; « Annuler » par défaut, puis 10 s pour revenir en arrière.<span class="ref"><b>UX-A-07</b> · B&amp;S 3.1 Actions explicites · WCAG 3.3.4 · Nielsen #5</span></div></li><li><span class="pin" aria-hidden="true">5</span><div><strong>L’erreur sous le champ.</strong> « ⚠ Erreur : date non comprise… », reliée par aria-describedby et annoncée en role="alert" ; le format est dans le libellé visible, plus dans un placeholder.<span class="ref"><b>UX-A-14</b> · <b>UX-A-23</b> · RGAA 11.10 · WCAG 3.3.1 et 3.3.3 · B&amp;S 5.2</span></div></li><li><span class="pin" aria-hidden="true">6</span><div><strong>« Annuler » attend qu’on l’atteigne.</strong> Le minuteur se met en pause au survol et au focus ; le focus revient sur le déclencheur ; Ctrl Z annule la dernière action.<span class="ref"><b>UX-A-08</b> · RGAA 7.3 et 12.8 · WCAG 2.2.1 et 2.4.3 · Nielsen #3</span></div></li><li><span class="pin" aria-hidden="true">7</span><div><strong>Un statut, une commande.</strong> « Publiée · Dépublier… » avec la raison obligatoire ; « (obligatoire) » et « (facultatif) » écrits dans les libellés.<span class="ref"><b>UX-A-23</b> · <b>UX-A-16</b> · B&amp;S 6 · RGAA 11.10 · WCAG 3.3.2</span></div></li><li><span class="pin" aria-hidden="true">8</span><div><strong>Une pastille d’état pour toute l’admin.</strong> ○ Brouillon · ◐ Proposée · ● Publiée · ▲ À vérifier · ✕ Bloquée, symbole et mot, avec sa légende dans l’aide.<span class="ref"><b>UX-A-16</b> · RGAA 3.1 · WCAG 1.4.1 · B&amp;S 7 Signifiance des codes · Nielsen #2</span></div></li><li><span class="pin" aria-hidden="true">9</span><div><strong>Le focus visible des champs.</strong> Contour de 2 px #9A5B0C, 4,7:1, sur les champs, listes et cases en mode clair.<span class="ref"><b>UX-A-27</b> · RGAA 10.7 · WCAG 1.4.11 et 2.4.7</span></div></li></ol><p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette) — Axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation sur bureau (1 440 px) et sur téléphone (412 px) ; aucun débordement horizontal. Au premier écran de bureau : photo, titre, légende, description prête, erreur de date et barre « Enregistrer » tiennent au-dessus de 900 px. Focus des champs en mode clair : contour #9A5B0C à 4,7:1 (avant : 1,7:1).</p></aside>
+</aside>
+<main class="main" id="contenu" tabindex="-1">
+  <p class="help-link"><a href="/admin/aide/photos#la-fiche">Aide sur cette page</a></p>
+  <header class="ep">
+    <a class="ep-retour" href="/admin/photos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Photothèque</a>
+    <div class="ep-titre"><h1>Foz, la barre</h1><span class="mq-a"><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Publiée</span><span class="mq-pin d" aria-hidden="true">2</span></span></div>
+    <p class="ep-meta"><span>Sébastien</span><span>publiée le 12 oct. 2026</span><span role="status" class="mq-a"><a class="enreg enreg--attente" href="#date"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>1 champ non enregistré : date</a><span class="mq-pin d" aria-hidden="true">1</span></span></p>
+    <div class="ep-actions">
+      <details class="menu ep-plus"><summary class="btn ghost" aria-label="Plus d’actions"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></summary><div class="menu-pop"><button type="button">Dépublier…</button></div></details>
+      <a class="btn ghost" href="/photo/foz-la-barre" target="_blank" rel="noopener">Voir sur le site<span class="sr-only"> (nouvel onglet)</span></a>
+      <button class="btn danger-c ep-secondaire" type="button">Dépublier…</button>
+    </div>
+  </header>
+  <div class="fiche">
+    <figure class="fiche-photo"><img src="_commun/photos/480/foz.webp" width="480" height="320" alt="La houle de l’Atlantique roule vers un petit phare allumé."><figcaption>Foz do Douro, Porto · dim. 11 oct. 2026, 17 h 20</figcaption></figure>
+    <form class="form fiche-form" action="/admin/photos/16" method="post" novalidate>
+      <p class="hint mq-a"><span class="mq-pin" aria-hidden="true">3</span>Tous les champs sont obligatoires, sauf mention « facultatif ». Chacun s’enregistre quand vous le quittez.</p>
+      <h2>Ce que voit le visiteur</h2>
+      <div class="champ-a"><label for="titre">Titre</label><p class="aide" id="titre-a">Sous la photo. L’adresse de sa page, /photo/foz-la-barre, ne change plus.</p><input id="titre" value="Foz, la barre" aria-describedby="titre-a"></div>
+      <div class="champ-a"><label for="leg" class="mq-a"><span class="mq-pin" aria-hidden="true">4</span>Légende <span class="facultatif">(facultatif)</span></label><textarea id="leg" class="is-focus" rows="2">Là où le fleuve devient l’océan, ça cogne. Le vent tient la mer debout.</textarea></div>
+      <div class="champ-a"><label for="alt">Texte de remplacement</label><p class="aide" id="alt-a">Lu par les personnes aveugles à la place de la photo : ce qu’on y voit, en une phrase.</p><textarea id="alt" rows="2" aria-describedby="alt-a">La houle de l’Atlantique roule vers un petit phare allumé.</textarea>
+        <div class="sugg-d mq-a" role="status"><span class="mq-pin" aria-hidden="true">5</span><p class="t"><span class="s" aria-hidden="true">✦</span>Suggestion de description, arrivée à 22 h 56</p><p><q>Des vagues roulent vers un petit phare au bout d’une jetée, sous un ciel gris.</q></p><p class="hint">Traduite de l’anglais. À relire : elle ne remplace rien d’elle-même.</p>
+          <div class="actions"><button class="btn ghost" type="button">Reprendre ce texte</button><button class="btn ghost" type="button">Ignorer</button></div></div></div>
+      <h2>Où et quand</h2>
+      <div class="row">
+        <div class="champ-a"><label for="serie">Série</label><select id="serie"><option selected>Atlantique</option><option>Paysage</option><option>Portrait</option><option>Rue</option><option>Voyage</option></select></div>
+        <div class="champ-a"><label for="lieu">Lieu</label><input id="lieu" value="Foz do Douro, Porto"></div>
+      </div>
+      <div class="champ-a mq-a"><span class="mq-pin" aria-hidden="true">6</span><label for="date">Date de la prise de vue</label><p class="aide" id="date-a">Écrivez-la comme vous voulez : « 11/10/2026 », « 11 oct. 2026 », « octobre 2026 ». L’appareil indique le 11 oct. 2026 à 17 h 20.</p><input id="date" value="11 oct. 2062" aria-invalid="true" aria-describedby="date-a date-e">
+        <div class="err-l"><p class="err" id="date-e"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> 11 oct. 2062 est dans le futur : la date n’est pas enregistrée. Vouliez-vous écrire 11 oct. 2026 ?</span></p><button class="btn ghost" type="button">Corriger en 11 oct. 2026</button></div></div>
+    </form>
+  </div>
+</main>
+</div>
+<nav class="tabbar" aria-label="Navigation rapide">
+  <a href="/admin"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
+  <a href="/admin/photos" aria-current="page"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photos</a>
+  <a class="imp" href="/admin/photos?importer#import" aria-label="Importer des photos"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></a>
+  <a href="/admin/rencontre/accueil"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
+  <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
+</nav>
+<div class="etats-a" role="region" aria-label="Autres états de l’écran">
+<div class="mq-ecran"><p class="mq-etat">État · Quitter la fiche avec une date refusée</p>
+  <div class="voile-a">
+    <div class="confirm mq-a" role="dialog" aria-modal="false" aria-labelledby="dq-t" aria-describedby="dq-d"><span class="mq-pin" aria-hidden="true">7</span>
+      <h2 id="dq-t">Quitter sans enregistrer la date ?</h2>
+      <p id="dq-d">« 11 oct. 2062 » n’est pas enregistrée : elle est dans le futur. Le titre, la légende et le texte de remplacement le sont déjà.</p>
+      <div class="actions"><button class="btn ghost is-focus" type="button">Annuler</button><button class="btn" type="button">Quitter sans la date</button></div>
+    </div>
+  </div></div>
+<div class="mq-ecran"><p class="mq-etat">État · Message d’action : en pause, défait, en erreur</p>
+  <div class="ecran-a mq-a"><span class="mq-pin" aria-hidden="true">8</span><div class="toasts">
+    <div class="toast toast-ech pause" role="status"><p><b>Légende</b> enregistrée.</p><button type="button" class="is-focus">Défaire</button><span class="toast-temps" style="--reste: 70%"></span></div>
+    <div class="toast toast-ech " role="status"><p><b>Légende</b> rétablie, comme à 22 h 51.</p></div>
+    <div class="toast toast-ech error" role="alert"><p><b>Erreur :</b> légende non enregistrée, réseau coupé.</p><button type="button">Réessayer</button></div>
+  </div></div></div>
+<div class="mq-ecran large"><p class="mq-etat">État · Dépublier : la raison est demandée</p>
+  <div class="voile-a">
+    <div class="confirm mq-a" role="dialog" aria-modal="false" aria-labelledby="dd-t" aria-describedby="dd-d"><span class="mq-pin" aria-hidden="true">9</span><form action="/admin/photos/16/depublier" method="post" novalidate>
+      <h2 id="dd-t">Dépublier « Foz, la barre » ?</h2>
+      <p id="dd-d">La photo quitte la galerie, la série Atlantique et la carte ; son adresse mène à la galerie. Sébastien reçoit la raison. « Republier » la remettra en ligne.</p>
+      <fieldset aria-describedby="dd-e" class="choix-v"><legend id="dd-r">Raison</legend>
+        <p class="err" id="dd-e"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> choisissez une raison : Sébastien la recevra.</span></p>
+        <label class="inline"><input type="radio" name="raison" aria-invalid="true"> Une personne photographiée a retiré son accord</label>
+        <label class="inline"><input type="radio" name="raison" aria-invalid="true"> Titre, légende ou lieu à revoir</label>
+        <label class="inline"><input type="radio" name="raison" aria-invalid="true"> Autre raison, dite dans le message</label>
+      </fieldset>
+      <div class="champ-a"><label for="dd-m">Message pour Sébastien <span class="facultatif">(facultatif)</span></label><textarea id="dd-m" rows="2">On en parle demain ?</textarea></div>
+      <div class="actions"><button class="btn ghost" type="button">Annuler</button><button class="btn danger" type="submit">Dépublier la photo</button></div>
+    </form></div>
+  </div></div>
+<div class="mq-ecran large"><p class="mq-etat">État · Comptes : désactiver avant de supprimer</p>
+  <div class="ecran-a">
+    <h2 class="titre-ecran">Comptes et rôles</h2>
+    <div class="comptes mq-a"><span class="mq-pin" aria-hidden="true">10</span>
+      <article class="panel"><span class="av" aria-hidden="true">S</span><div class="who-c"><b>Sébastien Exemple</b><p>Photographe · <span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Actif</span></p></div><div class="acts"><a class="btn ghost" href="/admin/comptes/sebastien">Modifier<span class="sr-only"> Sébastien Exemple</span></a><button class="btn ghost" type="button">Désactiver…<span class="sr-only"> Sébastien Exemple</span></button></div></article>
+      <article class="panel"><span class="av" aria-hidden="true">C</span><div class="who-c"><b>Camille Exemple</b><p>Relectrice · <span class="etat etat--arret"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg>Désactivé le 2 oct.</span></p></div><div class="acts"><button class="btn ghost" type="button">Réactiver<span class="sr-only"> Camille Exemple</span></button><button class="btn danger-c" type="button">Supprimer le compte…<span class="sr-only"> de Camille Exemple</span></button></div></article>
+    </div>
+    <div class="voile-a" style="margin-top:24px">
+      <div class="confirm" role="dialog" aria-modal="false" aria-labelledby="dc-t" aria-describedby="dc-d">
+        <h2 id="dc-t">Supprimer le compte de Camille Exemple ?</h2>
+        <p id="dc-d">Ses 14 traductions restent sur le site, et le Journal garde son nom. Le compte ne pourra pas être rétabli : pour lui rendre l’accès, il faudra en créer un nouveau.</p>
+        <div class="actions"><button class="btn ghost is-focus" type="button">Annuler</button><button class="btn danger" type="button">Supprimer le compte de Camille</button></div>
+      </div>
+    </div>
+  </div></div>
+<div class="mq-ecran"><p class="mq-etat">État · Séries et Instagram : rien ne se recharge</p>
+  <div class="ecran-a mini">
+    <h2 class="titre-ecran" style="margin:0">Séries</h2>
+    <p class="statut-l mq-a" role="status"><span class="mq-pin" aria-hidden="true">11</span><span class="s" aria-hidden="true">✦</span><span>2 nouvelles suggestions de série sont prêtes.</span><a class="more" href="/admin/photos?serie=suggeree">Les voir</a></p>
+    <div class="panel"><div class="champ-a"><label for="ren">Nom de la série</label><input id="ren" class="is-focus" value="Atlantique, de Lisbonne à Porto"></div></div>
+    <h2 class="titre-ecran" style="margin:8px 0 0">Instagram</h2>
+    <div class="panel ligne-s"><img src="_commun/photos/160/cais.webp" alt="" width="64" height="43" style="border-radius:5px;object-fit:cover"><p><b>Cais do Sodré, marée basse</b><br><span class="hint">Publiée sur Instagram à 22 h 50</span></p><a class="more" href="https://www.instagram.com/" target="_blank" rel="noopener">Voir le post<span class="sr-only"> (nouvel onglet)</span></a></div>
+  </div></div>
+<div class="mq-ecran"><p class="mq-etat">État · Aide : les mots de l’administration</p>
+  <div class="ecran-a mq-a"><span class="mq-pin" aria-hidden="true">12</span>
+    <table class="lex"><caption>Un mot, un seul sens</caption>
+      <thead><tr><th scope="col">Mot</th><th scope="col">Ce qu’il fait</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Annuler</th><td>Ne rien faire : ferme un dialogue sans rien changer.</td></tr>
+        <tr><th scope="row">Défaire</th><td>Revient sur le geste qu’on vient de faire, pendant 10 s.</td></tr>
+        <tr><th scope="row">Revenir à la version enregistrée</th><td>Oublie ce qui n’est pas encore mis en ligne (mentions légales).</td></tr>
+        <tr><th scope="row">✦ Suggestion</th><td>Ce que propose un assistant ; rien ne change sans votre clic.</td></tr>
+        <tr><th scope="row">Proposée</th><td>Un état : la photo attend le modérateur.</td></tr>
+        <tr><th scope="row">prête</th><td>Le traitement des images est fini, et rien d’autre.</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+<div class="mq-ecran large"><p class="mq-etat">État · Photothèque : pastilles et filtres</p>
+  <div class="ecran-a">
+    <nav class="chips mq-a" aria-label="Filtrer par état"><span class="mq-pin" aria-hidden="true">13</span><a class="chip" href="/admin/photos">Toutes<span class="n">26</span></a><a class="chip" href="/admin/photos?etat=brouillon" aria-current="page">Brouillons<span class="n">3</span></a><a class="chip" href="/admin/photos?etat=proposee">Proposées<span class="n">1</span></a><a class="chip" href="/admin/photos?etat=publiee">Publiées<span class="n">22</span></a><a class="chip warn" href="/admin/photos?etat=accord">Accord à vérifier<span class="n">1</span></a><a class="chip" href="/admin/photos?etat=depubliee">Dépubliées<span class="n">0</span></a></nav>
+    <ul class="liste-p" aria-label="Photos non publiées">
+      <li><img src="_commun/photos/160/pont.webp" alt="" width="64" height="43"><span class="t"><a href="/admin/photos/x">Pont Dom-Luís, le soir</a><small>Julien · Porto · 11 oct. 2026</small></span><span class="ets"><span class="etat etat--encours"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Proposée</span></span></li>
+      <li><img src="_commun/photos/160/ligny.webp" alt="" width="64" height="43"><span class="t"><a href="/admin/photos/x">Quai Ligny, soir</a><small>Sébastien · Angers · 14 oct. 2026</small></span><span class="ets"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</span><span class="etat etat--attention"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Accord à vérifier</span></span></li>
+      <li><img src="_commun/photos/160/maine.webp" alt="" width="64" height="43"><span class="t"><a href="/admin/photos/x">Minoterie, brume du matin</a><small>Sébastien · Angers · 14 oct. 2026</small></span><span class="ets"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</span></span></li>
+      <li><img src="_commun/photos/160/reverberes.webp" alt="" width="64" height="43"><span class="t"><a href="/admin/photos/x">R0004057</a><small>Sébastien · titre provisoire</small></span><span class="ets"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</span></span></li>
+    </ul>
+    <ul class="etats-legende" aria-label="Légende des états">
+      <li><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</li><li><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Proposée, attend le modérateur</li><li><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Publiée</li><li><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Accord à vérifier</li><li><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg>Dépubliée ou refusée</li>
+    </ul>
+  </div></div>
+<div class="mq-ecran large" lang="de"><p class="mq-etat" lang="fr">État · En allemand : quitter, Rückgängig</p>
+  <div class="ecran-a">
+    <div class="ep mq-a" style="margin-bottom:16px"><span class="mq-pin" aria-hidden="true">14</span><a class="ep-retour" href="/admin/photos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Fotothek</a><div class="ep-titre"><h2 class="titre-ecran" style="margin:0">Foz, die Brandung</h2><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Veröffentlicht</span></div>
+      <p class="ep-meta"><span>Sébastien</span><span><a class="enreg enreg--attente" href="#de-q"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>1 Feld nicht gespeichert: Datum</a></span></p></div>
+    <div class="voile-a">
+      <div class="confirm" role="dialog" aria-modal="false" aria-labelledby="de-q" aria-describedby="de-d">
+        <h2 id="de-q">Ohne das Datum verlassen?</h2>
+        <p id="de-d">„11. Okt. 2062“ ist nicht gespeichert: Das Datum liegt in der Zukunft. Titel, Bildunterschrift und Alternativtext sind bereits gespeichert.</p>
+        <div class="actions"><button class="btn ghost is-focus" type="button">Abbrechen</button><button class="btn" type="button">Ohne das Datum verlassen</button></div>
+      </div>
+    </div>
+    <div style="margin-top:24px" class="toast toast-ech " role="status"><p><b>Bildunterschrift</b> gespeichert.</p><button type="button">Rückgängig</button><span class="toast-temps" style="--reste: 55%"></span></div>
+  </div></div>
+</div>
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MQ-09 · administration · thème clair · bureau 1 440 × 900 et Pixel 7 · Julien, administrateur, vendredi 16 oct. 2026, 22 h 58</p>
+  <h2 id="mq-t">Ce qui change</h2>
+  <p class="mq-lead">Julien revoit la fiche de « Foz, la barre », photo publiée de Sébastien. Une seule règle d’enregistrement, un seul message d’action, un seul dialogue de confirmation, une seule pastille : ceux de la planche MQ-00, assemblés ici dans leur usage. Comparé à photo.eta, accounts.eta et admin.js de main ; le commit 0d1925c a déjà corrigé une partie de UX-A-05, 07, 08 et 27, ce que chaque repère précise.</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>Un témoin, une règle</b><p>Chaque champ s’enregistre quand on le quitte ; le témoin de l’en-tête dit ce qui ne l’est pas (« 1 champ non enregistré : date ») et mène au champ. Plus de « • Modifié » ni de bouton « Enregistrer » sur la fiche : seuls Publier et Dépublier engagent.</p><span class="mq-ref">UX-A-06 · règle MQ-00 § 12 · B&S 1.3</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>Une pastille, une commande de statut</b><p>● Publiée, avec la couleur et le mot ; la seule façon de retirer la photo est « Dépublier… », qui demande une raison. Plus de boutons radio Brouillon / Publiée qui la contournaient.</p><span class="mq-ref">UX-A-23 · UX-A-16 · B&S 6</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Ce qui est obligatoire, dit avant</b><p>Une phrase en tête du formulaire, « (facultatif) » sur les seuls champs facultatifs, comme dans l’app de terrain.</p><span class="mq-ref">UX-A-23 · RGAA 11.10 · WCAG 3.3.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Le focus se voit en mode clair</b><p>Contour intérieur de 2 px --accent-ink (4,7:1 sur le champ) et halo : c’est déjà dans main (0d1925c) ; la maquette le montre sur la légende en cours de saisie.</p><span class="mq-ref">UX-A-27 · RGAA 10.7 · WCAG 2.4.7, 1.4.11</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>La suggestion arrive sans recharger</b><p>Demandée à 22 h 55, elle s’écrit dans son bloc (role="status") pendant que Julien tape la légende ; « Reprendre ce texte » ou « Ignorer ». Main ne recharge déjà plus la fiche (0d1925c) ; la maquette étend la règle à Séries et Instagram (état 11).</p><span class="mq-ref">UX-A-05 · WCAG 3.2.5 · B&S 3</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Une date refusée, dite sous le champ, avec la correction</b><p>Le message occupe la largeur du bloc, dit ce qui ne va pas et ce qui n’est pas enregistré, puis propose « Corriger en 11 oct. 2026 » ; le format attendu est dans l’aide, au-dessus du champ, pas dans un message éphémère.</p><span class="mq-ref">UX-A-14 · UX-A-23 · RGAA 11.10 · WCAG 3.3.1, 3.3.3</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Partir n’efface rien en silence</b><p>Seul un champ refusé retient la page : le dialogue dit ce qui sera perdu et ce qui est déjà enregistré. [Annuler] d’abord, avec le focus.</p><span class="mq-ref">UX-A-06 · B&S 5.1 · dialogue MQ-00</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Un message d’action, trois états</b><p>En pause tant que le focus est sur « Défaire » (barre de temps arrêtée) ; « rétablie » après Défaire, le focus revient au champ ; l’erreur, en role="alert", reste jusqu’à « Réessayer ». « Défaire » et non « Annuler ».</p><span class="mq-ref">UX-A-08 · RGAA 7.3, 7.5 · WCAG 2.2.1 · lexique MQ-00</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Dépublier demande une raison, et le dit sous le choix</b><p>Le dialogue nomme la photo et les conséquences ; sans raison choisie, l’erreur s’affiche dans le groupe et le dialogue reste ouvert. Le bouton répète l’objet, plein et en danger, seulement ici.</p><span class="mq-ref">UX-A-23 · UX-A-07 · B&S 3.1 · WCAG 3.3.4</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>Un compte se désactive avant de se supprimer</b><p>Main demande déjà confirmation (0d1925c) ; la maquette ajoute l’étape : « Supprimer le compte… » n’existe que sur un compte désactivé, et le dialogue dit ce qui reste.</p><span class="mq-ref">UX-A-07 · B&S 5.1 · ISO 9241-110 contrôlabilité</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>Séries et Instagram ne se rechargent plus</b><p>Les nouvelles suggestions s’annoncent dans une ligne d’état pendant qu’on renomme une série ; le lien « Voir le post » reste à sa place.</p><span class="mq-ref">UX-A-05 · WCAG 3.2.5</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>Les mots de l’administration, une fois pour toutes</b><p>La page d’aide le dit en six lignes : Annuler, Défaire, Revenir à la version enregistrée, ✦ Suggestion, Proposée, prête.</p><span class="mq-ref">UX-A-16 · B&S 7 · lexique MQ-00</span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>Une seule pastille, une légende, des filtres aux noms des états</b><p>○ ◐ ● ▲ ✕, une couleur fixe par symbole, le mot toujours écrit ; la légende sur une ligne sous la liste ; les filtres disent « Brouillons », « Proposées », « Accord à vérifier ».</p><span class="mq-ref">UX-A-16 · RGAA 3.1 · WCAG 1.4.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">14</span><b>L’allemand tient</b><p>« 1 Feld nicht gespeichert: Datum », « Ohne das Datum verlassen? », « Rückgängig » : rien n’est coupé, les boutons passent à la ligne au téléphone.</p><span class="mq-ref">Grille, critère 4</span></li>
+  </ol>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur, outils/inspect.sh) · axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation au bureau, au téléphone et à 320, 820 et 1 024 px · Débordement horizontal : 0 à 320, 412, 820, 1 024 et 1 440 px · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher (outils/mq00-cibles.mjs, liens dans une phrase exemptés) · Poids : 253 ko, 21 requêtes (photo de la fiche en 480 px, 13 ko d’images en tout) ; aucun script, aucune ressource tierce · Focus des champs en clair : 2 px --accent-ink, 4,7:1 (main, 0d1925c) · Sans annotations : 14 pastilles, 8 étiquettes et cadres retirés ; 0 pixel déplacé hors de leur emprise sur 4 512 px au bureau et 6 908 px au téléphone (1 px d’anticrénelage).</p>
+</aside>
 </body>
 </html>

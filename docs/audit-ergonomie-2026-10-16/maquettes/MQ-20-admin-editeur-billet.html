@@ -1,700 +1,448 @@
 <!doctype html>
-<!-- MQ-20 — Admin : éditeur de billet (Carnets). Maquette de l'audit du 16 octobre 2026 (Camille Arnaud).
-     Styles de l'administration (_commun/admin.css, « Chambre noire » ou clair selon le système), photos de démonstration.
-     Aucun script : les états (enregistré, bloc sélectionné, focus, aperçu, onglet EN) sont figés pour la démonstration. -->
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex">
-  <meta name="color-scheme" content="dark light">
-  <title>Lisbonne et Porto · Carnets · Administration · Nicephos — maquette MQ-20</title>
-  <link rel="stylesheet" href="_commun/admin.css">
-  <style>
-    /* MQ-20 — composants nouveaux. Tout passe par les variables d'admin.css. */
-
-    /* Maquette : la barre latérale garde sa hauteur naturelle pour la capture pleine page. */
-    .side { height: auto; align-self: start; }
-    /* Capture pleine page : le fond de la barre latérale descend jusqu’en bas de la page (audit, B). */
-    @media (min-width: 721px) { .shell { background: linear-gradient(90deg, var(--s1) 0 var(--side), transparent var(--side)); } .shell > .side { border-right: 0; } .shell::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--side) - 1px); border-left: 1px solid var(--line); } .shell { position: relative; } }
-    .side .foot { margin-top: 18px; }
-    .nav-sub { list-style: none; margin: 0 0 2px; padding: 0 0 0 30px; display: grid; gap: 2px; }
-    .nav-sub a { min-height: 30px; font-size: 13.5px; }
-    .me-link { display: flex; align-items: center; gap: 10px; padding: 4px 6px; border-radius: 8px; }
-    .me-link:hover { background: var(--s2); }
-    .side .foot .nav a { min-height: 30px; }
-
-    /* Repères d'annotation (la légende est en bas de page). */
-    
-    .mq-screen { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 18px; padding-top: 10px; border-top: 1px dashed var(--line2); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink2); }
-    .mq-screen b { color: var(--accent-ink); font-weight: 600; }
-    .mq-screen code { text-transform: none; letter-spacing: 0; }
-    .mq-first { border-top: 0; padding-top: 0; padding-right: 160px; }
-    .mq-focus { outline: 2px solid var(--accent-ink) !important; outline-offset: 2px; }
-    select.mq-focus, input.mq-focus, textarea.mq-focus { outline: none !important; box-shadow: inset 0 0 0 1.5px var(--accent), 0 0 0 4px var(--accent-soft); }
-
-    /* Fil d'Ariane et en-tête */
-    .crumbs ol { list-style: none; margin: 0 0 6px; padding: 0; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink3); }
-    .crumbs li + li::before { content: "›"; margin-right: 8px; color: var(--ink3); }
-    .crumbs a { color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
-    .e-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 20px; margin: 0 0 16px; }
-    .e-top h1 { margin: 0 0 6px; }
-    .e-top .sub { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0; }
-    .e-top .sub a { color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; }
-    .e-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
-    .saved-st { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 4px 0 12px; border-radius: 9px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); font-size: 13px; color: var(--ink2); }
-    .saved-st .ok { color: var(--ok); font-weight: 600; }
-    .saved-st button { min-height: 30px; padding: 0 10px; border-radius: 7px; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; font-size: 13px; }
-    .saved-st button:hover { background: var(--s2); }
-
-    /* Pastille d'état commune (MQ-09) : une forme ET un mot, jamais la couleur seule. */
-    .etat { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 999px; font-size: 12.5px; line-height: 1.3; color: var(--ink); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); white-space: nowrap; }
-    .etat .sym { font-size: 13px; line-height: 1; color: var(--ink2); }
-    .etat.todo { box-shadow: inset 0 0 0 1.5px var(--accent-ink); }
-    .etat.todo .sym { color: var(--accent-ink); }
-    .etat.done .sym { color: var(--ok); }
-    .etat.warn .sym { color: var(--warn); }
-    .half { display: inline-block; width: .78em; height: .78em; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); vertical-align: -0.08em; }
-
-    /* Onglets de langue : des liens (une adresse par langue), état écrit et non coloré seulement. */
-    .langs { display: flex; flex-wrap: wrap; gap: 0; margin: 0 0 20px; padding: 0; list-style: none; border-bottom: 1px solid var(--line2); }
-    .langs a { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 18px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--ink2); font-size: 14px; }
-    .langs a:hover { color: var(--ink); background: var(--s1); }
-    .langs a[aria-current] { color: var(--ink); font-weight: 500; border-bottom-color: var(--accent); }
-    .langs .code { font-weight: 600; letter-spacing: .08em; }
-    .langs .lst { font-size: 12.5px; font-weight: 400; color: var(--ink3); }
-    .langs .lst.todo { color: var(--accent-ink); }
-    .langs .lst.warn::before { content: "▲ "; color: var(--warn); }
-
-    /* Mise en page : éditeur + colonne latérale */
-    .e-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; align-items: start; }
-    .e-col > .panel, .e-aside > .panel { margin: 0 0 18px; }
-    .panel > h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
-    .panel > h2 .mono { margin: 0; }
-    .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 16px; }
-    .grid2 .full { grid-column: 1 / -1; }
-    .fs { border: 0; margin: 0; padding: 0; min-width: 0; }
-    .fs legend { padding: 0; margin: 0 0 6px; color: var(--ink2); font-size: 13px; }
-    .choice-line { display: flex; flex-wrap: wrap; gap: 6px 18px; }
-    .choice-line label.inline { min-height: 32px; }
-    .slug { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12.5px; color: var(--ink3); }
-    .slug code { font-size: 12.5px; }
-    .count-c { justify-self: end; font-size: 12px; color: var(--ink3); }
-    .lbl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-
-    /* Blocs du corps */
-    .blocks { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-    .blk { border-radius: 12px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); padding: 12px 14px 14px; display: grid; gap: 10px; }
-    .blk.sel { box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 1px var(--line2); }
-    .blk-hd { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
-    .blk-hd h3 { margin: 0; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-    .blk-n { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 6px; background: var(--s3); font-size: 12px; font-weight: 600; color: var(--ink2); }
-    .blk-hd .mono { margin-right: auto; }
-    .blk-tools { display: flex; gap: 6px; margin-left: auto; }
-    .blk-tools .iconbtn { width: 32px; height: 32px; }
-    .blk-tools .iconbtn[disabled] { opacity: .4; cursor: default; }
-    .blk .sel-tag { font-size: 12px; color: var(--accent-ink); font-weight: 500; }
-    .blk input, .blk select, .blk textarea { background: var(--s1); }
-    .fmt { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
-    .fmt button { min-height: 30px; padding: 0 10px; border-radius: 7px; box-shadow: inset 0 0 0 1px var(--line2); font-size: 12.5px; color: var(--ink2); background: var(--s1); }
-    .fmt button:hover { color: var(--ink); }
-    .fmt button[aria-pressed="true"] { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--accent-ink); }
-    .fmt .note { align-self: center; font-size: 12px; color: var(--ink3); margin-left: 4px; }
-    .typo { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; padding: 7px 10px; border-radius: 8px; background: var(--s1); box-shadow: inset 3px 0 0 var(--ok); font-size: 12.5px; color: var(--ink2); }
-    .typo b { color: var(--ink); font-weight: 500; }
-    .typo q { quotes: none; font-variant-numeric: normal; }
-    .typo kbd { font-size: 10.5px; }
-    .typo .more { font-size: 12.5px; display: inline-flex; align-items: center; min-height: 24px; }
-    .ph-blk { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 14px; align-items: start; }
-    .ph-blk img, .dip-slots img, .tp img, .pv img { display: block; width: 100%; height: auto; border-radius: 6px; background: var(--photo-bg); }
-    .ph-blk .ph-f { display: grid; gap: 10px; }
-    .cartel-r { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); font-size: 13px; }
-    .cartel-r .t { color: var(--ink); font-weight: 500; }
-    .cartel-r .m { color: var(--ink2); }
-    .cartel-r small { display: block; margin-top: 3px; font-size: 12px; color: var(--ink3); }
-    .dip-slots { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: center; }
-    .dip-slots figure { display: grid; gap: 6px; }
-    .dip-slots figcaption { font-size: 12.5px; color: var(--ink2); }
-    .dip-slots figcaption b { display: block; font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); }
-    .swap { min-height: 38px; padding: 0 12px; border-radius: 9px; box-shadow: inset 0 0 0 1px var(--line2); font-size: 12.5px; color: var(--ink2); background: var(--s1); }
-    .add-blk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; padding: 12px 14px; border-radius: 12px; box-shadow: inset 0 0 0 1px dashed var(--line2); border: 1px dashed var(--line2); }
-    .add-blk .lb { font-size: 13px; color: var(--ink2); margin-right: 4px; }
-
-    /* Colonne latérale */
-    .e-aside .panel { padding: 16px 16px 18px; }
-    .e-aside h2 { font-size: 15px; margin-bottom: 10px; }
-    .pub-st { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 13px; color: var(--ink2); }
-    .pub-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 0 0 12px; font-size: 12.5px; color: var(--ink3); }
-    .when { display: grid; gap: 8px; }
-    .when { gap: 4px; }
-    .when label.inline { display: flex; align-items: center; min-height: 32px; font-size: 13.5px; }
-    .when .row { margin-top: 4px; }
-    .when .row label { flex: 1 1 120px; font-size: 12.5px; }
-    .when input { min-height: 36px; padding-top: 4px; padding-bottom: 4px; }
-    .pub-btns { display: grid; gap: 8px; margin-top: 14px; }
-    .pub-btns .btn { width: 100%; }
-    .seg-pv { display: flex; gap: 6px; }
-    .seg-pv .btn { flex: 1; }
-    .weight meter { width: 100%; height: 12px; display: block; margin: 8px 0 6px; }
-    .weight .big { font-size: 20px; font-weight: 300; color: var(--ink); }
-    .weight dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; margin: 8px 0 0; font-size: 12.5px; }
-    .weight dt { color: var(--ink2); }
-    .weight dd { margin: 0; text-align: right; color: var(--ink); }
-    .tp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-    .tp { display: grid; grid-template-columns: 18px 64px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px; border-radius: 10px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); }
-    .tp .grip { color: var(--ink3); cursor: grab; display: grid; place-items: center; }
-    .tp img { width: 64px; height: 43px; object-fit: contain; background: var(--photo-bg); }
-    .tp .t { font-size: 12.5px; line-height: 1.3; color: var(--ink); }
-    .tp .t small { display: block; color: var(--ink3); font-size: 11.5px; }
-    .tp .btn { min-height: 32px; padding: 0 10px; font-size: 12.5px; }
-    .tp.used { opacity: 1; }
-    .tp .in { font-size: 11.5px; color: var(--ok); }
-    .tp-hint { margin: 10px 0 0; }
-
-    /* Écran B : aperçu comme sur le site, nuit et jour */
-    .mq-b, .mq-c, .mq-d { margin-top: 56px; }
-    .pv-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
-    .pv { margin: 0; border-radius: 12px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line2); }
-    .pv-bar { display: flex; justify-content: space-between; gap: 8px; padding: 8px 12px; background: var(--s3); font-size: 12px; color: var(--ink2); }
-    .pv-page { padding: 18px 22px 22px; font-family: var(--font); }
-    .pv-page .nm { margin: 0 0 18px; font-size: 10.5px; letter-spacing: .4em; text-transform: uppercase; }
-    .pv-page .k { margin: 0 0 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-family: ui-monospace, 'IBM Plex Mono', monospace; }
-    .pv-page .h { margin: 0; font-weight: 300; font-size: 34px; line-height: 1.05; }
-    .pv-page .s { margin: 6px 0 10px; font-size: 15px; }
-    .pv-page .b { margin: 0 0 14px; font-size: 12px; font-family: ui-monospace, 'IBM Plex Mono', monospace; }
-    .pv-page img { border-radius: 0; margin-bottom: 6px; }
-    .pv-page .c { margin: 0 0 12px; font-size: 11px; font-family: ui-monospace, 'IBM Plex Mono', monospace; }
-    .pv-page .p { margin: 0; font-size: 14px; line-height: 1.7; }
-    .pv.nuit .pv-page { background: #0b0b0b; color: #f0efeb; }
-    .pv.nuit .k, .pv.nuit .b, .pv.nuit .c { color: #a19f99; }
-    .pv.nuit .s, .pv.nuit .p { color: #cfcdc7; }
-    .pv.jour .pv-page { background: #f7f5f0; color: #1a1917; }
-    .pv.jour .k, .pv.jour .b, .pv.jour .c { color: #5f5b54; }
-    .pv.jour .s, .pv.jour .p { color: #34322e; }
-    .pv figcaption { padding: 10px 12px; font-size: 12.5px; color: var(--ink2); background: var(--s1); }
-
-    /* Écran C : traduction en tableau */
-    .trad { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-    .trad caption { caption-side: top; text-align: left; padding: 0 0 10px; font-size: 15px; font-weight: 500; color: var(--ink); }
-    .trad caption .mono { font-weight: 400; margin-left: 6px; }
-    .trad th, .trad td { text-align: left; vertical-align: top; padding: 10px; border-bottom: 1px solid var(--line); }
-    .trad thead th { font-size: 11.5px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); border-bottom-color: var(--line2); }
-    .trad tbody th { font-weight: 500; width: 130px; color: var(--ink2); }
-    .trad .src { width: 38%; color: var(--ink2); }
-    .trad textarea, .trad input { width: 100%; background: var(--s2); }
-    .trad textarea { min-height: 64px; }
-    .trad .cellnote { margin: 4px 0 0; font-size: 12px; color: var(--ink3); }
-    .trad .cellnote.todo { color: var(--accent-ink); }
-
-    /* Écran D : rôle Photographe */
-    .role-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
-    .role-pair .panel { margin: 0; }
-    .role-pair h3 { font-size: 15px; font-weight: 500; margin: 0 0 10px; }
-    .role-pair .actions { margin-top: 12px; }
-    .role-pair .actions .btn { flex: 1 1 auto; }
-
-    /* Barre basse du téléphone : état + Publier, au-dessus des onglets ; ne masque jamais le champ focalisé
-       (scroll-padding-bottom réserve sa hauteur). */
-    .m-bar { display: none; }
-
-    /* Annotations */
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    @media (max-width: 1180px) {
-      .e-grid { grid-template-columns: minmax(0, 1fr); }
-      
-    }
-    @media (max-width: 720px) {
-      html { scroll-padding-bottom: 150px; }
-      .mq-first { padding-right: 0; }
-      .crumbs a { min-height: 44px; }
-      .help-link a { border-bottom: 0; text-decoration: underline; text-underline-offset: 4px; }
-      .e-top { margin-bottom: 10px; }
-      .e-top .e-acts { display: none; }               /* reprises dans la barre basse */
-      .langs { flex-wrap: nowrap; overflow-x: auto; }
-      .langs a { padding: 0 12px; white-space: nowrap; flex-direction: column; justify-content: center; align-items: flex-start; gap: 0; min-height: 52px; }
-      .grid2 { grid-template-columns: minmax(0, 1fr); }
-      .panel { padding: 16px 14px; }
-      .blk { padding: 12px; }
-      .blk-tools .iconbtn { width: 44px; height: 44px; }
-      .blk-hd .mono { flex-basis: 100%; order: 3; }
-      .fmt button, .swap, .saved-st button { min-height: 44px; }
-      .ph-blk { grid-template-columns: minmax(0, 1fr); }
-      .dip-slots { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-      .dip-slots .swap { grid-column: 1 / -1; grid-row: 2; }
-      .add-blk .btn { flex: 1 1 40%; }
-      .tp { grid-template-columns: 64px minmax(0, 1fr) auto; }
-      .tp .grip { display: none; }               /* au toucher : « Insérer » seulement */
-      .tp .btn { min-height: 44px; }
-      .typo .more { min-height: 44px; }
-      .pv-pair, .role-pair { grid-template-columns: minmax(0, 1fr); }
-      .pv-page .h { font-size: 28px; }
-      .trad thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-      .trad, .trad tbody, .trad tr, .trad th, .trad td { display: block; width: auto; }
-      .trad caption { display: block; }
-      .trad tr { padding: 10px 0; border-bottom: 1px solid var(--line2); }
-      .trad th, .trad td { padding: 4px 0; border: 0; }
-      .trad .src::before { content: "Français : "; color: var(--ink3); }
-      .m-bar { display: flex; position: fixed; left: 0; right: 0; bottom: 74px; z-index: 39; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; background: var(--s1); border-top: 1px solid var(--line2); box-shadow: 0 -8px 20px rgba(0,0,0,.12); }
-      .m-bar .mst { font-size: 12.5px; color: var(--ink2); line-height: 1.3; }
-      .m-bar .mst b { color: var(--ink); font-weight: 500; }
-      .m-bar .mst .ok { color: var(--ok); font-weight: 600; }
-      .m-bar .btn { min-height: 44px; }
-      
-    }
-    .m-only { display: none; }
-    @media (max-width: 720px) {
-      .langs { flex-wrap: nowrap; overflow: visible; }
-      .langs li { flex: 1 1 0; min-width: 0; }
-      .langs li:last-child { flex: 0 0 auto; }
-      .langs a { white-space: normal; padding: 6px 10px; }
-      .trad .src, .trad tbody th { width: auto; }
-      /* Maquette : barres montrées à plat en fin d'écran (sur le site, fixées en bas). */
-      .m-bars { padding: 24px 16px 28px; background: var(--bg); }
-      .m-only { display: flex; }
-      .m-bars .m-bar, .m-bars .tabbar { position: static; box-shadow: none; }
-      .m-bars .m-bar { border: 1px solid var(--line2); border-bottom: 0; border-radius: 14px 14px 0 0; }
-      .m-bars .tabbar { border: 1px solid var(--line2); border-radius: 0 0 14px 14px; }
-      
-      .m-bars .m-bar .mst { flex: 1 1 auto; min-width: 0; margin: 0; }
-      .m-bars .m-bar .btn { flex: none; }
-      .when label.inline { align-items: center; }
-      .when label.inline input { margin-top: 0; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="Maquette MQ-20 : éditeur de billet du Carnet (brouillon, langues, photos et accords, proposition et publication).">
+<title>Angers, un soir d’octobre · Carnets · Nicephos (maquette MQ-20)</title>
+<link rel="stylesheet" href="_commun/admin.css">
+<link rel="stylesheet" href="_commun/tokens.css">
+<link rel="stylesheet" href="_commun/admin-plus.css">
 <link rel="stylesheet" href="_commun/annotations.css">
+<style>
+/* --- Composants ajoutés (proposés pour admin-plus.css, voir l'encart « Ce qui change ») --- */
+/* A. Autres états : espace au-dessus de chaque cadre pour son étiquette (hors du flux). */
+.ecrans-suite { display: grid; gap: 88px; margin-top: 112px; }
+.ecran-bloc { min-width: 0; }
+.ecran-bloc > .ep { margin-top: 0; }
+/* Titre d'un autre écran : même dessin que le H1 de l'en-tête de page, mais niveau 2 dans le plan de la maquette. */
+.main .ep .h1 { margin: 0; font-size: var(--at-h1); font-weight: 300; line-height: 1.12; overflow-wrap: anywhere; }
+@media (max-width: 720px) { .main .ep .h1 { font-size: 28px; } .ecrans-suite { gap: 80px; margin-top: 96px; } }
+/* Dans un autre état, la barre basse du téléphone reste dans son cadre (un seul écran de téléphone est réel). */
+@media (max-width: 720px) { .ecran-bloc .ep-actions { position: static; grid-area: auto; padding: 0; border: 0; background: none; margin-top: 12px; } }
+/* B. Message d'action et dialogue montrés dans la page (dans l'interface, ils sont en bas de l'écran ou en modal). */
+.admin .toast.toast-ech { position: relative; left: auto; bottom: auto; transform: none; display: inline-flex; max-width: 100%; margin: 0; }
+.confirm.confirm-ech[open], .dialog.confirm-ech[open] { position: static; display: block; margin: 0; max-width: 100%; }
+.confirm.confirm-ech { width: min(560px, 100%); }
+.voile-ech { padding: 32px; border-radius: var(--r-admin-panneau); background: var(--scrim); }
+@media (max-width: 720px) { .voile-ech { padding: 12px; } }
+/* C. Panneau en deux colonnes : formulaire, puis colonne d'appui. */
+.deux-col { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 24px; align-items: start; }
+@media (max-width: 1180px) { .deux-col { grid-template-columns: minmax(0, 1fr); } }
+.main .panel > h2, .main .panel > h3, .main .panel > .panel-t { margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
+.panel > .aide-panel { margin: -6px 0 14px; color: var(--ink3); font-size: var(--at-petit); }
+/* D. Liste en tableau, en cartes au téléphone (modèle : .lot de main). */
+.liste-a { width: 100%; border-collapse: collapse; background: var(--s1); font-size: var(--at-texte); }
+.liste-a caption { padding: 12px 14px; text-align: left; color: var(--ink2); font-size: var(--at-petit); caption-side: top; }
+.liste-a th, .liste-a td { padding: 12px 14px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+.liste-a thead th { color: var(--ink2); font-size: var(--at-min); font-weight: 500; letter-spacing: .04em; white-space: nowrap; }
+.liste-a tbody th { font-weight: 500; }
+.liste-a .sec { display: block; margin-top: 2px; color: var(--ink3); font-size: var(--at-petit); font-weight: 400; }
+.liste-a .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.liste-a tr.choisie { background: var(--accent-soft); }
+.liste-a a.ligne-lien { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
+.liste-a a.ligne-lien:hover { text-decoration-color: currentColor; }
+.liste-a .ref { font-family: var(--mono); font-size: 13px; font-weight: 400; letter-spacing: 0; }
+@media (max-width: 1100px) {
+  .liste-wrap { overflow: visible; box-shadow: none; border-radius: 0; }
+  .liste-a, .liste-a tbody { display: block; background: transparent; }
+  .liste-a caption { display: block; padding: 0 0 10px; }
+  .liste-a thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  /* Une carte par ligne : en tête la référence (et le montant), puis l'état, puis le reste ; les données courtes vont par deux. */
+  .liste-a tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 16px; margin: 0 0 12px; padding: 14px 16px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+  .liste-a td, .liste-a th { display: block; padding: 0; border: 0; min-width: 0; grid-column: 1 / -1; }
+  .liste-a th[scope="row"] { grid-column: 1; }
+  .liste-a .c-haut { grid-column: 2; grid-row: 1; text-align: right; }
+  .liste-a .c-demi { grid-column: auto; }
+  .liste-a .c-demi[data-label]::before { content: attr(data-label); display: block; color: var(--ink3); font-size: var(--at-min); }
+  .liste-a .num { text-align: right; }
+}
+@media (max-width: 1100px) and (min-width: 721px) { .liste-a tbody { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; } .liste-a tr { margin: 0; } }
+@media (max-width: 720px), (pointer: coarse) { .liste-a a.ligne-lien { min-height: 44px; } }
+/* E. Vignettes d'une galerie ou d'un billet (pastilles de 160 px). */
+.vignettes-a { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.vignettes-a li { margin: 0; }
+.vignettes-a img { display: block; height: 56px; width: auto; border-radius: 4px; background: var(--photo-bg); }
+/* F. Ligne d'objet avec son état (photo d'un billet, favori) */
+.objets-a { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.objets-a > li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 4px 14px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
+.objets-a > li:first-child { border-top: 0; padding-top: 0; }
+.objets-a img { width: 64px; height: auto; border-radius: 4px; background: var(--photo-bg); grid-row: span 3; }
+.objets-a .t { font-weight: 500; }
+.objets-a .t .sec { display: block; color: var(--ink3); font-size: var(--at-petit); font-weight: 400; }
+.objets-a .actions { gap: 6px 8px; }
+.objets-a .actions .btn { min-height: 32px; padding: 0 12px; font-size: 13px; }
+@media (max-width: 720px), (pointer: coarse) { .objets-a .actions .btn { min-height: 44px; } }
+/* G. Chronologie (événements datés, du plus récent au plus ancien) */
+.chrono { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; font-size: var(--at-texte); }
+.chrono li { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 2px 14px; padding: 9px 0; border-top: 1px solid var(--line); }
+.chrono li:first-child { border-top: 0; }
+.chrono time { color: var(--ink3); font-size: var(--at-petit); font-variant-numeric: tabular-nums; }
+.chrono .sec { color: var(--ink3); font-size: var(--at-petit); }
+@media (max-width: 720px) { .chrono li { grid-template-columns: 1fr; } }
+/* H. Aperçu d'un e-mail en texte seul */
+.courriel { margin: 0; padding: 18px 20px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); font-size: var(--at-texte); line-height: 1.6; }
+.courriel dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px 12px; margin: 0 0 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line2); font-size: var(--at-petit); }
+.courriel dt { color: var(--ink3); } .courriel dd { margin: 0; overflow-wrap: anywhere; }
+.courriel p { margin: 0 0 10px; max-width: 64ch; } .courriel p:last-child { margin-bottom: 0; }
+.courriel .bas { color: var(--ink3); font-size: var(--at-petit); }
+.courriel .donnee, .donnee { font-family: var(--mono); font-size: 13px; letter-spacing: 0; overflow-wrap: anywhere; }
+/* I. Signalement (non bloquant) dans un panneau : symbole, mot, deux issues */
+.signal { display: grid; gap: 8px; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 3px 0 0 var(--warn); }
+.signal p { margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.signal .signal-t { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: var(--at-texte); font-weight: 500; }
+.signal .signal-t .ic { color: var(--warn); }
+.signal .actions .btn { min-height: 32px; padding: 0 12px; font-size: 13px; }
+@media (max-width: 720px), (pointer: coarse) { .signal .actions .btn { min-height: 44px; } }
+/* J. Choix (cases et boutons radio) avec leur explication, cibles de 24 et 44 px */
+.choix-a { display: grid; gap: 4px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.choix-a > legend { padding: 0; margin: 0 0 6px; color: var(--ink); font-size: var(--at-petit); font-weight: 500; }
+.choix-a > .aide { margin: -2px 0 6px; color: var(--ink3); font-size: 12px; }
+.choix-a label { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 0 8px; align-items: start; min-height: 32px; padding: 4px 0; color: var(--ink); font-size: var(--at-texte); cursor: pointer; }
+.choix-a label input { margin: 1px 3px 0; }
+.choix-a label .sec { grid-column: 2; color: var(--ink3); font-size: 12px; line-height: 1.45; }
+.choix-a label.inactif { color: var(--ink3); cursor: default; }
+@media (max-width: 720px), (pointer: coarse) { .choix-a label { min-height: 44px; padding: 10px 0; } .choix-a label input { width: 22px; height: 22px; margin: 0 1px; } }
+/* K. Pied de formulaire : [Annuler] puis l'action, le seul bouton plein, en dernier */
+.form-pied { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px 12px; padding-top: 16px; border-top: 1px solid var(--line); }
+.form-pied .hint { margin-right: auto; }
+@media (max-width: 720px) { .form-pied { flex-direction: column; align-items: stretch; } .form-pied .hint { margin: 0; } }
+/* L. Annotations : lien de bascule dans l'encart (comme MQ-00) */
+.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
+.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
+/* Résumé d'erreurs : liens de 24 px (44 au toucher) ; barre d'onglets à 12 px (rien sous 12 px). */
+.resume-a a { display: inline-flex; align-items: center; min-height: 24px; }
+@media (max-width: 720px), (pointer: coarse) { .resume-a a { min-height: 44px; } }
+@media (max-width: 720px) { .admin .tabbar a, .admin .tabbar button { font-size: 12px; } }
+/* M. Petits communs : focus figé pour la maquette, liens d'action, conséquences d'un dialogue, deux états côte à côte */
+.btn.is-focus { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+.mq-notes code { color: var(--mq-encre); }
+.filtres-l { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin: 0 0 14px; }
+@media (max-width: 720px), (pointer: coarse) { .chips .chip { min-height: 44px; } }
+.btns-ligne { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.voile-ech { display: grid; place-items: center; }
+.dlg-cons { margin: 0 0 12px; padding-left: 20px; color: var(--ink2); font-size: var(--at-petit); }
+.dlg-cons li { margin: 3px 0; }
+.deux-etats { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 88px 40px; align-items: start; }
+@media (max-width: 1180px) { .deux-etats { grid-template-columns: minmax(0, 1fr) !important; } }
+.champ-a .lu { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.champ-a .lu .ic { color: var(--ok); }
+.cote { display: grid; gap: 0; min-width: 0; }
+/* Pastilles de marge droite : au téléphone, dans le coin du panneau (aucun débordement horizontal). */
+@media (max-width: 767px) { .mq-pin.d { left: auto; right: 4px; top: 4px; } }
+/* Barre latérale à 220 px (tablette) : la recherche et le compte tiennent sur une ligne. */
+.admin .cmdk span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin .cmdk kbd { white-space: nowrap; }
+@media (max-width: 1180px) and (min-width: 721px) { .admin .cmdk kbd { display: none; } .admin .me { gap: 4px; } .admin .me .iconbtn { width: 32px; height: 32px; } }
+/* Champs : 16 px au téléphone (pas de zoom forcé sur iOS) */
+@media (max-width: 720px) { .admin input:not([type="checkbox"]):not([type="radio"]), .admin select, .admin textarea { font-size: 16px; } }
+/* --- MQ-20 : composants locaux --- */
+.editeur-grille { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
+@media (max-width: 1180px) { .editeur-grille { grid-template-columns: minmax(0, 1fr); } }
+.langues { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
+.langues .seg a { gap: 8px; }
+.langues .seg .st-l { color: var(--ink3); font-size: 12px; }
+.langues .seg a[aria-current] .st-l { color: var(--ink2); }
+@media (max-width: 720px), (pointer: coarse) { .langues .seg a { min-height: 44px; } }
+.champ-a .lb-l { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.admin textarea.auto { field-sizing: content; min-height: 0; }
+.compteur { color: var(--ink3); font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 400; }
+.compteur.trop { color: var(--warn); }
+.avert { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.avert .ic { color: var(--warn); margin-top: 3px; }
+.barre-outils { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px; border-radius: var(--r-admin) var(--r-admin) 0 0; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); }
+.barre-outils button { min-height: 32px; min-width: 32px; padding: 0 10px; border-radius: 7px; color: var(--ink); font-size: 13px; }
+.barre-outils button:hover { background: var(--s3); }
+.barre-outils .sep { width: 1px; margin: 4px 4px; background: var(--line2); }
+@media (max-width: 720px), (pointer: coarse) { .barre-outils button { min-height: 44px; min-width: 44px; } }
+.source { min-height: 420px; border-radius: 0 0 var(--r-admin) var(--r-admin) !important; font-size: 15px; line-height: 1.7; }
+.sous-source { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; margin: 0; color: var(--ink3); font-size: 12px; }
+.sous-source a { color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
+@media (max-width: 720px), (pointer: coarse) { .sous-source a { min-height: 44px; } }
+.objets-a .detail { grid-column: 2; margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.objets-a .err { grid-column: 2; display: flex; gap: 6px; margin: 0; color: var(--danger); font-size: var(--at-petit); }
+.objets-a .err .ic { width: 14px; height: 14px; margin-top: 2px; }
+.objets-a .err b { font-weight: 600; }
+.objets-a .actions { grid-column: 2; }
+.objets-a .etat { justify-self: start; }
+.champ-a .lb-l label { color: var(--ink); font-size: 13px; font-weight: 500; }
+.objets-a .n { color: var(--ink3); font-variant-numeric: tabular-nums; margin-right: 4px; }
+.jauge { height: 6px; border-radius: 6px; background: var(--s3); overflow: hidden; margin: 6px 0 4px; }
+.jauge i { display: block; height: 100%; width: 38%; background: var(--ok); }
+.kv-a { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 0; font-size: var(--at-texte); }
+.kv-a dt { color: var(--ink3); } .kv-a dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.plier > summary { display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; list-style: none; font-weight: 500; }
+.plier > summary::-webkit-details-marker { display: none; }
+.plier > summary .ic { transition: transform .15s; }
+.plier[open] > summary .ic { transform: rotate(90deg); }
+.plier > summary .sec { display: block; color: var(--ink3); font-size: 12px; font-weight: 400; }
+@media (max-width: 720px), (pointer: coarse) { .plier > summary { min-height: 44px; } }
+.lien-a { color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; font-size: var(--at-petit); }
+@media (max-width: 720px), (pointer: coarse) { .lien-a { min-height: 44px; } }
+.sugg { display: grid; gap: 8px; padding: 10px 12px; border-radius: var(--r-admin); background: var(--accent-soft); color: var(--ink); font-size: var(--at-petit); }
+.sugg p { margin: 0; }
+.sugg .btn { justify-self: start; min-height: 32px; padding: 0 12px; font-size: 13px; }
+@media (max-width: 720px), (pointer: coarse) { .sugg .btn { min-height: 44px; } }
+.choix-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 0; padding: 0; border: 0; }
+.choix-photos label { display: grid; gap: 6px; padding: 8px; border-radius: var(--r-admin); box-shadow: inset 0 0 0 1px var(--line2); cursor: pointer; font-size: 13px; color: var(--ink); }
+.choix-photos label:has(input:checked) { box-shadow: inset 0 0 0 2px var(--accent-ink); }
+.choix-photos img { width: 100%; height: auto; border-radius: 4px; }
+.choix-photos .l { display: flex; gap: 8px; align-items: flex-start; }
+.choix-photos .sec { display: block; color: var(--ink3); font-size: 12px; }
+.dialog.confirm-ech { width: min(640px, 100%); max-width: 100%; }
+.dialog.confirm-ech h2 { font-size: 20px; font-weight: 500; margin: 0 0 4px; }
+.dialog.confirm-ech .actions { justify-content: flex-end; margin-top: 18px; }
+@media (max-width: 720px) { .dialog.confirm-ech .actions { flex-direction: column; align-items: stretch; } }
+/* Aperçu « comme sur le site » : thème Nicephos nuit, jetons du site (tokens.css), taille de lecture */
+.apercu-site { padding: 0 0 40px; border-radius: var(--r-admin-panneau); overflow: hidden; font-family: var(--sans); }
+.apercu-site .bandeau { margin: 0; padding: 8px 16px; background: var(--safelight); color: var(--on-accent); font-size: 13px; font-weight: 500; }
+.apercu-site .corps { max-width: 640px; margin: 0 auto; padding: 32px 24px 0; }
+.apercu-site .rub { margin: 0; color: var(--mute); font-size: 13px; letter-spacing: var(--capitales); text-transform: uppercase; }
+.apercu-site .tt { margin: 8px 0 8px; font-size: 40px; font-weight: 300; line-height: var(--i-serre); color: var(--ink); }
+.apercu-site .par { margin: 0 0 20px; color: var(--mute); font-size: 14px; }
+.apercu-site .chapo { margin: 0 0 24px; color: var(--ink); font-size: 20px; line-height: 1.5; font-weight: 400; }
+.apercu-site p.prose { margin: 0 0 18px; color: var(--prose); font-size: var(--t-prose); line-height: 1.7; }
+.apercu-site .h4 { margin: 28px 0 12px; color: var(--ink); font-size: 24px; font-weight: 400; }
+.apercu-site figure { margin: 24px 0; }
+.apercu-site figure img { display: block; width: 100%; height: auto; }
+.apercu-site figcaption { margin-top: 8px; color: var(--mute); font-size: 13px; }
+.apercu-site .np img { outline: 2px dashed var(--safelight); outline-offset: -2px; }
+.apercu-site .np b { color: var(--safelight); font-weight: 500; }
+@media (max-width: 720px) { .apercu-site .tt { font-size: 32px; } .apercu-site .corps { padding: 24px 16px 0; } }
+
+</style>
 </head>
 <body class="admin">
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
 <a class="skip" href="#contenu">Aller au contenu</a>
 <div class="shell">
-
 <aside class="side" id="admin-nav" aria-label="Menu de l’administration">
-  <a class="word" href="#">Nicephos</a>
-  <button class="cmdk" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
-  <nav class="nav" aria-label="Accueil de l’administration">
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
+  <a class="word" href="/admin"><span>Nicephos</span></a>
+  <button class="cmdk" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
+  <nav class="nav" aria-label="Aujourd’hui">
+    <a href="/admin"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
   </nav>
-  <p class="grp" id="nav-photos">Photos</p>
-  <nav class="nav" aria-labelledby="nav-photos">
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Sorties</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg>Voyages</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a>
+  <p class="grp" id="nav-photos-fr">Photos</p>
+  <nav class="nav" aria-labelledby="nav-photos-fr">
+    <a href="/admin/photos"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
+    <div class="nav-ser"><a href="/admin/series"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a><details class="ser-plier"><summary aria-label="Afficher les 5 séries (vos photos)"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>5</summary>
+      <ul class="ser" aria-label="Séries">
+        <li><a href="/admin/photos?serie=atlantique"><span class="sw"><img src="_commun/photos/160/cais.webp" alt="" width="18" height="18"></span><span class="t">Atlantique</span><span class="n">3</span></a></li>
+        <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">3</span></a></li>
+        <li><a href="/admin/photos?serie=portrait"><span class="sw"><img src="_commun/photos/160/ines.webp" alt="" width="18" height="18"></span><span class="t">Portrait</span><span class="n">1</span></a></li>
+        <li><a href="/admin/photos?serie=rue"><span class="sw"><img src="_commun/photos/160/linge.webp" alt="" width="18" height="18"></span><span class="t">Rue</span><span class="n">1</span></a></li>
+        <li><a href="/admin/photos?serie=voyage"><span class="sw"><img src="_commun/photos/160/miradouro.webp" alt="" width="18" height="18"></span><span class="t">Voyage</span><span class="n">2</span></a></li>
+      </ul></details></div>
+    <a href="/admin/sorties"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/></svg>Sorties</a>
+    <a href="/admin/voyages"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg>Voyages</a>
   </nav>
-  <p class="grp" id="nav-people">Personnes</p>
-  <nav class="nav" aria-labelledby="nav-people">
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/></svg>Personnes</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>App de terrain</a>
+  <p class="grp" id="nav-personnes-fr">Personnes</p>
+  <nav class="nav" aria-labelledby="nav-personnes-fr">
+    <a href="/admin/personnes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg>Personnes<span class="nav-badge"><span aria-hidden="true">1</span><span class="sr-only">, 1 nouvelle</span></span></a>
+    <a href="/admin/terrain"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>App de terrain</a>
   </nav>
-  <p class="grp" id="nav-publish">Publier</p>
-  <nav class="nav" aria-labelledby="nav-publish">
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>À valider<span class="nav-badge">5<span class="sr-only"> photos</span></span></a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>Site public</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>Instagram</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
-    <ul class="nav-sub">
-      <li><a href="#" aria-current="page">Billets<span class="nav-badge">2<span class="sr-only"> brouillons</span></span></a></li>
-      <li><a href="#">Nouveau billet</a></li>
-    </ul>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>Galeries privées</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>Boutique</a>
+  <p class="grp" id="nav-publier-fr">Publier</p>
+  <nav class="nav" aria-labelledby="nav-publier-fr">
+    <a href="/admin/carnets" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <a href="/admin/galeries"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Galeries privées</a>
+    <a href="/admin/boutique"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>Boutique</a>
+    <a href="/admin/instagram"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>Instagram</a>
   </nav>
-  <p class="grp" id="nav-team">Équipe</p>
-  <nav class="nav" aria-labelledby="nav-team">
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg>Comptes et rôles</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.5"/></svg>Circuit de publication</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Journal</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
-  </nav>
-  <nav class="nav" aria-label="Réglages">
-    <a href="#" style="margin-top:10px"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Réglages</a>
+  <p class="grp" id="nav-equipe-fr">Équipe</p>
+  <nav class="nav" aria-labelledby="nav-equipe-fr">
+    <a href="/admin/statistiques"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
   </nav>
   <div class="foot">
-    <a class="me-link" href="#"><span class="av" aria-hidden="true">J</span><span class="who">Julien<small>Administrateur · Mon compte</small></span></a>
-    <nav class="nav" aria-label="Aide et nouveautés">
-      <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg>Aide</a>
-      <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>Nouveautés</a>
+    <nav class="pied-liens" aria-label="Réglages et aide">
+      <a href="/admin/aide"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg>Aide</a>
+      <a href="/" target="_blank" rel="noopener"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Voir le site<span class="sr-only"> (nouvel onglet)</span></a>
+      <details class="lang-pick admin-lang">
+        <summary><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h9M8.5 3v2M6 5c.8 3.5 3 6 6 7.5M11 5c-.9 3.8-3.6 6.8-7 8"/><path d="M13 21l4-10 4 10M14.5 17.5h5"/></svg><span>FR</span><span class="sr-only"> – Langue de l’administration : français</span></summary>
+        <ul aria-label="Langue de l’administration : français">
+          <li><a href="/admin/langue?l=fr" lang="fr" aria-current="true">Français</a></li>
+          <li><a href="/admin/langue?l=en" lang="en">English</a></li>
+          <li><a href="/admin/langue?l=de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
     </nav>
+    <div class="me">
+      <span class="av" aria-hidden="true">S</span>
+      <span class="who">Sébastien<small>Photographe</small></span>
+      <button class="iconbtn" type="button" aria-label="Mode clair / sombre" title="Mode clair / sombre"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span></button>
+      <button class="iconbtn" type="button" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button>
+    </div>
   </div>
 </aside>
-
 <main class="main" id="contenu" tabindex="-1">
-  <p class="help-link"><a href="#">Aide sur cette page</a></p>
-  <p class="mq-screen mq-first"><b>Écran A</b> Éditeur de billet, rôle Administrateur <code>/admin/carnets/lisbonne-et-porto</code></p>
+  <p class="help-link"><a href="/admin/aide#carnets-ecrire-un-billet">Aide sur cette page</a></p>
+<header class="ep mq-a"><span class="mq-pin d" aria-hidden="true" style="top:70px">2</span>
+  <a class="ep-retour" href="/admin/carnets"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Carnets</a>
+  <div class="ep-titre"><span class="mq-pin" aria-hidden="true">1</span><h1>Angers, un soir d’octobre</h1><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</span></div>
+  <p class="ep-meta"><span>Sébastien</span><span>Voyages</span><span>commencé le 15 oct. à 22 h 10</span><span role="status"><span class="enreg enreg--ok"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Enregistré à 22 h 42</span></span></p>
+  <div class="ep-actions"><a class="btn ghost ep-secondaire" href="#apercu"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Aperçu</a><button class="btn danger-c ep-secondaire" type="button" aria-haspopup="dialog">Supprimer…</button><details class="menu ep-plus"><summary class="btn ghost" aria-label="Plus d’actions"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></summary><div class="menu-pop"><a href="#apercu">Aperçu</a><button type="button">Supprimer…</button></div></details><button class="btn" type="button">Proposer à Julien</button></div>
+</header>
+<div class="editeur-grille">
+<div class="panel"><form class="form" action="/admin/carnets/18" method="post" aria-label="Billet, version française">
+  <div class="resume-a" tabindex="-1" role="group" aria-labelledby="res-t"><span class="mq-pin" aria-hidden="true">3</span><h2 id="res-t"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg>Pas encore proposé : 2 points à régler</h2>
+    <ul><li><a href="#ph-2">Photo 2, « Quai Ligny, soir » : l’accord de Claire est à vérifier, Hugo n’en a pas.</a></li><li><a href="#ph-3">Photo 3, « Réverbères, quai Ligny » : écrivez son texte de remplacement.</a></li></ul></div>
+  <div class="langues"><span class="mq-pin" aria-hidden="true">4</span><nav class="seg" aria-label="Langue du billet"><a href="/admin/carnets/18?langue=fr" aria-current="page">Français <span class="st-l">brouillon</span></a><a href="/admin/carnets/18?langue=en">English <span class="st-l">vide</span></a><a href="/admin/carnets/18?langue=de">Deutsch <span class="st-l">vide</span></a></nav>
+    <span class="hint">Français : langue d’origine</span></div>
+  <div class="champ-a"><div class="lb-l"><label for="titre">Titre</label><span class="compteur" id="titre-n">25 / 70</span></div><input id="titre" value="Angers, un soir d’octobre" aria-describedby="titre-n"></div>
+  <div class="champ-a"><span class="mq-pin" aria-hidden="true">5</span><div class="lb-l"><label for="chapo">Chapô</label><span class="compteur trop" id="chapo-n">182 / 160</span></div><p class="aide" id="chapo-aide">Sous le titre, dans la liste des carnets et dans le flux. 300 signes au plus.</p><textarea class="auto" id="chapo" rows="3" aria-describedby="chapo-aide chapo-n chapo-av">Le quai Ligny, je le photographie le matin depuis dix ans. Mercredi soir, la Maine montait, les réverbères s’allumaient un à un, et deux promeneurs ont accepté d’entrer dans l’image.</textarea>
+    <p class="avert" id="chapo-av"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg><span>22 signes au-delà de 160 : les moteurs de recherche couperont la fin. Rien n’empêche de proposer.</span></p></div>
+  <div class="champ-a"><span class="mq-pin" aria-hidden="true">6</span><div class="lb-l"><label for="texte">Texte</label><div class="seg" role="group" aria-label="Affichage du texte"><a href="#texte" aria-current="page">Écrire</a><a href="#apercu">Aperçu</a></div></div>
+    <div><div class="barre-outils" role="toolbar" aria-label="Mise en forme" aria-controls="texte"><button type="button">Intertitre</button><button type="button">Gras</button><button type="button">Italique</button><button type="button">Lien</button><button type="button">Citation</button><button type="button">Liste</button><span class="sep" aria-hidden="true"></span><button type="button" aria-haspopup="dialog">Photo…</button><button type="button" aria-haspopup="dialog">Galerie…</button><button type="button" aria-haspopup="dialog">Lien interne…</button></div>
+    <textarea class="source" id="texte" rows="16" spellcheck="true" aria-describedby="texte-aide">Je connais le quai Ligny le matin. J’y passe depuis des années, avant le travail, quand la Maine fume encore et que les péniches dorment.
 
-  <nav class="crumbs" aria-label="Fil d’Ariane">
-    <ol>
-      <li><a href="#">Carnets</a></li>
-      <li><span aria-current="page">Lisbonne et Porto</span></li>
-    </ol>
-  </nav>
+![Quai désert sous un ciel gris, trois silhouettes au loin.](photo:quai-7-h-12 "Il y a deux ans, le même quai, à l’heure où je le connais.")
 
-  <div class="e-top">
-    <div>
-      <h1>Lisbonne et Porto</h1>
-      <p class="sub"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Brouillon</span> <span>Billet · Voyage</span> <span class="slug">adresse <code>/carnet/lisbonne-et-porto</code></span> <span class="pin" aria-hidden="true">1</span></p>
-    </div>
-    <div class="e-acts">
-      <p class="saved-st" role="status"><span class="ok" aria-hidden="true">✓</span>Enregistré à 22 h 42 <button type="button">Annuler</button> <span class="pin" aria-hidden="true">5</span></p>
-      <a class="btn ghost" href="#apercu">Aperçu comme sur le site</a>
-      <a class="btn" href="#publication">Publier…</a>
-    </div>
-  </div>
+## Puis le soir
 
-  <nav aria-label="Langue du billet">
-    <ul class="langs">
-      <li><a href="#" aria-current="page"><span class="code" lang="fr">FR</span><span class="lst">rédigé, langue d’origine</span></a></li>
-      <li><a href="#traduire"><span class="code" lang="en">EN</span><span class="lst todo">à traduire</span></a></li>
-      <li><a href="#traduire"><span class="code" lang="de">DE</span><span class="lst warn">à revoir : le français a changé ce soir</span></a></li>
-      <li style="align-self:center;margin-left:10px"><span class="pin" aria-hidden="true">2</span></li>
-    </ul>
-  </nav>
+Mercredi, j’y suis revenu à la tombée du jour. À 18 h 10, Claire et Hugo marchaient devant moi, au bord de l’eau. Je leur ai tendu la carte « Bonjour » ; ils ont ri, puis ont continué comme si je n’étais pas là.
 
-  <div class="e-grid">
-    <div class="e-col">
-      <section class="panel" aria-labelledby="hd-t">
-        <h2 id="hd-t">En-tête du billet <span class="mono">ce que l’on voit dans la liste des Carnets</span> <span class="pin" aria-hidden="true">3</span></h2>
-        <div class="grid2">
-          <label class="full" for="f-titre">Titre
-            <input id="f-titre" name="titre" value="Lisbonne et Porto" maxlength="90" autocomplete="off">
-          </label>
-          <label class="full" for="f-chapo"><span class="lbl-row"><span>Chapô (deux lignes dans la liste)</span><span class="count-c">186 / 240 signes</span></span>
-            <textarea id="f-chapo" name="chapo" rows="2">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : de l’Alfama au premier tram jusqu’à la barre de Foz.</textarea>
-          </label>
-          <fieldset class="fs">
-            <legend>Auteurs (signent sous le titre)</legend>
-            <div class="choice-line">
-              <label class="inline"><input type="checkbox" name="auteurs" value="sebastien" checked> Sébastien</label>
-              <label class="inline"><input type="checkbox" name="auteurs" value="julien" checked> Julien</label>
-            </div>
-          </fieldset>
-          <fieldset class="fs">
-            <legend>Rubrique</legend>
-            <div class="choice-line">
-              <label class="inline"><input type="radio" name="rubrique" value="voyage" checked> Voyage</label>
-              <label class="inline"><input type="radio" name="rubrique" value="atelier"> Notes d’atelier</label>
-            </div>
-          </fieldset>
-          <label for="f-voyage">Voyage lié
-            <select id="f-voyage" name="voyage">
-              <option>Aucun</option>
-              <option selected>Lisbonne et Porto · 10–11 oct. 2026 · 10 photos</option>
-              <option>Saint-Malo, grandes marées · sept. 2026</option>
-            </select>
-          </label>
-          <label for="f-date">Date affichée
-            <input id="f-date" name="date" value="12 octobre 2026" aria-describedby="f-date-h">
-            <span class="hint" id="f-date-h">Celle de la publication ; « mis à jour le … » s’ajoute seul ensuite.</span>
-          </label>
-        </div>
-      </section>
+![Deux personnes sur un quai au coucher du soleil, une rangée de réverbères.](photo:quai-ligny-soir)
 
-      <section class="panel" aria-labelledby="corps-t">
-        <h2 id="corps-t">Corps du billet <span class="mono">7 blocs · 1 040 mots · 6 min de lecture</span> <span class="pin" aria-hidden="true">4</span></h2>
-        <ol class="blocks">
-          <li class="blk" aria-labelledby="b1-t">
-            <div class="blk-hd">
-              <h3 id="b1-t"><span class="blk-n" aria-hidden="true">1</span>Photo</h3>
-              <span class="mono">pleine largeur · ouvre la visionneuse dans le contexte du billet</span>
-              <div class="blk-tools">
-                <button class="iconbtn" type="button" disabled aria-label="Monter le bloc 1 (déjà en tête)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
-                <button class="iconbtn" type="button" aria-label="Descendre le bloc 1, photo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
-                <button class="iconbtn" type="button" aria-label="Retirer le bloc 1, photo (Annuler possible)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-              </div>
-            </div>
-            <div class="ph-blk">
-              <img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy">
-              <div class="ph-f">
-                <p class="cartel-r"><span class="t">Miradouro, l’heure dorée</span> <span class="m">— Julien · Miradouro da Graça, Lisbonne · 10 octobre 2026</span><small>Cartel repris de la photothèque · <a class="more" href="#">modifier dans la fiche photo</a></small></p>
-                <label for="b1-alt">Texte de remplacement (repris de la fiche, modifiable)
-                  <textarea id="b1-alt" name="alt" rows="2">Les toits de la Graça au soleil couchant ; au loin, le Tage et la colline du château, dans une lumière orangée.</textarea>
-                </label>
-              </div>
-            </div>
-          </li>
+Une demi-heure plus tard, il ne restait que les réverbères.
 
-          <li class="blk" aria-labelledby="b2-t">
-            <div class="blk-hd">
-              <h3 id="b2-t"><span class="blk-n" aria-hidden="true">2</span>Texte</h3>
-              <span class="mono">142 mots</span>
-              <div class="blk-tools">
-                <button class="iconbtn" type="button" aria-label="Monter le bloc 2, texte"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
-                <button class="iconbtn" type="button" aria-label="Descendre le bloc 2, texte"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
-                <button class="iconbtn" type="button" aria-label="Retirer le bloc 2, texte (Annuler possible)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-              </div>
-            </div>
-            <ul class="fmt" aria-label="Mise en forme du bloc 2">
-              <li><button type="button" aria-pressed="false">Intertitre</button></li>
-              <li><button type="button" aria-pressed="true"><i>Italique</i></button></li>
-              <li><button type="button" aria-pressed="false">Lien</button></li>
-              <li><button type="button" aria-pressed="false">Liste</button></li>
-              <li class="note">ni couleur, ni taille, ni gras : le site s’en charge</li>
-            </ul>
-            <label for="b2-txt" class="sr-only">Texte du bloc 2</label>
-            <textarea id="b2-txt" name="b2" rows="5">Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une matinée. Le samedi, à Lisbonne, nous nous sommes levés avant le premier tram, quand l’Alfama sent encore le café et le linge mouillé. Sébastien est descendu vers le Tage, Julien est monté dans les ruelles.</textarea>
-            <p class="typo" role="status"><span aria-hidden="true">✓</span> <b>Typographie corrigée à la saisie :</b> 2 apostrophes droites → ’, « » avec espaces fines, « -- » → tiret —. <button class="more" type="button">Annuler ces corrections</button> <kbd>Ctrl Z</kbd> <span class="pin" aria-hidden="true">6</span></p>
-          </li>
+![](photo:reverberes-quai-ligny)</textarea></div>
+    <p class="sous-source" id="texte-aide"><span>## intertitre · **gras** · &gt; citation · une photo par ligne ; apostrophes et guillemets corrigés à la frappe</span><span>112 mots · 1 min de lecture · <a href="/admin/aide#carnets-mise-en-forme">Aide sur la mise en forme</a></span></p></div>
+</form></div>
+<div class="cote">
+<section class="panel mq-a" aria-labelledby="t-ph"><span class="mq-pin d" aria-hidden="true">7</span><h2 class="panel-t" id="t-ph">Photos du billet · 3</h2><ol class="objets-a" aria-label="Photos du billet, dans l’ordre">
+<li id="ph-1"><img src="_commun/photos/160/quai.webp" width="160" height="107" alt="Quai désert sous un ciel gris, trois silhouettes au loin." loading="lazy" decoding="async"><span class="t"><span class="n">1</span>Quai, 7 h 12<span class="sec">oct. 2024 · couverture</span></span><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Publiée</span></li>
+<li id="ph-2"><img src="_commun/photos/160/ligny.webp" width="160" height="107" alt="Deux personnes sur un quai au coucher du soleil, une rangée de réverbères." loading="lazy" decoding="async"><span class="t"><span class="n">2</span>Quai Ligny, soir<span class="sec">14 oct. 2026, 18 h 10</span></span><span class="etat etat--attention"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Accord à vérifier</span>
+  <p class="detail">Claire a donné son accord en ligne le 15 oct. : il reste à le vérifier. Hugo, à côté d’elle, n’en a pas encore.</p>
+  <div class="actions"><a class="btn ghost" href="/admin/rencontres/2026-10-14-quai-ligny">Ouvrir la rencontre du 14 oct.</a><button class="btn ghost" type="button">Retirer du billet</button></div></li>
+<li id="ph-3"><img src="_commun/photos/160/reverberes.webp" width="160" height="107" alt="La ville la nuit, fenêtres allumées et halos de réverbères." loading="lazy" decoding="async"><span class="t"><span class="n">3</span>Réverbères, quai Ligny<span class="sec">R0004057.jpg · proposée avec le billet</span></span><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</span>
+  <p class="err" id="ph-3-err"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> texte de remplacement vide. Décrivez la photo pour qui ne la voit pas.</span></p>
+  <div class="actions"><button class="btn ghost" type="button" aria-haspopup="dialog" aria-describedby="ph-3-err">Décrire la photo…</button></div></li>
+</ol></section>
+<section class="panel mq-a" aria-labelledby="t-pub"><span class="mq-pin d" aria-hidden="true">8</span><h2 class="panel-t" id="t-pub">Publication</h2>
+<dl class="kv-a"><dt>État</dt><dd><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Brouillon</span></dd><dt>Ensuite</dt><dd>vous proposez, Julien publie</dd><dt>Adresse</dt><dd><span class="donnee">/carnet/angers-un-soir-doctobre</span><span class="hint" style="display:block">modifiable jusqu’à la première publication</span></dd></dl>
+<p style="margin:14px 0 0;font-size:13px">Première vue : 380 ko estimés, budget 1 Mo</p><div class="jauge" role="img" aria-label="380 ko sur 1 Mo"><i></i></div>
+<p style="margin:10px 0 0"><a class="lien-a" href="/admin/carnets/18/versions">9 versions depuis le 15 oct. · voir et rétablir</a></p></section>
+<section class="panel mq-a"><span class="mq-pin d" aria-hidden="true">9</span><details class="plier"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg><span>Autres réglages<span class="sec">signature, rubrique, couverture, étiquettes, visibilité</span></span></summary>
+<dl class="kv-a" style="margin-top:12px"><dt>Signature</dt><dd>Sébastien</dd><dt>Rubrique</dt><dd>Voyages</dd><dt>Couverture</dt><dd>Quai, 7 h 12 (première photo publiée)</dd><dt>Étiquettes</dt><dd>aucune</dd><dt>Visibilité</dt><dd>public</dd></dl></details></section>
+</div>
+</div>
+<div class="ecrans-suite">
+<section class="ecran-bloc mq-ecran" aria-labelledby="etat-1"><p class="mq-etat" id="etat-1">État · « Décrire la photo… » : texte vide</p>
+<div class="voile-ech">
+<dialog class="dialog confirm-ech" open aria-labelledby="dlg-ph"><span class="mq-pin" aria-hidden="true">10</span>
+  <h2 id="dlg-ph">Photo 3 : Réverbères, quai Ligny</h2>
+  <p class="hint" style="margin:0 0 14px">Brouillon de Sébastien · R0004057.jpg · proposée avec le billet</p>
+  <form class="dialog-form" method="post" action="/admin/carnets/18/photos/3" novalidate style="display:grid;gap:14px">
+    <div class="champ-a"><label for="alt">Texte de remplacement</label><p class="aide" id="alt-aide">Ce que montre la photo, pour qui ne la voit pas. Une phrase.</p><textarea id="alt" rows="2" aria-invalid="true" aria-describedby="alt-aide alt-err"></textarea><p class="err" id="alt-err"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> décrivez la photo ; sans ce texte, le billet ne peut pas être proposé.</span></p>
+      <div class="sugg"><p>✦ Suggestion, à relire : « La ville la nuit, fenêtres allumées et halos de réverbères le long du quai. »</p><button class="btn ghost" type="button">Reprendre la suggestion</button></div></div>
+    <div class="champ-a"><label for="leg">Légende <span class="facultatif">(facultatif)</span></label><input id="leg" value=""><p class="aide">Vide : le titre de la photo s’affiche seul.</p></div>
+    <fieldset class="choix-a"><legend>Taille</legend><label><input type="radio" name="taille" checked><span>Largeur du texte</span></label><label><input type="radio" name="taille"><span>Pleine largeur</span></label></fieldset>
+  </form>
+  <div class="actions"><button class="btn ghost" type="button">Annuler</button><button class="btn" type="button">Mettre à jour la photo</button></div>
+</dialog>
+</div>
+</section>
+<section class="ecran-bloc mq-ecran" aria-labelledby="etat-2"><p class="mq-etat" id="etat-2">État · Onglet Deutsch : traduction à relire</p>
+<div class="panel" style="max-width:820px"><span class="mq-pin" aria-hidden="true">11</span>
+<h2 class="panel-t" id="t-de">Version allemande</h2>
+<div class="langues"><nav class="seg" aria-label="Langue du billet (version allemande)"><a href="/admin/carnets/18?langue=fr">Français <span class="st-l">brouillon</span></a><a href="/admin/carnets/18?langue=en">English <span class="st-l">vide</span></a><a href="/admin/carnets/18?langue=de" aria-current="page">Deutsch <span class="st-l">à relire</span></a></nav></div>
+<div class="sugg" style="margin:14px 0"><p>✦ Traduction proposée par l’assistant à 22 h 44, d’après le français. À relire par Camille ou par vous.</p></div>
+<div class="form" style="gap:14px">
+<div class="champ-a"><div class="lb-l"><label for="titre-de">Titre</label><span class="compteur">28 / 70</span></div><input id="titre-de" lang="de" value="Angers, ein Abend im Oktober"></div>
+<div class="champ-a"><div class="lb-l"><label for="chapo-de">Chapô</label><span class="compteur trop">191 / 160</span></div><textarea class="auto" id="chapo-de" lang="de" rows="3">Den Quai Ligny fotografiere ich seit zehn Jahren am Morgen. Am Mittwochabend stieg die Maine, die Laternen gingen eine nach der anderen an, und zwei Spaziergänger ließen sich ins Bild nehmen.</textarea></div>
+<div class="champ-a"><label for="texte-de">Texte</label><textarea id="texte-de" lang="de" rows="7" class="source" style="min-height:0;border-radius:var(--r-admin)!important">Den Quai Ligny kenne ich am Morgen. Ich gehe seit Jahren dort vorbei, vor der Arbeit, wenn die Maine noch dampft und die Lastkähne schlafen.
 
-          <li class="blk" aria-labelledby="b3-t">
-            <div class="blk-hd">
-              <h3 id="b3-t"><span class="blk-n" aria-hidden="true">3</span>Citation</h3>
-              <span class="mono">balisée dans sa langue</span>
-              <div class="blk-tools">
-                <button class="iconbtn" type="button" aria-label="Monter le bloc 3, citation"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
-                <button class="iconbtn" type="button" aria-label="Descendre le bloc 3, citation"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
-                <button class="iconbtn" type="button" aria-label="Retirer le bloc 3, citation (Annuler possible)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-              </div>
-            </div>
-            <div class="grid2">
-              <label class="full" for="b3-q">Citation, telle qu’elle a été dite
-                <textarea id="b3-q" name="q" rows="2" lang="pt-PT">«Fotografe à vontade. As flores não fogem, e eu também não.»</textarea>
-              </label>
-              <label for="b3-lang"><span>Langue de la citation <span class="pin" aria-hidden="true">7</span></span>
-                <select id="b3-lang" name="q_lang" class="mq-focus" aria-describedby="b3-lang-h">
-                  <option value="fr">français</option>
-                  <option value="pt-PT" selected>portugais (Portugal) · pt-PT</option>
-                  <option value="pt-BR">portugais (Brésil) · pt-BR</option>
-                  <option value="es">espagnol · es</option>
-                  <option value="en">anglais · en</option>
-                  <option value="de">allemand · de</option>
-                </select>
-                <span class="hint" id="b3-lang-h">Les lecteurs d’écran la prononceront en portugais.</span>
-              </label>
-              <label for="b3-src">Source
-                <input id="b3-src" name="q_src" value="Inês, fleuriste, rua dos Remédios">
-              </label>
-              <label class="full" for="b3-tr">Traduction (affichée dessous, en français)
-                <textarea id="b3-tr" name="q_tr" rows="2">« Photographiez tant que vous voulez. Les fleurs ne s’en vont pas, et moi non plus. »</textarea>
-              </label>
-            </div>
-          </li>
+![Ein menschenleerer Kai unter grauem Himmel, drei Gestalten in der Ferne.](photo:quai-7-h-12 "Vor zwei Jahren, derselbe Kai, zu der Stunde, die ich kenne.")
 
-          <li class="blk sel" aria-labelledby="b4-t" aria-current="true">
-            <div class="blk-hd">
-              <h3 id="b4-t"><span class="blk-n" aria-hidden="true">4</span>Diptyque <span class="sel-tag">· bloc sélectionné</span></h3>
-              <span class="mono">même lieu, deux regards</span>
-              <div class="blk-tools">
-                <button class="iconbtn" type="button" aria-label="Monter le bloc 4, diptyque"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
-                <button class="iconbtn" type="button" aria-label="Descendre le bloc 4, diptyque"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
-                <button class="iconbtn" type="button" aria-label="Retirer le bloc 4, diptyque (Annuler possible)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-              </div>
-            </div>
-            <label for="b4-t-in">Titre du diptyque
-              <input id="b4-t-in" name="dip_t" value="Même lieu, deux regards : le Douro">
-            </label>
-            <div class="dip-slots">
-              <figure><img src="_commun/photos/mer.webp" width="900" height="600" alt="" loading="lazy"><figcaption><b>À gauche · Sébastien</b>Foz, la barre</figcaption></figure>
-              <button class="swap" type="button">⇄ Échanger</button>
-              <figure><img src="_commun/photos/brume.webp" width="900" height="600" alt="" loading="lazy"><figcaption><b>À droite · Julien</b>Ribeira, brume du fleuve</figcaption></figure>
-            </div>
-          </li>
-
-          <li class="blk" aria-labelledby="b5-t">
-            <div class="blk-hd">
-              <h3 id="b5-t"><span class="blk-n" aria-hidden="true">5</span>Texte</h3>
-              <span class="mono">96 mots</span>
-              <div class="blk-tools">
-                <button class="iconbtn" type="button" aria-label="Monter le bloc 5, texte"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
-                <button class="iconbtn" type="button" aria-label="Descendre le bloc 5, texte"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
-                <button class="iconbtn" type="button" aria-label="Retirer le bloc 5, texte (Annuler possible)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-              </div>
-            </div>
-            <label for="b5-txt" class="sr-only">Texte du bloc 5</label>
-            <textarea id="b5-txt" name="b5" rows="3">Sébastien a cherché la mer, Julien les gens. Inês nous a vendu des fleurs, Tiago nous a laissé photographier son étal : merci à eux.</textarea>
-          </li>
-        </ol>
-        <p class="hint" style="margin-top:10px">Blocs 6 et 7 repliés dans cette maquette : texte « Porto, la brume et la barre », photo « Inês, rua dos Remédios ».</p>
-        <div class="add-blk" role="group" aria-labelledby="add-lb">
-          <span class="lb" id="add-lb">Ajouter après le bloc 4 :</span>
-          <button class="btn ghost" type="button">Texte</button>
-          <button class="btn ghost" type="button">Photo</button>
-          <button class="btn ghost" type="button">Diptyque</button>
-          <button class="btn ghost" type="button">Citation</button>
-        </div>
-      </section>
-    </div>
-
-    <div class="e-aside">
-      <section class="panel" id="publication" aria-labelledby="pub-t">
-        <h2 id="pub-t">Publication <span class="pin" aria-hidden="true">8</span></h2>
-        <p class="pub-st"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Brouillon</span> visible de vous deux seulement</p>
-        <p class="pub-flow" aria-label="Circuit : brouillon, proposé, publié">○ Brouillon <span aria-hidden="true">→</span> <i class="half" aria-hidden="true"></i> Proposé <span aria-hidden="true">→</span> ● Publié</p>
-        <fieldset class="fs when">
-          <legend>Quand le publier</legend>
-          <label class="inline"><input type="radio" name="quand" value="now"> Dès que je clique sur « Publier »</label>
-          <label class="inline"><input type="radio" name="quand" value="later" checked> Programmer</label>
-          <div class="row">
-            <label for="p-date">Le <input id="p-date" name="p_date" value="lun. 12 oct. 2026" inputmode="text" autocomplete="off"></label>
-            <label for="p-time">à <input id="p-time" name="p_time" value="8 h 00" autocomplete="off"></label>
-          </div>
-          <p class="hint">Lundi 12 octobre à 8 h, heure de Paris. Le flux RSS l’annonce à cette heure-là.</p>
-        </fieldset>
-        <div class="pub-btns">
-          <button class="btn big" type="button">Programmer pour le 12 oct., 8 h</button>
-          <p class="hint">Avant de programmer : <strong>EN à traduire</strong>, DE à revoir. Le billet peut partir en français seul ; les autres langues renverront au français.</p>
-        </div>
-      </section>
-
-      <section class="panel" id="apercu" aria-labelledby="pv-t">
-        <h2 id="pv-t">Aperçu comme sur le site</h2>
-        <div class="seg-pv">
-          <a class="btn ghost" href="#ecran-b">Nuit</a>
-          <a class="btn ghost" href="#ecran-b">Jour</a>
-        </div>
-        <p class="hint" style="margin-top:8px">S’ouvre dans un nouvel onglet ; rien n’est publié.</p>
-      </section>
-
-      <section class="panel weight" aria-labelledby="w-t">
-        <h2 id="w-t">Poids du billet <span class="pin" aria-hidden="true">9</span></h2>
-        <p style="margin:0"><span class="big">640 ko</span> estimés, budget 1,2 Mo</p>
-        <meter min="0" max="1200" low="900" high="1100" optimum="400" value="640" aria-label="Poids estimé : 640 ko sur un budget de 1 200 ko">640 ko sur 1 200</meter>
-        <dl>
-          <dt>7 photos (1 280 px, AVIF)</dt><dd>540 ko</dd>
-          <dt>Planche des 10 photos</dt><dd>84 ko</dd>
-          <dt>Texte, carte d’itinéraire</dt><dd>16 ko</dd>
-        </dl>
-        <p class="hint" style="margin-top:8px">Mesuré à l’ouverture d’un téléphone ; les photos suivantes ne chargent qu’au défilement.</p>
-      </section>
-
-      <section class="panel" aria-labelledby="tp-t">
-        <h2 id="tp-t">Photos du voyage <span class="mono">10 · Lisbonne et Porto</span> <span class="pin" aria-hidden="true">10</span></h2>
-        <ul class="tp-list">
-          <li class="tp" draggable="true"><span class="grip" aria-hidden="true">⠿</span><img src="_commun/photos/quai.webp" width="900" height="600" alt="" loading="lazy"><span class="t">Cais do Sodré, marée basse<small>Sébastien · 10 oct.</small></span><button class="btn sec" type="button" aria-label="Insérer « Cais do Sodré, marée basse » après le bloc 4">Insérer</button></li>
-          <li class="tp" draggable="true"><span class="grip" aria-hidden="true">⠿</span><img src="_commun/photos/ruelle.webp" width="600" height="900" alt="" loading="lazy"><span class="t">Alfama, premier tram<small>Julien · 10 oct.</small></span><button class="btn sec" type="button" aria-label="Insérer « Alfama, premier tram » après le bloc 4">Insérer</button></li>
-          <li class="tp used"><span class="grip" aria-hidden="true"></span><img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy"><span class="t">Miradouro, l’heure dorée<small class="in">✓ dans le bloc 1</small></span><a class="more" href="#b1-t" style="font-size:12.5px">Voir</a></li>
-          <li class="tp" draggable="true"><span class="grip" aria-hidden="true">⠿</span><img src="_commun/photos/ombre.webp" width="900" height="600" alt="" loading="lazy"><span class="t">Tiago, marché do Bolhão<small>Sébastien · 11 oct.</small></span><button class="btn sec" type="button" aria-label="Insérer « Tiago, marché do Bolhão » après le bloc 4">Insérer</button></li>
-          <li class="tp used"><span class="grip" aria-hidden="true"></span><img src="_commun/photos/mer.webp" width="900" height="600" alt="" loading="lazy"><span class="t">Foz, la barre<small class="in">✓ dans le bloc 4</small></span><a class="more" href="#b4-t" style="font-size:12.5px">Voir</a></li>
-          <li class="tp" draggable="true"><span class="grip" aria-hidden="true">⠿</span><img src="_commun/photos/nuit.webp" width="600" height="900" alt="" loading="lazy"><span class="t">Escaliers des Guindais<small>Julien · 11 oct.</small></span><button class="btn sec" type="button" aria-label="Insérer « Escaliers des Guindais » après le bloc 4">Insérer</button></li>
-        </ul>
-        <p class="hint tp-hint">Glissez une photo entre deux blocs, ou utilisez « Insérer » : elle se place après le bloc sélectionné. <a class="more" href="#">Les 10 photos</a></p>
-      </section>
-    </div>
-  </div>
-
-  <!-- ================= Écran B ================= -->
-  <section class="mq-b" aria-labelledby="ecran-b">
-    <p class="mq-screen" id="ecran-b"><b>Écran B</b> Aperçu comme sur le site, nuit et jour <span class="pin" aria-hidden="true">11</span></p>
-    <div class="pv-pair">
-      <figure class="pv nuit">
-        <div class="pv-bar" aria-hidden="true"><span>Aperçu · thème Nicephos, nuit</span><span>non publié</span></div>
-        <div class="pv-page" role="img" aria-label="Aperçu en thème nuit : titre Lisbonne et Porto, sous-titre, signature et date, première photo et début du texte, en clair sur fond noir.">
-          <p class="nm">Nicephos</p>
-          <p class="k">Voyage</p>
-          <p class="h">Lisbonne et Porto</p>
-          <p class="s">Deux jours, deux regards, un même océan</p>
-          <p class="b">Par Sébastien et Julien · 12 octobre 2026 · 6 min de lecture</p>
-          <img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy">
-          <p class="c">Miradouro, l’heure dorée — Julien · Lisbonne</p>
-          <p class="p">Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une matinée.</p>
-        </div>
-        <figcaption>Nuit : prose en Jost 400, contraste 12:1.</figcaption>
-      </figure>
-      <figure class="pv jour">
-        <div class="pv-bar" aria-hidden="true"><span>Aperçu · thème Nicephos, jour</span><span>non publié</span></div>
-        <div class="pv-page" role="img" aria-label="Aperçu en thème jour : la même page en sombre sur fond ivoire.">
-          <p class="nm">Nicephos</p>
-          <p class="k">Voyage</p>
-          <p class="h">Lisbonne et Porto</p>
-          <p class="s">Deux jours, deux regards, un même océan</p>
-          <p class="b">Par Sébastien et Julien · 12 octobre 2026 · 6 min de lecture</p>
-          <img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy">
-          <p class="c">Miradouro, l’heure dorée — Julien · Lisbonne</p>
-          <p class="p">Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une matinée.</p>
-        </div>
-        <figcaption>Jour : mêmes règles, contraste 11:1. Rendu complet : MQ-12.</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <!-- ================= Écran C ================= -->
-  <section class="mq-c" aria-labelledby="ecran-c">
-    <p class="mq-screen" id="traduire"><b id="ecran-c">Écran C</b> Onglet EN : traduire tout le billet sur une page <span class="pin" aria-hidden="true">12</span></p>
-    <table class="trad">
-      <caption>Traduction anglaise <span class="mono">4 textes sur 11 traduits · Tab passe d’un champ au suivant</span></caption>
-      <thead><tr><th scope="col">Élément</th><th scope="col">Français (référence)</th><th scope="col">English</th></tr></thead>
-      <tbody>
-        <tr><th scope="row">Titre</th><td class="src">Lisbonne et Porto</td><td><label class="sr-only" for="en-1">Titre en anglais</label><input id="en-1" lang="en" value="Lisbon and Porto"><p class="cellnote">✓ traduit le 11 oct.</p></td></tr>
-        <tr><th scope="row">Chapô</th><td class="src">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens…</td><td><label class="sr-only" for="en-2">Chapô en anglais</label><textarea id="en-2" lang="en" rows="2">Two days, two ways of seeing, one ocean. Sébastien went looking for the sea, Julien for people…</textarea><p class="cellnote">✓ traduit le 11 oct.</p></td></tr>
-        <tr><th scope="row">Bloc 2 · texte</th><td class="src">Nous étions partis avec une seule règle : ne pas photographier la même chose…</td><td><label class="sr-only" for="en-3">Bloc 2 en anglais</label><textarea id="en-3" lang="en" rows="2" aria-describedby="en-3-h"></textarea><p class="cellnote todo" id="en-3-h">▲ à traduire · <button class="more" type="button">Proposer une traduction</button></p></td></tr>
-        <tr><th scope="row">Bloc 3 · traduction de la citation</th><td class="src">« Photographiez tant que vous voulez… »</td><td><label class="sr-only" for="en-4">Traduction de la citation en anglais</label><textarea id="en-4" lang="en" rows="2">“Take as many pictures as you like. The flowers aren’t going anywhere, and neither am I.”</textarea><p class="cellnote">La citation reste en portugais dans toutes les langues.</p></td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- ================= Écran D ================= -->
-  <section class="mq-d" aria-labelledby="ecran-d">
-    <p class="mq-screen" id="ecran-d"><b>Écran D</b> Le même bloc Publication selon le rôle <span class="pin" aria-hidden="true">13</span></p>
-    <div class="role-pair">
-      <section class="panel" aria-labelledby="rp-t">
-        <h3 id="rp-t">Photographe : proposer</h3>
-        <p class="pub-st"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Brouillon</span> écrit par Sébastien</p>
-        <label for="rp-mot">Un mot pour le modérateur (facultatif)
-          <textarea id="rp-mot" rows="2">Julien, peux-tu relire la citation d’Inês ? Je n’ai pas son accord écrit pour la photo 04.</textarea>
-        </label>
-        <p class="actions"><button class="btn" type="button">Proposer le billet</button></p>
-        <p class="hint">Vous restez auteur ; Julien ou Sébastien le publient, ou vous le renvoient avec un mot.</p>
-      </section>
-      <section class="panel" aria-labelledby="rm-t">
-        <h3 id="rm-t">Administrateur : après une proposition</h3>
-        <p class="pub-st"><span class="etat todo"><span class="sym" aria-hidden="true"><i class="half"></i></span>Proposé</span> par Sébastien, le 11 oct. à 21 h 58</p>
-        <p class="cartel-r"><span class="m">« Julien, peux-tu relire la citation d’Inês ? Je n’ai pas son accord écrit pour la photo 04. »</span></p>
-        <p class="actions"><button class="btn" type="button">Publier</button> <button class="btn ghost" type="button">Renvoyer avec un mot</button></p>
-        <p class="hint">Après « Publier » : « Billet publié · Annuler » pendant 10 s, avant l’annonce dans le flux RSS.</p>
-      </section>
-    </div>
-  </section>
+## Dann der Abend</textarea></div>
+<fieldset class="choix-a"><legend>Publication en allemand</legend><label><input type="checkbox"><span>Traduction relue : publier aussi en allemand</span><span class="sec">Non cochée, la page allemande montre le texte français avec un bandeau « Nur auf Französisch », sans redirection.</span></label></fieldset>
+</div></div>
+</section>
+<div class="deux-etats">
+<section class="ecran-bloc mq-ecran" aria-labelledby="etat-3"><p class="mq-etat" id="etat-3">État · Julien : le libellé suit le choix</p>
+<h2 class="sr-only" id="t-j1">Publication, vue par Julien : programmation valide</h2><span class="mq-pin" aria-hidden="true">12</span><div class="panel"><h3 class="panel-t">Publication</h3>
+<fieldset class="choix-a"><legend>Quand</legend><label><input type="radio" name="quand-a"><span>Maintenant</span></label><label><input type="radio" name="quand-a" checked><span>Programmer</span></label></fieldset>
+<div class="champ-a" style="margin-top:8px"><label for="quand-a">Jour et heure</label><p class="aide" id="quand-aide-a">Écrivez-les comme vous voulez : « samedi 8 h », « 17/10 8:00 ».</p><input id="quand-a" value="sam. 17 oct., 8 h" aria-describedby="quand-aide-a quand-lu-a"><p class="lu" id="quand-lu-a" style="display:flex;gap:6px;align-items:center;margin:0;color:var(--ink2);font-size:13px"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Samedi 17 octobre 2026, 8 h 00</p></div>
+<div class="form-pied" style="margin-top:16px"><button class="btn ghost" type="button">Renvoyer à Sébastien…</button><button class="btn" type="button">Programmer pour le sam. 17 oct., 8 h</button></div></div></section>
+<section class="ecran-bloc mq-ecran" aria-labelledby="etat-4"><p class="mq-etat" id="etat-4">État · Julien : date passée</p>
+<h2 class="sr-only" id="t-j2">Publication, vue par Julien : date passée</h2><div class="panel"><h3 class="panel-t">Publication</h3>
+<fieldset class="choix-a"><legend>Quand</legend><label><input type="radio" name="quand-b"><span>Maintenant</span></label><label><input type="radio" name="quand-b" checked><span>Programmer</span></label></fieldset>
+<div class="champ-a" style="margin-top:8px"><label for="quand-b">Jour et heure</label><p class="aide" id="quand-aide-b">Écrivez-les comme vous voulez : « samedi 8 h », « 17/10 8:00 ».</p><input id="quand-b" value="jeu. 15 oct., 8 h" aria-invalid="true" aria-describedby="quand-aide-b quand-err-b"><p class="err" id="quand-err-b"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> le jeudi 15 octobre est passé. Écrivez un jour à venir, par exemple « sam. 17 oct., 8 h ».</span></p></div>
+<div class="form-pied" style="margin-top:16px"><button class="btn ghost" type="button">Renvoyer à Sébastien…</button><button class="btn" type="button">Programmer</button></div></div></section>
+</div>
+<section class="ecran-bloc mq-ecran" aria-labelledby="etat-5"><p class="mq-etat" id="etat-5">État · Sans JavaScript</p>
+<form class="panel form" action="/admin/carnets/18" method="post" style="max-width:820px"><span class="mq-pin" aria-hidden="true">13</span>
+<h2 class="panel-t" id="t-nojs">Angers, un soir d’octobre · français</h2>
+<div class="champ-a"><label for="texte-nj">Texte</label><textarea id="texte-nj" rows="5" class="source" style="min-height:0;border-radius:var(--r-admin)!important">Je connais le quai Ligny le matin. J’y passe depuis des années, avant le travail, quand la Maine fume encore et que les péniches dorment.</textarea></div>
+<fieldset class="choix-a"><legend>Photos du billet</legend><p class="aide">Cochées, elles s’ajoutent à la fin du texte ; déplacez ensuite leur ligne.</p>
+<label><input type="checkbox" checked><span>Quai, 7 h 12</span></label><label><input type="checkbox" checked><span>Quai Ligny, soir</span></label><label><input type="checkbox" checked><span>Réverbères, quai Ligny</span></label><label><input type="checkbox"><span>Minoterie, brume du matin</span></label></fieldset>
+<div class="form-pied"><button class="btn ghost" type="submit" name="faire" value="enregistrer">Enregistrer et voir l’aperçu</button><button class="btn" type="submit" name="faire" value="proposer">Proposer à Julien</button></div>
+</form>
+</section>
+<div class="deux-etats" style="grid-template-columns:minmax(0,3fr) minmax(0,2fr)">
+<section class="ecran-bloc mq-ecran" id="apercu" aria-labelledby="etat-6"><p class="mq-etat" id="etat-6">État · Aperçu, comme sur le site (nuit)</p>
+<div class="apercu-site mode-nuit theme-nicephos"><span class="mq-pin" aria-hidden="true">14</span><p class="bandeau">Aperçu · non publié · visible de l’équipe seulement</p>
+<div class="corps"><p class="rub">Voyages</p><h2 class="tt" id="t-ap">Angers, un soir d’octobre</h2><p class="par">Par Sébastien</p>
+<p class="chapo">Le quai Ligny, je le photographie le matin depuis dix ans. Mercredi soir, la Maine montait, les réverbères s’allumaient un à un, et deux promeneurs ont accepté d’entrer dans l’image.</p>
+<p class="prose">Je connais le quai Ligny le matin. J’y passe depuis des années, avant le travail, quand la Maine fume encore et que les péniches dorment.</p>
+<figure><a href="/carnet/angers-un-soir-doctobre/photo/quai-7-h-12"><img src="_commun/photos/480/quai.webp" srcset="_commun/photos/480/quai.webp 480w, _commun/photos/quai.webp 900w" sizes="(max-width: 720px) calc(100vw - 64px), 592px" width="480" height="320" alt="Quai désert sous un ciel gris, trois silhouettes au loin." loading="lazy" decoding="async"></a><figcaption>Quai, 7 h 12 · Il y a deux ans, le même quai, à l’heure où je le connais.</figcaption></figure>
+<h3 class="h4">Puis le soir</h3>
+<p class="prose">Mercredi, j’y suis revenu à la tombée du jour. À 18 h 10, Claire et Hugo marchaient devant moi, au bord de l’eau.</p>
+<figure class="np"><img src="_commun/photos/480/ligny.webp" srcset="_commun/photos/480/ligny.webp 480w, _commun/photos/ligny.webp 900w" sizes="(max-width: 720px) calc(100vw - 64px), 592px" width="480" height="320" alt="Deux personnes sur un quai au coucher du soleil, une rangée de réverbères." loading="lazy" decoding="async"><figcaption>Quai Ligny, soir · <b>non publiée</b> : absente du site tant qu’elle ne l’est pas</figcaption></figure>
+</div></div>
+</section>
+<section class="ecran-bloc mq-ecran" aria-labelledby="etat-7"><p class="mq-etat" id="etat-7">État · « Retirer du billet » : Défaire</p><span class="mq-pin" aria-hidden="true">15</span>
+<div class="toast toast-ech" role="status"><p><b>« Quai Ligny, soir »</b> retirée du billet.</p><button type="button">Défaire</button><span class="toast-temps" style="--reste: 62%"></span></div>
+</section>
+<section class="ecran-bloc mq-ecran" aria-labelledby="etat-8"><p class="mq-etat" id="etat-8">État · Aperçu en thème jour</p>
+<div class="apercu-site mode-jour theme-nicephos"><p class="bandeau">Aperçu · non publié</p>
+<div class="corps"><p class="rub">Voyages</p><h2 class="tt" id="t-ap-j" style="font-size:32px">Angers, un soir d’octobre</h2><p class="par">Par Sébastien</p>
+<p class="chapo" style="font-size:18px">Le quai Ligny, je le photographie le matin depuis dix ans. Mercredi soir, la Maine montait, les réverbères s’allumaient un à un, et deux promeneurs ont accepté d’entrer dans l’image.</p>
+<figure><a href="/carnet/angers-un-soir-doctobre/photo/quai-7-h-12"><img src="_commun/photos/480/quai.webp" srcset="_commun/photos/480/quai.webp 480w, _commun/photos/quai.webp 900w" sizes="(max-width: 720px) calc(100vw - 64px), 400px" width="480" height="320" alt="Quai désert sous un ciel gris, trois silhouettes au loin." loading="lazy" decoding="async"></a><figcaption>Quai, 7 h 12</figcaption></figure>
+</div></div>
+</section>
+</div>
+</div>
 </main>
 </div>
-
-<section class="m-bars" aria-label="Barres basses du téléphone, montrées à plat">
-<p class="mq-screen m-only"><b>Téléphone</b> Barre basse, fixée en bas de l’écran au-dessus des onglets (montrée ici à plat)</p>
-<div class="m-bar" aria-label="État et publication du billet" role="region">
-  <p class="mst" role="status"><span class="ok" aria-hidden="true">✓</span> Enregistré à 22 h 42<br><b>○ Brouillon</b> · 640 ko sur 1,2 Mo</p>
-  <a class="btn" href="#publication">Publier…</a>
-</div>
-
 <nav class="tabbar" aria-label="Navigation rapide">
-  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
-  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photos</a>
-  <a class="imp" href="#" aria-label="Importer des photos"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></a>
-  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
-  <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
+  <a href="/admin"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
+  <a href="/admin/photos"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photos</a>
+  <a class="imp" href="/admin/photos?importer#import" aria-label="Importer des photos"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></a>
+  <a href="/admin/rencontre/accueil"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
+  <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
 </nav>
-</section>
-
-
-
-
-<aside class="mq-notes" aria-labelledby="mq-notes-t">
-  <p class="mq-id">Maquette MQ-20 · administration · carnets, éditeur de billet · « Chambre noire » au bureau, mode clair sur téléphone · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
-  <h2 id="mq-notes-t">Ce qui change</h2>
-  <p class="mq-lead">Maquette MQ-20 · Administration › Publier › Carnets. L’écran est figé au dimanche 11 octobre 2026 au soir, la veille de la publication : MQ-11 et MQ-12 montrent le même billet publié le lundi 12 octobre à 8 h, puis mis à jour le 14. Aujourd’hui, le seul récit possible est la page d’un voyage : un nom et un texte dans un champ unique, deux champs de traduction pour le nom seulement, un bouton « Enregistrer » qui ne prévient pas si l’on part (UX-A-06). L’éditeur qui suit reprend la coquille de l’administration rangée (MQ-07), sa pastille d’état (MQ-09) et la règle d’enregistrement automatique. Le mode suit le système : « Chambre noire » sur la capture de bureau, clair sur celle du téléphone. Données fictives, photos de démonstration, aucun script.</p>
-  <ol class="mq-list">
-    <li><span class="pin">1</span><span><strong>Où je suis, dans quel état.</strong> Fil d’Ariane « Carnets › Lisbonne et Porto », titre du billet en H1, pastille commune « ○ Brouillon » (forme et mot), adresse publique affichée avant la publication.</span><span class="ref">UX-A-32, UX-A-16 · B&amp;S 1.3 et 6 · RGAA 12.1 · WCAG 1.4.1 · Nielsen n°1</span></li>
-    <li><span class="pin">2</span><span><strong>Trois langues, trois onglets qui disent leur état en mots.</strong> « EN : à traduire », « DE : à revoir, le français a changé ce soir » ; chaque onglet est un lien (une adresse par langue), l’onglet actif porte aria-current et un soulignement, pas seulement une couleur.</span><span class="ref">UX-A-21, UX-T-16 · B&amp;S 1.3 et 7 · RGAA 10.7 et 12.2 · WCAG 1.4.1</span></li>
-    <li><span class="pin">3</span><span><strong>L’en-tête du billet, tel qu’il apparaîtra dans la liste.</strong> Titre, chapô avec compteur de signes, auteurs qui signent sous le titre, rubrique, voyage lié, date affichée ; chaque champ a un libellé visible, les groupes ont leur légende.</span><span class="ref">UX-T-18 · RGAA 11.1, 11.2 et 11.5 · Opquast 6 et 231 · B&amp;S 1.2.1</span></li>
-    <li><span class="pin">4</span><span><strong>Un corps en blocs, sans glisser obligatoire.</strong> Texte, photo, diptyque, citation : chacun a son titre, son numéro et des boutons « Monter », « Descendre », « Retirer » nommés avec le numéro du bloc ; « Retirer » s’annule. La photo reprend son cartel et son texte de remplacement depuis la photothèque.</span><span class="ref">UX-A-32, UX-T-16 · WCAG 2.5.7 et 2.5.8 · RGAA 1.2, 11.9 · B&amp;S 2.1.2 et 3.2</span></li>
-    <li><span class="pin">5</span><span><strong>Une seule façon d’enregistrer : automatiquement, avec Annuler.</strong> « ✓ Enregistré à 22 h 42 » dans une zone d’état annoncée, « Annuler » à côté ; aucune saisie ne peut plus être perdue en quittant la page. Seul « Publier » reste un bouton explicite, parce qu’il a un effet public.</span><span class="ref">UX-A-06 · B&amp;S 1.3, 5.1 et 6 · ISO 9241-110 robustesse face aux erreurs · RGAA 7.5 · WCAG 4.1.3 · Nielsen n°3</span></li>
-    <li><span class="pin">6</span><span><strong>La typographie corrigée à la saisie, et dite.</strong> Apostrophe ’, guillemets « » avec espaces fines, tiret — : le message dit ce qui a été changé, et « Annuler ces corrections » (ou Ctrl Z) rend la main. La mise en forme est limitée à intertitre, italique, lien et liste : ni couleur ni taille, le site s’en charge.</span><span class="ref">UX-T-18, UX-F-29 · B&amp;S 3.2 et 5.3 · Opquast 186 · ISO 9241-110 contrôlabilité</span></li>
-    <li><span class="pin">7</span><span><strong>Une citation dans sa langue.</strong> Le champ de la citation porte lang="pt-PT" ; la langue choisie est reprise à la publication (balise lang), la traduction s’affiche dessous. Le focus de 2 px est montré sur la liste « Langue de la citation ».</span><span class="ref">UX-F-22, UX-T-18 · RGAA 8.7 · WCAG 3.1.2 et 2.4.7 · Opquast 132</span></li>
-    <li><span class="pin">8</span><span><strong>Publier ou programmer, sans surprise.</strong> Le circuit est écrit (○ Brouillon → <i class="half" aria-hidden="true"></i> Proposé → ● Publié) ; « Programmer » demande une date et une heure (heure de Paris) et le bouton les répète ; ce qui manque encore (EN à traduire) est dit avant, sans bloquer.</span><span class="ref">UX-A-32, UX-A-16 · B&amp;S 1.1 et 5.1 · WCAG 3.3.4 · Nielsen n°5</span></li>
-    <li><span class="pin">9</span><span><strong>Un budget de poids, affiché pendant l’écriture.</strong> « 640 ko estimés, budget 1,2 Mo », avec un &lt;meter&gt; doublé du texte et le détail par poste : on sait ce que coûte une photo de plus avant de l’insérer.</span><span class="ref">RGESN 6.1, 5.1 et 6.4 · UX-T-07 · étude B53</span></li>
-    <li><span class="pin">10</span><span><strong>Les photos du voyage à portée de main.</strong> Glisser entre deux blocs, ou « Insérer » (après le bloc sélectionné), qui suffit à lui seul au clavier et au toucher ; une photo déjà placée le dit (« ✓ dans le bloc 4 ») et mène à son bloc.</span><span class="ref">UX-T-16, UX-A-21 · WCAG 2.5.7 · RGAA 7.1 et 12.8 · B&amp;S 2.1.2 · ISO 9241-110 adéquation à la tâche</span></li>
-    <li><span class="pin">11</span><span><strong>Voir avant de publier, de nuit comme de jour.</strong> L’aperçu « comme sur le site » montre le billet dans les deux modes du thème Nicephos, avec la date programmée ; rien n’est publié.</span><span class="ref">UX-T-18, UX-F-29 · Nielsen n°1 · ISO 9241-110 conformité aux attentes</span></li>
-    <li><span class="pin">12</span><span><strong>Traduire tout le billet sur une page.</strong> Un tableau : élément, français de référence, champ anglais balisé lang="en" ; Tab d’un champ au suivant ; « ▲ à traduire » écrit ; « Proposer une traduction » si un traducteur est allumé. Sur téléphone, une carte par élément.</span><span class="ref">UX-A-21 · B&amp;S 2.1.2 · RGAA 5.4, 5.6 et 8.7 · Nielsen n°7</span></li>
-    <li><span class="pin">13</span><span><strong>Le même billet, deux rôles, les mêmes mots.</strong> Le Photographe « Propose » avec un mot facultatif pour le modérateur ; l’Administrateur voit « <i class="half" aria-hidden="true"></i> Proposé », le mot, puis « Publier » ou « Renvoyer avec un mot ». « Publier » s’annule pendant 10 s, avant l’annonce dans le flux.</span><span class="ref">UX-A-32, UX-A-07, UX-A-16 · B&amp;S 3.2 et 6 · ISO 9241-110 contrôlabilité</span></li>
+<div class="toast" role="status" aria-live="polite"></div>
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MQ-20 · administration · carnets, éditeur de billet · Sébastien, photographe · vendredi 16 octobre 2026, 22 h 42 · « Chambre noire » au bureau, clair au téléphone (le mode suit le système)</p>
+  <h2 id="mq-t">Ce qui change</h2>
+  <p class="mq-lead">Sébastien reprend son brouillon « Angers, un soir d’octobre » et le propose à Julien. L’éditeur garde tout seul ; ce qui bloque la proposition (une photo sans accord, un texte de remplacement vide) est dit en tête et sur chaque photo. Tous les composants sont ceux de la planche MQ-00.</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>Un billet, son état, son enregistrement</b><p>« ← Carnets », le titre, ○ Brouillon, puis la méta : signature, rubrique, et « ✓ Enregistré à 22 h 42 ». Le brouillon s’enregistre seul ; rien à cliquer pour ne rien perdre.</p><span class="mq-ref">UX-A-06 · planche, règle 1 · étude B31</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>Une seule commande de publication</b><p>Sébastien est Photographe : « Proposer à Julien ». Julien, Administrateur, a « Publier » ou « Programmer pour… » au même endroit, un seul bouton.</p><span class="mq-ref">jury v0 MQ-20 (1, 3) · étude circuit l.179 · B&S 3.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Ce qui bloque, dit avant tout</b><p>Après « Proposer », le résumé en tête : la photo sans accord, le texte de remplacement manquant, avec un lien vers chacun.</p><span class="mq-ref">étude B37, B43, B44 · WCAG 3.3.1 · RGAA 11.10</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Trois langues, un onglet chacune</b><p>Français, English, Deutsch, avec leur état ; une traduction n’est jamais publiée sans être relue.</p><span class="mq-ref">étude B7, B36, B54 · UX-A-21</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>Compter, signaler, ne pas bloquer</b><p>Titre 25 / 70, chapô 182 / 160 : le dépassement est signalé (▲), sans erreur, puisque 300 signes restent permis.</p><span class="mq-ref">étude B2, B4, B37 · B&S 5.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Markdown restreint, de vrais boutons</b><p>Barre de mise en forme en &lt;button&gt;, Écrire ou Aperçu ; une photo s’écrit par son adresse (photo:quai-ligny-soir), jamais par un numéro interne.</p><span class="mq-ref">étude B17 à B29, B9 · UX-A-10 · RGAA 7.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Les photos du billet, avec leur état</b><p>La même pastille que la photothèque ; chaque problème a sa phrase et ses issues : vérifier l’accord, retirer, décrire.</p><span class="mq-ref">UX-A-16 · étude B21, B43, B44 · lexique § 3</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Adresse, poids, versions</b><p>L’adresse se fige à la publication ; la première vue pèse 380 ko sur un budget de 1 Mo ; 9 versions à rétablir.</p><span class="mq-ref">étude B3, B38, B63 · RGESN 4.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Le reste, replié</b><p>Signature, rubrique, couverture, étiquettes, visibilité : une ligne qui dit ce qu’il y a dedans, ouverte au besoin.</p><span class="mq-ref">jury v0 MQ-20 (2) · B&S 2.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>Décrire une photo, avec de l’aide</b><p>Erreur sous le champ, et ✦ Suggestion de l’assistant à reprendre d’un geste, toujours à relire.</p><span class="mq-ref">étude B30 · UX-F-44 · WCAG 1.1.1, 3.3.3</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>La version allemande</b><p>Traduction proposée, à relire ; la case « relue » décide seule de la publication en allemand ; sinon, bandeau et texte français, sans redirection.</p><span class="mq-ref">étude B36, B54 · WCAG 3.1.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>Le libellé suit le choix</b><p>« Maintenant » donne « Publier » ; « Programmer » donne « Programmer pour le sam. 17 oct., 8 h ». Une date passée est refusée sous le champ.</p><span class="mq-ref">jury v0 MQ-20 (1) · B&S 5 · lexique § 1</span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>Sans JavaScript</b><p>Un formulaire classique : photos par cases à cocher, « Enregistrer et voir l’aperçu », et la même commande « Proposer à Julien ».</p><span class="mq-ref">étude B27 · planche, règle 4 · RGESN 2.3</span></li>
+    <li><span class="mq-num" aria-hidden="true">14</span><b>L’aperçu, comme sur le site</b><p>Nuit et jour, prose de lecture ; une photo non publiée y est signalée et n’apparaîtra pas sur le site. Une photo du billet s’ouvre dans la visionneuse du billet, pas dans la galerie.</p><span class="mq-ref">étude B21, B55 · UX-T-16, UX-T-18</span></li>
+    <li><span class="mq-num" aria-hidden="true">15</span><b>Un geste se défait</b><p>« Retirer du billet » a son message d’action et « Défaire » pendant 10 s.</p><span class="mq-ref">UX-A-08 · planche, message d’action</span></li>
   </ol>
-  <p class="mq-lead mq-socle">À décider avant de coder : le format de stockage du corps (des blocs en JSON plutôt que du HTML libre, pour garder la typographie, les cartels et les langues sous contrôle), et l’emplacement du traducteur proposé dans l’onglet EN (le même assistant que celui de MQ-07, éteint par défaut).</p>
-  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette, hors encart et pastilles) — <b>bureau 1440 × 900, « Chambre noire »</b> : H1 à 98 px ; contraste le plus faible du texte 4,8:1 (texte indicatif de la recherche) ; fond de la barre latérale sur toute la hauteur ; 11 vignettes, toutes en chargement différé. <b>Pixel 7 (412 × 839, densité 2), mode clair</b> : contraste le plus faible 4,7:1 (#9a5b0c sur #f1eee8) ; la traduction de la citation passe dans une zone de texte de deux lignes (plus de texte coupé) ; aucun défilement horizontal. Seul texte sous 12 px : les raccourcis « Ctrl K » et « Ctrl Z » (10,5 px, UX-A-30). Axe-core (WCAG 2.2 A et AA) : 0 violation sur les deux rendus.</p>
+  <h3>Composants ajoutés, proposés pour la planche</h3>
+  <p>Outre ceux de MQ-18 : <b>éditeur Markdown</b> (<code>.barre-outils</code> en vrais boutons, <code>.source</code>, <code>.sous-source</code>) · <b>compteur et signalement d’un champ</b> (<code>.compteur</code>, <code>.avert</code> : ▲ sans erreur) · <b>photos d’un billet avec leur état</b> (<code>.objets-a</code>) · <b>suggestion d’un assistant</b> (<code>.sugg</code>, ✦) · <b>réglages repliés</b> (<code>.plier</code>) · <b>aperçu « comme sur le site »</b> (<code>.apercu-site</code>, jetons du thème nuit) · <b>jauge de poids</b> (<code>.jauge</code>).</p>
+  <h3>Écarts avec l’étude, tranchés ici</h3>
+  <p>Corps en Markdown restreint, comme l’étude (B17), et non en blocs comme la v0. La source montre l’adresse de la photo (photo:quai-ligny-soir) ; le serveur la garde par identifiant (B9). Pas de bouton « Enregistrer » à côté de l’enregistrement automatique (B31, B34) : règle unique de la planche ; l’historique garde les versions. Rubrique « Voyages » (lexique), l’étude parlant d’étiquettes et de formats. Écran du vendredi 16 oct. à 22 h 42, le brouillon commencé la veille (LEXIQUE-ET-DONNEES.md § 4.3).</p>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium de Playwright 1.64 en conteneur ; outils/inspect.sh, outils/mq1820-rendu.mjs) · <b>axe-core</b> : 0 violation au bureau (1 440 × 900) en Chambre noire et en clair, et au téléphone (Pixel 7) · <b>Poids au chargement</b> : 258 ko et 19 requêtes (polices 68 ko, CSS 123 ko, 8 images 7 ko), aucun script, aucune ressource tierce ; photos en pastilles de 160 px, grands formats en 480/900 px selon l’écran, chargement différé sous la ligne de flottaison · <b>Largeurs</b> 320, 412, 820, 1 024 et 1 440 px : 0 débordement horizontal, 0 texte coupé dans l’interface (à 320 px, seules des étiquettes « État · … » de la maquette sont abrégées) ; listes en cartes sous 1 100 px · <b>Cibles</b> : 0 sous 24 px au bureau, 0 sous 44 px au téléphone · <b>Texte</b> : rien sous 12 px · <b>Sans annotations</b> : 37 pixels au bureau et 1 069 au téléphone, tous dans le grain des photos ou l’anticrénelage (6 au plus au-dessus de 48/765), aucun écart visible · Barre latérale : celle de la planche (Photographe : menu filtré par ses permissions, comptes de ses séries).</p>
 </aside>
+
 </body>
 </html>

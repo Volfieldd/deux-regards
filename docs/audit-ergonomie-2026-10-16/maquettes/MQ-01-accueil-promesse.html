@@ -5,171 +5,417 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <title>Nicephos — photographies de Sébastien et Julien</title>
-<meta name="description" content="Rue, mer et nuit, de Saint-Malo à la Californie : les photographies de Sébastien et Julien.">
+<meta name="description" content="Deux regards, une même lumière : les photographies de Sébastien et Julien, d’Angers à Lisbonne et Porto. Séries, galerie, carnets et tirages.">
 <link rel="stylesheet" href="_commun/site.css">
-<link rel="stylesheet" href="_commun/site-entete.css">
-<style>
-/* ===== Thème « Nicephos » (repris de public/themes/nicephos.css) + corrections proposées ===== */
-.theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
-  --display-style: normal; --dark: #050505; --dark-ink: #f0efeb; --dark-mute: #b4b2ac; --dark-rule: rgba(240,239,235,.28); }
-.mode-nuit { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
-  --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
-.mode-jour, .mode-auto { color-scheme: light; --paper: #fbfbf9; --ink: #111111; --mute: #5e5d59; --prose: #3a3936; --rule: #dddcd7;
-  --frame: #efeeea; --safelight: #7d6532; --on-accent: #fbfbf9; --field: #5e5d59; --error: #a8412b; --ok: #2f6b3a; }
-@media (prefers-color-scheme: dark) {
-  .mode-auto { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
-    --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
-}
-/* Thème Atelier (valeurs par défaut de site.css) : seules les couleurs d'erreur et de champ sont ajoutées. */
-.mode-atelier { --field: #6b665d; --error: #9e3a22; --ok: #2f6b3a; --on-accent: #f6f4ef; }
-
-/* Corrections typographiques (UX-F-29) et de comportement (UX-F-34) appliquées à toutes les maquettes */
-body { font-weight: 400; position: relative; }
-.theme-nicephos body { font-weight: 400; }
-.mono { font-size: 13px; }
-.eyebrow { font-size: 12px; }
-img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; -webkit-user-drag: auto; }
-:focus-visible, .is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
-.u, .prose a, .txt a { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
-.u:hover, .prose a:hover, .txt a:hover { text-decoration-thickness: 2px; }
-.arrow { display: inline-block; }
-.wrap { padding-inline: max(var(--gut), env(safe-area-inset-left)) max(var(--gut), env(safe-area-inset-right)); }
-
-/* Lien d’évitement, en-tête et pied de page : voir _commun/site-entete.css */
-
-/* Annotations : voir _commun/annotations.css (gabarit commun) */
-.site-tools li, .site-nav li { display: flex; align-items: center; }
-@media (min-width: 761px) { .menu-btn + .pin { display: none; } }
-/* ===== MQ-01 : ouverture ===== */
-body { background: var(--paper); }
-.hwrap { position: relative; }
-.op { display: grid; }
-/* La photo entière, posée sur le noir comme un tirage au mur : ni voile, ni zoom, ni recadrage (UX-F-17). */
-.op-photo { position: relative; margin: 0; display: flex; justify-content: center; padding-inline: var(--gut); }
-.op-im { position: relative; display: block; }
-.op-photo img { width: auto; height: min(600px, calc(100svh - 300px)); min-height: 380px; max-width: 100%; background: var(--frame); }
-/* Bandeau noir sous la photo : le texte n'est plus jamais posé sur l'image (UX-F-01). */
-.op-band { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 20px 48px; padding-block: 26px 28px; }
-.h1row { display: flex; align-items: center; gap: 14px; }
-.op-band h1 { margin: 0; font: 300 clamp(30px, 3vw, 42px)/1.12 var(--sans); letter-spacing: .01em; color: var(--ink); text-wrap: balance; }
-.op-band .sub { margin: 10px 0 0; max-width: 64ch; text-wrap: pretty; font-size: 17px; line-height: 1.5; color: var(--prose); }
-.op-cartel { display: grid; justify-items: end; gap: 10px; text-align: right; }
-.op-cartel .cap { margin: 0; font: 400 13px/1.5 var(--mono); letter-spacing: .03em; color: var(--mute); }
-.op-cartel .cap b { font: 400 15px/1.4 var(--sans); letter-spacing: .01em; color: var(--ink); }
-.op-cartel .cap a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; display: inline-flex; align-items: center; min-height: 44px; }
-.op-ctl { display: flex; align-items: center; gap: 12px; }
-.dots { display: flex; list-style: none; margin: 0; padding: 0; }
-.dots button { width: 32px; height: 44px; display: grid; place-items: center; }
-.dots button::before { content: ''; width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--ink); }
-.dots button[aria-current="true"]::before { width: 10px; height: 10px; background: var(--ink); }
-.pause { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid var(--field); color: var(--ink);
-  font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
-.m-only { display: none; }
-/* Section suivante : le diptyque, signature du site (UX-F-45) */
-.dip { padding-top: 88px; }
-.dip h2 { margin: 0; font: 400 13px/1.3 var(--sans); letter-spacing: .3em; text-transform: uppercase; color: var(--safelight); }
-.dip .lead { margin: 10px 0 28px; font: 300 28px/1.25 var(--sans); max-width: 32ch; color: var(--ink); }
-.pair { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: end; }
-.pair a { display: grid; gap: 10px; }
-.pair img { width: 100%; height: auto; background: var(--frame); }
-.pair .t { display: flex; justify-content: space-between; gap: 12px; }
-.pair .t b { font: 400 16px/1.3 var(--sans); color: var(--ink); }
-.pair .t span { font: 400 13px/1.5 var(--mono); color: var(--mute); white-space: nowrap; }
-.pins-h .pin-abs { top: 24px; }
-@media (max-width: 760px) {
-  .op-photo img { height: min(50svh, 420px); min-height: 0; }
-  .op-band { grid-template-columns: 1fr; padding-block: 20px 24px; }
-  .op-band h1 { font-size: 30px; }
-  .op-band .sub { font-size: 16px; }
-  .op-cartel { justify-items: start; text-align: left; }
-  .d-only { display: none; }
-  .m-only { display: inline; }
-  .pair { grid-template-columns: 1fr; }
-  .dip .lead { font-size: 24px; }
-}
-</style>
+<link rel="stylesheet" href="_commun/tokens.css">
+<link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
+<style>
+/* MQ-01 · accueil. Composants de MQ-00 (_commun/public.css) ; ci-dessous, la seule mise en page de l'accueil,
+   construite avec les jetons de tokens.css (aucun jeton redéclaré). Composants nouveaux, à verser dans la planche :
+   « ouverture » (photo, bandeau à trois zones, points et Pause), « choix du regard », « carte de billet ». */
+
+/* ----- Ouverture : la photo à la hauteur de l'écran, moins l'en-tête et le bandeau (jury MQ-01 n° 11) -----
+   Ordre du document : promesse (H1), puis le diaporama ; à l'écran, au-delà du téléphone, la photo vient d'abord.
+   Bandeau : Points et Pause sur une ligne sous la photo, puis la promesse à gauche et le cartel seul à droite (jury n° 2). */
+.acc-ouv-zone { padding-top: var(--esp-2); }
+.acc-ouv { --acc-r: 0.6667; --acc-reste: 300px; --acc-cw: 0px;
+  --acc-h: clamp(300px, calc(100svh - var(--acc-reste)), 860px);
+  position: relative; display: flex; flex-direction: column; width: min(100%, calc(var(--acc-h) * var(--acc-r))); margin-inline: auto; }
+.acc-diapo { margin: 0; display: flex; flex-direction: column; }
+.acc-diapo--bureau { display: none; }
+.acc-diapo picture { display: block; }
+.acc-img { display: block; width: 100%; height: auto; aspect-ratio: var(--acc-r); background: var(--frame); }
+.acc-promesse { min-width: 0; padding-bottom: var(--esp-2); }
+.acc-h1 { margin: 0; font: 300 30px/var(--i-serre) var(--sans); letter-spacing: 0; text-wrap: balance; }
+.acc-sous { margin: var(--esp-1) 0 0; color: var(--prose); font-size: var(--t-texte); line-height: 1.5; text-wrap: pretty; }
+/* Points et Pause : une seule ligne, centrée sous la photo. */
+.acc-ctl { display: flex; align-items: center; justify-content: center; gap: var(--esp-2); padding-top: var(--esp-1); }
+.acc-points { display: flex; list-style: none; margin: 0; padding: 0; }
+.acc-points li { position: relative; }
+.acc-point { display: grid; place-items: center; width: var(--esp-4); height: var(--cible); }
+.acc-point::before { content: ''; width: 8px; height: 8px; border-radius: 50%; box-sizing: border-box; border: 1px solid var(--ink); }
+.acc-point[aria-pressed="true"]::before { width: 10px; height: 10px; background: var(--ink); }
+.acc-point:hover::before { background: var(--mute); }
+.acc-point:focus-visible { outline-offset: -4px; }
+.acc-pause { padding-right: var(--esp-2); }
+/* Cartel du diaporama : le cartel de MQ-00 ; le cartel entier est le lien vers la photo. */
+.acc-cartel { min-width: 0; padding-top: var(--esp-2); }
+.acc-cartel a { display: grid; gap: 2px; min-height: var(--cible); align-content: center; color: inherit; }
+.acc-cartel a:hover .cartel-t { text-decoration: underline; text-underline-offset: 4px; }
+.acc-voir { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field); }
+@media (max-width: 359px) { .acc-h1 { font-size: 26px; } }
+@media (min-width: 768px) {
+  .acc-ouv { --acc-r: 1.5; --acc-reste: 272px; --acc-cw: 30ch; }
+  .acc-diapo--bureau { display: flex; } .acc-diapo--tel { display: none; }
+  .acc-promesse { order: 2; padding: var(--esp-2) calc(var(--acc-cw) + var(--esp-4)) 0 0; }
+  .acc-h1 { font-size: var(--t-titre-2); }
+  .acc-cartel { position: absolute; right: 0; bottom: 0; max-width: var(--acc-cw); padding: 0; }
+}
+@media (min-width: 1280px) { .acc-ouv { --acc-reste: 228px; } }
+
+/* ----- Deuxième temps : les regards, les séries, les carnets ----- */
+.acc-sec { padding-top: var(--esp-12); }
+.acc-tete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--esp-1) var(--esp-4); margin-bottom: var(--esp-4); }
+.acc-tete > div { display: grid; gap: var(--esp-1); }
+.acc-h2 { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); letter-spacing: 0; text-wrap: balance; }
+.acc-tete p { margin: 0; color: var(--prose); }
+.acc-texte { margin: 0; max-width: 46ch; color: var(--prose); font-size: var(--t-prose); line-height: 1.6; text-wrap: pretty; }
+/* Choix du regard : trois liens vers la Galerie, le compte en clair (« Les deux · Sébastien · Julien », dans cet ordre). */
+.acc-regards { display: grid; gap: var(--esp-6) var(--esp-8); align-items: end; }
+.acc-regards-txt { display: grid; gap: var(--esp-2); align-content: end; }
+.acc-choix { list-style: none; margin: var(--esp-2) 0 0; padding: 0; border-top: 1px solid var(--rule); }
+.acc-choix a { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px var(--esp-2); min-height: var(--esp-8);
+  padding-block: 10px; border-bottom: 1px solid var(--rule); color: var(--ink); }
+.acc-choix-n { font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.acc-choix-d { grid-column: 1; color: var(--mute); font-size: var(--t-petit); }
+.acc-choix .ic { grid-column: 2; grid-row: 1 / span 2; }
+.acc-choix a:hover .acc-choix-n { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+@media (min-width: 1024px) { .acc-regards { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
+/* Séries : une rangée justifiée, étirée sur toute la largeur au-delà du téléphone. */
+@media (min-width: 768px) { .acc-series .rangees { --h: 120px; } .acc-series .rangees::after { content: none; } }
+@media (min-width: 1024px) { .acc-series .rangees { --h: 180px; } }
+/* Carnets : deux billets, couverture verticale à côté du texte. */
+.acc-billets { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--esp-6) var(--esp-8); }
+@media (min-width: 900px) { .acc-billets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.acc-billet { display: grid; grid-template-columns: minmax(96px, 2fr) minmax(0, 3fr); gap: var(--esp-3); align-items: end; }
+.acc-billet img { display: block; width: 100%; height: auto; aspect-ratio: 0.6667; background: var(--frame); }
+.acc-billet-t { display: grid; gap: var(--esp-1); }
+.acc-billet h3 { margin: 0; font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.acc-billet h3 a { color: var(--ink); }
+.acc-billet h3 a::after { content: ''; position: absolute; inset: 0; }
+.acc-billet { position: relative; }
+.acc-billet:hover h3 a { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
+.acc-billet:focus-within { outline: var(--focus-l) solid var(--ink); outline-offset: var(--focus-o); }
+.acc-billet h3 a:focus-visible { outline: 0; }
+.acc-billet p { margin: 0; }
+.acc-billet .chapo { font-size: var(--t-texte); }
+.acc-tous { white-space: nowrap; }
+.acc-galerie { margin: var(--esp-3) 0 0; }
+
+/* ----- États montrés en fin de page ----- */
+.acc-etats { display: grid; gap: var(--esp-12); padding-top: var(--esp-12); }
+.acc-etat { position: relative; }
+.acc-bande .acc-ctl { padding-top: 0; }
+/* Démonstration du lien d'évitement au focus (même dessin que .skip:focus de public.css). */
+.acc-skip-vu { position: absolute; left: var(--gut); top: var(--esp-1); z-index: 30; display: inline-flex; align-items: center; min-height: var(--cible);
+  padding: 0 var(--esp-3); background: var(--ink); color: var(--paper); font: 500 var(--t-petit)/1 var(--sans);
+  outline: var(--focus-l) solid var(--ink); outline-offset: var(--focus-o); }
+/* Encart : liens « avec / sans annotations » (même dessin que MQ-00). */
+.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
+.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
+</style>
 </head>
 <body>
-<a class="skip is-focus" href="#contenu">Aller au contenu</a><span class="pin" style="margin-left:10px" aria-hidden="true">1</span>
-<header class="site-h wrap">
-  <a class="wordmark" href="#">Nicephos</a>
-  <nav class="site-nav" id="menu-principal" aria-label="Menu principal"><ul role="list"><li><a href="#">Séries</a></li><li><a href="#">Galerie</a></li><li><a href="#">Carte</a></li><li><a href="#">Carnets</a></li><li><a href="#">À propos</a></li><li class="soft"><a href="#">Tirages</a><span class="pin pin-in" aria-hidden="true">2</span></li></ul></nav>
-  <ul class="site-tools" role="list">
-    <li><a class="tool" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="tool-t">Rechercher</span></a></li>
-    
-    <li><details class="lang"><summary><span class="sr-only">Langue : </span>FR <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
-      <ul role="list"><li><a href="#" lang="fr" hreflang="fr" aria-current="true"><span>Français</span></a></li><li><a href="#" lang="en" hreflang="en">English</a></li><li><a href="#" lang="de" hreflang="de">Deutsch</a></li></ul></details><span class="pin pin-in" aria-hidden="true">3</span></li>
-    <li><button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-principal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button><span class="pin pin-in" aria-hidden="true">2</span></li>
-  </ul>
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil"><span class="mq-pin" aria-hidden="true">1</span>Nicephos</a>
+    <nav class="sh-nav" aria-label="Menu principal">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal (téléphone)">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
 </header>
 <main id="contenu">
-  <section class="op" aria-labelledby="op-h1">
-    <figure class="op-photo">
-      <span class="op-im">
-      <picture>
-        <source media="(max-width: 760px)" srcset="_commun/photos/ruelle.webp" width="600" height="900">
-        <img src="_commun/photos/ciel.webp" width="900" height="600" alt="" fetchpriority="high" decoding="async">
-      </picture>
-      <span class="pin pin-abs" style="bottom:14px; left:14px" aria-hidden="true">4</span>
-      <span class="pin pin-abs" style="bottom:14px; right:14px" aria-hidden="true">8</span>
-      </span>
-    </figure>
-    <div class="op-band wrap">
-      <div class="op-promise">
-        <div class="h1row"><h1 id="op-h1">Deux regards, une même lumière.</h1><span class="pin" aria-hidden="true">5</span></div>
-        <p class="sub">Rue, mer et nuit, de Saint-Malo à la Californie&#8239;: les photographies de Sébastien et Julien.</p>
-      </div>
-      <div class="op-cartel">
-        <p class="cap"><span class="pin" style="margin-right:10px" aria-hidden="true">6</span><span class="d-only"><b>Miradouro, l’heure dorée</b> — Julien · Lisbonne, oct. 2026</span><span class="m-only"><b>Alfama, premier tram</b> — Julien · Lisbonne, oct. 2026</span> · <a href="#">Voir la photo</a></p>
-        <div class="op-ctl">
-          <span class="pin" aria-hidden="true">7</span>
-          <ul class="dots" role="list" aria-label="Photos de l’ouverture">
-            <li><button type="button" aria-current="true" aria-label="Photo 1 sur 6"></button></li>
-            <li><button type="button" aria-label="Photo 2 sur 6"></button></li>
-            <li><button type="button" aria-label="Photo 3 sur 6"></button></li>
-            <li><button type="button" aria-label="Photo 4 sur 6"></button></li>
-            <li><button type="button" aria-label="Photo 5 sur 6"></button></li>
-            <li><button type="button" aria-label="Photo 6 sur 6"></button></li>
+  <div class="wrap acc-ouv-zone">
+    <section class="acc-ouv" aria-labelledby="acc-h1">
+      <div class="acc-promesse"><span class="mq-pin" aria-hidden="true">4</span><h1 class="acc-h1" id="acc-h1">Deux regards, une même lumière.</h1><p class="acc-sous">Les photographies de Sébastien et Julien, d’Angers à Lisbonne et Porto.</p></div>
+      <figure class="acc-diapo acc-diapo--bureau" aria-roledescription="diaporama" aria-label="Diaporama, 6 photos : photo 1, Le ciel s’est ouvert, de Sébastien">
+        <span class="mq-pin" aria-hidden="true">2</span><picture><source media="(max-width: 767px)" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><img class="acc-img" src="_commun/photos/ciel.webp" srcset="_commun/photos/480/ciel.webp 480w, _commun/photos/ciel.webp 900w" sizes="(max-width: 767px) calc(100vw - 48px), min(calc(100vw - 144px), calc((100vh - 196px) * 1.5))" width="900" height="600" alt="Ciel rose et mauve, soleil rond posé sur des collines violettes." fetchpriority="high" decoding="async"></picture>
+        <div class="acc-ctl">
+          <ul class="acc-points" aria-label="Choisir une photo du diaporama">
+          <li><span class="mq-pin" aria-hidden="true">3</span><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 1 sur 6 : Le ciel s’est ouvert"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 2 sur 6 : Brume sur la Loire"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 6 : Dernière heure"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 6 : Ligne d’eau"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 5 sur 6 : Miradouro, l’heure dorée"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 6 sur 6 : Belém, contre-jour"></button></li>
           </ul>
-          <button class="pause" type="button"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="1" width="3" height="10" fill="currentColor"/><rect x="7" y="1" width="3" height="10" fill="currentColor"/></svg>Pause</button>
+          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
         </div>
+        <figcaption class="cartel acc-cartel"><span class="mq-pin" aria-hidden="true">5</span><a href="/photo/le-ciel-s-est-ouvert"><span class="cartel-t">Le ciel s’est ouvert</span><span class="cartel-m">Sébastien · Anjou · oct. 2025 · <span class="acc-voir">Voir la photo</span></span></a></figcaption>
+      </figure>
+      <figure class="acc-diapo acc-diapo--tel" aria-roledescription="diaporama" aria-label="Diaporama, 4 photos : photo 1, Escaliers des Guindais, de Julien">
+        <span class="mq-pin" aria-hidden="true">2</span><picture><source media="(min-width: 768px)" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><img class="acc-img" src="_commun/photos/escaliers.webp" srcset="_commun/photos/480/escaliers.webp 320w, _commun/photos/escaliers.webp 600w" sizes="(max-width: 767px) min(calc(100vw - 48px), calc((100vh - 312px) * 0.6667)), 1px" width="600" height="900" alt="Une silhouette au milieu d’un long escalier en diagonale, mur clair." fetchpriority="high" decoding="async"></picture>
+        <div class="acc-ctl">
+          <ul class="acc-points" aria-label="Choisir une photo du diaporama">
+          <li><span class="mq-pin" aria-hidden="true">3</span><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 1 sur 4 : Escaliers des Guindais"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 2 sur 4 : Alfama, premier tram"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 4 : Tiago, marché do Bolhão"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 4 : Deux, minuit"></button></li>
+          </ul>
+          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
+        </div>
+        <figcaption class="cartel acc-cartel"><span class="mq-pin" aria-hidden="true">5</span><a href="/photo/escaliers-des-guindais"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · Porto · 11 oct. 2026 · <span class="acc-voir">Voir la photo</span></span></a></figcaption>
+      </figure>
+    </section>
+  </div>
+
+  <section class="wrap acc-sec" id="regards" aria-labelledby="acc-regards-t">
+    <div class="acc-regards">
+      <div class="acc-regards-txt">
+        <span class="mq-pin" aria-hidden="true">7</span><p class="etiquette">Deux regards</p>
+        <h2 class="acc-h2" id="acc-regards-t">Deux photographes, un même goût pour les heures creuses.</h2>
+        <p class="acc-texte">Sébastien et Julien photographient chacun de leur côté, puis mettent leurs images en commun. Choisissez un regard, ou gardez les deux.</p>
+        <ul class="acc-choix" aria-label="Voir la galerie">
+          <li><a href="/galerie"><span class="acc-choix-n">Les deux</span><span class="acc-choix-d">22 photos, dans l’ordre que nous avons choisi</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+          <li><a href="/galerie?regard=sebastien"><span class="acc-choix-n">Sébastien</span><span class="acc-choix-d">10 photos · le matin, les quais, les fleuves</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+          <li><a href="/galerie?regard=julien"><span class="acc-choix-n">Julien</span><span class="acc-choix-d">12 photos · la rue, et ceux qui y passent</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+        </ul>
       </div>
+      <figure class="diptyque">
+        <figcaption class="diptyque-t"><p class="etiquette">Le même fleuve, deux regards</p><p class="cartel-m">Porto, dimanche 11 octobre 2026 : le Douro à 9 h 10, puis à 17 h 20</p></figcaption>
+        <div class="diptyque-paire">
+          <figure class="photo" style="--r:1.5"><img src="_commun/photos/480/foz.webp" srcset="_commun/photos/480/foz.webp 480w, _commun/photos/foz.webp 900w" sizes="(min-width: 1024px) 34vw, (min-width: 768px) 46vw, 92vw" width="480" height="320" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><figcaption class="cartel"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Sébastien · Porto · 11 oct. 2026</span></figcaption></figure>
+          <figure class="photo" style="--r:1.5"><img src="_commun/photos/480/ribeira.webp" srcset="_commun/photos/480/ribeira.webp 480w, _commun/photos/ribeira.webp 900w" sizes="(min-width: 1024px) 34vw, (min-width: 768px) 46vw, 92vw" width="480" height="320" alt="Les quais de la Ribeira et l’arche du pont presque effacés par la brume." loading="lazy" decoding="async"><figcaption class="cartel"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></figcaption></figure>
+        </div>
+      </figure>
     </div>
   </section>
 
-  <section class="dip wrap" aria-labelledby="dip-h">
-    <h2 id="dip-h">Même lieu, deux regards</h2>
-    <p class="lead">Porto, un matin d’octobre&#8239;: ce que chacun a vu de la même rive.</p>
-    <ul class="pair" role="list">
-      <li><a href="#"><img src="_commun/photos/mer.webp" width="900" height="600" alt="" loading="lazy"><span class="t"><b>Foz, la barre</b><span>Sébastien · Porto</span></span></a></li>
-      <li><a href="#"><img src="_commun/photos/brume.webp" width="900" height="600" alt="" loading="lazy"><span class="t"><b>Ribeira, brume du fleuve</b><span>Julien · Porto</span></span></a></li>
+  <section class="wrap acc-sec acc-series" id="series" aria-labelledby="acc-series-t">
+    <div class="acc-tete">
+      <div><span class="mq-pin" aria-hidden="true">8</span><h2 class="acc-h2" id="acc-series-t">Séries</h2><p>Cinq ensembles, composés à deux.</p></div>
+      <a class="lien acc-tous" href="/series">Toutes les séries<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <ul class="rangees" aria-labelledby="acc-series-t">
+      <li style="--r:1.5"><a class="vignette" href="/series/atlantique"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Atlantique</span><span class="cartel-m">3 photos</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/series/paysage"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Paysage</span><span class="cartel-m">5 photos</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/series/portrait"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Portrait</span><span class="cartel-m">3 photos</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/series/rue"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Rue</span><span class="cartel-m">7 photos</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/series/voyage"><img src="_commun/photos/480/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Voyage</span><span class="cartel-m">4 photos</span></span></a></li>
+    </ul>
+    <p id="galerie" class="acc-galerie"><a class="lien" href="/galerie">Toute la galerie : 22 photos<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+  </section>
+
+  <section class="wrap acc-sec" id="carnets" aria-labelledby="acc-carnets-t">
+    <div class="acc-tete">
+      <div><span class="mq-pin" aria-hidden="true">9</span><h2 class="acc-h2" id="acc-carnets-t">Carnets</h2><p>Voyages et récits, à deux voix.</p></div>
+      <a class="lien acc-tous" href="/carnets">Tous les carnets (4)<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <ul class="acc-billets">
+      <li><article class="acc-billet" aria-labelledby="b1">
+        <img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w" sizes="(min-width: 900px) 220px, 40vw" width="320" height="480" alt="" loading="lazy" decoding="async">
+        <div class="acc-billet-t">
+          <p class="etiquette">Notes d’atelier</p>
+          <h3 id="b1"><a href="/carnets/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></h3>
+          <p class="chapo">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte « Bonjour » : voici ce qu’elle a répondu.</p>
+          <p class="cartel-m">Julien · <time datetime="2026-10-15">15 oct. 2026</time></p>
+        </div>
+      </article></li>
+      <li><article class="acc-billet" aria-labelledby="b2">
+        <img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w" sizes="(min-width: 900px) 220px, 40vw" width="320" height="480" alt="" loading="lazy" decoding="async">
+        <div class="acc-billet-t">
+          <p class="etiquette">Voyages</p>
+          <h3 id="b2"><a href="/carnets/lisbonne-et-porto">Lisbonne et Porto</a></h3>
+          <p class="chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : de l’Alfama au premier tram jusqu’à la barre de Foz.</p>
+          <p class="cartel-m">Sébastien et Julien · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos</p>
+        </div>
+      </article></li>
     </ul>
   </section>
 </main>
-<footer class="site-f wrap">
-  <p>© 2026 Sébastien &amp; Julien</p>
-  <ul role="list" aria-label="Pied de page"><li><a href="#">Tirages et licences</a></li><li><a href="#">Contact</a></li><li><a href="#" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="#">Flux RSS</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Mentions légales</a></li></ul>
+<footer class="sf sf--complet wrap">
+  <div class="sf-in"><span class="mq-pin" aria-hidden="true">10</span>
+    <div>
+      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
+      <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage, un tirage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
+    </div>
+    <nav class="sf-groupes" aria-label="Pied de page">
+      <div>
+        <h2 id="sf-site">Le site</h2>
+        <ul aria-labelledby="sf-site">
+          <li><a href="/a-propos#contact">Contact</a></li>
+          <li><a href="/droits">Droits et licences</a></li>
+          <li><a href="/carnets/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
+          <li><a href="/confidentialite">Confidentialité</a></li>
+          <li><a href="/mentions-legales">Mentions légales</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 id="sf-tirages">Tirages</h2>
+        <ul aria-labelledby="sf-tirages">
+          <li><a href="/conditions-de-vente">Conditions de vente</a></li>
+          <li><a href="/livraison">Livraison et retours</a></li>
+          <li><a href="/renoncer">Renoncer à une commande</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
 </footer>
-<div class="mq-fold" aria-hidden="true"><span>bas du premier écran</span></div>
 
-<aside class="mq-notes" aria-labelledby="mq-h">
-  <p class="mq-id">Maquette MQ-01 · site public · thème « Nicephos — nuit » · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
-  <h2 id="mq-h">Ce qui change</h2>
-  <p class="mq-lead">Le premier écran dit enfin qui vous êtes et ce qu’on va voir, et la photo y est entière. Le titre de la page devient « Nicephos — photographies de Sébastien et Julien » (aujourd’hui « Nicephos »).</p>
-  <ol>
-    <li><span class="pin">1</span><p>Premier élément de la page : « Aller au contenu », montré ici dans son état focus (contour de 2 px). Une tabulation suffit pour atteindre l’ouverture, au lieu de 18 avant le contenu.<span class="ref">UX-F-06 · RGAA 12.7 · WCAG 2.4.1 · Opquast 155</span></p></li>
-    <li><span class="pin">2</span><p>En-tête sur une ligne : « NICEPHOS » en Jost 300 (lien vers l’accueil), le menu, puis un filet et « Tirages » en retrait, plus pâle. Le menu est posé sur sa propre bande noire, au-dessus de la photo : 17,2:1 pour le menu, 7,4:1 pour « Tirages », quelle que soit la photo. Sur téléphone, l’en-tête fait 64 px (187 px aujourd’hui) : marque, loupe, langue et bouton « Menu ».<span class="ref">UX-F-01 · UX-F-36 · UX-T-16 · RGAA 3.2 · WCAG 1.4.3 · Loi de Hick</span></p></li>
-    <li><span class="pin">3</span><p>La langue en toutes lettres, sans drapeau : « Français · English · Deutsch », chacune dans sa langue (attribut lang). La liste s’ancre au bord droit, sous le sélecteur qui reste à droite : elle tient dans l’écran à 320 px (aujourd’hui, elle commence à −105 px sur Pixel 7). Le nom accessible devient « Langue : FR ».<span class="ref">UX-F-02 · UX-F-32 · UX-F-24 · RGAA 10.11 · WCAG 1.4.10 et 2.5.3</span></p></li>
-    <li><span class="pin">4</span><p>La photo entière, sans voile ni zoom, sur le noir : horizontale au bureau (900 × 600 px), verticale sur téléphone, choisie parmi les photos verticales plutôt que recadrée au tiers. Aucun texte ne la recouvre.<span class="ref">UX-F-17 · UX-F-01 · Nielsen #8 · B&amp;S 1.4 Lisibilité</span></p></li>
-    <li><span class="pin">5</span><p>Une promesse d’une ligne en H1 stable (elle ne change plus à chaque diapositive) et une sous-ligne factuelle qui nomme les deux photographes. Contraste 17,2:1 et 12,4:1 sur fond uni, au-delà des 7:1 du niveau AAA.<span class="ref">UX-F-16 · UX-F-10 · RGAA 9.1 · Opquast 99 et 101 · B&amp;S 1.1 Incitation</span></p></li>
-    <li><span class="pin">6</span><p>La légende de la diapositive devient un cartel sous l’image : titre en casse normale, auteur, lieu et date, puis « Voir la photo » souligné, en cible de 44 px. Plex Mono à 13 px (11 px aujourd’hui), 7,4:1.<span class="ref">UX-F-29 · UX-F-23 · RGAA 10.6 · WCAG 1.4.1</span></p></li>
-    <li><span class="pin">7</span><p>Les vignettes du bandeau cèdent la place à six points de position (cibles de 32 × 44 px, état courant plein et non seulement coloré) et à un bouton « Pause » de 44 px de haut, toujours visible. Le diaporama s’arrête au survol, au focus et en mouvement réduit, comme aujourd’hui.<span class="ref">UX-F-36 · WCAG 2.2.2 et 2.5.8 · RGAA 13.8 · Loi de Fitts</span></p></li>
-    <li><span class="pin">8</span><p>Une seule image dans le HTML au départ (eager, fetchpriority=high). Les cinq suivantes sont demandées par le script environ 1,5 s avant leur tour, et seulement si le diaporama tourne ; sans JavaScript, rien d’autre ne se charge. Le diptyque, plus bas, est en chargement différé.<span class="ref">UX-F-18 · RGESN 6.4 et 6.5 · RGESN 4.6</span></p></li>
+<section class="wrap acc-etats" aria-labelledby="acc-etats-t">
+  <h2 class="sr-only" id="acc-etats-t">Autres états de l’accueil</h2>
+  <div class="acc-etat mq-ecran">
+    <p class="mq-etat">État · Diaporama en pause, sur la photo 2</p><span class="mq-pin" aria-hidden="true">11</span>
+    <div class="acc-ouv acc-bande">
+      <div class="acc-promesse"><p class="acc-h1">Deux regards, une même lumière.</p><p class="acc-sous">Les photographies de Sébastien et Julien, d’Angers à Lisbonne et Porto.</p></div>
+      <figure class="acc-diapo acc-diapo--bureau" aria-roledescription="diaporama" aria-label="Diaporama, 6 photos : photo 2, Brume sur la Loire, de Sébastien">
+        <div class="acc-ctl">
+          <ul class="acc-points" aria-label="Choisir une photo du diaporama">
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 1 sur 6 : Le ciel s’est ouvert"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 2 sur 6 : Brume sur la Loire"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 6 : Dernière heure"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 6 : Ligne d’eau"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 5 sur 6 : Miradouro, l’heure dorée"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 6 sur 6 : Belém, contre-jour"></button></li>
+          </ul>
+          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z"/></svg>Reprendre</button>
+        </div>
+        <figcaption class="cartel acc-cartel"><a href="/photo/brume-sur-la-loire"><span class="cartel-t">Brume sur la Loire</span><span class="cartel-m">Sébastien · Anjou · mars 2024 · <span class="acc-voir">Voir la photo</span></span></a></figcaption>
+      </figure>
+      <figure class="acc-diapo acc-diapo--tel" aria-roledescription="diaporama" aria-label="Diaporama, 4 photos : photo 2, Alfama, premier tram, de Julien">
+        <div class="acc-ctl">
+          <ul class="acc-points" aria-label="Choisir une photo du diaporama">
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 1 sur 4 : Escaliers des Guindais"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 2 sur 4 : Alfama, premier tram"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 4 : Tiago, marché do Bolhão"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 4 : Deux, minuit"></button></li>
+          </ul>
+          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z"/></svg>Reprendre</button>
+        </div>
+        <figcaption class="cartel acc-cartel"><a href="/photo/alfama-premier-tram"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026 · <span class="acc-voir">Voir la photo</span></span></a></figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="acc-etat mq-ecran" style="margin-inline:calc(-1 * var(--gut))">
+    <p class="mq-etat" style="left:calc(var(--gut) - 8px)">État · Première tabulation : le lien d’évitement</p><span class="mq-pin" aria-hidden="true">12</span>
+    <span class="acc-skip-vu" aria-hidden="true">Aller au contenu</span>
+    <header class="sh sh--site" inert>
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Menu principal (état : première tabulation)">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal (état : première tabulation) (téléphone)">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+  </div>
+  <div class="acc-etat mq-ecran" style="margin-inline:calc(-1 * var(--gut))" lang="de">
+    <p class="mq-etat" style="left:calc(var(--gut) - 8px)" lang="fr">État · Allemand, panier plein : les libellés les plus longs</p><span class="mq-pin" aria-hidden="true">13</span>
+    <header class="sh sh--site" lang="de" inert>
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <nav class="sh-nav" aria-label="Hauptmenü (Zustand: Deutsch)">
+      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
+      <a class="sh-outil sh-panier" href="/de/warenkorb"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Warenkorb</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> Kunstdrucke</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <nav class="sh-panneau" aria-label="Hauptmenü (Zustand: Deutsch) (Telefon)">
+          <ul>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
+            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+    <div class="wrap" style="padding-top:var(--esp-3)"><div class="acc-ouv acc-bande">
+      <div class="acc-promesse" lang="de"><p class="acc-h1">Zwei Blicke, ein Licht.</p><p class="acc-sous">Die Fotografien von Sébastien und Julien, von Angers bis Lissabon und Porto.</p></div>
+      <figure class="acc-diapo acc-diapo--bureau" aria-roledescription="Diashow" aria-label="Diashow, 6 Fotos: Foto 1, Der Himmel hat sich geöffnet, von Sébastien">
+        <div class="acc-ctl">
+          <ul class="acc-points" aria-label="Foto der Diashow wählen">
+          <li><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 1 von 6: Der Himmel hat sich geöffnet"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 2 von 6: Nebel über der Loire"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 von 6: Letzte Stunde"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 von 6: Wasserlinie"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 5 von 6: Miradouro, goldene Stunde"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 6 von 6: Belém im Gegenlicht"></button></li>
+          </ul>
+          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
+        </div>
+        <figcaption class="cartel acc-cartel"><a href="/photo/le-ciel-s-est-ouvert"><span class="cartel-t">Der Himmel hat sich geöffnet</span><span class="cartel-m">Sébastien · Anjou · Okt. 2025 · <span class="acc-voir">Foto ansehen</span></span></a></figcaption>
+      </figure>
+      <figure class="acc-diapo acc-diapo--tel" aria-roledescription="Diashow" aria-label="Diashow, 4 Fotos: Foto 1, Die Treppen der Guindais, von Julien">
+        <div class="acc-ctl">
+          <ul class="acc-points" aria-label="Foto der Diashow wählen">
+          <li><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 1 von 4: Die Treppen der Guindais"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 2 von 4: Alfama, die erste Straßenbahn"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 von 4: Tiago, Markt do Bolhão"></button></li>
+          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 von 4: Zwei, Mitternacht"></button></li>
+          </ul>
+          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
+        </div>
+        <figcaption class="cartel acc-cartel"><a href="/photo/escaliers-des-guindais"><span class="cartel-t">Die Treppen der Guindais</span><span class="cartel-m">Julien · Porto · 11. Okt. 2026 · <span class="acc-voir">Foto ansehen</span></span></a></figcaption>
+      </figure>
+    </div></div>
+  </div>
+</section>
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MQ-01 · site public · accueil · thème Nicephos nuit · bureau 1 440 × 900 et Pixel 7 · v2 du 16 oct. 2026, sur la planche MQ-00</p>
+  <h2 id="mq-t">Ce qui change</h2>
+  <p class="mq-lead">L’accueil s’ouvre sur une grande photo entière, dit en une ligne qui vous êtes, puis mène au travail : les deux regards, les séries, les derniers carnets. Titre de la page : « Nicephos — photographies de Sébastien et Julien » (aujourd’hui « Nicephos »).</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>En-tête Site de la planche, et des pages au lieu des ancres</b><p>Galerie, Séries, Carnets, Carte, À propos, puis Tirages (la boutique) après un filet, de même graisse : ni secondaire ni désactivé. Galerie et Séries deviennent des pages (/galerie, /series) ; les anciennes adresses /#galerie, /#series et /#regards arrivent toujours quelque part, car l’accueil garde ces trois id sur les sections qui y mènent. Panier absent tant qu’il est vide.</p><span class="mq-ref">UX-F-36, UX-F-02 · jury MQ-01 n° 1, 7 et 12 · MQ-00 § 3</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>La photo entière, à la hauteur de l’écran</b><p>Hauteur de l’écran moins l’en-tête et le bandeau : 1 008 × 672 px au bureau 1 440 × 900, soit 70 % de la largeur et 75 % de la hauteur (62 % et 67 % en v0) ; elle grandit avec l’écran (1 194 px de large à 1 440 × 1 024) ; verticale au téléphone, 359 × 539 px. Ni voile, ni zoom, ni texte posé dessus. Une vraie description en alt, et le cartel en figcaption.</p><span class="mq-ref">UX-F-17, UX-F-01, UX-F-44 · RGAA 1.2, 1.9 · jury n° 11 et 9</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Points et Pause, une seule ligne sous la photo</b><p>Le groupe s’annonce « Diaporama, 6 photos » avant la première. Chaque point dit ce qu’il montre (« Photo 2 sur 6 : Brume sur la Loire ») et son état par aria-pressed ; cible de 32 × 44 px. Pause toujours visible ; le diaporama s’arrête au survol, au focus et en mouvement réduit. Sans JavaScript : la première photo seule, sans commandes.</p><span class="mq-ref">WCAG 2.2.2, 2.5.8, 4.1.2 · RGAA 13.8 · jury n° 2, 3, 7 et 9</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Une promesse stable en H1</b><p>« Deux regards, une même lumière. » et une sous-ligne qui nomme les deux photographes et les lieux du référentiel. Le H1 prend la taille titre-2 de la planche (32 px) : la photo d’abord. Il ne change plus avec la diapositive.</p><span class="mq-ref">UX-F-16, UX-F-10 · RGAA 9.1 · Opquast 99</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>Le cartel, seul à droite</b><p>Le cartel de la planche (titre Jost 16 px, puis « Auteur · Lieu · date »), aligné sur le bord droit de la photo ; tout le cartel est le lien vers la photo, « Voir la photo » souligné, 44 px de haut.</p><span class="mq-ref">UX-F-29, UX-F-23 · jury n° 2, 6 et 7</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Une seule image au départ</b><p>La photo d’ouverture seule est chargée, en priorité. Les suivantes viennent du script, 1,5 s avant leur tour, si le diaporama tourne. Au téléphone, la photo du bureau est remplacée par une image vide en ligne : rien n’est chargé deux fois. Mesuré : 1 image au premier écran ; budget visé ≤ 1 000 ko à froid.</p><span class="mq-ref">UX-F-18 · RGESN 4.6, 6.4, 6.5 · jury n° 10</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Deux regards : où l’on va ensuite</b><p>La phrase de la démo, puis le choix « Les deux · Sébastien · Julien » avec le compte de chacun, qui mène à la Galerie filtrée (MQ-02). À côté, le diptyque de la planche : le Douro le matin pour Julien, le soir pour Sébastien, Sébastien à gauche.</p><span class="mq-ref">UX-F-45, UX-F-12 · jury n° 1, 6 et 8</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Les séries, au format de leurs photos</b><p>Les cinq couvertures du référentiel, en rangée justifiée, sans fond gris ni cercle, avec le compte en clair (« 3 photos »). « Toute la galerie » garde l’id galerie des anciens liens.</p><span class="mq-ref">UX-F-30, UX-F-28 · jury n° 1 et 11</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Les derniers carnets</b><p>Les deux billets les plus récents (15 et 14 oct. 2026), couverture verticale à côté du texte ; toute la carte est cliquable, le titre est le lien.</p><span class="mq-ref">UX-T-16 · jury n° 11</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>Le pied de page complet de la planche</b><p>Deux groupes nommés, Le site et Tirages ; plus de « reproduction interdite » sur chaque page.</p><span class="mq-ref">UX-F-34 · MQ-00 § 4</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>État · en pause</b><p>Après « Pause », le bouton devient « Reprendre » (icône lecture), la photo 2 reste affichée, le point 2 est plein. La région du cartel passe en annonce polie.</p><span class="mq-ref">WCAG 2.2.2 · jury n° 3</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>État · première tabulation</b><p>« Aller au contenu » est le premier arrêt du clavier ; il apparaît au focus, au-dessus de l’en-tête. Une tabulation, et l’on est sur la photo.</p><span class="mq-ref">UX-F-06 · RGAA 12.7 · WCAG 2.4.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>État · allemand, panier plein</b><p>L’en-tête de la planche, calé sur « Reisetagebücher », « Kunstdrucke » et « Warenkorb (2) » : une ligne dès 1 280 px, deux de 768 à 1 279 px, « Menü » en dessous. Rendu ici à la largeur de l’écran ; contrôlé à 320, 412, 820, 1 024 et 1 440 px.</p><span class="mq-ref">Jury T1 et T2 · WCAG 1.4.4, 1.4.10</span></li>
   </ol>
-  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette) — <b>bureau 1440 × 900</b> : texte du bandeau 17,2:1 (titre), 12,4:1 (sous-ligne), 7,4:1 (cartel, Plex Mono 13 px) sur #0b0b0b ; menu 17,2:1 ; « Tirages » 7,4:1 ; images chargées au départ : 1 (la photo d’ouverture). <b>Pixel 7 (412 × 839, densité 2)</b> : en-tête de 64 px ; photo verticale entière de 280 × 420 px, haut à 118 px ; H1 en Jost 300 à 30 px (17,1:1), sous-ligne à 16 px (12,4:1), cartel à 13 px (7,4:1) ; bouton « Menu » 98 × 44 px, points de position 32 × 44 px, « Pause » 102 × 44 px, tous au-dessus du bas du premier écran (haut à 781 px, écran de 839 px) ; liens du pied de page en cibles de 44 px, empilés. Les poids réels se mesureront en production : la cible du plan d’action est un accueil sous 1 000 ko à froid sur bureau (1 953 ko aujourd’hui).</p>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium 1.64 en conteneur : outils/inspect.sh, outils/mq0104-controle.mjs) · axe-core : 0 violation au bureau (1 440 × 900) et au téléphone (Pixel 7) · Poids après défilement complet : 248 ko et 19 requêtes au bureau, 278 ko au téléphone, polices et feuilles communes comprises ; 1 seule image visible et prioritaire au premier écran ; aucune ressource tierce, aucun script ; images en variantes de 480 et 160 px hors grands formats · Photo d’ouverture 1 008 × 672 px au bureau (70 % de la largeur, 75 % de la hauteur de l’écran ; 900 × 600, soit 62 % et 67 %, en v0), bandeau entier au-dessus du bas du premier écran (sous-ligne à 889 px pour 900) ; 359 × 539 px au téléphone, H1 à 81 px, Points et Pause à 759 px pour 839 · Largeurs 320, 412, 820, 823 × 514 (1 440 px zoomé à 175 %), 1 024, 1 280 et 1 440 px, puis les mêmes avec l’en-tête en allemand et le panier plein : 0 débordement, 0 chevauchement, 0 texte coupé dans l’en-tête, 0 cible sous 24 px · Contrastes (formule WCAG 2.2, valeurs de tokens.css) : promesse 17,1:1, sous-ligne 12,4:1, cartel 7,4:1, points 17,1:1 sur #0b0b0b · Sans annotations (#sans-annotations) : 18 pastilles et étiquettes retirées, 0 pixel changé hors de leur emprise, sur 3 616 px de haut au bureau et 5 538 px au téléphone.</p>
 </aside>
-<script>/* Démonstration d’état seulement : sur téléphone, la liste des langues est montrée ouverte. */
-if (matchMedia('(max-width: 760px)').matches) document.querySelector('.lang').open = true;</script>
 </body>
 </html>

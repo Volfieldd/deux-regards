@@ -5,236 +5,236 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <title>Rue — série de Sébastien et Julien · Nicephos</title>
-<meta name="description" content="Maquette MQ-03 (audit du 16 octobre 2026) : page de la série « Rue », avec photos de démonstration.">
-<meta name="robots" content="noindex">
+<meta name="description" content="Rue : la ville quand elle ne pose pas. Sept photos de Sébastien et Julien, de Nantes à Lisbonne et Porto, 2023–2026.">
 <link rel="stylesheet" href="_commun/site.css">
-<link rel="stylesheet" href="_commun/site-entete.css">
-<style>
-/* ===== Thème « Nicephos » (repris de public/themes/nicephos.css) + corrections proposées ===== */
-.theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
-  --display-style: normal; --dark: #050505; --dark-ink: #f0efeb; --dark-mute: #b4b2ac; --dark-rule: rgba(240,239,235,.28); }
-.mode-nuit { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
-  --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
-.mode-jour, .mode-auto { color-scheme: light; --paper: #fbfbf9; --ink: #111111; --mute: #5e5d59; --prose: #3a3936; --rule: #dddcd7;
-  --frame: #efeeea; --safelight: #7d6532; --on-accent: #fbfbf9; --field: #5e5d59; --error: #a8412b; --ok: #2f6b3a; }
-@media (prefers-color-scheme: dark) {
-  .mode-auto { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
-    --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
-}
-/* Thème Atelier (valeurs par défaut de site.css) : seules les couleurs d'erreur et de champ sont ajoutées. */
-.mode-atelier { --field: #6b665d; --error: #9e3a22; --ok: #2f6b3a; --on-accent: #f6f4ef; }
-
-/* Corrections typographiques (UX-F-29) et de comportement (UX-F-34) appliquées à toutes les maquettes */
-body { font-weight: 400; position: relative; }
-.theme-nicephos body { font-weight: 400; }
-.mono { font-size: 13px; }
-.eyebrow { font-size: 12px; }
-img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; -webkit-user-drag: auto; }
-:focus-visible, .is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
-.u, .prose a, .txt a { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
-.u:hover, .prose a:hover, .txt a:hover { text-decoration-thickness: 2px; }
-.arrow { display: inline-block; }
-.wrap { padding-inline: max(var(--gut), env(safe-area-inset-left)) max(var(--gut), env(safe-area-inset-right)); }
-
-/* Lien d’évitement, en-tête et pied de page : voir _commun/site-entete.css */
-
-/* Annotations : voir _commun/annotations.css (gabarit commun) */
-.site-tools li, .site-nav li { display: flex; align-items: center; }
-@media (min-width: 761px) { .menu-btn + .pin { display: none; } }
-
-/* ===== Composants communs des maquettes correctives du site public (MQ-02 à MQ-06, MQ-15) ===== */
-html { background: var(--paper); }
-body { background: var(--paper); color: var(--ink); }
-.mode-nuit, .mode-jour, .mode-atelier { --err: var(--error); }
-/* Fil d'Ariane en mono, au-dessus du H1 (UX-F-06, Opquast 156) */
-.ariane ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; margin: 0; padding: 8px 0 0; list-style: none; font: 400 13px/1.4 var(--mono); color: var(--mute); }
-.ariane li + li::before { content: '›' / ''; margin-right: 10px; }
-.ariane a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
-.ariane [aria-current] { color: var(--mute); }
-/* Boutons : un seul bouton plein par écran (B&S 1.2.2) */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 26px; border: 1px solid var(--ink);
-  background: var(--ink); color: var(--paper); font: 500 15px/1.2 var(--sans); letter-spacing: .03em; cursor: pointer; text-align: center; }
-.btn-2 { background: transparent; color: var(--ink); font-weight: 400; border-color: var(--field); }
-.btn-s { min-height: 44px; padding: 0 16px; font-size: 14px; }
-/* Champs : filet en --field (5,2:1 en Atelier, 7,4:1 en nuit), 2 px au focus et en erreur (UX-F-04) */
-.f-champ { display: grid; gap: 6px; align-content: start; }
-.f-champ > label, .f-l { font: 500 15px/1.4 var(--sans); color: var(--ink); }
-.f-q { font-weight: 400; color: var(--mute); }
-.f-aide { margin: 0; font-size: 14px; line-height: 1.5; color: var(--mute); }
-.f-input { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--field); border-radius: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.4 var(--sans); }
-textarea.f-input { min-height: 120px; resize: vertical; }
-.f-input:focus, .f-input.is-focus { outline: 2px solid var(--ink); outline-offset: 2px; }
-.f-input[aria-invalid="true"] { border: 2px solid var(--err); }
-.f-err { display: flex; gap: 8px; margin: 0; color: var(--err); font: 500 14.5px/1.45 var(--sans); }
-.f-err::before { content: '⚠' / ''; }
-fieldset.f-grp { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 10px; }
-fieldset.f-grp > legend { padding: 0; margin-bottom: 8px; font: 500 15px/1.4 var(--sans); color: var(--ink); }
-.f-opt { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 10px 0; color: var(--ink); font-size: 15.5px; line-height: 1.4; cursor: pointer; }
-.f-opt input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--ink); }
-.f-opt input:focus-visible, .f-opt input.is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
-.f-opt small { display: block; color: var(--mute); font-size: 14px; }
-.f-resume { margin: 0 0 28px; padding: 18px 20px; border: 2px solid var(--err); background: var(--paper); }
-.f-resume:focus { outline: 2px solid var(--ink); outline-offset: 3px; }
-.f-resume h2 { margin: 0 0 8px; font: 500 18px/1.3 var(--sans); color: var(--ink); }
-.f-resume ul { margin: 0; padding-left: 20px; }
-.f-resume a { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-/* Cartel : titre, auteur, lieu, date ; mono pour les références */
-.cartel-t { margin: 0; font: 400 22px/1.3 var(--sans); color: var(--ink); }
-.cartel-m { margin: 0; font: 400 13px/1.6 var(--mono); color: var(--mute); }
-.cartel-m a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
-.eyb { margin: 0; font: 400 12px/1.4 var(--sans); letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
-.pin-in2 { margin-left: 6px; }
-.mq-state > .mq-label .pin { color: #111; letter-spacing: 0; text-transform: none; font-weight: 600; }
-
-/* ===== MQ-03 : page Série ===== */
-.s-top { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 24px clamp(32px, 5vw, 80px); align-items: end; padding-top: 4px; }
-.s-txt h1 { margin: 6px 0 0; font: 300 clamp(44px, 4.4vw, 64px)/1.05 var(--sans); letter-spacing: .01em; }
-.s-int { margin: 18px 0 0; max-width: 46ch; font-size: 17px; line-height: 1.65; color: var(--prose); text-wrap: pretty; }
-.s-more, .m9 { display: none; }
-@media (max-width: 760px) { .m9 { display: inline-flex; } }
-.s-fiche { display: flex; flex-wrap: wrap; gap: 4px 0; margin: 22px 0 0; padding: 0; list-style: none; font: 400 13px/1.6 var(--mono); color: var(--mute); }
-.s-fiche li + li::before { content: '·' / ''; margin: 0 10px; }
-.s-fiche b { font-weight: 400; color: var(--ink); }
-.s-fiche a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
-/* Couverture choisie, entière : hauteur limitée, jamais recadrée (UX-F-17) */
-.s-cov { position: relative; margin: 0; justify-self: end; }
-.s-cov img { display: block; width: auto; height: min(38vh, 344px); max-width: 100%; background: var(--frame); }
-.s-cov figcaption { margin-top: 8px; font: 400 13px/1.5 var(--mono); color: var(--mute); text-align: right; }
-.s-grid-h { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; margin: 32px 0 18px; padding-top: 14px; border-top: 1px solid var(--rule); }
-.s-grid-h h2 { margin: 0; font: 400 13px/1.3 var(--sans); letter-spacing: .26em; text-transform: uppercase; }
-.s-grid-h p { margin: 0; font: 400 13px/1.5 var(--mono); color: var(--mute); }
-.jr { display: flex; flex-wrap: wrap; gap: 30px 12px; margin: 0; padding: 0; list-style: none; }
-.jr > li { position: relative; flex-grow: calc(var(--r) * 100); flex-basis: calc(var(--r) * 260px); min-width: 0; }
-.jr a { display: grid; gap: 10px; color: var(--ink); }
-.jr img { display: block; width: 100%; height: auto; background: var(--frame); }
-.jr .t { display: grid; gap: 2px; }
-.jr .t b { font: 400 15.5px/1.35 var(--sans); }
-.jr .t span { font: 400 13px/1.45 var(--mono); color: var(--mute); }
-.jr a:hover b { text-decoration: underline; text-underline-offset: 4px; }
-/* Suites : autres séries et l'autre regard (UX-F-10, UX-F-45) */
-.s-suite { margin-top: 88px; display: grid; gap: 56px; }
-.s-suite h2 { margin: 0 0 18px; font: 400 13px/1.3 var(--sans); letter-spacing: .26em; text-transform: uppercase; }
-.covers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px; margin: 0; padding: 0; list-style: none; }
-.covers a { display: grid; gap: 10px; color: var(--ink); }
-.covers .box { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; background: var(--frame); }
-.covers .box img { max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; }
-.covers b { font: 300 22px/1.2 var(--sans); }
-.covers span.c2 { font: 400 13px/1.4 var(--mono); color: var(--mute); }
-.autre { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
-.autre a { display: grid; grid-template-columns: 120px minmax(0, 1fr); align-items: center; gap: 20px; min-height: 96px; padding: 12px; border: 1px solid var(--rule); color: var(--ink); }
-.autre img { width: 120px; height: 80px; object-fit: cover; display: block; }
-.autre b { display: block; font: 300 22px/1.25 var(--sans); }
-.autre span span { display: block; margin-top: 4px; color: var(--prose); font-size: 14.5px; }
-.pin-r { position: absolute; z-index: 5; top: -12px; right: -12px; }
-@media (max-width: 760px) {
-  .s-top { grid-template-columns: 1fr; }
-  .s-cov { display: none; }
-  .s-txt h1 { font-size: 42px; }
-  .s-int { font-size: 16px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
-  .s-int.open { display: block; }
-  .s-more { display: inline-flex; align-items: center; min-height: 44px; margin-top: 2px; padding: 0; border: 0; background: none; color: var(--ink); font: 400 15px/1 var(--sans); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
-  .s-fiche { margin-top: 10px; }
-  .s-grid-h { margin-top: 24px; }
-  .jr { gap: 24px 8px; }
-  .jr > li { flex-basis: calc(var(--r) * 160px); }
-  .jr .t span { font-size: 12.5px; }
-  .covers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .covers b { font-size: 19px; }
-  .autre { grid-template-columns: 1fr; }
-  .autre a { grid-template-columns: 88px minmax(0, 1fr); gap: 14px; }
-  .autre img { width: 88px; height: 59px; }
-  .autre b { font-size: 19px; }
-}
-</style>
+<link rel="stylesheet" href="_commun/tokens.css">
+<link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
+<style>
+/* MQ-03 · page d'une série. Composants de MQ-00 seulement (en-tête, fil d'Ariane, cartel, rangées, pied de page) ;
+   ci-dessous, la mise en page de la page, avec les jetons de tokens.css. Aucun jeton redéclaré. */
+.ser-haut { display: grid; gap: var(--esp-4) var(--esp-8); padding-top: var(--esp-2); }
+.ser-txt { display: grid; gap: var(--esp-3); align-content: start; }
+.ser-txt .titre-page { margin-top: var(--esp-2); }
+.ser-int { margin: 0; max-width: 58ch; font-size: var(--t-prose); line-height: 1.6; color: var(--prose); text-wrap: pretty; }
+.ser-int + .ser-int { margin-top: calc(-1 * var(--esp-2)); }
+.ser-suite > summary { list-style: none; display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); cursor: pointer;
+  color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
+.ser-suite > summary::-webkit-details-marker { display: none; }
+.ser-suite[open] > summary { display: none; }
+.ser-fiche { display: flex; flex-wrap: wrap; gap: var(--esp-1) var(--esp-3); list-style: none; margin: 0; padding: var(--esp-2) 0 0; border-top: 1px solid var(--rule); color: var(--prose); }
+.ser-fiche li { white-space: nowrap; }
+.ser-fiche b { font-weight: 500; color: var(--ink); }
+.ser-fiche a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
+.ser-couv { display: none; }
+.ser-couv img { width: auto; max-width: 100%; max-height: 45svh; }
+.que-bureau { display: none; }
+@media (min-width: 768px) {
+  .ser-haut { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: end; }
+  .ser-couv { display: block; justify-self: end; }
+  .ser-suite { display: none; } .que-bureau { display: block; }
+}
+.ser-sec { padding-top: var(--esp-6); }
+.ser-sec + .ser-sec { padding-top: var(--esp-12); }
+.ser-tete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--esp-1) var(--esp-3); margin-bottom: var(--esp-3); }
+.ser-tete h2 { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); }
+.ser-tete p { margin: 0; color: var(--mute); }
+/* Un seul regard : deux liens vers la galerie filtrée. */
+.ser-regards { list-style: none; margin: 0; padding: 0; display: grid; gap: 0 var(--esp-8); border-top: 1px solid var(--rule); }
+@media (min-width: 768px) { .ser-regards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ser-regards a { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px var(--esp-2); min-height: var(--esp-8); padding-block: 10px; border-bottom: 1px solid var(--rule); color: var(--ink); }
+.ser-regards b { font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.ser-regards span { grid-column: 1; color: var(--mute); font-size: var(--t-petit); }
+.ser-regards .ic { grid-column: 2; grid-row: 1 / span 2; }
+.ser-regards a:hover b { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+@media (min-width: 768px) { .ser-autres .rangees::after { content: none; } }
+/* État · réseau lent : la réserve au format de la photo (--frame), le cartel déjà là. */
+.ser-etats { display: grid; gap: var(--esp-16); padding-top: var(--esp-16); }
+.ser-etat { position: relative; }
+.ser-lent img { visibility: hidden; }
+.ser-lent .vignette > span:first-child { display: block; background: var(--frame); }
+/* Encart : liens « avec / sans annotations » (même dessin que MQ-00). */
+.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
+.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
+</style>
 </head>
 <body>
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
 <a class="skip" href="#contenu">Aller au contenu</a>
-<header class="site-h wrap">
-  <a class="wordmark" href="#">Nicephos</a>
-  <nav class="site-nav" id="menu-principal" aria-label="Menu principal"><ul role="list"><li><a href="#" aria-current="page">Séries</a></li><li><a href="#">Galerie</a></li><li><a href="#">Carte</a></li><li><a href="#">Carnets</a></li><li><a href="#">À propos</a></li><li class="soft"><a href="#">Tirages</a></li></ul></nav>
-  <ul class="site-tools" role="list">
-    <li><a class="tool" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="tool-t">Rechercher</span></a></li>
-    <li><details class="lang"><summary><span class="sr-only">Langue : </span>FR <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
-      <ul role="list"><li><a href="#" lang="fr" hreflang="fr" aria-current="true"><span>Français</span></a></li><li><a href="#" lang="en" hreflang="en">English</a></li><li><a href="#" lang="de" hreflang="de">Deutsch</a></li></ul></details></li>
-    <li><button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-principal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button></li>
-  </ul>
+<header class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Menu principal">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – langue de la page : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Choisir la langue">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Menu principal (téléphone)">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series" aria-current="page">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
 </header>
 <main id="contenu">
   <div class="wrap">
-    <nav class="ariane" aria-label="Fil d’Ariane"><ol><li><a href="#">Accueil</a></li><li><a href="#">Séries</a></li><li><span aria-current="page">Rue</span><span class="pin pin-in" aria-hidden="true">1</span></li></ol></nav>
-    <div class="s-top">
-      <div class="s-txt">
-        <h1>Rue<span class="pin pin-in" aria-hidden="true">2</span></h1>
-        <p class="s-int" id="intention">Des passants, des seuils, des vitrines&#8239;: la ville quand elle ne pose pas. Sébastien y cherche les lignes, Julien les visages. Les photos ont été faites à pied, sans flash, à la focale fixe, entre Saint-Malo, Lorient, Rennes et Paris, le plus souvent tôt le matin ou à la tombée du jour, quand la lumière rase les façades et que les gens rentrent chez eux.</p>
-        <button class="s-more" type="button" aria-expanded="false" aria-controls="intention">Lire la suite</button><span class="pin pin-in m9" aria-hidden="true">9</span>
-        <ul class="s-fiche" role="list"><li><b>2019–2026</b></li><li>par <a href="#">Sébastien</a> et <a href="#">Julien</a></li><li><b>8 photos</b><span class="pin pin-in" aria-hidden="true">3</span></li></ul>
+    <div class="ser-haut">
+      <div class="ser-txt">
+        <nav class="ariane" aria-label="Fil d’Ariane"><span class="mq-pin" aria-hidden="true">1</span><ol><li><a href="/series">Séries</a></li><li aria-current="page">Rue</li></ol></nav>
+        <h1 class="titre-page"><span class="mq-pin" aria-hidden="true">2</span>Rue</h1>
+        <p class="ser-int">Des passants, des seuils, des fenêtres : la ville quand elle ne pose pas. Julien y cherche les visages et les gestes, Sébastien les lignes et les quais vides du petit matin.</p>
+        <p class="ser-int que-bureau">Tout a été fait à pied, sans flash, de Nantes à Paris, d’Angers à Lisbonne et Porto, le plus souvent à l’heure où la lumière rase les façades et où l’on rentre chez soi.</p>
+        <details class="ser-suite"><summary>Lire la suite<span class="sr-only"> du texte de la série</span></summary><p class="ser-int">Tout a été fait à pied, sans flash, de Nantes à Paris, d’Angers à Lisbonne et Porto, le plus souvent à l’heure où la lumière rase les façades et où l’on rentre chez soi.</p></details>
+        <ul class="ser-fiche" aria-label="La série en bref"><span class="mq-pin" aria-hidden="true">3</span>
+          <li><b>7 photos</b>, ordre choisi par nous</li>
+          <li>par <a href="/galerie?regard=sebastien">Sébastien</a> et <a href="/galerie?regard=julien">Julien</a></li>
+          <li>2023–2026</li>
+        </ul>
       </div>
-      <figure class="s-cov">
-        <img src="_commun/photos/quai.webp" width="900" height="600" alt="" fetchpriority="high">
-        <figcaption>Couverture : Quai des Indes, 6 h — Julien · Lorient</figcaption>
-        <span class="pin pin-abs" style="top:12px; left:12px" aria-hidden="true">4</span>
-      </figure>
-    </div>
-
-    <section aria-labelledby="g-h">
-      <div class="s-grid-h"><h2 id="g-h">Les photos de la série <span class="pin pin-in" aria-hidden="true">5</span></h2><p>8 photos · ordre choisi par nous</p></div>
-      <ul class="jr" role="list">
-        <li style="--r:.6667"><a href="#"><img src="_commun/photos/portrait.webp" width="600" height="900" alt=""><span class="t"><b>Passante, rue Saint-Vincent</b><span>Julien · Saint-Malo</span></span></a></li>
-        <li style="--r:.6667"><a href="#"><img src="_commun/photos/ruelle.webp" width="600" height="900" alt=""><span class="t"><b>Vitrine, boulevard Voltaire</b><span>Sébastien · Paris</span></span></a></li>
-        <li style="--r:1.5"><a href="#"><img src="_commun/photos/ombre.webp" width="900" height="600" alt=""><span class="t"><b>Le seuil, rue de Dinan</b><span>Julien · Saint-Malo</span></span></a></li>
-        <li style="--r:1.5"><a href="#"><img src="_commun/photos/quai.webp" width="900" height="600" alt=""><span class="t"><b>Quai des Indes, 6 h</b><span>Julien · Lorient</span></span></a><span class="pin pin-r" aria-hidden="true">6</span></li>
-        <li style="--r:1.5"><a href="#"><img src="_commun/photos/neige.webp" width="900" height="600" alt="" loading="lazy"><span class="t"><b>Premier givre, les Lices</b><span>Sébastien · Rennes</span></span></a></li>
-        <li style="--r:.6667"><a href="#"><img src="_commun/photos/nuit.webp" width="600" height="900" alt="" loading="lazy"><span class="t"><b>Dernier métro, Belleville</b><span>Julien · Paris</span></span></a></li>
-        <li style="--r:1.5"><a href="#"><img src="_commun/photos/brume.webp" width="900" height="600" alt="" loading="lazy"><span class="t"><b>Brouillard, cours Dajot</b><span>Sébastien · Brest</span></span></a></li>
-        <li style="--r:.6667"><a href="#"><img src="_commun/photos/foret.webp" width="600" height="900" alt="" loading="lazy"><span class="t"><b>Square, après l’averse</b><span>Sébastien · Rennes</span></span></a></li>
-      </ul>
-    </section>
-
-    <div class="s-suite">
-      <section aria-labelledby="as-h">
-        <h2 id="as-h">Autres séries <span class="pin pin-in" aria-hidden="true">7</span></h2>
-        <ul class="covers" role="list">
-          <li><a href="#"><span class="box"><img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy"></span><b>Voyage</b><span class="c2">22 photos · Sébastien et Julien</span></a></li>
-          <li><a href="#"><span class="box"><img src="_commun/photos/foret.webp" width="600" height="900" alt="" loading="lazy"></span><b>Paysage</b><span class="c2">7 photos · Sébastien et Julien</span></a></li>
-          <li><a href="#"><span class="box"><img src="_commun/photos/portrait.webp" width="600" height="900" alt="" loading="lazy"></span><b>Portrait</b><span class="c2">3 photos · Sébastien et Julien</span></a></li>
-          <li><a href="#"><span class="box"><img src="_commun/photos/mer.webp" width="900" height="600" alt="" loading="lazy"></span><b>Atlantique</b><span class="c2">2 photos · Sébastien et Julien</span></a></li>
-        </ul>
-      </section>
-      <section aria-labelledby="ar-h">
-        <h2 id="ar-h">L’autre regard <span class="pin pin-in" aria-hidden="true">8</span></h2>
-        <ul class="autre" role="list">
-          <li><a href="#"><img src="_commun/photos/neige.webp" width="900" height="600" alt="" loading="lazy"><span><b>Rue, vue par Sébastien</b><span>Les lignes, les reflets, les façades · 4 photos</span></span></a></li>
-          <li><a href="#"><img src="_commun/photos/portrait.webp" width="600" height="900" alt="" loading="lazy"><span><b>Les photos de Julien</b><span>Toutes ses séries, des visages aux voyages · 12 photos</span></span></a></li>
-        </ul>
-      </section>
+      <figure class="photo ser-couv"><span class="mq-pin" aria-hidden="true">4</span><picture><source media="(max-width: 767px)" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><img src="_commun/photos/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w" sizes="(min-width: 768px) 45vw, 1px" width="900" height="600" alt="Façade rose, six fenêtres, un fil de linge de couleurs." fetchpriority="high" decoding="async"></picture>
+        <figcaption class="cartel"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026 · couverture de la série</span></figcaption></figure>
     </div>
   </div>
+  <section class="wrap ser-sec" aria-labelledby="g-h">
+    <div class="ser-tete"><span class="mq-pin" aria-hidden="true">5</span><h2 id="g-h">Les 7 photos</h2><p>Ordre choisi par nous</p></div>
+    <ul class="rangees" aria-labelledby="g-h">
+      <li style="--r:0.6667"><span class="mq-pin" aria-hidden="true">6</span><a class="vignette" href="/photo/deux-minuit"><img src="_commun/photos/480/nuit.webp" srcset="_commun/photos/480/nuit.webp 320w, _commun/photos/nuit.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Deux silhouettes minuscules au bas d’une nuit violette." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux, minuit</span><span class="cartel-m">Julien · Nantes · nov. 2023</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/quai-7h12"><img src="_commun/photos/480/quai.webp" srcset="_commun/photos/480/quai.webp 480w, _commun/photos/quai.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Quai désert sous un ciel gris, trois silhouettes au loin." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Quai, 7 h 12</span><span class="cartel-m">Sébastien · Angers · oct. 2024</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/passage-fin-d-apres-midi"><img src="_commun/photos/480/ruelle.webp" srcset="_commun/photos/480/ruelle.webp 320w, _commun/photos/ruelle.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Lumière brune d’une ruelle, un passant seul tout en bas." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Passage, fin d’après-midi</span><span class="cartel-m">Julien · Lisbonne · mai 2024</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/deux-ombres"><img src="_commun/photos/480/ombre.webp" srcset="_commun/photos/480/ombre.webp 480w, _commun/photos/ombre.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Presque noir : deux ombres à peine visibles." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux ombres</span><span class="cartel-m">Julien · Paris · déc. 2023</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/alfama-premier-tram"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Un tram jaune grimpe une pente devant les façades de l’Alfama." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/linge-au-balcon"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Façade rose, six fenêtres, un fil de linge de couleurs." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/escaliers-des-guindais"><img src="_commun/photos/480/escaliers.webp" srcset="_commun/photos/480/escaliers.webp 320w, _commun/photos/escaliers.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Une silhouette au milieu d’un long escalier en diagonale, mur clair." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></span></a></li>
+    </ul>
+  </section>
+  <section class="wrap ser-sec" aria-labelledby="r-h">
+    <div class="ser-tete"><span class="mq-pin" aria-hidden="true">7</span><h2 id="r-h">La même série, un seul regard</h2></div>
+    <ul class="ser-regards">
+      <li><a href="/galerie?serie=rue&amp;regard=sebastien#filtres"><b>Rue, par Sébastien</b><span>1 photo · les lignes, les quais</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+      <li><a href="/galerie?serie=rue&amp;regard=julien#filtres"><b>Rue, par Julien</b><span>6 photos · les visages, les gestes</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+    </ul>
+  </section>
+  <section class="wrap ser-sec ser-autres" aria-labelledby="a-h">
+    <div class="ser-tete"><span class="mq-pin" aria-hidden="true">8</span><h2 id="a-h">Autres séries</h2><a class="lien" href="/series">Toutes les séries<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <ul class="rangees" aria-labelledby="a-h">
+      <li style="--r:1.5"><a class="vignette" href="/series/atlantique"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 30vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Atlantique</span><span class="cartel-m">3 photos</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/series/paysage"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 30vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Paysage</span><span class="cartel-m">5 photos</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/series/portrait"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 30vw, 45vw" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Portrait</span><span class="cartel-m">3 photos</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/series/voyage"><img src="_commun/photos/480/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 30vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Voyage</span><span class="cartel-m">4 photos</span></span></a></li>
+    </ul>
+  </section>
 </main>
-<footer class="site-f wrap">
-  <p>© 2026 Sébastien &amp; Julien</p>
-  <ul role="list" aria-label="Pied de page"><li><a href="#">Tirages et licences</a></li><li><a href="#">Contact</a></li><li><a href="#" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="#">Flux RSS</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Mentions légales</a></li></ul>
+<footer class="sf sf--complet wrap">
+  <div class="sf-in"><span class="mq-pin" aria-hidden="true">9</span>
+    <div>
+      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
+      <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage, un tirage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
+    </div>
+    <nav class="sf-groupes" aria-label="Pied de page">
+      <div>
+        <h2 id="sf-site">Le site</h2>
+        <ul aria-labelledby="sf-site">
+          <li><a href="/a-propos#contact">Contact</a></li>
+          <li><a href="/droits">Droits et licences</a></li>
+          <li><a href="/carnets/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
+          <li><a href="/confidentialite">Confidentialité</a></li>
+          <li><a href="/mentions-legales">Mentions légales</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 id="sf-tirages">Tirages</h2>
+        <ul aria-labelledby="sf-tirages">
+          <li><a href="/conditions-de-vente">Conditions de vente</a></li>
+          <li><a href="/livraison">Livraison et retours</a></li>
+          <li><a href="/renoncer">Renoncer à une commande</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
 </footer>
-<div class="mq-fold" aria-hidden="true"><span>bas du premier écran</span></div>
-
-<aside class="mq-notes" aria-labelledby="mq-h">
-  <p class="mq-id">Maquette MQ-03 · site public · thème « Nicephos — nuit » · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
-  <h2 id="mq-h">Ce qui change</h2>
-  <p class="mq-lead">/serie/rue cesse d’être l’accueil déguisé : c’est une salle d’exposition, avec son titre, son texte d’intention et sa séquence dès le premier écran. Titre de la page : « Rue — série de Sébastien et Julien · Nicephos ».</p>
-  <ol>
-    <li><span class="pin">1</span><p>Un fil d’Ariane discret en Plex Mono 13 px, au-dessus du H1 : « Accueil › Séries › Rue ». Deuxième système de navigation, et lien d’évitement en tête de page.<span class="ref">UX-F-06 · RGAA 12.1 et 12.7 · WCAG 2.4.5 et 2.4.8 · Opquast 156</span></p></li>
-    <li><span class="pin">2</span><p>Un seul H1, stable : le nom de la série, et non plus la diapositive du moment. Dessous, un texte d’intention d’environ 400 signes (FR, EN, DE) qui dit ce que la série cherche, en 17 px, interlignage 1,65, 12,4:1.<span class="ref">UX-F-10 · RGAA 9.1 · WCAG 1.3.1 et 2.4.6 · Opquast 234 · B&amp;S 1.1 Incitation</span></p></li>
-    <li><span class="pin">3</span><p>La fiche de la série : période « 2019–2026 », auteurs en liens vers leur page, « 8 photos » en clair (et non « 08 vues »).<span class="ref">UX-F-10 · UX-F-28 · ISO 9241-110 Autodescriptivité</span></p></li>
-    <li><span class="pin">4</span><p>Une couverture choisie dans l’admin, entière, à 38 % de la hauteur d’écran au plus (344 px), avec son cartel. Pas de diaporama, pas de voile ni de zoom : une seule image chargée en priorité.<span class="ref">UX-F-10 · UX-F-17 · UX-F-18 · RGESN 4.6 et 6.5</span></p></li>
-    <li><span class="pin">5</span><p>La séquence commence dans le premier écran : première vignette à 587 px du haut sur bureau (2 247 px aujourd’hui), à 481 px sur Pixel 7 (1 675 px). Le trait pointillé marque le bas de l’écran.<span class="ref">UX-F-10 · B&amp;S 2.1.2 Actions minimales · Loi de Jakob</span></p></li>
-    <li><span class="pin">6</span><p>Mêmes rangées justifiées que la galerie (MQ-02) : l’ordre composé se lit de gauche à droite, et les deux regards alternent dans la séquence, nom de l’auteur en entier sous chaque photo.<span class="ref">UX-F-13 · UX-F-45 · RGAA 12.8</span></p></li>
-    <li><span class="pin">7</span><p>En bas, « Autres séries » : quatre couvertures entières (letterbox, sans recadrage) avec nom, nombre de photos et auteurs. On passe d’une salle à l’autre sans remonter.<span class="ref">UX-F-30 · Nielsen #6 · B&amp;S 1.1</span></p></li>
-    <li><span class="pin">8</span><p>« L’autre regard » : la même série vue par un seul des deux, et la page de l’autre photographe. Le concept du site sert de navigation.<span class="ref">UX-F-45 · UX-F-10</span></p></li>
-    <li><span class="pin">9</span><p>Sur téléphone (voir la capture mobile) : H1, trois lignes de texte puis « Lire la suite » (aria-expanded), et la grille aussitôt ; la couverture n’est pas chargée, la première photo de la séquence en tient lieu. Sans JavaScript, le texte s’affiche entier.<span class="ref">UX-F-10 · UX-F-30 · RGESN 6.5 · WCAG 4.1.2</span></p></li>
+<section class="wrap ser-etats" aria-labelledby="ser-etats-t">
+  <h2 class="sr-only" id="ser-etats-t">Autres états de la page</h2>
+  <div class="ser-etat mq-ecran">
+    <p class="mq-etat">État · Réseau lent : les photos arrivent, la page ne bouge pas</p><span class="mq-pin" aria-hidden="true">10</span>
+    <ul class="rangees ser-lent" aria-label="Vignettes en cours de chargement">
+      <li style="--r:0.6667"><a class="vignette" href="/photo/deux-minuit"><span style="aspect-ratio:0.6667"><img src="_commun/photos/480/nuit.webp" srcset="_commun/photos/480/nuit.webp 320w, _commun/photos/nuit.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Deux silhouettes minuscules au bas d’une nuit violette." loading="lazy" decoding="async"></span><span class="cartel cartel--ligne"><span class="cartel-t">Deux, minuit</span><span class="cartel-m">Julien · Nantes · nov. 2023</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/quai-7h12"><span style="aspect-ratio:1.5"><img src="_commun/photos/480/quai.webp" srcset="_commun/photos/480/quai.webp 480w, _commun/photos/quai.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Quai désert sous un ciel gris, trois silhouettes au loin." loading="lazy" decoding="async"></span><span class="cartel cartel--ligne"><span class="cartel-t">Quai, 7 h 12</span><span class="cartel-m">Sébastien · Angers · oct. 2024</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/passage-fin-d-apres-midi"><span style="aspect-ratio:0.6667"><img src="_commun/photos/480/ruelle.webp" srcset="_commun/photos/480/ruelle.webp 320w, _commun/photos/ruelle.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Lumière brune d’une ruelle, un passant seul tout en bas." loading="lazy" decoding="async"></span><span class="cartel cartel--ligne"><span class="cartel-t">Passage, fin d’après-midi</span><span class="cartel-m">Julien · Lisbonne · mai 2024</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/deux-ombres"><span style="aspect-ratio:1.5"><img src="_commun/photos/480/ombre.webp" srcset="_commun/photos/480/ombre.webp 480w, _commun/photos/ombre.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Presque noir : deux ombres à peine visibles." loading="lazy" decoding="async"></span><span class="cartel cartel--ligne"><span class="cartel-t">Deux ombres</span><span class="cartel-m">Julien · Paris · déc. 2023</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/alfama-premier-tram"><span style="aspect-ratio:0.6667"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Un tram jaune grimpe une pente devant les façades de l’Alfama." loading="lazy" decoding="async"></span><span class="cartel cartel--ligne"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+    </ul>
+  </div>
+  <div class="ser-etat mq-ecran" style="margin-inline:calc(-1 * var(--gut))" lang="de">
+    <p class="mq-etat" style="left:calc(var(--gut) - 8px)" lang="fr">État · Allemand : en-tête, fil d’Ariane et fiche</p><span class="mq-pin" aria-hidden="true">11</span>
+    <header class="sh sh--site" lang="de" inert>
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <nav class="sh-nav" aria-label="Hauptmenü (Zustand: Deutsch)">
+      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien" aria-current="page">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache wählen">
+          <li><a href="/langue/fr?vers=%2F" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2F" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2F" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <nav class="sh-panneau" aria-label="Hauptmenü (Zustand: Deutsch) (Telefon)">
+          <ul>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien" aria-current="page">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
+            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+    <div class="wrap" style="padding-block:var(--esp-2) var(--esp-4)">
+      <nav class="ariane" aria-label="Brotkrumen (Zustand)"><ol><li><a href="/de/serien">Serien</a></li><li aria-current="page">Straße</li></ol></nav>
+      <p class="titre-page" style="margin-top:var(--esp-2)">Straße</p>
+      <ul class="ser-fiche" style="margin-top:var(--esp-3)"><li><b>7 Fotos</b>, von uns geordnet</li><li>von <a href="/de/galerie?blick=sebastien">Sébastien</a> und <a href="/de/galerie?blick=julien">Julien</a></li><li>2023–2026</li></ul>
+    </div>
+  </div>
+</section>
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MQ-03 · site public · page d’une série (Rue) · thème Nicephos nuit · bureau 1 440 × 900 et Pixel 7 · v2 du 16 oct. 2026, sur la planche MQ-00</p>
+  <h2 id="mq-t">Ce qui change</h2>
+  <p class="mq-lead">/series/rue cesse d’être l’accueil déguisé : c’est une salle d’exposition, avec son titre, son texte, sa couverture et ses photos dès le premier écran. Titre de la page : « Rue — série de Sébastien et Julien · Nicephos ».</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>Un fil d’Ariane discret</b><p>« Séries / Rue » en Jost 14 px, séparateurs pâles, la page en cours non liée (aria-current). Un deuxième chemin, après le menu, où « Séries » est actif.</p><span class="mq-ref">UX-F-06 · RGAA 12.1 · WCAG 2.4.8 · jury MQ-03 n° 8</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>Un seul H1, et un texte d’intention</b><p>« Rue », stable : plus de diapositive en guise de titre. Le texte dit ce que la série cherche, et qui cherche quoi (environ 330 signes, en 18 px). Au téléphone, deux phrases entières, puis « Lire la suite » (un &lt;details&gt;, sans script) : la coupe tombe à la fin d’une phrase.</p><span class="mq-ref">UX-F-10 · RGAA 9.1 · jury n° 2</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>La fiche de la série</b><p>« 7 photos, ordre choisi par nous · par Sébastien et Julien · 2023–2026 » : chaque élément reste entier sur sa ligne ; les noms mènent à la galerie de chacun.</p><span class="mq-ref">UX-F-10, UX-F-28 · jury n° 2</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>La couverture, au format standard</b><p>Celle du référentiel (Linge au balcon), entière, 45 % de la hauteur d’écran au plus, avec le cartel de la planche. Au téléphone, elle n’est pas chargée : une image vide en ligne la remplace, et la première photo de la série en tient lieu.</p><span class="mq-ref">UX-F-17, UX-F-18 · RGESN 6.5 · jury n° 7</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>Les photos dès le premier écran</b><p>Première rangée à 652 px du haut au bureau, à 609 px au téléphone. Le compte se dit une fois, dans le titre de la grille.</p><span class="mq-ref">UX-F-10 · B&S 2.1.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Les rangées de la galerie</b><p>Les mêmes que MQ-02, à hauteur commune, sans boîte grise ni recadrage, dans l’ordre de la galerie ; l’auteur en entier sous chaque photo. Les deux images les plus sombres restent à leur place, comme le veut la règle des grands formats.</p><span class="mq-ref">UX-F-13, UX-F-45 · jury n° 6 et 11</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>La même série, un seul regard</b><p>Remplace « L’autre regard » : on choisit Sébastien ou Julien dans cette série, avec le compte de chacun ; le lien ouvre la galerie filtrée (MQ-02).</p><span class="mq-ref">UX-F-45 · jury n° 1</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Autres séries, à hauteur commune</b><p>Quatre couvertures au format de leur photo, en une rangée justifiée, sans fond gris : plus d’emplacement vide au-dessus des verticales.</p><span class="mq-ref">UX-F-30 · jury n° 6 et 11</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Le pied de page complet</b><p>Celui de la planche : Le site, Tirages.</p><span class="mq-ref">UX-F-34</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>État · réseau lent</b><p>Chaque vignette réserve sa place au format de la photo (fond --frame), le cartel est déjà lisible : rien ne saute quand l’image arrive.</p><span class="mq-ref">UX-F-40 · RGESN 6.5</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>État · allemand</b><p>« Serien / Straße », « 7 Fotos, von uns geordnet » : la fiche passe à la ligne entre deux éléments, jamais au milieu.</p><span class="mq-ref">Jury T1 · WCAG 1.4.4</span></li>
   </ol>
-  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette) — <b>bureau 1440 × 900</b> : un seul H1 ; texte d’intention 12,4:1, fiche 7,4:1 sur #0b0b0b ; première vignette de la série à y = 587 px : les images de la première rangée tiennent entières au-dessus du bas du premier écran (bas à 878 px). <b>Pixel 7 (412 × 839, densité 2)</b> : en-tête de 64 px ; trois lignes de texte puis « Lire la suite » ; première vignette à y = 481 px, images de 272 px de haut, deux par rangée. Une image prioritaire (la couverture au bureau, la première photo sur téléphone), toutes les autres en chargement différé hors de la première rangée.</p>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium 1.64 en conteneur : outils/inspect.sh, outils/mq0104-controle.mjs) · axe-core : 0 violation au bureau (1 440 × 900) et au téléphone (Pixel 7) · Poids après défilement complet : 293 ko et 22 requêtes au bureau, 372 ko au téléphone (la couverture n’y est pas chargée) ; aucune ressource tierce, aucun script ; images en variantes de 480 et 160 px hors grands formats · Couverture à 45 % de la hauteur d’écran au plus ; première rangée de la série à 652 px du haut au bureau, à 609 px au téléphone · Largeurs 320, 412, 820, 823 × 514 (1 440 px zoomé à 175 %), 1 024, 1 280 et 1 440 px, puis les mêmes avec l’en-tête en allemand et le panier plein : 0 débordement, 0 chevauchement, 0 texte coupé dans l’en-tête, 0 cible sous 24 px · Contrastes (formule WCAG 2.2, valeurs de tokens.css) : texte d’intention 12,4:1, fiche 12,4:1, cartels 7,4:1 sur #0b0b0b · Sans annotations (#sans-annotations) : 13 pastilles et étiquettes retirées, 0 pixel changé hors de leur emprise, sur 3 224 px de haut au bureau et 3 877 px au téléphone.</p>
 </aside>
-<script>/* Démonstration d’état seulement : « Lire la suite » sur téléphone. */
-document.querySelector('.s-more').addEventListener('click', e => { const p = document.getElementById('intention'); const o = p.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', String(o)); e.currentTarget.textContent = o ? 'Réduire' : 'Lire la suite'; });</script>
 </body>
 </html>
