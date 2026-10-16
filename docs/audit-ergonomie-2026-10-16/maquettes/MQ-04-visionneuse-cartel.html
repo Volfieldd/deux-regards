@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="fr" class="theme-nicephos mode-nuit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Miradouro, l’heure dorée — Julien · Lisbonne et Porto (3 / 10) · Nicephos</title>
+<meta name="description" content="Maquette MQ-04 (audit du 16 octobre 2026) : visionneuse et cartel de la page photo, avec photos de démonstration.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="_commun/site.css">
+<link rel="stylesheet" href="_commun/site-entete.css">
+<style>
+/* ===== Thème « Nicephos » (repris de public/themes/nicephos.css) + corrections proposées ===== */
+.theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
+  --display-style: normal; --dark: #050505; --dark-ink: #f0efeb; --dark-mute: #b4b2ac; --dark-rule: rgba(240,239,235,.28); }
+.mode-nuit { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
+  --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
+.mode-jour, .mode-auto { color-scheme: light; --paper: #fbfbf9; --ink: #111111; --mute: #5e5d59; --prose: #3a3936; --rule: #dddcd7;
+  --frame: #efeeea; --safelight: #7d6532; --on-accent: #fbfbf9; --field: #5e5d59; --error: #a8412b; --ok: #2f6b3a; }
+@media (prefers-color-scheme: dark) {
+  .mode-auto { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
+    --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
+}
+/* Thème Atelier (valeurs par défaut de site.css) : seules les couleurs d'erreur et de champ sont ajoutées. */
+.mode-atelier { --field: #6b665d; --error: #9e3a22; --ok: #2f6b3a; --on-accent: #f6f4ef; }
+
+/* Corrections typographiques (UX-F-29) et de comportement (UX-F-34) appliquées à toutes les maquettes */
+body { font-weight: 400; position: relative; }
+.theme-nicephos body { font-weight: 400; }
+.mono { font-size: 13px; }
+.eyebrow { font-size: 12px; }
+img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; -webkit-user-drag: auto; }
+:focus-visible, .is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.u, .prose a, .txt a { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.u:hover, .prose a:hover, .txt a:hover { text-decoration-thickness: 2px; }
+.arrow { display: inline-block; }
+.wrap { padding-inline: max(var(--gut), env(safe-area-inset-left)) max(var(--gut), env(safe-area-inset-right)); }
+
+/* Lien d’évitement, en-tête et pied de page : voir _commun/site-entete.css */
+
+/* Annotations : voir _commun/annotations.css (gabarit commun) */
+.site-tools li, .site-nav li { display: flex; align-items: center; }
+@media (min-width: 761px) { .menu-btn + .pin { display: none; } }
+
+/* ===== Composants communs des maquettes correctives du site public (MQ-02 à MQ-06, MQ-15) ===== */
+html { background: var(--paper); }
+body { background: var(--paper); color: var(--ink); }
+.mode-nuit, .mode-jour, .mode-atelier { --err: var(--error); }
+/* Fil d'Ariane en mono, au-dessus du H1 (UX-F-06, Opquast 156) */
+.ariane ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; margin: 0; padding: 8px 0 0; list-style: none; font: 400 13px/1.4 var(--mono); color: var(--mute); }
+.ariane li + li::before { content: '›' / ''; margin-right: 10px; }
+.ariane a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
+.ariane [aria-current] { color: var(--mute); }
+/* Boutons : un seul bouton plein par écran (B&S 1.2.2) */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 26px; border: 1px solid var(--ink);
+  background: var(--ink); color: var(--paper); font: 500 15px/1.2 var(--sans); letter-spacing: .03em; cursor: pointer; text-align: center; }
+.btn-2 { background: transparent; color: var(--ink); font-weight: 400; border-color: var(--field); }
+.btn-s { min-height: 44px; padding: 0 16px; font-size: 14px; }
+/* Champs : filet en --field (5,2:1 en Atelier, 7,4:1 en nuit), 2 px au focus et en erreur (UX-F-04) */
+.f-champ { display: grid; gap: 6px; align-content: start; }
+.f-champ > label, .f-l { font: 500 15px/1.4 var(--sans); color: var(--ink); }
+.f-q { font-weight: 400; color: var(--mute); }
+.f-aide { margin: 0; font-size: 14px; line-height: 1.5; color: var(--mute); }
+.f-input { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--field); border-radius: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.4 var(--sans); }
+textarea.f-input { min-height: 120px; resize: vertical; }
+.f-input:focus, .f-input.is-focus { outline: 2px solid var(--ink); outline-offset: 2px; }
+.f-input[aria-invalid="true"] { border: 2px solid var(--err); }
+.f-err { display: flex; gap: 8px; margin: 0; color: var(--err); font: 500 14.5px/1.45 var(--sans); }
+.f-err::before { content: '⚠' / ''; }
+fieldset.f-grp { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 10px; }
+fieldset.f-grp > legend { padding: 0; margin-bottom: 8px; font: 500 15px/1.4 var(--sans); color: var(--ink); }
+.f-opt { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 10px 0; color: var(--ink); font-size: 15.5px; line-height: 1.4; cursor: pointer; }
+.f-opt input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--ink); }
+.f-opt input:focus-visible, .f-opt input.is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.f-opt small { display: block; color: var(--mute); font-size: 14px; }
+.f-resume { margin: 0 0 28px; padding: 18px 20px; border: 2px solid var(--err); background: var(--paper); }
+.f-resume:focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.f-resume h2 { margin: 0 0 8px; font: 500 18px/1.3 var(--sans); color: var(--ink); }
+.f-resume ul { margin: 0; padding-left: 20px; }
+.f-resume a { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* Cartel : titre, auteur, lieu, date ; mono pour les références */
+.cartel-t { margin: 0; font: 400 22px/1.3 var(--sans); color: var(--ink); }
+.cartel-m { margin: 0; font: 400 13px/1.6 var(--mono); color: var(--mute); }
+.cartel-m a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
+.eyb { margin: 0; font: 400 12px/1.4 var(--sans); letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
+.pin-in2 { margin-left: 6px; }
+.mq-state > .mq-label .pin { color: #111; letter-spacing: 0; text-transform: none; font-weight: 600; }
+
+/* ===== MQ-04 : visionneuse-cartel ===== */
+body { background: #050505; }
+.mode-nuit { --paper: #050505; }
+/* Barre haute : marque, retour nommé, recherche, compteur accolé aux flèches, langue (UX-F-08, UX-F-09) */
+.v-bar { display: flex; align-items: center; gap: 8px 22px; min-height: 60px; position: relative; z-index: 20; }
+.v-bar .wordmark { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); font: 300 14px/1 var(--sans); letter-spacing: .42em; text-transform: uppercase; white-space: nowrap; }
+.v-back { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding-left: 20px; border-left: 1px solid var(--rule); color: var(--ink); font-size: 15px; white-space: nowrap; }
+.v-back:hover span { text-decoration: underline; text-underline-offset: 4px; }
+.v-end { display: flex; align-items: center; gap: 6px 16px; margin-left: auto; }
+.v-end .tool { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; min-width: 44px; justify-content: center; color: var(--ink); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
+.v-pos { display: flex; align-items: center; gap: 4px; }
+.v-pos .c { padding: 0 8px; font: 400 13px/1.3 var(--mono); color: var(--ink); white-space: nowrap; }
+.v-pos .c span { color: var(--mute); }
+.arr { display: inline-grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--field); border-radius: 50%; color: var(--ink); }
+.arr:hover { background: var(--frame); }
+/* La photo d'abord : hauteur d'écran moins la barre et une ligne de titre (UX-F-14, UX-F-21) */
+.v-ph { display: flex; justify-content: center; margin: 0; padding-inline: var(--gut); }
+.v-ph .box { position: relative; display: block; width: min(1116px, calc((100vh - 156px) * 1.5), 100%); }
+.v-ph img { display: block; width: 100%; height: auto; background: var(--frame); }
+/* Cartel : l'œuvre d'un côté, les gestes de l'autre (UX-F-14) */
+.v-cartel { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px 56px; width: min(1116px, 100%); margin: 20px auto 0; }
+.v-cartel h1 { margin: 0; font: 300 30px/1.2 var(--sans); letter-spacing: .005em; color: var(--ink); }
+.v-cartel dl { display: grid; gap: 4px; margin: 12px 0 0; }
+.v-cartel dl div { display: flex; flex-wrap: wrap; gap: 0 10px; }
+.v-cartel dt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.v-cartel dd { margin: 0; color: var(--prose); font-size: 15.5px; line-height: 1.55; }
+.v-cartel dd.mo { font: 400 13px/1.7 var(--mono); color: var(--mute); }
+.v-cartel dd a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
+.v-side { display: grid; gap: 14px; justify-items: end; align-content: start; }
+.v-act { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; margin: 0; padding: 0; list-style: none; }
+.v-act a, .v-act button { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px; border: 1px solid var(--field); background: none; color: var(--ink); font: 400 15px/1 var(--sans); cursor: pointer; white-space: nowrap; }
+.v-act a.prim { border-color: var(--ink); }
+.v-act button[aria-pressed="true"] svg path { fill: currentColor; }
+.v-sig { margin: 0; font-size: 14px; color: var(--mute); }
+.v-sig a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
+.v-hint { display: flex; align-items: center; gap: 14px; margin: 0; font: 400 13px/1.4 var(--mono); color: var(--mute); }
+.v-hint kbd { display: inline-block; min-width: 22px; padding: 1px 5px; border: 1px solid var(--field); border-radius: 3px; font: inherit; color: var(--ink); text-align: center; }
+.v-fs { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--field); background: none; color: var(--ink); font: 400 14px/1 var(--sans); cursor: pointer; }
+/* À proximité et mini-carte (UX-F-14, UX-F-20) */
+.v-near { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px 40px; width: min(1116px, 100%); margin: 72px auto 0; padding-top: 18px; border-top: 1px solid var(--rule); }
+.v-near h2 { grid-column: 1 / -1; margin: 0; font: 400 13px/1.3 var(--sans); letter-spacing: .26em; text-transform: uppercase; color: var(--ink); }
+.v-near ul { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+.v-near ul a { display: grid; gap: 8px; color: var(--ink); }
+.v-near .bx { display: flex; align-items: center; justify-content: center; aspect-ratio: 1; background: var(--frame); }
+.v-near .bx img { max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; }
+.v-near b { font: 400 15px/1.3 var(--sans); }
+.v-near ul span.k2 { font: 400 13px/1.4 var(--mono); color: var(--mute); }
+.v-map { margin: 0; }
+.v-map svg { display: block; width: 100%; height: auto; background: #0f1417; border: 1px solid var(--rule); }
+.v-map figcaption { margin-top: 8px; font: 400 13px/1.5 var(--mono); color: var(--mute); }
+.v-map figcaption a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* Pied de page compact, comme un cartel (UX-F-08, UX-F-34) */
+.v-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0 22px; width: min(1116px, calc(100% - 2 * var(--gut))); margin: 64px auto 0; padding-block: 18px 40px; border-top: 1px solid var(--rule); font: 400 13px/1.5 var(--mono); color: var(--mute); }
+.v-foot p { margin: 0; }
+.v-foot ul { display: flex; flex-wrap: wrap; gap: 0 20px; margin: 0; padding: 0; list-style: none; }
+.v-foot a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--mute); }
+/* Second état : plein écran */
+.fs { width: min(100%, 860px); margin-inline: auto; position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 16 / 10; background: #000; }
+.fs img { max-width: 100%; max-height: 100%; width: auto; height: 100%; display: block; }
+.fs .arr { position: absolute; top: 50%; transform: translateY(-50%); width: 56px; height: 56px; background: rgba(0,0,0,.55); border-color: rgba(240,239,235,.6); }
+.fs .l { left: 16px; } .fs .r { right: 16px; }
+.fs .x { position: absolute; top: 14px; right: 16px; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; background: rgba(0,0,0,.55); border: 1px solid rgba(240,239,235,.6); color: #f0efeb; font: 400 14px/1 var(--sans); }
+.fs .cnt { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); padding: 6px 12px; background: rgba(0,0,0,.55); color: #f0efeb; font: 400 13px/1.3 var(--mono); }
+.mq-state .in { padding: 20px; }
+.m-only { display: none; }
+@media (max-width: 760px) {
+  .v-bar { flex-wrap: wrap; gap: 0 8px; padding-block: 4px; }
+  .v-bar .wordmark { font-size: 13px; letter-spacing: .34em; }
+  .v-bar::after { content: ""; order: 2; flex-basis: 100%; }
+  .v-bar .wordmark { margin-right: auto; }
+  .v-back { order: 3; flex: 1 1 0; min-width: 0; padding-left: 0; border-left: 0; font-size: 15px; }
+  .v-end { display: contents; }
+
+  .v-end .tool-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .v-pos { order: 4; }
+  .v-pos .c span { display: none; }
+  .v-ph { padding-inline: 0; }
+  .v-ph .box { width: 100%; }
+  .v-cartel { grid-template-columns: 1fr; margin-top: 16px; padding-inline: var(--gut); width: auto; }
+  .v-cartel h1 { font-size: 25px; }
+  .v-side { justify-items: start; }
+  .v-act { justify-content: flex-start; }
+  .v-hint { display: none; }
+  .v-near { grid-template-columns: 1fr; margin-top: 48px; padding-inline: var(--gut); width: auto; border-top: 0; }
+  .v-near ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fs { aspect-ratio: 9 / 16; }
+  .fs img { width: 100%; height: auto; }
+  .d-only { display: none; }
+  .m-only { display: inline; }
+}
+</style>
+<link rel="stylesheet" href="_commun/annotations.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="v-bar wrap">
+  <a class="wordmark" href="#">Nicephos</a>
+  <a class="v-back" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg><span>Lisbonne et Porto</span><span class="pin pin-in" aria-hidden="true">1</span></a>
+  <div class="v-end">
+    <a class="tool tool-s" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="tool-t">Rechercher</span></a>
+    <nav class="v-pos" aria-label="Photos du carnet Lisbonne et Porto">
+      <a class="arr" href="#" rel="prev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg><span class="sr-only">Précédente : Alfama, premier tram</span></a>
+      <span class="c">3 / 10<span> · Lisbonne et Porto</span></span>
+      <a class="arr" href="#" rel="next"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span class="sr-only">Suivante : Belém, contre-jour</span></a>
+      <span class="pin pin-in" aria-hidden="true">2</span>
+    </nav>
+    <details class="lang"><summary class="tool"><span class="sr-only">Langue : </span>FR</summary>
+      <ul role="list"><li><a href="#" lang="fr" hreflang="fr" aria-current="true"><span>Français</span></a></li><li><a href="#" lang="en" hreflang="en">English</a></li><li><a href="#" lang="de" hreflang="de">Deutsch</a></li></ul></details>
+  </div>
+</header>
+
+<main id="contenu">
+  <figure class="v-ph">
+    <span class="box">
+      <img src="_commun/photos/ciel.webp" width="900" height="600" fetchpriority="high" alt="Le soleil bas et pâle au-dessus de collines violettes, dans un ciel rose orangé qui fonce vers l’horizon.">
+      <span class="pin pin-abs" style="top:14px; left:14px" aria-hidden="true">3</span>
+    </span>
+  </figure>
+
+  <div class="v-cartel">
+    <div>
+      <h1>Miradouro, l’heure dorée<span class="pin pin-in" aria-hidden="true">4</span></h1>
+      <dl>
+        <div><dt>Auteur, lieu et date</dt><dd><a href="#">Julien</a> · Miradouro da Graça, Lisbonne · <time datetime="2026-10-10">10 octobre 2026</time></dd></div>
+        <div><dt>Série et carnet</dt><dd>Série <a href="#">Voyage</a> · Carnet « <a href="#">Lisbonne et Porto</a> », jour 1<span class="pin pin-in" aria-hidden="true">5</span></dd></div>
+        <div><dt>Prise de vue</dt><dd class="mo">Nikon Z 7II · 24-120 mm · 1/250 s · f/8</dd></div>
+        <div><dt>Numéro d’inventaire</dt><dd class="mo">Inventaire J-2026-019</dd></div>
+      </dl>
+    </div>
+    <div class="v-side">
+      <ul class="v-act" role="list">
+        <li><button type="button" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>J’aime</button></li>
+        <li><a href="#" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>Partager</a></li>
+        <li><a class="prim" href="MQ-06-contact-tirage.html">Tirage, licence&#8239;: nous écrire</a></li>
+        <li><span class="pin" aria-hidden="true">6</span></li>
+      </ul>
+      <p class="v-sig">Vous êtes sur cette photo&#8239;? <a href="#">Signaler</a><span class="pin pin-in" aria-hidden="true">7</span></p>
+      <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; justify-content:flex-end">
+        <p class="v-hint"><span><kbd>←</kbd> <kbd>→</kbd> pour naviguer · <kbd>Échap</kbd> pour revenir · <kbd>F</kbd> plein écran</span></p>
+        <button class="v-fs" type="button" aria-keyshortcuts="F"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Plein écran</button>
+        <span class="pin" aria-hidden="true">8</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="v-near" aria-labelledby="near-h">
+    <h2 id="near-h">À proximité <span class="pin pin-in" aria-hidden="true">9</span></h2>
+    <ul role="list">
+      <li><a href="#"><span class="bx"><img src="_commun/photos/ruelle.webp" width="600" height="900" alt="" loading="lazy"></span><b>Alfama, premier tram</b><span class="k2">Julien · Lisbonne · 1,2 km</span></a></li>
+      <li><a href="#"><span class="bx"><img src="_commun/photos/lac.webp" width="900" height="600" alt="" loading="lazy"></span><b>Graça, le fleuve à midi</b><span class="k2">Sébastien · même lieu</span></a></li>
+      <li><a href="#"><span class="bx"><img src="_commun/photos/dune.webp" width="900" height="600" alt="" loading="lazy"></span><b>Belém, contre-jour</b><span class="k2">Sébastien · Lisbonne · 6 km</span></a></li>
+      <li><a href="#"><span class="bx"><img src="_commun/photos/mer.webp" width="900" height="600" alt="" loading="lazy"></span><b>Cabo da Roca</b><span class="k2">Sébastien · Sintra · 32 km</span></a></li>
+    </ul>
+    <figure class="v-map">
+      <svg viewBox="0 0 320 220" role="img" aria-labelledby="map-t">
+        <title id="map-t">Carte de la région de Lisbonne : la photo à Graça, et les photos voisines à Alfama, Belém et au cabo da Roca</title>
+        <path d="M0 0H320V220H0Z" fill="#0f1417"/>
+        <path d="M150 0 L320 0 L320 220 L118 220 L112 196 L96 182 L104 160 L82 148 L60 128 L58 104 L76 92 L104 98 L132 86 L150 70 L142 40 Z" fill="#23272a" stroke="#4b5053" stroke-width="1"/>
+        <path d="M150 112 C180 108 200 120 214 140" fill="none" stroke="#0f1417" stroke-width="10" stroke-linecap="round"/>
+        <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#cfcdc7">
+          <circle cx="64" cy="112" r="5" fill="#f0efeb"/><text x="14" y="98">Cabo da Roca</text>
+          <circle cx="136" cy="126" r="5" fill="#f0efeb"/><text x="104" y="146">Belém</text>
+          <circle cx="174" cy="104" r="5" fill="#f0efeb"/><text x="184" y="98">Alfama</text>
+          <circle cx="168" cy="90" r="9" fill="#cbb68b" stroke="#050505" stroke-width="2"/><text x="182" y="80" fill="#f0efeb" font-size="12">Graça (ici)</text>
+        </g>
+      </svg>
+      <figcaption>Lisbonne · 4 photos à moins de 35 km · <a href="#">Carte du monde</a></figcaption>
+    </figure>
+  </section>
+<div class="mq-state">
+  <p class="mq-label">Second état <span>Plein écran (touche F ou bouton « Plein écran ») : la photo seule sur le noir, flèches au milieu des bords</span><span class="pin" aria-hidden="true">11</span></p>
+  <div class="in">
+    <div class="fs">
+      <img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy">
+      <a class="arr l" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg><span class="sr-only">Précédente (plein écran)</span></a>
+      <a class="arr r" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span class="sr-only">Suivante (plein écran)</span></a>
+      <span class="x"><span aria-hidden="true">✕</span> Quitter · Échap</span>
+      <span class="cnt">3 / 10</span>
+    </div>
+  </div>
+</div>
+</main>
+
+<footer class="v-foot">
+  <p>© 2026 Sébastien &amp; Julien</p>
+  <ul role="list" aria-label="Pied de page"><li><a href="#">Tirages et licences</a></li><li><a href="#">Contact</a></li><li><a href="#" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="#">Flux RSS</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Mentions légales</a></li></ul>
+  <span class="pin" aria-hidden="true">10</span>
+</footer>
+
+<aside class="mq-notes" aria-labelledby="mq-h">
+  <p class="mq-id">Maquette MQ-04 · site public · visionneuse (toujours sur noir) · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
+  <h2 id="mq-h">Ce qui change</h2>
+  <p class="mq-lead">La photo prend la place d’une œuvre au mur, le cartel la présente, et la page reste reliée au site et au récit d’où l’on vient. Titre de la page : « Miradouro, l’heure dorée — Julien · Lisbonne et Porto (3 / 10) · Nicephos ».</p>
+  <ol>
+    <li><span class="pin">1</span><p>« NICEPHOS » ramène à l’accueil ; le retour est nommé par sa destination (« ← Lisbonne et Porto ») au lieu de « Fermer », et mène au jour du carnet, pas à /#galerie.<span class="ref">UX-F-08 · UX-F-09 · UX-F-28 · RGAA 12.1 · WCAG 2.4.4 · Nielsen #3 · ISO 9241-110 Contrôlabilité</span></p></li>
+    <li><span class="pin">2</span><p>Compteur dans le contexte d’arrivée (« 3 / 10 · Lisbonne et Porto » au lieu de « 13 / 22 ») et accolé aux flèches ‹ › de 44 px, dont le nom annonce la photo visée. Loupe et langue restent à droite.<span class="ref">UX-F-09 · UX-F-14 · RGAA 6.1 · WCAG 2.5.8 · Loi de Fitts</span></p></li>
+    <li><span class="pin">3</span><p>La photo à 1 116 × 744 px sur bureau (64 % de l’écran au lieu de 36 %), pleine largeur sur téléphone. Le navigateur reçoit <code>sizes="min(1116px, calc((100vh - 156px) * 1.5))"</code>, calculé avec le format de chaque photo (ici 3:2) : il ne télécharge plus la variante de 2 000 px pour une boîte de 555 px. La photo, œuvre à part entière, a une vraie description.<span class="ref">UX-F-14 · UX-F-21 · UX-F-44 · RGESN 6.4 · RGAA 1.1 et 1.3</span></p></li>
+    <li><span class="pin">4</span><p>Le titre à 20 px sous la photo, en casse normale (fini les capitales espacées) : on lit l’image et son nom ensemble. Dessous, un cartel en liste de définitions : auteur, lieu, date (balise time), prise de vue, et un numéro d’inventaire stable « J-2026-019 » qui ne change plus quand vous réordonnez.<span class="ref">UX-F-14 · UX-T-05 · UX-F-29 · RGAA 9.3 · Loi de proximité</span></p></li>
+    <li><span class="pin">5</span><p>La photo dit à quoi elle appartient : « Série Voyage · Carnet « Lisbonne et Porto », jour 1 », en liens. Le même mécanisme servira aux galeries privées.<span class="ref">UX-F-09 · UX-T-16 · B&amp;S 1.1 Incitation</span></p></li>
+    <li><span class="pin">6</span><p>Les gestes à droite, séparés de l’œuvre : « J’aime » sans compteur (le nombre reste dans vos statistiques), nom accessible égal au texte visible et état par aria-pressed ; « Partager » ; et une porte vers l’achat : « Tirage, licence : nous écrire », qui ouvre le formulaire prérempli de MQ-06.<span class="ref">UX-F-11 · UX-F-39 · UX-F-24 · RGAA 6.1 · WCAG 2.5.3 · B&amp;S 2.1.2</span></p></li>
+    <li><span class="pin">7</span><p>« Vous êtes sur cette photo ? Signaler » en lien discret, mais souligné et de 44 px : la personne photographiée sait que c’est pour elle.<span class="ref">UX-F-28 · UX-F-23 · RGAA 10.6</span></p></li>
+    <li><span class="pin">8</span><p>Les raccourcis, qui marchent déjà très bien, deviennent visibles : « ← → pour naviguer · Échap pour revenir · F plein écran », et un bouton « Plein écran » (aria-keyshortcuts). Sur téléphone, l’indice disparaît ; le glissé reste.<span class="ref">UX-F-14 · Nielsen #7 et #10 · WCAG 2.1.4 · B&amp;S 4.1 Flexibilité</span></p></li>
+    <li><span class="pin">9</span><p>« À proximité » sous le cartel : quatre vignettes entières (« même lieu » pour l’autre regard), puis la mini-carte, en SVG de quelques ko au lieu des 230 ko du fond mondial, qui ne retarde plus la photo.<span class="ref">UX-F-14 · UX-F-20 · UX-F-45 · RGESN 4.7, 6.5 et 6.1</span></p></li>
+    <li><span class="pin">10</span><p>Le pied de page cible, le même que sur tout le site (MQ-01, MQ-06) : « © 2026 Sébastien &amp; Julien · Tirages et licences · Contact · Instagram · Flux RSS · Confidentialité · Mentions légales », en une ligne compacte. Plus de « reproduction interdite » : le crédit de la photo est dans le cartel. Celui qui arrive d’Instagram ou d’un QR trouve enfin les mentions légales.<span class="ref">UX-F-08 · UX-F-34 · RGAA 12.1 · LCEN · Opquast 2 et 15</span></p></li>
+    <li><span class="pin">11</span><p>Second état, plein écran : la photo seule sur le noir, flèches de 56 px au milieu des bords, « Quitter · Échap » en haut à droite, compteur discret. Le focus reste visible sur les flèches.<span class="ref">UX-F-14 · WCAG 2.4.7 et 2.1.2 · Nielsen #8</span></p></li>
+  </ol>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette) — <b>bureau 1440 × 900</b> : image à 1 116 × 744 px, haut à 60 px, titre à 20 px sous l’image et visible sans défiler ; textes du cartel 12,8:1 (prose) et 7,7:1 (Plex Mono 13 px) sur #050505 ; toutes les cibles à 44 px au moins. <b>Pixel 7 (412 × 839, densité 2)</b> : barre haute de 96 px sur deux lignes (marque et retour, puis loupe, flèches de 44 × 44 px et langue) ; photo pleine largeur, 412 × 275 px, haut à 96 px ; titre en Jost 25 px à 387 px, cartel complet et les trois gestes (J’aime, Partager, « Tirage, licence : nous écrire », 44 px de haut) au-dessus du bas du premier écran (675 px pour 839) ; liens du pied de page en cibles de 44 px. Une seule image prioritaire ; vignettes « À proximité » en chargement différé.</p>
+</aside>
+</body>
+</html>

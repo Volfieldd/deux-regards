@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="dark light">
+  <title>Commandes · Boutique · Administration · Nicephos — maquette MQ-19</title>
+  <link rel="stylesheet" href="_commun/admin.css">
+  <style>
+    /* MQ-19 — composants nouveaux. Tout passe par les variables d'admin.css : mode sombre (Chambre noire) ou clair selon le système. */
+
+    /* Maquette : la barre latérale garde sa hauteur naturelle pour la capture pleine page. */
+    .side { height: auto; align-self: start; }
+    /* Capture pleine page : le fond de la barre latérale descend jusqu’en bas de la page (audit, B). */
+    @media (min-width: 721px) { .shell { background: linear-gradient(90deg, var(--s1) 0 var(--side), transparent var(--side)); } .shell > .side { border-right: 0; } .shell::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--side) - 1px); border-left: 1px solid var(--line); } .shell { position: relative; } }
+    .side .foot { margin-top: 18px; }
+    .nav-sub { list-style: none; margin: 0 0 2px; padding: 0 0 0 30px; display: grid; gap: 2px; }
+    .nav-sub a { min-height: 30px; font-size: 13.5px; }
+    .nav-badge .sr-only { position: absolute; }
+    .soon { margin-left: auto; font-size: 11px; color: var(--ink3); }
+    .me-link { display: flex; align-items: center; gap: 10px; padding: 4px 6px; border-radius: 8px; }
+    .me-link:hover { background: var(--s2); }
+    .side .foot .nav a { min-height: 30px; }
+
+    /* Repères d'annotation ①②③ (la légende est en bas de page). */
+    
+    .mq-screen { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 18px; padding-top: 10px; border-top: 1px dashed var(--line2); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink2); }
+    .mq-screen b { color: var(--accent-ink); font-weight: 600; }
+    .mq-screen code { text-transform: none; letter-spacing: 0; }
+    .mq-first { border-top: 0; padding-top: 0; padding-right: 160px; }
+    .mq-focus { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
+
+    /* Fil d'Ariane, en-tête */
+    .crumbs ol { list-style: none; margin: 0 0 6px; padding: 0; display: flex; gap: 8px; font-size: 12.5px; color: var(--ink3); }
+    .crumbs li + li::before { content: "›"; margin-right: 8px; color: var(--ink3); }
+    .crumbs a { color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; }
+    .o-top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 20px; margin: 0 0 18px; }
+    .o-top h1 { margin: 0 0 6px; }
+    .o-top .sub { font-size: 13.5px; color: var(--ink2); }
+    .o-top .sub strong { color: var(--ink); font-weight: 500; }
+
+    /* Filtres : pastilles d'état, puis période et recherche appliquées par un bouton. */
+    .o-filters { display: grid; gap: 12px; margin: 0 0 22px; padding: 14px 16px; border-radius: 14px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+    .o-filters .line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+    .f-lb { font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); min-width: 64px; }
+    .chips { list-style: none; margin: 0; padding: 0; }
+    .chip[aria-current] .n { color: inherit; }
+    .chip[aria-current]::before { content: "✓"; font-size: 12px; }
+    .o-filters form { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 12px; margin: 0; }
+    .o-filters label { font-size: 12.5px; }
+    .o-filters select { width: auto; min-width: 200px; min-height: 36px; padding-top: 6px; padding-bottom: 6px; }
+    .o-filters input[type="search"] { width: 240px; min-height: 36px; }
+
+    /* Tableau des commandes */
+    .orders { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .orders caption { caption-side: top; text-align: left; padding: 0 0 10px; font-size: 15px; font-weight: 500; color: var(--ink); }
+    .orders caption .mono { font-weight: 400; margin-left: 6px; }
+    .orders th, .orders td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .orders thead th { padding-top: 8px; padding-bottom: 8px; font-weight: 500; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); border-bottom-color: var(--line2); }
+    .orders tbody th { font-weight: 500; white-space: nowrap; }
+    .orders tbody th a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
+    .orders tbody tr:hover { background: var(--s1); }
+    .orders tr.todo th { box-shadow: inset 3px 0 0 var(--accent); }
+    .orders .num { text-align: right; white-space: nowrap; }
+    .orders td .mono { display: block; margin-top: 2px; }
+    .orders time { white-space: nowrap; }
+    .o-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+    .o-items li { display: flex; align-items: center; gap: 10px; }
+    .o-items img { width: 48px; height: 32px; border-radius: 4px; display: block; flex: none; background: var(--photo-bg); }
+    .o-items .ref { color: var(--ink3); }
+
+    /* Pastille d'état commune : une forme ET un mot (○ ◐ ● ▲ ✕), jamais la couleur seule. */
+    .etat { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 999px; font-size: 12.5px; line-height: 1.3; color: var(--ink); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); white-space: nowrap; }
+    .etat .sym { font-size: 13px; line-height: 1; color: var(--ink2); }
+    .etat.todo { box-shadow: inset 0 0 0 1.5px var(--accent-ink); }
+    .etat.todo .sym { color: var(--accent-ink); }
+    .etat.done .sym { color: var(--ok); }
+    .etat.warn .sym { color: var(--warn); }
+    .etat.stop { box-shadow: inset 0 0 0 1.5px var(--danger); }
+    .etat.stop .sym { color: var(--danger); }
+    .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 14px 0 0; font-size: 12.5px; color: var(--ink2); }
+    .legend .f-lb { min-width: 0; margin-right: 2px; }
+
+    /* Écran B : détail d'une commande */
+    .mq-b { margin-top: 64px; }
+    .back { display: inline-flex; align-items: center; min-height: 24px; margin-bottom: 4px; font-size: 13px; }
+    .od-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+    .main .od-head h2 { margin: 0; font-weight: 300; font-size: 30px; line-height: 1.15; }
+    .od-sub { margin: 8px 0 0; color: var(--ink2); max-width: 80ch; }
+    .od-grid { display: grid; grid-template-columns: minmax(0, 1fr) 344px; gap: 18px; align-items: start; margin-top: 20px; }
+    .od-grid .panel { margin: 0 0 18px; }
+    .panel h3 { margin: 0 0 14px; font-size: 17px; font-weight: 500; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .panel h3 .mono { font-weight: 400; }
+    .panel h4 { margin: 0 0 4px; font-size: 15px; font-weight: 500; }
+
+    .o-steps { list-style: none; margin: 0 0 20px; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .o-steps li { position: relative; display: grid; gap: 3px; padding-right: 14px; }
+    .o-steps li::before { content: ""; position: absolute; top: 14px; left: 34px; right: 6px; height: 2px; background: var(--line2); }
+    .o-steps li.done::before { background: var(--ok); }
+    .o-steps li:last-child::before { display: none; }
+    .o-steps .dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; background: var(--s1); color: var(--ink3); box-shadow: inset 0 0 0 1.5px var(--ink3); margin-bottom: 6px; }
+    .o-steps .done .dot { color: var(--ok); box-shadow: inset 0 0 0 2px var(--ok); }
+    .o-steps [aria-current] .dot { color: var(--accent-ink); box-shadow: inset 0 0 0 2px var(--accent-ink), 0 0 0 4px var(--accent-soft); }
+    .o-steps strong { font-weight: 500; }
+    .o-steps [aria-current] strong { color: var(--accent-ink); }
+    .o-steps .mono { line-height: 1.4; }
+
+    .o-forms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .o-form { display: grid; gap: 12px; align-content: start; padding: 16px; border-radius: 12px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); }
+    .o-form.now { box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 1px var(--line2); }
+    .o-form .kicker { font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); margin: 0; }
+    .o-form.now .kicker { color: var(--accent-ink); }
+    .o-form label { gap: 5px; }
+    .o-form input, .o-form select { background: var(--s1); }
+    .o-form .hint { margin: -4px 0 0; }
+
+    .o-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+    .o-line { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+    .o-line:last-child { padding-bottom: 0; border-bottom: 0; }
+    .o-line img { width: 150px; height: 100px; border-radius: 6px; display: block; background: var(--photo-bg); }
+    .o-line p { margin: 0 0 3px; }
+    .o-line .meta { color: var(--ink2); font-size: 13px; }
+    .o-line .ex { font-size: 14px; }
+    .o-line .ex strong { font-weight: 500; }
+    .cert { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); display: grid; gap: 10px; }
+    .cert-hd { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13px; color: var(--ink2); }
+    .cert dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0; font-size: 13px; }
+    .cert dt { color: var(--ink3); }
+    .cert dd { margin: 0; overflow-wrap: anywhere; }
+    .hash { font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+    .cert .actions { gap: 8px 14px; }
+    .cert details summary { cursor: pointer; font-size: 12.5px; color: var(--ink2); display: inline-flex; align-items: center; min-height: 24px; }
+    .cert details p { margin: 6px 0 0; font-size: 12.5px; color: var(--ink2); }
+
+    .hist { list-style: none; margin: 0; padding: 0; }
+    .hist li { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 4px 14px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+    .hist li:last-child { border-bottom: 0; }
+    .hist time { color: var(--ink3); font-size: 12.5px; white-space: nowrap; }
+    .hist .actor { font-weight: 500; }
+    .panel-foot { margin: 12px 0 0; font-size: 13px; }
+
+    .od-side address { font-style: normal; line-height: 1.55; margin: 8px 0 12px; }
+    .od-side p { margin: 0 0 8px; }
+    .od-side .mail { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+    .client-note { margin: 12px 0; padding: 10px 12px; border-radius: 10px; background: var(--s2); box-shadow: inset 3px 0 0 var(--ink3); font-size: 13.5px; }
+    .client-note p { margin: 0; }
+    .client-note .lb { display: block; font-size: 12px; color: var(--ink3); margin-bottom: 2px; }
+    .sums { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; margin: 0 0 12px; font-size: 13.5px; }
+    .sums dt { color: var(--ink2); }
+    .sums dd { margin: 0; text-align: right; white-space: nowrap; }
+    .sums .total { padding-top: 8px; border-top: 1px solid var(--line2); color: var(--ink); font-weight: 500; font-size: 15px; }
+    .dl-file { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+    .refund-zone { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line2); display: grid; gap: 6px; justify-items: start; }
+    .btn.ghost.risk { color: var(--danger); box-shadow: inset 0 0 0 1px currentColor; }
+
+    .ed { margin: 0 0 14px; }
+    .ed:last-of-type { margin-bottom: 8px; }
+    .ed h4 { font-size: 14px; margin-bottom: 2px; }
+    .ed .of { font-size: 12.5px; color: var(--ink3); margin: 0; }
+    .ed-strip { display: flex; flex-wrap: wrap; gap: 3px; margin: 8px 0 6px; }
+    .sq { width: 16px; height: 16px; border-radius: 3px; display: inline-block; box-shadow: inset 0 0 0 1.5px var(--ink3); flex: none; vertical-align: -3px; }
+    .sq.sold { background: var(--ink2); box-shadow: none; }
+    .sq.here { background: var(--accent); box-shadow: 0 0 0 2px var(--s1), 0 0 0 3.5px var(--accent-ink); }
+    .sq.void { background: linear-gradient(45deg, transparent 44%, var(--ink2) 44% 56%, transparent 56%), linear-gradient(-45deg, transparent 44%, var(--ink2) 44% 56%, transparent 56%); }
+    .ed .count { margin: 0; font-size: 13.5px; }
+    .ed .count strong { font-weight: 500; }
+    .sq-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 10px 0 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink2); }
+    .sq-legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+    /* Écran C : dialogue de remboursement */
+    .mq-c { margin-top: 46px; }
+    .mq-scrim { padding: 44px 24px; border-radius: 16px; background: color-mix(in srgb, var(--bg) 35%, #000 65%); display: grid; place-items: center; box-shadow: inset 0 0 0 1px var(--line2); }
+    .mq-scrim .dialog { position: static; margin: 0; width: min(600px, 100%); }
+    .refund .sub { margin: -4px 0 4px; color: var(--ink2); font-size: 13px; }
+    .refund h3 { margin: 4px 0 6px; font-size: 13px; font-weight: 500; color: var(--ink2); }
+    .conseq { margin: 0 0 4px; padding-left: 20px; display: grid; gap: 7px; font-size: 13.5px; }
+    .conseq li::marker { color: var(--ink3); }
+    .refund .irrev { margin: 4px 0 0; padding: 9px 12px; border-radius: 10px; background: var(--danger-soft); box-shadow: inset 3px 0 0 var(--danger); font-size: 13.5px; }
+    .refund .irrev b { color: var(--danger); font-weight: 600; }
+    .refund label .req { color: var(--ink3); }
+    /* Le texte des boutons de danger reprend --on-danger : 6,5:1 en mode sombre (3,0:1 avec le blanc d'admin.css). */
+    .btn.danger { color: var(--on-danger); }
+
+    /* Annotations */
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    @media (max-width: 1100px) {
+      .od-grid { grid-template-columns: minmax(0, 1fr); }
+      
+    }
+    @media (max-width: 720px) {
+      .mq-first { padding-right: 0; }
+      .crumbs a { display: inline-flex; align-items: center; min-height: 44px; }
+      .o-top { margin-bottom: 14px; }
+      .o-top .acts .btn { width: 100%; }
+      .o-top .acts { width: 100%; }
+      .o-filters { padding: 12px; }
+      .o-filters .line { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
+      .o-filters .line .f-lb { display: none; }
+      .chips { flex-wrap: nowrap; }
+      .o-filters form > * { flex: 1 1 100%; }
+      .o-filters select, .o-filters input[type="search"] { width: 100%; min-height: 44px; }
+      /* Une carte par commande. */
+      .orders thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+      .orders, .orders tbody { display: block; }
+      .orders caption { display: block; }
+      .orders tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "no total" "etat etat" "items items" "client client"; gap: 8px 12px; margin: 0 0 12px; padding: 12px 14px; border-radius: 14px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+      .orders tr.todo { box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 1px var(--line); }
+      .orders tr.todo th { box-shadow: none; }
+      .orders th, .orders td { display: block; padding: 0; border: 0; }
+      .orders .c-no { grid-area: no; } .orders .c-total { grid-area: total; font-weight: 500; font-size: 15px; }
+      .orders .c-etat { grid-area: etat; } .orders .c-items { grid-area: items; }
+      .orders .c-date { grid-area: client; align-self: end; color: var(--ink3); font-size: 12.5px; }
+      .orders .c-client { grid-area: client; }
+      .orders tr { grid-template-areas: "no total" "etat etat" "items items" "client client" "date date"; }
+      .orders .c-date { grid-area: date; }
+      .orders .c-client .mono { display: inline; margin: 0 0 0 4px; }
+      .orders .c-client .mono::before { content: "· "; }
+      .orders tbody th a { min-height: 44px; font-size: 15px; }
+      .orders .c-etat .mono { display: inline; margin-left: 6px; }
+      .legend { font-size: 12px; }
+      .mq-b { margin-top: 44px; }
+      .main .od-head h2 { font-size: 26px; }
+      .back { min-height: 44px; }
+      .o-steps { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      .o-steps li { grid-template-columns: 28px minmax(0, 1fr); column-gap: 12px; padding: 0 0 14px; }
+      .o-steps li > .dot { grid-row: span 2; margin: 0; }
+      .o-steps li::before { top: 32px; bottom: 2px; left: 13px; right: auto; width: 2px; height: auto; }
+      .o-forms { grid-template-columns: minmax(0, 1fr); }
+      .o-line { grid-template-columns: 96px minmax(0, 1fr); gap: 12px; }
+      .o-line img { width: 96px; height: 64px; }
+      .o-line .cert { grid-column: 1 / -1; }
+      .cert dl { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      .cert dd { margin-bottom: 6px; }
+      .hist li { grid-template-columns: minmax(0, 1fr); }
+      .dl-file { min-height: 44px; }
+      .mq-c { margin-top: 36px; }
+      .mq-scrim { padding: 20px 8px; }
+      .mq-scrim .dialog { padding: 20px 16px; }
+      
+      .cert details summary { min-height: 44px; }
+    }
+    /* Demi-disque dessiné en CSS : le glyphe ◐ manque à Jost et retombe sur une police de secours. */
+    .half { display: inline-block; width: .78em; height: .78em; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); vertical-align: -0.08em; }
+    .o-steps .dot .half { width: 12px; height: 12px; }
+    .hist .more { display: inline; min-height: 0; }
+    @media (max-width: 720px) {
+      .help-link a { border-bottom: 0; text-decoration: underline; text-underline-offset: 4px; }
+      .crumbs ol { align-items: center; }
+      .chips { flex-wrap: wrap; }
+      .o-filters .line { flex-wrap: wrap; overflow: visible; }
+      .o-filters form { display: grid; grid-template-columns: minmax(0, 1fr); }
+      .o-filters form .btn { min-height: 44px; }
+      .o-filters input[type="search"] { width: 100%; }
+      .o-items li { flex-wrap: wrap; }
+      .tabbar { position: relative; }
+      .orders .c-total { align-self: center; }
+      .o-filters .line .f-lb { display: inline; flex: 1 1 auto; }
+      .o-filters .line .chips { flex: 1 1 100%; }
+      
+    }
+    .nw { white-space: nowrap; }
+</style>
+<link rel="stylesheet" href="_commun/annotations.css">
+</head>
+<body class="admin">
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="shell">
+
+<aside class="side" id="admin-nav" aria-label="Menu de l’administration">
+  <a class="word" href="#">Nicephos</a>
+  <button class="cmdk" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
+  <nav class="nav" aria-label="Accueil de l’administration">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
+  </nav>
+  <p class="grp" id="nav-photos">Photos</p>
+  <nav class="nav" aria-labelledby="nav-photos">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Sorties</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg>Voyages</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a>
+  </nav>
+  <p class="grp" id="nav-people">Personnes</p>
+  <nav class="nav" aria-labelledby="nav-people">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/></svg>Personnes</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>App de terrain</a>
+  </nav>
+  <p class="grp" id="nav-publish">Publier</p>
+  <nav class="nav" aria-labelledby="nav-publish">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>À valider<span class="nav-badge">5<span class="sr-only"> photos</span></span></a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>Site public</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>Instagram</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>Galeries privées</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>Boutique <span class="pin" aria-hidden="true">1</span></a>
+    <ul class="nav-sub">
+      <li><a href="#" aria-current="page">Commandes<span class="nav-badge">2<span class="sr-only"> à préparer</span></span></a></li>
+      <li><a href="#">Éditions et tirages</a></li>
+    </ul>
+  </nav>
+  <p class="grp" id="nav-team">Équipe</p>
+  <nav class="nav" aria-labelledby="nav-team">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg>Comptes et rôles</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.5"/></svg>Circuit de publication</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Journal</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
+  </nav>
+  <nav class="nav" aria-label="Réglages">
+    <a href="#" style="margin-top:10px"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Réglages</a>
+  </nav>
+  <div class="foot">
+    <a class="me-link" href="#"><span class="av" aria-hidden="true">J</span><span class="who">Julien<small>Administrateur · Mon compte</small></span></a>
+    <nav class="nav" aria-label="Aide et nouveautés">
+      <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg>Aide</a>
+      <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>Nouveautés</a>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" id="contenu" tabindex="-1">
+  <p class="help-link"><a href="#">Aide sur cette page</a></p>
+  <p class="mq-screen mq-first"><b>Écran A</b> Liste des commandes <code>/admin/boutique/commandes</code></p>
+
+  <nav class="crumbs" aria-label="Fil d’Ariane">
+    <ol><li><a href="#">Boutique</a></li><li><span aria-current="page">Commandes</span></li></ol>
+  </nav>
+  <div class="o-top">
+    <div>
+      <h1>Commandes</h1>
+      <p class="sub"><strong>2 commandes à préparer</strong>, la plus ancienne attend depuis 2 jours · délai annoncé aux clients : 10 à 15 jours ouvrés</p>
+    </div>
+    <div class="acts"><a class="btn ghost" href="#">Exporter pour la comptabilité (CSV, 3 ko)</a></div>
+  </div>
+
+  <div class="o-filters">
+    <div class="line">
+      <span class="pin" aria-hidden="true">2</span>
+      <p class="f-lb" id="f-etat">État</p>
+      <ul class="chips" aria-labelledby="f-etat">
+        <li><a class="chip" href="#">À préparer <span class="n">(2)</span></a></li>
+        <li><a class="chip" href="#">Expédiées <span class="n">(3)</span></a></li>
+        <li><a class="chip" href="#">Remboursées <span class="n">(1)</span></a></li>
+        <li><a class="chip" href="#" aria-current="true">Toutes <span class="n">(6)</span></a></li>
+      </ul>
+    </div>
+    <form class="line" action="#" method="get" role="search" aria-label="Période et recherche">
+      <label for="periode">Période
+        <select id="periode" name="periode">
+          <option selected>30 derniers jours</option>
+          <option>Octobre 2026</option>
+          <option>Septembre 2026</option>
+          <option>Depuis l’ouverture</option>
+        </select>
+      </label>
+      <label for="q">Rechercher
+        <input type="search" id="q" name="q" placeholder="N°, client ou titre de photo">
+      </label>
+      <button class="btn sec" type="submit">Appliquer</button>
+    </form>
+  </div>
+
+  <table class="orders">
+    <caption><span class="pin" aria-hidden="true">3</span> Toutes les commandes des 30 derniers jours <span class="mono">6 commandes, les plus récentes d’abord · heure de Paris</span></caption>
+    <thead>
+      <tr><th scope="col">N°</th><th scope="col">Date</th><th scope="col">Client</th><th scope="col">Tirages</th><th scope="col" class="num">Total TTC</th><th scope="col">État</th></tr>
+    </thead>
+    <tbody>
+      <tr class="todo">
+        <th scope="row" class="c-no"><a href="#commande"><span class="nw">N-2026-0007</span></a></th>
+        <td class="c-date"><time datetime="2026-10-16T10:12+02:00">16 oct. 2026, 10 h 12</time></td>
+        <td class="c-client">Claire Vasseur<span class="mono">Nantes, France</span></td>
+        <td class="c-items"><ul class="o-items">
+          <li><img src="_commun/photos/ciel.webp" width="48" height="32" alt="">Miradouro 40 × 60 <span class="ref">· ex. 7/15</span></li>
+          <li><img src="_commun/photos/brume.webp" width="48" height="32" alt="">Ribeira 40 × 60 <span class="ref">· ex. 4/15</span></li>
+        </ul></td>
+        <td class="c-total num">595,00 €</td>
+        <td class="c-etat"><span class="etat todo"><span class="sym" aria-hidden="true"><i class="half" aria-hidden="true"></i></span>Payée — à préparer</span><span class="mono">depuis 30 min</span></td>
+      </tr>
+      <tr class="todo">
+        <th scope="row" class="c-no"><a href="#">N-2026-0006</a></th>
+        <td class="c-date"><time datetime="2026-10-14T21:47+02:00">14 oct. 2026, 21 h 47</time></td>
+        <td class="c-client">Thomas Keller<span class="mono">Fribourg-en-Brisgau, Allemagne</span></td>
+        <td class="c-items"><ul class="o-items">
+          <li><img src="_commun/photos/quai.webp" width="48" height="32" alt="" loading="lazy">Quai Ligny 30 × 45 <span class="ref">· ex. 2/15</span></li>
+        </ul></td>
+        <td class="c-total num">205,00 €</td>
+        <td class="c-etat"><span class="etat todo"><span class="sym" aria-hidden="true"><i class="half" aria-hidden="true"></i></span>Tirage lancé — à expédier</span><span class="mono">depuis 2 jours</span></td>
+      </tr>
+      <tr>
+        <th scope="row" class="c-no"><a href="#">N-2026-0005</a></th>
+        <td class="c-date"><time datetime="2026-10-09T18:05+02:00">9 oct. 2026, 18 h 05</time></td>
+        <td class="c-client">Léa Moreau<span class="mono">Lyon, France</span></td>
+        <td class="c-items"><ul class="o-items">
+          <li><img src="_commun/photos/lac.webp" width="48" height="32" alt="" loading="lazy">Le lac ne dit rien 60 × 90, chêne <span class="ref">· ex. 1/15</span></li>
+        </ul></td>
+        <td class="c-total num">655,00 €</td>
+        <td class="c-etat"><span class="etat done"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Expédiée</span><span class="mono">Colissimo, 13 oct.</span></td>
+      </tr>
+      <tr>
+        <th scope="row" class="c-no"><a href="#">N-2026-0004</a></th>
+        <td class="c-date"><time datetime="2026-10-03T09:31+02:00">3 oct. 2026, 9 h 31</time></td>
+        <td class="c-client">Hugo Lambert<span class="mono">Saint-Malo, France</span></td>
+        <td class="c-items"><ul class="o-items">
+          <li><img src="_commun/photos/brume.webp" width="48" height="32" alt="" loading="lazy">Ribeira 30 × 45 <span class="ref">· ex. 3/15</span></li>
+        </ul></td>
+        <td class="c-total num">195,00 €</td>
+        <td class="c-etat"><span class="etat done"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Expédiée</span><span class="mono">Colissimo, 7 oct.</span></td>
+      </tr>
+      <tr>
+        <th scope="row" class="c-no"><a href="#">N-2026-0003</a></th>
+        <td class="c-date"><time datetime="2026-09-27T16:20+02:00">27 sept. 2026, 16 h 20</time></td>
+        <td class="c-client">Sarah Benali<span class="mono">Bruxelles, Belgique</span></td>
+        <td class="c-items"><ul class="o-items">
+          <li><img src="_commun/photos/brume.webp" width="48" height="32" alt="" loading="lazy">Ribeira 30 × 45 <span class="ref">· ex. 2/15, annulé</span></li>
+        </ul></td>
+        <td class="c-total num">205,00 €</td>
+        <td class="c-etat"><span class="etat stop"><span class="sym" aria-hidden="true">✕</span>Remboursée</span><span class="mono">rétractation, 2 oct.</span></td>
+      </tr>
+      <tr>
+        <th scope="row" class="c-no"><a href="#">N-2026-0002</a></th>
+        <td class="c-date"><time datetime="2026-09-21T11:02+02:00">21 sept. 2026, 11 h 02</time></td>
+        <td class="c-client">Marc Olivier<span class="mono">Rennes, France</span></td>
+        <td class="c-items"><ul class="o-items">
+          <li><img src="_commun/photos/neige.webp" width="48" height="32" alt="" loading="lazy">Silence blanc 30 × 45 <span class="ref">· ex. 3/15</span></li>
+        </ul></td>
+        <td class="c-total num">195,00 €</td>
+        <td class="c-etat"><span class="etat done"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Expédiée</span><span class="mono">Colissimo, 24 sept.</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="legend"><span class="pin" aria-hidden="true">4</span><span class="f-lb">États</span>
+    <span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>En attente de paiement</span>
+    <span class="etat todo"><span class="sym" aria-hidden="true"><i class="half" aria-hidden="true"></i></span>Payée — à préparer</span>
+    <span class="etat todo"><span class="sym" aria-hidden="true"><i class="half" aria-hidden="true"></i></span>Tirage lancé</span>
+    <span class="etat done"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Expédiée</span>
+    <span class="etat warn"><span class="sym" aria-hidden="true">▲</span>À vérifier (colis revenu, paiement contesté)</span>
+    <span class="etat stop"><span class="sym" aria-hidden="true">✕</span>Remboursée</span>
+    <span>— les mêmes formes que pour les photos : ○ brouillon, <i class="half" aria-hidden="true"></i> proposée, ● publiée.</span>
+  </p>
+
+  <!-- ================= Écran B ================= -->
+  <section class="mq-b" id="commande" aria-labelledby="commande-t">
+    <p class="mq-screen"><b>Écran B</b> Détail de la commande, ouvert depuis la liste <code>/admin/boutique/commandes/<span class="nw">N-2026-0007</span></code></p>
+    <a class="back more" href="#contenu">← Commandes</a>
+    <div class="od-head">
+      <h2 id="commande-t">Commande <span class="nw">N-2026-0007</span></h2>
+      <span class="etat todo"><span class="sym" aria-hidden="true"><i class="half" aria-hidden="true"></i></span>Payée — à préparer</span>
+    </div>
+    <p class="od-sub">Passée le vendredi <time datetime="2026-10-16T10:12+02:00">16 octobre 2026 à 10 h 12</time> par Claire Vasseur · 2 tirages · 595,00 € TTC · livraison annoncée entre le 30 octobre et le 6 novembre.</p>
+
+    <div class="od-grid">
+      <div class="od-main">
+        <section class="panel" aria-labelledby="etapes-t">
+          <h3 id="etapes-t"><span class="pin" aria-hidden="true">5</span> Où en est la commande</h3>
+          <ol class="o-steps">
+            <li class="done"><span class="dot" aria-hidden="true">✓</span><strong>Payée</strong><span class="mono">fait · 16 oct., 10 h 12</span></li>
+            <li aria-current="step"><span class="dot" aria-hidden="true"><i class="half" aria-hidden="true"></i></span><strong>Tirage lancé</strong><span class="mono">à faire maintenant</span></li>
+            <li><span class="dot" aria-hidden="true">○</span><strong>Expédiée</strong><span class="mono">à venir · le numéro de suivi part à la cliente</span></li>
+            <li><span class="dot" aria-hidden="true">○</span><strong>Livrée</strong><span class="mono">à venir · entre le 30 oct. et le 6 nov.</span></li>
+          </ol>
+          <div class="o-forms">
+            <form class="o-form now" action="#" method="post" aria-labelledby="f-tirage-t">
+              <p class="kicker">Maintenant</p>
+              <h4 id="f-tirage-t">Lancer le tirage</h4>
+              <label for="labo">Laboratoire
+                <select id="labo" name="labo">
+                  <option selected>Atelier Granit, Saint-Malo</option>
+                  <option>Tirage à l’atelier</option>
+                </select>
+              </label>
+              <label for="bon">N° de bon du laboratoire (facultatif)
+                <input type="text" id="bon" name="bon" inputmode="numeric" autocomplete="off">
+              </label>
+              <p><button class="btn" type="submit">Marquer le tirage comme lancé</button></p>
+              <p class="hint">Les deux tirages partent ensemble. La cliente n’est pas prévenue à cette étape.</p>
+            </form>
+            <form class="o-form" action="#" method="post" aria-labelledby="f-exp-t">
+              <p class="kicker">Ensuite</p>
+              <h4 id="f-exp-t">Expédier</h4>
+              <label for="transp">Transporteur
+                <select id="transp" name="transporteur">
+                  <option selected>Colissimo, suivi avec signature</option>
+                  <option>Remise en main propre</option>
+                </select>
+              </label>
+              <label for="suivi">Numéro de suivi
+                <input type="text" id="suivi" name="suivi" autocomplete="off" spellcheck="false" aria-describedby="suivi-aide">
+              </label>
+              <p class="hint" id="suivi-aide">13 caractères, par exemple 6A12345678901. Il part à Claire Vasseur avec le lien de suivi.</p>
+              <p><button class="btn sec" type="submit">Marquer comme expédiée</button></p>
+              <p class="hint">Réversible : « Annuler » reste affiché 10 s, l’e-mail part ensuite.</p>
+            </form>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="tirages-t">
+          <h3 id="tirages-t"><span class="pin" aria-hidden="true">6</span> Tirages et certificats <span class="mono">2 tirages</span></h3>
+          <ul class="o-lines">
+            <li class="o-line">
+              <img src="_commun/photos/ciel.webp" width="150" height="100" alt="" loading="lazy">
+              <div>
+                <h4>Miradouro, l’heure dorée</h4>
+                <p class="meta">Julien · inventaire J-2026-019</p>
+                <p class="meta">40 × 60 cm · Hahnemühle Photo Rag 308 g · tirage pigmentaire · marge blanche de 3 cm · sans cadre</p>
+                <p class="ex"><strong>Exemplaire 7/15</strong> · 290,00 € TTC</p>
+                <div class="cert">
+                  <p class="cert-hd"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Certificat à générer</span> une fois le tirage signé</p>
+                  <dl>
+                    <dt>Exemplaire</dt><dd>7 sur 15, tous formats confondus</dd>
+                    <dt>Inventaire</dt><dd>J-2026-019</dd>
+                    <dt>Empreinte de l’original</dt><dd><span class="hash">3f9a 1c07 5be2 d4e8 … 0a6f 8e21 c4d0</span> (SHA-256)</dd>
+                    <dt>Preuve datée</dt><dd>ajoutée à la génération par un service d’horodatage indépendant : la date ne pourra plus être changée</dd>
+                  </dl>
+                  <p class="actions"><button class="btn sec" type="button">Générer le certificat (PDF)</button></p>
+                  <details>
+                    <summary>Pour l’administrateur du serveur</summary>
+                    <p>Jeton d’horodatage RFC 3161 demandé au service réglé dans la configuration ; sans ce service, le certificat porte l’empreinte seule et le dit.</p>
+                  </details>
+                </div>
+              </div>
+            </li>
+            <li class="o-line">
+              <img src="_commun/photos/brume.webp" width="150" height="100" alt="" loading="lazy">
+              <div>
+                <h4>Ribeira, brume du fleuve</h4>
+                <p class="meta">Julien · inventaire J-2026-024</p>
+                <p class="meta">40 × 60 cm · Hahnemühle Photo Rag 308 g · tirage pigmentaire · marge blanche de 3 cm · sans cadre</p>
+                <p class="ex"><strong>Exemplaire 4/15</strong> · 290,00 € TTC</p>
+                <div class="cert">
+                  <p class="cert-hd"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Certificat à générer</span> une fois le tirage signé</p>
+                  <p class="actions"><button class="btn sec" type="button">Générer le certificat (PDF)</button></p>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <section class="panel" aria-labelledby="hist-t">
+          <h3 id="hist-t"><span class="pin" aria-hidden="true">9</span> Historique <span class="mono">dans l’ordre, heure de Paris</span></h3>
+          <ol class="hist">
+            <li><time datetime="2026-10-16T10:12+02:00">16 oct. 2026, 10 h 12</time><span>Paiement accepté par le prestataire : 595,00 € par carte (référence 7Q2K-91XD).</span></li>
+            <li><time datetime="2026-10-16T10:12+02:00">16 oct. 2026, 10 h 12</time><span>Exemplaires attribués : <a class="more" href="#">Miradouro, l’heure dorée</a> 7/15 et <a class="more" href="#">Ribeira, brume du fleuve</a> 4/15.</span></li>
+            <li><time datetime="2026-10-16T10:13+02:00">16 oct. 2026, 10 h 13</time><span>Confirmation et facture <span class="nw">JUL-2026-0004</span> envoyées à Claire Vasseur.</span></li>
+            <li><time datetime="2026-10-16T10:41+02:00">16 oct. 2026, 10 h 41</time><span><span class="actor">Julien</span> a ajouté une note interne : « Cadeau : facture à part, pas dans le tube. »</span></li>
+          </ol>
+          <p class="panel-foot"><a class="more" href="#">Voir la boutique dans le Journal</a></p>
+        </section>
+      </div>
+
+      <div class="od-side">
+        <section class="panel" aria-labelledby="client-t">
+          <h3 id="client-t">Client et livraison</h3>
+          <p><strong>Claire Vasseur</strong><br><a class="mail" href="mailto:claire.vasseur@example.org">claire.vasseur@example.org</a></p>
+          <address>12 rue des Olivettes<br>44000 Nantes<br>France</address>
+          <p>Colissimo suivi, roulé en tube · 15,00 €</p>
+          <div class="client-note"><p><span class="lb">Note de la cliente</span>« C’est un cadeau : pouvez-vous ne pas glisser la facture dans le tube ? »</p></div>
+          <p class="hint">Coordonnées visibles des seuls administrateurs.</p>
+        </section>
+
+        <section class="panel" aria-labelledby="paie-t">
+          <h3 id="paie-t"><span class="pin" aria-hidden="true">7</span> Paiement et facture</h3>
+          <dl class="sums">
+            <dt>Miradouro, 40 × 60, ex. 7/15</dt><dd>290,00 €</dd>
+            <dt>Ribeira, 40 × 60, ex. 4/15</dt><dd>290,00 €</dd>
+            <dt>Livraison France</dt><dd>15,00 €</dd>
+            <dt class="total">Total TTC</dt><dd class="total">595,00 €</dd>
+          </dl>
+          <p class="hint">Payé par carte le 16 oct. 2026 à 10 h 12, reçu par le prestataire de paiement.</p>
+          <p><a class="dl-file" href="#">Facture <span class="nw">JUL-2026-0004</span> (PDF, 48 ko)</a></p>
+          <p><a class="more" href="#">Renvoyer la facture à la cliente</a></p>
+          <p class="hint">Conservée 10 ans (obligation comptable).</p>
+          <div class="refund-zone">
+            <button class="btn ghost risk" type="button" aria-haspopup="dialog">Rembourser…</button>
+            <p class="hint">Montant, conséquences et motif sont demandés avant toute opération.</p>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="ed-t">
+          <h3 id="ed-t"><span class="pin" aria-hidden="true">8</span> Éditions concernées</h3>
+          <div class="ed">
+            <h4>Miradouro, l’heure dorée</h4>
+            <p class="of">édition de 15, tous formats confondus</p>
+            <div class="ed-strip" aria-hidden="true"><i class="sq sold"></i><i class="sq sold"></i><i class="sq sold"></i><i class="sq sold"></i><i class="sq sold"></i><i class="sq sold"></i><i class="sq here"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i></div>
+            <p class="count"><strong>7 vendus</strong>, dont le 7/15 de cette commande · <strong>8 disponibles</strong></p>
+          </div>
+          <div class="ed">
+            <h4>Ribeira, brume du fleuve</h4>
+            <p class="of">édition de 15, tous formats confondus</p>
+            <div class="ed-strip" aria-hidden="true"><i class="sq sold"></i><i class="sq void"></i><i class="sq sold"></i><i class="sq here"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i></div>
+            <p class="count"><strong>3 vendus</strong>, dont le 4/15 de cette commande · 1 annulé (2/15) · <strong>11 disponibles</strong></p>
+          </div>
+          <p class="sq-legend" aria-hidden="true"><span><i class="sq sold"></i>vendu</span><span><i class="sq here"></i>cette commande</span><span><i class="sq void"></i>annulé</span><span><i class="sq"></i>disponible</span></p>
+          <p class="panel-foot"><a class="more" href="#">Registre complet des éditions</a></p>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Écran C ================= -->
+  <section class="mq-c" aria-labelledby="ecran-c">
+    <p class="mq-screen" id="ecran-c"><b>Écran C</b> Après « Rembourser… » : le dialogue s’ouvre, le focus est posé sur « Annuler »</p>
+    <div class="mq-scrim">
+      <dialog open class="dialog refund" aria-labelledby="rb-t" aria-describedby="rb-d">
+        <form method="dialog">
+          <h2 id="rb-t"><span class="pin" aria-hidden="true">10</span> Rembourser 595,00 € à Claire Vasseur ?</h2>
+          <p class="sub" id="rb-d">Commande <span class="nw">N-2026-0007</span> · 2 tirages · payée le 16 oct. 2026 par carte</p>
+          <h3>Ce qui va se passer</h3>
+          <ul class="conseq">
+            <li>Le prestataire de paiement recrédite 595,00 € sur la carte de Claire Vasseur ; l’argent arrive sous 5 à 10 jours.</li>
+            <li>Un avoir <span class="nw">AV-JUL-2026-0002</span> annule la facture <span class="nw">JUL-2026-0004</span> ; il lui est envoyé par e-mail avec le motif.</li>
+            <li>L’exemplaire 7/15 de « Miradouro, l’heure dorée » et le 4/15 de « Ribeira, brume du fleuve » ne seront pas réattribués : ils sont notés « annulés » au registre, et un numéro ne désignera jamais deux tirages. Il restera 8 et 11 exemplaires disponibles.</li>
+            <li>Le laboratoire n’a rien à annuler : le tirage n’est pas encore lancé.</li>
+          </ul>
+          <label for="motif">Motif <span class="req">(obligatoire ; il figure sur l’avoir)</span>
+            <select id="motif" name="motif" required>
+              <option value="" selected>Choisir un motif</option>
+              <option>Rétractation dans les 14 jours</option>
+              <option>Tirage abîmé à la livraison</option>
+              <option>Erreur de notre part</option>
+              <option>Autre (préciser à la cliente)</option>
+            </select>
+          </label>
+          <p><a class="more" href="#">Rembourser une partie seulement (un tirage ou la livraison)…</a></p>
+          <p class="irrev"><b><span aria-hidden="true">▲</span> Irréversible :</b> un remboursement envoyé au prestataire ne peut plus être annulé.</p>
+          <p class="actions"><button class="btn ghost mq-focus" type="submit" value="annuler">Annuler</button> <button class="btn danger" type="submit" value="rembourser">Rembourser 595,00 €</button></p>
+        </form>
+      </dialog>
+    </div>
+  </section>
+</main>
+</div>
+
+
+
+<nav class="tabbar" aria-label="Navigation rapide">
+  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
+  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photos</a>
+  <a class="imp" href="#" aria-label="Importer des photos"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></a>
+  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
+  <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
+</nav>
+<aside class="mq-notes" aria-labelledby="mq-notes-t">
+  <p class="mq-id">Maquette MQ-19 · administration · boutique, commandes · « Chambre noire » au bureau, mode clair sur téléphone · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
+  <h2 id="mq-notes-t">Ce qui change</h2>
+  <p class="mq-lead">Maquette MQ-19 · Administration › Boutique › Commandes. Le mode suit le système : « Chambre noire » sur la capture de bureau, clair sur celle du téléphone. Données fictives, photos de démonstration, aucun script : les états sont figés pour la démonstration. Les repères renvoient aux numéros ci-dessous.</p>
+  <ol class="mq-list">
+    <li><span class="pin">1</span><span><strong>La boutique entre dans le menu cible sans le rallonger.</strong> Elle se range dans « Publier » (MQ-07) ; « Commandes » porte un compteur lu en entier (« 2 à préparer ») ; « Éditions et tirages » à côté.</span><span class="ref">UX-A-32, UX-A-11 · loi de Hick · B&amp;S 1.2.1 · RGAA 12.2</span></li>
+    <li><span class="pin">2</span><span><strong>Des filtres qui montrent leur état.</strong> La pastille active est pleine, cochée et porte aria-current ; chacune dit son nombre. La période et la recherche ne s’appliquent qu’au bouton « Appliquer », jamais à la flèche.</span><span class="ref">UX-A-16, UX-A-10 · RGAA 3.1 · WCAG 1.4.1 et 3.2.2 · Opquast 181</span></li>
+    <li><span class="pin">3</span><span><strong>Un vrai tableau de données.</strong> Légende qui dit le filtre, le tri et le fuseau ; N° en en-tête de ligne et lien vers la commande ; dates en clair (« 16 oct. 2026, 10 h 12 », balise time) ; montants TTC alignés à droite. Sur téléphone, une carte par commande et des cibles de 44 px.</span><span class="ref">UX-A-19 · RGAA 5.4, 5.6 et 5.7 · Opquast 4, 231 et 243 · WCAG 2.5.8</span></li>
+    <li><span class="pin">4</span><span><strong>Une seule pastille d’état, forme et mot.</strong> ○ <i class="half" aria-hidden="true"></i> ● ▲ ✕ ont le même sens que pour les photos (MQ-09) ; la légende est sous le tableau ; « Payée — à préparer » remplace un « prête » à trois sens.</span><span class="ref">UX-A-16, UX-T-17 · B&amp;S 6 et 7 · RGAA 3.1 · WCAG 1.4.1</span></li>
+    <li><span class="pin">5</span><span><strong>La chronologie dit où l’on en est, et le geste suivant est à côté.</strong> Liste ordonnée avec aria-current="step", « fait / à faire / à venir » écrits en toutes lettres. Expédier demande le numéro de suivi, dont le format est annoncé avant la saisie et relié au champ. C’est réversible : pas de confirmation, mais « Annuler » pendant 10 s, avant l’e-mail à la cliente.</span><span class="ref">UX-A-07, UX-A-08 · B&amp;S 1.1 et 1.3 · ISO 9241-110 contrôlabilité · RGAA 11.10 · WCAG 3.3.2</span></li>
+    <li><span class="pin">6</span><span><strong>Le certificat se génère depuis la commande.</strong> Exemplaire 7/15, numéro d’inventaire stable J-2026-019, empreinte SHA-256 de l’original, preuve datée par un service indépendant : dit en mots ; le détail technique est replié sous « Pour l’administrateur du serveur ».</span><span class="ref">UX-T-17, UX-T-05, UX-A-18 · Nielsen 2</span></li>
+    <li><span class="pin">7</span><span><strong>Paiement et facture lisibles, remboursement à l’écart.</strong> Détail TTC, facture PDF de 48 ko (sous le budget de 100 ko), poids et format annoncés ; « Rembourser… » est seul, au bas du bloc, loin des gestes courants, et annonce qu’il demandera une confirmation.</span><span class="ref">UX-T-17, UX-T-12 · Opquast 147 et 148 · B&amp;S 1.2.1</span></li>
+    <li><span class="pin">8</span><span><strong>Le registre de l’édition, en texte d’abord.</strong> « 7 vendus · 8 disponibles » est écrit ; les cases ne font qu’illustrer (masquées aux lecteurs d’écran) ; un numéro annulé n’est jamais réattribué. Avant cette commande, la page du tirage (MQ-13) affichait « 9 disponibles ».</span><span class="ref">UX-T-17 · WCAG 1.4.1 · B&amp;S 1.4</span></li>
+    <li><span class="pin">9</span><span><strong>Un historique qui se lit comme un récit.</strong> Une phrase par événement, la personne nommée, l’heure de Paris, les titres en liens ; ni adresse technique, ni connexion, ni identifiant brut.</span><span class="ref">UX-A-19, UX-A-18 · B&amp;S 1.4, 2.2 et 7 · ISO 9241-110 autodescriptivité</span></li>
+    <li><span class="pin">10</span><span><strong>Rembourser : le seul geste irréversible demande une confirmation qui nomme tout.</strong> Le titre dit qui et combien ; la liste dit les conséquences (carte recréditée, avoir, exemplaires 7/15 et 4/15 non réattribués) ; un motif est demandé ; « Annuler » vient en premier et reçoit le focus ; le bouton répète le montant. Le texte des boutons de danger passe en sombre en mode sombre (3,0:1 → 6,5:1).</span><span class="ref">UX-A-07, UX-A-32, UX-T-17 · WCAG 3.3.4 · RGAA 11.12 et 3.2 · B&amp;S 3.1 et 5.1 · ISO 9241-110 robustesse face aux erreurs · Nielsen 5</span></li>
+  </ol>
+  <p class="mq-lead mq-socle">À trancher avec votre comptable avant de coder : le régime de TVA (œuvre d’art à 5,5 % ou franchise), qui change le libellé de la facture ; et le délai au-delà duquel une commande « à préparer » devient « ▲ À vérifier » sur Aujourd’hui (je propose 5 jours ouvrés, soit la moitié du délai annoncé).</p>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette, hors encart et pastilles) — <b>bureau 1440 × 900, « Chambre noire »</b> : H1 à 93 px ; contraste le plus faible du texte 4,8:1 (texte indicatif de la recherche), tout le reste au-dessus ; fond de la barre latérale sur toute la hauteur ; 9 vignettes dont 7 en chargement différé. <b>Pixel 7 (412 × 839, densité 2), mode clair</b> : contraste le plus faible 4,7:1 (#9a5b0c sur #f1eee8) ; une carte par commande, cibles de 30 px au moins ; aucun défilement horizontal. Seul texte sous 12 px : « Ctrl K » (10,5 px, UX-A-30). Axe-core (WCAG 2.2 A et AA) : 0 violation sur les deux rendus.</p>
+</aside>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="fr" class="theme-nicephos mode-nuit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Tirage, licence : nous écrire — Miradouro, l’heure dorée · Nicephos</title>
+<meta name="description" content="Maquette MQ-06 (audit du 16 octobre 2026) : demande de tirage ou de licence préremplie depuis une photo, confirmation et page Contact.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="_commun/site.css">
+<link rel="stylesheet" href="_commun/site-entete.css">
+<style>
+/* ===== Thème « Nicephos » (repris de public/themes/nicephos.css) + corrections proposées ===== */
+.theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
+  --display-style: normal; --dark: #050505; --dark-ink: #f0efeb; --dark-mute: #b4b2ac; --dark-rule: rgba(240,239,235,.28); }
+.mode-nuit { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
+  --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
+.mode-jour, .mode-auto { color-scheme: light; --paper: #fbfbf9; --ink: #111111; --mute: #5e5d59; --prose: #3a3936; --rule: #dddcd7;
+  --frame: #efeeea; --safelight: #7d6532; --on-accent: #fbfbf9; --field: #5e5d59; --error: #a8412b; --ok: #2f6b3a; }
+@media (prefers-color-scheme: dark) {
+  .mode-auto { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
+    --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
+}
+/* Thème Atelier (valeurs par défaut de site.css) : seules les couleurs d'erreur et de champ sont ajoutées. */
+.mode-atelier { --field: #6b665d; --error: #9e3a22; --ok: #2f6b3a; --on-accent: #f6f4ef; }
+
+/* Corrections typographiques (UX-F-29) et de comportement (UX-F-34) appliquées à toutes les maquettes */
+body { font-weight: 400; position: relative; }
+.theme-nicephos body { font-weight: 400; }
+.mono { font-size: 13px; }
+.eyebrow { font-size: 12px; }
+img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; -webkit-user-drag: auto; }
+:focus-visible, .is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.u, .prose a, .txt a { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.u:hover, .prose a:hover, .txt a:hover { text-decoration-thickness: 2px; }
+.arrow { display: inline-block; }
+.wrap { padding-inline: max(var(--gut), env(safe-area-inset-left)) max(var(--gut), env(safe-area-inset-right)); }
+
+/* Lien d’évitement, en-tête et pied de page : voir _commun/site-entete.css */
+
+/* Annotations : voir _commun/annotations.css (gabarit commun) */
+.site-tools li, .site-nav li { display: flex; align-items: center; }
+@media (min-width: 761px) { .menu-btn + .pin { display: none; } }
+
+/* ===== Composants communs des maquettes correctives du site public (MQ-02 à MQ-06, MQ-15) ===== */
+html { background: var(--paper); }
+body { background: var(--paper); color: var(--ink); }
+.mode-nuit, .mode-jour, .mode-atelier { --err: var(--error); }
+/* Fil d'Ariane en mono, au-dessus du H1 (UX-F-06, Opquast 156) */
+.ariane ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; margin: 0; padding: 8px 0 0; list-style: none; font: 400 13px/1.4 var(--mono); color: var(--mute); }
+.ariane li + li::before { content: '›' / ''; margin-right: 10px; }
+.ariane a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
+.ariane [aria-current] { color: var(--mute); }
+/* Boutons : un seul bouton plein par écran (B&S 1.2.2) */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 26px; border: 1px solid var(--ink);
+  background: var(--ink); color: var(--paper); font: 500 15px/1.2 var(--sans); letter-spacing: .03em; cursor: pointer; text-align: center; }
+.btn-2 { background: transparent; color: var(--ink); font-weight: 400; border-color: var(--field); }
+.btn-s { min-height: 44px; padding: 0 16px; font-size: 14px; }
+/* Champs : filet en --field (5,2:1 en Atelier, 7,4:1 en nuit), 2 px au focus et en erreur (UX-F-04) */
+.f-champ { display: grid; gap: 6px; align-content: start; }
+.f-champ > label, .f-l { font: 500 15px/1.4 var(--sans); color: var(--ink); }
+.f-q { font-weight: 400; color: var(--mute); }
+.f-aide { margin: 0; font-size: 14px; line-height: 1.5; color: var(--mute); }
+.f-input { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--field); border-radius: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.4 var(--sans); }
+textarea.f-input { min-height: 120px; resize: vertical; }
+.f-input:focus, .f-input.is-focus { outline: 2px solid var(--ink); outline-offset: 2px; }
+.f-input[aria-invalid="true"] { border: 2px solid var(--err); }
+.f-err { display: flex; gap: 8px; margin: 0; color: var(--err); font: 500 14.5px/1.45 var(--sans); }
+.f-err::before { content: '⚠' / ''; }
+fieldset.f-grp { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 10px; }
+fieldset.f-grp > legend { padding: 0; margin-bottom: 8px; font: 500 15px/1.4 var(--sans); color: var(--ink); }
+.f-opt { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 10px 0; color: var(--ink); font-size: 15.5px; line-height: 1.4; cursor: pointer; }
+.f-opt input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--ink); }
+.f-opt input:focus-visible, .f-opt input.is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.f-opt small { display: block; color: var(--mute); font-size: 14px; }
+.f-resume { margin: 0 0 28px; padding: 18px 20px; border: 2px solid var(--err); background: var(--paper); }
+.f-resume:focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.f-resume h2 { margin: 0 0 8px; font: 500 18px/1.3 var(--sans); color: var(--ink); }
+.f-resume ul { margin: 0; padding-left: 20px; }
+.f-resume a { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* Cartel : titre, auteur, lieu, date ; mono pour les références */
+.cartel-t { margin: 0; font: 400 22px/1.3 var(--sans); color: var(--ink); }
+.cartel-m { margin: 0; font: 400 13px/1.6 var(--mono); color: var(--mute); }
+.cartel-m a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
+.eyb { margin: 0; font: 400 12px/1.4 var(--sans); letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
+.pin-in2 { margin-left: 6px; }
+.mq-state > .mq-label .pin { color: #111; letter-spacing: 0; text-transform: none; font-weight: 600; }
+
+/* ===== MQ-06 : contact, tirages et licences ===== */
+.ct { display: grid; grid-template-columns: minmax(0, 680px) minmax(0, 1fr); gap: 40px clamp(40px, 6vw, 96px); padding-top: 8px; }
+.ct-back { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--ink); font-size: 15px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--mute); }
+.ct h1 { margin: 10px 0 8px; font: 300 clamp(32px, 3vw, 44px)/1.15 var(--sans); }
+.ct .intro { margin: 0 0 28px; color: var(--prose); font-size: 16.5px; line-height: 1.6; max-width: 58ch; }
+.ct-form { display: grid; gap: 26px; }
+/* En-tête : la photo dont on parle, référence préremplie et modifiable (UX-F-11, UX-T-05) */
+.ct-photo { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 20px; align-items: center; padding: 16px; background: var(--frame); border: 1px solid var(--rule); }
+.ct-photo img { width: 160px; height: auto; display: block; }
+.ct-photo .f-champ { gap: 8px; }
+.ct-photo .cartel-m { margin-top: 2px; }
+.choix { display: flex; flex-wrap: wrap; gap: 0 28px; }
+.ct-aside { display: grid; gap: 22px; align-content: start; padding-top: 64px; }
+.ct-aside h2 { margin: 0; font: 400 13px/1.3 var(--sans); letter-spacing: .26em; text-transform: uppercase; }
+.ct-aside p, .ct-aside li { color: var(--prose); font-size: 15px; line-height: 1.6; }
+.ct-aside p { margin: 0; }
+.ct-aside ul { margin: 0; padding-left: 18px; }
+.ct-aside a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.ct-box { padding: 20px 22px; border: 1px solid var(--rule); display: grid; gap: 10px; }
+.ct-send { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+.ct-priv { margin: 0; font-size: 14px; color: var(--mute); line-height: 1.55; }
+.ct-priv a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* Confirmation */
+.ok { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 22px; align-items: start; }
+.ok img { width: 120px; height: auto; display: block; }
+.ok h3 { margin: 0 0 6px; font: 300 28px/1.2 var(--sans); }
+.ok p { margin: 0 0 6px; color: var(--prose); }
+.ok dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; margin: 12px 0 14px; font-size: 14.5px; }
+.ok dt { color: var(--mute); }
+.ok dd { margin: 0; color: var(--ink); }
+.ok a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 44px; }
+/* Page Contact générale */
+.cp h3 { margin: 0; font: 300 clamp(30px, 2.8vw, 40px)/1.15 var(--sans); }
+.cp .intro { margin: 8px 0 24px; color: var(--prose); font-size: 16.5px; }
+.who3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+.who3 li { padding: 20px; border: 1px solid var(--rule); display: grid; gap: 6px; align-content: start; }
+.who3 b { font: 400 20px/1.25 var(--sans); }
+.who3 span { color: var(--prose); font-size: 14.5px; }
+.who3 a { color: var(--ink); font: 400 14.5px/1.4 var(--mono); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 44px; overflow-wrap: anywhere; }
+.cp-more { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 40px; margin-top: 28px; }
+.cp-more h4 { margin: 0 0 8px; font: 400 13px/1.3 var(--sans); letter-spacing: .22em; text-transform: uppercase; }
+.cp-more p, .cp-more li { margin: 0; color: var(--prose); font-size: 15px; line-height: 1.6; }
+.cp-more ul { margin: 0; padding-left: 18px; }
+.cp-more a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.mq-state .in { padding: 22px 22px 26px; }
+@media (max-width: 960px) {
+  .ct { grid-template-columns: 1fr; }
+  .ct-aside { padding-top: 0; }
+}
+@media (max-width: 760px) {
+  .ct-photo { grid-template-columns: 96px minmax(0, 1fr); gap: 14px; padding: 12px; }
+  .ct-photo img { width: 96px; }
+  .ok { grid-template-columns: 1fr; }
+  .who3, .cp-more { grid-template-columns: 1fr; }
+  .mq-state { margin-inline: 0; }
+}
+.nw { white-space: nowrap; }
+textarea.f-input.f-ref { min-height: 0; height: auto; resize: none; overflow: hidden; line-height: 1.45; }
+</style>
+<link rel="stylesheet" href="_commun/annotations.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-h wrap">
+  <a class="wordmark" href="#">Nicephos</a>
+  <nav class="site-nav" id="menu-principal" aria-label="Menu principal"><ul role="list"><li><a href="#">Séries</a></li><li><a href="#">Galerie</a></li><li><a href="#">Carte</a></li><li><a href="#">Carnets</a></li><li><a href="#">À propos</a></li><li class="soft"><a href="#">Tirages</a></li></ul></nav>
+  <ul class="site-tools" role="list">
+    <li><a class="tool" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="tool-t">Rechercher</span></a></li>
+    <li><details class="lang"><summary><span class="sr-only">Langue : </span>FR <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <ul role="list"><li><a href="#" lang="fr" hreflang="fr" aria-current="true"><span>Français</span></a></li><li><a href="#" lang="en" hreflang="en">English</a></li><li><a href="#" lang="de" hreflang="de">Deutsch</a></li></ul></details></li>
+    <li><button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-principal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button></li>
+  </ul>
+</header>
+<main id="contenu" class="wrap">
+  <div class="ct">
+    <div>
+      <a class="ct-back" href="MQ-04-visionneuse-cartel.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>Miradouro, l’heure dorée</a>
+      <h1>Tirage, licence&#8239;: nous écrire</h1>
+      <p class="intro">Un tirage pour chez vous, une photo pour un article ou une affiche&#8239;: dites-nous ce que vous avez en tête, nous vous répondons avec un prix et un délai.</p>
+
+      <form class="ct-form" action="#" method="post">
+        <div class="ct-photo" style="position:relative">
+          <img src="_commun/photos/ciel.webp" width="900" height="600" alt="">
+          <div class="f-champ">
+            <label for="photo">Photo concernée <span class="f-q">(modifiable)</span></label>
+            <textarea class="f-input f-ref" id="photo" name="photo" rows="2">Miradouro, l’heure dorée — Julien · J-2026-019</textarea>
+            <p class="cartel-m">Julien · Lisbonne, oct. 2026 · <span class="nw">inventaire J-2026-019</span></p>
+          </div>
+          <span class="pin pin-abs" style="top:-12px; right:-12px" aria-hidden="true">1</span>
+        </div>
+
+        <fieldset class="f-grp">
+          <legend>Je voudrais&#8239;:<span class="pin pin-in" aria-hidden="true">2</span></legend>
+          <div class="choix">
+            <label class="f-opt"><input type="radio" name="objet" value="tirage" checked> un tirage</label>
+            <label class="f-opt"><input type="radio" name="objet" value="licence"> une licence d’utilisation</label>
+            <label class="f-opt"><input type="radio" name="objet" value="autre"> autre chose</label>
+          </div>
+        </fieldset>
+
+        <div class="f-champ">
+          <label for="format">Format souhaité <span class="f-q">(facultatif)</span></label>
+          <input class="f-input" id="format" name="format" aria-describedby="format-aide" style="max-width:320px">
+          <p class="f-aide" id="format-aide">Par exemple&#8239;: 40 × 60 cm, encadré, ou « je ne sais pas encore ».</p>
+        </div>
+
+        <div class="f-champ">
+          <label for="message">Votre message</label>
+          <textarea class="f-input is-focus" id="message" name="message" rows="5" required>Bonjour Julien, cette lumière me rappelle mon premier voyage à Lisbonne. Je cherche un tirage pour le salon, plutôt grand. Est-ce possible, et à quel prix&#8239;?</textarea>
+        </div>
+
+        <div class="f-champ">
+          <label for="email">Votre e-mail <span class="f-q">(pour vous répondre)</span><span class="pin pin-in" aria-hidden="true">3</span></label>
+          <input class="f-input" type="email" id="email" name="email" autocomplete="email" required value="claire.dubreuil@exemple.fr" style="max-width:420px">
+        </div>
+
+        <div class="ct-send"><button class="btn" type="submit">Envoyer</button><span class="f-aide">Nous répondons sous 7 jours.<span class="pin pin-in" aria-hidden="true">4</span></span></div>
+        <p class="ct-priv">Votre adresse sert seulement à vous répondre&#8239;; elle est effacée au bout de 12 mois sans suite. <a href="#">Confidentialité</a></p>
+      </form>
+    </div>
+
+    <aside class="ct-aside" aria-labelledby="aide-h">
+      <h2 id="aide-h">Bon à savoir</h2>
+      <div class="ct-box">
+        <p><strong>Tirages.</strong> Tirages pigmentaires sur papier d’art, signés et numérotés par l’auteur, livrés en France et dans l’Union européenne.</p>
+        <p><strong>Licences.</strong> Presse, édition, affiche, site web&#8239;: le prix dépend de l’usage, de la durée et du tirage.</p>
+        <p><a href="#">Droits, tirages et licences</a> · <a href="#">Toutes les façons de nous écrire</a></p>
+      </div>
+    </aside>
+  </div>
+
+  <section class="mq-state" aria-labelledby="ok-h">
+    <h2 class="mq-label" id="ok-h">Après l’envoi <span>Confirmation sur la même page, focus sur le titre, accusé de réception par e-mail</span><span class="pin" aria-hidden="true">5</span></h2>
+    <div class="in">
+      <div class="ok" role="status">
+        <img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy">
+        <div>
+          <h3 tabindex="-1">Merci, c’est envoyé.</h3>
+          <p>Un accusé de réception est parti à l’adresse indiquée. Julien vous répond sous 7 jours.</p>
+          <dl>
+            <dt>Photo</dt><dd>Miradouro, l’heure dorée — Julien · <span class="nw">J-2026-019</span></dd>
+            <dt>Demande</dt><dd>Un tirage</dd>
+            <dt>Réponse à</dt><dd>claire.dubreuil@exemple.fr</dd>
+            <dt>Référence</dt><dd class="mono" style="font-size:13px">D-2026-0412</dd>
+          </dl>
+          <a href="MQ-04-visionneuse-cartel.html">Revenir à la photo</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mq-state cp" aria-labelledby="cp-h">
+    <h2 class="mq-label" id="cp-lab">Page Contact générale <span>/contact, liée depuis le pied de page, À propos et la visionneuse</span><span class="pin" aria-hidden="true">6</span></h2>
+    <div class="in">
+      <h3 id="cp-h">Écrire à Sébastien, à Julien, ou aux deux</h3>
+      <p class="intro">Une question sur une photo, un tirage, une licence, une exposition&#8239;: nous répondons sous 7 jours.</p>
+      <ul class="who3" role="list">
+        <li><b>Sébastien</b><span>La mer, les lignes, l’Atlantique.</span><a href="mailto:sebastien@nicephos.art">sebastien@nicephos.art</a></li>
+        <li><b>Julien</b><span>Les visages, la rue, les voyages.</span><a href="mailto:julien@nicephos.art">julien@nicephos.art</a></li>
+        <li><b>Les deux</b><span>Expositions, presse, projets communs.</span><a href="mailto:info@nicephos.art">info@nicephos.art</a></li>
+      </ul>
+      <div class="cp-more">
+        <div>
+          <h4>Suivre <span class="pin pin-in" aria-hidden="true">7</span></h4>
+          <p><a href="#" rel="me">Suivre sur Instagram&#8239;: @nicephos.art<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a> · <a href="#">Flux RSS des nouvelles photos et des carnets</a></p>
+        </div>
+        <div>
+          <h4>Droits, tirages et licences <span class="pin pin-in" aria-hidden="true">8</span></h4>
+          <ul>
+            <li>Partager le lien d’une photo&#8239;: toujours permis, et bienvenu.</li>
+            <li>Acquérir un tirage signé&#8239;: <a href="#">nous écrire depuis la photo</a>.</li>
+            <li>Utiliser une photo (presse, édition, web)&#8239;: une licence, sur demande.</li>
+            <li>Ce qui demande notre accord&#8239;: toute reproduction ou modification.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="site-f wrap">
+  <p>© 2026 Sébastien &amp; Julien</p>
+  <ul role="list" aria-label="Pied de page"><li><a href="#">Tirages et licences</a></li><li><a href="#">Contact</a></li><li><a href="#" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="#">Flux RSS</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Mentions légales</a></li></ul>
+  <span class="pin" aria-hidden="true">9</span>
+</footer>
+
+<aside class="mq-notes" aria-labelledby="mq-h">
+  <p class="mq-id">Maquette MQ-06 · site public · /photo/…/ecrire et /contact · thème « Nicephos — nuit » · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
+  <h2 id="mq-h">Ce qui change</h2>
+  <p class="mq-lead">L’envie d’un tirage naît devant la photo : elle trouve désormais une porte en un clic (« Tirage, licence : nous écrire » sur la visionneuse, MQ-04), au lieu de 27 écrans de défilement puis d’un e-mail à rédiger sans la référence.</p>
+  <ol>
+    <li><span class="pin">1</span><p>Le formulaire s’ouvre avec la photo dont on parle : vignette de 160 px, référence préremplie « Miradouro, l’heure dorée — Julien · J-2026-019 », modifiable. Le numéro d’inventaire stable sert enfin de référence. Le retour est nommé par la photo.<span class="ref">UX-F-11 · UX-T-05 · B&amp;S 2.1.2 Actions minimales · ISO 9241-110 Adéquation aux tâches</span></p></li>
+    <li><span class="pin">2</span><p>Trois choix en boutons radio dans un fieldset à légende : « un tirage · une licence d’utilisation · autre chose ». Pas de liste déroulante, pas de champ inutile.<span class="ref">UX-F-11 · RGAA 11.5 et 11.6 · Loi de Hick</span></p></li>
+    <li><span class="pin">3</span><p>Les libellés disent pourquoi on demande : « (facultatif) », « (pour vous répondre) », autocomplete="email", un exemple sous le format. Champs en filet 7,4:1, focus de 2 px (montré sur le message).<span class="ref">UX-F-05 · UX-F-04 · RGAA 11.10 et 11.13 · WCAG 1.3.5 et 3.3.2</span></p></li>
+    <li><span class="pin">4</span><p>Le délai est promis avant l’envoi : « Nous répondons sous 7 jours. ». Un seul bouton plein.<span class="ref">UX-T-04 · Opquast 107 · Nielsen #1 · B&amp;S 1.2.2</span></p></li>
+    <li><span class="pin">5</span><p>Après l’envoi : « Merci, c’est envoyé. Un accusé de réception est parti à l’adresse indiquée. », le récapitulatif et une référence de demande, en role="status", focus sur le titre ; « Revenir à la photo ».<span class="ref">UX-T-04 · RGAA 7.5 · WCAG 4.1.3 · B&amp;S 1.3 Feedback immédiat</span></p></li>
+    <li><span class="pin">6</span><p>Une vraie page Contact : « Écrire à Sébastien, à Julien, ou aux deux », chaque adresse en mailto, touchable sur téléphone (fini « prénom[at]domaine{point}art » à recopier). Le délai y est redit.<span class="ref">UX-F-11 · UX-F-23 · UX-T-03 · Opquast 107 et 108 · RGAA 10.6</span></p></li>
+    <li><span class="pin">7</span><p>On peut vous suivre : « Suivre sur Instagram : @nicephos.art » (rel="me", nouvel onglet annoncé) et un flux RSS. Le lien Instagram sort de la fenêtre Partager, où il était compté comme un partage.<span class="ref">UX-T-06 · UX-F-34 · UX-F-23 · WCAG 3.2.5</span></p></li>
+    <li><span class="pin">8</span><p>« Droits, tirages et licences » commence par ce qui est possible (partager, acquérir, licencier) avant ce qui demande un accord. Le ton cesse d’être défensif.<span class="ref">UX-F-34 · Opquast 99 · B&amp;S 1.1 Incitation</span></p></li>
+    <li><span class="pin">9</span><p>Le pied de page cible, sur toutes les pages : « © 2026 Sébastien &amp; Julien · Tirages et licences · Contact · Instagram · Flux RSS · Confidentialité · Mentions légales », liens soulignés de 44 px. Les mentions légales doivent nommer les éditeurs et le responsable de la publication avant la boutique.<span class="ref">UX-F-34 · UX-T-03 · UX-F-23 · RGAA 12.1 · LCEN art. 6</span></p></li>
+  </ol>
+  <p class="mq-measures">Mesures sur cette maquette : textes 17,1:1 (saisie), 12,4:1 (prose), 7,4:1 (aides) sur #0b0b0b ; filets des champs 7,4:1 ; cibles de 44 px au moins, adresses comprises. Aucune image chargée au-delà de la vignette de la photo ; sur le site, la variante de 320 px suffit pour 160 px affichés (UX-T-07).</p>
+</aside>
+</body>
+</html>

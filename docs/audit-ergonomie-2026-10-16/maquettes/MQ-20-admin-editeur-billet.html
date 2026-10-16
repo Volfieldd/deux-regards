@@ -1,0 +1,700 @@
+<!doctype html>
+<!-- MQ-20 — Admin : éditeur de billet (Carnets). Maquette de l'audit du 16 octobre 2026 (Camille Arnaud).
+     Styles de l'administration (_commun/admin.css, « Chambre noire » ou clair selon le système), photos de démonstration.
+     Aucun script : les états (enregistré, bloc sélectionné, focus, aperçu, onglet EN) sont figés pour la démonstration. -->
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="dark light">
+  <title>Lisbonne et Porto · Carnets · Administration · Nicephos — maquette MQ-20</title>
+  <link rel="stylesheet" href="_commun/admin.css">
+  <style>
+    /* MQ-20 — composants nouveaux. Tout passe par les variables d'admin.css. */
+
+    /* Maquette : la barre latérale garde sa hauteur naturelle pour la capture pleine page. */
+    .side { height: auto; align-self: start; }
+    /* Capture pleine page : le fond de la barre latérale descend jusqu’en bas de la page (audit, B). */
+    @media (min-width: 721px) { .shell { background: linear-gradient(90deg, var(--s1) 0 var(--side), transparent var(--side)); } .shell > .side { border-right: 0; } .shell::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--side) - 1px); border-left: 1px solid var(--line); } .shell { position: relative; } }
+    .side .foot { margin-top: 18px; }
+    .nav-sub { list-style: none; margin: 0 0 2px; padding: 0 0 0 30px; display: grid; gap: 2px; }
+    .nav-sub a { min-height: 30px; font-size: 13.5px; }
+    .me-link { display: flex; align-items: center; gap: 10px; padding: 4px 6px; border-radius: 8px; }
+    .me-link:hover { background: var(--s2); }
+    .side .foot .nav a { min-height: 30px; }
+
+    /* Repères d'annotation (la légende est en bas de page). */
+    
+    .mq-screen { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 18px; padding-top: 10px; border-top: 1px dashed var(--line2); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink2); }
+    .mq-screen b { color: var(--accent-ink); font-weight: 600; }
+    .mq-screen code { text-transform: none; letter-spacing: 0; }
+    .mq-first { border-top: 0; padding-top: 0; padding-right: 160px; }
+    .mq-focus { outline: 2px solid var(--accent-ink) !important; outline-offset: 2px; }
+    select.mq-focus, input.mq-focus, textarea.mq-focus { outline: none !important; box-shadow: inset 0 0 0 1.5px var(--accent), 0 0 0 4px var(--accent-soft); }
+
+    /* Fil d'Ariane et en-tête */
+    .crumbs ol { list-style: none; margin: 0 0 6px; padding: 0; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink3); }
+    .crumbs li + li::before { content: "›"; margin-right: 8px; color: var(--ink3); }
+    .crumbs a { color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
+    .e-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 20px; margin: 0 0 16px; }
+    .e-top h1 { margin: 0 0 6px; }
+    .e-top .sub { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0; }
+    .e-top .sub a { color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; }
+    .e-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+    .saved-st { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 4px 0 12px; border-radius: 9px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); font-size: 13px; color: var(--ink2); }
+    .saved-st .ok { color: var(--ok); font-weight: 600; }
+    .saved-st button { min-height: 30px; padding: 0 10px; border-radius: 7px; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; font-size: 13px; }
+    .saved-st button:hover { background: var(--s2); }
+
+    /* Pastille d'état commune (MQ-09) : une forme ET un mot, jamais la couleur seule. */
+    .etat { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 999px; font-size: 12.5px; line-height: 1.3; color: var(--ink); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); white-space: nowrap; }
+    .etat .sym { font-size: 13px; line-height: 1; color: var(--ink2); }
+    .etat.todo { box-shadow: inset 0 0 0 1.5px var(--accent-ink); }
+    .etat.todo .sym { color: var(--accent-ink); }
+    .etat.done .sym { color: var(--ok); }
+    .etat.warn .sym { color: var(--warn); }
+    .half { display: inline-block; width: .78em; height: .78em; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); vertical-align: -0.08em; }
+
+    /* Onglets de langue : des liens (une adresse par langue), état écrit et non coloré seulement. */
+    .langs { display: flex; flex-wrap: wrap; gap: 0; margin: 0 0 20px; padding: 0; list-style: none; border-bottom: 1px solid var(--line2); }
+    .langs a { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 18px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--ink2); font-size: 14px; }
+    .langs a:hover { color: var(--ink); background: var(--s1); }
+    .langs a[aria-current] { color: var(--ink); font-weight: 500; border-bottom-color: var(--accent); }
+    .langs .code { font-weight: 600; letter-spacing: .08em; }
+    .langs .lst { font-size: 12.5px; font-weight: 400; color: var(--ink3); }
+    .langs .lst.todo { color: var(--accent-ink); }
+    .langs .lst.warn::before { content: "▲ "; color: var(--warn); }
+
+    /* Mise en page : éditeur + colonne latérale */
+    .e-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; align-items: start; }
+    .e-col > .panel, .e-aside > .panel { margin: 0 0 18px; }
+    .panel > h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+    .panel > h2 .mono { margin: 0; }
+    .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 16px; }
+    .grid2 .full { grid-column: 1 / -1; }
+    .fs { border: 0; margin: 0; padding: 0; min-width: 0; }
+    .fs legend { padding: 0; margin: 0 0 6px; color: var(--ink2); font-size: 13px; }
+    .choice-line { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+    .choice-line label.inline { min-height: 32px; }
+    .slug { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12.5px; color: var(--ink3); }
+    .slug code { font-size: 12.5px; }
+    .count-c { justify-self: end; font-size: 12px; color: var(--ink3); }
+    .lbl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+
+    /* Blocs du corps */
+    .blocks { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+    .blk { border-radius: 12px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); padding: 12px 14px 14px; display: grid; gap: 10px; }
+    .blk.sel { box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 1px var(--line2); }
+    .blk-hd { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+    .blk-hd h3 { margin: 0; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .blk-n { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 6px; background: var(--s3); font-size: 12px; font-weight: 600; color: var(--ink2); }
+    .blk-hd .mono { margin-right: auto; }
+    .blk-tools { display: flex; gap: 6px; margin-left: auto; }
+    .blk-tools .iconbtn { width: 32px; height: 32px; }
+    .blk-tools .iconbtn[disabled] { opacity: .4; cursor: default; }
+    .blk .sel-tag { font-size: 12px; color: var(--accent-ink); font-weight: 500; }
+    .blk input, .blk select, .blk textarea { background: var(--s1); }
+    .fmt { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .fmt button { min-height: 30px; padding: 0 10px; border-radius: 7px; box-shadow: inset 0 0 0 1px var(--line2); font-size: 12.5px; color: var(--ink2); background: var(--s1); }
+    .fmt button:hover { color: var(--ink); }
+    .fmt button[aria-pressed="true"] { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--accent-ink); }
+    .fmt .note { align-self: center; font-size: 12px; color: var(--ink3); margin-left: 4px; }
+    .typo { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; padding: 7px 10px; border-radius: 8px; background: var(--s1); box-shadow: inset 3px 0 0 var(--ok); font-size: 12.5px; color: var(--ink2); }
+    .typo b { color: var(--ink); font-weight: 500; }
+    .typo q { quotes: none; font-variant-numeric: normal; }
+    .typo kbd { font-size: 10.5px; }
+    .typo .more { font-size: 12.5px; display: inline-flex; align-items: center; min-height: 24px; }
+    .ph-blk { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 14px; align-items: start; }
+    .ph-blk img, .dip-slots img, .tp img, .pv img { display: block; width: 100%; height: auto; border-radius: 6px; background: var(--photo-bg); }
+    .ph-blk .ph-f { display: grid; gap: 10px; }
+    .cartel-r { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); font-size: 13px; }
+    .cartel-r .t { color: var(--ink); font-weight: 500; }
+    .cartel-r .m { color: var(--ink2); }
+    .cartel-r small { display: block; margin-top: 3px; font-size: 12px; color: var(--ink3); }
+    .dip-slots { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: center; }
+    .dip-slots figure { display: grid; gap: 6px; }
+    .dip-slots figcaption { font-size: 12.5px; color: var(--ink2); }
+    .dip-slots figcaption b { display: block; font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); }
+    .swap { min-height: 38px; padding: 0 12px; border-radius: 9px; box-shadow: inset 0 0 0 1px var(--line2); font-size: 12.5px; color: var(--ink2); background: var(--s1); }
+    .add-blk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; padding: 12px 14px; border-radius: 12px; box-shadow: inset 0 0 0 1px dashed var(--line2); border: 1px dashed var(--line2); }
+    .add-blk .lb { font-size: 13px; color: var(--ink2); margin-right: 4px; }
+
+    /* Colonne latérale */
+    .e-aside .panel { padding: 16px 16px 18px; }
+    .e-aside h2 { font-size: 15px; margin-bottom: 10px; }
+    .pub-st { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 13px; color: var(--ink2); }
+    .pub-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 0 0 12px; font-size: 12.5px; color: var(--ink3); }
+    .when { display: grid; gap: 8px; }
+    .when { gap: 4px; }
+    .when label.inline { display: flex; align-items: center; min-height: 32px; font-size: 13.5px; }
+    .when .row { margin-top: 4px; }
+    .when .row label { flex: 1 1 120px; font-size: 12.5px; }
+    .when input { min-height: 36px; padding-top: 4px; padding-bottom: 4px; }
+    .pub-btns { display: grid; gap: 8px; margin-top: 14px; }
+    .pub-btns .btn { width: 100%; }
+    .seg-pv { display: flex; gap: 6px; }
+    .seg-pv .btn { flex: 1; }
+    .weight meter { width: 100%; height: 12px; display: block; margin: 8px 0 6px; }
+    .weight .big { font-size: 20px; font-weight: 300; color: var(--ink); }
+    .weight dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; margin: 8px 0 0; font-size: 12.5px; }
+    .weight dt { color: var(--ink2); }
+    .weight dd { margin: 0; text-align: right; color: var(--ink); }
+    .tp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    .tp { display: grid; grid-template-columns: 18px 64px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px; border-radius: 10px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); }
+    .tp .grip { color: var(--ink3); cursor: grab; display: grid; place-items: center; }
+    .tp img { width: 64px; height: 43px; object-fit: contain; background: var(--photo-bg); }
+    .tp .t { font-size: 12.5px; line-height: 1.3; color: var(--ink); }
+    .tp .t small { display: block; color: var(--ink3); font-size: 11.5px; }
+    .tp .btn { min-height: 32px; padding: 0 10px; font-size: 12.5px; }
+    .tp.used { opacity: 1; }
+    .tp .in { font-size: 11.5px; color: var(--ok); }
+    .tp-hint { margin: 10px 0 0; }
+
+    /* Écran B : aperçu comme sur le site, nuit et jour */
+    .mq-b, .mq-c, .mq-d { margin-top: 56px; }
+    .pv-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+    .pv { margin: 0; border-radius: 12px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line2); }
+    .pv-bar { display: flex; justify-content: space-between; gap: 8px; padding: 8px 12px; background: var(--s3); font-size: 12px; color: var(--ink2); }
+    .pv-page { padding: 18px 22px 22px; font-family: var(--font); }
+    .pv-page .nm { margin: 0 0 18px; font-size: 10.5px; letter-spacing: .4em; text-transform: uppercase; }
+    .pv-page .k { margin: 0 0 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-family: ui-monospace, 'IBM Plex Mono', monospace; }
+    .pv-page .h { margin: 0; font-weight: 300; font-size: 34px; line-height: 1.05; }
+    .pv-page .s { margin: 6px 0 10px; font-size: 15px; }
+    .pv-page .b { margin: 0 0 14px; font-size: 12px; font-family: ui-monospace, 'IBM Plex Mono', monospace; }
+    .pv-page img { border-radius: 0; margin-bottom: 6px; }
+    .pv-page .c { margin: 0 0 12px; font-size: 11px; font-family: ui-monospace, 'IBM Plex Mono', monospace; }
+    .pv-page .p { margin: 0; font-size: 14px; line-height: 1.7; }
+    .pv.nuit .pv-page { background: #0b0b0b; color: #f0efeb; }
+    .pv.nuit .k, .pv.nuit .b, .pv.nuit .c { color: #a19f99; }
+    .pv.nuit .s, .pv.nuit .p { color: #cfcdc7; }
+    .pv.jour .pv-page { background: #f7f5f0; color: #1a1917; }
+    .pv.jour .k, .pv.jour .b, .pv.jour .c { color: #5f5b54; }
+    .pv.jour .s, .pv.jour .p { color: #34322e; }
+    .pv figcaption { padding: 10px 12px; font-size: 12.5px; color: var(--ink2); background: var(--s1); }
+
+    /* Écran C : traduction en tableau */
+    .trad { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .trad caption { caption-side: top; text-align: left; padding: 0 0 10px; font-size: 15px; font-weight: 500; color: var(--ink); }
+    .trad caption .mono { font-weight: 400; margin-left: 6px; }
+    .trad th, .trad td { text-align: left; vertical-align: top; padding: 10px; border-bottom: 1px solid var(--line); }
+    .trad thead th { font-size: 11.5px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); border-bottom-color: var(--line2); }
+    .trad tbody th { font-weight: 500; width: 130px; color: var(--ink2); }
+    .trad .src { width: 38%; color: var(--ink2); }
+    .trad textarea, .trad input { width: 100%; background: var(--s2); }
+    .trad textarea { min-height: 64px; }
+    .trad .cellnote { margin: 4px 0 0; font-size: 12px; color: var(--ink3); }
+    .trad .cellnote.todo { color: var(--accent-ink); }
+
+    /* Écran D : rôle Photographe */
+    .role-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+    .role-pair .panel { margin: 0; }
+    .role-pair h3 { font-size: 15px; font-weight: 500; margin: 0 0 10px; }
+    .role-pair .actions { margin-top: 12px; }
+    .role-pair .actions .btn { flex: 1 1 auto; }
+
+    /* Barre basse du téléphone : état + Publier, au-dessus des onglets ; ne masque jamais le champ focalisé
+       (scroll-padding-bottom réserve sa hauteur). */
+    .m-bar { display: none; }
+
+    /* Annotations */
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    @media (max-width: 1180px) {
+      .e-grid { grid-template-columns: minmax(0, 1fr); }
+      
+    }
+    @media (max-width: 720px) {
+      html { scroll-padding-bottom: 150px; }
+      .mq-first { padding-right: 0; }
+      .crumbs a { min-height: 44px; }
+      .help-link a { border-bottom: 0; text-decoration: underline; text-underline-offset: 4px; }
+      .e-top { margin-bottom: 10px; }
+      .e-top .e-acts { display: none; }               /* reprises dans la barre basse */
+      .langs { flex-wrap: nowrap; overflow-x: auto; }
+      .langs a { padding: 0 12px; white-space: nowrap; flex-direction: column; justify-content: center; align-items: flex-start; gap: 0; min-height: 52px; }
+      .grid2 { grid-template-columns: minmax(0, 1fr); }
+      .panel { padding: 16px 14px; }
+      .blk { padding: 12px; }
+      .blk-tools .iconbtn { width: 44px; height: 44px; }
+      .blk-hd .mono { flex-basis: 100%; order: 3; }
+      .fmt button, .swap, .saved-st button { min-height: 44px; }
+      .ph-blk { grid-template-columns: minmax(0, 1fr); }
+      .dip-slots { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+      .dip-slots .swap { grid-column: 1 / -1; grid-row: 2; }
+      .add-blk .btn { flex: 1 1 40%; }
+      .tp { grid-template-columns: 64px minmax(0, 1fr) auto; }
+      .tp .grip { display: none; }               /* au toucher : « Insérer » seulement */
+      .tp .btn { min-height: 44px; }
+      .typo .more { min-height: 44px; }
+      .pv-pair, .role-pair { grid-template-columns: minmax(0, 1fr); }
+      .pv-page .h { font-size: 28px; }
+      .trad thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+      .trad, .trad tbody, .trad tr, .trad th, .trad td { display: block; width: auto; }
+      .trad caption { display: block; }
+      .trad tr { padding: 10px 0; border-bottom: 1px solid var(--line2); }
+      .trad th, .trad td { padding: 4px 0; border: 0; }
+      .trad .src::before { content: "Français : "; color: var(--ink3); }
+      .m-bar { display: flex; position: fixed; left: 0; right: 0; bottom: 74px; z-index: 39; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; background: var(--s1); border-top: 1px solid var(--line2); box-shadow: 0 -8px 20px rgba(0,0,0,.12); }
+      .m-bar .mst { font-size: 12.5px; color: var(--ink2); line-height: 1.3; }
+      .m-bar .mst b { color: var(--ink); font-weight: 500; }
+      .m-bar .mst .ok { color: var(--ok); font-weight: 600; }
+      .m-bar .btn { min-height: 44px; }
+      
+    }
+    .m-only { display: none; }
+    @media (max-width: 720px) {
+      .langs { flex-wrap: nowrap; overflow: visible; }
+      .langs li { flex: 1 1 0; min-width: 0; }
+      .langs li:last-child { flex: 0 0 auto; }
+      .langs a { white-space: normal; padding: 6px 10px; }
+      .trad .src, .trad tbody th { width: auto; }
+      /* Maquette : barres montrées à plat en fin d'écran (sur le site, fixées en bas). */
+      .m-bars { padding: 24px 16px 28px; background: var(--bg); }
+      .m-only { display: flex; }
+      .m-bars .m-bar, .m-bars .tabbar { position: static; box-shadow: none; }
+      .m-bars .m-bar { border: 1px solid var(--line2); border-bottom: 0; border-radius: 14px 14px 0 0; }
+      .m-bars .tabbar { border: 1px solid var(--line2); border-radius: 0 0 14px 14px; }
+      
+      .m-bars .m-bar .mst { flex: 1 1 auto; min-width: 0; margin: 0; }
+      .m-bars .m-bar .btn { flex: none; }
+      .when label.inline { align-items: center; }
+      .when label.inline input { margin-top: 0; }
+    }
+  </style>
+<link rel="stylesheet" href="_commun/annotations.css">
+</head>
+<body class="admin">
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="shell">
+
+<aside class="side" id="admin-nav" aria-label="Menu de l’administration">
+  <a class="word" href="#">Nicephos</a>
+  <button class="cmdk" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
+  <nav class="nav" aria-label="Accueil de l’administration">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
+  </nav>
+  <p class="grp" id="nav-photos">Photos</p>
+  <nav class="nav" aria-labelledby="nav-photos">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photothèque</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Sorties</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg>Voyages</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a>
+  </nav>
+  <p class="grp" id="nav-people">Personnes</p>
+  <nav class="nav" aria-labelledby="nav-people">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/></svg>Personnes</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>App de terrain</a>
+  </nav>
+  <p class="grp" id="nav-publish">Publier</p>
+  <nav class="nav" aria-labelledby="nav-publish">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>À valider<span class="nav-badge">5<span class="sr-only"> photos</span></span></a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>Site public</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>Instagram</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
+    <ul class="nav-sub">
+      <li><a href="#" aria-current="page">Billets<span class="nav-badge">2<span class="sr-only"> brouillons</span></span></a></li>
+      <li><a href="#">Nouveau billet</a></li>
+    </ul>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>Galeries privées</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>Boutique</a>
+  </nav>
+  <p class="grp" id="nav-team">Équipe</p>
+  <nav class="nav" aria-labelledby="nav-team">
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg>Comptes et rôles</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.5"/></svg>Circuit de publication</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Journal</a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiques</a>
+  </nav>
+  <nav class="nav" aria-label="Réglages">
+    <a href="#" style="margin-top:10px"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Réglages</a>
+  </nav>
+  <div class="foot">
+    <a class="me-link" href="#"><span class="av" aria-hidden="true">J</span><span class="who">Julien<small>Administrateur · Mon compte</small></span></a>
+    <nav class="nav" aria-label="Aide et nouveautés">
+      <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg>Aide</a>
+      <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>Nouveautés</a>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" id="contenu" tabindex="-1">
+  <p class="help-link"><a href="#">Aide sur cette page</a></p>
+  <p class="mq-screen mq-first"><b>Écran A</b> Éditeur de billet, rôle Administrateur <code>/admin/carnets/lisbonne-et-porto</code></p>
+
+  <nav class="crumbs" aria-label="Fil d’Ariane">
+    <ol>
+      <li><a href="#">Carnets</a></li>
+      <li><span aria-current="page">Lisbonne et Porto</span></li>
+    </ol>
+  </nav>
+
+  <div class="e-top">
+    <div>
+      <h1>Lisbonne et Porto</h1>
+      <p class="sub"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Brouillon</span> <span>Billet · Voyage</span> <span class="slug">adresse <code>/carnet/lisbonne-et-porto</code></span> <span class="pin" aria-hidden="true">1</span></p>
+    </div>
+    <div class="e-acts">
+      <p class="saved-st" role="status"><span class="ok" aria-hidden="true">✓</span>Enregistré à 22 h 42 <button type="button">Annuler</button> <span class="pin" aria-hidden="true">5</span></p>
+      <a class="btn ghost" href="#apercu">Aperçu comme sur le site</a>
+      <a class="btn" href="#publication">Publier…</a>
+    </div>
+  </div>
+
+  <nav aria-label="Langue du billet">
+    <ul class="langs">
+      <li><a href="#" aria-current="page"><span class="code" lang="fr">FR</span><span class="lst">rédigé, langue d’origine</span></a></li>
+      <li><a href="#traduire"><span class="code" lang="en">EN</span><span class="lst todo">à traduire</span></a></li>
+      <li><a href="#traduire"><span class="code" lang="de">DE</span><span class="lst warn">à revoir : le français a changé ce soir</span></a></li>
+      <li style="align-self:center;margin-left:10px"><span class="pin" aria-hidden="true">2</span></li>
+    </ul>
+  </nav>
+
+  <div class="e-grid">
+    <div class="e-col">
+      <section class="panel" aria-labelledby="hd-t">
+        <h2 id="hd-t">En-tête du billet <span class="mono">ce que l’on voit dans la liste des Carnets</span> <span class="pin" aria-hidden="true">3</span></h2>
+        <div class="grid2">
+          <label class="full" for="f-titre">Titre
+            <input id="f-titre" name="titre" value="Lisbonne et Porto" maxlength="90" autocomplete="off">
+          </label>
+          <label class="full" for="f-chapo"><span class="lbl-row"><span>Chapô (deux lignes dans la liste)</span><span class="count-c">186 / 240 signes</span></span>
+            <textarea id="f-chapo" name="chapo" rows="2">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : de l’Alfama au premier tram jusqu’à la barre de Foz.</textarea>
+          </label>
+          <fieldset class="fs">
+            <legend>Auteurs (signent sous le titre)</legend>
+            <div class="choice-line">
+              <label class="inline"><input type="checkbox" name="auteurs" value="sebastien" checked> Sébastien</label>
+              <label class="inline"><input type="checkbox" name="auteurs" value="julien" checked> Julien</label>
+            </div>
+          </fieldset>
+          <fieldset class="fs">
+            <legend>Rubrique</legend>
+            <div class="choice-line">
+              <label class="inline"><input type="radio" name="rubrique" value="voyage" checked> Voyage</label>
+              <label class="inline"><input type="radio" name="rubrique" value="atelier"> Notes d’atelier</label>
+            </div>
+          </fieldset>
+          <label for="f-voyage">Voyage lié
+            <select id="f-voyage" name="voyage">
+              <option>Aucun</option>
+              <option selected>Lisbonne et Porto · 10–11 oct. 2026 · 10 photos</option>
+              <option>Saint-Malo, grandes marées · sept. 2026</option>
+            </select>
+          </label>
+          <label for="f-date">Date affichée
+            <input id="f-date" name="date" value="12 octobre 2026" aria-describedby="f-date-h">
+            <span class="hint" id="f-date-h">Celle de la publication ; « mis à jour le … » s’ajoute seul ensuite.</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="corps-t">
+        <h2 id="corps-t">Corps du billet <span class="mono">7 blocs · 1 040 mots · 6 min de lecture</span> <span class="pin" aria-hidden="true">4</span></h2>
+        <ol class="blocks">
+          <li class="blk" aria-labelledby="b1-t">
+            <div class="blk-hd">
+              <h3 id="b1-t"><span class="blk-n" aria-hidden="true">1</span>Photo</h3>
+              <span class="mono">pleine largeur · ouvre la visionneuse dans le contexte du billet</span>
+              <div class="blk-tools">
+                <button class="iconbtn" type="button" disabled aria-label="Monter le bloc 1 (déjà en tête)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+                <button class="iconbtn" type="button" aria-label="Descendre le bloc 1, photo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+                <button class="iconbtn" type="button" aria-label="Retirer le bloc 1, photo (Annuler possible)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+              </div>
+            </div>
+            <div class="ph-blk">
+              <img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy">
+              <div class="ph-f">
+                <p class="cartel-r"><span class="t">Miradouro, l’heure dorée</span> <span class="m">— Julien · Miradouro da Graça, Lisbonne · 10 octobre 2026</span><small>Cartel repris de la photothèque · <a class="more" href="#">modifier dans la fiche photo</a></small></p>
+                <label for="b1-alt">Texte de remplacement (repris de la fiche, modifiable)
+                  <textarea id="b1-alt" name="alt" rows="2">Les toits de la Graça au soleil couchant ; au loin, le Tage et la colline du château, dans une lumière orangée.</textarea>
+                </label>
+              </div>
+            </div>
+          </li>
+
+          <li class="blk" aria-labelledby="b2-t">
+            <div class="blk-hd">
+              <h3 id="b2-t"><span class="blk-n" aria-hidden="true">2</span>Texte</h3>
+              <span class="mono">142 mots</span>
+              <div class="blk-tools">
+                <button class="iconbtn" type="button" aria-label="Monter le bloc 2, texte"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+                <button class="iconbtn" type="button" aria-label="Descendre le bloc 2, texte"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+                <button class="iconbtn" type="button" aria-label="Retirer le bloc 2, texte (Annuler possible)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+              </div>
+            </div>
+            <ul class="fmt" aria-label="Mise en forme du bloc 2">
+              <li><button type="button" aria-pressed="false">Intertitre</button></li>
+              <li><button type="button" aria-pressed="true"><i>Italique</i></button></li>
+              <li><button type="button" aria-pressed="false">Lien</button></li>
+              <li><button type="button" aria-pressed="false">Liste</button></li>
+              <li class="note">ni couleur, ni taille, ni gras : le site s’en charge</li>
+            </ul>
+            <label for="b2-txt" class="sr-only">Texte du bloc 2</label>
+            <textarea id="b2-txt" name="b2" rows="5">Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une matinée. Le samedi, à Lisbonne, nous nous sommes levés avant le premier tram, quand l’Alfama sent encore le café et le linge mouillé. Sébastien est descendu vers le Tage, Julien est monté dans les ruelles.</textarea>
+            <p class="typo" role="status"><span aria-hidden="true">✓</span> <b>Typographie corrigée à la saisie :</b> 2 apostrophes droites → ’, « » avec espaces fines, « -- » → tiret —. <button class="more" type="button">Annuler ces corrections</button> <kbd>Ctrl Z</kbd> <span class="pin" aria-hidden="true">6</span></p>
+          </li>
+
+          <li class="blk" aria-labelledby="b3-t">
+            <div class="blk-hd">
+              <h3 id="b3-t"><span class="blk-n" aria-hidden="true">3</span>Citation</h3>
+              <span class="mono">balisée dans sa langue</span>
+              <div class="blk-tools">
+                <button class="iconbtn" type="button" aria-label="Monter le bloc 3, citation"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+                <button class="iconbtn" type="button" aria-label="Descendre le bloc 3, citation"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+                <button class="iconbtn" type="button" aria-label="Retirer le bloc 3, citation (Annuler possible)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+              </div>
+            </div>
+            <div class="grid2">
+              <label class="full" for="b3-q">Citation, telle qu’elle a été dite
+                <textarea id="b3-q" name="q" rows="2" lang="pt-PT">«Fotografe à vontade. As flores não fogem, e eu também não.»</textarea>
+              </label>
+              <label for="b3-lang"><span>Langue de la citation <span class="pin" aria-hidden="true">7</span></span>
+                <select id="b3-lang" name="q_lang" class="mq-focus" aria-describedby="b3-lang-h">
+                  <option value="fr">français</option>
+                  <option value="pt-PT" selected>portugais (Portugal) · pt-PT</option>
+                  <option value="pt-BR">portugais (Brésil) · pt-BR</option>
+                  <option value="es">espagnol · es</option>
+                  <option value="en">anglais · en</option>
+                  <option value="de">allemand · de</option>
+                </select>
+                <span class="hint" id="b3-lang-h">Les lecteurs d’écran la prononceront en portugais.</span>
+              </label>
+              <label for="b3-src">Source
+                <input id="b3-src" name="q_src" value="Inês, fleuriste, rua dos Remédios">
+              </label>
+              <label class="full" for="b3-tr">Traduction (affichée dessous, en français)
+                <textarea id="b3-tr" name="q_tr" rows="2">« Photographiez tant que vous voulez. Les fleurs ne s’en vont pas, et moi non plus. »</textarea>
+              </label>
+            </div>
+          </li>
+
+          <li class="blk sel" aria-labelledby="b4-t" aria-current="true">
+            <div class="blk-hd">
+              <h3 id="b4-t"><span class="blk-n" aria-hidden="true">4</span>Diptyque <span class="sel-tag">· bloc sélectionné</span></h3>
+              <span class="mono">même lieu, deux regards</span>
+              <div class="blk-tools">
+                <button class="iconbtn" type="button" aria-label="Monter le bloc 4, diptyque"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+                <button class="iconbtn" type="button" aria-label="Descendre le bloc 4, diptyque"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+                <button class="iconbtn" type="button" aria-label="Retirer le bloc 4, diptyque (Annuler possible)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+              </div>
+            </div>
+            <label for="b4-t-in">Titre du diptyque
+              <input id="b4-t-in" name="dip_t" value="Même lieu, deux regards : le Douro">
+            </label>
+            <div class="dip-slots">
+              <figure><img src="_commun/photos/mer.webp" width="900" height="600" alt="" loading="lazy"><figcaption><b>À gauche · Sébastien</b>Foz, la barre</figcaption></figure>
+              <button class="swap" type="button">⇄ Échanger</button>
+              <figure><img src="_commun/photos/brume.webp" width="900" height="600" alt="" loading="lazy"><figcaption><b>À droite · Julien</b>Ribeira, brume du fleuve</figcaption></figure>
+            </div>
+          </li>
+
+          <li class="blk" aria-labelledby="b5-t">
+            <div class="blk-hd">
+              <h3 id="b5-t"><span class="blk-n" aria-hidden="true">5</span>Texte</h3>
+              <span class="mono">96 mots</span>
+              <div class="blk-tools">
+                <button class="iconbtn" type="button" aria-label="Monter le bloc 5, texte"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+                <button class="iconbtn" type="button" aria-label="Descendre le bloc 5, texte"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+                <button class="iconbtn" type="button" aria-label="Retirer le bloc 5, texte (Annuler possible)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+              </div>
+            </div>
+            <label for="b5-txt" class="sr-only">Texte du bloc 5</label>
+            <textarea id="b5-txt" name="b5" rows="3">Sébastien a cherché la mer, Julien les gens. Inês nous a vendu des fleurs, Tiago nous a laissé photographier son étal : merci à eux.</textarea>
+          </li>
+        </ol>
+        <p class="hint" style="margin-top:10px">Blocs 6 et 7 repliés dans cette maquette : texte « Porto, la brume et la barre », photo « Inês, rua dos Remédios ».</p>
+        <div class="add-blk" role="group" aria-labelledby="add-lb">
+          <span class="lb" id="add-lb">Ajouter après le bloc 4 :</span>
+          <button class="btn ghost" type="button">Texte</button>
+          <button class="btn ghost" type="button">Photo</button>
+          <button class="btn ghost" type="button">Diptyque</button>
+          <button class="btn ghost" type="button">Citation</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="e-aside">
+      <section class="panel" id="publication" aria-labelledby="pub-t">
+        <h2 id="pub-t">Publication <span class="pin" aria-hidden="true">8</span></h2>
+        <p class="pub-st"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Brouillon</span> visible de vous deux seulement</p>
+        <p class="pub-flow" aria-label="Circuit : brouillon, proposé, publié">○ Brouillon <span aria-hidden="true">→</span> <i class="half" aria-hidden="true"></i> Proposé <span aria-hidden="true">→</span> ● Publié</p>
+        <fieldset class="fs when">
+          <legend>Quand le publier</legend>
+          <label class="inline"><input type="radio" name="quand" value="now"> Dès que je clique sur « Publier »</label>
+          <label class="inline"><input type="radio" name="quand" value="later" checked> Programmer</label>
+          <div class="row">
+            <label for="p-date">Le <input id="p-date" name="p_date" value="lun. 12 oct. 2026" inputmode="text" autocomplete="off"></label>
+            <label for="p-time">à <input id="p-time" name="p_time" value="8 h 00" autocomplete="off"></label>
+          </div>
+          <p class="hint">Lundi 12 octobre à 8 h, heure de Paris. Le flux RSS l’annonce à cette heure-là.</p>
+        </fieldset>
+        <div class="pub-btns">
+          <button class="btn big" type="button">Programmer pour le 12 oct., 8 h</button>
+          <p class="hint">Avant de programmer : <strong>EN à traduire</strong>, DE à revoir. Le billet peut partir en français seul ; les autres langues renverront au français.</p>
+        </div>
+      </section>
+
+      <section class="panel" id="apercu" aria-labelledby="pv-t">
+        <h2 id="pv-t">Aperçu comme sur le site</h2>
+        <div class="seg-pv">
+          <a class="btn ghost" href="#ecran-b">Nuit</a>
+          <a class="btn ghost" href="#ecran-b">Jour</a>
+        </div>
+        <p class="hint" style="margin-top:8px">S’ouvre dans un nouvel onglet ; rien n’est publié.</p>
+      </section>
+
+      <section class="panel weight" aria-labelledby="w-t">
+        <h2 id="w-t">Poids du billet <span class="pin" aria-hidden="true">9</span></h2>
+        <p style="margin:0"><span class="big">640 ko</span> estimés, budget 1,2 Mo</p>
+        <meter min="0" max="1200" low="900" high="1100" optimum="400" value="640" aria-label="Poids estimé : 640 ko sur un budget de 1 200 ko">640 ko sur 1 200</meter>
+        <dl>
+          <dt>7 photos (1 280 px, AVIF)</dt><dd>540 ko</dd>
+          <dt>Planche des 10 photos</dt><dd>84 ko</dd>
+          <dt>Texte, carte d’itinéraire</dt><dd>16 ko</dd>
+        </dl>
+        <p class="hint" style="margin-top:8px">Mesuré à l’ouverture d’un téléphone ; les photos suivantes ne chargent qu’au défilement.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="tp-t">
+        <h2 id="tp-t">Photos du voyage <span class="mono">10 · Lisbonne et Porto</span> <span class="pin" aria-hidden="true">10</span></h2>
+        <ul class="tp-list">
+          <li class="tp" draggable="true"><span class="grip" aria-hidden="true">⠿</span><img src="_commun/photos/quai.webp" width="900" height="600" alt="" loading="lazy"><span class="t">Cais do Sodré, marée basse<small>Sébastien · 10 oct.</small></span><button class="btn sec" type="button" aria-label="Insérer « Cais do Sodré, marée basse » après le bloc 4">Insérer</button></li>
+          <li class="tp" draggable="true"><span class="grip" aria-hidden="true">⠿</span><img src="_commun/photos/ruelle.webp" width="600" height="900" alt="" loading="lazy"><span class="t">Alfama, premier tram<small>Julien · 10 oct.</small></span><button class="btn sec" type="button" aria-label="Insérer « Alfama, premier tram » après le bloc 4">Insérer</button></li>
+          <li class="tp used"><span class="grip" aria-hidden="true"></span><img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy"><span class="t">Miradouro, l’heure dorée<small class="in">✓ dans le bloc 1</small></span><a class="more" href="#b1-t" style="font-size:12.5px">Voir</a></li>
+          <li class="tp" draggable="true"><span class="grip" aria-hidden="true">⠿</span><img src="_commun/photos/ombre.webp" width="900" height="600" alt="" loading="lazy"><span class="t">Tiago, marché do Bolhão<small>Sébastien · 11 oct.</small></span><button class="btn sec" type="button" aria-label="Insérer « Tiago, marché do Bolhão » après le bloc 4">Insérer</button></li>
+          <li class="tp used"><span class="grip" aria-hidden="true"></span><img src="_commun/photos/mer.webp" width="900" height="600" alt="" loading="lazy"><span class="t">Foz, la barre<small class="in">✓ dans le bloc 4</small></span><a class="more" href="#b4-t" style="font-size:12.5px">Voir</a></li>
+          <li class="tp" draggable="true"><span class="grip" aria-hidden="true">⠿</span><img src="_commun/photos/nuit.webp" width="600" height="900" alt="" loading="lazy"><span class="t">Escaliers des Guindais<small>Julien · 11 oct.</small></span><button class="btn sec" type="button" aria-label="Insérer « Escaliers des Guindais » après le bloc 4">Insérer</button></li>
+        </ul>
+        <p class="hint tp-hint">Glissez une photo entre deux blocs, ou utilisez « Insérer » : elle se place après le bloc sélectionné. <a class="more" href="#">Les 10 photos</a></p>
+      </section>
+    </div>
+  </div>
+
+  <!-- ================= Écran B ================= -->
+  <section class="mq-b" aria-labelledby="ecran-b">
+    <p class="mq-screen" id="ecran-b"><b>Écran B</b> Aperçu comme sur le site, nuit et jour <span class="pin" aria-hidden="true">11</span></p>
+    <div class="pv-pair">
+      <figure class="pv nuit">
+        <div class="pv-bar" aria-hidden="true"><span>Aperçu · thème Nicephos, nuit</span><span>non publié</span></div>
+        <div class="pv-page" role="img" aria-label="Aperçu en thème nuit : titre Lisbonne et Porto, sous-titre, signature et date, première photo et début du texte, en clair sur fond noir.">
+          <p class="nm">Nicephos</p>
+          <p class="k">Voyage</p>
+          <p class="h">Lisbonne et Porto</p>
+          <p class="s">Deux jours, deux regards, un même océan</p>
+          <p class="b">Par Sébastien et Julien · 12 octobre 2026 · 6 min de lecture</p>
+          <img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy">
+          <p class="c">Miradouro, l’heure dorée — Julien · Lisbonne</p>
+          <p class="p">Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une matinée.</p>
+        </div>
+        <figcaption>Nuit : prose en Jost 400, contraste 12:1.</figcaption>
+      </figure>
+      <figure class="pv jour">
+        <div class="pv-bar" aria-hidden="true"><span>Aperçu · thème Nicephos, jour</span><span>non publié</span></div>
+        <div class="pv-page" role="img" aria-label="Aperçu en thème jour : la même page en sombre sur fond ivoire.">
+          <p class="nm">Nicephos</p>
+          <p class="k">Voyage</p>
+          <p class="h">Lisbonne et Porto</p>
+          <p class="s">Deux jours, deux regards, un même océan</p>
+          <p class="b">Par Sébastien et Julien · 12 octobre 2026 · 6 min de lecture</p>
+          <img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy">
+          <p class="c">Miradouro, l’heure dorée — Julien · Lisbonne</p>
+          <p class="p">Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une matinée.</p>
+        </div>
+        <figcaption>Jour : mêmes règles, contraste 11:1. Rendu complet : MQ-12.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================= Écran C ================= -->
+  <section class="mq-c" aria-labelledby="ecran-c">
+    <p class="mq-screen" id="traduire"><b id="ecran-c">Écran C</b> Onglet EN : traduire tout le billet sur une page <span class="pin" aria-hidden="true">12</span></p>
+    <table class="trad">
+      <caption>Traduction anglaise <span class="mono">4 textes sur 11 traduits · Tab passe d’un champ au suivant</span></caption>
+      <thead><tr><th scope="col">Élément</th><th scope="col">Français (référence)</th><th scope="col">English</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Titre</th><td class="src">Lisbonne et Porto</td><td><label class="sr-only" for="en-1">Titre en anglais</label><input id="en-1" lang="en" value="Lisbon and Porto"><p class="cellnote">✓ traduit le 11 oct.</p></td></tr>
+        <tr><th scope="row">Chapô</th><td class="src">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens…</td><td><label class="sr-only" for="en-2">Chapô en anglais</label><textarea id="en-2" lang="en" rows="2">Two days, two ways of seeing, one ocean. Sébastien went looking for the sea, Julien for people…</textarea><p class="cellnote">✓ traduit le 11 oct.</p></td></tr>
+        <tr><th scope="row">Bloc 2 · texte</th><td class="src">Nous étions partis avec une seule règle : ne pas photographier la même chose…</td><td><label class="sr-only" for="en-3">Bloc 2 en anglais</label><textarea id="en-3" lang="en" rows="2" aria-describedby="en-3-h"></textarea><p class="cellnote todo" id="en-3-h">▲ à traduire · <button class="more" type="button">Proposer une traduction</button></p></td></tr>
+        <tr><th scope="row">Bloc 3 · traduction de la citation</th><td class="src">« Photographiez tant que vous voulez… »</td><td><label class="sr-only" for="en-4">Traduction de la citation en anglais</label><textarea id="en-4" lang="en" rows="2">“Take as many pictures as you like. The flowers aren’t going anywhere, and neither am I.”</textarea><p class="cellnote">La citation reste en portugais dans toutes les langues.</p></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= Écran D ================= -->
+  <section class="mq-d" aria-labelledby="ecran-d">
+    <p class="mq-screen" id="ecran-d"><b>Écran D</b> Le même bloc Publication selon le rôle <span class="pin" aria-hidden="true">13</span></p>
+    <div class="role-pair">
+      <section class="panel" aria-labelledby="rp-t">
+        <h3 id="rp-t">Photographe : proposer</h3>
+        <p class="pub-st"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Brouillon</span> écrit par Sébastien</p>
+        <label for="rp-mot">Un mot pour le modérateur (facultatif)
+          <textarea id="rp-mot" rows="2">Julien, peux-tu relire la citation d’Inês ? Je n’ai pas son accord écrit pour la photo 04.</textarea>
+        </label>
+        <p class="actions"><button class="btn" type="button">Proposer le billet</button></p>
+        <p class="hint">Vous restez auteur ; Julien ou Sébastien le publient, ou vous le renvoient avec un mot.</p>
+      </section>
+      <section class="panel" aria-labelledby="rm-t">
+        <h3 id="rm-t">Administrateur : après une proposition</h3>
+        <p class="pub-st"><span class="etat todo"><span class="sym" aria-hidden="true"><i class="half"></i></span>Proposé</span> par Sébastien, le 11 oct. à 21 h 58</p>
+        <p class="cartel-r"><span class="m">« Julien, peux-tu relire la citation d’Inês ? Je n’ai pas son accord écrit pour la photo 04. »</span></p>
+        <p class="actions"><button class="btn" type="button">Publier</button> <button class="btn ghost" type="button">Renvoyer avec un mot</button></p>
+        <p class="hint">Après « Publier » : « Billet publié · Annuler » pendant 10 s, avant l’annonce dans le flux RSS.</p>
+      </section>
+    </div>
+  </section>
+</main>
+</div>
+
+<section class="m-bars" aria-label="Barres basses du téléphone, montrées à plat">
+<p class="mq-screen m-only"><b>Téléphone</b> Barre basse, fixée en bas de l’écran au-dessus des onglets (montrée ici à plat)</p>
+<div class="m-bar" aria-label="État et publication du billet" role="region">
+  <p class="mst" role="status"><span class="ok" aria-hidden="true">✓</span> Enregistré à 22 h 42<br><b>○ Brouillon</b> · 640 ko sur 1,2 Mo</p>
+  <a class="btn" href="#publication">Publier…</a>
+</div>
+
+<nav class="tabbar" aria-label="Navigation rapide">
+  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
+  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photos</a>
+  <a class="imp" href="#" aria-label="Importer des photos"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></a>
+  <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
+  <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
+</nav>
+</section>
+
+
+
+
+<aside class="mq-notes" aria-labelledby="mq-notes-t">
+  <p class="mq-id">Maquette MQ-20 · administration · carnets, éditeur de billet · « Chambre noire » au bureau, mode clair sur téléphone · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
+  <h2 id="mq-notes-t">Ce qui change</h2>
+  <p class="mq-lead">Maquette MQ-20 · Administration › Publier › Carnets. L’écran est figé au dimanche 11 octobre 2026 au soir, la veille de la publication : MQ-11 et MQ-12 montrent le même billet publié le lundi 12 octobre à 8 h, puis mis à jour le 14. Aujourd’hui, le seul récit possible est la page d’un voyage : un nom et un texte dans un champ unique, deux champs de traduction pour le nom seulement, un bouton « Enregistrer » qui ne prévient pas si l’on part (UX-A-06). L’éditeur qui suit reprend la coquille de l’administration rangée (MQ-07), sa pastille d’état (MQ-09) et la règle d’enregistrement automatique. Le mode suit le système : « Chambre noire » sur la capture de bureau, clair sur celle du téléphone. Données fictives, photos de démonstration, aucun script.</p>
+  <ol class="mq-list">
+    <li><span class="pin">1</span><span><strong>Où je suis, dans quel état.</strong> Fil d’Ariane « Carnets › Lisbonne et Porto », titre du billet en H1, pastille commune « ○ Brouillon » (forme et mot), adresse publique affichée avant la publication.</span><span class="ref">UX-A-32, UX-A-16 · B&amp;S 1.3 et 6 · RGAA 12.1 · WCAG 1.4.1 · Nielsen n°1</span></li>
+    <li><span class="pin">2</span><span><strong>Trois langues, trois onglets qui disent leur état en mots.</strong> « EN : à traduire », « DE : à revoir, le français a changé ce soir » ; chaque onglet est un lien (une adresse par langue), l’onglet actif porte aria-current et un soulignement, pas seulement une couleur.</span><span class="ref">UX-A-21, UX-T-16 · B&amp;S 1.3 et 7 · RGAA 10.7 et 12.2 · WCAG 1.4.1</span></li>
+    <li><span class="pin">3</span><span><strong>L’en-tête du billet, tel qu’il apparaîtra dans la liste.</strong> Titre, chapô avec compteur de signes, auteurs qui signent sous le titre, rubrique, voyage lié, date affichée ; chaque champ a un libellé visible, les groupes ont leur légende.</span><span class="ref">UX-T-18 · RGAA 11.1, 11.2 et 11.5 · Opquast 6 et 231 · B&amp;S 1.2.1</span></li>
+    <li><span class="pin">4</span><span><strong>Un corps en blocs, sans glisser obligatoire.</strong> Texte, photo, diptyque, citation : chacun a son titre, son numéro et des boutons « Monter », « Descendre », « Retirer » nommés avec le numéro du bloc ; « Retirer » s’annule. La photo reprend son cartel et son texte de remplacement depuis la photothèque.</span><span class="ref">UX-A-32, UX-T-16 · WCAG 2.5.7 et 2.5.8 · RGAA 1.2, 11.9 · B&amp;S 2.1.2 et 3.2</span></li>
+    <li><span class="pin">5</span><span><strong>Une seule façon d’enregistrer : automatiquement, avec Annuler.</strong> « ✓ Enregistré à 22 h 42 » dans une zone d’état annoncée, « Annuler » à côté ; aucune saisie ne peut plus être perdue en quittant la page. Seul « Publier » reste un bouton explicite, parce qu’il a un effet public.</span><span class="ref">UX-A-06 · B&amp;S 1.3, 5.1 et 6 · ISO 9241-110 robustesse face aux erreurs · RGAA 7.5 · WCAG 4.1.3 · Nielsen n°3</span></li>
+    <li><span class="pin">6</span><span><strong>La typographie corrigée à la saisie, et dite.</strong> Apostrophe ’, guillemets « » avec espaces fines, tiret — : le message dit ce qui a été changé, et « Annuler ces corrections » (ou Ctrl Z) rend la main. La mise en forme est limitée à intertitre, italique, lien et liste : ni couleur ni taille, le site s’en charge.</span><span class="ref">UX-T-18, UX-F-29 · B&amp;S 3.2 et 5.3 · Opquast 186 · ISO 9241-110 contrôlabilité</span></li>
+    <li><span class="pin">7</span><span><strong>Une citation dans sa langue.</strong> Le champ de la citation porte lang="pt-PT" ; la langue choisie est reprise à la publication (balise lang), la traduction s’affiche dessous. Le focus de 2 px est montré sur la liste « Langue de la citation ».</span><span class="ref">UX-F-22, UX-T-18 · RGAA 8.7 · WCAG 3.1.2 et 2.4.7 · Opquast 132</span></li>
+    <li><span class="pin">8</span><span><strong>Publier ou programmer, sans surprise.</strong> Le circuit est écrit (○ Brouillon → <i class="half" aria-hidden="true"></i> Proposé → ● Publié) ; « Programmer » demande une date et une heure (heure de Paris) et le bouton les répète ; ce qui manque encore (EN à traduire) est dit avant, sans bloquer.</span><span class="ref">UX-A-32, UX-A-16 · B&amp;S 1.1 et 5.1 · WCAG 3.3.4 · Nielsen n°5</span></li>
+    <li><span class="pin">9</span><span><strong>Un budget de poids, affiché pendant l’écriture.</strong> « 640 ko estimés, budget 1,2 Mo », avec un &lt;meter&gt; doublé du texte et le détail par poste : on sait ce que coûte une photo de plus avant de l’insérer.</span><span class="ref">RGESN 6.1, 5.1 et 6.4 · UX-T-07 · étude B53</span></li>
+    <li><span class="pin">10</span><span><strong>Les photos du voyage à portée de main.</strong> Glisser entre deux blocs, ou « Insérer » (après le bloc sélectionné), qui suffit à lui seul au clavier et au toucher ; une photo déjà placée le dit (« ✓ dans le bloc 4 ») et mène à son bloc.</span><span class="ref">UX-T-16, UX-A-21 · WCAG 2.5.7 · RGAA 7.1 et 12.8 · B&amp;S 2.1.2 · ISO 9241-110 adéquation à la tâche</span></li>
+    <li><span class="pin">11</span><span><strong>Voir avant de publier, de nuit comme de jour.</strong> L’aperçu « comme sur le site » montre le billet dans les deux modes du thème Nicephos, avec la date programmée ; rien n’est publié.</span><span class="ref">UX-T-18, UX-F-29 · Nielsen n°1 · ISO 9241-110 conformité aux attentes</span></li>
+    <li><span class="pin">12</span><span><strong>Traduire tout le billet sur une page.</strong> Un tableau : élément, français de référence, champ anglais balisé lang="en" ; Tab d’un champ au suivant ; « ▲ à traduire » écrit ; « Proposer une traduction » si un traducteur est allumé. Sur téléphone, une carte par élément.</span><span class="ref">UX-A-21 · B&amp;S 2.1.2 · RGAA 5.4, 5.6 et 8.7 · Nielsen n°7</span></li>
+    <li><span class="pin">13</span><span><strong>Le même billet, deux rôles, les mêmes mots.</strong> Le Photographe « Propose » avec un mot facultatif pour le modérateur ; l’Administrateur voit « <i class="half" aria-hidden="true"></i> Proposé », le mot, puis « Publier » ou « Renvoyer avec un mot ». « Publier » s’annule pendant 10 s, avant l’annonce dans le flux.</span><span class="ref">UX-A-32, UX-A-07, UX-A-16 · B&amp;S 3.2 et 6 · ISO 9241-110 contrôlabilité</span></li>
+  </ol>
+  <p class="mq-lead mq-socle">À décider avant de coder : le format de stockage du corps (des blocs en JSON plutôt que du HTML libre, pour garder la typographie, les cartels et les langues sous contrôle), et l’emplacement du traducteur proposé dans l’onglet EN (le même assistant que celui de MQ-07, éteint par défaut).</p>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette, hors encart et pastilles) — <b>bureau 1440 × 900, « Chambre noire »</b> : H1 à 98 px ; contraste le plus faible du texte 4,8:1 (texte indicatif de la recherche) ; fond de la barre latérale sur toute la hauteur ; 11 vignettes, toutes en chargement différé. <b>Pixel 7 (412 × 839, densité 2), mode clair</b> : contraste le plus faible 4,7:1 (#9a5b0c sur #f1eee8) ; la traduction de la citation passe dans une zone de texte de deux lignes (plus de texte coupé) ; aucun défilement horizontal. Seul texte sous 12 px : les raccourcis « Ctrl K » et « Ctrl Z » (10,5 px, UX-A-30). Axe-core (WCAG 2.2 A et AA) : 0 violation sur les deux rendus.</p>
+</aside>
+</body>
+</html>

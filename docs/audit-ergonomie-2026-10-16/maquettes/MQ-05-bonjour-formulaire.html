@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="fr" class="mode-atelier pg-bonjour">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Erreur — 2 points à corriger · Je vous ai photographié · Nicephos</title>
+<meta name="description" content="Maquette MQ-05 (audit du 16 octobre 2026) : formulaire « Bonjour » de la personne photographiée, consentement corrigé.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="_commun/site.css">
+<link rel="stylesheet" href="_commun/site-entete.css">
+<style>
+/* ===== Thème « Nicephos » (repris de public/themes/nicephos.css) + corrections proposées ===== */
+.theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
+  --display-style: normal; --dark: #050505; --dark-ink: #f0efeb; --dark-mute: #b4b2ac; --dark-rule: rgba(240,239,235,.28); }
+.mode-nuit { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
+  --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
+.mode-jour, .mode-auto { color-scheme: light; --paper: #fbfbf9; --ink: #111111; --mute: #5e5d59; --prose: #3a3936; --rule: #dddcd7;
+  --frame: #efeeea; --safelight: #7d6532; --on-accent: #fbfbf9; --field: #5e5d59; --error: #a8412b; --ok: #2f6b3a; }
+@media (prefers-color-scheme: dark) {
+  .mode-auto { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
+    --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
+}
+/* Thème Atelier (valeurs par défaut de site.css) : seules les couleurs d'erreur et de champ sont ajoutées. */
+.mode-atelier { --field: #6b665d; --error: #9e3a22; --ok: #2f6b3a; --on-accent: #f6f4ef; }
+
+/* Corrections typographiques (UX-F-29) et de comportement (UX-F-34) appliquées à toutes les maquettes */
+body { font-weight: 400; position: relative; }
+.theme-nicephos body { font-weight: 400; }
+.mono { font-size: 13px; }
+.eyebrow { font-size: 12px; }
+img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; -webkit-user-drag: auto; }
+:focus-visible, .is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.u, .prose a, .txt a { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.u:hover, .prose a:hover, .txt a:hover { text-decoration-thickness: 2px; }
+.arrow { display: inline-block; }
+.wrap { padding-inline: max(var(--gut), env(safe-area-inset-left)) max(var(--gut), env(safe-area-inset-right)); }
+
+/* Lien d’évitement, en-tête et pied de page : voir _commun/site-entete.css */
+
+/* Annotations : voir _commun/annotations.css (gabarit commun) */
+.site-tools li, .site-nav li { display: flex; align-items: center; }
+@media (min-width: 761px) { .menu-btn + .pin { display: none; } }
+
+/* ===== Composants communs des maquettes correctives du site public (MQ-02 à MQ-06, MQ-15) ===== */
+html { background: var(--paper); }
+body { background: var(--paper); color: var(--ink); }
+.mode-nuit, .mode-jour, .mode-atelier { --err: var(--error); }
+/* Fil d'Ariane en mono, au-dessus du H1 (UX-F-06, Opquast 156) */
+.ariane ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; margin: 0; padding: 8px 0 0; list-style: none; font: 400 13px/1.4 var(--mono); color: var(--mute); }
+.ariane li + li::before { content: '›' / ''; margin-right: 10px; }
+.ariane a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
+.ariane [aria-current] { color: var(--mute); }
+/* Boutons : un seul bouton plein par écran (B&S 1.2.2) */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 26px; border: 1px solid var(--ink);
+  background: var(--ink); color: var(--paper); font: 500 15px/1.2 var(--sans); letter-spacing: .03em; cursor: pointer; text-align: center; }
+.btn-2 { background: transparent; color: var(--ink); font-weight: 400; border-color: var(--field); }
+.btn-s { min-height: 44px; padding: 0 16px; font-size: 14px; }
+/* Champs : filet en --field (5,2:1 en Atelier, 7,4:1 en nuit), 2 px au focus et en erreur (UX-F-04) */
+.f-champ { display: grid; gap: 6px; align-content: start; }
+.f-champ > label, .f-l { font: 500 15px/1.4 var(--sans); color: var(--ink); }
+.f-q { font-weight: 400; color: var(--mute); }
+.f-aide { margin: 0; font-size: 14px; line-height: 1.5; color: var(--mute); }
+.f-input { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--field); border-radius: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.4 var(--sans); }
+textarea.f-input { min-height: 120px; resize: vertical; }
+.f-input:focus, .f-input.is-focus { outline: 2px solid var(--ink); outline-offset: 2px; }
+.f-input[aria-invalid="true"] { border: 2px solid var(--err); }
+.f-err { display: flex; gap: 8px; margin: 0; color: var(--err); font: 500 14.5px/1.45 var(--sans); }
+.f-err { display: block; }
+.f-err::before { margin-right: 8px; }
+.f-err-p { font-weight: 600; }
+.f-err::before { content: '⚠' / ''; }
+fieldset.f-grp { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 10px; }
+fieldset.f-grp > legend { padding: 0; margin-bottom: 8px; font: 500 15px/1.4 var(--sans); color: var(--ink); }
+.f-opt { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 10px 0; color: var(--ink); font-size: 15.5px; line-height: 1.4; cursor: pointer; }
+.f-opt input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--ink); }
+.f-opt input:focus-visible, .f-opt input.is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.f-opt small { display: block; color: var(--mute); font-size: 14px; }
+.f-resume { margin: 0 0 28px; padding: 18px 20px; border: 2px solid var(--err); background: var(--paper); }
+.f-resume:focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.f-resume h2 { margin: 0 0 8px; font: 500 18px/1.3 var(--sans); color: var(--ink); }
+.f-resume ul { margin: 0; padding-left: 20px; }
+.f-resume a { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* Cartel : titre, auteur, lieu, date ; mono pour les références */
+.cartel-t { margin: 0; font: 400 22px/1.3 var(--sans); color: var(--ink); }
+.cartel-m { margin: 0; font: 400 13px/1.6 var(--mono); color: var(--mute); }
+.cartel-m a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
+.eyb { margin: 0; font: 400 12px/1.4 var(--sans); letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
+.pin-in2 { margin-left: 6px; }
+.mq-state > .mq-label .pin { color: #111; letter-spacing: 0; text-transform: none; font-weight: 600; }
+
+/* ===== MQ-05 : formulaire « Bonjour » =====
+   Bureau : thème Atelier (papier). Téléphone : thème Nicephos — nuit, comme le verra la personne qui scanne sa carte. */
+.mode-atelier { --field: #6b665d; --error: #9e3a22; --err: #9e3a22; --prose: #4a463f; }
+@media (max-width: 760px) {
+  :root.pg-bonjour { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b; --frame: #171717;
+    --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --err: #f08c78; --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --display-style: normal; }
+}
+.bj { max-width: 760px; padding-top: clamp(28px, 4vw, 56px); }
+.bj .eyb { margin-bottom: 6px; }
+.bj h1 { margin: 0; font: 400 clamp(40px, 5vw, 64px)/1.05 var(--serif); font-style: var(--display-style); }
+.bj .intro { margin: 14px 0 28px; font-size: 17px; line-height: 1.6; color: var(--prose); max-width: 60ch; }
+.bj-form { display: grid; gap: 40px; }
+.bj-form > fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: 14px; min-width: 0; }
+.bj-form > fieldset > legend { width: 100%; padding: 0 0 10px; margin-bottom: 6px; border-bottom: 1px solid var(--ink); font: 400 26px/1.2 var(--serif); font-style: var(--display-style); }
+.bj-form > fieldset > legend .f-q { font: 400 14px/1 var(--sans); font-style: normal; }
+.bj-sub { margin: 0; padding: 0; border: 0; display: grid; gap: 0; }
+.bj-sub > legend { padding: 0 0 4px; font: 500 15px/1.4 var(--sans); color: var(--ink); }
+.bj-scopes { display: flex; flex-wrap: wrap; gap: 0 28px; padding-left: 34px; }
+.bj-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 16px 24px; }
+.bj-sum { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--ink); cursor: pointer; list-style: none; font-size: 15px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--mute); }
+.bj-sum::-webkit-details-marker { display: none; }
+.bj-sum::before { content: '' / ''; width: 8px; height: 8px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); margin: 0 4px 0 2px; }
+details[open] > .bj-sum::before { transform: rotate(45deg); }
+.bj-ok { margin: 0; padding: 10px 14px; border: 1px solid var(--field); font: 400 13px/1.5 var(--mono); color: var(--ink); }
+.bj-priv { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--prose); }
+.bj-priv a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 32px; }
+.bj-send { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+.f-resume { border-color: var(--err); }
+.f-resume.is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+.f-resume h2 { display: flex; align-items: center; gap: 10px; }
+.f-resume h2::before { content: '⚠' / ''; color: var(--err); }
+/* États côte à côte */
+.etats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
+.etats > div { padding: 20px 22px 26px; border-left: 1px dashed var(--field); display: grid; gap: 12px; align-content: start; }
+.etats > div:first-child { border-left: 0; }
+.etats h3 { margin: 0 0 4px; font: 500 13px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
+.etats .f-opt { font-size: 15px; }
+.quota { display: grid; gap: 6px; margin: 0; padding: 16px 18px; border: 1px solid var(--field); border-left: 4px solid var(--ink); }
+.quota p { margin: 0; }
+.quota a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.mq-state .in { padding: 20px 22px 24px; }
+.mq-state.light-note { }
+@media (max-width: 760px) {
+  .bj h1 { font-size: 40px; }
+  .bj .intro { font-size: 16px; }
+  .bj-form > fieldset > legend { font-size: 23px; }
+  .bj-scopes { padding-left: 34px; flex-direction: column; }
+  .etats { grid-template-columns: 1fr; }
+  .etats > div { border-left: 0; border-top: 1px dashed var(--field); }
+  .etats > div:first-child { border-top: 0; }
+}
+</style>
+<link rel="stylesheet" href="_commun/annotations.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-h wrap">
+  <a class="wordmark" href="#">Nicephos</a>
+  <nav class="site-nav" id="menu-principal" aria-label="Menu principal"><ul role="list"><li><a href="#">Séries</a></li><li><a href="#">Galerie</a></li><li><a href="#">Carte</a></li><li><a href="#">Carnets</a></li><li><a href="#">À propos</a></li><li class="soft"><a href="#">Tirages</a></li></ul></nav>
+  <ul class="site-tools" role="list">
+    <li><a class="tool" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="tool-t">Rechercher</span></a></li>
+    <li><details class="lang"><summary><span class="sr-only">Langue : </span>FR <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <ul role="list"><li><a href="#" lang="fr" hreflang="fr" aria-current="true"><span>Français</span></a></li><li><a href="#" lang="en" hreflang="en">English</a></li><li><a href="#" lang="de" hreflang="de">Deutsch</a></li></ul></details></li>
+    <li><button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-principal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button></li>
+  </ul>
+</header>
+<main id="contenu" class="wrap">
+  <div class="bj">
+    <p class="eyb">Je vous ai photographié</p>
+    <h1>Bonjour&#8239;!</h1>
+    <p class="intro">Vous avez croisé Julien et il vous a peut-être pris en photo. Cette photo vous concerne&#8239;: vous décidez de ce qu’elle devient.</p>
+
+    <div class="f-resume is-focus" id="erreurs" tabindex="-1" role="alert" aria-labelledby="err-h" style="position:relative">
+      <h2 id="err-h">2 points à corriger</h2>
+      <ul>
+        <li><a href="#email">Indiquez votre e-mail pour recevoir la photo</a></li>
+        <li><a href="#age-majeur">Indiquez si vous avez 18 ans</a></li>
+      </ul>
+      <span class="pin pin-abs" style="top:-12px; right:-12px" aria-hidden="true">1</span>
+      <span class="pin pin-abs" style="bottom:12px; right:16px" aria-hidden="true">2</span>
+    </div>
+
+    <form class="bj-form" action="#" method="post" novalidate>
+      <fieldset>
+        <legend>Votre carte</legend>
+        <div class="f-champ">
+          <label for="ref">Référence, comme sur la carte (J-0142)</label>
+          <input class="f-input" id="ref" name="ref" value="J-0142" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" style="max-width:260px">
+        </div>
+        <p class="bj-ok">J-0142 · carte de Julien&#8239;: merci de l’avoir gardée.</p>
+        <details><summary class="bj-sum">Pas de carte&#8239;? Dites-nous quand et où</summary><p class="f-aide">Date, heure et lieu suffisent pour que nous retrouvions la photo.</p></details>
+      </fieldset>
+
+      <fieldset aria-describedby="age-err" style="position:relative">
+        <legend>Votre âge <span class="f-q">(obligatoire)</span><span class="pin pin-in" aria-hidden="true">5</span></legend>
+        <p class="f-err" id="age-err"><span class="f-err-p">Erreur&#8239;:</span> Indiquez si vous avez 18 ans ou plus.</p>
+        <label class="f-opt"><input type="radio" name="age" value="majeur" id="age-majeur" aria-invalid="true" required> J’ai 18 ans ou plus</label>
+        <label class="f-opt"><input type="radio" name="age" value="mineur" aria-invalid="true"> <span>J’ai moins de 18 ans&#8239;: un parent remplit ce formulaire avec moi</span></label>
+        <div class="f-champ" style="padding-left:34px">
+          <label for="parent">Nom du parent <span class="f-q">(obligatoire si moins de 18 ans)</span></label>
+          <input class="f-input" id="parent" name="parent" autocomplete="off" style="max-width:420px">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Ce que vous souhaitez</legend>
+        <label class="f-opt"><input type="checkbox" name="wants_photo" checked> Recevoir la photo</label>
+        <fieldset class="bj-sub">
+          <legend>Publication de la photo</legend>
+          <label class="f-opt"><input type="radio" name="decision" value=""> Je ne sais pas encore</label>
+          <label class="f-opt"><input type="radio" name="decision" value="accord" checked> J’accepte qu’elle soit publiée&#8239;:</label>
+          <div class="bj-scopes">
+            <label class="f-opt"><input type="checkbox" name="scope_site" checked> sur le site</label>
+            <label class="f-opt"><input type="checkbox" name="scope_instagram"> sur Instagram</label>
+          </div>
+          <label class="f-opt"><input type="radio" name="decision" value="refus"> Je refuse toute publication</label>
+        </fieldset>
+      </fieldset>
+
+      <fieldset>
+        <legend>Vos coordonnées<span class="pin pin-in" aria-hidden="true">6</span></legend>
+        <div class="bj-row">
+          <div class="f-champ" style="position:relative">
+            <label for="email">Votre e-mail <span class="f-q">(nécessaire pour recevoir la photo ou donner votre accord)</span></label>
+            <input class="f-input" type="email" id="email" name="email" autocomplete="email" aria-invalid="true" aria-describedby="email-err" required>
+            <p class="f-err" id="email-err"><span class="f-err-p">Erreur&#8239;:</span> Indiquez votre e-mail pour recevoir la photo.</p>
+            <span class="pin pin-abs" style="top:-6px; right:0" aria-hidden="true">3</span>
+          </div>
+          <div class="f-champ" style="position:relative">
+            <label for="nom">Votre prénom ou nom <span class="f-q">(obligatoire avec un accord)</span></label>
+            <input class="f-input is-focus" id="nom" name="name" autocomplete="name" value="Inès" required>
+            <span class="pin pin-abs" style="top:-6px; right:0" aria-hidden="true">4</span>
+          </div>
+        </div>
+        <p class="bj-priv">Votre adresse sert seulement à vous répondre et à vous envoyer votre photo&#8239;; un accusé de réception vous est envoyé. Sans accord ni refus, votre demande est effacée au bout de 12 mois. <a href="#">Confidentialité</a> · <a href="#">Vos droits sur vos données</a><span class="pin pin-in" aria-hidden="true">7</span></p>
+      </fieldset>
+
+      <div class="bj-send"><button class="btn" type="submit">Envoyer</button><span class="f-aide">Nous répondons sous 7 jours.</span></div>
+    </form>
+  </div>
+
+  <section class="mq-state" aria-labelledby="etats-h">
+    <h2 class="mq-label" id="etats-h">Trois états côte à côte <span>Extrait « Votre âge », « Recevoir la photo » et l’e-mail : vide, focus sur une case, après un envoi incomplet</span><span class="pin" aria-hidden="true">9</span></h2>
+    <div class="etats">
+      <div>
+        <h3>1 · Vide</h3>
+        <fieldset class="f-grp"><legend>Votre âge <span class="f-q">(obligatoire)</span></legend>
+          <label class="f-opt"><input type="radio" name="age-a"> J’ai 18 ans ou plus</label>
+          <label class="f-opt"><input type="radio" name="age-a"> J’ai moins de 18 ans&#8239;: un parent remplit ce formulaire avec moi</label></fieldset>
+        <label class="f-opt"><input type="checkbox" name="photo-a"> Recevoir la photo</label>
+        <div class="f-champ"><label for="email-a">Votre e-mail <span class="f-q">(nécessaire pour recevoir la photo)</span></label><input class="f-input" id="email-a" type="email" autocomplete="email"></div>
+      </div>
+      <div>
+        <h3>2 · Focus sur une case</h3>
+        <fieldset class="f-grp"><legend>Votre âge <span class="f-q">(obligatoire)</span></legend>
+          <label class="f-opt"><input type="radio" name="age-b" checked> J’ai 18 ans ou plus</label>
+          <label class="f-opt"><input type="radio" name="age-b"> J’ai moins de 18 ans&#8239;: un parent remplit ce formulaire avec moi</label></fieldset>
+        <label class="f-opt"><input type="checkbox" class="is-focus" name="photo-b" checked> Recevoir la photo</label>
+        <div class="f-champ"><label for="email-b">Votre e-mail <span class="f-q">(nécessaire pour recevoir la photo)</span></label><input class="f-input" id="email-b" type="email" autocomplete="email"></div>
+      </div>
+      <div>
+        <h3>3 · Après un envoi incomplet</h3>
+        <fieldset class="f-grp" aria-describedby="age-c-err"><legend>Votre âge <span class="f-q">(obligatoire)</span></legend>
+          <p class="f-err" id="age-c-err"><span class="f-err-p">Erreur&#8239;:</span> Indiquez si vous avez 18 ans ou plus.</p>
+          <label class="f-opt"><input type="radio" name="age-c" aria-invalid="true"> J’ai 18 ans ou plus</label>
+          <label class="f-opt"><input type="radio" name="age-c" aria-invalid="true"> J’ai moins de 18 ans&#8239;: un parent remplit ce formulaire avec moi</label></fieldset>
+        <label class="f-opt"><input type="checkbox" name="photo-c" checked> Recevoir la photo</label>
+        <div class="f-champ"><label for="email-c">Votre e-mail <span class="f-q">(nécessaire pour recevoir la photo)</span></label><input class="f-input" id="email-c" type="email" autocomplete="email" aria-invalid="true" aria-describedby="email-c-err"><p class="f-err" id="email-c-err"><span class="f-err-p">Erreur&#8239;:</span> Indiquez votre e-mail pour recevoir la photo.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mq-state" aria-labelledby="quota-h">
+    <h2 class="mq-label" id="quota-h">Autre état <span>Limite anti-abus atteinte : un bandeau séparé des erreurs de saisie, qui garde la saisie</span><span class="pin" aria-hidden="true">8</span></h2>
+    <div class="in">
+      <div class="quota" role="status">
+        <p><strong>Ce formulaire est limité pour éviter les envois automatiques.</strong></p>
+        <p>Réessayez à partir de 15 h 40, ou écrivez à <a href="mailto:info@nicephos.art">info@nicephos.art</a>. Ce que vous avez saisi est conservé.</p>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="site-f wrap">
+  <p>© 2026 Sébastien &amp; Julien</p>
+  <ul role="list" aria-label="Pied de page"><li><a href="#">Tirages et licences</a></li><li><a href="#">Contact</a></li><li><a href="#" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="#">Flux RSS</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Mentions légales</a></li></ul>
+</footer>
+
+<aside class="mq-notes" aria-labelledby="mq-h">
+  <p class="mq-id">Maquette MQ-05 · site public · /bonjour · thème Atelier sur bureau, « Nicephos — nuit » sur téléphone · Camille Arnaud, 16 octobre 2026</p>
+  <h2 id="mq-h">Ce qui change</h2>
+  <p class="mq-lead">Le formulaire qui engage le droit à l’image d’une personne devient lisible, navigable au clavier et honnête sur ce qu’il exige. Montré ici après un envoi incomplet : titre de la page « Erreur — 2 points à corriger · Je vous ai photographié ».</p>
+  <ol>
+    <li><span class="pin">1</span><p>Après l’envoi, le titre de la page commence par « Erreur — 2 points à corriger », et le focus est donné au résumé (tabindex=-1, contour de 2 px montré), au lieu de rester sur la page.<span class="ref">UX-F-05 · RGAA 11.10 et 8.6 · WCAG 3.3.1 et 2.4.2 · Opquast 70 · B&amp;S 5.2</span></p></li>
+    <li><span class="pin">2</span><p>Chaque point du résumé est un lien qui mène à son champ : on corrige sans chercher.<span class="ref">UX-F-05 · WCAG 3.3.3 · Opquast 71 · Nielsen #9</span></p></li>
+    <li><span class="pin">3</span><p>Sous le champ, « ⚠ Erreur : … » en texte, relié par aria-describedby et aria-invalid, filet de 2 px : l’erreur ne repose plus sur la couleur d’un trait. Couleur d’erreur propre à chaque thème : brique #9e3a22 en Atelier (6,2:1), corail #f08c78 en nuit (8,2:1), distincte du sable des états actifs.<span class="ref">UX-F-04 · UX-F-05 · RGAA 3.1 et 11.10 · WCAG 1.4.1 et 3.3.1</span></p></li>
+    <li><span class="pin">4</span><p>Les champs se voient : cadre de 1 px en <code>--field</code>, 5,2:1 en Atelier et 7,4:1 en nuit (1,30:1 et 1,41:1 aujourd’hui). Au focus, contour de 2 px : on retire le <code>outline: none</code> de <code>.hello-form</code>.<span class="ref">UX-F-04 · UX-F-03 · RGAA 3.3 et 10.7 · WCAG 1.4.11 et 2.4.7</span></p></li>
+    <li><span class="pin">5</span><p>La question de l’âge, reprise de l’app de terrain, avant les usages : « J’ai moins de 18 ans : un parent remplit ce formulaire avec moi », puis le nom du parent. Côté serveur, un accord de mineur sans parent reste « à confirmer » et ne rend jamais la photo publiable.<span class="ref">UX-T-02 · Code civil art. 9 (droit à l’image) et art. 371-1 (autorité parentale) · B&amp;S 5.1 Protection contre les erreurs</span></p></li>
+    <li><span class="pin">6</span><p>Ce qui est exigé est dit avant l’envoi, dans le libellé : « (obligatoire) », « (nécessaire pour recevoir la photo ou donner votre accord) », « (obligatoire avec un accord) », avec required côté navigateur. Chaque fieldset a sa légende.<span class="ref">UX-F-05 · RGAA 11.5, 11.6 et 11.10 · WCAG 3.3.2 · Opquast 69</span></p></li>
+    <li><span class="pin">7</span><p>« Confidentialité » est souligné, et « Vos droits sur vos données » mène directement à la rubrique. Un accusé de réception est annoncé.<span class="ref">UX-F-23 · UX-T-04 · RGAA 10.6 · WCAG 1.4.1</span></p></li>
+    <li><span class="pin">8</span><p>La limite anti-abus ne compte plus que les envois acceptés. Quand elle joue, un bandeau à part dit l’heure de reprise (« à partir de 15 h 40 ») et donne un recours par e-mail : une demande sur ses données n’est jamais bloquée.<span class="ref">UX-F-27 · WCAG 2.2.1 · B&amp;S 5.2 · Nielsen #9</span></p></li>
+    <li><span class="pin">9</span><p>Les trois états côte à côte montrent le focus des cases et des radios, invisible aujourd’hui (0 pixel modifié) : contour de 2 px décalé de 3 px sur la case « Recevoir la photo ». Le résumé « Pas de carte ? » retrouve son chevron.<span class="ref">UX-F-03 · UX-F-04 · RGAA 10.7 · WCAG 2.4.7 (et 2.4.13 en AAA)</span></p></li>
+  </ol>
+  <p class="mq-measures">Mesures sur cette maquette : Atelier — texte #1d1c1a sur #f6f4ef 15,5:1, aides #6b665d 5,2:1, erreur #9e3a22 6,2:1 ; nuit (téléphone) — texte 17,1:1, aides 7,4:1, erreur #f08c78 8,2:1. Cibles des cases et radios : 44 px de haut (libellé compris). Le contrôle se fait aussi dans le navigateur (checkValidity, mêmes textes que le serveur) ; sans JavaScript, le serveur renvoie exactement cette page.</p>
+</aside>
+</body>
+</html>

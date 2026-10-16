@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="fr" class="theme-nicephos mode-nuit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<!-- Sur le site : /prive/<id>, X-Robots-Tag: noindex, Referrer-Policy: no-referrer, Cache-Control: no-store ; images en private, no-cache (étude, G32, G39). -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Galerie de Marie · Nicephos</title>
+<link rel="stylesheet" href="_commun/site.css">
+<style>
+/* Maquette MQ-17 — Camille Arnaud, 16 octobre 2026.
+   Jetons du thème « Nicephos — nuit » (public/themes/nicephos.css), recopiés ici : la feuille du thème n'est pas dans _commun. */
+.theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif; --display-style: normal; }
+.theme-nicephos.mode-nuit {
+  color-scheme: dark;
+  --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b; --frame: #171717;
+  --safelight: #cbb68b; --on-accent: #0b0b0b; --error: #ff8a70;
+  --annot: #f5c84c; --on-annot: #111111;
+  --bar-h: 76px;
+}
+/* Capture de la planche entière (adresse …#planche) : la barre reprend sa place dans le flux. */
+html:has(#planche:target) .pv-bar { position: static; }
+html { scroll-padding-bottom: calc(var(--bar-h) + 16px); }  /* la barre collante ne cache jamais l’élément focalisé (WCAG 2.4.11) */
+body { font-weight: 400; }
+.skip { position: absolute; left: 16px; top: -80px; z-index: 30; padding: 12px 16px; background: var(--ink); color: var(--paper); font-size: 14px; }
+.skip:focus { top: 12px; }
+
+
+
+a.u, .pv-legal a, .pg-foot a, .pv-word a, .mq-page p a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+
+/* En-tête privé : marque en texte, langue, quitter. Aucun menu public, aucune recherche. */
+.pg-top { display: flex; justify-content: space-between; align-items: center; gap: 8px 24px; flex-wrap: wrap; padding-block: 10px; border-bottom: 1px solid var(--rule); }
+.pg-brand { margin: 0; font-size: 14px; font-weight: 300; letter-spacing: .42em; text-transform: uppercase; color: var(--mute); }
+.pg-brand span { letter-spacing: .24em; }
+.pg-top-r { display: flex; align-items: center; gap: 8px 22px; }
+.pg-top .langs { gap: 0 18px; font-size: 13px; }
+.pg-top .langs a { letter-spacing: .04em; }
+.pg-top form { margin: 0; }
+.pg-quit { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid var(--mute); color: var(--ink); font-size: 14px; font-weight: 400; }
+.pg-quit:hover { border-color: var(--ink); }
+.lang-s { display: none; }
+.lang-s summary { list-style: none; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; color: var(--mute); font-size: 13px; letter-spacing: .08em; cursor: pointer; }
+.lang-s summary::-webkit-details-marker { display: none; }
+
+/* En-tête de la galerie */
+.pv-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: 24px 64px; align-items: end; padding-block: 44px 28px; }
+.pv-kicker { margin: 0 0 12px; color: var(--mute); font-size: 12px; font-weight: 400; letter-spacing: .24em; text-transform: uppercase; }
+.pv-head h1 { margin: 0; font-weight: 300; font-size: clamp(34px, 4.6vw, 54px); line-height: 1.06; letter-spacing: .01em; }
+.pv-meta { margin: 14px 0 0; color: var(--ink); font: 13px/1.6 var(--mono); letter-spacing: .03em; }
+.pv-word { margin: 20px 0 0; max-width: 62ch; color: var(--prose); font-size: 16.5px; line-height: 1.7; }
+.pv-word cite { font-style: normal; color: var(--mute); white-space: nowrap; }
+.pv-dl { display: grid; gap: 10px; justify-items: start; padding: 20px 22px; border: 1px solid var(--rule); }
+.pv-zip { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 20px; background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 500; }
+.pv-zip span { font-weight: 400; }
+.pv-zip:hover { background: #fff; }
+.pv-dl p { margin: 0; color: var(--mute); font-size: 13.5px; line-height: 1.55; }
+
+/* Vues et légende des gestes */
+.pv-tools { display: flex; justify-content: space-between; align-items: center; gap: 8px 32px; flex-wrap: wrap; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.pv-tabs { display: flex; gap: 0 28px; }
+.pv-tabs a { display: inline-flex; align-items: center; gap: 8px; min-height: 52px; color: var(--mute); font-size: 15px; border-bottom: 2px solid transparent; }
+.pv-tabs a[aria-current] { color: var(--ink); font-weight: 400; border-bottom-color: var(--safelight); }
+.pv-tabs a:hover { color: var(--ink); }
+.pv-how { margin: 0; color: var(--mute); font-size: 13.5px; display: flex; gap: 6px 20px; flex-wrap: wrap; align-items: center; padding-block: 8px; }
+.pv-how span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Planche en rangées justifiées : l'ordre de Julien se lit de gauche à droite, chaque photo garde son format (UX-F-13). */
+.pv-grid { list-style: none; margin: 0; padding-block: 32px 8px; display: flex; flex-wrap: wrap; gap: 30px 16px; --h: 280px; }
+.pv-grid::after { content: ''; flex-grow: 1e6; }
+.pv-grid > li { flex: calc(var(--r) * 1000) 1 calc(var(--r) * var(--h)); min-width: 0; }
+.pv-grid figure { margin: 0; }
+.pv-ph { display: block; background: var(--frame); }
+.pv-ph img { width: 100%; height: auto; aspect-ratio: var(--r); }
+.pv-ph:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.pv-grid figcaption { padding-top: 10px; display: grid; gap: 2px; }
+.pv-t { font-size: 15px; line-height: 1.35; color: var(--ink); }
+.pv-t .n { font: 13px var(--mono); color: var(--mute); margin-right: 8px; }
+.pv-acts { display: flex; align-items: center; gap: 4px 14px; flex-wrap: wrap; margin-left: -6px; }
+.pv-acts form { margin: 0; }
+.fav, .dl { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 6px; color: var(--mute); font-size: 14px; white-space: nowrap; }
+.fav:hover, .dl:hover { color: var(--ink); }
+.fav svg { width: 20px; height: 20px; }
+.fav[aria-pressed="true"] { color: var(--ink); font-weight: 400; }
+.fav[aria-pressed="true"] svg { fill: var(--safelight); stroke: var(--safelight); }
+.fav:focus-visible, .fav.demo-focus, .dl:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.dl svg { width: 18px; height: 18px; }
+.nodl { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; color: var(--mute); font-size: 13.5px; }
+.pv-more { display: grid; place-content: center; text-align: center; gap: 6px; aspect-ratio: 1.5; border: 1px dashed var(--annot); color: var(--annot); font: 13px/1.6 var(--mono); padding: 16px; }
+.mob-only { display: none; }
+
+/* Barre collante des favoris : une seule action principale, ne masque jamais le focus. */
+.pv-bar { position: sticky; bottom: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; gap: 10px 24px; flex-wrap: wrap; min-height: var(--bar-h); margin-top: 40px; padding: 12px var(--gut) calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(11, 11, 11, .96); border-top: 1px solid var(--mute); }
+.pv-count { margin: 0; display: inline-flex; align-items: center; gap: 10px; font-size: 16px; color: var(--ink); }
+.pv-count svg { width: 20px; height: 20px; fill: var(--safelight); stroke: var(--safelight); }
+.pv-count a { color: var(--mute); font-size: 14px; text-decoration: underline; text-underline-offset: 4px; display: inline-flex; align-items: center; min-height: 44px; margin-left: 6px; }
+.pv-bar-acts { display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; }
+.pv-bar-acts form { margin: 0; }
+.pv-btn { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 500; }
+.pv-btn:hover { background: #fff; }
+.pv-btn2 { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border: 1px solid var(--mute); color: var(--ink); font-size: 15px; font-weight: 400; }
+.pv-btn2:hover { border-color: var(--ink); }
+.pv-legal { margin: 28px var(--gut) 0; max-width: 90ch; color: var(--mute); font-size: 13.5px; line-height: 1.6; }
+
+.pg-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap; padding-block: 14px 18px; margin-top: 32px; border-top: 1px solid var(--rule); color: var(--mute); }
+.pg-foot span { display: flex; gap: 0 18px; flex-wrap: wrap; }
+.pg-foot a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* Planche des autres écrans (maquette) */
+.mq-states { padding: 56px var(--gut) 8px; border-top: 1px dashed var(--annot); margin-top: 24px; }
+.mq-states > h2 { margin: 0 0 8px; font-weight: 400; font-size: 13px; letter-spacing: .3em; text-transform: uppercase; color: var(--annot); }
+.mq-states > p { margin: 0 0 28px; color: var(--prose); max-width: 80ch; font-size: 15px; }
+.mq-screen { margin: 0; display: grid; gap: 10px; }
+.mq-screen > figcaption { color: var(--annot); font: 12px/1.5 var(--mono); letter-spacing: .03em; }
+.mq-screen > div { min-width: 0; }
+.mq-tab { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #1c1c1c; border: 1px solid var(--rule); border-bottom: 0; border-radius: 8px 8px 0 0; color: var(--prose); font: 12px/1.4 var(--mono); }
+.mq-tab::before { content: ''; width: 10px; height: 10px; border: 1px solid var(--mute); border-radius: 2px; flex: none; }
+.mq-page { border: 1px solid var(--rule); background: var(--paper); padding: 24px 26px 28px; display: grid; gap: 16px; }
+.mq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 32px; align-items: start; margin-top: 40px; }
+.mq-grid > * { min-width: 0; }
+
+/* Visionneuse dans le contexte privé */
+.pvv { padding: 0; background: #050505; gap: 0; }
+.pvv-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 24px; border-bottom: 1px solid var(--rule); }
+.pvv-back { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--ink); font-size: 15px; }
+.pvv-nav { display: flex; align-items: center; gap: 10px; }
+.pvv-nav .mono { color: var(--prose); font-size: 12.5px; margin-right: 6px; }
+.pvv-nav a { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--mute); display: grid; place-items: center; color: var(--ink); }
+.pvv-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); gap: 48px; align-items: end; padding: 32px 40px 36px; }
+.pvv-body img { justify-self: end; width: auto; max-width: 100%; height: min(70vh, 640px); aspect-ratio: 2 / 3; object-fit: contain; background: var(--frame); }
+.pvv-cartel { display: grid; gap: 14px; align-content: end; padding-bottom: 4px; }
+.pvv-cartel h3 { margin: 0; font-weight: 300; font-size: 26px; line-height: 1.2; }
+.pvv-meta { margin: -6px 0 0; color: var(--prose); font-size: 15px; line-height: 1.6; }
+.pvv-meta .mono { color: var(--mute); font-size: 12px; }
+.pvv-cartel .fav { padding: 0 16px 0 12px; border: 1px solid var(--mute); }
+.pvv-dl { display: grid; gap: 2px; justify-items: start; }
+.pvv-dl a { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 18px; background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 500; }
+.pvv-dl span { color: var(--mute); font-size: 13px; }
+.pvv-print { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; justify-self: start; }
+.pvv-keys { margin: 4px 0 0; padding-top: 12px; border-top: 1px solid var(--rule); color: var(--mute); font-size: 13px; }
+.pvv-keys kbd svg { display: block; }
+.pvv-keys kbd { display: inline-flex; align-items: center; vertical-align: -3px; min-height: 20px; font: 13px var(--mono); color: var(--prose); border: 1px solid var(--mute); border-radius: 3px; padding: 0 5px; }
+
+/* Petits écrans d'état */
+.mq-page .pg-brand { font-size: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+.st-ok { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; padding: 14px 16px; border-left: 3px solid var(--safelight); background: rgba(203, 182, 139, .08); font-size: 15px; line-height: 1.55; }
+.st-ok .sy { color: var(--safelight); font-weight: 500; }
+.st-ok strong { font-weight: 500; }
+.st-ok > span:last-child { grid-column: 2; color: var(--prose); font-size: 14px; }
+.mq-page h3 { margin: 0; font-weight: 300; font-size: 26px; line-height: 1.15; }
+.mq-page p { margin: 0; color: var(--prose); font-size: 15px; line-height: 1.6; }
+.mini { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: end; }
+.mini img { width: 150px; height: 100px; background: var(--frame); }
+
+/* Encart « Ce qui change » */
+
+
+
+
+
+
+
+
+@media (max-width: 900px) {
+  .pv-head { grid-template-columns: 1fr; }
+  .pvv-body { grid-template-columns: 1fr; padding: 0 0 24px; gap: 20px; }
+  .pvv-body img { justify-self: center; height: auto; width: 100%; }
+  .pvv-cartel { padding: 0 18px; }
+}
+@media (max-width: 640px) {
+  :root { --bar-h: 124px; }
+  .pg-brand { font-size: 12px; letter-spacing: .34em; }
+  .pg-brand span { display: none; }
+  .pg-top .langs { display: none; }
+  .lang-s { display: block; }
+  .pg-quit { padding: 0 12px; font-size: 13.5px; }
+  .pv-head { padding-block: 28px 20px; }
+  .pv-word { font-size: 16px; }
+  .pv-how { font-size: 13px; }
+  .pv-grid { gap: 26px 0; }
+  .pv-grid > li { flex: 1 1 100%; }
+  .pv-grid > li.desk-only { display: none; }
+  .pv-grid > li.mob-only { display: block; }
+  .pv-bar { padding-inline: 16px; }
+  .pv-bar-acts { width: 100%; }
+  .pv-bar-acts form { flex: 1; }
+  .pv-btn { width: 100%; justify-content: center; padding: 0 12px; }
+  .pv-btn2 { display: none; }
+  .pv-count a.mob-only { display: inline-flex; }
+  .pvv-top { padding: 4px 12px; gap: 8px; }
+  .pvv-back { white-space: nowrap; font-size: 14.5px; gap: 8px; }
+  .pvv-nav { gap: 6px; }
+  .pvv-nav .mono { white-space: nowrap; margin-right: 2px; }
+  .pg-top { flex-wrap: nowrap; gap: 8px; }
+  .pg-top-r { gap: 8px; }
+  .pg-top-r > .pin { margin: 0; }
+  .mini { grid-template-columns: 110px 1fr; }
+  .mini img { width: 110px; height: 73px; }
+}
+
+.mono { font-size: 13px; }
+a.mob-only { align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
+/* Capture pleine page : la barre « Vos favoris », collante en bas de l’écran sur le site, est posée à sa place (après la grille). */
+.pv-bar { position: relative !important; }
+</style>
+<link rel="stylesheet" href="_commun/annotations.css">
+</head>
+<body>
+<a class="skip" href="#photos">Aller aux photos</a>
+
+
+<header class="pg-top wrap">
+  <p class="pg-brand">Nicephos <span>· Galerie privée</span></p>
+  <div class="pg-top-r">
+    <nav class="langs" aria-label="Langue de la page">
+      <a href="#" lang="fr" hreflang="fr" aria-current="true">Français</a>
+      <a href="#" lang="en" hreflang="en">English</a>
+      <a href="#" lang="de" hreflang="de">Deutsch</a>
+    </nav>
+    <details class="lang-s">
+      <summary aria-label="Langue : français">FR <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+    </details>
+    <form method="post" action="#"><button class="pg-quit" type="submit"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M15 4h4v16h-4M10 17l5-5-5-5M15 12H3"/></svg>Quitter la galerie</button></form>
+    <span class="pin"><span class="sr-only">Repère </span>1</span>
+  </div>
+</header>
+
+<main id="contenu"><span id="planche"></span>
+  <section class="pv-head wrap" aria-labelledby="titre">
+    <div>
+      <p class="pv-kicker">Préparée par Julien</p>
+      <h1 id="titre">Galerie de Marie<span class="pin"><span class="sr-only">Repère </span>2</span></h1>
+      <p class="pv-meta">24 photos · séance du <time datetime="2026-09-12">12 septembre 2026</time> · accès jusqu’au <time datetime="2026-11-15">15 novembre</time></p>
+      <p class="pv-word">Marie, voici notre fin d’après-midi sur la plage du Sillon, jusqu’à la nuit. Marquez d’un cœur celles que vous préférez, puis envoyez-moi votre sélection : je préparerai les tirages. <cite>— Julien</cite></p>
+    </div>
+    <div class="pv-dl">
+      <a class="pv-zip" href="#" download="Nicephos-Galerie-de-Marie-2026-09-12.zip"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg>Tout télécharger <span>(ZIP, 29 Mo)</span></a>
+      <p>Les 24 photos en JPEG de 2 000 px, pour votre usage personnel. Vous n’en gardez que quelques-unes ? Téléchargez-les une à une, chacune pèse environ 1,2 Mo.<span class="pin"><span class="sr-only">Repère </span>3</span></p>
+    </div>
+  </section>
+
+  <div class="pv-tools wrap">
+    <nav class="pv-tabs" aria-label="Photos affichées">
+      <a href="#" aria-current="page">Toutes (24)</a>
+      <a href="#">Vos favoris (6)</a>
+      <span class="pin" style="align-self:center"><span class="sr-only">Repère </span>4</span>
+    </nav>
+    <p class="pv-how"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori : à envoyer à Julien</span><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg>Télécharger : JPEG 2 000 px, usage personnel</span></p>
+  </div>
+
+  <ul class="pv-grid wrap" id="photos" aria-label="Photos 1 à 12 sur 24, dans l’ordre choisi par Julien">
+    <li style="--r:1.5"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p01"><img src="_commun/photos/ciel.webp" alt="" width="900" height="600"></a>
+      <figcaption><span class="pv-t" id="p01"><span class="n">01</span>Le soleil derrière Cézembre</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav" type="submit" aria-pressed="false" aria-label="Favori : Le soleil derrière Cézembre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-01-soleil-cezembre.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « Le soleil derrière Cézembre », JPEG 2 000 px, </span>1,2 Mo</a><span class="pin" style="margin:0"><span class="sr-only">Repère </span>5</span></span></figcaption></figure></li>
+    <li style="--r:.6667"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p02"><img src="_commun/photos/portrait.webp" alt="" width="600" height="900"></a>
+      <figcaption><span class="pv-t" id="p02"><span class="n">02</span>Marie, contre-jour</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav" type="submit" aria-pressed="true" aria-label="Favori : Marie, contre-jour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-02-contre-jour.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « Marie, contre-jour », JPEG 2 000 px, </span>1,3 Mo</a><span class="pin" style="margin:0"><span class="sr-only">Repère </span>6</span></span></figcaption></figure></li>
+    <li style="--r:1.5"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p03"><img src="_commun/photos/dune.webp" alt="" width="900" height="600"></a>
+      <figcaption><span class="pv-t" id="p03"><span class="n">03</span>Sable chaud, 17 h</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav" type="submit" aria-pressed="false" aria-label="Favori : Sable chaud, 17 h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-03-sable-chaud.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « Sable chaud, 17 h », JPEG 2 000 px, </span>1,1 Mo</a><span class="pin" style="margin:0"><span class="sr-only">Repère </span>7</span></span></figcaption></figure></li>
+    <li style="--r:.6667"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p04"><img src="_commun/photos/foret.webp" alt="" width="600" height="900"></a>
+      <figcaption><span class="pv-t" id="p04"><span class="n">04</span>Sous les pins de Rochebonne</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav" type="submit" aria-pressed="false" aria-label="Favori : Sous les pins de Rochebonne"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-04-seule-sur-la-cale.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « Sous les pins de Rochebonne », JPEG 2 000 px, </span>1,2 Mo</a></span></figcaption></figure></li>
+    <li style="--r:1.5"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p05"><img src="_commun/photos/brume.webp" alt="" width="900" height="600" loading="lazy"></a>
+      <figcaption><span class="pv-t" id="p05"><span class="n">05</span>Brume sur le Grand Bé</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav" type="submit" aria-pressed="true" aria-label="Favori : Brume sur le Grand Bé"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-05-brume-grand-be.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « Brume sur le Grand Bé », JPEG 2 000 px, </span>0,9 Mo</a></span></figcaption></figure></li>
+    <li style="--r:1.5"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p06"><img src="_commun/photos/mer.webp" alt="" width="900" height="600" loading="lazy"></a>
+      <figcaption><span class="pv-t" id="p06"><span class="n">06</span>Marée montante</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav" type="submit" aria-pressed="false" aria-label="Favori : Marée montante"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-06-maree-montante.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « Marée montante », JPEG 2 000 px, </span>1,0 Mo</a></span></figcaption></figure></li>
+    <li style="--r:1.5" class="desk-only"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p07"><img src="_commun/photos/lac.webp" alt="" width="900" height="600" loading="lazy"></a>
+      <figcaption><span class="pv-t" id="p07"><span class="n">07</span>La lune se lève</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav demo-focus" type="submit" aria-pressed="false" aria-label="Favori : La lune se lève"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-07-la-lune-se-leve.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « La lune se lève », JPEG 2 000 px, </span>1,1 Mo</a></span></figcaption></figure></li>
+    <li style="--r:.6667" class="desk-only"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p08"><img src="_commun/photos/nuit.webp" alt="" width="600" height="900" loading="lazy"></a>
+      <figcaption><span class="pv-t" id="p08"><span class="n">08</span>Marie et Paul, à la nuit</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav" type="submit" aria-pressed="true" aria-label="Favori : Marie et Paul, à la nuit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-08-marie-et-paul.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « Marie et Paul, à la nuit », JPEG 2 000 px, </span>1,4 Mo</a></span></figcaption></figure></li>
+    <li style="--r:1.5" class="desk-only"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p09"><img src="_commun/photos/quai.webp" alt="" width="900" height="600" loading="lazy"></a>
+      <figcaption><span class="pv-t" id="p09"><span class="n">09</span>Les brise-lames, à trois</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav" type="submit" aria-pressed="false" aria-label="Favori : Les brise-lames, à trois"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-09-brise-lames.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « Les brise-lames, à trois », JPEG 2 000 px, </span>1,2 Mo</a></span></figcaption></figure></li>
+    <li style="--r:.6667" class="desk-only"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p10"><img src="_commun/photos/ruelle.webp" alt="" width="600" height="900" loading="lazy"></a>
+      <figcaption><span class="pv-t" id="p10"><span class="n">10</span>Seule sur la cale</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav" type="submit" aria-pressed="false" aria-label="Favori : Seule sur la cale"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-10-sous-les-pins.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « Seule sur la cale », JPEG 2 000 px, </span>1,5 Mo</a></span></figcaption></figure></li>
+    <li style="--r:1.5" class="desk-only"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p11"><img src="_commun/photos/neige.webp" alt="" width="900" height="600" loading="lazy"></a>
+      <figcaption><span class="pv-t" id="p11"><span class="n">11</span>Ciel blanc, marée basse</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav" type="submit" aria-pressed="true" aria-label="Favori : Ciel blanc, marée basse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-11-ciel-blanc.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « Ciel blanc, marée basse », JPEG 2 000 px, </span>0,8 Mo</a></span></figcaption></figure></li>
+    <li style="--r:1.5" class="desk-only"><figure>
+      <a class="pv-ph" href="#ecran-2" aria-labelledby="p12"><img src="_commun/photos/ombre.webp" alt="" width="900" height="600" loading="lazy"></a>
+      <figcaption><span class="pv-t" id="p12"><span class="n">12</span>Dernière lumière</span>
+        <span class="pv-acts"><form method="post" action="#"><button class="fav" type="submit" aria-pressed="false" aria-label="Favori : Dernière lumière"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+        <a class="dl" href="#" download="Nicephos-Marie-12-derniere-lumiere.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg><span class="sr-only">Télécharger « Dernière lumière », JPEG 2 000 px, </span>0,7 Mo</a></span></figcaption></figure></li>
+    <li style="--r:1.5" aria-hidden="true" class="desk-only"><div class="pv-more"><span>Photos 13 à 24</span><span>même planche, chargées à l’approche (loading="lazy")</span><span>pas de défilement infini : la page s’arrête après la 24e</span></div></li>
+    <li style="--r:1.5" aria-hidden="true" class="mob-only"><div class="pv-more"><span>Photos 7 à 24</span><span>même colonne, chargées à l’approche</span></div></li>
+  </ul>
+
+  <div class="pv-bar" role="region" aria-label="Votre sélection">
+    <p class="pv-count" role="status"><svg viewBox="0 0 24 24" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Vos favoris : <b>6</b><a class="mob-only" href="#">voir</a><span class="pin"><span class="sr-only">Repère </span>8</span></p>
+    <div class="pv-bar-acts">
+      <a class="pv-btn2" href="#">Choisir pour un tirage</a>
+      <form method="post" action="#"><button class="pv-btn" type="submit">Envoyer ma sélection à Julien<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></form>
+    </div>
+  </div>
+
+  <p class="pv-legal">Nous notons la date de vos visites, vos téléchargements et vos favoris, pour savoir si les photos vous sont parvenues et préparer vos tirages. Tout est effacé six mois après la fin de votre invitation, le 15 mai 2027. <a href="#">Confidentialité</a></p>
+</main>
+
+<footer class="pg-foot wrap mono">
+  <span>Nicephos · Sébastien &amp; Julien</span>
+  <span><a href="#">Confidentialité</a><a href="#">Mentions légales</a></span>
+</footer>
+
+<section class="mq-states" aria-labelledby="ecrans">
+  <h2 id="ecrans">Les autres écrans de la galerie</h2>
+  <p>La visionneuse reste dans la galerie de Marie ; les variantes montrent ce qui change selon les droits accordés et après l’envoi de la sélection.</p>
+
+  <figure class="mq-screen" id="ecran-2">
+    <figcaption>Écran 2 · une photo ouverte depuis la galerie (ici la 2e) : on reste chez Marie</figcaption>
+    <div>
+      <div class="mq-tab">Marie, contre-jour — Galerie de Marie · Nicephos</div>
+      <div class="mq-page pvv">
+        <div class="pvv-top">
+          <a class="pvv-back" href="#photos"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Galerie de Marie<span class="pin"><span class="sr-only">Repère </span>9</span></a>
+          <nav class="pvv-nav" aria-label="Photos de la galerie">
+            <span class="mono">2 / 24</span>
+            <a href="#" aria-label="Photo précédente : Le soleil derrière Cézembre"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a>
+            <a href="#" aria-label="Photo suivante : Sable chaud, 17 h"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+          </nav>
+        </div>
+        <div class="pvv-body">
+          <img src="_commun/photos/portrait.webp" alt="Marie de dos, à contre-jour ; la lumière du soir dore ses cheveux et brouille la mer derrière elle." width="600" height="900" loading="lazy">
+          <div class="pvv-cartel">
+            <h3>Marie, contre-jour</h3>
+            <p class="pvv-meta">Julien · plage du Sillon, Saint-Malo<br><time datetime="2026-09-12T18:47">12 septembre 2026, 18 h 47</time> <span class="mono">· photo 02</span></p>
+            <form method="post" action="#" style="margin:0"><button class="fav" type="submit" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button></form>
+            <div class="pvv-dl"><a href="#" download="Nicephos-Marie-02-contre-jour.jpg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg>Télécharger</a><span>JPEG 2 000 px · usage personnel · 1,3 Mo</span></div>
+            <a class="pvv-print" href="#">Choisir pour un tirage<span class="pin"><span class="sr-only">Repère </span>10</span></a>
+            <p class="pvv-keys"><kbd><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sr-only">Flèche gauche</span></kbd> <kbd><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="sr-only">Flèche droite</span></kbd> photo précédente ou suivante · <kbd>Échap</kbd> retour à la galerie</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <div class="mq-grid">
+    <figure class="mq-screen">
+      <figcaption>Variante · droits « voir seulement »</figcaption>
+      <div>
+        <div class="mq-tab">Galerie de Marie · Nicephos</div>
+        <div class="mq-page">
+          <div class="mini">
+            <img src="_commun/photos/portrait.webp" alt="" width="600" height="900" style="width:auto;height:150px;justify-self:start" loading="lazy">
+            <div>
+              <p class="pv-t" style="margin-bottom:6px"><span class="n">02</span>Marie, contre-jour</p>
+              <div class="pv-acts"><button class="fav" type="button" aria-pressed="true" aria-label="Favori : Marie, contre-jour (variante)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Favori</button><span class="nodl">Téléchargement non inclus<span class="pin"><span class="sr-only">Repère </span>11</span></span></div>
+            </div>
+          </div>
+          <p>En haut de la galerie, à la place de « Tout télécharger » : « Les photos se regardent ici. Pour en garder une, <a href="#">demandez-la à Julien</a>. »</p>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="mq-screen">
+      <figcaption>État · après « Envoyer ma sélection à Julien »</figcaption>
+      <div>
+        <div class="mq-tab">Sélection envoyée — Galerie de Marie · Nicephos</div>
+        <div class="mq-page">
+          <p class="st-ok" role="status"><span class="sy" aria-hidden="true">✓</span><strong>C’est envoyé : Julien a reçu vos 6 favoris.<span class="pin"><span class="sr-only">Repère </span>12</span></strong><span>Le 18 octobre 2026 à 21 h 14. La galerie reste ouverte jusqu’au 15 novembre ; pour changer votre choix, écrivez à Julien, il rouvrira votre sélection.</span></p>
+          <p>La barre du bas devient : « Sélection envoyée le 18 octobre · 6 photos · <a href="#">Voir</a> ».</p>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="mq-screen">
+      <figcaption>État · après « Quitter la galerie »</figcaption>
+      <div>
+        <div class="mq-tab">Galerie quittée · Nicephos</div>
+        <div class="mq-page">
+          <p class="pg-brand">Nicephos</p>
+          <h3>Vous avez quitté la galerie.</h3>
+          <p>Sur cet appareil, il faudra de nouveau votre lien et votre mot de passe. Vos favoris sont gardés jusqu’au 15 novembre.</p>
+        </div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<aside class="mq-notes" aria-labelledby="change">
+  <p class="mq-id">Maquette MQ-17 · site public · galerie privée, après le mot de passe · thème « Nicephos — nuit » · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
+  <h2 id="change">Ce qui change</h2>
+  <p class="mq-lead">Galerie privée, après le mot de passe · droits de Marie : voir, télécharger en 2 000 px, choisir des tirages · écran 2 et variantes plus bas. Styles et polices du site (_commun/site.css), données fictives, photos de démonstration.</p>
+  <ol>
+    <li><span class="pin" aria-hidden="true">1</span><span><b>Un en-tête privé, sans issue vers le site public</b> : la marque en texte, la langue, et « Quitter la galerie », qui ferme la session et vide le cache de cet appareil. Ni menu, ni recherche, ni « Partager ».<span class="ref">UX-T-16 · UX-T-18 · Opquast 23 · étude G29, G34</span></span></li>
+    <li><span class="pin" aria-hidden="true">2</span><span><b>« Galerie de Marie »</b>, le nombre de photos, la date de la séance et l’échéance (balises time), puis un mot de Julien : on sait ce qu’on regarde, pour combien de temps, et ce qu’on attend de vous.<span class="ref">Opquast 6 et 172 · B&amp;S 1.1 Incitation · ISO 9241-110 Autodescriptivité</span></span></li>
+    <li><span class="pin" aria-hidden="true">3</span><span><b>Tout télécharger, poids annoncé</b> : format, taille, poids réel (24 × 1,2 Mo ≈ 29 Mo), nom de fichier explicite ; une phrase invite à ne prendre que ce qu’on garde. L’archive est écrite une fois sur le disque, jamais l’original.<span class="ref">Opquast 147, 148, 150 · RGESN 4.12 et 5.7 · étude G44, G46 · UX-T-12</span></span></li>
+    <li><span class="pin" aria-hidden="true">4</span><span><b>Deux vues, un état actif visible</b> par un trait de 2 px et la graisse, pas seulement la couleur (aria-current) ; une légende courte dit ce que font le cœur et la flèche.<span class="ref">RGAA 3.1 · B&amp;S 1.1 · Nielsen #6</span></span></li>
+    <li><span class="pin" aria-hidden="true">5</span><span><b>Une planche en rangées justifiées</b> : l’ordre de Julien se lit de gauche à droite et au clavier dans le même sens, chaque photo garde son format, un numéro stable sert à en parler (« la 05 »). Images dimensionnées, chargées à l’approche après la première rangée, 24 photos au plus : pas de défilement infini.<span class="ref">UX-F-13 · RGAA 12.8 · WCAG 1.3.2 · RGESN 4.2, 6.4, 6.5</span></span></li>
+    <li><span class="pin" aria-hidden="true">6</span><span><b>« Favori », un bouton bascule</b> (aria-pressed) de 44 px : cœur plein et texte en clair quand il est enfoncé ; il porte le titre de la photo pour un lecteur d’écran ; sans JavaScript, c’est un formulaire qui ramène à la photo. Focus de 2 px montré sur la 07.<span class="ref">RGAA 7.1, 10.7, 3.1 · WCAG 2.5.8, 4.1.2 · étude G48</span></span></li>
+    <li><span class="pin" aria-hidden="true">7</span><span><b>Télécharger une photo</b> : le poids est visible, le nom complet (« Télécharger … JPEG 2 000 px, 1,1 Mo ») est donné aux lecteurs d’écran et le nom du fichier dit ce qu’il contient.<span class="ref">Opquast 147, 148, 150 · RGAA 6.1 · WCAG 2.5.3</span></span></li>
+    <li><span class="pin" aria-hidden="true">8</span><span><b>Une barre collante, une seule action principale</b> (barre posée à sa place, après la grille, sur la capture pleine page) : « Envoyer ma sélection à Julien » ; « Choisir pour un tirage » en second. Le compteur est un message de statut, et scroll-padding garde l’élément focalisé au-dessus de la barre.<span class="ref">WCAG 2.4.11 · RGAA 7.5 · B&amp;S 2.1 Brièveté · étude G50</span></span></li>
+    <li><span class="pin" aria-hidden="true">9</span><span><b>La visionneuse garde le contexte</b> : retour nommé « Galerie de Marie », « 2 / 24 » parmi ses photos, flèches dans l’ordre de la galerie, Échap pour revenir. Le cartel est à côté de la photo verticale, comme au mur.<span class="ref">UX-F-09 · UX-T-16 · ISO 9241-110 Contrôlabilité · Nielsen #3</span></span></li>
+    <li><span class="pin" aria-hidden="true">10</span><span><b>Les actions selon les droits</b> : favori, téléchargement avec son poids, tirage ; ni Partager, ni lien vers la page publique de la photo.<span class="ref">UX-T-18 · UX-T-16 · étude G45, G67</span></span></li>
+    <li><span class="pin" aria-hidden="true">11</span><span><b>Sans droit de téléchargement</b>, on le dit en texte, à la place du lien, plutôt que de cacher la fonction ou de griser un bouton inactif.<span class="ref">B&amp;S 1.1 · Opquast 98 · RGAA 3.1</span></span></li>
+    <li><span class="pin" aria-hidden="true">12</span><span><b>L’envoi est confirmé</b> par un message de statut daté, avec la suite : jusqu’à quand on peut regarder, et comment changer d’avis.<span class="ref">RGAA 7.5 · Opquast 85 · Nielsen #1 · étude G50</span></span></li>
+  </ol>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette, hors encart et pastilles) — <b>bureau 1440 × 900</b> : H1 à 139 px ; « Favori » inactif 7,4:1 (#a19f99 sur #0b0b0b), actif 17,1:1 et rempli ; légende de la barre d’outils (« Favori : à envoyer à Julien », « Télécharger : … ») 7,4:1, en Jost 400 ; boutons « Favori » de 74 × 44 px ; 14 images dont 10 en chargement différé. <b>Pixel 7 (412 × 839, densité 2)</b> : lien « voir » de la barre des favoris porté à 44 × 44 px ; aucun défilement horizontal. Axe-core (WCAG 2.2 A et AA) : 0 violation sur les deux rendus.</p>
+</aside>
+
+<script>
+/* Démonstration : le cœur bascule sans recharger la page (sans JavaScript, le formulaire est envoyé). */
+document.querySelectorAll('.pv-grid .fav').forEach(b => b.addEventListener('click', e => {
+  e.preventDefault();
+  const on = b.getAttribute('aria-pressed') !== 'true';
+  b.setAttribute('aria-pressed', String(on));
+  const n = document.querySelector('.pv-count b'); n.textContent = String(Number(n.textContent) + (on ? 1 : -1));
+}));
+</script>
+</body>
+</html>

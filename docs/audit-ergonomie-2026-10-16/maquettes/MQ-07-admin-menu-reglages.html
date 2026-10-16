@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Maquette MQ-07 — Réglages › Assistants d’analyse · Administration Nicephos</title>
+<link rel="stylesheet" href="_commun/admin.css">
+<style>
+/* ===== Barre latérale cible (UX-A-11) : 5 groupes, une seule liste par groupe, tient dans 900 px ===== */
+.side { padding: 12px 12px 10px; }
+.side .word { padding: 2px 10px 6px; }
+.cmdk-row { position: relative; display: flex; align-items: center; margin-bottom: 6px; }
+.cmdk-row .pin { position: absolute; right: -10px; top: -9px; }
+.side .cmdk { height: 34px; margin: 0; color: var(--ink2); flex: 1; min-width: 0; }
+.side .cmdk kbd { white-space: nowrap; font-size: 11px; }
+.mqnav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.mqnav .grp { display: flex; align-items: center; margin: 0; padding: 5px 10px 0; }
+.mqnav .it, .mqlinks .it { display: flex; align-items: center; gap: 11px; min-height: 25px; padding: 0 10px; border-radius: 8px; color: var(--ink2); }
+.mqnav a.it:hover, .mqlinks a.it:hover { background: var(--s2); color: var(--ink); }
+.mqnav .it[aria-current], .mqnav .it.cur { background: var(--s3); color: var(--ink); font-weight: 500; }
+.mqnav .it[aria-current] .ic, .mqnav .it.cur .ic { color: var(--accent-ink); }
+.mqnav .it .l { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mqnav .n { font-size: 12px; color: var(--ink3); }
+.mqser .it { min-height: 24px; padding-left: 39px; gap: 9px; font-size: 13px; }
+.mqser .sw { width: 16px; height: 16px; border-radius: 3px; overflow: hidden; flex: none; box-shadow: 0 0 0 1px var(--line2); }
+.mqser .sw img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mqser .all .l { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+.mqsoon { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 3px 4px 3px 12px; }
+.mqsoon .soon-l { display: inline-flex; align-items: center; font-size: 11.5px; color: var(--ink3); letter-spacing: .04em; margin-right: 2px; }
+.mqsoon ul { display: flex !important; flex-wrap: wrap; gap: 4px; }
+.mqsoon ul li { font-size: 11.5px; line-height: 1.35; color: var(--ink3); padding: 0 6px; border-radius: 6px; border: 1px dashed var(--ink3); }
+.mqsep { border: 0; border-top: 1px solid var(--line); margin: 6px 4px 4px; }
+.mqfoot { margin-top: auto; border-top: 1px solid var(--line); padding-top: 6px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+.mqme { position: relative; display: flex; align-items: center; gap: 6px; }
+.mqme > .pin { position: absolute; right: 38px; top: -8px; }
+.mqme .who { min-width: 0; white-space: normal; overflow: visible; }
+.mqme .who small { white-space: nowrap; line-height: 1.3; }
+.mqme .who small .ml { display: block; }
+.mqme form { margin: 0; }
+.mqme .who-l { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; padding: 4px 6px; border-radius: 9px; }
+.mqme a.who-l:hover { background: var(--s2); }
+.mqme .who small .ml { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; }
+.mqlinks { display: flex; gap: 2px; margin: 0; }
+.mqlinks .it { font-size: 13.5px; }
+@media (max-width: 720px) {
+  .mqnav .it, .mqlinks .it, .mqser .it { min-height: 44px; }
+  .mqsoon ul li { padding: 4px 8px; }
+}
+
+/* ===== Composants communs proposés ===== */
+/* Pastille d'état unique (UX-A-16) : symbole + mot ; la couleur ne fait que doubler. */
+.mq-st { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; line-height: 1.2; padding: 3px 10px 3px 8px; border-radius: 999px; white-space: nowrap; color: var(--ink); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2); }
+.mq-st .sy { font-size: 12px; width: 12px; text-align: center; }
+.mq-st.draft .sy { color: var(--ink2); }
+.mq-st.prop { box-shadow: inset 0 0 0 1.5px var(--ok); } .mq-st.prop .sy { color: var(--ok); }
+.mq-st.pub { box-shadow: inset 0 0 0 1.5px var(--ink2); } .mq-st.pub .sy { color: var(--ink); }
+.mq-st.warn { box-shadow: inset 0 0 0 1.5px var(--warn); } .mq-st.warn .sy { color: var(--warn); }
+.mq-st.no { box-shadow: inset 0 0 0 1.5px var(--danger); } .mq-st.no .sy { color: var(--danger); }
+/* Champs : filet lisible (WCAG 1.4.11) et focus en contour de 2 px (UX-A-27). */
+input:not([type]), input[type="text"], input[type="search"], input[type="email"], select, textarea { box-shadow: inset 0 0 0 1px #8c8578; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, .mq-focus { outline: 2px solid var(--accent-ink) !important; outline-offset: 1px; box-shadow: inset 0 0 0 1px #8c8578, 0 0 0 5px var(--accent-soft) !important; }
+.mq-focus-btn { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+.mq-alert { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 11px 14px; margin: 0 0 16px; border-radius: 12px; background: var(--s1); box-shadow: inset 4px 0 0 var(--warn), inset 0 0 0 1px var(--line2); font-size: 14px; }
+.mq-alert .sy { color: var(--warn); }
+.mq-alert.err { box-shadow: inset 4px 0 0 var(--danger), inset 0 0 0 1px var(--line2); } .mq-alert.err .sy { color: var(--danger); }
+.mq-alert.ok { box-shadow: inset 4px 0 0 var(--ok), inset 0 0 0 1px var(--line2); } .mq-alert.ok .sy { color: var(--ok); }
+.mq-alert .t { flex: 1 1 320px; min-width: 0; }
+.mq-alert .t strong { font-weight: 500; }
+.mq-alert .acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.mq-dialog { width: min(540px, 100%); background: var(--s1); color: var(--ink); border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+.mq-dialog .dt { margin: 0 0 10px; font-weight: 300; font-size: 23px; line-height: 1.2; }
+.mq-dialog p { margin: 0 0 10px; color: var(--ink2); }
+.mq-dialog .actions { margin-top: 18px; }
+.btn.danger-o { background: transparent; color: var(--danger); box-shadow: inset 0 0 0 1.5px var(--danger); }
+.btn.danger { background: var(--danger); color: var(--on-danger); }
+.err-msg { display: flex; gap: 6px; align-items: baseline; margin: 6px 0 0; color: var(--danger); font-size: 13px; font-weight: 500; }
+.mq-kbd { font: 500 11px var(--font); color: var(--ink2); border: 1px solid var(--line2); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; background: var(--s3); white-space: nowrap; }
+.mq-switch { position: relative; display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--ink); }
+.mq-switch input[role="switch"] { appearance: none; -webkit-appearance: none; width: 46px; height: 26px; margin: 0; border-radius: 999px; background: var(--s3); box-shadow: inset 0 0 0 1.5px #8c8578; position: relative; cursor: pointer; flex: none; }
+.mq-switch input[role="switch"]::after { content: ""; position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; border-radius: 50%; background: #6b665d; transition: left .15s; }
+.mq-switch input[role="switch"]:checked { background: var(--ink); box-shadow: none; }
+.mq-switch input[role="switch"]:checked::after { left: 24px; background: var(--accent); }
+.mq-switch input[role="switch"]:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+
+/* ===== Couche « maquette » : ruban, repères numérotés, planches d'états, encart « Ce qui change » ===== */
+:root { --mq: #3a2fd0; --mq-ink: #2f27b8; }
+
+
+
+
+
+.mq-boards { background: #e4e0d7; color: #1b1a17; padding: 40px 36px 48px; border-top: 1px solid rgba(20,18,14,.15); }
+.mq-boards > h2 { font: 300 30px/1.15 Jost, Arial, sans-serif; margin: 0 0 6px; color: #1b1a17; }
+
+.mq-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.mq-board { background: var(--bg); color: var(--ink); border-radius: 16px; padding: 20px 22px 24px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(60,40,10,.10); min-width: 0; }
+.mq-board.wide { grid-column: 1 / -1; }
+.mq-board > h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 4px; margin: 0 0 4px; font-weight: 500; font-size: 17px; }
+.mq-board > .mq-cap { color: var(--ink2); font-size: 13px; margin: 0 0 16px; max-width: 76ch; }
+.mq-scrim { background: rgba(30,26,20,.46); border-radius: 12px; padding: 32px 24px; display: grid; place-items: center; }
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 720px) {
+  .mq-boards { padding: 28px 14px 32px; }
+  .mq-boards > h2 { font-size: 26px; }
+  .mq-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .mq-board { padding: 16px 14px 18px; }
+  .mq-desk { display: none !important; }
+  .mq-scrim { padding: 18px 10px; }
+  
+  
+}
+@media (min-width: 721px) { .mq-mob { display: none !important; } }
+
+/* L'écran tel qu'au premier affichage : barre latérale non collante pour la capture, colonne continue. */
+@media (min-width: 721px) {
+  .shell { position: relative; background: linear-gradient(90deg, var(--s1) 0 var(--side), var(--bg) var(--side)); }
+  .shell::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--side) - 1px); border-left: 1px solid var(--line); }
+  .side { position: relative; height: auto; min-height: 900px; overflow: visible; border-right: 0; align-self: start; }
+}
+@media (max-width: 720px) {
+  /* Capture pleine page : la barre d'onglets (fixée en bas de l'écran) est posée à la fin de l'écran. */
+  .tabbar { position: relative; }
+  .main { padding-bottom: 24px; }
+  
+}
+
+/* Réglages à onglets (UX-A-11, UX-A-26) : onglets = liens vers des sous-pages, état courant souligné et aria-current. */
+.mq-tabs { margin: 0 0 22px; display: flex; align-items: flex-end; gap: 6px; border-bottom: 1px solid var(--line2); }
+.mq-tabs ul { position: relative; list-style: none; margin: 0; padding: 0; display: flex; gap: 2px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; }
+.mq-tabs a { display: inline-flex; align-items: center; gap: 7px; min-height: 42px; padding: 0 14px; color: var(--ink2); white-space: nowrap; border-bottom: 3px solid transparent; margin-bottom: -1px; font-size: 14px; }
+.mq-tabs a:hover { color: var(--ink); background: var(--s2); }
+.mq-tabs a[aria-current] { color: var(--ink); font-weight: 500; border-bottom-color: var(--accent-ink); }
+.mq-tabs .tw { font-size: 11.5px; font-weight: 500; color: var(--ink); padding: 1px 7px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--warn); }
+.mq-tabs .tw .sy { color: var(--warn); }
+
+
+/* Assistants d'analyse (UX-A-17, UX-A-18) */
+.mq-assists { display: grid; gap: 14px; }
+.mq-assist { margin: 0; display: grid; gap: 10px; }
+.mq-assist-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.mq-assist-head h3 { margin: 0; font-weight: 500; font-size: 18px; flex: 1 1 auto; display: flex; align-items: center; gap: 4px; }
+.mq-assist-head h3 label { display: inline; color: var(--ink); font-size: inherit; cursor: pointer; }
+.mq-effet { margin: 0; color: var(--ink2); max-width: 78ch; }
+.mq-etat { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13.5px; color: var(--ink2); }
+.mq-row2 { display: flex; flex-wrap: wrap; gap: 10px 36px; align-items: start; }
+.mq-when { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: center; }
+.mq-when legend { float: left; margin-right: 6px; padding: 0; color: var(--ink2); font-size: 13px; }
+.mq-when label.inline { min-height: 32px; font-size: 13.5px; }
+.mq-tech > summary { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; color: var(--ink2); font-size: 13px; }
+.mq-tech > summary::marker { content: ""; }
+.mq-tech > summary::-webkit-details-marker { display: none; }
+.mq-tech > summary::before { content: ""; flex: none; width: 7px; height: 7px; margin: 0 4px 0 2px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(-45deg); transition: transform .15s; }
+.mq-tech[open] > summary::before { transform: rotate(45deg); }
+.mq-dl code { white-space: nowrap; }
+.mq-dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 16px; margin: 6px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--s2); font-size: 13px; color: var(--ink2); }
+.mq-dl dt { color: var(--ink); font-weight: 500; }
+.mq-dl dd { margin: 0; }
+.mq-dl code { font-size: 12px; }
+.mq-assist.off .mq-effet { color: var(--ink2); }
+.mq-save { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 4px; }
+/* Planches */
+.mq-two { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: start; }
+.mq-static { position: static !important; transform: none !important; visibility: visible !important; width: 248px; height: auto !important; min-height: 0 !important; border-radius: 14px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); overflow: hidden; }
+.mq-static .mqfoot { margin-top: 10px; }
+
+.mq-logos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.mq-logo { display: grid; gap: 6px; font-size: 13px; color: var(--ink2); }
+.mq-logo .box { height: 70px; border-radius: 10px; display: grid; place-items: center; box-shadow: inset 0 0 0 1px #8c8578; font: 500 13px/1 Jost, Arial, sans-serif; letter-spacing: .3em; text-transform: uppercase; color: var(--ink); background: var(--s2); }
+.mq-logo .box.dark { background: #121214; color: #eeece7; }
+.mq-logo .box.icon { letter-spacing: 0; font-size: 22px; font-weight: 300; }
+.mq-logo .btn { justify-self: start; }
+.mq-pal { width: min(600px, 100%); background: var(--s1); color: var(--ink); border-radius: 16px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+.mq-pal .pal-in input { font-size: 18px; }
+.mq-pal .pal-status { margin: 0; padding: 8px 18px 0; font-size: 12.5px; color: var(--ink2); }
+.mq-pal .pal-list { max-height: none; }
+.mq-pal [role="option"] { display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 4px 12px; border-radius: 10px; color: var(--ink2); }
+.mq-pal [role="option"] .tx { display: grid; line-height: 1.3; min-width: 0; }
+.mq-pal [role="option"] b { color: var(--ink); font-weight: 500; }
+.mq-pal [role="option"] small { font-size: 12px; color: var(--ink3); }
+.mq-pal [role="option"] mark { background: var(--accent-soft); color: inherit; border-radius: 3px; padding: 0 1px; }
+.mq-pal [role="option"] .r { margin-left: auto; font-size: 12px; color: var(--ink2); white-space: nowrap; }
+.mq-pal [aria-selected="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent-ink); color: var(--ink); }
+.mq-pal .pal-ft { flex-wrap: wrap; }
+.mq-pal .syn { margin: 0; padding: 0 18px 12px; font-size: 12.5px; color: var(--ink2); }
+.mq-fiche-line { display: grid; gap: 10px; padding: 14px 16px; border-radius: 12px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.mq-fiche-line label { font-size: 13px; }
+.mq-off-line { margin: 0; font-size: 13px; color: var(--ink2); }
+.mq-off-line a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px) {
+  .mq-tabs { border-bottom: 0; }
+  .mq-tabs ul { flex-wrap: wrap; overflow: visible; gap: 6px; }
+  .mq-tabs a { min-height: 44px; margin: 0; border: 0; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line2); padding: 0 14px; }
+  .mq-tabs a[aria-current] { background: var(--ink); color: var(--bg); box-shadow: none; }
+  .mq-tabs a[aria-current]::after { content: " ✓"; }
+  .mq-when label.inline { min-height: 44px; }
+  .mq-tech > summary { min-height: 44px; }
+  .mq-dl { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .mq-dl dd { margin-bottom: 6px; }
+  .mq-two { grid-template-columns: minmax(0, 1fr); }
+  .mq-static { width: 100%; max-width: 300px; }
+  .mq-logos { grid-template-columns: minmax(0, 1fr); }
+  .mq-alert .btn { width: 100%; }
+}
+</style>
+<link rel="stylesheet" href="_commun/annotations.css">
+</head>
+<body class="admin">
+<a class="skip" href="#contenu">Aller au contenu</a><div class="shell"><aside class="side" id="admin-nav" aria-label="Menu"><a class="word" href="#"><span>Nicephos</span></a><div class="cmdk-row"><button class="cmdk" type="button" aria-keyshortcuts="Control+K"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button><span class="pin" aria-hidden="true">5</span></div><nav class="mqnav" aria-label="Administration"><ul class="" aria-labelledby="g-top"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span class="l">Aujourd’hui</span></a></li></ul><p class="grp" id="g-photos">Photos<span class="pin" aria-hidden="true">1</span></p><ul class="" aria-labelledby="g-photos"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg><span class="l">Photothèque</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/></svg><span class="l">Sorties</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg><span class="l">Voyages</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg><span class="l">Séries</span></a></li><li class="sub"><ul class="mqser" aria-label="Séries les plus utilisées"><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/ciel.webp" alt="" width="16" height="16"></span><span class="l">Voyage</span><span class="n">23</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/ruelle.webp" alt="" width="16" height="16"></span><span class="l">Rue</span><span class="n">8</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/dune.webp" alt="" width="16" height="16"></span><span class="l">Paysage</span><span class="n">7</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/portrait.webp" alt="" width="16" height="16"></span><span class="l">Portrait</span><span class="n">3</span></a></li><li><a class="it" href="#"><span class="sw"><img src="_commun/photos/mer.webp" alt="" width="16" height="16"></span><span class="l">Atlantique</span><span class="n">2</span></a></li><li><a class="it all" href="#"><span class="l">Toutes les séries (7)</span><span class="pin" aria-hidden="true">2</span></a></li></ul></li></ul><p class="grp" id="g-personnes">Personnes</p><ul class="" aria-labelledby="g-personnes"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg><span class="l">Personnes</span><span class="nav-badge" aria-hidden="true">1</span><span class="sr-only">, 1 nouvelle</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><span class="l">App de terrain</span></a></li></ul><p class="grp" id="g-publier">Publier</p><ul class="" aria-labelledby="g-publier"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 10.5l2.5 2.5L16 8"/></svg><span class="l">À valider</span><span class="nav-badge" aria-hidden="true">5</span><span class="sr-only">, 5 photos à valider</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg><span class="l">Site public</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg><span class="l">Instagram</span></a></li><li class="mqsoon"><span class="soon-l">Bientôt<span class="pin" aria-hidden="true">3</span></span><ul aria-label="Bientôt dans Publier"><li>Carnets</li><li>Galeries privées</li><li>Boutique</li></ul></li></ul><p class="grp" id="g-equipe">Équipe</p><ul class="" aria-labelledby="g-equipe"><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg><span class="l">Comptes et rôles</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 3 3v6.5M6 8.5V15a3 3 0 0 0 3 3h6.5"/></svg><span class="l">Circuit de publication</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span class="l">Journal</span></a></li><li><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="l">Statistiques</span></a></li></ul><hr class="mqsep"><ul class="" aria-labelledby="g-reglages"><li><a class="it cur" href="#" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span class="l">Réglages</span></a></li></ul></nav><div class="mqfoot"><div class="mqme"><a class="who-l" href="#"><span class="av" aria-hidden="true">J</span><span class="who">Julien<small>Administrateur<span class="sr-only"> · </span><span class="ml">Mon compte</span></small></span></a><span class="pin" aria-hidden="true">4</span><form action="#" method="post"><button class="iconbtn" type="submit" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button></form></div><p class="mqlinks"><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg><span class="l">Aide</span></a><a class="it" href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><span class="l">Nouveautés</span></a></p></div></aside><div class="mq-fold" aria-hidden="true"><span>bas du premier écran</span></div><main class="main" id="contenu" tabindex="-1">
+<p class="help-link"><a href="#">Aide sur cette page</a></p>
+<h1>Réglages</h1>
+<div class="mq-intro"><p class="prose">Ce qui vaut pour tout le site et toute l’équipe : un onglet par sujet, un seul bouton « Enregistrer » par onglet.</p></div>
+<div class="mq-alert"><span class="sy" aria-hidden="true">▲</span><p class="t"><strong>Mentions légales : 2 rubriques obligatoires manquent</strong> — Éditeurs du site, Responsable de la publication. Tant qu’elles sont vides, la page publique les omet.<span class="pin" aria-hidden="true">7</span></p><span class="acts"><a class="btn ghost" href="#">Compléter les mentions</a></span></div>
+<nav class="mq-tabs" aria-label="Rubriques des réglages"><ul>
+  <li><a href="#">Identité</a></li>
+  <li><a href="#">Apparence</a></li>
+  <li><a href="#">Filigrane &amp; EXIF</a></li>
+  <li><a href="#">Mentions légales &amp; confidentialité <span class="tw"><span class="sy" aria-hidden="true">▲</span> 2<span class="sr-only"> rubriques manquent</span></span></a></li>
+  <li><a href="#">Photographes</a></li>
+  <li><a href="#" aria-current="page">Assistants d’analyse</a></li>
+</ul><span class="pin" aria-hidden="true">6</span></nav>
+<section aria-labelledby="t-assist">
+  <h2 id="t-assist" style="font-size:22px;font-weight:300">Assistants d’analyse</h2>
+  <p class="prose">Trois aides facultatives, calculées sur ce serveur : aucune image n’en sort, aucune personne n’est reconnue ni nommée. Elles proposent ; rien n’est appliqué sans votre clic.</p>
+  <form class="mq-assists" action="#" method="post">
+    
+<section class="panel mq-assist" aria-labelledby="as1-t">
+  <div class="mq-assist-head">
+    <h3 id="as1-t"><label for="as1">Proposer une série</label><span class="pin" aria-hidden="true">8</span></h3>
+    <span class="mq-switch"><input type="checkbox" role="switch" id="as1" name="as1" checked aria-describedby="as1-e as1-s"><span aria-hidden="true">Allumé</span></span>
+  </div>
+  <p class="mq-effet" id="as1-e">Pour une photo pas encore rangée, propose la série dont les photos lui ressemblent le plus : une pastille ✦ dans le lot, la vue rapide et la fiche. Rien n’est classé sans votre clic.</p>
+  <p class="mq-etat" id="as1-s"><span class="enc-tag ok">Prêt</span> 46 photos analysées sur 46 · la dernière cette nuit à 1 h 12</p>
+  <div class="mq-row2">
+    
+    <fieldset class="mq-when"><legend>Quand analyser</legend>
+      <label class="inline"><input type="radio" name="as1w" checked> La nuit (1 h–6 h)</label>
+      <label class="inline"><input type="radio" name="as1w"> À tout moment</label>
+    </fieldset>
+  </div>
+  <details class="mq-tech"><summary>Pour l’administrateur du serveur</summary>
+    <dl class="mq-dl"><dt>Modèle</dt><dd>CLIP, modèle libre exécuté sur ce serveur ; aucune image n’en sort, aucune personne n’est reconnue</dd><dt>Téléchargement</dt><dd>≈ 89 Mo, une seule fois, empreinte SHA-256 vérifiée</dd><dt>Données gardées</dt><dd>une empreinte d’image par photo ; « Éteindre et effacer » supprime le modèle et les empreintes</dd></dl>
+  </details>
+</section>
+    
+<section class="panel mq-assist" aria-labelledby="as2-t">
+  <div class="mq-assist-head">
+    <h3 id="as2-t"><label for="as2">Suggérer des mots-clés</label></h3>
+    <span class="mq-switch"><input type="checkbox" role="switch" id="as2" name="as2" checked aria-describedby="as2-e as2-s"><span aria-hidden="true">Allumé</span></span>
+  </div>
+  <p class="mq-effet" id="as2-e">Propose 3 à 6 mots pour la recherche du site (« brume, quai, soir »), à ajouter d’un clic dans le lot et la fiche. Indépendant de « Proposer une série » : il en partage seulement l’analyse, donc un seul téléchargement.</p>
+  <p class="mq-etat" id="as2-s"><span class="enc-tag ok">Prêt</span> 46 photos analysées sur 46</p>
+  <div class="mq-row2">
+    
+    <fieldset class="mq-when"><legend>Quand analyser</legend>
+      <label class="inline"><input type="radio" name="as2w" checked> La nuit (1 h–6 h)</label>
+      <label class="inline"><input type="radio" name="as2w"> À tout moment</label>
+    </fieldset>
+  </div>
+  <details class="mq-tech"><summary>Pour l’administrateur du serveur</summary>
+    <dl class="mq-dl"><dt>Modèle</dt><dd>le même que « Proposer une série » (CLIP), avec un vocabulaire de 1 200 mots en trois langues</dd><dt>Téléchargement</dt><dd>aucun de plus si « Proposer une série » est allumé</dd></dl>
+  </details>
+</section>
+    
+<section class="panel mq-assist off" aria-labelledby="as3-t">
+  <div class="mq-assist-head">
+    <h3 id="as3-t"><label for="as3">Décrire les photos</label></h3>
+    <span class="mq-switch"><input type="checkbox" role="switch" id="as3" name="as3" aria-describedby="as3-e as3-s"><span aria-hidden="true">Éteint</span></span>
+  </div>
+  <p class="mq-effet" id="as3-e">Écrit une phrase courte et factuelle par photo (« un phare rouge sur une petite île »), proposée sous la légende pour vous aider à rédiger la description destinée aux personnes aveugles. À relire et à réécrire ; jamais publiée seule ; ne nomme jamais personne. Allumé, il télécharge ≈ 270 Mo et occupe le serveur pendant les heures choisies.</p>
+  <p class="mq-etat" id="as3-s"><span class="enc-tag">Éteint</span> rien n’est téléchargé ni calculé tant qu’il est éteint · 46 photos à décrire à l’allumage</p>
+  <div class="mq-row2">
+    <fieldset class="mq-when"><legend>Précision</legend><label class="inline"><input type="radio" name="as3p" checked> Légère, plus rapide</label><label class="inline"><input type="radio" name="as3p"> Fine, plus lente</label></fieldset>
+    <fieldset class="mq-when"><legend>Quand analyser<span class="pin" aria-hidden="true">10</span></legend>
+      <label class="inline"><input type="radio" name="as3w" checked> La nuit (1 h–6 h)</label>
+      <label class="inline"><input type="radio" name="as3w"> À tout moment</label>
+    </fieldset>
+  </div>
+  <details class="mq-tech" open><summary>Pour l’administrateur du serveur<span class="pin" aria-hidden="true">9</span></summary>
+    <dl class="mq-dl"><dt>Modèle</dt><dd>Florence-2, libre, sur ce serveur : version base (légère, ≈ 270 Mo, ≈ 2 Go de mémoire pendant le calcul) ou large (fine, ≈ 850 Mo, ≈ 4 Go)</dd><dt>Langue</dt><dd>le modèle écrit en anglais ; traduction en français et en allemand si un traducteur est déclaré (<code>TRANSLATE_URL</code>), sinon la phrase reste en anglais</dd><dt>Calcul</dt><dd>une photo à la fois, sur un seul cœur, heure de Paris ; une photo demandée depuis sa fiche passe tout de suite</dd></dl>
+  </details>
+</section>
+    <p class="mq-save"><button class="btn" type="submit">Enregistrer</button><span class="pin" aria-hidden="true">11</span><span class="hint">Le seul bouton plein de la page. Les assistants allumés se signalent dans le lot, la vue rapide et la fiche.</span></p>
+  </form>
+</section>
+</main></div><nav class="tabbar" aria-label="Navigation rapide"><a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a><a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photos</a><a class="imp" href="#" aria-label="Importer des photos"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></a><a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a><button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button></nav>
+<section class="mq-boards" aria-labelledby="mq-boards-t">
+  <h2 id="mq-boards-t">Autres états et variantes</h2>
+  <p class="mq-lead">La même règle partout : une entrée de menu par tâche, une page par sujet, un réglage trouvé par son nom.</p>
+  <div class="mq-grid">
+    <article class="mq-board mq-mob" aria-labelledby="b0">
+      <h3 id="b0">Téléphone : le menu en panneau <span class="pin" aria-hidden="true">1</span></h3>
+      <p class="mq-cap">Ouvert par « Menu » dans la barre d’onglets : les cinq mêmes groupes, des cibles de 44 px, la page dessous rendue inerte (le focus ne s’y perd plus) ; « Fermer » et Échap le referment.</p>
+      <div class="side mq-static" role="img" aria-label="Menu du rôle Administrateur : Aujourd’hui ; Photos (Photothèque, Sorties, Voyages, Séries, 5 séries, toutes les séries) ; Personnes (Personnes, App de terrain) ; Publier (À valider, 5 ; Site public ; Instagram ; bientôt Carnets, Galeries privées, Boutique) ; Équipe (Comptes et rôles, Circuit de publication, Journal, Statistiques) ; Réglages ; pied : Julien, Administrateur, Mon compte, Aide, Nouveautés."><span class="word"><span>Nicephos</span></span><div class="cmdk-row"><span class="cmdk"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></span></div><div class="mqnav"><ul class=""><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span class="l">Aujourd’hui</span></span></li></ul><p class="grp">Photos</p><ul class=""><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg><span class="l">Photothèque</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/></svg><span class="l">Sorties</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg><span class="l">Voyages</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg><span class="l">Séries</span></span></li><li class="sub"><ul class="mqser"><li><span class="it"><span class="sw"><img src="_commun/photos/ciel.webp" alt="" width="16" height="16"></span><span class="l">Voyage</span><span class="n">23</span></span></li><li><span class="it"><span class="sw"><img src="_commun/photos/ruelle.webp" alt="" width="16" height="16"></span><span class="l">Rue</span><span class="n">8</span></span></li><li><span class="it"><span class="sw"><img src="_commun/photos/dune.webp" alt="" width="16" height="16"></span><span class="l">Paysage</span><span class="n">7</span></span></li><li><span class="it"><span class="sw"><img src="_commun/photos/portrait.webp" alt="" width="16" height="16"></span><span class="l">Portrait</span><span class="n">3</span></span></li><li><span class="it"><span class="sw"><img src="_commun/photos/mer.webp" alt="" width="16" height="16"></span><span class="l">Atlantique</span><span class="n">2</span></span></li><li><span class="it all"><span class="l">Toutes les séries (7)</span></span></li></ul></li></ul><p class="grp">Personnes</p><ul class=""><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg><span class="l">Personnes</span><span class="nav-badge">1</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><span class="l">App de terrain</span></span></li></ul><p class="grp">Publier</p><ul class=""><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 10.5l2.5 2.5L16 8"/></svg><span class="l">À valider</span><span class="nav-badge">5</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg><span class="l">Site public</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg><span class="l">Instagram</span></span></li><li class="mqsoon"><span class="soon-l">Bientôt</span><ul><li>Carnets</li><li>Galeries privées</li><li>Boutique</li></ul></li></ul><p class="grp">Équipe</p><ul class=""><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg><span class="l">Comptes et rôles</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 3 3v6.5M6 8.5V15a3 3 0 0 0 3 3h6.5"/></svg><span class="l">Circuit de publication</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span class="l">Journal</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="l">Statistiques</span></span></li></ul><hr class="mqsep"><ul class=""><li><span class="it cur"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span class="l">Réglages</span></span></li></ul></div><div class="mqfoot"><div class="mqme"><span class="who-l"><span class="av" aria-hidden="true">J</span><span class="who">Julien<small>Administrateur<span class="sr-only"> · </span><span class="ml">Mon compte</span></small></span></span></div><p class="mqlinks"><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg><span class="l">Aide</span></span><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><span class="l">Nouveautés</span></span></p></div></div>
+    </article>
+    <article class="mq-board" aria-labelledby="b1">
+      <h3 id="b1">Onglet « Identité » : tout ce qui nomme le site, au même endroit <span class="pin" aria-hidden="true">12</span></h3>
+      <p class="mq-cap">Nom, sous-titre, emblème et logos, aujourd’hui répartis entre « Site public » et « Apparence ».</p>
+      
+<div class="mq-id">
+  <label>Nom du site <span class="mono">dans l’onglet du navigateur, les partages et le pied de page</span><input value="Nicephos"></label>
+  <label>Sous-titre <span class="mono">sous le nom, à l’accueil · EN ✓ · DE ✓</span><input value="Photographies de Sébastien et Julien"></label>
+  <div class="mq-logos" role="group" aria-labelledby="logos-t">
+    <p id="logos-t" class="sr-only">Emblème et logos</p>
+    <div class="mq-logo"><span>Emblème</span><span class="box icon" aria-hidden="true">N</span><button class="btn ghost" type="button">Remplacer l’emblème…</button></div>
+    <div class="mq-logo"><span>Logotype, fond clair</span><span class="box" aria-hidden="true">Nicephos</span><button class="btn ghost" type="button">Remplacer le logotype clair…</button></div>
+    <div class="mq-logo"><span>Logotype, fond sombre</span><span class="box dark" aria-hidden="true">Nicephos</span><button class="btn ghost" type="button">Remplacer le logotype sombre…</button></div>
+  </div>
+  <p class="hint">SVG ou PNG, 200 ko au plus. Un fichier choisi est enregistré tout de suite, avec « Annuler » pendant 10 s : plus de bouton « Envoyer le fichier » par logo.</p>
+</div>
+    </article>
+    <article class="mq-board" aria-labelledby="b2">
+      <h3 id="b2">Palette « Ctrl K » : trouver un réglage par son nom <span class="pin" aria-hidden="true">5</span></h3>
+      <p class="mq-cap">Toutes les pages et rubriques profondes, avec leurs synonymes ; le nombre de résultats est annoncé.</p>
+      <div class="mq-scrim">
+<div class="mq-pal">
+  <div class="pal-in"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="text" value="mentions" role="combobox" aria-expanded="true" aria-controls="pal-demo" aria-activedescendant="pal-o1" aria-autocomplete="list" aria-label="Rechercher une photo, une page, une action"><kbd>Échap</kbd></div>
+  <p class="pal-status" role="status">3 résultats pour « mentions »</p>
+  <div class="pal-list" id="pal-demo" role="listbox" aria-label="Résultats">
+    <div role="group" aria-labelledby="pg1"><div class="sec" id="pg1">Réglages</div>
+      <div role="option" id="pal-o1" aria-selected="true"><span class="tx"><b><mark>Mentions</mark> légales &amp; confidentialité</b><small>Réglages › onglet</small></span><span class="r">▲ 2 rubriques manquent</span></div>
+      <div role="option" id="pal-o2" aria-selected="false"><span class="tx"><b>Éditeurs du site</b><small>Réglages › <mark>Mentions</mark> légales · rubrique obligatoire</small></span><span class="r">vide</span></div>
+    </div>
+    <div role="group" aria-labelledby="pg2"><div class="sec" id="pg2">Aide</div>
+      <div role="option" id="pal-o3" aria-selected="false"><span class="tx"><b><mark>Mentions</mark> légales : ce que la loi demande</b><small>Aide › Réglages</small></span></div>
+    </div>
+  </div>
+  <p class="syn">Trouvé aussi avec : légales, impressum, éditeur, hébergeur.</p>
+  <p class="pal-ft"><span><kbd>↑</kbd> <kbd>↓</kbd> choisir</span><span><kbd>Entrée</kbd> ouvrir</span><span><kbd>Échap</kbd> fermer</span></p>
+</div></div>
+    </article>
+    <article class="mq-board wide" aria-labelledby="b3">
+      <h3 id="b3">Variante Photographe : un menu réduit, sans groupe vide <span class="pin" aria-hidden="true">13</span></h3>
+      <p class="mq-cap">Sébastien ne voit que ce qu’il peut ouvrir. « Publier » contient « Mes propositions » ; pas d’« Équipe » ni de « Réglages ». Sur téléphone, ce menu s’ouvre en panneau par le bouton « Menu » de la barre d’onglets, et le reste de la page devient inerte.</p>
+      <div class="mq-two">
+        <div class="side mq-static" role="img" aria-label="Menu du rôle Photographe : Aujourd’hui ; Photos (Photothèque, Sorties, Voyages, 5 séries, toutes les séries) ; Personnes (Personnes, App de terrain) ; Publier (Mes propositions, 2 en attente ; Instagram ; bientôt Carnets, Galeries privées, Boutique) ; pied : Sébastien, Photographe, Mon compte, Aide, Nouveautés."><span class="word"><span>Nicephos</span></span><div class="cmdk-row"><span class="cmdk"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></span></div><div class="mqnav"><ul class=""><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span class="l">Aujourd’hui</span></span></li></ul><p class="grp">Photos</p><ul class=""><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg><span class="l">Photothèque</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/></svg><span class="l">Sorties</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/></svg><span class="l">Voyages</span></span></li><li class="sub"><ul class="mqser"><li><span class="it"><span class="sw"><img src="_commun/photos/ciel.webp" alt="" width="16" height="16"></span><span class="l">Voyage</span><span class="n">23</span></span></li><li><span class="it"><span class="sw"><img src="_commun/photos/ruelle.webp" alt="" width="16" height="16"></span><span class="l">Rue</span><span class="n">8</span></span></li><li><span class="it"><span class="sw"><img src="_commun/photos/dune.webp" alt="" width="16" height="16"></span><span class="l">Paysage</span><span class="n">7</span></span></li><li><span class="it"><span class="sw"><img src="_commun/photos/portrait.webp" alt="" width="16" height="16"></span><span class="l">Portrait</span><span class="n">3</span></span></li><li><span class="it"><span class="sw"><img src="_commun/photos/mer.webp" alt="" width="16" height="16"></span><span class="l">Atlantique</span><span class="n">2</span></span></li><li><span class="it all"><span class="l">Toutes les séries (7)</span></span></li></ul></li></ul><p class="grp">Personnes</p><ul class=""><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/></svg><span class="l">Personnes</span><span class="nav-badge">1</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><span class="l">App de terrain</span></span></li></ul><p class="grp">Publier</p><ul class=""><li><span class="it cur"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12l16-8-6 17-3-7z"/></svg><span class="l">Mes propositions</span><span class="nav-badge">2</span></span></li><li><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg><span class="l">Instagram</span></span></li></ul></div><div class="mqfoot"><div class="mqme"><span class="who-l"><span class="av" aria-hidden="true">S</span><span class="who">Sébastien<small>Photographe<span class="sr-only"> · </span><span class="ml">Mon compte</span></small></span></span></div><p class="mqlinks"><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/></svg><span class="l">Aide</span></span><span class="it"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><span class="l">Nouveautés</span></span></p></div></div>
+        <div class="mq-fiche-line">
+          <p style="margin:0;font-weight:500">Une aide éteinte se signale là où l’on en aurait besoin <span class="pin" aria-hidden="true">14</span></p>
+          <label>Légende <textarea rows="2">Le Douro au petit matin, la brume encore posée sur l’eau.</textarea></label>
+          <p class="mq-off-line">✦ Suggérer une description : <a href="#">à activer dans Réglages › Assistants d’analyse</a> (administrateur).</p>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+<aside class="mq-notes" aria-labelledby="mq-notes-t"><p class="mq-id">Maquette MQ-07 · administration · thème clair · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p><h2 id="mq-notes-t">Ce qui change</h2><p class="mq-lead">Les repères numérotés sur l’écran renvoient à cette liste. Les textes des assistants reprennent ceux du site, réécrits sans jargon. L’administration a deux modes : le mode clair, montré ici et dans MQ-08 à MQ-10, et « Chambre noire », qui suit le réglage du système ; MQ-18 à MQ-20 le montrent en « Chambre noire » sur la capture de bureau et en clair sur celle du téléphone. Les composants sont les mêmes dans les deux modes.</p><ol><li><span class="pin" aria-hidden="true">1</span><div><strong>Cinq groupes nommés par tâche.</strong> Aujourd’hui · Photos · Personnes · Publier · Équipe, puis un seul lien « Réglages » : 15 entrées de premier niveau au lieu de 21 liens et 7 séries, et la barre tient dans 900 px, Aide comprise.<span class="ref"><b>UX-A-11</b> · B&amp;S 1.2.1 Groupement par la localisation · B&amp;S 2.2 Densité informationnelle · ISO 9241-110 Autodescriptivité · Loi de Hick</span></div></li><li><span class="pin" aria-hidden="true">2</span><div><strong>Les séries repliées.</strong> 5 séries visibles (les plus utilisées), puis « Toutes les séries (7) » ; vignettes servies en 160 px.<span class="ref"><b>UX-A-11</b> · <b>UX-A-29</b> · RGESN 6.4 Images aux dimensions d’affichage</span></div></li><li><span class="pin" aria-hidden="true">3</span><div><strong>« Publier » prêt pour la suite.</strong> Carnets, Galeries privées et Boutique y ont leur place réservée, marquée « bientôt » en pointillés et en texte, sans lien.<span class="ref"><b>UX-A-32</b> · B&amp;S 6 Homogénéité · ISO 9241-210 conception centrée sur l’humain</span></div></li><li><span class="pin" aria-hidden="true">4</span><div><strong>Le pied du menu dit qui vous êtes.</strong> « Julien · Administrateur » est un lien vers « Mon compte » (langue, thème, raccourcis, e-mails) ; Aide et Nouveautés restent toujours visibles.<span class="ref"><b>UX-A-11</b> · <b>UX-A-25</b> · Nielsen #10 Aide · ISO 9241-110 Autodescriptivité</span></div></li><li><span class="pin" aria-hidden="true">5</span><div><strong>Une palette qui trouve les rubriques.</strong> « Ctrl K » (⌘ K sur Mac, masqué au toucher) cherche aussi dans les rubriques et l’aide, avec des synonymes (impressum, légales) ; « 3 résultats » est annoncé en role="status", groupes nommés.<span class="ref"><b>UX-A-15</b> · <b>UX-A-26</b> · RGAA 7.1 et 7.5 · WCAG 4.1.3 · Nielsen #6 et #7</span></div></li><li><span class="pin" aria-hidden="true">6</span><div><strong>Un seul lien « Réglages », une page à onglets.</strong> Les onglets sont des liens vers des sous-pages (adresse propre, aria-current, utilisables sans JavaScript, atteignables par la palette).<span class="ref"><b>UX-A-11</b> · <b>UX-A-26</b> · B&amp;S 1.2.1 · RGAA 12.2 Cohérence des menus</span></div></li><li><span class="pin" aria-hidden="true">7</span><div><strong>Les mentions légales nommées et signalées.</strong> L’alerte cite les deux rubriques vides, sur tous les onglets ; l’onglet porte « ▲ 2 » en texte.<span class="ref"><b>UX-A-26</b> · <b>UX-T-03</b> · Nielsen #1 Visibilité de l’état · B&amp;S 1.1 Incitation</span></div></li><li><span class="pin" aria-hidden="true">8</span><div><strong>Un interrupteur par assistant, indépendant des autres.</strong> Chaque aide a son effet en une phrase, son état écrit (« Prêt, 46 photos analysées », « Éteint ») et un role="switch" nommé par son titre. Les mots-clés ne dépendent plus des séries.<span class="ref"><b>UX-A-17</b> · B&amp;S 1.1 Incitation · ISO 9241-110 Autodescriptivité · RGAA 11.1 · WCAG 4.1.2</span></div></li><li><span class="pin" aria-hidden="true">9</span><div><strong>Le jargon replié.</strong> CLIP, Florence-2, mémoire, TRANSLATE_URL : sous « Pour l’administrateur du serveur », fermé par défaut et visible du seul rôle Administrateur.<span class="ref"><b>UX-A-18</b> · B&amp;S 8 Compatibilité · Nielsen #2 Correspondance avec le monde réel</span></div></li><li><span class="pin" aria-hidden="true">10</span><div><strong>« Quand » en clair.</strong> « La nuit (1 h–6 h) / À tout moment » au lieu de deux champs d’heures, pour chaque assistant ; le poids du téléchargement est annoncé avant l’allumage.<span class="ref"><b>UX-A-17</b> · <b>UX-T-13</b> · RGESN 8.10 Planifier les calculs · RGESN 4.12 Signaler les impacts</span></div></li><li><span class="pin" aria-hidden="true">11</span><div><strong>Un seul bouton plein par écran.</strong> « Enregistrer » est l’unique action principale ; les autres boutons sont en contour.<span class="ref"><b>UX-A-25</b> · B&amp;S 1.2.2 Distinction par le format · Nielsen #8</span></div></li><li><span class="pin" aria-hidden="true">12</span><div><strong>L’identité réunie.</strong> Nom, sous-titre, emblème et logos dans « Réglages › Identité » ; un logo choisi est enregistré aussitôt, avec « Annuler ».<span class="ref"><b>UX-A-26</b> · <b>UX-A-25</b> · B&amp;S 1.2.1</span></div></li><li><span class="pin" aria-hidden="true">13</span><div><strong>Rôle Photographe : pas de groupe vide.</strong> Le menu ne montre que les pages permises ; « Publier » contient « Mes propositions » ; le rôle réel s’affiche.<span class="ref"><b>UX-A-11</b> · <b>UX-A-04</b> · B&amp;S 2.2 · Nielsen #4</span></div></li><li><span class="pin" aria-hidden="true">14</span><div><strong>Une aide éteinte se signale sur place.</strong> Dans la fiche, une ligne discrète renvoie au réglage, au lieu de rester muette.<span class="ref"><b>UX-A-17</b> · ISO 9241-110 Facilité d’apprentissage · Nielsen #6</span></div></li></ol><p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette) — Barre latérale à 1 440 × 900 : 15 entrées de premier niveau, 21 liens, pied (Aide et Nouveautés compris) achevé à 890 px, au-dessus de la ligne de flottaison (900 px). Axe-core (WCAG 2.2 AA et bonnes pratiques) : 0 violation sur bureau et sur téléphone (412 px) ; aucun débordement horizontal. Seules cibles sous 24 px : les boutons radio de 18 px, dont le libellé cliquable fait 32 px (44 px au toucher).</p></aside>
+</body>
+</html>
