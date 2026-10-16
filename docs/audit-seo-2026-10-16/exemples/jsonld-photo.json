@@ -1,0 +1,65 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ItemPage",
+      "@id": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute",
+      "url": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute",
+      "name": "Le Sillon de Saint-Malo à marée haute",
+      "inLanguage": "fr-FR",
+      "isPartOf": { "@id": "https://www.nicephos.art/#site" },
+      "primaryImageOfPage": { "@id": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute#image" },
+      "breadcrumb": { "@id": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute#ariane" }
+    },
+    {
+      "@type": "ImageObject",
+      "@id": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute#image",
+      "contentUrl": "https://www.nicephos.art/media/e20acafb-930b-49c6-963a-fa208e5ad0cd-2a46625b-2000.webp",
+      "thumbnailUrl": "https://www.nicephos.art/media/e20acafb-930b-49c6-963a-fa208e5ad0cd-2a46625b-640.webp",
+      "encodingFormat": "image/webp",
+      "width": 2000,
+      "height": 1333,
+      "name": "Le Sillon de Saint-Malo à marée haute",
+      "caption": "À marée haute, la mer bat la digue du Sillon, à Saint-Malo ; une pose de 30 secondes lisse les vagues.",
+      "description": "La digue du Sillon à Saint-Malo battue par la mer à marée haute ; la pose longue transforme les vagues en brume.",
+      "creator": {
+        "@type": "Person",
+        "@id": "https://www.nicephos.art/auteur/julien#personne",
+        "name": "Julien",
+        "url": "https://www.nicephos.art/auteur/julien"
+      },
+      "creditText": "Julien / Nicephos",
+      "copyrightNotice": "© 2026 Julien",
+      "license": "https://www.nicephos.art/droits",
+      "acquireLicensePage": "https://www.nicephos.art/droits",
+      "dateCreated": "2026-10",
+      "datePublished": "2026-10-12",
+      "contentLocation": {
+        "@type": "Place",
+        "name": "Le Sillon, Saint-Malo",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Saint-Malo",
+          "addressRegion": "Bretagne",
+          "addressCountry": "FR"
+        }
+      },
+      "exifData": [
+        { "@type": "PropertyValue", "name": "Model", "value": "Nikon Z 7II" },
+        { "@type": "PropertyValue", "name": "LensModel", "value": "NIKKOR Z 24-120 mm f/4 S" },
+        { "@type": "PropertyValue", "name": "ExposureTime", "value": "30 s" }
+      ],
+      "isPartOf": { "@id": "https://www.nicephos.art/serie/bord-de-mer" },
+      "inLanguage": "fr-FR"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute#ariane",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Nicephos", "item": "https://www.nicephos.art/" },
+        { "@type": "ListItem", "position": 2, "name": "Pas la mer à boire", "item": "https://www.nicephos.art/serie/bord-de-mer" },
+        { "@type": "ListItem", "position": 3, "name": "Le Sillon de Saint-Malo à marée haute" }
+      ]
+    }
+  ]
+}

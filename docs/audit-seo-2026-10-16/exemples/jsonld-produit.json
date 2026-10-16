@@ -1,0 +1,126 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ProductGroup",
+      "@id": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute#tirage",
+      "productGroupID": "NPH-011",
+      "name": "Tirage d’art « Le Sillon de Saint-Malo à marée haute »",
+      "description": "Tirage d’art de la photo de Julien : la digue du Sillon à Saint-Malo à marée haute, en pose longue. Papier d’art mat, signé et numéroté, édition limitée à 30 exemplaires par format.",
+      "url": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute",
+      "image": [
+        "https://www.nicephos.art/media/e20acafb-930b-49c6-963a-fa208e5ad0cd-2a46625b-2000.webp"
+      ],
+      "brand": {
+        "@type": "Brand",
+        "name": "Nicephos"
+      },
+      "material": "Papier d’art mat 310 g/m²",
+      "variesBy": [
+        "https://schema.org/size"
+      ],
+      "hasVariant": [
+        {
+          "@type": "Product",
+          "sku": "NPH-011-30x45",
+          "name": "Tirage d’art « Le Sillon de Saint-Malo à marée haute » — 30 × 45 cm",
+          "size": "30 × 45 cm",
+          "image": "https://www.nicephos.art/media/e20acafb-930b-49c6-963a-fa208e5ad0cd-2a46625b-2000.webp",
+          "offers": {
+            "@type": "Offer",
+            "url": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute?format=30x45",
+            "price": "90.00",
+            "priceCurrency": "EUR",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition",
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "9.90",
+                "currency": "EUR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "FR"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 3,
+                  "maxValue": 7,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 2,
+                  "maxValue": 4,
+                  "unitCode": "DAY"
+                }
+              }
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "FR",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": 14,
+              "returnMethod": "https://schema.org/ReturnByMail",
+              "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility"
+            }
+          }
+        },
+        {
+          "@type": "Product",
+          "sku": "NPH-011-40x60",
+          "name": "Tirage d’art « Le Sillon de Saint-Malo à marée haute » — 40 × 60 cm",
+          "size": "40 × 60 cm",
+          "image": "https://www.nicephos.art/media/e20acafb-930b-49c6-963a-fa208e5ad0cd-2a46625b-2000.webp",
+          "offers": {
+            "@type": "Offer",
+            "url": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute?format=40x60",
+            "price": "140.00",
+            "priceCurrency": "EUR",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition",
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "12.90",
+                "currency": "EUR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "FR"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 3,
+                  "maxValue": 7,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 2,
+                  "maxValue": 4,
+                  "unitCode": "DAY"
+                }
+              }
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "FR",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": 14,
+              "returnMethod": "https://schema.org/ReturnByMail",
+              "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

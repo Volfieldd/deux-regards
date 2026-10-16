@@ -1,0 +1,59 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ProfilePage",
+      "@id": "https://www.nicephos.art/auteur/julien",
+      "url": "https://www.nicephos.art/auteur/julien",
+      "name": "Julien, photographe — mer, ville et Californie",
+      "description": "Les photos de Julien : la Côte d’Émeraude à marée haute, Paris, la Bavière et la Californie (San Francisco, séquoias, Lassen).",
+      "inLanguage": "fr-FR",
+      "isPartOf": {
+        "@id": "https://www.nicephos.art/#site"
+      },
+      "dateModified": "2026-10-15",
+      "mainEntity": {
+        "@id": "https://www.nicephos.art/auteur/julien#personne"
+      },
+      "breadcrumb": {
+        "@id": "https://www.nicephos.art/auteur/julien#ariane"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://www.nicephos.art/auteur/julien#personne",
+      "name": "Julien",
+      "url": "https://www.nicephos.art/auteur/julien",
+      "description": "Julien photographie la mer et la ville : la Côte d’Émeraude à marée haute, Paris, la Bavière et la Californie, souvent en pose longue.",
+      "knowsAbout": [
+        "Photographie de paysage",
+        "Pose longue",
+        "Photographie urbaine",
+        "Photographie de voyage"
+      ],
+      "memberOf": {
+        "@id": "https://www.nicephos.art/#organisation"
+      },
+      "sameAs": [
+        "https://www.instagram.com/COMPTE_JULIEN/"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://www.nicephos.art/auteur/julien#ariane",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Nicephos",
+          "item": "https://www.nicephos.art/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Julien, photographe"
+        }
+      ]
+    }
+  ]
+}

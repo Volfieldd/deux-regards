@@ -1,0 +1,54 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "@id": "https://www.nicephos.art/carnet/sillon-saint-malo-maree-haute#billet",
+      "mainEntityOfPage": "https://www.nicephos.art/carnet/sillon-saint-malo-maree-haute",
+      "url": "https://www.nicephos.art/carnet/sillon-saint-malo-maree-haute",
+      "headline": "Le Sillon à marée haute : 30 secondes de pose à Saint-Malo",
+      "description": "Comment est née la photo du Sillon à marée haute : l’heure de la marée, le trépied sur la digue, la pose de 30 secondes et ce qu’elle change à la mer.",
+      "image": [
+        "https://www.nicephos.art/media/e20acafb-930b-49c6-963a-fa208e5ad0cd-2a46625b-2000.webp"
+      ],
+      "datePublished": "2026-11-12T09:00:00+01:00",
+      "dateModified": "2026-11-12T09:00:00+01:00",
+      "author": [
+        {
+          "@type": "Person",
+          "@id": "https://www.nicephos.art/auteur/julien#personne",
+          "name": "Julien",
+          "url": "https://www.nicephos.art/auteur/julien"
+        }
+      ],
+      "publisher": { "@id": "https://www.nicephos.art/#organisation" },
+      "inLanguage": "fr-FR",
+      "articleSection": "Histoire d’une photo",
+      "wordCount": 650,
+      "about": [
+        {
+          "@type": "Place",
+          "name": "Le Sillon, Saint-Malo",
+          "address": { "@type": "PostalAddress", "addressLocality": "Saint-Malo", "addressRegion": "Bretagne", "addressCountry": "FR" }
+        }
+      ],
+      "associatedMedia": { "@id": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute#image" },
+      "isPartOf": {
+        "@type": "Blog",
+        "@id": "https://www.nicephos.art/carnet#carnet",
+        "name": "Le carnet de Nicephos",
+        "url": "https://www.nicephos.art/carnet"
+      },
+      "breadcrumb": { "@id": "https://www.nicephos.art/carnet/sillon-saint-malo-maree-haute#ariane" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://www.nicephos.art/carnet/sillon-saint-malo-maree-haute#ariane",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Nicephos", "item": "https://www.nicephos.art/" },
+        { "@type": "ListItem", "position": 2, "name": "Carnet", "item": "https://www.nicephos.art/carnet" },
+        { "@type": "ListItem", "position": 3, "name": "Le Sillon à marée haute : 30 secondes de pose à Saint-Malo" }
+      ]
+    }
+  ]
+}
