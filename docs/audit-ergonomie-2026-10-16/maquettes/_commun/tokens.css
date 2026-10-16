@@ -136,8 +136,11 @@ body.dark, .sombre {
   --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.13); --field-line: #7a766e;
   --ink: #eeece7; --ink2: #a9a59c; --ink3: #8a857c;           /* 15,8 · 7,6 · 5,1:1 sur --s1 */
   --accent: #f0a94c; --on-accent: #1b1206; --accent-ink: #f0a94c; --accent-soft: rgba(240,169,76,.14);
-  --ok: #56b4e9; --warn: #f0e442; --danger: #e8743b; --on-danger: #1b0a04; --danger-soft: rgba(232,116,59,.12);
+  --ok: #56b4e9; --warn: #f0e442; --danger: #f0605a; --on-danger: #1b0a04; --danger-soft: rgba(240,96,90,.13);
   --shadow: 0 18px 40px rgba(0,0,0,.45); --scrim: rgba(5,5,6,.62); --photo-bg: #000;
+  /* Danger (nouveau, passe 2 du 16 oct.) : main écrit #e8743b, un orangé trop voisin de l'ambre du bouton principal (#f0a94c :
+     19° contre 36° de teinte, 1,5:1 entre eux). #f0605a est un rouge (2°), plus sombre que l'ambre (1,6:1 entre eux) : 5,8:1 sur
+     --s1, 6,0:1 avec --on-danger. Le bouton danger plein porte en plus son icône (✕ ou corbeille) : la teinte n'est jamais seule. */
 }
 [data-theme="light"] .admin, .admin[data-theme="light"], .admin .clair {
   color-scheme: light;
@@ -175,8 +178,8 @@ body.dark, .sombre {
   --at-h2: 18px;    /* 500 */
   --at-h1: 34px;    /* 300 ; 28 px au téléphone */
 
-  /* Lignes du menu : 32 px au bureau, 44 px au toucher. */
-  --ligne-menu: 32px;
+  /* Lignes du menu : 30 px au bureau (32 dans main : les deux pixels font tenir Nouveautés et la version dans 900 px), 44 px au toucher. */
+  --ligne-menu: 30px;
   --barre-basse: 74px; /* barre d'onglets du téléphone (admin.css) */
 }
 @media (max-width: 720px), (pointer: coarse) { .admin { --ligne-menu: 44px; } }

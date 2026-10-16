@@ -10,6 +10,10 @@
                15 têtes de page et de partie · 16 listes de liens · 17 filtres · 18 rangées : variantes
                19 ouverture de l'accueil · 20 visionneuse · 21 carnet · 22 formulaires : compléments
                23 galerie privée · 24 contact · 25 tirages, panier, commande · 26 aperçu d'impression
+   Passe 2 (jury v1, 16 oct.) : rangées à deux photos au plus au téléphone et cartel jamais coupé (§ 6, § 5), règle de sizes
+   par format (§ 6) ; cibles de 44 px (fil d'Ariane, points du diaporama, titres des lignes du panier, lien de la sélection) ;
+   rien sous 13 px (marque à 320 px, signature) ; commandes qui exigent un script : .js-seul (§ 0) ; insécables (§ 0) ;
+   résumé d'erreurs en <section> titrée (§ 10) ; en-tête Contexte : 16 px entre le titre et la langue (§ 1).
    ===================================================================================================== */
 
 /* ---------- 0. Socle : corrections de lisibilité (UX-F-29) et de comportement (UX-F-34) ---------- */
@@ -34,6 +38,16 @@ img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: au
 /* Réseau lent : l'image n'est pas encore arrivée ; la réserve au format de la photo (--frame) et le cartel sont déjà là. */
 .is-lent img { visibility: hidden; }
 .is-lent .vignette > span:first-child { display: block; background: var(--frame); }
+
+/* Commandes qui n'ont de sens qu'avec un script (points et Pause du diaporama, Plein écran, Copier, Afficher le mot de passe) :
+   classe .js-seul, cachées tant que <html> n'a pas la classe js, posée par la première ligne du script
+   (document.documentElement.classList.add('js')). Une maquette pose class="js" sur <html> pour montrer la page avec script,
+   et .sans-js sur un cadre d'état pour la montrer sans. Le HTML garde [hidden] pour ce que le serveur cache. */
+html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
+[hidden] { display: none !important; }
+/* Ponctuation (lexique § 2) : espace insécable avant « : ; ! ? » et à l'intérieur des guillemets « », dans le texte comme dans
+   les attributs (alt, aria-label, title). Utilitaire : dr-work/outils/insecables.py. */
+.nobr { white-space: nowrap; }
 
 /* Lien d'évitement (UX-F-06) : premier élément de la page, visible au focus. */
 .skip { position: absolute; left: -9999px; top: 0; z-index: 100; }
@@ -109,9 +123,12 @@ button.sh-outil { border: 0; background: none; font: inherit; font-size: 15px; c
 }
 @container sh (max-width: 359px) {
   .sh-bar { gap: var(--esp-1) var(--esp-1); }
-  .sh-marque { font-size: 12px; letter-spacing: .3em; }
+  .sh-marque { font-size: 13px; letter-spacing: .26em; }
   .sh-menu > summary .sh-menu-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
+/* Contexte : 16 px au moins entre le titre (« Private Galerie ») et la langue, qui ne se lisent jamais comme un seul libellé. */
+.sh--contexte .sh-bar { column-gap: var(--esp-2); }
+.sh-contexte-t > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 @container sh (min-width: 360px) { .sh-bar { --gut: 24px; } }
 @container sh (min-width: 560px) {
   .sh--contexte .sh-bar { grid-template-columns: minmax(0, 1fr) auto minmax(max-content, 1fr); column-gap: var(--esp-3); }
@@ -162,7 +179,9 @@ button.sh-outil { border: 0; background: none; font: inherit; font-size: 15px; c
 .lang-pick li a:hover, .lang-pick li button:hover, .deroulant li a:hover { background: color-mix(in srgb, var(--ink) 8%, var(--paper)); }
 .lang-pick li [aria-current], .deroulant li a[aria-current] { font-weight: 500; }
 .lang-pick li .ic, .deroulant li a .ic { margin-left: auto; color: var(--safelight); }
-@media (max-width: 767px) { .deroulant ul { right: auto; left: 0; } }
+/* Au téléphone (et à 200 % de zoom), la liste ouverte entre dans le flux, sous son bouton : elle ne sort jamais de l'écran,
+   que l'Ordre soit au début ou au bout de sa ligne. */
+@media (max-width: 767px) { .deroulant ul { position: static; width: max-content; max-width: calc(100vw - 2 * var(--gut)); margin-top: var(--esp-demi); } }
 
 /* ---------- 3. Menu du téléphone : <details>, sans script ----------
    Le mot reste « Menu » ouvert comme fermé (l'état ouvert est dit par <details> et par l'icône ✕) : la largeur ne bouge pas. */
@@ -202,18 +221,23 @@ footer.sf { display: block; margin: var(--esp-12) 0 0; padding-block: var(--esp-
   .sf-groupes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .sf a { min-height: 32px; }
 }
+@media (pointer: coarse) { .sf a { min-height: var(--cible); } }
 footer.sf--reduit { margin-top: var(--esp-8); padding-top: var(--esp-3); }
 .sf--reduit .sf-in { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-3); }
 .sf--reduit ul { display: flex; flex-wrap: wrap; gap: 0 var(--esp-3); }
 
 /* ---------- 5. Cartel : un seul objet. Titre (Jost) puis méta « Auteur · Lieu · date » ----------
    Règle de place : sous les horizontales et les carrés ; à côté des verticales en grand format (≥ 900 px de large).
-   En vignette : le titre sur deux lignes au plus, la méta sur une ; coupés d'une ellipse ; le texte entier reste le nom du lien. */
+   En vignette (.cartel--ligne) : jamais coupé au milieu d'un mot ni d'une donnée, jamais d'ellipse. Le titre passe sur trois
+   lignes au plus ; la méta passe à la ligne entre ses parties : une espace insécable avant chaque « · » et dans la date
+   (« Julien&nbsp;· Lisbonne&nbsp;· mai&nbsp;2024 ») ; une ligne ne commence jamais par « · » et une date ne se coupe pas.
+   Variantes de méta, déclarées : vignette « Auteur · Lieu · date » ; « À proximité » « 600 m · Alfama » (la distance
+   d'abord, c'est la raison d'être de la liste) ; récit d'un billet « Alfama, Lisbonne · sam. 10 oct., 7 h 42 » (lieu précis
+   et heure ; l'auteur est dit une fois par le billet). */
 .cartel { display: grid; gap: 2px; min-width: 0; margin: 0; padding-top: var(--esp-1); }
 .cartel-t { font-size: 16px; line-height: 1.35; color: var(--ink); font-weight: 400; }
 .cartel-m { font-size: var(--t-meta); line-height: 1.45; color: var(--mute); }
-.cartel--ligne .cartel-m { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cartel--ligne .cartel-t { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.cartel--ligne .cartel-t { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; overflow-wrap: normal; hyphens: manual; }
 .cartel--grand { gap: var(--esp-demi); padding-top: var(--esp-2); }
 .cartel--grand .cartel-t { font-size: var(--t-titre-3); line-height: 1.3; }
 .cartel--grand .cartel-m { font-size: var(--t-petit); }
@@ -228,12 +252,30 @@ footer.sf--reduit { margin-top: var(--esp-8); padding-top: var(--esp-3); }
 
 /* ---------- 6. Vignettes en rangées justifiées : le format de chaque photo, à hauteur commune ----------
    Ni fond gris, ni cercle, ni recadrage. Chaque <li> porte son rapport largeur/hauteur : style="--r: 1.5".
-   Hauteur visée --h : 240 px au bureau, 112 px au téléphone (deux photos par rangée). */
-.rangees { --h: 112px; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--esp-3) var(--esp-1); }
+   Hauteur visée --h : 240 px au bureau (≥ 1 280), 200 px sur tablette (768-1 279) ; au téléphone, 40 % de la largeur de la
+   rangée (40cqi) : DEUX PHOTOS AU PLUS PAR RANGÉE. Une horizontale y est seule, en pleine largeur, ou à côté d'une verticale ;
+   deux verticales vont ensemble. Trois photos ne tiennent que si trois verticales se suivent : l'ordre « choisi par nous »
+   l'évite (lexique § 4.2), et le cartel (§ 5) reste lisible même alors.
+   Taille des images (srcset + sizes) : srcset avec les vraies largeurs des fichiers (horizontale : 480/ 480w, 900 px 900w ;
+   verticale : 480/ 320w, 900 px 600w ; 1600/ seulement en grand format) ; sizes selon le FORMAT, à recopier tel quel :
+     horizontale (--r: 1.5)   sizes="(min-width: 1280px) 470px, (min-width: 768px) 390px, calc(100vw - 48px)"
+     verticale (--r: 0.6667)  sizes="(min-width: 1280px) 210px, (min-width: 768px) 175px, calc(50vw - 28px)"
+     carrée (--r: 1)          sizes="(min-width: 1280px) 312px, (min-width: 768px) 260px, calc(60vw - 30px)"
+   (largeur de base r × h, plus 30 % d'étirement au plus au bureau ; au téléphone, la place réelle : une horizontale seule ou
+   aux deux tiers, une verticale à la moitié). Variante étirée (.rangees--etiree, h 140/180) : horizontale
+   "(min-width: 1280px) 330px, (min-width: 768px) 260px, calc(100vw - 48px)", verticale "(min-width: 1280px) 150px,
+   (min-width: 768px) 120px, calc(50vw - 28px)". Résultat : au bureau (densité 1), une horizontale prend le fichier de 480 px,
+   une verticale celui de 480/ (320 px de large) ; sur un Pixel 7 (densité 2,6), une verticale de 178 px prend le 600 px de
+   large et une horizontale en pleine largeur le 900 px : chaque image est à la taille où elle s'affiche, ni plus ni moins.
+   Hors des rangées, même principe : srcset partout (une vignette de panier de 64 à 108 px : 160/ et 480/), sizes = la
+   largeur réelle (diptyque : (largeur du bloc − écart) × r / somme des r). */
+.rangees { --h: 112px; container-type: inline-size; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--esp-3) var(--esp-1); }
+@supports (width: 1cqi) { @media (max-width: 767px) { .rangees { --h: 40cqi; } } }
 .rangees::after { content: ''; flex: 999999 1 0; }
 .rangees > li { flex: var(--r) 1 calc(var(--r) * var(--h)); min-width: 0; }
 .rangees img { display: block; width: 100%; height: auto; aspect-ratio: var(--r); background: var(--frame); }
 @media (min-width: 768px) { .rangees { --h: 200px; column-gap: var(--esp-2); } }
+/* Diptyque dans une rangée : chaque photo vaut une horizontale de la rangée (même sizes). */
 @media (min-width: 1280px) { .rangees { --h: 240px; } }
 .vignette { display: block; color: inherit; }
 .vignette:hover .cartel-t { text-decoration: underline; text-underline-offset: 4px; }
@@ -284,7 +326,10 @@ a.lien, button.lien { display: inline-flex; align-items: center; gap: var(--esp-
    (mot de passe, pays de livraison) : pas de phrase d'obligation, le champ suffit.
    Ordre : libellé · aide · champ · erreur (sous le champ ; sous la légende pour un groupe).
    Erreur : ⚠ + « Erreur : » en gras + une phrase qui dit comment corriger ; bord de 2 px ; saisie gardée.
-   Résumé en tête au-delà d'un point : « 2 points à corriger », liens vers les champs, focus posé dessus (autofocus). */
+   Résumé en tête au-delà d'un point : « 2 points à corriger », liens vers les champs, focus posé dessus (autofocus).
+   Balisage du résumé : <section class="resume" tabindex="-1" autofocus aria-labelledby="resume-t"> et son titre
+   <h2 class="resume-t" id="resume-t"> (une région nommée, lue au focus) ; jamais un <div> nommé par aria-labelledby
+   (ARIA 1.2 interdit de nommer un élément générique : le nom n'était pas exposé). */
 .form { display: grid; gap: var(--esp-4); max-width: 640px; }
 .form-oblig { margin: 0; color: var(--mute); font-size: var(--t-petit); }
 .champ { display: grid; gap: var(--esp-1); min-width: 0; }
@@ -328,6 +373,7 @@ a.lien, button.lien { display: inline-flex; align-items: center; gap: var(--esp-
 .resume-t .ic { color: var(--error); }
 .resume ul { margin: 0; padding-left: 20px; }
 .resume a { display: block; padding-block: 10px; color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.resume h2.resume-t { font-size: var(--t-titre-3); }
 
 /* ---------- 11. Prix ----------
    Vitrine (pages Tirages) : « 290 € ». Panier, commande, facture : « 290,00 € ». Espace insécable avant €.
@@ -379,9 +425,10 @@ a.lien, button.lien { display: inline-flex; align-items: center; gap: var(--esp-
 .ariane ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; font-size: var(--t-petit); color: var(--mute); }
 .ariane li { display: inline-flex; align-items: center; }
 .ariane li + li::before { content: '/' / ''; padding-inline: var(--esp-1); color: var(--field); }
-.ariane a { display: inline-flex; align-items: center; min-height: var(--cible); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
+.ariane a { display: inline-flex; align-items: center; justify-content: center; min-height: var(--cible); min-width: var(--cible); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
 .ariane [aria-current] { color: var(--mute); }
-/* Étiquette en capitales espacées : trois mots au plus (nom de série, rubrique). */
+/* Étiquette en capitales espacées : trois mots au plus, les nombres ne comptant pas (« Commande 1 sur 2 », « Même soir »,
+   « Rue ») ; au-delà, la phrase s'écrit en casse normale (.cartel-m, .chapo). */
 .etiquette { margin: 0; font: 500 var(--t-meta)/1.3 var(--sans); letter-spacing: var(--capitales); text-transform: uppercase; color: var(--mute); }
 /* Données : la seule place de Plex Mono. Références, numéros d'exemplaire, poids, EXIF. Jamais une phrase. */
 .donnee { font: 400 var(--t-meta)/1.45 var(--mono); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
@@ -470,6 +517,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
    .rangees--etiree : une rangée étirée sur toute la largeur au-delà du téléphone (séries, « À proximité », autres tirages).
    .diptyque--rangee : dans la Galerie, le diptyque prend toute une rangée, à la place de sa première photo. */
 .rangees--etiree { --h: 112px; }
+@supports (width: 1cqi) { @media (max-width: 767px) { .rangees--etiree { --h: 40cqi; } } }
 @media (min-width: 768px) { .rangees--etiree { --h: 140px; } .rangees--etiree::after { content: none; } }
 @media (min-width: 1280px) { .rangees--etiree { --h: 180px; } }
 .diptyque--rangee { display: block; }
@@ -496,7 +544,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .ouverture-ctl { display: flex; align-items: center; justify-content: center; gap: var(--esp-2); padding-top: var(--esp-1); }
 .ouverture-points { display: flex; list-style: none; margin: 0; padding: 0; }
 .ouverture-points li { position: relative; }
-.ouverture-point { display: grid; place-items: center; width: var(--esp-4); height: var(--cible); }
+.ouverture-point { display: grid; place-items: center; width: var(--cible); height: var(--cible); }
 .ouverture-point::before { content: ''; width: 8px; height: 8px; border-radius: 50%; box-sizing: border-box; border: 1px solid var(--ink); }
 .ouverture-point[aria-pressed="true"]::before { width: 10px; height: 10px; background: var(--ink); }
 .ouverture-point:hover::before { background: var(--mute); }
@@ -792,7 +840,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
   margin-top: var(--esp-6); padding: var(--esp-2) 0 calc(var(--esp-2) + env(safe-area-inset-bottom, 0px)); background: var(--paper); border-top: 1px solid var(--field); }
 .selection-n { display: inline-flex; align-items: center; gap: var(--esp-1); margin: 0; }
 .selection-n .ic { color: var(--ink); }
-.selection-n a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.selection-n a { display: inline-flex; align-items: center; min-height: var(--cible); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
 .selection form { margin: 0; }
 @media (max-width: 559px) { .selection form, .selection .btn { width: 100%; } }
 .telecharger { display: grid; gap: var(--esp-1); }
@@ -822,7 +870,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .formats .choix input { margin: 0; }
 .formats .choix:has(input:checked) > span:first-of-type { font-weight: 500; }
 .formats .choix-d { font-weight: 400; }
-.signature { position: absolute; right: 3%; bottom: 3.5%; font: 300 clamp(11px, 1.15vw, 17px)/1 var(--sans); letter-spacing: .04em; color: var(--ink); opacity: .42; pointer-events: none; }
+.signature { position: absolute; right: 3%; bottom: 3.5%; font: 300 clamp(13px, 1.15vw, 17px)/1 var(--sans); letter-spacing: .04em; color: var(--ink); opacity: .42; pointer-events: none; }
 .mur { margin: 0; display: grid; gap: var(--esp-1); }
 .mur figcaption { font-size: var(--t-meta); color: var(--mute); }
 .mur figcaption b { font-weight: 500; color: var(--ink); }
@@ -846,7 +894,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .ligne-img { display: block; height: 96px; width: auto; }
 .ligne-img img { height: 96px; width: auto; }
 .ligne h3 { margin: 0; font: 400 var(--t-texte)/1.4 var(--sans); }
-.ligne h3 a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
+.ligne h3 a { display: inline-flex; align-items: center; min-height: var(--cible); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
 .ligne-d { margin: 2px 0 0; font-size: var(--t-meta); color: var(--mute); }
 .ligne-d + .ligne-d { margin-top: 0; }
 .ligne .prix { margin: 0; font-size: var(--t-texte); text-align: right; }

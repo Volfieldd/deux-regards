@@ -10,6 +10,18 @@
    - ajouter #sans-annotations à l'adresse (la page contient <i id="sans-annotations" hidden></i>) ;
    - ou poser la classe sans-annotations sur <html> ; - ou imprimer.
    Pastilles, étiquettes et repère étant hors du flux, les retirer ne déplace aucun pixel de l'interface.
+   Règles de la passe 2 (jury v1, 16 oct.), contrôlées par dr-work/outils/controle-annotations.mjs :
+   - une pastille n'est JAMAIS hors de l'écran (x < 0 ou au-delà de la largeur), ni sur une photo (img, picture, svg de carte),
+     ni sur un texte de l'interface. Devant un bloc qui touche le bord de l'écran (cadre d'état pleine largeur, en-tête, photo
+     pleine largeur), elle va dans l'étiquette de l'état (.mq-etat > .mq-pin, en premier) ou dans la gouttière intérieure
+     du bloc (.mq-pin.g) ; dans un <details>, après le <summary> (qui reste le premier enfant) ; dans une <figure>, jamais
+     entre l'image et la figcaption ;
+   - une étiquette « État · … » passe sur deux lignes plutôt que d'être coupée d'une ellipse ;
+   - ordre de la page : l'interface (avec son pied de page du site), puis la zone des autres états (.mq-etats), puis l'encart
+     .mq-notes, en dernier : le pied de page du site est TOUJOURS avant l'encart (sinon, retirer les annotations le déplace) ;
+   - chaque cadre d'autre état est inert (<section class="mq-ecran" inert aria-labelledby="…">) : on n'y tabule pas, ses
+     liens d'exemple ne sont pas des liens de la page ; seul l'écran principal est vivant ;
+   - un seul bloc « Mesures » par encart (.mq-mesures), celui de la dernière passe, daté, sans « à compléter ».
    ===================================================================================================== */
 @font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/ibm-plex-mono-latin-400-normal.woff2) format('woff2'); }
 @font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/ibm-plex-mono-latin-500-normal.woff2) format('woff2'); }
@@ -25,6 +37,7 @@
   --mq-pin: 24px;
 }
 @media (max-width: 767px) { :root { --mq-pin: 18px; } }
+@media (max-width: 359px) { :root { --mq-pin: 14px; } }
 
 /* 1. Pastille. À placer en premier enfant de l'élément commenté : elle se pose à sa position statique sans
    prendre de place, puis glisse dans la marge de gauche. Variante .d : marge de droite (l'élément commenté
@@ -36,12 +49,25 @@
 .mq-pin.d { translate: none; left: calc(100% + 6px); top: 0; }
 .mq-a { position: relative; }
 @media (max-width: 767px) { .mq-pin { font-size: 11px; translate: calc(-100% - 2px) 0; border-width: 1.5px; } .mq-pin.d { translate: none; left: calc(100% + 2px); } }
+/* Sous 360 px, la marge du site n'est que de 16 px : la pastille fait 14 px, à 1 px du contenu, et reste dans l'écran. */
+@media (max-width: 359px) { .mq-pin { font-size: 10px; translate: calc(-100% - 1px) 0; border-width: 1px; } .mq-pin.d { left: calc(100% + 1px); } }
+/* Gouttière intérieure d'un bloc pleine largeur (le bloc porte .mq-a) : la pastille se pose dans sa marge de gauche (--gut),
+   à côté du contenu, jamais dessus. */
+.mq-pin.g { translate: none; left: max(2px, calc(var(--gut, 24px) - var(--mq-pin) - 6px)); top: 4px; }
+/* Pastille d'un état : dans son étiquette, avant le texte (jamais en marge d'un cadre pleine largeur). */
+.mq-etat > .mq-pin { position: static; translate: none; display: inline-grid; vertical-align: -3px; width: 18px; height: 18px; margin: 0 8px 0 -2px; font-size: 11px; border-width: 1.5px; }
 
 /* 2. Autre état de l'écran : un cadre pointillé magenta (contour, hors du flux) et son étiquette au-dessus. */
 .mq-ecran { position: relative; outline: 1px dashed var(--mq); outline-offset: 8px; }
 .mq-etat { position: absolute; left: -8px; bottom: calc(100% + 14px); z-index: 60; margin: 0; max-width: calc(100vw - 32px); box-sizing: border-box;
   padding: 3px 8px; background: var(--mq); color: var(--mq-encre); font: 500 12px/1.4 'IBM Plex Mono', ui-monospace, monospace;
-  letter-spacing: .02em; text-transform: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  letter-spacing: .02em; text-transform: none; text-align: left; white-space: normal; overflow-wrap: anywhere;
+  width: max-content; max-width: min(calc(100% + 16px), calc(100vw - 16px)); }
+
+/* Cadre pleine largeur (il touche les bords de l'écran : en-tête, page entière) : contour dedans, étiquette posée sur la
+   gouttière ; sa pastille va dans l'étiquette. Rien ne sort de l'écran. */
+.mq-ecran--plein { outline-offset: -1px; }
+.mq-ecran--plein > .mq-etat { left: max(8px, var(--gut, 16px)); max-width: calc(100vw - 2 * max(8px, var(--gut, 16px))); }
 
 /* 3. Encart « Ce qui change » : toujours en fin de page, toujours le même dessin, indépendant du thème. */
 .mq-notes { margin-top: 96px; padding: 40px max(var(--gut, 24px), 16px) 56px; background: var(--mq-fond); color: var(--mq-encre);

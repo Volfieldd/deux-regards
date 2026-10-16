@@ -8,6 +8,13 @@
    14 montrer un état dans une maquette (hors produit)
    Consolidation du 16 oct. 2026 : les composants que MQ-07 à MQ-09 et MQ-18 à MQ-20 avaient ajoutés passent ici,
    un seul par besoin (voir MQ-00, section Administration).
+   Passe 2 (jury v1, 16 oct.) : focus visible sur un champ en erreur (§ 7, à reporter dans main) ; boutons qui passent à la
+   ligne au téléphone et dans les cartes (§ 3) ; danger rouge en Chambre noire (tokens.css) ; pied de la barre latérale à
+   parité avec layout.eta : Nouveautés et version, « Traitement : n photos », langue et thème en formulaires POST (§ 1) ;
+   variante Photographe sans lien « Séries » (§ 1) ; résumé d'erreurs en <section> titrée (§ 7).
+   Corrections techniques de la consolidation (rien à faire dans les maquettes) : voile de dialogue en minmax(0, 1fr),
+   cadres en min-width: 0, rangées défilantes en position: relative, toasts montrés sans z-index, barre d'actions d'un état
+   montré gardée dans son cadre au téléphone, « · » de la méta jamais en début de ligne.
    ===================================================================================================== */
 
 /* ---------- 1. Barre latérale unique ----------
@@ -39,7 +46,9 @@
 .admin .nav-ser > .ser-plier[open] { display: contents; }
 .admin .nav-ser .ser { grid-column: 1 / -1; padding-left: 28px; }
 .admin .ser a { min-height: var(--ligne-menu); }
-/* Pied : Réglages et Aide, puis Voir le site et la langue, puis le compte, le thème et la déconnexion. */
+/* Pied, à parité avec views/admin/layout.eta : Réglages et Aide ; Voir le site et la langue ; Nouveautés et le numéro de
+   version (une ligne) ; « Traitement : n photos » quand des images sont en cours (sinon hidden) ; puis le compte, le thème
+   et la déconnexion. Langue et thème sont des formulaires POST avec jeton CSRF, comme dans main : ils marchent sans script. */
 .admin .side .foot { padding-top: 8px; gap: 4px; }
 .admin .pied-liens { display: grid; grid-template-columns: 1fr 1fr; gap: 0 4px; }
 .admin .pied-liens a { display: flex; align-items: center; gap: 8px; min-height: var(--ligne-menu); padding: 0 10px; border-radius: 8px; color: var(--ink2); font-size: 13px; white-space: nowrap; }
@@ -54,6 +63,16 @@
 .admin .pied-liens .admin-lang li button, .admin .pied-liens .admin-lang li a { display: flex; width: 100%; align-items: center; min-height: var(--ligne-menu); padding: 0 10px; border-radius: 8px; color: var(--ink); text-align: left; }
 .admin .pied-liens .admin-lang li [aria-current] { font-weight: 500; }
 .admin .me { min-height: 40px; }
+/* Nouveautés : l'entrée et le numéro de version (package.json) sur une ligne ; .nav-ver d'admin.css passe de 10 à 12 px. */
+.admin .pied-liens .pied-large { grid-column: 1 / -1; }
+.admin .nav-ver { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--ink3); letter-spacing: 0; }
+/* « Traitement : 3 photos » (a.job d'admin.css, data-activity) : une ligne de menu, au-dessus du compte ; hidden sans traitement. */
+.admin .side .job { min-height: var(--ligne-menu); padding: 0 10px; border: 0; border-radius: 8px; background: var(--s2); color: var(--ink2); font-size: 13px; gap: 8px; }
+.admin .side .job:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* Langue et thème : formulaires POST (main) ; le formulaire ne prend pas de place. */
+.admin .pied-liens .admin-lang form, .admin .me form { margin: 0; }
+.admin .pied-liens .admin-lang li button { border: 0; background: none; font: inherit; font-size: 14px; cursor: pointer; }
+.admin .pied-liens .admin-lang li button:hover { background: var(--s2); }
 .admin .me .who small { font-size: 12px; }
 /* Haut de la barre : le nom du site et, au téléphone, « Fermer » (44 px) : le panneau se ferme sans chercher l'onglet Menu. */
 .admin .side-haut { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
@@ -79,9 +98,21 @@
 .admin .pal-list .sec, .admin .palette kbd { font-size: 12px; }
 @media (max-width: 1180px) and (min-width: 721px) { .admin .cmdk kbd, .admin .me .btn-theme { display: none; } .admin .me { gap: 4px; } }
 /* Variante du rôle Photographe (MQ-00) : les mêmes groupes, filtrés par les permissions (server/permissions.js) ; aucun
-   groupe vide. Photos (ses séries, comptées sur ses photos) · Personnes (sans Signalements) · Publier : Mes propositions,
-   Carnets, Galeries privées, Boutique · Équipe : Statistiques seules ; au pied, Aide et Voir le site, sans Réglages.
-   Icônes : Carnets, une page ; Journal, une horloge (UX-A-11). */
+   groupe vide, aucun lien vers une page interdite. Photos : Photothèque, puis « Séries » qui n'est PAS un lien (pas de
+   series.gerer : /admin/series lui répondrait 403) mais un intitulé repliant (.ser-titre) dont les sous-entrées
+   /admin/photos?serie=… sont des liens (photos.voir, comptées sur ses photos, tous statuts : navSeries de admin.js) ; Sorties
+   et Voyages (sorties.voir) · Personnes : Personnes, App de terrain (sans Signalements) · Publier : Mes propositions
+   (/admin/photos?statut=proposee), et les modules à venir s'ils lui sont ouverts (permissions à créer : carnet.ecrire,
+   galeries.gerer, boutique.voir, portée « les miennes ») · Équipe : Statistiques seules ; au pied, Aide, Voir le site,
+   Nouveautés et la langue, sans Réglages. Icônes : Carnets, une page ; Journal, une horloge (UX-A-11). */
+.admin .ser-titre > summary { display: flex; align-items: center; gap: 10px; min-height: var(--ligne-menu); padding: 0 10px; border-radius: 8px; color: var(--ink2); cursor: pointer; list-style: none; }
+.admin .ser-titre > summary::-webkit-details-marker { display: none; }
+.admin .ser-titre > summary:hover { background: var(--s2); color: var(--ink); }
+.admin .ser-titre > summary .ic { width: 18px; height: 18px; }
+.admin .ser-titre > summary .chev { margin-left: auto; width: 14px; height: 14px; color: var(--ink3); transition: transform .15s; }
+.admin .ser-titre[open] > summary .chev { transform: rotate(90deg); }
+.admin .ser-titre .ser { padding-left: 28px; }
+@media (prefers-reduced-motion: reduce) { .admin .ser-titre > summary .chev { transition: none; } }
 
 /* ---------- 2. En-tête de page type ----------
    Retour (« ← Photothèque » sur une fiche) · H1 Jost 300 · pastille d'état · une ligne de méta (dont l'enregistrement)
@@ -128,6 +159,12 @@
 .admin .btn.danger { background: var(--danger); color: var(--on-danger); }
 .admin .btn .ic { width: 16px; height: 16px; }
 @media (max-width: 720px), (pointer: coarse) { .admin .btn { min-height: 44px; } }
+/* Un libellé long (l'allemand : « Julien zur Veröffentlichung vorschlagen ») passe à la ligne au lieu d'être coupé par le bord :
+   au téléphone partout (barre basse comprise), et à toutes les largeurs dans les cartes et les colonnes étroites. */
+@media (max-width: 720px) { .admin .btn { white-space: normal; text-wrap: balance; line-height: 1.25; padding-block: 6px; text-align: center; } }
+.admin :is(.objets-a, .signal, .sugg-bloc, .liste-a, .cote, .assist) .btn { white-space: normal; text-wrap: balance; line-height: 1.25; padding-block: 6px; text-align: center; }
+/* Danger plein (action finale d'un dialogue) : toujours avec son icône (✕ ou corbeille) devant le verbe ; la teinte ne suffit pas. */
+.admin .btn.danger .ic { color: currentColor; }
 
 /* ---------- 4. Pastille d'état : symbole + mot, couleur fixe par symbole ----------
    ○ à faire · ◐ en cours, attend quelqu'un · ● abouti · ▲ demande votre attention · ✕ arrêté. */
@@ -200,12 +237,29 @@ a.enreg { text-decoration: underline; text-underline-offset: 3px; text-decoratio
 .confirm p.err, .dialog p.err { color: var(--danger); margin: 0 0 8px; }
 .err-l { display: grid; gap: 6px; justify-items: start; }
 .champ-a [aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--danger) !important; }
+/* Erreur ET focus, visibles ensemble (RGAA 10.7, WCAG 2.4.7) : admin.css (main) écrit [aria-invalid="true"] { box-shadow …
+   !important }, qui écrasait l'anneau du focus (input:focus { outline: none; box-shadow … }) : le champ vers lequel le résumé
+   envoie n'avait plus de focus visible. Le filet d'erreur (2 px, dedans, --danger) reste ; le focus s'y ajoute dehors : contour
+   --accent-ink de 2 px à 2 px du bord (≥ 3:1 sur --bg, --s1 et --s2 dans les deux thèmes) et halo --accent-soft. Même règle pour
+   les cases et boutons radio en erreur, et pour .is-focus (focus figé d'une capture). Correctif à reporter dans main :
+   dr-work/mq2-correctifs-main.md. */
+:is(input, select, textarea, button)[aria-invalid="true"]:is(:focus, :focus-visible, .is-focus) {
+  outline: 2px solid var(--accent-ink) !important; outline-offset: 2px !important;
+  box-shadow: inset 0 0 0 2px var(--danger), 0 0 0 4px var(--accent-soft) !important; }
+:is(input[type="checkbox"], input[type="radio"])[aria-invalid="true"] { outline: 2px solid var(--danger); outline-offset: 1px; }
+/* Résumé d'erreurs : <section class="resume-a" tabindex="-1" aria-labelledby="…"> titrée par son <h2> (un élément générique
+   ne se nomme pas : ARIA 1.2) ; le focus y est posé au rechargement ; un lien par point, vers le champ. */
 .resume-a { display: grid; gap: 6px; margin: 0 0 18px; padding: 12px 16px; border-radius: var(--r); background: var(--danger-soft); box-shadow: inset 3px 0 0 var(--danger); }
 .resume-a h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px; font-weight: 500; }
 .resume-a h2 .ic { color: var(--danger); }
 .resume-a ul { margin: 0; padding-left: 20px; }
 .resume-a a { display: inline-flex; align-items: center; min-height: 24px; text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 720px), (pointer: coarse) { .resume-a a { min-height: 44px; } }
+/* Sans JavaScript, chaque formulaire à enregistrement automatique garde son bouton « Enregistrer » (.sans-script) : présent
+   dans le HTML, il se cache dès que le script a posé la classe js sur <html> (une maquette pose class="js" pour montrer la page
+   avec script, et .sans-js sur un cadre d'état pour la montrer sans). */
+html.js .sans-script { display: none !important; }
+html .sans-js .sans-script { display: block !important; }
 /* Champs : 16 px au téléphone (pas de zoom forcé sur iOS). */
 @media (max-width: 720px) { .admin input:not([type="checkbox"]):not([type="radio"]), .admin select, .admin textarea { font-size: 16px; } }
 /* Relecture d'une saisie libre (date, ville d'après le GPS) : la machine dit ce qu'elle a compris, sous le champ. */

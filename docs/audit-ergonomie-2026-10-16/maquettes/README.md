@@ -43,9 +43,22 @@ MQ-00 n'est pas un écran du site : c'est la référence que les vingt maquettes
 ## Les rendus
 
 - `-bureau.webp` : capture pleine page à 1 440 × 900, densité 1. `-mobile.webp` : Pixel 7 (412 × 839), densité 2. Les images différées sont chargées avant la capture.
-- **Rendus en bandes.** Le WebP plafonne à 16 383 px de haut. Une capture plus haute est coupée en bandes posées côte à côte sur un fond gris, **à lire de gauche à droite**, coupées entre deux blocs (jamais dans une image ni dans un texte) ; elle garde sa densité au lieu d'être réduite. C'est le cas des rendus téléphone de MQ-01, 02, 04, 05, 06, 11, 13, 15, 16 et 17 (deux bandes), de MQ-12 (trois bandes) et de l'administration (MQ-07 à MQ-10, MQ-18 à MQ-20). MQ-00, très longue, est rendue en trois bandes au bureau (densité 1) et en six au téléphone (densité 1,5).
+- **Rendus en bandes.** Le WebP plafonne à 16 383 px de haut. Une capture plus haute est coupée en bandes posées côte à côte sur un fond gris, **à lire de gauche à droite**, coupées entre deux blocs (jamais dans une image ni dans un texte) ; elle garde sa densité au lieu d'être réduite (téléphone en densité 2). C'est le cas de la plupart des rendus téléphone ; le nombre de bandes suit la longueur de la page (les rangées à deux photos au plus allongent les galeries au téléphone). MQ-00, très longue, est rendue en bandes au bureau (densité 1) et au téléphone (densité 1,5).
 - Le bas du premier écran est marqué dans les marges par un trait magenta (à 900 px au bureau, 839 px au téléphone).
 - Contrôles faits sur MQ-00 et sur chaque maquette du site (16 oct. 2026) : axe-core au bureau et au téléphone ; largeurs 320, 412, 820, 1 024 et 1 440 px, en français et avec l'en-tête du site en allemand ; comparaison pixel à pixel avec et sans annotations. Outils : `outils/consol-final.mjs`, `consol-sans.py`, `consol-bandes.py`. Administration (MQ-07 à MQ-10, MQ-18 à MQ-20, échantillons de MQ-00) : `outils/consol-admin.mjs` (en plus : cibles, texte sous 12 px, barre latérale), `consol-sans-admin.py`, `consol-bandes-admin.py`, `mq00-admin-rendu.mjs`.
+
+## Règles communes de la passe 2 (16 oct. 2026, après le jury v1)
+
+Elles valent pour les vingt maquettes ; la planche (MQ-00) les montre, le lexique (§ 0) les résume.
+
+- **Ordre de la page** : l'interface et son pied de page, puis la zone des autres états (`.mq-etats`), puis l'encart « Ce qui change », toujours en dernier. Retirer les annotations ne doit déplacer aucun élément.
+- **Cadres d'état** : `<section class="mq-ecran" inert aria-labelledby="…">`, nommés par leur étiquette ; `.mq-ecran--plein` pour un cadre qui touche les bords de l'écran. Seul l'écran principal est vivant.
+- **Pastilles** : jamais hors de l'écran, ni sur une photo, ni sur un texte ; devant un bloc pleine largeur, dans l'étiquette de l'état (`.mq-etat > .mq-pin`) ou dans la gouttière (`.mq-pin.g`) ; après le `<summary>` d'un `<details>`. Les étiquettes « État · … » passent sur deux lignes au besoin.
+- **Un seul bloc « Mesures »** par encart : celui de la dernière passe, daté.
+- **Commandes qui exigent un script** (diaporama, plein écran, Copier, Afficher) : `.js-seul`, cachées sans la classe `js` sur `<html>` ; formulaires à enregistrement automatique de l'admin : un bouton « Enregistrer » en `.sans-script`. Une maquette pose `class="js"` sur `<html>` pour montrer la page avec script, `.sans-js` sur un cadre pour la montrer sans.
+- **Images** : `srcset` partout, `sizes` selon le format dans les rangées (`public.css` § 6) ; au téléphone, deux photos au plus par rangée.
+- **Texte** : espaces insécables (`outils/insecables.py`), capitales espacées de trois mots au plus, dates abrégées dans l'interface, adresses du code (`/serie/<slug>`) ou marquées « à créer ».
+- **Contrôles outillés** (dans `/home/claudecode/dr-work/outils/`, Playwright en conteneur par `run-pw.sh`) : `controle-annotations.mjs MQ-xx-…` (pastilles, étiquettes, `inert`, ordre de la page, Mesures, interface identique sans annotations, débordement, à 1 440, 412 et 320 px) ; `python3 insecables.py --ecrire MQ-xx-….html` ; `passe2-rangees.mjs MQ-xx-… 1440,412,320` (composition des rangées et fichier chargé par chaque vignette).
 
 ## Ce qui est annotation, et ce qui est interface
 
@@ -60,7 +73,7 @@ Tout ce qui est magenta appartient à la maquette, jamais à l'interface propos�
 | `public.css` | composants du site public. § 0 à 14 : en-têtes Site, Contexte, Tunnel ; langue et listes déroulantes ; menu du téléphone ; pieds de page ; cartel ; rangées ; diptyque ; boutons ; bascules ; formulaires ; prix ; étapes ; messages ; fil d'Ariane et données. § 15 à 26, les composants des pages versés depuis les maquettes : têtes de page et de partie, listes de liens, filtres, variantes des rangées, ouverture de l'accueil, visionneuse, carnet, compléments de formulaire, galerie privée, contact, tirages et panier, aperçu d'impression |
 | `admin.css`, `app.css` | styles de l'administration et de l'app de terrain, copies de `main` |
 | `admin-plus.css` | ce qui manque à `admin.css` : barre latérale unique (et sa variante Photographe), en-tête de page, trois boutons, états, témoin d'enregistrement, message d'action, formulaire type, dialogue ; puis listes et objets, panneaux et signalements, Réglages (onglets, interrupteur, carte d'assistant), éditeur de billet, aperçu « comme sur le site », et de quoi montrer un état dans une maquette — un composant par besoin (MQ-00, section Administration) |
-| `annotations.css` | gabarit commun des annotations (magenta), interrupteur « sans annotations », et mise en page des zones d'autres états (`.mq-etats`, `.mq-ecran-in`) |
+| `annotations.css` | gabarit commun des annotations (magenta), interrupteur « sans annotations », mise en page des zones d'autres états (`.mq-etats`, `.mq-ecran-in`) ; règles de la passe 2 en tête du fichier (pastilles dans l'écran, étiquettes sur deux lignes, `inert`, ordre de la page, un seul bloc Mesures) |
 | `site-entete.css` | ancien en-tête des maquettes v0, remplacé par `public.css` |
 | `fonts/` | polices WOFF2 |
 | `photos/` | 26 photos de synthèse de la démonstration (aucune photo réelle) en 900 px, et leurs variantes `480/` et `160/` ; `1600/` pour les 14 dessins de la démo montrés en grand (les 12 dégradés du dépôt n'existent qu'en 900 px). Une image = une photo, voir LEXIQUE-ET-DONNEES.md |

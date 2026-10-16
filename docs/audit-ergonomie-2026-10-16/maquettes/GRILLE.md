@@ -18,3 +18,14 @@ Chaque maquette est notée sur 10 pour chacun des critères ci-dessous, par un j
 | 12 | Fidélité au site et faisabilité | Construite avec les styles, gabarits et données réels du site ; implémentable telle quelle dans le code actuel, sans framework ni dépendance ; données plausibles. | Comparaison avec `views/`, `public/css`, `public/admin`, le modèle de données. |
 | 13 | Couverture des constats | Chaque constat cité par la maquette est réellement résolu à l'écran. | Liste des constats UX-… et vérification un par un. |
 | 14 | Lisibilité de la maquette | Les états importants sont montrés ; les annotations éclairent sans gêner la lecture de l'écran. | Lecture par quelqu'un qui n'a pas lu l'audit. |
+
+## Contrôles outillés (passe 2 du 16 oct. 2026)
+
+Les critères ne changent pas. Une partie de leurs vérifications est outillée, dans `/home/claudecode/dr-work/outils/` ; un jury peut s'en servir, et une maquette ne se déclare pas finie sans les avoir passés :
+
+| Critère | Contrôle |
+|---|---|
+| 4, 9 | axe-core au bureau et sur Pixel 7 ; débordement de 320 à 1 440 px, en allemand compris (`consol-final.mjs`, `consol-admin.mjs`) ; focus visible sur chaque champ, en erreur compris |
+| 10 | `passe2-rangees.mjs` : le fichier chargé par chaque vignette, à comparer à sa largeur d'affichage |
+| 6, 7 | `insecables.py` (ponctuation) ; lexique, § 0 et § 4.9 (mots, données, chronologie du 16 oct.) |
+| 14 | `controle-annotations.mjs` : pastilles dans l'écran et hors des photos et des textes, étiquettes entières, cadres `inert`, pied de page avant l'encart, un seul bloc Mesures, interface identique sans annotations |

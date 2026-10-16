@@ -2,7 +2,25 @@
 
 Référence commune des vingt maquettes (MQ-01 à MQ-20), avec la planche [MQ-00](MQ-00-direction-artistique.html). Une maquette n'invente ni un mot ni une donnée : elle prend ici ce dont elle a besoin. Ce qui manque s'ajoute ici d'abord.
 
-Les données suivent l'instance de démonstration (http://127.0.0.1:3091) quand elle les a : mêmes photos, mêmes titres, mêmes comptes de séries. Les écarts avec la démo (§ 4.8) et les arbitrages faits avec l'étude des projets (§ 4.9) sont listés à la fin. Mise à jour du 16 oct. 2026, après la refonte des vingt maquettes : adresses du carnet, numéro d'inventaire, ordre « choisi par nous », données des boutiques, des galeries privées et de l'administration. Consolidation de l'administration (même jour) : barre latérale du rôle Photographe, `/admin/carnet`, entrée Voyages gardée, noms de fichiers de la démo (`R0004046.JPG`), référence de commande et jeton de suivi, adresse `/tirages` (§ 1, § 4.9, § 4.10).
+Les données suivent l'instance de démonstration (http://127.0.0.1:3091) quand elle les a : mêmes photos, mêmes titres, mêmes comptes de séries. Les écarts avec la démo (§ 4.8), la journée du 16 octobre heure par heure (§ 4.9) et les arbitrages faits avec l'étude des projets (§ 4.10) sont à la fin. Les changements de la passe 2 (après le jury v1) sont résumés au § 0. Mise à jour du 16 oct. 2026, après la refonte des vingt maquettes : adresses du carnet, numéro d'inventaire, ordre « choisi par nous », données des boutiques, des galeries privées et de l'administration. Consolidation de l'administration (même jour) : barre latérale du rôle Photographe, `/admin/carnet`, entrée Voyages gardée, noms de fichiers de la démo (`R0004046.JPG`), référence de commande et jeton de suivi, adresse `/tirages` (§ 1, § 4.9, § 4.10).
+
+## 0. Changements de la passe 2 (16 oct. 2026, après le jury v1) : à reprendre dans chaque maquette
+
+Ce qui suit change une règle, un mot ou une donnée ; une maquette qui ne le reprend pas se contredit avec la planche. Le détail est dans les paragraphes indiqués.
+
+1. **Ordre « choisi par nous »** : « Deux ombres » passe du rang 6 au rang 18, juste avant « Élise, contre-jour » (§ 4.1, § 4.2). Les rangs 6 à 17 reculent d'une place. La série Rue devient Quai, 7 h 12 · Passage · Alfama · Linge · Deux ombres · Escaliers · Deux, minuit ; Portrait devient Tiago · Inês · Élise.
+2. **Règle des photos sombres**, étendue : jamais dans la première rangée d'aucune vue (Galerie, regard, série, « À proximité »), à aucune largeur, ni parmi ses trois premières photos ; jamais en tête de rangée dans la Galerie à 1 024 px et plus (§ 4).
+3. **Rangées au téléphone : deux photos au plus** (hauteur visée 40 % de la largeur, `public.css` § 6). **`sizes` selon le format** et `srcset` partout, avec les vraies largeurs des fichiers (§ 4).
+4. **Cartel jamais coupé** : plus d'ellipse ; la méta passe à la ligne, avec une espace insécable avant chaque « · » et dans la date. Variantes déclarées : « À proximité » met la distance d'abord (« 600 m · Alfama · Julien ») ; le récit d'un billet donne lieu précis et heure (§ 2).
+5. **Diptyque « Même soir »** : Miradouro (18 h 52) puis Belém (19 h 05), partout ; étiquette « Même soir », phrase « deux regards, à 18 h 52 puis à 19 h 05 » en casse normale (§ 4.2).
+6. **« À proximité »** trié par distance : Alfama 600 m · Linge 700 m · Cais do Sodré 2,4 km · Belém 6 km (même soir) (§ 4.1).
+7. **Adresses** : `/serie/<slug>` (le code), et non `/series/<slug>` ; la liste de ce qui existe et de ce qui est à créer est au § 2.
+8. **Dates** : abrégées partout dans l'interface (cartels, données, diptyques, en-têtes), en toutes lettres seulement dans une confirmation, un e-mail ou la prose d'un billet (§ 2).
+9. **Ponctuation** : espace fine insécable avant « : ; ! ? » et dans les guillemets ; outil `dr-work/outils/insecables.py` (§ 2).
+10. **Capitales espacées** : trois mots au plus, les nombres ne comptent pas (« Commande 1 sur 2 », « Même soir ») ; au-delà, casse normale (§ 2).
+11. **Mots** : « Revenir à la version enregistrée » / « Annuler » ; « prête » ; « von uns gewählt » ; « Bonsoir » après 18 h ; « flux RSS » (§ 1).
+12. **Administration** : compteurs de séries selon la règle du code (toutes les photos, tous statuts ; § 4.9) ; chronologie unique du 16 oct. heure par heure (§ 4.9) ; barre latérale à parité avec main (Nouveautés et version 1.90.0, « Traitement : n photos », langue et thème en formulaires POST) ; variante Photographe sans lien « Séries » ; danger rouge `#f0605a` en Chambre noire ; focus visible sur un champ en erreur.
+13. **Gabarit des maquettes** : résumé d'erreurs en `<section>` titrée ; cadres d'état `inert` ; pied de page avant l'encart ; un seul bloc « Mesures » ; pastilles jamais hors de l'écran ni sur une photo ou un texte ; commandes à script en `.js-seul` ; contrôle `dr-work/outils/controle-annotations.mjs`.
 
 ## 1. Lexique
 
@@ -27,7 +45,10 @@ Les données suivent l'instance de démonstration (http://127.0.0.1:3091) quand 
 | **Renoncer à une commande** | La fonction de rétractation (pied de page, page de suivi). | « Retour », « Annuler ma commande » après paiement |
 | **Retour au panier** · **← Lisbonne et Porto** | Un retour dit toujours où il mène. | « ← Retour », « RETOUR AU PANIER » |
 | **Menu** | Le bouton du menu au téléphone ; le mot ne change pas quand il est ouvert (l'icône devient ✕). | « Fermer » à la place de « Menu » |
-| **choisi par nous** · **Plus récentes d'abord** | Les deux ordres de la Galerie (DE « von uns gewählt », « Neueste zuerst »). | « Sélection » dans l'interface, « Tri » |
+| **choisi par nous** · **Plus récentes d'abord** | Les deux ordres de la Galerie (DE « von uns gewählt », « Neueste zuerst » ; la page d'une série dit « 7 Fotos, von uns gewählt »). | « Sélection » dans l'interface, « Tri » ; DE « von uns geordnet » |
+| **Même soir** | L'étiquette du diptyque (Miradouro puis Belém), suivie en casse normale de « deux regards, à 18 h 52 puis à 19 h 05 » (DE « Derselbe Abend » · « zwei Blicke, um 18:52 und um 19:05 »). | « MÊME SOIR, DEUX REGARDS » en capitales |
+| **flux RSS** | L'abonnement aux carnets (« S'abonner au flux RSS des carnets ») : le mot que le public connaît ; le format servi est Atom (`/carnet/flux.xml`, `type="application/atom+xml"`, étude B58). | « flux Atom » dans l'interface |
+| **Demander une licence** est un lien | Partout (visionneuse, galerie privée, planche) : un lien souligné, jamais un bouton à filet. | — |
 | **Inventaire** | Le numéro stable d'une photo publiée, `J26-003` (voir § 2). | « N°19 », « Numéro » |
 
 ### Administration
@@ -36,7 +57,10 @@ Les données suivent l'instance de démonstration (http://127.0.0.1:3091) quand 
 |---|---|---|
 | **Proposée** (photo) · **Proposé** (billet) | Un statut : l'objet attend le modérateur. Pastille ◐. | « Proposée : Rue » pour une suggestion d'assistant |
 | **✦ Suggestion** | Ce que proposent les assistants d'analyse : « ✦ Suggestion : Rue ». | « Proposition », « Proposée » |
-| **prête** | Traitement des images fini (et rien d'autre). | « prête » pour les accords ou pour « terminée » |
+| **prête** | Traitement des images fini (et rien d'autre) : « 3 photos prêtes ». | « prête » pour les accords, des suggestions (« 2 nouvelles suggestions de série »), une commande ou « terminée » |
+| **Bonjour, Julien.** · **Bonsoir, Julien.** | Le salut de « Aujourd'hui » suit l'heure, comme main (`views/admin/home.eta`) : « Bonsoir » de 18 h à 5 h. Le soir du 16 oct. (§ 4.9), c'est « Bonsoir, Julien. ». | « Bonjour » à 22 h 40 |
+| **Nouveautés** | L'entrée du pied de la barre latérale, avec le numéro de version (`1.90.0`, `package.json`) ; DE « Neuigkeiten ». | — |
+| **Traitement : 3 photos** | L'indicateur du pied de la barre latérale pendant le calcul des images (DE « Verarbeitung: 3 Fotos ») ; caché sinon. | « En cours… » sans nombre |
 | **Accord à vérifier** · **accords en règle** | État des accords de droit à l'image d'une photo. | « Site : prête » |
 | **vues** | Audience d'une page. | « ouvertures » |
 | **Brouillon · Proposée · Publiée · Accord à vérifier · Dépubliée** | Les états d'une photo (voir § 3). | une douzaine de statuts sans légende |
@@ -52,9 +76,9 @@ Les données suivent l'instance de démonstration (http://127.0.0.1:3091) quand 
 
 | Mot | Un seul sens | Exemple |
 |---|---|---|
-| **Annuler** | Ne pas faire : fermer un dialogue ou abandonner une saisie sans rien changer. Toujours le premier bouton d'un dialogue. | [Annuler] [Révoquer l'accès de Lucie] |
+| **Annuler** | Ne pas faire : fermer un dialogue, ou abandonner une **création** (rien n'est encore enregistré). Toujours le premier bouton d'un dialogue. | [Annuler] [Révoquer l'accès de Lucie] · nouvel accès : [Annuler] [Créer l'accès et envoyer l'invitation] |
 | **Défaire** | Revenir sur un geste déjà fait, dans le message d'action, pendant 10 s (en pause au survol et au focus). | « « Brume sur la Loire » publiée. · Défaire » |
-| **Revenir à la version enregistrée** | Abandonner les modifications non enregistrées, là où un bouton d'enregistrement existe encore. | Mentions légales |
+| **Revenir à la version enregistrée** | Abandonner les modifications non enregistrées d'un objet qui **existe déjà** (une version est en ligne ou enregistrée), là où un bouton d'enregistrement existe encore. Jamais « Annuler » dans ce cas : ce serait croire que rien n'a jamais existé. | Mentions légales : « Modifié, pas encore en ligne · [Revenir à la version enregistrée] [Mettre en ligne les mentions] » |
 | **Enregistrer** | Seulement sans JavaScript, ou dans un formulaire sans effet public. Ce qui a un effet public, légal ou financier dit son effet : Publier, Proposer, Programmer…, Mettre en ligne les mentions, Rembourser 290,00 €, Révoquer l'accès. | — |
 | **Supprimer…** | Ouvre le dialogue de confirmation (les points de suspension le disent). Le dialogue répète l'objet : « Supprimer la photo ». | — |
 
@@ -65,17 +89,23 @@ Les données suivent l'instance de démonstration (http://127.0.0.1:3091) quand 
 | Prix en vitrine (pages Tirages, visionneuse, billet) | euros entiers, espace insécable avant € ; un prix « à partir de », jamais « dès » | 180 € · 290 € · « Tirage : à partir de 180 € » |
 | Prix au panier, dans le tunnel, la commande, la facture, l'admin | deux décimales, virgule | 290,00 € · 15,00 € · Total 305,00 € |
 | TVA | une seule mention, une fois par page qui affiche un prix, près du premier prix ou du total ; jamais « TTC » ni « HT » | « TVA non applicable, art. 293 B du CGI » (jusqu'au 31 déc. 2026 ; « art. L. 233-3 du CIBS » ensuite) |
-| Date dans l'interface | jour, mois abrégé, année | 16 oct. 2026 · 10 oct. 2026 · mars 2024 (photo datée au mois) |
-| Date dans une confirmation ou un e-mail | en toutes lettres, avec le jour | vendredi 16 octobre 2026 |
+| Date dans l'interface | jour, mois abrégé, année ; partout : cartels, données de la visionneuse (« 10 oct. 2026, 18 h 52 »), diptyques, listes, en-têtes, admin. Le jour de la semaine, s'il aide, s'abrège aussi (« sam. 10 oct., 7 h 42 ») | 16 oct. 2026 · 10 oct. 2026 · mars 2024 (photo datée au mois) |
+| Date dans une confirmation, un e-mail, la prose d'un billet | en toutes lettres, avec le jour ; aussi la relecture d'une date saisie (« Lu : mercredi 14 octobre 2026 ») et les titres de journée d'un billet (« Samedi 10 octobre, Lisbonne »), qui sont du texte | vendredi 16 octobre 2026 |
 | Période | du … au … | du 30 oct. au 6 nov. |
-| Heure | h, espaces insécables | 22 h 42 · 7 h 12 |
+| Heure | h, espaces insécables (en anglais « 7:24 pm », en allemand « 19:24 Uhr ») | 22 h 42 · 7 h 12 |
+| Ponctuation | espace fine insécable (U+202F) avant « ; : ! ? » et à l'intérieur des guillemets « » ; espace insécable (U+00A0) avant « · », dans les heures, dans une date abrégée et devant une unité (€, px, Mo, km, m, min, %). Jamais d'espace avant « : ; ! ? » en anglais ni en allemand. Outil : `python3 dr-work/outils/insecables.py --ecrire MQ-xx.html` | « Vous partez ? » · 290 € · 22 h 42 · Julien · Lisbonne · 10 oct. 2026 |
+| Capitales espacées (`.etiquette`) | trois mots au plus, les nombres ne comptent pas ; au-delà, la phrase s'écrit en casse normale | RUE · VOYAGES · MÊME SOIR · COMMANDE 1 SUR 2 ; pas « JE VOUS AI PHOTOGRAPHIÉ » ni « LE MÊME FLEUVE, DEUX REGARDS » |
+| Titre de page (`<title>`) | « Page · Nicephos », comme `it.pageTitle` de main ; en erreur, « Erreur : 2 points à corriger · Page · Nicephos » ; une maquette ajoute « (maquette MQ-xx) » après | Fiche d'une photo · Nicephos (maquette MQ-09) |
 | Mois abrégés | janv., févr., mars, avr., mai, juin, juil., août, sept., oct., nov., déc. | — |
 | Saisie d'une date (admin, et date de rencontre de `/bonjour`) | libre (« 14/10/2026 », « 14 oct. 2026 », « octobre 2026 »), relue en toutes lettres ; jamais `type=date` | — |
 | Nombres | espace insécable des milliers | 1 280 px · 15 000 € |
 | Formats de tirage | image puis feuille, en cm, signe × | image 40 × 60 cm · feuille 50 × 70 |
 | Références (Plex Mono) | commande `C-2026-0007` ; facture par vendeur `S-2026-0002`, `J-2026-0001` ; exemplaire `6/15` ; inventaire `J26-003` ; fichier `R0004012.JPG` ; personne (carte « Bonjour ») `J-0001` | — |
 | Numéro d'inventaire (UX-T-05) | donné à la première publication et jamais changé : initiale de l'auteur, deux chiffres de l'année de publication, rang de l'auteur dans l'année sur trois chiffres. Il se lit dans les données de la visionneuse (« Inventaire J26-003 ») et sur le certificat ; la position « 4 / 10 » sert à la navigation. Il ne se confond ni avec une facture (`J-2026-0001` : tiret, quatre chiffres d'année, quatre chiffres), ni avec une carte (`J-0001`) | `J26-003` · `S25-001` |
-| Adresses publiques | slug du titre entier, en minuscules sans accents ; langue en préfixe (`/en`, `/de`), slug français partout | `/photo/miradouro-l-heure-doree` · `/photo/quai-7-h-12` · `/tirages/brume-sur-la-loire` · `/series/rue` · `/carnet/lisbonne-et-porto` · `/de/photo/belem-contre-jour` · `/galerie?regard=julien&serie=rue&ordre=recentes` |
+| Adresses publiques | slug du titre entier, en minuscules sans accents ; langue en préfixe (`/en`, `/de`), slug français partout | `/photo/miradouro-l-heure-doree` · `/photo/quai-7-h-12` · `/serie/rue` · `/de/photo/belem-contre-jour` · `/tirages/brume-sur-la-loire` (à créer) · `/carnet/lisbonne-et-porto` (à créer) |
+| Adresses qui existent (code de main, `server/routes/public.js`) | à employer telles quelles | `/` (aujourd'hui la Galerie, filtres `?regard=julien&serie=rue&ordre=recentes`) · `/serie/:slug` · `/auteur/:slug` · `/photo/:slug` (et `/partager`, `POST /aime`, `/signaler`) · `/voyages`, `/voyage/:slug` · `/recherche` · `/a-propos` · `/carte` · `/bonjour`, `/bonjour/merci`, `/bonjour/:ref` · `/droits` · `/confidentialite` · `/mentions-legales` · `/langue/:lang` · `/pour-vous/:token` |
+| Adresses à créer (évolutions montrées par les maquettes ; à reporter dans l'annexe des routes de l'étude) | à écrire avec « (à créer) » dans un encart | `/galerie` (la Galerie quand l'accueil prend `/`, MQ-01, MQ-02 ; l'ancien `/?regard=…` redirige) · `/series` (index des séries, MQ-02, MQ-03) · `/carnet`, `/carnet/:slug`, `/carnet/flux.xml`, `?rubrique=`, `?par=` (MQ-11, MQ-12) · `/tirages`, `/tirages/:slug`, `/panier`, `/commande`, `/commande/:ref/payer`, `/commande/suivi/:jeton`, `/renoncer`, `/conditions-de-vente`, `/livraison` (MQ-13 à MQ-15) · `/g/:jeton`, `/prive/:id`, `?vue=favoris`, `POST /prive/:id/langue`, `POST /prive/quitter`, `POST /prive/:id/selection/terminer` et `/reprendre` (MQ-16, MQ-17) · `/droits/demande?photo=<slug>`, `/instagram` (MQ-06) |
+| Adresses de l'administration | celles de main ; un objet par son numéro | `/admin/photos/24` · `/admin/rencontres/31` (jamais `/admin/rencontres/S-0001` ni un slug) · `/admin/series` · à créer : `/admin/carnet`, `/admin/galeries`, `/admin/boutique`, `/admin/reglages/<onglet>`, `/admin/compte` |
 
 ## 3. États de l'administration
 
@@ -94,9 +124,12 @@ Un symbole, une couleur fixe, un mot ; jamais l'un sans les autres. Les filtres 
 Règles :
 
 - **Une image = une photo, à jamais** : même titre, même auteur, même lieu, même date, même série dans toutes les maquettes. Il y a 26 images dans `_commun/photos/`, donc 26 photos ; un écran n'en montre jamais plus.
-- Tailles : `photos/160/` pour les pastilles et listes de l'admin, `photos/480/` pour les vignettes, `photos/` (900 px) pour les grands formats, `photos/1600/` (1 600 px de côté long) pour les 14 dessins de la démo montrés en grand (ouverture de l'accueil, visionneuse, billet, couverture de série) ; toujours en `srcset`, avec un `sizes` juste, pour que le navigateur ne prenne la grande que s'il en a besoin. Les 12 dégradés du dépôt n'existent qu'en 900 px (pas de source plus grande) : on ne les montre pas plus large que 900 px à densité 1.
+- Tailles : `photos/160/` pour les pastilles et listes de l'admin, `photos/480/` pour les vignettes, `photos/` (900 px) pour les grands formats, `photos/1600/` (1 600 px de côté long) pour les 14 dessins de la démo montrés en grand (ouverture de l'accueil, visionneuse, billet, couverture de série) ; les 12 dégradés du dépôt n'existent qu'en 900 px (pas de source plus grande) : on ne les montre pas plus large que 900 px à densité 1.
+- **`srcset` partout, avec les vraies largeurs des fichiers** (le côté long fait 160, 480, 900 ou 1 600 px) : horizontale `160/ 160w, 480/ 480w, 900 px 900w, 1600/ 1600w` ; verticale `160/ 107w, 480/ 320w, 900 px 600w, 1600/ 1067w`. Une vignette de 64 à 120 px (panier, commande, admin) a au moins 160 et 480 ; une couverture, une planche finale, une photo épuisée ont 480 et 900 (et 1 600 s'il existe).
+- **`sizes` selon le format dans les rangées** (règle de `public.css` § 6, à recopier) : horizontale `(min-width: 1280px) 470px, (min-width: 768px) 390px, calc(100vw - 48px)` · verticale `(min-width: 1280px) 210px, (min-width: 768px) 175px, calc(50vw - 28px)` · carrée `(min-width: 1280px) 312px, (min-width: 768px) 260px, calc(60vw - 30px)` ; rangée étirée (« À proximité », séries) : horizontale `(min-width: 1280px) 330px, (min-width: 768px) 260px, calc(100vw - 48px)`, verticale `(min-width: 1280px) 150px, (min-width: 768px) 120px, calc(50vw - 28px)`. Hors des rangées, `sizes` est la largeur réelle d'affichage (diptyque : la moitié du bloc moins l'écart). Plus jamais un `sizes` commun à toutes les vignettes.
 - **Une image chargée par emplacement** : quand l'image change avec l'appareil (ouverture de l'accueil, couverture d'une série), une `<picture>` et une `<source media>` ; jamais d'« image vide en ligne ».
-- **Réservées aux grands formats** (trop sombres pour une couverture, un panier ou une vignette isolée) : Deux, minuit · Élise, contre-jour · Deux ombres. Dans les rangées, elles ne sont jamais en tête de rangée ni dans la première rangée de la Galerie : l'ordre « choisi par nous » (§ 4.2) les place en conséquence.
+- **Réservées aux grands formats** (trop sombres pour une couverture, un panier ou une vignette isolée) : Deux, minuit · Élise, contre-jour · Deux ombres. Elles ne sont **jamais dans la première rangée d'aucune vue** (Galerie, regard, série, « À proximité ») à aucune largeur, ni parmi les trois premières photos d'une vue ; dans la Galerie, jamais en tête de rangée à 1 024 px et plus. Une série dont toutes les photos tiennent sur une rangée (Portrait) met la photo sombre en dernier. L'ordre « choisi par nous » (§ 4.2) le garantit ; il a été contrôlé pour « Les deux » (avec et sans diptyque), Julien et Rue à 1 440, 1 280, 1 024, 820, 768, 767, 412, 360 et 320 px (script de la passe 2).
+- **Au téléphone, deux photos au plus par rangée** (`public.css` § 6) ; jamais trois verticales de suite dans une vue, sinon trois tiendraient sur une ligne.
 - Les douze premières sont les dégradés du dépôt (`seed/images`), les quatorze autres les dessins de la démo (`outils/demo-photos`) ; aucune photo réelle, aucun logo.
 
 ### 4.1 Les 26 photos
@@ -110,19 +143,19 @@ Règles :
 | `quai.webp` | `S25-003` | 3 | Quai, 7 h 12 | Sébastien | Angers | oct. 2024 | Rue | Publiée | horizontale 3:2 | toutes |
 | `mer.webp` | `J25-003` | 4 | Ligne d’eau | Julien | Finistère | août 2024 | Paysage | Publiée | horizontale 3:2 | toutes |
 | `ciel.webp` | `S25-004` | 5 | Le ciel s’est ouvert | Sébastien | Anjou | oct. 2025 | Paysage | Publiée | horizontale 3:2 | toutes |
-| `ruelle.webp` | `J25-004` | 7 | Passage, fin d’après-midi | Julien | Lisbonne | mai 2024 | Rue | Publiée | verticale 2:3 | toutes |
-| `neige.webp` | `S25-005` | 8 | Silence blanc | Sébastien | Vercors | févr. 2025 | Paysage | Publiée | horizontale 3:2 | toutes |
-| `foret.webp` | `J25-005` | 9 | Sous-bois | Julien | Chandelais | juin 2025 | Paysage | Publiée | verticale 2:3 | toutes |
-| `lac.webp` | `S25-006` | 10 | Le lac ne dit rien | Sébastien | La Réunion | sept. 2024 | Voyage | Publiée | horizontale 3:2 | toutes |
-| `ombre.webp` | `J25-006` | 6 | Deux ombres | Julien | Paris | déc. 2023 | Rue | Publiée | horizontale 3:2 | réservée aux grands formats |
-| `cais.webp` | `S26-001` | 11 | Cais do Sodré, marée basse | Sébastien | Lisbonne | 10 oct. 2026 | Atlantique | Publiée | horizontale 3:2 | toutes |
-| `belem.webp` | `S26-002` | 12 | Belém, contre-jour | Sébastien | Lisbonne | 10 oct. 2026 | Atlantique | Publiée | horizontale 3:2 | toutes |
-| `tiago.webp` | `S26-003` | 13 | Tiago, marché do Bolhão | Sébastien | Porto | 11 oct. 2026 | Portrait | Publiée | verticale 2:3 | toutes |
-| `foz.webp` | `S26-004` | 14 | Foz, la barre | Sébastien | Porto | 11 oct. 2026 | Atlantique | Publiée | horizontale 3:2 | toutes |
-| `tram.webp` | `J26-001` | 15 | Alfama, premier tram | Julien | Lisbonne | 10 oct. 2026 | Rue | Publiée | verticale 2:3 | toutes |
-| `linge.webp` | `J26-002` | 16 | Linge au balcon | Julien | Lisbonne | 10 oct. 2026 | Rue | Publiée | horizontale 3:2 | toutes |
-| `miradouro.webp` | `J26-003` | 17 | Miradouro, l’heure dorée | Julien | Lisbonne | 10 oct. 2026 | Voyage | Publiée | horizontale 3:2 | toutes |
-| `ines.webp` | `J26-004` | 18 | Inês, rua dos Remédios | Julien | Lisbonne | 10 oct. 2026 | Portrait | Publiée | verticale 2:3 | toutes |
+| `ruelle.webp` | `J25-004` | 6 | Passage, fin d’après-midi | Julien | Lisbonne | mai 2024 | Rue | Publiée | verticale 2:3 | toutes |
+| `neige.webp` | `S25-005` | 7 | Silence blanc | Sébastien | Vercors | févr. 2025 | Paysage | Publiée | horizontale 3:2 | toutes |
+| `foret.webp` | `J25-005` | 8 | Sous-bois | Julien | Chandelais | juin 2025 | Paysage | Publiée | verticale 2:3 | toutes |
+| `lac.webp` | `S25-006` | 9 | Le lac ne dit rien | Sébastien | La Réunion | sept. 2024 | Voyage | Publiée | horizontale 3:2 | toutes |
+| `ombre.webp` | `J25-006` | 18 | Deux ombres | Julien | Paris | déc. 2023 | Rue | Publiée | horizontale 3:2 | réservée aux grands formats |
+| `cais.webp` | `S26-001` | 10 | Cais do Sodré, marée basse | Sébastien | Lisbonne | 10 oct. 2026 | Atlantique | Publiée | horizontale 3:2 | toutes |
+| `belem.webp` | `S26-002` | 11 | Belém, contre-jour | Sébastien | Lisbonne | 10 oct. 2026 | Atlantique | Publiée | horizontale 3:2 | toutes |
+| `tiago.webp` | `S26-003` | 12 | Tiago, marché do Bolhão | Sébastien | Porto | 11 oct. 2026 | Portrait | Publiée | verticale 2:3 | toutes |
+| `foz.webp` | `S26-004` | 13 | Foz, la barre | Sébastien | Porto | 11 oct. 2026 | Atlantique | Publiée | horizontale 3:2 | toutes |
+| `tram.webp` | `J26-001` | 14 | Alfama, premier tram | Julien | Lisbonne | 10 oct. 2026 | Rue | Publiée | verticale 2:3 | toutes |
+| `linge.webp` | `J26-002` | 15 | Linge au balcon | Julien | Lisbonne | 10 oct. 2026 | Rue | Publiée | horizontale 3:2 | toutes |
+| `miradouro.webp` | `J26-003` | 16 | Miradouro, l’heure dorée | Julien | Lisbonne | 10 oct. 2026 | Voyage | Publiée | horizontale 3:2 | toutes |
+| `ines.webp` | `J26-004` | 17 | Inês, rua dos Remédios | Julien | Lisbonne | 10 oct. 2026 | Portrait | Publiée | verticale 2:3 | toutes |
 | `ribeira.webp` | `J26-005` | 20 | Ribeira, brume du fleuve | Julien | Porto | 11 oct. 2026 | Voyage | Publiée | horizontale 3:2 | toutes |
 | `escaliers.webp` | `J26-006` | 21 | Escaliers des Guindais | Julien | Porto | 11 oct. 2026 | Rue | Publiée | verticale 2:3 | toutes |
 | `pont.webp` | — | — | Pont Dom-Luís, le soir | Julien | Porto | 11 oct. 2026 | Voyage | Proposée | horizontale 3:2 | toutes |
@@ -152,7 +185,7 @@ Heures et lieux précis des photos d'octobre 2026 (cartel de la visionneuse, car
 | Quai Ligny, soir | mer. 14 oct., 18 h 10 | quai Ligny, Angers |
 | Réverbères, quai Ligny | mer. 14 oct., 18 h 40 | quai Ligny, Angers |
 
-Données de « Miradouro, l'heure dorée » montrées par la visionneuse (MQ-04), d'après l'EXIF de la démo (DSCF2117.JPG) : Fujifilm X-T5 · 23 mm · 1/1000 s · f/11 · ISO 160 ; « J'aime 12 » (13 une fois aimée, MQ-00) ; 8 tirages disponibles sur 15 ; À proximité (distances depuis le miradouro da Graça) : Alfama, premier tram 600 m · Linge au balcon 700 m · Cais do Sodré, marée basse 2,4 km · Belém, contre-jour 6 km (même soir) ; « 4 photos à moins de 7 km ». Les EXIF des autres dessins sont ceux de la démo (Julien : Fujifilm X-T5, XF 23 mm ; Sébastien : Ricoh GR III, 18,3 mm).
+Données de « Miradouro, l'heure dorée » montrées par la visionneuse (MQ-04), d'après l'EXIF de la démo (DSCF2117.JPG) : Fujifilm X-T5 · 23 mm · 1/1000 s · f/11 · ISO 160 ; « J'aime 12 » (13 une fois aimée, MQ-00) ; 8 tirages disponibles sur 15 ; prise de vue « 10 oct. 2026, 18 h 52 » ; « Tirage : à partir de 180 € » mène à `/tirages/miradouro-l-heure-doree` (dans les maquettes, MQ-13 montre « Brume sur la Loire » : le lien le dit). À proximité (distances depuis le miradouro da Graça), **trié par distance, la distance en tête de la méta** : Alfama, premier tram « 600 m · Alfama · Julien » · Linge au balcon « 700 m · Alfama · Julien » · Cais do Sodré, marée basse « 2,4 km · Cais do Sodré · Sébastien » · Belém, contre-jour « 6 km · Belém · Sébastien · même soir » ; « 4 photos à moins de 7 km ». Les EXIF des autres dessins sont ceux de la démo (Julien : Fujifilm X-T5, XF 23 mm ; Sébastien : Ricoh GR III, 18,3 mm).
 
 Titres en allemand (maquettes en allemand) : Belém im Gegenlicht · Nebel über der Loire · Letzte Stunde · Wasserlinie · Miradouro, goldene Stunde · Der Himmel hat sich geöffnet · Die Treppen der Guindais · Alfama, die erste Straßenbahn · Tiago, Markt do Bolhão · Zwei, Mitternacht. Séries : Atlantik · Landschaft · Porträt · Straße · Reise. Les titres qui ne sont pas traduits gardent le titre français.
 
@@ -171,11 +204,13 @@ Légendes connues (démo) : Brume sur la Loire « Six heures, le fleuve fume enc
 | Rue | 7 | 1 | 6 | Linge au balcon |
 | Voyage | 4 | 2 | 2 | Miradouro, l'heure dorée |
 
-- Ordre « choisi par nous » de la galerie (colonne Rang du § 4.1) : celui de la démo, sauf les trois photos très sombres, déplacées pour n'ouvrir aucune rangée (contrôlé à 1 440, 1 024, 820 et 412 px) : Brume sur la Loire · Dernière heure · Quai, 7 h 12 · Ligne d'eau · Le ciel s'est ouvert · Deux ombres · Passage, fin d'après-midi · Silence blanc · Sous-bois · Le lac ne dit rien · Cais do Sodré · Belém (dans « Les deux », le diptyque « Même soir, deux regards » prend sa place et Miradouro quitte la sienne) · Tiago · Foz · Alfama · Linge au balcon · Miradouro · Inês · Élise, contre-jour · Ribeira · Escaliers des Guindais · Deux, minuit. « Plus récentes d'abord » : les photos d'octobre 2026 (Escaliers des Guindais en tête), puis les douze plus anciennes par date de publication.
-- **L'ordre d'une série est celui de la galerie filtrée** : Rue = Quai, 7 h 12 · Deux ombres · Passage, fin d'après-midi · Alfama, premier tram · Linge au balcon · Escaliers des Guindais · Deux, minuit ; Portrait = Tiago · Élise · Inês.
+- Ordre « choisi par nous » de la galerie (colonne Rang du § 4.1) : celui de la démo, sauf les trois photos très sombres, placées selon la règle du § 4 (passe 2 : « Deux ombres » passe du rang 6 au rang 18) : Brume sur la Loire · Dernière heure · Quai, 7 h 12 · Ligne d'eau · Le ciel s'est ouvert · Passage, fin d'après-midi · Silence blanc · Sous-bois · Le lac ne dit rien · Cais do Sodré · Belém (dans « Les deux », le diptyque « Même soir » prend sa place et Miradouro quitte la sienne) · Tiago · Foz · Alfama · Linge au balcon · Miradouro · Inês · Deux ombres · Élise, contre-jour · Ribeira · Escaliers des Guindais · Deux, minuit. Première rangée de la Galerie : au bureau (1 440 px) Brume · Dernière heure · Quai ; au téléphone, Brume seule (puis une photo par rangée jusqu'à Passage). « Plus récentes d'abord » : les photos d'octobre 2026 (Escaliers des Guindais en tête), puis les douze plus anciennes par date de publication.
+- **L'ordre d'une série est celui de la galerie filtrée** : Rue = Quai, 7 h 12 · Passage, fin d'après-midi · Alfama, premier tram · Linge au balcon · Deux ombres · Escaliers des Guindais · Deux, minuit (première rangée au bureau : Quai, Passage, Alfama, Linge) ; Portrait = Tiago · Inês · Élise ; Julien = Ligne d'eau · Passage · Sous-bois · Alfama · Linge · Miradouro · Inês · Deux ombres · Élise · Ribeira · Escaliers · Deux, minuit.
+- **Diptyque « Même soir »** : Miradouro, l'heure dorée (Julien, 18 h 52) puis Belém, contre-jour (Sébastien, 19 h 05), dans l'ordre des heures, partout (accueil, Galerie, billet, contact) ; étiquette « Même soir », puis en casse normale « deux regards, à 18 h 52 puis à 19 h 05 ». Le diptyque de l'accueil, sur le Douro : Ribeira (9 h 10) puis Foz (17 h 20), étiquette « Même fleuve ».
+- **Compteurs des séries** : le site public ne compte que les photos publiées (Atlantique 3 · Paysage 5 · Portrait 3 · Rue 7 · Voyage 4) ; l'administration compte selon le code (§ 4.9).
 - **Ouverture de l'accueil** : au bureau, 6 horizontales (Belém, contre-jour · Brume sur la Loire · Dernière heure · Ligne d'eau · Miradouro, l'heure dorée · Le ciel s'est ouvert) ; au téléphone, 4 verticales (Escaliers des Guindais · Alfama, premier tram · Tiago, marché do Bolhão · Deux, minuit). Promesse : « Deux regards, une même lumière. » ; sous-ligne : « Les photographies de Sébastien et Julien, d'Angers à Lisbonne et Porto. » (DE « Zwei Blicke, ein Licht. »).
 - Choix du regard (accueil) : « Les deux · 22 photos, dans l'ordre que nous avons choisi » · « Sébastien · 10 photos · le matin, les quais, les fleuves » · « Julien · 12 photos · la rue, et ceux qui y passent ».
-- Badges de l'admin (16 oct. 2026, compte de Julien) : Aujourd'hui ✕ 1 (le signalement du 14 oct. attend une réponse depuis plus de 48 h) · Personnes 1 (la demande de Claire Exemple) · Signalements 1 · À valider 1 (Pont Dom-Luís) · Boutique 1 (C-2026-0005 à préparer).
+- Badges de l'admin (16 oct. 2026, compte de Julien) : Aujourd'hui ✕ 1 (le signalement du 14 oct. attend une réponse depuis plus de 48 h) · Personnes 1 (la demande de Claire Exemple) · Signalements 1 · À valider 1 (Pont Dom-Luís) · Boutique 1 (le matin C-2026-0005 à préparer, 2 de 10 h 17 à 16 h 10, puis C-2026-0007 le soir : § 4.9).
 
 ### 4.3 Carnets
 
@@ -183,7 +218,7 @@ Légendes connues (démo) : Brume sur la Loire « Six heures, le fleuve fume enc
 
 | Billet | Rubrique | Auteur | Publié le | Lecture | Couverture | Photos, dans l'ordre |
 |---|---|---|---|---|---|---|
-| Lisbonne et Porto (DE « Lissabon und Porto ») · `/carnet/lisbonne-et-porto` | Voyages | Sébastien et Julien | 14 oct. 2026, mis à jour le 15 oct. | 4 min | Alfama, premier tram | 1 Alfama, premier tram · 2 Linge au balcon · 3 Cais do Sodré, marée basse · 4 Miradouro, l'heure dorée · 5 Belém, contre-jour · 6 Inês, rua dos Remédios · 7 Tiago, marché do Bolhão · 8 Ribeira, brume du fleuve · 9 Escaliers des Guindais · 10 Foz, la barre (diptyque « Même soir, deux regards » : 4 et 5 ; deux journées : samedi 10, dimanche 11 octobre) |
+| Lisbonne et Porto (DE « Lissabon und Porto ») · `/carnet/lisbonne-et-porto` | Voyages | Sébastien et Julien | 14 oct. 2026, mis à jour le 15 oct. | 4 min | Alfama, premier tram | 1 Alfama, premier tram · 2 Linge au balcon · 3 Cais do Sodré, marée basse · 4 Miradouro, l'heure dorée · 5 Belém, contre-jour · 6 Inês, rua dos Remédios · 7 Tiago, marché do Bolhão · 8 Ribeira, brume du fleuve · 9 Escaliers des Guindais · 10 Foz, la barre (diptyque « Même soir » : 4 et 5, Miradouro puis Belém ; deux journées : samedi 10, dimanche 11 octobre) |
 | Inês, ou comment demander une photo · `/carnet/ines-ou-comment-demander-une-photo` | Notes d'atelier | Julien | 15 oct. 2026 | 3 min | Inês, rua dos Remédios | Inês, rua dos Remédios |
 | Pourquoi nous ne recadrons pas · `/carnet/pourquoi-nous-ne-recadrons-pas` | Notes d'atelier | Sébastien | 2 oct. 2026 | 4 min | Brume sur la Loire | Brume sur la Loire · Ligne d'eau |
 | Tirer sur Photo Rag · `/carnet/tirer-sur-photo-rag` | Notes d'atelier | Sébastien | 25 sept. 2026 | 4 min | Silence blanc | Silence blanc |
@@ -199,7 +234,7 @@ Le billet « Lisbonne et Porto » remplace la page Voyage du même nom de la dé
 |---|---|---|---|---|---|
 | Brume sur la Loire | Sébastien | 1 à 4 (exposition), 5 (C-2026-0002) | — | 10 | 6 |
 | Cais do Sodré, marée basse | Sébastien | 1 (exposition) | — | 14 | 2 |
-| Foz, la barre | Sébastien | 1 (exposition) | 2 (C-2026-0006, jusqu'à 9 h 47) | 13 | 3 |
+| Foz, la barre | Sébastien | 1 (exposition) ; 2 (C-2026-0006, payée à 9 h 44) | 2 (C-2026-0006, jusqu'à 9 h 47 ; à 9 h 40, capture de MQ-19) | 13 | 3 |
 | Silence blanc | Sébastien | 1 et 2 (exposition), 3 (C-2026-0001) | — | 12 | 4 |
 | Le ciel s'est ouvert | Sébastien | 1 à 15 | — | **0 : épuisé** | — |
 | Miradouro, l'heure dorée | Julien | 1 à 6, 7 (C-2026-0005) | — | 8 | 8 |
@@ -211,7 +246,7 @@ Le certificat porte le numéro d'inventaire de la photo (Brume sur la Loire : `S
 
 Photos non vendues (ni tirage ni bouton) : les portraits sans accord « tirage » (Tiago : site seulement) et toutes les autres. Inês a donné son accord pour un tirage, mais il n'est pas au catalogue.
 
-### 4.5 Commandes (au vendredi 16 oct. 2026, 10 h)
+### 4.5 Commandes (au vendredi 16 oct. 2026, 9 h 40 : la capture de MQ-19 ; la suite de la journée est au § 4.9)
 
 Une commande par vendeur ; un panier qui mêle les deux photographes donne deux commandes et deux paiements, dans le même écran.
 
@@ -234,7 +269,7 @@ Panier en cours (maquettes du panier et du tunnel) : **Claire Exemple**, 5 rue d
 | Quai Ligny, 14 octobre | Sébastien, 15 oct. 2026 | Claire Exemple (et Hugo Exemple) | 2 : Quai Ligny, soir · Réverbères, quai Ligny | voir et télécharger | 15 oct. · 14 nov. 2026 | ● Ouvert le 15 oct. à 20 h 31 |
 | Angers, juin 2026 | Sébastien, 2 juin 2026 | Marc Exemple | 3 : Brume sur la Loire · Quai, 7 h 12 · Silence blanc | voir seulement | 2 juin · 30 sept. 2026 | ✕ Expiré |
 
-Lien : `https://www.nicephos.art/g/<jeton>` (exemple de Lucie : `/g/6Me5pScUZIQhW-wezlKchJ9h3k7EDpzm`) ; mot de passe de 12 caractères en trois groupes (exemple montré : `k7qm p3xw 9tra`), donné par un autre canal (SMS) ; après le bon mot de passe : `/prive/<id>` — `/prive/7Hk2Qp9xLm4R` pour « Lisbonne et Porto, planche de travail » (DE « Lissabon und Porto, Arbeitsauswahl »), `/prive/Rm8vT2kq5Wz1` pour « Quai Ligny, 14 octobre ». Vues : `?vue=favoris`. Après 5 refus, pause de sécurité (« réessayez à 13 h 58 ») ; Lucie entre ensuite, à 14 h 05. Ses 4 favoris sont envoyés à Julien le 16 oct. à 15 h 20 ; elle demande ensuite une licence pour « Miradouro, l'heure dorée » (MQ-06, `/droits/demande?photo=miradouro-l-heure-doree`). Claire télécharge : archive ZIP de 2,6 Mo (les 2 photos en JPEG de 2 048 px) ou une photo, 1,3 Mo. L'accès de Lucie : créé le 16 oct., « dans 30 jours, le 15 nov. » par défaut, porté au 30 nov. (fermeture de la galerie).
+Lien : `https://www.nicephos.art/g/<jeton>` (exemple de Lucie : `/g/6Me5pScUZIQhW-wezlKchJ9h3k7EDpzm`) ; mot de passe de 12 caractères en trois groupes (exemple montré : `k7qm p3xw 9tra`), donné par un autre canal (SMS) ; après le bon mot de passe : `/prive/<id>` — `/prive/7Hk2Qp9xLm4R` pour « Lisbonne et Porto, planche de travail » (DE « Lissabon und Porto, Arbeitsauswahl »), `/prive/Rm8vT2kq5Wz1` pour « Quai Ligny, 14 octobre ». Vues : `?vue=favoris`. Après 5 refus, pause de sécurité (« réessayez à 13 h 58 ») ; Lucie entre ensuite, à 14 h 05. Ses 4 favoris (posés de 14 h 12 à 14 h 46) sont envoyés à Julien le 16 oct. à 15 h 20 (heures au § 4.9) ; elle demande ensuite une licence pour « Miradouro, l'heure dorée » (MQ-06, `/droits/demande?photo=miradouro-l-heure-doree`). Claire télécharge : archive ZIP de 2,6 Mo (les 2 photos en JPEG de 2 048 px) ou une photo, 1,3 Mo. L'accès de Lucie : créé le 16 oct., « dans 30 jours, le 15 nov. » par défaut, porté au 30 nov. (fermeture de la galerie).
 
 ### 4.7 Personnes
 
@@ -245,7 +280,7 @@ Lien : `https://www.nicephos.art/g/<jeton>` (exemple de Lucie : `/g/6Me5pScUZIQh
 | Camille Exemple | Relectrice (traductions anglaises et allemandes). |
 | Inês Exemplo | Fleuriste, Lisbonne. Rencontre J-0001 du 10 oct. 2026 : accord signé pour le site, Instagram, un tirage et son prénom. |
 | Tiago Exemplo | Marchand de fruits, Porto. Rencontre S-0001 du 11 oct. 2026 : accord pour le site seulement. |
-| Claire Exemple | Photographiée le 14 oct. à 18 h 15 quai Ligny (avec Hugo) ; demande envoyée par `/bonjour` le 15 oct. : accord en ligne, à vérifier ; veut recevoir la photo. Cliente du panier en cours. |
+| Claire Exemple | Photographiée le 14 oct. à 18 h 10 quai Ligny, avec Hugo (heure de l'EXIF de « Quai Ligny, soir » ; dans sa demande, elle écrit « vers 18 h 15 ») ; demande envoyée par `/bonjour` le 15 oct. : accord en ligne, à vérifier ; veut recevoir la photo. Cliente du panier en cours. |
 | Hugo Exemple | L'ami de Claire sur Quai Ligny, soir ; pas encore d'accord. Client de la commande annulée C-2026-0004. |
 | Anna Beispiel | Cliente allemande (Fribourg-en-Brisgau), commande C-2026-0005, langue DE. |
 | Marc Exemple · Paul Exemple · Léa Exemple | Clients (Nantes, Lyon, Bruxelles). |
@@ -266,13 +301,52 @@ Camille Exemple, relectrice : compte désactivé le 2 oct. 2026 ; ses 14 traduct
 - L'ordre « choisi par nous » des maquettes diffère de celui de la démo pour trois photos sombres (§ 4.2).
 - Le premier dessin de l'ouverture de l'accueil est Belém, contre-jour (un dessin de la démo, disponible en 1 600 px), et non Le ciel s'est ouvert (dégradé de 900 px).
 
-### 4.9 Administration : données des maquettes MQ-07 à MQ-10 et MQ-18 à MQ-20
+### 4.9 La journée du vendredi 16 octobre 2026, heure par heure (et l'administration)
 
-- Journée de référence : vendredi 16 oct. 2026, compte de Julien (administrateur) ; le soir, Sébastien (photographe) travaille sur son brouillon. Heures montrées : lot de trois brouillons enregistré à 21 h 34 (MQ-08) ; « Mon compte » enregistré à 22 h 40 (MQ-07) ; billet « Angers, un soir d'octobre » enregistré à 22 h 42, traduction proposée à 22 h 44 (MQ-20) ; publication Instagram de « Cais do Sodré » à 22 h 50, légende rétablie « comme à 22 h 51 », suggestion de description demandée à 22 h 55 et arrivée à 22 h 56, capture de MQ-09 à 22 h 58.
-- Barre latérale du rôle Photographe (Sébastien, MQ-07, MQ-08, MQ-20 et planche) : Aujourd'hui · Photos (Photothèque ; Séries comptées sur ses 12 photos : Atlantique 3, Paysage 4 avec Minoterie, Portrait 1, Rue 2 avec Quai Ligny, Voyage 2, vignettes Cais do Sodré, Brume sur la Loire, Tiago, Quai 7 h 12, Dernière heure ; Sorties ; Voyages) · Personnes (Personnes 1, la demande de Claire ; App de terrain) · Publier (Mes propositions, Carnets, Galeries privées, Boutique) · Équipe (Statistiques) ; au pied, Aide, Voir le site, langue ; ni Signalements, ni Instagram, ni Réglages (`server/permissions.js`).
+Une seule chronologie pour toutes les maquettes qui montrent ce jour-là : un écran montré à une heure donnée montre l'état de chaque objet à cette heure, ni avant ni après. Heure de Paris.
+
+| Heure | Où | Ce qui se passe | Maquettes |
+|---|---|---|---|
+| 1 h 12 | Admin, assistants | L'analyse de nuit finit : 26 photos sur 26 (« la dernière cette nuit à 1 h 12 »). | MQ-07 |
+| 8 h 50 | Admin | Le signalement reçu le 14 oct. à 8 h 50 attend depuis 48 h : « Aujourd'hui ✕ 1 » (urgence) toute la journée. | toutes |
+| 9 h 12 | Boutique | Marc Exemple commande « Foz, la barre », grand format : C-2026-0006, ○ En attente de paiement, exemplaire 2/15 réservé jusqu'à 9 h 47. | MQ-19 |
+| 9 h 40 | Admin, Julien | Capture de MQ-19 (Commandes) : C-2026-0006 en attente, C-2026-0005 (Anna, 15 oct.) ◐ Payée, à préparer ; badge « Boutique 1 ». Séries de la barre (règle du code, ci-dessous) : 3 · 5 · 3 · 8 · 5. | MQ-19 |
+| 9 h 44 | Boutique | Marc paie : C-2026-0006 ◐ Payée, à préparer (vente de Sébastien) ; Foz : 13 disponibles. | — |
+| 10 h 00 à 10 h 17 | Site | Claire Exemple : panier (Escaliers des Guindais chez Julien, puis Brume sur la Loire chez Sébastien), coordonnées à 10 h 12, exemplaires réservés jusqu'à 10 h 47, deux paiements ; confirmation à 10 h 17 : C-2026-0007 (Julien, Escaliers ex. 6/15) et C-2026-0008 (Sébastien, Brume ex. 6/15), ◐ Payées, à préparer. Badge « Boutique 2 » pour Julien (C-0005, C-0007). | MQ-14, MQ-15 |
+| 11 h 24 | Admin, Julien | Accès de Lucie Exemple à « Lisbonne et Porto, planche de travail » (11 photos) : créé, invitation envoyée à lucie.exemple@example.org sans le mot de passe ; mot de passe `k7qm p3xw 9tra` affiché une seule fois, donné par SMS ; jusqu'au 30 nov. | MQ-18 |
+| 11 h 31 | Galerie privée | Lien consulté sans mot de passe (l'antivirus de la messagerie). | MQ-18 |
+| 13 h 49 à 13 h 57 | Galerie privée | Lucie tape le mot de passe de mémoire : 5 refus (13 h 49, 13 h 51, 13 h 54, 13 h 56, 13 h 57), pause de sécurité « réessayez à 13 h 58 ». | MQ-16, MQ-18 |
+| 14 h 05 | Galerie privée | Mot de passe accepté : première ouverture, ● Ouvert. | MQ-17, MQ-18 |
+| 14 h 12 à 14 h 46 | Galerie privée | Quatre favoris : Alfama, premier tram (14 h 12) · Miradouro (14 h 20) · Ribeira (14 h 31) · Pont Dom-Luís, le soir (14 h 46). | MQ-17 |
+| 15 h 20 | Galerie privée | Lucie envoie sa sélection à Julien (4 favoris) ; « Reprendre ma sélection » reste possible. | MQ-17, MQ-18 |
+| 15 h 34 | Site | Lucie demande une licence pour « Miradouro, l'heure dorée » (`/droits/demande?photo=miradouro-l-heure-doree`). | MQ-06 |
+| 16 h 10 | Admin, Julien | C-2026-0005 : « Tirage lancé » (les 2 tirages au laboratoire) ; badge « Boutique 1 » (C-0007 à préparer) jusqu'au soir. | — |
+| 17 h 30, 17 h 32 | Admin, Julien | Galeries privées (liste), puis le suivi de l'accès de Lucie : activité de 11 h 24 à 15 h 20, refus et pause compris ; « Favoris : 4 sur 11, sélection envoyée ». | MQ-18 |
+| 18 h | Admin | « Bonjour, Julien. » devient « Bonsoir, Julien. » (main, `home.eta`). | MQ-07, MQ-09 |
+| 21 h 34 | Admin, Sébastien | Lot de trois brouillons d'Angers enregistré : « Minoterie, brume du matin » titré, série Paysage (suggestion acceptée) ; « Quai Ligny, soir » (Rue, ▲ accord à vérifier) ; R0004057 garde son titre provisoire (le nom du fichier), et sa date est refusée (1 champ non enregistré). Dès lors, Paysage compte Minoterie. | MQ-08 |
+| 22 h 40 | Admin, Julien | « Mon compte » enregistré ; « Aujourd'hui » propose « Finir R0004057 · titre provisoire ». | MQ-07 |
+| 22 h 41 | Admin, Sébastien | R0004057 reçoit son titre, « Réverbères, quai Ligny » (dans « Décrire la photo » de l'éditeur du billet) ; il reste ○ Brouillon, texte de remplacement à écrire. | MQ-20 |
+| 22 h 42, 22 h 44 | Admin, Sébastien | Billet « Angers, un soir d'octobre » (○ brouillon, commencé le 15 oct. à 22 h 10) enregistré ; traduction allemande proposée par l'assistant à 22 h 44. | MQ-20 |
+| 22 h 50 à 22 h 56 | Admin, Julien | « Cais do Sodré » publiée sur Instagram (22 h 50) ; légende rétablie « comme à 22 h 51 » ; suggestion de description demandée à 22 h 55, arrivée à 22 h 56. | MQ-09 |
+| 22 h 58 | Admin, Julien | Capture de MQ-09 : la Photothèque, filtre « Brouillons 3 » : Quai Ligny, soir · Minoterie, brume du matin · Réverbères, quai Ligny (titrée depuis 22 h 41) ; Pont Dom-Luís est dans « Proposées 1 », pas dans les brouillons. | MQ-09 |
+
+Ce qui ne bouge pas de la journée : Personnes 1 (la demande de Claire, du 15 oct.) ; Signalements 1 ; À valider 1 (Pont Dom-Luís, proposé le 12 oct.) ; Camille Exemple désactivée depuis le 2 oct.
+
+**Compteurs des séries de la barre latérale : la règle du code** (`navSeries`, `server/routes/admin.js`) : toutes les photos de la série, **quel que soit leur statut** (publiées, proposées, brouillons) ; pour un compte en portée « les miennes » (Photographe), ses seules photos. Une photo sans série n'est comptée nulle part.
+
+| Compte, heure | Atlantique | Paysage | Portrait | Rue | Voyage |
+|---|---|---|---|---|---|
+| Julien (administrateur), avant 21 h 34 | 3 | 5 | 3 | 8 (avec Quai Ligny) | 5 (avec Pont Dom-Luís) |
+| Julien, à partir de 21 h 34 | 3 | 6 (avec Minoterie) | 3 | 8 | 5 |
+| Sébastien (photographe), à partir de 21 h 34 | 3 | 4 (avec Minoterie) | 1 | 2 (avec Quai Ligny) | 2 |
+| Site public (publiées seulement), toute la journée | 3 | 5 | 3 | 7 | 4 |
+
+- Barre latérale du rôle Photographe (Sébastien, MQ-07, MQ-08, MQ-20 et planche) : Aujourd'hui · Photos (Photothèque ; « Séries », un intitulé qui se déplie et **n'est pas un lien** — sans `series.gerer`, `/admin/series` lui répondrait 403 —, avec ses séries comptées sur ses 13 photos, dont 12 rangées : Atlantique 3, Paysage 4, Portrait 1, Rue 2, Voyage 2, vignettes Cais do Sodré, Brume sur la Loire, Tiago, Quai 7 h 12, Dernière heure ; Sorties ; Voyages) · Personnes (Personnes 1, la demande de Claire ; App de terrain) · Publier (Mes propositions ; Carnets, Galeries privées, Boutique : modules à venir, permissions à créer) · Équipe (Statistiques) ; au pied, Aide, Voir le site, langue, Nouveautés 1.90.0 ; ni Signalements, ni Instagram, ni Réglages (`server/permissions.js`). Badge « Boutique » de Sébastien : 1 à partir de 9 h 44 (C-0006), 2 à partir de 10 h 17 (C-0008).
+- Pied de la barre latérale (tous les rôles), comme `views/admin/layout.eta` : Réglages (administrateur), Aide, Voir le site, langue (formulaire POST), Nouveautés et la version `1.90.0` ; « Traitement : n photos » quand des images sont en cours (caché le 16 oct. au soir : rien n'est en cours) ; le compte, le thème (formulaire POST) et la déconnexion (POST).
 - Fichiers des brouillons d'Angers (EXIF de la démo) : `R0004012.JPG` Minoterie, brume du matin (14 oct., 6 h 55) · `R0004046.JPG` Quai Ligny, soir (18 h 10) · `R0004057.JPG` Réverbères, quai Ligny (18 h 40).
-- App de terrain (MQ-10) : rencontre d'Inês, carte `J-0001`, à 19 h 20 ; prochaine carte `J-0002` ; adresse imprimée sur la carte : `nicephos.art/bonjour/j` (puis le numéro) ; session de terrain ouverte jusqu'à 3 h 24.
-- Galeries privées (MQ-18) et commandes (MQ-19) : les données du § 4.5 et du § 4.6.
+- Les noms des séries sont fixes (Atlantique, Paysage, Portrait, Rue, Voyage) ; un écran qui montre une modification de série change sa description, jamais son nom.
+- App de terrain (MQ-10, le samedi 10 oct. à Lisbonne, pas le 16) : rencontre d'Inês, carte `J-0001`, à 19 h 20 ; prochaine carte `J-0002` ; adresse imprimée sur la carte : `nicephos.art/bonjour/j` (puis le numéro) ; session de terrain ouverte jusqu'à 3 h 24. L'anglais montré à Inês : « has been kept on this phone since 7:24 pm », « 62% ».
+- Galeries privées (MQ-18) et commandes (MQ-19) : les données du § 4.5 et du § 4.6, à l'heure de la capture (tableau ci-dessus).
 
 ### 4.10 Arbitrages avec l'étude des projets (docs/etudes/blog-galeries-boutique.md)
 
@@ -280,6 +354,10 @@ Camille Exemple, relectrice : compte désactivé le 2 oct. 2026 ; ses 14 traduct
 - **Galeries privées** : « Accès » (et non « partage ») ; « favoris » (et non « sélectionnés ») ; l'invitation part à la création de l'accès ; une sélection envoyée se reprend (`POST /prive/:pid/selection/reprendre`, à ajouter à l'annexe des routes : il contredit G50, qui la figeait).
 - **Boutique** : motif de remboursement libre ; le suivi Colissimo est un numéro de 13 signes ; un exemplaire revenu (remboursement, annulation) redevient disponible (S7 aligné sur S49) ; D16 en lecture seule.
 - **Formulaires** : la date de rencontre de `/bonjour` se saisit en champ libre (comme dans l'admin), et non en `type=date` : écart voulu avec le code actuel.
+- **Bouton final du tunnel** (passe 2) : « Payer 305,00 € à Julien » (FR, EN « Pay €305.00 to Julien ») plutôt que « Commander avec obligation de paiement » (étude S30, niveau O) : les lignes directrices européennes admettent « payer maintenant », et le bouton nomme le destinataire, ce qu'exige un panier à deux vendeurs. En allemand, la formule légale « Zahlungspflichtig bestellen » (§ 312j BGB) est gardée, suivie du montant et du destinataire. À reporter dans l'étude (S30).
+- **Flux du carnet** : l'interface dit « flux RSS » (le mot connu) ; le format reste Atom (étude B58).
+- **Danger en Chambre noire** (passe 2) : `#f0605a`, un rouge, au lieu de l'orangé `#e8743b` de main, trop voisin de l'ambre du bouton principal : évolution d'`admin.css` à reporter dans main (`dr-work/mq2-correctifs-main.md`).
+- **Routes** : la liste de ce qui existe et de ce qui est à créer est au § 2 (adresses) ; les maquettes écrivent « (à créer) » dans leur encart pour toute adresse de la seconde liste.
 - **Routes à créer** : `/droits/demande?photo=<slug>` (demande de licence préremplie) et `/instagram` (MQ-06).
 - **Références de commande** (tranché le 16 oct.) : la référence lisible `C-2026-0007` reste le numéro affiché (page de suivi, e-mails, factures, admin, téléphone) ; le lien de suivi envoyé au client porte un jeton aléatoire d'au moins 128 bits (22 caractères en base64url, `https://www.nicephos.art/commande/suivi/<jeton>`, préfixe de langue au besoin), seul à ouvrir la commande : la référence seule n'ouvre rien. Cela concilie S55 (référence d'au moins 50 bits) : l'aléa est porté par le jeton, pas par le numéro. MQ-19 le montre (e-mail d'Anna, lien masqué ; paiement : « Suivi d'Anna »). À reporter dans l'étude (S55, annexe des routes).
 - **Adresse de la boutique** (tranché le 16 oct.) : l'adresse publique est `/tirages` (`/tirages/<slug>`), le mot du menu ; l'étude écrivait `/boutique` (S10, schéma du parcours, annexe des routes) : à corriger dans l'étude. L'administration garde « Boutique » (`/admin/boutique`).
