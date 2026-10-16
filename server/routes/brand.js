@@ -53,9 +53,11 @@ export default async function brandRoutes(app) {
     return reply.type('text/css; charset=utf-8').header('cache-control', 'public, max-age=31536000, immutable').send(css);
   });
 
+  // Redirection temporaire, gardée un jour : le fichier visé change (et l'ancien est effacé) à chaque nouvel emblème ;
+  // une 301 serait gardée indéfiniment par les navigateurs, qui demanderaient ensuite un fichier disparu.
   app.get('/favicon.ico', async (request, reply) => {
     const b = current();
     if (!b.favicon64) return reply.code(204).send();
-    return reply.redirect(`/brand/${b.favicon64}`, 301);
+    return reply.header('cache-control', 'public, max-age=86400').redirect(`/brand/${b.favicon64}`, 302);
   });
 }

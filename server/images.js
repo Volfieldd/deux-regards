@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
-import exifReader from 'exif-reader';
+import { readExif } from './exif.js';
 import { overlayFor, resolveTone } from './watermark.js';
 
 export const WIDTHS = [640, 1280, 2000];
@@ -38,9 +38,10 @@ const exifDate = d => (d instanceof Date && !Number.isNaN(d.getTime()) ? d.toISO
 const exposure = s => (typeof s === 'number' && s > 0 ? (s < 1 ? `1/${Math.round(1 / s)}` : String(s)) : null);
 
 // Balises de prise de vue recopiées de l'original. Jamais de GPS, ni de numéro de série.
+// L'EXIF de l'original est lu une seule fois par rendu (lecture bornée, voir exif.js).
 function shootingTags(original) {
-  let e;
-  try { e = exifReader(original); } catch { return { IFD0: {}, IFD2: {} }; }
+  const e = readExif(original);
+  if (!e) return { IFD0: {}, IFD2: {} };
   const img = e.Image || {};
   const ph = e.Photo || {};
   const pick = obj => Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== undefined && v !== ''));
@@ -79,14 +80,15 @@ export function rightsXmp({ artist, copyright, credit, webStatement }) {
 //   rights     : auteur et copyright (EXIF), mentions IPTC (XMP)
 //   shooting   : droits + appareil, objectif, exposition, date (sans GPS)
 //   all        : tout l'EXIF de l'original, GPS compris
-function applyMeta(pipeline, meta, originalExif) {
+// `shot` : balises de prise de vue déjà lues (shootingTags), pour le mode « shooting ».
+function applyMeta(pipeline, meta, shot) {
   if (!meta) return pipeline;
   // Dès qu'on signe les fichiers, les mentions IPTC accompagnent l'EXIF (accents conservés en XMP).
   pipeline = pipeline.withXmp(rightsXmp(meta));
   if (meta.mode === 'all') return pipeline.keepExif();
   const rights = { Artist: ascii(meta.artist), Copyright: ascii(meta.copyright) };
   if (meta.mode === 'rights') return pipeline.withExif({ IFD0: rights });
-  const shot = originalExif ? shootingTags(originalExif) : { IFD0: {}, IFD2: {} };
+  shot ??= { IFD0: {}, IFD2: {} };
   return pipeline.withExif({ IFD0: { ...shot.IFD0, ...rights }, IFD2: shot.IFD2 });
 }
 
@@ -99,7 +101,8 @@ function applyMeta(pipeline, meta, originalExif) {
 // Performance : l'original (souvent 24 Mpx) n'est décodé qu'une fois, en une base orientée à la plus grande
 // largeur servie, gardée en mémoire ; chaque taille en dérive et les fichiers s'encodent en parallèle.
 // Exception : le mode « tout l'EXIF de l'original » relit l'original pour chaque fichier (keepExif()
-// recopie l'EXIF de l'entrée, absent d'une base en mémoire).
+// recopie l'EXIF de l'entrée, absent d'une base en mémoire) ; deux fichiers à la fois seulement, chaque lecture
+// décodant l'original entier.
 export async function renderVariants(storageDir, file, { key = '', mark: wanted = null, meta = null, force = false, onStep = null } = {}) {
   const src = path.join(storageDir, 'originals', file);
   const outDir = path.join(storageDir, 'variants');
@@ -137,12 +140,13 @@ export async function renderVariants(storageDir, file, { key = '', mark: wanted 
     overlays.set(w, marked && w >= 16 && h >= 16 ? await overlayFor(mark, w, h) : null);
   }
 
+  const shot = meta?.mode === 'shooting' ? shootingTags(info.exif) : null;
   const made = [];
-  await Promise.all(jobs.map(async ({ w, format, out }) => {
+  const renderJob = async ({ w, format, out }) => {
     // sharp applique composite() après le redimensionnement : filigrane posé à la taille finale.
     let pipeline = input().resize({ width: w, withoutEnlargement: true });
     if (overlays.get(w)) pipeline = pipeline.composite(overlays.get(w));
-    pipeline = applyMeta(pipeline, meta, info.exif);
+    pipeline = applyMeta(pipeline, meta, shot);
     // Écriture atomique : un rendu interrompu ne laisse jamais un fichier tronqué sous le nom final.
     const tmp = `${out}.${crypto.randomBytes(4).toString('hex')}.tmp`;
     try {
@@ -153,6 +157,11 @@ export async function renderVariants(storageDir, file, { key = '', mark: wanted 
     }
     made.push(out);
     advance();
+  };
+  const pending = [...jobs];
+  const lanes = fromSource ? 2 : jobs.length;
+  await Promise.all(Array.from({ length: Math.min(lanes, jobs.length) }, async () => {
+    for (let job; (job = pending.shift());) await renderJob(job);
   }));
   return made;
 }

@@ -37,4 +37,6 @@ Chaque thème est présenté avec ses trois couleurs (fond, encre, accent) et un
 - **Retirer :** un bouton sous chaque emplacement.
 - **Couleur automatique :** emblème, icône et logo complet prennent **la couleur du thème** (blanc sur fond noir, noir sur fond clair). Une seule version suffit, noire ou blanche : le sens du trait est détecté. Le pourtour est recadré automatiquement.
 - **Icône d'onglet :** une icône carrée sur fond opaque est reprise telle quelle. Sinon, elle est composée automatiquement.
+- **Photo d'un dessin :** l'orientation du téléphone est appliquée ; un dessin photographié n'est pas affiché de travers.
+- **Image de partage :** réencodée en JPEG, 1200 px au plus. Une transparence devient un fond **blanc** derrière un dessin sombre (logo noir détouré), **noir** derrière un dessin clair.
 - **SVG :** refusés à l'envoi.

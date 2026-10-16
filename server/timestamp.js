@@ -18,6 +18,7 @@ const OID = {
 };
 const MAX_REPLY = 64 * 1024;          // un jeton fait quelques ko
 const MAX_DEPTH = 32;
+const MAX_CHAIN = 5;                  // AC intermédiaires au plus entre la TSA et le certificat de confiance
 const HASHES = { [OID.sha256]: 'sha256', [OID.sha384]: 'sha384', [OID.sha512]: 'sha512', [OID.sha1]: 'sha1' };
 
 export class TimestampError extends Error {}
@@ -195,7 +196,7 @@ export const parseReply = structured(buf => {
 // ---------- vérification ----------
 
 // Vérifie le jeton : contenu signé, signature, certificat de la TSA (usage « horodatage », lié au jeton par
-// l'attribut SigningCertificate, valide à la date du jeton) et, si une racine est fournie, son émission par elle.
+// l'attribut SigningCertificate, valide à la date du jeton) et, si une autorité est fournie, la chaîne jusqu'à elle.
 // Renvoie { signer, validFrom, validTo, chained } ou lève TimestampError.
 export const verifyToken = structured((parsed, { caPem = null } = {}) => {
   const si = parsed.signerInfo.children;
@@ -240,10 +241,22 @@ export const verifyToken = structured((parsed, { caPem = null } = {}) => {
   const at = parsed.genTime;
   if (at < new Date(signer.validFrom) || at > new Date(signer.validTo)) throw new TimestampError('certificat de la TSA hors validité à la date du jeton');
 
+  // Chaîne : du certificat de la TSA jusqu'à un certificat du fichier fourni (la racine, ou un intermédiaire qu'on y a
+  // mis), en passant au besoin par les certificats d'AC intermédiaire joints au jeton, valides à la date du jeton.
+  // Les autorités qualifiées signent presque toutes avec un certificat émis par une AC intermédiaire.
   let chained = false;
   if (caPem) {
-    const roots = [...caPem.matchAll(/-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/g)].map(m => new crypto.X509Certificate(m[0]));
-    chained = roots.some(ca => signer.checkIssued(ca) && signer.verify(ca.publicKey));
+    const anchors = [...caPem.matchAll(/-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/g)].map(m => new crypto.X509Certificate(m[0]));
+    const issued = (child, ca) => { try { return child.checkIssued(ca) && child.verify(ca.publicKey); } catch { return false; } };
+    const validAt = c => at >= new Date(c.validFrom) && at <= new Date(c.validTo);
+    let cur = signer;
+    for (let depth = 0; depth <= MAX_CHAIN && !chained; depth++) {
+      chained = anchors.some(ca => issued(cur, ca));
+      if (chained) break;
+      const next = certs.find(c => c !== cur && c !== signer && c.ca && validAt(c) && issued(cur, c));
+      if (!next) break;
+      cur = next;
+    }
     if (!chained) throw new TimestampError('certificat de la TSA non émis par l’autorité attendue');
   }
   return { signer: signer.subject.replace(/\n/g, ', '), validFrom: signer.validFrom, validTo: signer.validTo, chained };

@@ -48,5 +48,5 @@ export const BRAND_SLOTS = {
   logotype: { field: 'logotype', ratio: 'logotypeRatio', kind: 'mask', label: 'Logo complet',
     help: 'Le logo avec le nom (version horizontale) : affiché en grand en tête de la page « À propos ».' },
   partage: { field: 'share', kind: 'share', label: 'Image de partage',
-    help: 'Aperçu quand une page sans photo (À propos, Droits…) est partagée sur un réseau social. Carré 1080 px ou 1200 × 630, utilisé tel quel.' },
+    help: 'Aperçu quand une page sans photo (À propos, Droits…) est partagée sur un réseau social. Carré 1080 px ou 1200 × 630, réencodé en JPEG (1200 px au plus) ; une transparence devient un fond blanc derrière un dessin sombre, noir derrière un dessin clair.' },
 };

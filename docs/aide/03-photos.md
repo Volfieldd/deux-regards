@@ -26,8 +26,9 @@ Dans la photothèque, chaque photo envoyée **apparaît aussitôt dans la planch
 
 | | |
 |---|---|
-| Formats | JPEG, PNG, WebP, TIFF, HEIF |
-| Taille | 90 Mo et 120 mégapixels par fichier au plus |
+| Formats | JPEG, PNG, WebP, TIFF, AVIF. Le **HEIC** de l'iPhone n'est pas pris en charge : exportez la photo en JPEG (ou réglez l'appareil sur « Le plus compatible ») |
+| Taille | 90 Mo et 120 mégapixels par fichier au plus (moins en 16 bits ou avec transparence) ; un panorama vertical ne doit pas être plus haut qu’environ 8 fois sa largeur |
+| Contrôle | chaque fichier est **décodé** à l'envoi : un fichier tronqué ou abîmé est refusé tout de suite, avec la raison |
 | Statut | **brouillon** : rien n'est visible sur le site avant publication |
 | Titre | **provisoire**, tiré du nom du fichier (`IMG_2041 quai-nord.jpg` → « IMG 2041 quai nord ») |
 | Date | **reprise de l'appareil photo** (date de prise de vue des métadonnées EXIF), quand elle existe |

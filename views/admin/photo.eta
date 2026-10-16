@@ -353,7 +353,7 @@
 <% } %>
     </dd>
   </dl>
-<% if (pf && pf.status === 'ok') { %>
+<% if (pf && pf.status === 'ok' && pf.sha256 === it.photo.sha256) { %>
   <p class="actions downloads">
 <% if (can('photos.original')) { %>    <a class="btn ghost" href="/admin/photos/<%= it.photo.id %>/original" download><%= t('Original') %></a>
 <% } %>

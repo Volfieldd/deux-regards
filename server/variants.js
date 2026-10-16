@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { renderVariants, renderPreview, removeVariants, hasVariants, VARIANT_RE } from './images.js';
 import { FONTS, POSITIONS, KINDS, TONE_LABELS } from './watermark.js';
+import { IMPORT_CONCURRENCY } from './imports.js';
 
 // Version du rendu : à incrémenter si le code de rendu change, pour régénérer toutes les variantes.
 const PIPELINE = 2;                // 2 : mentions IPTC (XMP) dans les modes signés
@@ -46,7 +47,16 @@ export function normalizeWatermark(body, current = WATERMARK_DEFAULTS) {
 }
 export const normalizeExif = body => ({ mode: oneOf(body.exif_mode, EXIF_MODES, 'none') });
 
-const yearOf = p => (/^\d{4}/.exec(p.taken_on || '') || /^\d{4}/.exec(p.created_at || '') || [String(new Date().getFullYear())])[0];
+// Année de la photo : celle de la prise de vue, sinon celle de l'import, en heure de Paris (created_at est en UTC :
+// une photo importée le 1er janvier à 0 h 30 est bien de la nouvelle année).
+const parisYear = d => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric' }).format(d);
+function yearOf(p) {
+  const taken = /^\d{4}/.exec(p.taken_on || '');
+  if (taken) return taken[0];
+  const created = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})$/.exec(p.created_at || '');
+  if (created) return parisYear(new Date(`${created[1]}T${created[2]}Z`));
+  return /^\d{4}/.exec(p.created_at || '')?.[0] || parisYear(new Date());
+}
 
 // « © {auteur} {annee} » → « © Julien 2024 »
 export function fillText(template, p, siteName) {
@@ -79,8 +89,9 @@ export function specFor(p, { watermark, exif, siteName, watermarkDir, rightsUrl,
   return { key, mark, meta };
 }
 
-// Service de rendu : une seule tâche à la fois (file d'attente), passage complet en arrière-plan
-// après chaque changement de réglage, rendu immédiat d'une photo à l'import.
+// Service de rendu : passages complets en arrière-plan, un seul à la fois (file d'attente), après chaque changement
+// de réglage ; rendu immédiat d'une photo à l'import, hors file, IMPORT_CONCURRENCY à la fois. Un verrou par photo
+// empêche deux rendus simultanés de la même image.
 export function createVariantService({ db, storageDir, siteName, log, publicUrl = null }) {
   const watermarkDir = path.join(storageDir, 'watermarks');
   const variantsDir = path.join(storageDir, 'variants');
@@ -107,7 +118,6 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
   let passQueued = false;
   let forceQueued = false;
   let stopping = false;
-  let swept = false;
   const state = { running: false, total: 0, done: 0, errors: [] };
   const enqueue = job => (queue = queue.then(job).catch(err => log?.error({ err }, 'passage des variantes interrompu')));
 
@@ -121,6 +131,21 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
     return run;
   }
 
+  // Rendus d'import (hors file), toutes routes confondues : IMPORT_CONCURRENCY à la fois au plus. Des imports
+  // classiques lancés en parallèle ne multiplient pas la mémoire et les threads occupés.
+  let slots = 0;
+  const slotWaiters = [];
+  async function withSlot(fn) {
+    while (slots >= IMPORT_CONCURRENCY) await new Promise(resolve => slotWaiters.push(resolve));
+    slots++;
+    try {
+      return await fn();
+    } finally {
+      slots--;
+      slotWaiters.shift()?.();
+    }
+  }
+
   // Rend une photo si son empreinte a changé ou si des fichiers manquent ; bascule puis nettoie.
   // La ligne est relue sous verrou : réglages, auteur ou suppression faits entre-temps sont pris en compte.
   async function render(id, ctx, { force = false, onStep = null } = {}) {
@@ -128,33 +153,37 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
     if (!p) return false;
     const { key, mark, meta } = specFor(p, ctx);
     if (!force && key === p.variant_key && hasVariants(storageDir, p, key)) return false;
+    // Photo supprimée pendant le rendu (son identifiant a même pu être repris par une nouvelle photo, d'où la
+    // comparaison du fichier) : on efface ce qui a déjà été écrit.
+    const gone = () => q.photo.get(id)?.file !== p.file;
     try {
       await renderVariants(storageDir, p.file, { key, mark, meta, force, onStep });
     } catch (err) {
-      // Photo supprimée pendant le rendu : on efface ce qui a déjà été écrit.
-      if (!q.photo.get(id)) { removeVariants(storageDir, p.file); return false; }
+      if (gone()) { removeVariants(storageDir, p.file); return false; }
       throw err;
     }
-    if (!q.photo.get(id)) { removeVariants(storageDir, p.file); return false; }
+    if (gone()) { removeVariants(storageDir, p.file); return false; }
     q.setKey.run(key, p.id);                      // les pages pointent désormais vers les nouvelles variantes
     removeVariants(storageDir, p.file, { keep: key });
     return true;
   }
 
   // Ménage : fichiers temporaires d'un rendu interrompu, variantes sans photo, logos remplacés.
-  // Les .tmp ne sont effacés qu'au premier passage (démarrage) : ensuite, un import peut être en train d'écrire.
-  function sweep({ tmp = false, logos = false } = {}) {
+  // Un fichier temporaire (« .tmp ») ou un logo en cours d'envoi (« .part ») n'est effacé que s'il traîne depuis plus
+  // d'une heure : un rendu peut être en train de l'écrire, dans ce processus ou dans un autre (npm run variants).
+  function sweep({ logos = false } = {}) {
     const stems = new Set(q.files.all().map(f => path.parse(f).name));
+    const stale = Date.now() - 60 * 60 * 1000;
+    const old = file => { try { return fs.statSync(file).mtimeMs <= stale; } catch { return false; } };
     if (fs.existsSync(variantsDir)) {
       for (const f of fs.readdirSync(variantsDir)) {
         const m = VARIANT_RE.exec(f);
-        if ((tmp && f.endsWith('.tmp')) || (m && !stems.has(m[1]))) fs.rmSync(path.join(variantsDir, f), { force: true });
+        const file = path.join(variantsDir, f);
+        if ((f.endsWith('.tmp') && old(file)) || (m && !stems.has(m[1]))) fs.rmSync(file, { force: true });
       }
     }
     if (logos) {
       const current = read('watermark', WATERMARK_DEFAULTS).image;
-      // Un logo en cours d'envoi (« .part ») n'est pas effacé, sauf s'il traîne depuis plus d'une heure.
-      const stale = Date.now() - 60 * 60 * 1000;
       for (const f of fs.readdirSync(watermarkDir)) {
         const file = path.join(watermarkDir, f);
         if (f === current || (f.endsWith('.part') && fs.statSync(file).mtimeMs > stale)) continue;
@@ -171,7 +200,8 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
     // Rendu immédiat d'une photo (import), hors de la file : il n'attend pas un passage en cours.
     // L'erreur remonte à l'appelant.
     renderPhoto(id, { onStep = null } = {}) {
-      return withLock(id, () => render(id, context(), { onStep }));
+      // Le verrou est pris d'abord : stop() et idle() attendent aussi un rendu qui attend sa place.
+      return withLock(id, () => withSlot(() => render(id, context(), { onStep })));
     },
 
     // Passage complet en arrière-plan ; plusieurs demandes rapprochées n'en font qu'un.
@@ -183,7 +213,7 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
         passQueued = false;
         const forced = forceQueued;
         forceQueued = false;
-        if (!swept) { sweep({ tmp: true }); swept = true; }
+        sweep();
         const ids = q.ids.all();
         Object.assign(state, { running: true, total: ids.length, done: 0, errors: [] });
         let changed = 0;
@@ -195,7 +225,10 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
               // (et un nouveau passage, déjà demandé, reprend les précédentes).
               if (await withLock(id, () => render(id, context(), { force: forced }))) changed++;
             } catch (err) {
-              state.errors.push({ id, title: q.photo.get(id)?.title ?? `#${id}`, error: err.message });
+              // Message fixe et traduisible : celui de libvips (anglais, chemin absolu de l'original) va au journal.
+              const p = q.photo.get(id);
+              const missing = p && !fs.existsSync(path.join(storageDir, 'originals', p.file));
+              state.errors.push({ id, title: p?.title ?? `#${id}`, error: missing ? 'original introuvable' : 'image illisible ou format non pris en charge par le serveur' });
               log?.error({ err, photo: id }, 'rendu des variantes impossible');
             }
             state.done++;
