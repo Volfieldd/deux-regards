@@ -104,4 +104,4 @@
 | T1 | Sécurité : voir le wiki, page Sécurité (sessions, CSRF, CSP, limites d'import, configuration en ligne). |
 | T2 | Accessibilité : focus visible, `prefers-reduced-motion`, textes alternatifs, alternatives clavier au glisser-déposer, erreurs de formulaire annoncées ; audit axe-core sans violation sur l'admin (clair et sombre, ordinateur et téléphone). |
 | T3 | Sobriété : pas de framework front ni de build, images au format et à la taille adaptés, chargement à la demande. |
-| T4 | Données : tout l'état dans `STORAGE_DIR` ; refus de démarrer sans montage en conteneur ; sauvegarde quotidienne de la base et des originaux. |
+| T4 | Données : tout l'état dans `STORAGE_DIR` ; refus de démarrer sans montage en conteneur ; sauvegarde quotidienne de la base (copie compacte, sans les restes des données effacées) et des originaux (supprimés gardés 90 jours à part) ; restauration par script (site arrêté, sessions fermées, aucun original effacé ramené, actions à refaire listées). |

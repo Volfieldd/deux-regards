@@ -43,7 +43,7 @@ Chiffre dans la base les noms, e-mails, signatures, photos de repère et de cart
 4. **Compose Up**. Au démarrage, les données déjà enregistrées sont chiffrées (une seule fois) ; le journal indique « rencontres : données en clair chiffrées ».
 5. **Vérifiez** : Admin → **Droits & confidentialité** affiche « Chiffrement des données personnelles dans la base : **actif** ». Ouvrez une rencontre : tout se lit normalement.
 
-**À ne pas faire** : changer ou retirer la clé. Sans la bonne clé, les données chiffrées s'affichent « donnée chiffrée : clé DATA_KEY absente ou différente » (rien n'est détruit : remettre la bonne clé suffit). Pour changer de clé, demandez une procédure de rechiffrement (non prévue aujourd'hui).
+**À ne pas faire** : changer ou retirer la clé. Sans la bonne clé, les données chiffrées s'affichent « donnée chiffrée : clé DATA_KEY absente ou différente », aucune carte d'accord n'est reconnue et l'impression de cartes échoue (la clé de leurs codes est elle aussi scellée) ; rien n'est détruit : remettre la bonne clé suffit. Pour changer de clé, demandez une procédure de rechiffrement (non prévue aujourd'hui).
 
 ## 3. Chiffrer les disques sur Unraid
 
@@ -112,7 +112,7 @@ Délai légal : **un mois** à compter de la demande.
 
 Exemples : vol du serveur ou d'un disque, accès frauduleux à l'admin, `DATA_KEY` divulguée, archive envoyée à la mauvaise personne.
 
-1. **Contenir** : arrêtez la pile si besoin, changez les mots de passe et `COOKIE_SECRET`, révoquez les sessions (Zitadel, et `DELETE FROM sessions`), gardez les journaux.
+1. **Contenir** : arrêtez la pile si besoin, changez les mots de passe et `COOKIE_SECRET`, révoquez les sessions (Zitadel, et `DELETE FROM sessions`), gardez les journaux. Si le serveur lui-même est touché, régénérez aussi le **jeton du tunnel** (Cloudflare Zero Trust → Networks → Tunnels → votre tunnel) et mettez le nouveau dans `TUNNEL_TOKEN` : sinon un connecteur copié ailleurs continuerait de recevoir une partie des visites.
 2. **Évaluer** : quelles données, combien de personnes, chiffrées ou non.
 3. **CNIL sous 72 heures** (www.cnil.fr → « Notifier une violation de données personnelles ») si les personnes sont exposées à un risque.
 4. **Informer les personnes** si le risque est élevé.
@@ -120,12 +120,17 @@ Exemples : vol du serveur ou d'un disque, accès frauduleux à l'admin, `DATA_KE
 
 ## 10. Restaurer une sauvegarde
 
-1. Arrêtez la pile et gardez une copie du dossier des données tel quel.
-2. Copiez `db/site-<date>.db` en `data/site.db` ; supprimez `data/site.db-wal` et `data/site.db-shm` s'ils existent.
-3. Recopiez `files/*` dans `data/` (originaux, logos, marque), puis `chown -R 99:100 data`.
-4. Relancez la pile : les images servies se recalculent. Avec `DATA_KEY`, gardez la **même clé** que celle de la sauvegarde.
+Une restauration remet **tout le site** à l'heure de l'instantané : ce qui a été fait depuis, par vous ou par d'autres (photos, rencontres, demandes reçues, effacements, rôles), est défait. Pour une seule photo supprimée par erreur, voyez plutôt la fin de cette section.
 
-Les originaux supprimés restent dans la sauvegarde 90 jours (puis en sont effacés) ; la base est sauvegardée chaque jour, 14 jours conservés.
+1. **Compose Down** (pile arrêtée).
+2. Lancez le script de restauration avec le nom de l'instantané (dossier `db/` des sauvegardes) ; commande complète dans le [Guide Unraid](Unraid#sauvegardes) (`docker run … node server/db/restore.js site-AAAA-MM-JJTHHMMSS.db`), ou [Déploiement](Déploiement#restaurer) pour la pile générique. Il refuse si le site tourne, garde la base actuelle (`data/site-avant-restauration-<date>.db`), ferme toutes les sessions et ne recopie que les originaux que cite l'instantané : un original effacé depuis ne revient pas.
+3. **Compose Up** : les images servies se recalculent. Avec `DATA_KEY`, gardez la **même clé** que celle de la sauvegarde.
+4. **Refaites ce que l'instantané a défait** : le script liste les actions faites après lui, d'après le journal de la base gardée. En priorité celles marquées « ! » : effacement des données d'une personne (refaites-le, c'est une obligation), suppression de photos, rôles retirés ou comptes désactivés (**Comptes et rôles**). Les rencontres saisies et les demandes reçues depuis l'instantané ne sont plus dans le site, seulement dans la base gardée : ne l'effacez pas avant de les avoir reprises.
+5. **Consignez** la restauration et les effacements refaits dans le registre de la page [RGPD](RGPD), puis effacez `site-avant-restauration-…` une fois tout vérifié.
+
+La base est sauvegardée chaque jour, 14 instantanés conservés ; les originaux supprimés restent 90 jours dans `supprimes/` (puis en sont effacés).
+
+**Une seule photo supprimée par erreur** : inutile de tout restaurer. Son original est dans `supprimes/originals/` du dossier des sauvegardes pendant 90 jours (`.absents.json` donne la date de suppression de chaque fichier, pour le retrouver). Rendez-le au photographe, qui le réimporte : titre, légendes, mots-clés et série sont à ressaisir, et la preuve d'antériorité est refaite à la date du nouvel import (une preuve téléchargée avant la suppression reste valable pour ce même fichier).
 
 ## 11. Publier le wiki
 

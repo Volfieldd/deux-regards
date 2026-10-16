@@ -29,14 +29,14 @@ Le serveur lit presque tout dans [`server/config.js`](https://github.com/Volfiel
 
 ## Sauvegarde
 
-Lues par [`server/db/backup.js`](https://github.com/Volfieldd/deux-regards/blob/main/server/db/backup.js) seulement : `npm run backup` (une sauvegarde) ou `node server/db/backup.js --loop` (une sauvegarde, puis une à chaque intervalle ; c'est le service `backup` de Compose). Voir [Déploiement](Déploiement#sauvegardes).
+Lues par [`server/db/backup.js`](https://github.com/Volfieldd/deux-regards/blob/main/server/db/backup.js) seulement : `npm run backup` (une sauvegarde) ou `node server/db/backup.js --loop` (une sauvegarde, puis une à chaque intervalle ; c'est le service `backup` de Compose ; `--etat` sert à son healthcheck). La restauration ([`server/db/restore.js`](https://github.com/Volfieldd/deux-regards/blob/main/server/db/restore.js)) lit les mêmes `STORAGE_DIR`, `DATABASE_PATH` et `BACKUP_DIR`. Voir [Déploiement](Déploiement#sauvegardes).
 
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `BACKUP_DIR` | — | Dossier des sauvegardes. **Obligatoire** pour le script, et jamais à l'intérieur de `STORAGE_DIR`. Dans Compose, c'est `/backups`, monté depuis le `BACKUP_DIR` de l'hôte. |
-| `BACKUP_KEEP` | `14` | Nombre d'instantanés de la base conservés (1 au moins). |
-| `BACKUP_INTERVAL_HOURS` | `24` | Intervalle entre deux sauvegardes avec `--loop` (1 au moins). |
-| `BACKUP_DELETED_DAYS` | `90` | Jours pendant lesquels un fichier supprimé des données (original, logo) reste dans la sauvegarde avant d'en être effacé (droit à l'effacement). Garde-fou : un dossier source vide n'efface rien. |
+| `BACKUP_KEEP` | `14` | Nombre d'instantanés de la base conservés (1 au moins). Garde-fou : quand la base n'a plus aucune photo alors que la précédente en avait, les vrais instantanés sont gardés `BACKUP_KEEP` × `BACKUP_INTERVAL_HOURS` heures au lieu d'être effacés au nombre. |
+| `BACKUP_INTERVAL_HOURS` | `24` | Intervalle entre deux sauvegardes avec `--loop`, de 1 à 168 heures (borné). |
+| `BACKUP_DELETED_DAYS` | `90` | Jours pendant lesquels un fichier supprimé des données (original, logo) reste dans la sauvegarde (`supprimes/`) avant d'en être effacé (droit à l'effacement). Garde-fou : un dossier source vide ne retire rien. |
 
 ## Connexion
 

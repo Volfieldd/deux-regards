@@ -79,11 +79,17 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   };
 
   // Clé des codes de contrôle : tirée au hasard une fois, gardée en base (indépendante des autres secrets du serveur,
-  // pour que les cartes déjà imprimées restent valables).
+  // pour que les cartes déjà imprimées restent valables). Avec DATA_KEY, elle y est scellée, sans changer de valeur :
+  // une sauvegarde volée ne permet pas de calculer le code d'une carte. Illisible (DATA_KEY absente ou différente) :
+  // aucune carte n'est reconnue.
   function key() {
     let k = q.setting.get();
-    if (!k) { q.saveKey.run(JSON.stringify(crypto.randomBytes(32).toString('hex'))); k = q.setting.get(); }
-    return Buffer.from(JSON.parse(k), 'hex');
+    if (!k) { q.saveKey.run(JSON.stringify(S(crypto.randomBytes(32).toString('hex')))); k = q.setting.get(); }
+    const stored = JSON.parse(k);
+    if (vault.enabled && !vault.sealed(stored)) db.prepare("UPDATE settings SET value = ? WHERE key = 'encounter_key'").run(JSON.stringify(S(stored)));
+    const hex = O(stored);
+    if (!/^[0-9a-f]{64}$/.test(hex)) throw new Error('clé des codes de contrôle illisible : DATA_KEY absente ou différente');
+    return Buffer.from(hex, 'hex');
   }
   function codeOf(ref) {
     const h = crypto.createHmac('sha256', key()).update(ref).digest();
@@ -94,9 +100,14 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   const emailHash = email => {
     const norm = String(email || '').trim().toLowerCase();
     if (!norm) return null;
-    return vault.index(norm) ?? crypto.createHmac('sha256', key()).update(`email:${norm}`).digest('hex');
+    try { return vault.index(norm) ?? crypto.createHmac('sha256', key()).update(`email:${norm}`).digest('hex'); } catch { return null; }
   };
-  const verify = (ref, code) => Boolean(code) && crypto.timingSafeEqual(Buffer.from(codeOf(ref)), Buffer.from(String(code).toUpperCase().padEnd(3).slice(0, 3)));
+  const verify = (ref, code) => {
+    if (!code) return false;
+    let expected;
+    try { expected = codeOf(ref); } catch { return false; }
+    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(String(code).toUpperCase().padEnd(3).slice(0, 3)));
+  };
 
   // Carte (ou référence tapée) : la référence, l'auteur d'après le préfixe, et si le code de contrôle est bon.
   function card(input) {
@@ -472,6 +483,8 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     portraitJpeg: id => vault.openBuf(db.prepare('SELECT portrait_jpeg FROM encounters WHERE id = ?').pluck().get(id)) || null,
     signaturePng: id => vault.openBuf(db.prepare('SELECT signature_png FROM encounters WHERE id = ?').pluck().get(id)) || null,
     parseRef, card, codeOf, list, get, events, photos: id => q.photos.all(id), setStatus, unlink, applyRefusal, remove, purge,
+    // Code à afficher (fiche) : absent si la clé est illisible, comme une donnée chiffrée sans la bonne DATA_KEY.
+    codeOrNull: ref => { try { return codeOf(ref); } catch { return null; } },
     submit: (...args) => { const r = submit(...args); changed(); return r; },
     saveCard: (...args) => { const r = saveCard(...args); changed(); return r; },
     link: (...args) => { link(...args); changed(); },
@@ -479,6 +492,8 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     // Données déjà en base, en clair (clé ajoutée après coup) : chiffrées au démarrage, une fois.
     sealExisting() {
       if (!vault.enabled) return 0;
+      // Clé des codes de contrôle scellée dès le démarrage (sans attendre une carte) ; illisible : signalée à l'usage.
+      try { if (q.setting.get()) key(); } catch { /* DATA_KEY différente : aucune carte reconnue */ }
       let n = 0;
       db.transaction(() => {
         for (const e of db.prepare('SELECT * FROM encounters').all()) {

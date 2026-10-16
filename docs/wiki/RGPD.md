@@ -23,7 +23,7 @@ Responsables conjoints : **Sébastien et Julien**, photographes de Nicephos. Con
 
 **Sous-traitants** : Cloudflare (acheminement HTTPS, conditions de traitement des données de Cloudflare, transferts encadrés : Data Privacy Framework, clauses contractuelles types) ; Zitadel (connexion à l'admin) ; fournisseur de messagerie si `SMTP_URL` est configuré (les relances des demandes de droits ne contiennent que la référence de la carte, jamais le nom ni l'adresse de la personne ; préférer un fournisseur européen avec un contrat de sous-traitance ; pas un Gmail personnel). Hébergement : notre serveur, en France.
 
-**Sécurité** (art. 32) : voir [Sécurité](Sécurité) — authentification forte de l'admin, formulaires protégés (CSRF), politique de sécurité des contenus stricte, HTTPS, limites de débit, données personnelles des rencontres chiffrées dans la base (`DATA_KEY`), disques chiffrés (à mettre en place sur Unraid), sauvegardes quotidiennes sur un autre disque.
+**Sécurité** (art. 32) : voir [Sécurité](Sécurité) — authentification forte de l'admin, formulaires protégés (CSRF), politique de sécurité des contenus stricte, HTTPS, limites de débit, données personnelles des rencontres chiffrées dans la base (`DATA_KEY`), disques chiffrés (à mettre en place sur Unraid), sauvegardes quotidiennes sur un autre disque ; effacement effectif (données effacées mises à zéro dans la base, instantanés sans leurs restes, restauration qui ne ramène pas un original effacé et liste les effacements à refaire).
 
 ## 2. Accord entre responsables conjoints (article 26)
 

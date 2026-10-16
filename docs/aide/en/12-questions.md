@@ -43,4 +43,4 @@ The timestamping service is not responding. The site retries on its own; **Retry
 It shouldn’t: logos take the theme’s colour. Check that you uploaded it to the right slot on the [Appearance](apparence) page, then reload the page.
 
 **I deleted a photo by mistake.**
-The admin cannot undo it. The original is in the server backups: ask for a restore.
+The admin cannot undo it. The original stays in the server backups for 90 days: ask the person who runs the server for it, then import it again. Title, captions, keywords and series must be entered again, and the proof of prior existence is made again with the date of the new import (a proof downloaded before remains valid for that same file). Do not ask for a full restore: it would take the whole site back to the time of the last backup, and everything done since, by you or by others, would be lost.

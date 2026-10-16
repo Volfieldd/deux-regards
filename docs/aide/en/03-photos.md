@@ -146,7 +146,7 @@ In the photo library likewise: the Publish, Unpublish, Delete and Import buttons
 
 The original, the site images and the proof of prior existence are erased, and the photo is removed from the opening slideshow.
 
-**This cannot be undone from the admin.** Download the original and the proof first if you want to keep them. The original also remains in the server backups.
+**This cannot be undone from the admin.** Download the original and the proof first if you want to keep them. The original also remains in the server backups for 90 days (see [Frequently asked questions](questions)).
 
 ## The publishing workflow
 
