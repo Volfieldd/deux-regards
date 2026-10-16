@@ -1,0 +1,39 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": "https://www.nicephos.art/serie/bord-de-mer",
+      "url": "https://www.nicephos.art/serie/bord-de-mer",
+      "name": "Pas la mer à boire — la mer à Saint-Malo",
+      "description": "La Côte d’Émeraude vue par Julien : le Sillon de Saint-Malo à marée haute, la pointe du Nick à Saint-Lunaire face à Cézembre. Poses longues, octobre 2026.",
+      "inLanguage": "fr-FR",
+      "isPartOf": { "@id": "https://www.nicephos.art/#site" },
+      "image": "https://www.nicephos.art/media/e20acafb-930b-49c6-963a-fa208e5ad0cd-2a46625b-2000.webp",
+      "author": { "@id": "https://www.nicephos.art/auteur/julien#personne" },
+      "about": [
+        { "@type": "Place", "name": "Saint-Malo", "address": { "@type": "PostalAddress", "addressLocality": "Saint-Malo", "addressRegion": "Bretagne", "addressCountry": "FR" } },
+        { "@type": "Place", "name": "Saint-Lunaire", "address": { "@type": "PostalAddress", "addressLocality": "Saint-Lunaire", "addressRegion": "Bretagne", "addressCountry": "FR" } }
+      ],
+      "breadcrumb": { "@id": "https://www.nicephos.art/serie/bord-de-mer#ariane" },
+      "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": 4,
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "url": "https://www.nicephos.art/photo/le-sillon-de-saint-malo-a-maree-haute", "name": "Le Sillon de Saint-Malo à marée haute" },
+          { "@type": "ListItem", "position": 2, "url": "https://www.nicephos.art/photo/boulangerie-des-sports", "name": "Boulangerie des sports" },
+          { "@type": "ListItem", "position": 3, "url": "https://www.nicephos.art/photo/le-sillon-en-contre-jour", "name": "Le Sillon en contre-jour" },
+          { "@type": "ListItem", "position": 4, "url": "https://www.nicephos.art/photo/dsc7561-dxo", "name": "Depuis la pointe du Nick vers Cézembre" }
+        ]
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://www.nicephos.art/serie/bord-de-mer#ariane",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Nicephos", "item": "https://www.nicephos.art/" },
+        { "@type": "ListItem", "position": 2, "name": "Pas la mer à boire" }
+      ]
+    }
+  ]
+}

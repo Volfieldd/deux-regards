@@ -1,0 +1,51 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://www.nicephos.art/#site",
+      "url": "https://www.nicephos.art/",
+      "name": "Nicephos",
+      "alternateName": ["nicephos.art", "Nicephos photographie"],
+      "description": "Deux regards, une galerie : les photos de Sébastien et Julien, de la Côte d’Émeraude à Paris, de l’Anjou à la Bavière et à la Californie.",
+      "inLanguage": "fr-FR",
+      "publisher": { "@id": "https://www.nicephos.art/#organisation" }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://www.nicephos.art/#organisation",
+      "name": "Nicephos",
+      "url": "https://www.nicephos.art/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.nicephos.art/brand/favicon-abd53bab-180.png",
+        "width": 180,
+        "height": 180
+      },
+      "image": "https://www.nicephos.art/brand/partage-730e300a.jpg",
+      "description": "Galerie de photographies de Sébastien et Julien : mer, ville, nuit, nature et voyages.",
+      "founder": [
+        { "@id": "https://www.nicephos.art/auteur/seb#personne" },
+        { "@id": "https://www.nicephos.art/auteur/julien#personne" }
+      ],
+      "sameAs": [
+        "https://www.instagram.com/COMPTE_INSTAGRAM/",
+        "https://www.pinterest.com/COMPTE_PINTEREST/"
+      ]
+    },
+    {
+      "@type": "Person",
+      "@id": "https://www.nicephos.art/auteur/seb#personne",
+      "name": "Sébastien",
+      "url": "https://www.nicephos.art/auteur/seb",
+      "memberOf": { "@id": "https://www.nicephos.art/#organisation" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://www.nicephos.art/auteur/julien#personne",
+      "name": "Julien",
+      "url": "https://www.nicephos.art/auteur/julien",
+      "memberOf": { "@id": "https://www.nicephos.art/#organisation" }
+    }
+  ]
+}
