@@ -202,7 +202,7 @@ const I18N = {
   "Voir le post ↗": {"en": "See the post ↗", "de": "Beitrag ansehen ↗"},
   "Mettre à jour la page": {"en": "Refresh the page", "de": "Seite aktualisieren"},
   "Suivi interrompu : rechargez la page pour voir où en est l’envoi.": {"en": "Tracking interrupted: reload the page to see how the sending is going.", "de": "Verfolgung unterbrochen: Laden Sie die Seite neu, um den Stand der Sendung zu sehen."},
-  "Échec : {error}": {"en": "Failed: {error}", "de": "Fehlgeschlagen: {error}"},
+  "Dernier essai sans succès : {error}": {"en": "Last attempt failed: {error}", "de": "Letzter Versuch fehlgeschlagen: {error}"},
   "Description prête : enregistrez vos modifications, puis rechargez la page pour la reprendre.": {"en": "Description ready: save your changes, then reload the page to use it.", "de": "Beschreibung bereit: Speichern Sie Ihre Änderungen und laden Sie dann die Seite neu, um sie zu übernehmen."},
 };
 function tr(s, params) {
@@ -2156,7 +2156,7 @@ document.querySelectorAll('[data-desc-pending]').forEach(box => {
       if (!d.pending) {
         if (!dirty()) { location.reload(); return; }
         const text = $('[data-desc-text]', box);
-        text.textContent = d.text ? `« ${d.text} »` : d.error ? tr('Échec : {error}', { error: d.error }) : '';
+        text.textContent = d.text ? `« ${d.text} »` : d.error ? tr('Dernier essai sans succès : {error}', { error: d.error }) : '';   // mêmes mots que la fiche
         box.removeAttribute('data-desc-pending');
         const note = document.createElement('span');
         note.className = 'hint';
