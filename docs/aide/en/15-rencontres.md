@@ -109,7 +109,7 @@ A **trip** groups outings: “Morocco 2025”, ten shooting days. It is optional
 
 ## Faces and photo status
 
-On import, the server **detects the faces** in each photo (how many, and where). It recognises no one and keeps no facial fingerprint: only the number and the boxes. Photos imported before this feature are examined once, in the background.
+On import, the server **detects the faces** in each photo (how many, and where). It recognises no one and keeps no facial fingerprint: only the number and the boxes. The photo is examined as a whole, then piece by piece: a small face counts too (a passer-by at mid-distance, whose face is 2% of the height of a 24 MP photo, is detected; in profile, the face needs to be a little larger). Photos imported before this feature are examined once, in the background; those seen “with no face” before piece-by-piece detection existed (16 October 2026) are examined again, once.
 
 Each photo then has a **status for each use** (site, Instagram), readable by its shape:
 

@@ -109,7 +109,7 @@ Un **voyage** regroupe des sorties : « Maroc 2025 », dix journées de prise de
 
 ## Visages et état des photos
 
-À l'import, le serveur **repère les visages** de chaque photo (combien, et où). Il ne reconnaît personne et ne garde aucune empreinte de visage : seulement le nombre et les cadres. Les photos importées avant cette fonction sont examinées une fois, en arrière-plan.
+À l'import, le serveur **repère les visages** de chaque photo (combien, et où). Il ne reconnaît personne et ne garde aucune empreinte de visage : seulement le nombre et les cadres. La photo est examinée entière, puis par morceaux : un petit visage compte aussi (un passant à mi-distance, dont le visage fait 2 % de la hauteur d'une photo de 24 Mpx, est repéré ; de profil, il faut un visage un peu plus grand). Les photos importées avant cette fonction sont examinées une fois, en arrière-plan ; celles vues « sans visage » avant que la détection par morceaux n'existe (16 octobre 2026) sont réexaminées une fois.
 
 Chaque photo a alors un **état pour chaque usage** (site, Instagram), lisible par sa forme :
 

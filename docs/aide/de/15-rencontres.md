@@ -109,7 +109,7 @@ Eine **Reise** fasst Ausflüge zusammen: „Marokko 2025“, zehn Aufnahmetage. 
 
 ## Gesichter und Status der Fotos
 
-Beim Import **erkennt der Server die Gesichter** auf jedem Foto (wie viele und wo). Er identifiziert niemanden und speichert keine Gesichtsmerkmale: nur die Anzahl und die Rahmen. Fotos, die vor dieser Funktion importiert wurden, werden einmal im Hintergrund untersucht.
+Beim Import **erkennt der Server die Gesichter** auf jedem Foto (wie viele und wo). Er identifiziert niemanden und speichert keine Gesichtsmerkmale: nur die Anzahl und die Rahmen. Das Foto wird als Ganzes und dann stückweise untersucht: Auch ein kleines Gesicht zählt (ein Passant in mittlerer Entfernung, dessen Gesicht 2 % der Höhe eines 24-MP-Fotos ausmacht, wird erkannt; im Profil muss das Gesicht etwas größer sein). Fotos, die vor dieser Funktion importiert wurden, werden einmal im Hintergrund untersucht; Fotos, die vor der stückweisen Erkennung (16. Oktober 2026) als „ohne Gesicht“ galten, werden einmal erneut untersucht.
 
 Jedes Foto hat dann einen **Status für jede Verwendung** (Website, Instagram), an seiner Form erkennbar:
 

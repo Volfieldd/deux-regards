@@ -1,8 +1,10 @@
 // Empreintes CLIP du vocabulaire des mots-clés (server/vocabulaire.json) : server/vocabulaire-vecteurs.bin,
-// un Float32 normalisé de 512 valeurs par terme, dans l'ordre du fichier. Même modèle que l'image (CLIP ViT-B/32,
+// un Float32 normalisé de 512 valeurs par terme, dans l'ordre du fichier (et vocabulaire-vecteurs.json, l'empreinte
+// SHA-256 de la liste, vérifiée par le site). Même modèle que l'image (CLIP ViT-B/32,
 // Xenova, quantifié), partie texte, avec la phrase « a photo of … ». À relancer après chaque changement du vocabulaire :
 //   npm i --no-save @huggingface/transformers@3.7.1 && node scripts/vocabulaire.mjs
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import { AutoTokenizer, CLIPTextModelWithProjection } from '@huggingface/transformers';
 const MODEL = 'Xenova/clip-vit-base-patch32';
 const REVISION = 'd15189d7028b43f1d3e65039190477f6af591c2a';            // la même que le modèle d'image du site
@@ -19,4 +21,7 @@ for (const [i, v] of vocab.entries()) {
   for (let k = 0; k < 512; k++) out[i * 512 + k] = e[k] / n;
 }
 fs.writeFileSync(new URL('../server/vocabulaire-vecteurs.bin', import.meta.url), Buffer.from(out.buffer));
+// Empreinte des textes anglais dans l'ordre : le site refuse des empreintes qui ne correspondent plus à la liste.
+const sha256 = crypto.createHash('sha256').update(vocab.map(v => v.en).join('\n')).digest('hex');
+fs.writeFileSync(new URL('../server/vocabulaire-vecteurs.json', import.meta.url), `${JSON.stringify({ n: vocab.length, sha256 }, null, 1)}\n`);
 console.log(`${vocab.length} termes`);

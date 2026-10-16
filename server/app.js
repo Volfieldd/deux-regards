@@ -156,9 +156,9 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Villes proposées d'après le GPS des originaux importés avant la carte (une seule lecture par photo).
   app.decorate('locator', createLocator({ db, storageDir: config.storageDir, log: app.log }));
   app.addHook('onReady', async () => { app.locator.schedule(); });
-  // Liste des villes (~250 000 lieux, 1 à 2 s de lecture) : chargée juste après le démarrage en production, pas à la
-  // première frappe dans le champ Ville.
-  if (config.production) app.addHook('onReady', async () => { setTimeout(() => cities.byId(0), 1000).unref(); });
+  // Liste des villes (~250 000 lieux, 2 à 5 s de calcul) : chargée juste après le démarrage en production, par tranches
+  // entre lesquelles le site répond, pas à la première frappe dans le champ Ville.
+  if (config.production) app.addHook('onReady', async () => { setTimeout(() => cities.preload().catch(err => app.log.error({ err }, 'villes')), 1000).unref(); });
   app.addHook('onClose', async () => { await app.locator.stop(); });
   app.addHook('onClose', async () => { await app.variants.stop(); });
   // Preuves d'antériorité : empreintes et horodatage RFC 3161, repris en arrière-plan.
@@ -202,13 +202,13 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Visages : détectés (jamais reconnus) sur le serveur, à l'import et une fois pour les anciennes photos.
   // faceOptions.manual (tests) : rien ne démarre seul ; faceOptions.detector remplace le modèle.
   app.decorate('faces', createFaceService({ db, storageDir: config.storageDir, detector: faceOptions.detector || createFaceDetector({ log: app.log }), log: app.log }));
-  if (!faceOptions.manual) app.addHook('onReady', async () => { app.faces.retryFailed(); setTimeout(() => app.faces.run(), 3000).unref(); });
+  if (!faceOptions.manual) app.addHook('onReady', async () => { app.faces.retryFailed(); app.faces.recheckOnce(); setTimeout(() => app.faces.run(), 3000).unref(); });
   app.addHook('onClose', async () => { app.faces.stop(); await app.faces.idle(); });
   // Série proposée (désactivée par défaut) : empreintes d'images calculées sur le serveur, modèle téléchargé à
   // l'allumage dans le dossier de données. seriesOptions.model (tests) remplace le modèle ; manual : rien ne démarre seul.
   app.decorate('seriesSuggest', createSeriesSuggest({ db, storageDir: config.storageDir, log: app.log,
     model: seriesOptions.model || createImageModel({ dir: path.join(config.storageDir, 'models'), log: app.log }) }));
-  if (!seriesOptions.manual) app.addHook('onReady', async () => { app.seriesSuggest.retryFailed(); setTimeout(() => app.seriesSuggest.run(), 5000).unref(); });
+  if (!seriesOptions.manual) app.addHook('onReady', async () => { app.seriesSuggest.retryFailed(); setTimeout(() => app.seriesSuggest.run(), 5000).unref(); setTimeout(() => app.seriesSuggest.warm().catch(err => app.log.warn({ err }, 'séries : propositions')), 15000).unref(); });
   app.addHook('onClose', async () => { app.seriesSuggest.stop(); await app.seriesSuggest.idle(); });
   // Instagram suit les accords : une photo bloquée ne part pas, une photo à vérifier seulement sur confirmation ; la
   // file est revue dès qu'un accord change.
@@ -241,14 +241,15 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { reviewTimer = setInterval(() => app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée')), 60 * 1000); reviewTimer.unref(); });
   app.addHook('onClose', async () => clearInterval(reviewTimer));
   app.decorate('trips', createTrips({ db }));
-  app.decorate('keywordSuggest', createKeywordSuggester({ db }));
+  app.decorate('keywordSuggest', createKeywordSuggester({ db, log: app.log }));
   // Descriptions suggérées (Florence-2, désactivées par défaut) : demandes depuis la fiche tout de suite, file de nuit
   // vérifiée toutes les 10 minutes. describeOptions.model (tests) remplace le modèle ; manual : rien ne démarre seul.
   app.decorate('describer', createDescriber({ db, storageDir: config.storageDir, translator: app.translator, log: app.log,
     model: describeOptions.model || createFlorence({ dir: path.join(config.storageDir, 'models', 'florence'), log: app.log }) }));
   let describeTimer = null;
-  if (!describeOptions.manual) app.addHook('onReady', async () => { describeTimer = setInterval(() => app.describer.run(), 10 * 60 * 1000); describeTimer.unref(); });
-  app.addHook('onClose', async () => clearInterval(describeTimer));
+  // Au démarrage, les photos en échec sont reprises une fois (réseau rétabli, modèle réparé…).
+  if (!describeOptions.manual) app.addHook('onReady', async () => { app.describer.retryFailed(); describeTimer = setInterval(() => app.describer.run(), 10 * 60 * 1000); describeTimer.unref(); });
+  app.addHook('onClose', async () => { clearInterval(describeTimer); await app.describer.close(); });
   app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
   // Relances par e-mail (demandes RGPD par quarts du délai, récapitulatifs) : toutes les heures.
