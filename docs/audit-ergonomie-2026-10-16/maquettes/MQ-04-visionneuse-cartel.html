@@ -11,87 +11,12 @@
 <link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* MQ-04 · visionneuse. En-tête Contexte, cartel, rangées, bascule, boutons et pied de page de MQ-00 ; ci-dessous, la scène
-   de la visionneuse (composant nouveau, à verser dans la planche : « visionneuse » — photo, flèches, cartel, actions, plein écran),
-   construite avec les jetons de tokens.css. Fond noir de body.dark, quel que soit le thème. Aucun jeton redéclaré. */
-.vis-scene { --vis-r: 1.5; --vis-reste: 191px; --vis-h: clamp(260px, calc(100svh - var(--vis-reste)), 900px); --vis-w: min(100%, calc(var(--vis-h) * var(--vis-r))); padding-top: var(--esp-2); }
-.vis-plus, .vis-pres { width: var(--vis-w); margin-inline: auto; }
-.vis-fig {
-  position: relative; margin: 0 auto; width: var(--vis-w);
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--esp-4); }
-.vis-cadre { grid-column: 1 / -1; position: relative; }
-.vis-img { display: block; width: 100%; height: auto; aspect-ratio: var(--vis-r); background: var(--frame); }
-/* Flèches : dans les marges, au milieu de la hauteur de la photo (≥ 1 200 px) ; sinon sous la photo, avec le compteur. */
-.vis-nav { display: flex; align-items: center; justify-content: space-between; gap: var(--esp-2); padding-top: var(--esp-1); }
-.vis-fleche { display: inline-flex; align-items: center; justify-content: center; gap: var(--esp-1); min-width: var(--cible); min-height: var(--cible); color: var(--ink); font-size: 15px; }
-.vis-fleche:hover .vis-fleche-t { text-decoration: underline; text-underline-offset: 6px; }
-.vis-compte { color: var(--mute); font-variant-numeric: tabular-nums; }
-.vis-pos { display: none; margin: 0 0 var(--esp-demi); color: var(--mute); }
-.vis-cartel { grid-column: 1; padding-top: var(--esp-2); align-self: start; }
-.vis-cartel h1 { margin: 0; }
-.vis-actions { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--esp-2) var(--esp-3); padding-top: var(--esp-2); align-self: start; }
-.vis-actions .lien { min-height: var(--cible); }
-@media (min-width: 1200px) {
-  .vis-nav { display: contents; }
-  .vis-nav .vis-compte { display: none; }
-  .vis-fleche { position: absolute; top: calc(50% - 28px); width: 56px; height: 56px; }
-  .vis-prec { right: calc(100% + var(--esp-3)); } .vis-suiv { left: calc(100% + var(--esp-3)); }
-  .vis-fleche-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .vis-pos { display: block; }
-}
-@media (min-width: 768px) and (max-width: 1199px) { .vis-scene { --vis-reste: 267px; } }
-/* Téléphone : la photo bord à bord, le cartel puis les gestes empilés. */
-@media (max-width: 767px) {
-  .vis-scene { padding-top: 0; }
-  .vis-fig { width: auto; margin-inline: calc(-1 * var(--gut)); grid-template-columns: minmax(0, 1fr); }
-  .vis-nav, .vis-cartel, .vis-actions { padding-inline: var(--gut); }
-  .vis-actions { grid-column: 1; justify-content: flex-start; }
-  .vis-actions .btn { width: 100%; order: -1; }
-  .vis-fleche-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-}
-/* Sous le cartel : la légende et les données à gauche ; tirage, licence et signalement à droite. */
-.vis-plus { display: grid; gap: var(--esp-5) var(--esp-8); padding-top: var(--esp-6); }
-@media (min-width: 900px) { .vis-plus { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); } }
-.vis-legende { margin: 0 0 var(--esp-3); max-width: 52ch; font-size: var(--t-prose); line-height: 1.6; color: var(--prose); }
-.vis-dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--esp-1) var(--esp-3); margin: 0; }
-.vis-dl dt { color: var(--mute); font-size: var(--t-petit); padding-top: 1px; }
-.vis-dl dd { margin: 0; color: var(--ink); }
-.vis-dl a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
-@media (max-width: 479px) { .vis-dl { grid-template-columns: minmax(0, 1fr); gap: 0; } .vis-dl dd { margin-bottom: var(--esp-1); } }
-.vis-cote { display: grid; gap: var(--esp-3); align-content: start; }
-.vis-cote > div { display: grid; gap: var(--esp-demi); padding-top: var(--esp-2); border-top: 1px solid var(--rule); }
-.vis-cote p { margin: 0; color: var(--prose); }
-.vis-cote .tva { color: var(--mute); }
-.vis-cote > .vis-clavier { display: flex; flex-wrap: wrap; align-items: center; gap: var(--esp-2) var(--esp-3); }
-.vis-clavier p { color: var(--mute); font-size: var(--t-petit); }
-kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px solid var(--field); font: 400 var(--t-meta)/1.4 var(--mono); color: var(--ink); text-align: center; }
-@media (pointer: coarse), (max-width: 767px) { .vis-clavier p { display: none; } }
-/* À proximité et mini-carte */
-.vis-pres { display: grid; gap: var(--esp-5) var(--esp-8); padding-top: var(--esp-12); }
-@media (min-width: 768px) { .vis-pres .rangees { --h: 140px; } .vis-pres .rangees::after { content: none; } }
-.vis-carte { max-width: 400px; }
-.vis-pres h2 { margin: 0 0 var(--esp-3); font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); }
-.vis-carte { margin: 0; }
-.vis-carte svg { display: block; width: 100%; height: auto; }
-.vis-carte figcaption { margin-top: var(--esp-1); color: var(--mute); font-size: var(--t-meta); }
-.vis-carte figcaption a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field); }
-/* États */
-.vis-etats { display: grid; gap: var(--esp-16); padding-top: var(--esp-16); }
-.vis-etat { position: relative; }
-.vis-plein { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 10; max-height: 640px; margin-inline: auto; background: var(--dark); }
-.vis-plein img { display: block; max-width: 86%; max-height: 86%; width: auto; height: auto; }
-.vis-plein .vis-fleche { position: absolute; top: calc(50% - 28px); width: 56px; height: 56px; color: var(--dark-ink); }
-.vis-plein .vis-prec { left: var(--esp-2); right: auto; } .vis-plein .vis-suiv { right: var(--esp-2); left: auto; }
-.vis-quitter { position: absolute; top: var(--esp-2); right: var(--esp-2); display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); padding: 0 var(--esp-2); color: var(--dark-ink); }
-.vis-plein .vis-compte { position: absolute; bottom: var(--esp-2); left: 50%; translate: -50% 0; }
-@media (max-width: 767px) { .vis-plein { aspect-ratio: 9 / 16; max-height: 560px; } .vis-plein img { max-width: 100%; } .vis-quitter kbd { display: none; } .vis-plein .vis-fleche { top: auto; bottom: var(--esp-1); } }
+/* MQ-04 · visionneuse. En-tête Contexte, visionneuse (cartel, flèches, actions, données .def, plein écran), rangées et pied de page
+   de la planche (_commun/public.css) ; ci-dessous, seulement ce que la maquette montre en plus. Aucun jeton redéclaré. */
 .vis-menu-etat { min-height: 600px; }
 .vis-pin-tel { display: none; }
 @media (max-width: 767px) { .vis-licence-de { padding-inline: var(--gut); } }
 @media (max-width: 767px) { .vis-pin-tel { display: inline-grid; } .vis-cadre > .mq-pin { display: none; } }
-/* Encart : liens « avec / sans annotations » (même dessin que MQ-00). */
-.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
-.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
 </style>
 </head>
 <body class="dark">
@@ -100,7 +25,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 <a class="skip" href="#contenu">Aller au contenu</a>
 <header class="sh sh--contexte">
   <div class="sh-bar">
-    <span class="mq-pin" aria-hidden="true">1</span><a class="sh-retour" href="/carnets/lisbonne-et-porto#photo-4"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Retour au carnet : </span>Lisbonne et Porto</span></a>
+    <span class="mq-pin" aria-hidden="true">1</span><a class="sh-retour" href="/carnet/lisbonne-et-porto#photo-4"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Retour au carnet : </span>Lisbonne et Porto</span></a>
     <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
     <div class="sh-outils">
       <details class="lang-pick">
@@ -115,7 +40,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
         <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
         <nav class="sh-panneau" aria-label="Menu principal">
           <ul>
-            <li><a href="/">Accueil<span class="sh-panneau-marque">Nicephos</span></a></li><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/">Accueil<span class="sh-panneau-marque">Nicephos</span></a></li><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
             <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
           </ul>
         </nav>
@@ -127,7 +52,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
   <div class="wrap vis-scene">
     <figure class="vis-fig">
       <div class="vis-cadre"><span class="mq-pin" aria-hidden="true">3</span>
-        <img class="vis-img" src="_commun/photos/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w" sizes="(max-width: 767px) 100vw, min(calc(100vw - 144px), calc((100vh - 191px) * 1.5))" width="900" height="600" alt="Fin d’après-midi au miradouro da Graça : le soleil, bas et doré, s’efface dans la brume au-dessus du Tage ; au premier plan, deux silhouettes regardent la ville, ses toits et ses fenêtres déjà allumées." fetchpriority="high" decoding="async">
+        <img class="vis-img" src="_commun/photos/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w, _commun/photos/1600/miradouro.webp 1600w" sizes="(max-width: 767px) 100vw, min(calc(100vw - 144px), calc((100vh - 191px) * 1.5))" width="900" height="600" alt="Fin d’après-midi au miradouro da Graça : le soleil, bas et doré, s’efface dans la brume au-dessus du Tage ; au premier plan, deux silhouettes regardent la ville, ses toits et ses fenêtres déjà allumées." fetchpriority="high" decoding="async">
         <nav class="vis-nav" aria-label="Photos du carnet Lisbonne et Porto"><span class="mq-pin vis-pin-tel" aria-hidden="true">3</span>
           <a class="vis-fleche vis-prec" href="/photo/cais-do-sodre-maree-basse?carnet=lisbonne-et-porto" rel="prev"><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg><span class="vis-fleche-t">Précédente<span class="sr-only"> : Cais do Sodré, marée basse</span></span></a>
           <span class="vis-compte donnee">4 / 10</span>
@@ -138,29 +63,29 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
       <div class="vis-actions">
         <form class="bascule-form" method="post" action="/photo/miradouro-l-heure-doree/aime"><span class="mq-pin" aria-hidden="true">5</span><button class="bascule" type="submit" aria-pressed="false"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>J’aime <span class="bascule-n">12</span></button></form>
         <a class="lien" href="/photo/miradouro-l-heure-doree/partager" aria-haspopup="dialog"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>Partager</a>
-        <a class="btn" href="MQ-13-boutique-tirage.html">Tirage : dès 180 €</a>
+        <a class="btn" href="MQ-13-boutique-tirage.html">Tirage : à partir de 180 €</a>
       </div>
     </figure>
     <div class="vis-plus">
       <div><span class="mq-pin" aria-hidden="true">6</span>
         <p class="vis-legende">On attendait le soleil ; il a pris son temps, et nous aussi.</p>
-        <dl class="vis-dl">
+        <dl class="def">
           <dt>Lieu et heure</dt><dd>Miradouro da Graça, Lisbonne · <time datetime="2026-10-10T18:52">samedi 10 octobre 2026, 18 h 52</time></dd>
-          <dt>Carnet</dt><dd><a href="/carnets/lisbonne-et-porto">Lisbonne et Porto</a>, photo 4 sur 10 · samedi 10 octobre</dd>
+          <dt>Carnet</dt><dd><a href="/carnet/lisbonne-et-porto">Lisbonne et Porto</a>, photo 4 sur 10 · samedi 10 octobre</dd>
           <dt>Série</dt><dd><a href="/series/voyage">Voyage</a></dd>
           <dt>Photographe</dt><dd><a href="/galerie?regard=julien">Julien</a> · 12 photos</dd>
-          <dt>Prise de vue</dt><dd class="donnee">Nikon Z 7II · 24-120 mm · 1/250 s · f/8</dd>
-          <dt>Numéro</dt><dd class="donnee">N°19</dd>
+          <dt>Prise de vue</dt><dd class="donnee">Fujifilm X-T5 · 23 mm · 1/1000 s · f/11 · ISO 160</dd>
+          <dt>Inventaire</dt><dd class="donnee">J26-003</dd>
         </dl>
       </div>
       <div class="vis-cote">
         <div><span class="mq-pin" aria-hidden="true">7</span>
-          <p><a class="lien" href="MQ-13-boutique-tirage.html">Tirage : dès 180 €</a></p>
+          <p><a class="lien" href="MQ-13-boutique-tirage.html">Tirage : à partir de 180 €</a></p>
           <p>Signé et numéroté, sur Hahnemühle Photo Rag : 180 € en petit format, 290 € en grand. Édition de 15 exemplaires, tous formats confondus : 8 disponibles.</p>
           <p class="tva">TVA non applicable, art. 293 B du CGI.</p>
         </div>
         <div><span class="mq-pin" aria-hidden="true">8</span>
-          <p><a class="lien" href="MQ-06-contact-tirage.html">Licence : nous écrire</a></p>
+          <p><a class="lien" href="MQ-06-contact-tirage.html">Demander une licence</a></p>
           <p>Pour la presse, une entreprise ou un usage hors catalogue : la demande part préremplie avec cette photo.</p>
         </div>
         <div><span class="mq-pin" aria-hidden="true">9</span>
@@ -174,12 +99,12 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
     </div>
     <section class="vis-pres" aria-labelledby="pres-t">
       <div><span class="mq-pin" aria-hidden="true">11</span>
-        <h2 id="pres-t">À proximité</h2>
-        <ul class="rangees" aria-labelledby="pres-t">
-          <li style="--r:1.5"><a class="vignette" href="/photo/belem-contre-jour"><img src="_commun/photos/480/belem.webp" srcset="_commun/photos/480/belem.webp 480w, _commun/photos/belem.webp 900w" sizes="(min-width: 1024px) 220px, 45vw" width="480" height="320" alt="La tour de Belém en ombre chinoise devant un soleil couchant sur le fleuve." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Belém, contre-jour</span><span class="cartel-m">Sébastien · Belém · 6 km · même soir</span></span></a></li>
-          <li style="--r:0.6667"><a class="vignette" href="/photo/alfama-premier-tram"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w" sizes="(min-width: 1024px) 220px, 45vw" width="320" height="480" alt="Un tram jaune grimpe une pente devant les façades de l’Alfama." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Alfama · 600 m</span></span></a></li>
-          <li style="--r:1.5"><a class="vignette" href="/photo/linge-au-balcon"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w" sizes="(min-width: 1024px) 220px, 45vw" width="480" height="320" alt="Façade rose, six fenêtres, un fil de linge de couleurs." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · Alfama · 700 m</span></span></a></li>
-          <li style="--r:1.5"><a class="vignette" href="/photo/cais-do-sodre-maree-basse"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w" sizes="(min-width: 1024px) 220px, 45vw" width="480" height="320" alt="Une rangée de pieux dans l’eau grise du Tage, un pêcheur seul au loin." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · Cais do Sodré · 2,4 km</span></span></a></li>
+        <h2 class="titre-2" id="pres-t">À proximité</h2>
+        <ul class="rangees rangees--etiree" aria-labelledby="pres-t">
+          <li style="--r:1.5"><a class="vignette" href="/photo/belem-contre-jour"><img src="_commun/photos/480/belem.webp" srcset="_commun/photos/480/belem.webp 480w, _commun/photos/belem.webp 900w, _commun/photos/1600/belem.webp 1600w" sizes="(min-width: 1024px) 220px, 45vw" width="480" height="320" alt="La tour de Belém en ombre chinoise devant un soleil couchant sur le fleuve." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Belém, contre-jour</span><span class="cartel-m">Sébastien · Belém · 6 km · même soir</span></span></a></li>
+          <li style="--r:0.6667"><a class="vignette" href="/photo/alfama-premier-tram"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 1024px) 220px, 45vw" width="320" height="480" alt="Un tram jaune grimpe une pente devant les façades de l’Alfama." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Alfama · 600 m</span></span></a></li>
+          <li style="--r:1.5"><a class="vignette" href="/photo/linge-au-balcon"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w, _commun/photos/1600/linge.webp 1600w" sizes="(min-width: 1024px) 220px, 45vw" width="480" height="320" alt="Façade rose, six fenêtres, un fil de linge de couleurs." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · Alfama · 700 m</span></span></a></li>
+          <li style="--r:1.5"><a class="vignette" href="/photo/cais-do-sodre-maree-basse"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w, _commun/photos/1600/cais.webp 1600w" sizes="(min-width: 1024px) 220px, 45vw" width="480" height="320" alt="Une rangée de pieux dans l’eau grise du Tage, un pêcheur seul au loin." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · Cais do Sodré · 2,4 km</span></span></a></li>
         </ul>
       </div>
       <figure class="vis-carte"><span class="mq-pin" aria-hidden="true">12</span>
@@ -215,7 +140,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
         <ul aria-labelledby="sf-site">
           <li><a href="/a-propos#contact">Contact</a></li>
           <li><a href="/droits">Droits et licences</a></li>
-          <li><a href="/carnets/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="/carnet/flux.xml">Flux RSS des carnets</a></li>
           <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
           <li><a href="/confidentialite">Confidentialité</a></li>
           <li><a href="/mentions-legales">Mentions légales</a></li>
@@ -232,23 +157,23 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
     </nav>
   </div>
 </footer>
-<section class="wrap vis-etats" aria-labelledby="vis-etats-t">
+<section class="wrap mq-etats" aria-labelledby="vis-etats-t">
   <h2 class="sr-only" id="vis-etats-t">Autres états de la visionneuse</h2>
-  <div class="vis-etat mq-ecran">
+  <div class="mq-ecran">
     <p class="mq-etat">État · Plein écran (touche F ou bouton « Plein écran »)</p><span class="mq-pin" aria-hidden="true">14</span>
     <div class="vis-plein">
-      <img src="_commun/photos/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w" sizes="90vw" width="900" height="600" alt="" loading="lazy" decoding="async">
+      <img src="_commun/photos/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w, _commun/photos/1600/miradouro.webp 1600w" sizes="90vw" width="900" height="600" alt="" loading="lazy" decoding="async">
       <a class="vis-fleche vis-prec" href="#"><span class="sr-only">Précédente : Cais do Sodré, marée basse</span><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg></a>
       <a class="vis-fleche vis-suiv" href="#"><span class="sr-only">Suivante : Belém, contre-jour</span><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></a>
       <button class="vis-quitter" type="button"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Quitter <kbd>Échap</kbd></button>
       <span class="vis-compte donnee">4 / 10</span>
     </div>
   </div>
-  <div class="vis-etat mq-ecran vis-menu-etat" style="margin-inline:calc(-1 * var(--gut))">
+  <div class="mq-ecran vis-menu-etat" style="margin-inline:calc(-1 * var(--gut))">
     <p class="mq-etat" style="left:calc(var(--gut) - 8px)">État · Menu ouvert : tout le site, à un geste</p><span class="mq-pin" aria-hidden="true">15</span>
     <header class="sh sh--contexte" inert>
   <div class="sh-bar">
-    <a class="sh-retour" href="/carnets/lisbonne-et-porto#photo-4"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Retour au carnet : </span>Lisbonne et Porto</span></a>
+    <a class="sh-retour" href="/carnet/lisbonne-et-porto#photo-4"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Retour au carnet : </span>Lisbonne et Porto</span></a>
     <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
     <div class="sh-outils">
       <details class="lang-pick">
@@ -263,7 +188,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
         <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
         <nav class="sh-panneau" aria-label="Menu principal (état : menu ouvert)">
           <ul>
-            <li><a href="/">Accueil<span class="sh-panneau-marque">Nicephos</span></a></li><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/">Accueil<span class="sh-panneau-marque">Nicephos</span></a></li><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
             <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
           </ul>
         </nav>
@@ -272,11 +197,11 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
   </div>
 </header>
   </div>
-  <div class="vis-etat mq-ecran" style="margin-inline:calc(-1 * var(--gut))" lang="de">
+  <div class="mq-ecran" style="margin-inline:calc(-1 * var(--gut))" lang="de">
     <p class="mq-etat" style="left:calc(var(--gut) - 8px)" lang="fr">État · Allemand : en-tête et gestes</p><span class="mq-pin" aria-hidden="true">16</span>
     <header class="sh sh--contexte" lang="de" inert>
   <div class="sh-bar">
-    <a class="sh-retour" href="/de/reisetagebuecher/lissabon-und-porto#foto-4"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Zurück zum Reisetagebuch: </span>Lissabon und Porto</span></a>
+    <a class="sh-retour" href="/de/carnet/lisbonne-et-porto#foto-4"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="sh-retour-t"><span class="sr-only">Zurück zum Reisetagebuch: </span>Lissabon und Porto</span></a>
     <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
     <div class="sh-outils">
       <details class="lang-pick">
@@ -291,8 +216,8 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
         <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
         <nav class="sh-panneau" aria-label="Hauptmenü (Zustand: Deutsch)">
           <ul>
-            <li><a href="/de/">Startseite<span class="sh-panneau-marque">Nicephos</span></a></li><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
-            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+            <li><a href="/de/">Startseite<span class="sh-panneau-marque">Nicephos</span></a></li><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/tirages">Kunstdrucke</a></li>
+            <li><a href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
           </ul>
         </nav>
       </details>
@@ -303,10 +228,10 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
       <div class="cartel cartel--grand vis-cartel" style="padding-top:0"><span class="vis-pos donnee">4 / 10 · Lissabon und Porto</span><p class="cartel-t" style="margin:0">Miradouro, goldene Stunde</p><span class="cartel-m">Julien · Lissabon · 10. Okt. 2026</span></div>
       <div class="vis-actions" style="padding-top:0">
         <form class="bascule-form" method="post" action="/photo/miradouro-l-heure-doree/aime"><button class="bascule" type="submit" aria-pressed="false"><svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/></svg>Gefällt mir <span class="bascule-n">12</span></button></form>
-        <a class="lien" href="/de/foto/miradouro/teilen" aria-haspopup="dialog"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>Teilen</a>
-        <a class="btn" href="/de/kunstdrucke/miradouro">Abzug: ab 180 €</a>
+        <a class="lien" href="/de/photo/miradouro-l-heure-doree/partager" aria-haspopup="dialog"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>Teilen</a>
+        <a class="btn" href="/de/tirages/miradouro-l-heure-doree">Kunstdruck: ab 180 €</a>
       </div>
-      <p class="vis-licence-de" style="grid-column:1/-1;margin:var(--esp-2) 0 0"><a class="lien" href="/de/rechte/anfrage?foto=19">Lizenz: Schreiben Sie uns</a></p>
+      <p class="vis-licence-de" style="grid-column:1/-1;margin:var(--esp-2) 0 0"><a class="lien" href="/de/droits/demande?photo=miradouro-l-heure-doree">Lizenz anfragen</a></p>
     </div></div>
   </div>
 </section>
@@ -319,9 +244,9 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
     <li><span class="mq-num" aria-hidden="true">2</span><b>Le menu, à un geste</b><p>Le bouton « Menu » de la planche (un &lt;details&gt;, sans script) ouvre tout le site, Accueil compris, avec la recherche et Tirages : voir l’état 15.</p><span class="mq-ref">UX-F-08 · jury n° 1 et 13</span></li>
     <li><span class="mq-num" aria-hidden="true">3</span><b>La photo, à la hauteur de l’écran</b><p>1 064 × 709 px au bureau 1 440 × 900 (74 % de la largeur), bord à bord au téléphone. sizes est calculé avec le format de la photo : le navigateur ne télécharge plus 2 000 px pour une boîte de 1 064. Une vraie description en alt.</p><span class="mq-ref">UX-F-14, UX-F-21, UX-F-44 · RGESN 6.4</span></li>
     <li><span class="mq-num" aria-hidden="true">4</span><b>Le cartel, sous l’horizontale</b><p>Règle de la planche : sous une horizontale, à côté d’une verticale à partir de 900 px. Le compteur « 4 / 10 · Lisbonne et Porto » en tête, le titre en H1 (20 px, casse normale), puis « Julien · Lisbonne · 10 oct. 2026 ».</p><span class="mq-ref">UX-F-14, UX-F-29 · jury n° 6</span></li>
-    <li><span class="mq-num" aria-hidden="true">5</span><b>Trois gestes, trois niveaux</b><p>Un seul bouton plein, « Tirage : dès 180 € », qui ouvre la page du tirage (MQ-13) ; « J’aime » en bascule à filet (aria-pressed, compteur dès 1) ; « Partager » en lien. Tout tient dans le premier écran.</p><span class="mq-ref">UX-F-11, UX-F-39, UX-F-24 · WCAG 2.5.3 · jury n° 2 et 7</span></li>
-    <li><span class="mq-num" aria-hidden="true">6</span><b>La légende et les données, à part</b><p>La légende de la démo, puis une liste de définitions : lieu et heure (balise time), carnet, série, photographe, prise de vue et N°19 en Plex Mono, la seule place des données.</p><span class="mq-ref">UX-F-14, UX-T-05 · RGAA 9.3</span></li>
-    <li><span class="mq-num" aria-hidden="true">7</span><b>Tirage : dès 180 €</b><p>Le lien vers la boutique répète l’offre en clair : formats, prix, édition et stock du référentiel (8 sur 15), mention de TVA unique.</p><span class="mq-ref">UX-F-11, UX-T-17 · jury n° 7 et 13</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>Trois gestes, trois niveaux</b><p>Un seul bouton plein, « Tirage : à partir de 180 € », qui ouvre la page du tirage (MQ-13) ; « J’aime » en bascule à filet (aria-pressed, compteur dès 1) ; « Partager » en lien. Tout tient dans le premier écran.</p><span class="mq-ref">UX-F-11, UX-F-39, UX-F-24 · WCAG 2.5.3 · jury n° 2 et 7</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>La légende et les données, à part</b><p>La légende de la démo, puis une liste de définitions : lieu et heure (balise time), carnet, série, photographe, prise de vue (l’EXIF de la démo) et le numéro d’inventaire J26-003 en Plex Mono, la seule place des données. Ce numéro, donné à la première publication, ne bouge plus quand l’ordre change (UX-T-05) ; la position « 4 / 10 » sert à la navigation.</p><span class="mq-ref">UX-F-14, UX-T-05 · RGAA 9.3</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Tirage : à partir de 180 €</b><p>Le lien vers la boutique répète l’offre en clair : formats, prix, édition et stock du référentiel (8 sur 15), mention de TVA unique.</p><span class="mq-ref">UX-F-11, UX-T-17 · jury n° 7 et 13</span></li>
     <li><span class="mq-num" aria-hidden="true">8</span><b>Licence : nous écrire, à part</b><p>Un autre besoin, un autre lien : le formulaire prérempli de MQ-06, pour la presse, une entreprise ou un usage hors catalogue.</p><span class="mq-ref">UX-F-11 · jury n° 7</span></li>
     <li><span class="mq-num" aria-hidden="true">9</span><b>Vous êtes sur cette photo ?</b><p>Le signalement dit ce qu’il permet : recevoir la photo, donner ou refuser son accord. Lien souligné, dans une phrase.</p><span class="mq-ref">UX-F-28 · UX-F-23 · UX-F-46</span></li>
     <li><span class="mq-num" aria-hidden="true">10</span><b>Les raccourcis, visibles au bureau</b><p>← → , Échap et F, et un bouton « Plein écran » (aria-keyshortcuts). Masqués au toucher, où le glissé reste.</p><span class="mq-ref">UX-F-14 · WCAG 2.1.4 · jury n° 2</span></li>
@@ -330,10 +255,10 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
     <li><span class="mq-num" aria-hidden="true">13</span><b>Le pied de page du site</b><p>Le même que partout (variante complète) : celui qui arrive d’un partage trouve les mentions, les droits et la boutique.</p><span class="mq-ref">UX-F-08, UX-F-34 · jury n° 6</span></li>
     <li><span class="mq-num" aria-hidden="true">14</span><b>État · plein écran</b><p>La photo seule sur le noir, flèches de 56 px au milieu des bords, compteur discret. « Quitter », suivi de la touche Échap au bureau seulement : au téléphone, on lit « Quitter ».</p><span class="mq-ref">UX-F-14 · WCAG 2.4.7 · jury n° 14</span></li>
     <li><span class="mq-num" aria-hidden="true">15</span><b>État · menu ouvert</b><p>Le panneau s’ancre à droite (400 px) au-delà de 560 px, pleine largeur en dessous ; le mot « Menu » ne change pas, l’icône devient ✕.</p><span class="mq-ref">UX-F-08 · MQ-00 § 3</span></li>
-    <li><span class="mq-num" aria-hidden="true">16</span><b>État · allemand</b><p>« Lissabon und Porto », « Abzug: ab 180 € », « Gefällt mir », « Lizenz: Schreiben Sie uns » : les gestes passent à la ligne, jamais hors de l’écran.</p><span class="mq-ref">Jury T1 · WCAG 1.4.4, 1.4.10</span></li>
+    <li><span class="mq-num" aria-hidden="true">16</span><b>État · allemand</b><p>« Lissabon und Porto », « Kunstdruck: ab 180 € », « Gefällt mir », « Lizenz anfragen » : les gestes passent à la ligne, jamais hors de l’écran.</p><span class="mq-ref">Jury T1 · WCAG 1.4.4, 1.4.10</span></li>
   </ol>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium 1.64 en conteneur : outils/inspect.sh, outils/mq0104-controle.mjs) · axe-core : 0 violation au bureau (1 440 × 900) et au téléphone (Pixel 7) · Poids après défilement complet : 212 ko et 15 requêtes au bureau, 230 ko au téléphone ; carte en SVG dans la page ; aucune ressource tierce, aucun script ; images en variantes de 480 et 160 px hors grands formats · Photo 1 064 × 709 px au bureau, titre à 841 px et « Tirage : dès 180 € » à 814 px, tous deux dans le premier écran ; au téléphone, photo bord à bord 412 × 275 px, titre à 408 px, bouton du tirage à 474 px · Largeurs 320, 412, 820, 823 × 514 (1 440 px zoomé à 175 %), 1 024, 1 280 et 1 440 px, puis les mêmes avec l’en-tête en allemand et le panier plein : 0 débordement, 0 chevauchement, 0 texte coupé dans l’en-tête, 0 cible sous 24 px · Contrastes (formule WCAG 2.2, valeurs de tokens.css) : titre 17,7:1, légende 12,8:1, méta 9,6:1, bord des champs et bascules 3,9:1, sable 10,3:1 sur #050505 ; étiquettes de la carte 9,3:1 à 11,8:1 · Sans annotations (#sans-annotations) : 20 pastilles et étiquettes retirées, 0 pixel changé hors de leur emprise, sur 4 487 px de haut au bureau et 5 207 px au téléphone.</p>
+  <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium 1.64 en conteneur : outils/inspect.sh, outils/mq0104-controle.mjs) · axe-core : 0 violation au bureau (1 440 × 900) et au téléphone (Pixel 7) · Poids après défilement complet : 212 ko et 15 requêtes au bureau, 230 ko au téléphone ; carte en SVG dans la page ; aucune ressource tierce, aucun script ; images en variantes de 480 et 160 px hors grands formats · Photo 1 064 × 709 px au bureau, titre à 841 px et « Tirage : à partir de 180 € » à 814 px, tous deux dans le premier écran ; au téléphone, photo bord à bord 412 × 275 px, titre à 408 px, bouton du tirage à 474 px · Largeurs 320, 412, 820, 823 × 514 (1 440 px zoomé à 175 %), 1 024, 1 280 et 1 440 px, puis les mêmes avec l’en-tête en allemand et le panier plein : 0 débordement, 0 chevauchement, 0 texte coupé dans l’en-tête, 0 cible sous 24 px · Contrastes (formule WCAG 2.2, valeurs de tokens.css) : titre 17,7:1, légende 12,8:1, méta 9,6:1, bord des champs et bascules 3,9:1, sable 10,3:1 sur #050505 ; étiquettes de la carte 9,3:1 à 11,8:1 · Sans annotations (#sans-annotations) : 20 pastilles et étiquettes retirées, 0 pixel changé hors de leur emprise, sur 4 487 px de haut au bureau et 5 207 px au téléphone.</p>
 </aside>
 </body>
 </html>

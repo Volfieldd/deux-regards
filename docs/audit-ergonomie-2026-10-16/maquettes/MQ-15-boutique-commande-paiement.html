@@ -12,50 +12,15 @@
 <link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* MQ-15 · commande et paiement. Composants que la planche n'a pas encore (proposés pour MQ-00) : .paiement (bloc
-   du bouton final : à qui, combien, ce qui suit), .presta (dessin neutre de la page du prestataire), .commandes
-   (liste des commandes confirmées), .feuille (aperçu d'impression). Tout vient des jetons. */
+/* MQ-15 · commande et paiement. Composants de la planche (_commun/public.css : étapes, formulaire, champ à libellé court
+   .champ-ligne, dépliant, récapitulatif .recap et ses blocs .rc, paiement, commandes confirmées, fiche, aperçu d'impression) ;
+   ci-dessous, la mise en page de ces écrans, et le dessin neutre de la page du prestataire de paiement (.presta), propre à MQ-15. */
 .c-etapes { padding-top: var(--esp-2); }
-.c-tete { display: grid; gap: var(--esp-2); padding-block: var(--esp-4) var(--esp-5); }
-.c-tete > * { margin: 0; }
-.c-tete .chapo { font-size: var(--t-texte); }
+.c-tete { padding-top: var(--esp-4); }
 .commande { display: grid; gap: var(--esp-6) var(--esp-8); grid-template-columns: minmax(0, 1fr); grid-template-areas: "champs" "recap" "payer"; align-items: start; }
-@media (min-width: 1024px) {
-  .commande { grid-template-columns: minmax(0, 7fr) minmax(340px, 5fr); grid-template-areas: "champs recap" "payer recap"; }
-  .c-recap { position: sticky; top: var(--esp-3); }
-}
+@media (min-width: 1024px) { .commande { grid-template-columns: minmax(0, 7fr) minmax(340px, 5fr); grid-template-areas: "champs recap" "payer recap"; } }
 .c-champs { grid-area: champs; max-width: 640px; } .c-recap { grid-area: recap; } .c-payer { grid-area: payer; max-width: 640px; }
-.champ-ligne { display: grid; align-items: start; gap: var(--esp-4) var(--esp-3); grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 600px) { .champ-ligne { grid-template-columns: 11em minmax(0, 1fr); } }
-.facturation summary { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); cursor: pointer; list-style: none; text-decoration: underline; text-underline-offset: 4px; }
-.facturation summary::-webkit-details-marker { display: none; }
-/* Récapitulatif */
-.c-recap { display: grid; gap: var(--esp-3); }
-.c-recap > * { margin: 0; }
-.c-recap h2 { font: 400 var(--t-titre-3)/1.3 var(--sans); margin: 0; }
-.rc { display: grid; gap: var(--esp-1); padding-top: var(--esp-2); border-top: 1px solid var(--rule); }
-.rc > * { margin: 0; }
-.rc-t { display: flex; justify-content: space-between; gap: var(--esp-2); font-size: var(--t-petit); }
-.rc-t b { font-weight: 500; }
-.rc-l { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: var(--esp-2); align-items: start; font-size: var(--t-petit); color: var(--prose); }
-.rc-l img { height: 56px; width: auto; }
-.rc-l .m, .rc-s .m { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); }
-.rc-s { display: flex; justify-content: space-between; gap: var(--esp-2); font-size: var(--t-petit); color: var(--prose); }
-.rc-s.total { color: var(--ink); font-weight: 500; }
-.c-recap .montants .total { font-size: var(--t-titre-3); }
-.montants { column-gap: 0; } .montants dd { padding-left: var(--esp-3); }
-.c-note { font-size: var(--t-meta); color: var(--mute); }
-.c-note p { margin: 0; }
-/* Le bloc du bouton final : à qui, combien, ce qui suit. */
 .c-payer { display: grid; gap: var(--esp-4); }
-.paiement { display: grid; gap: var(--esp-2); padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
-.paiement > * { margin: 0; }
-.paiement-qui { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: var(--esp-demi) var(--esp-3); }
-.paiement-qui b { font-weight: 500; }
-.paiement .btn { min-height: var(--cible-tunnel); }
-.paiement-suite { display: grid; gap: var(--esp-1); font-size: var(--t-meta); color: var(--mute); }
-.paiement-suite p { margin: 0; display: flex; gap: var(--esp-1); align-items: flex-start; }
-.paiement-suite .ic { margin-top: 2px; flex: none; }
 .retenu { font-size: var(--t-petit); color: var(--prose); }
 /* Page du prestataire : un dessin neutre, sans marque, sur fond clair comme la plupart de ces pages. */
 .presta { max-width: 560px; margin: 0; padding: var(--esp-4); display: grid; gap: var(--esp-3); box-shadow: 0 0 0 1px var(--rule); }
@@ -70,41 +35,20 @@
 .presta-r { font-size: var(--t-petit); text-decoration: underline; text-underline-offset: 4px; }
 .presta-l { margin-top: var(--esp-2); max-width: 64ch; font-size: var(--t-meta); color: var(--mute); }
 /* Confirmation */
-.commandes { list-style: none; margin: 0; padding: 0; display: grid; }
-.commandes > li { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; gap: var(--esp-1) var(--esp-3); padding-block: var(--esp-3); border-top: 1px solid var(--rule); align-items: start; }
-.commandes img { height: 80px; width: auto; }
-@media (max-width: 599px) { .commandes > li { grid-template-columns: 72px minmax(0, 1fr); } .commandes .prix { grid-column: 2; } .commandes img { height: 48px; } }
-.commandes p { margin: 0; }
-.commandes .ref { color: var(--mute); }
-.commandes .ex { color: var(--ink); }
 .conf { display: grid; gap: var(--esp-5); max-width: 760px; }
 .conf > * { margin: 0; }
-.conf dl.fiche { display: grid; margin: 0; }
-.fiche > div { display: grid; gap: 2px var(--esp-3); padding-block: 12px; border-top: 1px solid var(--rule); }
-@media (min-width: 600px) { .fiche > div { grid-template-columns: 9em minmax(0, 1fr); } }
-.fiche dt { font-weight: 500; } .fiche dd { margin: 0; color: var(--prose); }
-.fiche a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
-/* Aperçu d'impression : noir sur blanc, ni en-tête ni bouton. */
-.feuille { max-width: 640px; padding: var(--esp-5) var(--esp-5) var(--esp-6); display: grid; gap: var(--esp-2); font-size: 14px; box-shadow: 0 12px 32px rgba(0, 0, 0, .45); }
-.feuille > * { margin: 0; }
+/* Aperçu d'impression de la confirmation : la feuille de la planche, et son tableau */
+.feuille { display: grid; gap: var(--esp-2); }
 .feuille .f-m { font: 300 13px/1 var(--sans); letter-spacing: .34em; text-transform: uppercase; }
 .feuille h2 { font: 400 20px/1.3 var(--sans); }
 .feuille table { width: 100%; border-collapse: collapse; }
 .feuille th, .feuille td { text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--rule); vertical-align: top; font-weight: 400; }
 .feuille td.m { text-align: right; white-space: nowrap; }
 .feuille .f-pied { color: var(--mute); font-size: 13px; }
-.etats .c-payer { grid-area: auto; }
-.etapes li.fait a { gap: .3em; }
-.etats { display: grid; gap: var(--esp-12); padding-top: var(--esp-16); }
+.mq-etats .c-payer { grid-area: auto; }
 .etat-court { display: grid; gap: var(--esp-3); max-width: 760px; }
 .etat-court > * { margin: 0; }
-.msg[tabindex]:focus { outline: none; }
-.msg[tabindex]:focus-visible { outline: var(--focus-l) solid var(--ink); outline-offset: var(--focus-o); }
-.msg form { margin: 0; }
-.titre-2 { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); text-wrap: balance; }
-@media print {
-  .sh-outils, .etapes, .sf, .mq-ecran:not(.imprime) { display: none !important; }
-}
+@media print { .sh-outils, .etapes, .sf, .mq-ecran:not(.imprime) { display: none !important; } }
 </style>
 </head>
 <body>
@@ -134,9 +78,9 @@
   <li><span class="n">3.</span> Paiement</li>
   <li><span class="n">4.</span> Confirmation</li>
 </ol></div>
-  <div class="c-tete">
+  <div class="tete-page c-tete">
     <h1 class="titre-page">Vos coordonnées</h1>
-    <p class="chapo">Une seule fois pour vos deux commandes. Ensuite, deux paiements à la suite : 305,00 € à Julien, puis 195,00 € à Sébastien.</p>
+    <p class="chapo chapo--texte">Une seule fois pour vos deux commandes. Ensuite, deux paiements à la suite : 305,00 € à Julien, puis 195,00 € à Sébastien.</p>
   </div>
 
   <form class="commande" method="post" action="/commande" novalidate>
@@ -153,10 +97,10 @@
         </div>
         <div class="champ"><label for="c-pays">Pays</label><p class="champ-aide" id="c-pays-aide">France métropolitaine ou Union européenne. Le choix vient du panier ; le changer recalcule la livraison.</p><select id="c-pays" name="pays" autocomplete="country" aria-describedby="c-pays-aide"><option selected>France métropolitaine</option><option>Allemagne</option><option>Belgique</option><option>Espagne</option><option>Italie</option><option>Luxembourg</option><option>Pays-Bas</option><option>Portugal</option><option>Autre pays de l’Union européenne</option></select></div>
         <div class="champ"><label for="c-tel">Téléphone <span class="facultatif">(facultatif)</span></label><p class="champ-aide" id="c-tel-aide">Pour le transporteur seulement, s’il ne trouve pas l’adresse.</p><input id="c-tel" name="tel" type="tel" autocomplete="tel" value="" aria-describedby="c-tel-aide"></div>
-        <details class="facturation"><summary>Adresse de facturation différente<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary><p class="champ-aide" style="margin-top:var(--esp-1)">Sinon, les factures reprennent l’adresse de livraison.</p></details>
+        <details class="depliant facturation"><summary>Adresse de facturation différente<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary><p class="champ-aide" style="margin-top:var(--esp-1)">Sinon, les factures reprennent l’adresse de livraison.</p></details>
       </div>
     </div>
-    <section class="c-recap mq-a" aria-labelledby="recap-h"><span class="mq-pin" aria-hidden="true">4</span>
+    <section class="recap c-recap mq-a" aria-labelledby="recap-h"><span class="mq-pin" aria-hidden="true">4</span>
         <h2 id="recap-h">Vos deux commandes</h2>
         <div class="rc">
           <p class="rc-t"><b>Commande 1 sur 2 · Julien Exemple</b></p>
@@ -174,7 +118,7 @@
           <dl class="montants"><dt class="total">Total</dt><dd class="total prix--total">500,00&nbsp;€</dd></dl>
           <p class="tva" style="margin-top:var(--esp-1)">Livraison comprise. TVA non applicable, art. 293 B du CGI.</p>
         </div>
-        <div class="c-note"><p>Deux colis suivis, chacun depuis chez son photographe : reçus du 30 oct. au 6 nov.</p></div>
+        <div class="recap-note"><p>Deux colis suivis, chacun depuis chez son photographe : reçus du 30 oct. au 6 nov.</p></div>
         <p><a class="lien" href="/panier">Modifier le panier</a></p>
       </section>
     <div class="c-payer">
@@ -190,11 +134,11 @@
     </div>
   </form>
 
-  <div class="etats">
+  <div class="mq-etats">
     <div class="mq-ecran">
       <p class="mq-etat">État · conditions de vente non cochées</p>
       <div class="etat-court mq-a"><span class="mq-pin" aria-hidden="true">6</span>
-        <p class="c-note">La page revient avec toute la saisie ; le titre devient « Erreur : 1 point à corriger · Vos coordonnées » et le focus va sur la case.</p>
+        <p class="recap-note">La page revient avec toute la saisie ; le titre devient « Erreur : 1 point à corriger · Vos coordonnées » et le focus va sur la case.</p>
         <form class="c-payer" method="post" action="/commande" novalidate style="max-width:640px">
           <fieldset class="groupe groupe--erreur" aria-describedby="e1-cgv-err"><legend id="e1-cgv">Conditions de vente</legend><p class="champ-err" id="e1-cgv-err"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> cochez la case pour accepter les conditions de vente, puis payez.</span></p>
           <label class="choix"><input type="checkbox" name="cgv" aria-invalid="true" class="is-focus"><span>J’ai lu les <a class="lien" style="display:inline;min-height:0" href="/conditions-de-vente">conditions de vente</a> de Julien Exemple et de Sébastien Exemple, et le droit de rétractation (14 jours).</span></label>
@@ -217,7 +161,7 @@
           <div class="champ"><label for="e2-cp">Code postal</label><input id="e2-cp" name="cp" autocomplete="postal-code" inputmode="numeric" value="4910" aria-invalid="true" aria-describedby="e2-cp-err"><p class="champ-err" id="e2-cp-err"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> le code postal a 5 chiffres, par exemple 49100.</span></p></div>
           <div class="champ"><label for="e2-ville">Ville</label><input id="e2-ville" name="ville" autocomplete="address-level2" value="Angers"></div>
         </div>
-        <p class="c-note">Au-delà d’un point, un résumé en tête reçoit le focus ; chaque ligne mène à son champ. Les autres champs gardent leur saisie.</p>
+        <p class="recap-note">Au-delà d’un point, un résumé en tête reçoit le focus ; chaque ligne mène à son champ. Les autres champs gardent leur saisie.</p>
       </div>
     </div>
 
@@ -264,7 +208,7 @@
         </div>
         </form>
         <form method="post" action="/commande/C-2026-0008/annuler"><button class="lien" type="submit">Ne pas commander « Brume sur la Loire »</button></form>
-        <p class="c-note" style="margin-top:calc(-1 * var(--esp-2))">La commande de Julien reste payée ; l’exemplaire réservé chez Sébastien est libéré.</p>
+        <p class="recap-note" style="margin-top:calc(-1 * var(--esp-2))">La commande de Julien reste payée ; l’exemplaire réservé chez Sébastien est libéré.</p>
       </div>
     </div>
 
@@ -279,8 +223,8 @@
 </ol>
         <div style="display:grid;gap:var(--esp-2)"><p class="titre-page">Merci, Claire : vos deux commandes sont payées.</p><p class="chapo" style="font-size:var(--t-texte)">Le vendredi 16 octobre 2026, à 10 h 17. Total payé : 500,00 €, en deux lignes sur votre relevé (NICEPHOS JULIEN EXEMPLE, NICEPHOS SEBASTIEN EXEMPLE).</p></div>
         <ul class="commandes">
-          <li><img src="_commun/photos/160/escaliers.webp" width="53" height="80" alt="" loading="lazy" decoding="async"><div><p><span class="donnee ref">C-2026-0007</span> · Julien Exemple</p><p>Escaliers des Guindais, grand format, <span class="ex">exemplaire <span class="donnee">6/15</span></span></p><p class="c-note"><a class="lien" style="display:inline;min-height:0" href="/suivi/jeton-c7">Suivre la commande</a></p></div><p class="prix prix--detail">305,00&nbsp;€</p></li>
-          <li><img src="_commun/photos/160/brume.webp" width="120" height="80" alt="" loading="lazy" decoding="async"><div><p><span class="donnee ref">C-2026-0008</span> · Sébastien Exemple</p><p>Brume sur la Loire, petit format, <span class="ex">exemplaire <span class="donnee">6/15</span></span></p><p class="c-note"><a class="lien" style="display:inline;min-height:0" href="/suivi/jeton-c8">Suivre la commande</a></p></div><p class="prix prix--detail">195,00&nbsp;€</p></li>
+          <li><img src="_commun/photos/160/escaliers.webp" width="53" height="80" alt="" loading="lazy" decoding="async"><div><p><span class="donnee ref">C-2026-0007</span> · Julien Exemple</p><p>Escaliers des Guindais, grand format, <span class="ex">exemplaire <span class="donnee">6/15</span></span></p><p class="recap-note"><a class="lien" style="display:inline;min-height:0" href="/suivi/jeton-c7">Suivre la commande</a></p></div><p class="prix prix--detail">305,00&nbsp;€</p></li>
+          <li><img src="_commun/photos/160/brume.webp" width="120" height="80" alt="" loading="lazy" decoding="async"><div><p><span class="donnee ref">C-2026-0008</span> · Sébastien Exemple</p><p>Brume sur la Loire, petit format, <span class="ex">exemplaire <span class="donnee">6/15</span></span></p><p class="recap-note"><a class="lien" style="display:inline;min-height:0" href="/suivi/jeton-c8">Suivre la commande</a></p></div><p class="prix prix--detail">195,00&nbsp;€</p></li>
         </ul>
         <dl class="fiche">
           <div><dt>Livraison</dt><dd>5 rue des Exemples, 49100 Angers. Deux colis suivis, remis contre signature, du 30 oct. au 6 nov.</dd></div>
@@ -320,7 +264,7 @@
           <div class="paiement-suite"><p><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="9.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg><span>Vous serez redirigé vers la page sécurisée de notre prestataire de paiement.</span></p></div>
         </div>
         </form>
-        <p class="c-note">Exemple : le panier de Claire, s’il avait compté « Le ciel s’est ouvert » au lieu de « Brume sur la Loire ». Le stock est relu au clic, dans la même opération que la réservation : rien ne part payer pour un exemplaire qui n’existe plus.</p>
+        <p class="recap-note">Exemple : le panier de Claire, s’il avait compté « Le ciel s’est ouvert » au lieu de « Brume sur la Loire ». Le stock est relu au clic, dans la même opération que la réservation : rien ne part payer pour un exemplaire qui n’existe plus.</p>
       </div>
     </div>
 
@@ -336,14 +280,14 @@
       <p class="mq-etat" lang="fr">État · en allemand</p>
       <div class="etat-court mq-a"><span class="mq-pin" aria-hidden="true">14</span>
         <ol class="etapes" aria-label="Bestellschritte">
-  <li class="fait"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><a href="/de/warenkorb"><span class="n">1.</span> Warenkorb</a></li>
+  <li class="fait"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><a href="/de/panier"><span class="n">1.</span> Warenkorb</a></li>
   <li aria-current="step"><span class="etapes-court">Schritt 2 von 4 · </span><span class="n">2.</span> <span class="etapes-nom">Adresse</span></li>
   <li><span class="n">3.</span> Zahlung</li>
   <li><span class="n">4.</span> Bestätigung</li>
 </ol>
         <form method="post" action="/de/bestellung" novalidate style="max-width:640px;display:grid;gap:var(--esp-4)">
           <fieldset class="groupe"><legend>Verkaufsbedingungen</legend>
-          <label class="choix"><input type="checkbox" name="cgv" checked><span>Ich habe die <a class="lien" style="display:inline;min-height:0" href="/de/verkaufsbedingungen">Verkaufsbedingungen</a> von Julien Exemple und Sébastien Exemple und die Widerrufsbelehrung (14 Tage) gelesen.</span></label>
+          <label class="choix"><input type="checkbox" name="cgv" checked><span>Ich habe die <a class="lien" style="display:inline;min-height:0" href="/de/conditions-de-vente">Verkaufsbedingungen</a> von Julien Exemple und Sébastien Exemple und die Widerrufsbelehrung (14 Tage) gelesen.</span></label>
         </fieldset>
           <div class="paiement mq-a">
           <p class="paiement-qui"><span class="etiquette">Zahlung 1 von 2</span><span><b>305,00&nbsp;€</b> an Julien Exemple · „Escaliers des Guindais“</span></p>
@@ -355,6 +299,18 @@
     </div>
   </div>
 </main>
+<footer class="sf sf--reduit wrap">
+  <div class="sf-in">
+    <p class="sf-marque"><b>Nicephos</b></p>
+    <ul>
+      <li><a href="/conditions-de-vente">Conditions de vente</a></li>
+      <li><a href="/renoncer">Renoncer à une commande</a></li>
+      <li><a href="/mentions-legales">Mentions légales</a></li>
+      <li><a href="/confidentialite">Confidentialité</a></li>
+      <li><a href="/a-propos#contact">Contact</a></li>
+    </ul>
+  </div>
+</footer>
 <aside class="mq-notes" aria-labelledby="mq-t">
   <p class="mq-id">MQ-15 · site public · commande et paiement · thème Nicephos nuit (production) · bureau 1 440 × 900 et Pixel 7</p>
   <h2 id="mq-t">Ce qui change</h2>
@@ -379,17 +335,5 @@
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
   <p class="mq-mesures"><b>Mesures</b> (16 oct. 2026, Chromium 1.64 en conteneur, outils/mqb-rendu.mjs) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et au téléphone (Pixel 7) · Largeurs 320, 820 et 1 024 px, et en-tête en allemand à 320, 412, 820, 1 024 et 1 280 px, menu ouvert compris : 0 débordement, 0 texte coupé · Cibles : 0 sous 24 px au bureau, 0 sous 44 px au téléphone (liens dans une phrase exemptés) · Sans annotations : pastilles et étiquettes retirées, 0 pixel changé dans l’interface, au bureau comme au téléphone ; aucune pastille ne touche un texte, un champ ni une image · Poids : 193 ko en 12 fichiers au bureau (dont 2 images, 1 ko), 193 ko au téléphone ; aucun script, aucune ressource du prestataire sur nos pages ; vignettes en 160 px · Contrastes : jetons de tokens.css (--mute 7,4:1, --error 8,2:1, bord des champs --field 3,8:1).</p>
 </aside>
-<footer class="sf sf--reduit wrap">
-  <div class="sf-in">
-    <p class="sf-marque"><b>Nicephos</b></p>
-    <ul>
-      <li><a href="/conditions-de-vente">Conditions de vente</a></li>
-      <li><a href="/renoncer">Renoncer à une commande</a></li>
-      <li><a href="/mentions-legales">Mentions légales</a></li>
-      <li><a href="/confidentialite">Confidentialité</a></li>
-      <li><a href="/a-propos#contact">Contact</a></li>
-    </ul>
-  </div>
-</footer>
 </body>
 </html>

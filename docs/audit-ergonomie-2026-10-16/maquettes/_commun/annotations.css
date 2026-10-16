@@ -69,6 +69,23 @@
 .mq-fold::before { left: 0; } .mq-fold::after { right: 0; }
 @media (max-width: 767px) { .mq-fold { top: 839px; } .mq-fold::before, .mq-fold::after { width: 10px; } }
 
+/* 5. Liens « Voir cette page sans annotations · Revenir avec les annotations » de l'encart. */
+.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
+.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* 6. Zone des autres états d'une page du site (après la page, avant l'encart) : des cadres .mq-ecran les uns sous les
+   autres (.mq-etats), deux colonnes au bureau (.mq-etats--deux : un téléphone de 412 px à gauche), ou une grille
+   (.mq-etats--grille) ; .large prend toute la ligne ; .mq-pile empile des cadres dans une colonne ; .mq-ecran-in est la
+   marge intérieure d'un cadre. Rien de magenta ici : ces cadres montrent l'interface, ils ne la commentent pas. */
+.mq-etats { display: grid; gap: var(--esp-12) var(--esp-8); padding-top: var(--esp-16); align-items: start; }
+.mq-etats > *, .mq-pile > * { min-width: 0; }
+@media (min-width: 1024px) { .mq-etats--deux { grid-template-columns: 412px minmax(0, 1fr); } }
+.mq-etats--grille { column-gap: var(--esp-6); grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr)); }
+.mq-etats .large { grid-column: 1 / -1; }
+.mq-pile { display: grid; gap: var(--esp-12); align-content: start; }
+.mq-ecran.mq-fond { background: var(--paper); }
+.mq-ecran-in { display: grid; gap: var(--esp-3); padding: var(--esp-3) var(--esp-3) var(--esp-4); }
+
 /* Interrupteur « sans annotations » : #sans-annotations dans l'adresse, la classe sur <html>, ou l'impression. */
 html.sans-annotations .mq-pin, html.sans-annotations .mq-etat, html.sans-annotations .mq-fold, html.sans-annotations .mq-notes,
 html:has(#sans-annotations:target) .mq-pin, html:has(#sans-annotations:target) .mq-etat,

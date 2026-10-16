@@ -17,63 +17,14 @@
 <link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* Composants propres aux Carnets, absents de la planche MQ-00 (documentés dans l'encart, « Composants locaux »).
-   Construits avec les jetons de tokens.css ; aucun jeton n'est redéclaré. Les mêmes servent à MQ-12. */
-
-/* En-tête de rubrique */
-.rub { display: grid; gap: var(--esp-2); padding-block: var(--esp-8) var(--esp-5); }
-.rub .chapo { max-width: 46ch; }
-.rub .chapo a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: var(--field); }
-.rub .chapo a:hover { text-decoration-color: var(--ink); }
-@media (max-width: 767px) { .rub { padding-block: var(--esp-5) var(--esp-4); } }
-
-/* Filtres : des liens (adresse partageable, sans script), l'entrée active comme dans le menu (500, soulignée de sable).
-   Chaque choix annonce son nombre de billets : on ne tombe jamais sur une liste vide. */
-.filtres { display: flex; flex-wrap: wrap; gap: 0 var(--esp-6); padding-block: var(--esp-1); border-block: 1px solid var(--rule); }
-.filtre { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-3); min-width: 0; }
-.filtre-t { margin: 0; font-size: var(--t-petit); color: var(--mute); }
-.filtre ul { display: flex; flex-wrap: wrap; gap: 0 var(--esp-3); list-style: none; margin: 0; padding: 0; }
-.filtre a { display: inline-flex; align-items: center; gap: 6px; min-height: var(--cible); font-size: 15px; color: var(--ink); white-space: nowrap; }
-.filtre a:hover .filtre-nom { text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 1px; }
-.filtre a[aria-current] { font-weight: 500; }
-.filtre a[aria-current] .filtre-nom { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
-.filtre-n { font-size: var(--t-meta); color: var(--mute); font-weight: 400; font-variant-numeric: tabular-nums; }
-@media (max-width: 767px) { .filtres { display: grid; gap: 0; } .filtre { gap: 0 var(--esp-2); } .filtre ul { gap: 0 var(--esp-2); } }
+/* MQ-11 · liste des carnets. Composants de la planche (_commun/public.css : tête de page, filtres, carte de billet .billet-e
+   dans la planche .billets, abonnement .abo, pagination .pages). Ci-dessous, la seule mise en page de la page. */
+.tete-page { padding-top: var(--esp-8); }
+.tete-page .chapo { max-width: 46ch; }
+@media (max-width: 767px) { .tete-page { padding-top: var(--esp-5); } }
 .compte { margin: var(--esp-3) 0 0; font-size: var(--t-petit); color: var(--mute); }
-
-/* Liste des billets : une planche de deux colonnes, comme une double page. La couverture d'abord, au format de la photo
-   et à hauteur commune (règle des rangées de la planche), jamais recadrée ni posée sur un fond ; puis le texte.
-   Les couvertures d'une rangée ont la même hauteur : les titres d'une rangée tombent sur la même ligne. */
-.billets { list-style: none; margin: var(--esp-5) 0 0; padding: 0; display: grid; gap: var(--esp-8) var(--esp-8); }
-.billet-e { --h: 300px; position: relative; display: grid; gap: var(--esp-2); align-content: start; }
-.billet-e-txt { display: grid; gap: var(--esp-1); align-content: start; max-width: 60ch; }
-.billet-e-titre { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); letter-spacing: -.003em; text-wrap: balance; }
-.billet-e-titre a { color: var(--ink); }
-.billet-e-titre a::after { content: ''; position: absolute; inset: 0; z-index: 1; }
-.billet-e:hover .billet-e-titre a { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
-.billet-e-titre a:focus-visible { outline: 0; }
-.billet-e:has(.billet-e-titre a:focus-visible), .billet-e.is-focus { outline: var(--focus-l) solid var(--ink); outline-offset: 12px; }
-.billet-e-chapo { margin: 0; font-size: var(--t-texte); line-height: 1.6; color: var(--prose); text-wrap: pretty; }
-.billet-e-meta { margin: var(--esp-1) 0 0; font-size: var(--t-petit); color: var(--mute); }
-.billet-e-meta b { font-weight: 400; color: var(--ink); }
-.billet-e-img { margin: 0 0 var(--esp-1); order: -1; }
-.billet-e-img img { display: block; width: min(100%, calc(var(--h) * var(--r))); height: auto; aspect-ratio: var(--r); background: var(--frame); }
-@media (min-width: 768px) { .billets { grid-template-columns: repeat(2, minmax(0, 1fr)); } .billet-e { --h: 300px; } }
-@media (min-width: 1280px) { .billets { gap: var(--esp-10) var(--esp-8); } .billet-e { --h: 380px; } }
-
-/* Abonnement : une phrase, un lien, rien à remplir. */
-.abo { display: grid; gap: var(--esp-1); margin-top: var(--esp-10); padding-top: var(--esp-4); border-top: 1px solid var(--rule); max-width: 60ch; }
-.abo p { margin: 0; color: var(--prose); }
-.abo .lien { font-size: var(--t-texte); }
-.abo .ic { color: var(--mute); }
-
-/* Pagination (au-delà de 12 billets) */
-.pages { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--esp-1) var(--esp-4); padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
-.pages p { margin: 0; color: var(--mute); font-size: var(--t-petit); }
-
 /* Zone des autres états (maquette) */
-.mq-etats { padding-block: var(--esp-12) 0; display: grid; gap: var(--esp-16); }
-.mq-etats .mq-ecran { background: var(--paper); }
+.mq-etats { padding-top: var(--esp-12); }
 .etat-mini { padding: var(--esp-4) var(--gut) var(--esp-5); }
 .etat-mini .billets { gap: var(--esp-6); margin-top: var(--esp-4); }
 .etat-mini .billet-e { --h: 220px; }
@@ -116,26 +67,26 @@
 </header>
 
 <main id="contenu" class="wrap">
-  <div class="rub">
+  <div class="tete-page">
     <h1 class="titre-page"><span class="mq-pin" aria-hidden="true">2</span>Carnets</h1>
     <p class="chapo">Nos voyages et nos notes d’atelier, à deux voix : Sébastien cherche la mer, Julien les gens. <a href="/a-propos">Qui sommes-nous ?</a></p>
   </div>
 
   <nav class="filtres" aria-label="Filtrer les billets"><span class="mq-pin" aria-hidden="true">3</span>
-    <div class="filtre">
-      <p class="filtre-t" id="f-rub">Rubrique</p>
+    <div class="filtres-groupe">
+      <p class="etiquette" id="f-rub">Rubrique</p>
       <ul aria-labelledby="f-rub">
-        <li><a href="/carnet" aria-current="page"><span class="filtre-nom">Toutes</span> <span class="filtre-n">4</span></a></li>
-        <li><a href="/carnet?rubrique=voyages"><span class="filtre-nom">Voyages</span> <span class="filtre-n">1</span></a></li>
-        <li><a href="/carnet?rubrique=atelier"><span class="filtre-nom">Notes d’atelier</span> <span class="filtre-n">3</span></a></li>
+        <li><a class="filtre" href="/carnet" aria-current="page"><span class="filtre-nom">Toutes</span> <span class="filtre-n">4</span></a></li>
+        <li><a class="filtre" href="/carnet?rubrique=voyages"><span class="filtre-nom">Voyages</span> <span class="filtre-n">1</span></a></li>
+        <li><a class="filtre" href="/carnet?rubrique=atelier"><span class="filtre-nom">Notes d’atelier</span> <span class="filtre-n">3</span></a></li>
       </ul>
     </div>
-    <div class="filtre">
-      <p class="filtre-t" id="f-reg">Regard</p>
+    <div class="filtres-groupe">
+      <p class="etiquette" id="f-reg">Regard</p>
       <ul aria-labelledby="f-reg">
-        <li><a href="/carnet" aria-current="page"><span class="filtre-nom">Les deux</span> <span class="filtre-n">4</span></a></li>
-        <li><a href="/carnet?par=sebastien"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">3</span></a></li>
-        <li><a href="/carnet?par=julien"><span class="filtre-nom">Julien</span> <span class="filtre-n">2</span></a></li>
+        <li><a class="filtre" href="/carnet" aria-current="page"><span class="filtre-nom">Les deux</span> <span class="filtre-n">4</span></a></li>
+        <li><a class="filtre" href="/carnet?par=sebastien"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">3</span></a></li>
+        <li><a class="filtre" href="/carnet?par=julien"><span class="filtre-nom">Julien</span> <span class="filtre-n">2</span></a></li>
       </ul>
     </div>
   </nav>
@@ -150,7 +101,7 @@
           <p class="billet-e-chapo">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte « Bonjour » : voici ce qu’elle a répondu, et ce que nous en avons appris.</p>
           <p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15 oct. 2026</time> · 1 photo · 3 min de lecture</p>
         </div>
-        <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w" sizes="(min-width: 1280px) 253px, 200px" width="320" height="480" alt="" fetchpriority="high" decoding="async"></figure>
+        <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 1280px) 253px, 200px" width="320" height="480" alt="" fetchpriority="high" decoding="async"></figure>
       </article>
     </li>
     <li>
@@ -161,7 +112,7 @@
           <p class="billet-e-chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : du premier tram de l’Alfama à la barre de Foz, là où le Douro rencontre l’Atlantique.</p>
           <p class="billet-e-meta"><b>Sébastien et Julien</b> · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos · 4 min de lecture</p>
         </div>
-        <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w" sizes="(min-width: 1280px) 253px, 200px" width="320" height="480" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 1280px) 253px, 200px" width="320" height="480" alt="" loading="lazy" decoding="async"></figure>
       </article>
     </li>
     <li>
@@ -227,11 +178,11 @@
 <!-- ================= Autres états (maquette) : des écrans réels, inertes, chacun sous son étiquette ================= -->
 <aside class="mq-etats wrap" aria-label="Autres états de l’écran (maquette)">
 
-  <div class="mq-ecran" inert><p class="mq-etat">État · filtre « Julien », focus au clavier</p>
+  <div class="mq-ecran mq-fond" inert><p class="mq-etat">État · filtre « Julien », focus au clavier</p>
     <div class="etat-mini">
       <div class="filtres">
-        <div class="filtre"><p class="filtre-t">Rubrique</p><ul><li><a href="/carnet?par=julien" aria-current="page"><span class="filtre-nom">Toutes</span> <span class="filtre-n">2</span></a></li><li><a href="/carnet?rubrique=voyages&amp;par=julien"><span class="filtre-nom">Voyages</span> <span class="filtre-n">1</span></a></li><li><a href="/carnet?rubrique=atelier&amp;par=julien"><span class="filtre-nom">Notes d’atelier</span> <span class="filtre-n">1</span></a></li></ul></div>
-        <div class="filtre"><p class="filtre-t">Regard</p><ul><li><a href="/carnet"><span class="filtre-nom">Les deux</span> <span class="filtre-n">4</span></a></li><li><a href="/carnet?par=sebastien"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">3</span></a></li><li><a href="/carnet?par=julien" aria-current="page"><span class="filtre-nom">Julien</span> <span class="filtre-n">2</span></a></li></ul></div>
+        <div class="filtres-groupe"><p class="etiquette">Rubrique</p><ul><li><a class="filtre" href="/carnet?par=julien" aria-current="page"><span class="filtre-nom">Toutes</span> <span class="filtre-n">2</span></a></li><li><a class="filtre" href="/carnet?rubrique=voyages&amp;par=julien"><span class="filtre-nom">Voyages</span> <span class="filtre-n">1</span></a></li><li><a class="filtre" href="/carnet?rubrique=atelier&amp;par=julien"><span class="filtre-nom">Notes d’atelier</span> <span class="filtre-n">1</span></a></li></ul></div>
+        <div class="filtres-groupe"><p class="etiquette">Regard</p><ul><li><a class="filtre" href="/carnet"><span class="filtre-nom">Les deux</span> <span class="filtre-n">4</span></a></li><li><a class="filtre" href="/carnet?par=sebastien"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">3</span></a></li><li><a class="filtre" href="/carnet?par=julien" aria-current="page"><span class="filtre-nom">Julien</span> <span class="filtre-n">2</span></a></li></ul></div>
       </div>
       <p class="compte">2 billets signés par Julien, dont un à deux voix. <a class="lien" style="display:inline;min-height:0" href="/carnet">Voir les 4 billets</a></p>
       <ol class="billets">
@@ -241,7 +192,7 @@
     </div>
   </div>
 
-  <div class="mq-ecran etat-de" inert lang="de"><p class="mq-etat" lang="fr">État · page en allemand (/de/carnet)</p>
+  <div class="mq-ecran mq-fond etat-de" inert lang="de"><p class="mq-etat" lang="fr">État · page en allemand (/de/carnet)</p>
     <header class="sh sh--site">
       <div class="sh-bar">
         <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
@@ -260,12 +211,12 @@
       <p class="chapo" style="margin-top:var(--esp-2)">Unsere Reisen und Werkstattnotizen, mit zwei Stimmen: Sébastien sucht das Meer, Julien die Menschen.</p>
       <ol class="billets">
         <li><article class="billet-e"><div class="billet-e-txt"><p class="etiquette">Werkstattnotizen</p><p class="billet-e-titre" lang="fr"><a href="/de/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></p><p class="billet-e-chapo" lang="fr">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte « Bonjour » : voici ce qu’elle a répondu.</p><p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15. Okt. 2026</time> · 1 Foto · 3 Min. Lesezeit</p><p class="nur-fr">Nur auf Französisch</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
-        <li><article class="billet-e"><div class="billet-e-txt"><p class="etiquette">Reisen</p><p class="billet-e-titre"><a href="/de/carnet/lisbonne-et-porto">Lissabon und Porto</a></p><p class="billet-e-chapo">Zwei Tage, zwei Blicke, ein Ozean. Sébastien suchte das Meer, Julien die Menschen: von der ersten Straßenbahn der Alfama bis zur Brandung von Foz, wo der Douro auf den Atlantik trifft.</p><p class="billet-e-meta"><b>Sébastien und Julien</b> · <time datetime="2026-10-14">14. Okt. 2026</time> · 10 Fotos · 6 Min. Lesezeit</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
+        <li><article class="billet-e"><div class="billet-e-txt"><p class="etiquette">Reisen</p><p class="billet-e-titre"><a href="/de/carnet/lisbonne-et-porto">Lissabon und Porto</a></p><p class="billet-e-chapo">Zwei Tage, zwei Blicke, ein Ozean. Sébastien suchte das Meer, Julien die Menschen: von der ersten Straßenbahn der Alfama bis zur Brandung von Foz, wo der Douro auf den Atlantik trifft.</p><p class="billet-e-meta"><b>Sébastien und Julien</b> · <time datetime="2026-10-14">14. Okt. 2026</time> · 10 Fotos · 4 Min. Lesezeit</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
       </ol>
     </div>
   </div>
 
-  <div class="mq-ecran" inert><p class="mq-etat">État · plus tard, au-delà de 12 billets : la page 1 sur 2</p>
+  <div class="mq-ecran mq-fond" inert><p class="mq-etat">État · plus tard, au-delà de 12 billets : la page 1 sur 2</p>
     <div class="etat-mini">
       <nav class="pages" aria-label="Pages des billets">
         <p>Page 1 sur 2 · billets 1 à 12 sur 15</p>
@@ -294,7 +245,7 @@
   <h3>Composants locaux, à verser dans la planche</h3>
   <p><code>.rub</code> en-tête de rubrique · <code>.filtres</code> et <code>.filtre</code> (liens, nombre, état actif du menu) · <code>.billets</code> et <code>.billet-e</code> (texte, couverture à hauteur commune, lien étendu) · <code>.abo</code> abonnement · <code>.pages</code> pagination. Tous faits de jetons ; les mêmes servent à MQ-12, et les filtres conviennent à MQ-02.</p>
   <h3>À trancher ailleurs</h3>
-  <p>Adresses : l’étude (B1, B73) dit <code>/carnet</code> et garde le slug français dans toutes les langues ; la planche MQ-00 écrit <code>/carnets</code> et <code>/de/reisetagebuecher/lissabon-und-porto</code>. Cette maquette suit l’étude. Temps de lecture (Inês 3 min, les trois autres 4 min, calculés sur le texte et les photos) : à ajouter au lexique, comme la mise à jour du billet « Lisbonne et Porto » le 15 oct.</p>
+  <p>Adresses : l’étude (B1, B73) dit <code>/carnet</code> et garde le slug français dans toutes les langues ; la planche MQ-00 écrit <code>/carnets</code> et <code>/de/carnet/lisbonne-et-porto</code>. Cette maquette suit l’étude. Temps de lecture (Inês 3 min, les trois autres 4 min, calculés sur le texte et les photos) : à ajouter au lexique, comme la mise à jour du billet « Lisbonne et Porto » le 15 oct.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
   <p class="mq-mesures" id="mesures"><b>Mesures</b> (16 oct. 2026, Chromium 1.64 en conteneur, outils/inspect.sh) · à compléter</p>
 </aside>

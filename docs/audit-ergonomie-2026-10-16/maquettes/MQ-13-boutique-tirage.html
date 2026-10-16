@@ -12,9 +12,8 @@
 <link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* MQ-13 · page d'un tirage. Mise en page propre à cet écran, et quatre composants que la planche n'a pas encore
-   (proposés pour MQ-00) : .formats (choix d'un format, prix en face), .mur (le tirage à l'échelle, sans script),
-   .fiche (caractéristiques en deux colonnes), .signe (signature d'écran, simulée ici en CSS). Tout vient des jetons. */
+/* MQ-13 · page d'un tirage. Composants de la planche (_commun/public.css, § 25 : formats, signature d'écran, tirage au mur,
+   fiche, relevé .def) ; ci-dessous, la mise en page de la page, et le lien entre le format coché et le mur (:has). */
 .t-ariane { padding-top: var(--esp-2); }
 .tirage { display: grid; gap: var(--esp-5) var(--esp-8); grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "achat" "note" "mur"; padding-top: var(--esp-2); }
 @media (max-width: 1023px) { .tirage { row-gap: var(--esp-3); } .t-note { margin-top: var(--esp-3) !important; } }
@@ -24,7 +23,6 @@
   .t-note { margin-bottom: var(--esp-6) !important; }
 }
 .t-photo .photo { position: relative; }
-.signe { position: absolute; right: 3%; bottom: 3.5%; font: 300 clamp(11px, 1.15vw, 17px)/1 var(--sans); letter-spacing: .04em; color: var(--ink); opacity: .42; pointer-events: none; }
 .t-note { margin: var(--esp-1) 0 0; font-size: var(--t-meta); color: var(--mute); max-width: 62ch; }
 .t-achat { display: grid; gap: var(--esp-3); align-content: start; }
 .t-achat > * { margin: 0; }
@@ -35,38 +33,12 @@
 .t-edition .dispo { font-size: var(--t-titre-3); line-height: 1.3; color: var(--ink); }
 .t-edition .dispo b { font-weight: 500; }
 .t-edition .prov { font-size: var(--t-meta); color: var(--mute); }
-/* Formats : une ligne par format, prix en face ; le papier, commun, est dit une fois dans l'aide. */
-.formats { gap: 0; }
-.formats .choix { align-items: center; gap: var(--esp-2); min-height: 64px; border-bottom: 1px solid var(--rule); }
-.formats .choix:first-of-type { border-top: 1px solid var(--rule); }
-.formats .choix > span:first-of-type { flex: 1; }
-.formats .choix input { margin: 0; }
-.formats .choix:has(input:checked) > span:first-of-type { font-weight: 500; }
-.formats .choix-d { font-weight: 400; }
-.t-liv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px var(--esp-2); margin: 0; font-size: var(--t-petit); }
-.t-liv dt { color: var(--ink); } .t-liv dd { margin: 0; color: var(--prose); }
-.t-liv + .tva { margin-top: var(--esp-1); }
 .t-vendeur { display: grid; gap: 0; font-size: var(--t-petit); color: var(--prose); }
 .t-vendeur p { margin: 0; }
 .t-vendeur .actions { gap: 0 var(--esp-3); }
-/* Le tirage au mur, à l'échelle : 1 cm = 0,5 % de la largeur ; il suit le format coché (:has), sans script. */
-.mur { margin: 0; display: grid; gap: var(--esp-1); }
-.mur figcaption { font-size: var(--t-meta); color: var(--mute); }
-.mur figcaption b { font-weight: 500; color: var(--ink); }
-/* Un pan de mur de 160 × 95 cm (de 60 à 155 cm du sol) ; 1 cm = 0,625 cqi. Console : dessus à 80 cm ; tirage accroché 20 cm au-dessus (bas de la feuille à 100 cm). */
-.mur-scene { position: relative; aspect-ratio: 160 / 95; container-type: inline-size; overflow: hidden;
-  background: color-mix(in srgb, var(--ink) 13%, var(--paper)); }
-.mur-feuille { position: absolute; left: 50%; translate: -50% 0; box-sizing: border-box; background: var(--ink);
-  box-shadow: 0 .8cqi 2cqi rgba(0, 0, 0, .4); width: 25cqi; top: 15.6cqi; padding: 1.875cqi 1.25cqi; }
-.mur-feuille img { width: 100%; height: auto; }
-.mur-console { position: absolute; left: 12.5cqi; width: 75cqi; top: 46.9cqi; height: 1.9cqi; background: var(--field); }
-.mur-console::before, .mur-console::after { content: ''; position: absolute; top: 100%; width: 1.6cqi; height: 14cqi; background: var(--field); }
-.mur-console::before { left: 4cqi; } .mur-console::after { right: 4cqi; }
-.mur-cote { position: absolute; left: 12.5cqi; width: 75cqi; top: 52cqi; margin: 0; text-align: center; font-size: 13px; line-height: 1; color: var(--prose); }
-.mur .si-grand { display: none; }
-.tirage:has(#f-grand:checked) .mur-feuille, .mur--grand .mur-feuille { width: 43.75cqi; top: 3.15cqi; padding: 3.125cqi; }
-.tirage:has(#f-grand:checked) .mur .si-grand, .mur--grand .si-grand { display: inline; }
-.tirage:has(#f-grand:checked) .mur .si-petit, .mur--grand .si-petit { display: none; }
+.tirage:has(#f-grand:checked) .mur-feuille { width: 43.75cqi; top: 3.15cqi; padding: 3.125cqi; }
+.tirage:has(#f-grand:checked) .mur .si-grand { display: inline; }
+.tirage:has(#f-grand:checked) .mur .si-petit { display: none; }
 /* Sections du bas */
 .t-recit { display: grid; gap: var(--esp-2) var(--esp-8); grid-template-columns: minmax(0, 1fr); padding-top: var(--esp-12); align-items: end; }
 @media (min-width: 1024px) { .t-recit { grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr); } }
@@ -76,31 +48,20 @@
 .t-recit h2, .t-bas h2, .t-autres h2 { margin: 0 0 var(--esp-2); font: 400 var(--t-titre-3)/1.3 var(--sans); }
 .t-legende { margin: 0; font: 300 var(--t-titre-1)/var(--i-serre) var(--sans); color: var(--ink); max-width: 20ch; text-wrap: balance; }
 .t-recit .pl-texte { margin: 0 0 var(--esp-1); color: var(--prose); max-width: 56ch; }
-.fiche { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; }
-.fiche > div { display: grid; gap: 2px var(--esp-3); padding-block: 12px; border-top: 1px solid var(--rule); }
-@media (min-width: 600px) and (max-width: 1023px), (min-width: 1280px) { .fiche > div { grid-template-columns: 8.5em minmax(0, 1fr); } }
-.fiche dt { color: var(--ink); font-weight: 500; }
-.fiche dd { margin: 0; color: var(--prose); max-width: 64ch; }
-.fiche a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
-
 .t-autres { padding-top: var(--esp-10); }
 .t-autres .rangees { --h: 112px; }
 @media (min-width: 768px) { .t-autres .rangees { --h: 180px; } }
 @media (min-width: 1280px) { .t-autres .rangees { --h: 200px; } }
 .t-autres .cartel .prix-v { font-size: var(--t-meta); color: var(--prose); }
-.t-autres .entete { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0 var(--esp-3); }
 /* Autres états */
-.etats { display: grid; gap: var(--esp-12); padding-top: var(--esp-16); }
 .etat-deux { display: grid; gap: var(--esp-4); grid-template-columns: minmax(0, 1fr); align-items: start; }
 @media (min-width: 900px) { .etat-deux { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } }
-.etats .t-achat { grid-area: auto; }
+.mq-etats .t-achat { grid-area: auto; }
 .etat-deux > .t-achat { max-width: 520px; }
 .etat-sh { background: none; border: 0; z-index: auto; }
 .etat-outils { display: flex; justify-content: flex-end; padding-bottom: var(--esp-2); border-bottom: 1px solid var(--rule); }
-.etats .t-achat .titre-page { font-size: var(--t-titre-2); }
+.mq-etats .t-achat .titre-page { font-size: var(--t-titre-2); }
 .btn-note { margin: var(--esp-1) 0 0; font-size: var(--t-meta); color: var(--mute); }
-.msg[tabindex]:focus { outline: none; }
-.msg[tabindex]:focus-visible { outline: var(--focus-l) solid var(--ink); outline-offset: var(--focus-o); }
 </style>
 </head>
 <body>
@@ -112,7 +73,7 @@
   <div class="sh-bar">
     <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
     <nav class="sh-nav" aria-label="Menu principal">
-      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages" aria-current="true">Tirages</a></li></ul>
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages" aria-current="true">Tirages</a></li></ul>
     </nav>
     <div class="sh-outils">
       <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
@@ -127,7 +88,7 @@
         <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
         <nav class="sh-panneau" aria-label="Menu principal">
           <ul>
-            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages" aria-current="true">Tirages</a></li>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages" aria-current="true">Tirages</a></li>
             <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
           </ul>
         </nav>
@@ -141,7 +102,7 @@
 
   <div class="tirage">
     <div class="t-photo">
-      <figure class="photo"><span class="mq-pin" aria-hidden="true">2</span><img src="_commun/photos/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1024px) 56vw, 100vw" width="900" height="600" alt="Collines grises sous un ciel de brume, le fleuve invisible au pied." fetchpriority="high"><span class="signe" aria-hidden="true">© Sébastien</span></figure>
+      <figure class="photo"><span class="mq-pin" aria-hidden="true">2</span><img src="_commun/photos/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1024px) 56vw, 100vw" width="900" height="600" alt="Collines grises sous un ciel de brume, le fleuve invisible au pied." fetchpriority="high"><span class="signature" aria-hidden="true">© Sébastien</span></figure>
     </div>
     <p class="t-note">La photo entière, telle qu’elle sera tirée. La signature « © Sébastien » n’existe qu’à l’écran : le tirage n’en porte aucune, Sébastien le signe au crayon dans la marge.</p>
 
@@ -162,7 +123,7 @@
           <label class="choix"><input type="radio" name="format" value="petit" id="f-petit" checked><span>Petit format<span class="choix-d">image 24 × 36 cm · feuille 30 × 40</span></span><span class="prix">180&nbsp;€</span></label>
           <label class="choix"><input type="radio" name="format" value="grand" id="f-grand"><span>Grand format<span class="choix-d">image 40 × 60 cm · feuille 50 × 70</span></span><span class="prix">290&nbsp;€</span></label>
         </fieldset>
-        <div class="mq-a"><span class="mq-pin" aria-hidden="true">5</span><dl class="t-liv">
+        <div class="mq-a"><span class="mq-pin" aria-hidden="true">5</span><dl class="def def--petit">
           <dt>France métropolitaine</dt><dd>15&nbsp;€ · reçu du 30 oct. au 6 nov.</dd>
           <dt>Union européenne</dt><dd>25&nbsp;€ · reçu du 3 au 10 nov.</dd>
         </dl>
@@ -191,7 +152,7 @@
     <h2 id="t-photo-h">La photo</h2>
     <p class="t-legende">Six heures, le fleuve fume encore.</p>
     <div>
-      <p class="pl-texte">Prise en mars 2024, en Anjou, avant que le soleil ne lève la brume. Série Paysage. Sébastien raconte pourquoi il ne la recadre pas dans <a class="lien" style="display:inline;min-height:0" href="/carnets/notes-d-atelier/pourquoi-nous-ne-recadrons-pas">Pourquoi nous ne recadrons pas</a>.</p>
+      <p class="pl-texte">Prise en mars 2024, en Anjou, avant que le soleil ne lève la brume. Série Paysage. Sébastien raconte pourquoi il ne la recadre pas dans <a class="lien" style="display:inline;min-height:0" href="/carnet/pourquoi-nous-ne-recadrons-pas">Pourquoi nous ne recadrons pas</a>.</p>
       <div class="actions"><a class="lien" href="/photo/brume-sur-la-loire">Voir la photo dans la galerie</a><a class="lien" href="/series/paysage">La série Paysage</a></div>
     </div>
   </section>
@@ -202,8 +163,8 @@
       <dl class="fiche">
         <div><dt>Le tirage</dt><dd>Pigmentaire, sur Hahnemühle Photo Rag 308 g, 100 % coton, mat. L’image entière, au format 3:2, jamais recadrée.</dd></div>
         <div><dt>La signature</dt><dd>Au crayon, dans la marge blanche, de la main de Sébastien, avec le numéro de l’exemplaire (par exemple 6/15).</dd></div>
-        <div><dt>Le certificat</dt><dd>Titre, N°01, numéro de l’exemplaire, dates de la prise de vue et du tirage, format, papier, laboratoire ; empreinte de l’original et horodatage, vérifiables ; signé à la main.</dd></div>
-        <div><dt>La fabrication</dt><dd>Un laboratoire d’art de l’Union européenne tire l’épreuve ; Sébastien la reçoit, la vérifie et la signe avant de vous l’envoyer. Il raconte le papier dans <a href="/carnets/notes-d-atelier/tirer-sur-photo-rag">Tirer sur Photo Rag</a>.</dd></div>
+        <div><dt>Le certificat</dt><dd>Titre, numéro d’inventaire (S25-001), numéro de l’exemplaire, dates de la prise de vue et du tirage, format, papier, laboratoire ; empreinte de l’original et horodatage, vérifiables ; signé à la main.</dd></div>
+        <div><dt>La fabrication</dt><dd>Un laboratoire d’art de l’Union européenne tire l’épreuve ; Sébastien la reçoit, la vérifie et la signe avant de vous l’envoyer. Il raconte le papier dans <a href="/carnet/tirer-sur-photo-rag">Tirer sur Photo Rag</a>.</dd></div>
         <div><dt>L’entretien</dt><dd>À l’abri du soleil direct ; à encadrer sous verre anti-UV, avec un passe-partout sans acide.</dd></div>
         <div><dt>Le fabricant</dt><dd>Sébastien Exemple, 12 rue de l’Exemple, 49000 Angers · <a href="mailto:contact@example.org">contact@example.org</a></dd></div>
       </dl>
@@ -221,11 +182,11 @@
   </div>
 
   <section class="t-autres mq-a" aria-labelledby="t-autres-h"><span class="mq-pin" aria-hidden="true">9</span>
-    <div class="entete"><h2 id="t-autres-h">Les autres tirages de Sébastien</h2><a class="lien" href="/tirages">Voir les 9 tirages</a></div>
+    <div class="partie-tete"><h2 id="t-autres-h">Les autres tirages de Sébastien</h2><a class="lien" href="/tirages">Voir les 9 tirages</a></div>
     <ul class="rangees"><li style="--r:1.5"><a class="vignette" href="/tirages/cais-do-sodre-maree-basse"><img src="_commun/photos/480/cais.webp" width="480" height="320" alt="Une rangée de pieux dans l’eau grise du Tage, un pêcheur seul au loin." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/foz-la-barre"><img src="_commun/photos/480/foz.webp" width="480" height="320" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Porto · 11 oct. 2026</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/silence-blanc"><img src="_commun/photos/480/neige.webp" width="480" height="320" alt="Ciel blanc au-dessus de crêtes grises enneigées." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Silence blanc</span><span class="cartel-m">Vercors · févr. 2025</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/le-ciel-s-est-ouvert"><img src="_commun/photos/480/ciel.webp" width="480" height="320" alt="Ciel rose et mauve, soleil rond posé sur des collines violettes." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Le ciel s’est ouvert</span><span class="cartel-m">Anjou · oct. 2025</span><span class="prix-v">Épuisé : 15 sur 15 vendus</span></span></a></li></ul>
   </section>
 
-  <div class="etats">
+  <div class="mq-etats">
     <div class="mq-ecran">
       <p class="mq-etat">État · juste après l’ajout</p>
       <div class="t-achat mq-a" style="max-width:520px"><span class="mq-pin" aria-hidden="true">10</span>
@@ -265,14 +226,14 @@
       <div class="t-achat mq-a" style="max-width:520px"><span class="mq-pin" aria-hidden="true">12</span>
         <div class="t-tete"><p class="etiquette">Kunstdruck</p><p class="titre-page" lang="fr">Brume sur la Loire</p><p class="cartel-m">Sébastien · Anjou · März 2024</p></div>
         <div class="t-edition"><p class="dispo"><b>10 verfügbar</b> von 15</p><p class="prov">Limitierte Auflage von 15 Exemplaren, alle Formate zusammen, signiert und nummeriert.</p></div>
-        <form method="post" action="/de/kunstdrucke/brume-sur-la-loire/hinzufuegen" style="display:grid;gap:var(--esp-3)">
+        <form method="post" action="/de/tirages/brume-sur-la-loire/hinzufuegen" style="display:grid;gap:var(--esp-3)">
           <fieldset class="groupe formats" aria-describedby="de-aide">
           <legend>Format</legend>
           <p class="champ-aide" id="de-aide">Beide auf Hahnemühle Photo Rag 308 g, 100 % Baumwolle, mit weißem Rand für Signatur und Nummer.</p>
           <label class="choix"><input type="radio" name="format" value="petit" id="de-petit"><span>Kleines Format<span class="choix-d">Bild 24 × 36 cm · Blatt 30 × 40</span></span><span class="prix">180&nbsp;€</span></label>
           <label class="choix"><input type="radio" name="format" value="grand" id="de-grand" checked><span>Großes Format<span class="choix-d">Bild 40 × 60 cm · Blatt 50 × 70</span></span><span class="prix">290&nbsp;€</span></label>
         </fieldset>
-          <div><dl class="t-liv"><dt>Frankreich (Festland)</dt><dd>15&nbsp;€ · Ankunft 30. Okt. bis 6. Nov.</dd><dt>Europäische Union</dt><dd>25&nbsp;€ · Ankunft 3. bis 10. Nov.</dd></dl><p class="tva">Keine Umsatzsteuer gemäß Art. 293 B CGI (Kleinunternehmer).</p></div>
+          <div><dl class="def def--petit"><dt>Frankreich (Festland)</dt><dd>15&nbsp;€ · Ankunft 30. Okt. bis 6. Nov.</dd><dt>Europäische Union</dt><dd>25&nbsp;€ · Ankunft 3. bis 10. Nov.</dd></dl><p class="tva">Keine Umsatzsteuer gemäß Art. 293 B CGI (Kleinunternehmer).</p></div>
           <button class="btn btn--large" type="submit">In den Warenkorb</button>
         </form>
         <div class="t-vendeur"><p>Verkauft, signiert und versandt von <b>Sébastien Exemple</b>, in eigenem Namen.</p></div>
@@ -292,7 +253,7 @@
     <li><span class="mq-num" aria-hidden="true">5</span><b>Frais, dates et TVA avant le panier</b><p>Les deux zones, leurs frais et leurs dates de réception ; une seule mention de TVA, sous le premier prix. Plus de « TTC ».</p><span class="mq-ref">Jury v0 critère 7 · Baymard : 64 % cherchent le port sur la fiche · étude S25</span></li>
     <li><span class="mq-num" aria-hidden="true">6</span><b>Un seul bouton plein</b><p>« Ajouter au panier », un formulaire POST ordinaire : il marche sans script. Juste sous les formats, au téléphone aussi : plus de barre collante qui répétait le prix.</p><span class="mq-ref">UX-F-11 · étude S20 · jury v0 critères 2 et 8</span></li>
     <li><span class="mq-num" aria-hidden="true">7</span><b>À l’échelle d’un mur</b><p>Le tirage au-dessus d’une console de 120 cm ; le dessin suit le format coché (CSS :has, sans script). Il remplit la colonne de la photo au lieu de la laisser vide.</p><span class="mq-ref">Jury v0 critère 11 · RGESN 4.5</span></li>
-    <li><span class="mq-num" aria-hidden="true">8</span><b>Ce que vous recevez, dit simplement</b><p>Signature, certificat (avec le N°01 stable de la photo), fabrication, fabricant (sécurité des produits), livraison et retours ; deux billets des Carnets en lien.</p><span class="mq-ref">UX-T-05 · UX-T-17 · étude S11, § 6.4</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Ce que vous recevez, dit simplement</b><p>Signature, certificat (avec le numéro d’inventaire S25-001, stable, de la photo), fabrication, fabricant (sécurité des produits), livraison et retours ; deux billets des Carnets en lien.</p><span class="mq-ref">UX-T-05 · UX-T-17 · étude S11, § 6.4</span></li>
     <li><span class="mq-num" aria-hidden="true">9</span><b>Les autres tirages du même auteur</b><p>Quatre vignettes en rangée, sans recadrage ; l’édition close est dite en mots (« Épuisé : 15 sur 15 vendus »).</p><span class="mq-ref">MQ-00 vignettes · étude S12</span></li>
     <li><span class="mq-num" aria-hidden="true">10</span><b>Après l’ajout</b><p>La page revient avec « Ajouté au panier », qui reçoit le focus, et un lien vers le panier (2). Aucune fenêtre surgissante.</p><span class="mq-ref">WCAG 4.1.3 · B&S 1.3 Retour d’information</span></li>
     <li><span class="mq-num" aria-hidden="true">11</span><b>L’édition s’épuise entre-temps</b><p>Le serveur relit le stock à l’ajout : s’il n’y a plus d’exemplaire, rien n’est ajouté, le message le dit près du bouton, l’édition passe « Épuisé ». Un chemin vers les 8 tirages disponibles.</p><span class="mq-ref">Jury v0 critère 5 · étude S24 · WCAG 3.3.1</span></li>
@@ -314,7 +275,7 @@
         <ul aria-labelledby="sf-site">
           <li><a href="/a-propos#contact">Contact</a></li>
           <li><a href="/droits">Droits et licences</a></li>
-          <li><a href="/carnets/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="/carnet/flux.xml">Flux RSS des carnets</a></li>
           <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
           <li><a href="/confidentialite">Confidentialité</a></li>
           <li><a href="/mentions-legales">Mentions légales</a></li>

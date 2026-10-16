@@ -11,99 +11,24 @@
 <link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* MQ-01 · accueil. Composants de MQ-00 (_commun/public.css) ; ci-dessous, la seule mise en page de l'accueil,
-   construite avec les jetons de tokens.css (aucun jeton redéclaré). Composants nouveaux, à verser dans la planche :
-   « ouverture » (photo, bandeau à trois zones, points et Pause), « choix du regard », « carte de billet ». */
-
-/* ----- Ouverture : la photo à la hauteur de l'écran, moins l'en-tête et le bandeau (jury MQ-01 n° 11) -----
-   Ordre du document : promesse (H1), puis le diaporama ; à l'écran, au-delà du téléphone, la photo vient d'abord.
-   Bandeau : Points et Pause sur une ligne sous la photo, puis la promesse à gauche et le cartel seul à droite (jury n° 2). */
-.acc-ouv-zone { padding-top: var(--esp-2); }
-.acc-ouv { --acc-r: 0.6667; --acc-reste: 300px; --acc-cw: 0px;
-  --acc-h: clamp(300px, calc(100svh - var(--acc-reste)), 860px);
-  position: relative; display: flex; flex-direction: column; width: min(100%, calc(var(--acc-h) * var(--acc-r))); margin-inline: auto; }
-.acc-diapo { margin: 0; display: flex; flex-direction: column; }
-.acc-diapo--bureau { display: none; }
-.acc-diapo picture { display: block; }
-.acc-img { display: block; width: 100%; height: auto; aspect-ratio: var(--acc-r); background: var(--frame); }
-.acc-promesse { min-width: 0; padding-bottom: var(--esp-2); }
-.acc-h1 { margin: 0; font: 300 30px/var(--i-serre) var(--sans); letter-spacing: 0; text-wrap: balance; }
-.acc-sous { margin: var(--esp-1) 0 0; color: var(--prose); font-size: var(--t-texte); line-height: 1.5; text-wrap: pretty; }
-/* Points et Pause : une seule ligne, centrée sous la photo. */
-.acc-ctl { display: flex; align-items: center; justify-content: center; gap: var(--esp-2); padding-top: var(--esp-1); }
-.acc-points { display: flex; list-style: none; margin: 0; padding: 0; }
-.acc-points li { position: relative; }
-.acc-point { display: grid; place-items: center; width: var(--esp-4); height: var(--cible); }
-.acc-point::before { content: ''; width: 8px; height: 8px; border-radius: 50%; box-sizing: border-box; border: 1px solid var(--ink); }
-.acc-point[aria-pressed="true"]::before { width: 10px; height: 10px; background: var(--ink); }
-.acc-point:hover::before { background: var(--mute); }
-.acc-point:focus-visible { outline-offset: -4px; }
-.acc-pause { padding-right: var(--esp-2); }
-/* Cartel du diaporama : le cartel de MQ-00 ; le cartel entier est le lien vers la photo. */
-.acc-cartel { min-width: 0; padding-top: var(--esp-2); }
-.acc-cartel a { display: grid; gap: 2px; min-height: var(--cible); align-content: center; color: inherit; }
-.acc-cartel a:hover .cartel-t { text-decoration: underline; text-underline-offset: 4px; }
-.acc-voir { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field); }
-@media (max-width: 359px) { .acc-h1 { font-size: 26px; } }
-@media (min-width: 768px) {
-  .acc-ouv { --acc-r: 1.5; --acc-reste: 272px; --acc-cw: 30ch; }
-  .acc-diapo--bureau { display: flex; } .acc-diapo--tel { display: none; }
-  .acc-promesse { order: 2; padding: var(--esp-2) calc(var(--acc-cw) + var(--esp-4)) 0 0; }
-  .acc-h1 { font-size: var(--t-titre-2); }
-  .acc-cartel { position: absolute; right: 0; bottom: 0; max-width: var(--acc-cw); padding: 0; }
-}
-@media (min-width: 1280px) { .acc-ouv { --acc-reste: 228px; } }
-
-/* ----- Deuxième temps : les regards, les séries, les carnets ----- */
-.acc-sec { padding-top: var(--esp-12); }
-.acc-tete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--esp-1) var(--esp-4); margin-bottom: var(--esp-4); }
-.acc-tete > div { display: grid; gap: var(--esp-1); }
-.acc-h2 { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); letter-spacing: 0; text-wrap: balance; }
-.acc-tete p { margin: 0; color: var(--prose); }
-.acc-texte { margin: 0; max-width: 46ch; color: var(--prose); font-size: var(--t-prose); line-height: 1.6; text-wrap: pretty; }
-/* Choix du regard : trois liens vers la Galerie, le compte en clair (« Les deux · Sébastien · Julien », dans cet ordre). */
+/* MQ-01 · accueil. Composants de la planche (_commun/public.css : ouverture, liste de liens, diptyque, rangées, carte de billet) ;
+   ci-dessous, la seule mise en page de l'accueil, avec les jetons de tokens.css (aucun jeton redéclaré). */
+/* Deux regards : le texte et le choix à gauche, le diptyque à droite. */
 .acc-regards { display: grid; gap: var(--esp-6) var(--esp-8); align-items: end; }
 .acc-regards-txt { display: grid; gap: var(--esp-2); align-content: end; }
-.acc-choix { list-style: none; margin: var(--esp-2) 0 0; padding: 0; border-top: 1px solid var(--rule); }
-.acc-choix a { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px var(--esp-2); min-height: var(--esp-8);
-  padding-block: 10px; border-bottom: 1px solid var(--rule); color: var(--ink); }
-.acc-choix-n { font: 400 var(--t-titre-3)/1.3 var(--sans); }
-.acc-choix-d { grid-column: 1; color: var(--mute); font-size: var(--t-petit); }
-.acc-choix .ic { grid-column: 2; grid-row: 1 / span 2; }
-.acc-choix a:hover .acc-choix-n { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+.acc-regards .liste-liens { margin-top: var(--esp-2); }
+.acc-texte { margin: 0; max-width: 46ch; color: var(--prose); font-size: var(--t-prose); line-height: 1.6; text-wrap: pretty; }
 @media (min-width: 1024px) { .acc-regards { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
-/* Séries : une rangée justifiée, étirée sur toute la largeur au-delà du téléphone. */
-@media (min-width: 768px) { .acc-series .rangees { --h: 120px; } .acc-series .rangees::after { content: none; } }
-@media (min-width: 1024px) { .acc-series .rangees { --h: 180px; } }
-/* Carnets : deux billets, couverture verticale à côté du texte. */
-.acc-billets { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--esp-6) var(--esp-8); }
-@media (min-width: 900px) { .acc-billets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.acc-billet { display: grid; grid-template-columns: minmax(96px, 2fr) minmax(0, 3fr); gap: var(--esp-3); align-items: end; }
-.acc-billet img { display: block; width: 100%; height: auto; aspect-ratio: 0.6667; background: var(--frame); }
-.acc-billet-t { display: grid; gap: var(--esp-1); }
-.acc-billet h3 { margin: 0; font: 400 var(--t-titre-3)/1.3 var(--sans); }
-.acc-billet h3 a { color: var(--ink); }
-.acc-billet h3 a::after { content: ''; position: absolute; inset: 0; }
-.acc-billet { position: relative; }
-.acc-billet:hover h3 a { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
-.acc-billet:focus-within { outline: var(--focus-l) solid var(--ink); outline-offset: var(--focus-o); }
-.acc-billet h3 a:focus-visible { outline: 0; }
-.acc-billet p { margin: 0; }
-.acc-billet .chapo { font-size: var(--t-texte); }
-.acc-tous { white-space: nowrap; }
+.partie-tete { margin-bottom: var(--esp-4); }
+.partie-tete > div p { color: var(--prose); }
+.billets { margin-top: 0; }
 .acc-galerie { margin: var(--esp-3) 0 0; }
-
-/* ----- États montrés en fin de page ----- */
-.acc-etats { display: grid; gap: var(--esp-12); padding-top: var(--esp-12); }
-.acc-etat { position: relative; }
-.acc-bande .acc-ctl { padding-top: 0; }
+/* États montrés en fin de page */
+.acc-bande .ouverture-ctl { padding-top: 0; }
 /* Démonstration du lien d'évitement au focus (même dessin que .skip:focus de public.css). */
 .acc-skip-vu { position: absolute; left: var(--gut); top: var(--esp-1); z-index: 30; display: inline-flex; align-items: center; min-height: var(--cible);
   padding: 0 var(--esp-3); background: var(--ink); color: var(--paper); font: 500 var(--t-petit)/1 var(--sans);
   outline: var(--focus-l) solid var(--ink); outline-offset: var(--focus-o); }
-/* Encart : liens « avec / sans annotations » (même dessin que MQ-00). */
-.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
-.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
 </style>
 </head>
 <body>
@@ -114,7 +39,7 @@
   <div class="sh-bar">
     <a class="sh-marque" href="/" aria-label="Nicephos, accueil"><span class="mq-pin" aria-hidden="true">1</span>Nicephos</a>
     <nav class="sh-nav" aria-label="Menu principal">
-      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
     </nav>
     <div class="sh-outils">
       <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
@@ -130,7 +55,7 @@
         <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
         <nav class="sh-panneau" aria-label="Menu principal (téléphone)">
           <ul>
-            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
             <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
           </ul>
         </nav>
@@ -139,99 +64,95 @@
   </div>
 </header>
 <main id="contenu">
-  <div class="wrap acc-ouv-zone">
-    <section class="acc-ouv" aria-labelledby="acc-h1">
-      <div class="acc-promesse"><span class="mq-pin" aria-hidden="true">4</span><h1 class="acc-h1" id="acc-h1">Deux regards, une même lumière.</h1><p class="acc-sous">Les photographies de Sébastien et Julien, d’Angers à Lisbonne et Porto.</p></div>
-      <figure class="acc-diapo acc-diapo--bureau" aria-roledescription="diaporama" aria-label="Diaporama, 6 photos : photo 1, Le ciel s’est ouvert, de Sébastien">
-        <span class="mq-pin" aria-hidden="true">2</span><picture><source media="(max-width: 767px)" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><img class="acc-img" src="_commun/photos/ciel.webp" srcset="_commun/photos/480/ciel.webp 480w, _commun/photos/ciel.webp 900w" sizes="(max-width: 767px) calc(100vw - 48px), min(calc(100vw - 144px), calc((100vh - 196px) * 1.5))" width="900" height="600" alt="Ciel rose et mauve, soleil rond posé sur des collines violettes." fetchpriority="high" decoding="async"></picture>
-        <div class="acc-ctl">
-          <ul class="acc-points" aria-label="Choisir une photo du diaporama">
-          <li><span class="mq-pin" aria-hidden="true">3</span><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 1 sur 6 : Le ciel s’est ouvert"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 2 sur 6 : Brume sur la Loire"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 6 : Dernière heure"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 6 : Ligne d’eau"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 5 sur 6 : Miradouro, l’heure dorée"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 6 sur 6 : Belém, contre-jour"></button></li>
+  <div class="wrap ouverture-zone">
+    <section class="ouverture" aria-labelledby="acc-h1">
+      <div class="ouverture-promesse"><span class="mq-pin" aria-hidden="true">4</span><h1 class="ouverture-h1" id="acc-h1">Deux regards, une même lumière.</h1><p class="ouverture-sous">Les photographies de Sébastien et Julien, d’Angers à Lisbonne et Porto.</p></div>
+      <figure class="ouverture-diapo" aria-roledescription="diaporama" aria-label="Diaporama">
+        <span class="mq-pin" aria-hidden="true">2</span><picture><source media="(max-width: 767px)" srcset="_commun/photos/480/escaliers.webp 320w, _commun/photos/escaliers.webp 600w, _commun/photos/1600/escaliers.webp 1067w" sizes="min(calc(100vw - 48px), calc((100svh - 300px) * 0.6667))" width="600" height="900"><img class="ouverture-img" src="_commun/photos/belem.webp" srcset="_commun/photos/480/belem.webp 480w, _commun/photos/belem.webp 900w, _commun/photos/1600/belem.webp 1600w" sizes="min(calc(100vw - 144px), calc((100svh - 228px) * 1.5))" width="900" height="600" alt="" fetchpriority="high" decoding="async"></picture>
+        <div class="ouverture-ctl que-bureau">
+          <ul class="ouverture-points" aria-label="Choisir une photo du diaporama, 6 photos">
+          <li><span class="mq-pin" aria-hidden="true">3</span><button class="ouverture-point" type="button" aria-pressed="true" aria-label="Photo 1 sur 6 : Belém, contre-jour"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 2 sur 6 : Brume sur la Loire"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 6 : Dernière heure"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 6 : Ligne d’eau"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 5 sur 6 : Miradouro, l’heure dorée"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 6 sur 6 : Le ciel s’est ouvert"></button></li>
           </ul>
-          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
+          <button class="bascule ouverture-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
         </div>
-        <figcaption class="cartel acc-cartel"><span class="mq-pin" aria-hidden="true">5</span><a href="/photo/le-ciel-s-est-ouvert"><span class="cartel-t">Le ciel s’est ouvert</span><span class="cartel-m">Sébastien · Anjou · oct. 2025 · <span class="acc-voir">Voir la photo</span></span></a></figcaption>
-      </figure>
-      <figure class="acc-diapo acc-diapo--tel" aria-roledescription="diaporama" aria-label="Diaporama, 4 photos : photo 1, Escaliers des Guindais, de Julien">
-        <span class="mq-pin" aria-hidden="true">2</span><picture><source media="(min-width: 768px)" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><img class="acc-img" src="_commun/photos/escaliers.webp" srcset="_commun/photos/480/escaliers.webp 320w, _commun/photos/escaliers.webp 600w" sizes="(max-width: 767px) min(calc(100vw - 48px), calc((100vh - 312px) * 0.6667)), 1px" width="600" height="900" alt="Une silhouette au milieu d’un long escalier en diagonale, mur clair." fetchpriority="high" decoding="async"></picture>
-        <div class="acc-ctl">
-          <ul class="acc-points" aria-label="Choisir une photo du diaporama">
-          <li><span class="mq-pin" aria-hidden="true">3</span><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 1 sur 4 : Escaliers des Guindais"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 2 sur 4 : Alfama, premier tram"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 4 : Tiago, marché do Bolhão"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 4 : Deux, minuit"></button></li>
+        <div class="ouverture-ctl que-tel">
+          <ul class="ouverture-points" aria-label="Choisir une photo du diaporama, 4 photos">
+          <li><span class="mq-pin" aria-hidden="true">3</span><button class="ouverture-point" type="button" aria-pressed="true" aria-label="Photo 1 sur 4 : Escaliers des Guindais"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 2 sur 4 : Alfama, premier tram"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 4 : Tiago, marché do Bolhão"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 4 : Deux, minuit"></button></li>
           </ul>
-          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
+          <button class="bascule ouverture-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
         </div>
-        <figcaption class="cartel acc-cartel"><span class="mq-pin" aria-hidden="true">5</span><a href="/photo/escaliers-des-guindais"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · Porto · 11 oct. 2026 · <span class="acc-voir">Voir la photo</span></span></a></figcaption>
+        <figcaption class="cartel ouverture-cartel"><span class="mq-pin" aria-hidden="true">5</span><span class="sr-only que-bureau">Photo : la tour de Belém en ombre chinoise devant un soleil couchant sur le fleuve. </span><a class="que-bureau" href="/photo/belem-contre-jour"><span class="cartel-t">Belém, contre-jour</span><span class="cartel-m">Sébastien · Lisbonne · 10 oct. 2026 · <span class="ouverture-voir">Voir la photo</span></span></a><span class="sr-only que-tel">Photo : une silhouette au milieu d’un long escalier en diagonale, mur clair. </span><a class="que-tel" href="/photo/escaliers-des-guindais"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · Porto · 11 oct. 2026 · <span class="ouverture-voir">Voir la photo</span></span></a></figcaption>
       </figure>
     </section>
   </div>
 
-  <section class="wrap acc-sec" id="regards" aria-labelledby="acc-regards-t">
+  <section class="wrap partie" id="regards" aria-labelledby="acc-regards-t">
     <div class="acc-regards">
       <div class="acc-regards-txt">
         <span class="mq-pin" aria-hidden="true">7</span><p class="etiquette">Deux regards</p>
-        <h2 class="acc-h2" id="acc-regards-t">Deux photographes, un même goût pour les heures creuses.</h2>
+        <h2 class="titre-2" id="acc-regards-t">Deux photographes, un même goût pour les heures creuses.</h2>
         <p class="acc-texte">Sébastien et Julien photographient chacun de leur côté, puis mettent leurs images en commun. Choisissez un regard, ou gardez les deux.</p>
-        <ul class="acc-choix" aria-label="Voir la galerie">
-          <li><a href="/galerie"><span class="acc-choix-n">Les deux</span><span class="acc-choix-d">22 photos, dans l’ordre que nous avons choisi</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
-          <li><a href="/galerie?regard=sebastien"><span class="acc-choix-n">Sébastien</span><span class="acc-choix-d">10 photos · le matin, les quais, les fleuves</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
-          <li><a href="/galerie?regard=julien"><span class="acc-choix-n">Julien</span><span class="acc-choix-d">12 photos · la rue, et ceux qui y passent</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+        <ul class="liste-liens" aria-label="Voir la galerie">
+          <li><a href="/galerie"><span class="liste-liens-n">Les deux</span><span class="liste-liens-d">22 photos, dans l’ordre que nous avons choisi</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+          <li><a href="/galerie?regard=sebastien"><span class="liste-liens-n">Sébastien</span><span class="liste-liens-d">10 photos · le matin, les quais, les fleuves</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+          <li><a href="/galerie?regard=julien"><span class="liste-liens-n">Julien</span><span class="liste-liens-d">12 photos · la rue, et ceux qui y passent</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
         </ul>
       </div>
       <figure class="diptyque">
         <figcaption class="diptyque-t"><p class="etiquette">Le même fleuve, deux regards</p><p class="cartel-m">Porto, dimanche 11 octobre 2026 : le Douro à 9 h 10, puis à 17 h 20</p></figcaption>
         <div class="diptyque-paire">
-          <figure class="photo" style="--r:1.5"><img src="_commun/photos/480/foz.webp" srcset="_commun/photos/480/foz.webp 480w, _commun/photos/foz.webp 900w" sizes="(min-width: 1024px) 34vw, (min-width: 768px) 46vw, 92vw" width="480" height="320" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><figcaption class="cartel"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Sébastien · Porto · 11 oct. 2026</span></figcaption></figure>
-          <figure class="photo" style="--r:1.5"><img src="_commun/photos/480/ribeira.webp" srcset="_commun/photos/480/ribeira.webp 480w, _commun/photos/ribeira.webp 900w" sizes="(min-width: 1024px) 34vw, (min-width: 768px) 46vw, 92vw" width="480" height="320" alt="Les quais de la Ribeira et l’arche du pont presque effacés par la brume." loading="lazy" decoding="async"><figcaption class="cartel"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></figcaption></figure>
+          <figure class="photo" style="--r:1.5"><img src="_commun/photos/480/foz.webp" srcset="_commun/photos/480/foz.webp 480w, _commun/photos/foz.webp 900w, _commun/photos/1600/foz.webp 1600w" sizes="(min-width: 1024px) 34vw, (min-width: 768px) 46vw, 92vw" width="480" height="320" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><figcaption class="cartel"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Sébastien · Porto · 11 oct. 2026</span></figcaption></figure>
+          <figure class="photo" style="--r:1.5"><img src="_commun/photos/480/ribeira.webp" srcset="_commun/photos/480/ribeira.webp 480w, _commun/photos/ribeira.webp 900w, _commun/photos/1600/ribeira.webp 1600w" sizes="(min-width: 1024px) 34vw, (min-width: 768px) 46vw, 92vw" width="480" height="320" alt="Les quais de la Ribeira et l’arche du pont presque effacés par la brume." loading="lazy" decoding="async"><figcaption class="cartel"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></figcaption></figure>
         </div>
       </figure>
     </div>
   </section>
 
-  <section class="wrap acc-sec acc-series" id="series" aria-labelledby="acc-series-t">
-    <div class="acc-tete">
-      <div><span class="mq-pin" aria-hidden="true">8</span><h2 class="acc-h2" id="acc-series-t">Séries</h2><p>Cinq ensembles, composés à deux.</p></div>
-      <a class="lien acc-tous" href="/series">Toutes les séries<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <section class="wrap partie" id="series" aria-labelledby="acc-series-t">
+    <div class="partie-tete">
+      <div><span class="mq-pin" aria-hidden="true">8</span><h2 class="titre-2" id="acc-series-t">Séries</h2><p>Cinq ensembles, composés à deux.</p></div>
+      <a class="lien" href="/series">Toutes les séries<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
-    <ul class="rangees" aria-labelledby="acc-series-t">
-      <li style="--r:1.5"><a class="vignette" href="/series/atlantique"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Atlantique</span><span class="cartel-m">3 photos</span></span></a></li>
+    <ul class="rangees rangees--etiree" aria-labelledby="acc-series-t">
+      <li style="--r:1.5"><a class="vignette" href="/series/atlantique"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w, _commun/photos/1600/cais.webp 1600w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Atlantique</span><span class="cartel-m">3 photos</span></span></a></li>
       <li style="--r:1.5"><a class="vignette" href="/series/paysage"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Paysage</span><span class="cartel-m">5 photos</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/series/portrait"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Portrait</span><span class="cartel-m">3 photos</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/series/rue"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Rue</span><span class="cartel-m">7 photos</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/series/voyage"><img src="_commun/photos/480/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Voyage</span><span class="cartel-m">4 photos</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/series/portrait"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="320" height="480" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Portrait</span><span class="cartel-m">3 photos</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/series/rue"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w, _commun/photos/1600/linge.webp 1600w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Rue</span><span class="cartel-m">7 photos</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/series/voyage"><img src="_commun/photos/480/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w, _commun/photos/1600/miradouro.webp 1600w" sizes="(min-width: 1280px) 290px, (min-width: 768px) 25vw, 45vw" width="480" height="320" alt="" loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Voyage</span><span class="cartel-m">4 photos</span></span></a></li>
     </ul>
     <p id="galerie" class="acc-galerie"><a class="lien" href="/galerie">Toute la galerie : 22 photos<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
   </section>
 
-  <section class="wrap acc-sec" id="carnets" aria-labelledby="acc-carnets-t">
-    <div class="acc-tete">
-      <div><span class="mq-pin" aria-hidden="true">9</span><h2 class="acc-h2" id="acc-carnets-t">Carnets</h2><p>Voyages et récits, à deux voix.</p></div>
-      <a class="lien acc-tous" href="/carnets">Tous les carnets (4)<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <section class="wrap partie" id="carnets" aria-labelledby="acc-carnets-t">
+    <div class="partie-tete">
+      <div><span class="mq-pin" aria-hidden="true">9</span><h2 class="titre-2" id="acc-carnets-t">Carnets</h2><p>Voyages et récits, à deux voix.</p></div>
+      <a class="lien" href="/carnet">Tous les carnets (4)<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
-    <ul class="acc-billets">
-      <li><article class="acc-billet" aria-labelledby="b1">
-        <img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w" sizes="(min-width: 900px) 220px, 40vw" width="320" height="480" alt="" loading="lazy" decoding="async">
-        <div class="acc-billet-t">
+    <ul class="billets">
+      <li><article class="billet-e billet-e--cote" aria-labelledby="b1">
+        <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 900px) 220px, 40vw" width="320" height="480" alt="" loading="lazy" decoding="async"></figure>
+        <div class="billet-e-txt">
           <p class="etiquette">Notes d’atelier</p>
-          <h3 id="b1"><a href="/carnets/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></h3>
-          <p class="chapo">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte « Bonjour » : voici ce qu’elle a répondu.</p>
-          <p class="cartel-m">Julien · <time datetime="2026-10-15">15 oct. 2026</time></p>
+          <h3 class="billet-e-titre" id="b1"><a href="/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></h3>
+          <p class="billet-e-chapo">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte « Bonjour » : voici ce qu’elle a répondu.</p>
+          <p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15 oct. 2026</time></p>
         </div>
       </article></li>
-      <li><article class="acc-billet" aria-labelledby="b2">
-        <img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w" sizes="(min-width: 900px) 220px, 40vw" width="320" height="480" alt="" loading="lazy" decoding="async">
-        <div class="acc-billet-t">
+      <li><article class="billet-e billet-e--cote" aria-labelledby="b2">
+        <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 900px) 220px, 40vw" width="320" height="480" alt="" loading="lazy" decoding="async"></figure>
+        <div class="billet-e-txt">
           <p class="etiquette">Voyages</p>
-          <h3 id="b2"><a href="/carnets/lisbonne-et-porto">Lisbonne et Porto</a></h3>
-          <p class="chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : de l’Alfama au premier tram jusqu’à la barre de Foz.</p>
-          <p class="cartel-m">Sébastien et Julien · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos</p>
+          <h3 class="billet-e-titre" id="b2"><a href="/carnet/lisbonne-et-porto">Lisbonne et Porto</a></h3>
+          <p class="billet-e-chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : de l’Alfama au premier tram jusqu’à la barre de Foz.</p>
+          <p class="billet-e-meta"><b>Sébastien et Julien</b> · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos</p>
         </div>
       </article></li>
     </ul>
@@ -249,7 +170,7 @@
         <ul aria-labelledby="sf-site">
           <li><a href="/a-propos#contact">Contact</a></li>
           <li><a href="/droits">Droits et licences</a></li>
-          <li><a href="/carnets/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="/carnet/flux.xml">Flux RSS des carnets</a></li>
           <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
           <li><a href="/confidentialite">Confidentialité</a></li>
           <li><a href="/mentions-legales">Mentions légales</a></li>
@@ -267,48 +188,45 @@
   </div>
 </footer>
 
-<section class="wrap acc-etats" aria-labelledby="acc-etats-t">
+<section class="wrap mq-etats" aria-labelledby="acc-etats-t">
   <h2 class="sr-only" id="acc-etats-t">Autres états de l’accueil</h2>
-  <div class="acc-etat mq-ecran">
+  <div class="mq-ecran">
     <p class="mq-etat">État · Diaporama en pause, sur la photo 2</p><span class="mq-pin" aria-hidden="true">11</span>
-    <div class="acc-ouv acc-bande">
-      <div class="acc-promesse"><p class="acc-h1">Deux regards, une même lumière.</p><p class="acc-sous">Les photographies de Sébastien et Julien, d’Angers à Lisbonne et Porto.</p></div>
-      <figure class="acc-diapo acc-diapo--bureau" aria-roledescription="diaporama" aria-label="Diaporama, 6 photos : photo 2, Brume sur la Loire, de Sébastien">
-        <div class="acc-ctl">
-          <ul class="acc-points" aria-label="Choisir une photo du diaporama">
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 1 sur 6 : Le ciel s’est ouvert"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 2 sur 6 : Brume sur la Loire"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 6 : Dernière heure"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 6 : Ligne d’eau"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 5 sur 6 : Miradouro, l’heure dorée"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 6 sur 6 : Belém, contre-jour"></button></li>
+    <div class="ouverture acc-bande">
+      <div class="ouverture-promesse"><p class="ouverture-h1">Deux regards, une même lumière.</p><p class="ouverture-sous">Les photographies de Sébastien et Julien, d’Angers à Lisbonne et Porto.</p></div>
+      <figure class="ouverture-diapo" aria-roledescription="diaporama" aria-label="Diaporama">
+        <div class="ouverture-ctl que-bureau">
+          <ul class="ouverture-points" aria-label="Choisir une photo du diaporama, 6 photos">
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 1 sur 6 : Belém, contre-jour"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="true" aria-label="Photo 2 sur 6 : Brume sur la Loire"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 6 : Dernière heure"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 6 : Ligne d’eau"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 5 sur 6 : Miradouro, l’heure dorée"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 6 sur 6 : Le ciel s’est ouvert"></button></li>
           </ul>
-          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z"/></svg>Reprendre</button>
+          <button class="bascule ouverture-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z"/></svg>Reprendre</button>
         </div>
-        <figcaption class="cartel acc-cartel"><a href="/photo/brume-sur-la-loire"><span class="cartel-t">Brume sur la Loire</span><span class="cartel-m">Sébastien · Anjou · mars 2024 · <span class="acc-voir">Voir la photo</span></span></a></figcaption>
-      </figure>
-      <figure class="acc-diapo acc-diapo--tel" aria-roledescription="diaporama" aria-label="Diaporama, 4 photos : photo 2, Alfama, premier tram, de Julien">
-        <div class="acc-ctl">
-          <ul class="acc-points" aria-label="Choisir une photo du diaporama">
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 1 sur 4 : Escaliers des Guindais"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 2 sur 4 : Alfama, premier tram"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 4 : Tiago, marché do Bolhão"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 4 : Deux, minuit"></button></li>
+        <div class="ouverture-ctl que-tel">
+          <ul class="ouverture-points" aria-label="Choisir une photo du diaporama, 4 photos">
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 1 sur 4 : Escaliers des Guindais"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="true" aria-label="Photo 2 sur 4 : Alfama, premier tram"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 3 sur 4 : Tiago, marché do Bolhão"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Photo 4 sur 4 : Deux, minuit"></button></li>
           </ul>
-          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z"/></svg>Reprendre</button>
+          <button class="bascule ouverture-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z"/></svg>Reprendre</button>
         </div>
-        <figcaption class="cartel acc-cartel"><a href="/photo/alfama-premier-tram"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026 · <span class="acc-voir">Voir la photo</span></span></a></figcaption>
+        <figcaption class="cartel ouverture-cartel"><a class="que-bureau" href="/photo/brume-sur-la-loire"><span class="cartel-t">Brume sur la Loire</span><span class="cartel-m">Sébastien · Anjou · mars 2024 · <span class="ouverture-voir">Voir la photo</span></span></a><a class="que-tel" href="/photo/alfama-premier-tram"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026 · <span class="ouverture-voir">Voir la photo</span></span></a></figcaption>
       </figure>
     </div>
   </div>
-  <div class="acc-etat mq-ecran" style="margin-inline:calc(-1 * var(--gut))">
+  <div class="mq-ecran" style="margin-inline:calc(-1 * var(--gut))">
     <p class="mq-etat" style="left:calc(var(--gut) - 8px)">État · Première tabulation : le lien d’évitement</p><span class="mq-pin" aria-hidden="true">12</span>
     <span class="acc-skip-vu" aria-hidden="true">Aller au contenu</span>
     <header class="sh sh--site" inert>
   <div class="sh-bar">
     <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
     <nav class="sh-nav" aria-label="Menu principal (état : première tabulation)">
-      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
     </nav>
     <div class="sh-outils">
       <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
@@ -324,7 +242,7 @@
         <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
         <nav class="sh-panneau" aria-label="Menu principal (état : première tabulation) (téléphone)">
           <ul>
-            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
             <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
           </ul>
         </nav>
@@ -333,17 +251,17 @@
   </div>
 </header>
   </div>
-  <div class="acc-etat mq-ecran" style="margin-inline:calc(-1 * var(--gut))" lang="de">
+  <div class="mq-ecran" style="margin-inline:calc(-1 * var(--gut))" lang="de">
     <p class="mq-etat" style="left:calc(var(--gut) - 8px)" lang="fr">État · Allemand, panier plein : les libellés les plus longs</p><span class="mq-pin" aria-hidden="true">13</span>
     <header class="sh sh--site" lang="de" inert>
   <div class="sh-bar">
     <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
     <nav class="sh-nav" aria-label="Hauptmenü (Zustand: Deutsch)">
-      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li></ul>
+      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-sep"><a href="/de/tirages">Kunstdrucke</a></li></ul>
     </nav>
     <div class="sh-outils">
-      <a class="sh-outil sh-recherche" href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
-      <a class="sh-outil sh-panier" href="/de/warenkorb"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Warenkorb</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> Kunstdrucke</span></a>
+      <a class="sh-outil sh-recherche" href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
+      <a class="sh-outil sh-panier" href="/de/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Warenkorb</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> Kunstdrucke</span></a>
       <details class="lang-pick">
         <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
         <ul aria-label="Sprache wählen">
@@ -356,41 +274,38 @@
         <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
         <nav class="sh-panneau" aria-label="Hauptmenü (Zustand: Deutsch) (Telefon)">
           <ul>
-            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
-            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/tirages">Kunstdrucke</a></li>
+            <li><a href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
           </ul>
         </nav>
       </details>
     </div>
   </div>
 </header>
-    <div class="wrap" style="padding-top:var(--esp-3)"><div class="acc-ouv acc-bande">
-      <div class="acc-promesse" lang="de"><p class="acc-h1">Zwei Blicke, ein Licht.</p><p class="acc-sous">Die Fotografien von Sébastien und Julien, von Angers bis Lissabon und Porto.</p></div>
-      <figure class="acc-diapo acc-diapo--bureau" aria-roledescription="Diashow" aria-label="Diashow, 6 Fotos: Foto 1, Der Himmel hat sich geöffnet, von Sébastien">
-        <div class="acc-ctl">
-          <ul class="acc-points" aria-label="Foto der Diashow wählen">
-          <li><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 1 von 6: Der Himmel hat sich geöffnet"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 2 von 6: Nebel über der Loire"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 von 6: Letzte Stunde"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 von 6: Wasserlinie"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 5 von 6: Miradouro, goldene Stunde"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 6 von 6: Belém im Gegenlicht"></button></li>
+    <div class="wrap" style="padding-top:var(--esp-3)"><div class="ouverture acc-bande">
+      <div class="ouverture-promesse" lang="de"><p class="ouverture-h1">Zwei Blicke, ein Licht.</p><p class="ouverture-sous">Die Fotografien von Sébastien und Julien, von Angers bis Lissabon und Porto.</p></div>
+      <figure class="ouverture-diapo" aria-roledescription="Diashow" aria-label="Diashow">
+        <div class="ouverture-ctl que-bureau">
+          <ul class="ouverture-points" aria-label="Foto der Diashow wählen, 6 Fotos">
+          <li><button class="ouverture-point" type="button" aria-pressed="true" aria-label="Foto 1 von 6: Belém im Gegenlicht"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Foto 2 von 6: Nebel über der Loire"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Foto 3 von 6: Letzte Stunde"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Foto 4 von 6: Wasserlinie"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Foto 5 von 6: Miradouro, goldene Stunde"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Foto 6 von 6: Der Himmel hat sich geöffnet"></button></li>
           </ul>
-          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
+          <button class="bascule ouverture-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
         </div>
-        <figcaption class="cartel acc-cartel"><a href="/photo/le-ciel-s-est-ouvert"><span class="cartel-t">Der Himmel hat sich geöffnet</span><span class="cartel-m">Sébastien · Anjou · Okt. 2025 · <span class="acc-voir">Foto ansehen</span></span></a></figcaption>
-      </figure>
-      <figure class="acc-diapo acc-diapo--tel" aria-roledescription="Diashow" aria-label="Diashow, 4 Fotos: Foto 1, Die Treppen der Guindais, von Julien">
-        <div class="acc-ctl">
-          <ul class="acc-points" aria-label="Foto der Diashow wählen">
-          <li><button class="acc-point" type="button" aria-pressed="true" aria-label="Photo 1 von 4: Die Treppen der Guindais"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 2 von 4: Alfama, die erste Straßenbahn"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 3 von 4: Tiago, Markt do Bolhão"></button></li>
-          <li><button class="acc-point" type="button" aria-pressed="false" aria-label="Photo 4 von 4: Zwei, Mitternacht"></button></li>
+        <div class="ouverture-ctl que-tel">
+          <ul class="ouverture-points" aria-label="Foto der Diashow wählen, 4 Fotos">
+          <li><button class="ouverture-point" type="button" aria-pressed="true" aria-label="Foto 1 von 4: Die Treppen der Guindais"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Foto 2 von 4: Alfama, die erste Straßenbahn"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Foto 3 von 4: Tiago, Markt do Bolhão"></button></li>
+          <li><button class="ouverture-point" type="button" aria-pressed="false" aria-label="Foto 4 von 4: Zwei, Mitternacht"></button></li>
           </ul>
-          <button class="bascule acc-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
+          <button class="bascule ouverture-pause" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12"/></svg>Pause</button>
         </div>
-        <figcaption class="cartel acc-cartel"><a href="/photo/escaliers-des-guindais"><span class="cartel-t">Die Treppen der Guindais</span><span class="cartel-m">Julien · Porto · 11. Okt. 2026 · <span class="acc-voir">Foto ansehen</span></span></a></figcaption>
+        <figcaption class="cartel ouverture-cartel"><a class="que-bureau" href="/de/photo/belem-contre-jour"><span class="cartel-t">Belém im Gegenlicht</span><span class="cartel-m">Sébastien · Lissabon · 10. Okt. 2026 · <span class="ouverture-voir">Foto ansehen</span></span></a><a class="que-tel" href="/de/photo/escaliers-des-guindais"><span class="cartel-t">Die Treppen der Guindais</span><span class="cartel-m">Julien · Porto · 11. Okt. 2026 · <span class="ouverture-voir">Foto ansehen</span></span></a></figcaption>
       </figure>
     </div></div>
   </div>
@@ -401,11 +316,11 @@
   <p class="mq-lead">L’accueil s’ouvre sur une grande photo entière, dit en une ligne qui vous êtes, puis mène au travail : les deux regards, les séries, les derniers carnets. Titre de la page : « Nicephos — photographies de Sébastien et Julien » (aujourd’hui « Nicephos »).</p>
   <ol class="mq-reperes">
     <li><span class="mq-num" aria-hidden="true">1</span><b>En-tête Site de la planche, et des pages au lieu des ancres</b><p>Galerie, Séries, Carnets, Carte, À propos, puis Tirages (la boutique) après un filet, de même graisse : ni secondaire ni désactivé. Galerie et Séries deviennent des pages (/galerie, /series) ; les anciennes adresses /#galerie, /#series et /#regards arrivent toujours quelque part, car l’accueil garde ces trois id sur les sections qui y mènent. Panier absent tant qu’il est vide.</p><span class="mq-ref">UX-F-36, UX-F-02 · jury MQ-01 n° 1, 7 et 12 · MQ-00 § 3</span></li>
-    <li><span class="mq-num" aria-hidden="true">2</span><b>La photo entière, à la hauteur de l’écran</b><p>Hauteur de l’écran moins l’en-tête et le bandeau : 1 008 × 672 px au bureau 1 440 × 900, soit 70 % de la largeur et 75 % de la hauteur (62 % et 67 % en v0) ; elle grandit avec l’écran (1 194 px de large à 1 440 × 1 024) ; verticale au téléphone, 359 × 539 px. Ni voile, ni zoom, ni texte posé dessus. Une vraie description en alt, et le cartel en figcaption.</p><span class="mq-ref">UX-F-17, UX-F-01, UX-F-44 · RGAA 1.2, 1.9 · jury n° 11 et 9</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>La photo entière, à la hauteur de l’écran</b><p>Première photo au bureau : Belém, contre-jour (un dessin de la démo, en 1 600 px : plus d’agrandissement). Hauteur de l’écran moins l’en-tête et le bandeau : 1 008 × 672 px au bureau 1 440 × 900, soit 70 % de la largeur et 75 % de la hauteur (62 % et 67 % en v0) ; elle grandit avec l’écran (1 194 px de large à 1 440 × 1 024) ; verticale au téléphone, 359 × 539 px. Ni voile, ni zoom, ni texte posé dessus. Une vraie description en alt, et le cartel en figcaption.</p><span class="mq-ref">UX-F-17, UX-F-01, UX-F-44 · RGAA 1.2, 1.9 · jury n° 11 et 9</span></li>
     <li><span class="mq-num" aria-hidden="true">3</span><b>Points et Pause, une seule ligne sous la photo</b><p>Le groupe s’annonce « Diaporama, 6 photos » avant la première. Chaque point dit ce qu’il montre (« Photo 2 sur 6 : Brume sur la Loire ») et son état par aria-pressed ; cible de 32 × 44 px. Pause toujours visible ; le diaporama s’arrête au survol, au focus et en mouvement réduit. Sans JavaScript : la première photo seule, sans commandes.</p><span class="mq-ref">WCAG 2.2.2, 2.5.8, 4.1.2 · RGAA 13.8 · jury n° 2, 3, 7 et 9</span></li>
     <li><span class="mq-num" aria-hidden="true">4</span><b>Une promesse stable en H1</b><p>« Deux regards, une même lumière. » et une sous-ligne qui nomme les deux photographes et les lieux du référentiel. Le H1 prend la taille titre-2 de la planche (32 px) : la photo d’abord. Il ne change plus avec la diapositive.</p><span class="mq-ref">UX-F-16, UX-F-10 · RGAA 9.1 · Opquast 99</span></li>
     <li><span class="mq-num" aria-hidden="true">5</span><b>Le cartel, seul à droite</b><p>Le cartel de la planche (titre Jost 16 px, puis « Auteur · Lieu · date »), aligné sur le bord droit de la photo ; tout le cartel est le lien vers la photo, « Voir la photo » souligné, 44 px de haut.</p><span class="mq-ref">UX-F-29, UX-F-23 · jury n° 2, 6 et 7</span></li>
-    <li><span class="mq-num" aria-hidden="true">6</span><b>Une seule image au départ</b><p>La photo d’ouverture seule est chargée, en priorité. Les suivantes viennent du script, 1,5 s avant leur tour, si le diaporama tourne. Au téléphone, la photo du bureau est remplacée par une image vide en ligne : rien n’est chargé deux fois. Mesuré : 1 image au premier écran ; budget visé ≤ 1 000 ko à froid.</p><span class="mq-ref">UX-F-18 · RGESN 4.6, 6.4, 6.5 · jury n° 10</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Une seule image au départ</b><p>La photo d’ouverture seule est chargée, en priorité. Les suivantes viennent du script, 1,5 s avant leur tour, si le diaporama tourne. Une seule &lt;picture&gt; : une &lt;source media&gt; donne au téléphone une verticale (Escaliers des Guindais), l’&lt;img&gt; donne au bureau l’horizontale (Belém, contre-jour, en 480, 900 ou 1 600 px selon l’écran) ; le navigateur n’en charge qu’une. Comme la photo change avec l’appareil, son alt est vide et sa description est dite dans le cartel de chaque version. Mesuré : 1 image au premier écran ; budget visé ≤ 1 000 ko à froid.</p><span class="mq-ref">UX-F-18 · RGESN 4.6, 6.4, 6.5 · jury n° 10</span></li>
     <li><span class="mq-num" aria-hidden="true">7</span><b>Deux regards : où l’on va ensuite</b><p>La phrase de la démo, puis le choix « Les deux · Sébastien · Julien » avec le compte de chacun, qui mène à la Galerie filtrée (MQ-02). À côté, le diptyque de la planche : le Douro le matin pour Julien, le soir pour Sébastien, Sébastien à gauche.</p><span class="mq-ref">UX-F-45, UX-F-12 · jury n° 1, 6 et 8</span></li>
     <li><span class="mq-num" aria-hidden="true">8</span><b>Les séries, au format de leurs photos</b><p>Les cinq couvertures du référentiel, en rangée justifiée, sans fond gris ni cercle, avec le compte en clair (« 3 photos »). « Toute la galerie » garde l’id galerie des anciens liens.</p><span class="mq-ref">UX-F-30, UX-F-28 · jury n° 1 et 11</span></li>
     <li><span class="mq-num" aria-hidden="true">9</span><b>Les derniers carnets</b><p>Les deux billets les plus récents (15 et 14 oct. 2026), couverture verticale à côté du texte ; toute la carte est cliquable, le titre est le lien.</p><span class="mq-ref">UX-T-16 · jury n° 11</span></li>

@@ -11,74 +11,16 @@
 <link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* MQ-02 · galerie. Composants de MQ-00 ; ci-dessous, la seule barre de filtres (composant nouveau, à verser dans la planche :
-   « filtres de galerie » : regard, ordre, séries), construite avec les jetons de tokens.css. Aucun jeton redéclaré. */
-.gal-tetepage { display: grid; gap: var(--esp-2); padding-block: var(--esp-6) var(--esp-4); }
-/* Barre collante : pas de filet haut ; un seul filet bas (jury MQ-02 n° 2 et 11). */
-.gal-filtres { position: sticky; top: 0; z-index: 15; background: var(--paper); border-bottom: 1px solid var(--rule); }
-.gal-filtres-in { display: grid; gap: 0; padding-block: var(--esp-1); }
-.gal-ligne { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--esp-4); min-width: 0; }
-.gal-groupe { display: flex; align-items: center; gap: var(--esp-2); min-width: 0; }
-.gal-groupe .etiquette { flex: none; min-width: 5.5em; }
-.gal-groupe ul { display: flex; align-items: center; gap: 0 var(--esp-3); list-style: none; margin: 0; padding: 0; }
-.gal-groupe li { display: flex; align-items: center; flex: none; }
-.gal-f { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); color: var(--ink); font-size: 15px; white-space: nowrap; }
-.gal-f:hover .gal-f-t { text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 1px; }
-.gal-f[aria-current] .gal-f-t { font-weight: 500; text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
-.gal-n { color: var(--mute); font-size: var(--t-petit); font-variant-numeric: tabular-nums; }
-.gal-f--vide { color: var(--mute); cursor: default; }
-.gal-f img { display: block; height: 32px; width: auto; flex: none; background: var(--frame); }
-/* Séries : au téléphone, une ligne qui défile ; la pastille coupée au bord dit qu'il y a une suite. */
-.gal-series { overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--gut)); padding-inline: var(--gut); scroll-padding-inline: var(--gut); }
-.gal-series::-webkit-scrollbar { display: none; }
-/* Ordre : un <details>, sans script, comme le choix de la langue. */
-.gal-trier { position: relative; flex: none; }
-.gal-trier > summary { list-style: none; display: inline-flex; align-items: center; gap: 6px; min-height: var(--cible); cursor: pointer; color: var(--ink); font-size: 15px; white-space: nowrap; }
-.gal-trier > summary::-webkit-details-marker { display: none; }
-.gal-trier > summary .gal-n { margin-right: 2px; }
-.gal-trier[open] > summary .ic { transform: rotate(180deg); }
-.gal-trier > summary:hover > span:last-of-type { text-decoration: underline; text-underline-offset: 6px; }
-.gal-trier ul { position: absolute; right: 0; top: calc(100% + 4px); z-index: 40; min-width: 232px; margin: 0; padding: var(--esp-1) 0; list-style: none;
-  background: var(--paper); border: 1px solid var(--field); box-shadow: 0 12px 32px rgba(0, 0, 0, .28); }
-.gal-trier li a { display: flex; align-items: center; gap: var(--esp-2); min-height: var(--cible); padding: 0 var(--esp-2); color: var(--ink); font-size: 16px; white-space: nowrap; }
-.gal-trier li a:hover { background: color-mix(in srgb, var(--ink) 8%, var(--paper)); }
-.gal-trier li a[aria-current] { font-weight: 500; }
-.gal-trier li a .ic { margin-left: auto; color: var(--safelight); }
-@media (max-width: 767px) {
-  .gal-groupe .etiquette { min-width: 0; }
-  .gal-trier ul { right: auto; left: 0; }
-  .gal-ligne:first-child .gal-groupe { flex-wrap: wrap; }
-  .gal-ligne:first-child .gal-groupe ul { flex-wrap: wrap; gap: 0 var(--esp-2); }
-  .gal-ligne--series .etiquette { display: none; }
-}
-/* En-tête de la grille : ce qu'on voit, et combien. */
+/* MQ-02 · galerie. Composants de la planche (_commun/public.css : filtres, liste déroulante, rangées, diptyque en rangée,
+   étiquettes ✕) ; ci-dessous, la seule mise en page de la page. Aucun jeton redéclaré. */
 .gal-grille { padding-top: var(--esp-5); }
-.gal-tete { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--esp-1) var(--esp-3); margin-bottom: var(--esp-3); }
-.gal-tete h2 { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); }
-.gal-tete h2:focus { outline: 0; }
-.gal-tete p { margin: 0; color: var(--mute); }
-/* Filtres cumulés : une étiquette ✕ par filtre, seulement quand il y en a plusieurs (jury MQ-02 n° 2). */
-.gal-actifs { display: flex; flex-wrap: wrap; gap: var(--esp-1); list-style: none; margin: 0; padding: 0; }
-.gal-actif { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); padding: 0 12px 0 var(--esp-2); border: 1px solid var(--field); color: var(--ink); font-size: 15px; }
-.gal-actif:hover { border-color: var(--ink); }
-/* Le diptyque prend toute la rangée, à la place de sa première photo. */
-.gal-dip-f { margin: 0; }
-.gal-dip-paire { display: flex; gap: var(--esp-2); }
-.gal-dip-paire > a { flex: 1 1 0; min-width: 0; }
-.gal-dip-t { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--esp-2); margin-top: var(--esp-1); padding-top: var(--esp-1); border-top: 1px solid var(--field); }
-@media (max-width: 767px) { .gal-dip-paire { gap: var(--esp-1); } }
 .gal-fin { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-4); margin: var(--esp-5) 0 0; padding-top: var(--esp-2); border-top: 1px solid var(--rule); color: var(--mute); }
 .gal-fin p { margin: 0; }
-/* États */
-.gal-etats { display: grid; gap: var(--esp-16); padding-top: var(--esp-16); }
-.gal-etat { position: relative; }
-.gal-etat .gal-filtres { position: relative; }
+/* États : la barre n'y est pas collante ; l'ordre ouvert garde la place de sa liste. */
+.mq-ecran .filtres-barre { position: relative; }
 .gal-ouvert { min-height: 200px; }
 .gal-vide { display: grid; gap: var(--esp-2); max-width: 640px; }
 .gal-vide .actions { gap: 0 var(--esp-4); }
-/* Encart : liens « avec / sans annotations » (même dessin que MQ-00). */
-.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
-.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
 </style>
 </head>
 <body>
@@ -89,7 +31,7 @@
   <div class="sh-bar">
     <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
     <nav class="sh-nav" aria-label="Menu principal">
-      <ul><li><a href="/galerie" aria-current="page">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+      <ul><li><a href="/galerie" aria-current="page">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
     </nav>
     <div class="sh-outils">
       <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
@@ -105,7 +47,7 @@
         <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
         <nav class="sh-panneau" aria-label="Menu principal (téléphone)">
           <ul>
-            <li><a href="/galerie" aria-current="page">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/galerie" aria-current="page">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
             <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
           </ul>
         </nav>
@@ -114,72 +56,71 @@
   </div>
 </header>
 <main id="contenu">
-  <div class="wrap gal-tetepage">
+  <div class="wrap tete-page">
     <span class="mq-pin" aria-hidden="true">1</span><h1 class="titre-page">Galerie</h1>
     <p class="chapo">Les 22 photos publiées de Sébastien et de Julien. Choisissez un regard ou une série ; chaque choix a sa propre adresse, à partager.</p>
   </div>
-  <div class="gal-filtres" id="filtres">
-    <div class="wrap gal-filtres-in">
-      <div class="gal-ligne">
-        <nav class="gal-groupe" aria-label="Regard"><span class="mq-pin" aria-hidden="true">2</span><span class="etiquette" aria-hidden="true">Regard</span>
+  <div class="filtres-barre" id="filtres">
+    <div class="wrap filtres">
+      <div class="filtres-ligne">
+        <nav class="filtres-groupe" aria-label="Regard"><span class="mq-pin" aria-hidden="true">2</span><span class="etiquette" aria-hidden="true">Regard</span>
           <ul>
-          <li><a class="gal-f" href="/galerie#filtres" aria-current="page"><span class="gal-f-t">Les deux</span> <span class="gal-n">22</span></a></li>
-          <li><a class="gal-f" href="/galerie?regard=sebastien#filtres"><span class="gal-f-t">Sébastien</span> <span class="gal-n">10</span></a></li>
-          <li><a class="gal-f" href="/galerie?regard=julien#filtres"><span class="gal-f-t">Julien</span> <span class="gal-n">12</span></a></li>
+          <li><a class="filtre" href="/galerie#filtres" aria-current="page"><span class="filtre-nom">Les deux</span> <span class="filtre-n">22</span></a></li>
+          <li><a class="filtre" href="/galerie?regard=sebastien#filtres"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">10</span></a></li>
+          <li><a class="filtre" href="/galerie?regard=julien#filtres"><span class="filtre-nom">Julien</span> <span class="filtre-n">12</span></a></li>
           </ul>
         </nav>
-        <details class="gal-trier">
-          <summary><span class="mq-pin d" aria-hidden="true">3</span><span class="gal-n">Ordre :</span> <span>choisi par nous</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <details class="deroulant">
+          <summary><span class="mq-pin d" aria-hidden="true">3</span><span class="deroulant-t">Ordre :</span> <span>choisi par nous</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
           <ul aria-label="Ordre">
             <li><a href="/galerie#filtres" aria-current="true">Choisi par nous<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
             <li><a href="/galerie?ordre=recentes#filtres">Plus récentes d’abord</a></li>
           </ul>
         </details>
       </div>
-      <div class="gal-ligne gal-ligne--series">
-        <nav class="gal-groupe gal-series" aria-label="Séries" data-defile><span class="mq-pin" aria-hidden="true">4</span><span class="etiquette" aria-hidden="true">Séries</span>
+      <div class="filtres-ligne">
+        <nav class="filtres-groupe filtres-defile" aria-label="Séries" data-defile><span class="mq-pin" aria-hidden="true">4</span><span class="etiquette" aria-hidden="true">Séries</span>
           <ul>
-          <li><a class="gal-f" href="/galerie?serie=atlantique#filtres"><img src="_commun/photos/160/cais.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Atlantique</span> <span class="gal-n">3</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=paysage#filtres"><img src="_commun/photos/160/brume.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Paysage</span> <span class="gal-n">5</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=portrait#filtres"><img src="_commun/photos/160/ines.webp" width="107" height="160" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Portrait</span> <span class="gal-n">3</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=rue#filtres"><img src="_commun/photos/160/linge.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Rue</span> <span class="gal-n">7</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=voyage#filtres"><img src="_commun/photos/160/miradouro.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Voyage</span> <span class="gal-n">4</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=atlantique#filtres"><img src="_commun/photos/160/cais.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Atlantique</span> <span class="filtre-n">3</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=paysage#filtres"><img src="_commun/photos/160/brume.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Paysage</span> <span class="filtre-n">5</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=portrait#filtres"><img src="_commun/photos/160/ines.webp" width="107" height="160" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Portrait</span> <span class="filtre-n">3</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=rue#filtres"><img src="_commun/photos/160/linge.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Rue</span> <span class="filtre-n">7</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=voyage#filtres"><img src="_commun/photos/160/miradouro.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Voyage</span> <span class="filtre-n">4</span></a></li>
           </ul>
         </nav>
       </div>
     </div>
   </div>
   <section class="wrap gal-grille" aria-labelledby="g-h">
-    <div class="gal-tete"><span class="mq-pin" aria-hidden="true">5</span><h2 id="g-h" tabindex="-1">Les deux regards</h2><p>22 photos · ordre choisi par nous</p></div>
+    <div class="partie-tete partie-tete--serre"><span class="mq-pin" aria-hidden="true">5</span><h2 class="titre-2" id="g-h" tabindex="-1">Les deux regards</h2><p>22 photos · ordre choisi par nous</p></div>
     <ul class="rangees" aria-labelledby="g-h">
       <li style="--r:1.5"><span class="mq-pin" aria-hidden="true">6</span><a class="vignette" href="/photo/brume-sur-la-loire"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Collines grises sous un ciel de brume, le fleuve invisible au pied." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Brume sur la Loire</span><span class="cartel-m">Sébastien · Anjou · mars 2024</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/deux-minuit"><img src="_commun/photos/480/nuit.webp" srcset="_commun/photos/480/nuit.webp 320w, _commun/photos/nuit.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Deux silhouettes minuscules au bas d’une nuit violette." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux, minuit</span><span class="cartel-m">Julien · Nantes · nov. 2023</span></span></a></li>
       <li style="--r:1.5"><a class="vignette" href="/photo/derniere-heure"><img src="_commun/photos/480/dune.webp" srcset="_commun/photos/480/dune.webp 480w, _commun/photos/dune.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Dunes ocre sous un soleil bas et pâle." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Dernière heure</span><span class="cartel-m">Sébastien · Erg Chebbi · avr. 2023</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/elise-contre-jour"><img src="_commun/photos/480/portrait.webp" srcset="_commun/photos/480/portrait.webp 320w, _commun/photos/portrait.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Pénombre brune et taches de lumière floues." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Élise, contre-jour</span><span class="cartel-m">Julien · Nantes · janv. 2025</span></span></a></li>
-      <li style="--r:1.5"><span class="mq-pin" aria-hidden="true">7</span><a class="vignette is-focus" href="/photo/quai-7h12"><img src="_commun/photos/480/quai.webp" srcset="_commun/photos/480/quai.webp 480w, _commun/photos/quai.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Quai désert sous un ciel gris, trois silhouettes au loin." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Quai, 7 h 12</span><span class="cartel-m">Sébastien · Angers · oct. 2024</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/ligne-d-eau"><img src="_commun/photos/480/mer.webp" srcset="_commun/photos/480/mer.webp 480w, _commun/photos/mer.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Une ligne d’horizon bleu-vert, la mer sombre dessous." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Ligne d’eau</span><span class="cartel-m">Julien · Finistère · août 2024</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/le-ciel-s-est-ouvert"><img src="_commun/photos/480/ciel.webp" srcset="_commun/photos/480/ciel.webp 480w, _commun/photos/ciel.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Ciel rose et mauve, soleil rond posé sur des collines violettes." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Le ciel s’est ouvert</span><span class="cartel-m">Sébastien · Anjou · oct. 2025</span></span></a></li>
+      <li style="--r:1.5"><span class="mq-pin" aria-hidden="true">7</span><a class="vignette is-focus" href="/photo/quai-7-h-12"><img src="_commun/photos/480/quai.webp" srcset="_commun/photos/480/quai.webp 480w, _commun/photos/quai.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Quai désert sous un ciel gris, trois silhouettes au loin." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Quai, 7 h 12</span><span class="cartel-m">Sébastien · Angers · oct. 2024</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/ligne-d-eau"><img src="_commun/photos/480/mer.webp" srcset="_commun/photos/480/mer.webp 480w, _commun/photos/mer.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Une ligne d’horizon bleu-vert, la mer sombre dessous." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Ligne d’eau</span><span class="cartel-m">Julien · Finistère · août 2024</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/le-ciel-s-est-ouvert"><img src="_commun/photos/480/ciel.webp" srcset="_commun/photos/480/ciel.webp 480w, _commun/photos/ciel.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Ciel rose et mauve, soleil rond posé sur des collines violettes." fetchpriority="high" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Le ciel s’est ouvert</span><span class="cartel-m">Sébastien · Anjou · oct. 2025</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/deux-ombres"><img src="_commun/photos/480/ombre.webp" srcset="_commun/photos/480/ombre.webp 480w, _commun/photos/ombre.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Presque noir : deux ombres à peine visibles." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux ombres</span><span class="cartel-m">Julien · Paris · déc. 2023</span></span></a></li>
       <li style="--r:0.6667"><a class="vignette" href="/photo/passage-fin-d-apres-midi"><img src="_commun/photos/480/ruelle.webp" srcset="_commun/photos/480/ruelle.webp 320w, _commun/photos/ruelle.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Lumière brune d’une ruelle, un passant seul tout en bas." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Passage, fin d’après-midi</span><span class="cartel-m">Julien · Lisbonne · mai 2024</span></span></a></li>
       <li style="--r:1.5"><a class="vignette" href="/photo/silence-blanc"><img src="_commun/photos/480/neige.webp" srcset="_commun/photos/480/neige.webp 480w, _commun/photos/neige.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Ciel blanc au-dessus de crêtes grises enneigées." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Silence blanc</span><span class="cartel-m">Sébastien · Vercors · févr. 2025</span></span></a></li>
       <li style="--r:0.6667"><a class="vignette" href="/photo/sous-bois"><img src="_commun/photos/480/foret.webp" srcset="_commun/photos/480/foret.webp 320w, _commun/photos/foret.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Vert profond d’un sous-bois, cercles de lumière floue." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Sous-bois</span><span class="cartel-m">Julien · Chandelais · juin 2025</span></span></a></li>
       <li style="--r:1.5"><a class="vignette" href="/photo/le-lac-ne-dit-rien"><img src="_commun/photos/480/lac.webp" srcset="_commun/photos/480/lac.webp 480w, _commun/photos/lac.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Lune blanche au-dessus d’un lac bleu, rive sombre." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Le lac ne dit rien</span><span class="cartel-m">Sébastien · La Réunion · sept. 2024</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/deux-ombres"><img src="_commun/photos/480/ombre.webp" srcset="_commun/photos/480/ombre.webp 480w, _commun/photos/ombre.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Presque noir : deux ombres à peine visibles." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux ombres</span><span class="cartel-m">Julien · Paris · déc. 2023</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/cais-do-sodre-maree-basse"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Une rangée de pieux dans l’eau grise du Tage, un pêcheur seul au loin." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · Lisbonne · 10 oct. 2026</span></span></a></li>
-      <li class="gal-dip" style="--r:3.07"><span class="mq-pin" style="left:var(--gut)" aria-hidden="true">8</span><figure class="gal-dip-f" aria-labelledby="gal-dip-t">
-        <div class="gal-dip-paire">
-          <a class="vignette" style="--r:1.5" href="/photo/belem-contre-jour"><img src="_commun/photos/480/belem.webp" srcset="_commun/photos/480/belem.webp 480w, _commun/photos/belem.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="La tour de Belém en ombre chinoise devant un soleil couchant sur le fleuve." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Belém, contre-jour</span><span class="cartel-m">Sébastien · Lisbonne · 10 oct. 2026</span></span></a>
-          <a class="vignette" style="--r:1.5" href="/photo/miradouro-l-heure-doree"><img src="_commun/photos/480/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Deux silhouettes sur un belvédère, la ville et le Tage dans le soleil couchant." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a>
+      <li style="--r:1.5"><a class="vignette" href="/photo/cais-do-sodre-maree-basse"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w, _commun/photos/1600/cais.webp 1600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Une rangée de pieux dans l’eau grise du Tage, un pêcheur seul au loin." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Sébastien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:3.07"><span class="mq-pin" style="left:var(--gut)" aria-hidden="true">8</span><figure class="diptyque diptyque--rangee" aria-labelledby="gal-dip-t">
+        <div class="diptyque-paire">
+          <a class="vignette" style="--r:1.5" href="/photo/belem-contre-jour"><img src="_commun/photos/480/belem.webp" srcset="_commun/photos/480/belem.webp 480w, _commun/photos/belem.webp 900w, _commun/photos/1600/belem.webp 1600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="La tour de Belém en ombre chinoise devant un soleil couchant sur le fleuve." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Belém, contre-jour</span><span class="cartel-m">Sébastien · Lisbonne · 10 oct. 2026</span></span></a>
+          <a class="vignette" style="--r:1.5" href="/photo/miradouro-l-heure-doree"><img src="_commun/photos/480/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w, _commun/photos/1600/miradouro.webp 1600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Deux silhouettes sur un belvédère, la ville et le Tage dans le soleil couchant." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a>
         </div>
-        <figcaption class="gal-dip-t" id="gal-dip-t"><span class="etiquette">Même soir, deux regards</span> <span class="cartel-m">18 h 52 et 19 h 05</span></figcaption>
+        <figcaption class="diptyque-t" id="gal-dip-t"><span class="etiquette">Même soir, deux regards</span> <span class="cartel-m">19 h 05 et 18 h 52</span></figcaption>
       </figure></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/tiago-marche-do-bolhao"><img src="_commun/photos/480/tiago.webp" srcset="_commun/photos/480/tiago.webp 320w, _commun/photos/tiago.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Un marchand en silhouette derrière un étal d’oranges et de fruits." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Tiago, marché do Bolhão</span><span class="cartel-m">Sébastien · Porto · 11 oct. 2026</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/foz-la-barre"><img src="_commun/photos/480/foz.webp" srcset="_commun/photos/480/foz.webp 480w, _commun/photos/foz.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Sébastien · Porto · 11 oct. 2026</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/alfama-premier-tram"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Un tram jaune grimpe une pente devant les façades de l’Alfama." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/linge-au-balcon"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Façade rose, six fenêtres, un fil de linge de couleurs." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/ines-rua-dos-remedios"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Une fleuriste de trois quarts, un bouquet de fleurs claires contre elle." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Inês, rua dos Remédios</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/ribeira-brume-du-fleuve"><img src="_commun/photos/480/ribeira.webp" srcset="_commun/photos/480/ribeira.webp 480w, _commun/photos/ribeira.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Les quais de la Ribeira et l’arche du pont presque effacés par la brume." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/escaliers-des-guindais"><img src="_commun/photos/480/escaliers.webp" srcset="_commun/photos/480/escaliers.webp 320w, _commun/photos/escaliers.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Une silhouette au milieu d’un long escalier en diagonale, mur clair." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></span></a></li>
-    </ul>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/tiago-marche-do-bolhao"><img src="_commun/photos/480/tiago.webp" srcset="_commun/photos/480/tiago.webp 320w, _commun/photos/tiago.webp 600w, _commun/photos/1600/tiago.webp 1067w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Un marchand en silhouette derrière un étal d’oranges et de fruits." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Tiago, marché do Bolhão</span><span class="cartel-m">Sébastien · Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/foz-la-barre"><img src="_commun/photos/480/foz.webp" srcset="_commun/photos/480/foz.webp 480w, _commun/photos/foz.webp 900w, _commun/photos/1600/foz.webp 1600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Sébastien · Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/alfama-premier-tram"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Un tram jaune grimpe une pente devant les façades de l’Alfama." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/linge-au-balcon"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w, _commun/photos/1600/linge.webp 1600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Façade rose, six fenêtres, un fil de linge de couleurs." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/ines-rua-dos-remedios"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Une fleuriste de trois quarts, un bouquet de fleurs claires contre elle." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Inês, rua dos Remédios</span><span class="cartel-m">Julien · Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/elise-contre-jour"><img src="_commun/photos/480/portrait.webp" srcset="_commun/photos/480/portrait.webp 320w, _commun/photos/portrait.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Pénombre brune et taches de lumière floues." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Élise, contre-jour</span><span class="cartel-m">Julien · Nantes · janv. 2025</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/ribeira-brume-du-fleuve"><img src="_commun/photos/480/ribeira.webp" srcset="_commun/photos/480/ribeira.webp 480w, _commun/photos/ribeira.webp 900w, _commun/photos/1600/ribeira.webp 1600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Les quais de la Ribeira et l’arche du pont presque effacés par la brume." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/escaliers-des-guindais"><img src="_commun/photos/480/escaliers.webp" srcset="_commun/photos/480/escaliers.webp 320w, _commun/photos/escaliers.webp 600w, _commun/photos/1600/escaliers.webp 1067w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Une silhouette au milieu d’un long escalier en diagonale, mur clair." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Julien · Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/deux-minuit"><img src="_commun/photos/480/nuit.webp" srcset="_commun/photos/480/nuit.webp 320w, _commun/photos/nuit.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Deux silhouettes minuscules au bas d’une nuit violette." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux, minuit</span><span class="cartel-m">Julien · Nantes · nov. 2023</span></span></a></li></ul>
     <div class="gal-fin"><span class="mq-pin" aria-hidden="true">9</span><p>Les 22 photos sont affichées.</p><a class="lien" href="/series">Voir les cinq séries<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="lien" href="/carte">Voir la carte<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
   </section>
 </main>
@@ -195,7 +136,7 @@
         <ul aria-labelledby="sf-site">
           <li><a href="/a-propos#contact">Contact</a></li>
           <li><a href="/droits">Droits et licences</a></li>
-          <li><a href="/carnets/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="/carnet/flux.xml">Flux RSS des carnets</a></li>
           <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
           <li><a href="/confidentialite">Confidentialité</a></li>
           <li><a href="/mentions-legales">Mentions légales</a></li>
@@ -213,133 +154,132 @@
   </div>
 </footer>
 
-<section class="gal-etats" aria-labelledby="gal-etats-t">
+<section class="mq-etats" aria-labelledby="gal-etats-t">
   <h2 class="sr-only" id="gal-etats-t">Autres états de la galerie</h2>
-  <div class="gal-etat mq-ecran">
+  <div class="mq-ecran">
     <p class="mq-etat" style="left:calc(var(--gut) - 8px)">État · Regard « Julien » : la grille, le titre et les comptes suivent</p>
-    <div class="gal-filtres" id="filtres-julien">
-    <div class="wrap gal-filtres-in">
-      <div class="gal-ligne">
-        <nav class="gal-groupe" aria-label="Regard (julien)"><span class="etiquette" aria-hidden="true">Regard</span>
+    <div class="filtres-barre" id="filtres-julien">
+    <div class="wrap filtres">
+      <div class="filtres-ligne">
+        <nav class="filtres-groupe" aria-label="Regard (julien)"><span class="etiquette" aria-hidden="true">Regard</span>
           <ul>
-          <li><a class="gal-f" href="/galerie#filtres"><span class="gal-f-t">Les deux</span> <span class="gal-n">22</span></a></li>
-          <li><a class="gal-f" href="/galerie?regard=sebastien#filtres"><span class="gal-f-t">Sébastien</span> <span class="gal-n">10</span></a></li>
-          <li><a class="gal-f" href="/galerie?regard=julien#filtres" aria-current="page"><span class="gal-f-t">Julien</span> <span class="gal-n">12</span></a></li>
+          <li><a class="filtre" href="/galerie#filtres"><span class="filtre-nom">Les deux</span> <span class="filtre-n">22</span></a></li>
+          <li><a class="filtre" href="/galerie?regard=sebastien#filtres"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">10</span></a></li>
+          <li><a class="filtre" href="/galerie?regard=julien#filtres" aria-current="page"><span class="filtre-nom">Julien</span> <span class="filtre-n">12</span></a></li>
           </ul>
         </nav>
-        <details class="gal-trier">
-          <summary><span class="gal-n">Ordre :</span> <span>choisi par nous</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <details class="deroulant">
+          <summary><span class="deroulant-t">Ordre :</span> <span>choisi par nous</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
           <ul aria-label="Ordre">
             <li><a href="/galerie?regard=julien#filtres" aria-current="true">Choisi par nous<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
             <li><a href="/galerie?regard=julien&ordre=recentes#filtres">Plus récentes d’abord</a></li>
           </ul>
         </details>
       </div>
-      <div class="gal-ligne gal-ligne--series">
-        <nav class="gal-groupe gal-series" aria-label="Séries (julien)" data-defile><span class="etiquette" aria-hidden="true">Séries</span>
+      <div class="filtres-ligne">
+        <nav class="filtres-groupe filtres-defile" aria-label="Séries (julien)" data-defile><span class="etiquette" aria-hidden="true">Séries</span>
           <ul>
-          <li><span class="gal-f gal-f--vide"><img src="_commun/photos/160/cais.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Atlantique</span> <span class="gal-n">0<span class="sr-only"> photo : aucune de Julien</span></span></span></li>
-          <li><a class="gal-f" href="/galerie?regard=julien&serie=paysage#filtres"><img src="_commun/photos/160/brume.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Paysage</span> <span class="gal-n">2</span></a></li>
-          <li><a class="gal-f" href="/galerie?regard=julien&serie=portrait#filtres"><img src="_commun/photos/160/ines.webp" width="107" height="160" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Portrait</span> <span class="gal-n">2</span></a></li>
-          <li><a class="gal-f" href="/galerie?regard=julien&serie=rue#filtres"><img src="_commun/photos/160/linge.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Rue</span> <span class="gal-n">6</span></a></li>
-          <li><a class="gal-f" href="/galerie?regard=julien&serie=voyage#filtres"><img src="_commun/photos/160/miradouro.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Voyage</span> <span class="gal-n">2</span></a></li>
+          <li><span class="filtre filtre--vide"><img src="_commun/photos/160/cais.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Atlantique</span> <span class="filtre-n">0<span class="sr-only"> photo : aucune de Julien</span></span></span></li>
+          <li><a class="filtre" href="/galerie?regard=julien&serie=paysage#filtres"><img src="_commun/photos/160/brume.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Paysage</span> <span class="filtre-n">2</span></a></li>
+          <li><a class="filtre" href="/galerie?regard=julien&serie=portrait#filtres"><img src="_commun/photos/160/ines.webp" width="107" height="160" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Portrait</span> <span class="filtre-n">2</span></a></li>
+          <li><a class="filtre" href="/galerie?regard=julien&serie=rue#filtres"><img src="_commun/photos/160/linge.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Rue</span> <span class="filtre-n">6</span></a></li>
+          <li><a class="filtre" href="/galerie?regard=julien&serie=voyage#filtres"><img src="_commun/photos/160/miradouro.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Voyage</span> <span class="filtre-n">2</span></a></li>
           </ul>
         </nav>
       </div>
     </div>
   </div>
     <div class="wrap gal-grille">
-      <div class="gal-tete"><span class="mq-pin" aria-hidden="true">10</span><h3 class="sr-only">Grille filtrée</h3><p style="font:300 var(--t-titre-2)/var(--i-serre) var(--sans);color:var(--ink)">Les photos de Julien</p><p>12 sur 22 · ordre choisi par nous</p></div>
+      <div class="partie-tete partie-tete--serre"><span class="mq-pin" aria-hidden="true">10</span><h3 class="sr-only">Grille filtrée</h3><p class="titre-2">Les photos de Julien</p><p>12 sur 22 · ordre choisi par nous</p></div>
       <ul class="rangees" aria-label="Les photos de Julien">
-      <li style="--r:0.6667"><a class="vignette" href="/photo/deux-minuit"><img src="_commun/photos/480/nuit.webp" srcset="_commun/photos/480/nuit.webp 320w, _commun/photos/nuit.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Deux silhouettes minuscules au bas d’une nuit violette." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux, minuit</span><span class="cartel-m">Nantes · nov. 2023</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/elise-contre-jour"><img src="_commun/photos/480/portrait.webp" srcset="_commun/photos/480/portrait.webp 320w, _commun/photos/portrait.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Pénombre brune et taches de lumière floues." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Élise, contre-jour</span><span class="cartel-m">Nantes · janv. 2025</span></span></a></li>
       <li style="--r:1.5"><a class="vignette" href="/photo/ligne-d-eau"><img src="_commun/photos/480/mer.webp" srcset="_commun/photos/480/mer.webp 480w, _commun/photos/mer.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Une ligne d’horizon bleu-vert, la mer sombre dessous." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Ligne d’eau</span><span class="cartel-m">Finistère · août 2024</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/deux-ombres"><img src="_commun/photos/480/ombre.webp" srcset="_commun/photos/480/ombre.webp 480w, _commun/photos/ombre.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Presque noir : deux ombres à peine visibles." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux ombres</span><span class="cartel-m">Paris · déc. 2023</span></span></a></li>
       <li style="--r:0.6667"><a class="vignette" href="/photo/passage-fin-d-apres-midi"><img src="_commun/photos/480/ruelle.webp" srcset="_commun/photos/480/ruelle.webp 320w, _commun/photos/ruelle.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Lumière brune d’une ruelle, un passant seul tout en bas." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Passage, fin d’après-midi</span><span class="cartel-m">Lisbonne · mai 2024</span></span></a></li>
       <li style="--r:0.6667"><a class="vignette" href="/photo/sous-bois"><img src="_commun/photos/480/foret.webp" srcset="_commun/photos/480/foret.webp 320w, _commun/photos/foret.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Vert profond d’un sous-bois, cercles de lumière floue." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Sous-bois</span><span class="cartel-m">Chandelais · juin 2025</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/deux-ombres"><img src="_commun/photos/480/ombre.webp" srcset="_commun/photos/480/ombre.webp 480w, _commun/photos/ombre.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Presque noir : deux ombres à peine visibles." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux ombres</span><span class="cartel-m">Paris · déc. 2023</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/alfama-premier-tram"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Un tram jaune grimpe une pente devant les façades de l’Alfama." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/linge-au-balcon"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Façade rose, six fenêtres, un fil de linge de couleurs." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/miradouro-l-heure-doree"><img src="_commun/photos/480/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Deux silhouettes sur un belvédère, la ville et le Tage dans le soleil couchant." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/ines-rua-dos-remedios"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Une fleuriste de trois quarts, un bouquet de fleurs claires contre elle." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Inês, rua dos Remédios</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span></span></a></li>
-      <li style="--r:1.5"><a class="vignette" href="/photo/ribeira-brume-du-fleuve"><img src="_commun/photos/480/ribeira.webp" srcset="_commun/photos/480/ribeira.webp 480w, _commun/photos/ribeira.webp 900w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Les quais de la Ribeira et l’arche du pont presque effacés par la brume." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Porto · 11 oct. 2026</span></span></a></li>
-      <li style="--r:0.6667"><a class="vignette" href="/photo/escaliers-des-guindais"><img src="_commun/photos/480/escaliers.webp" srcset="_commun/photos/480/escaliers.webp 320w, _commun/photos/escaliers.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Une silhouette au milieu d’un long escalier en diagonale, mur clair." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Porto · 11 oct. 2026</span></span></a></li>
-      </ul>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/alfama-premier-tram"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Un tram jaune grimpe une pente devant les façades de l’Alfama." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Alfama, premier tram</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/linge-au-balcon"><img src="_commun/photos/480/linge.webp" srcset="_commun/photos/480/linge.webp 480w, _commun/photos/linge.webp 900w, _commun/photos/1600/linge.webp 1600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Façade rose, six fenêtres, un fil de linge de couleurs." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Linge au balcon</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/miradouro-l-heure-doree"><img src="_commun/photos/480/miradouro.webp" srcset="_commun/photos/480/miradouro.webp 480w, _commun/photos/miradouro.webp 900w, _commun/photos/1600/miradouro.webp 1600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Deux silhouettes sur un belvédère, la ville et le Tage dans le soleil couchant." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Miradouro, l’heure dorée</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/ines-rua-dos-remedios"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Une fleuriste de trois quarts, un bouquet de fleurs claires contre elle." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Inês, rua dos Remédios</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/elise-contre-jour"><img src="_commun/photos/480/portrait.webp" srcset="_commun/photos/480/portrait.webp 320w, _commun/photos/portrait.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Pénombre brune et taches de lumière floues." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Élise, contre-jour</span><span class="cartel-m">Nantes · janv. 2025</span></span></a></li>
+      <li style="--r:1.5"><a class="vignette" href="/photo/ribeira-brume-du-fleuve"><img src="_commun/photos/480/ribeira.webp" srcset="_commun/photos/480/ribeira.webp 480w, _commun/photos/ribeira.webp 900w, _commun/photos/1600/ribeira.webp 1600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="480" height="320" alt="Les quais de la Ribeira et l’arche du pont presque effacés par la brume." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Ribeira, brume du fleuve</span><span class="cartel-m">Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/escaliers-des-guindais"><img src="_commun/photos/480/escaliers.webp" srcset="_commun/photos/480/escaliers.webp 320w, _commun/photos/escaliers.webp 600w, _commun/photos/1600/escaliers.webp 1067w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Une silhouette au milieu d’un long escalier en diagonale, mur clair." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Escaliers des Guindais</span><span class="cartel-m">Porto · 11 oct. 2026</span></span></a></li>
+      <li style="--r:0.6667"><a class="vignette" href="/photo/deux-minuit"><img src="_commun/photos/480/nuit.webp" srcset="_commun/photos/480/nuit.webp 320w, _commun/photos/nuit.webp 600w" sizes="(min-width: 1280px) 360px, (min-width: 768px) 300px, 45vw" width="320" height="480" alt="Deux silhouettes minuscules au bas d’une nuit violette." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Deux, minuit</span><span class="cartel-m">Nantes · nov. 2023</span></span></a></li></ul>
     </div>
   </div>
-  <div class="gal-etat mq-ecran wrap">
+  <div class="mq-ecran wrap">
     <p class="mq-etat" style="left:calc(var(--gut) - 8px)">État · Deux filtres sans photo commune (adresse partagée)</p><span class="mq-pin" aria-hidden="true">11</span>
     <div class="gal-vide">
-      <div class="gal-tete" style="margin:0"><p style="font:300 var(--t-titre-2)/var(--i-serre) var(--sans);color:var(--ink);margin:0">Atlantique, par Julien</p><p>0 photo</p></div>
-      <ul class="gal-actifs" aria-label="Filtres choisis">
-        <li><a class="gal-actif" href="/galerie?serie=atlantique#filtres">Julien<span class="sr-only"> : retirer ce filtre</span><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></a></li>
-        <li><a class="gal-actif" href="/galerie?regard=julien#filtres">Atlantique<span class="sr-only"> : retirer ce filtre</span><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></a></li>
+      <div class="partie-tete partie-tete--serre" style="margin:0"><p class="titre-2">Atlantique, par Julien</p><p>0 photo</p></div>
+      <ul class="actifs" aria-label="Filtres choisis">
+        <li><a class="actif" href="/galerie?serie=atlantique#filtres">Julien<span class="sr-only"> : retirer ce filtre</span><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></a></li>
+        <li><a class="actif" href="/galerie?regard=julien#filtres">Atlantique<span class="sr-only"> : retirer ce filtre</span><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></a></li>
       </ul>
       <div class="msg"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.2"/></svg><p><b>Aucune photo de Julien dans la série Atlantique.</b> Ses trois photos sont de Sébastien.</p></div>
       <div class="actions"><a class="lien" href="/galerie?serie=atlantique#filtres">Voir Atlantique, les deux regards (3 photos)</a><a class="lien" href="/galerie?regard=julien#filtres">Voir les 12 photos de Julien</a></div>
     </div>
   </div>
-  <div class="gal-etat mq-ecran gal-ouvert">
+  <div class="mq-ecran gal-ouvert">
     <p class="mq-etat" style="left:calc(var(--gut) - 8px)">État · Ordre ouvert (un &lt;details&gt;, sans script)</p><span class="mq-pin" aria-hidden="true">12</span>
-    <div class="gal-filtres" id="filtres-ordre">
-    <div class="wrap gal-filtres-in">
-      <div class="gal-ligne">
-        <nav class="gal-groupe" aria-label="Regard (ordre)"><span class="etiquette" aria-hidden="true">Regard</span>
+    <div class="filtres-barre" id="filtres-ordre">
+    <div class="wrap filtres">
+      <div class="filtres-ligne">
+        <nav class="filtres-groupe" aria-label="Regard (ordre)"><span class="etiquette" aria-hidden="true">Regard</span>
           <ul>
-          <li><a class="gal-f" href="/galerie#filtres" aria-current="page"><span class="gal-f-t">Les deux</span> <span class="gal-n">22</span></a></li>
-          <li><a class="gal-f" href="/galerie?regard=sebastien#filtres"><span class="gal-f-t">Sébastien</span> <span class="gal-n">10</span></a></li>
-          <li><a class="gal-f" href="/galerie?regard=julien#filtres"><span class="gal-f-t">Julien</span> <span class="gal-n">12</span></a></li>
+          <li><a class="filtre" href="/galerie#filtres" aria-current="page"><span class="filtre-nom">Les deux</span> <span class="filtre-n">22</span></a></li>
+          <li><a class="filtre" href="/galerie?regard=sebastien#filtres"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">10</span></a></li>
+          <li><a class="filtre" href="/galerie?regard=julien#filtres"><span class="filtre-nom">Julien</span> <span class="filtre-n">12</span></a></li>
           </ul>
         </nav>
-        <details class="gal-trier" open>
-          <summary><span class="gal-n">Ordre :</span> <span>choisi par nous</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <details class="deroulant" open>
+          <summary><span class="deroulant-t">Ordre :</span> <span>choisi par nous</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
           <ul aria-label="Ordre">
             <li><a href="/galerie#filtres" aria-current="true">Choisi par nous<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
             <li><a href="/galerie?ordre=recentes#filtres">Plus récentes d’abord</a></li>
           </ul>
         </details>
       </div>
-      <div class="gal-ligne gal-ligne--series">
-        <nav class="gal-groupe gal-series" aria-label="Séries (ordre)" data-defile><span class="etiquette" aria-hidden="true">Séries</span>
+      <div class="filtres-ligne">
+        <nav class="filtres-groupe filtres-defile" aria-label="Séries (ordre)" data-defile><span class="etiquette" aria-hidden="true">Séries</span>
           <ul>
-          <li><a class="gal-f" href="/galerie?serie=atlantique#filtres"><img src="_commun/photos/160/cais.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Atlantique</span> <span class="gal-n">3</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=paysage#filtres"><img src="_commun/photos/160/brume.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Paysage</span> <span class="gal-n">5</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=portrait#filtres"><img src="_commun/photos/160/ines.webp" width="107" height="160" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Portrait</span> <span class="gal-n">3</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=rue#filtres"><img src="_commun/photos/160/linge.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Rue</span> <span class="gal-n">7</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=voyage#filtres"><img src="_commun/photos/160/miradouro.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Voyage</span> <span class="gal-n">4</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=atlantique#filtres"><img src="_commun/photos/160/cais.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Atlantique</span> <span class="filtre-n">3</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=paysage#filtres"><img src="_commun/photos/160/brume.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Paysage</span> <span class="filtre-n">5</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=portrait#filtres"><img src="_commun/photos/160/ines.webp" width="107" height="160" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Portrait</span> <span class="filtre-n">3</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=rue#filtres"><img src="_commun/photos/160/linge.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Rue</span> <span class="filtre-n">7</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=voyage#filtres"><img src="_commun/photos/160/miradouro.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Voyage</span> <span class="filtre-n">4</span></a></li>
           </ul>
         </nav>
       </div>
     </div>
   </div>
   </div>
-  <div class="gal-etat mq-ecran" lang="de">
+  <div class="mq-ecran" lang="de">
     <p class="mq-etat" style="left:calc(var(--gut) - 8px)" lang="fr">État · Allemand : les libellés les plus longs</p><span class="mq-pin" aria-hidden="true">13</span>
-    <div class="gal-filtres" id="filtres-de">
-    <div class="wrap gal-filtres-in">
-      <div class="gal-ligne">
-        <nav class="gal-groupe" aria-label="Blick (de)"><span class="etiquette" aria-hidden="true">Blick</span>
+    <div class="filtres-barre" id="filtres-de">
+    <div class="wrap filtres">
+      <div class="filtres-ligne">
+        <nav class="filtres-groupe" aria-label="Blick (de)"><span class="etiquette" aria-hidden="true">Blick</span>
           <ul>
-          <li><a class="gal-f" href="/galerie#filtres" aria-current="page"><span class="gal-f-t">Beide</span> <span class="gal-n">22</span></a></li>
-          <li><a class="gal-f" href="/galerie?regard=sebastien#filtres"><span class="gal-f-t">Sébastien</span> <span class="gal-n">10</span></a></li>
-          <li><a class="gal-f" href="/galerie?regard=julien#filtres"><span class="gal-f-t">Julien</span> <span class="gal-n">12</span></a></li>
+          <li><a class="filtre" href="/galerie#filtres" aria-current="page"><span class="filtre-nom">Beide</span> <span class="filtre-n">22</span></a></li>
+          <li><a class="filtre" href="/galerie?regard=sebastien#filtres"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">10</span></a></li>
+          <li><a class="filtre" href="/galerie?regard=julien#filtres"><span class="filtre-nom">Julien</span> <span class="filtre-n">12</span></a></li>
           </ul>
         </nav>
-        <details class="gal-trier">
-          <summary><span class="gal-n">Reihenfolge:</span> <span>von uns gewählt</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <details class="deroulant">
+          <summary><span class="filtre-n">Reihenfolge:</span> <span>von uns gewählt</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
           <ul aria-label="Reihenfolge">
             <li><a href="/galerie#filtres" aria-current="true">Von uns gewählt<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
             <li><a href="/galerie?ordre=recentes#filtres">Neueste zuerst</a></li>
           </ul>
         </details>
       </div>
-      <div class="gal-ligne gal-ligne--series">
-        <nav class="gal-groupe gal-series" aria-label="Serien (de)" data-defile><span class="etiquette" aria-hidden="true">Serien</span>
+      <div class="filtres-ligne">
+        <nav class="filtres-groupe filtres-defile" aria-label="Serien (de)" data-defile><span class="etiquette" aria-hidden="true">Serien</span>
           <ul>
-          <li><a class="gal-f" href="/galerie?serie=atlantique#filtres"><img src="_commun/photos/160/cais.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Atlantik</span> <span class="gal-n">3</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=paysage#filtres"><img src="_commun/photos/160/brume.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Landschaft</span> <span class="gal-n">5</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=portrait#filtres"><img src="_commun/photos/160/ines.webp" width="107" height="160" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Porträt</span> <span class="gal-n">3</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=rue#filtres"><img src="_commun/photos/160/linge.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Straße</span> <span class="gal-n">7</span></a></li>
-          <li><a class="gal-f" href="/galerie?serie=voyage#filtres"><img src="_commun/photos/160/miradouro.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="gal-f-t">Reise</span> <span class="gal-n">4</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=atlantique#filtres"><img src="_commun/photos/160/cais.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Atlantik</span> <span class="filtre-n">3</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=paysage#filtres"><img src="_commun/photos/160/brume.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Landschaft</span> <span class="filtre-n">5</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=portrait#filtres"><img src="_commun/photos/160/ines.webp" width="107" height="160" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Porträt</span> <span class="filtre-n">3</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=rue#filtres"><img src="_commun/photos/160/linge.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Straße</span> <span class="filtre-n">7</span></a></li>
+          <li><a class="filtre" href="/galerie?serie=voyage#filtres"><img src="_commun/photos/160/miradouro.webp" width="160" height="107" alt="" loading="lazy" decoding="async"><span class="filtre-nom">Reise</span> <span class="filtre-n">4</span></a></li>
           </ul>
         </nav>
       </div>
@@ -359,7 +299,7 @@
     <li><span class="mq-num" aria-hidden="true">5</span><b>Le titre de la grille dit ce qu’on voit</b><p>« Les deux regards · 22 photos », puis « Les photos de Julien · 12 sur 22 » : le regard n’est dit qu’une fois. Les étiquettes ✕ n’apparaissent que si deux filtres se cumulent.</p><span class="mq-ref">UX-F-28 · jury n° 2 et 7</span></li>
     <li><span class="mq-num" aria-hidden="true">6</span><b>Des rangées justifiées, dans l’ordre choisi</b><p>Rangées de la planche : chaque photo garde son format, sans recadrage ni fond gris, 240 px de haut au bureau, 112 px au téléphone (deux par rangée). On lit de gauche à droite, comme vous avez composé la sélection, au clavier comme à l’œil.</p><span class="mq-ref">UX-F-13, UX-F-17 · RGAA 12.8 · jury n° 11</span></li>
     <li><span class="mq-num" aria-hidden="true">7</span><b>Un seul cartel, et le focus visible</b><p>Titre, puis « Auteur · Lieu · date » sur une ligne, coupée d’une ellipse au besoin ; le texte entier reste le nom du lien, et chaque image a sa description. Ici, « Quai, 7 h 12 » au focus clavier : contour de 2 px, à 4 px de la photo.</p><span class="mq-ref">UX-F-28, UX-F-29, UX-F-44 · WCAG 2.4.7 · jury n° 9 et 11</span></li>
-    <li><span class="mq-num" aria-hidden="true">8</span><b>Un diptyque à la place de sa première photo</b><p>Dans « Les deux », la sélection peut réunir deux regards du même instant : le diptyque de la planche prend la place de Belém (N°14), et Miradouro (N°19) quitte la sienne. Sébastien à gauche, Julien à droite.</p><span class="mq-ref">UX-F-45 · jury n° 6</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Un diptyque à la place de sa première photo</b><p>Dans « Les deux », la sélection peut réunir deux regards du même instant : le diptyque de la planche prend la place de Belém, et Miradouro quitte la sienne. Ordre « choisi par nous » du lexique : les trois photos très sombres (Deux ombres, Élise, Deux, minuit) ne sont jamais en tête de rangée. Sébastien à gauche, Julien à droite.</p><span class="mq-ref">UX-F-45 · jury n° 6</span></li>
     <li><span class="mq-num" aria-hidden="true">9</span><b>Une fin de liste qui dit où aller</b><p>Ni défilement infini ni bouton « Charger plus » : 22 photos sur une page, puis les séries et la carte.</p><span class="mq-ref">B&S 1.1 Incitation</span></li>
     <li><span class="mq-num" aria-hidden="true">10</span><b>État · un regard choisi</b><p>Le compte de chaque série suit le regard : Julien n’a aucune photo dans Atlantique, qui n’est plus un lien (« 0 »), et 6 dans Rue. Le cartel retire l’auteur, déjà dit par le titre.</p><span class="mq-ref">jury n° 7</span></li>
     <li><span class="mq-num" aria-hidden="true">11</span><b>État · aucune photo</b><p>Une adresse partagée peut cumuler deux filtres sans photo commune. La page le dit, explique pourquoi et propose les deux pistes ; chaque filtre se retire d’un geste (✕).</p><span class="mq-ref">UX-F-26 · jury n° 5</span></li>

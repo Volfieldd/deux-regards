@@ -10,9 +10,8 @@
 <link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
 <style>
-/* MQ-05 : mise en page de /bonjour, et elle seule. Aucun jeton redéclaré ; composants de public.css (formulaire, cases
-   dessinées, résumé, messages). Ajouts locaux, construits avec les jetons et proposés à la planche (encart) :
-   .depliant (un <details> dans un formulaire), .sous-choix (cases rattachées à un choix), .parent (champ révélé par :has). */
+/* MQ-05 : mise en page de /bonjour, et elle seule. Composants de la planche (_commun/public.css : formulaire, cases dessinées,
+   résumé, messages, bloc, dépliant, sous-choix, champ révélé, duo, envoi, note sur les données, relevé .def). Aucun jeton redéclaré. */
 .bj { display: grid; gap: var(--esp-6); padding-block: var(--esp-6) 0; }
 .bj-intro { display: grid; gap: var(--esp-2); align-content: start; }
 .bj-ensuite { align-self: start; padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
@@ -26,45 +25,8 @@
   .bj-intro { grid-area: intro; } .bj .form { grid-area: form; } .bj-ensuite { grid-area: ensuite; }
 }
 .form .groupe + .groupe, .form .champ + .groupe { margin-top: 0; }
-.bloc { display: grid; gap: var(--esp-3); margin: 0; padding: var(--esp-3) 0 0; border: 0; border-top: 1px solid var(--rule); min-width: 0; }
-.bloc > legend { float: left; width: 100%; padding: 0; margin: 0 0 var(--esp-1); font: 400 var(--t-titre-3)/1.3 var(--sans); color: var(--ink); }
-.bloc > legend + * { clear: left; }
-.bloc .groupe > legend { font-weight: 500; }
-.bloc > legend + .champ-aide { margin-top: calc(-1 * var(--esp-2)); }
-.bloc.groupe { gap: var(--esp-demi); }
-.bloc.groupe > legend { margin-bottom: var(--esp-2); }
-.sous-choix { display: grid; margin: 0 0 0 34px; padding: 0; list-style: none; }
-.depliant > summary { list-style: none; display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); cursor: pointer; color: var(--ink);
-  text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
-.depliant > summary::-webkit-details-marker { display: none; }
-.depliant > summary .ic { transition: transform .2s; }
-.depliant[open] > summary .ic { transform: rotate(180deg); }
-.depliant > div { display: grid; gap: var(--esp-3); margin-top: var(--esp-2); padding-left: var(--esp-2); border-left: 1px solid var(--field); }
-.duo { display: grid; gap: var(--esp-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
-/* Nom du parent : visible seulement si « moins de 18 ans » est coché ; sans :has (navigateurs d'avant 2023), toujours visible. */
-.parent { margin: var(--esp-1) 0 0 34px; }
-@supports selector(:has(*)) { .age:not(:has(input[value="non"]:checked)) .parent { display: none; } }
-.envoi { display: flex; flex-wrap: wrap; align-items: center; gap: var(--esp-2) var(--esp-3); }
-.envoi p { margin: 0; color: var(--mute); font-size: var(--t-petit); }
-.note-donnees { margin: 0; color: var(--mute); font-size: var(--t-meta); line-height: 1.55; max-width: 60ch; }
-.note-donnees a, .champ-aide a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-/* Champ piège (anti-robots) : hors de l'écran et des tabulations, comme .hello-trap. */
-.piege { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-/* Autres états */
-.etats { display: grid; gap: var(--esp-12) var(--esp-8); padding-top: var(--esp-16); align-items: start; }
-.etats-pile { display: grid; gap: var(--esp-12); align-content: start; }
-.etats > *, .etats-pile > * { min-width: 0; }
-.resume.is-focus { outline-offset: 4px; } /* même dessin que .resume:focus-visible */
-@media (min-width: 1024px) { .etats { grid-template-columns: 412px minmax(0, 1fr); } }
-.ecran { background: var(--paper); }
-.ecran-in { display: grid; gap: var(--esp-3); padding: var(--esp-3) var(--esp-3) var(--esp-4); }
-.ecran-in > .titre-page { justify-self: start; }
-.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
-.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
-.ecran-in .titre-page { font-size: var(--t-titre-2); }
-.recap { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--esp-1) var(--esp-3); margin: 0; }
-.recap dt { color: var(--mute); } .recap dd { margin: 0; }
-
+/* Autres états : la page de remerciement dans un cadre de téléphone */
+.mq-ecran-in > .titre-page { justify-self: start; font-size: var(--t-titre-2); }
 </style>
 </head>
 <body>
@@ -75,7 +37,7 @@
   <div class="sh-bar">
     <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
     <nav class="sh-nav" aria-label="Menu principal">
-      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
     </nav>
     <div class="sh-outils">
       <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
@@ -91,7 +53,7 @@
         <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
         <nav class="sh-panneau" aria-label="Menu principal">
           <ul>
-            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnets">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
             <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
           </ul>
         </nav>
@@ -124,10 +86,10 @@
         </div>
       </details>
     </fieldset>
-    <fieldset class="bloc groupe age groupe--erreur" aria-describedby="age-err"><legend id="age">Votre âge</legend><p class="champ-err" id="age-err"><span class="mq-pin" aria-hidden="true">2</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> dites-nous si vous avez 18 ans ou plus. Avant 18 ans, un parent remplit ce formulaire avec vous.</span></p>
+    <fieldset class="bloc groupe revele-si groupe--erreur" aria-describedby="age-err"><legend id="age">Votre âge</legend><p class="champ-err" id="age-err"><span class="mq-pin" aria-hidden="true">2</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> dites-nous si vous avez 18 ans ou plus. Avant 18 ans, un parent remplit ce formulaire avec vous.</span></p>
       <label class="choix"><span class="mq-pin" aria-hidden="true">5</span><input type="radio" name="adult" value="oui" aria-invalid="true"><span>J’ai 18 ans ou plus</span></label>
-      <label class="choix"><input type="radio" name="adult" value="non" aria-invalid="true"><span>J’ai moins de 18 ans : un parent remplit ce formulaire avec moi</span></label>
-      <div class="champ parent"><label for="parent">Nom du parent</label><p class="champ-aide" id="parent-aide">Il ou elle donne son accord avec vous.</p><input id="parent" name="guardian" maxlength="80" autocomplete="off" aria-describedby="parent-aide"></div>
+      <label class="choix"><input type="radio" name="adult" value="non" data-revele aria-invalid="true"><span>J’ai moins de 18 ans : un parent remplit ce formulaire avec moi</span></label>
+      <div class="champ revele"><label for="parent">Nom du parent</label><p class="champ-aide" id="parent-aide">Il ou elle donne son accord avec vous.</p><input id="parent" name="guardian" maxlength="80" autocomplete="off" aria-describedby="parent-aide"></div>
     </fieldset>
     <fieldset class="bloc" aria-describedby="souhait-aide"><legend>Ce que vous souhaitez</legend>
       <p class="champ-aide" id="souhait-aide">Au moins un choix : recevoir la photo, décider de sa publication, une demande sur vos données, ou un message.</p>
@@ -170,41 +132,41 @@
   </section>
 </div>
 
-<div class="etats">
-  <section class="mq-ecran ecran haut" aria-labelledby="de-t"><span class="mq-pin" aria-hidden="true">9</span><p class="mq-etat" aria-hidden="true">État · Allemand, page vide, focus sur une case</p>
+<div class="mq-etats mq-etats--deux">
+  <section class="mq-ecran mq-fond haut" aria-labelledby="de-t"><span class="mq-pin" aria-hidden="true">9</span><p class="mq-etat" aria-hidden="true">État · Allemand, page vide, focus sur une case</p>
     <header lang="de" class="sh sh--site">
   <div class="sh-bar">
     <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
     <nav class="sh-nav" aria-label="Hauptmenü (Beispiel)">
-      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li></ul>
+      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-sep"><a href="/de/tirages">Kunstdrucke</a></li></ul>
     </nav>
     <div class="sh-outils">
-      <a class="sh-outil sh-recherche" href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
+      <a class="sh-outil sh-recherche" href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suche</span></a>
       <details class="lang-pick">
         <summary><span>DE</span><span class="sr-only"> – Sprache der Seite: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
         <ul aria-label="Sprache wählen">
-          <li><a href="/langue/fr?vers=%2Fde%2Fhallo" hreflang="fr" lang="fr">Français</a></li>
-          <li><a href="/langue/en?vers=%2Fde%2Fhallo" hreflang="en" lang="en">English</a></li>
-          <li><a href="/langue/de?vers=%2Fde%2Fhallo" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/fr?vers=%2Fde%2Fbonjour" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2Fde%2Fbonjour" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2Fde%2Fbonjour" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
         </ul>
       </details>
       <details class="sh-menu">
         <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
         <nav class="sh-panneau" aria-label="Hauptmenü (Beispiel)">
           <ul>
-            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/serien">Serien</a></li><li><a href="/de/reisetagebuecher">Reisetagebücher</a></li><li><a href="/de/karte">Karte</a></li><li><a href="/de/ueber-uns">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/kunstdrucke">Kunstdrucke</a></li>
-            <li><a href="/de/suche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/tirages">Kunstdrucke</a></li>
+            <li><a href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suche</a></li>
           </ul>
         </nav>
       </details>
     </div>
   </div>
 </header>
-    <div class="ecran-in" lang="de">
+    <div class="mq-ecran-in" lang="de">
       <p class="etiquette">Ich habe Sie fotografiert</p>
       <h2 class="titre-page" id="de-t">Hallo!</h2>
       <p class="chapo">Sie sind einem Fotografen von Nicephos begegnet, der Sie vielleicht fotografiert hat. Dieses Foto betrifft Sie: Sie entscheiden, was damit geschieht.</p>
-      <form class="form" action="/de/hallo" method="post" novalidate lang="de">
+      <form class="form" action="/de/bonjour" method="post" novalidate lang="de">
     <p class="form-oblig">Alle Felder sind Pflichtfelder, außer „optional“.</p>
     <fieldset class="bloc" aria-describedby="de-carte-aide"><legend>Ihre Karte</legend>
       <p class="champ-aide" id="de-carte-aide">Die Referenz steht unten auf der Karte, die Ihnen der Fotograf gegeben hat. Keine Karte? Sagen Sie uns stattdessen wann und wo.</p>
@@ -220,10 +182,10 @@
         </div>
       </details>
     </fieldset>
-    <fieldset class="bloc groupe age"><legend id="de-age">Ihr Alter</legend>
+    <fieldset class="bloc groupe revele-si"><legend id="de-age">Ihr Alter</legend>
       <label class="choix"><input type="radio" name="adult" value="oui"><span>Ich bin 18 Jahre oder älter</span></label>
-      <label class="choix"><input type="radio" name="adult" value="non"><span>Ich bin unter 18: Ein Elternteil füllt dieses Formular mit mir aus</span></label>
-      <div class="champ parent"><label for="de-parent">Name des Elternteils</label><p class="champ-aide" id="de-parent-aide">Er oder sie stimmt mit Ihnen zu.</p><input id="de-parent" name="guardian" maxlength="80" autocomplete="off" aria-describedby="de-parent-aide"></div>
+      <label class="choix"><input type="radio" name="adult" value="non" data-revele><span>Ich bin unter 18: Ein Elternteil füllt dieses Formular mit mir aus</span></label>
+      <div class="champ revele"><label for="de-parent">Name des Elternteils</label><p class="champ-aide" id="de-parent-aide">Er oder sie stimmt mit Ihnen zu.</p><input id="de-parent" name="guardian" maxlength="80" autocomplete="off" aria-describedby="de-parent-aide"></div>
     </fieldset>
     <fieldset class="bloc" aria-describedby="de-souhait-aide"><legend>Was Sie möchten</legend>
       <p class="champ-aide" id="de-souhait-aide">Mindestens eine Auswahl: das Foto erhalten, über die Veröffentlichung entscheiden, eine Anfrage zu Ihren Daten oder eine Nachricht.</p>
@@ -243,14 +205,14 @@
         <label class="choix"><input type="radio" name="rights" value="" checked><span>Nichts weiter</span></label>
         <label class="choix"><input type="radio" name="rights" value="acces"><span>Eine Kopie aller meiner Daten erhalten</span></label>
         <label class="choix"><input type="radio" name="rights" value="effacement"><span>Alle meine Daten löschen (und, wenn ich es in der Nachricht verlange, die Fotos, auf denen ich zu sehen bin)</span></label>
-        <p style="margin:0"><a class="lien" href="/de/datenschutz#ihre-rechte">Ihre Rechte an Ihren Daten</a></p>
+        <p style="margin:0"><a class="lien" href="/de/confidentialite#vos-droits">Ihre Rechte an Ihren Daten</a></p>
       </fieldset>
       <div class="champ"><label for="de-message">Eine Nachricht <span class="facultatif">(optional)</span></label><textarea id="de-message" name="message" rows="3" maxlength="2000"></textarea></div>
     </fieldset>
     <fieldset class="bloc"><legend>So erreichen wir Sie</legend>
       <div class="champ"><label for="de-email">Ihre E-Mail</label><p class="champ-aide" id="de-email-aide">Um Ihnen das Foto zu schicken und zu antworten; für nichts anderes.</p><input id="de-email" name="email" type="email" maxlength="200" autocomplete="email" aria-describedby="de-email-aide"></div>
       <div class="champ"><label for="de-nom">Ihr Vor- oder Nachname</label><p class="champ-aide" id="de-nom-aide">Nötig, wenn Sie einer Veröffentlichung zustimmen.</p><input id="de-nom" name="name" maxlength="80" autocomplete="name" aria-describedby="de-nom-aide"></div>
-      <p class="note-donnees">Ihre Adresse dient nur dazu, Ihnen zu antworten und Ihr Foto zu schicken. Sie erhalten sofort eine Eingangsbestätigung. Ohne Einwilligung oder Ablehnung wird Ihre Anfrage nach 12 Monaten gelöscht. <a href="/de/datenschutz">Datenschutz</a></p>
+      <p class="note-donnees">Ihre Adresse dient nur dazu, Ihnen zu antworten und Ihr Foto zu schicken. Sie erhalten sofort eine Eingangsbestätigung. Ohne Einwilligung oder Ablehnung wird Ihre Anfrage nach 12 Monaten gelöscht. <a href="/de/confidentialite">Datenschutz</a></p>
     </fieldset>
     <div class="piege" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
     <div class="envoi"><button class="btn" type="submit">Senden</button><p>Wir antworten innerhalb von 7 Tagen.</p></div>
@@ -258,30 +220,30 @@
     </div>
   </section>
 
-  <div class="etats-pile">
-  <section class="mq-ecran ecran" aria-labelledby="min-t"><span class="mq-pin" aria-hidden="true">10</span><p class="mq-etat" aria-hidden="true">État · Moins de 18 ans : le nom du parent</p>
-    <div class="ecran-in">
-      <fieldset class="bloc groupe age" aria-labelledby="min-t"><legend id="min-t">Votre âge</legend>
+  <div class="mq-pile">
+  <section class="mq-ecran mq-fond" aria-labelledby="min-t"><span class="mq-pin" aria-hidden="true">10</span><p class="mq-etat" aria-hidden="true">État · Moins de 18 ans : le nom du parent</p>
+    <div class="mq-ecran-in">
+      <fieldset class="bloc groupe revele-si" aria-labelledby="min-t"><legend id="min-t">Votre âge</legend>
         <label class="choix"><input type="radio" name="m-adult" value="oui"><span>J’ai 18 ans ou plus</span></label>
-        <label class="choix"><input type="radio" name="m-adult" value="non" checked><span>J’ai moins de 18 ans : un parent remplit ce formulaire avec moi</span></label>
-        <div class="champ parent"><label for="m-parent">Nom du parent</label><p class="champ-aide" id="m-parent-aide">Il ou elle donne son accord avec vous.</p><input id="m-parent" class="is-focus" name="guardian" maxlength="80" autocomplete="off" aria-describedby="m-parent-aide"></div>
+        <label class="choix"><input type="radio" name="m-adult" value="non" data-revele checked><span>J’ai moins de 18 ans : un parent remplit ce formulaire avec moi</span></label>
+        <div class="champ revele"><label for="m-parent">Nom du parent</label><p class="champ-aide" id="m-parent-aide">Il ou elle donne son accord avec vous.</p><input id="m-parent" class="is-focus" name="guardian" maxlength="80" autocomplete="off" aria-describedby="m-parent-aide"></div>
       </fieldset>
     </div>
   </section>
 
-  <section class="mq-ecran ecran" aria-labelledby="quota-t"><span class="mq-pin" aria-hidden="true">11</span><p class="mq-etat" aria-hidden="true">État · Limite anti-abus atteinte</p>
-    <div class="ecran-in">
+  <section class="mq-ecran mq-fond" aria-labelledby="quota-t"><span class="mq-pin" aria-hidden="true">11</span><p class="mq-etat" aria-hidden="true">État · Limite anti-abus atteinte</p>
+    <div class="mq-ecran-in">
       <h2 class="sr-only" id="quota-t">Envoi suspendu un moment</h2>
       <div class="msg" role="status" id="quota-msg"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg><p><b>Ce formulaire a reçu beaucoup d’envois depuis votre connexion.</b> Pour éviter les envois automatiques, il fait une pause : réessayez à partir de 15 h 40, ou écrivez à <a href="mailto:contact@example.org">contact@example.org</a>. Ce que vous avez saisi est gardé.</p></div>
       <div class="envoi"><button class="btn" type="button" aria-disabled="true" aria-describedby="quota-msg">Envoyer</button><p>Possible à partir de 15 h 40.</p></div>
     </div>
   </section>
 
-  <section class="mq-ecran ecran" aria-labelledby="merci-t"><span class="mq-pin" aria-hidden="true">12</span><p class="mq-etat" aria-hidden="true">État · Après l’envoi</p>
-    <div class="ecran-in">
+  <section class="mq-ecran mq-fond" aria-labelledby="merci-t"><span class="mq-pin" aria-hidden="true">12</span><p class="mq-etat" aria-hidden="true">État · Après l’envoi</p>
+    <div class="mq-ecran-in">
       <div class="msg msg--ok" role="status"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><p><b>Envoyé.</b> Un accusé de réception est parti à claire.exemple@example.org.</p></div>
       <h2 class="titre-page is-focus" id="merci-t" tabindex="-1">Merci, c’est noté.</h2>
-      <dl class="recap">
+      <dl class="def">
         <dt>Photo</dt><dd>14 oct. 2026, vers 18 h 15, quai Ligny, Angers</dd>
         <dt>Vous souhaitez</dt><dd>recevoir la photo par e-mail ; sa publication sur le site, avec votre prénom</dd>
         <dt>Âge</dt><dd>18 ans ou plus</dd>
@@ -332,7 +294,7 @@
         <ul aria-labelledby="sf-site">
           <li><a href="/a-propos#contact">Contact</a></li>
           <li><a href="/droits">Droits et licences</a></li>
-          <li><a href="/carnets/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="/carnet/flux.xml">Flux RSS des carnets</a></li>
           <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
           <li><a href="/confidentialite">Confidentialité</a></li>
           <li><a href="/mentions-legales">Mentions légales</a></li>
