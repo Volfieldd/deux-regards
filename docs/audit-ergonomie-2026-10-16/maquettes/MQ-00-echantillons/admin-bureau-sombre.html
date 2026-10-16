@@ -21,7 +21,7 @@
 <a class="skip" href="#contenu">Aller au contenu</a>
 <div class="shell">
 <aside class="side" id="admin-nav" aria-label="Menu de l’administration">
-  <div class="side-haut"><a class="word" href="/admin"><span>Nicephos</span></a><button class="side-fermer" type="button" aria-controls="admin-nav" aria-expanded="true"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Fermer</button></div>
+  <div class="side-haut"><a class="word" href="/admin"><span>Nicephos</span></a><a class="side-fermer" href="#contenu"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Fermer<span class="sr-only"> le menu</span></a></div>
   <button class="cmdk js-seul" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Rechercher, agir…</span><kbd>Ctrl K</kbd></button>
   <nav class="nav" aria-label="Aujourd’hui">
     <a href="/admin"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui<span class="nav-badge urgent"><span aria-hidden="true">✕ 1</span><span class="sr-only">, 1 urgence</span></span></a>
@@ -32,7 +32,7 @@
     <div class="nav-ser"><a href="/admin/series"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/></svg>Séries</a><details class="ser-plier"><summary aria-label="Afficher les 5 séries"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>5</summary>
       <ul class="ser" aria-label="Séries">
         <li><a href="/admin/photos?serie=atlantique"><span class="sw"><img src="../_commun/photos/160/cais.webp" alt="" width="18" height="18"></span><span class="t">Atlantique</span><span class="n">3</span></a></li>
-        <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="../_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">6</span></a></li>
+        <li><a href="/admin/photos?serie=paysage"><span class="sw"><img src="../_commun/photos/160/brume.webp" alt="" width="18" height="18"></span><span class="t">Paysage</span><span class="n">7</span></a></li>
         <li><a href="/admin/photos?serie=portrait"><span class="sw"><img src="../_commun/photos/160/ines.webp" alt="" width="18" height="18"></span><span class="t">Portrait</span><span class="n">3</span></a></li>
         <li><a href="/admin/photos?serie=rue"><span class="sw"><img src="../_commun/photos/160/linge.webp" alt="" width="18" height="18"></span><span class="t">Rue</span><span class="n">8</span></a></li>
         <li><a href="/admin/photos?serie=voyage"><span class="sw"><img src="../_commun/photos/160/miradouro.webp" alt="" width="18" height="18"></span><span class="t">Voyage</span><span class="n">5</span></a></li>
@@ -99,7 +99,7 @@
       </div>
     </header>
     <div class="fiche-grille">
-      <figure class="fiche-photo"><img src="../_commun/photos/480/maine.webp" width="480" height="320" alt="Une minoterie à six cheminées sur la Maine, à demi noyée dans la brume bleue du matin."></figure>
+      <figure class="fiche-photo"><img src="../_commun/photos/480/maine.webp" srcset="../_commun/photos/480/maine.webp 480w, ../_commun/photos/maine.webp 900w, ../_commun/photos/1600/maine.webp 1600w" sizes="(min-width: 1181px) 460px, (min-width: 721px) 230px, 260px" width="480" height="320" alt="Une minoterie à six cheminées sur la Maine, à demi noyée dans la brume bleue du matin."></figure>
       <form class="form fiche-form" action="/admin/photos/24" method="post">
         <p class="hint">Tous les champs sont obligatoires, sauf mention « facultatif ».</p>
         <div class="champ-a"><label for="titre-fr">Titre</label><p class="aide" id="titre-aide-fr">Il apparaît sous la photo et dans l’adresse de sa page.</p><input id="titre-fr" type="text" value="Minoterie, brume du matin" aria-describedby="titre-aide-fr"></div>
@@ -109,6 +109,7 @@
         </div>
         <div class="champ-a"><label for="date-fr">Date de la prise de vue</label><p class="aide" id="date-aide-fr">Écrivez-la comme vous voulez : « 14/10/2026 », « 14 oct. 2026 », « octobre 2026 ». L’appareil indique le 14 oct. 2026 à 6 h 55.</p><input id="date-fr" type="text" class="is-focus" value="demain matin" aria-invalid="true" aria-describedby="date-aide-fr date-err-fr"><p class="err" id="date-err-fr"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> cette date est dans le futur. Écrivez le jour de la prise de vue, par exemple « 14 oct. 2026 ».</span></p></div>
         <div class="champ-a"><label for="leg-fr">Légende <span class="facultatif">(facultatif)</span></label><textarea id="leg-fr" rows="2">La Maine fume encore ; le moulin attend le soleil.</textarea></div>
+        <div class="champ-a"><label for="alt-fr">Texte de remplacement</label><p class="aide" id="alt-aide-fr">Lu par les personnes aveugles à la place de la photo : ce qu’on y voit, en une phrase.</p><textarea id="alt-fr" rows="2" aria-describedby="alt-aide-fr">Une minoterie à six cheminées sur la Maine, à demi noyée dans la brume bleue du matin.</textarea></div>
         <p class="sans-script"><button class="btn ghost" type="submit">Enregistrer</button></p>
       </form>
     </div>
@@ -119,7 +120,7 @@
   <a href="/admin/photos" aria-current="page"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>Photos</a>
   <a class="imp" href="/admin/photos?importer#import" aria-label="Importer des photos"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></a>
   <a href="/admin/rencontre/accueil"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
-  <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
+  <a href="#admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</a>
 </nav>
 <div class="toast" role="status"><p><b>Titre</b> enregistré.</p><button type="button">Défaire</button><span class="toast-temps" style="--reste: 62%"></span></div>
 </body>

@@ -23,6 +23,9 @@
    onglets .sur-onglet, onglets de langue sur deux lignes sous 420 px (§ 11, 12) ; visionneuse d'un aperçu .vis-b (§ 13) ;
    barre « Pour les cochées » dans un cadre d'état, pastille de la barre d'actions fixe (§ 14). L'app de terrain (MQ-10)
    a les siens en fin d'app.css.
+   Passe 4 (jury v2, 16 oct.) : menu du téléphone sans JavaScript (« Menu » est un lien vers #admin-nav, la barre s'ouvre
+   par .side:target, « Fermer » est un lien ; défaut de main, mq2-correctifs-main.md § 8) ; pied de la barre latérale qui
+   passe à la ligne dans la barre de 220 px (tablette), au lieu de rogner « Hilfe », « DE » et la version en allemand (§ 1).
    ===================================================================================================== */
 
 /* Texte lu seulement : admin.css (main) le masque par clip, qui est déprécié ; clip-path est la forme actuelle (celle de
@@ -92,6 +95,13 @@
 /* Haut de la barre : le nom du site et, au téléphone, « Fermer » (44 px) : le panneau se ferme sans chercher l'onglet Menu. */
 .admin .side-haut { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .admin .side-fermer { display: none; }
+/* Menu du téléphone SANS JavaScript (passe 4, jury v2, défaut A, hérité de main) : admin.css cache la barre sous 720 px
+   (visibility: hidden) et seule la classe .open, posée par le script, la montrait ; sans script, Réglages, Personnes, Boutique,
+   Carnets ou Galeries privées n'étaient joignables qu'en tapant l'adresse. Désormais, « Menu » (barre d'onglets) est un lien
+   <a href="#admin-nav"> : sans script, il ouvre la barre par :target ; « Fermer » est un lien <a href="#contenu"> qui la
+   referme et rend le focus au contenu. Avec le script, rien ne change : il intercepte le clic (preventDefault), pose .open et
+   aria-expanded, et donne au lien le rôle d'un bouton (role="button"). */
+@media (max-width: 720px) { .admin .side:target { transform: none; visibility: visible; transition: transform .2s; } }
 @media (max-width: 720px) { .admin .side-fermer { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; margin: -6px 0 0;
   border-radius: var(--r-admin); color: var(--ink); font-size: 14px; box-shadow: inset 0 0 0 1px var(--line2); } }
 /* Le nom du compte ouvre « Mon compte » (langue, thème, raccourcis, e-mail des avis) : souligné, sa ligne entière est la cible. */
@@ -112,6 +122,18 @@
 /* Palette Ctrl K (admin.css) : intitulés de groupe et touches à 12 px. */
 .admin .pal-list .sec, .admin .palette kbd { font-size: 12px; }
 @media (max-width: 1180px) and (min-width: 721px) { .admin .cmdk kbd, .admin .me .btn-theme { display: none; } .admin .me { gap: 4px; } }
+/* Pied de la barre de 220 px (passe 4, jury v2, défaut B) : la grille à deux colonnes rognait, en allemand, « Hilfe », le
+   sélecteur « DE » et « 1.90.0 » de 4 à 5 px (« Einstellungen » prend la première colonne). Dans la barre étroite, les
+   entrées se serrent (6 px de marge au lieu de 10) et passent à la ligne quand elles ne tiennent pas côte à côte : rien ne
+   sort de la barre, dans aucune langue ; en français, le pied garde ses trois lignes. Essai : outils/consol-admin.mjs, la
+   barre allemande de l'échantillon MQ-00 à 820 et 1 024 px. */
+@media (max-width: 1180px) and (min-width: 721px) {
+  .admin .pied-liens { display: flex; flex-wrap: wrap; gap: 0 4px; }
+  .admin .pied-liens > * { flex: 1 1 auto; min-width: 0; }
+  .admin .pied-liens > .pied-large { flex-basis: 100%; }
+  .admin .pied-liens a, .admin .pied-liens .admin-lang > summary { gap: 6px; padding: 0 6px; }
+  .admin .pied-liens a { white-space: normal; }
+}
 /* Variante du rôle Photographe (MQ-00) : les mêmes groupes, filtrés par les permissions (server/permissions.js) ; aucun
    groupe vide, aucun lien vers une page interdite. Photos : Photothèque, puis « Séries » qui n'est PAS un lien (pas de
    series.gerer : /admin/series lui répondrait 403) mais un intitulé repliant (.ser-titre) dont les sous-entrées
@@ -155,6 +177,17 @@
   .ep-actions .menu { flex: 0 0 auto; }
 }
 @media (min-width: 721px) { .ep-actions .ep-plus { display: none; } }
+/* Focus jamais caché par une barre collante ou fixe (passe 4, WCAG 2.4.11, RGAA 10.7 ; contrôle outils/focus-colle.mjs) :
+   la page réserve la hauteur des barres au défilement. Au téléphone, la barre d'onglets (74 px) et, sur une fiche, la barre
+   d'actions au-dessus (65 px) ; au bureau, la barre « Pour les photos cochées » d'un lot (.bulk, collante en haut). */
+@media (max-width: 720px) {
+  html:has(> body.admin .tabbar) { scroll-padding-bottom: 90px; }
+  html:has(> body.admin .ep-actions) { scroll-padding-bottom: 155px; }
+}
+@media (min-width: 721px) { html:has(> body.admin .main:not(.wide) .bulk) { scroll-padding-top: 136px; } }
+/* Palette Ctrl K : admin.css (main) retire tout dessin au champ (box-shadow: none !important) ; le focus se voit sur sa
+   ligne, un trait ambre de 2 px (passe 4 ; à reporter dans main, mq2-correctifs-main.md § 9). */
+.admin .pal-in:focus-within { box-shadow: inset 0 -2px 0 var(--accent-ink); }
 /* Barre d'onglets du téléphone (admin.css) : ses libellés à 12 px, comme tout le texte de l'admin. */
 @media (max-width: 720px) { .admin .tabbar a, .admin .tabbar button { font-size: 12px; } }
 /* Titre d'un autre écran montré dans la même page : le dessin du H1, au niveau 2 du plan. */
@@ -560,12 +593,16 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
 .onglet-alerte { display: inline-flex; align-items: center; gap: 4px; color: var(--warn); font-size: 12px; font-weight: 500; }
 .onglets a { min-width: 44px; justify-content: center; }
 .onglets .n { color: var(--ink3); font-size: 12px; font-weight: 400; }
-@media (max-width: 720px) {
+/* Passe 4 (jury v2) : la rangée passe à la ligne jusqu'à 1 100 px (tablette comprise), et non plus seulement au téléphone :
+   à 820 px, l'onglet courant (« Assistants d'analyse », le dernier) était hors de vue sous Firefox et Safari. */
+@media (max-width: 1100px) {
   .onglets { margin: 0 0 24px; }
   .onglets ul { flex-wrap: wrap; gap: 8px; overflow: visible; padding-inline: 0; box-shadow: none; mask-image: none; }
   .onglets a { padding: 0 14px; border: 1px solid var(--line2); border-radius: var(--r-admin); white-space: normal; }
-  .onglets a[aria-current] { border-color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent-ink); }
+  .onglets a[aria-current] { border-color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent-ink); scroll-initial-target: none; }
 }
+/* (scroll-initial-target ne sert qu'à la rangée qui défile : sur une rangée qui passe à la ligne, il ferait défiler la page
+   entière jusqu'aux onglets à l'ouverture.) */
 .sur-onglet { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; margin: 0 0 20px; color: var(--ink2); font-size: 13px; }
 .sur-onglet a { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line2); }
 @media (max-width: 720px), (pointer: coarse) { .sur-onglet a { min-height: 44px; } }

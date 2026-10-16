@@ -117,3 +117,5 @@ input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; margin:
 :is(input[type="radio"], input[type="checkbox"])[aria-invalid="true"] { outline: 2px solid var(--error, var(--ko)); outline-offset: 1px; }
 input[type="radio"][aria-invalid="true"] { border-radius: 50%; }
 :is(input[type="radio"], input[type="checkbox"])[aria-invalid="true"]:is(:focus-visible, .is-focus) { outline: 2px solid var(--ink) !important; outline-offset: 4px; box-shadow: 0 0 0 2px var(--error, var(--ko)); }
+/* Passe 4 (jury v2) : l'en-tête de l'app (.app-bar, collant) ne cache jamais le champ qui reçoit le focus (WCAG 2.4.11). */
+html:has(.app-bar) { scroll-padding-top: 88px; }

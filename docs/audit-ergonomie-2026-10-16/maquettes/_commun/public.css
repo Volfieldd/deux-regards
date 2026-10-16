@@ -19,6 +19,10 @@
    .billet-e--cote en liste, adresses imprimées en 10 pt (§ 21) ; .choix-sous (§ 22) ; étoile de .favorisable sous le cartel
    (§ 23) ; grille du contact (§ 24) ; mur sans aplat et réduit au petit format, .p-haut, vignettes de .ligne, .rc-l et
    .commandes qui suivent le format (§ 25) ; aperçu d'impression à l'échelle 1 et .f-date (§ 26).
+   Passe 4 (jury v2, 16 oct.) : deux photos au plus par rangée au téléphone, garanti par le CSS (.v, .c, § 18) ; barre de
+   filtres non collante au téléphone, scroll-padding-top sous un élément collant, ligne qui défile toujours coupée au bord
+   (§ 17) ; en-tête des galeries privées .sh--prive (§ 1) ; une seule visionneuse par adresse, .vu réservée à la galerie
+   privée (§ 20).
    ===================================================================================================== */
 
 /* ---------- 0. Socle : corrections de lisibilité (UX-F-29) et de comportement (UX-F-34) ---------- */
@@ -119,6 +123,12 @@ button.sh-outil { border: 0; background: none; font: inherit; font-size: 15px; c
 /* Variante Tunnel : marque | retour | langue. */
 .sh--tunnel .sh-marque { margin-right: auto; }
 .sh--tunnel .sh-outils { gap: var(--esp-2); }
+/* Galeries privées (.sh--prive, passe 4 ; jury v1 et v2) : « Galerie privée » au même bord, à gauche, sur la page du mot de
+   passe (Tunnel, MQ-16) comme dans la galerie ouverte (Contexte, MQ-17) ; la marque, un texte, au centre dès 560 px, à droite
+   en dessous (le Contexte, lui, la cache sous 560 px : ses outils prennent la place). Ordre du document : le titre, la marque,
+   puis les outils s'il y en a. L'en-tête ne change pas de place entre le mot de passe et la galerie. */
+.sh--tunnel.sh--prive .sh-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--esp-2); }
+.sh--tunnel.sh--prive .sh-marque { margin: 0; }
 
 /* Contexte étroit : la liste des langues s'ancre au bord droit de l'en-tête, et non au sélecteur ; suivi de « Quitter »
    (galerie privée) ou de « Menu », elle sortirait de l'écran à 320 px. */
@@ -143,6 +153,7 @@ button.sh-outil { border: 0; background: none; font: inherit; font-size: 15px; c
   .sh--contexte .sh-marque { display: inline-flex; }
   .sh--contexte .sh-outils { justify-self: end; }
   .sh--tunnel .sh-retour-court { display: none; }
+  .sh--tunnel.sh--prive .sh-bar { grid-template-columns: minmax(0, 1fr) auto minmax(max-content, 1fr); column-gap: var(--esp-3); }
   .sh--tunnel .sh-retour-long { display: inline; }
 }
 /* M : deux lignes. Ligne 1 marque et outils ; ligne 2 le menu entier. */
@@ -241,7 +252,8 @@ footer.sf--reduit { margin-top: var(--esp-8); padding-top: var(--esp-3); }
    Variantes de méta, déclarées : vignette « Auteur · Lieu · date » ; « À proximité » « 600 m · Alfama » (la distance
    d'abord, c'est la raison d'être de la liste) ; récit d'un billet « Alfama, Lisbonne · sam. 10 oct., 7 h 42 » (lieu précis
    et heure ; l'auteur est dit une fois par le billet) ; récit d'un billet à deux voix (Sébastien et Julien signent ensemble) :
-   l'auteur reste en tête, « Julien · Alfama, Lisbonne · sam. 10 oct., 7 h 42 », comme dans la visionneuse compacte (§ 20). */
+   l'auteur reste en tête, « Julien · Alfama, Lisbonne · sam. 10 oct., 7 h 42 ». Ces variantes du récit restent dans le
+   billet : la visionneuse (§ 20) et la galerie privée (§ 23) gardent le cartel de vignette (passe 4). */
 .cartel { display: grid; gap: 2px; min-width: 0; margin: 0; padding-top: var(--esp-1); }
 .cartel-t { font-size: 16px; line-height: 1.35; color: var(--ink); font-weight: 400; }
 .cartel-m { font-size: var(--t-meta); line-height: 1.45; color: var(--mute); }
@@ -261,9 +273,10 @@ footer.sf--reduit { margin-top: var(--esp-8); padding-top: var(--esp-3); }
 /* ---------- 6. Vignettes en rangées justifiées : le format de chaque photo, à hauteur commune ----------
    Ni fond gris, ni cercle, ni recadrage. Chaque <li> porte son rapport largeur/hauteur : style="--r: 1.5".
    Hauteur visée --h : 240 px au bureau (≥ 1 280), 200 px sur tablette (768-1 279) ; au téléphone, 40 % de la largeur de la
-   rangée (40cqi) : DEUX PHOTOS AU PLUS PAR RANGÉE. Une horizontale y est seule, en pleine largeur, ou à côté d'une verticale ;
-   deux verticales vont ensemble. Trois photos ne tiennent que si trois verticales se suivent : l'ordre « choisi par nous »
-   l'évite (lexique § 4.2), et le cartel (§ 5) reste lisible même alors.
+   rangée (40cqi) : DEUX PHOTOS AU PLUS PAR RANGÉE, garanti par le CSS et non par l'ordre des photos (§ 18, passe 4). Une
+   horizontale y est seule, en pleine largeur, ou à côté d'une verticale ; deux verticales vont ensemble ; trois verticales de
+   suite ne tiennent jamais sur une rangée (la troisième passe à la suivante). Chaque <li> d'une photo verticale porte la
+   classe .v (le serveur la pose quand r < 1), une photo carrée .c.
    Taille des images (srcset + sizes) : srcset avec les vraies largeurs des fichiers (horizontale : 480/ 480w, 900 px 900w ;
    verticale : 480/ 320w, 900 px 600w ; 1600/ seulement en grand format) ; sizes selon le FORMAT, à recopier tel quel :
      horizontale (--r: 1.5)   sizes="(min-width: 1280px) 470px, (min-width: 768px) 390px, calc(100vw - 48px)"
@@ -503,10 +516,19 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 /* ---------- 17. Filtres : des liens, une adresse par choix (partageable, sans script) ----------
    L'entrée active comme dans le menu (500, soulignée de sable) ; chaque choix annonce son nombre : jamais de liste vide.
    .filtres-barre : la barre collante de la Galerie (un seul filet, en bas). Un groupe = une étiquette + une liste.
-   .filtres-defile : au téléphone, une ligne qui défile (la vignette coupée au bord dit qu'il y a une suite).
+   .filtres-defile : au téléphone, une ligne qui défile ; ses choix ont tous la même largeur, calculée pour que le dernier
+   visible soit toujours coupé à moitié au bord de l'écran (2,5 choix visibles sous 480 px, 3,5 au-delà) : la vignette coupée
+   dit qu'il y a une suite, à toutes les largeurs (passe 4 ; avant, « Rue » commençait juste après le bord d'un Pixel 7).
    .actifs : filtres cumulés, une étiquette ✕ par filtre, seulement quand il y en a plusieurs. */
 .filtres { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-6); padding-block: var(--esp-1); border-block: 1px solid var(--rule); }
 .filtres-barre { position: sticky; top: 0; z-index: 15; background: var(--paper); border-bottom: 1px solid var(--rule); }
+/* Passe 4 (jury v2) : au téléphone, la barre n'est plus collante (149 px, 18 % d'un Pixel 7, 26 % à 320 × 640, en permanence
+   au-dessus des photos) ; elle reste en tête de la Galerie, et « Filtres » se retrouve en remontant. Collante à partir de
+   768 px, où elle tient sur deux lignes basses : la page réserve sa hauteur au défilement (scroll-padding-top), pour qu'un
+   élément qui reçoit le focus au clavier ne passe jamais dessous (WCAG 2.4.11, RGAA 10.7 ; contrôle outils/focus-colle.mjs).
+   Règle générale : tout élément collant qui reste au-dessus du contenu réserve sa hauteur par scroll-padding-top. */
+@media (max-width: 767px) { .filtres-barre { position: static; } }
+@media (min-width: 768px) { html:has(.filtres-barre) { scroll-padding-top: calc(var(--filtres-h, 106px) + var(--esp-2)); } }
 .filtres-barre .filtres { display: grid; gap: 0; border: 0; }
 .filtres-ligne { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--esp-4); min-width: 0; }
 .filtres-groupe { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-2); min-width: 0; }
@@ -525,18 +547,41 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .filtres-defile::-webkit-scrollbar { display: none; }
 .filtres-defile ul { flex-wrap: nowrap; }
 @media (max-width: 767px) {
+  .filtres-defile { --vus: 2.5; column-gap: 0; }
+  .filtres-defile ul { gap: 0 var(--esp-2); }
+  .filtres-defile li { flex: none; width: calc((100vw - var(--gut) - var(--esp-2) * (var(--vus) - .5)) / var(--vus)); }
+  .filtres-defile .filtre { width: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto;
+    align-content: center; column-gap: var(--esp-1); white-space: normal; line-height: 1.25; padding-block: 4px; }
+  .filtres-defile .filtre img { grid-row: 1 / span 2; }
+  .filtres-defile .filtre-nom, .filtres-defile .filtre-n { grid-column: 2; min-width: 0; overflow-wrap: anywhere; }
   .filtres:not(.filtres-barre .filtres) { display: grid; gap: 0; }
   .filtres-groupe > .etiquette { min-width: 0; }
   .filtres-groupe ul { gap: 0 var(--esp-2); }
   .filtres-defile > .etiquette { display: none; }
 }
+@media (min-width: 480px) and (max-width: 767px) { .filtres-defile { --vus: 3.5; } }
 .actifs { display: flex; flex-wrap: wrap; gap: var(--esp-1); list-style: none; margin: 0; padding: 0; }
 .actif { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); padding: 0 12px 0 var(--esp-2); border: 1px solid var(--field); color: var(--ink); font-size: 15px; }
 .actif:hover { border-color: var(--ink); }
 
 /* ---------- 18. Rangées : variantes ----------
    .rangees--etiree : une rangée étirée sur toute la largeur au-delà du téléphone (séries, « À proximité », autres tirages).
-   .diptyque--rangee : dans la Galerie, le diptyque prend toute une rangée, à la place de sa première photo. */
+   .diptyque--rangee : dans la Galerie, le diptyque prend toute une rangée, à la place de sa première photo.
+   Deux photos au plus par rangée au téléphone, GARANTI PAR LE CSS (passe 4, jury v2 : la série Portrait, Tiago · Inês ·
+   Élise, alignait trois verticales de 97 px sur un Pixel 7). La rangée a pour hauteur 40 % de sa largeur : une verticale y
+   vaut 26,7 %, une horizontale 60 %. Deux verticales et une troisième photo tiendraient ensemble (53,3 % + 8 px + 26,7 %) ;
+   la photo qui suit deux verticales (.v + .v + li) prend donc 47 % au moins : elle ne tient plus à côté d'elles et ouvre
+   la rangée suivante (les deux premières, à 50 % chacune, n'en sont pas changées). Une photo carrée (.c) prend 47 % au
+   moins : aucune rangée de trois ne se forme avec elle, et elle ne change pas de taille (seule, à deux ou avec une
+   verticale, elle vaut déjà plus). Une verticale ne dépasse jamais la moitié de la rangée : si trois verticales ouvrent une
+   rangée et qu'une horizontale suit, la troisième y reste seule, à la moitié de la largeur, au lieu d'occuper tout l'écran.
+   Vérifié sur la vue Portrait (Tiago · Inês | Élise) et sur la vue Julien (Ligne d'eau · Passage | Sous-bois · Alfama |
+   Linge…), à 320, 360, 412 et 767 px (outils/sizes-tel.py compose les rangées de la même façon). L'ordre « choisi par
+   nous » n'a plus à l'éviter. Au-delà du téléphone, rien ne change. */
+@media (max-width: 767px) {
+  .rangees > .v + .v + li, .rangees > .c { min-width: 47%; }
+  .rangees > .v { max-width: calc(50% - var(--esp-1) / 2); }
+}
 .rangees--etiree { --h: 112px; }
 @supports (width: 1cqi) { @media (max-width: 767px) { .rangees--etiree { --h: 40cqi; } } }
 /* Au-delà du téléphone, une rangée étirée tient sur UNE ligne : si ses photos ne tiennent pas à la hauteur visée, elles
@@ -600,7 +645,12 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
    Fond noir de body.dark, quel que soit le thème. La photo à la hauteur de l'écran ; les flèches dans les marges, au milieu
    de la photo (≥ 1 200 px), sinon sous la photo avec le compteur ; le cartel à gauche, les actions à droite ; dessous la légende
    et les données (.def), le tirage, la licence ; puis « À proximité ». Plein écran : .vis-plein.
-   .vu : la même visionneuse, compacte, ouverte depuis un contexte (billet, galerie privée) : précédente · position · suivante. */
+   Une seule visionneuse par adresse (passe 4, jury v2) : /photo/<slug>, avec ou sans ?carnet=<billet> ou ?serie=…, s'ouvre
+   TOUJOURS dans cette visionneuse entière (MQ-04) ; depuis un billet, seuls changent le retour de l'en-tête Contexte
+   (« ← Lisbonne et Porto ») et l'ordre des voisines (celui du billet) ; cartel standard « Julien · Lisbonne · 10 oct. 2026 »,
+   « Tirage : à partir de 180 € » en bouton plein, comme ailleurs.
+   .vu : la visionneuse compacte, RÉSERVÉE À LA GALERIE PRIVÉE (MQ-17, /prive/<id>/photo/<slug>) : précédente · position ·
+   suivante, la photo, le cartel de la galerie privée (le cartel de vignette, « Julien · Lisbonne · 10 oct. 2026 ») et l'étoile. */
 .vis-scene { --vis-r: 1.5; --vis-reste: 191px; --vis-h: clamp(260px, calc(100svh - var(--vis-reste)), 900px); --vis-w: min(100%, calc(var(--vis-h) * var(--vis-r))); padding-top: var(--esp-2); }
 .vis-plus, .vis-pres { width: var(--vis-w); margin-inline: auto; }
 .vis-fig { position: relative; margin: 0 auto; width: var(--vis-w); display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--esp-4); }

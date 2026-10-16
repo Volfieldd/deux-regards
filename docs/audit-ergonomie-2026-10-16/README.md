@@ -1970,13 +1970,29 @@ Elles reposent sur `maquettes/_commun/` : les jetons (`tokens.css`), les composa
 - **Des mots et des données qui se contredisaient** : « Tous » ici, « Les deux » là ; « Prix TTC » à côté de la franchise de TVA ; « Tirage, licence : nous écrire » à côté de la boutique ; une même image sous plusieurs titres ; des stocks et un ordre du carnet qui changeaient d'une maquette à l'autre.
 - **Des défauts de direction artistique récurrents** : passe-partout gris autour des vignettes, capitales espacées, trop de Plex Mono, trop de boîtes, une photo d'ouverture timide.
 
-| Maquette | Note v0 | Note v1 |
-|---|---|---|
-| MQ-01 à MQ-06, MQ-11 à MQ-13, MQ-15 (site public) | 6/10 | à venir |
-| MQ-14 (panier) | 5/10 | à venir |
-| MQ-16 et MQ-17 (galerie privée) | 7/10 | à venir |
-| MQ-07 à MQ-09 (administration) | 7/10 | à venir |
-| MQ-10 (app de terrain), MQ-18 à MQ-20 (administration) | 6/10 | à venir |
+| Maquette | Note v0 | Note v1 | Note v2 |
+|---|---|---|---|
+| MQ-00 Planche (site public · administration) | — | 7 · 7 | 9 · 9 |
+| MQ-01 Accueil | 6 | 8 | 9 |
+| MQ-02 Galerie | 6 | 8 | 9 |
+| MQ-03 Série Rue | 6 | 8 | 9 |
+| MQ-04 Visionneuse | 6 | 8 | 9 |
+| MQ-05 Bonjour | 6 | 9 | 9 |
+| MQ-06 Licence, contact | 6 | 9 | 9 |
+| MQ-07 Admin : menu, Réglages | 7 | 7 | 8 |
+| MQ-08 Admin : lot | 7 | 7 | 8 |
+| MQ-09 Admin : enregistrer | 7 | 7 | 8 |
+| MQ-10 App de terrain | 6 | 8 | 9 |
+| MQ-11 Carnets | 6 | 8 | 9 |
+| MQ-12 Billet | 6 | 8 | 8 |
+| MQ-13 Tirage | 6 | 9 | 9 |
+| MQ-14 Panier | 5 | 9 | 10 |
+| MQ-15 Commande | 6 | 9 | 9 |
+| MQ-16 Accès privé | 7 | 9 | 10 |
+| MQ-17 Galerie privée | 7 | 9 | 9 |
+| MQ-18 Admin : accès privé | 6 | 7 | 9 |
+| MQ-19 Admin : commandes | 6 | 7 | 9 |
+| MQ-20 Admin : éditeur de billet | 6 | 7 | 8 |
 
 **Ce qui a changé.**
 
@@ -1985,13 +2001,17 @@ Elles reposent sur `maquettes/_commun/` : les jetons (`tokens.css`), les composa
 - **Une grille écrite avant de redessiner**, [GRILLE.md](maquettes/GRILLE.md) : quatorze critères (les huit de Bastien et Scapin, accessibilité, sobriété, direction artistique, fidélité au site, couverture des constats, lisibilité de la maquette). Chaque maquette a été refaite entièrement et chaque remarque du jury v0 traitée.
 - **Des annotations qui ne touchent plus l'interface** : pastilles carrées hors du flux, `aria-hidden`, interrupteur `#sans-annotations` contrôlé pixel à pixel ; axe-core à 0 violation au bureau et au téléphone ; états d'erreur, de chargement et en allemand montrés.
 
-**Évaluation v1 : à venir.**
+**Évaluation v1** (jury indépendant, 16 oct. 2026, sur la passe 1) : site public de 7 à 9 sur 10 (planche 7 ; MQ-01 à MQ-04, MQ-11 et MQ-12 à 8 ; MQ-05, MQ-06, MQ-13 à MQ-17 à 9), administration de 7 à 8 (planche et MQ-07 à MQ-09, MQ-18 à MQ-20 à 7 ; MQ-10 à 8). Huit défauts transverses ont été relevés : images pas à la taille, cartels tronqués, pastilles hors de l'écran, pied de page après l'encart, résumé d'erreurs en `div`, cibles sous 44 px, dates et insécables, adresses `/series/…` ; côté administration, un focus invisible sur les champs en erreur, le danger confondu avec l'ambre en Chambre noire et une coquille en retrait de main. Ils ont été corrigés en deux passes (commun, puis chaque maquette ; consolidation de la passe 3).
+
+**Évaluation v2** (même jury, 16 oct. 2026, sur la passe 3) : de 8 à 10 sur 10. Site public : planche 9, MQ-14 et MQ-16 à 10, MQ-12 à 8, les autres à 9 ; administration : planche, MQ-10, MQ-18 et MQ-19 à 9, MQ-07, MQ-08, MQ-09 et MQ-20 à 8. Plus aucun critère sous 8. Les défauts restants étaient surtout hors de portée des outils : « Suche » au lieu du « Suchen » du code, deux visionneuses pour une même adresse, la règle « deux photos au plus par rangée » qui ne tenait que par l'ordre des photos, la barre de filtres collante qui cachait le focus au téléphone ; dans l'administration, le menu du téléphone hors d'atteinte sans JavaScript (défaut de main), le pied de la barre latérale qui débordait en allemand à 220 px, des compteurs de séries fondés sur des photos sans série que le code interdit. La passe 4 les corrige dans le commun (planche, `public.css`, `admin-plus.css`, lexique § 0, points 14 à 24, outils de contrôle), puis maquette par maquette.
+
+**Évaluation finale : à venir.**
 
 ### Les maquettes une à une
 
 #### MQ-00 — Planche de direction artistique — jetons, typographie, en-têtes, cartel, boutons, formulaires, prix, composants des pages, administration, annotations, lexique
 
-**Rôle :** la référence commune des vingt maquettes (site public et administration). **Fichier :** [MQ-00-direction-artistique.html](maquettes/MQ-00-direction-artistique.html). Rendue en trois bandes au bureau et en six au téléphone (densité 1,5).
+**Rôle :** la référence commune des vingt maquettes (site public et administration). **Fichier :** [MQ-00-direction-artistique.html](maquettes/MQ-00-direction-artistique.html). Rendue en trois bandes au bureau et en huit au téléphone (densité 1,5).
 
 ![MQ-00, bureau 1440 × 900, page entière : Planche de direction artistique — jetons, typographie, en-têtes, cartel, boutons, formulaires, prix, composants des pages, administration, annotations, lexique](maquettes/MQ-00-direction-artistique-bureau.webp)
 

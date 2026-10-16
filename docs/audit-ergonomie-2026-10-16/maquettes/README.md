@@ -60,6 +60,21 @@ Elles valent pour les vingt maquettes ; la planche (MQ-00) les montre, le lexiqu
 - **Texte** : espaces insécables (`outils/insecables.py`), capitales espacées de trois mots au plus, dates abrégées dans l'interface, adresses du code (`/serie/<slug>`) ou marquées « à créer ».
 - **Contrôles outillés** (dans `/home/claudecode/dr-work/outils/`, Playwright en conteneur par `run-pw.sh`) : `controle-annotations.mjs MQ-xx-…` (pastilles, étiquettes, `inert`, ordre de la page, Mesures, interface identique sans annotations, débordement, à 1 440, 412 et 320 px) ; `python3 insecables.py --ecrire MQ-xx-….html` ; `passe2-rangees.mjs MQ-xx-… 1440,412,320` (composition des rangées et fichier chargé par chaque vignette).
 
+## Passe 4 (16 oct. 2026, après le jury v2)
+
+Le commun a été corrigé avant chaque maquette ; le détail est au § 0 du lexique (points 14 à 24) :
+
+- « Suchen » partout en allemand, comme le code ;
+- une seule visionneuse par adresse, la compacte réservée à la galerie privée ;
+- deux photos au plus par rangée au téléphone, garanti par le CSS (classe `.v` des verticales, `public.css` § 18) ;
+- barre de filtres non collante au téléphone, `scroll-padding` sous tout élément collant ou fixe (site et administration), ligne qui défile toujours coupée au bord ;
+- « Galerie privée » au même bord dans les deux en-têtes privés (`.sh--prive`) ;
+- administration : menu du téléphone sans script (`.side:target`), pied de la barre de 220 px qui passe à la ligne, modèle des séries du code (toute photo a une série), « Texte de remplacement » déclaré à créer ;
+- règle des images écrite sur les variantes du code (640, 1 280, 2 000 px, AVIF et WebP) ;
+- planche raccourcie (de 44 530 à 37 800 px environ au bureau), justifications regroupées.
+
+Contrôles ajoutés (voir `GRILLE.md`) : ellipses, lignes qui défilent, axe et focus sans `inert`, intérieur de la barre latérale en allemand, images sans `srcset`, jour abrégé insécable, focus caché par un élément collant (`focus-colle.mjs`), deux photos par rangée (`p4-portrait.mjs`).
+
 ## Ce qui est annotation, et ce qui est interface
 
 Tout ce qui est magenta appartient à la maquette, jamais à l'interface proposée : pastilles carrées numérotées (en marge, hors du flux, `aria-hidden`), étiquettes « État · … » au-dessus d'un cadre pointillé, traits du bas du premier écran dans les marges, et l'encart « Ce qui change » en fin de page. Gabarit commun : `_commun/annotations.css`. Pour voir une maquette sans annotations, ajoutez `#sans-annotations` à l'adresse (ou imprimez) : l'interface ne bouge pas d'un pixel.
