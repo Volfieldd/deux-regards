@@ -1,7 +1,7 @@
 # Audit SEO de Nicephos et plan d’action
 
 **Date :** 16 octobre 2026.
-**Périmètre :** le site public https://www.nicephos.art (français, anglais, allemand) et son code (`/home/claudecode/dr-work/seo`, dépôt deux-regards, base `4042eaa`). L’administration n’est examinée que pour ce qui produit le contenu public : fiche photo, séries, réglages.
+**Périmètre :** le site public https://www.nicephos.art (français, anglais, allemand) et son code (dépôt deux-regards, commit 4042eaa). L’administration n’est examinée que pour ce qui produit le contenu public : fiche photo, séries, réglages.
 **Projets à venir pris en compte :** un carnet (blog), des galeries privées, une boutique de tirages.
 
 **Méthode**
@@ -61,12 +61,12 @@ Mais Google ne voit presque rien de ce qui fait la valeur du site. Le 16 octobre
 | Audit | Recommandation qui touche le référencement | État au 16/10 |
 |---|---|---|
 | Ergonomie de l’admin (F-m06) | Signaler le titre provisoire tiré du nom de fichier | **Suivi pour le titre** : il est repéré dans « À finir » (`server/todo.js:156`). **Pas pour l’adresse** : elle reste celle du nom de fichier, d’où 11 photos publiées en `/photo/dsc…-dxo` (SEO-08). |
-| Ergonomie, cible « Séries » (C3) | Adresse de la série repliée, avec l’avertissement « la changer casse les liens » | **Suivi** pour l’avertissement (`docs/aide/03-photos.md:109`). Mais aucune redirection n’existe, donc l’avertissement reste vrai (SEO-08). |
+| Ergonomie d’octobre, cible « Séries » | Adresse de la série repliée, avec l’avertissement « la changer casse les liens » | **Suivi** pour l’avertissement (`docs/aide/03-photos.md:109`). Mais aucune redirection n’existe, donc l’avertissement reste vrai (SEO-08). |
 | Revue d’octobre | `<main>` et `<h1>` à l’accueil sans ouverture | **Suivi** (`views/home.eta:3` et `:35`). Avec l’ouverture, c’est l’inverse : 6 H1 (SEO-04). |
-| Revue d’octobre | Voiles de l’ouverture plus denses | **Suivi au bureau seulement** : le menu tombe à 1,9:1 sur téléphone (audit RGAA, constat 1). |
-| Revue d’octobre | Focus rendu au lien activé après un filtre | **Régression** : le focus part sur un autre lien qui a la même adresse (audit RGAA, constat 4). |
-| Revue d’octobre | `aria-invalid` et `aria-describedby` sur les erreurs | `aria-describedby` **absent** des formulaires publics (audit RGAA, constat 8). |
-| Revue d’octobre | Bordures des champs à 3,2:1 | **Pas sur les formulaires publics** : 1,3:1 (audit RGAA, constat 9). |
+| Revue d’octobre | Voiles de l’ouverture plus denses | **Suivi au bureau seulement** : le menu tombe à 1,9:1 sur téléphone (audit d’ergonomie, UX-F-01). |
+| Revue d’octobre | Focus rendu au lien activé après un filtre | **Régression** : le focus part sur un autre lien qui a la même adresse (audit d’ergonomie, UX-F-07). |
+| Revue d’octobre | `aria-invalid` et `aria-describedby` sur les erreurs | `aria-describedby` **absent** des formulaires publics (audit d’ergonomie, UX-F-05). |
+| Revue d’octobre | Bordures des champs à 3,2:1 | **Pas sur les formulaires publics** : 1,3:1 (audit d’ergonomie, UX-F-04). |
 | Audit iPhone (admin) | Saisie au toucher, « Compléter et publier » | Hors référencement. Utile indirectement : c’est là que se saisissent les titres, les lieux et les légendes (SEO-07). |
 | Design d’octobre | Maquettes de l’admin | Hors référencement. |
 
@@ -154,7 +154,7 @@ Les chemins `server/…` et `views/…` renvoient au dépôt. Les chemins `ux-da
 **Constat**
 - **Accueil** : le `<title>` est « Nicephos » (8 caractères), identique en fr, en et de. Il ne contient ni « photographie », ni lieu, ni nom.
 - **Photographes** : « par Julien · Nicephos ». **Séries** : le nom créatif seul, comme « Super Urbain · Nicephos » ou « Nocturne · Nicephos ». **Carte** et **À propos** : « Carte · Nicephos », « À propos · Nicephos ».
-- **Description** : la devise « Ce qui attire nos regards mérite d’être partagé. » sert sur l’accueil, les 8 séries, les 2 photographes et À propos. Cela fait 12 adresses en français et 36 en tout.
+- **Description** : la devise « Ce qui attire nos regards mérite d’être partagé. » sert sur l’accueil, les 8 séries de production, les 2 photographes et À propos. Cela fait 12 adresses en français et 36 en tout.
 - **Photo** : la légende et la signature sont collées sans ponctuation (« …24-120 f4 Julien, Saint Malo, France, oct. 2026 »). La description n’est jamais tronquée (347 caractères sur *The Grapes of Wrath*). La photo-logo n’a que « Julien ».
 - **Voyage** : `intro.slice(0, 200)` coupe au milieu d’un mot.
 - **Titres trop longs** : « Volcan de Lassen - Caldeira de volcan et sources d’eau chaude sulfurée · Nicephos » fait 81 caractères.
@@ -245,7 +245,7 @@ Les chemins `server/…` et `views/…` renvoient au dépôt. Les chemins `ux-da
 - La table `categories` n’a aucun champ de texte (`server/repo.js:20`).
 - Les filtres combinés `/?regard=julien&serie=nuit` (16 combinaisons × 3 langues) répondent 200, avec une canonique sur eux-mêmes et des hreflang.
 
-**Preuve.** `ux-data/prod/seo/serie.html` et `filtre.html` (mêmes 6 `<h1>` que `home.html`) ; `ux-data/seo/balises-prod-bureau.csv` ; `server/routes/public.js:180-214` ; `views/home.eta:6-23`, `:38`, `:72` ; `server/urls.js:7` ; audit RGAA, constat 10.
+**Preuve.** `ux-data/prod/seo/serie.html` et `filtre.html` (mêmes 6 `<h1>` que `home.html`) ; `ux-data/seo/balises-prod-bureau.csv` ; `server/routes/public.js:180-214` ; `views/home.eta:6-23`, `:38`, `:72` ; `server/urls.js:7` ; audit d’ergonomie, UX-F-10.
 
 **Correction**
 1. **Migration `040_textes_series.sql`** (ou le prochain numéro libre) :
@@ -285,7 +285,7 @@ Les chemins `server/…` et `views/…` renvoient au dépôt. Les chemins `ux-da
    - les titres des diapositives deviennent des `<h2>` (ou `<p class="cap-title">`) ;
    - le H3 de la grille devient un H2.
 
-   C’est aussi la correction du constat 10 de l’audit RGAA.
+   C’est aussi la correction de UX-F-10 dans l’audit d’ergonomie.
 3. **`og:image`** : la couverture de la série (`series.find(c => c.slug === filter.serie)?.cover`), ou la première photo du photographe. Sur l’accueil, l’image de partage de la marque (`/brand/partage-….jpg`), et non `hero[0]`.
 4. **Filtres combinés** (`server/routes/public.js`, dans `renderGallery`) :
    ```js
@@ -416,7 +416,7 @@ Des exemples prêts à coller sont dans `exemples/` : `jsonld-site.json`, `jsonl
   - titres : « Lassen Vulkan - Caldera und Heißwassersulfidquellen » (ce mot n’existe pas) ; « Ein Affe wartet auf das Kind » (le français dit « cherche son enfant ») ; « Radfahrer im Gegenlicht in le Marais in Paris » ;
   - `/en/a-propos` : « discover the world through our goals » (« objectifs » photo traduit par *goals* et non *lenses*) ; la biographie de Sébastien y reste en français.
 
-**Preuve.** Comparaison des liens de `ux-data/prod-front-bureau/accueil.json`, `accueil-en.json` et `accueil-de.json` ; `ux-data/prod/seo/photo.html` et `photo-en.html` ; `server/i18n.js:14-23` ; `server/repo.js:10-13` ; `server/routes/public.js:113-134` ; `views/layout.eta:18-21` ; audit RGAA, constat 6.
+**Preuve.** Comparaison des liens de `ux-data/prod-front-bureau/accueil.json`, `accueil-en.json` et `accueil-de.json` ; `ux-data/prod/seo/photo.html` et `photo-en.html` ; `server/i18n.js:14-23` ; `server/repo.js:10-13` ; `server/routes/public.js:113-134` ; `views/layout.eta:18-21` ; audit d’ergonomie, UX-F-22.
 
 **Correction**
 1. **Tout de suite** : faire relire par un locuteur natif les 8 noms de séries, la page À propos, les deux biographies et les 6 titres traduits. Propositions, à faire valider :
@@ -584,7 +584,7 @@ Des exemples prêts à coller sont dans `exemples/` : `jsonld-site.json`, `jsonl
 **Constat**
 - « Bienvenue! Hi ! Hallo! » est publiée comme photo n°37 de la série « Plus près du ciel ». Sa description se réduit à « Julien », et la photo figure dans le sitemap en 3 langues.
 - C’est la première diapositive de l’ouverture. Son titre est donc le premier H1 de l’accueil, des séries et des photographes, et l’image sert d’`og:image` à toutes ces pages.
-- Son texte alternatif ne restitue pas le texte de l’image (audit RGAA, constat 17).
+- Son texte alternatif ne restitue pas le texte de l’image (audit d’ergonomie, UX-F-16).
 
 **Preuve.** `ux-data/seo/balises-prod-bureau.csv` (ligne `photo-logo-nicephos`) ; `ux-data/prod-front-bureau/photo-logo-nicephos.json`.
 
@@ -595,18 +595,18 @@ Des exemples prêts à coller sont dans `exemples/` : `jsonld-site.json`, `jsonl
 
 **Indicateur.** L’`og:image` de l’accueil n’est plus le logo. La photo-logo n’est plus dans le sitemap.
 
-#### SEO-10 · Page photo sur mobile : LCP ≈ 3 s et TBT ≈ 400 ms, à cause du fond de carte de 1 Mo
+#### SEO-10 · Page photo sur mobile : LCP ≈ 3 s et TBT ≈ 400 ms, à cause du fond de carte (230 ko transférés, 1 Mo décodé)
 
 **Impact moyen · effort S · front**
 
 **Constat**
-- La page photo est la porte d’entrée des moteurs et des liens partagés. Sa petite carte « Prise à … » charge `carte-terre-fine.svg` (1 057 Ko décodés, 230 Ko en brotli). `site.js` analyse ensuite 4 tuiles de détail avec `DOMParser` et masque le fond. Tout cela se passe au chargement, même quand la carte est hors de l’écran.
+- La page photo est la porte d’entrée des moteurs et des liens partagés. Sa petite carte « Prise à … » charge `carte-terre-fine.svg` (1 057 ko décodés, 230 ko en brotli). `site.js` analyse ensuite 4 tuiles de détail avec `DOMParser` et masque le fond. Tout cela se passe au chargement, même quand la carte est hors de l’écran.
 - **Mesures** (Pixel 7, 1,6 Mbit/s, processeur ×4, cache vide) :
   - avec la carte : LCP 2 964, 3 084 et 3 136 ms ; TBT 395, 416 et 451 ms ;
   - carte bloquée : LCP 2 064 et 2 144 ms ; TBT 0 ;
   - à 512 kbit/s (démo), la photo n’apparaît qu’à 7,0 s.
-- Le fond léger `carte-terre.svg` (25 Ko en brotli) est déclaré dans le gabarit, mais n’est pas utilisé.
-- Sur bureau, la visionneuse annonce `sizes="100vw"` alors que la hauteur limite l’image à 70 % de l’écran. Un portrait est ainsi servi 5,4 fois trop large (audit RGESN, C4).
+- Le fond léger `carte-terre.svg` (25 ko en brotli) est déclaré dans le gabarit, mais n’est pas utilisé.
+- Sur bureau, la visionneuse annonce `sizes="100vw"` alors que la hauteur limite l’image à 70 % de l’écran. Un portrait est ainsi servi 5,4 fois trop large (audit d’ergonomie, UX-F-21).
 - Pour Google, les Core Web Vitals comptent à travers les données terrain (CrUX). Le site n’en a pas encore : l’enjeu immédiat est l’expérience de celui qui arrive.
 
 **Preuve.** `ux-data/prod/seo/cwv-prod-out.json` et `cwv-prod-out2.json` ; `views/photo.eta:9`, `:27`, `:31`, `:33` ; `views/trip.eta:27-29` ; `public/js/site.js:526-549`.
@@ -631,7 +631,7 @@ Des exemples prêts à coller sont dans `exemples/` : `jsonld-site.json`, `jsonl
    ```eta
    <%~ it.picture(p, { sizes: `min(92vw, ${(70 * p.width / p.height).toFixed(1)}vh)`, eager: true }) %>
    ```
-4. Sans JavaScript, la côte sera plus grossière à l’échelle d’une ville : c’est le prix accepté pour l’instant. Pour aller plus loin (audit RGESN, C3) : écrire côté serveur les 1 à 3 tuiles utiles, ce qui fonctionne aussi sans JavaScript.
+4. Sans JavaScript, la côte sera plus grossière à l’échelle d’une ville : c’est le prix accepté pour l’instant. Pour aller plus loin (audit d’ergonomie, UX-F-20) : écrire côté serveur les 1 à 3 tuiles utiles, ce qui fonctionne aussi sans JavaScript.
 
 **Indicateur.** Avec `outils/seo-cwv.mjs` sur mobile : LCP < 2,5 s et TBT < 100 ms sur 3 passes. Ensuite, le rapport « Core Web Vitals » de la Search Console, dès qu’il a des données.
 
@@ -648,7 +648,7 @@ Des exemples prêts à coller sont dans `exemples/` : `jsonld-site.json`, `jsonl
 - La page photo ne renvoie pas non plus vers son voyage (en démo, « Miradouro » ne mène pas à « Lisbonne et Porto »).
 - Sur `/carte`, les villes ne sont que des ancres.
 
-**Preuve.** `views/photo.eta:13` ; `ux-data/prod/seo/photo.html` (26 liens, aucun `/serie/…`) ; `ux-data/demo-front-bureau/photo-miradouro.json` ; audit RGAA, constat 11.
+**Preuve.** `views/photo.eta:13` ; `ux-data/prod/seo/photo.html` (26 liens, aucun `/serie/…`) ; `ux-data/demo-front-bureau/photo-miradouro.json` ; audit d’ergonomie, UX-F-08.
 
 **Correction**
 1. `views/photo.eta:13` :
@@ -671,7 +671,7 @@ Des exemples prêts à coller sont dans `exemples/` : `jsonld-site.json`, `jsonl
 - La fonction regarde d’abord le pays. Hors des pays de la liste `SEVERAL`, elle renvoie « en », quelle que soit la langue du navigateur. Un francophone à Londres, à New York ou à Madrid qui clique sur un résultat Google `/photo/x` est donc envoyé sur `/en/photo/x`.
 - Googlebot n’est pas touché. Mais cette redirection contredit le ciblage hreflang de Google, qui déconseille les redirections automatiques selon la langue supposée.
 - Les liens de langue passent par `/langue/…`, en `rel="nofollow"` et interdit par robots.txt. Il n’existe donc aucun lien explorable entre les versions.
-- Sur téléphone, la liste des langues sort de l’écran (audit RGAA, constat 2).
+- Sur téléphone, la liste des langues sort de l’écran (audit d’ergonomie, UX-F-02).
 
 **Preuve.** `server/i18n.js:52-59` ; `server/routes/public.js:158-170` ; `views/langs.eta:6`.
 
@@ -738,6 +738,8 @@ Les photos dépubliées continuent de répondre 404.
 
 **Indicateur.** Une ancienne adresse `…-5348f47c-2000.webp` répond `301`, puis `200`.
 
+**Ordre.** Cette redirection doit être en place avant tout changement de filigrane ou de clé de variante : le filigrane en signature d’angle (V0-05 de l’audit d’ergonomie) et la nouvelle clé de variante après un refus (V1-01) renomment les images. D’où l’action 0.10, livrée dans la même PR que V0-05.
+
 #### SEO-14 · Sitemap sans images, sans x-default, avec un lastmod partiel
 
 **Impact moyen · effort S · front**
@@ -769,7 +771,7 @@ const image = p => p ? `<image:image><image:loc>${xml(`${base}/media/${variantNa
 **Impact moyen · effort S · front**
 
 **Constat**
-- `og:image` pointe vers la variante WebP de 2 000 px (166 Ko). LinkedIn et certains clients de messagerie lisent mal le WebP.
+- `og:image` pointe vers la variante WebP de 2 000 px (166 ko). LinkedIn et certains clients de messagerie lisent mal le WebP.
 - Il n’y a ni `og:image:width` et `og:image:height`, ni `og:image:alt`, ni `twitter:image:alt`, ni `og:locale:alternate`.
 - `og:type` vaut toujours `website`.
 - La description envoyée à Pinterest se limite à « titre · Nicephos ».
@@ -821,9 +823,11 @@ Le noindex par en-tête des pages utilitaires reste prioritaire. Un aperçu en g
 - L’IPTC, le badge « Licenciable » et les preuves d’antériorité horodatées protègent déjà les photos.
 
 **Correction.** Proposer une signature discrète en coin, par exemple « © Julien [Nom] · nicephos.art », sur 12 à 15 % de la largeur et à 40–60 % d’opacité. On peut aussi réserver le plein cadre à la seule variante de 2 000 px.
-- Le recalcul se fait la nuit (audit RGESN, C15).
+- Le recalcul se fait la nuit (audit d’ergonomie, UX-T-13).
 - Il ne faut le lancer **qu’après SEO-13**.
 - Mesurer l’effet avant et après dans la Search Console : onglet Images, impressions et taux de clic.
+
+**Ordre.** L’audit d’ergonomie retient la signature d’angle dès la vague 0 (V0-05), avec la redirection des anciennes empreintes (0.10) ; l’action 2.8 en fait le bilan.
 
 ### Impact faible
 
@@ -913,13 +917,13 @@ app.addHook('onRequest', async (request, reply) => {
 
 **Impact faible · effort M · front**
 
-**Constat** (détail dans l’audit RGESN, C1, C2, C5, C6, C7)
-- Les 5 diapositives invisibles de l’ouverture pèsent 820 Ko, même sans JavaScript.
-- La carte charge 1,1 Mo de vignettes de 640 px pour des pastilles de 26 unités. Son LCP mobile est de 5,8 s.
-- L’emblème est un PNG de 1 600 px (93 Ko).
+**Constat** (détail dans l’audit d’ergonomie : UX-F-18, UX-F-19, UX-T-07, UX-F-38, UX-F-37)
+- Les 5 diapositives invisibles de l’ouverture pèsent 820 ko, même sans JavaScript.
+- La carte charge 1,1 Mo de vignettes de 640 px pour des épingles d’environ 34 px à l’écran (26 unités du SVG). Son LCP mobile est de 5,8 s.
+- L’emblème est un PNG de 1 600 px (93 ko).
 - La police Cormorant est préchargée alors que le thème de production ne l’emploie pas.
 
-**Correction.** Reprendre les corrections de l’audit RGESN :
+**Correction.** Reprendre les corrections de l’audit d’ergonomie (volet RGESN) :
 - première diapositive seule dans le HTML ;
 - variantes de 160 et 320 px ;
 - emblème à la taille utile ;
@@ -945,7 +949,7 @@ Côté SEO, cela ne pèse que sur l’expérience. Cela ne gêne ni l’explorat
 
 ### Positionnement
 
-Nicephos est une galerie d’auteurs, sans notoriété, avec 44 photos. On gagne là où la concurrence est faible et où l’intention est artistique. Les cibles sont, dans l’ordre :
+Nicephos est une galerie d’auteurs, sans notoriété, avec 44 photos en production (43 une fois le logo retiré, 0.7). On gagne là où la concurrence est faible et où l’intention est artistique. Les cibles sont, dans l’ordre :
 1. **La marque et les auteurs.** Il faut que « Nicephos » soit reconnu comme une entité distincte de « Nicéphore » (Niépce). Pour cela :
    - le même nom partout : Instagram, Pinterest, Bluesky ;
    - `Organization` avec logo et `sameAs` ;
@@ -1118,7 +1122,7 @@ Il ne faut rien laisser fuiter dans les moteurs, pages comme images. Le modèle 
   - « Tirages de Saint-Malo » dès que 6 photos d’un même lieu sont en vente.
 - **Licences** : `acquireLicensePage` pointe ensuite vers une page de licence de la boutique.
 - **Mentions** : mentions légales complètes, CGV, Impressum (SEO-03).
-- **Paiement** : le script du prestataire n’est chargé que sur la page de paiement, avec une CSP élargie à cet endroit seulement (audit RGESN, C18).
+- **Paiement** : le script du prestataire n’est chargé que sur la page de paiement, avec une CSP élargie à cet endroit seulement (audit d’ergonomie, UX-T-17).
 
 ---
 
@@ -1142,27 +1146,28 @@ Les vagues suivent la façon de travailler du projet : une PR par vague (ou par 
 | 0.2 | Bing Webmaster Tools par import, Crawler Hints activé | SEO-01 | 15 min | moyen | Sitemap lu par Bing | BWT |
 | 0.3 | Cloudflare : obfuscation des e-mails désactivée (NEL aussi, si personne ne lit les rapports) | SEO-20 | 10 min | faible | Plus de `/cdn-cgi/` dans le HTML | curl |
 | 0.4 | Titres et descriptions par gabarit, `clip()`, `titled()` | SEO-02 | S | fort | Aucun doublon, titres de 30 à 65 caractères | curl, puis taux de clic dans GSC |
-| 0.5 | Fond de carte léger, chargement à l’approche, `sizes` de la visionneuse | SEO-10 | S | moyen | LCP mobile < 2,5 s, TBT < 100 ms | CWV |
+| 0.5 | Fond de carte léger (`carte-terre.svg`, 25 ko, à la place du fond fin de 230 ko) et chargement à l’approche ; = V0-17 de l’audit d’ergonomie. Le `sizes` de la visionneuse suit en vague 1 (V1-06 de l’audit d’ergonomie) | SEO-10 | S | moyen | LCP mobile < 2,5 s, TBT < 100 ms | CWV |
 | 0.6 | Recherche et filtres combinés en noindex ; x-default dans le sitemap | SEO-18, SEO-04 (point 4), SEO-14 | S | faible | En-têtes et sitemap justes | curl |
 | 0.7 | Logo hors de la photothèque, première diapositive = une vraie photo | SEO-09 | S | moyen | `og:image` de l’accueil ≠ logo | curl |
 | 0.8 | `max-image-preview:large`, si les auteurs l’acceptent | SEO-16 | S | moyen | Meta présente | curl |
 | 0.9 | Relecture native des noms de séries et des 6 titres traduits | SEO-06 | S | fort | Plus aucun calque | Relecture |
+| 0.10 | Redirection 301 des anciennes empreintes d’images, avant tout changement de filigrane ou de clé de variante, et dans la même PR que le filigrane en signature d’angle (V0-05 de l’audit d’ergonomie) | SEO-13, SEO-17 | S | moyen | Ancienne image → 301 → 200 | curl |
 
-PR « SEO, vague 0 » : 0.4 à 0.6 et 0.8. Les points 0.1 à 0.3, 0.7 et 0.9 se font sans code (réglages, admin, relecture).
+PR « SEO, vague 0 » : 0.4 à 0.6 et 0.8 ; 0.10 part avec la PR du filigrane (V0-05 de l’audit d’ergonomie). Les points 0.1 à 0.3, 0.7 et 0.9 se font sans code (réglages, admin, relecture).
 
-### Vague 1 : technique (27 octobre au 21 novembre)
+### Vague 1 : technique (26 octobre au 22 novembre)
 
 | N° | Action | Réf. | Effort | Impact | Indicateur de réussite | Mesure |
 |---|---|---|---|---|---|---|
 | 1.1 | Historique des adresses et 301 ; correction de l’adresse figée au titre provisoire | SEO-08 | M | moyen | Ancienne adresse → 301 | curl, rapport Pages de GSC |
 | 1.2 | Renommer les 11 photos et les 2 séries (après 1.1) | SEO-08 | S | moyen | Aucune adresse `dsc` | Sitemap |
-| 1.3 | Redirection des anciennes empreintes d’images | SEO-13 | S | moyen | Ancienne image → 301 → 200 | curl |
-| 1.4 | JSON-LD : `layout.eta` et `server/jsonld.js` | SEO-05 | M | fort | Aucune erreur ; 44 « Métadonnées d’image » valides | TRE, GSC |
+| 1.3 | Contrôle de la redirection des anciennes empreintes (posée en 0.10) après le premier recalcul de la vague 1 (1.2, 1.8) | SEO-13 | S | moyen | 100 % des anciennes images → 301 → 200 | curl, rapport Pages de GSC |
+| 1.4 | JSON-LD : `layout.eta` et `server/jsonld.js` | SEO-05 | M | fort | Aucune erreur ; 43 « Métadonnées d’image » valides (production, logo retiré) | TRE, GSC |
 | 1.5 | Gabarit des séries et des photographes, migration 040, champs dans l’admin | SEO-04 | M | fort | Un H1 et une description propres par page | curl, GSC |
 | 1.6 | Langues : `alternates`, noindex des versions non traduites, `lang` des replis, redirection, liens directs | SEO-06, SEO-12 | M | fort | Canonique retenue = déclarée | Inspection d’URL dans GSC |
 | 1.7 | Sitemap : images et lastmod | SEO-14 | S | moyen | Images découvertes | GSC |
 | 1.8 | Cartes de partage : JPEG 1 200 px et balises `og:` | SEO-15 | S | moyen | Aperçu du premier coup | Débogueurs Facebook et LinkedIn |
-| 1.9 | Page photo : lien vers la série, fil d’Ariane, pied de page, mini-menu | SEO-11 | S | moyen | Lien vers la série sur 44 pages sur 44 | curl, rapport Liens de GSC |
+| 1.9 | Page photo : lien vers la série, fil d’Ariane, pied de page, mini-menu | SEO-11 | S | moyen | Lien vers la série sur 43 pages sur 43 | curl, rapport Liens de GSC |
 | 1.10 | robots.txt en un groupe, barre oblique finale, HSTS, ETag | SEO-19, SEO-21, SEO-22 | S | faible | Rapport robots.txt sans alerte | GSC |
 
 Lots de PR proposés :
@@ -1177,13 +1182,13 @@ Lots de PR proposés :
 |---|---|---|---|---|---|---|
 | 2.1 | Identité publique, biographies de 120 à 250 mots ×3, portraits, profils | SEO-03 | S par auteur | fort | 2 biographies × 3 langues | Relecture, TRE (Person) |
 | 2.2 | Mentions légales complètes (avis d’un juriste) | SEO-03 | S | moyen | Éditeur, contact, responsable | Relecture |
-| 2.3 | Introductions (80 à 150 mots) et sous-titres des 8 séries ×3 | SEO-04 | M | fort | 8 sur 8 | GSC (impressions des séries) |
-| 2.4 | Légendes de 2 à 4 phrases et lieux normalisés pour les 44 photos (≈ 4 h) | SEO-07 | M | fort | 44 sur 44 | GSC Images (requêtes de lieu) |
+| 2.3 | Introductions (80 à 150 mots) et sous-titres des 8 séries de production ×3 | SEO-04 | M | fort | 8 sur 8 | GSC (impressions des séries) |
+| 2.4 | Légendes de 2 à 4 phrases et lieux normalisés pour les 43 photos de production (≈ 4 h) | SEO-07 | M | fort | 43 sur 43 | GSC Images (requêtes de lieu) |
 | 2.5 | Textes alternatifs dédiés, à partir de Florence-2 relu | SEO-07 | M | moyen | 100 % | Relevé (curl) |
 | 2.6 | Traductions relues : titres, puis légendes (anglais pour la Californie, allemand pour la Bavière) | SEO-06 | M | fort | Part des photos traduites | Sitemap, GSC par pays |
 | 2.7 | Ouvrir les Voyages : Côte d’Émeraude et Californie | Stratégie | M | fort | 2 voyages en ligne, liés depuis leurs photos | GSC |
-| 2.8 | Décision sur le filigrane, puis recalcul de nuit (après 1.3) | SEO-17 | S | moyen | Taux de clic Images avant et après | GSC Images |
-| 2.9 | XMP enrichi : titre, description, lieu, nom complet, crédit (après 1.3) | SEO-07, SEO-03 | S | moyen | Champs présents | exiftool sur une variante |
+| 2.8 | Bilan du filigrane en signature d’angle (posé en vague 0 avec 0.10 et V0-05 de l’audit d’ergonomie) : garder ou ajuster, recalcul de nuit | SEO-17 | S | moyen | Taux de clic Images avant et après | GSC Images |
+| 2.9 | XMP enrichi : titre, description, lieu, nom complet, crédit (après 0.10) | SEO-07, SEO-03 | S | moyen | Champs présents | exiftool sur une variante |
 
 ### Vague 3 : autorité et suivi (à partir de décembre, puis en continu)
 
@@ -1203,7 +1208,7 @@ Lots de PR proposés :
 | 19 au 25 oct. | Vague 0 | Search Console et Bing actifs ; PR de la vague 0 fusionnée |
 | 26 oct. au 8 nov. | Vague 1, lots (a) et (b) ; renommage des adresses | Test des résultats enrichis sans erreur ; aucune adresse `dsc` |
 | 9 au 22 nov. | Vague 1, lots (c) et (d) ; rédaction des biographies et des introductions | Inspection de `/en/…` conforme ; premiers chiffres dans la Search Console |
-| 23 nov. au 6 déc. | Vague 2 : légendes, textes alternatifs, traductions ; voyage Côte d’Émeraude | 44 légendes ; 8 introductions |
+| 23 nov. au 6 déc. | Vague 2 : légendes, textes alternatifs, traductions ; voyage Côte d’Émeraude | 43 légendes ; 8 introductions |
 | 7 au 20 déc. | Voyage Californie (anglais) ; Pinterest ; premier billet si le carnet est prêt | Premier bilan Search Console : Pages, Images, requêtes |
 | 21 déc. au 3 janv. | Fêtes : billet « Nos photos de 2026 » ; démarches presse et clubs | — |
 | 4 au 17 janv. | Bilan à 3 mois ; pages de lieu ; cadrage de la boutique | Bilan écrit, objectifs du trimestre suivant |
@@ -1211,7 +1216,7 @@ Lots de PR proposés :
 **Objectifs indicatifs à 3 mois.** Ils sont à réviser après les premières données.
 - « nicephos » en première position en France, en Allemagne et au Royaume-Uni.
 - Au moins 90 % des adresses françaises du sitemap indexées.
-- Les 44 photos dans le rapport « Métadonnées d’image ».
+- Les 43 photos de production (logo retiré) dans le rapport « Métadonnées d’image ».
 - Des impressions Images en hausse d’un mois sur l’autre.
 - Au moins 10 requêtes de lieu avec des impressions.
 - Au moins 5 domaines référents.
