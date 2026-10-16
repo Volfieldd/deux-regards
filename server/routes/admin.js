@@ -930,8 +930,14 @@ export default async function adminRoutes(app) {
   // Description suggérée d'une photo : la demander (elle passe avant la file de nuit), et son état (suivi sans recharger).
   app.post('/admin/photos/:id/description', W('photos.textes'), async (request, reply) => {
     const id = byId(request.params.id);
+    if (!repo.photo(id)) return reply.callNotFound();
     if (!app.describer.settings().on) return failed(reply, `/admin/photos/${id}`, request.t('Les descriptions suggérées sont éteintes (page Séries).'));
-    app.describer.request(id);
+    // File bornée (MAX_ASKED demandes en attente) : un compte ne peut pas occuper le calcul indéfiniment.
+    if (app.describer.request(id) === false) {
+      const busy = request.t('Trop de descriptions demandées attendent déjà : réessayez dans quelques minutes.');
+      if (!request.headers.accept?.includes('text/html')) return reply.code(429).send({ ok: false, error: busy });
+      return failed(reply, `/admin/photos/${id}#description`, busy);
+    }
     if (!request.headers.accept?.includes('text/html')) return { ok: true };
     return done(reply, `/admin/photos/${id}#description`, request.t('Description demandée : elle arrive dans une minute environ.'));
   });
