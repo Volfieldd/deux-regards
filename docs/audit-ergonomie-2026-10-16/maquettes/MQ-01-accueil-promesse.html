@@ -7,6 +7,7 @@
 <title>Nicephos — photographies de Sébastien et Julien</title>
 <meta name="description" content="Rue, mer et nuit, de Saint-Malo à la Californie : les photographies de Sébastien et Julien.">
 <link rel="stylesheet" href="_commun/site.css">
+<link rel="stylesheet" href="_commun/site-entete.css">
 <style>
 /* ===== Thème « Nicephos » (repris de public/themes/nicephos.css) + corrections proposées ===== */
 .theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
@@ -25,7 +26,7 @@
 /* Corrections typographiques (UX-F-29) et de comportement (UX-F-34) appliquées à toutes les maquettes */
 body { font-weight: 400; position: relative; }
 .theme-nicephos body { font-weight: 400; }
-.mono { font-size: 12px; }
+.mono { font-size: 13px; }
 .eyebrow { font-size: 12px; }
 img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; -webkit-user-drag: auto; }
 :focus-visible, .is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
@@ -34,92 +35,11 @@ img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: au
 .arrow { display: inline-block; }
 .wrap { padding-inline: max(var(--gut), env(safe-area-inset-left)) max(var(--gut), env(safe-area-inset-right)); }
 
-/* Lien d'évitement (UX-F-06) : hors écran, révélé au focus, premier élément de la page */
-.skip { position: absolute; left: -9999px; top: 0; }
-.skip:focus, .skip.is-focus { position: static; display: inline-flex; align-items: center; min-height: 44px; margin: 10px 0 0 var(--gut);
-  padding: 0 18px; background: var(--ink); color: var(--paper); font: 500 14px/1 var(--sans); letter-spacing: .02em;
-  outline: 2px solid var(--ink); outline-offset: 3px; }
+/* Lien d’évitement, en-tête et pied de page : voir _commun/site-entete.css */
 
-/* En-tête sur une ligne (UX-F-36, UX-T-16) : marque, menu, filet, Tirages, recherche, langue */
-.site-h { display: flex; align-items: center; gap: 12px 28px; min-height: 72px; position: relative; z-index: 20; }
-.site-h .wordmark { display: inline-flex; align-items: center; min-height: 44px; margin-right: auto; color: var(--ink);
-  font: 300 15px/1 var(--sans); letter-spacing: .42em; text-transform: uppercase; white-space: nowrap; }
-.site-nav ul, .site-tools { display: flex; align-items: center; list-style: none; margin: 0; padding: 0; }
-.site-nav ul { gap: 0 clamp(14px, 2vw, 30px); }
-.site-nav a, .site-tools .tool, .lang > summary { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 12px; font-weight: 400;
-  letter-spacing: .2em; text-transform: uppercase; color: var(--ink); white-space: nowrap; }
-.site-nav a:hover { text-decoration: underline; text-underline-offset: 8px; }
-.site-nav a[aria-current] { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
-.site-nav .soft { display: flex; align-items: center; gap: clamp(14px, 2vw, 30px); }
-.site-nav .soft::before { content: ''; width: 1px; height: 18px; background: var(--mute); }
-.site-nav .soft a { color: var(--mute); }
-.site-tools { gap: 6px 18px; }
-.site-tools .tool { color: var(--ink); }
-.lang { position: relative; }
-.lang > summary { list-style: none; cursor: pointer; padding-inline: 4px; }
-.lang > summary::-webkit-details-marker { display: none; }
-.lang > summary svg { transition: transform .2s; }
-.lang[open] > summary svg { transform: rotate(180deg); }
-.lang ul { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 184px; margin: 0; padding: 6px 0; list-style: none;
-  background: var(--paper); border: 1px solid var(--field); box-shadow: 0 12px 32px rgba(0,0,0,.35); }
-.lang li a { display: flex; align-items: center; min-height: 44px; padding: 0 18px; color: var(--ink); font-size: 15px; letter-spacing: .02em; }
-.lang li a:hover { background: var(--frame); }
-.lang li a[aria-current] span { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 6px; }
-.lang li a[aria-current]::after { content: '✓'; display: inline-block; margin-left: auto; padding-left: 14px; color: var(--mute); text-decoration: none; }
-.menu-btn { display: none; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--field); color: var(--ink);
-  font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
-.cart-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); }
-@media (max-width: 760px) {
-  .site-h { min-height: 64px; gap: 4px 10px; }
-  .site-h .wordmark { font-size: 13px; letter-spacing: .34em; }
-  .site-nav { display: none; }
-  .site-tools { gap: 2px 8px; }
-  .site-tools .tool-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .site-tools .tool { min-width: 44px; justify-content: center; }
-  .menu-btn { display: inline-flex; }
-}
-
-/* Pied de page cible (UX-F-34, UX-F-23, UX-T-03) : liens soulignés, cibles de 44 px, liste verticale sur téléphone */
-.site-f { display: flex; justify-content: space-between; align-items: center; gap: 4px 24px; flex-wrap: wrap; margin-top: 72px;
-  padding-block: 28px calc(env(safe-area-inset-bottom, 0px) + 36px); border-top: 1px solid var(--rule); color: var(--mute);
-  font: 400 12px/1.5 var(--mono); letter-spacing: .04em; }
-.site-f p { margin: 0; }
-.site-f ul { display: flex; flex-wrap: wrap; gap: 0 20px; list-style: none; margin: 0; padding: 0; }
-.site-f a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 4px;
-  text-decoration-color: var(--mute); }
-.site-f a:hover { text-decoration-color: var(--ink); }
-@media (max-width: 640px) { .site-f { flex-direction: column; align-items: flex-start; } .site-f ul { flex-direction: column; } }
-
-/* ===== Annotations de la maquette (hors produit) ===== */
-.pin { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex: none; border-radius: 50%;
-  background: #f5c84c; color: #111; box-shadow: 0 0 0 2px #111; font: 600 12px/1 'IBM Plex Mono', ui-monospace, monospace;
-  letter-spacing: 0; text-transform: none; font-style: normal; vertical-align: middle; text-decoration: none; }
-.pin-abs { position: absolute; z-index: 45; }
-.pin-in { margin-left: 8px; }
+/* Annotations : voir _commun/annotations.css (gabarit commun) */
 .site-tools li, .site-nav li { display: flex; align-items: center; }
 @media (min-width: 761px) { .menu-btn + .pin { display: none; } }
-.ord { position: absolute; z-index: 5; top: 8px; left: 8px; padding: 3px 7px; background: #f5c84c; color: #111;
-  font: 600 12px/1.2 'IBM Plex Mono', ui-monospace, monospace; box-shadow: 0 0 0 2px #111; }
-.mq-fold { position: absolute; left: 0; right: 0; top: 900px; height: 0; border-top: 2px dashed #f5c84c; z-index: 60; pointer-events: none; }
-.mq-fold span { position: absolute; right: 12px; top: -28px; padding: 4px 8px; background: #f5c84c; color: #111; font: 500 12px/1.2 'IBM Plex Mono', monospace; }
-@media (max-width: 760px) { .mq-fold { top: 839px; } }
-.mq-state { position: relative; margin: 56px var(--gut) 0; border: 1px dashed var(--field); padding: 0; }
-.mq-state > .mq-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0; padding: 12px 16px; border-bottom: 1px dashed var(--field);
-  font: 500 12px/1.4 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
-.mq-state > .mq-label span { text-transform: none; letter-spacing: .02em; font-weight: 400; color: var(--mute); }
-.mq-notes { margin-top: 72px; padding: 40px var(--gut) 56px; background: #f3efe6; color: #1d1c1a; border-top: 6px solid #f5c84c;
-  font: 400 15px/1.55 Jost, 'Helvetica Neue', Arial, sans-serif; color-scheme: light; }
-.mq-notes :focus-visible { outline-color: #1d1c1a; }
-.mq-notes .mq-id { margin: 0; font: 400 12px/1.5 'IBM Plex Mono', monospace; color: #5c574e; letter-spacing: .04em; }
-.mq-notes h2 { margin: 6px 0 4px; font: 500 22px/1.25 Jost, sans-serif; letter-spacing: .01em; }
-.mq-notes .mq-lead { margin: 0; max-width: 90ch; color: #3a3936; }
-.mq-notes ol { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 18px 44px; }
-.mq-notes li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; align-items: start; }
-.mq-notes li p { margin: 0; }
-.mq-notes .ref { display: block; margin-top: 4px; font: 400 12px/1.5 'IBM Plex Mono', monospace; color: #5c574e; }
-.mq-notes .mq-measures { margin: 28px 0 0; padding-top: 16px; border-top: 1px solid #cfc8b8; font: 400 12.5px/1.6 'IBM Plex Mono', monospace; color: #3a3936; max-width: 120ch; }
-.mq-notes a { text-decoration: underline; text-underline-offset: 3px; }
-@media print { .mq-fold, .pin, .ord { display: none !important; } }
 /* ===== MQ-01 : ouverture ===== */
 body { background: var(--paper); }
 .hwrap { position: relative; }
@@ -154,10 +74,10 @@ body { background: var(--paper); }
 .pair img { width: 100%; height: auto; background: var(--frame); }
 .pair .t { display: flex; justify-content: space-between; gap: 12px; }
 .pair .t b { font: 400 16px/1.3 var(--sans); color: var(--ink); }
-.pair .t span { font: 400 12px/1.5 var(--mono); color: var(--mute); white-space: nowrap; }
+.pair .t span { font: 400 13px/1.5 var(--mono); color: var(--mute); white-space: nowrap; }
 .pins-h .pin-abs { top: 24px; }
 @media (max-width: 760px) {
-  .op-photo img { height: min(56svh, 470px); min-height: 0; }
+  .op-photo img { height: min(50svh, 420px); min-height: 0; }
   .op-band { grid-template-columns: 1fr; padding-block: 20px 24px; }
   .op-band h1 { font-size: 30px; }
   .op-band .sub { font-size: 16px; }
@@ -168,6 +88,7 @@ body { background: var(--paper); }
   .dip .lead { font-size: 24px; }
 }
 </style>
+<link rel="stylesheet" href="_commun/annotations.css">
 </head>
 <body>
 <a class="skip is-focus" href="#contenu">Aller au contenu</a><span class="pin" style="margin-left:10px" aria-hidden="true">1</span>
@@ -237,16 +158,16 @@ body { background: var(--paper); }
   <h2 id="mq-h">Ce qui change</h2>
   <p class="mq-lead">Le premier écran dit enfin qui vous êtes et ce qu’on va voir, et la photo y est entière. Le titre de la page devient « Nicephos — photographies de Sébastien et Julien » (aujourd’hui « Nicephos »).</p>
   <ol>
-    <li><span class="pin">1</span><p>Premier élément de la page : « Aller au contenu », montré ici dans son état focus (contour de 2 px). Une tabulation suffit pour atteindre l’ouverture, au lieu de 18 avant le contenu.<span class="ref">UX-F-06 · RGAA 12.7 · WCAG 2.4.1 · Opquast 155</span></p></li>
-    <li><span class="pin">2</span><p>En-tête sur une ligne : « NICEPHOS » en Jost 300 (lien vers l’accueil), le menu, puis un filet et « Tirages » en retrait, plus pâle. Le menu est posé sur sa propre bande noire, au-dessus de la photo : 17,2:1 pour le menu, 7,4:1 pour « Tirages », quelle que soit la photo. Sur téléphone, l’en-tête fait 64 px (187 px aujourd’hui) : marque, loupe, langue et bouton « Menu ».<span class="ref">UX-F-01 · UX-F-36 · UX-T-16 · RGAA 3.2 · WCAG 1.4.3 · Loi de Hick</span></p></li>
-    <li><span class="pin">3</span><p>La langue en toutes lettres, sans drapeau : « Français · English · Deutsch », chacune dans sa langue (attribut lang). La liste s’ancre au bord droit, sous le sélecteur qui reste à droite : elle tient dans l’écran à 320 px (aujourd’hui, elle commence à −105 px sur Pixel 7). Le nom accessible devient « Langue : FR ».<span class="ref">UX-F-02 · UX-F-32 · UX-F-24 · RGAA 10.11 · WCAG 1.4.10 et 2.5.3</span></p></li>
-    <li><span class="pin">4</span><p>La photo entière, sans voile ni zoom, sur le noir : horizontale au bureau (900 × 600 px), verticale sur téléphone, choisie parmi les photos verticales plutôt que recadrée au tiers. Aucun texte ne la recouvre.<span class="ref">UX-F-17 · UX-F-01 · Nielsen #8 · B&amp;S 1.4 Lisibilité</span></p></li>
+    <li><span class="pin">1</span><p>Premier élément de la page : « Aller au contenu », montré ici dans son état focus (contour de 2 px). Une tabulation suffit pour atteindre l’ouverture, au lieu de 18 avant le contenu.<span class="ref">UX-F-06 · RGAA 12.7 · WCAG 2.4.1 · Opquast 155</span></p></li>
+    <li><span class="pin">2</span><p>En-tête sur une ligne : « NICEPHOS » en Jost 300 (lien vers l’accueil), le menu, puis un filet et « Tirages » en retrait, plus pâle. Le menu est posé sur sa propre bande noire, au-dessus de la photo : 17,2:1 pour le menu, 7,4:1 pour « Tirages », quelle que soit la photo. Sur téléphone, l’en-tête fait 64 px (187 px aujourd’hui) : marque, loupe, langue et bouton « Menu ».<span class="ref">UX-F-01 · UX-F-36 · UX-T-16 · RGAA 3.2 · WCAG 1.4.3 · Loi de Hick</span></p></li>
+    <li><span class="pin">3</span><p>La langue en toutes lettres, sans drapeau : « Français · English · Deutsch », chacune dans sa langue (attribut lang). La liste s’ancre au bord droit, sous le sélecteur qui reste à droite : elle tient dans l’écran à 320 px (aujourd’hui, elle commence à −105 px sur Pixel 7). Le nom accessible devient « Langue : FR ».<span class="ref">UX-F-02 · UX-F-32 · UX-F-24 · RGAA 10.11 · WCAG 1.4.10 et 2.5.3</span></p></li>
+    <li><span class="pin">4</span><p>La photo entière, sans voile ni zoom, sur le noir : horizontale au bureau (900 × 600 px), verticale sur téléphone, choisie parmi les photos verticales plutôt que recadrée au tiers. Aucun texte ne la recouvre.<span class="ref">UX-F-17 · UX-F-01 · Nielsen #8 · B&amp;S 1.4 Lisibilité</span></p></li>
     <li><span class="pin">5</span><p>Une promesse d’une ligne en H1 stable (elle ne change plus à chaque diapositive) et une sous-ligne factuelle qui nomme les deux photographes. Contraste 17,2:1 et 12,4:1 sur fond uni, au-delà des 7:1 du niveau AAA.<span class="ref">UX-F-16 · UX-F-10 · RGAA 9.1 · Opquast 99 et 101 · B&amp;S 1.1 Incitation</span></p></li>
-    <li><span class="pin">6</span><p>La légende de la diapositive devient un cartel sous l’image : titre en casse normale, auteur, lieu et date, puis « Voir la photo » souligné, en cible de 44 px. Plex Mono à 13 px (11 px aujourd’hui), 7,4:1.<span class="ref">UX-F-29 · UX-F-23 · RGAA 10.6 · WCAG 1.4.1</span></p></li>
-    <li><span class="pin">7</span><p>Les vignettes du bandeau cèdent la place à six points de position (cibles de 32 × 44 px, état courant plein et non seulement coloré) et à un bouton « Pause » de 44 px de haut, toujours visible. Le diaporama s’arrête au survol, au focus et en mouvement réduit, comme aujourd’hui.<span class="ref">UX-F-36 · WCAG 2.2.2 et 2.5.8 · RGAA 13.8 · Loi de Fitts</span></p></li>
-    <li><span class="pin">8</span><p>Une seule image dans le HTML au départ (eager, fetchpriority=high). Les cinq suivantes sont demandées par le script environ 1,5 s avant leur tour, et seulement si le diaporama tourne ; sans JavaScript, rien d’autre ne se charge. Le diptyque, plus bas, est en chargement différé.<span class="ref">UX-F-18 · RGESN 6.4 et 6.5 · RGESN 4.6</span></p></li>
+    <li><span class="pin">6</span><p>La légende de la diapositive devient un cartel sous l’image : titre en casse normale, auteur, lieu et date, puis « Voir la photo » souligné, en cible de 44 px. Plex Mono à 13 px (11 px aujourd’hui), 7,4:1.<span class="ref">UX-F-29 · UX-F-23 · RGAA 10.6 · WCAG 1.4.1</span></p></li>
+    <li><span class="pin">7</span><p>Les vignettes du bandeau cèdent la place à six points de position (cibles de 32 × 44 px, état courant plein et non seulement coloré) et à un bouton « Pause » de 44 px de haut, toujours visible. Le diaporama s’arrête au survol, au focus et en mouvement réduit, comme aujourd’hui.<span class="ref">UX-F-36 · WCAG 2.2.2 et 2.5.8 · RGAA 13.8 · Loi de Fitts</span></p></li>
+    <li><span class="pin">8</span><p>Une seule image dans le HTML au départ (eager, fetchpriority=high). Les cinq suivantes sont demandées par le script environ 1,5 s avant leur tour, et seulement si le diaporama tourne ; sans JavaScript, rien d’autre ne se charge. Le diptyque, plus bas, est en chargement différé.<span class="ref">UX-F-18 · RGESN 6.4 et 6.5 · RGESN 4.6</span></p></li>
   </ol>
-  <p class="mq-measures">Mesures sur cette maquette (Chromium, 1440 × 900) : texte du bandeau 17,2:1 (titre), 12,4:1 (sous-ligne), 7,4:1 (cartel) sur #0b0b0b ; menu 17,2:1 ; « Tirages » 7,4:1. Images chargées au départ : 1 (la photo d’ouverture). Les poids réels se mesureront en production : la cible du plan d’action est un accueil sous 1 000 ko à froid sur bureau (1 953 ko aujourd’hui).</p>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette) — <b>bureau 1440 × 900</b> : texte du bandeau 17,2:1 (titre), 12,4:1 (sous-ligne), 7,4:1 (cartel, Plex Mono 13 px) sur #0b0b0b ; menu 17,2:1 ; « Tirages » 7,4:1 ; images chargées au départ : 1 (la photo d’ouverture). <b>Pixel 7 (412 × 839, densité 2)</b> : en-tête de 64 px ; photo verticale entière de 280 × 420 px, haut à 118 px ; H1 en Jost 300 à 30 px (17,1:1), sous-ligne à 16 px (12,4:1), cartel à 13 px (7,4:1) ; bouton « Menu » 98 × 44 px, points de position 32 × 44 px, « Pause » 102 × 44 px, tous au-dessus du bas du premier écran (haut à 781 px, écran de 839 px) ; liens du pied de page en cibles de 44 px, empilés. Les poids réels se mesureront en production : la cible du plan d’action est un accueil sous 1 000 ko à froid sur bureau (1 953 ko aujourd’hui).</p>
 </aside>
 <script>/* Démonstration d’état seulement : sur téléphone, la liste des langues est montrée ouverte. */
 if (matchMedia('(max-width: 760px)').matches) document.querySelector('.lang').open = true;</script>

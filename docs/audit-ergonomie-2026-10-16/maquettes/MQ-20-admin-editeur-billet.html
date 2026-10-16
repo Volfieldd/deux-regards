@@ -15,6 +15,8 @@
 
     /* Maquette : la barre latérale garde sa hauteur naturelle pour la capture pleine page. */
     .side { height: auto; align-self: start; }
+    /* Capture pleine page : le fond de la barre latérale descend jusqu’en bas de la page (audit, B). */
+    @media (min-width: 721px) { .shell { background: linear-gradient(90deg, var(--s1) 0 var(--side), transparent var(--side)); } .shell > .side { border-right: 0; } .shell::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--side) - 1px); border-left: 1px solid var(--line); } .shell { position: relative; } }
     .side .foot { margin-top: 18px; }
     .nav-sub { list-style: none; margin: 0 0 2px; padding: 0 0 0 30px; display: grid; gap: 2px; }
     .nav-sub a { min-height: 30px; font-size: 13.5px; }
@@ -23,7 +25,7 @@
     .side .foot .nav a { min-height: 30px; }
 
     /* Repères d'annotation (la légende est en bas de page). */
-    .mq-n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font: 600 12px/1 var(--font); letter-spacing: 0; text-transform: none; vertical-align: middle; flex: none; box-shadow: 0 0 0 2px var(--bg); }
+    
     .mq-screen { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 18px; padding-top: 10px; border-top: 1px dashed var(--line2); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink2); }
     .mq-screen b { color: var(--accent-ink); font-weight: 600; }
     .mq-screen code { text-transform: none; letter-spacing: 0; }
@@ -196,20 +198,20 @@
     .m-bar { display: none; }
 
     /* Annotations */
-    .mq-notes { padding: 34px 36px 56px calc(var(--side) + 36px); background: var(--s1); border-top: 1px solid var(--line2); }
-    .mq-notes > * { max-width: 1120px; }
-    .mq-notes h2 { margin: 0 0 6px; font-weight: 300; font-size: 28px; }
-    .mq-notes .intro { margin: 0 0 22px; color: var(--ink2); max-width: 90ch; }
-    .mq-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 36px; }
-    .mq-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 2px 12px; font-size: 13.5px; line-height: 1.55; }
-    .mq-list li > .mq-n { grid-row: span 2; margin-top: 1px; }
-    .mq-list strong { font-weight: 500; }
-    .mq-list .refs { grid-column: 2; font-size: 12px; color: var(--ink3); }
-    .mq-notes .after { margin: 24px 0 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--ink2); font-size: 13px; max-width: 110ch; }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     @media (max-width: 1180px) {
       .e-grid { grid-template-columns: minmax(0, 1fr); }
-      .mq-list { grid-template-columns: minmax(0, 1fr); }
+      
     }
     @media (max-width: 720px) {
       html { scroll-padding-bottom: 150px; }
@@ -247,7 +249,7 @@
       .m-bar .mst b { color: var(--ink); font-weight: 500; }
       .m-bar .mst .ok { color: var(--ok); font-weight: 600; }
       .m-bar .btn { min-height: 44px; }
-      .mq-notes { padding: 26px 16px 190px; }
+      
     }
     .m-only { display: none; }
     @media (max-width: 720px) {
@@ -262,13 +264,14 @@
       .m-bars .m-bar, .m-bars .tabbar { position: static; box-shadow: none; }
       .m-bars .m-bar { border: 1px solid var(--line2); border-bottom: 0; border-radius: 14px 14px 0 0; }
       .m-bars .tabbar { border: 1px solid var(--line2); border-radius: 0 0 14px 14px; }
-      .mq-notes { padding-bottom: 32px; }
+      
       .m-bars .m-bar .mst { flex: 1 1 auto; min-width: 0; margin: 0; }
       .m-bars .m-bar .btn { flex: none; }
       .when label.inline { align-items: center; }
       .when label.inline input { margin-top: 0; }
     }
   </style>
+<link rel="stylesheet" href="_commun/annotations.css">
 </head>
 <body class="admin">
 <a class="skip" href="#contenu">Aller au contenu</a>
@@ -338,10 +341,10 @@
   <div class="e-top">
     <div>
       <h1>Lisbonne et Porto</h1>
-      <p class="sub"><span class="etat"><span class="sym" aria-hidden="true">○</span>Brouillon</span> <span>Billet · Voyage</span> <span class="slug">adresse <code>/carnet/lisbonne-et-porto</code></span> <span class="mq-n" aria-hidden="true">1</span></p>
+      <p class="sub"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Brouillon</span> <span>Billet · Voyage</span> <span class="slug">adresse <code>/carnet/lisbonne-et-porto</code></span> <span class="pin" aria-hidden="true">1</span></p>
     </div>
     <div class="e-acts">
-      <p class="saved-st" role="status"><span class="ok" aria-hidden="true">✓</span>Enregistré à 10 h 42 <button type="button">Annuler</button> <span class="mq-n" aria-hidden="true">5</span></p>
+      <p class="saved-st" role="status"><span class="ok" aria-hidden="true">✓</span>Enregistré à 22 h 42 <button type="button">Annuler</button> <span class="pin" aria-hidden="true">5</span></p>
       <a class="btn ghost" href="#apercu">Aperçu comme sur le site</a>
       <a class="btn" href="#publication">Publier…</a>
     </div>
@@ -351,15 +354,15 @@
     <ul class="langs">
       <li><a href="#" aria-current="page"><span class="code" lang="fr">FR</span><span class="lst">rédigé, langue d’origine</span></a></li>
       <li><a href="#traduire"><span class="code" lang="en">EN</span><span class="lst todo">à traduire</span></a></li>
-      <li><a href="#traduire"><span class="code" lang="de">DE</span><span class="lst warn">à revoir : le français a changé le 14 oct.</span></a></li>
-      <li style="align-self:center;margin-left:10px"><span class="mq-n" aria-hidden="true">2</span></li>
+      <li><a href="#traduire"><span class="code" lang="de">DE</span><span class="lst warn">à revoir : le français a changé ce soir</span></a></li>
+      <li style="align-self:center;margin-left:10px"><span class="pin" aria-hidden="true">2</span></li>
     </ul>
   </nav>
 
   <div class="e-grid">
     <div class="e-col">
       <section class="panel" aria-labelledby="hd-t">
-        <h2 id="hd-t">En-tête du billet <span class="mono">ce que l’on voit dans la liste des Carnets</span> <span class="mq-n" aria-hidden="true">3</span></h2>
+        <h2 id="hd-t">En-tête du billet <span class="mono">ce que l’on voit dans la liste des Carnets</span> <span class="pin" aria-hidden="true">3</span></h2>
         <div class="grid2">
           <label class="full" for="f-titre">Titre
             <input id="f-titre" name="titre" value="Lisbonne et Porto" maxlength="90" autocomplete="off">
@@ -396,7 +399,7 @@
       </section>
 
       <section class="panel" aria-labelledby="corps-t">
-        <h2 id="corps-t">Corps du billet <span class="mono">7 blocs · 1 040 mots · 6 min de lecture</span> <span class="mq-n" aria-hidden="true">4</span></h2>
+        <h2 id="corps-t">Corps du billet <span class="mono">7 blocs · 1 040 mots · 6 min de lecture</span> <span class="pin" aria-hidden="true">4</span></h2>
         <ol class="blocks">
           <li class="blk" aria-labelledby="b1-t">
             <div class="blk-hd">
@@ -438,7 +441,7 @@
             </ul>
             <label for="b2-txt" class="sr-only">Texte du bloc 2</label>
             <textarea id="b2-txt" name="b2" rows="5">Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une matinée. Le samedi, à Lisbonne, nous nous sommes levés avant le premier tram, quand l’Alfama sent encore le café et le linge mouillé. Sébastien est descendu vers le Tage, Julien est monté dans les ruelles.</textarea>
-            <p class="typo" role="status"><span aria-hidden="true">✓</span> <b>Typographie corrigée à la saisie :</b> 2 apostrophes droites → ’, « » avec espaces fines, « -- » → tiret —. <button class="more" type="button">Annuler ces corrections</button> <kbd>Ctrl Z</kbd> <span class="mq-n" aria-hidden="true">6</span></p>
+            <p class="typo" role="status"><span aria-hidden="true">✓</span> <b>Typographie corrigée à la saisie :</b> 2 apostrophes droites → ’, « » avec espaces fines, « -- » → tiret —. <button class="more" type="button">Annuler ces corrections</button> <kbd>Ctrl Z</kbd> <span class="pin" aria-hidden="true">6</span></p>
           </li>
 
           <li class="blk" aria-labelledby="b3-t">
@@ -455,7 +458,7 @@
               <label class="full" for="b3-q">Citation, telle qu’elle a été dite
                 <textarea id="b3-q" name="q" rows="2" lang="pt-PT">«Fotografe à vontade. As flores não fogem, e eu também não.»</textarea>
               </label>
-              <label for="b3-lang"><span>Langue de la citation <span class="mq-n" aria-hidden="true">7</span></span>
+              <label for="b3-lang"><span>Langue de la citation <span class="pin" aria-hidden="true">7</span></span>
                 <select id="b3-lang" name="q_lang" class="mq-focus" aria-describedby="b3-lang-h">
                   <option value="fr">français</option>
                   <option value="pt-PT" selected>portugais (Portugal) · pt-PT</option>
@@ -470,7 +473,7 @@
                 <input id="b3-src" name="q_src" value="Inês, fleuriste, rua dos Remédios">
               </label>
               <label class="full" for="b3-tr">Traduction (affichée dessous, en français)
-                <input id="b3-tr" name="q_tr" value="« Photographiez tant que vous voulez. Les fleurs ne s’en vont pas, et moi non plus. »">
+                <textarea id="b3-tr" name="q_tr" rows="2">« Photographiez tant que vous voulez. Les fleurs ne s’en vont pas, et moi non plus. »</textarea>
               </label>
             </div>
           </li>
@@ -522,21 +525,21 @@
 
     <div class="e-aside">
       <section class="panel" id="publication" aria-labelledby="pub-t">
-        <h2 id="pub-t">Publication <span class="mq-n" aria-hidden="true">8</span></h2>
-        <p class="pub-st"><span class="etat"><span class="sym" aria-hidden="true">○</span>Brouillon</span> visible de vous deux seulement</p>
+        <h2 id="pub-t">Publication <span class="pin" aria-hidden="true">8</span></h2>
+        <p class="pub-st"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Brouillon</span> visible de vous deux seulement</p>
         <p class="pub-flow" aria-label="Circuit : brouillon, proposé, publié">○ Brouillon <span aria-hidden="true">→</span> <i class="half" aria-hidden="true"></i> Proposé <span aria-hidden="true">→</span> ● Publié</p>
         <fieldset class="fs when">
           <legend>Quand le publier</legend>
           <label class="inline"><input type="radio" name="quand" value="now"> Dès que je clique sur « Publier »</label>
           <label class="inline"><input type="radio" name="quand" value="later" checked> Programmer</label>
           <div class="row">
-            <label for="p-date">Le <input id="p-date" name="p_date" value="sam. 18 oct. 2026" inputmode="text" autocomplete="off"></label>
+            <label for="p-date">Le <input id="p-date" name="p_date" value="lun. 12 oct. 2026" inputmode="text" autocomplete="off"></label>
             <label for="p-time">à <input id="p-time" name="p_time" value="8 h 00" autocomplete="off"></label>
           </div>
-          <p class="hint">Samedi 18 octobre à 8 h, heure de Paris. Le flux RSS l’annonce à cette heure-là.</p>
+          <p class="hint">Lundi 12 octobre à 8 h, heure de Paris. Le flux RSS l’annonce à cette heure-là.</p>
         </fieldset>
         <div class="pub-btns">
-          <button class="btn big" type="button">Programmer pour le 18 oct., 8 h</button>
+          <button class="btn big" type="button">Programmer pour le 12 oct., 8 h</button>
           <p class="hint">Avant de programmer : <strong>EN à traduire</strong>, DE à revoir. Le billet peut partir en français seul ; les autres langues renverront au français.</p>
         </div>
       </section>
@@ -551,19 +554,19 @@
       </section>
 
       <section class="panel weight" aria-labelledby="w-t">
-        <h2 id="w-t">Poids du billet <span class="mq-n" aria-hidden="true">9</span></h2>
-        <p style="margin:0"><span class="big">640 ko</span> estimés, budget 1,2 Mo</p>
-        <meter min="0" max="1200" low="900" high="1100" optimum="400" value="640" aria-label="Poids estimé : 640 ko sur un budget de 1 200 ko">640 ko sur 1 200</meter>
+        <h2 id="w-t">Poids du billet <span class="pin" aria-hidden="true">9</span></h2>
+        <p style="margin:0"><span class="big">640 ko</span> estimés, budget 1,2 Mo</p>
+        <meter min="0" max="1200" low="900" high="1100" optimum="400" value="640" aria-label="Poids estimé : 640 ko sur un budget de 1 200 ko">640 ko sur 1 200</meter>
         <dl>
-          <dt>7 photos (1 280 px, AVIF)</dt><dd>540 ko</dd>
-          <dt>Planche des 10 photos</dt><dd>84 ko</dd>
-          <dt>Texte, carte d’itinéraire</dt><dd>16 ko</dd>
+          <dt>7 photos (1 280 px, AVIF)</dt><dd>540 ko</dd>
+          <dt>Planche des 10 photos</dt><dd>84 ko</dd>
+          <dt>Texte, carte d’itinéraire</dt><dd>16 ko</dd>
         </dl>
         <p class="hint" style="margin-top:8px">Mesuré à l’ouverture d’un téléphone ; les photos suivantes ne chargent qu’au défilement.</p>
       </section>
 
       <section class="panel" aria-labelledby="tp-t">
-        <h2 id="tp-t">Photos du voyage <span class="mono">10 · Lisbonne et Porto</span> <span class="mq-n" aria-hidden="true">10</span></h2>
+        <h2 id="tp-t">Photos du voyage <span class="mono">10 · Lisbonne et Porto</span> <span class="pin" aria-hidden="true">10</span></h2>
         <ul class="tp-list">
           <li class="tp" draggable="true"><span class="grip" aria-hidden="true">⠿</span><img src="_commun/photos/quai.webp" width="900" height="600" alt="" loading="lazy"><span class="t">Cais do Sodré, marée basse<small>Sébastien · 10 oct.</small></span><button class="btn sec" type="button" aria-label="Insérer « Cais do Sodré, marée basse » après le bloc 4">Insérer</button></li>
           <li class="tp" draggable="true"><span class="grip" aria-hidden="true">⠿</span><img src="_commun/photos/ruelle.webp" width="600" height="900" alt="" loading="lazy"><span class="t">Alfama, premier tram<small>Julien · 10 oct.</small></span><button class="btn sec" type="button" aria-label="Insérer « Alfama, premier tram » après le bloc 4">Insérer</button></li>
@@ -579,7 +582,7 @@
 
   <!-- ================= Écran B ================= -->
   <section class="mq-b" aria-labelledby="ecran-b">
-    <p class="mq-screen" id="ecran-b"><b>Écran B</b> Aperçu comme sur le site, nuit et jour <span class="mq-n" aria-hidden="true">11</span></p>
+    <p class="mq-screen" id="ecran-b"><b>Écran B</b> Aperçu comme sur le site, nuit et jour <span class="pin" aria-hidden="true">11</span></p>
     <div class="pv-pair">
       <figure class="pv nuit">
         <div class="pv-bar" aria-hidden="true"><span>Aperçu · thème Nicephos, nuit</span><span>non publié</span></div>
@@ -588,7 +591,7 @@
           <p class="k">Voyage</p>
           <p class="h">Lisbonne et Porto</p>
           <p class="s">Deux jours, deux regards, un même océan</p>
-          <p class="b">Par Sébastien et Julien · 18 octobre 2026 · 6 min de lecture</p>
+          <p class="b">Par Sébastien et Julien · 12 octobre 2026 · 6 min de lecture</p>
           <img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy">
           <p class="c">Miradouro, l’heure dorée — Julien · Lisbonne</p>
           <p class="p">Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une matinée.</p>
@@ -602,7 +605,7 @@
           <p class="k">Voyage</p>
           <p class="h">Lisbonne et Porto</p>
           <p class="s">Deux jours, deux regards, un même océan</p>
-          <p class="b">Par Sébastien et Julien · 18 octobre 2026 · 6 min de lecture</p>
+          <p class="b">Par Sébastien et Julien · 12 octobre 2026 · 6 min de lecture</p>
           <img src="_commun/photos/ciel.webp" width="900" height="600" alt="" loading="lazy">
           <p class="c">Miradouro, l’heure dorée — Julien · Lisbonne</p>
           <p class="p">Nous étions partis avec une seule règle : ne pas photographier la même chose. Elle n’a pas tenu une matinée.</p>
@@ -614,13 +617,13 @@
 
   <!-- ================= Écran C ================= -->
   <section class="mq-c" aria-labelledby="ecran-c">
-    <p class="mq-screen" id="traduire"><b id="ecran-c">Écran C</b> Onglet EN : traduire tout le billet sur une page <span class="mq-n" aria-hidden="true">12</span></p>
+    <p class="mq-screen" id="traduire"><b id="ecran-c">Écran C</b> Onglet EN : traduire tout le billet sur une page <span class="pin" aria-hidden="true">12</span></p>
     <table class="trad">
       <caption>Traduction anglaise <span class="mono">4 textes sur 11 traduits · Tab passe d’un champ au suivant</span></caption>
       <thead><tr><th scope="col">Élément</th><th scope="col">Français (référence)</th><th scope="col">English</th></tr></thead>
       <tbody>
-        <tr><th scope="row">Titre</th><td class="src">Lisbonne et Porto</td><td><label class="sr-only" for="en-1">Titre en anglais</label><input id="en-1" lang="en" value="Lisbon and Porto"><p class="cellnote">✓ traduit le 13 oct.</p></td></tr>
-        <tr><th scope="row">Chapô</th><td class="src">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens…</td><td><label class="sr-only" for="en-2">Chapô en anglais</label><textarea id="en-2" lang="en" rows="2">Two days, two ways of seeing, one ocean. Sébastien went looking for the sea, Julien for people…</textarea><p class="cellnote">✓ traduit le 13 oct.</p></td></tr>
+        <tr><th scope="row">Titre</th><td class="src">Lisbonne et Porto</td><td><label class="sr-only" for="en-1">Titre en anglais</label><input id="en-1" lang="en" value="Lisbon and Porto"><p class="cellnote">✓ traduit le 11 oct.</p></td></tr>
+        <tr><th scope="row">Chapô</th><td class="src">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens…</td><td><label class="sr-only" for="en-2">Chapô en anglais</label><textarea id="en-2" lang="en" rows="2">Two days, two ways of seeing, one ocean. Sébastien went looking for the sea, Julien for people…</textarea><p class="cellnote">✓ traduit le 11 oct.</p></td></tr>
         <tr><th scope="row">Bloc 2 · texte</th><td class="src">Nous étions partis avec une seule règle : ne pas photographier la même chose…</td><td><label class="sr-only" for="en-3">Bloc 2 en anglais</label><textarea id="en-3" lang="en" rows="2" aria-describedby="en-3-h"></textarea><p class="cellnote todo" id="en-3-h">▲ à traduire · <button class="more" type="button">Proposer une traduction</button></p></td></tr>
         <tr><th scope="row">Bloc 3 · traduction de la citation</th><td class="src">« Photographiez tant que vous voulez… »</td><td><label class="sr-only" for="en-4">Traduction de la citation en anglais</label><textarea id="en-4" lang="en" rows="2">“Take as many pictures as you like. The flowers aren’t going anywhere, and neither am I.”</textarea><p class="cellnote">La citation reste en portugais dans toutes les langues.</p></td></tr>
       </tbody>
@@ -629,11 +632,11 @@
 
   <!-- ================= Écran D ================= -->
   <section class="mq-d" aria-labelledby="ecran-d">
-    <p class="mq-screen" id="ecran-d"><b>Écran D</b> Le même bloc Publication selon le rôle <span class="mq-n" aria-hidden="true">13</span></p>
+    <p class="mq-screen" id="ecran-d"><b>Écran D</b> Le même bloc Publication selon le rôle <span class="pin" aria-hidden="true">13</span></p>
     <div class="role-pair">
       <section class="panel" aria-labelledby="rp-t">
         <h3 id="rp-t">Photographe : proposer</h3>
-        <p class="pub-st"><span class="etat"><span class="sym" aria-hidden="true">○</span>Brouillon</span> écrit par Sébastien</p>
+        <p class="pub-st"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Brouillon</span> écrit par Sébastien</p>
         <label for="rp-mot">Un mot pour le modérateur (facultatif)
           <textarea id="rp-mot" rows="2">Julien, peux-tu relire la citation d’Inês ? Je n’ai pas son accord écrit pour la photo 04.</textarea>
         </label>
@@ -642,10 +645,10 @@
       </section>
       <section class="panel" aria-labelledby="rm-t">
         <h3 id="rm-t">Administrateur : après une proposition</h3>
-        <p class="pub-st"><span class="etat todo"><span class="sym" aria-hidden="true"><i class="half"></i></span>Proposé</span> par Sébastien, le 16 oct. à 9 h 58</p>
+        <p class="pub-st"><span class="etat todo"><span class="sym" aria-hidden="true"><i class="half"></i></span>Proposé</span> par Sébastien, le 11 oct. à 21 h 58</p>
         <p class="cartel-r"><span class="m">« Julien, peux-tu relire la citation d’Inês ? Je n’ai pas son accord écrit pour la photo 04. »</span></p>
         <p class="actions"><button class="btn" type="button">Publier</button> <button class="btn ghost" type="button">Renvoyer avec un mot</button></p>
-        <p class="hint">Après « Publier » : « Billet publié · Annuler » pendant 10 s, avant l’annonce dans le flux RSS.</p>
+        <p class="hint">Après « Publier » : « Billet publié · Annuler » pendant 10 s, avant l’annonce dans le flux RSS.</p>
       </section>
     </div>
   </section>
@@ -655,7 +658,7 @@
 <section class="m-bars" aria-label="Barres basses du téléphone, montrées à plat">
 <p class="mq-screen m-only"><b>Téléphone</b> Barre basse, fixée en bas de l’écran au-dessus des onglets (montrée ici à plat)</p>
 <div class="m-bar" aria-label="État et publication du billet" role="region">
-  <p class="mst" role="status"><span class="ok" aria-hidden="true">✓</span> Enregistré à 10 h 42<br><b>○ Brouillon</b> · 640 ko sur 1,2 Mo</p>
+  <p class="mst" role="status"><span class="ok" aria-hidden="true">✓</span> Enregistré à 22 h 42<br><b>○ Brouillon</b> · 640 ko sur 1,2 Mo</p>
   <a class="btn" href="#publication">Publier…</a>
 </div>
 
@@ -668,27 +671,30 @@
 </nav>
 </section>
 
+
+
+
 <aside class="mq-notes" aria-labelledby="mq-notes-t">
+  <p class="mq-id">Maquette MQ-20 · administration · carnets, éditeur de billet · « Chambre noire » au bureau, mode clair sur téléphone · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
   <h2 id="mq-notes-t">Ce qui change</h2>
-  <p class="intro">Maquette MQ-20 · Administration › Publier › Carnets. Aujourd’hui, le seul récit possible est la page d’un voyage : un nom et un texte dans un champ unique, deux champs de traduction pour le nom seulement, un bouton « Enregistrer » qui ne prévient pas si l’on part (UX-A-06). L’éditeur qui suit reprend la coquille de l’administration rangée (MQ-07), sa pastille d’état (MQ-09) et la règle d’enregistrement automatique. Le mode suit le système : « Chambre noire » sur la capture de bureau, clair sur celle du téléphone. Données fictives, photos de démonstration, aucun script.</p>
+  <p class="mq-lead">Maquette MQ-20 · Administration › Publier › Carnets. L’écran est figé au dimanche 11 octobre 2026 au soir, la veille de la publication : MQ-11 et MQ-12 montrent le même billet publié le lundi 12 octobre à 8 h, puis mis à jour le 14. Aujourd’hui, le seul récit possible est la page d’un voyage : un nom et un texte dans un champ unique, deux champs de traduction pour le nom seulement, un bouton « Enregistrer » qui ne prévient pas si l’on part (UX-A-06). L’éditeur qui suit reprend la coquille de l’administration rangée (MQ-07), sa pastille d’état (MQ-09) et la règle d’enregistrement automatique. Le mode suit le système : « Chambre noire » sur la capture de bureau, clair sur celle du téléphone. Données fictives, photos de démonstration, aucun script.</p>
   <ol class="mq-list">
-    <li><span class="mq-n">1</span><span><strong>Où je suis, dans quel état.</strong> Fil d’Ariane « Carnets › Lisbonne et Porto », titre du billet en H1, pastille commune « ○ Brouillon » (forme et mot), adresse publique affichée avant la publication.</span><span class="refs">UX-A-32, UX-A-16 · B&amp;S 1.3 et 6 · RGAA 12.1 · WCAG 1.4.1 · Nielsen n°1</span></li>
-    <li><span class="mq-n">2</span><span><strong>Trois langues, trois onglets qui disent leur état en mots.</strong> « EN : à traduire », « DE : à revoir, le français a changé le 14 oct. » ; chaque onglet est un lien (une adresse par langue), l’onglet actif porte aria-current et un soulignement, pas seulement une couleur.</span><span class="refs">UX-A-21, UX-T-16 · B&amp;S 1.3 et 7 · RGAA 10.7 et 12.2 · WCAG 1.4.1</span></li>
-    <li><span class="mq-n">3</span><span><strong>L’en-tête du billet, tel qu’il apparaîtra dans la liste.</strong> Titre, chapô avec compteur de signes, auteurs qui signent sous le titre, rubrique, voyage lié, date affichée ; chaque champ a un libellé visible, les groupes ont leur légende.</span><span class="refs">UX-T-18 · RGAA 11.1, 11.2 et 11.5 · Opquast 6 et 231 · B&amp;S 1.2.1</span></li>
-    <li><span class="mq-n">4</span><span><strong>Un corps en blocs, sans glisser obligatoire.</strong> Texte, photo, diptyque, citation : chacun a son titre, son numéro et des boutons « Monter », « Descendre », « Retirer » nommés avec le numéro du bloc ; « Retirer » s’annule. La photo reprend son cartel et son texte de remplacement depuis la photothèque.</span><span class="refs">UX-A-32, UX-T-16 · WCAG 2.5.7 et 2.5.8 · RGAA 1.2, 11.9 · B&amp;S 2.1.2 et 3.2</span></li>
-    <li><span class="mq-n">5</span><span><strong>Une seule façon d’enregistrer : automatiquement, avec Annuler.</strong> « ✓ Enregistré à 10 h 42 » dans une zone d’état annoncée, « Annuler » à côté ; aucune saisie ne peut plus être perdue en quittant la page. Seul « Publier » reste un bouton explicite, parce qu’il a un effet public.</span><span class="refs">UX-A-06 · B&amp;S 1.3, 5.1 et 6 · ISO 9241-110 robustesse face aux erreurs · RGAA 7.5 · WCAG 4.1.3 · Nielsen n°3</span></li>
-    <li><span class="mq-n">6</span><span><strong>La typographie corrigée à la saisie, et dite.</strong> Apostrophe ’, guillemets « » avec espaces fines, tiret — : le message dit ce qui a été changé, et « Annuler ces corrections » (ou Ctrl Z) rend la main. La mise en forme est limitée à intertitre, italique, lien et liste : ni couleur ni taille, le site s’en charge.</span><span class="refs">UX-T-18, UX-F-29 · B&amp;S 3.2 et 5.3 · Opquast 186 · ISO 9241-110 contrôlabilité</span></li>
-    <li><span class="mq-n">7</span><span><strong>Une citation dans sa langue.</strong> Le champ de la citation porte lang="pt-PT" ; la langue choisie est reprise à la publication (balise lang), la traduction s’affiche dessous. Le focus de 2 px est montré sur la liste « Langue de la citation ».</span><span class="refs">UX-F-22, UX-T-18 · RGAA 8.7 · WCAG 3.1.2 et 2.4.7 · Opquast 132</span></li>
-    <li><span class="mq-n">8</span><span><strong>Publier ou programmer, sans surprise.</strong> Le circuit est écrit (○ Brouillon → <i class="half" aria-hidden="true"></i> Proposé → ● Publié) ; « Programmer » demande une date et une heure (heure de Paris) et le bouton les répète ; ce qui manque encore (EN à traduire) est dit avant, sans bloquer.</span><span class="refs">UX-A-32, UX-A-16 · B&amp;S 1.1 et 5.1 · WCAG 3.3.4 · Nielsen n°5</span></li>
-    <li><span class="mq-n">9</span><span><strong>Un budget de poids, affiché pendant l’écriture.</strong> « 640 ko estimés, budget 1,2 Mo », avec un &lt;meter&gt; doublé du texte et le détail par poste : on sait ce que coûte une photo de plus avant de l’insérer.</span><span class="refs">RGESN 6.1, 5.1 et 6.4 · UX-T-07 · étude B53</span></li>
-    <li><span class="mq-n">10</span><span><strong>Les photos du voyage à portée de main.</strong> Glisser entre deux blocs, ou « Insérer » (après le bloc sélectionné), qui suffit à lui seul au clavier et au toucher ; une photo déjà placée le dit (« ✓ dans le bloc 4 ») et mène à son bloc.</span><span class="refs">UX-T-16, UX-A-21 · WCAG 2.5.7 · RGAA 7.1 et 12.8 · B&amp;S 2.1.2 · ISO 9241-110 adéquation à la tâche</span></li>
-    <li><span class="mq-n">11</span><span><strong>Voir avant de publier, de nuit comme de jour.</strong> L’aperçu « comme sur le site » montre le billet dans les deux modes du thème Nicephos, avec la date programmée ; rien n’est publié.</span><span class="refs">UX-T-18, UX-F-29 · Nielsen n°1 · ISO 9241-110 conformité aux attentes</span></li>
-    <li><span class="mq-n">12</span><span><strong>Traduire tout le billet sur une page.</strong> Un tableau : élément, français de référence, champ anglais balisé lang="en" ; Tab d’un champ au suivant ; « ▲ à traduire » écrit ; « Proposer une traduction » si un traducteur est allumé. Sur téléphone, une carte par élément.</span><span class="refs">UX-A-21 · B&amp;S 2.1.2 · RGAA 5.4, 5.6 et 8.7 · Nielsen n°7</span></li>
-    <li><span class="mq-n">13</span><span><strong>Le même billet, deux rôles, les mêmes mots.</strong> Le Photographe « Propose » avec un mot facultatif pour le modérateur ; l’Administrateur voit « <i class="half" aria-hidden="true"></i> Proposé », le mot, puis « Publier » ou « Renvoyer avec un mot ». « Publier » s’annule pendant 10 s, avant l’annonce dans le flux.</span><span class="refs">UX-A-32, UX-A-07, UX-A-16 · B&amp;S 3.2 et 6 · ISO 9241-110 contrôlabilité</span></li>
+    <li><span class="pin">1</span><span><strong>Où je suis, dans quel état.</strong> Fil d’Ariane « Carnets › Lisbonne et Porto », titre du billet en H1, pastille commune « ○ Brouillon » (forme et mot), adresse publique affichée avant la publication.</span><span class="ref">UX-A-32, UX-A-16 · B&amp;S 1.3 et 6 · RGAA 12.1 · WCAG 1.4.1 · Nielsen n°1</span></li>
+    <li><span class="pin">2</span><span><strong>Trois langues, trois onglets qui disent leur état en mots.</strong> « EN : à traduire », « DE : à revoir, le français a changé ce soir » ; chaque onglet est un lien (une adresse par langue), l’onglet actif porte aria-current et un soulignement, pas seulement une couleur.</span><span class="ref">UX-A-21, UX-T-16 · B&amp;S 1.3 et 7 · RGAA 10.7 et 12.2 · WCAG 1.4.1</span></li>
+    <li><span class="pin">3</span><span><strong>L’en-tête du billet, tel qu’il apparaîtra dans la liste.</strong> Titre, chapô avec compteur de signes, auteurs qui signent sous le titre, rubrique, voyage lié, date affichée ; chaque champ a un libellé visible, les groupes ont leur légende.</span><span class="ref">UX-T-18 · RGAA 11.1, 11.2 et 11.5 · Opquast 6 et 231 · B&amp;S 1.2.1</span></li>
+    <li><span class="pin">4</span><span><strong>Un corps en blocs, sans glisser obligatoire.</strong> Texte, photo, diptyque, citation : chacun a son titre, son numéro et des boutons « Monter », « Descendre », « Retirer » nommés avec le numéro du bloc ; « Retirer » s’annule. La photo reprend son cartel et son texte de remplacement depuis la photothèque.</span><span class="ref">UX-A-32, UX-T-16 · WCAG 2.5.7 et 2.5.8 · RGAA 1.2, 11.9 · B&amp;S 2.1.2 et 3.2</span></li>
+    <li><span class="pin">5</span><span><strong>Une seule façon d’enregistrer : automatiquement, avec Annuler.</strong> « ✓ Enregistré à 22 h 42 » dans une zone d’état annoncée, « Annuler » à côté ; aucune saisie ne peut plus être perdue en quittant la page. Seul « Publier » reste un bouton explicite, parce qu’il a un effet public.</span><span class="ref">UX-A-06 · B&amp;S 1.3, 5.1 et 6 · ISO 9241-110 robustesse face aux erreurs · RGAA 7.5 · WCAG 4.1.3 · Nielsen n°3</span></li>
+    <li><span class="pin">6</span><span><strong>La typographie corrigée à la saisie, et dite.</strong> Apostrophe ’, guillemets « » avec espaces fines, tiret — : le message dit ce qui a été changé, et « Annuler ces corrections » (ou Ctrl Z) rend la main. La mise en forme est limitée à intertitre, italique, lien et liste : ni couleur ni taille, le site s’en charge.</span><span class="ref">UX-T-18, UX-F-29 · B&amp;S 3.2 et 5.3 · Opquast 186 · ISO 9241-110 contrôlabilité</span></li>
+    <li><span class="pin">7</span><span><strong>Une citation dans sa langue.</strong> Le champ de la citation porte lang="pt-PT" ; la langue choisie est reprise à la publication (balise lang), la traduction s’affiche dessous. Le focus de 2 px est montré sur la liste « Langue de la citation ».</span><span class="ref">UX-F-22, UX-T-18 · RGAA 8.7 · WCAG 3.1.2 et 2.4.7 · Opquast 132</span></li>
+    <li><span class="pin">8</span><span><strong>Publier ou programmer, sans surprise.</strong> Le circuit est écrit (○ Brouillon → <i class="half" aria-hidden="true"></i> Proposé → ● Publié) ; « Programmer » demande une date et une heure (heure de Paris) et le bouton les répète ; ce qui manque encore (EN à traduire) est dit avant, sans bloquer.</span><span class="ref">UX-A-32, UX-A-16 · B&amp;S 1.1 et 5.1 · WCAG 3.3.4 · Nielsen n°5</span></li>
+    <li><span class="pin">9</span><span><strong>Un budget de poids, affiché pendant l’écriture.</strong> « 640 ko estimés, budget 1,2 Mo », avec un &lt;meter&gt; doublé du texte et le détail par poste : on sait ce que coûte une photo de plus avant de l’insérer.</span><span class="ref">RGESN 6.1, 5.1 et 6.4 · UX-T-07 · étude B53</span></li>
+    <li><span class="pin">10</span><span><strong>Les photos du voyage à portée de main.</strong> Glisser entre deux blocs, ou « Insérer » (après le bloc sélectionné), qui suffit à lui seul au clavier et au toucher ; une photo déjà placée le dit (« ✓ dans le bloc 4 ») et mène à son bloc.</span><span class="ref">UX-T-16, UX-A-21 · WCAG 2.5.7 · RGAA 7.1 et 12.8 · B&amp;S 2.1.2 · ISO 9241-110 adéquation à la tâche</span></li>
+    <li><span class="pin">11</span><span><strong>Voir avant de publier, de nuit comme de jour.</strong> L’aperçu « comme sur le site » montre le billet dans les deux modes du thème Nicephos, avec la date programmée ; rien n’est publié.</span><span class="ref">UX-T-18, UX-F-29 · Nielsen n°1 · ISO 9241-110 conformité aux attentes</span></li>
+    <li><span class="pin">12</span><span><strong>Traduire tout le billet sur une page.</strong> Un tableau : élément, français de référence, champ anglais balisé lang="en" ; Tab d’un champ au suivant ; « ▲ à traduire » écrit ; « Proposer une traduction » si un traducteur est allumé. Sur téléphone, une carte par élément.</span><span class="ref">UX-A-21 · B&amp;S 2.1.2 · RGAA 5.4, 5.6 et 8.7 · Nielsen n°7</span></li>
+    <li><span class="pin">13</span><span><strong>Le même billet, deux rôles, les mêmes mots.</strong> Le Photographe « Propose » avec un mot facultatif pour le modérateur ; l’Administrateur voit « <i class="half" aria-hidden="true"></i> Proposé », le mot, puis « Publier » ou « Renvoyer avec un mot ». « Publier » s’annule pendant 10 s, avant l’annonce dans le flux.</span><span class="ref">UX-A-32, UX-A-07, UX-A-16 · B&amp;S 3.2 et 6 · ISO 9241-110 contrôlabilité</span></li>
   </ol>
-  <p class="after">À décider avant de coder : le format de stockage du corps (des blocs en JSON plutôt que du HTML libre, pour garder la typographie, les cartels et les langues sous contrôle), et l’emplacement du traducteur proposé dans l’onglet EN (le même assistant que celui de MQ-07, éteint par défaut).</p>
+  <p class="mq-lead mq-socle">À décider avant de coder : le format de stockage du corps (des blocs en JSON plutôt que du HTML libre, pour garder la typographie, les cartels et les langues sous contrôle), et l’emplacement du traducteur proposé dans l’onglet EN (le même assistant que celui de MQ-07, éteint par défaut).</p>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette, hors encart et pastilles) — <b>bureau 1440 × 900, « Chambre noire »</b> : H1 à 98 px ; contraste le plus faible du texte 4,8:1 (texte indicatif de la recherche) ; fond de la barre latérale sur toute la hauteur ; 11 vignettes, toutes en chargement différé. <b>Pixel 7 (412 × 839, densité 2), mode clair</b> : contraste le plus faible 4,7:1 (#9a5b0c sur #f1eee8) ; la traduction de la citation passe dans une zone de texte de deux lignes (plus de texte coupé) ; aucun défilement horizontal. Seul texte sous 12 px : les raccourcis « Ctrl K » et « Ctrl Z » (10,5 px, UX-A-30). Axe-core (WCAG 2.2 A et AA) : 0 violation sur les deux rendus.</p>
 </aside>
-
-
 </body>
 </html>

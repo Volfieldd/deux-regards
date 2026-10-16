@@ -11,34 +11,35 @@
   <meta name="description" content="Voyages et récits, à deux voix : les carnets de Sébastien et Julien, photographes.">
   <link rel="alternate" type="application/atom+xml" title="Nicephos — les carnets (flux Atom)" href="/carnet/flux.xml">
   <link rel="stylesheet" href="_commun/site.css">
+  <link rel="stylesheet" href="_commun/site-entete.css">
   <style>
     /* ---------- Thème Nicephos (repris de public/themes/nicephos.css) ---------- */
     .theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif; --display-style: normal; }
     .theme-nicephos.mode-nuit { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b; --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; }
-    body { font-weight: 300; }
+    body { font-weight: 400; }
 
     /* ---------- Lien d'évitement (UX-F-06) ---------- */
-    .skip { position: absolute; left: 12px; top: -120px; z-index: 100; padding: 12px 16px; background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 400; }
-    .skip:focus { top: 10px; }
+    
+    
 
     /* ---------- En-tête cible (MQ-01) : une ligne, « Tirages » après un filet ---------- */
-    .site-h { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 76px; border-bottom: 1px solid var(--rule); }
-    .wordmark { display: inline-flex; align-items: center; min-height: 44px; font-weight: 300; font-size: 15px; letter-spacing: .42em; text-transform: uppercase; white-space: nowrap; }
-    .menu { display: flex; align-items: center; gap: clamp(16px, 2.2vw, 34px); margin: 0; padding: 0; list-style: none; }
-    .menu a, .tools a, .tools summary { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 12px; font-weight: 400; letter-spacing: .16em; text-transform: uppercase; color: var(--mute); }
-    .menu a:hover, .tools a:hover, .tools summary:hover { color: var(--ink); }
-    .menu a[aria-current] { color: var(--ink); text-decoration: underline 2px var(--safelight); text-underline-offset: 9px; }
-    .menu .apart { padding-left: clamp(16px, 2.2vw, 34px); border-left: 1px solid var(--rule); }
-    .tools { display: flex; align-items: center; gap: 22px; }
-    .lang { position: relative; }
-    .lang summary { list-style: none; cursor: pointer; }
-    .lang summary::-webkit-details-marker { display: none; }
-    .lang ul { position: absolute; right: 0; top: 100%; z-index: 30; min-width: 180px; margin: 0; padding: 6px 0; list-style: none; background: var(--paper); border: 1px solid var(--rule); }
-    .lang li a { display: flex; min-height: 44px; padding: 0 16px; align-items: center; color: var(--ink); font-size: 14px; letter-spacing: .02em; text-transform: none; }
-    .lang li a[aria-current] { text-decoration: underline 2px var(--safelight); text-underline-offset: 6px; }
-    .menu-m { display: none; }
-    .menu-m summary { list-style: none; cursor: pointer; }
-    .menu-m summary::-webkit-details-marker { display: none; }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     /* ---------- En-tête de la rubrique ---------- */
     .c-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px 40px; padding-block: clamp(40px, 6vw, 80px) 28px; border-bottom: 1px solid var(--rule); }
@@ -56,8 +57,8 @@
     .filters a:hover { color: var(--ink); }
     .filters a[aria-current] { color: var(--ink); text-decoration: underline 2px var(--safelight); text-underline-offset: 8px; }
     .filters .by { padding-left: 28px; border-left: 1px solid var(--rule); }
-    .filters .by-l { font-family: var(--mono); font-size: 12.5px; color: var(--mute); margin-right: 18px; }
-    .count { margin: 22px 0 0; font-family: var(--mono); font-size: 12.5px; letter-spacing: .03em; color: var(--mute); }
+    .filters .by-l { font-family: var(--mono); font-size: 13px; color: var(--mute); margin-right: 18px; }
+    .count { margin: 22px 0 0; font-family: var(--mono); font-size: 13px; letter-spacing: .03em; color: var(--mute); }
 
     /* ---------- Billets ---------- */
     .posts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 72px 48px; padding-block: 36px 0; }
@@ -66,14 +67,14 @@
     .post .cover { display: flex; justify-content: center; aspect-ratio: 3 / 2; background: var(--frame); overflow: hidden; }
     .post .cover img { width: auto; height: 100%; max-width: 100%; object-fit: contain; }
     .post .cover.v { padding-block: 18px; }                 /* verticale : entière, sur passe-partout */
-    .post .kicker { margin: 0; font-family: var(--mono); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
+    .post .kicker { margin: 0; font-family: var(--mono); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
     .post h2 { margin: 0; font-weight: 300; font-size: clamp(28px, 2.6vw, 36px); line-height: 1.15; }
     .post h2 a::after { content: ''; position: absolute; inset: 0; }   /* toute la carte est cliquable : un seul arrêt de tabulation */
     .post h2 a:focus-visible { outline: none; }
     .post:has(h2 a:focus-visible) { outline: 2px solid var(--ink); outline-offset: 8px; }
     .post:hover h2 a { text-decoration: underline 1px var(--mute); text-underline-offset: 6px; }
     .post .chapo { margin: 0; max-width: 58ch; font-weight: 400; font-size: 17px; line-height: 1.6; color: var(--prose); }
-    .post .meta { margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; letter-spacing: .02em; color: var(--mute); }
+    .post .meta { margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.7; letter-spacing: .02em; color: var(--mute); }
     .post .meta .sig { color: var(--ink); }
     .post .txt { display: grid; gap: 12px; align-content: start; }
     .post.lead { grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); column-gap: 56px; align-items: end; }
@@ -89,35 +90,26 @@
     .pager a small { font-size: 13px; color: var(--mute); }
 
     /* ---------- Pied de page cible ---------- */
-    .site-f { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 40px; margin-top: 56px; padding-block: 36px 40px; border-top: 1px solid var(--rule); color: var(--mute); font-family: var(--mono); font-size: 12.5px; }
-    .site-f p { margin: 0; }
-    .site-f ul { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 0; padding: 0; list-style: none; }
-    .site-f a { display: inline-flex; align-items: center; min-height: 32px; color: var(--mute); text-decoration: underline 1px var(--rule); text-underline-offset: 4px; }
-    .site-f a:hover { color: var(--ink); text-decoration-color: var(--ink); }
+    
+    
+    
+    
+    
 
     /* ---------- Annotations de la maquette (hors page) ---------- */
-    .pin { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 22px; height: 22px; margin-inline: 8px; border-radius: 50%; background: var(--safelight); color: var(--on-accent); font: 500 12px/1 var(--sans); letter-spacing: 0; text-transform: none; vertical-align: middle; }
-    .annot { margin: 40px var(--gut) 0; padding: 36px 0 64px; border-top: 2px dashed var(--safelight); }
-    .annot .tag { margin: 0; font-family: var(--mono); font-size: 12.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--safelight); }
-    .annot h2 { margin: 10px 0 8px; font-weight: 300; font-size: 30px; }
-    .annot .intro { margin: 0; max-width: 90ch; font-weight: 400; font-size: 15px; line-height: 1.6; color: var(--prose); }
-    .annot ol { counter-reset: n; list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 20px 48px; }
-    .annot li { counter-increment: n; position: relative; padding-left: 38px; font-weight: 400; font-size: 15px; line-height: 1.6; color: var(--prose); }
-    .annot li::before { content: counter(n); position: absolute; left: 0; top: 1px; width: 24px; height: 24px; border-radius: 50%; background: var(--safelight); color: var(--on-accent); font: 500 12px/24px var(--sans); text-align: center; }
-    .annot li strong { font-weight: 500; color: var(--ink); }
-    .annot .ref { display: block; margin-top: 4px; font-family: var(--mono); font-size: 12px; line-height: 1.6; color: var(--mute); }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     /* ---------- Téléphone ---------- */
-    @media (max-width: 900px) {
-      .menu-d { display: none; }
-      .menu-m { display: block; position: relative; }
-      .site-h { min-height: 64px; gap: 10px; }
-      .menu-m > ul { position: absolute; left: 0; top: 100%; z-index: 30; min-width: 230px; margin: 0; padding: 8px 0; list-style: none; background: var(--paper); border: 1px solid var(--rule); }
-      .menu-m > ul a { display: flex; min-height: 48px; padding: 0 18px; align-items: center; }
-      .tools { gap: 6px; }
-      .tools .t-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-      .tools a, .tools summary, .menu-m summary { min-width: 44px; justify-content: center; }
-    }
+    
     @media (max-width: 760px) {
       .c-head { grid-template-columns: 1fr; }
       .rss { grid-column: 1; grid-row: auto; }
@@ -127,50 +119,24 @@
       .post.lead h2 { font-size: 34px; }
       .filters .by { padding-left: 0; border-left: 0; }
       .pager a { width: 100%; justify-content: space-between; }
-      .wordmark { font-size: 14px; letter-spacing: .34em; }
+      
     }
     @media (prefers-reduced-motion: no-preference) { .post .cover img { transition: opacity .3s; } }
   </style>
+<link rel="stylesheet" href="_commun/annotations.css">
 </head>
 <body>
 <a class="skip" href="#contenu">Aller au contenu</a>
 
 <header class="site-h wrap">
-  <a class="wordmark" href="/">Nicephos</a>
-  <nav class="menu-d" aria-label="Menu principal">
-    <ul class="menu">
-      <li><a href="/series">Séries</a></li>
-      <li><a href="/#galerie">Galerie</a></li>
-      <li><a href="/carte">Carte</a></li>
-      <li><a href="MQ-11-carnets-liste.html" aria-current="page">Carnets</a><span class="pin" aria-hidden="true">1</span></li>
-      <li><a href="/a-propos">À propos</a></li>
-      <li class="apart"><a href="MQ-13-boutique-tirage.html">Tirages</a></li>
-    </ul>
-  </nav>
-  <div class="tools">
-    <details class="menu-m">
-      <summary aria-label="Menu">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Menu</span>
-      </summary>
-      <ul aria-label="Menu principal">
-        <li><a href="/series">Séries</a></li>
-        <li><a href="/#galerie">Galerie</a></li>
-        <li><a href="/carte">Carte</a></li>
-        <li><a href="MQ-11-carnets-liste.html" aria-current="page">Carnets</a></li>
-        <li><a href="/a-propos">À propos</a></li>
-        <li><a href="MQ-13-boutique-tirage.html">Tirages</a></li>
-      </ul>
-    </details>
-    <a href="/recherche"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="t-label">Rechercher</span></a>
-    <details class="lang">
-      <summary aria-label="Langue : FR, français">FR</summary>
-      <ul>
-        <li><a href="/langue/fr?vers=%2Fcarnet" hreflang="fr" lang="fr" aria-current="true">Français</a></li>
-        <li><a href="/langue/en?vers=%2Fcarnet" hreflang="en" lang="en">English</a></li>
-        <li><a href="/langue/de?vers=%2Fcarnet" hreflang="de" lang="de">Deutsch</a></li>
-      </ul>
-    </details>
-  </div>
+  <a class="wordmark" href="#">Nicephos</a>
+  <nav class="site-nav" id="menu-principal" aria-label="Menu principal"><ul role="list"><li><a href="#">Séries</a></li><li><a href="#">Galerie</a></li><li><a href="#">Carte</a></li><li><a href="MQ-11-carnets-liste.html" aria-current="page">Carnets</a><span class="pin pin-in" aria-hidden="true">1</span></li><li><a href="#">À propos</a></li><li class="soft"><a href="MQ-13-boutique-tirage.html">Tirages</a></li></ul></nav>
+  <ul class="site-tools" role="list">
+    <li><a class="tool" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="tool-t">Rechercher</span></a></li>
+    <li><details class="lang"><summary><span class="sr-only">Langue : </span>FR <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <ul role="list"><li><a href="#" lang="fr" hreflang="fr" aria-current="true"><span>Français</span></a></li><li><a href="#" lang="en" hreflang="en">English</a></li><li><a href="#" lang="de" hreflang="de">Deutsch</a></li></ul></details></li>
+    <li><button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-principal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button></li>
+  </ul>
 </header>
 
 <main id="contenu" class="wrap" tabindex="-1">
@@ -205,7 +171,7 @@
         <p class="kicker">Voyage · Lisbonne et Porto</p>
         <h2 id="p1"><a href="MQ-12-carnet-billet.html">Lisbonne et Porto</a></h2>
         <p class="chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens&#8239;: de l’Alfama au premier tram jusqu’à la barre de Foz, là où le Douro rencontre l’Atlantique.</p>
-        <p class="meta"><span class="sig">par Sébastien &amp; Julien</span> · <time datetime="2026-10-12">12 octobre 2026</time> · 10 photos · 6 min de lecture<span class="pin" aria-hidden="true">5</span></p>
+        <p class="meta"><span class="sig">par Sébastien &amp; Julien</span> · <time datetime="2026-10-12">12 octobre 2026</time> · 10 photos · 6 min de lecture<span class="pin" aria-hidden="true">5</span></p>
       </div>
       </article>
     </li>
@@ -216,7 +182,7 @@
         <p class="kicker">Notes d’atelier</p>
         <h2 id="p2"><a href="/carnet/tirer-sur-hahnemuhle-photo-rag">Tirer sur Hahnemühle Photo Rag</a></h2>
         <p class="chapo">Un papier coton mat de 308&#8239;g, une marge blanche de 3&#8239;cm et trois essais avant le bon&#8239;: ce que nos premières épreuves nous ont appris.</p>
-        <p class="meta"><span class="sig">par Julien</span> · <time datetime="2026-10-05">5 octobre 2026</time> · 4 photos · 4 min de lecture</p>
+        <p class="meta"><span class="sig">par Julien</span> · <time datetime="2026-10-05">5 octobre 2026</time> · 4 photos · 4 min de lecture</p>
       </div>
       </article>
     </li>
@@ -227,7 +193,7 @@
         <p class="kicker">Notes d’atelier</p>
         <h2 id="p3"><a href="/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></h2>
         <p class="chapo">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte «&#8239;Bonjour&#8239;»&#8239;: voici ce qu’elle a répondu.</p>
-        <p class="meta"><span class="sig">par Julien</span> · <time datetime="2026-09-28">28 septembre 2026</time> · 3 photos · 3 min de lecture</p>
+        <p class="meta"><span class="sig">par Julien</span> · <time datetime="2026-09-28">28 septembre 2026</time> · 3 photos · 3 min de lecture</p>
       </div>
       </article>
     </li>
@@ -238,7 +204,7 @@
         <p class="kicker">Voyage · Saint-Malo</p>
         <h2 id="p4"><a href="/carnet/saint-malo-grandes-marees">Saint-Malo, grandes marées</a></h2>
         <p class="chapo">Coefficient 117&#8239;: la mer monte jusqu’au pied du Sillon. Sébastien y est retourné trois matins de suite, avant les premiers promeneurs.</p>
-        <p class="meta"><span class="sig">par Sébastien</span> · <time datetime="2026-09-21">21 septembre 2026</time> · 14 photos · 5 min de lecture</p>
+        <p class="meta"><span class="sig">par Sébastien</span> · <time datetime="2026-09-21">21 septembre 2026</time> · 14 photos · 5 min de lecture</p>
       </div>
       </article>
     </li>
@@ -249,7 +215,7 @@
         <p class="kicker">Notes d’atelier</p>
         <h2 id="p5"><a href="/carnet/pourquoi-nous-ne-recadrons-pas">Pourquoi nous ne recadrons pas</a></h2>
         <p class="chapo">Le cadre se décide au viseur, pas à l’écran. Deux photographes, une même règle, et les rares fois où nous y avons dérogé.</p>
-        <p class="meta"><span class="sig">par Sébastien &amp; Julien</span> · <time datetime="2026-09-07">7 septembre 2026</time> · 6 photos · 4 min de lecture</p>
+        <p class="meta"><span class="sig">par Sébastien &amp; Julien</span> · <time datetime="2026-09-07">7 septembre 2026</time> · 6 photos · 4 min de lecture</p>
       </div>
       </article>
     </li>
@@ -263,42 +229,34 @@
 
 <footer class="site-f wrap">
   <p>© 2026 Sébastien &amp; Julien</p>
-  <nav aria-label="Pied de page">
-    <ul>
-      <li><a href="/droits">Tirages et licences</a></li>
-      <li><a href="MQ-06-contact-tirage.html">Contact</a></li>
-      <li><a href="https://www.instagram.com/nicephos.art/">Instagram</a></li>
-      <li><a href="/carnet/flux.xml" type="application/atom+xml">Flux RSS</a></li>
-      <li><a href="/confidentialite">Confidentialité</a></li>
-      <li><a href="/mentions-legales">Mentions légales</a><span class="pin" aria-hidden="true">8</span></li>
-    </ul>
-  </nav>
+  <ul role="list" aria-label="Pied de page"><li><a href="#">Tirages et licences</a></li><li><a href="MQ-06-contact-tirage.html">Contact</a></li><li><a href="https://www.instagram.com/nicephos.art/" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="/carnet/flux.xml" type="application/atom+xml">Flux RSS</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Mentions légales</a><span class="pin pin-in" aria-hidden="true">8</span></li></ul>
 </footer>
 
-<aside class="annot" aria-labelledby="annot-t">
-  <p class="tag">Maquette MQ-11 · audit du 16 octobre 2026 · Camille Arnaud</p>
+<aside class="mq-notes" aria-labelledby="annot-t">
+  <p class="mq-id">Maquette MQ-11 · site public · thème « Nicephos — nuit » · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
   <h2 id="annot-t">Ce qui change</h2>
-  <p class="intro">Aujourd’hui, la rubrique n’existe pas&#8239;: en production, /voyages répond 404, et sur la démo la liste des voyages n’a ni signature, ni date de publication, ni moyen d’être suivie. Ici, «&#8239;Carnets&#8239;» réunit les voyages et les billets, datés, signés et paginés. Thème «&#8239;Nicephos — nuit&#8239;» de la production, aucun script.</p>
+  <p class="mq-lead">Aujourd’hui, la rubrique n’existe pas&#8239;: en production, /voyages répond 404, et sur la démo la liste des voyages n’a ni signature, ni date de publication, ni moyen d’être suivie. Ici, «&#8239;Carnets&#8239;» réunit les voyages et les billets, datés, signés et paginés. Thème «&#8239;Nicephos — nuit&#8239;» de la production, aucun script.</p>
   <ol>
-    <li><strong>Le menu cible, avec «&#8239;Carnets&#8239;» actif</strong>&#8239;: aria-current="page" et un soulignement sable, pas seulement une couleur&#8239;; «&#8239;Tirages&#8239;» en retrait après un filet&#8239;; sur téléphone, un bouton «&#8239;Menu&#8239;» et un en-tête de 64&#8239;px.
-      <span class="ref">UX-T-16 · UX-F-36 · RGAA 3.1 et 12.2 · WCAG 1.4.1 · Opquast 158 · loi de Jakob</span></li>
-    <li><strong>Une promesse en une ligne</strong>&#8239;: «&#8239;Voyages et récits, à deux voix.&#8239;» dit ce qu’on va lire et qui écrit, sous un titre de niveau 1 unique.
-      <span class="ref">UX-F-33 · UX-F-45 · RGAA 9.1 · Nielsen n°2 · B&amp;S 1.1 Incitation</span></li>
-    <li><strong>Des filtres qui sont des liens</strong> (?type=, ?par=)&#8239;: ils marchent sans JavaScript, se partagent, et l’état actif est souligné et annoncé. Cibles de 44&#8239;px. Les pages filtrées sont en noindex (étude, B53).
-      <span class="ref">UX-T-16 · B&amp;S 1.1.1 Groupement · RGAA 7.1 · WCAG 2.5.8</span></li>
-    <li><strong>Couverture 3:2, jamais recadrée</strong>&#8239;: une verticale est montrée entière sur un passe-partout. L’image est décorative (alt=""), car le titre nomme déjà le carnet&#8239;: la carte entière est cliquable mais ne compte qu’un arrêt de tabulation.
-      <span class="ref">UX-T-16 · UX-F-17 (même principe) · RGAA 1.2 et 6.1 · Opquast 119</span></li>
-    <li><strong>Signé et daté</strong>&#8239;: «&#8239;par Sébastien &amp; Julien&#8239;», &lt;time datetime="2026-10-12"&gt;, le nombre de photos et le temps de lecture. Les métadonnées passent de 11 à 12,5&#8239;px, le chapô en Jost 400.
-      <span class="ref">UX-T-18 · UX-F-29 · Opquast 6, 101 et 231</span></li>
-    <li><strong>Une pagination, pas un défilement infini</strong>&#8239;: 12 carnets par page (la maquette en montre 5), une adresse par page, «&#8239;Suivante&#8239;» nommée par ce qu’elle contient. Le pied de page reste atteignable.
-      <span class="ref">UX-T-16 · RGESN 4.2 · Nielsen n°3 · étude B53</span></li>
-    <li><strong>S’abonner sans compte</strong>&#8239;: un flux Atom visible, expliqué en une phrase, déclaré aussi par &lt;link rel="alternate"&gt; dans l’en-tête, et repris au pied de page.
-      <span class="ref">UX-F-34 · UX-T-16 · Opquast 1 · étude B58</span></li>
-    <li><strong>Un pied de page complet</strong>&#8239;: tirages et licences, contact, Instagram, flux, confidentialité, mentions légales, sur chaque page.
-      <span class="ref">UX-F-34 · UX-T-03 · RGAA 12.1 · Opquast 2 et 15</span></li>
-    <li><strong>Sobriété</strong>&#8239;: 5 images à leur taille, dimensions déclarées (aucun saut de mise en page), la première prioritaire, les suivantes en chargement différé&#8239;; aucun script, aucun tiers. Couvertures servies en 640 et 1280&#8239;px avec srcset sur le site.
-      <span class="ref">RGESN 4.2, 5.1, 6.4 et 6.5 · UX-T-07</span></li>
+    <li><span class="pin">1</span><p><strong>Le menu cible, avec «&#8239;Carnets&#8239;» actif</strong>&#8239;: aria-current="page" et un soulignement sable, pas seulement une couleur&#8239;; «&#8239;Tirages&#8239;» en retrait après un filet&#8239;; sur téléphone, un bouton «&#8239;Menu&#8239;» et un en-tête de 64&#8239;px.
+      <span class="ref">UX-T-16 · UX-F-36 · RGAA 3.1 et 12.2 · WCAG 1.4.1 · Opquast 158 · loi de Jakob</span></p></li>
+    <li><span class="pin">2</span><p><strong>Une promesse en une ligne</strong>&#8239;: «&#8239;Voyages et récits, à deux voix.&#8239;» dit ce qu’on va lire et qui écrit, sous un titre de niveau 1 unique.
+      <span class="ref">UX-F-33 · UX-F-45 · RGAA 9.1 · Nielsen n°2 · B&amp;S 1.1 Incitation</span></p></li>
+    <li><span class="pin">3</span><p><strong>Des filtres qui sont des liens</strong> (?type=, ?par=)&#8239;: ils marchent sans JavaScript, se partagent, et l’état actif est souligné et annoncé. Cibles de 44&#8239;px. Les pages filtrées sont en noindex (étude, B53).
+      <span class="ref">UX-T-16 · B&amp;S 1.2.1 Groupement par la localisation · RGAA 7.1 · WCAG 2.5.8</span></p></li>
+    <li><span class="pin">4</span><p><strong>Couverture 3:2, jamais recadrée</strong>&#8239;: une verticale est montrée entière sur un passe-partout. L’image est décorative (alt=""), car le titre nomme déjà le carnet&#8239;: la carte entière est cliquable mais ne compte qu’un arrêt de tabulation.
+      <span class="ref">UX-T-16 · UX-F-17 (même principe) · RGAA 1.2 et 6.1 · Opquast 119</span></p></li>
+    <li><span class="pin">5</span><p><strong>Signé et daté</strong>&#8239;: «&#8239;par Sébastien &amp; Julien&#8239;», &lt;time datetime="2026-10-12"&gt;, le nombre de photos et le temps de lecture. Les métadonnées passent de 11 à 13&#8239;px (Plex Mono, comme tous les cartels), le chapô en Jost 400.
+      <span class="ref">UX-T-18 · UX-F-29 · Opquast 6, 101 et 231</span></p></li>
+    <li><span class="pin">6</span><p><strong>Une pagination, pas un défilement infini</strong>&#8239;: 12 carnets par page (la maquette en montre 5), une adresse par page, «&#8239;Suivante&#8239;» nommée par ce qu’elle contient. Le pied de page reste atteignable.
+      <span class="ref">UX-T-16 · RGESN 4.2 · Nielsen n°3 · étude B53</span></p></li>
+    <li><span class="pin">7</span><p><strong>S’abonner sans compte</strong>&#8239;: un flux Atom visible, expliqué en une phrase, déclaré aussi par &lt;link rel="alternate"&gt; dans l’en-tête, et repris au pied de page.
+      <span class="ref">UX-F-34 · UX-T-16 · Opquast 1 · étude B58</span></p></li>
+    <li><span class="pin">8</span><p><strong>Un pied de page complet</strong>&#8239;: tirages et licences, contact, Instagram, flux, confidentialité, mentions légales, sur chaque page.
+      <span class="ref">UX-F-34 · UX-T-03 · RGAA 12.1 · Opquast 2 et 15</span></p></li>
+    <li><span class="pin">9</span><p><strong>Sobriété</strong>&#8239;: 5 images à leur taille, dimensions déclarées (aucun saut de mise en page), la première prioritaire, les suivantes en chargement différé&#8239;; aucun script, aucun tiers. Couvertures servies en 640 et 1280&#8239;px avec srcset sur le site.
+      <span class="ref">RGESN 4.2, 5.1, 6.4 et 6.5 · UX-T-07</span></p></li>
   </ol>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette, hors encart et pastilles) — <b>bureau 1440 × 900</b> : en-tête de 72 px, H1 à 152 px ; contraste le plus faible du texte 7,4:1 (« Tirages » et métadonnées, #a19f99 sur #0b0b0b) ; métadonnées en Plex Mono 13 px ; aucun texte sous 12 px ; 5 images, la première prioritaire, les 4 autres en chargement différé. <b>Pixel 7 (412 × 839, densité 2)</b> : en-tête de 64 px, H1 à 104 px, filtres et pagination en cibles de 44 px, aucun défilement horizontal. Axe-core (WCAG 2.2 A et AA) : 0 violation sur les deux rendus.</p>
 </aside>
 </body>
 </html>

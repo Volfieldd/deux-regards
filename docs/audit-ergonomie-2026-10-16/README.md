@@ -1,6 +1,6 @@
 # Audit d'ergonomie, d'accessibilité, d'écoconception et de direction artistique — Nicephos
 
-> **Livrables :** ce rapport ; les données structurées [`donnees-audit.json`](donnees-audit.json) (constats, plan d'action, maquettes) ; les grilles complétées dans [`grilles/`](grilles/) (RGAA du site public et de l'administration en Markdown et en Excel, RGESN 2024) ; 30 captures de la démonstration dans [`captures/`](captures/) ; les maquettes HTML dans [`maquettes/`](maquettes/) (en cours, voir [Maquettes](#maquettes)).
+> **Livrables :** ce rapport ; les données structurées [`donnees-audit.json`](donnees-audit.json) (constats, plan d'action, maquettes) ; les grilles complétées dans [`grilles/`](grilles/) (RGAA du site public et de l'administration en Markdown et en Excel, RGESN 2024) ; 30 captures de la démonstration dans [`captures/`](captures/) ; les 20 maquettes HTML et leurs rendus WebP dans [`maquettes/`](maquettes/) (voir [Maquettes](#maquettes)).
 
 **Date :** 16 octobre 2026  
 **Auditrice :** Camille Arnaud — ergonome certifiée (conception centrée utilisateur, ISO 9241-210), auditrice RGAA (méthode DINUM), référente écoconception (RGESN 2024), ancienne responsable marketing et communication d'une galerie de photographie, photographe.  
@@ -78,11 +78,11 @@ Presque tout se corrige en petits lots, sans toucher à l'esthétique que vous a
 | Périmètre | C | NC | NA | NT | Taux |
 |---|---|---|---|---|---|
 | Site public — grille automatique du 15/10 | 6 | 3 | 13 | 84 | non calculable |
-| **Site public — grille complétée du 16/10** | **48** | **23** | **35** | **0** | 68 % (48 / 71), indicatif |
+| **Site public — grille complétée du 16/10** | **48** | **23** | **35** | **0** | non calculé (échantillon non réglementaire, restitution au lecteur d’écran non testée) |
 | Administration — grille automatique du 15/10 | 6 | 6 | 13 | 81 | non calculable |
 | **Administration — grille complétée du 16/10** | **48** | **27** | **29** | **2** | non calculable (8.2 et 10.5 non testés) |
 
-Le taux du site public est indicatif : il porte sur un échantillon, sans test au lecteur d'écran réel. **Ce n'est pas une déclaration d'accessibilité** ; elle reste à établir par l'éditeur, sur l'échantillon réglementaire. Pour l'administration, je ne calcule aucun taux tant qu'il reste des critères non testés.
+Je ne calcule de taux ni pour le site public ni pour l'administration : je ne donne que les effectifs. Pour le site public, aucun critère n'est resté NT, mais l'échantillon n'est pas l'échantillon réglementaire et je n'ai pas fait de test avec un lecteur d'écran réel : 7.1 et 7.5 (et, côté WCAG, 4.1.2) ont été jugés sur l'arbre d'accessibilité de Chromium, ce qui ne suffit pas pour les déclarer entièrement testés. Pour l'administration, il reste deux critères non testés. **Ce n'est pas une déclaration d'accessibilité** ; elle reste à établir par l'éditeur, sur l'échantillon réglementaire.
 
 Critères non conformes, et constats qui les traitent :
 
@@ -201,7 +201,7 @@ Grille complète : [RGESN 2024](grilles/rgesn-2024.md).
 | Liens | 140, 141, 142, 146 (liens différenciés, visités, externes, nouvelle fenêtre), 147, 148 (format et poids des fichiers) | UX-F-23, UX-T-12 |
 | Navigation | 155, 156, 164, 171 (accueil, fil d'Ariane, accès rapide, plan), 165 (focus), 172 (limites de temps) | UX-F-06, UX-F-03, UX-A-01 |
 | Présentation | 181 (pas seulement la couleur), 186 (cibles), 189 (pictogrammes), 195, 196 (impression) | UX-F-04, UX-F-36, UX-F-41, UX-F-35 |
-| Serveur et performances | 224 (page 403), 225 (menu sur les erreurs), 229, 230 (minification) | UX-A-01, UX-A-30, UX-T-15 |
+| Serveur et performances | 224 (page 403), 225 (menu sur les erreurs), 229, 230 (minification) | 224 : UX-A-04, UX-A-01 ; 225 : UX-A-30 ; 229 et 230 : sans constat (voir ci-dessous) |
 | Structure et code | 231 (dates balisées), 234 (titres), 238 (menu contextuel), 239 (rafraîchissement), 243 (titres de tableaux) | UX-F-41, UX-F-10, UX-F-34, UX-A-05, UX-A-30 |
 
 Les règles du commerce en ligne (30 à 68), des comptes (17 à 22) et de la lettre d'information (173 à 179) sont sans objet aujourd'hui ; je les ai reprises comme critères d'acceptation des projets (UX-T-17, UX-T-18). La minification (229, 230) est en grande partie absorbée par la compression de production : vous pouvez aussi l'assumer et l'écrire dans la documentation.
@@ -288,7 +288,7 @@ Je n'ai pas refait ces audits ; j'ai vérifié ce qu'il est advenu de leurs reco
 | UX-F-17 | L'ouverture recadre les photos jusqu'à n'en montrer qu'un tiers, les voile et les zoome | majeur | M | fort | 1 |
 | UX-F-18 | Ouverture : 820 ko de diapositives invisibles téléchargés dès l'arrivée, même sans JavaScript | majeur | M | fort | 1 |
 | UX-F-19 | Carte du monde : 1,1 Mo de vignettes de 640 px pour des épingles de 34 px, dont 15 sur 19 invisibles | majeur | M | fort | 1 |
-| UX-F-20 | Page photo : 230 ko de fond de carte mondial pour une vignette de carte, qui retarde la photo en bas débit | majeur | M | fort | 1 |
+| UX-F-20 | Page photo : 230 ko de fond de carte mondial pour une vignette de carte, qui retarde la photo en bas débit | majeur | M | fort | 0 et 1 |
 | UX-F-21 | Visionneuse : l'image est choisie pour toute la largeur de l'écran alors que la hauteur la limite | majeur | S | fort | 1 |
 | UX-F-22 | Textes affichés dans une autre langue que la page, sans attribut lang | majeur | M | moyen | 1 |
 | UX-F-23 | Liens impossibles à distinguer du texte, nouvelles fenêtres non signalées, adresses non cliquables | moyen | S | moyen | 1 |
@@ -634,7 +634,7 @@ Il n'y a ni plein écran, ni indice des gestes (← →, Échap, glissé, qui fo
 **Écran :** Production : accueil (bureau et Pixel 7), /en/, /de/, et les pages série et photographe qui reprennent la même ouverture  
 **Référentiels :** Opquast 99, 101 et 102 ; RGAA 1.3 ; RGAA 8.7 ; B&S 1.1 Incitation ; Nielsen #2 ; Effet de position sérielle
 
-**Constat.** La première diapositive est le logo (fichier logo-nicephos-fond-noir-2x), publié comme photo N°37 de la série « Plus près du ciel », attribuée à Julien et placée à Strasbourg sur la carte. Il est compté dans les 44 photos et apparaît dans la grille et dans « À proximité ». Son titre « BIENVENUE! HI ! HALLO! » devient le H1 de l'accueil, des séries et des photographes, dans les trois langues, avec une ponctuation incohérente et sans attribut lang ; son alternative ne restitue pas le texte de l'image. Le premier écran montre trois rhinocéros (en-tête, diapositive, filigrane). Aucune phrase ne dit « deux photographes, Sébastien et Julien » ; l'accroche « Ce qui attire nos regards mérite d'être partagé. » commence à y ≈ 917 px, sous la ligne de flottaison ; le titre de la page est seulement « Nicephos ».
+**Constat.** La première diapositive est le logo (fichier logo-nicephos-fond-noir-2x), publié comme photo N°37 de la série « Plus près du ciel », attribuée à Julien et placée à Strasbourg sur la carte. Il est compté dans les 44 photos de production et apparaît dans la grille et dans « À proximité ». Son titre « BIENVENUE! HI ! HALLO! » devient le H1 de l'accueil, des séries et des photographes, dans les trois langues, avec une ponctuation incohérente et sans attribut lang ; son alternative ne restitue pas le texte de l'image. Le premier écran montre trois rhinocéros (en-tête, diapositive, filigrane). Aucune phrase ne dit « deux photographes, Sébastien et Julien » ; l'accroche « Ce qui attire nos regards mérite d'être partagé. » commence à y ≈ 917 px, sous la ligne de flottaison ; le titre de la page est seulement « Nicephos ».
 
 **Preuve.** Production décrite sans image : ux-data/prod/direction-artistique/hero-prod.json ; prod-front-bureau/accueil.json (title « Nicephos », 6 H1) ; prod-front-bureau/carte.json (« Strasbourg · 1 photo ») ; prod-front-bureau/photo-logo-nicephos.json (alt « Bienvenue! Hi ! Hallo! ») ; server/routes/public.js:210.
 
@@ -692,7 +692,7 @@ Il n'y a ni plein écran, ni indice des gestes (← →, Échap, glissé, qui fo
 
 ### UX-F-20 — Page photo : 230 ko de fond de carte mondial pour une vignette de carte, qui retarde la photo en bas débit
 
-**Gravité :** majeur · **Effort :** M · **Impact :** fort · **Vague :** 1 (V1-10)  
+**Gravité :** majeur · **Effort :** M · **Impact :** fort · **Vague :** 0 et 1 (V0-17 pour le fond de carte léger, V1-10 pour les tuiles écrites par le serveur)  
 **Écran :** /photo/… des photos situées, production et démo, bureau et mobile (de même la page d'un voyage)  
 **Référentiels :** RGESN 6.5 ; RGESN 2.3 ; RGESN 6.4 ; RGESN 6.1
 
@@ -830,13 +830,13 @@ Au clavier, on zoome (+, −, Monde) mais on ne déplace pas la vue : après tro
 
 **Preuve.** server/i18n.js:70 et 86-89 ; views/home.eta (p.author[0]) ; ux-data/ergo-public/desktop/p4-9.json (« 06 / 22 shown ») ; ux-data/INDEX.md, observation 9 (11 adresses tirées du nom de fichier).
 
-**Recommandation.** « 44 photos sur 44 » ; en-tête de grille « Toutes les photos » ou menu « Photos » ; « Ordre : choisi par nous · plus récentes d'abord » ; « ← Galerie » ou « ← Rue, par Julien » au lieu de « Fermer » ; nom complet de l'auteur dans les vignettes ; « 3 photos » ; sur Signaler, « Vous êtes sur cette photo ? Recevez-la, ou donnez ou refusez votre accord » ; un même cartel partout (titre · série · auteur · lieu). Dans l'admin, proposer de régénérer l'adresse quand le titre provisoire est remplacé, avec une redirection 301 depuis l'ancienne.
+**Recommandation.** « 43 photos sur 43 » (production, une fois le logo retiré : V0-05) ; en-tête de grille « Toutes les photos » ou menu « Photos » ; « Ordre : choisi par nous · plus récentes d'abord » ; « ← Galerie » ou « ← Rue, par Julien » au lieu de « Fermer » ; nom complet de l'auteur dans les vignettes ; « 3 photos » ; sur Signaler, « Vous êtes sur cette photo ? Recevez-la, ou donnez ou refusez votre accord » ; un même cartel partout (titre · série · auteur · lieu). Dans l'admin, proposer de régénérer l'adresse quand le titre provisoire est remplacé, avec une redirection 301 depuis l'ancienne.
 
 ### UX-F-29 — Lisibilité : textes de 11 px, titres longs en capitales espacées, Jost 300 sur noir, faux gras et faux italique
 
 **Gravité :** moyen · **Effort :** S · **Impact :** moyen · **Vague :** 2 (V2-03)  
 **Écran :** Accueil, visionneuse, pied de page, pages de texte (Mentions, Confidentialité, Droits), fenêtre Partager — thème nuit en production, Atelier en démo  
-**Référentiels :** B&S 1.4 Lisibilité ; ISO 9241-110 Adaptabilité à l'individualisation ; ISO 9241-125 ; WCAG 2.2 1.4.8 (AAA) ; Opquast 180 et 192 ; Nielsen #8
+**Référentiels :** B&S 1.4 Lisibilité ; ISO 9241-110 Contrôlabilité ; ISO 9241-125 ; WCAG 2.2 1.4.8 (AAA) ; Opquast 180 et 192 ; Nielsen #8
 
 **Constat.** Sur l'accueil, 76 éléments de texte sur 111 sont en 11 px : métadonnées en IBM Plex Mono, menu en capitales espacées, compteur, choix de l'ordre, pied de page. En production, tout est en Jost 300 sur fond noir : légendes à 15 px, titres de photos en capitales espacées de 0,22 em (« LE SILLON DE SAINT MALO À MARÉE HAUTE »), qui se déchiffrent mot à mot. Les pages de texte (4 000 px de juridique, formulaires de consentement) sont imposées en nuit, sans réglage automatique : les traits fins sur noir « bavent » pour les nombreux lecteurs astigmates. Leurs intertitres H2 sont en faux gras (Jost 700 n'est pas chargé) ; la fenêtre Partager impose un faux italique. En thème Atelier, le H1 en Cormorant à interlignage 1,02 fait toucher les accents de « même » et « goût » aux jambages de la ligne du dessus. Les contrastes sont bons (7,4:1 et plus) : ce sont la taille, la graisse et la casse qui fatiguent l'œil.
 
@@ -877,7 +877,7 @@ Au clavier, on zoome (+, −, Monde) mais on ne déplace pas la vue : après tro
 
 **Gravité :** moyen · **Effort :** S · **Impact :** moyen · **Vague :** 1 (V1-15)  
 **Écran :** Toute arrivée sur une adresse française sans cookie « langue » ; sélecteur de langue  
-**Référentiels :** Opquast 135 ; ISO 9241-110 Adaptabilité à l'individualisation ; B&S 4 Adaptabilité ; Nielsen #7
+**Référentiels :** Opquast 135 ; ISO 9241-110 Conformité aux attentes ; B&S 4 Adaptabilité ; Nielsen #7
 
 **Constat.** detectLang() regarde d'abord le pays (CF-IPCountry). Sur 7 combinaisons testées, 6 ignorent la langue du navigateur : une Française à Londres ou en Californie, navigateur en français, reçoit l'anglais ; un anglophone en France reste en français ; hors des pays prévus, tout le monde reçoit l'anglais. Le sélecteur s'appuie sur des drapeaux (Royaume-Uni pour l'anglais, Allemagne pour l'allemand), qui désignent des pays et non des langues : un passant autrichien ou américain ne s'y reconnaît pas.
 
@@ -1239,7 +1239,7 @@ Or trois façons d'enregistrer coexistent : l'inspecteur, le lot et l'ordre des 
 **Écran :** Barre latérale de toutes les pages ; bureau 1440 × 900 et téléphone ; rôles Administrateur et Photographe  
 **Référentiels :** B&S 1.2.1 Groupement par la localisation ; B&S 2.2 Densité informationnelle ; B&S 7 ; ISO 9241-110 Autodescriptivité ; ISO 9241-110 Facilité d'apprentissage ; Nielsen #8 ; Loi de Hick
 
-**Constat.** Le menu compte 21 liens et 7 séries, soit 28 entrées, contre 12 lors de l'audit du 10 octobre ; 87 PR ont été fusionnées entre-temps. Il fait 1 272 px de haut sur bureau pour une fenêtre de 900 : le groupe « Réglages » commence à 828 px et l'Aide est à 1 099 px ; 1 630 px sur téléphone.
+**Constat.** Le menu compte 21 liens et 7 séries (celles de la démo), soit 28 entrées, contre 12 lors de l'audit du 10 octobre ; 87 PR ont été fusionnées entre-temps. Il fait 1 272 px de haut sur bureau pour une fenêtre de 900 : le groupe « Réglages » commence à 828 px et l'Aide est à 1 099 px ; 1 630 px sur téléphone.
 
 - « Réglages » mélange 10 entrées de trois natures : l'équipe (Photographes, Comptes et rôles, Circuit, Journal), le site (Apparence, Filigrane & EXIF, Droits & confidentialité) et l'aide (Aide, Nouveautés, Voir le site).
 - Instagram et Statistiques forment un groupe sans titre visible, collé sous la liste des séries : on les croit dans « Publier ».
@@ -1252,7 +1252,7 @@ Or trois façons d'enregistrer coexistent : l'inspecteur, le lot et l'ordre des 
 
 *Démo, menu de l'administration au bureau : 28 entrées, l'Aide est hors de l'écran.*
 
-**Recommandation.** Un premier niveau d'environ 12 entrées, en 5 groupes nommés par tâche : Aujourd'hui · Photos (Photothèque, Sorties, Voyages, Séries) · Personnes (Personnes, App de terrain) · Publier (À valider, Site public, Instagram ; demain Carnets, Galeries privées, Boutique) · Équipe (Comptes et rôles, Circuit, Journal, Statistiques). Un seul lien « Réglages », vers une page à onglets : Identité et apparence, Filigrane & EXIF, Mentions légales & confidentialité, Photographes, Assistants d'analyse. Aide, Nouveautés et Mon compte dans le pied du menu. Les séries repliées (5 visibles, puis « toutes »). Masquer un groupe vide et afficher le rôle réel. Valider ce classement en 30 minutes de tri par cartes avec vous deux.
+**Recommandation.** Un premier niveau de 15 entrées au plus, en 5 groupes nommés par tâche : Aujourd'hui · Photos (Photothèque, Sorties, Voyages, Séries) · Personnes (Personnes, App de terrain) · Publier (À valider, Site public, Instagram ; demain Carnets, Galeries privées, Boutique) · Équipe (Comptes et rôles, Circuit, Journal, Statistiques). Un seul lien « Réglages », vers une page à onglets : Identité et apparence, Filigrane & EXIF, Mentions légales & confidentialité, Photographes, Assistants d'analyse. Aide, Nouveautés et Mon compte dans le pied du menu. Les séries repliées (5 visibles, puis « toutes »). Masquer un groupe vide et afficher le rôle réel. Valider ce classement en 30 minutes de tri par cartes avec vous deux.
 
 ### UX-A-12 — App de terrain : langue, titres, regroupements et repères
 
@@ -1279,7 +1279,7 @@ Or trois façons d'enregistrer coexistent : l'inspecteur, le lot et l'ordre des 
 
 **Gravité :** moyen · **Effort :** S · **Impact :** moyen · **Vague :** 1 (V1-02)  
 **Écran :** /admin/rencontres/cartes/planche (A4, cinq paires 85 × 55 mm, impression à 100 %)  
-**Référentiels :** RGPD art. 4.11 et 7 (consentement éclairé) ; B&S 1.4 Lisibilité ; ISO 9241-112
+**Référentiels :** RGPD art. 4, point 11, et art. 7 (consentement éclairé) ; B&S 1.4 Lisibilité ; ISO 9241-112
 
 **Constat.** Sur la carte « pour nous », le passant lit et signe au coin d'une rue. Le texte d'accord fait 7,4 pt, mais les traductions anglaise et allemande font 5,3 pt (#5f5a52), les libellés Nom, Date, Lieu, E-mail et Signature 5,6 pt, et l'invitation de la carte « pour eux » 5,4 pt. Sous 6 pt, la lecture devient difficile pour beaucoup de passants, surtout les plus âgés. La carte dit « Révocable à tout moment » sans dire où ; « site nicephos.art » est écrit en dur. Le QR (21 mm, correction Q) est bien dimensionné.
 
@@ -1289,7 +1289,7 @@ Or trois façons d'enregistrer coexistent : l'inspecteur, le lot et l'ordre des 
 
 *Démo, planche de cartes d'accord imprimée : traductions en 5,3 pt, aucune ligne pour un parent.*
 
-**Recommandation.** Aucun texte à lire sous 6,5 pt : traductions à 6,5 pt en noir, sur deux lignes au besoin, en réduisant l'italique décoratif de la carte « Merci ». Sous l'accord : « Pour le retirer : nicephos.art/bonjour + votre référence », et une ligne parent (UX-T-02). L'hôte pris dans la configuration. Imprimer une planche test et la faire lire à trois personnes, à bout de bras.
+**Recommandation.** Le passant lit debout, dans la rue : la phrase d'accord en 9 pt au moins, en français et dans sa traduction, en noir ; aucun autre texte sous 8 pt (libellés, invitation, adresse de retrait). Pour que tout tienne sur 85 × 55 mm, passer la carte en recto verso (accord et signature au recto ; nom, date, lieu, e-mail et adresse de retrait au verso) et réduire l'italique décoratif de la carte « Merci » (MQ-10). Sous l'accord : « Pour le retirer : nicephos.art/bonjour + votre référence », et une ligne parent (UX-T-02). L'hôte pris dans la configuration. Imprimer une planche test et la faire lire à trois personnes, à bout de bras.
 
 ### UX-A-14 — Inspecteur : une erreur de saisie dite dans un message éphémère, loin du champ
 
@@ -1838,7 +1838,7 @@ Des réglages dans l'admin, du CSS et quelques lignes de gabarit ou de serveur. 
 | V0-02 | Poser sur /bonjour la question de l'âge et le nom du parent ; un accord de mineur sans parent passe « à confirmer » | UX-T-02 | S | fort | Aucun accord publiable sans majorité déclarée ou nom de parent (test e2e en FR, EN et DE) |
 | V0-03 | App de terrain, premiers filets : signature renvoyée après erreur, âge requis avec un accord, page HTML qui garde la saisie sur 401 et 403 | UX-A-01 | S | fort | Scénario « âge oublié » sans nouvelle signature ; 0 JSON brut ni texte « Jeton CSRF invalide » affiché |
 | V0-04 | Compléter les mentions légales dans l'admin ; phrase d'hébergement conditionnelle ; adresses en mailto | UX-T-03 | S | fort | Rubriques « Éditeurs » et « Responsable de la publication » présentes en FR, EN et DE ; legalMissing() vide ; 0 adresse e-mail non cliquable |
-| V0-05 | Dépublier le logo de la photothèque ; filigrane en signature d'angle sur les tailles ≥ 1 280 px ; réécrire la section de l'aide | UX-F-16, UX-F-15 | S | fort | Aucun H1 « Bienvenue » ; 44 → 43 photos publiées ; filigrane ≤ 14 % de la largeur et absent des variantes de 640 px (contrôle sur 3 photos) |
+| V0-05 | Dépublier le logo de la photothèque ; filigrane en signature d'angle sur les tailles ≥ 1 280 px, dans la même PR que la redirection 301 des anciennes adresses d'images (action 0.10 de l'audit SEO), puisque le changement de filigrane renomme toutes les variantes ; réécrire la section de l'aide | UX-F-16, UX-F-15 | S | fort | Aucun H1 « Bienvenue » ; 44 → 43 photos publiées en production ; une ancienne adresse de variante répond 301 puis 200 ; filigrane ≤ 14 % de la largeur et absent des variantes de 640 px (contrôle sur 3 photos) |
 | V0-06 | Formulaires publics en CSS : focus visible, filets à 3:1, couleur d'erreur propre au thème nuit, chevron du résumé | UX-F-03, UX-F-04 | S | fort | Différence de pixels > 0 au focus sur 100 % des contrôles de /bonjour et /signaler ; filets ≥ 3:1 dans les trois thèmes |
 | V0-07 | Ancrer la liste des langues au bord visible et ajouter le test e2e | UX-F-02 | S | fort | Bord gauche de la liste ≥ 0 à 320, 360, 375, 390, 412 et 430 px, sur 9 pages, dans les trois langues |
 | V0-08 | Contraste de l'ouverture : voile du haut en pixels et menu en --dark-ink (palliatif avant V1-09) | UX-F-01 | S | fort | 0 texte de menu sous 4,5:1 sur les diapositives de production à 320, 412 et 1 440 px (outil de mesure fourni) |
@@ -1850,7 +1850,7 @@ Des réglages dans l'admin, du CSS et quelques lignes de gabarit ou de serveur. 
 | V0-14 | Rôle Photographe : « Compléter et proposer », bouton « Proposer » dans le lot et dans « À finir », page 403 dans l'admin | UX-A-04 | S | fort | Parcours Photographe de l'import à la proposition en ≤ 12 actions, sans page 403 |
 | V0-15 | Confirmation nommée avant la suppression d'un compte ou d'un voyage (dialogue existant de la photothèque) | UX-A-07 | S | moyen | 0 suppression en un clic (test e2e sur photothèque, comptes, voyages) |
 | V0-16 | Focus des champs de l'admin en mode clair (contour 2 px) et scroll-padding sous la barre d'onglets | UX-A-27, UX-A-09 | S | moyen | Indicateur de focus ≥ 3:1 dans les deux modes ; 0 arrêt masqué par la barre d'onglets sur 4 pages (Pixel 7) |
-| V0-17 | Sobriété immédiate : préchargement des polices décidé par le thème, HEALTHCHECK toutes les 5 min, obfuscation des e-mails et NEL coupés chez Cloudflare | UX-F-37, UX-T-08, UX-T-11 | S | moyen | 0 police préchargée inutilisée ; 288 lancements du contrôle de santé par jour au lieu de 2 880 ; Mentions lisibles sans JavaScript |
+| V0-17 | Sobriété immédiate : préchargement des polices décidé par le thème, fond de carte léger (carte-terre.svg, déjà livré) sur la page photo à la place du fond fin, HEALTHCHECK toutes les 5 min, obfuscation des e-mails et NEL coupés chez Cloudflare (= action 0.5 de l'audit SEO pour le fond de carte) | UX-F-37, UX-F-20, UX-T-08, UX-T-11 | S | moyen | 0 police préchargée inutilisée ; plus de carte-terre-fine.svg (230 ko) sur la page photo ; 288 lancements du contrôle de santé par jour au lieu de 2 880 ; Mentions lisibles sans JavaScript |
 | V0-18 | Détails du cartel et des réseaux : « J'aime » sans zéro, og:title et og:description avec l'auteur, menu contextuel rendu sur les images | UX-F-39, UX-F-42, UX-F-34 | S | faible | 0 « 0 j'aime » affiché ; og:title contient l'auteur ; contextmenu non annulé |
 
 ### Vague 1 — accessibilité et ergonomie majeures
@@ -1859,8 +1859,8 @@ Les chantiers qui changent l'expérience : la visionneuse reliée au site et ren
 
 | Id | Action | Constats couverts | Effort | Impact | Critère de réussite mesurable |
 |---|---|---|---|---|---|
-| V1-01 | Retrait effectif d'une photo refusée : nouvelle clé de variante, purge Cloudflare par URL, réponse 410 | UX-T-01 | M | fort | Après un refus, l'ancienne adresse de variante ne répond plus 200 au bord en moins de 5 min ; la page de la photo répond 410 |
-| V1-02 | Cartes d'accord lisibles (≥ 6,5 pt), ligne parent, adresse de retrait de l'accord | UX-A-13, UX-T-02 | S | moyen | Aucun texte de carte sous 6,5 pt ; planche relue sans aide par 3 personnes à bout de bras |
+| V1-01 | Retrait effectif d'une photo refusée : nouvelle clé de variante (après la redirection des anciennes empreintes, SEO 0.10, sauf pour la photo retirée, qui répond 410), purge Cloudflare par URL, réponse 410 | UX-T-01 | M | fort | Après un refus, l'ancienne adresse de variante ne répond plus 200 au bord en moins de 5 min ; la page de la photo répond 410 |
+| V1-02 | Cartes d'accord lisibles (phrase d'accord ≥ 9 pt, tout autre texte ≥ 8 pt, recto verso au besoin), ligne parent, adresse de retrait de l'accord | UX-A-13, UX-T-02 | S | moyen | Phrase d'accord ≥ 9 pt et aucun autre texte de carte sous 8 pt ; planche relue sans aide par 3 personnes à bout de bras |
 | V1-03 | App de terrain fiable : vérification avant envoi, photo réduite, progression et « Réessayer », brouillon local, structure (h1, main, fieldset, lang) | UX-A-01, UX-A-12 | M | fort | Scénario « âge oublié » en 15 gestes au lieu de 20 ; 0 accord perdu sur coupure réseau simulée ; 0 violation axe sur les 3 écrans de l'app |
 | V1-04 | Formulaires publics : obligations annoncées, erreurs reliées et liées depuis le résumé, focus sur le résumé, titre « Erreur », vérification avant envoi | UX-F-05, UX-T-12 | M | fort | 100 % des champs requis annoncés avant l'envoi ; aria-describedby sur 100 % des champs en erreur ; focus sur le résumé après un envoi refusé |
 | V1-05 | Recoudre la visionneuse au site : marque, retour nommé, loupe, pied de page compact, « Tirage, licence : nous écrire », contexte dans l'adresse | UX-F-08, UX-F-09, UX-F-11 | M | fort | Liens Droits, Confidentialité, Mentions et Contact sur 100 % des gabarits ; depuis un voyage, compteur « n / 10 » et retour au voyage ; RGAA 12.1 en C |
@@ -1876,7 +1876,7 @@ Les chantiers qui changent l'expérience : la visionneuse reliée au site et ren
 | V1-15 | Langues : lang sur les textes de repli, langue du navigateur d'abord, sélecteur en texte | UX-F-22, UX-F-32 | M | moyen | 0 texte de repli sans lang sur /en/ et /de/ ; 7 combinaisons sur 7 respectent la langue du navigateur |
 | V1-16 | Passe RGAA de finition, site public et admin | UX-F-23, UX-F-24, UX-F-41, UX-A-28, UX-A-30, UX-A-31 | S | moyen | 0 violation axe sur l'échantillon des deux grilles ; critères 1.1, 1.9, 6.1, 6.2, 7.1, 7.5, 8.2, 9.3 et 10.6 en C |
 | V1-17 | Téléphone, site public : cibles de 44 px, en-tête compact sur une ligne, bords sûrs | UX-F-36 | S | moyen | 0 action isolée sous 44 px sur l'accueil, la page photo et /bonjour ; en-tête ≤ 80 px |
-| V1-18 | Menu de l'admin rangé en 5 groupes, Réglages à onglets, palette complète avec synonymes | UX-A-11, UX-A-15, UX-A-26 | M | fort | ≤ 12 entrées au premier niveau ; menu ≤ 900 px de haut ; 27 requêtes sur 27 aboutissent dans la palette |
+| V1-18 | Menu de l'admin rangé en 5 groupes, Réglages à onglets, palette complète avec synonymes | UX-A-11, UX-A-15, UX-A-26 | M | fort | ≤ 15 entrées au premier niveau (celles de MQ-07) ; menu ≤ 900 px de haut ; 27 requêtes sur 27 aboutissent dans la palette |
 
 ### Vague 2 — contenus, marketing, préparation du carnet, des galeries privées et de la boutique
 
@@ -1889,7 +1889,7 @@ Le récit, la voix, la marque, la confiance juridique, et le cadre commun sur le
 | V2-03 | Typographie et thème « auto » pour les pages de texte | UX-F-29 | S | moyen | 0 texte de contenu sous 12 px ; 0 faux gras ni faux italique ; titres de photos en casse normale |
 | V2-04 | Traduire par séries : écran « Traduire », villes en lot, relecture des noms de séries, correction typographique à la saisie | UX-F-31, UX-A-21 | M | moyen | 39 titres traduits en ≤ 80 actions ; 12 villes en ≤ 6 actions ; 0 nom de série traduit mot à mot |
 | V2-05 | Confidentialité : « Vos droits en un clic », base légale, délais chiffrés, accusé de réception | UX-T-04 | S | moyen | Formulaire de droits atteint en 1 clic depuis Confidentialité et le pied de page ; accusé envoyé à chaque demande avec e-mail |
-| V2-06 | Numéro d'inventaire stable et dénominations claires (« photos », « ← Galerie », nom complet de l'auteur, adresses régénérées) | UX-T-05, UX-F-28 | M | moyen | Numéro inchangé après réordonnancement ; « 44 photos sur 44 » ; 0 adresse publiée tirée d'un nom de fichier |
+| V2-06 | Numéro d'inventaire stable et dénominations claires (« photos », « ← Galerie », nom complet de l'auteur, adresses régénérées) | UX-T-05, UX-F-28 | M | moyen | Numéro inchangé après réordonnancement ; « 43 photos sur 43 » en production ; 0 adresse publiée tirée d'un nom de fichier |
 | V2-07 | Charte de marque : un seul rhinocéros au trait, en SVG, sous-titre revu | UX-F-38 | S | moyen | Emblème ≤ 5 ko ; un seul dessin sur le site, l'admin et le filigrane |
 | V2-08 | Feuille d'impression (photo avec cartel, pages de texte, voyages) | UX-F-35 | S | moyen | Une page photo tient sur une A4 avec son cartel et son adresse ; texte imprimé ≥ 4,5:1 dans les trois thèmes |
 | V2-09 | Écoconception : déclaration publiée, budgets vérifiés en e2e, référent, Dependabot, licence, mode sobre | UX-T-10, UX-T-09, UX-F-43 | M | moyen | Déclaration en ligne en trois langues ; budgets tenus à chaque version (test e2e) ; Save-Data pris en compte |
@@ -1929,53 +1929,213 @@ Répartition : vague 0 : 18 actions ; vague 1 : 18 actions ; vague 2 : 13 action
 
 ## Maquettes
 
-Section à compléter : les liens vers les fichiers seront ajoutés quand les maquettes seront livrées. Elles utiliseront les styles, les polices et les photos de démonstration du site (`maquettes/_commun/`), jamais le logo ni vos photos personnelles. Dix maquettes correctives illustrent les recommandations les plus fortes du plan (MQ-01 à MQ-10) ; dix autres préparent les projets (MQ-11 à MQ-20).
+Vingt maquettes HTML, chacune avec ses rendus en WebP : bureau (1440 × 900, densité 1) et téléphone (Pixel 7, 412 × 839, densité 2 ; les pages les plus longues réduites pour tenir sous la limite de hauteur du WebP), en page entière. Dix maquettes correctives illustrent les recommandations les plus fortes du plan (MQ-01 à MQ-10) ; dix autres préparent les projets (MQ-11 à MQ-20). Elles utilisent les styles, les polices et les photos de démonstration du site (`maquettes/_commun/`), jamais le logo ni vos photos personnelles ; les données (noms, commandes, séries de la démo) sont fictives et cohérentes d’une maquette à l’autre. Chaque maquette se termine par le même encart « Ce qui change » : en-tête, repères numérotés avec leur ligne de références, et bloc « Mesures ». Pour les ouvrir : [maquettes/README.md](maquettes/README.md).
 
-| Id | Maquette | Fichier prévu | Périmètre | Écrans | Constats illustrés |
-|---|---|---|---|---|---|
-| MQ-01 | Accueil — premier écran avec promesse, photo entière, texte hors de l'image | `maquettes/MQ-01-accueil-promesse.html` | site public | bureau, mobile | UX-F-16, UX-F-17, UX-F-01, UX-F-18, UX-F-06, UX-F-02, UX-F-36 |
-| MQ-02 | Galerie — grille en rangées justifiées et barre de filtres collante | `maquettes/MQ-02-galerie-rangees-filtres.html` | site public | bureau, mobile | UX-F-13, UX-F-12, UX-F-30, UX-F-28, UX-F-07, UX-F-45 |
-| MQ-03 | Page Série — « Rue » | `maquettes/MQ-03-page-serie.html` | site public | bureau, mobile | UX-F-10, UX-F-18, UX-F-06, UX-F-30 |
-| MQ-04 | Visionneuse-cartel — la photo d'abord, reliée au site | `maquettes/MQ-04-visionneuse-cartel.html` | site public | bureau, mobile | UX-F-08, UX-F-09, UX-F-14, UX-F-21, UX-F-11, UX-F-39, UX-F-24, UX-T-05 |
-| MQ-05 | Formulaire « Bonjour » — consentement corrigé (vide, focus, erreurs) | `maquettes/MQ-05-bonjour-formulaire.html` | site public | mobile, bureau | UX-F-03, UX-F-04, UX-F-05, UX-F-27, UX-F-23, UX-T-02, UX-T-04 |
-| MQ-06 | Contact, tirages et licences — demande préremplie depuis une photo | `maquettes/MQ-06-contact-tirage.html` | site public | bureau, mobile | UX-F-11, UX-F-34, UX-T-03, UX-T-06, UX-F-23 |
-| MQ-07 | Admin — menu rangé, Réglages à onglets, Assistants d'analyse | `maquettes/MQ-07-admin-menu-reglages.html` | administration | bureau, mobile | UX-A-11, UX-A-26, UX-A-17, UX-A-15, UX-A-25, UX-A-18 |
-| MQ-08 | Admin — Compléter et proposer (ou publier) un lot | `maquettes/MQ-08-admin-lot-proposer.html` | administration | bureau, mobile | UX-A-04, UX-A-03, UX-A-02, UX-A-10, UX-A-20, UX-A-21 |
-| MQ-09 | Admin — enregistrer, confirmer, annuler (composants communs) | `maquettes/MQ-09-admin-enregistrer-confirmer.html` | administration | bureau, mobile | UX-A-06, UX-A-07, UX-A-08, UX-A-05, UX-A-23, UX-A-14, UX-A-16, UX-A-27 |
-| MQ-10 | App de terrain — un accord qui ne se perd jamais | `maquettes/MQ-10-app-terrain-accord.html` | administration | mobile | UX-A-01, UX-A-12, UX-A-13, UX-A-09, UX-T-02 |
-| MQ-11 | Blog — liste des billets (« Carnets ») | `maquettes/MQ-11-carnets-liste.html` | site public | bureau, mobile | UX-T-16, UX-T-18, UX-F-33, UX-F-45 |
-| MQ-12 | Blog — billet avec photos | `maquettes/MQ-12-carnet-billet.html` | site public | bureau, mobile | UX-T-18, UX-T-16, UX-F-09, UX-F-35, UX-F-29, UX-F-22, UX-F-45 |
-| MQ-13 | Boutique — page d'un tirage | `maquettes/MQ-13-boutique-tirage.html` | site public | bureau, mobile | UX-T-17, UX-T-05, UX-F-11, UX-F-15 |
-| MQ-14 | Boutique — panier | `maquettes/MQ-14-boutique-panier.html` | site public | bureau, mobile | UX-T-17, UX-F-05 |
-| MQ-15 | Boutique — commande et paiement (adresse, récapitulatif, redirection, confirmation) | `maquettes/MQ-15-boutique-commande-paiement.html` | site public | bureau, mobile | UX-T-17, UX-F-05, UX-F-04, UX-F-35 |
-| MQ-16 | Galerie privée — accès par lien et mot de passe | `maquettes/MQ-16-galerie-privee-acces.html` | site public | bureau, mobile | UX-T-18, UX-F-05, UX-F-03 |
-| MQ-17 | Galerie privée — la galerie (favoris, téléchargement selon les droits) | `maquettes/MQ-17-galerie-privee.html` | site public | bureau, mobile | UX-T-18, UX-T-16, UX-F-13, UX-F-09 |
-| MQ-18 | Admin — créer un accès privé (lien temporaire, mot de passe, suivi des ouvertures) | `maquettes/MQ-18-admin-acces-prive.html` | administration | bureau, mobile | UX-T-18, UX-A-32, UX-A-07, UX-A-16 |
-| MQ-19 | Admin — commandes de la boutique | `maquettes/MQ-19-admin-commandes.html` | administration | bureau, mobile | UX-T-17, UX-A-16, UX-A-32, UX-A-19, UX-A-07 |
-| MQ-20 | Admin — éditeur de billet | `maquettes/MQ-20-admin-editeur-billet.html` | administration | bureau, mobile | UX-T-16, UX-T-18, UX-A-06, UX-A-21, UX-A-32 |
+| Id | Maquette | Périmètre | Constats illustrés | Images |
+|---|---|---|---|---|
+| MQ-01 | Accueil — premier écran avec promesse, photo entière, texte hors de l'image | site public | UX-F-16, UX-F-17, UX-F-01, UX-F-18, UX-F-06, UX-F-02, UX-F-36 | <img src="maquettes/vignettes/MQ-01.webp" width="160" alt=""><br>[HTML](maquettes/MQ-01-accueil-promesse.html) · [bureau](maquettes/MQ-01-accueil-promesse-bureau.webp) · [téléphone](maquettes/MQ-01-accueil-promesse-mobile.webp) |
+| MQ-02 | Galerie — grille en rangées justifiées et barre de filtres collante | site public | UX-F-13, UX-F-12, UX-F-30, UX-F-28, UX-F-07, UX-F-45 | <img src="maquettes/vignettes/MQ-02.webp" width="160" alt=""><br>[HTML](maquettes/MQ-02-galerie-rangees-filtres.html) · [bureau](maquettes/MQ-02-galerie-rangees-filtres-bureau.webp) · [téléphone](maquettes/MQ-02-galerie-rangees-filtres-mobile.webp) |
+| MQ-03 | Page Série — « Rue » | site public | UX-F-10, UX-F-18, UX-F-06, UX-F-30 | <img src="maquettes/vignettes/MQ-03.webp" width="160" alt=""><br>[HTML](maquettes/MQ-03-page-serie.html) · [bureau](maquettes/MQ-03-page-serie-bureau.webp) · [téléphone](maquettes/MQ-03-page-serie-mobile.webp) |
+| MQ-04 | Visionneuse-cartel — la photo d'abord, reliée au site | site public | UX-F-08, UX-F-09, UX-F-14, UX-F-21, UX-F-11, UX-F-39, UX-F-24, UX-T-05 | <img src="maquettes/vignettes/MQ-04.webp" width="160" alt=""><br>[HTML](maquettes/MQ-04-visionneuse-cartel.html) · [bureau](maquettes/MQ-04-visionneuse-cartel-bureau.webp) · [téléphone](maquettes/MQ-04-visionneuse-cartel-mobile.webp) |
+| MQ-05 | Formulaire « Bonjour » — consentement corrigé (vide, focus, erreurs) | site public | UX-F-03, UX-F-04, UX-F-05, UX-F-27, UX-F-23, UX-T-02, UX-T-04 | <img src="maquettes/vignettes/MQ-05.webp" width="160" alt=""><br>[HTML](maquettes/MQ-05-bonjour-formulaire.html) · [bureau](maquettes/MQ-05-bonjour-formulaire-bureau.webp) · [téléphone](maquettes/MQ-05-bonjour-formulaire-mobile.webp) |
+| MQ-06 | Contact, tirages et licences — demande préremplie depuis une photo | site public | UX-F-11, UX-F-34, UX-T-03, UX-T-06, UX-F-23 | <img src="maquettes/vignettes/MQ-06.webp" width="160" alt=""><br>[HTML](maquettes/MQ-06-contact-tirage.html) · [bureau](maquettes/MQ-06-contact-tirage-bureau.webp) · [téléphone](maquettes/MQ-06-contact-tirage-mobile.webp) |
+| MQ-07 | Admin — menu rangé, Réglages à onglets, Assistants d'analyse | administration | UX-A-11, UX-A-26, UX-A-17, UX-A-15, UX-A-25, UX-A-18 | <img src="maquettes/vignettes/MQ-07.webp" width="160" alt=""><br>[HTML](maquettes/MQ-07-admin-menu-reglages.html) · [bureau](maquettes/MQ-07-admin-menu-reglages-bureau.webp) · [téléphone](maquettes/MQ-07-admin-menu-reglages-mobile.webp) |
+| MQ-08 | Admin — Compléter et proposer (ou publier) un lot | administration | UX-A-04, UX-A-03, UX-A-02, UX-A-10, UX-A-20, UX-A-21 | <img src="maquettes/vignettes/MQ-08.webp" width="160" alt=""><br>[HTML](maquettes/MQ-08-admin-lot-proposer.html) · [bureau](maquettes/MQ-08-admin-lot-proposer-bureau.webp) · [téléphone](maquettes/MQ-08-admin-lot-proposer-mobile.webp) |
+| MQ-09 | Admin — enregistrer, confirmer, annuler (composants communs) | administration | UX-A-06, UX-A-07, UX-A-08, UX-A-05, UX-A-23, UX-A-14, UX-A-16, UX-A-27 | <img src="maquettes/vignettes/MQ-09.webp" width="160" alt=""><br>[HTML](maquettes/MQ-09-admin-enregistrer-confirmer.html) · [bureau](maquettes/MQ-09-admin-enregistrer-confirmer-bureau.webp) · [téléphone](maquettes/MQ-09-admin-enregistrer-confirmer-mobile.webp) |
+| MQ-10 | App de terrain — un accord qui ne se perd jamais | administration | UX-A-01, UX-A-12, UX-A-13, UX-A-09, UX-T-02 | <img src="maquettes/vignettes/MQ-10.webp" width="160" alt=""><br>[HTML](maquettes/MQ-10-app-terrain-accord.html) · [téléphone](maquettes/MQ-10-app-terrain-accord-mobile.webp) (téléphone seulement) |
+| MQ-11 | Blog — liste des billets (« Carnets ») | site public | UX-T-16, UX-T-18, UX-F-33, UX-F-45 | <img src="maquettes/vignettes/MQ-11.webp" width="160" alt=""><br>[HTML](maquettes/MQ-11-carnets-liste.html) · [bureau](maquettes/MQ-11-carnets-liste-bureau.webp) · [téléphone](maquettes/MQ-11-carnets-liste-mobile.webp) |
+| MQ-12 | Blog — billet avec photos | site public | UX-T-18, UX-T-16, UX-F-09, UX-F-35, UX-F-29, UX-F-22, UX-F-45 | <img src="maquettes/vignettes/MQ-12.webp" width="160" alt=""><br>[HTML](maquettes/MQ-12-carnet-billet.html) · [bureau](maquettes/MQ-12-carnet-billet-bureau.webp) · [téléphone](maquettes/MQ-12-carnet-billet-mobile.webp) |
+| MQ-13 | Boutique — page d'un tirage | site public | UX-T-17, UX-T-05, UX-F-11, UX-F-15 | <img src="maquettes/vignettes/MQ-13.webp" width="160" alt=""><br>[HTML](maquettes/MQ-13-boutique-tirage.html) · [bureau](maquettes/MQ-13-boutique-tirage-bureau.webp) · [téléphone](maquettes/MQ-13-boutique-tirage-mobile.webp) |
+| MQ-14 | Boutique — panier | site public | UX-T-17, UX-F-05 | <img src="maquettes/vignettes/MQ-14.webp" width="160" alt=""><br>[HTML](maquettes/MQ-14-boutique-panier.html) · [bureau](maquettes/MQ-14-boutique-panier-bureau.webp) · [téléphone](maquettes/MQ-14-boutique-panier-mobile.webp) |
+| MQ-15 | Boutique — commande et paiement (adresse, récapitulatif, redirection, confirmation) | site public | UX-T-17, UX-F-05, UX-F-04, UX-F-35 | <img src="maquettes/vignettes/MQ-15.webp" width="160" alt=""><br>[HTML](maquettes/MQ-15-boutique-commande-paiement.html) · [bureau](maquettes/MQ-15-boutique-commande-paiement-bureau.webp) · [téléphone](maquettes/MQ-15-boutique-commande-paiement-mobile.webp) |
+| MQ-16 | Galerie privée — accès par lien et mot de passe | site public | UX-T-18, UX-F-05, UX-F-03 | <img src="maquettes/vignettes/MQ-16.webp" width="160" alt=""><br>[HTML](maquettes/MQ-16-galerie-privee-acces.html) · [bureau](maquettes/MQ-16-galerie-privee-acces-bureau.webp) · [téléphone](maquettes/MQ-16-galerie-privee-acces-mobile.webp) |
+| MQ-17 | Galerie privée — la galerie (favoris, téléchargement selon les droits) | site public | UX-T-18, UX-T-16, UX-F-13, UX-F-09 | <img src="maquettes/vignettes/MQ-17.webp" width="160" alt=""><br>[HTML](maquettes/MQ-17-galerie-privee.html) · [bureau](maquettes/MQ-17-galerie-privee-bureau.webp) · [téléphone](maquettes/MQ-17-galerie-privee-mobile.webp) |
+| MQ-18 | Admin — créer un accès privé (lien temporaire, mot de passe, suivi des ouvertures) | administration | UX-T-18, UX-A-32, UX-A-07, UX-A-16 | <img src="maquettes/vignettes/MQ-18.webp" width="160" alt=""><br>[HTML](maquettes/MQ-18-admin-acces-prive.html) · [bureau](maquettes/MQ-18-admin-acces-prive-bureau.webp) · [téléphone](maquettes/MQ-18-admin-acces-prive-mobile.webp) |
+| MQ-19 | Admin — commandes de la boutique | administration | UX-T-17, UX-A-16, UX-A-32, UX-A-19, UX-A-07 | <img src="maquettes/vignettes/MQ-19.webp" width="160" alt=""><br>[HTML](maquettes/MQ-19-admin-commandes.html) · [bureau](maquettes/MQ-19-admin-commandes-bureau.webp) · [téléphone](maquettes/MQ-19-admin-commandes-mobile.webp) |
+| MQ-20 | Admin — éditeur de billet | administration | UX-T-16, UX-T-18, UX-A-06, UX-A-21, UX-A-32 | <img src="maquettes/vignettes/MQ-20.webp" width="160" alt=""><br>[HTML](maquettes/MQ-20-admin-editeur-billet.html) · [bureau](maquettes/MQ-20-admin-editeur-billet-bureau.webp) · [téléphone](maquettes/MQ-20-admin-editeur-billet-mobile.webp) |
+
+### Les maquettes une à une
+
+#### MQ-01 — Accueil — premier écran avec promesse, photo entière, texte hors de l'image
+
+**Constats illustrés :** UX-F-16, UX-F-17, UX-F-01, UX-F-18, UX-F-06, UX-F-02, UX-F-36. **Fichier :** [MQ-01-accueil-promesse.html](maquettes/MQ-01-accueil-promesse.html).
+
+![MQ-01, bureau 1440 × 900, page entière : Accueil — premier écran avec promesse, photo entière, texte hors de l'image](maquettes/MQ-01-accueil-promesse-bureau.webp)
+
+![MQ-01, téléphone Pixel 7, page entière : Accueil — premier écran avec promesse, photo entière, texte hors de l'image](maquettes/MQ-01-accueil-promesse-mobile.webp)
+
+#### MQ-02 — Galerie — grille en rangées justifiées et barre de filtres collante
+
+**Constats illustrés :** UX-F-13, UX-F-12, UX-F-30, UX-F-28, UX-F-07, UX-F-45. **Fichier :** [MQ-02-galerie-rangees-filtres.html](maquettes/MQ-02-galerie-rangees-filtres.html).
+
+![MQ-02, bureau 1440 × 900, page entière : Galerie — grille en rangées justifiées et barre de filtres collante](maquettes/MQ-02-galerie-rangees-filtres-bureau.webp)
+
+![MQ-02, téléphone Pixel 7, page entière : Galerie — grille en rangées justifiées et barre de filtres collante](maquettes/MQ-02-galerie-rangees-filtres-mobile.webp)
+
+#### MQ-03 — Page Série — « Rue »
+
+**Constats illustrés :** UX-F-10, UX-F-18, UX-F-06, UX-F-30. **Fichier :** [MQ-03-page-serie.html](maquettes/MQ-03-page-serie.html).
+
+![MQ-03, bureau 1440 × 900, page entière : Page Série — « Rue »](maquettes/MQ-03-page-serie-bureau.webp)
+
+![MQ-03, téléphone Pixel 7, page entière : Page Série — « Rue »](maquettes/MQ-03-page-serie-mobile.webp)
+
+#### MQ-04 — Visionneuse-cartel — la photo d'abord, reliée au site
+
+**Constats illustrés :** UX-F-08, UX-F-09, UX-F-14, UX-F-21, UX-F-11, UX-F-39, UX-F-24, UX-T-05. **Fichier :** [MQ-04-visionneuse-cartel.html](maquettes/MQ-04-visionneuse-cartel.html).
+
+![MQ-04, bureau 1440 × 900, page entière : Visionneuse-cartel — la photo d'abord, reliée au site](maquettes/MQ-04-visionneuse-cartel-bureau.webp)
+
+![MQ-04, téléphone Pixel 7, page entière : Visionneuse-cartel — la photo d'abord, reliée au site](maquettes/MQ-04-visionneuse-cartel-mobile.webp)
+
+#### MQ-05 — Formulaire « Bonjour » — consentement corrigé (vide, focus, erreurs)
+
+**Constats illustrés :** UX-F-03, UX-F-04, UX-F-05, UX-F-27, UX-F-23, UX-T-02, UX-T-04. **Fichier :** [MQ-05-bonjour-formulaire.html](maquettes/MQ-05-bonjour-formulaire.html).
+
+![MQ-05, bureau 1440 × 900, page entière : Formulaire « Bonjour » — consentement corrigé (vide, focus, erreurs)](maquettes/MQ-05-bonjour-formulaire-bureau.webp)
+
+![MQ-05, téléphone Pixel 7, page entière : Formulaire « Bonjour » — consentement corrigé (vide, focus, erreurs)](maquettes/MQ-05-bonjour-formulaire-mobile.webp)
+
+#### MQ-06 — Contact, tirages et licences — demande préremplie depuis une photo
+
+**Constats illustrés :** UX-F-11, UX-F-34, UX-T-03, UX-T-06, UX-F-23. **Fichier :** [MQ-06-contact-tirage.html](maquettes/MQ-06-contact-tirage.html).
+
+![MQ-06, bureau 1440 × 900, page entière : Contact, tirages et licences — demande préremplie depuis une photo](maquettes/MQ-06-contact-tirage-bureau.webp)
+
+![MQ-06, téléphone Pixel 7, page entière : Contact, tirages et licences — demande préremplie depuis une photo](maquettes/MQ-06-contact-tirage-mobile.webp)
+
+#### MQ-07 — Admin — menu rangé, Réglages à onglets, Assistants d'analyse
+
+**Constats illustrés :** UX-A-11, UX-A-26, UX-A-17, UX-A-15, UX-A-25, UX-A-18. **Fichier :** [MQ-07-admin-menu-reglages.html](maquettes/MQ-07-admin-menu-reglages.html).
+
+![MQ-07, bureau 1440 × 900, page entière : Admin — menu rangé, Réglages à onglets, Assistants d'analyse](maquettes/MQ-07-admin-menu-reglages-bureau.webp)
+
+![MQ-07, téléphone Pixel 7, page entière : Admin — menu rangé, Réglages à onglets, Assistants d'analyse](maquettes/MQ-07-admin-menu-reglages-mobile.webp)
+
+#### MQ-08 — Admin — Compléter et proposer (ou publier) un lot
+
+**Constats illustrés :** UX-A-04, UX-A-03, UX-A-02, UX-A-10, UX-A-20, UX-A-21. **Fichier :** [MQ-08-admin-lot-proposer.html](maquettes/MQ-08-admin-lot-proposer.html).
+
+![MQ-08, bureau 1440 × 900, page entière : Admin — Compléter et proposer (ou publier) un lot](maquettes/MQ-08-admin-lot-proposer-bureau.webp)
+
+![MQ-08, téléphone Pixel 7, page entière : Admin — Compléter et proposer (ou publier) un lot](maquettes/MQ-08-admin-lot-proposer-mobile.webp)
+
+#### MQ-09 — Admin — enregistrer, confirmer, annuler (composants communs)
+
+**Constats illustrés :** UX-A-06, UX-A-07, UX-A-08, UX-A-05, UX-A-23, UX-A-14, UX-A-16, UX-A-27. **Fichier :** [MQ-09-admin-enregistrer-confirmer.html](maquettes/MQ-09-admin-enregistrer-confirmer.html).
+
+![MQ-09, bureau 1440 × 900, page entière : Admin — enregistrer, confirmer, annuler (composants communs)](maquettes/MQ-09-admin-enregistrer-confirmer-bureau.webp)
+
+![MQ-09, téléphone Pixel 7, page entière : Admin — enregistrer, confirmer, annuler (composants communs)](maquettes/MQ-09-admin-enregistrer-confirmer-mobile.webp)
+
+#### MQ-10 — App de terrain — un accord qui ne se perd jamais
+
+**Constats illustrés :** UX-A-01, UX-A-12, UX-A-13, UX-A-09, UX-T-02. **Fichier :** [MQ-10-app-terrain-accord.html](maquettes/MQ-10-app-terrain-accord.html). Téléphone seulement : l’app de terrain ne s’utilise que sur téléphone.
+
+![MQ-10, téléphone Pixel 7, page entière : App de terrain — un accord qui ne se perd jamais](maquettes/MQ-10-app-terrain-accord-mobile.webp)
+
+#### MQ-11 — Blog — liste des billets (« Carnets »)
+
+**Constats illustrés :** UX-T-16, UX-T-18, UX-F-33, UX-F-45. **Fichier :** [MQ-11-carnets-liste.html](maquettes/MQ-11-carnets-liste.html).
+
+![MQ-11, bureau 1440 × 900, page entière : Blog — liste des billets (« Carnets »)](maquettes/MQ-11-carnets-liste-bureau.webp)
+
+![MQ-11, téléphone Pixel 7, page entière : Blog — liste des billets (« Carnets »)](maquettes/MQ-11-carnets-liste-mobile.webp)
+
+#### MQ-12 — Blog — billet avec photos
+
+**Constats illustrés :** UX-T-18, UX-T-16, UX-F-09, UX-F-35, UX-F-29, UX-F-22, UX-F-45. **Fichier :** [MQ-12-carnet-billet.html](maquettes/MQ-12-carnet-billet.html).
+
+![MQ-12, bureau 1440 × 900, page entière : Blog — billet avec photos](maquettes/MQ-12-carnet-billet-bureau.webp)
+
+![MQ-12, téléphone Pixel 7, page entière : Blog — billet avec photos](maquettes/MQ-12-carnet-billet-mobile.webp)
+
+#### MQ-13 — Boutique — page d'un tirage
+
+**Constats illustrés :** UX-T-17, UX-T-05, UX-F-11, UX-F-15. **Fichier :** [MQ-13-boutique-tirage.html](maquettes/MQ-13-boutique-tirage.html).
+
+![MQ-13, bureau 1440 × 900, page entière : Boutique — page d'un tirage](maquettes/MQ-13-boutique-tirage-bureau.webp)
+
+![MQ-13, téléphone Pixel 7, page entière : Boutique — page d'un tirage](maquettes/MQ-13-boutique-tirage-mobile.webp)
+
+#### MQ-14 — Boutique — panier
+
+**Constats illustrés :** UX-T-17, UX-F-05. **Fichier :** [MQ-14-boutique-panier.html](maquettes/MQ-14-boutique-panier.html).
+
+![MQ-14, bureau 1440 × 900, page entière : Boutique — panier](maquettes/MQ-14-boutique-panier-bureau.webp)
+
+![MQ-14, téléphone Pixel 7, page entière : Boutique — panier](maquettes/MQ-14-boutique-panier-mobile.webp)
+
+#### MQ-15 — Boutique — commande et paiement (adresse, récapitulatif, redirection, confirmation)
+
+**Constats illustrés :** UX-T-17, UX-F-05, UX-F-04, UX-F-35. **Fichier :** [MQ-15-boutique-commande-paiement.html](maquettes/MQ-15-boutique-commande-paiement.html).
+
+![MQ-15, bureau 1440 × 900, page entière : Boutique — commande et paiement (adresse, récapitulatif, redirection, confirmation)](maquettes/MQ-15-boutique-commande-paiement-bureau.webp)
+
+![MQ-15, téléphone Pixel 7, page entière : Boutique — commande et paiement (adresse, récapitulatif, redirection, confirmation)](maquettes/MQ-15-boutique-commande-paiement-mobile.webp)
+
+#### MQ-16 — Galerie privée — accès par lien et mot de passe
+
+**Constats illustrés :** UX-T-18, UX-F-05, UX-F-03. **Fichier :** [MQ-16-galerie-privee-acces.html](maquettes/MQ-16-galerie-privee-acces.html).
+
+![MQ-16, bureau 1440 × 900, page entière : Galerie privée — accès par lien et mot de passe](maquettes/MQ-16-galerie-privee-acces-bureau.webp)
+
+![MQ-16, téléphone Pixel 7, page entière : Galerie privée — accès par lien et mot de passe](maquettes/MQ-16-galerie-privee-acces-mobile.webp)
+
+#### MQ-17 — Galerie privée — la galerie (favoris, téléchargement selon les droits)
+
+**Constats illustrés :** UX-T-18, UX-T-16, UX-F-13, UX-F-09. **Fichier :** [MQ-17-galerie-privee.html](maquettes/MQ-17-galerie-privee.html).
+
+![MQ-17, bureau 1440 × 900, page entière : Galerie privée — la galerie (favoris, téléchargement selon les droits)](maquettes/MQ-17-galerie-privee-bureau.webp)
+
+![MQ-17, téléphone Pixel 7, page entière : Galerie privée — la galerie (favoris, téléchargement selon les droits)](maquettes/MQ-17-galerie-privee-mobile.webp)
+
+#### MQ-18 — Admin — créer un accès privé (lien temporaire, mot de passe, suivi des ouvertures)
+
+**Constats illustrés :** UX-T-18, UX-A-32, UX-A-07, UX-A-16. **Fichier :** [MQ-18-admin-acces-prive.html](maquettes/MQ-18-admin-acces-prive.html).
+
+![MQ-18, bureau 1440 × 900, page entière : Admin — créer un accès privé (lien temporaire, mot de passe, suivi des ouvertures)](maquettes/MQ-18-admin-acces-prive-bureau.webp)
+
+![MQ-18, téléphone Pixel 7, page entière : Admin — créer un accès privé (lien temporaire, mot de passe, suivi des ouvertures)](maquettes/MQ-18-admin-acces-prive-mobile.webp)
+
+#### MQ-19 — Admin — commandes de la boutique
+
+**Constats illustrés :** UX-T-17, UX-A-16, UX-A-32, UX-A-19, UX-A-07. **Fichier :** [MQ-19-admin-commandes.html](maquettes/MQ-19-admin-commandes.html).
+
+![MQ-19, bureau 1440 × 900, page entière : Admin — commandes de la boutique](maquettes/MQ-19-admin-commandes-bureau.webp)
+
+![MQ-19, téléphone Pixel 7, page entière : Admin — commandes de la boutique](maquettes/MQ-19-admin-commandes-mobile.webp)
+
+#### MQ-20 — Admin — éditeur de billet
+
+**Constats illustrés :** UX-T-16, UX-T-18, UX-A-06, UX-A-21, UX-A-32. **Fichier :** [MQ-20-admin-editeur-billet.html](maquettes/MQ-20-admin-editeur-billet.html).
+
+![MQ-20, bureau 1440 × 900, page entière : Admin — éditeur de billet](maquettes/MQ-20-admin-editeur-billet-bureau.webp)
+
+![MQ-20, téléphone Pixel 7, page entière : Admin — éditeur de billet](maquettes/MQ-20-admin-editeur-billet-mobile.webp)
 
 ### Ce que chaque maquette doit montrer
 
 - **MQ-01 — Accueil — premier écran avec promesse, photo entière, texte hors de l'image.** Thème « Nicephos — nuit ». Lien « Aller au contenu » montré dans son état focus (premier élément). En-tête sur une ligne : mot « NICEPHOS » en Jost 300 (lien accueil), menu « Séries · Galerie · Carte · Carnets · À propos », puis après un filet « Tirages » en retrait, loupe « Rechercher » et « FR » à droite ; sur mobile, en-tête ≤ 80 px avec bouton « Menu », et la liste des langues ouverte ancrée à droite, entièrement visible (« Français · English · Deutsch », en texte, sans drapeau). Photo d'ouverture entière : horizontale sur bureau, verticale sur mobile (non recadrée, sur fond noir), sans voile ni zoom ; seule une bande légère sous le menu. Sous la photo, un bandeau noir : H1 « Deux regards, une même lumière. », sous-ligne « Rue, mer et nuit, de Saint-Malo à la Californie : les photographies de Sébastien et Julien. », légende de la diapositive en cartel « Miradouro, l'heure dorée — Julien · Lisbonne, oct. 2026 · Voir la photo », points de position et bouton « Pause » de 44 px. Titre de page annoté : « Nicephos — photographies de Sébastien et Julien ». Annotations : contraste du texte ≥ 7:1 sur fond uni ; une seule image chargée au départ, les suivantes à la demande.
-- **MQ-02 — Galerie — grille en rangées justifiées et barre de filtres collante.** Barre collante au-dessus de la grille : « Les deux · Sébastien · Julien » (état actif souligné couleur sable et aria-current), puis pastilles de séries avec couverture de 32 px (« Rue · 8 photos », « Atlantique · 3 photos », « Voyage · 23 photos »), ordre « Choisi par nous · Plus récentes d'abord ». En-tête de grille « Toutes les photos — 12 photos sur 44, par Julien » avec étiquette « Julien ✕ ». Grille en rangées justifiées (hauteur ≈ 300 px sur bureau, 240 px sur mobile), le numéro d'ordre 01, 02, 03… visible en annotation sur la première rangée pour montrer le sens de lecture ; cartel sous chaque vignette « Titre · Série · Julien · Lisbonne » (nom complet). Un diptyque inséré « Même lieu, deux regards : Lisbonne » (Sébastien à gauche, Julien à droite). Une vignette en état focus. Mobile : barre de filtres défilante horizontalement, index des séries avec couverture de 64 px à droite de chaque nom.
+- **MQ-02 — Galerie — grille en rangées justifiées et barre de filtres collante.** Barre collante au-dessus de la grille : « Les deux · Sébastien · Julien » (état actif souligné couleur sable et aria-current), puis ordre « Choisi par nous · Plus récentes d'abord » sur la même ligne, puis, sur une seconde ligne (114 px de barre en tout au bureau), les séries de la démo en pastilles avec couverture de 32 px (« Voyage · 22 photos », « Rue · 8 photos », « Paysage · 7 photos », « Portrait · 3 photos », « Porto, octobre · 3 photos », « Atlantique · 2 photos »). En-tête de grille « Toutes les photos — 12 photos sur 45, par Julien » (45 photos publiées dans la démo) avec étiquette « Julien ✕ ». Grille en rangées justifiées (hauteur ≈ 285 px sur bureau ; ≈ 165 px sur mobile, pour garder deux photos par rangée : à 240 px, une seule tiendrait), le numéro d'ordre 01, 02, 03… visible en annotation sur la première rangée pour montrer le sens de lecture ; cartel sous chaque vignette « Titre · Série · Julien · Lisbonne » (nom complet, lieu jamais coupé). Un diptyque inséré « Même lieu, deux regards : Lisbonne » (Sébastien à gauche, Julien à droite). Une vignette en état focus. Mobile : barre de filtres défilante horizontalement, index des séries avec couverture de 64 px à droite de chaque nom.
 - **MQ-03 — Page Série — « Rue ».** Pas de diaporama. Fil d'Ariane en mono « Accueil › Séries › Rue ». H1 « Rue ». Texte d'intention d'environ 400 signes : « Des passants, des seuils, des vitrines : la ville quand elle ne pose pas. Sébastien y cherche les lignes, Julien les visages. » Période « 2019–2026 », « par Sébastien et Julien ». Couverture choisie, non recadrée, en bandeau de 50 % de la hauteur d'écran au plus. Grille de la série dès le premier écran (première photo à y ≤ 900 px), compteur « 8 photos ». En bas : « Autres séries » (4 couvertures avec nom et nombre de photos) et « L'autre regard : les photos de Julien ». Pied de page complet. Mobile : H1, trois lignes de texte puis « Lire la suite », grille immédiatement après.
-- **MQ-04 — Visionneuse-cartel — la photo d'abord, reliée au site.** Barre haute : « NICEPHOS » (lien accueil), retour nommé par le contexte « ← Lisbonne et Porto », loupe « Rechercher », compteur « 3 / 10 · Lisbonne et Porto » accolé aux flèches ‹ ›, langue « FR ». Photo 3:2 à environ 1 116 × 744 px sur bureau (64 % de l'écran), pleine largeur sur mobile, titre à 24 px au plus dessous. Cartel : titre en casse normale « Miradouro, l'heure dorée » ; « Julien · Miradouro da Graça, Lisbonne · 10 octobre 2026 » ; « Série Voyage · Carnet « Lisbonne et Porto », jour 1 » ; « Nikon Z 7II · 24-120 mm · 1/250 s · f/8 » ; « Inventaire J-2026-019 ». Actions : « ♡ J'aime » (sans compteur), « Partager », « Tirage, licence : nous écrire » ; « Vous êtes sur cette photo ? Signaler » en lien discret. Indice « ← → pour naviguer · Échap pour revenir · F plein écran » et bouton « Plein écran ». Sous la photo : « À proximité » (4 vignettes) et la mini-carte. Pied de page compact : « © 2026 Julien · Nicephos — reproduction interdite · Utiliser cette photo ? · Contact · Confidentialité · Mentions légales ». Second état : plein écran (photo seule sur noir, flèches au milieu des bords).
+- **MQ-04 — Visionneuse-cartel — la photo d'abord, reliée au site.** Barre haute : « NICEPHOS » (lien accueil), retour nommé par le contexte « ← Lisbonne et Porto », loupe « Rechercher », compteur « 3 / 10 · Lisbonne et Porto » accolé aux flèches ‹ ›, langue « FR ». Photo 3:2 à environ 1 116 × 744 px sur bureau (64 % de l'écran), pleine largeur sur mobile, titre à 24 px au plus dessous. Cartel : titre en casse normale « Miradouro, l'heure dorée » ; « Julien · Miradouro da Graça, Lisbonne · 10 octobre 2026 » ; « Série Voyage · Carnet « Lisbonne et Porto », jour 1 » ; « Nikon Z 7II · 24-120 mm · 1/250 s · f/8 » ; « Inventaire J-2026-019 ». Actions : « ♡ J'aime » (sans compteur), « Partager », « Tirage, licence : nous écrire » ; « Vous êtes sur cette photo ? Signaler » en lien discret. Indice « ← → pour naviguer · Échap pour revenir · F plein écran » et bouton « Plein écran ». Sous la photo : « À proximité » (4 vignettes) et la mini-carte. Pied de page compact, identique au pied de page cible du site (UX-F-34) : « © 2026 Sébastien & Julien · Tirages et licences · Contact · Instagram · Flux RSS · Confidentialité · Mentions légales » ; plus de « reproduction interdite », le crédit de la photo est dans le cartel. Second état : plein écran (photo seule sur noir, flèches au milieu des bords).
 - **MQ-05 — Formulaire « Bonjour » — consentement corrigé (vide, focus, erreurs).** Thème nuit sur mobile, Atelier sur bureau. Trois états côte à côte : vide, focus sur une case, après un envoi incomplet. Fieldsets : « Votre carte » (« Référence, comme sur la carte (J-0142) ») ; « Votre âge » (radios « J'ai 18 ans ou plus » / « J'ai moins de 18 ans : un parent remplit ce formulaire avec moi », puis « Nom du parent (obligatoire si moins de 18 ans) ») ; « Ce que vous souhaitez » (cases « Recevoir la photo », « J'accepte qu'elle soit publiée : sur le site / sur Instagram », « Je refuse toute publication ») ; « Vos coordonnées » (« Votre e-mail (nécessaire pour recevoir la photo ou donner votre accord) », « Votre prénom ou nom (obligatoire avec un accord) »). Filets à 5,2:1, focus de 2 px visible sur case, radio et champ. Après erreur : titre de page « Erreur — 2 points à corriger · Je vous ai photographié » ; résumé focalisé « 2 points à corriger : Indiquez votre e-mail pour recevoir la photo · Indiquez si vous avez 18 ans », chaque point lien vers son champ ; sous chaque champ « ⚠ Erreur : … » relié par aria-describedby ; couleur d'erreur corail en nuit. Lien « Confidentialité » souligné. Bandeau de quota séparé : « Ce formulaire est limité pour éviter les envois automatiques. Réessayez à partir de 15 h 40, ou écrivez à info@nicephos.art. » Lien « Vos droits sur vos données ».
-- **MQ-06 — Contact, tirages et licences — demande préremplie depuis une photo.** Formulaire court ouvert depuis la visionneuse : en-tête avec vignette de 160 px et référence préremplie « Miradouro, l'heure dorée — Julien · J-2026-019 » (modifiable) ; « Je voudrais : un tirage · une licence d'utilisation · autre chose » ; « Format souhaité (facultatif) » ; « Votre message » ; « Votre e-mail (pour vous répondre) » ; bouton « Envoyer » ; « Nous répondons sous 7 jours. ». Confirmation : « Merci, c'est envoyé. Un accusé de réception est parti à l'adresse indiquée. ». Page Contact générale : « Écrire à Sébastien, à Julien, ou aux deux », adresses en mailto, délai annoncé, « Suivre sur Instagram » (@compte), lien « Droits, tirages et licences » qui commence par ce qui est possible. Pied de page cible : « © 2026 Sébastien & Julien · Tirages et licences · Contact · Instagram · Flux RSS · Confidentialité · Mentions légales ».
+- **MQ-06 — Contact, tirages et licences — demande préremplie depuis une photo.** Formulaire court ouvert depuis la visionneuse : en-tête avec vignette de 160 px et référence préremplie « Miradouro, l'heure dorée — Julien · J-2026-019 » (modifiable) ; « Je voudrais : un tirage · une licence d'utilisation · autre chose » ; « Format souhaité (facultatif) » ; « Votre message » ; « Votre e-mail (pour vous répondre) » ; bouton « Envoyer » ; « Nous répondons sous 7 jours. ». Confirmation : « Merci, c'est envoyé. Un accusé de réception est parti à l'adresse indiquée. ». Page Contact générale : « Écrire à Sébastien, à Julien, ou aux deux », adresses en mailto, délai annoncé, « Suivre sur Instagram : @nicephos.art », lien « Droits, tirages et licences » qui commence par ce qui est possible. Pied de page cible : « © 2026 Sébastien & Julien · Tirages et licences · Contact · Instagram · Flux RSS · Confidentialité · Mentions légales ».
 - **MQ-07 — Admin — menu rangé, Réglages à onglets, Assistants d'analyse.** Barre latérale de bureau tenant dans 900 px : recherche « Rechercher, agir… Ctrl K » ; « Aujourd'hui » ; « Photos » (Photothèque, Sorties, Voyages, Séries, avec 5 séries puis « Toutes les séries (7) ») ; « Personnes » (Personnes, App de terrain) ; « Publier » (À valider 5, Site public, Instagram ; emplacements grisés « Carnets », « Galeries privées », « Boutique » marqués « bientôt ») ; « Équipe » (Comptes et rôles, Circuit, Journal, Statistiques) ; « Réglages ». Pied : « Julien · Administrateur » (lien « Mon compte »), « Aide », « Nouveautés ». Page Réglages à onglets : Identité (nom, sous-titre, emblème, logos), Apparence, Filigrane & EXIF, Mentions légales & confidentialité (alerte « 2 rubriques obligatoires manquent : Éditeurs du site, Responsable de la publication »), Photographes, Assistants d'analyse (trois interrupteurs : « Proposer une série », « Suggérer des mots-clés », « Décrire les photos », chacun avec une phrase d'effet, l'état « prêt, 46 photos analysées », le détail technique replié « Pour l'administrateur du serveur », et « Quand : la nuit (1 h–6 h) / à tout moment »). Variante Photographe : menu réduit, « Publier » contient « Mes propositions ». Mobile : barre d'onglets et menu en panneau.
-- **MQ-08 — Admin — Compléter et proposer (ou publier) un lot.** Deux variantes d'en-tête : « Compléter et proposer — 5 photos de ce matin » (Photographe) et « Compléter et publier » (Administrateur). Résumé : « 5 photos dans Voyage — changer ». Avertissement de doublons : « 2 photos déjà importées le 16 octobre — Ignorer · Importer quand même ». Tableau (cartes sur mobile) dont chaque ligne a pour en-tête la vignette et le nom de fichier ; colonnes Titre, Série, Ville (« Porto, Portugal — d'après le GPS »), Date (« oct. 2026 »), EN / DE. Pastilles « ✦ » de suggestions à accepter d'un clic (série, mots-clés). Barre « Pour les 3 photos cochées : Série [liste] Appliquer · Ville [champ] Appliquer » (rien ne s'applique à la flèche). Étiquette « Titre provisoire » sur R0004012. En bas : « Proposer les 5 photos » et « Un mot pour le modérateur (facultatif) » pour le Photographe. Dialogue avant publication : « 2 photos ont encore un titre provisoire : R0004012, R0004057 — Les corriger ici [champs] · Publier quand même ». Mobile : barre basse « Proposer les 5 » au-dessus des onglets.
+- **MQ-08 — Admin — Compléter et proposer (ou publier) un lot.** Deux variantes d'en-tête : « Compléter et proposer — 5 photos de ce matin » (Photographe) et « Compléter et publier » (Administrateur). Résumé : « 5 photos dans Voyage — changer ». Avertissement de doublons : « 2 photos déjà importées le 16 octobre — Ignorer · Importer quand même ». Tableau (cartes sur mobile) dont chaque ligne a pour en-tête la vignette et le nom de fichier ; colonnes Titre, Série, Ville (« Porto, Portugal — d'après le GPS »), Date (« oct. 2026 »), EN / DE. Pastilles « ✦ » de suggestions à accepter d'un clic (série, mots-clés). Barre « Pour les 3 photos cochées : Série [liste] Appliquer · Ville [champ] Appliquer » (rien ne s'applique à la flèche). Étiquette « Titre provisoire » sur R0004012. En bas : « Proposer les 5 photos » et « Un mot pour le modérateur (facultatif) » pour le Photographe. Dialogue avant publication : « 2 photos ont encore un titre provisoire : R0004012, R0004057 — Les corriger ici [champs] · Publier quand même ». Mobile : barre basse « Proposer les 5 photos du lot » au-dessus des onglets. Lot de Sébastien (fichiers R000…) : aucune photo de Julien n'y figure.
 - **MQ-09 — Admin — enregistrer, confirmer, annuler (composants communs).** Fiche photo : indicateur « • Modifié » près de l'unique bouton « Enregistrer » (barre collante en bas sur mobile, qui ne masque jamais le focus). Dialogue de départ : « Modifications non enregistrées — Le titre et la légende ont changé. [Enregistrer] [Quitter sans enregistrer] [Rester] ». Bandeau à l'arrivée de la description : « Description prête — Reprendre comme légende » (aucun rechargement). Dialogue de suppression d'un voyage : « Supprimer le voyage « Lisbonne, octobre 2026 » ? La page publique /voyage/lisbonne-octobre-2026 disparaîtra ; ses 2 sorties et ses 20 photos restent. [Annuler] (par défaut) [Supprimer le voyage] ». Message d'action « 5 photos publiées · Annuler » qui reste tant que la souris ou le focus est dessus, avec le délai visible. Erreur de date dans l'inspecteur, sous le champ : « ⚠ Date non comprise : essayez « oct. 2026 » ou « 2026-10-16 » ». Statut unique : « Publiée · Dépublier… (raison demandée) ». Pastille d'état commune et sa légende : « ○ Brouillon · ◐ Proposée · ● Publiée · ▲ À vérifier · ✕ Bloquée ». Focus des champs en contour de 2 px.
 - **MQ-10 — App de terrain — un accord qui ne se perd jamais.** Écran de téléphone, section de la personne en anglais (lang="en"). H1 « Nouvelle rencontre · J-0009 » ; ligne « Connecté jusqu'à 14 h 20 ». Fieldset « I agree, for: » regroupant les 4 cases ; fieldset « Age » (« I am 18 or older » / « I am under 18: a parent signs with me ») et « Parent's name » à part. État après erreur : message à côté du champ, dans la langue de la personne, « Please tell us whether you are 18 or older. », défilement jusqu'au champ ; signature conservée (trait visible, « Signature kept — Clear ») ; photo de repère conservée (vignette, « Retake »). Barre « Enregistrer » collante qui ne cache pas le champ focalisé. États d'envoi : « Sending… 62 % » ; « No network: the consent is kept on this phone. [Try again] » ; session expirée : « Votre session a expiré. L'accord est gardé sur ce téléphone. [Se reconnecter dans un nouvel onglet] ». Écran « Merci » avec le QR de la personne.
 - **MQ-11 — Blog — liste des billets (« Carnets »).** Menu avec « Carnets » actif (aria-current et soulignement). H1 « Carnets », introduction « Voyages et récits, à deux voix. ». Filtres « Tous · Voyages · Notes d'atelier · Sébastien · Julien ». Liste paginée (pas de défilement infini) : grande couverture 3:2 non recadrée, titre « Lisbonne et Porto », chapeau de deux lignes, « par Sébastien & Julien · 12 octobre 2026 (balise time) · 10 photos · 6 min de lecture ». Second billet : « Notes d'atelier : tirer sur Hahnemühle Photo Rag ». Pagination « Page 1 sur 3 · Suivante → ». Lien « S'abonner (flux RSS) ». Pied de page complet. Mobile : une colonne, couverture pleine largeur.
 - **MQ-12 — Blog — billet avec photos.** Fil d'Ariane « Carnets › Lisbonne et Porto ». H1, sous-titre « Deux jours, deux regards, un même océan », auteurs nommés sous le titre, date de publication et « mis à jour le 14 octobre 2026 » (balises time). Prose en mode lecture (graisse 400, interlignage 1,7, environ 65 caractères par ligne). Photos insérées pleine largeur et en diptyque « même lieu, deux regards », chacune avec un cartel (titre, auteur, lieu) ; une citation en portugais balisée lang="pt-PT". Chaque photo mène à la visionneuse dans le contexte du billet (« ← Lisbonne et Porto »). Petite carte de l'itinéraire légère. En fin : « Les 10 photos de ce carnet », « Carnet précédent / suivant », « Tirages disponibles de ce carnet » (deux vignettes, sobre). Aperçu d'impression : texte noir sur blanc, sans menu, cartels et adresses. Variantes thème nuit et jour.
-- **MQ-13 — Boutique — page d'un tirage.** Fil d'Ariane « Tirages › Miradouro, l'heure dorée ». Photo entière, non recadrée, signature discrète en coin ; option « Voir au mur » (simulation sur un mur neutre). Titre, « Julien · Lisbonne, 2026 · Inventaire J-2026-019 ». Bloc édition : « Édition limitée à 15 exemplaires, tous formats confondus — 9 disponibles » ; « Signé et numéroté, certificat d'authenticité vérifiable ». Formats en boutons radio avec prix TTC : « 30 × 45 cm — 180 € », « 40 × 60 cm — 290 € », « 60 × 90 cm — 520 € » ; papier « Hahnemühle Photo Rag 308 g, tirage pigmentaire, marge blanche de 3 cm » ; encadrement « Sans (par défaut) / Cadre chêne + 120 € ». Livraison : « Livré en 10 à 15 jours ouvrés, à plat ou roulé en tube. Frais : 15 € en France, 25 € dans l'Union européenne, affichés avant le paiement. » Bouton « Ajouter au panier » ; lien « Une question ? Nous écrire ». Mentions « Prix TTC · Rétractation 14 jours · CGV ». Aucun compte à rebours ni promotion. État épuisé montré : « Épuisé — 15 exemplaires sur 15 vendus » en texte. Mobile : formats en liste, bouton collant en bas.
-- **MQ-14 — Boutique — panier.** H1 « Votre panier (2 tirages) ». Lignes : vignette, titre, « 40 × 60 cm · Photo Rag · exemplaire 7/15 », quantité modifiable (limitée par la disponibilité), « Retirer », prix TTC. Sous-total « 580,00 € TTC », pays de livraison modifiable, « Livraison France : 15,00 € », « Total : 595,00 € TTC », « Délai : 10 à 15 jours ouvrés ». Bouton principal « Commander », secondaire « Continuer la visite ». Mention « Achat sans compte ». Aucun produit suggéré, aucune case pré-cochée. État panier vide : « Votre panier est vide. Voir les tirages disponibles ». Menu : pas d'icône panier si vide, « Panier (2) » sinon.
+- **MQ-13 — Boutique — page d'un tirage.** Fil d'Ariane « Tirages › Miradouro, l'heure dorée ». Photo entière, non recadrée, signature discrète en coin ; option « Voir au mur » (simulation sur un mur neutre). Titre, « Julien · Lisbonne, 2026 · Inventaire J-2026-019 ». Bloc édition : « Édition limitée à 15 exemplaires, tous formats confondus — 9 disponibles » ; « Signé et numéroté, certificat d'authenticité vérifiable ». Formats en boutons radio avec prix TTC : « 30 × 45 cm — 180 € », « 40 × 60 cm — 290 € », « 60 × 90 cm — 520 € » ; papier « Hahnemühle Photo Rag 308 g, tirage pigmentaire, marge blanche de 3 cm » ; encadrement « Sans (par défaut) / Cadre chêne + 120 € ». Livraison : « Livré en 10 à 15 jours ouvrés, à plat ou roulé en tube. Frais : 15 € en France, 25 € dans l'Union européenne, affichés avant le paiement. » Bouton « Ajouter au panier » ; lien « Une question ? Nous écrire ». Mentions « Prix TTC · Rétractation 14 jours · CGV ». Aucun compte à rebours ni promotion. État épuisé montré : « Épuisé — 15 exemplaires sur 15 vendus » en texte. Au bureau, la photo reste collante dans sa colonne, avec « La photo » (son histoire) dessous. Mobile : formats en liste, prix et bouton collants en bas (posés à leur place sur la capture pleine page).
+- **MQ-14 — Boutique — panier.** H1 « Votre panier (2 tirages) ». Lignes (« Miradouro, l'heure dorée » et « Ribeira, brume du fleuve ») : vignette, titre, « 40 × 60 cm · Photo Rag · sans cadre », « Signé et numéroté sur 15 ; numéro attribué au paiement », quantité modifiable (limitée par la disponibilité), « Retirer », prix TTC. Sous-total « 580,00 € TTC », pays de livraison modifiable, « Livraison France : 15,00 € », « Total : 595,00 € TTC », « Délai : 10 à 15 jours ouvrés ». Bouton principal « Commander », secondaire « Continuer la visite ». Mention « Achat sans compte ». Aucun produit suggéré, aucune case pré-cochée. État panier vide : « Votre panier est vide. Voir les tirages disponibles ». Menu : pas d'icône panier si vide, « Panier (2) » sinon.
 - **MQ-15 — Boutique — commande et paiement (adresse, récapitulatif, redirection, confirmation).** Étapes visibles « 1 Coordonnées · 2 Livraison · 3 Vérification · 4 Paiement » (étape courante marquée). Étape 1 : « E-mail (obligatoire : pour la facture et le suivi) » (autocomplete email), nom, adresse, code postal, ville, pays (autocomplete) ; « Adresse de facturation identique » coché par défaut. Étape 2 : mode de livraison en radios avec prix et délai. Étape 3 : récapitulatif complet (tirages, édition, format, livraison, total TTC, adresse) avec « Modifier » par bloc ; case « J'ai lu et j'accepte les conditions générales de vente » non cochée ; bouton « Payer 595,00 € » et texte « Vous allez être redirigé vers notre prestataire de paiement pour saisir votre carte. Aucune donnée bancaire ne passe par ce site. ». Étape 4 (retour) : « Merci, votre commande N-2026-0007 est confirmée. La confirmation et la facture ont été envoyées à … » ; « Télécharger la facture (PDF, 48 ko) » ; délai ; contact. État d'erreur montré sur le code postal (message sous le champ, relié). Aperçu d'impression de la confirmation.
 - **MQ-16 — Galerie privée — accès par lien et mot de passe.** Page sobre, sans menu public, marque discrète, noindex annoté. « Galerie privée de Marie », « préparée par Julien », « Accès valable jusqu'au 15 novembre 2026 ». Champ « Mot de passe (dans le message que vous avez reçu) » avec autocomplete current-password, collage permis, bouton « Afficher » (état enfoncé montré) ; bouton « Ouvrir la galerie ». Erreur unique : « Lien ou mot de passe incorrect. Vérifiez le message reçu, ou écrivez à Julien. » avec mailto. État expiré (410) : « Cet accès a expiré le 15 novembre 2026. Demander un nouvel accès à Julien. ». Aucun CAPTCHA, focus visible.
-- **MQ-17 — Galerie privée — la galerie (favoris, téléchargement selon les droits).** En-tête « Galerie de Marie — 24 photos · 12 septembre 2026 · accès jusqu'au 15 novembre ». Grille en rangées justifiées. Sur chaque photo : bouton cœur « Ajouter aux favoris » (aria-pressed, état actif montré) ; selon les droits, « Télécharger (2 000 px, usage personnel, 1,2 Mo) » ou « Téléchargement non inclus ». Barre collante « Vos favoris : 6 — Envoyer ma sélection à Julien · Choisir pour un tirage ». Visionneuse dans le contexte privé (retour « ← Galerie de Marie », pas de Partager public, pas de lien vers le site public). « Tout télécharger (ZIP, 180 Mo) » si permis, poids annoncé.
+- **MQ-17 — Galerie privée — la galerie (favoris, téléchargement selon les droits).** En-tête « Galerie de Marie — 24 photos · 12 septembre 2026 · accès jusqu'au 15 novembre ». Grille en rangées justifiées. Sur chaque photo : bouton cœur « Ajouter aux favoris » (aria-pressed, état actif montré) ; selon les droits, « Télécharger (2 000 px, usage personnel, 1,2 Mo) » ou « Téléchargement non inclus ». Barre collante « Vos favoris : 6 — Envoyer ma sélection à Julien · Choisir pour un tirage ». Visionneuse dans le contexte privé (retour « ← Galerie de Marie », pas de Partager public, pas de lien vers le site public). « Tout télécharger (ZIP, 29 Mo) » si permis, poids annoncé (24 JPEG de 2 000 px, 1,2 Mo en moyenne).
 - **MQ-18 — Admin — créer un accès privé (lien temporaire, mot de passe, suivi des ouvertures).** Page « Galeries privées › Nouvel accès ». Champs : « Pour qui » (nom), « E-mail pour l'invitation », « Photos » (24 choisies dans la photothèque, vignettes), « Droits » (radios : voir seulement / voir et télécharger en 2 000 px / voir, télécharger et choisir des tirages), « Expire le » (30 jours par défaut), « Mot de passe » généré en mots lisibles (« olive-pont-marée-sept ») avec « Régénérer » et « Afficher ». Aperçu de l'e-mail d'invitation (date d'expiration incluse). Bouton « Créer l'accès et envoyer l'invitation ». Liste des accès avec pastille d'état commune (Actif / Expire dans 3 jours / Expiré / Révoqué), « Ouvert 4 fois, dernière ouverture le 18 oct. à 21 h 10 », « 6 favoris », actions « Prolonger », « Révoquer » (dialogue « Révoquer l'accès de Marie ? Le lien cessera de fonctionner immédiatement. [Annuler] [Révoquer] », puis « Annuler » pendant 10 s). Mention « Administration réservée, connexion via Zitadel ».
-- **MQ-19 — Admin — commandes de la boutique.** Page « Commandes ». Filtres en pastilles avec état actif : « À préparer (2) · Expédiées · Remboursées · Toutes » et période. Tableau avec légende (caption) : N° « N-2026-0007 », date « 16 oct. 2026, 10 h 12 », client, tirages (« Miradouro 40 × 60 · ex. 7/15 »), total TTC, état en pastille commune (« Payée — à préparer », « Expédiée », « Remboursée »). Détail d'une commande : chronologie (Payée → Tirage lancé → Expédiée, avec numéro de suivi), facture PDF, adresse, « Générer le certificat » (inventaire J-2026-019, 7/15, empreinte SHA-256, jeton d'horodatage), « Marquer comme expédiée » (champ numéro de suivi), « Rembourser… » (dialogue nommant le montant et les conséquences : « L'exemplaire 7/15 ne sera pas réattribué »). Encadré du stock d'édition : « Miradouro : 6 vendus · 9 disponibles ». Mobile : commandes en cartes.
-- **MQ-20 — Admin — éditeur de billet.** Éditeur « Carnets › Lisbonne et Porto ». Onglets de langue « FR · EN · DE » avec l'indicateur « EN : à traduire ». Champs : titre, chapeau, auteurs (Sébastien, Julien), date, voyage lié. Corps en blocs : texte (mise en forme limitée), photo (choisie dans la photothèque, légende reprise), diptyque, citation avec sa langue. Panneau « Photos du voyage » à glisser, avec un bouton « Insérer » pour chaque photo (alternative au glisser). Enregistrement automatique « Enregistré à 10 h 42 » avec « Annuler ». Statut en pastille commune : « Brouillon » → « Proposer » ou « Publier » selon le rôle, « Programmer le … ». Aperçu « comme sur le site » (jour et nuit). Correction typographique à la saisie (’ « » – espaces fines). Indicateur de poids : « Billet : 640 ko estimés (budget 1,2 Mo) ».
+- **MQ-19 — Admin — commandes de la boutique.** Page « Commandes ». Filtres en pastilles avec état actif : « À préparer (2) · Expédiées · Remboursées · Toutes » et période. Tableau avec légende (caption) : N° « N-2026-0007 », date « 16 oct. 2026, 10 h 12 », client, tirages (« Miradouro 40 × 60 · ex. 7/15 »), total TTC, état en pastille commune (« Payée — à préparer », « Expédiée », « Remboursée »). Détail d'une commande : chronologie (Payée → Tirage lancé → Expédiée, avec numéro de suivi), facture PDF, adresse, « Générer le certificat » (inventaire J-2026-019, 7/15, empreinte SHA-256, jeton d'horodatage), « Marquer comme expédiée » (champ numéro de suivi), « Rembourser… » (dialogue nommant le montant et les conséquences : « L'exemplaire 7/15 ne sera pas réattribué »). Encadré du stock d'édition : « Miradouro : 7 vendus, dont le 7/15 de cette commande · 8 disponibles » (la page du tirage, MQ-13, montrait « 9 disponibles » avant la commande). Mobile : commandes en cartes.
+- **MQ-20 — Admin — éditeur de billet.** Éditeur « Carnets › Lisbonne et Porto ». Onglets de langue « FR · EN · DE » avec l'indicateur « EN : à traduire ». Champs : titre, chapeau, auteurs (Sébastien, Julien), date, voyage lié. Corps en blocs : texte (mise en forme limitée), photo (choisie dans la photothèque, légende reprise), diptyque, citation avec sa langue. Panneau « Photos du voyage » à glisser, avec un bouton « Insérer » pour chaque photo (alternative au glisser). Écran figé au dimanche 11 octobre au soir, la veille de la publication (MQ-11 et MQ-12 montrent le billet publié le 12 et mis à jour le 14). Enregistrement automatique « Enregistré à 22 h 42 » avec « Annuler ». Statut en pastille commune : « Brouillon » → « Proposer » ou « Publier » selon le rôle, « Programmer pour le 12 oct., 8 h ». Aperçu « comme sur le site » (jour et nuit). Correction typographique à la saisie (’ « » – espaces fines). Indicateur de poids : « Billet : 640 ko estimés (budget 1,2 Mo) ».
 
 ## Annexes
 

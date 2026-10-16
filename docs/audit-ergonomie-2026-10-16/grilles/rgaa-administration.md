@@ -83,6 +83,8 @@ Statuts changés par rapport à la grille automatique : 81 critères.
 | 4.1.3 Messages d’état (AA) | NC | Voir 7.5. |
 
 ## Grille complète (106 critères)
+Colonne « Niv. » : niveau le plus exigeant parmi les critères WCAG auxquels le critère RGAA renvoie (référentiel DINUM, attribut des critères). Ainsi 7.3, 9.1, 11.1 et 12.7 sont notés AA parce qu'ils renvoient aussi à 2.4.7, 2.4.6 ou 3.2.3 (AA), même si leur critère WCAG principal (2.1.1, 1.3.1, 2.4.1…) est de niveau A.
+
 
 | Critère | Niv. | Auto 15/10 | **Statut** | Constat | Preuve |
 |---|---|---|---|---|---|

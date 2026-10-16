@@ -8,6 +8,7 @@
 <meta name="description" content="Maquette MQ-15 (audit du 16 octobre 2026) : commande et paiement d’un tirage, de l’adresse à la confirmation, avec photos de démonstration.">
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="_commun/site.css">
+<link rel="stylesheet" href="_commun/site-entete.css">
 <style>
 /* ===== Socle commun des maquettes de la boutique (MQ-13, MQ-14, MQ-15) =====
    Jetons : copie de public/themes/nicephos.css (thème de production), complétée des recommandations
@@ -30,39 +31,34 @@ body { background: var(--paper); color: var(--ink); font: 400 15px/1.6 var(--san
 .nx-ext::after { content: ' ↗' / ''; }
 
 /* Lien d'évitement (UX-F-06) */
-.nx-skip { position: absolute; left: var(--gut); top: -120px; z-index: 60; display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; background: var(--ink); color: var(--paper); font-weight: 500; }
-.nx-skip:focus { top: 12px; }
+
+
 
 /* En-tête sur une ligne : marque, menu, filet, Tirages, outils (UX-T-16, UX-F-36) */
-.nx-top { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 72px; border-bottom: 1px solid var(--rule); }
-.nx-brand { display: inline-flex; align-items: center; min-height: 44px; font-weight: 300; font-size: 15px; letter-spacing: .42em; text-transform: uppercase; white-space: nowrap; }
-.nx-nav ul { display: flex; align-items: center; gap: clamp(12px, 1.8vw, 28px); margin: 0; padding: 0; list-style: none; }
-.nx-nav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--mute); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
-.nx-nav a:hover { color: var(--ink); }
-.nx-nav a[aria-current] { color: var(--ink); text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 9px; }
-.nx-nav .nx-filet { display: flex; align-items: center; gap: clamp(12px, 1.8vw, 28px); }
-.nx-nav .nx-filet::before { content: ''; width: 1px; height: 18px; background: var(--mute); opacity: .6; }
-.nx-outils { display: flex; align-items: center; gap: 6px; }
-.nx-outil, .nx-lang summary, .nx-menu summary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 44px; min-height: 44px; padding: 0 6px; color: var(--mute); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; list-style: none; }
-.nx-outil:hover, .nx-lang summary:hover, .nx-menu summary:hover { color: var(--ink); }
-.nx-lang summary::-webkit-details-marker, .nx-menu summary::-webkit-details-marker { display: none; }
-.nx-lang, .nx-menu { position: relative; }
-.nx-lang ul, .nx-menu .nx-menu-panneau { position: absolute; right: 0; top: 100%; z-index: 40; min-width: 190px; margin: 0; padding: 6px 0; list-style: none; background: var(--paper); border: 1px solid var(--field); }
-.nx-lang a { display: flex; align-items: center; min-height: 44px; padding: 0 16px; color: var(--ink); }
-.nx-lang a[aria-current] { text-decoration: underline; text-underline-offset: 5px; }
-.nx-menu { display: none; }
-.nx-menu .nx-menu-panneau ul { margin: 0; padding: 0; list-style: none; }
-.nx-menu .nx-menu-panneau a { display: flex; align-items: center; min-height: 48px; padding: 0 18px; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; }
-.nx-menu .nx-menu-panneau a[aria-current] { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 7px; }
-.nx-menu .nx-menu-panneau li.nx-filet { border-top: 1px solid var(--rule); margin-top: 6px; padding-top: 6px; }
-.nx-outil-t { }
-@media (max-width: 960px) {
-  .nx-top { min-height: 64px; gap: 8px; }
-  .nx-top > .nx-nav { display: none; }
-  .nx-menu { display: block; }
-  .nx-outil-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-}
-@media (max-width: 380px) { .nx-brand { letter-spacing: .3em; font-size: 14px; } }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Fil d'Ariane en mono (Opquast 156) */
 .nx-ariane ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; margin: 0; padding: 14px 0 0; list-style: none; font-family: var(--mono); font-size: 13px; color: var(--mute); }
@@ -90,34 +86,34 @@ select.nx-input { padding-right: 8px; }
 input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--ink); }
 
 /* Pied de page complet, liens soulignés (UX-F-23, UX-F-34) */
-.nx-pied { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 40px; margin-top: 72px; padding-block: 36px 48px; border-top: 1px solid var(--rule); color: var(--mute); font-size: 14px; }
-.nx-pied p { margin: 0; display: flex; align-items: center; min-height: 44px; }
-.nx-pied ul { display: flex; flex-wrap: wrap; gap: 0 22px; margin: 0; padding: 0; list-style: none; }
-.nx-pied a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
-@media (max-width: 640px) { .nx-pied ul { flex-direction: column; } }
+
+
+
+
+
 
 /* ===== Calque d'annotation (maquette seulement) ===== */
 .mq-a { position: relative; }
-.mq-pin { position: absolute; z-index: 20; display: block; width: 26px; height: 26px; border-radius: 50%; background: #cbb68b; color: #0b0b0b; box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px #0b0b0b; font: 500 13px/26px Jost, Arial, sans-serif; letter-spacing: 0; text-align: center; text-transform: none; text-decoration: none; pointer-events: none; }
-.mq-pin.in { position: static; display: inline-block; vertical-align: middle; margin-left: 8px; }
-.mq-notes { margin-top: 0; padding-block: 48px 64px; background: var(--frame); border-top: 6px solid #cbb68b; color: var(--ink); }
-.mq-notes > h2 { margin: 0 0 6px; font-weight: 400; font-size: 13px; letter-spacing: .26em; text-transform: uppercase; color: var(--ink); }
-.mq-notes .mq-intro { margin: 0 0 28px; max-width: 90ch; color: var(--prose); }
-.mq-notes h3 { margin: 0 0 14px; font-weight: 400; font-size: 20px; letter-spacing: .01em; }
+
+
+
+
+
+
 .mq-etats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 28px; margin-bottom: 44px; }
 .mq-etat { padding: 22px; background: var(--paper); border: 1px solid var(--rule); min-width: 0; }
 .mq-etat > .mq-cap { margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px dashed var(--mute); font-family: var(--mono); font-size: 13px; color: var(--mute); }
-.mq-leg { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 16px 40px; margin: 0; padding: 0; list-style: none; }
-.mq-leg li { display: grid; grid-template-columns: 26px 1fr; gap: 14px; align-items: start; color: var(--prose); line-height: 1.55; }
-.mq-leg li .mq-pin { position: static; margin-top: 1px; }
-.mq-leg strong { color: var(--ink); font-weight: 500; }
-.mq-ref { display: block; margin-top: 4px; font-family: var(--mono); font-size: 12.5px; color: var(--mute); }
-.mq-socle { margin: 32px 0 0; padding-top: 18px; border-top: 1px solid var(--rule); max-width: 110ch; color: var(--prose); font-size: 14px; }
-@media print { .mq-pin, .mq-notes { display: none !important; } }
+
+
+
+
+
+
+
 /* Sur téléphone, les repères ne débordent jamais de l'écran (pas de défilement horizontal) */
 @media (max-width: 960px) {
-  .mq-pin[style*="right:-"] { right: 0 !important; }
-  .mq-pin[style*="left:-"] { left: 0 !important; }
+  .pin-abs[style*="right:-"] { right: 0 !important; }
+  .pin-abs[style*="left:-"] { left: 0 !important; }
 }
 
 
@@ -127,7 +123,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
 .nx-q { font-weight: 400; color: var(--mute); }
 
 /* En-tête réduit pendant la commande : la marque, le retour au panier, la langue */
-.cm-top-retour { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; color: var(--ink); font-size: 14px; text-decoration: underline; text-underline-offset: 4px; }
+
 
 .cm-tete { padding-top: 18px; }
 .cm-tete h1 { margin: 6px 0 4px; font-weight: 300; font-size: clamp(30px, 2.6vw, 38px); line-height: 1.15; }
@@ -286,26 +282,21 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
   .cm-etapes .e { font-size: 13px; }
 }
 @media print {
-  .nx-top, .nx-pied, .nx-skip, .cm-etapes, .cm-modif, .cm-payer form { display: none !important; }
+  .cm-etapes, .cm-modif, .cm-payer form { display: none !important; }
   body { background: #fff; color: #111; }
 }
 </style>
+<link rel="stylesheet" href="_commun/annotations.css">
 </head>
 <body>
-<a class="nx-skip" href="#contenu">Aller au contenu</a>
-<header class="nx-top wrap mq-a">
-  <span class="mq-a" style="display:inline-flex;align-items:center"><a class="nx-brand" href="/">Nicephos</a><span class="mq-pin in" aria-hidden="true">1</span></span>
-  <div class="nx-outils">
-    <a class="cm-top-retour" href="MQ-14-boutique-panier.html">← Retour au panier</a>
-    <details class="nx-lang">
-      <summary><span class="sr-only">Langue : </span>FR</summary>
-      <ul>
-        <li><a href="/commande/verification" lang="fr" hreflang="fr" aria-current="true">Français</a></li>
-        <li><a href="/en/checkout/review" lang="en" hreflang="en">English</a></li>
-        <li><a href="/de/bestellung/pruefen" lang="de" hreflang="de">Deutsch</a></li>
-      </ul>
-    </details>
-  </div>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-h wrap">
+  <a class="wordmark" href="#">Nicephos<span class="pin pin-in" aria-hidden="true">1</span></a>
+  <ul class="site-tools" role="list">
+    <li><a class="tool" href="MQ-14-boutique-panier.html"><span aria-hidden="true">←</span> Retour au panier</a></li>
+    <li><details class="lang"><summary><span class="sr-only">Langue : </span>FR <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <ul role="list"><li><a href="#" lang="fr" hreflang="fr" aria-current="true"><span>Français</span></a></li><li><a href="#" lang="en" hreflang="en">English</a></li><li><a href="#" lang="de" hreflang="de">Deutsch</a></li></ul></details></li>
+  </ul>
 </header>
 
 <main id="contenu" class="wrap" tabindex="-1">
@@ -321,17 +312,17 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
       <li aria-current="step"><span class="n">Étape 3</span><span class="t">Vérification</span><span class="e">● en cours</span></li>
       <li><span class="n">Étape 4</span><span class="t">Paiement</span><span class="e">à venir</span></li>
     </ol>
-    <span class="mq-pin" aria-hidden="true" style="right:0;top:-6px">2</span>
+    <span class="pin pin-abs" aria-hidden="true" style="right:0;top:-6px">2</span>
   </nav>
 
   <div class="cm-grille">
     <div>
       <section class="cm-bloc mq-a" aria-labelledby="b-tirages">
-        <h2 id="b-tirages">Vos tirages<span class="mq-pin in" aria-hidden="true">3</span></h2>
+        <h2 id="b-tirages">Vos tirages<span class="pin pin-in" aria-hidden="true">3</span></h2>
         <a class="cm-modif" href="MQ-14-boutique-panier.html">Modifier<span class="sr-only"> les tirages</span></a>
         <div>
           <div class="cm-art">
-            <img src="_commun/photos/dune.webp" width="900" height="600" alt="">
+            <img src="_commun/photos/ciel.webp" width="900" height="600" alt="">
             <div>
               <h3>Miradouro, l’heure dorée</h3>
               <p class="nx-mono">Julien · Lisbonne, 2026 · <span class="nw">J-2026-019</span></p>
@@ -341,10 +332,10 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
             <p class="prix">290,00 €</p>
           </div>
           <div class="cm-art">
-            <img src="_commun/photos/ciel.webp" width="900" height="600" alt="">
+            <img src="_commun/photos/brume.webp" width="900" height="600" alt="">
             <div>
-              <h3>Rua da Bica, le 28</h3>
-              <p class="nx-mono">Julien · Lisbonne, 2026 · <span class="nw">J-2026-023</span></p>
+              <h3>Ribeira, brume du fleuve</h3>
+              <p class="nx-mono">Julien · Porto, 2026 · <span class="nw">J-2026-024</span></p>
               <p>40 × 60 cm · Hahnemühle Photo Rag 308 g · sans cadre</p>
               <p>Édition de 15, signé et numéroté ; numéro attribué au paiement</p>
             </div>
@@ -356,7 +347,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
       <section class="cm-bloc" aria-labelledby="b-coord">
         <h2 id="b-coord">Vos coordonnées</h2>
         <a class="cm-modif" href="#etape-1">Modifier<span class="sr-only"> les coordonnées</span></a>
-        <p><strong>Claire Moreau</strong> · claire.moreau@exemple.fr</p>
+        <p><strong>Claire Vasseur</strong> · claire.vasseur@example.org</p>
         <p>Téléphone : non indiqué (facultatif)</p>
       </section>
 
@@ -365,7 +356,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
         <a class="cm-modif" href="#etape-2">Modifier<span class="sr-only"> la livraison</span></a>
         <p><strong>Colissimo suivi, remis contre signature</strong> · 15,00 €</p>
         <p>Livré entre le <strong>30 octobre</strong> et le <strong>6 novembre</strong> (10 à 15 jours ouvrés), à plat entre deux cartons rigides.</p>
-        <address>Claire Moreau<br>14 rue des Tanneurs<br>35400 Saint-Malo<br>France</address>
+        <address>Claire Vasseur<br>12 rue des Olivettes<br>44000 Nantes<br>France</address>
       </section>
 
       <section class="cm-bloc" aria-labelledby="b-fact">
@@ -376,7 +367,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
     </div>
 
     <aside class="cm-payer mq-a" aria-labelledby="payer-t">
-      <h2 id="payer-t">Total à payer<span class="mq-pin in" aria-hidden="true">4</span></h2>
+      <h2 id="payer-t">Total à payer<span class="pin pin-in" aria-hidden="true">4</span></h2>
       <dl class="cm-dl">
         <div><dt>Tirages (2)</dt><dd>580,00 €</dd></div>
         <div><dt>Livraison France</dt><dd>15,00 €</dd></div>
@@ -386,12 +377,12 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
       <form action="#etape-4" method="post">
         <div class="cm-case mq-a">
           <input type="checkbox" id="cgv" name="cgv" required aria-describedby="cgv-aide">
-          <label for="cgv">J’ai lu et j’accepte les conditions générales de vente<span class="mq-pin in" aria-hidden="true">5</span></label>
+          <label for="cgv">J’ai lu et j’accepte les conditions générales de vente<span class="pin pin-in" aria-hidden="true">5</span></label>
           <p class="nx-aide" id="cgv-aide"><a class="nx-u" href="/conditions-de-vente#julien">Lire les conditions de vente de Julien</a> (une page, environ 5 minutes). Rétractation : 14 jours après la réception.</p>
         </div>
         <div class="mq-a" style="margin-top:18px;display:grid;gap:14px">
           <button class="nx-btn" type="submit">Payer 595,00 €</button>
-          <p class="cm-redir">Vous allez être redirigé vers notre prestataire de paiement pour saisir votre carte. <strong>Aucune donnée bancaire ne passe par ce site.</strong><span class="mq-pin in" aria-hidden="true">6</span></p>
+          <p class="cm-redir">Vous allez être redirigé vers notre prestataire de paiement pour saisir votre carte. <strong>Aucune donnée bancaire ne passe par ce site.</strong><span class="pin pin-in" aria-hidden="true">6</span></p>
           <p class="cm-petit">Carte bancaire, Apple Pay, Google Pay ou Wero. Vos deux tirages vous sont réservés 30 minutes, le temps du paiement.</p>
         </div>
       </form>
@@ -399,23 +390,13 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
   </div>
 </main>
 
-<footer class="nx-pied wrap">
-  <p>© 2026 Sébastien &amp; Julien · Nicephos</p>
-  <ul>
-    <li><a href="/tirages">Tirages et licences</a></li>
-    <li><a href="/conditions-de-vente">Conditions de vente</a></li>
-    <li><a href="/renoncer">Renoncer à un achat</a></li>
-    <li><a href="/contact?objet=commande">Contact</a></li>
-    <li><a href="/confidentialite">Confidentialité</a></li>
-    <li><a href="/mentions-legales">Mentions légales</a></li>
-  </ul>
+<footer class="site-f wrap">
+  <p>© 2026 Sébastien &amp; Julien</p>
+  <ul role="list" aria-label="Pied de page"><li><a href="/tirages">Tirages et licences</a></li><li><a href="/conditions-de-vente">Conditions de vente</a></li><li><a href="/renoncer">Renoncer à un achat</a></li><li><a href="MQ-06-contact-tirage.html">Contact</a></li><li><a href="https://www.instagram.com/nicephos.art/" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="/carnet/flux.xml" type="application/atom+xml">Flux RSS</a></li><li><a href="/confidentialite">Confidentialité</a></li><li><a href="/mentions-legales">Mentions légales</a></li></ul>
 </footer>
 
-<aside class="mq-notes wrap" aria-labelledby="mq-notes-t">
-  <h2 id="mq-notes-t">Maquette MQ-15 — notes de l’auditrice</h2>
-  <p class="mq-intro">Boutique, commande et paiement, de l’adresse à la confirmation. Thème « Nicephos — nuit ». Écran principal : l’étape 3, juste avant de payer. Les autres étapes et états suivent, dans l’ordre du parcours. Une commande ne concerne qu’un vendeur (étude, arbitrage 7) : ici Julien, deux tirages, 2 × 290 € + 15 €. Cliente, adresse et numéros fictifs ; mention de franchise de TVA à confirmer avec votre comptable.</p>
-
-  <div class="mq-etats">
+<section class="mq-etats-bloc wrap" aria-label="Autres états de l’écran (maquette)">
+<div class="mq-etats">
     <section class="mq-etat mq-a mq-large" id="etape-1" aria-labelledby="e1-cap">
       <p class="mq-cap" id="e1-cap">Étape 1 · Coordonnées, après un envoi avec un code postal incomplet</p>
       <p class="cm-titre-annote">Titre de la page : <b>Erreur — 1 point à corriger · Coordonnées, étape 1 sur 4 · Commande chez Julien · Nicephos</b></p>
@@ -429,14 +410,14 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
       <form class="cm-form" action="#etape-2" method="post" novalidate>
         <div class="cm-resume" role="alert" tabindex="-1" aria-labelledby="e1-res">
           <h4 id="e1-res">1 point à corriger</h4>
-          <ul><li><a href="#e1-cp">Code postal : 5 chiffres attendus, par exemple 35400</a></li></ul>
+          <ul><li><a href="#e1-cp">Code postal : 5 chiffres attendus, par exemple 44000</a></li></ul>
         </div>
         <p class="cm-oblig">Tous les champs sont obligatoires, sauf ceux marqués « facultatif ».</p>
         <fieldset>
           <legend>Pour vous joindre</legend>
           <div class="nx-champ c4">
             <label for="e1-mail">E-mail <span class="nx-q">(obligatoire : pour la facture et le suivi)</span></label>
-            <input class="nx-input" type="email" id="e1-mail" name="email" autocomplete="email" value="claire.moreau@exemple.fr">
+            <input class="nx-input" type="email" id="e1-mail" name="email" autocomplete="email" value="claire.vasseur@example.org">
           </div>
           <div class="nx-champ c2">
             <label for="e1-tel">Téléphone <span class="nx-q">(facultatif)</span></label>
@@ -448,11 +429,11 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
           <legend>Adresse de livraison</legend>
           <div class="nx-champ c6">
             <label for="e1-nom">Prénom et nom</label>
-            <input class="nx-input" type="text" id="e1-nom" name="nom" autocomplete="shipping name" value="Claire Moreau">
+            <input class="nx-input" type="text" id="e1-nom" name="nom" autocomplete="shipping name" value="Claire Vasseur">
           </div>
           <div class="nx-champ c6">
             <label for="e1-adr">Adresse</label>
-            <input class="nx-input" type="text" id="e1-adr" name="adresse" autocomplete="shipping address-line1" value="14 rue des Tanneurs">
+            <input class="nx-input" type="text" id="e1-adr" name="adresse" autocomplete="shipping address-line1" value="12 rue des Olivettes">
           </div>
           <div class="nx-champ c6">
             <label for="e1-adr2">Complément <span class="nx-q">(facultatif : bâtiment, étage, code)</span></label>
@@ -460,12 +441,12 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
           </div>
           <div class="nx-champ c3">
             <label for="e1-cp">Code postal</label>
-            <input class="nx-input" type="text" id="e1-cp" name="cp" inputmode="numeric" autocomplete="shipping postal-code" value="3540" aria-invalid="true" aria-describedby="e1-cp-err">
-            <p class="nx-err" id="e1-cp-err"><span aria-hidden="true">⚠</span><span>Erreur : le code postal compte 5 chiffres, par exemple 35400.</span></p>
+            <input class="nx-input" type="text" id="e1-cp" name="cp" inputmode="numeric" autocomplete="shipping postal-code" value="4400" aria-invalid="true" aria-describedby="e1-cp-err">
+            <p class="nx-err" id="e1-cp-err"><span aria-hidden="true">⚠</span><span>Erreur : le code postal compte 5 chiffres, par exemple 44000.</span></p>
           </div>
           <div class="nx-champ c3">
             <label for="e1-ville">Ville</label>
-            <input class="nx-input" type="text" id="e1-ville" name="ville" autocomplete="shipping address-level2" value="Saint-Malo">
+            <input class="nx-input" type="text" id="e1-ville" name="ville" autocomplete="shipping address-level2" value="Nantes">
           </div>
           <div class="nx-champ c6">
             <label for="e1-pays">Pays</label>
@@ -487,7 +468,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
           <a class="lien" href="MQ-14-boutique-panier.html">← Retour au panier</a>
         </div>
       </form>
-      <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">7</span>
+      <span class="pin pin-abs" aria-hidden="true" style="right:10px;top:10px">7</span>
     </section>
 
     <section class="mq-etat mq-a mq-large" id="etape-2" aria-labelledby="e2-cap">
@@ -499,13 +480,13 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
           <label class="cm-opt"><input type="radio" name="livraison" value="colissimo" checked><span class="t">Colissimo suivi, remis contre signature<small>10 à 15 jours ouvrés : entre le 30 octobre et le 6 novembre</small></span><span class="p">15,00 €</span></label>
           <label class="cm-opt"><input type="radio" name="livraison" value="atelier"><span class="t">Retrait à l’atelier, Saint-Malo, sur rendez-vous<small>à partir du 30 octobre ; Julien vous écrit pour fixer l’heure</small></span><span class="p">gratuit</span></label>
         </fieldset>
-        <p class="nx-aide">Livraison à : Claire Moreau, 14 rue des Tanneurs, 35400 Saint-Malo, France. <a class="nx-u" href="#etape-1">Modifier l’adresse</a></p>
+        <p class="nx-aide">Livraison à : Claire Vasseur, 12 rue des Olivettes, 44000 Nantes, France. <a class="nx-u" href="#etape-1">Modifier l’adresse</a></p>
         <div class="cm-boutons">
           <button class="nx-btn" type="submit">Continuer vers la vérification</button>
           <a class="lien" href="#etape-1">← Coordonnées</a>
         </div>
       </form>
-      <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">8</span>
+      <span class="pin pin-abs" aria-hidden="true" style="right:10px;top:10px">8</span>
     </section>
 
     <section class="mq-etat mq-a" aria-labelledby="e4a-cap">
@@ -516,10 +497,10 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
           <div class="cm-psp-g">
             <p>← Nicephos — Julien</p>
             <p class="m">595,00 €</p>
-            <p>Miradouro, l’heure dorée · 290,00 €<br>Rua da Bica, le 28 · 290,00 €<br>Livraison · 15,00 €</p>
+            <p>Miradouro, l’heure dorée · 290,00 €<br>Ribeira, brume du fleuve · 290,00 €<br>Livraison · 15,00 €</p>
           </div>
           <div class="cm-psp-d">
-            <p class="lib">E-mail : claire.moreau@exemple.fr</p>
+            <p class="lib">E-mail : claire.vasseur@example.org</p>
             <p class="lib">Numéro de carte</p><div class="champ"></div>
             <p class="lib">Expiration · Cryptogramme</p><div class="champ"></div>
             <div class="btn">Payer 595,00 €</div>
@@ -528,7 +509,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
         </div>
       </div>
       <p class="cm-psp-note">Ce que nous réglons chez le prestataire : le nom du vendeur, le détail et le montant, la langue de la visiteuse, l’e-mail prérempli, le retour vers Nicephos, une session de 30 minutes. Son script n’est chargé que sur cette page, chez lui.</p>
-      <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">9</span>
+      <span class="pin pin-abs" aria-hidden="true" style="right:10px;top:10px">9</span>
     </section>
 
     <section class="mq-etat mq-a" aria-labelledby="e4b-cap">
@@ -547,7 +528,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
         <h4>Confirmation en cours…</h4>
         <p>Votre banque n’a pas encore répondu. Cela prend d’ordinaire moins d’une minute. Ne repayez pas : <a class="nx-u" href="#etape-4">actualiser cette page</a>.</p>
       </div>
-      <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">10</span>
+      <span class="pin pin-abs" aria-hidden="true" style="right:10px;top:10px">10</span>
     </section>
 
     <section class="mq-etat mq-a mq-large" id="etape-4" aria-labelledby="e5-cap">
@@ -555,9 +536,9 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
       <div class="cm-merci">
         <div style="display:grid;gap:16px">
           <h3 class="cm-h">Merci, votre commande <span class="nw">N-2026-0007</span> est confirmée.</h3>
-          <p class="lead">La confirmation et la facture ont été envoyées à <strong>claire.moreau@exemple.fr</strong>.</p>
-          <p>Payé le 16 octobre 2026 à 10 h 24 · 595,00 € · carte se terminant par 4242.</p>
-          <p>Vos exemplaires : « Miradouro, l’heure dorée » <strong style="color:var(--ink);font-weight:500">n° 7/15</strong> et « Rua da Bica, le 28 » <strong style="color:var(--ink);font-weight:500">n° 4/15</strong>.</p>
+          <p class="lead">La confirmation et la facture ont été envoyées à <strong>claire.vasseur@example.org</strong>.</p>
+          <p>Payé le 16 octobre 2026 à 10 h 12 · 595,00 € · carte se terminant par 4242.</p>
+          <p>Vos exemplaires : « Miradouro, l’heure dorée » <strong style="color:var(--ink);font-weight:500">n° 7/15</strong> et « Ribeira, brume du fleuve » <strong style="color:var(--ink);font-weight:500">n° 4/15</strong>.</p>
           <h4 style="margin:10px 0 0;font-size:13px;font-weight:400;letter-spacing:.26em;text-transform:uppercase">Ce qui se passe maintenant</h4>
           <ol class="cm-suite">
             <li><span><strong>Le tirage</strong> part au laboratoire lundi ; Julien reçoit et vérifie chaque épreuve.</span></li>
@@ -574,7 +555,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
           <a class="nx-u" href="/tirages" style="display:inline-flex;align-items:center;min-height:44px">Retour aux tirages</a>
         </div>
       </div>
-      <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">11</span>
+      <span class="pin pin-abs" aria-hidden="true" style="right:10px;top:10px">11</span>
     </section>
 
     <section class="mq-etat mq-a mq-large" aria-labelledby="e6-cap">
@@ -588,38 +569,42 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
           <thead><tr><th scope="col">Tirage</th><th scope="col">Format et papier</th><th scope="col">Exemplaire</th><th scope="col" class="n">Prix TTC</th></tr></thead>
           <tbody>
             <tr><td>Miradouro, l’heure dorée<br>J-2026-019</td><td>40 × 60 cm, Hahnemühle Photo Rag 308 g</td><td>7/15</td><td class="n">290,00 €</td></tr>
-            <tr><td>Rua da Bica, le 28<br>J-2026-023</td><td>40 × 60 cm, Hahnemühle Photo Rag 308 g</td><td>4/15</td><td class="n">290,00 €</td></tr>
+            <tr><td>Ribeira, brume du fleuve<br>J-2026-024</td><td>40 × 60 cm, Hahnemühle Photo Rag 308 g</td><td>4/15</td><td class="n">290,00 €</td></tr>
             <tr><td colspan="3">Livraison Colissimo suivi, contre signature</td><td class="n">15,00 €</td></tr>
           </tbody>
           <tfoot><tr><th scope="row" colspan="3">Total payé</th><td class="n">595,00 €</td></tr></tfoot>
         </table>
         <p>TVA non applicable, art. 293 B du CGI.</p>
         <div class="deux">
-          <div><p><strong>Livré à</strong></p><p>Claire Moreau<br>14 rue des Tanneurs<br>35400 Saint-Malo, France</p></div>
+          <div><p><strong>Livré à</strong></p><p>Claire Vasseur<br>12 rue des Olivettes<br>44000 Nantes, France</p></div>
           <div><p><strong>Délai</strong></p><p>Entre le 30 octobre et le 6 novembre 2026.</p><p><strong>Rétractation</strong></p><p>14 jours après la réception : www.nicephos.art/renoncer</p></div>
         </div>
         <p class="pp">Les adresses des liens sont écrites en toutes lettres ; ni menu, ni bouton, ni fond sombre.</p>
       </div>
-      <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">12</span>
+      <span class="pin pin-abs" aria-hidden="true" style="right:10px;top:10px">12</span>
     </section>
   </div>
-
-  <h3>Ce qui change</h3>
+</section>
+<aside class="mq-notes wrap" aria-labelledby="mq-notes-t">
+  <p class="mq-id">Maquette MQ-15 · site public · boutique, commande et paiement · thème « Nicephos — nuit » · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
+  <h2 id="mq-notes-t">Ce qui change</h2>
+  <p class="mq-lead">Boutique, commande et paiement, de l’adresse à la confirmation. Thème « Nicephos — nuit ». Écran principal : l’étape 3, juste avant de payer. Les autres étapes et états suivent, dans l’ordre du parcours. Une commande ne concerne qu’un vendeur (étude, arbitrage 7) : ici Julien, deux tirages, 2 × 290 € + 15 €. Cliente, adresse et numéros fictifs ; mention de franchise de TVA à confirmer avec votre comptable.</p>
   <ol class="mq-leg">
-    <li><span class="mq-pin" aria-hidden="true">1</span><span><strong>Un en-tête réduit pendant la commande :</strong> la marque, « ← Retour au panier » et la langue ; le menu revient après. Le pied de page garde les conditions, le contact et les mentions.<span class="mq-ref">B&amp;S 2.2 Densité · Nielsen 8 · Opquast 30 à 68 (commerce) · WCAG 3.2.3</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">2</span><span><strong>Quatre étapes nommées,</strong> l’état écrit (« ✓ terminée », « ● en cours », « à venir ») et pas seulement coloré ; l’étape courante en aria-current="step", les étapes faites restent des liens ; « étape 3 sur 4 » dans le titre de la page.<span class="mq-ref">RGAA 3.1, 8.6, 12.6 · WCAG 1.4.1, 2.4.2, 2.4.8 · B&amp;S 1.2 Groupement/Distinction</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">3</span><span><strong>Tout relire avant de payer,</strong> chaque bloc avec son « Modifier » nommé (« Modifier la livraison ») ; les dates de livraison, l’adresse, le vendeur.<span class="mq-ref">WCAG 3.3.4, 2.4.4 · UX-T-17 · B&amp;S 5.1 Protection contre les erreurs · Code de la consommation L221-5</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">4</span><span><strong>Le même total qu’au panier,</strong> sans frais surprise ; la mention de TVA du vendeur en franchise.<span class="mq-ref">UX-T-17 · Opquast 30 à 68 (commerce) · Code de la consommation L112-1 · étude S1</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">5</span><span><strong>Conditions générales : une case non cochée,</strong> le lien dans l’aide et non dans le libellé, la rétractation rappelée.<span class="mq-ref">RGAA 11.1, 11.10 · WCAG 3.3.2 · Opquast 30 à 68 (commerce) · Code de la consommation L221-18</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">6</span><span><strong>« Payer 595,00 € » :</strong> un verbe et un montant, formule sans ambiguïté sur l’obligation de payer (à faire valider : « Commander avec obligation de paiement » est la forme sûre). La redirection est annoncée avant le clic, avec les moyens de paiement en texte, sans logos. Pas de bouton collant sur téléphone ici : la case doit précéder le paiement.<span class="mq-ref">Code de la consommation L221-14 · WCAG 3.2.2, 3.2.5 · Nielsen 1 · B&amp;S 1.1 Incitation · RGESN 2.10</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">7</span><span><strong>Étape 1, erreur reliée :</strong> obligations annoncées avant la saisie, titre de page « Erreur — 1 point à corriger », résumé qui reçoit le focus et mène au champ, message sous le champ (aria-describedby, aria-invalid), symbole ⚠ et mot « Erreur » en corail, la saisie conservée ; autocomplete sur chaque champ, clavier numérique pour le code postal.<span class="mq-ref">UX-F-05 · UX-F-04 · RGAA 11.10, 11.11, 11.13, 8.6 · WCAG 3.3.1, 3.3.3, 1.3.5, 3.3.7 · Opquast 70, 71, 95</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">8</span><span><strong>Étape 2 :</strong> modes de livraison en boutons radio groupés (fieldset, legend), prix et dates en face ; l’adresse rappelée avec un lien pour la changer.<span class="mq-ref">RGAA 11.5, 11.6 · UX-T-17 · Opquast 30 à 68 (commerce)</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">9</span><span><strong>La page du prestataire,</strong> hors du site : nous n’en maîtrisons que le réglage. À choisir sur sa déclaration d’accessibilité EN 301 549 et à tester au zoom 200 % et avec VoiceOver avant l’ouverture.<span class="mq-ref">UX-T-17 · directive (UE) 2019/882 · RGESN 2.10 · étude annexe paiement § 2</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">10</span><span><strong>Un abandon sans piège :</strong> rien de débité, l’heure de fin de réservation, « Reprendre » ou « Annuler » ; et « ne repayez pas » quand la banque tarde.<span class="mq-ref">Nielsen 9 · B&amp;S 5.3 Correction des erreurs · WCAG 2.2.1</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">11</span><span><strong>La confirmation dit tout :</strong> numéro, e-mail d’envoi, numéros d’exemplaire attribués, ce qui se passe et quand, la facture avec son format et son poids, le contact et la rétractation ; aucune publicité.<span class="mq-ref">UX-T-17 · Opquast 110, 108 · RGESN 4.13 · Code de la consommation L221-13</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">12</span><span><strong>Une confirmation qui s’imprime :</strong> noir sur blanc, sans menu, adresses écrites, tableau avec légende et en-têtes.<span class="mq-ref">UX-F-35 · Opquast 195, 196 · RGAA 5.4, 5.6</span></span></li>
+    <li><span class="pin" aria-hidden="true">1</span><span><strong>Un en-tête réduit pendant la commande :</strong> la marque, « ← Retour au panier » et la langue ; le menu revient après. Le pied de page garde les conditions, le contact et les mentions.<span class="ref">B&amp;S 2.2 Densité · Nielsen 8 · Opquast 30 à 68 (commerce) · WCAG 3.2.3</span></span></li>
+    <li><span class="pin" aria-hidden="true">2</span><span><strong>Quatre étapes nommées,</strong> l’état écrit (« ✓ terminée », « ● en cours », « à venir ») et pas seulement coloré ; l’étape courante en aria-current="step", les étapes faites restent des liens ; « étape 3 sur 4 » dans le titre de la page.<span class="ref">RGAA 3.1, 8.6, 12.6 · WCAG 1.4.1, 2.4.2, 2.4.8 · B&amp;S 1.2 Groupement/Distinction</span></span></li>
+    <li><span class="pin" aria-hidden="true">3</span><span><strong>Tout relire avant de payer,</strong> chaque bloc avec son « Modifier » nommé (« Modifier la livraison ») ; les dates de livraison, l’adresse, le vendeur.<span class="ref">WCAG 3.3.4, 2.4.4 · UX-T-17 · B&amp;S 5.1 Protection contre les erreurs · Code de la consommation L221-5</span></span></li>
+    <li><span class="pin" aria-hidden="true">4</span><span><strong>Le même total qu’au panier,</strong> sans frais surprise ; la mention de TVA du vendeur en franchise.<span class="ref">UX-T-17 · Opquast 30 à 68 (commerce) · Code de la consommation L112-1 · étude S1</span></span></li>
+    <li><span class="pin" aria-hidden="true">5</span><span><strong>Conditions générales : une case non cochée,</strong> le lien dans l’aide et non dans le libellé, la rétractation rappelée.<span class="ref">RGAA 11.1, 11.10 · WCAG 3.3.2 · Opquast 30 à 68 (commerce) · Code de la consommation L221-18</span></span></li>
+    <li><span class="pin" aria-hidden="true">6</span><span><strong>« Payer 595,00 € » :</strong> un verbe et un montant, formule sans ambiguïté sur l’obligation de payer (à faire valider : « Commander avec obligation de paiement » est la forme sûre). La redirection est annoncée avant le clic, avec les moyens de paiement en texte, sans logos. Pas de bouton collant sur téléphone ici : la case doit précéder le paiement.<span class="ref">Code de la consommation L221-14 · WCAG 3.2.2, 3.2.5 · Nielsen 1 · B&amp;S 1.1 Incitation · RGESN 2.10</span></span></li>
+    <li><span class="pin" aria-hidden="true">7</span><span><strong>Étape 1, erreur reliée :</strong> obligations annoncées avant la saisie, titre de page « Erreur — 1 point à corriger », résumé qui reçoit le focus et mène au champ, message sous le champ (aria-describedby, aria-invalid), symbole ⚠ et mot « Erreur » en corail, la saisie conservée ; autocomplete sur chaque champ, clavier numérique pour le code postal.<span class="ref">UX-F-05 · UX-F-04 · RGAA 11.10, 11.11, 11.13, 8.6 · WCAG 3.3.1, 3.3.3, 1.3.5, 3.3.7 · Opquast 70, 71, 95</span></span></li>
+    <li><span class="pin" aria-hidden="true">8</span><span><strong>Étape 2 :</strong> modes de livraison en boutons radio groupés (fieldset, legend), prix et dates en face ; l’adresse rappelée avec un lien pour la changer.<span class="ref">RGAA 11.5, 11.6 · UX-T-17 · Opquast 30 à 68 (commerce)</span></span></li>
+    <li><span class="pin" aria-hidden="true">9</span><span><strong>La page du prestataire,</strong> hors du site : nous n’en maîtrisons que le réglage. À choisir sur sa déclaration d’accessibilité EN 301 549 et à tester au zoom 200 % et avec VoiceOver avant l’ouverture.<span class="ref">UX-T-17 · directive (UE) 2019/882 · RGESN 2.10 · étude annexe paiement § 2</span></span></li>
+    <li><span class="pin" aria-hidden="true">10</span><span><strong>Un abandon sans piège :</strong> rien de débité, l’heure de fin de réservation, « Reprendre » ou « Annuler » ; et « ne repayez pas » quand la banque tarde.<span class="ref">Nielsen 9 · B&amp;S 5.3 Correction des erreurs · WCAG 2.2.1</span></span></li>
+    <li><span class="pin" aria-hidden="true">11</span><span><strong>La confirmation dit tout :</strong> numéro, e-mail d’envoi, numéros d’exemplaire attribués, ce qui se passe et quand, la facture avec son format et son poids, le contact et la rétractation ; aucune publicité.<span class="ref">UX-T-17 · Opquast 110, 108 · RGESN 4.13 · Code de la consommation L221-13</span></span></li>
+    <li><span class="pin" aria-hidden="true">12</span><span><strong>Une confirmation qui s’imprime :</strong> noir sur blanc, sans menu, adresses écrites, tableau avec légende et en-têtes.<span class="ref">UX-F-35 · Opquast 195, 196 · RGAA 5.4, 5.6</span></span></li>
   </ol>
-  <p class="mq-socle"><strong>Sobriété :</strong> quatre pages servies par le site, sans script ni traceur ; deux vignettes de 120 px ; la facture PDF/A sous 100 ko ; les e-mails en texte, sans image distante. <strong>Socle commun aux maquettes de la boutique :</strong> lien « Aller au contenu » (UX-F-06), liens soulignés (UX-F-23), focus de 2 px, cibles de 44 px au moins, filets de champs à 7,4:1 en nuit (UX-F-04), pages de commande en noindex.</p>
+  <p class="mq-lead mq-socle"><strong>Sobriété :</strong> quatre pages servies par le site, sans script ni traceur ; deux vignettes de 120 px ; la facture PDF/A sous 100 ko ; les e-mails en texte, sans image distante. <strong>Socle commun aux maquettes de la boutique :</strong> lien « Aller au contenu » (UX-F-06), liens soulignés (UX-F-23), focus de 2 px, cibles de 44 px au moins, filets de champs à 7,4:1 en nuit (UX-F-04), pages de commande en noindex.</p>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette, hors encart et pastilles) — <b>bureau 1440 × 900</b> : en-tête de tunnel de 72 px (marque, « Retour au panier », langue, sans menu), H1 à 96 px ; contraste le plus faible du texte 6,8:1 (#a19f99 sur #171717) ; erreurs préfixées « Erreur : », en corail #f28b7a ; boutons radio de 22 px dans des libellés de 44 px. <b>Pixel 7 (412 × 839, densité 2)</b> : en-tête de 64 px, H1 à 88 px, étapes empilées, aucun défilement horizontal. Axe-core (WCAG 2.2 A et AA) : 0 violation sur les deux rendus.</p>
 </aside>
 </body>
 </html>

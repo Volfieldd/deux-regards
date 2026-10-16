@@ -8,6 +8,7 @@
 <meta name="description" content="Maquette MQ-14 (audit du 16 octobre 2026) : panier de la boutique de tirages, avec photos de démonstration.">
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="_commun/site.css">
+<link rel="stylesheet" href="_commun/site-entete.css">
 <style>
 /* ===== Socle commun des maquettes de la boutique (MQ-13, MQ-14, MQ-15) =====
    Jetons : copie de public/themes/nicephos.css (thème de production), complétée des recommandations
@@ -30,39 +31,34 @@ body { background: var(--paper); color: var(--ink); font: 400 15px/1.6 var(--san
 .nx-ext::after { content: ' ↗' / ''; }
 
 /* Lien d'évitement (UX-F-06) */
-.nx-skip { position: absolute; left: var(--gut); top: -120px; z-index: 60; display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; background: var(--ink); color: var(--paper); font-weight: 500; }
-.nx-skip:focus { top: 12px; }
+
+
 
 /* En-tête sur une ligne : marque, menu, filet, Tirages, outils (UX-T-16, UX-F-36) */
-.nx-top { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 72px; border-bottom: 1px solid var(--rule); }
-.nx-brand { display: inline-flex; align-items: center; min-height: 44px; font-weight: 300; font-size: 15px; letter-spacing: .42em; text-transform: uppercase; white-space: nowrap; }
-.nx-nav ul { display: flex; align-items: center; gap: clamp(12px, 1.8vw, 28px); margin: 0; padding: 0; list-style: none; }
-.nx-nav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--mute); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
-.nx-nav a:hover { color: var(--ink); }
-.nx-nav a[aria-current] { color: var(--ink); text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 9px; }
-.nx-nav .nx-filet { display: flex; align-items: center; gap: clamp(12px, 1.8vw, 28px); }
-.nx-nav .nx-filet::before { content: ''; width: 1px; height: 18px; background: var(--mute); opacity: .6; }
-.nx-outils { display: flex; align-items: center; gap: 6px; }
-.nx-outil, .nx-lang summary, .nx-menu summary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 44px; min-height: 44px; padding: 0 6px; color: var(--mute); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; list-style: none; }
-.nx-outil:hover, .nx-lang summary:hover, .nx-menu summary:hover { color: var(--ink); }
-.nx-lang summary::-webkit-details-marker, .nx-menu summary::-webkit-details-marker { display: none; }
-.nx-lang, .nx-menu { position: relative; }
-.nx-lang ul, .nx-menu .nx-menu-panneau { position: absolute; right: 0; top: 100%; z-index: 40; min-width: 190px; margin: 0; padding: 6px 0; list-style: none; background: var(--paper); border: 1px solid var(--field); }
-.nx-lang a { display: flex; align-items: center; min-height: 44px; padding: 0 16px; color: var(--ink); }
-.nx-lang a[aria-current] { text-decoration: underline; text-underline-offset: 5px; }
-.nx-menu { display: none; }
-.nx-menu .nx-menu-panneau ul { margin: 0; padding: 0; list-style: none; }
-.nx-menu .nx-menu-panneau a { display: flex; align-items: center; min-height: 48px; padding: 0 18px; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; }
-.nx-menu .nx-menu-panneau a[aria-current] { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 7px; }
-.nx-menu .nx-menu-panneau li.nx-filet { border-top: 1px solid var(--rule); margin-top: 6px; padding-top: 6px; }
-.nx-outil-t { }
-@media (max-width: 960px) {
-  .nx-top { min-height: 64px; gap: 8px; }
-  .nx-top > .nx-nav { display: none; }
-  .nx-menu { display: block; }
-  .nx-outil-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-}
-@media (max-width: 380px) { .nx-brand { letter-spacing: .3em; font-size: 14px; } }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Fil d'Ariane en mono (Opquast 156) */
 .nx-ariane ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; margin: 0; padding: 14px 0 0; list-style: none; font-family: var(--mono); font-size: 13px; color: var(--mute); }
@@ -90,40 +86,40 @@ select.nx-input { padding-right: 8px; }
 input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--ink); }
 
 /* Pied de page complet, liens soulignés (UX-F-23, UX-F-34) */
-.nx-pied { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 40px; margin-top: 72px; padding-block: 36px 48px; border-top: 1px solid var(--rule); color: var(--mute); font-size: 14px; }
-.nx-pied p { margin: 0; display: flex; align-items: center; min-height: 44px; }
-.nx-pied ul { display: flex; flex-wrap: wrap; gap: 0 22px; margin: 0; padding: 0; list-style: none; }
-.nx-pied a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
-@media (max-width: 640px) { .nx-pied ul { flex-direction: column; } }
+
+
+
+
+
 
 /* ===== Calque d'annotation (maquette seulement) ===== */
 .mq-a { position: relative; }
-.mq-pin { position: absolute; z-index: 20; display: block; width: 26px; height: 26px; border-radius: 50%; background: #cbb68b; color: #0b0b0b; box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px #0b0b0b; font: 500 13px/26px Jost, Arial, sans-serif; letter-spacing: 0; text-align: center; text-transform: none; text-decoration: none; pointer-events: none; }
-.mq-pin.in { position: static; display: inline-block; vertical-align: middle; margin-left: 8px; }
-.mq-notes { margin-top: 0; padding-block: 48px 64px; background: var(--frame); border-top: 6px solid #cbb68b; color: var(--ink); }
-.mq-notes > h2 { margin: 0 0 6px; font-weight: 400; font-size: 13px; letter-spacing: .26em; text-transform: uppercase; color: var(--ink); }
-.mq-notes .mq-intro { margin: 0 0 28px; max-width: 90ch; color: var(--prose); }
-.mq-notes h3 { margin: 0 0 14px; font-weight: 400; font-size: 20px; letter-spacing: .01em; }
+
+
+
+
+
+
 .mq-etats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 28px; margin-bottom: 44px; }
 .mq-etat { padding: 22px; background: var(--paper); border: 1px solid var(--rule); min-width: 0; }
 .mq-etat > .mq-cap { margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px dashed var(--mute); font-family: var(--mono); font-size: 13px; color: var(--mute); }
-.mq-leg { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 16px 40px; margin: 0; padding: 0; list-style: none; }
-.mq-leg li { display: grid; grid-template-columns: 26px 1fr; gap: 14px; align-items: start; color: var(--prose); line-height: 1.55; }
-.mq-leg li .mq-pin { position: static; margin-top: 1px; }
-.mq-leg strong { color: var(--ink); font-weight: 500; }
-.mq-ref { display: block; margin-top: 4px; font-family: var(--mono); font-size: 12.5px; color: var(--mute); }
-.mq-socle { margin: 32px 0 0; padding-top: 18px; border-top: 1px solid var(--rule); max-width: 110ch; color: var(--prose); font-size: 14px; }
-@media print { .mq-pin, .mq-notes { display: none !important; } }
+
+
+
+
+
+
+
 /* Sur téléphone, les repères ne débordent jamais de l'écran (pas de défilement horizontal) */
 @media (max-width: 960px) {
-  .mq-pin[style*="right:-"] { right: 0 !important; }
-  .mq-pin[style*="left:-"] { left: 0 !important; }
+  .pin-abs[style*="right:-"] { right: 0 !important; }
+  .pin-abs[style*="left:-"] { left: 0 !important; }
 }
 
 
 /* ===== MQ-14 : panier ===== */
 .nw { white-space: nowrap; }
-.nx-panier { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; color: var(--ink); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 9px; white-space: nowrap; }
+
 .pn-tete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; padding-top: 18px; }
 .pn-tete h1 { margin: 6px 0 0; font-weight: 300; font-size: clamp(30px, 2.6vw, 38px); line-height: 1.15; }
 .pn-tete p { margin: 0; color: var(--prose); }
@@ -198,7 +194,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
   .pn-prix { grid-column: 2; text-align: left; }
   .pn-recap { position: relative; padding: 22px 18px; margin-inline: calc(-1 * var(--gut)); border-inline: 0; }
   .pn-actions { margin-top: 8px; }
-  .nx-panier { letter-spacing: .12em; }
+  
   /* La commande reste à portée du pouce, sans masquer le focus (WCAG 2.4.11) */
   html { scroll-padding-bottom: 96px; }
   .pn-colle { position: sticky; bottom: 0; z-index: 10; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; margin-inline: calc(-1 * var(--gut)); padding: 12px var(--gut) calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--paper); border-top: 1px solid var(--field); }
@@ -206,48 +202,26 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
   .pn-colle p small { display: block; font-size: 13px; color: var(--mute); }
 }
 @media (min-width: 961px) { .pn-colle { display: none; } }
-@media print { .nx-top, .nx-pied, .nx-skip, .pn-actions, .pn-recap .nx-btn, .pn-colle { display: none !important; } body { background: #fff; color: #111; } }
+@media print { .pn-actions, .pn-recap .nx-btn, .pn-colle { display: none !important; } body { background: #fff; color: #111; } }
+@media (max-width: 960px) {
+  /* Capture pleine page : la barre « total + Commander », collante en bas de l’écran sur le site, est posée à sa place. */
+  .pn-colle { position: relative !important; }
+}
 </style>
+<link rel="stylesheet" href="_commun/annotations.css">
 </head>
 <body>
-<a class="nx-skip" href="#contenu">Aller au contenu</a>
-<header class="nx-top wrap">
-  <a class="nx-brand" href="/">Nicephos</a>
-  <nav class="nx-nav" aria-label="Menu principal">
-    <ul>
-      <li><a href="/series">Séries</a></li>
-      <li><a href="/galerie">Galerie</a></li>
-      <li><a href="/carte">Carte</a></li>
-      <li><a href="/carnets">Carnets</a></li>
-      <li><a href="/a-propos">À propos</a></li>
-      <li class="nx-filet"><a href="/tirages">Tirages</a></li>
-    </ul>
-  </nav>
-  <div class="nx-outils">
-    <a class="nx-outil" href="/recherche"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="nx-outil-t">Rechercher</span></a>
-    <span class="mq-a"><a class="nx-panier" href="/panier" aria-current="page">Panier (2)<span class="sr-only"> tirages</span></a><span class="mq-pin" aria-hidden="true" style="right:-20px;top:-14px">1</span></span>
-    <details class="nx-lang">
-      <summary><span class="sr-only">Langue : </span>FR</summary>
-      <ul>
-        <li><a href="/panier" lang="fr" hreflang="fr" aria-current="true">Français</a></li>
-        <li><a href="/en/cart" lang="en" hreflang="en">English</a></li>
-        <li><a href="/de/warenkorb" lang="de" hreflang="de">Deutsch</a></li>
-      </ul>
-    </details>
-    <details class="nx-menu">
-      <summary>Menu</summary>
-      <nav class="nx-menu-panneau" aria-label="Menu principal">
-        <ul>
-          <li><a href="/series">Séries</a></li>
-          <li><a href="/galerie">Galerie</a></li>
-          <li><a href="/carte">Carte</a></li>
-          <li><a href="/carnets">Carnets</a></li>
-          <li><a href="/a-propos">À propos</a></li>
-          <li class="nx-filet"><a href="/tirages">Tirages</a></li>
-        </ul>
-      </nav>
-    </details>
-  </div>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-h wrap">
+  <a class="wordmark" href="#">Nicephos</a>
+  <nav class="site-nav" id="menu-principal" aria-label="Menu principal"><ul role="list"><li><a href="#">Séries</a></li><li><a href="#">Galerie</a></li><li><a href="#">Carte</a></li><li><a href="MQ-11-carnets-liste.html">Carnets</a></li><li><a href="#">À propos</a></li><li class="soft"><a href="MQ-13-boutique-tirage.html">Tirages</a></li></ul></nav>
+  <ul class="site-tools" role="list">
+    <li><a class="tool" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="tool-t">Rechercher</span></a></li>
+    <li style="position:relative"><a class="cart-link" href="MQ-14-boutique-panier.html" aria-current="page">Panier (2)<span class="sr-only"> tirages</span></a><span class="pin pin-abs" aria-hidden="true" style="right:-16px;top:-12px">1</span></li>
+    <li><details class="lang"><summary><span class="sr-only">Langue : </span>FR <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <ul role="list"><li><a href="#" lang="fr" hreflang="fr" aria-current="true"><span>Français</span></a></li><li><a href="#" lang="en" hreflang="en">English</a></li><li><a href="#" lang="de" hreflang="de">Deutsch</a></li></ul></details></li>
+    <li><button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-principal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button></li>
+  </ul>
 </header>
 
 <main id="contenu" class="wrap" tabindex="-1">
@@ -267,13 +241,13 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
     <div>
       <div class="pn-statut mq-a" role="status">
         <span>Le format de « Miradouro, l’heure dorée » est passé au 40 × 60 cm. Total mis à jour.</span>
-        <span class="mq-pin" aria-hidden="true" style="right:-13px;top:-13px">2</span>
+        <span class="pin pin-abs" aria-hidden="true" style="right:-13px;top:-13px">2</span>
       </div>
 
       <form action="/panier" method="post">
       <ul class="pn-lignes">
         <li class="pn-ligne mq-a">
-          <img src="_commun/photos/dune.webp" width="900" height="600" alt="">
+          <img src="_commun/photos/ciel.webp" width="900" height="600" alt="">
           <div class="pn-info">
             <h2><a href="/tirages/miradouro-l-heure-doree">Miradouro, l’heure dorée</a></h2>
             <p class="nx-mono">Julien · Lisbonne, 2026 · <span class="nw">J-2026-019</span></p>
@@ -293,27 +267,27 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
             </div>
           </div>
           <p class="pn-prix">290,00 €<small>TTC</small></p>
-          <span class="mq-pin" aria-hidden="true" style="left:-13px;top:14px">3</span>
+          <span class="pin pin-abs" aria-hidden="true" style="left:-13px;top:14px">3</span>
         </li>
         <li class="pn-ligne">
-          <img src="_commun/photos/ciel.webp" width="900" height="600" alt="">
+          <img src="_commun/photos/brume.webp" width="900" height="600" alt="">
           <div class="pn-info">
-            <h2><a href="/tirages/rua-da-bica-tram-28">Rua da Bica, le 28</a></h2>
-            <p class="nx-mono">Julien · Lisbonne, 2026 · <span class="nw">J-2026-023</span></p>
+            <h2><a href="/tirages/ribeira-brume-du-fleuve">Ribeira, brume du fleuve</a></h2>
+            <p class="nx-mono">Julien · Porto, 2026 · <span class="nw">J-2026-024</span></p>
             <p>40 × 60 cm · Hahnemühle Photo Rag · sans cadre</p>
             <p>Signé et numéroté sur 15 ; numéro attribué au paiement</p>
             <div class="pn-actions mq-a">
               <div class="pn-qte">
                 <label for="q2">Quantité <span class="nx-q">(1 disponible)</span></label>
                 <div class="ligne">
-                  <select class="nx-input" id="q2" name="q[J-2026-023-40]">
+                  <select class="nx-input" id="q2" name="q[J-2026-024-40]">
                     <option selected>1</option>
                   </select>
-                  <button class="nx-btn nx-btn-2 nx-btn-s" type="submit" name="maj" value="J-2026-023-40" aria-label="Mettre à jour la quantité de Rua da Bica, le 28">Mettre à jour</button>
+                  <button class="nx-btn nx-btn-2 nx-btn-s" type="submit" name="maj" value="J-2026-024-40" aria-label="Mettre à jour la quantité de Ribeira, brume du fleuve">Mettre à jour</button>
                 </div>
               </div>
-              <button class="pn-retirer" type="submit" name="retirer" value="J-2026-023-40">Retirer<span class="sr-only"> « Rua da Bica, le 28 » du panier</span></button>
-              <span class="mq-pin" aria-hidden="true" style="right:-40px;top:24px">4</span>
+              <button class="pn-retirer" type="submit" name="retirer" value="J-2026-024-40">Retirer<span class="sr-only"> « Ribeira, brume du fleuve » du panier</span></button>
+              <span class="pin pin-abs" aria-hidden="true" style="right:-40px;top:24px">4</span>
             </div>
           </div>
           <p class="pn-prix">290,00 €<small>TTC</small></p>
@@ -355,33 +329,24 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
         <li>Rétractation : 14 jours après la réception. <a class="nx-u" href="/conditions-de-vente#retractation">Conditions de vente</a></li>
         <li><a class="nx-u" href="/contact?objet=commande">Une question ? Nous écrire</a></li>
       </ul>
-      <span class="mq-pin" aria-hidden="true" style="right:-13px;top:-13px">5</span>
+      <span class="pin pin-abs" aria-hidden="true" style="right:-13px;top:-13px">5</span>
     </aside>
   </div>
 
   <div class="pn-colle mq-a">
     <p>595,00 €<small>TTC, livraison comprise</small></p>
     <a class="nx-btn" href="MQ-15-boutique-commande-paiement.html">Commander</a>
-    <span class="mq-pin" aria-hidden="true" style="right:8px;top:-13px">6</span>
+    <span class="pin pin-abs" aria-hidden="true" style="right:8px;top:-13px">6</span>
   </div>
 </main>
 
-<footer class="nx-pied wrap">
-  <p>© 2026 Sébastien &amp; Julien · Nicephos</p>
-  <ul>
-    <li><a href="/tirages">Tirages et licences</a></li>
-    <li><a href="/conditions-de-vente">Conditions de vente</a></li>
-    <li><a href="/renoncer">Renoncer à un achat</a></li>
-    <li><a href="/contact">Contact</a></li>
-    <li><a href="/confidentialite">Confidentialité</a></li>
-    <li><a href="/mentions-legales">Mentions légales</a></li>
-  </ul>
+<footer class="site-f wrap">
+  <p>© 2026 Sébastien &amp; Julien</p>
+  <ul role="list" aria-label="Pied de page"><li><a href="/tirages">Tirages et licences</a></li><li><a href="/conditions-de-vente">Conditions de vente</a></li><li><a href="/renoncer">Renoncer à un achat</a></li><li><a href="MQ-06-contact-tirage.html">Contact</a></li><li><a href="https://www.instagram.com/nicephos.art/" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="/carnet/flux.xml" type="application/atom+xml">Flux RSS</a></li><li><a href="/confidentialite">Confidentialité</a></li><li><a href="/mentions-legales">Mentions légales</a></li></ul>
 </footer>
 
-<aside class="mq-notes wrap" aria-labelledby="mq-notes-t">
-  <h2 id="mq-notes-t">Maquette MQ-14 — notes de l’auditrice</h2>
-  <p class="mq-intro">Boutique, panier. Thème « Nicephos — nuit ». Deux tirages fictifs de Julien ; montants calculés (2 × 290 € + 15 €). Comme le recommande l’étude (arbitrages 6 et 7, S1), chacun vend ses œuvres en son nom : un panier qui mêle les deux auteurs s’affiche en un bloc par vendeur (état ⑨). Mention de franchise de TVA reprise de l’étude, à confirmer avec votre comptable ; le numéro d’exemplaire n’est attribué qu’au paiement (S36).</p>
-  <div class="mq-etats">
+<section class="mq-etats-bloc wrap" aria-label="Autres états de l’écran (maquette)">
+<div class="mq-etats">
     <section class="mq-etat mq-a" aria-labelledby="etat-vide">
       <p class="mq-cap" id="etat-vide">Autre état · panier vide</p>
       <div class="pn-vide">
@@ -389,7 +354,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
         <p>Chaque tirage est signé et numéroté, en édition limitée à 15 exemplaires.</p>
         <a class="nx-btn nx-btn-2" href="/tirages">Voir les tirages disponibles</a>
       </div>
-      <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">7</span>
+      <span class="pin pin-abs" aria-hidden="true" style="right:10px;top:10px">7</span>
     </section>
     <section class="mq-etat mq-a" aria-labelledby="etat-menu">
       <p class="mq-cap" id="etat-menu">Autre état · l’en-tête, panier vide puis rempli</p>
@@ -405,10 +370,10 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
       </div>
       <p class="mq-cap2">Après « Retirer »</p>
       <div class="pn-statut" style="margin:0">
-        <span>« Rua da Bica, le 28 » a été retiré du panier.</span>
+        <span>« Ribeira, brume du fleuve » a été retiré du panier.</span>
         <button type="button">Le remettre</button>
       </div>
-      <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">8</span>
+      <span class="pin pin-abs" aria-hidden="true" style="right:10px;top:10px">8</span>
     </section>
     <section class="mq-etat mq-a mq-large" aria-labelledby="etat-mixte">
       <p class="mq-cap" id="etat-mixte">Autre état · panier qui mêle les deux auteurs : un bloc par vendeur</p>
@@ -416,7 +381,7 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
       <div class="pn-blocs">
         <section class="pn-bloc" aria-labelledby="bloc-j">
           <h3 id="bloc-j">Tirages de Julien <span class="nx-q">(2)</span></h3>
-          <p>Miradouro, l’heure dorée · 40 × 60 cm · 290,00 €<br>Rua da Bica, le 28 · 40 × 60 cm · 290,00 €</p>
+          <p>Miradouro, l’heure dorée · 40 × 60 cm · 290,00 €<br>Ribeira, brume du fleuve · 40 × 60 cm · 290,00 €</p>
           <dl class="pn-dl">
             <div><dt>Livraison France</dt><dd>15,00 €</dd></div>
             <div class="total"><dt>Total TTC</dt><dd>595,00 €</dd></div>
@@ -435,23 +400,27 @@ input[type="radio"], input[type="checkbox"] { width: 22px; height: 22px; margin:
           <a class="nx-btn nx-btn-2" href="MQ-15-boutique-commande-paiement.html">Commander les tirages de Sébastien</a>
         </section>
       </div>
-      <span class="mq-pin" aria-hidden="true" style="right:10px;top:10px">9</span>
+      <span class="pin pin-abs" aria-hidden="true" style="right:10px;top:10px">9</span>
     </section>
   </div>
-
-  <h3>Ce qui change</h3>
+</section>
+<aside class="mq-notes wrap" aria-labelledby="mq-notes-t">
+  <p class="mq-id">Maquette MQ-14 · site public · boutique, panier · thème « Nicephos — nuit » · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
+  <h2 id="mq-notes-t">Ce qui change</h2>
+  <p class="mq-lead">Boutique, panier. Thème « Nicephos — nuit ». Deux tirages fictifs de Julien ; montants calculés (2 × 290 € + 15 €). Comme le recommande l’étude (arbitrages 6 et 7, S1), chacun vend ses œuvres en son nom : un panier qui mêle les deux auteurs s’affiche en un bloc par vendeur (état ⑨). Mention de franchise de TVA reprise de l’étude, à confirmer avec votre comptable ; le numéro d’exemplaire n’est attribué qu’au paiement (S36).</p>
   <ol class="mq-leg">
-    <li><span class="mq-pin" aria-hidden="true">1</span><span><strong>« Panier (2) » en toutes lettres</strong> dans l’en-tête, seulement quand il y a quelque chose dedans ; le nombre est lu « 2 tirages ».<span class="mq-ref">UX-T-17 · Opquast 30 à 68 (commerce) · RGAA 6.1 · Nielsen 1, 8</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">2</span><span><strong>Chaque action se confirme</strong> dans un message d’état annoncé (role=status) qui dit ce qui a changé ; après « Retirer », on peut remettre l’article d’un geste.<span class="mq-ref">RGAA 7.5 · WCAG 4.1.3 · B&amp;S 1.3 Feedback immédiat · Nielsen 3</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">3</span><span><strong>Une ligne qui dit tout :</strong> titre lié à sa fiche, auteur, inventaire, format, papier, cadre, numéro d’exemplaire et prix TTC. La vignette est décorative (alt vide) : le titre suit.<span class="mq-ref">UX-T-17 · UX-T-05 · Opquast 39 · RGAA 1.2</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">4</span><span><strong>Quantité limitée par la disponibilité,</strong> annoncée dans le libellé ; un bouton « Mettre à jour » envoie le formulaire : rien ne change au simple choix dans la liste, et tout marche sans JavaScript. Boutons nommés par l’article.<span class="mq-ref">UX-F-05 · RGAA 7.5, 11.1, 11.9 · WCAG 3.2.2, 2.4.6 · RGESN 4.4</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">5</span><span><strong>Le total avant de s’engager :</strong> sous-total, livraison selon le pays, total TTC, mention de TVA, et le délai en dates. Un seul bouton plein, « Commander » ; « Continuer la visite » en second. Aucun produit suggéré, aucune case cochée d’avance.<span class="mq-ref">UX-T-17 · Opquast 30 à 68 (commerce) · Code de la consommation L112-1, L221-5 · loi de Hick · B&amp;S 2.2 Densité</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">6</span><span><strong>Sur téléphone, le total et « Commander »</strong> restent collés en bas (52 px de haut), et html { scroll-padding-bottom } garde le champ actif visible au-dessus.<span class="mq-ref">WCAG 2.4.11, 2.5.8 · UX-F-36 · loi de Fitts</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">7</span><span><strong>Panier vide : une phrase et une porte,</strong> « Voir les tirages disponibles », sans culpabiliser ni pousser.<span class="mq-ref">Opquast 30 à 68 (commerce) · Nielsen 9</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">8</span><span><strong>Pas d’icône de panier tant qu’il est vide,</strong> ni de pastille de couleur : un mot et un chiffre, lisibles sans la couleur. Annulation de « Retirer » à la place d’une confirmation.<span class="mq-ref">UX-T-17 · RGAA 3.1 · WCAG 1.4.1 · Nielsen 3 · B&amp;S 3.2 Contrôle utilisateur</span></span></li>
-    <li><span class="mq-pin" aria-hidden="true">9</span><span><strong>Deux auteurs, deux blocs, dit d’avance :</strong> un sous-total, un port, une date et un bouton nommé par vendeur ; boutons secondaires de même poids, pour ne favoriser personne. Le visiteur sait avant de payer qu’il y aura deux paiements.<span class="mq-ref">UX-T-17 · étude S1, arbitrage 7 · Nielsen 1 · B&amp;S 1.1 Incitation · Opquast 30 à 68 (commerce)</span></span></li>
+    <li><span class="pin" aria-hidden="true">1</span><span><strong>« Panier (2) » en toutes lettres</strong> dans l’en-tête, seulement quand il y a quelque chose dedans ; le nombre est lu « 2 tirages ».<span class="ref">UX-T-17 · Opquast 30 à 68 (commerce) · RGAA 6.1 · Nielsen 1, 8</span></span></li>
+    <li><span class="pin" aria-hidden="true">2</span><span><strong>Chaque action se confirme</strong> dans un message d’état annoncé (role=status) qui dit ce qui a changé ; après « Retirer », on peut remettre l’article d’un geste.<span class="ref">RGAA 7.5 · WCAG 4.1.3 · B&amp;S 1.3 Feedback immédiat · Nielsen 3</span></span></li>
+    <li><span class="pin" aria-hidden="true">3</span><span><strong>Une ligne qui dit tout :</strong> titre lié à sa fiche, auteur, inventaire, format, papier, cadre, « signé et numéroté sur 15 ; numéro attribué au paiement » et prix TTC. La vignette est décorative (alt vide) : le titre suit.<span class="ref">UX-T-17 · UX-T-05 · Opquast 39 · RGAA 1.2</span></span></li>
+    <li><span class="pin" aria-hidden="true">4</span><span><strong>Quantité limitée par la disponibilité,</strong> annoncée dans le libellé ; un bouton « Mettre à jour » envoie le formulaire : rien ne change au simple choix dans la liste, et tout marche sans JavaScript. Boutons nommés par l’article.<span class="ref">UX-F-05 · RGAA 7.5, 11.1, 11.9 · WCAG 3.2.2, 2.4.6</span></span></li>
+    <li><span class="pin" aria-hidden="true">5</span><span><strong>Le total avant de s’engager :</strong> sous-total, livraison selon le pays, total TTC, mention de TVA, et le délai en dates. Un seul bouton plein, « Commander » ; « Continuer la visite » en second. Aucun produit suggéré, aucune case cochée d’avance.<span class="ref">UX-T-17 · Opquast 30 à 68 (commerce) · Code de la consommation L112-1, L221-5 · loi de Hick · B&amp;S 2.2 Densité</span></span></li>
+    <li><span class="pin" aria-hidden="true">6</span><span><strong>Sur téléphone, le total et « Commander »</strong> restent collés en bas (52 px de haut ; posés à leur place sur la capture pleine page), et <code>html { scroll-padding-bottom }</code> garde le champ actif visible au-dessus.<span class="ref">WCAG 2.4.11, 2.5.8 · UX-F-36 · loi de Fitts</span></span></li>
+    <li><span class="pin" aria-hidden="true">7</span><span><strong>Panier vide : une phrase et une porte,</strong> « Voir les tirages disponibles », sans culpabiliser ni pousser.<span class="ref">Opquast 30 à 68 (commerce) · Nielsen 9</span></span></li>
+    <li><span class="pin" aria-hidden="true">8</span><span><strong>Pas d’icône de panier tant qu’il est vide,</strong> ni de pastille de couleur : un mot et un chiffre, lisibles sans la couleur. Annulation de « Retirer » à la place d’une confirmation.<span class="ref">UX-T-17 · RGAA 3.1 · WCAG 1.4.1 · Nielsen 3 · B&amp;S 3.2 Contrôle utilisateur</span></span></li>
+    <li><span class="pin" aria-hidden="true">9</span><span><strong>Deux auteurs, deux blocs, dit d’avance :</strong> un sous-total, un port, une date et un bouton nommé par vendeur ; boutons secondaires de même poids, pour ne favoriser personne. Le visiteur sait avant de payer qu’il y aura deux paiements.<span class="ref">UX-T-17 · étude S1, arbitrage 7 · Nielsen 1 · B&amp;S 1.1 Incitation · Opquast 30 à 68 (commerce)</span></span></li>
   </ol>
-  <p class="mq-socle"><strong>Sobriété :</strong> deux vignettes de 168 px (en production, servies en 336 px, moins de 20 ko chacune), aucun script, aucun traceur ; le panier vit dans une session côté serveur, sans compte. <strong>Socle commun aux maquettes de la boutique :</strong> lien « Aller au contenu » (UX-F-06), liens soulignés (UX-F-23), focus de 2 px, cibles de 44 px au moins, filets de champs à 7,4:1 en nuit (UX-F-04), page en noindex.</p>
+  <p class="mq-lead mq-socle"><strong>Sobriété :</strong> deux vignettes de 168 px (en production, servies en 336 px, moins de 20 ko chacune), aucun script, aucun traceur ; le panier vit dans une session côté serveur, sans compte. <strong>Socle commun aux maquettes de la boutique :</strong> lien « Aller au contenu » (UX-F-06), liens soulignés (UX-F-23), focus de 2 px, cibles de 44 px au moins, filets de champs à 7,4:1 en nuit (UX-F-04), page en noindex.</p>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette, hors encart et pastilles) — <b>bureau 1440 × 900</b> : en-tête de 72 px, H1 à 154 px ; contraste le plus faible du texte 6,8:1 (mention de TVA, #a19f99 sur #171717) ; deux vignettes à leurs dimensions, aucune autre image. <b>Pixel 7 (412 × 839, densité 2)</b> : en-tête de 71 px avec « Panier (2) » en toutes lettres ; quantité, « Mettre à jour » et « Retirer » en cibles de 44 px ; aucun défilement horizontal. Axe-core (WCAG 2.2 A et AA) : 0 violation sur les deux rendus.</p>
 </aside>
 </body>
 </html>

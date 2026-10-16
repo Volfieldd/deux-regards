@@ -12,6 +12,8 @@
 
     /* Maquette : la barre latérale garde sa hauteur naturelle pour la capture pleine page. */
     .side { height: auto; align-self: start; }
+    /* Capture pleine page : le fond de la barre latérale descend jusqu’en bas de la page (audit, B). */
+    @media (min-width: 721px) { .shell { background: linear-gradient(90deg, var(--s1) 0 var(--side), transparent var(--side)); } .shell > .side { border-right: 0; } .shell::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--side) - 1px); border-left: 1px solid var(--line); } .shell { position: relative; } }
     .side .foot { margin-top: 18px; }
     .nav-sub { list-style: none; margin: 0 0 2px; padding: 0 0 0 30px; display: grid; gap: 2px; }
     .nav-sub a { min-height: 30px; font-size: 13.5px; }
@@ -22,7 +24,7 @@
     .side .foot .nav a { min-height: 30px; }
 
     /* Repères d'annotation ①②③ (la légende est en bas de page). */
-    .mq-n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font: 600 12px/1 var(--font); letter-spacing: 0; text-transform: none; vertical-align: middle; flex: none; box-shadow: 0 0 0 2px var(--bg); }
+    
     .mq-screen { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 18px; padding-top: 10px; border-top: 1px dashed var(--line2); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink2); }
     .mq-screen b { color: var(--accent-ink); font-weight: 600; }
     .mq-screen code { text-transform: none; letter-spacing: 0; }
@@ -38,7 +40,7 @@
     .a-top h1 { margin: 0 0 6px; }
     .a-top .sub { font-size: 13.5px; color: var(--ink2); max-width: 78ch; }
     .main h2.big { font-weight: 300; font-size: 30px; line-height: 1.15; margin: 0 0 6px; }
-    .main h2.big .mq-n { margin: -4px 10px 0 0; }
+    .main h2.big .pin { margin: -4px 10px 0 0; }
 
     /* Écran A : formulaire et aperçu de l'invitation */
     .a-grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 22px; align-items: start; }
@@ -49,7 +51,7 @@
     .a-form label > .hint { display: block; line-height: 1.45; }
     .acc time { white-space: nowrap; }
     .acc td:first-of-type { min-width: 120px; }
-    .mq-toast p .mq-n { margin-right: 8px; }
+    .mq-toast p .pin { margin-right: 8px; }
     .a-form label .opt { color: var(--ink3); }
     .a-form .hint { margin: -6px 0 0; }
     .a-form .hint.after { margin: 6px 0 0; }
@@ -193,21 +195,21 @@
     .mq-cap { margin: 0; font-size: 12px; color: #eeece7; text-align: center; letter-spacing: .06em; text-transform: uppercase; }
 
     /* Annotations */
-    .mq-notes { padding: 34px 36px 56px calc(var(--side) + 36px); background: var(--s1); border-top: 1px solid var(--line2); }
-    .mq-notes > * { max-width: 1120px; }
-    .mq-notes h2 { margin: 0 0 6px; font-weight: 300; font-size: 28px; }
-    .mq-notes .intro { margin: 0 0 22px; color: var(--ink2); max-width: 90ch; }
-    .mq-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 36px; }
-    .mq-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 2px 12px; font-size: 13.5px; line-height: 1.55; }
-    .mq-list li > .mq-n { grid-row: span 2; margin-top: 1px; }
-    .mq-list strong { font-weight: 500; }
-    .mq-list .refs { grid-column: 2; font-size: 12px; color: var(--ink3); }
-    .mq-notes .after { margin: 24px 0 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--ink2); font-size: 13px; max-width: 110ch; }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     @media (max-width: 1180px) {
       .a-grid, .c-grid { grid-template-columns: minmax(0, 1fr); }
       .mail-prev { position: static; }
-      .mq-list { grid-template-columns: minmax(0, 1fr); }
+      
     }
     @media (max-width: 720px) {
       .mq-first { padding-right: 0; }
@@ -253,11 +255,13 @@
       .mq-scrim { padding: 20px 8px; }
       .mq-scrim .dialog { padding: 20px 16px; }
       .dialog .actions .btn { flex: 1 1 100%; }
-      .mq-notes { padding: 26px 16px 32px; }
+      
     }
     .quick .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); box-shadow: none; }
     .quick .chip[aria-pressed="true"]::before { content: "✓"; font-size: 12px; }
-  </style>
+    .nw { white-space: nowrap; }
+</style>
+<link rel="stylesheet" href="_commun/annotations.css">
 </head>
 <body class="admin">
 <a class="skip" href="#contenu">Aller au contenu</a>
@@ -287,7 +291,7 @@
     <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>Site public</a>
     <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>Instagram</a>
     <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>Galeries privées <span class="mq-n" aria-hidden="true">1</span></a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>Galeries privées <span class="pin" aria-hidden="true">1</span></a>
     <ul class="nav-sub">
       <li><a href="#" aria-current="page">Accès<span class="nav-badge">1<span class="sr-only"> accès expire bientôt</span></span></a></li>
       <li><a href="#">Galeries</a></li>
@@ -328,7 +332,7 @@
   <div class="a-grid">
     <form class="a-form" action="#" method="post" aria-label="Créer l’accès privé">
       <fieldset class="panel">
-        <legend><span class="mq-n" aria-hidden="true">2</span> Pour qui</legend>
+        <legend><span class="pin" aria-hidden="true">2</span> Pour qui</legend>
         <div class="two">
           <label for="qui">Nom de la personne
             <input type="text" id="qui" name="qui" value="Marie Le Goff" autocomplete="off" aria-describedby="qui-h">
@@ -345,7 +349,7 @@
       </fieldset>
 
       <fieldset class="panel">
-        <legend><span class="mq-n" aria-hidden="true">3</span> Photos</legend>
+        <legend><span class="pin" aria-hidden="true">3</span> Photos</legend>
         <div class="ph-count"><span><strong>24 photos choisies</strong> · séance du 12 septembre 2026, plage du Sillon</span><span class="actions"><a class="btn ghost" href="#">Choisir dans la photothèque</a></span></div>
         <ul class="thumbs" aria-label="Photos de la galerie (8 premières sur 24)">
           <li><img src="_commun/photos/ciel.webp" width="900" height="600" alt="Le soleil derrière Cézembre"></li>
@@ -365,16 +369,16 @@
       </fieldset>
 
       <fieldset class="panel">
-        <legend><span class="mq-n" aria-hidden="true">4</span> Droits de Marie</legend>
+        <legend><span class="pin" aria-hidden="true">4</span> Droits de Marie</legend>
         <div class="rights">
           <label class="opt-card"><input type="radio" name="droits" value="voir"><span>Voir seulement <span class="tag">(choix par défaut)</span></span><span class="d">Les photos s’affichent avec le filigrane du site ; rien à télécharger.</span></label>
-          <label class="opt-card"><input type="radio" name="droits" value="telecharger"><span>Voir et télécharger en 2 000 px</span><span class="d">JPEG de 1 à 1,5 Mo, sans GPS, marqué « usage personnel ». Jamais l’original.</span></label>
+          <label class="opt-card"><input type="radio" name="droits" value="telecharger"><span>Voir et télécharger en 2 000 px</span><span class="d">JPEG de 1 à 1,5 Mo, sans GPS, marqué « usage personnel ». Jamais l’original.</span></label>
           <label class="opt-card"><input type="radio" name="droits" value="tirages" checked><span>Voir, télécharger et choisir des tirages <span class="sel">— choisi</span></span><span class="d">En plus : ses favoris vous sont envoyés comme sélection, et elle peut commander un tirage au prix de la boutique.</span></label>
         </div>
       </fieldset>
 
       <fieldset class="panel">
-        <legend><span class="mq-n" aria-hidden="true">5</span> Durée</legend>
+        <legend><span class="pin" aria-hidden="true">5</span> Durée</legend>
         <div class="date-row">
           <label for="fin">Expire le
             <input type="text" id="fin" name="fin" value="15/11/2026" inputmode="numeric" aria-describedby="fin-f fin-h">
@@ -391,7 +395,7 @@
       </fieldset>
 
       <fieldset class="panel">
-        <legend><span class="mq-n" aria-hidden="true">6</span> Mot de passe</legend>
+        <legend><span class="pin" aria-hidden="true">6</span> Mot de passe</legend>
         <label for="mdp" class="lbl">Mot de passe, généré : 4 mots reliés par des tirets</label>
         <div class="pw">
           <input type="text" id="mdp" name="mdp" value="olive-pont-marée-sept" readonly aria-describedby="mdp-h" spellcheck="false">
@@ -412,7 +416,7 @@
     <aside class="mail-prev" aria-labelledby="prev-t">
       <div class="panel">
         <div class="mail-hd">
-          <h2 id="prev-t"><span class="mq-n" aria-hidden="true">7</span> Aperçu de l’e-mail d’invitation</h2>
+          <h2 id="prev-t"><span class="pin" aria-hidden="true">7</span> Aperçu de l’e-mail d’invitation</h2>
           <dl>
             <dt>De</dt><dd>Julien · Nicephos &lt;julien@nicephos.art&gt;</dd>
             <dt>À</dt><dd>marie.legoff@exemple.fr</dd>
@@ -427,13 +431,13 @@
           <p>Le mot de passe, je vous le donne à part, par SMS. Vous pourrez :</p>
           <ul>
             <li>marquer d’un cœur vos préférées et me les envoyer ;</li>
-            <li>télécharger les photos (2 000 px, pour votre usage personnel) ;</li>
+            <li>télécharger les photos (2 000 px, pour votre usage personnel) ;</li>
             <li>choisir celles à tirer.</li>
           </ul>
           <p>Ce lien est à vous seule : merci de ne pas le transférer.<br>À bientôt, Julien</p>
           <p class="small">Nicephos note la date de vos visites, vos favoris et vos téléchargements, pour savoir si les photos vous sont parvenues ; tout est effacé six mois après la fin de l’accès. Un seul cookie, nécessaire, garde la galerie ouverte. <a href="#">Confidentialité</a></p>
         </div>
-        <p class="mail-foot">Texte seul, sans image ni pixel de suivi · environ 2 ko · en français, langue choisie plus haut</p>
+        <p class="mail-foot">Texte seul, sans image ni pixel de suivi · environ 2 ko · en français, langue choisie plus haut</p>
       </div>
     </aside>
   </div>
@@ -442,7 +446,7 @@
   <section class="mq-sec" aria-labelledby="ecran-b">
     <p class="mq-screen" id="ecran-b"><b>Écran B</b> Juste après « Créer l’accès » · page affichée une seule fois <code>/admin/prive/acces/31/cree</code></p>
     <p class="flash-ok" role="status"><span class="sym" aria-hidden="true">✓</span><span>Accès créé pour <strong>Marie Le Goff</strong>. L’invitation est partie à marie.legoff@exemple.fr à 10 h 42.</span></p>
-    <h2 class="big"><span class="mq-n" aria-hidden="true">8</span> À transmettre à Marie, par un autre canal</h2>
+    <h2 class="big"><span class="pin" aria-hidden="true">8</span> À transmettre à Marie, par un autre canal</h2>
     <div class="panel secrets">
       <p class="once"><span class="sym" aria-hidden="true">▲</span><span><strong>Notez-les maintenant :</strong> en quittant cette page, ni le lien ni le mot de passe ne pourront être relus. Perdus, ils se remplacent (« Nouveau mot de passe » garde le lien).</span></p>
       <div class="secret">
@@ -452,12 +456,12 @@
       </div>
       <div class="secret">
         <span class="k" id="k-mdp">Mot de passe</span>
-        <output aria-labelledby="k-mdp">olive-pont-marée-sept</output>
+        <output aria-labelledby="k-mdp"><span class="nw">olive-pont-marée-sept</span></output>
         <span class="copied" role="status"><span aria-hidden="true">✓ </span>Copié</span>
       </div>
       <div class="secret">
         <span class="k" id="k-sms">SMS prêt à envoyer</span>
-        <p class="sms" id="sms">Bonjour Marie, le mot de passe de votre galerie : olive-pont-marée-sept. Le lien est dans mon e-mail de ce matin. Julien</p>
+        <p class="sms" id="sms">Bonjour Marie, le mot de passe de votre galerie : <span class="nw">olive-pont-marée-sept</span>. Le lien est dans mon e-mail de ce matin. Julien</p>
         <button class="btn sec" type="button">Copier le SMS</button>
       </div>
       <p class="actions"><a class="btn" href="#ecran-c">J’ai noté, voir les accès</a> <a class="btn ghost" href="#">Voir la galerie comme Marie</a></p>
@@ -482,7 +486,7 @@
     </div>
 
     <table class="acc">
-      <caption><span class="mq-n" aria-hidden="true">9</span> Tous les accès <span class="mono">5 accès, les plus proches de leur fin d’abord · heure de Paris</span></caption>
+      <caption><span class="pin" aria-hidden="true">9</span> Tous les accès <span class="mono">5 accès, les plus proches de leur fin d’abord · heure de Paris</span></caption>
       <thead>
         <tr><th scope="col">Pour qui</th><th scope="col">Droits</th><th scope="col">Fin de l’accès</th><th scope="col">État</th><th scope="col">Activité</th><th scope="col">Actions</th></tr>
       </thead>
@@ -499,7 +503,7 @@
           <th scope="row"><a href="#">Claire et Antoine Dubreuil</a><span class="gal"><img src="_commun/photos/mer.webp" width="900" height="600" alt="">Mariage à Dinard · 86 photos</span></th>
           <td data-k="Droits">Voir et télécharger</td>
           <td data-k="Fin de l’accès"><time datetime="2026-12-31">31 déc. 2026</time><span class="mono">créé le 2 nov. par Sébastien</span></td>
-          <td data-k="État"><span class="etat done"><span class="sym" aria-hidden="true">●</span>Actif</span></td>
+          <td data-k="État"><span class="etat done"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Actif</span></td>
           <td data-k="Activité"><span class="act"><strong>Ouvert 11 fois</strong><span>dernière ouverture le <time datetime="2026-11-09T14:02+01:00">9 nov. à 14 h 02</time></span><span>3 appareils · 52 téléchargements</span></span></td>
           <td><span class="acts"><a class="btn sec" href="#">Prolonger…</a> <a class="btn ghost risk" href="#">Révoquer…</a></span></td>
         </tr>
@@ -507,7 +511,7 @@
           <th scope="row"><a href="#">Hugo Lambert</a><span class="gal"><img src="_commun/photos/dune.webp" width="900" height="600" alt="">Portraits d’atelier · 9 photos</span></th>
           <td data-k="Droits">Voir seulement</td>
           <td data-k="Fin de l’accès"><time datetime="2026-12-12">12 déc. 2026</time><span class="mono">créé le 12 nov. par Julien</span></td>
-          <td data-k="État"><span class="etat done"><span class="sym" aria-hidden="true">●</span>Actif</span></td>
+          <td data-k="État"><span class="etat done"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Actif</span></td>
           <td data-k="Activité"><span class="act"><strong>Jamais ouvert</strong><span>invitation copiée, sans e-mail</span></span></td>
           <td><span class="acts"><a class="btn sec" href="#">Prolonger…</a> <a class="btn ghost risk" href="#">Révoquer…</a></span></td>
         </tr>
@@ -530,15 +534,15 @@
       </tbody>
     </table>
     <p class="legend"><span class="f-lb">États</span>
-      <span class="etat"><span class="sym" aria-hidden="true">○</span>Brouillon, pas encore envoyé</span>
-      <span class="etat done"><span class="sym" aria-hidden="true">●</span>Actif</span>
+      <span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Brouillon, pas encore envoyé</span>
+      <span class="etat done"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Actif</span>
       <span class="etat warn"><span class="sym" aria-hidden="true">▲</span>Expire dans 7 jours ou moins</span>
       <span class="etat stop"><span class="sym" aria-hidden="true">✕</span>Expiré ou révoqué : le lien ne marche plus</span>
     </p>
 
     <div class="c-grid" id="activite">
       <section class="panel" aria-labelledby="act-t">
-        <h3 id="act-t"><span class="mq-n" aria-hidden="true">10</span> Accès de Marie Le Goff : activité</h3>
+        <h3 id="act-t"><span class="pin" aria-hidden="true">10</span> Accès de Marie Le Goff : activité</h3>
         <dl class="stats">
           <div><dt>Ouvertures</dt><dd>4<small>sur 2 appareils</small></dd></div>
           <div><dt>Favoris</dt><dd>6<small>sur 24</small></dd></div>
@@ -547,7 +551,7 @@
         <ol class="hist" reversed>
           <li><time datetime="2026-10-18T21:14+02:00">18 oct., 21 h 14</time><span>Marie a envoyé sa sélection : 6 photos. <a class="more" href="#">Voir la sélection</a></span></li>
           <li><time datetime="2026-10-18T21:10+02:00">18 oct., 21 h 10</time><span>Mot de passe accepté, sur un deuxième appareil.</span></li>
-          <li><time datetime="2026-10-17T08:05+02:00">17 oct., 8 h 05</time><span>9 photos téléchargées en 2 000 px.</span></li>
+          <li><time datetime="2026-10-17T08:05+02:00">17 oct., 8 h 05</time><span>9 photos téléchargées en 2 000 px.</span></li>
           <li><time datetime="2026-10-16T19:02+02:00">16 oct., 19 h 02</time><span>Mot de passe accepté. Première ouverture.</span></li>
           <li><time datetime="2026-10-16T10:42+02:00">16 oct., 10 h 42</time><span>Accès créé par Julien ; invitation envoyée.</span></li>
         </ol>
@@ -578,7 +582,7 @@
     <div class="mq-scrim">
       <dialog open class="dialog revoke" aria-labelledby="rv-t" aria-describedby="rv-d">
         <form method="dialog">
-          <h2 id="rv-t"><span class="mq-n" aria-hidden="true">11</span> Révoquer l’accès de Marie ?</h2>
+          <h2 id="rv-t"><span class="pin" aria-hidden="true">11</span> Révoquer l’accès de Marie ?</h2>
           <p class="sub" id="rv-d">Le lien cessera de fonctionner immédiatement.</p>
           <h3>Ce qui va se passer</h3>
           <ul class="conseq">
@@ -593,7 +597,7 @@
       </dialog>
       <p class="mq-cap">puis, en bas de l’écran</p>
       <div class="mq-toast" role="status">
-        <p><span class="mq-n" aria-hidden="true">12</span> Accès de Marie révoqué.<span class="left">Annulable encore 7 s · le délai s’arrête tant que la souris ou le focus est ici</span></p>
+        <p><span class="pin" aria-hidden="true">12</span> Accès de Marie révoqué.<span class="left">Annulable encore 7 s · le délai s’arrête tant que la souris ou le focus est ici</span></p>
         <button type="button">Annuler</button>
         <span class="timer" aria-hidden="true"><i></i></span>
       </div>
@@ -602,25 +606,7 @@
 </main>
 </div>
 
-<aside class="mq-notes" aria-labelledby="mq-notes-t">
-  <h2 id="mq-notes-t">Ce qui change</h2>
-  <p class="intro">Maquette MQ-18 · Administration › Galeries privées › Accès. Le mode suit le système : « Chambre noire » sur la capture de bureau, clair sur celle du téléphone. Données fictives, photos de démonstration, aucun script : les états sont figés pour la démonstration. Les repères renvoient aux numéros ci-dessous ; Marie retrouve ces réglages dans les maquettes MQ-16 (accès) et MQ-17 (galerie).</p>
-  <ol class="mq-list">
-    <li><span class="mq-n">1</span><span><strong>Les galeries privées trouvent leur place sans rallonger le menu.</strong> Rangées dans « Publier » (MQ-07), avec « Accès » et « Galeries » ; le compteur se lit en entier (« 1 accès expire bientôt »). L’administration reste réservée à l’équipe, connectée via Zitadel, ce que rappelle le pied du menu. Modérateur et Relecteur n’y ont pas accès.</span><span class="refs">UX-A-32, UX-A-11 · loi de Hick · B&amp;S 1.2.1 · RGAA 12.2 · étude G55</span></li>
-    <li><span class="mq-n">2</span><span><strong>Un accès, une personne nommée.</strong> Le nom donne le titre que verra l’invitée (« Galerie de Marie ») ; l’e-mail est facultatif et sa durée de conservation est dite ; la langue de l’invitation se choisit ici. Chaque champ a son étiquette visible et son aide reliée.</span><span class="refs">UX-T-18 · étude G5, G37, G70 · RGAA 11.1, 11.2 · WCAG 3.3.2 · Opquast 69</span></li>
-    <li><span class="mq-n">3</span><span><strong>Les photos, et leurs accords, avant l’envoi.</strong> On voit les 8 premières et le total ; une photo dont une personne reconnaissable n’a pas d’accord pour un usage privé est signalée par un symbole, un mot et deux issues, sans bloquer le reste.</span><span class="refs">UX-T-18, UX-A-16 · étude G61 · B&amp;S 1.1 Incitation · WCAG 1.4.1 · Nielsen 5</span></li>
-    <li><span class="mq-n">4</span><span><strong>Les droits en trois phrases, pas en cases à combiner.</strong> Groupe de boutons radio dans un fieldset ; chaque option dit ce que la personne pourra faire, et le poids d’un téléchargement. Le choix par défaut est le plus prudent (« Voir seulement ») ; le choix fait est marqué par un cadre ET le mot « choisi ».</span><span class="refs">UX-T-18 · étude G44, G45 · RGAA 11.5, 11.6 · B&amp;S 3.1 · WCAG 1.4.1</span></li>
-    <li><span class="mq-n">5</span><span><strong>La fin de l’accès, en date et en mots.</strong> 30 jours par défaut, raccourcis 7 jours / 30 jours / 3 mois, et la date relue en toutes lettres (« dimanche 15 novembre 2026, à minuit »). L’aide annonce qu’on pourra prolonger sans changer le lien.</span><span class="refs">UX-T-18 · étude G8, G10 · WCAG 2.2.1 · Opquast 172 · ISO 9241-110 autodescriptivité</span></li>
-    <li><span class="mq-n">6</span><span><strong>Un mot de passe qu’on peut dicter.</strong> Généré, jamais saisi à la main ; « Afficher » est un vrai bouton bascule (aria-pressed), « Régénérer » à côté ; la saisie tolère accents, majuscules et espaces. Il ne voyage jamais dans l’e-mail.</span><span class="refs">UX-T-18 · WCAG 3.3.8 · étude G14, G15, G22 · RGAA 7.1 · Opquast 76</span></li>
-    <li><span class="mq-n">7</span><span><strong>L’e-mail se relit avant de partir.</strong> Expéditeur nommé, objet humain, date de fin mise en évidence, ce que Marie pourra faire, information sur ses données et le cookie. Texte seul, environ 2 ko, sans pixel de suivi.</span><span class="refs">UX-T-18 · étude G58, G72 · RGPD art. 13 · RGESN 4.4 · Nielsen 1</span></li>
-    <li><span class="mq-n">8</span><span><strong>Le lien et le mot de passe, une seule fois.</strong> La page le dit avant de les montrer, propose de les copier un par un et un SMS prêt à envoyer ; « Copié » est annoncé comme message de statut. Un rechargement ne crée pas un second accès.</span><span class="refs">UX-T-18 · étude G7, G57 · RGAA 7.5 · WCAG 4.1.3 · B&amp;S 1.4 Feedback immédiat</span></li>
-    <li><span class="mq-n">9</span><span><strong>La liste parle la langue commune des états.</strong> Même pastille (forme et mot) que les photos et les commandes, avec sa légende ; « Ouvert » veut dire « mot de passe accepté », jamais « lien chargé » (un antivirus ouvre aussi les liens). Vrai tableau de données sur bureau, une carte par accès sur téléphone, cibles de 44 px.</span><span class="refs">UX-A-16, UX-A-32 · étude G12, G59 · RGAA 5.4, 5.6, 5.7, 3.1 · WCAG 1.4.1, 2.5.8</span></li>
-    <li><span class="mq-n">10</span><span><strong>L’activité se lit comme un récit, et les gestes sont à côté.</strong> Une phrase par événement, heure de Paris, aucune adresse IP ; « Prolonger » garde le lien et le dit ; « Nouveau mot de passe » aussi ; « Révoquer » est isolé en bas, en couleur de danger ET annoncé comme demandant confirmation.</span><span class="refs">UX-T-18, UX-A-19 · étude G9, G10, G31, G60 · B&amp;S 1.2.1 · ISO 9241-110 conformité aux attentes</span></li>
-    <li><span class="mq-n">11</span><span><strong>Révoquer : une confirmation qui nomme la personne et les conséquences.</strong> Ce que verra Marie, ce qui reste (favoris, historique), ce qui ne bouge pas (les photos) ; « Annuler » vient en premier et reçoit le focus ; le texte du bouton de danger est sombre en mode sombre (6,5:1).</span><span class="refs">UX-A-07, UX-A-32 · WCAG 3.3.4 · RGAA 7.1, 12.8 · B&amp;S 3.1, 5.1 · Nielsen 3, 5</span></li>
-    <li><span class="mq-n">12</span><span><strong>Et dix secondes pour changer d’avis.</strong> Le message dit ce qui vient d’arriver, offre « Annuler » et montre le temps restant ; le délai s’arrête au survol et au focus, le message est annoncé et « Annuler » s’atteint d’une tabulation.</span><span class="refs">UX-A-08, UX-A-07 · WCAG 2.2.1, 4.1.3 · RGAA 7.5 · B&amp;S 3.2 Contrôle utilisateur</span></li>
-  </ol>
-  <p class="after">À trancher avant de coder : l’étude (G14) prévoit un mot de passe de 12 caractères groupés par 4 ; je propose quatre mots, plus faciles à dicter, à condition de les tirer d’une liste d’au moins 7 776 mots sans homonymes (51,7 bits, au-dessus des 50 bits demandés par la CNIL). Et le seuil d’alerte d’appareils (G31) : 3, comme dans l’étude, mais seulement signalé dans la liste, jamais bloquant pour une famille qui regarde à plusieurs.</p>
-</aside>
+
 
 <nav class="tabbar" aria-label="Navigation rapide">
   <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
@@ -629,5 +615,26 @@
   <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
   <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
 </nav>
+<aside class="mq-notes" aria-labelledby="mq-notes-t">
+  <p class="mq-id">Maquette MQ-18 · administration · galeries privées, nouvel accès · « Chambre noire » au bureau, mode clair sur téléphone · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
+  <h2 id="mq-notes-t">Ce qui change</h2>
+  <p class="mq-lead">Maquette MQ-18 · Administration › Galeries privées › Accès. Le mode suit le système : « Chambre noire » sur la capture de bureau, clair sur celle du téléphone. Données fictives, photos de démonstration, aucun script : les états sont figés pour la démonstration. Les repères renvoient aux numéros ci-dessous ; Marie retrouve ces réglages dans les maquettes MQ-16 (accès) et MQ-17 (galerie).</p>
+  <ol class="mq-list">
+    <li><span class="pin">1</span><span><strong>Les galeries privées trouvent leur place sans rallonger le menu.</strong> Rangées dans « Publier » (MQ-07), avec « Accès » et « Galeries » ; le compteur se lit en entier (« 1 accès expire bientôt »). L’administration reste réservée à l’équipe, connectée via Zitadel, ce que rappelle le pied du menu. Modérateur et Relecteur n’y ont pas accès.</span><span class="ref">UX-A-32, UX-A-11 · loi de Hick · B&amp;S 1.2.1 · RGAA 12.2 · étude G55</span></li>
+    <li><span class="pin">2</span><span><strong>Un accès, une personne nommée.</strong> Le nom donne le titre que verra l’invitée (« Galerie de Marie ») ; l’e-mail est facultatif et sa durée de conservation est dite ; la langue de l’invitation se choisit ici. Chaque champ a son étiquette visible et son aide reliée.</span><span class="ref">UX-T-18 · étude G5, G37, G70 · RGAA 11.1, 11.2 · WCAG 3.3.2 · Opquast 69</span></li>
+    <li><span class="pin">3</span><span><strong>Les photos, et leurs accords, avant l’envoi.</strong> On voit les 8 premières et le total ; une photo dont une personne reconnaissable n’a pas d’accord pour un usage privé est signalée par un symbole, un mot et deux issues, sans bloquer le reste.</span><span class="ref">UX-T-18, UX-A-16 · étude G61 · B&amp;S 1.1 Incitation · WCAG 1.4.1 · Nielsen 5</span></li>
+    <li><span class="pin">4</span><span><strong>Les droits en trois phrases, pas en cases à combiner.</strong> Groupe de boutons radio dans un fieldset ; chaque option dit ce que la personne pourra faire, et le poids d’un téléchargement. Le choix par défaut est le plus prudent (« Voir seulement ») ; le choix fait est marqué par un cadre ET le mot « choisi ».</span><span class="ref">UX-T-18 · étude G44, G45 · RGAA 11.5, 11.6 · B&amp;S 3.1 · WCAG 1.4.1</span></li>
+    <li><span class="pin">5</span><span><strong>La fin de l’accès, en date et en mots.</strong> 30 jours par défaut, raccourcis 7 jours / 30 jours / 3 mois, et la date relue en toutes lettres (« dimanche 15 novembre 2026, à minuit »). L’aide annonce qu’on pourra prolonger sans changer le lien.</span><span class="ref">UX-T-18 · étude G8, G10 · WCAG 2.2.1 · Opquast 172 · ISO 9241-110 autodescriptivité</span></li>
+    <li><span class="pin">6</span><span><strong>Un mot de passe qu’on peut dicter.</strong> Généré, jamais saisi à la main ; « Afficher » est un vrai bouton bascule (aria-pressed), « Régénérer » à côté ; la saisie tolère accents, majuscules et espaces. Il ne voyage jamais dans l’e-mail.</span><span class="ref">UX-T-18 · WCAG 3.3.8 · étude G14, G15, G22 · RGAA 7.1 · Opquast 76</span></li>
+    <li><span class="pin">7</span><span><strong>L’e-mail se relit avant de partir.</strong> Expéditeur nommé, objet humain, date de fin mise en évidence, ce que Marie pourra faire, information sur ses données et le cookie. Texte seul, environ 2 ko, sans pixel de suivi.</span><span class="ref">UX-T-18 · étude G58, G72 · RGPD art. 13 · RGESN 4.4 · Nielsen 1</span></li>
+    <li><span class="pin">8</span><span><strong>Le lien et le mot de passe, une seule fois.</strong> La page le dit avant de les montrer, propose de les copier un par un et un SMS prêt à envoyer ; « Copié » est annoncé comme message de statut. Un rechargement ne crée pas un second accès.</span><span class="ref">UX-T-18 · étude G7, G57 · RGAA 7.5 · WCAG 4.1.3 · B&amp;S 1.3 Feedback immédiat</span></li>
+    <li><span class="pin">9</span><span><strong>La liste parle la langue commune des états.</strong> Même pastille (forme et mot) que les photos et les commandes, avec sa légende ; « Ouvert » veut dire « mot de passe accepté », jamais « lien chargé » (un antivirus ouvre aussi les liens). Vrai tableau de données sur bureau, une carte par accès sur téléphone, cibles de 44 px.</span><span class="ref">UX-A-16, UX-A-32 · étude G12, G59 · RGAA 5.4, 5.6, 5.7, 3.1 · WCAG 1.4.1, 2.5.8</span></li>
+    <li><span class="pin">10</span><span><strong>L’activité se lit comme un récit, et les gestes sont à côté.</strong> Une phrase par événement, heure de Paris, aucune adresse IP ; « Prolonger » garde le lien et le dit ; « Nouveau mot de passe » aussi ; « Révoquer » est isolé en bas, en couleur de danger ET annoncé comme demandant confirmation.</span><span class="ref">UX-T-18, UX-A-19 · étude G9, G10, G31, G60 · B&amp;S 1.2.1 · ISO 9241-110 conformité aux attentes</span></li>
+    <li><span class="pin">11</span><span><strong>Révoquer : une confirmation qui nomme la personne et les conséquences.</strong> Ce que verra Marie, ce qui reste (favoris, historique), ce qui ne bouge pas (les photos) ; « Annuler » vient en premier et reçoit le focus ; le texte du bouton de danger est sombre en mode sombre (6,5:1).</span><span class="ref">UX-A-07, UX-A-32 · WCAG 3.3.4 · RGAA 7.1, 12.8 · B&amp;S 3.1, 5.1 · Nielsen 3, 5</span></li>
+    <li><span class="pin">12</span><span><strong>Et dix secondes pour changer d’avis.</strong> Le message dit ce qui vient d’arriver, offre « Annuler » et montre le temps restant ; le délai s’arrête au survol et au focus, le message est annoncé et « Annuler » s’atteint d’une tabulation.</span><span class="ref">UX-A-08, UX-A-07 · WCAG 2.2.1, 4.1.3 · RGAA 7.5 · B&amp;S 3.2 Contrôle utilisateur</span></li>
+  </ol>
+  <p class="mq-lead mq-socle">À trancher avant de coder : l’étude (G14) prévoit un mot de passe de 12 caractères groupés par 4 ; je propose quatre mots, plus faciles à dicter, à condition de les tirer d’une liste d’au moins 7 776 mots sans homonymes (51,7 bits, au-dessus des 50 bits demandés par la CNIL). Et le seuil d’alerte d’appareils (G31) : 3, comme dans l’étude, mais seulement signalé dans la liste, jamais bloquant pour une famille qui regarde à plusieurs.</p>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette, hors encart et pastilles) — <b>bureau 1440 × 900, « Chambre noire »</b> : H1 à 93 px ; contraste le plus faible du texte 4,8:1 (texte indicatif « Rechercher, agir… », #8a857c sur #18181b), tout le reste au-dessus ; fond de la barre latérale sur toute la hauteur de la page ; 12 vignettes. <b>Pixel 7 (412 × 839, densité 2), mode clair</b> : contraste le plus faible 4,7:1 (liens ambre #9a5b0c sur #f1eee8) ; aucun défilement horizontal. Seul texte sous 12 px : le raccourci « Ctrl K » (10,5 px), hérité de l’administration actuelle (UX-A-30). Axe-core (WCAG 2.2 A et AA) : 0 violation sur les deux rendus.</p>
+</aside>
 </body>
 </html>

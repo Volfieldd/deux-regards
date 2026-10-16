@@ -12,11 +12,13 @@
 |---|---|---|---|
 | 48 | 23 | 35 | 0 |
 
-Taux C / (C + NC) sur cet échantillon : **68%** (48 / 71). Taux global indicatif, calculé sur un échantillon et sans test au lecteur d'écran réel : **ce n'est pas une déclaration d'accessibilité** (elle reste à faire par l'éditeur, sur l'échantillon réglementaire, page par page).
+Taux de conformité : **non calculé**. Aucun critère n'est resté NT, mais l'échantillon n'est pas l'échantillon réglementaire et la restitution n'a pas été testée avec un lecteur d'écran réel (7.1 et 7.5, et le critère WCAG 4.1.2, ont été jugés sur l'arbre d'accessibilité de Chromium) : seuls les effectifs ci-dessus sont donnés. **Ce n'est pas une déclaration d'accessibilité** (elle reste à faire par l'éditeur, sur l'échantillon réglementaire, page par page).
 
 Écarts avec la grille automatique : 10.8 et 11.13 passent de NC à C (faux positifs : piège à robots non focalisable, case « avec mon prénom ») ; 1.1 passe de C à NC (QR code SVG que la sonde ne voit pas) ; 12.7 s'étend à l'accueil (la sonde avait pris « #series » pour un lien d'évitement).
 
 ## Grille (106 critères)
+
+Colonne « Niv. » : niveau le plus exigeant parmi les critères WCAG auxquels le critère RGAA renvoie (référentiel DINUM, attribut des critères). Ainsi 7.3, 9.1, 11.1 et 12.7 sont notés AA parce qu'ils renvoient aussi à 2.4.7, 2.4.6 ou 3.2.3 (AA), même si leur critère WCAG principal (2.1.1, 1.3.1, 2.4.1…) est de niveau A.
 
 | Critère | Thématique | Niv. | Intitulé | Statut | Justification | Où |
 |---|---|---|---|---|---|---|

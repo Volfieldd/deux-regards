@@ -1153,3 +1153,6 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .desc-sugg { border-left: 2px dashed var(--line2); padding: 2px 0 2px 12px; margin: -2px 0 8px; display: grid; gap: 4px; }
 .desc-sugg p { margin: 0; }
 .desc-sugg .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* Symboles d'état en SVG en ligne (forme + mot), indépendants de la police (audit, MQ-09) */
+svg.sy, svg.sym { display: inline-block; flex: none; width: 12px; height: 12px; vertical-align: -1px; }

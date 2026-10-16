@@ -12,6 +12,8 @@
 
     /* Maquette : la barre latérale garde sa hauteur naturelle pour la capture pleine page. */
     .side { height: auto; align-self: start; }
+    /* Capture pleine page : le fond de la barre latérale descend jusqu’en bas de la page (audit, B). */
+    @media (min-width: 721px) { .shell { background: linear-gradient(90deg, var(--s1) 0 var(--side), transparent var(--side)); } .shell > .side { border-right: 0; } .shell::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--side) - 1px); border-left: 1px solid var(--line); } .shell { position: relative; } }
     .side .foot { margin-top: 18px; }
     .nav-sub { list-style: none; margin: 0 0 2px; padding: 0 0 0 30px; display: grid; gap: 2px; }
     .nav-sub a { min-height: 30px; font-size: 13.5px; }
@@ -22,7 +24,7 @@
     .side .foot .nav a { min-height: 30px; }
 
     /* Repères d'annotation ①②③ (la légende est en bas de page). */
-    .mq-n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font: 600 12px/1 var(--font); letter-spacing: 0; text-transform: none; vertical-align: middle; flex: none; box-shadow: 0 0 0 2px var(--bg); }
+    
     .mq-screen { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 18px; padding-top: 10px; border-top: 1px dashed var(--line2); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink2); }
     .mq-screen b { color: var(--accent-ink); font-weight: 600; }
     .mq-screen code { text-transform: none; letter-spacing: 0; }
@@ -181,20 +183,20 @@
     .btn.danger { color: var(--on-danger); }
 
     /* Annotations */
-    .mq-notes { padding: 34px 36px 56px calc(var(--side) + 36px); background: var(--s1); border-top: 1px solid var(--line2); }
-    .mq-notes > * { max-width: 1120px; }
-    .mq-notes h2 { margin: 0 0 6px; font-weight: 300; font-size: 28px; }
-    .mq-notes .intro { margin: 0 0 22px; color: var(--ink2); max-width: 90ch; }
-    .mq-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 36px; }
-    .mq-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 2px 12px; font-size: 13.5px; line-height: 1.55; }
-    .mq-list li > .mq-n { grid-row: span 2; margin-top: 1px; }
-    .mq-list strong { font-weight: 500; }
-    .mq-list .refs { grid-column: 2; font-size: 12px; color: var(--ink3); }
-    .mq-notes .after { margin: 24px 0 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--ink2); font-size: 13px; max-width: 110ch; }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     @media (max-width: 1100px) {
       .od-grid { grid-template-columns: minmax(0, 1fr); }
-      .mq-list { grid-template-columns: minmax(0, 1fr); }
+      
     }
     @media (max-width: 720px) {
       .mq-first { padding-right: 0; }
@@ -245,7 +247,7 @@
       .mq-c { margin-top: 36px; }
       .mq-scrim { padding: 20px 8px; }
       .mq-scrim .dialog { padding: 20px 16px; }
-      .mq-notes { padding: 26px 16px 110px; }
+      
       .cert details summary { min-height: 44px; }
     }
     /* Demi-disque dessiné en CSS : le glyphe ◐ manque à Jost et retombe sur une police de secours. */
@@ -265,9 +267,11 @@
       .orders .c-total { align-self: center; }
       .o-filters .line .f-lb { display: inline; flex: 1 1 auto; }
       .o-filters .line .chips { flex: 1 1 100%; }
-      .mq-notes { padding-bottom: 32px; }
+      
     }
-  </style>
+    .nw { white-space: nowrap; }
+</style>
+<link rel="stylesheet" href="_commun/annotations.css">
 </head>
 <body class="admin">
 <a class="skip" href="#contenu">Aller au contenu</a>
@@ -298,7 +302,7 @@
     <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>Instagram</a>
     <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Carnets</a>
     <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>Galeries privées</a>
-    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>Boutique <span class="mq-n" aria-hidden="true">1</span></a>
+    <a href="#"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>Boutique <span class="pin" aria-hidden="true">1</span></a>
     <ul class="nav-sub">
       <li><a href="#" aria-current="page">Commandes<span class="nav-badge">2<span class="sr-only"> à préparer</span></span></a></li>
       <li><a href="#">Éditions et tirages</a></li>
@@ -340,7 +344,7 @@
 
   <div class="o-filters">
     <div class="line">
-      <span class="mq-n" aria-hidden="true">2</span>
+      <span class="pin" aria-hidden="true">2</span>
       <p class="f-lb" id="f-etat">État</p>
       <ul class="chips" aria-labelledby="f-etat">
         <li><a class="chip" href="#">À préparer <span class="n">(2)</span></a></li>
@@ -366,17 +370,17 @@
   </div>
 
   <table class="orders">
-    <caption><span class="mq-n" aria-hidden="true">3</span> Toutes les commandes des 30 derniers jours <span class="mono">6 commandes, les plus récentes d’abord · heure de Paris</span></caption>
+    <caption><span class="pin" aria-hidden="true">3</span> Toutes les commandes des 30 derniers jours <span class="mono">6 commandes, les plus récentes d’abord · heure de Paris</span></caption>
     <thead>
       <tr><th scope="col">N°</th><th scope="col">Date</th><th scope="col">Client</th><th scope="col">Tirages</th><th scope="col" class="num">Total TTC</th><th scope="col">État</th></tr>
     </thead>
     <tbody>
       <tr class="todo">
-        <th scope="row" class="c-no"><a href="#commande">N-2026-0007</a></th>
+        <th scope="row" class="c-no"><a href="#commande"><span class="nw">N-2026-0007</span></a></th>
         <td class="c-date"><time datetime="2026-10-16T10:12+02:00">16 oct. 2026, 10 h 12</time></td>
         <td class="c-client">Claire Vasseur<span class="mono">Nantes, France</span></td>
         <td class="c-items"><ul class="o-items">
-          <li><img src="_commun/photos/dune.webp" width="48" height="32" alt="">Miradouro 40 × 60 <span class="ref">· ex. 7/15</span></li>
+          <li><img src="_commun/photos/ciel.webp" width="48" height="32" alt="">Miradouro 40 × 60 <span class="ref">· ex. 7/15</span></li>
           <li><img src="_commun/photos/brume.webp" width="48" height="32" alt="">Ribeira 40 × 60 <span class="ref">· ex. 4/15</span></li>
         </ul></td>
         <td class="c-total num">595,00 €</td>
@@ -400,7 +404,7 @@
           <li><img src="_commun/photos/lac.webp" width="48" height="32" alt="" loading="lazy">Le lac ne dit rien 60 × 90, chêne <span class="ref">· ex. 1/15</span></li>
         </ul></td>
         <td class="c-total num">655,00 €</td>
-        <td class="c-etat"><span class="etat done"><span class="sym" aria-hidden="true">●</span>Expédiée</span><span class="mono">Colissimo, 13 oct.</span></td>
+        <td class="c-etat"><span class="etat done"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Expédiée</span><span class="mono">Colissimo, 13 oct.</span></td>
       </tr>
       <tr>
         <th scope="row" class="c-no"><a href="#">N-2026-0004</a></th>
@@ -410,7 +414,7 @@
           <li><img src="_commun/photos/brume.webp" width="48" height="32" alt="" loading="lazy">Ribeira 30 × 45 <span class="ref">· ex. 3/15</span></li>
         </ul></td>
         <td class="c-total num">195,00 €</td>
-        <td class="c-etat"><span class="etat done"><span class="sym" aria-hidden="true">●</span>Expédiée</span><span class="mono">Colissimo, 7 oct.</span></td>
+        <td class="c-etat"><span class="etat done"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Expédiée</span><span class="mono">Colissimo, 7 oct.</span></td>
       </tr>
       <tr>
         <th scope="row" class="c-no"><a href="#">N-2026-0003</a></th>
@@ -430,15 +434,15 @@
           <li><img src="_commun/photos/neige.webp" width="48" height="32" alt="" loading="lazy">Silence blanc 30 × 45 <span class="ref">· ex. 3/15</span></li>
         </ul></td>
         <td class="c-total num">195,00 €</td>
-        <td class="c-etat"><span class="etat done"><span class="sym" aria-hidden="true">●</span>Expédiée</span><span class="mono">Colissimo, 24 sept.</span></td>
+        <td class="c-etat"><span class="etat done"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Expédiée</span><span class="mono">Colissimo, 24 sept.</span></td>
       </tr>
     </tbody>
   </table>
-  <p class="legend"><span class="mq-n" aria-hidden="true">4</span><span class="f-lb">États</span>
-    <span class="etat"><span class="sym" aria-hidden="true">○</span>En attente de paiement</span>
+  <p class="legend"><span class="pin" aria-hidden="true">4</span><span class="f-lb">États</span>
+    <span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>En attente de paiement</span>
     <span class="etat todo"><span class="sym" aria-hidden="true"><i class="half" aria-hidden="true"></i></span>Payée — à préparer</span>
     <span class="etat todo"><span class="sym" aria-hidden="true"><i class="half" aria-hidden="true"></i></span>Tirage lancé</span>
-    <span class="etat done"><span class="sym" aria-hidden="true">●</span>Expédiée</span>
+    <span class="etat done"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>Expédiée</span>
     <span class="etat warn"><span class="sym" aria-hidden="true">▲</span>À vérifier (colis revenu, paiement contesté)</span>
     <span class="etat stop"><span class="sym" aria-hidden="true">✕</span>Remboursée</span>
     <span>— les mêmes formes que pour les photos : ○ brouillon, <i class="half" aria-hidden="true"></i> proposée, ● publiée.</span>
@@ -446,10 +450,10 @@
 
   <!-- ================= Écran B ================= -->
   <section class="mq-b" id="commande" aria-labelledby="commande-t">
-    <p class="mq-screen"><b>Écran B</b> Détail de la commande, ouvert depuis la liste <code>/admin/boutique/commandes/N-2026-0007</code></p>
+    <p class="mq-screen"><b>Écran B</b> Détail de la commande, ouvert depuis la liste <code>/admin/boutique/commandes/<span class="nw">N-2026-0007</span></code></p>
     <a class="back more" href="#contenu">← Commandes</a>
     <div class="od-head">
-      <h2 id="commande-t">Commande N-2026-0007</h2>
+      <h2 id="commande-t">Commande <span class="nw">N-2026-0007</span></h2>
       <span class="etat todo"><span class="sym" aria-hidden="true"><i class="half" aria-hidden="true"></i></span>Payée — à préparer</span>
     </div>
     <p class="od-sub">Passée le vendredi <time datetime="2026-10-16T10:12+02:00">16 octobre 2026 à 10 h 12</time> par Claire Vasseur · 2 tirages · 595,00 € TTC · livraison annoncée entre le 30 octobre et le 6 novembre.</p>
@@ -457,7 +461,7 @@
     <div class="od-grid">
       <div class="od-main">
         <section class="panel" aria-labelledby="etapes-t">
-          <h3 id="etapes-t"><span class="mq-n" aria-hidden="true">5</span> Où en est la commande</h3>
+          <h3 id="etapes-t"><span class="pin" aria-hidden="true">5</span> Où en est la commande</h3>
           <ol class="o-steps">
             <li class="done"><span class="dot" aria-hidden="true">✓</span><strong>Payée</strong><span class="mono">fait · 16 oct., 10 h 12</span></li>
             <li aria-current="step"><span class="dot" aria-hidden="true"><i class="half" aria-hidden="true"></i></span><strong>Tirage lancé</strong><span class="mono">à faire maintenant</span></li>
@@ -500,17 +504,17 @@
         </section>
 
         <section class="panel" aria-labelledby="tirages-t">
-          <h3 id="tirages-t"><span class="mq-n" aria-hidden="true">6</span> Tirages et certificats <span class="mono">2 tirages</span></h3>
+          <h3 id="tirages-t"><span class="pin" aria-hidden="true">6</span> Tirages et certificats <span class="mono">2 tirages</span></h3>
           <ul class="o-lines">
             <li class="o-line">
-              <img src="_commun/photos/dune.webp" width="150" height="100" alt="" loading="lazy">
+              <img src="_commun/photos/ciel.webp" width="150" height="100" alt="" loading="lazy">
               <div>
                 <h4>Miradouro, l’heure dorée</h4>
                 <p class="meta">Julien · inventaire J-2026-019</p>
                 <p class="meta">40 × 60 cm · Hahnemühle Photo Rag 308 g · tirage pigmentaire · marge blanche de 3 cm · sans cadre</p>
                 <p class="ex"><strong>Exemplaire 7/15</strong> · 290,00 € TTC</p>
                 <div class="cert">
-                  <p class="cert-hd"><span class="etat"><span class="sym" aria-hidden="true">○</span>Certificat à générer</span> une fois le tirage signé</p>
+                  <p class="cert-hd"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Certificat à générer</span> une fois le tirage signé</p>
                   <dl>
                     <dt>Exemplaire</dt><dd>7 sur 15, tous formats confondus</dd>
                     <dt>Inventaire</dt><dd>J-2026-019</dd>
@@ -533,7 +537,7 @@
                 <p class="meta">40 × 60 cm · Hahnemühle Photo Rag 308 g · tirage pigmentaire · marge blanche de 3 cm · sans cadre</p>
                 <p class="ex"><strong>Exemplaire 4/15</strong> · 290,00 € TTC</p>
                 <div class="cert">
-                  <p class="cert-hd"><span class="etat"><span class="sym" aria-hidden="true">○</span>Certificat à générer</span> une fois le tirage signé</p>
+                  <p class="cert-hd"><span class="etat"><svg class="sym" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Certificat à générer</span> une fois le tirage signé</p>
                   <p class="actions"><button class="btn sec" type="button">Générer le certificat (PDF)</button></p>
                 </div>
               </div>
@@ -542,11 +546,11 @@
         </section>
 
         <section class="panel" aria-labelledby="hist-t">
-          <h3 id="hist-t"><span class="mq-n" aria-hidden="true">9</span> Historique <span class="mono">dans l’ordre, heure de Paris</span></h3>
+          <h3 id="hist-t"><span class="pin" aria-hidden="true">9</span> Historique <span class="mono">dans l’ordre, heure de Paris</span></h3>
           <ol class="hist">
             <li><time datetime="2026-10-16T10:12+02:00">16 oct. 2026, 10 h 12</time><span>Paiement accepté par le prestataire : 595,00 € par carte (référence 7Q2K-91XD).</span></li>
             <li><time datetime="2026-10-16T10:12+02:00">16 oct. 2026, 10 h 12</time><span>Exemplaires attribués : <a class="more" href="#">Miradouro, l’heure dorée</a> 7/15 et <a class="more" href="#">Ribeira, brume du fleuve</a> 4/15.</span></li>
-            <li><time datetime="2026-10-16T10:13+02:00">16 oct. 2026, 10 h 13</time><span>Confirmation et facture F-2026-0007 envoyées à Claire Vasseur.</span></li>
+            <li><time datetime="2026-10-16T10:13+02:00">16 oct. 2026, 10 h 13</time><span>Confirmation et facture <span class="nw">JUL-2026-0004</span> envoyées à Claire Vasseur.</span></li>
             <li><time datetime="2026-10-16T10:41+02:00">16 oct. 2026, 10 h 41</time><span><span class="actor">Julien</span> a ajouté une note interne : « Cadeau : facture à part, pas dans le tube. »</span></li>
           </ol>
           <p class="panel-foot"><a class="more" href="#">Voir la boutique dans le Journal</a></p>
@@ -564,7 +568,7 @@
         </section>
 
         <section class="panel" aria-labelledby="paie-t">
-          <h3 id="paie-t"><span class="mq-n" aria-hidden="true">7</span> Paiement et facture</h3>
+          <h3 id="paie-t"><span class="pin" aria-hidden="true">7</span> Paiement et facture</h3>
           <dl class="sums">
             <dt>Miradouro, 40 × 60, ex. 7/15</dt><dd>290,00 €</dd>
             <dt>Ribeira, 40 × 60, ex. 4/15</dt><dd>290,00 €</dd>
@@ -572,7 +576,7 @@
             <dt class="total">Total TTC</dt><dd class="total">595,00 €</dd>
           </dl>
           <p class="hint">Payé par carte le 16 oct. 2026 à 10 h 12, reçu par le prestataire de paiement.</p>
-          <p><a class="dl-file" href="#">Facture F-2026-0007 (PDF, 48 ko)</a></p>
+          <p><a class="dl-file" href="#">Facture <span class="nw">JUL-2026-0004</span> (PDF, 48 ko)</a></p>
           <p><a class="more" href="#">Renvoyer la facture à la cliente</a></p>
           <p class="hint">Conservée 10 ans (obligation comptable).</p>
           <div class="refund-zone">
@@ -582,7 +586,7 @@
         </section>
 
         <section class="panel" aria-labelledby="ed-t">
-          <h3 id="ed-t"><span class="mq-n" aria-hidden="true">8</span> Éditions concernées</h3>
+          <h3 id="ed-t"><span class="pin" aria-hidden="true">8</span> Éditions concernées</h3>
           <div class="ed">
             <h4>Miradouro, l’heure dorée</h4>
             <p class="of">édition de 15, tous formats confondus</p>
@@ -608,12 +612,12 @@
     <div class="mq-scrim">
       <dialog open class="dialog refund" aria-labelledby="rb-t" aria-describedby="rb-d">
         <form method="dialog">
-          <h2 id="rb-t"><span class="mq-n" aria-hidden="true">10</span> Rembourser 595,00 € à Claire Vasseur ?</h2>
-          <p class="sub" id="rb-d">Commande N-2026-0007 · 2 tirages · payée le 16 oct. 2026 par carte</p>
+          <h2 id="rb-t"><span class="pin" aria-hidden="true">10</span> Rembourser 595,00 € à Claire Vasseur ?</h2>
+          <p class="sub" id="rb-d">Commande <span class="nw">N-2026-0007</span> · 2 tirages · payée le 16 oct. 2026 par carte</p>
           <h3>Ce qui va se passer</h3>
           <ul class="conseq">
             <li>Le prestataire de paiement recrédite 595,00 € sur la carte de Claire Vasseur ; l’argent arrive sous 5 à 10 jours.</li>
-            <li>Un avoir AV-2026-0002 annule la facture F-2026-0007 ; il lui est envoyé par e-mail avec le motif.</li>
+            <li>Un avoir <span class="nw">AV-JUL-2026-0002</span> annule la facture <span class="nw">JUL-2026-0004</span> ; il lui est envoyé par e-mail avec le motif.</li>
             <li>L’exemplaire 7/15 de « Miradouro, l’heure dorée » et le 4/15 de « Ribeira, brume du fleuve » ne seront pas réattribués : ils sont notés « annulés » au registre, et un numéro ne désignera jamais deux tirages. Il restera 8 et 11 exemplaires disponibles.</li>
             <li>Le laboratoire n’a rien à annuler : le tirage n’est pas encore lancé.</li>
           </ul>
@@ -636,23 +640,7 @@
 </main>
 </div>
 
-<aside class="mq-notes" aria-labelledby="mq-notes-t">
-  <h2 id="mq-notes-t">Ce qui change</h2>
-  <p class="intro">Maquette MQ-19 · Administration › Boutique › Commandes. Le mode suit le système : « Chambre noire » sur la capture de bureau, clair sur celle du téléphone. Données fictives, photos de démonstration, aucun script : les états sont figés pour la démonstration. Les repères renvoient aux numéros ci-dessous.</p>
-  <ol class="mq-list">
-    <li><span class="mq-n">1</span><span><strong>La boutique entre dans le menu cible sans le rallonger.</strong> Elle se range dans « Publier » (MQ-07) ; « Commandes » porte un compteur lu en entier (« 2 à préparer ») ; « Éditions et tirages » à côté.</span><span class="refs">UX-A-32, UX-A-11 · loi de Hick · B&amp;S 1.2.1 · RGAA 12.2</span></li>
-    <li><span class="mq-n">2</span><span><strong>Des filtres qui montrent leur état.</strong> La pastille active est pleine, cochée et porte aria-current ; chacune dit son nombre. La période et la recherche ne s’appliquent qu’au bouton « Appliquer », jamais à la flèche.</span><span class="refs">UX-A-16, UX-A-10 · RGAA 3.1 · WCAG 1.4.1 et 3.2.2 · Opquast 181</span></li>
-    <li><span class="mq-n">3</span><span><strong>Un vrai tableau de données.</strong> Légende qui dit le filtre, le tri et le fuseau ; N° en en-tête de ligne et lien vers la commande ; dates en clair (« 16 oct. 2026, 10 h 12 », balise time) ; montants TTC alignés à droite. Sur téléphone, une carte par commande et des cibles de 44 px.</span><span class="refs">UX-A-19 · RGAA 5.4, 5.6 et 5.7 · Opquast 4, 231 et 243 · WCAG 2.5.8</span></li>
-    <li><span class="mq-n">4</span><span><strong>Une seule pastille d’état, forme et mot.</strong> ○ <i class="half" aria-hidden="true"></i> ● ▲ ✕ ont le même sens que pour les photos (MQ-09) ; la légende est sous le tableau ; « Payée — à préparer » remplace un « prête » à trois sens.</span><span class="refs">UX-A-16, UX-T-17 · B&amp;S 6 et 7 · RGAA 3.1 · WCAG 1.4.1</span></li>
-    <li><span class="mq-n">5</span><span><strong>La chronologie dit où l’on en est, et le geste suivant est à côté.</strong> Liste ordonnée avec aria-current="step", « fait / à faire / à venir » écrits en toutes lettres. Expédier demande le numéro de suivi, dont le format est annoncé avant la saisie et relié au champ. C’est réversible : pas de confirmation, mais « Annuler » pendant 10 s, avant l’e-mail à la cliente.</span><span class="refs">UX-A-07, UX-A-08 · B&amp;S 1.1 et 1.3 · ISO 9241-110 contrôlabilité · RGAA 11.10 · WCAG 3.3.2</span></li>
-    <li><span class="mq-n">6</span><span><strong>Le certificat se génère depuis la commande.</strong> Exemplaire 7/15, numéro d’inventaire stable J-2026-019, empreinte SHA-256 de l’original, preuve datée par un service indépendant : dit en mots ; le détail technique est replié sous « Pour l’administrateur du serveur ».</span><span class="refs">UX-T-17, UX-T-05, UX-A-18 · Nielsen 2</span></li>
-    <li><span class="mq-n">7</span><span><strong>Paiement et facture lisibles, remboursement à l’écart.</strong> Détail TTC, facture PDF de 48 ko (sous le budget de 100 ko), poids et format annoncés ; « Rembourser… » est seul, au bas du bloc, loin des gestes courants, et annonce qu’il demandera une confirmation.</span><span class="refs">UX-T-17, UX-T-12 · Opquast 147 et 148 · B&amp;S 1.2.1 · RGESN 4.4</span></li>
-    <li><span class="mq-n">8</span><span><strong>Le registre de l’édition, en texte d’abord.</strong> « 7 vendus · 8 disponibles » est écrit ; les cases ne font qu’illustrer (masquées aux lecteurs d’écran) ; un numéro annulé n’est jamais réattribué. Le plan citait « 6 vendus · 9 disponibles » : c’est l’état d’avant cette commande, celui de la page du tirage (MQ-13).</span><span class="refs">UX-T-17 · WCAG 1.4.1 · B&amp;S 1.4</span></li>
-    <li><span class="mq-n">9</span><span><strong>Un historique qui se lit comme un récit.</strong> Une phrase par événement, la personne nommée, l’heure de Paris, les titres en liens ; ni adresse technique, ni connexion, ni identifiant brut.</span><span class="refs">UX-A-19, UX-A-18 · B&amp;S 1.4, 2.2 et 7 · ISO 9241-110 autodescriptivité</span></li>
-    <li><span class="mq-n">10</span><span><strong>Rembourser : le seul geste irréversible demande une confirmation qui nomme tout.</strong> Le titre dit qui et combien ; la liste dit les conséquences (carte recréditée, avoir, exemplaires 7/15 et 4/15 non réattribués) ; un motif est demandé ; « Annuler » vient en premier et reçoit le focus ; le bouton répète le montant. Le texte des boutons de danger passe en sombre en mode sombre (3,0:1 → 6,5:1).</span><span class="refs">UX-A-07, UX-A-32, UX-T-17 · WCAG 3.3.4 · RGAA 11.12 et 3.2 · B&amp;S 3.1 et 5.1 · ISO 9241-110 robustesse face aux erreurs · Nielsen 5</span></li>
-  </ol>
-  <p class="after">À trancher avec votre comptable avant de coder : le régime de TVA (œuvre d’art à 5,5 % ou franchise), qui change le libellé de la facture ; et le délai au-delà duquel une commande « à préparer » devient « ▲ À vérifier » sur Aujourd’hui (je propose 5 jours ouvrés, soit la moitié du délai annoncé).</p>
-</aside>
+
 
 <nav class="tabbar" aria-label="Navigation rapide">
   <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Aujourd’hui</a>
@@ -661,5 +649,24 @@
   <a href="#"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Terrain</a>
   <button type="button" aria-expanded="false" aria-controls="admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
 </nav>
+<aside class="mq-notes" aria-labelledby="mq-notes-t">
+  <p class="mq-id">Maquette MQ-19 · administration · boutique, commandes · « Chambre noire » au bureau, mode clair sur téléphone · bureau 1440 × 900 et Pixel 7 · Camille Arnaud, 16 octobre 2026</p>
+  <h2 id="mq-notes-t">Ce qui change</h2>
+  <p class="mq-lead">Maquette MQ-19 · Administration › Boutique › Commandes. Le mode suit le système : « Chambre noire » sur la capture de bureau, clair sur celle du téléphone. Données fictives, photos de démonstration, aucun script : les états sont figés pour la démonstration. Les repères renvoient aux numéros ci-dessous.</p>
+  <ol class="mq-list">
+    <li><span class="pin">1</span><span><strong>La boutique entre dans le menu cible sans le rallonger.</strong> Elle se range dans « Publier » (MQ-07) ; « Commandes » porte un compteur lu en entier (« 2 à préparer ») ; « Éditions et tirages » à côté.</span><span class="ref">UX-A-32, UX-A-11 · loi de Hick · B&amp;S 1.2.1 · RGAA 12.2</span></li>
+    <li><span class="pin">2</span><span><strong>Des filtres qui montrent leur état.</strong> La pastille active est pleine, cochée et porte aria-current ; chacune dit son nombre. La période et la recherche ne s’appliquent qu’au bouton « Appliquer », jamais à la flèche.</span><span class="ref">UX-A-16, UX-A-10 · RGAA 3.1 · WCAG 1.4.1 et 3.2.2 · Opquast 181</span></li>
+    <li><span class="pin">3</span><span><strong>Un vrai tableau de données.</strong> Légende qui dit le filtre, le tri et le fuseau ; N° en en-tête de ligne et lien vers la commande ; dates en clair (« 16 oct. 2026, 10 h 12 », balise time) ; montants TTC alignés à droite. Sur téléphone, une carte par commande et des cibles de 44 px.</span><span class="ref">UX-A-19 · RGAA 5.4, 5.6 et 5.7 · Opquast 4, 231 et 243 · WCAG 2.5.8</span></li>
+    <li><span class="pin">4</span><span><strong>Une seule pastille d’état, forme et mot.</strong> ○ <i class="half" aria-hidden="true"></i> ● ▲ ✕ ont le même sens que pour les photos (MQ-09) ; la légende est sous le tableau ; « Payée — à préparer » remplace un « prête » à trois sens.</span><span class="ref">UX-A-16, UX-T-17 · B&amp;S 6 et 7 · RGAA 3.1 · WCAG 1.4.1</span></li>
+    <li><span class="pin">5</span><span><strong>La chronologie dit où l’on en est, et le geste suivant est à côté.</strong> Liste ordonnée avec aria-current="step", « fait / à faire / à venir » écrits en toutes lettres. Expédier demande le numéro de suivi, dont le format est annoncé avant la saisie et relié au champ. C’est réversible : pas de confirmation, mais « Annuler » pendant 10 s, avant l’e-mail à la cliente.</span><span class="ref">UX-A-07, UX-A-08 · B&amp;S 1.1 et 1.3 · ISO 9241-110 contrôlabilité · RGAA 11.10 · WCAG 3.3.2</span></li>
+    <li><span class="pin">6</span><span><strong>Le certificat se génère depuis la commande.</strong> Exemplaire 7/15, numéro d’inventaire stable J-2026-019, empreinte SHA-256 de l’original, preuve datée par un service indépendant : dit en mots ; le détail technique est replié sous « Pour l’administrateur du serveur ».</span><span class="ref">UX-T-17, UX-T-05, UX-A-18 · Nielsen 2</span></li>
+    <li><span class="pin">7</span><span><strong>Paiement et facture lisibles, remboursement à l’écart.</strong> Détail TTC, facture PDF de 48 ko (sous le budget de 100 ko), poids et format annoncés ; « Rembourser… » est seul, au bas du bloc, loin des gestes courants, et annonce qu’il demandera une confirmation.</span><span class="ref">UX-T-17, UX-T-12 · Opquast 147 et 148 · B&amp;S 1.2.1</span></li>
+    <li><span class="pin">8</span><span><strong>Le registre de l’édition, en texte d’abord.</strong> « 7 vendus · 8 disponibles » est écrit ; les cases ne font qu’illustrer (masquées aux lecteurs d’écran) ; un numéro annulé n’est jamais réattribué. Avant cette commande, la page du tirage (MQ-13) affichait « 9 disponibles ».</span><span class="ref">UX-T-17 · WCAG 1.4.1 · B&amp;S 1.4</span></li>
+    <li><span class="pin">9</span><span><strong>Un historique qui se lit comme un récit.</strong> Une phrase par événement, la personne nommée, l’heure de Paris, les titres en liens ; ni adresse technique, ni connexion, ni identifiant brut.</span><span class="ref">UX-A-19, UX-A-18 · B&amp;S 1.4, 2.2 et 7 · ISO 9241-110 autodescriptivité</span></li>
+    <li><span class="pin">10</span><span><strong>Rembourser : le seul geste irréversible demande une confirmation qui nomme tout.</strong> Le titre dit qui et combien ; la liste dit les conséquences (carte recréditée, avoir, exemplaires 7/15 et 4/15 non réattribués) ; un motif est demandé ; « Annuler » vient en premier et reçoit le focus ; le bouton répète le montant. Le texte des boutons de danger passe en sombre en mode sombre (3,0:1 → 6,5:1).</span><span class="ref">UX-A-07, UX-A-32, UX-T-17 · WCAG 3.3.4 · RGAA 11.12 et 3.2 · B&amp;S 3.1 et 5.1 · ISO 9241-110 robustesse face aux erreurs · Nielsen 5</span></li>
+  </ol>
+  <p class="mq-lead mq-socle">À trancher avec votre comptable avant de coder : le régime de TVA (œuvre d’art à 5,5 % ou franchise), qui change le libellé de la facture ; et le délai au-delà duquel une commande « à préparer » devient « ▲ À vérifier » sur Aujourd’hui (je propose 5 jours ouvrés, soit la moitié du délai annoncé).</p>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette, hors encart et pastilles) — <b>bureau 1440 × 900, « Chambre noire »</b> : H1 à 93 px ; contraste le plus faible du texte 4,8:1 (texte indicatif de la recherche), tout le reste au-dessus ; fond de la barre latérale sur toute la hauteur ; 9 vignettes dont 7 en chargement différé. <b>Pixel 7 (412 × 839, densité 2), mode clair</b> : contraste le plus faible 4,7:1 (#9a5b0c sur #f1eee8) ; une carte par commande, cibles de 30 px au moins ; aucun défilement horizontal. Seul texte sous 12 px : « Ctrl K » (10,5 px, UX-A-30). Axe-core (WCAG 2.2 A et AA) : 0 violation sur les deux rendus.</p>
+</aside>
 </body>
 </html>

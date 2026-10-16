@@ -8,6 +8,7 @@
 <meta name="description" content="Maquette MQ-04 (audit du 16 octobre 2026) : visionneuse et cartel de la page photo, avec photos de démonstration.">
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="_commun/site.css">
+<link rel="stylesheet" href="_commun/site-entete.css">
 <style>
 /* ===== Thème « Nicephos » (repris de public/themes/nicephos.css) + corrections proposées ===== */
 .theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
@@ -26,7 +27,7 @@
 /* Corrections typographiques (UX-F-29) et de comportement (UX-F-34) appliquées à toutes les maquettes */
 body { font-weight: 400; position: relative; }
 .theme-nicephos body { font-weight: 400; }
-.mono { font-size: 12px; }
+.mono { font-size: 13px; }
 .eyebrow { font-size: 12px; }
 img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; -webkit-user-drag: auto; }
 :focus-visible, .is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
@@ -35,92 +36,11 @@ img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: au
 .arrow { display: inline-block; }
 .wrap { padding-inline: max(var(--gut), env(safe-area-inset-left)) max(var(--gut), env(safe-area-inset-right)); }
 
-/* Lien d'évitement (UX-F-06) : hors écran, révélé au focus, premier élément de la page */
-.skip { position: absolute; left: -9999px; top: 0; }
-.skip:focus, .skip.is-focus { position: static; display: inline-flex; align-items: center; min-height: 44px; margin: 10px 0 0 var(--gut);
-  padding: 0 18px; background: var(--ink); color: var(--paper); font: 500 14px/1 var(--sans); letter-spacing: .02em;
-  outline: 2px solid var(--ink); outline-offset: 3px; }
+/* Lien d’évitement, en-tête et pied de page : voir _commun/site-entete.css */
 
-/* En-tête sur une ligne (UX-F-36, UX-T-16) : marque, menu, filet, Tirages, recherche, langue */
-.site-h { display: flex; align-items: center; gap: 12px 28px; min-height: 72px; position: relative; z-index: 20; }
-.site-h .wordmark { display: inline-flex; align-items: center; min-height: 44px; margin-right: auto; color: var(--ink);
-  font: 300 15px/1 var(--sans); letter-spacing: .42em; text-transform: uppercase; white-space: nowrap; }
-.site-nav ul, .site-tools { display: flex; align-items: center; list-style: none; margin: 0; padding: 0; }
-.site-nav ul { gap: 0 clamp(14px, 2vw, 30px); }
-.site-nav a, .site-tools .tool, .lang > summary { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 12px; font-weight: 400;
-  letter-spacing: .2em; text-transform: uppercase; color: var(--ink); white-space: nowrap; }
-.site-nav a:hover { text-decoration: underline; text-underline-offset: 8px; }
-.site-nav a[aria-current] { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
-.site-nav .soft { display: flex; align-items: center; gap: clamp(14px, 2vw, 30px); }
-.site-nav .soft::before { content: ''; width: 1px; height: 18px; background: var(--mute); }
-.site-nav .soft a { color: var(--mute); }
-.site-tools { gap: 6px 18px; }
-.site-tools .tool { color: var(--ink); }
-.lang { position: relative; }
-.lang > summary { list-style: none; cursor: pointer; padding-inline: 4px; }
-.lang > summary::-webkit-details-marker { display: none; }
-.lang > summary svg { transition: transform .2s; }
-.lang[open] > summary svg { transform: rotate(180deg); }
-.lang ul { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 184px; margin: 0; padding: 6px 0; list-style: none;
-  background: var(--paper); border: 1px solid var(--field); box-shadow: 0 12px 32px rgba(0,0,0,.35); }
-.lang li a { display: flex; align-items: center; min-height: 44px; padding: 0 18px; color: var(--ink); font-size: 15px; letter-spacing: .02em; }
-.lang li a:hover { background: var(--frame); }
-.lang li a[aria-current] span { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 6px; }
-.lang li a[aria-current]::after { content: '✓'; display: inline-block; margin-left: auto; padding-left: 14px; color: var(--mute); text-decoration: none; }
-.menu-btn { display: none; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--field); color: var(--ink);
-  font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
-.cart-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); }
-@media (max-width: 760px) {
-  .site-h { min-height: 64px; gap: 4px 10px; }
-  .site-h .wordmark { font-size: 13px; letter-spacing: .34em; }
-  .site-nav { display: none; }
-  .site-tools { gap: 2px 8px; }
-  .site-tools .tool-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .site-tools .tool { min-width: 44px; justify-content: center; }
-  .menu-btn { display: inline-flex; }
-}
-
-/* Pied de page cible (UX-F-34, UX-F-23, UX-T-03) : liens soulignés, cibles de 44 px, liste verticale sur téléphone */
-.site-f { display: flex; justify-content: space-between; align-items: center; gap: 4px 24px; flex-wrap: wrap; margin-top: 72px;
-  padding-block: 28px calc(env(safe-area-inset-bottom, 0px) + 36px); border-top: 1px solid var(--rule); color: var(--mute);
-  font: 400 12px/1.5 var(--mono); letter-spacing: .04em; }
-.site-f p { margin: 0; }
-.site-f ul { display: flex; flex-wrap: wrap; gap: 0 20px; list-style: none; margin: 0; padding: 0; }
-.site-f a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 4px;
-  text-decoration-color: var(--mute); }
-.site-f a:hover { text-decoration-color: var(--ink); }
-@media (max-width: 640px) { .site-f { flex-direction: column; align-items: flex-start; } .site-f ul { flex-direction: column; } }
-
-/* ===== Annotations de la maquette (hors produit) ===== */
-.pin { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex: none; border-radius: 50%;
-  background: #f5c84c; color: #111; box-shadow: 0 0 0 2px #111; font: 600 12px/1 'IBM Plex Mono', ui-monospace, monospace;
-  letter-spacing: 0; text-transform: none; font-style: normal; vertical-align: middle; text-decoration: none; }
-.pin-abs { position: absolute; z-index: 45; }
-.pin-in { margin-left: 8px; }
+/* Annotations : voir _commun/annotations.css (gabarit commun) */
 .site-tools li, .site-nav li { display: flex; align-items: center; }
 @media (min-width: 761px) { .menu-btn + .pin { display: none; } }
-.ord { position: absolute; z-index: 5; top: 8px; left: 8px; padding: 3px 7px; background: #f5c84c; color: #111;
-  font: 600 12px/1.2 'IBM Plex Mono', ui-monospace, monospace; box-shadow: 0 0 0 2px #111; }
-.mq-fold { position: absolute; left: 0; right: 0; top: 900px; height: 0; border-top: 2px dashed #f5c84c; z-index: 60; pointer-events: none; }
-.mq-fold span { position: absolute; right: 12px; top: -28px; padding: 4px 8px; background: #f5c84c; color: #111; font: 500 12px/1.2 'IBM Plex Mono', monospace; }
-@media (max-width: 760px) { .mq-fold { top: 839px; } }
-.mq-state { position: relative; margin: 56px var(--gut) 0; border: 1px dashed var(--field); padding: 0; }
-.mq-state > .mq-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0; padding: 12px 16px; border-bottom: 1px dashed var(--field);
-  font: 500 12px/1.4 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
-.mq-state > .mq-label span { text-transform: none; letter-spacing: .02em; font-weight: 400; color: var(--mute); }
-.mq-notes { margin-top: 72px; padding: 40px var(--gut) 56px; background: #f3efe6; color: #1d1c1a; border-top: 6px solid #f5c84c;
-  font: 400 15px/1.55 Jost, 'Helvetica Neue', Arial, sans-serif; color-scheme: light; }
-.mq-notes :focus-visible { outline-color: #1d1c1a; }
-.mq-notes .mq-id { margin: 0; font: 400 12px/1.5 'IBM Plex Mono', monospace; color: #5c574e; letter-spacing: .04em; }
-.mq-notes h2 { margin: 6px 0 4px; font: 500 22px/1.25 Jost, sans-serif; letter-spacing: .01em; }
-.mq-notes .mq-lead { margin: 0; max-width: 90ch; color: #3a3936; }
-.mq-notes ol { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 18px 44px; }
-.mq-notes li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; align-items: start; }
-.mq-notes li p { margin: 0; }
-.mq-notes .ref { display: block; margin-top: 4px; font: 400 12px/1.5 'IBM Plex Mono', monospace; color: #5c574e; }
-.mq-notes .mq-measures { margin: 28px 0 0; padding-top: 16px; border-top: 1px solid #cfc8b8; font: 400 12.5px/1.6 'IBM Plex Mono', monospace; color: #3a3936; max-width: 120ch; }
-.mq-notes a { text-decoration: underline; text-underline-offset: 3px; }
-@media print { .mq-fold, .pin, .ord { display: none !important; } }
 
 /* ===== Composants communs des maquettes correctives du site public (MQ-02 à MQ-06, MQ-15) ===== */
 html { background: var(--paper); }
@@ -257,6 +177,7 @@ body { background: #050505; }
   .m-only { display: inline; }
 }
 </style>
+<link rel="stylesheet" href="_commun/annotations.css">
 </head>
 <body>
 <a class="skip" href="#contenu">Aller au contenu</a>
@@ -290,7 +211,7 @@ body { background: #050505; }
       <dl>
         <div><dt>Auteur, lieu et date</dt><dd><a href="#">Julien</a> · Miradouro da Graça, Lisbonne · <time datetime="2026-10-10">10 octobre 2026</time></dd></div>
         <div><dt>Série et carnet</dt><dd>Série <a href="#">Voyage</a> · Carnet « <a href="#">Lisbonne et Porto</a> », jour 1<span class="pin pin-in" aria-hidden="true">5</span></dd></div>
-        <div><dt>Prise de vue</dt><dd class="mo">Nikon Z 7II · 24-120 mm · 1/250 s · f/8</dd></div>
+        <div><dt>Prise de vue</dt><dd class="mo">Nikon Z 7II · 24-120 mm · 1/250 s · f/8</dd></div>
         <div><dt>Numéro d’inventaire</dt><dd class="mo">Inventaire J-2026-019</dd></div>
       </dl>
     </div>
@@ -313,10 +234,10 @@ body { background: #050505; }
   <section class="v-near" aria-labelledby="near-h">
     <h2 id="near-h">À proximité <span class="pin pin-in" aria-hidden="true">9</span></h2>
     <ul role="list">
-      <li><a href="#"><span class="bx"><img src="_commun/photos/ruelle.webp" width="600" height="900" alt="" loading="lazy"></span><b>Alfama, premier tram</b><span class="k2">Julien · Lisbonne · 1,2 km</span></a></li>
+      <li><a href="#"><span class="bx"><img src="_commun/photos/ruelle.webp" width="600" height="900" alt="" loading="lazy"></span><b>Alfama, premier tram</b><span class="k2">Julien · Lisbonne · 1,2 km</span></a></li>
       <li><a href="#"><span class="bx"><img src="_commun/photos/lac.webp" width="900" height="600" alt="" loading="lazy"></span><b>Graça, le fleuve à midi</b><span class="k2">Sébastien · même lieu</span></a></li>
-      <li><a href="#"><span class="bx"><img src="_commun/photos/dune.webp" width="900" height="600" alt="" loading="lazy"></span><b>Belém, contre-jour</b><span class="k2">Sébastien · Lisbonne · 6 km</span></a></li>
-      <li><a href="#"><span class="bx"><img src="_commun/photos/mer.webp" width="900" height="600" alt="" loading="lazy"></span><b>Cabo da Roca</b><span class="k2">Sébastien · Sintra · 32 km</span></a></li>
+      <li><a href="#"><span class="bx"><img src="_commun/photos/dune.webp" width="900" height="600" alt="" loading="lazy"></span><b>Belém, contre-jour</b><span class="k2">Sébastien · Lisbonne · 6 km</span></a></li>
+      <li><a href="#"><span class="bx"><img src="_commun/photos/mer.webp" width="900" height="600" alt="" loading="lazy"></span><b>Cabo da Roca</b><span class="k2">Sébastien · Sintra · 32 km</span></a></li>
     </ul>
     <figure class="v-map">
       <svg viewBox="0 0 320 220" role="img" aria-labelledby="map-t">
@@ -331,7 +252,7 @@ body { background: #050505; }
           <circle cx="168" cy="90" r="9" fill="#cbb68b" stroke="#050505" stroke-width="2"/><text x="182" y="80" fill="#f0efeb" font-size="12">Graça (ici)</text>
         </g>
       </svg>
-      <figcaption>Lisbonne · 4 photos à moins de 35 km · <a href="#">Carte du monde</a></figcaption>
+      <figcaption>Lisbonne · 4 photos à moins de 35 km · <a href="#">Carte du monde</a></figcaption>
     </figure>
   </section>
 <div class="mq-state">
@@ -349,8 +270,8 @@ body { background: #050505; }
 </main>
 
 <footer class="v-foot">
-  <p>© 2026 Julien · Nicephos — reproduction interdite</p>
-  <ul role="list" aria-label="Pied de page"><li><a href="#">Utiliser cette photo&#8239;?</a></li><li><a href="#">Contact</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Mentions légales</a></li></ul>
+  <p>© 2026 Sébastien &amp; Julien</p>
+  <ul role="list" aria-label="Pied de page"><li><a href="#">Tirages et licences</a></li><li><a href="#">Contact</a></li><li><a href="#" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="#">Flux RSS</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Mentions légales</a></li></ul>
   <span class="pin" aria-hidden="true">10</span>
 </footer>
 
@@ -360,18 +281,18 @@ body { background: #050505; }
   <p class="mq-lead">La photo prend la place d’une œuvre au mur, le cartel la présente, et la page reste reliée au site et au récit d’où l’on vient. Titre de la page : « Miradouro, l’heure dorée — Julien · Lisbonne et Porto (3 / 10) · Nicephos ».</p>
   <ol>
     <li><span class="pin">1</span><p>« NICEPHOS » ramène à l’accueil ; le retour est nommé par sa destination (« ← Lisbonne et Porto ») au lieu de « Fermer », et mène au jour du carnet, pas à /#galerie.<span class="ref">UX-F-08 · UX-F-09 · UX-F-28 · RGAA 12.1 · WCAG 2.4.4 · Nielsen #3 · ISO 9241-110 Contrôlabilité</span></p></li>
-    <li><span class="pin">2</span><p>Compteur dans le contexte d’arrivée (« 3 / 10 · Lisbonne et Porto » au lieu de « 13 / 22 ») et accolé aux flèches ‹ › de 44 px, dont le nom annonce la photo visée. Loupe et langue restent à droite.<span class="ref">UX-F-09 · UX-F-14 · RGAA 6.1 · WCAG 2.5.8 · Loi de Fitts</span></p></li>
-    <li><span class="pin">3</span><p>La photo à 1 116 × 744 px sur bureau (64 % de l’écran au lieu de 36 %), pleine largeur sur téléphone. Le navigateur reçoit sizes="min(1116px, calc((100vh − 156px) × 1,5))" calculé avec le format de chaque photo : il ne télécharge plus la variante de 2 000 px pour une boîte de 555 px. La photo, œuvre à part entière, a une vraie description.<span class="ref">UX-F-14 · UX-F-21 · UX-F-44 · RGESN 6.4 · RGAA 1.2 et 1.3</span></p></li>
-    <li><span class="pin">4</span><p>Le titre à 20 px sous la photo, en casse normale (fini les capitales espacées) : on lit l’image et son nom ensemble. Dessous, un cartel en liste de définitions : auteur, lieu, date (balise time), prise de vue, et un numéro d’inventaire stable « J-2026-019 » qui ne change plus quand vous réordonnez.<span class="ref">UX-F-14 · UX-T-05 · UX-F-29 · RGAA 9.3 · Loi de proximité</span></p></li>
+    <li><span class="pin">2</span><p>Compteur dans le contexte d’arrivée (« 3 / 10 · Lisbonne et Porto » au lieu de « 13 / 22 ») et accolé aux flèches ‹ › de 44 px, dont le nom annonce la photo visée. Loupe et langue restent à droite.<span class="ref">UX-F-09 · UX-F-14 · RGAA 6.1 · WCAG 2.5.8 · Loi de Fitts</span></p></li>
+    <li><span class="pin">3</span><p>La photo à 1 116 × 744 px sur bureau (64 % de l’écran au lieu de 36 %), pleine largeur sur téléphone. Le navigateur reçoit <code>sizes="min(1116px, calc((100vh - 156px) * 1.5))"</code>, calculé avec le format de chaque photo (ici 3:2) : il ne télécharge plus la variante de 2 000 px pour une boîte de 555 px. La photo, œuvre à part entière, a une vraie description.<span class="ref">UX-F-14 · UX-F-21 · UX-F-44 · RGESN 6.4 · RGAA 1.1 et 1.3</span></p></li>
+    <li><span class="pin">4</span><p>Le titre à 20 px sous la photo, en casse normale (fini les capitales espacées) : on lit l’image et son nom ensemble. Dessous, un cartel en liste de définitions : auteur, lieu, date (balise time), prise de vue, et un numéro d’inventaire stable « J-2026-019 » qui ne change plus quand vous réordonnez.<span class="ref">UX-F-14 · UX-T-05 · UX-F-29 · RGAA 9.3 · Loi de proximité</span></p></li>
     <li><span class="pin">5</span><p>La photo dit à quoi elle appartient : « Série Voyage · Carnet « Lisbonne et Porto », jour 1 », en liens. Le même mécanisme servira aux galeries privées.<span class="ref">UX-F-09 · UX-T-16 · B&amp;S 1.1 Incitation</span></p></li>
     <li><span class="pin">6</span><p>Les gestes à droite, séparés de l’œuvre : « J’aime » sans compteur (le nombre reste dans vos statistiques), nom accessible égal au texte visible et état par aria-pressed ; « Partager » ; et une porte vers l’achat : « Tirage, licence : nous écrire », qui ouvre le formulaire prérempli de MQ-06.<span class="ref">UX-F-11 · UX-F-39 · UX-F-24 · RGAA 6.1 · WCAG 2.5.3 · B&amp;S 2.1.2</span></p></li>
-    <li><span class="pin">7</span><p>« Vous êtes sur cette photo ? Signaler » en lien discret, mais souligné et de 44 px : la personne photographiée sait que c’est pour elle.<span class="ref">UX-F-28 · UX-F-23 · RGAA 10.6</span></p></li>
+    <li><span class="pin">7</span><p>« Vous êtes sur cette photo ? Signaler » en lien discret, mais souligné et de 44 px : la personne photographiée sait que c’est pour elle.<span class="ref">UX-F-28 · UX-F-23 · RGAA 10.6</span></p></li>
     <li><span class="pin">8</span><p>Les raccourcis, qui marchent déjà très bien, deviennent visibles : « ← → pour naviguer · Échap pour revenir · F plein écran », et un bouton « Plein écran » (aria-keyshortcuts). Sur téléphone, l’indice disparaît ; le glissé reste.<span class="ref">UX-F-14 · Nielsen #7 et #10 · WCAG 2.1.4 · B&amp;S 4.1 Flexibilité</span></p></li>
-    <li><span class="pin">9</span><p>« À proximité » sous le cartel : quatre vignettes entières (« même lieu » pour l’autre regard), puis la mini-carte, en SVG de quelques ko au lieu des 230 ko du fond mondial, qui ne retarde plus la photo.<span class="ref">UX-F-14 · UX-F-20 · UX-F-45 · RGESN 4.6 et 6.1</span></p></li>
-    <li><span class="pin">10</span><p>Un pied de page compact, comme une ligne de cartel : crédit « © 2026 Julien », mention de droits, et les liens obligatoires. Celui qui arrive d’Instagram ou d’un QR trouve enfin les mentions légales.<span class="ref">UX-F-08 · UX-F-34 · RGAA 12.1 · LCEN · Opquast 2 et 15</span></p></li>
-    <li><span class="pin">11</span><p>Second état, plein écran : la photo seule sur le noir, flèches de 56 px au milieu des bords, « Quitter · Échap » en haut à droite, compteur discret. Le focus reste visible sur les flèches.<span class="ref">UX-F-14 · WCAG 2.4.7 et 2.1.2 · Nielsen #8</span></p></li>
+    <li><span class="pin">9</span><p>« À proximité » sous le cartel : quatre vignettes entières (« même lieu » pour l’autre regard), puis la mini-carte, en SVG de quelques ko au lieu des 230 ko du fond mondial, qui ne retarde plus la photo.<span class="ref">UX-F-14 · UX-F-20 · UX-F-45 · RGESN 4.7, 6.5 et 6.1</span></p></li>
+    <li><span class="pin">10</span><p>Le pied de page cible, le même que sur tout le site (MQ-01, MQ-06) : « © 2026 Sébastien &amp; Julien · Tirages et licences · Contact · Instagram · Flux RSS · Confidentialité · Mentions légales », en une ligne compacte. Plus de « reproduction interdite » : le crédit de la photo est dans le cartel. Celui qui arrive d’Instagram ou d’un QR trouve enfin les mentions légales.<span class="ref">UX-F-08 · UX-F-34 · RGAA 12.1 · LCEN · Opquast 2 et 15</span></p></li>
+    <li><span class="pin">11</span><p>Second état, plein écran : la photo seule sur le noir, flèches de 56 px au milieu des bords, « Quitter · Échap » en haut à droite, compteur discret. Le focus reste visible sur les flèches.<span class="ref">UX-F-14 · WCAG 2.4.7 et 2.1.2 · Nielsen #8</span></p></li>
   </ol>
-  <p class="mq-measures">Mesures sur cette maquette (Chromium, 1440 × 900) : image à 1 116 × 744 px, haut à 60 px, titre à 20 px sous l’image et visible sans défiler ; textes du cartel 12,8:1 (prose) et 7,7:1 (mono) sur #050505 ; toutes les cibles à 44 px au moins. Une seule image prioritaire ; vignettes « À proximité » en chargement différé.</p>
+  <p class="mq-measures"><b>Mesures</b> (Chromium, rendus de cette maquette) — <b>bureau 1440 × 900</b> : image à 1 116 × 744 px, haut à 60 px, titre à 20 px sous l’image et visible sans défiler ; textes du cartel 12,8:1 (prose) et 7,7:1 (Plex Mono 13 px) sur #050505 ; toutes les cibles à 44 px au moins. <b>Pixel 7 (412 × 839, densité 2)</b> : barre haute de 96 px sur deux lignes (marque et retour, puis loupe, flèches de 44 × 44 px et langue) ; photo pleine largeur, 412 × 275 px, haut à 96 px ; titre en Jost 25 px à 387 px, cartel complet et les trois gestes (J’aime, Partager, « Tirage, licence : nous écrire », 44 px de haut) au-dessus du bas du premier écran (675 px pour 839) ; liens du pied de page en cibles de 44 px. Une seule image prioritaire ; vignettes « À proximité » en chargement différé.</p>
 </aside>
 </body>
 </html>
