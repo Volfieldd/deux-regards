@@ -29,7 +29,11 @@
 <% if (!self && !a.locked) { %>      <label class="inline"><input type="checkbox" name="status" value="desactive"<%~ a.status === 'desactive' ? ' checked' : '' %>> <%= t('Désactivé (ne peut plus se connecter)') %></label>
 <% } %>      <p class="actions"><button class="btn" type="submit"><%= a.status === 'en_attente' ? t('Donner ce rôle') : t('Enregistrer') %></button></p>
     </form>
-<% if (!self && !a.locked) { %>    <form method="post" action="/admin/comptes/<%= a.id %>/supprimer" class="acc-del"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit"><%= t('Supprimer ce compte') %></button></form>
+<% if (!self && !a.locked) { %>    <details class="danger acc-del">
+      <summary><%= t('Supprimer ce compte') %></summary>
+      <p class="hint"><%= t('Ses rôles, son photographe lié et ses réglages sont effacés ; s’il se reconnecte, il repart « en attente ».') %></p>
+      <form method="post" action="/admin/comptes/<%= a.id %>/supprimer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn danger" type="submit"><%= t('Supprimer le compte « {name} »', { name: a.name || a.sub }) %></button></form>
+    </details>
 <% } %>  </li>
 <% }) %>
 </ul>

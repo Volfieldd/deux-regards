@@ -152,7 +152,8 @@
         <div class="fld"><span class="lb"><%= t('Lieu') %></span><input data-one-field="place" maxlength="120"<%~ it.can('photos.textes') ? '' : ' readonly' %> aria-label="<%= t('Lieu') %>" placeholder="<%= t('Où ?') %>"></div>
         <div class="fld"<%~ mod ? '' : ' hidden' %>><span class="lb"><%= t('Date') %> <span class="r" data-one-when></span></span><input data-one-field="taken_on" maxlength="40" aria-label="<%= t('Date') %>" placeholder="<%= t('oct. 2026, 10/2026…') %>"></div>
         <div class="fld"<%~ mod ? '' : ' hidden' %>><span class="lb"><%= t('Photographe') %></span><select data-one-field="author_id" aria-label="<%= t('Photographe') %>"><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
-        <div class="fld" data-one-audience><span class="lb"><%= t('Audience') %> <span class="r"><%= t('30 jours') %></span></span><div class="aud" data-one-aud><span class="hint">…</span></div></div>
+<% if (it.can('statistiques.voir')) { %>        <div class="fld" data-one-audience><span class="lb"><%= t('Audience') %> <span class="r"><%= t('30 jours') %></span></span><div class="aud" data-one-aud><span class="hint">…</span></div></div>
+<% } %>
         <div class="fld"><a class="more" data-one-link href="#"><%= t('Fiche complète : filigrane, preuve d’antériorité, suppression →') %></a></div>
       </div>
     </div>

@@ -22,7 +22,7 @@ Dans la photothèque, chaque photo envoyée **apparaît aussitôt dans la planch
 - **Connexion interrompue :** seule la photo concernée échoue ; **Réessayer** la renvoie sans toucher au reste.
 - **Annuler le reste :** arrête les envois pas encore terminés. Les photos déjà envoyées restent en brouillon.
 - **Pendant l'envoi**, gardez la page ouverte (le navigateur vous prévient si vous la quittez). **Le traitement**, lui, continue sur le serveur même si vous changez de page : l'indicateur **Traitement : *n* photos** reste affiché en bas de la barre latérale, sur toutes les pages.
-- Dès que l'envoi est terminé, **Compléter et publier les *n* photos →** (ou **la photo**) apparaît (et reçoit le focus) : il mène à l'étape 3, même si le traitement n'est pas fini.
+- Dès que l'envoi est terminé, **Compléter et publier les *n* photos →** (ou **la photo**) apparaît (et reçoit le focus, sauf si vous êtes en train de saisir ou de travailler ailleurs dans la page) : il mène à l'étape 3, même si le traitement n'est pas fini. Les photos importées sont aussi choisies dans la planche, sauf pendant une saisie ou si une sélection est déjà en cours.
 
 | | |
 |---|---|
@@ -38,7 +38,7 @@ Au traitement, le site applique l'orientation de l'appareil, calcule les images 
 
 ### 3. Compléter et publier
 
-Toutes les photos du lot sont réunies sur un seul écran : titre, série, lieu et date.
+Toutes les photos du lot sont réunies sur un seul écran : titre, série, lieu et date. Un écran en montre 200 au plus : au-delà (une grosse carte mémoire), il l'indique en haut et mène aux suivantes.
 
 - **Sur ordinateur :** un tableau, une ligne par photo.
 - **Sur téléphone :** une **carte par photo**, avec sa case, sa vignette, son état, puis les champs Titre, Série, Lieu et Date les uns sous les autres.
@@ -71,7 +71,7 @@ Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir pl
 Il change selon la sélection :
 
 - **Rien de sélectionné** : les chiffres de la photothèque et les raccourcis.
-- **Une photo** (un clic dessus) : en tête du panneau, le bouton **Ouvrir la fiche** ; puis l’image en grand, **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **photographe** et son **audience** sur 30 jours. Chaque champ s’enregistre tout seul quand vous le quittez (ou Entrée), comme le rappelle le panneau — la fiche complète, elle, s’enregistre avec **Enregistrer** ; le message en bas propose **Annuler**. **Ouvrir la fiche**, ou le lien **Fiche complète** en bas du panneau, mène à la fiche (filigrane, Instagram, preuve d’antériorité, suppression).
+- **Une photo** (un clic dessus) : en tête du panneau, le bouton **Ouvrir la fiche** ; puis l’image en grand, **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **photographe** et son **audience** sur 30 jours (pour les comptes qui voient les statistiques). Chaque champ s’enregistre tout seul quand vous le quittez (ou Entrée), comme le rappelle le panneau — la fiche complète, elle, s’enregistre avec **Enregistrer** ; le message en bas propose **Annuler**. **Ouvrir la fiche**, ou le lien **Fiche complète** en bas du panneau, mène à la fiche (filigrane, Instagram, preuve d’antériorité, suppression).
 - **Plusieurs photos** : voir ci-dessous.
 
 En bas, toujours : **Publier**, **Dépublier**, **Supprimer…**.

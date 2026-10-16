@@ -33,7 +33,7 @@ La spécification complète est dans [`docs/specs/filigrane-et-exif.md`](https:/
 7. Cliquer sur **Aperçu sans enregistrer** : le rendu s'ouvre dans un nouvel onglet, sur la photo choisie dans « Photo d'aperçu ». Rien n'est enregistré.
 8. Une fois le résultat convenable, cliquer sur **Enregistrer et mettre à jour les images**.
 
-Un bandeau indique ensuite la progression (« Mise à jour des images en cours : 5 / 12 »). Pendant ce temps, le site reste en ligne avec les anciennes images, et chaque photo passe aux nouvelles dès qu'elles sont prêtes.
+Un bandeau indique ensuite la progression (« Mise à jour des images en cours : 5 / 12 ») aux comptes qui règlent le filigrane (les autres ne le voient pas : la liste des photos en erreur nomme des photos de tous les photographes). Pendant ce temps, le site reste en ligne avec les anciennes images, et chaque photo passe aux nouvelles dès qu'elles sont prêtes.
 
 ### Conseils
 

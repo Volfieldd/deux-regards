@@ -6,6 +6,13 @@ const I18N = {
   'Position refusée ou introuvable : indiquez le lieu. ': { en: 'Location refused or not found: enter the place. ', de: 'Standort verweigert oder nicht gefunden: Ort angeben. ' },
   'Position prise. ': { en: 'Location found. ', de: 'Standort ermittelt. ' },
   'Enregistrement…': { en: 'Saving…', de: 'Wird gespeichert…' },
+  'Adresse e-mail invalide.': { en: 'Invalid email address.', de: 'Ungültige E-Mail-Adresse.' },
+  'Cochez au moins un usage accepté.': { en: 'Tick at least one accepted use.', de: 'Kreuzen Sie mindestens eine akzeptierte Nutzung an.' },
+  'Le nom de la personne est nécessaire avec son accord.': { en: 'The person’s name is needed with their consent.', de: 'Mit der Einwilligung ist der Name der Person nötig.' },
+  'Indiquez si la personne est majeure.': { en: 'Say whether the person is an adult.', de: 'Geben Sie an, ob die Person volljährig ist.' },
+  'Personne mineure : le nom du parent qui signe est nécessaire.': { en: 'Minor: the name of the signing parent is needed.', de: 'Minderjährige Person: Der Name des unterschreibenden Elternteils ist nötig.' },
+  'La signature manque.': { en: 'The signature is missing.', de: 'Die Unterschrift fehlt.' },
+  'Rien à enregistrer : un accord, un refus, ou au moins une adresse pour envoyer la photo.': { en: 'Nothing to save: a consent, a refusal, or at least an address to send the photo.', de: 'Nichts zu speichern: eine Einwilligung, eine Ablehnung oder mindestens eine Adresse zum Senden des Fotos.' },
 };
 const tr = s => I18N[s]?.[document.documentElement.lang] ?? s;
 // Rencontre sur le téléphone : position (arrondie à ~100 m), aperçu de la photo, langue de la personne,
@@ -86,8 +93,52 @@ const tr = s => I18N[s]?.[document.documentElement.lang] ?? s;
   canvas.addEventListener('pointercancel', end);
   $('[data-sign-clear]').addEventListener('click', () => { ctx.clearRect(0, 0, canvas.width, canvas.height); drawn = false; $('[data-sign-value]').value = ''; });
 
+  // ----- vérification avant l'envoi -----
+  // Les règles du serveur (qui reste seul juge), vérifiées ici d'abord : après un refus du serveur, la photo de la
+  // personne et la signature seraient à refaire (elles ne sont pas gardées entre deux envois).
+  const EMAIL = /^[^\s@<>]{1,100}@[^\s@<>]{1,100}\.[^\s@<>]{2,30}$/;
+  function problems() {
+    const f = form.elements;
+    const out = [];
+    const email = f.email.value.trim();
+    if (email && !EMAIL.test(email)) out.push([f.email, 'Adresse e-mail invalide.']);
+    if (f.decision.value === 'accord') {
+      if (!['scope_site', 'scope_instagram', 'scope_print'].some(n => f[n].checked)) out.push([f.scope_site, 'Cochez au moins un usage accepté.']);
+      if (!f.name.value.trim()) out.push([f.name, 'Le nom de la personne est nécessaire avec son accord.']);
+      if (!f.adult.value) out.push([f.adult[0], 'Indiquez si la personne est majeure.']);
+      else if (f.adult.value === 'non' && !f.guardian.value.trim()) out.push([f.guardian, 'Personne mineure : le nom du parent qui signe est nécessaire.']);
+      if (!drawn) out.push([canvas, 'La signature manque.']);
+    } else if (!f.decision.value && !email && !f.wants_photo.checked) out.push([f.decision[0], 'Rien à enregistrer : un accord, un refus, ou au moins une adresse pour envoyer la photo.']);
+    return out;
+  }
+  function report(list) {
+    let box = form.querySelector('[data-app-check]');
+    form.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+    if (!list.length) { box?.remove(); return; }
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'app-errors';
+      box.setAttribute('role', 'alert');
+      box.dataset.appCheck = '';
+      form.querySelector('.app-step').before(box);
+    }
+    const ul = document.createElement('ul');
+    for (const [el, msg] of list) {
+      const li = document.createElement('li');
+      li.textContent = tr(msg);
+      ul.append(li);
+      if (el !== canvas) el.setAttribute('aria-invalid', 'true');
+    }
+    box.replaceChildren(ul);
+    const first = list[0][0];
+    if (first === canvas) canvas.scrollIntoView({ block: 'center' }); else first.focus();
+  }
+
   // ----- envoi : signature jointe, pas de double envoi -----
-  form.addEventListener('submit', () => {
+  form.addEventListener('submit', e => {
+    const list = problems();
+    report(list);
+    if (list.length) { e.preventDefault(); return; }
     if (drawn) $('[data-sign-value]').value = canvas.toDataURL('image/png');
     const save = $('[data-save]');
     save.disabled = true;

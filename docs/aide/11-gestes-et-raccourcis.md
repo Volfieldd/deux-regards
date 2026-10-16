@@ -26,6 +26,9 @@
 | Séries → nouvelle série | **Entrée** / **Échap** | crée / efface la saisie |
 | Site public → ouverture | **←** / **→** / **✕** | réordonne ou retire une photo du diaporama |
 | Menus ⋯, fenêtres, loupe, palette | **Échap** | les ferme |
+| Listes déroulantes qui agissent (filtres, photographe, série) | au clavier : **↑ ↓** puis **Entrée** (ou quitter la liste) | les flèches parcourent sans rien appliquer ; Entrée ou la sortie applique (filtres : Entrée ou **Filtrer**) |
+
+Les touches d'une seule lettre (**P**, **I**, **L**, **Espace**) n'agissent que lorsque le focus est dans la planche ou dans le panneau de droite (après un clic sur une photo) : jamais depuis la barre latérale ou un autre lien, ce qui évite une publication par une faute de frappe ou une dictée.
 
 Tout fonctionne au clavier : chaque glisser-déposer a son équivalent en boutons ou en touches fléchées. Sur téléphone, la barre d’onglets du bas remplace la barre latérale (**Menu** l’ouvre).
 

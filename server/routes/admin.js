@@ -147,12 +147,14 @@ export default async function adminRoutes(app) {
   // déjà notée avec son détail par la route (request.audited) n'est pas notée deux fois ; la langue et le thème de
   // l'admin, simples préférences, ne le sont pas.
   app.decorateRequest('audited', false);
+  app.decorateRequest('refused', false);
   app.addHook('onResponse', async (request, reply) => {
     if (request.method !== 'GET' && request.method !== 'HEAD' && request.session) {
       const action = `${request.method} ${request.routeOptions.url}`;
       request.log.info({ audit: true, sub: request.session.sub, action, params: request.params, status: reply.statusCode }, 'action admin');
       if (!request.audited && !['POST /admin/langue', 'POST /admin/theme'].includes(action)) {
-        app.audit.log({ sub: request.session.sub, name: request.session.name, action, target: Object.values(request.params || {}).join(' / '), status: reply.statusCode });
+        // Statut gardé : celui de l'issue (422 pour un refus par failed(), redirigé en 303), lu « fait » ou « refusé ».
+        app.audit.log({ sub: request.session.sub, name: request.session.name, action, target: Object.values(request.params || {}).join(' / '), status: request.refused && reply.statusCode < 400 ? 422 : reply.statusCode });
       }
     }
   });
@@ -185,7 +187,8 @@ export default async function adminRoutes(app) {
     try { return unsigned.valid ? JSON.parse(unsigned.value) : null; } catch { return null; }
   }
   const done = (reply, to, text, details) => flash(reply, { type: 'ok', text, details }).redirect(to, 303);
-  const failed = (reply, to, text, details) => flash(reply, { type: 'error', text, details }).redirect(to, 303);
+  // Refus annoncé par un message et une redirection : noté « refusé » au journal (request.refused), malgré le 303.
+  const failed = (reply, to, text, details) => { reply.request.refused = true; return flash(reply, { type: 'error', text, details }).redirect(to, 303); };
 
   // Apparence de l'admin : « dark », « light », ou rien (celle du système, prefers-color-scheme).
   const THEME_COOKIE = 'admin_theme';
@@ -234,9 +237,12 @@ export default async function adminRoutes(app) {
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply), can: perm => Boolean(request.can(perm)), canAll: perm => Boolean(request.scope(perm)?.all),
       // Droits du compte, lus par admin.js (boutons, raccourcis, palette) ; le serveur reste seul juge.
       grants: Object.keys(PERMISSIONS).filter(p => request.can(p)),
-      section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES, variants: app.variants.status(),
+      section: template, picture: (p, o) => picture(p, { base: '/admin/media/', ...o }), pad, STATUSES,
+      // Mise à jour des images : seulement pour qui règle le filigrane (titres de toutes les photos en échec, suivi
+      // par /admin/images/etat, réservé à ce droit).
+      variants: request.can('site.filigrane') ? app.variants.status() : { running: false, total: 0, done: 0, errors: [] },
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
-      translate: app.translator.enabled, encountersNew: newEncounters(request), urgent: app.todo.urgentCount(perm => request.scope(perm)), toValidate: (request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0) + (request.scope('instagram.file')?.all ? app.instagram.proposals().length : 0), description: '',
+      translate: app.translator.enabled, encountersNew: newEncounters(request), reportsNew: request.can('signalements.traiter') ? app.feedback.pending() : 0, urgent: app.todo.urgentCount(perm => request.scope(perm)), toValidate: (request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0) + (request.scope('instagram.file')?.all ? app.instagram.proposals().length : 0), description: '',
       t: request.t, lang: request.t.lang, locale: request.t.locale, adminLangs: ADMIN_LANGS, langNames: ADMIN_LANG_NAMES,
       ...data, pageTitle: `${data.title} · ${request.t('Administration')} · ${siteName}`,
     });
@@ -282,7 +288,8 @@ export default async function adminRoutes(app) {
     const todo = photos.filter(p => p.status === 'draft' || p.provisional);
     return render(request, reply, 'home', {
       title: request.t('Aujourd’hui'), tasks: app.todo.list(request.t, perm => request.scope(perm)),
-      todo: todo.slice(0, 6).map(withReady), todoCount: todo.length,
+      // État des accords de chaque brouillon affiché (prête, à vérifier, bloquée) : « Publier » seulement si prête.
+      todo: todo.slice(0, 6).map(withReady).map(p => ({ ...p, gate: (g => (g.blocked.length ? 'no' : g.verify.length ? 'warn' : 'ok'))(app.readiness.gate([p.id])) })), todoCount: todo.length,
       hero: (hero.length ? hero : published.slice(0, 5)).map(withReady).filter(p => p.ready),
       heroChosen: hero.length > 0,
       rhythm: repo.importsByMonth(12, own),
@@ -503,6 +510,14 @@ export default async function adminRoutes(app) {
     const p = repo.photoView(byId(request.params.id));
     if (!p) return reply.code(404).send({ error: request.t('Photo introuvable.') });
     return dataOf(withReady({ ...p, suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(p.id))) }), request.t.lang);
+  });
+  // Plusieurs photos d'un coup (inspecteur, après une action groupée ou son annulation) : une requête, et non une par
+  // photo ; seulement celles que le compte voit.
+  app.get('/admin/photos/donnees', P('photos.voir'), async request => {
+    const ids = new Set(String(request.query.ids || '').split(',').slice(0, 2000).map(Number).filter(Number.isInteger));
+    const names = catNames();
+    return { photos: request.mine('photos.voir', repo.photos()).filter(p => ids.has(p.id))
+      .map(p => dataOf(withReady({ ...p, suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(p.id)), names) }), request.t.lang)) };
   });
 
   // Série proposée : la prendre (category_id) ou garder la série actuelle (garder=1). JSON ou formulaire (fiche,
@@ -834,7 +849,9 @@ export default async function adminRoutes(app) {
     // Mots-clés suggérés par CLIP (empreinte des propositions de séries) ; null : pas encore d'empreinte.
     keywordSuggestions: app.keywordSuggest.forPhoto(photo, { lang: request.t.lang, have: photo.keywords }), seriesSuggestOn: app.seriesSuggest.enabled(),
     // Description suggérée (Florence-2) : seulement si la fonction est allumée.
-    description: app.describer.settings().on ? (app.describer.forPhoto(photo.id, request.t.lang) || { pending: false, text: '' }) : null,
+    // « Reprendre comme légende » : la version française dans la légende (française) ; sans traducteur, l'anglais va dans
+    // la légende anglaise, jamais dans la française.
+    description: app.describer.settings().on ? (d => (d ? { ...d, use: (f => (f.translated ? { field: 'legend', text: f.text } : { field: 'legend_en', text: f.en || '' }))(app.describer.forPhoto(photo.id, 'fr')) } : { pending: false, text: '' }))(app.describer.forPhoto(photo.id, request.t.lang)) : null,
     igFile: request.owns('instagram.file', photo.author_id), igPropose: request.owns('instagram.proposer', photo.author_id), igProposal: app.instagram.openProposal(photo.id),
     review: { state: repo.photo(photo.id)?.review || null, at: repo.photo(photo.id)?.publish_at || null, history: app.review.history(photo.id).slice(0, 10) },
     suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(photo.id)), undefined, true, request),
@@ -1028,7 +1045,8 @@ export default async function adminRoutes(app) {
   });
 
   // ---------- compléter un lot ----------
-  const lotIds = raw => [...new Set(String([].concat(raw || []).join(',')).split(',').filter(Boolean).map(Number))].filter(Number.isInteger).slice(0, 200);
+  const lotAll = raw => [...new Set(String([].concat(raw || []).join(',')).split(',').filter(Boolean).map(Number))].filter(Number.isInteger);
+  const lotIds = raw => lotAll(raw).slice(0, 200);
   const lotPage = (request, reply, ids, extra = {}) => {
     const byIdMap = new Map(repo.photos().map(p => [p.id, withReady(p)]));
     const photos = ids.map(id => byIdMap.get(id)).filter(Boolean);
@@ -1039,9 +1057,11 @@ export default async function adminRoutes(app) {
   };
   app.get('/admin/photos/lot', P('photos.textes'), async (request, reply) => {
     const visible = new Set(request.mine('photos.voir', repo.photos()).map(p => p.id));
-    const ids = lotIds(request.query.ids).filter(id => visible.has(id));
+    // 200 photos par page ; au-delà (grosse carte mémoire), la page le dit et mène aux suivantes.
+    const all = lotAll(request.query.ids).filter(id => visible.has(id));
+    const ids = all.slice(0, 200);
     if (!ids.length) return reply.redirect('/admin/photos?statut=draft', 303);
-    return lotPage(request, reply, ids);
+    return lotPage(request, reply, ids, { rest: all.slice(200), total: all.length });
   });
 
   // Sans JavaScript : tout le tableau est envoyé d'un coup (champs titre_<id>, serie_<id>…).

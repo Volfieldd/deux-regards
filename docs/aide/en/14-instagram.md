@@ -19,7 +19,9 @@ Setting it up is done only once: a **professional Instagram account**, a **Meta 
 - on the right, the **failed** photos (with **Try again**) and the **10 latest posts**;
 - at the bottom, the **log**: queueing, sending, steps, posts, failures, pauses, resumes, repost requests. For each event: the date, the status (✓ success, ✕ failed, ▲ warning, info), the photo and who triggered it (otherwise “automatic”). The log is kept 90 days.
 
-The **settings** are folded below the log.
+The **settings** are folded below the log. The account (connect, disconnect), **Collect now** and the settings are only shown to the accounts that manage them (administrators); the moderator sees the queue, the failures, the log and the rhythm, with the note “managed by an administrator”.
+
+A photo blocked by a consent shows its reason (“blocked: J-0042 refuses publication”) to the photographer and administrators; the moderator, who does not see people, only reads “blocked by a consent” (or “to check: a consent is missing”), here as on the photo’s page.
 
 > A photo never enters the queue twice on its own: unpublished then republished, it is not offered again. To share it again, use **Republish (put back in the queue)** on its page.
 

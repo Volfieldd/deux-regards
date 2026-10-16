@@ -16,7 +16,7 @@
     </ol>
   </nav>
   <div class="help-body">
-    <p class="help-empty" data-help-empty hidden role="status"><%= t('Aucune section ne contient ce texte.') %></p>
+    <p class="help-empty" data-help-empty data-text="<%= t('Aucune section ne contient ce texte.') %>" role="status"></p>
 <% it.help.sections.forEach(s => { %>
     <section class="panel help-section" id="<%= s.id %>" data-help-section<%~ it.help.lang !== it.lang ? ' lang="fr"' : '' %>>
       <h2><%= s.title %></h2>

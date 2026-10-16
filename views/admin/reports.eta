@@ -13,7 +13,7 @@
     <div class="rp-body">
       <p><span class="enc-tag <%= r.kind === 'inapproprie' ? 'warn' : '' %>"><%= KIND[r.kind] || r.kind %></span> <span class="mono"><%= when(r.created_at) %> · <%= r.lang.toUpperCase() %><%= r.status === 'traite' ? ` · ${t('traité')}` : '' %></span></p>
 <% if (r.message) { %>      <p class="rp-msg"><%= r.message %></p>
-<% } %><% if (r.email) { %>      <p class="mono"><a class="more" href="mailto:<%= r.email %>"><%= r.email %></a></p>
+<% } %><% if (r.email) { %>      <p class="mono"><a class="more" href="mailto:<%= encodeURIComponent(r.email).replace(/%40/g, '@') %>"><%= r.email %></a></p>
 <% } %>      <div class="rp-acts">
 <% if (r.status === 'nouveau') { %>        <form method="post" action="/admin/signalements/<%= r.reportId %>/traite"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Traité') %></button></form>
 <% } %>        <form method="post" action="/admin/signalements/<%= r.reportId %>/supprimer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="linkbtn" type="submit"><%= t('Supprimer') %></button></form>

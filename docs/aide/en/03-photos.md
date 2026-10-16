@@ -22,7 +22,7 @@ In the photo library, each uploaded photo **appears straight away on the contact
 - **Connection interrupted:** only the photo concerned fails; **Try again** sends it again without touching the rest.
 - **Cancel the rest:** stops the uploads not yet finished. Photos already uploaded stay as drafts.
 - **During the upload**, keep the page open (the browser warns you if you leave it). **Processing**, on the other hand, carries on on the server even if you change page: the **Processing: *n* photos** indicator stays at the bottom of the sidebar, on every page.
-- As soon as the upload is finished, **Complete and publish the *n* photos →** (or **the photo**) appears (and receives focus): it leads to step 3, even if processing is not finished.
+- As soon as the upload is finished, **Complete and publish the *n* photos →** (or **the photo**) appears (and receives focus, unless you are typing or working elsewhere on the page): it leads to step 3, even if processing is not finished. The imported photos are also selected on the contact sheet, except while you are typing or if a selection is already in progress.
 
 | | |
 |---|---|
@@ -38,7 +38,7 @@ During processing, the site applies the camera orientation, computes the served 
 
 ### 3. Complete and publish
 
-All the photos in the batch are gathered on a single screen: title, series, place and date.
+All the photos in the batch are gathered on a single screen: title, series, place and date. A screen shows 200 at most: beyond that (a large memory card), it says so at the top and leads to the next ones.
 
 - **On a computer:** a table, one row per photo.
 - **On a phone:** **one card per photo**, with its checkbox, thumbnail and state, then the Title, Series, Place and Date fields one below the other.
@@ -71,7 +71,7 @@ Caption, watermark and proof are set in each photo's details (see below).
 It changes with the selection:
 
 - **Nothing selected**: the photo library figures and the shortcuts.
-- **One photo** (a click on it): at the top of the panel, the **Open details** button; then the large image, **title**, **caption**, **series** (chips), **place**, **date**, **photographer** and its **audience** over 30 days. Each field is saved when you leave it (or Enter); the message at the bottom offers **Undo**. **Open details**, or the **Full details** link at the bottom of the panel, leads to the details page (watermark, Instagram, proof of prior existence, deletion).
+- **One photo** (a click on it): at the top of the panel, the **Open details** button; then the large image, **title**, **caption**, **series** (chips), **place**, **date**, **photographer** and its **audience** over 30 days (for accounts that see statistics). Each field is saved when you leave it (or Enter); the message at the bottom offers **Undo**. **Open details**, or the **Full details** link at the bottom of the panel, leads to the details page (watermark, Instagram, proof of prior existence, deletion).
 - **Several photos**: see below.
 
 At the bottom, always: **Publish**, **Unpublish**, **Delete…**.

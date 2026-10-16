@@ -30,7 +30,7 @@
         <label><%= t('Police') %> <select name="wm_font"><% Object.entries(it.FONTS).forEach(([k, f]) => { %><option value="<%= k %>"<%~ w.font === k ? ' selected' : '' %>><%= t(f.label) %></option><% }) %></select></label>
         <fieldset class="row"><legend><%= t('Teinte') %> <span class="mono"><%= t('texte et dessins du site ; un logo envoyé garde ses couleurs') %></span></legend>
 <% Object.entries(it.TONE_LABELS).forEach(([k, label]) => { %>
-          <label class="inline"><input type="radio" name="wm_tone" value="<%= k %>"<%~ (w.tone || 'light') === k ? ' checked' : '' %>> <%= label %></label>
+          <label class="inline"><input type="radio" name="wm_tone" value="<%= k %>"<%~ (w.tone || 'light') === k ? ' checked' : '' %>> <%= t(label) %></label>
 <% }) %>
         </fieldset>
       </div>

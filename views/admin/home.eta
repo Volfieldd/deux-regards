@@ -50,14 +50,18 @@
 <% it.todo.forEach(p => { %>
         <li>
           <% if (p.ready) { %><%~ it.picture(p, { sizes: '56px', alt: '' }) %><% } else { %><span class="ph">…</span><% } %>
-          <span class="t"><a href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.provisional ? t('titre provisoire') : t('brouillon, prêt à publier') %><%= p.place ? '' : ' · ' + t('sans lieu') %></small></span>
+          <span class="t"><a href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.provisional ? t('titre provisoire') : p.gate === 'no' ? t('brouillon, bloqué par un accord') : p.gate === 'warn' ? t('brouillon, accords à vérifier') : t('brouillon, prêt à publier') %><%= p.place ? '' : ' · ' + t('sans lieu') %></small></span>
 <% if (p.provisional) { %>
           <a class="btn ghost" href="/admin/photos/<%= p.id %>"><%= t('Titrer') %></a>
-<% } else { %>
+<% } else if (p.gate === 'ok' && it.can('photos.publier')) { %>
           <form method="post" action="/admin/photos/<%= p.id %>/status">
             <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin"><input type="hidden" name="status" value="published">
             <button class="btn ghost" type="submit"><%= t('Publier') %></button>
           </form>
+<% } else if (p.gate !== 'no' && (it.can('photos.publier') || it.can('photos.proposer'))) { %>
+          <a class="btn ghost" href="/admin/photos/<%= p.id %>#publication"><%= p.gate === 'warn' && it.can('photos.publier') ? t('Vérifier') : t('Proposer') %></a>
+<% } else { %>
+          <a class="btn ghost" href="/admin/photos/<%= p.id %>"><%= t('Voir') %></a>
 <% } %>
         </li>
 <% }) %>

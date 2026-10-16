@@ -9,7 +9,7 @@ C’est la page **Aujourd’hui**, celle où l’on arrive. En haut, **Voir le s
 
   Les urgences sont aussi comptées dans la barre latérale, à côté d’**Aujourd’hui** (✕ et leur nombre). Les liens « sans ville » et « sans traduction » ouvrent la photothèque filtrée ; la pastille du filtre, avec ✕, le retire.
 
-- **À finir** : les brouillons et les photos qui ont encore leur titre provisoire, chacun avec son geste direct : **Publier**, ou **Titrer** (ouvre la fiche). **Tout finir en un écran** ouvre la photothèque filtrée sur « À finir ».
+- **À finir** : les brouillons et les photos qui ont encore leur titre provisoire, chacun avec son geste direct : **Publier** (photo prête, pour qui publie), **Titrer** (ouvre la fiche), **Vérifier** (accords à vérifier : la fiche demande la confirmation), **Proposer** (pour qui propose au modérateur) ou **Voir** (photo bloquée par un accord). Le petit texte dit l'état : « prêt à publier », « accords à vérifier » ou « bloqué par un accord ». **Tout finir en un écran** ouvre la photothèque filtrée sur « À finir ».
 - **Le site, en ce moment** : les photos de l’ouverture, dans l’ordre, et le thème du site. **modifier** mène à [Site public](reglages#photos-de-louverture).
 - **Chiffres** : visiteurs du jour, photos publiées, brouillons, séries, photographes ; un clic ouvre la page correspondante.
 - **La photo du moment** : la photo la plus ouverte en grand sur 30 jours, avec son nombre d’ouvertures. **Statistiques →** ouvre les [Statistiques](statistiques). Ce cadre n’apparaît que si des photos ont été vues.
@@ -24,4 +24,4 @@ C’est la page **Aujourd’hui**, celle où l’on arrive. En haut, **Voir le s
   - **Compte non lié :** un administrateur le relie à son photographe dans [Comptes et rôles](reglages#comptes-et-rôles).
   - **Compte lié :** vos imports vous sont attribués par défaut.
 
-**Bandeau « Mise à jour des images en cours »** : il apparaît après un changement de filigrane, d’EXIF, de nom d’auteur… Le compteur avance tout seul ; voir [Filigrane et EXIF](filigrane-exif#mise-à-jour-des-images).
+**Bandeau « Mise à jour des images en cours »** : il apparaît après un changement de filigrane, d’EXIF, de nom d’auteur… Le compteur avance tout seul ; voir [Filigrane et EXIF](filigrane-exif#mise-à-jour-des-images). Seuls les comptes qui règlent le filigrane le voient.

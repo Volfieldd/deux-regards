@@ -81,6 +81,8 @@ Après **Enregistrer et mettre à jour les images** :
 - chaque photo passe aux nouvelles dès qu'elles sont prêtes, sans image cassée ;
 - à la fin, le bandeau indique « Images à jour », ou la liste des photos en erreur.
 
+Ce bandeau n'apparaît qu'aux comptes qui règlent le filigrane (administrateurs) : la liste des photos en erreur nomme des photos de tous les photographes.
+
 Comptez quelques secondes par photo.
 
 Le même recalcul se déclenche quand vous renommez un auteur, changez le nom du site, ou modifiez le titre, la date, l'auteur ou l'option de filigrane d'une photo.

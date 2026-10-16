@@ -81,6 +81,8 @@ Um **gemeinsam mit der Person** auszufüllen, im Moment des Fotos, ohne Papierka
 
 Sie brauchen Netz (4G genügt): Ohne Netz schlägt das Speichern fehl, ohne dass auf dem Bildschirm etwas verloren geht; versuchen Sie es etwas weiter erneut. Eine auf dem Smartphone unterschriebene Einwilligung gilt wie eine unterschriebene Karte: Die Seite zeigt die Unterschrift und das Erkennungsfoto.
 
+**Vor dem Senden** prüft der Bildschirm, was der Server verlangen wird: bei einer Einwilligung den Namen, volljährig oder minderjährig (und den unterschreibenden Elternteil), mindestens eine Nutzung und die Unterschrift; eine gültige E-Mail-Adresse. Was fehlt, steht oben, ohne dass etwas gesendet wird. Lehnt der Server das Senden trotzdem ab, werden das Foto der Person und die Unterschrift nicht aufbewahrt: Der Bildschirm sagt es oben (**Lassen Sie die Person erneut unterschreiben und machen Sie ihr Foto noch einmal**), und beide Bereiche sind umrandet.
+
 ## Die Ausflüge
 
 Die Seite **Ausflüge** (Seitenleiste, Gruppe „Arbeiten“) zeigt eine Zeile pro **Aufnahmetag** eines Fotografen: Datum und Ort, einige Vorschaubilder, die Zahl der Fotos (und der veröffentlichten), die Gesichter der getroffenen Personen mit ihren Einwilligungen und Ablehnungen und einen **Status**, der auch ohne Farbe lesbar ist: **✕ Ablehnung anzuwenden** (jemand hat abgelehnt, und veröffentlichte Fotos des Ausflugs sind für diese Person nicht ausgeschlossen), **▲ zu sortieren** (Entwürfe oder eine Person ohne Entscheidung), **✓ abgeschlossen**. Die Chips filtern nach Status und nach Fotograf.
@@ -104,7 +106,7 @@ Eine **Reise** fasst Ausflüge zusammen: „Marokko 2025“, zehn Aufnahmetage. 
 - **Tage zuordnen**: Auf der Seite der Reise ordnet **Vom … Bis …** alle Aufnahmetage zwischen diesen beiden Daten zu (von der Kamera datierte Fotos oder Begegnungen); oder kreuzen Sie Ausflüge in der Liste an. Auf der Seite eines Ausflugs ordnet das Menü **Reise** ihn zu, verschiebt ihn in eine andere Reise oder löst ihn. Ein Tag, der schon zu einer anderen Reise gehört, wird verschoben.
 - **Die Seite der Reise**: ihre Tage der Reihe nach (T1, T2…), jeder mit Ort, Fotos, Personen und einem Link zum Ausflug; alle Fotos der Reise mit ihrem Status; **Bereite Fotos vorschlagen** (oder **Bereite Fotos veröffentlichen**) auf einmal, wie bei einem Ausflug.
 - **Öffentliche Seite**: Name und Text in drei Sprachen und das Kästchen **Seite der Reise auf der Website veröffentlichen**. Sobald es aktiviert ist und ein Foto der Reise veröffentlicht ist, hat die Reise ihre Seite (`/voyage/…`), und das Menü der Website erhält einen Link **Reisen**. Vorher sieht das Team sie als Vorschau. Siehe [Website](site-public).
-- Einen Tag **entfernen** oder **Diese Reise löschen**: Die Ausflüge und Fotos bleiben.
+- Einen Tag **entfernen** oder **Diese Reise löschen** (ein Klick klappt die Bestätigung auf, dann **„…“ löschen**): Die Ausflüge und Fotos bleiben; Name, Texte und öffentliche Seite der Reise werden gelöscht.
 - **Fotograf**: sieht nur seine eigenen Reisen und ordnet nur seine eigenen Tage zu.
 
 ## Gesichter und Status der Fotos

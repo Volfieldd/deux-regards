@@ -22,7 +22,7 @@ In der Fotothek **erscheint jedes hochgeladene Foto sofort auf dem Kontaktbogen*
 - **Verbindung unterbrochen:** Nur das betroffene Foto schlägt fehl; **Erneut versuchen** sendet es erneut, ohne den Rest zu berühren.
 - **Rest abbrechen:** stoppt die noch nicht abgeschlossenen Uploads. Bereits hochgeladene Fotos bleiben als Entwurf erhalten.
 - **Während des Hochladens** lassen Sie die Seite geöffnet (der Browser warnt Sie, wenn Sie sie verlassen). **Die Verarbeitung** dagegen läuft auf dem Server weiter, auch wenn Sie die Seite wechseln: Die Anzeige **Verarbeitung: *n* Fotos** bleibt unten in der Seitenleiste sichtbar, auf allen Seiten.
-- Sobald das Hochladen beendet ist, erscheint **Die *n* Fotos vervollständigen und veröffentlichen →** (oder **Das Foto…**) und erhält den Fokus: Es führt zu Schritt 3, auch wenn die Verarbeitung noch nicht fertig ist.
+- Sobald das Hochladen beendet ist, erscheint **Die *n* Fotos vervollständigen und veröffentlichen →** (oder **Das Foto…**) und erhält den Fokus (außer wenn Sie gerade tippen oder anderswo auf der Seite arbeiten): Es führt zu Schritt 3, auch wenn die Verarbeitung noch nicht fertig ist. Die importierten Fotos werden auch im Kontaktbogen ausgewählt, außer während einer Eingabe oder wenn schon eine Auswahl besteht.
 
 | | |
 |---|---|
@@ -38,7 +38,7 @@ Bei der Verarbeitung wendet die Website die Ausrichtung der Kamera an, berechnet
 
 ### 3. Vervollständigen und veröffentlichen
 
-Alle Fotos des Stapels sind auf einem einzigen Bildschirm versammelt: Titel, Serie, Ort und Datum.
+Alle Fotos des Stapels sind auf einem einzigen Bildschirm versammelt: Titel, Serie, Ort und Datum. Ein Bildschirm zeigt höchstens 200: darüber hinaus (eine große Speicherkarte) steht es oben, mit einem Link zu den nächsten.
 
 - **Am Computer:** eine Tabelle, eine Zeile pro Foto.
 - **Auf dem Telefon:** **eine Karte pro Foto**, mit Kästchen, Miniatur und Zustand, darunter die Felder Titel, Serie, Ort und Datum untereinander.
@@ -71,7 +71,7 @@ Bildunterschrift, Wasserzeichen und Nachweis werden in den Details jedes Fotos e
 Er ändert sich je nach Auswahl:
 
 - **Nichts ausgewählt**: die Zahlen der Fotothek und die Tastenkürzel.
-- **Ein Foto** (ein Klick darauf): oben im Bereich die Schaltfläche **Details öffnen**; dann das große Bild, **Titel**, **Bildunterschrift**, **Serie** (Chips), **Ort**, **Datum**, **Fotograf** und sein **Publikum** über 30 Tage. Jedes Feld wird gespeichert, wenn Sie es verlassen (oder Eingabe); die Meldung unten bietet **Rückgängig** an. **Details öffnen** oder der Link **Alle Details** unten im Bereich führt zu den Details (Wasserzeichen, Instagram, Prioritätsnachweis, Löschen).
+- **Ein Foto** (ein Klick darauf): oben im Bereich die Schaltfläche **Details öffnen**; dann das große Bild, **Titel**, **Bildunterschrift**, **Serie** (Chips), **Ort**, **Datum**, **Fotograf** und sein **Publikum** über 30 Tage (für Konten, die die Statistiken sehen). Jedes Feld wird gespeichert, wenn Sie es verlassen (oder Eingabe); die Meldung unten bietet **Rückgängig** an. **Details öffnen** oder der Link **Alle Details** unten im Bereich führt zu den Details (Wasserzeichen, Instagram, Prioritätsnachweis, Löschen).
 - **Mehrere Fotos**: siehe unten.
 
 Unten immer: **Veröffentlichen**, **Veröffentlichung zurückziehen**, **Löschen…**.

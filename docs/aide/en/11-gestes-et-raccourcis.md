@@ -26,6 +26,9 @@
 | Series → new series | **Enter** / **Esc** | creates / clears the entry |
 | Public site → opening slideshow | **←** / **→** / **✕** | reorders or removes a photo from the slideshow |
 | ⋯ menus, windows, loupe, palette | **Esc** | closes them |
+| Drop-down lists that act (filters, photographer, series) | with the keyboard: **↑ ↓** then **Enter** (or leave the list) | the arrows browse without applying anything; Enter or leaving applies (filters: Enter or **Filter**) |
+
+Single-letter keys (**P**, **I**, **L**, **Space**) only act when the focus is in the contact sheet or in the right-hand panel (after clicking a photo): never from the sidebar or another link, which avoids publishing through a typo or dictation.
 
 Everything works from the keyboard: every drag and drop has an equivalent in buttons or arrow keys. On a phone, the tab bar at the bottom replaces the sidebar (**Menu** opens it).
 

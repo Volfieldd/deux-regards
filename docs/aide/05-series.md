@@ -19,7 +19,7 @@ Pour classer des photos dans une série, le plus rapide est la [sélection multi
 
 ## Série proposée
 
-En bas de la page Séries, **Proposer une série** aide à ranger les photos qui arrivent. C'est **désactivé par défaut**.
+En bas de la page Séries, **Proposer une série** aide à ranger les photos qui arrivent. C'est **désactivé par défaut**. Ce panneau (comme **Décrire les photos**) n'est montré qu'aux comptes qui règlent les propositions : les administrateurs.
 
 - **Allumer :** **Allumer les propositions**. Le modèle d'analyse (environ 90 Mo, un modèle libre appelé CLIP) se télécharge une seule fois dans le dossier des données. Les photos existantes sont ensuite analysées en tâche de fond, avec une barre de progression ; chaque photo importée l'est ensuite tout de suite.
 - **Ce qu'il propose :** à l'import, chaque photo reçoit la série choisie dans le formulaire. Tant que vous ne l'avez pas choisie vous-même, le serveur compare la photo aux photos déjà rangées (les vôtres et celles de l'autre photographe : la ressemblance se calcule par série). Si une **autre** série lui ressemble nettement plus, il la propose, et en propose deux quand elles sont presque aussi proches. Une série n'est proposée qu'à partir de **3 photos** rangées. Une photo publiée n'a jamais de proposition.
@@ -40,7 +40,7 @@ Sous **Proposer une série**, le panneau **Décrire les photos** propose pour ch
 
 - **Allumer :** choisissez le modèle, **Léger** (Florence-2 base, proposé par défaut : environ 270 Mo à télécharger, 2 Go de mémoire pendant le calcul, environ 10 secondes par photo) ou **Précis** (Florence-2 large : environ 850 Mo, 4 Go, un peu plus détaillé). **Précis** demande que le site dispose de 6 Go : ajoutez `SITE_MEM_LIMIT=6g` au `.env` de la pile, puis **Compose Up**. Le panneau indique la mémoire disponible et refuse **Précis** si elle ne suffit pas. Choisissez aussi les **heures de nuit** (de 1 h à 6 h par défaut, heure de Paris), puis **Allumer les descriptions**. Le modèle se télécharge une seule fois, au premier calcul.
 - **Quand :** les photos sans description sont décrites pendant les heures de nuit, une à la fois, sur un seul cœur du processeur, pour ne pas gêner le reste du serveur. Le modèle n'occupe la mémoire que pendant le calcul.
-- **Sur la fiche :** **Décrire cette photo** la fait passer tout de suite (une minute environ). Puis **Reprendre comme légende** recopie la phrase dans le champ Légende, à relire, à réécrire et à enregistrer. **Décrire de nouveau** la recalcule. Rien n'est jamais recopié seul.
+- **Sur la fiche :** **Décrire cette photo** la fait passer tout de suite (une minute environ). Ce bouton n'enregistre pas la fiche : enregistrez d'abord vos modifications (la touche Entrée dans un champ, elle, enregistre la fiche). Puis **Reprendre comme légende** recopie la phrase française dans le champ Légende, à relire, à réécrire et à enregistrer ; sans traducteur, **Reprendre comme légende anglaise** met la phrase anglaise dans la légende anglaise. **Décrire de nouveau** la recalcule. Rien n'est jamais recopié seul. Si le calcul échoue, la fiche en donne la raison. Si vous modifiez la fiche pendant le calcul, la page ne se recharge pas : elle indique que la description est prête.
 - **Langue :** le modèle écrit en anglais. Si le site a un traducteur (LibreTranslate), la phrase est traduite en français et en allemand ; sinon elle reste en anglais.
 - **Éteindre :** **Éteindre et effacer le modèle** retire le modèle du disque ; les descriptions déjà faites restent.
 

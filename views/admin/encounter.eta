@@ -4,7 +4,8 @@
    const ST = { nouvelle: t('Nouvelle'), en_cours: t('En cours'), traitee: t('Traitée') };
    const e = it.e; const scopes = c => it.SCOPES.filter(s => c && c[s]).map(s => SL[s] || it.SCOPE_LABELS[s]).join(', ');
    const values = it.values || { ...e, signed: e.consent_source === 'carte' ? 'on' : '', ...Object.fromEntries(it.SCOPES.map(s => [`scope_${s}`, e.consent_source === 'carte' && e.consent && e.consent[s] ? 'on' : ''])) };
-   const mail = e.email ? `mailto:${e.email}?subject=${encodeURIComponent(`Votre photo${e.ref ? ` (${e.ref})` : ''} · ${it.siteName}`)}` : null;
+   // Adresse encodée : une adresse saisie par un visiteur ne peut pas ajouter de champ au lien (« ?bcc=… », RFC 6068).
+   const mail = e.email ? `mailto:${encodeURIComponent(e.email).replace(/%40/g, '@')}?subject=${encodeURIComponent(`Votre photo${e.ref ? ` (${e.ref})` : ''} · ${it.siteName}`)}` : null;
    const status = k => ST[k] || it.STATUS[k];
    const published = p => p.status === 'published' ? t('publiée') : t('brouillon'); %>
 <p class="mono"><a class="more eyebrow" href="/admin/rencontres">← <%= t('Personnes photographiées') %></a></p>
