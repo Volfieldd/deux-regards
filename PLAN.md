@@ -315,4 +315,9 @@ Fait côté nom et domaine : **Nicephos**, en ligne sur `https://www.nicephos.ar
    - purge de Cloudflare par API (jeton) lors d'une dépublication ou d'un refus ; script de restauration d'une seule photo ;
    - import lancé dès le dépôt de fichiers, ou après un clic sur « Envoyer » ; `<h2>` dans `<summary>` dans tout l'admin.
 
+Plus tard (noté le 15 octobre 2026 ; étude détaillée dans [`docs/etudes/blog-galeries-boutique.md`](docs/etudes/blog-galeries-boutique.md)) :
+- **Blog** : récits et billets des photographes, avec leurs photos, dans les trois langues du site.
+- **Photos privées protégées** : galeries privées visibles de l'administration (connexion Zitadel) et de personnes choisies, qui reçoivent un lien temporaire et un mot de passe.
+- **Boutique** : panier et achat (tirages, peut-être fichiers numériques), jusqu'au paiement et à la facturation.
+
 Écarté pour l'instant : suggestions de titres et légendes par IA (contrainte de coût nul ; l'offre gratuite de Gemini exige le payant pour des utilisateurs dans l'EEE ; piste possible : modèle local via Ollama).
