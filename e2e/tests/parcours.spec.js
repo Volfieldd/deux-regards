@@ -95,7 +95,7 @@ test.describe('parcours d’une photo', () => {
     await page.getByLabel('Légende').fill('Test de bout en bout.');
     await page.getByLabel('Publiée').check();
     await page.getByRole('button', { name: 'Enregistrer' }).click();
-    await expect(page.getByRole('status')).toHaveText('Photo enregistrée.');
+    await expect(page.getByRole('status').filter({ hasText: 'Photo enregistrée.' })).toHaveText('Photo enregistrée.');
     const editUrl = page.url();
 
     // Visible sur le site public, en dernière position.
