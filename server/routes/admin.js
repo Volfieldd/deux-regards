@@ -867,6 +867,11 @@ export default async function adminRoutes(app) {
   // ---------- statistiques (anonymes, voir server/stats.js) ----------
   const short = t => [t('janv.'), t('févr.'), t('mars'), t('avr.'), t('mai'), t('juin'), t('juil.'), t('août'), t('sept.'), t('oct.'), t('nov.'), t('déc.')];
   const dayLabel = (d, t) => t('{day} {month}', { day: Number(d.slice(8)), month: short(t)[Number(d.slice(5, 7)) - 1] });
+  // Infobulle d'une barre du graphique, dans la langue de l'admin (pluriel français : 0 et 1 au singulier).
+  const chartTip = t => {
+    const n = (k, one, many) => `${k} ${(t.lang === 'fr' ? k > 1 : k !== 1) ? many : one}`;
+    return p => `${p.label}${t.lang === 'fr' ? ' :' : ':'} ${n(p.views, t('vue'), t('vues'))}, ${n(p.visitors, t('visiteur'), t('visiteurs'))}`;
+  };
   const monthLabel = (m, t) => `${short(t)[Number(m.slice(5, 7)) - 1]} ${m.slice(0, 4)}`;
   const PERIODS = { 30: '30 jours', 90: '3 mois', 365: '12 mois' };
   const periods = t => ({ 30: t('30 jours'), 90: t('3 mois'), 365: t('12 mois') });
@@ -971,7 +976,7 @@ export default async function adminRoutes(app) {
     const authors = repo.authors();
     return render(request, reply, 'stats', {
       title: request.t('Statistiques'), days, PERIODS: periods(request.t), from, to, totals, previous, photoViews,
-      chart: barsAndLine(points, { labels: [points[0].label, points.at(-1).label] }), points,
+      chart: barsAndLine(points, { labels: [points[0].label, points.at(-1).label], tip: chartTip(request.t) }), points,
       own: own != null,
       top: viewed.slice(0, own == null ? 10 : 100).map(r => ({ ...r, photo: all.get(r.id) && withReady(all.get(r.id)) })).filter(r => r.photo).slice(0, 10),
       pages: own != null ? [] : app.stats.topPages(from, to, 8).map(r => ({ ...r, label: pageLabel(r.page, categories, authors, request.t) })),

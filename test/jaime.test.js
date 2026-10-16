@@ -13,7 +13,7 @@ test('j’aime : une fois par visiteur, retirable, compteur affiché ; un autre 
   const like = (ip, payload = '', headers = {}) => ctx.app.inject({ method: 'POST', url: `/photo/${p.slug}/aime`, payload, remoteAddress: ip,
     headers: { accept: 'application/json', 'content-type': 'application/x-www-form-urlencoded', ...headers } });
   assert.match((await ctx.app.inject(`/photo/${p.slug}`)).body, /data-like-n>0 j’aime</);
-  assert.deepEqual((await like('203.0.113.1')).json(), { likes: 1, liked: true, label: '1 j’aime' });
+  assert.deepEqual((await like('203.0.113.1')).json(), { likes: 1, liked: true, counted: true, label: '1 j’aime' });
   assert.equal((await like('203.0.113.1')).json().likes, 1);                         // même visiteur : pas de doublon
   assert.equal((await like('203.0.113.2')).json().likes, 2);
   assert.equal((await like('203.0.113.1', 'retirer=1')).json().likes, 1);           // « je n'aime plus »

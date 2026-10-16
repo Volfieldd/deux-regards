@@ -11,8 +11,9 @@
 }; const icon = k => `<span class="ic ic-${k}" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24">${ICONS[k]}</svg></span>`; %>
 <div class="share-card"><img <%= it.deferThumb ? "data-src" : "src" %>="<%= sh.thumb %>" alt="" width="92" height="61"><div><b><%= p.title %></b><small class="mono"><%= p.author %> · <%= sh.host %></small></div></div>
 <ul class="share-nets" data-share-nets>
-<% sh.links.forEach(l => { %>  <li><a class="net" href="<%= l.href %>"<%~ l.id === 'email' ? '' : ' target="_blank" rel="noopener noreferrer"' %> data-via="<%= l.id %>"><%~ icon(l.id) %><span><%= l.id === 'email' ? s.email : l.label %></span></a></li>
-<% }) %><% if (sh.instagram) { %>  <li><a class="net" href="<%= sh.instagram %>" target="_blank" rel="noopener noreferrer" data-via="instagram"><%~ icon('instagram') %><span><%= s.instagram %></span></a></li>
+<% /* Réseaux et Instagram : ouverts dans un nouvel onglet, annoncé aux lecteurs d'écran. */ %>
+<% sh.links.forEach(l => { %>  <li><a class="net" href="<%= l.href %>"<%~ l.id === 'email' ? '' : ' target="_blank" rel="noopener noreferrer"' %> data-via="<%= l.id %>"><%~ icon(l.id) %><span><%= l.id === 'email' ? s.email : l.label %><% if (l.id !== 'email') { %><span class="sr-only"><%= s.newWindow %></span><% } %></span></a></li>
+<% }) %><% if (sh.instagram) { %>  <li><a class="net" href="<%= sh.instagram %>" target="_blank" rel="noopener noreferrer" data-via="instagram"><%~ icon('instagram') %><span><%= s.instagram %><span class="sr-only"><%= s.newWindow %></span></span></a></li>
 <% } %>  <li data-share-more-item hidden><button type="button" class="net" data-share-more><%~ icon('more') %><span><%= s.more %></span></button></li>
 </ul>
 <div class="share-copy"><input readonly value="<%= sh.url %>" aria-label="<%= s.link %>" data-share-url><button type="button" class="share-copy-btn" data-share-copy data-copied="<%= s.copied %>" data-js-only hidden><%= s.copyLink %></button></div>

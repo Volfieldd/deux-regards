@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import { parisDay } from './stats.js';
 
 // Partager une photo : de simples liens vers chaque service (aucun script ni cookie de Facebook, X… sur le site), le
 // lien à copier, un QR, et sur téléphone le menu de partage du téléphone (Instagram, Signal, Messages… y sont). On
@@ -26,7 +27,8 @@ export function shareLinks({ url, title, image }) {
 export const shareQr = url => QRCode.toString(`${url}${url.includes('?') ? '&' : '?'}partage=qr`, { type: 'svg', errorCorrectionLevel: 'M', margin: 1 });
 
 export function createShares({ db, now = () => new Date() }) {
-  const day = () => now().toISOString().slice(0, 10);
+  // Jour de Paris, comme les statistiques de l'admin (un partage à 0 h 30 compte pour ce jour-là, pas la veille).
+  const day = () => parisDay(now());
   const add = db.prepare('INSERT INTO photo_shares (photo_id, via, day, n) VALUES (?, ?, ?, 1) ON CONFLICT(photo_id, via, day) DO UPDATE SET n = n + 1');
   return {
     record(photoId, via) {
