@@ -1,0 +1,182 @@
+{
+ "Impossible pour l’instant :": {
+  "en": "Not possible for now:",
+  "de": "Im Moment nicht möglich:"
+ },
+ "{name} a encore {n} photo(s).": {
+  "en": "{name} still has {n} photo(s).",
+  "de": "{name} hat noch {n} Foto(s)."
+ },
+ "{name} a encore {n} rencontre(s) : rattachez-les à un autre photographe (fiche de chaque rencontre).": {
+  "en": "{name} still has {n} encounter(s): assign them to another photographer (on each encounter’s record).",
+  "de": "{name} hat noch {n} Begegnung(en): Ordnen Sie sie einem anderen Fotografen zu (im Datenblatt jeder Begegnung)."
+ },
+ "{name} a encore {n} voyage(s) : rattachez-les à un autre photographe ou supprimez-les (page Voyages).": {
+  "en": "{name} still has {n} trip(s): assign them to another photographer or delete them (Trips page).",
+  "de": "{name} hat noch {n} Reise(n): Ordnen Sie sie einem anderen Fotografen zu oder löschen Sie sie (Seite Reisen)."
+ },
+ "Le compte « {account} » est lié à {name} : changez son photographe dans Comptes et rôles.": {
+  "en": "The account “{account}” is linked to {name}: change its photographer in Accounts and roles.",
+  "de": "Das Konto „{account}“ ist mit {name} verknüpft: Ändern Sie seinen Fotografen unter Konten und Rollen."
+ },
+ "La lettre {letter} est déjà celle de {name} : choisissez-en une autre.": {
+  "en": "The letter {letter} already belongs to {name}: choose another one.",
+  "de": "Der Buchstabe {letter} gehört bereits {name}: Wählen Sie einen anderen."
+ },
+ "La série « {name} » contient {n} photo(s) : choisissez la série où les déplacer.": {
+  "en": "The series “{name}” contains {n} photo(s): choose the series to move them to.",
+  "de": "Die Serie „{name}“ enthält {n} Foto(s): Wählen Sie die Serie, in die sie verschoben werden."
+ },
+ "La personne photographiée refuse la publication (rencontre {ref}) : la photo reste en brouillon.": {
+  "en": "The photographed person refuses publication (encounter {ref}): the photo stays a draft.",
+  "de": "Die fotografierte Person lehnt die Veröffentlichung ab (Begegnung {ref}): Das Foto bleibt ein Entwurf."
+ },
+ "bloquée : {reasons}": {
+  "en": "blocked: {reasons}",
+  "de": "blockiert: {reasons}"
+ },
+ "à vérifier : {reasons}. Confirmez depuis la fiche de la photo": {
+  "en": "to check: {reasons}. Confirm from the photo’s page",
+  "de": "zu prüfen: {reasons}. Bestätigen Sie auf der Seite des Fotos"
+ },
+ "envoi interrompu par un redémarrage du serveur : vérifiez sur Instagram avant de réessayer": {
+  "en": "upload interrupted by a server restart: check on Instagram before trying again",
+  "de": "Upload durch einen Neustart des Servers unterbrochen: Prüfen Sie auf Instagram, bevor Sie es erneut versuchen"
+ },
+ "Trop de photos à la fois : {n} au plus.": {
+  "en": "Too many photos at once: {n} at most.",
+  "de": "Zu viele Fotos auf einmal: höchstens {n}."
+ },
+ "Horodatage déjà relancé il y a moins de 5 minutes : réessayez un peu plus tard.": {
+  "en": "Timestamping already restarted less than 5 minutes ago: try again a little later.",
+  "de": "Zeitstempel bereits vor weniger als 5 Minuten neu gestartet: Versuchen Sie es etwas später erneut."
+ },
+ "{n} photos ne sont plus proposées : rien n’a été fait pour elles.": {
+  "en": "{n} photos are no longer submitted: nothing was done for them.",
+  "de": "{n} Fotos sind nicht mehr vorgeschlagen: Für sie wurde nichts getan."
+ },
+ "{n} photo n’est plus proposée : rien n’a été fait pour elle.": {
+  "en": "{n} photo is no longer submitted: nothing was done for it.",
+  "de": "{n} Foto ist nicht mehr vorgeschlagen: Dafür wurde nichts getan."
+ },
+ "Rien à annuler : la photo n’est pas programmée.": {
+  "en": "Nothing to cancel: the photo is not scheduled.",
+  "de": "Nichts aufzuheben: Das Foto ist nicht geplant."
+ },
+ "Rien à dépublier : la photo n’est pas en ligne.": {
+  "en": "Nothing to unpublish: the photo is not online.",
+  "de": "Nichts zurückzuziehen: Das Foto ist nicht online."
+ },
+ "Images en cours de calcul : elles apparaissent dans quelques instants.": {
+  "en": "Images being computed: they will appear in a few moments.",
+  "de": "Bilder werden berechnet: Sie erscheinen in wenigen Augenblicken."
+ },
+ "{n} photos proposées à la publication": {
+  "en": "{n} photos submitted for publishing",
+  "de": "{n} Fotos zur Veröffentlichung vorgeschlagen"
+ },
+ "Une photo proposée à la publication": {
+  "en": "A photo submitted for publishing",
+  "de": "Ein Foto zur Veröffentlichung vorgeschlagen"
+ },
+ "{name} propose {n} photos à la publication.": {
+  "en": "{name} submits {n} photos for publishing.",
+  "de": "{name} schlägt {n} Fotos zur Veröffentlichung vor."
+ },
+ "{name} propose « {title} » à la publication.": {
+  "en": "{name} submits “{title}” for publishing.",
+  "de": "{name} schlägt „{title}“ zur Veröffentlichung vor."
+ },
+ "Un photographe": {
+  "en": "A photographer",
+  "de": "Ein Fotograf"
+ },
+ "le modérateur": {
+  "en": "the moderator",
+  "de": "Moderator"
+ },
+ "Son mot : {message}": {
+  "en": "Their note: {message}",
+  "de": "Nachricht: {message}"
+ },
+ "Photos programmées": {
+  "en": "Photos scheduled",
+  "de": "Fotos geplant"
+ },
+ "Photos publiées": {
+  "en": "Photos published",
+  "de": "Fotos veröffentlicht"
+ },
+ "{n} de vos photos seront publiées le {date} (validé par {name}).": {
+  "en": "{n} of your photos will be published on {date} (approved by {name}).",
+  "de": "{n} Ihrer Fotos werden am {date} veröffentlicht (freigegeben von {name})."
+ },
+ "« {title} » sera publiée le {date} (validé par {name}).": {
+  "en": "“{title}” will be published on {date} (approved by {name}).",
+  "de": "„{title}“ wird am {date} veröffentlicht (freigegeben von {name})."
+ },
+ "{n} de vos photos sont publiées (validé par {name}).": {
+  "en": "{n} of your photos are published (approved by {name}).",
+  "de": "{n} Ihrer Fotos sind veröffentlicht (freigegeben von {name})."
+ },
+ "« {title} » est publiée (validé par {name}).": {
+  "en": "“{title}” is published (approved by {name}).",
+  "de": "„{title}“ ist veröffentlicht (freigegeben von {name})."
+ },
+ "Photo à reprendre": {
+  "en": "Photo to rework",
+  "de": "Foto zu überarbeiten"
+ },
+ "« {title} » vous est renvoyée par {name} :": {
+  "en": "“{title}” is sent back to you by {name}:",
+  "de": "„{title}“ wird Ihnen von {name} zurückgeschickt:"
+ },
+ "« {title} » a été dépubliée par {name} :": {
+  "en": "“{title}” was unpublished by {name}:",
+  "de": "„{title}“ wurde von {name} zurückgezogen:"
+ },
+ "{n} de vos photos programmées sont publiées.": {
+  "en": "{n} of your scheduled photos are published.",
+  "de": "{n} Ihrer geplanten Fotos sind veröffentlicht."
+ },
+ "« {title} », programmée, est publiée.": {
+  "en": "“{title}”, scheduled, is published.",
+  "de": "„{title}“, geplant, ist veröffentlicht."
+ },
+ "Photo proposée pour Instagram": {
+  "en": "Photo proposed for Instagram",
+  "de": "Foto für Instagram vorgeschlagen"
+ },
+ "{name} propose « {title} » pour Instagram.": {
+  "en": "{name} proposes “{title}” for Instagram.",
+  "de": "{name} schlägt „{title}“ für Instagram vor."
+ },
+ "Photo acceptée pour Instagram": {
+  "en": "Photo accepted for Instagram",
+  "de": "Foto für Instagram angenommen"
+ },
+ "« {title} » est dans la file Instagram (validé par {name}).": {
+  "en": "“{title}” is in the Instagram queue (approved by {name}).",
+  "de": "„{title}“ ist in der Instagram-Warteschlange (freigegeben von {name})."
+ },
+ "Proposition Instagram à reprendre": {
+  "en": "Instagram proposal to rework",
+  "de": "Instagram-Vorschlag zu überarbeiten"
+ },
+ "« {title} » ne part pas sur Instagram pour l’instant ; {name} vous écrit :": {
+  "en": "“{title}” is not going to Instagram for now; {name} writes to you:",
+  "de": "„{title}“ geht vorerst nicht auf Instagram; {name} schreibt Ihnen:"
+ },
+ "Republication Instagram demandée": {
+  "en": "Instagram repost requested",
+  "de": "Erneute Instagram-Veröffentlichung angefragt"
+ },
+ "{name} demande que « {title} » soit republiée sur Instagram.": {
+  "en": "{name} asks for “{title}” to be reposted on Instagram.",
+  "de": "{name} bittet darum, „{title}“ erneut auf Instagram zu veröffentlichen."
+ },
+ "Dernière erreur : {error}": {
+  "en": "Last error: {error}",
+  "de": "Letzter Fehler: {error}"
+ }
+}

@@ -63,7 +63,7 @@ openssl ts -verify -in photo.tsr -data photo.jpg -CAfile autorite-horodatage.pem
 | `GET /admin/photos/:id/preuve.txt` | fiche de preuve |
 | `GET /admin/preuves/autorite.pem` | certificat racine de l'autorité configurée |
 | `POST /admin/photos/:id/verifier` | vérification complète |
-| `POST /admin/preuves/reessayer` | relance immédiate des demandes en attente |
+| `POST /admin/preuves/reessayer` | relance immédiate des demandes en attente, sans l'attente progressive ; une fois toutes les 5 minutes au plus (tous comptes confondus) |
 
 ### 2.5 Portée et limites
 
