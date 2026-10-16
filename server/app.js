@@ -23,7 +23,7 @@ import { createVariantService } from './variants.js';
 import { createProofService } from './proofs.js';
 import { createStats } from './stats.js';
 import { createTranslator } from './translate.js';
-import { createEncounters } from './encounters.js';
+import { createEncounters, parseRef } from './encounters.js';
 import { createMailer } from './mailer.js';
 import { createReminders } from './reminders.js';
 import { createTrips } from './trips.js';
@@ -64,12 +64,15 @@ const SECURITY_HEADERS = {
   'permissions-policy': 'camera=(), microphone=(), geolocation=()',
 };
 
-// Le code d'autorisation, le state OAuth et le jeton d'image Instagram n'ont rien à faire dans les journaux,
-// même encodés dans un paramètre (« next=…%3Fcode%3D… »).
+// Le code d'autorisation, le state OAuth, le jeton d'image Instagram, celui d'une photo offerte (/pour-vous/…) et le
+// code de contrôle d'une carte (/bonjour/J-0042-K7Q : la référence reste, le code non) n'ont rien à faire dans les
+// journaux, même encodés dans un paramètre (« next=…%3Fcode%3D… »).
 export function redactUrl(url) {
   let u = String(url);
   try { u = decodeURIComponent(u); } catch { /* URL mal encodée : telle quelle */ }
-  return u.replace(/([?&](?:code|state)=)[^&#]*/g, '$1[masqué]').replace(/(\/partage\/instagram\/)[^/?#]+/, '$1[masqué]');
+  return u.replace(/([?&](?:code|state)=)[^&#]*/g, '$1[masqué]').replace(/(\/partage\/instagram\/)[^/?#]+/, '$1[masqué]')
+    .replace(/(\/pour-vous\/)[^/?#]+/, '$1[masqué]')
+    .replace(/(\/bonjour\/)([^/?#]+)/, (m, p, seg) => { const r = parseRef(seg); return r?.code ? `${p}${r.ref}-[masqué]` : m; });
 }
 // Adresse IP tronquée dans les journaux (/24 en IPv4, /48 en IPv6) : assez pour diagnostiquer, pas pour identifier.
 export function truncateIp(ip) {
@@ -103,6 +106,11 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   const app = Fastify({ logger: loggerOptions(logger), trustProxy: config.trustProxy });
 
   app.decorate('config', config);
+  // TRUST_PROXY laissé par défaut (toutes les adresses privées) sur un serveur joignable du réseau : un poste du réseau
+  // local pourrait se faire passer pour le proxy (X-Forwarded-For) et contourner les limites de débit.
+  if (config.trustProxyDefault && !['127.0.0.1', '::1', 'localhost'].includes(config.host)) {
+    app.log.warn('TRUST_PROXY non défini : X-Forwarded-For est accepté de toute adresse privée ; fixez TRUST_PROXY à l’adresse du tunnel (cloudflared)');
+  }
   // Liste des routes (méthode, chemin) : les tests vérifient que chaque route d'admin est protégée.
   const routeList = [];
   app.decorate('routeList', routeList);
@@ -262,6 +270,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
 
   app.addHook('onSend', async (request, reply) => {
     reply.headers(headers);
+    // Rien de l'admin ne se garde en cache, quel que soit le gestionnaire (fichier envoyé par sendFile compris).
+    if (/^\/admin(?:[/?#]|$)/.test(request.url)) reply.header('cache-control', 'no-store');
     // Seul l'écran « Rencontre » de l'admin (sur le téléphone) peut demander la position, au site lui-même.
     if (request.routeOptions?.config?.geolocation) reply.header('permissions-policy', 'camera=(), microphone=(), geolocation=(self)');
     // Sans includeSubDomains : à ajouter quand tous les sous-domaines de nicephos.art seront servis en HTTPS (PLAN.md, feuille de route).
@@ -273,11 +283,12 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.setErrorHandler((err, request, reply) => {
     const status = err.statusCode >= 400 && err.statusCode < 500 ? err.statusCode : 500;
     if (status >= 500) request.log.error({ err }, 'erreur inattendue');
-    const message = status < 500 ? err.message : 'Une erreur inattendue est survenue. Réessayez dans un instant.';
+    const t = request.t || (x => x);                                            // langue de l'admin si elle est connue
+    const message = status < 500 ? err.message : t('Une erreur inattendue est survenue. Réessayez dans un instant.');
     reply.code(status).header('cache-control', 'no-store');
     if (!request.headers.accept?.includes('text/html')) return reply.send({ error: message });
     const siteName = app.siteName();
-    return reply.render('auth-error', { siteName, pageTitle: `Erreur · ${siteName}`, description: '', title: status < 500 ? 'Requête refusée' : 'Erreur', message });
+    return reply.render('auth-error', { siteName, pageTitle: `${t('Erreur')} · ${siteName}`, description: '', t: request.t, lang: request.t?.lang || 'fr', title: status < 500 ? t('Requête refusée') : t('Erreur'), message });
   });
 
   app.get('/healthz', async (request, reply) => {

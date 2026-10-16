@@ -444,7 +444,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     en: (site, ref) => `Your data at ${site}${ref ? ` (meeting ${ref})` : ''}\n\ndonnees.json: everything we keep about you (meeting, choices, consent or refusal, history of your requests).\nsignature.png, photo-de-reperage.jpg, carte-signee.jpg: if they exist.\nphotos/: the photos you appear in.\n\nRetention periods and rights: the website's "Privacy" page.\n`,
     de: (site, ref) => `Ihre Daten bei ${site}${ref ? ` (Begegnung ${ref})` : ''}\n\ndonnees.json: alles, was wir über Sie speichern (Begegnung, Wahl, Einwilligung oder Ablehnung, Verlauf Ihrer Anfragen).\nsignature.png, photo-de-reperage.jpg, carte-signee.jpg: falls vorhanden.\nphotos/: die Fotos, auf denen Sie zu sehen sind.\n\nAufbewahrungsfristen und Rechte: Seite „Datenschutz“ der Website.\n`,
   };
-  app.get('/admin/rencontres/:id/export.zip', P('personnes.exporter'), async (request, reply) => {
+  app.get('/admin/rencontres/:id/export.zip', { config: { perm: 'personnes.exporter', audit: true } }, async (request, reply) => {   // au Journal
     const id = byId(request.params.id);
     const x = enc.exportData(id);
     if (!x) return reply.callNotFound();
@@ -566,7 +566,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     return done(reply, toPerson(p.id), n > 1 ? request.t('{n} photos liées à cette personne (à sa rencontre de la sortie de chaque photo).', { n }) : request.t('{n} photo liée à cette personne (à sa rencontre de la sortie de chaque photo).', { n }));
   });
   // Droits : tout ce qui concerne la personne, toutes rencontres confondues.
-  app.get('/admin/personnes/:id/export.zip', P('personnes.exporter'), async (request, reply) => {
+  app.get('/admin/personnes/:id/export.zip', { config: { perm: 'personnes.exporter', audit: true } }, async (request, reply) => {   // au Journal
     const p = personOr404(request, reply); if (!p) return reply;
     const lang = p.meetings.find(e => e.lang)?.lang || 'fr';
     const entries = [{ name: 'LISEZMOI.txt', data: (README[lang] || README.fr)(app.siteName(), null) }];

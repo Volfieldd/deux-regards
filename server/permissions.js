@@ -85,14 +85,17 @@ export const ADJUSTABLE = {
   'instagram.file': 'Mettre ses photos dans la file Instagram sans validation',
 };
 // Droits d'un ensemble de rôles : permission → « tout » ou « les miennes » (la plus large l'emporte), puis les
-// réglages du compte (adjust : { add: [...], remove: [...] }, seulement des droits de ADJUSTABLE).
+// réglages du compte (adjust : { add: [...], remove: [...] }, seulement des droits de ADJUSTABLE). Ces réglages sont
+// ceux du rôle Photographe (page « Circuit de publication ») : sans ce rôle, ils ne valent rien, et un retrait n'ôte
+// jamais ce qu'un autre rôle du compte donne (un Relecteur garde « modifier les photos publiées »).
 export function grantsOf(roles = [], adjust = {}) {
   const out = new Map();
   for (const r of roles) {
     for (const [perm, scope] of Object.entries(ROLES[r]?.perms || {})) if (out.get(perm) !== ALL) out.set(perm, scope);
   }
-  if (roles.includes('admin')) return out;                          // l'administrateur n'est jamais restreint
-  for (const perm of adjust.remove || []) if (Object.hasOwn(ADJUSTABLE, perm)) out.delete(perm);
+  if (roles.includes('admin') || !roles.includes('photographe')) return out;   // l'administrateur n'est jamais restreint
+  const fromOthers = perm => roles.some(r => r !== 'photographe' && ROLES[r]?.perms?.[perm]);
+  for (const perm of adjust.remove || []) if (Object.hasOwn(ADJUSTABLE, perm) && !fromOthers(perm)) out.delete(perm);
   for (const perm of adjust.add || []) if (Object.hasOwn(ADJUSTABLE, perm) && !out.has(perm)) out.set(perm, PERMISSIONS[perm].scoped ? OWN : ALL);
   return out;
 }
@@ -114,7 +117,7 @@ export function registerPermissions(app, { renderError }) {
     reply.code(403).header('cache-control', 'no-store');
     const t = request.t || (x => x);                                            // langue de l'admin (posée avant ce contrôle)
     return json ? reply.send({ error: t('Accès refusé : ce compte n’a pas ce droit.') })
-      : renderError(reply, 403, { title: t('Accès refusé'), message: t('Ce compte n’a pas le droit de faire cela.') });
+      : renderError(reply, 403, { t: request.t, title: t('Accès refusé'), message: t('Ce compte n’a pas le droit de faire cela.'), adminLink: true });
   };
   app.decorate('forbid', forbid);
   app.decorate('requirePermission', async function (request, reply) {

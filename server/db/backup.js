@@ -14,7 +14,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import Database from 'better-sqlite3';
-import { assertPersistentStorage } from '../storage-guard.js';
+import { assertPersistentStorage, assertDatabaseInStorage } from '../storage-guard.js';
 
 const storageDir = path.resolve(process.env.STORAGE_DIR || './storage');
 const dbPath = path.resolve(process.env.DATABASE_PATH || path.join(storageDir, 'site.db'));
@@ -106,6 +106,7 @@ export async function backupOnce({ nowMs = Date.now() } = {}) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   assertPersistentStorage(storageDir);
+  assertDatabaseInStorage(dbPath, storageDir);                                    // la base sauvegardée est bien celle du site
   if (process.env.REQUIRE_PERSISTENT_STORAGE === '1' && backupDir) assertPersistentStorage(backupDir);
   const run = () => backupOnce({ nowMs: Number(process.env.BACKUP_NOW_MS) || Date.now() }).catch(err => { log('sauvegarde en échec', { error: err.message }); process.exitCode = 1; });
   await run();

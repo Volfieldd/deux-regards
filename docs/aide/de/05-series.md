@@ -13,7 +13,7 @@ Serien fassen die Fotos zusammen (Straße, Porträt…). Sie bilden den Index de
   Die Reihenfolge wird sofort gespeichert, und eine Meldung nennt den neuen Platz.
 - **Löschen:** Menü **⋯**, **Löschen…**. Ein Fenster öffnet sich.
   - Leere Serie: Bestätigen Sie.
-  - Serie mit Fotos: **Diese werden nie gelöscht.** Wählen Sie die Serie, in die sie verschoben werden sollen, dann **Die *n* Fotos verschieben und löschen**.
+  - Serie mit Fotos: **Diese werden nie gelöscht.** Wählen Sie die Serie, in die sie verschoben werden sollen, dann **Die *n* Fotos verschieben und löschen**. Das ändert die Serie aller ihrer Fotos: Es ist einem Konto vorbehalten, das alle Fotos bearbeiten darf (Administrator); der Moderator löscht nur eine leere Serie.
 
 Um Fotos einer Serie zuzuordnen, ist die [Mehrfachauswahl](photos#agir-sur-plusieurs-photos) auf der Seite Fotos am schnellsten. Auf der Website ist eine Serie ohne veröffentlichtes Foto ausgegraut und nicht anklickbar.
 

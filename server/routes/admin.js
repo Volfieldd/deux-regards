@@ -145,10 +145,11 @@ export default async function adminRoutes(app) {
   });
   // Journal d'audit : qui a modifié quoi, dans le journal du serveur et dans la base (page « Journal »). Une action
   // déjà notée avec son détail par la route (request.audited) n'est pas notée deux fois ; la langue et le thème de
-  // l'admin, simples préférences, ne le sont pas.
+  // l'admin, simples préférences, ne le sont pas. Les lectures les plus sensibles (exports RGPD, originaux avec leur
+  // GPS) le sont aussi : leur route le demande (config.audit).
   app.decorateRequest('audited', false);
   app.addHook('onResponse', async (request, reply) => {
-    if (request.method !== 'GET' && request.method !== 'HEAD' && request.session) {
+    if (request.session && ((request.method !== 'GET' && request.method !== 'HEAD') || request.routeOptions.config?.audit)) {
       const action = `${request.method} ${request.routeOptions.url}`;
       request.log.info({ audit: true, sub: request.session.sub, action, params: request.params, status: reply.statusCode }, 'action admin');
       if (!request.audited && !['POST /admin/langue', 'POST /admin/theme'].includes(action)) {
@@ -167,6 +168,9 @@ export default async function adminRoutes(app) {
   // proposition, pour que le modérateur revoie ce qui partira en ligne.
   const edited = (request, ids) => { if (!request.scope('photos.publier')?.all) app.review.edited([].concat(ids).map(Number), by(request)); };
   const editable = (request, photo) => Boolean(photo) && (photo.status !== 'published' || request.owns('photos.publiees.modifier', photo.author_id));
+  // Photo absente (supprimée entre-temps, dans un autre onglet) : 404, en page ou en JSON selon l'appel — jamais une
+  // erreur 500 (le contrôle de portée laisse passer une photo absente : à chaque route de le dire).
+  const noPhoto = (request, reply) => (request.headers.accept?.includes('text/html') ? reply.callNotFound() : reply.code(404).send({ error: request.t('Photo introuvable.') }));
   // La ville et la carte comptent toujours comme « plus que du texte » (city_label n'est pas une colonne : la comparer
   // ne voudrait rien dire, et la vider effacerait la ville).
   const CITY_FIELDS = new Set(['city_label', 'city_id', 'on_map']);
@@ -595,6 +599,7 @@ export default async function adminRoutes(app) {
     if (!code) return failed(reply, '/admin/instagram', denied ? request.t('Connexion annulée : {reason}.', { reason: String(denied).slice(0, 200) }) : request.t('Connexion annulée.'));
     try {
       const username = await app.instagram.connect(String(code));
+      app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'compte Instagram connecté', target: `@${username}`, status: 303 });
       return done(reply, '/admin/instagram', request.t('Compte Instagram @{username} connecté.', { username }));
     } catch (err) {
       if (!(err instanceof InstagramError)) throw err;
@@ -675,6 +680,7 @@ export default async function adminRoutes(app) {
   app.post('/admin/photos/:id/instagram/proposer', W('instagram.proposer'), async (request, reply) => {
     const id = byId(request.params.id);
     const photo = repo.photo(id);
+    if (!photo) return noPhoto(request, reply);
     const body = request.body || {};
     const back = `/admin/photos/${id}#instagram`;
     if (body.signature_set) app.db.prepare('UPDATE photos SET ig_signature = ? WHERE id = ?').run(body.signature === 'on' || body.signature === true ? 1 : 0, id);
@@ -848,9 +854,14 @@ export default async function adminRoutes(app) {
   };
 
   // ---------- signalements des visiteurs ----------
-  app.get('/admin/signalements', P('signalements.traiter'), async (request, reply) => render(request, reply, 'reports', {
-    title: request.t('Signalements des visiteurs'), reports: app.feedback.reports().map(r => withReady({ ...r, id: r.pid, reportId: r.id })),
-  }));
+  // L'adresse laissée par le visiteur est une donnée personnelle : seul qui voit toutes les personnes (l'administrateur)
+  // la reçoit ; le modérateur lit le message, et sait seulement qu'une adresse a été laissée.
+  app.get('/admin/signalements', P('signalements.traiter'), async (request, reply) => {
+    const contact = Boolean(request.scope('personnes.voir')?.all);
+    return render(request, reply, 'reports', {
+      title: request.t('Signalements des visiteurs'), reports: app.feedback.reports().map(r => withReady({ ...r, id: r.pid, reportId: r.id, email: contact ? r.email : '', hasEmail: Boolean(r.email) })),
+    });
+  });
   app.post('/admin/signalements/:id/traite', W('signalements.traiter'), async (request, reply) => {
     app.feedback.done(byId(request.params.id));
     return done(reply, '/admin/signalements', request.t('Signalement marqué comme traité.'));
@@ -918,18 +929,18 @@ export default async function adminRoutes(app) {
   });
 
   // ---------- comptes et rôles, journal ----------
-  // Rôles proposés dans l'ordre (un rôle hors de READY_ROLES serait affiché sans pouvoir être donné).
+  // Rôles proposés, dans l'ordre.
   const ROLE_ORDER = ['admin', 'photographe', 'moderateur', 'relecteur'];
-  const READY_ROLES = new Set(ROLE_ORDER);
   const STATUS_FR = { actif: 'actif', en_attente: 'en attente', desactive: 'désactivé' };
   app.get('/admin/comptes', P('comptes.gerer'), async (request, reply) => render(request, reply, 'accounts', {
     title: request.t('Comptes et rôles'), accounts: app.accounts.list(), authors: repo.authors(), me: request.session.sub,
-    roles: ROLE_ORDER.map(key => ({ key, label: ROLES[key].label, ready: READY_ROLES.has(key) })), guarded: (app.config.adminSubs || []).length > 0,
+    roles: ROLE_ORDER.map(key => ({ key, label: ROLES[key].label })), guarded: (app.config.adminSubs || []).length > 0,
     mail: { enabled: app.mailer.enabled, from: app.mailer.from, mine: (a => a?.notify_to || a?.email || request.session.email || '')(app.accounts.bySub(request.session.sub)) },
   }));
   // Description suggérée d'une photo : la demander (elle passe avant la file de nuit), et son état (suivi sans recharger).
   app.post('/admin/photos/:id/description', W('photos.textes'), async (request, reply) => {
     const id = byId(request.params.id);
+    if (!repo.photo(id)) return noPhoto(request, reply);
     if (!app.describer.settings().on) return failed(reply, `/admin/photos/${id}`, request.t('Les descriptions suggérées sont éteintes (page Séries).'));
     app.describer.request(id);
     if (!request.headers.accept?.includes('text/html')) return { ok: true };
@@ -959,8 +970,7 @@ export default async function adminRoutes(app) {
     const body = request.body || {};
     const a = app.accounts.byId(byId(request.params.id));
     if (!a) return reply.callNotFound();
-    // Un rôle pas encore proposé (Photographe) déjà présent est gardé tel quel.
-    const roles = [...[].concat(body.roles || []).filter(r => READY_ROLES.has(r)), ...a.roles.filter(r => !READY_ROLES.has(r))];
+    const roles = [].concat(body.roles || []).filter(r => ROLE_ORDER.includes(r));
     if (a.locked && !roles.includes('admin')) roles.push('admin');        // protégé par ADMIN_SUBS : sa case est grisée, donc absente
     const status = body.status === 'desactive' ? 'desactive' : roles.length ? 'actif' : a.status === 'desactive' ? 'actif' : 'en_attente';
     const authorId = body.author_id === undefined ? undefined : Number(body.author_id) || null;
@@ -1310,7 +1320,7 @@ export default async function adminRoutes(app) {
   const ext = file => path.extname(file).slice(1);
   const attachment = (reply, name) => reply.header('cache-control', 'no-store').header('content-disposition', `attachment; filename="${name}"`);
 
-  app.get('/admin/photos/:id/original', P('photos.original'), async (request, reply) => {
+  app.get('/admin/photos/:id/original', { config: { perm: 'photos.original', audit: true } }, async (request, reply) => {
     const photo = repo.photo(byId(request.params.id));
     if (!photo) return reply.callNotFound();
     return attachment(reply, `${photo.slug}.${ext(photo.file)}`).sendFile(photo.file, path.join(storageDir, 'originals'), { cacheControl: false });
@@ -1393,6 +1403,7 @@ export default async function adminRoutes(app) {
   // Remarque adressée au photographe de la photo : elle remonte dans son « Aujourd'hui ».
   app.post('/admin/photos/:id/remarques', W('taches.adresser'), async (request, reply) => {
     const id = byId(request.params.id);
+    if (!repo.photo(id)) return noPhoto(request, reply);
     try {
       app.notes.add(id, request.body?.message, { sub: request.session.sub, name: request.session.name });
     } catch (err) {
@@ -1519,8 +1530,10 @@ export default async function adminRoutes(app) {
   // Réglages du circuit, photographe par photographe : publier sans validation, modifier ses photos publiées.
   app.get('/admin/circuit', P('circuit.regler'), async (request, reply) => {
     const authors = new Map(repo.authors().map(a => [a.id, a.name]));
+    // Un droit qu'un autre rôle du compte donne déjà (Relecteur, Modérateur) ne se retire pas ici : la page le dit.
+    const byRole = a => grantsOf(a.roles.filter(r => r !== 'photographe'));
     const list = app.accounts.list().filter(a => a.roles.includes('photographe') && !a.roles.includes('admin'))
-      .map(a => ({ ...a, author: authors.get(a.author_id) || '', publishAlone: a.adjust.add.includes('photos.publier'), editPublished: !a.adjust.remove.includes('photos.publiees.modifier'), igAlone: a.adjust.add.includes('instagram.file') }));
+      .map(a => ({ ...a, author: authors.get(a.author_id) || '', publishAlone: a.adjust.add.includes('photos.publier'), editPublished: !a.adjust.remove.includes('photos.publiees.modifier'), igAlone: a.adjust.add.includes('instagram.file'), byRole: byRole(a) }));
     return render(request, reply, 'circuit', { title: request.t('Circuit de publication'), list });
   });
   app.post('/admin/circuit/:id', W('circuit.regler'), async (request, reply) => {
@@ -1661,6 +1674,10 @@ export default async function adminRoutes(app) {
   });
 
   app.post('/admin/series/:id/delete', W('series.gerer'), async (request, reply) => {
+    // Supprimer une série qui a des photos les reclasse toutes (publiées comprises, de tous les photographes) : c'est
+    // changer leur série, ce qui demande de pouvoir modifier toutes les photos. Le modérateur supprime une série vide.
+    const c = repo.categories().find(x => x.id === byId(request.params.id));
+    if (c?.count && !(request.scope('photos.modifier')?.all && request.scope('photos.publiees.modifier')?.all)) return app.forbid(request, reply);
     let r;
     try {
       r = repo.deleteCategory(byId(request.params.id), { moveTo: request.body?.move_to });
@@ -1757,7 +1774,8 @@ export default async function adminRoutes(app) {
   app.get('/admin/images/logo', P('site.filigrane'), async (request, reply) => {
     const { watermark } = app.variants.context();
     if (!watermark.image) return reply.callNotFound();
-    return reply.header('cache-control', 'no-store').sendFile(watermark.image, app.variants.watermarkDir);
+    // cacheControl: false — sinon le cache d'un an de /static/ (production) remplacerait le no-store.
+    return reply.header('cache-control', 'no-store').sendFile(watermark.image, app.variants.watermarkDir, { cacheControl: false });
   });
 
   // Logo : PNG ou WebP, réencodé en PNG (aucune donnée du fichier envoyé n'est servie telle quelle).

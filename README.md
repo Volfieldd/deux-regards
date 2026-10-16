@@ -54,7 +54,7 @@ Pour entrer dans l'admin sans Zitadel, laissez les variables `OIDC_*` vides et m
 
 ## Connexion à l'admin
 
-L'admin n'accepte que des comptes OIDC portant le rôle de projet `admin` (Zitadel), ou, en repli, un `sub` listé dans `OIDC_ALLOWED_SUBS` avec un e-mail vérifié. Renseigner `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_PROJECT_ID` et `OIDC_ORG_ID`, et déclarer `PUBLIC_URL/auth/callback` comme URL de redirection dans Zitadel. Sans ces variables, le site public fonctionne et `/auth/login` répond 503. Pas à pas : [Connexion et comptes](docs/wiki/Connexion-et-comptes.md).
+L'admin n'accepte que des comptes qui ont un rôle, donné dans **Comptes et rôles** (Administrateur, Photographe, Modérateur, Relecteur) ; un compte inconnu arrive « en attente ». Le rôle de projet `admin` (Zitadel), ou, en repli, un `sub` listé dans `OIDC_ALLOWED_SUBS` avec un e-mail vérifié, ne sert qu'à créer un administrateur à sa première connexion. Renseigner `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_PROJECT_ID` et `OIDC_ORG_ID`, et déclarer `PUBLIC_URL/auth/callback` comme URL de redirection dans Zitadel. Sans ces variables, le site public fonctionne et `/auth/login` répond 503. Pas à pas : [Connexion et comptes](docs/wiki/Connexion-et-comptes.md).
 
 Le serveur refuse de démarrer sans `COOKIE_SECRET` (32 caractères ou plus) dès que `PUBLIC_URL` est en HTTPS, que `NODE_ENV=production` ou qu'il écoute ailleurs qu'en local (`HOST` autre qu'une adresse de bouclage) ; il refuse aussi un émetteur OIDC en HTTP une fois en ligne.
 

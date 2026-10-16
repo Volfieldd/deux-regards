@@ -1,4 +1,5 @@
 <% layout('./layout') %>
+<% const t = it.t || (x => x); /* traduction de l'admin quand la langue du compte est connue, sinon le français */ %>
 <header class="top wrap">
   <%~ include('./brand', it) %>
 </header>
@@ -6,11 +7,20 @@
   <h1><%= it.title %></h1>
   <div class="prose">
     <p><%= it.message %></p>
-<% if (it.switchAccount) { %>
-    <p><a class="more eyebrow" href="/auth/login?prompt=select_account">Utiliser un autre compte</a></p>
-<% } else if (it.retry) { %>
-    <p><a class="more eyebrow" href="/auth/login">Réessayer</a></p>
+<% if (it.sub) { /* compte en attente : l'identifiant à donner à l'administrateur, qui le vérifie avant de donner un rôle */ %>
+    <p><%= t('Identifiant (sub)') %> : <code><%= it.sub %></code></p>
 <% } %>
-    <p><a class="more eyebrow" href="/">Revenir au site</a></p>
+<% if (it.adminLink) { %>
+    <p><a class="more eyebrow" href="/admin"><%= t('Revenir à l’administration') %></a></p>
+<% } %>
+<% if (it.switchAccount) { %>
+    <p><a class="more eyebrow" href="/auth/login?prompt=select_account"><%= t('Utiliser un autre compte') %></a></p>
+<% } else if (it.retry) { %>
+    <p><a class="more eyebrow" href="/auth/login"><%= t('Réessayer') %></a></p>
+<% } %>
+<% if (it.logoutCsrf) { %>
+    <form method="post" action="/auth/logout"><input type="hidden" name="_csrf" value="<%= it.logoutCsrf %>"><p><button class="more eyebrow" type="submit"><%= t('Se déconnecter') %></button></p></form>
+<% } %>
+    <p><a class="more eyebrow" href="/"><%= t('Revenir au site') %></a></p>
   </div>
 </main>

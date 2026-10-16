@@ -1,11 +1,15 @@
 import crypto from 'node:crypto';
 import { registerPermissions, hasRole } from './permissions.js';
-import { createAccounts, createAudit } from './accounts.js';
 import { createOidc } from './oidc.js';
 import { createSessionStore, IDLE_TTL } from './sessions.js';
 import { createRateLimiter } from './ratelimit.js';
 
 const TX_TTL = 10 * 60; // secondes pour revenir de l'IdP
+// Connexions en cours (un cookie de transaction par onglet) : au-delà, les plus anciennes sont oubliées, et la page
+// demandée n'est gardée que si elle est courte — une page tierce qui enchaîne les /auth/login ne peut pas gonfler
+// l'en-tête Cookie jusqu'au refus (431) de tout le site pour ce navigateur.
+const TX_MAX = 3;
+const NEXT_MAX = 1000;
 const PROMPTS = new Set(['login', 'select_account']);
 const STATE_RE = /^[\w-]{16,128}$/;
 const LOCAL = 'http://local.invalid';
@@ -51,16 +55,20 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   const isAttempt = request => request.routeOptions.url === '/auth/callback'
     || (request.routeOptions.url === '/auth/local' && request.method === 'POST');
 
+  // Sans OIDC_ORG_ID, un rôle « admin » donné dans une autre organisation Zitadel (projet partagé) serait accepté :
+  // en ligne, le rôle de l'IdP ne crée alors aucun administrateur (ADMIN_SUBS reste la voie d'amorce).
+  const idpRoleTrusted = !(config.oidc.projectId && !config.oidc.orgId && config.deployed);
   if (config.oidc.projectId && !config.oidc.orgId) {
-    app.log.warn('OIDC_ORG_ID non défini : un rôle admin donné dans une autre organisation Zitadel serait accepté');
+    app.log.warn(idpRoleTrusted ? 'OIDC_ORG_ID non défini : un rôle admin donné dans une autre organisation Zitadel serait accepté'
+      : 'OIDC_ORG_ID non défini : le rôle admin de Zitadel est ignoré (amorce par ADMIN_SUBS seulement) ; renseignez OIDC_ORG_ID');
   }
 
   app.decorate('oidc', oidc);
   app.decorateRequest('session', null);
-  // Comptes et journal (server/accounts.js) : les rôles d'une session sont ceux de son compte, relus à chaque requête.
-  if (!app.hasDecorator('accounts')) app.decorate('accounts', createAccounts({ db: app.db, adminSubs: config.adminSubs || [] }));
-  if (!app.hasDecorator('audit')) app.decorate('audit', createAudit({ db: app.db }));
+  // Comptes et journal (server/accounts.js, décorés par buildApp) : les rôles d'une session sont ceux de son compte,
+  // relus à chaque requête.
   const { accounts, audit } = app;
+  const lastPending = app.db.prepare("SELECT MAX(at) FROM audit_log WHERE sub = ? AND action = 'connexion en attente d’un rôle'").pluck();
 
   app.addHook('onRequest', async (request, reply) => {
     const token = request.cookies[SESSION_COOKIE];
@@ -73,8 +81,10 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   });
 
   const pendingPage = { title: 'Compte en attente', message: 'Votre compte est bien enregistré. Un administrateur doit maintenant lui donner un rôle ; réessayez ensuite.' };
+  // data.t : traduction de l'admin (request.t), quand la langue du compte est connue ; la page est alors dans sa langue,
+  // liens compris, et le dit (lang).
   const renderError = (reply, code, data) => reply.code(code).header('cache-control', 'no-store').render('auth-error', {
-    siteName: app.siteName(), pageTitle: `${data.title} · ${app.siteName()}`, description: '', ...data,
+    siteName: app.siteName(), pageTitle: `${data.title} · ${app.siteName()}`, description: '', lang: data.t?.lang || 'fr', ...data,
   });
 
   // Permissions de chaque route (server/permissions.js).
@@ -92,8 +102,10 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     if (!hasRole(request.session.roles)) {
       const a = accounts.bySub(request.session.sub);
       const t = request.t || (x => x);                                          // langue de l'admin, si elle est connue
-      if (a?.status === 'en_attente') return renderError(reply, 403, { title: t(pendingPage.title), message: t(pendingPage.message) });
-      return renderError(reply, 403, { title: t('Accès refusé'), message: t('Ce compte n’a pas accès à l’administration.') });
+      // Une sortie : changer de compte (la session sans rôle est oubliée par /auth/login) ou se déconnecter.
+      const out = { t: request.t, switchAccount: true, logoutCsrf: request.session.csrf };
+      if (a?.status === 'en_attente') return renderError(reply, 403, { title: t(pendingPage.title), message: t(pendingPage.message), sub: a.sub, ...out });
+      return renderError(reply, 403, { title: t('Accès refusé'), message: t('Ce compte n’a pas accès à l’administration.'), ...out });
     }
     // Expiration glissante : le cookie suit l'échéance de la session.
     const maxAge = Math.floor((request.session.expires_at - Date.now()) / 1000);
@@ -101,16 +113,17 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   });
 
   const csrfOk = request => Boolean(request.session) && sameToken(request.body?._csrf ?? request.headers['x-csrf-token'], request.session.csrf);
-  const csrfPage = reply => renderError(reply, 403, {
-    title: 'Formulaire expiré', message: 'Ce formulaire n’est plus valide. Rechargez la page et recommencez.',
-  });
+  const csrfPage = (request, reply) => {
+    const t = request.t || (x => x);                                            // pas de langue connue : français
+    return renderError(reply, 403, { t: request.t, title: t('Formulaire expiré'), message: t('Ce formulaire n’est plus valide. Rechargez la page et recommencez.') });
+  };
 
   // preHandler des routes d'écriture : jeton synchronisé (champ _csrf ou en-tête x-csrf-token).
   // Page d'erreur pour un formulaire, JSON pour un appel fetch.
   app.decorate('verifyCsrf', async function (request, reply) {
     if (csrfOk(request)) return;
-    if (request.headers.accept?.includes('text/html')) return csrfPage(reply);
-    return reply.code(403).send({ error: 'Jeton CSRF invalide.' });
+    if (request.headers.accept?.includes('text/html')) return csrfPage(request, reply);
+    return reply.code(403).send({ error: (request.t || (x => x))('Jeton CSRF invalide.') });
   });
 
   app.addHook('onRequest', async (request, reply) => {
@@ -120,8 +133,20 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     });
   });
 
+  // Une session sans rôle (compte en attente, rôles retirés) n'ouvre rien : elle est oubliée, pour qu'on puisse se
+  // connecter avec un autre compte. Une session qui a un rôle n'est jamais fermée par un simple GET (page tierce).
+  const leaveIfNoRole = (request, reply) => {
+    if (!request.session || hasRole(request.session.roles)) return false;
+    sessions.destroy(request.cookies[SESSION_COOKIE]);
+    reply.clearCookie(SESSION_COOKIE, cookieBase);
+    request.session = null;
+    return true;
+  };
+
   app.get('/auth/login', async (request, reply) => {
-    const next = safeNext(request.query.next);
+    let next = safeNext(request.query.next);
+    if (next.length > NEXT_MAX) next = '/admin';
+    leaveIfNoRole(request, reply);
     if (request.session) return reply.redirect(next);
     if (!oidc.configured) {
       if (config.localAuthToken) return reply.redirect(`/auth/local?next=${encodeURIComponent(next)}`);
@@ -134,6 +159,8 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       request.log.error(err, 'fournisseur OIDC injoignable');
       return renderError(reply, 502, { title: 'Connexion indisponible', message: 'Le service de connexion ne répond pas. Réessayez dans un instant.', retry: true });
     }
+    const pending = Object.keys(request.cookies).filter(n => n.startsWith(`${prefix}oidc-`));
+    if (pending.length >= TX_MAX) for (const n of pending) reply.clearCookie(n, cookieBase);
     reply.setCookie(txCookie(start.tx.state), JSON.stringify({ ...start.tx, next }), { ...cookieBase, signed: true, maxAge: TX_TTL });
     return reply.header('cache-control', 'no-store').redirect(start.url);
   });
@@ -165,26 +192,35 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     }
 
     const { claims } = result;
-    const who = { sub: claims.sub, name: claims.name || claims.preferred_username || claims.email || '', email: claims.email || '' };
+    // L'adresse n'est retenue que si l'IdP l'a vérifiée : sinon, n'importe qui pourrait se présenter sous celle d'un autre
+    // (page « Comptes et rôles », e-mails de l'admin). Certains IdP envoient la chaîne « true ».
+    const verified = claims.email_verified === true || claims.email_verified === 'true';
+    const email = verified && typeof claims.email === 'string' ? claims.email : '';
+    const who = { sub: claims.sub, name: claims.name || claims.preferred_username || email || '', email };
+    if (result.admin && !idpRoleTrusted) request.log.warn({ sub: claims.sub }, 'rôle admin de l’IdP ignoré : OIDC_ORG_ID non défini');
     // Compte créé à la première connexion : administrateur si l'IdP transporte le rôle « admin », sinon en attente
     // qu'un administrateur lui donne un rôle. Ensuite, seuls comptent les rôles réglés dans l'admin.
-    const account = accounts.login({ ...who, idpAdmin: result.admin });
+    const account = accounts.login({ ...who, idpAdmin: idpRoleTrusted && result.admin });
+    if (account.rescued) audit.log({ ...who, action: 'compte rétabli par ADMIN_SUBS' });
     if (account.status === 'desactive') {
       audit.log({ ...who, action: 'connexion refusée (compte désactivé)' });
       return renderError(reply, 403, { title: 'Accès refusé', message: 'Ce compte a été désactivé.', switchAccount: true });
     }
     if (!hasRole(accounts.rolesOf(who.sub))) {
-      audit.log({ ...who, action: 'connexion en attente d’un rôle' });
+      // Au journal : une ligne par jour au plus pour un compte en attente (pas une par essai, qui noierait le reste).
+      const last = lastPending.get(who.sub);
+      if (!last || Date.now() - last > 864e5) audit.log({ ...who, action: 'connexion en attente d’un rôle' });
       request.log.warn({ sub: claims.sub }, 'connexion sans rôle : compte en attente');
-      return renderError(reply, 403, { ...pendingPage, switchAccount: true });
+      return renderError(reply, 403, { ...pendingPage, switchAccount: true, sub: who.sub });
     }
 
-    openSession(request, reply, { ...who, roles: accounts.rolesOf(who.sub), idToken: result.idToken });
+    openSession(request, reply, { ...who, idToken: result.idToken });
     audit.log({ ...who, action: 'connexion' });
     return reply.header('cache-control', 'no-store').redirect(safeNext(tx.next));
   });
 
-  // Nouvelle session à chaque connexion ; l'ancienne éventuelle est détruite.
+  // Nouvelle session à chaque connexion ; l'ancienne éventuelle est détruite. Elle ne porte pas de rôles : ceux du
+  // compte sont relus à chaque requête.
   function openSession(request, reply, user) {
     sessions.destroy(request.cookies[SESSION_COOKIE]);
     reply.setCookie(SESSION_COOKIE, sessions.create(user), { ...cookieBase, maxAge: IDLE_TTL / 1000 });
@@ -202,22 +238,26 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
 
     app.get('/auth/local', async (request, reply) => {
       const next = safeNext(request.query.next);
+      leaveIfNoRole(request, reply);
       if (request.session) return reply.redirect(next);
       return renderLocal(reply, 200, { next });
     });
 
     app.post('/auth/local', async (request, reply) => {
-      const { token, author, next, role } = request.body || {};
+      const { token, author, next } = request.body || {};
       const who = authors.all().find(a => a.slug === author);
       if (!sameToken(token, config.localAuthToken) || !who) {
         return renderLocal(reply, 401, { next: safeNext(next), error: 'Jeton ou compte invalide.' });
       }
       // Le compte est celui lié au photographe s'il existe (pour tester le lien compte ↔ photographe), sinon
-      // « local:<photographe> », administrateur ; role (tests) : un autre rôle pour ce compte.
+      // « local:<photographe> », administrateur à sa création. Ses rôles ne changent ensuite que dans « Comptes et
+      // rôles » (garde-fous, journal) ; désactivé ou sans rôle, comme en OIDC, aucune session.
       const sub = who.linked || `local:${who.slug}`;
-      const roles = typeof role === 'string' && role ? [role] : (accounts.bySub(sub) ? undefined : ['admin']);
-      accounts.ensureLocal({ sub, name: `${who.name} (test)`, authorId: who.id, roles });
-      openSession(request, reply, { sub, name: `${who.name} (test)`, roles: accounts.rolesOf(sub) });
+      const account = accounts.ensureLocal({ sub, name: `${who.name} (test)`, authorId: who.id, roles: ['admin'] });
+      if (account.status === 'desactive' || !hasRole(accounts.rolesOf(sub))) {
+        return renderLocal(reply, 403, { next: safeNext(next), error: 'Ce compte est désactivé ou n’a pas de rôle.' });
+      }
+      openSession(request, reply, { sub, name: `${who.name} (test)` });
       audit.log({ sub, name: `${who.name} (test)`, action: 'connexion (test)' });
       return reply.header('cache-control', 'no-store').redirect(safeNext(next), 303);
     });
@@ -226,7 +266,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // POST + CSRF : une page tierce ne peut pas déconnecter l'utilisateur.
   app.post('/auth/logout', async (request, reply) => {
     if (!request.session) return reply.redirect('/', 303);
-    if (!csrfOk(request)) return csrfPage(reply);
+    if (!csrfOk(request)) return csrfPage(request, reply);
     sessions.destroy(request.cookies[SESSION_COOKIE]);
     reply.clearCookie(SESSION_COOKIE, cookieBase);
     let target = '/';

@@ -10,7 +10,7 @@
   <Project>https://github.com/cloudflare/cloudflared</Project>
   <Overview>Tunnel Cloudflare de Nicephos : publie le site en HTTPS sans ouvrir de port. Dans Cloudflare, le Public Hostname www.nicephos.art pointe vers http://nicephos:3000.</Overview>
   <Category>Network:Proxy</Category>
-  <ExtraParams>--security-opt no-new-privileges:true</ExtraParams>
+  <ExtraParams>--ip 172.29.42.10 --security-opt no-new-privileges:true</ExtraParams>
   <PostArgs>tunnel --no-autoupdate run</PostArgs>
     <Config Name="Jeton du tunnel" Target="TUNNEL_TOKEN" Default="" Mode="" Description="Zero Trust → Networks → Tunnels → votre tunnel." Type="Variable" Display="always" Required="true" Mask="true"></Config>
 </Container>

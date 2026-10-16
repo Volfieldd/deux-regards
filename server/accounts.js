@@ -2,8 +2,9 @@ import { ROLES, ADJUSTABLE } from './permissions.js';
 
 // Comptes de l'admin : une ligne par identité (sub de l'IdP, ou « local:<photographe> » pour la connexion de test),
 // avec ses rôles, le photographe lié et son état. Les rôles vivent ici ; l'IdP ne fait que transporter l'identité
-// (et, à la première connexion seulement, son rôle « admin » sert d'amorce). Ils sont relus à chaque requête : un
-// retrait s'applique tout de suite. Garde-fou : les identités de ADMIN_SUBS sont toujours administratrices.
+// (et, à la première connexion seulement, son rôle « admin » sert d'amorce ; pas pour un compte supprimé qui revient).
+// Ils sont relus à chaque requête : un retrait s'applique tout de suite. Garde-fou : les identités de ADMIN_SUBS sont
+// toujours administratrices.
 export const STATUSES = ['actif', 'en_attente', 'desactive'];
 
 export class AccountError extends Error {}
@@ -14,16 +15,28 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
     byId: db.prepare('SELECT * FROM accounts WHERE id = ?'),
     all: db.prepare(`SELECT c.*, a.name AS author_name FROM accounts c LEFT JOIN authors a ON a.id = c.author_id
       ORDER BY CASE c.status WHEN 'en_attente' THEN 0 WHEN 'actif' THEN 1 ELSE 2 END, c.name COLLATE NOCASE, c.id`),
-    insert: db.prepare(`INSERT INTO accounts (sub, name, email, author_id, roles, status, created_at, last_login_at)
-      VALUES (@sub, @name, @email, @author_id, @roles, @status, @created_at, @last_login_at)`),
+    insert: db.prepare(`INSERT INTO accounts (sub, name, email, author_id, roles, status, created_at, last_login_at, decided_at)
+      VALUES (@sub, @name, @email, @author_id, @roles, @status, @created_at, @last_login_at, @decided_at)`),
+    // Comptes supprimés (migration 040) : l'identité seule, le temps qu'elle revienne.
+    removedAt: db.prepare('SELECT removed_at FROM accounts_removed WHERE sub = ?').pluck(),
+    unremove: db.prepare('DELETE FROM accounts_removed WHERE sub = ?'),
+    tombstone: db.prepare('INSERT OR REPLACE INTO accounts_removed (sub, removed_at) VALUES (?, ?)'),
   };
   const adjustOf = raw => { let a = {}; try { a = JSON.parse(raw || '{}'); } catch { a = {}; } const ok = l => [...new Set(l || [])].filter(p => Object.hasOwn(ADJUSTABLE, p)); return { add: ok(a.add), remove: ok(a.remove) }; };
   const parse = row => row && { ...row, roles: JSON.parse(row.roles || '[]').filter(r => Object.hasOwn(ROLES, r)), adjust: adjustOf(row.adjust), notify_email: Boolean(row.notify_email), locked: adminSubs.includes(row.sub) };
   const bySub = sub => parse(q.bySub.get(sub));
   const byId = id => parse(q.byId.get(id));
+  // Un compte supprimé par un administrateur qui revient (connexion OIDC, de test, ou session) : « en attente », sans
+  // rôle, avec la décision de l'administrateur (decided_at) — le rôle « admin » de l'IdP ne le recrée pas
+  // administrateur et ne le promeut pas ensuite. Seul ADMIN_SUBS passe outre.
   const create = ({ sub, name = '', email = '', authorId = null, roles = [], status }) => {
     const t = now();
-    q.insert.run({ sub, name, email, author_id: authorId, roles: JSON.stringify(roles), status: status || (roles.length ? 'actif' : 'en_attente'), created_at: t, last_login_at: null });
+    const removed = adminSubs.includes(sub) ? undefined : q.removedAt.get(sub);
+    if (removed != null) { roles = []; status = undefined; }
+    db.transaction(() => {
+      q.insert.run({ sub, name, email, author_id: authorId, roles: JSON.stringify(roles), status: status || (roles.length ? 'actif' : 'en_attente'), created_at: t, last_login_at: null, decided_at: removed ?? null });
+      q.unremove.run(sub);
+    })();
     return bySub(sub);
   };
   // Administrateurs actifs (garde-fou : jamais zéro).
@@ -46,16 +59,27 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
       return a && a.status === 'actif' ? a.roles : [];
     },
     // Connexion : compte créé à la première connexion (administrateur si l'IdP transporte le rôle « admin » ou si
-    // l'identité est dans ADMIN_SUBS, sinon en attente), nom et e-mail tenus à jour.
+    // l'identité est dans ADMIN_SUBS, sinon en attente), nom et e-mail tenus à jour. rescued : remis administrateur
+    // par ADMIN_SUBS (à noter au journal).
     login({ sub, name = '', email = '', idpAdmin = false }) {
       let a = bySub(sub);
-      const admin = idpAdmin || adminSubs.includes(sub);
+      const locked = adminSubs.includes(sub);
+      const admin = idpAdmin || locked;
+      let rescued = false;
       if (!a) a = create({ sub, name, email, roles: admin ? ['admin'] : [] });
+      // Garde-fou ADMIN_SUBS : une identité ajoutée à la liste après coup (compte désactivé, rôles retirés) redevient
+      // administrateur actif, en base aussi (page « Comptes et rôles », « au moins un administrateur actif »). Jamais
+      // sur la seule foi de l'IdP : son rôle « admin » ne contredit pas une décision d'administrateur.
+      else if (locked && (a.status !== 'actif' || !a.roles.includes('admin'))) {
+        db.prepare("UPDATE accounts SET roles = ?, status = 'actif' WHERE id = ?").run(JSON.stringify([...new Set([...a.roles, 'admin'])]), a.id);
+        rescued = true;
+      }
       // En attente sans décision d'un administrateur, et l'IdP transporte désormais le rôle « admin » : promu. Un
-      // compte dont un administrateur a retiré les rôles ne l'est jamais.
+      // compte dont un administrateur a retiré les rôles (ou qu'il a supprimé) ne l'est jamais.
       else if (a.status === 'en_attente' && !a.decided_at && admin) db.prepare("UPDATE accounts SET roles = '[\"admin\"]', status = 'actif' WHERE id = ?").run(a.id);
-      db.prepare('UPDATE accounts SET name = ?, email = ?, last_login_at = ? WHERE id = ?').run(name || a.name, email || a.email, now(), a.id);
-      return bySub(sub);
+      // Une connexion refusée (compte désactivé) n'en est pas une : « dernière connexion » ne bouge pas (le journal la garde).
+      db.prepare("UPDATE accounts SET name = ?, email = ?, last_login_at = CASE WHEN status = 'desactive' THEN last_login_at ELSE ? END WHERE id = ?").run(name || a.name, email || a.email, now(), a.id);
+      return { ...bySub(sub), rescued };
     },
     // Compte d'une session : s'il manque (session d'avant les comptes), il est créé SANS rôle, en attente : les rôles
     // stockés dans la session ne valent jamais (sinon un compte effacé reviendrait avec ses anciens droits).
@@ -63,7 +87,8 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
     ensure({ sub, name = '', email = '', roles = [] }) {
       return bySub(sub) || create({ sub, name, email, roles: roles.filter(r => Object.hasOwn(ROLES, r)) });
     },
-    // Connexion de test : compte « local:<photographe> » lié à ce photographe.
+    // Connexion de test : compte « local:<photographe> » lié à ce photographe, créé avec roles. Un compte qui existe
+    // déjà garde ses rôles et son état : ils ne changent que par update() (garde-fous, journal).
     ensureLocal({ sub, name, authorId, roles }) {
       const a = bySub(sub);
       if (!a) {
@@ -71,8 +96,7 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
         db.prepare('UPDATE accounts SET last_login_at = ? WHERE id = ?').run(now(), created.id);
         return bySub(sub);
       }
-      if (roles) db.prepare('UPDATE accounts SET roles = ?, status = ? WHERE id = ?').run(JSON.stringify(roles), roles.length ? 'actif' : 'en_attente', a.id);
-      db.prepare('UPDATE accounts SET last_login_at = ? WHERE id = ?').run(now(), a.id);
+      if (a.status !== 'desactive') db.prepare('UPDATE accounts SET last_login_at = ? WHERE id = ?').run(now(), a.id);
       return bySub(sub);
     },
     // Droits réglés pour une identité (circuit de publication) : { add, remove }.
@@ -122,7 +146,10 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
       if (next.author_id && db.prepare('SELECT 1 FROM accounts WHERE author_id = ? AND id != ?').get(next.author_id, id)) throw new AccountError('Ce photographe est déjà lié à un autre compte.');
       if (next.author_id && !db.prepare('SELECT 1 FROM authors WHERE id = ?').get(next.author_id)) throw new AccountError('Photographe inconnu.');
       const decided = next.roles.join() !== a.roles.join() || next.status !== a.status;
-      db.prepare('UPDATE accounts SET roles = ?, author_id = ?, status = ?, decided_at = CASE WHEN ? THEN ? ELSE decided_at END WHERE id = ?').run(JSON.stringify(next.roles), next.author_id, next.status, decided ? 1 : 0, now(), id);
+      // Plus Photographe : ses réglages du circuit (page « Circuit de publication », réservée aux photographes) sont
+      // remis à zéro, pour qu'un rôle Photographe rendu plus tard ne les réactive pas en silence.
+      const resetAdjust = a.roles.includes('photographe') && !next.roles.includes('photographe');
+      db.prepare("UPDATE accounts SET roles = ?, author_id = ?, status = ?, decided_at = CASE WHEN ? THEN ? ELSE decided_at END, adjust = CASE WHEN ? THEN '{}' ELSE adjust END WHERE id = ?").run(JSON.stringify(next.roles), next.author_id, next.status, decided ? 1 : 0, now(), resetAdjust ? 1 : 0, id);
       // Plus aucun accès : ses sessions sont fermées tout de suite.
       if (next.status !== 'actif') db.prepare('DELETE FROM sessions WHERE sub = ?').run(a.sub);
       return { before: a, after: byId(id) };
@@ -133,8 +160,11 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
       if (a.locked) throw new AccountError('Ce compte est protégé par ADMIN_SUBS : il reste administrateur.');
       if (a.sub === by) throw new AccountError('Vous ne pouvez pas supprimer votre propre compte.');
       if (a.status === 'actif' && a.roles.includes('admin') && activeAdmins().length <= 1) throw new AccountError('Il faut au moins un administrateur actif.');
-      db.prepare('DELETE FROM accounts WHERE id = ?').run(id);
-      db.prepare('DELETE FROM sessions WHERE sub = ?').run(a.sub);                 // déconnecté tout de suite
+      db.transaction(() => {
+        q.tombstone.run(a.sub, now());                                            // s'il revient : en attente, sans rôle
+        db.prepare('DELETE FROM accounts WHERE id = ?').run(id);
+        db.prepare('DELETE FROM sessions WHERE sub = ?').run(a.sub);               // déconnecté tout de suite
+      })();
       return a;
     },
   };

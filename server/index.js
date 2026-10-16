@@ -1,12 +1,13 @@
 import { loadConfig } from './config.js';
 import { openDb, migrate } from './db/index.js';
 import { buildApp } from './app.js';
-import { assertPersistentStorage } from './storage-guard.js';
+import { assertPersistentStorage, assertDatabaseInStorage } from './storage-guard.js';
 
 let config;
 try {
   config = loadConfig();
   assertPersistentStorage(config.storageDir);
+  assertDatabaseInStorage(config.databasePath, config.storageDir);
 } catch (err) {
   // Erreur de configuration : message lisible, pas de pile d'appels.
   console.error(`Démarrage refusé : ${err.message}`);

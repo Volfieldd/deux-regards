@@ -58,7 +58,7 @@ openssl ts -verify -in photo.tsr -data photo.jpg -CAfile autorite-horodatage.pem
 
 | Route | Rôle |
 |---|---|
-| `GET /admin/photos/:id/original` | original, en pièce jointe |
+| `GET /admin/photos/:id/original` | original, en pièce jointe (permission `photos.original` ; chaque téléchargement est noté au Journal) |
 | `GET /admin/photos/:id/preuve.tsr` | jeton RFC 3161 (`application/timestamp-reply`) |
 | `GET /admin/photos/:id/preuve.txt` | fiche de preuve |
 | `GET /admin/preuves/autorite.pem` | certificat racine de l'autorité configurée |
