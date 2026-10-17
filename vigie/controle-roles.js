@@ -1,45 +1,124 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import Database from 'better-sqlite3';
 
 // Contrôle des rôles sur les sauvegardes du site (annexe architecture, section 4.4) : la Vigie ouvre en lecture seule le
 // dernier instantané du site (dossier des sauvegardes monté en lecture seule), lit les administrateurs actifs et les
-// déclencheurs du journal des comptes, et compare à ce que le site a déclaré (événements sys_state). Un site compromis
-// peut mentir dans ses événements ; il ne réécrit pas la sauvegarde déjà faite par un autre conteneur.
+// déclencheurs du journal des comptes, et compare à ce que le site a déclaré (événements sys_state) et à l'instantané
+// précédent. Un site compromis peut mentir dans ses événements ; il ne réécrit pas la sauvegarde déjà faite par un autre
+// conteneur.
+// Revue du 17 octobre 2026 : seuls des fichiers ordinaires au nom attendu sont lus (ni lien, ni tube, ni nom fabriqué
+// pour passer en tête du tri) ; un nouvel administrateur doit correspondre à un changement journalisé ; le texte des
+// déclencheurs est comparé à celui de l'instantané précédent ; un contrôle impossible ou une sauvegarde trop ancienne
+// est signalé (haut), un écart est critique.
 
 const TRIGGERS = ['account_changes_insert', 'account_changes_update', 'account_changes_delete', 'account_changes_immuable',
   'account_changes_conserve', 'account_change_tickets_immuable', 'account_change_tickets_conserve'];
+const NAME = /^site-(\d{4})-(\d{2})-(\d{2})T(\d{2})(\d{2})(\d{2})(-suspect)?\.db$/;
+const STALE = 48 * 3600e3;                       // sauvegarde quotidienne : au-delà de deux jours, le contrôle est aveugle
+const MAX_SIZE = 2 * 1024 ** 3;
 
-export function latestSnapshot(dir) {
+const stampOf = f => { const m = NAME.exec(f); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) : NaN; };
+// Nom d'instantané pour un instant donné (même format que server/db/backup.js).
+export const snapshotName = t => `site-${new Date(t).toISOString().replace(/[:]/g, '').replace(/\..+/, '')}.db`;
+
+// Instantané le plus récent d'après la date de son nom (jamais dans le futur), fichier ordinaire seulement.
+export function latestSnapshot(dir, now = Date.now()) {
   const db = path.join(dir, 'db');
   let files = [];
-  try { files = fs.readdirSync(db).filter(f => /^site-.+\.db$/.test(f)).sort(); } catch { return null; }
-  return files.length ? path.join(db, files.at(-1)) : null;
+  try { files = fs.readdirSync(db); } catch { return null; }
+  const candidates = files.map(f => ({ f, t: stampOf(f) })).filter(x => Number.isFinite(x.t) && x.t <= now + 5 * 60e3).sort((a, b) => b.t - a.t);
+  for (const { f, t } of candidates) {
+    const file = path.join(db, f);
+    let st;
+    try { st = fs.lstatSync(file); } catch { continue; }
+    if (st.isFile() && st.size > 0 && st.size <= MAX_SIZE) return { file, stamp: t, stat: st };
+  }
+  return null;
 }
 
+const hash = s => crypto.createHash('sha256').update(s || '').digest('hex').slice(0, 16);
+
 export function checkRoles({ store, siteBackupDir, now = Date.now }) {
-  const file = latestSnapshot(siteBackupDir);
-  if (!file) return { ok: null, raison: 'aucun instantané du site' };
-  const seen = store.setting.get('controle_roles_vu');
-  const stat = fs.statSync(file);
-  if (seen?.fichier === path.basename(file) && seen?.taille === stat.size && seen?.modifie === stat.mtimeMs) return { ok: null, raison: 'instantané déjà contrôlé' };
-  const snap = new Database(file, { readonly: true, fileMustExist: true });
-  let admins, triggers;
-  try {
-    admins = snap.prepare("SELECT sub, roles FROM accounts WHERE status = 'actif'").all()
-      .filter(a => { try { return JSON.parse(a.roles).includes('admin'); } catch { return false; } }).map(a => a.sub).sort();
-    triggers = snap.prepare("SELECT name FROM sqlite_master WHERE type = 'trigger'").pluck().all();
-  } finally { snap.close(); }
-  // Ce que le site a déclaré depuis la sauvegarde (sys_state le plus récent avant elle, et ceux d'après).
-  const declared = new Set();
-  for (const d of store.db.prepare("SELECT detail FROM events WHERE type = 'sys_state' AND recu_a > ? ORDER BY seq DESC LIMIT 500").pluck().iterate(stat.mtimeMs - 864e5)) {
-    try { for (const s of JSON.parse(d).administrateurs || []) declared.add(s); } catch { /* ligne illisible */ }
+  const t = now();
+  const report = (severity, detail) => { store.own('vigie_controle_roles', { severity, emetteur: 'vigie/controle-roles.js', detail }); };
+  const snapInfo = latestSnapshot(siteBackupDir, t);
+  if (!snapInfo) {
+    // Signalé une fois par jour au plus (le contrôle tourne chaque heure).
+    if (t - store.setting.get('controle_roles_absent', 0) >= 864e5) {
+      store.setting.set('controle_roles_absent', t);
+      report('haut', { erreur: 'aucun instantané lisible du site' });
+    }
+    return { ok: null, raison: 'aucun instantané du site' };
   }
-  const unknownAdmins = declared.size ? admins.filter(a => !declared.has(a)) : [];
-  const missing = TRIGGERS.filter(t => !triggers.includes(t));
-  const ok = !unknownAdmins.length && !missing.length;
-  store.setting.set('controle_roles_vu', { fichier: path.basename(file), taille: stat.size, modifie: stat.mtimeMs, at: now() });
-  store.own('vigie_controle_roles', { severity: ok ? 'info' : 'critique', emetteur: 'vigie/controle-roles.js',
-    detail: { instantane: path.basename(file), administrateurs: admins.length, administrateurs_non_declares: unknownAdmins, declencheurs_absents: missing, declare: declared.size > 0 } });
-  return { ok, unknownAdmins, missing };
+  const { file, stamp, stat } = snapInfo;
+  const name = path.basename(file);
+  const seen = store.setting.get('controle_roles_vu');
+  if (seen?.fichier === name && seen?.taille === stat.size && seen?.modifie === stat.mtimeMs) {
+    // Même instantané : pas de nouvelle sauvegarde depuis plus de deux jours se signale (une fois par jour).
+    if (t - stamp > STALE && t - (seen.ancien_signale || 0) >= 864e5) {
+      store.setting.set('controle_roles_vu', { ...seen, ancien_signale: t });
+      report('haut', { instantane: name, erreur: 'sauvegarde du site trop ancienne', age_heures: Math.round((t - stamp) / 3600e3) });
+    }
+    return { ok: null, raison: 'instantané déjà contrôlé' };
+  }
+  store.setting.set('controle_roles_vu', { fichier: name, taille: stat.size, modifie: stat.mtimeMs, at: t });
+
+  let admins, triggers, migration;
+  try {
+    const snap = new Database(file, { readonly: true, fileMustExist: true });
+    try {
+      snap.pragma('query_only = ON');
+      if (!snap.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'accounts'").get()) throw new Error('table accounts absente');
+      admins = snap.prepare("SELECT sub, roles FROM accounts WHERE status = 'actif'").all()
+        .filter(a => { try { const r = JSON.parse(a.roles); return Array.isArray(r) && r.includes('admin'); } catch { return false; } }).map(a => String(a.sub)).sort();
+      triggers = Object.fromEntries(snap.prepare("SELECT name, sql FROM sqlite_master WHERE type = 'trigger'").all().map(r => [r.name, hash(r.sql)]));
+      try { migration = snap.prepare('SELECT MAX(name) FROM migrations').pluck().get() || ''; } catch { migration = ''; }
+    } finally { snap.close(); }
+  } catch (err) {
+    report('critique', { instantane: name, erreur: `instantané illisible : ${String(err.message).slice(0, 200)}` });
+    return { ok: false, erreur: err.message };
+  }
+
+  // Ce que le site a déclaré autour de la sauvegarde (sys_state depuis la veille).
+  const declared = new Set();
+  let declarations = 0;
+  for (const d of store.db.prepare("SELECT detail FROM events WHERE type = 'sys_state' AND recu_a > ? ORDER BY seq DESC LIMIT 500").pluck().iterate(stamp - 864e5)) {
+    try { const list = JSON.parse(d).administrateurs; if (Array.isArray(list)) { declarations += 1; for (const s of list) declared.add(s); } } catch { /* ligne illisible */ }
+  }
+  const unknownAdmins = declarations ? admins.filter(a => !declared.has(a)) : [];
+
+  // Instantané précédent : un administrateur apparu depuis doit correspondre à un changement journalisé par le site.
+  const previous = store.setting.get('controle_roles_admins', null);
+  const unexplained = [];
+  if (previous && Array.isArray(previous.administrateurs)) {
+    const before = new Set(previous.administrateurs);
+    const granted = new Set();
+    const since = (previous.instantane_a ?? stamp - 864e5) - 3600e3;
+    for (const d of store.db.prepare("SELECT detail FROM events WHERE type IN ('privilege_permissions_changed', 'user_created', 'user_rescued') AND recu_a > ?").pluck().iterate(since)) {
+      try { const x = JSON.parse(d); if (x.administrateur_donne || (Array.isArray(x.apres?.roles) && x.apres.roles.includes('admin'))) granted.add(x.compte); } catch { /* ligne illisible */ }
+    }
+    for (const a of admins) if (!before.has(a) && !granted.has(a)) unexplained.push(a);
+  }
+
+  // Déclencheurs : présents, et même texte que dans l'instantané précédent (sauf migration du site entre les deux).
+  const missing = TRIGGERS.filter(n => !triggers[n]);
+  const ref = store.setting.get('controle_roles_declencheurs', null);
+  const differs = ref ? TRIGGERS.filter(n => triggers[n] && ref.sql?.[n] && ref.sql[n] !== triggers[n]) : [];
+  const migrated = Boolean(ref) && ref.migration !== migration;
+  const altered = migrated ? [] : differs;
+
+  const critical = unknownAdmins.length || unexplained.length || missing.length || altered.length;
+  const severity = critical ? 'critique' : (!declarations || (migrated && differs.length) || t - stamp > STALE) ? 'haut' : 'info';
+  report(severity, {
+    instantane: name, administrateurs: admins.length, administrateurs_non_declares: unknownAdmins, administrateurs_sans_changement: unexplained,
+    declencheurs_absents: missing, declencheurs_modifies: altered, declencheurs_modifies_par_migration: migrated && differs.length ? differs : undefined,
+    declare: declarations > 0, age_heures: Math.round((t - stamp) / 3600e3),
+  });
+  // Références pour le prochain contrôle. Sur un écart, l'ancienne est gardée : l'écart ressort tant qu'il n'est pas
+  // expliqué (ou que la ligne de commande ne l'a pas accepté).
+  if (!unexplained.length && !unknownAdmins.length) store.setting.set('controle_roles_admins', { administrateurs: admins, instantane_a: stamp });
+  if (!altered.length && !missing.length) store.setting.set('controle_roles_declencheurs', { migration, sql: Object.fromEntries(TRIGGERS.map(n => [n, triggers[n]])) });
+  return { ok: !critical, unknownAdmins, unexplained, missing, altered, severity };
 }

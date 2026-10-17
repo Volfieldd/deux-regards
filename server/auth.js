@@ -75,7 +75,9 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // L'adresse complète n'est pas gardée dans la session (seuls le réseau, le pays et le navigateur servent).
   // Empreinte : navigateur complet, langues, plateforme et mobile annoncés (client hints) ; un vol de cookie depuis un
   // autre appareil la change même quand la famille de navigateur est la même.
-  const fpOf = h => crypto.createHash('sha256').update(['user-agent', 'accept-language', 'sec-ch-ua-platform', 'sec-ch-ua-mobile'].map(k => String(h[k] || '')).join('\n')).digest('hex').slice(0, 16);
+  // Empreinte d'appareil : en-têtes stables du navigateur, chiffres retirés de l'agent (une mise à jour du navigateur ou
+  // du système ne change pas l'appareil ; revue de la Vigie du 17 octobre 2026).
+  const fpOf = h => crypto.createHash('sha256').update(['user-agent', 'accept-language', 'sec-ch-ua-platform', 'sec-ch-ua-mobile'].map(k => (k === 'user-agent' ? String(h[k] || '').replace(/\d+/g, '') : String(h[k] || ''))).join('\n')).digest('hex').slice(0, 16);
   const ctxOf = request => { const n = networkOf(request); return { ip: null, net: n.ip_net ?? null, country: n.country ?? null, ua: uaFamily(request.headers['user-agent']), fp: fpOf(request.headers) }; };
   const told = new Map();
   const startedAt = Date.now();
@@ -96,7 +98,10 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       if (!r || Date.now() - r.revoked_at < 10e3) return;
       const ctx = ctxOf(request);
       if (!tellOnce(`fermee:${r.id}`, ctx.net)) return;                      // une fois par session et par réseau
-      const same = r.ctx_net === ctx.net && r.ctx_ua === ctx.ua && (!r.ctx_fp || r.ctx_fp === ctx.fp);
+      // Rejoué depuis un autre appareil : autre réseau ET autre navigateur (famille ou empreinte). Un seul des deux (box
+      // qui change d'adresse, même appareil ; navigateur mis à jour) reste « moyen », sans réponse automatique.
+      const otherDevice = r.ctx_ua !== ctx.ua || Boolean(r.ctx_fp && r.ctx_fp !== ctx.fp);
+      const same = !(r.ctx_net !== ctx.net && otherDevice);
       const a = accounts.bySub(r.sub);
       securite.emit('session_use_after_expire', { request, sub: r.sub, severity: same ? 'moyen' : 'haut', emetteur: 'server/auth.js · session', reference: `session:${String(r.id).slice(0, 12)}`,
         detail: { fermee_il_y_a_min: Math.round((Date.now() - r.revoked_at) / 60e3), expiree: r.expires_at <= r.revoked_at + 1000, meme_reseau_et_navigateur: same, compte_actif: a?.status === 'actif' } });

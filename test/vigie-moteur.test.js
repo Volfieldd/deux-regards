@@ -97,7 +97,7 @@ test('cookie rejoué depuis un autre appareil → révocation des sessions du co
   assert.equal(v.alerts().filter(a => a.entite_key === 'zitadel-c').length, 0);
 });
 
-test('modes : arrêt (rien), alerter ; détection arrêtée : rien ; blocage automatique d’une adresse jamais si liée à un compte', async t => {
+test('modes : arrêt (rien), alerter ; détection arrêtée : rien ; blocage automatique jamais pour une adresse d’administrateur ou privée', async t => {
   const v = engineOf(t);
   v.engine.setMode('sigma.configuration', 'arret', 'test');
   v.site('sys_config_changed', 'haut', { composant: 'site · système' });
@@ -110,12 +110,53 @@ test('modes : arrêt (rien), alerter ; détection arrêtée : rien ; blocage aut
   v.engine.setMode('entite.score', 'bloquer', 'test');
   for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.66' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.66' }); }
   assert.deepEqual(v.decisions.active().filter(d => d.kind === 'bloquer').map(d => d.cible), ['192.0.2.66/32']);
-  // … sauf une adresse vue avec un compte (on ne s'enferme pas dehors), ni une adresse de confiance.
+  // … sauf une adresse vue avec un administrateur (on ne s'enferme pas dehors), une adresse privée ou de confiance.
+  v.site('sys_state', 'info', { composant: 'site · système', detail: JSON.stringify({ administrateurs: ['zitadel-moi'] }) });
   v.site('authn_login_success', 'info', { ip: '192.0.2.77', sub: 'zitadel-moi' });
   for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.77' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.77' }); }
   const a = v.alerts().find(x => x.entite_key === '192.0.2.77' && x.entite_kind === 'ip');
-  assert.match(a.reponse, /liée à un compte/);
+  assert.match(a.reponse, /liée à un administrateur/);
   assert.ok(!v.decisions.active().some(d => d.cible === '192.0.2.77/32'));
+  // Un compte ordinaire ne protège pas son adresse (un attaquant qui ouvre un compte ne s'achète pas l'exemption).
+  v.site('authn_login_success', 'info', { ip: '192.0.2.88', sub: 'zitadel-quelconque' });
+  for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.88' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.88' }); }
+  assert.ok(v.decisions.active().some(d => d.cible === '192.0.2.88/32'));
+  for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '172.29.42.10' }); v.zitadel('zitadel_echec', 'moyen', { ip: '172.29.42.10' }); }
+  assert.match(v.alerts().find(x => x.entite_key === '172.29.42.10').reponse, /adresse privée/);
+});
+
+test('alerte : rouverte après 24 h de calme, aggravation notée, réponse rejouée si la décision a été levée', async t => {
+  const v = engineOf(t);
+  v.engine.setMode('entite.score', 'bloquer', 'test');
+  const burst = () => { for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '198.51.100.5' }); v.zitadel('zitadel_echec', 'moyen', { ip: '198.51.100.5' }); } };
+  burst();
+  const [first] = v.alerts();
+  assert.equal(first.gravite, 'moyen');
+  // Levée à la main, l'attaque continue : au-delà de 15 minutes, la réponse est reprise sur la même alerte.
+  v.decisions.lift({ all: true, par: 'test' });
+  v.clock.t += 20 * 60e3;
+  for (let i = 0; i < 6; i++) { v.site('malicious_input', 'moyen', { ip: '198.51.100.5' }); v.zitadel('zitadel_echec', 'moyen', { ip: '198.51.100.5' }); }
+  assert.equal(v.alerts().length, 1);
+  assert.ok(v.decisions.active().some(d => d.cible === '198.51.100.5/32'), 'réponse rejouée');
+  assert.equal(v.alerts()[0].gravite, 'haut', 'score au double du seuil');
+  const aggr = v.db.prepare("SELECT detail FROM events WHERE type = 'vigie_alerte'").pluck().all().map(JSON.parse).filter(d => d.action === 'aggravee');
+  assert.equal(aggr.length, 1);
+  // 24 h sans nouvel événement : la reprise ouvre une nouvelle alerte (et la notification qui va avec).
+  v.clock.t += 25 * 3600e3;
+  burst();
+  assert.equal(v.alerts().length, 2);
+});
+
+test('signal noté une fois par 10 minutes pour la même règle et la même entité ; clé d’entité sans caractères de contrôle', async t => {
+  const v = engineOf(t);
+  for (let i = 0; i < 5; i++) v.site('malicious_honeypot', 'moyen', { ip: '203.0.113.50' });
+  const signals = () => v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_signal'").pluck().get();
+  assert.equal(signals(), 1);
+  v.clock.t += 11 * 60e3;
+  v.site('malicious_honeypot', 'moyen', { ip: '203.0.113.50' });
+  assert.equal(signals(), 2);
+  v.site('authz_fail', 'bas', { sub: 'zitadel-\u001b[31mrouge' });
+  assert.ok(v.engine.current('compte', 'zitadel-?[31mrouge'), 'séquence de terminal neutralisée');
 });
 
 test('exceptions : intégrité des comptes, chaîne rompue, Zitadel critique, saisie depuis un compte de l’admin', async t => {

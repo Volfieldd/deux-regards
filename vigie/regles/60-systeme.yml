@@ -26,3 +26,30 @@ correlation:
   condition: { gte: 10 }
 level: medium
 vigie: { cas: DS21, entite: { kind: ip, champ: ip }, points: 3 }
+---
+title: Moteur de la Vigie saturé (événements non analysés)
+name: moteur_sature
+id: 50985a19-d707-4ce0-ae4e-29f4f5b20809
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion, attack.t1499]
+detection:
+  selection:
+    type: vigie_moteur_sature
+  condition: selection
+level: high
+vigie: { cas: MV11, entite: { kind: vigie, valeur: moteur }, source_unique: true }
+---
+title: Contrôle des rôles impossible ou incomplet (sauvegarde absente, ancienne ou illisible)
+name: controle_roles_degrade
+id: 616bd319-1bbc-4e4f-9bd5-daf89d634157
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion]
+detection:
+  selection:
+    type: vigie_controle_roles
+    severity: haut
+  condition: selection
+level: high
+vigie: { cas: DS8, entite: { kind: vigie, valeur: controle_roles }, source_unique: true }

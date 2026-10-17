@@ -12,7 +12,8 @@ import { createEngine } from '../vigie/moteur.js';
 import { loadRules, RuleError, createCorrelator } from '../vigie/sigma.js';
 import { createChains, km } from '../vigie/detecteurs.js';
 import { createThreats, parseList } from '../vigie/menaces.js';
-import { checkRoles } from '../vigie/controle-roles.js';
+import { checkRoles, snapshotName } from '../vigie/controle-roles.js';
+import { execFileSync } from 'node:child_process';
 import { openDb, migrate } from '../server/db/index.js';
 
 // Vigie, phase C2 : règles Sigma (D20), détecteurs comportementaux, listes de menaces (D22), contrôle des rôles sur les
@@ -66,13 +67,17 @@ detection:
   for (const [bad, err] of [
     ['detection:\n  s:\n    type: x\n  condition: s and inconnue', /sélection inconnue/],
     ['detection:\n  s:\n    type|re: "("\n  condition: s', /expression régulière invalide/],
-    ['detection:\n  s:\n    type|fuzzy: x\n  condition: s', null],
+    ['detection:\n  s:\n    type|fuzzy: x\n  condition: s', /modificateur non pris en charge/],
+    ['detection:\n  s:\n    type|contains|startswith: x\n  condition: s', /modificateur non pris en charge/],
+    ['detection:\n  s:\n    type: x\n  condition: s\nvigie: { entite: { kind: site, valeur: x } }', /doit être source_unique/],
   ]) {
     const d2 = tmp(t);
     fs.writeFileSync(path.join(d2, 'b.yml'), `title: b\nname: b\nlevel: low\n${bad}\n`);
-    if (err) assert.throws(() => loadRules(d2), err);
-    else assert.throws(() => loadRules(d2).rules[0].match({ type: 'x' }), /non pris en charge/);
+    assert.throws(() => loadRules(d2), err, 'refusée au chargement, jamais à chaque événement');
   }
+  const d4 = tmp(t);
+  fs.writeFileSync(path.join(d4, 'd.yml'), 'title: d\nname: d\nlevel: low\ndetection:\n  s:\n    type: x\n  condition: s\n---\ntitle: e\nname: e\nlevel: low\ncorrelation:\n  type: event_count\n  rules: [d]\n  timespan: 1m\n  condition: { lte: 2 }\n');
+  assert.throws(() => loadRules(d4), /lte et eq ne sont pas pris en charge/);
   const d3 = tmp(t);
   fs.writeFileSync(path.join(d3, 'c.yml'), 'title: c\nname: c\nlevel: low\ncorrelation:\n  type: event_count\n  rules: [absente]\n  timespan: 1m\n  condition: { gte: 2 }\n');
   assert.throws(() => loadRules(d3), RuleError);
@@ -99,11 +104,29 @@ test('corrélations : 3 échecs OIDC d’une adresse en 10 min → un signal (pa
   const [s] = v.signals('sigma.cible_commune');
   assert.deepEqual(s.entite, { kind: 'compte', key: 'zitadel-cible' });
   assert.equal(s.valeur, 3);
+  assert.deepEqual(s.sources, ['zitadel']);
   // Une corrélation tombée hors de sa fenêtre ne compte plus.
   const c = createCorrelator([{ name: 'x', type: 'event_count', rules: ['r'], groupBy: ['ip'], span: 600e3, cond: { gte: 2 } }], { now: () => v.clock.t });
   assert.equal(c({ ip: '1.2.3.4', seq: 1 }, new Set(['r'])).length, 0);
   v.clock.t += 700e3;
   assert.equal(c({ ip: '1.2.3.4', seq: 2 }, new Set(['r'])).length, 0);
+  // Un résumé de l'émetteur (D23) compte pour ce qu'il résume.
+  assert.equal(c({ ip: '1.2.3.5', seq: 3, detail: '{"nombre":4}' }, new Set(['r'])).length, 1);
+  // Sources des événements qui ont contribué : le quorum voit le site et Zitadel.
+  const c2 = createCorrelator([{ name: 'y', type: 'event_count', rules: ['r'], groupBy: ['sub'], span: 600e3, cond: { gte: 2 } }], { now: () => v.clock.t });
+  c2({ sub: 'a', seq: 1 }, new Set(['r']), { source: 'site' });
+  assert.deepEqual(c2({ sub: 'a', seq: 2 }, new Set(['r']), { source: 'zitadel' })[0].sources, ['site', 'zitadel']);
+});
+
+test('corrélations : mémoire bornée (budget global, groupes oubliés, valeurs en empreinte courte)', () => {
+  let t0 = 0;
+  const c = createCorrelator([{ name: 'v', type: 'value_count', rules: ['r'], groupBy: ['ip'], span: 3600e3, cond: { gte: 1e9, field: 'detail.x' } }], { now: () => t0, maxGroups: 1000, maxHits: 5000 });
+  const big = 'x'.repeat(10_000);
+  for (let i = 0; i < 20_000; i++) c({ ip: `10.0.${i >> 8}.${i & 255}`, seq: i, detail: JSON.stringify({ x: `${big}${i}` }) }, new Set(['r']));
+  assert.ok(c.size() <= 5000, `au plus 5000 points (${c.size()})`);
+  t0 += 2 * 3600e3;
+  c.prune();
+  assert.equal(c.size(), 0, 'fenêtres échues retirées');
 });
 
 test('détecteurs : première apparition, voyage impossible, pivot d’identifiants, rôle incohérent', async t => {
@@ -118,7 +141,11 @@ test('détecteurs : première apparition, voyage impossible, pivot d’identifia
   assert.equal(Math.round(km({ lat: 48.86, lon: 2.35 }, { lat: 51.51, lon: -0.13 })), 343, 'Paris – Londres');
   // Trois échecs chez Zitadel puis un succès : pivot.
   for (let i = 0; i < 3; i++) v.add('zitadel_echec', 'moyen', { composant: 'zitadel', canal: 'API Zitadel', confiance: 'constaté', sub: 'zitadel-b' });
-  v.add('zitadel_connexion', 'info', { composant: 'zitadel', canal: 'API Zitadel', confiance: 'constaté', sub: 'zitadel-b' });
+  // Un événement Zitadel qui n'est pas une connexion (jeton, mot de passe vérifié) ne compte pas ; puis une seule fois.
+  v.add('zitadel_connexion', 'info', { composant: 'zitadel', canal: 'API Zitadel', confiance: 'constaté', sub: 'zitadel-b', detail: { type_zitadel: 'user.token.added' } });
+  assert.equal(v.signals('detecteur.pivot_identifiants').length, 0);
+  for (let i = 0; i < 3; i++) v.add('zitadel_connexion', 'info', { composant: 'zitadel', canal: 'API Zitadel', confiance: 'constaté', sub: 'zitadel-b', detail: { type_zitadel: 'session.added' } });
+  assert.equal(v.signals('detecteur.pivot_identifiants').length, 1);
   assert.equal(v.signals('detecteur.pivot_identifiants')[0].echecs_avant, 3);
   // Export réservé à l'administrateur par un compte qui ne l'est pas : critique, alerte directe.
   v.add('sys_state', 'info', { composant: 'site · système', detail: { administrateurs: ['zitadel-admin'] } });
@@ -126,6 +153,26 @@ test('détecteurs : première apparition, voyage impossible, pivot d’identifia
   const a = v.alerts().find(x => x.regle === 'detecteur.role_incoherent');
   assert.equal(a.gravite, 'critique');
   assert.equal(a.entite_key, 'zitadel-relecteur');
+});
+
+test('détecteurs : heure inhabituelle (heures UTC, en base) et vitesse de lecture (rafale vue dans l’heure)', async t => {
+  const start = Date.parse('2026-09-20T09:00:00Z');
+  const v = vigieOf(t, { start });
+  const read = () => v.add('sensitive_read', 'info', { composant: 'site · admin', sub: 'zitadel-l', detail: { cible: '/admin/personnes/:id' } });
+  // 20 jours d'habitudes : deux lectures vers 9 h et 10 h UTC.
+  for (let d = 0; d < 20; d++) { v.clock.t = start + d * 864e5; read(); v.clock.t += 3600e3; read(); }
+  assert.equal(v.signals('detecteur.heure_inhabituelle').length, 0);
+  // 3 h UTC : jamais vue ; une seule fois.
+  v.clock.t = start + 20 * 864e5 - 6 * 3600e3;
+  read(); read();
+  const h = v.signals('detecteur.heure_inhabituelle');
+  assert.equal(h.length, 1);
+  assert.equal(h[0].heure_utc, 3);
+  // Vitesse : trente lectures dans la même heure, contre deux par jour d'habitude.
+  for (let i = 0; i < 30; i++) read();
+  const s = v.signals('detecteur.vitesse');
+  assert.equal(s.length, 1);
+  assert.ok(s[0].aujourdhui >= 10 && s[0].moyenne <= 2);
 });
 
 test('détecteurs périodiques : exploration lente sur 12 heures, site silencieux (une seule alerte), chaîne d’attaque', async t => {
@@ -163,11 +210,28 @@ test('listes de menaces : formats Spamhaus et lignes, étiquettes, points sans c
   assert.deepEqual(v.engine.top().find(x => x.key === '203.0.113.9').sources, ['site'], 'les listes ne comptent pas dans le quorum');
 });
 
-test('contrôle des rôles sur la sauvegarde du site : administrateur non déclaré ou déclencheur absent → alerte critique', async t => {
+test('listes de menaces : préfixes bornés par liste, liste triplée refusée, pas de redirection, désactivées : rien', async t => {
+  assert.deepEqual(parseList('lignes', '10.0.0.0/8\n198.51.100.7\n2001:db8::/32\n', { min4: 32, min6: 128 }), ['198.51.100.7/32']);
+  assert.deepEqual(parseList('ndjson-cidr', '{"cidr":"0.0.0.0/1"}\n{"cidr":"203.0.113.0/24"}\n{"cidr":"2001:db8::/16"}\n', { min4: 10, min6: 19 }), ['203.0.113.0/24']);
+  let feodo = Array.from({ length: 60 }, (_, i) => `198.51.100.${i + 1}`).join('\n');
+  const seen = [];
+  const fetchImpl = async (url, opts) => { seen.push(opts.redirect); return new Response(url.includes('feodo') ? feodo : '{"cidr":"203.0.113.0/24"}\n192.0.2.1\n', { status: 200 }); };
+  const v = vigieOf(t, { threats: (store, now) => createThreats({ store, fetchImpl, now }) });
+  assert.equal((await v.threats.update()).feodo, 60);
+  assert.ok(seen.every(r => r === 'error'));
+  feodo = Array.from({ length: 200 }, (_, i) => `192.0.2.${i + 1}`).join('\n');
+  assert.match(String((await v.threats.update()).feodo), /liste triplée/);
+  assert.deepEqual(v.threats.labels('198.51.100.7'), ['feodo'], 'ancienne liste gardée');
+  const off = createThreats({ store: v.store, fetchImpl, enabled: false });
+  assert.deepEqual(off.labels('198.51.100.7'), []);
+  assert.deepEqual(await off.update(), {});
+});
+
+test('contrôle des rôles sur la sauvegarde du site : administrateur non déclaré ou sans changement journalisé, déclencheur absent → critique', async t => {
   const v = vigieOf(t, { start: Date.now() });
   const backups = tmp(t);
   fs.mkdirSync(path.join(backups, 'db'));
-  const file = path.join(backups, 'db', 'site-20261020T100000.db');
+  const file = path.join(backups, 'db', snapshotName(Date.now() - 3600e3));
   const site = openDb(file);
   migrate(site);
   site.prepare("INSERT INTO accounts (sub, name, roles, status, created_at) VALUES ('zitadel-admin', 'A', '[\"admin\"]', 'actif', 1)").run();
@@ -175,14 +239,53 @@ test('contrôle des rôles sur la sauvegarde du site : administrateur non décla
   v.add('sys_state', 'info', { composant: 'site · système', detail: { administrateurs: ['zitadel-admin'] } });
   assert.equal(checkRoles({ store: v.store, siteBackupDir: backups }).ok, true);
   assert.equal(checkRoles({ store: v.store, siteBackupDir: backups }).ok, null, 'même instantané : déjà contrôlé');
-  // Nouvel instantané : un administrateur que le site n'a jamais déclaré, un déclencheur supprimé.
-  const s2 = openDb(file);
+  // Fichiers plantés : un tube et un lien au nom plus récent, un nom fabriqué pour passer en tête du tri, une date
+  // future. Aucun n'est lu (ni blocage sur le tube).
+  const db = path.join(backups, 'db');
+  execFileSync('mkfifo', [path.join(db, snapshotName(Date.now() - 60e3))]);
+  fs.symlinkSync(file, path.join(db, snapshotName(Date.now() - 120e3)));
+  fs.writeFileSync(path.join(db, 'site-zzzz.db'), 'x');
+  fs.writeFileSync(path.join(db, snapshotName(Date.now() + 864e5)), 'x');
+  assert.equal(checkRoles({ store: v.store, siteBackupDir: backups }).ok, null, 'le vrai instantané, déjà contrôlé');
+  // Nouvel instantané : un administrateur déclaré par le site mais sans changement journalisé, un déclencheur supprimé.
+  const s2file = path.join(db, snapshotName(Date.now() - 30e3));
+  fs.copyFileSync(file, s2file);
+  const s2 = openDb(s2file);
   s2.exec('DROP TRIGGER account_changes_conserve');
   s2.prepare("INSERT INTO accounts (sub, name, roles, status, created_at) VALUES ('zitadel-cache', 'B', '[\"admin\"]', 'actif', 2)").run();
   s2.close();
+  v.add('sys_state', 'info', { composant: 'site · système', detail: { administrateurs: ['zitadel-admin', 'zitadel-cache'] } });
   const r = checkRoles({ store: v.store, siteBackupDir: backups });
-  assert.deepEqual(r.unknownAdmins, ['zitadel-cache']);
+  assert.deepEqual(r.unknownAdmins, []);
+  assert.deepEqual(r.unexplained, ['zitadel-cache'], 'le site peut mentir dans ses déclarations, pas dans le journal des comptes');
   assert.deepEqual(r.missing, ['account_changes_conserve']);
   const a = v.alerts().find(x => x.regle === 'sigma.controle_roles');
   assert.equal(a.gravite, 'critique');
+});
+
+test('contrôle des rôles : déclencheur vidé sous le même nom → critique ; sauvegarde trop ancienne ou absente → haut', async t => {
+  const v = vigieOf(t, { start: Date.now() });
+  const backups = tmp(t);
+  const db = path.join(backups, 'db');
+  fs.mkdirSync(db);
+  assert.equal(checkRoles({ store: v.store, siteBackupDir: backups }).ok, null);
+  assert.ok(v.alerts().find(x => x.regle === 'sigma.controle_roles_degrade'), 'aucun instantané : signalé');
+  const file = path.join(db, snapshotName(Date.now() - 3 * 864e5));
+  const site = openDb(file);
+  migrate(site);
+  site.close();
+  v.add('sys_state', 'info', { composant: 'site · système', detail: { administrateurs: [] } });
+  const r1 = checkRoles({ store: v.store, siteBackupDir: backups });
+  assert.equal(r1.ok, true);
+  assert.equal(r1.severity, 'haut', 'instantané de trois jours : contrôle aveugle');
+  const f2 = path.join(db, snapshotName(Date.now() - 60e3));
+  fs.copyFileSync(file, f2);
+  const s2 = openDb(f2);
+  const sql = s2.prepare("SELECT sql FROM sqlite_master WHERE name = 'account_changes_immuable'").pluck().get();
+  s2.exec('DROP TRIGGER account_changes_immuable');
+  s2.exec(sql.replace(/BEGIN[\s\S]*END/, 'BEGIN SELECT 1; END'));
+  s2.close();
+  const r2 = checkRoles({ store: v.store, siteBackupDir: backups });
+  assert.deepEqual(r2.altered, ['account_changes_immuable']);
+  assert.equal(r2.ok, false);
 });

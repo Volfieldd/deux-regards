@@ -8,7 +8,7 @@ export const BY_TYPE = {
   // Faits ordinaires : aucun point (ils servent au contexte et aux liens).
   authn_login_success: 0, session_created: 0, session_destroyed: 0, session_expired: 0, sys_startup: 0, sys_heartbeat: 0,
   sys_state: 0, zitadel_connexion: 0, vigie_demarrage: 0, vigie_purge: 0, vigie_alerte: 0, vigie_decision: 0, vigie_interrupteur: 0,
-  vigie_signal: 0, vigie_controle_roles: 0,
+  vigie_signal: 0, vigie_controle_roles: 0, vigie_moteur_sature: 0,
   // Lectures : peu, beaucoup s'additionnent.
   sensitive_read: 0.2, sensitive_export: 1,
   // Signaux d'exploration ou d'attaque.
