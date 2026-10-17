@@ -154,9 +154,10 @@ export default async function adminRoutes(app) {
   // Fichier refusé au décodage (Vigie) : image piégée, illisible ou bombe de décompression. Un HEIC d'iPhone, une image
   // trop grande ou trop haute sont des refus ordinaires, non signalés. Seule l'extension du nom est gardée.
   const signalUpload = (request, err, name) => {
-    const m = String(err?.message || '');
-    if (/HEIC|trop grande|trop haute/.test(m)) return;
-    app.securite.emit('upload_rejected', { request, emetteur: 'server/routes/admin.js · import', detail: { raison: m.slice(0, 120) || 'rendu impossible', extension: path.extname(String(name || '')).slice(0, 10).toLowerCase() } });
+    if (!(err instanceof ImportError)) return;                                  // panne du serveur, pas un fichier piégé
+    const m = String(err.message || '');
+    if (/HEIC|trop grande|trop haute|16 bits|non pris en charge/.test(m)) return;
+    app.securite.emit('upload_rejected', { request, emetteur: 'server/routes/admin.js · import', detail: { raison: m.slice(0, 120), extension: path.extname(String(name || '')).slice(0, 10).toLowerCase() } });
   };
   // Journal d'audit : qui a modifié quoi, dans le journal du serveur et dans la base (page « Journal »). Une action
   // déjà notée avec son détail par la route (request.audited) n'est pas notée deux fois ; la langue et le thème de

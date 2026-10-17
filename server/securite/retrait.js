@@ -9,16 +9,16 @@ export const settingsOf = db => ({
   set: (key, value) => db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, JSON.stringify(value)),
   del: key => db.prepare('DELETE FROM settings WHERE key = ?').run(key),
 });
-const VIGIE_KEYS = ['vigie_config', 'vigie_comptes_vus', 'vigie_restauration_vue'];
 
-// Sans Vigie : rien de ce qu'elle avait laissé ne reste (déclencheur des sessions, sessions fermées, contexte des
-// sessions, événements en attente, repères).
+
+// Sans Vigie : rien de ce qu'elle avait laissé de personnel ne reste (déclencheur des sessions, sessions fermées,
+// contexte des sessions, événements en attente). Les repères (configuration, position dans le journal des comptes,
+// restauration vue, empreintes des déclencheurs), sans donnée personnelle, sont gardés : une Vigie remise en route
+// signale ce qui a changé entre-temps au lieu de repartir de zéro.
 export function retireVigie({ db, storageDir }) {
   db.exec(`DROP TRIGGER IF EXISTS ${SESSION_TRIGGER}`);
   db.prepare('DELETE FROM sessions_revoked').run();
   db.prepare('UPDATE sessions SET ctx_ip = NULL, ctx_net = NULL, ctx_country = NULL, ctx_ua = NULL WHERE ctx_ip IS NOT NULL OR ctx_ua IS NOT NULL').run();
-  const s = settingsOf(db);
-  for (const k of VIGIE_KEYS) s.del(k);
   fs.rmSync(path.join(storageDir, 'securite-attente'), { recursive: true, force: true });
 }
 

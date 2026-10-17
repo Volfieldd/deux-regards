@@ -83,7 +83,7 @@ Composant à part, qui reçoit les événements de sécurité du site, détecte 
 | `VIGIE_URL` | — | Adresse d'ingestion de la Vigie sur le réseau interne, par exemple `http://vigie:4100` ; `http://` ou `https://`, sans identifiants ni paramètres. |
 | `VIGIE_INGEST_KEY` | — | Clé de signature des envois (HMAC-SHA-256), 32 caractères au moins (`openssl rand -base64 32`), la même dans le `.env` de la Vigie. **Obligatoire avec `VIGIE_URL`**, sinon refus de démarrer. |
 
-Avec la Vigie, le site garde aussi, en plus : le contexte de chaque session de l'admin (adresse, réseau, pays, famille de navigateur), les empreintes des sessions fermées pendant 48 h, et, si la Vigie est injoignable, les événements en attente dans `STORAGE_DIR/securite-attente` (50 Mo au plus). La page **Confidentialité** le dit alors.
+Avec la Vigie, le site garde aussi, en plus : le contexte de chaque session de l'admin (réseau, pays, famille de navigateur), les empreintes des sessions fermées pendant 48 h, et, si la Vigie est injoignable, les événements en attente dans `STORAGE_DIR/securite-attente` (50 Mo au plus). La page **Confidentialité** le dit alors.
 
 ## Site « en ligne »
 

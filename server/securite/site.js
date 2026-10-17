@@ -14,17 +14,22 @@ import { settingsOf, SESSION_TRIGGER } from './retrait.js';
 
 // Chemins que cherchent les scanners : le site n'en a aucun (Cloudflare les bloque aussi, règle R3 ; ce qui passe est
 // signalé ici).
-const TRAPS = ['/.env', '/.git/config', '/.git/HEAD', '/wp-login.php', '/wp-admin', '/wp-admin/*', '/xmlrpc.php', '/phpmyadmin', '/phpmyadmin/*',
-  '/server-status', '/.aws/credentials', '/config.php', '/.DS_Store', TRAP_PATH];
-const ACCOUNT_TRIGGERS = ['account_changes_insert', 'account_changes_update', 'account_changes_delete'];
+// Reconnus au chemin, sans route : la réponse reste exactement la 404 du site (pas de 415 ni de 400 d'un analyseur de
+// corps, qui trahiraient le piège).
+const TRAPS = new Set(['/.env', '/.git/config', '/.git/HEAD', '/wp-login.php', '/wp-admin', '/xmlrpc.php', '/phpmyadmin',
+  '/server-status', '/.aws/credentials', '/config.php', '/.DS_Store', TRAP_PATH]);
+const TRAP_PREFIXES = ['/wp-admin/', '/phpmyadmin/', '/.git/'];
+// Déclencheurs dont dépend la détection des comptes (migrations 048 et 049) : un absent ou modifié est critique.
+const ACCOUNT_TRIGGERS = ['account_changes_insert', 'account_changes_update', 'account_changes_delete', 'account_changes_immuable',
+  'account_changes_conserve', 'account_change_tickets_immuable', 'account_change_tickets_conserve'];
 const METHODS = new Set(['GET', 'HEAD', 'POST']);
 const SENSITIVE = /^\/admin\/(?:personnes|rencontres)\/:id(?:\/|$)/;
 const NOT_FOUND_LIMIT = 20, NOT_FOUND_WINDOW = 10 * 60e3;
 
 // Empreinte de la configuration de sécurité : ce qui, changé dans le .env, ouvre ou ferme une porte d'administration.
-// Aucun secret n'y figure en clair (DATA_KEY : empreinte courte).
+// Aucun secret n'y figure en clair (DATA_KEY : empreinte HMAC courte, clé dérivée de COOKIE_SECRET).
 function configPrint(config) {
-  const short = v => (v ? crypto.createHash('sha256').update(String(v)).digest('hex').slice(0, 12) : null);
+  const short = v => (v ? crypto.createHmac('sha256', `vigie-config:${config.cookieSecret}`).update(String(v)).digest('hex').slice(0, 12) : null);
   return {
     ADMIN_SUBS: [...(config.adminSubs || [])].sort(),
     OIDC_ALLOWED_SUBS: [...(config.oidc?.allowedSubs || [])].sort(),
@@ -49,7 +54,8 @@ function configDiff(before, after) {
   return changes;
 }
 
-const parseRoles = v => { try { return JSON.parse(v || '[]'); } catch { return []; } };
+// Rôles d'une ligne du journal : une valeur écrite à la main peut être n'importe quoi.
+const parseRoles = v => { try { const r = JSON.parse(v || '[]'); return Array.isArray(r) ? r.map(String) : []; } catch { return []; } };
 
 export function installVigie(app, { config, db, send = null, timers = true }) {
   const settings = settingsOf(db);
@@ -63,18 +69,25 @@ export function installVigie(app, { config, db, send = null, timers = true }) {
   END`);
   const purgeRevoked = () => db.prepare('DELETE FROM sessions_revoked WHERE revoked_at < ?').run(Date.now() - 48 * 3600e3);
 
-  // Comptes et rôles (migration 048) : chaque changement noté par la base devient un événement ; ceux qui n'ont pas de
-  // ticket de l'application sont critiques.
+  // Comptes et rôles (migrations 048 et 049) : chaque changement noté par la base devient un événement ; ceux qui n'ont
+  // pas de ticket signé de l'application sont critiques.
   if (settings.get('vigie_comptes_vus') == null) settings.set('vigie_comptes_vus', app.accounts.lastChangeId());
   const scanAccounts = () => {
     let last = Number(settings.get('vigie_comptes_vus')) || 0;
+    // Numéros revenus en arrière (base restaurée ou journal vidé) : on repart du début plutôt que de sauter des lignes.
+    if (app.accounts.lastChangeId() < last) last = 0;
+    let found = false;
     for (;;) {
       const rows = app.accounts.changesSince(last);
       if (!rows.length) break;
+      found = true;
       for (const r of rows) {
         const before = parseRoles(r.old_roles), after = parseRoles(r.new_roles);
-        const adminGiven = after.includes('admin') && !before.includes('admin') && r.op !== 'DELETE';
-        const outside = r.ticket_id == null;
+        const admin = (roles, status) => roles.includes('admin') && status === 'actif';
+        const adminGiven = r.op !== 'DELETE' && admin(after, r.new_status) && !(r.op === 'UPDATE' && admin(before, r.old_status));
+        const valid = app.accounts.ticketValid(r);
+        const outside = valid === false;
+        const forged = r.ticket_id != null && valid === false;
         const type = r.op === 'INSERT' ? 'user_created' : r.op === 'DELETE' ? 'user_deleted' : /ADMIN_SUBS/.test(r.action || '') ? 'user_rescued' : 'privilege_permissions_changed';
         sec.emit(type, {
           severity: outside ? 'critique' : adminGiven ? 'haut' : undefined,
@@ -82,30 +95,39 @@ export function installVigie(app, { config, db, send = null, timers = true }) {
           emetteur: outside ? 'base de données · déclencheur (hors application)' : `server/accounts.js · ${r.action}`,
           reference: `account_changes#${r.id}`,
           detail: {
-            compte: r.sub, operation: r.op, hors_application: outside, administrateur_donne: adminGiven, action: r.action || null,
+            compte: r.sub, ancien_sub: r.old_sub || undefined, champs: r.champs || undefined, operation: r.op, hors_application: outside,
+            ticket_falsifie: forged || undefined, administrateur_donne: adminGiven, action: outside ? null : r.action || null,
             avant: r.op === 'INSERT' ? null : { roles: before, etat: r.old_status, photographe: r.old_author },
             apres: r.op === 'DELETE' ? null : { roles: after, etat: r.new_status, photographe: r.new_author },
             circuit: r.old_adjust !== r.new_adjust && r.op === 'UPDATE' ? { avant: r.old_adjust, apres: r.new_adjust } : undefined,
           },
         });
         last = r.id;
+        settings.set('vigie_comptes_vus', last);
       }
-      settings.set('vigie_comptes_vus', last);
     }
+    if (found) state();
   };
   app.accounts.onChange(() => { try { scanAccounts(); } catch (err) { app.log.error({ err: err.message }, 'Vigie : comptes'); } });
   sec.every(60e3, scanAccounts);
 
   // État : administrateurs actifs, déclencheurs présents, schéma des comptes. Un déclencheur disparu est critique.
+  // Le texte de chaque déclencheur est comparé à celui d'origine (retenu au premier démarrage avec la Vigie) : un
+  // déclencheur vidé de son effet sous le même nom est signalé comme un absent.
+  const triggerSql = () => Object.fromEntries(db.prepare("SELECT name, sql FROM sqlite_master WHERE type = 'trigger'").all().map(t => [t.name, crypto.createHash('sha256').update(t.sql || '').digest('hex').slice(0, 16)]));
   const state = () => {
-    const triggers = db.prepare("SELECT name FROM sqlite_master WHERE type = 'trigger'").pluck().all();
-    const missing = [...ACCOUNT_TRIGGERS, SESSION_TRIGGER].filter(n => !triggers.includes(n));
+    const triggers = triggerSql();
+    const known = settings.get('vigie_declencheurs') || {};
+    const watched = [...ACCOUNT_TRIGGERS, SESSION_TRIGGER];
+    const missing = watched.filter(n => !triggers[n]);
+    const altered = watched.filter(n => triggers[n] && known[n] && known[n] !== triggers[n]);
+    const openTickets = db.prepare('SELECT COUNT(*) FROM account_change_tickets WHERE open = 1').pluck().get();
     const schema = db.prepare("SELECT group_concat(sql, ';') FROM (SELECT sql FROM sqlite_master WHERE tbl_name IN ('accounts', 'account_changes', 'account_change_tickets') ORDER BY name)").pluck().get() || '';
     const admins = app.accounts.list().filter(a => a.status === 'actif' && (a.roles.includes('admin') || a.locked)).map(a => a.sub).sort();
     sec.emit('sys_state', {
-      severity: missing.length ? 'critique' : undefined,
+      severity: missing.length || altered.length || openTickets ? 'critique' : undefined,
       emetteur: 'server/securite · état',
-      detail: { administrateurs: admins, comptes: app.accounts.list().length, declencheurs_absents: missing, schema: crypto.createHash('sha256').update(schema).digest('hex').slice(0, 16), dernier_changement: app.accounts.lastChangeId() },
+      detail: { administrateurs: admins, comptes: app.accounts.list().length, declencheurs_absents: missing, declencheurs_modifies: altered, tickets_ouverts: openTickets, schema: crypto.createHash('sha256').update(schema).digest('hex').slice(0, 16), dernier_changement: app.accounts.lastChangeId() },
     });
   };
   sec.every(5 * 60e3, state);
@@ -115,30 +137,49 @@ export function installVigie(app, { config, db, send = null, timers = true }) {
   const offDecrypt = onDecryptFail(kind => sec.emitThrottled(`dechiffrement:${kind}`, 'crypto_decrypt_fail', { emetteur: 'server/vault.js', detail: { nature: kind } }));
 
   // Démarrage : version, configuration changée depuis le démarrage précédent, restauration de la base.
+  // Rien de la Vigie n'empêche le site de démarrer : chaque étape est protégée.
+  const step = (name, fn) => { try { fn(); } catch (err) { app.log.error({ err: err.message }, `Vigie : ${name}`); } };
   app.addHook('onReady', async () => {
-    const pkg = JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
-    const print = configPrint(config);
-    const before = settings.get('vigie_config');
-    sec.emit('sys_startup', { emetteur: 'server/index.js', detail: { version: pkg.version, node: process.version, premiere_fois: !before } });
-    const changes = before ? configDiff(before, print) : [];
-    if (changes.length) sec.emit('sys_config_changed', { emetteur: 'server/securite · configuration', detail: { changements: changes } });
-    settings.set('vigie_config', print);
-    const restored = settings.get('restauree_le');
-    if (restored && JSON.stringify(restored) !== JSON.stringify(settings.get('vigie_restauration_vue'))) {
-      sec.emit('sys_restore', { emetteur: 'server/db/restore.js', detail: restored });
-      settings.set('vigie_restauration_vue', restored);
-    }
-    purgeRevoked();
-    scanAccounts();
-    state();
+    step('démarrage', () => {
+      let version = null;
+      try { version = JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url), 'utf8')).version; } catch { /* inconnue */ }
+      const print = configPrint(config);
+      const before = settings.get('vigie_config');
+      sec.emit('sys_startup', { emetteur: 'server/index.js', detail: { version, node: process.version, premiere_fois: !before } });
+      const changes = before ? configDiff(before, print) : [];
+      if (changes.length) sec.emit('sys_config_changed', { emetteur: 'server/securite · configuration', detail: { changements: changes } });
+      settings.set('vigie_config', print);
+      // Restauration : signalée une fois ; à la toute première mise en route de la Vigie, une ancienne restauration sert
+      // de point de départ (rien à signaler).
+      const restored = settings.get('restauree_le');
+      if (!before && restored) settings.set('vigie_restauration_vue', restored);
+      else if (restored && JSON.stringify(restored) !== JSON.stringify(settings.get('vigie_restauration_vue'))) {
+        sec.emit('sys_restore', { emetteur: 'server/db/restore.js', detail: restored });
+        settings.set('vigie_restauration_vue', restored);
+      }
+      if (!settings.get('vigie_declencheurs')) settings.set('vigie_declencheurs', triggerSql());
+    });
+    step('sessions fermées', purgeRevoked);
+    step('comptes', scanAccounts);
+    step('état', state);
     sec.start();
   });
   app.addHook('onClose', async () => { offDecrypt(); await sec.stop(); });
 
   // Méthode qu'aucune page du site n'utilise (PUT, DELETE, TRACE, OPTIONS…).
   // Crochets synchrones (done) : ils ne décalent pas ceux du site (journal d'audit écrit dans le même tour).
+  // Pièges reconnus au chemin (chemins de scanners, lien caché interdit par robots.txt) et connexion de test sollicitée
+  // alors qu'elle est désactivée : signalés ici, la requête suit son cours (404 du site, aucune limite consommée).
   app.addHook('onRequest', (request, reply, done) => {
-    if (!METHODS.has(request.method)) sec.emit('input_validation_fail', { request, emetteur: 'server/securite · méthodes', detail: { raison: 'méthode inattendue', methode: request.method } });
+    try {
+      if (!METHODS.has(request.method)) sec.emit('input_validation_fail', { request, emetteur: 'server/securite · méthodes', detail: { raison: 'méthode inattendue', methode: request.method } });
+      const p = String(request.url).split('?')[0];
+      if (TRAPS.has(p) || TRAP_PREFIXES.some(x => p.startsWith(x))) {
+        sec.emit('malicious_honeypot', { request, emetteur: 'server/securite · pièges', detail: { piege: p === TRAP_PATH ? 'lien caché' : 'chemin de scanner', chemin: p.slice(0, 80) } });
+      } else if (p === '/auth/local' && !config.localAuthToken) {
+        sec.emit('authn_local_attempt', { request, emetteur: 'server/auth.js · connexion de test' });
+      }
+    } catch (err) { app.log.error({ err: err.message }, 'Vigie : requête'); }
     done();
   });
 
@@ -163,7 +204,9 @@ export function installVigie(app, { config, db, send = null, timers = true }) {
       severity: request.session ? 'haut' : undefined,
       composant: request.url.startsWith('/admin') || request.url.startsWith('/auth/') ? 'site · admin' : 'site · public',
       emetteur: 'server/securite · saisies',
-      detail: { familles: [...new Set([...hits.map(h => h.famille), ...(tool ? ['outil'] : [])])], constats: hits.map(h => ({ famille: h.famille, champ: h.champ, extrait: h.extrait })) },
+      // Extrait seulement pour le chemin, l'adresse et le navigateur : un formulaire (message de /bonjour, fiche d'une
+      // personne) peut contenir des données personnelles, chiffrées ailleurs ; on n'en garde que le champ et la longueur.
+      detail: { familles: [...new Set([...hits.map(h => h.famille), ...(tool ? ['outil'] : [])])], constats: hits.map(h => ({ famille: h.famille, champ: h.champ, ...(h.champ.startsWith('body.') ? { longueur: h.longueur } : { extrait: h.extrait }) })) },
     });
   };
 
@@ -195,22 +238,6 @@ export function installVigie(app, { config, db, send = null, timers = true }) {
     if (request.routeOptions?.config?.audit) sec.emit('sensitive_export', { request, status, emetteur: 'server/routes · lecture sensible', detail: { cible: route, id: request.params?.id ?? null } });
     else if (SENSITIVE.test(route)) sec.emit('sensitive_read', { request, status, emetteur: 'server/routes · lecture sensible', detail: { cible: route, id: request.params?.id ?? null } });
   };
-
-  // Pièges : chemins de scanners et lien caché des pages publiques (interdit par robots.txt, invisible, hors du clavier).
-  for (const url of TRAPS) {
-    app.route({ method: ['GET', 'HEAD', 'POST'], url, handler: async (request, reply) => {
-      sec.emit('malicious_honeypot', { request, emetteur: 'server/securite · pièges', detail: { piege: url === TRAP_PATH ? 'lien caché' : 'chemin de scanner', chemin: request.routeOptions.url } });
-      return reply.callNotFound();
-    } });
-  }
-
-  // Connexion de test désactivée (en ligne) : personne de légitime ne la connaît.
-  if (!config.localAuthToken) {
-    app.route({ method: ['GET', 'POST'], url: '/auth/local', handler: async (request, reply) => {
-      sec.emit('authn_local_attempt', { request, emetteur: 'server/auth.js · connexion de test' });
-      return reply.callNotFound();
-    } });
-  }
 
   return sec;
 }

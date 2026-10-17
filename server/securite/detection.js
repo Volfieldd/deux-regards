@@ -30,17 +30,31 @@ export function scanValue(where, field, value) {
   return null;
 }
 
-// Parcourt un objet (paramètres, requête, formulaire) : renvoie les constats (au plus 5), clés comprises.
-export function scanObject(where, obj, out = [], depth = 0, prefix = where) {
+// Champs secrets jamais examinés (leur valeur ne doit apparaître nulle part, même dans un constat).
+const SECRET = /^(?:_csrf|token|code|state|id_token|password|pass|secret|key)$/i;
+const MAX_ENTRIES = 200, MAX_CHARS = 16 * 1024;      // un formulaire de 100 000 champs ne coûte pas plus qu'un normal
+
+// Parcourt un objet (paramètres, requête, formulaire) : renvoie les constats (au plus 5), clés comprises. Chaque constat
+// porte un extrait (pour le chemin, l'adresse et le navigateur) et la longueur de la valeur (seule gardée pour un
+// formulaire, qui peut contenir des données personnelles).
+export function scanObject(where, obj, out = [], depth = 0, prefix = where, budget = { entries: MAX_ENTRIES, chars: MAX_CHARS }) {
   if (!obj || typeof obj !== 'object' || depth > 3 || out.length >= 5) return out;
   for (const [k, v] of Object.entries(obj)) {
-    if (out.length >= 5) break;
+    if (out.length >= 5 || budget.entries <= 0 || budget.chars <= 0) break;
+    budget.entries -= 1;
+    if (SECRET.test(k)) continue;
     const field = `${prefix}.${String(k).slice(0, 40)}`;
     const keyHit = scanValue(where, field, String(k));
-    if (keyHit) out.push({ ...keyHit, extrait: String(k) });
-    if (typeof v === 'string') { const hit = scanValue(where, field, v); if (hit && out.length < 5) out.push({ ...hit, extrait: v }); }
-    else if (Array.isArray(v)) v.slice(0, 50).forEach((x, i) => { if (typeof x === 'string' && out.length < 5) { const hit = scanValue(where, `${field}[${i}]`, x); if (hit) out.push({ ...hit, extrait: x }); } });
-    else if (v && typeof v === 'object' && !Buffer.isBuffer(v) && typeof v.pipe !== 'function') scanObject(where, v, out, depth + 1, field);
+    if (keyHit) out.push({ ...keyHit, extrait: String(k), longueur: String(k).length });
+    const check = (f, x) => {
+      if (typeof x !== 'string' || out.length >= 5) return;
+      budget.chars -= Math.min(x.length, MAX_LEN);
+      const hit = scanValue(where, f, x);
+      if (hit) out.push({ ...hit, extrait: x, longueur: x.length });
+    };
+    if (typeof v === 'string') check(field, v);
+    else if (Array.isArray(v)) v.slice(0, 50).forEach((x, i) => check(`${field}[${i}]`, x));
+    else if (v && typeof v === 'object' && !Buffer.isBuffer(v) && typeof v.pipe !== 'function') scanObject(where, v, out, depth + 1, field, budget);
   }
   return out;
 }

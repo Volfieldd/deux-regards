@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { ROLES, ADJUSTABLE } from './permissions.js';
 
 // Comptes de l'admin : une ligne par identité (sub de l'IdP, ou « local:<photographe> » pour la connexion de test),
@@ -9,7 +10,7 @@ export const STATUSES = ['actif', 'en_attente', 'desactive'];
 
 export class AccountError extends Error {}
 
-export function createAccounts({ db, adminSubs = [], now = Date.now }) {
+export function createAccounts({ db, adminSubs = [], ticketKey = null, now = Date.now }) {
   const q = {
     bySub: db.prepare('SELECT * FROM accounts WHERE sub = ?'),
     byId: db.prepare('SELECT * FROM accounts WHERE id = ?'),
@@ -26,13 +27,16 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
   // les déclencheurs de la base relient le changement noté à ce ticket. Un changement sans ticket vient d'ailleurs.
   const tq = {
     open: db.prepare('INSERT INTO account_change_tickets (at, action, by_sub) VALUES (?, ?, ?)'),
-    close: db.prepare('UPDATE account_change_tickets SET open = 0 WHERE id = ?'),
+    close: db.prepare('UPDATE account_change_tickets SET open = 0, sig = ? WHERE id = ?'),
   };
+  // Signature d'un ticket (migration 049) : un ticket ouvert à la main dans la base n'en a pas de valide.
+  const signTicket = t => (ticketKey ? crypto.createHmac('sha256', ticketKey).update(`${t.id}|${t.at}|${t.action}|${t.by_sub ?? ''}`).digest('hex') : null);
   const listeners = [];
   const ticketed = (action, by, fn) => {
     const r = db.transaction(() => {
-      const id = tq.open.run(now(), action, by ?? null).lastInsertRowid;
-      try { return fn(); } finally { tq.close.run(id); }
+      const at = now();
+      const id = Number(tq.open.run(at, action, by ?? null).lastInsertRowid);
+      try { return fn(); } finally { tq.close.run(signTicket({ id, at, action, by_sub: by ?? null }), id); }
     })();
     for (const l of listeners) l();
     return r;
@@ -70,11 +74,14 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
     // Journal des changements de comptes (migration 048) : gardé 13 mois, comme le Journal.
     purgeChanges() {
       const before = now() - 396 * 864e5;
-      db.prepare('DELETE FROM account_changes WHERE at < ?').run(before);
+      // La dernière ligne reste : les numéros ne repartent jamais à 1 (la Vigie suit le journal par numéro).
+      db.prepare('DELETE FROM account_changes WHERE at < ? AND id < (SELECT MAX(id) FROM account_changes)').run(before);
       return db.prepare('DELETE FROM account_change_tickets WHERE at < ? AND id NOT IN (SELECT ticket_id FROM account_changes WHERE ticket_id IS NOT NULL)').run(before).changes;
     },
     // Changements notés depuis l'identifiant after (pour la Vigie), avec le ticket de l'application s'il y en a un.
-    changesSince: (after, limit = 500) => db.prepare(`SELECT c.*, t.action, t.by_sub FROM account_changes c LEFT JOIN account_change_tickets t ON t.id = c.ticket_id
+    // Ticket de l'application ? null : impossible à vérifier (pas de clé) ; sinon vrai ou faux.
+    ticketValid: row => (row.ticket_id == null ? false : !ticketKey ? null : row.ticket_sig != null && row.ticket_sig === signTicket({ id: row.ticket_id, at: row.ticket_at, action: row.action, by_sub: row.by_sub })),
+    changesSince: (after, limit = 500) => db.prepare(`SELECT c.*, t.action, t.by_sub, t.at AS ticket_at, t.sig AS ticket_sig FROM account_changes c LEFT JOIN account_change_tickets t ON t.id = c.ticket_id
       WHERE c.id > ? ORDER BY c.id LIMIT ?`).all(after, limit),
     lastChangeId: () => db.prepare('SELECT COALESCE(MAX(id), 0) FROM account_changes').pluck().get(),
     onChange: fn => listeners.push(fn),
@@ -104,7 +111,9 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
       // compte dont un administrateur a retiré les rôles (ou qu'il a supprimé) ne l'est jamais.
       else if (a.status === 'en_attente' && !a.decided_at && admin) ticketed('compte promu administrateur à la connexion', sub, () => db.prepare("UPDATE accounts SET roles = '[\"admin\"]', status = 'actif' WHERE id = ?").run(a.id));
       // Une connexion refusée (compte désactivé) n'en est pas une : « dernière connexion » ne bouge pas (le journal la garde).
-      db.prepare("UPDATE accounts SET name = ?, email = ?, last_login_at = CASE WHEN status = 'desactive' THEN last_login_at ELSE ? END WHERE id = ?").run(name || a.name, email || a.email, now(), a.id);
+      const seen = () => db.prepare("UPDATE accounts SET name = ?, email = ?, last_login_at = CASE WHEN status = 'desactive' THEN last_login_at ELSE ? END WHERE id = ?").run(name || a.name, email || a.email, now(), a.id);
+      // E-mail changé par l'IdP : noté au journal des comptes, avec le ticket de l'application.
+      if ((email || a.email) !== a.email) ticketed('e-mail du compte mis à jour à la connexion', sub, seen); else seen();
       return { ...bySub(sub), rescued };
     },
     // Compte d'une session : s'il manque (session d'avant les comptes), il est créé SANS rôle, en attente : les rôles
@@ -143,8 +152,10 @@ export function createAccounts({ db, adminSubs = [], now = Date.now }) {
       if (addr && !/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(addr)) throw new AccountError('Cette adresse e-mail n’est pas valide.');
       const recap = ['off', 'daily', 'weekly'].includes(digest) ? digest : undefined;
       if ((on || (recap && recap !== 'off')) && !addr && !bySub(sub)?.email) throw new AccountError('Indiquez l’adresse où vous prévenir.');
-      db.prepare('UPDATE accounts SET notify_email = ?, notify_to = ? WHERE sub = ?').run(on ? 1 : 0, addr, sub);
-      if (recap) db.prepare('UPDATE accounts SET digest = ? WHERE sub = ?').run(recap, sub);
+      ticketed('choix des e-mails', sub, () => {
+        db.prepare('UPDATE accounts SET notify_email = ?, notify_to = ? WHERE sub = ?').run(on ? 1 : 0, addr, sub);
+        if (recap) db.prepare('UPDATE accounts SET digest = ? WHERE sub = ?').run(recap, sub);
+      });
       return bySub(sub);
     },
     // Nouveautés : la dernière version vue dans la fenêtre « Nouveautés ».
