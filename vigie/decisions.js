@@ -4,17 +4,29 @@ import { EventEmitter } from 'node:events';
 
 // Décisions de la Vigie, appliquées par le site (annexe architecture, section 4.2) : le site les lit, signées par la
 // Vigie (Ed25519 ; le site n'a que la clé publique). Toutes sont bornées dans le temps ; aucune ne peut bloquer tout le
-// monde.
+// monde. Chaque ligne porte un HMAC (clé du journal) : une décision écrite à la main dans la base n'est jamais signée
+// pour le site.
 
 export const KINDS = ['bloquer', 'revoquer_session', 'revoquer_compte', 'geler', 'verrouiller'];
 export const SCOPES = ['tout', 'admin', 'auth'];
 const DAY = 864e5;
 export const MAX_DURATION = { bloquer: 30 * DAY, revoquer_session: 2 * DAY, revoquer_compte: 2 * DAY, geler: 30 * DAY, verrouiller: DAY };
 export const MAX_ACTIVE = 10_000;
+// Espace d'adresses IPv4 bloqué au total : l'équivalent d'un /8 au plus.
+export const MAX_IPV4 = 2 ** 24;
 
 export class DecisionError extends Error {}
 
-// Adresse ou réseau à bloquer : IPv4 /8 à /32, IPv6 /32 à /128 ; jamais 0.0.0.0/0 ni ::/0.
+// Plages IPv6 qui contiennent tout l'IPv4 (adresses IPv4 dans IPv6, NAT64, 6to4) : une règle qui les touche bloquerait
+// tous les visiteurs IPv4. Plages locales jamais bloquées (vérification de santé, proxy).
+const V6_IPV4 = new net.BlockList();
+for (const [a, p] of [['::ffff:0:0', 96], ['::', 96], ['64:ff9b::', 96], ['2002::', 16]]) V6_IPV4.addSubnet(a, p, 'ipv6');
+const V6_BASES = [['::ffff:0:0', 96], ['::', 96], ['64:ff9b::', 96], ['2002::', 16]];
+const LOCAL = new net.BlockList();
+LOCAL.addSubnet('127.0.0.0', 8, 'ipv4'); LOCAL.addAddress('::1', 'ipv6'); LOCAL.addSubnet('0.0.0.0', 8, 'ipv4');
+
+// Adresse ou réseau à bloquer : IPv4 /8 à /32, IPv6 /32 à /128 ; jamais 0.0.0.0/0 ni ::/0, ni une plage IPv6 qui
+// recouvre l'IPv4, ni la boucle locale.
 export function parseTarget(cible) {
   const m = /^([^/]+)(?:\/(\d{1,3}))?$/.exec(String(cible || '').trim());
   if (!m) throw new DecisionError('adresse ou réseau attendu (ex. 203.0.113.7 ou 203.0.113.0/24)');
@@ -23,7 +35,13 @@ export function parseTarget(cible) {
   const prefix = m[2] == null ? (v === 4 ? 32 : 128) : Number(m[2]);
   const [min, max] = v === 4 ? [8, 32] : [32, 128];
   if (prefix < min || prefix > max) throw new DecisionError(`réseau trop large ou invalide : /${prefix} (IPv${v} de /${min} à /${max})`);
-  return { address: m[1], prefix, family: v === 4 ? 'ipv4' : 'ipv6', cible: `${m[1]}/${prefix}` };
+  const type = v === 4 ? 'ipv4' : 'ipv6';
+  if (LOCAL.check(m[1], type)) throw new DecisionError('adresse locale : jamais bloquée');
+  if (v === 6) {
+    const target = new net.BlockList(); target.addSubnet(m[1], prefix, 'ipv6');
+    if (V6_IPV4.check(m[1], 'ipv6') || V6_BASES.some(([a]) => target.check(a, 'ipv6'))) throw new DecisionError('plage IPv6 qui recouvre des adresses IPv4 : refusée (bloquez l’adresse IPv4 elle-même)');
+  }
+  return { address: m[1], prefix, family: type, cible: `${m[1]}/${prefix}`, size: v === 4 ? 2 ** (32 - prefix) : 0 };
 }
 
 export const parseDuration = text => {
@@ -35,19 +53,34 @@ export const parseDuration = text => {
 export function createDecisions({ store, privateKey, now = Date.now }) {
   const { db, setting } = store;
   const events = new EventEmitter();
-  events.setMaxListeners(100);
+  events.setMaxListeners(0);
+  const rowMac = d => store.hmac(`decision|${d.id}|${d.kind}|${d.cible}|${d.portee ?? ''}|${d.par}|${d.cree_a}|${d.fin}|${d.leve_a ?? ''}|${d.leve_par ?? ''}|${d.details ?? ''}`);
   const bump = () => { setting.set('decisions_version', (setting.get('decisions_version', 0) || 0) + 1); events.emit('change'); };
-  const active = () => db.prepare('SELECT * FROM decisions WHERE leve_a IS NULL AND fin > ? ORDER BY id').all(now());
+  const live = () => db.prepare('SELECT * FROM decisions WHERE leve_a IS NULL AND fin > ? ORDER BY id').all(now());
+  // Décisions actives et intègres ; une ligne à la signature fausse est écartée et signalée (une fois).
+  const reported = new Set();
+  function active() {
+    const ok = [];
+    for (const d of live()) {
+      if (d.mac && d.mac === rowMac(d)) { ok.push(d); continue; }
+      if (!reported.has(d.id)) { reported.add(d.id); store.own('log_integrity_fail', { emetteur: 'vigie/decisions.js', detail: { raison: 'décision sans signature valide, écartée', id: d.id, kind: d.kind, cible: d.cible } }); }
+    }
+    return ok;
+  }
 
-  function create({ kind, cible, portee = null, duree, motif = '', par, auto = false, details = null }) {
+  const create = ({ kind, cible, portee = null, duree, motif = '', par, auto = false, details = null }) => db.transaction(() => {
     if (!KINDS.includes(kind)) throw new DecisionError(`action inconnue : ${kind}`);
     if (!par) throw new DecisionError('auteur de la décision manquant');
     const ms = Math.min(typeof duree === 'number' ? duree : parseDuration(duree), MAX_DURATION[kind]);
     let target = String(cible || '').trim();
+    const current = active();
     if (kind === 'bloquer') {
-      target = parseTarget(target).cible;
+      const t = parseTarget(target);
+      target = t.cible;
       if (!SCOPES.includes(portee || 'tout')) throw new DecisionError(`portée inconnue : ${portee}`);
       portee ||= 'tout';
+      const used = current.filter(d => d.kind === 'bloquer').reduce((n, d) => n + parseTarget(d.cible).size, 0);
+      if (used + t.size > MAX_IPV4) throw new DecisionError('trop d’adresses IPv4 bloquées au total (l’équivalent d’un /8 au plus)');
     } else if (kind === 'revoquer_session') {
       if (!/^[0-9a-f]{12,64}$/.test(target)) throw new DecisionError('empreinte de session attendue (12 caractères hexadécimaux au moins)');
     } else if (kind === 'verrouiller') {
@@ -58,21 +91,25 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
       if (!comptes.length && !adresses.length) throw new DecisionError('verrouillage : au moins un compte ou une adresse autorisés (sinon personne n’entre plus)');
       details = { comptes, adresses };
     } else if (!target || target.length > 200) throw new DecisionError('compte (sub) attendu');
-    if (active().length >= MAX_ACTIVE) throw new DecisionError(`trop de décisions actives (${MAX_ACTIVE} au plus)`);
-    const id = db.prepare(`INSERT INTO decisions (kind, cible, portee, motif, par, cree_a, fin, auto, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(kind, target, portee, String(motif).slice(0, 300), par, now(), now() + ms, auto ? 1 : 0, details ? JSON.stringify(details) : null).lastInsertRowid;
+    if (current.length >= MAX_ACTIVE) throw new DecisionError(`trop de décisions actives (${MAX_ACTIVE} au plus)`);
+    const row = { kind, cible: target, portee, motif: String(motif).slice(0, 300), par, cree_a: now(), fin: now() + ms, auto: auto ? 1 : 0, details: details ? JSON.stringify(details) : null };
+    row.id = Number(db.prepare('INSERT INTO decisions (kind, cible, portee, motif, par, cree_a, fin, auto, details) VALUES (@kind, @cible, @portee, @motif, @par, @cree_a, @fin, @auto, @details)').run(row).lastInsertRowid);
+    db.prepare('UPDATE decisions SET mac = ? WHERE id = ?').run(rowMac(row), row.id);
+    store.own('vigie_decision', { emetteur: par, detail: { action: 'créée', id: row.id, kind, cible: target, portee, fin: row.fin, motif: row.motif, auto } });
     bump();
-    store.own('vigie_decision', { emetteur: par, detail: { action: 'créée', id: Number(id), kind, cible: target, portee, fin: now() + ms, motif: String(motif).slice(0, 300), auto } });
-    return Number(id);
-  }
+    return row.id;
+  }).immediate();
 
-  function lift({ id = null, all = false, par }) {
+  const lift = ({ id = null, all = false, par }) => db.transaction(() => {
     const t = now();
-    const n = all ? db.prepare('UPDATE decisions SET leve_a = ?, leve_par = ? WHERE leve_a IS NULL AND fin > ?').run(t, par, t).changes
-      : db.prepare('UPDATE decisions SET leve_a = ?, leve_par = ? WHERE id = ? AND leve_a IS NULL').run(t, par, id).changes;
-    if (n) { bump(); store.own('vigie_decision', { emetteur: par, detail: { action: 'levée', id, toutes: all, nombre: n } }); }
-    return n;
-  }
+    const rows = all ? live() : live().filter(d => d.id === id);
+    for (const d of rows) {
+      const next = { ...d, leve_a: t, leve_par: par };
+      db.prepare('UPDATE decisions SET leve_a = ?, leve_par = ?, mac = ? WHERE id = ?').run(t, par, rowMac(next), d.id);
+    }
+    if (rows.length) { store.own('vigie_decision', { emetteur: par, detail: { action: 'levée', id, toutes: all, nombre: rows.length } }); bump(); }
+    return rows.length;
+  }).immediate();
 
   // Ce que lit le site : liste à jour, signée. Le site vérifie la signature sur la chaîne exacte reçue.
   function signed() {
@@ -91,8 +128,8 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
     return { payload, signature: crypto.sign(null, Buffer.from(payload), privateKey).toString('base64') };
   }
 
-  // Changement fait par la ligne de commande (autre processus) : vu par le service en relisant la version.
-  // Une décision échue fait aussi repartir la liste (le site retire tout de suite ce qui a expiré).
+  // Changement fait par la ligne de commande (autre processus) : vu par le service en relisant la version. Une décision
+  // échue fait aussi repartir la liste (le site retire tout de suite ce qui a expiré).
   let seen = setting.get('decisions_version', 0);
   const nextEnd = () => db.prepare('SELECT MIN(fin) FROM decisions WHERE leve_a IS NULL AND fin > ?').pluck().get(now()) ?? null;
   let pendingEnd = nextEnd();
@@ -101,6 +138,8 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
     if (v !== seen) { seen = v; pendingEnd = nextEnd(); events.emit('change'); return; }
     if (pendingEnd && now() >= pendingEnd) { bump(); seen = setting.get('decisions_version', 0); pendingEnd = nextEnd(); }
   };
+  // Arrêt : les attentes longues en cours répondent tout de suite.
+  const release = () => events.emit('change');
 
-  return { create, lift, active, signed, events, watch, version: () => setting.get('decisions_version', 0) || 0 };
+  return { create, lift, active, signed, events, watch, release, version: () => setting.get('decisions_version', 0) || 0 };
 }

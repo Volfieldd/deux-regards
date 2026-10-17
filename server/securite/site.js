@@ -27,6 +27,16 @@ const METHODS = new Set(['GET', 'HEAD', 'POST']);
 const SENSITIVE = /^\/admin\/(?:personnes|rencontres)\/:id(?:\/|$)/;
 const NOT_FOUND_LIMIT = 20, NOT_FOUND_WINDOW = 10 * 60e3;
 
+// Chemin comme le voit le routeur : gabarit de la route trouvée, sinon chemin décodé et normalisé (« /%61dmin »,
+// « //admin » sont « /admin »). Jamais l'adresse brute pour une décision de sécurité.
+export function routeKey(request) {
+  const pattern = request.routeOptions?.url;
+  if (pattern) return pattern;
+  let p = String(request.url).split('?')[0];
+  try { p = decodeURIComponent(p); } catch { /* laissé tel quel */ }
+  return p.replace(/\/{2,}/g, '/');
+}
+
 // Empreinte de la configuration de sécurité : ce qui, changé dans le .env, ouvre ou ferme une porte d'administration.
 // Aucun secret n'y figure en clair (DATA_KEY : empreinte HMAC courte, clé dérivée de COOKIE_SECRET).
 function configPrint(config) {
@@ -64,7 +74,7 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   app.decorate('securite', sec);
   // Décisions de la Vigie (blocages, révocations, gels, verrouillage), lues et appliquées par le site.
   const decisions = createDecisionsClient({ url: config.vigie.url, key: config.vigie.ingestKey, pubkey: config.vigie.decisionsPubkey, storageDir: config.storageDir,
-    log: app.log, apply: config.vigie.apply, ...(decisionsFetch ? { fetchImpl: decisionsFetch } : {}) });
+    log: app.log, apply: config.vigie.apply, adminSubs: config.adminSubs || [], ...(decisionsFetch ? { fetchImpl: decisionsFetch } : {}) });
   app.decorate('decisions', decisions);
   if (!config.vigie.apply) app.log.warn('VIGIE_APPLIQUER=0 : les décisions de la Vigie ne sont pas appliquées');
 
@@ -192,15 +202,14 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   // Adresse bloquée par la Vigie : 403 sobre, avant tout le reste (aucune page, aucun indice).
   app.addHook('onRequest', (request, reply, done) => {
     let scope = null;
-    try { scope = decisions.blocked(request.ip, String(request.url).split('?')[0]); } catch (err) { app.log.error({ err: err.message }, 'Vigie : blocage'); }
+    try { scope = decisions.blocked(request.ip, routeKey(request)); } catch (err) { app.log.error({ err: err.message }, 'Vigie : blocage'); }
     if (!scope) return done();
     sec.emit('authz_blocked', { request, emetteur: 'server/securite/decisions.js · blocage', detail: { raison: 'adresse bloquée', portee: scope } });
     reply.code(403).header('cache-control', 'no-store').type('text/plain; charset=utf-8').send('Accès refusé.');
   });
   // Admin verrouillée : seuls les comptes et adresses listés y entrent (la connexion est vérifiée dans auth.js).
   app.addHook('preHandler', (request, reply, done) => {
-    const p = String(request.url).split('?')[0];
-    if (!request.session || !/^\/admin(?:[/?#]|$)/.test(p) || decisions.lockAllows(request.session.sub, request.ip) !== false) return done();
+    if (!request.session || !/^\/admin(?:[/?#]|$)/.test(routeKey(request)) || decisions.lockAllows(request.session.sub, request.ip) !== false) return done();
     sec.emit('authz_blocked', { request, emetteur: 'server/securite/decisions.js · verrouillage', detail: { raison: 'administration verrouillée' } });
     reply.code(403).header('cache-control', 'no-store').type('text/plain; charset=utf-8').send('Administration verrouillée.');
   });

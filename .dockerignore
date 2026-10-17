@@ -12,3 +12,6 @@ docs/*
 !docs/aide/*.md
 Dockerfile
 compose*.yaml
+vigie/node_modules
+**/vigie.env
+vigie.env

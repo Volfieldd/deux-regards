@@ -20,5 +20,6 @@ export function retireVigie({ db, storageDir }) {
   db.prepare('DELETE FROM sessions_revoked').run();
   db.prepare('UPDATE sessions SET ctx_ip = NULL, ctx_net = NULL, ctx_country = NULL, ctx_ua = NULL WHERE ctx_ip IS NOT NULL OR ctx_ua IS NOT NULL').run();
   fs.rmSync(path.join(storageDir, 'securite-attente'), { recursive: true, force: true });
+  fs.rmSync(path.join(storageDir, 'securite-decisions.json'), { force: true });
 }
 

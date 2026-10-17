@@ -4,6 +4,8 @@ import Fastify from 'fastify';
 import { isSiteType, SEVERITIES, SITE_COMPOSANTS } from './vocabulaire.js';
 import { clean, num } from './util.js';
 
+const str = v => (typeof v === 'string' ? v : null);
+
 // Réception des événements du site et remise des décisions (réseau interne « vigie-ingest », annexe 4.1 et 4.2).
 //   - chaque requête est signée par le site (HMAC-SHA-256 de « horodatage.nonce.corps », VIGIE_INGEST_KEY) : horodatage à
 //     60 s près, nonce jamais vu (10 min), signature comparée en temps constant ; sinon 401 (le site garde ses lots) ;
@@ -17,7 +19,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 export function createIngest({ store, decisions, ingestKey, now = Date.now, logger = false }) {
   // Pas de journal par requête : le site envoie chaque seconde ; les refus sont des événements de la Vigie.
-  const app = Fastify({ logger, disableRequestLogging: true, bodyLimit: 1024 * 1024, trustProxy: false });
+  const app = Fastify({ logger, bodyLimit: 1024 * 1024, trustProxy: false });
+  // Arrêt : les attentes longues répondent tout de suite (Docker n'attend que 10 s).
+  app.addHook('preClose', async () => decisions.release());
   const nonceSeen = store.db.prepare('SELECT 1 FROM nonces WHERE nonce = ?');
   const nonceAdd = store.db.prepare('INSERT INTO nonces (nonce, at) VALUES (?, ?)');
   let lastRefusal = 0;
@@ -48,7 +52,7 @@ export function createIngest({ store, decisions, ingestKey, now = Date.now, logg
 
   // Un événement du site, revérifié champ par champ ; null s'il est invalide.
   function row(e, late) {
-    if (!e || typeof e !== 'object' || !UUID.test(String(e.id)) || !isSiteType(e.type) || !SEVERITIES.includes(e.severity)) return null;
+    if (!e || typeof e !== 'object' || Array.isArray(e) || typeof e.id !== 'string' || !UUID.test(e.id) || typeof e.type !== 'string' || !isSiteType(e.type) || !SEVERITIES.includes(e.severity)) return null;
     const composant = e.origine?.composant;
     if (!SITE_COMPOSANTS.includes(composant)) return null;
     let detail = e.detail == null ? null : JSON.stringify(e.detail);
@@ -56,16 +60,17 @@ export function createIngest({ store, decisions, ingestKey, now = Date.now, logg
     const t = now();
     return {
       id: e.id, recu_a: t, survenu_a: num(e.survenu_a, t - 30 * 864e5, t + 5 * 60e3) ?? t, type: e.type, severity: e.severity,
-      composant, emetteur: clean(e.origine?.emetteur, 120), canal: 'ingestion signée', confiance: 'rapporté', reference: clean(e.origine?.reference, 120),
-      sub: clean(e.sub, 200), session: /^[0-9a-f]{12}$/.test(String(e.session)) ? e.session : null,
-      ip: net.isIP(String(e.ip || '')) ? e.ip : null, ip_net: clean(e.ip_net, 50), country: /^[A-Z]{2}$/.test(String(e.country)) ? e.country : null,
-      city: clean(e.city, 80), lat: num(e.lat, -90, 90), lon: num(e.lon, -180, 180), ua: clean(e.ua, 200), ua_family: clean(e.ua_family, 60),
-      method: /^[A-Z]{3,10}$/.test(String(e.method)) ? e.method : null, route: clean(e.route, 120),
+      composant, emetteur: clean(str(e.origine?.emetteur), 120), canal: 'ingestion signée', confiance: 'rapporté', reference: clean(str(e.origine?.reference), 120),
+      sub: clean(str(e.sub), 200), session: typeof e.session === 'string' && /^[0-9a-f]{12}$/.test(e.session) ? e.session : null,
+      ip: typeof e.ip === 'string' && net.isIP(e.ip) ? e.ip : null, ip_net: clean(str(e.ip_net), 50), country: typeof e.country === 'string' && /^[A-Z]{2}$/.test(e.country) ? e.country : null,
+      city: clean(str(e.city), 80), lat: num(e.lat, -90, 90), lon: num(e.lon, -180, 180), ua: clean(str(e.ua), 200), ua_family: clean(str(e.ua_family), 60),
+      method: typeof e.method === 'string' && /^[A-Z]{3,10}$/.test(e.method) ? e.method : null, route: clean(str(e.route), 120),
       status: Number.isInteger(e.status) && e.status >= 100 && e.status < 600 ? e.status : null, detail, retard: late,
     };
   }
 
-  app.post('/v1/events', async (request, reply) => {
+  // Routes sans journal par requête (le site envoie chaque seconde) : les refus sont des événements de la Vigie.
+  app.post('/v1/events', { logLevel: 'warn' }, async (request, reply) => {
     const body = typeof request.body === 'string' ? request.body : '';
     const bad = verify(request, body);
     if (bad) return refuse(reply, request, bad);
@@ -79,7 +84,7 @@ export function createIngest({ store, decisions, ingestKey, now = Date.now, logg
     return reply.code(200).send({ recus: rows.length, gardes: added, ecartes: rows.length - ok.length });
   });
 
-  app.get('/v1/decisions', async (request, reply) => {
+  app.get('/v1/decisions', { logLevel: 'warn' }, async (request, reply) => {
     const bad = verify(request, `GET ${request.url}`);
     if (bad) return refuse(reply, request, bad);
     const since = Number.parseInt(request.query.depuis, 10);
@@ -94,6 +99,6 @@ export function createIngest({ store, decisions, ingestKey, now = Date.now, logg
     return reply.header('cache-control', 'no-store').send(decisions.signed());
   });
 
-  app.get('/healthz', async () => ({ status: 'ok' }));
+  app.get('/healthz', { logLevel: 'warn' }, async () => ({ status: 'ok' }));
   return app;
 }

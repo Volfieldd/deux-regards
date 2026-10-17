@@ -44,6 +44,10 @@ networks:
   vigie-ingest:
     name: nicephos-vigie-ingest
     internal: true
+    ipam:
+      config:
+        - subnet: ${VIGIE_NET_SUBNET:-172.29.43.0/24}
+          ip_range: ${VIGIE_NET_IP_RANGE:-172.29.43.128/25}
 
 services:
   site:
@@ -172,10 +176,17 @@ services:
     environment:
       VIGIE_DATA_DIR: /data
       VIGIE_INGEST_PORT: 4100
+      # La réception n'écoute que sur le réseau interne (adresse fixe) : ni le tunnel ni les autres conteneurs ne la
+      # joignent. Le site l'appelle par son nom sur ce réseau : VIGIE_URL=http://vigie-reception:4100.
+      VIGIE_HOST: ${VIGIE_INGEST_IP:-172.29.43.10}
       VIGIE_ZITADEL_KEY_FILE: /secrets/zitadel.json
     user: "${PUID:-99}:${PGID:-100}"
     # vigie-ingest : le site seul la joint ; nicephos : sortie vers Zitadel (et, plus tard, la console derrière le tunnel).
-    networks: [vigie-ingest, nicephos]
+    networks:
+      vigie-ingest:
+        ipv4_address: ${VIGIE_INGEST_IP:-172.29.43.10}
+        aliases: [vigie-reception]
+      nicephos: {}
     volumes:
       - type: bind
         source: ${VIGIE_DATA_DIR:-/mnt/cache/appdata/nicephos/vigie}
