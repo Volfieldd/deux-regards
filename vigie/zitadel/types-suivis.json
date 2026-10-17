@@ -1,0 +1,1062 @@
+{
+ "source": "liste des types de l'instance Zitadel (admin/v1/events/types/_search), 553 types, 17 octobre 2026",
+ "regles": {
+  "DS3": "connexions (voyage impossible, nouvel appareil)",
+  "DS25": "échecs d'authentification",
+  "DS26": "facteurs et moyens de récupération",
+  "DS27": "droits et comptes",
+  "DS28": "politique et configuration de l'identité"
+ },
+ "types": {
+  "action.added": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "action.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "action.removed": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "auth_request.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "execution.removed": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "execution.set": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "execution.v2.set": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "feature.instance.login_v2.set": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "iam.idp.config.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "iam.idp.config.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "idpintent.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "idpintent.succeeded": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "instance.domain.added": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.domain.removed": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "instance.idp.google.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.idp.google.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.idp.jwt.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.idp.oauth.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.idp.oidc.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.idp.oidc.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.idp.removed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.idp.saml.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.idp.zitadel.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.mail.template.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.mail.text.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.member.added": {
+   "categorie": "droits",
+   "gravite": "critique",
+   "regle": "DS27"
+  },
+  "instance.member.changed": {
+   "categorie": "droits",
+   "gravite": "critique",
+   "regle": "DS27"
+  },
+  "instance.member.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "instance.notification.provider.debug.fileadded": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.notification.provider.debug.logadded": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.oidc.settings.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.policy.lockout.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.policy.login.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.policy.login.idpprovider.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.policy.login.idpprovider.removed": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "instance.policy.login.multifactor.added": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "instance.policy.login.multifactor.removed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.policy.login.secondfactor.added": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "instance.policy.login.secondfactor.removed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.policy.password.age.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.policy.password.complexity.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.policy.security.set": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.secret.generator.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.sms.confighttp.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.sms.configtwilio.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "instance.smtp.config.activated": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.smtp.config.added": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.smtp.config.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.smtp.config.deactivated": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "instance.smtp.config.http.added": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.smtp.config.http.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.smtp.config.password.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.smtp.config.removed": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "instance.trusted_domains.added": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "instance.trusted_domains.removed": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "key_pair.added": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "oidc_session.added": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "org.deactivated": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.domain.added": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "org.domain.removed": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "org.domain.verified": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "org.flow.trigger_actions.set": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "org.idp.config.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.idp.config.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.idp.google.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.idp.google.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.idp.jwt.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.idp.oauth.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.idp.oidc.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.idp.oidc.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.idp.removed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.idp.saml.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.idp.zitadel.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.mail.template.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.mail.text.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.member.added": {
+   "categorie": "droits",
+   "gravite": "critique",
+   "regle": "DS27"
+  },
+  "org.member.changed": {
+   "categorie": "droits",
+   "gravite": "critique",
+   "regle": "DS27"
+  },
+  "org.member.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "org.policy.lockout.added": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "org.policy.lockout.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "org.policy.lockout.removed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "org.policy.login.added": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "org.policy.login.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "org.policy.login.idpprovider.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.policy.login.idpprovider.removed": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "org.policy.login.multifactor.added": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "org.policy.login.multifactor.removed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "org.policy.login.removed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "org.policy.login.secondfactor.added": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "org.policy.login.secondfactor.removed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "org.policy.password.age.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.policy.password.complexity.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "org.removed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "permission.added": {
+   "categorie": "droits",
+   "gravite": "critique",
+   "regle": "DS27"
+  },
+  "permission.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "project.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "project.application.added": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "project.application.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "project.application.config.api.secret.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "project.application.config.oidc.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "project.application.config.oidc.secret.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "project.application.deactivated": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "project.application.oidc.key.added": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "project.application.removed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "project.changed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "project.deactivated": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "project.grant.added": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "project.grant.changed": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "project.grant.member.added": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "project.grant.member.changed": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "project.grant.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "project.member.added": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "project.member.changed": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "project.member.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "project.removed": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "project.role.added": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "project.role.changed": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "project.role.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "restrictions.set": {
+   "categorie": "politique",
+   "gravite": "haut",
+   "regle": "DS28"
+  },
+  "saml_request.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "session.added": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "session.terminated": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "target.added": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "target.changed": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "target.removed": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "user.added": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.deactivated": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.email.changed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.grant.added": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "user.grant.cascade.changed": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "user.grant.cascade.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.grant.changed": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "user.grant.deactivated": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.grant.reactivated": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "user.grant.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.human.added": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.human.email.changed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.externalidp.added": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.externalidp.removed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.externallogin.check.succeeded": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.human.initialization.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.human.invite.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.human.mfa.init.skipped": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.mfa.otp.added": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.human.mfa.otp.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.human.mfa.otp.check.reused": {
+   "categorie": "echec",
+   "gravite": "haut",
+   "regle": "DS25"
+  },
+  "user.human.mfa.otp.check.succeeded": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.human.mfa.otp.email.added": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.human.mfa.otp.email.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.human.mfa.otp.email.check.succeeded": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.human.mfa.otp.email.removed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.mfa.otp.removed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.mfa.otp.sms.added": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.human.mfa.otp.sms.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.human.mfa.otp.sms.check.succeeded": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.human.mfa.otp.sms.removed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.mfa.recoverycode.added": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.human.mfa.recoverycode.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.human.mfa.recoverycode.check.succeeded": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.human.mfa.recoverycode.removed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.mfa.u2f.token.added": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.human.mfa.u2f.token.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.human.mfa.u2f.token.check.succeeded": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.human.mfa.u2f.token.removed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.password.changed": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.human.password.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.human.password.check.succeeded": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.human.password.code.added": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.human.passwordless.initialization.code.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.human.passwordless.initialization.code.requested": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.human.passwordless.token.added": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.human.passwordless.token.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.human.passwordless.token.check.succeeded": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.human.passwordless.token.removed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.phone.changed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.phone.removed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.human.selfregistered": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "user.human.signed.out": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.impersonated": {
+   "categorie": "droits",
+   "gravite": "critique",
+   "regle": "DS27"
+  },
+  "user.initialization.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.locked": {
+   "categorie": "echec",
+   "gravite": "haut",
+   "regle": "DS25"
+  },
+  "user.machine.added": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "user.machine.key.added": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "user.machine.key.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.machine.secret.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.machine.secret.set": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "user.machine.secret.updated": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "user.mfa.otp.added": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.mfa.otp.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.mfa.otp.check.succeeded": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.mfa.otp.init.skipped": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.mfa.otp.removed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.password.changed": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.password.check.failed": {
+   "categorie": "echec",
+   "gravite": "moyen",
+   "regle": "DS25"
+  },
+  "user.password.check.succeeded": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.password.code.added": {
+   "categorie": "facteur",
+   "gravite": "moyen",
+   "regle": "DS26"
+  },
+  "user.pat.added": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "user.pat.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.phone.changed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.phone.removed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "user.reactivated": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.removed": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.selfregistered": {
+   "categorie": "droits",
+   "gravite": "haut",
+   "regle": "DS27"
+  },
+  "user.signed.out": {
+   "categorie": "connexion",
+   "gravite": "info",
+   "regle": "DS3"
+  },
+  "user.unlocked": {
+   "categorie": "droits",
+   "gravite": "moyen",
+   "regle": "DS27"
+  },
+  "user.username.changed": {
+   "categorie": "facteur",
+   "gravite": "haut",
+   "regle": "DS26"
+  },
+  "web_key.activated": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "web_key.added": {
+   "categorie": "politique",
+   "gravite": "critique",
+   "regle": "DS28"
+  },
+  "web_key.deactivated": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  },
+  "web_key.removed": {
+   "categorie": "politique",
+   "gravite": "moyen",
+   "regle": "DS28"
+  }
+ }
+}

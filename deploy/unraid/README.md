@@ -10,6 +10,7 @@ Ce dossier contient tout le nécessaire :
 | `env.example` | les réglages, à copier en `.env` de la pile |
 | `signal/` | **facultatif** : passerelle Signal de la Vigie (alertes de sécurité sur le téléphone), pile à part ; guide dans [`signal/README.md`](signal/README.md) |
 | `vigie-phase-0.md` | **facultatif** : réglages de Cloudflare et de Zitadel qui préparent la Vigie (second facteur, compte de lecture des événements, règles du WAF, Access) ; la partie « maintenant » sert aussi sans Vigie |
+| `vigie.env.example` | **facultatif** : secrets de la Vigie, à copier en `vigie.env` à côté de `compose.yaml` (services `vigie` et `vigie-backup`, profil `vigie`) ; guide : [Vigie](https://github.com/Volfieldd/deux-regards/wiki/Vigie) |
 | `modeles/*.xml` | les mêmes conteneurs en modèles Unraid (onglet Docker), si vous préférez ne pas utiliser Compose |
 | `exporter-donnees.sh` | exporte les données d'une installation existante (serveur de test) pour les reprendre sur Unraid |
 

@@ -15,6 +15,7 @@
 - [Déploiement](Déploiement)
 - [Configuration](Configuration)
 - [Connexion et comptes](Connexion-et-comptes)
+- [Vigie (sécurité, facultative)](Vigie)
 
 **Comprendre**
 - [Spécifications](Spécifications)

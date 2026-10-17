@@ -1,0 +1,11 @@
+{
+  "name": "deux-regards-vigie",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Vigie : journalisation de sécurité de Nicephos (facultative)",
+  "dependencies": {
+    "better-sqlite3": "13.0.3",
+    "fastify": "5.12.5"
+  }
+}

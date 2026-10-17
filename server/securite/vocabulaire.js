@@ -24,6 +24,7 @@ export const EVENTS = {
   // E7, E8 : droits
   authz_fail: E('bas', 'site · admin'),
   authz_csrf_fail: E('moyen', 'site · admin'),
+  authz_blocked: E('bas', 'site · public'),           // requête refusée par une décision de la Vigie (blocage, verrouillage)
   // E9, E10 : comptes et rôles
   privilege_permissions_changed: E('bas', 'site · admin'),
   user_created: E('bas', 'site · admin'),

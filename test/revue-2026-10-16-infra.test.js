@@ -358,7 +358,15 @@ test('A007, A045, A046, A047, A049, A210 : fichiers de déploiement', () => {
   // Publication de l'image : actions épinglées sur un commit, « latest » depuis main seulement, constructions une à une.
   const wf = read('.github/workflows/image.yml');
   const uses = [...wf.matchAll(/uses: (\S+)/g)].map(m => m[1]);
-  assert.equal(uses.length, 5);
+  assert.equal(uses.length, 10);                                          // deux images : le site et la Vigie (phase B)
+  assert.match(wf, /file: Dockerfile\.vigie/);
+  // Vigie (facultative) : seulement avec le profil « vigie », durcie comme le reste, sauvegarde sans réseau.
+  for (const name of ['vigie', 'vigie-backup']) {
+    const svc = service(unraid, name);
+    assert.match(svc, /profiles: \[vigie\]/, name);
+    assert.match(svc, /<<: \*hardening/, name);
+  }
+  assert.match(service(unraid, 'vigie-backup'), /network_mode: none/);
   for (const u of uses) assert.match(u, /@[0-9a-f]{40}$/, u);
   assert.match(wf, /type=raw,value=latest,enable=\{\{is_default_branch\}\}/);
   assert.match(wf, /\nconcurrency:\n {2}group: image-\$\{\{ github\.ref \}\}\n {2}cancel-in-progress: false\n/);

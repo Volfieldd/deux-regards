@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { pubkeyOf } from './securite/decisions.js';
 
 const required = (env, key) => {
   const value = env[key];
@@ -108,7 +109,11 @@ export function loadConfig(env = process.env) {
     const ingestKey = env.VIGIE_INGEST_KEY || '';
     if (!ingestKey) throw new Error('VIGIE_INGEST_KEY est obligatoire avec VIGIE_URL (openssl rand -base64 32)');
     if (ingestKey.length < 32) throw new Error('VIGIE_INGEST_KEY doit faire au moins 32 caractères');
-    vigie = { url: `${u.origin}${u.pathname}`.replace(/\/+$/, ''), ingestKey };
+    // Décisions de la Vigie (blocages, révocations) : signées, vérifiées avec cette clé publique. VIGIE_APPLIQUER=0 :
+    // lues mais jamais appliquées (dernier recours, voir docs/wiki/Vigie.md).
+    if (!env.VIGIE_DECISIONS_PUBKEY) throw new Error('VIGIE_DECISIONS_PUBKEY est obligatoire avec VIGIE_URL (node vigie/cli.js cles)');
+    const decisionsPubkey = pubkeyOf(env.VIGIE_DECISIONS_PUBKEY);
+    vigie = { url: `${u.origin}${u.pathname}`.replace(/\/+$/, ''), ingestKey, decisionsPubkey, apply: env.VIGIE_APPLIQUER !== '0' };
   }
 
   return {

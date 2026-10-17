@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { setup } from './helpers.js';
+import { setup, VIGIE_KEYS } from './helpers.js';
 import { loadConfig } from '../server/config.js';
 import { openDb, migrate } from '../server/db/index.js';
 import { buildApp } from '../server/app.js';
@@ -17,7 +17,7 @@ import { EVENTS } from '../server/securite/vocabulaire.js';
 // Vigie ; sans VIGIE_URL, rien ne change.
 const TOKEN = 'jeton-de-test-0123456789';
 const KEY = 'cle-de-signature-vigie-0123456789abcdef';
-const VIGIE = { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, LOCAL_AUTH_TOKEN: TOKEN };
+const VIGIE = { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64, LOCAL_AUTH_TOKEN: TOKEN };
 const UA_MAC = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15';
 const UA_WIN = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';
 const cookiesOf = res => Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
@@ -38,7 +38,7 @@ function fakeVigie({ down = false } = {}) {
 }
 
 async function withVigie(t, { env = {}, vigie = fakeVigie() } = {}) {
-  const ctx = await setup(t, { seeded: true, env: { ...VIGIE, ...env }, vigieOptions: { send: vigie.send, timers: false } });
+  const ctx = await setup(t, { seeded: true, env: { ...VIGIE, ...env }, vigieOptions: { send: vigie.send, timers: false, pollDecisions: false } });
   const flush = async () => { ctx.app.securite.runTasks(); ctx.app.securite.retryNow(); await ctx.app.securite.flush(); return vigie; };
   const login = async (ua = UA_MAC, ip = '203.0.113.7') => {
     const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', remoteAddress: ip, headers: { 'user-agent': ua }, payload: { token: TOKEN, author: 'julien', next: '/admin' } });
@@ -67,9 +67,9 @@ test('Vigie retirée : déclencheur, sessions fermées, contexte et événements
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const env = { STORAGE_DIR: dir, DATABASE_PATH: path.join(dir, 't.db'), TSA_URL: 'off' };
   const open = async extra => { const config = loadConfig({ ...env, ...extra }); const db = openDb(config.databasePath); migrate(db);
-    const app = await buildApp({ config, db, logger: false, vigieOptions: { send: async () => { throw new Error('hors ligne'); }, timers: false }, instagramOptions: { manual: true }, faceOptions: { manual: true, detector: { detect: async () => [] } }, seriesOptions: { manual: true }, describeOptions: { manual: true } });
+    const app = await buildApp({ config, db, logger: false, vigieOptions: { send: async () => { throw new Error('hors ligne'); }, timers: false, pollDecisions: false }, instagramOptions: { manual: true }, faceOptions: { manual: true, detector: { detect: async () => [] } }, seriesOptions: { manual: true }, describeOptions: { manual: true } });
     await app.ready(); return { app, db }; };
-  let { app, db } = await open({ VIGIE_URL: 'http://vigie', VIGIE_INGEST_KEY: KEY });
+  let { app, db } = await open({ VIGIE_URL: 'http://vigie', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 });
   db.prepare("INSERT INTO sessions (id, sub, csrf, created_at, expires_at, ctx_ip, ctx_ua) VALUES ('h', 's', 'c', 1, 9e15, '1.2.3.4', 'Safari · macOS')").run();
   db.prepare("DELETE FROM sessions WHERE id = 'h'").run();
   assert.equal(db.prepare('SELECT COUNT(*) FROM sessions_revoked').pluck().get(), 1);
@@ -96,7 +96,12 @@ test('configuration : VIGIE_URL exige une clé de signature d’au moins 32 cara
   assert.throws(() => loadConfig({ VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: 'court' }), /au moins 32/);
   assert.throws(() => loadConfig({ VIGIE_URL: 'ftp://vigie', VIGIE_INGEST_KEY: KEY }), /http/);
   assert.throws(() => loadConfig({ VIGIE_URL: 'http://u:p@vigie:4100', VIGIE_INGEST_KEY: KEY }), /adresse simple/);
-  assert.deepEqual(loadConfig({ VIGIE_URL: 'http://vigie:4100/', VIGIE_INGEST_KEY: KEY }).vigie, { url: 'http://vigie:4100', ingestKey: KEY });
+  assert.throws(() => loadConfig({ VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY }), /VIGIE_DECISIONS_PUBKEY est obligatoire/);
+  assert.throws(() => loadConfig({ VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: 'abc' }), /illisible/);
+  const v = loadConfig({ VIGIE_URL: 'http://vigie:4100/', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 }).vigie;
+  assert.equal(v.url, 'http://vigie:4100');
+  assert.equal(v.apply, true);
+  assert.equal(loadConfig({ VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64, VIGIE_APPLIQUER: '0' }).vigie.apply, false);
   assert.equal(loadConfig({}).vigie, null);
 });
 
@@ -228,7 +233,7 @@ test('démarrage : configuration changée et restauration signalées', async t =
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const env = { STORAGE_DIR: dir, DATABASE_PATH: path.join(dir, 't.db'), TSA_URL: 'off', ...VIGIE };
   const start = async (extra, vigie) => { const config = loadConfig({ ...env, ...extra }); const db = openDb(config.databasePath); migrate(db);
-    const app = await buildApp({ config, db, logger: false, vigieOptions: { send: vigie.send, timers: false }, instagramOptions: { manual: true }, faceOptions: { manual: true, detector: { detect: async () => [] } }, seriesOptions: { manual: true }, describeOptions: { manual: true } });
+    const app = await buildApp({ config, db, logger: false, vigieOptions: { send: vigie.send, timers: false, pollDecisions: false }, instagramOptions: { manual: true }, faceOptions: { manual: true, detector: { detect: async () => [] } }, seriesOptions: { manual: true }, describeOptions: { manual: true } });
     await app.ready(); await app.securite.flush(); await app.close(); db.close(); return vigie; };
   let v = await start({ ADMIN_SUBS: 'sub-a' }, fakeVigie());
   assert.equal(v.of('sys_startup')[0].detail.premiere_fois, true);
@@ -540,10 +545,10 @@ test('N1 : même famille de navigateur, autre empreinte (langues, plateforme) : 
 
 test('N2 : VIGIE_URL en clair seulement sur un réseau interne', () => {
   for (const ok of ['http://vigie:4100', 'http://127.0.0.1:4100', 'http://172.29.42.20:4100', 'http://10.0.0.5', 'http://vigie.internal:4100', 'http://[::1]:4100', 'https://vigie.example.org']) {
-    assert.equal(loadConfig({ VIGIE_URL: ok, VIGIE_INGEST_KEY: KEY }).vigie.url.startsWith(ok.replace(/\/$/, '').slice(0, 10)), true, ok);
+    assert.equal(loadConfig({ VIGIE_URL: ok, VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 }).vigie.url.startsWith(ok.replace(/\/$/, '').slice(0, 10)), true, ok);
   }
   for (const bad of ['http://vigie.example.org', 'http://203.0.113.5:4100', 'http://172.32.0.1']) {
-    assert.throws(() => loadConfig({ VIGIE_URL: bad, VIGIE_INGEST_KEY: KEY }), /réseau interne/, bad);
+    assert.throws(() => loadConfig({ VIGIE_URL: bad, VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 }), /réseau interne/, bad);
   }
 });
 
