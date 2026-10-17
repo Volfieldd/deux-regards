@@ -32,6 +32,13 @@ export const clean = v => String(v).replace(/[\u0000-\u001f\u007f-\u009f\u2028\u
 const PRIVATE = new net.BlockList();
 for (const [a, p] of [['10.0.0.0', 8], ['172.16.0.0', 12], ['192.168.0.0', 16], ['127.0.0.0', 8], ['169.254.0.0', 16], ['100.64.0.0', 10], ['0.0.0.0', 8]]) PRIVATE.addSubnet(a, p, 'ipv4');
 for (const [a, p] of [['fc00::', 7], ['fe80::', 10], ['::1', 128]]) PRIVATE.addSubnet(a, p, 'ipv6');
+// Réseau /64 d'une adresse IPv6 (« 2001:db8:1:2::/64 »).
+export function net64(ip) {
+  const [h, t = ''] = String(ip).split('::');
+  const head = h ? h.split(':') : [], tail = t ? t.split(':') : [];
+  const groups = [...head, ...Array(Math.max(8 - head.length - tail.length, 0)).fill('0'), ...tail].slice(0, 4).map(g => parseInt(g, 16).toString(16));
+  return `${groups.join(':')}::/64`;
+}
 export const isPrivate = ip => { try { return PRIVATE.check(ip, net.isIPv6(ip) ? 'ipv6' : 'ipv4'); } catch { return false; } };
 
 export function createEngine({ store, decisions, switches, threats = null, now = Date.now, log, rulesDir = RULES_DIR }) {
@@ -172,9 +179,14 @@ export function createEngine({ store, decisions, switches, threats = null, now =
       // un compte s'achète l'exemption).
       const adm = admins();
       if (isPrivate(entite.key)) done.push('adresse privée : aucun blocage automatique');
+      // Sans contrôle des rôles réussi, les adresses des administrateurs ne sont pas connues : aucun blocage automatique
+      // d'adresse (il serait aussi appliqué en bordure).
+      else if (!setting.get('controle_roles_admins', null)) done.push('aucun contrôle des rôles réussi : aucun blocage automatique d’adresse');
       else if (trusted().has(entite.key)) done.push('adresse de confiance : aucune réponse');
       else if (q.linkedSubs.all(entite.key, now() - 30 * 864e5).some(s => adm.has(s))) done.push('adresse liée à un administrateur : aucun blocage automatique');
-      else make('bloquer', entite.key, '24h', { portee: 'tout' });
+      // IPv6 : le /64 (une machine en change d'adresse à volonté dans son /64 ; bloquer le /128 ne servirait à rien et
+      // gonflerait la liste).
+      else make('bloquer', net.isIPv6(entite.key) ? net64(entite.key) : entite.key, '24h', { portee: 'tout' });
     }
     q.respond.run(done.join(' ; ') || 'aucune réponse prévue pour cette règle', id);
   }
@@ -250,14 +262,19 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   // Un lot dans une seule transaction (une seule écriture forcée sur disque : abaques, docs/etudes/vigie-capacite.md),
   // chaque événement dans un point de sauvegarde : une erreur n'annule que le sien.
   const processOne = db.transaction(row => processRow(row));
-  const processAll = db.transaction(rows => {
-    for (const row of rows) {
-      try { processOne(row); } catch (err) { log?.error({ err: err.message, type: row.type }, 'Vigie : moteur'); }
+  // Le curseur de la file est enregistré dans la même transaction : un arrêt brutal ne fait jamais analyser un lot deux
+  // fois (revue C3). Détection arrêtée : le curseur avance quand même (ces événements ne seront pas analysés plus tard).
+  const processAll = db.transaction((rows, cursorTo) => {
+    if (switches.isOn('detection')) {
+      for (const row of rows) {
+        try { processOne(row); } catch (err) { log?.error({ err: err.message, type: row.type }, 'Vigie : moteur'); }
+      }
     }
+    if (cursorTo != null) setting.set('moteur_curseur', cursorTo);
   });
-  function process(rows) {
-    if (!switches.isOn('detection') || !rows.length) return;
-    processAll.immediate(rows);
+  function process(rows, cursorTo = null) {
+    if (!rows.length || (cursorTo == null && !switches.isOn('detection'))) return;
+    processAll.immediate(rows, cursorTo);
   }
   // File : la réception répond sans attendre le moteur. Le moteur garde seulement un curseur (dernier numéro analysé,
   // enregistré) et relit les événements dans la base par lots de 200, en rendant la main entre deux lots : mémoire
@@ -285,9 +302,8 @@ export function createEngine({ store, decisions, switches, threats = null, now =
       }
       const rows = q2.after.all(cursor);
       if (rows.length) {
-        process(rows);
+        process(rows, rows.at(-1).seq);
         cursor = rows.at(-1).seq;
-        setting.set('moteur_curseur', cursor);
         setImmediate(run);
         return;
       }

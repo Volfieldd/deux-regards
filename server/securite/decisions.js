@@ -78,7 +78,8 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     if (!crypto.verify(null, Buffer.from(signed.payload), pubkey, Buffer.from(signed.signature, 'base64'))) throw new Error('signature des décisions fausse');
     const p = JSON.parse(signed.payload);
     // Liste destinée à la bordure (blocages seuls, même clé) : jamais lue ici, elle effacerait révocations et gels.
-    if (p.usage !== undefined && p.usage !== 'site') throw new Error('liste qui n’est pas destinée au site');
+    // Liste sans « usage » : seulement celle gardée sur le disque avant ce changement (une liste reçue doit le dire).
+    if (fromCache ? p.usage !== undefined && p.usage !== 'site' : p.usage !== 'site') throw new Error('liste qui n’est pas destinée au site');
     const t = now();
     if (!Number.isSafeInteger(p.version) || p.version < 0) throw new Error('numéro de liste invalide');
     if (!Number.isFinite(p.emis_a) || p.emis_a > t + 5 * 60e3) throw new Error('liste datée dans le futur');

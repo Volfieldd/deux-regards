@@ -205,7 +205,8 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
     app.addHook('onRequest', (request, reply, done) => {
       try {
         const r = verifyEdge(request);
-        if (r?.invalide) sec.emitThrottled(`bordure:${r.invalide}`, 'edge_signature_invalid', { request, emetteur: 'server/securite/bordure.js', detail: { raison: r.invalide } });
+        // Une fois par minute, par raison et par réseau : le bruit d'un visiteur ne masque pas une vraie désynchronisation.
+        if (r?.invalide) sec.emitThrottled(`bordure:${r.invalide}:${String(request.ip).slice(0, 48)}`, 'edge_signature_invalid', { request, emetteur: 'server/securite/bordure.js', detail: { raison: r.invalide } });
         request.bordure = r && !r.invalide ? r : null;
       } catch (err) { app.log.error({ err: err.message }, 'Vigie : bordure'); }
       done();

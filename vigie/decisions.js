@@ -28,7 +28,7 @@ LOCAL.addSubnet('127.0.0.0', 8, 'ipv4'); LOCAL.addAddress('::1', 'ipv6'); LOCAL.
 // Adresse ou réseau à bloquer : IPv4 /8 à /32, IPv6 /32 à /128 ; jamais 0.0.0.0/0 ni ::/0, ni une plage IPv6 qui
 // recouvre l'IPv4, ni la boucle locale.
 export function parseTarget(cible) {
-  const m = /^([^/]+)(?:\/(\d{1,3}))?$/.exec(String(cible || '').trim());
+  const m = /^([^/%]+)(?:\/(\d{1,3}))?$/.exec(String(cible || '').trim());          // jamais d'identifiant de zone (%eth0)
   if (!m) throw new DecisionError('adresse ou réseau attendu (ex. 203.0.113.7 ou 203.0.113.0/24)');
   const v = net.isIP(m[1]);
   if (!v) throw new DecisionError(`adresse invalide : ${m[1]}`);
@@ -55,7 +55,9 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
   const events = new EventEmitter();
   events.setMaxListeners(0);
   const rowMac = d => store.hmac(`decision|${d.id}|${d.kind}|${d.cible}|${d.portee ?? ''}|${d.par}|${d.cree_a}|${d.fin}|${d.leve_a ?? ''}|${d.leve_par ?? ''}|${d.details ?? ''}`);
-  const bump = () => { setting.set('decisions_version', (setting.get('decisions_version', 0) || 0) + 1); events.emit('change'); };
+  // Le signal part après la validation de la transaction en cours (revue C3) : une liste n'est jamais calculée sur une
+  // décision qu'un point de sauvegarde annulerait ensuite.
+  const bump = () => { setting.set('decisions_version', (setting.get('decisions_version', 0) || 0) + 1); setImmediate(() => events.emit('change')); };
   const live = () => db.prepare('SELECT * FROM decisions WHERE leve_a IS NULL AND fin > ? ORDER BY id').all(now());
   // Décisions actives et intègres ; une ligne à la signature fausse est écartée et signalée (une fois).
   const reported = new Set();
@@ -136,7 +138,9 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
       usage: 'bordure',
       version: setting.get('decisions_version', 0) || 0,
       emis_a: now(),
-      blocages: active().filter(d => d.kind === 'bloquer').map(d => ({ cible: d.cible, portee: d.portee, fin: d.fin })),
+      // 1 000 au plus (coût de calcul du Worker) : les décisions prises à la main d'abord, puis les plus récentes.
+      blocages: active().filter(d => d.kind === 'bloquer').sort((a, b) => a.auto - b.auto || b.cree_a - a.cree_a).slice(0, 1000)
+        .map(d => ({ cible: d.cible, portee: d.portee, fin: d.fin })),
     });
     return { payload, signature: crypto.sign(null, Buffer.from(payload), privateKey).toString('base64') };
   }

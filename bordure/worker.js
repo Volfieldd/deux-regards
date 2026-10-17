@@ -1,4 +1,4 @@
-import { acceptEdgeList, blockedScope } from './decisions.js';
+import { acceptEdgeList, blockedScope, routePath } from './decisions.js';
 
 // Capteur en bordure de la Vigie (phase C3, recadrage du 17 octobre 2026, décision D19) : un Cloudflare Worker posé
 // devant l'admin, la connexion et les pages (jamais devant les images), sur l'offre gratuite. Il
@@ -34,14 +34,23 @@ const clean = (v, max) => String(v ?? '').replace(/[^\x20-\x7e]/g, '?').slice(0,
 // Texte signé : le site recompose le même à partir de ce qu'il reçoit (server/securite/bordure.js).
 export const canonical = h => ['v1', h.ts, h.ip, h.method, h.host, h.path, h.asn, h.org, h.pays, h.tls, h.tlsBrut, h.rtt].join('\n');
 
-// Liste des blocages, relue dans KV au plus une fois par minute et par instance du Worker.
+// Liste des blocages, relue dans KV au plus une fois par minute et par instance du Worker ; une liste inchangée n'est
+// pas revérifiée. Liste refusée ou en partie illisible : un point « liste_refusee » / « liste_partielle » (lu par la
+// Vigie, qui le signale), la précédente reste en place tant qu'elle a moins de 24 h.
 async function edgeList(env, now) {
   if (now - cache.at < LIST_TTL) return cache.list;
-  cache = { at: now, list: cache.list, error: null };
+  cache = { ...cache, at: now };
   try {
     const signed = await env.DECISIONS?.get('blocages', { type: 'json', cacheTtl: 60 });
-    cache.list = signed ? await acceptEdgeList(signed, env.DECISIONS_PUBKEY, now) : null;
-  } catch (err) { cache.error = err.message; }       // liste refusée : la précédente reste, sinon aucune
+    const before = cache.list;
+    cache.list = signed ? await acceptEdgeList(signed, env.DECISIONS_PUBKEY, now, cache.list) : null;
+    cache.error = null;
+    if (cache.list && cache.list !== before && cache.list.ignorees) point(env, { indexes: ['bordure'], blobs: ['liste_partielle', '', '', '', '', '', '', '', `${cache.list.ignorees} entrée(s) écartée(s)`], doubles: [1, cache.list.version] });
+  } catch (err) {
+    if (cache.error !== err.message) point(env, { indexes: ['bordure'], blobs: ['liste_refusee', '', '', '', '', '', '', '', String(err.message).slice(0, 120)], doubles: [1, 0] });
+    cache.error = err.message;
+    if (cache.list && now - cache.list.emis_a > 24 * 3600e3) cache.list = null;
+  }
   return cache.list;
 }
 
@@ -55,16 +64,20 @@ export default {
     const headers = new Headers(request.headers);
     for (const k of [...headers.keys()]) if (k.startsWith('x-bordure-')) headers.delete(k);   // jamais d'en-tête venu du visiteur
     const plain = () => fetch(new Request(request, { headers }));
-    if (PASS.test(url.pathname)) return plain();
+    // Dernier recours : DESACTIVE=1 (variable du Worker, effet immédiat) laisse tout passer sans rien bloquer.
+    if (env.DESACTIVE === '1') return plain();
+    // Chemin décodé comme le routeur du site (« /%61dmin » est « /admin ») : pour décider, classer et signer.
+    const path = routePath(url.pathname);
+    if (PASS.test(path)) return plain();
     const now = Date.now();
     const ip = request.headers.get('cf-connecting-ip') || '';
     const cf = request.cf || {};
-    const classe = classOf(url.pathname);
+    const classe = classOf(path);
     let ctx;
     try {
-      const scope = blockedScope(await edgeList(env, now), ip, url.pathname, now);
+      const scope = blockedScope(await edgeList(env, now), ip, path, now);
       ctx = {
-        ts: String(now), ip, method: request.method, host: url.host, path: url.pathname,
+        ts: String(now), ip, method: request.method, host: url.host, path,
         asn: String(Number(cf.asn) || ''), org: encodeURIComponent(clean(cf.asOrganization, 80)), pays: /^[A-Z]{2}$/.test(cf.country || '') ? cf.country : '',
         // Empreinte TLS « grossière » (version et chiffrement négociés ; pas le protocole HTTP, qui passe de HTTP/2 à
         // HTTP/3 pour un même navigateur) ; « brute » (suites proposées et longueur du ClientHello) : plus fine, mais
@@ -81,7 +94,8 @@ export default {
         });
       }
       if (env.BORDURE_KEY) {
-        headers.set('x-bordure-ts', ctx.ts); headers.set('x-bordure-asn', ctx.asn); headers.set('x-bordure-org', ctx.org);
+        // x-bordure-ip : l'adresse signée, pour que le site dise laquelle des deux diffère si la signature échoue.
+        headers.set('x-bordure-ts', ctx.ts); headers.set('x-bordure-ip', ip.slice(0, 64)); headers.set('x-bordure-asn', ctx.asn); headers.set('x-bordure-org', ctx.org);
         headers.set('x-bordure-pays', ctx.pays); headers.set('x-bordure-tls', ctx.tls); headers.set('x-bordure-tls-brut', ctx.tlsBrut);
         headers.set('x-bordure-rtt', ctx.rtt); headers.set('x-bordure-sig', await hmac(env.BORDURE_KEY, canonical(ctx)));
       }
@@ -91,7 +105,7 @@ export default {
       return plain();
     }
     const res = await plain();
-    point(env, { indexes: [ip.slice(0, 96)], blobs: [classe, String(res.status), ctx.pays, ctx.asn, decodeURIComponent(ctx.org), ctx.tls, request.method, firstSegment(url.pathname), ''], doubles: [1, Number(ctx.rtt)] });
+    point(env, { indexes: [ip.slice(0, 96)], blobs: [classe, String(res.status), ctx.pays, ctx.asn, decodeURIComponent(ctx.org), ctx.tls, request.method, firstSegment(path), ''], doubles: [1, Number(ctx.rtt)] });
     return res;
   },
 };

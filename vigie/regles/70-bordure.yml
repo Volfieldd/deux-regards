@@ -26,7 +26,7 @@ detection:
 level: medium
 vigie: { cas: DS15, entite: { kind: ip, champ: ip }, points: 3 }
 ---
-title: Admin ou connexion depuis un opérateur réseau jamais vu en bordure
+title: Page de l'admin servie depuis un opérateur réseau jamais vu en bordure
 name: bordure_nouvel_operateur
 id: a2ac631c-5957-446b-99d9-aa78c8858766
 author: Nicephos (Vigie)

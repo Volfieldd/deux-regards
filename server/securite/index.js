@@ -324,6 +324,7 @@ export function createSecurite({ url, key, storageDir, log, send = null, now = D
         const e = last.get(k) || { at: 0, n: 0 };
         e.n += 1;
         if (t - e.at < 60e3) { last.set(k, e); return null; }
+        if (!last.has(k) && last.size >= 10_000) last.delete(last.keys().next().value);   // clés bornées (réseaux)
         last.set(k, { at: t, n: 0 });
         return securite.emit(type, { ...opts, detail: { ...(opts.detail || {}), occurrences: e.n } });
       };

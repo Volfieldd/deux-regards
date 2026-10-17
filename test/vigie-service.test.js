@@ -277,7 +277,7 @@ test('bout en bout : le site envoie ses lots à une vraie Vigie et applique ses 
 test('site : VIGIE_APPLIQUER=0 lit les décisions sans les appliquer ; une liste qui bloquerait tout est refusée', async t => {
   const c = await setup(t, { seeded: true, env: { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64, VIGIE_APPLIQUER: '0' }, vigieOptions: { send: async () => {}, timers: false, pollDecisions: false } });
   const sign = payload => ({ payload, signature: crypto.sign(null, Buffer.from(payload), VIGIE_KEYS.privateKey).toString('base64') });
-  const p = { version: 1, emis_a: Date.now(), blocages: [{ cible: '192.0.2.0/24', portee: 'tout', fin: Date.now() + 3600e3 }], sessions: [], comptes: [], gels: [], verrouillage: null };
+  const p = { usage: 'site', version: 1, emis_a: Date.now(), blocages: [{ cible: '192.0.2.0/24', portee: 'tout', fin: Date.now() + 3600e3 }], sessions: [], comptes: [], gels: [], verrouillage: null };
   c.app.decisions.accept(sign(JSON.stringify(p)));
   assert.equal((await c.app.inject({ url: '/', remoteAddress: '192.0.2.9' })).statusCode, 200);
   assert.throws(() => c.app.decisions.accept(sign(JSON.stringify({ ...p, emis_a: Date.now() + 1, blocages: [{ cible: '0.0.0.0/0', portee: 'tout', fin: Date.now() + 1 }] }))), /réseau refusé/);
@@ -336,7 +336,7 @@ test('revue B : jamais tout le monde — IPv4 dans IPv6, boucle locale, plus d�
   v.decisions.create({ kind: 'bloquer', cible: '10.0.0.0/8', duree: '1h', par: 'test' });
   assert.throws(() => v.decisions.create({ kind: 'bloquer', cible: '11.0.0.0/8', duree: '1h', par: 'test' }), /trop d’adresses/);
   const c = await setup(t, { seeded: true, env: { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 }, vigieOptions: { send: async () => {}, timers: false, pollDecisions: false } });
-  const sign = p => ({ payload: JSON.stringify({ version: 1, emis_a: Date.now(), blocages: [], sessions: [], comptes: [], gels: [], verrouillage: null, ...p }), signature: '' });
+  const sign = p => ({ payload: JSON.stringify({ usage: 'site', version: 1, emis_a: Date.now(), blocages: [], sessions: [], comptes: [], gels: [], verrouillage: null, ...p }), signature: '' });
   const signed = p => { const s = sign(p); s.signature = crypto.sign(null, Buffer.from(s.payload), VIGIE_KEYS.privateKey).toString('base64'); return s; };
   const fin = Date.now() + 3600e3;
   assert.throws(() => c.app.decisions.accept(signed({ blocages: [{ cible: '::ffff:0:0/96', portee: 'tout', fin }] })), /réseau refusé/);
@@ -354,7 +354,7 @@ test('revue B : adresse encodée (/%61dmin, /%61uth) ne contourne ni le verrouil
   const c = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: TOKEN, VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 }, vigieOptions: { send: async () => {}, timers: false, pollDecisions: false } });
   const res = await c.app.inject({ method: 'POST', url: '/auth/local', remoteAddress: '192.0.2.5', payload: { token: TOKEN, author: 'julien' } });
   const cookies = Object.fromEntries(res.cookies.filter(x => x.value).map(x => [x.name, x.value]));
-  const signed = p => { const payload = JSON.stringify({ version: 1, emis_a: Date.now(), blocages: [], sessions: [], comptes: [], gels: [], verrouillage: null, ...p }); return { payload, signature: crypto.sign(null, Buffer.from(payload), VIGIE_KEYS.privateKey).toString('base64') }; };
+  const signed = p => { const payload = JSON.stringify({ usage: 'site', version: 1, emis_a: Date.now(), blocages: [], sessions: [], comptes: [], gels: [], verrouillage: null, ...p }); return { payload, signature: crypto.sign(null, Buffer.from(payload), VIGIE_KEYS.privateKey).toString('base64') }; };
   const fin = Date.now() + 3600e3;
   c.app.decisions.accept(signed({ version: 1, blocages: [{ cible: '198.51.100.0/24', portee: 'auth', fin }, { cible: '203.0.113.0/24', portee: 'admin', fin }] }));
   for (const url of ['/auth/login', '/%61uth/login', '//auth/login']) assert.equal((await c.app.inject({ url, remoteAddress: '198.51.100.7' })).statusCode, 403, url);
@@ -371,7 +371,7 @@ test('revue B : adresse encodée (/%61dmin, /%61uth) ne contourne ni le verrouil
 
 test('revue B : ADMIN_SUBS jamais gelé ni tenu dehors ; ligne de commande sous un utilisateur sans nom ; interrupteur jamais éteint sans durée', async t => {
   const c = await setup(t, { seeded: true, env: { ADMIN_SUBS: 'proprietaire', VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 }, vigieOptions: { send: async () => {}, timers: false, pollDecisions: false } });
-  const payload = JSON.stringify({ version: 1, emis_a: Date.now(), blocages: [], sessions: [], comptes: [], gels: [{ sub: 'proprietaire', fin: Date.now() + 3600e3 }], verrouillage: { fin: Date.now() + 3600e3, comptes: ['autre'], adresses: [] } });
+  const payload = JSON.stringify({ usage: 'site', version: 1, emis_a: Date.now(), blocages: [], sessions: [], comptes: [], gels: [{ sub: 'proprietaire', fin: Date.now() + 3600e3 }], verrouillage: { fin: Date.now() + 3600e3, comptes: ['autre'], adresses: [] } });
   c.app.decisions.accept({ payload, signature: crypto.sign(null, Buffer.from(payload), VIGIE_KEYS.privateKey).toString('base64') });
   assert.equal(c.app.decisions.frozen('proprietaire'), false);
   assert.equal(c.app.decisions.lockAllows('proprietaire', '192.0.2.1'), true);

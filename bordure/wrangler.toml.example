@@ -15,7 +15,13 @@ routes = [
   { pattern = "nicephos.art/*", zone_name = "nicephos.art" },
 ]
 
+# Journaux du Worker coupés : ils garderaient l'adresse complète des pages (dont « /pour-vous/<jeton> »).
+[observability]
+enabled = false
+
 [vars]
+# Dernier recours (effet immédiat après « wrangler deploy ») : "1" laisse tout passer sans rien bloquer ni compter.
+DESACTIVE = "0"
 # Clé publique des décisions (la même que VIGIE_DECISIONS_PUBKEY du site) : publique, sans risque ici.
 DECISIONS_PUBKEY = "REMPLACER-PAR-VIGIE_DECISIONS_PUBKEY"
 
