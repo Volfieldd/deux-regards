@@ -1,0 +1,185 @@
+/* =====================================================================================================
+   Jetons de la direction artistique commune (MQ-00) : la seule source des couleurs, tailles, espaces,
+   rayons et focus des vingt maquettes. Aucune maquette ne redéclare ces variables : elle charge ce fichier.
+
+   Ordre de chargement, site public :  site.css (main) → tokens.css → public.css → annotations.css
+   Ordre de chargement, admin       :  admin.css (main) → tokens.css → admin-plus.css → annotations.css
+
+   Correspondance avec le code :
+   - Atelier = valeurs par défaut de public/css/site.css (:root, sans classe sur <html>) ;
+   - Nicephos nuit et jour = public/themes/nicephos.css (<html class="theme-nicephos mode-nuit|mode-jour">) ;
+   - admin clair et « Chambre noire » = public/admin/admin.css (<html data-theme="light|dark">, sinon le système).
+   Les couleurs reprises du code gardent leur valeur ; les ajouts sont marqués « nouveau ».
+   Contrastes mesurés (WCAG 2.2, luminance relative) sur le fond du thème : voir MQ-00, section Couleurs.
+   ===================================================================================================== */
+
+/* ---------- 1. Échelles communes (tous thèmes) ---------- */
+:root {
+  /* Espacement : grille de 8 px. Le demi-pas (4 px) ne sert qu'à aligner une icône sur un texte. */
+  --esp-demi: 4px;
+  --esp-1: 8px;  --esp-2: 16px; --esp-3: 24px; --esp-4: 32px; --esp-5: 40px;
+  --esp-6: 48px; --esp-8: 64px; --esp-10: 80px; --esp-12: 96px; --esp-16: 128px;
+
+  /* Marges latérales du site : 16 px (≤ 359), 24 (360-767), 40 (768-1023), 56 (1024-1279), 72 (≥ 1280).
+     Remplace le clamp(16px, 5vw, 72px) de site.css, qui tombait hors de la grille (20,6 px sur un Pixel 7). */
+  --gut: 16px;
+
+  /* Familles. Cormorant n'est chargée qu'en Atelier ; Plex Mono ne sert qu'aux données (voir public.css). */
+  --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+
+  /* Échelle typographique du site public : 7 tailles, rien sous 13 px. */
+  --t-meta: 13px;     /* méta d'un cartel, aide d'un champ, pied de page secondaire */
+  --t-petit: 14px;    /* menus, boutons secondaires, pied de page */
+  --t-texte: 16px;    /* texte courant, champs (16 px : pas de zoom forcé sur iOS) */
+  --t-prose: 18px;    /* lecture longue (billets, À propos) */
+  --t-titre-3: 20px;  /* intertitre H3, titre d'un cartel en grand format */
+  --t-titre-2: clamp(24px, 1.2vw + 18px, 32px);
+  --t-titre-1: clamp(32px, 2.2vw + 22px, 52px);
+  --t-affiche: clamp(36px, 3.6vw + 22px, 72px);
+  --i-serre: 1.12;    /* interlignage des titres (≥ 1,1 : les accents ne touchent plus la ligne du dessus) */
+  --i-texte: 1.6;
+  --capitales: .2em;  /* espacement des étiquettes en capitales (3 mots au plus) */
+  --marque: .42em;    /* espacement du nom « NICEPHOS » (repris de nicephos.css) */
+
+  /* Rayons : le site public est à angles vifs (le trait du logo) ; l'admin garde ses rayons. */
+  --r-site: 0;
+  --r-admin: 9px;          /* boutons, champs, pastilles carrées */
+  --r-admin-panneau: 14px; /* panneaux, dialogue, message d'action */
+
+  /* Focus : un seul dessin. Public : 2 px à 3 px du bord ; admin : 2 px à 2 px. */
+  --focus-l: 2px;
+  --focus-o: 3px;
+
+  /* Cibles : 24 px au moins au pointeur fin, 44 px au toucher, 48 px pour l'action d'un tunnel d'achat. */
+  --cible: 44px;
+  --cible-tunnel: 48px;
+}
+@media (min-width: 360px)  { :root { --gut: 24px; } }
+@media (min-width: 768px)  { :root { --gut: 40px; } }
+@media (min-width: 1024px) { :root { --gut: 56px; } }
+@media (min-width: 1280px) { :root { --gut: 72px; } }
+
+/* ---------- 2. Site public : trois thèmes ---------- */
+
+/* Atelier (thème d'origine, défaut du code) : papier chaud, Cormorant en italique pour les titres. */
+/* (color-scheme reste celui de site.css ou d'admin.css sur :root ; il n'est posé ici que sur un bloc .theme-atelier.) */
+.theme-atelier { color-scheme: light; }
+:root, .theme-atelier {
+  --paper: #f6f4ef;
+  --ink: #1d1c1a;       /* 15,5:1 */
+  --mute: #6b665d;      /* 5,2:1 */
+  --prose: #5f5a52;     /* 6,2:1 */
+  --rule: #dcd7cd;      /* filet décoratif : jamais seul porteur d'information */
+  --field: #8a847a;     /* bord des champs et des cases : 3,4:1 (WCAG 1.4.11) */
+  --frame: #e7e3da;     /* réserve d'image pendant le chargement, jamais un passe-partout visible */
+  --safelight: #b5523b; /* lampe inactinique : état actif seulement, 4,5:1 */
+  --on-accent: #f6f4ef;
+  --error: #a12a2a;     /* nouveau : 6,6:1, toujours avec ⚠ et le mot « Erreur » */
+  --ok: #2f6b3a;        /* nouveau : 5,8:1, toujours avec ✓ */
+  --dark: #0d0d0e; --dark-ink: #ecebe6; --dark-mute: #9b988f; --dark-rule: rgba(236, 235, 230, .3);
+  --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --display-style: italic;
+}
+
+/* Nicephos (thème de production) : Jost seul, aucune italique, sable pour l'état actif. */
+.theme-nicephos {
+  --serif: Jost, 'Helvetica Neue', Arial, sans-serif;
+  --display-style: normal;
+  --dark: #050505; --dark-ink: #f0efeb; --dark-mute: #b4b2ac; --dark-rule: rgba(240, 239, 235, .28);
+}
+.theme-nicephos.mode-nuit, .mode-nuit {
+  color-scheme: dark;
+  --paper: #0b0b0b;
+  --ink: #f0efeb;       /* 17,1:1 */
+  --mute: #a19f99;      /* 7,4:1 */
+  --prose: #cfcdc7;     /* 12,4:1 */
+  --rule: #2c2c2b;
+  --field: #6e6c67;     /* 3,8:1 */
+  --frame: #141414;
+  --safelight: #cbb68b; /* sable, 9,9:1 */
+  --on-accent: #0b0b0b;
+  --error: #f08c78;     /* nouveau : corail, 8,2:1 (le sable n'est plus l'erreur) */
+  --ok: #9fd3a8;        /* nouveau : 11,6:1 */
+}
+.theme-nicephos.mode-jour, .mode-jour {
+  color-scheme: light;
+  --paper: #fbfbf9;
+  --ink: #111111;       /* 18,2:1 */
+  --mute: #5e5d59;      /* 6,4:1 */
+  --prose: #3a3936;     /* 11,1:1 */
+  --rule: #dddcd7;
+  --field: #8a8985;     /* 3,4:1 */
+  --frame: #efeeea;
+  --safelight: #7d6532; /* 5,4:1 */
+  --on-accent: #fbfbf9;
+  --error: #a8412b;     /* nouveau : brique, 5,9:1 */
+  --ok: #2f6b3a;        /* nouveau : 6,2:1 */
+}
+/* Les classes de mode se posent aussi sur un bloc : une planche nuit dans une page jour (MQ-00, aperçus). */
+.mode-nuit, .mode-jour, .theme-atelier { background-color: var(--paper); color: var(--ink); }
+
+/* Fond noir de la visionneuse, quel que soit le thème (body.dark de site.css). */
+body.dark, .sombre {
+  color-scheme: dark;
+  --paper: var(--dark); --ink: var(--dark-ink); --mute: var(--dark-mute); --prose: #cfcdc7;
+  --rule: #2c2c2b; --field: #6e6c67; --frame: #141414; --on-accent: var(--dark);
+  --safelight: #cbb68b; --error: #f08c78; --ok: #9fd3a8;
+}
+
+/* ---------- 3. Administration : clair et « Chambre noire » ---------- */
+/* Valeurs identiques à public/admin/admin.css (main, 16 oct. 2026) ; ajouts : états, échelle, toast.
+   Portée : la classe .admin (posée sur <body> par views/admin/layout.eta). */
+.admin {
+  color-scheme: dark;
+  --bg: #0b0b0c; --s1: #121214; --s2: #18181b; --s3: #202024;
+  --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.13); --field-line: #7a766e;
+  --ink: #eeece7; --ink2: #a9a59c; --ink3: #8a857c;           /* 15,8 · 7,6 · 5,1:1 sur --s1 */
+  --accent: #f0a94c; --on-accent: #1b1206; --accent-ink: #f0a94c; --accent-soft: rgba(240,169,76,.14);
+  --ok: #56b4e9; --warn: #f0e442; --danger: #f0605a; --on-danger: #1b0a04; --danger-soft: rgba(240,96,90,.13);
+  --shadow: 0 18px 40px rgba(0,0,0,.45); --scrim: rgba(5,5,6,.62); --photo-bg: #000;
+  /* Danger (nouveau, passe 2 du 16 oct.) : main écrit #e8743b, un orangé trop voisin de l'ambre du bouton principal (#f0a94c :
+     19° contre 36° de teinte, 1,5:1 entre eux). #f0605a est un rouge (2°), plus sombre que l'ambre (1,6:1 entre eux) : 5,8:1 sur
+     --s1, 6,0:1 avec --on-danger. Le bouton danger plein porte en plus son icône (✕ ou corbeille) : la teinte n'est jamais seule. */
+}
+[data-theme="light"] .admin, .admin[data-theme="light"], .admin .clair {
+  color-scheme: light;
+  --bg: #f6f4ef; --s1: #ffffff; --s2: #f1eee8; --s3: #e8e4dc;
+  --line: rgba(20,18,14,.08); --line2: rgba(20,18,14,.15); --field-line: #857f75;
+  --ink: #1b1a17; --ink2: #55514a; --ink3: #6b665d;           /* 17,4 · 7,9 · 5,7:1 sur --s1 */
+  --accent: #f0a94c; --on-accent: #1b1206; --accent-ink: #9a5b0c; --accent-soft: rgba(240,169,76,.20);
+  --ok: #0067a3; --warn: #6e6000; --danger: #b2410a; --on-danger: #ffffff; --danger-soft: rgba(178,65,10,.08);
+  --shadow: 0 18px 40px rgba(60,40,10,.16); --scrim: rgba(30,26,20,.38); --photo-bg: #e8e4dc;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) .admin:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #f6f4ef; --s1: #ffffff; --s2: #f1eee8; --s3: #e8e4dc;
+    --line: rgba(20,18,14,.08); --line2: rgba(20,18,14,.15); --field-line: #857f75;
+    --ink: #1b1a17; --ink2: #55514a; --ink3: #6b665d;
+    --accent-ink: #9a5b0c; --accent-soft: rgba(240,169,76,.20);
+    --ok: #0067a3; --warn: #6e6000; --danger: #b2410a; --on-danger: #ffffff; --danger-soft: rgba(178,65,10,.08);
+    --shadow: 0 18px 40px rgba(60,40,10,.16); --scrim: rgba(30,26,20,.38); --photo-bg: #e8e4dc;
+  }
+}
+.admin {
+  /* États (nouveau) : le symbole porte le sens, la couleur le double, le mot le dit. Jamais l'un sans les autres. */
+  --st-afaire: var(--ink2);     /* ○ pas commencé : brouillon, non payée, pas encore envoyé */
+  --st-encours: var(--accent-ink); /* ◐ en cours, attend quelqu'un : proposée, payée à préparer, expédiée */
+  --st-abouti: var(--ok);       /* ● abouti : publiée, active, livrée */
+  --st-attention: var(--warn);  /* ▲ demande votre attention : à vérifier, expire bientôt, litige */
+  --st-arret: var(--danger);    /* ✕ arrêté : refusée, révoquée, annulée, remboursée */
+
+  /* Échelle typographique de l'admin (Jost seul) : rien sous 12 px, touches de clavier comprises. */
+  --at-min: 12px;   /* méta, compteurs, kbd */
+  --at-petit: 13px; /* aide, libellés */
+  --at-texte: 14px; /* texte courant, champs */
+  --at-h3: 15px;
+  --at-h2: 18px;    /* 500 */
+  --at-h1: 34px;    /* 300 ; 28 px au téléphone */
+
+  /* Lignes du menu : 30 px au bureau (32 dans main : les deux pixels font tenir Nouveautés et la version dans 900 px), 44 px au toucher. */
+  --ligne-menu: 30px;
+  --barre-basse: 74px; /* barre d'onglets du téléphone (admin.css) */
+}
+@media (max-width: 720px), (pointer: coarse) { .admin { --ligne-menu: 44px; } }

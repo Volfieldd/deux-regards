@@ -1,297 +1,327 @@
 <!doctype html>
-<html lang="fr" class="mode-atelier pg-bonjour">
+<html lang="fr" class="theme-nicephos mode-nuit">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light dark">
-<title>Erreur — 2 points à corriger · Je vous ai photographié · Nicephos</title>
-<meta name="description" content="Maquette MQ-05 (audit du 16 octobre 2026) : formulaire « Bonjour » de la personne photographiée, consentement corrigé.">
-<meta name="robots" content="noindex">
+<title>Erreur : 2 points à corriger · Je vous ai photographié · Nicephos (maquette MQ-05)</title>
+<meta name="description" content="Vous avez été photographié par Sébastien ou Julien : recevez la photo, acceptez ou refusez sa publication, exercez vos droits sur vos données.">
 <link rel="stylesheet" href="_commun/site.css">
-<link rel="stylesheet" href="_commun/site-entete.css">
-<style>
-/* ===== Thème « Nicephos » (repris de public/themes/nicephos.css) + corrections proposées ===== */
-.theme-nicephos { --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
-  --display-style: normal; --dark: #050505; --dark-ink: #f0efeb; --dark-mute: #b4b2ac; --dark-rule: rgba(240,239,235,.28); }
-.mode-nuit { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
-  --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
-.mode-jour, .mode-auto { color-scheme: light; --paper: #fbfbf9; --ink: #111111; --mute: #5e5d59; --prose: #3a3936; --rule: #dddcd7;
-  --frame: #efeeea; --safelight: #7d6532; --on-accent: #fbfbf9; --field: #5e5d59; --error: #a8412b; --ok: #2f6b3a; }
-@media (prefers-color-scheme: dark) {
-  .mode-auto { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b;
-    --frame: #171717; --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --ok: #9fd3a8; }
-}
-/* Thème Atelier (valeurs par défaut de site.css) : seules les couleurs d'erreur et de champ sont ajoutées. */
-.mode-atelier { --field: #6b665d; --error: #9e3a22; --ok: #2f6b3a; --on-accent: #f6f4ef; }
-
-/* Corrections typographiques (UX-F-29) et de comportement (UX-F-34) appliquées à toutes les maquettes */
-body { font-weight: 400; position: relative; }
-.theme-nicephos body { font-weight: 400; }
-.mono { font-size: 13px; }
-.eyebrow { font-size: 12px; }
-img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; -webkit-user-drag: auto; }
-:focus-visible, .is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
-.u, .prose a, .txt a { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
-.u:hover, .prose a:hover, .txt a:hover { text-decoration-thickness: 2px; }
-.arrow { display: inline-block; }
-.wrap { padding-inline: max(var(--gut), env(safe-area-inset-left)) max(var(--gut), env(safe-area-inset-right)); }
-
-/* Lien d’évitement, en-tête et pied de page : voir _commun/site-entete.css */
-
-/* Annotations : voir _commun/annotations.css (gabarit commun) */
-.site-tools li, .site-nav li { display: flex; align-items: center; }
-@media (min-width: 761px) { .menu-btn + .pin { display: none; } }
-
-/* ===== Composants communs des maquettes correctives du site public (MQ-02 à MQ-06, MQ-15) ===== */
-html { background: var(--paper); }
-body { background: var(--paper); color: var(--ink); }
-.mode-nuit, .mode-jour, .mode-atelier { --err: var(--error); }
-/* Fil d'Ariane en mono, au-dessus du H1 (UX-F-06, Opquast 156) */
-.ariane ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; margin: 0; padding: 8px 0 0; list-style: none; font: 400 13px/1.4 var(--mono); color: var(--mute); }
-.ariane li + li::before { content: '›' / ''; margin-right: 10px; }
-.ariane a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
-.ariane [aria-current] { color: var(--mute); }
-/* Boutons : un seul bouton plein par écran (B&S 1.2.2) */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 26px; border: 1px solid var(--ink);
-  background: var(--ink); color: var(--paper); font: 500 15px/1.2 var(--sans); letter-spacing: .03em; cursor: pointer; text-align: center; }
-.btn-2 { background: transparent; color: var(--ink); font-weight: 400; border-color: var(--field); }
-.btn-s { min-height: 44px; padding: 0 16px; font-size: 14px; }
-/* Champs : filet en --field (5,2:1 en Atelier, 7,4:1 en nuit), 2 px au focus et en erreur (UX-F-04) */
-.f-champ { display: grid; gap: 6px; align-content: start; }
-.f-champ > label, .f-l { font: 500 15px/1.4 var(--sans); color: var(--ink); }
-.f-q { font-weight: 400; color: var(--mute); }
-.f-aide { margin: 0; font-size: 14px; line-height: 1.5; color: var(--mute); }
-.f-input { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--field); border-radius: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.4 var(--sans); }
-textarea.f-input { min-height: 120px; resize: vertical; }
-.f-input:focus, .f-input.is-focus { outline: 2px solid var(--ink); outline-offset: 2px; }
-.f-input[aria-invalid="true"] { border: 2px solid var(--err); }
-.f-err { display: flex; gap: 8px; margin: 0; color: var(--err); font: 500 14.5px/1.45 var(--sans); }
-.f-err { display: block; }
-.f-err::before { margin-right: 8px; }
-.f-err-p { font-weight: 600; }
-.f-err::before { content: '⚠' / ''; }
-fieldset.f-grp { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 10px; }
-fieldset.f-grp > legend { padding: 0; margin-bottom: 8px; font: 500 15px/1.4 var(--sans); color: var(--ink); }
-.f-opt { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 10px 0; color: var(--ink); font-size: 15.5px; line-height: 1.4; cursor: pointer; }
-.f-opt input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--ink); }
-.f-opt input:focus-visible, .f-opt input.is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
-.f-opt small { display: block; color: var(--mute); font-size: 14px; }
-.f-resume { margin: 0 0 28px; padding: 18px 20px; border: 2px solid var(--err); background: var(--paper); }
-.f-resume:focus { outline: 2px solid var(--ink); outline-offset: 3px; }
-.f-resume h2 { margin: 0 0 8px; font: 500 18px/1.3 var(--sans); color: var(--ink); }
-.f-resume ul { margin: 0; padding-left: 20px; }
-.f-resume a { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-/* Cartel : titre, auteur, lieu, date ; mono pour les références */
-.cartel-t { margin: 0; font: 400 22px/1.3 var(--sans); color: var(--ink); }
-.cartel-m { margin: 0; font: 400 13px/1.6 var(--mono); color: var(--mute); }
-.cartel-m a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--mute); }
-.eyb { margin: 0; font: 400 12px/1.4 var(--sans); letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
-.pin-in2 { margin-left: 6px; }
-.mq-state > .mq-label .pin { color: #111; letter-spacing: 0; text-transform: none; font-weight: 600; }
-
-/* ===== MQ-05 : formulaire « Bonjour » =====
-   Bureau : thème Atelier (papier). Téléphone : thème Nicephos — nuit, comme le verra la personne qui scanne sa carte. */
-.mode-atelier { --field: #6b665d; --error: #9e3a22; --err: #9e3a22; --prose: #4a463f; }
-@media (max-width: 760px) {
-  :root.pg-bonjour { color-scheme: dark; --paper: #0b0b0b; --ink: #f0efeb; --mute: #a19f99; --prose: #cfcdc7; --rule: #2c2c2b; --frame: #171717;
-    --safelight: #cbb68b; --on-accent: #0b0b0b; --field: #a19f99; --error: #f08c78; --err: #f08c78; --serif: Jost, 'Helvetica Neue', Arial, sans-serif; --display-style: normal; }
-}
-.bj { max-width: 760px; padding-top: clamp(28px, 4vw, 56px); }
-.bj .eyb { margin-bottom: 6px; }
-.bj h1 { margin: 0; font: 400 clamp(40px, 5vw, 64px)/1.05 var(--serif); font-style: var(--display-style); }
-.bj .intro { margin: 14px 0 28px; font-size: 17px; line-height: 1.6; color: var(--prose); max-width: 60ch; }
-.bj-form { display: grid; gap: 40px; }
-.bj-form > fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: 14px; min-width: 0; }
-.bj-form > fieldset > legend { width: 100%; padding: 0 0 10px; margin-bottom: 6px; border-bottom: 1px solid var(--ink); font: 400 26px/1.2 var(--serif); font-style: var(--display-style); }
-.bj-form > fieldset > legend .f-q { font: 400 14px/1 var(--sans); font-style: normal; }
-.bj-sub { margin: 0; padding: 0; border: 0; display: grid; gap: 0; }
-.bj-sub > legend { padding: 0 0 4px; font: 500 15px/1.4 var(--sans); color: var(--ink); }
-.bj-scopes { display: flex; flex-wrap: wrap; gap: 0 28px; padding-left: 34px; }
-.bj-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 16px 24px; }
-.bj-sum { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--ink); cursor: pointer; list-style: none; font-size: 15px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--mute); }
-.bj-sum::-webkit-details-marker { display: none; }
-.bj-sum::before { content: '' / ''; width: 8px; height: 8px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); margin: 0 4px 0 2px; }
-details[open] > .bj-sum::before { transform: rotate(45deg); }
-.bj-ok { margin: 0; padding: 10px 14px; border: 1px solid var(--field); font: 400 13px/1.5 var(--mono); color: var(--ink); }
-.bj-priv { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--prose); }
-.bj-priv a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 32px; }
-.bj-send { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
-.f-resume { border-color: var(--err); }
-.f-resume.is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
-.f-resume h2 { display: flex; align-items: center; gap: 10px; }
-.f-resume h2::before { content: '⚠' / ''; color: var(--err); }
-/* États côte à côte */
-.etats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
-.etats > div { padding: 20px 22px 26px; border-left: 1px dashed var(--field); display: grid; gap: 12px; align-content: start; }
-.etats > div:first-child { border-left: 0; }
-.etats h3 { margin: 0 0 4px; font: 500 13px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
-.etats .f-opt { font-size: 15px; }
-.quota { display: grid; gap: 6px; margin: 0; padding: 16px 18px; border: 1px solid var(--field); border-left: 4px solid var(--ink); }
-.quota p { margin: 0; }
-.quota a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-.mq-state .in { padding: 20px 22px 24px; }
-.mq-state.light-note { }
-@media (max-width: 760px) {
-  .bj h1 { font-size: 40px; }
-  .bj .intro { font-size: 16px; }
-  .bj-form > fieldset > legend { font-size: 23px; }
-  .bj-scopes { padding-left: 34px; flex-direction: column; }
-  .etats { grid-template-columns: 1fr; }
-  .etats > div { border-left: 0; border-top: 1px dashed var(--field); }
-  .etats > div:first-child { border-top: 0; }
-}
-</style>
+<link rel="stylesheet" href="_commun/tokens.css">
+<link rel="stylesheet" href="_commun/public.css">
 <link rel="stylesheet" href="_commun/annotations.css">
+<style>
+/* MQ-05 : mise en page de /bonjour, et elle seule. Composants de la planche (_commun/public.css : formulaire, cases dessinées,
+   résumé en <section> titrée, messages, bloc, dépliant, sous-choix, champ révélé, duo, envoi, note sur les données, relevé .def).
+   Aucun jeton redéclaré. */
+.bj { display: grid; gap: var(--esp-6); padding-block: var(--esp-6) 0; }
+.bj-intro { display: grid; gap: var(--esp-2); align-content: start; }
+.bj-ensuite { align-self: start; padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+.bj-ensuite h2 { margin: 0 0 var(--esp-2); font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.bj-ensuite ol { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--esp-2); counter-reset: e; }
+.bj-ensuite li { counter-increment: e; display: grid; grid-template-columns: 2em minmax(0, 1fr); color: var(--prose); line-height: 1.55; }
+.bj-ensuite li::before { content: counter(e) / ''; color: var(--mute); font-variant-numeric: tabular-nums; }
+.bj-ensuite p { margin: var(--esp-3) 0 0; color: var(--mute); font-size: var(--t-petit); }
+@media (min-width: 1024px) {
+  .bj { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); grid-template-rows: auto 1fr; grid-template-areas: "intro form" "ensuite form"; column-gap: var(--esp-8); row-gap: var(--esp-6); align-items: start; }
+  .bj-intro { grid-area: intro; } .bj .form { grid-area: form; } .bj-ensuite { grid-area: ensuite; }
+}
+.form .groupe + .groupe, .form .champ + .groupe { margin-top: 0; }
+/* Autres états : la page de remerciement dans un cadre de téléphone */
+.mq-ecran-in > .titre-page { justify-self: start; font-size: var(--t-titre-2); }
+</style>
 </head>
 <body>
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
 <a class="skip" href="#contenu">Aller au contenu</a>
-<header class="site-h wrap">
-  <a class="wordmark" href="#">Nicephos</a>
-  <nav class="site-nav" id="menu-principal" aria-label="Menu principal"><ul role="list"><li><a href="#">Séries</a></li><li><a href="#">Galerie</a></li><li><a href="#">Carte</a></li><li><a href="#">Carnets</a></li><li><a href="#">À propos</a></li><li class="soft"><a href="#">Tirages</a></li></ul></nav>
-  <ul class="site-tools" role="list">
-    <li><a class="tool" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="tool-t">Rechercher</span></a></li>
-    <li><details class="lang"><summary><span class="sr-only">Langue : </span>FR <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
-      <ul role="list"><li><a href="#" lang="fr" hreflang="fr" aria-current="true"><span>Français</span></a></li><li><a href="#" lang="en" hreflang="en">English</a></li><li><a href="#" lang="de" hreflang="de">Deutsch</a></li></ul></details></li>
-    <li><button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-principal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button></li>
-  </ul>
+<header class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Navigation">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – Langue : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Langue">
+          <li><a href="/langue/fr?vers=%2Fbonjour" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2Fbonjour" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2Fbonjour" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Navigation (téléphone)">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
 </header>
 <main id="contenu" class="wrap">
-  <div class="bj">
-    <p class="eyb">Je vous ai photographié</p>
-    <h1>Bonjour&#8239;!</h1>
-    <p class="intro">Vous avez croisé Julien et il vous a peut-être pris en photo. Cette photo vous concerne&#8239;: vous décidez de ce qu’elle devient.</p>
-
-    <div class="f-resume is-focus" id="erreurs" tabindex="-1" role="alert" aria-labelledby="err-h" style="position:relative">
-      <h2 id="err-h">2 points à corriger</h2>
-      <ul>
-        <li><a href="#email">Indiquez votre e-mail pour recevoir la photo</a></li>
-        <li><a href="#age-majeur">Indiquez si vous avez 18 ans</a></li>
-      </ul>
-      <span class="pin pin-abs" style="top:-12px; right:-12px" aria-hidden="true">1</span>
-      <span class="pin pin-abs" style="bottom:12px; right:16px" aria-hidden="true">2</span>
-    </div>
-
-    <form class="bj-form" action="#" method="post" novalidate>
-      <fieldset>
-        <legend>Votre carte</legend>
-        <div class="f-champ">
-          <label for="ref">Référence, comme sur la carte (J-0142)</label>
-          <input class="f-input" id="ref" name="ref" value="J-0142" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" style="max-width:260px">
-        </div>
-        <p class="bj-ok">J-0142 · carte de Julien&#8239;: merci de l’avoir gardée.</p>
-        <details><summary class="bj-sum">Pas de carte&#8239;? Dites-nous quand et où</summary><p class="f-aide">Date, heure et lieu suffisent pour que nous retrouvions la photo.</p></details>
-      </fieldset>
-
-      <fieldset aria-describedby="age-err" style="position:relative">
-        <legend>Votre âge <span class="f-q">(obligatoire)</span><span class="pin pin-in" aria-hidden="true">5</span></legend>
-        <p class="f-err" id="age-err"><span class="f-err-p">Erreur&#8239;:</span> Indiquez si vous avez 18 ans ou plus.</p>
-        <label class="f-opt"><input type="radio" name="age" value="majeur" id="age-majeur" aria-invalid="true" required> J’ai 18 ans ou plus</label>
-        <label class="f-opt"><input type="radio" name="age" value="mineur" aria-invalid="true"> <span>J’ai moins de 18 ans&#8239;: un parent remplit ce formulaire avec moi</span></label>
-        <div class="f-champ" style="padding-left:34px">
-          <label for="parent">Nom du parent <span class="f-q">(obligatoire si moins de 18 ans)</span></label>
-          <input class="f-input" id="parent" name="parent" autocomplete="off" style="max-width:420px">
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Ce que vous souhaitez</legend>
-        <label class="f-opt"><input type="checkbox" name="wants_photo" checked> Recevoir la photo</label>
-        <fieldset class="bj-sub">
-          <legend>Publication de la photo</legend>
-          <label class="f-opt"><input type="radio" name="decision" value=""> Je ne sais pas encore</label>
-          <label class="f-opt"><input type="radio" name="decision" value="accord" checked> J’accepte qu’elle soit publiée&#8239;:</label>
-          <div class="bj-scopes">
-            <label class="f-opt"><input type="checkbox" name="scope_site" checked> sur le site</label>
-            <label class="f-opt"><input type="checkbox" name="scope_instagram"> sur Instagram</label>
-          </div>
-          <label class="f-opt"><input type="radio" name="decision" value="refus"> Je refuse toute publication</label>
-        </fieldset>
-      </fieldset>
-
-      <fieldset>
-        <legend>Vos coordonnées<span class="pin pin-in" aria-hidden="true">6</span></legend>
-        <div class="bj-row">
-          <div class="f-champ" style="position:relative">
-            <label for="email">Votre e-mail <span class="f-q">(nécessaire pour recevoir la photo ou donner votre accord)</span></label>
-            <input class="f-input" type="email" id="email" name="email" autocomplete="email" aria-invalid="true" aria-describedby="email-err" required>
-            <p class="f-err" id="email-err"><span class="f-err-p">Erreur&#8239;:</span> Indiquez votre e-mail pour recevoir la photo.</p>
-            <span class="pin pin-abs" style="top:-6px; right:0" aria-hidden="true">3</span>
-          </div>
-          <div class="f-champ" style="position:relative">
-            <label for="nom">Votre prénom ou nom <span class="f-q">(obligatoire avec un accord)</span></label>
-            <input class="f-input is-focus" id="nom" name="name" autocomplete="name" value="Inès" required>
-            <span class="pin pin-abs" style="top:-6px; right:0" aria-hidden="true">4</span>
-          </div>
-        </div>
-        <p class="bj-priv">Votre adresse sert seulement à vous répondre et à vous envoyer votre photo&#8239;; un accusé de réception vous est envoyé. Sans accord ni refus, votre demande est effacée au bout de 12 mois. <a href="#">Confidentialité</a> · <a href="#">Vos droits sur vos données</a><span class="pin pin-in" aria-hidden="true">7</span></p>
-      </fieldset>
-
-      <div class="bj-send"><button class="btn" type="submit">Envoyer</button><span class="f-aide">Nous répondons sous 7 jours.</span></div>
-    </form>
+<div class="bj">
+  <div class="bj-intro">
+    <p class="etiquette">Votre photo</p>
+    <h1 class="titre-page">Bonjour !</h1>
+    <p class="chapo">Vous avez croisé un photographe de Nicephos et il vous a peut-être pris en photo. Cette photo vous concerne : vous décidez de ce qu’elle devient.</p>
   </div>
-
-  <section class="mq-state" aria-labelledby="etats-h">
-    <h2 class="mq-label" id="etats-h">Trois états côte à côte <span>Extrait « Votre âge », « Recevoir la photo » et l’e-mail : vide, focus sur une case, après un envoi incomplet</span><span class="pin" aria-hidden="true">9</span></h2>
-    <div class="etats">
-      <div>
-        <h3>1 · Vide</h3>
-        <fieldset class="f-grp"><legend>Votre âge <span class="f-q">(obligatoire)</span></legend>
-          <label class="f-opt"><input type="radio" name="age-a"> J’ai 18 ans ou plus</label>
-          <label class="f-opt"><input type="radio" name="age-a"> J’ai moins de 18 ans&#8239;: un parent remplit ce formulaire avec moi</label></fieldset>
-        <label class="f-opt"><input type="checkbox" name="photo-a"> Recevoir la photo</label>
-        <div class="f-champ"><label for="email-a">Votre e-mail <span class="f-q">(nécessaire pour recevoir la photo)</span></label><input class="f-input" id="email-a" type="email" autocomplete="email"></div>
-      </div>
-      <div>
-        <h3>2 · Focus sur une case</h3>
-        <fieldset class="f-grp"><legend>Votre âge <span class="f-q">(obligatoire)</span></legend>
-          <label class="f-opt"><input type="radio" name="age-b" checked> J’ai 18 ans ou plus</label>
-          <label class="f-opt"><input type="radio" name="age-b"> J’ai moins de 18 ans&#8239;: un parent remplit ce formulaire avec moi</label></fieldset>
-        <label class="f-opt"><input type="checkbox" class="is-focus" name="photo-b" checked> Recevoir la photo</label>
-        <div class="f-champ"><label for="email-b">Votre e-mail <span class="f-q">(nécessaire pour recevoir la photo)</span></label><input class="f-input" id="email-b" type="email" autocomplete="email"></div>
-      </div>
-      <div>
-        <h3>3 · Après un envoi incomplet</h3>
-        <fieldset class="f-grp" aria-describedby="age-c-err"><legend>Votre âge <span class="f-q">(obligatoire)</span></legend>
-          <p class="f-err" id="age-c-err"><span class="f-err-p">Erreur&#8239;:</span> Indiquez si vous avez 18 ans ou plus.</p>
-          <label class="f-opt"><input type="radio" name="age-c" aria-invalid="true"> J’ai 18 ans ou plus</label>
-          <label class="f-opt"><input type="radio" name="age-c" aria-invalid="true"> J’ai moins de 18 ans&#8239;: un parent remplit ce formulaire avec moi</label></fieldset>
-        <label class="f-opt"><input type="checkbox" name="photo-c" checked> Recevoir la photo</label>
-        <div class="f-champ"><label for="email-c">Votre e-mail <span class="f-q">(nécessaire pour recevoir la photo)</span></label><input class="f-input" id="email-c" type="email" autocomplete="email" aria-invalid="true" aria-describedby="email-c-err"><p class="f-err" id="email-c-err"><span class="f-err-p">Erreur&#8239;:</span> Indiquez votre e-mail pour recevoir la photo.</p></div>
-      </div>
-    </div>
+  <form class="form" action="/bonjour" method="post" novalidate>
+    <section class="resume is-focus mq-a" id="resume" tabindex="-1" autofocus aria-labelledby="resume-t"><span class="mq-pin" aria-hidden="true">1</span><h2 class="resume-t" id="resume-t"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg>2 points à corriger</h2>
+      <ul><li><a href="#age">Votre âge : dites-nous si vous avez 18 ans ou plus.</a></li><li><a href="#email">Votre e-mail : l’adresse contient une virgule.</a></li></ul></section>
+    <p class="form-oblig"><span class="mq-pin" aria-hidden="true">3</span>Tous les champs sont obligatoires, sauf mention « facultatif ».</p>
+    <fieldset class="bloc" aria-describedby="carte-aide"><legend>Votre carte</legend>
+      <p class="champ-aide" id="carte-aide">La référence est en bas de la carte que le photographe vous a donnée. Pas de carte ? Dites-nous plutôt quand et où.</p>
+      <div class="champ champ--court"><label for="ref">Référence de la carte</label><p class="champ-aide" id="ref-aide">Une lettre et un numéro, par exemple J‑0142.</p><input id="ref" name="ref" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="ref-aide"></div>
+      <details class="depliant" open><summary><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg>Pas de carte ? Dites-nous quand et où</summary>
+        <div>
+          <div class="duo">
+            <div class="champ"><label for="date">Date</label><p class="champ-aide" id="date-aide">Par exemple 14/10/2026.</p><input id="date" name="met_on" inputmode="numeric" autocomplete="off" aria-describedby="date-aide" value="14/10/2026"></div>
+            <div class="champ"><label for="heure">Vers quelle heure <span class="facultatif">(facultatif)</span></label><p class="champ-aide" id="heure-aide">Par exemple 18 h.</p><input aria-describedby="heure-aide" id="heure" name="met_time" maxlength="20" value="18 h 15"></div>
+          </div>
+          <div class="champ"><label for="lieu">Lieu</label><p class="champ-aide" id="lieu-aide">Ville, rue, quartier.</p><input id="lieu" name="place" maxlength="120" aria-describedby="lieu-aide" value="quai Ligny, Angers"></div>
+          <div class="champ"><label for="detail">Un détail pour vous reconnaître <span class="facultatif">(facultatif)</span></label><p class="champ-aide" id="detail-aide">Une veste rouge, un vélo, un chien…</p><input id="detail" name="details" maxlength="500" aria-describedby="detail-aide" value="Avec un ami, face au coucher du soleil."></div>
+        </div>
+      </details>
+    </fieldset>
+    <fieldset class="bloc groupe revele-si groupe--erreur" aria-describedby="age-err"><legend id="age">Votre âge</legend><p class="champ-err" id="age-err"><span class="mq-pin" aria-hidden="true">2</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> dites-nous si vous avez 18 ans ou plus. Avant 18 ans, un parent remplit ce formulaire avec vous.</span></p>
+      <label class="choix"><span class="mq-pin" aria-hidden="true">5</span><input type="radio" name="adult" value="oui" aria-invalid="true"><span>J’ai 18 ans ou plus</span></label>
+      <label class="choix"><input type="radio" name="adult" value="non" data-revele aria-invalid="true"><span>J’ai moins de 18 ans : un parent remplit ce formulaire avec moi</span></label>
+      <div class="champ revele"><label for="parent">Nom du parent</label><p class="champ-aide" id="parent-aide">Il ou elle donne son accord avec vous.</p><input id="parent" name="guardian" maxlength="80" autocomplete="off" aria-describedby="parent-aide"></div>
+    </fieldset>
+    <fieldset class="bloc" aria-describedby="souhait-aide"><legend>Ce que vous souhaitez</legend>
+      <p class="champ-aide" id="souhait-aide">Au moins un choix : recevoir la photo, décider de sa publication, une demande sur vos données, ou un message.</p>
+      <label class="choix"><input type="checkbox" name="wants_photo" checked><span>Recevoir la photo par e-mail</span></label>
+      <fieldset class="groupe" aria-describedby="pub-aide"><legend>Publication de la photo</legend><p class="champ-aide" id="pub-aide">Vous pourrez changer d’avis à tout moment.</p>
+        <label class="choix"><span class="mq-pin" aria-hidden="true">6</span><input type="radio" name="decision" value=""><span>Je ne sais pas encore</span></label>
+        <label class="choix"><input type="radio" name="decision" value="accord" checked><span>J’accepte qu’elle soit publiée :</span></label>
+        <ul class="sous-choix" aria-label="J’accepte qu’elle soit publiée">
+          <li><label class="choix"><input type="checkbox" name="scope_site" checked><span>sur le site</span></label></li>
+          <li><label class="choix"><input type="checkbox" name="scope_instagram"><span>sur Instagram (avec le site)</span></label></li>
+          <li><label class="choix"><input type="checkbox" name="scope_print"><span>en exposition et en tirage</span></label></li>
+          <li><label class="choix"><input type="checkbox" name="scope_name" checked><span>avec mon prénom</span></label></li>
+        </ul>
+        <label class="choix"><input type="radio" name="decision" value="refus"><span>Je refuse qu’elle soit publiée</span></label>
+      </fieldset>
+      <fieldset class="groupe"><legend>Vos données</legend>
+        <label class="choix"><span class="mq-pin" aria-hidden="true">7</span><input type="radio" name="rights" value="" checked><span>Rien de plus</span></label>
+        <label class="choix"><input type="radio" name="rights" value="acces"><span>Recevoir une copie de toutes mes données</span></label>
+        <label class="choix"><input type="radio" name="rights" value="effacement"><span>Effacer toutes mes données (et, si je le demande dans le message, les photos où j’apparais)</span></label>
+        <p style="margin:0"><a class="lien" href="/confidentialite#vos-droits">Vos droits sur vos données</a></p>
+      </fieldset>
+      <div class="champ"><label for="message">Un message <span class="facultatif">(facultatif)</span></label><textarea id="message" name="message" rows="3" maxlength="2000">Nous étions deux : Hugo vous écrira lui-même.</textarea></div>
+    </fieldset>
+    <fieldset class="bloc"><legend>Vous joindre</legend>
+      <div class="champ"><span class="mq-pin" aria-hidden="true">4</span><label for="email">Votre e-mail</label><p class="champ-aide" id="email-aide">Pour vous envoyer la photo et vous répondre ; jamais pour autre chose.</p><input id="email" name="email" type="email" maxlength="200" autocomplete="email" value="claire.exemple@example,org" aria-invalid="true" aria-describedby="email-err email-aide"><p class="champ-err" id="email-err"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> l’adresse contient une virgule. Écrivez-la sous la forme nom@domaine.fr, par exemple claire.exemple@example.org.</span></p></div>
+      <div class="champ"><label for="nom">Votre prénom ou nom</label><p class="champ-aide" id="nom-aide">Nécessaire si vous acceptez une publication.</p><input id="nom" name="name" maxlength="80" autocomplete="name" aria-describedby="nom-aide" value="Claire Exemple"></div>
+      <p class="note-donnees"><span class="mq-pin" aria-hidden="true">8</span>Votre adresse sert seulement à vous répondre et à vous envoyer la photo. Un accusé de réception part dès l’envoi. Sans accord ni refus, votre demande est effacée au bout de 12 mois. <a href="/confidentialite">Confidentialité</a></p>
+    </fieldset>
+    <div class="piege" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    <div class="envoi"><button class="btn" type="submit">Envoyer</button><p>Nous répondons sous 7 jours.</p></div>
+  </form>
+  <section class="bj-ensuite" aria-labelledby="ensuite-t">
+    <h2 id="ensuite-t">Ce qui se passe ensuite</h2>
+    <ol>
+      <li>Le photographe retrouve la photo grâce à la référence de la carte, ou à la date et au lieu.</li>
+      <li>Vous recevez tout de suite un accusé de réception, puis sa réponse sous 7 jours, avec la photo si vous l’avez demandée.</li>
+      <li>Vous pouvez changer d’avis à tout moment : revenez sur cette page, ou répondez à l’accusé de réception.</li>
+    </ol>
+    <p>Une question avant d’écrire ? <a class="lien" style="min-height:0;display:inline" href="/a-propos#contact">Contact</a></p>
   </section>
-
-  <section class="mq-state" aria-labelledby="quota-h">
-    <h2 class="mq-label" id="quota-h">Autre état <span>Limite anti-abus atteinte : un bandeau séparé des erreurs de saisie, qui garde la saisie</span><span class="pin" aria-hidden="true">8</span></h2>
-    <div class="in">
-      <div class="quota" role="status">
-        <p><strong>Ce formulaire est limité pour éviter les envois automatiques.</strong></p>
-        <p>Réessayez à partir de 15 h 40, ou écrivez à <a href="mailto:info@nicephos.art">info@nicephos.art</a>. Ce que vous avez saisi est conservé.</p>
-      </div>
-    </div>
-  </section>
+</div>
 </main>
-<footer class="site-f wrap">
-  <p>© 2026 Sébastien &amp; Julien</p>
-  <ul role="list" aria-label="Pied de page"><li><a href="#">Tirages et licences</a></li><li><a href="#">Contact</a></li><li><a href="#" rel="me">Instagram<span aria-hidden="true">&nbsp;↗</span><span class="sr-only"> (nouvel onglet)</span></a></li><li><a href="#">Flux RSS</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Mentions légales</a></li></ul>
+
+<footer class="sf sf--complet wrap">
+  <div class="sf-in">
+    <div>
+      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
+      <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage, un tirage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
+    </div>
+    <nav class="sf-groupes" aria-label="Pied de page">
+      <div>
+        <h2 id="sf-site">Le site</h2>
+        <ul aria-labelledby="sf-site">
+          <li><a href="/a-propos#contact">Contact</a></li>
+          <li><a href="/droits">Droits et licences</a></li>
+          <li><a href="/carnet/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
+          <li><a href="/confidentialite">Confidentialité</a></li>
+          <li><a href="/mentions-legales">Mentions légales</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 id="sf-tirages">Tirages</h2>
+        <ul aria-labelledby="sf-tirages">
+          <li><a href="/conditions-de-vente">Conditions de vente</a></li>
+          <li><a href="/livraison">Livraison et retours</a></li>
+          <li><a href="/renoncer">Renoncer à une commande</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
 </footer>
 
-<aside class="mq-notes" aria-labelledby="mq-h">
-  <p class="mq-id">Maquette MQ-05 · site public · /bonjour · thème Atelier sur bureau, « Nicephos — nuit » sur téléphone · Camille Arnaud, 16 octobre 2026</p>
-  <h2 id="mq-h">Ce qui change</h2>
-  <p class="mq-lead">Le formulaire qui engage le droit à l’image d’une personne devient lisible, navigable au clavier et honnête sur ce qu’il exige. Montré ici après un envoi incomplet : titre de la page « Erreur — 2 points à corriger · Je vous ai photographié ».</p>
-  <ol>
-    <li><span class="pin">1</span><p>Après l’envoi, le titre de la page commence par « Erreur — 2 points à corriger », et le focus est donné au résumé (tabindex=-1, contour de 2 px montré), au lieu de rester sur la page.<span class="ref">UX-F-05 · RGAA 11.10 et 8.6 · WCAG 3.3.1 et 2.4.2 · Opquast 70 · B&amp;S 5.2</span></p></li>
-    <li><span class="pin">2</span><p>Chaque point du résumé est un lien qui mène à son champ : on corrige sans chercher.<span class="ref">UX-F-05 · WCAG 3.3.3 · Opquast 71 · Nielsen #9</span></p></li>
-    <li><span class="pin">3</span><p>Sous le champ, « ⚠ Erreur : … » en texte, relié par aria-describedby et aria-invalid, filet de 2 px : l’erreur ne repose plus sur la couleur d’un trait. Couleur d’erreur propre à chaque thème : brique #9e3a22 en Atelier (6,2:1), corail #f08c78 en nuit (8,2:1), distincte du sable des états actifs.<span class="ref">UX-F-04 · UX-F-05 · RGAA 3.1 et 11.10 · WCAG 1.4.1 et 3.3.1</span></p></li>
-    <li><span class="pin">4</span><p>Les champs se voient : cadre de 1 px en <code>--field</code>, 5,2:1 en Atelier et 7,4:1 en nuit (1,30:1 et 1,41:1 aujourd’hui). Au focus, contour de 2 px : on retire le <code>outline: none</code> de <code>.hello-form</code>.<span class="ref">UX-F-04 · UX-F-03 · RGAA 3.3 et 10.7 · WCAG 1.4.11 et 2.4.7</span></p></li>
-    <li><span class="pin">5</span><p>La question de l’âge, reprise de l’app de terrain, avant les usages : « J’ai moins de 18 ans : un parent remplit ce formulaire avec moi », puis le nom du parent. Côté serveur, un accord de mineur sans parent reste « à confirmer » et ne rend jamais la photo publiable.<span class="ref">UX-T-02 · Code civil art. 9 (droit à l’image) et art. 371-1 (autorité parentale) · B&amp;S 5.1 Protection contre les erreurs</span></p></li>
-    <li><span class="pin">6</span><p>Ce qui est exigé est dit avant l’envoi, dans le libellé : « (obligatoire) », « (nécessaire pour recevoir la photo ou donner votre accord) », « (obligatoire avec un accord) », avec required côté navigateur. Chaque fieldset a sa légende.<span class="ref">UX-F-05 · RGAA 11.5, 11.6 et 11.10 · WCAG 3.3.2 · Opquast 69</span></p></li>
-    <li><span class="pin">7</span><p>« Confidentialité » est souligné, et « Vos droits sur vos données » mène directement à la rubrique. Un accusé de réception est annoncé.<span class="ref">UX-F-23 · UX-T-04 · RGAA 10.6 · WCAG 1.4.1</span></p></li>
-    <li><span class="pin">8</span><p>La limite anti-abus ne compte plus que les envois acceptés. Quand elle joue, un bandeau à part dit l’heure de reprise (« à partir de 15 h 40 ») et donne un recours par e-mail : une demande sur ses données n’est jamais bloquée.<span class="ref">UX-F-27 · WCAG 2.2.1 · B&amp;S 5.2 · Nielsen #9</span></p></li>
-    <li><span class="pin">9</span><p>Les trois états côte à côte montrent le focus des cases et des radios, invisible aujourd’hui (0 pixel modifié) : contour de 2 px décalé de 3 px sur la case « Recevoir la photo ». Le résumé « Pas de carte ? » retrouve son chevron.<span class="ref">UX-F-03 · UX-F-04 · RGAA 10.7 · WCAG 2.4.7 (et 2.4.13 en AAA)</span></p></li>
+<section class="wrap mq-etats mq-etats--deux" aria-labelledby="etats-t">
+  <h2 class="sr-only" id="etats-t">Autres états de la page</h2>
+  <section class="mq-ecran mq-fond haut" inert aria-labelledby="et-9"><p class="mq-etat" id="et-9"><span class="mq-pin" aria-hidden="true">9</span>État · En allemand : la page vide, focus sur une case</p>
+    <header lang="de" class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <nav class="sh-nav" aria-label="Navigation (Beispiel)">
+      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-sep"><a href="/de/tirages">Kunstdrucke</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suchen</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache">
+          <li><a href="/langue/fr?vers=%2Fde%2Fbonjour" hreflang="fr" lang="fr">Français</a></li>
+          <li><a href="/langue/en?vers=%2Fde%2Fbonjour" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2Fde%2Fbonjour" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <nav class="sh-panneau" aria-label="Navigation (Telefon, Beispiel)">
+          <ul>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/tirages">Kunstdrucke</a></li>
+            <li><a href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suchen</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+    <div class="mq-ecran-in" lang="de">
+      <p class="etiquette">Ihr Foto</p>
+      <h2 class="titre-page" id="de-t">Hallo!</h2>
+      <p class="chapo">Sie sind einem Fotografen von Nicephos begegnet, der Sie vielleicht fotografiert hat. Dieses Foto betrifft Sie: Sie entscheiden, was damit geschieht.</p>
+      <form class="form" action="/de/bonjour" method="post" novalidate lang="de">
+    <p class="form-oblig">Alle Felder sind Pflichtfelder, außer „optional“.</p>
+    <fieldset class="bloc" aria-describedby="de-carte-aide"><legend>Ihre Karte</legend>
+      <p class="champ-aide" id="de-carte-aide">Die Referenz steht unten auf der Karte, die Ihnen der Fotograf gegeben hat. Keine Karte? Sagen Sie uns stattdessen wann und wo.</p>
+      <div class="champ champ--court"><label for="de-ref">Referenz der Karte</label><p class="champ-aide" id="de-ref-aide">Ein Buchstabe und eine Zahl, zum Beispiel J‑0142.</p><input id="de-ref" name="ref" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="de-ref-aide"></div>
+      <details class="depliant"><summary><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg>Keine Karte? Sagen Sie uns wann und wo</summary>
+        <div>
+          <div class="duo">
+            <div class="champ"><label for="de-date">Datum</label><p class="champ-aide" id="de-date-aide">Zum Beispiel 14.10.2026.</p><input id="de-date" name="met_on" inputmode="numeric" autocomplete="off" aria-describedby="de-date-aide"></div>
+            <div class="champ"><label for="de-heure">Ungefähre Uhrzeit <span class="facultatif">(optional)</span></label><p class="champ-aide" id="de-heure-aide">Zum Beispiel 18 Uhr.</p><input aria-describedby="de-heure-aide" id="de-heure" name="met_time" maxlength="20"></div>
+          </div>
+          <div class="champ"><label for="de-lieu">Ort</label><p class="champ-aide" id="de-lieu-aide">Stadt, Straße, Viertel.</p><input id="de-lieu" name="place" maxlength="120" aria-describedby="de-lieu-aide"></div>
+          <div class="champ"><label for="de-detail">Ein Detail, an dem wir Sie erkennen <span class="facultatif">(optional)</span></label><p class="champ-aide" id="de-detail-aide">Eine rote Jacke, ein Fahrrad, ein Hund…</p><input id="de-detail" name="details" maxlength="500" aria-describedby="de-detail-aide"></div>
+        </div>
+      </details>
+    </fieldset>
+    <fieldset class="bloc groupe revele-si"><legend id="de-age">Ihr Alter</legend>
+      <label class="choix"><input type="radio" name="adult" value="oui"><span>Ich bin 18 Jahre oder älter</span></label>
+      <label class="choix"><input type="radio" name="adult" value="non" data-revele><span>Ich bin unter 18: Ein Elternteil füllt dieses Formular mit mir aus</span></label>
+      <div class="champ revele"><label for="de-parent">Name des Elternteils</label><p class="champ-aide" id="de-parent-aide">Er oder sie stimmt mit Ihnen zu.</p><input id="de-parent" name="guardian" maxlength="80" autocomplete="off" aria-describedby="de-parent-aide"></div>
+    </fieldset>
+    <fieldset class="bloc" aria-describedby="de-souhait-aide"><legend>Was Sie möchten</legend>
+      <p class="champ-aide" id="de-souhait-aide">Mindestens eine Auswahl: das Foto erhalten, über die Veröffentlichung entscheiden, eine Anfrage zu Ihren Daten oder eine Nachricht.</p>
+      <label class="choix"><input type="checkbox" name="wants_photo" class="is-focus"><span>Das Foto per E-Mail erhalten</span></label>
+      <fieldset class="groupe" aria-describedby="de-pub-aide"><legend>Veröffentlichung des Fotos</legend><p class="champ-aide" id="de-pub-aide">Sie können Ihre Meinung jederzeit ändern.</p>
+        <label class="choix"><input type="radio" name="decision" value="" checked><span>Ich weiß es noch nicht</span></label>
+        <label class="choix"><input type="radio" name="decision" value="accord"><span>Ich bin mit der Veröffentlichung einverstanden:</span></label>
+        <ul class="sous-choix" aria-label="Ich bin mit der Veröffentlichung einverstanden">
+          <li><label class="choix"><input type="checkbox" name="scope_site"><span>auf der Website</span></label></li>
+          <li><label class="choix"><input type="checkbox" name="scope_instagram"><span>auf Instagram (mit der Website)</span></label></li>
+          <li><label class="choix"><input type="checkbox" name="scope_print"><span>in Ausstellungen und als Abzug</span></label></li>
+          <li><label class="choix"><input type="checkbox" name="scope_name"><span>mit meinem Vornamen</span></label></li>
+        </ul>
+        <label class="choix"><input type="radio" name="decision" value="refus"><span>Ich möchte nicht, dass es veröffentlicht wird</span></label>
+      </fieldset>
+      <fieldset class="groupe"><legend>Ihre Daten</legend>
+        <label class="choix"><input type="radio" name="rights" value="" checked><span>Nichts weiter</span></label>
+        <label class="choix"><input type="radio" name="rights" value="acces"><span>Eine Kopie aller meiner Daten erhalten</span></label>
+        <label class="choix"><input type="radio" name="rights" value="effacement"><span>Alle meine Daten löschen (und, wenn ich es in der Nachricht verlange, die Fotos, auf denen ich zu sehen bin)</span></label>
+        <p style="margin:0"><a class="lien" href="/de/confidentialite#vos-droits">Ihre Rechte an Ihren Daten</a></p>
+      </fieldset>
+      <div class="champ"><label for="de-message">Eine Nachricht <span class="facultatif">(optional)</span></label><textarea id="de-message" name="message" rows="3" maxlength="2000"></textarea></div>
+    </fieldset>
+    <fieldset class="bloc"><legend>So erreichen wir Sie</legend>
+      <div class="champ"><label for="de-email">Ihre E-Mail</label><p class="champ-aide" id="de-email-aide">Um Ihnen das Foto zu schicken und zu antworten; für nichts anderes.</p><input id="de-email" name="email" type="email" maxlength="200" autocomplete="email" aria-describedby="de-email-aide"></div>
+      <div class="champ"><label for="de-nom">Ihr Vor- oder Nachname</label><p class="champ-aide" id="de-nom-aide">Nötig, wenn Sie einer Veröffentlichung zustimmen.</p><input id="de-nom" name="name" maxlength="80" autocomplete="name" aria-describedby="de-nom-aide"></div>
+      <p class="note-donnees">Ihre Adresse dient nur dazu, Ihnen zu antworten und Ihr Foto zu schicken. Sie erhalten sofort eine Eingangsbestätigung. Ohne Einwilligung oder Ablehnung wird Ihre Anfrage nach 12 Monaten gelöscht. <a href="/de/confidentialite">Datenschutz</a></p>
+    </fieldset>
+    <div class="piege" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    <div class="envoi"><button class="btn" type="submit">Senden</button><p>Wir antworten innerhalb von 7 Tagen.</p></div>
+  </form>
+    </div>
+  </section>
+
+  <div class="mq-pile">
+  <section class="mq-ecran mq-fond" inert aria-labelledby="et-10"><p class="mq-etat" id="et-10"><span class="mq-pin" aria-hidden="true">10</span>État · Après le lien « Votre e-mail » du résumé : le focus sur le champ, l’erreur gardée</p>
+    <div class="mq-ecran-in">
+      <div class="champ"><label for="f-email">Votre e-mail</label><p class="champ-aide" id="f-email-aide">Pour vous envoyer la photo et vous répondre ; jamais pour autre chose.</p><input id="f-email" class="is-focus" name="email" type="email" maxlength="200" autocomplete="email" value="claire.exemple@example,org" aria-invalid="true" aria-describedby="f-email-err f-email-aide"><p class="champ-err" id="f-email-err"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> l’adresse contient une virgule. Écrivez-la sous la forme nom@domaine.fr, par exemple claire.exemple@example.org.</span></p></div>
+    </div>
+  </section>
+
+  <section class="mq-ecran mq-fond" inert aria-labelledby="et-11"><p class="mq-etat" id="et-11"><span class="mq-pin" aria-hidden="true">11</span>État · Moins de 18 ans : le nom du parent apparaît, sans script</p>
+    <div class="mq-ecran-in">
+      <fieldset class="bloc groupe revele-si" aria-labelledby="min-t"><legend id="min-t">Votre âge</legend>
+        <label class="choix"><input type="radio" name="m-adult" value="oui"><span>J’ai 18 ans ou plus</span></label>
+        <label class="choix"><input type="radio" name="m-adult" value="non" data-revele checked><span>J’ai moins de 18 ans : un parent remplit ce formulaire avec moi</span></label>
+        <div class="champ revele"><label for="m-parent">Nom du parent</label><p class="champ-aide" id="m-parent-aide">Il ou elle donne son accord avec vous.</p><input id="m-parent" class="is-focus" name="guardian" maxlength="80" autocomplete="off" aria-describedby="m-parent-aide"></div>
+      </fieldset>
+    </div>
+  </section>
+
+  <section class="mq-ecran mq-fond" inert aria-labelledby="et-12"><p class="mq-etat" id="et-12"><span class="mq-pin" aria-hidden="true">12</span>État · Limite anti-abus atteinte : rien n’est perdu</p>
+    <div class="mq-ecran-in">
+      <h2 class="sr-only" id="quota-t">Envoi suspendu un moment</h2>
+      <div class="msg" role="status" id="quota-msg"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg><p><b>Ce formulaire a reçu beaucoup d’envois depuis votre connexion.</b> Pour éviter les envois automatiques, il fait une pause : réessayez à partir de 15 h 40, ou écrivez à <a href="mailto:contact@example.org">contact@example.org</a>. Ce que vous avez saisi est gardé.</p></div>
+      <div class="envoi"><button class="btn" type="button" aria-disabled="true" aria-describedby="quota-msg">Envoyer</button><p>Possible à partir de 15 h 40.</p></div>
+    </div>
+  </section>
+
+  <section class="mq-ecran mq-fond" inert aria-labelledby="et-13"><p class="mq-etat" id="et-13"><span class="mq-pin" aria-hidden="true">13</span>État · Après l’envoi : le récapitulatif</p>
+    <div class="mq-ecran-in">
+      <div class="msg msg--ok" role="status"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><p><b>Envoyé.</b> Un accusé de réception est parti à claire.exemple@example.org.</p></div>
+      <h2 class="titre-page is-focus" id="merci-t" tabindex="-1">Merci, c’est noté.</h2>
+      <dl class="def">
+        <dt>Photo</dt><dd>mercredi 14 octobre 2026, vers 18 h 15, quai Ligny, Angers</dd>
+        <dt>Vous souhaitez</dt><dd>recevoir la photo par e-mail ; sa publication sur le site, avec votre prénom</dd>
+        <dt>Âge</dt><dd>18 ans ou plus</dd>
+      </dl>
+      <p class="chapo" style="font-size:var(--t-texte)">Le photographe vous répond sous 7 jours. Pour changer d’avis, revenez sur cette page ou répondez à l’accusé de réception.</p>
+      <p style="margin:0"><a class="lien" href="/galerie">Voir les photos du site</a></p>
+    </div>
+  </section>
+  </div>
+</section>
+
+
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MQ-05 · site public · /bonjour (fr, en, de) · thème Nicephos nuit, celui de la production · état principal : le 15 oct. 2026, après un envoi incomplet de Claire Exemple, photographiée la veille à 18 h 10 quai Ligny, avec Hugo (elle écrit « vers 18 h 15 ») · v2, passe 5 du 17 oct. 2026, sur la planche MQ-00</p>
+  <h2 id="mq-t">Ce qui change</h2>
+  <p class="mq-lead">Le formulaire qui décide du droit à l’image d’une personne devient lisible, honnête sur ce qu’il exige, et utilisable au clavier, au toucher et sans script ; l’étiquette dit « Votre photo » (trois mots au plus en capitales), le titre de l’onglet garde « Je vous ai photographié ». Il passe du thème Atelier au thème de production, sur une seule colonne, et reprend tous les champs de <code>views/bonjour.eta</code>.</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>Résumé focalisé, titre de page qui le dit</b><p>Au retour du serveur, le titre commence par « Erreur : 2 points à corriger » et le focus est posé sur le résumé (<code>autofocus</code> sur <code>tabindex="-1"</code>, sans script) ; c’est une <code>&lt;section&gt;</code> titrée par son <code>&lt;h2&gt;</code>, une région nommée lue au focus ; chaque point mène à son champ. Un seul focus montré par état.</p><span class="mq-ref">UX-F-05 · RGAA 11.10, 8.6 · WCAG 3.3.1, 3.3.3, 2.4.2 · jury v1 : résumé nommé sans rôle</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>Erreur sous la légende d’un groupe, sous le champ sinon</b><p>La règle de la planche : « ⚠ Erreur : » en 500, puis comment corriger ; bord de 2 px, aria-invalid et aria-describedby ; la saisie de Claire est gardée.</p><span class="mq-ref">UX-F-04 · UX-F-05 · WCAG 1.4.1 · jury v0 : erreur au-dessus ou dessous</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Une seule règle d’obligation</b><p>« Tous les champs sont obligatoires, sauf mention « facultatif ». » Les champs conditionnels disent quand dans leur aide (« Nécessaire si vous acceptez une publication »), avant l’envoi.</p><span class="mq-ref">UX-F-05 · RGAA 11.10 · WCAG 3.3.2 · jury v0 : trois façons d’annoncer</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Des champs qui se voient, un focus partout</b><p>Bord en <code>--field</code> à 3,8:1, cases et radios dessinées (vides et cerclées, pleines quand cochées) au lieu des disques gris natifs ; focus de 2 px sur champ, case et radio (montré sur l’état allemand).</p><span class="mq-ref">UX-F-03 · UX-F-04 · RGAA 3.3, 10.7 · WCAG 1.4.11, 2.4.7 · jury v0 : radios natives sombres</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>L’âge avant les usages</b><p>Question reprise de l’app de terrain ; le nom du parent n’apparaît que si « moins de 18 ans » est coché, par CSS (<code>:has</code>), sans script ; toujours visible sur un vieux navigateur. Côté serveur, un accord de mineur sans parent reste « à confirmer ».</p><span class="mq-ref">UX-T-02 · Code civil art. 9 et 371-1 · jury v0 : champ parent toujours visible</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Prévenir plutôt que corriger</b><p>« Je ne sais pas encore » est présélectionné ; les usages sont rattachés à « J’accepte » (indentés, nommés par le groupe) ; « sur Instagram (avec le site) » dit la règle avant l’erreur.</p><span class="mq-ref">B&amp;S 5.1 · jury v0 : présélection</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Vos droits, sur place</b><p>Copie ou effacement des données, et un lien direct « Vos droits sur vos données » vers la rubrique de Confidentialité.</p><span class="mq-ref">UX-T-04 · RGPD art. 12 à 17</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Accusé de réception et délai promis</b><p>Un accusé part dès l’envoi ; « Nous répondons sous 7 jours » est écrit à côté du bouton ; liens soulignés.</p><span class="mq-ref">UX-T-04 · UX-F-23 · RGAA 10.6 · Opquast 107</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Allemand, longueur tenue</b><p>La même page en allemand (« Ihr Foto », « Alle Felder sind Pflichtfelder, außer „optional“ »), en-tête compris (« Suchen », comme le code), de 320 à 1 440 px : rien ne déborde ; les noms lus par un lecteur d’écran sont ceux du code (<code>server/i18n.js</code> : « Navigation », « Sprache: Deutsch », « Sprache »). Focus sur la case « Das Foto per E-Mail erhalten ».</p><span class="mq-ref">Jury v0 : aucun état EN ni DE · jury v2 : « Suche » · B&amp;S 4</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>Le focus sur un champ en erreur</b><p>Le lien « Votre e-mail » du résumé pose le focus sur le champ : l’anneau de focus s’ajoute au filet rouge de 2 px, l’un ne cache pas l’autre, et le message reste dessous.</p><span class="mq-ref">WCAG 2.4.7, 3.3.1 · planche, Formulaires (passe 2) · jury v1</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>Parent révélé</b><p>Le champ suit la radio cochée, sous elle, avec son aide.</p><span class="mq-ref">UX-T-02</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>Le quota n’est pas une erreur de saisie</b><p>Un message à part, l’heure de reprise et un recours par e-mail ; seuls les envois acceptés comptent, plus une heure de blocage.</p><span class="mq-ref">UX-F-27 · WCAG 2.2.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>Après l’envoi</b><p>Le titre reçoit le focus ; le récapitulatif reprend ce que Claire a choisi (la date relue en toutes lettres, « mercredi 14 octobre 2026 »), dit le délai et comment changer d’avis.</p><span class="mq-ref">UX-T-04 · RGAA 7.5 · WCAG 4.1.3</span></li>
   </ol>
-  <p class="mq-measures">Mesures sur cette maquette : Atelier — texte #1d1c1a sur #f6f4ef 15,5:1, aides #6b665d 5,2:1, erreur #9e3a22 6,2:1 ; nuit (téléphone) — texte 17,1:1, aides 7,4:1, erreur #f08c78 8,2:1. Cibles des cases et radios : 44 px de haut (libellé compris). Le contrôle se fait aussi dans le navigateur (checkValidity, mêmes textes que le serveur) ; sans JavaScript, le serveur renvoie exactement cette page.</p>
+  <h3>Composants de la planche</h3>
+  <p>Tous dans <code>_commun/public.css</code> (§ 10 et 22) et montrés dans MQ-00 : <b>bloc de formulaire</b> (<code>.bloc</code>, légende en titre 3 sur un filet), <b>dépliant</b> (<code>.depliant</code>, un <code>&lt;details&gt;</code> souligné et chevronné), <b>sous-choix</b> (<code>.sous-choix</code>, cases rattachées à une radio, indentées de 34 px), <b>champ révélé</b> (<code>.revele</code> dans un groupe <code>.revele-si</code> : visible quand la radio qui le demande est cochée, par <code>:has</code>, sans script). Proposé par cette page à la passe 4 et versé dans la planche avant le jury final : le texte d’un message qui passe à la ligne au lieu d’élargir sa colonne (<code>.msg p</code>, § 13 : l’adresse e-mail du message « Envoyé », avec l’espacement du texte agrandi, WCAG 1.4.12). La page n’ajoute que sa mise en page.</p>
+  <h3>Écarts avec le code</h3>
+  <p>Mêmes champs et mêmes noms que <code>views/bonjour.eta</code> (ref, met_on, met_time, place, details, wants_photo, decision, scope_*, rights, message, email, name) ; ajoutés : adult et guardian, déjà lus par <code>server/encounters.js</code> pour l’app. Le champ piège (<code>website</code>) reste, invisible et hors des tabulations. La date de la rencontre devient un champ libre (« 14/10/2026 »), relue en toutes lettres par le serveur comme dans l’admin : le calendrier natif de <code>type="date"</code> suit la langue du navigateur, pas celle de la page. Les classes <code>.hello-form</code> de <code>site.css</code> cèdent la place à <code>.form</code>.</p>
+  <p style="margin-top:12px"><b>Passe 5 (jury final, 17 oct. 2026)</b> : les noms lus de l’en-tête sont ceux du code en français aussi (<code>server/i18n.js</code>) : la navigation « Navigation », le bouton de langue « FR – Langue : français », sa liste « Langue » ; le panneau du téléphone « Navigation (téléphone) » ; dans un cadre d’état allemand, « Navigation (Beispiel) », pour un nom par repère sur la page de maquette (la page réelle dit « Navigation »).</p>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures"><b>Mesures</b> (passe 4, 16 oct. 2026 ; Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, p3-images.mjs, focus-colle.mjs, p3-sombres.mjs, radios-cadres.py, insecables.py, et l’espacement du texte du jury v2) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7, et 0 encore une fois tous les <code>inert</code> et <code>.is-focus</code> retirés (chaque état sans défaut une fois actif) · débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête du site en allemand (libellés du code, « Suchen ») : aucun · texte coupé d’une ellipse : aucun, à toutes ces largeurs · lignes qui défilent : aucune · focus caché par un élément collant (WCAG 2.4.11), au clavier en avant et en arrière, au bureau, sur Pixel 7 et à 320 × 640 : 0 sur 43 éléments au bureau, 37 sur Pixel 7 et à 320 px · espacement du texte agrandi (WCAG 1.4.12) à 1 440, 412 et 320 px : rien ne sort ni n’est coupé · annotations à 1 440, 412 et 320 px : rien à redire (pastilles dans l’écran, hors des photos et des textes ; étiquettes entières ; cadres inert ; pied de page avant les états ; un seul bloc de mesures ; sans annotations, 0 élément déplacé) · sans annotations : 0 pixel changé hors du magenta, au bureau comme sur Pixel 7 · images, avec ou sans <code>srcset</code>, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px : toutes à la taille d’affichage · aucune rangée de photos · scènes de nuit et de contre-jour : aucune dans une première rangée, à 9 largeurs · radios : un nom de groupe par cadre · insécables : 0 à poser · poids après défilement complet : 209 ko au bureau, 209 ko au téléphone ; aucun script, aucune ressource tierce · html-validate (<code>outils/html-valide.sh</code>) : 0 erreur · textes sous 13 px, ceux des SVG mesurés à leur taille rendue (échelle du viewBox) : aucun, au bureau, sur Pixel 7 et de 320 à 1 440 px · listes en rangées mesurées sur Pixel 7 (<code>sizes-tel-ecrire.py</code>) : toutes à la largeur de la page, aucun sizes à réécrire.</p>
 </aside>
+
 </body>
 </html>

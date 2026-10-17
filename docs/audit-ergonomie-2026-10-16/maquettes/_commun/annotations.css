@@ -1,61 +1,165 @@
-/* Gabarit commun des annotations de maquette (hors produit), le même pour les 20 maquettes :
-   pastilles numérotées, repère du premier écran, bandeau d'état, planches d'états, encart « Ce qui change »
-   (en-tête, liste numérotée avec sa ligne de références, bloc « Mesures »). Rien de ceci n'appartient à l'interface proposée. */
+/* =====================================================================================================
+   Annotations des maquettes (hors produit), le même gabarit pour les vingt : rien de ceci n'appartient à
+   l'interface proposée. Quatre objets, une seule couleur : le magenta, qu'aucun thème du site ni de l'admin
+   n'emploie (sable, lampe inactinique, ambre, bleu, jaune et vermillon sont pris).
+   1. .mq-pin   pastille numérotée : carrée, magenta, cerclée de noir ; hors du flux, en marge ; aria-hidden="true".
+   2. .mq-etat  étiquette d'un autre état (« État · Panier vide »), posée au-dessus de son cadre .mq-ecran, hors du flux.
+   3. .mq-notes encart « Ce qui change » : titre, une phrase, puis les repères (titre, phrase, références) et Mesures.
+   4. .mq-fold  bas du premier écran : un trait magenta dans chaque marge, sans texte posé sur l'interface.
+   Rendre la maquette SANS annotations (contrôle « interface identique avec et sans pastilles ») :
+   - ajouter #sans-annotations à l'adresse (la page contient <i id="sans-annotations" hidden></i>) ;
+   - ou poser la classe sans-annotations sur <html> ; - ou imprimer.
+   Pastilles, étiquettes et repère étant hors du flux, les retirer ne déplace aucun pixel de l'interface.
+   Règles de la passe 2 (jury v1, 16 oct.), contrôlées par dr-work/outils/controle-annotations.mjs :
+   - une pastille n'est JAMAIS hors de l'écran (x < 0 ou au-delà de la largeur), ni sur une photo (img, picture, svg de carte),
+     ni sur un texte de l'interface. Devant un bloc qui touche le bord de l'écran (cadre d'état pleine largeur, en-tête, photo
+     pleine largeur), elle va dans l'étiquette de l'état (.mq-etat > .mq-pin, en premier) ou dans la gouttière intérieure
+     du bloc (.mq-pin.g) ; dans un <details>, après le <summary> (qui reste le premier enfant) ; dans une <figure>, jamais
+     entre l'image et la figcaption ;
+   - une étiquette « État · … » passe sur deux lignes plutôt que d'être coupée d'une ellipse ;
+   - ordre de la page : l'interface (avec son pied de page du site), puis la zone des autres états (.mq-etats), puis l'encart
+     .mq-notes, en dernier : le pied de page du site est TOUJOURS avant l'encart (sinon, retirer les annotations le déplace) ;
+   - chaque cadre d'autre état est inert (<section class="mq-ecran" inert aria-labelledby="…">) : on n'y tabule pas, ses
+     liens d'exemple ne sont pas des liens de la page ; seul l'écran principal est vivant ;
+   - un seul bloc « Mesures » par encart (.mq-mesures), celui de la dernière passe, daté, sans « à compléter ».
+   Règles de la passe 3 (16 oct.) :
+   - un nom de groupe de boutons radio par cadre : un cadre d'état qui montre un formulaire nomme ses radios à part
+     (name="format-e2"), ou les met dans leur propre <form> ; sinon le navigateur les lie à ceux de l'écran principal, ne coche
+     qu'un bouton pour toute la page, et l'état montré ment (contrôle : dr-work/outils/radios-cadres.py) ;
+   - le contour d'un cadre pleine largeur passe au-dessus de ce qu'il contient (en-tête, barre de filtres collante) : § 2 ;
+   - un cadre « page entière » posé dans la marge du site : .e-plein (§ 2).
+   ===================================================================================================== */
 @font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/ibm-plex-mono-latin-400-normal.woff2) format('woff2'); }
 @font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/ibm-plex-mono-latin-500-normal.woff2) format('woff2'); }
 @font-face { font-family: Jost; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/jost-latin-400-normal.woff2) format('woff2'); }
 @font-face { font-family: Jost; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/jost-latin-500-normal.woff2) format('woff2'); }
 
-/* Pastille numérotée : jaune cerclée de noir, lisible sur fond clair comme sur fond sombre */
+:root {
+  --mq: #ff2e93;        /* magenta d'annotation : 6,1:1 avec le noir de ses chiffres */
+  --mq-encre: #141414;
+  --mq-fond: #fdf0f6;   /* fond de l'encart : 15,6:1 avec --mq-encre */
+  --mq-gris: #5b4752;   /* texte secondaire de l'encart : 7,7:1 */
+  --mq-trait: #b0005a;  /* liens de l'encart : 6,3:1 */
+  --mq-pin: 24px;
+}
+@media (max-width: 767px) { :root { --mq-pin: 18px; } }
+@media (max-width: 359px) { :root { --mq-pin: 14px; } }
+
+/* 1. Pastille. À placer en premier enfant de l'élément commenté : elle se pose à sa position statique sans
+   prendre de place, puis glisse dans la marge de gauche. Variante .d : marge de droite (l'élément commenté
+   porte alors .mq-a, position: relative, sans effet visuel). Jamais sur une photo, jamais sur un texte. */
+.mq-pin { position: absolute; z-index: 60; box-sizing: border-box; display: inline-grid; place-items: center; width: var(--mq-pin); height: var(--mq-pin);
+  margin: 0; translate: calc(-100% - 6px) 0; background: var(--mq); color: var(--mq-encre); border: 2px solid var(--mq-encre); border-radius: 3px;
+  font: 500 12px/1 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: 0; text-transform: none; font-style: normal; text-decoration: none;
+  pointer-events: none; user-select: none; }
+.mq-pin.d { translate: none; left: calc(100% + 6px); top: 0; }
+.mq-a { position: relative; }
+@media (max-width: 767px) { .mq-pin { font-size: 11px; translate: calc(-100% - 2px) 0; border-width: 1.5px; } .mq-pin.d { translate: none; left: calc(100% + 2px); } }
+/* Sous 360 px, la marge du site n'est que de 16 px : la pastille fait 14 px, à 1 px du contenu, et reste dans l'écran. */
+@media (max-width: 359px) { .mq-pin { font-size: 10px; translate: calc(-100% - 1px) 0; border-width: 1px; } .mq-pin.d { left: calc(100% + 1px); } }
+/* Gouttière intérieure d'un bloc pleine largeur (le bloc porte .mq-a) : la pastille se pose dans sa marge de gauche (--gut),
+   à côté du contenu, jamais dessus. */
+.mq-pin.g { translate: none; left: max(2px, calc(var(--gut, 24px) - var(--mq-pin) - 6px)); top: 4px; }
+/* Pastille d'un état : dans son étiquette, avant le texte (jamais en marge d'un cadre pleine largeur). */
+.mq-etat > .mq-pin { position: static; translate: none; display: inline-grid; vertical-align: -3px; width: 18px; height: 18px; margin: 0 8px 0 -2px; font-size: 11px; border-width: 1.5px; }
+
+/* 2. Autre état de l'écran : un cadre pointillé magenta (contour, hors du flux) et son étiquette au-dessus. */
+.mq-ecran { position: relative; outline: 1px dashed var(--mq); outline-offset: 8px; }
+.mq-etat { position: absolute; left: -8px; bottom: calc(100% + 14px); z-index: 60; margin: 0; max-width: calc(100vw - 32px); box-sizing: border-box;
+  padding: 3px 8px; background: var(--mq); color: var(--mq-encre); font: 500 12px/1.4 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .02em; text-transform: none; text-align: left; white-space: normal; overflow-wrap: anywhere;
+  width: max-content; max-width: min(calc(100% + 16px), calc(100vw - 16px)); }
+
+/* Cadre pleine largeur (il touche les bords de l'écran : en-tête, page entière) : contour dedans, étiquette posée sur la
+   gouttière ; sa pastille va dans l'étiquette. Rien ne sort de l'écran. */
+.mq-ecran--plein { outline-offset: -1px; }
+.mq-ecran--plein > .mq-etat { left: max(8px, var(--gut, 16px)); max-width: calc(100vw - 2 * max(8px, var(--gut, 16px))); }
+/* Le contour d'un cadre pleine largeur passe au-dessus de l'en-tête (z-index 20) et de la barre de filtres collante (15)
+   qu'il contient, qui le cachaient (passe 3, d'après MQ-01 à MQ-04) ; retiré avec les autres annotations (§ « Interrupteur »). */
+.mq-ecran--plein::after { content: ''; position: absolute; inset: 0; z-index: 59; outline: 1px dashed var(--mq); outline-offset: -1px; pointer-events: none; }
+/* Cadre « page entière » posé dans la marge du site (.wrap) : il s'élargit jusqu'à 10 px des bords de l'écran, en-tête du site
+   compris ; son contour (à 6 px) et son étiquette restent dans l'écran (passe 3, d'après MQ-13 à MQ-15). */
+.e-plein { margin-inline: calc(10px - var(--gut)); padding-bottom: var(--esp-5); outline-offset: 6px; }
+
+/* 3. Encart « Ce qui change » : toujours en fin de page, toujours le même dessin, indépendant du thème. */
+.mq-notes { margin-top: 96px; padding: 40px max(var(--gut, 24px), 16px) 56px; background: var(--mq-fond); color: var(--mq-encre);
+  border-top: 6px solid var(--mq); font: 400 15px/1.55 Jost, 'Helvetica Neue', Arial, sans-serif; letter-spacing: normal; text-transform: none; color-scheme: light; }
+.mq-notes :focus-visible { outline: 2px solid var(--mq-encre); outline-offset: 3px; }
+.mq-notes .mq-id { margin: 0; font: 400 12px/1.5 'IBM Plex Mono', monospace; color: var(--mq-gris); letter-spacing: .02em; }
+.mq-notes h2 { margin: 6px 0 8px; font: 500 24px/1.25 Jost, sans-serif; color: var(--mq-encre); letter-spacing: 0; text-transform: none; }
+.mq-notes h3 { margin: 32px 0 8px; font: 500 17px/1.3 Jost, sans-serif; color: var(--mq-encre); letter-spacing: 0; text-transform: none; }
+.mq-notes > p, .mq-notes .mq-lead { margin: 0; max-width: 90ch; color: var(--mq-encre); }
+.mq-notes ol.mq-reperes { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 20px 40px; }
+.mq-notes ol.mq-reperes > li { position: relative; padding-left: 36px; }
+.mq-notes .mq-num { position: absolute; left: 0; top: 1px; display: inline-grid; place-items: center; width: 24px; height: 24px; box-sizing: border-box;
+  background: var(--mq); color: var(--mq-encre); border: 2px solid var(--mq-encre); border-radius: 3px; font: 500 12px/1 'IBM Plex Mono', monospace; }
+.mq-notes ol.mq-reperes b { display: block; font-weight: 500; }
+.mq-notes ol.mq-reperes p { margin: 2px 0 0; }
+.mq-notes .mq-ref { display: block; margin-top: 4px; font: 400 12px/1.5 'IBM Plex Mono', monospace; color: var(--mq-gris); }
+.mq-notes .mq-mesures { margin: 32px 0 0; padding-top: 16px; border-top: 1px solid #e3c4d4; font: 400 13px/1.6 'IBM Plex Mono', monospace; color: var(--mq-encre); max-width: 120ch; }
+.mq-notes .mq-mesures b { font-weight: 500; }
+.mq-notes a { color: var(--mq-trait); text-decoration: underline; text-underline-offset: 3px; }
+.mq-notes code { font: 400 13px/1.4 'IBM Plex Mono', monospace; background: #f6dcea; padding: 0 4px; }
+
+/* 4. Bas du premier écran : 900 px au bureau, 839 px sur Pixel 7. */
+.mq-fold { position: absolute; left: 0; right: 0; top: 900px; height: 0; z-index: 60; pointer-events: none; }
+.mq-fold::before, .mq-fold::after { content: ''; position: absolute; top: -1px; width: 16px; border-top: 3px solid var(--mq); }
+.mq-fold::before { left: 0; } .mq-fold::after { right: 0; }
+@media (max-width: 767px) { .mq-fold { top: 839px; } .mq-fold::before, .mq-fold::after { width: 10px; } }
+/* Sous une barre fixe ou collante du bas de l'écran (administration et app de terrain au téléphone), le bas du premier
+   écran est le bord de la barre : le trait se pose juste dessous, jamais sur la barre. */
+@media (max-width: 767px) { .admin .mq-fold::before, .admin .mq-fold::after, .mq-fold.sous::before, .mq-fold.sous::after { top: 4px; } }
+
+/* 5. Liens « Voir cette page sans annotations · Revenir avec les annotations » de l'encart. */
+.mq-notes .mq-bascule { display: inline-flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 12px; }
+.mq-notes .mq-bascule a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* 6. Zone des autres états d'une page du site ou de l'administration (après la page, avant l'encart) : des cadres .mq-ecran les uns sous les
+   autres (.mq-etats), deux colonnes au bureau (.mq-etats--deux : un téléphone de 412 px à gauche), ou une grille
+   (.mq-etats--grille) ; .large prend toute la ligne ; .mq-pile empile des cadres dans une colonne ; .mq-ecran-in est la
+   marge intérieure d'un cadre. Rien de magenta ici : ces cadres montrent l'interface, ils ne la commentent pas. */
+.mq-etats { display: grid; gap: var(--esp-12) var(--esp-8); padding-top: var(--esp-16); align-items: start; }
+.mq-etats > *, .mq-pile > * { min-width: 0; }
+@media (min-width: 1024px) { .mq-etats--deux { grid-template-columns: 412px minmax(0, 1fr); } }
+.mq-etats--grille { column-gap: var(--esp-6); grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr)); }
+.mq-etats .large { grid-column: 1 / -1; }
+.mq-pile { display: grid; gap: var(--esp-12); align-content: start; }
+.mq-ecran.mq-fond { background: var(--paper); }
+.mq-ecran-in { display: grid; gap: var(--esp-3); padding: var(--esp-3) var(--esp-3) var(--esp-4); }
+/* Passe 5 (jury final) : cadre qui touche les bords de l'écran au téléphone (.mq-ecran--plein-tel), comme .mq-ecran--plein, sa marge
+   intérieure ramenée à la gouttière du site : ses listes en rangées ont la largeur de celles de la page (100vw − 48 px sur un téléphone
+   de 412 px) et leurs sizes, ceux de la page, y sont justes (sizes-tel-ecrire.py le mesure). Au-delà de 767 px, un cadre ordinaire. */
+@media (max-width: 767px) {
+  .mq-ecran--plein-tel { margin-inline: calc(-1 * var(--gut, 16px)); outline-offset: -1px; }
+  .mq-ecran--plein-tel > .mq-etat { left: max(8px, var(--gut, 16px)); max-width: calc(100vw - 2 * max(8px, var(--gut, 16px))); }
+  .mq-ecran--plein-tel > .mq-ecran-in { padding-inline: var(--gut, 16px); }
+}
+
+/* Interrupteur « sans annotations » : #sans-annotations dans l'adresse, la classe sur <html>, ou l'impression. */
+html.sans-annotations .mq-pin, html.sans-annotations .mq-etat, html.sans-annotations .mq-fold, html.sans-annotations .mq-notes,
+html:has(#sans-annotations:target) .mq-pin, html:has(#sans-annotations:target) .mq-etat,
+html:has(#sans-annotations:target) .mq-fold, html:has(#sans-annotations:target) .mq-notes { display: none !important; }
+html.sans-annotations .mq-ecran, html:has(#sans-annotations:target) .mq-ecran { outline-color: transparent; }
+html.sans-annotations .mq-ecran--plein::after, html:has(#sans-annotations:target) .mq-ecran--plein::after { display: none; }
+@media print { .mq-pin, .mq-etat, .mq-fold, .pin, .ord, .mq-band, .mq-ecran--plein::after { display: none !important; } .mq-ecran { outline: 0; } }
+
+/* ----- Ancien gabarit (maquettes v0) : gardé pour que les fichiers v0 restent lisibles jusqu'à leur reprise.
+   Ne pas l'employer dans une nouvelle maquette ; à retirer quand les vingt maquettes auront été refaites. ----- */
 .pin { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex: none; border-radius: 50%;
-  background: #f5c84c; color: #111; box-shadow: 0 0 0 2px #111; font: 600 12px/1 'IBM Plex Mono', ui-monospace, monospace;
-  letter-spacing: 0; text-transform: none; font-style: normal; vertical-align: middle; text-decoration: none; margin: 0 6px; position: relative; z-index: 2; }
+  background: #f5c84c; color: #111; box-shadow: 0 0 0 2px #111; font: 600 12px/1 'IBM Plex Mono', ui-monospace, monospace; margin: 0 6px; position: relative; z-index: 2; }
 .pin-abs { position: absolute; z-index: 45; margin: 0; }
 .pin-in { margin-left: 8px; }
-.ord { position: absolute; z-index: 5; top: 8px; left: 8px; padding: 3px 7px; background: #f5c84c; color: #111;
-  font: 600 12px/1.2 'IBM Plex Mono', ui-monospace, monospace; box-shadow: 0 0 0 2px #111; }
-
-/* Repère du bas du premier écran : deux traits dans les marges et une étiquette au bord droit, jamais à travers le texte */
-.mq-fold { position: absolute; left: 0; right: 0; top: 900px; height: 0; z-index: 60; pointer-events: none; }
-.mq-fold::before { content: ''; position: absolute; left: 0; top: -1px; width: 14px; border-top: 2px dashed #f5c84c; }
-.mq-fold span { position: absolute; right: 0; top: -10px; padding: 3px 8px 3px 10px; background: #f5c84c; color: #111;
-  font: 500 11px/14px 'IBM Plex Mono', monospace; letter-spacing: .02em; text-transform: none; }
-@media (max-width: 760px) { .mq-fold { top: 839px; } }
-
-/* Bandeau d'état (facultatif), en tête de page */
+.ord { position: absolute; z-index: 5; top: 8px; left: 8px; padding: 3px 7px; background: #f5c84c; color: #111; font: 600 12px/1.2 'IBM Plex Mono', monospace; box-shadow: 0 0 0 2px #111; }
+.mq-fold span { position: absolute; right: 0; top: -10px; padding: 3px 8px; background: #f5c84c; color: #111; font: 500 11px/14px 'IBM Plex Mono', monospace; }
 .mq-band { margin: 0; padding: 8px 16px; background: #f5c84c; color: #111; font: 400 12px/1.5 'IBM Plex Mono', monospace; letter-spacing: .02em; }
-.mq-band b, .mq-band strong { font-weight: 500; }
-
-/* Planche d'un autre état de l'écran */
 .mq-state { position: relative; margin: 56px var(--gut, 24px) 0; border: 1px dashed currentColor; padding: 0; }
 .mq-state > .mq-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0; padding: 12px 16px; border-bottom: 1px dashed currentColor;
   font: 500 12px/1.4 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
-.mq-state > .mq-label span { text-transform: none; letter-spacing: .02em; font-weight: 400; opacity: .8; }
-
-/* Encart « Ce qui change » */
-.mq-notes { margin-top: 72px; padding: 40px var(--gut, 24px) 56px; background: #f3efe6; color: #1d1c1a; border-top: 6px solid #f5c84c;
-  font: 400 15px/1.55 Jost, 'Helvetica Neue', Arial, sans-serif; letter-spacing: normal; text-transform: none; color-scheme: light; }
-.mq-notes :focus-visible { outline-color: #1d1c1a; }
-.mq-notes .mq-id { margin: 0; font: 400 12px/1.5 'IBM Plex Mono', monospace; color: #5c574e; letter-spacing: .04em; text-transform: none; }
-.mq-notes h2 { margin: 6px 0 4px; font: 500 22px/1.25 Jost, sans-serif; letter-spacing: .01em; color: #1d1c1a; text-transform: none; }
-.mq-notes h3 { margin: 28px 0 8px; font: 500 17px/1.3 Jost, sans-serif; color: #1d1c1a; text-transform: none; letter-spacing: 0; }
-.mq-notes .mq-lead, .mq-notes > p { margin: 0; max-width: 90ch; color: #3a3936; }
-.mq-notes ol { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 18px 44px; }
-.mq-notes ol > li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 0 12px; align-items: start; color: #1d1c1a; font-size: 15px; line-height: 1.55; padding: 0; }
-.mq-notes ol > li::before { content: none; }
-.mq-notes ol > li > :not(.pin) { grid-column: 2; }
-.mq-notes ol > li > .pin { margin: 0; }
-.mq-notes ol > li > p, .mq-notes ol > li > span:not(.pin), .mq-notes ol > li > div { margin: 0; }
-.mq-notes b, .mq-notes strong, .mq-notes li strong { font-weight: 500; color: inherit; }
-.mq-notes code { font: 400 13px/1.4 'IBM Plex Mono', monospace; background: #e6e0d2; padding: 0 4px; }
-.mq-notes .ref, .mq-notes .ref b { color: #5c574e; }
-.mq-notes .ref { display: block; margin-top: 4px; font: 400 12px/1.5 'IBM Plex Mono', monospace; color: #5c574e; }
-.mq-notes .mq-measures { margin: 28px 0 0; padding-top: 16px; border-top: 1px solid #cfc8b8; font: 400 12.5px/1.6 'IBM Plex Mono', monospace; color: #3a3936; max-width: 120ch; }
-.mq-notes .mq-measures b { font-weight: 500; color: #1d1c1a; }
-.mq-notes a { color: #1d1c1a; text-decoration: underline; text-underline-offset: 3px; }
-@media print { .mq-fold, .pin, .ord, .mq-band { display: none !important; } }
-/* Une pastille posée à côté d'un champ ne doit pas le faire passer à la ligne */
-.cmdk > span { white-space: nowrap; }
-/* Planches « autres états » des maquettes de la boutique, posées avant l'encart */
+.mq-notes ol:not(.mq-reperes) { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 18px 44px; }
+.mq-notes ol:not(.mq-reperes) > li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 0 12px; align-items: start; }
+.mq-notes ol:not(.mq-reperes) > li > :not(.pin) { grid-column: 2; }
+.mq-notes ol:not(.mq-reperes) > li > .pin { margin: 0; }
+.mq-notes .ref { display: block; margin-top: 4px; font: 400 12px/1.5 'IBM Plex Mono', monospace; color: var(--mq-gris); }
+.mq-notes .mq-measures { margin: 28px 0 0; padding-top: 16px; border-top: 1px solid #e3c4d4; font: 400 12.5px/1.6 'IBM Plex Mono', monospace; }
 .mq-etats-bloc { margin-top: 56px; }
-.mq-notes .mq-socle { margin-top: 20px; }
+.cmdk > span { white-space: nowrap; }

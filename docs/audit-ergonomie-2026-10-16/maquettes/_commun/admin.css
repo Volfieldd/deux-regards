@@ -11,6 +11,8 @@
 :root {
   color-scheme: dark;
   --bg: #0b0b0c; --s1: #121214; --s2: #18181b; --s3: #202024; --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.13);
+  /* Bord des champs de saisie : ≥ 3:1 sur le champ et sur le panneau (WCAG 1.4.11) ; --line2 reste décoratif. */
+  --field-line: #7a766e;
   --ink: #eeece7; --ink2: #a9a59c; --ink3: #8a857c;
   --accent: #f0a94c; --on-accent: #1b1206; --accent-ink: #f0a94c; --accent-soft: rgba(240,169,76,.14);
   /* États lisibles par un daltonien (deutéranope compris) : bleu / jaune / vermillon (palette Okabe-Ito), jamais
@@ -22,7 +24,7 @@
 }
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f6f4ef; --s1: #ffffff; --s2: #f1eee8; --s3: #e8e4dc; --line: rgba(20,18,14,.08); --line2: rgba(20,18,14,.15);
+  --bg: #f6f4ef; --s1: #ffffff; --s2: #f1eee8; --s3: #e8e4dc; --line: rgba(20,18,14,.08); --line2: rgba(20,18,14,.15); --field-line: #857f75;
   --ink: #1b1a17; --ink2: #55514a; --ink3: #6b665d;
   --accent-ink: #9a5b0c; --accent-soft: rgba(240,169,76,.20);
   --ok: #0067a3; --warn: #6e6000; --danger: #b2410a; --on-danger: #ffffff; --danger-soft: rgba(178,65,10,.08);
@@ -31,7 +33,7 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-theme]) {
     color-scheme: light;
-    --bg: #f6f4ef; --s1: #ffffff; --s2: #f1eee8; --s3: #e8e4dc; --line: rgba(20,18,14,.08); --line2: rgba(20,18,14,.15);
+    --bg: #f6f4ef; --s1: #ffffff; --s2: #f1eee8; --s3: #e8e4dc; --line: rgba(20,18,14,.08); --line2: rgba(20,18,14,.15); --field-line: #857f75;
     --ink: #1b1a17; --ink2: #55514a; --ink3: #6b665d;
     --accent-ink: #9a5b0c; --accent-soft: rgba(240,169,76,.20);
     --ok: #0067a3; --warn: #6e6000; --danger: #b2410a; --on-danger: #ffffff; --danger-soft: rgba(178,65,10,.08);
@@ -132,11 +134,12 @@ fieldset.row legend { font: inherit; padding: 0; margin-bottom: 6px; color: var(
 label { display: grid; gap: 6px; color: var(--ink2); font-size: 13px; }
 label.inline { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-size: 14px; }
 input:not([type]), input[type="text"], input[type="search"], input[type="password"], input[type="number"], input[type="email"], input[type="date"], input[type="time"], select, textarea {
-  width: 100%; min-height: 40px; padding: 9px 12px; border: 0; border-radius: 9px; background: var(--s2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line2); font-size: 14px;
+  width: 100%; min-height: 40px; padding: 9px 12px; border: 0; border-radius: 9px; background: var(--s2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--field-line); font-size: 14px;
 }
 textarea { resize: vertical; min-height: 80px; }
 select { appearance: none; padding-right: 32px; background-image: linear-gradient(45deg, transparent 50%, var(--ink3) 50%), linear-gradient(135deg, var(--ink3) 50%, transparent 50%); background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
-input:focus, select:focus, textarea:focus { outline: none; box-shadow: inset 0 0 0 1.5px var(--accent), 0 0 0 4px var(--accent-soft); }
+/* Champ actif : --accent-ink (4,7:1 en mode clair ; --accent n'y fait que 1,7:1). */
+input:focus, select:focus, textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent-ink), 0 0 0 4px var(--accent-soft); }
 [aria-invalid="true"] { box-shadow: inset 0 0 0 1.5px var(--danger) !important; }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; }
 input[type="file"] { font-size: 13px; color: var(--ink2); }
@@ -165,6 +168,8 @@ input[type="file"] { font-size: 13px; color: var(--ink2); }
 .toast.error { background: var(--danger); color: #fff; }
 .toast button { background: var(--bg); color: var(--ink); border-radius: 8px; min-height: 30px; padding: 0 12px; font-size: 12.5px; font-weight: 500; }
 .toast:not(:has(button)) { padding-right: 16px; }
+/* Vide : hors de la vue mais toujours rendu, pour que le message écrit ensuite soit annoncé (région live). */
+.toast:empty { padding: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); box-shadow: none; }
 
 /* ---------- barre d'outils, pastilles ---------- */
 .toolbar { display: flex; justify-content: space-between; align-items: end; gap: 12px 16px; flex-wrap: wrap; margin: 0 0 18px; }
@@ -286,8 +291,8 @@ body.dropping .canvas { outline: 2px dashed var(--accent); outline-offset: -10px
 .pill { min-height: 32px; padding: 0 12px; border-radius: 999px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); display: inline-flex; align-items: center; gap: 7px; color: var(--ink2); font-size: 13px; }
 .pill:hover { color: var(--ink); }
 .pill[aria-pressed="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--ink); }
-.insp .big-title { font-weight: 300; font-size: 26px; line-height: 1.15; width: 100%; background: transparent !important; box-shadow: none !important; padding: 2px 0 !important; min-height: 0 !important; border-bottom: 1px dashed var(--line2) !important; border-radius: 0 !important; }
-.insp .big-title:focus { border-bottom: 1.5px solid var(--accent) !important; }
+.insp .big-title { font-weight: 300; font-size: 26px; line-height: 1.15; width: 100%; background: transparent !important; box-shadow: none !important; padding: 2px 0 !important; min-height: 0 !important; border-bottom: 1px dashed var(--field-line) !important; border-radius: 0 !important; }
+.insp .big-title:focus { border-bottom: 2px solid var(--accent-ink) !important; }
 .preview-one { border-radius: 8px; overflow: hidden; background: var(--photo-bg); margin: 16px 20px 0; aspect-ratio: 3 / 2; display: grid; place-items: center; }
 .preview-one img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 13px; }
@@ -772,7 +777,7 @@ code.mono, .mono code { color: var(--ink2); }
 .ig-meters meter { grid-column: 1 / -1; width: 100%; height: 8px; }
 .ig-main { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; margin-bottom: 16px; }
 .ig-side { display: grid; gap: 16px; }
-.igq-n { color: var(--muted); }
+.igq-n { color: var(--ink3); }
 .ig-progress { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
 .ig-progress progress { width: min(260px, 100%); height: 10px; }
 .ig-progress.done-ok [data-ig-progress-label]::before { content: '✓ '; }
@@ -1153,6 +1158,3 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .desc-sugg { border-left: 2px dashed var(--line2); padding: 2px 0 2px 12px; margin: -2px 0 8px; display: grid; gap: 4px; }
 .desc-sugg p { margin: 0; }
 .desc-sugg .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-
-/* Symboles d'état en SVG en ligne (forme + mot), indépendants de la police (audit, MQ-09) */
-svg.sy, svg.sym { display: inline-block; flex: none; width: 12px; height: 12px; vertical-align: -1px; }
