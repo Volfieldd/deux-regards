@@ -19,13 +19,16 @@ export function loadVigieConfig(env = process.env) {
   const issuer = env.VIGIE_ZITADEL_ISSUER ? env.VIGIE_ZITADEL_ISSUER.replace(/\/+$/, '') : null;
   if (issuer && !issuer.startsWith('https://')) throw new Error('VIGIE_ZITADEL_ISSUER doit être en https://');
   if (issuer && !env.VIGIE_ZITADEL_KEY_FILE) throw new Error('VIGIE_ZITADEL_KEY_FILE est obligatoire avec VIGIE_ZITADEL_ISSUER');
+  const ingestKey = key32(env, 'VIGIE_INGEST_KEY'), logKey = key32(env, 'VIGIE_LOG_KEY');
+  // Clé du journal distincte de celle des envois : le site (qui a la seconde) ne doit pas pouvoir refaire la chaîne.
+  if (ingestKey === logKey) throw new Error('VIGIE_LOG_KEY doit être différente de VIGIE_INGEST_KEY');
   return {
     dataDir,
     databasePath: path.resolve(env.VIGIE_DATABASE || path.join(dataDir, 'vigie.db')),
     host: env.VIGIE_HOST || '0.0.0.0',
     ingestPort: int(env.VIGIE_INGEST_PORT, 4100, 0, 65535),              // 0 : port libre (tests)
-    ingestKey: key32(env, 'VIGIE_INGEST_KEY'),
-    logKey: key32(env, 'VIGIE_LOG_KEY'),
+    ingestKey,
+    logKey,
     decisionsKey: decisionsKey(need(env, 'VIGIE_DECISIONS_PRIVATE_KEY')),
     retentionDays: int(env.VIGIE_RETENTION_DAYS, 183, 30, 400),
     zitadel: issuer ? { issuer, keyFile: env.VIGIE_ZITADEL_KEY_FILE, intervalMs: int(env.VIGIE_ZITADEL_INTERVAL_S, 60, 30, 3600) * 1000 } : null,

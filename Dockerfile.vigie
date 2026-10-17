@@ -24,5 +24,5 @@ USER node
 EXPOSE 4100
 STOPSIGNAL SIGTERM
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:'+(process.env.VIGIE_INGEST_PORT||4100)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  CMD node -e "const h=process.env.VIGIE_HOST&&process.env.VIGIE_HOST!=='0.0.0.0'?process.env.VIGIE_HOST:'127.0.0.1';fetch('http://'+h+':'+(process.env.VIGIE_INGEST_PORT||4100)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 CMD ["node", "vigie/index.js"]

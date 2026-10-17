@@ -24,18 +24,50 @@ export function pubkeyOf(b64) {
   return key;
 }
 
+// Plages IPv6 qui contiennent tout l'IPv4 (IPv4 dans IPv6, NAT64, 6to4) et plages locales : jamais bloquées (une seule
+// entrée ne doit pas pouvoir couper tous les visiteurs IPv4, ni la vérification de santé).
+const V6_IPV4 = new net.BlockList();
+const V6_BASES = [['::ffff:0:0', 96], ['::', 96], ['64:ff9b::', 96], ['2002::', 16]];
+for (const [a, p] of V6_BASES) V6_IPV4.addSubnet(a, p, 'ipv6');
+const LOCAL = new net.BlockList();
+LOCAL.addSubnet('127.0.0.0', 8, 'ipv4'); LOCAL.addSubnet('0.0.0.0', 8, 'ipv4'); LOCAL.addAddress('::1', 'ipv6');
+const MAX_IPV4 = 2 ** 24;                                         // l'équivalent d'un /8 au plus, au total
 const cidr = s => {
   const m = /^([^/]+)\/(\d{1,3})$/.exec(String(s || ''));
   const v = m && net.isIP(m[1]);
   if (!v) return null;
   const p = Number(m[2]);
   if (v === 4 ? p < 8 || p > 32 : p < 32 || p > 128) return null;
-  return { address: m[1], prefix: p, type: v === 4 ? 'ipv4' : 'ipv6' };
+  const type = v === 4 ? 'ipv4' : 'ipv6';
+  if (LOCAL.check(m[1], type)) return null;
+  if (v === 6) {
+    const t = new net.BlockList(); t.addSubnet(m[1], p, 'ipv6');
+    if (V6_IPV4.check(m[1], 'ipv6') || V6_BASES.some(([a]) => t.check(a, 'ipv6'))) return null;
+  }
+  return { address: m[1], prefix: p, type, size: v === 4 ? 2 ** (32 - p) : 0 };
 };
+const SESSION_PREFIX = /^[0-9a-f]{12,64}$/;
+
+// Corps lu par morceaux, abandonné au-delà de max octets (une Vigie malveillante ne remplit pas la mémoire du site).
+async function readLimited(res, max) {
+  if (!res.body?.getReader) { const t = await res.text(); if (t.length > max) throw new Error('réponse trop grande'); return t; }
+  const reader = res.body.getReader();
+  const chunks = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) { await reader.cancel().catch(() => {}); throw new Error('liste de décisions trop grande'); }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
 const ipType = ip => (net.isIPv4(ip) ? 'ipv4' : net.isIPv6(ip) ? 'ipv6' : null);
 const plainIp = ip => (String(ip).startsWith('::ffff:') && net.isIPv4(String(ip).slice(7)) ? String(ip).slice(7) : String(ip));
 
-export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply = true, fetchImpl = fetch, now = Date.now, onApplied = () => {} }) {
+export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply = true, adminSubs = [], fetchImpl = fetch, now = Date.now, onApplied = () => {} }) {
+  const owners = new Set(adminSubs);                // ADMIN_SUBS : jamais gelés ni tenus dehors par un verrouillage
   const cacheFile = path.join(storageDir, 'securite-decisions.json');
   let state = null;                    // { version, emis_a, lists… }
   let running = false, timer = null, controller = null;
@@ -45,29 +77,39 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     if (!signed || typeof signed.payload !== 'string' || typeof signed.signature !== 'string') throw new Error('réponse sans signature');
     if (!crypto.verify(null, Buffer.from(signed.payload), pubkey, Buffer.from(signed.signature, 'base64'))) throw new Error('signature des décisions fausse');
     const p = JSON.parse(signed.payload);
-    if (state && p.emis_a < state.emis_a) throw new Error('liste plus ancienne que celle en place');
     const t = now();
+    if (!Number.isSafeInteger(p.version) || p.version < 0) throw new Error('numéro de liste invalide');
+    if (!Number.isFinite(p.emis_a) || p.emis_a > t + 5 * 60e3) throw new Error('liste datée dans le futur');
+    // Plus ancienne que celle en place : refusée, sauf si elle est fraîche à notre horloge (horloge de la Vigie revenue
+    // en arrière, base de la Vigie restaurée) — jamais bloqué sur une vieille liste.
+    if (state && p.emis_a < state.emis_a && t - p.emis_a > 5 * 60e3) throw new Error('liste plus ancienne que celle en place');
+    if (state && signed.payload === state.payload) return state;               // même liste (attente longue écoulée)
     const cap = (fin, max) => Math.min(Number(fin) || 0, t + max);
     const all = [...(p.blocages || []), ...(p.sessions || []), ...(p.comptes || []), ...(p.gels || [])];
     if (all.length > 10_000) throw new Error('trop de décisions (10 000 au plus)');
     const raw = [];
+    let ipv4 = 0;
     for (const b of p.blocages || []) {
       const c = cidr(b.cible);
       if (!c) throw new Error(`réseau refusé : ${b.cible}`);
       if (!SCOPES.has(b.portee)) throw new Error(`portée inconnue : ${b.portee}`);
+      ipv4 += c.size;
       raw.push({ ...c, portee: b.portee, fin: cap(b.fin, MAX.bloquer) });
     }
+    if (ipv4 > MAX_IPV4) throw new Error('trop d’adresses IPv4 bloquées au total');
+    for (const s of p.sessions || []) if (!SESSION_PREFIX.test(String(s.prefixe))) throw new Error('empreinte de session invalide');
     const lock = p.verrouillage && cap(p.verrouillage.fin, MAX.verrou) > t ? {
       fin: cap(p.verrouillage.fin, MAX.verrou),
       comptes: new Set((p.verrouillage.comptes || []).map(String)),
       adresses: (() => { const l = new net.BlockList(); for (const a of p.verrouillage.adresses || []) { const c = cidr(a); if (c) l.addSubnet(c.address, c.prefix, c.type); } return l; })(),
     } : null;
     if (lock && !lock.comptes.size && !(p.verrouillage.adresses || []).length) throw new Error('verrouillage sans aucun compte ni adresse autorisés');
-    const live = (list, max) => new Map((list || []).map(x => [x.key, cap(x.fin, max)]).filter(([, f]) => f > t));
+    // Plusieurs décisions sur la même cible : la plus longue l'emporte.
+    const live = (list, max) => { const m = new Map(); for (const x of list || []) { const f = cap(x.fin, max); if (f > t && f > (m.get(x.key) || 0)) m.set(x.key, f); } return m; };
     state = {
-      version: p.version, emis_a: p.emis_a, raw, blocks: null, nextExpiry: 0,
+      version: p.version, emis_a: p.emis_a, payload: signed.payload, raw, blocks: null, nextExpiry: 0,
       sessions: live((p.sessions || []).map(s => ({ key: String(s.prefixe), fin: s.fin })), MAX.session),
-      comptes: new Map((p.comptes || []).filter(c => cap(c.fin, MAX.compte) > t).map(c => [String(c.sub), { avant: Number(c.avant) || 0, fin: cap(c.fin, MAX.compte) }])),
+      comptes: (() => { const m = new Map(); for (const c of p.comptes || []) { const fin = cap(c.fin, MAX.compte), k = String(c.sub), prev = m.get(k); if (fin > t) m.set(k, { avant: Math.max(Number(c.avant) || 0, prev?.avant || 0), fin: Math.max(fin, prev?.fin || 0) }); } return m; })(),
       gels: live((p.gels || []).map(g => ({ key: String(g.sub), fin: g.fin })), MAX.gel),
       lock,
       counts: { blocages: (p.blocages || []).length, sessions: (p.sessions || []).length, comptes: (p.comptes || []).length, gels: (p.gels || []).length, verrouillage: Boolean(lock) },
@@ -106,9 +148,8 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     const t = setTimeout(() => controller.abort(), 35000);
     try {
       const res = await fetchImpl(`${url}${p}`, { headers: signedGet(p), redirect: 'manual', signal: controller.signal });
-      const text = await res.text();
-      if (res.status !== 200) throw new Error(`Vigie : réponse ${res.status}`);
-      if (text.length > 4 * 1024 * 1024) throw new Error('liste de décisions trop grande');
+      if (res.status !== 200) { await res.body?.cancel?.().catch(() => {}); throw new Error(`Vigie : réponse ${res.status}`); }
+      const text = await readLimited(res, 4 * 1024 * 1024);
       return accept(JSON.parse(text));
     } finally { clearTimeout(t); }
   }
@@ -120,8 +161,10 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     poll,
     accept,
     get state() { return state; },
-    // Adresse bloquée pour ce chemin ? Renvoie la portée, ou null.
+    // Adresse bloquée pour ce chemin ? Renvoie la portée, ou null. pathname : gabarit de la route ou chemin décodé
+    // (jamais l'adresse brute, que le routeur décode : « /%61dmin » est « /admin »).
     blocked(ip, pathname) {
+      if (pathname === '/healthz') return null;
       if (!on()) return null;
       if (t() >= state.nextExpiry) build(t());
       if (!state.blocks) return null;
@@ -132,21 +175,23 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
       if (/^\/auth\//.test(pathname) && state.blocks.auth.check(a, type)) return 'auth';
       return null;
     },
-    // Session à fermer ? (empreinte révoquée, compte révoqué avant sa création, compte gelé)
-    sessionDenied(session) {
+    // Session à fermer ? (empreinte révoquée, compte révoqué avant sa création, compte gelé, admin verrouillée pour ce
+    // compte et cette adresse)
+    sessionDenied(session, ip) {
       if (!on() || !session) return null;
       const id = String(session.id || '');
       for (const [prefix, fin] of state.sessions) if (fin > t() && id.startsWith(prefix)) return 'session révoquée';
       const c = live(state.comptes, session.sub);
       if (c && session.created_at < c.avant) return 'sessions du compte révoquées';
-      if (live(state.gels, session.sub)) return 'compte gelé';
+      if (this.frozen(session.sub)) return 'compte gelé';
+      if (this.lockAllows(session.sub, ip) === false) return 'administration verrouillée';
       return null;
     },
-    frozen: sub => Boolean(on() && live(state.gels, sub)),
+    frozen: sub => Boolean(on() && !owners.has(sub) && live(state.gels, sub)),
     // Verrouillage de l'admin : null (pas de verrouillage) ; sinon vrai si ce compte ou cette adresse peut entrer.
     lockAllows(sub, ip) {
       if (!on() || !state.lock || state.lock.fin <= t()) return null;
-      if (sub && state.lock.comptes.has(sub)) return true;
+      if (sub && (state.lock.comptes.has(sub) || owners.has(sub))) return true;
       const a = plainIp(ip), type = ipType(a);
       return Boolean(type && state.lock.adresses.check(a, type));
     },

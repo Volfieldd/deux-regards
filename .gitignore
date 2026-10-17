@@ -5,3 +5,6 @@ storage/
 *.db-shm
 *.db-wal
 *.tar.gz
+vigie.env
+**/vigie.env
+zitadel*.json

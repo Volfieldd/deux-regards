@@ -1,3 +1,4 @@
+import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pubkeyOf } from './securite/decisions.js';
@@ -103,8 +104,11 @@ export function loadConfig(env = process.env) {
     // En clair (http) seulement sur un réseau interne : nom de service Docker (sans point), adresse privée ou locale, ou
     // nom en .internal / .local. Ailleurs, HTTPS : les événements portent des adresses IP complètes.
     const host = u.hostname.replace(/^\[|\]$/g, '');
-    const internal = !host.includes('.') && !host.includes(':') || /\.(?:internal|local|lan)$/i.test(host)
-      || /^(?:10\.|127\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)/.test(host) || /^(?:::1|f[cd][0-9a-f]{2}:|fe80:)/i.test(host);
+    // Adresse privée écrite telle quelle (vérifiée par net.isIP), ou nom de service Docker sans point.
+    const v = net.isIP(host);
+    const internal = (!v && /^[a-z0-9-]+$/i.test(host))
+      || (v === 4 && /^(?:10\.|127\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)/.test(host))
+      || (v === 6 && /^(?:::1$|f[cd][0-9a-f]{2}:|fe80:)/i.test(host));
     if (u.protocol === 'http:' && !internal) throw new Error('VIGIE_URL en http:// seulement sur un réseau interne (nom de service Docker, adresse privée) ; sinon https://');
     const ingestKey = env.VIGIE_INGEST_KEY || '';
     if (!ingestKey) throw new Error('VIGIE_INGEST_KEY est obligatoire avec VIGIE_URL (openssl rand -base64 32)');

@@ -69,7 +69,7 @@ export function createSecurite({ url, key, storageDir, log, send = null, now = D
 
   const post = send || (async (body, headers) => {
     const res = await fetch(endpoint, { method: 'POST', body, headers, redirect: 'manual', signal: AbortSignal.timeout(TIMEOUT_MS) });
-    await res.arrayBuffer().catch(() => {});
+    await res.body?.cancel?.().catch(() => {});                     // réponse jamais lue (rien d'utile, taille inconnue)
     if (res.status >= 200 && res.status < 300) return;
     // Refus du contenu du lot (400, 413, 422) : inutile de le renvoyer. 401 (clé ou horloge à régler) : on garde.
     const refused = [400, 413, 422].includes(res.status);

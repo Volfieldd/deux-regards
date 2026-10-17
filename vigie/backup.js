@@ -27,6 +27,8 @@ if (isMain) {
   const opts = { databasePath: path.resolve(process.env.VIGIE_DATABASE || path.join(dataDir, 'vigie.db')), backupDir: process.env.VIGIE_BACKUP_DIR,
     keep: Number.parseInt(process.env.VIGIE_BACKUP_KEEP, 10) || 14 };
   const once = () => { try { console.log(JSON.stringify(backupVigie(opts))); } catch (err) { console.error(`Sauvegarde refusée : ${err.message}`); process.exitCode = 1; } };
-  once();
-  if (process.argv.includes('--loop')) setInterval(once, (Number(process.env.VIGIE_BACKUP_INTERVAL_HOURS) || 24) * 3600e3);
+  // En boucle : une sauvegarde par intervalle ; après un échec (base pas encore créée au premier démarrage), nouvel
+  // essai une heure plus tard.
+  const loop = () => { once(); setTimeout(loop, (process.exitCode ? 1 : Number(process.env.VIGIE_BACKUP_INTERVAL_HOURS) || 24) * 3600e3); process.exitCode = 0; };
+  if (process.argv.includes('--loop')) loop(); else once();
 }

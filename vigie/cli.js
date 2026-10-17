@@ -21,7 +21,7 @@ const HELP = `Commandes :
   geler <sub> [--duree 24h] [--motif "…"]  compte traité comme désactivé sur le site
   verrouiller --comptes <sub,…> [--adresses <ip,…>] [--duree 12h] [--motif "…"]
   lever <id> | lever --tout
-  interrupteur <detection|alertes|blocages> <marche|arret> [--duree 2h]`;
+  interrupteur <detection|alertes|blocages> marche | arret --duree 2h   (7j au plus)`;
 
 function args(argv) {
   const pos = [], opt = {};
@@ -40,7 +40,10 @@ export function keys() {
   };
 }
 
-export function run(argv, { config, now = Date.now, user = os.userInfo().username } = {}) {
+// Utilisateur du système pour le journal : le conteneur tourne sous un identifiant sans nom (99) ; jamais d'erreur.
+const whoami = () => { try { return os.userInfo().username; } catch { return process.env.USER || `uid ${process.getuid?.() ?? '?'}`; } };
+
+export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
   const { pos, opt } = args(argv);
   const [cmd, ...rest] = pos;
   if (!cmd || cmd === 'aide' || cmd === 'help') return HELP;
@@ -53,7 +56,7 @@ export function run(argv, { config, now = Date.now, user = os.userInfo().usernam
   }
   const db = openVigieDb(config.databasePath);
   try {
-    const store = createStore({ db, logKey: config.logKey, now });
+    const store = createStore({ db, logKey: config.logKey, retentionDays: config.retentionDays, now });
     const decisions = createDecisions({ store, privateKey: config.decisionsKey, now });
     const switches = createSwitches({ store, now });
     const par = `ligne de commande (${user})`;
@@ -72,7 +75,7 @@ export function run(argv, { config, now = Date.now, user = os.userInfo().usernam
           `Décisions actives :\n${list()}`,
         ].join('\n');
       }
-      case 'verifier': { const r = store.verify(); store.setting.set('chaine_verifiee', { at: now(), ...r }); if (!r.ok) store.own('log_integrity_fail', { emetteur: par, detail: r.rupture }); return r.ok ? `Chaîne intacte (${r.lignes} lignes).` : `CHAÎNE ROMPUE : ${r.rupture.raison}, ligne ${r.rupture.seq}.`; }
+      case 'verifier': { const r = store.verify(); store.setting.set('chaine_verifiee', { at: now(), ...r }); if (!r.ok) store.own('log_integrity_fail', { emetteur: par, detail: { ruptures: r.ruptures } }); return r.ok ? `Chaîne intacte (${r.lignes} lignes).` : `CHAÎNE ROMPUE :\n${r.ruptures.map(x => `  ligne ${x.seq} : ${x.raison}`).join('\n')}`; }
       case 'decisions': return list();
       case 'bloquer': return `Décision #${decisions.create({ kind: 'bloquer', cible: rest[0], portee: opt.portee || 'tout', duree: opt.duree || '24h', motif, par })} : ${rest[0]} bloqué.`;
       case 'revoquer-session': return `Décision #${decisions.create({ kind: 'revoquer_session', cible: rest[0], duree: opt.duree || '48h', motif, par })} : session révoquée.`;

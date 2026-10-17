@@ -544,10 +544,10 @@ test('N1 : même famille de navigateur, autre empreinte (langues, plateforme) : 
 });
 
 test('N2 : VIGIE_URL en clair seulement sur un réseau interne', () => {
-  for (const ok of ['http://vigie:4100', 'http://127.0.0.1:4100', 'http://172.29.42.20:4100', 'http://10.0.0.5', 'http://vigie.internal:4100', 'http://[::1]:4100', 'https://vigie.example.org']) {
+  for (const ok of ['http://vigie:4100', 'http://vigie-reception:4100', 'http://127.0.0.1:4100', 'http://172.29.42.20:4100', 'http://10.0.0.5', 'http://[::1]:4100', 'https://vigie.example.org']) {
     assert.equal(loadConfig({ VIGIE_URL: ok, VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 }).vigie.url.startsWith(ok.replace(/\/$/, '').slice(0, 10)), true, ok);
   }
-  for (const bad of ['http://vigie.example.org', 'http://203.0.113.5:4100', 'http://172.32.0.1']) {
+  for (const bad of ['http://vigie.example.org', 'http://203.0.113.5:4100', 'http://172.32.0.1', 'http://10.evil.com', 'http://192.168.0.1.nip.io', 'http://evil.lan', 'http://vigie.internal:4100']) {
     assert.throws(() => loadConfig({ VIGIE_URL: bad, VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 }), /réseau interne/, bad);
   }
 });

@@ -135,7 +135,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       return;
     }
     // Décision de la Vigie (session révoquée, sessions du compte révoquées, compte gelé) : la session est fermée.
-    const denied = app.decisions?.sessionDenied(request.session);
+    const denied = app.decisions?.sessionDenied(request.session, request.ip);
     if (denied) {
       securite.emit('session_destroyed', { request, emetteur: 'server/auth.js · décision de la Vigie', detail: { motif: denied } });
       sessions.destroy(token);

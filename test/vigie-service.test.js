@@ -79,8 +79,8 @@ test('chaîne : intacte, puis ligne modifiée, ligne effacée, dernières lignes
   assert.deepEqual(v.store.verify(), { ok: true, lignes: 5 });
   // Purge (6 mois plus tard) : les plus anciennes partent, la chaîne reste vérifiable depuis l'ancre.
   clock += 183 * 864e5 - 2.5 * 864e5;
-  assert.equal(v.store.purge(183), 3);
-  assert.deepEqual(v.store.verify(), { ok: true, lignes: 2 });
+  assert.equal(v.store.purge(), 3);
+  assert.deepEqual(v.store.verify(), { ok: true, lignes: 3 }, 'deux lignes gardées et la purge, chaînée');
   v.store.own('vigie_demarrage', {});
   v.db.prepare("UPDATE events SET severity = 'info', detail = '{}' WHERE seq = (SELECT MAX(seq) - 1 FROM events)").run();
   assert.equal(v.store.verify().rupture.raison, 'ligne modifiée ou insérée');
@@ -107,7 +107,9 @@ test('décisions : bornées, jamais tout le monde, signées ; attente longue ren
   const version = v.decisions.version();
   const url = `/v1/decisions?depuis=${version}`;
   const waiting = v.ingest.inject({ method: 'GET', url, headers: signed(`GET ${url}`) });
-  setTimeout(() => v.decisions.create({ kind: 'geler', cible: 'zitadel-x', duree: '1h', par: 'test' }), 50);
+  // La décision n'arrive qu'une fois l'attente installée (jamais un délai fixe : la machine peut être chargée).
+  while (!v.decisions.events.listenerCount('change')) await new Promise(r => setTimeout(r, 5));
+  v.decisions.create({ kind: 'geler', cible: 'zitadel-x', duree: '1h', par: 'test' });
   const res = await waiting;
   assert.equal(res.statusCode, 200);
   assert.equal(JSON.parse(res.json().payload).gels[0].sub, 'zitadel-x');
@@ -249,4 +251,140 @@ test('site : VIGIE_APPLIQUER=0 lit les décisions sans les appliquer ; une liste
   assert.equal((await c.app.inject({ url: '/', remoteAddress: '192.0.2.9' })).statusCode, 200);
   assert.throws(() => c.app.decisions.accept(sign(JSON.stringify({ ...p, emis_a: Date.now() + 1, blocages: [{ cible: '0.0.0.0/0', portee: 'tout', fin: Date.now() + 1 }] }))), /réseau refusé/);
   assert.throws(() => c.app.decisions.accept(sign(JSON.stringify({ ...p, emis_a: 1 }))), /plus ancienne/);
+});
+
+// ---------- revue de la phase B (17 octobre 2026) ----------
+
+test('revue B : ancre recopiée, fin du journal effacée, demi-caractère UTF-16 — la vérification voit tout et continue', async t => {
+  let clock = Date.parse('2026-01-01T00:00:00Z');
+  const v = vigieOf(t, { now: () => clock });
+  for (let i = 0; i < 6; i++) { v.store.own('vigie_demarrage', { detail: { i } }); clock += 864e5; }
+  // Demi-caractère (lot du site ou réponse de Zitadel) : la ligne relue donne le même maillon.
+  v.store.add([{ id: crypto.randomUUID(), type: 'malicious_input', severity: 'moyen', composant: 'site · public', canal: 'ingestion signée', confiance: 'rapporté', ua: 'Mozilla \ud800 x', sub: 'a\udc00b', reference: 123 }]);
+  assert.deepEqual(v.store.verify(), { ok: true, lignes: 7 });
+  // Effacer le début et recopier l'ancre depuis la base : falsifiée.
+  const row = v.db.prepare('SELECT seq, chain, recu_a FROM events WHERE seq = 3').get();
+  v.db.prepare('DELETE FROM events WHERE seq <= 3').run();
+  v.db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('chaine_ancre', ?)").run(JSON.stringify(row));
+  assert.equal(v.store.verify().rupture.raison, 'ancre de purge falsifiée');
+  // Fin effacée et compteur remis en arrière : la tête publiée le dit.
+  const v2 = vigieOf(t);
+  for (let i = 0; i < 4; i++) v2.store.own('vigie_demarrage', {});
+  v2.store.head();
+  v2.db.prepare('DELETE FROM events WHERE seq >= 3').run();
+  v2.db.prepare("UPDATE sqlite_sequence SET seq = 2 WHERE name = 'events'").run();
+  assert.equal(v2.store.verify().rupture.raison, 'journal plus court que sa dernière tête publiée');
+  // Plusieurs ruptures : toutes listées (la première n'aveugle pas la suite).
+  const v3 = vigieOf(t);
+  for (let i = 0; i < 5; i++) v3.store.own('vigie_demarrage', {});
+  v3.db.prepare("UPDATE events SET emetteur = 'x' WHERE seq IN (2, 4)").run();
+  assert.deepEqual(v3.store.verify().ruptures.map(r => r.seq), [2, 4], 'chaque ligne abîmée, et seulement elles');
+});
+
+test('revue B : purge signée et chaînée ; décision écrite à la main jamais signée pour le site', async t => {
+  let clock = Date.parse('2026-01-01T00:00:00Z');
+  const v = vigieOf(t, { now: () => clock });
+  for (let i = 0; i < 3; i++) { v.store.own('vigie_demarrage', {}); clock += 864e5; }
+  clock += 200 * 864e5;
+  assert.equal(v.store.purge(), 3);
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_purge'").pluck().get(), 1);
+  assert.equal(v.store.verify().ok, true);
+  v.db.prepare("INSERT INTO decisions (kind, cible, portee, motif, par, cree_a, fin) VALUES ('bloquer', '192.0.2.0/24', 'tout', '', 'intrus', ?, ?)").run(clock, clock + 3600e3);
+  const list = JSON.parse(v.decisions.signed().payload);
+  assert.deepEqual(list.blocages, []);
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'log_integrity_fail'").pluck().get(), 1);
+  // Une décision levée à la main dans la base : signature fausse, écartée aussi (et signalée).
+  const id = v.decisions.create({ kind: 'geler', cible: 'x', duree: '1h', par: 'test' });
+  v.db.prepare('UPDATE decisions SET fin = fin + 864e5 WHERE id = ?').run(id);
+  assert.deepEqual(JSON.parse(v.decisions.signed().payload).gels, []);
+});
+
+test('revue B : jamais tout le monde — IPv4 dans IPv6, boucle locale, plus d’un /8, préfixe de session vide', async t => {
+  const v = vigieOf(t);
+  for (const bad of ['::ffff:0:0/96', '::/32', '64:ff9b::/96', '2002:c000:0200::/48', '127.0.0.1', '::1']) assert.throws(() => parseTarget(bad), DecisionError, bad);
+  v.decisions.create({ kind: 'bloquer', cible: '10.0.0.0/8', duree: '1h', par: 'test' });
+  assert.throws(() => v.decisions.create({ kind: 'bloquer', cible: '11.0.0.0/8', duree: '1h', par: 'test' }), /trop d’adresses/);
+  const c = await setup(t, { seeded: true, env: { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 }, vigieOptions: { send: async () => {}, timers: false, pollDecisions: false } });
+  const sign = p => ({ payload: JSON.stringify({ version: 1, emis_a: Date.now(), blocages: [], sessions: [], comptes: [], gels: [], verrouillage: null, ...p }), signature: '' });
+  const signed = p => { const s = sign(p); s.signature = crypto.sign(null, Buffer.from(s.payload), VIGIE_KEYS.privateKey).toString('base64'); return s; };
+  const fin = Date.now() + 3600e3;
+  assert.throws(() => c.app.decisions.accept(signed({ blocages: [{ cible: '::ffff:0:0/96', portee: 'tout', fin }] })), /réseau refusé/);
+  assert.throws(() => c.app.decisions.accept(signed({ blocages: [{ cible: '127.0.0.0/8', portee: 'tout', fin }] })), /réseau refusé/);
+  assert.throws(() => c.app.decisions.accept(signed({ blocages: [{ cible: '1.0.0.0/8', portee: 'tout', fin }, { cible: '2.0.0.0/8', portee: 'tout', fin }] })), /trop d’adresses/);
+  assert.throws(() => c.app.decisions.accept(signed({ sessions: [{ prefixe: '', fin }] })), /empreinte de session/);
+  assert.throws(() => c.app.decisions.accept(signed({ emis_a: Date.now() + 3600e3 })), /futur/);
+  // Horloge de la Vigie revenue en arrière : une liste fraîche à notre horloge est acceptée.
+  c.app.decisions.accept(signed({ version: 5, emis_a: Date.now() }));
+  assert.equal(c.app.decisions.accept(signed({ version: 6, emis_a: Date.now() - 60e3 })).version, 6);
+  assert.equal((await c.app.inject({ url: '/healthz', remoteAddress: '127.0.0.1' })).statusCode, 200);
+});
+
+test('revue B : adresse encodée (/%61dmin, /%61uth) ne contourne ni le verrouillage ni un blocage ; sessions non autorisées fermées', async t => {
+  const c = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: TOKEN, VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 }, vigieOptions: { send: async () => {}, timers: false, pollDecisions: false } });
+  const res = await c.app.inject({ method: 'POST', url: '/auth/local', remoteAddress: '192.0.2.5', payload: { token: TOKEN, author: 'julien' } });
+  const cookies = Object.fromEntries(res.cookies.filter(x => x.value).map(x => [x.name, x.value]));
+  const signed = p => { const payload = JSON.stringify({ version: 1, emis_a: Date.now(), blocages: [], sessions: [], comptes: [], gels: [], verrouillage: null, ...p }); return { payload, signature: crypto.sign(null, Buffer.from(payload), VIGIE_KEYS.privateKey).toString('base64') }; };
+  const fin = Date.now() + 3600e3;
+  c.app.decisions.accept(signed({ version: 1, blocages: [{ cible: '198.51.100.0/24', portee: 'auth', fin }, { cible: '203.0.113.0/24', portee: 'admin', fin }] }));
+  for (const url of ['/auth/login', '/%61uth/login', '//auth/login']) assert.equal((await c.app.inject({ url, remoteAddress: '198.51.100.7' })).statusCode, 403, url);
+  for (const url of ['/admin', '/%61dmin', '/adm%69n/photos']) assert.equal((await c.app.inject({ url, remoteAddress: '203.0.113.7' })).statusCode, 403, url);
+  assert.equal((await c.app.inject({ method: 'POST', url: '/%61uth/local', remoteAddress: '198.51.100.7', payload: { token: TOKEN, author: 'julien' } })).statusCode, 403);
+  // Verrouillage : la session ouverte d'un compte non autorisé est fermée, quelle que soit l'adresse demandée.
+  c.app.decisions.accept(signed({ version: 2, emis_a: Date.now() + 1, verrouillage: { fin, comptes: ['zitadel-moi'], adresses: [] } }));
+  for (const url of ['/%61dmin', '/admin/comptes']) {
+    const r = await c.app.inject({ url, cookies, remoteAddress: '192.0.2.5' });
+    assert.notEqual(r.statusCode, 200, url);
+  }
+  assert.equal(c.db.prepare("SELECT COUNT(*) FROM sessions WHERE sub = 'local:julien'").pluck().get(), 0, 'session fermée');
+});
+
+test('revue B : ADMIN_SUBS jamais gelé ni tenu dehors ; ligne de commande sous un utilisateur sans nom ; interrupteur jamais éteint sans durée', async t => {
+  const c = await setup(t, { seeded: true, env: { ADMIN_SUBS: 'proprietaire', VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 }, vigieOptions: { send: async () => {}, timers: false, pollDecisions: false } });
+  const payload = JSON.stringify({ version: 1, emis_a: Date.now(), blocages: [], sessions: [], comptes: [], gels: [{ sub: 'proprietaire', fin: Date.now() + 3600e3 }], verrouillage: { fin: Date.now() + 3600e3, comptes: ['autre'], adresses: [] } });
+  c.app.decisions.accept({ payload, signature: crypto.sign(null, Buffer.from(payload), VIGIE_KEYS.privateKey).toString('base64') });
+  assert.equal(c.app.decisions.frozen('proprietaire'), false);
+  assert.equal(c.app.decisions.lockAllows('proprietaire', '192.0.2.1'), true);
+  // Conteneur sous l'identifiant 99, sans nom dans /etc/passwd : os.userInfo() échoue, la commande marche quand même.
+  const dir = tmp(t);
+  const k = keys();
+  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, ...k.vigie });
+  t.mock.method(os, 'userInfo', () => { throw new Error('uv_os_get_passwd returned ENOENT'); });
+  assert.match(cli(['bloquer', '203.0.113.9', '--duree', '1h'], { config }), /Décision #1/);
+  assert.match(cli(['decisions'], { config }), /ligne de commande \(/);
+  assert.throws(() => cli(['interrupteur', 'blocages', 'arret'], { config }), /toujours pour une durée/);
+  assert.throws(() => loadVigieConfig({ VIGIE_DATA_DIR: dir, ...k.vigie, VIGIE_LOG_KEY: k.vigie.VIGIE_INGEST_KEY }), /différente/);
+});
+
+test('revue B : Zitadel — trou signalé une fois, curseur illisible ou futur sans blocage, type « constructor » ignoré', async t => {
+  let clock = Date.parse('2026-10-17T12:00:00Z');
+  const v = vigieOf(t, { now: () => clock });
+  const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const key = { keyId: 'k', key: privateKey.export({ type: 'pkcs8', format: 'pem' }), userId: 'u' };
+  let down = false;
+  const fetchImpl = async url => {
+    if (down) throw new Error('injoignable');
+    if (url.endsWith('/token')) return new Response(JSON.stringify({ access_token: 'j', expires_in: 3600 }));
+    return new Response(JSON.stringify({ events: [{ aggregate: { id: 'a' }, sequence: 1, creationDate: new Date(clock).toISOString(), type: { type: 'constructor' } }] }));
+  };
+  const z = createZitadelReader({ issuer: 'https://z.example', keyFile: null, readKey: () => key, store: v.store, fetchImpl, now: () => clock });
+  assert.equal(await z.run(), 0);
+  down = true;
+  clock += 21 * 3600e3;
+  for (let i = 0; i < 3; i++) await z.run().catch(() => {});
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_zitadel_trou'").pluck().get(), 1);
+  down = false;
+  v.store.setting.set('zitadel_curseur', 'pas une date');
+  await z.run();
+  v.store.setting.set('zitadel_curseur', '2099-01-01T00:00:00Z');
+  await z.run();
+  assert.ok(Date.parse(v.store.setting.get('zitadel_curseur')) <= clock, 'curseur ramené au présent');
+});
+
+test('revue B : valeur mal typée dans un lot signé — écartée, le reste gardé (jamais d’erreur 500)', async t => {
+  const v = vigieOf(t);
+  const body = lot([ev({ ip: ['1.2.3.4'], country: { a: 1 }, session: ['abc'] }), ev({ id: ['x'] })]);
+  const res = await v.ingest.inject({ method: 'POST', url: '/v1/events', payload: body, headers: signed(body) });
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.json(), { recus: 2, gardes: 1, ecartes: 1 });
+  assert.equal(v.db.prepare('SELECT ip FROM events WHERE type = ?').pluck().get('malicious_input'), null);
 });
