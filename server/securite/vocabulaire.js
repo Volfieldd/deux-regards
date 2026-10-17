@@ -51,6 +51,8 @@ export const EVENTS = {
   sys_heartbeat: E('info', 'site · système'),
   sys_state: E('info', 'site · système'),
   sys_events_dropped: E('haut', 'site · système'),
+  // En-têtes de la bordure (Worker Cloudflare) présents mais faux : fabriqués, rejoués, ou clé du Worker différente.
+  edge_signature_invalid: E('haut', 'site · système'),
 };
 
 export const isType = type => Object.hasOwn(EVENTS, type);

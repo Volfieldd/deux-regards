@@ -15,3 +15,5 @@ compose*.yaml
 vigie/node_modules
 **/vigie.env
 vigie.env
+bordure/
+cloudflare-token

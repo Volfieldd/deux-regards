@@ -1,0 +1,30 @@
+# Capteur en bordure de la Vigie (phase C3) : modèle de configuration pour Wrangler (docs/wiki/Vigie.md, « Bordure
+# Cloudflare »). Copier en wrangler.toml (ignoré par Git), remplir les identifiants, puis :
+#   npx wrangler@4 secret put BORDURE_KEY      # la même valeur que VIGIE_BORDURE_KEY dans le .env du site
+#   npx wrangler@4 deploy
+# Offre gratuite : 100 000 requêtes par jour, 10 ms de calcul par requête ; KV : 100 000 lectures, 1 000 écritures par
+# jour ; Analytics Engine : 100 000 points écrits, 10 000 lectures par jour.
+name = "vigie-bordure"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+# Routes : l'admin, la connexion et les pages ; jamais les images ni les fichiers statiques (quota). Les routes « sans
+# Worker » des chemins exclus se posent dans le tableau de bord (Workers Routes → Add route → Worker : None).
+routes = [
+  { pattern = "nicephos.art/*", zone_name = "nicephos.art" },
+]
+
+[vars]
+# Clé publique des décisions (la même que VIGIE_DECISIONS_PUBKEY du site) : publique, sans risque ici.
+DECISIONS_PUBKEY = "REMPLACER-PAR-VIGIE_DECISIONS_PUBKEY"
+
+[[kv_namespaces]]
+# npx wrangler@4 kv namespace create vigie-blocages → identifiant à mettre ici ET dans VIGIE_CF_KV_NAMESPACE (Vigie).
+binding = "DECISIONS"
+id = "REMPLACER-PAR-L-IDENTIFIANT-KV"
+
+[[analytics_engine_datasets]]
+# Créé au premier point écrit ; même nom que VIGIE_CF_DATASET (Vigie), « vigie_bordure » par défaut.
+binding = "ANALYTICS"
+dataset = "vigie_bordure"

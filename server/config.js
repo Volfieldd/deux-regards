@@ -117,7 +117,11 @@ export function loadConfig(env = process.env) {
     // lues mais jamais appliquées (dernier recours, voir docs/wiki/Vigie.md).
     if (!env.VIGIE_DECISIONS_PUBKEY) throw new Error('VIGIE_DECISIONS_PUBKEY est obligatoire avec VIGIE_URL (node vigie/cli.js cles)');
     const decisionsPubkey = pubkeyOf(env.VIGIE_DECISIONS_PUBKEY);
-    vigie = { url: `${u.origin}${u.pathname}`.replace(/\/+$/, ''), ingestKey, decisionsPubkey, apply: env.VIGIE_APPLIQUER !== '0' };
+    // Bordure (phase C3, facultative) : clé partagée avec le Worker Cloudflare, distincte de celle des envois.
+    const bordureKey = env.VIGIE_BORDURE_KEY || null;
+    if (bordureKey && bordureKey.length < 32) throw new Error('VIGIE_BORDURE_KEY doit faire au moins 32 caractères');
+    if (bordureKey && bordureKey === ingestKey) throw new Error('VIGIE_BORDURE_KEY doit être différente de VIGIE_INGEST_KEY (le Worker ne doit pas pouvoir écrire dans la Vigie)');
+    vigie = { url: `${u.origin}${u.pathname}`.replace(/\/+$/, ''), ingestKey, decisionsPubkey, bordureKey, apply: env.VIGIE_APPLIQUER !== '0' };
   }
 
   return {

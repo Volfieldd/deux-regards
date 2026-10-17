@@ -78,7 +78,12 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // Empreinte d'appareil : en-têtes stables du navigateur, chiffres retirés de l'agent (une mise à jour du navigateur ou
   // du système ne change pas l'appareil ; revue de la Vigie du 17 octobre 2026).
   const fpOf = h => crypto.createHash('sha256').update(['user-agent', 'accept-language', 'sec-ch-ua-platform', 'sec-ch-ua-mobile'].map(k => (k === 'user-agent' ? String(h[k] || '').replace(/\d+/g, '') : String(h[k] || ''))).join('\n')).digest('hex').slice(0, 16);
-  const ctxOf = request => { const n = networkOf(request); return { ip: null, net: n.ip_net ?? null, country: n.country ?? null, ua: uaFamily(request.headers['user-agent']), fp: fpOf(request.headers) }; };
+  // Bordure (phase C3) : opérateur et empreintes TLS, seulement si le Worker les a signés (request.bordure).
+  const ctxOf = request => {
+    const n = networkOf(request), b = request.bordure;
+    return { ip: null, net: n.ip_net ?? null, country: n.country ?? null, ua: uaFamily(request.headers['user-agent']), fp: fpOf(request.headers),
+      asn: b?.asn ?? null, tls: b?.tls ?? null, tlsBrut: b?.tlsBrut ?? null };
+  };
   const told = new Map();
   const startedAt = Date.now();
   const tellOnce = (id, kind) => {
@@ -104,7 +109,9 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       const same = !(r.ctx_net !== ctx.net && otherDevice);
       const a = accounts.bySub(r.sub);
       securite.emit('session_use_after_expire', { request, sub: r.sub, severity: same ? 'moyen' : 'haut', emetteur: 'server/auth.js · session', reference: `session:${String(r.id).slice(0, 12)}`,
-        detail: { fermee_il_y_a_min: Math.round((Date.now() - r.revoked_at) / 60e3), expiree: r.expires_at <= r.revoked_at + 1000, meme_reseau_et_navigateur: same, compte_actif: a?.status === 'actif' } });
+        detail: { fermee_il_y_a_min: Math.round((Date.now() - r.revoked_at) / 60e3), expiree: r.expires_at <= r.revoked_at + 1000, meme_reseau_et_navigateur: same, compte_actif: a?.status === 'actif',
+        // Bordure : observé seulement (stabilité des empreintes TLS à mesurer avant d'en faire une preuve).
+        empreinte_tls_changee: r.ctx_tls && ctx.tls ? r.ctx_tls !== ctx.tls : undefined, operateur_change: r.ctx_asn && ctx.asn ? r.ctx_asn !== ctx.asn : undefined } });
       return;
     }
     if (!s.ctx_ua && !s.ctx_net) {
@@ -119,12 +126,17 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     // Même famille de navigateur mais autre empreinte (autre appareil, autres langues) : « moyen », « haut » s'il change
     // aussi de réseau. Session d'avant l'empreinte (ctx_fp vide) : non comparée.
     const device = !browser && Boolean(s.ctx_fp) && s.ctx_fp !== ctx.fp;
-    if (!browser && !device && !country && !net) return;
-    const kind = `${browser ? 'n' : ''}${device ? 'e' : ''}${country ? 'p' : ''}${net ? `r${ctx.net}` : ''}`;
+    // Bordure (phase C3) : empreinte TLS ou opérateur changés pendant la session. Observés en « info » tant que leur
+    // stabilité n'est pas mesurée (docs/wiki/Vigie.md, bordure) ; ils ne relèvent pas la gravité.
+    const tls = Boolean(s.ctx_tls && ctx.tls && s.ctx_tls !== ctx.tls), tlsBrut = Boolean(s.ctx_tls_brut && ctx.tlsBrut && s.ctx_tls_brut !== ctx.tlsBrut);
+    const asn = Boolean(s.ctx_asn && ctx.asn && s.ctx_asn !== ctx.asn);
+    if (!browser && !device && !country && !net && !tls && !tlsBrut && !asn) return;
+    const kind = `${browser ? 'n' : ''}${device ? 'e' : ''}${country ? 'p' : ''}${net ? `r${ctx.net}` : ''}${tls ? `t${ctx.tls}` : ''}${tlsBrut ? `b${ctx.tlsBrut}` : ''}${asn ? `a${ctx.asn}` : ''}`;
     if (!tellOnce(s.id, kind)) return;
     const severity = browser && country ? 'critique' : browser || (device && (net || country)) ? 'haut' : device || country ? 'moyen' : 'info';
     securite.emit('session_context_change', { request, severity, emetteur: 'server/auth.js · session',
-      detail: { navigateur: browser ? { avant: s.ctx_ua, apres: ctx.ua } : undefined, empreinte_changee: device || undefined, pays: country ? { avant: s.ctx_country, apres: ctx.country } : undefined, reseau: net ? { avant: s.ctx_net, apres: ctx.net } : undefined } });
+      detail: { navigateur: browser ? { avant: s.ctx_ua, apres: ctx.ua } : undefined, empreinte_changee: device || undefined, pays: country ? { avant: s.ctx_country, apres: ctx.country } : undefined, reseau: net ? { avant: s.ctx_net, apres: ctx.net } : undefined,
+        tls_change: tls || undefined, tls_brut_change: tlsBrut || undefined, operateur: asn ? { avant: s.ctx_asn, apres: ctx.asn } : undefined } });
   };
   const lastPending = app.db.prepare("SELECT MAX(at) FROM audit_log WHERE sub = ? AND action = 'connexion en attente d’un rôle'").pluck();
 

@@ -7,6 +7,7 @@ import { onDecryptFail } from '../vault.js';
 import { clientKey } from '../ratelimit.js';
 import { TRAP_PATH } from './piege.js';
 import { settingsOf, SESSION_TRIGGER } from './retrait.js';
+import { createEdgeVerifier } from './bordure.js';
 
 // Branchement de la Vigie sur le site (seulement quand VIGIE_URL est réglé ; sans elle, retireVigie() efface ce qu'elle
 // avait laissé). Points d'émission communs à tout le site : saisies, pièges, méthodes inattendues, rafales de 404,
@@ -81,8 +82,8 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   // Sessions fermées ou expirées : empreinte, compte et dates, 48 h (un cookie qui revient après a été copié).
   // Posé de nouveau à chaque démarrage (sa définition suit le code).
   db.exec(`DROP TRIGGER IF EXISTS ${SESSION_TRIGGER}; CREATE TRIGGER ${SESSION_TRIGGER} AFTER DELETE ON sessions BEGIN
-    INSERT OR REPLACE INTO sessions_revoked (id, sub, created_at, expires_at, revoked_at, ctx_net, ctx_ua, ctx_fp)
-    VALUES (OLD.id, OLD.sub, OLD.created_at, OLD.expires_at, CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER), OLD.ctx_net, OLD.ctx_ua, OLD.ctx_fp);
+    INSERT OR REPLACE INTO sessions_revoked (id, sub, created_at, expires_at, revoked_at, ctx_net, ctx_ua, ctx_fp, ctx_asn, ctx_tls, ctx_tls_brut)
+    VALUES (OLD.id, OLD.sub, OLD.created_at, OLD.expires_at, CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER), OLD.ctx_net, OLD.ctx_ua, OLD.ctx_fp, OLD.ctx_asn, OLD.ctx_tls, OLD.ctx_tls_brut);
   END`);
   const purgeRevoked = () => db.prepare('DELETE FROM sessions_revoked WHERE revoked_at < ?').run(Date.now() - 48 * 3600e3);
 
@@ -194,6 +195,22 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
     if (pollDecisions) decisions.start();
   });
   app.addHook('onClose', async () => { decisions.stop(); offDecrypt(); await sec.stop(); });
+
+  // Bordure (phase C3) : en-têtes signés du Worker Cloudflare, crus seulement vérifiés (server/securite/bordure.js).
+  // Des en-têtes faux sont signalés (une fois par minute et par raison) : quelqu'un les fabrique, ou la clé du Worker
+  // n'est pas celle du site.
+  const verifyEdge = config.vigie.bordureKey ? createEdgeVerifier({ key: config.vigie.bordureKey }) : null;
+  app.decorateRequest('bordure', null);
+  if (verifyEdge) {
+    app.addHook('onRequest', (request, reply, done) => {
+      try {
+        const r = verifyEdge(request);
+        if (r?.invalide) sec.emitThrottled(`bordure:${r.invalide}`, 'edge_signature_invalid', { request, emetteur: 'server/securite/bordure.js', detail: { raison: r.invalide } });
+        request.bordure = r && !r.invalide ? r : null;
+      } catch (err) { app.log.error({ err: err.message }, 'Vigie : bordure'); }
+      done();
+    });
+  }
 
   // Méthode qu'aucune page du site n'utilise (PUT, DELETE, TRACE, OPTIONS…).
   // Crochets synchrones (done) : ils ne décalent pas ceux du site (journal d'audit écrit dans le même tour).

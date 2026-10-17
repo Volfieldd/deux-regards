@@ -29,7 +29,20 @@ export function loadVigieConfig(env = process.env) {
   let st = null;
   try { st = fs.statSync(siteBackupDir); } catch { /* absent */ }
   if (!st?.isDirectory()) throw new Error(`VIGIE_SITE_BACKUP_DIR : dossier introuvable (${siteBackupDir}) ; montez le BACKUP_DIR du site en lecture seule`);
+  // Bordure Cloudflare (phase C3, facultative) : compte, espace KV des blocages, jeu de données Analytics Engine, jeton
+  // en fichier (Account Analytics Read + Workers KV Storage Edit).
+  let bordure = null;
+  if (env.VIGIE_CF_ACCOUNT_ID) {
+    const tokenFile = path.resolve(env.VIGIE_CF_TOKEN_FILE || '/secrets/cloudflare-token');
+    if (!/^[0-9a-f]{32}$/.test(env.VIGIE_CF_ACCOUNT_ID)) throw new Error('VIGIE_CF_ACCOUNT_ID : identifiant de compte Cloudflare (32 caractères hexadécimaux)');
+    if (!/^[0-9a-f]{32}$/.test(env.VIGIE_CF_KV_NAMESPACE || '')) throw new Error('VIGIE_CF_KV_NAMESPACE est obligatoire avec VIGIE_CF_ACCOUNT_ID (identifiant de l’espace KV « vigie-blocages »)');
+    if (!fs.existsSync(tokenFile)) throw new Error(`VIGIE_CF_TOKEN_FILE : jeton Cloudflare introuvable (${tokenFile})`);
+    const dataset = env.VIGIE_CF_DATASET || 'vigie_bordure';
+    if (!/^[a-z_][a-z0-9_]{0,63}$/.test(dataset)) throw new Error('VIGIE_CF_DATASET : nom de jeu de données invalide');
+    bordure = { accountId: env.VIGIE_CF_ACCOUNT_ID, kvNamespace: env.VIGIE_CF_KV_NAMESPACE, dataset, tokenFile };
+  }
   return {
+    bordure,
     dataDir,
     databasePath: path.resolve(env.VIGIE_DATABASE || path.join(dataDir, 'vigie.db')),
     host: env.VIGIE_HOST || '0.0.0.0',

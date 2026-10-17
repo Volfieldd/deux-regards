@@ -158,7 +158,8 @@ export function createSecurite({ url, key, storageDir, log, send = null, now = D
       method: request?.method,
       route: request ? neutralize(request.routeOptions?.url || '(aucune route)', 120) : undefined,
       status: status ?? undefined,
-      detail: cleanDetail(detail),
+      // Bordure (phase C3) : opérateur et empreinte TLS vus par le Worker, quand ses en-têtes signés sont là.
+      detail: cleanDetail(request?.bordure ? { ...(detail || {}), bordure: { asn: request.bordure.asn, org: request.bordure.org, tls: request.bordure.tls } } : detail),
     };
   }
 
