@@ -9,6 +9,12 @@ import crypto from 'node:crypto';
 
 const TEXT = 'enc1:';
 const MAGIC = Buffer.from('NCE1');
+// Échecs de déchiffrement (clé différente, donnée altérée ou réinjectée) : signalés à qui écoute (la Vigie, si elle est
+// configurée). Une donnée chiffrée lue sans aucune clé n'est pas un échec : la configuration le dit déjà.
+const failures = new Set();
+export const onDecryptFail = fn => { failures.add(fn); return () => failures.delete(fn); };
+const failed = kind => { for (const fn of failures) { try { fn(kind); } catch { /* jamais d'erreur pour l'appelant */ } } };
+
 export const LOCKED = '« donnée chiffrée : clé DATA_KEY absente ou différente »';
 
 export function createVault(secret) {
@@ -40,13 +46,13 @@ export function createVault(secret) {
     open(v) {
       if (!isText(v)) return v;
       if (!key) return LOCKED;
-      try { return decrypt(Buffer.from(v.slice(TEXT.length), 'base64')).toString('utf8'); } catch { return LOCKED; }
+      try { return decrypt(Buffer.from(v.slice(TEXT.length), 'base64')).toString('utf8'); } catch { failed('texte'); return LOCKED; }
     },
     sealBuf: b => (key && Buffer.isBuffer(b) ? Buffer.concat([MAGIC, encrypt(b)]) : b),
     openBuf(b) {
       if (!isBuf(b)) return b;
       if (!key) return null;
-      try { return decrypt(b.subarray(4)); } catch { return null; }
+      try { return decrypt(b.subarray(4)); } catch { failed('binaire'); return null; }
     },
   };
 }
