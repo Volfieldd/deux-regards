@@ -72,8 +72,10 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // relus à chaque requête.
   const { accounts, audit, securite } = app;
   // Vigie : contexte d'une session à sa création, et changements déjà signalés (une fois par session et par nature).
-  const ctxOf = request => { const n = networkOf(request); return { ip: n.ip ?? null, net: n.ip_net ?? null, country: n.country ?? null, ua: uaFamily(request.headers['user-agent']) }; };
+  // L'adresse complète n'est pas gardée dans la session (seuls le réseau, le pays et le navigateur servent).
+  const ctxOf = request => { const n = networkOf(request); return { ip: null, net: n.ip_net ?? null, country: n.country ?? null, ua: uaFamily(request.headers['user-agent']) }; };
   const told = new Map();
+  const startedAt = Date.now();
   const tellOnce = (id, kind) => {
     const k = `${id}:${kind}`;
     if (told.has(k)) return false;
@@ -90,13 +92,20 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       const r = sessions.revoked(token);
       if (!r || Date.now() - r.revoked_at < 10e3) return;
       const ctx = ctxOf(request);
+      if (!tellOnce(`fermee:${r.id}`, ctx.net)) return;                      // une fois par session et par réseau
       const same = r.ctx_net === ctx.net && r.ctx_ua === ctx.ua;
       const a = accounts.bySub(r.sub);
       securite.emit('session_use_after_expire', { request, sub: r.sub, severity: same ? 'moyen' : 'haut', emetteur: 'server/auth.js · session', reference: `session:${String(r.id).slice(0, 12)}`,
         detail: { fermee_il_y_a_min: Math.round((Date.now() - r.revoked_at) / 60e3), expiree: r.expires_at <= r.revoked_at + 1000, meme_reseau_et_navigateur: same, compte_actif: a?.status === 'actif' } });
       return;
     }
-    if (!s.ctx_ua && !s.ctx_net) return;                                         // session ouverte sans la Vigie
+    if (!s.ctx_ua && !s.ctx_net) {
+      // Session sans contexte : ouverte avant la Vigie, ou écrite directement dans la base (jamais par la connexion).
+      if (s.created_at > startedAt && tellOnce(s.id, 'sans-contexte')) {
+        securite.emit('session_context_change', { request, severity: 'haut', emetteur: 'server/auth.js · session', detail: { raison: 'session sans contexte, créée hors de la connexion' } });
+      }
+      return;
+    }
     const ctx = ctxOf(request);
     const browser = s.ctx_ua !== ctx.ua, country = Boolean(s.ctx_country && ctx.country && s.ctx_country !== ctx.country), net = s.ctx_net !== ctx.net;
     if (!browser && !country && !net) return;

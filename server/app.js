@@ -179,7 +179,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // J'aime et signalements des visiteurs (voir server/feedback.js).
   app.decorate('feedback', createFeedback({ db, vault: createVault(config.dataKey) }));
   // Comptes de l'admin et journal (server/accounts.js), utilisés aussi par la connexion (server/auth.js).
-  app.decorate('accounts', createAccounts({ db, adminSubs: config.adminSubs || [] }));
+  app.decorate('accounts', createAccounts({ db, adminSubs: config.adminSubs || [], ticketKey: Buffer.from(crypto.hkdfSync('sha256', config.cookieSecret, 'deux-regards', 'tickets-comptes-v1', 32)) }));
   app.decorate('audit', createAudit({ db }));
   // Remarques adressées au photographe d'une photo (server/notes.js).
   app.decorate('notes', createNotes({ db }));

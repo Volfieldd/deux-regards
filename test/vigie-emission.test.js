@@ -39,7 +39,7 @@ function fakeVigie({ down = false } = {}) {
 
 async function withVigie(t, { env = {}, vigie = fakeVigie() } = {}) {
   const ctx = await setup(t, { seeded: true, env: { ...VIGIE, ...env }, vigieOptions: { send: vigie.send, timers: false } });
-  const flush = async () => { ctx.app.securite.runTasks(); await ctx.app.securite.flush(); return vigie; };
+  const flush = async () => { ctx.app.securite.runTasks(); ctx.app.securite.retryNow(); await ctx.app.securite.flush(); return vigie; };
   const login = async (ua = UA_MAC, ip = '203.0.113.7') => {
     const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', remoteAddress: ip, headers: { 'user-agent': ua }, payload: { token: TOKEN, author: 'julien', next: '/admin' } });
     assert.equal(res.statusCode, 303);
@@ -77,6 +77,7 @@ test('Vigie retirée : déclencheur, sessions fermées, contexte et événements
   app.securite.emit('sys_error', {});
   await app.securite.flush();
   assert.ok(fs.readdirSync(path.join(dir, 'securite-attente')).length >= 1, 'lot gardé en attente');
+  db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('vigie_comptes_vus', '7')").run();
   await app.close(); db.close();
 
   ({ app, db } = await open({}));
@@ -86,7 +87,8 @@ test('Vigie retirée : déclencheur, sessions fermées, contexte et événements
   assert.equal(db.prepare("SELECT COUNT(*) FROM sqlite_master WHERE name = 'vigie_sessions_revoked'").pluck().get(), 0);
   assert.deepEqual(db.prepare("SELECT ctx_ip, ctx_ua FROM sessions WHERE id = 'k'").get(), { ctx_ip: null, ctx_ua: null });
   assert.equal(fs.existsSync(path.join(dir, 'securite-attente')), false);
-  assert.equal(db.prepare("SELECT COUNT(*) FROM settings WHERE key LIKE 'vigie_%'").pluck().get(), 0);
+  // Repères sans donnée personnelle gardés : une Vigie remise en route reprend où elle en était.
+  assert.equal(db.prepare("SELECT value FROM settings WHERE key = 'vigie_comptes_vus'").pluck().get(), '7');
 });
 
 test('configuration : VIGIE_URL exige une clé de signature d’au moins 32 caractères et une adresse simple', () => {
@@ -102,7 +104,7 @@ test('connexion : succès, session créée avec son contexte, lots signés, jama
   const c = await withVigie(t);
   const cookies = await c.login();
   const ctx = c.db.prepare('SELECT ctx_ip, ctx_net, ctx_ua FROM sessions').get();
-  assert.deepEqual(ctx, { ctx_ip: '203.0.113.7', ctx_net: '203.0.113.0', ctx_ua: 'Safari · macOS' });
+  assert.deepEqual(ctx, { ctx_ip: null, ctx_net: '203.0.113.0', ctx_ua: 'Safari · macOS' }, 'réseau et navigateur, pas l’adresse complète');
   const v = await c.flush();
   const ok = v.of('authn_login_success')[0];
   assert.equal(ok.sub, 'local:julien');
@@ -155,6 +157,9 @@ test('saisies malveillantes, méthodes inattendues, pièges, rafales de 404, CSR
   await c.app.inject({ url: '/', remoteAddress: '192.0.2.11', headers: { 'user-agent': 'sqlmap/1.8' } });
   await c.app.inject({ method: 'PUT', url: '/', remoteAddress: '192.0.2.12' });
   assert.equal((await c.app.inject({ url: '/.env', remoteAddress: '192.0.2.13' })).statusCode, 404);
+  // Même réponse qu'une vraie page introuvable, quel que soit le corps envoyé.
+  const xml = await c.app.inject({ method: 'POST', url: '/xmlrpc.php', remoteAddress: '192.0.2.13', headers: { 'content-type': 'text/xml' }, payload: '<methodCall/>' });
+  assert.equal(xml.statusCode, 404);
   assert.equal((await c.app.inject({ url: '/galerie/tout-telecharger', remoteAddress: '192.0.2.13' })).statusCode, 404);
   for (let i = 0; i < 21; i++) await c.app.inject({ url: `/introuvable-${i}`, remoteAddress: '192.0.2.14' });
   let v = await c.flush();
@@ -164,7 +169,7 @@ test('saisies malveillantes, méthodes inattendues, pièges, rafales de 404, CSR
   assert.equal(inputs[0].detail.constats[0].champ, 'query.q');
   assert.deepEqual(inputs[1].detail.familles, ['outil']);
   assert.equal(v.of('input_validation_fail')[0].detail.methode, 'PUT');
-  assert.deepEqual(v.of('malicious_honeypot').map(e => e.detail.piege), ['chemin de scanner', 'lien caché']);
+  assert.deepEqual(v.of('malicious_honeypot').map(e => e.detail.piege), ['chemin de scanner', 'chemin de scanner', 'lien caché']);
   assert.equal(v.of('malicious_excess_404').length, 1);
   assert.match((await c.app.inject('/robots.txt')).body, /Disallow: \/galerie\/tout-telecharger/);
   assert.match((await c.app.inject('/')).body, /<a href="\/galerie\/tout-telecharger" rel="nofollow" hidden tabindex="-1" aria-hidden="true">/);
@@ -246,20 +251,38 @@ test('Vigie injoignable : lots gardés en attente, renvoyés au retour, marqués
   const c = await withVigie(t, { vigie });
   c.app.securite.emit('sys_error', { emetteur: 'test' });
   await c.flush();
-  assert.equal(c.app.securite.spooled(), 1);
+  const waiting = c.app.securite.spooled();
+  assert.ok(waiting >= 1);
+  // Pendant l'attente, rien ne part sur le réseau : la file va sur le disque, dans le même fichier.
+  c.app.securite.emit('sys_error', { emetteur: 'test 2' });
+  await c.app.securite.flush();
+  assert.equal(c.app.securite.spooled(), waiting + 1);
+  assert.equal(fs.readdirSync(path.join(c.dir, 'securite-attente')).length, 1);
   vigie.down = false;
+  c.app.securite.retryNow();
   await c.app.securite.flush();
   assert.equal(c.app.securite.spooled(), 0);
-  assert.equal(vigie.headers.at(-1)['x-vigie-retard'], '1');
-  assert.ok(vigie.of('sys_error').length >= 1);
+  assert.equal(JSON.parse(vigie.lots.at(-1)).retard, true, 'renvoi marqué en retard dans le corps signé');
+  assert.ok(vigie.of('sys_error').length >= 2);
+  assert.equal(new Set(vigie.events.map(e => e.id)).size, vigie.events.length, 'identifiants uniques');
 });
 
-test('budget par adresse : au-delà de 60 événements par heure, une ligne de synthèse', async t => {
+test('budget : par réseau et par type, jamais pour un compte connecté ni une connexion ; synthèse tout de suite', async t => {
   const c = await withVigie(t);
-  for (let i = 0; i < 70; i++) c.app.securite.emit('token_guess', { request: { ip: '192.0.2.50', headers: {}, method: 'GET', routeOptions: { url: '/pour-vous/:token' } }, emetteur: 'test' });
-  await c.app.securite.stop();
+  const req = (url, extra = {}) => ({ ip: '192.0.2.50', headers: {}, method: 'GET', routeOptions: { url }, ...extra });
+  for (let i = 0; i < 70; i++) c.app.securite.emit('token_guess', { request: req('/pour-vous/:token'), emetteur: 'test' });
+  // Le budget d'un type épuisé ne fait pas taire les autres, ni ce qui touche un compte.
+  c.app.securite.emit('malicious_honeypot', { request: req('/.env'), emetteur: 'test' });
+  c.app.securite.emit('authn_login_success', { request: req('/auth/local'), sub: 'local:julien', emetteur: 'test' });
+  for (let i = 0; i < 70; i++) c.app.securite.emit('sensitive_read', { request: req('/admin/personnes/:id', { session: { sub: 'local:julien', id: 'abc' } }), emetteur: 'test' });
+  await c.app.securite.flush();
   assert.equal(c.vigie.of('token_guess').length, 60);
-  assert.equal(c.vigie.of('malicious_excess_events')[0].detail.resumes, 10);
+  assert.equal(c.vigie.of('malicious_honeypot').length, 1);
+  assert.equal(c.vigie.of('authn_login_success').length, 1);
+  assert.equal(c.vigie.of('sensitive_read').length, 70);
+  assert.equal(c.vigie.of('malicious_excess_events')[0].detail.depasse, true, 'signalé dès le premier événement retenu');
+  await c.app.securite.stop();
+  assert.equal(c.vigie.of('malicious_excess_events').at(-1).detail.resumes, 10);
   // Un type inconnu est refusé sans erreur pour l'appelant.
   assert.equal(c.app.securite.emit('type_inconnu', {}), null);
 });
@@ -316,4 +339,151 @@ test('client : rien n’est envoyé sans clé valide côté Vigie (signature cal
   const forged = crypto.createHmac('sha256', 'autre-cle-0123456789-0123456789-xx').update(`${h['x-vigie-ts']}.${h['x-vigie-nonce']}.${body}`).digest('hex');
   assert.notEqual(h['x-vigie-sig'], forged);
   assert.match(h['x-vigie-nonce'], /^[0-9a-f]{32}$/);
+});
+
+// ---------- revue de la phase A (17 octobre 2026) ----------
+
+test('revue : faux ticket, échange de sub, traces effacées — détectés ou refusés par la base', async t => {
+  const c = await withVigie(t);
+  await c.login();
+  await c.flush();
+  c.app.accounts.login({ sub: 'zitadel-intrus', name: 'Intrus' });
+  // Ticket ouvert à la main avant de se donner le rôle : sans signature valide, il ne couvre rien.
+  c.db.prepare("INSERT INTO account_change_tickets (at, action, by_sub) VALUES (1, 'compte modifié', 'local:julien')").run();
+  c.db.prepare("UPDATE accounts SET roles = '[\"admin\"]', status = 'actif' WHERE sub = 'zitadel-intrus'").run();
+  let v = await c.flush();
+  const forged = v.of('privilege_permissions_changed').find(e => e.detail.compte === 'zitadel-intrus');
+  assert.equal(forged.severity, 'critique');
+  assert.equal(forged.detail.hors_application, true);
+  assert.equal(forged.detail.ticket_falsifie, true);
+  assert.equal(v.of('sys_state').at(-1).detail.tickets_ouverts, 1, 'le ticket resté ouvert est signalé');
+  assert.equal(v.of('sys_state').at(-1).severity, 'critique');
+  c.db.prepare('UPDATE account_change_tickets SET open = 0 WHERE open = 1').run();
+  // Prendre l'identité d'un administrateur en changeant de sub.
+  c.app.accounts.login({ sub: 'zitadel-camille', name: 'Camille' });
+  c.db.prepare("UPDATE accounts SET sub = 'pris' WHERE sub = 'local:julien'").run();
+  v = await c.flush();
+  const swap = v.of('privilege_permissions_changed').find(e => e.detail.ancien_sub === 'local:julien');
+  assert.equal(swap.detail.compte, 'pris');
+  assert.match(swap.detail.champs, /sub/);
+  assert.equal(swap.severity, 'critique');
+  // Le journal ne se modifie ni ne s'efface (avant 13 mois), les tickets non plus.
+  assert.throws(() => c.db.prepare("DELETE FROM account_changes").run(), /effacement interdit/);
+  assert.throws(() => c.db.prepare("UPDATE account_changes SET ticket_id = 1").run(), /modification interdite/);
+  assert.throws(() => c.db.prepare("UPDATE account_change_tickets SET by_sub = 'x'").run(), /modification interdite/);
+  // Un déclencheur vidé sous le même nom : signalé comme modifié.
+  c.db.exec(`DROP TRIGGER account_changes_conserve; CREATE TRIGGER account_changes_conserve BEFORE DELETE ON account_changes WHEN 0 BEGIN SELECT 1; END`);
+  v = await c.flush();
+  assert.deepEqual(v.of('sys_state').at(-1).detail.declencheurs_modifies, ['account_changes_conserve']);
+});
+
+test('revue : un changement par l’application reste couvert ; e-mail changé à la connexion noté avec ticket', async t => {
+  const c = await withVigie(t);
+  c.app.accounts.login({ sub: 'zitadel-camille', name: 'Camille', email: 'a@example.org' });
+  c.app.accounts.login({ sub: 'zitadel-camille', name: 'Camille', email: 'b@example.org' });
+  c.app.accounts.setNotify('zitadel-camille', { on: true, to: 'c@example.org' });
+  const v = await c.flush();
+  const rows = v.of('privilege_permissions_changed').filter(e => e.detail.compte === 'zitadel-camille');
+  assert.deepEqual(rows.map(e => [e.detail.champs, e.detail.hors_application]), [['email', false], ['notification', false]]);
+  assert.ok(!JSON.stringify(v.events).includes('b@example.org'), 'aucune adresse dans les événements');
+});
+
+test('revue : numéros du journal jamais réutilisés après la purge, curseur remis à zéro s’ils reculent', async t => {
+  const c = await withVigie(t);
+  c.app.accounts.login({ sub: 'a1', name: 'A' });
+  c.app.accounts.login({ sub: 'a2', name: 'B' });
+  await c.flush();
+  const max = c.app.accounts.lastChangeId();
+  c.db.exec('DROP TRIGGER account_changes_conserve');
+  c.db.prepare('UPDATE account_changes SET at = 0 WHERE 0').run();
+  c.db.exec('DROP TRIGGER account_changes_immuable');
+  c.db.prepare('UPDATE account_changes SET at = 0').run();
+  c.app.accounts.purgeChanges();
+  assert.equal(c.app.accounts.lastChangeId(), max, 'la dernière ligne reste');
+  // Journal vidé à la main : les numéros reculent, le curseur repart du début.
+  c.db.prepare('DELETE FROM account_changes').run();
+  c.db.prepare("UPDATE accounts SET roles = '[\"admin\"]', status = 'actif' WHERE sub = 'a2'").run();
+  const v = await c.flush();
+  assert.ok(v.of('privilege_permissions_changed').some(e => e.detail.compte === 'a2' && e.severity === 'critique'));
+});
+
+test('revue : une saisie de formulaire n’est jamais recopiée (données personnelles), seulement son champ et sa longueur', async t => {
+  const c = await withVigie(t);
+  await c.app.inject({ method: 'POST', url: '/bonjour', remoteAddress: '192.0.2.70', payload: { ref: 'J-0042', name: 'Marie Martin', message: 'Bonjour `Marie` 12 rue des Lilas Paris' } });
+  const v = await c.flush();
+  const hit = v.of('malicious_input')[0];
+  assert.equal(hit.detail.constats[0].champ, 'body.message');
+  assert.equal(hit.detail.constats[0].longueur, 38);
+  assert.ok(!JSON.stringify(v.events).includes('Lilas') && !JSON.stringify(v.events).includes('Martin'));
+});
+
+test('revue : lot refusé (4xx) écarté sans bloquer la suite ; arrêt pendant une panne sans perte', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vigie-'));
+  const http = await import('node:http');
+  const received = [];
+  const srv = http.createServer((req, res) => { let b = ''; req.on('data', d => { b += d; }); req.on('end', () => {
+    received.push(JSON.parse(b).lot);
+    res.writeHead(received.length === 1 ? 400 : 204, { connection: 'close' }).end();
+  }); });
+  await new Promise(r => srv.listen(0, '127.0.0.1', r));
+  try {
+    // Envoi réel (fetch) : la Vigie refuse le premier lot, accepte la suite.
+    const sec = createSecurite({ url: `http://127.0.0.1:${srv.address().port}`, key: KEY, storageDir: dir, timers: false });
+    sec.emit('sys_error', { emetteur: 'refusé' });
+    await sec.flush();
+    sec.emit('sys_error', { emetteur: 'suivant' });
+    await sec.flush();
+    assert.equal(received.length, 2);
+    assert.deepEqual(received[1].map(e => e.type), ['sys_events_dropped', 'sys_error'], 'le refus est compté, la suite passe');
+    assert.equal(received[1][0].detail.perdus, 1);
+    assert.equal(sec.spooled(), 0, 'rien de bloqué en attente');
+    assert.equal(sec.stats.refused, 1);
+
+    // Arrêt pendant une panne : la file part sur le disque, et repart au démarrage suivant.
+    let up = false;
+    const got = [];
+    const send = async body => { if (!up) throw new Error('injoignable'); got.push(...JSON.parse(body).lot); };
+    const down = createSecurite({ url: 'http://v', key: KEY, storageDir: dir, timers: false, send });
+    for (let i = 0; i < 450; i++) down.emit('sys_error', { emetteur: `e${i}` });
+    await down.stop();
+    assert.equal(down.spooled(), 450);
+    up = true;
+    const again = createSecurite({ url: 'http://v', key: KEY, storageDir: dir, timers: false, send });
+    assert.equal(again.spooled(), 450, 'tampon relu au démarrage');
+    await again.flush();
+    assert.equal(again.spooled(), 0);
+    assert.equal(got.length, 450);
+  } finally {
+    srv.closeAllConnections?.();
+    srv.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('revue : tampon en panne prolongée — quelques fichiers, pas un par seconde, et aucun relu à chaque passage', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vigie-'));
+  try {
+    let t0 = 1e12;
+    const sec = createSecurite({ url: 'http://v', key: KEY, storageDir: dir, timers: false, now: () => t0, send: async () => { throw new Error('injoignable'); } });
+    for (let s = 0; s < 3000; s++) { sec.emit('sys_error', { emetteur: 'x' }); t0 += 1000; await sec.flush(); }
+    assert.equal(sec.spooled(), 3000);
+    assert.ok(fs.readdirSync(path.join(dir, 'securite-attente')).length <= 3, 'segments de 1 Mo');
+    assert.ok(sec.stats.failed < 40, `essais espacés (${sec.stats.failed})`);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('revue : un compte mal formé n’empêche pas le démarrage ; session sans contexte signalée', async t => {
+  const c = await withVigie(t);
+  c.db.prepare("INSERT INTO accounts (sub, roles, status, created_at) VALUES ('bizarre', '{}', 'actif', 1)").run();
+  c.db.prepare("UPDATE accounts SET roles = '\"admin\"' WHERE sub = 'bizarre'").run();
+  let v = await c.flush();
+  assert.ok(v.of('user_created').some(e => e.detail.compte === 'bizarre'));
+  // Session écrite directement dans la base, sans passer par la connexion.
+  const token = crypto.randomBytes(32).toString('base64url');
+  const id = crypto.createHash('sha256').update(token).digest('hex');
+  c.app.accounts.login({ sub: 'local:julien', name: 'J' });
+  c.db.prepare("INSERT INTO sessions (id, sub, csrf, created_at, expires_at) VALUES (?, 'local:julien', 'c', ?, ?)").run(id, Date.now() + 1, Date.now() + 3600e3);
+  await c.app.inject({ url: '/admin', cookies: { session: token } });
+  v = await c.flush();
+  assert.equal(v.of('session_context_change').at(-1).detail.raison, 'session sans contexte, créée hors de la connexion');
 });

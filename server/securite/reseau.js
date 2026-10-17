@@ -3,7 +3,7 @@ import { truncateIp } from '../ip.js';
 const STR_MAX = 200;
 
 // Caractères de contrôle remplacés (une saisie ne peut pas fabriquer de fausses lignes dans un journal), longueur bornée.
-export const neutralize = (v, max = STR_MAX) => String(v ?? '').replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g, '␤').slice(0, max);
+export const neutralize = (v, max = STR_MAX) => String(v ?? '').replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '␤').slice(0, max).replace(/[\ud800-\udbff]$/, '');
 
 // Contexte réseau d'une requête : adresse, réseau, et position donnée par Cloudflare, crue seulement si la requête est
 // passée par le proxy de confiance (TRUST_PROXY ; sans lui, un visiteur pourrait se dire ailleurs).
