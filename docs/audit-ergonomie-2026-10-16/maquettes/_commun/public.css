@@ -661,6 +661,10 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .vis-plus, .vis-pres { width: var(--vis-w); margin-inline: auto; }
 .vis-fig { position: relative; margin: 0 auto; width: var(--vis-w); display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--esp-4); }
 .vis-cadre { grid-column: 1 / -1; position: relative; }
+/* Passe 6 : figcaption d'abord dans le HTML, la photo d'abord à l'écran, puis cartel et gestes (venu de MQ-04). */
+.vis-fig > .vis-cadre { grid-row: 1; }
+.vis-fig > .vis-cartel, .vis-fig > .vis-actions { grid-row: 2; }
+@media (max-width: 767px) { .vis-fig > .vis-actions { grid-row: 3; } }
 .vis-img { display: block; width: 100%; height: auto; aspect-ratio: var(--vis-r); background: var(--frame); }
 .vis-nav { display: flex; align-items: center; justify-content: space-between; gap: var(--esp-2); padding-top: var(--esp-1); }
 .vis-fleche { display: inline-flex; align-items: center; justify-content: center; gap: var(--esp-1); min-width: var(--cible); min-height: var(--cible); color: var(--ink); font-size: 15px; }
@@ -671,7 +675,9 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .vis-cartel h1 { margin: 0; }
 .vis-actions { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--esp-2) var(--esp-3); padding-top: var(--esp-2); align-self: start; }
 .vis-actions .lien { min-height: var(--cible); }
+/* Passe 6 : la photo laisse à chaque flèche (56 + 24 px) ce que --gut n'a pas ; sinon, écran haut, la page défilait. */
 @media (min-width: 1200px) {
+  .vis-scene { --vis-w: min(100% - 2 * max(0px, 56px + var(--esp-3) - var(--gut)), calc(var(--vis-h) * var(--vis-r))); }
   .vis-nav { display: contents; }
   .vis-nav .vis-compte { display: none; }
   .vis-fleche { position: absolute; top: calc(50% - 28px); width: 56px; height: 56px; }

@@ -145,6 +145,9 @@
 /* Palette Ctrl K (admin.css) : intitulés de groupe et touches à 12 px. */
 .admin .pal-list .sec, .admin .palette kbd { font-size: 12px; }
 @media (max-width: 1180px) and (min-width: 721px) { .admin .cmdk kbd, .admin .me .av { display: none; } .admin .me { gap: 4px; } }
+/* Passe 6 : au toucher, thème et déconnexion à 44 px partout ; l'avatar s'efface dès 721 px (essai : p6-coarse-me.mjs). */
+@media (pointer: coarse) { .admin .me .iconbtn { width: 44px; height: 44px; } }
+@media (pointer: coarse) and (min-width: 721px) { .admin .me .av { display: none; } .admin .me { gap: 4px; } }
 /* Pied de la barre de 220 px (passe 4, jury v2, défaut B) : la grille à deux colonnes rognait, en allemand, « Hilfe », le
    sélecteur « DE » et « 1.90.0 » de 4 à 5 px (« Einstellungen » prend la première colonne). Dans la barre étroite, les
    entrées se serrent (6 px de marge au lieu de 10) et passent à la ligne quand elles ne tiennent pas côte à côte : rien ne

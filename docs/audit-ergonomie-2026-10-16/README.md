@@ -2005,7 +2005,68 @@ Elles reposent sur `maquettes/_commun/` : les jetons (`tokens.css`), les composa
 
 **Évaluation v2** (même jury, 16 oct. 2026, sur la passe 3) : de 8 à 10 sur 10. Site public : planche 9, MQ-14 et MQ-16 à 10, MQ-12 à 8, les autres à 9 ; administration : planche, MQ-10, MQ-18 et MQ-19 à 9, MQ-07, MQ-08, MQ-09 et MQ-20 à 8. Plus aucun critère sous 8. Les défauts restants étaient surtout hors de portée des outils : « Suche » au lieu du « Suchen » du code, deux visionneuses pour une même adresse, la règle « deux photos au plus par rangée » qui ne tenait que par l'ordre des photos, la barre de filtres collante qui cachait le focus au téléphone ; dans l'administration, le menu du téléphone hors d'atteinte sans JavaScript (défaut de main), le pied de la barre latérale qui débordait en allemand à 220 px, des compteurs de séries fondés sur des photos sans série que le code interdit. La passe 4 les corrige dans le commun (planche, `public.css`, `admin-plus.css`, lexique § 0, points 14 à 24, outils de contrôle), puis maquette par maquette.
 
-**Évaluation finale : à venir.**
+### Évaluation finale
+
+**Jury final** (jury indépendant, 17 oct. 2026, sur la finalisation `8abe64c`), puis **contre-vérification** par un autre juré indépendant (17 oct. 2026, sur la passe 5, `0d1936f`). La grille est la même : la note d'une maquette est sa note la plus basse sur les quatorze critères, et un point n'est retiré que pour un défaut démontré.
+
+| Maquette | Jury final | Contre-vérification | Critères sous 10 à la contre-vérification |
+|---|---|---|---|
+| MQ-00 Planche (site public · administration) | 9 · 9 | 9 | 14 Lisibilité : bloc Mesures périmé |
+| MQ-01 Accueil | 9 | 10 | — |
+| MQ-02 Galerie | 9 | 10 | — |
+| MQ-03 Série Rue | 9 | 10 | — |
+| MQ-04 Visionneuse | 9 | 9 | 4 Adaptabilité : défilement horizontal dès 1 200 px sur un écran haut |
+| MQ-05 Bonjour | 9 | 10 | — |
+| MQ-06 Licence, contact | 9 | 10 | — |
+| MQ-07 Admin : menu, Réglages | 9 | 10 | — |
+| MQ-08 Admin : lot | 9 | 10 | — |
+| MQ-09 Admin : enregistrer | 9 | 10 | — |
+| MQ-10 App de terrain | 10 | 10 | — |
+| MQ-11 Carnets | 9 | 10 | — |
+| MQ-12 Billet | 9 | 9 | 4 Adaptabilité (même défaut que MQ-04, état 16) ; 6 Homogénéité : visionneuse de l'état 16 rangée autrement que MQ-04 |
+| MQ-13 Tirage | 9 | 10 | — |
+| MQ-14 Panier | 9 | 10 | — |
+| MQ-15 Commande | 9 | 10 | — |
+| MQ-16 Accès privé | 10 | 10 | — |
+| MQ-17 Galerie privée | 9 | 10 | — |
+| MQ-18 Admin : accès privé | 9 | 10 | — |
+| MQ-19 Admin : commandes | 9 | 10 | — |
+| MQ-20 Admin : éditeur de billet | 9 | 10 | — |
+
+**Entre les deux.** La passe 5 a traité tous les points que le jury final demandait pour 10. La contre-vérification les a vérifiés un par un, à l'écran et dans le code, et a relancé chaque contrôle sur une copie figée de `8abe64c` pour prouver qu'il voit le défaut corrigé. Résultat : 18 maquettes sur 21 à 10, aucune sous 9. Trois défauts restaient, dont un ancien que personne n'avait vu : les outils testaient 5 largeurs à 900 px de haut seulement.
+
+**Après la passe 6** (17 oct. 2026). Les trois défauts sont corrigés exactement comme la contre-vérification le prescrivait. Ces trois maquettes n'ont pas encore été notées de nouveau.
+
+1. **Visionneuse : plus de défilement horizontal** (MQ-04, MQ-12 état 16). Dès 1 200 px, les flèches sont posées à 80 px de la photo (56 px de flèche, 24 px d'écart), alors que la marge de page ne fait que 56 px (jusqu'à 1 279 px) ou 72 px. Sur un écran haut, la photo prenait toute la largeur et les flèches sortaient de 24 ou 8 px. La largeur de la photo réserve maintenant, de chaque côté, ce qui manque à la marge (`public.css` § 20 : `--vis-w: min(100% - 2 * max(0px, 56px + var(--esp-3) - var(--gut)), …)`). Le `sizes` de la photo suit (`100vw - 160px` dès 1 200 px dans MQ-04, `100vw - 180px` dans le cadre de MQ-12).
+   - Mesure : nouvel outil `debord-hauteurs.mjs`, ajouté à la grille. Il teste 90 largeurs (de 320 à 1 440 px au pas de 16 px, plus les largeurs charnières), à 900, 1 024 et 1 100 px de haut, en français et en allemand. Il signale aussi toute flèche coupée par l'écran ou par un cadre.
+   - Avant, sur `0d1936f` : 34 débordements dans MQ-04 et 28 dans MQ-12. Par exemple, à 1 200 × 1 024, la page défilait de 24 px et le chevron gauche était coupé ; à 1 280 × 1 024 et 1 440 × 1 100, elle défilait de 8 px.
+   - Après : 0 débordement et 0 flèche coupée dans les 21 maquettes et les 6 échantillons. MQ-04 et MQ-12 donnent aussi 0 à 700, 768, 800, 1 200 et 1 440 px de haut.
+   - À 1 200 × 1 024, la photo passe de 1 120 à 1 040 px et les flèches restent entières dans l'écran. Le `sizes` égale la largeur rendue dans 516 cas (de 768 à 1 440 px de large, de 700 à 1 200 px de haut). À 1 440 × 900, la photo fait toujours 1 064 × 709 px ; seul l'état allemand de MQ-04, sans photo, range son cartel et ses gestes 8 px plus près du centre.
+2. **Visionneuse : un seul ordre** (MQ-12, état 16). Les trois règles qui posent la photo d'abord, puis le cartel à gauche et les gestes à droite (dessous au téléphone), quittent le `<style>` de MQ-04 pour `public.css` § 20.
+   - Mesure, avec la sonde `ordre.mjs` de la contre-vérification. Au bureau, MQ-12 état 16 a maintenant la photo à 0 px et le cartel à 709 px, comme MQ-04 (avant : le cartel en haut, la photo à 93 px). Au téléphone : la photo à 0 px, puis le cartel (avant : le titre au-dessus de la photo).
+   - MQ-04 garde les mêmes positions (la photo à 0 px, le cartel à 709 px au bureau, à 327 px au téléphone).
+3. **Planche : des Mesures vraies** (MQ-00).
+   - Hauteur sans annotations mesurée de nouveau : 35 251 px au bureau (`consol-final.mjs`). Elle était de 35 226 px à la contre-vérification ; les lignes ajoutées aux Mesures font la différence. Le README des maquettes dit maintenant « sous 35 300 px ».
+   - L'échantillon « menu ouvert » de l'administration est propre à axe au bureau aussi. Un repère lu seulement par un lecteur d'écran, hors de la page inerte et sans rien de focalisable, donne à l'échantillon une zone principale et un titre. Il disparaît dès que la page n'est plus inerte, pour qu'il n'y ait jamais deux zones principales.
+   - Mesure : axe 0 à 1 440 px, à 820 px et sur Pixel 7, avec et sans `inert` ; html-validate 0 erreur (deux règles levées en commentaire, raison écrite sur place) ; rendu de l'échantillon identique au pixel près.
+
+**Remarques de la contre-vérification, réglées aussi.**
+
+- Au toucher, le bouton de thème et « Se déconnecter » font 44 × 44 px à toute largeur, et plus seulement au téléphone (`admin-plus.css`). Dès 721 px, l'avatar s'efface au toucher, sinon le rôle « Administrateur » était coupé dès 1 181 px. Le commentaire « 44 px chacun au toucher » est donc vrai.
+  - Mesure : `p6-coarse-me.mjs`, de 721 à 1 440 px, barre française et allemande, 6 maquettes et 4 échantillons : boutons à 44 px, nom et rôle entiers, rien hors de la barre.
+  - Les rendus de l'administration ne changent pas : leurs WebP refaits sont identiques à l'octet près.
+- `sizes-tel-ecrire.py` conseille maintenant la bonne classe, `.mq-ecran--plein-tel`.
+
+**Contrôles relancés sur les pages touchées** (MQ-00 et ses échantillons, MQ-04, MQ-12, l'administration). Tous à 0 :
+
+- axe-core, au bureau, sur Pixel 7 et sans `inert` ;
+- débordements, ellipses et textes sous 13 px ;
+- annotations, et interface identique sans elles (0 pixel ; 86 écrans pour MQ-00 au téléphone) ;
+- images à la taille, `sizes` au téléphone, scènes sombres, deux photos au plus par rangée ;
+- focus caché par un élément collant (0 caché, menu ouvert compris) ; focus visible dans l'administration (clair et sombre, sans `inert`) ;
+- formulaires, html-validate (les 21 pages et 9 échantillons), insécables, radios par cadre.
+
+Les poids des trois pages sont ceux de leurs Mesures (242 et 241 ko pour MQ-04, 373 et 374 ko pour MQ-12).
 
 ### Les maquettes une à une
 

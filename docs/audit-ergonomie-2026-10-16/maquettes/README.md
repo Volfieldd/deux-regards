@@ -111,7 +111,7 @@ Le détail est au § 0 du lexique (« Passe 5 ») ; côté site public et commun
 - aucun lien dans le libellé d'une case : « Lire les conditions de vente » en `.choix-sous` (MQ-15, planche) ;
 - textes SVG à 13 px rendus au moins : mini-carte de MQ-04 (`public.css`, `.vis-carte`) et carte au trait du billet à 116 px au téléphone (`public.css`, `.sommaire .carte`) ;
 - cadre d'état qui touche les bords au téléphone, `.mq-ecran--plein-tel` (`annotations.css` § 6) : ses listes en rangées ont la largeur de la page et gardent les `sizes` de la page (MQ-06, MQ-17) ;
-- planche raccourcie sous 35 000 px au bureau, sans annotations : un échantillon par composant dans la section 10, règles à côté des échantillons.
+- planche raccourcie sous 35 300 px au bureau, sans annotations : un échantillon par composant dans la section 10, règles à côté des échantillons.
 
 Contrôles ajoutés (voir `GRILLE.md`) : html-validate (`outils/html-valide.sh`), taille rendue des textes, SVG compris (`consol-final.mjs`), largeur mesurée des listes en rangées (`sizes-tel-ecrire.py`).
 
@@ -124,3 +124,12 @@ Côté administration (MQ-07 à MQ-10, MQ-18 à MQ-20, section Administration de
 - 0 erreur html-validate : zones d'états en `<section>`, `<progress>` natif ; deux règles levées en commentaire, justifiées sur place (la liste de la palette, combobox de main ; les cases `ids` d'un lot, groupe de main).
 
 Contrôles ajoutés : `focus-colle.mjs` menu ouvert (et les coins arrondis), `controle-annotations.mjs` P5 et S2 (pastille coupée par un conteneur qui défile), `formulaires.mjs` (noms, boutons hors formulaire, jetons) ; `p2-1820-de.mjs` se lance de n'importe quel dossier.
+
+## Passe 6 (17 oct. 2026, après la contre-vérification)
+
+- visionneuse (`public.css` § 20) : dès 1 200 px, la largeur de la photo laisse à chaque flèche la place que la marge n'a pas ; la page ne défile plus à l'horizontale sur un écran haut (MQ-04, MQ-12 état 16) ;
+- l'ordre de la visionneuse à l'écran (la photo, puis le cartel et les gestes) passe du `<style>` de MQ-04 au commun : MQ-12, état 16, se range comme MQ-04 ;
+- planche : bloc Mesures remis à jour (hauteur mesurée) ; l'échantillon « menu ouvert » de l'administration est sans remarque axe au bureau aussi ;
+- administration (`admin-plus.css`) : au toucher, le thème et « Se déconnecter » font 44 px à toute largeur ; l'avatar s'efface dès 721 px.
+
+Contrôles ajoutés (voir `GRILLE.md`) : `debord-hauteurs.mjs` (débordements à 900, 1 024 et 1 100 px de haut, pas de 16 px, flèches de la visionneuse), `p6-coarse-me.mjs` (pied de la barre au toucher).
