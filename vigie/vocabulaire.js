@@ -19,6 +19,7 @@ export const OWN = {
   vigie_ingestion_refusee: E('haut', 'vigie · contrôle'),
   log_integrity_fail: E('critique', 'vigie · contrôle'),
   vigie_purge: E('info', 'vigie · contrôle'),
+  vigie_alerte: E('info', 'vigie · contrôle'),
   vigie_decision: E('moyen', 'vigie · ligne de commande'),
   vigie_interrupteur: E('moyen', 'vigie · ligne de commande'),
 };

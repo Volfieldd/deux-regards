@@ -8,7 +8,9 @@ La Vigie est un composant **à part** du site : son propre conteneur, sa propre 
 |---|---|---|
 | A | Le site émet ses événements | fait |
 | B | Conteneur de la Vigie : réception signée, base chaînée, décisions signées appliquées par le site, interrupteurs, ligne de commande, lecture de Zitadel, sauvegarde | fait |
-| C | Règles de détection (DS1 à DS30) et alertes | à venir |
+| C1 | Moteur d'entités : score composite qui s'efface avec le temps, quorum entre sources (deux sources pour une alerte « moyen » ou « haut »), exceptions à source unique, alertes, modes par règle, réponses automatiques prudentes | fait |
+| C2 | Règles au format Sigma, détecteurs comportementaux, listes de menaces, contrôle des rôles sur les sauvegardes, verdicts agrégés | à venir |
+| C3 | Capteur en bordure (Cloudflare Worker) | à venir |
 | D | Console `vigie.nicephos.art` (Cloudflare Access + Zitadel), notifications (admin, e-mail, Signal) | à venir |
 
 ---
@@ -82,6 +84,26 @@ docker exec nicephos-vigie node vigie/cli.js <commande>
 | `interrupteur blocages arret --duree 2h` | arrête les blocages automatiques (phase C) pour une durée (obligatoire, 7 jours au plus) ; `detection`, `alertes` de même |
 
 Chaque action est notée dans la base de la Vigie, avec l'utilisateur du système. Le site applique une décision en quelques secondes.
+
+## Alertes (phase C1)
+
+Concepts repris de marlinOS ([recadrage](https://github.com/Volfieldd/deux-regards/blob/main/docs/etudes/recadrage-vigie-edge-wake.md)) :
+
+- **Entités** : adresse, réseau, compte (`sub`, le même sur le site et chez Zitadel), session. Chaque événement y dépose des points (barème : `vigie/poids.js`) ; le score perd la moitié de sa valeur chaque heure ; chaque source (site, Zitadel, bordure, contrôles de la Vigie) a sa part.
+- **Quorum** : une alerte de score (« moyen », « haut » au double du seuil) demande le seuil franchi **et deux sources** ; une source seule fait monter le score, jamais l'alerte. Seuils de départ : adresse 7, réseau 12, compte 7, session 5.
+- **Exceptions à source unique** (alerte immédiate) : rôle donné hors de l'application, administrateur donné, déclencheurs ou tickets des comptes altérés, chaîne rompue, cookie rejoué depuis un autre appareil, session reprise depuis un autre appareil, saisie malveillante depuis un compte de l'admin, Zitadel critique (emprunt d'identité, administrateur ajouté, politique affaiblie), configuration changée, restauration, déchiffrement impossible, ingestion refusée, trou Zitadel.
+- **Modes** (par règle) : `arret`, `observer` (alerte ouverte et marquée, sans notification ni réponse : le mois d'observation), `alerter`, `bloquer` (réponse automatique). Au départ, tout est en `observer`, sauf le cookie rejoué (sessions du compte fermées) et le rôle donné hors de l'application (compte gelé 24 h, sessions fermées), en `bloquer`.
+- **Réponses automatiques** : seulement en mode `bloquer` et interrupteur `blocages` en marche ; jamais en double ; une adresse n'est jamais bloquée automatiquement si elle a été vue avec un compte (30 jours) ou si elle est « de confiance ».
+- **Une alerte par règle et par entité** tant qu'elle est ouverte : les événements suivants s'y ajoutent (compteur, sources, gravité la plus haute).
+
+| Commande | Effet |
+|---|---|
+| `alertes` (`--toutes`) | alertes ouvertes, de la plus grave à la moins grave |
+| `alerte <id>` | règle, entité, sources, réponse, et « D'où vient le signal » (les événements, leur composant, leur émetteur, leur confiance) |
+| `prendre <id>`, `classer <id> <incident\|faux_positif\|test> --note "…"` | prise en charge ; clôture |
+| `entites` | entités les plus chaudes (score, sources) |
+| `regles`, `regle <règle> <mode>`, `seuil <classe> <points>` | modes et seuils |
+| `confiance ajouter\|retirer <ip>` | adresses jamais bloquées automatiquement |
 
 ## Garde-fous
 
