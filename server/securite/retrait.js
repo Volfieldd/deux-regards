@@ -18,7 +18,8 @@ export const settingsOf = db => ({
 export function retireVigie({ db, storageDir }) {
   db.exec(`DROP TRIGGER IF EXISTS ${SESSION_TRIGGER}`);
   db.prepare('DELETE FROM sessions_revoked').run();
-  db.prepare('UPDATE sessions SET ctx_ip = NULL, ctx_net = NULL, ctx_country = NULL, ctx_ua = NULL WHERE ctx_ip IS NOT NULL OR ctx_ua IS NOT NULL').run();
+  db.prepare(`UPDATE sessions SET ctx_ip = NULL, ctx_net = NULL, ctx_country = NULL, ctx_ua = NULL, ctx_fp = NULL, ctx_asn = NULL, ctx_tls = NULL, ctx_tls_brut = NULL
+    WHERE ctx_ip IS NOT NULL OR ctx_ua IS NOT NULL OR ctx_fp IS NOT NULL OR ctx_asn IS NOT NULL OR ctx_tls IS NOT NULL`).run();
   fs.rmSync(path.join(storageDir, 'securite-attente'), { recursive: true, force: true });
   fs.rmSync(path.join(storageDir, 'securite-decisions.json'), { force: true });
 }

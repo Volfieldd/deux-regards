@@ -6,5 +6,8 @@ storage/
 *.db-wal
 *.tar.gz
 vigie.env
+bordure/wrangler.toml
+bordure/.wrangler/
+cloudflare-token
 **/vigie.env
 zitadel*.json

@@ -1,0 +1,66 @@
+# Bordure Cloudflare (phase C3, décision D19) : constats du Worker, lus dans Analytics Engine. Source « bordure » du
+# quorum : avec le site (pages introuvables, pièges, saisies) ou Zitadel sur la même adresse, une alerte s'ouvre.
+title: Rafale de réponses 4xx vue en bordure (exploration, énumération)
+name: bordure_erreurs
+id: 1b3a6778-26d8-47fb-8931-bcecef461f73
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.reconnaissance, attack.t1595.003]
+detection:
+  selection:
+    type: bordure_erreurs
+  condition: selection
+level: medium
+vigie: { cas: DS16, entite: { kind: ip, champ: ip }, points: 3 }
+---
+title: Rafale de pages vue en bordure (aspiration du site)
+name: bordure_rafale
+id: 581bdb3e-4034-4f1d-b054-93fbbbb43da0
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.collection, attack.t1213]
+detection:
+  selection:
+    type: bordure_rafale
+  condition: selection
+level: medium
+vigie: { cas: DS15, entite: { kind: ip, champ: ip }, points: 3 }
+---
+title: Admin ou connexion depuis un opérateur réseau jamais vu en bordure
+name: bordure_nouvel_operateur
+id: a2ac631c-5957-446b-99d9-aa78c8858766
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.initial_access, attack.t1078]
+detection:
+  selection:
+    type: bordure_nouvel_operateur
+  condition: selection
+level: low
+vigie: { cas: DS4, entite: { kind: ip, champ: ip }, points: 1 }
+---
+title: En-têtes de la bordure fabriqués ou rejoués
+name: bordure_entetes_faux
+id: d4b43d70-8143-48da-9eb6-2b96ceff6791
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion, attack.t1036]
+detection:
+  selection:
+    type: edge_signature_invalid
+  condition: selection
+level: high
+vigie: { cas: DS32, entite: { kind: ip, champ: ip }, points: 3 }
+---
+title: Bordure injoignable ou silencieuse (jeton, quota, Worker retiré)
+name: bordure_muette
+id: 1bababd6-3619-463d-8fba-ed1ad9018d1c
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion, attack.t1562]
+detection:
+  selection:
+    type: [vigie_bordure_erreur, vigie_bordure_silence]
+  condition: selection
+level: medium
+vigie: { cas: DS24, entite: { kind: vigie, valeur: bordure }, source_unique: true }

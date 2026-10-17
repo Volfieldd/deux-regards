@@ -121,6 +121,37 @@ Concepts repris de marlinOS ([recadrage](https://github.com/Volfieldd/deux-regar
 | `controle` | contrôle des rôles sur la dernière sauvegarde du site, tout de suite (alertes ouvertes comme dans le service) |
 | `controle --accepter --motif "…"` | après vérification d'un écart expliqué ailleurs (administrateur ajouté directement dans la base, par exemple) : l'instantané actuel devient la référence |
 
+## Bordure Cloudflare (phase C3, facultative)
+
+Un **Worker** Cloudflare (`bordure/worker.js`, offre gratuite) devant l'admin, la connexion et les pages :
+
+- **bloque avant le site** les adresses bloquées par la Vigie : liste signée (Ed25519), copiée par la Vigie dans Workers KV, ne contenant **que** des adresses (ni compte ni session ne part chez Cloudflare). Mêmes garde-fous que le site (jamais tout le monde) ; une liste refusée ou KV en panne : la requête passe, le site applique les siennes ;
+- **transmet au site**, en en-têtes `x-bordure-*` signés (HMAC, `VIGIE_BORDURE_KEY`), l'opérateur réseau (ASN) et deux empreintes TLS ; le site ne les croit que signés, frais (60 s) et pour cette adresse et cette requête ; des en-têtes faux sont signalés (`edge_signature_invalid`, cas DS32) ;
+- **écrit un point par requête** dans Analytics Engine (adresse, classe de route, statut, opérateur, empreinte TLS, premier segment du chemin seulement), lu chaque minute par la Vigie : rafales d'erreurs 4xx (DS16), rafales de pages (DS15), admin depuis un opérateur jamais vu (DS4), blocages appliqués. La bordure est une **source du quorum** à part entière : avec le site ou Zitadel sur la même adresse, une alerte s'ouvre. Bordure muette (jeton refusé, quota, Worker retiré, 6 h sans point) : alerte (DS24).
+
+**Empreintes TLS : observées d'abord.** Cloudflare donne l'empreinte de la connexion chiffrée sur toutes les offres, mais certains navigateurs la font varier d'une connexion à l'autre (valeurs GREASE, extensions mélangées). Un changement d'empreinte pendant une session est donc noté en « info » (`session_context_change`, `tls_change`), sans alerte, le temps de mesurer sa stabilité sur l'instance de test (requête sur la base de la Vigie : part des sessions ordinaires dont l'empreinte change).
+
+**Offre gratuite** : 100 000 requêtes de Worker par jour (routes en « laisser passer » au-delà), 10 ms de calcul par requête ; KV : 100 000 lectures et 1 000 écritures par jour (la Vigie écrit au plus toutes les 2 minutes) ; Analytics Engine : 100 000 points écrits et 10 000 lectures par jour (la Vigie lit une fois par minute), données gardées 3 mois.
+
+### Installer (instance de test d'abord, D19)
+
+1. **Clé partagée** : `openssl rand -base64 32` → `VIGIE_BORDURE_KEY` dans le `.env` du site (différente de `VIGIE_INGEST_KEY`).
+2. **Espace KV** : `npx wrangler@4 kv namespace create vigie-blocages` (noter l'identifiant).
+3. **Worker** : copier `bordure/wrangler.toml.example` en `bordure/wrangler.toml` (ignoré par Git), remplir `DECISIONS_PUBKEY` (= `VIGIE_DECISIONS_PUBKEY`), l'identifiant KV et la zone ; puis, dans `bordure/` :
+
+   ```bash
+   npx wrangler@4 secret put BORDURE_KEY   # la valeur de VIGIE_BORDURE_KEY
+   npx wrangler@4 deploy
+   ```
+
+4. **Routes** (tableau de bord → Workers Routes) : la route `nicephos.art/*` vers `vigie-bordure` en mode **« Fail open »** (au-delà du quota, les requêtes passent) ; routes **sans Worker** (« None ») pour `nicephos.art/media/*`, `/static/*`, `/fonts/*`, `/partage/*`, `/admin/media/*` (images et fichiers : jamais comptés dans le quota). Le Worker les laisse aussi passer s'il les reçoit.
+5. **Jeton pour la Vigie** (Mon profil → API Tokens → Create custom token) : *Account → Account Analytics → Read* et *Account → Workers KV Storage → Edit*, sur ce compte seulement ; le poser dans `VIGIE_SECRETS_DIR/cloudflare-token` (`chmod 600`, `99:100`).
+6. **`vigie.env`** : `VIGIE_CF_ACCOUNT_ID`, `VIGIE_CF_KV_NAMESPACE` (et `VIGIE_CF_DATASET` si autre que `vigie_bordure`). Redémarrer le site et la Vigie.
+
+**Vérifier** : `docker exec nicephos-vigie node vigie/cli.js regles | grep bordure` ; après quelques minutes de trafic, des événements `bordure_*` dans `alertes --toutes` ou la base ; une adresse bloquée par `bloquer` reçoit la page « Accès refusé » de Cloudflare, sans que la requête n'atteigne le site (journal du site muet).
+
+**Retirer** : supprimer la route (ou le Worker), retirer `VIGIE_BORDURE_KEY` du site et `VIGIE_CF_*` de la Vigie. Le site retire les empreintes de bordure de ses sessions avec le reste du contexte quand la Vigie est retirée.
+
 ## Horodatages et capacité
 
 - **Deux heures par événement** : `survenu_a`, l'heure de la source (site, Zitadel), et `recu_a`, l'heure de réception par la Vigie. Les détecteurs (heure inhabituelle, voyage impossible) prennent l'heure de la source, bornée à 30 jours en arrière et 5 minutes en avant ; hors bornes, l'heure reçue est gardée telle quelle dans le détail (`horodatage_site_brut`). Les horloges du site et de la Vigie ne peuvent pas diverger de plus de 60 s : un lot signé plus décalé est refusé.

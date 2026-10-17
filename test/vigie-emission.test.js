@@ -315,6 +315,7 @@ test('lectures sensibles, page de confidentialité, jeton de photo offerte incon
   assert.equal((await c.app.inject({ url: '/pour-vous/abcdefghijklmnopqrstuvwxyz0123456789', remoteAddress: '192.0.2.60' })).statusCode, 404);
   assert.equal((await c.flush()).of('token_guess')[0].detail.nature, 'lien de photo offerte');
   assert.match((await c.app.inject('/confidentialite')).body, /Journal de sécurité/);
+  assert.doesNotMatch((await c.app.inject('/confidentialite')).body, /chez Cloudflare/, 'sans bordure : pas de filtre décrit');
   assert.match((await c.app.inject('/en/confidentialite')).body, /Security log/);
   assert.match((await c.app.inject('/de/confidentialite')).body, /Sicherheitsprotokoll/);
 });

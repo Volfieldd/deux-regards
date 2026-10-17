@@ -117,6 +117,7 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
     const by = k => list.filter(d => d.kind === k);
     const lock = by('verrouiller').at(-1);
     const payload = JSON.stringify({
+      usage: 'site',
       version: setting.get('decisions_version', 0) || 0,
       emis_a: now(),
       blocages: by('bloquer').map(d => ({ cible: d.cible, portee: d.portee, fin: d.fin })),
@@ -124,6 +125,18 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
       comptes: by('revoquer_compte').map(d => ({ sub: d.cible, avant: d.cree_a, fin: d.fin })),
       gels: by('geler').map(d => ({ sub: d.cible, fin: d.fin })),
       verrouillage: lock ? { fin: lock.fin, ...JSON.parse(lock.details) } : null,
+    });
+    return { payload, signature: crypto.sign(null, Buffer.from(payload), privateKey).toString('base64') };
+  }
+  // Ce que lit la bordure (Worker Cloudflare, phase C3) : les blocages d'adresses seulement, jamais un compte ni une
+  // session (minimisation : rien de personnel ne part chez Cloudflare au-delà des adresses qu'il voit déjà).
+  // « usage » sépare les deux listes : signées par la même clé, chacune est refusée par l'autre lecteur.
+  function signedEdge() {
+    const payload = JSON.stringify({
+      usage: 'bordure',
+      version: setting.get('decisions_version', 0) || 0,
+      emis_a: now(),
+      blocages: active().filter(d => d.kind === 'bloquer').map(d => ({ cible: d.cible, portee: d.portee, fin: d.fin })),
     });
     return { payload, signature: crypto.sign(null, Buffer.from(payload), privateKey).toString('base64') };
   }
@@ -141,5 +154,5 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
   // Arrêt : les attentes longues en cours répondent tout de suite.
   const release = () => events.emit('change');
 
-  return { create, lift, active, signed, events, watch, release, version: () => setting.get('decisions_version', 0) || 0 };
+  return { create, lift, active, signed, signedEdge, events, watch, release, version: () => setting.get('decisions_version', 0) || 0 };
 }

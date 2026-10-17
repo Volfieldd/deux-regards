@@ -24,6 +24,14 @@ export const OWN = {
   vigie_controle_roles: E('info', 'vigie · contrôle'),
   vigie_moteur_sature: E('haut', 'vigie · contrôle'),
   vigie_regle_lente: E('moyen', 'vigie · contrôle'),
+  // Bordure Cloudflare (phase C3) : constats du Worker, lus dans Analytics Engine (source « bordure » du quorum)
+  bordure_blocage: E('info', 'bordure'),
+  bordure_erreurs: E('moyen', 'bordure'),
+  bordure_rafale: E('moyen', 'bordure'),
+  bordure_nouvel_operateur: E('bas', 'bordure'),
+  bordure_erreur_worker: E('bas', 'bordure'),
+  vigie_bordure_erreur: E('moyen', 'vigie · contrôle'),
+  vigie_bordure_silence: E('moyen', 'vigie · contrôle'),
   vigie_decision: E('moyen', 'vigie · ligne de commande'),
   vigie_interrupteur: E('moyen', 'vigie · ligne de commande'),
 };

@@ -8,6 +8,7 @@ import { createEngine } from './moteur.js';
 import { createThreats } from './menaces.js';
 import { checkRoles } from './controle-roles.js';
 import { createSwitches } from './interrupteurs.js';
+import { createEdge } from './bordure.js';
 
 // Service de la Vigie : réception des événements du site, décisions signées, lecture de Zitadel, vérification de la
 // chaîne et purge. La console (phase D) et les règles (phase C) viendront s'y ajouter.
@@ -73,13 +74,20 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   setTimeout(roles, 60e3).unref();
   timers.push(setInterval(roles, 3600e3));
   for (const t of timers) t.unref();
+  // Bordure Cloudflare (phase C3) : blocages copiés dans KV, lecture d'Analytics Engine chaque minute.
+  const edge = config.bordure ? createEdge({ store, decisions, ...config.bordure, fetchImpl, now, log }) : null;
+  if (edge) {
+    setTimeout(() => { edge.push({ force: true }).catch(() => {}); }, 5e3).unref();
+    timers.push(setInterval(() => { edge.read().catch(err => log.warn({ err: err.message }, 'Vigie : bordure')); edge.push().catch(() => {}); }, 60e3));
+    timers.at(-1).unref();
+  }
   const zitadel = config.zitadel ? createZitadelReader({ ...config.zitadel, store, log, fetchImpl, now }) : null;
   zitadel?.start(config.zitadel.intervalMs);
 
   await ingest.listen({ host: config.host, port: config.ingestPort });
   return {
-    store, decisions, ingest, zitadel, engine, switches, threats,
-    async close() { for (const t of timers) clearInterval(t); zitadel?.stop(); await ingest.close(); await engine.drain(); db.close(); },
+    store, decisions, ingest, zitadel, engine, switches, threats, edge,
+    async close() { for (const t of timers) clearInterval(t); zitadel?.stop(); edge?.stop(); await ingest.close(); await engine.drain(); db.close(); },
   };
 }
 
