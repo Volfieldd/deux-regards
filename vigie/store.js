@@ -73,6 +73,7 @@ export function createStore({ db, logKey, retentionDays = 183, now = Date.now })
 
   // Ajoute des événements déjà validés, dans une seule transaction (immédiate : la ligne de commande écrit à côté) ;
   // ignore un identifiant déjà connu (lot renvoyé). Renvoie le nombre de lignes ajoutées.
+  let added = [];
   const add = db.transaction(events => {
     let prev = q.last.get() ?? anchor().chain;
     let n = 0;
@@ -83,14 +84,25 @@ export function createStore({ db, logKey, retentionDays = 183, now = Date.now })
       row.recu_a ??= now();
       row.retard = row.retard ? 1 : 0;
       row.chain = mac(prev, row);
-      q.insert.run(row);
+      row.seq = Number(q.insert.run(row).lastInsertRowid);
+      added.push(row);
       q.daily.run(new Date(row.recu_a).toISOString().slice(0, 10), row.type, row.severity, row.composant);
       prev = row.chain;
       n += 1;
     }
     return n;
   });
-  const addNow = events => add.immediate(events);
+  // Après l'écriture, les lignes ajoutées sont remises aux abonnés (moteur de détection) ; une erreur d'un abonné ne
+  // remet jamais en cause ce qui est écrit.
+  const listeners = [];
+  const addNow = events => {
+    added = [];
+    const n = add.immediate(events);
+    const rows = added;
+    added = [];
+    if (rows.length) for (const l of listeners) { try { l(rows); } catch (err) { console.error(`Vigie : abonné : ${err.message}`); } }
+    return n;
+  };
 
   // Événement constaté par la Vigie elle-même.
   const own = (type, { severity, detail, emetteur = '', sub, reference, composant, ip, ip_net } = {}) => addNow([{
@@ -153,5 +165,5 @@ export function createStore({ db, logKey, retentionDays = 183, now = Date.now })
     return removed;
   }
 
-  return { db, add: addNow, own, verify, purge, head, setting, hmac, retentionDays };
+  return { db, add: addNow, own, verify, purge, head, setting, hmac, retentionDays, onAdded: fn => listeners.push(fn) };
 }
