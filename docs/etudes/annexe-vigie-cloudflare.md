@@ -170,6 +170,7 @@ Fait le 17 octobre 2026 : `bordure/worker.js`, guide d'installation dans [Vigie]
 | Workers | 100 000 requêtes par jour, 10 ms de calcul par requête | une invocation par page ; routes « sans Worker » pour les images et fichiers |
 | Workers KV | 100 000 lectures, 1 000 écritures par jour | liste des blocages, écrite au plus toutes les 2 minutes |
 | Analytics Engine | 100 000 points écrits, 10 000 lectures par jour ; 3 mois de conservation | un point par requête ; une lecture par minute |
+| Tâches planifiées (Cron Triggers) | 5 par compte | battement du Worker toutes les 5 minutes (288 par jour) |
 
 Le Worker complète la règle R1 (liste `vigie_bloquees`, recopiée par l'API en phase E) : R1 bloque sur tout le site, images comprises, mais sa liste est limitée à 10 000 adresses et ne connaît pas les portées « admin » et « connexion » ; le Worker applique les portées et ne coûte rien de plus.
 

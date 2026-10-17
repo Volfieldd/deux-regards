@@ -48,3 +48,12 @@ Ce que ni le code ni les tests ne peuvent établir :
 - le calcul réel du Worker (tableau de bord : CPU time) ;
 - le délai d'arrivée des points dans Analytics Engine (2 minutes de marge prévues) ;
 - la stabilité des empreintes TLS (part des sessions ordinaires dont `tls_change` apparaît).
+
+## Arbitrage du 17 octobre 2026
+
+| Id | Décision | Fait |
+|---|---|---|
+| NC3-1 | erreurs vues en bordure en contexte | Bloc `vigie` des règles : `contexte: true` (points dans le score, jamais une source du quorum) ; `bordure_erreurs` passe en contexte (2 points). La bordure fait le quorum par ses constats propres (rafales de pages, opérateurs). |
+| NC3-2 | protéger contre l'épuisement du quota | Battement du Worker (tâche planifiée gratuite, toutes les 5 minutes, avec l'état de sa liste) ; alerte « bordure muette » s'il manque depuis 20 minutes, ou si aucune requête n'est vue depuis 6 h (Cloudflare ne dit pas si un quota épuisé arrête les tâches planifiées). La seule règle gratuite de limite de débit reste sur les images ; la recopie de la liste `vigie_bloquees` (phase E) arrêtera les adresses connues avant le Worker. |
+| NC3-3 | condition gardée | La page de confidentialité décrit la bordure quand `VIGIE_BORDURE_KEY` est réglée ; le guide l'impose avant tout déploiement du Worker. |
+| NC3-4 à NC3-6 | acceptés | — |

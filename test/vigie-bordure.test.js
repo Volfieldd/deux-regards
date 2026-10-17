@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { setup, VIGIE_KEYS } from './helpers.js';
 import { parseBlock, acceptEdgeList, blockedScope } from '../bordure/decisions.js';
-import worker, { resetCache } from '../bordure/worker.js';
+import worker, { resetCache, scheduled } from '../bordure/worker.js';
 import { createEdgeVerifier } from '../server/securite/bordure.js';
 import { createDecisionsClient } from '../server/securite/decisions.js';
 import { loadConfig } from '../server/config.js';
@@ -239,9 +239,14 @@ test('Vigie : blocages copiés dans KV (liste de la bordure, 2 minutes au moins 
   assert.equal(evs[0].confiance, 'constaté');
   assert.equal(evs[0].survenu_a, minute * 1000, 'heure de la minute vue en bordure');
   assert.equal(await edge.read(), 0, 'minute déjà lue : rien en double ; minute en cours : pas encore');
-  // Quorum : le site voit aussi l'adresse (pages introuvables) → alerte de score, sources bordure + site.
-  for (let i = 0; i < 4; i++) v.store.add([{ id: crypto.randomUUID(), recu_a: v.now(), survenu_a: v.now(), type: 'malicious_excess_404', severity: 'bas', canal: 'ingestion signée', confiance: 'rapporté', composant: 'site · public', ip: '198.51.100.7', ip_net: '198.51.100.0' }]);
-  const a = v.db.prepare("SELECT * FROM alerts WHERE regle = 'entite.score' AND entite_key = '198.51.100.7'").get();
+  // Quorum (arbitrage NC3-1) : les 404 vues en bordure sont les mêmes que celles du site → contexte, pas une seconde
+  // source ; une rafale de pages (que le site ne voit pas) en est une.
+  const site404 = ip => { for (let i = 0; i < 4; i++) v.store.add([{ id: crypto.randomUUID(), recu_a: v.now(), survenu_a: v.now(), type: 'malicious_excess_404', severity: 'bas', canal: 'ingestion signée', confiance: 'rapporté', composant: 'site · public', ip, ip_net: '198.51.100.0' }]); };
+  site404('198.51.100.7');
+  assert.ok(v.engine.current('ip', '198.51.100.7').score >= 7, 'points de contexte comptés');
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM alerts WHERE regle = 'entite.score' AND entite_key = '198.51.100.7'").pluck().get(), 0, 'une seule source réelle : pas d’alerte');
+  site404('198.51.100.8');
+  const a = v.db.prepare("SELECT * FROM alerts WHERE regle = 'entite.score' AND entite_key = '198.51.100.8'").get();
   assert.deepEqual(JSON.parse(a.sources), ['bordure', 'site']);
   // Vigie arrêtée plus d'une heure : la période manquante est signalée.
   v.clock.t += 3 * 3600e3;
@@ -261,4 +266,33 @@ test('Vigie : blocages copiés dans KV (liste de la bordure, 2 minutes au moins 
   assert.throws(() => loadVigieConfig({ ...env, VIGIE_CF_ACCOUNT_ID: account }), /VIGIE_CF_KV_NAMESPACE/);
   assert.throws(() => loadVigieConfig({ ...env, VIGIE_CF_ACCOUNT_ID: account, VIGIE_CF_KV_NAMESPACE: ns, VIGIE_CF_TOKEN_FILE: path.join(dir, 'absent') }), /introuvable/);
   assert.equal(loadVigieConfig({ ...env, VIGIE_CF_ACCOUNT_ID: account, VIGIE_CF_KV_NAMESPACE: ns, VIGIE_CF_TOKEN_FILE: tokenFile }).bordure.dataset, 'vigie_bordure');
+});
+
+test('bordure : battement du Worker toutes les 5 minutes ; son absence signalée en 20 minutes (quota épuisé, Worker retiré)', async t => {
+  const points = [];
+  resetCache();
+  await scheduled({}, { DECISIONS: { get: async () => null }, DECISIONS_PUBKEY: VIGIE_KEYS.pub64, ANALYTICS: { writeDataPoint: p => points.push(p) } });
+  assert.equal(points[0].indexes[0], 'bordure');
+  assert.equal(points[0].blobs[0], 'battement');
+  const v = vigieOf(t, { start: Date.parse('2026-10-20T10:00:30Z') });
+  const dir = tmp(t);
+  const tokenFile = path.join(dir, 'cloudflare-token');
+  fs.writeFileSync(tokenFile, 'jeton');
+  let rows = [];
+  const edge = createEdge({ store: v.store, decisions: v.decisions, accountId: 'a'.repeat(32), kvNamespace: 'b'.repeat(32), dataset: 'vigie_bordure', tokenFile, now: v.now,
+    fetchImpl: async () => new Response(JSON.stringify({ data: rows }), { status: 200 }) });
+  t.after(() => edge.stop());
+  const beat = ms => ({ minute: String(Math.floor(ms / 60e3) * 60), ip: 'bordure', classe: 'battement', statut: '', pays: '', asn: '', org: '', tls: '', note: 'liste 3, 0 blocage(s)', n: '1' });
+  rows = [beat(v.clock.t - 4 * 60e3)];
+  await edge.read();
+  assert.equal(v.store.setting.get('bordure_dernier_battement').etat, 'liste 3, 0 blocage(s)');
+  rows = [];
+  for (let i = 0; i < 4; i++) { v.clock.t += 5 * 60e3; await edge.read(); }
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_bordure_silence'").pluck().get(), 1);
+  assert.ok(v.db.prepare("SELECT 1 FROM alerts WHERE regle = 'sigma.bordure_muette'").get());
+  // Le battement revient : la prochaine absence sera de nouveau signalée.
+  v.clock.t += 5 * 60e3;
+  rows = [beat(v.clock.t - 4 * 60e3)];
+  await edge.read();
+  assert.equal(v.store.setting.get('bordure_silence_signale'), false);
 });

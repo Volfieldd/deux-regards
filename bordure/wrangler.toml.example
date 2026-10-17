@@ -16,6 +16,10 @@ routes = [
 ]
 
 # Journaux du Worker coupés : ils garderaient l'adresse complète des pages (dont « /pour-vous/<jeton> »).
+# Battement toutes les 5 minutes (gratuit) : la Vigie signale son absence en 20 minutes (quota épuisé, Worker retiré).
+[triggers]
+crons = ["*/5 * * * *"]
+
 [observability]
 enabled = false
 
