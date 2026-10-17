@@ -76,6 +76,13 @@ test('bordure : garde-fous des blocages (jamais tout le monde), séparation des 
   const client = createDecisionsClient({ url: 'http://x', key: KEY, pubkey: crypto.createPublicKey({ key: Buffer.from(VIGIE_KEYS.pub64, 'base64'), format: 'der', type: 'spki' }), storageDir: tmp(t) });
   assert.throws(() => client.accept(edge), /pas destinée au site/);
   assert.equal(client.accept(v.decisions.signed()).counts.gels, 1);
+  // 1 000 blocages au plus en bordure (10 ms de calcul du Worker) : décisions manuelles d'abord, puis les plus récentes.
+  for (let i = 0; i < 1001; i++) v.decisions.create({ kind: 'bloquer', cible: `10.${i >> 8}.${i & 255}.1`, portee: 'tout', duree: '1h', par: 'Vigie', auto: true });
+  const big = JSON.parse(v.decisions.signedEdge().payload).blocages;
+  assert.equal(big.length, 1000);
+  assert.ok(big.some(b => b.cible === '203.0.113.7/32'), 'la décision manuelle reste');
+  const accepted = await acceptEdgeList(v.decisions.signedEdge(), VIGIE_KEYS.pub64, v.now());
+  assert.equal(accepted.exact.size + accepted.blocks.length, 1000, 'acceptée en entier par le Worker');
   // Signature fausse : refusée.
   await assert.rejects(acceptEdgeList({ ...edge, payload: edge.payload.replace('203.0.113.7', '203.0.113.8') }, VIGIE_KEYS.pub64), /signature fausse/);
 });
@@ -103,7 +110,23 @@ test('Worker : bloque avant le site, signe ses en-têtes (vérifiés par le site
   const b = verify(req);
   assert.deepEqual({ asn: b.asn, org: b.org, pays: b.pays, rtt: b.rtt }, { asn: '3215', org: 'Orange', pays: 'FR', rtt: 12 });
   assert.match(b.tls, /^[0-9a-f]{16}$/);
-  assert.deepEqual(verify({ ...req, ip: '203.0.113.8' }), { invalide: 'signature fausse' }, 'en-têtes d’un autre visiteur');
+  assert.deepEqual(verify({ ...req, ip: '203.0.113.8' }), { invalide: 'adresse différente' }, 'en-têtes d’un autre visiteur (ou adresse mal transmise)');
+  assert.deepEqual(verify({ ...req, headers: { ...req.headers, 'x-bordure-ip': '203.0.113.8' } }), { invalide: 'signature fausse' }, 'adresse signée changée');
+  // Chemin encodé : le Worker le décode comme le routeur du site, le bloque, et le site vérifie la même signature.
+  v.decisions.create({ kind: 'bloquer', cible: '198.51.100.44', portee: 'admin', duree: '1h', par: 'test' });
+  resetCache();
+  await new Promise(r => setImmediate(r));
+  const kv2 = { get: async () => v.decisions.signedEdge() };
+  for (const p of ['/%61dmin/photos', '//admin', '/a%75th/login']) assert.equal((await runWorker({ url: `https://nicephos.art${p}`, ip: '198.51.100.44', env: { DECISIONS: kv2 } })).res.status, 403, p);
+  resetCache();
+  const enc = await runWorker({ url: 'https://nicephos.art/photo/caf%C3%A9%7Cx', env: { DECISIONS: kv2 } });
+  const he = Object.fromEntries(enc.forwarded[0].headers);
+  // cloudflared réencode certains caractères (« | ») : le site décode avant de comparer.
+  assert.equal(verify({ ip: '203.0.113.7', method: 'GET', headers: { ...he, host: 'nicephos.art' }, raw: { url: '/photo/caf%C3%A9|x' } }).asn, '3215');
+  // IPv6 du visiteur.
+  resetCache();
+  const six = await runWorker({ url: 'https://nicephos.art/', ip: '2001:db8::7', env: { DECISIONS: kv2 } });
+  assert.equal(verify({ ip: '2001:db8::7', method: 'GET', headers: { ...Object.fromEntries(six.forwarded[0].headers), host: 'nicephos.art' }, raw: { url: '/' } }).asn, '3215');
   assert.deepEqual(verify({ ...req, raw: { url: '/admin' } }), { invalide: 'signature fausse' }, 'en-têtes d’une autre requête');
   assert.deepEqual(createEdgeVerifier({ key: EDGE_KEY, now: () => Date.now() + 120e3 })(req), { invalide: 'en-têtes périmés' });
   assert.equal(verify({ ip: '1.2.3.4', method: 'GET', headers: {}, url: '/' }), null, 'sans bordure');
@@ -111,7 +134,21 @@ test('Worker : bloque avant le site, signe ses en-têtes (vérifiés par le site
   const media = await runWorker({ url: 'https://nicephos.art/media/abc.avif', headers: { 'x-bordure-asn': '666' }, env: { DECISIONS: kv } });
   assert.equal(media.points.length, 0);
   assert.equal(media.forwarded[0].headers.get('x-bordure-asn'), null);
-  // KV en panne : la requête passe (le site garde ses protections).
+  // Liste inchangée : pas revérifiée ; KV en panne ensuite : la liste précédente reste appliquée.
+  resetCache();
+  let calls = 0;
+  const flaky = { get: async () => { calls += 1; if (calls > 1) throw new Error('KV'); return v.decisions.signedEdge(); } };
+  assert.equal((await runWorker({ url: 'https://nicephos.art/', ip: '192.0.2.66', env: { DECISIONS: flaky } })).res.status, 403);
+  const realNow = Date.now;
+  Date.now = () => realNow() + 61e3;
+  try {
+    const again = await runWorker({ url: 'https://nicephos.art/', ip: '192.0.2.66', env: { DECISIONS: flaky } });
+    assert.equal(again.res.status, 403, 'liste précédente gardée');
+    assert.equal(again.points[0].blobs[0], 'liste_refusee', 'refus signalé à la Vigie');
+  } finally { Date.now = realNow; }
+  // Dernier recours : DESACTIVE=1 laisse tout passer.
+  assert.equal((await runWorker({ url: 'https://nicephos.art/', ip: '192.0.2.66', env: { DECISIONS: kv, DESACTIVE: '1' } })).res.status, 200);
+  // KV en panne dès le départ : la requête passe (le site garde ses protections).
   resetCache();
   const down = await runWorker({ url: 'https://nicephos.art/', ip: '192.0.2.66', env: { DECISIONS: { get: async () => { throw new Error('KV'); } } } });
   assert.equal(down.res.status, 200);
@@ -181,16 +218,22 @@ test('Vigie : blocages copiés dans KV (liste de la bordure, 2 minutes au moins 
   v.clock.t += 121e3;
   assert.equal(await edge.push(), true);
   assert.match(JSON.parse(JSON.parse(calls.at(-1).body).payload).blocages[0].cible, /^203\.0\.113\.9/);
-  // Analytics Engine : minute close, une adresse avec 25 réponses 404 et une rafale de 150 pages.
-  const minute = Math.floor((v.clock.t - 180e3) / 60e3) * 60;
+  // Analytics Engine : minute close depuis 2 minutes, une adresse avec 25 réponses 404 et une rafale de 150 pages.
+  const bound = Math.floor((v.clock.t - 180e3) / 60e3) * 60e3;
+  v.store.setting.set('bordure_curseur', bound - 5 * 60e3);
+  const minute = bound / 1000 - 60;
   sql = { data: [
     { minute: String(minute), ip: '198.51.100.7', classe: 'page', statut: '404', pays: 'NL', asn: '14061', org: 'DigitalOcean', tls: 'a'.repeat(16), n: '25' },
     { minute: String(minute), ip: '198.51.100.8', classe: 'page', statut: '200', pays: 'US', asn: '16509', org: 'Amazon', tls: 'b'.repeat(16), n: '150' },
     { minute: String(minute), ip: '203.0.113.9', classe: 'bloque', statut: '403', pays: 'FR', asn: '3215', org: 'Orange', tls: 'c'.repeat(16), n: '4' },
     { minute: String(minute), ip: 'pas-une-adresse', classe: 'page', statut: '404', pays: '', asn: '', org: '', tls: '', n: '99' },
-    { minute: String(Math.floor(v.clock.t / 60e3) * 60), ip: '198.51.100.7', classe: 'page', statut: '404', pays: 'NL', asn: '14061', org: '', tls: '', n: '50' },
+    { minute: String(bound / 1000), ip: '198.51.100.7', classe: 'page', statut: '404', pays: 'NL', asn: '14061', org: '', tls: '', n: '50' },
+    { minute: String(minute), ip: 'bordure', classe: 'liste_refusee', statut: '', pays: '', asn: '', org: '', tls: '', note: 'signature fausse', n: '1' },
   ] };
   assert.equal(await edge.read(), 3);
+  assert.match(calls.at(-1).body, /timestamp >= toDateTime\('[0-9-]+ [0-9:]+'\) AND timestamp < toDateTime/, 'période bornée par le curseur');
+  assert.equal(v.store.setting.get('bordure_curseur'), bound, 'curseur à la borne, même sans point');
+  assert.ok(v.db.prepare("SELECT 1 FROM events WHERE type = 'vigie_bordure_erreur' AND detail LIKE '%liste refusée par le Worker%'").get(), 'liste refusée par le Worker : signalée');
   const evs = v.db.prepare("SELECT type, ip, composant, confiance, survenu_a FROM events WHERE composant = 'bordure' ORDER BY seq").all();
   assert.deepEqual(evs.map(e => [e.type, e.ip]), [['bordure_erreurs', '198.51.100.7'], ['bordure_rafale', '198.51.100.8'], ['bordure_blocage', '203.0.113.9']]);
   assert.equal(evs[0].confiance, 'constaté');
@@ -200,11 +243,17 @@ test('Vigie : blocages copiés dans KV (liste de la bordure, 2 minutes au moins 
   for (let i = 0; i < 4; i++) v.store.add([{ id: crypto.randomUUID(), recu_a: v.now(), survenu_a: v.now(), type: 'malicious_excess_404', severity: 'bas', canal: 'ingestion signée', confiance: 'rapporté', composant: 'site · public', ip: '198.51.100.7', ip_net: '198.51.100.0' }]);
   const a = v.db.prepare("SELECT * FROM alerts WHERE regle = 'entite.score' AND entite_key = '198.51.100.7'").get();
   assert.deepEqual(JSON.parse(a.sources), ['bordure', 'site']);
+  // Vigie arrêtée plus d'une heure : la période manquante est signalée.
+  v.clock.t += 3 * 3600e3;
+  sql = { data: [] };
+  await edge.read();
+  assert.ok(v.db.prepare("SELECT 1 FROM events WHERE type = 'vigie_bordure_erreur' AND detail LIKE '%période non lue%'").get());
   // Lecture en échec (jeton refusé) : signalée une fois par heure, alerte « bordure muette ».
   const failing = createEdge({ store: v.store, decisions: v.decisions, accountId: account, kvNamespace: ns, dataset: 'vigie_bordure', tokenFile, fetchImpl: async () => new Response('{}', { status: 403 }), now: v.now });
   t.after(() => failing.stop());
+  v.clock.t += 5 * 60e3;
   await failing.read(); await failing.read();
-  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_bordure_erreur'").pluck().get(), 1);
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_bordure_erreur' AND detail LIKE ?").pluck().get('%"operation":"lecture"%'), 1);
   assert.ok(v.db.prepare("SELECT 1 FROM alerts WHERE regle = 'sigma.bordure_muette'").get());
   // Configuration de la Vigie : identifiants contrôlés, jeton en fichier obligatoire.
   const env = { VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, VIGIE_INGEST_KEY: KEY, VIGIE_LOG_KEY: LOG_KEY, VIGIE_DECISIONS_PRIVATE_KEY: VIGIE_KEYS.priv64 };

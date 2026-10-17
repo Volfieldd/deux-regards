@@ -128,7 +128,9 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     const device = !browser && Boolean(s.ctx_fp) && s.ctx_fp !== ctx.fp;
     // Bordure (phase C3) : empreinte TLS ou opérateur changés pendant la session. Observés en « info » tant que leur
     // stabilité n'est pas mesurée (docs/wiki/Vigie.md, bordure) ; ils ne relèvent pas la gravité.
-    const tls = Boolean(s.ctx_tls && ctx.tls && s.ctx_tls !== ctx.tls), tlsBrut = Boolean(s.ctx_tls_brut && ctx.tlsBrut && s.ctx_tls_brut !== ctx.tlsBrut);
+    // L'empreinte brute (gardée avec la session, pour l'enquête) n'est pas suivie ici : elle change avec la reprise de
+    // session TLS et produirait un événement à chaque nouvelle valeur (revue C3).
+    const tls = Boolean(s.ctx_tls && ctx.tls && s.ctx_tls !== ctx.tls), tlsBrut = false;
     const asn = Boolean(s.ctx_asn && ctx.asn && s.ctx_asn !== ctx.asn);
     if (!browser && !device && !country && !net && !tls && !tlsBrut && !asn) return;
     const kind = `${browser ? 'n' : ''}${device ? 'e' : ''}${country ? 'p' : ''}${net ? `r${ctx.net}` : ''}${tls ? `t${ctx.tls}` : ''}${tlsBrut ? `b${ctx.tlsBrut}` : ''}${asn ? `a${ctx.asn}` : ''}`;

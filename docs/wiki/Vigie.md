@@ -125,7 +125,7 @@ Concepts repris de marlinOS ([recadrage](https://github.com/Volfieldd/deux-regar
 
 Un **Worker** Cloudflare (`bordure/worker.js`, offre gratuite) devant l'admin, la connexion et les pages :
 
-- **bloque avant le site** les adresses bloquées par la Vigie : liste signée (Ed25519), copiée par la Vigie dans Workers KV, ne contenant **que** des adresses (ni compte ni session ne part chez Cloudflare). Mêmes garde-fous que le site (jamais tout le monde) ; une liste refusée ou KV en panne : la requête passe, le site applique les siennes ;
+- **bloque avant le site** les adresses bloquées par la Vigie : liste signée (Ed25519), copiée par la Vigie dans Workers KV, ne contenant **que** des adresses (ni compte ni session ne part chez Cloudflare), 1 000 au plus (décisions manuelles d'abord ; le site applique toute la liste). Mêmes garde-fous que le site (jamais tout le monde) ; chemin décodé comme le routeur du site (`/%61dmin` est `/admin`). Liste de plus de 24 h ou plus ancienne que celle en place : refusée ; entrée illisible : écartée seule ; refus signalé à la Vigie (alerte « bordure muette »). KV en panne : la liste précédente reste ; sans liste, la requête passe et le site applique les siennes ;
 - **transmet au site**, en en-têtes `x-bordure-*` signés (HMAC, `VIGIE_BORDURE_KEY`), l'opérateur réseau (ASN) et deux empreintes TLS ; le site ne les croit que signés, frais (60 s) et pour cette adresse et cette requête ; des en-têtes faux sont signalés (`edge_signature_invalid`, cas DS32) ;
 - **écrit un point par requête** dans Analytics Engine (adresse, classe de route, statut, opérateur, empreinte TLS, premier segment du chemin seulement), lu chaque minute par la Vigie : rafales d'erreurs 4xx (DS16), rafales de pages (DS15), admin depuis un opérateur jamais vu (DS4), blocages appliqués. La bordure est une **source du quorum** à part entière : avec le site ou Zitadel sur la même adresse, une alerte s'ouvre. Bordure muette (jeton refusé, quota, Worker retiré, 6 h sans point) : alerte (DS24).
 
@@ -149,6 +149,14 @@ Un **Worker** Cloudflare (`bordure/worker.js`, offre gratuite) devant l'admin, l
 6. **`vigie.env`** : `VIGIE_CF_ACCOUNT_ID`, `VIGIE_CF_KV_NAMESPACE` (et `VIGIE_CF_DATASET` si autre que `vigie_bordure`). Redémarrer le site et la Vigie.
 
 **Vérifier** : `docker exec nicephos-vigie node vigie/cli.js regles | grep bordure` ; après quelques minutes de trafic, des événements `bordure_*` dans `alertes --toutes` ou la base ; une adresse bloquée par `bloquer` reçoit la page « Accès refusé » de Cloudflare, sans que la requête n'atteigne le site (journal du site muet).
+
+**Délais** : une décision (ou une levée) atteint la bordure en 4 à 5 minutes au plus (copie dans KV au plus toutes les 2 minutes, propagation de KV, cache du Worker d'une minute). Le site, lui, l'applique tout de suite.
+
+**Dernier recours** (adresse d'un administrateur bloquée par erreur, Worker qui dérange) : `DESACTIVE = "1"` dans `bordure/wrangler.toml` puis `npx wrangler@4 deploy` (tout passe, rien n'est compté), ou supprimer la route du Worker dans le tableau de bord. `VIGIE_APPLIQUER=0` ne concerne que le site.
+
+**En-têtes refusés par le site** (`edge_signature_invalid`) : motif « adresse différente » → l'adresse que voit le site n'est pas celle que voit Cloudflare (vérifier `TRUST_PROXY`, l'adresse de cloudflared) ; « signature fausse » → clé différente entre le Worker et le site, ou chemin transformé en route ; « en-têtes périmés » → horloge du serveur décalée. La règle (DS32) reste en mode « observer » tant que l'instance de test n'a pas validé.
+
+**Quotas** : 100 000 requêtes par jour, y compris celles d'une adresse bloquée ; au-delà, la route laisse passer (le site garde ses protections) et la bordure se tait (alerte de silence après 6 h). Le jeton « Workers KV Storage Edit » vaut pour tous les espaces KV du compte (Cloudflare ne permet pas mieux) : le garder dans `VIGIE_SECRETS_DIR` seulement.
 
 **Retirer** : supprimer la route (ou le Worker), retirer `VIGIE_BORDURE_KEY` du site et `VIGIE_CF_*` de la Vigie. Le site retire les empreintes de bordure de ses sessions avec le reste du contexte quand la Vigie est retirée.
 

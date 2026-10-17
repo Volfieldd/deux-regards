@@ -11,6 +11,14 @@ const SKEW = 60e3;
 const HEX16 = /^[0-9a-f]{16}$/;
 const plainIp = ip => (String(ip).startsWith('::ffff:') && /^\d+\.\d+\.\d+\.\d+$/.test(String(ip).slice(7)) ? String(ip).slice(7) : String(ip || ''));
 
+// Chemin comme le voit le routeur : décodé, barres doublées réduites (même fonction que routePath de
+// bordure/decisions.js ; le Worker n'est pas dans l'image du site, d'où la copie, vérifiée par les tests).
+export function routePath(raw) {
+  let p = String(raw || '/').split('?')[0];
+  try { p = decodeURIComponent(p); } catch { /* laissé tel quel */ }
+  return p.replace(/\/{2,}/g, '/');
+}
+
 // Même texte que bordure/worker.js (canonical).
 const canonical = h => ['v1', h.ts, h.ip, h.method, h.host, h.path, h.asn, h.org, h.pays, h.tls, h.tlsBrut, h.rtt].join('\n');
 
@@ -23,13 +31,16 @@ export function createEdgeVerifier({ key, now = Date.now }) {
     const get = n => (typeof h[n] === 'string' ? h[n] : '');
     const raw = String(request.raw?.url || request.url || '');
     const fields = {
-      ts: get('x-bordure-ts'), ip: plainIp(request.ip), method: String(request.method || ''), host: String(h.host || ''),
-      path: raw.split('?')[0], asn: get('x-bordure-asn'), org: get('x-bordure-org'), pays: get('x-bordure-pays'),
+      ts: get('x-bordure-ts'), ip: plainIp(get('x-bordure-ip')), method: String(request.method || ''), host: String(h.host || ''),
+      path: routePath(raw), asn: get('x-bordure-asn'), org: get('x-bordure-org'), pays: get('x-bordure-pays'),
       tls: get('x-bordure-tls'), tlsBrut: get('x-bordure-tls-brut'), rtt: get('x-bordure-rtt'),
     };
     if (typeof sig !== 'string' || !/^[0-9a-f]{64}$/.test(sig)) return { invalide: 'signature absente' };
     const expected = crypto.createHmac('sha256', k).update(canonical(fields)).digest();
     if (!crypto.timingSafeEqual(expected, Buffer.from(sig, 'hex'))) return { invalide: 'signature fausse' };
+    // Signature bonne mais adresse différente de celle que voit le site : rejeu par un autre visiteur, ou chaîne
+    // Cloudflare → cloudflared → site qui ne transmet pas la même adresse (réglage à corriger, TRUST_PROXY).
+    if (fields.ip !== plainIp(request.ip)) return { invalide: 'adresse différente' };
     const ts = Number(fields.ts);
     if (!Number.isFinite(ts) || Math.abs(now() - ts) > SKEW) return { invalide: 'en-têtes périmés' };
     if (!/^\d{0,10}$/.test(fields.asn) || !HEX16.test(fields.tls) || !HEX16.test(fields.tlsBrut)) return { invalide: 'valeurs illisibles' };

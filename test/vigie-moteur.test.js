@@ -29,6 +29,8 @@ function engineOf(t, { start = Date.parse('2026-10-20T10:00:00Z') } = {}) {
   const switches = createSwitches({ store, now });
   const engine = createEngine({ store, decisions, switches, now });
   store.onAdded(rows => engine.process(rows));
+  // Contrôle des rôles déjà réussi (sans administrateur) : sinon aucun blocage automatique d'adresse.
+  store.setting.set('controle_roles_admins', { administrateurs: [], instantane_a: start });
   const ev = (type, severity, extra = {}) => ({ id: crypto.randomUUID(), recu_a: now(), survenu_a: now(), type, severity, canal: 'ingestion signée', confiance: 'rapporté', composant: 'site · public', ...extra });
   const site = (type, severity, extra) => store.add([ev(type, severity, extra)]);
   const zitadel = (type, severity, extra) => store.add([ev(type, severity, { composant: 'zitadel', canal: 'API Zitadel', confiance: 'constaté', ...extra })]);
@@ -123,6 +125,13 @@ test('modes : arrêt (rien), alerter ; détection arrêtée : rien ; blocage aut
   assert.ok(v.decisions.active().some(d => d.cible === '192.0.2.88/32'));
   for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '172.29.42.10' }); v.zitadel('zitadel_echec', 'moyen', { ip: '172.29.42.10' }); }
   assert.match(v.alerts().find(x => x.entite_key === '172.29.42.10').reponse, /adresse privée/);
+  // IPv6 : le /64 entier (une machine change d'adresse à volonté dans son /64).
+  for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '2001:db8:1:2::abcd' }); v.zitadel('zitadel_echec', 'moyen', { ip: '2001:db8:1:2::abcd' }); }
+  assert.ok(v.decisions.active().some(d => d.cible === '2001:db8:1:2::/64'));
+  // Sans contrôle des rôles réussi : les adresses des administrateurs sont inconnues, aucun blocage automatique.
+  v.store.setting.set('controle_roles_admins', null);
+  for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.200' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.200' }); }
+  assert.match(v.alerts().find(x => x.entite_key === '192.0.2.200').reponse, /aucun contrôle des rôles réussi/);
 });
 
 test('alerte : rouverte après 24 h de calme, aggravation notée, réponse rejouée si la décision a été levée', async t => {
