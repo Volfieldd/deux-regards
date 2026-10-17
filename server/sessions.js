@@ -10,8 +10,8 @@ export const hash = token => crypto.createHash('sha256').update(token).digest('h
 // Sessions côté serveur. Le cookie porte un jeton aléatoire ; la base n'en garde que l'empreinte.
 export function createSessionStore(db, { now = Date.now } = {}) {
   const q = {
-    insert: db.prepare(`INSERT INTO sessions (id, sub, name, email, roles, id_token, csrf, created_at, expires_at, ctx_ip, ctx_net, ctx_country, ctx_ua)
-      VALUES (@id, @sub, @name, @email, @roles, @id_token, @csrf, @created_at, @expires_at, @ctx_ip, @ctx_net, @ctx_country, @ctx_ua)`),
+    insert: db.prepare(`INSERT INTO sessions (id, sub, name, email, roles, id_token, csrf, created_at, expires_at, ctx_ip, ctx_net, ctx_country, ctx_ua, ctx_fp)
+      VALUES (@id, @sub, @name, @email, @roles, @id_token, @csrf, @created_at, @expires_at, @ctx_ip, @ctx_net, @ctx_country, @ctx_ua, @ctx_fp)`),
     revoked: db.prepare('SELECT * FROM sessions_revoked WHERE id = ?'),
     get: db.prepare('SELECT * FROM sessions WHERE id = ?'),
     touch: db.prepare('UPDATE sessions SET expires_at = ? WHERE id = ?'),
@@ -29,7 +29,7 @@ export function createSessionStore(db, { now = Date.now } = {}) {
         id: hash(token), sub, name, email, roles: JSON.stringify(roles), id_token: idToken,
         csrf: crypto.randomBytes(32).toString('base64url'),
         created_at: t, expires_at: Math.min(t + IDLE_TTL, t + ABSOLUTE_TTL),
-        ctx_ip: ctx?.ip ?? null, ctx_net: ctx?.net ?? null, ctx_country: ctx?.country ?? null, ctx_ua: ctx?.ua ?? null,
+        ctx_ip: ctx?.ip ?? null, ctx_net: ctx?.net ?? null, ctx_country: ctx?.country ?? null, ctx_ua: ctx?.ua ?? null, ctx_fp: ctx?.fp ?? null,
       });
       return token;
     },

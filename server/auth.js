@@ -73,7 +73,10 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   const { accounts, audit, securite } = app;
   // Vigie : contexte d'une session à sa création, et changements déjà signalés (une fois par session et par nature).
   // L'adresse complète n'est pas gardée dans la session (seuls le réseau, le pays et le navigateur servent).
-  const ctxOf = request => { const n = networkOf(request); return { ip: null, net: n.ip_net ?? null, country: n.country ?? null, ua: uaFamily(request.headers['user-agent']) }; };
+  // Empreinte : navigateur complet, langues, plateforme et mobile annoncés (client hints) ; un vol de cookie depuis un
+  // autre appareil la change même quand la famille de navigateur est la même.
+  const fpOf = h => crypto.createHash('sha256').update(['user-agent', 'accept-language', 'sec-ch-ua-platform', 'sec-ch-ua-mobile'].map(k => String(h[k] || '')).join('\n')).digest('hex').slice(0, 16);
+  const ctxOf = request => { const n = networkOf(request); return { ip: null, net: n.ip_net ?? null, country: n.country ?? null, ua: uaFamily(request.headers['user-agent']), fp: fpOf(request.headers) }; };
   const told = new Map();
   const startedAt = Date.now();
   const tellOnce = (id, kind) => {
@@ -93,7 +96,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       if (!r || Date.now() - r.revoked_at < 10e3) return;
       const ctx = ctxOf(request);
       if (!tellOnce(`fermee:${r.id}`, ctx.net)) return;                      // une fois par session et par réseau
-      const same = r.ctx_net === ctx.net && r.ctx_ua === ctx.ua;
+      const same = r.ctx_net === ctx.net && r.ctx_ua === ctx.ua && (!r.ctx_fp || r.ctx_fp === ctx.fp);
       const a = accounts.bySub(r.sub);
       securite.emit('session_use_after_expire', { request, sub: r.sub, severity: same ? 'moyen' : 'haut', emetteur: 'server/auth.js · session', reference: `session:${String(r.id).slice(0, 12)}`,
         detail: { fermee_il_y_a_min: Math.round((Date.now() - r.revoked_at) / 60e3), expiree: r.expires_at <= r.revoked_at + 1000, meme_reseau_et_navigateur: same, compte_actif: a?.status === 'actif' } });
@@ -108,11 +111,15 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     }
     const ctx = ctxOf(request);
     const browser = s.ctx_ua !== ctx.ua, country = Boolean(s.ctx_country && ctx.country && s.ctx_country !== ctx.country), net = s.ctx_net !== ctx.net;
-    if (!browser && !country && !net) return;
-    const kind = `${browser ? 'n' : ''}${country ? 'p' : ''}${net ? `r${ctx.net}` : ''}`;
+    // Même famille de navigateur mais autre empreinte (autre appareil, autres langues) : « moyen », « haut » s'il change
+    // aussi de réseau. Session d'avant l'empreinte (ctx_fp vide) : non comparée.
+    const device = !browser && Boolean(s.ctx_fp) && s.ctx_fp !== ctx.fp;
+    if (!browser && !device && !country && !net) return;
+    const kind = `${browser ? 'n' : ''}${device ? 'e' : ''}${country ? 'p' : ''}${net ? `r${ctx.net}` : ''}`;
     if (!tellOnce(s.id, kind)) return;
-    securite.emit('session_context_change', { request, severity: browser && country ? 'critique' : browser ? 'haut' : country ? 'moyen' : 'info', emetteur: 'server/auth.js · session',
-      detail: { navigateur: browser ? { avant: s.ctx_ua, apres: ctx.ua } : undefined, pays: country ? { avant: s.ctx_country, apres: ctx.country } : undefined, reseau: net ? { avant: s.ctx_net, apres: ctx.net } : undefined } });
+    const severity = browser && country ? 'critique' : browser || (device && (net || country)) ? 'haut' : device || country ? 'moyen' : 'info';
+    securite.emit('session_context_change', { request, severity, emetteur: 'server/auth.js · session',
+      detail: { navigateur: browser ? { avant: s.ctx_ua, apres: ctx.ua } : undefined, empreinte_changee: device || undefined, pays: country ? { avant: s.ctx_country, apres: ctx.country } : undefined, reseau: net ? { avant: s.ctx_net, apres: ctx.net } : undefined } });
   };
   const lastPending = app.db.prepare("SELECT MAX(at) FROM audit_log WHERE sub = ? AND action = 'connexion en attente d’un rôle'").pluck();
 

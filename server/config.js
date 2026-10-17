@@ -99,6 +99,12 @@ export function loadConfig(env = process.env) {
     try { u = new URL(env.VIGIE_URL); } catch { throw new Error(`VIGIE_URL n’est pas une adresse valide : ${env.VIGIE_URL}`); }
     if (u.protocol !== 'http:' && u.protocol !== 'https:') throw new Error('VIGIE_URL doit commencer par http:// ou https://');
     if (u.username || u.password || u.search || u.hash) throw new Error('VIGIE_URL : adresse simple attendue (sans identifiants ni paramètres)');
+    // En clair (http) seulement sur un réseau interne : nom de service Docker (sans point), adresse privée ou locale, ou
+    // nom en .internal / .local. Ailleurs, HTTPS : les événements portent des adresses IP complètes.
+    const host = u.hostname.replace(/^\[|\]$/g, '');
+    const internal = !host.includes('.') && !host.includes(':') || /\.(?:internal|local|lan)$/i.test(host)
+      || /^(?:10\.|127\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)/.test(host) || /^(?:::1|f[cd][0-9a-f]{2}:|fe80:)/i.test(host);
+    if (u.protocol === 'http:' && !internal) throw new Error('VIGIE_URL en http:// seulement sur un réseau interne (nom de service Docker, adresse privée) ; sinon https://');
     const ingestKey = env.VIGIE_INGEST_KEY || '';
     if (!ingestKey) throw new Error('VIGIE_INGEST_KEY est obligatoire avec VIGIE_URL (openssl rand -base64 32)');
     if (ingestKey.length < 32) throw new Error('VIGIE_INGEST_KEY doit faire au moins 32 caractères');

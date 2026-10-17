@@ -40,7 +40,7 @@ export async function setup(t, { seeded = false, env, oidc, logger = false, proo
   // TEST_AVEC_VIGIE=1 (npm run test:vigie) : toute la suite tourne avec une Vigie simulée, pour vérifier qu'elle ne
   // change rien à ce que fait le site.
   if (process.env.TEST_AVEC_VIGIE === '1' && !(env && 'VIGIE_URL' in env)) {
-    env = { VIGIE_URL: 'http://vigie.test:4100', VIGIE_INGEST_KEY: 'cle-de-signature-vigie-0123456789abcdef', ...env };
+    env = { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: 'cle-de-signature-vigie-0123456789abcdef', ...env };
     vigieOptions ??= { send: async () => {}, timers: false };
   }
   const config = configFor(dir, env);
