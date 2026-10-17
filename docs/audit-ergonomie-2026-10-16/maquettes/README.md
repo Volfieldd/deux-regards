@@ -114,3 +114,13 @@ Le détail est au § 0 du lexique (« Passe 5 ») ; côté site public et commun
 - planche raccourcie sous 35 000 px au bureau, sans annotations : un échantillon par composant dans la section 10, règles à côté des échantillons.
 
 Contrôles ajoutés (voir `GRILLE.md`) : html-validate (`outils/html-valide.sh`), taille rendue des textes, SVG compris (`consol-final.mjs`), largeur mesurée des listes en rangées (`sizes-tel-ecrire.py`).
+
+Côté administration (MQ-07 à MQ-10, MQ-18 à MQ-20, section Administration de la planche et ses échantillons) :
+
+- bouton de thème gardé dans la barre de 220 px de la tablette, comme main (l'avatar s'efface) ;
+- menu du téléphone ouvert : la page et la barre d'onglets masquées sans script, inertes avec (`admin-plus.css` § 1, `dr-work/mq2-correctifs-main.md` § 8) : le clavier ne se pose plus sous le panneau ;
+- jeton `_csrf` dans tous les formulaires POST montrés, cadres d'état compris ; « Réactiver » renvoie le rôle du compte ; fiche de référence de la planche aux noms de `photo.eta`, « Publier » en formulaire et « Supprimer… » en lien ;
+- « Lieu » (`place`) et « Ville de la carte » (`city_label`) distingués dans le lot (MQ-08) ; une seule suggestion de série à 22 h 58 (MQ-09) ; légende des galeries privées citant G3 et G62, états et signaux séparés (MQ-18) ; pastille 3 de MQ-19 hors du tableau qui défile ;
+- 0 erreur html-validate : zones d'états en `<section>`, `<progress>` natif ; deux règles levées en commentaire, justifiées sur place (la liste de la palette, combobox de main ; les cases `ids` d'un lot, groupe de main).
+
+Contrôles ajoutés : `focus-colle.mjs` menu ouvert (et les coins arrondis), `controle-annotations.mjs` P5 et S2 (pastille coupée par un conteneur qui défile), `formulaires.mjs` (noms, boutons hors formulaire, jetons) ; `p2-1820-de.mjs` se lance de n'importe quel dossier.

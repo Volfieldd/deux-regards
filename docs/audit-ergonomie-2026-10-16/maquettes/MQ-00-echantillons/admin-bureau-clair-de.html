@@ -92,26 +92,28 @@
       <div class="ep-titre"><h1 lang="fr">Minoterie, brume du matin</h1><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Entwurf</span></div>
       <p class="ep-meta"><span>Sébastien</span><span>importiert am 14. Okt. 2026</span><span class="donnee">R0004012.JPG</span><span role="status"><a class="enreg enreg--attente" href="#date-de"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>1 Feld nicht gespeichert: Datum</a></span></p>
       <div class="ep-actions">
-        <a class="btn ghost ep-secondaire" href="/photo/minoterie">Vorschau auf der Website</a>
-        <button class="btn danger-c ep-secondaire" type="button">Löschen…</button>
-        <details class="menu ep-plus"><summary class="btn ghost" aria-label="Weitere Aktionen"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></summary><div class="menu-pop"><a href="/photo/minoterie">Vorschau auf der Website</a><button type="button">Löschen…</button></div></details>
-        <button class="btn" type="button">Veröffentlichen</button>
+        <a class="btn ghost ep-secondaire" href="/photo/minoterie-brume-du-matin">Vorschau auf der Website</a>
+        <a class="btn danger-c ep-secondaire" href="/admin/photos/24/supprimer">Löschen…</a>
+        <details class="menu ep-plus"><summary class="btn ghost" aria-label="Weitere Aktionen"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></summary><div class="menu-pop"><a href="/photo/minoterie-brume-du-matin">Vorschau auf der Website</a><a href="/admin/photos/24/supprimer">Löschen…</a></div></details>
+        <button class="btn" type="submit" form="f-publier">Veröffentlichen</button>
       </div>
     </header>
     <div class="fiche-grille">
       <figure class="fiche-photo"><img src="../_commun/photos/480/maine.webp" srcset="../_commun/photos/480/maine.webp 480w, ../_commun/photos/maine.webp 900w, ../_commun/photos/1600/maine.webp 1600w" sizes="(min-width: 1181px) 460px, (min-width: 721px) 230px, 260px" width="480" height="320" lang="fr" alt="Une minoterie à six cheminées sur la Maine, à demi noyée dans la brume bleue du matin."></figure>
       <form class="form fiche-form" action="/admin/photos/24" method="post">
+        <input type="hidden" name="_csrf" value="c5f0…">
         <p class="hint">Alle Felder sind Pflichtfelder, außer „optional“.</p>
-        <div class="champ-a"><label for="titre-de">Titel</label><p class="aide" id="titre-aide-de">Er steht unter dem Foto und in der Adresse seiner Seite.</p><input id="titre-de" type="text" lang="fr" value="Minoterie, brume du matin" aria-describedby="titre-aide-de"></div>
+        <div class="champ-a"><label for="titre-de">Titel</label><p class="aide" id="titre-aide-de">Er steht unter dem Foto und in der Adresse seiner Seite.</p><input id="titre-de" name="title" type="text" lang="fr" value="Minoterie, brume du matin" aria-describedby="titre-aide-de"></div>
         <div class="row">
-          <div class="champ-a"><label for="serie-de">Serie</label><select id="serie-de" lang="fr"><option>Atlantique</option><option selected>Paysage</option><option>Portrait</option><option>Rue</option><option>Voyage</option></select></div>
-          <div class="champ-a"><label for="lieu-de">Ort</label><input id="lieu-de" type="text" lang="fr" value="Angers, la Maine"></div>
+          <div class="champ-a"><label for="serie-de">Serie</label><select id="serie-de" name="category_id" lang="fr"><option>Atlantique</option><option selected>Paysage</option><option>Portrait</option><option>Rue</option><option>Voyage</option></select></div>
+          <div class="champ-a"><label for="lieu-de">Ort</label><input id="lieu-de" name="place" type="text" lang="fr" value="la Maine, Angers"></div>
         </div>
-        <div class="champ-a"><label for="date-de">Aufnahmedatum</label><p class="aide" id="date-aide-de">Schreiben Sie es, wie Sie möchten: „14.10.2026“, „14. Okt. 2026“, „Oktober 2026“. Die Kamera meldet den 14. Okt. 2026, 6:55 Uhr.</p><input id="date-de" type="text" value="morgen früh" aria-invalid="true" aria-describedby="date-aide-de date-err-de"><p class="err" id="date-err-de"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Fehler:</b> Dieses Datum liegt in der Zukunft. Geben Sie den Aufnahmetag an, zum Beispiel „14. Okt. 2026“.</span></p></div>
-        <div class="champ-a"><label for="leg-de">Bildunterschrift <span class="facultatif">(optional)</span></label><textarea id="leg-de" rows="2" lang="fr">La Maine fume encore ; le moulin attend le soleil.</textarea></div>
-        <div class="champ-a"><label for="alt-de">Alternativtext</label><p class="aide" id="alt-aide-de">Wird blinden Menschen anstelle des Fotos vorgelesen: was man darauf sieht, in einem Satz.</p><textarea id="alt-de" rows="2" lang="fr" aria-describedby="alt-aide-de">Une minoterie à six cheminées sur la Maine, à demi noyée dans la brume bleue du matin.</textarea></div>
+        <div class="champ-a"><label for="date-de">Aufnahmedatum</label><p class="aide" id="date-aide-de">Schreiben Sie es, wie Sie möchten: „14.10.2026“, „14. Okt. 2026“, „Oktober 2026“. Die Kamera meldet den 14. Okt. 2026, 6:55 Uhr.</p><input id="date-de" name="taken_on" type="text" value="morgen früh" aria-invalid="true" aria-describedby="date-aide-de date-err-de"><p class="err" id="date-err-de"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Fehler:</b> Dieses Datum liegt in der Zukunft. Geben Sie den Aufnahmetag an, zum Beispiel „14. Okt. 2026“.</span></p></div>
+        <div class="champ-a"><label for="leg-de">Bildunterschrift <span class="facultatif">(optional)</span></label><textarea id="leg-de" name="legend" rows="2" lang="fr">La Maine fume encore ; le moulin attend le soleil.</textarea></div>
+        <div class="champ-a"><label for="alt-de">Alternativtext</label><p class="aide" id="alt-aide-de">Wird blinden Menschen anstelle des Fotos vorgelesen: was man darauf sieht, in einem Satz.</p><textarea id="alt-de" name="alt" rows="2" lang="fr" aria-describedby="alt-aide-de">Une minoterie à six cheminées sur la Maine, à demi noyée dans la brume bleue du matin.</textarea></div>
         <p class="sans-script"><button class="btn ghost" type="submit">Speichern</button></p>
       </form>
+      <form class="form-cache" id="f-publier" action="/admin/photos/24/status" method="post"><input type="hidden" name="_csrf" value="c5f0…"><input type="hidden" name="status" value="published"></form>
     </div>
 </main>
 </div>

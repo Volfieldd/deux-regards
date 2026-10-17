@@ -95,7 +95,7 @@ body { padding: 0; }
     <li><a href="/admin/reglages/assistants" aria-current="page">Assistants d’analyse</a></li>
   </ul></nav>
   <article class="panel assist" aria-labelledby="as-t" style="margin:0">
-    <div class="assist-tete"><h3 id="as-t">Proposer une série</h3><label class="inter"><span class="inter-mot" aria-hidden="true"><span class="inter-oui">Allumé</span><span class="inter-non">Éteint</span></span><input type="checkbox" role="switch" checked aria-labelledby="as-t" aria-describedby="as-e"><span class="inter-piste" aria-hidden="true"></span></label></div>
+    <div class="assist-tete"><h3 id="as-t">Proposer une série</h3><label class="inter"><span class="inter-mot" aria-hidden="true"><span class="inter-oui">Allumé</span><span class="inter-non">Éteint</span></span><input type="checkbox" role="switch" name="serie" checked aria-labelledby="as-t" aria-describedby="as-e"><span class="inter-piste" aria-hidden="true"></span></label></div>
     <p class="assist-effet" id="as-e">Pour une photo pas encore rangée, suggère la série qui lui ressemble le plus : « ✦ Suggestion : Rue ».</p>
     <p class="assist-etat"><svg class="ic ok" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg><b>Analyse faite :</b> 26 photos sur 26, la dernière cette nuit à 1 h 12.</p>
     <details class="assist-serveur"><summary><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>Pour l’administrateur du serveur</summary></details>
@@ -106,10 +106,10 @@ body { padding: 0; }
     <label><input type="radio" name="g"><span>Un groupe (le même lien pour plusieurs personnes)</span></label>
   </fieldset>
   <div class="choix-a choix-a--ligne" role="radiogroup" aria-label="Quand calculer"><label><input type="radio" name="q" checked><span>La nuit, de 1 h à 6 h</span></label><label><input type="radio" name="q"><span>Dès l’import</span></label></div>
-  <div class="champ-a"><label for="fin">Fin de l’accès</label><input id="fin" type="text" value="30 nov. 2026" aria-describedby="fin-lu"><p class="lu" id="fin-lu"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Lundi 30 novembre 2026, jusqu’à 23 h 59</p></div>
-  <div class="champ-a"><div class="lb-l"><label for="chapo">Chapô</label><span class="compteur trop" id="chapo-n">182 / 160</span></div><textarea class="auto" id="chapo" rows="2" aria-describedby="chapo-n chapo-av">Le quai Ligny, je le photographie le matin depuis dix ans. Mercredi soir, la Maine montait.</textarea>
+  <div class="champ-a"><label for="fin">Fin de l’accès</label><input id="fin" name="expires" type="text" value="30 nov. 2026" aria-describedby="fin-lu"><p class="lu" id="fin-lu"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Lundi 30 novembre 2026, jusqu’à 23 h 59</p></div>
+  <div class="champ-a"><div class="lb-l"><label for="chapo">Chapô</label><span class="compteur trop" id="chapo-n">182 / 160</span></div><textarea class="auto" id="chapo" name="dek" rows="2" aria-describedby="chapo-n chapo-av">Le quai Ligny, je le photographie le matin depuis dix ans. Mercredi soir, la Maine montait.</textarea>
     <p class="avert" id="chapo-av"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg><span>22 signes au-delà de 160 : les moteurs de recherche couperont la fin. Rien n’empêche de proposer.</span></p></div>
-  <div class="champ-a"><span class="lb" id="m3">Logotype, fond sombre</span><span class="fichier-w"><label class="btn ghost fichier" for="f3">Remplacer…</label><input class="fichier-i" id="f3" type="file" accept="image/png,image/webp,image/jpeg" aria-labelledby="m3" aria-invalid="true" aria-describedby="f3-err"></span>
+  <div class="champ-a"><span class="lb" id="m3">Logotype, fond sombre</span><span class="fichier-w"><label class="btn ghost fichier" for="f3">Remplacer…</label><input class="fichier-i" id="f3" name="fichier" type="file" accept="image/png,image/webp,image/jpeg" aria-labelledby="m3" aria-invalid="true" aria-describedby="f3-err"></span>
     <p class="err" id="f3-err"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur :</b> « logo-nuit.gif » est un GIF. Choisissez un PNG, un WebP ou un JPEG ; le logotype actuel est gardé.</span></p></div>
   <div class="form-pied"><span class="mod" role="status">Modifié, pas encore en ligne : adresse postale</span><button class="btn ghost" type="button">Revenir à la version enregistrée</button><button class="btn" type="button">Mettre en ligne les mentions</button></div>
   <h2>Erreur dans un dialogue, montré ouvert</h2>
@@ -160,9 +160,11 @@ body { padding: 0; }
   <nav class="sur-onglet" aria-label="Sur cet onglet" style="margin:0">Sur cet onglet : <a href="/admin/reglages/mentions#mentions-legales">Mentions légales</a><a href="/admin/reglages/mentions#droits">Droits et licences</a><a href="/admin/reglages/mentions#confidentialite">Confidentialité</a></nav>
   <p class="hint" style="margin:0">Au téléphone, la rangée passe à la ligne : des cases à filet, la courante cerclée d’ambre ; 44 px de large au moins.</p>
   <h2>Choix rapides d’une date : des boutons d’envoi</h2>
+  <form action="/admin/galeries/12/acces" method="post" aria-label="Fin de l’accès, choix rapides"><input type="hidden" name="_csrf" value="c5f0…">
   <div class="champ-a"><label for="fin-p3">Fin de l’accès</label><p class="aide" id="fin-p3-a">Une date, ou un choix rapide ; jamais après la fermeture de la galerie.</p>
     <div class="pills" role="group" aria-label="Choix rapides de la fin"><button class="pill" type="submit" name="fin_rapide" value="2026-11-15" formnovalidate aria-pressed="false">Dans 30 jours, le 15 nov.</button><button class="pill" type="submit" name="fin_rapide" value="2026-11-30" formnovalidate aria-pressed="true">À la fermeture de la galerie, le 30 nov.</button></div>
-    <input id="fin-p3" type="text" value="30 nov. 2026" aria-describedby="fin-p3-a fin-p3-lu"><p class="lu" id="fin-p3-lu"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Lundi 30 novembre 2026, jusqu’à 23 h 59</p></div>
+    <input id="fin-p3" name="expires" type="text" value="30 nov. 2026" aria-describedby="fin-p3-a fin-p3-lu"><p class="lu" id="fin-p3-lu"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Lundi 30 novembre 2026, jusqu’à 23 h 59</p></div>
+  </form>
   <h2>Résumé d’erreurs sous un titre de niveau 2 : un h3</h2>
   <section class="resume-a" tabindex="-1" aria-labelledby="res-p3"><h3 id="res-p3"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg>Accès pas encore créé : 1 point à corriger</h3>
     <ul><li><a href="#fin-p3">Fin de l’accès : une date après aujourd’hui, au plus tard le 30 nov. 2026.</a></li></ul></section>
@@ -176,7 +178,7 @@ body { padding: 0; }
   <table class="lot" style="--lot-retrait: 112px">
     <caption class="sr-only">Brouillons d’Angers</caption>
     <thead><tr><th scope="col" style="width:102px">Photo</th><th scope="col">Titre</th><th scope="col" style="width:150px">Date</th></tr></thead>
-    <tbody><tr class="a-erreur"><th scope="row"><img src="../_commun/photos/160/reverberes.webp" srcset="../_commun/photos/160/reverberes.webp 160w, ../_commun/photos/480/reverberes.webp 480w" sizes="84px" width="84" height="56" alt="R0004057.JPG" style="display:block;width:84px;height:56px;object-fit:cover;border-radius:5px"></th><td>R0004057</td><td><input aria-label="Date, R0004057.JPG" value="14/15/2026" aria-invalid="true" aria-describedby="lot-p3-e" style="min-width:0;width:100%"></td></tr>
+    <tbody><tr class="a-erreur"><th scope="row"><img src="../_commun/photos/160/reverberes.webp" srcset="../_commun/photos/160/reverberes.webp 160w, ../_commun/photos/480/reverberes.webp 480w" sizes="84px" width="84" height="56" alt="R0004057.JPG" style="display:block;width:84px;height:56px;object-fit:cover;border-radius:5px"></th><td>R0004057</td><td><input name="taken_on_26" aria-label="Date, R0004057.JPG" value="14/15/2026" aria-invalid="true" aria-describedby="lot-p3-e" style="min-width:0;width:100%"></td></tr>
     <tr class="err-ligne"><td colspan="3"><p class="err" id="lot-p3-e"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Erreur, date de R0004057 :</b> il n’y a pas de 15ᵉ mois. Écrivez par exemple « 14 oct. 2026 » ; la date n’est pas enregistrée.</span></p></td></tr></tbody></table>
   <h2>Chiffres d’un objet</h2>
   <dl class="chiffres" style="margin:0"><div><dt>Ouvert</dt><dd>16 oct., 14 h 05<span class="sec">après 5 refus et une pause</span></dd></div><div><dt>Favoris</dt><dd>4 sur 11<span class="sec">sélection envoyée</span></dd></div></dl>
@@ -201,21 +203,27 @@ body { padding: 0; }
 </div>
 <div class="col">
   <h2>Interrupteur à deux mots, case décochée (.inter-oui, .inter-non)</h2>
+  <form class="form-assist" action="/admin/reglages/assistants" method="post"><input type="hidden" name="_csrf" value="c5f0…">
   <article class="panel assist" aria-labelledby="fk-t">
         <div class="assist-tete"><h3 id="fk-t">Décrire les photos</h3><label class="inter"><span class="inter-mot" aria-hidden="true"><span class="inter-oui">Allumé</span><span class="inter-non">Éteint</span></span><input type="checkbox" role="switch" name="decrire" aria-labelledby="fk-t" aria-describedby="fk-e"><span class="inter-piste" aria-hidden="true"></span></label></div>
         <p class="assist-effet" id="fk-e">Propose une phrase factuelle par photo sous son texte de remplacement. À relire ; jamais publiée seule.</p>
         <p class="assist-etat si-decoche"><svg class="ic af" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg><b>Éteint :</b> rien n’est téléchargé ni calculé.</p>
         <p class="assist-etat si-coche"><svg class="ic cours" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg><b>S’allumera à l’enregistrement :</b> rien n’est téléchargé avant « Enregistrer les assistants ».</p>
       </article>
+    <p class="sans-script"><button class="btn ghost" type="submit">Enregistrer les assistants</button></p>
+  </form>
 </div>
 <div class="col">
   <h2>Case cochée, sans script : la phrase d’état suit (.si-coche)</h2>
+  <form class="form-assist sans-js" action="/admin/reglages/assistants" method="post"><input type="hidden" name="_csrf" value="c5f0…">
   <article class="panel assist" aria-labelledby="fl-t">
         <div class="assist-tete"><h3 id="fl-t">Décrire les photos</h3><label class="inter"><span class="inter-mot" aria-hidden="true"><span class="inter-oui">Allumé</span><span class="inter-non">Éteint</span></span><input type="checkbox" role="switch" name="decrire" checked aria-labelledby="fl-t" aria-describedby="fl-e"><span class="inter-piste" aria-hidden="true"></span></label></div>
         <p class="assist-effet" id="fl-e">Propose une phrase factuelle par photo sous son texte de remplacement. À relire ; jamais publiée seule.</p>
         <p class="assist-etat si-decoche"><svg class="ic af" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg><b>Éteint :</b> rien n’est téléchargé ni calculé.</p>
         <p class="assist-etat si-coche"><svg class="ic cours" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg><b>S’allumera à l’enregistrement :</b> rien n’est téléchargé avant « Enregistrer les assistants ».</p>
       </article>
+    <p class="sans-script"><button class="btn ghost" type="submit">Enregistrer les assistants</button></p>
+  </form>
 </div>
 </main>
 </body>

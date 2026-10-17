@@ -142,6 +142,13 @@ html { scroll-padding-bottom: 104px; }
   <input type="hidden" name="_csrf" value="c5f0…"><input type="hidden" name="card" value="J-0001">
   <section class="app-step vous-s" aria-labelledby="s-vous">
     <details class="vous-plie"><summary><h2 id="s-vous">Vous</h2><span class="vous-r"><span class="mq-a">Julien · Rua dos Remédios, Lisbonne<span class="mq-pin d" aria-hidden="true">3</span></span><span class="ok"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>photo de repère gardée</span></span><span class="vous-m">Modifier</span></summary>
+    <div class="corps" style="gap:14px;padding:12px 0 0">
+    <label>Photographe <select name="author_id"><option selected>Julien</option><option>Sébastien</option></select></label>
+    <p class="app-pos" role="status"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Position : Rua dos Remédios, Lisbonne</p>
+    <label>Lieu <span class="hint">facultatif : la ville est déduite de la position</span><input type="text" name="place" value="Alfama, devant la fleuriste"></label>
+    <div class="repere"><img loading="lazy" src="_commun/photos/160/ines.webp" srcset="_commun/photos/160/ines.webp 107w, _commun/photos/480/ines.webp 320w" sizes="96px" alt="Photo de repère d’Inês" width="96" height="96"><div style="display:grid;gap:8px"><p class="ok"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Photo de repère gardée</p><p class="hint" style="margin:0">Gardée en privé avec l’accord, réduite à 1 600 px.</p><button class="btn-app" type="button">Reprendre la photo</button></div></div>
+    <label>Notes <span class="hint">facultatif</span><input type="text" name="details" value="fleurs blanches, tablier vert"></label>
+    </div>
     </details>
   </section>
 
@@ -182,9 +189,9 @@ html { scroll-padding-bottom: 104px; }
   <div class="app-actions"><button class="app-save" type="submit"><span data-l="fr" lang="fr">Enregistrer</span><span data-l="en" lang="en">Save</span><span data-l="de" lang="de">Speichern</span></button><p class="hint"><span class="mq-a"><span data-l="fr" lang="fr">Vos réponses restent sur ce téléphone jusqu’à leur envoi.</span><span data-l="en" lang="en">Your answers stay on this phone until they are sent.</span><span data-l="de" lang="de">Ihre Antworten bleiben auf diesem Telefon, bis sie gesendet sind.</span><span class="mq-pin d" aria-hidden="true">10</span></span></p></div>
 </form>
 </main>
-<div class="etats-t" role="region" aria-label="Autres états de l’écran">
+<section class="etats-t" aria-label="Autres états de l’écran">
 <section class="mq-ecran sans-js" inert aria-labelledby="etat-11"><p class="mq-etat" id="etat-11"><span class="mq-pin" aria-hidden="true">11</span>État · Sans JavaScript : la carte papier à la place de la signature</p>
-  <div class="app-ecran"><div class="corps blanc app-person" style="margin:0;border:0">
+  <div class="app-ecran"><form class="corps blanc app-person" style="margin:0;border:0" method="post" action="/admin/rencontre" enctype="multipart/form-data" novalidate><input type="hidden" name="_csrf" value="c5f0…"><input type="hidden" name="card" value="J-0001">
     <div class="msg" role="note"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/></svg><p><b>Sans JavaScript</b>, ce téléphone ne garde pas de brouillon et ne prend pas la signature au doigt. Faites signer la carte J-0001 et vérifiez le réseau avant l’envoi. Le choix de la langue, lui, marche : la section passe dans la langue cochée, sans recharger.</p></div>
     <div lang="en" class="sans-sig">
       <fieldset><legend>Signature</legend>
@@ -194,7 +201,7 @@ html { scroll-padding-bottom: 104px; }
       <button class="app-save" type="submit">Save</button>
       <p class="hint" style="margin:0;text-align:center">Nothing is kept on this phone: check the connection before you tap Save.</p>
     </div>
-  </div></div></section>
+  </form></div></section>
 <section class="mq-ecran" inert aria-labelledby="etat-12"><p class="mq-etat" id="etat-12"><span class="mq-pin" aria-hidden="true">12</span>État · Vous, avant de tendre le téléphone</p>
   <div class="app-ecran"><div class="corps" style="gap:14px">
     <h2 class="sec">Vous</h2>
@@ -238,7 +245,7 @@ html { scroll-padding-bottom: 104px; }
     <div class="defaire" role="status"><span>Signature cleared.</span><button type="button" class="is-focus">Undo</button></div>
   </div></div></section>
 <section class="mq-ecran" lang="de" inert aria-labelledby="etat-18"><p class="mq-etat" id="etat-18" lang="fr"><span class="mq-pin" aria-hidden="true">18</span>État · En allemand : le nom du parent manque</p>
-  <div class="app-ecran"><div class="corps blanc app-person" style="margin:0;border:0">
+  <div class="app-ecran"><form class="corps blanc app-person" style="margin:0;border:0" method="post" action="/admin/rencontre" enctype="multipart/form-data" novalidate><input type="hidden" name="_csrf" value="c5f0…"><input type="hidden" name="card" value="J-0001">
     <fieldset><legend class="sr-only">Langue · Language · Sprache</legend>
       <div class="langues"><label lang="fr"><input type="radio" name="lang2" value="fr">Français</label><label lang="en"><input type="radio" name="lang2" value="en">English</label><label lang="de"><input type="radio" name="lang2" value="de" checked>Deutsch</label></div></fieldset>
     <section class="resume" tabindex="-1" aria-labelledby="res-de"><h3 class="resume-t" id="res-de"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg>1 Angabe fehlt</h3><ul><li><a href="#gu-de">Name des Elternteils: Bitte angeben, wer mitunterschreibt.</a></li></ul></section>
@@ -250,7 +257,7 @@ html { scroll-padding-bottom: 104px; }
     </fieldset>
     <div class="groupe-err" style="display:grid;gap:6px"><label class="champ-l" for="gu-de">Name des Elternteils</label><input type="text" id="gu-de" name="guardian2" class="is-focus" aria-invalid="true" aria-describedby="gu-de-e" autocomplete="off"><p class="champ-err" id="gu-de-e"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><span><b>Fehler:</b> Bitte geben Sie den Namen des Elternteils an, der mitunterschreibt.</span></p></div>
     <button class="app-save" type="submit">Speichern</button>
-  </div></div></section>
+  </form></div></section>
 <section class="mq-ecran" lang="en" inert aria-labelledby="etat-19"><p class="mq-etat" id="etat-19" lang="fr"><span class="mq-pin" aria-hidden="true">19</span>État · « Thank you! » et le QR d’Inês</p>
   <div class="app-ecran"><div class="app-merci-m">
     <h2>Thank you!</h2>
@@ -268,7 +275,7 @@ html { scroll-padding-bottom: 104px; }
       <p class="mono">nicephos.art/bonjour/j</p>
     </div>
   </div></section>
-<section class="mq-ecran" inert aria-labelledby="etat-21"><p class="mq-etat" id="etat-21"><span class="mq-pin" aria-hidden="true">21</span>État · Carte papier, recto verso, échelle 1,13</p>
+<section class="mq-ecran" inert aria-labelledby="etat-21"><p class="mq-etat" id="etat-21"><span class="mq-pin" aria-hidden="true">21</span>État · Carte papier, recto verso, échelle 1,13 (dès 412 px)</p>
   <div class="app-ecran"><div class="cartes">
     <figure class="face" style="margin:0"><div class="carte nous" lang="fr">
       <p class="lab"><span>VOTRE ACCORD</span><span>J-0001</span></p>
@@ -291,9 +298,9 @@ html { scroll-padding-bottom: 104px; }
       <p class="url">nicephos.art/bonjour/j</p><p class="ref">J-0001</p>
     </div><figcaption>Pour eux · recto (verso blanc)</figcaption></figure>
   </div></div></section>
-</div>
+</section>
 <aside class="mq-notes" aria-labelledby="mq-t">
-  <p class="mq-id">MQ-10 · app de terrain · téléphone (Pixel 7, 412 × 839) · Julien et Inês Exemplo, rua dos Remédios, Lisbonne, samedi 10 oct. 2026, 19 h 24 · v2, passe 4</p>
+  <p class="mq-id">MQ-10 · app de terrain · téléphone (Pixel 7, 412 × 839) · Julien et Inês Exemplo, rua dos Remédios, Lisbonne, samedi 10 oct. 2026, 19 h 24 · v2, passe 5</p>
   <h2 id="mq-t">Ce qui change</h2>
   <p class="mq-lead">Julien tend son téléphone à Inês, qui passe l’écran en anglais, signe et oublie de dire son âge. L’envoi est arrêté avant de partir, le point à corriger est dit dans sa langue, et rien n’est perdu : ni la signature, ni la photo de repère, ni l’accord si le réseau ou la session lâchent. Sans JavaScript, la carte papier prend le relais. Construit sur app.css et app.eta de main, avec les composants d’erreur du site (MQ-00) pour la section tenue par la personne.</p>
   <ol class="mq-reperes">
@@ -322,7 +329,7 @@ html { scroll-padding-bottom: 104px; }
   <h3>À créer (écarts avec le code de main)</h3>
   <p>Changement de langue sans script (<code>app.css</code>, ajout de la passe 4, par <code>:has()</code>) ; résumé d’erreurs en tête de la section et erreur sous le groupe, dans la langue de la personne ; nom du parent hors du groupe Âge ; signature et photo de repère gardées après une erreur (<code>app.js</code>, fichier temporaire côté serveur) ; brouillon gardé sur le téléphone jusqu’à l’accusé du serveur ; case « carte papier signée » sans script ; « Undo » après « Clear » ; page de session expirée (au lieu d’un JSON) ; carte imprimée sans texte sous 8 pt, à l’adresse <code>nicephos.art/bonjour/j</code> suivie du numéro.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
-  <p class="mq-mesures"><b>Mesures</b> · <b>v2, passe 4 du 16 oct. 2026</b> (Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-admin.mjs, consol-sans-admin.py, controle-annotations.mjs, focus-colle.mjs, p4-menu.mjs, p3-images.mjs, p2adm-de.mjs, p2adm-focus.mjs --sans-inert, radios-cadres.py, insecables.py, p4adm-langue.mjs, html-validate 11) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation à 1 440 px et sur Pixel 7, les cadres d’état inertes, puis 0 encore une fois tous les inert et les .is-focus retirés · débordement : aucun à 320, 412, 820, 1 024 et 1 440 px en français, ni à 320, 412, 820, 1 024 et 1 440 px en allemand (25 libellés traduits de l’app et les autres allongés de 35 %) ; les boutons longs passent à la ligne, aucun n’est coupé ; aucune ellipse ; toute ligne qui défile montre sa suite · focus visible sur les 46 éléments focalisables, cadres d’état compris (inert retiré), en clair et en sombre, et sur les champs en erreur (les boutons radio de l’âge et #gu-de : filet rouge et anneau ensemble) · focus jamais caché par une barre collante ou fixe (WCAG 2.4.11), au bureau, sur Pixel 7 et à 320 px · cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px · champs : tous nommés (attribut name) · annotations : rien à redire à 1 440, 412 et 320 px ; sans annotations, 0 pixel changé hors du magenta et des contours des cadres d’état, au bureau et au téléphone · images : toutes à la taille d’affichage, avec ou sans srcset, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px · insécables : 0 à poser · un nom de groupe de radios par cadre · langue sans script (p4adm-langue.mjs, JavaScript coupé) : « Français », « Deutsch » puis « English » cochés, la section passe chaque fois entière dans la langue cochée (27 textes, titres et bouton « Enregistrer », « Speichern », « Save ») · poids après défilement complet : 198 ko au bureau, 200 ko sur Pixel 7, polices et CSS compris ; aucun script, aucune ressource tierce.</p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>v2, passe 5 du 17 oct. 2026</b> (Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-admin.mjs, consol-sans-admin.py, controle-annotations.mjs, focus-colle.mjs (menu ouvert compris), p4-menu.mjs, formulaires.mjs, p3-images.mjs, p2adm-de.mjs, p2adm-focus.mjs --sans-inert, radios-cadres.py, insecables.py, p4adm-langue.mjs, html-validate 11) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation à 1 440 px et sur Pixel 7, les cadres d’état inertes, puis 0 encore une fois tous les inert et les .is-focus retirés · débordement : aucun à 320, 412, 820, 1 024 et 1 440 px en français, ni à 320, 412, 820, 1 024 et 1 440 px en allemand (25 libellés traduits de l’app et les autres allongés de 35 %) ; les boutons longs passent à la ligne, aucun n’est coupé ; aucune ellipse ; toute ligne qui défile montre sa suite · focus visible sur les 46 éléments focalisables, cadres d’état compris (inert retiré), en clair et en sombre, et sur les champs en erreur (les boutons radio de l’âge et #gu-de : filet rouge et anneau ensemble) · focus jamais caché par une barre collante ou fixe (WCAG 2.4.11), au bureau, sur Pixel 7 et à 320 px · cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher ; rien sous 12 px · formulaires : champs tous nommés (attribut name), aucun bouton d’envoi hors formulaire, un jeton _csrf dans chaque formulaire POST, cadres d’état compris (formulaires.mjs) · html-validate 11 : 0 erreur · annotations : rien à redire à 1 440, 412 et 320 px ; sans annotations, 0 pixel changé hors du magenta et des contours des cadres d’état, au bureau et au téléphone · images : toutes à la taille d’affichage, avec ou sans srcset, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px · insécables : 0 à poser · un nom de groupe de radios par cadre · langue sans script (p4adm-langue.mjs, JavaScript coupé) : « Français », « Deutsch » puis « English » cochés, la section passe chaque fois entière dans la langue cochée (27 textes, titres et bouton « Enregistrer », « Speichern », « Save ») · poids après défilement complet : 202 ko au bureau, 205 ko sur Pixel 7, polices et CSS compris ; aucun script, aucune ressource tierce.</p>
 </aside>
 </body>
 </html>

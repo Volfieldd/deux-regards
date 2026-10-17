@@ -29,6 +29,11 @@
    Finalisation (16 oct., avant le jury final ; composants proposés par les maquettes de la passe 4) : filtre d'état à symbole
    coloré .chip .chip-st (§ 9, d'après MQ-08, MQ-09, MQ-18, MQ-19) ; interrupteur à deux mots, .inter-oui, .inter-non, et
    phrase d'état qui suit la case, .si-coche, .si-decoche, sans script par :has() (§ 11, d'après MQ-07).
+   Passe 5 (jury final, 17 oct.) : bouton de thème gardé dans la barre de 220 px (tablette), comme main ; c'est l'avatar, décoratif,
+   qui s'efface (défaut D1) ; menu du téléphone ouvert : la page, la barre d'onglets et le reste du <body> masqués sans script
+   (visibility: hidden), inertes avec le script (à créer dans main), pour que le clavier ne se pose jamais sous le panneau
+   (défaut D2, WCAG 2.4.11 ; mq2-correctifs-main.md § 8) ; marge du bas de la page au téléphone égale aux deux barres fixes
+   (§ 2) ; barre de progression native, <progress class="bar"> (§ 11).
    ===================================================================================================== */
 
 /* Texte lu seulement : admin.css (main) le masque par clip, qui est déprécié ; clip-path est la forme actuelle (celle de
@@ -102,9 +107,22 @@
    (visibility: hidden) et seule la classe .open, posée par le script, la montrait ; sans script, Réglages, Personnes, Boutique,
    Carnets ou Galeries privées n'étaient joignables qu'en tapant l'adresse. Désormais, « Menu » (barre d'onglets) est un lien
    <a href="#admin-nav"> : sans script, il ouvre la barre par :target ; « Fermer » est un lien <a href="#contenu"> qui la
-   referme et rend le focus au contenu. Avec le script, rien ne change : il intercepte le clic (preventDefault), pose .open et
-   aria-expanded, et donne au lien le rôle d'un bouton (role="button"). */
+   referme et rend le focus au contenu. Avec le script, rien ne change : il remplace le lien par un vrai bouton
+   (<button type="button" aria-expanded aria-controls="admin-nav">, le bouton de main ; passe 5 : plus de role="button" sur un
+   lien), pose .open et aria-expanded. */
 @media (max-width: 720px) { .admin .side:target { transform: none; visibility: visible; transition: transform .2s; } }
+/* Menu ouvert, le clavier reste dans le panneau (passe 5, jury final, défaut D2 ; WCAG 2.4.11, RGAA 10.7 et 12.8). Le panneau
+   (280 px, fixe) couvre la page sans la retirer : la tabulation passait du dernier lien du menu aux onglets des Réglages, puis à
+   la barre d'onglets, sous lui. SANS script, menu ouvert par :target : la page (.shell > .main) et ce qui suit .shell dans le
+   <body> (barre d'onglets, message d'action ; dans une maquette, ses autres états et l'encart) sont masqués par visibility, qui
+   les retire aussi de la tabulation ; le lien d'évitement reste, et « Fermer », dans le panneau, rend la page. AVEC le script,
+   qui pose .open au lieu de :target, les mêmes éléments reçoivent l'attribut inert à l'ouverture et le perdent à la fermeture
+   (à créer dans main : public/admin/admin.js, mq2-correctifs-main.md § 8) ; la page reste visible sous son voile.
+   Contrôle : outils/focus-colle.mjs, passe « menu ouvert » (adresse #admin-nav, et l'échantillon MQ-00 menu ouvert). */
+@media (max-width: 720px) {
+  body.admin:has(> .shell > .side:target) > .shell > .main,
+  body.admin:has(> .shell > .side:target) > :not(.shell, .skip) { visibility: hidden; }
+}
 @media (max-width: 720px) { .admin .side-fermer { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; margin: -6px 0 0;
   border-radius: var(--r-admin); color: var(--ink); font-size: 14px; box-shadow: inset 0 0 0 1px var(--line2); } }
 /* Le nom du compte ouvre « Mon compte » (langue, thème, raccourcis, e-mail des avis) : souligné, sa ligne entière est la cible. */
@@ -118,13 +136,15 @@
 [data-theme="light"] .admin .btn-theme > .when-dark { display: none; } [data-theme="light"] .admin .btn-theme > .when-light { display: contents; }
 .admin[data-theme="light"] .btn-theme > .when-dark { display: none; } .admin[data-theme="light"] .btn-theme > .when-light { display: contents; }
 @media (prefers-color-scheme: light) { :root:not([data-theme]) .admin .btn-theme > .when-dark { display: none; } :root:not([data-theme]) .admin .btn-theme > .when-light { display: contents; } }
-/* Barre de 220 px (tablette, 721 à 1 180 px) : « Ctrl K » se masque au lieu de passer à la ligne ; le thème se règle
-   dans Mon compte, pour que le nom et le rôle restent entiers. */
+/* Barre de 220 px (tablette, 721 à 1 180 px) : « Ctrl K » se masque au lieu de passer à la ligne. Le bouton de thème reste,
+   comme dans main (passe 5, jury final, défaut D1 : masqué, il ne se réglait plus nulle part à la tablette, et « Mon compte »
+   renvoie au pied du menu) : c'est l'avatar, décoratif (aria-hidden), qui s'efface, pour que le nom et le rôle restent entiers
+   à côté du thème et de la déconnexion (44 px chacun au toucher). Essai : consol-admin.mjs, barre française et allemande. */
 .admin .cmdk span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .admin .cmdk kbd { white-space: nowrap; }
 /* Palette Ctrl K (admin.css) : intitulés de groupe et touches à 12 px. */
 .admin .pal-list .sec, .admin .palette kbd { font-size: 12px; }
-@media (max-width: 1180px) and (min-width: 721px) { .admin .cmdk kbd, .admin .me .btn-theme { display: none; } .admin .me { gap: 4px; } }
+@media (max-width: 1180px) and (min-width: 721px) { .admin .cmdk kbd, .admin .me .av { display: none; } .admin .me { gap: 4px; } }
 /* Pied de la barre de 220 px (passe 4, jury v2, défaut B) : la grille à deux colonnes rognait, en allemand, « Hilfe », le
    sélecteur « DE » et « 1.90.0 » de 4 à 5 px (« Einstellungen » prend la première colonne). Dans la barre étroite, les
    entrées se serrent (6 px de marge au lieu de 10) et passent à la ligne quand elles ne tiennent pas côte à côte : rien ne
@@ -188,6 +208,17 @@
   html:has(> body.admin .ep-actions) { scroll-padding-bottom: 155px; }
 }
 @media (min-width: 721px) { html:has(> body.admin .main:not(.wide) .bulk) { scroll-padding-top: 136px; } }
+/* Et la page se termine au-dessus des deux barres (passe 5, recommandation du jury final, WCAG 2.4.12) : la marge du bas
+   d'admin.css (120 px) passe à 74 + 65 px et un peu plus sur une fiche, pour que le dernier champ puisse toujours défiler
+   au-dessus de la barre d'actions, au lieu d'y laisser deux coins. */
+@media (max-width: 720px) { .admin .shell > .main:has(.ep-actions) { padding-bottom: 160px; } }
+/* Un message d'action affiché (.toast non vide, au-dessus des barres) s'ajoute à la réserve du défilement : le champ atteint au
+   clavier ne passe pas dessous (passe 5, WCAG 2.4.12 ; l'échantillon de la fiche de MQ-00 le montre affiché en permanence). */
+@media (max-width: 720px) {
+  html:has(> body.admin > .toast:not(:empty)) { scroll-padding-bottom: 160px; }
+  html:has(> body.admin .ep-actions):has(> body.admin > .toast:not(:empty)) { scroll-padding-bottom: 230px; }
+  .admin:has(> .toast:not(:empty)) .shell > .main:has(.ep-actions) { padding-bottom: 240px; }
+}
 /* Palette Ctrl K : admin.css (main) retire tout dessin au champ (box-shadow: none !important) ; le focus se voit sur sa
    ligne, un trait ambre de 2 px (passe 4 ; à reporter dans main, mq2-correctifs-main.md § 9). */
 .admin .pal-in:focus-within { box-shadow: inset 0 -2px 0 var(--accent-ink); }
@@ -581,6 +612,13 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
 @media (prefers-reduced-motion: reduce) { .plier > summary .ic { transition: none; } }
 .bar.jauge { margin: 6px 0 4px; }
 .bar.jauge i { background: var(--ok); }
+/* Barre de progression d'un téléchargement : l'élément natif <progress class="bar" max value> (passe 5, html-validate,
+   prefer-native-element : plus de <div role="progressbar">), au dessin de .bar d'admin.css (6 px, piste --s3, valeur ambre).
+   Son nom vient d'aria-label ; la phrase au-dessus dit la quantité (« 120 Mo sur 270 »). */
+progress.bar { -webkit-appearance: none; appearance: none; display: block; height: 6px; border: 0; border-radius: 6px; background: var(--s3); color: var(--accent); }
+progress.bar::-webkit-progress-bar { background: var(--s3); border-radius: 6px; }
+progress.bar::-webkit-progress-value { background: var(--accent); border-radius: 6px; }
+progress.bar::-moz-progress-bar { background: var(--accent); border-radius: 6px; }
 .dlg-cons { margin: 0 0 12px; padding-left: 20px; color: var(--ink2); font-size: var(--at-petit); }
 .dlg-cons li { margin: 3px 0; }
 
