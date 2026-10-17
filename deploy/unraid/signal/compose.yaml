@@ -1,0 +1,57 @@
+# Passerelle Signal de la Vigie (alertes de sécurité sur le téléphone). Pile à part, à lancer AVANT la Vigie :
+# elle sert à enregistrer le numéro et à tester l'envoi. Guide : README.md de ce dossier.
+#
+# L'API de signal-cli-rest-api n'a AUCUNE authentification : aucun port publié, et elle n'est joignable que par le
+# réseau interne « nicephos-vigie-signal », où seule la Vigie viendra s'ajouter. Son autre réseau (par défaut) ne lui
+# sert qu'à sortir vers les serveurs de Signal.
+#
+# DONNÉES : SIGNAL_DATA_DIR contient les clés du compte Signal. Il doit exister avant le premier lancement et
+# appartenir à 1000:1000 (utilisateur de l'image), droits 700. Jamais dans un partage réseau.
+
+name: nicephos-signal
+
+networks:
+  # Réseau sans sortie vers Internet entre la Vigie et la passerelle (nom fixe : la pile de la Vigie le rejoindra).
+  vigie-signal:
+    name: nicephos-vigie-signal
+    internal: true
+  # Sortie vers les serveurs de Signal (la passerelle seule).
+  sortie:
+    name: nicephos-signal-sortie
+
+services:
+  signal:
+    # Version épinglée par étiquette et empreinte (0.101, 25 septembre 2026).
+    image: bbernhard/signal-cli-rest-api:0.101@sha256:2cf09d66a86fdd210e42ee91662216364acc27da1163a8c44167a77ea3a6559a
+    container_name: nicephos-signal
+    restart: unless-stopped
+    environment:
+      # Processus signal-cli permanent (binaire natif : démarrage rapide, mémoire modérée). Il reçoit en continu, ce que
+      # Signal attend d'un compte (pas besoin d'AUTO_RECEIVE_SCHEDULE dans ce mode).
+      MODE: json-rpc-native
+      LOG_LEVEL: warn
+      # Rien n'est attendu en réception : pièces jointes, stories et avatars ignorés.
+      JSON_RPC_IGNORE_ATTACHMENTS: "true"
+      JSON_RPC_IGNORE_STORIES: "true"
+      JSON_RPC_IGNORE_AVATARS: "true"
+    volumes:
+      - type: bind
+        source: ${SIGNAL_DATA_DIR:?SIGNAL_DATA_DIR obligatoire (ex. /mnt/cache/appdata/nicephos/signal)}
+        target: /home/.local/share/signal-cli
+        bind:
+          create_host_path: false
+    networks: [vigie-signal, sortie]
+    # Aucun port publié (API sans authentification). Les commandes d'enregistrement passent par « docker exec ».
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    mem_limit: 512m
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
