@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import fs from 'node:fs';
 import path from 'node:path';
 
 // Configuration de la Vigie (son propre .env, jamais celui du site). Refus de démarrer plutôt qu'un réglage douteux.
@@ -22,6 +23,12 @@ export function loadVigieConfig(env = process.env) {
   const ingestKey = key32(env, 'VIGIE_INGEST_KEY'), logKey = key32(env, 'VIGIE_LOG_KEY');
   // Clé du journal distincte de celle des envois : le site (qui a la seconde) ne doit pas pouvoir refaire la chaîne.
   if (ingestKey === logKey) throw new Error('VIGIE_LOG_KEY doit être différente de VIGIE_INGEST_KEY');
+  // Sauvegardes du site (lecture seule) : obligatoires (arbitrage NC2 du 17 octobre 2026). Sans elles, la Vigie ne
+  // saurait les administrateurs que par ce que déclare le site, qu'un site compromis peut falsifier.
+  const siteBackupDir = path.resolve(need(env, 'VIGIE_SITE_BACKUP_DIR'));
+  let st = null;
+  try { st = fs.statSync(siteBackupDir); } catch { /* absent */ }
+  if (!st?.isDirectory()) throw new Error(`VIGIE_SITE_BACKUP_DIR : dossier introuvable (${siteBackupDir}) ; montez le BACKUP_DIR du site en lecture seule`);
   return {
     dataDir,
     databasePath: path.resolve(env.VIGIE_DATABASE || path.join(dataDir, 'vigie.db')),
@@ -33,8 +40,8 @@ export function loadVigieConfig(env = process.env) {
     retentionDays: int(env.VIGIE_RETENTION_DAYS, 183, 30, 400),
     zitadel: issuer ? { issuer, keyFile: env.VIGIE_ZITADEL_KEY_FILE, intervalMs: int(env.VIGIE_ZITADEL_INTERVAL_S, 60, 30, 3600) * 1000 } : null,
     backupDir: env.VIGIE_BACKUP_DIR ? path.resolve(env.VIGIE_BACKUP_DIR) : null,
-    // Sauvegardes du site, montées en lecture seule : contrôle quotidien des rôles (annexe architecture 4.4).
-    siteBackupDir: env.VIGIE_SITE_BACKUP_DIR ? path.resolve(env.VIGIE_SITE_BACKUP_DIR) : null,
+    // Sauvegardes du site, montées en lecture seule : contrôle des rôles (annexe architecture 4.4), obligatoire.
+    siteBackupDir,
     // Listes de menaces gratuites (D22) : « 0 » pour ne pas les télécharger.
     threatLists: env.VIGIE_MENACES !== '0',
     backupKeep: int(env.VIGIE_BACKUP_KEEP, 14, 1, 365),

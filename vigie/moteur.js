@@ -2,7 +2,7 @@ import net from 'node:net';
 import { fileURLToPath } from 'node:url';
 import { pointsOf, THRESHOLDS, HALF_LIFE_MIN, SOURCE_MIN, QUORUM, sourceOf, MODES } from './poids.js';
 import { rank } from './vocabulaire.js';
-import { loadRules, createCorrelator, fieldOf } from './sigma.js';
+import { loadRules, createCorrelator, fieldOf, RegexTimeout } from './sigma.js';
 import { createDetectors, createChains, lru } from './detecteurs.js';
 
 // Moteur de détection de la Vigie (phases C1 et C2, recadrage du 17 octobre 2026, concepts de marlinOS) :
@@ -15,16 +15,18 @@ import { createDetectors, createChains, lru } from './detecteurs.js';
 //   - une alerte par règle et par entité tant qu'elle est ouverte et active (24 heures de calme : une nouvelle) ; mode par
 //     règle : arrêt, observer, alerter, bloquer ;
 //   - réponses automatiques prudentes : jamais une adresse privée, de confiance ou vue avec un administrateur.
-// Le traitement se fait hors de la réception (file, par lots) : un afflux d'événements ne bloque pas la réception.
+// Le traitement se fait hors de la réception (curseur dans la base, par lots) : un afflux d'événements ne bloque pas la
+// réception, la mémoire ne dépend pas du retard, un redémarrage reprend l'analyse où elle s'était arrêtée.
 
 const DECAY = ms => 0.5 ** (ms / (HALF_LIFE_MIN * 60e3));
 const IGNORED = new Set(['vigie_alerte', 'vigie_decision', 'vigie_interrupteur', 'vigie_signal']);
 const parse = s => { try { return s ? JSON.parse(s) : {}; } catch { return {}; } };
 const RULES_DIR = fileURLToPath(new URL('./regles/', import.meta.url));
 const QUIET = 24 * 3600e3;                       // alerte sans nouvel événement depuis 24 h : la suivante en ouvre une autre
+const QUIET_CLOSE = 7 * 864e5;                   // alerte ouverte sans nouvel événement depuis 7 jours : close sans suite
 const RESPOND_EVERY = 15 * 60e3;                 // réponse rejouée au plus toutes les 15 minutes sur une alerte qui dure
 const SIGNAL_DEDUP = 10 * 60e3;                  // signal identique (règle, entité) noté une fois par 10 minutes
-const QUEUE_MAX = 100_000;
+const LAG_MAX = 100_000;                         // retard d'analyse au-delà duquel le moteur saute en avant
 // Clé d'entité propre : sans caractères de contrôle (la ligne de commande les affiche), 200 caractères au plus.
 export const clean = v => String(v).replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/g, '?').slice(0, 200);
 const PRIVATE = new net.BlockList();
@@ -41,10 +43,12 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   const threatSeen = lru(50_000);                 // « adresse|liste » → jour : points de liste une fois par jour
   const signalSeen = lru(20_000);                 // « règle|entité » → instant du dernier signal noté
   const responded = lru(10_000);                  // alerte → instant de la dernière réponse
+  const slowSeen = lru(1_000);                    // règle → heure de la dernière expression arrêtée signalée
+  for (const r of [...rules, ...correlations]) if (r.expireAt && r.expireAt < now()) log?.info({ regle: r.name, expire: new Date(r.expireAt).toISOString() }, 'Vigie : règle expirée (inactive)');
   // Registre des règles (pour les modes) : quorum, règles Sigma qui produisent un signal, détecteurs.
   const REGISTRY = {
     'entite.score': { cas: 'quorum', mode: 'observer', titre: 'Score d’une entité au-dessus du seuil, confirmé par deux sources' },
-    ...Object.fromEntries([...rules.filter(r => r.generate && r.signal), ...correlations].map(r => [`sigma.${r.name}`, { cas: r.cas, mode: r.mode, titre: r.title, sourceUnique: r.sourceUnique }])),
+    ...Object.fromEntries([...rules.filter(r => r.generate && r.signal), ...correlations].map(r => [`sigma.${r.name}`, { cas: r.cas, mode: r.mode, titre: r.title, sourceUnique: r.sourceUnique, expire: r.expireAt }])),
     ...Object.fromEntries(['premiere_apparition', 'heure_inhabituelle', 'vitesse', 'voyage_impossible', 'pivot_identifiants', 'role_incoherent', 'exploration_lente', 'chaine_attaque', 'silence', 'menaces']
       .map(n => [`detecteur.${n}`, { cas: { premiere_apparition: 'DS4', heure_inhabituelle: 'DS18', vitesse: 'DS17', voyage_impossible: 'DS3', pivot_identifiants: 'DS25', role_incoherent: 'DS10', exploration_lente: 'DS15', chaine_attaque: 'DS23', silence: 'DS24', menaces: 'D22' }[n], mode: 'observer', titre: n.replaceAll('_', ' ') }])),
   };
@@ -68,13 +72,11 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   const modeOf = id => { const m = modes()[id]; return MODES.includes(m) ? m : REGISTRY[id]?.mode || 'observer'; };
   const thresholds = () => ({ ...THRESHOLDS, ...setting.get('seuils', {}) });
   const trusted = () => new Set(setting.get('adresses_confiance', []));
-  // Administrateurs connus : ceux du dernier contrôle des rôles (sauvegarde du site), sinon ceux que le site déclare.
+  // Administrateurs connus : ceux du dernier contrôle des rôles réussi (sauvegarde du site), jamais la seule
+  // déclaration du site, qu'un site compromis peut falsifier (arbitrage NC2). Avant le premier contrôle : aucun.
   const admins = () => {
     const fromSnapshot = setting.get('controle_roles_admins', null);
-    if (Array.isArray(fromSnapshot?.administrateurs)) return new Set(fromSnapshot.administrateurs);
-    const d = db.prepare("SELECT detail FROM events WHERE type = 'sys_state' ORDER BY seq DESC LIMIT 1").pluck().get();
-    const list = parse(d).administrateurs;
-    return new Set(Array.isArray(list) ? list : []);
+    return new Set(Array.isArray(fromSnapshot?.administrateurs) ? fromSnapshot.administrateurs : []);
   };
 
   function current(kind, key, t = now()) {
@@ -218,8 +220,16 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     // Règles Sigma et corrélations. Une règle qui échoue sur un événement est notée, les autres continuent.
     const matched = new Set();
     for (const r of rules) {
+      if (r.expireAt && t > r.expireAt) continue;
       let hit = false;
-      try { hit = r.match(row); } catch (err) { log?.warn({ err: err.message, regle: r.name }, 'Vigie : règle en échec'); }
+      try { hit = r.match(row); } catch (err) {
+        log?.warn({ err: err.message, regle: r.name }, 'Vigie : règle en échec');
+        // Expression arrêtée par son délai : notée une fois par heure et par règle (alerte « règle lente »).
+        if (err instanceof RegexTimeout && slowSeen.get(r.name) !== Math.floor(t / 3600e3)) {
+          slowSeen.set(r.name, Math.floor(t / 3600e3));
+          store.own('vigie_regle_lente', { emetteur: 'vigie/moteur.js', reference: row.seq ? `events#${row.seq}` : undefined, detail: { regle: r.name, erreur: err.message } });
+        }
+      }
       if (!hit) continue;
       matched.add(r.name);
       if (!r.generate || !r.signal) continue;
@@ -237,35 +247,77 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     for (const s of detectors.onEvent(row)) signal({ regle: `detecteur.${s.nom}`, titre: s.nom.replaceAll('_', ' '), ...s, detail: s.detail }, row, sources);
   }
 
-  function process(rows) {
-    if (!switches.isOn('detection')) return;
+  // Un lot dans une seule transaction (une seule écriture forcée sur disque : abaques, docs/etudes/vigie-capacite.md),
+  // chaque événement dans un point de sauvegarde : une erreur n'annule que le sien.
+  const processOne = db.transaction(row => processRow(row));
+  const processAll = db.transaction(rows => {
     for (const row of rows) {
-      try { db.transaction(() => processRow(row)).immediate(); } catch (err) { log?.error({ err: err.message, type: row.type }, 'Vigie : moteur'); }
+      try { processOne(row); } catch (err) { log?.error({ err: err.message, type: row.type }, 'Vigie : moteur'); }
     }
+  });
+  function process(rows) {
+    if (!switches.isOn('detection') || !rows.length) return;
+    processAll.immediate(rows);
   }
-  // File : la réception répond sans attendre le moteur ; traitement par lots de 200, en rendant la main entre deux lots.
-  // File pleine (afflux massif) : les événements restent dans la base (la chaîne les garde), le moteur saute les plus
-  // récents et le note une fois.
-  const queue = [];
-  let scheduled = false, dropped = 0;
+  // File : la réception répond sans attendre le moteur. Le moteur garde seulement un curseur (dernier numéro analysé,
+  // enregistré) et relit les événements dans la base par lots de 200, en rendant la main entre deux lots : mémoire
+  // constante quel que soit le retard (100 000 événements en mémoire prendraient 120 Mo, la moitié de la limite du
+  // conteneur), et un redémarrage reprend où l'analyse s'était arrêtée. Retard de plus de 100 000 événements (afflux
+  // massif) : le moteur saute en avant (les événements restent dans la base et la chaîne) et le note.
+  const q2 = {
+    max: db.prepare('SELECT MAX(seq) FROM events').pluck(),
+    after: db.prepare('SELECT * FROM events WHERE seq > ? ORDER BY seq LIMIT 200'),
+  };
+  let cursor = setting.get('moteur_curseur', null);
+  if (cursor == null) { cursor = q2.max.get() ?? 0; setting.set('moteur_curseur', cursor); }   // premier démarrage : pas l'historique
+  let scheduled = false;
   const waiters = [];
-  function enqueue(rows) {
-    for (const r of rows) { if (queue.length < QUEUE_MAX) queue.push(r); else dropped += 1; }
-    if (!scheduled) { scheduled = true; setImmediate(run); }
-  }
+  const schedule = () => { if (!scheduled) { scheduled = true; setImmediate(run); } };
+  function enqueue() { schedule(); }
   function run() {
-    process(queue.splice(0, 200));
-    if (dropped) { const n = dropped; dropped = 0; try { store.own('vigie_moteur_sature', { severity: 'haut', emetteur: 'vigie/moteur.js', detail: { ignores: n } }); } catch { /* base indisponible */ } }
-    if (queue.length) { setImmediate(run); return; }
+    try {
+      const last = q2.max.get() ?? 0;
+      if (last - cursor > LAG_MAX) {
+        const skipped = last - LAG_MAX - cursor;
+        cursor = last - LAG_MAX;
+        setting.set('moteur_curseur', cursor);
+        store.own('vigie_moteur_sature', { severity: 'haut', emetteur: 'vigie/moteur.js', detail: { ignores: skipped } });
+      }
+      const rows = q2.after.all(cursor);
+      if (rows.length) {
+        process(rows);
+        cursor = rows.at(-1).seq;
+        setting.set('moteur_curseur', cursor);
+        setImmediate(run);
+        return;
+      }
+    } catch (err) { log?.error({ err: err.message }, 'Vigie : file du moteur'); }
     scheduled = false;
     while (waiters.length) waiters.shift()();
   }
-  const drain = () => (queue.length || scheduled ? new Promise(r => waiters.push(r)) : Promise.resolve());
+  const drain = () => (scheduled ? new Promise(r => waiters.push(r)) : Promise.resolve());
+  const lag = () => (q2.max.get() ?? 0) - cursor;
 
-  // Tâches périodiques : détecteurs sur l'historique (exploration lente), site silencieux (DS24).
-  let silent = false;
+  // Alertes ouvertes restées 7 jours sans nouvel événement : closes « sans suite » (arbitrage NC3). Une alerte prise en
+  // charge par un intervenant reste à lui.
+  function closeQuiet() {
+    const t = now();
+    const ids = db.prepare("SELECT id FROM alerts WHERE statut = 'ouverte' AND derniere < ? LIMIT 1000").pluck().all(t - QUIET_CLOSE);
+    if (!ids.length) return 0;
+    db.transaction(() => {
+      const up = db.prepare("UPDATE alerts SET statut = 'close', note = 'sans suite : 7 jours sans nouvel événement', traite_par = 'Vigie (clôture automatique)', traite_a = ? WHERE id = ?");
+      for (const id of ids) up.run(t, id);
+      store.own('vigie_alerte', { emetteur: 'vigie/moteur.js · clôture automatique', detail: { action: 'close', classement: 'sans_suite', ids: ids.slice(0, 200), nombre: ids.length } });
+    })();
+    return ids.length;
+  }
+
+  // Tâches périodiques : détecteurs sur l'historique (exploration lente), site silencieux (DS24), clôture des alertes
+  // sans suite (une fois par heure).
+  let silent = false, lastClose = 0;
   function tick() {
     correlate.prune();
+    if (now() - lastClose >= 3600e3) { lastClose = now(); closeQuiet(); }
     if (!switches.isOn('detection')) return;
     for (const s of detectors.periodic()) signal({ regle: `detecteur.${s.nom}`, titre: s.nom.replaceAll('_', ' '), ...s }, null, ['site']);
     const last = q.lastSite.get();
@@ -307,6 +359,6 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     store.own('vigie_interrupteur', { emetteur: par, detail: { seuil: kind, valeur: value } });
   };
 
-  return { process, enqueue, drain, detectors, tick, current, top, purge, classify, setMode, setThreshold, modeOf, thresholds,
+  return { process, enqueue, drain, lag, detectors, tick, closeQuiet, current, top, purge, classify, setMode, setThreshold, modeOf, thresholds,
     rules: () => Object.entries(REGISTRY).map(([id, r]) => ({ id, ...r, mode: modeOf(id) })), counts: () => ({ regles: rules.length, correlations: correlations.length }) };
 }

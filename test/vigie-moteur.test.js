@@ -111,7 +111,7 @@ test('modes : arrêt (rien), alerter ; détection arrêtée : rien ; blocage aut
   for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.66' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.66' }); }
   assert.deepEqual(v.decisions.active().filter(d => d.kind === 'bloquer').map(d => d.cible), ['192.0.2.66/32']);
   // … sauf une adresse vue avec un administrateur (on ne s'enferme pas dehors), une adresse privée ou de confiance.
-  v.site('sys_state', 'info', { composant: 'site · système', detail: JSON.stringify({ administrateurs: ['zitadel-moi'] }) });
+  v.store.setting.set('controle_roles_admins', { administrateurs: ['zitadel-moi'], instantane_a: v.clock.t });   // contrôle des rôles réussi
   v.site('authn_login_success', 'info', { ip: '192.0.2.77', sub: 'zitadel-moi' });
   for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.77' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.77' }); }
   const a = v.alerts().find(x => x.entite_key === '192.0.2.77' && x.entite_kind === 'ip');
@@ -145,6 +145,66 @@ test('alerte : rouverte après 24 h de calme, aggravation notée, réponse rejou
   v.clock.t += 25 * 3600e3;
   burst();
   assert.equal(v.alerts().length, 2);
+});
+
+test('alertes ouvertes 7 jours sans événement : closes sans suite (une alerte prise en charge reste) ; administrateurs protégés : sauvegarde seulement', async t => {
+  const v = engineOf(t);
+  v.site('sys_config_changed', 'haut', { composant: 'site · système' });
+  v.site('sys_restore', 'haut', { composant: 'site · système' });
+  const [a1, a2] = v.alerts();
+  v.engine.classify(a2.id, { classement: null, par: 'test', statut: 'en_cours' });
+  v.clock.t += 6 * 864e5;
+  v.engine.tick();
+  assert.equal(v.alerts().filter(a => a.statut === 'close').length, 0);
+  v.clock.t += 2 * 864e5;
+  v.engine.tick();
+  const after = v.alerts();
+  assert.equal(after.find(a => a.id === a1.id).statut, 'close');
+  assert.match(after.find(a => a.id === a1.id).note, /sans suite/);
+  assert.equal(after.find(a => a.id === a2.id).statut, 'en_cours');
+  // La déclaration du site seule ne protège plus une adresse (un site compromis pourrait mentir).
+  v.engine.setMode('entite.score', 'bloquer', 'test');
+  v.site('sys_state', 'info', { composant: 'site · système', detail: JSON.stringify({ administrateurs: ['zitadel-moi'] }) });
+  v.site('authn_login_success', 'info', { ip: '192.0.2.99', sub: 'zitadel-moi' });
+  for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.99' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.99' }); }
+  assert.ok(v.decisions.active().some(d => d.cible === '192.0.2.99/32'));
+});
+
+test('file du moteur : curseur dans la base, reprise après redémarrage, saut en avant au-delà de 100 000 de retard', async t => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vigie-file-'));
+  const db = openVigieDb(path.join(dir, 'vigie.db'));
+  t.after(() => { db.close(); fs.rmSync(dir, { recursive: true, force: true }); });
+  const now = () => Date.parse('2026-10-20T10:00:00Z');
+  const store = createStore({ db, logKey: LOG_KEY, now });
+  const decisions = createDecisions({ store, privateKey: VIGIE_KEYS.privateKey, now });
+  const switches = createSwitches({ store, now });
+  const ev = (type, severity, extra = {}) => ({ id: crypto.randomUUID(), recu_a: now(), survenu_a: now(), type, severity, canal: 'ingestion signée', confiance: 'rapporté', composant: 'site · système', ...extra });
+  store.add([ev('sys_heartbeat', 'info')]);
+  // Premier démarrage : l'historique n'est pas analysé ; ensuite, la file suit la base.
+  const e1 = createEngine({ store, decisions, switches, now });
+  const off = [];
+  store.onAdded(() => { if (!off.length) e1.enqueue(); });
+  store.add([ev('sys_config_changed', 'haut')]);
+  assert.equal(db.prepare('SELECT COUNT(*) FROM alerts').pluck().get(), 0, 'pas encore : la réception n’attend pas le moteur');
+  await e1.drain();
+  assert.equal(db.prepare("SELECT COUNT(*) FROM alerts WHERE regle = 'sigma.configuration'").pluck().get(), 1);
+  // Arrêt du moteur, événements reçus entre-temps : repris au redémarrage, une seule fois.
+  off.push(1);
+  store.add([ev('sys_restore', 'haut')]);
+  const e2 = createEngine({ store, decisions, switches, now });
+  assert.equal(e2.lag() >= 1, true);
+  e2.enqueue(); await e2.drain();
+  assert.equal(db.prepare("SELECT COUNT(*) FROM alerts WHERE regle = 'sigma.restauration'").pluck().get(), 1);
+  e2.enqueue(); await e2.drain();
+  assert.equal(db.prepare("SELECT compteur FROM alerts WHERE regle = 'sigma.restauration'").pluck().get(), 1, 'jamais deux fois');
+  // Retard de plus de 100 000 : saut en avant, noté.
+  store.setting.set('moteur_curseur', 0);
+  db.prepare("UPDATE sqlite_sequence SET seq = seq + 200000 WHERE name = 'events'").run();
+  store.add([ev('sys_heartbeat', 'info')]);
+  const e3 = createEngine({ store, decisions, switches, now });
+  e3.enqueue(); await e3.drain();
+  assert.ok(db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_moteur_sature'").pluck().get() >= 1);
+  assert.equal(e3.lag(), 0);
 });
 
 test('signal noté une fois par 10 minutes pour la même règle et la même entité ; clé d’entité sans caractères de contrôle', async t => {
@@ -189,7 +249,7 @@ test('reprise : le score et les sources survivent à un redémarrage du moteur ;
 test('ligne de commande : alertes, détail avec l’origine du signal, entités, règles, modes, seuils, confiance', async t => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vigie-cli-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
-  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, ...keys().vigie });
+  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, ...keys().vigie });
   const db = openVigieDb(config.databasePath);
   const store = createStore({ db, logKey: config.logKey });
   const decisions = createDecisions({ store, privateKey: config.decisionsKey });
@@ -199,7 +259,7 @@ test('ligne de commande : alertes, détail avec l’origine du signal, entités,
   store.add([{ id: crypto.randomUUID(), type: 'sys_config_changed', severity: 'haut', composant: 'site · système', emetteur: 'server/securite · configuration', canal: 'ingestion signée', confiance: 'rapporté' }]);
   db.close();
   assert.match(cli(['alertes'], { config }), /#1 {2}haut +ouverte +sigma\.configuration {2}site configuration/);
-  assert.match(cli(['alerte', '1'], { config }), /D’où vient le signal :\n.*sys_config_changed \(haut\) {2}site · système · server\/securite · configuration · rapporté/);
+  assert.match(cli(['alerte', '1'], { config }), /D’où vient le signal \(heure de la source[^)]*\) :\n.*sys_config_changed \(haut\) {2}site · système · server\/securite · configuration · rapporté/);
   assert.match(cli(['regles'], { config }), /sigma\.cookie_rejoue +bloquer +DS1/);
   assert.match(cli(['regle', 'entite.score', 'alerter'], { config }), /alerter/);
   assert.throws(() => cli(['regle', 'inconnue', 'alerter'], { config }), /règle inconnue/);

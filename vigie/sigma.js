@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import vm from 'node:vm';
 import { parseAllDocuments } from 'yaml';
 
 // Règles au format Sigma (décision D20, recadrage du 17 octobre 2026) : sous-ensemble évalué sur les événements de la
@@ -20,6 +21,8 @@ const RESPONSES = ['revoquer_compte', 'geler_et_revoquer', 'bloquer_ip'];
 const MODES = ['arret', 'observer', 'alerter', 'bloquer'];
 
 export class RuleError extends Error {}
+// Expression régulière arrêtée au bout de son délai (bloc vigie « delai_re_ms ») : l'événement ne correspond pas.
+export class RegexTimeout extends Error {}
 
 // Valeur d'un champ, « detail.a.b » compris (detail est du JSON dans la ligne).
 export function fieldOf(row, name, cache = {}) {
@@ -39,8 +42,22 @@ export function timespan(s) {
 
 // Comparaison d'une valeur avec un motif, selon les modificateurs (vérifiés au chargement, expressions compilées une
 // fois : une règle fausse empêche le démarrage, jamais une erreur à chaque événement).
+// Délai facultatif des expressions régulières (arbitrage NC5) : avec « delai_re_ms », chaque essai tourne dans un
+// contexte isolé arrêté au bout du délai (retour arrière catastrophique) ; coût d'environ 0,25 ms par essai, d'où un
+// réglage par règle, pour les expressions venues d'ailleurs ou difficiles à relire.
 const OPS = new Set(['contains', 'startswith', 'endswith', 're', 'gte', 'gt', 'lte', 'lt', 'exists']);
-function compile(key, values) {
+const RE_SCRIPT = new vm.Script('re.test(s)');
+function timed(re, ms) {
+  const ctx = vm.createContext({ re, s: '' });
+  return s => {
+    ctx.s = s;
+    try { return RE_SCRIPT.runInContext(ctx, { timeout: ms }); } catch (err) {
+      if (err?.code === 'ERR_SCRIPT_EXECUTION_TIMEOUT') throw new RegexTimeout(`expression ${re.source.slice(0, 80)} arrêtée après ${ms} ms`);
+      throw err;
+    }
+  };
+}
+function compile(key, values, { reDelay = null } = {}) {
   const [field, ...mods] = key.split('|');
   const all = mods.includes('all');
   const ops = mods.filter(m => m !== 'all');
@@ -48,7 +65,13 @@ function compile(key, values) {
   const op = ops[0];
   const list = (Array.isArray(values) ? values : [values]);
   const regexes = new Map();
-  if (op === 're') for (const v of list) { try { regexes.set(v, new RegExp(v)); } catch { throw new RuleError(`expression régulière invalide : ${v}`); } }
+  if (op === 're') {
+    for (const v of list) {
+      let re;
+      try { re = new RegExp(v); } catch { throw new RuleError(`expression régulière invalide : ${v}`); }
+      regexes.set(v, reDelay ? timed(re, reDelay) : s => re.test(s));
+    }
+  }
   const one = v => {
     return x => {
       if (op === 'exists') return (x != null) === Boolean(v);
@@ -57,7 +80,7 @@ function compile(key, values) {
       if (op === 'contains') return String(x).toLowerCase().includes(String(v).toLowerCase());
       if (op === 'startswith') return String(x).toLowerCase().startsWith(String(v).toLowerCase());
       if (op === 'endswith') return String(x).toLowerCase().endsWith(String(v).toLowerCase());
-      if (op === 're') return regexes.get(v).test(String(x).slice(0, 4000));
+      if (op === 're') return regexes.get(v)(String(x).slice(0, 4000));
       if (op === 'gte') return Number(x) >= Number(v);
       if (op === 'gt') return Number(x) > Number(v);
       if (op === 'lte') return Number(x) <= Number(v);
@@ -69,10 +92,10 @@ function compile(key, values) {
   const tests = list.map(one);
   return (row, cache) => { const x = fieldOf(row, field, cache); return all ? tests.every(t => t(x)) : tests.some(t => t(x)); };
 }
-function selection(def) {
-  if (Array.isArray(def)) { const parts = def.map(selection); return (r, c) => parts.some(p => p(r, c)); }
+function selection(def, opts) {
+  if (Array.isArray(def)) { const parts = def.map(d => selection(d, opts)); return (r, c) => parts.some(p => p(r, c)); }
   if (!def || typeof def !== 'object') throw new RuleError('sélection : carte ou liste de cartes attendue');
-  const parts = Object.entries(def).map(([k, v]) => compile(k, v));
+  const parts = Object.entries(def).map(([k, v]) => compile(k, v, opts));
   return (r, c) => parts.every(p => p(r, c));
 }
 
@@ -117,8 +140,18 @@ function vigieBlock(doc, file) {
   // Les points ne se déposent que sur une adresse, un réseau, un compte, une session ou un appareil : une règle sur le site
   // ou la Vigie qui n'ouvrirait pas d'alerte elle-même ne servirait à rien (revue du 17 octobre 2026).
   if (['site', 'vigie'].includes(entite.kind) && v.source_unique !== true && v.signal !== false) throw new RuleError(`${file} : une règle sur l'entité ${entite.kind} doit être source_unique`);
+  // Date d'expiration facultative (arbitrage NC5) : une règle temporaire (pendant un incident, une campagne) cesse
+  // d'elle-même ; elle reste listée, marquée expirée. Date seule : expire à la fin de ce jour (UTC).
+  let expireAt = null;
+  if (v.expire != null) {
+    const s = String(v.expire);
+    expireAt = /^\d{4}-\d{2}-\d{2}$/.test(s) ? Date.parse(`${s}T23:59:59.999Z`) : Date.parse(s);
+    if (!Number.isFinite(expireAt)) throw new RuleError(`${file} : expire attend une date (AAAA-MM-JJ) : ${s}`);
+  }
+  const reDelay = v.delai_re_ms == null ? null : Number(v.delai_re_ms);
+  if (reDelay != null && !(Number.isInteger(reDelay) && reDelay >= 1 && reDelay <= 1000)) throw new RuleError(`${file} : delai_re_ms de 1 à 1000`);
   return { cas: v.cas || null, entite, sourceUnique: v.source_unique === true, points: v.points ?? POINTS[gravite], reponse: v.reponse || null,
-    mode: v.mode || 'observer', gravite, graviteEvenement: v.gravite === 'evenement', signal: v.signal !== false };
+    mode: v.mode || 'observer', gravite, graviteEvenement: v.gravite === 'evenement', signal: v.signal !== false, expireAt, reDelay };
 }
 
 // Charge toutes les règles d'un dossier (un fichier peut contenir plusieurs documents YAML).
@@ -146,10 +179,11 @@ export function loadRules(dir) {
       const det = doc.detection || {};
       const selNames = Object.keys(det).filter(k => k !== 'condition');
       if (!selNames.length || !det.condition) throw new RuleError(`${file} : detection et condition attendues`);
-      const sels = Object.fromEntries(selNames.map(n => [n, selection(det[n])]));
+      const vb = vigieBlock(doc, file);
+      const sels = Object.fromEntries(selNames.map(n => [n, selection(det[n], { reDelay: vb.reDelay })]));
       const cond = condition(det.condition, selNames);
       const match = row => { const cache = {}, memo = {}; return cond(n => (memo[n] ??= sels[n](row, cache))); };
-      rules.push({ ...base, match, generate: doc.generate !== false, ...vigieBlock(doc, file) });
+      rules.push({ ...base, match, generate: doc.generate !== false, ...vb });
     }
   }
   const known = new Set(rules.map(r => r.name));
@@ -171,6 +205,7 @@ export function createCorrelator(correlations, { now = Date.now, maxGroups = 10_
   function feed(row, matched, { t = now(), source = null } = {}) {
     const out = [];
     for (const c of correlations) {
+      if (c.expireAt && t > c.expireAt) continue;
       const which = c.rules.filter(r => matched.has(r));
       if (!which.length) continue;
       const key = groupKey(c, row);

@@ -53,9 +53,39 @@ test('réception : lot signé gardé, canal et confiance fixés par la Vigie, do
   assert.equal(row.confiance, 'rapporté');
   assert.equal(row.composant, 'site · public');
   // Le même lot renvoyé (nouvelle signature) : rien en double.
-  const again = await v.ingest.inject({ method: 'POST', url: '/v1/events', payload: lot([e1], { retard: true }), headers: signed(lot([e1], { retard: true })) });
+  const body2 = lot([e1], { retard: true });
+  const again = await v.ingest.inject({ method: 'POST', url: '/v1/events', payload: body2, headers: signed(body2) });
   assert.equal(again.json().gardes, 0);
   assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_ingestion_refusee'").pluck().get(), 1);
+});
+
+test('réception : deux horodatages, celui du site et celui de la Vigie ; heure du site hors bornes gardée dans le détail', async t => {
+  const v = vigieOf(t);
+  const old = Date.now() - 10 * 60e3, absurd = Date.now() - 400 * 864e5;
+  const e1 = ev({ survenu_a: old }), e2 = ev({ survenu_a: absurd, detail: { champ: 'q' } });
+  const body = lot([e1, e2], { retard: true });
+  await v.ingest.inject({ method: 'POST', url: '/v1/events', payload: body, headers: signed(body) });
+  const r1 = v.db.prepare('SELECT * FROM events WHERE id = ?').get(e1.id), r2 = v.db.prepare('SELECT * FROM events WHERE id = ?').get(e2.id);
+  assert.equal(r1.survenu_a, old);
+  assert.ok(r1.recu_a - r1.survenu_a >= 10 * 60e3 - 1000, 'écart gardé');
+  assert.equal(r2.survenu_a, r2.recu_a, 'heure hors bornes : les détecteurs prennent celle de réception');
+  assert.deepEqual(JSON.parse(r2.detail), { champ: 'q', horodatage_site_brut: absurd });
+});
+
+test('chaîne : vérification par paquets, en rendant la main ; des lignes écrites pendant ne font pas de fausse rupture', async t => {
+  const v = vigieOf(t);
+  const rows = n => Array.from({ length: n }, (_, i) => ({ id: crypto.randomUUID(), recu_a: Date.now(), survenu_a: Date.now(), type: 'sys_heartbeat', severity: 'info', canal: 'interne', confiance: 'constaté', composant: 'site · système', detail: String(i) }));
+  for (let i = 0; i < 12; i++) v.store.add(rows(1000));
+  let ticks = 0;
+  const timer = setInterval(() => { ticks += 1; v.store.add(rows(10)); }, 0);
+  const r = await v.store.verifyAsync();
+  clearInterval(timer);
+  assert.equal(r.ok, true);
+  assert.ok(r.lignes >= 12000);
+  assert.ok(ticks >= 1, 'la boucle d’événements a tourné pendant la vérification');
+  assert.deepEqual(v.store.verify(), { ok: true, lignes: v.db.prepare('SELECT COUNT(*) FROM events').pluck().get() });
+  v.db.prepare("UPDATE events SET detail = 'x' WHERE seq = 7000").run();
+  assert.equal((await v.store.verifyAsync()).rupture.seq, 7000);
 });
 
 test('réception : signature fausse, horloge décalée, lot rejoué → 401 (le site garde ses lots), signalé une fois par minute', async t => {
@@ -168,7 +198,7 @@ test('Zitadel : jeton par clé JWT, événements suivis seulement, charge rédui
 test('ligne de commande : clés, blocage, gel, verrouillage, interrupteur, levée, état, vérification', async t => {
   const dir = tmp(t);
   const k = keys();
-  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_INGEST_KEY: k.vigie.VIGIE_INGEST_KEY, VIGIE_LOG_KEY: k.vigie.VIGIE_LOG_KEY, VIGIE_DECISIONS_PRIVATE_KEY: k.vigie.VIGIE_DECISIONS_PRIVATE_KEY });
+  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, VIGIE_INGEST_KEY: k.vigie.VIGIE_INGEST_KEY, VIGIE_LOG_KEY: k.vigie.VIGIE_LOG_KEY, VIGIE_DECISIONS_PRIVATE_KEY: k.vigie.VIGIE_DECISIONS_PRIVATE_KEY });
   assert.match(cli(['cles']), /VIGIE_DECISIONS_PUBKEY=/);
   assert.match(cli(['bloquer', '203.0.113.7', '--duree', '2h', '--motif', 'scan'], { config, user: 'root' }), /Décision #1/);
   assert.throws(() => cli(['bloquer', '0.0.0.0/0'], { config }), /trop large/);
@@ -199,7 +229,7 @@ test('sauvegarde : instantané contrôlé, N gardés, jamais dans le dossier des
 test('bout en bout : le site envoie ses lots à une vraie Vigie et applique ses décisions (blocage, gel, verrouillage)', async t => {
   const dir = tmp(t);
   const k = keys();
-  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_HOST: '127.0.0.1', VIGIE_INGEST_PORT: '0', VIGIE_INGEST_KEY: KEY, VIGIE_LOG_KEY: LOG_KEY, VIGIE_DECISIONS_PRIVATE_KEY: VIGIE_KEYS.priv64 });
+  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, VIGIE_HOST: '127.0.0.1', VIGIE_INGEST_PORT: '0', VIGIE_INGEST_KEY: KEY, VIGIE_LOG_KEY: LOG_KEY, VIGIE_DECISIONS_PRIVATE_KEY: VIGIE_KEYS.priv64 });
   void k;
   const vigie = await startVigie({ config, logger: false });
   t.after(() => vigie.close());
@@ -348,12 +378,15 @@ test('revue B : ADMIN_SUBS jamais gelé ni tenu dehors ; ligne de commande sous 
   // Conteneur sous l'identifiant 99, sans nom dans /etc/passwd : os.userInfo() échoue, la commande marche quand même.
   const dir = tmp(t);
   const k = keys();
-  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, ...k.vigie });
+  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, ...k.vigie });
   t.mock.method(os, 'userInfo', () => { throw new Error('uv_os_get_passwd returned ENOENT'); });
   assert.match(cli(['bloquer', '203.0.113.9', '--duree', '1h'], { config }), /Décision #1/);
   assert.match(cli(['decisions'], { config }), /ligne de commande \(/);
   assert.throws(() => cli(['interrupteur', 'blocages', 'arret'], { config }), /toujours pour une durée/);
-  assert.throws(() => loadVigieConfig({ VIGIE_DATA_DIR: dir, ...k.vigie, VIGIE_LOG_KEY: k.vigie.VIGIE_INGEST_KEY }), /différente/);
+  assert.throws(() => loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, ...k.vigie, VIGIE_LOG_KEY: k.vigie.VIGIE_INGEST_KEY }), /différente/);
+  // Sauvegardes du site obligatoires (arbitrage NC2) : absentes ou introuvables, la Vigie refuse de démarrer.
+  assert.throws(() => loadVigieConfig({ VIGIE_DATA_DIR: dir, ...k.vigie }), /VIGIE_SITE_BACKUP_DIR/);
+  assert.throws(() => loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: path.join(dir, 'absent'), ...k.vigie }), /dossier introuvable/);
 });
 
 test('revue B : Zitadel — trou signalé une fois, curseur illisible ou futur sans blocage, type « constructor » ignoré', async t => {

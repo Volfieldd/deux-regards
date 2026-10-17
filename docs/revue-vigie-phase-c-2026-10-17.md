@@ -49,3 +49,15 @@ Gravité : **C** critique, **H** haute, **M** moyenne, **B** basse, **I** inform
 | NC5 | B | Expressions régulières des règles appliquées sans limite de temps (retour arrière catastrophique possible avec une règle mal écrite) ; les règles sont les nôtres, le texte comparé est limité à 4 000 caractères. | Relire les expressions de toute nouvelle règle ; à terme, le moteur `re2` si des règles venaient de l'extérieur. |
 | NC6 | B | Coût d'analyse mesuré autour de 1,3 ms par événement (chaîne comprise) : environ 700 événements par seconde au plus ; au-delà, la file grossit (puis alerte « moteur saturé »). | Accepter : le budget par réseau et les résumés du site gardent le flux bien en dessous ; à revoir avec le capteur en bordure (C3). |
 | NC7 | I | L'heure des événements du site est celle que le site déclare (bornée à 7 jours en arrière, jamais dans le futur) : un site compromis peut fausser l'heure inhabituelle et le voyage impossible. | Accepter (un site compromis est déjà le pire cas ; Zitadel et la bordure donnent leur propre heure). |
+
+## Arbitrage du 17 octobre 2026
+
+| Id | Décision | Fait |
+|---|---|---|
+| NC1 | accepté | — |
+| NC2 | sauvegardes du site obligatoires | `VIGIE_SITE_BACKUP_DIR` obligatoire et vérifié au démarrage ; administrateurs protégés seulement d'après le dernier contrôle des rôles réussi, jamais la déclaration du site ; contrôle une minute après le démarrage puis chaque heure. |
+| NC3 | clôture automatique | alerte ouverte 7 jours sans nouvel événement : close « sans suite » (une alerte prise en charge reste à son intervenant). |
+| NC4 | accepté | — |
+| NC5 | délai et expiration facultatifs | `delai_re_ms` (1 à 1000) arrête une expression régulière trop longue (alerte « règle lente ») ; `expire: AAAA-MM-JJ` rend une règle temporaire. |
+| NC6 | abaques demandés | [`docs/etudes/vigie-capacite.md`](etudes/vigie-capacite.md), banc `vigie/banc.js`. Les mesures ont montré deux goulots, corrigés : une transaction par événement analysé (désormais une par lot) et l'absence d'index par compte et par type (migration 005) : à 1 million de lignes d'historique, 912 événements analysés par seconde au lieu de 231. Ajouts : file du moteur réduite à un curseur dans la base (mémoire constante, reprise après redémarrage), vérification quotidienne par paquets (la réception continue), retard d'analyse et taille de la base dans `etat`. |
+| NC7 | deux horodatages | `survenu_a` (source) et `recu_a` (Vigie) gardés et affichés avec leur écart par `alerte` ; heure de la source hors bornes gardée telle quelle dans le détail (`horodatage_site_brut`). |
