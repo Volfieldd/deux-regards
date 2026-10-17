@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Statut | Étude, rien n'est développé. Le code n'a pas été modifié. |
+| Statut | Étude, rien n'est développé. Le code n'a pas été modifié. Décisions D1 à D7 **validées** le 17 octobre 2026. |
+| Architecture | **Révisée le 17 octobre 2026** : événements, alertes et écran vivent dans un composant isolé, la Vigie (conteneur, base et console à part). Voir [Architecture de la Vigie](annexe-vigie-architecture.md), qui prime sur les sections 4 à 6 et 8 ci-dessous, et [Cloudflare : configuration gratuite](annexe-vigie-cloudflare.md). Le vocabulaire des événements (section 2) et les cas de détection (section 3) restent valables. |
 | Date | 17 octobre 2026. |
 | Base lue | `main` à `096e8c8` (version 1.90.0). |
 | Demande | « Je veux être en mesure de détecter les incidents de sécurité avec les logs du back office. Cloudflare et son WAF ne sont pas infaillibles. […] Tentative d'intrusion via la saisie, réutilisation de jeton d'authentification, voyage impossible, injections, élévation de privilèges sans qu'un admin ait donné le droit, siphonage du site public et de l'admin, accès inhabituel aux données personnelles… Un écran spécifique, des alertes par e-mail et/ou une notification interne. » |
@@ -351,9 +352,11 @@ Ordre de grandeur : A et B sont le gros du travail (migrations, une trentaine de
 
 ---
 
-## 9. Décisions à prendre
+## 9. Décisions
 
-| Id | Question | Proposition |
+Validées le 17 octobre 2026 telles que proposées. Décisions suivantes (D8 à D15) : annexes [architecture](annexe-vigie-architecture.md) et [Cloudflare](annexe-vigie-cloudflare.md).
+
+| Id | Question | Décision |
 |---|---|---|
 | D1 | Durée de conservation des événements de sécurité | 6 mois (bas de la fourchette de la CNIL [4]) |
 | D2 | Activer les en-têtes de position de Cloudflare (ville, latitude, longitude) | Oui : sans eux, `DS3` ne raisonne qu'au pays |
