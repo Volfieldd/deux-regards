@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Statut | Étude de recadrage, rien n'est développé. Phases A et B faites et fusionnées (#100 à #104) ; la phase C est suspendue en attendant ce recadrage. |
+| Statut | Étude de recadrage ; décisions D17 à D23 prises le 17 octobre 2026. Phases A et B faites et fusionnées (#100 à #104) ; la phase C est suspendue en attendant ce recadrage. |
 | Date | 17 octobre 2026. Sources consultées ce jour-là. |
 | Demande | « J'aimerais introduire de nouveaux concepts, notamment : Detection at the edge et les concepts introduits par marlinOS, est-il possible de reprendre des composants, en particulier le pipeline Wake. Ça demande un recadrage je pense. » Source indiquée : marlinos.io. |
 | Base | [`journalisation-securite.md`](journalisation-securite.md), [`annexe-vigie-architecture.md`](annexe-vigie-architecture.md), [`annexe-vigie-cloudflare.md`](annexe-vigie-cloudflare.md), revues des phases A et B. |
@@ -186,17 +186,19 @@ Les verdicts et signaux peuvent être projetés en **OCSF 1.8.0** (classes Déte
 
 ---
 
-## 7. Décisions à prendre
+## 7. Décisions
 
-| Id | Question | Proposition |
+Prises le 17 octobre 2026.
+
+| Id | Question | Décision |
 |---|---|---|
-| D17 | Écrire à l'éditeur de marlinOS pour connaître la licence et la disponibilité des paquets | facultatif ; le plan n'en dépend pas |
-| D18 | Quorum : deux sources pour « moyen » et « haut », exceptions à source unique (3.2) | oui |
-| D19 | Capteur en bordure (Cloudflare Worker) sur l'admin, la connexion et les pages, jamais sur les images | oui, essai sur l'instance de test d'abord |
-| D20 | Règles au format Sigma (sous-ensemble) plutôt qu'en code | oui |
-| D21 | Export OCSF des verdicts | phase E, si un autre outil doit s'y brancher |
-| D22 | Listes de menaces gratuites (Spamhaus DROP, Feodo Tracker, sorties Tor) | oui ; CrowdSec plus tard |
-| D23 | Verdicts agrégés au lieu d'événements unitaires pour les familles publiques à fort volume | oui |
+| D17 | Écrire à l'éditeur de marlinOS pour connaître la licence et la disponibilité des paquets | un collègue s'en charge (semaine du 19 octobre 2026) ; le plan n'en dépend pas |
+| D18 | Quorum : deux sources pour « moyen » et « haut », exceptions à source unique (3.2) | **oui** (phase C1) |
+| D19 | Capteur en bordure (Cloudflare Worker) sur l'admin, la connexion et les pages, jamais sur les images | **oui**, essai sur l'instance de test d'abord (phase C3) |
+| D20 | Règles au format Sigma (sous-ensemble) plutôt qu'en code | **oui** (phase C2) |
+| D21 | Export OCSF des verdicts | **oui**, phase E |
+| D22 | Listes de menaces gratuites (Spamhaus DROP, Feodo Tracker, sorties Tor) | **oui** (phase C2) ; CrowdSec plus tard |
+| D23 | Verdicts agrégés au lieu d'événements unitaires pour les familles publiques à fort volume | **oui** (phase C2) |
 
 ---
 
