@@ -260,7 +260,9 @@ footer.sf--reduit { margin-top: var(--esp-8); padding-top: var(--esp-3); }
 .cartel { display: grid; gap: 2px; min-width: 0; margin: 0; padding-top: var(--esp-1); }
 .cartel-t { font-size: 16px; line-height: 1.35; color: var(--ink); font-weight: 400; }
 .cartel-m { font-size: var(--t-meta); line-height: 1.45; color: var(--mute); }
-.cartel--ligne .cartel-t { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; overflow-wrap: normal; hyphens: manual; }
+/* Passe 5 : plus de line-clamp. Il ne coupait rien à l'espacement normal (contrôle des ellipses), mais coupait un titre de vignette
+   étroite quand le lecteur agrandit l'espacement du texte (WCAG 1.4.12 : « Passage, fin d'après-midi » à 320 px dans la planche). */
+.cartel--ligne .cartel-t { display: block; overflow-wrap: normal; hyphens: manual; }
 .cartel--grand { gap: var(--esp-demi); padding-top: var(--esp-2); }
 .cartel--grand .cartel-t { font-size: var(--t-titre-3); line-height: 1.3; }
 .cartel--grand .cartel-m { font-size: var(--t-petit); }
@@ -620,7 +622,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .ouverture-promesse { min-width: 0; padding-bottom: var(--esp-2); }
 .ouverture-h1 { margin: 0; font: 300 30px/var(--i-serre) var(--sans); letter-spacing: 0; text-wrap: balance; }
 .ouverture-sous { margin: var(--esp-1) 0 0; color: var(--prose); font-size: var(--t-texte); line-height: 1.5; text-wrap: pretty; }
-.ouverture-ctl { display: flex; align-items: center; justify-content: center; gap: var(--esp-2); padding-top: var(--esp-1); }
+.ouverture-ctl { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--esp-2); padding-top: var(--esp-1); } /* passe 5 : passe à la ligne plutôt que de sortir (WCAG 1.4.12, « Abspielen (Diashow) » à 320 px) */
 .ouverture-points { display: flex; list-style: none; margin: 0; padding: 0; }
 .ouverture-points li { position: relative; }
 .ouverture-point { display: grid; place-items: center; width: var(--cible); height: var(--cible); }
@@ -700,6 +702,9 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .vis-pres h2 { margin: 0 0 var(--esp-3); }
 .vis-carte { max-width: 400px; margin: 0; }
 .vis-carte svg { display: block; width: 100%; height: auto; }
+/* Passe 5 : la mini-carte est dessinée dans un viewBox de 400 de large ; sous 448 px d'écran, elle rétrécit (364 px sur un
+   téléphone de 412 px, 288 px à 320 px) : ses textes passent de 13 à 18,1 unités, soit 13 px rendus au moins (18,1 × 288 / 400). */
+@media (max-width: 447px) { .vis-carte svg text { font-size: 18.1px; } }
 .vis-carte figcaption { margin-top: var(--esp-1); color: var(--mute); font-size: var(--t-meta); }
 .vis-carte figcaption a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field); }
 .vis-plein { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 10; max-height: 640px; margin-inline: auto; background: var(--dark); }
@@ -822,7 +827,8 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .sommaire .carte .trajet { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 3 4; }
 .sommaire .carte .pt { fill: var(--ink); }
 .sommaire .carte text { fill: var(--ink); font: 400 17px var(--sans); }
-@media (max-width: 479px) { .sommaire { gap: var(--esp-2); } .sommaire .carte { width: 92px; } }
+/* Passe 5 : 116 px au téléphone (92 px avant), pour que les noms de ville (17 unités sur 150) restent à 13 px rendus (116 × 17 / 150 = 13,1). */
+@media (max-width: 479px) { .sommaire { gap: var(--esp-2); } .sommaire .carte { width: 116px; } }
 .sommaire-t { margin: 0 0 var(--esp-demi); font-size: var(--t-petit); color: var(--mute); }
 .sommaire ol { list-style: none; margin: 0; padding: 0; }
 .sommaire a { display: flex; align-items: baseline; gap: var(--esp-1); min-height: var(--cible); padding-block: 10px; color: var(--ink); }

@@ -126,6 +126,14 @@
 .mq-pile { display: grid; gap: var(--esp-12); align-content: start; }
 .mq-ecran.mq-fond { background: var(--paper); }
 .mq-ecran-in { display: grid; gap: var(--esp-3); padding: var(--esp-3) var(--esp-3) var(--esp-4); }
+/* Passe 5 (jury final) : cadre qui touche les bords de l'écran au téléphone (.mq-ecran--plein-tel), comme .mq-ecran--plein, sa marge
+   intérieure ramenée à la gouttière du site : ses listes en rangées ont la largeur de celles de la page (100vw − 48 px sur un téléphone
+   de 412 px) et leurs sizes, ceux de la page, y sont justes (sizes-tel-ecrire.py le mesure). Au-delà de 767 px, un cadre ordinaire. */
+@media (max-width: 767px) {
+  .mq-ecran--plein-tel { margin-inline: calc(-1 * var(--gut, 16px)); outline-offset: -1px; }
+  .mq-ecran--plein-tel > .mq-etat { left: max(8px, var(--gut, 16px)); max-width: calc(100vw - 2 * max(8px, var(--gut, 16px))); }
+  .mq-ecran--plein-tel > .mq-ecran-in { padding-inline: var(--gut, 16px); }
+}
 
 /* Interrupteur « sans annotations » : #sans-annotations dans l'adresse, la classe sur <html>, ou l'impression. */
 html.sans-annotations .mq-pin, html.sans-annotations .mq-etat, html.sans-annotations .mq-fold, html.sans-annotations .mq-notes,

@@ -101,3 +101,16 @@ Tout ce qui est magenta appartient à la maquette, jamais à l'interface propos�
 | `photos/` | 26 photos de synthèse de la démonstration (aucune photo réelle ; les trois scènes de nuit et de contre-jour, Deux ombres, Élise, contre-jour et Deux, minuit, redessinées lisibles à la passe 3) en 900 px, et leurs variantes `480/` et `160/` ; `1600/` pour les 14 dessins de la démo montrés en grand (les 12 dégradés du dépôt n'existent qu'en 900 px). Une image = une photo, voir LEXIQUE-ET-DONNEES.md |
 
 `MQ-00-echantillons/` contient les pages de contrôle des en-têtes (à redimensionner) et les écrans de l'administration montrés dans MQ-00.
+
+## Passe 5 (17 oct. 2026, après le jury final)
+
+Le détail est au § 0 du lexique (« Passe 5 ») ; côté site public et commun :
+
+- noms lus de l'en-tête pris au code en français aussi : « Navigation », « FR – Langue : français », « Langue » ; le panneau du téléphone « Navigation (téléphone) » ;
+- « Directeur de la publication », le terme de la loi (LCEN art. 1-1), dans les maquettes et le lexique ; la correction de main est au § 11 de `dr-work/mq2-correctifs-main.md` ;
+- aucun lien dans le libellé d'une case : « Lire les conditions de vente » en `.choix-sous` (MQ-15, planche) ;
+- textes SVG à 13 px rendus au moins : mini-carte de MQ-04 (`public.css`, `.vis-carte`) et carte au trait du billet à 116 px au téléphone (`public.css`, `.sommaire .carte`) ;
+- cadre d'état qui touche les bords au téléphone, `.mq-ecran--plein-tel` (`annotations.css` § 6) : ses listes en rangées ont la largeur de la page et gardent les `sizes` de la page (MQ-06, MQ-17) ;
+- planche raccourcie sous 35 000 px au bureau, sans annotations : un échantillon par composant dans la section 10, règles à côté des échantillons.
+
+Contrôles ajoutés (voir `GRILLE.md`) : html-validate (`outils/html-valide.sh`), taille rendue des textes, SVG compris (`consol-final.mjs`), largeur mesurée des listes en rangées (`sizes-tel-ecrire.py`).
