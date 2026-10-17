@@ -76,9 +76,8 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
     const decisions = createDecisions({ store, privateKey: config.decisionsKey, now });
     const switches = createSwitches({ store, now });
     const engine = createEngine({ store, decisions, switches, now });
-    // Événements écrits par la ligne de commande (chaîne rompue, contrôle des rôles) : analysés tout de suite, comme
-    // dans le service (sinon le contrôle marque l'instantané comme vu sans qu'aucune alerte ne s'ouvre).
-    store.onAdded(rows => engine.process(rows));
+    // Événements écrits par la ligne de commande (chaîne rompue, contrôle des rôles) : analysés par le service, qui suit
+    // la base par son curseur (dans la minute ; au démarrage s'il était arrêté), une seule fois.
     const par = `ligne de commande (${user})`;
     const motif = opt.motif === true ? '' : opt.motif || '';
     const list = () => decisions.active().map(d => `#${d.id}  ${d.kind}  ${d.cible}${d.portee ? ` (${d.portee})` : ''}  jusqu'au ${new Date(d.fin).toISOString().slice(0, 16).replace('T', ' ')} UTC  par ${d.par}${d.motif ? `  — ${d.motif}` : ''}`).join('\n') || 'Aucune décision active.';
@@ -91,6 +90,8 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
           `Chaîne : ${v ? `${v.ok ? 'intacte' : `ROMPUE (${v.rupture?.raison}, ligne ${v.rupture?.seq})`}, vérifiée le ${new Date(v.at).toISOString().slice(0, 16).replace('T', ' ')} UTC` : 'jamais vérifiée'}`,
           `Événements des dernières 24 h : ${day.map(r => `${r.severity} ${r.n}`).join(', ') || 'aucun'}`,
           `Zitadel : ${z ? `lu le ${new Date(z).toISOString().slice(0, 16).replace('T', ' ')} UTC` : 'jamais lu (ou non configuré)'}`,
+          // Abaques (docs/etudes/vigie-capacite.md) : retard d'analyse, lignes gardées, taille de la base.
+          `Analyse : ${engine.lag()} événement(s) en attente ; base : ${db.prepare('SELECT COUNT(*) FROM events').pluck().get()} lignes, ${Math.round((db.pragma('page_count', { simple: true }) * db.pragma('page_size', { simple: true })) / 1048576)} Mo`,
           `Interrupteurs : ${Object.entries(switches.state()).map(([n, s]) => `${n} ${s.marche ? 'marche' : `ARRÊT${s.jusqua ? ` jusqu'au ${new Date(s.jusqua).toISOString().slice(0, 16).replace('T', ' ')} UTC` : ''}`}`).join(', ')}`,
           `Décisions actives :\n${list()}`,
         ].join('\n');
@@ -117,17 +118,18 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
       case 'alerte': {
         const a = db.prepare('SELECT * FROM alerts WHERE id = ?').get(Number(rest[0]));
         if (!a) return 'Alerte inconnue.';
-        const evs = db.prepare('SELECT e.seq, e.recu_a, e.type, e.severity, e.composant, e.emetteur, e.confiance, e.ip, e.sub FROM alert_events x JOIN events e ON e.seq = x.seq WHERE x.alert_id = ? ORDER BY e.seq DESC LIMIT 20').all(a.id);
+        const evs = db.prepare('SELECT e.seq, e.recu_a, e.survenu_a, e.type, e.severity, e.composant, e.emetteur, e.confiance, e.ip, e.sub FROM alert_events x JOIN events e ON e.seq = x.seq WHERE x.alert_id = ? ORDER BY e.seq DESC LIMIT 20').all(a.id);
         const iso = t => new Date(t).toISOString().slice(0, 19).replace('T', ' ');
+        const gap = ms => (ms < 60e3 ? `${Math.round(ms / 1e3)} s` : ms < 3600e3 ? `${Math.round(ms / 60e3)} min` : `${Math.round(ms / 3600e3)} h`);
         return [`Alerte #${a.id} : ${a.regle} (${a.cas || '—'}), gravité ${a.gravite}, ${a.statut}${a.classement ? ` (${a.classement})` : ''}, mode ${a.mode}`,
           `Entité : ${a.entite_kind} ${a.entite_key}${a.score != null ? `, score ${a.score}` : ''}, sources : ${JSON.parse(a.sources).join(', ') || '—'}`,
           `Première ${iso(a.premiere)} UTC, dernière ${iso(a.derniere)} UTC, ${a.compteur} fois`, `Réponse : ${a.reponse || 'aucune'}`,
-          'D’où vient le signal :', ...evs.map(e => `  ${iso(e.recu_a)}  ${e.type} (${e.severity})  ${e.composant} · ${e.emetteur || ''} · ${e.confiance}${e.ip ? `  ${e.ip}` : ''}${e.sub ? `  ${e.sub}` : ''}`)].join('\n');
+          'D’où vient le signal (heure de la source · écart jusqu’à la réception par la Vigie) :', ...evs.map(e => `  ${iso(e.survenu_a ?? e.recu_a)}${e.survenu_a != null && Math.abs(e.recu_a - e.survenu_a) >= 1000 ? ` (reçu ${e.recu_a >= e.survenu_a ? '+' : '−'}${gap(Math.abs(e.recu_a - e.survenu_a))})` : ''}  ${e.type} (${e.severity})  ${e.composant} · ${e.emetteur || ''} · ${e.confiance}${e.ip ? `  ${e.ip}` : ''}${e.sub ? `  ${e.sub}` : ''}`)].join('\n');
       }
       case 'prendre': return engine.classify(Number(rest[0]), { classement: null, par, statut: 'en_cours' }) ? `Alerte #${rest[0]} prise en charge.` : 'Alerte inconnue.';
       case 'classer': return engine.classify(Number(rest[0]), { classement: rest[1], note: opt.note === true ? '' : opt.note || '', par }) ? `Alerte #${rest[0]} close (${rest[1]}).` : 'Alerte inconnue.';
       case 'entites': return engine.top(20).map(e => `${e.kind.padEnd(8)} ${e.key}  score ${e.score.toFixed(1)}  sources ${e.sources.join('+') || '—'}  ${e.signaux} signaux`).join('\n') || 'Aucune entité active.';
-      case 'regles': return engine.rules().map(r => `${r.id.padEnd(40)} ${r.mode.padEnd(9)} ${r.cas || ''}`).join('\n') + `\nSeuils : ${Object.entries(engine.thresholds()).map(([k, v]) => `${k} ${v}`).join(', ')}`;
+      case 'regles': return engine.rules().map(r => `${r.id.padEnd(40)} ${r.mode.padEnd(9)} ${(r.cas || '').padEnd(5)}${r.expire ? ` ${r.expire < now() ? 'EXPIRÉE' : 'expire'} le ${new Date(r.expire).toISOString().slice(0, 10)}` : ''}`).join('\n') + `\nSeuils : ${Object.entries(engine.thresholds()).map(([k, v]) => `${k} ${v}`).join(', ')}`;
       case 'regle': engine.setMode(rest[0], rest[1], par); return `Règle ${rest[0]} : ${rest[1]}.`;
       case 'seuil': engine.setThreshold(rest[0], Number(rest[1]), par); return `Seuil ${rest[0]} : ${rest[1]} points.`;
       case 'confiance': {
@@ -144,7 +146,6 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         return st ? `Listes mises à jour le ${new Date(st.at).toISOString().slice(0, 16).replace('T', ' ')} UTC : ${Object.entries(st).filter(([k]) => k !== 'at').map(([k, v]) => `${k} ${v}`).join(', ')}` : 'Listes jamais téléchargées.';
       }
       case 'controle': {
-        if (!config.siteBackupDir) return 'VIGIE_SITE_BACKUP_DIR non défini : contrôle impossible.';
         store.setting.set('controle_roles_vu', null);
         // --accepter : l'instantané actuel devient la référence (après vérification d'un écart expliqué hors journal).
         if (opt.accepter) {

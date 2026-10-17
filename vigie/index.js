@@ -23,27 +23,32 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   const switches = createSwitches({ store, now });
   const threats = createThreats({ store, fetchImpl, now, log, enabled: config.threatLists });
   const engine = createEngine({ store, decisions, switches, threats, now, log });
-  store.onAdded(rows => engine.enqueue(rows));
+  store.onAdded(() => engine.enqueue());
+  engine.enqueue();                                  // reprise : événements reçus mais pas encore analysés
 
   // Chaîne vérifiée au démarrage puis chaque jour, avant la purge ; rupture : critique. La tête de la chaîne est
   // écrite dans le journal du conteneur (hors de la base) : une fin de journal effacée se voit en la comparant.
-  const check = () => {
-    const r = store.verify();
+  // Au démarrage d'une traite (rien d'autre ne tourne encore) ; chaque jour, par paquets (la réception continue).
+  const record = r => {
     store.setting.set('chaine_verifiee', { at: now(), ...r });
     if (!r.ok) store.own('log_integrity_fail', { emetteur: 'vigie/store.js', detail: { ruptures: r.ruptures } });
     const h = store.head();
     log.info({ tete_chaine: { seq: h.seq, maillon: h.chain, mac: h.mac }, chaine_intacte: r.ok }, 'Vigie : tête de la chaîne');
     return r;
   };
+  const check = () => record(store.verify());
   // Tâche quotidienne : depuis la dernière exécution enregistrée (un redémarrage ne la repousse pas).
-  const daily = () => {
+  let dailyRunning = false;
+  const daily = async () => {
     const last = store.setting.get('derniere_purge', 0);
-    if (now() - last < 24 * 3600e3) return;
-    check();
-    store.purge();
-    engine.purge();
-    if (config.siteBackupDir) checkRoles({ store, siteBackupDir: config.siteBackupDir, now });
-    store.setting.set('derniere_purge', now());
+    if (dailyRunning || now() - last < 24 * 3600e3) return;
+    dailyRunning = true;
+    try {
+      record(await store.verifyAsync());
+      store.purge();
+      engine.purge();
+      store.setting.set('derniere_purge', now());
+    } catch (err) { log.error({ err: err.message }, 'Vigie : tâche quotidienne'); } finally { dailyRunning = false; }
   };
   const safe = (name, fn) => () => { try { fn(); } catch (err) { log.error({ err: err.message }, `Vigie : ${name}`); } };
   let version = null;
@@ -59,11 +64,14 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   setTimeout(safe('purge', daily), 60e3).unref();
   // Site silencieux et fenêtres de corrélation échues : chaque minute ; détecteurs périodiques : chaque heure ; listes de menaces : chaque jour (première après 2 min) ;
   // contrôle des rôles : à chaque nouvelle sauvegarde du site (vérifié chaque heure).
-  timers.push(setInterval(safe('détecteurs', () => engine.tick()), 60e3));
+  timers.push(setInterval(safe('détecteurs', () => { engine.tick(); engine.enqueue(); }), 60e3));   // enqueue : écrits de la ligne de commande
   const refreshThreats = () => { if (config.threatLists) threats.update().catch(err => log.warn({ err: err.message }, 'Vigie : listes de menaces')); };
   setTimeout(refreshThreats, 120e3).unref();
   timers.push(setInterval(refreshThreats, 24 * 3600e3));
-  if (config.siteBackupDir) timers.push(setInterval(safe('contrôle des rôles', () => checkRoles({ store, siteBackupDir: config.siteBackupDir, now })), 3600e3));
+  // Contrôle des rôles : une minute après le démarrage (les administrateurs protégés en dépendent), puis chaque heure.
+  const roles = safe('contrôle des rôles', () => checkRoles({ store, siteBackupDir: config.siteBackupDir, now }));
+  setTimeout(roles, 60e3).unref();
+  timers.push(setInterval(roles, 3600e3));
   for (const t of timers) t.unref();
   const zitadel = config.zitadel ? createZitadelReader({ ...config.zitadel, store, log, fetchImpl, now }) : null;
   zitadel?.start(config.zitadel.intervalMs);

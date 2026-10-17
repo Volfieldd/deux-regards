@@ -55,11 +55,18 @@ export function createIngest({ store, decisions, ingestKey, now = Date.now, logg
     if (!e || typeof e !== 'object' || Array.isArray(e) || typeof e.id !== 'string' || !UUID.test(e.id) || typeof e.type !== 'string' || !isSiteType(e.type) || !SEVERITIES.includes(e.severity)) return null;
     const composant = e.origine?.composant;
     if (!SITE_COMPOSANTS.includes(composant)) return null;
-    let detail = e.detail == null ? null : JSON.stringify(e.detail);
-    if (detail && detail.length > 4096) detail = JSON.stringify({ tronque: true });
     const t = now();
+    // Deux horodatages (arbitrage NC7) : survenu_a, l'heure du site (bornée : 30 jours en arrière, 5 minutes en avant,
+    // pour les détecteurs), recu_a, l'heure de réception par la Vigie. Une heure du site hors bornes est gardée telle
+    // quelle dans le détail (horodatage_site_brut) : rien n'est perdu, et l'écart se voit.
+    const site = num(e.survenu_a, t - 30 * 864e5, t + 5 * 60e3);
+    const raw = typeof e.survenu_a === 'number' && Number.isFinite(e.survenu_a) && site == null ? e.survenu_a : null;
+    let base = e.detail;
+    if (raw != null) base = { ...(base && typeof base === 'object' && !Array.isArray(base) ? base : base == null ? {} : { valeur: base }), horodatage_site_brut: raw };
+    let detail = base == null ? null : JSON.stringify(base);
+    if (detail && detail.length > 4096) detail = JSON.stringify({ tronque: true, ...(raw != null ? { horodatage_site_brut: raw } : {}) });
     return {
-      id: e.id, recu_a: t, survenu_a: num(e.survenu_a, t - 30 * 864e5, t + 5 * 60e3) ?? t, type: e.type, severity: e.severity,
+      id: e.id, recu_a: t, survenu_a: site ?? t, type: e.type, severity: e.severity,
       composant, emetteur: clean(str(e.origine?.emetteur), 120), canal: 'ingestion signée', confiance: 'rapporté', reference: clean(str(e.origine?.reference), 120),
       sub: clean(str(e.sub), 200), session: typeof e.session === 'string' && /^[0-9a-f]{12}$/.test(e.session) ? e.session : null,
       ip: typeof e.ip === 'string' && net.isIP(e.ip) ? e.ip : null, ip_net: clean(str(e.ip_net), 50), country: typeof e.country === 'string' && /^[A-Z]{2}$/.test(e.country) ? e.country : null,

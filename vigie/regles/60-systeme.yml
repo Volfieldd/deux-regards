@@ -53,3 +53,16 @@ detection:
   condition: selection
 level: high
 vigie: { cas: DS8, entite: { kind: vigie, valeur: controle_roles }, source_unique: true }
+---
+title: Expression régulière d'une règle arrêtée par son délai
+name: regle_lente
+id: 039c2284-5967-40ea-b6a4-0481f98ae034
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion, attack.t1499]
+detection:
+  selection:
+    type: vigie_regle_lente
+  condition: selection
+level: medium
+vigie: { cas: MV11, entite: { kind: vigie, valeur: regles }, source_unique: true }

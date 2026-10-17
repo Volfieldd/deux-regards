@@ -9,7 +9,7 @@ import { openVigieDb, createStore } from '../vigie/store.js';
 import { createDecisions } from '../vigie/decisions.js';
 import { createSwitches } from '../vigie/interrupteurs.js';
 import { createEngine } from '../vigie/moteur.js';
-import { loadRules, RuleError, createCorrelator } from '../vigie/sigma.js';
+import { loadRules, RuleError, RegexTimeout, createCorrelator } from '../vigie/sigma.js';
 import { createChains, km } from '../vigie/detecteurs.js';
 import { createThreats, parseList } from '../vigie/menaces.js';
 import { checkRoles, snapshotName } from '../vigie/controle-roles.js';
@@ -21,7 +21,7 @@ import { openDb, migrate } from '../server/db/index.js';
 const LOG_KEY = 'cle-de-chaine-vigie-0123456789abcdefgh';
 const tmp = t => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'vigie-c2-')); t.after(() => fs.rmSync(d, { recursive: true, force: true })); return d; };
 
-function vigieOf(t, { start = Date.parse('2026-10-20T10:00:00Z'), threats = null } = {}) {
+function vigieOf(t, { start = Date.parse('2026-10-20T10:00:00Z'), threats = null, rulesDir } = {}) {
   const dir = tmp(t);
   const db = openVigieDb(path.join(dir, 'vigie.db'));
   t.after(() => db.close());
@@ -31,7 +31,7 @@ function vigieOf(t, { start = Date.parse('2026-10-20T10:00:00Z'), threats = null
   const decisions = createDecisions({ store, privateKey: VIGIE_KEYS.privateKey, now });
   const switches = createSwitches({ store, now });
   const th = threats ? threats(store, now) : null;
-  const engine = createEngine({ store, decisions, switches, threats: th, now });
+  const engine = createEngine({ store, decisions, switches, threats: th, now, ...(rulesDir ? { rulesDir } : {}) });
   store.onAdded(rows => engine.process(rows));
   const ev = (type, severity, extra = {}) => ({ id: crypto.randomUUID(), recu_a: now(), survenu_a: now(), type, severity, canal: 'ingestion signée', confiance: 'rapporté', composant: 'site · public', ...extra,
     detail: extra.detail && typeof extra.detail === 'object' ? JSON.stringify(extra.detail) : extra.detail });
@@ -75,12 +75,57 @@ detection:
     fs.writeFileSync(path.join(d2, 'b.yml'), `title: b\nname: b\nlevel: low\n${bad}\n`);
     assert.throws(() => loadRules(d2), err, 'refusée au chargement, jamais à chaque événement');
   }
+  for (const [bad, err] of [['vigie: { expire: demain }', /expire attend une date/], ['vigie: { delai_re_ms: 0 }', /delai_re_ms/]]) {
+    const d5 = tmp(t);
+    fs.writeFileSync(path.join(d5, 'f.yml'), `title: f\nname: f\nlevel: low\ndetection:\n  s:\n    type: x\n  condition: s\n${bad}\n`);
+    assert.throws(() => loadRules(d5), err);
+  }
   const d4 = tmp(t);
   fs.writeFileSync(path.join(d4, 'd.yml'), 'title: d\nname: d\nlevel: low\ndetection:\n  s:\n    type: x\n  condition: s\n---\ntitle: e\nname: e\nlevel: low\ncorrelation:\n  type: event_count\n  rules: [d]\n  timespan: 1m\n  condition: { lte: 2 }\n');
   assert.throws(() => loadRules(d4), /lte et eq ne sont pas pris en charge/);
   const d3 = tmp(t);
   fs.writeFileSync(path.join(d3, 'c.yml'), 'title: c\nname: c\nlevel: low\ncorrelation:\n  type: event_count\n  rules: [absente]\n  timespan: 1m\n  condition: { gte: 2 }\n');
   assert.throws(() => loadRules(d3), RuleError);
+});
+
+test('règles : date d’expiration facultative, délai facultatif des expressions régulières (retour arrière catastrophique arrêté)', async t => {
+  const dir = tmp(t);
+  fs.writeFileSync(path.join(dir, 'a.yml'), `title: temporaire
+name: temporaire
+level: high
+tags: [attack.t1190]
+detection:
+  s:
+    type: malicious_input
+  condition: s
+vigie: { cas: DS5, entite: { kind: ip, champ: ip }, source_unique: true, expire: 2026-10-20 }
+---
+title: lente
+name: lente
+level: high
+tags: [attack.t1190]
+detection:
+  s:
+    detail.valeur|re: '^(a+)+$'
+  condition: s
+vigie: { cas: DS5, entite: { kind: ip, champ: ip }, source_unique: true, delai_re_ms: 20 }
+`);
+  const { rules } = loadRules(dir);
+  assert.equal(rules[0].expireAt, Date.parse('2026-10-20T23:59:59.999Z'));
+  assert.throws(() => rules[1].match({ detail: JSON.stringify({ valeur: `${'a'.repeat(40)}b` }) }), RegexTimeout);
+  assert.equal(rules[1].match({ detail: JSON.stringify({ valeur: 'aaa' }) }), true);
+  // Dans le moteur : la règle temporaire compte jusqu'à sa date, plus après ; la règle lente est notée, sans arrêter
+  // l'analyse.
+  const v = vigieOf(t, { rulesDir: dir });
+  v.add('malicious_input', 'moyen', { ip: '203.0.113.1' });
+  assert.equal(v.alerts().filter(a => a.regle === 'sigma.temporaire').length, 1);
+  v.clock.t = Date.parse('2026-10-21T08:00:00Z');
+  v.add('malicious_input', 'moyen', { ip: '203.0.113.2' });
+  assert.equal(v.alerts().filter(a => a.regle === 'sigma.temporaire').length, 1, 'expirée');
+  assert.match(v.engine.rules().find(r => r.id === 'sigma.temporaire').expire.toString(), /^\d+$/);
+  v.add('malicious_input', 'moyen', { ip: '203.0.113.3', detail: { valeur: `${'a'.repeat(40)}b` } });
+  v.add('malicious_input', 'moyen', { ip: '203.0.113.4', detail: { valeur: `${'a'.repeat(40)}b` } });
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_regle_lente'").pluck().get(), 1, 'une fois par heure');
 });
 
 test('règles livrées : toutes chargées, chacune avec son cas, sa gravité et ses tactiques ; DS1 à DS31 couverts', async () => {

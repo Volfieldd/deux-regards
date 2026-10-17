@@ -40,6 +40,9 @@ export function openVigieDb(file) {
   db.pragma('journal_mode = WAL');
   db.pragma('busy_timeout = 5000');
   db.pragma('secure_delete = ON');
+  // Cache de 32 Mo (2 Mo par défaut) : au-delà de quelques centaines de Mo de base, les index ne tiennent plus en
+  // cache et chaque écriture va au disque (abaques : docs/etudes/vigie-capacite.md).
+  db.pragma('cache_size = -32768');
   db.exec('CREATE TABLE IF NOT EXISTS migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL DEFAULT (datetime(\'now\')))');
   const dir = new URL('./migrations/', import.meta.url);
   const done = new Set(db.prepare('SELECT name FROM migrations').pluck().all());
@@ -111,23 +114,44 @@ export function createStore({ db, logKey, retentionDays = 183, now = Date.now })
   }]);
 
   // Vérifie la chaîne depuis l'ancre : { ok, lignes, ruptures, rupture (la première) }. Continue après une rupture.
-  function verify() {
+  // Par paquets de 5 000 lignes : verify() d'une traite (ligne de commande, tests), verifyAsync() en rendant la main
+  // entre deux paquets (service : la réception continue pendant la vérification, environ 13,5 s par million de lignes).
+  function* steps() {
     const ruptures = [];
     const rupture = (seq, raison) => { if (ruptures.length < 20) ruptures.push({ seq, raison }); };
     const a = anchor();
     if (a.seq !== 0 && a.mac !== anchorMac(a)) rupture(a.seq, 'ancre de purge falsifiée');
     else if (a.seq !== 0 && a.recu_a > now() - (retentionDays - 1) * 864e5) rupture(a.seq, 'purge avant la fin de la durée de conservation');
-    let prev = a.chain, expected = a.seq + 1, lignes = 0;
-    for (const row of db.prepare('SELECT * FROM events WHERE seq > ? ORDER BY seq').iterate(a.seq)) {
-      if (row.seq !== expected) rupture(expected, 'ligne manquante');
-      if (mac(prev, row) !== row.chain) rupture(row.seq, 'ligne modifiée ou insérée');
-      prev = row.chain; expected = row.seq + 1; lignes += 1;
+    let prev = a.chain, expected = a.seq + 1, lignes = 0, last = a.seq;
+    const page = db.prepare('SELECT * FROM events WHERE seq > ? ORDER BY seq LIMIT 5000');
+    const maxSeq = db.prepare("SELECT seq FROM sqlite_sequence WHERE name = 'events'").pluck();
+    // Lignes ajoutées pendant la vérification : relues avant de conclure (jamais une fausse « fin effacée »).
+    for (let tries = 0; ; tries++) {
+      for (;;) {
+        const rows = page.all(last);
+        if (!rows.length) break;
+        for (const row of rows) {
+          if (row.seq !== expected) rupture(expected, 'ligne manquante');
+          if (mac(prev, row) !== row.chain) rupture(row.seq, 'ligne modifiée ou insérée');
+          prev = row.chain; expected = row.seq + 1; lignes += 1;
+        }
+        last = rows.at(-1).seq;
+        yield;
+      }
+      const max = maxSeq.get() ?? a.seq;
+      if (max <= expected - 1 || tries >= 3) {
+        if (max > expected - 1) rupture(expected, 'dernières lignes effacées');
+        break;
+      }
     }
-    const max = db.prepare("SELECT seq FROM sqlite_sequence WHERE name = 'events'").pluck().get() ?? a.seq;
-    if (max > expected - 1) rupture(expected, 'dernières lignes effacées');
     const published = setting.get('tete_publiee');
     if (published && published.mac === hmac(`tete|${published.seq}|${published.chain}`) && published.seq > expected - 1) rupture(expected, 'journal plus court que sa dernière tête publiée');
     return ruptures.length ? { ok: false, lignes, rupture: ruptures[0], ruptures } : { ok: true, lignes };
+  }
+  function verify() { const it = steps(); for (;;) { const r = it.next(); if (r.done) return r.value; } }
+  async function verifyAsync() {
+    const it = steps();
+    for (;;) { const r = it.next(); if (r.done) return r.value; await new Promise(resolve => setImmediate(resolve)); }
   }
 
   // Tête de la chaîne (dernier numéro et maillon) : gardée signée et publiée hors de la base chaque nuit.
@@ -165,5 +189,5 @@ export function createStore({ db, logKey, retentionDays = 183, now = Date.now })
     return removed;
   }
 
-  return { db, add: addNow, own, verify, purge, head, setting, hmac, retentionDays, onAdded: fn => listeners.push(fn) };
+  return { db, add: addNow, own, verify, verifyAsync, purge, head, setting, hmac, retentionDays, onAdded: fn => listeners.push(fn) };
 }
