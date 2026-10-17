@@ -11,7 +11,9 @@ detection:
     type: bordure_erreurs
   condition: selection
 level: medium
-vigie: { cas: DS16, entite: { kind: ip, champ: ip }, points: 3 }
+# Les mêmes réponses 4xx que le site signale déjà (rafales de 404, pièges) : contexte, jamais une seconde source du
+# quorum (arbitrage NC3-1). La bordure fait le quorum par ce que le site ne voit pas (rafales de pages, opérateurs).
+vigie: { cas: DS16, entite: { kind: ip, champ: ip }, points: 2, contexte: true }
 ---
 title: Rafale de pages vue en bordure (aspiration du site)
 name: bordure_rafale

@@ -20,7 +20,8 @@ const netOf = ip => (net.isIPv4(ip) ? ip.replace(/\.\d+$/, '.0') : `${ip.split('
 const API = 'https://api.cloudflare.com/client/v4';
 const KV_EVERY = 120e3;
 const ERRORS_MIN = 20, PAGES_MIN = 120;           // par adresse et par minute
-const SILENCE = 6 * 3600e3;
+const SILENCE = 6 * 3600e3;                    // aucune requête vue en bordure depuis 6 h
+const HEARTBEAT_SILENCE = 20 * 60e3;           // battement attendu toutes les 5 minutes
 
 export function createEdge({ store, decisions, accountId, tokenFile, kvNamespace, dataset, fetchImpl = fetch, now = Date.now, log }) {
   const { setting } = store;
@@ -100,7 +101,9 @@ export function createEdge({ store, decisions, accountId, tokenFile, kvNamespace
       // Données de Cloudflare, revérifiées comme toute entrée : valeurs bornées, sans caractère de contrôle.
       .map(r => ({ ...r, classe: clean(r.classe, 20), statut: /^\d{3}$/.test(r.statut) ? r.statut : '', pays: /^[A-Z]{2}$/.test(r.pays || '') ? r.pays : null,
         asn: /^\d{1,10}$/.test(r.asn || '') ? r.asn : null, org: clean(r.org, 80), tls: /^[0-9a-f]{16}$/.test(r.tls || '') ? r.tls : null }));
-    if (all.length) setting.set('bordure_derniere_donnee', t);
+    if (all.some(x => x.ip !== 'bordure')) setting.set('bordure_derniere_donnee', t);   // requêtes vues (pas le battement)
+    const beats = all.filter(x => x.ip === 'bordure' && x.classe === 'battement');
+    if (beats.length) setting.set('bordure_dernier_battement', { at: Math.max(...beats.map(b => b.minute)), etat: clean(beats.at(-1).note, 120) });
     const out = [];
     const ev = (type, r, detail, severity) => ({ type, severity, composant: 'bordure', emetteur: 'Worker Cloudflare · Analytics Engine', canal: 'API Cloudflare',
       confiance: 'constaté', survenu_a: r.minute, ip: r.ip, ip_net: netOf(r.ip), country: r.pays,
@@ -141,13 +144,16 @@ export function createEdge({ store, decisions, accountId, tokenFile, kvNamespace
       if (changed) setting.set('bordure_operateurs_admin_vus', Object.fromEntries(ops));
       setting.set('bordure_curseur', bound);
     })();
-    // Silence : aucun point depuis 6 h (Worker retiré, routes changées, quota dépassé en « laisser passer »).
+    // Silence (arbitrage NC3-2) : plus de battement depuis 20 minutes (Worker retiré, tâche planifiée supprimée, quota
+    // épuisé si Cloudflare arrête aussi les tâches planifiées, ce qu'il ne documente pas), ou aucune requête vue en
+    // bordure depuis 6 h (routes changées, quota épuisé en « laisser passer »).
+    const beat = setting.get('bordure_dernier_battement', null);
     const lastData = setting.get('bordure_derniere_donnee', null) ?? setting.get('bordure_debut', null) ?? (setting.set('bordure_debut', t), t);
-    const silent = t - lastData > SILENCE;
-    if (silent && !setting.get('bordure_silence_signale', false)) {
+    const why = beat && bound - beat.at > HEARTBEAT_SILENCE ? 'plus de battement' : t - lastData > SILENCE ? 'aucune requête vue' : null;
+    if (why && !setting.get('bordure_silence_signale', false)) {
       setting.set('bordure_silence_signale', true);
-      store.own('vigie_bordure_silence', { emetteur: 'vigie/bordure.js', detail: { depuis: new Date(lastData).toISOString().slice(0, 16) } });
-    } else if (!silent) setting.set('bordure_silence_signale', false);
+      store.own('vigie_bordure_silence', { emetteur: 'vigie/bordure.js', detail: { raison: why, depuis: new Date(why === 'plus de battement' ? beat.at : lastData).toISOString().slice(0, 16), dernier_etat: beat?.etat || null } });
+    } else if (!why) setting.set('bordure_silence_signale', false);
     return out.length;
   }
 
