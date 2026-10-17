@@ -4,6 +4,8 @@
 // Responsables conjoints : les auteurs du site ; contact réglable dans l'admin (privacy_contact).
 
 export const UPDATED = '2026-10-16';
+// Date du paragraphe « Journal de sécurité », affiché seulement avec la Vigie (facultative).
+export const UPDATED_SECURITY_LOG = '2026-10-17';
 
 const list = (names, and) => (names.length > 1 ? `${names.slice(0, -1).join(', ')}${and}${names.at(-1)}` : names[0] || '');
 
@@ -12,7 +14,7 @@ export const PRIVACY = {
     title: 'Confidentialité', link: 'Confidentialité',
     description: site => `Données personnelles sur ${site} : ce qui est collecté, pourquoi, combien de temps, et vos droits.`,
     updated: d => `Mise à jour : ${d}.`,
-    sections: ({ site, authors, contact, host, mfa, encrypted, fields }) => [
+    sections: ({ site, authors, contact, host, mfa, encrypted, fields, securityLog }) => [
       ['Qui est responsable', [
         `${list(authors, ' et ')}, photographes du site ${site}, sont responsables ensemble (responsables conjoints) des données décrites ici. Pour toute question ou demande : ${contact}.`,
         'Le site est hébergé chez nous, en France, sur notre propre serveur. Il ne contient ni publicité, ni outil de suivi, ni service extérieur dans ses pages.',
@@ -51,6 +53,7 @@ export const PRIVACY = {
       ['Mesure d’audience et cookies', [
         'Le site compte ses visites de façon anonyme, sans cookie ni service extérieur : aucune adresse IP ni identifiant n’est conservé, les compteurs sont effacés après 25 mois.',
         'Le seul cookie du site public retient la langue que vous choisissez avec le sélecteur de langue. Nos journaux techniques, destinés à la sécurité, ne gardent que des adresses IP tronquées.',
+        ...(securityLog ? ['Journal de sécurité : lorsqu’une requête paraît malveillante (tentative d’intrusion, saisie piégée, envois en rafale, lien inexistant cherché en série) et à chaque connexion à l’administration, nous enregistrons l’adresse IP complète, la ville et le pays estimés par Cloudflare, le type de navigateur et la page demandée, dans un journal séparé du site, consultable par nous seuls. Une visite ordinaire n’y laisse rien. Ce journal est effacé au bout de 6 mois. Base légale : notre intérêt légitime à protéger le site et les données qu’il contient (RGPD, articles 6-1-f et 32).'] : []),
       ]],
       ['Sécurité', [
         `Accès réservé à nous deux et aux personnes que nous autorisons, chacune avec son compte${mfa ? ', avec une authentification à deux facteurs' : ''} ; connexions chiffrées (HTTPS) ; signatures, photos de repère et cartes signées visibles seulement de nous deux ; données ${encrypted ? 'stockées sur un disque chiffré et ' : ''}sauvegardées chaque jour sur un autre disque${fields ? ' ; vos nom, adresse, signature et messages sont en plus chiffrés dans notre base, avec une clé conservée à part' : ''}.`,
@@ -65,7 +68,7 @@ export const PRIVACY = {
     title: 'Privacy', link: 'Privacy',
     description: site => `Personal data on ${site}: what is collected, why, for how long, and your rights.`,
     updated: d => `Updated: ${d}.`,
-    sections: ({ site, authors, contact, host, mfa, encrypted, fields }) => [
+    sections: ({ site, authors, contact, host, mfa, encrypted, fields, securityLog }) => [
       ['Who is responsible', [
         `${list(authors, ' and ')}, the photographers of ${site}, are jointly responsible (joint controllers) for the data described here. For any question or request: ${contact}.`,
         'The website is hosted by us, in France, on our own server. Its pages contain no advertising, no tracking tool and no third-party service.',
@@ -104,6 +107,7 @@ export const PRIVACY = {
       ['Audience measurement and cookies', [
         'The website counts its visits anonymously, without cookies or third-party services: no IP address or identifier is stored, and the counters are deleted after 25 months.',
         'The only cookie on the public website remembers the language you choose with the language selector. Our technical logs, used for security, only keep truncated IP addresses.',
+        ...(securityLog ? ['Security log: when a request looks malicious (intrusion attempt, booby-trapped input, bursts of requests, non-existent links requested in series) and at each sign-in to the administration area, we record the full IP address, the city and country estimated by Cloudflare, the type of browser and the page requested, in a log kept separately from the website and accessible only to us. An ordinary visit leaves nothing in it. This log is deleted after 6 months. Legal basis: our legitimate interest in protecting the website and the data it holds (GDPR, Articles 6(1)(f) and 32).'] : []),
       ]],
       ['Security', [
         `Access restricted to the two of us and the people we authorise, each with their own account${mfa ? ', with two-factor authentication' : ''}; encrypted connections (HTTPS); signatures, reference photos and signed cards visible only to the two of us; data ${encrypted ? 'stored on an encrypted disk and ' : ''}backed up daily on another disk${fields ? '; your name, address, signature and messages are also encrypted in our database, with a key kept separately' : ''}.`,
@@ -118,7 +122,7 @@ export const PRIVACY = {
     title: 'Datenschutz', link: 'Datenschutz',
     description: site => `Personenbezogene Daten auf ${site}: was erhoben wird, warum, wie lange, und Ihre Rechte.`,
     updated: d => `Stand: ${d}.`,
-    sections: ({ site, authors, contact, host, mfa, encrypted, fields }) => [
+    sections: ({ site, authors, contact, host, mfa, encrypted, fields, securityLog }) => [
       ['Verantwortliche', [
         `${list(authors, ' und ')}, die Fotografen von ${site}, sind gemeinsam verantwortlich (gemeinsam Verantwortliche) für die hier beschriebenen Daten. Für Fragen oder Anfragen: ${contact}.`,
         'Die Website wird von uns in Frankreich auf unserem eigenen Server betrieben. Ihre Seiten enthalten weder Werbung noch Tracking-Werkzeuge noch externe Dienste.',
@@ -157,6 +161,7 @@ export const PRIVACY = {
       ['Reichweitenmessung und Cookies', [
         'Die Website zählt ihre Besuche anonym, ohne Cookies und ohne externe Dienste: Es werden weder IP-Adressen noch Kennungen gespeichert, die Zähler werden nach 25 Monaten gelöscht.',
         'Das einzige Cookie der öffentlichen Website speichert die Sprache, die Sie mit der Sprachauswahl wählen. Unsere technischen Protokolle dienen der Sicherheit und enthalten nur gekürzte IP-Adressen.',
+        ...(securityLog ? ['Sicherheitsprotokoll: Wenn eine Anfrage bösartig erscheint (Einbruchsversuch, manipulierte Eingabe, Anfragen in schneller Folge, serienweise abgefragte nicht vorhandene Links) und bei jeder Anmeldung im Verwaltungsbereich speichern wir die vollständige IP-Adresse, die von Cloudflare geschätzte Stadt und das Land, den Browsertyp und die aufgerufene Seite in einem von der Website getrennten Protokoll, das nur wir einsehen können. Ein gewöhnlicher Besuch hinterlässt dort nichts. Dieses Protokoll wird nach 6 Monaten gelöscht. Rechtsgrundlage: unser berechtigtes Interesse am Schutz der Website und der darin enthaltenen Daten (DSGVO, Art. 6 Abs. 1 lit. f und Art. 32).'] : []),
       ]],
       ['Sicherheit', [
         `Zugang nur für uns beide und die Personen, die wir dazu berechtigen, jede mit eigenem Konto${mfa ? ', mit Zwei-Faktor-Authentifizierung' : ''}; verschlüsselte Verbindungen (HTTPS); Unterschriften, Erinnerungsfotos und unterschriebene Karten nur für uns beide sichtbar; Daten ${encrypted ? 'auf einer verschlüsselten Festplatte gespeichert und ' : ''}täglich auf einer anderen Festplatte gesichert${fields ? '; Ihr Name, Ihre Adresse, Ihre Unterschrift und Ihre Nachrichten sind zusätzlich in unserer Datenbank verschlüsselt, mit einem separat aufbewahrten Schlüssel' : ''}.`,

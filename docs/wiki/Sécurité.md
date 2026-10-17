@@ -97,6 +97,17 @@ Détail et autres refus de démarrage : [Configuration](Configuration), section 
 - **Image publiée :** actions GitHub épinglées sur un commit, constructions une à une, `latest` posée depuis `main` seulement ; script d'installation d'ONNX Runtime et ses dépendances retirés de l'image.
 - **Unraid :** partages `appdata` et `backups` non exportés sur le réseau (l'invité SMB est l'utilisateur des conteneurs) ; archive d'export lisible par son seul propriétaire.
 
+## Journal de sécurité (Vigie, facultative)
+
+Avec `VIGIE_URL` (voir [Configuration](Configuration)), le site émet ses événements de sécurité vers la Vigie, composant à part qui les garde, les corrèle et alerte ([étude et architecture](https://github.com/Volfieldd/deux-regards/blob/main/docs/etudes/annexe-vigie-architecture.md)). Sans elle, rien de ce qui suit n'est actif.
+
+- **Événements** (`server/securite/`, vocabulaire de journalisation d'OWASP, liste fermée) : connexion réussie ou refusée (retour OIDC non vérifié, `state` faux, compte désactivé ou en attente), connexion de test sollicitée en ligne, session créée, fermée, expirée, **cookie d'une session fermée qui revient**, **session reprise depuis un autre navigateur, pays ou réseau**, droit refusé (permission, hors portée), CSRF faux, comptes et rôles changés, lectures et exports de données personnelles, **saisies malveillantes** (SQL, XSS, gabarits, chemins, commandes, SSRF, prototype, injection de journal, outils d'attaque), méthodes inattendues, formulaire venu d'un autre site, limites de débit atteintes, rafales de 404, **pièges** (chemins de scanners, lien caché interdit par `robots.txt`, champ piège des formulaires), jetons faux (photo offerte, image Instagram, code de carte), fichier piégé à l'import, déchiffrement impossible, démarrage, configuration de sécurité changée (`ADMIN_SUBS`, OIDC, `TRUST_PROXY`, `DATA_KEY`…), restauration de la base, erreurs, état (administrateurs, déclencheurs), battement chaque minute.
+- **Rôles changés hors de l'application** : la base note elle-même tout changement de rôle, d'état, de photographe lié ou de circuit d'un compte (déclencheurs, migration 048). L'application ouvre un ticket dans la même transaction ; un changement sans ticket (outil SQL, restauration, injection) est signalé **critique**, comme un déclencheur disparu.
+- **Ce qui n'est jamais envoyé** : jetons de session, cookies, jetons CSRF, code et `state` OIDC, jetons de photo offerte ou d'image Instagram, secrets, corps complets, contenu des fiches des personnes. Une saisie malveillante n'est gardée que sur 200 caractères, caractères de contrôle neutralisés.
+- **Envoi** : lots signés (HMAC-SHA-256 de l'horodatage, d'un nonce et du corps, `VIGIE_INGEST_KEY`), sans redirection suivie, 5 s au plus ; Vigie injoignable : lots en attente dans `STORAGE_DIR/securite-attente` (dossier `0700`, 50 Mo au plus, les plus anciens perdus en dernier recours, et c'est signalé), renvoyés au retour. Budget de 60 événements par heure et par adresse sous la gravité « haut », puis une ligne de synthèse.
+- **Adresses** : complètes dans les événements seulement (les journaux du serveur restent tronqués) ; pays, ville et position de Cloudflare crus seulement derrière le proxy de confiance (`TRUST_PROXY`).
+- **Retrait** : sans `VIGIE_URL`, le site efface au démarrage le déclencheur des sessions, les sessions fermées gardées, le contexte des sessions et les événements en attente.
+
 ## Points d'attention
 
 - **Mode EXIF « Tout l'EXIF de l'original » :** il publie la position GPS des photos.

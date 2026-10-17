@@ -145,9 +145,19 @@ export default async function adminRoutes(app) {
     } else {
       return;
     }
-    if (!visible) { reply.callNotFound(); return reply; }
+    if (!visible) {
+      app.securite.emit('authz_fail', { request, emetteur: 'server/routes/admin.js · portée', detail: { raison: 'hors portée', permission: perm ?? null } });
+      reply.callNotFound(); return reply;
+    }
     if (found && scoped && author !== undefined && !request.owns(perm, author)) return app.forbid(request, reply);
   });
+  // Fichier refusé au décodage (Vigie) : image piégée, illisible ou bombe de décompression. Un HEIC d'iPhone, une image
+  // trop grande ou trop haute sont des refus ordinaires, non signalés. Seule l'extension du nom est gardée.
+  const signalUpload = (request, err, name) => {
+    const m = String(err?.message || '');
+    if (/HEIC|trop grande|trop haute/.test(m)) return;
+    app.securite.emit('upload_rejected', { request, emetteur: 'server/routes/admin.js · import', detail: { raison: m.slice(0, 120) || 'rendu impossible', extension: path.extname(String(name || '')).slice(0, 10).toLowerCase() } });
+  };
   // Journal d'audit : qui a modifié quoi, dans le journal du serveur et dans la base (page « Journal »). Une action
   // déjà notée avec son détail par la route (request.audited) n'est pas notée deux fois ; la langue et le thème de
   // l'admin, simples préférences, ne le sont pas. Les lectures les plus sensibles (exports RGPD, originaux avec leur
@@ -436,6 +446,7 @@ export default async function adminRoutes(app) {
           // Rien ne reste d'une image qui n'a pas pu être rendue : ni ligne, ni original, ni variante.
           if (id) repo.deletePhoto(id);
           if (original) removePhotoFiles(storageDir, original.file);
+          signalUpload(request, err, part.filename);
           if (err instanceof ImportError) refused.push({ name: part.filename, reason: request.t.msg(err.message) });
           else {
             request.log.warn({ err, file: part.filename }, 'rendu impossible à l’import');
@@ -505,6 +516,7 @@ export default async function adminRoutes(app) {
           result = { code: 200, id, title };
         } catch (err) {
           if (!(err instanceof ImportError)) throw err;
+          signalUpload(request, err, part.filename);
           refuse(422, request.t.msg(err.message));
         }
       }
@@ -1220,6 +1232,7 @@ export default async function adminRoutes(app) {
     if (!request.can(actPerm)) return app.forbid(request, reply);
     const t = request.t;
     const ko = (code, text) => (json ? reply.code(code).send({ error: text }) : failed(reply, back, text));
+    if ([].concat(body.ids || []).length > MAX_BULK) app.securite.emit('input_validation_fail', { request, composant: 'site · admin', emetteur: 'server/routes/admin.js · actions groupées', detail: { raison: 'liste trop longue', nombre: [].concat(body.ids || []).length } });
     if ([].concat(body.ids || []).length > MAX_BULK) return ko(413, t('Trop de photos à la fois : {n} au plus.', { n: MAX_BULK }));
     const touchable = id => { const p = repo.photo(Number(id)); return Boolean(p) && request.owns(actPerm, p.author_id) && (Boolean(need) || editable(request, p)); };
     const ids = repo.existingIds(body.ids).filter(touchable);
@@ -1659,9 +1672,9 @@ export default async function adminRoutes(app) {
     const a = app.accounts.byId(byId(request.params.id));
     if (!a || !a.roles.includes('photographe') || a.roles.includes('admin')) return reply.callNotFound();
     const alone = request.body?.publier === '1', edit = request.body?.modifier === '1', igAlone = request.body?.instagram === '1';
-    app.accounts.setAdjust(a.id, 'photos.publier', alone ? true : null);
-    app.accounts.setAdjust(a.id, 'photos.publiees.modifier', edit ? null : false);
-    app.accounts.setAdjust(a.id, 'instagram.file', igAlone ? true : null);
+    app.accounts.setAdjust(a.id, 'photos.publier', alone ? true : null, request.session.sub);
+    app.accounts.setAdjust(a.id, 'photos.publiees.modifier', edit ? null : false, request.session.sub);
+    app.accounts.setAdjust(a.id, 'instagram.file', igAlone ? true : null, request.session.sub);
     app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'circuit réglé', target: a.name || a.sub, status: 303,
       detail: `publier sans validation : ${alone ? 'oui' : 'non'} ; modifier ses photos publiées : ${edit ? 'oui' : 'non'} ; Instagram sans validation : ${igAlone ? 'oui' : 'non'}` });
     request.audited = true;

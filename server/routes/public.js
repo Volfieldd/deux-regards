@@ -4,7 +4,7 @@ import { widthsFor, variantName } from '../images.js';
 import { pad } from '../format.js';
 import { picture } from '../picture.js';
 import { RIGHTS, rightsText } from '../rights.js';
-import { PRIVACY, UPDATED as PRIVACY_UPDATED } from '../privacy.js';
+import { PRIVACY, UPDATED as PRIVACY_UPDATED, UPDATED_SECURITY_LOG } from '../privacy.js';
 import { LEGAL } from '../legal.js';
 import { project, MAP } from '../geo/projection.js';
 import { countryName, nameOf } from '../geo/cities.js';
@@ -16,6 +16,7 @@ import { BOTS, countryOf } from '../stats.js';
 import path from 'node:path';
 import sharp from 'sharp';
 import { createRateLimiter, clientKey } from '../ratelimit.js';
+import { TRAP_PATH } from '../securite/piege.js';
 import { FeedbackError } from '../feedback.js';
 import { shareLinks, shareQr } from '../share.js';
 import { EncounterError } from '../encounters.js';
@@ -87,7 +88,7 @@ export default async function publicRoutes(app) {
   const giftHeaders = reply => reply.header('x-robots-tag', 'noindex').header('cache-control', 'no-store').header('referrer-policy', 'no-referrer');
   app.get('/pour-vous/:token', async (request, reply) => {
     const s = app.encounters.share(request.params.token);
-    if (!s) return reply.callNotFound();
+    if (!s) { app.securite.emit('token_guess', { request, emetteur: 'server/routes/public.js · photo offerte', detail: { nature: 'lien de photo offerte' } }); return reply.callNotFound(); }
     const lang = LANGS.includes(s.lang) ? s.lang : 'fr';
     if (!s.expired) app.encounters.countShare(s.token, 'view');
     const siteName = app.siteName();
@@ -100,6 +101,7 @@ export default async function publicRoutes(app) {
   for (const [name, width, kind] of [['apercu.jpg', 1200, 'view'], ['photo.jpg', 2048, 'download']]) {
     app.get(`/pour-vous/:token/${name}`, async (request, reply) => {
       const s = app.encounters.share(request.params.token);
+      if (!s) app.securite.emit('token_guess', { request, emetteur: 'server/routes/public.js · photo offerte', detail: { nature: 'lien de photo offerte' } });
       if (!s || s.expired) return reply.callNotFound();
       const buf = await giftOf(s, width);
       if (kind === 'download') {
@@ -129,6 +131,7 @@ export default async function publicRoutes(app) {
   app.get('/partage/instagram/:file', async (request, reply) => {
     const m = /^([\w-]{20,64})\.jpg$/.exec(request.params.file);
     const post = m && app.instagram.byMediaToken(m[1]);
+    if (!post) app.securite.emit('token_guess', { request, emetteur: 'server/routes/public.js · image Instagram', detail: { nature: 'image Instagram' } });
     if (!post || !app.instagram.isPublic(post.photo_id)) return reply.callNotFound();
     const buf = await app.instagram.image(post.photo_id, app.instagram.optionsOf(post));
     return reply.header('cache-control', 'no-store').header('x-robots-tag', 'noindex').type('image/jpeg').send(buf);
@@ -136,7 +139,7 @@ export default async function publicRoutes(app) {
 
   // Moteurs de recherche : tout le site public, jamais l'admin ni la connexion.
   app.get('/robots.txt', async (request, reply) => reply.type('text/plain; charset=utf-8')
-    .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nDisallow: /partage/\nDisallow: /langue/\nDisallow: /pour-vous/\nAllow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
+    .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nDisallow: /partage/\nDisallow: /langue/\nDisallow: /pour-vous/\n${app.securite.enabled ? `Disallow: ${TRAP_PATH}\n` : ''}Allow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
 
   // Chaque page dans ses trois langues, avec les liens hreflang entre elles.
   app.get('/sitemap.xml', async (request, reply) => {
@@ -424,6 +427,23 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
 
   // Envoyé depuis le site lui-même (un autre site ne peut pas faire aimer, signaler ou compter un partage à la place du visiteur).
   const sameSite = request => { const o = request.headers.origin; return !o || o === new URL(app.config.publicUrl).origin || o === `${request.protocol}://${request.headers.host}`; };
+  // Envoi accepté ? Formulaire venu d'un autre site, ou limite de débit atteinte : refusé, et signalé à la Vigie.
+  const gate = (request, limiter, name) => {
+    if (!sameSite(request)) {
+      app.securite.emit('input_validation_fail', { request, emetteur: 'server/routes/public.js · provenance', detail: { raison: 'formulaire envoyé depuis un autre site', formulaire: name, origine: String(request.headers.origin).slice(0, 100) } });
+      return false;
+    }
+    if (!limiter(request.ip)) {
+      app.securite.emit('excess_rate_limit_exceeded', { request, emetteur: 'server/routes/public.js · limite', detail: { limite: name } });
+      return false;
+    }
+    return true;
+  };
+  const trapped = (request, name) => {
+    if (!String(request.body?.website || '').trim()) return false;
+    app.securite.emit('malicious_honeypot', { request, emetteur: 'server/routes/public.js · champ piège', detail: { piege: 'champ caché', formulaire: name } });
+    return true;
+  };
 
   // ---------- partager ----------
   // Ce que montre la fenêtre « Partager » : aperçu, liens des réseaux, lien à copier, QR, post Instagram s'il existe.
@@ -449,7 +469,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const photo = repo.publishedPhotos({ lang }).find(p => p.slug === request.params.slug);
     if (!photo) return reply.callNotFound();
     const via = String(request.body?.via || '');
-    if (!sameSite(request) || !shareLimit(request.ip)) return reply.code(429).send({ error: 'limit' });
+    if (!gate(request, shareLimit, 'partage')) return reply.code(429).send({ error: 'limit' });
     return app.shares.record(photo.id, via) ? reply.code(204).send() : reply.code(422).send({ error: 'via' });
   });
 
@@ -459,7 +479,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const photo = publishedBySlug(request.params.slug);
     if (!photo) return reply.callNotFound();
     const json = String(request.headers.accept || '').includes('application/json');
-    if (!sameSite(request) || !likeLimit(request.ip)) return json ? reply.code(429).send({ error: 'limit' }) : reply.redirect(base.photoUrl(photo.slug), 303);
+    if (!gate(request, likeLimit, 'j’aime')) return json ? reply.code(429).send({ error: 'limit' }) : reply.redirect(base.photoUrl(photo.slug), 303);
     const r = app.feedback.like(photo.id, clientKey(request.ip), { undo: request.body?.retirer === '1' || request.body?.retirer === true });
     return json ? reply.header('cache-control', 'no-store').send({ ...r, label: t.fb.likes(r.likes) }) : reply.redirect(base.photoUrl(photo.slug), 303);
   });
@@ -479,8 +499,9 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     if (!photo) return reply.callNotFound();
     const body = request.body || {};
     const done = `${base.u(`/photo/${photo.slug}/signaler`)}?envoye=1`;
-    if (String(body.website || '').trim() || !sameSite(request)) return reply.redirect(done, 303);     // piège à robots
-    if (!reportLimit(request.ip)) return reportPage(request, reply, photo, { values: body, errors: { limit: 'limit' }, status: 429 });
+    if (trapped(request, 'signalement')) return reply.redirect(done, 303);                               // piège à robots
+    if (!sameSite(request)) { gate(request, reportLimit, 'signalement'); return reply.redirect(done, 303); }
+    if (!gate(request, reportLimit, 'signalement')) return reportPage(request, reply, photo, { values: body, errors: { limit: 'limit' }, status: 429 });
     try {
       app.feedback.report(photo.id, body, { lang });
     } catch (err) {
@@ -528,14 +549,17 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const body = request.body || {};
     // Piège à robots (un champ invisible rempli), ou formulaire envoyé depuis un autre site : réponse « merci » sans rien
     // enregistrer.
-    if (String(body.website || '').trim() || !sameSite(request)) return reply.redirect(localize('/bonjour/merci', lang), 303);
+    if (trapped(request, 'bonjour')) return reply.redirect(localize('/bonjour/merci', lang), 303);
+    if (!sameSite(request)) { gate(request, helloLimit, 'bonjour'); return reply.redirect(localize('/bonjour/merci', lang), 303); }
     const card = body.ref ? shownCard(body.ref) : null;
-    if (!helloLimit(request.ip)) return hello(request, reply, { values: body, errors: { limit: 'limit' }, card, status: 429 });
+    if (!gate(request, helloLimit, 'bonjour')) return hello(request, reply, { values: body, errors: { limit: 'limit' }, card, status: 429 });
     // Code de contrôle : compté et ignoré dans submit, sur la référence qu'il décode lui-même (une garde posée ici sur
     // une autre lecture de la saisie se contournait avec des espaces en tête).
     const onLock = ref => request.log.warn({ ref }, 'codes de carte faux : référence bloquée 24 h');
     try {
-      const r = app.encounters.submit(body, { lang, codeGuard, onLock });
+      // Code de carte faux : signalé (essais de codes), puis compté comme avant.
+      const guard = { locked: codeGuard.locked, fail: ref => { app.securite.emit('token_guess', { request, emetteur: 'server/routes/public.js · code de carte', detail: { nature: 'code de carte', reference: String(ref).slice(0, 20) } }); return codeGuard.fail(ref); } };
+      const r = app.encounters.submit(body, { lang, codeGuard: guard, onLock });
       // Demande RGPD : le photographe est prévenu tout de suite (relances ensuite, voir server/reminders.js).
       if (body.rights) app.reminders?.rights().catch(err => request.log.warn({ err: err.message }, 'relance RGPD'));
       return reply.redirect(`${localize('/bonjour/merci', lang)}${r.ref ? `?ref=${encodeURIComponent(r.ref)}` : ''}`, 303);
@@ -553,8 +577,8 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const contact = String(settings.privacy_contact || settings.rights_contact || '').trim();
     const host = app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, '');
     const sections = P.sections({ site: siteName, authors: repo.authors().map(a => a.name), contact: contact || `${host}${localize('/bonjour', lang)}`, host,
-      mfa: settings.privacy_mfa === true, encrypted: settings.privacy_encrypted === true, fields: app.encounters.encrypted });
-    const date = new Intl.DateTimeFormat({ fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(PRIVACY_UPDATED));
+      mfa: settings.privacy_mfa === true, encrypted: settings.privacy_encrypted === true, fields: app.encounters.encrypted, securityLog: app.securite.enabled });
+    const date = new Intl.DateTimeFormat({ fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(app.securite.enabled ? UPDATED_SECURITY_LOG : PRIVACY_UPDATED));
     app.stats.hit(request, { page: 'confidentialite' });
     return reply.render('privacy', {
       ...base, siteName, P, sections, updated: P.updated(date), contact, contactHref: contactLink(contact),

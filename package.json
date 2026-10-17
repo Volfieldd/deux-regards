@@ -14,6 +14,7 @@
     "seed": "node --env-file-if-exists=.env server/db/cli.js seed",
     "variants": "node --env-file-if-exists=.env server/db/cli.js variants",
     "test": "AVIF_EFFORT=0 node --test \"test/**/*.test.js\"",
+    "test:vigie": "AVIF_EFFORT=0 TEST_AVEC_VIGIE=1 node --test \"test/**/*.test.js\"",
     "e2e": "e2e/run.sh",
     "backup": "node --env-file-if-exists=.env server/db/backup.js"
   },

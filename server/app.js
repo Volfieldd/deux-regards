@@ -39,6 +39,10 @@ import { createReadiness } from './readiness.js';
 import { createFaceDetector, createFaceService } from './faces.js';
 import { createImageModel, createSeriesSuggest } from './series-suggest.js';
 import { createShares } from './share.js';
+import { truncateIp } from './ip.js';
+import { TRAP_PATH } from './securite/piege.js';
+
+export { truncateIp };
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -74,15 +78,6 @@ export function redactUrl(url) {
     .replace(/(\/pour-vous\/)[^/?#]+/, '$1[masqué]')
     .replace(/(\/bonjour\/)([^/?#]+)/, (m, p, seg) => { const r = parseRef(seg); return r?.code ? `${p}${r.ref}-[masqué]` : m; });
 }
-// Adresse IP tronquée dans les journaux (/24 en IPv4, /48 en IPv6) : assez pour diagnostiquer, pas pour identifier.
-export function truncateIp(ip) {
-  const s = String(ip || '');
-  if (/^\d+\.\d+\.\d+\.\d+$/.test(s)) return s.replace(/\.\d+$/, '.0');
-  if (s.startsWith('::ffff:')) return truncateIp(s.slice(7));
-  if (s.includes(':')) return `${s.split(':').slice(0, 3).join(':')}::`;
-  return s;
-}
-
 const loggerOptions = logger => logger && {
   ...(typeof logger === 'object' ? logger : {}),
   serializers: {
@@ -102,7 +97,10 @@ function assetUrls(root, cache) {
   };
 }
 
-export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {}, faceOptions = {}, seriesOptions = {}, describeOptions = {}, mailTransport = null }) {
+// Sans Vigie : aucun événement n'est construit ni gardé.
+const SECURITE_OFF = Object.freeze({ enabled: false, emit: () => null, emitThrottled: () => null });
+
+export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {}, faceOptions = {}, seriesOptions = {}, describeOptions = {}, mailTransport = null, vigieOptions = {} }) {
   const app = Fastify({ logger: loggerOptions(logger), trustProxy: config.trustProxy });
 
   app.decorate('config', config);
@@ -141,7 +139,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     const names = authorNames.all();
     const brand = app.appearance.brand();
     const theme = app.appearance.forRequest(this.request, this);
-    const common = { asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
+    const common = { trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
       // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
       here: splitLang(this.request.url).path, langs: LANGS, langNames: NAMES, locales: LOCALES, localize,
       authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '' };
@@ -197,8 +195,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     app.encounters.purge();
     app.feedback.purge();
     app.people.sync();
-    app.audit.purge(); app.accounts.purgePending();
-    purgeTimer = setInterval(() => { try { app.encounters.purge(); app.feedback.purge(); app.audit.purge(); app.accounts.purgePending(); app.people.sync(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
+    app.audit.purge(); app.accounts.purgePending(); app.accounts.purgeChanges();
+    purgeTimer = setInterval(() => { try { app.encounters.purge(); app.feedback.purge(); app.audit.purge(); app.accounts.purgePending(); app.accounts.purgeChanges(); app.people.sync(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
     purgeTimer.unref();
   });
   app.addHook('onClose', async () => clearInterval(purgeTimer));
@@ -266,6 +264,17 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { remindTimer = setInterval(() => app.reminders.run(), 3600 * 1000); remindTimer.unref(); setTimeout(() => app.reminders.run(), 60 * 1000).unref(); });
   app.addHook('onClose', async () => clearInterval(remindTimer));
 
+  // Vigie (journalisation de sécurité, facultative) : chargée seulement si VIGIE_URL est réglé. Sans elle, ce qu'elle
+  // avait laissé est effacé et app.securite ne fait rien.
+  if (config.vigie) {
+    const { installVigie } = await import('./securite/site.js');
+    installVigie(app, { config, db, ...vigieOptions });
+  } else {
+    const { retireVigie } = await import('./securite/retrait.js');
+    retireVigie({ db, storageDir: config.storageDir });
+    app.decorate('securite', SECURITE_OFF);
+  }
+
   await setupAuth(app, oidc && { oidc });
   const headers = { ...SECURITY_HEADERS, 'content-security-policy': csp([app.oidc.origin].filter(Boolean)) };
 
@@ -283,7 +292,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Erreurs inattendues : détail dans les journaux, jamais dans la réponse (chemins, noms de fichiers…).
   app.setErrorHandler((err, request, reply) => {
     const status = err.statusCode >= 400 && err.statusCode < 500 ? err.statusCode : 500;
-    if (status >= 500) request.log.error({ err }, 'erreur inattendue');
+    if (status >= 500) {
+      request.log.error({ err }, 'erreur inattendue');
+      app.securite.emit('sys_error', { request, status, emetteur: 'server/app.js · erreur inattendue', detail: { erreur: String(err?.code || err?.name || 'Error') } });
+    }
     const t = request.t || (x => x);                                            // langue de l'admin si elle est connue
     const message = status < 500 ? err.message : t('Une erreur inattendue est survenue. Réessayez dans un instant.');
     reply.code(status).header('cache-control', 'no-store');

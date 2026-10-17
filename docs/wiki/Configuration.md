@@ -74,6 +74,17 @@ Facultatif : publication des photos sur un compte Instagram professionnel. Voir 
 
 Pour une présomption d'exactitude de la date (eIDAS), choisissez une **autorité qualifiée** figurant sur la liste de confiance européenne. Reportez alors son URL RFC 3161 dans `TSA_URL` et son certificat racine dans `TSA_CA_FILE` : ces autorités signent presque toujours avec un certificat émis par une AC intermédiaire, que la vérification sait remonter. Le serveur doit pouvoir joindre cette URL en sortie.
 
+## Vigie (journalisation de sécurité, facultative)
+
+Composant à part, qui reçoit les événements de sécurité du site, détecte les incidents et les signale ([étude](https://github.com/Volfieldd/deux-regards/blob/main/docs/etudes/annexe-vigie-architecture.md)). **Facultatif** : sans `VIGIE_URL`, le site n'envoie et ne garde rien de plus, et efface au démarrage ce qu'une Vigie retirée avait laissé.
+
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `VIGIE_URL` | — | Adresse d'ingestion de la Vigie sur le réseau interne, par exemple `http://vigie:4100` ; `http://` ou `https://`, sans identifiants ni paramètres. |
+| `VIGIE_INGEST_KEY` | — | Clé de signature des envois (HMAC-SHA-256), 32 caractères au moins (`openssl rand -base64 32`), la même dans le `.env` de la Vigie. **Obligatoire avec `VIGIE_URL`**, sinon refus de démarrer. |
+
+Avec la Vigie, le site garde aussi, en plus : le contexte de chaque session de l'admin (adresse, réseau, pays, famille de navigateur), les empreintes des sessions fermées pendant 48 h, et, si la Vigie est injoignable, les événements en attente dans `STORAGE_DIR/securite-attente` (50 Mo au plus). La page **Confidentialité** le dit alors.
+
 ## Site « en ligne »
 
 Dès que `PUBLIC_URL` est en HTTPS ou que `NODE_ENV=production`, le serveur **refuse de démarrer** dans les cas suivants :

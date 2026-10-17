@@ -1,8 +1,10 @@
 import crypto from 'node:crypto';
 import { registerPermissions, hasRole } from './permissions.js';
 import { createOidc } from './oidc.js';
-import { createSessionStore, IDLE_TTL } from './sessions.js';
+import { createSessionStore, IDLE_TTL, hash as hashToken } from './sessions.js';
 import { createRateLimiter } from './ratelimit.js';
+import { networkOf } from './securite/reseau.js';
+import { uaFamily } from './securite/detection.js';
 
 const TX_TTL = 10 * 60; // secondes pour revenir de l'IdP
 // Connexions en cours (un cookie de transaction par onglet) : au-delà, les plus anciennes sont oubliées, et la page
@@ -68,14 +70,55 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   app.decorateRequest('session', null);
   // Comptes et journal (server/accounts.js, décorés par buildApp) : les rôles d'une session sont ceux de son compte,
   // relus à chaque requête.
-  const { accounts, audit } = app;
+  const { accounts, audit, securite } = app;
+  // Vigie : contexte d'une session à sa création, et changements déjà signalés (une fois par session et par nature).
+  const ctxOf = request => { const n = networkOf(request); return { ip: n.ip ?? null, net: n.ip_net ?? null, country: n.country ?? null, ua: uaFamily(request.headers['user-agent']) }; };
+  const told = new Map();
+  const tellOnce = (id, kind) => {
+    const k = `${id}:${kind}`;
+    if (told.has(k)) return false;
+    if (told.size >= 10_000) told.delete(told.keys().next().value);
+    told.set(k, true);
+    return true;
+  };
+  const sessionChecks = (request, token) => {
+    if (!securite.enabled) return;
+    const s = request.session;
+    if (!s) {
+      // Cookie d'une session fermée ou expirée avant cette requête : copié (vol de cookie) ou vieil onglet. Les
+      // requêtes parties juste avant la fermeture (10 s) ne comptent pas.
+      const r = sessions.revoked(token);
+      if (!r || Date.now() - r.revoked_at < 10e3) return;
+      const ctx = ctxOf(request);
+      const same = r.ctx_net === ctx.net && r.ctx_ua === ctx.ua;
+      const a = accounts.bySub(r.sub);
+      securite.emit('session_use_after_expire', { request, sub: r.sub, severity: same ? 'moyen' : 'haut', emetteur: 'server/auth.js · session', reference: `session:${String(r.id).slice(0, 12)}`,
+        detail: { fermee_il_y_a_min: Math.round((Date.now() - r.revoked_at) / 60e3), expiree: r.expires_at <= r.revoked_at + 1000, meme_reseau_et_navigateur: same, compte_actif: a?.status === 'actif' } });
+      return;
+    }
+    if (!s.ctx_ua && !s.ctx_net) return;                                         // session ouverte sans la Vigie
+    const ctx = ctxOf(request);
+    const browser = s.ctx_ua !== ctx.ua, country = Boolean(s.ctx_country && ctx.country && s.ctx_country !== ctx.country), net = s.ctx_net !== ctx.net;
+    if (!browser && !country && !net) return;
+    const kind = `${browser ? 'n' : ''}${country ? 'p' : ''}${net ? `r${ctx.net}` : ''}`;
+    if (!tellOnce(s.id, kind)) return;
+    securite.emit('session_context_change', { request, severity: browser && country ? 'critique' : browser ? 'haut' : country ? 'moyen' : 'info', emetteur: 'server/auth.js · session',
+      detail: { navigateur: browser ? { avant: s.ctx_ua, apres: ctx.ua } : undefined, pays: country ? { avant: s.ctx_country, apres: ctx.country } : undefined, reseau: net ? { avant: s.ctx_net, apres: ctx.net } : undefined } });
+  };
   const lastPending = app.db.prepare("SELECT MAX(at) FROM audit_log WHERE sub = ? AND action = 'connexion en attente d’un rôle'").pluck();
 
   app.addHook('onRequest', async (request, reply) => {
     const token = request.cookies[SESSION_COOKIE];
     if (!token) return;
+    const before = securite.enabled ? sessions.revoked(token) : null;
     request.session = sessions.load(token);
-    if (!request.session) { reply.clearCookie(SESSION_COOKIE, cookieBase); return; }
+    if (!request.session) {
+      reply.clearCookie(SESSION_COOKIE, cookieBase);
+      if (before) sessionChecks(request, token);
+      else if (securite.enabled && sessions.revoked(token)) securite.emit('session_expired', { request, sub: sessions.revoked(token).sub, emetteur: 'server/auth.js · session' });
+      return;
+    }
+    sessionChecks(request, token);
     accounts.ensure({ sub: request.session.sub, name: request.session.name, email: request.session.email });   // sans rôle s'il manquait
     request.session.roles = accounts.rolesOf(request.session.sub);
     request.session.adjust = accounts.adjustOf(request.session.sub);
@@ -123,12 +166,14 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // Page d'erreur pour un formulaire, JSON pour un appel fetch.
   app.decorate('verifyCsrf', async function (request, reply) {
     if (csrfOk(request)) return;
+    if (request.session) securite.emit('authz_csrf_fail', { request, emetteur: 'server/auth.js · CSRF', detail: { jeton: request.body?._csrf ?? request.headers['x-csrf-token'] ? 'faux' : 'absent' } });
     if (request.headers.accept?.includes('text/html')) return csrfPage(request, reply);
     return reply.code(403).send({ error: (request.t || (x => x))('Jeton CSRF invalide.') });
   });
 
   app.addHook('onRequest', async (request, reply) => {
     if (!isAttempt(request) || allow(request.ip)) return;
+    securite.emit('excess_rate_limit_exceeded', { request, composant: 'site · connexion', emetteur: 'server/auth.js · limite de connexion', detail: { limite: 'connexion', par_10_min: config.authRateLimit } });
     return renderError(reply.header('retry-after', '600'), 429, {
       title: 'Trop de tentatives', message: 'Trop de tentatives de connexion depuis votre réseau. Réessayez dans quelques minutes.',
     });
@@ -173,6 +218,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     if (name) reply.clearCookie(name, cookieBase);
     if (request.query.error) {
       request.log.info({ error: request.query.error }, 'connexion refusée par le fournisseur');
+      securite.emit('authn_login_fail', { request, severity: 'bas', emetteur: 'server/auth.js · retour OIDC', detail: { raison: 'refus du fournisseur', code: String(request.query.error).slice(0, 60) } });
       return renderError(reply, 400, { title: 'Connexion annulée', message: 'La connexion n’a pas abouti.', retry: true });
     }
 
@@ -181,6 +227,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     try { tx = unsigned?.valid ? JSON.parse(unsigned.value) : null; } catch { tx = null; }
     // Vérification explicite du state avant tout appel réseau (openid-client la refait).
     if (!tx || !sameToken(state, tx.state)) {
+      securite.emit('authn_login_fail', { request, emetteur: 'server/auth.js · retour OIDC', detail: { raison: raw ? 'state différent ou cookie de transaction altéré' : 'state sans transaction' } });
       return renderError(reply, 400, { title: 'Connexion expirée', message: 'Le lien de connexion a expiré ou n’est pas valide.', retry: true });
     }
 
@@ -189,6 +236,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       result = await oidc.finish(request.query, tx);
     } catch (err) {
       request.log.warn(err, 'échec de la vérification OIDC');
+      securite.emit('authn_login_fail', { request, emetteur: 'server/auth.js · retour OIDC', detail: { raison: 'réponse du fournisseur non vérifiée', erreur: String(err?.code || err?.name || 'Error').slice(0, 60) } });
       return renderError(reply, 400, { title: 'Connexion refusée', message: 'La réponse du service de connexion n’a pas pu être vérifiée.', retry: true });
     }
 
@@ -205,6 +253,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     if (account.rescued) audit.log({ ...who, action: 'compte rétabli par ADMIN_SUBS' });
     if (account.status === 'desactive') {
       audit.log({ ...who, action: 'connexion refusée (compte désactivé)' });
+      securite.emit('authn_login_disabled', { request, sub: who.sub, emetteur: 'server/auth.js · retour OIDC' });
       return renderError(reply, 403, { title: 'Accès refusé', message: 'Ce compte a été désactivé.', switchAccount: true });
     }
     if (!hasRole(accounts.rolesOf(who.sub))) {
@@ -212,11 +261,14 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       const last = lastPending.get(who.sub);
       if (!last || Date.now() - last > 864e5) audit.log({ ...who, action: 'connexion en attente d’un rôle' });
       request.log.warn({ sub: claims.sub }, 'connexion sans rôle : compte en attente');
+      securite.emit('authn_login_pending', { request, sub: who.sub, emetteur: 'server/auth.js · retour OIDC' });
       return renderError(reply, 403, { ...pendingPage, switchAccount: true, sub: who.sub });
     }
 
     openSession(request, reply, { ...who, idToken: result.idToken });
     audit.log({ ...who, action: 'connexion' });
+    securite.emit('authn_login_success', { request, sub: who.sub, emetteur: 'server/auth.js · retour OIDC',
+      detail: { methode: 'oidc', amr: Array.isArray(claims.amr) ? claims.amr.slice(0, 10).map(String) : undefined, administrateur_idp: Boolean(result.admin) } });
     return reply.header('cache-control', 'no-store').redirect(safeNext(tx.next));
   });
 
@@ -224,7 +276,9 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // compte sont relus à chaque requête.
   function openSession(request, reply, user) {
     sessions.destroy(request.cookies[SESSION_COOKIE]);
-    reply.setCookie(SESSION_COOKIE, sessions.create(user), { ...cookieBase, maxAge: IDLE_TTL / 1000 });
+    const token = sessions.create({ ...user, ctx: securite.enabled ? ctxOf(request) : null });
+    reply.setCookie(SESSION_COOKIE, token, { ...cookieBase, maxAge: IDLE_TTL / 1000 });
+    securite.emit('session_created', { request, sub: user.sub, emetteur: 'server/auth.js · session', reference: `session:${hashToken(token).slice(0, 12)}` });
     request.log.info({ sub: user.sub }, 'connexion admin');
   }
 
@@ -248,6 +302,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       const { token, author, next } = request.body || {};
       const who = authors.all().find(a => a.slug === author);
       if (!sameToken(token, config.localAuthToken) || !who) {
+        securite.emit('authn_login_fail', { request, emetteur: 'server/auth.js · connexion de test', detail: { raison: 'jeton ou compte de test invalide' } });
         return renderLocal(reply, 401, { next: safeNext(next), error: 'Jeton ou compte invalide.' });
       }
       // Le compte est celui lié au photographe s'il existe (pour tester le lien compte ↔ photographe), sinon
@@ -260,6 +315,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       }
       openSession(request, reply, { sub, name: `${who.name} (test)` });
       audit.log({ sub, name: `${who.name} (test)`, action: 'connexion (test)' });
+      securite.emit('authn_login_success', { request, sub, emetteur: 'server/auth.js · connexion de test', detail: { methode: 'test' } });
       return reply.header('cache-control', 'no-store').redirect(safeNext(next), 303);
     });
   }
@@ -267,8 +323,12 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // POST + CSRF : une page tierce ne peut pas déconnecter l'utilisateur.
   app.post('/auth/logout', async (request, reply) => {
     if (!request.session) return reply.redirect('/', 303);
-    if (!csrfOk(request)) return csrfPage(request, reply);
+    if (!csrfOk(request)) {
+      securite.emit('authz_csrf_fail', { request, emetteur: 'server/auth.js · déconnexion', detail: { jeton: request.body?._csrf ? 'faux' : 'absent' } });
+      return csrfPage(request, reply);
+    }
     sessions.destroy(request.cookies[SESSION_COOKIE]);
+    securite.emit('session_destroyed', { request, emetteur: 'server/auth.js · déconnexion' });
     reply.clearCookie(SESSION_COOKIE, cookieBase);
     let target = '/';
     // Session OIDC : déconnexion aussi côté IdP. Session locale de test : rien à faire ailleurs.

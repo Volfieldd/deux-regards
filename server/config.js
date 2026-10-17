@@ -91,7 +91,22 @@ export function loadConfig(env = process.env) {
   const translateUrl = env.TRANSLATE_URL || null;
   if (translateUrl && !/^https?:\/\/[^\s/]+/.test(translateUrl)) throw new Error('TRANSLATE_URL doit être une adresse http:// ou https://');
 
+  // Vigie (composant de sécurité facultatif, docs/etudes/annexe-vigie-architecture.md) : sans VIGIE_URL, rien n'est
+  // envoyé ni gardé. Avec elle, la clé de signature des envois est obligatoire.
+  let vigie = null;
+  if (env.VIGIE_URL) {
+    let u;
+    try { u = new URL(env.VIGIE_URL); } catch { throw new Error(`VIGIE_URL n’est pas une adresse valide : ${env.VIGIE_URL}`); }
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') throw new Error('VIGIE_URL doit commencer par http:// ou https://');
+    if (u.username || u.password || u.search || u.hash) throw new Error('VIGIE_URL : adresse simple attendue (sans identifiants ni paramètres)');
+    const ingestKey = env.VIGIE_INGEST_KEY || '';
+    if (!ingestKey) throw new Error('VIGIE_INGEST_KEY est obligatoire avec VIGIE_URL (openssl rand -base64 32)');
+    if (ingestKey.length < 32) throw new Error('VIGIE_INGEST_KEY doit faire au moins 32 caractères');
+    vigie = { url: `${u.origin}${u.pathname}`.replace(/\/+$/, ''), ingestKey };
+  }
+
   return {
+    vigie,
     production,
     instagram,
     deployed,

@@ -69,7 +69,12 @@ export function restore(name) {
   copy(snapshot, dbPath);
   const db = new Database(dbPath);
   let sessions;
-  try { sessions = db.prepare('DELETE FROM sessions').run().changes; } finally { db.close(); }
+  try {
+    sessions = db.prepare('DELETE FROM sessions').run().changes;
+    // Restauration notée dans la base remise en place : le site la signale à la Vigie à son prochain démarrage (une
+    // restauration peut ramener un rôle retiré depuis).
+    db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('restauree_le', JSON.stringify({ at: Date.now(), instantane: path.basename(snapshot) }));
+  } finally { db.close(); }
 
   // 4. Fichiers.
   const report = { snapshot: path.basename(snapshot), before: hadDb ? path.basename(before) : null, sessions, originals: 0, logos: 0, missing: [], orphans: [], later: [] };

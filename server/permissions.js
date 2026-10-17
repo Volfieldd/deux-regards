@@ -113,6 +113,7 @@ export function registerPermissions(app, { renderError }) {
     return this.grants.get(perm) || false;
   });
   const forbid = (request, reply) => {
+    app.securite?.emit('authz_fail', { request, emetteur: 'server/permissions.js · droit refusé', detail: { raison: 'permission', permission: request.routeOptions?.config?.perm ?? null } });
     const json = !String(request.headers.accept || '').includes('text/html');
     reply.code(403).header('cache-control', 'no-store');
     const t = request.t || (x => x);                                            // langue de l'admin (posée avant ce contrôle)
