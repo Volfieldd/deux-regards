@@ -20,6 +20,8 @@ export const OWN = {
   log_integrity_fail: E('critique', 'vigie · contrôle'),
   vigie_purge: E('info', 'vigie · contrôle'),
   vigie_alerte: E('info', 'vigie · contrôle'),
+  vigie_signal: E('info', 'vigie · contrôle'),
+  vigie_controle_roles: E('info', 'vigie · contrôle'),
   vigie_decision: E('moyen', 'vigie · ligne de commande'),
   vigie_interrupteur: E('moyen', 'vigie · ligne de commande'),
 };

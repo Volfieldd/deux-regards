@@ -1,0 +1,99 @@
+# Connexion et sessions : points déposés sur les entités (quorum entre sources).
+title: Échec de connexion OIDC
+name: oidc_echec
+id: 32e9b0f0-49d5-5683-ab05-bbdc6b242c48
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: authn_login_fail
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Échecs OIDC répétés depuis une adresse
+name: oidc_echecs_repetes
+id: f25522bb-2c4a-586f-ab72-cf492b14e70e
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.credential_access, attack.t1110]
+correlation:
+  type: event_count
+  rules: [oidc_echec]
+  group-by: [ip]
+  timespan: 10m
+  condition: { gte: 3 }
+level: medium
+vigie: { cas: DS5, entite: { kind: ip, champ: ip }, points: 3 }
+---
+title: Connexion de test sollicitée alors qu'elle est désactivée
+name: connexion_test
+id: c5640f9b-1be4-5ef5-a618-ee1881d204ea
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.reconnaissance, attack.t1595]
+detection:
+  selection:
+    type: authn_local_attempt
+  condition: selection
+level: medium
+vigie: { cas: DS6, entite: { kind: ip, champ: ip }, points: 2 }
+---
+title: Échec CSRF
+name: csrf
+id: a0dfb3e6-1d6d-5c67-93cd-cced65baae29
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: authz_csrf_fail
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Échecs CSRF répétés pour un compte
+name: csrf_repetes
+id: 1ebe78af-ee1d-5c01-926d-997cfb252063
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.t1185]
+correlation:
+  type: event_count
+  rules: [csrf]
+  group-by: [sub]
+  timespan: 1h
+  condition: { gte: 3 }
+level: medium
+vigie: { cas: DS14, points: 3 }
+---
+title: Échec d'authentification (site ou Zitadel)
+name: echec_authentification
+id: 014071c1-a2ea-5b0f-a573-15e31c5a7b05
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  site:
+    type: authn_login_fail
+  zitadel:
+    type: zitadel_echec
+  condition: 1 of site or zitadel
+level: low
+vigie: { signal: false }
+---
+title: Plusieurs adresses contre un même compte (essais d'identifiants répartis)
+name: cible_commune
+id: f7357d1d-d109-540a-99c7-3579816edf6a
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.credential_access, attack.t1110.004]
+correlation:
+  type: value_count
+  rules: [echec_authentification]
+  group-by: [sub]
+  timespan: 1h
+  condition: { gte: 3, field: ip }
+level: high
+vigie: { cas: DS31, points: 4 }

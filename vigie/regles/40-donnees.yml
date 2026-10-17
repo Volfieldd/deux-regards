@@ -1,0 +1,56 @@
+# Données personnelles et lectures de l'admin.
+title: Export de données personnelles ou original téléchargé
+name: export
+id: 0571ac26-f6c6-5b6d-b47f-c410bfb3a314
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: sensitive_export
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Exports nombreux pour un compte
+name: exports_nombreux
+id: 95246b63-846e-5dbb-a08e-0d28ce37cef1
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.collection, attack.exfiltration, attack.t1530]
+correlation:
+  type: event_count
+  rules: [export]
+  group-by: [sub]
+  timespan: 24h
+  condition: { gte: 4 }
+level: medium
+vigie: { cas: DS18, points: 3 }
+---
+title: Lecture de fiche personnelle
+name: lecture_fiche
+id: edaad9b4-3bb0-5041-90a1-a8d77f786718
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: sensitive_read
+  condition: selection
+level: informational
+vigie: { signal: false }
+---
+title: Fiches personnelles lues en masse
+name: lectures_massives
+id: 7f9d31f9-4bc6-5d15-8cd4-d5b0ac985036
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.collection, attack.t1213]
+correlation:
+  type: value_count
+  rules: [lecture_fiche]
+  group-by: [sub]
+  timespan: 1h
+  condition: { gte: 30, field: detail.id }
+level: medium
+vigie: { cas: DS18, points: 3 }

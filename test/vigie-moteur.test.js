@@ -73,7 +73,7 @@ test('exceptions à source unique : rôle donné hors de l’application → cri
   const v = engineOf(t);
   v.site('privilege_permissions_changed', 'critique', { composant: 'site · admin', detail: JSON.stringify({ compte: 'zitadel-intrus', hors_application: true }) });
   const [a] = v.alerts();
-  assert.equal(a.regle, 'exception.role_hors_application');
+  assert.equal(a.regle, 'sigma.role_hors_application');
   assert.equal(a.gravite, 'critique');
   assert.equal(a.entite_key, 'zitadel-intrus');
   assert.deepEqual(v.decisions.active().map(d => [d.kind, d.cible, d.auto]), [['geler', 'zitadel-intrus', 1], ['revoquer_compte', 'zitadel-intrus', 1]]);
@@ -99,7 +99,7 @@ test('cookie rejoué depuis un autre appareil → révocation des sessions du co
 
 test('modes : arrêt (rien), alerter ; détection arrêtée : rien ; blocage automatique d’une adresse jamais si liée à un compte', async t => {
   const v = engineOf(t);
-  v.engine.setMode('exception.configuration', 'arret', 'test');
+  v.engine.setMode('sigma.configuration', 'arret', 'test');
   v.site('sys_config_changed', 'haut', { composant: 'site · système' });
   assert.equal(v.alerts().length, 0);
   v.switches.set('detection', 'arret', { duree: '1h', par: 'test' });
@@ -125,7 +125,7 @@ test('exceptions : intégrité des comptes, chaîne rompue, Zitadel critique, sa
   v.zitadel('zitadel_droits', 'critique', { sub: 'admin-9', detail: JSON.stringify({ type_zitadel: 'user.impersonated' }) });
   v.site('malicious_input', 'haut', { composant: 'site · admin', sub: 'zitadel-x' });
   assert.deepEqual(v.alerts().map(a => [a.regle, a.gravite]), [
-    ['exception.integrite_comptes', 'critique'], ['exception.chaine_rompue', 'critique'], ['exception.zitadel_critique', 'critique'], ['exception.saisie_compte_admin', 'haut'],
+    ['sigma.integrite_comptes', 'critique'], ['sigma.chaine_rompue', 'critique'], ['sigma.zitadel_critique', 'critique'], ['sigma.saisie_compte_admin', 'haut'],
   ]);
 });
 
@@ -157,9 +157,9 @@ test('ligne de commande : alertes, détail avec l’origine du signal, entités,
   store.onAdded(rows => engine.process(rows));
   store.add([{ id: crypto.randomUUID(), type: 'sys_config_changed', severity: 'haut', composant: 'site · système', emetteur: 'server/securite · configuration', canal: 'ingestion signée', confiance: 'rapporté' }]);
   db.close();
-  assert.match(cli(['alertes'], { config }), /#1 {2}haut +ouverte +exception\.configuration {2}site configuration/);
+  assert.match(cli(['alertes'], { config }), /#1 {2}haut +ouverte +sigma\.configuration {2}site configuration/);
   assert.match(cli(['alerte', '1'], { config }), /D’où vient le signal :\n.*sys_config_changed \(haut\) {2}site · système · server\/securite · configuration · rapporté/);
-  assert.match(cli(['regles'], { config }), /exception\.cookie_rejoue +bloquer +DS1/);
+  assert.match(cli(['regles'], { config }), /sigma\.cookie_rejoue +bloquer +DS1/);
   assert.match(cli(['regle', 'entite.score', 'alerter'], { config }), /alerter/);
   assert.throws(() => cli(['regle', 'inconnue', 'alerter'], { config }), /règle inconnue/);
   assert.match(cli(['seuil', 'ip', '9'], { config }), /9 points/);

@@ -5,6 +5,8 @@ import { createDecisions } from './decisions.js';
 import { createIngest } from './ingest.js';
 import { createZitadelReader } from './zitadel.js';
 import { createEngine } from './moteur.js';
+import { createThreats } from './menaces.js';
+import { checkRoles } from './controle-roles.js';
 import { createSwitches } from './interrupteurs.js';
 
 // Service de la Vigie : réception des événements du site, décisions signées, lecture de Zitadel, vérification de la
@@ -18,7 +20,8 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   const log = ingest.log;
   // Moteur d'entités (phase C1) : chaque événement écrit dans la base lui est remis.
   const switches = createSwitches({ store, now });
-  const engine = createEngine({ store, decisions, switches, now, log });
+  const threats = createThreats({ store, fetchImpl, now, log });
+  const engine = createEngine({ store, decisions, switches, threats, now, log });
   store.onAdded(rows => engine.process(rows));
 
   // Chaîne vérifiée au démarrage puis chaque jour, avant la purge ; rupture : critique. La tête de la chaîne est
@@ -38,6 +41,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     check();
     store.purge();
     engine.purge();
+    if (config.siteBackupDir) checkRoles({ store, siteBackupDir: config.siteBackupDir, now });
     store.setting.set('derniere_purge', now());
   };
   const safe = (name, fn) => () => { try { fn(); } catch (err) { log.error({ err: err.message }, `Vigie : ${name}`); } };
@@ -52,13 +56,21 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     setInterval(safe('nonces', () => store.db.prepare('DELETE FROM nonces WHERE at < ?').run(now() - 10 * 60e3)), 60e3),
   ];
   setTimeout(safe('purge', daily), 60e3).unref();
+  // Détecteurs périodiques et site silencieux : chaque minute ; listes de menaces : chaque jour (première après 2 min) ;
+  // contrôle des rôles : à chaque nouvelle sauvegarde du site (vérifié chaque heure).
+  timers.push(setInterval(safe('détecteurs', () => engine.tick()), 60e3));
+  const refreshThreats = () => { if (config.threatLists) threats.update().catch(err => log.warn({ err: err.message }, 'Vigie : listes de menaces')); };
+  setTimeout(refreshThreats, 120e3).unref();
+  timers.push(setInterval(refreshThreats, 24 * 3600e3));
+  if (config.siteBackupDir) timers.push(setInterval(safe('contrôle des rôles', () => checkRoles({ store, siteBackupDir: config.siteBackupDir, now })), 3600e3));
+  for (const t of timers) t.unref();
   for (const t of timers) t.unref();
   const zitadel = config.zitadel ? createZitadelReader({ ...config.zitadel, store, log, fetchImpl, now }) : null;
   zitadel?.start(config.zitadel.intervalMs);
 
   await ingest.listen({ host: config.host, port: config.ingestPort });
   return {
-    store, decisions, ingest, zitadel, engine, switches,
+    store, decisions, ingest, zitadel, engine, switches, threats,
     async close() { for (const t of timers) clearInterval(t); zitadel?.stop(); await ingest.close(); db.close(); },
   };
 }

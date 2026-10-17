@@ -163,9 +163,9 @@ test('saisies malveillantes, méthodes inattendues, pièges, rafales de 404, CSR
   await c.app.inject({ method: 'PUT', url: '/', remoteAddress: '192.0.2.12' });
   assert.equal((await c.app.inject({ url: '/.env', remoteAddress: '192.0.2.13' })).statusCode, 404);
   // Même réponse qu'une vraie page introuvable, quel que soit le corps envoyé.
-  const xml = await c.app.inject({ method: 'POST', url: '/xmlrpc.php', remoteAddress: '192.0.2.13', headers: { 'content-type': 'text/xml' }, payload: '<methodCall/>' });
+  const xml = await c.app.inject({ method: 'POST', url: '/xmlrpc.php', remoteAddress: '192.0.2.15', headers: { 'content-type': 'text/xml' }, payload: '<methodCall/>' });
   assert.equal(xml.statusCode, 404);
-  assert.equal((await c.app.inject({ url: '/galerie/tout-telecharger', remoteAddress: '192.0.2.13' })).statusCode, 404);
+  assert.equal((await c.app.inject({ url: '/galerie/tout-telecharger', remoteAddress: '192.0.2.16' })).statusCode, 404);
   for (let i = 0; i < 21; i++) await c.app.inject({ url: `/introuvable-${i}`, remoteAddress: '192.0.2.14' });
   let v = await c.flush();
   const inputs = v.of('malicious_input');
@@ -275,7 +275,8 @@ test('Vigie injoignable : lots gardés en attente, renvoyés au retour, marqués
 test('budget : par réseau et par type, jamais pour un compte connecté ni une connexion ; synthèse tout de suite', async t => {
   const c = await withVigie(t);
   const req = (url, extra = {}) => ({ ip: '192.0.2.50', headers: {}, method: 'GET', routeOptions: { url }, ...extra });
-  for (let i = 0; i < 70; i++) c.app.securite.emit('token_guess', { request: req('/pour-vous/:token'), emetteur: 'test' });
+  // Adresses différentes d'un même réseau (le résumé par adresse, D23, ne les regroupe pas ; le budget par réseau, si).
+  for (let i = 0; i < 70; i++) c.app.securite.emit('token_guess', { request: req('/pour-vous/:token', { ip: `192.0.2.${100 + i}` }), emetteur: 'test' });
   // Le budget d'un type épuisé ne fait pas taire les autres, ni ce qui touche un compte.
   c.app.securite.emit('malicious_honeypot', { request: req('/.env'), emetteur: 'test' });
   c.app.securite.emit('authn_login_success', { request: req('/auth/local'), sub: 'local:julien', emetteur: 'test' });
@@ -567,4 +568,18 @@ test('N7 : « hors portée » signalé pour la chose d’un autre, pas pour une 
   const fails = v.of('authz_fail').filter(e => e.detail.raison === 'hors portée');
   assert.equal(fails.length, 1);
   assert.equal(fails[0].route, '/admin/photos/:id');
+});
+
+test('D23 : pièges et jetons faux d’une même adresse — le premier tout de suite, puis un résumé par fenêtre de 5 minutes', async t => {
+  const c = await withVigie(t);
+  for (let i = 0; i < 12; i++) await c.app.inject({ url: '/.env', remoteAddress: '198.51.100.30' });
+  await c.app.inject({ url: '/.env', remoteAddress: '198.51.100.31' });
+  let v = await c.flush();
+  assert.deepEqual(v.of('malicious_honeypot').map(e => e.ip), ['198.51.100.30', '198.51.100.31']);
+  await c.app.securite.stop();
+  v = c.vigie;
+  const resume = v.of('malicious_honeypot').find(e => e.detail?.agrege);
+  assert.equal(resume.ip, '198.51.100.30');
+  assert.equal(resume.detail.nombre, 11);
+  assert.equal(resume.detail.fenetre_min, 5);
 });
