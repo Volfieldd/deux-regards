@@ -298,7 +298,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     openSession(request, reply, { ...who, idToken: result.idToken });
     audit.log({ ...who, action: 'connexion' });
     securite.emit('authn_login_success', { request, sub: who.sub, emetteur: 'server/auth.js · retour OIDC',
-      detail: { methode: 'oidc', amr: Array.isArray(claims.amr) ? claims.amr.slice(0, 10).map(String) : undefined, administrateur_idp: Boolean(result.admin) } });
+      detail: { methode: 'oidc', amr: Array.isArray(claims.amr) ? claims.amr.slice(0, 10).map(String) : undefined, administrateur_idp: Boolean(result.admin), appareil: fpOf(request.headers) } });
     return reply.header('cache-control', 'no-store').redirect(safeNext(tx.next));
   });
 
@@ -308,7 +308,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     sessions.destroy(request.cookies[SESSION_COOKIE]);
     const token = sessions.create({ ...user, ctx: securite.enabled ? ctxOf(request) : null });
     reply.setCookie(SESSION_COOKIE, token, { ...cookieBase, maxAge: IDLE_TTL / 1000 });
-    securite.emit('session_created', { request, sub: user.sub, emetteur: 'server/auth.js · session', reference: `session:${hashToken(token).slice(0, 12)}` });
+    securite.emit('session_created', { request, sub: user.sub, emetteur: 'server/auth.js · session', reference: `session:${hashToken(token).slice(0, 12)}`, detail: securite.enabled ? { appareil: fpOf(request.headers) } : undefined });
     request.log.info({ sub: user.sub }, 'connexion admin');
   }
 
@@ -347,7 +347,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       }
       openSession(request, reply, { sub, name: `${who.name} (test)` });
       audit.log({ sub, name: `${who.name} (test)`, action: 'connexion (test)' });
-      securite.emit('authn_login_success', { request, sub, emetteur: 'server/auth.js · connexion de test', detail: { methode: 'test' } });
+      securite.emit('authn_login_success', { request, sub, emetteur: 'server/auth.js · connexion de test', detail: { methode: 'test', appareil: fpOf(request.headers) } });
       return reply.header('cache-control', 'no-store').redirect(safeNext(next), 303);
     });
   }

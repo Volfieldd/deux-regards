@@ -1,0 +1,28 @@
+# Système.
+title: Erreur inattendue du site
+name: erreur
+id: 4df89a35-d0af-5ebc-9523-137a03afb280
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: sys_error
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Rafale d'erreurs depuis une adresse (fuzzing)
+name: rafale_erreurs
+id: 87f76d9b-ff26-5927-90b7-3eca6116fbc7
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.t1190]
+correlation:
+  type: event_count
+  rules: [erreur]
+  group-by: [ip]
+  timespan: 10m
+  condition: { gte: 10 }
+level: medium
+vigie: { cas: DS21, entite: { kind: ip, champ: ip }, points: 3 }

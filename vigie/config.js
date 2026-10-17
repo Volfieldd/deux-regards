@@ -33,6 +33,10 @@ export function loadVigieConfig(env = process.env) {
     retentionDays: int(env.VIGIE_RETENTION_DAYS, 183, 30, 400),
     zitadel: issuer ? { issuer, keyFile: env.VIGIE_ZITADEL_KEY_FILE, intervalMs: int(env.VIGIE_ZITADEL_INTERVAL_S, 60, 30, 3600) * 1000 } : null,
     backupDir: env.VIGIE_BACKUP_DIR ? path.resolve(env.VIGIE_BACKUP_DIR) : null,
+    // Sauvegardes du site, montées en lecture seule : contrôle quotidien des rôles (annexe architecture 4.4).
+    siteBackupDir: env.VIGIE_SITE_BACKUP_DIR ? path.resolve(env.VIGIE_SITE_BACKUP_DIR) : null,
+    // Listes de menaces gratuites (D22) : « 0 » pour ne pas les télécharger.
+    threatLists: env.VIGIE_MENACES !== '0',
     backupKeep: int(env.VIGIE_BACKUP_KEEP, 14, 1, 365),
   };
 }

@@ -1,0 +1,70 @@
+# Identité (Zitadel) : points sur le compte ; les critiques sont dans 10-preuves.yml.
+title: Échec d'authentification chez Zitadel
+name: zitadel_echec
+id: e2faf46b-2eaf-5454-81d5-834aa80631fb
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: zitadel_echec
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Échecs répétés chez Zitadel pour un compte
+name: zitadel_echecs_repetes
+id: 819ed8de-b1be-5dd1-9cd6-0f7aaefd7a61
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.credential_access, attack.t1110]
+correlation:
+  type: event_count
+  rules: [zitadel_echec]
+  group-by: [sub]
+  timespan: 1h
+  condition: { gte: 5 }
+level: high
+vigie: { cas: DS25, points: 4 }
+---
+title: Facteur d'authentification retiré ou changé
+name: zitadel_facteur
+id: 13a62f1d-a153-5056-a789-e569e21ec88c
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.persistence, attack.t1556]
+detection:
+  selection:
+    type: zitadel_facteur
+    severity: haut
+  condition: selection
+level: high
+vigie: { cas: DS26, points: 3 }
+---
+title: Droit donné dans Zitadel
+name: zitadel_droits
+id: e73adc7a-ca36-5dd0-bda1-c28aede081c4
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.privilege_escalation, attack.t1098]
+detection:
+  selection:
+    type: zitadel_droits
+    severity: haut
+  condition: selection
+level: high
+vigie: { cas: DS27, points: 3 }
+---
+title: Politique de connexion ou configuration de l'identité changée
+name: zitadel_politique
+id: 90fb066a-6b33-5d97-856a-f723be098a04
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion, attack.t1556]
+detection:
+  selection:
+    type: zitadel_politique
+    severity: haut
+  condition: selection
+level: high
+vigie: { cas: DS28, entite: { kind: site, valeur: zitadel }, points: 3 }

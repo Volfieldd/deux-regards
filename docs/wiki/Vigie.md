@@ -9,7 +9,7 @@ La Vigie est un composant **à part** du site : son propre conteneur, sa propre 
 | A | Le site émet ses événements | fait |
 | B | Conteneur de la Vigie : réception signée, base chaînée, décisions signées appliquées par le site, interrupteurs, ligne de commande, lecture de Zitadel, sauvegarde | fait |
 | C1 | Moteur d'entités : score composite qui s'efface avec le temps, quorum entre sources (deux sources pour une alerte « moyen » ou « haut »), exceptions à source unique, alertes, modes par règle, réponses automatiques prudentes | fait |
-| C2 | Règles au format Sigma, détecteurs comportementaux, listes de menaces, contrôle des rôles sur les sauvegardes, verdicts agrégés | à venir |
+| C2 | Règles au format Sigma, détecteurs comportementaux, listes de menaces, contrôle des rôles sur les sauvegardes, verdicts agrégés | fait |
 | C3 | Capteur en bordure (Cloudflare Worker) | à venir |
 | D | Console `vigie.nicephos.art` (Cloudflare Access + Zitadel), notifications (admin, e-mail, Signal) | à venir |
 
@@ -104,6 +104,19 @@ Concepts repris de marlinOS ([recadrage](https://github.com/Volfieldd/deux-regar
 | `entites` | entités les plus chaudes (score, sources) |
 | `regles`, `regle <règle> <mode>`, `seuil <classe> <points>` | modes et seuils |
 | `confiance ajouter\|retirer <ip>` | adresses jamais bloquées automatiquement |
+
+## Règles et détecteurs (phase C2)
+
+- **Règles au format Sigma** (`vigie/regles/*.yml`, décision D20) : 32 règles et 13 corrélations (`event_count`, `value_count`), chacune avec son cas (DS…), sa gravité (`level`), ses tactiques MITRE ATT&CK (`tags`) et un bloc `vigie` : entité visée, preuve à source unique (`source_unique: true`, alerte immédiate) ou points déposés sur l'entité (quorum), réponse automatique, mode par défaut. Format standard, lisible ; une règle mal écrite empêche la Vigie de démarrer (jamais une règle ignorée en silence). Sous-ensemble pris en charge : sélections (carte = ET, liste = OU), modificateurs `contains`, `startswith`, `endswith`, `re`, `gte`, `gt`, `lte`, `lt`, `exists`, `all` ; conditions `and`, `or`, `not`, parenthèses, `1 of`, `all of` ; corrélations `event_count`, `value_count`, `temporal`.
+- **Détecteurs comportementaux** (`vigie/detecteurs.js`, inspirés de marlinOS) : première apparition (pays ou appareil jamais vus pour un compte en 90 jours, DS4), heure inhabituelle (DS18), vitesse (lectures au-delà de la moyenne + 3 écarts-types, DS17), voyage impossible (plus de 500 km à plus de 900 km/h, DS3), pivot d'identifiants (3 échecs puis un succès en 6 h, DS25), rôle incohérent (export réservé à l'administrateur fait par un autre compte : preuve, critique, DS10), exploration lente (un réseau dans les pièges sur 12 heures distinctes en 72 h, DS15), chaîne d'attaque (repérage, tentative puis accès sur une entité en 24 h, critique, DS23), site silencieux (plus de 3 min sans événement du site, DS24).
+- **Listes de menaces** (D22) : Spamhaus DROP, abuse.ch Feodo Tracker, sorties Tor, téléchargées une fois par jour par la Vigie ; une adresse listée prend des points (3, 3, 1) qui **ne comptent pas** comme une source du quorum. Aucune adresse de visiteur n'est envoyée à un tiers. `VIGIE_MENACES=0` pour ne pas les télécharger.
+- **Contrôle des rôles sur les sauvegardes du site** : à chaque nouvelle sauvegarde, la Vigie ouvre l'instantané en lecture seule (`VIGIE_SITE_BACKUP_DIR`, le `BACKUP_DIR` du site monté en lecture seule) et compare les administrateurs actifs et les déclencheurs du journal des comptes à ce que le site a déclaré : un écart est critique.
+- **Résumés côté site** (D23) : pour les pièges, pages introuvables, jetons faux, valeurs impossibles, blocages et limites venant du public, le premier événement d'une adresse part tout de suite, les suivants de la même fenêtre de 5 minutes partent en un seul événement (`agrege`, `nombre`).
+
+| Commande | Effet |
+|---|---|
+| `menaces` | date et taille des listes de menaces |
+| `controle` | contrôle des rôles sur la dernière sauvegarde du site, tout de suite |
 
 ## Garde-fous
 

@@ -1,0 +1,237 @@
+# Preuves à source unique (décision D18) : une seule observation suffit, alerte immédiate sans quorum.
+title: Rôle donné, retiré ou compte changé hors de l'application
+name: role_hors_application
+id: 7eb3ad9a-4b84-5996-bca3-667469c7fbfe
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: Changement de compte noté par la base sans ticket signé de l'application (outil SQL, injection, restauration, faux ticket).
+tags: [attack.persistence, attack.privilege_escalation, attack.t1098]
+detection:
+  selection:
+    type: [privilege_permissions_changed, user_created, user_deleted, user_rescued]
+    detail.hors_application: true
+  condition: selection
+level: critical
+vigie: { cas: DS8, entite: { kind: compte, champ: detail.compte }, source_unique: true, mode: bloquer, reponse: geler_et_revoquer }
+---
+title: Rôle administrateur donné par l'application
+name: administrateur_donne
+id: 37f992da-e4a2-565d-b745-113876a8fb0d
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: Normal mais rare ; à confirmer par un administrateur.
+tags: [attack.privilege_escalation, attack.t1098]
+detection:
+  selection:
+    detail.administrateur_donne: true
+  filtre:
+    detail.hors_application: true
+  condition: selection and not filtre
+level: high
+vigie: { cas: DS8, entite: { kind: compte, champ: detail.compte }, source_unique: true }
+---
+title: Journal des comptes altéré (déclencheur absent ou modifié, ticket resté ouvert)
+name: integrite_comptes
+id: 403bd873-8509-5678-ac81-becf1bba66c1
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion, attack.t1562]
+detection:
+  selection:
+    type: sys_state
+    severity: critique
+  condition: selection
+level: critical
+vigie: { cas: DS8, entite: { kind: site, valeur: site }, source_unique: true }
+---
+title: Chaîne du journal de la Vigie rompue
+name: chaine_rompue
+id: a82a9fdc-1338-5e92-aaae-8e74aa60a2a6
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion, attack.t1070]
+detection:
+  selection:
+    type: log_integrity_fail
+  condition: selection
+level: critical
+vigie: { cas: DS20, entite: { kind: vigie, valeur: chaine }, source_unique: true }
+---
+title: Cookie d'une session fermée rejoué depuis un autre appareil
+name: cookie_rejoue
+id: 35f37e31-ed94-585a-ae6f-9c19bbd0fbd4
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.credential_access, attack.t1539, attack.lateral_movement, attack.t1550.004]
+detection:
+  selection:
+    type: session_use_after_expire
+    detail.meme_reseau_et_navigateur: false
+    sub|exists: true
+  condition: selection
+level: high
+vigie: { cas: DS1, source_unique: true, mode: bloquer, reponse: revoquer_compte }
+---
+title: Session reprise depuis un autre appareil
+name: session_autre_appareil
+id: c4924851-c225-59bc-ab60-b42cf8274031
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.t1550.004]
+detection:
+  selection:
+    type: session_context_change
+    severity: [haut, critique]
+    sub|exists: true
+  condition: selection
+level: high
+vigie: { cas: DS2, source_unique: true, gravite: evenement, reponse: revoquer_compte }
+---
+title: Saisie malveillante depuis un compte de l'admin
+name: saisie_compte_admin
+id: 09c48730-cc14-56a9-9c7d-0296f8d87b08
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.initial_access, attack.t1190]
+detection:
+  selection:
+    type: malicious_input
+    severity: haut
+    sub|exists: true
+  condition: selection
+level: high
+vigie: { cas: DS11, source_unique: true }
+---
+title: Événement critique de Zitadel (emprunt d'identité, administrateur ajouté, politique affaiblie)
+name: zitadel_critique
+id: 97a8320b-c80c-5932-bbc4-5a15460f7e1e
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.privilege_escalation, attack.persistence, attack.t1098]
+detection:
+  selection:
+    composant: zitadel
+    severity: critique
+  condition: selection
+level: critical
+vigie: { cas: DS27, entite: { kind: compte, champ: sub, sinon: zitadel }, source_unique: true }
+---
+title: Configuration de sécurité du site changée
+name: configuration
+id: 086a7bea-3f59-50ff-bc96-2a3943be6291
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion, attack.t1562]
+detection:
+  selection:
+    type: sys_config_changed
+  condition: selection
+level: high
+vigie: { cas: DS9, entite: { kind: site, valeur: configuration }, source_unique: true }
+---
+title: Base du site restaurée
+name: restauration
+id: 4a4be720-c295-5c9d-a99b-2eb0d4058008
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.t1485]
+detection:
+  selection:
+    type: sys_restore
+  condition: selection
+level: high
+vigie: { cas: DS19, entite: { kind: site, valeur: restauration }, source_unique: true }
+---
+title: Donnée personnelle impossible à déchiffrer
+name: dechiffrement
+id: 035d7a1a-2f19-5014-ad05-565436a150d4
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.collection, attack.t1005]
+detection:
+  selection:
+    type: crypto_decrypt_fail
+  condition: selection
+level: high
+vigie: { cas: DS18, entite: { kind: site, valeur: donnees }, source_unique: true }
+---
+title: Lot refusé par la Vigie (signature fausse, lot rejoué)
+name: ingestion_refusee
+id: 57c041ec-cfce-576c-9298-7abf2e8f420c
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion]
+detection:
+  selection:
+    type: vigie_ingestion_refusee
+    severity: haut
+  condition: selection
+level: high
+vigie: { cas: MV11, entite: { kind: vigie, valeur: ingestion }, source_unique: true }
+---
+title: Événements de Zitadel perdus (plus de 20 h sans lecture)
+name: trou_zitadel
+id: c44994ff-9179-52b9-9366-db46d1d72322
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion]
+detection:
+  selection:
+    type: vigie_zitadel_trou
+  condition: selection
+level: medium
+vigie: { cas: DS24, entite: { kind: vigie, valeur: zitadel }, source_unique: true }
+---
+title: Fichier piégé envoyé à l'import
+name: fichier_piege
+id: c703af8e-f0cb-5e46-af9b-340366722403
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.execution, attack.t1204]
+detection:
+  selection:
+    type: upload_rejected
+  condition: selection
+level: high
+vigie: { cas: DS13, source_unique: true }
+---
+title: Comptes « en attente » en rafale (inscription libre réouverte ?)
+name: compte_en_attente
+id: 5ee6b50d-dd01-5bae-a887-20751113a80e
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: authn_login_pending
+  condition: selection
+level: low
+vigie: { cas: DS7, signal: false }
+---
+title: Plus de 3 nouveaux comptes inconnus en 24 h
+name: comptes_en_attente_rafale
+id: 8ac48a39-96bb-58a0-b8d5-ae54c5158ac9
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.initial_access, attack.t1078]
+correlation:
+  type: value_count
+  rules: [compte_en_attente]
+  timespan: 24h
+  condition: { gte: 4, field: sub }
+level: medium
+vigie: { cas: DS7, entite: { kind: site, valeur: connexion }, source_unique: true }
+---
+title: Sauvegarde du site différente de ce qu'il déclare (administrateur non déclaré, déclencheur absent)
+name: controle_roles
+id: 06e2b6dc-d385-53de-87ce-49243dfcc993
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.privilege_escalation, attack.defense_evasion, attack.t1098]
+detection:
+  selection:
+    type: vigie_controle_roles
+    severity: critique
+  condition: selection
+level: critical
+vigie: { cas: DS8, entite: { kind: site, valeur: comptes }, source_unique: true }

@@ -34,6 +34,10 @@ const BACKOFF_MAX = 5 * 60e3;
 const TIMEOUT_MS = 5000;
 const DETAIL_MAX = 2000;
 const KEYS_MAX = 10_000;
+// Résumés par entité (décision D23) : pour ces familles publiques à fort volume, le premier événement d'une adresse part
+// tout de suite, les suivants de la même fenêtre de 5 minutes sont comptés et partent en un seul événement résumé.
+const AGGREGATED = new Set(['malicious_honeypot', 'malicious_excess_404', 'token_guess', 'input_validation_fail', 'authz_blocked', 'excess_rate_limit_exceeded']);
+const AGG_WINDOW = 5 * 60e3;
 // Jamais soumis au budget : ce qu'un attaquant ne doit pas pouvoir faire taire en saturant d'abord le réseau.
 const UNBUDGETED = /^(?:authn_|session_|sensitive_|privilege_|user_|sys_|crypto_|malicious_excess_events$)/;
 
@@ -60,6 +64,7 @@ export function createSecurite({ url, key, storageDir, log, send = null, now = D
   const spoolDir = path.join(storageDir, 'securite-attente');
   const queue = [];
   const budgets = new Map();             // « réseau|type » → { start, count, dropped, told }
+  const aggregates = new Map();          // « adresse|type » → { start, n, last }
   let dropped = 0;                       // perdus (file pleine, tampon plein, refusés par la Vigie)
   let inflight = null;
   let flushTimer = null, beatTimer = null, sweepTimer = null;
@@ -94,6 +99,22 @@ export function createSecurite({ url, key, storageDir, log, send = null, now = D
   function sweep(all = false) {
     const t = now();
     for (const [k, b] of budgets) if (all || t - b.start >= HOUR) close(k, b);
+    for (const [k, a] of aggregates) if (all || t - a.start >= AGG_WINDOW) { aggregates.delete(k); if (a.n) push({ ...a.last, id: crypto.randomUUID(), survenu_a: t, detail: { ...(a.last.detail || {}), agrege: true, nombre: a.n, fenetre_min: AGG_WINDOW / 60e3 } }); }
+  }
+  // Résumé par adresse et par type : true si l'événement part tel quel, false s'il est compté dans le résumé.
+  function aggregate(ev) {
+    if (!AGGREGATED.has(ev.type) || ev.sub || !ev.ip || rank(ev.severity) >= rank('haut')) return true;
+    const k = `${ev.ip}|${ev.type}`;
+    const t = now();
+    const a = aggregates.get(k);
+    if (!a || t - a.start >= AGG_WINDOW) {
+      if (a?.n) push({ ...a.last, id: crypto.randomUUID(), survenu_a: t, detail: { ...(a.last.detail || {}), agrege: true, nombre: a.n, fenetre_min: AGG_WINDOW / 60e3 } });
+      if (aggregates.size >= KEYS_MAX) aggregates.delete(aggregates.keys().next().value);
+      aggregates.set(k, { start: t, n: 0, last: ev });
+      return true;
+    }
+    a.n += 1; a.last = ev;
+    return false;
   }
   function budget(ev) {
     if (!ev.ip_net || ev.sub || UNBUDGETED.test(ev.type) || rank(ev.severity) >= rank('haut')) return true;
@@ -287,7 +308,7 @@ export function createSecurite({ url, key, storageDir, log, send = null, now = D
     emit(type, opts = {}) {
       let ev;
       try { ev = build(type, opts); } catch (err) { log?.error({ err: err.message }, 'Vigie : événement refusé'); return null; }
-      if (!budget(ev)) return null;
+      if (!aggregate(ev) || !budget(ev)) return null;
       push(ev);
       return ev;
     },

@@ -1,0 +1,140 @@
+# Saisies, exploration, siphonage (site public et admin).
+title: Saisie malveillante
+name: saisie
+id: b01a93a1-bd3d-5b54-9cef-c7f1f838746d
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: malicious_input
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Saisies malveillantes en série (scanner)
+name: scanner
+id: 1aa18278-9f11-5826-954d-465c6393b612
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.reconnaissance, attack.t1595.002]
+correlation:
+  type: event_count
+  rules: [saisie]
+  group-by: [ip]
+  timespan: 1h
+  condition: { gte: 5 }
+level: high
+vigie: { cas: DS11, entite: { kind: ip, champ: ip }, points: 4 }
+---
+title: Valeur impossible pour l'interface
+name: valeur_impossible
+id: f15c7ad1-f846-5110-a314-38e5613561ae
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: input_validation_fail
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Valeurs impossibles répétées
+name: valeurs_impossibles_repetees
+id: e3062d3f-8c70-5834-b2b7-c95f2631bb60
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.t1190]
+correlation:
+  type: event_count
+  rules: [valeur_impossible]
+  group-by: [ip]
+  timespan: 10m
+  condition: { gte: 2 }
+level: medium
+vigie: { cas: DS12, entite: { kind: ip, champ: ip }, points: 3 }
+---
+title: Droit refusé ou chose hors portée
+name: droit_refuse
+id: 46a32536-4115-5464-ba44-4c25b8442f37
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: authz_fail
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Exploration des droits (IDOR)
+name: exploration_droits
+id: 8287c15d-dcfe-5779-aa39-7ed3ba6c3a42
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.discovery, attack.t1087]
+correlation:
+  type: event_count
+  rules: [droit_refuse]
+  group-by: [sub]
+  timespan: 10m
+  condition: { gte: 10 }
+level: high
+vigie: { cas: DS10, points: 4 }
+---
+title: Piège déclenché (chemin de scanner, lien caché, champ piège)
+name: piege
+id: 9f46ca91-a681-5c42-b5c3-9c44609a1603
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.reconnaissance, attack.t1595]
+detection:
+  selection:
+    type: malicious_honeypot
+  condition: selection
+level: medium
+vigie: { cas: DS15, entite: { kind: ip, champ: ip }, points: 2 }
+---
+title: Aspiration distribuée (plusieurs adresses d'un même réseau dans les pièges)
+name: aspiration_distribuee
+id: 9164db33-9cf9-5960-9063-c96a4fc86049
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.collection, attack.t1119]
+correlation:
+  type: value_count
+  rules: [piege]
+  group-by: [ip_net]
+  timespan: 1h
+  condition: { gte: 3, field: ip }
+level: medium
+vigie: { cas: DS15, entite: { kind: reseau, champ: ip_net }, points: 4 }
+---
+title: Jeton ou code faux
+name: jeton_faux
+id: 1c6b7ecd-621c-595e-9c53-08d453253675
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: token_guess
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Énumération de jetons et de références
+name: enumeration_jetons
+id: e204f634-23d4-5760-973c-e418b2b778c9
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.credential_access, attack.t1110.001]
+correlation:
+  type: event_count
+  rules: [jeton_faux]
+  group-by: [ip]
+  timespan: 1h
+  condition: { gte: 10 }
+level: medium
+vigie: { cas: DS16, entite: { kind: ip, champ: ip }, points: 3 }

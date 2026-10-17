@@ -180,6 +180,9 @@ services:
       # joignent. Le site l'appelle par son nom sur ce réseau : VIGIE_URL=http://vigie-reception:4100.
       VIGIE_HOST: ${VIGIE_INGEST_IP:-172.29.43.10}
       VIGIE_ZITADEL_KEY_FILE: /secrets/zitadel.json
+      # Sauvegardes du site, en lecture seule : contrôle quotidien des rôles (un site compromis ne réécrit pas une
+      # sauvegarde déjà faite par le conteneur de sauvegarde).
+      VIGIE_SITE_BACKUP_DIR: /sauvegardes-site
     user: "${PUID:-99}:${PGID:-100}"
     # vigie-ingest : le site seul la joint ; nicephos : sortie vers Zitadel (et, plus tard, la console derrière le tunnel).
     networks:
@@ -196,6 +199,12 @@ services:
       - type: bind
         source: ${VIGIE_SECRETS_DIR:-/mnt/cache/appdata/nicephos/vigie-secrets}
         target: /secrets
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${BACKUP_DIR:-/mnt/user/backups/nicephos}
+        target: /sauvegardes-site
         read_only: true
         bind:
           create_host_path: false

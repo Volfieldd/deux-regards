@@ -7,6 +7,8 @@ import { openVigieDb, createStore } from './store.js';
 import { createDecisions, DecisionError } from './decisions.js';
 import { createSwitches } from './interrupteurs.js';
 import { createEngine } from './moteur.js';
+import { createThreats } from './menaces.js';
+import { checkRoles } from './controle-roles.js';
 
 // Secours en ligne de commande (annexe architecture, section 6.4), dans le conteneur :
 //   docker exec nicephos-vigie node vigie/cli.js <commande>
@@ -32,7 +34,9 @@ const HELP = `Commandes :
   regles                                   règles et leur mode
   regle <règle> <arret|observer|alerter|bloquer>
   seuil <ip|reseau|compte|session|appareil> <points>
-  confiance <ajouter|retirer> <ip>         adresse jamais bloquée automatiquement`;
+  confiance <ajouter|retirer> <ip>         adresse jamais bloquée automatiquement
+  menaces                                  état des listes de menaces (Spamhaus DROP, Feodo, Tor)
+  controle                                 contrôle des rôles sur la dernière sauvegarde du site`;
 
 function args(argv) {
   const pos = [], opt = {};
@@ -130,6 +134,16 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         store.setting.set('adresses_confiance', [...list]);
         store.own('vigie_interrupteur', { emetteur: par, detail: { adresse_confiance: rest[0], ip } });
         return `Adresses de confiance : ${[...list].join(', ') || 'aucune'}.`;
+      }
+      case 'menaces': {
+        const st = createThreats({ store, now }).state();
+        return st ? `Listes mises à jour le ${new Date(st.at).toISOString().slice(0, 16).replace('T', ' ')} UTC : ${Object.entries(st).filter(([k]) => k !== 'at').map(([k, v]) => `${k} ${v}`).join(', ')}` : 'Listes jamais téléchargées.';
+      }
+      case 'controle': {
+        if (!config.siteBackupDir) return 'VIGIE_SITE_BACKUP_DIR non défini : contrôle impossible.';
+        store.setting.set('controle_roles_vu', null);
+        const r = checkRoles({ store, siteBackupDir: config.siteBackupDir, now });
+        return r.ok === null ? r.raison : r.ok ? 'Sauvegarde du site conforme : administrateurs déclarés, déclencheurs présents.' : `ÉCART : administrateurs non déclarés ${r.unknownAdmins.join(', ') || '—'} ; déclencheurs absents ${r.missing.join(', ') || '—'}.`;
       }
       default: throw new DecisionError(`commande inconnue : ${cmd}\n${HELP}`);
     }
