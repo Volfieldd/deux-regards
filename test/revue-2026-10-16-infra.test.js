@@ -127,6 +127,8 @@ test('A044, A203 : restauration — site en marche refusé, sessions fermées, a
   erase(photos[0]);
   createSessionStore(db).create({ sub: 'ancien-admin', name: 'Ancien', roles: ['admin'] });
   app.audit.log({ sub: 'admin', name: 'Admin', action: 'POST /admin/photos/:id', target: 'avant' });
+  // Comme avec la Vigie : un déclencheur note les sessions fermées (N6, revue de la phase A).
+  db.exec("CREATE TRIGGER essai_sessions_fermees AFTER DELETE ON sessions BEGIN INSERT OR REPLACE INTO sessions_revoked (id, sub, created_at, expires_at, revoked_at) VALUES (OLD.id, OLD.sub, OLD.created_at, OLD.expires_at, 1); END");
   const first = backup(env);
   assert.equal(first.report.photos, 11);
   // Après l'instantané : une personne et ses photos effacées (droit à l'effacement), puis la sauvegarde suivante
@@ -153,6 +155,9 @@ test('A044, A203 : restauration — site en marche refusé, sessions fermées, a
   const restored = new Database(dbFile, { readonly: true });
   assert.equal(restored.prepare('SELECT COUNT(*) FROM photos').pluck().get(), 11);
   assert.equal(restored.prepare('SELECT COUNT(*) FROM sessions').pluck().get(), 0);        // sessions fermées
+  // Fermées par la restauration, pas volées : rien à signaler à la reconnexion. Restauration notée pour la Vigie.
+  assert.equal(restored.prepare('SELECT COUNT(*) FROM sessions_revoked').pluck().get(), 0);
+  assert.match(restored.prepare("SELECT value FROM settings WHERE key = 'restauree_le'").pluck().get(), /instantane/);
   restored.close();
   assert.ok(!fs.existsSync(`${dbFile}-wal`) && !fs.existsSync(`${dbFile}-shm`));
   // L'original effacé avant l'instantané ne revient pas ; celui que cite l'instantané revient (depuis supprimes/).

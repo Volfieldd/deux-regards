@@ -63,9 +63,10 @@ export function installVigie(app, { config, db, send = null, timers = true }) {
   app.decorate('securite', sec);
 
   // Sessions fermées ou expirées : empreinte, compte et dates, 48 h (un cookie qui revient après a été copié).
-  db.exec(`CREATE TRIGGER IF NOT EXISTS ${SESSION_TRIGGER} AFTER DELETE ON sessions BEGIN
-    INSERT OR REPLACE INTO sessions_revoked (id, sub, created_at, expires_at, revoked_at, ctx_net, ctx_ua)
-    VALUES (OLD.id, OLD.sub, OLD.created_at, OLD.expires_at, CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER), OLD.ctx_net, OLD.ctx_ua);
+  // Posé de nouveau à chaque démarrage (sa définition suit le code).
+  db.exec(`DROP TRIGGER IF EXISTS ${SESSION_TRIGGER}; CREATE TRIGGER ${SESSION_TRIGGER} AFTER DELETE ON sessions BEGIN
+    INSERT OR REPLACE INTO sessions_revoked (id, sub, created_at, expires_at, revoked_at, ctx_net, ctx_ua, ctx_fp)
+    VALUES (OLD.id, OLD.sub, OLD.created_at, OLD.expires_at, CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER), OLD.ctx_net, OLD.ctx_ua, OLD.ctx_fp);
   END`);
   const purgeRevoked = () => db.prepare('DELETE FROM sessions_revoked WHERE revoked_at < ?').run(Date.now() - 48 * 3600e3);
 
@@ -115,12 +116,23 @@ export function installVigie(app, { config, db, send = null, timers = true }) {
   // Le texte de chaque déclencheur est comparé à celui d'origine (retenu au premier démarrage avec la Vigie) : un
   // déclencheur vidé de son effet sous le même nom est signalé comme un absent.
   const triggerSql = () => Object.fromEntries(db.prepare("SELECT name, sql FROM sqlite_master WHERE type = 'trigger'").all().map(t => [t.name, crypto.createHash('sha256').update(t.sql || '').digest('hex').slice(0, 16)]));
+  // Référence des déclencheurs : retenue au premier démarrage, et de nouveau après une migration (le code les a changés).
+  const lastMigration = () => db.prepare('SELECT MAX(name) FROM migrations').pluck().get() || '';
+  const baseline = () => {
+    const ref = settings.get('vigie_declencheurs');
+    if (ref?.migration === lastMigration() && ref.sql) return ref;
+    const fresh = { migration: lastMigration(), sql: triggerSql() };
+    settings.set('vigie_declencheurs', fresh);
+    return fresh;
+  };
   const state = () => {
     const triggers = triggerSql();
-    const known = settings.get('vigie_declencheurs') || {};
+    const known = baseline().sql;
     const watched = [...ACCOUNT_TRIGGERS, SESSION_TRIGGER];
     const missing = watched.filter(n => !triggers[n]);
-    const altered = watched.filter(n => triggers[n] && known[n] && known[n] !== triggers[n]);
+    // Texte comparé pour les déclencheurs des migrations ; celui des sessions, reposé à chaque démarrage, est seulement
+    // attendu présent.
+    const altered = ACCOUNT_TRIGGERS.filter(n => triggers[n] && known[n] && known[n] !== triggers[n]);
     const openTickets = db.prepare('SELECT COUNT(*) FROM account_change_tickets WHERE open = 1').pluck().get();
     const schema = db.prepare("SELECT group_concat(sql, ';') FROM (SELECT sql FROM sqlite_master WHERE tbl_name IN ('accounts', 'account_changes', 'account_change_tickets') ORDER BY name)").pluck().get() || '';
     const admins = app.accounts.list().filter(a => a.status === 'actif' && (a.roles.includes('admin') || a.locked)).map(a => a.sub).sort();
@@ -157,7 +169,7 @@ export function installVigie(app, { config, db, send = null, timers = true }) {
         sec.emit('sys_restore', { emetteur: 'server/db/restore.js', detail: restored });
         settings.set('vigie_restauration_vue', restored);
       }
-      if (!settings.get('vigie_declencheurs')) settings.set('vigie_declencheurs', triggerSql());
+      baseline();
     });
     step('sessions fermées', purgeRevoked);
     step('comptes', scanAccounts);
@@ -201,7 +213,9 @@ export function installVigie(app, { config, db, send = null, timers = true }) {
     if (!hits.length && !tool) return;
     sec.emit('malicious_input', {
       request,
-      severity: request.session ? 'haut' : undefined,
+      // Compte connecté : « haut » pour une saisie dans l'adresse ou le navigateur (fabriquée à la main), « bas » dans un
+      // formulaire (gardé pour l'enquête, sans alerte : un texte de l'admin ne doit pas fatiguer la vigilance).
+      severity: !request.session ? undefined : hits.length && hits.every(h => h.champ.startsWith('body.')) && !tool ? 'bas' : 'haut',
       composant: request.url.startsWith('/admin') || request.url.startsWith('/auth/') ? 'site · admin' : 'site · public',
       emetteur: 'server/securite · saisies',
       // Extrait seulement pour le chemin, l'adresse et le navigateur : un formulaire (message de /bonjour, fiche d'une

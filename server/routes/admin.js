@@ -107,6 +107,7 @@ export default async function adminRoutes(app) {
   // compte n'existe pas pour lui (404). Les listes, elles, sont filtrées dans chaque route.
   const encounterAuthor = app.db.prepare('SELECT author_id FROM encounters WHERE id = ?');
   const personHasOwn = app.db.prepare('SELECT 1 FROM encounters WHERE person_id = ? AND author_id = ? LIMIT 1');
+  const personExists = app.db.prepare('SELECT 1 FROM people WHERE id = ?');
   // Deux contrôles : la chose doit être visible (sinon 404), et la permission de la route doit couvrir son
   // photographe quand elle a une portée (sinon 403) — un compte peut voir toutes les photos (relecteur) sans pouvoir
   // supprimer ou modifier celles des autres (photographe).
@@ -115,14 +116,15 @@ export default async function adminRoutes(app) {
     const perm = request.routeOptions.config?.perm;
     const scoped = perm && PERMISSIONS[perm]?.scoped;
     const id = Number(request.params?.id);
-    let author, visible = true, found = true;
+    // exists : la chose existe (un « hors portée » n'est signalé à la Vigie que pour une chose qui existe).
+    let author, visible = true, found = true, exists = true;
     if (url.startsWith('/admin/photos/:id')) {
       const p = repo.photo(id);
-      found = Boolean(p); author = p?.author_id;
+      found = exists = Boolean(p); author = p?.author_id;
       visible = !p || request.owns('photos.voir', author);
     } else if (url.startsWith('/admin/rencontres/:id')) {
       const e = encounterAuthor.get(id);
-      found = Boolean(e); author = e?.author_id;
+      found = exists = Boolean(e); author = e?.author_id;
       visible = !e || request.owns('personnes.voir', author);
     } else if (url.startsWith('/admin/personnes/:id')) {
       // Une personne : visible si l'une de ses rencontres l'est ; les actions qui la modifient vérifient en plus que
@@ -130,23 +132,26 @@ export default async function adminRoutes(app) {
       const s = request.scope('personnes.voir');
       visible = !s || s.all || Boolean(personHasOwn.get(id, s.authorId));
       found = false;                                                  // pas de contrôle par photographe unique ici
+      exists = Boolean(personExists.get(id));
     } else if (url.startsWith('/admin/sorties/:author')) {
       const a = repo.authors().find(x => x.slug === request.params.author);
       author = a?.id;
       visible = Boolean(a) && request.owns('sorties.voir', a.id);
+      exists = Boolean(a);
     } else if (url.startsWith('/admin/instagram/:id/')) {
       // Un envoi de la file : celui de la photo (portée de instagram.file pour qui la règle sur ses photos seulement).
       const post = app.instagram.post(id);
-      found = Boolean(post); author = post ? repo.photo(post.photo_id)?.author_id : undefined;
+      found = exists = Boolean(post); author = post ? repo.photo(post.photo_id)?.author_id : undefined;
       visible = !post || request.can('instagram.voir') || request.owns('photos.voir', author);
     } else if (url === '/admin/auteurs/:id/qr/:file') {
       author = id;
       visible = request.owns('terrain.cartes', id);
+      exists = repo.authors().some(a => a.id === id);
     } else {
       return;
     }
     if (!visible) {
-      app.securite.emit('authz_fail', { request, emetteur: 'server/routes/admin.js · portée', detail: { raison: 'hors portée', permission: perm ?? null } });
+      if (exists) app.securite.emit('authz_fail', { request, emetteur: 'server/routes/admin.js · portée', detail: { raison: 'hors portée', permission: perm ?? null } });
       reply.callNotFound(); return reply;
     }
     if (found && scoped && author !== undefined && !request.owns(perm, author)) return app.forbid(request, reply);

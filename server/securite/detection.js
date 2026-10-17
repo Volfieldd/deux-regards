@@ -19,12 +19,17 @@ const MAX_LEN = 4000;           // au-delà, seul le début est examiné (texte 
 // Un retour à la ligne est normal dans un formulaire (légende, message) : la famille « journal » ne vaut que pour le
 // chemin et les paramètres d'adresse, où il n'a rien à faire.
 const LINE_SAFE = new Set(['params', 'query']);
+// Dans un formulaire (légende, message, texte en allemand ou en français avec ses guillemets et signes), seules les
+// familles sans ambiguïté sont examinées : un accent grave, « ${…} » ou « $(…) » peuvent être du texte ordinaire et
+// n'ont aucun effet ici (gabarits échappés, aucune commande lancée). Revue du 17 octobre 2026 (N8).
+const FORM_SKIP = new Set(['gabarit', 'commande', 'journal']);
 
 export function scanValue(where, field, value) {
   if (typeof value !== 'string' || value.length < 2) return null;
   const v = value.length > MAX_LEN ? value.slice(0, MAX_LEN) : value;
   for (const [family, re] of FAMILIES) {
     if (family === 'journal' && !LINE_SAFE.has(where)) continue;
+    if (where === 'body' && FORM_SKIP.has(family)) continue;
     if (re.test(v)) return { famille: family, champ: field };
   }
   return null;

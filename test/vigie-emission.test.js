@@ -17,7 +17,7 @@ import { EVENTS } from '../server/securite/vocabulaire.js';
 // Vigie ; sans VIGIE_URL, rien ne change.
 const TOKEN = 'jeton-de-test-0123456789';
 const KEY = 'cle-de-signature-vigie-0123456789abcdef';
-const VIGIE = { VIGIE_URL: 'http://vigie.test:4100', VIGIE_INGEST_KEY: KEY, LOCAL_AUTH_TOKEN: TOKEN };
+const VIGIE = { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, LOCAL_AUTH_TOKEN: TOKEN };
 const UA_MAC = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15';
 const UA_WIN = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';
 const cookiesOf = res => Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
@@ -69,7 +69,7 @@ test('Vigie retirée : déclencheur, sessions fermées, contexte et événements
   const open = async extra => { const config = loadConfig({ ...env, ...extra }); const db = openDb(config.databasePath); migrate(db);
     const app = await buildApp({ config, db, logger: false, vigieOptions: { send: async () => { throw new Error('hors ligne'); }, timers: false }, instagramOptions: { manual: true }, faceOptions: { manual: true, detector: { detect: async () => [] } }, seriesOptions: { manual: true }, describeOptions: { manual: true } });
     await app.ready(); return { app, db }; };
-  let { app, db } = await open({ VIGIE_URL: 'http://vigie.test', VIGIE_INGEST_KEY: KEY });
+  let { app, db } = await open({ VIGIE_URL: 'http://vigie', VIGIE_INGEST_KEY: KEY });
   db.prepare("INSERT INTO sessions (id, sub, csrf, created_at, expires_at, ctx_ip, ctx_ua) VALUES ('h', 's', 'c', 1, 9e15, '1.2.3.4', 'Safari · macOS')").run();
   db.prepare("DELETE FROM sessions WHERE id = 'h'").run();
   assert.equal(db.prepare('SELECT COUNT(*) FROM sessions_revoked').pluck().get(), 1);
@@ -317,7 +317,8 @@ test('détection : motifs sans faux positifs sur des textes ordinaires ; famille
   for (const ok of ["l'aube sur la Seine", 'Aujourd’hui, 3 < 4', 'Prix : 12 $ (soit ~11 €)', 'Rue du Temple / Paris', 'f/2.8 · 1/250 s', '{titre}\n{légende}', 'C:/Photos']) {
     assert.equal(scanValue('body', 'legend', ok), null, ok);
   }
-  assert.equal(scanValue('body', 'legend', '<% it.x %>').famille, 'gabarit');
+  assert.equal(scanValue('query', 'q', '<% it.x %>').famille, 'gabarit');
+  assert.equal(scanValue('body', 'legend', '<% it.x %>'), null, 'dans un formulaire, un gabarit n’est que du texte');
   assert.equal(scanValue('query', 'next', '/a\r\nSet-Cookie: x').famille, 'journal');
   assert.equal(scanValue('body', 'legend', 'ligne 1\nligne 2'), null);
   assert.equal(scanValue('params', 'file', '../../etc/passwd').famille, 'chemin');
@@ -409,11 +410,13 @@ test('revue : numéros du journal jamais réutilisés après la purge, curseur r
 
 test('revue : une saisie de formulaire n’est jamais recopiée (données personnelles), seulement son champ et sa longueur', async t => {
   const c = await withVigie(t);
-  await c.app.inject({ method: 'POST', url: '/bonjour', remoteAddress: '192.0.2.70', payload: { ref: 'J-0042', name: 'Marie Martin', message: 'Bonjour `Marie` 12 rue des Lilas Paris' } });
+  const message = 'Bonjour <script>x</script> Marie, 12 rue des Lilas Paris';
+  await c.app.inject({ method: 'POST', url: '/bonjour', remoteAddress: '192.0.2.70', payload: { ref: 'J-0042', name: 'Marie Martin', message } });
   const v = await c.flush();
   const hit = v.of('malicious_input')[0];
   assert.equal(hit.detail.constats[0].champ, 'body.message');
-  assert.equal(hit.detail.constats[0].longueur, 38);
+  assert.equal(hit.detail.constats[0].longueur, message.length);
+  assert.equal(hit.detail.constats[0].extrait, undefined);
   assert.ok(!JSON.stringify(v.events).includes('Lilas') && !JSON.stringify(v.events).includes('Martin'));
 });
 
@@ -486,4 +489,77 @@ test('revue : un compte mal formé n’empêche pas le démarrage ; session sans
   await c.app.inject({ url: '/admin', cookies: { session: token } });
   v = await c.flush();
   assert.equal(v.of('session_context_change').at(-1).detail.raison, 'session sans contexte, créée hors de la connexion');
+});
+
+// ---------- arbitrages de la revue (17 octobre 2026) ----------
+
+test('N8 : textes ordinaires en allemand et en français, dans un formulaire ou une recherche : aucune alerte', async t => {
+  const c = await withVigie(t);
+  const texts = [
+    'Grüße aus München — „Straße“ & ‚Kölner Dom‘ (ca. 3–4 €), Öffnungszeiten 9–18 Uhr; Maß & Größe: ½ · ß · Ä Ö Ü',
+    '« L’aube », aujourd’hui à 6 h 30 — prix : 12 $ (soit ~11 €) ; voir `Rue du Temple` et ${prix} ou $(ce) ; f/2.8 · 1/250 s',
+    'Ligne 1\nLigne 2 : « Bonjour » ‹ › » « — Zürich/Genève ; 50% #1 @ami',
+  ];
+  for (const message of texts) {
+    await c.app.inject({ method: 'POST', url: '/bonjour', remoteAddress: '192.0.2.80', payload: { ref: 'J-0042', message } });
+    // Un champ de recherche du navigateur ne transmet jamais de retour à la ligne.
+    await c.app.inject({ url: `/de/recherche?q=${encodeURIComponent(message.replace(/\n/g, ' ').slice(0, 60))}`, remoteAddress: '192.0.2.80' });
+  }
+  const v = await c.flush();
+  assert.deepEqual(v.of('malicious_input'), []);
+});
+
+test('N8 : saisie douteuse dans un formulaire de l’admin gardée en « bas » (sans alerte), dans l’adresse en « haut »', async t => {
+  const c = await withVigie(t);
+  const cookies = await c.login();
+  const csrf = c.db.prepare('SELECT csrf FROM sessions').pluck().get();
+  const photo = c.db.prepare('SELECT id FROM photos LIMIT 1').pluck().get();
+  await c.app.inject({ method: 'POST', url: `/admin/photos/${photo}`, cookies, headers: { accept: 'text/html' }, payload: { _csrf: csrf, legend: 'Exemple <script>alert(1)</script>' } });
+  await c.app.inject({ url: '/admin/photos?q=%3Cscript%3E', cookies });
+  const v = await c.flush();
+  assert.deepEqual(v.of('malicious_input').map(e => e.severity), ['bas', 'haut']);
+});
+
+test('N1 : même famille de navigateur, autre empreinte (langues, plateforme) : signalé', async t => {
+  const c = await withVigie(t);
+  const cookies = await c.login(UA_MAC);
+  const h = lang => ({ 'user-agent': UA_MAC, 'accept-language': lang });
+  await c.app.inject({ url: '/admin', cookies, remoteAddress: '203.0.113.7', headers: h('') });
+  let v = await c.flush();
+  assert.equal(v.of('session_context_change').length, 0, 'même empreinte : rien');
+  await c.app.inject({ url: '/admin', cookies, remoteAddress: '203.0.113.7', headers: h('ru-RU,ru;q=0.9') });
+  v = await c.flush();
+  const e = v.of('session_context_change').at(-1);
+  assert.equal(e.severity, 'moyen');
+  assert.equal(e.detail.empreinte_changee, true);
+  await c.app.inject({ url: '/admin', cookies, remoteAddress: '198.51.100.20', headers: h('ru-RU,ru;q=0.9') });
+  v = await c.flush();
+  assert.equal(v.of('session_context_change').at(-1).severity, 'haut', 'autre appareil et autre réseau');
+  assert.match(c.db.prepare('SELECT ctx_fp FROM sessions').pluck().get(), /^[0-9a-f]{16}$/);
+});
+
+test('N2 : VIGIE_URL en clair seulement sur un réseau interne', () => {
+  for (const ok of ['http://vigie:4100', 'http://127.0.0.1:4100', 'http://172.29.42.20:4100', 'http://10.0.0.5', 'http://vigie.internal:4100', 'http://[::1]:4100', 'https://vigie.example.org']) {
+    assert.equal(loadConfig({ VIGIE_URL: ok, VIGIE_INGEST_KEY: KEY }).vigie.url.startsWith(ok.replace(/\/$/, '').slice(0, 10)), true, ok);
+  }
+  for (const bad of ['http://vigie.example.org', 'http://203.0.113.5:4100', 'http://172.32.0.1']) {
+    assert.throws(() => loadConfig({ VIGIE_URL: bad, VIGIE_INGEST_KEY: KEY }), /réseau interne/, bad);
+  }
+});
+
+test('N7 : « hors portée » signalé pour la chose d’un autre, pas pour une chose qui n’existe pas', async t => {
+  const c = await withVigie(t);
+  const jul = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
+  const other = c.db.prepare('SELECT id FROM photos WHERE author_id != ? LIMIT 1').pluck().get(jul);
+  c.app.accounts.ensure({ sub: 'photographe-j', name: 'J', roles: ['photographe'] });
+  c.app.accounts.update(c.app.accounts.bySub('photographe-j').id, { authorId: jul }, 'test');
+  const token = (await import('../server/sessions.js')).createSessionStore(c.db).create({ sub: 'photographe-j', name: 'J', ctx: { net: '127.0.0.0', ua: 'autre · autre', fp: null } });
+  const get = url => c.app.inject({ url, cookies: { session: token }, headers: { accept: 'text/html' } });
+  assert.equal((await get(`/admin/photos/${other}`)).statusCode, 404);
+  assert.equal((await get('/admin/photos/999999')).statusCode, 404);
+  assert.equal((await get('/admin/personnes/999999')).statusCode, 404);
+  const v = await c.flush();
+  const fails = v.of('authz_fail').filter(e => e.detail.raison === 'hors portée');
+  assert.equal(fails.length, 1);
+  assert.equal(fails[0].route, '/admin/photos/:id');
 });

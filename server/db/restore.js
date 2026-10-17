@@ -71,6 +71,9 @@ export function restore(name) {
   let sessions;
   try {
     sessions = db.prepare('DELETE FROM sessions').run().changes;
+    // Sessions fermées par la restauration elle-même : pas des cookies volés (la Vigie ne les signale pas à la
+    // reconnexion). Table absente d'un instantané d'avant la Vigie : rien à faire.
+    try { db.prepare('DELETE FROM sessions_revoked').run(); } catch { /* instantané d'avant la migration 048 */ }
     // Restauration notée dans la base remise en place : le site la signale à la Vigie à son prochain démarrage (une
     // restauration peut ramener un rôle retiré depuis).
     db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('restauree_le', JSON.stringify({ at: Date.now(), instantane: path.basename(snapshot) }));
