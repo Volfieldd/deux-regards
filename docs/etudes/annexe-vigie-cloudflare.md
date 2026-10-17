@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Statut | Étude. Réglages à faire dans le tableau de bord de Cloudflare (phase 0) puis, pour la recopie des blocages, par l'API (phase E). Rien n'est fait. |
+| Statut | Étude. Réglages à faire dans le tableau de bord de Cloudflare (phase 0) puis, pour la recopie des blocages, par l'API (phase E, décision D11 prise le 17 octobre 2026). Rien n'est fait. Les règles R1 et la liste ne servent que si la Vigie est installée (elle est facultative) ; les autres réglages valent pour tout site. |
 | Date | 17 octobre 2026. Limites de l'offre gratuite vérifiées ce jour-là dans la documentation de Cloudflare (sources en fin de document) ; Cloudflare les change souvent : ce qui est marqué « à vérifier » se contrôle dans le tableau de bord avant d'être réglé. |
 | Contexte | Site derrière Cloudflare Tunnel (`cloudflared`), toutes les adresses redirigées vers `https://www.nicephos.art` ([Déploiement](../wiki/Déploiement.md)). Offre **Free**. |
 | Lien | [Architecture de la Vigie](annexe-vigie-architecture.md) |
@@ -46,6 +46,7 @@
 | Speed → Optimization | *Rocket Loader*, *Email Address Obfuscation*, *Mirage* : **non** ; Web Analytics de Cloudflare (injection automatique) : **non** | ils injectent des scripts : la CSP du site les bloquerait, et ce seraient des ressources tierces |
 | Caching → Cache Rules | aucune règle qui mette en cache `/admin`, `/auth`, `/bonjour`, `/pour-vous` (le site les envoie déjà en `no-store`) ; vérifier après tout changement de règle de cache | une page de l'admin en cache partagé serait une fuite |
 | Network | *IPv6* : oui ; *WebSockets* : non (inutiles) | surface réduite |
+| Rules → Redirect Rules | la règle qui renvoie tout vers `www` (`deploy/unraid/README.md`, étape 4.5) doit **exclure la console** : expression `not http.host in {"www.nicephos.art" "vigie.nicephos.art"}` au lieu de `(http.host ne "www.nicephos.art")` ; dans le tunnel, *Public Hostname* `vigie.nicephos.art` → la Vigie (l'enregistrement DNS créé par le tunnel prime sur le `*` de redirection) | sans cela, la console serait redirigée vers le site |
 
 ---
 
@@ -164,7 +165,7 @@ Le site garde ses propres limites (`/auth`, `/bonjour`, signalements) : elles ne
 
 | Besoin | Droit du jeton | Coût |
 |---|---|---|
-| Ajouter et retirer des adresses de la liste `vigie_bloquees` | *Account → Account Filter Lists → Edit* (les listes sont au niveau du compte) | gratuit |
+| Ajouter et retirer des adresses de la liste `vigie_bloquees` | *Account → Account Filter Lists → Edit* (les listes sont au niveau du compte) ; appels : `GET /accounts/{compte}/rules/lists` (trouver la liste), `POST /accounts/{compte}/rules/lists/{liste}/items` (ajouter, avec un commentaire « Vigie #alerte, fin le … »), `DELETE …/items` (retirer), `GET …/items` (rapprochement) ; les ajouts et retraits sont asynchrones : la Vigie suit l'opération (`GET /accounts/{compte}/rules/lists/bulk_operations/{id}`) avant de marquer la décision « recopiée » | gratuit |
 | Passer en mode « I'm Under Attack » depuis la console (mode urgence) | *Zone → Zone Settings → Edit*, sur la seule zone `nicephos.art` | gratuit ; droit large : jeton à part, facultatif |
 | Purger une image du cache après dépublication (déjà dans la feuille de route) | *Zone → Cache Purge → Purge* | gratuit |
 | Lire les événements de sécurité de Cloudflare pour les recouper dans la Vigie | *Zone → Analytics → Read* (API GraphQL) | gratuit ; **à vérifier** : jeux de données et durée accessibles en offre gratuite |

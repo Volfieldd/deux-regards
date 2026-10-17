@@ -6,6 +6,7 @@
 | Date | 17 octobre 2026. Sources consultées ce jour-là. |
 | Demande | « Je veux une instance de base séparée dans un conteneur séparé pour stocker les alertes, et un front séparé qui sera caché derrière le menu. Tout le composant sécu doit être isolé de l'admin. Et audite sécu. On peut même réfléchir à l'intégrer dans Zitadel si ça permet d'améliorer la sécurité. Pour les remontées on privilégie la notification dans la page d'admin mais je veux pouvoir plus tard envoyer un message par un autre canal tant que ça reste gratuit. Je veux une façon simple d'activer et désactiver les détections, alertes et blocages, et un moyen simple de forcer le blocage. […] SQLite sera peut-être en panne de performances […] Propose-moi la meilleure architecture. » |
 | Décisions D1 à D7 | **Validées** le 17 octobre 2026 (« je suis tes suggestions ») : 6 mois, en-têtes de position de Cloudflare, un mois d'observation sauf DS1 et DS8, e-mails aux administrateurs, canal de secours plus tard, `LOG_KEY` à part, double authentification obligatoire chez Zitadel. |
+| Décisions D8 à D12 | **Prises** le 17 octobre 2026 : console sur `vigie.nicephos.art` ; second facteur exigé, compatible Zitadel (section 7.2) ; **Signal** comme canal hors admin (paquet prêt : [`deploy/unraid/signal/`](../../deploy/unraid/signal/README.md)) ; recopie des blocages chez Cloudflare par l'API ; deux administrateurs, droits de la Vigie à quatre rôles (section 5.4). La Vigie est un **composant facultatif** (section 3.3). |
 | Annexe liée | [Cloudflare : configuration gratuite recommandée](annexe-vigie-cloudflare.md) |
 
 Le composant s'appelle ici **la Vigie** (nom de travail : conteneur `vigie`, image `deux-regards-vigie`).
@@ -14,13 +15,16 @@ Le composant s'appelle ici **la Vigie** (nom de travail : conteneur `vigie`, ima
 
 ## En bref
 
-- **Architecture retenue** : un service à part (conteneur `vigie`, même dépôt, image à part), **sa propre base SQLite** dans son propre dossier de l'hôte, **sa propre console web** sur une autre origine (`<sous-domaine>.nicephos.art`), protégée par **trois verrous** : Cloudflare Access (gratuit jusqu'à 50 utilisateurs), une connexion Zitadel propre à la console avec un rôle `securite` tenu **chez Zitadel** (et non dans la base du site), et la double authentification exigée. L'admin du site n'affiche qu'un lien « Sécurité » et un compteur d'alertes.
+- **Composant facultatif** : sans Vigie configurée, le site fonctionne exactement comme aujourd'hui (aucun envoi, aucune consigne, aucune entrée de menu) ; on l'ajoute ou on la retire par une variable et un profil Compose (section 3.3).
+- **Architecture retenue** : un service à part (conteneur `vigie`, même dépôt, image à part), **sa propre base SQLite** dans son propre dossier de l'hôte, **sa propre console web** sur une autre origine (`vigie.nicephos.art`), protégée par **trois verrous** : Cloudflare Access (gratuit jusqu'à 50 utilisateurs), une connexion Zitadel propre à la console dont le rôle est tenu **chez Zitadel** (et non dans la base du site), et la double authentification exigée. L'admin du site n'affiche qu'un lien « Sécurité » et un compteur d'alertes.
+- **Droits de la Vigie** : quatre rôles, Lecteur (`viewer`), Intervenant (`handler`, peut bloquer), Analyste (`analyst`, règle détections et interrupteurs), Administrateur (`admin`, gère les droits) ; **à deux clés** : le plafond vient de Zitadel, l'attribution de la Vigie, le droit effectif est le plus faible des deux (section 5.4).
+- **Origine du signal** : chaque événement et chaque alerte disent de quel composant, de quel émetteur, par quel canal et avec quel degré de confiance vient le signal (section 4.6).
 - **Le site ne peut qu'écrire et lire ses consignes.** Il envoie ses événements à la Vigie (écriture seule, signée) et lit les décisions qui le concernent (adresses bloquées, sessions révoquées, comptes gelés), signées par la Vigie. Il ne peut ni lire, ni modifier, ni effacer une alerte. La Vigie, elle, n'appelle jamais le site : un site compromis ne peut pas effacer ses traces, et une Vigie compromise ne peut pas modifier le site.
 - **SQLite suffit, à condition d'être à part.** Le volume prévu (quelques milliers d'événements par jour, quelques dizaines de milliers un jour de scan) est cent à mille fois sous ce que SQLite écrit sans peine en lots. Le vrai risque n'était pas la vitesse mais **la concurrence avec la base du site** (un seul écrivain à la fois) et **l'isolement** : une base à part dans un conteneur à part règle les deux. PostgreSQL n'apporterait ici qu'un serveur de plus à tenir (section 2).
-- **Zitadel** : la console s'y authentifie, le rôle `securite` y vit, la double authentification y est imposée, et la Vigie lit ses événements d'identité (échecs de mot de passe, facteur retiré, rôle donné, politique affaiblie) avec un compte de service **en lecture seule**. Les alertes ne vont pas dans Zitadel (ce n'est pas un stockage de journaux ; l'offre gratuite garde son journal un jour).
+- **Zitadel** : la console s'y authentifie, le plafond des rôles de la Vigie y vit, la double authentification y est imposée, et la Vigie lit ses événements d'identité (échecs de mot de passe, facteur retiré, rôle donné, politique affaiblie) par l'**API des événements**, disponible avec l'offre gratuite, avec un compte de service **en lecture seule** (`IAM_OWNER_VIEWER`) toutes les minutes : l'offre gratuite ne garde l'historique qu'un jour, la Vigie en fait la copie durable (section 7). Les alertes ne vont pas dans Zitadel.
 - **Interrupteurs** : trois interrupteurs généraux (détection, alertes, blocages automatiques), un mode par règle (arrêt, observer, alerter, bloquer), et des **actions forcées** à un clic : révoquer une session, toutes les sessions d'un compte, geler un compte, bloquer une adresse ou un réseau, verrouiller l'admin. Appliquées par le site en moins de 5 secondes.
-- **Notifications** : dans l'admin d'abord (badge, bandeau, « Aujourd'hui ») ; plus tard, un canal gratuit au choix (e-mail par la boîte existante, ntfy, Telegram, Matrix, Discord), sans aucune donnée personnelle dans le message.
-- **Audit de sécurité** (section 9) : 26 menaces examinées, la conception répond à chacune ; 6 risques résiduels dits.
+- **Notifications** : dans l'admin d'abord (badge, bandeau, « Aujourd'hui ») ; e-mail de secours ; **Signal** ensuite, par une passerelle auto-hébergée (gratuite), sans aucune donnée personnelle dans le message.
+- **Audit de sécurité** (section 9) : 30 menaces examinées, la conception répond à chacune ; 7 risques résiduels dits.
 
 ---
 
@@ -37,6 +41,9 @@ Le composant s'appelle ici **la Vigie** (nom de travail : conteneur `vigie`, ima
 | V7 | Rester dans l'existant : Node 22, Fastify, SQLite, gabarits Eta, pas de framework front, pas de build, aucune ressource tierce dans les pages | `docs/wiki/Développer.md` |
 | V8 | Coût nul ; tout ce qui est payant est signalé | demande |
 | V9 | La Vigie en panne ne fait jamais tomber le site, et ne bloque jamais tout le monde | sûreté |
+| V10 | La Vigie est **facultative** : le site s'installe, tourne et se met à jour sans elle | demande du 17 octobre 2026 |
+| V11 | Droits de la Vigie : Lecteur, Intervenant, Analyste, Administrateur | demande du 17 octobre 2026 |
+| V12 | Chaque alerte dit d'où vient le signal (composant, source) | demande du 17 octobre 2026 |
 
 ---
 
@@ -147,6 +154,24 @@ Dockerfile.vigie      image à part (sans sharp, onnxruntime ni modèles : surfa
 
 Le vocabulaire des événements (`E1` à `E24`, étude principale) est un module partagé ; le site et la Vigie refusent de démarrer sur un type inconnu.
 
+### 3.3 Composant facultatif
+
+Le dépôt est public et sert aussi à d'autres installations : la Vigie s'ajoute, elle n'est jamais exigée.
+
+| | Sans Vigie (par défaut) | Avec Vigie |
+|---|---|---|
+| Réglage du site | `VIGIE_URL` vide | `VIGIE_URL=http://vigie:4100`, `VIGIE_INGEST_KEY`, `VIGIE_DECISIONS_PUBKEY` (le site refuse de démarrer si l'une manque quand `VIGIE_URL` est rempli) |
+| Compose | `docker compose up -d` : rien ne change | `docker compose --profile vigie up -d` (conteneurs `vigie` et `vigie-backup`, réseau `vigie-ingest`) ; Signal : pile à part, facultative elle aussi |
+| Événements | **aucun envoi, aucun tampon** : le module `server/securite/` n'est pas chargé | envoyés à la Vigie |
+| Décisions | aucune ; aucun crochet ajouté aux requêtes | appliquées (section 4.2) |
+| Admin | ni lien « Sécurité », ni badge, ni ligne dans « Aujourd'hui » ; permission `securite.voir` masquée dans **Comptes et rôles** | lien, badge, bandeau |
+| Ce qui reste | toutes les protections actuelles (journal d'audit, limites de débit, permissions, CSRF, CSP…) ; les déclencheurs de `accounts` (quelques lignes par mois, utiles à une Vigie ajoutée plus tard) | idem |
+| Confidentialité | texte actuel de `/confidentialite` | paragraphe sur les journaux de sécurité ajouté **seulement** quand la Vigie est configurée (`server/privacy.js` le lit dans la configuration) |
+
+Retirer la Vigie : vider `VIGIE_URL` et redémarrer le site ; il oublie les décisions reçues (le fichier de cache est effacé) et l'admin redevient celui d'aujourd'hui. Les données de la Vigie restent dans son dossier jusqu'à ce que vous l'effaciez.
+
+Tests : la suite du site tourne **dans les deux configurations** (sans Vigie, et avec une Vigie simulée), pour qu'aucune évolution ne la rende obligatoire par accident.
+
 ---
 
 ## 4. Flux
@@ -195,13 +220,36 @@ Un site compromis pourrait masquer ce bandeau : c'est pourquoi la Vigie a ses pr
 
 Voir section 7.
 
+### 4.6 Origine du signal
+
+Chaque événement porte un bloc `origine`, rempli par qui le produit **et complété par la Vigie** à la réception (le site ne peut pas se faire passer pour Zitadel ou pour un contrôle de la Vigie : le canal est fixé par la Vigie selon la porte par laquelle l'événement est entré).
+
+| Champ | Valeurs | Rempli par |
+|---|---|---|
+| `composant` | `site · public`, `site · admin`, `site · connexion`, `site · système`, `zitadel`, `cloudflare`, `vigie · contrôle` (rôles, chaîne, battement), `vigie · console` (actions des intervenants) | l'émetteur, vérifié par la Vigie (un lot reçu par l'ingestion ne peut porter que `site · …`) |
+| `emetteur` | module et point précis : `server/auth.js · retour OIDC`, `server/routes/admin.js · portée`, `vigie · contrôle des sauvegardes`, `zitadel · API des événements` | l'émetteur |
+| `canal` | `ingestion signée`, `API Zitadel`, `API Cloudflare`, `sauvegarde du site`, `interne` | **la Vigie seule** |
+| `confiance` | `constaté` (vu par la Vigie elle-même : contrôles, Zitadel, Cloudflare) ou `rapporté` (dit par le site) | **la Vigie seule** |
+| `reference` | identifiant d'origine : `req_id` du site, séquence et agrégat de l'événement Zitadel, `Ray ID` de Cloudflare | l'émetteur |
+| `survenu_a` / `recu_a` | date de l'événement à la source / date d'arrivée dans la Vigie (écart affiché s'il dépasse 1 min : envoi en retard, tampon) | émetteur / Vigie |
+
+Dans la **fiche d'une alerte**, un encadré « D'où vient le signal » dit :
+
+- la **règle** qui l'a ouverte (identifiant, version, mode, seuil franchi) ;
+- les **sources** des événements qui l'ont déclenchée, regroupées : « 3 événements `site · connexion` (`server/auth.js · retour OIDC`, rapportés par le site), 1 événement `zitadel` (`user.human.password.check.failed`, constaté par l'API, séquence 81244) » ;
+- pour chaque événement, sa référence d'origine, pour le retrouver dans les journaux du site (même `req_id`), dans la console Zitadel ou dans les événements de sécurité de Cloudflare (même `Ray ID`).
+
+Dans la **liste des alertes**, une colonne « Source » montre le composant principal ; filtres par composant et par confiance. Dans les **notifications** (admin, e-mail, Signal) : le composant et l'émetteur, jamais l'adresse ni le compte (« Source : contrôle des sauvegardes (Vigie) »).
+
+Une alerte appuyée **uniquement** sur des événements `rapporté` le dit (« signalé par le site seul ») : si le site est compromis (MV11), c'est la confiance à lui accorder.
+
 ---
 
 ## 5. Console
 
 ### 5.1 Où et comment on y arrive
 
-- Adresse : un sous-domaine dédié, non devinable (par exemple `veille-7k2.nicephos.art`, `D8`), publié par le **même tunnel** vers `vigie:4200`. Le certificat universel de Cloudflare couvre `*.nicephos.art` : le nom n'apparaît pas dans les journaux publics de certificats.
+- Adresse : **`vigie.nicephos.art`** (`D8`), publiée par le **même tunnel** vers `vigie:4200`. Le nom se devine, sans conséquence : rien n'y répond sans Cloudflare Access. La règle de redirection de Cloudflare qui envoie tous les autres noms vers `www` doit l'exclure (annexe Cloudflare, section 2).
 - **Autre origine que l'admin** : une faille XSS dans l'admin ne peut ni lire la console, ni agir en son nom (politique de même origine) ; les cookies ne sont pas partagés.
 - Lien « Sécurité » dans le menu de l'admin, montré aux seuls comptes `securite.voir` : il ouvre la console dans un nouvel onglet. Aucun lien ailleurs ; `robots.txt` et `X-Robots-Tag: noindex` de toute façon.
 
@@ -211,9 +259,9 @@ Voir section 7.
 |---|---|---|
 | **Cloudflare Access** | Application Access sur le sous-domaine ; politique : les adresses e-mail des administrateurs ; fournisseur d'identité : Zitadel (OIDC générique), code à usage unique par e-mail en secours ; session Access 8 h. Rien n'atteint la Vigie sans être passé par là | gratuit jusqu'à 50 utilisateurs |
 | **Jeton Access vérifié par la Vigie** | Chaque requête porte `Cf-Access-Jwt-Assertion` ; la Vigie vérifie signature (clés publiques de l'équipe Access), audience (étiquette de l'application) et expiration. Sans lui : 403. Ferme le passage direct par le réseau `edge` | gratuit |
-| **Connexion Zitadel propre à la console** | Application OIDC « Vigie » distincte de celle du site ; accès seulement avec le rôle de projet `securite` **donné dans Zitadel** ; double authentification exigée (contrôle de la revendication `amr` du jeton, `D9`) ; session 1 h, 15 min sans activité ; ré-authentification (`max_age=300`) avant toute action forcée et tout changement d'interrupteur | gratuit (offre gratuite de Zitadel : 100 utilisateurs actifs par jour) |
+| **Connexion Zitadel propre à la console** | Application OIDC « Vigie » dans un projet Zitadel « Vigie » distinct de celui du site ; accès seulement avec l'un des rôles de projet `vigie.viewer`, `vigie.handler`, `vigie.analyst`, `vigie.admin` **donné dans Zitadel** (section 5.4) ; double authentification exigée (`amr` du jeton contient `mfa`, `D9`) ; session 1 h, 15 min sans activité ; ré-authentification (`max_age=300`) avant toute action forcée et tout changement d'interrupteur | gratuit (offre gratuite de Zitadel : 100 utilisateurs actifs par jour) |
 
-Pourquoi le rôle `securite` vit chez Zitadel et pas dans la base du site : quelqu'un qui obtient le rôle Administrateur du site (faille, injection, `ADMIN_SUBS`) **n'obtient pas la console**. Il faut en plus un compte Zitadel avec ce rôle et son second facteur. C'est la séparation demandée en V3.
+Pourquoi le plafond des droits vit chez Zitadel et pas dans la base du site : quelqu'un qui obtient le rôle Administrateur du site (faille, injection, `ADMIN_SUBS`) **n'obtient pas la console**. Il faut en plus un compte Zitadel avec un rôle `vigie.*` et son second facteur. C'est la séparation demandée en V3. Dans l'admin du site, la permission `securite.voir` ne sert qu'à montrer le lien et le badge.
 
 ### 5.3 Écrans
 
@@ -223,6 +271,34 @@ Les écrans `EC1` à `EC5` de l'étude principale, dans la console, avec en plus
 - **Actions forcées** (section 6.3) depuis la vue d'ensemble, la fiche d'une alerte, la fiche d'un compte ou d'une adresse ;
 - **Décisions en cours** : tout ce que le site applique, avec qui l'a décidé, pourquoi, jusqu'à quand, « Lever » ;
 - **Santé** : dernier battement du site, file d'attente du site, dernière lecture de Zitadel, dernier contrôle des rôles, état de la chaîne, place sur le disque.
+
+### 5.4 Droits dans la Vigie
+
+Quatre rôles, chacun comprend le précédent :
+
+| Action | Lecteur `viewer` | Intervenant `handler` | Analyste `analyst` | Administrateur `admin` |
+|---|---|---|---|---|
+| Voir alertes, événements, décisions, santé, origine du signal | ✓ | ✓ | ✓ | ✓ |
+| Voir les adresses complètes | — (tronquées /24, /48) | ✓ | ✓ | ✓ |
+| Acquitter, classer une alerte, ajouter une note | — | ✓ | ✓ | ✓ |
+| Actions forcées : révoquer, geler, bloquer, lever, verrouiller l'admin | — | ✓ | ✓ | ✓ |
+| Exporter les événements (CSV) | — | — | ✓ | ✓ |
+| Interrupteurs généraux, mode et seuils des règles, exceptions | — | — | ✓ | ✓ |
+| Vérifier la chaîne, tester un canal, relancer la synchronisation Cloudflare | — | — | ✓ | ✓ |
+| Gérer les droits de la Vigie, les destinataires des canaux, les adresses de confiance | — | — | — | ✓ |
+
+**Deux clés.** Le droit effectif d'une personne est **le plus faible** de :
+
+1. son **plafond**, lu à chaque connexion dans la revendication de rôles de Zitadel (`urn:zitadel:iam:org:project:roles`, projet « Vigie ») : sans rôle `vigie.*`, pas d'entrée ; c'est ce que vous gérez « en dehors du site » ;
+2. son **attribution** dans la Vigie, réglée par un Administrateur de la Vigie ; une personne qui arrive avec un plafond mais sans attribution est **Lectrice**.
+
+Pourquoi deux clés : une Vigie compromise ne peut pas donner plus que Zitadel n'accorde, et un rôle ajouté par erreur (ou par un attaquant) dans Zitadel ne donne que la lecture tant qu'un Administrateur de la Vigie ne l'a pas confirmé. Pour tout gérer dans Zitadel, l'attribution peut suivre le plafond (`VIGIE_ROLES=zitadel` : une seule clé ; par défaut `deux-cles`).
+
+Garde-fous : amorce par `VIGIE_ADMIN_SUBS` (comme `ADMIN_SUBS` du site) ; au moins un Administrateur ; personne ne change son propre rôle ; tout changement de droits est journalisé et envoyé aux Administrateurs de la Vigie (règle **DS29**, haut) ; une connexion refusée à la console (sans rôle, sans second facteur, jeton Access absent) est un événement (règle **DS30**, moyen, haut au-delà de 3 en 1 h).
+
+Au départ (`D12`) : les deux administrateurs du site, plafond `vigie.admin` dans Zitadel et Administrateurs dans la Vigie.
+
+### 5.5 Présentation
 
 Gabarits Eta rendus côté serveur, CSS propre à la console (jetons de couleur repris de l'admin pour la cohérence), un script local minimal (rafraîchissement de la vue d'ensemble), CSP stricte sans `unsafe-inline`, `frame-ancestors 'none'`. Utilisable sur iPhone. Maquettes et jury avant le code, comme pour l'admin.
 
@@ -276,10 +352,10 @@ Et côté site, en dernier recours : `VIGIE_APPLIQUER=0` dans le `.env` du site 
 
 | Apport | Comment | Gain |
 |---|---|---|
-| Authentification de la console | application OIDC à part, rôle de projet `securite` | séparation des droits du site et de la console (V3) |
+| Authentification de la console | projet et application OIDC à part, rôles `vigie.viewer` à `vigie.admin` | séparation des droits du site et de la console (V3) ; plafond des droits (section 5.4) |
 | Double authentification | politique de connexion de l'organisation : facteur obligatoire (y compris après Google, `D9`) ; la Vigie vérifie `amr` | un vol de mot de passe ne suffit plus |
-| Événements d'identité | compte de service Zitadel **en lecture seule**, lecture des événements par l'API toutes les minutes (l'offre gratuite ne garde son journal qu'**un jour** : la Vigie en fait la copie durable) | voit enfin ce que le site ne voit pas : mots de passe faux, facteurs retirés, rôles donnés |
-| Nouvelles détections | **DS25** rafale d'échecs de mot de passe ou de second facteur sur un compte de l'admin ; **DS26** second facteur retiré ou remplacé ; **DS27** rôle `admin` ou `securite` donné dans Zitadel ; **DS28** politique affaiblie (facteur non obligatoire, inscription libre, nouveau fournisseur d'identité) | haut, critique pour DS27 et DS28 |
+| Événements d'identité | API des événements, compte de service **en lecture seule**, toutes les minutes (section 7.1) | voit enfin ce que le site ne voit pas : mots de passe faux, facteurs retirés, rôles donnés |
+| Nouvelles détections | **DS25** rafale d'échecs de mot de passe ou de second facteur sur un compte de l'admin ; **DS26** second facteur retiré ou remplacé ; **DS27** rôle `admin` du site ou `vigie.*` donné dans Zitadel, ou administrateur de l'instance ajouté ; **DS28** politique affaiblie (facteur non obligatoire, inscription libre, nouveau fournisseur d'identité) | haut, critique pour DS27 et DS28 |
 
 Ce qu'on ne fait **pas** avec Zitadel :
 
@@ -287,22 +363,54 @@ Ce qu'on ne fait **pas** avec Zitadel :
 - donner à la Vigie un compte de service capable de **modifier** les utilisateurs Zitadel (gérant des utilisateurs) : une Vigie compromise deviendrait une porte de prise de compte. Le gel d'un compte se fait côté site (suffisant : c'est le site qu'on protège) ; la console offre un lien direct vers l'utilisateur dans la console Zitadel pour le bloquer à la main. À reconsidérer seulement si Zitadel propose un droit limité au blocage ;
 - recevoir les **Actions v2** de Zitadel (webhooks signés par HMAC sur ses événements) : ce serait plus rapide que la lecture par minute, mais il faudrait exposer une route d'entrée de la Vigie sur Internet. Option de la phase D, sur une route à part, sans Access, vérifiée par la signature de Zitadel.
 
-À vérifier sur l'instance (`D9`) : noms exacts des événements et du rôle de lecture du compte de service, contenu de `amr` après une connexion par Google, réglage « facteur obligatoire aussi après un fournisseur externe ».
+### 7.1 Récupérer les événements de Zitadel Cloud (offre gratuite)
+
+**Oui, c'est possible gratuitement.** Zitadel expose une **API des événements** (`POST /admin/v1/events/_search`, API d'administration) qui rend son journal d'événements, filtrable par type, agrégat, date, séquence et auteur. Elle exige un compte ayant le rôle d'administrateur d'instance `IAM_OWNER_VIEWER` (lecture seule) ou `IAM_OWNER` ; sur Zitadel Cloud, l'instance est la vôtre : vous pouvez donner ce rôle. Seule limite de l'offre gratuite : l'**historique n'est gardé qu'un jour** (deux semaines en Pro, payant). D'où une lecture fréquente et une copie durable dans la Vigie.
+
+Mise en place (phase 0, dans la console Zitadel) :
+
+1. **Utilisateur de service** (*Service User*) « vigie-lecture », authentification par **clé privée JWT** (*JSON key*, plutôt qu'un jeton personnel : la clé ne circule jamais, chaque jeton d'accès dure une heure).
+2. Lui donner, au niveau de l'**instance** (*Default settings → Managers*), le rôle **`IAM_OWNER_VIEWER`**, rien d'autre.
+3. Télécharger la clé JSON ; elle ira dans le `.env` de la Vigie (`VIGIE_ZITADEL_KEY_FILE`), jamais ailleurs.
+4. Lister les types d'événements de votre instance (`POST /admin/v1/events/types/_search`) et me transmettre la liste : je fige celle que lit la Vigie (les noms changent d'une version de Zitadel à l'autre).
+
+Lecture par la Vigie :
+
+- toutes les minutes, `events/_search` avec `asc: true`, les types retenus, et pour reprise la dernière **séquence** lue (repli : la date de création) ; dédoublonnage par agrégat et séquence ;
+- types visés (noms d'après la documentation, à confirmer par l'étape 4) : échecs de vérification (`user.human.password.check.failed`, `user.human.mfa.otp.check.failed`, `user.human.mfa.u2f.token.check.failed`, `user.human.passwordless.token.check.failed`), sessions (`oidc_session.added`), verrouillage et désactivation d'utilisateur, ajout ou retrait de facteurs, changement de mot de passe ou d'e-mail, **attribution de rôles** (`user.grant.*`), ajout de **gestionnaires** d'instance ou d'organisation, changements de **politique de connexion** et de **fournisseurs d'identité**, clés et jetons ajoutés à des utilisateurs de service ;
+- chaque événement entre avec l'origine `zitadel · API des événements`, confiance `constaté`, référence = séquence et agrégat ;
+- **trou** : si la Vigie a été arrêtée plus de 20 h, ou si l'événement le plus ancien rendu est postérieur à la dernière séquence connue, alerte « événements Zitadel perdus » (haut), visible dans la santé.
+
+Ce que la lecture apporte : DS25 à DS28 ; le **voyage impossible** (`DS3`) enrichi des connexions Zitadel même quand le site n'est pas ouvert ; la mémoire des rôles (section 4.4) recoupée avec les attributions faites dans Zitadel.
+
+Option plus rapide (phase E) : les **Actions v2** de Zitadel (incluses dans l'offre gratuite, « custom workflows ») poussent les événements choisis vers une adresse, signés par HMAC. Il faudrait ouvrir sur `vigie.nicephos.art` une route d'entrée exemptée d'Access, vérifiée par la signature de Zitadel. Gain : quelques secondes au lieu d'une minute. La lecture par l'API reste nécessaire pour combler les trous.
+
+À garder en tête : `IAM_OWNER_VIEWER` voit **tous** les utilisateurs et réglages de l'instance (noms, e-mails). La clé est donc sensible (MV29).
+
+### 7.2 Second facteur : compatibilité avec Zitadel (`D9`)
+
+Compatible. Dans la politique de connexion de l'organisation (ou de l'instance) : **Force MFA** activé, et **« Force MFA for local authenticated users only » désactivé** : Zitadel demande alors son second facteur à tous, y compris après « Continuer avec Google ». Zitadel indique les méthodes utilisées dans la revendication `amr` du jeton d'identité (RFC 8176 : `pwd`, `mfa`…) ; la console exige `mfa` et refuse sinon, avec un message qui renvoie au réglage. Réglage lisible par l'API (`/v2/settings/login`, champs `forceMfa` et `forceMfaLocalOnly`) ; un passage à « non obligatoire » déclenche `DS28`.
+
+À vérifier à la phase 0 : le contenu exact de `amr` après une connexion Google suivie du second facteur (essai réel, jeton décodé).
+
+Pourquoi c'est important : une faille corrigée de Zitadel (CVE-2026-85056, connexion « Login V2 », versions 4.0.0 à 4.16.1) permettait de réutiliser une session sans repasser le second facteur **quand celui-ci n'était pas imposé** par la politique. Zitadel Cloud est mis à jour par l'éditeur ; imposer le facteur ferme ce genre de cas.
 
 ---
 
-## 8. Autres canaux de notification (plus tard)
+## 8. Autres canaux de notification
+
+**Choix (`D10`) : Signal**, par une passerelle auto-hébergée (`signal-cli-rest-api`, gratuite) dans sa propre pile Compose, sur un réseau interne que seule la Vigie rejoint. Le paquet de déploiement et la marche à suivre (numéro, enregistrement, PIN, groupe « Vigie Nicephos », essai) sont prêts : [`deploy/unraid/signal/`](../../deploy/unraid/signal/README.md). Le seul coût possible est le numéro : la ligne fixe de la box (vérification par appel vocal) le rend gratuit. L'e-mail reste le canal de secours si Signal échoue. Les autres canaux ci-dessous restent possibles par la même interface.
 
 Une interface commune `notify/` : chaque canal reçoit le même message court, **sans adresse, sans compte, sans donnée personnelle** : « Vigie : 1 alerte critique, Rôle donné hors de l'application, 14 h 02 » et le lien de la console (qui exige toujours Access et Zitadel).
 
 | Canal | Coût | Sur le téléphone | Remarque |
 |---|---|---|---|
 | E-mail (boîte existante, `SMTP_URL`) | gratuit | oui | dès la phase C pour haut et critique ; déjà en place pour les relances RGPD |
-| **ntfy** (serveur public ntfy.sh, ou auto-hébergé sur Unraid) | gratuit | oui, application iOS et Android | **recommandé** : un simple POST HTTP ; sujet au nom long et aléatoire ou jeton d'accès ; sur iOS, la notification passe par le serveur public de ntfy pour atteindre Apple |
+| ntfy (serveur public ntfy.sh, ou auto-hébergé sur Unraid) | gratuit | oui, application iOS et Android | alternative : un simple POST HTTP ; sujet au nom long et aléatoire ou jeton d'accès ; sur iOS, la notification passe par le serveur public de ntfy pour atteindre Apple |
 | Telegram (robot) | gratuit | oui | messages chez Telegram (pas chiffrés de bout en bout pour un robot) |
 | Matrix (Element) | gratuit | oui | chiffrement possible, réglage plus long |
 | Discord (webhook) | gratuit | oui | le plus simple à brancher, chez un tiers |
-| Signal (`signal-cli`) | gratuit | oui | numéro de téléphone dédié nécessaire, conteneur de plus |
+| **Signal** (`signal-cli-rest-api`) | gratuit (numéro : ligne fixe de la box ; une SIM prépayée est **payante**) | oui | **retenu** ; chiffré de bout en bout ; conteneur de plus, sans port publié |
 | Pushover | **payant** (licence unique par plateforme) | oui | signalé, non retenu |
 | SMS | **payant** | oui | signalé, non retenu |
 
@@ -318,7 +426,7 @@ Modèle STRIDE, menaces numérotées `MV`. Gravité de la menace avant mesures ;
 
 | Id | Menace | Mesures | Résiduel |
 |---|---|---|---|
-| MV1 | Trouver et attaquer la console | sous-domaine non devinable, absent des journaux de certificats ; Cloudflare Access devant ; jeton Access vérifié par la Vigie ; connexion Zitadel, rôle `securite`, second facteur | faible |
+| MV1 | Trouver et attaquer la console | Cloudflare Access devant (le nom `vigie.nicephos.art` se devine, sans effet) ; jeton Access vérifié par la Vigie ; connexion Zitadel, rôle `vigie.*`, second facteur | faible |
 | MV2 | Contourner Access en joignant directement l'origine | aucun port de la Vigie publié sur l'hôte ; seul `cloudflared` y mène ; jeton Access exigé à chaque requête | faible |
 | MV3 | XSS stockée : une saisie publique malveillante s'exécute dans la console quand l'administrateur la lit | tout est échappé (Eta `<%=`), saisies suspectes neutralisées et tronquées à l'écriture, affichées en texte ; CSP stricte sans `unsafe-inline` ; aucun `innerHTML` dans le script de la console ; test dédié avec les charges du `DS11` | faible |
 | MV4 | CSRF sur la console (lever un blocage, éteindre les blocages) | cookie `__Host-`, `SameSite=Strict`, jeton CSRF, vérification de `Origin`, ré-authentification avant les actions sensibles | faible |
@@ -335,7 +443,7 @@ Modèle STRIDE, menaces numérotées `MV`. Gravité de la menace avant mesures ;
 | MV10 | Faire taire le site (ne plus rien envoyer) | battement par minute, alerte `DS24` après 3 min | faible |
 | MV11 | Envoyer de faux événements rassurants ou du bruit (il a `VIGIE_INGEST_KEY`) | il ne peut qu'**ajouter** ; les contrôles indépendants (sauvegardes, Zitadel, Cloudflare) ne passent pas par lui ; le bruit massif est borné (MV6) | moyen : pendant la compromission, les événements venant du site ne sont plus fiables ; d'où les contrôles indépendants |
 | MV12 | Ignorer les décisions (ne plus bloquer) | les blocages recopiés chez Cloudflare (phase D) s'appliquent en amont ; la Vigie voit que les requêtes d'une adresse bloquée continuent d'arriver (événements) | moyen sans Cloudflare, faible avec |
-| MV13 | Se donner le rôle Administrateur du site puis la console | la console exige le rôle `securite` chez Zitadel et le second facteur : le rôle du site ne donne rien | nul |
+| MV13 | Se donner le rôle Administrateur du site puis la console | la console exige un rôle `vigie.*` chez Zitadel, l'attribution dans la Vigie et le second facteur : le rôle du site ne donne rien | nul |
 | MV14 | Supprimer les déclencheurs et changer un rôle | contrôle quotidien sur la sauvegarde (section 4.4) et mémoire des rôles de la Vigie | faible (délai d'un jour au plus ; l'événement du site, s'il arrive, alerte tout de suite) |
 | MV15 | Lire la clé publique des décisions et forger des décisions | une clé publique ne permet pas de signer | nul |
 | MV16 | Atteindre la console par le réseau `edge` | jeton Access exigé et vérifié | faible |
@@ -351,6 +459,11 @@ Modèle STRIDE, menaces numérotées `MV`. Gravité de la menace avant mesures ;
 | MV21 | Prendre des comptes Zitadel | compte de service en **lecture seule** | faible |
 | MV22 | Abuser du jeton Cloudflare (phase D) | jeton limité à l'édition des listes de règles de l'**unique** zone, sans DNS, sans tunnel, sans réglages ; filtré par adresse source si possible | faible |
 | MV23 | Lire la base du site depuis les sauvegardes montées | les données personnelles y sont chiffrées par `DATA_KEY`, que la Vigie n'a pas ; elle ne lit que `accounts` et `sqlite_master` | faible |
+
+| MV27 | Joindre la passerelle Signal (API sans authentification) pour envoyer de faux messages ou lire le compte | aucun port publié ; réseau `nicephos-vigie-signal` interne, où seule la Vigie est ; le site n'y est pas | faible |
+| MV28 | Se donner un rôle dans la Vigie | deux clés (section 5.4) : il faut le plafond Zitadel et l'attribution par un Administrateur de la Vigie ; DS29 prévient les Administrateurs | faible |
+| MV29 | Voler la clé du compte de service Zitadel (`IAM_OWNER_VIEWER`) | clé dans le seul `.env` de la Vigie ; lecture seule (aucune modification possible) mais vue sur tous les utilisateurs de l'instance ; rotation annuelle ; utilisations de la clé visibles dans les événements Zitadel | moyen |
+| MV30 | Couper la Vigie sans bruit (vider `VIGIE_URL` côté site) | demande l'accès à l'hôte ; la Vigie voit cesser les battements (`DS24`) et prévient par Signal et e-mail | faible |
 
 ### 9.4 Exploitation et chaîne d'approvisionnement
 
@@ -368,6 +481,7 @@ Modèle STRIDE, menaces numérotées `MV`. Gravité de la menace avant mesures ;
 4. **MV18** : la Vigie concentre des adresses complètes ; sa compromission les expose (6 mois au plus).
 5. **MV14** : le contrôle indépendant des rôles a jusqu'à 24 h de retard.
 6. **Zitadel Cloud et Cloudflare** restent des tiers de confiance : une compromission de l'un d'eux est hors de portée de la Vigie (elle en verrait seulement les effets).
+7. **MV29** : la clé de lecture de Zitadel donne la vue sur tous les comptes de l'instance.
 
 ---
 
@@ -377,24 +491,27 @@ Une branche et une PR par phase, revue et audit avant la suivante.
 
 | Phase | Contenu |
 |---|---|
-| **0. Hors code** | Zitadel : second facteur obligatoire (D7), projet ou application « Vigie », rôle `securite`, compte de service en lecture seule ; Cloudflare : réglages gratuits de l'annexe Cloudflare (sections 1 à 4), en-têtes de position, application Access sur le sous-domaine ; `TRUST_PROXY` fixé |
-| **A. Site : émission** | `server/securite/` : vocabulaire, événements E1 à E24, contexte des sessions, déclencheurs, file et tampon, battement, signature ; sans Vigie, le site garde ses événements en tampon (aucun changement visible). Confidentialité et registre RGPD mis à jour |
-| **B. Vigie : socle** | conteneur, réseaux, ingestion, base, chaîne, agrégats, purge, sauvegarde ; décisions signées et leur application par le site ; interrupteurs ; secours en ligne de commande |
-| **C. Vigie : règles** | moteur, DS1 à DS24 puis DS25 à DS28 (Zitadel), contrôle des rôles sur les sauvegardes ; un test par règle (attaque détectée, parcours normal non alerté) |
-| **D. Console et notifications** | maquettes et jury, console (EC1 à EC5, interrupteurs, actions forcées, décisions, santé), résumé dans l'admin, e-mail |
-| **E. Compléments** | recopie des blocages chez Cloudflare par l'API ; canal ntfy (ou autre) ; Actions v2 de Zitadel ; CrowdSec en option ; jeu d'attaques rejouable contre l'instance de démonstration |
+| **0. Hors code** | Zitadel : second facteur obligatoire pour tous (7.2), projet « Vigie » et ses quatre rôles, compte de service `IAM_OWNER_VIEWER` et liste des types d'événements (7.1) ; Cloudflare : réglages gratuits de l'annexe Cloudflare, en-têtes de position, redirection qui exclut `vigie.nicephos.art`, application Access ; `TRUST_PROXY` fixé ; passerelle Signal enregistrée et essayée (`deploy/unraid/signal/`) |
+| **A. Site : émission** | `server/securite/` : vocabulaire, événements E1 à E24, contexte des sessions, déclencheurs, file et tampon, battement, signature ; **tout est inactif tant que `VIGIE_URL` est vide** (section 3.3), et la suite de tests tourne dans les deux configurations. Texte de confidentialité conditionnel, registre RGPD |
+| **B. Vigie : socle** | conteneur (profil Compose `vigie`), réseaux, ingestion, base, origine du signal, chaîne, agrégats, purge, sauvegarde ; décisions signées et leur application par le site ; interrupteurs ; secours en ligne de commande ; lecture des événements Zitadel |
+| **C. Vigie : règles** | moteur, DS1 à DS24 puis DS25 à DS30 (Zitadel, droits de la Vigie), contrôle des rôles sur les sauvegardes ; un test par règle (attaque détectée, parcours normal non alerté) |
+| **D. Console et notifications** | maquettes et jury, console (EC1 à EC5, interrupteurs, actions forcées, décisions, santé, origine du signal, droits à deux clés), résumé dans l'admin, e-mail, **Signal** |
+| **E. Compléments** | recopie des blocages chez Cloudflare par l'API (annexe Cloudflare, section 8) ; Actions v2 de Zitadel ; CrowdSec en option ; jeu d'attaques rejouable contre l'instance de démonstration |
 
 ---
 
-## 11. Décisions nouvelles
+## 11. Décisions
 
-| Id | Question | Proposition |
+Prises le 17 octobre 2026.
+
+| Id | Question | Décision |
 |---|---|---|
-| D8 | Sous-domaine de la console | un nom non devinable, choisi par vous, jamais écrit dans le dépôt public (variable `VIGIE_PUBLIC_URL`) |
-| D9 | Second facteur exigé après une connexion Google | oui, réglé dans Zitadel ; à défaut, la console refuse une connexion sans `amr` de second facteur |
-| D10 | Canal hors admin à brancher en premier (phase E) | ntfy (gratuit, simple, application téléphone) |
-| D11 | Recopie des blocages chez Cloudflare | oui en phase E, pour les blocages de 24 h et plus (la liste gratuite est limitée à 10 000 entrées) |
-| D12 | Qui a le rôle `securite` | les deux administrateurs ; aucun autre compte |
+| D8 | Adresse de la console | `vigie.nicephos.art` (variable `VIGIE_PUBLIC_URL`) ; exclue de la redirection vers `www` |
+| D9 | Second facteur exigé, y compris après Google | oui : compatible avec Zitadel (*Force MFA*, sans « local only ») ; la console exige `mfa` dans `amr` (section 7.2) |
+| D10 | Canal hors admin | **Signal**, passerelle auto-hébergée ; paquet prêt dans `deploy/unraid/signal/` ; e-mail en secours |
+| D11 | Recopie des blocages chez Cloudflare | oui, par l'API des listes (annexe Cloudflare, section 8), pour les blocages de 24 h et plus |
+| D12 | Qui accède à la console | les deux administrateurs ; plafond tenu dans Zitadel (rôles `vigie.*`), quatre rôles dans la Vigie à deux clés (section 5.4) |
+| D16 | La Vigie est-elle obligatoire | non : composant facultatif (section 3.3) |
 
 ---
 
@@ -408,3 +525,9 @@ Une branche et une PR par phase, revue et audit avant la suivante.
 6. CrowdSec, *Cloudflare Bouncer*. https://docs.crowdsec.net/u/bouncers/cloudflare
 7. ntfy, documentation (publication par HTTP, applications iOS et Android, contrôle d'accès). https://docs.ntfy.sh/
 8. OWASP, *Threat Modeling Cheat Sheet* (STRIDE). https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html
+9. Zitadel, *Event API* (`/admin/v1/events/_search`, rôle `IAM_OWNER_VIEWER`, filtres, exemples de types). https://zitadel.com/docs/guides/integrate/zitadel-apis/event-api
+10. Zitadel, *Claims* (`amr` selon RFC 8176, `urn:zitadel:iam:org:project:roles`). https://zitadel.com/docs/apis/openidoauth/claims
+11. Zitadel, réglages de connexion `forceMfa` et `forceMfaLocalOnly` (API v2 `/v2/settings/login`). https://zitadel.com/docs/apis/resources/settings_service_v2
+12. CVE-2026-85056, contournement du second facteur dans Zitadel Login V2 4.0.0 à 4.16.1. https://app.opencve.io/cve/CVE-2026-85056
+13. `signal-cli-rest-api` (bbernhard), version 0.101 du 25 septembre 2026, modes et API. https://github.com/bbernhard/signal-cli-rest-api
+

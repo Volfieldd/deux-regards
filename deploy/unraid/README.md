@@ -8,6 +8,7 @@ Ce dossier contient tout le nécessaire :
 |---|---|
 | `compose.yaml` | la pile complète : site, sauvegarde quotidienne, tunnel Cloudflare, traducteur LibreTranslate (**méthode recommandée**) |
 | `env.example` | les réglages, à copier en `.env` de la pile |
+| `signal/` | **facultatif** : passerelle Signal de la Vigie (alertes de sécurité sur le téléphone), pile à part ; guide dans [`signal/README.md`](signal/README.md) |
 | `modeles/*.xml` | les mêmes conteneurs en modèles Unraid (onglet Docker), si vous préférez ne pas utiliser Compose |
 | `exporter-donnees.sh` | exporte les données d'une installation existante (serveur de test) pour les reprendre sur Unraid |
 
