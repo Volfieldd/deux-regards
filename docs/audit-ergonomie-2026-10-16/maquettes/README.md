@@ -75,6 +75,13 @@ Le commun a été corrigé avant chaque maquette ; le détail est au § 0 du lex
 
 Contrôles ajoutés (voir `GRILLE.md`) : ellipses, lignes qui défilent, axe et focus sans `inert`, intérieur de la barre latérale en allemand, images sans `srcset`, jour abrégé insécable, focus caché par un élément collant (`focus-colle.mjs`), deux photos par rangée (`p4-portrait.mjs`).
 
+## Finalisation (avant le jury final)
+
+- Versés dans le commun depuis les maquettes de la passe 4 : `.msg p` qui passe à la ligne (`public.css` § 13, MQ-05, MQ-06), retour d'une galerie privée sur deux lignes (`.sh--prive .sh-retour-t`, § 1, MQ-17), filtre d'état à symbole coloré (`.chip .chip-st`, `admin-plus.css` § 9, MQ-08, MQ-09, MQ-18, MQ-19) et interrupteur à deux mots (`.inter-oui`, `.inter-non`, `.si-coche`, `.si-decoche`, § 11, MQ-07) ; les maquettes n'en gardent plus de copie locale, la planche les montre.
+- Mots : « Retour au billet : » et « Billet » dans les données de la visionneuse (MQ-04, MQ-12, planche) ; noms allemands lus pris au code partout (« Navigation », « Sprache: Deutsch », « Sprache »), en-tête de contrôle compris.
+- MQ-20 : grille des états rééquilibrée (22 px d'écart au lieu de 251).
+- `outils/consol-bandes.py` ajoute une bande quand l'une dépasse le plafond du WebP, au lieu de s'arrêter.
+
 ## Ce qui est annotation, et ce qui est interface
 
 Tout ce qui est magenta appartient à la maquette, jamais à l'interface proposée : pastilles carrées numérotées (en marge, hors du flux, `aria-hidden`), étiquettes « État · … » au-dessus d'un cadre pointillé, traits du bas du premier écran dans les marges, et l'encart « Ce qui change » en fin de page. Gabarit commun : `_commun/annotations.css`. Pour voir une maquette sans annotations, ajoutez `#sans-annotations` à l'adresse (ou imprimez) : l'interface ne bouge pas d'un pixel.

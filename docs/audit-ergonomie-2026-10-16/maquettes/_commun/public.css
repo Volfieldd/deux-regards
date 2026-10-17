@@ -23,6 +23,7 @@
    filtres non collante au téléphone, scroll-padding-top sous un élément collant, ligne qui défile toujours coupée au bord
    (§ 17) ; en-tête des galeries privées .sh--prive (§ 1) ; une seule visionneuse par adresse, .vu réservée à la galerie
    privée (§ 20).
+   Finalisation (avant le jury final) : .sh--prive .sh-retour-t (§ 1, MQ-17) ; .msg p (§ 13, MQ-05, MQ-06).
    ===================================================================================================== */
 
 /* ---------- 0. Socle : corrections de lisibilité (UX-F-29) et de comportement (UX-F-34) ---------- */
@@ -129,6 +130,8 @@ button.sh-outil { border: 0; background: none; font: inherit; font-size: 15px; c
    puis les outils s'il y en a. L'en-tête ne change pas de place entre le mot de passe et la galerie. */
 .sh--tunnel.sh--prive .sh-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--esp-2); }
 .sh--tunnel.sh--prive .sh-marque { margin: 0; }
+/* Retour d'une galerie privée : « ← Galerie » sous 560 px (.sh-court), puis le titre, sur deux lignes, jamais d'ellipse. */
+.sh--prive .sh-retour-t { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.25; }
 
 /* Contexte étroit : la liste des langues s'ancre au bord droit de l'en-tête, et non au sélecteur ; suivi de « Quitter »
    (galerie privée) ou de « Menu », elle sortirait de l'écran à 320 px. */
@@ -445,6 +448,7 @@ a.lien, button.lien { display: inline-flex; align-items: center; gap: var(--esp-
    Un filet de couleur à gauche, une icône, un texte qui commence par ce qui vient de se passer. Pas d'aplat. */
 .msg { display: flex; align-items: flex-start; gap: 12px; padding: 12px var(--esp-2); border-left: 3px solid var(--mute); color: var(--ink); }
 .msg p { margin: 0; line-height: 1.5; }
+.msg p { min-width: 0; overflow-wrap: anywhere; } /* un long mot (adresse e-mail) passe à la ligne, WCAG 1.4.12 */
 .msg .ic { margin-top: 3px; color: var(--mute); }
 .msg b { font-weight: 500; }
 .msg a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
@@ -649,7 +653,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
    TOUJOURS dans cette visionneuse entière (MQ-04) ; depuis un billet, seuls changent le retour de l'en-tête Contexte
    (« ← Lisbonne et Porto ») et l'ordre des voisines (celui du billet) ; cartel standard « Julien · Lisbonne · 10 oct. 2026 »,
    « Tirage : à partir de 180 € » en bouton plein, comme ailleurs.
-   .vu : la visionneuse compacte, RÉSERVÉE À LA GALERIE PRIVÉE (MQ-17, /prive/<id>/photo/<slug>) : précédente · position ·
+   .vu : la visionneuse compacte, RÉSERVÉE À LA GALERIE PRIVÉE (MQ-17, /prive/:id/photo/:n) : précédente · position ·
    suivante, la photo, le cartel de la galerie privée (le cartel de vignette, « Julien · Lisbonne · 10 oct. 2026 ») et l'étoile. */
 .vis-scene { --vis-r: 1.5; --vis-reste: 191px; --vis-h: clamp(260px, calc(100svh - var(--vis-reste)), 900px); --vis-w: min(100%, calc(var(--vis-h) * var(--vis-r))); padding-top: var(--esp-2); }
 .vis-plus, .vis-pres { width: var(--vis-w); margin-inline: auto; }

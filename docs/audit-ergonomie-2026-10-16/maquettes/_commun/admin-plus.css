@@ -26,6 +26,9 @@
    Passe 4 (jury v2, 16 oct.) : menu du téléphone sans JavaScript (« Menu » est un lien vers #admin-nav, la barre s'ouvre
    par .side:target, « Fermer » est un lien ; défaut de main, mq2-correctifs-main.md § 8) ; pied de la barre latérale qui
    passe à la ligne dans la barre de 220 px (tablette), au lieu de rogner « Hilfe », « DE » et la version en allemand (§ 1).
+   Finalisation (16 oct., avant le jury final ; composants proposés par les maquettes de la passe 4) : filtre d'état à symbole
+   coloré .chip .chip-st (§ 9, d'après MQ-08, MQ-09, MQ-18, MQ-19) ; interrupteur à deux mots, .inter-oui, .inter-non, et
+   phrase d'état qui suit la case, .si-coche, .si-decoche, sans script par :has() (§ 11, d'après MQ-07).
    ===================================================================================================== */
 
 /* Texte lu seulement : admin.css (main) le masque par clip, qui est déprécié ; clip-path est la forme actuelle (celle de
@@ -386,6 +389,15 @@ a.att { min-height: 24px; text-decoration: underline; text-underline-offset: 3px
    le registre d'une édition (.registre, une case par numéro). Les filtres au-dessus d'une liste : .filtres-l. */
 .tablewrap, .onglets ul { position: relative; }
 @media (max-width: 720px), (pointer: coarse) { .chips .chip { min-height: 44px; } }
+/* Filtre d'état (lexique § 3 ; finalisation, d'après MQ-08, MQ-09, MQ-18, MQ-19) : le symbole dans la couleur de son état,
+   puis le mot et le nombre, comme une pastille (« ◐ Proposées 1 ») ; la même forme dans la Photothèque, le lot, les accès et
+   les commandes. Sur le filtre courant (aplat --ink), le symbole garde sa couleur sur un disque --s1.
+   <a class="chip" href="…"><span class="chip-st chip-st--encours"><svg class="ic">…</svg></span>Proposées<span class="n">1</span></a> */
+.chip .chip-st { display: inline-grid; place-items: center; flex: none; width: 18px; height: 18px; margin-left: -4px; border-radius: 50%; }
+.chip .chip-st .ic { width: 12px; height: 12px; }
+.chip .chip-st--afaire { color: var(--st-afaire); } .chip .chip-st--encours { color: var(--st-encours); } .chip .chip-st--abouti { color: var(--st-abouti); }
+.chip .chip-st--attention { color: var(--st-attention); } .chip .chip-st--arret { color: var(--st-arret); }
+.chip[aria-current] .chip-st { background: var(--s1); }
 .filtres-l { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin: 0 0 14px; }
 .btns-ligne { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
 .lien-a { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink2); font-size: var(--at-petit); text-decoration: underline; text-underline-offset: 3px; }
@@ -580,7 +592,8 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
    d'ambre ; tous les onglets se voient, sans défilement caché ni script (scroll-initial-target, qui ouvrait la rangée
    défilante sur l'onglet courant, n'existe que dans Chromium). Sous les onglets, une <nav class="sur-onglet"> dit ce que
    contient un onglet long et y mène (« Sur cet onglet : Mentions légales · Droits et licences · Confidentialité »).
-   Interrupteur : <input type="checkbox" role="switch">, le mot (Allumé, Éteint) à côté, 44 px de cible ; il s'enregistre au geste.
+   Interrupteur : <input type="checkbox" role="switch">, le mot (Allumé, Éteint) à côté, 44 px de cible ; il s'enregistre au geste ;
+   les deux mots sont écrits et le bon se montre sans script (ci-dessous, .inter-oui, .inter-non).
    Carte d'assistant : titre et interrupteur sur une ligne, une phrase d'effet, son état ; le jargon replié pour l'administrateur. */
 .onglets { margin: 0 -16px 32px; }
 .onglets ul { display: flex; gap: 0 28px; margin: 0; list-style: none; overflow-x: auto; scrollbar-width: none; box-shadow: inset 0 -1px 0 var(--line2); scroll-padding-inline: 32px; padding-inline: 16px;
@@ -614,6 +627,15 @@ fieldset.panel.titre-dedans > legend + * { clear: both; }
 .inter input:checked + .inter-piste::after { transform: translateX(20px); background: var(--s1); }
 .inter input:focus-visible + .inter-piste { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .inter-piste::after { transition: none; } }
+/* Interrupteur à deux mots (finalisation, d'après MQ-07 ; jury v2) : le mot suit la case SANS script. Les deux mots sont
+   écrits, :has() montre le bon (« Allumé » coché, « Éteint » sinon) ; de même pour la phrase d'état d'un formulaire sans
+   script (.si-coche, .si-decoche), écrite deux fois par le serveur : l'écran ne se contredit pas avant l'envoi.
+   <span class="inter-mot" aria-hidden="true"><span class="inter-oui">Allumé</span><span class="inter-non">Éteint</span></span> */
+.inter .inter-oui, .assist .si-coche { display: none; }
+.inter:has(input:checked) .inter-oui { display: inline; }
+.inter:has(input:checked) .inter-non { display: none; }
+.assist:has(.inter input:checked) .si-coche { display: block; }
+.assist:has(.inter input:checked) .si-decoche { display: none; }
 .assist { display: grid; gap: 10px; }
 .assist-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 44px; }
 .assist-tete h3 { margin: 0; font-size: 17px; font-weight: 500; }

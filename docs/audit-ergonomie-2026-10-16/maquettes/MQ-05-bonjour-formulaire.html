@@ -28,9 +28,6 @@
 .form .groupe + .groupe, .form .champ + .groupe { margin-top: 0; }
 /* Autres états : la page de remerciement dans un cadre de téléphone */
 .mq-ecran-in > .titre-page { justify-self: start; font-size: var(--t-titre-2); }
-/* Passe 4 (jury v2, WCAG 1.4.12) : avec l'espacement du texte agrandi, l'adresse e-mail du message « Envoyé » (un seul mot de
-   250 px à 320 px) élargissait le cadre de 34 px ; elle passe à la ligne au lieu de pousser la colonne. Proposé pour public.css § 10. */
-.msg p { min-width: 0; overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
@@ -318,7 +315,7 @@
     <li><span class="mq-num" aria-hidden="true">13</span><b>Après l’envoi</b><p>Le titre reçoit le focus ; le récapitulatif reprend ce que Claire a choisi (la date relue en toutes lettres, « mercredi 14 octobre 2026 »), dit le délai et comment changer d’avis.</p><span class="mq-ref">UX-T-04 · RGAA 7.5 · WCAG 4.1.3</span></li>
   </ol>
   <h3>Composants de la planche</h3>
-  <p>Tous dans <code>_commun/public.css</code> (§ 10 et 22) et montrés dans MQ-00 : <b>bloc de formulaire</b> (<code>.bloc</code>, légende en titre 3 sur un filet), <b>dépliant</b> (<code>.depliant</code>, un <code>&lt;details&gt;</code> souligné et chevronné), <b>sous-choix</b> (<code>.sous-choix</code>, cases rattachées à une radio, indentées de 34 px), <b>champ révélé</b> (<code>.revele</code> dans un groupe <code>.revele-si</code> : visible quand la radio qui le demande est cochée, par <code>:has</code>, sans script). La page n’ajoute que sa mise en page.</p>
+  <p>Tous dans <code>_commun/public.css</code> (§ 10 et 22) et montrés dans MQ-00 : <b>bloc de formulaire</b> (<code>.bloc</code>, légende en titre 3 sur un filet), <b>dépliant</b> (<code>.depliant</code>, un <code>&lt;details&gt;</code> souligné et chevronné), <b>sous-choix</b> (<code>.sous-choix</code>, cases rattachées à une radio, indentées de 34 px), <b>champ révélé</b> (<code>.revele</code> dans un groupe <code>.revele-si</code> : visible quand la radio qui le demande est cochée, par <code>:has</code>, sans script). Proposé par cette page à la passe 4 et versé dans la planche avant le jury final : le texte d’un message qui passe à la ligne au lieu d’élargir sa colonne (<code>.msg p</code>, § 13 : l’adresse e-mail du message « Envoyé », avec l’espacement du texte agrandi, WCAG 1.4.12). La page n’ajoute que sa mise en page.</p>
   <h3>Écarts avec le code</h3>
   <p>Mêmes champs et mêmes noms que <code>views/bonjour.eta</code> (ref, met_on, met_time, place, details, wants_photo, decision, scope_*, rights, message, email, name) ; ajoutés : adult et guardian, déjà lus par <code>server/encounters.js</code> pour l’app. Le champ piège (<code>website</code>) reste, invisible et hors des tabulations. La date de la rencontre devient un champ libre (« 14/10/2026 »), relue en toutes lettres par le serveur comme dans l’admin : le calendrier natif de <code>type="date"</code> suit la langue du navigateur, pas celle de la page. Les classes <code>.hello-form</code> de <code>site.css</code> cèdent la place à <code>.form</code>.</p>
   <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
