@@ -39,6 +39,11 @@ networks:
       config:
         - subnet: ${NET_SUBNET:-172.29.42.0/24}
           ip_range: ${NET_IP_RANGE:-172.29.42.128/25}
+  # Vigie (facultative) : réseau sans sortie vers Internet entre le site et la Vigie (envoi des événements, lecture des
+  # décisions). Sans le profil « vigie », il existe mais personne n'y écoute.
+  vigie-ingest:
+    name: nicephos-vigie-ingest
+    internal: true
 
 services:
   site:
@@ -59,7 +64,7 @@ services:
       # Traducteur de la pile (vide dans le .env pour retirer le bouton « Proposer une traduction »).
       TRANSLATE_URL: ${TRANSLATE_URL-http://libretranslate:5000}
     user: "${PUID:-99}:${PGID:-100}"
-    networks: [nicephos]
+    networks: [nicephos, vigie-ingest]
     logging: *logging
     # Mémoire du site : un original de 120 Mpx décodé pèse ~0,5 Go. Descriptions « Précis » (Florence-2 large,
     # ~4 Go pendant le calcul, dans ce conteneur) : SITE_MEM_LIMIT=6g dans le .env ; « Léger » tient dans 3g.
@@ -152,6 +157,71 @@ services:
     security_opt:
       - no-new-privileges:true
     cap_drop: [ALL]
+
+  # ---------- Vigie : journalisation de sécurité, FACULTATIVE (docs/wiki/Vigie.md) ----------
+  # Ne démarre qu'avec le profil « vigie » (Compose Up avec --profile vigie, ou COMPOSE_PROFILES=vigie dans le .env).
+  # Secrets dans vigie.env (à côté de ce fichier), jamais dans le .env du site. Base dans VIGIE_DATA_DIR, à part.
+  vigie:
+    image: ${VIGIE_IMAGE:-ghcr.io/volfieldd/deux-regards-vigie:latest}
+    container_name: nicephos-vigie
+    profiles: [vigie]
+    restart: unless-stopped
+    env_file:
+      - path: vigie.env
+        required: false
+    environment:
+      VIGIE_DATA_DIR: /data
+      VIGIE_INGEST_PORT: 4100
+      VIGIE_ZITADEL_KEY_FILE: /secrets/zitadel.json
+    user: "${PUID:-99}:${PGID:-100}"
+    # vigie-ingest : le site seul la joint ; nicephos : sortie vers Zitadel (et, plus tard, la console derrière le tunnel).
+    networks: [vigie-ingest, nicephos]
+    volumes:
+      - type: bind
+        source: ${VIGIE_DATA_DIR:-/mnt/cache/appdata/nicephos/vigie}
+        target: /data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${VIGIE_SECRETS_DIR:-/mnt/cache/appdata/nicephos/vigie-secrets}
+        target: /secrets
+        read_only: true
+        bind:
+          create_host_path: false
+    logging: *logging
+    mem_limit: 256m
+    pids_limit: 128
+    <<: *hardening
+
+  # Sauvegarde quotidienne de la base de la Vigie (instantané contrôlé, 14 gardés), sans réseau ni secret.
+  vigie-backup:
+    image: ${VIGIE_IMAGE:-ghcr.io/volfieldd/deux-regards-vigie:latest}
+    container_name: nicephos-vigie-sauvegarde
+    profiles: [vigie]
+    restart: unless-stopped
+    command: ["node", "vigie/backup.js", "--loop"]
+    environment:
+      VIGIE_DATA_DIR: /data
+      VIGIE_BACKUP_DIR: /backups
+      VIGIE_BACKUP_KEEP: ${VIGIE_BACKUP_KEEP:-14}
+    user: "${PUID:-99}:${PGID:-100}"
+    network_mode: none
+    healthcheck:
+      disable: true
+    volumes:
+      - type: bind
+        source: ${VIGIE_DATA_DIR:-/mnt/cache/appdata/nicephos/vigie}
+        target: /data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${VIGIE_BACKUP_DIR:-/mnt/user/backups/nicephos-vigie}
+        target: /backups
+        bind:
+          create_host_path: false
+    logging: *logging
+    mem_limit: 256m
+    <<: *hardening
 
 volumes:
   traduction-modeles:

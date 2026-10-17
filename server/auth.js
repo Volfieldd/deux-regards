@@ -134,6 +134,15 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       else if (securite.enabled && sessions.revoked(token)) securite.emit('session_expired', { request, sub: sessions.revoked(token).sub, emetteur: 'server/auth.js · session' });
       return;
     }
+    // Décision de la Vigie (session révoquée, sessions du compte révoquées, compte gelé) : la session est fermée.
+    const denied = app.decisions?.sessionDenied(request.session);
+    if (denied) {
+      securite.emit('session_destroyed', { request, emetteur: 'server/auth.js · décision de la Vigie', detail: { motif: denied } });
+      sessions.destroy(token);
+      reply.clearCookie(SESSION_COOKIE, cookieBase);
+      request.session = null;
+      return;
+    }
     sessionChecks(request, token);
     accounts.ensure({ sub: request.session.sub, name: request.session.name, email: request.session.email });   // sans rôle s'il manquait
     request.session.roles = accounts.rolesOf(request.session.sub);
@@ -267,6 +276,11 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     // qu'un administrateur lui donne un rôle. Ensuite, seuls comptent les rôles réglés dans l'admin.
     const account = accounts.login({ ...who, idpAdmin: (idpRoleTrusted && result.admin) || Boolean(result.listed) });
     if (account.rescued) audit.log({ ...who, action: 'compte rétabli par ADMIN_SUBS' });
+    // Gel par la Vigie : comme un compte désactivé. Admin verrouillée : seuls les comptes et adresses listés.
+    if (app.decisions?.frozen(who.sub) || app.decisions?.lockAllows(who.sub, request.ip) === false) {
+      securite.emit('authz_blocked', { request, sub: who.sub, emetteur: 'server/auth.js · retour OIDC', detail: { raison: app.decisions.frozen(who.sub) ? 'compte gelé' : 'administration verrouillée' } });
+      return renderError(reply, 403, { title: 'Accès refusé', message: 'Ce compte ne peut pas se connecter pour le moment.', switchAccount: true });
+    }
     if (account.status === 'desactive') {
       audit.log({ ...who, action: 'connexion refusée (compte désactivé)' });
       securite.emit('authn_login_disabled', { request, sub: who.sub, emetteur: 'server/auth.js · retour OIDC' });
@@ -326,7 +340,9 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       // rôles » (garde-fous, journal) ; désactivé ou sans rôle, comme en OIDC, aucune session.
       const sub = who.linked || `local:${who.slug}`;
       const account = accounts.ensureLocal({ sub, name: `${who.name} (test)`, authorId: who.id, roles: ['admin'] });
-      if (account.status === 'desactive' || !hasRole(accounts.rolesOf(sub))) {
+      const vigieDenied = app.decisions?.frozen(sub) ? 'compte gelé' : app.decisions?.lockAllows(sub, request.ip) === false ? 'administration verrouillée' : null;
+      if (vigieDenied) securite.emit('authz_blocked', { request, sub, emetteur: 'server/auth.js · connexion de test', detail: { raison: vigieDenied } });
+      if (account.status === 'desactive' || !hasRole(accounts.rolesOf(sub)) || vigieDenied) {
         return renderLocal(reply, 403, { next: safeNext(next), error: 'Ce compte est désactivé ou n’a pas de rôle.' });
       }
       openSession(request, reply, { sub, name: `${who.name} (test)` });

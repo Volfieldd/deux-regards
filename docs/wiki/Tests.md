@@ -6,7 +6,7 @@
 npm test
 ```
 
-`npm run test:vigie` fait tourner la même suite avec une Vigie simulée (`TEST_AVEC_VIGIE=1`) : le site doit s'y comporter exactement de la même façon (la Vigie est facultative). `test/vigie-emission.test.js` couvre l'émission elle-même (événements, signature, tampon, budget, comptes, retrait).
+`npm run test:vigie` fait tourner la même suite avec une Vigie simulée (`TEST_AVEC_VIGIE=1`) : le site doit s'y comporter exactement de la même façon (la Vigie est facultative). `test/vigie-emission.test.js` couvre l'émission elle-même (événements, signature, tampon, budget, comptes, retrait) ; `test/vigie-service.test.js` le service de la Vigie (réception, chaîne, décisions, Zitadel avec une API simulée, ligne de commande, sauvegarde) et un essai de bout en bout : une vraie Vigie sur un port local, le site qui lui envoie ses lots et applique ses décisions.
 
 Ils utilisent `node:test`, sans dépendance supplémentaire, et prennent environ 40 s. Chaque test travaille dans un dossier temporaire avec sa propre base. Le jeu de démonstration n'est généré qu'une fois par fichier, puis recopié pour chaque test.
 

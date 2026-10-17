@@ -81,9 +81,13 @@ Composant à part, qui reçoit les événements de sécurité du site, détecte 
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `VIGIE_URL` | — | Adresse d'ingestion de la Vigie sur le réseau interne, par exemple `http://vigie:4100`, sans identifiants ni paramètres. `http://` seulement sur un réseau interne (nom de service Docker, adresse privée ou locale, `.internal`, `.local`, `.lan`) ; ailleurs, `https://` (les événements portent des adresses IP complètes). |
+| `VIGIE_DECISIONS_PUBKEY` | — | Clé publique Ed25519 des décisions de la Vigie (base64), sortie de `node vigie/cli.js cles`. **Obligatoire avec `VIGIE_URL`.** Le site n'applique qu'une liste signée par la Vigie. |
+| `VIGIE_APPLIQUER` | `1` | `0` : décisions lues mais jamais appliquées (dernier recours, voir [Vigie](Vigie)). |
 | `VIGIE_INGEST_KEY` | — | Clé de signature des envois (HMAC-SHA-256), 32 caractères au moins (`openssl rand -base64 32`), la même dans le `.env` de la Vigie. **Obligatoire avec `VIGIE_URL`**, sinon refus de démarrer. |
 
-Avec la Vigie, le site garde aussi, en plus : le contexte de chaque session de l'admin (réseau, pays, famille et empreinte du navigateur), les empreintes des sessions fermées pendant 48 h, et, si la Vigie est injoignable, les événements en attente dans `STORAGE_DIR/securite-attente` (50 Mo au plus). La page **Confidentialité** le dit alors.
+Variables de la Vigie elle-même (dans `vigie.env`, jamais dans le `.env` du site) : `VIGIE_INGEST_KEY`, `VIGIE_LOG_KEY` (clé de la chaîne du journal), `VIGIE_DECISIONS_PRIVATE_KEY`, `VIGIE_ZITADEL_ISSUER`, `VIGIE_RETENTION_DAYS` ; voir [Vigie](Vigie).
+
+Avec la Vigie, le site garde aussi, en plus : la dernière liste de décisions valide (`STORAGE_DIR/securite-decisions.json`), le contexte de chaque session de l'admin (réseau, pays, famille et empreinte du navigateur), les empreintes des sessions fermées pendant 48 h, et, si la Vigie est injoignable, les événements en attente dans `STORAGE_DIR/securite-attente` (50 Mo au plus). La page **Confidentialité** le dit alors.
 
 ## Site « en ligne »
 

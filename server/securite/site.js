@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { createSecurite } from './index.js';
+import { createDecisionsClient } from './decisions.js';
 import { scanObject, isAttackTool } from './detection.js';
 import { onDecryptFail } from '../vault.js';
 import { clientKey } from '../ratelimit.js';
@@ -57,10 +58,15 @@ function configDiff(before, after) {
 // Rôles d'une ligne du journal : une valeur écrite à la main peut être n'importe quoi.
 const parseRoles = v => { try { const r = JSON.parse(v || '[]'); return Array.isArray(r) ? r.map(String) : []; } catch { return []; } };
 
-export function installVigie(app, { config, db, send = null, timers = true }) {
+export function installVigie(app, { config, db, send = null, timers = true, decisionsFetch, pollDecisions = true }) {
   const settings = settingsOf(db);
   const sec = createSecurite({ url: config.vigie.url, key: config.vigie.ingestKey, storageDir: config.storageDir, log: app.log, send, timers });
   app.decorate('securite', sec);
+  // Décisions de la Vigie (blocages, révocations, gels, verrouillage), lues et appliquées par le site.
+  const decisions = createDecisionsClient({ url: config.vigie.url, key: config.vigie.ingestKey, pubkey: config.vigie.decisionsPubkey, storageDir: config.storageDir,
+    log: app.log, apply: config.vigie.apply, ...(decisionsFetch ? { fetchImpl: decisionsFetch } : {}) });
+  app.decorate('decisions', decisions);
+  if (!config.vigie.apply) app.log.warn('VIGIE_APPLIQUER=0 : les décisions de la Vigie ne sont pas appliquées');
 
   // Sessions fermées ou expirées : empreinte, compte et dates, 48 h (un cookie qui revient après a été copié).
   // Posé de nouveau à chaque démarrage (sa définition suit le code).
@@ -139,7 +145,7 @@ export function installVigie(app, { config, db, send = null, timers = true }) {
     sec.emit('sys_state', {
       severity: missing.length || altered.length || openTickets ? 'critique' : undefined,
       emetteur: 'server/securite · état',
-      detail: { administrateurs: admins, comptes: app.accounts.list().length, declencheurs_absents: missing, declencheurs_modifies: altered, tickets_ouverts: openTickets, schema: crypto.createHash('sha256').update(schema).digest('hex').slice(0, 16), dernier_changement: app.accounts.lastChangeId() },
+      detail: { decisions: decisions.state ? { version: decisions.state.version, ...decisions.state.counts, appliquees: config.vigie.apply } : null, administrateurs: admins, comptes: app.accounts.list().length, declencheurs_absents: missing, declencheurs_modifies: altered, tickets_ouverts: openTickets, schema: crypto.createHash('sha256').update(schema).digest('hex').slice(0, 16), dernier_changement: app.accounts.lastChangeId() },
     });
   };
   sec.every(5 * 60e3, state);
@@ -175,13 +181,29 @@ export function installVigie(app, { config, db, send = null, timers = true }) {
     step('comptes', scanAccounts);
     step('état', state);
     sec.start();
+    if (pollDecisions) decisions.start();
   });
-  app.addHook('onClose', async () => { offDecrypt(); await sec.stop(); });
+  app.addHook('onClose', async () => { decisions.stop(); offDecrypt(); await sec.stop(); });
 
   // Méthode qu'aucune page du site n'utilise (PUT, DELETE, TRACE, OPTIONS…).
   // Crochets synchrones (done) : ils ne décalent pas ceux du site (journal d'audit écrit dans le même tour).
   // Pièges reconnus au chemin (chemins de scanners, lien caché interdit par robots.txt) et connexion de test sollicitée
   // alors qu'elle est désactivée : signalés ici, la requête suit son cours (404 du site, aucune limite consommée).
+  // Adresse bloquée par la Vigie : 403 sobre, avant tout le reste (aucune page, aucun indice).
+  app.addHook('onRequest', (request, reply, done) => {
+    let scope = null;
+    try { scope = decisions.blocked(request.ip, String(request.url).split('?')[0]); } catch (err) { app.log.error({ err: err.message }, 'Vigie : blocage'); }
+    if (!scope) return done();
+    sec.emit('authz_blocked', { request, emetteur: 'server/securite/decisions.js · blocage', detail: { raison: 'adresse bloquée', portee: scope } });
+    reply.code(403).header('cache-control', 'no-store').type('text/plain; charset=utf-8').send('Accès refusé.');
+  });
+  // Admin verrouillée : seuls les comptes et adresses listés y entrent (la connexion est vérifiée dans auth.js).
+  app.addHook('preHandler', (request, reply, done) => {
+    const p = String(request.url).split('?')[0];
+    if (!request.session || !/^\/admin(?:[/?#]|$)/.test(p) || decisions.lockAllows(request.session.sub, request.ip) !== false) return done();
+    sec.emit('authz_blocked', { request, emetteur: 'server/securite/decisions.js · verrouillage', detail: { raison: 'administration verrouillée' } });
+    reply.code(403).header('cache-control', 'no-store').type('text/plain; charset=utf-8').send('Administration verrouillée.');
+  });
   app.addHook('onRequest', (request, reply, done) => {
     try {
       if (!METHODS.has(request.method)) sec.emit('input_validation_fail', { request, emetteur: 'server/securite · méthodes', detail: { raison: 'méthode inattendue', methode: request.method } });

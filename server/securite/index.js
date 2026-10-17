@@ -14,7 +14,7 @@ import { networkOf, neutralize } from './reseau.js';
 //     avec VIGIE_INGEST_KEY), 200 événements et 256 ko au plus par lot ;
 //   - Vigie injoignable : lots ajoutés à quelques fichiers de 1 Mo (STORAGE_DIR/securite-attente, 50 Mo au plus), dont
 //     la liste est tenue en mémoire (le dossier n'est lu qu'au démarrage) ; nouvel essai après une attente qui double
-//     (5 minutes au plus) ; un lot refusé par la Vigie (4xx) est écarté et compté, il ne bloque pas les suivants ;
+//     (5 minutes au plus) ; un lot refusé par la Vigie (contenu invalide : 400, 413, 422) est écarté et compté ; une signature refusée (401) le garde, il ne bloque pas les suivants ;
 //   - budget : 60 événements par heure pour un même réseau et un même type, sous la gravité « haut » ; au-delà, une
 //     ligne tout de suite puis le compte à la fin de l'heure. Jamais pour un événement d'un compte connecté, de
 //     connexion, de session, de données sensibles, de comptes ou du système ;
@@ -53,7 +53,7 @@ function cleanDetail(detail) {
   return out;
 }
 
-class Refused extends Error {}         // la Vigie a répondu, et refuse ce lot (4xx) : inutile de le renvoyer
+class Refused extends Error {}         // la Vigie a répondu, et refuse le contenu de ce lot : inutile de le renvoyer
 
 export function createSecurite({ url, key, storageDir, log, send = null, now = Date.now, timers = true }) {
   const endpoint = `${String(url).replace(/\/+$/, '')}/v1/events`;
@@ -71,7 +71,8 @@ export function createSecurite({ url, key, storageDir, log, send = null, now = D
     const res = await fetch(endpoint, { method: 'POST', body, headers, redirect: 'manual', signal: AbortSignal.timeout(TIMEOUT_MS) });
     await res.arrayBuffer().catch(() => {});
     if (res.status >= 200 && res.status < 300) return;
-    const refused = res.status >= 400 && res.status < 500 && res.status !== 408 && res.status !== 429;
+    // Refus du contenu du lot (400, 413, 422) : inutile de le renvoyer. 401 (clé ou horloge à régler) : on garde.
+    const refused = [400, 413, 422].includes(res.status);
     const err = refused ? new Refused(`Vigie : lot refusé (${res.status})`) : new Error(`Vigie : réponse ${res.status}`);
     err.status = res.status;
     throw err;
