@@ -148,10 +148,11 @@ test('Zitadel : jeton par clé JWT, événements suivis seulement, charge rédui
   assert.equal(await z.run(), 2);
   const rows = v.db.prepare("SELECT * FROM events WHERE composant = 'zitadel' ORDER BY seq").all();
   assert.deepEqual(rows.map(r => [r.type, r.severity, r.canal, r.confiance, r.sub, r.ip]), [
-    ['zitadel_droits', 'haut', 'API Zitadel', 'constaté', 'admin-9', '198.51.100.4'],
+    ['zitadel_droits', 'haut', 'API Zitadel', 'constaté', 'user-1', '198.51.100.4'], // compte visé, pas l'auteur
     ['zitadel_echec', 'moyen', 'API Zitadel', 'constaté', 'user-2', '203.0.113.50'],
   ]);
   const detail = JSON.parse(rows[0].detail);
+  assert.equal(detail.auteur, 'admin-9', 'auteur gardé dans le détail');
   assert.deepEqual(detail.charge, { roleKeys: ['admin'], projectId: 'p1' });
   assert.equal(detail.type_zitadel, 'user.grant.added');
   assert.ok(!rows.some(r => String(r.detail).includes('secret@example.org')), 'aucune adresse e-mail gardée');

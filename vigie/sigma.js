@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseAllDocuments } from 'yaml';
@@ -36,14 +37,19 @@ export function timespan(s) {
   return Number(m[1]) * durations[m[2]];
 }
 
-// Comparaison d'une valeur avec un motif, selon les modificateurs.
+// Comparaison d'une valeur avec un motif, selon les modificateurs (vérifiés au chargement, expressions compilées une
+// fois : une règle fausse empêche le démarrage, jamais une erreur à chaque événement).
+const OPS = new Set(['contains', 'startswith', 'endswith', 're', 'gte', 'gt', 'lte', 'lt', 'exists']);
 function compile(key, values) {
   const [field, ...mods] = key.split('|');
   const all = mods.includes('all');
+  const ops = mods.filter(m => m !== 'all');
+  if (ops.length > 1 || (ops[0] && !OPS.has(ops[0]))) throw new RuleError(`modificateur non pris en charge : ${mods.join('|')}`);
+  const op = ops[0];
   const list = (Array.isArray(values) ? values : [values]);
-  if (mods.includes('re')) for (const v of list) { try { new RegExp(v); } catch { throw new RuleError(`expression régulière invalide : ${v}`); } }
+  const regexes = new Map();
+  if (op === 're') for (const v of list) { try { regexes.set(v, new RegExp(v)); } catch { throw new RuleError(`expression régulière invalide : ${v}`); } }
   const one = v => {
-    const op = mods.find(m => m !== 'all');
     return x => {
       if (op === 'exists') return (x != null) === Boolean(v);
       if (x == null) return v === null;
@@ -51,12 +57,11 @@ function compile(key, values) {
       if (op === 'contains') return String(x).toLowerCase().includes(String(v).toLowerCase());
       if (op === 'startswith') return String(x).toLowerCase().startsWith(String(v).toLowerCase());
       if (op === 'endswith') return String(x).toLowerCase().endsWith(String(v).toLowerCase());
-      if (op === 're') return new RegExp(v).test(String(x));
+      if (op === 're') return regexes.get(v).test(String(x).slice(0, 4000));
       if (op === 'gte') return Number(x) >= Number(v);
       if (op === 'gt') return Number(x) > Number(v);
       if (op === 'lte') return Number(x) <= Number(v);
       if (op === 'lt') return Number(x) < Number(v);
-      if (op) throw new RuleError(`modificateur non pris en charge : ${op}`);
       if (typeof v === 'boolean' || typeof v === 'number') return x === v;
       return String(x).toLowerCase() === String(v).toLowerCase();
     };
@@ -109,6 +114,9 @@ function vigieBlock(doc, file) {
   if (!KINDS.includes(entite.kind)) throw new RuleError(`${file} : entité inconnue ${entite.kind}`);
   if (v.reponse && !RESPONSES.includes(v.reponse)) throw new RuleError(`${file} : réponse inconnue ${v.reponse}`);
   if (v.mode && !MODES.includes(v.mode)) throw new RuleError(`${file} : mode inconnu ${v.mode}`);
+  // Les points ne se déposent que sur une adresse, un réseau, un compte, une session ou un appareil : une règle sur le site
+  // ou la Vigie qui n'ouvrirait pas d'alerte elle-même ne servirait à rien (revue du 17 octobre 2026).
+  if (['site', 'vigie'].includes(entite.kind) && v.source_unique !== true && v.signal !== false) throw new RuleError(`${file} : une règle sur l'entité ${entite.kind} doit être source_unique`);
   return { cas: v.cas || null, entite, sourceUnique: v.source_unique === true, points: v.points ?? POINTS[gravite], reponse: v.reponse || null,
     mode: v.mode || 'observer', gravite, graviteEvenement: v.gravite === 'evenement', signal: v.signal !== false };
 }
@@ -130,7 +138,7 @@ export function loadRules(dir) {
         const c = doc.correlation;
         if (!['event_count', 'value_count', 'temporal'].includes(c.type)) throw new RuleError(`${file} : corrélation ${c.type} non prise en charge`);
         const cond = c.condition || {};
-        if (c.type !== 'temporal' && !['gte', 'gt', 'eq', 'lte'].some(k => k in cond)) throw new RuleError(`${file} : condition de corrélation attendue (gte…)`);
+        if (c.type !== 'temporal' && !['gte', 'gt'].some(k => k in cond)) throw new RuleError(`${file} : condition de corrélation attendue (gte ou gt ; lte et eq ne sont pas pris en charge)`);
         if (c.type === 'value_count' && !cond.field) throw new RuleError(`${file} : value_count demande condition.field`);
         correlations.push({ ...base, type: c.type, rules: [].concat(c.rules || []), groupBy: [].concat(c['group-by'] || []), span: timespan(c.timespan), cond, ...vigieBlock(doc, file) });
         continue;
@@ -149,13 +157,18 @@ export function loadRules(dir) {
   return { rules, correlations };
 }
 
-// État des corrélations (fenêtres glissantes en mémoire, bornées) : renvoie les corrélations satisfaites par cet
-// événement, avec le groupe et la preuve (numéros des événements).
-export function createCorrelator(correlations, { now = Date.now, maxGroups = 10_000 } = {}) {
-  const state = new Map();           // nom → Map(groupe → { hits: [{t, seq, v, rule}], fired })
+// État des corrélations (fenêtres glissantes en mémoire) : renvoie les corrélations satisfaites par cet événement, avec
+// le groupe, la preuve (numéros des événements) et les sources qui y ont contribué. Mémoire bornée (revue du 17 octobre
+// 2026) : valeurs gardées en empreinte courte, budget global de points, groupes oubliés du moins récemment touché au
+// plus ancien, fenêtres échues retirées par prune(). Un résumé de l'émetteur (detail.nombre) compte pour son nombre.
+export function createCorrelator(correlations, { now = Date.now, maxGroups = 10_000, maxHits = 200_000 } = {}) {
+  const state = new Map();           // nom → Map(groupe → { hits: [{t, seq, v, rule, source, w}], fired })
+  let total = 0;
   const groupKey = (c, row) => c.groupBy.map(f => String(fieldOf(row, f) ?? '')).join('|');
-  return function feed(row, matched) {
-    const t = now();
+  const short = v => (v == null ? null : crypto.createHash('sha256').update(JSON.stringify(v)).digest('hex').slice(0, 16));
+  const weight = row => { const n = Number(fieldOf(row, 'detail.nombre')); return Number.isFinite(n) && n > 0 ? Math.min(Math.floor(n) + 1, 1000) : 1; };
+  const trim = (g, t, span) => { const before = g.hits.length; g.hits = g.hits.filter(h => t - h.t <= span); total -= before - g.hits.length; };
+  function feed(row, matched, { t = now(), source = null } = {}) {
     const out = [];
     for (const c of correlations) {
       const which = c.rules.filter(r => matched.has(r));
@@ -165,17 +178,52 @@ export function createCorrelator(correlations, { now = Date.now, maxGroups = 10_
       let m = state.get(c.name);
       if (!m) { m = new Map(); state.set(c.name, m); }
       let g = m.get(key);
-      if (!g) { if (m.size >= maxGroups) m.delete(m.keys().next().value); g = { hits: [], fired: 0 }; m.set(key, g); }
-      g.hits = g.hits.filter(h => t - h.t <= c.span);
-      for (const r of which) g.hits.push({ t, seq: row.seq, rule: r, v: c.cond.field ? fieldOf(row, c.cond.field) : null });
-      if (g.hits.length > 1000) g.hits = g.hits.slice(-1000);
-      const n = c.type === 'event_count' ? g.hits.length
-        : c.type === 'value_count' ? new Set(g.hits.map(h => JSON.stringify(h.v)).filter(v => v !== 'null')).size
+      if (g) m.delete(key);                                     // remis en fin : le moins récemment touché part d'abord
+      else {
+        if (m.size >= maxGroups) { const [k0, old] = m.entries().next().value; total -= old.hits.length; m.delete(k0); }
+        g = { hits: [], fired: 0 };
+      }
+      m.set(key, g);
+      trim(g, t, c.span);
+      // temporal : un point par règle satisfaite ; sinon un point par événement, même s'il satisfait plusieurs règles.
+      for (const r of c.type === 'temporal' ? which : [which[0]]) {
+        g.hits.push({ t, seq: row.seq, rule: r, source, v: c.cond.field ? short(fieldOf(row, c.cond.field)) : null, w: weight(row) });
+        total += 1;
+      }
+      if (g.hits.length > 1000) { total -= g.hits.length - 1000; g.hits = g.hits.slice(-1000); }
+      if (total > maxHits) prune(t, true);
+      const n = c.type === 'event_count' ? g.hits.reduce((a, h) => a + h.w, 0)
+        : c.type === 'value_count' ? new Set(g.hits.map(h => h.v).filter(v => v != null)).size
           : new Set(g.hits.map(h => h.rule)).size === c.rules.length ? 1 : 0;
-      const ok = c.type === 'temporal' ? n === 1 : ('gte' in c.cond ? n >= c.cond.gte : 'gt' in c.cond ? n > c.cond.gt : 'eq' in c.cond ? n === c.cond.eq : n <= c.cond.lte);
+      const ok = c.type === 'temporal' ? n === 1 : ('gte' in c.cond ? n >= c.cond.gte : n > c.cond.gt);
       // Une fois par fenêtre et par groupe (pas un signal par événement suivant).
-      if (ok && t - g.fired > c.span) { g.fired = t; out.push({ correlation: c, key, valeur: n, evenements: g.hits.map(h => h.seq).slice(-50) }); }
+      if (ok && t - g.fired > c.span) {
+        g.fired = t;
+        out.push({ correlation: c, key, valeur: n, evenements: g.hits.map(h => h.seq).filter(Boolean).slice(-50),
+          sources: [...new Set(g.hits.map(h => h.source).filter(Boolean))].sort() });
+      }
     }
     return out;
-  };
+  }
+  // Retire les fenêtres échues ; sous pression (budget dépassé), retire aussi les groupes les moins récemment touchés
+  // jusqu'à revenir sous 90 % du budget.
+  function prune(t = now(), pressure = false) {
+    for (const c of correlations) {
+      const m = state.get(c.name);
+      if (!m) continue;
+      for (const [k, g] of m) {
+        trim(g, t, c.span);
+        if (!g.hits.length && t - g.fired > c.span) m.delete(k);
+      }
+    }
+    if (!pressure) return;
+    for (const c of correlations) {
+      const m = state.get(c.name);
+      if (!m) continue;
+      for (const [k, g] of m) { if (total <= maxHits * 0.9) return; total -= g.hits.length; m.delete(k); }
+    }
+  }
+  feed.prune = prune;
+  feed.size = () => total;
+  return feed;
 }

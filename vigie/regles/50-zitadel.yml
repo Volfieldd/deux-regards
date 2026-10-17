@@ -67,4 +67,4 @@ detection:
     severity: haut
   condition: selection
 level: high
-vigie: { cas: DS28, entite: { kind: site, valeur: zitadel }, points: 3 }
+vigie: { cas: DS28, entite: { kind: site, valeur: zitadel }, source_unique: true }

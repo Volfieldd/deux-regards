@@ -22,6 +22,7 @@ export const OWN = {
   vigie_alerte: E('info', 'vigie · contrôle'),
   vigie_signal: E('info', 'vigie · contrôle'),
   vigie_controle_roles: E('info', 'vigie · contrôle'),
+  vigie_moteur_sature: E('haut', 'vigie · contrôle'),
   vigie_decision: E('moyen', 'vigie · ligne de commande'),
   vigie_interrupteur: E('moyen', 'vigie · ligne de commande'),
 };

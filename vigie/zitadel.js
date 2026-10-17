@@ -104,12 +104,16 @@ export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = f
         const id = `z${crypto.createHash('sha256').update(key).digest('hex').slice(0, 35)}`;
         const at = Date.parse(e.creationDate || e.creation_date) || now();
         const ip = agentIp(e.payload);
+        // Compte visé : l'agrégat quand c'est un utilisateur, sinon l'utilisateur de la charge (sessions), sinon l'auteur.
+        // L'auteur (un administrateur qui modifie le compte d'un autre, le service de connexion) reste dans le détail.
+        const editor = clean(e.editor?.userId || e.editor?.user_id, 200);
+        const target = e.aggregate?.type === 'user' ? e.aggregate.id : (e.payload?.userID || e.payload?.userId || e.payload?.user_id);
         rows.push({
           id: `${id.slice(0, 8)}-${id.slice(8, 12)}-${id.slice(12, 16)}-${id.slice(16, 20)}-${id.slice(20, 32)}`,
           recu_a: now(), survenu_a: at, type: KIND[def.categorie], severity: def.gravite, composant: 'zitadel', emetteur: 'zitadel · API des événements',
           canal: 'API Zitadel', confiance: 'constaté', reference: clean(`${e.aggregate?.type}:${e.aggregate?.id}#${e.sequence}`, 120),
-          sub: clean(e.editor?.userId || e.editor?.user_id, 200), ip, ip_net: ip,
-          detail: { type_zitadel: type, regle: def.regle, agregat: { type: clean(e.aggregate?.type, 40), id: clean(e.aggregate?.id, 60) },
+          sub: clean(typeof target === 'string' && target ? target : editor, 200), ip, ip_net: ip,
+          detail: { type_zitadel: type, regle: def.regle, auteur: editor, agregat: { type: clean(e.aggregate?.type, 40), id: clean(e.aggregate?.id, 60) },
             proprietaire: clean(e.aggregate?.resourceOwner || e.aggregate?.resource_owner, 60), service: clean(e.editor?.service, 60), charge: minimize(e.payload) },
         });
       }

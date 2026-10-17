@@ -99,8 +99,9 @@ export function createSecurite({ url, key, storageDir, log, send = null, now = D
   function sweep(all = false) {
     const t = now();
     for (const [k, b] of budgets) if (all || t - b.start >= HOUR) close(k, b);
-    for (const [k, a] of aggregates) if (all || t - a.start >= AGG_WINDOW) { aggregates.delete(k); if (a.n) push({ ...a.last, id: crypto.randomUUID(), survenu_a: t, detail: { ...(a.last.detail || {}), agrege: true, nombre: a.n, fenetre_min: AGG_WINDOW / 60e3 } }); }
+    for (const [k, a] of aggregates) if (all || t - a.start >= AGG_WINDOW) { aggregates.delete(k); if (a.n) summary(a, t); }
   }
+  const summary = (a, t) => push({ ...a.last, id: crypto.randomUUID(), survenu_a: t, detail: { ...(a.last.detail || {}), agrege: true, nombre: a.n, fenetre_min: AGG_WINDOW / 60e3 } });
   // Résumé par adresse et par type : true si l'événement part tel quel, false s'il est compté dans le résumé.
   function aggregate(ev) {
     if (!AGGREGATED.has(ev.type) || ev.sub || !ev.ip || rank(ev.severity) >= rank('haut')) return true;
@@ -108,8 +109,9 @@ export function createSecurite({ url, key, storageDir, log, send = null, now = D
     const t = now();
     const a = aggregates.get(k);
     if (!a || t - a.start >= AGG_WINDOW) {
-      if (a?.n) push({ ...a.last, id: crypto.randomUUID(), survenu_a: t, detail: { ...(a.last.detail || {}), agrege: true, nombre: a.n, fenetre_min: AGG_WINDOW / 60e3 } });
-      if (aggregates.size >= KEYS_MAX) aggregates.delete(aggregates.keys().next().value);
+      if (a?.n) summary(a, t);
+      // Plus de place : la clé la plus ancienne part, avec son résumé (un afflux de clés ne cache pas un comptage).
+      if (!a && aggregates.size >= KEYS_MAX) { const [k0, old] = aggregates.entries().next().value; aggregates.delete(k0); if (old.n) summary(old, t); }
       aggregates.set(k, { start: t, n: 0, last: ev });
       return true;
     }

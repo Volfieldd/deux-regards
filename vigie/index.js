@@ -18,11 +18,12 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   const decisions = createDecisions({ store, privateKey: config.decisionsKey, now });
   const ingest = createIngest({ store, decisions, ingestKey: config.ingestKey, now, logger });
   const log = ingest.log;
-  // Moteur d'entités (phase C1) : chaque événement écrit dans la base lui est remis.
+  // Moteur d'entités (phase C1) : chaque événement écrit dans la base lui est remis, par une file (la réception répond
+  // sans attendre l'analyse).
   const switches = createSwitches({ store, now });
-  const threats = createThreats({ store, fetchImpl, now, log });
+  const threats = createThreats({ store, fetchImpl, now, log, enabled: config.threatLists });
   const engine = createEngine({ store, decisions, switches, threats, now, log });
-  store.onAdded(rows => engine.process(rows));
+  store.onAdded(rows => engine.enqueue(rows));
 
   // Chaîne vérifiée au démarrage puis chaque jour, avant la purge ; rupture : critique. La tête de la chaîne est
   // écrite dans le journal du conteneur (hors de la base) : une fin de journal effacée se voit en la comparant.
@@ -56,7 +57,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     setInterval(safe('nonces', () => store.db.prepare('DELETE FROM nonces WHERE at < ?').run(now() - 10 * 60e3)), 60e3),
   ];
   setTimeout(safe('purge', daily), 60e3).unref();
-  // Détecteurs périodiques et site silencieux : chaque minute ; listes de menaces : chaque jour (première après 2 min) ;
+  // Site silencieux et fenêtres de corrélation échues : chaque minute ; détecteurs périodiques : chaque heure ; listes de menaces : chaque jour (première après 2 min) ;
   // contrôle des rôles : à chaque nouvelle sauvegarde du site (vérifié chaque heure).
   timers.push(setInterval(safe('détecteurs', () => engine.tick()), 60e3));
   const refreshThreats = () => { if (config.threatLists) threats.update().catch(err => log.warn({ err: err.message }, 'Vigie : listes de menaces')); };
@@ -64,14 +65,13 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   timers.push(setInterval(refreshThreats, 24 * 3600e3));
   if (config.siteBackupDir) timers.push(setInterval(safe('contrôle des rôles', () => checkRoles({ store, siteBackupDir: config.siteBackupDir, now })), 3600e3));
   for (const t of timers) t.unref();
-  for (const t of timers) t.unref();
   const zitadel = config.zitadel ? createZitadelReader({ ...config.zitadel, store, log, fetchImpl, now }) : null;
   zitadel?.start(config.zitadel.intervalMs);
 
   await ingest.listen({ host: config.host, port: config.ingestPort });
   return {
     store, decisions, ingest, zitadel, engine, switches, threats,
-    async close() { for (const t of timers) clearInterval(t); zitadel?.stop(); await ingest.close(); db.close(); },
+    async close() { for (const t of timers) clearInterval(t); zitadel?.stop(); await ingest.close(); await engine.drain(); db.close(); },
   };
 }
 

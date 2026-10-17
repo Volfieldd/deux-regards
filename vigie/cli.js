@@ -36,7 +36,8 @@ const HELP = `Commandes :
   seuil <ip|reseau|compte|session|appareil> <points>
   confiance <ajouter|retirer> <ip>         adresse jamais bloquée automatiquement
   menaces                                  état des listes de menaces (Spamhaus DROP, Feodo, Tor)
-  controle                                 contrôle des rôles sur la dernière sauvegarde du site`;
+  controle [--accepter --motif "…"]       contrôle des rôles sur la dernière sauvegarde du site ;
+                                           --accepter : l'instantané devient la référence`;
 
 function args(argv) {
   const pos = [], opt = {};
@@ -75,6 +76,9 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
     const decisions = createDecisions({ store, privateKey: config.decisionsKey, now });
     const switches = createSwitches({ store, now });
     const engine = createEngine({ store, decisions, switches, now });
+    // Événements écrits par la ligne de commande (chaîne rompue, contrôle des rôles) : analysés tout de suite, comme
+    // dans le service (sinon le contrôle marque l'instantané comme vu sans qu'aucune alerte ne s'ouvre).
+    store.onAdded(rows => engine.process(rows));
     const par = `ligne de commande (${user})`;
     const motif = opt.motif === true ? '' : opt.motif || '';
     const list = () => decisions.active().map(d => `#${d.id}  ${d.kind}  ${d.cible}${d.portee ? ` (${d.portee})` : ''}  jusqu'au ${new Date(d.fin).toISOString().slice(0, 16).replace('T', ' ')} UTC  par ${d.par}${d.motif ? `  — ${d.motif}` : ''}`).join('\n') || 'Aucune décision active.';
@@ -142,8 +146,15 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
       case 'controle': {
         if (!config.siteBackupDir) return 'VIGIE_SITE_BACKUP_DIR non défini : contrôle impossible.';
         store.setting.set('controle_roles_vu', null);
+        // --accepter : l'instantané actuel devient la référence (après vérification d'un écart expliqué hors journal).
+        if (opt.accepter) {
+          store.setting.set('controle_roles_admins', null);
+          store.setting.set('controle_roles_declencheurs', null);
+          store.own('vigie_interrupteur', { emetteur: par, detail: { controle_roles: 'référence acceptée', motif } });
+        }
         const r = checkRoles({ store, siteBackupDir: config.siteBackupDir, now });
-        return r.ok === null ? r.raison : r.ok ? 'Sauvegarde du site conforme : administrateurs déclarés, déclencheurs présents.' : `ÉCART : administrateurs non déclarés ${r.unknownAdmins.join(', ') || '—'} ; déclencheurs absents ${r.missing.join(', ') || '—'}.`;
+        return r.ok === null ? r.raison : r.ok ? `Sauvegarde du site conforme : administrateurs déclarés et expliqués, déclencheurs intacts${r.severity === 'haut' ? ' (contrôle incomplet : voir l\'alerte)' : ''}.`
+          : `ÉCART : ${r.erreur ? `instantané illisible (${r.erreur})` : `administrateurs non déclarés ${r.unknownAdmins.join(', ') || '—'} ; nouveaux administrateurs sans changement journalisé ${r.unexplained.join(', ') || '—'} ; déclencheurs absents ${r.missing.join(', ') || '—'} ; déclencheurs modifiés ${r.altered.join(', ') || '—'}`}.`;
       }
       default: throw new DecisionError(`commande inconnue : ${cmd}\n${HELP}`);
     }
@@ -154,6 +165,7 @@ const isMain = (() => { try { return fs.realpathSync(process.argv[1]) === fs.rea
 if (isMain) {
   try {
     const argv = process.argv.slice(2);
-    console.log(run(argv, { config: argv[0] === 'cles' || !argv[0] ? null : loadVigieConfig() }));
+    // Sortie sans séquences de terminal : clés, adresses et émetteurs viennent d'événements reçus.
+    console.log(run(argv, { config: argv[0] === 'cles' || !argv[0] ? null : loadVigieConfig() }).replace(/[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/g, '?'));
   } catch (err) { console.error(err.message); process.exitCode = 1; }
 }
