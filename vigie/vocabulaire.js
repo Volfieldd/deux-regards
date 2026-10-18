@@ -44,6 +44,7 @@ export const OWN = {
   vigie_console_arrivee: E('moyen', 'vigie · console'),
   vigie_console_droits: E('haut', 'vigie · console'),
   vigie_console_export: E('bas', 'vigie · console'),           // export CSV du journal (Analyste)
+  vigie_console_indisponible: E('haut', 'vigie · contrôle'),   // console réglée mais qui ne peut pas écouter
 };
 export const ALL = { ...SITE, ...OWN };
 export const isSiteType = t => Object.hasOwn(SITE, t);

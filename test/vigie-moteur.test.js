@@ -315,3 +315,27 @@ test('bout en bout : un lot signé du site et un événement Zitadel sur le mêm
   v.zitadel('zitadel_echec', 'moyen', { sub: 'zitadel-777' });
   assert.deepEqual(v.alerts().map(a => [a.entite_kind, a.entite_key, JSON.parse(a.sources).join('+')]), [['compte', 'zitadel-777', 'site+zitadel']]);
 });
+
+test('modes pendant un arrêt (audit D3-B1) : descendre ou prolonger demande un motif et prévient ; le mode à reprendre est gardé', async t => {
+  const v = engineOf(t);
+  const reduites = () => v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_surveillance_reduite'").pluck().get();
+  v.engine.setMode('entite.score', 'bloquer', 'test');
+  v.engine.setMode('entite.score', 'arret', 'test', { duree: '30min', motif: 'maintenance courte' });
+  const n = reduites();
+  // Pendant l'arrêt, Observer est une descente par rapport à Bloquer : motif exigé, avis émis.
+  assert.throws(() => v.engine.setMode('entite.score', 'observer', 'test'), /motif obligatoire/);
+  v.engine.setMode('entite.score', 'observer', 'test', { motif: 'calibrage' });
+  assert.equal(reduites(), n + 1);
+  // Arrêter de nouveau, puis prolonger l'arrêt : motif exigé, et la règle reprend ensuite son mode d'avant.
+  v.engine.setMode('entite.score', 'bloquer', 'test');
+  v.engine.setMode('entite.score', 'arret', 'test', { duree: '1h', motif: 'essai' });
+  assert.throws(() => v.engine.setMode('entite.score', 'arret', 'test', { duree: '1h' }), /motif obligatoire/);
+  v.engine.setMode('entite.score', 'arret', 'test', { duree: '2h', motif: 'encore' });
+  v.clock.t += 3 * 3600e3;
+  assert.equal(v.engine.modeOf('entite.score'), 'bloquer', 'mode d’avant le premier arrêt repris');
+  // Remonter pendant un arrêt (ou le finir) n'est pas une réduction.
+  v.engine.setMode('entite.score', 'arret', 'test', { duree: '1h', motif: 'essai' });
+  const m = reduites();
+  v.engine.setMode('entite.score', 'bloquer', 'test');
+  assert.equal(reduites(), m);
+});
