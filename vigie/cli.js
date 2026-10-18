@@ -1,15 +1,14 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
-import net from 'node:net';
 import os from 'node:os';
 import { loadVigieConfig } from './config.js';
 import { openVigieDb, createStore } from './store.js';
-import { createDecisions, DecisionError, parseDuration } from './decisions.js';
+import { createDecisions, DecisionError } from './decisions.js';
 import { createSwitches } from './interrupteurs.js';
 import { createEngine } from './moteur.js';
 import { createThreats } from './menaces.js';
-import { checkRoles } from './controle-roles.js';
 import { testChannel } from './notifications.js';
+import { setTrust, runRolesCheck } from './reglages.js';
 import { createRights, LABELS } from './console/droits.js';
 
 // Secours en ligne de commande (annexe architecture, section 6.4), dans le conteneur :
@@ -151,20 +150,7 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         if (!motif && Number(rest[1]) > (engine.thresholds()[rest[0]] ?? Infinity)) throw new DecisionError('seuil relevé (surveillance réduite) : --motif "…" obligatoire');
         engine.setThreshold(rest[0], Number(rest[1]), par, { motif }); return `Seuil ${rest[0]} : ${rest[1]} points.`;
       case 'confiance': {
-        const ip = rest[1];
-        if (!['ajouter', 'retirer'].includes(rest[0]) || !net.isIP(String(ip))) throw new DecisionError('usage : confiance ajouter|retirer <ip>');
-        // Une adresse de confiance n'est jamais bloquée automatiquement : toujours pour une durée (7 jours au plus), et
-        // signalée aux Administrateurs (surveillance réduite).
-        const list = store.setting.get('adresses_confiance', []).filter(x => x && typeof x === 'object' && x.ip !== ip);
-        if (rest[0] === 'ajouter') {
-          if (!opt.duree) throw new DecisionError('adresse de confiance toujours pour une durée (--duree 7j au plus)');
-          if (!motif) throw new DecisionError('adresse de confiance : --motif "…" obligatoire');
-          const jusqua = now() + Math.min(parseDuration(opt.duree), 7 * 864e5);
-          list.push({ ip, jusqua, par, motif: motif || undefined });
-          store.own('vigie_surveillance_reduite', { emetteur: par, detail: { objet: `confiance:${ip}`, jusqua, motif: motif || undefined } });
-        }
-        store.setting.set('adresses_confiance', list);
-        store.own('vigie_interrupteur', { emetteur: par, detail: { adresse_confiance: rest[0], ip } });
+        const list = setTrust(store, { action: rest[0], ip: rest[1], duree: opt.duree, motif, par, now });
         return `Adresses de confiance : ${list.map(x => `${x.ip} (jusqu'au ${new Date(x.jusqua).toISOString().slice(0, 16).replace('T', ' ')} UTC)`).join(', ') || 'aucune'}.`;
       }
       case 'console': {
@@ -202,20 +188,7 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
       }
       case 'controle': {
         // --accepter : l'instantané actuel devient la référence (après vérification d'un écart expliqué hors journal).
-        if (opt.accepter) {
-          // Jamais pendant qu'une alerte du contrôle des rôles est ouverte : accepter rendrait légitime ce qu'elle signale.
-          const open = db.prepare("SELECT id FROM alerts WHERE regle = 'sigma.controle_roles' AND statut != 'close' ORDER BY id DESC LIMIT 1").pluck().get();
-          if (open) throw new DecisionError(`alerte #${open} du contrôle des rôles encore ouverte : classez-la d'abord (classer ${open} incident|faux_positif|test --note "…")`);
-          if (!motif) throw new DecisionError('référence acceptée : --motif "…" obligatoire');
-        }
-        store.setting.set('controle_roles_vu', null);
-        if (opt.accepter) {
-          store.setting.set('controle_roles_admins', null);
-          store.setting.set('controle_roles_declencheurs', null);
-          store.own('vigie_interrupteur', { emetteur: par, detail: { controle_roles: 'référence acceptée', motif } });
-          store.own('vigie_surveillance_reduite', { emetteur: par, detail: { objet: 'controle_roles:reference', motif: motif || undefined } });
-        }
-        const r = checkRoles({ store, siteBackupDir: config.siteBackupDir, now });
+        const r = runRolesCheck(store, { accepter: Boolean(opt.accepter), motif, par, siteBackupDir: config.siteBackupDir, now });
         return r.ok === null ? r.raison : r.ok ? `Sauvegarde du site conforme : administrateurs déclarés et expliqués, déclencheurs intacts${r.severity === 'haut' ? ' (contrôle incomplet : voir l\'alerte)' : ''}.`
           : `ÉCART : ${r.erreur ? `instantané illisible (${r.erreur})` : `administrateurs non déclarés ${r.unknownAdmins.join(', ') || '—'} ; nouveaux administrateurs sans changement journalisé ${r.unexplained.join(', ') || '—'} ; déclencheurs absents ${r.missing.join(', ') || '—'} ; déclencheurs modifiés ${r.altered.join(', ') || '—'}`}.`;
       }

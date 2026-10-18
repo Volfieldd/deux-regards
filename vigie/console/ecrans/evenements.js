@@ -6,7 +6,9 @@
 //                               neutralisées pour le tableur, l'export noté au journal (vigie_console_export) ;
 //   GET /evenements/:seq        un événement : ses deux heures, son origine, son maillon, ses alertes, son détail échappé ;
 //   GET /entites                les entités les plus chaudes (engine.top) et un formulaire pour en ouvrir une ;
-//   GET /entites/:kind/:cle     la fiche d'une entité : score par source, seuil, liens, alertes, décisions, derniers événements.
+//   GET /entites/:kind/:cle     la fiche d'une entité : score par source, seuil, liens, alertes, décisions, derniers événements ;
+//                               en D3c, selon le droit, les actions forcées sur l'entité (formulaires POST /decisions, et
+//                               « Lever… » des décisions en cours ; vigie/console/ecrans/decisions.js, actionsForcees).
 //
 // Lectures bornées : la table events peut faire des millions de lignes. Chaque lecture part d'UN index (events_recu,
 // events_type, events_sub, events_ip, events_net ; alert_events pour une alerte), dans l'ordre de cet index (heure de
@@ -23,6 +25,7 @@ import { ALL, rank } from '../../vocabulaire.js';
 import { alertOrder, isPrivate } from '../../moteur.js';
 import { HALF_LIFE_MIN, THRESHOLDS } from '../../poids.js';
 import { can } from '../droits.js';
+import { actionsForcees, lienLever } from './decisions.js';
 import { FINE, adresseDetail, reseauVue, dateHeure, duree, gravite, guillemets, heure, jour, jusqua, nombre, paris, quand } from '../format.js';
 
 export const PAGE = 50;                   // lignes par page du journal
@@ -960,10 +963,12 @@ export function fiche({ db, engine, switches, kind, cle, role, t }) {
   }
 
   const reseau = kind === 'ip' && reseauDe(cle) ? reseauVueDe(reseauDe(cle), role) : null;
+  const ici = `/entites/${kind}/${encodeURIComponent(cle)}`;
   const decisions = decisionsDe(q, kind, cle, t).map(d => {
     const auto = /^alerte #(\d+)$/.exec(d.motif || '');
     return {
       id: d.id, type: DECISIONS[d.kind] || propre(d.kind, 30),
+      lever: can(role, 'actions_forcees') ? lienLever(d, ici) : null,
       cible: d.kind === 'bloquer' ? { texte: adresseDetail(String(d.cible).replace(/\/(32|128)$/, ''), role).texte, mono: 'ip' } : { texte: propre(d.cible, 200), mono: 'sub' },
       sec: [{ t: `${d.portee ? `${PORTEES[d.portee] || propre(d.portee, 20)} · ` : ''}${jusqua(d.fin, t)} · ` }, ...(d.auto && auto ? [{ t: 'par la Vigie, alerte ' }, { t: `#${auto[1]}`, href: `/alertes/${auto[1]}` }]
         : [{ t: `par ${d.auto ? 'la Vigie' : propre(d.par, 60)}${d.motif ? motif(d.motif, role) : ''}` }])],
@@ -977,7 +982,7 @@ export function fiche({ db, engine, switches, kind, cle, role, t }) {
   // Ce qu'on en sait, en une phrase.
   const lede = e ? `Vue depuis le ${dateHeure(e.premiere)}, dernier point ${aQuand(e.derniere, t)}${FINE}; ${nombre(e.signaux)} ${pluriel(e.signaux, 'signal noté', 'signaux notés')}.`
     : 'Aucun point en cours sur cette entité (un score s’efface 30 jours après son dernier signal).';
-  const ledeSec = ouvertes.length ? `${nombre(ouvertes.length)} ${pluriel(ouvertes.length, 'alerte ouverte', 'alertes ouvertes')}${kind === 'reseau' ? ' sur ce réseau ou ses adresses' : ''}. Rien ne se fait depuis cet écran${FINE}: il se lit.`
+  const ledeSec = ouvertes.length ? `${nombre(ouvertes.length)} ${pluriel(ouvertes.length, 'alerte ouverte', 'alertes ouvertes')}${kind === 'reseau' ? ' sur ce réseau ou ses adresses' : ''}.${can(role, 'actions_forcees') ? '' : ` Rien ne se fait depuis cet écran${FINE}: il se lit.`}`
     : `Aucune alerte ouverte${kind === 'reseau' ? ' sur ce réseau ni ses adresses' : ''}.`;
 
   // En-tête.
@@ -1063,7 +1068,12 @@ export function register(app, ctx) {
     if (f.redirection) return reply.redirect(f.redirection, 302);
     // Le titre de l'onglet ne porte ni adresse ni compte (historique, onglets).
     const de = { ip: 'd’une adresse', reseau: 'd’un réseau', compte: 'd’un compte', session: 'd’une session' }[f.kind] || 'd’une entité';
-    return ctx.view(reply, req, 'entite', { page: 'entites', titre: `Fiche ${de} · Vigie`, f });
+    // Actions forcées (D3c), selon le droit : le message d'une action est lu ici (une fois) pour placer une erreur près de
+    // son champ, puis passé à la page.
+    const message = ctx.isRefresh(req) ? null : ctx.sessions.takeMessage(req.moi.sid);
+    const kind = String(req.params.kind), cle = String(req.params.cle ?? '');
+    const actions = actionsForcees({ db, kind, key: cle, req, t: now(), retour: `/entites/${kind}/${encodeURIComponent(cle)}`, message, prefixe: 'e' });
+    return ctx.view(reply, req, 'entite', { page: 'entites', titre: `Fiche ${de} · Vigie`, f, actions, message });
   });
 
   return ['/evenements', '/entites'];

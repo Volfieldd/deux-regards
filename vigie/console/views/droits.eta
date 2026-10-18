@@ -1,0 +1,12 @@
+<%
+/* Droits (MV-08, /droits). Données : it.d = vueAdmin() ou vueSoi() (vigie/console/ecrans/droits.js), déjà mises en forme ;
+   it.identite : identité confirmée il y a moins de 5 minutes ; it.message : le retour de l'action POST /droits/:sub (le
+   layout l'affiche en tête ; le champ en erreur est marqué sur la ligne de la personne). Aucun style ni script en ligne. */
+const d = it.d || {};
+layout('./layout', { titre: d.admin ? 'Droits' : 'Vos droits' });
+%>
+<% if (d.admin) { %>
+<%~ include('./_droits-admin', { d, csrf: it.csrf, message: it.message, identite: it.identite }) %>
+<% } else { %>
+<%~ include('./_droits-soi', { d, identite: it.identite }) %>
+<% } %>

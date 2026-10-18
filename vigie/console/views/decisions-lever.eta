@@ -1,0 +1,33 @@
+<%
+/* Lever une décision (MV-05, état « Lever le gel… ») : la question avec l'objet, l'action rappelée mot pour mot, qui l'a
+   décidée et pour quoi, ce qui va changer, la ré-authentification, puis « Lever le gel » en danger (POST
+   /decisions/<n°>/lever, vigie/console/actions.js) avec un motif facultatif. Données : it.vue = pageLever(). */
+const vue = it.vue;
+layout('./layout', { titre: it.titre });
+const c = vue.cible;
+const ident = vue.identite;
+%>
+<header class="ep">
+  <a class="ep-retour" href="<%= vue.retour %>"><%~ include('./_dec-ic', { icone: 'retour', taille: 16 }) %><%= vue.retour === '/decisions' ? 'Décisions' : 'Retour' %></a>
+  <div class="ep-titre"><h1><%= vue.titre %></h1></div>
+  <p class="ep-meta"><span>décision #<%= vue.id %></span><% if (vue.enCours) { %><span>rien n’est encore levé</span><% } %><% if (ident && ident.fraiche) { %><span class="tel-non"><span class="vg-identite"><%~ include('./_dec-ic', { icone: 'cadenas', taille: 13 }) %><%= ident.texte %></span></span><% } %></p>
+</header>
+<div class="panel vg-confirmer">
+<p class="action-rappel"><%= vue.enCours ? `Lever la décision #${vue.id} : ` : `Décision #${vue.id} : ` %><%= vue.type %> · <% if (c.mono === 'ip') { %><span class="ip<%= c.v6 ? ' v6' : '' %>"><%= c.texte %></span><% } else if (c.mono === 'sub') { %><span class="sub"><%= c.texte %></span><% } else { %><%= c.texte %><% } %><% if (vue.enCours) { %> · jusqu’au <%= vue.finTexte %><% } %></p>
+<dl class="kv-a">
+<dt>Décidée par</dt><dd><%= vue.par.t %>, le <%= vue.depuis %><% if (vue.par.sec.length) { %><span class="sec"><%~ include('./_morceaux', { morceaux: vue.par.sec }) %></span><% } %></dd>
+<% if (c.sec) { %><dt>Effet</dt><dd><%= c.sec %></dd><% } %>
+<% if (!vue.enCours) { %><dt>Fin</dt><dd><%= vue.fin.t %><% if (vue.fin.sec) { %> <%= vue.fin.sec %><% } %></dd><% } %>
+</dl>
+<% if (vue.enCours) { %>
+<div class="signal"><p class="signal-t"><%~ include('./_dec-ic', { icone: 'triangle', taille: 16 }) %><%= vue.effet %></p></div>
+<% if (ident && !ident.fraiche) { %><div class="vg-reauth"><%~ include('./_dec-ic', { icone: 'cadenas', taille: 18 }) %><p>Lever est une action forcée&#8239;: Zitadel vous redemande votre identité. Après la confirmation, vous revenez sur cette page&#8239;: renvoyez alors le formulaire.</p></div><% } %>
+<form method="post" action="/decisions/<%= vue.id %>/lever"><input type="hidden" name="_csrf" value="<%= vue.csrf %>"><input type="hidden" name="formulaire" value="lever"><input type="hidden" name="retour" value="<%= vue.retour %>">
+<div class="champ-a"><label for="l-motif">Motif <span class="facultatif">(facultatif)</span></label><p class="aide" id="l-motif-aide">300 signes au plus&#8239;; gardé au journal avec la levée.</p><input id="l-motif" name="motif" type="text" maxlength="300" aria-describedby="l-motif-aide"></div>
+<div class="form-pied"><p class="hint">Sans rien faire, la décision se lève seule le <%= vue.finTexte %>.</p><a class="btn ghost" href="<%= vue.retour %>">Annuler</a><button class="btn danger" type="submit"><%~ include('./_dec-ic', { icone: 'ouvert', taille: 16 }) %><%= vue.bouton %></button></div>
+</form>
+<% } else { %>
+<p>Rien à lever&#8239;: le site ne l’applique plus.</p>
+<p><a class="vg-lien" href="<%= vue.retour %>"><%= vue.retour === '/decisions' ? 'Revenir aux décisions' : 'Revenir à la page précédente' %></a></p>
+<% } %>
+</div>

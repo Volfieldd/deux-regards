@@ -1,17 +1,24 @@
 <%
 /* Santé et intégrité (MV-07, /sante) : l'état en une phrase, puis une carte par composant, toujours dans le même ordre (la
    chaîne d'abord) : nom, état (symbole et mot), faits datés, « Alerte si… » (la règle du code), le dépliant des commandes du
-   serveur. Données : it.sante = vueSante() (vigie/console/ecrans/sante-flux.js), déjà mises en forme. Lecture seule. */
+   serveur. Données : it.sante = vueSante() (vigie/console/ecrans/sante-flux.js), déjà mises en forme.
+   Commandes (D3c) : le geste de chaque carte (c.commande), un formulaire POST vers les routes d'action, montré seulement à qui a
+   le droit et si la Vigie sait le faire (it.peut) ; « Accepter comme référence… » se déplie (motif, identité redemandée) et
+   n'est proposé que si aucune alerte du contrôle des rôles n'est ouverte. Un refus revient près de son bouton. */
 const s = it.sante || { cartes: [], faits: [] };
+const peut = it.peut || {};
+const FN = '\u202f';
+const m = it.message && it.message.k === 'erreur' && it.message.valeurs ? it.message : null;
+const refus = nom => (m && m.valeurs.formulaire === nom ? m : null);
+const cache = (retour, formulaire) => ({ csrf: it.csrf, retour, formulaire });
 layout('./layout', { titre: it.titre && it.titre !== 'Vigie' ? it.titre : 'Santé et intégrité' });
 %>
 <header class="ep">
   <div class="ep-titre"><h1>Santé et intégrité</h1></div>
-  <p class="ep-meta"><span><%= s.maintenant %></span><span class="tel-non">heure de Paris</span><span class="tel-non">relue à chaque visite</span></p>
-  <% /* D3c : l'identité confirmée dans la méta (« Identité confirmée à …, valable jusqu’à … »). */ %>
+  <p class="ep-meta"><span><%= s.maintenant %></span><span class="tel-non">heure de Paris</span><span class="tel-non">relue à chaque visite</span><% if (it.identite) { %><span class="vg-identite"><%~ include('./_ic', { icone: 'cadenas', taille: 13 }) %><%= it.identite.texte %></span><% } %></p>
 </header>
 <% if (s.lecteur) { %>
-<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule : vous voyez, vous n’agissez pas.</b> Les commandes de la santé (vérifier la chaîne, recopier la liste de la bordure) sont réservées aux Administrateurs.</span></p>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule : vous voyez, vous n’agissez pas.</b> Les commandes de la santé (vérifier la chaîne, recopier la liste de la bordure) sont réservées aux Analystes et aux Administrateurs.</span></p>
 <% } %>
 <div class="vg-etat">
   <h2 class="phrase" id="t-etat"><%= s.phrase %></h2>
@@ -34,8 +41,27 @@ layout('./layout', { titre: it.titre && it.titre !== 'Vigie' ? it.titre : 'Sant�
 <% } %>
 </dl>
 <p class="vg-compo-seuil"><% for (const m of c.seuil) { %><% if (m.donnee) { %><span class="donnee"><%= m.t %></span><% } else if (m.r) { %><span class="r"><%= m.t %></span><% } else { %><%= m.t %><% } %><% } %></p>
-<% /* D3c : le bouton de la carte (Vérifier maintenant, Recopier la liste maintenant, Accepter comme référence…), un formulaire
-   POST avec le jeton _csrf, gardé par guard() ; rien n'est affiché avant (pas de bouton mort). Le libellé prévu est dans c.d3c. */ %>
+<% const k = c.commande && c.commande.k; %>
+<% if (k === 'verifier' && peut.verifier) { const e = refus('sante-verifier'); %>
+<div class="btns-ligne"><form method="post" action="/sante/verifier"><%~ include('./_reg-cache', cache('/sante#chaine', 'sante-verifier')) %><button class="btn ghost" type="submit">Vérifier maintenant<span class="sr-only"> la chaîne du journal</span></button></form><span class="hint"><%= c.commande.hint %></span></div>
+<% if (e) { %><%~ include('./_reg-err', { texte: e.texte }) %><% } %>
+<% } else if (k === 'bordure' && peut.bordure) { const e = refus('sante-bordure'); %>
+<div class="btns-ligne"><form method="post" action="/sante/bordure/copier"><%~ include('./_reg-cache', cache('/sante#bordure', 'sante-bordure')) %><button class="btn ghost" type="submit">Recopier la liste maintenant<span class="sr-only"> à la bordure</span></button></form><span class="hint"><%= c.commande.hint %></span></div>
+<% if (e) { %><%~ include('./_reg-err', { texte: e.texte }) %><% } %>
+<% } else if (k === 'accepter' && peut.accepter) { %>
+<% if (c.commande.bloquee) { %><p class="vg-sans">Accepter comme référence<%= FN %>: impossible tant que l’alerte #<%= c.commande.bloquee %> est ouverte<%= FN %>; classez-la d’abord.</p>
+<% } else { const e = refus('sante-accepter'); const errM = e && /motif/i.test(e.texte); %>
+<details class="plier"<%= e ? ' open' : '' %>><summary><%~ include('./_flux-ic', { icone: 'chevron', taille: 14 }) %>Accepter comme référence…</summary>
+<form class="vg-form" method="post" action="/sante/controle/accepter"><%~ include('./_reg-cache', cache('/sante#roles', 'sante-accepter')) %>
+<div class="signal"><p class="signal-t"><%~ include('./_reg-ic', { icone: 'attention', taille: 16 }) %>Ce qui ne sera plus vu</p><p>La dernière sauvegarde contrôlée devient la référence des administrateurs et des déclencheurs, sans durée<%= FN %>: un écart identique à celui d’aujourd’hui ne ressortira plus. Seul un nouveau changement, après cette sauvegarde, ressortira.</p></div>
+<div class="champ-a"><label for="motif-acc">Motif</label><input id="motif-acc" name="motif" type="text" maxlength="200" required autocomplete="off"<% if (e && e.valeurs.motif) { %> value="<%= e.valeurs.motif %>"<% } %><% if (errM) { %> aria-invalid="true" aria-describedby="motif-acc-err"<% } %>><% if (errM) { %><%~ include('./_reg-err', { errId: 'motif-acc-err', texte: e.texte }) %><% } %></div>
+<div class="vg-reauth"><%~ include('./_ic', { icone: 'cadenas' }) %><p><%= it.reauthFraiche ? 'Votre identité est confirmée' : 'Zitadel vous redemandera votre identité (mot de passe et second facteur)' %><%= it.reauthFraiche ? FN + ': pas redemandée dans les 5 minutes qui suivent sa confirmation.' : ' avant d’accepter.' %> L’alerte « Surveillance réduite » (Moyenne) part vers les autres Administrateurs.</p></div>
+<% if (e && !errM) { %><%~ include('./_reg-err', { texte: e.texte }) %><% } %>
+<div class="form-pied"><button class="btn danger" type="submit">Accepter comme référence</button></div>
+</form>
+</details>
+<% } %>
+<% } %>
 <% if (c.liens.length) { %>
 <div class="btns-ligne"><% for (const a of c.liens) { %><a class="<%= a.btn ? 'btn' : 'vg-lien' %>" href="<%= a.href %>"><%= a.t %></a><% } %></div>
 <% } %>

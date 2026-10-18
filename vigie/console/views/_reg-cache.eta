@@ -1,0 +1,4 @@
+<%
+/* Champs cachés de chaque formulaire d'action : jeton CSRF, page où revenir, nom du formulaire (pour remettre un refus près
+   de lui). include('./_reg-cache', { csrf, retour, formulaire }). */
+%><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="retour" value="<%= it.retour %>"><input type="hidden" name="formulaire" value="<%= it.formulaire %>">

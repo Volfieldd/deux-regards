@@ -1,8 +1,11 @@
 <%
 /* Fiche d'une alerte (MV-02, phase D3b) : ce qui s'est passé, la réponse déjà faite, d'où vient le signal (la règle, ses
    tactiques MITRE, les sources, les événements de l'alerte), l'entité et son score, le classement, l'historique. Données :
-   it.vue = fiche() (vigie/console/ecrans/alertes.js), déjà mises en forme. Lecture seule : les gestes viennent en D3c. */
+   it.vue = fiche() (vigie/console/ecrans/alertes.js), déjà mises en forme. Gestes (D3c), selon le droit : it.actions
+   (actionsFiche, même module) ; null pour un Lecteur. Prendre en charge, classer, ajouter une note : POST /alertes/<n°>/… ;
+   actions forcées : POST /decisions avec alerte=<n°> (_dec-actions, _dec-form) ; « Lever… » : /decisions/<n°>/lever. */
 const vue = it.vue || {};
+const ac = it.actions || null;
 layout('./layout', { titre: it.titre && it.titre !== 'Vigie' ? it.titre : `Alerte #${vue.id}` });
 const ent = vue.entite || {};
 const rep = vue.reponse || { lignes: [], raisons: [] };
@@ -14,9 +17,13 @@ const RETOUR = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill=
 <header class="ep">
   <a class="ep-retour" href="<%= vue.retour %>"><%~ RETOUR %>Alertes</a>
   <div class="ep-titre"><h1><%= vue.titre %></h1><span class="ep-pastilles"><%~ include('./_grav', { gravClasse: vue.grav.classe, gravMot: vue.grav.mot }) %><%~ include('./_etat', { etatK: vue.statut.k, etatMot: vue.statut.mot }) %></span></div>
-  <p class="ep-meta"><span>Alerte #<%= vue.id %></span><span class="tel-non">règle «&#8239;<%= rg.titre %>&#8239;»<% if (rg.cas) { %> <span class="vg-code"><%= rg.cas %></span><% } %></span><span><%~ include('./_ent', { ent }) %></span><span><%= vue.quand %></span><% if (vue.priseEnCharge) { %><span><%= vue.priseEnCharge %></span><% } %></p>
-  <% /* D3c : « Classer… » en contour, menu « Plus d’actions » et « Prendre en charge » (bouton plein, POST /alertes/<n°>/prendre) ; l'identité confirmée dans la méta. */ %>
+  <p class="ep-meta"><span>Alerte #<%= vue.id %></span><span class="tel-non">règle «&#8239;<%= rg.titre %>&#8239;»<% if (rg.cas) { %> <span class="vg-code"><%= rg.cas %></span><% } %></span><span><%~ include('./_ent', { ent }) %></span><span><%= vue.quand %></span><% if (vue.priseEnCharge) { %><span><%= vue.priseEnCharge %></span><% } %><% if (ac && ac.identite && ac.identite.fraiche) { %><span class="tel-non"><span class="vg-identite"><%~ include('./_dec-ic', { icone: 'cadenas', taille: 13 }) %><%= ac.identite.texte %></span></span><% } %></p>
+<% if (ac && (ac.classer || ac.forcees || ac.prendre)) { %>
+  <div class="ep-actions"><% if (ac.classer) { %><a class="btn ghost ep-secondaire" href="#classer">Classer…</a><% } %><% if (ac.forcees) { %><a class="btn ghost ep-secondaire" href="#agir">Actions forcées…</a><% } %><% if (ac.classer || ac.forcees) { %><details class="menu ep-plus"><summary class="btn ghost" aria-label="Plus d’actions"><%~ include('./_dec-ic', { icone: 'points', taille: 18 }) %></summary><div class="menu-pop"><% if (ac.classer) { %><a href="#classer">Classer…</a><% } %><% if (ac.forcees) { %><a href="#agir">Actions forcées</a><% } %></div></details><% } %><% if (ac.prendre) { %><button class="btn" type="submit" form="f-prendre">Prendre en charge</button><% } %></div>
+<% } %>
 </header>
+<% if (ac && ac.prendre) { %><form class="form-cache" id="f-prendre" method="post" action="<%= ac.prendre %>"><input type="hidden" name="_csrf" value="<%= ac.csrf %>"><input type="hidden" name="formulaire" value="prendre"></form>
+<% } %>
 <% if (vue.lecteur) { %>
 <p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule : vous voyez l’alerte, son score et d’où vient le signal.</b> Les adresses sont tronquées à leur réseau (/24, /48).</span></p>
 <% } %>
@@ -36,7 +43,7 @@ const RETOUR = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill=
 <% if (rep.lignes.length) { %>
 <ul class="vg-lignes">
 <% for (const d of rep.lignes) { %>
-<li><span class="t"><%= d.type %><% if (d.cible) { %> · <% if (d.cible.mono === 'ip') { %><span class="ip<%= d.cible.v6 ? ' v6' : '' %>"><%= d.cible.texte %></span><% if (d.cible.tronquee) { %> <span class="tronq">(tronquée)</span><% } %><% } else { %><span class="sub"><%= d.cible.texte %></span><% } %><% } %></span><span class="n">#<%= d.id %></span><span class="sec"><%= d.sec %></span><% if (d.enCours) { %><% /* D3c : « Lever… » (vers /decisions/<n°>/lever), selon le droit. */ %><% } %></li>
+<li><span class="t"><%= d.type %><% if (d.cible) { %> · <% if (d.cible.mono === 'ip') { %><span class="ip<%= d.cible.v6 ? ' v6' : '' %>"><%= d.cible.texte %></span><% if (d.cible.tronquee) { %> <span class="tronq">(tronquée)</span><% } %><% } else { %><span class="sub"><%= d.cible.texte %></span><% } %><% } %></span><span class="n">#<%= d.id %></span><span class="sec"><%= d.sec %></span><% if (d.lever) { %><a class="vg-lien" href="<%= d.lever.href %>"><%= d.lever.texte %><span class="sr-only"><%= d.lever.sr %></span></a><% } %></li>
 <% } %>
 </ul>
 <% } %>
@@ -90,7 +97,11 @@ const RETOUR = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill=
 <p class="vg-seuils">Maintenant (le score perd la moitié de sa valeur chaque heure). <%= vue.score.seuils %></p>
 </section>
 <% } %>
-<% /* D3c : « Actions forcées sur <l’entité> » (geler, fermer les sessions, bloquer l’adresse avec portée et durée, verrouiller l’admin), selon le droit, avec ré-authentification. */ %>
+<% if (ac && ac.forcees) { %>
+<section class="panel" id="agir" aria-labelledby="t-agir"><h2 class="panel-t" id="t-agir"><%= ac.forcees.titre %></h2>
+<%~ include('./_dec-actions', { a: ac.forcees }) %>
+</section>
+<% } %>
 <% if (vue.classement) { %>
 <section class="panel" aria-labelledby="t-classe"><h2 class="panel-t" id="t-classe">Classement</h2>
 <dl class="kv-a">
@@ -101,7 +112,19 @@ const RETOUR = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill=
 <p class="panel-pied"><span>Si le signal revient, une nouvelle alerte s’ouvre.</span></p>
 </section>
 <% } else { %>
-<% /* D3c : « Classer l’alerte » (Incident confirmé, Faux positif, Test ; note de 500 signes ; POST /alertes/<n°>/classer). */ %>
+<% if (ac && ac.classer) { const c = ac.classer; const ce = c.err; const en = k => Boolean(ce && ce.place === k); %>
+<section class="panel" id="classer" aria-labelledby="t-classer"><h2 class="panel-t" id="t-classer">Classer l’alerte</h2>
+<form class="form" method="post" action="<%= c.action %>"<% if (en('general')) { %> aria-describedby="c-err"<% } %>><input type="hidden" name="_csrf" value="<%= ac.csrf %>"><input type="hidden" name="formulaire" value="classer">
+<% if (en('general')) { %><%~ include('./_dec-err', { id: 'c-err', texte: ce.texte }) %>
+<% } %>
+<fieldset class="choix-a"<% if (en('classement')) { %> aria-describedby="c-classement-err"<% } %>><legend>Classement</legend>
+<% for (const o of c.choix) { %><label><input type="radio" name="classement" value="<%= o.v %>" required<% if (o.coche) { %> checked<% } %><% if (en('classement')) { %> aria-invalid="true"<% } %>><span><%= o.t %></span><span class="sec"><%= o.sec %></span></label>
+<% } %><% if (en('classement')) { %><%~ include('./_dec-err', { id: 'c-classement-err', texte: ce.texte }) %><% } %></fieldset>
+<div class="champ-a"><label for="c-note">Note <span class="facultatif">(facultatif)</span></label><p class="aide" id="c-note-aide">500 signes au plus.</p><textarea id="c-note" name="note" rows="3" maxlength="500" aria-describedby="c-note-aide<%= en('note') ? ' c-note-err' : '' %>"<% if (en('note')) { %> aria-invalid="true"<% } %>><%= c.note %></textarea><% if (en('note')) { %><%~ include('./_dec-err', { id: 'c-note-err', texte: ce.texte }) %><% } %></div>
+<div class="form-pied"><p class="hint">Classer clôt l’alerte.</p><button class="btn ghost" type="submit">Classer et clore l’alerte</button></div>
+</form>
+</section>
+<% } %>
 <% } %>
 <section class="panel" aria-labelledby="t-hist"><h2 class="panel-t" id="t-hist">Historique</h2>
 <% if (hist.lignes.length) { %>
@@ -113,6 +136,14 @@ const RETOUR = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill=
 <% if (hist.coupe) { %><p class="vg-compte">Les <%= hist.lignes.length %> derniers changements ; les plus anciens sont au journal.</p><% } %>
 <% } else { %>
 <p class="vg-compte">Aucun changement noté au journal pour cette alerte.</p>
+<% } %>
+<% if (ac && ac.note) { const nn = ac.note; const ne = nn.err; %>
+<form class="form" method="post" action="<%= nn.action %>"<% if (ne && ne.place === 'general') { %> aria-describedby="h-err"<% } %>><input type="hidden" name="_csrf" value="<%= ac.csrf %>"><input type="hidden" name="formulaire" value="note">
+<% if (ne && ne.place === 'general') { %><%~ include('./_dec-err', { id: 'h-err', texte: ne.texte }) %>
+<% } %>
+<div class="champ-a"><label for="h-note">Ajouter une note</label><p class="aide" id="h-note-aide">500 signes au plus&#8239;; gardée à l’historique, sans changer l’état de l’alerte.</p><textarea id="h-note" name="note" rows="2" maxlength="500" required aria-describedby="h-note-aide<%= ne && ne.place === 'note' ? ' h-note-err' : '' %>"<% if (ne && ne.place === 'note') { %> aria-invalid="true"<% } %>><%= nn.valeur %></textarea><% if (ne && ne.place === 'note') { %><%~ include('./_dec-err', { id: 'h-note-err', texte: ne.texte }) %><% } %></div>
+<div class="form-pied"><button class="btn ghost" type="submit">Ajouter la note</button></div>
+</form>
 <% } %>
 </section>
 </div>

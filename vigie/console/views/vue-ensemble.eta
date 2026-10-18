@@ -1,7 +1,10 @@
 <%
 /* Vue d'ensemble (MV-01) : l'état en une phrase, les interrupteurs, les alertes ouvertes, les décisions en cours, la santé,
    sept jours. Données : it.vue = overview() (vigie/console/vue-ensemble.js), déjà mises en forme. it.fragment : le contenu
-   seul, sans la page autour (rafraîchissement par console.js, qui remplace le contenu de #contenu). */
+   seul, sans la page autour (rafraîchissement par console.js, qui remplace le contenu de #contenu).
+   Interrupteurs (D3c) : pour qui a le droit des réglages, « Arrêter… » mène à la carte des réglages (motif, durée, identité :
+   /reglages?arreter=<nom>, la carte ouverte) ; « Remettre en marche maintenant » est un formulaire POST (jeton _csrf). Le
+   contenu rafraîchi (it.fragment) n'a pas le jeton : le bouton y devient un lien vers la carte des réglages. */
 const vue = it.vue || {};
 if (!it.fragment) layout('./layout', { rafraichir: true, titre: it.titre && it.titre !== 'Vigie' ? it.titre : 'Vue d’ensemble' });
 const faits = vue.faits || [];
@@ -38,7 +41,7 @@ const pl = (n, un, plusieurs) => (n > 1 ? plusieurs : un);
 <h2 class="vg-section-t" id="t-inter">Interrupteurs</h2>
 <ul class="vg-inters" aria-labelledby="t-inter">
 <% for (const s of vue.interrupteurs || []) { %>
-<li class="vg-inter<%= s.marche ? '' : ' arret' %>"><div class="tete"><h3><%= s.titre %></h3><%~ include('./_etat', { etatK: s.etat.k, etatMot: s.etat.mot }) %></div><p><%~ include('./_morceaux', { morceaux: s.morceaux }) %></p><% if (vue.lecteur) { %><p class="lecture">Lecture seule.</p><% } else { %><% /* D3c : « Arrêter… » (vers /reglages#interrupteurs) ou « Remettre en marche maintenant » (POST /interrupteurs/<nom>, ré-authentification). */ %><% } %></li>
+<li class="vg-inter<%= s.marche ? '' : ' arret' %>"><div class="tete"><h3><%= s.titre %></h3><%~ include('./_etat', { etatK: s.etat.k, etatMot: s.etat.mot }) %></div><p><%~ include('./_morceaux', { morceaux: s.morceaux }) %></p><% if (!vue.peutRegler) { %><p class="lecture">Lecture seule.</p><% } else if (s.marche) { %><div class="btns-ligne"><a class="btn ghost" href="/reglages?arreter=<%= s.nom %>#inter-<%= s.nom %>">Arrêter…<span class="sr-only"> <%= s.objet %></span></a></div><% } else if (it.csrf) { %><form method="post" action="/interrupteurs/<%= s.nom %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="retour" value="/"><input type="hidden" name="formulaire" value="ve-inter-<%= s.nom %>"><input type="hidden" name="etat" value="marche"><button class="btn ghost" type="submit">Remettre en marche maintenant<span class="sr-only"> : <%= s.objet %></span></button></form><% const m = it.message; if (m && m.k === 'erreur' && m.valeurs && m.valeurs.formulaire === 've-inter-' + s.nom) { %><p class="err"><%~ include('./_flux-ic', { icone: 'erreur', taille: 14 }) %><span><b>Erreur :</b> <%= m.texte %></span></p><% } %><% } else { %><div class="btns-ligne"><a class="btn ghost" href="/reglages#inter-<%= s.nom %>">Remettre en marche…<span class="sr-only"> <%= s.objet %></span></a></div><% } %></li>
 <% } %>
 </ul>
 

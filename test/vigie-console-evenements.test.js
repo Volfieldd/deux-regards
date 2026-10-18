@@ -308,7 +308,8 @@ test('entités (MV-04) : liste, fiche d’une adresse, d’un compte, d’une se
   assert.match(f.body, />malicious_input<\/code>/);
   assert.match(f.body, /Réponse automatique|Aucun contrôle des rôles réussi/);
   assert.ok(!f.body.includes(PIEGE) && !f.body.includes('<svg/onload'));
-  assert.doesNotMatch(f.body.slice(f.body.indexOf('<main'), f.body.indexOf('</main>')), /<form[^>]*method="post"|<button/i, 'aucune action en D3b (ni formulaire POST ni bouton dans le contenu)');
+  // Actions forcées (D3c) : des formulaires POST vers /decisions seulement (vigie-console-decisions.test.js les vérifie).
+  for (const fo of f.body.slice(f.body.indexOf('<main'), f.body.indexOf('</main>')).match(/<form[^>]*method="post"[^>]*>/gi) || []) assert.match(fo, /action="\/decisions"/);
 
   // Lecteur : l'adresse complète n'a pas de fiche, ni dans l'adresse de la page ; redirection vers le réseau.
   const r = await lect('/entites/ip/198.51.100.23');
@@ -320,6 +321,7 @@ test('entités (MV-04) : liste, fiche d’une adresse, d’un compte, d’une se
   assert.doesNotMatch(fr.body, /198\.51\.100\.23/);
   assert.match(fr.body, /198\.51\.100\.0\/24/);
   assert.match(fr.body, /vous voyez le réseau, pas l’adresse/);
+  assert.doesNotMatch(fr.body.slice(fr.body.indexOf('<main'), fr.body.indexOf('</main>')), /<form[^>]*method="post"|<button/i, 'aucune action pour un Lecteur');
   assert.match(fr.body, new RegExp(`#${s.alerte}`), 'les alertes des adresses du réseau');
   assert.equal((await lect('/entites/ip/2001:db8:4:1c::5e')).headers.location, '/entites/reseau/2001%3Adb8%3A4%3A%3A');
   // Réseau écrit comme une adresse (Zitadel) : un Lecteur va au réseau tronqué.

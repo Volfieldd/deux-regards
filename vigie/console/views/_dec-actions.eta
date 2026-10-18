@@ -1,0 +1,20 @@
+<%
+/* Actions forcées sur une entité (MV-02, MV-04) : include('./_dec-actions', { a }), a venant de actionsForcees()
+   (vigie/console/ecrans/decisions.js). Un geste par ligne : son effet, « déjà en cours » avec « Lever… », ou la raison d'un
+   geste impossible, puis son formulaire (_dec-form). Le panneau qui l'entoure est celui de la fiche. */
+const a = it.a;
+%>
+<% if (a.identite && !a.identite.fraiche) { %><div class="vg-reauth"><%~ include('./_dec-ic', { icone: 'cadenas', taille: 18 }) %><p><%= a.identite.texte %> Après la confirmation, vous revenez sur cette page&#8239;: renvoyez alors le formulaire.</p></div>
+<% } %>
+<ul class="vg-actions">
+<% for (const i of a.items) { %>
+<li><h3><%= i.h %><% if (i.mono) { %> <span class="ip<%= i.v6 ? ' v6' : '' %>"><%= i.mono %></span><% } %></h3>
+<% if (i.p) { %><p><%= i.p %></p><% } %>
+<% if (i.fait) { %><p class="vg-fait"><%~ include('./_dec-ic', { icone: 'coche' }) %><span><%= i.fait.texte %></span></p><a class="vg-lien" href="<%= i.fait.lever.href %>"><%= i.fait.lever.texte %><span class="sr-only"><%= i.fait.lever.sr %></span></a><% } %>
+<% if (i.sans) { %><p class="vg-sans"><%= i.sans %></p><% } %>
+<% if (i.form) { %><%~ include('./_dec-form', { f: i.form }) %><% } %>
+<% if (i.pied) { %><p><%= i.pied.t %>&#8239;: <a class="vg-lien" href="<%= i.pied.lien.href %>"><%= i.pied.lien.texte %></a></p><% } %>
+<% if (i.lien) { %><div class="btns-ligne"><a class="btn ghost" href="<%= i.lien.href %>"><%= i.lien.texte %></a></div><% } %>
+</li>
+<% } %>
+</ul>

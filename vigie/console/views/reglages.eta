@@ -1,0 +1,111 @@
+<%
+/* Règles et réglages (MV-06, /reglages) : interrupteurs, seuils du score, adresses de confiance, canaux, mode des règles.
+   Données : it.reglages = vueReglages() (vigie/console/ecrans/reglages.js), déjà mises en forme. Les formulaires postent vers
+   les routes d'action (vigie/console/actions.js) ; ils ne sont montrés qu'à qui a le droit (g.peut). Un refus revient avec
+   it.message (texte, champ, valeurs) : le layout le dit en tête, la page le remet près de son formulaire, la saisie reprise. */
+const g = it.reglages;
+layout('./layout', { titre: it.titre && it.titre !== 'Vigie' ? it.titre : 'Règles et réglages' });
+const FN = ' ';
+const R = g.regles, f = R.filtres;
+const sel = (a, b) => (a === b ? ' selected' : '');
+const s = g.seuils;
+const rs = s.refus;
+const aj = g.ajout, ra = aj.refus;
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Règles et réglages</h1></div>
+  <p class="ep-meta"><span><%= g.maintenant %></span><span class="tel-non"><%= R.total %> règles<%= FN %>: <%= R.nb.bloquer %> en Bloquer, <%= R.nb.alerter %> en Alerter</span><% for (const a of g.arretes) { %><span><%= a %></span><% } %><% if (g.identite) { %><span class="vg-identite"><%~ include('./_ic', { icone: 'cadenas', taille: 13 }) %><%= g.identite.texte %></span><% } %></p>
+</header>
+<% if (!g.peut.reglages) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><% if (g.lecteur) { %><b>Lecture seule<%= FN %>: vous voyez les réglages, vous ne les changez pas.</b> Les adresses sont tronquées à leur réseau (/24, /48).<% } else { %><b><%= g.role %><%= FN %>: vous voyez les réglages, vous ne les changez pas.</b> Vos actions forcées sont sur <a href="/decisions">Décisions</a> ; les réglages sont aux Analystes et aux Administrateurs.<% } %></span></p>
+<% } %>
+<nav class="sur-onglet" aria-label="Sur cette page">Sur cette page<%= FN %>:<a href="#interrupteurs">Interrupteurs</a><a href="#seuils">Seuils</a><a href="#confiance">Adresses de confiance</a><a href="#canaux">Canaux</a><a href="#regles">Règles</a></nav>
+
+<section class="vg-bloc" id="interrupteurs" aria-labelledby="t-inter">
+<h2 class="vg-section-t" id="t-inter">Interrupteurs</h2>
+<ul class="vg-inters" aria-labelledby="t-inter">
+<% for (const c of g.interrupteurs) { %><%~ include('./_reg-inter', { c, csrf: it.csrf, peut: g.peut.reglages, reauth: g.reauth, durees: g.dureesInter }) %>
+<% } %></ul>
+<p class="vg-compte">Arrêter affaiblit la surveillance<%= FN %>: un motif, une durée de 7 jours au plus, votre identité redemandée s’il le faut, et l’alerte « Surveillance réduite » part vers les autres Administrateurs. Chaque interrupteur se rallume seul à la fin.</p>
+</section>
+
+<div class="vg-trois vg-bloc">
+<section class="panel" id="seuils" aria-labelledby="t-seuils"><h2 class="panel-t" id="t-seuils">Seuils du score</h2>
+<p class="aide-panel">Deux sources au moins<%= FN %>: Moyenne au seuil, Haute au double. Le score perd la moitié de sa valeur chaque heure.</p>
+<% if (g.peut.reglages) { %>
+<form class="vg-form" method="post" action="/reglages/seuils"><%~ include('./_reg-cache', { csrf: it.csrf, retour: '/reglages#seuils', formulaire: 'seuils' }) %>
+<fieldset class="vg-seuils-f"><legend class="sr-only">Seuil par classe d’entité, en points</legend>
+<% for (const c of s.champs) { const err = rs && rs.champ === c.k; %><div class="champ-a"><label for="s-<%= c.k %>"><%= c.lib %></label><p class="aide" id="s-<%= c.k %>-aide">points (départ<%= FN %>: <%= c.depart %>)</p><input id="s-<%= c.k %>" name="<%= c.k %>" type="number" min="0.5" max="1000" step="any" inputmode="decimal" value="<%= c.valeur %>" aria-describedby="s-<%= c.k %>-aide<%= err ? ' s-' + c.k + '-err' : '' %>"<% if (err) { %> aria-invalid="true"<% } %>><% if (err) { %><%~ include('./_reg-err', { errId: 's-' + c.k + '-err', texte: rs.texte }) %><% } %></div>
+<% } %></fieldset>
+<div class="champ-a"><label for="s-motif">Motif <span class="facultatif">(obligatoire pour relever un seuil)</span></label><input id="s-motif" name="motif" type="text" maxlength="200" autocomplete="off"<% if (s.motif) { %> value="<%= s.motif %>"<% } %><% if (rs && rs.champ === 'motif') { %> aria-invalid="true" aria-describedby="s-motif-err"<% } %>><% if (rs && rs.champ === 'motif') { %><%~ include('./_reg-err', { errId: 's-motif-err', texte: rs.texte }) %><% } %></div>
+<% if (rs && !rs.champ) { %><%~ include('./_reg-err', { texte: rs.texte }) %><% } %>
+<div class="form-pied"><p class="hint">De 0,5 à 1<%= ' ' %>000 points. Relever un seuil réduit la surveillance<%= FN %>: motif, identité redemandée et « Surveillance réduite ».</p><button class="btn ghost" type="submit">Enregistrer les seuils</button></div>
+</form>
+<% } else { %>
+<dl class="kv-a"><% for (const c of s.champs) { %><dt><%= c.lib %></dt><dd><%= c.valeur.replace('.', ',') %> points<span class="sec">départ<%= FN %>: <%= c.depart %></span></dd><% } %></dl>
+<% } %>
+</section>
+
+<section class="panel" id="confiance" aria-labelledby="t-conf"><h2 class="panel-t" id="t-conf">Adresses de confiance</h2>
+<p class="aide-panel">Jamais bloquées d’elles-mêmes par la Vigie<%= FN %>; une adresse exacte, 7 jours au plus. Ajouter affaiblit la surveillance<%= FN %>: motif, identité redemandée, et « Surveillance réduite » prévient les autres Administrateurs.</p>
+<% if (g.confiance.length) { %>
+<ul class="vg-lignes">
+<% for (const a of g.confiance) { %><li><span class="t"><span class="ip<%= a.v6 ? ' v6' : '' %>"><%= a.texte %></span><% if (a.tronquee) { %> <span class="tronq">(tronquée)</span><% } %><% if (a.motif) { %> · <%= a.motif %><% } %></span><% if (g.peut.confiance) { %><form method="post" action="/reglages/confiance/retirer"><%~ include('./_reg-cache', { csrf: it.csrf, retour: '/reglages#confiance', formulaire: 'confiance-retirer:' + a.ip }) %><input type="hidden" name="ip" value="<%= a.ip %>"><button class="btn ghost" type="submit">Retirer<span class="sr-only"> <%= a.texte %></span></button></form><% } %><span class="sec">jusqu’au <%= a.jusqua %><% if (a.par) { %> · ajoutée par <%= a.par %><% } %></span><% if (a.refus) { %><%~ include('./_reg-err', { texte: a.refus.texte }) %><% } %></li>
+<% } %></ul>
+<% } else { %>
+<p class="vg-sans">Aucune adresse de confiance en ce moment.</p>
+<% } %>
+<% if (g.peut.reglages && !g.peut.confiance) { %>
+<p class="vg-sans">Réservé aux Administrateurs.</p>
+<% } %>
+<% if (g.peut.confiance) { %>
+<details class="plier vg-sur"<%= aj.ouvert ? ' open' : '' %>><summary><%~ include('./_flux-ic', { icone: 'chevron', taille: 14 }) %>Ajouter une adresse…</summary>
+<form class="vg-form" method="post" action="/reglages/confiance/ajouter"><%~ include('./_reg-cache', { csrf: it.csrf, retour: '/reglages#confiance', formulaire: 'confiance-ajouter' }) %>
+<div class="champ-a"><label for="conf-ip">Adresse à ajouter</label><p class="aide" id="conf-ip-aide">une adresse exacte (IPv4 ou IPv6), pas un réseau</p><input class="vg-mono" id="conf-ip" name="ip" type="text" maxlength="64" required autocomplete="off" spellcheck="false" aria-describedby="conf-ip-aide<%= ra && ra.champ === 'ip' ? ' conf-ip-err' : '' %>"<% if (aj.ip) { %> value="<%= aj.ip %>"<% } %><% if (ra && ra.champ === 'ip') { %> aria-invalid="true"<% } %>><% if (ra && ra.champ === 'ip') { %><%~ include('./_reg-err', { errId: 'conf-ip-err', texte: ra.texte }) %><% } %></div>
+<div class="champ-a"><label for="conf-motif">Motif</label><input id="conf-motif" name="motif" type="text" maxlength="200" required autocomplete="off"<% if (aj.motif) { %> value="<%= aj.motif %>"<% } %><% if (ra && ra.champ === 'motif') { %> aria-invalid="true" aria-describedby="conf-motif-err"<% } %>><% if (ra && ra.champ === 'motif') { %><%~ include('./_reg-err', { errId: 'conf-motif-err', texte: ra.texte }) %><% } %></div>
+<div class="vg-reauth"><%~ include('./_ic', { icone: 'cadenas' }) %><p><%= g.reauth %></p></div>
+<% if (ra && !ra.champ) { %><%~ include('./_reg-err', { texte: ra.texte }) %><% } %>
+<div class="btns-ligne" role="group" aria-label="Ajouter l’adresse pour une durée"><button class="btn ghost" type="submit" name="duree" value="1j">Ajouter pour 1<%= ' ' %>jour</button><button class="btn ghost" type="submit" name="duree" value="7j">Ajouter pour 7<%= ' ' %>jours</button></div>
+</form>
+</details>
+<% } %>
+<p class="panel-pied"><span>Déjà à l’abri sans liste<%= FN %>: les adresses privées, et celles d’où un administrateur s’est connecté ces 30 derniers jours.</span></p>
+</section>
+</div>
+
+<section class="vg-bloc" id="canaux" aria-labelledby="t-canaux">
+<h2 class="vg-section-t" id="t-canaux">Canaux de notification</h2>
+<p class="vg-compte">Un message part quand une alerte Haute ou Critique s’ouvre ou s’aggrave, en Alerter ou en Bloquer<%= FN %>; et à chaque geste qui réduit la surveillance, même Alertes arrêtées. Jamais en Observer<%= FN %>; sans adresse ni compte.</p>
+<ul class="vg-canaux">
+<% for (const c of g.canaux) { %><li class="vg-canal" id="canal-<%= c.k %>"><div class="tete"><h3><%= c.titre %></h3><%~ include('./_etat', { etatK: c.etat.k, etatMot: c.etat.mot }) %></div>
+<dl class="kv-a"><% for (const l of c.kv) { %><dt><%= l.dt %></dt><dd><% if (l.env) { %>le <span class="donnee">.env</span> de la Vigie (<% l.env.forEach((v, i) => { %><%= i ? ', ' : '' %><span class="donnee"><%= v %></span><% }) %>)<% } else { %><%= l.t %><% if (l.sec) { %><span class="sec"><%= l.sec %></span><% } %><% } %></dd><% } %></dl>
+<% if (!c.regle) { %><p class="vg-sans">Non réglé<%= FN %>: aucun message ne part par ce canal.</p>
+<% } else if (g.peut.essais) { %><form method="post" action="/reglages/canaux/<%= c.k %>/essai"><%~ include('./_reg-cache', { csrf: it.csrf, retour: '/reglages#canal-' + c.k, formulaire: 'canal-' + c.k }) %><p>Le message d’essai, mot pour mot<%= FN %>:</p><pre class="courriel vg-msg"><%= c.texte %></pre><button class="btn ghost" type="submit"><%~ include('./_reg-ic', { icone: 'envoi', taille: 16 }) %>Envoyer un essai<span class="sr-only"> sur <%= c.titre %></span></button><% if (c.refus) { %><%~ include('./_reg-err', { texte: c.refus.texte }) %><% } %></form>
+<% } %></li>
+<% } %></ul>
+</section>
+
+<section class="vg-bloc" id="regles" aria-labelledby="t-regles">
+<h2 class="vg-section-t" id="t-regles">Règles <span class="n"><%= R.total %></span></h2>
+<p class="vg-compte"><b><%= R.total %> règles</b><%= FN %>: <%= R.resume %>. Descendre d’un mode ou arrêter réduit la surveillance<%= FN %>: motif, identité redemandée et message « Surveillance réduite ».</p>
+<dl class="vg-defs vg-modes"><dt>Arrêt</dt><dd>la règle ne tourne pas, 7 jours au plus<%= FN %>; à la fin, elle reprend le mode qu’elle avait avant</dd><dt>Observer</dt><dd>l’alerte s’ouvre dans la console, sans message ni réponse</dd><dt>Alerter</dt><dd>et un message part, pour une alerte Haute ou Critique</dd><dt>Bloquer</dt><dd>et la Vigie répond d’elle-même, si la règle a une réponse</dd></dl>
+<form class="vg-filtres" method="get" action="/reglages#regles" role="search" aria-label="Filtrer les règles">
+<div class="champ-a"><label for="f-q">Rechercher</label><p class="aide" id="f-q-aide">titre, identifiant ou cas (DS15)</p><input id="f-q" name="q" type="search" maxlength="100" autocomplete="off" aria-describedby="f-q-aide" value="<%= f.q %>"></div>
+<div class="champ-a"><label for="f-grav">Gravité</label><select id="f-grav" name="gravite"><option value=""<%= sel('', f.gravite) %>>Toutes</option><% for (const [k, mot] of Object.entries(R.gravites)) { %><option value="<%= k %>"<%= sel(k, f.gravite) %>><%= mot %></option><% } %></select></div>
+<div class="champ-a"><label for="f-mode">Mode</label><select id="f-mode" name="mode"><option value=""<%= sel('', f.mode) %>>Tous les modes</option><% for (const [k, mot] of Object.entries(R.modes)) { %><option value="<%= k %>"<%= sel(k, f.mode) %>><%= mot %></option><% } %></select></div>
+<div class="pied"><a class="lien-a" href="/reglages#regles">Tout effacer</a><button class="btn ghost" type="submit">Filtrer</button></div></form>
+<% if (f.actifs) { %><p class="vg-compte" role="status"><%= R.affichees %> <%= R.affichees > 1 ? 'règles correspondent' : 'règle correspond' %> aux filtres, sur <%= R.total %>.<% if (!R.affichees) { %> <a class="lien-a" href="/reglages#regles">Tout effacer</a><% } %></p><% } %>
+<% for (const gr of R.groupes) { %>
+<h3 class="vg-regles-t" id="t-<%= gr.id %>"><%= gr.titre %> <span class="sec"><%= gr.sec %></span></h3>
+<% if (!gr.lignes.length) { %><p class="vg-sans">Aucune de ces règles ne correspond aux filtres.</p>
+<% } else { %>
+<% if (gr.id === 'points') { %><p class="vg-replie-lien"><span><%= gr.lignes.length %> <%= gr.lignes.length > 1 ? 'règles' : 'règle' %> à points</span><a href="#regles-points">Afficher<span class="sr-only"> les règles à points</span></a></p>
+<div class="vg-replie" id="regles-points"><% } %>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-regles"><caption class="sr-only"><%= gr.titre %> : <%= gr.lignes.length %> <%= gr.lignes.length > 1 ? 'règles' : 'règle' %></caption>
+<thead><tr><th scope="col">Règle</th><th scope="col">Gravité ou points</th><th scope="col">Entité</th><th scope="col">Effet</th><th scope="col">Mode</th></tr></thead><tbody>
+<% for (const r of gr.lignes) { %><%~ include('./_reg-regle', { r, csrf: it.csrf, peut: g.peut.reglages, durees: g.dureesRegle }) %>
+<% } %></tbody></table></div>
+<% if (gr.id === 'points') { %></div><% } %>
+<% } %>
+<% } %>
+</section>

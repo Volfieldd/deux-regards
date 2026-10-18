@@ -1,0 +1,4 @@
+<%
+/* Erreur près d'un champ ou d'un formulaire (admin-plus.css, .err) : include('./_reg-err', { errId, texte }). Le texte est
+   échappé. */
+%><p class="err"<% if (it.errId) { %> id="<%= it.errId %>"<% } %>><%~ include('./_flux-ic', { icone: 'erreur', taille: 14 }) %><span><b>Erreur :</b> <%= it.texte %></span></p>

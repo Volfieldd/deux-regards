@@ -1,0 +1,15 @@
+<%
+/* Décision introuvable (404) : numéro inconnu, ou qui n'est pas un numéro. Rien de l'adresse demandée n'est repris, sauf un
+   numéro reconnu comme tel. */
+layout('./layout', { titre: 'Décision introuvable' });
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Décision introuvable</h1></div>
+</header>
+<div class="vg-vide">
+<p class="t"><%= it.numero ? `Aucune décision n° ${it.numero}.` : 'Cette adresse ne désigne aucune décision.' %></p>
+<p>Le numéro est peut-être faux&#8239;; une décision levée ou échue reste au journal de la Vigie.</p>
+<ul>
+<li><a class="vg-lien" href="/decisions">Les décisions en cours</a></li>
+</ul>
+</div>

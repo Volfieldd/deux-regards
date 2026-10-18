@@ -1,0 +1,23 @@
+<%
+/* Une carte d'interrupteur des réglages (MV-06) : nom, état, effet ; en marche, « Arrêter… » déplie le formulaire de l'arrêt
+   (ce qu'il coupe, motif obligatoire, autre durée, identité redemandée, un bouton par durée : les autres en contour, la durée
+   proposée pleine, en dernier) ; à l'arrêt, « Remettre en marche maintenant ». Sans le droit des réglages : « Lecture seule. ».
+   include('./_reg-inter', { c, csrf, peut, reauth, durees }). */
+const c = it.c;
+const r = c.refus;
+const errM = r && r.champ === 'motif', errD = r && r.champ === 'duree_libre';
+const id = c.nom;
+const retour = '/reglages#inter-' + id;
+%><li class="vg-inter<%= c.marche ? '' : ' arret' %>" id="inter-<%= id %>"><div class="tete"><h3><%= c.titre %></h3><%~ include('./_etat', { etatK: c.etat.k, etatMot: c.etat.mot }) %></div>
+<div><% if (c.marche) { %><p><%= c.effetMarche %></p><p class="effet-arret">Arrêté<%= ' ' %>: <%= c.effetArret %></p><% } else { %><p><%~ include('./_morceaux', { morceaux: c.morceaux }) %></p><% if (c.rallume) { %><p><%= c.rallume %></p><% } %><% } %></div>
+<% if (!it.peut) { %><p class="lecture">Lecture seule.</p>
+<% } else if (c.marche) { %><details class="plier"<%= c.ouvert ? ' open' : '' %>><summary><%~ include('./_flux-ic', { icone: 'chevron', taille: 14 }) %>Arrêter…<span class="sr-only"> <%= c.objet %></span></summary>
+<form class="vg-arret" method="post" action="/interrupteurs/<%= id %>"><%~ include('./_reg-cache', { csrf: it.csrf, retour, formulaire: 'inter-' + id }) %><input type="hidden" name="etat" value="arret">
+<div class="champ-a"><label for="motif-<%= id %>">Motif</label><input id="motif-<%= id %>" name="motif" type="text" maxlength="200" required autocomplete="off"<% if (c.motif) { %> value="<%= c.motif %>"<% } %><% if (errM) { %> aria-invalid="true" aria-describedby="motif-<%= id %>-err"<% } %>><% if (errM) { %><%~ include('./_reg-err', { errId: 'motif-' + id + '-err', texte: r.texte }) %><% } %></div>
+<div class="champ-a"><label for="duree-<%= id %>">Autre durée <span class="facultatif">(7 jours au plus)</span></label><p class="aide" id="duree-<%= id %>-aide">30min, 2h, 3j… ; écrite, elle remplace la durée du bouton</p><input id="duree-<%= id %>" name="duree_libre" type="text" maxlength="20" autocomplete="off" spellcheck="false" aria-describedby="duree-<%= id %>-aide<%= errD ? ' duree-' + id + '-err' : '' %>"<% if (c.dureeLibre) { %> value="<%= c.dureeLibre %>"<% } %><% if (errD) { %> aria-invalid="true"<% } %>><% if (errD) { %><%~ include('./_reg-err', { errId: 'duree-' + id + '-err', texte: r.texte }) %><% } %></div>
+<div class="vg-reauth"><%~ include('./_ic', { icone: 'cadenas' }) %><p><%= it.reauth %> L’alerte « Surveillance réduite » (Moyenne) part vers les autres Administrateurs ; l’interrupteur se rallume seul à la fin.</p></div>
+<% if (r && !r.champ) { %><%~ include('./_reg-err', { texte: r.texte }) %><% } %>
+<div class="btns-ligne" role="group" aria-label="Arrêter <%= c.objet %> pour une durée"><% for (const [v, mot] of it.durees.autres) { %><button class="btn danger-c" type="submit" name="duree" value="<%= v %>">Arrêter <%= mot %><span class="sr-only"> (<%= c.objet %>)</span></button><% } %><button class="btn danger-c" type="submit" name="duree" value="">Arrêter pour l’autre durée<span class="sr-only"> (<%= c.objet %>)</span></button><button class="btn danger" type="submit" name="duree" value="<%= it.durees.proposee[0] %>"><%~ include('./_ic', { icone: 'interdit', taille: 16 }) %>Arrêter <%= it.durees.proposee[1] %><span class="sr-only"> (<%= c.objet %>)</span></button></div>
+</form></details>
+<% } else { %><form method="post" action="/interrupteurs/<%= id %>"><%~ include('./_reg-cache', { csrf: it.csrf, retour, formulaire: 'inter-' + id + '-marche' }) %><input type="hidden" name="etat" value="marche"><button class="btn ghost" type="submit">Remettre en marche maintenant<span class="sr-only"> : <%= c.objet %></span></button></form><% if (r) { %><%~ include('./_reg-err', { texte: r.texte }) %><% } %>
+<% } %></li>

@@ -34,7 +34,7 @@ export function safeRetour(v) {
 }
 
 export function createConsole({ config, store, engine, switches, decisions, zitadel, logger = true, fetchImpl = fetch, now = Date.now,
-  access: accessImpl, oidc: oidcImpl, readCeiling: readCeilingImpl }) {
+  access: accessImpl, oidc: oidcImpl, readCeiling: readCeilingImpl, notifications = {}, edge = null, siteBackupDir = null, verifyChain = null }) {
   const { db } = store;
   const access = accessImpl || createAccessVerifier({ ...config.access, fetchImpl, now });
   const oidc = oidcImpl || createConsoleOidc(config);
@@ -109,7 +109,10 @@ export function createConsole({ config, store, engine, switches, decisions, zita
       refuse(req, 'access', { detail: { erreur: clean(err.message, 120) } });
       return page(reply, 'interdit', { raison: 'access' }, 403);
     }
-    req.ip2 = clientIp(req, true);
+    // Adresse du visiteur : celle que transmet Cloudflare, ou aucune (jamais celle du conteneur du tunnel, qui n'a de
+    // sens ni dans un verrouillage ni dans une confirmation de sa propre adresse).
+    const h = req.headers['cf-connecting-ip'];
+    req.ip2 = typeof h === 'string' && net.isIP(h) ? h : null;
   });
 
   // Relecture du plafond chez Zitadel (une à la fois par compte).
@@ -194,9 +197,10 @@ export function createConsole({ config, store, engine, switches, decisions, zita
     return true;
   }
 
+  // Page en session : le message laissé par une action (fait, ou refusé) y est montré une fois.
   const view = (reply, req, name, it, code = 200) => render(reply, name, {
     moi: { nom: req.moi.nom, sub: req.moi.sub, role: req.moi.role }, csrf: req.moi.csrf,
-    compteurs: compteurs({ db, engine, switches, now }), ...it,
+    compteurs: compteurs({ db, engine, switches, now }), message: isRefresh(req) ? null : sessions.takeMessage(req.moi.sid), ...it,
   }, code);
 
   // Connexion : aller vers Zitadel (PKCE, state, nonce gardés en base, le state aussi dans un cookie de 10 minutes).
@@ -274,13 +278,14 @@ export function createConsole({ config, store, engine, switches, decisions, zita
 
   app.get('/', async (req, reply) => {
     const vue = overview({ db, engine, switches, now, role: req.moi.role });
-    if (isRefresh(req)) return render(reply, 'vue-ensemble', { vue, fragment: true, moi: { nom: req.moi.nom, sub: req.moi.sub, role: req.moi.role } });
-    return view(reply, req, 'vue-ensemble', { page: 'vue', titre: 'Vue d’ensemble · Vigie', vue, fragment: false });
+    if (isRefresh(req)) return render(reply, 'vue-ensemble', { vue, fragment: true, csrf: req.moi.csrf, authA: req.moi.authA, moi: { nom: req.moi.nom, sub: req.moi.sub, role: req.moi.role } });
+    return view(reply, req, 'vue-ensemble', { page: 'vue', titre: 'Vue d’ensemble · Vigie', vue, fragment: false, authA: req.moi.authA });
   });
 
   // Écrans, un module par groupe (vigie/console/ecrans/*.js) : chacun déclare ses routes avec ce contexte. Les routes
   // héritent des trois verrous (crochets ci-dessus) ; une route d'action appelle guard().
-  const ctx = { db, store, engine, switches, decisions, rights, now, view, render, page, guard, isRefresh, log,
+  const ctx = { db, store, engine, switches, decisions, rights, now, view, render, page, guard, isRefresh, log, sessions,
+    notifications, edge, siteBackupDir, verifyChain, safeRetour,
     moiVue: req => ({ nom: req.moi.nom, sub: req.moi.sub, role: req.moi.role }) };
   const served = new Set();
   for (const mod of ECRANS) for (const url of mod.register(app, ctx) || []) served.add(url);

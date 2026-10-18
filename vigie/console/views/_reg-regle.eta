@@ -1,0 +1,23 @@
+<%
+/* Une règle (MV-06) : titre en clair, identifiant et cas en petit, gravité ou points, entité, effet, mode. Le mode est un petit
+   formulaire : la liste, « Motif et durée » (dépliant), « Enregistrer » (les deux n'apparaissent que si le choix diffère du mode
+   enregistré, par :has, sans script ; après un refus, ils restent : .fige-change), l'avertissement de l'Arrêt. « Surveillance
+   réduite » garde son mode : une phrase. Sans le droit des réglages : le mode en lecture seule.
+   include('./_reg-regle', { r, csrf, peut, durees }). */
+const r = it.r;
+const e = r.refus;
+const errM = e && e.champ === 'motif', errD = e && e.champ === 'duree';
+const k = r.n;   // identifiants courts des champs (la ligne garde son ancre r-…)
+%><tr id="<%= r.rid %>"><th scope="row"><%= r.titre %><span class="id"><%= r.idCas %></span></th>
+<td class="c-grav" data-label="Gravité ou points"><% if (r.grav) { %><%~ include('./_grav', { gravClasse: r.grav.classe, gravMot: r.grav.mot }) %><% if (r.grav.sec) { %><span class="sec"><%= r.grav.sec %></span><% } %><% } else { %><span class="vg-sans"><%= r.points %></span><% } %></td>
+<td class="c-ent" data-label="Entité"><%= r.ent %></td>
+<td class="c-effet" data-label="Effet"><%= r.effet.t %><% if (r.effet.sec) { %><span class="sec"><%= r.effet.sec %></span><% } %></td>
+<td class="c-mode" data-label="Mode"><% if (r.fige) { %><span class="vg-mode-lu">Alerter · ne peut pas être changé<%= ' ' %>: c’est elle qui prévient</span><% } else if (!it.peut) { %><span class="vg-mode-lu"><%= r.modeMot %></span><% if (r.enArret) { %><span class="sec"><%= r.enArret %></span><% } %><% } else { %><form class="vg-mode<%= r.change || e ? ' fige-change' : '' %>" method="post" action="/reglages/regles/<%= r.id %>"><%~ include('./_reg-cache', { csrf: it.csrf, retour: r.retour, formulaire: r.formulaire }) %>
+<label class="sr-only" for="m<%= k %>">Mode de « <%= r.titre %> »</label><select id="m<%= k %>" name="mode"><% for (const o of r.options) { %><option value="<%= o.v %>"<%= o.sel ? ' selected' : '' %>><%= o.mot %></option><% } %></select>
+<details class="plier enr"<%= e ? ' open' : '' %>><summary><%~ include('./_flux-ic', { icone: 'chevron', taille: 14 }) %>Motif et durée</summary>
+<div class="champ-a"><label for="mm<%= k %>">Motif <span class="facultatif">(pour descendre ou arrêter)</span></label><input id="mm<%= k %>" name="motif" type="text" maxlength="200" autocomplete="off"<% if (r.motif) { %> value="<%= r.motif %>"<% } %><% if (errM) { %> aria-invalid="true" aria-describedby="mm<%= k %>-err"<% } %>><% if (errM) { %><%~ include('./_reg-err', { errId: 'mm' + k + '-err', texte: e.texte }) %><% } %></div>
+<div class="champ-a"><label for="md<%= k %>">Durée, si Arrêt <span class="facultatif">(puis le mode d’avant)</span></label><select id="md<%= k %>" name="duree"<% if (errD) { %> aria-invalid="true" aria-describedby="md<%= k %>-err"<% } %>><% for (const [v, mot] of it.durees) { %><option value="<%= v %>"<%= v === r.duree ? ' selected' : '' %>><%= mot %></option><% } %></select><% if (errD) { %><%~ include('./_reg-err', { errId: 'md' + k + '-err', texte: e.texte }) %><% } %></div>
+</details>
+<button class="btn ghost enr" type="submit">Enregistrer<span class="sr-only"> le mode de « <%= r.titre %> »</span></button>
+<p class="avert vg-mode-avert"><%~ include('./_reg-ic', { icone: 'attention', taille: 14 }) %><span><%= r.enArret || r.avert %> Pour la faire taire sans l’aveugler<%= ' ' %>: Observer.</span></p>
+<% if (e && !e.champ) { %><%~ include('./_reg-err', { texte: e.texte }) %><% } %></form><% } %></td></tr>

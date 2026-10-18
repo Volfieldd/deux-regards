@@ -1,0 +1,46 @@
+<%
+/* Une personne dans le tableau des droits (MV-08) : include('./_droits-personne', { p, csrf, err }).
+   p : une ligne de vueAdmin().personnes ; err : le message d'erreur de l'action POST /droits/:sub quand il porte sur cette
+   personne (champ caché « personne »), sinon null. Deux formulaires au plus : « Attribuer » (le rôle actuel et ceux
+   au-dessus) et, replié, « Retirer un droit… » (ceux au-dessous), en danger, avec une case de confirmation. Pour soi, un
+   compte de l'amorce ou le mode VIGIE_ROLES=zitadel : la raison à la place, jamais de formulaire. */
+const p = it.p, err = it.err || null;
+const qui = p.nom || p.sub;
+const forme = err ? (err.valeurs && err.valeurs.forme === 'retirer' ? 'retirer' : 'attribuer') : null;
+const val = err && err.valeurs && typeof err.valeurs.attribution === 'string' ? err.valeurs.attribution : null;
+const choix = (opts, f, defaut) => (forme === f && opts.some(o => o.v === val) ? val : defaut);
+const vMonter = choix(p.monter, 'attribuer', p.actuel);
+const vDescendre = p.descendre.length ? choix(p.descendre, 'retirer', p.descendre[p.descendre.length - 1].v) : null;
+const action = '/droits/' + encodeURIComponent(p.sub);
+const retour = '/droits#' + p.id;
+const errId = 'err-' + p.id;
+const invalide = f => (forme === f ? ' aria-invalid="true" aria-describedby="' + errId + '"' : '');
+const auDessus = p.monter.some(o => o.auDessus);
+%>
+<tr id="<%= p.id %>"><th scope="row"><% if (p.nom) { %><%= p.nom %><%= p.soi ? ' (vous)' : '' %><span class="sec"><span class="sub"><%= p.sub %></span></span><% } else { %><span class="sub"><%= p.sub %></span><%= p.soi ? ' (vous)' : '' %><% } %><span class="sec">depuis <%= p.depuis %><% if (p.amorce) { %> · amorce <span class="donnee">VIGIE_ADMIN_SUBS</span><% } else { %> · vu <%= p.derniere %><% } %></span></th>
+<td data-label="Plafond (Zitadel)"><% if (p.plafond) { %><%= p.plafond.t %><span class="sec"><%= p.plafond.code %></span><% } else { %>Aucun<span class="sec">aucun rôle vigie.*, aucun accès</span><% } %></td>
+<td data-label="Attribution (Vigie)"><% if (p.attribution) { %><%= p.attribution.t %><% if (p.amorce) { %><span class="sec">par l’amorce</span><% } else if (p.attribution.le) { %><span class="sec">le <%= p.attribution.le %></span><% } %><% } else { %>—<span class="manque"><%~ include('./_droits-ic', { icone: 'manque' }) %>pas encore attribuée</span><% } %></td>
+<td class="eff" data-label="Droit effectif"><%= p.effectif || 'Aucun accès' %></td>
+<td class="c-chg" data-label="Changer l’attribution">
+<% if (p.raison) { %><span class="vous"><%~ include('./_droits-txt', { morceaux: p.raison }) %></span>
+<% if (err) { %><p class="err" id="<%= errId %>"><%~ include('./_droits-ic', { icone: 'erreur' }) %><span><b>Erreur :</b> <%= err.texte %></span></p><% } %>
+<% } else { %>
+<% if (p.monter.length) { %>
+<form class="vg-attrib" method="post" action="<%= action %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="retour" value="<%= retour %>"><input type="hidden" name="personne" value="<%= p.sub %>"><input type="hidden" name="forme" value="attribuer">
+<label class="sr-only" for="a-<%= p.id %>">Attribution de <%= qui %></label><select id="a-<%= p.id %>" name="attribution"<%~ invalide('attribuer') %>><% for (const o of p.monter) { %><option value="<%= o.v %>"<%~ o.auDessus ? ' class="au-dessus"' : '' %><%~ o.v === vMonter ? ' selected' : '' %>><%= o.t %><%= o.auDessus ? ' (au-dessus de son plafond)' : '' %></option><% } %></select><button class="btn<%= p.sansAttribution ? '' : ' ghost' %> enr" type="submit">Attribuer<span class="sr-only"> le rôle de <%= qui %></span></button>
+<% if (auDessus) { %><p class="avert plafond"><%~ include('./_droits-ic', { icone: 'avert' }) %><span><% if (p.plafond) { %>Au-dessus de son plafond dans Zitadel (<%= p.plafondT %>) : le droit effectif resterait <%= p.plafondT %>. Élevez d’abord son rôle dans Zitadel, projet « Vigie ».<% } else { %>Aucun rôle vigie.* dans Zitadel : aucun accès, quoi qu’on attribue ici.<% } %></span></p><% } %>
+<% if (forme === 'attribuer') { %><p class="err" id="<%= errId %>"><%~ include('./_droits-ic', { icone: 'erreur' }) %><span><b>Erreur :</b> <%= err.texte %></span></p><% } %>
+</form>
+<% } %>
+<% if (p.descendre.length) { %>
+<details class="plier vg-retirer"<%~ forme === 'retirer' ? ' open' : '' %>><summary>Retirer un droit…<span class="sec">aujourd’hui <%= p.actuelT %></span></summary>
+<form class="vg-attrib" method="post" action="<%= action %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="retour" value="<%= retour %>"><input type="hidden" name="personne" value="<%= p.sub %>"><input type="hidden" name="forme" value="retirer">
+<label for="r-<%= p.id %>">Nouveau rôle de <%= qui %></label><select id="r-<%= p.id %>" name="attribution"<%~ invalide('retirer') %>><% for (const o of p.descendre) { %><option value="<%= o.v %>"<%~ o.v === vDescendre ? ' selected' : '' %>><%= o.t %></option><% } %></select>
+<div class="choix-a"><label for="c-<%= p.id %>"><input type="checkbox" id="c-<%= p.id %>" name="confirme" value="oui" required><span>Je confirme : <%= qui %> perd ce droit dès sa requête suivante.</span></label></div>
+<button class="btn danger" type="submit">Retirer le droit<span class="sr-only"> de <%= qui %></span></button>
+<% if (forme === 'retirer') { %><p class="err" id="<%= errId %>"><%~ include('./_droits-ic', { icone: 'erreur' }) %><span><b>Erreur :</b> <%= err.texte %></span></p><% } %>
+</form>
+</details>
+<% } %>
+<% } %>
+</td></tr>

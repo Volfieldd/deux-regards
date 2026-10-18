@@ -396,6 +396,14 @@ export function createEngine({ store, decisions, switches, threats = null, now =
       db.prepare("DELETE FROM alerts WHERE statut = 'close' AND derniere < ?").run(before);
     })();
   }
+  // Note ajoutée à une alerte (console) : dans son historique (événement vigie_alerte), sans changer son état.
+  function note(id, texte, par) {
+    const t = String(texte || '').trim().slice(0, 500);
+    if (!t) throw new Error('note vide');
+    const n = db.prepare('SELECT COUNT(*) FROM alerts WHERE id = ?').pluck().get(id);
+    if (n) store.own('vigie_alerte', { emetteur: par, detail: { action: 'note', id, note: t } });
+    return n;
+  }
   function classify(id, { classement, note = '', par, statut = 'close' }) {
     if (!['incident', 'faux_positif', 'test', null].includes(classement)) throw new Error('classement : incident, faux_positif ou test');
     const n = db.prepare('UPDATE alerts SET statut = ?, classement = ?, note = ?, traite_par = ?, traite_a = ? WHERE id = ?').run(statut, classement, String(note).slice(0, 500), par, now(), id).changes;
@@ -437,6 +445,6 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     if (value > before) store.own('vigie_surveillance_reduite', { emetteur: par, detail: { objet: `seuil:${kind}`, valeur: value, avant: before, motif: m } });
   };
 
-  return { process, enqueue, drain, lag, detectors, tick, closeQuiet, summary, current, top, purge, classify, setMode, setThreshold, modeOf, thresholds,
+  return { process, enqueue, drain, lag, detectors, tick, closeQuiet, summary, current, top, purge, classify, note, setMode, setThreshold, modeOf, thresholds,
     rules: () => Object.entries(REGISTRY).map(([id, r]) => ({ id, ...r, mode: modeOf(id) })), counts: () => ({ regles: rules.length, correlations: correlations.length }) };
 }

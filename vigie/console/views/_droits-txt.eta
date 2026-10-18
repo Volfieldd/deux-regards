@@ -1,0 +1,10 @@
+<%
+/* Une phrase de l'écran Droits en morceaux, tout échappé : { t } du texte, { d } une donnée (réglage, rôle de Zitadel,
+   chemin) en chasse fixe, { sub } un identifiant de compte, { ip } une adresse, { b } en gras. */
+for (const m of it.morceaux || []) {
+  if (m.sub != null) { %><span class="sub"><%= m.sub %></span><% }
+  else if (m.ip != null) { %><span class="ip"><%= m.ip %></span><% }
+  else if (m.d != null) { %><span class="donnee"><%= m.d %></span><% }
+  else if (m.b != null) { %><b><%= m.b %></b><% }
+  else { %><%= m.t %><% }
+} %>
