@@ -1,0 +1,55 @@
+# Console de la Vigie (phase D3, annexe architecture § 5.4) : connexions refusées (DS30), arrivées et changements de
+# droits (DS29). Constats de la Vigie elle-même : une alerte par entité de la Vigie, ouverte tout de suite.
+title: Connexion à la console refusée
+name: console_refus
+id: b43bc0b0-21bb-44df-8ce7-1565e397d763
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.initial_access, attack.t1078]
+detection:
+  selection:
+    type: vigie_console_refus
+  condition: selection
+level: medium
+vigie: { cas: DS30, entite: { kind: vigie, valeur: console_refus }, source_unique: true, mode: alerter }
+---
+title: Connexions à la console refusées à répétition
+name: console_refus_repetes
+id: 98d10959-d52f-4c3f-9259-91dc6fc17556
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.credential_access, attack.t1110]
+correlation:
+  type: event_count
+  rules: [console_refus]
+  group-by: [type]
+  timespan: 1h
+  condition: { gte: 4 }
+level: high
+vigie: { cas: DS30, entite: { kind: vigie, valeur: console_refus_repetes }, source_unique: true, mode: alerter }
+---
+title: Arrivée à la console d'un compte sans attribution
+name: console_arrivee
+id: 4ff4ed6e-9f24-43ed-9ec9-7486e667fb4a
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.persistence, attack.t1098]
+detection:
+  selection:
+    type: vigie_console_arrivee
+  condition: selection
+level: medium
+vigie: { cas: DS29, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+title: Droits de la console changés
+name: console_droits
+id: 0a686957-f290-45fb-9130-4c761cbd447f
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.privilege_escalation, attack.persistence, attack.t1098]
+detection:
+  selection:
+    type: vigie_console_droits
+  condition: selection
+level: high
+vigie: { cas: DS29, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }

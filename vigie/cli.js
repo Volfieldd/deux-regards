@@ -10,6 +10,7 @@ import { createEngine } from './moteur.js';
 import { createThreats } from './menaces.js';
 import { checkRoles } from './controle-roles.js';
 import { testChannel } from './notifications.js';
+import { createRights, LABELS } from './console/droits.js';
 
 // Secours en ligne de commande (annexe architecture, section 6.4), dans le conteneur :
 //   docker exec nicephos-vigie node vigie/cli.js <commande>
@@ -41,7 +42,9 @@ const HELP = `Commandes :
                                            --accepter : l'instantané devient la référence
   bordure                                  état de la bordure Cloudflare : copie des blocages, battement, en-têtes
                                            refusés par le site, stabilité des empreintes TLS (essai, phase C3)
-  notifier essai <signal|email>            envoie un message d'essai sur le canal`;
+  notifier essai <signal|email>            envoie un message d'essai sur le canal
+  console                                  droits de la console (plafond, attribution, effectif), sessions ouvertes,
+                                           dix dernières connexions refusées (raison, amr)`;
 
 function args(argv) {
   const pos = [], opt = {};
@@ -163,6 +166,18 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         store.setting.set('adresses_confiance', list);
         store.own('vigie_interrupteur', { emetteur: par, detail: { adresse_confiance: rest[0], ip } });
         return `Adresses de confiance : ${list.map(x => `${x.ip} (jusqu'au ${new Date(x.jusqua).toISOString().slice(0, 16).replace('T', ' ')} UTC)`).join(', ') || 'aucune'}.`;
+      }
+      case 'console': {
+        const rights = createRights({ db, store, adminSubs: config.console?.adminSubs || [], mode: config.console?.roles || 'deux-cles', now });
+        const lab = r => (r ? LABELS[r] : '—');
+        const droits = rights.list().map(r => `  ${r.sub}${r.nom ? ` (${r.nom})` : ''}  plafond ${lab(r.plafond)}  attribution ${r.amorce ? 'amorce' : lab(r.attribution)}  effectif ${lab(r.effectif)}`);
+        const ouvertes = db.prepare('SELECT COUNT(*) FROM console_sessions WHERE ferme_a IS NULL AND cree_a > ?').pluck().get(now() - 3600e3);
+        const refus = db.prepare("SELECT recu_a, sub, detail FROM events WHERE type = 'vigie_console_refus' ORDER BY seq DESC LIMIT 10").all().map(r => {
+          const d = JSON.parse(r.detail || '{}');
+          return `  ${new Date(r.recu_a).toISOString().slice(0, 19)}  ${d.raison}${r.sub ? `  ${r.sub}` : ''}${d.amr ? `  amr ${JSON.stringify(d.amr)}` : ''}${d.erreur ? `  ${d.erreur}` : ''}`;
+        });
+        return [config.console ? 'Console réglée.' : 'Console non réglée (VIGIE_CONSOLE_CLIENT_ID absent).', 'Droits :', ...(droits.length ? droits : ['  aucun compte connu']),
+          `Sessions ouvertes : ${ouvertes}`, 'Connexions refusées (10 dernières) :', ...(refus.length ? refus : ['  aucune'])].join('\n');
       }
       case 'bordure': {
         // Grille de lecture de l'essai sur l'instance de test (docs/wiki/Vigie.md, bordure).

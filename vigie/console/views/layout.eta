@@ -1,0 +1,77 @@
+<%
+/* Page en session de la console (MV-01 à MV-11) : barre latérale, contenu, barre d'onglets du téléphone, à l'identique des
+   maquettes (dr-tmp/vigie-mq/commun.py : side, tabbar). Aucun style ni script en ligne (CSP sans « unsafe-inline »). */
+const v = it.v ? '?v=' + encodeURIComponent(it.v) : '';
+const page = it.page || '';
+const moi = it.moi || {};
+const ROLES = { viewer: 'Lecteur', handler: 'Intervenant', analyst: 'Analyste', admin: 'Administrateur' };
+const nom = String(moi.nom || '').trim() || String(moi.sub || '').trim() || 'Compte';
+const initiale = (nom.match(/[\p{L}\p{N}]/u) || ['?'])[0].toUpperCase();
+const n = x => Math.max(0, Math.trunc(Number(x) || 0));
+const c = it.compteurs || {};
+const nbAlertes = n(c.alertes), nbSante = n(c.sante), nbDecisions = n(c.decisions);
+const cur = k => (k === page ? ' aria-current="page"' : '');
+// Titre de l'onglet : « Page · Vigie · Nicephos » (un titre déjà suffixé « · Vigie » ou réduit à « Vigie » n'est pas doublé).
+const titreSeul = String(it.titre || '').replace(/\s*·\s*Vigie(\s*·\s*Nicephos)?\s*$/, '').replace(/^Vigie$/, '');
+const titrePage = (titreSeul ? titreSeul + ' · ' : '') + 'Vigie · Nicephos';
+%>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
+<title><%= titrePage %></title>
+<link rel="stylesheet" href="/static/admin.css<%= v %>">
+<link rel="stylesheet" href="/static/tokens.css<%= v %>">
+<link rel="stylesheet" href="/static/admin-plus.css<%= v %>">
+<link rel="stylesheet" href="/static/vigie.css<%= v %>">
+<script src="/static/theme.js<%= v %>"></script>
+<script src="/static/console.js<%= v %>" defer></script>
+</head>
+<body class="admin vigie">
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="shell">
+<aside class="side" id="admin-nav" aria-label="Menu de la console">
+  <div class="side-haut"><a class="word" href="/"><span class="marque">Vigie</span><span class="mention">Sécurité de Nicephos</span></a><a class="side-fermer" href="#contenu"><%~ include('./_ic', { icone: 'fermer' }) %>Fermer<span class="sr-only"> le menu</span></a></div>
+  <nav class="nav" aria-label="Vue d’ensemble">
+    <a href="/"<%~ cur('vue') %>><%~ include('./_ic', { icone: 'ensemble' }) %>Vue d’ensemble</a>
+  </nav>
+  <p class="grp" id="nav-surveiller">Surveiller</p>
+  <nav class="nav" aria-labelledby="nav-surveiller">
+    <a href="/alertes"<%~ cur('alertes') %>><%~ include('./_ic', { icone: 'alertes' }) %>Alertes<% if (nbAlertes) { %><span class="nav-badge"><span aria-hidden="true"><%= nbAlertes %></span><span class="sr-only">, <%= nbAlertes %> <%= nbAlertes > 1 ? 'ouvertes' : 'ouverte' %></span></span><% } %></a>
+    <a href="/flux"<%~ cur('flux') %>><%~ include('./_ic', { icone: 'flux' }) %>Flux</a>
+    <a href="/evenements"<%~ cur('evenements') %>><%~ include('./_ic', { icone: 'evenements' }) %>Événements</a>
+    <a href="/entites"<%~ cur('entites') %>><%~ include('./_ic', { icone: 'entites' }) %>Entités</a>
+    <a href="/sante"<%~ cur('sante') %>><%~ include('./_ic', { icone: 'sante' }) %>Santé<% if (nbSante) { %><span class="nav-badge attention"><span aria-hidden="true">▲ <%= nbSante %></span><span class="sr-only">, <%= nbSante %> <%= nbSante > 1 ? 'écarts' : 'écart' %></span></span><% } %></a>
+  </nav>
+  <p class="grp" id="nav-agir">Agir</p>
+  <nav class="nav" aria-labelledby="nav-agir">
+    <a href="/decisions"<%~ cur('decisions') %>><%~ include('./_ic', { icone: 'decisions' }) %>Décisions<% if (nbDecisions) { %><span class="nav-badge neutre"><span aria-hidden="true"><%= nbDecisions %></span><span class="sr-only">, <%= nbDecisions %> en cours</span></span><% } %></a>
+  </nav>
+  <p class="grp" id="nav-regler">Régler</p>
+  <nav class="nav" aria-labelledby="nav-regler">
+    <a href="/reglages"<%~ cur('reglages') %>><%~ include('./_ic', { icone: 'reglages' }) %>Règles et réglages</a>
+    <a href="/droits"<%~ cur('droits') %>><%~ include('./_ic', { icone: 'droits' }) %>Droits</a>
+  </nav>
+  <div class="foot">
+    <div class="me">
+      <span class="av" aria-hidden="true"><%= initiale %></span><span class="who"><span class="me-nom"><%= nom %></span><small><%= ROLES[moi.role] || 'Lecteur' %></small></span>
+      <button class="iconbtn btn-theme js-seul" type="button" data-theme-bascule title="Mode clair / sombre"><span class="when-dark"><%~ include('./_ic', { icone: 'soleil' }) %><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><%~ include('./_ic', { icone: 'lune' }) %><span class="sr-only">Passer en mode sombre</span></span></button>
+      <form method="post" action="/auth/logout"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="iconbtn" type="submit" aria-label="Se déconnecter" title="Se déconnecter"><%~ include('./_ic', { icone: 'sortir' }) %></button></form>
+    </div>
+  </div>
+</aside>
+<main class="main" id="contenu" tabindex="-1"<% if (it.rafraichir) { %> data-rafraichir="60"<% } %>>
+<%~ it.body %>
+</main>
+</div>
+<nav class="tabbar" aria-label="Navigation rapide">
+  <a href="/"<%~ cur('vue') %>><%~ include('./_ic', { icone: 'ensemble', taille: 22 }) %>Vue d’ensemble</a>
+  <a href="/alertes"<%~ cur('alertes') %>><%~ include('./_ic', { icone: 'alertes', taille: 22 }) %>Alertes</a>
+  <a href="/decisions"<%~ cur('decisions') %>><%~ include('./_ic', { icone: 'decisions', taille: 22 }) %>Décisions</a>
+  <a href="#admin-nav"><%~ include('./_ic', { icone: 'menu', taille: 22 }) %>Menu</a>
+</nav>
+</body>
+</html>

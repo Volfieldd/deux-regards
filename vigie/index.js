@@ -10,9 +10,10 @@ import { checkRoles } from './controle-roles.js';
 import { createSwitches } from './interrupteurs.js';
 import { createEdge } from './bordure.js';
 import { createNotifier } from './notifications.js';
+import { createConsole } from './console/server.js';
 
 // Service de la Vigie : réception des événements du site, décisions signées, lecture de Zitadel, vérification de la
-// chaîne et purge. La console (phase D) et les règles (phase C) viendront s'y ajouter.
+// chaîne et purge, moteur de règles, notifications, console (phase D3, facultative).
 
 export async function startVigie({ config, logger = true, fetchImpl, now = Date.now } = {}) {
   const db = openVigieDb(config.databasePath);
@@ -88,10 +89,14 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   const zitadel = config.zitadel ? createZitadelReader({ ...config.zitadel, store, log, fetchImpl, now }) : null;
   zitadel?.start(config.zitadel.intervalMs);
 
+  // Console (phase D3) : son propre port, sur le réseau du tunnel ; la réception reste sur le réseau interne.
+  const consoleApp = config.console ? createConsole({ config: config.console, store, engine, switches, decisions, zitadel, logger, fetchImpl, now }) : null;
+
   await ingest.listen({ host: config.host, port: config.ingestPort });
+  if (consoleApp) await consoleApp.app.listen({ host: config.console.host, port: config.console.port });
   return {
-    store, decisions, ingest, zitadel, engine, switches, threats, edge, notifier,
-    async close() { for (const t of timers) clearInterval(t); zitadel?.stop(); edge?.stop(); await ingest.close(); await engine.drain(); db.close(); },
+    store, decisions, ingest, zitadel, engine, switches, threats, edge, notifier, console: consoleApp,
+    async close() { for (const t of timers) clearInterval(t); zitadel?.stop(); edge?.stop(); await consoleApp?.close(); await ingest.close(); await engine.drain(); db.close(); },
   };
 }
 

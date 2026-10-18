@@ -191,7 +191,24 @@ Vérifier pendant une semaine dans **Security → Events** qu'aucun visiteur lé
    - *Identity providers* : Zitadel et One-time PIN ; *Instant Auth* : off ;
    - politique **Allow** « Administrateurs » : *Include → Emails* : les deux adresses ;
    - noter l'**Application Audience (AUD) Tag** (onglet *Overview* de l'application) : il ira dans le `.env` de la Vigie (`VIGIE_ACCESS_AUD`), avec le nom d'équipe (`VIGIE_ACCESS_TEAM`).
-4. **Networks → Tunnels → nicephos → Public Hostname → Add** : `vigie.nicephos.art`, service **HTTP**, URL : l'adresse fixe de la Vigie (donnée à la phase B), port 4200. **Seulement quand la Vigie tourne.**
+4. **Networks → Tunnels → nicephos → Public Hostname → Add** : `vigie.nicephos.art`, service **HTTP**, URL : `172.29.42.20:4200` (adresse fixe de la console, `VIGIE_CONSOLE_IP`). **Seulement quand la Vigie tourne avec la console réglée** (étape 3.5).
+
+### 3.5 `vigie.env` : la console
+
+Avec ce qui a été noté aux étapes 3.1 et 3.2 :
+
+```
+VIGIE_CONSOLE_CLIENT_ID=<Client ID de « Console Vigie »>
+VIGIE_CONSOLE_PROJECT_ID=<identifiant du projet « Vigie » (Projects → Vigie, en haut de la page)>
+VIGIE_CONSOLE_ORG_ID=<identifiant de l'organisation propriétaire du projet (Organization → en haut de la page)>
+VIGIE_ACCESS_TEAM=<nom d'équipe Zero Trust>
+VIGIE_ACCESS_AUD=<Application Audience (AUD) Tag>
+VIGIE_ADMIN_SUBS=<sub Zitadel des deux administrateurs, séparés par une virgule>
+```
+
+Le **Client Secret** va dans un fichier, jamais dans `vigie.env` : `VIGIE_SECRETS_DIR/console-secret` (une ligne, `chmod 600`, propriétaire 99:100). Le sub d'un compte se lit dans Zitadel (**Users →** le compte, champ *ID*). La console exige aussi la lecture des événements (`VIGIE_ZITADEL_ISSUER` et `zitadel.json`, étape 1.3) : elle relit les rôles `vigie.*` toutes les 5 minutes par ce compte de service.
+
+Première connexion : vérifier que la console vous laisse entrer avec la clé d'accès. Un refus « clé d'accès exigée » veut dire que le jeton ne porte pas `mfa` dans `amr` : revoir l'étape 1.1, et me transmettre la ligne `vigie_console_refus` du journal (`docker exec nicephos-vigie node vigie/cli.js console`), qui donne le contenu de `amr`.
 
 ### 3.3 Redirection vers `www` : exclure la console
 

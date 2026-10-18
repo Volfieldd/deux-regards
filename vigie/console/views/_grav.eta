@@ -1,0 +1,4 @@
+<%
+/* Pastille de gravité (vigie.css § 1 : mot, jauge de quatre barres, couleur) : include('./_grav', { gravClasse, gravMot }). */
+const k = ['critique', 'haute', 'moyenne', 'basse', 'info'].includes(it.gravClasse) ? it.gravClasse : 'info';
+%><span class="grav grav--<%= k %>"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span><%= it.gravMot %></span>

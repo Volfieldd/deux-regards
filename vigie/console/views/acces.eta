@@ -1,0 +1,103 @@
+<%
+/* Pages hors session (MV-09), une par cas (it.cas) : la marque, une carte qui dit ce qui se passe et quoi faire, dans l'ordre,
+   au plus un bouton plein. Rien de la console n'y paraît (ni alerte, ni compte, ni adresse). */
+const cas = it.cas;
+const local = r => (typeof r === 'string' && r.startsWith('/') && !r.startsWith('//') && !r.startsWith('/\\') ? r : '/');
+const retour = local(it.retour);
+const CAS = ['refusee', 'mfa', 'reauth', 'autre', 'expiree', 'interdit', 'zitadel'];
+// Le 403 sans Cloudflare Access (et tout cas inconnu) : la page la plus nue, sans marque ni lien.
+const nu = !CAS.includes(cas) || (cas === 'interdit' && it.raison !== 'droit');
+const TITRES = { refusee: 'Connexion refusée', mfa: 'Clé d’accès exigée', reauth: 'Confirmez votre identité', autre: 'Confirmation refusée',
+  expiree: 'Session expirée', interdit: it.raison === 'droit' ? 'Droit insuffisant' : 'Accès refusé', zitadel: 'Connexion impossible pour l’instant' };
+const titre = TITRES[cas] || 'Accès refusé';
+// Le titre propre au cas, sauf si le serveur en donne un plus précis que « Vigie ».
+layout('./hors-session', nu ? { titreNu: 'Accès refusé' } : { titre: it.titre && it.titre !== 'Vigie' ? it.titre : titre });
+const FAVORI = 'Ouvrez la Vigie depuis votre favori ; elle ne demande jamais votre mot de passe par message.';
+%>
+<% if (nu) { %>
+<div class="hors">
+<section class="hors-carte nue" aria-labelledby="t-page">
+<h1 class="hors-titre" id="t-page">Accès refusé</h1>
+<p class="lede">Cette adresse ne répond qu’aux demandes autorisées.</p>
+</section>
+</div>
+<% } else { %>
+<div class="hors">
+<p class="hors-marque"><span class="marque">Vigie</span><span class="mention">Sécurité de Nicephos</span></p>
+<% if (cas === 'refusee') { %>
+<section class="hors-carte refus" aria-labelledby="t-page">
+<h1 class="hors-titre" id="t-page"><%~ include('./_ic', { icone: 'cadenas', taille: 26 }) %>Connexion refusée</h1>
+<p class="lede">Votre compte Zitadel n’a aucun rôle dans la console de la Vigie. Vous ne pouvez pas y entrer tant qu’un administrateur de la Vigie ne vous en a pas donné un.</p>
+<% if (it.qui) { %>
+<dl class="hors-id"><dt>Compte</dt><dd><%= it.qui %></dd></dl>
+<% } %>
+<ol class="vg-etapes">
+<li><span>Demandez l’accès à un administrateur de la Vigie, en lui donnant <%= it.qui ? 'l’adresse ci-dessus' : 'l’adresse e-mail de votre compte Zitadel' %>.</span></li>
+<li><span>Il vous donne un rôle de la Vigie dans Zitadel.</span><span class="sec">Tant qu’il ne vous a pas attribué de rôle dans la console, vous y entrez en lecture seule.</span></li>
+<li><span>Reconnectez-vous ici.</span></li>
+</ol>
+<div class="hors-actions"><a class="btn ghost" href="/auth/login">Se reconnecter</a></div>
+</section>
+<p class="hors-pied">Cette tentative est notée par la Vigie. <%= FAVORI %></p>
+<% } else if (cas === 'mfa') { %>
+<section class="hors-carte attente" aria-labelledby="t-page">
+<h1 class="hors-titre" id="t-page"><%~ include('./_ic', { icone: 'cle', taille: 26 }) %>Clé d’accès exigée</h1>
+<p class="lede">Vous vous êtes connecté sans second facteur. La console de la Vigie l’exige à chaque connexion ; préférez une clé d’accès (passkey) : une fausse page ne peut pas l’imiter, contrairement à un code ou à un SMS.</p>
+<ol class="vg-etapes">
+<li><span>Ouvrez votre compte Zitadel et ajoutez une clé d’accès : votre téléphone, votre ordinateur ou une clé de sécurité.</span></li>
+<li><span>Revenez ici et reconnectez-vous : Zitadel vous la demandera.</span></li>
+</ol>
+<p class="sec">Si Zitadel ne vous l’a pas demandée alors que vous en avez une, prévenez un administrateur de la Vigie.</p>
+<div class="hors-actions"><a class="btn" href="/auth/login">Se reconnecter</a></div>
+</section>
+<p class="hors-pied">Cette tentative est notée par la Vigie. <%= FAVORI %></p>
+<% } else if (cas === 'reauth') { %>
+<section class="hors-carte" aria-labelledby="t-page">
+<h1 class="hors-titre" id="t-page"><%~ include('./_ic', { icone: 'cadenas', taille: 26 }) %>Confirmez votre identité</h1>
+<% if (it.action) { %>
+<p class="action-rappel"><%= it.action %></p>
+<% } %>
+<p class="lede">Cette action demande de confirmer votre identité : Zitadel vous redemande votre mot de passe et votre second facteur. Vous revenez ensuite à la page où vous étiez.</p>
+<p class="sec">Si vous ne confirmez pas, rien ne change. La confirmation vaut 5 minutes pour les actions suivantes.</p>
+<form class="hors-actions" method="post" action="/reauth"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="retour" value="<%= retour %>"><button class="btn" type="submit">Confirmer avec Zitadel</button><a class="btn ghost" href="<%= retour %>">Annuler</a></form>
+</section>
+<p class="hors-pied"><%= FAVORI %></p>
+<% } else if (cas === 'autre') { %>
+<section class="hors-carte refus" aria-labelledby="t-page">
+<h1 class="hors-titre" id="t-page"><%~ include('./_ic', { icone: 'cadenas', taille: 26 }) %>Confirmation refusée</h1>
+<p class="lede">Zitadel a confirmé un autre compte que le vôtre. L’action n’est pas partie.</p>
+<p class="sec">Recommencez avec votre propre compte. Si vous partagez cet appareil, déconnectez l’autre compte de Zitadel d’abord.</p>
+<div class="hors-actions"><a class="btn" href="<%= retour %>">Revenir à la page</a></div>
+</section>
+<p class="hors-pied"><%= FAVORI %></p>
+<% } else if (cas === 'expiree') { %>
+<section class="hors-carte" aria-labelledby="t-page">
+<h1 class="hors-titre" id="t-page"><%~ include('./_ic', { icone: 'horloge', taille: 26 }) %>Session expirée</h1>
+<% if (it.raison === 'duree') { %>
+<p class="lede">Par sécurité, une session de la console dure une heure au plus : la vôtre est arrivée à son terme.</p>
+<% } else { %>
+<p class="lede">Par sécurité, la console vous a déconnecté après 15 minutes sans activité.</p>
+<% } %>
+<p class="sec">Ce que vous avez envoyé après la fin de la session n’a pas été enregistré : refaites-le si vous ne le retrouvez pas.</p>
+<div class="hors-actions"><a class="btn" href="/auth/login">Se reconnecter</a></div>
+</section>
+<p class="hors-pied"><%= FAVORI %></p>
+<% } else if (cas === 'interdit') { %>
+<section class="hors-carte refus" aria-labelledby="t-page">
+<h1 class="hors-titre" id="t-page"><%~ include('./_ic', { icone: 'interdit', taille: 26 }) %>Droit insuffisant</h1>
+<p class="lede">Votre rôle dans la console ne permet pas cette page ou cette action<% if (it.requis) { %> : il faut le rôle <b><%= it.requis %></b> au moins<% } %>.</p>
+<p class="sec">Un administrateur de la Vigie peut vous le donner (dans Zitadel, puis dans la console).</p>
+<div class="hors-actions"><a class="btn" href="/">Revenir à la vue d’ensemble</a></div>
+</section>
+<p class="hors-pied"><%= FAVORI %></p>
+<% } else { %>
+<section class="hors-carte attente" aria-labelledby="t-page">
+<h1 class="hors-titre" id="t-page"><%~ include('./_ic', { icone: 'zitadel', taille: 26 }) %>Connexion impossible pour l’instant</h1>
+<p class="lede">Zitadel, qui vérifie votre identité, ne répond pas. La surveillance continue ; seule la connexion à la console attend.</p>
+<p class="sec">Réessayez dans quelques minutes. En urgence, la ligne de commande de la Vigie, sur le serveur, fait tout ce que fait la console.</p>
+<div class="hors-actions"><a class="btn" href="/auth/login">Réessayer</a></div>
+</section>
+<p class="hors-pied"><%= FAVORI %></p>
+<% } %>
+</div>
+<% } %>

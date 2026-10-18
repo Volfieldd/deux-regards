@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
 WORKDIR /app/vigie
 COPY vigie/package.json vigie/package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force \
- && node --input-type=module -e "await import('better-sqlite3'); await import('fastify')"
+ && node --input-type=module -e "await import('better-sqlite3'); await import('fastify'); await import('openid-client'); await import('eta')"
 
 # 2. Image finale, sans compilateur.
 FROM node:22-bookworm-slim
@@ -21,7 +21,7 @@ COPY --from=deps /app/vigie/node_modules ./vigie/node_modules
 COPY vigie ./vigie
 COPY server/securite/vocabulaire.js ./server/securite/vocabulaire.js
 USER node
-EXPOSE 4100
+EXPOSE 4100 4200
 STOPSIGNAL SIGTERM
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD node -e "const h=process.env.VIGIE_HOST&&process.env.VIGIE_HOST!=='0.0.0.0'?process.env.VIGIE_HOST:'127.0.0.1';fetch('http://'+h+':'+(process.env.VIGIE_INGEST_PORT||4100)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"

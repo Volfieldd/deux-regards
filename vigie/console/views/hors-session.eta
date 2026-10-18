@@ -1,0 +1,28 @@
+<%
+/* Pages hors session (MV-09) : ni barre latérale, ni barre d'onglets, ni rien de la console. Le thème mémorisé s'applique
+   (theme.js) ; aucun autre script. */
+const v = it.v ? '?v=' + encodeURIComponent(it.v) : '';
+// Titre de l'onglet : « Page · Vigie · Nicephos » (un titre déjà suffixé « · Vigie » ou réduit à « Vigie » n'est pas doublé).
+const titreSeul = String(it.titre || '').replace(/\s*·\s*Vigie(\s*·\s*Nicephos)?\s*$/, '').replace(/^Vigie$/, '');
+const titrePage = (titreSeul ? titreSeul + ' · ' : '') + 'Vigie · Nicephos';
+%>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
+<% if (it.titreNu) { %><title><%= it.titreNu %></title><% } else { %><title><%= titrePage %></title><% } %>
+<link rel="stylesheet" href="/static/admin.css<%= v %>">
+<link rel="stylesheet" href="/static/tokens.css<%= v %>">
+<link rel="stylesheet" href="/static/admin-plus.css<%= v %>">
+<link rel="stylesheet" href="/static/vigie.css<%= v %>">
+<script src="/static/theme.js<%= v %>"></script>
+</head>
+<body class="admin vigie">
+<main class="hors-main" id="contenu" tabindex="-1">
+<%~ it.body %>
+</main>
+</body>
+</html>

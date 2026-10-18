@@ -42,6 +42,10 @@ export function net64(ip) {
 }
 export const isPrivate = ip => { try { return PRIVATE.check(ip, net.isIPv6(ip) ? 'ipv6' : 'ipv4'); } catch { return false; } };
 
+// Ordre des alertes partout (console, ligne de commande, résumé de l'admin) : gravité, puis ouverte avant prise en charge,
+// puis la plus récente d'abord.
+export const alertOrder = (a, b) => rank(b.gravite) - rank(a.gravite) || (a.statut === 'ouverte' ? 0 : 1) - (b.statut === 'ouverte' ? 0 : 1) || b.derniere - a.derniere;
+
 export function createEngine({ store, decisions, switches, threats = null, now = Date.now, log, rulesDir = RULES_DIR }) {
   const { db, setting } = store;
   const { rules, correlations } = loadRules(rulesDir);
@@ -362,8 +366,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   // la plus grave, sa date ; ni adresse, ni compte, ni détail. Les alertes en observation n'y figurent pas (comme pour
   // les notifications). « critique_a_prendre » : une critique encore « ouverte » (le bandeau de l'admin reste jusqu'à
   // sa prise en charge dans la console).
-  // Ordre des alertes partout (console, ligne de commande, résumé de l'admin).
-  const alertOrder = (a, b) => rank(b.gravite) - rank(a.gravite) || (a.statut === 'ouverte' ? 0 : 1) - (b.statut === 'ouverte' ? 0 : 1) || b.derniere - a.derniere;
+  // Ordre des alertes : alertOrder, plus haut (exporté pour la console).
   function summary() {
     const rows = db.prepare("SELECT id, regle, gravite, statut, premiere, derniere FROM alerts WHERE statut != 'close' AND mode != 'observer'").all();
     const ouvertes = { critique: 0, haut: 0, moyen: 0, bas: 0 };
