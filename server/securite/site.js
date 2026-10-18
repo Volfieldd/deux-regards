@@ -273,6 +273,45 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
     });
   };
 
+  // Ce qu'un compte fait une fois entré (registre des briques, docs/etudes/vigie-besoins-des-briques.md, BV-1 et BV-2) :
+  // un seul point d'émission, après chaque écriture d'un compte de l'admin, qui compare à l'état d'avant
+  //   - les réglages qui changent ce que voient tous les visiteurs ou qui servent de point de contact (version du site
+  //     public, mentions légales, contacts des droits et de la confidentialité, accroche, ouverture, thème, EXIF) :
+  //     config_public_changed, « moyen » si un contact ou le directeur de la publication change (une adresse remplacée
+  //     sert à hameçonner les personnes qui exercent leurs droits) ; valeurs seulement pour les réglages sans donnée
+  //     personnelle ;
+  //   - ce qui rend publics le lieu et l'heure d'une personne (photos à l'heure visible, EXIF complet avec le GPS) :
+  //     privacy_exposure_changed.
+  // Quelle que soit la route (aucun emit à ajouter route par route) ; ce qui change hors de l'admin (ligne de commande)
+  // est vu à l'écriture suivante.
+  const WATCHED = /^(public_version|site_name|tagline(_en|_de)?|hero|theme|exif|rights_contact|privacy_contact|privacy_mfa|privacy_encrypted|legal_[a-z_]+)$/;
+  const CONTACT = new Set(['rights_contact', 'privacy_contact', 'legal_email', 'legal_phone', 'legal_address', 'legal_names', 'legal_director']);
+  const PLAIN = new Set(['public_version', 'theme', 'exif', 'privacy_mfa', 'privacy_encrypted', 'legal_host']);
+  const settingsRows = db.prepare('SELECT key, value FROM settings');
+  const shownTimes = db.prepare('SELECT COUNT(*) FROM photos WHERE show_time = 1').pluck();
+  const parseJson = v => { try { return JSON.parse(v); } catch { return v; } };
+  const exifMode = v => parseJson(v)?.mode ?? null;
+  const snapshot = () => ({ settings: Object.fromEntries(settingsRows.all().filter(r => WATCHED.test(r.key)).map(r => [r.key, r.value])), heure: shownTimes.get() });
+  let lastSnapshot = null;
+  const watchWrites = request => {
+    const now = snapshot();
+    const before = lastSnapshot;
+    lastSnapshot = now;
+    if (!before) return;
+    const keys = [...new Set([...Object.keys(now.settings), ...Object.keys(before.settings)])].filter(k => now.settings[k] !== before.settings[k]).sort();
+    if (keys.length) {
+      const contact = keys.some(k => CONTACT.has(k));
+      const valeurs = Object.fromEntries(keys.filter(k => PLAIN.has(k)).map(k => [k, k === 'exif' ? { avant: exifMode(before.settings[k]), apres: exifMode(now.settings[k]) } : { avant: parseJson(before.settings[k]) ?? null, apres: parseJson(now.settings[k]) ?? null }]));
+      sec.emit('config_public_changed', { request, severity: contact ? 'moyen' : undefined, emetteur: 'server/securite · réglages publics', detail: { cles: keys.slice(0, 30), contact_change: contact, valeurs } });
+    }
+    const exifAll = exifMode(now.settings.exif) === 'all' && exifMode(before.settings.exif) !== 'all';
+    const more = now.heure - before.heure;
+    if (more > 0 || exifAll) {
+      sec.emit('privacy_exposure_changed', { request, severity: exifAll ? 'moyen' : undefined, emetteur: 'server/securite · données exposées', detail: { heure_visible_ajoutees: Math.max(more, 0), heure_visible_total: now.heure, exif_complet: exifAll || undefined } });
+    }
+  };
+  app.addHook('onReady', async () => { step('réglages publics', () => { lastSnapshot = snapshot(); }); });
+
   // Rafales de 404 par adresse (exploration), lectures sensibles de l'admin.
   const notFound = new Map();
   app.addHook('onResponse', (request, reply, done) => {
@@ -296,6 +335,8 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
         sec.emit('malicious_excess_404', { request, status, emetteur: 'server/securite · 404', detail: { pages_introuvables: e.count, fenetre_min: NOT_FOUND_WINDOW / 60e3 } });
       }
     }
+    // Écriture d'un compte de l'admin : réglages publics et données exposées comparés à l'état d'avant (BV-1, BV-2).
+    if (request.session && request.method !== 'GET' && request.method !== 'HEAD') { watchWrites(request); return; }
     if (!request.session || status >= 300 || (request.method !== 'GET' && request.method !== 'HEAD')) return;
     const route = request.routeOptions?.url || '';
     if (request.routeOptions?.config?.audit) sec.emit('sensitive_export', { request, status, emetteur: 'server/routes · lecture sensible', detail: { cible: route, id: request.params?.id ?? null } });

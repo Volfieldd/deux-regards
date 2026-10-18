@@ -334,3 +334,25 @@ test('contrôle des rôles : déclencheur vidé sous le même nom → critique ;
   assert.deepEqual(r2.altered, ['account_changes_immuable']);
   assert.equal(r2.ok, false);
 });
+
+test('admin : contact remplacé, EXIF complet, heures visibles en masse, réglage changé après une session reprise (BV-1, BV-2)', async t => {
+  const v = vigieOf(t);
+  const admin = (type, severity, detail, extra = {}) => v.add(type, severity, { composant: 'site · admin', sub: 'zitadel-julien', ip: '198.51.100.5', detail, ...extra });
+  admin('config_public_changed', 'bas', { cles: ['tagline'], contact_change: false });
+  assert.equal(v.alerts().length, 0, 'un réglage ordinaire : des points, pas d’alerte');
+  admin('config_public_changed', 'moyen', { cles: ['privacy_contact'], contact_change: true });
+  assert.equal(v.alerts().find(a => a.regle === 'sigma.contact_public_change').mode, 'alerter');
+  admin('privacy_exposure_changed', 'moyen', { heure_visible_ajoutees: 0, exif_complet: true });
+  assert.ok(v.alerts().find(a => a.regle === 'sigma.exif_complet'));
+  for (let i = 0; i < 19; i++) admin('privacy_exposure_changed', 'info', { heure_visible_ajoutees: 1 });
+  assert.ok(!v.alerts().find(a => a.regle === 'sigma.heures_visibles_en_masse'), '19 : pas encore');
+  admin('privacy_exposure_changed', 'info', { heure_visible_ajoutees: 1 });
+  assert.equal(v.alerts().find(a => a.regle === 'sigma.heures_visibles_en_masse').entite_key, 'zitadel-julien');
+  // Session reprise depuis un autre appareil, puis un réglage public dans l'heure : haute.
+  v.add('session_context_change', 'haut', { composant: 'site · admin', sub: 'zitadel-seb', ip: '203.0.113.50', detail: { navigateur: { avant: 'Safari · macOS', apres: 'Chrome · Windows' } } });
+  v.clock.t += 20 * 60e3;
+  v.add('config_public_changed', 'bas', { composant: 'site · admin', sub: 'zitadel-seb', ip: '203.0.113.50', detail: { cles: ['public_version'], contact_change: false } });
+  const a = v.alerts().find(x => x.regle === 'sigma.reglage_apres_session_reprise');
+  assert.equal(a.gravite, 'haut');
+  assert.equal(a.entite_key, 'zitadel-seb');
+});

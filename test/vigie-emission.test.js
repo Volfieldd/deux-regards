@@ -584,3 +584,36 @@ test('D23 : pièges et jetons faux d’une même adresse — le premier tout de 
   assert.equal(resume.detail.nombre, 11);
   assert.equal(resume.detail.fenetre_min, 5);
 });
+
+test('ce qu’un compte fait une fois entré : réglage public, contact remplacé, heure rendue visible, EXIF complet (BV-1, BV-2)', async t => {
+  const c = await withVigie(t);
+  const cookies = await c.login();
+  const csrf = c.db.prepare('SELECT csrf FROM sessions').pluck().get();
+  const write = () => c.app.inject({ method: 'POST', url: '/admin/theme', cookies, remoteAddress: '203.0.113.7', headers: { 'user-agent': UA_MAC }, payload: { _csrf: csrf, theme: 'dark' } });
+  const set = (k, v) => c.db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run(k, JSON.stringify(v));
+  await write();                                                       // première écriture : point de départ
+  set('public_version', 'v2'); set('tagline', 'Une autre accroche');
+  await write();
+  set('privacy_contact', 'piege@exemple.org');
+  await write();
+  c.db.prepare("UPDATE photos SET show_time = 1 WHERE id IN (SELECT id FROM photos LIMIT 2)").run();
+  set('exif', { mode: 'all' });
+  await write();
+  await write();                                                       // rien de changé : rien d'émis
+  const v = await c.flush();
+  const pub = v.of('config_public_changed');
+  assert.equal(pub.length, 3);
+  assert.deepEqual(pub[0].detail.cles, ['public_version', 'tagline']);
+  assert.deepEqual(pub[0].detail.valeurs, { public_version: { avant: null, apres: 'v2' } }, 'valeur seulement pour un réglage sans donnée personnelle');
+  assert.equal(pub[0].severity, 'bas');
+  assert.equal(pub[1].severity, 'moyen', 'contact remplacé');
+  assert.equal(pub[1].detail.contact_change, true);
+  assert.ok(!JSON.stringify(pub).includes('piege@exemple.org'), 'jamais la nouvelle adresse de contact');
+  assert.deepEqual(pub[2].detail.valeurs.exif, { avant: null, apres: 'all' });
+  const exp = v.of('privacy_exposure_changed');
+  assert.equal(exp.length, 1);
+  assert.equal(exp[0].detail.heure_visible_ajoutees, 2);
+  assert.equal(exp[0].detail.exif_complet, true);
+  assert.equal(exp[0].severity, 'moyen');
+  assert.equal(exp[0].sub, 'local:julien');
+});

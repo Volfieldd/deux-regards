@@ -1,0 +1,86 @@
+# Ce qu'un compte fait une fois entré dans l'admin (registre des briques, docs/etudes/vigie-besoins-des-briques.md,
+# BV-1 et BV-2). Le site compare les réglages publics et les données exposées avant et après chaque écriture.
+title: Réglage public changé (version du site, mentions, accroche, ouverture, thème, EXIF)
+name: reglage_public
+id: adf4caa2-a8c7-4c30-853c-f78eece6c8fa
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: config_public_changed
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Adresse de contact ou directeur de la publication changés
+name: contact_public_change
+id: a92b4442-c98a-4d88-8926-e60e0ff2feae
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: Une adresse de contact remplacée sert à hameçonner les personnes photographiées qui exercent leurs droits.
+tags: [attack.impact, attack.t1491, attack.t1566]
+detection:
+  selection:
+    type: config_public_changed
+    detail.contact_change: true
+  condition: selection
+level: medium
+vigie: { cas: DS9, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+title: EXIF complet publié (lieu GPS et heure dans les images servies)
+name: exif_complet
+id: 53bebd00-4062-4a5b-bb0e-0ee6c40e29d5
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.collection, attack.t1213]
+detection:
+  selection:
+    type: privacy_exposure_changed
+    detail.exif_complet: true
+  condition: selection
+level: medium
+vigie: { cas: DS18, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+title: Heure d'une photo rendue visible
+name: heure_rendue_visible
+id: 72b2c5f7-e731-4077-b682-e6981178d1fc
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: privacy_exposure_changed
+    detail.heure_visible_ajoutees|gte: 1
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Heure rendue visible sur 20 photos ou plus en 10 minutes par un compte
+name: heures_visibles_en_masse
+id: a0482392-d853-4f57-96b0-ec5883d710dc
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.collection, attack.t1213]
+correlation:
+  type: event_count
+  rules: [heure_rendue_visible]
+  group-by: [sub]
+  timespan: 10m
+  condition: { gte: 20 }
+level: medium
+vigie: { cas: DS18, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+title: Réglage public changé dans l'heure qui suit une session reprise depuis un autre appareil
+name: reglage_apres_session_reprise
+id: 330be0bf-00e6-4275-99af-8809e958cf4a
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.persistence, attack.impact, attack.t1078]
+correlation:
+  type: temporal
+  rules: [session_autre_appareil, reglage_public]
+  group-by: [sub]
+  timespan: 1h
+level: high
+vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
