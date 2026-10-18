@@ -8,5 +8,5 @@
 <% const v = it.v2, list = it.list, etiree = Boolean(it.etiree), eager = it.eager || 0;
    const meta = it.meta || (p => [it.filter?.regard ? null : p.author, p.place, v.date(p.taken_on)].filter(Boolean).join(' · ')); %>
 <ul class="rangees<%= etiree ? ' rangees--etiree' : '' %>" aria-labelledby="<%= it.labelledby %>">
-<% list.forEach((p, i) => { const g = v.fmt(p); %>  <li class="<%= g.cls %><%= g.r < 1 ? ' v' : g.r === 1 ? ' c' : '' %>"><a class="vignette" href="<%= it.photoUrl(p.slug, it.filter) %>"><%~ it.picture(p, { sizes: v.rowSizes(p, list, { etiree }), eager: i < eager, alt: '' }) %><span class="cartel cartel--ligne"><span class="cartel-t"><%~ v.nobr(p.title) %></span><span class="cartel-m"><%= meta(p) %></span></span></a></li>
+<% list.forEach((p, i) => { const g = v.fmt(p); %>  <li class="<%= g.cls %><%= g.r < 1 ? ' v' : g.r === 1 ? ' c' : '' %>"><a class="vignette" href="<%= it.photoUrl(p.slug, it.filter) %>"><%~ it.picture(p, { sizes: v.rowSizes(p, list, { etiree }), eager: i < eager, alt: p.alt || '' }) %><span class="cartel cartel--ligne"><span class="cartel-t"><%~ v.nobr(p.title) %></span><span class="cartel-m"><%= meta(p) %></span></span></a></li>
 <% }) %></ul>

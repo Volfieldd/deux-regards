@@ -2154,18 +2154,24 @@ document.addEventListener('click', e => {
 });
 document.querySelectorAll('[data-kw-add]').forEach(b => { b.hidden = false; });
 
-// ----- description suggérée (fiche) : la reprendre comme légende ; suivre son calcul sans recharger -----
+// ----- description suggérée (fiche) : la reprendre comme texte de remplacement ; suivre son calcul sans recharger -----
+// Le bouton remplit seulement les champs : rien n'est enregistré, ni publié, avant « Enregistrer ».
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-desc-use]');
   if (!b) return;
-  // La légende de la langue de la description : française (traduite), sinon anglaise (rubrique des traductions).
-  const legend = b.closest('form')?.querySelector(`textarea[name="${b.dataset.descField === 'legend_en' ? 'legend_en' : 'legend'}"]`);
-  if (!legend) return;
-  const fold = legend.closest('details');
-  if (fold) fold.open = true;
-  legend.value = b.dataset.descUse;
-  legend.dispatchEvent(new Event('input', { bubbles: true }));
-  legend.focus();
+  const form = b.closest('form');
+  const field = name => form?.querySelector(`textarea[name="${name}"]`);
+  // Le champ de la langue de la description : français (traduite), sinon anglais (rubrique des traductions).
+  const main = field(b.dataset.descField === 'alt_text_en' ? 'alt_text_en' : 'alt_text');
+  if (!main) return;
+  const put = (el, text) => { const fold = el.closest('details'); if (fold) fold.open = true; el.value = text; el.dispatchEvent(new Event('input', { bubbles: true })); };
+  put(main, b.dataset.descUse);
+  // Les autres langues déjà traduites : seulement dans un champ encore vide (un texte écrit à la main reste).
+  for (const [name, text] of [['alt_text_en', b.dataset.descEn], ['alt_text_de', b.dataset.descDe]]) {
+    const el = field(name);
+    if (el && el !== main && text && !el.value.trim()) put(el, text);
+  }
+  main.focus();
 });
 document.querySelectorAll('[data-desc-pending]').forEach(box => {
   // Saisie en cours dans la fiche (valeur différente de celle de la page) : on ne recharge pas, elle serait perdue.

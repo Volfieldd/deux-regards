@@ -222,8 +222,10 @@ export function createAdminRepo(db) {
       const showTime = truthy(body.show_time) && /^\d{2}:\d{2}$/.test(before?.taken_time || '') ? 1 : 0;
       // Traductions facultatives (site en anglais et en allemand) : gardées telles quelles si le formulaire ne les envoie pas.
       const tr = (field, max) => Object.fromEntries(['en', 'de'].map(l => [`${field}_${l}`, `${field}_${l}` in body ? text(body[`${field}_${l}`], max) : (before?.[`${field}_${l}`] ?? '')]));
+      // Texte de remplacement, en trois langues, sur une ligne : gardé tel quel si le formulaire ne l'envoie pas.
+      const alt = Object.fromEntries(['alt_text', 'alt_text_en', 'alt_text_de'].map(k => [k, k in body ? line(body[k], LIMITS.alt_text) : (before?.[k] ?? '')]));
       const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn === undefined ? text(body.taken_on, 40) : takenOn, legend: text(body.legend, 2000), status, watermark,
-        ...tr('title', 160), ...tr('legend', 2000), ...tr('place', 120),
+        ...tr('title', 160), ...tr('legend', 2000), ...tr('place', 120), ...alt,
         keywords: 'keywords' in body ? normKeywords(body.keywords) : (before?.keywords ?? ''),
         city_label: 'city_label' in body ? text(body.city_label, 120) : cities.labelOf(before), on_map: loc.on_map, show_time: showTime };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
@@ -232,6 +234,7 @@ export function createAdminRepo(db) {
         db.prepare(`UPDATE photos SET series_checked = CASE WHEN category_id = @category_id THEN series_checked ELSE 1 END, title = @title, slug = @slug, category_id = @category_id, author_id = @author_id, place = @place,
           taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark,
           title_en = @title_en, title_de = @title_de, legend_en = @legend_en, legend_de = @legend_de, place_en = @place_en, place_de = @place_de,
+          alt_text = @alt_text, alt_text_en = @alt_text_en, alt_text_de = @alt_text_de,
           keywords = @keywords, show_time = @show_time, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
         db.prepare(`UPDATE photos SET city_id = @city_id, city_name = @city_name, city_cc = @city_cc, city_lat = @city_lat, city_lon = @city_lon,
           city_source = @city_source, on_map = @on_map WHERE id = @id`).run({ ...loc, id });
@@ -250,7 +253,7 @@ export function createAdminRepo(db) {
       if (!p) return null;
       const merged = { ...p, taken_on: p.taken_on || '', watermark: p.watermark === 0 ? 'none' : 'default' };
       for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend', 'keywords', 'city_id', 'city_label', 'on_map', 'show_time',
-        'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de']) if (k in body) merged[k] = body[k];
+        'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de', 'alt_text', 'alt_text_en', 'alt_text_de']) if (k in body) merged[k] = body[k];
       // Brouillon dont l'adresse dérive encore du titre : elle suit le nouveau titre.
       merged.slug = 'title' in body && p.status === 'draft' && p.slug === uniqueSlug('photos', p.title, id) ? '' : p.slug;
       this.updatePhoto(id, merged);

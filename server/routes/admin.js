@@ -185,7 +185,8 @@ export default async function adminRoutes(app) {
   const W = perm => ({ preHandler: app.verifyCsrf, config: { perm } });
   // Routes qui font plusieurs choses : la permission de l'action précise est vérifiée en plus.
   // Textes d'une photo (photos.textes) ; changer un autre champ demande photos.modifier.
-  const TEXT_FIELDS = new Set(['title', 'legend', 'place', 'keywords', 'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de']);
+  // Le texte de remplacement (migration 053) en est un : le relecteur le corrige comme la légende.
+  const TEXT_FIELDS = new Set(['title', 'legend', 'place', 'keywords', 'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de', 'alt_text', 'alt_text_en', 'alt_text_de']);
   // Une photo publiée ne se modifie qu'avec « modifier ses photos publiées » (réglable par photographe).
   // Après une modification par qui ne valide pas lui-même (le photographe) : une photo programmée repasse en
   // proposition, pour que le modérateur revoie ce qui partira en ligne.
@@ -924,7 +925,16 @@ export default async function adminRoutes(app) {
   // Personnes et audience : selon la portée, sur le photographe de la photo (un compte photographe et relecteur voit
   // toutes les photos, mais seulement ses personnes et ses chiffres) ; une rencontre d'un autre photographe liée à la
   // photo reste tue, comme sa fiche (404).
+  // « Reprendre comme texte de remplacement » : la version française dans le champ français ; sans traducteur, l'anglais
+  // va dans le champ anglais, jamais dans le français ; l'allemande (traduite) et l'anglaise remplissent en plus leur
+  // champ s'il est vide.
+  const descriptionUse = id => {
+    const fr = app.describer.forPhoto(id, 'fr'), de = app.describer.forPhoto(id, 'de');
+    if (!fr?.en) return { field: 'alt_text_en', text: '' };
+    return fr.translated ? { field: 'alt_text', text: fr.text, en: fr.en, de: de?.translated ? de.text : '' } : { field: 'alt_text_en', text: fr.en, de: de?.translated ? de.text : '' };
+  };
   const photoExtras = (photo, t, request) => ({
+    altMax: LIMITS.alt_text,
     seePeople: request.owns('personnes.voir', photo.author_id), seeStats: request.owns('statistiques.voir', photo.author_id),
     proof: app.proofs.get(photo.id), tsa: app.config.tsa,
     audience: request.owns('statistiques.voir', photo.author_id) ? photoStats(photo.id) : null, shares: request.owns('statistiques.voir', photo.author_id) ? app.shares.forPhoto(photo.id) : 0, insta: instaOf(photo, t),
@@ -936,10 +946,9 @@ export default async function adminRoutes(app) {
     // Instagram : la main sur la file pour cette photo, ou seulement la proposer (circuit) ; sa proposition en cours.
     // Mots-clés suggérés par CLIP (empreinte des propositions de séries) ; null : pas encore d'empreinte.
     keywordSuggestions: app.keywordSuggest.forPhoto(photo, { lang: request.t.lang, have: photo.keywords }), seriesSuggestOn: app.seriesSuggest.enabled(),
-    // Description suggérée (Florence-2) : seulement si la fonction est allumée.
-    // « Reprendre comme légende » : la version française dans la légende (française) ; sans traducteur, l'anglais va dans
-    // la légende anglaise, jamais dans la française.
-    description: app.describer.settings().on ? (d => (d ? { ...d, use: (f => (f.translated ? { field: 'legend', text: f.text } : { field: 'legend_en', text: f.en || '' }))(app.describer.forPhoto(photo.id, 'fr')) } : { pending: false, text: '' }))(app.describer.forPhoto(photo.id, request.t.lang)) : null,
+    // Description suggérée (Florence-2) : seulement si la fonction est allumée. Elle se reprend dans le texte de
+    // remplacement (UX-F-44, maquette MQ-09), jamais seule : le bouton remplit le champ, la personne relit et enregistre.
+    description: app.describer.settings().on ? (d => (d ? { ...d, use: descriptionUse(photo.id) } : { pending: false, text: '' }))(app.describer.forPhoto(photo.id, request.t.lang)) : null,
     igFile: request.owns('instagram.file', photo.author_id), igPropose: request.owns('instagram.proposer', photo.author_id), igProposal: app.instagram.openProposal(photo.id),
     review: { state: repo.photo(photo.id)?.review || null, at: repo.photo(photo.id)?.publish_at || null, history: app.review.history(photo.id).slice(0, 10) },
     suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(photo.id)), undefined, true, request),

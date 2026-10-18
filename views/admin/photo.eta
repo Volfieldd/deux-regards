@@ -72,12 +72,16 @@
 <% } %><% } %>
     <label><%= t('Légende') %> <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'legend', label: t('Légende'), max: 2000, rows: 3 }) %>
-<% if (it.description) { const d = it.description; %>    <div class="desc-sugg" id="description" data-desc data-desc-url="/admin/photos/<%= it.photo.id %>/description"<%~ d.pending ? ' data-desc-pending' : '' %>>
+    <label><%= t('Texte de remplacement') %> <span class="mono"><%= t('une ligne, {n} signes au plus', { n: it.altMax }) %></span><textarea name="alt_text" rows="2" maxlength="<%= it.altMax %>" aria-describedby="alt-aide"><%= v.alt_text || '' %></textarea></label>
+    <p class="hint" id="alt-aide"><%= t('Lu par les personnes aveugles à la place de la photo : ce qu’on y voit, en une phrase. Vide : le titre est lu.') %></p>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'alt_text', label: t('Texte de remplacement'), max: it.altMax, rows: 2 }) %>
+<% if (it.description) { const d = it.description, u = d.use || {}; %>    <div class="desc-sugg" id="description" data-desc data-desc-url="/admin/photos/<%= it.photo.id %>/description"<%~ d.pending ? ' data-desc-pending' : '' %>>
       <p><span class="mono"><%= t('Description suggérée') %> :</span> <span data-desc-text><%= d.pending ? t('en cours de calcul…') : d.text ? `« ${d.text} »` : d.error ? t('Dernier essai sans succès : {error}', { error: t.msg(d.error) }) : t('pas encore calculée') %></span><% if (d.text && !d.translated && it.lang !== 'en') { %> <span class="mono">(<%= it.translate ? t('en anglais : traduction pas encore faite, nouvel essai dans quelques minutes') : t('en anglais : aucun traducteur configuré') %>)</span><% } %><% if (d.text && d.error && !d.pending) { %> <span class="err"><%= t('Dernier essai sans succès : {error}', { error: t.msg(d.error) }) %></span><% } %></p>
-      <p class="actions"><% if (d.text && d.use && d.use.text) { %><button class="btn ghost sm" type="button" data-desc-use="<%= d.use.text %>" data-desc-field="<%= d.use.field %>" data-js-only hidden><%= d.use.field === 'legend' ? t('Reprendre comme légende') : t('Reprendre comme légende anglaise') %></button> <% } %><button class="btn ghost sm" type="submit" form="desc-form"><%= d.text ? t('Décrire de nouveau') : t('Décrire cette photo') %></button>
-        <span class="hint"><%= t('Florence-2, sur ce serveur : une phrase factuelle, à relire et à réécrire à votre façon.') %></span></p>
+      <p class="actions"><% if (d.text && u.text) { %><button class="btn ghost sm" type="button" data-desc-use="<%= u.text %>" data-desc-field="<%= u.field %>"<% if (u.en) { %> data-desc-en="<%= u.en %>"<% } %><% if (u.de) { %> data-desc-de="<%= u.de %>"<% } %> data-js-only hidden><%= u.field === 'alt_text' ? t('Reprendre comme texte de remplacement') : t('Reprendre comme texte de remplacement anglais') %></button> <% } %><button class="btn ghost sm" type="submit" form="desc-form"><%= d.text ? t('Décrire de nouveau') : t('Décrire cette photo') %></button>
+        <span class="hint"><%= t('Florence-2, sur ce serveur : une phrase factuelle, à relire et à réécrire à votre façon. Rien n’est publié sans « Enregistrer ».') %></span></p>
     </div>
 <% } %>
+
     <label><%= t('Mots-clés') %> <span class="mono"><%= t('séparés par des virgules · pour la recherche sur le site ; en plusieurs langues si besoin') %></span><input name="keywords" value="<%= v.keywords || '' %>" maxlength="1200" placeholder="<%= t('brume, Loire, matin') %>"></label>
 <% if (it.keywordSuggestions && it.keywordSuggestions.length) { %>    <p class="kw-sugg" data-kw-sugg><span class="mono"><%= t('Suggestions') %> :</span> <% it.keywordSuggestions.forEach(k => { %><button type="button" class="kw-chip" data-kw-add="<%= k.word %>" hidden>+ <%= k.word %></button><span class="kw-plain" data-nojs><%= k.word %></span> <% }) %><span class="hint" data-js-only hidden><%= t('un clic ajoute le mot, à enregistrer ensuite') %></span></p>
 <% } else if (it.keywordSuggestions === null && !it.seriesSuggestOn && it.can('series.gerer')) { %>    <p class="hint"><%= t('Mots-clés suggérés : activez les propositions de séries (page Séries), le même modèle les calcule.') %></p>
@@ -138,12 +142,16 @@
       <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'title', label: t('Titre'), max: 160 }) %>
       <label><%= t('Légende') %> <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
       <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'legend', label: t('Légende'), max: 2000, rows: 3 }) %>
-<% if (it.description) { const d = it.description; %>    <div class="desc-sugg" id="description" data-desc data-desc-url="/admin/photos/<%= it.photo.id %>/description"<%~ d.pending ? ' data-desc-pending' : '' %>>
+    <label><%= t('Texte de remplacement') %> <span class="mono"><%= t('une ligne, {n} signes au plus', { n: it.altMax }) %></span><textarea name="alt_text" rows="2" maxlength="<%= it.altMax %>" aria-describedby="alt-aide"><%= v.alt_text || '' %></textarea></label>
+    <p class="hint" id="alt-aide"><%= t('Lu par les personnes aveugles à la place de la photo : ce qu’on y voit, en une phrase. Vide : le titre est lu.') %></p>
+    <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'alt_text', label: t('Texte de remplacement'), max: it.altMax, rows: 2 }) %>
+<% if (it.description) { const d = it.description, u = d.use || {}; %>    <div class="desc-sugg" id="description" data-desc data-desc-url="/admin/photos/<%= it.photo.id %>/description"<%~ d.pending ? ' data-desc-pending' : '' %>>
       <p><span class="mono"><%= t('Description suggérée') %> :</span> <span data-desc-text><%= d.pending ? t('en cours de calcul…') : d.text ? `« ${d.text} »` : d.error ? t('Dernier essai sans succès : {error}', { error: t.msg(d.error) }) : t('pas encore calculée') %></span><% if (d.text && !d.translated && it.lang !== 'en') { %> <span class="mono">(<%= it.translate ? t('en anglais : traduction pas encore faite, nouvel essai dans quelques minutes') : t('en anglais : aucun traducteur configuré') %>)</span><% } %><% if (d.text && d.error && !d.pending) { %> <span class="err"><%= t('Dernier essai sans succès : {error}', { error: t.msg(d.error) }) %></span><% } %></p>
-      <p class="actions"><% if (d.text && d.use && d.use.text) { %><button class="btn ghost sm" type="button" data-desc-use="<%= d.use.text %>" data-desc-field="<%= d.use.field %>" data-js-only hidden><%= d.use.field === 'legend' ? t('Reprendre comme légende') : t('Reprendre comme légende anglaise') %></button> <% } %><button class="btn ghost sm" type="submit" form="desc-form"><%= d.text ? t('Décrire de nouveau') : t('Décrire cette photo') %></button>
-        <span class="hint"><%= t('Florence-2, sur ce serveur : une phrase factuelle, à relire et à réécrire à votre façon.') %></span></p>
+      <p class="actions"><% if (d.text && u.text) { %><button class="btn ghost sm" type="button" data-desc-use="<%= u.text %>" data-desc-field="<%= u.field %>"<% if (u.en) { %> data-desc-en="<%= u.en %>"<% } %><% if (u.de) { %> data-desc-de="<%= u.de %>"<% } %> data-js-only hidden><%= u.field === 'alt_text' ? t('Reprendre comme texte de remplacement') : t('Reprendre comme texte de remplacement anglais') %></button> <% } %><button class="btn ghost sm" type="submit" form="desc-form"><%= d.text ? t('Décrire de nouveau') : t('Décrire cette photo') %></button>
+        <span class="hint"><%= t('Florence-2, sur ce serveur : une phrase factuelle, à relire et à réécrire à votre façon. Rien n’est publié sans « Enregistrer ».') %></span></p>
     </div>
 <% } %>
+
       <label><%= t('Lieu affiché') %> <input name="place" value="<%= v.place %>" maxlength="120"></label>
       <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'place', label: t('Lieu'), max: 120 }) %>
       <label><%= t('Mots-clés') %> <span class="mono"><%= t('séparés par des virgules · pour la recherche sur le site ; en plusieurs langues si besoin') %></span><input name="keywords" value="<%= v.keywords || '' %>" maxlength="1200" placeholder="<%= t('brume, Loire, matin') %>"></label>
@@ -154,7 +162,7 @@
       <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
     </form>
 <% } else { %>
-    <dl class="facts"><dt><%= t('Titre') %></dt><dd><%= it.photo.title %></dd><dt><%= t('Légende') %></dt><dd><%= it.photo.legend || '—' %></dd><dt><%= t('Lieu') %></dt><dd><%= it.photo.place || '—' %></dd><dt><%= t('Série') %></dt><dd><%= it.photo.category %> · <%= it.photo.author %></dd></dl>
+    <dl class="facts"><dt><%= t('Titre') %></dt><dd><%= it.photo.title %></dd><dt><%= t('Légende') %></dt><dd><%= it.photo.legend || '—' %></dd><dt><%= t('Lieu') %></dt><dd><%= it.photo.place || '—' %></dd><dt><%= t('Texte de remplacement') %></dt><dd><%= it.photo.alt_text || '—' %></dd><dt><%= t('Série') %></dt><dd><%= it.photo.category %> · <%= it.photo.author %></dd></dl>
     <p class="hint"><%= can('photos.modifier') && !editableHere ? t('Publiée sur le site. La modifier demande un droit que le modérateur peut vous donner.') : t('Pour une correction, écrivez une remarque au photographe (plus bas) ou renvoyez-lui la photo.') %></p>
 <% } %>
   </div>

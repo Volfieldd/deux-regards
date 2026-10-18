@@ -17,6 +17,7 @@ const PHOTO_COLUMNS = `p.id, p.likes, p.slug, p.title, p.place, p.taken_on, p.le
 const decorate = lang => (p, i) => ({
   ...p, n: i + 1, when: monthYear(p.taken_on, lang), time: clockTime(p.shown_time, lang), index: i,
   title: pick(p, 'title', lang), legend: pick(p, 'legend', lang), place: pick(p, 'place', lang), category: pick(p, 'category', lang),
+  alt: pick(p, 'alt_text', lang),
 });
 
 export function createRepo(db) {

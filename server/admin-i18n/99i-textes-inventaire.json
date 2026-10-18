@@ -1,4 +1,28 @@
 {
+ "Texte de remplacement": {
+  "en": "Alternative text",
+  "de": "Alternativtext"
+ },
+ "une ligne, {n} signes au plus": {
+  "en": "one line, {n} characters at most",
+  "de": "eine Zeile, höchstens {n} Zeichen"
+ },
+ "Lu par les personnes aveugles à la place de la photo : ce qu’on y voit, en une phrase. Vide : le titre est lu.": {
+  "en": "Read to blind people instead of the photo: what can be seen in it, in one sentence. Empty: the title is read.",
+  "de": "Wird blinden Menschen anstelle des Fotos vorgelesen: was darauf zu sehen ist, in einem Satz. Leer: Der Titel wird vorgelesen."
+ },
+ "Reprendre comme texte de remplacement": {
+  "en": "Use as alternative text",
+  "de": "Als Alternativtext übernehmen"
+ },
+ "Reprendre comme texte de remplacement anglais": {
+  "en": "Use as English alternative text",
+  "de": "Als englischen Alternativtext übernehmen"
+ },
+ "Florence-2, sur ce serveur : une phrase factuelle, à relire et à réécrire à votre façon. Rien n’est publié sans « Enregistrer ».": {
+  "en": "Florence-2, on this server: one factual sentence, to be reread and rewritten your way. Nothing is published without “Save”.",
+  "de": "Florence-2, auf diesem Server: ein sachlicher Satz, zum Gegenlesen und Umschreiben nach Ihrer Art. Ohne „Speichern“ wird nichts veröffentlicht."
+ },
  "inventaire {n}": {
   "en": "inventory {n}",
   "de": "Inventarnummer {n}"

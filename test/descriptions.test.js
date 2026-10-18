@@ -62,7 +62,7 @@ test('sans traducteur : la description reste en anglais ; fiche : bloc, bouton, 
   assert.match(series, /id="descriptions"[\s\S]*name="model" value="base" checked[\s\S]*Allumer les descriptions/);   // « Léger » par défaut
   await post('/admin/series/descriptions', { action: 'on', model: 'base', from: '2', to: '5' });
   assert.deepEqual(ctx.app.describer.settings(), { on: true, model: 'base', from: 2, to: 5 });
-  // Fiche : bouton, demande, puis le texte en anglais (pas de traducteur ici) et « Reprendre comme légende ».
+  // Fiche : bouton, demande, puis le texte en anglais (pas de traducteur ici) et « Reprendre comme texte de remplacement ».
   assert.match((await ctx.app.inject({ url: `/admin/photos/${id}`, cookies })).body, /Description suggérée[\s\S]*pas encore calculée[\s\S]*Décrire cette photo/);
   const r = await post(`/admin/photos/${id}/description`);
   assert.equal(r.statusCode, 303);

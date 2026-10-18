@@ -100,16 +100,18 @@ test('fiche photo : « Décrire cette photo » dans son propre formulaire ; éch
   assert.match((await admin.get(`/admin/photos/${p.id}`)).body, /<span data-desc-text>Dernier essai sans succès : image illisible<\/span>/);
   c.db.prepare("UPDATE photo_descriptions SET text_en = 'A test photo.' WHERE photo_id = ?").run(p.id);
   assert.match((await admin.get(`/admin/photos/${p.id}`)).body, /« A test photo\. »<\/span>[^\n]*<span class="err">Dernier essai sans succès : image illisible<\/span>/);
-  // Sans traducteur : la phrase anglaise va dans la légende anglaise, jamais dans la française.
+  // Sans traducteur : la phrase anglaise va dans le texte de remplacement anglais (UX-F-44, MQ-09 : plus dans la
+  // légende), jamais dans le français.
   c.db.prepare("UPDATE photo_descriptions SET text_en = 'A test photo.', error = NULL WHERE photo_id = ?").run(p.id);
   const en = (await admin.get(`/admin/photos/${p.id}`)).body;
-  assert.match(en, /data-desc-use="A test photo\." data-desc-field="legend_en"[^>]*>Reprendre comme légende anglaise</);
-  // Traduite : la version française va dans la légende française, même quand l'admin est en anglais.
+  assert.match(en, /data-desc-use="A test photo\." data-desc-field="alt_text_en"[^>]*>Reprendre comme texte de remplacement anglais</);
+  // Traduite : la version française va dans le texte de remplacement français, même quand l'admin est en anglais ;
+  // l'anglaise et l'allemande suivent, pour leurs champs s'ils sont vides.
   c.db.prepare("UPDATE photo_descriptions SET text_fr = 'Une photo de test.', text_de = 'Ein Testfoto.' WHERE photo_id = ?").run(p.id);
   await admin.post('/admin/langue', { lang: 'en', back: '/admin' });
   const fr = (await admin.get(`/admin/photos/${p.id}`)).body;
   assert.match(fr, /« A test photo\. »/);                                         // affichée dans la langue de l'admin
-  assert.match(fr, /data-desc-use="Une photo de test\." data-desc-field="legend"/);   // reprise en français
+  assert.match(fr, /data-desc-use="Une photo de test\." data-desc-field="alt_text" data-desc-en="A test photo\." data-desc-de="Ein Testfoto\."/);   // reprise en français
 });
 
 test('app Rencontre : après une erreur du serveur, l’écran dit que la photo et la signature sont à refaire', async t => {

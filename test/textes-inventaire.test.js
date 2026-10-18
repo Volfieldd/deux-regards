@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import { setup, VIGIE_KEYS } from './helpers.js';
 import { createSessionStore } from '../server/sessions.js';
 import { openDb } from '../server/db/index.js';
+import { LIMITS } from '../server/admin-repo.js';
 import { intentParts } from '../server/v2-vues.js';
 
 // Données du site public v2 créées par la migration 053 (PLAN.md, point 8) : texte d'intention d'une série (MQ-03),
@@ -50,6 +51,8 @@ async function site(t, opts = {}) {
 }
 const audits = (db, action) => db.prepare('SELECT action, target, detail FROM audit_log WHERE action = ? ORDER BY id').all(action);
 
+// ---------- migration ----------
+
 test('migration 053 : textes vides par défaut, numéro d’inventaire pour chaque photo publiée, compteur par préfixe', async t => {
   const c = await site(t);
   assert.ok(c.db.prepare('SELECT 1 FROM migrations WHERE name = ?').get('053_textes_inventaire.sql'));
@@ -93,6 +96,8 @@ test('migration 053 sur une base en service : photos déjà publiées numéroté
   db.prepare("UPDATE photos SET status = 'published' WHERE id = 5").run();
   assert.equal(db.prepare('SELECT inventory FROM photos WHERE id = 5').pluck().get(), YY === '26' ? 'J26-002' : `J${YY}-001`);
 });
+
+// ---------- numéro d'inventaire ----------
 
 test('numéro d’inventaire : donné à la première publication, unique, stable, jamais réutilisé après suppression', async t => {
   const c = await site(t);
@@ -148,6 +153,185 @@ test('numéro d’inventaire : rien de privé (ni l’heure, ni l’identifiant 
   }
 });
 
+// ---------- droits ----------
+
+test('droits : le photographe écrit le texte de remplacement des siennes seulement ; une photo d’un autre est hors portée', async t => {
+  const c = await site(t);
+  const ph = c.photographer();
+  const mine = c.first(c.seb), other = c.first(c.jul);
+  // Les siennes : par la fiche, champ par champ et par « textes seuls ».
+  assert.equal((await ph.post(`/admin/photos/${mine.id}`, c.form(mine, { alt_text: 'Un quai désert.' }))).statusCode, 303);
+  assert.equal(c.row(mine.id).alt_text, 'Un quai désert.');
+  assert.equal((await ph.json(`/admin/photos/${mine.id}/champs`, { alt_text_en: 'An empty quay.' })).statusCode, 200);
+  assert.equal(c.row(mine.id).alt_text_en, 'An empty quay.');
+  assert.equal((await ph.post(`/admin/photos/${mine.id}/textes`, { alt_text_de: 'Ein leerer Kai.' })).statusCode, 303);
+  assert.equal(c.row(mine.id).alt_text_de, 'Ein leerer Kai.');
+  // Celles de Julien : introuvables pour lui (404), signalées « hors portée », rien d'écrit.
+  const before = (await c.security()).length;
+  for (const r of [await ph.post(`/admin/photos/${other.id}`, c.form(other, { alt_text: 'piraté' })), await ph.json(`/admin/photos/${other.id}/champs`, { alt_text: 'piraté' }),
+    await ph.post(`/admin/photos/${other.id}/textes`, { alt_text: 'piraté' }), await ph.get(`/admin/photos/${other.id}`)]) assert.equal(r.statusCode, 404);
+  assert.equal(c.row(other.id).alt_text, '');
+  const fails = (await c.security()).slice(before).filter(e => e.type === 'authz_fail');
+  assert.equal(fails.length, 4);
+  assert.ok(fails.every(e => e.detail.raison === 'hors portée'));
+  // Lot : une photo d'un autre glissée dans la liste est ignorée.
+  await ph.post('/admin/photos/lot', { ids: `${mine.id},${other.id}`, [`title_${other.id}`]: 'piraté' });
+  assert.equal(c.row(other.id).title, other.title);
+});
+
+test('droits : séries et photographes réservés à leurs gestionnaires ; le relecteur corrige le texte de remplacement', async t => {
+  const c = await site(t);
+  const ph = c.photographer(), relu = c.as('relecteur'), modo = c.as('moderateur'), admin = c.as('admin');
+  const rue = c.serie('paysage') || c.db.prepare('SELECT * FROM categories LIMIT 1').get();
+  const sebRow = c.db.prepare('SELECT * FROM authors WHERE id = ?').get(c.seb);
+  const before = (await c.security()).length;
+  // Photographe : ni le texte d'intention d'une série (même où sont ses photos), ni sa propre description courte.
+  assert.equal((await ph.post(`/admin/series/${rue.id}`, { name: rue.name, intent: 'piraté' })).statusCode, 403);
+  assert.equal((await ph.post(`/admin/auteurs/${c.seb}`, { name: sebRow.name, short_bio: 'piraté' })).statusCode, 403);
+  assert.equal((await relu.post(`/admin/series/${rue.id}`, { name: rue.name, intent: 'piraté' })).statusCode, 403);
+  assert.equal(c.serie(rue.slug).intent, '');
+  assert.equal(c.db.prepare('SELECT short_bio FROM authors WHERE id = ?').pluck().get(c.seb), '');
+  const refused = (await c.security()).slice(before).filter(e => e.type === 'authz_fail');
+  assert.equal(refused.length, 3);
+  assert.ok(refused.every(e => e.detail.raison === 'permission'));
+  // Modérateur : les séries (series.gerer) ; administrateur : les photographes (photographes.gerer).
+  assert.equal((await modo.post(`/admin/series/${rue.id}`, { name: rue.name, intent: 'Ce que la série cherche.' })).statusCode, 303);
+  assert.equal(c.serie(rue.slug).intent, 'Ce que la série cherche.');
+  assert.equal((await admin.post(`/admin/auteurs/${c.seb}`, { name: sebRow.name, short_bio: 'le matin, les quais, les fleuves' })).statusCode, 303);
+  assert.equal(c.db.prepare('SELECT short_bio FROM authors WHERE id = ?').pluck().get(c.seb), 'le matin, les quais, les fleuves');
+  // Relecteur : le texte de remplacement est un texte de la photo, comme la légende (photos.textes), publiée comprise.
+  const p = c.first(c.jul);
+  assert.equal((await relu.post(`/admin/photos/${p.id}/textes`, { alt_text: 'Une ruelle brune.', category_id: '999' })).statusCode, 303);
+  assert.equal(c.row(p.id).alt_text, 'Une ruelle brune.');
+  assert.equal(c.row(p.id).category_id, p.category_id, 'rien d’autre que les textes');
+  assert.equal((await relu.json(`/admin/photos/${p.id}/champs`, { alt_text_en: 'A brown alley.' })).statusCode, 200);
+  assert.equal(c.row(p.id).alt_text_en, 'A brown alley.');
+  // Modérateur : ne retouche pas les photos.
+  assert.equal((await modo.json(`/admin/photos/${p.id}/champs`, { alt_text: 'non' })).statusCode, 403);
+  assert.equal(c.row(p.id).alt_text, 'Une ruelle brune.');
+  // La fiche du relecteur et la page des séries montrent les champs ; la page Photographes aussi.
+  assert.match((await relu.get(`/admin/photos/${p.id}`)).body, /name="alt_text"[^>]*>Une ruelle brune\.<\/textarea>/);
+  assert.match((await modo.get('/admin/series')).body, /name="intent" rows="4" maxlength="800">Ce que la série cherche\.<\/textarea>/);
+  assert.match((await admin.get('/admin/auteurs')).body, /name="short_bio" value="le matin, les quais, les fleuves" maxlength="160"/);
+});
+
+// ---------- bornes et échappement ----------
+
+test('bornes : une ligne pour le texte de remplacement et la description courte, longueurs coupées côté serveur', async t => {
+  const c = await site(t);
+  const admin = c.as('admin'), p = c.first(c.seb);
+  assert.deepEqual(LIMITS, { alt_text: 250, short_bio: 160, intent: 800 });
+  await admin.post(`/admin/photos/${p.id}`, c.form(p, { alt_text: `  Un quai\r\nau matin\t\u2028gris  ${'x'.repeat(400)}`, alt_text_en: 'a\u0000b\u0007c' }));
+  const r = c.row(p.id);
+  assert.ok(r.alt_text.startsWith('Un quai au matin gris x'));
+  assert.equal(r.alt_text.length, 250);
+  assert.doesNotMatch(r.alt_text, /[\r\n\t\u2028]/);
+  assert.equal(r.alt_text_en, 'a b c');
+  await admin.post(`/admin/auteurs/${c.seb}`, { name: 'Sébastien', short_bio: `le matin,\nles quais ${'y'.repeat(300)}` });
+  const sb = c.db.prepare('SELECT short_bio FROM authors WHERE id = ?').pluck().get(c.seb);
+  assert.equal(sb.length, 160);
+  assert.ok(sb.startsWith('le matin, les quais'));
+  const s = c.db.prepare('SELECT * FROM categories LIMIT 1').get();
+  await admin.post(`/admin/series/${s.id}`, { name: s.name, intent: `Une.\n\nDeux. ${'z'.repeat(2000)}` });
+  const it = c.serie(s.slug).intent;
+  assert.equal(it.length, 800);
+  assert.ok(it.startsWith('Une. Deux. z'));
+  // Un champ absent du formulaire garde sa valeur (traductions comprises).
+  await admin.post(`/admin/photos/${p.id}`, c.form(c.row(p.id), { title: 'Autre titre' }));
+  assert.equal(c.row(p.id).alt_text_en, 'a b c');
+  await admin.post(`/admin/series/${s.id}`, { name: 'Renommée', slug: s.slug });
+  assert.equal(c.serie(s.slug).intent, it);
+  // Champs du formulaire bornés aussi dans la page (maxlength).
+  assert.match((await admin.get(`/admin/photos/${p.id}`)).body, /<textarea name="alt_text" rows="2" maxlength="250"/);
+});
+
+test('échappement : une saisie <script> reste du texte, dans l’admin, en v1 et en v2', async t => {
+  const c = await site(t);
+  const admin = c.as('admin'), modo = c.as('moderateur'), p = c.first(c.seb);
+  const evil = '<script>alert(1)</script>" onerror="x';
+  await admin.post(`/admin/photos/${p.id}`, c.form(p, { alt_text: evil }));
+  const s = c.serie(p.category_id ? c.db.prepare('SELECT slug FROM categories WHERE id = ?').pluck().get(p.category_id) : 'rue');
+  await modo.post(`/admin/series/${s.id}`, { name: s.name, intent: `${evil}. Deux. Trois.` });
+  await admin.post(`/admin/auteurs/${c.seb}`, { name: 'Sébastien', short_bio: evil });
+  const pages = async () => [await c.visit(`/photo/${p.slug}`), await c.visit(`/serie/${s.slug}`), await c.visit('/'), await c.visit(`/auteur/sebastien`)];
+  for (const v of ['v1', 'v2']) {
+    c.app.publicVersion.save(v);
+    for (const res of await pages()) {
+      assert.equal(res.statusCode, 200);
+      assert.doesNotMatch(res.body, /<script>alert/, v);
+      assert.doesNotMatch(res.body, /" onerror="x/, v);
+    }
+  }
+  const v2photo = (await c.visit(`/photo/${p.slug}`)).body;
+  assert.ok(v2photo.includes(`alt="${esc(evil)}"`));
+  const v2serie = (await c.visit(`/serie/${s.slug}`)).body;
+  assert.ok(v2serie.includes('&lt;script&gt;alert(1)&lt;/script&gt;&quot; onerror=&quot;x.'));
+  const fiche = (await admin.get(`/admin/photos/${p.id}`)).body;
+  assert.ok(fiche.includes('&lt;script&gt;alert(1)&lt;/script&gt;&quot; onerror=&quot;x</textarea>'));
+  assert.doesNotMatch(fiche, /<script>alert/);
+});
+
+// ---------- suggestion ----------
+
+test('description suggérée : jamais publiée ni enregistrée sans une personne ; la fiche la propose sous le texte de remplacement', async t => {
+  const c = await site(t, { describeOptions: { manual: true, model: { describe: async () => 'A quay at dawn.', unload: async () => {}, remove: async () => {} } } });
+  const admin = c.as('admin'), p = c.first(c.seb);
+  c.app.describer.save({ on: true, model: 'base', from: 1, to: 6 });
+  await admin.post(`/admin/photos/${p.id}/description`);
+  await c.app.describer.idle();
+  assert.equal(c.app.describer.forPhoto(p.id).en, 'A quay at dawn.');
+  // Calculée : rien dans la photo, rien sur le site public (v1 et v2), ni dans aucune langue.
+  assert.equal(c.row(p.id).alt_text_en, '');
+  for (const v of ['v1', 'v2']) {
+    c.app.publicVersion.save(v);
+    for (const url of [`/photo/${p.slug}`, `/en/photo/${p.slug}`, '/', `/en/auteur/sebastien`]) assert.doesNotMatch((await c.visit(url)).body, /A quay at dawn/, `${v} ${url}`);
+  }
+  // La fiche la montre sous le champ, avec un bouton qui remplit le champ (script) sans rien enregistrer.
+  const fiche = (await admin.get(`/admin/photos/${p.id}`)).body;
+  const field = fiche.indexOf('name="alt_text"'), sugg = fiche.indexOf('id="description"');
+  assert.ok(field > 0 && sugg > field, 'suggestion sous le texte de remplacement');
+  assert.match(fiche, /data-desc-use="A quay at dawn\." data-desc-field="alt_text_en"[^>]*data-js-only hidden>Reprendre comme texte de remplacement anglais</);
+  assert.match(fiche, /Rien n’est publié sans « Enregistrer »/);
+  // Enregistrer la fiche telle quelle ne la reprend pas ; seule la saisie de la personne compte.
+  await admin.post(`/admin/photos/${p.id}`, c.form(c.row(p.id)));
+  assert.equal(c.row(p.id).alt_text_en, '');
+  await admin.post(`/admin/photos/${p.id}`, c.form(c.row(p.id), { alt_text_en: 'A quay at dawn, two mooring posts.' }));
+  c.app.publicVersion.save('v2');
+  assert.ok((await c.visit(`/en/photo/${p.slug}`)).body.includes('alt="A quay at dawn, two mooring posts."'));
+});
+
+// ---------- texte de remplacement sur le site ----------
+
+test('alt : le texte de remplacement dans la visionneuse (v1 et v2) et les vignettes v2 ; le titre, ou rien, sans lui', async t => {
+  const c = await site(t);
+  const admin = c.as('admin'), p = c.first(c.seb);
+  const serie = c.db.prepare('SELECT slug FROM categories WHERE id = ?').pluck().get(p.category_id);
+  const main = body => /<div class="vimg">[\s\S]*?alt="([^"]*)"/.exec(body)?.[1];
+  const v2main = body => /<div class="vis-cadre" data-cadre>[\s\S]*?alt="([^"]*)"/.exec(body)?.[1];
+  const thumb = (body, slug) => new RegExp(`href="[^"]*/photo/${slug}[^"]*"><picture>[\\s\\S]*?alt="([^"]*)"`).exec(body)?.[1];
+  // Sans texte : le titre pour la photo, rien pour une vignette (son lien dit déjà le titre).
+  c.app.publicVersion.save('v1');
+  assert.equal(main((await c.visit(`/photo/${p.slug}`)).body), esc(p.title));
+  c.app.publicVersion.save('v2');
+  assert.equal(v2main((await c.visit(`/photo/${p.slug}`)).body), esc(p.title));
+  assert.equal(thumb((await c.visit(`/serie/${serie}`)).body, p.slug), '');
+  // Écrit, en trois langues.
+  await admin.post(`/admin/photos/${p.id}`, c.form(p, { alt_text: 'Brume sur le fleuve.', alt_text_en: 'Mist on the river.', alt_text_de: 'Nebel über dem Fluss.' }));
+  const ALT = { '': 'Brume sur le fleuve.', '/en': 'Mist on the river.', '/de': 'Nebel über dem Fluss.' };
+  for (const [prefix, alt] of Object.entries(ALT)) {
+    c.app.publicVersion.save('v1');
+    assert.equal(main((await c.visit(`${prefix}/photo/${p.slug}`)).body), alt, `v1 ${prefix || '/'}`);
+    c.app.publicVersion.save('v2');
+    assert.equal(v2main((await c.visit(`${prefix}/photo/${p.slug}`)).body), alt, `v2 ${prefix || '/'}`);
+    for (const url of [`${prefix}/serie/${serie}`, `${prefix}/`, `${prefix}/auteur/sebastien`]) assert.equal(thumb((await c.visit(url)).body, p.slug), alt, `vignette ${url}`);
+  }
+  // Une seule langue écrite : repli comme les autres textes.
+  await admin.post(`/admin/photos/${p.id}`, c.form(c.row(p.id), { alt_text_en: '', alt_text_de: '' }));
+  assert.equal(v2main((await c.visit(`/de/photo/${p.slug}`)).body), 'Brume sur le fleuve.');
+});
+
+// ---------- rendu v2 ----------
+
 test('v2 : texte d’intention (deux phrases, puis « Lire la suite »), description courte et inventaire, en trois langues', async t => {
   const c = await site(t);
   const admin = c.as('admin'), modo = c.as('moderateur'), p = c.first(c.jul);
@@ -194,4 +378,29 @@ test('coupe du texte d’intention : à la fin d’une phrase, jamais dans un no
   assert.deepEqual(intentParts('Elle dit « Viens. » Il vient. Fin.'), { head: 'Elle dit « Viens. » Il vient.', rest: 'Fin.' });
   assert.deepEqual(intentParts(''), { head: '', rest: '' });
   assert.deepEqual(intentParts(null), { head: '', rest: '' });
+});
+
+// ---------- la v1 ne change pas ----------
+
+test('v1 : le même HTML avant et après ces données, sauf l’attribut alt de la photo de la visionneuse', async t => {
+  const c = await site(t);
+  const admin = c.as('admin'), modo = c.as('moderateur'), p = c.first(c.seb);
+  const serie = c.db.prepare('SELECT * FROM categories WHERE id = ?').get(p.category_id);
+  c.app.publicVersion.save('v1');
+  const urls = ['/', `/serie/${serie.slug}`, '/auteur/sebastien', `/photo/${p.slug}`, '/a-propos', '/recherche?q=brume', '/carte', '/en/', `/de/photo/${p.slug}`, `/en/serie/${serie.slug}`];
+  const snap = async () => Object.fromEntries(await Promise.all(urls.map(async u => [u, (await c.visit(u)).body])));
+  const before = await snap();
+  assert.deepEqual(await snap(), before, 'pages stables d’une visite à l’autre');
+  await admin.post(`/admin/photos/${p.id}`, c.form(p, { alt_text: 'Brume « bleue » & quai.', alt_text_de: 'Nebel.' }));
+  await modo.post(`/admin/series/${serie.id}`, { name: serie.name, intent: 'Une. Deux. Trois.', intent_en: 'One. Two. Three.' });
+  await admin.post(`/admin/auteurs/${c.seb}`, { name: 'Sébastien', short_bio: 'le matin, les quais, les fleuves', short_bio_en: 'mornings' });
+  const after = await snap();
+  for (const u of urls) {
+    const expected = u === `/photo/${p.slug}` ? before[u].replace(`alt="${esc(p.title)}"`, `alt="${esc('Brume « bleue » & quai.')}"`)
+      : u === `/de/photo/${p.slug}` ? before[u].replace(`alt="${esc(p.title)}"`, 'alt="Nebel."') : before[u];
+    assert.equal(after[u], expected, u);
+  }
+  assert.notEqual(after[`/photo/${p.slug}`], before[`/photo/${p.slug}`]);
+  // Rien de la v2 ne passe en v1 : ni l'inventaire, ni l'intention, ni la description courte.
+  for (const u of urls) assert.doesNotMatch(after[u], new RegExp(`${p.inventory}|Une\\. Deux|le matin, les quais`), u);
 });
