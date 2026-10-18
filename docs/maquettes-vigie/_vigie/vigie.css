@@ -1,0 +1,752 @@
+/* =====================================================================================================
+   Console de la Vigie (vigie.nicephos.art) : ce qui lui est propre, construit SUR le commun de l'administration.
+   Une seule feuille pour les neuf écrans de la console (MV-01 à MV-09) : fusion du 18 oct. 2026 (consolidation) de la base de
+   MV-01 et MV-02 et des ajouts de MV-03 à MV-09 ; ce qui ne sert qu'à l'admin du site (MV-10) est dans _vigie/admin-site.css.
+   Ordre de chargement : admin.css (main) → tokens.css → admin-plus.css → _vigie/vigie.css → annotations.css
+   (chemins : ../audit-ergonomie-2026-10-16/maquettes/_commun/…). Aucun jeton redéclaré : couleurs, tailles, rayons et focus
+   sont ceux de tokens.css (.admin, Chambre noire et clair selon le système). Portée : <body class="admin vigie">.
+   Réutilisés tels quels : barre latérale .side (et son menu du téléphone sans script, .side:target), en-tête .ep, boutons,
+   pastilles d'état .etat (○ ◐ ● ▲ ✕), tableaux .liste-a (en cartes sous 1 100 px), panneaux, .note-a, .signal, .avert, .err,
+   .resume-a, .chiffres, .chrono, .chips, .choix-a, .champ-a, .kv-a, .plier, .form-pied, .sur-onglet, .confirm et .voile-a,
+   .form-cache, .toast, cadres d'état .mq-ecran et .ecran-a.
+   Un composant par besoin :
+    0 marque, échelle (rien sous 13 px), barre d'onglets          10 actions forcées, ré-authentification, réponse automatique
+    1 pastille de gravité                                         11 décision : type, formulaire, garde-fous, ajouté d'office,
+    2 puce de source et confiance                                    page de confirmation
+    3 adresse, réseau, compte (chasse fixe), liens                12 listes à lignes, santé en une ligne, mise en page
+    4 bandeau critique, d'intégrité ou d'attention                13 réglages : modes des règles, seuils, confiance, canaux
+    5 phrase d'état                                               14 droits : deux clés, attribution
+    6 interrupteurs                                               15 santé : une carte par composant, ruptures de la chaîne
+    7 tableaux en cartes (alertes, événements, décisions,         16 pages hors session (connexion, ré-authentification…)
+      règles, droits)                                             17 cibles : boutons petits et moyens, 44 px au toucher
+    8 filtres, résumé d'une liste, export, pagination, liste vide 18 montrer un état (hors produit)
+    9 « D'où vient le signal », événement, saisie suspecte, score  19 retour après une action, étapes, « À faire maintenant »
+                                                                  20 identité confirmée (en-tête), repliés au téléphone
+                                                                  21 contraste forcé, mouvement réduit
+   Passe 2 (jury v1, lexique § 3.14) : sections 19 à 21, identifiants insécables tant qu'ils tiennent (§ 3), pastille d'état
+   unique (§ 10), compteur neutre (§ 0), trois chiffres sur une ligne (§ 12).
+   CSP de la console (annexe, § 5.5) : sans « unsafe-inline » ; aucun attribut style= dans l'interface (les barres de score
+   sont des <meter> natifs, pas des largeurs écrites en ligne).
+   ===================================================================================================== */
+
+/* ---------- 0. Marque, échelle, barre d'onglets ----------
+   « Vigie » à la place de « Nicephos », au même dessin (capitales espacées, admin.css .word), et sa mention en casse normale
+   dessous. La console n'a ni recherche Ctrl K, ni langue (français seul), ni Nouveautés : son pied est le compte, le thème et
+   « Se déconnecter ». Rien sous 13 px dans la console (l'admin descend à 12 px pour ses compteurs et ses intitulés de groupe). */
+.vigie .word { flex-direction: column; align-items: flex-start; gap: 2px; min-height: 0; padding: 2px 10px 14px; }
+.vigie .word .marque { font-size: 15px; font-weight: 500; letter-spacing: .32em; text-transform: uppercase; color: var(--ink); }
+.vigie .word .mention { font-size: 13px; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--ink3); }
+.vigie .grp, .vigie .nav-badge, .vigie .me .who small, .vigie .liste-a thead th, .vigie .champ-a .aide, .vigie .pied-liste,
+.vigie .chiffres dd .sec, .vigie .att, .vigie .choix-a label .sec, .vigie .choix-a > .aide, .vigie .hint, .vigie .mono,
+.vigie code, .vigie .plier > summary .sec { font-size: 13px; }
+.vigie .nav-badge { min-width: 22px; height: 22px; }
+.vigie .nav-badge.attention { background: var(--s3); color: var(--warn); box-shadow: inset 0 0 0 1px var(--line2); }
+.vigie .nav-badge.neutre { background: var(--s3); color: var(--ink2); box-shadow: inset 0 0 0 1px var(--line2); }   /* un compte qui n'appelle aucune action (Décisions) */
+.vigie .side .foot { padding-top: 12px; }
+/* Barre d'onglets du téléphone : quatre entrées (Vue d'ensemble, Alertes, Décisions, Menu), libellés sur deux lignes au besoin. */
+@media (max-width: 720px) {
+  .vigie .tabbar { gap: 0; }
+  .vigie .tabbar a { min-width: 0; flex: 1 1 0; padding: 0 4px; font-size: 13px; line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
+  /* Barre d'actions du téléphone : un libellé long passe à la ligne au lieu de pousser la page (espacement du texte, WCAG 1.4.12). */
+  .vigie .ep-actions > * { min-width: 0; }
+  .vigie .ep-actions .btn { overflow-wrap: anywhere; }
+}
+
+/* ---------- 1. Pastille de gravité ----------
+   Toujours trois indices : le MOT (Critique, Haute, Moyenne, Basse, Info), une JAUGE de quatre barres dont le nombre de barres
+   pleines dit le rang (4, 3, 2, 1, 0 : lisible sans couleur, en niveaux de gris, par un daltonien), et la couleur, qui ne fait que
+   doubler. Critique est la seule pastille pleine. Contrastes du mot (mesurés, WCAG 2.2, luminance relative), sur --s1, puis le
+   plus faible sur --bg ou --s2 : Chambre noire — Critique #1b0a04 sur #f0605a 6,0:1 · Haute #f0605a 5,8 (5,5):1 · Moyenne
+   #f0e442 14,2 (13,4):1 · Basse #a9a59c 7,6 (7,2):1 · Info #8a857c 5,1 (4,8):1 ; clair — Critique #fff sur #b2410a 5,8:1 ·
+   Haute #b2410a 5,8 (5,0):1 · Moyenne #6e6000 6,3 (5,4):1 · Basse #55514a 7,9 (6,8):1 · Info #6b665d 5,7 (4,9):1.
+   Le symbole des états (○ ◐ ● ▲ ✕) reste aux statuts : la gravité a sa propre forme, on ne confond pas « Haute » et « Ouverte ».
+   <span class="grav grav--haute"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Haute</span>
+   Sous une liste, l'échelle rappelée (.grav-leg : son intitulé .lb, puis la liste .grav-legende). */
+.grav { display: inline-flex; align-items: center; gap: 7px; min-height: 24px; padding: 2px 10px 2px 8px; border-radius: 999px;
+  font-size: 13px; font-weight: 500; line-height: 1.2; white-space: nowrap; box-shadow: inset 0 0 0 1px currentColor; }
+.grav .barres { display: inline-grid; grid-auto-flow: column; align-items: end; gap: 2px; height: 12px; flex: none; }
+.grav .barres i { display: block; width: 3px; border-radius: 1px; background: currentColor; opacity: .3; }
+.grav .barres i:nth-child(1) { height: 4px; } .grav .barres i:nth-child(2) { height: 7px; }
+.grav .barres i:nth-child(3) { height: 10px; } .grav .barres i:nth-child(4) { height: 12px; }
+.grav--critique .barres i, .grav--haute .barres i:nth-child(-n+3), .grav--moyenne .barres i:nth-child(-n+2), .grav--basse .barres i:nth-child(1) { opacity: 1; }
+.grav--critique { background: var(--danger); color: var(--on-danger); box-shadow: none; }
+.grav--haute { color: var(--danger); }
+.grav--moyenne { color: var(--warn); }
+.grav--basse { color: var(--ink2); box-shadow: inset 0 0 0 1px var(--line2); }
+.grav--info { color: var(--ink3); box-shadow: inset 0 0 0 1px var(--line2); }
+.grav-leg { display: grid; gap: 6px; }
+.grav-leg .lb { width: fit-content; color: var(--ink3); font-size: 13px; }
+.grav-legende { display: flex; flex-wrap: wrap; gap: 6px 10px; margin: 0; padding: 0; list-style: none; }
+
+/* ---------- 2. Puce de source, et confiance ----------
+   Quatre sources (lexique § 1) : site, Zitadel, bordure Cloudflare, contrôles de la Vigie. Une puce neutre à angles de 6 px
+   (les pastilles rondes sont aux états et à la gravité) : une icône par source (globe, carte d'identité, nuage, œil), le mot ;
+   jamais une couleur par source (quatre teintes de plus ne diraient rien de plus que le mot). La confiance suit en toutes lettres :
+   « constaté » (vu par la Vigie elle-même) en --ink, avec ✓ ; « rapporté » (dit par le site) en --ink2, sans symbole. */
+.src { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 1px 8px 1px 6px; border-radius: 6px;
+  background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink2); font-size: 13px; line-height: 1.25; white-space: nowrap; }
+.src .ic { width: 14px; height: 14px; color: var(--ink3); }
+.srcs { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: 0; padding: 0; list-style: none; }
+.conf { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--ink2); white-space: nowrap; }
+.conf--constate { color: var(--ink); font-weight: 500; }
+.conf--constate .ic { width: 13px; height: 13px; color: var(--ok); }
+
+/* ---------- 3. Adresse IP, réseau, compte ; liens ----------
+   IBM Plex Mono à 13 px, chiffres alignés, jamais coupés. Pour un Lecteur, l'adresse est tronquée par le serveur (/24, /48 : « 198.51.100.0/24 ») et le dit en clair (.tronq).
+   Une entité nommée (.ent) : son type (.k), sa clé, le nom de la personne (.nom). Dans un titre de fiche (MV-04), la clé est à
+   82 % du corps du titre (la chasse fixe paraît plus grande que le Jost 300 au même corps) ; le titre de la page (onglet,
+   historique) ne la porte jamais. Un champ qui attend une adresse ou un compte est en chasse fixe aussi (input.vg-mono). */
+.ip, .sub { display: inline-block; font-family: var(--mono); font-size: 13px; font-weight: 400; letter-spacing: 0; font-variant-numeric: tabular-nums;
+  white-space: nowrap; vertical-align: bottom; }
+/* Un identifiant n'est jamais coupé en fin de ligne : en bloc dans la ligne (inline-block, insécable), il passe entier à la ligne
+   suivante ; la largeur minimale d'une cellule reste la sienne, un tableau ne s'écrase pas pour le couper (son tiret, « zitadel- »,
+   ne sert pas de point de coupure). Les colonnes étroites lui laissent sa place (définitions empilées au téléphone). Le même
+   traitement pour un nom de code (code) dans l'écran. */
+.vigie .ip.v6 { white-space: nowrap; }   /* une IPv6 de la console tient sur sa ligne : 2001:db8:4:1c::5e, 19 signes au plus */
+/* Les paires clé-valeur (.kv-a) s'empilent au téléphone : la valeur prend la largeur de la carte, un identifiant y tient entier. */
+@media (max-width: 480px) { .vigie .kv-a, .vigie .hors-id { grid-template-columns: minmax(0, 1fr); row-gap: 2px; } .vigie :is(.kv-a, .hors-id) dd { margin-bottom: 6px; } }
+.vigie :is(.main, .hors) code:not(.vg-saisie-x) { display: inline-block; max-width: 100%; white-space: nowrap; vertical-align: bottom; }
+.ent { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; min-width: 0; }
+.ent .k { color: var(--ink3); font-size: 13px; }
+.ent .nom { color: var(--ink2); font-size: 13px; }
+.tronq { color: var(--ink3); font-size: 13px; }
+.vigie .ep :is(h1, .h1) :is(.ip, .sub) { font-size: .82em; font-weight: 400; color: var(--ink); white-space: normal; overflow-wrap: anywhere; }
+.vigie .ep :is(h1, .h1) .k { color: var(--ink3); }
+.vigie .ep :is(h1, .h1) .nom { color: var(--ink2); }
+.vigie input.vg-mono { font-family: var(--mono); font-size: 14px; letter-spacing: 0; }
+@media (max-width: 720px) { .vigie input.vg-mono { font-size: 16px; } }
+/* Lien dans une phrase ou une cellule : souligné, en --ink (en ligne : exception « en ligne » de WCAG 2.5.8). Un lien seul sur sa
+   ligne, ou qui mène à une entité depuis un tableau (a.vg-lien), a sa cible de 24 px, 44 au toucher (§ 17). */
+.vg-etat .aussi a, .vg-etat .faits a, .vg-resume .sec a, .vg-detail a, .vg-decisions td a:not(.vg-lien), .vg-etapes a, .vg-lien {
+  color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field-line); }
+.vg-lien:hover { text-decoration-color: currentColor; }
+a.vg-lien { display: inline-flex; align-items: center; min-height: 24px; }
+.vg-sans-val { color: var(--ink3); }
+
+/* ---------- 4. Bandeau critique, d'intégrité, d'attention ----------
+   En tête de chaque page de la console (sauf la vue d'ensemble, où la phrase d'état le remplace, et la fiche de l'alerte qu'il
+   signale) : une alerte critique que personne n'a prise en charge, ou un écart d'intégrité de la Vigie. Une icône, une phrase qui
+   dit le fait et sa conséquence, un lien qui y mène. Filet de 4 px et aplat léger : jamais un fond rouge plein, le texte reste
+   en --ink (≥ 15:1). Variante --attention (▲, --warn) : un interrupteur arrêté, un canal en échec. */
+.vg-bandeau { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; margin: 0 0 24px; padding: 12px 16px 12px 18px;
+  border-radius: var(--r-admin); background: var(--danger-soft); box-shadow: inset 4px 0 0 var(--danger); color: var(--ink); }
+.vg-bandeau > .ic { width: 20px; height: 20px; color: var(--danger); align-self: start; margin-top: 1px; }
+.vg-bandeau p { margin: 0; }
+.vg-bandeau .t { font-weight: 500; }
+.vg-bandeau .sec { display: block; color: var(--ink2); font-size: 13px; }
+.vg-bandeau--attention { background: var(--s2); box-shadow: inset 4px 0 0 var(--warn), inset 0 0 0 1px var(--line); }
+.vg-bandeau--attention > .ic { color: var(--warn); }
+@media (max-width: 720px) { .vg-bandeau { grid-template-columns: 20px minmax(0, 1fr); } .vg-bandeau > .btn, .vg-bandeau > form { grid-column: 1 / -1; } }
+
+/* ---------- 5. Phrase d'état (vue d'ensemble, santé, états) ----------
+   L'état en une phrase d'abord, en Jost 300 (le registre du titre, pas un chiffre géant), puis au plus trois faits qui
+   commandent l'action (la critique sans intervenant, un interrupteur arrêté), chacun avec son symbole, puis une ligne « Aussi ». */
+.vg-etat { display: grid; gap: 10px; margin: 0 0 24px; padding: 20px 22px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.vg-etat .phrase { margin: 0; font-size: 26px; font-weight: 300; line-height: 1.25; color: var(--ink); }
+.vg-etat .faits { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.vg-etat .faits li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; align-items: baseline; }
+.vg-etat .faits li > .etat, .vg-etat .faits li > .grav { align-self: start; justify-self: start; }
+.vg-etat .aussi { margin: 0; color: var(--ink2); font-size: 13px; }
+@media (max-width: 720px) { .vg-etat { padding: 16px; } .vg-etat .phrase { font-size: 22px; } .vg-etat .faits li { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- 6. Interrupteurs généraux ----------
+   Pas la case à bascule des Réglages de l'admin (.inter, qui s'enregistre au geste) : un interrupteur de la Vigie demande une
+   ré-authentification et, pour l'arrêt, une durée ; c'est donc un état écrit (● Marche, ▲ Arrêt jusqu'à…) et un bouton qui dit
+   ce qu'il fera (« Remettre en marche maintenant », « Arrêter… » vers le choix de la durée). Sur la page des réglages (MV-06), la
+   carte porte ce qui fait l'arrêt : un motif facultatif, un bouton par durée (« Arrêter 1 h », « Arrêter 4 h », « Arrêter jusqu'à
+   demain 8 h ») et une autre durée, 7 jours au plus, repliée dans son propre formulaire (la touche Entrée d'un champ envoie le
+   premier bouton de SON formulaire). */
+.vg-inters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 12px; margin: 0 0 24px; padding: 0; list-style: none; }
+.vg-inter { display: grid; grid-template-rows: auto 1fr auto; gap: 6px; padding: 14px 16px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.vg-inter.arret { box-shadow: inset 0 0 0 1px var(--line), inset 0 3px 0 var(--warn); }
+.vg-inter .tete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; }
+.vg-inter :is(h3, h4) { margin: 0; font-size: var(--at-h3); font-weight: 500; }
+.vg-inter p { margin: 0; color: var(--ink2); font-size: 13px; }
+.vg-inter form, .vg-inter .btns-ligne { margin: 4px 0 0; }
+.vg-inter .lecture, .vg-inter .effet-arret { color: var(--ink3); }
+.vg-inter .vg-arret { display: grid; gap: 10px; margin: 6px 0 0; }
+.vg-inter .vg-arret .btns-ligne { margin: 0; }
+.vg-inter .plier { margin: 0; }
+.vg-inter .plier > summary { min-height: 32px; color: var(--ink2); font-size: 13px; font-weight: 400; }
+.vg-inter .plier form { display: grid; gap: 8px; margin: 6px 0 0; }
+
+/* ---------- 7. Tableaux en cartes ----------
+   Le tableau de l'admin (.liste-a), une carte par ligne sous 1 100 px (sous 1 281 px pour le journal), chaque donnée sous son
+   intitulé (data-label) ; entre 721 et 1 100 px, une carte par rangée (ces listes se lisent dans un ordre). Une ligne critique
+   porte un filet rouge de 4 px. */
+.vigie .liste-wrap { margin: 0 0 24px; }
+.vigie .liste-wrap:has(+ .pied-liste) { margin-bottom: 6px; }   /* le lien « Toutes les alertes » collé au tableau */
+:is(.vg-alertes, .vg-evenements) tr.vg-crit > td:first-child { box-shadow: inset 4px 0 0 var(--danger); }
+@media (max-width: 1100px) {
+  :is(.vg-alertes, .vg-decisions, .vg-regles, .vg-droits) [data-label]::before { content: attr(data-label); display: block; color: var(--ink3); font-size: 13px; }
+}
+@media (max-width: 1100px) and (min-width: 721px) { .vigie :is(.vg-alertes, .vg-regles, .vg-droits) tbody { grid-template-columns: minmax(0, 1fr); } }
+/* Légende au téléphone : la place de la pastille d'annotation n'empiète pas sur le texte (géométrie identique sans). */
+@media (max-width: 767px) { :is(.vg-decisions, .vg-regles, .vg-droits) caption { padding-right: 24px; } }
+
+/* 7.1 Alertes (MV-01) : gravité d'abord, puis l'alerte (titre, numéro, cas), l'entité, les sources, les occurrences, le mode, le
+   statut. Triée par gravité puis par date de la dernière occurrence (vigie/cli.js, « alertes »). En carte : gravité et mode en
+   tête, le titre, l'entité, puis sources et occurrences côte à côte, le statut en bas. */
+.vg-alertes td, .vg-alertes th { vertical-align: top; }
+@media (min-width: 1101px) and (max-width: 1280px) { .vg-alertes :is(td, th) { padding-inline: 10px; } }
+.vg-alertes .c-grav { width: 1%; white-space: nowrap; }
+.vg-alertes .c-mode .sec { display: block; }
+.vg-alertes th[scope="row"] { width: 27%; }
+.vg-alertes .c-src { width: 15%; }
+.vg-alertes :is(.c-occ, .src) { white-space: normal; }   /* les heures et les sources passent à la ligne : seul l'identifiant reste entier */
+.vg-alertes .ent { display: flex; }
+@media (max-width: 1100px) {
+  .vg-alertes tr { grid-template-columns: minmax(0, 1fr) auto; }
+  .vg-alertes .c-grav { grid-column: 1; grid-row: 1; width: auto; }
+  .vg-alertes .c-mode { grid-column: 2; grid-row: 1; text-align: right; }
+  .vg-alertes th[scope="row"] { grid-column: 1 / -1; grid-row: 2; }
+  .vg-alertes .c-ent { grid-column: 1 / -1; grid-row: 3; }
+  .vg-alertes .c-src { grid-column: 1; grid-row: 4; }
+  .vg-alertes .c-occ { grid-column: 2; grid-row: 4; text-align: right; }
+  .vg-alertes .c-etat { grid-column: 1 / -1; grid-row: 5; }
+  .vg-alertes .c-mode[data-label]::before, .vg-alertes .c-grav[data-label]::before { content: none; }
+  .vg-alertes tr.vg-crit { box-shadow: inset 0 0 0 1px var(--line), inset 4px 0 0 var(--danger); }
+  .vg-alertes tr.vg-crit > td:first-child { box-shadow: none; }
+  .vg-alertes th[scope="row"], .vg-alertes .c-src { width: auto; }
+}
+
+/* 7.2 Événements (MV-03, le journal) : l'heure À LA SOURCE et l'écart de réception (§ 9) ; la gravité ; l'événement, en-tête de
+   la ligne : son type lisible, le nom du code en chasse fixe, la route ou le détail ; la source, la confiance et l'émetteur ;
+   l'adresse et le compte, en chasse fixe, qui mènent à la fiche de l'entité (MV-04) ; « — » quand le code n'a pas le champ.
+   Six colonnes tiennent sans défilement à partir de 1 281 px ; en dessous, une carte par événement, toujours sur une colonne
+   (la liste se lit dans l'ordre du temps). Conteneur : .vg-evenements-w. */
+.vg-evenements-w { margin: 0 0 14px; }
+.vg-evenements th, .vg-evenements td { padding: 11px 10px; vertical-align: top; }
+.vg-evenements thead th { white-space: normal; }
+.vg-evenements .c-h { width: 1%; white-space: nowrap; }
+.vg-evenements .c-h time, .vg-evenements .c-h .vg-ecart { display: block; }
+.vg-evenements .c-h time { color: var(--ink); font-variant-numeric: tabular-nums; }
+.vg-evenements .c-g { width: 1%; }
+.vg-evenements .c-ev { font-weight: 400; }
+.vg-evenements .c-src { width: 17%; }
+.vg-evenements .c-ip { width: 15%; } .vg-evenements .c-cpt { width: 14%; }
+.vg-evenements .src { white-space: normal; }
+.vg-evenements .nom, .vg-evenements .tronq { display: block; color: var(--ink2); font-size: 13px; }
+@media (max-width: 1280px) {
+  .vigie .vg-evenements, .vigie .vg-evenements tbody { display: block; background: transparent; }
+  .vigie .vg-evenements caption { display: block; padding: 0 0 10px; }
+  .vigie .vg-evenements thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .vigie .vg-evenements tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 16px; margin: 0 0 10px; padding: 12px 14px;
+    border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+  .vigie .vg-evenements :is(td, th) { display: block; width: auto; padding: 0; border: 0; min-width: 0; }
+  .vigie .vg-evenements .c-h { grid-column: 1; grid-row: 1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; white-space: normal; }
+  .vigie .vg-evenements .c-g { grid-column: 2; grid-row: 1; justify-self: end; }
+  .vigie .vg-evenements th[scope="row"] { grid-column: 1 / -1; grid-row: 2; }
+  .vigie .vg-evenements .c-src { grid-column: 1 / -1; grid-row: 3; }
+  .vigie .vg-evenements .c-ip { grid-column: 1; grid-row: 4; }
+  .vigie .vg-evenements .c-cpt { grid-column: 2; grid-row: 4; }
+  .vigie .vg-evenements [data-label]::before { content: attr(data-label); display: block; color: var(--ink3); font-size: 13px; }
+  .vigie .vg-evenements .c-src[data-label]::before { content: none; }
+  .vigie .vg-evenements tr.vg-crit { box-shadow: inset 0 0 0 1px var(--line), inset 4px 0 0 var(--danger); }
+  .vigie .vg-evenements tr.vg-crit > td:first-child { box-shadow: none; }
+  .vigie .vg-evenements-w { overflow: visible; box-shadow: none; border-radius: 0; }
+}
+@media (max-width: 1100px) and (min-width: 721px) { .vigie .vg-evenements tbody { display: block; } }
+@media (max-width: 360px) { .vigie .vg-evenements tr { grid-template-columns: minmax(0, 1fr); } .vigie .vg-evenements .c-g { grid-column: 1; grid-row: auto; justify-self: start; } .vigie .vg-evenements .c-cpt { grid-column: 1; grid-row: auto; } }
+
+/* 7.3 Décisions en cours (MV-05) : la décision (verbe du lexique et numéro), la cible en chasse fixe et la portée, la fin, qui
+   l'a décidée (la Vigie : la règle et l'alerte ; une personne : son nom et son motif), puis « Lever… ». En carte, « Lever… » en
+   haut à droite (.c-haut d'admin-plus.css). */
+.vg-decisions th[scope="row"] { width: 22%; }
+.vg-decisions .c-fin { white-space: nowrap; }
+.vg-decisions .c-par .src { margin-right: 4px; vertical-align: 1px; }
+.vg-decisions .c-lever { width: 1%; white-space: nowrap; text-align: right; }
+@media (max-width: 1100px) {
+  .vg-decisions tr { grid-template-columns: minmax(0, 1fr) auto; }
+  .vg-decisions th[scope="row"], .vg-decisions .c-lever { width: auto; }
+}
+
+/* 7.4 Règles (MV-06) : trois tableaux (ouvrent une alerte seules ; le score ; déposent des points), triés par cas. Une ligne : le
+   titre du code et l'identifiant en chasse fixe, le cas, la gravité, l'entité visée, l'effet (alerte seule et réponse, ou points),
+   le mode (§ 13). En carte : « Entité : compte » et « Effet : 3 points » sur une ligne ; « Mode » à gauche de sa liste. */
+.vg-regles th[scope="row"] { width: 34%; }
+.vg-regles th[scope="row"] .id { display: block; margin-top: 2px; color: var(--ink3); font: 400 13px var(--mono); overflow-wrap: anywhere; }
+.vg-regles .c-cas { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.vg-regles .c-effet { color: var(--ink2); font-size: 13px; }
+.vg-regles .c-mode { width: 1%; min-width: 250px; }
+@media (max-width: 1100px) {
+  .vg-regles tr { grid-template-columns: minmax(0, 1fr) fit-content(55%); }
+  .vg-regles .c-grav { grid-column: 1; grid-row: 1; }
+  .vg-regles .c-cas { grid-column: 2; grid-row: 1; text-align: right; }
+  .vg-regles th[scope="row"] { grid-column: 1 / -1; grid-row: 2; width: auto; }
+  .vg-regles .c-ent { grid-column: 1; grid-row: 3; }
+  .vg-regles .c-effet { grid-column: 2; grid-row: 3; text-align: right; }
+  .vg-regles .c-mode { grid-column: 1 / -1; grid-row: 4; width: auto; min-width: 0; }
+  .vg-regles .c-grav[data-label]::before, .vg-regles .c-cas[data-label]::before { content: none; }
+  .vg-regles .c-ent[data-label]::before, .vg-regles .c-effet[data-label]::before { content: attr(data-label) " : "; display: inline; }
+  .vg-regles td.c-mode { display: flex; align-items: flex-start; gap: 10px; }
+  .vg-regles td.c-mode[data-label]::before { flex: none; min-height: 32px; display: inline-flex; align-items: center; }
+  .vg-regles td.c-mode .vg-mode { flex: 1 1 auto; min-width: 0; }
+}
+
+/* 7.5 Droits (MV-08) : la personne ; plafond, attribution et droit effectif côte à côte (les deux clés et leur résultat, § 14) ;
+   la commande. */
+.vg-droits th[scope="row"] { width: 18%; }
+.vg-droits th[scope="row"] .sec + .sec { margin-top: 4px; }
+.vg-droits .eff { color: var(--ink); font-weight: 500; }
+.vg-droits .c-chg { min-width: 0; }
+.vigie .vg-droits thead th { white-space: normal; }
+.vg-droits .vous { color: var(--ink3); font-size: 13px; }
+.vg-droits .manque { display: flex; align-items: center; gap: 4px; margin-top: 2px; color: var(--warn); font-size: 13px; font-weight: 500; }
+.vg-droits .manque .ic { width: 12px; height: 12px; }
+@media (min-width: 1101px) { .vg-droits th, .vg-droits td { padding-inline: 12px; } }
+@media (max-width: 1100px) {
+  .vg-droits tr { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .vg-droits tr > * { grid-column: 1 / -1; }
+  .vg-droits tr > td:nth-of-type(1), .vg-droits tr > td:nth-of-type(2), .vg-droits tr > td:nth-of-type(3) { grid-column: auto; grid-row: 2; }
+  .vg-droits th[scope="row"] { width: auto; grid-column: 1 / -1; }   /* la personne sur toute la carte (admin-plus.css la met en colonne 1) */
+}
+@media (max-width: 480px) { .vg-droits tr { grid-template-columns: minmax(0, 1fr); } .vg-droits tr > td:nth-of-type(-n+3) { grid-column: 1 / -1; grid-row: auto; } }
+
+/* ---------- 8. Filtres, résumé d'une liste, export, pagination, liste vide ----------
+   Filtres : un formulaire GET, sans script (l'adresse de la page porte les filtres : elle se partage, se garde en favori, revient
+   avec « Précédent ») ; les champs du formulaire type (.champ-a) en grille, quatre par rangée au bureau, deux sous 1 281 px, un
+   sous 360 px ; le pied (« Tout effacer », un lien ; « Filtrer ») dans la dernière colonne, sur toute la largeur au téléphone.
+   Le même composant pour le journal (MV-03) et pour les règles (MV-06). */
+.vg-filtres { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 18px; margin: 0 0 18px; padding: 16px 18px 18px;
+  border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.vg-filtres .champ-a :is(select, input) { width: 100%; min-width: 0; }
+.vg-filtres .pied { grid-column: -2 / -1; align-self: end; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px 18px; }
+.vg-filtres .pied .lien-a { margin-right: auto; }
+@media (max-width: 1280px) { .vg-filtres { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 720px) { .vg-filtres { gap: 12px 12px; padding: 14px; } .vg-filtres .pied { grid-column: 1 / -1; flex-direction: column-reverse; align-items: stretch; } .vg-filtres .pied .lien-a { margin: 0; justify-content: center; } }
+@media (max-width: 480px) { .vg-filtres { grid-template-columns: minmax(0, 1fr); } }
+/* Résumé : ce que montre la liste en une phrase (combien, dans quel ordre, par gravité), ce qui est masqué et comment le voir ; à
+   droite, l'export CSV, réservé aux Analystes et aux Administrateurs (absent pour un Lecteur, dit dans sa note). Une ligne de
+   compte sous un titre de section (.vg-compte : « 53 règles : … »). */
+.vg-resume { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 24px; align-items: start; margin: 0 0 14px; }
+.vg-resume p { margin: 0; color: var(--ink); }
+.vg-resume .vg-section-t { margin: 0 0 4px; }
+.vg-resume .sec { display: block; margin-top: 2px; color: var(--ink2); font-size: 13px; }
+.vg-export { display: grid; gap: 4px; justify-items: end; text-align: right; }
+.vg-export .sec { color: var(--ink3); font-size: 13px; max-width: 30ch; }
+@media (max-width: 720px) { .vg-resume { grid-template-columns: minmax(0, 1fr); } .vg-export { justify-items: start; text-align: left; } }
+.vg-compte { margin: 0 0 6px; color: var(--ink2); font-size: 13px; }
+.vg-compte b { color: var(--ink); font-weight: 500; }
+/* Pagination : où l'on est (« Page 1 sur 16 · événements 1 à 20 sur 318 »), puis les plus anciens, des liens à adresse propre
+   (?page=2, filtres gardés) ; jamais de défilement infini ; sur la première page, pas de lien « Plus récents » mort. */
+.vg-pages { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 0 0 20px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--ink2); font-size: 13px; }
+.vg-pages p { margin: 0; }
+@media (max-width: 720px) { .vg-pages .btns-ligne { width: 100%; } .vg-pages .btns-ligne .btn { flex: 1 1 0; } }
+/* Liste vide pour un filtre : une phrase qui reprend les filtres, ce qu'on sait d'autre, puis au plus deux issues, des liens. */
+.vg-vide { display: grid; gap: 8px; justify-items: start; margin: 0 0 20px; padding: 22px 24px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.vg-vide .t { margin: 0; color: var(--ink); font-size: 20px; font-weight: 300; line-height: 1.3; }
+.vg-vide p { margin: 0; color: var(--ink2); }
+.vg-vide ul { display: grid; gap: 0; margin: 4px 0 0; padding: 0; list-style: none; }
+@media (max-width: 720px) { .vg-vide { padding: 16px; } }
+
+/* ---------- 9. « D'où vient le signal », événement, saisie suspecte, score ----------
+   La règle, les sources regroupées, un verdict, puis chaque événement : à gauche l'heure À LA SOURCE (à la seconde ; « à la
+   minute » pour la bordure, que la Vigie lit minute par minute) et l'écart jusqu'à la réception par la Vigie (.vg-ecart : « reçu
+   + 2 min 40 » ; « — » pour ce que la Vigie constate elle-même ; .tard au-delà du seuil de la source, la couleur ne fait que
+   doubler le délai écrit) ; au milieu ce qui s'est passé et sa gravité ; à droite la source, l'émetteur et la confiance. Sur une
+   fiche d'alerte, du plus ancien au plus récent (on lit l'histoire) ; sur une fiche d'entité, les derniers d'abord. */
+.vg-regle { display: grid; gap: 4px; margin: 0 0 14px; }
+.vg-regle p { margin: 0; color: var(--ink2); font-size: 13px; }
+.vg-regle .r { color: var(--ink); font-size: var(--at-texte); }
+.vg-verdict { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 14px; padding: 10px 12px; color: var(--ink); }
+.vg-verdict .ic { flex: none; width: 16px; height: 16px; margin-top: 1px; color: var(--ok); }
+.vg-verdict--seul .ic { color: var(--warn); }
+.vg-signal { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.vg-signal > li, .vg-signal-tete { display: grid; grid-template-columns: 128px minmax(0, 1fr) minmax(0, 230px); gap: 6px 16px; }
+.vg-signal > li { padding: 12px 0; border-top: 1px solid var(--line); }
+.vg-signal > li:first-child { border-top: 0; padding-top: 4px; }
+.vg-signal .h { display: grid; gap: 2px; align-content: start; }
+.vg-signal .h time { color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.vg-signal .quoi { display: grid; gap: 6px; justify-items: start; align-content: start; }
+.vg-signal .quoi p { margin: 0; }
+.vg-signal .d-ou { display: grid; gap: 4px; justify-items: start; align-content: start; }
+.vg-signal .emetteur { color: var(--ink2); font-size: 13px; }
+.vg-signal-tete { row-gap: 0; margin: 0; padding: 0 0 6px; color: var(--ink3); font-size: 13px; }
+@media (max-width: 900px) {
+  .vg-signal > li { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .vg-signal .h { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; }
+  .vg-signal-tete { display: none; }
+}
+.vg-ecart { color: var(--ink3); font-size: 13px; white-space: nowrap; }
+.vg-ecart.tard { color: var(--warn); }
+/* Un événement : son type lisible, le nom du code en chasse fixe, la route ou le détail ; puis la source, la confiance, l'émetteur.
+   Noms de code, routes et champs : la chasse fixe suffit à les distinguer, sans le pavé gris de code (admin.css), qui alourdirait
+   chaque ligne, et sans coupure au milieu d'un mot (word-break de admin.css). */
+.vg-type { display: grid; gap: 1px; justify-items: start; }
+.vg-type .t { color: var(--ink); font-weight: 500; }
+.vg-code { color: var(--ink3); font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
+.vigie :is(.vg-evenements, .vg-signal, .vg-saisie, .vg-vide) code { padding: 0; background: none; border-radius: 0; word-break: normal; }
+.vg-route, .vg-detail { display: block; margin-top: 4px; color: var(--ink2); font-size: 13px; overflow-wrap: anywhere; }
+.vg-route code, .vg-detail code { font-family: var(--mono); font-size: 13px; color: var(--ink2); }
+.vg-src-l { display: flex; flex-wrap: wrap; gap: 2px 8px; margin-top: 4px; color: var(--ink2); font-size: 13px; }
+.vg-src-l .emet { overflow-wrap: anywhere; }
+/* Saisie suspecte : ce que le visiteur a tapé n'est jamais interprété (texte échappé par le gabarit, <%= %> ; CSP sans script en
+   ligne). En chasse fixe, sur un fond à part avec un filet --warn à gauche (la famille est écrite), coupé à 24 signes, la longueur
+   entière dite, la suite « non affichée » dite aussi (pas une ellipse muette). Pour un Lecteur, l'extrait n'est pas envoyé. */
+.vg-saisie { display: grid; gap: 4px; justify-items: start; max-width: 100%; margin: 6px 0 0; padding: 8px 10px; border-radius: var(--r-admin); background: var(--s2);
+  box-shadow: inset 2px 0 0 var(--warn); color: var(--ink2); font-size: 13px; line-height: 1.45; }
+.vg-saisie b { color: var(--ink); font-weight: 500; }
+.vg-saisie code { font-family: var(--mono); font-size: 13px; }
+.vg-saisie-x { color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-all; }
+.vg-saisie-coupe, .vg-saisie-r { color: var(--ink3); }
+/* Score par source : une ligne par source qui a déposé des points, son nom, une barre <meter> (native : ni script, ni style en
+   ligne, lue « 9,1 sur 20 »), la valeur écrite ; puis le total, le seuil de la classe d'entité et le double en toutes lettres
+   (.vg-seuils). Les barres ont toutes le même dessin : la source se lit au mot. Échelle commune de 0 à 20 points. */
+.vg-score { display: grid; grid-template-columns: minmax(0, max-content) minmax(40px, 1fr) minmax(0, max-content); gap: 8px 12px; align-items: center; margin: 0 0 10px; }
+.vg-score dt { color: var(--ink2); font-size: 13px; overflow-wrap: anywhere; }
+.vg-score dd { margin: 0; }
+.vg-score dd.v { font-variant-numeric: tabular-nums; text-align: right; }
+.vg-score .total { color: var(--ink); font-weight: 500; }
+meter.vg-m { -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 10px; border: 0; border-radius: 6px; background: var(--s3); }
+meter.vg-m::-webkit-meter-bar { background: var(--s3); border: 0; border-radius: 6px; height: 10px; }
+meter.vg-m::-webkit-meter-optimum-value, meter.vg-m::-webkit-meter-suboptimum-value, meter.vg-m::-webkit-meter-even-less-good-value { background: var(--ink2); border-radius: 6px; }
+meter.vg-m::-moz-meter-bar { background: var(--ink2); border-radius: 6px; }
+meter.vg-m.total::-webkit-meter-optimum-value, meter.vg-m.total::-webkit-meter-suboptimum-value, meter.vg-m.total::-webkit-meter-even-less-good-value { background: var(--danger); }
+meter.vg-m.total::-moz-meter-bar { background: var(--danger); }
+.vg-seuils { margin: 0; color: var(--ink2); font-size: 13px; }
+
+/* ---------- 10. Actions forcées, ré-authentification, réponse automatique ----------
+   Une action par ligne : ce qu'elle fait sur le site, en une phrase, puis ses boutons, qui nomment l'effet ET la durée
+   (« Geler 7 jours ») — sans script, un bouton ne peut pas suivre une liste déroulante : une durée, un bouton. Une action déjà
+   faite le dit (✓, par qui, jusqu'à quand) au lieu d'offrir un bouton inutile ; une action impossible dit pourquoi (.vg-sans).
+   Des encarts gris au même dessin (fond --s2, 13 px), chacun pour un besoin : la ré-authentification (.vg-reauth, cadenas : on sait
+   avant de cliquer que Zitadel va redemander le second facteur, avant une action forcée, un changement de mode, de seuil,
+   d'interrupteur ou de droits) ; la réponse automatique d'une entité (.vg-auto, bouclier : ce que la Vigie ferait d'elle-même et
+   ce qui l'en empêche — mode de la règle, interrupteur, protection) ; le verdict de « D'où vient le signal » (.vg-verdict, § 9) ;
+   les refus dits avant l'envoi (.vg-refus, § 11). */
+:is(.vg-reauth, .vg-auto, .vg-verdict, .vg-refus) { border-radius: var(--r-admin); background: var(--s2); font-size: 13px; }
+:is(.vg-reauth, .vg-auto) { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 2px 10px; margin: 0 0 14px; padding: 10px 12px; color: var(--ink2); }
+:is(.vg-reauth, .vg-auto) > .ic { width: 18px; height: 18px; margin-top: 1px; color: var(--ink); }
+:is(.vg-reauth, .vg-auto) p { grid-column: 2; margin: 0; }
+:is(.vg-reauth, .vg-auto) b { color: var(--ink); font-weight: 500; }
+.vg-actions { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.vg-actions > li { display: grid; gap: 8px; padding: 14px 0; border-top: 1px solid var(--line); }
+.vg-actions > li:first-child { border-top: 0; padding-top: 0; }
+.vg-actions :is(h3, h4), .vg-actions .t { margin: 0; font-size: var(--at-h3); font-weight: 500; }
+.vg-actions p { margin: 0; color: var(--ink2); font-size: 13px; }
+.vg-actions form { display: grid; gap: 10px; margin: 0; }
+.vg-actions .avert { color: var(--ink); font-size: 13px; }
+.vg-actions .avert .ic { width: 14px; height: 14px; }
+.vg-fait { display: flex; align-items: flex-start; gap: 6px; color: var(--ink); font-size: 13px; }
+.vg-fait .ic { flex: none; width: 14px; height: 14px; margin-top: 2px; color: var(--ok); }
+.vg-sans { color: var(--ink3); font-size: 13px; }
+/* Un seul composant d'état, la pastille de l'admin (.etat : symbole et mot) ; sa variante neutre (.etat--neutre, bouclier) dit un
+   attribut qui n'appelle aucune action : « Protégée : vue avec un administrateur », « Administrateur ». Dans la console, le mot
+   passe à la ligne plutôt que de sortir de l'écran (espacement du texte à 320 px). */
+.vigie .etat { white-space: normal; }
+.etat--neutre { color: var(--ink2); }
+.etat--neutre .ic { width: 13px; height: 13px; color: var(--ink); }
+/* Le dialogue de ré-authentification (.confirm sur .voile-a, admin-plus.css § 8 et § 14), son cadenas devant le titre ; l'action
+   rappelée mot pour mot (.action-rappel), la même dans le dialogue, sur une page de confirmation (§ 11) et hors session (§ 16). */
+.confirm .titre-ic { display: flex; align-items: center; gap: 10px; }
+.confirm .titre-ic .ic { width: 22px; height: 22px; flex: none; }
+.action-rappel { margin: 0 0 12px; padding: 10px 12px; border-radius: var(--r-admin); background: var(--s2); color: var(--ink); font-size: var(--at-texte); }
+
+/* ---------- 11. Décision : type, formulaire, garde-fous, ajouté d'office, confirmation ----------
+   Le type se choisit par des liens (.chips, aria-current) : sans script, chaque type a son formulaire, et ses boutons disent
+   l'effet et la durée (« Bloquer 24 h »). Les garde-fous du code sont écrits AVANT les boutons (.vg-refus : un titre, puis la liste
+   .vg-garde-fous), en clair, avec ce qu'il reste (« 256 adresses bloquées sur 16 777 216 ») : on sait ce qui sera refusé avant
+   de l'envoyer. La même liste .vg-garde-fous porte les garde-fous des droits (MV-08). */
+.vg-types { display: grid; gap: 8px; margin: 0 0 16px; }
+.vg-types .lb { color: var(--ink); font-size: 13px; font-weight: 500; }
+.vg-types ul.chips { margin: 0; padding: 0; list-style: none; }
+.vg-form { display: grid; gap: 16px; }
+.vg-form .duree-l { display: grid; gap: 8px; }
+.vg-form .duree-l .lb { color: var(--ink); font-size: 13px; font-weight: 500; }
+.vg-form .duree-l .hint { margin: 0; color: var(--ink3); font-size: 13px; }
+.champ-a .err + .err { margin-top: -2px; }
+.vg-refus { display: grid; gap: 6px; margin: 0; padding: 12px 14px; color: var(--ink2); line-height: 1.45; }
+.vg-refus .t { margin: 0; color: var(--ink); font-weight: 500; }
+.vg-garde-fous { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; color: var(--ink2); font-size: 13px; line-height: 1.45; }
+.vg-garde-fous li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 0 8px; align-items: start; }
+.vg-garde-fous .ic { width: 14px; height: 14px; margin-top: 2px; color: var(--ink3); }
+.vg-garde-fous li.vous .ic { color: var(--warn); }
+.vg-garde-fous b { color: var(--ink); font-weight: 500; }
+/* « Ajouté d'office » : dans un choix de comptes ou d'adresses, ce que la console ajoute sans qu'on puisse l'ôter (vous, votre
+   adresse ; les administrateurs d'amorce du site) se lit comme un choix déjà fait, ✓ à la place de la case, sur la même colonne
+   de 24 px ; ce qui n'est jamais proposé, ▲. Un champ texte dans un groupe de choix (« Autres comptes ») garde le dessin du
+   libellé de champ. */
+.vg-office { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.vg-office li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 0 8px; align-items: start; min-height: 32px; padding: 4px 0; color: var(--ink); font-size: var(--at-texte); }
+.vg-office li > .ic { width: 16px; height: 16px; margin: 3px 4px 0; color: var(--ok); }
+.vg-office .sec { grid-column: 2; color: var(--ink3); font-size: 13px; line-height: 1.45; }
+.vg-office li.exclu { color: var(--ink2); }
+.vg-office li.exclu > .ic { color: var(--warn); }
+.choix-a .champ-a { margin-top: 6px; }
+.choix-a .champ-a > label { display: block; min-height: 0; padding: 0; color: var(--ink); font-size: 13px; font-weight: 500; cursor: default; }
+/* Page de confirmation (« Lever… », un blocage de sa propre adresse, un droit retiré) : une page servie après le clic, sans script.
+   L'en-tête pose la question avec l'objet ; le panneau rappelle l'action mot pour mot (.action-rappel), ce qui va changer, la
+   ré-authentification, puis [Annuler] et l'action qui répète l'objet, en dernier. */
+.vg-confirmer { max-width: 720px; }
+.vg-confirmer > p { margin: 0 0 12px; color: var(--ink2); }
+.vg-confirmer :is(.kv-a, .signal, .action-rappel) { margin: 0 0 14px; }
+.vg-confirmer .form-pied { margin-top: 4px; }
+.vg-confirmer .form-pied .btn .ic { width: 16px; height: 16px; }
+
+/* ---------- 12. Listes à lignes, santé en une ligne, mise en page ----------
+   Une liste à lignes (.vg-lignes) : un titre (.t), un numéro ou une valeur à droite (.n), une précision (.sec), au besoin un lien
+   ou un petit formulaire ; décisions en cours (MV-01), réponse déjà faite (MV-02), « Vue avec », sessions, alertes d'une entité
+   (MV-04), adresses de confiance (MV-06). */
+.vg-lignes { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.vg-lignes > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.vg-lignes > li:first-child { border-top: 0; padding-top: 0; }
+.vg-lignes .t { font-weight: 500; }
+.vg-lignes .sec { grid-column: 1 / -1; color: var(--ink3); font-size: 13px; }
+.vg-lignes .n { color: var(--ink3); font-family: var(--mono); font-size: 13px; }
+.vg-lignes form { margin: 0; }
+.vg-lignes > li > .vg-lien { grid-column: 1 / -1; justify-self: start; }
+/* La santé en une ligne (MV-01) : un symbole et un mot par composant. */
+.vg-sante { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0; list-style: none; color: var(--ink2); font-size: 13px; }
+.vg-sante li { display: inline-flex; align-items: center; gap: 6px; }
+.vg-sante .ic { width: 12px; height: 12px; }
+.vg-sante .ok .ic { color: var(--st-abouti); } .vg-sante .att-s .ic { color: var(--st-attention); } .vg-sante .arret .ic { color: var(--st-arret); }
+.vg-sante b { color: var(--ink); font-weight: 500; }
+/* Mise en page : bas de la vue d'ensemble (.vg-bas), blocs des réglages (.vg-trois, .vg-bloc), titres de section, introduction
+   d'un panneau (.vg-lede), pied d'un panneau (.panel-pied), en-tête d'une fiche (gravité et statut ensemble, après le titre). */
+.vg-bas { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 18px; align-items: start; }
+.vg-bas > .panel { margin: 0; }
+@media (max-width: 1180px) { .vg-bas { grid-template-columns: minmax(0, 1fr); } }
+.vg-trois { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 18px; align-items: start; }
+.vg-trois > .panel { margin: 0; }
+.vg-bloc { margin: 0 0 28px; scroll-margin-top: 16px; }
+.vg-sur { margin-bottom: 18px; }
+.panel .panel-pied { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; margin: 12px 0 0; padding-top: 10px; border-top: 1px solid var(--line); color: var(--ink3); font-size: 13px; }
+.vigie .chiffres { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 0 12px; }   /* trois chiffres de 7 jours, sur une ligne */
+.vigie .chiffres dd .sec { margin-top: 4px; }
+@media (max-width: 720px) { .vigie .chiffres { gap: 8px; } .vigie .chiffres > div { padding: 10px; } .vigie .chiffres dd { font-size: 20px; } .vigie .chiffres dt { overflow-wrap: anywhere; } }
+.vg-section-t { width: fit-content; margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
+.vg-section-t .n { color: var(--ink3); font-weight: 400; }
+.ecran-a .note-a + .vg-section-t { margin-top: 18px; }
+.vg-lede { max-width: 72ch; margin: 0 0 18px; color: var(--ink); font-size: 17px; line-height: 1.5; }
+.vg-lede .sec { display: block; margin-top: 6px; color: var(--ink2); font-size: var(--at-texte); }
+.vg-lede .donnee { white-space: nowrap; }   /* un chemin cité dans une phrase (« /wp-login.php ») ne se coupe pas à son tiret */
+.ep-titre .grav { flex: none; }
+.ep-pastilles { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; max-width: 100%; }
+.ep-pastilles > .etat { min-width: 0; }
+.ep-meta .vg-code { margin-left: 6px; }
+/* Message envoyé (Signal, e-mail), mot pour mot : le texte du code, en chasse fixe, qui passe à la ligne. */
+.vg-msg { display: block; margin: 8px 0 0; padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere; font: 400 13px/1.6 var(--mono); }
+
+/* ---------- 13. Réglages : modes des règles, seuils, adresses de confiance, canaux ----------
+   Le mode d'une règle est une liste dans un petit formulaire POST : « Enregistrer » n'apparaît que si le choix diffère du mode
+   enregistré (:has, sans script ; sans :has, il reste affiché) ; l'Arrêt montre son avertissement dès qu'il est choisi, et tant
+   qu'il dure. Une liste de définitions (.vg-defs) explique les quatre modes (MV-06) et les quatre rôles (MV-08). */
+.vg-mode { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0; }
+.vg-mode select { width: 172px; min-height: 32px; padding-top: 4px; padding-bottom: 4px; font-size: 13px; }
+.vg-mode .vg-mode-avert { display: none; flex-basis: 100%; }
+.vg-mode:has(option[value="arret"]:checked) .vg-mode-avert { display: flex; }
+.vg-mode:has(option[value="arret"]:checked) select:not(:focus) { box-shadow: inset 0 0 0 1.5px var(--warn); }
+@supports selector(:has(*)) { .vg-mode:not(:has(option[selected]:not(:checked))):not(.fige-change) .enr { display: none; } }
+@media (max-width: 720px) { .vg-mode select { width: auto; flex: 1 1 140px; min-width: 0; } }
+@media (max-width: 1100px) { .vg-mode-lu { display: inline-flex; align-items: center; min-height: 32px; } }   /* mode en lecture seule, aligné sur « Mode » */
+.vg-regles-t { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 22px 0 6px; font-size: var(--at-h3); font-weight: 500; }
+.vg-regles-t .sec { color: var(--ink3); font-size: 13px; font-weight: 400; }
+.vg-defs { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 16px; margin: 0; font-size: 13px; }
+.vg-defs dt { color: var(--ink); font-weight: 500; }
+.vg-defs dt .donnee { display: block; color: var(--ink3); font-weight: 400; }
+.vg-defs dd { margin: 0; color: var(--ink2); line-height: 1.5; }
+@media (max-width: 540px) { .vg-defs { grid-template-columns: minmax(0, 1fr); gap: 2px; } .vg-defs dd { margin-bottom: 8px; } }
+.vg-modes { margin: 0 0 18px; }
+.vg-seuils-f { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 104px), 1fr)); gap: 14px 16px; margin: 0; padding: 0; border: 0; }
+.vg-seuils-f input { font-variant-numeric: tabular-nums; }
+.vg-ajout { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 12px; margin: 14px 0 0; }
+.vg-ajout .champ-a { flex: 1 1 200px; }
+.vg-canaux { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.vg-canal { display: grid; gap: 10px; align-content: start; padding: 14px 16px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.vg-canal .tete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; }
+.vg-canal h3 { margin: 0; font-size: var(--at-h3); font-weight: 500; }
+.vg-canal .kv-a { font-size: 13px; }
+.vg-canal form { display: grid; gap: 8px; margin: 0; }
+.vg-canal form p { margin: 0; color: var(--ink3); font-size: 13px; }
+.vg-canal .vg-msg { margin: 0; }
+.vg-canal .btn { justify-self: start; }
+
+/* ---------- 14. Droits : deux clés, attribution ----------
+   Les deux clés en une ligne : le plafond (Zitadel) ET l'attribution (Vigie) donnent le droit effectif, le plus faible des deux ;
+   le même dessin que les colonnes du tableau (§ 7.5), pour que la règle se lise avant la liste. L'attribution est une liste dans
+   un petit formulaire POST : un choix au-dessus du plafond montre son avertissement (:has, sans script). */
+.vg-cles-w { margin: 0 0 14px; }
+.vg-cles { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: stretch; margin: 0 0 14px; padding: 0; list-style: none; }
+.vg-cles-w > .vg-cles { margin: 0; }
+.vg-cles li { display: grid; gap: 2px; align-content: start; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s2); }
+.vg-cles li.op { place-content: center; padding: 0 2px; background: none; color: var(--ink3); font-size: 13px; }
+.vg-cles li.eff { box-shadow: inset 0 0 0 1px var(--line2); background: var(--s1); }
+.vg-cles .t { display: flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 500; }
+.vg-cles .t .ic { flex: none; width: 16px; height: 16px; color: var(--ink3); }
+.vg-cles .sec { color: var(--ink3); font-size: 13px; line-height: 1.45; }
+@media (max-width: 900px) { .vg-cles { grid-template-columns: minmax(0, 1fr); } .vg-cles li.op { justify-content: start; padding: 0 14px; } }
+.vg-attrib { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0; }
+.vg-attrib select { width: auto; min-width: 140px; max-width: 100%; min-height: 32px; padding-top: 4px; padding-bottom: 4px; font-size: 13px; }
+.vg-attrib .avert { display: none; flex-basis: 100%; }
+.vg-attrib:has(option.au-dessus:checked) .avert.plafond { display: flex; }
+@supports selector(:has(*)) { .vg-attrib.si-change:not(:has(option[selected]:not(:checked))):not(.fige-change) .enr { display: none; } }
+.signal.vg-arrivee { margin: 0 0 24px; }
+
+/* ---------- 15. Santé : une carte par composant, ruptures de la chaîne ----------
+   Neuf cartes, toujours dans le même ordre (la chaîne d'abord : c'est d'elle que dépend la foi dans tout le reste) : le nom,
+   l'état en symbole et en mot (● Répond, ▲ Écart, ✕ Rompue, Injoignable, Muette), les faits datés, puis « Alerte si… » : ce
+   qui fait parler la Vigie, avec la règle du code. Une carte en écart porte un filet en tête (▲ --warn, ✕ --danger), comme
+   l'interrupteur arrêté (§ 6) : la couleur double le symbole et le mot. « Pour l'administrateur du serveur » : le dépliant des
+   Réglages de l'admin (MQ-07, .assist-serveur), même dessin. */
+.vg-sante-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr)); gap: 16px; margin: 0 0 24px; padding: 0; list-style: none; }
+.vg-sante-grille > li { min-width: 0; }
+.vg-compo { display: grid; grid-template-rows: auto auto 1fr auto; gap: 12px; height: 100%; margin: 0; padding: 16px 18px; border: 0; border-radius: var(--r-admin-panneau);
+  background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.vg-compo.ecart { box-shadow: inset 0 0 0 1px var(--line), inset 0 3px 0 var(--warn); }
+.vg-compo.panne { box-shadow: inset 0 0 0 1px var(--line), inset 0 3px 0 var(--danger); }
+.vg-compo-tete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+.vg-compo-tete :is(h2, h3, h4) { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--at-h3); font-weight: 500; }
+.vg-compo-tete :is(h2, h3, h4) > .ic { width: 18px; height: 18px; color: var(--ink3); flex: none; }   /* l’icône du composant ; la pastille .etat garde son dessin (§ 3.15, point 6) */
+.vg-compo .kv-a { gap: 5px 14px; font-size: 13px; }
+.vg-compo .kv-a dd .sec { display: block; color: var(--ink3); font-size: 13px; }
+.vg-compo .kv-a b { font-weight: 500; }
+.vg-compo p, .vg-compo form { margin: 0; }
+.vg-compo-seuil { align-self: end; padding-top: 10px; border-top: 1px solid var(--line); color: var(--ink2); font-size: 13px; line-height: 1.45; }
+.vg-compo-seuil .r { color: var(--ink3); }
+.vg-compo .btns-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; }
+.vg-compo .btns-ligne .hint { color: var(--ink3); font-size: 13px; }
+.vg-empreinte { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }   /* maillon, tête publiée : coupée plutôt que de sortir */
+.vg-compo .plier-serveur > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; color: var(--ink2); font-size: 13px; cursor: pointer; list-style: none; }
+.vg-compo .plier-serveur > summary::-webkit-details-marker { display: none; }
+.vg-compo .plier-serveur > summary .ic { width: 14px; height: 14px; transition: transform .15s; }
+.vg-compo .plier-serveur[open] > summary .ic { transform: rotate(90deg); }
+.vg-compo .plier-serveur > :not(summary) { margin: 8px 0 0; color: var(--ink2); font-size: 13px; }
+.vg-compo .plier-serveur code { font-size: 13px; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { .vg-compo .plier-serveur > summary .ic { transition: none; } }
+/* Ruptures de la chaîne : une ligne par rupture (vigie/store.js les liste toutes, 20 au plus à l'écran) : le numéro de ligne en
+   chasse fixe, la raison du code mot pour mot, ce que la ligne contient aujourd'hui (à ne pas croire), et un lien vers elle. */
+.vg-ruptures { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.vg-ruptures > li { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.vg-ruptures > li:first-child { border-top: 0; padding-top: 0; }
+.vg-ruptures .n { font-family: var(--mono); color: var(--ink); }
+.vg-ruptures .raison { color: var(--ink); font-weight: 500; }
+.vg-ruptures .sec { grid-column: 2; color: var(--ink2); }
+.vg-ruptures .vg-lien { grid-column: 2; justify-self: start; font-size: 13px; }
+
+/* ---------- 16. Pages hors session (MV-09) ----------
+   Ni barre latérale, ni barre d'onglets : la marque (le dessin de la tête de la barre), une carte qui dit ce qui se passe et ce
+   qu'il faut faire, dans l'ordre, puis un bouton plein (l'étape suivante) et au plus deux liens. Rien de la console n'y paraît :
+   ni alerte, ni compte, ni adresse ; seulement ce que la personne sait déjà d'elle-même (son compte Zitadel). Le 403 sans jeton
+   Cloudflare Access est la page la plus nue, sans marque (.nue). */
+.hors-main { display: block; min-width: 0; }
+.hors-main > .mq-etats { padding-inline: max(var(--gut, 24px), 16px); padding-bottom: 32px; }
+.vigie .hors { display: grid; justify-items: center; align-content: start; gap: 20px; min-height: 100vh; padding: 64px 24px 48px; }
+@media (max-width: 720px) { .vigie .hors { min-height: 0; padding: 32px 16px 40px; } }
+.hors-marque { display: grid; justify-items: center; gap: 2px; margin: 0; }
+.hors-marque .marque { padding-left: .32em; color: var(--ink); font-size: 15px; font-weight: 500; letter-spacing: .32em; text-transform: uppercase; }
+.hors-marque .mention { color: var(--ink3); font-size: 13px; }
+.hors-carte { display: grid; gap: 16px; width: min(100%, 560px); margin: 0; padding: 28px 30px 30px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+@media (max-width: 720px) { .hors-carte { padding: 20px 18px 22px; } }
+.hors-carte.refus { box-shadow: inset 0 0 0 1px var(--line), inset 0 3px 0 var(--danger); }
+.hors-carte.attente { box-shadow: inset 0 0 0 1px var(--line), inset 0 3px 0 var(--warn); }
+.hors-carte.nue { gap: 10px; }
+.hors-titre { display: flex; align-items: center; gap: 12px; margin: 0; color: var(--ink); font-size: 28px; font-weight: 300; line-height: 1.2; }
+.hors-titre .ic { flex: none; width: 26px; height: 26px; color: var(--ink2); }
+.hors-carte.refus .hors-titre .ic { color: var(--danger); }
+.hors-carte.attente .hors-titre .ic { color: var(--warn); }
+@media (max-width: 720px) { .hors-titre { font-size: 24px; } }
+.ecran-a .hors-carte .hors-titre { font-size: 24px; }
+.hors-carte > p { margin: 0; color: var(--ink); font-size: var(--at-texte); line-height: 1.55; }
+.hors-carte .sec { color: var(--ink2); font-size: 13px; }
+.hors-carte .btn .ic { width: 14px; height: 14px; }
+.hors-carte .code-ref { color: var(--ink2); font-family: var(--mono); font-size: 13px; }
+.hors-id { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s2); font-size: 13px; }
+.hors-id dt { color: var(--ink3); } .hors-id dd { margin: 0; min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
+.hors-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin: 4px 0 0; }
+.hors-actions form { margin: 0; }
+.hors-actions .btn { padding-block: 6px; line-height: 1.25; text-align: center; white-space: normal; }
+@media (max-width: 720px) { .hors-actions { display: grid; } .hors-actions .btn, .hors-actions form, .hors-actions form .btn { width: 100%; } }
+.hors-pied { width: min(100%, 560px); margin: 0; color: var(--ink3); font-size: 13px; text-align: center; }
+
+/* ---------- 17. Cibles : boutons petits et moyens, 44 px au toucher ----------
+   Deux tailles de bouton de plus que l'admin (38 px), toujours 44 px au toucher : petit (32 px, 13 px) dans une carte ou une ligne
+   dense ; moyen (36 px) dans une liste d'actions, un formulaire de décision, des filtres, la pagination, un canal. Les champs et
+   commandes de ces mêmes lignes suivent. */
+:is(.vg-inter, .vg-lignes, .vg-compo, .vg-attrib) .btn, .vg-mode .enr { min-height: 32px; padding: 0 12px; font-size: 13px; }
+:is(.vg-actions .btns-ligne, .vg-form .btns-ligne, .vg-export, .vg-pages, .vg-canal, .vg-filtres) .btn { min-height: 36px; }
+.vg-filtres select, .vg-inter .vg-arret .champ-a input { min-height: 36px; }
+.vg-ajout .btn { min-height: 40px; }
+@media (max-width: 720px), (pointer: coarse) {
+  :is(.vg-inter, .vg-lignes, .vg-compo, .vg-attrib, .vg-actions .btns-ligne, .vg-form .btns-ligne, .vg-export, .vg-pages, .vg-canal, .vg-filtres, .vg-ajout) .btn,
+  .vg-mode .enr, .vg-mode select, .vg-attrib select, .vg-filtres select, .vg-inter .vg-arret .champ-a input, .vg-mode-lu,
+  .vg-inter .plier > summary, .vg-compo .plier-serveur > summary, a.vg-lien { min-height: 44px; }
+  .vg-regles td.c-mode[data-label]::before { min-height: 44px; }
+  .vg-office li { min-height: 44px; padding: 8px 0; }
+  .sur-onglet a { min-width: 44px; justify-content: center; }
+}
+
+/* ---------- 18. Montrer un état (hors produit) ----------
+   Un cadre d'état de la console reprend .ecran-a (admin-plus.css § 14) ; la colonne d'une page entière y garde la largeur de la
+   page (.vg-page : l'en-tête, puis le contenu). Une légende de groupe annotée garde sa largeur (pastille à côté). */
+.vg-page { display: grid; gap: 0; }
+.vg-page > .ep { margin-bottom: 18px; }
+.vigie .mq-etats .ecran-a { padding: 24px 28px 28px; }
+@media (max-width: 720px) { .vigie .mq-etats .ecran-a { padding: 16px; } }
+.vigie .mq-etats .hors { min-height: 0; padding: 8px 0 0; }
+.choix-a > legend.mq-a { width: fit-content; }
+
+/* ---------- 19. Retour après une action, étapes, « À faire maintenant » ----------
+   Après chaque action, la page qui revient le dit en tête (role="status") : ce qui a été fait, par qui, quand le site l'a lu
+   (« Décision #89 créée, lue par le site à 14 h 23 »). Un filet --ok et ✓ ; le texte en --ink. Les étapes numérotées
+   (.vg-etapes) : ce qu'il faut faire, dans l'ordre, sur une page hors session (MV-09) comme sur la fiche d'une alerte critique,
+   dont le bloc « À faire maintenant » (.vg-afaire) vient en tête, avant ce qui s'est passé. */
+.vg-retour { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 18px; padding: 10px 14px; border-radius: var(--r-admin); background: var(--s2);
+  box-shadow: inset 3px 0 0 var(--ok); color: var(--ink); font-size: var(--at-texte); }
+.vg-retour > .ic { flex: none; width: 16px; height: 16px; margin-top: 2px; color: var(--ok); }
+.vg-retour .sec { display: block; color: var(--ink2); font-size: 13px; }
+.vg-etapes { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: etape; }
+.vg-etapes > li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 2px 10px; align-items: start; color: var(--ink); font-size: var(--at-texte); line-height: 1.5; counter-increment: etape; }
+.vg-etapes > li::before { content: counter(etape); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line2); color: var(--ink2); font-size: 13px; font-weight: 500; }
+.vg-etapes .sec { display: block; grid-column: 2; color: var(--ink2); font-size: 13px; }
+.vg-etapes > li > :is(form, .btns-ligne) { grid-column: 2; margin-top: 4px; }
+.panel.vg-afaire { box-shadow: inset 0 0 0 1px var(--line), inset 0 3px 0 var(--danger); }
+
+/* ---------- 20. Identité confirmée, repliés au téléphone ----------
+   La ré-authentification tient en une ligne d'en-tête, dans la méta de chaque page en session : « Identité confirmée à 14 h 17,
+   valable jusqu'à 14 h 22 » ; au-delà, Zitadel la redemande avant toute action forcée et tout geste qui affaiblit la surveillance
+   (page de confirmation). Au téléphone, l'en-tête garde l'essentiel (.tel-non s'efface) ; les filtres du journal et les règles à
+   points se replient en une ligne qui les résume (.vg-replie-lien), et s'ouvrent sans script à leur ancre (:target). */
+.vg-identite { display: inline-flex; align-items: center; gap: 6px; }
+.vg-identite .ic { width: 13px; height: 13px; color: var(--ink2); }
+@media (max-width: 720px) { .ep-meta .tel-non { display: none; } }
+.vg-replie-lien { display: none; }
+@media (max-width: 720px) {
+  .vg-replie-lien { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; margin: 0 0 14px; padding: 6px 6px 6px 14px;
+    border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink2); font-size: 13px; }
+  .vg-replie-lien a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field-line); }
+  .vg-replie:not(:target) { display: none; }
+}
+
+/* ---------- 21. Contraste forcé, mouvement réduit ----------
+   En contraste forcé (Windows), les ombres internes qui dessinent les contours disparaissent : chaque bouton reprend une bordure
+   ButtonText, et ce qui est sélectionné (page courante, type choisi, choix coché) se voit en Highlight. En mouvement réduit,
+   aucune transition ni animation. */
+@media (forced-colors: active) {
+  .vigie :is(.btn, .iconbtn, .chip) { border: 1px solid ButtonText; }
+  .vigie :is(.nav a, .tabbar a, .chip)[aria-current] { border: 2px solid Highlight; }
+  .vigie .choix-a label:has(input:checked) { outline: 2px solid Highlight; outline-offset: 2px; }
+  .vigie :is(.vg-bandeau, .vg-retour, .panel.vg-afaire, .vg-inter.arret, .vg-compo.ecart, .vg-compo.panne) { border: 1px solid CanvasText; }
+}
+@media (prefers-reduced-motion: reduce) { .vigie *, .vigie *::before, .vigie *::after { transition: none !important; animation: none !important; } }
+
+/* ---------- 22. Passe 3 : téléphone, seuils, commandes ----------
+   Au téléphone, une carte d'interrupteur n'a qu'un « Arrêter… » (.tel-seul) : motif et durées passent sur la page de confirmation ;
+   le formulaire complet reste au bureau (.bureau-seul). L'erreur d'un seuil n'étire pas les champs voisins. Une commande à copier
+   (.vg-commande) se coupe aux espaces seulement, chaque mot insécable, et défile seule si un mot ne tient pas, à 320 px comme en espacement WCAG 1.4.12. */
+.vigie .tel-seul { display: none; }
+@media (max-width: 720px) {
+  .vigie .tel-seul { display: flex; }
+  .vigie .bureau-seul { display: none; }
+}
+.vg-seuils-f { align-items: start; }
+.vigie pre.vg-commande { margin: 6px 0 10px; padding: 8px 10px; max-width: 100%; overflow-x: auto; border-radius: var(--r-admin-panneau); background: var(--s1);
+  box-shadow: inset 0 0 0 1px var(--line); font: 13px/1.5 var(--mono, ui-monospace, monospace); white-space: pre-wrap; overflow-wrap: normal; word-break: normal; }
+.vigie pre.vg-commande .mot { white-space: nowrap; }   /* finitions (§ 3.16, point 1) : coupure aux espaces seulement, jamais dans « --accepter » */
+.vigie :is(.main, .hors) pre.vg-commande code { display: inline; white-space: inherit; overflow-wrap: normal; background: none; padding: 0; font: inherit; }   /* pas l’identifiant insécable de la § 19 */
+@media (max-width: 720px) { .vigie .ep-plus .menu-pop { right: auto; left: 0; max-width: calc(100vw - 32px); } }   /* « Plus d’actions » sous le titre : le menu s’ouvre vers la droite */
+
+/* ---------- 23. Finitions (lexique § 3.16) ----------
+   La légende des gravités dans la légende (caption) du tableau des alertes : la phrase d'ordre, puis l'échelle. */
+.vg-alertes caption .vg-cap-t { display: block; }
+.vg-alertes caption .grav-leg { margin-top: 10px; }

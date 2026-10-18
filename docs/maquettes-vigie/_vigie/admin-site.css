@@ -1,0 +1,130 @@
+/* =====================================================================================================
+   La Vigie dans l'administration du site (MV-10) : ce qui ne sert qu'à l'admin, à reporter dans admin-plus.css au moment du code.
+   Chargé seul après admin-plus.css (l'admin du site ne charge pas _vigie/vigie.css, propre à la console), avant annotations.css.
+   Mêmes règles que l'admin : aucun jeton redéclaré, aucun attribut style= (CSP sans unsafe-inline), cibles de 24 px au bureau et
+   de 44 px au toucher, 12 px admis (règle de l'admin, tokens.css ; la console, elle, ne descend pas sous 13 px).
+   Le bandeau .sec-bandeau a le dessin du bandeau de la console (vigie.css § 4), sous un autre nom : l'admin n'a pas vigie.css.
+   Réutilisés tels quels : .side (MQ-07), .panel, .ep, .btn, .note-a, .courriel, .ecran-a, .help-link, .hint.
+   Un composant par besoin :
+   1 entrée « Sécurité » de la barre latérale      4 cadres d'état : la barre et la page côte à côte
+   2 bandeau d'une alerte critique                 5 messages Signal et e-mail, mot pour mot (hors produit)
+   3 « Aujourd'hui » : la liste « À faire » (de MQ-07)
+   ===================================================================================================== */
+
+/* ---------- 1. Entrée « Sécurité » de la barre latérale ----------
+   Groupe « Équipe », après « Journal », pour les seuls comptes securite.voir. Le bouclier, le mot, une petite flèche qui sort
+   (nouvel onglet, comme « Voir le site » ; dit aussi au lecteur d'écran), le badge du résumé : ✕ et le nombre pour haut et
+   critique (comme « Aujourd'hui » compte ses urgences), le nombre seul pour moyen, ▲ quand le résumé manque.
+   Tenir dans 900 px : l'entrée ajoute une ligne de 30 px à une barre qui laissait 13 px libres (MQ-07 : bas du compte à 888 px).
+   Quand elle est là (.side--securite, posé par le gabarit), l'espace au-dessus des intitulés de groupe passe de 8 à 3 px et la
+   marge sous « Rechercher, agir… » de 8 à 6 px (intitulés de 24 à 19 px de haut) : 22 px repris, le bas du compte reste dans
+   l'écran de 900 px. Au toucher, rien ne change (lignes de 44 px, la barre défile comme partout). */
+.admin .nav a.nav-sec .sec-ext { width: 12px; height: 12px; margin-left: auto; color: var(--ink3); flex: none; }
+.admin .nav a.nav-sec .sec-ext + .nav-badge { margin-left: 0; }
+.admin .nav a.nav-sec .nav-badge { min-width: 22px; }
+.admin .nav-badge.attention { background: var(--s3); color: var(--warn); box-shadow: inset 0 0 0 1px var(--line2); }
+@media (min-width: 721px) and (pointer: fine) {
+  .admin .side--securite .grp { min-height: 19px; padding-top: 3px; }
+  .admin .side--securite .cmdk { margin-bottom: 6px; }
+}
+
+/* ---------- 2. Bandeau d'une alerte critique ----------
+   En tête de toutes les pages de l'admin, pour les comptes securite.voir, tant que le résumé de la Vigie dit qu'une critique
+   n'est pas prise en charge (critique_a_prendre). Le dessin du bandeau de la console : filet de 4 px et aplat léger du rouge, le
+   texte en --ink ; le bouton ouvre la console dans un nouvel onglet. Sous l'« Aide sur cette page ». Quand le résumé manque, le
+   bandeau reste, daté (« au dernier résumé, 14 h 10 ») : il dit ce que l'admin savait, pas ce qu'il devine (lexique § 3.13). */
+.sec-bandeau { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; margin: 22px 0 24px; padding: 12px 16px 12px 18px;
+  border-radius: var(--r-admin); background: var(--danger-soft); box-shadow: inset 4px 0 0 var(--danger); color: var(--ink); }
+.sec-bandeau > .ic { width: 20px; height: 20px; color: var(--danger); align-self: start; margin-top: 1px; }
+.sec-bandeau p { margin: 0; }
+.sec-bandeau .t { display: block; font-weight: 500; }
+.sec-bandeau .sec { display: block; color: var(--ink2); font-size: 13px; }
+.sec-bandeau .btn { white-space: nowrap; }
+.sec-bandeau > .sec-bouton { display: block; }
+.admin .btn .sec-ext { width: 14px; height: 14px; margin-left: 6px; }
+@media (max-width: 720px) { .sec-bandeau { grid-template-columns: 20px minmax(0, 1fr); margin-top: 0; } .sec-bandeau > .btn, .sec-bandeau > .sec-bouton { grid-column: 1 / -1; justify-self: start; } }
+.ecran-a > .sec-bandeau:first-child, .sec-page > .sec-bandeau:first-child { margin-top: 0; }
+
+/* ---------- 3. « Aujourd'hui » : la liste « À faire » (repris de MQ-07, L8) ----------
+   Une seule liste « À faire », la plus urgente d'abord : le symbole du niveau (▲ urgent, horloge bientôt, ○ plus tard), la
+   ligne et son détail, une action. La ligne de la Vigie en est une comme les autres : urgent pour haut et critique,
+   bientôt pour moyen ou pour un résumé indisponible (annexe architecture § 4.3) ; son action ouvre la console dans un nouvel
+   onglet. */
+.sec-afaire { margin: 0; }
+.sec-afaire-t { margin: 0 0 4px; font-size: 17px; font-weight: 500; }
+.sec-afaire-t .hint { font-weight: 400; }
+.taches { list-style: none; margin: 0; padding: 0; }
+.taches > li { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.taches > li:first-child { border-top: 0; }
+.taches .q { display: block; color: var(--ink2); font-size: 12.5px; }
+.taches .u-urgent { color: var(--danger); } .taches .u-bientot { color: var(--warn); } .taches .u-temps { color: var(--ink2); }
+.taches .vign { grid-column: 2 / -1; display: grid; gap: 8px; margin: 4px 0 0; padding: 0; list-style: none; }
+.taches .vign li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.taches .vign img { display: block; width: 64px; height: 43px; object-fit: cover; border-radius: 5px; }
+.taches .vign small { display: block; color: var(--ink2); font-size: 12px; }
+.taches .vign small.att { display: flex; }
+.taches .btn { padding-block: 6px; line-height: 1.25; text-align: center; white-space: normal; }
+@media (max-width: 540px) { .taches > li { grid-template-columns: 20px minmax(0, 1fr); } .taches > li > .btn { grid-column: 2; justify-self: start; }
+  .taches .vign li { grid-template-columns: 56px minmax(0, 1fr); } .taches .vign li .btn { grid-column: 2; justify-self: start; } .taches .vign img { width: 56px; height: 37px; } }
+.sec-rien { margin: 6px 0 0; }
+
+/* ---------- 4. Cadres d'état de l'admin : la barre et la page côte à côte (hors produit) ----------
+   Le .duo de MQ-07 (L7) : une barre latérale statique dans son cadre, la page à côté ; au téléphone, la page seule, la barre
+   au-dessus quand c'est elle qu'on montre (.sec-duo--barre). Une barre « extrait » (.sec-barre-extrait) ne montre que le
+   groupe qui change. */
+.sec-duo { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 24px; align-items: start; }
+.sec-duo .side { position: static; width: auto; height: auto; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--line2); transform: none; visibility: visible; }
+.sec-duo .side-haut { flex-wrap: wrap; }
+.sec-duo .who { overflow: visible; white-space: normal; }
+.sec-duo > .sec-page { display: grid; gap: 0; align-content: start; min-width: 0; }
+.sec-page .ep { margin-bottom: 18px; }
+@media (max-width: 720px) { .sec-duo { grid-template-columns: minmax(0, 1fr); } .sec-duo:not(.sec-duo--barre) > .side { display: none; } }
+.sec-barre-extrait { padding: 10px 12px 12px; border-radius: 12px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2); }
+.sec-barre-extrait .grp { padding-top: 0; }
+.sec-barre-extrait .etc { margin: 6px 10px 0; color: var(--ink3); font-size: 12px; }
+
+/* ---------- 5. Messages Signal et e-mail, mot pour mot (hors produit) ----------
+   Un téléphone et une messagerie NEUTRES (ni la marque ni les couleurs de Signal ou d'un client de messagerie), pour lire le texte
+   exact que vigie/notifications.js produit (messageOf, objet et corps de l'e-mail). Le texte est dans un <pre> : espaces, retours
+   à la ligne et apostrophes du code gardés tels quels. */
+.msg-tel { display: grid; grid-template-rows: auto 1fr; width: min(100%, 360px); margin: 0 auto; border-radius: 28px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line2), 0 0 0 6px var(--s3); overflow: hidden; }
+.msg-tel-tete { display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: var(--s1); border-bottom: 1px solid var(--line); }
+.msg-tel-tete .av { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 999px; background: var(--s3); color: var(--ink); font-size: 13px; font-weight: 500; }
+.msg-tel-tete b { display: block; font-size: 14px; font-weight: 500; }
+.msg-tel-tete small { display: block; color: var(--ink3); font-size: 12px; }
+.msg-fil { display: grid; gap: 12px; margin: 0; padding: 14px 12px 18px; list-style: none; }
+.msg-jour { justify-self: center; padding: 2px 10px; border-radius: 999px; background: var(--s2); color: var(--ink2); font-size: 12px; }
+.msg-bulle { justify-self: start; max-width: 92%; padding: 9px 12px 7px; border-radius: 16px 16px 16px 4px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); }
+.msg-bulle .de { display: block; margin-bottom: 2px; color: var(--ink2); font-size: 12px; font-weight: 500; }
+.msg-bulle pre, .msg-texte { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 400 14px/1.45 Jost, system-ui, sans-serif; color: var(--ink); }
+.msg-bulle time { display: block; margin-top: 2px; color: var(--ink3); font-size: 12px; text-align: right; }
+.msg-legende { max-width: 64ch; margin: 12px auto 0; color: var(--ink2); font-size: 13px; text-align: center; }
+.msg-courriel.courriel { max-width: 640px; }
+.msg-courriel .msg-texte { margin: 0 0 10px; font-family: var(--mono); font-size: 13px; line-height: 1.6; }
+.msg-courriel dd .mono { font-family: var(--mono); font-size: 12px; }
+.msg-code { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.msg-code > li { display: grid; gap: 6px; }
+.msg-code .t { color: var(--ink); font-size: 14px; font-weight: 500; }
+.msg-code pre { margin: 0; padding: 10px 12px; border-radius: var(--r-admin); background: var(--s2); white-space: pre-wrap; overflow-wrap: anywhere; font: 400 13px/1.55 var(--mono); color: var(--ink); }
+.msg-code .sec { color: var(--ink2); font-size: 13px; }
+.msg-jamais { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; color: var(--ink2); font-size: 13px; }
+.msg-jamais li { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 8px; }
+.msg-jamais .ic { width: 12px; height: 12px; margin-top: 4px; color: var(--st-arret); }
+
+/* ---------- 6. Contraste forcé, mouvement réduit (passe 2, lexique § 3.14, point 15) ----------
+   Les boutons de l'admin reprennent une bordure ButtonText ; la page courante se voit en Highlight ; un nom de code ne se coupe
+   pas en fin de ligne tant qu'il tient ; aucune transition en mouvement réduit (le chevron des séries, MQ-07). */
+@media (forced-colors: active) {
+  .admin :is(.btn, .iconbtn, .chip) { border: 1px solid ButtonText; }
+  .admin :is(.nav a, .tabbar a, .chip)[aria-current] { border: 2px solid Highlight; }
+  .sec-bandeau { border: 1px solid CanvasText; }
+}
+.msg-code code, .msg-code .t code { display: inline-block; max-width: 100%; overflow-wrap: anywhere; vertical-align: bottom; }
+@media (prefers-reduced-motion: reduce) { .admin *, .admin *::before, .admin *::after { transition: none !important; animation: none !important; } }
+
+/* ---------- 7. Menus ouverts dans une barre étroite (passe 3, lexique § 3.15, point 12) ----------
+   Le choix de la langue s'ouvre au-dessus du pied de la barre, sur toute sa largeur (et non depuis son bouton, à droite du pied) :
+   il reste dans la barre à toute largeur, cadres d'état 8 et 10 en allemand compris, à 320 px. À reporter dans l'admin (MQ-07). */
+.admin .pied-liens { position: relative; }
+.admin .pied-liens .admin-lang { position: static; }
+.admin .pied-liens .admin-lang ul { left: 0; right: 0; min-width: 0; }
