@@ -90,6 +90,13 @@ Vigie, en phase E ou à la fin de D. Application aux billets : [section Carnets]
 `heures_visibles_en_masse` (`vigie/regles/80-admin.yml`), seuil à caler (proposition : 20 en 10 minutes). Pris par
 la Vigie. Le numéro d'inventaire n'intéresse pas la Vigie.
 
+**Exigence d'implémentation commune à BV-20 et BV-21 (publication programmée).** Aujourd'hui `runDue` ne publie que des
+photos et ne touche à rien de ce que surveille `watchWrites` (`server/securite/site.js`) : rien à brancher. Dès qu'un
+texte publié peut l'être par programmation (un billet de Carnet programmé, par exemple), la comparaison se fait **à la
+publication**, dans `runDue` ou son équivalent pour les billets, avec `sub = null` et l'émetteur « publication
+programmée » : l'écart ne doit pas être attribué au prochain compte qui écrit dans l'admin. Pris par la Vigie, à
+l'implémentation de la brique (précision de la session de la Vigie, 18 octobre 2026).
+
 ---
 
 ## Par brique
