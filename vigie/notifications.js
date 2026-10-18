@@ -11,6 +11,7 @@ import { readLimited } from './zitadel.js';
 //   - Signal en échec : l'e-mail part à sa place et l'échec ouvre une alerte (une fois par heure et par canal).
 
 const PER_HOUR = 20;
+const REDUCED_PER_HOUR = 60;              // surveillance réduite : hors du plafond des alertes, borné à part
 const SOURCES = { site: 'site', zitadel: 'Zitadel', bordure: 'bordure Cloudflare', vigie: 'contrôles de la Vigie' };
 const LABEL = { critique: 'Critique', haut: 'Haute', moyen: 'Moyenne', bas: 'Basse', info: 'Info' };
 const hourOf = t => new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(t).replace(':', ' h ');
@@ -22,9 +23,27 @@ export function testChannel(config, canal, { fetchImpl = fetch, transport = null
 }
 
 // Texte d'un message (exporté pour les tests et la ligne de commande).
+// Ce qui a été réduit, sans donnée personnelle (ni adresse de confiance ni motif) : de quoi savoir sans ouvrir la console.
+const dayOf = t => new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', weekday: 'short', day: 'numeric', month: 'short' }).format(t);
+const dayHour = t => `${dayOf(t)}, ${hourOf(t)}`;
+const SWITCH_TEXT = { detection: 'détection arrêtée', alertes: 'notifications arrêtées', blocages: 'blocages automatiques arrêtés' };
+const SEUIL_TEXT = { ip: 'd’une adresse', reseau: 'd’un réseau', compte: 'd’un compte', session: 'd’une session', appareil: 'd’un appareil' };
+export function reducedText(d, { titreOf = id => id, t = Date.now() } = {}) {
+  const until = d.jusqua ? ` jusqu'${dayOf(d.jusqua) === dayOf(t) ? `à ${hourOf(d.jusqua)}` : `au ${dayHour(d.jusqua)}`}` : '';      // jour de Paris
+  const [kind, ...rest] = String(d.objet || '').split(':');
+  const id = rest.join(':');
+  if (kind === 'interrupteur') return `${SWITCH_TEXT[id] || `interrupteur ${id} arrêté`}${until}`;
+  if (kind === 'regle') return d.mode && d.mode !== 'arret' ? `règle « ${titreOf(id)} » passée de ${d.avant} à ${d.mode}` : `règle « ${titreOf(id)} » arrêtée${until}`;
+  if (kind === 'seuil') return `seuil ${SEUIL_TEXT[id] || id} relevé de ${d.avant} à ${d.valeur} points`;
+  if (kind === 'confiance') return `adresse de confiance ajoutée${until}`;
+  if (kind === 'controle_roles') return 'référence du contrôle des rôles acceptée';
+  return 'surveillance réduite';
+}
+
 // Réponse déjà faite, sans cible (ni compte ni adresse) : de quoi savoir à 23 h si l'urgence demeure.
 const DONE = { geler: 'compte gelé', revoquer_compte: 'sessions du compte fermées', revoquer_session: 'session fermée', bloquer: 'adresse bloquée', verrouiller: 'admin verrouillée' };
-const lengthOf = ms => (ms >= 864e5 - 60e3 ? `${Math.round(ms / 864e5)} j` : `${Math.round(ms / 3600e3)} h`);
+// En heures jusqu'à 48 h (« 24 h » se lit mieux qu'« 1 j » à 23 h), en jours au-delà.
+const lengthOf = ms => (ms > 48 * 3600e3 + 60e3 ? `${Math.round(ms / 864e5)} j` : `${Math.round(ms / 3600e3)} h`);
 export const responseOf = decisions => (decisions.length ? `Réponse : ${decisions.map(d => `${DONE[d.kind] || d.kind}${d.kind === 'geler' || d.kind === 'bloquer' ? ` ${lengthOf(d.fin - d.cree_a)}` : ''}`).join(', ')}` : 'Aucune réponse automatique');
 
 export function messageOf({ id, gravite, titre, sources = [], t, console: url, action = 'ouverte', reponse = null }) {
@@ -58,9 +77,18 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
     store.own('vigie_canal_echec', { emetteur: 'vigie/notifications.js', detail: { canal, erreur: String(err.message).slice(0, 200) } });
   };
   // Un canal, dans son budget horaire ; renvoie vrai si le message est parti.
-  async function viaChannel(canal, text) {
+  const reducedBudget = new Map();          // canal → { hour, sent }
+  async function viaChannel(canal, text, { prioritaire = false } = {}) {
     if (!channels[canal]) return false;
     const hour = Math.floor(now() / 3600e3);
+    if (prioritaire) {
+      const r = reducedBudget.get(canal);
+      const rb = r && r.hour === hour ? r : { hour, sent: 0 };
+      reducedBudget.set(canal, rb);
+      if (rb.sent >= REDUCED_PER_HOUR) return true;
+      rb.sent += 1;
+      try { await senders[canal](text); return true; } catch (err) { failed(canal, err); return false; }
+    }
     let b = budget.get(canal);
     if (!b || b.hour !== hour) {
       // Heure nouvelle : synthèse de ce qui n'a pas été envoyé une à une pendant la précédente.
@@ -75,10 +103,17 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
     try { await senders[canal](text); return true; } catch (err) { failed(canal, err); return false; }
   }
   // Envoi : Signal d'abord, l'e-mail s'il n'y a pas Signal ou s'il a échoué.
-  async function send(text) {
-    const ok = await viaChannel('signal', text);
-    if (!ok) return viaChannel('email', text);
+  async function send(text, opts = {}) {
+    const ok = await viaChannel('signal', text, opts);
+    if (!ok) return viaChannel('email', text, opts);
     return ok;
+  }
+
+  // Surveillance réduite (jury v2 des maquettes) : un message à CHAQUE geste (même quand son alerte est déjà ouverte),
+  // hors du plafond des alertes et quels que soient les interrupteurs ; il dit ce qui est réduit et jusqu'à quand.
+  async function onReduced(d, t = now()) {
+    const titreOf = id => engine?.rules().find(r => r.id === id)?.titre || id;
+    return send([`[Moyenne] Surveillance réduite : ${reducedText(d, { titreOf, t })}`, 'Source : contrôles de la Vigie', `${hourOf(t)} · ${consoleUrl}/reglages`].join('\n'), { prioritaire: true });
   }
 
   // Alerte ouverte ou aggravée → message, selon la gravité, le mode et l'interrupteur.
@@ -88,13 +123,14 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
     if (!a || !['alerter', 'bloquer'].includes(a.mode)) return false;
     // La surveillance réduite part toujours (y compris quand c'est l'interrupteur des alertes qu'on vient d'arrêter),
     // quelle que soit sa gravité ; les autres alertes : hautes et critiques, interrupteur en marche.
-    const reduced = a.regle === 'sigma.surveillance_reduite';
-    if (!reduced && (!switches.isOn('alertes') || !['haut', 'critique'].includes(detail.gravite))) return false;
+    // La surveillance réduite a son propre message, à chaque geste (onReduced) : pas une seconde fois ici.
+    if (a.regle === 'sigma.surveillance_reduite') return false;
+    if (!switches.isOn('alertes') || !['haut', 'critique'].includes(detail.gravite)) return false;
     const rule = engine.rules().find(r => r.id === a.regle);
     let sources = [];
     try { sources = JSON.parse(a.sources); } catch { /* illisible */ }
     const decisions = store.db.prepare('SELECT kind, cree_a, fin FROM decisions WHERE motif = ? AND auto = 1 ORDER BY id').all(`alerte #${a.id}`);
-    return send(messageOf({ id: a.id, gravite: detail.gravite, titre: rule?.titre || a.regle, sources, t, console: consoleUrl, action: detail.action, reponse: reduced ? null : responseOf(decisions) }));
+    return send(messageOf({ id: a.id, gravite: detail.gravite, titre: rule?.titre || a.regle, sources, t, console: consoleUrl, action: detail.action, reponse: responseOf(decisions) }));
   }
 
   // Abonnement : les alertes écrites dans la chaîne (vigie_alerte), traitées hors de l'écriture.
@@ -103,12 +139,12 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
   const drainQueue = async () => {
     if (busy) return;
     busy = true;
-    try { while (queue.length) { const d = queue.shift(); await onAlert(d).catch(err => log?.error({ err: err.message }, 'Vigie : notification')); } } finally { busy = false; }
+    try { while (queue.length) { const d = queue.shift(); await (d.reduite ? onReduced(d.detail, d.t) : onAlert(d)).catch(err => log?.error({ err: err.message }, 'Vigie : notification')); } } finally { busy = false; }
   };
   store.onAdded(rows => {
     for (const r of rows) {
-      if (r.type !== 'vigie_alerte') continue;
-      try { queue.push(JSON.parse(r.detail)); } catch { /* illisible */ }
+      if (r.type !== 'vigie_alerte' && r.type !== 'vigie_surveillance_reduite') continue;
+      try { const d = JSON.parse(r.detail); queue.push(r.type === 'vigie_alerte' ? d : { reduite: true, detail: d, t: r.survenu_a }); } catch { /* illisible */ }
     }
     if (queue.length) setImmediate(drainQueue);
   });

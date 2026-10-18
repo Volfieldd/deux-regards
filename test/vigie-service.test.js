@@ -204,7 +204,8 @@ test('ligne de commande : clés, blocage, gel, verrouillage, interrupteur, levé
   assert.throws(() => cli(['bloquer', '0.0.0.0/0'], { config }), /trop large/);
   assert.match(cli(['geler', 'zitadel-x', '--duree', '1h'], { config }), /gelé/);
   assert.match(cli(['verrouiller', '--comptes', 'zitadel-moi'], { config }), /verrouillée/);
-  assert.match(cli(['interrupteur', 'blocages', 'arret', '--duree', '2h'], { config }), /arret pour 2h/);
+  assert.throws(() => cli(['interrupteur', 'blocages', 'arret', '--duree', '2h'], { config }), /--motif/);
+  assert.match(cli(['interrupteur', 'blocages', 'arret', '--duree', '2h', '--motif', 'essai'], { config }), /arret pour 2h/);
   assert.match(cli(['decisions'], { config }), /#1 {2}bloquer {2}203\.0\.113\.7\/32 \(tout\)[^\n]*ligne de commande \(root\)[^\n]*scan/);
   assert.match(cli(['lever', '1'], { config }), /1 décision/);
   assert.match(cli(['lever', '--tout'], { config }), /2 décision/);

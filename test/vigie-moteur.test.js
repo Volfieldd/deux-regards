@@ -286,7 +286,9 @@ test('ligne de commande : alertes, détail avec l’origine du signal, entités,
   assert.match(cli(['regles'], { config }), /sigma\.cookie_rejoue +bloquer +DS1/);
   assert.match(cli(['regle', 'entite.score', 'alerter'], { config }), /alerter/);
   assert.throws(() => cli(['regle', 'inconnue', 'alerter'], { config }), /règle inconnue/);
-  assert.match(cli(['seuil', 'ip', '9'], { config }), /9 points/);
+  assert.throws(() => cli(['seuil', 'ip', '9'], { config }), /motif/, 'seuil relevé : motif obligatoire');
+  assert.match(cli(['seuil', 'ip', '9', '--motif', 'trop de bruit'], { config }), /9 points/);
+  assert.match(cli(['seuil', 'ip', '8'], { config }), /8 points/, 'seuil abaissé : sans motif');
   assert.throws(() => cli(['confiance', 'ajouter', '203.0.113.1'], { config }), /pour une durée/);
   assert.match(cli(['confiance', 'ajouter', '203.0.113.1', '--duree', '7j', '--motif', 'box'], { config }), /203\.0\.113\.1 \(jusqu'au/);
   assert.match(cli(['prendre', '1'], { config }), /prise en charge/);

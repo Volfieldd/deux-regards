@@ -119,7 +119,9 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         const n = opt.tout ? decisions.lift({ all: true, par }) : decisions.lift({ id: Number(rest[0]), par });
         return n ? `${n} décision(s) levée(s).` : 'Rien à lever.';
       }
-      case 'interrupteur': switches.set(rest[0], rest[1], { duree: opt.duree || null, par, motif }); return `Interrupteur ${rest[0]} : ${rest[1]}${opt.duree ? ` pour ${opt.duree}` : ''}.`;
+      case 'interrupteur':
+        if (rest[1] === 'arret' && opt.duree && !motif) throw new DecisionError('arrêt d’un interrupteur : --motif "…" obligatoire (il est envoyé aux autres Administrateurs avec l’arrêt)');
+        switches.set(rest[0], rest[1], { duree: opt.duree || null, par, motif }); return `Interrupteur ${rest[0]} : ${rest[1]}${opt.duree ? ` pour ${opt.duree}` : ''}.`;
       case 'alertes': {
         const rows = db.prepare(`SELECT * FROM alerts ${opt.toutes ? '' : "WHERE statut != 'close'"} ORDER BY CASE gravite WHEN 'critique' THEN 0 WHEN 'haut' THEN 1 WHEN 'moyen' THEN 2 ELSE 3 END, CASE statut WHEN 'ouverte' THEN 0 ELSE 1 END, derniere DESC LIMIT 50`).all();
         return rows.map(a => `#${a.id}  ${a.gravite.padEnd(8)} ${a.statut.padEnd(8)} ${a.regle}  ${a.entite_kind} ${a.entite_key}  ×${a.compteur}  sources ${JSON.parse(a.sources).join('+') || '—'}${a.mode === 'observer' ? '  (observée)' : ''}`).join('\n') || 'Aucune alerte.';
@@ -139,23 +141,28 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
       case 'classer': return engine.classify(Number(rest[0]), { classement: rest[1], note: opt.note === true ? '' : opt.note || '', par }) ? `Alerte #${rest[0]} close (${rest[1]}).` : 'Alerte inconnue.';
       case 'entites': return engine.top(20).map(e => `${e.kind.padEnd(8)} ${e.key}  score ${e.score.toFixed(1)}  sources ${e.sources.join('+') || '—'}  ${e.signaux} signaux`).join('\n') || 'Aucune entité active.';
       case 'regles': return engine.rules().map(r => `${r.id.padEnd(40)} ${r.mode.padEnd(9)} ${(r.cas || '').padEnd(5)}${r.expire ? ` ${r.expire < now() ? 'EXPIRÉE' : 'expire'} le ${new Date(r.expire).toISOString().slice(0, 10)}` : ''}`).join('\n') + `\nSeuils : ${Object.entries(engine.thresholds()).map(([k, v]) => `${k} ${v}`).join(', ')}`;
-      case 'regle': engine.setMode(rest[0], rest[1], par, { duree: opt.duree || null, motif }); return `Règle ${rest[0]} : ${rest[1]}${opt.duree ? ` pour ${opt.duree}` : ''}.`;
-      case 'seuil': engine.setThreshold(rest[0], Number(rest[1]), par); return `Seuil ${rest[0]} : ${rest[1]} points.`;
+      case 'regle':
+        if (!motif && ['arret', 'observer', 'alerter'].includes(rest[1]) && engine.rules().find(r => r.id === rest[0]) && ['arret', 'observer', 'alerter', 'bloquer'].indexOf(rest[1]) < ['arret', 'observer', 'alerter', 'bloquer'].indexOf(engine.modeOf(rest[0]))) throw new DecisionError('surveillance réduite : --motif "…" obligatoire');
+        engine.setMode(rest[0], rest[1], par, { duree: opt.duree || null, motif }); return `Règle ${rest[0]} : ${rest[1]}${opt.duree ? ` pour ${opt.duree}` : ''}.`;
+      case 'seuil':
+        if (!motif && Number(rest[1]) > (engine.thresholds()[rest[0]] ?? Infinity)) throw new DecisionError('seuil relevé (surveillance réduite) : --motif "…" obligatoire');
+        engine.setThreshold(rest[0], Number(rest[1]), par, { motif }); return `Seuil ${rest[0]} : ${rest[1]} points.`;
       case 'confiance': {
         const ip = rest[1];
         if (!['ajouter', 'retirer'].includes(rest[0]) || !net.isIP(String(ip))) throw new DecisionError('usage : confiance ajouter|retirer <ip>');
         // Une adresse de confiance n'est jamais bloquée automatiquement : toujours pour une durée (7 jours au plus), et
         // signalée aux Administrateurs (surveillance réduite).
-        const list = store.setting.get('adresses_confiance', []).filter(x => (typeof x === 'string' ? x : x.ip) !== ip);
+        const list = store.setting.get('adresses_confiance', []).filter(x => x && typeof x === 'object' && x.ip !== ip);
         if (rest[0] === 'ajouter') {
           if (!opt.duree) throw new DecisionError('adresse de confiance toujours pour une durée (--duree 7j au plus)');
+          if (!motif) throw new DecisionError('adresse de confiance : --motif "…" obligatoire');
           const jusqua = now() + Math.min(parseDuration(opt.duree), 7 * 864e5);
           list.push({ ip, jusqua, par, motif: motif || undefined });
           store.own('vigie_surveillance_reduite', { emetteur: par, detail: { objet: `confiance:${ip}`, jusqua, motif: motif || undefined } });
         }
         store.setting.set('adresses_confiance', list);
         store.own('vigie_interrupteur', { emetteur: par, detail: { adresse_confiance: rest[0], ip } });
-        return `Adresses de confiance : ${list.map(x => (typeof x === 'string' ? x : `${x.ip} (jusqu'au ${new Date(x.jusqua).toISOString().slice(0, 16).replace('T', ' ')} UTC)`)).join(', ') || 'aucune'}.`;
+        return `Adresses de confiance : ${list.map(x => `${x.ip} (jusqu'au ${new Date(x.jusqua).toISOString().slice(0, 16).replace('T', ' ')} UTC)`).join(', ') || 'aucune'}.`;
       }
       case 'bordure': {
         // Grille de lecture de l'essai sur l'instance de test (docs/wiki/Vigie.md, bordure).
@@ -179,12 +186,15 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         return st ? `Listes mises à jour le ${new Date(st.at).toISOString().slice(0, 16).replace('T', ' ')} UTC : ${Object.entries(st).filter(([k]) => k !== 'at').map(([k, v]) => `${k} ${v}`).join(', ')}` : 'Listes jamais téléchargées.';
       }
       case 'controle': {
-        store.setting.set('controle_roles_vu', null);
         // --accepter : l'instantané actuel devient la référence (après vérification d'un écart expliqué hors journal).
         if (opt.accepter) {
           // Jamais pendant qu'une alerte du contrôle des rôles est ouverte : accepter rendrait légitime ce qu'elle signale.
           const open = db.prepare("SELECT id FROM alerts WHERE regle = 'sigma.controle_roles' AND statut != 'close' ORDER BY id DESC LIMIT 1").pluck().get();
           if (open) throw new DecisionError(`alerte #${open} du contrôle des rôles encore ouverte : classez-la d'abord (classer ${open} incident|faux_positif|test --note "…")`);
+          if (!motif) throw new DecisionError('référence acceptée : --motif "…" obligatoire');
+        }
+        store.setting.set('controle_roles_vu', null);
+        if (opt.accepter) {
           store.setting.set('controle_roles_admins', null);
           store.setting.set('controle_roles_declencheurs', null);
           store.own('vigie_interrupteur', { emetteur: par, detail: { controle_roles: 'référence acceptée', motif } });
