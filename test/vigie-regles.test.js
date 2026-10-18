@@ -356,3 +356,11 @@ test('admin : contact remplacé, EXIF complet, heures visibles en masse, réglag
   assert.equal(a.gravite, 'haut');
   assert.equal(a.entite_key, 'zitadel-seb');
 });
+
+test('échecs de connexion : seuls ceux de l’admin (« site · connexion ») comptent pour DS5, jamais le mot de passe d’une galerie privée (BV-16)', async t => {
+  const v = vigieOf(t);
+  for (let i = 0; i < 5; i++) v.add('authn_login_fail', 'moyen', { composant: 'site · public', ip: '198.51.100.30', detail: { canal: 'galerie' } });
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_signal' AND detail LIKE '%oidc_echecs_repetes%'").pluck().get(), 0);
+  for (let i = 0; i < 3; i++) v.add('authn_login_fail', 'moyen', { composant: 'site · connexion', ip: '198.51.100.31' });
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_signal' AND detail LIKE '%oidc_echecs_repetes%'").pluck().get(), 1);
+});
