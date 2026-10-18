@@ -8,6 +8,11 @@ import { picture } from '../picture.js';
 import { fmt, typo } from '../v2-vues.js';
 import { legalEmail } from '../legal.js';
 import { TranslateError } from '../translate.js';
+import { createRateLimiter } from '../ratelimit.js';
+import { structureError } from '../carnet-markdown.js';
+
+// Adresse de « Écrire aux auteurs » : sans ? & % , ni espace (aucun paramètre ajouté au lien mailto:).
+export const CONTACT_RE = /^[^\s@?&%,;<>"']+@[^\s@?&%,;<>"']+\.[^\s@?&%,;<>"']+$/;
 
 // Admin « Carnets » (maquette MQ-20 ; étude § 1.5 et § 1.6) : la liste des billets, l'éditeur, le circuit de publication.
 // Enregistré dans le plugin d'administration (session d'admin exigée, comme le reste de /admin), comme voyages.js.
@@ -76,18 +81,22 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
   const photoBySlug = app.db.prepare('SELECT id, author_id, status, slug FROM photos WHERE slug = ?');
   const photoById = app.db.prepare('SELECT id, author_id, status, slug FROM photos WHERE id = ?');
   const usable = (request, p) => Boolean(p) && (p.status === 'published' || request.owns('photos.voir', p.author_id));
-  const resolver = request => (kind, v) => {
+  // post : le billet en cours ; une photo qu'il contient déjà (cosignée, mise par l'autre auteur) y reste, par son numéro,
+  // sans que le compte puisse en ajouter une autre qu'il ne voit pas (revue de sécurité des Carnets).
+  const resolver = (request, post = null) => (kind, v) => {
     if (kind === 'photo') {
       const p = /^\d+$/.test(v) ? photoById.get(Number(v)) : photoBySlug.get(v);
-      return usable(request, p) ? p.id : null;
+      if (!p) return null;
+      return usable(request, p) || (post && /^\d+$/.test(v) && c.photoIds(post).includes(p.id)) ? p.id : null;
     }
     if (kind === 'serie') return repo.categories().find(x => x.slug === v || String(x.id) === v)?.id ?? null;
     if (kind === 'voyage') return app.db.prepare('SELECT id FROM trips WHERE slug = ? OR id = ?').pluck().get(v, /^\d+$/.test(v) ? Number(v) : -1) ?? null;
     if (kind === 'carnet') return app.db.prepare('SELECT id FROM posts WHERE slug = ? OR id = ?').pluck().get(v, /^\d+$/.test(v) ? Number(v) : -1) ?? null;
     return null;
   };
-  const namer = (kind, id) => {
-    if (kind === 'photo') return photoById.get(id)?.slug ?? null;
+  // L'adresse d'une photo n'est écrite dans l'éditeur que si le compte peut la voir (sinon son numéro reste).
+  const namerFor = request => (kind, id) => {
+    if (kind === 'photo') { const p = photoById.get(id); return usable(request, p) ? p.slug : null; }
     if (kind === 'serie') return repo.categories().find(x => x.id === id)?.slug ?? null;
     if (kind === 'voyage') return app.db.prepare('SELECT slug FROM trips WHERE id = ?').pluck().get(id) ?? null;
     if (kind === 'carnet') return app.db.prepare('SELECT slug FROM posts WHERE id = ?').pluck().get(id) ?? null;
@@ -178,7 +187,8 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
   // avec les autres (Droits et confidentialité).
   app.post('/admin/carnet/reglages', W('reglages.droits'), async (request, reply) => {
     const v = String(request.body?.carnet_contact || '').trim().slice(0, 200);
-    if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return failed(reply, '/admin/carnet', request.t('Adresse e-mail invalide.'));
+    // Une adresse, rien d'autre : ni paramètre ni retour à la ligne glissés dans le lien mailto: (revue de sécurité).
+    if (v && !CONTACT_RE.test(v)) return failed(reply, '/admin/carnet', request.t('Adresse e-mail invalide.'));
     app.db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run('carnet_contact', JSON.stringify(v));
     note(request, ['carnet_contact']);
     return done(reply, '/admin/carnet', request.t('Adresse enregistrée.'));
@@ -190,20 +200,20 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
     const draft = c.draftOf(post.id);
     const fresh = draft && draft.at > post.updated_at ? draft : null;
     const value = f => (fresh && col(f, lang) in fresh.data ? fresh.data[col(f, lang)] : post[col(f, lang)]) ?? '';
-    const fields = { title: value('title'), dek: value('dek'), body: toEditor(value('body'), namer), mention: value('mention'), reply: value('reply') };
+    const fields = { title: value('title'), dek: value('dek'), body: toEditor(value('body'), namerFor(request)), mention: value('mention'), reply: value('reply') };
     const all = app.publicRepo.photosByIds(c.photoIds(post));
     const settings = c.settings(post.id);
     const people = new Map();
     const order = c.bodyPhotoIds(post);
     const photos = order.map((id, i) => {
       const p = all.get(id);
-      if (!p) return null;
+      if (!p || !usable(request, p)) return null;
       const s = settings.get(id) || {};
       const ready = app.readiness.state(id, people, t)?.site;
       return { ...withReady(p), n: i + 1, setting: s, alt: s[col('alt', lang)] || s.alt || p.alt_text || '', level: ready?.level || 'ok', reasons: ready?.reasons || [], cover: c.coverId(post) === id, thumb: thumb(p) };
     }).filter(Boolean);
     const checks = verify ? c.checks(post, { forPublish: verify === 'publier' }) : null;
-    const pv = preview(request, post, lang, toStored(fields.body, resolver(request)));
+    const pv = preview(request, post, lang, toStored(fields.body, resolver(request, post)));
     const sc = request.scope('photos.voir');
     // Sans script : les photos à cocher (celles du billet, puis les plus récentes que le compte peut y mettre).
     const candidates = app.db.prepare(`SELECT id, slug, title, status, author_id FROM photos WHERE status = 'published' OR (? = 1 OR author_id = ?) ORDER BY COALESCE(published_at, created_at) DESC, id DESC LIMIT 60`)
@@ -232,7 +242,7 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
   // Ce que le formulaire envoie, ramené à la forme de la base : les champs de la langue de l'onglet, et les réglages.
   function inputOf(request, post, body, lang, r) {
     const input = {};
-    for (const f of ['title', 'dek', 'body', 'mention', 'reply']) if (f in body) input[col(f, lang)] = f === 'body' ? toStored(body[f], resolver(request)) : body[f];
+    for (const f of ['title', 'dek', 'body', 'mention', 'reply']) if (f in body) input[col(f, lang)] = f === 'body' ? toStored(body[f], resolver(request, post)) : body[f];
     // Les réglages sont lus pour tous : en changer un sans carnet.ecrire est refusé (403, allowed), jamais ignoré en silence.
     {
       if ('rubrique' in body) input.rubrique = body.rubrique;
@@ -243,11 +253,13 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
         input.authors = list;
       }
       for (const f of ['cover_id', 'share_id', 'trip_id']) if (f in body) input[f] = Number(body[f]) || null;
+      // Couverture et image de partage : une photo que le compte peut utiliser, ou celle déjà choisie.
+      for (const f of ['cover_id', 'share_id']) if (input[f] && input[f] !== post[f] && !usable(request, photoById.get(input[f]))) input[f] = post[f] ?? null;
       if (body.contact_set) input.contact = body.contact === 'on' || body.contact === '1';
       if ('slug' in body && post.slug !== String(body.slug).trim()) input.slug = body.slug;
       if (body.langs_set && lang !== 'fr') input.langs = [...post.langs.filter(l => l !== lang), ...(body.langs === 'on' || body.langs === lang ? [lang] : [])];
       // Sans script : les photos cochées s'ajoutent en fin de texte, une ligne chacune (B27).
-      const add = [].concat(body['photos[]'] ?? body.photos ?? []).map(v => resolver(request)('photo', String(v))).filter(Boolean);
+      const add = [].concat(body['photos[]'] ?? body.photos ?? []).map(v => resolver(request, post)('photo', String(v))).filter(Boolean);
       if (add.length) input[col('body', lang)] = c.appendPhotos(input[col('body', lang)] ?? post[col('body', lang)], add);
     }
     return input;
@@ -270,16 +282,17 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
     const faire = ['enregistrer', 'proposer', 'publier', 'programmer'].includes(body.faire) ? body.faire : 'enregistrer';
     const input = inputOf(request, post, body, lang, r);
     const refused = allowed(post, input, r);
+    // « Retirer du billet » change le billet : mêmes droits qu'un réglage (revue de sécurité des Carnets).
+    if (body.retirer && !r.write) return app.forbid(request, reply);
+    if (body.retirer && post.state === 'publie' && !r.live) return failed(reply, back(post.id, lang), t('Ce billet est en ligne : il ne se modifie qu’avec le droit de modifier les billets publiés. Demandez-le à un administrateur.'));
     if (refused === 'write') return app.forbid(request, reply);
     if (refused === 'live') return failed(reply, back(post.id, lang), t('Ce billet est en ligne : il ne se modifie qu’avec le droit de modifier les billets publiés. Demandez-le à un administrateur.'));
     let saved = post;
     try {
-      const res = c.update(post.id, input, by(request), { version: body.version, revised: body.revised === 'on' });
+      // Modifié par qui ne publie pas lui-même : une programmation repasse en proposition (server/carnet.js, edited).
+      const res = c.update(post.id, input, by(request), { version: body.version, revised: body.revised === 'on', publisher: r.publish });
       note(request, res.changed);
       saved = res.post;
-      // Modifié par qui ne publie pas lui-même : une programmation repasse en proposition (le modérateur revoit ce qui
-      // partira en ligne), comme pour les photos.
-      if (res.changed.length && saved.state === 'programme' && !r.publish) { c.unschedule(post.id, { sub: null, name: t('modifié après validation') }); saved = c.get(post.id); }
       signal(request, saved);
     } catch (err) {
       if (!(err instanceof CarnetError)) throw err;
@@ -293,7 +306,7 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
     if (body.retirer) {
       const pid = byId(body.retirer);
       const before = c.revisions(post.id)[0]?.id;
-      try { const res = c.removePhoto(post.id, pid, by(request)); note(request, res.changed, `photo ${pid} retirée : `); } catch (err) { if (!(err instanceof CarnetError)) throw err; return failed(reply, back(post.id, lang), msg(request, err)); }
+      try { const res = c.removePhoto(post.id, pid, by(request), { publisher: r.publish }); note(request, res.changed, `photo ${pid} retirée : `); } catch (err) { if (!(err instanceof CarnetError)) throw err; return failed(reply, back(post.id, lang), msg(request, err)); }
       return done(reply, back(post.id, lang, '#photos'), t('Photo retirée du billet.'), before ? [t('Pour la remettre : Versions, puis Rétablir la version précédente.')] : undefined);
     }
     if (faire === 'proposer') return proposeFlow(request, reply, saved, lang, body.message);
@@ -304,21 +317,38 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
   // Enregistrement automatique (JSON, B31) et aperçu (JSON, B28) : hors du journal d'audit (B34, server/routes/admin.js) et
   // hors de l'inspection du corps par la Vigie (config.vigie.corps = 'rendu', BV-12 : c'est le rendu qui signale, à
   // l'enregistrement) ; toujours sous CSRF.
+  // Limites par compte (revue de sécurité : déni de service par l'aperçu) : le script en demande une toutes les 1,5 s au plus.
+  const previewLimit = createRateLimiter({ limit: 60, windowMs: 60 * 1000 });
+  const draftLimit = createRateLimiter({ limit: 30, windowMs: 60 * 1000 });
+  const tooFast = (request, reply, limiter, name) => {
+    if (limiter(`compte:${request.session.sub}`)) return false;
+    app.securite.emit('excess_rate_limit_exceeded', { request, composant: 'site · admin', emetteur: 'server/routes/carnet.js · limite', detail: { limite: name } });
+    reply.code(429).header('retry-after', '60').send({ error: request.t('Trop de demandes : réessayez dans une minute.') });
+    return true;
+  };
+  const badStructure = (request, reply, text) => {
+    const err = structureError(text);
+    if (!err) return false;
+    reply.code(422).send({ error: request.t.msg(`Texte refusé : ${err}.`) });
+    return true;
+  };
   app.post('/admin/carnet/:id/brouillon', { ...W('carnet.voir'), config: { perm: 'carnet.voir', vigie: { corps: 'rendu' } } }, async (request, reply) => {
     const post = load(request);
     if (!post) return reply.code(404).send({ error: request.t('Billet introuvable.') });
+    if (tooFast(request, reply, draftLimit, 'carnet_brouillon') || badStructure(request, reply, request.body?.body)) return reply;
     const body = request.body || {}, lang = langOf(body.langue), r = rights(request, post);
     if (!r.text || (post.state === 'publie' && !r.live)) return reply.code(403).send({ error: request.t('Accès refusé : ce compte n’a pas ce droit.') });
     const data = {};
-    for (const f of ['title', 'dek', 'body', 'mention', 'reply']) if (f in body) data[col(f, lang)] = f === 'body' ? toStored(body[f], resolver(request)) : String(body[f] ?? '');
+    for (const f of ['title', 'dek', 'body', 'mention', 'reply']) if (f in body) data[col(f, lang)] = f === 'body' ? toStored(body[f], resolver(request, post)) : String(body[f] ?? '');
     const at = c.saveDraft(post.id, data, by(request));
     return reply.header('cache-control', 'no-store').send({ ok: true, at, time: new Intl.DateTimeFormat(request.t.locale, { timeStyle: 'short', timeZone: 'Europe/Paris' }).format(at), version: post.version });
   });
   app.post('/admin/carnet/:id/apercu', { ...W('carnet.voir'), config: { perm: 'carnet.voir', vigie: { corps: 'rendu' } } }, async (request, reply) => {
     const post = load(request);
     if (!post) return reply.code(404).send({ error: request.t('Billet introuvable.') });
+    if (tooFast(request, reply, previewLimit, 'carnet_apercu') || badStructure(request, reply, request.body?.body)) return reply;
     const lang = langOf(request.body?.langue);
-    const r = preview(request, post, lang, toStored(String(request.body?.body ?? ''), resolver(request)));
+    const r = preview(request, post, lang, toStored(String(request.body?.body ?? ''), resolver(request, post)));
     return reply.header('cache-control', 'no-store').send({ html: r.html, words: r.words, minutes: readingMinutes(r.words) });
   });
   // Écarter le texte de l'enregistrement automatique (B31 : « reprendre / écarter »).
@@ -352,7 +382,7 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
     if (!post) return reply.callNotFound();
     const lang = langOf(request.query.langue);
     const at = photoAt(post, request.params.n, lang);
-    if (!at?.photo) return reply.callNotFound();
+    if (!at?.photo || !usable(request, at.photo)) return reply.callNotFound();
     const s = c.settings(post.id).get(at.id) || {};
     const suggestion = app.describer?.forPhoto?.(at.id, lang);
     return render(request, reply, 'carnet-photo-reglages', { title: request.t('Photo {n} du billet', { n: at.n }), post, lang, at, s, r: rights(request, post), suggestion: suggestion?.text || '', carnetAssets: true, LIMITS });
@@ -369,7 +399,7 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
     const input = { [col('alt', lang)]: b.alt, [col('legend', lang)]: b.legende };
     if (r.write) { input.size = b.taille; input.decorative = b.decorative === 'on'; }
     try {
-      const changed = c.setPhoto(post.id, at.id, Object.fromEntries(Object.entries(input).filter(([, v]) => v !== undefined)));
+      const changed = c.setPhoto(post.id, at.id, Object.fromEntries(Object.entries(input).filter(([, v]) => v !== undefined)), { publisher: r.publish });
       note(request, changed, `photo ${at.id} : `);
     } catch (err) {
       if (!(err instanceof CarnetError)) throw err;
@@ -415,9 +445,13 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
       if (at == null) return failed(reply, `${back(post.id, lang)}#publication`, t('Date illisible : écrivez par exemple « sam. 17 oct., 8 h » ou « 17/10 8:00 ».'));
       if (at <= Date.now()) return failed(reply, `${back(post.id, lang)}#publication`, t('Cette date est passée : choisissez un jour à venir.'));
     }
+    // Photos encore en brouillon : publiées avec le billet seulement si elles sont d'un de ses auteurs (ou déjà proposées),
+    // et que le compte les publie ; jamais la photo d'un autre glissée dans le billet (revue de sécurité des Carnets).
+    const proposed = app.db.prepare('SELECT review FROM photos WHERE id = ?').pluck();
     const drafts = c.photoIds(post).map(id => photoById.get(id)).filter(p => p && p.status !== 'published');
-    const mine = drafts.filter(p => request.owns('photos.publier', p.author_id));
-    const others = drafts.filter(p => !request.owns('photos.publier', p.author_id));
+    const eligible = p => (post.authors.includes(p.author_id) || proposed.get(p.id) === 'proposee') && request.owns('photos.publier', p.author_id);
+    const mine = drafts.filter(eligible);
+    const others = drafts.filter(p => !eligible(p));
     if (others.length) return failed(reply, `${back(post.id, lang)}${lang !== 'fr' ? '&' : '?'}verifier=publier#resume`, t('Des photos du billet ne sont pas publiées, et ce compte ne peut pas les publier : publiez-les d’abord.'));
     const g = app.readiness.gate(mine.map(p => p.id));
     if (g.verify.length || g.blocked.length) return failed(reply, `${back(post.id, lang)}${lang !== 'fr' ? '&' : '?'}verifier=publier#resume`, t('Des photos du billet attendent un accord : vérifiez-les avant de publier.'));
@@ -518,7 +552,7 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
     const r = rights(request, post);
     if (!r.write) return app.forbid(request, reply);
     if (post.state === 'publie' && !r.live) return failed(reply, `/admin/carnet/${post.id}/versions`, request.t('Ce billet est en ligne : il ne se modifie qu’avec le droit de modifier les billets publiés. Demandez-le à un administrateur.'));
-    try { const res = c.restore(post.id, request.params.rev, by(request)); note(request, res.changed); signal(request, res.post); } catch (err) { if (!(err instanceof CarnetError)) throw err; return failed(reply, `/admin/carnet/${post.id}/versions`, msg(request, err)); }
+    try { const res = c.restore(post.id, request.params.rev, by(request), { publisher: r.publish }); note(request, res.changed); signal(request, res.post); } catch (err) { if (!(err instanceof CarnetError)) throw err; return failed(reply, `/admin/carnet/${post.id}/versions`, msg(request, err)); }
     return done(reply, back(post.id), request.t('Version rétablie.'));
   });
 

@@ -289,5 +289,14 @@
   "Notes d’atelier": {"en": "Workshop notes", "de": "Werkstattnotizen"},
   "Publier ses billets sans validation": {"en": "Publish their posts without approval", "de": "Eigene Beiträge ohne Freigabe veröffentlichen"},
   "Modifier ses billets une fois publiés": {"en": "Edit their posts once published", "de": "Eigene Beiträge nach der Veröffentlichung bearbeiten"},
-  "Billet « {title} »": {"en": "Post “{title}”", "de": "Beitrag „{title}“"}
+  "Billet « {title} »": {"en": "Post “{title}”", "de": "Beitrag „{title}“"},
+  "Modifié après validation": {"en": "Edited after approval", "de": "Nach der Freigabe geändert"},
+  "Modifié après validation : à revoir.": {"en": "Edited after approval: to review again.", "de": "Nach der Freigabe geändert: erneut zu prüfen."},
+  "Ce texte ne peut pas être rendu : simplifiez sa mise en forme.": {"en": "This text cannot be rendered: simplify its formatting.", "de": "Dieser Text kann nicht dargestellt werden: Vereinfachen Sie seine Formatierung."},
+  "Trop de demandes : réessayez dans une minute.": {"en": "Too many requests: try again in a minute.", "de": "Zu viele Anfragen: Versuchen Sie es in einer Minute erneut."},
+  "Texte refusé : {reason}.": {"en": "Text refused: {reason}.", "de": "Text abgelehnt: {reason}."},
+  "citations imbriquées sur plus de 8 niveaux": {"en": "quotes nested more than 8 levels deep", "de": "Zitate über mehr als 8 Ebenen verschachtelt"},
+  "listes imbriquées sur plus de 8 niveaux": {"en": "lists nested more than 8 levels deep", "de": "Listen über mehr als 8 Ebenen verschachtelt"},
+  "plus de 200 intertitres": {"en": "more than 200 subheadings", "de": "mehr als 200 Zwischenüberschriften"},
+  "trop de marques de mise en forme": {"en": "too many formatting marks", "de": "zu viele Formatierungszeichen"}
 }

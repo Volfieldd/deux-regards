@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import { slugify } from './slug.js';
 import { translator } from './admin-i18n.js';
-import { toStored, photoIdsOf, refsOf, renderBody, scanPlain, emptyCounts, totalCount } from './carnet-markdown.js';
+import { toStored, photoIdsOf, refsOf, renderBody, scanPlain, emptyCounts, totalCount, structureError } from './carnet-markdown.js';
 
 // Carnets : les billets du site (étude docs/etudes/blog-galeries-boutique.md, partie 1 ; maquettes MQ-11, MQ-12, MQ-20 ;
 // décisions du propriétaire dans docs/etudes/vigie-besoins-des-briques.md, « Tranché »). Migration 055.
@@ -184,7 +184,12 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
       const s = clean(input[f], LIMITS[base]);
       if (s.length > LIMITS[base]) throw new CarnetError(`${{ title: 'Titre', dek: 'Chapô', body: 'Texte', mention: 'Mention commerciale', reply: 'Réponse' }[base]} : ${LIMITS[base]} signes au plus.`, { field: f });
       if (base === 'title' || base === 'dek' || base === 'mention') v[f] = s.replace(/\s*\n\s*/g, ' ');
-      else v[f] = s;
+      else {
+        // Plafonds de structure (revue de sécurité : déni de service par le contenu d'un billet).
+        const err = structureError(s);
+        if (err) throw new CarnetError(`Texte refusé : ${err}.`, { field: f });
+        v[f] = s;
+      }
     }
     if ('title' in v && !v.title) throw new CarnetError('Donnez un titre au billet (en français).', { field: 'title' });
     if ('rubrique' in input) {
@@ -235,7 +240,7 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
   }
 
   // Enregistrer : version attendue (verrou optimiste, B33), champs, case « mise à jour signalée » (B48).
-  function update(id, input, by = {}, { version = null, revised = false } = {}) {
+  function update(id, input, by = {}, { version = null, revised = false, publisher = false } = {}) {
     const post = get(id);
     if (!post) throw new CarnetError('Billet introuvable.', { status: 404 });
     if (version != null && Number(version) !== post.version) {
@@ -263,11 +268,22 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
       q.trimRevisions.run(id, id);
       q.dropDraft.run(id);
     })();
+    edited(id, changed, publisher);
     return { changed, post: get(id) };
+  }
+  // Un billet programmé modifié par qui ne publie pas lui-même (texte, réglage d'une photo, photo retirée, version
+  // rétablie) repasse en proposition : le modérateur revoit ce qui partira en ligne (revue de sécurité des Carnets ; même
+  // règle que les photos). Tout chemin d'écriture passe ici.
+  function edited(id, changed, publisher) {
+    if (publisher || !changed.length) return;
+    const p = q.get.get(id);
+    if (p?.state !== 'programme') return;
+    const r = db.prepare("UPDATE posts SET state = 'propose', publish_at = NULL, updated_at = ?, version = version + 1 WHERE id = ? AND state = 'programme'").run(now(), id);
+    if (r.changes) review(id, 'modifie', { sub: null, name: 'modifié après validation' }, 'Modifié après validation : à revoir.');
   }
 
   // Réglages d'une photo dans le billet, par langue (MQ-20, « Décrire la photo… »).
-  function setPhoto(id, photoId, input) {
+  function setPhoto(id, photoId, input, { publisher = false } = {}) {
     const s = q.setting.get(id, photoId);
     if (!s) throw new CarnetError('Cette photo n’est pas dans le billet.', { status: 404 });
     const v = {};
@@ -288,10 +304,11 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
       db.prepare(`UPDATE post_photos SET ${changed.map(k => `${k} = @${k}`).join(', ')} WHERE post_id = @post AND photo_id = @photo`).run({ ...Object.fromEntries(changed.map(k => [k, v[k]])), post: id, photo: photoId });
       db.prepare('UPDATE posts SET updated_at = ?, version = version + 1 WHERE id = ?').run(now(), id);
     }
+    edited(id, changed, publisher);
     return changed;
   }
   // Retirer une photo du billet : sa ligne dans les trois langues, ses réglages ; couverture et partage laissés au défaut.
-  function removePhoto(id, photoId, by = {}) {
+  function removePhoto(id, photoId, by = {}, { publisher = false } = {}) {
     const post = get(id);
     if (!post) throw new CarnetError('Billet introuvable.', { status: 404 });
     const input = {};
@@ -302,7 +319,7 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
     }
     if (post.cover_id === photoId) input.cover_id = null;
     if (post.share_id === photoId) input.share_id = null;
-    return update(id, input, by);
+    return update(id, input, by, { publisher });
   }
   // Ajouter des photos en fin de texte, une ligne chacune (sans JavaScript, cases à cocher : B27).
   const appendPhotos = (body, ids) => {
@@ -449,7 +466,7 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
     checks, neutralized, refExists,
     history: id => q.history.all(id),
     revisions: id => q.revisions.all(id),
-    restore(id, revId, by) {
+    restore(id, revId, by, { publisher = false } = {}) {
       const r = q.revision.get(id, Number(revId));
       if (!r) throw new CarnetError('Version introuvable.', { status: 404 });
       const data = JSON.parse(r.data);
@@ -457,7 +474,7 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
       for (const k of ['rubrique', 'cover_id', 'share_id', 'trip_id', 'contact']) input[k] = data[k];
       input.authors = data.authors;
       input.langs = String(data.langs || 'fr').split(',');
-      const res = update(id, input, by);
+      const res = update(id, input, by, { publisher });
       review(id, 'version_retablie', by, new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(r.at));
       return res;
     },
@@ -540,26 +557,37 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
     // Publications programmées arrivées à échéance (B45) : la seule fonction qui met un billet programmé en ligne. Sans
     // requête ni session : publiées par « publication programmée » (sub = null) et notées au journal d'audit avec les noms
     // des champs ; une photo qui n'est plus publiée renvoie le billet « à reprendre » avec la raison.
+    // Chaque billet change d'état par un UPDATE conditionnel (encore programmé, encore échu) : un billet déprogrammé ou
+    // renvoyé entre-temps, ou déjà publié par une exécution qui chevauche, est laissé tel quel ; les e-mails partent après la
+    // boucle, jamais entre la lecture et l'écriture (revue de sécurité des Carnets).
     async runDue() {
-      const due = q.due.all(now());
+      const t = now();
+      const due = q.due.all(t);
+      const mails = [];
       let n = 0;
       for (const id of due) {
         const post = get(id);
+        if (!post) continue;
         const photos = repo.photosByIds(photoIds(post));
         const missing = photoIds(post).filter(pid => photos.get(pid)?.status !== 'published');
         if (missing.length) {
           const reason = `Publication programmée annulée : ${missing.length > 1 ? `${missing.length} photos ne sont pas publiées` : '1 photo n’est pas publiée'} (${missing.map(pid => photos.get(pid)?.title || `n° ${pid}`).join(', ')}).`;
-          setState(id, 'a_reprendre', { publish_at: null });
+          const r = db.prepare("UPDATE posts SET state = 'a_reprendre', publish_at = NULL, updated_at = ?, version = version + 1 WHERE id = ? AND state = 'programme' AND publish_at <= ?").run(now(), id, t);
+          if (!r.changes) continue;
           review(id, 'renvoye', SYSTEM, reason);
           audit?.log({ sub: null, name: SYSTEM.name, action: 'carnet · publication programmée', target: String(id), status: 422, detail: 'champs : state, publish_at' });
-          await mail(authorMail(post), t => ({ subject: t('Billet à reprendre'), lines: [t('« {title} » n’a pas pu être publié à la date prévue.', { title: post.title }), t.msg(reason)] }));
+          mails.push([authorMail(post), tr => ({ subject: tr('Billet à reprendre'), lines: [tr('« {title} » n’a pas pu être publié à la date prévue.', { title: post.title }), tr.msg(reason)] })]);
           continue;
         }
-        putOnline(post, SYSTEM);
+        const r = db.prepare("UPDATE posts SET state = 'publie', publish_at = NULL, retired_at = NULL, retired_reason = '', published_at = COALESCE(published_at, ?), updated_at = ?, version = version + 1 WHERE id = ? AND state = 'programme' AND publish_at <= ?").run(now(), now(), id, t);
+        if (!r.changes) continue;
+        review(id, 'publie', SYSTEM);
+        q.dropDraft.run(id);
         audit?.log({ sub: null, name: SYSTEM.name, action: 'carnet · publication programmée', target: String(id), status: 200, detail: 'champs : state, published_at, publish_at' });
         n += 1;
-        await mail(authorMail(post), t => ({ subject: t('Billet publié'), lines: [t('« {title} », programmé, est publié.', { title: post.title })] }));
+        mails.push([authorMail(post), tr => ({ subject: tr('Billet publié'), lines: [tr('« {title} », programmé, est publié.', { title: post.title })] })]);
       }
+      for (const [to, compose] of mails) await mail(to, compose);
       return n;
     },
     // Ce qui attend : billets proposés (le modérateur), à reprendre et programmés (« Aujourd'hui », B50).

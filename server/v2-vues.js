@@ -223,10 +223,17 @@ export function intentParts(text, n = 2) {
 
 // Ancre d'un intertitre (sommaire des pages de texte) : son texte en adresse (« Qui est responsable » → qui-est-responsable),
 // numérotée si deux intertitres se ressemblent. ids : l'ensemble des ancres déjà prises dans la page.
+// Le prochain numéro de chaque ancre est gardé par ensemble (Map) : linéaire même pour des milliers d'intertitres identiques
+// (revue de sécurité des Carnets : la recherche pas à pas était quadratique).
+const nextOf = new WeakMap();
 export function ancre(text, ids = new Set()) {
   const base = slugify(String(text ?? '')) || 'partie';
-  let id = base;
-  for (let i = 2; ids.has(id); i++) id = `${base}-${i}`;
+  let counters = nextOf.get(ids);
+  if (!counters) { counters = new Map(); nextOf.set(ids, counters); }
+  let i = counters.get(base) ?? 1;
+  let id = i === 1 ? base : `${base}-${i}`;
+  while (ids.has(id)) { i += 1; id = `${base}-${i}`; }
+  counters.set(base, i + 1);
   ids.add(id);
   return id;
 }

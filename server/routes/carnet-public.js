@@ -5,6 +5,7 @@ import { variantName, widthsFor } from '../images.js';
 import { shareLinks, shareQr, VIAS } from '../share.js';
 import { scanValue } from '../securite/detection.js';
 import { legalEmail } from '../legal.js';
+import { CONTACT_RE } from './carnet.js';
 import { readingMinutes, renderReply } from '../carnet-markdown.js';
 import { typo } from '../v2-vues.js';
 
@@ -123,7 +124,9 @@ export function registerCarnetPages(app, { lang, repo, base, ignored, gate, shar
       by: v.names(v.authorsOf(p, lang), lang), date: v.card(p, lang, photos).date };
     const older = i >= 0 ? neighbour(all[i + 1]) : null, newer = i > 0 ? neighbour(all[i - 1]) : null;
     const trip = post.trip_id ? app.trips.listPublic().find(tr => tr.id === post.trip_id && app.trips.photos(tr.id).some(p => photos.has(p.id))) : null;
-    const contact = post.contact ? (String(repo.settings().carnet_contact || '').trim() || legalEmail(repo.settings())) : '';
+    // Une adresse seule (ni paramètre ni retour à la ligne : revue de sécurité) ; sinon, pas de lien.
+    const rawContact = post.contact ? (String(repo.settings().carnet_contact || '').trim() || String(legalEmail(repo.settings()) || '').trim()) : '';
+    const contact = CONTACT_RE.test(rawContact) ? rawContact : '';
     const names = v.names(authors, lang);
     const url = app.config.publicUrl + u(`/carnet/${post.slug}`);
     const modified = post.revised_at || post.published_at;

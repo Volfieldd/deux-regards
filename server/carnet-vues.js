@@ -25,7 +25,13 @@ export function isoParis(ms) {
   return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}${off}`;
 }
 
+// Une seule instance par application (son cache de rendu est partagé par les pages, le flux et la visionneuse).
+const instances = new WeakMap();
 export function createCarnetViews({ app, repo }) {
+  if (!instances.has(app)) instances.set(app, makeViews({ app, repo }));
+  return instances.get(app);
+}
+function makeViews({ app, repo }) {
   const c = app.carnet;
   // Langue du contenu d'un billet pour une page : celle de la page si elle est publiée (traduction relue), sinon le français
   // (B54 : jamais de repli champ par champ, jamais de redirection).
@@ -70,14 +76,29 @@ export function createCarnetViews({ app, repo }) {
   }
 
   // Corps rendu pour une page publique (preview : aperçu de l'équipe, photos non publiées servies par /admin/media/).
-  function body(post, lang, { photos = published(lang), preview = false, team = null, skipCover = false } = {}) {
+  // Rendu public mis en cache par billet, version, langue de la page et état de la photothèque (revue de sécurité : un
+  // billet n'est pas rendu à nouveau à chaque page de la liste, du flux ou des voisins). L'aperçu n'est jamais mis en cache.
+  const cache = new Map();
+  // Ce dont dépend le rendu, hors du billet : photos publiées (et leurs variantes), billets et voyages liés, séries.
+  const photosStamp = app.db.prepare(`SELECT (SELECT COUNT(*) || ':' || COALESCE(MAX(updated_at), '') || ':' || COALESCE(SUM(LENGTH(variant_key)), 0) FROM photos WHERE status = 'published')
+    || '|' || (SELECT COALESCE(MAX(updated_at), 0) FROM posts) || '|' || (SELECT COUNT(*) || ':' || COALESCE(SUM(public), 0) FROM trips) || '|' || (SELECT COUNT(*) FROM categories)`).pluck();
+  function body(post, lang, opts = {}) {
+    if (opts.preview) return renderPost(post, lang, opts);
+    const key = `${post.id}:${post.version}:${lang}:${opts.skipCover ? 1 : 0}:${photosStamp.get()}`;
+    if (cache.has(key)) return cache.get(key);
+    const r = renderPost(post, lang, opts);
+    cache.set(key, r);
+    if (cache.size > 300) cache.delete(cache.keys().next().value);
+    return r;
+  }
+  function renderPost(post, lang, { photos = published(lang), preview = false, team = null, skipCover = false } = {}) {
     const l = contentLang(post, lang);
     const settings = c.settings(post.id);
     const two = post.authors.length > 1;
     const t = UI[lang].carnet;
     const extra = preview ? repo.photosByIds(c.photoIds(post), lang) : new Map();
     return renderBody(field(post, 'body', l), {
-      lang: l, preview, host: app.config.publicUrl.replace(/^https?:\/\//, ''), skip: skipCover ? c.coverId(post) : null,
+      lang: l, preview, host: app.config.publicUrl.replace(/^https?:\/\//, ''), skip: skipCover ? c.coverId(post) : null, log: app.log,
       photo: id => {
         const p = photos.get(id) || (preview && team?.(extra.get(id)) ? extra.get(id) : null);
         if (!p) return null;

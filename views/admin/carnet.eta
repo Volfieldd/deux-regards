@@ -35,9 +35,9 @@
      sans_photo: t('Aucune photo dans le texte.'), traduction_vide: t('Traduction cochée mais vide.'), lien_casse: t('Un lien interne mène à une page qui n’est pas publiée : il s’affiche en texte simple.'),
      image_externe: t('Image externe retirée : seules les photos de la photothèque s’affichent.'), photo_dans_le_texte: t('Une photo s’écrit seule sur sa ligne (photo:adresse).'), niveau_saute: t('Niveau d’intertitre sauté (### sans ## avant).'),
      cliquez_ici: t('Un lien dit « cliquez ici » : nommez plutôt sa destination.'), schema_refuse: t('Un lien au schéma refusé a été rendu en texte.'), lien_refuse: t('Un lien illisible a été rendu en texte.'), html_brut: t('Du HTML est affiché comme du texte.'),
-     photo_inconnue: t('Une ligne photo: ne correspond à aucune photo que vous pouvez utiliser.'), photos_non_publiees: t('Des photos du billet ne sont pas encore publiées.'), galerie_trop_longue: t('Galerie de plus de 12 photos : les suivantes ne s’affichent pas.') };
+     photo_inconnue: t('Une ligne photo: ne correspond à aucune photo que vous pouvez utiliser.'), rendu_impossible: t('Ce texte ne peut pas être rendu : simplifiez sa mise en forme.'), photos_non_publiees: t('Des photos du billet ne sont pas encore publiées.'), galerie_trop_longue: t('Galerie de plus de 12 photos : les suivantes ne s’affichent pas.') };
    const ACTIONS = { cree: t('Billet créé'), propose: t('Proposé à la publication'), proposition_retiree: t('Proposition retirée'), publie: t('Publié'), programme: t('Programmé'),
-     deprogramme: t('Programmation annulée'), renvoye: t('Renvoyé'), retire: t('Retiré du site'), republie: t('Republié'), version_retablie: t('Version rétablie') };
+     deprogramme: t('Programmation annulée'), renvoye: t('Renvoyé'), retire: t('Retiré du site'), republie: t('Republié'), version_retablie: t('Version rétablie'), modifie: t('Modifié après validation') };
    const ensuite = p.state === 'publie' ? t('en ligne depuis le {date}', { date: fmt(p.published_at, { day: 'numeric', month: 'short', year: 'numeric' }) })
      : p.state === 'retire' ? t('retiré du site : son adresse répond « retiré »')
      : p.state === 'programme' ? t('en ligne le {date}', { date: fmt(p.publish_at, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) })

@@ -271,8 +271,16 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Publications programmées : vérifiées chaque minute, photos d'abord (un billet programmé attend ses photos programmées
   // à la même heure), puis billets (app.carnet.runDue, seule à publier un billet programmé).
   let reviewTimer = null;
-  const runDue = () => app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée'))
-    .then(() => app.carnet.runDue()).catch(err => app.log.error({ err }, 'carnets : publication programmée'));
+  // Une seule exécution à la fois : un e-mail lent ne fait jamais chevaucher deux passages (revue de sécurité des Carnets).
+  let dueRunning = false;
+  const runDue = async () => {
+    if (dueRunning) return;
+    dueRunning = true;
+    try {
+      await app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée'));
+      await app.carnet.runDue().catch(err => app.log.error({ err }, 'carnets : publication programmée'));
+    } finally { dueRunning = false; }
+  };
   app.addHook('onReady', async () => { reviewTimer = setInterval(runDue, 60 * 1000); reviewTimer.unref(); });
   app.addHook('onClose', async () => clearInterval(reviewTimer));
   app.decorate('trips', createTrips({ db }));

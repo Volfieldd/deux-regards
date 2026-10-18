@@ -201,6 +201,6 @@ test('sans JavaScript : les photos cochées s’ajoutent à la fin du texte, une
   const other = c.db.prepare("SELECT slug FROM photos WHERE author_id = (SELECT id FROM authors WHERE slug = 'julien') LIMIT 1").pluck().get();
   c.db.prepare("UPDATE photos SET status = 'draft' WHERE slug = ?").run(other);
   await c.seb.post(`/admin/carnet/${p.id}`, { langue: 'fr', body: `photo:${other}` });
-  assert.equal(c.app.carnet.get(p.id).body, `photo:${other}`);
+  assert.equal(c.app.carnet.get(p.id).body, `photo:?${other}`, 'référence refusée neutralisée, jamais gardée');
   assert.doesNotMatch((await c.seb.get(`/admin/carnet/${p.id}`)).body, /\/admin\/media\/[^"]*" [^>]*alt="[^"]*"[^>]*>[^<]*<span class="sr-only"> – voir en grand/);
 });

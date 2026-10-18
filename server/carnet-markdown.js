@@ -69,8 +69,42 @@ export function linkTarget(raw) {
   let u;
   try { u = new URL(clean); } catch { return { kind: 'refused' }; }
   if (u.protocol === 'https:' || u.protocol === 'http:') return u.hostname ? { kind: 'web', href: u.href } : { kind: 'refused' };
-  if (u.protocol === 'mailto:') return /^[^\s@]+@[^\s@]+$/.test(decodeURIComponent(u.pathname)) ? { kind: 'mailto', href: u.href } : { kind: 'refused' };
+  if (u.protocol === 'mailto:') return mailtoOf(u);
   return { kind: 'refused' };
+}
+
+// mailto: une seule adresse, sans retour à la ligne ni autre destinataire ; seuls subject et body sont gardés (pas de bcc,
+// cc, to ni en-tête ajouté : revue de sécurité des Carnets).
+export const MAILTO_PARAMS = ['subject', 'body'];
+function mailtoOf(u) {
+  let addr;
+  try { addr = decodeURIComponent(u.pathname); } catch { return { kind: 'refused' }; }
+  if (!/^[^\s@,;<>"'%?&]+@[^\s@,;<>"'%?&]+\.[^\s@,;<>"'%?&]+$/.test(addr)) return { kind: 'refused' };
+  const keep = new URLSearchParams();
+  for (const [k, v] of u.searchParams) {
+    if (!MAILTO_PARAMS.includes(k.toLowerCase())) return { kind: 'refused' };
+    keep.append(k.toLowerCase(), v);
+  }
+  const qs = [...keep].map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+  return { kind: 'mailto', href: `mailto:${addr}${qs ? `?${qs}` : ''}` };
+}
+
+// ---------- plafonds de structure (revue de sécurité : déni de service par le contenu d'un billet) ----------
+// Refusés à l'enregistrement, à l'aperçu et à l'enregistrement automatique : citations ou listes imbriquées sur plus de 8
+// niveaux, plus de 200 intertitres, plus de 6 000 marques de mise en forme (* _ ~ ` [ ] < >). Un billet réel en est loin.
+export const STRUCTURE = { depth: 8, headings: 200, marks: 6000 };
+export function structureError(text) {
+  const s = String(text ?? '');
+  let headings = 0;
+  for (const line of s.split('\n')) {
+    const q = /^(?:[ \t]*>)+/.exec(line);
+    if (q && (q[0].match(/>/g) || []).length > STRUCTURE.depth) return 'citations imbriquées sur plus de 8 niveaux';
+    const li = /^([ \t]*)(?:[-*+]|\d+[.)])[ \t]/.exec(line);
+    if (li && Math.floor(li[1].replace(/\t/g, '    ').length / 2) + 1 > STRUCTURE.depth) return 'listes imbriquées sur plus de 8 niveaux';
+    if (/^[ \t]{0,3}#{1,6}(?:[ \t]|$)/.test(line) && ++headings > STRUCTURE.headings) return 'plus de 200 intertitres';
+  }
+  if ((s.match(/[*_~`[\]<>]/g) || []).length > STRUCTURE.marks) return 'trop de marques de mise en forme';
+  return null;
 }
 
 // ---------- constructions actives dans un texte (titre, chapô, mention : du texte seul) ----------
@@ -103,11 +137,18 @@ export const totalCount = c => Object.values(c).reduce((a, b) => a + b, 0);
 // name(kind, id) → slug ou null. Une valeur inconnue reste telle quelle (signalée par les vérifications).
 const refsIn = (text, fn) => String(text ?? '').replace(/\r\n?/g, '\n').split('\n').map(line => {
   const pm = PHOTO_LINE.exec(line);
-  if (pm) return `photo:${fn('photo', pm[1]) ?? pm[1]}`;
-  return line.replace(/\]\((photo|serie|voyage|carnet):([^)\s"]+)/g, (m, kind, v) => `](${kind}:${fn(kind, v) ?? v}`);
+  if (pm) return `photo:${fn('photo', pm[1])}`;
+  return line.replace(/\]\((photo|serie|voyage|carnet):([^)\s"]+)/g, (m, kind, v) => `](${kind}:${fn(kind, v)}`);
 }).join('\n');
-export const toStored = (text, resolve) => refsIn(text, (kind, v) => resolve(kind, v));
-export const toEditor = (text, name) => refsIn(text, (kind, v) => (/^\d+$/.test(v) ? name(kind, Number(v)) : null));
+// Une référence que le compte ne peut pas utiliser (photo brouillon d'un autre photographe, numéro inconnu) n'est jamais
+// gardée par son identifiant : elle devient « photo:?<valeur> », que le rendu ignore et que les vérifications signalent
+// (revue de sécurité des Carnets).
+export const toStored = (text, resolve) => refsIn(text, (kind, v) => {
+  if (v.startsWith('?')) return v;
+  const id = resolve(kind, v);
+  return id != null ? id : `?${v}`;
+});
+export const toEditor = (text, name) => refsIn(text, (kind, v) => (/^\d+$/.test(v) ? name(kind, Number(v)) ?? v : v));
 
 // Identifiants des photos d'un corps en base, dans l'ordre, sans doublon.
 export function photoIdsOf(body) {
@@ -139,7 +180,16 @@ export function refsOf(body) {
 //   preview                   aperçu de l'équipe : photo non publiée montrée et marquée (B21)
 //   skip                      identifiant de la couverture, déjà montrée à l'ouverture : non répétée seule dans le texte
 // Renvoie { html, headings, photoIds, warnings, neutralized, words }.
+// Un billet qui ne se rend pas (texte d'avant les plafonds, cas imprévu) ne fait jamais tomber la page qui le montre : un
+// rendu vide, signalé (rendu_impossible).
 export function renderBody(source, ctx) {
+  if (structureError(source)) return { html: '', headings: [], photoIds: [], warnings: [{ code: 'rendu_impossible' }], neutralized: emptyCounts(), words: 0 };
+  try { return renderUnsafe(source, ctx); } catch (err) {
+    ctx.log?.warn?.({ err: err.message }, 'carnets : rendu impossible');
+    return { html: '', headings: [], photoIds: [], warnings: [{ code: 'rendu_impossible' }], neutralized: emptyCounts(), words: 0 };
+  }
+}
+function renderUnsafe(source, ctx) {
   const counts = emptyCounts();
   const warnings = [];
   const warn = (code, extra = {}) => { if (!warnings.some(w => w.code === code && w.ref === extra.ref)) warnings.push({ code, ...extra }); };
