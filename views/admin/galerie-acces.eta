@@ -20,7 +20,8 @@
   <p><%= i.suspended_at ? t('Le lien a peut-être fui : quelqu’un essaie des mots de passe. Si la personne vous appelle, redonnez-lui un nouveau mot de passe ; sinon, révoquez l’accès.') : t('La pause se lève seule. Si la personne vous appelle, redonnez-lui le mot de passe de vive voix, puis débloquez : elle peut réessayer tout de suite. Après 10 refus, la pause dure 15 minutes ; après 30, l’accès est suspendu jusqu’à ce que vous le débloquiez.') %></p>
 <% if (it.canShare) { %>  <div class="actions"><form method="post" action="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/debloquer"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Débloquer l’accès') %></button></form><a class="btn ghost" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/nouveau-mot-de-passe"><%= t('Nouveau mot de passe…') %></a></div><% } %></div>
 <% } %>
-<dl class="chiffres">
+<% if (s.hidden) { %><div class="signal gp-marge-b" role="note"><p class="signal-t"><span aria-hidden="true">▲</span> <%= s.hidden > 1 ? t('{n} photos cachées aux invités', { n: s.hidden }) : t('1 photo cachée aux invités') %></p><p><a class="more" href="/admin/galeries/<%= s.id %>/photos"><%= t('Les confirmer dans l’onglet Photos') %></a></p></div>
+<% } %><dl class="chiffres">
   <div><dt><%= t('Ouvert') %></dt><dd><%= i.openedText || t('pas encore') %><span class="sec"><%= i.openedText ? t('mot de passe accepté') : t('le lien seul ne compte pas') %></span></dd></div>
   <div><dt><%= t('Dernière visite') %></dt><dd><%= i.lastText %></dd></div>
   <div><dt><%= t('Appareils') %></dt><dd><%= i.devices %><span class="sec"><%= t('signalé au-delà de 3') %></span></dd></div>

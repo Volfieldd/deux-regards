@@ -85,7 +85,7 @@ export function parseDay(input, ref = Date.now()) {
   return null;
 }
 
-export function createSpaces({ db, vault, readiness, encounters, storageDir, securite = () => null, trustCountry = false, now = Date.now }) {
+export function createSpaces({ db, vault, readiness, encounters, storageDir, securite = () => null, variants = () => null, trustCountry = false, now = Date.now }) {
   const sec = () => securite() || { emit: () => null };
   const privateDir = path.join(storageDir, 'private');
   const q = {
@@ -169,7 +169,8 @@ export function createSpaces({ db, vault, readiness, encounters, storageDir, sec
       if (f.closes_at) {
         db.prepare('UPDATE space_invites SET expires_at = MIN(expires_at, ?) WHERE space_id = ?').run(f.closes_at, s.id);
         db.prepare('UPDATE visitor_grants SET expires_at = MIN(expires_at, ?) WHERE invite_id IN (SELECT id FROM space_invites WHERE space_id = ?)').run(f.closes_at, s.id);
-        if (s.state === 'fermee' && f.closes_at > now()) db.prepare("UPDATE private_spaces SET state = 'ouverte', closed_at = NULL WHERE id = ?").run(s.id);
+        // L'état ne change jamais ici : une galerie fermée dont on repousse la date reste fermée jusqu'à « Ouvrir »
+        // (setState, qui le note au journal et le dit à la Vigie, BV-23).
       }
     })();
     return get(id);
@@ -228,9 +229,13 @@ export function createSpaces({ db, vault, readiness, encounters, storageDir, sec
     const cache = new Map();
     let list = q.items.all(spaceId).map(decorate(lang)).map((p, i) => ({ ...p, n: i + 1 }));
     if (withState || forGuests) list = list.map(p => ({ ...p, prive: privateState(p, cache) }));
-    if (forGuests) list = list.filter(p => p.prive.level !== 'no').map((p, i) => ({ ...p, n: i + 1 }));
+    if (forGuests) list = list.filter(p => guestVisible(p.prive.level, p.confirmed_at)).map((p, i) => ({ ...p, n: i + 1 }));
     return list;
   }
+  // Ce que voit un invité : une photo prête, ou à vérifier ET confirmée par l'équipe (G61, M17) ; jamais une bloquée.
+  const guestVisible = (level, confirmedAt) => level === 'ok' || (level === 'warn' && Boolean(confirmedAt));
+  // Photos cachées aux invités tant qu'elles ne sont pas confirmées (ou bloquées), pour l'admin.
+  const hiddenFromGuests = spaceId => items(spaceId, { withState: true }).filter(p => !guestVisible(p.prive.level, p.confirmed_at));
   function addPhotos(spaceId, photoIds) {
     const cache = new Map();
     const added = [], blocked = [];
@@ -539,7 +544,7 @@ export function createSpaces({ db, vault, readiness, encounters, storageDir, sec
     const severity = (action === 'droits_elargis' && wide) || (action === 'debloque' && suspendu) || (['cree', 'prolonge'].includes(action) && wide) ? 'bas' : undefined;
     sec().emit('privacy_exposure_changed', { request, severity, emetteur: 'server/spaces.js · accès privé',
       detail: { objet: 'acces_prive', action, espace: space?.id ?? null, acces: inv?.id ?? null, auteur_espace: space?.author_id ?? null, groupe: Boolean(inv?.is_group),
-        telechargement: rights.telechargement, sans_filigrane: false,
+        telechargement: rights.telechargement, sans_filigrane: items.some(i => !variants()?.specOf(i.photo_id)?.mark),
         echeance_jours: inv ? Math.max(0, Math.round((inv.expires_at - now()) / DAY)) : space ? Math.max(0, Math.round((space.closes_at - now()) / DAY)) : null,
         appareils_max: null, photos_a_verifier_confirmees: items.filter(i => i.confirmed_at).length, debloque_apres_suspension: action === 'debloque' ? suspendu : undefined } });
   }
@@ -575,7 +580,7 @@ export function createSpaces({ db, vault, readiness, encounters, storageDir, sec
     try {
       const open = new Set(db.prepare("SELECT p.file FROM space_items i JOIN private_spaces s ON s.id = i.space_id JOIN photos p ON p.id = i.photo_id WHERE s.state <> 'fermee' OR s.closed_at > ?").pluck().all(t - 30 * DAY).map(f => path.parse(f).name));
       for (const f of fs.readdirSync(downloadsDir)) {
-        const stem = f.replace(/-(web|grande)\.jpg$/, '');
+        const stem = f.split('-').slice(0, 5).join('-');                        // l'UUID de l'original
         if (!open.has(stem)) fs.rmSync(path.join(downloadsDir, f), { force: true });
       }
     } catch { /* dossier absent */ }
@@ -600,7 +605,7 @@ export function createSpaces({ db, vault, readiness, encounters, storageDir, sec
 
   return {
     get, byPid, list: () => q.spaces.all().map(checkClose), titleOf, createSpace, updateSpace, setState, removeSpace,
-    items, addPhotos, removeItem, confirmItem, moveItem, hasFile, privateState, item: (spaceId, itemId) => q.item.get(itemId, spaceId),
+    items, guestVisible, hiddenFromGuests, addPhotos, removeItem, confirmItem, moveItem, hasFile, privateState, item: (spaceId, itemId) => q.item.get(itemId, spaceId),
     invite, invitesOf, inviteState, defaultEnd, createInvite, updateInvite, newLink, newPassword, unlock, revoke, erase, suspend, byLink,
     beginAttempt, succeed, failed, remaining, grant, access, hadAccess, leave,
     favorites, toggleFavorite, sendSelection, takeBack, reopen, markSeen, countDownload,
@@ -608,8 +613,15 @@ export function createSpaces({ db, vault, readiness, encounters, storageDir, sec
     dirs: { downloads: downloadsDir, archives: archivesDir },
     archives: {
       today: inviteId => db.prepare('SELECT COUNT(*) FROM space_archives WHERE invite_id = ? AND created_at > ?').pluck().get(inviteId, now() - DAY),
-      add: (inviteId, file, bytes, photos) => Number(db.prepare('INSERT INTO space_archives (invite_id, file, bytes, photos, created_at) VALUES (?, ?, ?, ?, ?)').run(inviteId, file, bytes, photos, now()).lastInsertRowid),
-      get: (inviteId, id) => db.prepare('SELECT * FROM space_archives WHERE id = ? AND invite_id = ? AND created_at > ?').get(id, inviteId, now() - DAY) || null,
+      // Place réservée d'un coup (transaction synchrone, avant tout calcul) : des demandes simultanées ne dépassent jamais
+      // la limite du jour. null : limite atteinte. La ligne est complétée à la fin (done) ou retirée en cas d'échec (drop).
+      reserve: db.transaction((inviteId, file, max) => {
+        if (db.prepare('SELECT COUNT(*) FROM space_archives WHERE invite_id = ? AND created_at > ?').pluck().get(inviteId, now() - DAY) >= max) return null;
+        return Number(db.prepare('INSERT INTO space_archives (invite_id, file, bytes, photos, created_at) VALUES (?, ?, 0, 0, ?)').run(inviteId, file, now()).lastInsertRowid);
+      }),
+      done: (id, bytes, photos) => db.prepare('UPDATE space_archives SET bytes = ?, photos = ? WHERE id = ?').run(bytes, photos, id),
+      drop: id => db.prepare('DELETE FROM space_archives WHERE id = ?').run(id),
+      get: (inviteId, id) => db.prepare('SELECT * FROM space_archives WHERE id = ? AND invite_id = ? AND created_at > ? AND photos > 0').get(id, inviteId, now() - DAY) || null,
     },
   };
 }

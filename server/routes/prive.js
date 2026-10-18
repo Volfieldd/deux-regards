@@ -15,8 +15,9 @@ import { shortDate } from '../format.js';
 import { createPasswordGate, verifyPassword, needsRehash, hashPassword } from '../passwords.js';
 import { createVisitorSessions, visitorRef, ctxPrint, REVOKED_KEEP } from '../visitor-sessions.js';
 import { PID_RE, SIZES } from '../spaces.js';
-import { zip } from '../zip.js';
+import { writeZip } from '../zip.js';
 import { MAX_PIXELS } from '../images.js';
+import { resolveTone, overlayFor } from '../watermark.js';
 import { insecables } from '../typographie.js';
 
 // Pages des invités d'une galerie privée (annexe de sécurité, § 5 ; maquettes MQ-16 et MQ-17) : hors des pages par
@@ -35,7 +36,7 @@ import { insecables } from '../typographie.js';
 const EMETTEUR = 'server/routes/prive.js';
 const PORTAIL = 'galerie_privee';
 const HOUR = 3600e3;
-const ARCHIVE_MAX_PHOTOS = 100, ARCHIVE_MAX_BYTES = 1024 ** 3, ARCHIVES_PER_DAY = 3, DOWNLOADS_PER_HOUR = 50;
+const ARCHIVE_MAX_PHOTOS = 100, ARCHIVE_MAX_BYTES = 1024 ** 3, ARCHIVES_PER_DAY = 3, ARCHIVES_AT_ONCE = 2, DOWNLOADS_PER_HOUR = 50;
 
 export default async function privateRoutes(app) {
   const { spaces } = app;
@@ -51,7 +52,9 @@ export default async function privateRoutes(app) {
   const variantsDir = path.join(config.storageDir, 'variants');
   const linkLimit = createRateLimiter({ limit: 60, windowMs: HOUR });                 // ouvertures de /g/ par adresse (G20)
   const passLimit = createRateLimiter({ limit: 20, windowMs: 15 * 60e3 });           // essais par adresse (G20)
-  const dlCounts = new Map();                                                          // accès → { start, n }
+  const dlCounts = new Map();
+  let building = 0;                                                                    // archives en cours d'écriture
+  const waiting = [];                                                          // accès → { start, n }
   const settingRow = app.db.prepare('SELECT value FROM settings WHERE key = ?').pluck();
   const setting = k => { try { return JSON.parse(settingRow.get(k) ?? 'null'); } catch { return null; } };
   const authorName = app.db.prepare('SELECT name FROM authors WHERE id = ?').pluck();
@@ -82,7 +85,7 @@ export default async function privateRoutes(app) {
   // ---------- rendu ----------
   const contactOf = () => {
     const c = String(setting('privacy_contact') || setting('rights_contact') || '').trim();
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c) ? `mailto:${c}` : null;
+    return /^[^\s@"<>'&]+@[^\s@"<>'&]+\.[^\s@"<>'&]+$/.test(c) ? `mailto:${c}` : null;
   };
   const whoOf = s => (s?.author_id ? authorName.get(s.author_id) : null) || app.siteName();
   function page(reply, template, lang, data, code = 200) {
@@ -241,7 +244,10 @@ export default async function privateRoutes(app) {
   // n'est pas signalée (échéance passée, « Quitter »), sauf un accès retiré (BV-22).
   function resolve(request, { nature = 'espace privé', write = false } = {}) {
     const s = spaces.byPid(request.params.pid);
-    if (s && request.session) {
+    // Vue équipe : seulement si l'adresse n'est pas bloquée pour l'administration par la Vigie (un blocage de portée
+    // « admin » vaut aussi pour la vue équipe des galeries ; revue de sécurité de la PR #149).
+    const adminBlocked = (() => { try { return Boolean(app.decisions?.blocked(request.ip, '/admin')); } catch { return false; } })();
+    if (s && request.session && !adminBlocked) {
       if (request.owns('galeries.voir', s.author_id)) return { team: true, space: s, invite: null };
       // Une session de l'admin sur la galerie d'un autre photographe : hors portée (BV-14).
       if (request.can('galeries.voir')) app.securite.emit('authz_fail', { request, emetteur: `${EMETTEUR} · portée`, detail: { raison: 'hors portée', permission: 'galeries.voir', objet: 'galerie', id: s.id, ecriture: write } });
@@ -314,7 +320,7 @@ export default async function privateRoutes(app) {
   });
 
   // ---------- images (G38, G39, G40) ----------
-  const photoOfFile = app.db.prepare("SELECT p.id, p.file, p.variant_key, p.faces, p.faces_override FROM space_items i JOIN photos p ON p.id = i.photo_id WHERE i.space_id = ? AND p.file >= ? || '.' AND p.file < ? || '/'");
+  const photoOfFile = app.db.prepare("SELECT p.id, p.file, p.variant_key, p.faces, p.faces_override, i.confirmed_at FROM space_items i JOIN photos p ON p.id = i.photo_id WHERE i.space_id = ? AND p.file >= ? || '.' AND p.file < ? || '/'");
   app.get('/prive/:pid/m/:name', async (request, reply) => {
     const m = VARIANT_RE.exec(request.params.name);
     const a = m && resolve(request, { nature: 'image privée' });
@@ -322,7 +328,8 @@ export default async function privateRoutes(app) {
     const photo = photoOfFile.get(a.space.id, m[1], m[1]);
     // Photo hors de la galerie, ancienne clé, photo devenue bloquée (refus), ou réglage « Tout l'EXIF » (les variantes
     // gardent alors le GPS : jamais servies par cette route, M19).
-    const blocked = photo && spaces.privateState(photo).level === 'no';
+    // Bloquée (refus), ou à vérifier sans la confirmation de l'équipe : jamais servie (G61, M17).
+    const blocked = photo && !spaces.guestVisible(spaces.privateState(photo).level, photo.confirmed_at);
     if (!photo || photo.variant_key !== (m[2] || '') || blocked || setting('exif')?.mode === 'all') {
       if (!photo || photo.variant_key !== (m[2] || '')) sec('token_guess', { request, reference: ref(request), emetteur: `${EMETTEUR} · images`, detail: { nature: 'image privée' } });
       return reply.code(404).header('cache-control', 'no-store').type('text/plain; charset=utf-8').send('Introuvable.');
@@ -336,8 +343,12 @@ export default async function privateRoutes(app) {
   const rendering = new Map();
   // JPEG rendu une fois depuis l'original, gardé dans storage/private (hors sauvegarde) : auteur et « usage personnel »,
   // jamais de GPS (withExif remplace tout l'EXIF), jamais l'original. Grande taille : 4 000 px au plus (Tranché 7).
+  // Le filigrane est celui des variantes (mêmes réglages, server/variants.js specFor) ; le rendu gardé est nommé d'après
+  // leur empreinte : un changement de filigrane le refait (G42, G44).
   function rendered(p, taille) {
-    const file = path.join(spaces.dirs.downloads, `${path.parse(p.file).name}-${taille}.jpg`);
+    const spec = app.variants.specOf(p.id) || { key: '', mark: null };
+    const stem = path.parse(p.file).name;
+    const file = path.join(spaces.dirs.downloads, `${stem}-${spec.key || 'brut'}-${taille}.jpg`);
     if (fs.existsSync(file)) return Promise.resolve(file);
     if (rendering.has(file)) return rendering.get(file);
     const width = SIZES[taille];
@@ -345,10 +356,20 @@ export default async function privateRoutes(app) {
       fs.mkdirSync(spaces.dirs.downloads, { recursive: true, mode: 0o700 });
       const tmp = `${file}.${crypto.randomBytes(4).toString('hex')}.tmp`;
       try {
-        await sharp(path.join(config.storageDir, 'originals', p.file), { limitInputPixels: MAX_PIXELS }).rotate()
-          .resize({ width, height: width, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 88, mozjpeg: true })
+        const { data, info } = await sharp(path.join(config.storageDir, 'originals', p.file), { limitInputPixels: MAX_PIXELS }).rotate()
+          .resize({ width, height: width, fit: 'inside', withoutEnlargement: true }).raw().toBuffer({ resolveWithObject: true });
+        const raw = { raw: { width: info.width, height: info.height, channels: info.channels } };
+        let pipeline = sharp(data, raw);
+        if (spec.mark) {
+          const mark = await resolveTone(data, spec.mark, raw);
+          const overlay = info.width >= 16 && info.height >= 16 ? await overlayFor(mark, info.width, Math.max(1, info.height - 1)) : null;
+          if (overlay) pipeline = pipeline.composite(overlay);
+        }
+        await pipeline.jpeg({ quality: 88, mozjpeg: true })
           .withExif({ IFD0: { Artist: ascii(p.author), Copyright: `(C) ${ascii(p.author)} - ${ascii(app.siteName())} - usage personnel / personal use` } }).toFile(tmp);
         fs.renameSync(tmp, file);
+        // Rendus d'anciens réglages de la même photo et de la même taille : effacés.
+        for (const f of fs.readdirSync(spaces.dirs.downloads)) if (f.startsWith(`${stem}-`) && f.endsWith(`-${taille}.jpg`) && path.join(spaces.dirs.downloads, f) !== file) fs.rmSync(path.join(spaces.dirs.downloads, f), { force: true });
       } finally { fs.rmSync(tmp, { force: true }); }
       return file;
     })().finally(() => rendering.delete(file));
@@ -385,6 +406,8 @@ export default async function privateRoutes(app) {
       spaces.countDownload(a.invite);
       spaces.logEvent(a.space.id, a.invite.id, 'telechargement', { request, item: p.item_id, detail: taille });
     }
+    // Téléchargement par l'équipe (vue équipe) : un export de photos privées, signalé comme tel.
+    if (a.team && request.method === 'GET') app.securite.emit('sensitive_export', { request, emetteur: `${EMETTEUR} · téléchargement (équipe)`, detail: { portail: PORTAIL, nature: 'telechargement', espace: a.space.id, taille, photo: p.n } });
     const file = await rendered(p, taille);
     return fileHeaders(reply, 'private, no-store').header('content-disposition', `attachment; filename="${fileName(p, taille)}"`).type('image/jpeg').send(fs.createReadStream(file));
   });
@@ -398,26 +421,32 @@ export default async function privateRoutes(app) {
     const taille = a.invite.rights.telechargement === 'grande' ? 'grande' : a.invite.rights.telechargement === 'web' ? 'web' : null;
     if (!taille) { impossible(request, 'taille non permise', { geste: 'archive', acces: a.invite.id }); return notFound(request, reply); }
     const back = `/prive/${a.space.public_id}`;
-    if (spaces.archives.today(a.invite.id) >= ARCHIVES_PER_DAY) {
+    // Place réservée avant tout calcul (transaction synchrone, aucun await avant) : des demandes simultanées ne passent
+    // jamais la limite de 3 par jour (G46).
+    const file = `${crypto.randomBytes(16).toString('hex')}.zip`;
+    const id = spaces.archives.reserve(a.invite.id, file, ARCHIVES_PER_DAY);
+    if (!id) {
       sec('excess_rate_limit_exceeded', { request, reference: ref(request), emetteur: `${EMETTEUR} · archives`, detail: { limite: 'archives', par_jour: ARCHIVES_PER_DAY, portail: PORTAIL, acces: a.invite.id, espace: a.space.id, taille } });
       return pageHeaders(reply).redirect(`${back}?etat=archive-limite`, 303);
     }
-    const list = spaces.items(a.space.id, { forGuests: true }).slice(0, ARCHIVE_MAX_PHOTOS);
-    const entries = [];
-    let bytes = 0;
-    for (const p of list) {
-      const data = fs.readFileSync(await rendered(p, taille));
-      if (bytes + data.length > ARCHIVE_MAX_BYTES) break;
-      bytes += data.length;
-      entries.push({ name: `${String(p.n).padStart(3, '0')}-${fileName(p, taille)}`, data });
-    }
-    fs.mkdirSync(spaces.dirs.archives, { recursive: true, mode: 0o700 });
-    const file = `${crypto.randomBytes(16).toString('hex')}.zip`;
-    const buf = zip(entries);
-    fs.writeFileSync(path.join(spaces.dirs.archives, file), buf, { mode: 0o600 });
-    const id = spaces.archives.add(a.invite.id, file, buf.length, entries.length);
-    spaces.logEvent(a.space.id, a.invite.id, 'archive', { request, detail: `${entries.length} photos` });
-    sec('sensitive_export', { request, reference: ref(request), emetteur: `${EMETTEUR} · archive`, detail: { portail: PORTAIL, acces: a.invite.id, espace: a.space.id, nature: 'archive', photos: entries.length, octets: buf.length, taille } });
+    // Deux archives en écriture à la fois sur tout le site (rendus et disque) ; les autres attendent leur tour.
+    if (building >= ARCHIVES_AT_ONCE) await new Promise(resolve => waiting.push(resolve)); else building += 1;
+    let made;
+    try {
+      const list = spaces.items(a.space.id, { forGuests: true }).slice(0, ARCHIVE_MAX_PHOTOS);
+      const entries = [];
+      for (const p of list) entries.push({ name: `${String(p.n).padStart(3, '0')}-${fileName(p, taille)}`, path: await rendered(p, taille) });
+      fs.mkdirSync(spaces.dirs.archives, { recursive: true, mode: 0o700 });
+      // Écrite en flux, photo par photo ; 1 Gio au plus.
+      made = await writeZip(path.join(spaces.dirs.archives, file), entries, { shouldStop: bytes => bytes > ARCHIVE_MAX_BYTES });
+      spaces.archives.done(id, made.bytes, made.count);
+    } catch (err) {
+      spaces.archives.drop(id);
+      fs.rmSync(path.join(spaces.dirs.archives, file), { force: true });
+      throw err;
+    } finally { const next = waiting.shift(); if (next) next(); else building -= 1; }
+    spaces.logEvent(a.space.id, a.invite.id, 'archive', { request, detail: `${made.count} photos` });
+    sec('sensitive_export', { request, reference: ref(request), emetteur: `${EMETTEUR} · archive`, detail: { portail: PORTAIL, acces: a.invite.id, espace: a.space.id, nature: 'archive', photos: made.count, octets: made.bytes, taille } });
     return pageHeaders(reply).redirect(`${back}/archive/${id}`, 303);
   });
   app.get('/prive/:pid/archive/:n', async (request, reply) => {

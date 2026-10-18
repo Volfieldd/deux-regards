@@ -5,7 +5,7 @@
 <% const P = it.P, ty = it.v2.typo, ic = it.v2.ic, k = it.kind, who = it.who || it.siteName;
    const titles = { introuvable: P.notFoundTitle, retire: P.removedTitle, revoque: P.revokedTitle, fini: it.date ? P.endedTitle(it.dateOf(it.date)) : P.revokedTitle,
      suspendu: P.suspendedTitle, occupe: P.busyTitle, limite: P.limitTitle, quitte: P.leftTitle, refuse: P.refusedTitle };
-   const writeTo = it.contact ? `<a class="btn btn--filet" href="${it.contact}">${it.v2.esc(P.write(who))}</a>` : ''; %>
+   const writeTo = it.contact ? `<a class="btn btn--filet" href="${it.v2.esc(it.contact)}">${it.v2.esc(P.write(who))}</a>` : ''; %>
 <% layout('./layout', { pageTitle: ty(`${titles[k]} · ${P.label} · ${it.siteName}`) }) %>
 <%~ include('./_prive-entete', { ...it, mode: 'tunnel' }) %>
 <main id="contenu" class="wrap">

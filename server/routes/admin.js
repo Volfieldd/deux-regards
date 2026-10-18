@@ -2185,6 +2185,13 @@ export default async function adminRoutes(app) {
   app.post('/admin/reglages', W('site.textes'), async (request, reply) => {
     const part = ['site', 'droits'].includes(request.body?.part) ? request.body.part : null;
     if (part !== 'site' && !request.can('reglages.droits')) return app.forbid(request, reply);
+    // Contacts des droits et de la confidentialité : une adresse e-mail ou une page https, sans guillemet, chevron, apostrophe
+    // ni esperluette (recopiés dans des liens, dont ceux des pages des galeries privées ; revue de sécurité de la PR #149).
+    if (part === 'droits') {
+      const SAFE = /^[^\s@"<>'&]+@[^\s@"<>'&]+\.[^\s@"<>'&]+$|^https:\/\/[^\s"<>'&]+$/;
+      const bad = ['rights_contact', 'privacy_contact'].find(k => String(request.body?.[k] ?? '').trim() && !SAFE.test(String(request.body[k]).trim()));
+      if (bad) return failed(reply, '/admin/droits', request.t('Contact refusé : écrivez une adresse e-mail (nom@exemple.fr) ou une adresse de page en https://, sans guillemet, chevron, apostrophe ni esperluette.'));
+    }
     repo.saveSettings(withoutDefaults(request.body || {}, defaultsNow()), part);
     app.variants.schedule();            // {site} peut figurer dans le filigrane
     if (request.body?.hero_op || request.body?.hero_save) return done(reply, '/admin/site#ouverture', request.t('Ordre de l’ouverture enregistré.'));

@@ -79,9 +79,10 @@ export function redactUrl(url) {
   try { u = decodeURIComponent(u); } catch { /* URL mal encodée : telle quelle */ }
   return u.replace(/([?&](?:code|state)=)[^&#]*/g, '$1[masqué]').replace(/(\/partage\/instagram\/)[^/?#]+/, '$1[masqué]')
     .replace(/(\/pour-vous\/)[^/?#]+/, '$1[masqué]')
-    // Lien d'une galerie privée (/g/<jeton>), y compris recopié dans un paramètre (« /langue/fr?vers=/g/… », « next=… ») ou
-    // sous un préfixe de langue (/en/g/…, une 404) : annexe de sécurité, G13, M14.
-    .replace(/(^|=|\/(?:en|de))\/g\/[^/?#&]+/g, '$1/g/[masqué]')
+    // Lien d'une galerie privée (/g/<jeton>) : toute suite de 20 caractères [\w-] ou plus après « /g/ », quelle que soit la
+    // casse et ce qui précède (« //g/… », « /fr/g/… », « /./g/… », « /G/… », « vers=/g/… », « next=https://site/g/… ») :
+    // annexe de sécurité, G13, M14 ; revue de sécurité de la PR #149.
+    .replace(/(\/g\/)[\w-]{20,}/gi, '$1[masqué]')
     .replace(/(\/bonjour\/)([^/?#]+)/, (m, p, seg) => { const r = parseRef(seg); return r?.code ? `${p}${r.ref}-[masqué]` : m; });
 }
 const loggerOptions = logger => logger && {
@@ -265,7 +266,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('trips', createTrips({ db }));
   // Galeries privées (server/spaces.js) : galeries, photos, accès, autorisations des invités ; purges chaque heure.
   app.decorate('spaces', createSpaces({ db, vault: createVault(config.dataKey), readiness: app.readiness, encounters: app.encounters, storageDir: config.storageDir,
-    securite: () => app.securite, trustCountry: Boolean(config.trustProxy) }));
+    securite: () => app.securite, variants: () => app.variants, trustCountry: Boolean(config.trustProxy) }));
   let spacesTimer = null;
   const purgeSpaces = () => { try { app.spaces.purge(); app.purgeVisitors?.(); } catch (err) { app.log.error({ err }, 'galeries privées : purge'); } };
   app.addHook('onReady', async () => { purgeSpaces(); spacesTimer = setInterval(purgeSpaces, 3600 * 1000); spacesTimer.unref(); });

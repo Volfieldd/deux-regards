@@ -99,6 +99,7 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     }
     return { ...s, who: s.author_id ? authors.get(s.author_id)?.name || '' : t('commune'), nPhotos: items.length, nInvites: invites.length, nLive: live.length,
       nOpened: live.filter(i => i.first_opened_at).length, groups: live.filter(i => i.is_group).length, last, signals,
+      hidden: spaces.hiddenFromGuests(s.id).length,
       stateKey: s.state === 'fermee' ? 'arret' : s.state === 'brouillon' ? 'afaire' : soon ? 'attention' : 'abouti',
       stateText: s.state === 'ouverte' && soon ? (days > 1 ? t('Ferme dans {n} jours', { n: days }) : t('Ferme demain')) : STATE_LABEL(t)[s.state],
       stateSec: s.state === 'ouverte' ? t('jusqu’au {date}', { date: fmtDate(s.closes_at, t) }) : s.state === 'fermee' ? t('le {date} · données des invités effacées le {purge}', { date: fmtDate(s.closed_at || s.closes_at, t), purge: fmtDate((s.closed_at || s.closes_at) + PURGE_AFTER, t) }) : t('l’équipe seule'),

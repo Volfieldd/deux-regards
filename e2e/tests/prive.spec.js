@@ -34,6 +34,14 @@ async function prepare(page, { title = `Galerie e2e ${Date.now()}`, rights = ['C
   const boxes = page.locator('.gp-candidats input[type="checkbox"]');
   for (let i = 0; i < 4; i++) await boxes.nth(i).check();
   await page.getByRole('button', { name: 'Ajouter les photos cochées' }).click();
+  // Une photo « à vérifier » (visage pas encore examiné, accord manquant) reste cachée aux invités tant que l'équipe ne
+  // l'a pas confirmée : on confirme celles qui le demandent.
+  for (let i = 0; i < 4; i++) {
+    const confirm = page.getByRole('button', { name: /Confirmer l’usage privé/ }).first();
+    if (!(await confirm.count())) break;
+    await confirm.click();
+    await expect(page).toHaveURL(/\/photos#photo-\d+$/);
+  }
   await page.getByRole('button', { name: 'Ouvrir la galerie' }).first().click();
   await page.getByRole('link', { name: 'Nouvel accès' }).first().click();
   await page.getByLabel('Nom de la personne').fill('Lucie Exemple, Éditions du Fleuve');

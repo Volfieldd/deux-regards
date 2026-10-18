@@ -379,10 +379,6 @@
   "en": "Quick choices for the end",
   "de": "Schnellauswahl für das Ende"
  },
- "Elle voit toujours toutes les photos de la galerie, avec le filigrane du site. Jamais l’original, jamais le GPS.": {
-  "en": "They always see all the photos of the gallery, with the site watermark. Never the original, never the GPS.",
-  "de": "Die Person sieht immer alle Fotos der Galerie, mit dem Wasserzeichen der Website. Nie das Original, nie das GPS."
- },
  "Une étoile sur chaque photo ; vous voyez sa sélection ici.": {
   "en": "A star on each photo; you see the selection here.",
   "de": "Ein Stern auf jedem Foto; Sie sehen die Auswahl hier."
@@ -406,18 +402,6 @@
  "Photos de la galerie, dans l’ordre": {
   "en": "Photos of the gallery, in order",
   "de": "Fotos der Galerie, in Reihenfolge"
- },
- "{n} photos à vérifier avant d’envoyer": {
-  "en": "{n} photos to check before sending",
-  "de": "{n} Fotos vor dem Senden prüfen"
- },
- "1 photo à vérifier avant d’envoyer": {
-  "en": "1 photo to check before sending",
-  "de": "1 Foto vor dem Senden prüfen"
- },
- "Rien ne bloque l’envoi.": {
-  "en": "Nothing blocks sending.",
-  "de": "Nichts blockiert das Senden."
  },
  "Ouvrir la fiche de la photo": {
   "en": "Open the photo’s page",
@@ -1174,5 +1158,45 @@
  "lecture": {
   "en": "reading",
   "de": "Lesen"
+ },
+ "{n} photos cachées aux invités": {
+  "en": "{n} photos hidden from guests",
+  "de": "{n} Fotos für Gäste verborgen"
+ },
+ "1 photo cachée aux invités": {
+  "en": "1 photo hidden from guests",
+  "de": "1 Foto für Gäste verborgen"
+ },
+ "Les confirmer dans l’onglet Photos": {
+  "en": "Confirm them in the Photos tab",
+  "de": "Im Reiter Fotos bestätigen"
+ },
+ "Elle voit les photos prêtes ou confirmées de la galerie, avec le filigrane du site, téléchargements compris. Jamais l’original, jamais le GPS.": {
+  "en": "They see the gallery's ready or confirmed photos, with the site watermark, downloads included. Never the original, never the GPS.",
+  "de": "Die Person sieht die bereiten oder bestätigten Fotos der Galerie, mit dem Wasserzeichen der Website, auch beim Download. Nie das Original, nie das GPS."
+ },
+ "{n} photos cachées aux invités tant que vous ne les confirmez pas": {
+  "en": "{n} photos hidden from guests until you confirm them",
+  "de": "{n} Fotos für Gäste verborgen, bis Sie sie bestätigen"
+ },
+ "1 photo cachée aux invités tant que vous ne la confirmez pas": {
+  "en": "1 photo hidden from guests until you confirm it",
+  "de": "1 Foto für Gäste verborgen, bis Sie es bestätigen"
+ },
+ "Les invités ne la voient pas tant qu’elle n’est pas confirmée ; l’accès peut être créé quand même.": {
+  "en": "Guests do not see it until it is confirmed; the access can be created anyway.",
+  "de": "Gäste sehen es nicht, solange es nicht bestätigt ist; der Zugang kann trotzdem erstellt werden."
+ },
+ "Une photo à vérifier ne s’affiche aux invités qu’une fois confirmée par l’équipe (onglet Photos) ; une photo bloquée par un refus ne s’affiche jamais.": {
+  "en": "A photo to check is only shown to guests once the team confirms it (Photos tab); a photo blocked by a refusal is never shown.",
+  "de": "Ein zu prüfendes Foto wird Gästen erst angezeigt, wenn das Team es bestätigt hat (Reiter Fotos); ein durch eine Ablehnung gesperrtes Foto wird nie angezeigt."
+ },
+ "cachée aux invités": {
+  "en": "hidden from guests",
+  "de": "für Gäste verborgen"
+ },
+ "Contact refusé : écrivez une adresse e-mail (nom@exemple.fr) ou une adresse de page en https://, sans guillemet, chevron, apostrophe ni esperluette.": {
+  "en": "Contact refused: write an email address (name@example.com) or a page address starting with https://, without quotes, angle brackets, apostrophes or ampersands.",
+  "de": "Kontakt abgelehnt: Schreiben Sie eine E-Mail-Adresse (name@beispiel.de) oder eine Seitenadresse mit https://, ohne Anführungszeichen, spitze Klammern, Apostroph oder kaufmännisches Und."
  }
 }

@@ -18,7 +18,8 @@
 <% if (s.state === 'brouillon') { %><div class="signal" role="note"><p class="signal-t"><span aria-hidden="true">○</span> <%= t('Brouillon : l’équipe seule voit cette galerie') %></p><p><%= t('Ses accès ne s’ouvrent qu’une fois la galerie ouverte. Ajoutez d’abord les photos, puis ouvrez-la.') %></p>
 <% if (it.canManage) { %><div class="actions"><form method="post" action="/admin/galeries/<%= s.id %>/ouvrir"><%~ csrf %><button class="btn" type="submit"><%= t('Ouvrir la galerie') %></button></form></div><% } %></div>
 <% } %>
-<nav class="onglets" aria-label="<%= t('Rubriques de la galerie') %>"><ul>
+<% if (s.hidden) { %><div class="signal" role="note"><p class="signal-t"><span aria-hidden="true">▲</span> <%= s.hidden > 1 ? t('{n} photos cachées aux invités', { n: s.hidden }) : t('1 photo cachée aux invités') %></p><p><%= t('Une photo à vérifier ne s’affiche aux invités qu’une fois confirmée par l’équipe (onglet Photos) ; une photo bloquée par un refus ne s’affiche jamais.') %></p></div>
+<% } %><nav class="onglets" aria-label="<%= t('Rubriques de la galerie') %>"><ul>
 <% it.tabs.forEach(k => { %>  <li><a href="<%= href(k) %>"<%~ k === tab ? ' aria-current="page"' : '' %>><%= LABELS[k] %><% if (N[k] !== undefined) { %> <span class="n"><%= N[k] %></span><% } %></a></li>
 <% }) %></ul></nav>
 <% if (tab === 'acces') { %>
@@ -41,7 +42,7 @@
 <% it.items.forEach((p, k) => { %>  <li id="photo-<%= p.item_id %>"><img src="<%= p.thumb %>" alt="" width="<%= p.width >= p.height ? 96 : Math.round(96 * p.width / p.height) %>" height="<%= p.width >= p.height ? Math.round(96 * p.height / p.width) : 96 %>" loading="lazy">
     <div class="gp-photo-t"><span class="t"><%= p.n %>. <%= p.title %></span><span class="sec"><%= p.author %> · <%= p.status === 'published' ? t('publiée') : t('brouillon') %></span>
       <span class="etat etat--<%= p.level === 'ok' ? 'abouti' : p.level === 'warn' ? 'attention' : 'arret' %>"><span aria-hidden="true"><%= p.level === 'ok' ? '●' : p.level === 'warn' ? '▲' : '✕' %></span><%= t('usage privé : {level}', { level: p.levelText }) %></span>
-<% if (p.level !== 'ok' && p.reasons.length) { %>      <span class="sec"><%= p.reasons.join(' ; ') %><% if (p.confirmed_at) { %> · <%= t('confirmé par {name}', { name: p.confirmed_by }) %><% } %></span><% } %></div>
+<% if (p.level !== 'ok' && p.reasons.length) { %>      <span class="sec"><%= p.reasons.join(' ; ') %><% if (p.confirmed_at) { %> · <%= t('confirmé par {name}', { name: p.confirmed_by }) %><% } else { %> · <b><%= t('cachée aux invités') %></b><% } %></span><% } %></div>
 <% if (it.canManage) { %>    <div class="btns-ligne">
 <% if (k > 0) { %>      <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/monter"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Monter') %><span class="sr-only"> : <%= p.title %></span></button></form><% } %>
 <% if (k < it.items.length - 1) { %>      <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/descendre"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Descendre') %><span class="sr-only"> : <%= p.title %></span></button></form><% } %>
