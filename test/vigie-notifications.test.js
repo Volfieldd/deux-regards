@@ -56,7 +56,7 @@ test('notification : alerte critique en mode bloquer → Signal (groupe), messag
   assert.match(text, /Source : site/);
   assert.match(text, /14 h 02 · https:\/\/vigie\.nicephos\.art\/alertes\/\d+/, 'heure de Paris');
   assert.doesNotMatch(text, /203\.0\.113|zitadel-/, 'ni adresse ni compte');
-  assert.match(text, /\nRéponse : compte gelé 1 j, sessions du compte fermées\n/, 'la réponse déjà faite, sans cible');
+  assert.match(text, /\nRéponse : compte gelé 24 h, sessions du compte fermées\n/, 'la réponse déjà faite, sans cible');
   // Mode « observer » (règle par défaut) : alerte ouverte, aucun message.
   v.site('sys_config_changed', 'haut');
   await v.notifier.idle();
@@ -137,4 +137,29 @@ test('configuration et ligne de commande : Signal, e-mail, console ; diagnostic 
   assert.match(cli(['bordure'], { config: base }), /Blocages copiés dans KV : jamais/);
   await assert.rejects(cli(['notifier', 'essai', 'signal'], { config: base }), /non configuré/);
   assert.equal(messageOf({ id: 3, gravite: 'haut', titre: 'Essai', sources: ['bordure', 'zitadel'], t: Date.parse('2026-10-20T07:05:00Z'), console: 'https://v' }), '[Haute] Essai\nSource : bordure Cloudflare, Zitadel\n09 h 05 · https://v/alertes/3');
+});
+
+test('surveillance réduite : un message à chaque geste (même alerte déjà ouverte), qui dit quoi et jusqu’à quand, hors plafond', async t => {
+  const v = vigieOf(t);
+  for (let i = 0; i < 25; i++) await v.notifier.send(`remplissage ${i}`);     // plafond des alertes atteint
+  const before = v.sent.length;
+  v.switches.set('blocages', 'arret', { duree: '1h', par: 'Julien', motif: 'essai de la bordure' });
+  await v.notifier.idle();
+  v.switches.set('blocages', 'arret', { duree: '7j', par: 'quelqu’un', motif: 'prolongé' });
+  await v.notifier.idle();
+  v.engine.setMode('sigma.cookie_rejoue', 'observer', 'Julien', { motif: 'trop de faux positifs' });
+  v.engine.setThreshold('ip', 20, 'Julien', { motif: 'bruit' });
+  await v.notifier.idle();
+  const msgs = v.sent.slice(before).map(s => s.body.message);
+  assert.equal(msgs.length, 4, 'chaque geste prévient, malgré le plafond et l’alerte déjà ouverte');
+  assert.match(msgs[0], /^\[Moyenne\] Surveillance réduite : blocages automatiques arrêtés jusqu'à 15 h 02/);
+  assert.match(msgs[1], /blocages automatiques arrêtés jusqu'au mar\. 27 oct\., 13 h 02/, 'sept jours plus tard, heure d’hiver comprise');
+  assert.match(msgs[2], /règle « Cookie d'une session fermée rejoué depuis un autre appareil » passée de bloquer à observer/);
+  assert.match(msgs[3], /seuil d’une adresse relevé de 7 à 20 points/);
+  assert.ok(msgs.every(m => !/essai de la bordure|prolongé|bruit/.test(m)), 'jamais le motif');
+  // Après un arrêt, une règle reprend le mode qu'elle avait (et non son mode de départ).
+  v.engine.setMode('sigma.restauration', 'alerter', 'test');
+  v.engine.setMode('sigma.restauration', 'arret', 'test', { duree: '1h', motif: 'm' });
+  v.clock.t += 2 * 3600e3;
+  assert.equal(v.engine.modeOf('sigma.restauration'), 'alerter');
 });

@@ -84,12 +84,14 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   // reprend son mode de départ.
   const modeOf = id => {
     const m = modes()[id];
-    if (m && typeof m === 'object') return m.mode === 'arret' && m.jusqua > now() ? 'arret' : REGISTRY[id]?.mode || 'observer';
+    // Arrêt échu : la règle reprend le mode qu'elle avait avant l'arrêt (et non son mode de départ).
+    if (m && typeof m === 'object') return m.mode === 'arret' && m.jusqua > now() ? 'arret' : MODES.includes(m.avant) ? m.avant : REGISTRY[id]?.mode || 'observer';
     return MODES.includes(m) ? m : REGISTRY[id]?.mode || 'observer';
   };
   const thresholds = () => ({ ...THRESHOLDS, ...setting.get('seuils', {}) });
-  // Adresses de confiance : { ip, jusqua } (une adresse ancienne écrite seule reste, sans fin, jusqu'à son retrait).
-  const trusted = () => new Set(setting.get('adresses_confiance', []).filter(x => typeof x === 'string' || x.jusqua > now()).map(x => (typeof x === 'string' ? x : x.ip)));
+  // Adresses de confiance : { ip, jusqua } ; une adresse écrite seule (avant la durée obligatoire) ne vaut plus rien :
+  // elle se réécrit avec une durée.
+  const trusted = () => new Set(setting.get('adresses_confiance', []).filter(x => x && typeof x === 'object' && x.jusqua > now()).map(x => x.ip));
   // Administrateurs connus : ceux du dernier contrôle des rôles réussi (sauvegarde du site), jamais la seule
   // déclaration du site, qu'un site compromis peut falsifier (arbitrage NC2). Avant le premier contrôle : aucun.
   const admins = () => {
@@ -404,21 +406,28 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     if (!MODES.includes(mode)) throw new Error(`mode : ${MODES.join(', ')}`);
     if (regle === 'sigma.surveillance_reduite' && mode !== 'alerter') throw new Error('la règle « Surveillance réduite » reste en mode alerter : c’est elle qui prévient quand on réduit la surveillance');
     const m = String(motif || '').slice(0, 200) || undefined;
+    const before = modeOf(regle);
     if (mode === 'arret') {
       if (!duree) throw new Error('arrêt d’une règle toujours pour une durée (--duree 4h, 7j au plus)');
       const jusqua = now() + Math.min(parseDuration(duree), 7 * 864e5);
-      setting.set('regles_modes', { ...modes(), [regle]: { mode: 'arret', jusqua, par, motif: m } });
+      setting.set('regles_modes', { ...modes(), [regle]: { mode: 'arret', jusqua, par, motif: m, avant: before === 'arret' ? undefined : before } });
       store.own('vigie_interrupteur', { emetteur: par, detail: { regle, mode, jusqua, motif: m } });
       store.own('vigie_surveillance_reduite', { emetteur: par, detail: { objet: `regle:${regle}`, jusqua, motif: m } });
       return;
     }
     setting.set('regles_modes', { ...modes(), [regle]: mode });
     store.own('vigie_interrupteur', { emetteur: par, detail: { regle, mode, motif: m } });
+    // Descente de mode (Bloquer → Alerter → Observer) : la surveillance est réduite aussi (jury v2 des maquettes).
+    if (MODES.indexOf(mode) < MODES.indexOf(before)) store.own('vigie_surveillance_reduite', { emetteur: par, detail: { objet: `regle:${regle}`, mode, avant: before, motif: m } });
   };
-  const setThreshold = (kind, value, par) => {
+  const setThreshold = (kind, value, par, { motif = '' } = {}) => {
     if (!Object.hasOwn(THRESHOLDS, kind) || !(value > 0 && value <= 1000)) throw new Error(`seuil : ${Object.keys(THRESHOLDS).join(', ')}, valeur de 0 à 1000`);
+    const before = thresholds()[kind];
+    const m = String(motif || '').slice(0, 200) || undefined;
     setting.set('seuils', { ...setting.get('seuils', {}), [kind]: value });
-    store.own('vigie_interrupteur', { emetteur: par, detail: { seuil: kind, valeur: value } });
+    store.own('vigie_interrupteur', { emetteur: par, detail: { seuil: kind, valeur: value, motif: m } });
+    // Seuil relevé : il faut plus de points pour une alerte, la surveillance est réduite.
+    if (value > before) store.own('vigie_surveillance_reduite', { emetteur: par, detail: { objet: `seuil:${kind}`, valeur: value, avant: before, motif: m } });
   };
 
   return { process, enqueue, drain, lag, detectors, tick, closeQuiet, summary, current, top, purge, classify, setMode, setThreshold, modeOf, thresholds,
