@@ -238,7 +238,7 @@ export function createConsole({ config, store, engine, switches, decisions, zita
     try { c = await oidc.finish({ code: q.code, state: q.state, ...(q.iss ? { iss: q.iss } : {}) }, tx); } catch (err) {
       log.warn({ err: err.message }, 'Vigie : console : retour de Zitadel refusé');
       refuse(req, 'jeton', { detail: { erreur: clean(err.message, 120) } });
-      return page(reply, 'zitadel', {}, 502);
+      return page(reply, 'zitadel', {}, 503);   // pas 502 : Cloudflare remplace une réponse 502 par sa propre page
     }
     const sub = clean(c.sub, 200);
     // Second facteur exigé (D9) : Zitadel met « mfa » dans amr dès deux facteurs (clé d'accès comprise).

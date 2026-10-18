@@ -126,7 +126,7 @@ test('connexion refusée (DS30) : sans second facteur, sans rôle vigie.*, rôle
   v.oidc.claims = new Error('unexpected JWT "nonce" claim value');
   const r4 = await v.app.inject({ url: '/auth/login', headers: v.h() });
   const st4 = r4.cookies.find(x => x.name === '__Host-vigie-tx').value;
-  assert.equal((await v.app.inject({ url: `/auth/callback?code=c&state=${st4}`, headers: v.h(), cookies: { '__Host-vigie-tx': st4 } })).statusCode, 502);
+  assert.equal((await v.app.inject({ url: `/auth/callback?code=c&state=${st4}`, headers: v.h(), cookies: { '__Host-vigie-tx': st4 } })).statusCode, 503);
   const raisons = v.events('vigie_console_refus').map(e => e.detail.raison);
   assert.deepEqual(raisons, ['mfa', 'role', 'zitadel', 'etat', 'jeton']);
   assert.equal(v.events('vigie_console_connexion').length, 0);
