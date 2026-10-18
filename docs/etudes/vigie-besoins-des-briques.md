@@ -121,6 +121,9 @@ l'implémentation de la brique (précision de la session de la Vigie, 18 octobre
 | #129 v2 | Recherche `?q=` (formulaire GET, 100 caractères) | injection, sondage | `malicious_input` (E14) par le crochet commun, DS11, DS22, DS23 ; identique en v1 et v2 | **BV-8**, **BV-9** |
 | #129 v2 | Carte, voyages, 404 v2 | parcours systématique, scanners | `malicious_excess_404` (E17, DS15/DS16), piège (E18), règle `bordure_rafale` | aucun |
 | #129 v2 | Pages légales et confidentialité | — (texte identique à la v1, journal de sécurité compris) | — | aucun |
+| #147 v2 | Texte de remplacement dans « Compléter et publier » (champ par champ et tableau sans script) et dans l'inspecteur | défacement par un compte volé ; écriture sur la photo d'un autre photographe | `app.audit.log` avec le **nom** du champ (`champs : alt_text`, « photo 12 : alt_text » pour le lot), jamais sa valeur ; `authz_fail` hors portée (DS10), CSRF (DS14) | **BV-20**, **BV-21** (mêmes signaux que la fiche) |
+| #147 v2 | Migration 054 : déclencheurs du numéro d'inventaire recréés (année de Paris) | — | référence des déclencheurs reprise après la migration (`vigie_declencheurs`) ; ni ceux des comptes ni celui des sessions ne changent | aucun |
+| #147 v2 | Liste de contrôle de la bascule (`docs/wiki/Bascule-v2.md`) | faux positifs d'aspiration et de 404 après la bascule | DS15, `malicious_excess_404` | **BV-4** (recalage avant la bascule, à confirmer par la Vigie), **BV-5** (test des liens internes) |
 
 ### BV-3 — Valeurs de filtre impossibles
 
