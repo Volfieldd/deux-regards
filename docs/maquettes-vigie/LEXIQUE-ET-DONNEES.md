@@ -111,7 +111,7 @@ Le code crée le gel, puis la fermeture des sessions (`vigie/moteur.js`, `respon
 - Résumé pour l'admin du site (`GET /v1/resume`, MV-10) : 2 critiques, 1 haute et 1 moyenne (#414) **(passe 3 : comme MV-10 depuis la passe 2)**, la plus grave #413, critique, depuis 14 h 05, sans titre de règle **(passe 3 : `plus_grave` = numéro, gravité, depuis ; PR #121)**, `critique_a_prendre` vrai. Hypothèse « résumé indisponible » : dernier résumé reçu à 14 h 10, indisponible depuis 14 h 11, bandeau daté **(consol. : § 3.12 et § 3.13, point 6)**.
 - Messages « Surveillance réduite » **(finitions : § 3.16, point 6 ; PR #124)** : un par geste, hors du plafond des alertes, au-delà de 60 par heure une synthèse au début de l'heure suivante (« … 4 autre(s) geste(s) l’heure précédente, non envoyés un à un (plus de 60 par heure). ») ; apostrophe typographique : « [Moyenne] Surveillance réduite : blocages automatiques arrêtés jusqu’à 15 h 10 » (#414) ; descente de mode, les modes en mots de la console : « [Moyenne] Surveillance réduite : règle « Cookie d'une session fermée rejoué depuis un autre appareil » passée de Bloquer à Observer » (exemple de MV-10, à 14 h 20) ; seuil : « seuil d’une adresse relevé de 7 à 9 points ».
 - E-mail de secours **(finitions : § 3.16, point 7)** : l'adresse d'envoi est protégée par SPF, DKIM et DMARC ; avec la clé d'accès exigée par la console et le favori (« Ouvrez la Vigie depuis votre favori ; elle ne demande jamais votre mot de passe par message. »), c'est ce qui déjoue une imitation.
-- Flux du jour **(MV-11 : § 3.17)**, sam. 17 oct. de 0 h à 14 h 20, comme le journal de MV-03 (le § 3.17 dit « 24 h » ; « aujourd'hui » garde les mêmes 319 événements) : **319 événements** hors routine masquée (le 319e, l'arrêt des blocages par Julien à 14 h 10, s'ajoute aux 318 du § 3.10 ; par source : site 241, bordure 38, Zitadel 19, contrôles de la Vigie 21). Par origine : visiteurs du site public 220, réseaux listés 32, comptes de l'admin 26, hors application 16 (dont 14 contrôles des rôles conformes), Zitadel 19, la Vigie elle-même 6. Par chemin : directement 4 (#412 site, #407 site, #413 et #414 contrôles), corrélation 49 (#409 : site 26, bordure 11 ; #405 : site 9, bordure 3), points sur une entité 187, routine 79. Issues : Critique 2, Haute 38, Moyenne 13 (en événements), sous le seuil 187, sans suite 79 ; vignette de MV-01 : « Aujourd'hui, 319 événements : 2 alertes par corrélation, 4 directes, le reste (266) sous le seuil ou sans suite ». Suites, hors du diagramme (décisions et messages, pas des événements) : réponses #87, #88 (#412) et #84 (#407) ; 4 messages Signal (#407, #412, #413, #414). Provenances : 198.51.100.23 44 événements, réseau 203.0.113.0/24 31, 192.0.2.214 1 ; opérateurs vus par la bordure (38) : AS64496 hébergeur (Pays-Bas) 14, AS64500 réseau mobile (France) 9, AS64497 hébergeur (États-Unis) 8, 7 autres 7 ; pays : France 15, Pays-Bas 11, États-Unis 8, Allemagne 4. Hypothèses de MV-11 : 7 jours, du dim. 11 au sam. 17 oct., 2 845 événements et 11 alertes (6 ouvertes ; les closes avant le 16 oct. sans numéro) ; journée calme, jeu. 15 oct., 206 événements, aucune alerte.
+- Flux du jour **(MV-11 : § 3.17 ; refonte du § 3.18)**, sam. 17 oct. de 0 h à 14 h 20, comme le journal de MV-03 (le § 3.17 dit « 24 h » ; « aujourd'hui » garde les mêmes 319 événements) : **319 événements** hors routine masquée (le 319e, l'arrêt des blocages par Julien à 14 h 10, s'ajoute aux 318 du § 3.10 ; par source : site 241, bordure 38, Zitadel 19, contrôles de la Vigie 21). Par origine : hors application 16 (dont 14 contrôles des rôles conformes), la Vigie elle-même 6, comptes de l'admin 26, visiteurs du site public 220, réseaux listés 32, Zitadel 19. Par chemin (ceux du code, § 3.18) : preuve directe 4 (#413 contrôles, #412 site, #407 site, #414 contrôles), score d'une entité 236 (au-dessus du seuil : #409, site 26 et bordure 11 ; #405, site 9 et bordure 3 ; sous le seuil 187), corrélation 0, sans point 79. Issues : Critique 2 alertes (2 événements), Haute 2 (38), Moyenne 2 (13), sans alerte 266. Les 6 alertes par origine : hors application 2 (#413, #412), visiteurs du site public 2 (#409, #405), comptes de l'admin 1 (#407), la Vigie elle-même 1 (#414) ; barre de provenance de MV-01 : hors application 1 (#412), site 3 (#409, #407, #405), contrôles de la Vigie 2 (#413, #414). Suites, hors des diagrammes : réponses #87, #88 (#412) et #84 (#407) ; 4 messages Signal (#407, #412, #413, #414). Provenances, sans le trafic des administrateurs (9 événements, non comptés) : 198.51.100.23 44 événements, réseau 203.0.113.0/24 31, 192.0.2.214 1, 194 autres ; opérateurs vus par la bordure (36 de 38) : AS64501 (198.51.100.23, hébergeur, Pays-Bas) 14, 9 autres opérateurs 22 ; pays : Pays-Bas 15, États-Unis 10, France 7, Allemagne 4. Hypothèses de MV-11 : 7 jours, du dim. 11 au sam. 17 oct., 2 845 événements et 11 alertes (6 ouvertes ; les closes avant le 16 oct. sans numéro) ; journée calme, jeu. 15 oct., 206 événements, aucune alerte.
 - Sur 7 jours : 64 connexions à l'admin, 4 adresses bloquées, 1 913 tentatives repoussées (pièges, saisies malveillantes, refus de droit, blocages).
 
 ### 3.6 Droits de la console
@@ -513,6 +513,61 @@ Répartir le reste par source selon MV-03, et le dire. `coherence-vigie.py` vér
 - le rendu SVG serveur ;
 - le surlignage d'une alerte.
 
+### 3.18 Refonte de MV-11 après son jury (18 oct. 2026)
+
+Jury ciblé : MV-11 à 5 (jury 1) et 8 (jury 2) ; MV-01 avec sa vignette à 6 et 9.
+
+Le constat commun : **le dessin dit d'où viennent les événements, pas les alertes**. La masse du site et le gris occupent toute l'image, les alertes critiques ne sont que des filets d'un pixel, et « Haute 38 » se lit « 38 alertes hautes ». Décisions :
+
+1. **Deux diagrammes, l'un sous l'autre.**
+   - **« Les 6 alertes »** en tête, le cœur de l'écran : origine → source → chemin → alerte. **Une alerte vaut une bande d'épaisseur égale** (au moins 12 px), avec son numéro et sa pastille de gravité `.grav` (mot et jauge) au bout. C'est lui qui répond en 5 secondes à « d'où viennent les alertes ».
+   - **« Les 319 événements »** dessous, pour le contexte, à l'échelle des événements.
+2. **Chemins fidèles au code** :
+   - **preuve directe** (règle ou détecteur à source unique) ;
+   - **score d'une entité**, qui se divise en « au-dessus du seuil, deux sources → alerte » et « sous le seuil » ;
+   - **corrélation** : seulement les vraies corrélations Sigma (MV-06), et aucune aujourd'hui, ce qui est dit ;
+   - **sans point**, à la place de « routine », pour ne pas se confondre avec la routine masquée de MV-03.
+
+   #409 et #405 sont des alertes **de score**.
+3. **Issues** :
+   - dans le diagramme des alertes, chaque alerte ;
+   - dans celui des événements, les issues d'alerte en **pastilles de gravité** (« Haute · 2 alertes · 38 événements ») ;
+   - une seule issue grise **« sans alerte 266 »**, nœud en contour seulement, bandes à 10–12 %.
+4. **Ordre** : origines et sources rangées **par gravité de l'issue** (hors application et la Vigie elle-même en haut). Les fils des critiques deviennent courts et horizontaux.
+5. **Libellés hors des bandes**, dans une gouttière à droite de chaque nœud, sans halo. L'essai les vérifie (point 12).
+6. **Palette selon l'issue, pas selon la source** :
+   - une bande qui mène à une alerte est en pleine teinte, avec un contour de 1 px à 3:1 au moins sur le fond ;
+   - une bande qui ne mène à rien est à 25 % de sa teinte ;
+   - en thème clair, les bandes d'alerte sont à 0,7 d'opacité au moins ;
+   - les luminances voisines sont écartées : Zitadel plus clair (lilas), la Vigie plus sombre (sarcelle), avec un rapport de 1,5 au moins entre deux teintes voisines.
+7. **Téléphone : pas de Sankey.** La phrase, puis une barre empilée libellée « 6 alertes par origine », puis la table avec ses intitulés (corriger la règle `[data-label]::before`, à laquelle manque `.vg-flux-t`). Un lien « Voir le diagramme » ouvre la version bureau. Le diagramme horizontal des alertes tient dès 1 024 px.
+8. **Mise en avant d'une alerte** (`?alerte=412`) :
+   - seule sa bande est allumée, d'un bout à l'autre, sans couvrir aucun libellé ;
+   - le paramètre est un entier ; un numéro inconnu rend la page normale avec une erreur « alerte inconnue », sans renvoyer la saisie.
+
+   Une période invalide (`?periode=`) a son erreur dessinée elle aussi.
+9. **Provenances les plus actives** : le trafic des administrateurs (adresses de leurs connexions réussies, leurs opérateurs) en est exclu, avec une ligne « dont 9 événements des administrateurs, non comptés ». Les opérateurs (ASN) sont repris du lexique (§ 3.10 : `198.51.100.23` est sur AS64501), et le contrôle de cohérence vérifie les ASN.
+10. **Vignette de MV-01** :
+    - une **barre de provenance des 6 alertes**, libellée (« hors application 1 · site 3 · contrôles de la Vigie 2 »), avec les couleurs de gravité ;
+    - placée **sous** le tableau des alertes, jamais au-dessus du pli de la première alerte ;
+    - lien « Voir les flux ».
+
+    Dans la barre latérale, **« Alertes » reste la première entrée de Surveiller**, puis « Flux ».
+11. **Accessibilité** :
+    - `aria-labelledby` vers le titre, `aria-describedby` vers la description ;
+    - aucune animation ;
+    - contraste forcé : contours et hachures.
+12. **Essai `flux-lisible.mjs`** :
+    - signale un texte posé sur une bande ou un nœud (intersection avec les `path` et `rect` de flux) ;
+    - exige au moins un libellé par diagramme ;
+    - force la version horizontale à 1 024 px.
+13. **MV-02** : lien « Voir son flux » (`/flux?alerte=412`).
+14. **Calcul en D3 (faisabilité)** :
+    - comptes par minute pour origine, source, « sans point » et « points » ;
+    - les événements des alertes sont repris à l'affichage par `alert_events` et retirés de « points » (le chemin d'un événement n'est connu qu'à l'ouverture de son alerte) ;
+    - comptes par heure pour 7 et 30 jours ;
+    - la vraie page ne porte qu'une version du diagramme.
+
 ## 4. Les maquettes et ce qu'elles montrent
 
 Chaque maquette : bureau (1 440 × 900, thème Chambre noire) et téléphone (Pixel 7, clair), écran principal vivant, autres états dans `.mq-etats`, encart « Ce qui change » en dernier. Rôle montré : **Administrateur** (Sébastien) sauf indication ; l'état « Lecteur » (Camille) là où il change l'écran.
@@ -529,7 +584,7 @@ Chaque maquette : bureau (1 440 × 900, thème Chambre noire) et téléphone (Pi
 | **MV-08** Droits | `/droits` : personnes (§ 3.6), plafond, attribution, effectif, changer l'attribution (Administrateur seulement), journal des changements | personne arrivée sans attribution (Lectrice) ; tentative de changer son propre rôle (refusée) |
 | **MV-09** Accès | pages hors session : « Connexion refusée : aucun rôle dans la console », « Second facteur exigé », « Confirmez votre identité » (ré-authentification), « Session expirée » | les quatre, plus le jeton Access absent (403 sobre) |
 | **MV-10** Dans l'admin du site | `/admin` (« Aujourd'hui ») : badge sur l'entrée « Sécurité » du menu, ligne « 2 alertes critiques et 1 haute ouvertes dans la Vigie » (urgent) **(consol. : « 1 alerte critique à traiter » ; § 3.12, § 3.13)**, bandeau rouge en haut de page pour une critique non prise en charge, lien qui ouvre la console dans un nouvel onglet ; **messages** Signal et e-mail (texte exact de `vigie/notifications.js`) | Vigie injoignable (bandeau daté « au dernier résumé, 14 h 10 », « Résumé de la Vigie indisponible depuis 14 h 11 » **(consol. : « indisponible depuis 14 h 10 », sans bandeau ; § 3.13, point 6)**) ; aucune alerte ; compte sans `securite.voir` (rien) |
-| **MV-11** Flux et provenance des alertes **(MV-11 : § 3.17)** | `/flux` (`?periode=7j`, `30j`, `?alerte=412`) : la phrase du jour, le diagramme des flux (origines, sources, chemins, issues ; hachures pour une corrélation, part perdue en gris), la table équivalente, ce que les alertes ont déclenché, les provenances les plus actives ; vignette dans MV-01, entrée « Flux » de la barre | 7 jours ; #412 mise en avant ; vue Lectrice ; journée calme ; téléphone (diagramme pivoté) |
+| **MV-11** Flux et provenance des alertes **(MV-11 : § 3.17)** | `/flux` (`?periode=7j`, `30j`, `?alerte=412`) : la phrase du jour, « Les 6 alertes » (une bande égale par alerte) puis « Les 319 événements » **(refonte : § 3.18)**, leurs tables, ce que les alertes ont déclenché, les provenances sans les administrateurs ; barre de provenance dans MV-01, entrée « Flux » après « Alertes », « Voir son flux » dans MV-02 | 7 jours ; #412 mise en avant ; vue Lectrice ; journée calme ; téléphone (barre et tables, sans Sankey) ; paramètres refusés |
 
 ## 5. Ce qui existe dans le code et ce qui est à créer
 
