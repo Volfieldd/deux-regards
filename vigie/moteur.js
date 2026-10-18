@@ -65,7 +65,10 @@ export function createEngine({ store, decisions, switches, threats = null, now =
       ON CONFLICT (kind, key) DO UPDATE SET score = @score, at = @at, contributions = @contributions, signaux = @signaux, derniere = @derniere`),
     link: db.prepare(`INSERT INTO entity_links (a_kind, a_key, b_kind, b_key, derniere) VALUES (?, ?, ?, ?, ?)
       ON CONFLICT (a_kind, a_key, b_kind, b_key) DO UPDATE SET derniere = excluded.derniere`),
-    linkedSubs: db.prepare("SELECT b_key FROM entity_links WHERE a_kind = 'ip' AND a_key = ? AND b_kind = 'compte' AND derniere > ? LIMIT 200").pluck(),
+    // Comptes connectés depuis une adresse (connexion réussie ou session ouverte seulement) : un événement qui cite un
+    // compte depuis une adresse (cookie rejoué, refus de droit) ne fait pas de cette adresse « celle d'un
+    // administrateur » ; sinon rejouer un cookie volé achèterait l'exemption de blocage automatique.
+    linkedSubs: db.prepare("SELECT DISTINCT sub FROM events WHERE ip = ? AND type IN ('authn_login_success', 'session_created') AND sub IS NOT NULL AND recu_a > ? LIMIT 200").pluck(),
     open: db.prepare("SELECT * FROM alerts WHERE regle = ? AND entite_kind = ? AND entite_key = ? AND statut != 'close' AND derniere > ? ORDER BY id DESC LIMIT 1"),
     insert: db.prepare(`INSERT INTO alerts (regle, cas, entite_kind, entite_key, gravite, mode, premiere, derniere, compteur, score, sources)
       VALUES (@regle, @cas, @entite_kind, @entite_key, @gravite, @mode, @t, @t, 1, @score, @sources)`),
@@ -184,7 +187,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
       // d'adresse (il serait aussi appliqué en bordure).
       else if (!setting.get('controle_roles_admins', null)) done.push('aucun contrôle des rôles réussi : aucun blocage automatique d’adresse');
       else if (trusted().has(entite.key)) done.push('adresse de confiance : aucune réponse');
-      else if (q.linkedSubs.all(entite.key, now() - 30 * 864e5).some(s => adm.has(s))) done.push('adresse liée à un administrateur : aucun blocage automatique');
+      else if (q.linkedSubs.all(entite.key, now() - 30 * 864e5).some(s => adm.has(s))) done.push('adresse d’une connexion d’administrateur : aucun blocage automatique');
       // IPv6 : le /64 (une machine en change d'adresse à volonté dans son /64 ; bloquer le /128 ne servirait à rien et
       // gonflerait la liste).
       else make('bloquer', net.isIPv6(entite.key) ? net64(entite.key) : entite.key, '24h', { portee: 'tout' });

@@ -117,8 +117,12 @@ test('modes : arrêt (rien), alerter ; détection arrêtée : rien ; blocage aut
   v.site('authn_login_success', 'info', { ip: '192.0.2.77', sub: 'zitadel-moi' });
   for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.77' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.77' }); }
   const a = v.alerts().find(x => x.entite_key === '192.0.2.77' && x.entite_kind === 'ip');
-  assert.match(a.reponse, /liée à un administrateur/);
+  assert.match(a.reponse, /connexion d’administrateur/);
   assert.ok(!v.decisions.active().some(d => d.cible === '192.0.2.77/32'));
+  // Un cookie d'administrateur rejoué depuis une autre adresse ne la protège pas (seule une connexion réussie compte).
+  v.site('session_use_after_expire', 'haut', { ip: '192.0.2.214', sub: 'zitadel-moi', composant: 'site · connexion', detail: JSON.stringify({ meme_reseau_et_navigateur: true }) });
+  for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.214' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.214' }); }
+  assert.ok(v.decisions.active().some(d => d.cible === '192.0.2.214/32'), 'adresse du rejeu bloquée');
   // Un compte ordinaire ne protège pas son adresse (un attaquant qui ouvre un compte ne s'achète pas l'exemption).
   v.site('authn_login_success', 'info', { ip: '192.0.2.88', sub: 'zitadel-quelconque' });
   for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.88' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.88' }); }
