@@ -1,0 +1,111 @@
+<% /* « Je vous ai photographié » en v2 (maquette MQ-05 de l'audit d'ergonomie du 16 oct. 2026) : /bonjour, /bonjour/<lettre>,
+      /bonjour/<référence>, et /bonjour/merci après l'envoi. Même route, même méthode, mêmes champs que la v1
+      (views/bonjour.eta : ref, met_on, met_time, place, details, wants_photo, decision, scope_*, rights, message, email,
+      name, photographer caché, et le champ piège website) ; rien de nouveau n'est envoyé au serveur (ni « adult » ni
+      « guardian » de la maquette : le formulaire public ne les a jamais envoyés). Erreurs (MQ-00 § 8) : sous le champ,
+      sous la légende d'un groupe ; dès deux points, le résumé en tête prend le focus ; un seul, le champ le prend. */ %>
+<% const t = it.t, h = it.h, F = t.v2form, B = F.hello, ic = it.v2.ic, ty = it.v2.typo;
+   const v = it.values || {}, e = it.errors || {}; const on = k => v[k] === 'on' || v[k] === true;
+   // Les points à corriger, dans l'ordre de la page ; chacun mène au premier champ qui le concerne.
+   const ORDER = ['ref', 'where', 'what', 'scopes', 'email', 'name'];
+   const TARGET = { ref: 'bj-ref', where: !v.met_on ? 'bj-date' : 'bj-lieu', what: 'bj-photo', scopes: 'bj-scope-site', email: 'bj-email', name: 'bj-nom' };
+   const text = k => ty(F.errors[e[k]] || h.errors[e[k]] || String(e[k]));
+   const keys = [...ORDER.filter(k => e[k]), ...Object.keys(e).filter(k => k !== 'limit' && !ORDER.includes(k))];
+   const errs = keys.map(k => ({ key: k, target: TARGET[k] || 'bj-ref', text: text(k) }));
+   const limit = e.limit ? ty(h.errors.limit) : '';
+   // Focus au chargement : la limite, sinon le résumé (deux points ou plus), sinon le seul champ en erreur.
+   const focusOn = !limit && errs.length === 1 ? errs[0].target : null;
+   const af = id => (focusOn === id ? ' autofocus' : '');
+   // Champ : aide et erreur reliées (aria-describedby), aria-invalid ; message « ⚠ Erreur : … » sous le champ.
+   const desc = (...ids) => { const l = ids.filter(Boolean); return l.length ? ` aria-describedby="${l.join(' ')}"` : ''; };
+   const bad = k => (e[k] ? ' aria-invalid="true"' : '');
+   const err = k => (e[k] ? `<p class="champ-err" id="err-${k}">${ic('alerte', { size: 16 })}<span><b>${F.error}</b> ${it.v2.esc(after(text(k)))}</span></p>` : '');
+   // Après « Erreur : », la phrase continue en minuscule en français (« Erreur : adresse e-mail invalide… »).
+   const after = s => (it.lang === 'fr' && !/^\p{Lu}{2}/u.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+   const ek = k => (e[k] ? `err-${k}` : null);
+   const opt = `<span class="facultatif">${F.optional}</span>`;
+   const pageTitle = it.sent ? it.pageTitle
+     : limit ? `${F.limitTitle} · ${it.pageTitle}`
+     : errs.length > 1 ? `${F.titleError(F.points(errs.length))} · ${it.pageTitle}`
+     : errs.length ? `${F.titleError(F.fields[errs[0].key] || F.fields.ref)} · ${it.pageTitle}` : it.pageTitle; %>
+<% layout('./layout', { pageTitle: ty(pageTitle), description: ty(it.description), formulaires: true }) %>
+<%~ include('./_entete', it) %>
+<main id="contenu" class="wrap">
+<% if (it.sent) { %>
+<div class="pf pf--seul">
+  <div class="pf-intro">
+    <p class="etiquette"><%= B.label %></p>
+    <h1 class="titre-page" id="merci-t" tabindex="-1" autofocus><%= ty(h.thanks) %></h1>
+    <div class="msg msg--ok" role="status"><%~ ic('coche', { size: 18 }) %><p><b><%= F.sent %></b> <%= ty(h.thanksText) %></p></div>
+<% if (it.sentRef) { %>    <dl class="def"><dt><%= B.sentRef %></dt><dd class="donnee"><%= it.sentRef %></dd></dl>
+<% } %>    <p class="pf-suite"><a class="lien" href="<%= it.u('/') %>"><%= h.back %></a></p>
+  </div>
+</div>
+<% } else { %>
+<div class="pf">
+  <div class="pf-intro">
+    <p class="etiquette"><%= B.label %></p>
+    <h1 class="titre-page"><%= ty(h.title) %></h1>
+    <p class="chapo"><%= ty(it.who ? h.introWho(it.who.name) : h.intro.replace('{site}', it.siteName)) %></p>
+  </div>
+  <form class="form" method="post" action="<%= it.u('/bonjour') %>" novalidate>
+<%~ include('./_erreurs', { ...it, errs, limit }) %>
+    <p class="form-oblig"><%= F.required %></p>
+<% if (it.who) { %>    <input type="hidden" name="photographer" value="<%= v.photographer %>">
+<% } %>
+    <fieldset class="bloc" aria-describedby="bj-carte-aide"><legend><%= h.card %></legend>
+      <p class="champ-aide" id="bj-carte-aide"><%= B.cardHelp %></p>
+<% if (it.card && it.card.author) { %>      <p class="pf-carte"><span class="donnee"><%= it.card.ref %></span>&nbsp;· <%= ty(it.card.code ? h.cardOk(it.card.author.name) : h.cardUnverified) %></p>
+<% } %>      <div class="champ champ--court"><label for="bj-ref"><%= h.refLabel %></label><p class="champ-aide" id="bj-ref-aide"><%= B.refHint %></p>
+        <input id="bj-ref" name="ref" value="<%= v.ref || '' %>" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false"<%~ desc(ek('ref'), 'bj-ref-aide') %><%~ bad('ref') %><%~ af('bj-ref') %>><%~ err('ref') %></div>
+      <details class="depliant"<%~ (it.who || (!v.ref && (v.met_on || v.place || e.where))) ? ' open' : '' %>><summary><%~ ic('bas', { size: 18 }) %><%= ty(h.noCard) %></summary>
+        <div>
+<%~ err('where') %>
+          <div class="duo">
+            <div class="champ"><label for="bj-date"><%= h.metOn %></label><input id="bj-date" type="date" name="met_on" value="<%= v.met_on || '' %>"<%~ desc(ek('where')) %><%~ bad('where') %><%~ af('bj-date') %>></div>
+            <div class="champ"><label for="bj-heure"><%= h.metTime %> <%~ opt %></label><p class="champ-aide" id="bj-heure-aide"><%= B.metTimeHint %></p><input id="bj-heure" name="met_time" value="<%= v.met_time || '' %>" maxlength="20" aria-describedby="bj-heure-aide"></div>
+          </div>
+          <div class="champ"><label for="bj-lieu"><%= h.place %></label><p class="champ-aide" id="bj-lieu-aide"><%= B.placeHint %></p><input id="bj-lieu" name="place" value="<%= v.place || '' %>" maxlength="120"<%~ desc(ek('where'), 'bj-lieu-aide') %><%~ bad('where') %><%~ af('bj-lieu') %>></div>
+          <div class="champ"><label for="bj-detail"><%= h.details %> <%~ opt %></label><p class="champ-aide" id="bj-detail-aide"><%= h.detailsHint %></p><input id="bj-detail" name="details" value="<%= v.details || '' %>" maxlength="500" aria-describedby="bj-detail-aide"></div>
+        </div>
+      </details>
+    </fieldset>
+    <fieldset class="bloc"<%~ desc('bj-souhait-aide', ek('what')) %>><legend><%= h.wish %></legend>
+      <p class="champ-aide" id="bj-souhait-aide"><%= B.wishHelp %></p>
+<%~ err('what') %>
+      <label class="choix"><input id="bj-photo" type="checkbox" name="wants_photo"<%~ on('wants_photo') ? ' checked' : '' %><%~ bad('what') %><%~ af('bj-photo') %>><span><%= h.wantsPhoto %></span></label>
+      <fieldset class="groupe<%= e.scopes ? ' groupe--erreur' : '' %>"<%~ desc('bj-pub-aide', ek('scopes')) %>><legend><%= h.decision %></legend><p class="champ-aide" id="bj-pub-aide"><%= B.decisionHelp %></p>
+<%~ err('scopes') %>
+        <label class="choix"><input type="radio" name="decision" value=""<%~ !v.decision ? ' checked' : '' %>><span><%= h.undecided %></span></label>
+        <label class="choix"><input type="radio" name="decision" value="accord"<%~ v.decision === 'accord' ? ' checked' : '' %>><span><%= ty(h.agree) %></span></label>
+        <ul class="sous-choix" aria-label="<%= ty(h.agree).replace(/\s*:$/, '') %>">
+<% ['site', 'instagram', 'print', 'name'].forEach(s => { %>          <li><label class="choix"><input id="bj-scope-<%= s %>" type="checkbox" name="scope_<%= s %>"<%~ on(`scope_${s}`) ? ' checked' : '' %><%~ bad('scopes') %><%~ af(`bj-scope-${s}`) %>><span><%= h.scopes[s] %></span></label></li>
+<% }) %>        </ul>
+        <label class="choix"><input type="radio" name="decision" value="refus"<%~ v.decision === 'refus' ? ' checked' : '' %>><span><%= h.refuse %></span></label>
+      </fieldset>
+      <fieldset class="groupe"><legend><%= h.rightsLegend %></legend>
+        <label class="choix"><input type="radio" name="rights" value=""<%~ !v.rights ? ' checked' : '' %>><span><%= h.rightsNone %></span></label>
+        <label class="choix"><input type="radio" name="rights" value="acces"<%~ v.rights === 'acces' ? ' checked' : '' %>><span><%= h.rightsAccess %></span></label>
+        <label class="choix"><input type="radio" name="rights" value="effacement"<%~ v.rights === 'effacement' ? ' checked' : '' %>><span><%= h.rightsErase %></span></label>
+        <p class="pf-droits"><a class="lien" href="<%= it.u('/confidentialite') %>"><%= B.rightsLink %></a></p>
+      </fieldset>
+      <div class="champ"><label for="bj-message"><%= B.message %> <%~ opt %></label><textarea id="bj-message" name="message" rows="4" maxlength="2000"><%= v.message || '' %></textarea></div>
+    </fieldset>
+    <fieldset class="bloc"><legend><%= h.contact %></legend>
+      <div class="champ"><label for="bj-email"><%= h.email %></label><p class="champ-aide" id="bj-email-aide"><%= B.emailHint %></p>
+        <input id="bj-email" type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ desc(ek('email'), 'bj-email-aide') %><%~ bad('email') %><%~ af('bj-email') %>><%~ err('email') %></div>
+      <div class="champ"><label for="bj-nom"><%= h.name %></label><p class="champ-aide" id="bj-nom-aide"><%= B.nameHint %></p>
+        <input id="bj-nom" name="name" value="<%= v.name || '' %>" maxlength="80" autocomplete="name"<%~ desc(ek('name'), 'bj-nom-aide') %><%~ bad('name') %><%~ af('bj-nom') %>><%~ err('name') %></div>
+      <p class="note-donnees"><%= ty(h.privacy) %> <a href="<%= it.u('/confidentialite') %>"><%= t.footer.privacy %></a></p>
+    </fieldset>
+    <div class="piege" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    <div class="envoi"><button class="btn" type="submit"><%= h.send %></button><p><%= B.sendNote %></p></div>
+  </form>
+  <section class="pf-ensuite" aria-labelledby="bj-ensuite-t">
+    <h2 id="bj-ensuite-t"><%= B.nextTitle %></h2>
+    <ol><% B.next.forEach(s => { %><li><%= s %></li><% }) %></ol>
+  </section>
+</div>
+<% } %>
+</main>
+<%~ include('./_pied', it) %>
