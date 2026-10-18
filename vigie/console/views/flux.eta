@@ -1,0 +1,99 @@
+<%
+/* Flux et provenance des alertes (MV-11, /flux, lexique § 3.17 à 3.19) : la phrase de la période, « Les N alertes » (une
+   bande égale par alerte, de leur origine à leur gravité) et son tableau, puis « Les N événements » et le leur, ce que les
+   alertes ont déclenché, les provenances les plus actives. Données : it.flux = vueFlux() (vigie/console/ecrans/sante-flux.js) ;
+   les SVG sont rendus et échappés par vigie/console/flux.js (sortie brute ici). Deux boîtes de dessin par diagramme
+   (760 et 1 120 unités) : vigie.css choisit selon la place ; sous 706 px de conteneur, la barre et les tableaux, et un lien
+   qui ouvre le diagramme à sa taille. Lecture seule. */
+const x = it.flux || {};
+layout('./layout', { titre: it.titre && it.titre !== 'Vigie' ? it.titre : 'Flux et provenance des alertes' });
+const pl = (n, un, plusieurs) => (n > 1 ? plusieurs : un);
+const G = ['critique', 'haute', 'moyenne', 'basse'];
+const B = '<span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>';
+const prov = x.provenances || {};
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Flux et provenance des alertes</h1></div>
+  <p class="ep-meta"><span><%= x.maintenant %></span><span><%= x.libelle %>, depuis le <%= x.depuis %></span><span class="tel-non">recalculé à chaque visite</span></p>
+</header>
+<% if (x.erreurs && x.erreurs.length) { %>
+<section class="resume-a" tabindex="-1" aria-labelledby="t-err"><h2 id="t-err"><%~ include('./_flux-ic', { icone: 'erreur', taille: 18 }) %><%= x.erreurs.length > 1 ? 'Deux paramètres de l’adresse ont été ignorés' : 'Un paramètre de l’adresse a été ignoré' %></h2>
+<ul>
+<% if (x.erreurs.includes('alerte')) { %><li>Alerte inconnue : aucune alerte de la période ne porte ce numéro (un nombre entier, comme 412). Les flux de toutes les alertes sont affichés.</li><% } %>
+<% if (x.erreurs.includes('periode')) { %><li>Période inconnue : choisissez 7 jours ou 30 jours. La période de 7 jours est affichée.</li><% } %>
+</ul></section>
+<% } %>
+<% if (x.lecteur) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule : les diagrammes et les tableaux sont les mêmes</b> ; les adresses sont tronquées à leur réseau (/24, /48).</span></p>
+<% } %>
+<div class="vg-etat fx-tete"><nav class="fx-periode" aria-label="Période"><% for (const p of x.periodes || []) { %><a href="<%= p.href %>"<%~ p.courante ? ' aria-current="page"' : '' %>><%= p.mot %></a><% } %></nav><p class="fx-phrase"><%= x.phrase %></p></div>
+<% if (x.surlignee) { %>
+<div class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>#<%= x.surlignee.id %>, <%= x.surlignee.mot %>, ouverte <%= x.surlignee.depuis.includes(',') ? 'le ' : 'à ' %><%= x.surlignee.depuis %> :</b> <%= x.surlignee.provenance %>. Sa bande seule est allumée. <a class="vg-lien" href="/alertes/<%= x.surlignee.id %>">Ouvrir l’alerte #<%= x.surlignee.id %></a> · <a class="vg-lien" href="<%= x.periode === '7j' ? '/flux' : '/flux?periode=' + x.periode %>">Voir tous les flux</a></span></div>
+<% } %>
+
+<h2 class="vg-section-t" id="t-al"><%= x.nAlertes ? `Les ${x.nAlertes} ${pl(x.nAlertes, 'alerte', 'alertes')}` : 'Aucune alerte' %></h2>
+<% if (x.dessinAl) { %>
+<div class="fx-fig">
+<figure class="fx-dessin" id="fx-dessin-al"><div class="fx-std"><%~ x.dessinAl.std %></div><div class="fx-large"><%~ x.dessinAl.large %></div>
+<figcaption><%~ include('./_flux-leg', { evenements: false }) %>
+<p class="sec">Une alerte, une bande de même épaisseur, partagée entre ses sources selon ses événements de la période. La teinte dit la source ; la pastille, la gravité.<% if (x.nAlertes > 12) { %> Plus de 12 alertes : elles sont rangées par gravité au bout du dessin ; le tableau les nomme une à une.<% } %></p></figcaption></figure>
+<div class="fx-tel"><%~ include('./_flux-barre', { barre: x.barre, titre: `${x.nAlertes} ${pl(x.nAlertes, 'alerte', 'alertes')} par origine`, tid: 'fxa-bt', niveau: 3 }) %><p class="fx-voir"><a class="vg-lien" href="#fx-dessin-al">Voir le diagramme</a> <span class="sec">(il défile à l’horizontale)</span></p></div>
+</div>
+<div class="liste-wrap tablewrap" id="t-tab-al"><table class="liste-a vg-flux-t vg-flux-al"><caption>Les <%= x.nAlertes %> <%= pl(x.nAlertes, 'alerte', 'alertes') %> de la période, dans l’ordre de la console : provenance et événements<% if (x.tronque) { %> (les <%= x.alertesMax %> plus récentes)<% } %></caption>
+<thead><tr><th scope="col">Alerte</th><th scope="col">Gravité</th><th scope="col">Provenance (origine → sources → chemin)</th><th scope="col" class="num">Événements</th><th scope="col">Statut</th></tr></thead>
+<tbody>
+<% for (const a of x.lignesAl) { %>
+<tr><th scope="row"><a class="vg-lien" href="/alertes/<%= a.id %>">#<%= a.id %></a></th><td data-label="Gravité"><span class="grav grav--<%= G.includes(a.grav) ? a.grav : 'info' %>"><%~ B %><%= a.mot %></span></td><td data-label="Provenance"><%= a.provenance %></td><td class="num" data-label="Événements"><%= a.evenements %></td><td data-label="Statut"><%= a.statut %></td></tr>
+<% } %>
+</tbody></table></div>
+<% } else { %>
+<p class="vg-compte">Aucune alerte sur les <%= x.libelle %> : le diagramme des alertes n’est pas dessiné.</p>
+<% } %>
+
+<h2 class="vg-section-t" id="t-ev"><%= x.total ? `Les ${x.totalTexte} ${pl(x.total, 'événement', 'événements')}` : 'Aucun événement' %></h2>
+<% if (x.dessinEv) { %>
+<div class="fx-fig">
+<figure class="fx-dessin" id="fx-dessin-ev"><div class="fx-std"><%~ x.dessinEv.std %></div><div class="fx-large"><%~ x.dessinEv.large %></div>
+<figcaption><%~ include('./_flux-leg', { evenements: true }) %>
+<p class="sec">Épaisseur : <%= x.echelle %> au bureau, 3 px au moins pour un flux minuscule. Sans la routine du journal (battements, états du site, signaux notés).</p></figcaption></figure>
+<div class="fx-tel"><p class="fx-voir"><a class="vg-lien" href="#fx-dessin-ev">Voir le diagramme</a> <span class="sec">(il défile à l’horizontale)</span></p></div>
+</div>
+<details class="plier fx-table" open><summary><%~ include('./_flux-ic', { icone: 'chevron', taille: 14 }) %>Les <%= x.totalTexte %> <%= pl(x.total, 'événement', 'événements') %> en tableau <span class="sec">(<%= x.lignesEv.length %> <%= pl(x.lignesEv.length, 'ligne', 'lignes') %>, de l’origine à l’issue)</span></summary>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-flux-t vg-flux-ev"><caption>Les <%= x.totalTexte %> <%= pl(x.total, 'événement', 'événements') %> de la période, par chemin : d’abord ceux qui ont ouvert une alerte, par gravité</caption>
+<thead><tr><th scope="col">Origine</th><th scope="col">Source</th><th scope="col">Chemin</th><th scope="col">Issue</th><th scope="col" class="num">Événements</th><th scope="col">Alerte</th></tr></thead>
+<tbody>
+<% for (const r of x.lignesEv) { %>
+<tr><th scope="row"><%= r.origine %></th><td data-label="Source"><%= r.source %></td><td data-label="Chemin"><%= r.chemin %></td><td data-label="Issue"><%= r.issue %></td><td class="num" data-label="Événements"><%= r.n %></td><td data-label="Alerte"><% if (r.alerte != null) { %><a class="vg-lien" href="/alertes/<%= r.alerte %>">#<%= r.alerte %></a><% } else { %><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span><% } %></td></tr>
+<% } %>
+</tbody>
+<tfoot><tr><th scope="row" colspan="4">Total</th><td class="num"><%= x.totalTexte %></td><td></td></tr></tfoot></table></div>
+</details>
+<% } else { %>
+<p class="vg-compte">Aucun événement sur les <%= x.libelle %>, routine du journal mise à part.</p>
+<% } %>
+
+<% if (x.nAlertes) { %>
+<div class="vg-sur"><section class="panel" aria-labelledby="t-suites"><h2 class="panel-t" id="t-suites">Ce que les alertes ont déclenché</h2>
+<ul class="fx-suites">
+<% if (x.reponses.suites.length) { %><li><b>Réponses automatiques : <%= x.reponses.n %> <%= pl(x.reponses.n, 'décision', 'décisions') %>.</b> <% x.reponses.suites.forEach((r, i) => { %><%= i ? ' ' : '' %>Pour l’<a class="vg-lien" href="/alertes/<%= r.id %>">alerte #<%= r.id %></a> (<%= r.quand %>) : <%= r.quoi %>.<% }) %><% if (x.reponses.plus) { %> Et <%= x.reponses.plus %> autres alertes.<% } %></li>
+<% } else { %><li><b>Aucune réponse automatique</b> pour les alertes de la période.</li><% } %>
+<li><b>Notifications :</b> la Vigie ne note que les envois en échec (page <a class="vg-lien" href="/sante#canaux">Santé, Canaux</a>) ; un message Signal, ou un e-mail en secours, part à l’ouverture d’une alerte haute ou critique en mode Alerter ou Bloquer.</li>
+</ul>
+<p class="sec">Comptées en décisions et en messages, pas en événements : elles ne sont pas dans les diagrammes.</p>
+</section></div>
+<% } %>
+
+<h2 class="vg-section-t" id="t-prov">Provenances les plus actives</h2>
+<p class="sec fx-admins">Sans le trafic des administrateurs (les adresses de leurs connexions réussies et leurs opérateurs)<%= prov.nExclus ? ` : ${prov.exclus} ${pl(prov.nExclus, 'événement', 'événements')} des administrateurs, non ${pl(prov.nExclus, 'compté', 'comptés')}` : '' %>.<% if (prov.coupe) { %> Sur les <%= x.provMax %> événements les plus récents de la période.<% } %></p>
+<div class="fx-cote">
+<section class="panel" aria-labelledby="t-prov-a"><h3 class="panel-t" id="t-prov-a">Adresses<%= x.lecteur ? ' (tronquées)' : '' %></h3>
+<% if ((prov.adresses || []).length) { %><ul class="fx-prov"><% for (const r of prov.adresses) { %><li><span><span class="ip<%= r.v6 ? ' v6' : '' %>"><%= r.texte %></span><% if (r.tronquee) { %> <span class="tronq">(tronquée)</span><% } %></span><span class="n"><%= r.n %></span><%~ include('./_flux-jauge', { pc: r.barre }) %></li><% } %></ul>
+<p class="sec">Vues par le site et la bordure<%= prov.nResteAdresses ? ` ; ${prov.resteAdresses} autres événements viennent d’adresses moins actives` : '' %>.<%= x.lecteur ? ' Adresses tronquées à leur réseau (/24, /48).' : '' %></p>
+<% } else { %><p class="sec">Aucune adresse sur la période.</p><% } %></section>
+<section class="panel" aria-labelledby="t-prov-o"><h3 class="panel-t" id="t-prov-o">Opérateurs</h3>
+<% if ((prov.operateurs || []).length) { %><ul class="fx-prov"><% for (const r of prov.operateurs) { %><li><span><%= r.texte %></span><span class="n"><%= r.n %></span><%~ include('./_flux-jauge', { pc: r.barre }) %></li><% } %></ul><% } %>
+<p class="sec">Numéro de système autonome (ASN), lu par la bordure Cloudflare : <%= prov.bordureAsn %> de ses <%= prov.bordure %> événements.</p></section>
+<section class="panel" aria-labelledby="t-prov-p"><h3 class="panel-t" id="t-prov-p">Pays</h3>
+<% if ((prov.pays || []).length) { %><ul class="fx-prov"><% for (const r of prov.pays) { %><li><span><%= r.texte %></span><span class="n"><%= r.n %></span><%~ include('./_flux-jauge', { pc: r.barre }) %></li><% } %></ul><% } else { %><p class="sec">Aucun pays connu sur la période.</p><% } %>
+<p class="sec">Pays de l’adresse selon la source ; pas de carte du monde : elle ne dirait rien de plus.</p></section>
+</div>

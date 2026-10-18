@@ -64,6 +64,9 @@ const titrePage = (titreSeul ? titreSeul + ' · ' : '') + 'Vigie · Nicephos';
   </div>
 </aside>
 <main class="main" id="contenu" tabindex="-1"<% if (it.rafraichir) { %> data-rafraichir="60"<% } %>>
+<% const ban = it.compteurs && it.compteurs.bandeau; if (ban && it.page !== 'vue') { %>
+<div class="vg-bandeau" role="alert"><%~ include('./_ic', { icone: 'alerte-crit', taille: 20 }) %><p><span class="t"><%= ban.texte %></span><% if (ban.sec) { %><span class="sec"><%= ban.sec %></span><% } %></p><a class="btn ghost" href="/alertes/<%= ban.id %>">Ouvrir l’alerte #<%= ban.id %></a></div>
+<% } %>
 <%~ it.body %>
 </main>
 </div>

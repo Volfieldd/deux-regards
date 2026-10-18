@@ -1,0 +1,6 @@
+<%
+/* Ce qui s'est passé (vigie.css § 9) : le type lisible, lien vers la fiche de l'événement (son numéro dit au lecteur
+   d'écran), le nom du code en chasse fixe, la route, le détail, la saisie suspecte. include('./_ev-quoi', { l, lienClasse }). */
+const l = it.l;
+const longue = l.route && l.route.length > 28;
+%><span class="vg-type"><span class="t"><a class="<%= it.lienClasse || 'ligne-lien' %>" href="<%= l.href %>"><%= l.type.t %><span class="sr-only"> (événement n° <%= l.seq %>)</span></a></span><code class="vg-code"><%= l.type.code %></code></span><% if (l.route) { %><span class="vg-route">route <% if (longue) { %><span class="vg-code"><%= l.route %></span><% } else { %><code><%= l.route %></code><% } %></span><% } %><% if (l.detail && l.detail.length) { %><span class="vg-detail"><%~ include('./_ev-morceaux', { morceaux: l.detail }) %></span><% } %><%~ include('./_ev-saisie', { s: l.saisie }) %>

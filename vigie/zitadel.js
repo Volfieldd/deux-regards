@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import net from 'node:net';
-import { clean } from './util.js';
+import { clean, netOf } from './util.js';
 
 // Lecture des événements de Zitadel Cloud (annexe architecture, section 7.1) : compte de service en lecture seule
 // (IAM_OWNER_VIEWER), clé JWT, API des événements toutes les minutes. L'offre gratuite ne garde qu'un jour d'historique :
@@ -112,7 +112,7 @@ export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = f
           id: `${id.slice(0, 8)}-${id.slice(8, 12)}-${id.slice(12, 16)}-${id.slice(16, 20)}-${id.slice(20, 32)}`,
           recu_a: now(), survenu_a: at, type: KIND[def.categorie], severity: def.gravite, composant: 'zitadel', emetteur: 'zitadel · API des événements',
           canal: 'API Zitadel', confiance: 'constaté', reference: clean(`${e.aggregate?.type}:${e.aggregate?.id}#${e.sequence}`, 120),
-          sub: clean(typeof target === 'string' && target ? target : editor, 200), ip, ip_net: ip,
+          sub: clean(typeof target === 'string' && target ? target : editor, 200), ip, ip_net: ip ? netOf(ip) : null,
           detail: { type_zitadel: type, regle: def.regle, auteur: editor, agregat: { type: clean(e.aggregate?.type, 40), id: clean(e.aggregate?.id, 60) },
             proprietaire: clean(e.aggregate?.resourceOwner || e.aggregate?.resource_owner, 60), service: clean(e.editor?.service, 60), charge: minimize(e.payload) },
         });

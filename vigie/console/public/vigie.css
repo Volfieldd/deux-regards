@@ -779,10 +779,10 @@ meter.vg-m.total::-moz-meter-bar { background: var(--danger); }
 .fx-n { stroke: none; }
 .fx-n.fx-n-neutre { fill: var(--ink2); }
 .fx-n.fx-n-sans { fill: none; stroke: var(--fx-gris); stroke-width: 1.5px; }
-.fx-n.fx-g-critique { fill: var(--danger); } .fx-n.fx-g-haute { fill: var(--danger); } .fx-n.fx-g-moyenne { fill: var(--warn); }
+.fx-n.fx-g-critique { fill: var(--danger); } .fx-n.fx-g-haute { fill: var(--danger); } .fx-n.fx-g-moyenne { fill: var(--warn); } .fx-n.fx-g-basse { fill: var(--ink2); }
 .fx-p .fx-p-fond { fill: none; stroke: currentColor; stroke-width: 1px; }
 .fx-p-critique { color: var(--danger); } .fx-p-critique .fx-p-fond { fill: var(--danger); } .fx-p-critique .fx-p-mot, .fx-p-critique .fx-p-barre.on { fill: var(--on-danger); }
-.fx-p-haute { color: var(--danger); } .fx-p-moyenne { color: var(--warn); }
+.fx-p-haute { color: var(--danger); } .fx-p-moyenne { color: var(--warn); } .fx-p-basse { color: var(--ink2); }
 .fx-svg .fx-p-mot { font-size: 14px; font-weight: 500; fill: currentColor; }
 .fx-svg .fx-p-critique .fx-p-mot, .fx-svg .fx-p-critique .fx-p-barre.on { fill: var(--on-danger); }
 .fx-p-barre { fill: currentColor; opacity: .3; } .fx-p-barre.on { opacity: 1; }

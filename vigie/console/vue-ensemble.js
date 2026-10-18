@@ -7,6 +7,7 @@
 import { alertOrder } from '../moteur.js';
 import { responseOf } from '../notifications.js';
 import { FINE, adresseDetail, reseauVue, dateHeure, gravite, guillemets, heure, ilYa, jusqua, nombre, quand, duree, jour, paris } from './format.js';
+import { provenanceAlertes, ecartsSante } from './ecrans/sante-flux.js';
 
 const LISTE_MAX = 50;                     // alertes affichées dans le tableau (le reste : « Toutes les alertes »)
 const DECISIONS_MAX = 20;
@@ -59,6 +60,7 @@ function requetes(db) {
   q = {
     reglage: db.prepare('SELECT value FROM settings WHERE key = ?').pluck(),
     nbAlertes: db.prepare("SELECT COUNT(*) FROM alerts WHERE statut != 'close'").pluck(),
+    critiques: db.prepare("SELECT id, regle, premiere FROM alerts WHERE statut = 'ouverte' AND gravite = 'critique' AND mode != 'observer' ORDER BY premiere DESC, id DESC LIMIT 4"),
     parGravite: db.prepare("SELECT gravite, statut, COUNT(*) n FROM alerts WHERE statut != 'close' GROUP BY gravite, statut"),
     alertes: db.prepare(`SELECT id, regle, cas, entite_kind, entite_key, gravite, mode, statut, premiere, derniere, compteur, score, sources, reponse, traite_par, traite_a
       FROM alerts WHERE statut != 'close' ORDER BY ${RANG_SQL} DESC, (statut = 'ouverte') DESC, derniere DESC LIMIT ${LISTE_MAX}`),
@@ -147,9 +149,27 @@ function compter(q, t) {
   const s = sante(q, t);
   return { alertes: q.nbAlertes.get(), sante: s.ecarts, decisions: q.nbDecisions.get(t), detailSante: s };
 }
-export function compteurs({ db, now = Date.now }) {
-  const { alertes, sante: ecarts, decisions } = compter(requetes(db), now());
-  return { alertes, sante: ecarts, decisions };
+// Badge Santé : la règle de /sante (ecartsSante) quand le moteur est donné ; sinon celle, plus courte, de la carte de MV-01.
+export function compteurs({ db, engine, switches, now = Date.now }) {
+  const q = requetes(db);
+  const { alertes, sante: ecarts, decisions } = compter(q, now());
+  return { alertes, sante: engine ? Math.max(ecarts, ecartsSante({ db, engine, switches, now }).n) : ecarts, decisions, bandeau: bandeauDe(q, engine) };
+}
+
+// Bandeau des critiques (maquettes MV-02 à MV-11, en tête de chaque page en session sauf la vue d'ensemble, qui le dit
+// dans sa phrase) : alertes critiques ouvertes et sans intervenant, la plus récente d'abord ; titre de la règle de la
+// première (la console n'est vue que par ses comptes ; l'admin du site, elle, ne reçoit jamais de titre).
+function bandeauDe(q, engine) {
+  const rows = q.critiques.all();
+  if (!rows.length) return null;
+  const shown = rows.slice(0, 3);
+  const titre = engine?.rules?.().find(r => r.id === rows[0].regle)?.titre || null;
+  const n = rows.length > 3 ? 'Au moins 4' : String(rows.length);
+  return {
+    texte: `${n} ${rows.length > 1 ? 'alertes critiques' : 'alerte critique'} sans intervenant${FINE}: ${shown.map(r => `#${r.id} depuis ${heure(r.premiere)}`).join(', ')}.`,
+    sec: titre ? typo(titre) : null,
+    id: rows[0].id,
+  };
 }
 
 function entiteVue(kind, key, role) {
@@ -262,6 +282,15 @@ export function overview({ db, engine, switches, now = Date.now, role }) {
 
   const nb = compter(q, t);
   const s = nb.detailSante;
+  // Écarts comptés comme /sante (menaces, disque, canaux… que la carte ne détaille pas) : une ligne y renvoie.
+  if (engine) {
+    const e = ecartsSante({ db, engine, switches, now: () => t });
+    if (e.n > s.ecarts) {
+      s.lignes.push({ k: 'att-s', morceaux: [{ t: `${e.n - s.ecarts} autre${e.n - s.ecarts > 1 ? 's' : ''} écart${e.n - s.ecarts > 1 ? 's' : ''}${FINE}: ` }, { t: 'voir la santé', href: '/sante' }] });
+      s.ecarts = e.n;
+    }
+    nb.sante = s.ecarts;
+  }
   const nbDecisions = nb.decisions;
   const etat = switches?.state?.() || {};
   const reduite = q.ouverteDe.get('sigma.surveillance_reduite');
@@ -355,6 +384,9 @@ export function overview({ db, engine, switches, now = Date.now, role }) {
     { libelle: 'Tentatives repoussées', valeur: nombre((parType.authz_blocked || 0) + (parType.bordure_blocage || 0)) },
   ];
 
+  // Barre de provenance des alertes (MV-01, lexique § 3.19, point 2) : celle de /flux, même période (7 jours), mêmes nombres.
+  const provenance = provenanceAlertes({ db, now: () => t });
+
   return {
     maintenant: { texte: dateHeure(t), iso: new Date(t).toISOString() },
     lecteur,
@@ -368,5 +400,6 @@ export function overview({ db, engine, switches, now = Date.now, role }) {
     decisions,
     sante: s,
     septJours,
+    provenance,
   };
 }

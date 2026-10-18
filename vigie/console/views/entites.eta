@@ -1,0 +1,42 @@
+<%
+/* Entités (/entites) : ouvrir la fiche d'une entité, puis les plus chaudes en ce moment (engine.top, 7 jours, score après
+   décroissance). Données : it.vue = top(), it.recherche = chercherEntite() (erreur et saisie gardée), mises en forme par
+   vigie/console/ecrans/evenements.js. Lecture seule. */
+const v = it.vue;
+const r = it.recherche || null;
+layout('./layout', { titre: it.titre });
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Entités</h1></div>
+  <p class="ep-meta"><span><%= v.maintenant %></span><span class="tel-non">adresses, réseaux, comptes, sessions vus depuis 7&nbsp;jours</span></p>
+</header>
+<% if (v.lecteur) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule&#8239;: adresses tronquées.</b> Une adresse se lit par son réseau (/24, /48), et sa fiche est celle du réseau.</span></p>
+<% } %>
+<form class="vg-filtres" method="get" action="/entites" role="search" aria-label="Ouvrir la fiche d’une entité">
+<div class="champ-a"><label for="e-type">Type</label><select id="e-type" name="type"<% if (r && r.erreur && !r.kind) { %> aria-invalid="true" aria-describedby="e-type-err"<% } %>>
+<% for (const k of v.kinds) { %><option value="<%= k.v %>"<%= r && r.kind === k.v ? ' selected' : '' %>><%= k.t %></option>
+<% } %></select><% if (r && r.erreur && !r.kind) { %><p class="err" id="e-type-err"><%~ include('./_ic', { icone: 'interdit', taille: 16 }) %><span><b>Erreur&#8239;:</b> <%= r.erreur %></span></p><% } %></div>
+<div class="champ-a"><label for="e-cle">Adresse, réseau, compte ou session</label><p class="aide" id="e-cle-aide">adresse, réseau /24 ou /48, zitadel-…, empreinte de session</p><input class="vg-mono" id="e-cle" name="cle" value="<%= r ? r.cle : '' %>" spellcheck="false" autocomplete="off" aria-describedby="e-cle-aide<%= r && r.erreur && r.kind ? ' e-cle-err' : '' %>"<% if (r && r.erreur && r.kind) { %> aria-invalid="true"<% } %>><% if (r && r.erreur && r.kind) { %><p class="err" id="e-cle-err"><%~ include('./_ic', { icone: 'interdit', taille: 16 }) %><span><b>Erreur&#8239;:</b> <%= r.erreur %></span></p><% } %></div>
+<div class="pied"><button class="btn" type="submit">Ouvrir la fiche</button></div>
+</form>
+<h2 class="vg-section-t" id="t-chaudes">Les plus chaudes<% if (v.lignes.length) { %> <span class="n"><%= v.lignes.length %></span><% } %></h2>
+<% if (v.lignes.length) { %>
+<div class="liste-wrap"><table class="liste-a">
+<caption>Du score le plus haut au plus bas, maintenant&#8239;; le score perd la moitié de sa valeur chaque heure</caption>
+<thead><tr><th scope="col">Entité</th><th scope="col" class="num">Score</th><th scope="col">Sources</th><th scope="col">Dernier signal</th></tr></thead>
+<tbody>
+<% for (const l of v.lignes) { %>
+<tr><th scope="row"><% if (l.href) { %><a class="ligne-lien" href="<%= l.href %>"><%~ include('./_ent', { ent: l.ent }) %></a><% } else { %><%~ include('./_ent', { ent: l.ent }) %><% } %></th>
+<td class="c-haut num"><%= l.score %><% if (l.seuil) { %><span class="sec"><%= l.auDessus ? '▲ ' : '' %>seuil <%= l.seuil %></span><% } %></td>
+<td class="c-demi" data-label="Sources"><% if (l.sources.length) { %><ul class="srcs" aria-label="Sources"><% for (const s of l.sources) { %><li><span class="src"><%~ include('./_ic', { icone: s.cle, taille: 14 }) %><%= s.mot %></span></li><% } %></ul><% } else { %><span class="vg-sans-val">—<span class="sr-only"> (aucune au-dessus du minimum)</span></span><% } %></td>
+<td class="c-demi" data-label="Dernier signal"><%= l.derniere %></td></tr>
+<% } %>
+</tbody></table></div>
+<% } else { %>
+<div class="vg-vide">
+<p class="t">Aucune entité n’a de points en ce moment.</p>
+<p>Les scores s’effacent d’eux-mêmes (la moitié chaque heure)&#8239;; une entité se cherche aussi par le formulaire ci-dessus ou depuis le journal.</p>
+<ul><li><a class="vg-lien" href="/evenements">Le journal des événements</a></li></ul>
+</div>
+<% } %>

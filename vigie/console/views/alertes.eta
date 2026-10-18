@@ -1,0 +1,77 @@
+<%
+/* Liste des alertes (phase D3b) : filtres (formulaire GET, sans script), résumé, tableau de MV-01, pagination. Données :
+   it.vue = liste() (vigie/console/ecrans/alertes.js), déjà mises en forme. Lecture seule. */
+const vue = it.vue || {};
+layout('./layout', { titre: it.titre && it.titre !== 'Vigie' ? it.titre : 'Alertes' });
+const f = vue.filtres || {};
+const pg = vue.pages || {};
+const sel = (a, b) => (a === b ? ' selected' : '');
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Alertes</h1></div>
+  <p class="ep-meta"><span><%= vue.maintenant %></span><span class="tel-non">heure de Paris</span><% if (f.actifs) { %><span><%= f.actifs %> <%= f.actifs > 1 ? 'filtres' : 'filtre' %></span><% } %></p>
+</header>
+<% if (vue.lecteur) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule : vous voyez les alertes, vous n’agissez pas.</b> Les adresses sont tronquées à leur réseau (/24, /48).</span></p>
+<% } %>
+<% if (f.ignores && f.ignores.length) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Filtre ignoré : <%= f.ignores.join(', ') %>.</b> La valeur de l’adresse n’est pas reconnue ; la liste ne la prend pas en compte.</span></p>
+<% } %>
+
+<p class="vg-replie-lien"><span><%= f.resume %></span><a href="#filtres">Modifier<span class="sr-only"> les filtres</span></a></p>
+<form class="vg-filtres vg-replie" id="filtres" method="get" action="/alertes" role="search" aria-label="Filtrer les alertes">
+<div class="champ-a"><label for="f-statut">Statut</label><select id="f-statut" name="statut">
+<% for (const [k, mot] of Object.entries(f.statuts || {})) { %><option value="<%= k %>"<%= sel(k, f.statut) %>><%= mot %></option>
+<% } %></select></div>
+<div class="champ-a"><label for="f-gravite">Gravité</label><select id="f-gravite" name="gravite"><option value=""<%= sel('', f.gravite) %>>Toutes</option>
+<% for (const [k, mot] of Object.entries(f.gravites || {})) { %><option value="<%= k %>"<%= sel(k, f.gravite) %>><%= mot %></option>
+<% } %></select></div>
+<div class="champ-a"><label for="f-regle">Règle</label><select id="f-regle" name="regle"><option value=""<%= sel('', f.regle) %>>Toutes les règles</option>
+<% for (const o of f.options || []) { %><option value="<%= o.valeur %>"<%= sel(o.valeur, f.regle) %>><%= o.mot %></option>
+<% } %></select></div>
+<div class="pied"><a class="lien-a" href="/alertes">Tout effacer</a><button class="btn" type="submit">Filtrer</button></div>
+</form>
+
+<div class="vg-resume">
+<div><h2 class="vg-section-t" id="t-liste"><%= vue.titre %></h2><p><%= vue.total ? (vue.parGravite ? `${vue.ordre.charAt(0).toUpperCase()}${vue.ordre.slice(1)} : ${vue.parGravite}.` : `${vue.ordre.charAt(0).toUpperCase()}${vue.ordre.slice(1)}.`) : '' %><% if (vue.closes) { %><span class="sec">Les alertes closes ne sont pas comptées. <a href="<%= vue.closes %>">Voir les closes</a></span><% } %></p></div>
+</div>
+
+<% if (vue.lignes && vue.lignes.length) { %>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-alertes">
+<caption><div class="vg-cap-t"><%= vue.titre %> : <%= vue.ordre %></div><div class="grav-leg"><span class="lb">Gravité d’une alerte, de la plus haute à la plus basse</span><ul class="grav-legende" aria-label="Gravité d’une alerte"><li><%~ include('./_grav', { gravClasse: 'critique', gravMot: 'Critique' }) %></li><li><%~ include('./_grav', { gravClasse: 'haute', gravMot: 'Haute' }) %></li><li><%~ include('./_grav', { gravClasse: 'moyenne', gravMot: 'Moyenne' }) %></li><li><%~ include('./_grav', { gravClasse: 'basse', gravMot: 'Basse' }) %></li></ul></div></caption>
+<thead><tr><th scope="col">Gravité</th><th scope="col">Alerte</th><th scope="col">Entité</th><th scope="col">Sources</th><th scope="col" class="num">Occurrences</th><th scope="col">Mode</th><th scope="col">Statut</th></tr></thead>
+<tbody>
+<% for (const a of vue.lignes) { %>
+<tr<% if (a.crit) { %> class="vg-crit"<% } %>><td class="c-grav"><%~ include('./_grav', { gravClasse: a.grav.classe, gravMot: a.grav.mot }) %></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/<%= a.id %>"><%= a.titre %><span class="sr-only"> (#<%= a.id %>)</span></a><span class="sec">#<%= a.id %><% if (a.cas) { %> · <%= a.cas %><% } %></span></th>
+<td class="c-ent"><%~ include('./_ent', { ent: a.entite }) %></td><td class="c-src" data-label="Sources"><% if (a.sources.length) { %><ul class="srcs" aria-label="Sources"><% for (const s of a.sources) { %><li><span class="src"><%~ include('./_ic', { icone: s.cle, taille: 14 }) %><%= s.mot %></span></li><% } %></ul><% } else { %><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span><% } %></td>
+<td class="c-occ num" data-label="Occurrences"><%= a.occ.n %><span class="sec"><%= a.occ.sec %></span></td>
+<td class="c-mode" data-label="Mode"><%= a.mode.mot %><% if (a.mode.sec) { %><span class="sec"><%= a.mode.sec %></span><% } %></td>
+<td class="c-etat"><%~ include('./_etat', { etatK: a.statut.k, etatMot: a.statut.mot }) %><% if (a.statut.sec) { %><span class="sec"><%= a.statut.sec %></span><% } %></td></tr>
+<% } %>
+</tbody></table></div>
+<% if (pg.suivante || pg.precedente) { %>
+<nav class="vg-pages" aria-label="Pages de la liste des alertes"><p><%= pg.position || '' %></p>
+<% if (pg.suivante || pg.precedente) { %><div class="btns-ligne"><% if (pg.precedente) { %><a class="btn ghost" href="<%= pg.precedente.href %>" rel="prev"><%= pg.precedente.texte %></a><% } %><% if (pg.suivante) { %><a class="btn ghost" href="<%= pg.suivante.href %>" rel="next"><%= pg.suivante.texte %></a><% } %></div><% } %></nav>
+<% } %>
+<% } else { %>
+<div class="vg-vide">
+<% if (f.actifs) { %>
+<h3 class="t">Aucune alerte pour ces filtres.</h3>
+<p>Filtres : <%= f.resume %>.</p>
+<ul>
+<li><a class="vg-lien" href="/alertes">Tout effacer : les alertes non closes</a></li>
+<li><a class="vg-lien" href="/alertes?statut=toutes">Toutes les alertes, closes comprises</a></li>
+</ul>
+<% } else { %>
+<h3 class="t">Aucune alerte ouverte.</h3>
+<p>Rien à traiter pour l’instant ; une alerte s’ouvre ici dès qu’une règle se déclenche.</p>
+<ul>
+<li><a class="vg-lien" href="/alertes?statut=close">Les alertes closes</a></li>
+<li><a class="vg-lien" href="/">Revenir à la vue d’ensemble</a></li>
+</ul>
+<% } %>
+</div>
+<% if (pg.precedente) { %><nav class="vg-pages" aria-label="Pages de la liste des alertes"><p><%= pg.position || '' %></p><div class="btns-ligne"><a class="btn ghost" href="<%= pg.precedente.href %>" rel="prev"><%= pg.precedente.texte %></a></div></nav><% } %>
+<% } %>
+<% /* D3c : la barre de provenance des alertes (MV-11) et l'export, s'ils viennent sur cette liste. Aucune action ici : les gestes se font sur la fiche d'une alerte. */ %>

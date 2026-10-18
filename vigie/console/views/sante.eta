@@ -1,0 +1,47 @@
+<%
+/* Santé et intégrité (MV-07, /sante) : l'état en une phrase, puis une carte par composant, toujours dans le même ordre (la
+   chaîne d'abord) : nom, état (symbole et mot), faits datés, « Alerte si… » (la règle du code), le dépliant des commandes du
+   serveur. Données : it.sante = vueSante() (vigie/console/ecrans/sante-flux.js), déjà mises en forme. Lecture seule. */
+const s = it.sante || { cartes: [], faits: [] };
+layout('./layout', { titre: it.titre && it.titre !== 'Vigie' ? it.titre : 'Santé et intégrité' });
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Santé et intégrité</h1></div>
+  <p class="ep-meta"><span><%= s.maintenant %></span><span class="tel-non">heure de Paris</span><span class="tel-non">relue à chaque visite</span></p>
+  <% /* D3c : l'identité confirmée dans la méta (« Identité confirmée à …, valable jusqu’à … »). */ %>
+</header>
+<% if (s.lecteur) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule : vous voyez, vous n’agissez pas.</b> Les commandes de la santé (vérifier la chaîne, recopier la liste de la bordure) sont réservées aux Administrateurs.</span></p>
+<% } %>
+<div class="vg-etat">
+  <h2 class="phrase" id="t-etat"><%= s.phrase %></h2>
+<% if (s.faits.length) { %>
+  <ul class="faits">
+<% for (const f of s.faits) { %>
+    <li><%~ include('./_etat', { etatK: f.etat.k, etatMot: f.etat.mot }) %><span><%~ include('./_morceaux', { morceaux: f.morceaux }) %></span></li>
+<% } %>
+  </ul>
+<% } %>
+  <p class="aussi"><%= s.nCartes %> composants, toujours dans cet ordre ; la même lecture en ligne de commande : <code>etat</code>, <code>bordure</code>, <code>menaces</code>, <code>controle</code>.</p>
+</div>
+<ul class="vg-sante-grille" aria-label="Composants de la Vigie">
+<% for (const c of s.cartes) { %>
+<li><section class="vg-compo<%= c.cls ? ' ' + c.cls : '' %>" id="<%= c.id %>" aria-labelledby="t-<%= c.id %>">
+<div class="vg-compo-tete"><h2 id="t-<%= c.id %>"><%~ include('./_flux-ic', { icone: c.icone }) %><%= c.titre %></h2><%~ include('./_etat', { etatK: c.etat.k, etatMot: c.etat.mot }) %></div>
+<dl class="kv-a">
+<% for (const l of c.kv) { %>
+<dt><%= l.dt %></dt><dd><% if (l.ruptures) { %><ol class="vg-ruptures" aria-label="Ruptures (20 au plus)"><% for (const r of l.ruptures) { %><li><span class="n"><%= r.seq %></span><span class="raison"><%= r.raison %></span><span class="sec">Son contenu ne peut plus être cru.</span></li><% } %></ol><% if (l.plus) { %><span class="sec">et <%= l.plus %> de plus (la ligne de commande les liste toutes)</span><% } %><% } else { %><% if (l.mono) { %><span class="vg-empreinte"><%= l.mono %></span><% } %><% if (l.t != null) { %><%= l.t %><% } %><% if (l.subs && l.subs.length) { %> <% l.subs.forEach((x, i) => { %><%= i ? ', ' : '' %><span class="sub"><%= x %></span><% }) %><% } %><% if (l.secMono) { %><span class="sec vg-empreinte"><%= l.secMono %></span><% } %><% if (l.sec) { %><span class="sec"><%= l.sec %></span><% } %><% } %></dd>
+<% } %>
+</dl>
+<p class="vg-compo-seuil"><% for (const m of c.seuil) { %><% if (m.donnee) { %><span class="donnee"><%= m.t %></span><% } else if (m.r) { %><span class="r"><%= m.t %></span><% } else { %><%= m.t %><% } %><% } %></p>
+<% /* D3c : le bouton de la carte (Vérifier maintenant, Recopier la liste maintenant, Accepter comme référence…), un formulaire
+   POST avec le jeton _csrf, gardé par guard() ; rien n'est affiché avant (pas de bouton mort). Le libellé prévu est dans c.d3c. */ %>
+<% if (c.liens.length) { %>
+<div class="btns-ligne"><% for (const a of c.liens) { %><a class="<%= a.btn ? 'btn' : 'vg-lien' %>" href="<%= a.href %>"><%= a.t %></a><% } %></div>
+<% } %>
+<% if (c.serveur.length) { %>
+<details class="plier-serveur"><summary><%~ include('./_flux-ic', { icone: 'chevron', taille: 14 }) %>Pour l’administrateur du serveur</summary><% for (const x of c.serveur) { %><% if (x.cmd) { %><pre class="vg-commande"><code><% x.cmd.forEach((m, i) => { %><%= i ? ' ' : '' %><span class="mot"><%= m %></span><% }) %></code></pre><% } else { %><p><%= x.p %></p><% } %><% } %></details>
+<% } %>
+</section></li>
+<% } %>
+</ul>

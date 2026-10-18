@@ -1,0 +1,11 @@
+<%
+/* Ce qui s'est passé, en morceaux (ecrans/evenements.js, detailEnMorceaux) : { t } du texte, { t, href } un lien local,
+   { code } en chasse fixe (insécable s'il est court, coupable sinon), { ip } une adresse. Tout est échappé ; un lien ne mène
+   qu'à un chemin local. */
+for (const m of it.morceaux || []) {
+  const local = typeof m.href === 'string' && m.href.startsWith('/') && !m.href.startsWith('//');
+  if (local) { %><a href="<%= m.href %>"><%= m.t %></a><% }
+  else if (m.code != null) { if (String(m.code).length <= 28) { %><code><%= m.code %></code><% } else { %><span class="vg-code"><%= m.code %></span><% } }
+  else if (m.ip) { %><span class="ip<%= m.ip.v6 ? ' v6' : '' %>"><%= m.ip.texte %></span><% }
+  else { %><%= m.t %><% }
+} %>

@@ -1,0 +1,10 @@
+<%
+/* Barre de provenance des alertes (MV-11 au téléphone, MV-01 sous le tableau des alertes) : un groupe par origine, son nom et
+   son nombre ; une case par alerte, pastille de gravité (jauge et couleur, jamais la couleur seule) et numéro, un lien vers
+   elle ; « + n » au-delà de trois cases ; la légende des gravités à côté. include('./_flux-barre', { barre, titre, tid,
+   niveau, lienFlux, suiteLien }). */
+const niveau = it.niveau === 3 ? 'h3' : 'h2';
+const B = '<span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>';
+const G = ['critique', 'haute', 'moyenne', 'basse'];
+const graves = new Set((it.barre || []).flatMap(g => g.cases.map(c => c.grav)));
+%><div class="fx-barre-al"><<%= niveau %> class="fx-barre-t" id="<%= it.tid %>"><%= it.titre %></<%= niveau %>><ul class="fx-barre-g" aria-labelledby="<%= it.tid %>"><% for (const g of it.barre || []) { %><li class="g <%= g.classe %>"><span class="lb"><%= g.nom %> <b><%= g.n %></b></span><ol class="cases"><% for (const c of g.cases) { %><li class="c"><a class="grav grav--<%= G.includes(c.grav) ? c.grav : 'info' %>" href="/alertes/<%= c.id %>"><%~ B %>#<%= c.id %><span class="sr-only">, <%= String(c.mot).toLowerCase() %></span></a></li><% } %><% if (g.plus > 0) { %><li class="c"><a class="grav grav--info" href="/flux#t-tab-al">+<%= g.plus %><span class="sr-only"> <%= g.plus > 1 ? 'autres alertes' : 'autre alerte' %> de cette origine, dans le tableau des flux</span></a></li><% } %></ol></li><% } %></ul><ul class="grav-legende fx-barre-leg" aria-label="Gravité d’une alerte"><% for (const k of G.filter(x => graves.has(x))) { %><li><span class="grav grav--<%= k %>"><%~ B %><%= { critique: 'Critique', haute: 'Haute', moyenne: 'Moyenne', basse: 'Basse' }[k] %></span></li><% } %></ul><% if (it.lienFlux) { %><p class="fx-voir"><a class="vg-lien" href="<%= it.lienFlux.href %>"><%= it.lienFlux.texte %></a> <span class="sec"><%= it.lienFlux.suite %></span></p><% } %></div>

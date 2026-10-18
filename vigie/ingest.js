@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import net from 'node:net';
 import Fastify from 'fastify';
 import { isSiteType, SEVERITIES, SITE_COMPOSANTS } from './vocabulaire.js';
-import { clean, num } from './util.js';
+import { clean, num, netOf } from './util.js';
 
 const str = v => (typeof v === 'string' ? v : null);
 
@@ -30,7 +30,7 @@ export function createIngest({ store, decisions, ingestKey, now = Date.now, logg
     // Une alerte par minute au plus : un site mal réglé (clé, horloge) ne noie pas la base.
     if (now() - lastRefusal > 60e3) {
       lastRefusal = now();
-      store.own('vigie_ingestion_refusee', { emetteur: 'vigie/ingest.js', detail: { raison, route: request.routeOptions?.url || request.url.slice(0, 60) }, ip: request.ip, ip_net: request.ip });
+      store.own('vigie_ingestion_refusee', { emetteur: 'vigie/ingest.js', detail: { raison, route: request.routeOptions?.url || request.url.slice(0, 60) }, ip: request.ip, ip_net: netOf(request.ip) });
     }
     return reply.code(401).send({ error: raison });
   };

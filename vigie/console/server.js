@@ -12,6 +12,7 @@ import { createConsoleOidc } from './oidc.js';
 import { createRights, createCeilingReader, ceilingOf, can, ACTIONS, LABELS } from './droits.js';
 import { createSessions, IDLE, ABSOLUTE, CEILING_EVERY, CEILING_GRACE, FRESH } from './sessions.js';
 import { overview, compteurs } from './vue-ensemble.js';
+import { ECRANS } from './ecrans/index.js';
 
 // Console de la Vigie (annexe architecture § 5), sur son propre port (4200, adresse fixe du réseau du tunnel). Trois
 // verrous, dans cet ordre, à chaque requête :
@@ -193,10 +194,10 @@ export function createConsole({ config, store, engine, switches, decisions, zita
     return true;
   }
 
-  const view = (reply, req, name, it) => render(reply, name, {
+  const view = (reply, req, name, it, code = 200) => render(reply, name, {
     moi: { nom: req.moi.nom, sub: req.moi.sub, role: req.moi.role }, csrf: req.moi.csrf,
     compteurs: compteurs({ db, engine, switches, now }), ...it,
-  });
+  }, code);
 
   // Connexion : aller vers Zitadel (PKCE, state, nonce gardés en base, le state aussi dans un cookie de 10 minutes).
   async function startLogin(req, reply, { retour, reauth = null }) {
@@ -277,10 +278,16 @@ export function createConsole({ config, store, engine, switches, decisions, zita
     return view(reply, req, 'vue-ensemble', { page: 'vue', titre: 'Vue d’ensemble · Vigie', vue, fragment: false });
   });
 
-  // Écrans des phases D3b et D3c : page d'attente dans la console (mêmes verrous).
+  // Écrans, un module par groupe (vigie/console/ecrans/*.js) : chacun déclare ses routes avec ce contexte. Les routes
+  // héritent des trois verrous (crochets ci-dessus) ; une route d'action appelle guard().
+  const ctx = { db, store, engine, switches, decisions, rights, now, view, render, page, guard, isRefresh, log,
+    moiVue: req => ({ nom: req.moi.nom, sub: req.moi.sub, role: req.moi.role }) };
+  const served = new Set();
+  for (const mod of ECRANS) for (const url of mod.register(app, ctx) || []) served.add(url);
+  // Écrans pas encore codés : page d'attente dans la console (mêmes verrous).
   for (const [url, pageId] of [['/alertes', 'alertes'], ['/evenements', 'evenements'], ['/entites', 'entites'], ['/sante', 'sante'], ['/flux', 'flux'],
     ['/decisions', 'decisions'], ['/reglages', 'reglages'], ['/droits', 'droits']]) {
-    app.get(url, async (req, reply) => view(reply, req, 'a-venir', { page: pageId, titre: 'Vigie' }));
+    if (!served.has(url)) app.get(url, async (req, reply) => view(reply, req, 'a-venir', { page: pageId, titre: 'Vigie' }));
   }
 
   app.setNotFoundHandler(async (req, reply) => {

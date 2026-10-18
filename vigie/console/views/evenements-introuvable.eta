@@ -1,0 +1,18 @@
+<%
+/* Événement ou entité introuvable (404) : une page en session, sobre, avec deux chemins de retour. it.quoi : 'evenement' ou
+   'entite'. Rien de la requête n'y est repris. */
+const ev = it.quoi === 'evenement';
+layout('./layout', { titre: it.titre });
+%>
+<header class="ep">
+  <a class="ep-retour" href="<%= ev ? '/evenements' : '/entites' %>"><%= ev ? 'Événements' : 'Entités' %></a>
+  <div class="ep-titre"><h1><%= ev ? 'Événement introuvable' : 'Entité introuvable' %></h1></div>
+</header>
+<div class="vg-vide">
+<p class="t"><%= ev ? 'Ce numéro n’est pas dans le journal.' : 'La Vigie ne connaît pas cette entité.' %></p>
+<p><%= ev ? 'Le journal garde les événements 6 mois ; un numéro plus ancien a été purgé (la purge est notée dans la chaîne).' : 'Ni score, ni lien, ni alerte, ni événement : l’adresse de la page est peut-être mal recopiée, ou l’entité s’est effacée (score : 30 jours, liens : 90 jours).' %></p>
+<ul>
+<li><a class="vg-lien" href="<%= ev ? '/evenements' : '/entites' %>"><%= ev ? 'Le journal des événements' : 'Les entités les plus chaudes' %></a></li>
+<li><a class="vg-lien" href="/">Revenir à la vue d’ensemble</a></li>
+</ul>
+</div>
