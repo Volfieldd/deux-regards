@@ -111,6 +111,14 @@ depuis la page sans script. Aucun événement nouveau ; proposition : que la Vig
 `excess_rate_limit_exceeded` / envois acceptés sur `partage` et `aime` pour recaler la limite (phase D), et rattache une
 rafale sur ces deux routes au score d'adresse (DS22) plutôt qu'à DS15.
 
+### BV-7 — Referer de la photo offerte (durcissement, pas un cas de détection)
+
+La page `/pour-vous/<jeton>` pose `Referrer-Policy: no-referrer`, mais le crochet `onSend` de `server/app.js` (~l. 290)
+réécrit tous les en-têtes de sécurité à la fin et le remplace par `strict-origin-when-cross-origin`. Les autres sites ne
+reçoivent que l'origine, jamais le jeton : risque faible. Correctif : ne pas réécrire `referrer-policy` quand la route
+l'a déjà posé. Même question pour `/partage/instagram/<jeton>` et `/bonjour/<réf>-<code>`. Rien à détecter ; noté ici
+parce que le fichier est partagé avec la Vigie.
+
 ### BV-8 — Saisie de recherche impossible pour le formulaire
 
 Le champ de recherche est limité à 100 caractères et n'existe qu'une fois. Le serveur coupe une saisie plus longue et
@@ -124,14 +132,6 @@ Aujourd'hui, ni limite ni signal côté site sur `/recherche` (seule la règle `
 Cloudflare est installé). Proposition : une limite par adresse (60 en 10 minutes) qui, une fois atteinte, répond 429 et
 émet `excess_rate_limit_exceeded` (détail : `limite: 'recherche'`), gravité `bas`, rattachée à DS15 et au score
 d'adresse (DS22).
-
-### BV-7 — Referer de la photo offerte (durcissement, pas un cas de détection)
-
-La page `/pour-vous/<jeton>` pose `Referrer-Policy: no-referrer`, mais le crochet `onSend` de `server/app.js` (~l. 290)
-réécrit tous les en-têtes de sécurité à la fin et le remplace par `strict-origin-when-cross-origin`. Les autres sites ne
-reçoivent que l'origine, jamais le jeton : risque faible. Correctif : ne pas réécrire `referrer-policy` quand la route
-l'a déjà posé. Même question pour `/partage/instagram/<jeton>` et `/bonjour/<réf>-<code>`. Rien à détecter ; noté ici
-parce que le fichier est partagé avec la Vigie.
 
 ---
 
