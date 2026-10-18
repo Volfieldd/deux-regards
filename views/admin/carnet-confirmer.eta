@@ -1,0 +1,14 @@
+<% layout('./layout') %>
+<% /* Renvoyer un billet (remarque obligatoire), le retirer du site (raison obligatoire, 410) ou le supprimer (jamais publié) :
+      une page de confirmation, comme le dialogue de la planche (titre = la question avec l'objet, conséquences, Annuler, l'action). */ %>
+<% const t = (k, x) => it.ty(it.t(k, x)), post = it.post, a = it.action;
+   const TXT = { renvoyer: { lead: t('Le billet revient à ses auteurs « à reprendre », avec votre remarque (dans l’éditeur et par e-mail).'), label: t('Votre remarque'), go: t('Renvoyer avec cette remarque') },
+     retirer: { lead: t('Le billet sort de la liste, du flux et du plan du site ; son adresse répond « retiré » (410). Il pourra être republié.'), label: t('Pourquoi le retirer'), go: t('Retirer du site') },
+     supprimer: { lead: t('Le billet n’a jamais été publié : il est effacé, avec ses versions. Ses photos restent dans la photothèque.'), go: t('Supprimer le billet') } }[a]; %>
+<header class="ep"><a class="ep-retour" href="/admin/carnet/<%= post.id %>">← <%= post.title %></a><div class="ep-titre"><h1><%= it.title %></h1></div></header>
+<form class="panel form" method="post" action="/admin/carnet/<%= post.id %>/<%= a %>">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <p><%= TXT.lead %></p>
+<% if (it.field) { %>  <div class="champ-a"><label for="motif"><%= TXT.label %></label><textarea id="motif" name="<%= it.field %>" rows="4" maxlength="1000" required></textarea></div>
+<% } %>  <div class="form-pied"><a class="btn ghost" href="/admin/carnet/<%= post.id %>"><%= t('Annuler') %></a><button class="btn<%= a === 'renvoyer' ? '' : ' danger-c' %>" type="submit"><%= TXT.go %></button></div>
+</form>

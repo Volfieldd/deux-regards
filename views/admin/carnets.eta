@@ -1,0 +1,57 @@
+<% layout('./layout') %>
+<% /* Carnets (étude, § 1.5 ; planche MQ-00, administration) : la liste des billets, le plus récent d'abord, avec leur état
+      (pastille ○ ◐ ● ▲ ✕ de la planche), leurs signatures, leur rubrique et leur date ; un billet neuf ; l'adresse de
+      « Écrire aux auteurs ». En cartes sous 1 100 px (.liste-a). */ %>
+<% const t = (k, x) => it.ty(it.t(k, x));
+   const fmt = ms => (ms ? new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Paris' }).format(ms).replace(/ /g, '\u00a0') : '');
+   const when = p => (p.state === 'publie' || p.state === 'retire' ? t('publié le {date}', { date: fmt(p.published_at) }) : p.state === 'programme' ? t('programmé pour le {date}', { date: fmt(p.publish_at) }) : t('modifié le {date}', { date: fmt(p.updated_at) })); %>
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Carnets') %></h1></div>
+  <p class="ep-meta"><span><%= it.list.length > 1 ? t('{n} billets', { n: it.list.length }) : t('{n} billet', { n: it.list.length }) %></span><span><%= t('{n} publiés', { n: it.list.filter(p => p.state === 'publie').length }) %></span></p>
+</header>
+<% if (!it.v2) { %>
+<div class="note-a"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.2"/></svg><p><%= t('Les Carnets n’existent que dans la version 2 du site public : tant que la v1 est appliquée (Apparence), leurs pages ne sont visibles que dans l’aperçu de la v2.') %></p></div>
+<% } %>
+<% if (it.canCreate) { %>
+<form class="panel form" method="post" action="/admin/carnet" aria-labelledby="nouveau-t">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <h2 class="panel-t" id="nouveau-t"><%= t('Nouveau billet') %></h2>
+  <div class="champ-a"><label for="nouveau-titre"><%= t('Titre') %></label><input type="text" id="nouveau-titre" name="title" maxlength="120" required></div>
+  <fieldset class="choix-a choix-a--ligne"><legend><%= t('Rubrique') %></legend>
+<% it.RUBRIQUES.forEach((r, i) => { %>    <label><input type="radio" name="rubrique" value="<%= r %>"<%~ i === 1 ? ' checked' : '' %>><span><%= t(it.RUBRIQUE_NAMES.fr[r]) %></span></label>
+<% }) %>  </fieldset>
+<% if (it.authors.length > 1) { %>  <fieldset class="choix-a choix-a--ligne"><legend><%= t('Signature') %></legend><p class="aide"><%= t('Une ou deux signatures.') %></p>
+<% it.authors.forEach((a, i) => { %>    <label><input type="checkbox" name="authors[]" value="<%= a.id %>"<%~ i === 0 ? ' checked' : '' %>><span><%= a.name %></span></label>
+<% }) %>  </fieldset>
+<% } %>  <div class="form-pied"><button class="btn" type="submit"><%= t('Commencer le billet') %></button></div>
+</form>
+<% } %>
+<% if (!it.list.length) { %>
+<p class="empty"><%= t('Aucun billet pour l’instant.') %></p>
+<% } else { %>
+<div class="liste-wrap">
+<table class="liste-a">
+  <caption><%= t('Les billets, le plus récent d’abord') %></caption>
+  <thead><tr><th scope="col"><%= t('Billet') %></th><th scope="col"><%= t('État') %></th><th scope="col"><%= t('Signature') %></th><th scope="col"><%= t('Rubrique') %></th><th scope="col"><%= t('Date') %></th></tr></thead>
+  <tbody>
+<% it.list.forEach(p => { %>    <tr>
+      <th scope="row"><span class="billet-l"><% if (p.cover && p.cover.ready) { %><%~ it.picture(p.cover, { sizes: '56px', alt: '' }) %><% } else { %><span class="ph" aria-hidden="true"></span><% } %><a class="ligne-lien" href="/admin/carnet/<%= p.id %>"><%= p.title %></a><span class="sec mono">/carnet/<%= p.slug %></span></span></th>
+      <td class="c-etat"><%~ it.pill(p.state) %></td>
+      <td class="c-demi" data-label="<%= t('Signature') %>"><%= p.who %></td>
+      <td class="c-demi" data-label="<%= t('Rubrique') %>"><%= p.rubriqueName %></td>
+      <td class="c-demi" data-label="<%= t('Date') %>"><%= when(p) %></td>
+    </tr>
+<% }) %>  </tbody>
+</table>
+</div>
+<% } %>
+<% if (it.canContact) { %>
+<form class="panel form" method="post" action="/admin/carnet/reglages" aria-labelledby="contact-t">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <h2 class="panel-t" id="contact-t"><%= t('Écrire aux auteurs') %></h2>
+  <div class="champ-a"><label for="carnet-contact"><%= t('Adresse e-mail') %> <span class="facultatif"><%= t('(facultatif)') %></span></label>
+    <p class="aide" id="carnet-contact-aide"><%= t('En bas de chaque billet, « Écrire à … » ouvre un message vers cette adresse (rien n’est gardé par le site). Vide : l’e-mail des mentions légales{fallback}.', { fallback: it.contact.fallback ? ` (${it.contact.fallback})` : '' }) %></p>
+    <input type="email" id="carnet-contact" name="carnet_contact" value="<%= it.contact.value %>" maxlength="200" aria-describedby="carnet-contact-aide"></div>
+  <div class="form-pied"><button class="btn ghost" type="submit"><%= t('Enregistrer l’adresse') %></button></div>
+</form>
+<% } %>

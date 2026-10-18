@@ -1,0 +1,13 @@
+<% layout('./layout') %>
+<% /* Une photo ouverte depuis l'aperçu d'un billet (MQ-20, état 15) : la visionneuse du billet, aux jetons du site (nuit),
+      « ← titre du billet », « 2 / 3 · photos du billet », ses voisines du billet, son cartel ; une photo non publiée le dit. */ %>
+<% const t = (k, x) => it.ty(it.t(k, x)), p = it.p, post = it.post, q = it.lang !== 'fr' ? `?langue=${it.lang}` : '';
+   const url = x => `/admin/carnet/${post.id}/apercu/photo/${encodeURIComponent(x.slug)}${q}`;
+   const ICON = d => `<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${d}</svg>`; %>
+<div class="vis-b mode-nuit theme-nicephos">
+  <p class="bandeau"><%= t('Aperçu · non publié') %></p>
+  <div class="haut"><a href="/admin/carnet/<%= post.id %><%= q %>#photo-<%= it.n %>"><%~ ICON('<path d="M19 12H5M11 6l-6 6 6 6"/>') %><%= post.title %></a><span class="pos"><%= t('{n} / {total} · photos du billet', { n: it.n, total: it.count }) %></span></div>
+  <figure><h1 class="sr-only"><%= p.title %></h1><%~ it.picture(p, { sizes: '(max-width: 720px) 100vw, 900px', eager: true, alt: it.alt }) %>
+    <figcaption><p class="t"><%= p.title %></p><p class="m"><%= it.meta %></p><% if (p.status !== 'published') { %><p class="np"><%= t('Non publiée : la visionneuse publique ne la montrera qu’une fois publiée.') %></p><% } %></figcaption></figure>
+  <nav class="voisines" aria-label="<%= t('Photos voisines du billet') %>"><% if (it.prev) { %><a href="<%= url(it.prev) %>" rel="prev"><%~ ICON('<path d="M15 6l-6 6 6 6"/>') %><%= t('Précédente') %><span class="sr-only"> : <%= it.prev.title %></span></a><% } else { %><span></span><% } %><% if (it.next) { %><a href="<%= url(it.next) %>" rel="next"><%= t('Suivante') %><span class="sr-only"> : <%= it.next.title %></span><%~ ICON('<path d="M9 6l6 6-6 6"/>') %></a><% } %></nav>
+</div>
