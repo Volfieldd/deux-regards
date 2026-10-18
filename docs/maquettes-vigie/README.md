@@ -1,8 +1,8 @@
 # Maquettes de la console de la Vigie (phase D2)
 
-Dix maquettes en HTML et CSS, sans dépendance ni script obligatoire : neuf écrans de la console de la Vigie (`https://vigie.nicephos.art`, annexe architecture, section 5) et son affichage dans l'administration du site (MV-10). Elles reposent sur le commun des maquettes de l'administration ([`../audit-ergonomie-2026-10-16/maquettes/_commun/`](../audit-ergonomie-2026-10-16/maquettes/_commun/)), sur **une seule feuille propre à la console**, [`_vigie/vigie.css`](_vigie/vigie.css), sur [`_vigie/admin-site.css`](_vigie/admin-site.css) pour ce qui ne sert qu'à l'admin du site, et sur le référentiel de mots et de données fictives [LEXIQUE-ET-DONNEES.md](LEXIQUE-ET-DONNEES.md). Grille du jury : celle de l'administration ([`GRILLE.md`](../audit-ergonomie-2026-10-16/maquettes/GRILLE.md)), avec ses contrôles outillés.
+Onze maquettes en HTML et CSS, sans dépendance ni script obligatoire : dix écrans de la console de la Vigie (`https://vigie.nicephos.art`, annexe architecture, section 5) et son affichage dans l'administration du site (MV-10). Elles reposent sur le commun des maquettes de l'administration ([`../audit-ergonomie-2026-10-16/maquettes/_commun/`](../audit-ergonomie-2026-10-16/maquettes/_commun/)), sur **une seule feuille propre à la console**, [`_vigie/vigie.css`](_vigie/vigie.css), sur [`_vigie/admin-site.css`](_vigie/admin-site.css) pour ce qui ne sert qu'à l'admin du site, et sur le référentiel de mots et de données fictives [LEXIQUE-ET-DONNEES.md](LEXIQUE-ET-DONNEES.md). Grille du jury : celle de l'administration ([`GRILLE.md`](../audit-ergonomie-2026-10-16/maquettes/GRILLE.md)), avec ses contrôles outillés.
 
-Dessinées par quatre personnes en parallèle (MV-01 et MV-02 ; MV-03 et MV-04 ; MV-05, MV-06 et MV-08 ; MV-07, MV-09 et MV-10), elles ont été consolidées le 18 oct. 2026 : une feuille au lieu de quatre, mêmes barre latérale, barre d'onglets, mots, données et composants d'un écran à l'autre, liens entre écrans vers les adresses que les autres montrent, arbitrages du § 3.13 du lexique repris partout. Après le jury v1 (deux jurés indépendants), la passe 2 du même jour applique les dix-huit arbitrages du § 3.14 ; après le jury v2, la passe 3 applique les treize du § 3.15 et montre comme faits les comportements de la PR #121 de la Vigie ; après le jury v3, les finitions appliquent les sept points du § 3.16 (textes de la PR #124).
+Dessinées par quatre personnes en parallèle (MV-01 et MV-02 ; MV-03 et MV-04 ; MV-05, MV-06 et MV-08 ; MV-07, MV-09 et MV-10), elles ont été consolidées le 18 oct. 2026 : une feuille au lieu de quatre, mêmes barre latérale, barre d'onglets, mots, données et composants d'un écran à l'autre, liens entre écrans vers les adresses que les autres montrent, arbitrages du § 3.13 du lexique repris partout. Après le jury v1 (deux jurés indépendants), la passe 2 du même jour applique les dix-huit arbitrages du § 3.14 ; après le jury v2, la passe 3 applique les treize du § 3.15 et montre comme faits les comportements de la PR #121 de la Vigie ; après le jury v3, les finitions appliquent les sept points du § 3.16 (textes de la PR #124). Après validation de MV-01 à MV-10 (PR #125), les photographes ont demandé MV-11, « Flux et provenance des alertes » (§ 3.17), refondue après son jury (§ 3.18), et sa barre de provenance dans MV-01.
 
 ## La liste
 
@@ -18,6 +18,7 @@ Dessinées par quatre personnes en parallèle (MV-01 et MV-02 ; MV-03 et MV-04 ;
 | [MV-08](MV-08-droits.html) | Droits de la console : deux clés (plafond, attribution), journal, rôles, garde-fous | `/droits` | [bureau](MV-08-droits-bureau.webp) · [téléphone](MV-08-droits-mobile.webp) |
 | [MV-09](MV-09-acces.html) | Accès, pages hors session : connexion refusée, second facteur, ré-authentification, session expirée, 403 | `/connexion`, `/reauth` | [bureau](MV-09-acces-bureau.webp) · [téléphone](MV-09-acces-mobile.webp) |
 | [MV-10](MV-10-admin-site.html) | Dans l'admin du site : entrée « Sécurité », bandeau, ligne d'« Aujourd'hui » ; messages Signal et e-mail | `/admin` | [bureau](MV-10-admin-site-bureau.webp) · [téléphone](MV-10-admin-site-mobile.webp) |
+| [MV-11](MV-11-flux.html) | Flux et provenance des alertes : « Les 6 alertes » (une bande égale par alerte), puis « Les 319 événements », leurs tables, provenances ; barre de provenance dans MV-01 | `/flux` | [bureau](MV-11-flux-bureau.webp) · [téléphone](MV-11-flux-mobile.webp) |
 
 Le contenu attendu de chaque écran et ses états sont au § 4 du lexique ; les données, au § 3 (tableaux de référence à l'état final, § 3.1 à 3.6).
 
@@ -25,7 +26,7 @@ Le contenu attendu de chaque écran et ses états sont au § 4 du lexique ; les 
 
 Ouvrez le fichier `MV-xx-….html` dans un navigateur, en gardant le dépôt entier : les pages chargent le commun de l'administration par `../audit-ergonomie-2026-10-16/maquettes/_commun/` et `_vigie/vigie.css` (console) ou `_vigie/admin-site.css` (MV-10). Aucune ressource externe, aucun script. `#sans-annotations` à la fin de l'adresse masque les annotations sans rien déplacer.
 
-Rendus comme ceux de l'administration : `-bureau.webp` en pleine page à 1 440 × 900, densité 1, thème « Chambre noire » ; `-mobile.webp` sur Pixel 7 (412 × 839), densité 2, thème clair ; au-delà de 16 000 px de haut, la capture est coupée en bandes posées côte à côte, à lire de gauche à droite, coupées entre deux blocs. Rendus téléphone en 3 bandes, sauf MV-02, MV-08 et MV-09 (2). Les barres fixes du téléphone (barre d'actions, barre d'onglets) apparaissent une fois, au bas du premier écran.
+Rendus comme ceux de l'administration : `-bureau.webp` en pleine page à 1 440 × 900, densité 1, thème « Chambre noire » ; `-mobile.webp` sur Pixel 7 (412 × 839), densité 2, thème clair ; au-delà de 16 000 px de haut, la capture est coupée en bandes posées côte à côte, à lire de gauche à droite, coupées entre deux blocs. Rendus téléphone en 3 bandes, sauf MV-02, MV-08 et MV-09 (2) et MV-11 (4). Les barres fixes du téléphone (barre d'actions, barre d'onglets) apparaissent une fois, au bas du premier écran.
 
 ## Règles propres à la console (état du 18 oct. 2026, après les finitions)
 
@@ -39,6 +40,8 @@ Elles s'ajoutent à celles de l'administration (planche MQ-00, `GRILLE.md`). `_v
 - **Titre de la page** : « Page · Vigie · Nicephos », une alerte par son numéro : ni compte ni adresse dans le titre. L'adresse de la page, elle, porte une adresse IP pour un Intervenant (`/entites/ip/…`) : toutes les pages sont servies `Cache-Control: no-store` et `Referrer-Policy: no-referrer`. Pour un Lecteur, une adresse complète n'est jamais acceptée dans l'adresse d'une page ni dans un filtre (redirection vers le réseau, filtres en /24 ou /48).
 
 **Lire**
+
+- **Flux** (MV-11, § 24, § 3.18 et § 3.19) : deux diagrammes de Sankey rendus par le serveur, sans script. **« Les 6 alertes »** en tête : origine → source → chemin (ceux du code : preuve directe, score d’une entité, corrélation, sans point) → alerte, une bande d’épaisseur égale par alerte, son numéro et sa pastille de gravité au bout ; **« Les 319 événements »** dessous, à l’échelle des événements. Des flux continus : les libellés des sources et des chemins sont au-dessus de leur nœud, sur une ligne, sur une plaque du fond. La teinte dit la source (Vigie sarcelle sombre, bordure bleue, Zitadel lilas, site ambre : 1,5 au moins pour toutes les paires, en sombre et en clair), la saturation dit l’issue : pleine et cernée à 3:1 vers une alerte, pâle (25 %) vers rien, grise (11 %) vers « sans alerte », qui se lit à son nœud. Deux boîtes de dessin : 760 unités dès 1 024 px, 1 120 au-delà de 1 280 px. Au téléphone, pas de Sankey : la barre « 6 alertes par origine » (pastilles de gravité, légende) et les tableaux. Mise en page : `dr-tmp/vigie-mq/flux.py`, référence du rendu serveur de D3.
 
 - **Gravité : le mot, une jauge, la couleur** (`.grav`, § 1) ; la légende d'une liste d'alertes, dans la légende (`caption`) du tableau, n'a que Critique, Haute, Moyenne (Basse et Info ne se voient qu'au journal).
 - **Un seul composant d'état** : la pastille de l'admin (`.etat`, symbole et mot), sa variante neutre pour un attribut sans action (« Protégée : vue avec un administrateur », « Administrateur ») (§ 10) ; le même dessin dans une phrase et sur une carte (l'icône d'une carte de santé ne déteint plus sur sa pastille, § 15).
@@ -80,35 +83,36 @@ Elles s'ajoutent à celles de l'administration (planche MQ-00, `GRILLE.md`). `_v
 
 **Encart** : « Ce que montre l'écran », la commande de `vigie/cli.js` équivalente, ce qui est « à créer », les écarts avec le lexique et le code, et les **styles à embarquer** (la console dépend de `liste-a`, `champ-a`, `note-a`, `kv-a`, `plier`, absents de `public/admin/admin.css` : D3) ; un seul bloc « Mesures », écrit par `mesures-vigie.py`.
 
-## Contrôles passés (18 oct. 2026, finitions)
+## Contrôles passés (18 oct. 2026, MV-11 ajoutée)
 
-Tous repassés sur les dix pages des finitions, une colonne par maquette ; tout est à 0 défaut. Console (MV-01 à MV-09) : textes à 13 px au moins, français seul ; admin du site (MV-10) : 12 px au moins, en français et avec la barre latérale allemande (« Sicherheit »), pied de la barre au toucher de 721 à 1 440 px (102 mesures, thème et « Se déconnecter » à 44 px). Les essais des deux jurés tournent à chaque passe ; depuis la passe 3, avec tous les `<details>` ouverts à 320 et 412 px, l'espacement du texte à 412 px et les noms en double cherchés dans chaque cadre d'état. Le poids d'une page de la console va de 281 à 402 ko : la feuille unique porte les composants des neuf écrans et se met en cache d'une page à l'autre.
+Tous repassés sur les onze pages (MV-11 comprise), une colonne par maquette ; tout est à 0 défaut. Console (MV-01 à MV-09, MV-11) : textes à 13 px au moins, français seul ; admin du site (MV-10) : 12 px au moins, en français et avec la barre latérale allemande (« Sicherheit »), pied de la barre au toucher de 721 à 1 440 px (102 mesures, thème et « Se déconnecter » à 44 px). Les essais des deux jurés tournent à chaque passe ; depuis la passe 3, avec tous les `<details>` ouverts à 320 et 412 px, l'espacement du texte à 412 px et les noms en double cherchés dans chaque cadre d'état. Le poids d'une page de la console va de 290 à 501 ko : la feuille unique porte les composants des neuf écrans et se met en cache d'une page à l'autre.
 
-| Contrôle | MV-01 | MV-02 | MV-03 | MV-04 | MV-05 | MV-06 | MV-07 | MV-08 | MV-09 | MV-10 |
-|---|---|---|---|---|---|---|---|---|---|---|
-| axe-core, bureau sombre et Pixel 7 clair (violations) | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
-| axe-core sans `inert` (violations ; inert retirés) | 0 / 0 (4) | 0 / 0 (6) | 0 / 0 (3) | 0 / 0 (3) | 0 / 0 (7) | 0 / 0 (5) | 0 / 0 (5) | 0 / 0 (5) | 0 / 0 (6) | 0 / 0 (7) |
-| débordement, 11 largeurs, et à 320 et 412 px `<details>` ouverts | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun |
-| débordement de 320 à 1 440 px au pas de 16, à 900, 1 024, 1 100 px de haut (mesures) | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 540 |
-| ellipses | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune |
-| lignes qui défilent sans suite visible | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| barre latérale : rien n’en sort ; bas du compte (bureau) | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | sans barre | oui ; 900 px ; fr et de |
-| cibles sous 24 px (bureau) / 44 px (toucher) | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
-| textes sous 13 px (console) ou 12 px (admin), bureau / téléphone | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
-| focus visible, sombre et clair, inert retirés (éléments, 0 invisible) | 47, 0 | 48, 0 | 72, 0 | 47, 0 | 76, 0 | 123, 0 | 34, 0 | 19, 0 | 11, 0 | 109, 0 |
-| focus caché par une barre fixe, menu ouvert compris | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| html-validate (erreurs) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| formulaires (noms, boutons, `_csrf` sur tout POST) | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire |
-| annotations à 1 440, 412, 320 px | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire |
-| insécables à poser | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| groupes de radios (aucun partagé entre cadres) | 0 | 2 | 0 | 2 | 3 | 0 | 0 | 0 | 0 | 0 |
-| cohérence des données (contradictions) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| espacement du texte (WCAG 1.4.12) à 320, 412, 1 440 px, et `<details>` ouverts à 320 et 412 px (défauts) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| contraste forcé : bouton sans bordure, sélection invisible | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| identifiants (.ip, .sub, code) coupés en fin de ligne, 320, 412, 1 440 px, `<details>` ouverts compris ; commandes coupées dans un mot | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| liens ou boutons de même nom vers des cibles différentes, écran et cadres d’état | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| transitions ou animations en mouvement réduit | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| poids, polices et CSS compris (ko) | 318 | 308 | 336 | 314 | 316 | 402 | 314 | 300 | 281 | 296 |
+| Contrôle | MV-01 | MV-02 | MV-03 | MV-04 | MV-05 | MV-06 | MV-07 | MV-08 | MV-09 | MV-10 | MV-11 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| axe-core, bureau sombre et Pixel 7 clair (violations) | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| axe-core sans `inert` (violations ; inert retirés) | 0 / 0 (4) | 0 / 0 (6) | 0 / 0 (3) | 0 / 0 (3) | 0 / 0 (7) | 0 / 0 (5) | 0 / 0 (5) | 0 / 0 (5) | 0 / 0 (6) | 0 / 0 (7) | 0 / 0 (6) |
+| débordement, 11 largeurs, et à 320 et 412 px `<details>` ouverts | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun |
+| débordement de 320 à 1 440 px au pas de 16, à 900, 1 024, 1 100 px de haut (mesures) | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 540 | 270 |
+| ellipses | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune |
+| lignes qui défilent sans suite visible | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| barre latérale : rien n’en sort ; bas du compte (bureau) | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | sans barre | oui ; 900 px ; fr et de | oui ; 900 px |
+| cibles sous 24 px (bureau) / 44 px (toucher) | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| textes sous 13 px (console) ou 12 px (admin), bureau / téléphone | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| focus visible, sombre et clair, inert retirés (éléments, 0 invisible) | 55, 0 | 50, 0 | 73, 0 | 48, 0 | 77, 0 | 124, 0 | 35, 0 | 20, 0 | 11, 0 | 109, 0 | 59, 0 |
+| focus caché par une barre fixe, menu ouvert compris | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| html-validate (erreurs) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| formulaires (noms, boutons, `_csrf` sur tout POST) | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire |
+| annotations à 1 440, 412, 320 px | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire |
+| insécables à poser | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| groupes de radios (aucun partagé entre cadres) | 0 | 2 | 0 | 2 | 3 | 0 | 0 | 0 | 0 | 0 | 0 |
+| cohérence des données (contradictions) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| espacement du texte (WCAG 1.4.12) à 320, 412, 1 440 px, et `<details>` ouverts à 320 et 412 px (défauts) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| contraste forcé : bouton sans bordure, sélection invisible | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| identifiants (.ip, .sub, code) coupés en fin de ligne, 320, 412, 1 440 px, `<details>` ouverts compris ; commandes coupées dans un mot | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| liens ou boutons de même nom vers des cibles différentes, écran et cadres d’état | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| transitions ou animations en mouvement réduit | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| diagrammes SVG : libellés qui se chevauchent, hors cadre, sous 13 px ou sur une bande ; contours sous 3:1 ; paires de teintes sous 1,5 (320 à 1 440 px) | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | 0 (10 SVG, 126 libellés) |
+| poids, polices et CSS compris (ko) | 331 | 318 | 346 | 324 | 326 | 412 | 324 | 310 | 290 | 296 | 501 |
 
 
 Les outils de `dr-work/outils/` filtrent sur `MQ-` ou visent le dossier des maquettes de l'administration : ils ont été **copiés et adaptés** dans `dr-work/dr-tmp/vigie-mq/` (sans les modifier), avec les générateurs. Depuis la consolidation, deux commandes suffisent :
@@ -163,3 +167,12 @@ Notes de 9 à 10 ; dernier tour, sans nouveau jury. Les sept points du § 3.16 d
 3. **MV-08** : « retirez son plafond `vigie.*` dans Zitadel : il perd l'accès dans les 5 minutes, et ne peut plus agir dès la requête suivante » ; relecture du plafond à créer en D3. 4. **MV-01** : la légende des gravités dans la légende (`caption`) du tableau.
 5. **MV-06** : un seul « Arrêter… » par carte, au bureau aussi ; motif, durées et autre durée sur la page de confirmation (l'erreur d'une autre durée y est dessinée) ; l'identité confirmée reste dans l'en-tête au téléphone.
 6. **Textes** : apostrophe typographique (« jusqu’à 15 h 10 ») ; descente de mode « passée de Bloquer à Observer » (MV-06, MV-10) ; synthèse au-delà de 60 gestes par heure (MV-10). 7. **Imitation** : SPF, DKIM et DMARC nommés pour l'e-mail de secours (MV-10, lexique).
+
+## MV-11, flux et provenance des alertes (après validation, puis refonte, 18 oct. 2026)
+
+Demandée par les photographes en validant MV-01 à MV-10 (§ 3.17 du lexique), sur le modèle du bilan énergétique de Lawrence Livermore ; refondue après son jury (5 et 8), selon les quatorze points du § 3.18 (le premier dessin disait d'où viennent les événements, pas les alertes), puis finie après son second jury (8 et 9) selon le § 3.19 : flux continus, deux boîtes de dessin, barre de MV-01 par origine avec pastilles, luminances écartées pour toutes les paires, provenance des alertes sur une ligne au téléphone.
+
+- **Mise en page** (`flux.py`, sans dépendance, déterministe : la référence de `vigie/flux.js` en D3) : chemins → nœuds et liens regroupés par teinte, issue et mise en avant ; des colonnes calculées d'après la largeur des libellés des deux bouts ; les libellés du milieu au-dessus de leur nœud, sur une plaque, les colonnes décalées pour qu'un libellé long ne rencontre pas celui de la colonne suivante ; une échelle commune ; l'ordre du métier (par gravité de l'issue) ; un écart entre nœuds voisins assez grand pour leurs libellés ; des rubans en Bézier cubiques, d'un nœud au suivant.
+- **Données** (`flux_donnees.py`, partagé avec la barre de MV-01) : les 319 événements du journal de MV-03 et les 6 alertes de MV-01, vérifiés par des assertions et par `coherence-vigie.py` (règles F1 à F3, et O1, O2 pour les opérateurs).
+- **Téléphone** : pas de Sankey ; la phrase, la barre « 6 alertes par origine », les tableaux avec leurs intitulés ; « Voir le diagramme » l'ouvre à sa taille, dans un cadre qui défile.
+- **Essai** `flux-lisible.mjs` : de 320 à 1 440 px, aucun libellé qui en chevauche un autre, hors cadre, sous 13 px ou posé sur une bande ou un nœud ; au moins un libellé par diagramme ; le diagramme des alertes affiché dès 1 024 px ; contours des bandes d'alerte à 3:1 au moins et toutes les paires de teintes à 1,5 au moins, en sombre et en clair ; la cohérence compare les barres de MV-01 et de MV-11. Il relève bien les copies sabotées des jurés et les nôtres.
