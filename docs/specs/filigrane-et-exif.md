@@ -39,8 +39,8 @@ Les **originaux ne sont jamais modifiés** : filigrane et métadonnées ne conce
 |---|---|
 | **Aucune métadonnée** (défaut) | Rien : EXIF, XMP, GPS et profil retirés. |
 | **Droits d'auteur** | `Artist` = nom de l'auteur, `Copyright` = `© année auteur`, écrits par le site (pas recopiés). Champs ASCII : « © 2024 Sébastien » devient « (C) 2024 Sebastien ». |
-| **Prise de vue** | Droits + `Make`, `Model`, `LensModel`, `ExposureTime`, `FNumber`, `ISOSpeedRatings`, `FocalLength`, `DateTimeOriginal` recopiés de l'original. **Jamais** de GPS ni de numéro de série. |
-| **Tout l'EXIF de l'original** | L'EXIF complet de l'original, **GPS compris**. Signalé comme à éviter dans l'admin. |
+| **Prise de vue** | Droits + `Make`, `Model`, `LensModel`, `ExposureTime`, `FNumber`, `ISOSpeedRatings`, `FocalLength` recopiés de l'original ; `DateTimeOriginal` seulement pour une photo qui montre son heure sur le site (case « Montrer l'heure sur le site », date au jour : `meta.time`, qui entre dans l'empreinte des variantes). **Jamais** de GPS ni de numéro de série. |
+| **Tout l'EXIF de l'original** | L'EXIF complet de l'original, **GPS et heure de prise de vue compris**, quelle que soit la case de la fiche (qui le rappelle). Signalé comme à éviter dans l'admin. |
 
 Dans tous les cas, l'orientation est appliquée aux pixels et la balise `Orientation` vaut 1 (pas de double rotation dans les navigateurs).
 

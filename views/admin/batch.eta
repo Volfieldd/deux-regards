@@ -69,7 +69,9 @@
         <td class="c-place" data-label="<%= t('Lieu') %>"><input name="place_<%= p.id %>" value="<%= v.place || '' %>" maxlength="120" aria-label="<%= t('Lieu de la photo {id}', { id: p.id }) %>" data-field="place"></td>
         <td class="c-date" data-label="<%= t('Date') %>">
           <input name="taken_on_<%= p.id %>" value="<%= v.taken_on || '' %>" maxlength="40" placeholder="<%= t('oct. 2026') %>" aria-label="<%= t('Date de la photo {id}', { id: p.id }) %>" data-field="taken_on" aria-describedby="date-<%= p.id %>"<%~ e.taken_on ? ' aria-invalid="true"' : '' %>>
-          <span class="cellnote<%= e.taken_on ? ' err' : '' %>" id="date-<%= p.id %>"><%= e.taken_on || (p.when ? t('compris : {date}', { date: p.when }) : '') %></span>
+<% /* Heure de prise de vue (EXIF) avec la date ; data-time : gardée par admin.js quand la date est réécrite. */
+   const shot = p.taken_time ? t('prise à {time}', { time: it.lang === 'fr' ? p.taken_time.replace(':', ' h ') : p.taken_time }) : ''; %>
+          <span class="cellnote<%= e.taken_on ? ' err' : '' %>" id="date-<%= p.id %>" data-time="<%= shot %>"><%= e.taken_on || [p.when && t('compris : {date}', { date: p.when }), shot].filter(Boolean).join(' · ') %></span>
         </td>
         <td class="c-state"><span class="saved" data-state><%= p.status === 'published' ? '● ' + t('Publiée') : '○ ' + t('Brouillon') %></span></td>
       </tr>

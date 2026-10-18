@@ -156,7 +156,7 @@ export const UI = {
     v2: {
       skip: 'Aller au contenu', menu: 'Menu', home: 'Accueil', homeOf: site => `${site}, accueil`, back: 'Retour\u202f: ',
       prev: 'Précédente', next: 'Suivante', photosOf: ctx => `Photos\u202f: ${ctx}`,
-      placeDate: 'Lieu et date', serie: 'Série', photographer: 'Photographe',
+      placeDate: 'Lieu et date', placeDateTime: 'Lieu, date et heure', serie: 'Série', photographer: 'Photographe',
       keys: 'Clavier', keysPrevNext: 'précédente, suivante', keyEsc: 'Échap', keysBack: 'retour',
       fullscreen: 'Plein écran', quit: 'Quitter', fullscreenLabel: 'Photo en plein écran',
       rights: 'Droits et licences', rightsText: 'Pour la presse, une entreprise ou tout usage hors du cadre privé\u202f: nos conditions et comment nous écrire.',
@@ -269,7 +269,7 @@ export const UI = {
     v2: {
       skip: 'Skip to content', menu: 'Menu', home: 'Home', homeOf: site => `${site}, home`, back: 'Back: ',
       prev: 'Previous', next: 'Next', photosOf: ctx => `Photos: ${ctx}`,
-      placeDate: 'Place and date', serie: 'Series', photographer: 'Photographer',
+      placeDate: 'Place and date', placeDateTime: 'Place, date and time', serie: 'Series', photographer: 'Photographer',
       keys: 'Keyboard', keysPrevNext: 'previous, next', keyEsc: 'Esc', keysBack: 'back',
       fullscreen: 'Full screen', quit: 'Exit', fullscreenLabel: 'Photo in full screen',
       rights: 'Rights and licences', rightsText: 'For the press, a company or any use beyond private use: our terms and how to write to us.',
@@ -382,7 +382,7 @@ export const UI = {
     v2: {
       skip: 'Zum Inhalt springen', menu: 'Menü', home: 'Startseite', homeOf: site => `${site}, Startseite`, back: 'Zurück: ',
       prev: 'Vorheriges', next: 'Nächstes', photosOf: ctx => `Fotos: ${ctx}`,
-      placeDate: 'Ort und Datum', serie: 'Serie', photographer: 'Fotograf',
+      placeDate: 'Ort und Datum', placeDateTime: 'Ort, Datum und Uhrzeit', serie: 'Serie', photographer: 'Fotograf',
       keys: 'Tastatur', keysPrevNext: 'vorheriges, nächstes', keyEsc: 'Esc', keysBack: 'zurück',
       fullscreen: 'Vollbild', quit: 'Beenden', fullscreenLabel: 'Foto im Vollbild',
       rights: 'Rechte und Lizenzen', rightsText: 'Für die Presse, ein Unternehmen oder jede Nutzung über den privaten Rahmen hinaus: unsere Bedingungen und wie Sie uns schreiben.',

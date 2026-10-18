@@ -4,6 +4,7 @@ import path from 'node:path';
 import { renderVariants, renderPreview, removeVariants, hasVariants, VARIANT_RE } from './images.js';
 import { FONTS, POSITIONS, KINDS, TONE_LABELS } from './watermark.js';
 import { IMPORT_CONCURRENCY } from './imports.js';
+import { shownTime } from './format.js';
 
 // Version du rendu : à incrémenter si le code de rendu change, pour régénérer toutes les variantes.
 const PIPELINE = 2;                // 2 : mentions IPTC (XMP) dans les modes signés
@@ -11,7 +12,7 @@ const PIPELINE = 2;                // 2 : mentions IPTC (XMP) dans les modes sig
 export const EXIF_MODES = {
   none: { label: 'Aucune métadonnée', help: 'Tout est retiré (recommandé). Comportement par défaut.' },
   rights: { label: 'Droits d’auteur', help: 'Auteur, copyright (« © année auteur ») et mentions IPTC : crédit, lien vers la page « Droits d’utilisation ».' },
-  shooting: { label: 'Prise de vue', help: 'Droits d’auteur + appareil, objectif, ouverture, vitesse, ISO, focale et date. Jamais la localisation.' },
+  shooting: { label: 'Prise de vue', help: 'Droits d’auteur + appareil, objectif, ouverture, vitesse, ISO, focale ; la date et l’heure seulement pour une photo qui montre son heure sur le site. Jamais la localisation.' },
   all: { label: 'Tout l’EXIF de l’original', help: 'Mentions IPTC + tout l’EXIF, y compris la localisation GPS et le numéro de série éventuel. À éviter.' },
 };
 export const MIN_WIDTHS = { 0: 'Toutes les tailles', 1280: '1280 px et plus (vignettes épargnées)', 2000: '2000 px seulement' };
@@ -81,8 +82,11 @@ export function specFor(p, { watermark, exif, siteName, watermarkDir, rightsUrl,
     }
     if (mark) Object.assign(mark, { position: watermark.position, opacity: watermark.opacity, size: watermark.size, margin: watermark.margin, minWidth: watermark.minWidth });
   }
+  // Mode « prise de vue » : la date et l'heure de l'appareil (DateTimeOriginal) ne partent qu'avec une photo qui montre
+  // son heure sur le site (case de la fiche, date au jour) ; time entre dans l'empreinte, les images suivent la case.
   const meta = exif.mode === 'none' ? null
-    : { mode: exif.mode, artist: p.author, copyright: `© ${yearOf(p)} ${p.author}`, credit: siteName, webStatement: rightsUrl || null };
+    : { mode: exif.mode, artist: p.author, copyright: `© ${yearOf(p)} ${p.author}`, credit: siteName, webStatement: rightsUrl || null,
+      ...(exif.mode === 'shooting' ? { time: shownTime(p) ? 1 : 0 } : {}) };
   if (!mark && !meta) return { key: '', mark: null, meta: null };
   const { imagePath, ...hashed } = mark || {};
   const key = crypto.createHash('sha256').update(JSON.stringify({ v: PIPELINE, mark: mark && hashed, meta })).digest('hex').slice(0, 8);
@@ -96,7 +100,7 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
   const watermarkDir = path.join(storageDir, 'watermarks');
   const variantsDir = path.join(storageDir, 'variants');
   fs.mkdirSync(watermarkDir, { recursive: true });
-  const SELECT = `SELECT p.id, p.file, p.width, p.height, p.title, p.taken_on, p.created_at, p.watermark, p.variant_key, a.name AS author
+  const SELECT = `SELECT p.id, p.file, p.width, p.height, p.title, p.taken_on, p.taken_time, p.show_time, p.created_at, p.watermark, p.variant_key, a.name AS author
     FROM photos p JOIN authors a ON a.id = p.author_id`;
   const q = {
     ids: db.prepare('SELECT id FROM photos ORDER BY position, id').pluck(),

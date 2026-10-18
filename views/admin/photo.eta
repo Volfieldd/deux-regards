@@ -64,6 +64,12 @@
     </div>
 <% } %>
     <label><%= t('Date') %> <span class="mono"><%= t('AAAA-MM ou AAAA-MM-JJ') %><%= it.photo.taken_time ? ' · ' + t('prise à {time}', { time: fr ? it.photo.taken_time.replace(':', ' h ') : it.photo.taken_time }) : '' %></span><input name="taken_on" value="<%= v.taken_on || '' %>" placeholder="<%= t('AAAA-MM ou AAAA-MM-JJ') %>" inputmode="numeric"<%~ inv('taken_on') %>></label><% if (e.taken_on) { %><span class="err" id="err-taken_on"><%= e.taken_on %></span><% } %>
+<% /* Heure sur le site : proposée seulement si l'heure de prise de vue est connue ; décochée par défaut. */
+   if (/^\d{2}:\d{2}$/.test(it.photo.taken_time || '')) { const showTime = Number(v.show_time) === 1; %>
+    <label class="inline"><input type="checkbox" name="show_time" value="1"<%~ showTime ? ' checked' : '' %> aria-describedby="show_time-aide"> <%= t('Montrer l’heure sur le site') %> <span class="mono">(<%= fr ? it.photo.taken_time.replace(':', ' h ') : it.photo.taken_time %>)</span></label>
+    <p class="hint" id="show_time-aide"><%= t('Avec le lieu, l’heure dit où se trouvaient les personnes photographiées à ce moment-là. Le site ne la montre qu’avec une date au jour.') %><% if (showTime && !/^\d{4}-\d{2}-\d{2}$/.test(it.photo.taken_on || '')) { %> <%= t('Date au mois : l’heure n’est pas montrée.') %><% } %></p>
+<% if (it.exifAll) { %>    <p class="hint warn"><%~ t('Métadonnées « Tout l’EXIF de l’original » ({link}) : les images servies portent l’heure (et la position GPS), quel que soit ce choix.', { link: `<a href="/admin/images">${esc(t('Filigrane & EXIF'))}</a>` }) %></p>
+<% } %><% } %>
     <label><%= t('Légende') %> <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'legend', label: t('Légende'), max: 2000, rows: 3 }) %>
 <% if (it.description) { const d = it.description; %>    <div class="desc-sugg" id="description" data-desc data-desc-url="/admin/photos/<%= it.photo.id %>/description"<%~ d.pending ? ' data-desc-pending' : '' %>>

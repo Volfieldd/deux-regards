@@ -87,9 +87,9 @@
   "en": "Shooting data",
   "de": "Aufnahmedaten"
  },
- "Droits d’auteur + appareil, objectif, ouverture, vitesse, ISO, focale et date. Jamais la localisation.": {
-  "en": "Copyright + camera, lens, aperture, shutter speed, ISO, focal length and date. Never the location.",
-  "de": "Urheberrecht + Kamera, Objektiv, Blende, Belichtungszeit, ISO, Brennweite und Datum. Nie der Standort."
+ "Droits d’auteur + appareil, objectif, ouverture, vitesse, ISO, focale ; la date et l’heure seulement pour une photo qui montre son heure sur le site. Jamais la localisation.": {
+  "en": "Copyright + camera, lens, aperture, shutter speed, ISO, focal length; the date and time only for a photo that shows its time on the site. Never the location.",
+  "de": "Urheberrecht + Kamera, Objektiv, Blende, Belichtungszeit, ISO, Brennweite; Datum und Uhrzeit nur bei einem Foto, das seine Uhrzeit auf der Website zeigt. Nie der Standort."
  },
  "Tout l’EXIF de l’original": {
   "en": "All EXIF of the original",

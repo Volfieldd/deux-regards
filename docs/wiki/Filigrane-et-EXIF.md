@@ -67,8 +67,8 @@ Dans la fiche de la photo, choisir **Filigrane : Jamais sur cette photo**, puis 
 |---|---|---|
 | **Aucune métadonnée** (défaut) | Rien. | Par défaut : rien ne fuit. |
 | **Droits d'auteur** | Auteur, « © année auteur », et mentions IPTC (crédit, lien vers la page « Droits d'utilisation ») | Pour signer les fichiers. Voir [Preuves d'antériorité et droits](Preuves-et-droits#signer-les-images-mentions-iptc). |
-| **Prise de vue** | Droits + appareil, objectif, ouverture, vitesse, ISO, focale, date | Pour partager sa technique. **Jamais la localisation.** |
-| **Tout l'EXIF de l'original** | Tout, **y compris la position GPS** et le numéro de série éventuel | Rarement : révèle où la photo a été prise. |
+| **Prise de vue** | Droits + appareil, objectif, ouverture, vitesse, ISO, focale ; date et heure seulement pour une photo qui montre son heure sur le site (case de la fiche) | Pour partager sa technique. **Jamais la localisation.** |
+| **Tout l'EXIF de l'original** | Tout, **y compris la position GPS, l'heure de prise de vue** et le numéro de série éventuel | Rarement : révèle où et quand la photo a été prise. |
 
 Les champs EXIF n'acceptent que des caractères simples : « © 2024 Sébastien » y est écrit « (C) 2024 Sebastien ». Les mentions IPTC (XMP) et le filigrane, eux, gardent les accents.
 

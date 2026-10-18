@@ -88,6 +88,7 @@ const I18N = {
   "{n} photo": {"en": "{n} photo", "de": "{n} Foto"},
   "Cochez au moins une photo.": {"en": "Tick at least one photo.", "de": "Wählen Sie mindestens ein Foto aus."},
   "compris : {when}": {"en": "read as: {when}", "de": "erkannt: {when}"},
+  "prise à {time}": {"en": "taken at {time}", "de": "aufgenommen um {time}"},
   "✓ Enregistré": {"en": "✓ Saved", "de": "✓ Gespeichert"},
   "● Enregistrement…": {"en": "● Saving…", "de": "● Wird gespeichert…"},
   "! Non enregistré": {"en": "! Not saved", "de": "! Nicht gespeichert"},
@@ -848,7 +849,7 @@ const activity = (() => {
             const f = $('input[data-field=taken_on]', row);
             f.value = r.values.taken_on; f.dataset.saved = f.value;
             f.removeAttribute('aria-invalid');
-            const note = $('.cellnote', f.closest('td')); note.classList.remove('err'); note.textContent = tr('compris : {when}', { when: r.values.taken_on });
+            const note = $('.cellnote', f.closest('td')); note.classList.remove('err'); note.textContent = [tr('compris : {when}', { when: r.values.taken_on }), note.dataset.time].filter(Boolean).join(' · ');
           }
           $('[data-state]', row).textContent = tr('✓ Enregistré');
         }
@@ -902,7 +903,8 @@ const activity = (() => {
       const { photo } = await postJson(`/admin/photos/${id}/champs`, { [key]: value });
       field.removeAttribute('aria-invalid');
       field.dataset.saved = key === 'taken_on' ? (photo.taken_on || '') : value;
-      if (note) { note.classList.remove('err'); note.textContent = photo.when ? tr('compris : {when}', { when: photo.when }) : ''; }
+      // L'heure de prise de vue (data-time) reste à côté de la date comprise.
+      if (note) { note.classList.remove('err'); note.textContent = [photo.when && tr('compris : {when}', { when: photo.when }), note.dataset.time].filter(Boolean).join(' · '); }
       if (key === 'title') {
         row.dataset.title = photo.title;
         row.toggleAttribute('data-provisional', photo.provisional);
@@ -1394,7 +1396,8 @@ const activity = (() => {
     put('place', p.place || '');
     put('taken_on', p.taken_on || '');
     put('author_id', p.author_id ? String(p.author_id) : '');
-    $('[data-one-when]', insp).textContent = p.when ? tr('compris : {when}', { when: p.when }) : '';
+    // Heure de prise de vue (EXIF) avec la date ; le choix de la montrer sur le site se fait dans la fiche.
+    $('[data-one-when]', insp).textContent = [p.when && tr('compris : {when}', { when: p.when }), p.time && tr('prise à {time}', { time: p.time })].filter(Boolean).join(' · ');
     $('[data-one-prov]', insp).hidden = !p.provisional;
     $('[data-one-n]', insp).textContent = `/photo/${p.slug}`;
     $('[data-one-link]', insp).href = `/admin/photos/${p.id}`;

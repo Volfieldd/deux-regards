@@ -7,7 +7,8 @@
    // Le contexte de la visionneuse : la vue d'où l'on vient (filtres de la galerie), qui règle l'ordre des voisines.
    const ctx = it.filter.serie && it.filter.regard ? `${p.category}, ${t.by(p.author)}` : it.filter.serie ? p.category : it.filter.regard ? p.author : t.nav.gallery;
    const pos = `${it.position} / ${it.count}`;
-   const date = v.date(p.taken_on);
+   // L'heure suit la date (« 10 oct. 2026, 14 h 32 ») seulement si le photographe a choisi de la montrer (p.time).
+   const date = [v.date(p.taken_on), p.time].filter(Boolean).join(', ');
    const meta = [p.author, p.place, date].filter(Boolean).join(' · ');
    const prevUrl = it.photoUrl(it.prev.slug, it.filter), nextUrl = it.photoUrl(it.next.slug, it.filter);
    const kws = it.showKeywords && p.keywords ? p.keywords.split(',').map(k => k.trim()).filter(Boolean) : []; %>
@@ -42,7 +43,7 @@
 <% } %>
         <dl class="def">
 <% if (p.place || date) { %>
-          <dt><%= t.v2.placeDate %></dt><dd><%= [p.place, date].filter(Boolean).join(' · ') %></dd>
+          <dt><%= p.time ? t.v2.placeDateTime : t.v2.placeDate %></dt><dd><%= [p.place, date].filter(Boolean).join(' · ') %></dd>
 <% } %>
           <dt><%= t.v2.serie %></dt><dd><a href="<%= it.galleryUrl({ serie: p.category_slug }) %>"><%= p.category %></a></dd>
           <dt><%= t.v2.photographer %></dt><dd><a href="<%= it.galleryUrl({ regard: p.author_slug }) %>"><%= p.author %></a><% if (it.authorCount) { %>&nbsp;· <%= nb(t.photos(it.authorCount)) %><% } %></dd>

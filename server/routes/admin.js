@@ -302,11 +302,13 @@ export default async function adminRoutes(app) {
   // Images de l'admin : vignette (la plus petite variante) et grande image (1280 px au plus).
   const thumb = p => `/admin/media/${variantName(p.file, widthsFor(p.width)[0], 'webp', p.variant_key)}`;
   const large = p => { const ws = widthsFor(p.width); return `/admin/media/${variantName(p.file, ws.filter(w => w <= 1280).at(-1) ?? ws[0], 'webp', p.variant_key)}`; };
+  // Heure de prise de vue dans l'admin (« 14 h 32 » en français, « 14:32 » sinon), toujours montrée avec la date.
+  const hourOf = (time, lang) => (lang === 'fr' ? time.replace(':', ' h ') : time);
   // Données d'une photo pour l'inspecteur de la photothèque.
   const dataOf = (p, lang = 'fr') => ({
     id: p.id, n: p.n, title: p.title, slug: p.slug, legend: p.legend, status: p.status, provisional: p.provisional,
     category_id: p.category_id, category: p.category, author_id: p.author_id, author: p.author, place: p.place,
-    taken_on: p.taken_on, when: p.when, width: p.width, height: p.height, ready: p.ready,
+    taken_on: p.taken_on, when: p.when, time: p.taken_time ? hourOf(p.taken_time, lang) : '', width: p.width, height: p.height, ready: p.ready,
     city_id: p.city_id ?? null, city: cities.labelOf(p, lang), city_source: p.city_source ?? null, on_map: Boolean(p.on_map),
     thumb: p.ready ? thumb(p) : null, large: p.ready ? large(p) : null, suggest: p.suggest || [],
   });
@@ -928,6 +930,8 @@ export default async function adminRoutes(app) {
     audience: request.owns('statistiques.voir', photo.author_id) ? photoStats(photo.id) : null, shares: request.owns('statistiques.voir', photo.author_id) ? app.shares.forPhoto(photo.id) : 0, insta: instaOf(photo, t),
     encounters: request.owns('personnes.voir', photo.author_id) ? app.encounters.forPhoto(photo.id).filter(e => request.owns('personnes.voir', encounterAuthor.get(e.id)?.author_id)) : [],
     outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
+    // Réglage des images « tout l'EXIF » : l'heure part avec les fichiers servis, quel que soit le choix de la fiche.
+    exifAll: repo.settings().exif?.mode === 'all',
     notes: app.notes.open({ photoId: photo.id }), ownPhoto: app.accounts.authorIdOf(request.session.sub) === photo.author_id,
     // Instagram : la main sur la file pour cette photo, ou seulement la proposer (circuit) ; sa proposition en cours.
     // Mots-clés suggérés par CLIP (empreinte des propositions de séries) ; null : pas encore d'empreinte.

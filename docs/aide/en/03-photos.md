@@ -110,7 +110,8 @@ If saving fails (session expired…), the previous order comes back and a messag
 | **Address** | the end of the URL: `/photo/<adresse>`. Empty: derived from the title. Lower case, digits and hyphens; it must be unique. Changing it breaks old shared links (the opening slideshow, however, follows). |
 | **Series**, **Photographer** | lists |
 | **Place** | free text, 120 characters |
-| **Date** | in everyday language: “mars 2024”, “3/2024”, “2/3/2024” or `2024-03` |
+| **Date** | in everyday language: “mars 2024”, “3/2024”, “2/3/2024” or `2024-03`. The shooting time read from the camera (“taken at 14:32”) is shown next to it; the admin always shows it with the date (record, photo library, “Complete and publish”, To approve, outings). |
+| **Show the time on the site** | offered only if the shooting time is known, **unticked at first**. Ticked, the photo’s page shows the time after the date (“1 May 2025, 2:32 pm”; “14 h 32” in French, “14:32 Uhr” in German), and only if the date is to the day (not “mars 2024”). Together with the place, the time tells where the people photographed were at that moment: only tick it knowingly. Nowhere else on the site (gallery, Nearby, map, sharing, sitemap); with “Shooting data” metadata, the date and time of the images served follow the box (see [Watermark and EXIF](filigrane-exif)). Same right as the date: photographers set it for their own photos. |
 | **Caption** | shown under the photo, 2000 characters |
 | **Status** | Draft or Published |
 | **Watermark** | “As per settings”, or “Never on this photo” (see [Watermark and EXIF](filigrane-exif)) |

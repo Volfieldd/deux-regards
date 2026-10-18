@@ -110,7 +110,8 @@ Si l’enregistrement échoue (session expirée…), l’ordre précédent revie
 | **Adresse** | la fin de l'URL : `/photo/<adresse>`. Vide : déduite du titre. Minuscules, chiffres et tirets ; elle doit être unique. La changer casse les anciens liens partagés (l'ouverture, elle, suit). |
 | **Série**, **Photographe** | listes |
 | **Lieu** | texte libre, 120 caractères |
-| **Date** | en langage courant : « mars 2024 », « 3/2024 », « 2/3/2024 » ou `2024-03` |
+| **Date** | en langage courant : « mars 2024 », « 3/2024 », « 2/3/2024 » ou `2024-03`. L'heure de prise de vue lue dans l'appareil (« prise à 14 h 32 ») est rappelée à côté ; l'admin la montre toujours avec la date (fiche, photothèque, « Compléter et publier », À valider, sorties). |
+| **Montrer l'heure sur le site** | proposée seulement si l'heure de prise de vue est connue, **décochée au départ**. Cochée, la page de la photo affiche l'heure après la date (« 1 mai 2025, 14 h 32 » ; « 2:32 pm » en anglais, « 14:32 Uhr » en allemand), et seulement si la date est au jour (pas « mars 2024 »). Avec le lieu, l'heure dit où se trouvaient les personnes photographiées à ce moment-là : ne la cochez qu'en connaissance de cause. Nulle part ailleurs sur le site (galerie, À proximité, carte, partage, plan du site) ; en métadonnées « Prise de vue », la date et l'heure des images servies suivent la case (voir [Filigrane et EXIF](filigrane-exif)). Même droit que la date : le photographe la règle pour ses photos. |
 | **Légende** | affichée sous la photo, 2000 caractères |
 | **Statut** | Brouillon ou Publiée |
 | **Filigrane** | « Selon les réglages », ou « Jamais sur cette photo » (voir [Filigrane et EXIF](filigrane-exif)) |

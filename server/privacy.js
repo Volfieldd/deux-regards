@@ -3,7 +3,7 @@
 // le code fait réellement : toute évolution d'un traitement ou d'une durée se reporte ici dans la même modification.
 // Responsables conjoints : les auteurs du site ; contact réglable dans l'admin (privacy_contact).
 
-export const UPDATED = '2026-10-16';
+export const UPDATED = '2026-10-18';
 // Date du paragraphe « Journal de sécurité », affiché seulement avec la Vigie (facultative).
 export const UPDATED_SECURITY_LOG = '2026-10-17';
 
@@ -22,6 +22,7 @@ export const PRIVACY = {
       ['Les photos', [
         'Nous photographions dans la rue, à des fins artistiques. Une photo où vous êtes reconnaissable n’est publiée (sur ce site, sur Instagram, en exposition ou en tirage) que pour les usages que vous avez acceptés, ou dans le cadre de la liberté d’expression artistique.',
         'Si vous refusez, la photo ne peut plus être publiée : nous la retirons du site et de la file Instagram. Un post déjà publié sur Instagram est supprimé à la main par nos soins.',
+        'Avec une photo publiée, le site indique le lieu et le mois ou le jour de la prise de vue. L’heure, qui dirait avec le lieu où vous vous trouviez à ce moment-là, n’est jamais montrée par défaut : seulement sur la page d’une photo pour laquelle nous l’avons choisi.',
         'Les photos ne sont jamais analysées pour reconnaître des visages. Sur notre serveur, un programme repère seulement s’il y a un visage sur une photo, et où (sans chercher à qui il appartient, et sans rien garder qui permette de le reconnaître) : cela nous dit s’il faut obtenir l’accord de quelqu’un avant de la publier.',
         'Pour nous aider à ranger les photos par série, le même serveur peut aussi calculer une empreinte de chaque image (une suite de nombres qui décrit son allure générale : lumière, couleurs, sujet). Elle sert seulement à comparer les photos entre elles, ne permet pas de reconnaître une personne, ne quitte jamais le serveur et est effacée avec la photo.',
       ]],
@@ -77,6 +78,7 @@ export const PRIVACY = {
       ['Photographs', [
         'We photograph in the street, for artistic purposes. A photograph in which you are recognisable is only published (on this website, on Instagram, in exhibitions or as prints) for the uses you have agreed to, or within the freedom of artistic expression.',
         'If you refuse, the photograph can no longer be published: we remove it from the website and from the Instagram queue. A post already published on Instagram is deleted by hand by us.',
+        'With a published photograph, the website gives the place and the month or day it was taken. The time, which together with the place would tell where you were at that moment, is never shown by default: only on the page of a photograph for which we have chosen to.',
         'Photographs are never analysed to recognise faces. On our server, a program only detects whether there is a face in a photograph, and where (without trying to find out whose it is, and without keeping anything that would allow it to be recognised): this tells us whether we need someone’s consent before publishing it.',
         'To help us file photographs by series, the same server can also compute a fingerprint of each image (a series of numbers describing its general look: light, colours, subject). It is only used to compare photographs with each other, cannot recognise a person, never leaves the server and is deleted with the photograph.',
       ]],
@@ -132,6 +134,7 @@ export const PRIVACY = {
       ['Die Fotos', [
         'Wir fotografieren auf der Straße, zu künstlerischen Zwecken. Ein Foto, auf dem Sie erkennbar sind, wird nur für die Nutzungen veröffentlicht, denen Sie zugestimmt haben (auf dieser Website, auf Instagram, in Ausstellungen oder als Abzug), oder im Rahmen der künstlerischen Freiheit.',
         'Wenn Sie ablehnen, kann das Foto nicht mehr veröffentlicht werden: Wir entfernen es von der Website und aus der Instagram-Warteschlange. Einen bereits auf Instagram veröffentlichten Beitrag löschen wir von Hand.',
+        'Zu einem veröffentlichten Foto nennt die Website den Ort und den Monat oder Tag der Aufnahme. Die Uhrzeit, die zusammen mit dem Ort verraten würde, wo Sie sich in diesem Moment aufhielten, wird nie standardmäßig gezeigt: nur auf der Seite eines Fotos, für das wir es so gewählt haben.',
         'Die Fotos werden nie zur Gesichtserkennung ausgewertet. Auf unserem Server erkennt ein Programm nur, ob auf einem Foto ein Gesicht ist und wo (ohne herauszufinden, wem es gehört, und ohne etwas zu speichern, das eine Erkennung ermöglicht): So wissen wir, ob wir vor der Veröffentlichung jemandes Einwilligung brauchen.',
         'Um die Fotos nach Serien zu ordnen, kann derselbe Server außerdem einen Fingerabdruck jedes Bildes berechnen (eine Zahlenfolge, die seinen allgemeinen Eindruck beschreibt: Licht, Farben, Motiv). Er dient nur dazu, Fotos miteinander zu vergleichen, kann keine Person erkennen, verlässt den Server nie und wird mit dem Foto gelöscht.',
       ]],
