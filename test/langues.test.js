@@ -62,7 +62,8 @@ test('pages en anglais et en allemand : langue déclarée, menu et textes tradui
   assert.match(en.body, /<link rel="alternate" hreflang="de" href="http:\/\/localhost:3000\/de\/">/);
   assert.match(en.body, /<link rel="alternate" hreflang="x-default" href="http:\/\/localhost:3000\/">/);
   assert.match(en.body, /<meta property="og:locale" content="en_GB">/);
-  assert.match(en.body, /<summary aria-label="Language: English"><img class="flag" src="\/static\/flags\/en\.svg\?v=[0-9a-f]{10}"/);
+  // Nom lu : le code visible, puis son nom (pas d'aria-label, qui masquerait « EN » : WCAG 2.5.3).
+  assert.match(en.body, /<summary><img class="flag" src="\/static\/flags\/en\.svg\?v=[0-9a-f]{10}" alt="" width="20" height="14"><span>EN<\/span><span class="sr-only"> – Language: English<\/span><\/summary>/);
   const photo = (await app.inject('/de/photo/brume-sur-la-loire?serie=paysage')).body;
   assert.match(photo, /<html lang="de"/);
   assert.match(photo, />Schließen<\/a>/);

@@ -5,7 +5,7 @@ import { pad } from '../format.js';
 import { picture } from '../picture.js';
 import { RIGHTS, rightsText } from '../rights.js';
 import { PRIVACY, UPDATED as PRIVACY_UPDATED, UPDATED_SECURITY_LOG } from '../privacy.js';
-import { LEGAL } from '../legal.js';
+import { LEGAL, legalEmail, hostingOf } from '../legal.js';
 import { project, MAP } from '../geo/projection.js';
 import { countryName, nameOf } from '../geo/cities.js';
 import { createSearch, MAX_QUERY } from '../search.js';
@@ -593,10 +593,9 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const L = LEGAL[lang];
     const host = app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, '');
     // E-mail : celui des mentions légales, sinon le contact de la page Confidentialité s'il s'agit d'une adresse e-mail.
-    const privacyMail = String(s.privacy_contact || '').trim();
+    // Hébergement : par les éditeurs (par défaut), ou chez l'hébergeur nommé dans l'admin.
     const sections = L.sections({ site: siteName, names: String(s.legal_names || '').trim(), address: s.legal_address,
-      email: String(s.legal_email || '').trim() || (contactLink(privacyMail)?.startsWith('mailto:') ? privacyMail : ''),
-      phone: String(s.legal_phone || '').trim(), director: String(s.legal_director || '').trim(), host });
+      email: legalEmail(s), phone: String(s.legal_phone || '').trim(), director: String(s.legal_director || '').trim(), host, hosting: hostingOf(s) });
     app.stats.hit(request, { page: 'mentions-legales' });
     return reply.render('legal', { ...base, siteName, L, sections, pageTitle: `${L.title} · ${siteName}`, canonical: '/mentions-legales', description: L.description(siteName) });
   });

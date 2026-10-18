@@ -178,6 +178,7 @@ test('droits d’utilisation : page et lien en pied de page', async ({ page }) =
 
 // Audit automatique d'accessibilité (axe-core, WCAG 2.2 A/AA) des pages publiques.
 test('accessibilité du site : aucune violation sérieuse', async ({ page }) => {
+  test.setTimeout(90_000);            // 8 pages analysées : plus que les 30 s par défaut sur une machine chargée
   const { default: AxeBuilder } = await import('@axe-core/playwright');
   await page.emulateMedia({ reducedMotion: 'reduce' });   // mesure l'état final, pas une animation d'apparition
   await page.goto('/');

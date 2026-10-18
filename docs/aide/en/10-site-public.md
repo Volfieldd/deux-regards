@@ -69,7 +69,7 @@ The next photo depends on the active filter: in “Street, by Julien”, you sta
 
   As you zoom in, the background becomes more detailed (coastlines, borders, small islands): only the displayed area is loaded. The scroll wheel alone and vertical swiping on the whole-world map scroll the page, as elsewhere. Without JavaScript, the map is fixed and the list of places stays complete.
 - **“I took your photo”** (`/bonjour`): the page behind the QR code on consent cards and clothing (`/bonjour/J`: with the photographer’s name), with no link in the menu (see [Encounters](rencontres)).
-- **Legal notice** (`/mentions-legales`, “Impressum” in German, linked in the footer of every page): publishers, address, contact, person responsible for the content, hosting (see [Rights & privacy](reglages#mentions-légales-impressum)).
+- **Legal notice** (`/mentions-legales`, “Impressum” in German, linked in the footer of every page): publishers, address, contact (email as a link, phone), person responsible for the content (publication director), hosting (see [Rights & privacy](reglages#mentions-légales-impressum)).
 - **Privacy** (`/confidentialite`, in three languages, linked in the footer): who is responsible, what the site collects and why, for how long, who receives it, and how to exercise your rights (see [Rights & privacy](reglages#droits-et-confidentialité)).
 - **Page not found:** for an unknown address or an unpublished photo.
 

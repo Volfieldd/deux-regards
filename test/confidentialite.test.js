@@ -80,14 +80,71 @@ test('mentions légales / Impressum : en pied de chaque page, remplies depuis l�
   const cookies = Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
   const csrf = ctx.db.prepare('SELECT csrf FROM sessions').pluck().get();
   assert.match((await ctx.app.inject({ url: '/admin', cookies })).body, /Mentions légales \/ Impressum à compléter/);
-  await ctx.app.inject({ method: 'POST', url: '/admin/reglages', cookies, headers: { accept: 'text/html' }, payload: { _csrf: csrf, part: 'droits',
-    legal_names: 'Sébastien Exemple et Julien Exemple', legal_address: '1 rue des Photos\n49000 Angers\nFrance', legal_email: 'info@nicephos.art', legal_director: 'Sébastien Exemple' } });
+  const legal = { _csrf: csrf, part: 'droits', legal_names: 'Sébastien Exemple et Julien Exemple', legal_address: '1 rue des Photos\n49000 Angers\nFrance', legal_email: 'info@nicephos.art', legal_director: 'Sébastien Exemple' };
+  await ctx.app.inject({ method: 'POST', url: '/admin/reglages', cookies, headers: { accept: 'text/html' }, payload: legal });
+  // Le téléphone est dû (LCEN art. 1-1, personne physique qui édite le site) : sans lui, toujours incomplètes.
+  assert.match((await ctx.app.inject({ url: '/admin', cookies })).body, /Impressum à compléter/);
+  assert.match((await ctx.app.inject({ url: '/admin/droits', cookies })).body, /<p class="cellnote warn" id="mentions-manque">1 rubrique obligatoire à remplir : Téléphone\./);
+  await ctx.app.inject({ method: 'POST', url: '/admin/reglages', cookies, headers: { accept: 'text/html' }, payload: { ...legal, legal_phone: '+33 6 00 00 00 00' } });
   const de = (await ctx.app.inject('/de/mentions-legales')).body;
   assert.match(de, /<h1>Impressum<\/h1>/);
   assert.match(de, /Angaben gemäß § 5 DDG<\/h2>\s*<p>Sébastien Exemple et Julien Exemple<\/p>\s*<p>1 rue des Photos<\/p>\s*<p>49000 Angers<\/p>/);
   assert.match(de, /Verantwortlich für den Inhalt nach § 18 Abs\. 2 MStV<\/h2>\s*<p>Sébastien Exemple<\/p>/);
-  assert.match((await ctx.app.inject('/mentions-legales')).body, /E-mail : info@nicephos\.art/);
+  const fr = (await ctx.app.inject('/mentions-legales')).body;
+  assert.match(fr, /E-mail : <a class="more" href="mailto:info@nicephos\.art">info@nicephos\.art<\/a>/);   // l'e-mail, en lien
+  assert.match(fr, /Téléphone : \+33 6 00 00 00 00/);
+  assert.match(fr, /<h2>Directeur de la publication<\/h2>\s*<p>Sébastien Exemple<\/p>/);                    // le terme de la loi
+  assert.doesNotMatch(fr, /esponsable de la publication/);
   assert.doesNotMatch((await ctx.app.inject({ url: '/admin', cookies })).body, /Impressum à compléter/);
+  assert.doesNotMatch((await ctx.app.inject({ url: '/admin/droits', cookies })).body, /mentions-manque/);
   // Enregistrer la page Droits ne touche pas au site public, et inversement.
   assert.match((await ctx.app.inject({ url: '/admin/droits', cookies })).body, /name="legal_names" value="Sébastien Exemple et Julien Exemple"/);
+});
+
+test('mentions légales : hébergement par les éditeurs (page inchangée) ou chez un hébergeur nommé, en trois langues', async t => {
+  const ctx = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: TOKEN } });
+  const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', payload: { token: TOKEN, author: 'julien', next: '/admin' } });
+  const cookies = cookiesOf(res);
+  const csrf = ctx.db.prepare('SELECT csrf FROM sessions').pluck().get();
+  const legal = { _csrf: csrf, part: 'droits', legal_names: 'Sébastien Exemple et Julien Exemple', legal_address: '1 rue des Photos\n49000 Angers', legal_email: 'info@nicephos.art', legal_phone: '02 00 00 00 00', legal_director: 'Sébastien Exemple' };
+  const avant = (await ctx.app.inject('/mentions-legales')).body;
+  assert.match(avant, /Le site est hébergé par ses éditeurs, sur leur propre serveur, en France, à l’adresse ci-dessus\./);
+  // Réglages : le choix « éditeurs » est coché par défaut ; le téléphone le dit dû, puisqu'ils hébergent le site.
+  const page = (await ctx.app.inject({ url: '/admin/droits', cookies })).body;
+  assert.match(page, /name="legal_host" value="editeurs" checked>/);
+  assert.match(page, /Dû, puisque vous hébergez le site\./);
+  assert.match(page, /<input type="email" name="legal_email" value="" maxlength="200" autocomplete="email">/);
+  assert.match(page, /name="legal_phone" value="" maxlength="40" inputmode="tel" autocomplete="tel">/);
+  // Enregistrer sans toucher au choix : la rubrique Hébergement ne change pas (hors réglages des noms et adresse).
+  await ctx.app.inject({ method: 'POST', url: '/admin/reglages', cookies, headers: { accept: 'text/html' }, payload: { ...legal, legal_host: 'editeurs' } });
+  assert.equal(ctx.db.prepare("SELECT value FROM settings WHERE key = 'legal_host'").pluck().get(), '"editeurs"');
+  assert.match((await ctx.app.inject('/mentions-legales')).body, /<h2>Hébergement<\/h2>\s*<p>Le site est hébergé par ses éditeurs, sur leur propre serveur/);
+  // Chez un hébergeur, sans ses coordonnées : trois rubriques obligatoires manquent, et la page n'invente rien.
+  await ctx.app.inject({ method: 'POST', url: '/admin/reglages', cookies, headers: { accept: 'text/html' }, payload: { ...legal, legal_host: 'hebergeur' } });
+  const manque = (await ctx.app.inject({ url: '/admin/droits', cookies })).body;
+  assert.match(manque, /3 rubriques obligatoires à remplir : Nom de l’hébergeur, Adresse de l’hébergeur, Téléphone de l’hébergeur\./);
+  assert.match(manque, /name="legal_host" value="hebergeur" checked>/);
+  assert.match(manque, /Dû par la loi pour une personne qui édite un site\./);
+  assert.match((await ctx.app.inject({ url: '/admin', cookies })).body, /Impressum à compléter/);
+  const vide = (await ctx.app.inject('/mentions-legales')).body;
+  assert.doesNotMatch(vide, /hébergé par ses éditeurs|hébergé par \./);
+  assert.match(vide, /<h2>Hébergement<\/h2>\s*<p>Le trafic transite par Cloudflare/);
+  // Coordonnées données : la page nomme l'hébergeur, en trois langues ; plus rien ne manque.
+  await ctx.app.inject({ method: 'POST', url: '/admin/reglages', cookies, headers: { accept: 'text/html' }, payload: { ...legal, legal_host: 'hebergeur',
+    legal_host_name: 'Hébergeur Exemple SAS', legal_host_address: '2 rue du Serveur\n59100 Roubaix', legal_host_phone: '03 00 00 00 00' } });
+  assert.match((await ctx.app.inject('/mentions-legales')).body, /Le site est hébergé par Hébergeur Exemple SAS, 2 rue du Serveur, 59100 Roubaix, 03 00 00 00 00\./);
+  assert.match((await ctx.app.inject('/en/mentions-legales')).body, /The website is hosted by Hébergeur Exemple SAS, 2 rue du Serveur, 59100 Roubaix, 03 00 00 00 00\./);
+  assert.match((await ctx.app.inject('/de/mentions-legales')).body, /Die Website wird gehostet von Hébergeur Exemple SAS, 2 rue du Serveur, 59100 Roubaix, 03 00 00 00 00\./);
+  assert.match((await ctx.app.inject('/de/mentions-legales')).body, /Der Datenverkehr läuft über Cloudflare/);   // Cloudflare, dans les deux cas
+  assert.doesNotMatch((await ctx.app.inject({ url: '/admin', cookies })).body, /Impressum à compléter/);
+});
+
+test('mentions légales : l’e-mail est dû, et le contact de la confidentialité ne le remplace que s’il est une adresse e-mail', async () => {
+  const { legalMissing } = await import('../server/legal.js');
+  const base = { legal_names: 'A', legal_address: '1 rue', legal_phone: '01', legal_director: 'A' };
+  assert.deepEqual(legalMissing({ ...base, legal_email: 'a@exemple.fr' }), []);
+  assert.deepEqual(legalMissing({ ...base, privacy_contact: 'info@exemple.fr' }), []);
+  assert.deepEqual(legalMissing({ ...base, privacy_contact: 'https://exemple.fr/contact' }), ['email']);  // un formulaire n'est pas un e-mail
+  assert.deepEqual(legalMissing({ ...base, legal_phone: ' ' }), ['email', 'phone']);
+  assert.deepEqual(legalMissing({ ...base, legal_email: 'a@exemple.fr', legal_host: 'hebergeur', legal_host_name: 'H' }), ['host_address', 'host_phone']);
 });

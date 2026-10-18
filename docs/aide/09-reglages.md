@@ -48,10 +48,12 @@ Obligatoires en France (LCEN) comme en Allemagne (Impressum, § 5 DDG) : la page
 
 - **Éditeurs** : vos prénoms et noms ;
 - **Adresse postale** : une adresse où l'on peut vous joindre (une ligne par ligne d'adresse) ;
-- **E-mail** (vide : celui de la confidentialité) et **téléphone** (facultatif) ;
-- **Responsable de la publication** : une personne (en Allemagne, « Verantwortlich nach § 18 MStV »).
+- **E-mail de contact** : publié en lien sur la page (vide, celui de la confidentialité le remplace s'il s'agit d'une adresse e-mail, pas d'un lien `https://`) ;
+- **Téléphone** : dû, pour une personne qui édite un site (LCEN, art. 1-1 ; § 5 DDG en Allemagne), que vous hébergiez le site ou non ;
+- **Directeur de la publication** : la personne qui répond de ce qui est publié (LCEN, art. 1-1 ; en Allemagne, « Verantwortlich nach § 18 MStV ») ;
+- **Hébergement** : **Par les éditeurs, sur leur serveur** (par défaut : la page le dit, avec l'adresse et le téléphone ci-dessus) ou **Chez un hébergeur** : son **nom**, son **adresse** et son **téléphone** sont alors demandés, et la page le nomme (« Le site est hébergé par … »). L'acheminement par Cloudflare est mentionné dans les deux cas.
 
-Tant qu'il manque l'essentiel (noms, adresse, e-mail, responsable), « Aujourd'hui » le signale et la page n'affiche que ce qui est rempli. L'hébergement (votre serveur, en France ; acheminement par Cloudflare) et les renvois vers les droits d'utilisation et la confidentialité sont ajoutés tout seuls.
+Tant qu'il manque une rubrique obligatoire (noms, adresse, e-mail, téléphone, directeur de la publication ; chez un hébergeur, ses nom, adresse et téléphone), la rubrique le dit (« 2 rubriques obligatoires à remplir : Téléphone, Directeur de la publication »), « Aujourd'hui » le signale, et la page n'affiche que ce qui est rempli. Les renvois vers les droits d'utilisation et la confidentialité sont ajoutés tout seuls.
 
 | Champ | Où il apparaît |
 |---|---|

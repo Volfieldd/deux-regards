@@ -84,7 +84,7 @@
     <label><%= t('Lieu affiché') %> <span class="mono"><%= t('texte libre, avec la photo') %></span><input name="place" value="<%= v.place %>" maxlength="120"></label>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'place', label: t('Lieu'), max: 120 }) %>
     <div class="city-field" data-city>
-      <label for="city_label"><%= t('Ville') %> <span class="mono"><%= t('pour la carte du monde · toutes les communes de France, plus de 500 habitants ailleurs') %></span></label>
+      <label for="city_label"><%= t('Ville de la carte') %> <span class="mono"><%= t('toutes les communes de France, plus de 500 habitants ailleurs') %></span></label>
       <input id="city_label" name="city_label" value="<%= v.city_label || '' %>" maxlength="120" autocomplete="off" placeholder="<%= t('Commencez à taper : Angers, Lisbonne…') %>" data-city-input<%~ inv('city') %>>
       <input type="hidden" name="city_id" value="<%= v.city_id || '' %>" data-city-id>
 <% if (e.city) { %>      <span class="err" id="err-city"><%= e.city %></span>

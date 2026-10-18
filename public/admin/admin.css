@@ -15,9 +15,10 @@
   --field-line: #7a766e;
   --ink: #eeece7; --ink2: #a9a59c; --ink3: #8a857c;
   --accent: #f0a94c; --on-accent: #1b1206; --accent-ink: #f0a94c; --accent-soft: rgba(240,169,76,.14);
-  /* États lisibles par un daltonien (deutéranope compris) : bleu / jaune / vermillon (palette Okabe-Ito), jamais
-     vert contre rouge ; la couleur double toujours une forme ou un mot (✓, ▲, ✕). */
-  --ok: #56b4e9; --warn: #f0e442; --danger: #e8743b; --on-danger: #1b0a04; --danger-soft: rgba(232,116,59,.12);
+  /* États lisibles par un daltonien (deutéranope compris) : bleu / jaune / rouge, jamais vert contre rouge ; la
+     couleur double toujours une forme ou un mot (✓, ▲, ✕). --danger est un rouge (2°), distinct de l'ambre de --accent
+     (36°, 1,6:1 entre eux) : « Supprimer » ne se confond plus avec « Publier ». 5,8:1 sur --s1, 6,0:1 avec --on-danger. */
+  --ok: #56b4e9; --warn: #f0e442; --danger: #f0605a; --on-danger: #1b0a04; --danger-soft: rgba(240,96,90,.13);
   --shadow: 0 18px 40px rgba(0,0,0,.45); --scrim: rgba(5,5,6,.62); --photo-bg: #000;
   --font: Jost, 'Helvetica Neue', Arial, sans-serif;
   --r: 10px; --side: 248px; --insp: 360px;
@@ -66,6 +67,7 @@ kbd { font: 500 10.5px var(--font); color: var(--ink2); border: 1px solid var(--
 .side > * { flex-shrink: 0; }
 .side { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: var(--s1); border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: 18px 14px 14px; }
 .word { display: flex; align-items: center; gap: 10px; padding: 4px 10px 18px; font-weight: 500; font-size: 15px; letter-spacing: .32em; text-transform: uppercase; }
+.side-fermer { display: none; }   /* « Fermer » le menu : au téléphone seulement (voir plus bas) */
 .word .emblem { width: 36px; height: 24px; background: currentColor; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
 .cmdk { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border: 1px solid var(--line2); border-radius: 9px; color: var(--ink3); background: var(--s2); margin-bottom: 16px; width: 100%; text-align: left; }
 .cmdk span { flex: 1; }
@@ -131,6 +133,12 @@ fieldset.panel { min-width: 0; }
 .row > label { flex: 1 1 200px; }
 fieldset.row { border: 0; padding: 0; margin: 0; }
 fieldset.row legend { font: inherit; padding: 0; margin-bottom: 6px; color: var(--ink2); }
+/* Mentions légales : hébergement par les éditeurs ou chez un hébergeur, dont les trois champs ne s'affichent qu'une
+   fois ce choix coché (sans script : :has() ; un navigateur qui l'ignore les montre toujours). */
+fieldset.host-pick { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 10px; }
+fieldset.host-pick legend { font: inherit; padding: 0; margin-bottom: 6px; color: var(--ink2); }
+.host-fields { display: grid; gap: 14px; padding-left: 26px; }
+.host-pick:has(input[value="editeurs"]:checked) .host-fields { display: none; }
 label { display: grid; gap: 6px; color: var(--ink2); font-size: 13px; }
 label.inline { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-size: 14px; }
 input:not([type]), input[type="text"], input[type="search"], input[type="password"], input[type="number"], input[type="email"], input[type="date"], input[type="time"], select, textarea {
@@ -141,6 +149,14 @@ select { appearance: none; padding-right: 32px; background-image: linear-gradien
 /* Champ actif : --accent-ink (4,7:1 en mode clair ; --accent n'y fait que 1,7:1). */
 input:focus, select:focus, textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent-ink), 0 0 0 4px var(--accent-soft); }
 [aria-invalid="true"] { box-shadow: inset 0 0 0 1.5px var(--danger) !important; }
+/* Erreur ET focus, visibles ensemble : le filet rouge reste (dedans), l'anneau du focus s'ajoute (dehors).
+   Contour --accent-ink de 2 px à 2 px du bord : 9,3:1 sur --s1 en sombre ; en clair 5,4:1 sur blanc, 4,7:1 sur --s2 (≥ 3:1 exigé).
+   Spécificité (0,2,1), plus forte que [aria-invalid="true"] ; vaut aussi pour les cases et boutons radio en erreur. */
+:is(input, select, textarea, button)[aria-invalid="true"]:is(:focus, :focus-visible) {
+  outline: 2px solid var(--accent-ink) !important;
+  outline-offset: 2px !important;
+  box-shadow: inset 0 0 0 2px var(--danger), 0 0 0 4px var(--accent-soft) !important;
+}
 input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; }
 input[type="file"] { font-size: 13px; color: var(--ink2); }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
@@ -154,7 +170,9 @@ input[type="file"] { font-size: 13px; color: var(--ink2); }
 .btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line2); filter: none; }
 .btn.ghost:hover { background: var(--s2); }
 .btn.sec { background: var(--s3); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line2); }
-.btn.danger { background: var(--danger); color: #fff; }
+.btn.danger { background: var(--danger); color: var(--on-danger); }
+/* La teinte ne porte jamais seule le sens : ✕ devant le verbe (décoratif, rien à lire : « / "" »). */
+.btn.danger::before { content: "✕"; content: "✕" / ""; font-weight: 600; }
 .btn.big { min-height: 42px; padding: 0 18px; }
 .btn[disabled], .btn[aria-disabled="true"] { opacity: .45; cursor: default; filter: none; }
 
@@ -165,7 +183,7 @@ input[type="file"] { font-size: 13px; color: var(--ink2); }
 .flash ul { margin-top: 6px; padding-left: 20px; color: var(--ink2); }
 .main.wide > .flash, .main.wide > .help-link + .flash { margin: 16px 24px 0; }
 .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 60; background: var(--ink); color: var(--bg); border-radius: 12px; padding: 10px 10px 10px 16px; display: flex; gap: 14px; align-items: center; box-shadow: var(--shadow); font-size: 13.5px; max-width: 92vw; }
-.toast.error { background: var(--danger); color: #fff; }
+.toast.error { background: var(--danger); color: var(--on-danger); }
 .toast button { background: var(--bg); color: var(--ink); border-radius: 8px; min-height: 30px; padding: 0 12px; font-size: 12.5px; font-weight: 500; }
 .toast:not(:has(button)) { padding-right: 16px; }
 /* Vide : hors de la vue mais toujours rendu, pour que le message écrit ensuite soit annoncé (région live). */
@@ -326,6 +344,8 @@ body.dropping .canvas { outline: 2px dashed var(--accent); outline-offset: -10px
 .palette::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .pal-in { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); color: var(--ink3); }
 .pal-in input { flex: 1; border: 0; background: transparent; box-shadow: none !important; font-size: 18px; color: var(--ink); min-height: 34px; padding: 0; }
+/* Le champ n'a pas de dessin propre : son focus est le trait ambre sous la ligne de saisie. */
+.pal-in:focus-within { box-shadow: inset 0 -2px 0 var(--accent-ink); }
 .pal-list { list-style: none; margin: 0; padding: 8px; max-height: 52vh; overflow-y: auto; }
 .pal-list .sec { padding: 10px 10px 4px; font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); }
 .pal-list [role="option"] { display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 10px; color: var(--ink2); cursor: pointer; }
@@ -561,6 +581,15 @@ body.dropping .canvas { outline: 2px dashed var(--accent); outline-offset: -10px
   .shell { display: block; }
   .side { position: fixed; inset: 0 auto 0 0; width: 280px; z-index: 50; transform: translateX(-102%); visibility: hidden; transition: transform .2s, visibility 0s .2s; box-shadow: var(--shadow); }
   .side.open { transform: none; visibility: visible; transition: transform .2s; }
+  /* Sans JavaScript : « Menu » est un lien vers #admin-nav, la barre s'ouvre par :target (le script, lui, pose .open). */
+  html:not(.js) .side:target { transform: none; visibility: visible; transition: transform .2s; }
+  /* Menu ouvert, le clavier reste dans le panneau : la page, la barre d'onglets et les fenêtres sont retirées
+     (visibility les retire aussi de la tabulation) ; le lien d'évitement reste, « Fermer » est dans le panneau.
+     Avec le script, c'est inert (admin.js) : la page reste visible sous le panneau. */
+  html:not(.js) body.admin:has(> .shell > .side:target) > .shell > .main,
+  html:not(.js) body.admin:has(> .shell > .side:target) > :not(.shell, .skip) { visibility: hidden; }
+  .side-fermer { display: flex; align-items: center; gap: 8px; min-height: 44px; margin: -6px 0 6px; padding: 0 10px; border-radius: 8px; color: var(--ink2); }
+  .side-fermer:hover { background: var(--s2); color: var(--ink); }
   .main { padding: 18px 16px 120px; }
   .main.wide { padding: 0 0 100px; }
   .help-link, .main.wide .help-link { position: static; text-align: right; padding: 10px 16px 0; }
@@ -596,6 +625,16 @@ body.dropping .canvas { outline: 2px dashed var(--accent); outline-offset: -10px
   .scard .grip { display: none; }
 }
 @media (pointer: coarse) { .scard .grip { display: none !important; } }
+@media (max-width: 720px) {
+  /* Un libellé long (« Julien zur Veröffentlichung vorschlagen ») passe à la ligne au lieu de sortir de l'écran. */
+  .btn { white-space: normal; text-wrap: balance; line-height: 1.25; padding-block: 6px; text-align: center; }
+  /* Le focus ne s'arrête pas sous la barre d'onglets fixe (74 px + une marge), ni sous la barre d'actions collante
+     de « À valider » au-dessus d'elle (WCAG 2.4.11). */
+  html:has(> body.admin .tabbar) { scroll-padding-bottom: 90px; }
+  html:has(> body.admin .rv-actions) { scroll-padding-bottom: 155px; }
+}
+/* Au bureau, la barre « Pour les photos cochées » (collante en haut) ne cache pas les champs du lot en Maj+Tab. */
+@media (min-width: 721px) { html:has(> body.admin .main:not(.wide) .bulk) { scroll-padding-top: 136px; } }
 
 /* ---------- téléphone : audit iPhone (docs/audit-iphone-2026-10) ---------- */
 @media (max-width: 720px) {
@@ -1137,7 +1176,7 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .trip-of form, .trip-of label { margin: 0; }
 @media (max-width: 640px) { .trip-row { align-items: flex-start; } .trip-cover img, .trip-cover .ph { width: 84px; height: 60px; } }
 /* Nouveautés : fenêtre à la connexion, page, version dans le menu */
-.nav-ver { margin-left: auto; font-size: 10px; color: var(--ink3); }
+.nav-ver { margin-left: auto; font-size: 12px; color: var(--ink3); }
 .release-pop { max-width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--line2); border-radius: 12px; background: var(--s1, var(--bg)); color: var(--ink); box-shadow: 0 24px 64px rgba(0, 0, 0, .25); }
 .release-pop[open] { position: fixed; inset: 0; margin: auto; z-index: 60; }
 .release-pop::backdrop { background: rgba(0, 0, 0, .45); }

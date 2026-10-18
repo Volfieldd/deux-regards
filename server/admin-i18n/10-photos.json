@@ -437,7 +437,7 @@
  },
  "Ville": {
   "en": "Town",
-  "de": "Ort"
+  "de": "Stadt"
  },
  "carte du site": {
   "en": "site map",
@@ -445,7 +445,7 @@
  },
  "Ville (carte du site)": {
   "en": "Town (site map)",
-  "de": "Ort (Karte der Website)"
+  "de": "Stadt (Karte der Website)"
  },
  "Angers, Lisbonne…": {
   "en": "Angers, Lisbon…",
@@ -690,10 +690,6 @@
  "texte libre, avec la photo": {
   "en": "free text, shown with the photo",
   "de": "freier Text, mit dem Foto"
- },
- "pour la carte du monde · toutes les communes de France, plus de 500 habitants ailleurs": {
-  "en": "for the world map · every municipality in France, over 500 inhabitants elsewhere",
-  "de": "für die Weltkarte · alle Gemeinden Frankreichs, anderswo über 500 Einwohner"
  },
  "Commencez à taper : Angers, Lisbonne…": {
   "en": "Start typing: Angers, Lisbon…",
@@ -1230,5 +1226,13 @@
  "Instagram : voir la rubrique {link}.": {
   "en": "Instagram: see the {link} section.",
   "de": "Instagram: siehe Abschnitt {link}."
+ },
+ "Ville de la carte": {
+  "en": "Town for the map",
+  "de": "Stadt für die Karte"
+ },
+ "toutes les communes de France, plus de 500 habitants ailleurs": {
+  "en": "every municipality in France, over 500 inhabitants elsewhere",
+  "de": "alle Gemeinden Frankreichs, anderswo über 500 Einwohner"
  }
 }

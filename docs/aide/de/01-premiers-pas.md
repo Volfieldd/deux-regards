@@ -42,7 +42,7 @@ Unten: Ihr Name, die Schaltfläche **Sonne / Mond**, die die Verwaltung in den *
 
 Während ein Import verarbeitet wird, erscheint unten in der Seitenleiste außerdem die Anzeige **Verarbeitung: *n* Fotos**.
 
-**Auf dem Telefon (iPhone…)** klappt die Seitenleiste ein: Eine **Tab-Leiste** unten bietet Heute, Fotos, **Importieren** (die große Schaltfläche in der Mitte), **Unterwegs** (die Startseite Unterwegs: neue Begegnung, mein QR, mein heutiger Ausflug) und **Menü** (öffnet die Seitenleiste). Schaltflächen, Kästchen und Felder sind groß genug für den Finger. Die Bildschirme passen sich an: „Vervollständigen und veröffentlichen“ zeigt zum Beispiel eine Karte pro Foto (siehe [Vervollständigen und veröffentlichen](photos#3-compléter-et-publier)).
+**Auf dem Telefon (iPhone…)** klappt die Seitenleiste ein: Eine **Tab-Leiste** unten bietet Heute, Fotos, **Importieren** (die große Schaltfläche in der Mitte), **Unterwegs** (die Startseite Unterwegs: neue Begegnung, mein QR, mein heutiger Ausflug) und **Menü** (öffnet die Seitenleiste, auch ohne JavaScript; **Schließen** oben schließt sie wieder; solange sie offen ist, bleibt die Tastatur im Menü). Schaltflächen, Kästchen und Felder sind groß genug für den Finger. Die Bildschirme passen sich an: „Vervollständigen und veröffentlichen“ zeigt zum Beispiel eine Karte pro Foto (siehe [Vervollständigen und veröffentlichen](photos#3-compléter-et-publier)).
 
 Jeder Bildschirm hat einen Link **„Hilfe zu dieser Seite“** (in der Fotothek: **Hilfe**, oben rechts), der direkt zum passenden Abschnitt führt.
 

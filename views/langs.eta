@@ -1,7 +1,9 @@
-<% /* Sélecteur de langue : drapeau et code de la langue de la page ; la même page dans les autres langues. */ %>
+<% /* Sélecteur de langue : drapeau et code de la langue de la page ; la même page dans les autres langues.
+      Nom lu : le code visible, puis son nom (« FR – Langue : français ») : un aria-label le remplacerait, et la commande
+      vocale « clique sur FR » ne trouverait rien (WCAG 2.5.3). */ %>
 <% const t = it.t, lang = it.lang || 'fr'; const flag = l => it.asset(`flags/${l}.svg`); %>
   <details class="lang-pick" data-lang-pick>
-    <summary aria-label="<%= t.nav.langCurrent %>"><img class="flag" src="<%= flag(lang) %>" alt="" width="20" height="14"><span><%= lang.toUpperCase() %></span></summary>
+    <summary><img class="flag" src="<%= flag(lang) %>" alt="" width="20" height="14"><span><%= lang.toUpperCase() %></span><span class="sr-only"> – <%= t.nav.langCurrent %></span></summary>
     <ul role="list" aria-label="<%= t.nav.lang %>">
 <% it.langs.forEach(l => { %>      <li><a href="/langue/<%= l %>?vers=<%= encodeURIComponent(it.here) %>" hreflang="<%= l %>" lang="<%= l %>" rel="nofollow"<%~ l === lang ? ' aria-current="true"' : '' %>><img class="flag" src="<%= flag(l) %>" alt="" width="20" height="14"><%= it.langNames[l] %></a></li>
 <% }) %>    </ul>

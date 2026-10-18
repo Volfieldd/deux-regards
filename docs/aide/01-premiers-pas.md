@@ -42,7 +42,7 @@ En bas : votre nom, le bouton **soleil / lune** qui passe l’admin en **mode cl
 
 Pendant le traitement d’un import, l’indicateur **Traitement : *n* photos** s’affiche aussi en bas de la barre latérale.
 
-**Sur téléphone (iPhone…)**, la barre latérale se replie : une **barre d’onglets** en bas donne Aujourd’hui, Photos, **Importer** (le gros bouton du milieu), **Terrain** (l’accueil Terrain : nouvelle rencontre, mon QR, ma sortie du jour) et **Menu** (qui ouvre la barre latérale). Boutons, cases et champs y sont assez grands pour le doigt. Les écrans s’adaptent : par exemple, « Compléter et publier » montre une carte par photo (voir [Compléter et publier](photos#3-compléter-et-publier)).
+**Sur téléphone (iPhone…)**, la barre latérale se replie : une **barre d’onglets** en bas donne Aujourd’hui, Photos, **Importer** (le gros bouton du milieu), **Terrain** (l’accueil Terrain : nouvelle rencontre, mon QR, ma sortie du jour) et **Menu** (qui ouvre la barre latérale, même sans JavaScript ; **Fermer**, en haut, la referme ; tant qu'elle est ouverte, le clavier reste dans le menu). Boutons, cases et champs y sont assez grands pour le doigt. Les écrans s’adaptent : par exemple, « Compléter et publier » montre une carte par photo (voir [Compléter et publier](photos#3-compléter-et-publier)).
 
 Chaque écran a un lien **« Aide sur cette page »** (dans la photothèque : **Aide**, en haut à droite) qui mène directement à la bonne section.
 

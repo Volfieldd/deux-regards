@@ -2,7 +2,11 @@
 <% const t = it.t; %>
 <% const v = it.values || {}, e = it.errors || {}; const L = ['fr', 'en', 'de']; const FLAG = { fr: 'FR', en: 'EN', de: 'DE' };
    const author = it.authors.find(a => a.id === Number(v.author_id)) || it.authors[0] || { name: '', next: '' };
-   const on = k => v[k] === 'on'; const b = it.brand || {}; %>
+   const on = k => v[k] === 'on'; const b = it.brand || {};
+   // Groupe de boutons radio refusé par le serveur : aria-invalid sur ses boutons, phrase d'erreur (dans la langue de la
+   // personne) sous la légende, reliée au groupe par aria-describedby ; app.js fait de même avant l'envoi.
+   const bad = k => (e[k] ? ' aria-invalid="true"' : '');
+   const said = (k, id) => (e[k] ? ` aria-describedby="${id}"` : ''); %>
 <html lang="<%= it.lang %>">
 <head>
   <meta charset="utf-8">
@@ -63,22 +67,24 @@
       <p class="app-consent"><%= A.consent('\u0000').split('\u0000')[0] %><span data-author-name><%= author.name %></span><%= A.consent('\u0000').split('\u0000')[1] %></p>
     </div>
 <% }) %>
-    <fieldset class="app-decision">
+    <fieldset class="app-decision" data-group="decision"<%~ said('what', 'err-decision') %>>
       <legend class="sr-only"><%= t('Décision') %></legend>
-      <label class="check big"><input type="radio" name="decision" value="accord"<%~ v.decision === 'accord' ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.accept %></span><% }) %></label>
+      <p class="app-err" id="err-decision" data-err-for="decision"<%~ e.what ? '' : ' hidden' %>><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.errDecision %></span><% }) %></p>
+      <label class="check big"><input type="radio" name="decision" value="accord"<%~ v.decision === 'accord' ? ' checked' : '' %><%~ bad('what') %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.accept %></span><% }) %></label>
       <div class="app-scopes">
 <% ['site', 'instagram', 'print', 'name'].forEach(s => { %>        <label class="check"><input type="checkbox" name="scope_<%= s %>"<%~ on(`scope_${s}`) ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].hello.scopes[s] %></span><% }) %></label>
 <% }) %>      </div>
-      <label class="check big"><input type="radio" name="decision" value="refus"<%~ v.decision === 'refus' ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.refuse %></span><% }) %></label>
-      <label class="check big"><input type="radio" name="decision" value=""<%~ !v.decision ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.later %></span><% }) %></label>
+      <label class="check big"><input type="radio" name="decision" value="refus"<%~ v.decision === 'refus' ? ' checked' : '' %><%~ bad('what') %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.refuse %></span><% }) %></label>
+      <label class="check big"><input type="radio" name="decision" value=""<%~ !v.decision ? ' checked' : '' %><%~ bad('what') %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.later %></span><% }) %></label>
     </fieldset>
     <label><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.name %></span><% }) %><input name="name" value="<%= v.name || '' %>" maxlength="80" autocomplete="off"></label>
     <label><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.email %></span><% }) %><input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="off" inputmode="email"></label>
     <label class="check"><input type="checkbox" name="wants_photo"<%~ on('wants_photo') ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].hello.wantsPhoto %></span><% }) %></label>
-    <fieldset class="app-age">
+    <fieldset class="app-age" data-group="adult"<%~ said('adult', 'err-adult') %>>
       <legend class="sr-only"><%= t('Âge') %></legend>
-      <label class="check"><input type="radio" name="adult" value="oui"<%~ v.adult === 'oui' ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.adult %></span><% }) %></label>
-      <label class="check"><input type="radio" name="adult" value="non"<%~ v.adult === 'non' ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.minor %></span><% }) %></label>
+      <p class="app-err" id="err-adult" data-err-for="adult"<%~ e.adult ? '' : ' hidden' %>><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.errAdult %></span><% }) %></p>
+      <label class="check"><input type="radio" name="adult" value="oui"<%~ v.adult === 'oui' ? ' checked' : '' %><%~ bad('adult') %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.adult %></span><% }) %></label>
+      <label class="check"><input type="radio" name="adult" value="non"<%~ v.adult === 'non' ? ' checked' : '' %><%~ bad('adult') %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.minor %></span><% }) %></label>
       <label><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.guardian %></span><% }) %><input name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off"></label>
     </fieldset>
     <p class="hint app-privacy"><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.privacy(it.host) %></span><% }) %></p>

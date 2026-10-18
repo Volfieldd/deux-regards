@@ -313,18 +313,36 @@ const toast = (() => {
 $$('[data-js-only]').forEach(el => { el.hidden = false; });
 
 // ----- menu mobile -----
+// Sans script, « Menu » est un lien vers #admin-nav (ouvert par :target, voir admin.css) ; ici, il redevient un bouton.
 (function () {
   const side = $('[data-side]');
-  const btn = $('[data-menu]');
-  if (!side || !btn) return;
+  const link = $('[data-menu]');
+  if (!side || !link) return;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = link.className;
+  btn.dataset.menu = '';
+  btn.setAttribute('aria-expanded', 'false');
+  btn.setAttribute('aria-controls', side.id);
+  btn.append(...link.childNodes);
+  link.replaceWith(btn);
+  // Menu ouvert, la page (et la barre d'onglets, la fenêtre « Nouveautés ») est inerte : ni le clavier ni un lecteur
+  // d'écran n'y entrent ; à la fermeture, le focus revient au bouton « Menu ». La palette (⌘K) reste utilisable.
+  const rest = () => [$('.shell > .main'), ...$$('body > :not(.shell, .skip, script, [data-cmdk])')].filter(Boolean);
   const set = open => {
+    const was = side.classList.contains('open');
     side.classList.toggle('open', open);
     btn.setAttribute('aria-expanded', String(open));
+    for (const el of rest()) el.inert = open;
     if (open) setTimeout(() => $('a[aria-current], a', side)?.focus(), 50);
+    else if (was) btn.focus();
   };
   btn.addEventListener('click', e => { e.stopPropagation(); set(!side.classList.contains('open')); });
+  $('[data-menu-close]', side)?.addEventListener('click', e => { e.preventDefault(); set(false); });
   document.addEventListener('click', e => { if (side.classList.contains('open') && !side.contains(e.target)) set(false); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && side.classList.contains('open')) { set(false); btn.focus(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && side.classList.contains('open')) set(false); });
+  // Au bureau, la barre est toujours là : un menu resté ouvert au téléphone ne laisse pas la page inerte.
+  matchMedia('(min-width: 721px)').addEventListener('change', e => { if (e.matches && side.classList.contains('open')) { side.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); for (const el of rest()) el.inert = false; } });
 })();
 
 // ----- mode clair / sombre : appliqué tout de suite, mémorisé (cookie lu par le serveur) -----

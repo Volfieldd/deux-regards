@@ -68,7 +68,7 @@ Das nächste Foto hängt vom aktiven Filter ab: In „Straße, von Julien“ ble
 
   Beim Vergrößern wird der Hintergrund detaillierter (Küsten, Grenzen, kleine Inseln): Nur der angezeigte Bereich wird geladen. Das Mausrad allein und senkrechtes Wischen auf der Karte der ganzen Welt scrollen die Seite, wie anderswo. Ohne JavaScript ist die Karte fest, und die Liste der Orte bleibt vollständig.
 - **„Ich habe Sie fotografiert“** (`/bonjour`): die Seite hinter dem QR-Code der Einwilligungskarten und der Kleidung (`/bonjour/J`: mit dem Namen des Fotografen), ohne Link im Menü (siehe [Begegnungen](rencontres)).
-- **Impressum** (`/mentions-legales`, „Impressum“ auf Deutsch, Link in der Fußzeile jeder Seite): Anbieter, Adresse, Kontakt, Verantwortlicher für den Inhalt, Hosting (siehe [Rechte & Datenschutz](reglages#mentions-légales-impressum)).
+- **Impressum** (`/mentions-legales`, „Impressum“ auf Deutsch, Link in der Fußzeile jeder Seite): Anbieter, Adresse, Kontakt (E-Mail als Link, Telefon), Verantwortlicher für den Inhalt, Hosting (siehe [Rechte & Datenschutz](reglages#mentions-légales-impressum)).
 - **Datenschutz** (`/confidentialite`, in drei Sprachen, Link in der Fußzeile): wer verantwortlich ist, was die Website erhebt und warum, wie lange, wer es erhält und wie man seine Rechte ausübt (siehe [Rechte & Datenschutz](reglages#droits-et-confidentialité)).
 - **Seite nicht gefunden:** für eine unbekannte Adresse oder ein zurückgezogenes Foto.
 

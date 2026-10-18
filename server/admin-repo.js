@@ -488,6 +488,8 @@ export function createAdminRepo(db) {
         rights_contact: text(body.rights_contact, 200),
         privacy_contact: text(body.privacy_contact, 200), privacy_mfa: body.privacy_mfa === 'on', privacy_encrypted: body.privacy_encrypted === 'on',
         legal_names: text(body.legal_names, 200), legal_address: text(body.legal_address, 400), legal_email: text(body.legal_email, 200), legal_phone: text(body.legal_phone, 40), legal_director: text(body.legal_director, 120),
+        // Hébergement : « editeurs » (par défaut) ou « hebergeur », dont le nom, l'adresse et le téléphone sont alors dus.
+        legal_host: body.legal_host === 'hebergeur' ? 'hebergeur' : 'editeurs', legal_host_name: text(body.legal_host_name, 200), legal_host_address: text(body.legal_host_address, 400), legal_host_phone: text(body.legal_host_phone, 40),
         map_page: body.map_page === 'on',
         search_page: body.search_page === 'on', keywords_shown: body.keywords_shown === 'on',
         hero,

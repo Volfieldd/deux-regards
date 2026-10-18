@@ -202,5 +202,9 @@
  "fermer": {
   "en": "close",
   "de": "schließen"
+ },
+ "le menu": {
+  "en": "the menu",
+  "de": "das Menü"
  }
 }
