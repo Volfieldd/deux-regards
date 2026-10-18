@@ -1,6 +1,20 @@
 # Appearance
 
-The appearance of the **public site**: theme, logo and icon. The admin always keeps its own.
+The appearance of the **public site**: version (v1 or v2), theme, logo and icon. The admin always keeps its own.
+
+## Public site: v1 or v2
+
+At the top of the page. **v2** is the new design of the public site, from the usability audit of October 2026. It covers every public page (see [The site as visitors see it](site-public)) except the error and sign-in pages, which keep the v1 design. The administration does not change.
+
+1. **See v2 before everyone else:** click **Open the v2 preview**.
+   - **Only you** see it, in this session (this device, this browser), until **Leave the preview**, sign-out or the end of the session.
+   - A sand-coloured banner at the top of every page of the site reminds you, even on a page still in v1; it carries **Quitter l’aperçu** (leave the preview).
+   - Visitors keep v1, whatever they send (cookie, address): the choice is kept on the server, never in the browser.
+   - During the preview, your pages are kept in no cache (Cloudflare included): a visitor cannot receive the page you see.
+2. **Before applying it to everyone:** follow the [switch-over checklist](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (tries on iPad, computer and phone, recent backup, what to watch during the first week; in French).
+3. **Apply it to everyone:** tick **v2**, then **Save the version**. Going back to v1 works the same way, at any time.
+
+Opening and closing the preview, and every change of version, are recorded in the [Log](reglages#journal).
 
 ## Choosing a theme
 
@@ -17,19 +31,6 @@ Each theme is shown with its three colours (background, ink, accent) and a descr
 | **Studio** | warm paper, italic headings |
 | **Nicephos — night** | black gallery, white line, spaced capitals, sand accent |
 | **Nicephos — day** | the same identity on a white background |
-
-## Public site: v1 or v2
-
-**v2** is the new design of the public site, from the usability audit of October 2026. Its pages arrive one by one; today: **the page of a photo** (the viewer), **the home page and its gallery** (with the views of a photographer and the filters) **the page of a series**, the form pages (“I took your photo”, Report, Share without script, the gift photo), and the other public pages: About, Terms of use, Legal notice, Privacy, Search, Map, Trips, page not found (see [The site as visitors see it](site-public)). A page that does not have its v2 version yet is shown in v1. The administration does not change.
-
-1. **See v2 before everyone else:** click **Open the v2 preview**.
-   - **Only you** see it, in this session (this device, this browser), until **Leave the preview**, sign-out or the end of the session.
-   - A sand-coloured banner at the top of every page of the site reminds you, even on a page still in v1; it carries **Quitter l’aperçu** (leave the preview).
-   - Visitors keep v1, whatever they send (cookie, address): the choice is kept on the server, never in the browser.
-   - During the preview, your pages are kept in no cache (Cloudflare included): a visitor cannot receive the page you see.
-2. **Apply it to everyone:** tick **v2**, then **Save the version**. Going back to v1 works the same way, at any time.
-
-Opening and closing the preview, and every change of version, are recorded in the [Log](reglages#journal).
 
 ## Brand
 

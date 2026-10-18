@@ -258,3 +258,21 @@ test('aides v2 : format arrondi vers le bas, sizes, date abrégée insécable', 
   assert.equal(shortDate('2024-03'), 'mars 2024');
   assert.equal(shortDate(''), '');
 });
+
+test('page Apparence : « Site public : v1 ou v2 » en tête, avant le thème ; un texte qui ne date pas', async t => {
+  const c = await site(t);
+  const page = (await c.as('admin').get('/admin/apparence')).body;
+  const main = page.slice(page.indexOf('<h1'));
+  const section = main.indexOf('id="site-public"'), theme = main.indexOf('name="theme"');
+  assert.ok(section > 0 && theme > 0 && section < theme, 'la version avant le formulaire du thème');
+  assert.ok(main.indexOf('id="site-public"') < main.indexOf('<form'), 'la section est le premier bloc après le titre');
+  assert.match(page, /Elle couvre toutes les pages publiques, sauf les pages d’erreur et de connexion/);
+  assert.doesNotMatch(page, /aujourd’hui : la page d’une photo|arrivent une à une|le site actuel/);
+  // Toujours en anglais et en allemand (dictionnaire de l'admin).
+  const { translator } = await import('../server/admin-i18n.js');
+  for (const l of ['en', 'de']) {
+    for (const k of ['La v2 est la nouvelle présentation du site public, issue de l’audit d’ergonomie. Elle couvre toutes les pages publiques, sauf les pages d’erreur et de connexion, qui gardent la présentation v1. L’administration ne change pas.', 'la nouvelle présentation', 'la présentation d’origine']) {
+      assert.notEqual(translator(l)(k), k, `${l} : ${k}`);
+    }
+  }
+});

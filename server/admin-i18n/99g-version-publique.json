@@ -3,21 +3,21 @@
   "en": "Public site: v1 or v2",
   "de": "Öffentliche Website: v1 oder v2"
  },
- "La v2 est la nouvelle présentation du site public, issue de l’audit d’ergonomie. Ses pages arrivent une à une : une page qui n’a pas encore sa version v2 reste en v1. L’administration ne change pas.": {
-  "en": "v2 is the new design of the public site, from the usability audit. Its pages arrive one by one: a page that does not have its v2 version yet stays in v1. The administration does not change.",
-  "de": "v2 ist die neue Gestaltung der öffentlichen Website, aus dem Ergonomie-Audit. Ihre Seiten kommen nach und nach: Eine Seite, die noch keine v2-Fassung hat, bleibt in v1. Die Verwaltung ändert sich nicht."
+ "La v2 est la nouvelle présentation du site public, issue de l’audit d’ergonomie. Elle couvre toutes les pages publiques, sauf les pages d’erreur et de connexion, qui gardent la présentation v1. L’administration ne change pas.": {
+  "en": "v2 is the new design of the public site, from the usability audit. It covers every public page except the error and sign-in pages, which keep the v1 design. The administration does not change.",
+  "de": "v2 ist die neue Gestaltung der öffentlichen Website, aus dem Ergonomie-Audit. Sie umfasst alle öffentlichen Seiten außer den Fehler- und Anmeldeseiten, die die Gestaltung von v1 behalten. Die Verwaltung ändert sich nicht."
  },
  "Version vue par les visiteurs": {
   "en": "Version seen by visitors",
   "de": "Fassung für die Besucher"
  },
- "le site actuel": {
-  "en": "the current site",
-  "de": "die aktuelle Website"
+ "la présentation d’origine": {
+  "en": "the original design",
+  "de": "die ursprüngliche Gestaltung"
  },
- "la nouvelle présentation (aujourd’hui : la page d’une photo)": {
-  "en": "the new design (today: the page of a photo)",
-  "de": "die neue Gestaltung (derzeit: die Seite eines Fotos)"
+ "la nouvelle présentation": {
+  "en": "the new design",
+  "de": "die neue Gestaltung"
  },
  "Enregistrer la version": {
   "en": "Save the version",
