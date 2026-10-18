@@ -75,13 +75,13 @@ To fill it in **with the person**, at the moment of the photo, with no paper car
 **In one minute:**
 
 1. **You**: the photographer (the one on your account), the **position** (asked for by the phone, kept to within 100 m; the town is worked out from it), a **reference photo** of the person (kept private, to find the right images), notes.
-2. **Hand over the phone**: the person chooses their language (FR · EN · DE), reads the consent, ticks what they accept (or refuses, or does not decide), gives their name, their email if they want to receive the photo, their age (**under 18: a parent signs with them**, the parent’s name is requested) and **signs with their finger**.
+2. **Hand over the phone**: the person chooses their language (FR · EN · DE; their text changes at once, even without JavaScript), reads the consent, ticks what they accept (or refuses, or does not decide), gives their name, their email if they want to receive the photo, their age (**under 18: a parent signs with them**, the parent’s name is requested) and **signs with their finger**.
 3. **Save**: the encounter gets the next number of your cards (J-0143). The **Thank you** screen appears in their language with a **QR code**: by scanning it, they find their page `/bonjour/J-0143-…` to receive their photo, change their mind or write to you. The links to the admin (new encounter, Field home, record) are folded under **Photographer: take the phone back**: the person still holding the phone does not come across the other people of the day.
 4. **Summary**: if email sending is configured on the server, it goes out automatically (their consent, what they ticked, the link to their page); otherwise, **Send the summary from Mail** opens the ready-made message, in their language, to send from your address.
 
 You need a network connection (4G is enough): without one, saving fails without losing anything on screen; try again a little further on. A consent signed on the phone is worth a signed card: the page shows the signature and the reference photo.
 
-**Before sending**, the screen checks what the server will require: with a consent, the name, adult or minor (and the signing parent), at least one use and the signature; a well-formed email address. Anything missing is shown at the top, without sending anything. If the server still refuses, the person’s photo and the signature are not kept: the screen says so at the top (**Have the person sign again and retake their photo**), and both areas are outlined.
+**Before sending**, the screen checks what the server will require: with a consent, the name, adult or minor (and the signing parent), at least one use and the signature; a well-formed email address. Anything missing is shown at the top, without sending anything; an unanswered question (their age, their decision) is also marked in place: its buttons are circled in red and a sentence, in the person’s language, asks it again under the question. If the server still refuses, the person’s photo and the signature are not kept: the screen says so at the top (**Have the person sign again and retake their photo**), and both areas are outlined.
 
 ## Outings
 

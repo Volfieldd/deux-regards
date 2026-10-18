@@ -48,10 +48,12 @@ Pflicht in Frankreich (LCEN) wie in Deutschland (Impressum, § 5 DDG): die Seite
 
 - **Anbieter**: Ihre Vor- und Nachnamen;
 - **Postanschrift**: eine Adresse, unter der man Sie erreichen kann (eine Zeile pro Adresszeile);
-- **E-Mail** (leer: die aus dem Datenschutz) und **Telefon** (optional);
-- **Verantwortlich für den Inhalt**: eine Person (in Deutschland „Verantwortlich nach § 18 MStV“).
+- **Kontakt-E-Mail**: auf der Seite als Link veröffentlicht (leer: der Kontakt aus dem Datenschutz ersetzt sie, wenn er eine E-Mail-Adresse ist, kein `https://`-Link);
+- **Telefon**: Pflicht für eine Person, die eine Website anbietet (LCEN, Art. 1-1; § 5 DDG), ob Sie die Website selbst hosten oder nicht;
+- **Verantwortlich für den Inhalt**: die Person, die für das Veröffentlichte einsteht (in Frankreich „directeur de la publication“, LCEN, Art. 1-1; in Deutschland „Verantwortlich nach § 18 MStV“);
+- **Hosting**: **Durch die Anbieter, auf ihrem eigenen Server** (Standard: die Seite sagt es, mit der Anschrift und der Telefonnummer oben) oder **Bei einem Hosting-Anbieter**: dann werden dessen **Name**, **Anschrift** und **Telefon** verlangt, und die Seite nennt ihn („Die Website wird gehostet von …“). Die Weiterleitung über Cloudflare wird in beiden Fällen genannt.
 
-Solange das Wesentliche fehlt (Namen, Adresse, E-Mail, Verantwortlicher), weist „Heute“ darauf hin, und die Seite zeigt nur das Ausgefüllte. Das Hosting (Ihr Server, in Frankreich; Weiterleitung über Cloudflare) und die Verweise auf die Nutzungsrechte und den Datenschutz werden automatisch ergänzt.
+Solange eine Pflichtangabe fehlt (Namen, Adresse, E-Mail, Telefon, Verantwortlicher; bei einem Hosting-Anbieter dessen Name, Anschrift und Telefon), sagt es der Abschnitt („2 Pflichtangaben fehlen: Telefon, Verantwortlich für den Inhalt“), „Heute“ weist darauf hin, und die Seite zeigt nur das Ausgefüllte. Die Verweise auf die Nutzungsrechte und den Datenschutz werden automatisch ergänzt.
 
 | Feld | Wo es erscheint |
 |---|---|

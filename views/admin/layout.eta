@@ -34,6 +34,7 @@
     search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
     upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
     menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
     instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
     stats: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
     people: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/>',
@@ -58,6 +59,8 @@
 <div class="shell">
 <aside class="side" id="admin-nav" data-side>
   <a class="word" href="/admin"><% if (b.emblem) { %><span class="emblem" aria-hidden="true"></span><% } %><span><%= it.siteName %></span></a>
+<% /* Téléphone : referme le menu et rend le focus au contenu (sans script, l'ancre #contenu ; avec, admin.js). */ %>
+  <a class="side-fermer" href="#contenu" data-menu-close><%~ ic('x', 18) %><%= t('Fermer') %><span class="sr-only"> <%= t('le menu') %></span></a>
   <button class="cmdk" type="button" data-cmdk-open hidden><%~ ic('search', 16) %><span><%= t('Rechercher, agir…') %></span><kbd>⌘K</kbd></button>
 <%
   // Menu rangé par intention : travailler les photos et les personnes, publier, préparer le terrain, régler.
@@ -115,7 +118,8 @@
     <a href="/" target="_blank" rel="noopener"><%~ ic('site') %><%= t('Voir le site') %></a>
   </nav>
   <details class="lang-pick admin-lang">
-    <summary aria-label="<%= t('Langue de l’administration') %> : <%= it.langNames[it.lang] %>"><img class="flag" src="<%= it.asset(`flags/${it.lang}.svg`) %>" alt="" width="20" height="14"><span><%= it.lang.toUpperCase() %></span></summary>
+<% /* Nom lu : le code visible, puis son nom (pas d'aria-label, qui masquerait « FR » : WCAG 2.5.3). */ %>
+    <summary><img class="flag" src="<%= it.asset(`flags/${it.lang}.svg`) %>" alt="" width="20" height="14"><span><%= it.lang.toUpperCase() %></span><span class="sr-only"> – <%= t('Langue de l’administration') %> : <%= it.langNames[it.lang] %></span></summary>
     <ul role="list" aria-label="<%= t('Langue de l’administration') %>">
 <% it.adminLangs.forEach(l => { %>      <li><form method="post" action="/admin/langue"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= it.currentPath %>"><button type="submit" name="lang" value="<%= l %>" lang="<%= l %>"<%~ l === it.lang ? ' aria-current="true"' : '' %>><img class="flag" src="<%= it.asset(`flags/${l}.svg`) %>" alt="" width="20" height="14"><%= it.langNames[l] %></button></form></li>
 <% }) %>    </ul>
@@ -169,7 +173,8 @@
 <% } %><% if (can('photos.importer')) { %>  <a class="imp" href="/admin/photos?importer#import" data-import-open aria-label="<%= t('Importer des photos') %>"><%~ ic('upload', 22) %></a>
 <% } %><% if (can('terrain.app')) { %>  <a href="/admin/rencontre/accueil"<%~ it.section === 'terrain' ? ' aria-current="page"' : '' %>><%~ ic('pin', 22) %><%= t('Terrain') %></a>
 <% } %>
-  <button type="button" data-menu aria-expanded="false" aria-controls="admin-nav"><%~ ic('menu', 22) %><%= t('Menu') %></button>
+<% /* Sans script, un lien vers la barre (ouverte par :target) ; admin.js le remplace par un bouton (aria-expanded). */ %>
+  <a href="#admin-nav" data-menu><%~ ic('menu', 22) %><%= t('Menu') %></a>
 </nav>
 
 <% if (it.releasePopup) { const rp = it.releasePopup; %>

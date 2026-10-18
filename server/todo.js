@@ -101,7 +101,7 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
     // Mentions légales / Impressum : obligatoires, signalées tant qu'il manque l'essentiel.
     const legal = Object.fromEntries(db.prepare("SELECT key, value FROM settings WHERE key LIKE 'legal_%' OR key = 'privacy_contact'").all()
       .map(r => { try { return [r.key, JSON.parse(r.value)]; } catch { return [r.key, '']; } }));
-    if (a.all('reglages.droits') && legalMissing(legal).length) items.push({ level: 'bientot', title: t('Mentions légales / Impressum à compléter'), detail: t('obligatoires en France et en Allemagne : éditeurs, adresse postale, responsable'), href: '/admin/droits#mentions', action: t('Compléter') });
+    if (a.all('reglages.droits') && legalMissing(legal).length) items.push({ level: 'bientot', title: t('Mentions légales / Impressum à compléter'), detail: t('obligatoires en France et en Allemagne : éditeurs, adresse postale, directeur de la publication'), href: '/admin/droits#mentions', action: t('Compléter') });
     // Remarques adressées : pour le photographe, chacune (jusqu'à 5) ; au-delà, ou pour qui voit tout, leur nombre.
     const na = a.author('photos.voir');
     const open = notes && na !== undefined ? notes.open({ authorId: na }) : [];

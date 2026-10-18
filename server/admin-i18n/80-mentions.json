@@ -7,9 +7,9 @@
   "en": "(“Impressum” in German), linked at the bottom of every page",
   "de": "(auf Deutsch „Impressum“), unten auf jeder Seite verlinkt"
  },
- "Obligatoires en France comme en Allemagne : qui édite le site, une adresse postale où vous joindre, un e-mail, et la personne responsable du contenu. Le texte est rédigé par le site (trois langues) ; seuls ces renseignements sont à donner.": {
-  "en": "Required in France and in Germany: who publishes the site, a postal address where you can be reached, an email address and the person responsible for the content. The text is written by the site (three languages); only these details are needed.",
-  "de": "In Frankreich wie in Deutschland Pflicht: wer die Website anbietet, eine ladungsfähige Anschrift, eine E-Mail-Adresse und die für den Inhalt verantwortliche Person. Der Text wird von der Website verfasst (drei Sprachen); nur diese Angaben sind nötig."
+ "Obligatoires en France comme en Allemagne : qui édite le site, une adresse postale où vous joindre, un e-mail, un téléphone, le directeur de la publication et l’hébergement. Le texte est rédigé par le site (trois langues) ; seuls ces renseignements sont à donner.": {
+  "en": "Required in France and in Germany: who publishes the site, a postal address where you can be reached, an email address, a phone number, the publication director and the hosting. The text is written by the site (three languages); only these details are needed.",
+  "de": "In Frankreich wie in Deutschland Pflicht: wer die Website anbietet, eine ladungsfähige Anschrift, eine E-Mail-Adresse, eine Telefonnummer, die für den Inhalt verantwortliche Person und das Hosting. Der Text wird von der Website verfasst (drei Sprachen); nur diese Angaben sind nötig."
  },
  "Incomplètes : la page n’affiche que ce qui est rempli.": {
   "en": "Incomplete: the page only shows what is filled in.",
@@ -31,15 +31,11 @@
   "en": "street, postcode, town, country; one line per address line",
   "de": "Straße, Postleitzahl, Ort, Land; eine Zeile pro Adresszeile"
  },
- "vide : celui de la confidentialité": {
-  "en": "empty: the privacy one",
-  "de": "leer: die aus dem Datenschutz"
- },
  "Téléphone": {
   "en": "Phone",
   "de": "Telefon"
  },
- "Responsable de la publication": {
+ "Directeur de la publication": {
   "en": "Person responsible for the content",
   "de": "Verantwortlich für den Inhalt"
  },
@@ -51,8 +47,64 @@
   "en": "Legal notice / Impressum to complete",
   "de": "Impressum zu vervollständigen"
  },
- "obligatoires en France et en Allemagne : éditeurs, adresse postale, responsable": {
-  "en": "required in France and Germany: publishers, postal address, person responsible",
+ "obligatoires en France et en Allemagne : éditeurs, adresse postale, directeur de la publication": {
+  "en": "required in France and Germany: publishers, postal address, publication director",
   "de": "in Frankreich und Deutschland Pflicht: Anbieter, Anschrift, Verantwortliche"
+ },
+ "E-mail de contact": {
+  "en": "Contact email",
+  "de": "Kontakt-E-Mail"
+ },
+ "Publié en lien sur la page.": {
+  "en": "Published as a link on the page.",
+  "de": "Auf der Seite als Link veröffentlicht."
+ },
+ "Dû, puisque vous hébergez le site.": {
+  "en": "Required, since you host the site.",
+  "de": "Pflicht, da Sie die Website selbst hosten."
+ },
+ "Dû par la loi pour une personne qui édite un site.": {
+  "en": "Required by law for a person who publishes a website.",
+  "de": "Gesetzlich Pflicht für eine Person, die eine Website anbietet."
+ },
+ "Hébergement": {
+  "en": "Hosting",
+  "de": "Hosting"
+ },
+ "Par les éditeurs, sur leur serveur": {
+  "en": "By the publishers, on their own server",
+  "de": "Durch die Anbieter, auf ihrem eigenen Server"
+ },
+ "La page le dit, avec l’adresse et le téléphone ci-dessus.": {
+  "en": "The page says so, with the address and phone number above.",
+  "de": "Die Seite sagt es, mit der Anschrift und der Telefonnummer oben."
+ },
+ "Chez un hébergeur": {
+  "en": "With a hosting provider",
+  "de": "Bei einem Hosting-Anbieter"
+ },
+ "Son nom, son adresse et son téléphone seront demandés.": {
+  "en": "Its name, address and phone number will be required.",
+  "de": "Name, Anschrift und Telefonnummer des Anbieters werden verlangt."
+ },
+ "Nom de l’hébergeur": {
+  "en": "Hosting provider’s name",
+  "de": "Name des Hosting-Anbieters"
+ },
+ "Adresse de l’hébergeur": {
+  "en": "Hosting provider’s address",
+  "de": "Anschrift des Hosting-Anbieters"
+ },
+ "Téléphone de l’hébergeur": {
+  "en": "Hosting provider’s phone",
+  "de": "Telefon des Hosting-Anbieters"
+ },
+ "1 rubrique obligatoire à remplir :": {
+  "en": "1 required item to fill in:",
+  "de": "1 Pflichtangabe fehlt:"
+ },
+ "{n} rubriques obligatoires à remplir :": {
+  "en": "{n} required items to fill in:",
+  "de": "{n} Pflichtangaben fehlen:"
  }
 }

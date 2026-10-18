@@ -8,7 +8,7 @@
   <div class="prose">
 <% it.sections.forEach(([h, ps]) => { %>
     <h2><%= h %></h2>
-<% ps.forEach(p => { %>    <p><%= p %></p>
+<% ps.forEach(p => { /* texte, ou { text, link, href } : l'e-mail en lien (server/legal.js) */ %>    <p><% if (typeof p === 'string') { %><%= p %><% } else { %><%= p.text %><a class="more" href="<%= p.href %>"><%= p.link %></a><% } %></p>
 <% }) %>
 <% }) %>
   </div>

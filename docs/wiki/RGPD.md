@@ -78,6 +78,6 @@ Une analyse d'impact complète (AIPD) n'est pas obligatoire ici : petit volume, 
 - [ ] **Disques chiffrés** pour les données et les sauvegardes (guide Unraid, « Chiffrer les données »), puis cocher la case dans Droits & confidentialité.
 - [ ] **Authentification à deux facteurs** dans Zitadel pour les deux comptes, puis cocher la case.
 - [ ] **Messagerie** : garder le bouton Mail, ou un fournisseur avec contrat de sous-traitance pour `SMTP_URL`.
-- [ ] **Mentions légales / Impressum** : remplir éditeurs, adresse postale, responsable dans Droits & confidentialité.
+- [ ] **Mentions légales / Impressum** : remplir éditeurs, adresse postale, e-mail, téléphone, directeur de la publication (et l'hébergeur s'il y en a un) dans Droits & confidentialité.
 - [ ] **Signer l'accord** du point 2 et le garder.
 - [ ] **Relire ce document** chaque année (date de la dernière relecture : ………………).

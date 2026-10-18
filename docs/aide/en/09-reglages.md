@@ -48,10 +48,12 @@ Required in France (LCEN) as in Germany (Impressum, § 5 DDG): the `/mentions-le
 
 - **Publishers**: your first names and surnames;
 - **Postal address**: an address where you can be reached (one line per address line);
-- **Email** (empty: the privacy one) and **phone** (optional);
-- **Person responsible for the content**: one person (in Germany, “Verantwortlich nach § 18 MStV”).
+- **Contact email**: published as a link on the page (if empty, the privacy contact replaces it when it is an email address, not an `https://` link);
+- **Phone**: required for a person who publishes a website (LCEN, art. 1-1; § 5 DDG in Germany), whether or not you host the site;
+- **Person responsible for the content**: the publication director, who answers for what is published (LCEN, art. 1-1; in Germany, “Verantwortlich nach § 18 MStV”);
+- **Hosting**: **By the publishers, on their own server** (default: the page says so, with the address and phone number above) or **With a hosting provider**: its **name**, **address** and **phone** are then required, and the page names it (“The website is hosted by …”). Routing through Cloudflare is mentioned in both cases.
 
-As long as the essentials are missing (names, address, email, person responsible), “Today” flags it and the page only shows what has been filled in. Hosting (your server, in France; routing through Cloudflare) and the links to the usage rights and privacy pages are added automatically.
+As long as a required item is missing (names, address, email, phone, person responsible; with a hosting provider, its name, address and phone), the section says so (“2 required items to fill in: Phone, Person responsible for the content”), “Today” flags it, and the page only shows what has been filled in. The links to the usage rights and privacy pages are added automatically.
 
 | Field | Where it appears |
 |---|---|

@@ -344,5 +344,5 @@ test('A105 : Confidentialité : contact de repli dans la langue de la page, adre
   const de = (await app.inject('/de/mentions-legales')).body;
   assert.doesNotMatch(de, /E-Mail: https/);
   set(db, 'privacy_contact', 'contact@exemple.org');
-  assert.match((await app.inject('/de/mentions-legales')).body, /E-Mail: contact@exemple\.org/);
+  assert.match((await app.inject('/de/mentions-legales')).body, /E-Mail: <a class="more" href="mailto:contact@exemple\.org">contact@exemple\.org<\/a>/);
 });

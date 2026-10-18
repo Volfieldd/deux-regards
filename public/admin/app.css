@@ -99,3 +99,30 @@ input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; margin:
 .app-qr-show { padding: 20px 16px 32px; display: grid; justify-items: center; gap: 14px; text-align: center; }
 .app-qr-show img { width: min(92vw, 420px); height: auto; background: #f5f2ec; border-radius: 16px; padding: 10px; }
 .app-qr-show .hint { margin: 0; }
+
+/* ---------- accessibilité : erreurs, focus, langue sans script (audit d'ergonomie, oct. 2026) ---------- */
+/* Phrase d'erreur sous la question restée sans réponse (âge, décision), dans la langue de la personne. */
+.app-err { margin: 0 0 4px; color: var(--ko); font-weight: 500; font-size: 15px; }
+/* Boutons radio et cases en erreur : un filet rouge collé ; au focus, l'anneau encre s'ajoute dehors, le filet reste.
+   --ko fait 5,2:1 sur le papier, l'encre 15,5:1. */
+:is(input[type="radio"], input[type="checkbox"])[aria-invalid="true"] { outline: 2px solid var(--ko); outline-offset: 1px; }
+input[type="radio"][aria-invalid="true"] { border-radius: 50%; }
+:is(input[type="radio"], input[type="checkbox"])[aria-invalid="true"]:focus-visible { outline: 2px solid var(--ink) !important; outline-offset: 4px; box-shadow: 0 0 0 2px var(--ko); }
+/* Boutons de langue : le bouton radio est invisible (le libellé est le bouton) ; son focus se voit sur le libellé. */
+.app-langs label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* Bouton inactif pendant l'envoi : en contour, jamais un aplat pâli (le filet --field fait 3,3:1, WCAG 1.4.11). */
+.app-save[disabled], .app-save[aria-disabled="true"] { opacity: 1; background: transparent; color: var(--mute); box-shadow: inset 0 0 0 1.5px var(--field); cursor: progress; }
+/* Texte lu seulement : clip-path, la forme actuelle (clip est déprécié). */
+.sr-only { clip-path: inset(50%); }
+/* Le focus ne s'arrête pas sous l'en-tête collant (WCAG 2.4.11). */
+html:has(.app-bar) { scroll-padding-top: 88px; }
+/* La langue de la personne change SANS script : la case cochée décide, par :has(). La règle « data-lang » plus haut (posée
+   par le serveur, changée par app.js) est neutralisée là où :has() existe, et reste celle des autres navigateurs. Les
+   éléments [data-l] n'ont pas d'affichage propre (des span, et le div .app-l10n) : revert leur rend celui du navigateur.
+   La langue envoyée reste celle du bouton coché (name="lang") ; app.js garde data-lang pour les autres navigateurs. */
+@supports selector(:has(*)) {
+  .app-form[data-lang] [data-l]:not([data-l=""]) { display: revert; }
+  .app-form:has([data-lang-pick][value="fr"]:checked) [data-l]:not([data-l="fr"]),
+  .app-form:has([data-lang-pick][value="en"]:checked) [data-l]:not([data-l="en"]),
+  .app-form:has([data-lang-pick][value="de"]:checked) [data-l]:not([data-l="de"]) { display: none; }
+}

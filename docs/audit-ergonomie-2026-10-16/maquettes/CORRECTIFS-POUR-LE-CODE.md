@@ -1,6 +1,8 @@
 # Correctifs à reporter dans main (relevés par le jury v1 des maquettes, 16 oct. 2026)
 
-Rien n'a été modifié dans main. Ce fichier dit précisément quoi changer, où, et comment le vérifier. Les § 5 à 7 viennent de la passe 3 (administration), les § 8 et 9 du jury v2 (passe 4), le § 10 de la finalisation des maquettes (avant le jury final), les § 11 et 12 du jury final (passe 5, 17 oct. 2026). Les maquettes (dossier `docs/audit-ergonomie-2026-10-16/maquettes/_commun/`) appliquent déjà ces corrections dans `admin-plus.css` et `tokens.css`, sans toucher à leur copie d'`admin.css`, qui reste identique à main ; pour l'app de terrain (§ 5), dans un bloc « Ajouts des maquettes » à la fin de leur copie d'`app.css`, le reste du fichier restant identique à main.
+**État (18 oct. 2026) : les 13 correctifs sont reportés dans le code** (branche `fix/correctifs-ergonomie`) ; chaque § porte une note « **Fait** » qui dit ce qui a été fait, et ce qui s'écarte de la consigne. Vérification : `test/correctifs-ergonomie.test.js`, `test/confidentialite.test.js` (mentions légales) et `e2e/tests/ergonomie.spec.js` (Playwright : focus, menu sans script, langue de l'app).
+
+Ce fichier dit précisément quoi changer, où, et comment le vérifier (il a été écrit avant ces modifications : « main » y désigne le code d'alors). Les § 5 à 7 viennent de la passe 3 (administration), les § 8 et 9 du jury v2 (passe 4), le § 10 de la finalisation des maquettes (avant le jury final), les § 11 et 12 du jury final (passe 5, 17 oct. 2026). Les maquettes (dossier `docs/audit-ergonomie-2026-10-16/maquettes/_commun/`) appliquent déjà ces corrections dans `admin-plus.css` et `tokens.css`, sans toucher à leur copie d'`admin.css`, qui reste identique à main ; pour l'app de terrain (§ 5), dans un bloc « Ajouts des maquettes » à la fin de leur copie d'`app.css`, le reste du fichier restant identique à main.
 
 ## 1. Le focus est invisible sur un champ en erreur (à corriger en premier)
 
@@ -33,6 +35,8 @@ Pourquoi elle l'emporte : spécificité (0,2,1), plus forte que `[aria-invalid="
 
 **Vérification.** Ouvrir une fiche de photo, saisir « demain matin » dans la date, enregistrer : le champ revient en erreur ; tabuler jusqu'à lui (ou suivre le lien du résumé). On doit voir le filet rouge **et** l'anneau ambre. Contrôle automatique possible dans les tests de bout en bout (Playwright) : comparer `getComputedStyle(champ).outlineStyle` avant et après `champ.focus()` (« none », puis « solid »), en thème clair et en sombre.
 
+> **Fait.** Règle ajoutée après `[aria-invalid="true"]` dans `public/admin/admin.css`, telle quelle. Vérifié en clair et en sombre (Playwright : `outlineStyle` « none » puis « solid », filet `inset` conservé).
+
 ## 2. Le bouton danger se confond avec le bouton principal en « Chambre noire »
 
 **Constat.** En thème sombre, `--danger: #e8743b` (orangé, 19° de teinte) et `--accent: #f0a94c` (ambre, 36°) ne diffèrent que de 1,5:1 en luminance : « Supprimer la photo » et « Publier » ont presque la même couleur, la même forme et le même texte foncé.
@@ -51,9 +55,13 @@ par
 
 `#f0605a` est un rouge (2°) : 5,8:1 sur `--s1` (texte d'erreur), 6,0:1 avec `--on-danger` (texte du bouton plein), 1,6:1 avec l'ambre. Le thème clair (`#b2410a`) ne change pas. Ajouter en plus, dans les gabarits, l'icône ✕ (ou la corbeille) devant le verbe des boutons `.btn.danger` pleins (dialogues de suppression, de dépublication) : la teinte ne porte jamais seule le sens. Corriger aussi le commentaire des lignes 18-19 (« bleu / jaune / vermillon ») en « bleu / jaune / rouge ».
 
+> **Fait.** `--danger: #f0605a` (sombre) et commentaire « bleu / jaune / rouge ». En plus : le bouton plein `.btn.danger` écrivait son texte en `#fff` (3,2:1 sur le nouveau rouge, 3,0:1 sur l'ancien) : il prend `--on-danger` (6,0:1 en sombre, blanc inchangé en clair), comme le message d'erreur `.toast.error`. Le ✕ devant le verbe est posé par la feuille de style (`.btn.danger::before`, texte de remplacement vide), pour tous les boutons pleins de suppression et de refus, plutôt que gabarit par gabarit.
+
 ## 3. Le numéro de version de la barre latérale est en 10 px
 
 `public/admin/admin.css`, ligne 1140 : `.nav-ver { margin-left: auto; font-size: 10px; … }`. L'échelle de l'administration ne descend pas sous 12 px. Remplacer `font-size: 10px` par `font-size: 12px` (et, pour une donnée, `font-family: var(--mono)`, comme le reste des numéros).
+
+> **Fait.** `font-size: 12px` (le `<span>` porte déjà la classe `.mono`, et l'admin n'a pas de variable `--mono`).
 
 ## 4. Un libellé long de bouton est coupé au téléphone
 
@@ -66,6 +74,8 @@ par
 ```
 
 (La ligne 1017 le fait déjà pour quelques blocs ; cette règle le généralise au téléphone.)
+
+> **Fait.** Règle reprise telle quelle, dans un `@media (max-width: 720px)` placé après le bloc « téléphone ».
 
 ## 5. App de terrain : le focus est invisible sur un bouton radio en erreur, et le bouton inactif est pâli
 
@@ -88,6 +98,8 @@ input[type="radio"][aria-invalid="true"] { border-radius: 50%; }
 
 **Vérification.** Ouvrir `/admin/rencontre`, cocher « Accord », signer, ne pas répondre à « Âge », envoyer : les deux boutons radio portent le filet rouge ; tabuler jusqu'à eux : l'anneau encre apparaît à 4 px, le filet reste. Playwright : `getComputedStyle(radio).outlineOffset` vaut « 1px » puis « 4px » après `radio.focus()`. Pendant l'envoi (réseau lent simulé), « Envoi… » se lit en contour.
 
+> **Fait.** `views/admin/app.eta` : `aria-invalid` sur les boutons radio du groupe refusé, phrase sous la légende dans les trois langues (seule celle de la personne s'affiche), `aria-describedby` sur le `<fieldset>`. Groupes : « Âge » (erreur `adult`) et « Décision » (erreur `what`, « Rien à enregistrer »). `public/admin/app.js` fait de même avant l'envoi (tous les boutons du groupe, phrase montrée). Règles CSS reprises ; en plus, le focus des boutons de langue (bouton radio invisible) se voit sur leur libellé. Phrases : `UI[lang].app.errAdult` et `errDecision` (`server/i18n.js`).
+
 ## 6. Mentions légales : le téléphone et l'e-mail sont obligatoires
 
 **Constat.** UX-T-03 ; LCEN art. 1-1 (ex-art. 6-III-1) : une personne physique qui édite un site doit donner ses nom et prénom, son domicile, son numéro de téléphone et une adresse de courrier électronique ; l'Impressum allemand (§ 5 DDG) exige aussi un moyen de contact électronique rapide. Or `views/admin/settings.eta`, lignes 49 et 50, présente l'e-mail comme facultatif (« vide : celui de la confidentialité ») et le téléphone comme « facultatif » ; `legalMissing` (`server/legal.js`, l. 56 à 63) ne compte pas le téléphone, et accepte comme e-mail le contact de la confidentialité, qui peut être une adresse de formulaire et non un e-mail. Les mentions se disent complètes sans le téléphone.
@@ -99,6 +111,8 @@ input[type="radio"][aria-invalid="true"] { border-radius: 50%; }
 
 **Vérification.** Vider le téléphone dans les réglages : l'onglet « Mentions et confidentialité » signale la rubrique manquante ; le remplir : le signal disparaît, la page `/mentions-legales` affiche « Téléphone : … » sous Contact (déjà rendu par `LEGAL.fr.sections`, l. 13).
 
+> **Fait.** Libellés, aides et attributs comme prévu ; `legalMissing` compte le téléphone et n'accepte le contact de la confidentialité que s'il est une adresse e-mail. L'avertissement nomme les rubriques manquantes (« 1 rubrique obligatoire à remplir : Téléphone. »). L'e-mail est publié en lien `mailto:` sur la page.
+
 ## 7. Mentions légales : un champ « Hébergement » (nouveau)
 
 **Constat.** La rubrique « Hébergement » des mentions est écrite en dur dans `server/legal.js` (l. 15 à 18 en français, l. 30 et 45 pour l'anglais et l'allemand) : « hébergé par ses éditeurs, sur leur propre serveur, en France » et Cloudflare. C'est vrai aujourd'hui, mais un déménagement chez un hébergeur rendrait la page fausse sans qu'aucun réglage ne le montre ; et la LCEN (art. 1-1) demande alors le nom, l'adresse et le téléphone de l'hébergeur.
@@ -106,6 +120,8 @@ input[type="radio"][aria-invalid="true"] { border-radius: 50%; }
 **Correctif** (MQ-07, onglet « Mentions et confidentialité », sous « Responsable de la publication ») : un groupe de deux boutons radio `legal_host` (« Par les éditeurs, sur leur serveur » · « Chez un hébergeur »), avec une phrase d'effet sous chaque choix (« La page le dit, avec l'adresse et le téléphone ci-dessus. » · « Son nom, son adresse et son téléphone seront demandés. ») ; le second fait apparaître trois champs (`legal_host_name`, `legal_host_address`, `legal_host_phone`), obligatoires dans `legalMissing` quand il est choisi. `server/admin-repo.js` (l. 490) enregistre ces quatre réglages (texte, 200, 400 et 40 signes). `server/legal.js` : la rubrique « Hébergement » (FR, EN, DE) rend la phrase actuelle pour « éditeurs » (valeur par défaut, aucun changement de la page publiée aujourd'hui) et, pour « hébergeur », « Le site est hébergé par {nom}, {adresse}, {téléphone}. » (DE « Die Website wird gehostet von … »), la phrase sur Cloudflare restant dans les deux cas.
 
 **Vérification.** Sans toucher au réglage, `/mentions-legales` est identique (test de bout en bout : capture du texte avant et après la migration). Choisir « Chez un hébergeur » sans remplir les trois champs : l'onglet signale « 3 rubriques obligatoires à remplir » ; les remplir : la page publique nomme l'hébergeur, en trois langues.
+
+> **Fait, sans migration** (les réglages sont des paires clé-valeur) : `legal_host` (`editeurs` par défaut, `hebergeur`), `legal_host_name`, `legal_host_address`, `legal_host_phone`. Les trois champs ne s'affichent que si « Chez un hébergeur » est coché (`:has()`, sans script). Page publique inchangée tant que le réglage n'est pas touché ; un hébergeur sans coordonnées n'est pas inventé (la phrase est omise, Cloudflare reste).
 
 ## 8. Au téléphone, sans JavaScript, le menu de l'administration est hors d'atteinte (passe 4, jury v2)
 
@@ -127,6 +143,8 @@ input[type="radio"][aria-invalid="true"] { border-radius: 50%; }
 
 **Vérification.** Navigateur au téléphone (412 px), JavaScript coupé : « Menu » ouvre la barre (l'adresse finit par `#admin-nav`) ; ses liens mènent où ils disent ; Tab depuis le dernier lien du menu ne va plus sur la page ni sur la barre d'onglets ; « Fermer » la referme et le focus est sur le contenu. Avec JavaScript : l'adresse ne change pas, `aria-expanded` suit l'état, `document.querySelector('.shell > .main').inert` vaut `true` menu ouvert et `false` fermé. Les maquettes le montrent (`admin-plus.css` § 1, échantillons de MQ-00 dont « menu ouvert », MQ-07 à MQ-09, MQ-18 à MQ-20) ; `outils/focus-colle.mjs` les parcourt menu ouvert (0 élément caché).
 
+> **Fait.** Lien « Menu » vers `#admin-nav`, lien « Fermer » (icône `x` ajoutée), `:target` et règle `visibility` limités à `html:not(.js)` (avec le script, l'état est `.open`), bouton recréé par `admin.js`, `inert` sur la page menu ouvert (la palette ⌘K en est exclue), focus rendu au bouton à la fermeture. Vérifié : Playwright (sans script à 412 px : ouverture, Tab depuis le dernier élément, « Fermer », liens ; avec script : `aria-expanded`, `inert`) et `focus-colle.mjs` menu ouvert sur six pages capturées : 0 élément caché.
+
 ## 9. Au téléphone, le focus passe sous la barre d'onglets ; la palette n'a pas de focus visible (passe 4, contrôle outillé)
 
 **Constat.** WCAG 2.4.11 (AA) et 2.4.7, RGAA 10.7. Sous 720 px, la barre d'onglets (`.tabbar`, fixe, 74 px) et, sur une fiche, la barre d'actions placée au-dessus couvrent le bas de l'écran : un champ atteint au clavier (Tab) s'y arrête dessous, entièrement caché (relevé par `dr-work/outils/focus-colle.mjs` sur les maquettes MQ-07 à MQ-20, qui reprennent ces barres de main). Au bureau, la barre « Pour les photos cochées » (`.main:not(.wide) .bulk`, collante, `admin.css` l. 381) cache de même les champs du lot en Shift+Tab. Dans la palette Ctrl K, `admin.css` l. 328 (`.pal-in input { box-shadow: none !important; }`) retire tout dessin au champ : son focus ne se voit pas.
@@ -145,6 +163,8 @@ input[type="radio"][aria-invalid="true"] { border-radius: 50%; }
 (Dans main, la barre d'actions fixe de la fiche s'appelle autrement : reprendre son sélecteur.) Même chose pour l'en-tête collant de l'app de terrain (`public/admin/app.css`, `.app-bar`) : `html:has(.app-bar) { scroll-padding-top: 88px; }`.
 
 **Vérification.** `run-pw.sh focus-colle.mjs` sur une page de main capturée (ou sur les maquettes) : aucun élément entièrement caché, au bureau, sur Pixel 7 et à 320 px ; dans la palette, le champ montre un trait ambre au focus.
+
+> **Fait.** Pas de barre d'actions fixe sur la fiche dans le code : la règle de 155 px vise la barre collante d'« À valider » (`.rv-actions`). `focus-colle.mjs` sur six pages capturées (tableau, fiche, droits, liste, À valider, lot ; bureau, Pixel 7, 320 px) : 0 élément entièrement caché ; restent « en partie » (2.4.12, AAA) des zones de texte plus hautes que l'espace libre. Palette : trait ambre sous le champ au focus (`.pal-in:focus-within`) ; app de terrain : `scroll-padding-top: 88px`.
 
 ## 10. App de terrain : sans JavaScript, la langue choisie pour la personne ne change pas son texte (finalisation, d'après MQ-10)
 
@@ -168,6 +188,8 @@ Pourquoi elle l'emporte : `.app-form:has(…:checked) [data-l]:not(…)` a une s
 
 **Vérification.** Navigateur au téléphone, JavaScript coupé : `/admin/rencontre`, cocher « Deutsch » : l'accord, les portées et les trois réponses passent en allemand, `lang="de"` compris ; « English » : en anglais. Avec JavaScript : comportement actuel. Playwright : `page.check('[data-lang-pick][value="de"]')` sans script (`javaScriptEnabled: false`), puis `getComputedStyle(document.querySelector('.app-l10n[data-l="fr"]')).display` vaut « none » et celui de `[data-l="de"]` « block ». La maquette MQ-10 le montre (repère « La langue de la personne, sans drapeau » : English coché, la section en anglais ; état « En allemand : le nom du parent manque ») ; contrôle des maquettes : `dr-work/outils/p4adm-langue.mjs`.
 
+> **Fait.** Bloc repris tel quel dans `public/admin/app.css`. Vérifié sans script (Playwright) : « Deutsch » coché, le texte passe en allemand (`lang="de"`), « English » en anglais.
+
 ## 11. Mentions légales : « Directeur de la publication », le terme de la loi (passe 5, jury final)
 
 **Constat.** Grille, critère 7 (signifiance) ; jurys finaux du site public et de l'administration. Main nomme la rubrique et le réglage « Responsable de la publication ». La loi dit « directeur de la publication » : LCEN (loi n° 2004-575), **art. 1-1**, issu de la loi SREN n° 2024-449 du 21 mai 2024 (en vigueur depuis le 23 mai 2024), qui reprend l'ancien art. 6, III, 1 : l'éditeur met à disposition « le nom du directeur ou du codirecteur de la publication et, le cas échéant, celui du responsable de la rédaction au sens de l'article 93-2 de la loi n° 82-652 du 29 juillet 1982 » ; l'art. 93-2 de la loi de 1982 impose à tout service de communication au public en ligne d'« avoir un directeur de la publication ». « Responsable de la publication » est un usage courant, mais inexact, et il se confond avec le « responsable de la rédaction », un autre rôle de la même phrase. Les maquettes (MQ-06, MQ-07, planche, lexique § 1) écrivent déjà « Directeur de la publication ».
@@ -190,6 +212,8 @@ L'allemand (« Verantwortlich nach § 18 MStV », rubrique « Verantwortlich fü
 
 **Vérification.** `grep -rn "esponsable de la publication" server views docs/aide` : plus rien ; `/mentions-legales` affiche la rubrique « Directeur de la publication » ; `npm test` (les tests qui lisent le texte des mentions, s'il y en a, suivent).
 
+> **Fait**, fichier par fichier comme dans le tableau ; `grep -rn "esponsable de la publication" server views docs/aide` ne trouve plus rien. Aide anglaise et allemande ajustées.
+
 ## 12. Nom lu du bouton de langue : le code visible y manque (passe 5, jury final)
 
 **Constat.** WCAG 2.5.3 (nom accessible contenant l'étiquette visible, niveau A), RGAA 6.1. `views/langs.eta`, l. 4 : `<summary aria-label="<%= t.nav.langCurrent %>">…<span><%= lang.toUpperCase() %></span></summary>`. L'`aria-label` (« Langue : français ») remplace tout le contenu du `<summary>` : la commande vocale « clique sur FR » ne trouve rien, puisque « FR », la seule étiquette visible, n'est pas dans le nom. Les maquettes (planche et toutes les pages du site) lisent « FR – Langue : français » : le code visible, puis le nom du code.
@@ -204,6 +228,8 @@ La classe `.sr-only` existe déjà (`public/css/site.css`, l. 46). Nom lu : « F
 
 **Vérification.** Playwright sur `/` puis `/de/` : le nom accessible du `<summary>` (`page.locator('[data-lang-pick] summary')`, `toHaveAccessibleName`) vaut « FR – Langue : français », puis « DE – Sprache: Deutsch » ; axe-core avec la règle `label-content-name-mismatch` (étiquetée « experimental », à activer) : 0 violation.
 
+> **Fait.** Et de même pour le sélecteur de langue de l'administration (« FR – Langue de l'administration : Français »), qui avait le même défaut.
+
 ## 13. « Lieu » et « Ville » : deux champs, un seul mot en allemand (passe 5, jury final, d'après MQ-08)
 
 **Constat.** Critère 6 de la grille (homogénéité) ; RGAA 11.1 (étiquettes pertinentes). La fiche d'une photo a deux champs distincts : « Lieu » (`place`, texte libre affiché sous la photo, `views/admin/photo.eta` l. 84, et la colonne « Lieu » de `batch.eta`) et « Ville » (`city_label`, pour la carte du monde, liste GeoNames, l. 87). En allemand, `server/admin-i18n` les traduit tous deux par « Ort » : la fiche allemande montre deux champs « Ort ».
@@ -211,6 +237,8 @@ La classe `.sr-only` existe déjà (`public/css/site.css`, l. 46). Nom lu : « F
 **Correctif.** `server/admin-i18n` (fichier qui porte « Ville ») : `"Ville": { "en": "Town for the map", "de": "Stadt für die Karte" }`, « Lieu » restant « Ort » ; dans la fiche, l'intitulé de la ville peut aussi devenir « Ville de la carte » en français (les maquettes l'écrivent ainsi : lexique § 1).
 
 **Vérification.** `/admin/photos/24` en allemand : « Ort » puis « Stadt für die Karte ».
+
+> **Fait.** La fiche écrit « Ville de la carte » (EN « Town for the map », DE « Stadt für die Karte ») ; « Ville » seul (panneau de la photothèque) devient « Stadt » en allemand, « Ville (carte du site) » « Stadt (Karte der Website) ». Le champ texte libre de la fiche s'appelait déjà « Lieu affiché » (DE « Angezeigter Ort ») dans le code.
 
 ## Ce qui n'est pas un défaut de main
 

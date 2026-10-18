@@ -114,6 +114,8 @@ const tr = s => I18N[s]?.[document.documentElement.lang] ?? s;
   function report(list) {
     let box = form.querySelector('[data-app-check]');
     form.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+    // Groupes de boutons radio (âge, décision) : la phrase sous la légende, dans la langue de la personne.
+    form.querySelectorAll('[data-err-for]').forEach(p => { p.hidden = true; p.closest('fieldset')?.removeAttribute('aria-describedby'); });
     if (!list.length) { box?.remove(); return; }
     if (!box) {
       box = document.createElement('div');
@@ -127,7 +129,11 @@ const tr = s => I18N[s]?.[document.documentElement.lang] ?? s;
       const li = document.createElement('li');
       li.textContent = tr(msg);
       ul.append(li);
-      if (el !== canvas) el.setAttribute('aria-invalid', 'true');
+      if (el === canvas) continue;
+      if (el.type !== 'radio') { el.setAttribute('aria-invalid', 'true'); continue; }
+      form.querySelectorAll(`input[type="radio"][name="${el.name}"]`).forEach(r => r.setAttribute('aria-invalid', 'true'));
+      const say = form.querySelector(`[data-err-for="${el.name}"]`);
+      if (say) { say.hidden = false; say.closest('fieldset')?.setAttribute('aria-describedby', say.id); }
     }
     box.replaceChildren(ul);
     const first = list[0][0];

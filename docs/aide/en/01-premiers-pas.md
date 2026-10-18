@@ -42,7 +42,7 @@ At the bottom: your name, the **sun / moon** button that switches the admin to *
 
 While an import is being processed, the **Processing: *n* photos** indicator also appears at the bottom of the sidebar.
 
-**On a phone (iPhone…)**, the sidebar folds away: a **tab bar** at the bottom gives Today, Photos, **Import** (the big button in the middle), **Field** (the Field home: new encounter, my QR, today's outing) and **Menu** (which opens the sidebar). Buttons, checkboxes and fields are large enough for a finger. Screens adapt: for example, “Complete and publish” shows one card per photo (see [Complete and publish](photos#3-compléter-et-publier)).
+**On a phone (iPhone…)**, the sidebar folds away: a **tab bar** at the bottom gives Today, Photos, **Import** (the big button in the middle), **Field** (the Field home: new encounter, my QR, today's outing) and **Menu** (which opens the sidebar, even without JavaScript; **Close**, at the top, closes it; while it is open, the keyboard stays in the menu). Buttons, checkboxes and fields are large enough for a finger. Screens adapt: for example, “Complete and publish” shows one card per photo (see [Complete and publish](photos#3-compléter-et-publier)).
 
 Each screen has a **“Help for this page”** link (in the photo library: **Help**, top right) that goes straight to the right section.
 

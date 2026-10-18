@@ -75,9 +75,12 @@ test('Site public et Droits & confidentialité : chaque page n’enregistre que 
   assert.match((await c.get('/admin/site')).body, /name="tagline" value="Autre"/);
 });
 
-test('états lisibles sans la couleur : palette bleu / jaune / vermillon, forme en plus de la couleur', () => {
+test('états lisibles sans la couleur : palette bleu / jaune / rouge, forme en plus de la couleur', () => {
   const css = fs.readFileSync(new URL('../public/admin/admin.css', import.meta.url), 'utf8');
-  assert.match(css, /--ok: #56b4e9; --warn: #f0e442; --danger: #e8743b;/);
+  // Sombre : un rouge (2°), distinct de l'ambre de --accent (36°) ; « Supprimer » ne se confond plus avec « Publier ».
+  assert.match(css, /--ok: #56b4e9; --warn: #f0e442; --danger: #f0605a; --on-danger: #1b0a04;/);
+  assert.match(css, /\.btn\.danger \{ background: var\(--danger\); color: var\(--on-danger\); \}/);
+  assert.match(css, /\.btn\.danger::before \{ content: "✕"; content: "✕" \/ "";/);           // la teinte ne porte pas seule le sens
   assert.doesNotMatch(css, /--ok: #7fc79a|--ok: #2e7d4f/);                     // plus de vert contre rouge
   for (const k of ['ok', 'warn', 'no']) assert.match(css, new RegExp(`\\.enc-tag\\.${k}::before \\{ content: "[✓▲✕] "`));
 });
