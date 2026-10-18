@@ -12,7 +12,10 @@ import { intentParts } from '../server/v2-vues.js';
 // description courte d'un photographe (MQ-01), texte de remplacement d'une photo (UX-F-44) et numéro d'inventaire
 // (UX-T-05, MQ-04). Écrits dans l'admin avec les droits de leurs voisins, notés au journal, échappés et bornés ; la v1
 // ne change que par l'attribut alt de la photo de la visionneuse.
-const YY = String(new Date().getUTCFullYear()).slice(2);
+// Année du numéro : celle de Paris (migration 054), soit l'UTC plus une heure au passage d'année ; la migration 053
+// seule comptait en UTC.
+const YY = String(new Date(Date.now() + 3600e3).getUTCFullYear()).slice(2);
+const YY_UTC = String(new Date().getUTCFullYear()).slice(2);
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
 // Vigie simulée : les événements de sécurité reçus (« hors portée », droit refusé).
@@ -94,7 +97,7 @@ test('migration 053 sur une base en service : photos déjà publiées numéroté
     [{ prefix: 'J25', last: 2 }, { prefix: 'J26', last: 1 }, { prefix: 'Q26', last: 1 }, { prefix: 'S25', last: 1 }]);
   // Le brouillon publié ensuite prend le rang suivant de l'année en cours.
   db.prepare("UPDATE photos SET status = 'published' WHERE id = 5").run();
-  assert.equal(db.prepare('SELECT inventory FROM photos WHERE id = 5').pluck().get(), YY === '26' ? 'J26-002' : `J${YY}-001`);
+  assert.equal(db.prepare('SELECT inventory FROM photos WHERE id = 5').pluck().get(), YY_UTC === '26' ? 'J26-002' : `J${YY_UTC}-001`);
 });
 
 // ---------- numéro d'inventaire ----------
@@ -151,6 +154,70 @@ test('numéro d’inventaire : rien de privé (ni l’heure, ni l’identifiant 
     assert.doesNotMatch(p.inventory, new RegExp(p.published_at.slice(11, 13) + p.published_at.slice(14, 16)), 'pas l’heure');
     assert.ok(Number(rank) <= 6, `rang de l’auteur, pas l’identifiant ${p.id}`);
   }
+});
+
+test('numéro d’inventaire : l’année de Paris (migration 054) ; le 1er janvier à 0 h 30 compte pour l’année nouvelle', async t => {
+  const c = await site(t);
+  assert.ok(c.db.prepare('SELECT 1 FROM migrations WHERE name = ?').get('054_inventaire_annee_paris.sql'));
+  // L'expression des déclencheurs : l'UTC plus une heure au passage d'année (toujours en heure d'hiver), sans effet
+  // sur l'année le reste du temps.
+  const year = at => c.db.prepare("SELECT strftime('%Y', ?, '+1 hour')").pluck().get(at);
+  assert.equal(year('2026-12-31 23:30:00'), '2027');                 // 1er janvier, 0 h 30 à Paris
+  assert.equal(year('2026-12-31 22:30:00'), '2026');                 // 31 décembre, 23 h 30 à Paris
+  assert.equal(year('2027-01-01 00:30:00'), '2027');
+  assert.equal(year('2026-06-30 22:30:00'), '2026');                 // été : 1er juillet, 0 h 30, même année
+  for (const name of ['photos_inventory_insert', 'photos_inventory_update']) {
+    const sql = c.db.prepare("SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?").pluck().get(name);
+    assert.equal(sql.match(/strftime\('%Y', COALESCE\(\(SELECT published_at FROM photos WHERE id = NEW\.id\), 'now'\), '\+1 hour'\)/g)?.length, 2, name);
+  }
+  // Les déclencheurs lisent published_at : une date posée par l'écriture tient lieu d'horloge.
+  const src = c.first(c.seb);
+  const insert = (slug, status, at) => Number(c.db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height, published_at)
+    SELECT ?, ?, category_id, author_id, ?, 200, ? || '.jpg', width, height, ? FROM photos WHERE id = ?`).run(slug, slug, status, slug, at, src.id).lastInsertRowid);
+  // Publiée à l'insertion : le 31 décembre à 23 h 30 UTC, c'est le 1er janvier à Paris.
+  assert.equal(c.row(insert('nouvel-an', 'published', '2026-12-31 23:30:00')).inventory, 'S27-001');
+  assert.equal(c.row(insert('reveillon', 'published', '2026-12-31 22:30:00')).inventory, `S26-${String(YY === '26' ? 7 : 1).padStart(3, '0')}`);
+  // Publiée plus tard (changement de statut) : même règle.
+  const draft = insert('brouillon', 'draft', null);
+  assert.equal(c.row(draft).inventory, null);
+  c.db.prepare("UPDATE photos SET status = 'published', published_at = '2026-12-31 23:59:00' WHERE id = ?").run(draft);
+  assert.equal(c.row(draft).inventory, 'S27-002');
+  const late = insert('veille', 'draft', null);
+  c.db.prepare("UPDATE photos SET status = 'published', published_at = '2027-12-31 22:59:59' WHERE id = ?").run(late);
+  assert.equal(c.row(late).inventory, 'S27-003');
+  // Toujours unique et stable.
+  c.db.prepare("UPDATE photos SET status = 'draft' WHERE id = ?").run(draft);
+  c.db.prepare("UPDATE photos SET status = 'published', published_at = '2028-06-01 10:00:00' WHERE id = ?").run(draft);
+  assert.equal(c.row(draft).inventory, 'S27-002');
+  assert.throws(() => c.db.prepare("UPDATE photos SET inventory = 'S28-001' WHERE id = ?").run(draft), /il ne change jamais/);
+  const all = c.db.prepare('SELECT inventory FROM photos WHERE inventory IS NOT NULL').pluck().all();
+  assert.equal(new Set(all).size, all.length);
+});
+
+test('migration 054 sur une base en service : les numéros déjà donnés et les compteurs ne bougent pas', async t => {
+  const c = await site(t);
+  const file = `${c.dir}/avant-054.db`;
+  const db = openDb(file);
+  t.after(() => db.close());
+  const read = name => fs.readFileSync(new URL(`../server/db/migrations/${name}`, import.meta.url), 'utf8');
+  db.exec(`CREATE TABLE authors (id INTEGER PRIMARY KEY, slug TEXT, name TEXT, card_prefix TEXT NOT NULL DEFAULT '');
+    CREATE TABLE categories (id INTEGER PRIMARY KEY, slug TEXT, name TEXT);
+    CREATE TABLE photos (id INTEGER PRIMARY KEY, author_id INTEGER, status TEXT, published_at TEXT);
+    INSERT INTO authors VALUES (1, 'julien', 'Julien', '');
+    INSERT INTO photos VALUES (1, 1, 'published', '2025-12-31 23:30:00'), (2, 1, 'published', '2026-01-02 10:00:00');`);
+  db.exec(read('053_textes_inventaire.sql'));
+  // Numérotée en UTC par 053 : 2025, gardé tel quel.
+  const before = db.prepare('SELECT id, inventory FROM photos ORDER BY id').all();
+  const counters = db.prepare('SELECT prefix, last FROM inventory_counters ORDER BY prefix').all();
+  assert.deepEqual(before.map(r => r.inventory), ['J25-001', 'J26-001']);
+  db.exec(read('054_inventaire_annee_paris.sql'));
+  assert.deepEqual(db.prepare('SELECT id, inventory FROM photos ORDER BY id').all(), before);
+  assert.deepEqual(db.prepare('SELECT prefix, last FROM inventory_counters ORDER BY prefix').all(), counters);
+  assert.deepEqual(db.prepare("SELECT name FROM sqlite_master WHERE type = 'trigger' ORDER BY name").pluck().all(),
+    ['inventory_counters_conserve', 'inventory_counters_monotone', 'photos_inventory_insert', 'photos_inventory_stable', 'photos_inventory_update']);
+  // La suite reprend au rang suivant, à l'heure de Paris.
+  db.exec("INSERT INTO photos (id, author_id, status, published_at) VALUES (3, 1, 'published', '2026-12-31 23:30:00'), (4, 1, 'published', '2026-03-01 10:00:00')");
+  assert.deepEqual(db.prepare('SELECT inventory FROM photos WHERE id IN (3, 4) ORDER BY id').pluck().all(), ['J27-001', 'J26-002']);
 });
 
 // ---------- droits ----------
