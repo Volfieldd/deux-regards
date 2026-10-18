@@ -17,7 +17,8 @@ import { alertOrder } from '../../moteur.js';
 import { pointsOf, sourceOf } from '../../poids.js';
 import { loadRules } from '../../sigma.js';
 import { LISTS } from '../../menaces.js';
-import { adresseDetail, dateHeure, quand, ilYa, nombre, jour, guillemets, heure } from '../format.js';
+import { adresseDetail, dateHeure, masquer, quand, ilYa, nombre, jour, guillemets, heure } from '../format.js';
+import { sansContacts } from '../../util.js';
 import { can } from '../droits.js';
 import { FRESH } from '../sessions.js';
 import * as F from '../flux.js';
@@ -93,7 +94,8 @@ function qFlux(db) {
     evAlertes: db.prepare(`SELECT alert_id a, type, severity, composant, SUM(n) n, SUM(premier) prop FROM alert_flux
       WHERE alert_id IN (SELECT value FROM json_each(?)) AND jour >= ? AND type NOT IN (${ROUTINE_SQL})
       GROUP BY alert_id, type, severity, composant`),
-    reponses: db.prepare("SELECT id, kind, motif, cree_a FROM decisions WHERE auto = 1 AND cree_a >= ? AND motif LIKE 'alerte #%' ORDER BY id LIMIT 2000"),
+    // Réponses automatiques des alertes de la période (numéros en JSON) : par la colonne indexée alerte_id (migration 012).
+    reponses: db.prepare('SELECT id, kind, alerte_id, cree_a FROM decisions WHERE alerte_id IN (SELECT value FROM json_each(?)) AND auto = 1 AND cree_a >= ? ORDER BY id LIMIT 2000'),
     admins: db.prepare(`SELECT DISTINCT ip FROM events WHERE type = 'authn_login_success' AND recu_a >= ? AND ip IS NOT NULL
       AND sub IN (SELECT value FROM json_each(?)) LIMIT 500`).pluck(),
     prov: db.prepare(`SELECT ip, country, composant, CASE WHEN composant = 'bordure' THEN json_extract(detail, '$.asn') END asn,
@@ -253,7 +255,24 @@ export function lireProvenances({ db, debut, role }) {
   };
 }
 
-const DESC_AL = 'De gauche à droite : l’origine de chaque alerte (qui), sa ou ses sources (par où la Vigie l’a vue), son chemin (preuve '
+// Provenances gardées une minute par période et par rôle (audit D3-D4 : PROV_MAX événements relus à chaque affichage de
+// /flux, 0,5 s de boucle bloquée), comme les écarts de santé (ecartsSante). Le rôle fait partie de la clé : un Lecteur
+// ne reçoit jamais ce qui a été calculé pour un Analyste (adresses entières).
+const provenancesCache = new WeakMap();
+export const PROV_CACHE_MS = 60e3;
+export function provenancesEnCache({ db, debut, role, t }) {
+  let m = provenancesCache.get(db);
+  if (!m) { m = new Map(); provenancesCache.set(db, m); }
+  const cle = `${debut}|${role || ''}`;
+  const c = m.get(cle);
+  if (c && t - c.at < PROV_CACHE_MS && t >= c.at) return c.v;
+  for (const [k, x] of m) if (!(t - x.at < PROV_CACHE_MS && t >= x.at)) m.delete(k);   // jamais plus que les clés de la minute
+  const v = lireProvenances({ db, debut, role });
+  m.set(cle, { at: t, v });
+  return v;
+}
+
+const DESC_AL ='De gauche à droite : l’origine de chaque alerte (qui), sa ou ses sources (par où la Vigie l’a vue), son chemin (preuve '
   + 'directe, score d’une entité ou corrélation) et l’alerte, avec sa gravité. Une alerte, une bande de même épaisseur. Le tableau qui '
   + 'suit donne les mêmes informations.';
 const DESC_EV = 'De gauche à droite : les origines, les sources, les chemins (preuve directe, score d’une entité, corrélation, sans point) '
@@ -292,11 +311,10 @@ export function vueFlux({ db, now = Date.now, role, periode = PERIODE_DEFAUT, al
   const lignesEv = [...fl.chemins].sort((a, b) => ordreI[a.issue] - ordreI[b.issue] || b.n - a.n || (a.alerte ?? 0) - (b.alerte ?? 0)).map(c => ({
     origine: F.NOMS[c.origine], source: F.NOMS[c.source], chemin: F.NOMS[c.chemin], issue: F.NOMS[c.issue], n: nombre(c.n), alerte: c.alerte,
   }));
-  // Réponses automatiques des alertes de la période (décisions « alerte #n »).
-  const ids = new Set(al.map(a => a.id));
-  const reponses = qFlux(db).reponses.all(fl.debut).filter(d => ids.has(Number(String(d.motif).slice(8))));
+  // Réponses automatiques des alertes de la période (décisions rattachées à l'une d'elles).
+  const reponses = al.length ? qFlux(db).reponses.all(JSON.stringify(al.map(a => a.id)), fl.debut) : [];
   const parAl = new Map();
-  for (const d of reponses) { const id = Number(d.motif.slice(8)); if (!parAl.has(id)) parAl.set(id, []); parAl.get(id).push(d); }
+  for (const d of reponses) { const id = d.alerte_id; if (!parAl.has(id)) parAl.set(id, []); parAl.get(id).push(d); }
   const suites = [...parAl.entries()].slice(0, 12).map(([id, ds]) => ({ id, quand: quand(ds[0].cree_a, t), quoi: ds.map(d => `${MOTS_D[d.kind] || d.kind} (#${d.id})`).join(', ') }));
   const s = surligne != null ? al.find(a => a.id === surligne) : null;
   return {
@@ -310,7 +328,7 @@ export function vueFlux({ db, now = Date.now, role, periode = PERIODE_DEFAUT, al
     barre: barreAlertes(al),
     lignesAl, lignesEv,
     reponses: { n: reponses.length, suites, plus: Math.max(0, parAl.size - suites.length) },
-    provenances: lireProvenances({ db, debut: fl.debut, role }),
+    provenances: provenancesEnCache({ db, debut: fl.debut, role, t }),
     provMax: nombre(PROV_MAX),
   };
 }
@@ -324,8 +342,7 @@ const ZITADEL_TROU = 20 * 3600e3;         // vigie/zitadel.js (GAP)
 const CHAINE_RETARD = 48 * 3600e3;        // vérifiée chaque jour : au-delà de deux jours, la vérification ne tourne plus
 const ANALYSE_RETARD = 1000;              // comme la vue d'ensemble
 const LISTES_RETARD = 48 * 3600e3;        // listes de menaces : une fois par jour
-const CONSERVATION = 183;                 // jours gardés par défaut (vigie/store.js)
-const LISTES = { spamhaus_drop: 'Spamhaus DROP', feodo: 'abuse.ch Feodo Tracker', tor: 'Sorties Tor' };
+const LISTES ={ spamhaus_drop: 'Spamhaus DROP', feodo: 'abuse.ch Feodo Tracker', tor: 'Sorties Tor' };
 
 const requetesSante = new WeakMap();
 function qSante(db) {
@@ -336,7 +353,9 @@ function qSante(db) {
     dernier: db.prepare('SELECT recu_a, severity, detail FROM events WHERE type = ? ORDER BY recu_a DESC LIMIT 1'),
     compte: db.prepare('SELECT COUNT(*) FROM events WHERE type = ? AND recu_a >= ?').pluck(),
     parType: db.prepare("SELECT type, COUNT(*) n FROM events WHERE type IN ('bordure_blocage', 'bordure_rafale', 'bordure_erreurs', 'bordure_nouvel_operateur') AND recu_a >= ? GROUP BY type"),
-    seqs: db.prepare('SELECT MIN(seq) mini, MAX(seq) maxi FROM events'),
+    // Deux sous-requêtes : chacune lit une extrémité de la clé (MIN et MAX ensemble parcouraient toute la table : 107 ms
+    // par million de lignes, audit D3-C6).
+    seqs: db.prepare('SELECT (SELECT MIN(seq) FROM events) mini, (SELECT MAX(seq) FROM events) maxi'),
     ouverte: db.prepare("SELECT id, gravite FROM alerts WHERE regle = ? AND statut != 'close' ORDER BY id DESC LIMIT 1"),
     jours: db.prepare('SELECT SUM(n) FROM daily WHERE day >= ?').pluck(),
     pages: db.prepare('PRAGMA page_count').pluck(),
@@ -361,8 +380,9 @@ const deuxPoints = s => `${s}${FINE}:`;
 // 'panne'), kv, faits, seuil (morceaux), liens, serveur, commande }. commande : le geste de la carte (D3c), { k: 'verifier' |
 // 'bordure' | 'accepter', hint, bloquee (accepter : numéro de l'alerte ouverte qui l'interdit) } ; le gabarit ne le montre qu'à qui
 // a le droit (it.peut, calculé par la route). Une ligne de kv : { dt, t, sec, mono, secMono, subs,
-// ruptures }.
-export function vueSante({ db, engine, switches, now = Date.now, role }) {
+// ruptures }. retentionDays : durée de conservation réglée (store.retentionDays ; audit D3-D15) ; sans elle, celle de la
+// dernière purge.
+export function vueSante({ db, engine, switches, now = Date.now, role, retentionDays = null }) {
   const q = qSante(db);
   const t = now();
   const reg = (k, d = null) => lire(q.reglage.get(k)) ?? d;
@@ -376,14 +396,17 @@ export function vueSante({ db, engine, switches, now = Date.now, role }) {
   const { mini, maxi } = q.seqs.get() || {};
   const lignesBase = maxi ? maxi - mini + 1 : 0;
   const chaineV = reg('chaine_verifiee');
+  const purgeNotee = dernier('vigie_purge');
+  const conservation = (Number.isFinite(retentionDays) && retentionDays > 0 ? retentionDays : null) ?? (Number(purgeNotee?.detail?.conservation_jours) || null);
 
   // 1. Chaîne du journal : c'est d'elle que dépend la foi dans tout le reste.
   {
     const c = chaineV;
     const tete = reg('tete_publiee');
-    const purge = dernier('vigie_purge');
+    const purge = purgeNotee;
     const derniere = reg('derniere_purge');
-    const conservation = Number(purge?.detail?.conservation_jours) || CONSERVATION;
+    // La purge notée dit sa propre durée (elle a pu tourner avec un autre réglage).
+    const effacees = Number(purge?.detail?.conservation_jours) || conservation;
     let etat, cls = '', faits = null;
     const kv = [];
     if (!c?.at) { etat = att('Jamais vérifiée'); cls = 'ecart'; kv.push({ dt: 'Vérifiée', t: 'jamais', sec: 'au démarrage de la Vigie puis chaque jour' }); faits = 'Chaîne du journal jamais vérifiée.'; }
@@ -401,8 +424,8 @@ export function vueSante({ db, engine, switches, now = Date.now, role }) {
     }
     if (tete?.seq) kv.push({ dt: 'Tête publiée', mono: `ligne ${nombre(tete.seq)} · maillon ${maillon(tete.chain)}`, sec: `${tete.at ? `${dateHeure(tete.at)}, ` : ''}écrite dans le journal du conteneur, hors de la base` });
     const purgeTexte = !derniere ? 'pas encore faite'
-      : `${dateHeure(derniere)}${D}${purge && Math.abs(purge.recu_a - derniere) < 3600e3 && purge.detail.lignes ? `${nombre(purge.detail.lignes)} lignes de plus de ${conservation}${NBSP}jours effacées${FINE}; ancre signée` : 'rien à effacer'}`;
-    kv.push({ dt: 'Purge', t: purgeTexte, sec: `conservation${D}${conservation}${NBSP}jours` });
+      : `${dateHeure(derniere)}${D}${purge && Math.abs(purge.recu_a - derniere) < 3600e3 && purge.detail.lignes ? `${nombre(purge.detail.lignes)} lignes de plus de ${effacees}${NBSP}jours effacées${FINE}; ancre signée` : 'rien à effacer'}`;
+    kv.push({ dt: 'Purge', t: purgeTexte, sec: conservation ? `conservation${D}${conservation}${NBSP}jours` : undefined });
     carte({ id: 'chaine', icone: 'chaine', titre: 'Chaîne du journal', etat, cls, kv, faits,
       seuil: [{ t: `Alerte si une ligne est modifiée, insérée ou manquante, une fin effacée, une ancre de purge falsifiée${D}${guillemets('Chaîne du journal de la Vigie rompue')} ` }, { t: '(Critique, DS20, ', r: true }, { t: 'chaine_rompue', donnee: true }, { t: ')', r: true }, { t: '. Vérifiée chaque jour et à chaque démarrage.' }],
       // Environ 13,5 s par million de lignes (vigie-capacite.md § 3.1).
@@ -448,7 +471,7 @@ export function vueSante({ db, engine, switches, now = Date.now, role }) {
       if (t - z > ZITADEL_TROU || (echec && t - z > 5 * 60e3)) { etat = arret('Injoignable'); cls = 'panne'; faits = `Zitadel ne répond plus depuis ${quand(z, t)}${t - z > ZITADEL_TROU ? '' : `${FINE}; rien n’est encore perdu`}.`; }
       else etat = ok('Répond');
       kv.push({ dt: echec ? 'Dernière lecture réussie' : 'Dernière lecture', t: quand(z, t),
-        sec: echec ? `échecs depuis${err.detail.echecs ? ` (${nombre(err.detail.echecs)})` : ''}${FINE}; le dernier${D}${guillemets(typo(String(err.detail.erreur || '').slice(0, 160)))}` : 'chaque minute, par son API des événements' });
+        sec: echec ? `échecs depuis${err.detail.echecs ? ` (${nombre(err.detail.echecs)})` : ''}${FINE}; le dernier${D}${guillemets(typo(masquer(String(err.detail.erreur || '').slice(0, 160), role)))}` : 'chaque minute, par son API des événements' });
       if (Number.isFinite(curseur)) kv.push({ dt: 'Lu jusqu’à', t: quand(curseur, t), sec: 'reprise depuis ce point au passage suivant' });
     }
     kv.push({ dt: 'Trous de plus de 20 h (30 jours)', t: nombre(trous) });
@@ -473,13 +496,13 @@ export function vueSante({ db, engine, switches, now = Date.now, role }) {
     } else {
       etat = silence ? arret('Muette') : ok('Répond'); cls = silence ? 'panne' : '';
       if (silence) faits = `Bordure muette${beat?.at ? `${FINE}: dernier battement ${aQuand(beat.at, t)}` : ''}.`;
-      kv.push({ dt: 'Battement du Worker', t: beat?.at ? quand(beat.at, t) : 'aucun', sec: beat?.etat ? `toutes les 5${NBSP}min · état${D}${guillemets(typo(beat.etat))}` : `toutes les 5${NBSP}min` });
+      kv.push({ dt: 'Battement du Worker', t: beat?.at ? quand(beat.at, t) : 'aucun', sec: beat?.etat ? `toutes les 5${NBSP}min · état${D}${guillemets(typo(masquer(beat.etat, role)))}` : `toutes les 5${NBSP}min` });
       if (kvL) kv.push({ dt: 'Liste des blocages', t: `${kvL.version != null ? `version ${kvL.version}, ` : ''}copiée ${kvL.at ? aQuand(kvL.at, t) : '—'}` });
       if (curseur) kv.push({ dt: 'Lue jusqu’à', t: quand(curseur, t), sec: donnee ? `dernière requête vue ${aQuand(donnee, t)}` : 'aucune requête vue' });
       const par = Object.fromEntries(q.parType.all(t - 864e5).map(r => [r.type, r.n]));
       const n = k => par[k] || 0;
       kv.push({ dt: 'Constats (24 h)', t: `${nombre(n('bordure_rafale'))} ${pluriel(n('bordure_rafale'), 'rafale')} de pages · ${nombre(n('bordure_erreurs'))} ${pluriel(n('bordure_erreurs'), 'rafale')} d’erreurs · ${nombre(n('bordure_blocage'))} ${pluriel(n('bordure_blocage'), 'blocage appliqué', 'blocages appliqués')}` });
-      if (err && t - err.recu_a < 864e5) kv.push({ dt: 'Dernière erreur', t: quand(err.recu_a, t), sec: `${typo(err.detail.operation || '')}${D}${typo(String(err.detail.erreur || '').slice(0, 160))}` });
+      if (err && t - err.recu_a < 864e5) kv.push({ dt: 'Dernière erreur', t: quand(err.recu_a, t), sec: `${typo(err.detail.operation || '')}${D}${typo(masquer(String(err.detail.erreur || '').slice(0, 160), role))}` });
     }
     carte({ id: 'bordure', icone: silence ? 'nuage-barre' : 'bordure', titre: 'Bordure Cloudflare', etat, cls, kv, faits,
       seuil: [{ t: `Alerte si plus de battement depuis 20${NBSP}min, aucune requête vue depuis 6${NBSP}h, ou une copie ou une lecture en échec${D}${guillemets('Bordure injoignable ou silencieuse (jeton, quota, Worker retiré)')} ` }, { t: '(Moyenne, DS24)', r: true }, { t: '.' }],
@@ -571,7 +594,7 @@ export function vueSante({ db, engine, switches, now = Date.now, role }) {
     let taille = null;
     if (fichier) { try { taille = fs.statSync(fichier).size + (fs.existsSync(`${fichier}-wal`) ? fs.statSync(`${fichier}-wal`).size : 0); } catch { /* illisible */ } }
     if (taille == null) taille = q.pages.get() * q.taillePage.get();
-    kv.push({ dt: 'Base', t: `${octets(taille)} · ${nombre(lignesBase)} ${pluriel(lignesBase, 'ligne')}`, sec: `${CONSERVATION}${NBSP}jours gardés par défaut` });
+    kv.push({ dt: 'Base', t: `${octets(taille)} · ${nombre(lignesBase)} ${pluriel(lignesBase, 'ligne')}`, sec: conservation ? `${conservation}${NBSP}jours gardés` : undefined });
     let libre = null, totalDisque = null;
     if (fichier && typeof fs.statfsSync === 'function') {
       try { const s = fs.statfsSync(path.dirname(fichier)); libre = s.bavail * s.bsize; totalDisque = s.blocks * s.bsize; } catch { /* indisponible */ }
@@ -597,7 +620,8 @@ export function vueSante({ db, engine, switches, now = Date.now, role }) {
     let etat = ok('Prêts'), cls = '', faits = null;
     if (!alertesOn) { etat = att('Arrêt'); cls = 'ecart'; faits = `Interrupteur Alertes arrêté${D}aucune notification Signal ni e-mail.`; }
     else if (n24) { etat = att('Écart'); cls = 'ecart'; faits = `${nombre(n24)} ${pluriel(n24, 'échec')} d’envoi en 24${NBSP}h.`; }
-    kv.push({ dt: 'Échecs (24 h)', t: nombre(n24), sec: echec ? `le dernier ${aQuand(echec.recu_a, t)}, ${typo(echec.detail.canal || '')}${D}${guillemets(typo(String(echec.detail.erreur || '').slice(0, 160)))}` : 'aucun échec noté' });
+    // Ni adresse e-mail, ni numéro, ni groupe Signal (anciens événements, écrits avant le masque de notifications.js : D3-C5).
+    kv.push({ dt: 'Échecs (24 h)', t: nombre(n24), sec: echec ? `le dernier ${aQuand(echec.recu_a, t)}, ${typo(echec.detail.canal || '')}${D}${guillemets(typo(masquer(sansContacts(String(echec.detail.erreur || '').slice(0, 300)), role).slice(0, 160)))}` : 'aucun échec noté' });
     kv.push({ dt: 'Envois réussis', t: 'non notés', sec: 'la Vigie ne garde que les échecs ; un message part à l’ouverture d’une alerte haute ou critique en mode Alerter ou Bloquer' });
     kv.push({ dt: 'Interrupteur Alertes', t: alertesOn ? 'Marche' : 'Arrêt' });
     carte({ id: 'canaux', icone: 'alertes', titre: 'Canaux', etat, cls, kv, faits,
@@ -668,7 +692,7 @@ export function register(app, ctx) {
   app.get('/sante', async (req, reply) => {
     // Le message de l'action précédente, lu ici pour remettre un refus près de son bouton (et montré en tête par le layout).
     const message = ctx.isRefresh(req) ? null : ctx.sessions.takeMessage(req.moi.sid);
-    const sante = vueSante({ db, engine, switches, now, role: req.moi.role });
+    const sante = vueSante({ db, engine, switches, now, role: req.moi.role, retentionDays: ctx.store?.retentionDays });
     const t = now();
     return view(reply, req, 'sante', { page: 'sante', titre: 'Santé et intégrité · Vigie', sante, message, peut: peutSante(ctx, req.moi.role),
       identite: identite(req.moi.authA, t), reauthFraiche: Number.isFinite(req.moi.authA) && req.moi.authA + FRESH > t });

@@ -26,7 +26,8 @@ import { alertOrder, isPrivate } from '../../moteur.js';
 import { HALF_LIFE_MIN, THRESHOLDS } from '../../poids.js';
 import { can } from '../droits.js';
 import { actionsForcees, lienLever } from './decisions.js';
-import { FINE, adresseDetail, reseauVue, dateHeure, duree, gravite, guillemets, heure, jour, jusqua, nombre, paris, quand } from '../format.js';
+import { FINE, adresseDetail, cibleBlocage, cleReseau, formesReseau, masquer, reseauVue, dateHeure, duree, gravite, guillemets, heure, jour, jusqua, nombre, paris, quand } from '../format.js';
+import { sansContacts } from '../../util.js';
 
 export const PAGE = 50;                   // lignes par page du journal
 export const LECTURE_MAX = 10_000;        // lignes lues au plus pour une page (fenêtre de lecture)
@@ -235,13 +236,9 @@ function periodeDe(a, b, t) {
 
 const voitAdresses = role => can(role || 'viewer', 'adresses_completes');
 const voitExtraits = role => can(role || 'viewer', 'exporter');      // « Extrait réservé aux Analystes et aux Administrateurs. »
-// Toute adresse IP d'un texte (détail, émetteur, référence), tronquée pour un Lecteur.
-const RE_IP = /::ffff:(?:\d{1,3}\.){3}\d{1,3}(?:\/\d{1,3})?|(?:\d{1,3}\.){3}\d{1,3}(?:\/\d{1,3})?|(?:[0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}(?:\/\d{1,3})?/g;
-export function masquer(s, role) {
-  const str = String(s ?? '');
-  if (voitAdresses(role)) return str;
-  return str.replace(RE_IP, m => (net.isIP(m.split('/')[0]) ? adresseDetail(m, 'viewer').texte : m));
-}
+// Toute adresse IP d'un texte (détail, émetteur, référence), tronquée pour un Lecteur : masquer, de format.js (une seule
+// fonction pour toute la console, audit D3-C2), reprise ici pour les essais.
+export { masquer };
 // Réseau (clé sans suffixe, comme server/ip.js truncateIp : « 198.51.100.0 », « 2001:db8:4:: ») d'une adresse.
 function reseauDe(ip) {
   const a = adresseDetail(String(ip).split('/')[0], 'viewer');
@@ -260,14 +257,20 @@ function reseauVueDe(cle, role) {
   const s = String(cle);
   // Une clé de réseau qui est en fait une adresse (Zitadel, refus d'ingestion : ip_net = l'adresse) se lit comme une adresse.
   if (net.isIP(s) && reseauDe(s) !== s) return adresseVue(s, role);
-  return { texte: propre(reseauVue(s), 60), v6: s.includes(':'), tronquee: false, href: `/entites/reseau/${encodeURIComponent(s)}` };
+  // Une ancienne clé fausse (« 2a01::bad:: », audit D3-C4) se lit et s'ouvre sous sa forme canonique : jamais l'hôte.
+  const c = cleReseau(s);
+  return { texte: propre(reseauVue(s, role), 60), v6: s.includes(':'), tronquee: false, href: c || voitAdresses(role) ? `/entites/reseau/${encodeURIComponent(c || s)}` : null };
 }
+// Texte affiché d'une clé d'entité « vigie » ou « site » (« confiance:198.51.100.44 ») : adresses tronquées selon le rôle (D3-C3).
+const cleTexte = (cle, role, max = 120) => typo(propre(masquer(cle, role), max));
 
 // Détail d'un événement (JSON venu du site ou de la Vigie), pour un rôle : adresses tronquées pour un Lecteur, extraits de
-// saisie retirés sous Analyste.
+// saisie retirés sous Analyste ; pour un canal de notification en échec, ni adresse e-mail, ni numéro, ni groupe Signal, quel
+// que soit le rôle (anciens événements, écrits avant le masque de vigie/notifications.js : audit D3-C5).
 const EXTRAIT_RESERVE = 'réservé aux Analystes et aux Administrateurs';
-function detailPour(d, role) {
+function detailPour(d, role, type = null) {
   const extraits = voitExtraits(role);
+  const contacts = type === 'vigie_canal_echec';
   const walk = (v, profondeur) => {
     if (profondeur > 8) return '…';
     if (Array.isArray(v)) return v.slice(0, 50).map(x => walk(x, profondeur + 1));
@@ -276,7 +279,7 @@ function detailPour(d, role) {
       for (const [k, x] of Object.entries(v).slice(0, 60)) o[k] = k === 'extrait' && !extraits ? `(${EXTRAIT_RESERVE})` : walk(x, profondeur + 1);
       return o;
     }
-    return typeof v === 'string' ? masquer(v, role) : v;
+    return typeof v === 'string' ? masquer(contacts ? sansContacts(v) : v, role) : v;
   };
   return walk(d, 0);
 }
@@ -340,7 +343,7 @@ function detailEnMorceaux(r, d, role, t) {
       if (d.motif) txt(motif(d.motif, role));
       return m;
     case 'vigie_signal':
-      if (d.titre) txt(typo(propre(d.titre, 160)));
+      if (d.titre) txt(typo(propre(masquer(d.titre, role), 160)));
       else if (d.regle) m.push({ code: propre(d.regle, 80) });
       return m;
     case 'sys_heartbeat':
@@ -391,7 +394,7 @@ function saisieDe(r, d, role) {
 
 function ligneEvenement(r, { role, t, noms }) {
   const d = lire(r.detail);
-  const dv = d && typeof d === 'object' ? detailPour(d, role) : d;
+  const dv = d && typeof d === 'object' ? detailPour(d, role, r.type) : d;
   const g = gravite(r.severity);
   const src = sourceDe(r.composant);
   const constatee = r.confiance === 'constaté';
@@ -534,7 +537,7 @@ export function lireFiltres(query, role, t) {
   let driver;
   if (f.alerte) driver = { k: 'alerte', v: f.alerte };
   else if (adr?.kind === 'ip') driver = { k: 'ip', v: adr.ip };
-  else if (adr?.kind === 'reseau') driver = { k: 'ip_net', v: adr.cle };
+  else if (adr?.kind === 'reseau') driver = { k: 'ip_net', v: adr.cle, formes: formesRecherche(adr.cle) };
   else if (f.compte) driver = { k: 'sub', v: f.compte };
   else if (f.type && f.type !== 'tout') driver = { k: 'type', v: f.type };
   else driver = { k: 'recu' };
@@ -545,7 +548,7 @@ export function lireFiltres(query, role, t) {
     && (!f.type || f.type === 'tout' || r.type === f.type)
     && (!routine || f.type !== '' || !Object.hasOwn(ROUTINE, r.type))
     && (adr?.kind !== 'ip' || r.ip === adr.ip)
-    && (adr?.kind !== 'reseau' || r.ip_net === adr.cle)
+    && (adr?.kind !== 'reseau' || r.ip_net === adr.cle || cleReseau(r.ip_net) === adr.cle)
     && (!f.compte || r.sub === f.compte);
   return { f, saisie, erreurs, redirection, debut, fin: t, driver, accepte, adr, periode: p };
 }
@@ -559,6 +562,15 @@ export function lecture(db, driver, cols = '*') {
     const c = cols === '*' ? 'e.*' : cols.split(',').map(x => `e.${x.trim()}`).join(', ');
     return q.prep(`alerte|${cols}`, `SELECT ${c} FROM alert_events ae JOIN events e ON e.seq = ae.seq WHERE ae.alert_id = ? AND ae.seq < ? ORDER BY ae.seq DESC LIMIT ?`);
   }
+  // Réseau IPv6 encore écrit sous une ancienne forme dans le journal (audit D3-C4 ; events n'est jamais réécrit, il est
+  // chaîné) : une lecture par écriture, chacune par l'index events_net et bornée par son LIMIT, fusionnées par l'heure.
+  const fm = driver.k === 'ip_net' ? driver.formes : null;
+  if (fm && (fm.exactes.length > 1 || fm.debut)) {
+    const cond = 'recu_a >= ? AND recu_a <= ? AND (recu_a < ? OR (recu_a = ? AND seq < ?)) ORDER BY recu_a DESC, seq DESC LIMIT ?';
+    const branches = [...fm.exactes.map(() => 'ip_net = ?'), ...(fm.debut ? ['ip_net >= ? AND ip_net < ?'] : [])]
+      .map(w => `SELECT * FROM (SELECT ${cols} FROM events WHERE ${w} AND ${cond})`);
+    return q.prep(`ip_net|${fm.exactes.length}|${fm.debut ? 1 : 0}|${cols}`, `${branches.join(' UNION ALL ')} ORDER BY recu_a DESC, seq DESC LIMIT ?`);
+  }
   const col = { ip: 'ip', ip_net: 'ip_net', sub: 'sub', type: 'type', recu: null }[driver.k];
   const egal = col ? `${col} = ? AND ` : '';
   return q.prep(`${driver.k}|${cols}`, `SELECT ${cols} FROM events WHERE ${egal}recu_a >= ? AND recu_a <= ? AND (recu_a < ? OR (recu_a = ? AND seq < ?))
@@ -569,7 +581,28 @@ export function parametres(lf, cle, limite) {
   const { driver, debut, fin } = lf;
   if (driver.k === 'alerte') return [driver.v, cle ? cle.seq : Number.MAX_SAFE_INTEGER, limite];
   const r = cle ? cle.recu_a : Number.MAX_SAFE_INTEGER, s = cle ? cle.seq : Number.MAX_SAFE_INTEGER;
-  return [...(driver.k === 'recu' ? [] : [driver.v]), debut, Math.min(fin + 60e3, r), r, r, s, limite];
+  const reste = [debut, Math.min(fin + 60e3, r), r, r, s, limite];
+  const fm = driver.k === 'ip_net' ? driver.formes : null;
+  if (fm && (fm.exactes.length > 1 || fm.debut)) {
+    return [...fm.exactes.flatMap(x => [x, ...reste]), ...(fm.debut ? [fm.debut, fm.debutFin, ...reste] : []), limite];
+  }
+  return [...(driver.k === 'recu' ? [] : [driver.v]), ...reste];
+}
+
+// Écritures d'un réseau à chercher dans events.ip_net (formesReseau) : les exactes, et les clés qui commencent par « debut »
+// (de debut inclus à debutFin exclu : « 2a01:: » à « 2a01:; », par l'index) ; une exacte déjà couverte par ce début est
+// retirée (jamais deux fois la même ligne).
+function formesRecherche(cle) {
+  const { exactes, debut } = formesReseau(cle);
+  const ex = exactes.length ? exactes : [cle];
+  return { exactes: debut ? ex.filter(x => !x.startsWith(debut)) : ex, debut, debutFin: debut ? `${debut.slice(0, -1)};` : null };
+}
+// Derniers événements d'un réseau, sous toutes ses écritures (fiche d'une entité).
+function derniersReseau(q, cle) {
+  const fm = formesRecherche(cle);
+  let rows = fm.exactes.flatMap(x => q.derniersNet.all(x));
+  if (fm.debut) rows = rows.concat(q.prep('derniersNetDebut', `SELECT * FROM events WHERE ip_net >= ? AND ip_net < ? ORDER BY recu_a DESC, seq DESC LIMIT ${DERNIERS}`).all(fm.debut, fm.debutFin));
+  return rows.sort((a, b) => b.recu_a - a.recu_a || b.seq - a.seq).slice(0, DERNIERS);
 }
 
 // Décompte borné : au plus COMPTE_MAX lignes lues par l'index ; par gravité, et la routine masquée par type.
@@ -712,19 +745,44 @@ export function celluleCsv(v) {
 const ENTETES_CSV = ['numéro', 'heure à la source (Paris)', 'heure de réception (Paris)', 'type', 'libellé', 'gravité', 'source', 'composant', 'confiance', 'canal',
   'émetteur', 'référence', 'compte', 'session', 'adresse', 'réseau', 'pays', 'ville', 'méthode', 'route', 'statut HTTP', 'navigateur', 'reçu en retard', 'détail'];
 
-export function exportCsv({ db, query, role, t }) {
+// Lu par tranches de EXPORT_TRANCHE lignes (même ordre, reprise après la clé de la dernière ligne lue), mis en forme par
+// pas de EXPORT_PAS lignes, en rendant la main entre deux (audit D3-D4 : 50 000 lignes lues et mises en forme d'une traite
+// bloquaient la réception et le moteur 0,5 à 0,8 s ; une tranche de 5 000 lignes mise en forme d'une traite, 0,25 s).
+export const EXPORT_TRANCHE = 5_000;
+const EXPORT_PAS = 500;
+export async function exportCsv({ db, query, role, t, tranche = EXPORT_TRANCHE }) {
   const lf = lireFiltres(query, role, t);
   if (Object.keys(lf.erreurs).length || lf.redirection) return { erreur: Object.values(lf.erreurs)[0] || 'filtre invalide' };
   const lignes = [ENTETES_CSV.map(celluleCsv).join(';')];
-  let n = 0, lus = 0, tronque = false;
-  for (const r of lecture(db, lf.driver).iterate(...parametres(lf, null, EXPORT_LECTURE))) {
-    lus += 1;
-    if (!lf.accepte(r)) continue;
-    if (n === EXPORT_MAX) { tronque = true; break; }
-    n += 1;
-    lignes.push([r.seq, isoParis(Number.isFinite(r.survenu_a) ? r.survenu_a : r.recu_a), isoParis(r.recu_a), r.type, libelleDe(r, lire(r.detail)), gravite(r.severity).mot,
-      SOURCES[sourceDe(r.composant)], r.composant, r.confiance, r.canal, r.emetteur, r.reference, r.sub, r.session, r.ip, r.ip_net, r.country, r.city, r.method, r.route,
-      r.status, r.ua_family, r.retard ? 'oui' : 'non', r.detail].map(celluleCsv).join(';'));
+  let n = 0, lus = 0, tronque = false, cle = null;
+  const st = lecture(db, lf.driver);
+  const main = () => new Promise(r => setImmediate(r));
+  // Heure de Paris : ses composantes sont les mêmes pour toutes les secondes d'une minute (Paris change d'heure à l'heure
+  // pile) ; calculées une fois par minute (Intl, le plus coûteux de la mise en forme).
+  let minute = null, prefixe = '';
+  const iso = x => {
+    const m = Math.floor(x / 60e3);
+    if (m !== minute) { minute = m; const s = isoParis(m * 60e3); prefixe = s ? s.slice(0, -2) : null; }
+    return prefixe == null ? '' : `${prefixe}${deux(secondes(x))}`;      // instant hors des dates possibles : vide, comme isoParis
+  };
+  tranches: for (;;) {
+    const limite = Math.min(tranche, EXPORT_LECTURE - lus);
+    const rows = st.all(...parametres(lf, cle, limite));
+    for (let i = 0; i < rows.length; i++) {
+      if (i && i % EXPORT_PAS === 0) await main();
+      const r = rows[i];
+      lus += 1;
+      if (!lf.accepte(r)) continue;
+      if (n === EXPORT_MAX) { tronque = true; break tranches; }
+      n += 1;
+      lignes.push([r.seq, iso(Number.isFinite(r.survenu_a) ? r.survenu_a : r.recu_a), iso(r.recu_a), r.type, libelleDe(r, lire(r.detail)), gravite(r.severity).mot,
+        SOURCES[sourceDe(r.composant)], r.composant, r.confiance, r.canal, r.emetteur, r.reference, r.sub, r.session, r.ip, r.ip_net, r.country, r.city, r.method, r.route,
+        r.status, r.ua_family, r.retard ? 'oui' : 'non', r.detail].map(celluleCsv).join(';'));
+    }
+    if (rows.length < limite || lus >= EXPORT_LECTURE) break;
+    const d = rows.at(-1);
+    cle = lf.driver.k === 'alerte' ? { seq: d.seq } : { recu_a: d.recu_a, seq: d.seq };
+    await main();
   }
   if (lus >= EXPORT_LECTURE) tronque = true;
   // Ce qui est noté au journal : les filtres, sans adresse complète (le réseau suffit à dire ce qui est sorti).
@@ -750,15 +808,15 @@ function titreDe(regle, titres) {
 function entiteCourte(kind, key, role) {
   if (kind === 'ip') { const a = adresseVue(key, role); return { k: ENTITES_MIN.ip, texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee }; }
   if (kind === 'reseau') { const a = reseauVueDe(key, role); return { k: ENTITES_MIN.reseau, texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee }; }
-  if (kind === 'site' || kind === 'vigie') return { k: ENTITES_MIN[kind], texte: typo(propre(key, 80)), mono: null, tronquee: false };
+  if (kind === 'site' || kind === 'vigie') return { k: ENTITES_MIN[kind], texte: cleTexte(key, role, 80), mono: null, tronquee: false };
   return { k: ENTITES_MIN[kind] || propre(kind, 20), texte: propre(key, 200), mono: 'sub', tronquee: false };
 }
 function ligneAlerte(a, { t, role, titres, avecEntite = false }) {
   const g = gravite(a.gravite);
   const statut = a.statut === 'close' ? { k: 'abouti', mot: 'Close' } : a.statut === 'en_cours' ? { k: 'encours', mot: 'Prise en charge' } : { k: 'afaire', mot: 'Ouverte' };
   const sec = [];
-  if (a.statut === 'close' && a.classement) sec.push(`${CLASSEMENTS[a.classement] || propre(a.classement, 30)}${a.traite_par ? `, par ${propre(a.traite_par, 60)}` : ''}${a.traite_a ? ` ${aQuand(a.traite_a, t)}` : ''}`);
-  else if (a.statut === 'en_cours' && a.traite_par) sec.push(`par ${propre(a.traite_par, 60)}${a.traite_a ? ` ${aQuand(a.traite_a, t)}` : ''}`);
+  if (a.statut === 'close' && a.classement) sec.push(`${CLASSEMENTS[a.classement] || propre(a.classement, 30)}${a.traite_par ? `, par ${propre(masquer(a.traite_par, role), 60)}` : ''}${a.traite_a ? ` ${aQuand(a.traite_a, t)}` : ''}`);
+  else if (a.statut === 'en_cours' && a.traite_par) sec.push(`par ${propre(masquer(a.traite_par, role), 60)}${a.traite_a ? ` ${aQuand(a.traite_a, t)}` : ''}`);
   sec.push(`mode ${MODES[a.mode] || propre(a.mode, 20)}`);
   sec.push(`${nombre(a.compteur)} ${pluriel(a.compteur, 'occurrence')}, ${a.compteur > 1 ? periodeDe(a.premiere, a.derniere, t) : aQuand(a.derniere, t)}`);
   return {
@@ -781,7 +839,7 @@ export function evenement({ db, seq, role, t, engine }) {
   const titres = new Map((engine?.rules?.() || []).map(x => [x.id, x.titre]));
   const alertes = q.alertesDe.all(seq).sort(alertOrder).map(a => ligneAlerte(a, { t, role, titres, avecEntite: true }));
   const ref = /^events#(\d{1,15})$/.exec(r.reference || '');
-  const dv = d == null ? null : typeof d === 'object' ? detailPour(d, role) : masquer(String(d), role);
+  const dv = d == null ? null : typeof d === 'object' ? detailPour(d, role, r.type) : masquer(String(d), role);
   return {
     ...l,
     lecteur: !voitAdresses(role),
@@ -895,6 +953,9 @@ export function fiche({ db, engine, switches, kind, cle, role, t }) {
   }
   // Une clé de réseau qui est une adresse complète (Zitadel écrit l'adresse comme réseau) : un Lecteur va au réseau tronqué.
   if (kind === 'reseau' && lecteur && net.isIP(cle) && reseauDe(cle) !== cle) { const n = reseauDe(cle); return n ? { redirection: `/entites/reseau/${encodeURIComponent(n)}` } : null; }
+  // Une ancienne clé de réseau fausse (« 2a01::bad:: », « 2606:4700::: », audit D3-C4) : la fiche du réseau sous sa forme
+  // canonique, pour tous les rôles (les entités ont été réécrites, vigie/reseaux.js ; le journal garde les deux écritures).
+  if (kind === 'reseau' && (!net.isIP(cle) || cle.endsWith('::'))) { const c = cleReseau(cle); if (c && c !== cle) return { redirection: `/entites/reseau/${encodeURIComponent(c)}` }; }
   const q = requetes(db);
   const titres = new Map((engine?.rules?.() || []).map(x => [x.id, x.titre]));
   const seuil = (engine?.thresholds?.() || THRESHOLDS)[kind] ?? null;
@@ -914,7 +975,7 @@ export function fiche({ db, engine, switches, kind, cle, role, t }) {
   // Derniers événements, par l'index qui convient.
   let derniers = [];
   if (kind === 'ip') derniers = q.derniersIp.all(cle);
-  else if (kind === 'reseau') derniers = q.derniersNet.all(cle);
+  else if (kind === 'reseau') derniers = derniersReseau(q, cle);
   else if (kind === 'compte') derniers = q.derniersSub.all(cle);
   else if (kind === 'session') {
     for (const l of liens.filter(x => x.k === 'compte').slice(0, 3)) derniers = derniers.concat(q.derniersSubFenetre.all(l.cle).filter(r => r.session === cle));
@@ -950,8 +1011,12 @@ export function fiche({ db, engine, switches, kind, cle, role, t }) {
     for (const l of liens.filter(x => x.k === k)) {
       let item;
       if (k === 'ip') { const a = adresseVue(l.cle, role); item = { texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee, href: a.href, lien: a.tronquee ? `Fiche du réseau ${a.texte}` : `Fiche de l’adresse ${a.texte}` }; } else if (k === 'reseau') { const a = reseauVueDe(l.cle, role); item = { texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee, href: a.href, lien: a.tronquee ? `Fiche du réseau ${a.texte}` : `Fiche du réseau ${a.texte}` }; } else {
-        const tx = propre(l.cle, 200);
-        item = { texte: tx, mono: k === 'site' || k === 'vigie' ? null : 'sub', href: `/entites/${k}/${encodeURIComponent(l.cle)}`, nom: k === 'compte' ? noms.get(l.cle) || null : null,
+        // Clé « vigie » ou « site » qui porte une adresse (« confiance:198.51.100.44 ») : tronquée pour un Lecteur, et sans
+        // lien (l'adresse de la fiche la porterait entière) ; audit D3-C3.
+        const libre = k === 'site' || k === 'vigie';
+        if (libre && lecteur && masquer(l.cle, role) !== l.cle) continue;
+        const tx = libre ? cleTexte(l.cle, role, 200) : propre(l.cle, 200);
+        item = { texte: tx, mono: libre ? null : 'sub', href: `/entites/${k}/${encodeURIComponent(l.cle)}`, nom: k === 'compte' ? noms.get(l.cle) || null : null,
           lien: `Fiche ${k === 'compte' ? 'du compte' : k === 'session' ? 'de la session' : 'de l’entité'} ${tx}` };
       }
       if (!item.href || deja.has(item.href)) continue;
@@ -969,9 +1034,9 @@ export function fiche({ db, engine, switches, kind, cle, role, t }) {
     return {
       id: d.id, type: DECISIONS[d.kind] || propre(d.kind, 30),
       lever: can(role, 'actions_forcees') ? lienLever(d, ici) : null,
-      cible: d.kind === 'bloquer' ? { texte: adresseDetail(String(d.cible).replace(/\/(32|128)$/, ''), role).texte, mono: 'ip' } : { texte: propre(d.cible, 200), mono: 'sub' },
+      cible: d.kind === 'bloquer' ? { texte: adresseDetail(cibleBlocage(d.cible), role).texte, mono: 'ip' } : { texte: propre(d.cible, 200), mono: 'sub' },
       sec: [{ t: `${d.portee ? `${PORTEES[d.portee] || propre(d.portee, 20)} · ` : ''}${jusqua(d.fin, t)} · ` }, ...(d.auto && auto ? [{ t: 'par la Vigie, alerte ' }, { t: `#${auto[1]}`, href: `/alertes/${auto[1]}` }]
-        : [{ t: `par ${d.auto ? 'la Vigie' : propre(d.par, 60)}${d.motif ? motif(d.motif, role) : ''}` }])],
+        : [{ t: `par ${d.auto ? 'la Vigie' : propre(masquer(d.par, role), 60)}${d.motif ? motif(d.motif, role) : ''}` }])],
     };
   });
 
@@ -989,7 +1054,7 @@ export function fiche({ db, engine, switches, kind, cle, role, t }) {
   let titre;
   if (kind === 'ip') titre = { k: 'Adresse', texte: propre(cle, 60), mono: 'ip', v6: cle.includes(':') };
   else if (kind === 'reseau') { const a = reseauVueDe(cle, role); titre = { k: 'Réseau', texte: a.texte, mono: 'ip', v6: a.v6 }; } else if (kind === 'compte' || kind === 'session') titre = { k: ENTITES[kind], texte: propre(cle, 200), mono: 'sub', nom: kind === 'compte' ? noms.get(cle) || null : null };
-  else titre = { k: ENTITES[kind], texte: typo(propre(cle, 120)), mono: null };
+  else titre = { k: ENTITES[kind], texte: cleTexte(cle, role), mono: null };
   const pastilles = [];
   if (score.auDessus) pastilles.push({ k: 'attention', mot: 'Au-dessus du seuil' });
   if (auto?.protegee) pastilles.push({ k: 'neutre', mot: auto.protegee });
@@ -1037,7 +1102,7 @@ export function register(app, ctx) {
 
   app.get('/evenements.csv', async (req, reply) => {
     if (!(await ctx.guard(req, reply, 'exporter'))) return reply;
-    const r = exportCsv({ db, query: req.query, role: req.moi.role, t: now() });
+    const r = await exportCsv({ db, query: req.query, role: req.moi.role, t: now() });
     if (r.erreur) return reply.code(400).type('text/plain; charset=utf-8').send(`Filtre refusé : ${r.erreur}`);
     try {
       store.own('vigie_console_export', { emetteur: 'vigie/console', sub: req.moi.sub, ip: req.ip2 || undefined, detail: { filtres: r.filtres, lignes: r.n, tronque: r.tronque || undefined } });

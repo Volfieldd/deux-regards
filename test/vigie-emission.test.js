@@ -11,6 +11,8 @@ import { buildApp } from '../server/app.js';
 import { createVault } from '../server/vault.js';
 import { createSecurite } from '../server/securite/index.js';
 import { scanValue, uaFamily } from '../server/securite/detection.js';
+import { networkOf } from '../server/securite/reseau.js';
+import { truncateIp } from '../server/ip.js';
 import { EVENTS } from '../server/securite/vocabulaire.js';
 
 // Vigie, phase A (docs/etudes/annexe-vigie-architecture.md) : le site émet ses événements de sécurité, signés, vers la
@@ -103,6 +105,17 @@ test('configuration : VIGIE_URL exige une clé de signature d’au moins 32 cara
   assert.equal(v.apply, true);
   assert.equal(loadConfig({ VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64, VIGIE_APPLIQUER: '0' }).vigie.apply, false);
   assert.equal(loadConfig({}).vigie, null);
+});
+
+// Réseau d'une adresse (journaux du site, ip_net envoyé à la Vigie) : /24 ou /48, forme canonique ; une IPv6 abrégée dont
+// le « :: » tombe dans les trois premiers groupes ne garde jamais l'hôte (audit D3-D5 : « 2a01::bad:5 » donnait « 2a01::bad:: »).
+test('truncateIp : /24, /48 canonique, IPv6 abrégée comprise', () => {
+  for (const [ip, net] of [['2a01::bad:5', '2a01::'], ['2606:4700::1a', '2606:4700::'], ['2001:db8:4:1c::5e', '2001:db8:4::'], ['2001:0DB8:0004:001c::5e', '2001:db8:4::'],
+    ['2001:db8::', '2001:db8::'], ['::1', '::'], ['::ffff:198.51.100.7', '198.51.100.0'], ['198.51.100.7', '198.51.100.0'], ['', ''], ['inconnue', '']]) {
+    assert.equal(truncateIp(ip), net, ip);
+  }
+  assert.equal(networkOf({ ip: '2a01::bad:5', ips: ['2a01::bad:5'], headers: {} }).ip_net, '2a01::');
+  assert.equal(networkOf({ ip: 'inconnue', ips: ['inconnue'], headers: {} }).ip_net, undefined);
 });
 
 test('connexion : succès, session créée avec son contexte, lots signés, jamais de jeton dans les événements', async t => {

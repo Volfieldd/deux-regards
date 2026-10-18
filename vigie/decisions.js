@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import net from 'node:net';
 import { EventEmitter } from 'node:events';
+import { reseauDe } from '../server/securite/adresses-ip.js';
 
 // Décisions de la Vigie, appliquées par le site (annexe architecture, section 4.2) : le site les lit, signées par la
 // Vigie (Ed25519 ; le site n'a que la clé publique). Toutes sont bornées dans le temps ; aucune ne peut bloquer tout le
@@ -41,7 +42,10 @@ export function parseTarget(cible) {
     const target = new net.BlockList(); target.addSubnet(m[1], prefix, 'ipv6');
     if (V6_IPV4.check(m[1], 'ipv6') || V6_BASES.some(([a]) => target.check(a, 'ipv6'))) throw new DecisionError('plage IPv6 qui recouvre des adresses IPv4 : refusée (bloquez l’adresse IPv4 elle-même)');
   }
-  return { address: m[1], prefix, family: type, cible: `${m[1]}/${prefix}`, size: v === 4 ? 2 ** (32 - prefix) : 0 };
+  // Le réseau lui-même, sous sa forme canonique (bits d'hôte à zéro, IPv6 en minuscules et abrégée) : « 198.51.100.7/24 » est
+  // gardé « 198.51.100.0/24 », jamais l'adresse d'une personne derrière un blocage de réseau (audit D3-C1).
+  const address = reseauDe(m[1], prefix) || m[1];
+  return { address, prefix, family: type, cible: `${address}/${prefix}`, size: v === 4 ? 2 ** (32 - prefix) : 0 };
 }
 
 export const parseDuration = text => {
@@ -70,8 +74,13 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
     return ok;
   }
 
-  const create = ({ kind, cible, portee = null, duree, motif = '', par, auto = false, details = null }) => db.transaction(() => {
+  // alerte : numéro de l'alerte à laquelle la décision répond (réponse automatique du moteur, décision prise depuis la
+  // fiche d'une alerte), rangé dans la colonne indexée alerte_id (audit D3-D3 : la console cherchait les réponses d'une
+  // alerte dans le motif, sans index). Sans lui, repris d'un motif « alerte #n » ou « alerte #n · … », comme la migration
+  // 012. Hors de l'empreinte de la ligne (rowMac) et de la liste signée : il ne sert qu'à la console.
+  const create = ({ kind, cible, portee = null, duree, motif = '', par, auto = false, details = null, alerte = null }) => db.transaction(() => {
     if (!KINDS.includes(kind)) throw new DecisionError(`action inconnue : ${kind}`);
+    if (alerte != null && !(Number.isSafeInteger(Number(alerte)) && Number(alerte) > 0)) throw new DecisionError('numéro d’alerte invalide');
     if (!par) throw new DecisionError('auteur de la décision manquant');
     const ms = Math.min(typeof duree === 'number' ? duree : parseDuration(duree), MAX_DURATION[kind]);
     let target = String(cible || '').trim();
@@ -95,7 +104,10 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
     } else if (!target || target.length > 200) throw new DecisionError('compte (sub) attendu');
     if (current.length >= MAX_ACTIVE) throw new DecisionError(`trop de décisions actives (${MAX_ACTIVE} au plus)`);
     const row = { kind, cible: target, portee, motif: String(motif).slice(0, 300), par, cree_a: now(), fin: now() + ms, auto: auto ? 1 : 0, details: details ? JSON.stringify(details) : null };
-    row.id = Number(db.prepare('INSERT INTO decisions (kind, cible, portee, motif, par, cree_a, fin, auto, details) VALUES (@kind, @cible, @portee, @motif, @par, @cree_a, @fin, @auto, @details)').run(row).lastInsertRowid);
+    const cite = /^alerte #([1-9]\d{0,14})(?: · |$)/.exec(row.motif);
+    const alerteId = alerte != null ? Number(alerte) : cite ? Number(cite[1]) : null;
+    row.id = Number(db.prepare('INSERT INTO decisions (kind, cible, portee, motif, par, cree_a, fin, auto, details, alerte_id) VALUES (@kind, @cible, @portee, @motif, @par, @cree_a, @fin, @auto, @details, @alerte_id)')
+      .run({ ...row, alerte_id: alerteId }).lastInsertRowid);
     db.prepare('UPDATE decisions SET mac = ? WHERE id = ?').run(rowMac(row), row.id);
     store.own('vigie_decision', { emetteur: par, detail: { action: 'créée', id: row.id, kind, cible: target, portee, fin: row.fin, motif: row.motif, auto } });
     bump();
@@ -111,6 +123,12 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
     }
     const m = String(motif || '').trim().slice(0, 300) || undefined;
     if (rows.length) { store.own('vigie_decision', { emetteur: par, detail: { action: 'levée', id, toutes: all, nombre: rows.length, motif: m } }); bump(); }
+    // Lever un verrouillage, une réponse automatique ou la décision de quelqu'un d'autre réduit la surveillance : les
+    // Administrateurs en sont prévenus (audit D3-B4).
+    const sensibles = rows.filter(d => d.kind === 'verrouiller' || d.auto || d.par !== par);
+    if (sensibles.length) {
+      store.own('vigie_surveillance_reduite', { emetteur: par, detail: { objet: all ? 'decisions:toutes' : `decision:${sensibles[0].id}`, kinds: [...new Set(sensibles.map(d => d.kind))], nombre: sensibles.length, motif: m } });
+    }
     return rows.length;
   }).immediate();
 

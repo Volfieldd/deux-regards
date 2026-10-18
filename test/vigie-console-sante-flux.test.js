@@ -440,3 +440,63 @@ test('vueSante : chaîne rompue en tête, bordure non réglée, Zitadel jamais l
   verifierPage(html);
   assert.match(html, /<ol class="vg-ruptures"[^>]*><li><span class="n">1 181 950<\/span><span class="raison">ligne modifiée ou insérée<\/span>/);
 });
+
+// ---------- Coût (audit D3-C6, D3-D3, D3-D4, D3-D15) ----------
+
+test('flux : provenances gardées une minute par période et par rôle (audit D3-D4) ; réponses par la colonne alerte_id', async t => {
+  const { provenancesEnCache, PROV_CACHE_MS } = await import('../vigie/console/ecrans/sante-flux.js');
+  const v = setup(t);
+  const ids = peupler(v);
+  const vue = (role = 'admin', periode = '7j') => vueFlux({ db: v.db, now: v.now, role, periode });
+  const p1 = vue().provenances;
+  assert.ok(p1.adresses.some(a => a.texte === '198.51.100.23'));
+  // Une nouvelle adresse très active : pas encore vue dans la minute…
+  v.store.add(Array.from({ length: 300 }, (_, i) => ev(T0 - 10e3 + i, 'malicious_excess_404', 'bas', 'site · public', { ip: '203.0.113.200', ip_net: '203.0.113.0', country: 'DE' })));
+  v.clock.t += PROV_CACHE_MS - 1000;
+  assert.deepEqual(vue().provenances, p1, 'la même minute : les provenances gardées');
+  // … le Lecteur et l'autre période ont leur propre lecture (jamais les adresses entières de l'Administrateur).
+  const lect = vue('viewer').provenances;
+  assert.ok(!lect.adresses.some(a => a.texte === '198.51.100.23'));
+  assert.ok(vue('admin', '30j').provenances.adresses.some(a => a.texte === '203.0.113.200'), '30 jours : lue maintenant');
+  // Passée la minute : relue.
+  v.clock.t += 2000;
+  const p2 = vue().provenances;
+  assert.equal(p2.adresses[0].texte, '203.0.113.200');
+  // Lue telle quelle (même résultat que lireProvenances).
+  const { lireProvenances, debutPeriode } = await import('../vigie/console/ecrans/sante-flux.js');
+  const debut = debutPeriode(v.clock.t, 7).debut;
+  assert.deepEqual(provenancesEnCache({ db: v.db, debut, role: 'admin', t: v.clock.t }), lireProvenances({ db: v.db, debut, role: 'admin' }));
+  // Réponses des alertes de la période : par alerte_id (la décision « alerte #n » d'une autre alerte n'y est pas).
+  const decisions = createDecisions({ store: v.store, privateKey: VIGIE_KEYS.privateKey, now: v.now });
+  decisions.create({ kind: 'bloquer', cible: '198.51.100.23', duree: '24h', par: 'Vigie · règle entite.score', auto: true, motif: `alerte #${ids.score}`, alerte: ids.score });
+  decisions.create({ kind: 'bloquer', cible: '198.51.100.24', duree: '24h', par: 'Vigie · règle entite.score', auto: true, motif: 'alerte #987654', alerte: 987654 });
+  const r = vue().reponses;
+  assert.equal(r.n, 1);
+  assert.deepEqual(r.suites.map(s => s.id), [ids.score]);
+});
+
+test('santé : conservation lue dans store.retentionDays (audit D3-D15) ; premier et dernier numéros par deux lectures de la clé (audit D3-C6)', async t => {
+  const v = setup(t);
+  peupler(v);
+  const carte = (s, id) => s.cartes.find(c => c.id === id);
+  const kv = (s, id, dt) => carte(s, id).kv.find(x => x.dt === dt);
+  let s = vueSante({ db: v.db, engine: v.engine, switches: v.switches, now: v.now, role: 'admin', retentionDays: 90 });
+  assert.match(kv(s, 'chaine', 'Purge').sec, /^conservation\s:\s90\sjours$/);
+  assert.match(kv(s, 'disque', 'Base').sec, /^90\sjours gardés$/);
+  // Sans réglage : la durée de la dernière purge notée ; sans purge, rien d'inventé.
+  s = vueSante({ db: v.db, engine: v.engine, switches: v.switches, now: v.now, role: 'admin' });
+  assert.equal(kv(s, 'chaine', 'Purge').sec, undefined);
+  v.store.own('vigie_purge', { emetteur: 'vigie/store.js', detail: { lignes: 3, jusqua_seq: 3, conservation_jours: 120 } });
+  s = vueSante({ db: v.db, engine: v.engine, switches: v.switches, now: v.now, role: 'admin' });
+  assert.match(kv(s, 'chaine', 'Purge').sec, /^conservation\s:\s120\sjours$/);
+  // La page /sante passe le réglage du service (183 jours par défaut ici).
+  const admin = await v.login();
+  assert.match((await admin('/sante')).body, /conservation\s:\s183\sjours/);
+  // Aucune lecture de MIN et MAX ensemble dans la console : chacune par la clé (deux sous-requêtes).
+  const dir = fileURLToPath(new URL('../vigie/console/', import.meta.url));
+  for (const f of [...fs.readdirSync(dir).filter(x => x.endsWith('.js')).map(x => path.join(dir, x)), ...fs.readdirSync(path.join(dir, 'ecrans')).map(x => path.join(dir, 'ecrans', x))]) {
+    assert.doesNotMatch(fs.readFileSync(f, 'utf8'), /SELECT MIN\(seq\)[^;]*?,\s*MAX\(seq\)/, f);
+  }
+  const plan = v.db.prepare('EXPLAIN QUERY PLAN SELECT (SELECT MIN(seq) FROM events) mini, (SELECT MAX(seq) FROM events) maxi').all().map(r => r.detail).join(' | ');
+  assert.doesNotMatch(plan, /SCAN events\b(?! USING)/);
+});

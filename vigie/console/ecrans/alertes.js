@@ -11,7 +11,7 @@ import { responseOf } from '../../notifications.js';
 import { SOURCE_MIN, QUORUM, sourceOf } from '../../poids.js';
 import { can } from '../droits.js';
 import { actionsForcees, erreurDe, identite, lienLever } from './decisions.js';
-import { FINE, adresseDetail, reseauVue, dateHeure, gravite, guillemets, heure, jour, nombre, quand, jusqua, paris } from '../format.js';
+import { FINE, adresseDetail, cibleBlocage, cleReseau, masquer, reseauVue, dateHeure, gravite, guillemets, heure, jour, nombre, quand, jusqua, paris } from '../format.js';
 
 const NBSP = '\u00a0';
 const PAGE = 50;                          // alertes par page
@@ -83,8 +83,9 @@ const capitale = s => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 const enLettres = n => NOMBRES[n] || nombre(n);
 const aQuand = (x, t) => { const s = quand(x, t); return s.includes(',') ? `le ${s}` : `à ${s}`; };
 const memeJour = (a, b) => { const pa = paris(a), pb = paris(b); return Boolean(pa && pb && pa.annee === pb.annee && pa.mois === pb.mois && pa.jour === pb.jour); };
-// Qui a traité : « console · Julien » (vigie/moteur.js, classify) s'écrit « Julien ».
-const nomDe = par => String(par || '').replace(/^console · /, '');
+// Qui a traité : « console · Julien » (vigie/moteur.js, classify) s'écrit « Julien » ; texte d'opérateur, masqué selon le
+// rôle (rôle absent : Lecteur).
+const nomDe = (par, role = 'viewer') => masquer(String(par || '').replace(/^console · /, ''), role);
 const compte = n => (n > COMPTE_MAX ? `plus de ${nombre(COMPTE_MAX)}` : nombre(n));
 
 // « 14 h 02 min 11 » (MV-02 : à la seconde) ; la date devant si ce n'est pas aujourd'hui.
@@ -140,7 +141,8 @@ function entiteVue(kind, key, role) {
   const k = ENTITES[kind] || kind;
   if (kind === 'ip') { const a = adresseDetail(key, role); return { k, texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee }; }
   if (kind === 'reseau') return { k, texte: reseauVue(key), mono: 'ip', v6: String(key).includes(':'), tronquee: false };
-  if (kind === 'vigie' || kind === 'site') return { k, texte: typo(key), mono: null, tronquee: false };
+  // Clé d'une entité « vigie » ou « site » : elle peut porter une adresse (« confiance:198.51.100.44 », audit D3-C3).
+  if (kind === 'vigie' || kind === 'site') return { k, texte: typo(masquer(key, role)), mono: null, tronquee: false };
   return { k, texte: String(key), mono: 'sub', tronquee: false };
 }
 // Fiche de l'entité (écran Entités) : /entites/<kind>/<clé encodée>. Un Lecteur ne voit jamais l'adresse entière, ni dans
@@ -151,6 +153,12 @@ function ficheEntite(kind, key, role) {
     const a = adresseDetail(key, role);
     if (a.tronquee) return { href: `/entites/reseau/${encodeURIComponent(a.texte.replace(/\/\d+$/, ''))}`, texte: FICHE_DE.reseau };
     if (a.texte === 'masquée') return null;
+  }
+  // Réseau : sa clé canonique (une ancienne clé fausse, « 2a01::bad:: », porte l'hôte ; audit D3-C4).
+  if (kind === 'reseau') {
+    const c = cleReseau(key);
+    if (!c && masquer(key, role) !== key) return null;
+    return { href: `/entites/reseau/${encodeURIComponent(c || key)}`, texte: FICHE_DE.reseau };
   }
   return { href: `/entites/${kind}/${encodeURIComponent(key)}`, texte: FICHE_DE[kind] };
 }
@@ -169,18 +177,16 @@ function requetes(db) {
   q = {
     sql: sql => { if (!formes.has(sql)) formes.set(sql, db.prepare(sql)); return formes.get(sql); },
     alerte: db.prepare('SELECT * FROM alerts WHERE id = ?'),
-    decisions: db.prepare(`SELECT id, kind, cible, portee, motif, par, cree_a, fin, leve_a, leve_par, auto FROM decisions WHERE (motif || ' · ') LIKE (? || ' · %') ORDER BY id LIMIT ${DECISIONS_MAX}`),
+    // Décisions rattachées à l'alerte (colonne indexée alerte_id, migration 012 ; audit D3-D3).
+    decisions: db.prepare(`SELECT id, kind, cible, portee, motif, par, cree_a, fin, leve_a, leve_par, auto FROM decisions WHERE alerte_id = ? ORDER BY id LIMIT ${DECISIONS_MAX}`),
     nbEvenements: db.prepare(`SELECT COUNT(*) FROM (SELECT 1 FROM alert_events WHERE alert_id = ? LIMIT ${COMPTE_MAX + 1})`).pluck(),
     evenements: db.prepare(`SELECT e.seq, e.recu_a, e.survenu_a, e.type, e.severity, e.composant, e.emetteur, e.confiance, e.sub, e.ip, e.method, e.route, e.status, e.retard
       FROM alert_events a JOIN events e ON e.seq = a.seq WHERE a.alert_id = ? AND a.seq < ? ORDER BY a.seq DESC LIMIT ${EVENEMENTS + 1}`),
     historique: db.prepare(HISTORIQUE),
     autres: db.prepare(`SELECT id, regle, gravite, statut, derniere FROM alerts WHERE entite_kind = ? AND entite_key = ? AND id != ? ORDER BY id DESC LIMIT ${AUTRES + 1}`),
   };
-  const reponses = new Map();
-  q.reponses = n => {
-    if (!reponses.has(n)) reponses.set(n, db.prepare(`SELECT motif, kind, cree_a, fin FROM decisions WHERE auto = 1 AND motif IN (${Array(n).fill('?').join(', ')}) ORDER BY id LIMIT 500`));
-    return reponses.get(n);
-  };
+  // Réponses automatiques des alertes d'une page (numéros en JSON), par la même colonne.
+  q.reponses = db.prepare('SELECT alerte_id, motif, kind, cree_a, fin FROM decisions WHERE alerte_id IN (SELECT value FROM json_each(?)) AND auto = 1 ORDER BY id LIMIT 500');
   cache.set(db, q);
   return q;
 }
@@ -240,11 +246,11 @@ function ligneAlerte(a, { t, role, regles, reponses }) {
   const score = a.regle === 'entite.score' && a.score != null ? `score ${virgule(a.score)}` : '';
   let statut;
   if (a.statut === 'close') {
-    const qui = a.traite_par ? ` par ${nomDe(a.traite_par)}` : '';
+    const qui = a.traite_par ? ` par ${nomDe(a.traite_par, role)}` : '';
     const quandC = a.traite_a ? `, ${quand(a.traite_a, t)}` : '';
     const sec = a.classement ? `classée ${CLASSEMENTS[a.classement] || a.classement}${qui}${quandC}` : `${/^sans suite/.test(a.note || '') ? 'sans suite' : 'close'}${quandC}`;
     statut = { k: 'abouti', mot: 'Close', sec };
-  } else if (a.statut === 'en_cours') statut = { k: 'encours', mot: 'Prise en charge', sec: [a.traite_par ? `par ${nomDe(a.traite_par)}` : '', reponse].filter(Boolean).join(' · ') };
+  } else if (a.statut === 'en_cours') statut = { k: 'encours', mot: 'Prise en charge', sec: [a.traite_par ? `par ${nomDe(a.traite_par, role)}` : '', reponse].filter(Boolean).join(' · ') };
   else statut = { k: 'afaire', mot: 'Ouverte', sec: [reponse, score].filter(Boolean).join(' · ') };
   return {
     id: a.id,
@@ -263,8 +269,8 @@ function ligneAlerte(a, { t, role, regles, reponses }) {
 function reponsesDe(q, ids) {
   const out = new Map();
   if (!ids.length) return out;
-  for (const d of q.reponses(ids.length).all(ids.map(id => `alerte #${id}`))) {
-    const id = Number(d.motif.slice(8));
+  for (const d of q.reponses.all(JSON.stringify(ids))) {
+    const id = d.alerte_id;
     if (!out.has(id)) out.set(id, []);
     out.get(id).push(d);
   }
@@ -340,12 +346,12 @@ export function liste({ db, engine, now = Date.now, role, query = {} }) {
 function ligneDecision(d, t, role, retour) {
   let cible = null;
   if (d.kind === 'bloquer') {
-    const a = adresseDetail(String(d.cible).replace(/\/(32|128)$/, ''), role);
+    const a = adresseDetail(cibleBlocage(d.cible), role);
     cible = { texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee };
   } else if (d.kind !== 'verrouiller') cible = { texte: String(d.cible), mono: 'sub', tronquee: false };
-  const etat = d.leve_a ? `levée ${aQuand(d.leve_a, t)}${d.leve_par ? ` par ${d.leve_par}` : ''}`
+  const etat = d.leve_a ? `levée ${aQuand(d.leve_a, t)}${d.leve_par ? ` par ${masquer(d.leve_par, role)}` : ''}`
     : d.fin <= t ? `expirée ${aQuand(d.fin, t)}` : jusqua(d.fin, t);
-  const par = d.auto ? 'par la Vigie' : `par ${String(d.par).replace(/^console · /, '')}`;
+  const par = d.auto ? 'par la Vigie' : `par ${nomDe(d.par, role)}`;
   const enCours = !d.leve_a && d.fin > t;
   return {
     id: d.id,
@@ -363,21 +369,21 @@ function raisonsReponse(texte, role) {
   const morceaux = String(texte || '').split(' ; ').map(s => s.trim()).filter(Boolean)
     .filter(s => !/^(bloquer|geler|revoquer_compte|revoquer_session|verrouiller) (?!refusé)/.test(s));
   return morceaux.map(s => {
-    if (RAISONS.some(r => r.test(s))) return typo(s);
+    if (RAISONS.some(r => r.test(s))) return typo(masquer(s, role));
     if (role === 'viewer') return /refusé/.test(s) ? 'une réponse a été refusée par les garde-fous' : null;
-    return typo(s.replace(/^(bloquer|geler|revoquer_compte|revoquer_session|verrouiller) refusé/, (m, k) => `${DECISION_FAITE[k] || k}${FINE}: refusé`));
+    return typo(masquer(s, role).replace(/^(bloquer|geler|revoquer_compte|revoquer_session|verrouiller) refusé/, (m, k) => `${DECISION_FAITE[k] || k}${FINE}: refusé`));
   }).filter(Boolean);
 }
 
-const parQui = e => {
+const parQui = (e, role = 'viewer') => {
   const s = String(e || '');
   if (/^vigie\/moteur\.js/.test(s) || /^Vigie\b/.test(s)) return 'la Vigie';
-  return s.replace(/^console · /, '') || 'inconnu';
+  return nomDe(s, role) || 'inconnu';
 };
 
 // Historique : les événements vigie_alerte de l'alerte (index events_alerte), du plus ancien au plus récent ; la clôture
 // automatique (un seul événement pour toutes les alertes closes ce jour-là) se lit dans l'alerte elle-même.
-function historique(q, a, t) {
+function historique(q, a, t, role = 'viewer') {
   const rows = q.historique.all(a.id);
   const coupe = rows.length > HISTOIRE;
   const lignes = rows.slice(0, HISTOIRE).reverse().map(r => {
@@ -386,11 +392,11 @@ function historique(q, a, t) {
     let texte;
     if (d.action === 'ouverte') texte = `Ouverte${g ? `, gravité ${g}` : ''}${d.mode ? `, mode ${MODES[d.mode] || d.mode}` : ''}`;
     else if (d.action === 'aggravee') texte = `Aggravée${d.avant && g ? `${FINE}: ${gravite(d.avant).mot}, puis ${g}` : g ? `${FINE}: ${g}` : ''}`;
-    else if (d.action === 'prise en charge') texte = `Prise en charge par ${parQui(r.emetteur)}`;
-    else if (d.action === 'close') texte = d.classement ? `Classée ${CLASSEMENTS[d.classement] || d.classement} par ${parQui(r.emetteur)}, alerte close` : `Close par ${parQui(r.emetteur)}`;
-    else if (d.action === 'note') texte = `Note de ${parQui(r.emetteur)}`;
-    else texte = `${capitale(String(d.action || 'changement').slice(0, 40))} par ${parQui(r.emetteur)}`;
-    const note = typeof d.note === 'string' && d.note.trim() ? guillemets(d.note.trim().slice(0, 200)) : null;
+    else if (d.action === 'prise en charge') texte = `Prise en charge par ${parQui(r.emetteur, role)}`;
+    else if (d.action === 'close') texte = d.classement ? `Classée ${CLASSEMENTS[d.classement] || d.classement} par ${parQui(r.emetteur, role)}, alerte close` : `Close par ${parQui(r.emetteur, role)}`;
+    else if (d.action === 'note') texte = `Note de ${parQui(r.emetteur, role)}`;
+    else texte = `${capitale(masquer(String(d.action || 'changement').slice(0, 40), role))} par ${parQui(r.emetteur, role)}`;
+    const note = typeof d.note === 'string' && d.note.trim() ? guillemets(masquer(d.note.trim().slice(0, 200), role)) : null;
     return { quand: quand(r.recu_a, t), iso: new Date(r.recu_a).toISOString(), texte, note, lien: `/evenements/${r.seq}` };
   });
   if (a.statut === 'close' && /^Vigie \(clôture automatique\)/.test(a.traite_par || '') && a.traite_a) {
@@ -415,11 +421,11 @@ function evenementVue(e, t, role) {
     tard: Boolean(e.retard),
     type: TYPES[e.type] || null,
     code: e.type,
-    route: e.route ? `${e.method ? `${e.method} ` : ''}${e.route}${e.status ? ` → ${e.status}` : ''}` : null,
+    route: e.route ? `${e.method ? `${e.method} ` : ''}${masquer(e.route, role)}${e.status ? ` → ${e.status}` : ''}` : null,
     grav: { mot: g.mot, classe: g.classe },
     source: src ? { cle: src, mot: SOURCES[src] } : null,
     composant: e.composant,
-    emetteur: e.emetteur || null,
+    emetteur: e.emetteur ? masquer(e.emetteur, role) : null,
     constate,
     adresse: a && a.texte ? { texte: a.texte, v6: a.v6, tronquee: a.tronquee } : null,
     compte: e.sub || null,
@@ -469,10 +475,9 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
   }[a.mode] || '';
   const modeActuel = r && r.mode !== a.mode ? `La règle est aujourd’hui en mode ${MODES[r.mode] || r.mode}.` : null;
 
-  // Réponse : décisions dont le motif cite l'alerte (automatiques, ou prises à la main depuis la fiche), et les raisons
-  // d'une absence de réponse.
-  // Le motif « alerte #n° » (automatiques) ou « alerte #n° · … » (prises à la main depuis la fiche, vigie/console/actions.js).
-  const decs = q.decisions.all(`alerte #${a.id}`);
+  // Réponse : décisions rattachées à l'alerte (automatiques, ou prises à la main depuis la fiche : colonne alerte_id), et
+  // les raisons d'une absence de réponse.
+  const decs = q.decisions.all(a.id);
   const auto = decs.filter(d => d.auto);
   const reponse = {
     lignes: decs.map(d => ligneDecision(d, t, roleVu, `/alertes/${a.id}`)),
@@ -517,9 +522,9 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
   const statut = a.statut === 'close' ? { k: 'abouti', mot: 'Close' } : a.statut === 'en_cours' ? { k: 'encours', mot: 'Prise en charge' } : { k: 'afaire', mot: 'Ouverte' };
   const classement = a.statut === 'close' ? {
     mot: a.classement ? CLASSEMENTS[a.classement] || a.classement : /^sans suite/.test(a.note || '') ? 'Sans suite' : 'Close sans classement',
-    par: a.traite_par ? nomDe(a.traite_par) : null,
+    par: a.traite_par ? nomDe(a.traite_par, roleVu) : null,
     quand: a.traite_a ? dateHeure(a.traite_a) : null,
-    note: a.note ? guillemets(String(a.note).slice(0, 500)) : null,
+    note: a.note ? guillemets(masquer(String(a.note).slice(0, 500), roleVu)) : null,
   } : null;
 
   return {
@@ -530,7 +535,7 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
     statut,
     retour: a.statut === 'close' ? '/alertes?statut=close' : '/alertes',
     quand: a.compteur > 1 ? capitale(periode(a.premiere, a.derniere, t)) : dateHeure(a.premiere),
-    priseEnCharge: a.statut === 'en_cours' ? `prise en charge${a.traite_par ? ` par ${nomDe(a.traite_par)}` : ''}${a.traite_a ? ` ${aQuand(a.traite_a, t)}` : ''}` : null,
+    priseEnCharge: a.statut === 'en_cours' ? `prise en charge${a.traite_par ? ` par ${nomDe(a.traite_par, roleVu)}` : ''}${a.traite_a ? ` ${aQuand(a.traite_a, t)}` : ''}` : null,
     entite: { ...entiteVue(a.entite_kind, a.entite_key, roleVu), titre: ENTITE_TITRE[a.entite_kind] || 'L’entité', fiche: ficheEntite(a.entite_kind, a.entite_key, roleVu) },
     sources,
     occ: a.compteur > 1 ? `${nombre(a.compteur)} occurrences ${periode(a.premiere, a.derniere, t)}` : `Une occurrence, ${aQuand(a.premiere, t)}`,
@@ -545,7 +550,7 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
     verdict,
     evenements,
     autres: { lignes: autres, plus: autresRows.length > AUTRES },
-    historique: historique(q, a, t),
+    historique: historique(q, a, t, roleVu),
     classement,
   };
 }

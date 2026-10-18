@@ -113,7 +113,8 @@ function ligneJournal(r, nomDe) {
   const sec = [];
   let morceaux;
   if (r.type === 'vigie_console_droits' && d.objet === 'attribution') {
-    const parSub = propre(String(r.emetteur || '').replace(/^console · /, ''));
+    // Auteur : identifiant dans le détail (par_sub) ou en fin d'émetteur « console · Nom (sub) » ; ancien format : le sub seul.
+    const parSub = propre(d.par_sub || (/\(([^()]+)\)$/.exec(String(r.emetteur || '')) || [])[1] || String(r.emetteur || '').replace(/^console · /, ''));
     morceaux = [...qui(parSub, nomDe(parSub)), { t: ' change l’attribution de ' }, ...p, { t: `${D}${roleOu(d.avant, 'aucune')} → ${roleOu(d.apres, 'aucune')}.` }];
     sec.push({ t: `droit effectif${D}${roleOu(d.effectif, 'aucun accès')}` });
   } else if (r.type === 'vigie_console_droits') {

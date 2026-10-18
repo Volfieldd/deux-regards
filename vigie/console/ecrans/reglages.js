@@ -19,7 +19,8 @@ import { LISTS } from '../../menaces.js';
 import { THRESHOLDS } from '../../poids.js';
 import { can, LABELS } from '../droits.js';
 import { FRESH } from '../sessions.js';
-import { FINE, adresseDetail, dateHeure, gravite, guillemets, heure, jusqua, nombre, quand } from '../format.js';
+import { FINE, adresseDetail, dateHeure, gravite, guillemets, heure, jusqua, masquer, nombre, quand } from '../format.js';
+import { sansContacts } from '../../util.js';
 import { INTERRUPTEURS, cartesInterrupteurs, surveillanceReduite } from '../vue-ensemble.js';
 
 const NBSP = ' ';
@@ -144,9 +145,9 @@ export function identiteDe(authA, t) {
 
 // Indice court d'un numéro : ses deux derniers chiffres (« …78 ») ; rien d'autre du numéro, de l'adresse ou du groupe.
 const finNumero = n => { const m = /(\d{2})$/.exec(String(n || '')); return m ? `…${m[1]}` : null; };
-// Le texte d'une erreur d'envoi, sans adresse e-mail, numéro ni identifiant de groupe.
-export const masquer = s => typo(String(s || '').slice(0, 200))
-  .replace(/[^\s<>@"'«»]+@[^\s<>@"'«»]+/g, '•••@•••').replace(/\+?\d[\d ]{6,}\d/g, '•••').replace(/group\.[A-Za-z0-9+/=_-]+/g, 'group.•••');
+// Le texte d'une erreur d'envoi, sans adresse e-mail, numéro ni identifiant de groupe (vigie/util.js, sansContacts : le même
+// masque qu'à l'écriture de l'événement, repris ici pour les anciens), adresses IP tronquées selon le rôle.
+export const erreurEnvoi = (s, role) => typo(masquer(sansContacts(String(s || '').slice(0, 300)), role).slice(0, 200));
 
 const requetesCache = new WeakMap();
 function requetes(db) {
@@ -169,7 +170,7 @@ export function vueReglages({ db, store, engine, switches, notifications, now = 
   // ---------- Interrupteurs ----------
   const etat = switches?.state?.() || {};
   const ouvrir = typeof query.arreter === 'string' ? query.arreter : '';
-  const interrupteurs = cartesInterrupteurs({ etat, reduite: surveillanceReduite(db), t }).map(c => {
+  const interrupteurs = cartesInterrupteurs({ etat, reduite: surveillanceReduite(db), t, role }).map(c => {
     const refus = refusDe(message, `inter-${c.nom}`, ['motif', 'duree_libre']) || refusDe(message, `inter-${c.nom}-marche`, []);
     return { ...c, ouvert: c.marche && (ouvrir === c.nom || Boolean(refus)), refus,
       motif: refus?.valeurs.motif || '', dureeLibre: refus?.valeurs.duree_libre || '' };
@@ -190,8 +191,10 @@ export function vueReglages({ db, store, engine, switches, notifications, now = 
   const confiance = (store.setting.get('adresses_confiance', []) || []).filter(x => x && typeof x === 'object' && typeof x.ip === 'string' && x.jusqua > t)
     .sort((a, b) => a.jusqua - b.jusqua).map(x => {
       const a = adresseDetail(x.ip, role);
-      return { ip: x.ip, texte: a.texte, v6: a.v6, tronquee: a.tronquee, jusqua: dateHeure(x.jusqua), par: x.par ? sansConsole(x.par) : null,
-        motif: x.motif ? typo(String(x.motif).slice(0, 200)) : null, refus: refusDe(message, `confiance-retirer:${x.ip}`, []) };
+      // L'adresse entière ne part vers la page que pour qui peut la retirer (champ caché du formulaire) ; motif et auteur
+      // masqués selon le rôle (audit D3-C2).
+      return { ip: peut.confiance ? x.ip : null, texte: a.texte, v6: a.v6, tronquee: a.tronquee, jusqua: dateHeure(x.jusqua), par: x.par ? masquer(sansConsole(x.par), role) : null,
+        motif: x.motif ? typo(masquer(String(x.motif).slice(0, 200), role)) : null, refus: refusDe(message, `confiance-retirer:${x.ip}`, []) };
     });
   const refusAjout = refusDe(message, 'confiance-ajouter', ['ip', 'motif']);
   const ajout = { ouvert: Boolean(refusAjout), refus: refusAjout, ip: refusAjout?.valeurs.ip || '', motif: refusAjout?.valeurs.motif || '' };
@@ -205,8 +208,8 @@ export function vueReglages({ db, store, engine, switches, notifications, now = 
     const essai = essais.find(r => r.detail.essai_canal === k);
     const echec = echecs.find(r => r.detail.canal === k);
     if (regle) {
-      kv.push({ dt: 'Dernier essai', t: essai ? quand(essai.recu_a, t) : 'aucun', sec: essai?.emetteur ? `par ${sansConsole(essai.emetteur)}` : null });
-      kv.push({ dt: 'Dernier échec', t: echec ? quand(echec.recu_a, t) : 'aucun noté', sec: echec ? masquer(echec.detail.erreur) : null });
+      kv.push({ dt: 'Dernier essai', t: essai ? quand(essai.recu_a, t) : 'aucun', sec: essai?.emetteur ? `par ${masquer(sansConsole(essai.emetteur), role)}` : null });
+      kv.push({ dt: 'Dernier échec', t: echec ? quand(echec.recu_a, t) : 'aucun noté', sec: echec ? erreurEnvoi(echec.detail.erreur, role) : null });
     }
     kv.push({ dt: 'Réglé dans', env });
     return { k, titre, regle, etat: regle ? { k: 'abouti', mot: 'Réglé' } : { k: 'neutre', mot: 'Non réglé' }, kv, texte, refus: refusDe(message, `canal-${k}`, []) };
@@ -256,7 +259,7 @@ export function vueReglages({ db, store, engine, switches, notifications, now = 
     const reglage = modesRegles[r.id];
     let enArret = null;
     if (r.mode === 'arret' && reglage && typeof reglage === 'object' && reglage.jusqua) {
-      enArret = `En Arrêt ${jusqua(reglage.jusqua, t)}${reglage.par ? `, par ${sansConsole(reglage.par)}` : ''}${reglage.motif ? `${D}${guillemets(typo(String(reglage.motif).slice(0, 200)))}` : ''}${FINE}; puis ${MODES[reglage.avant] || 'son mode de départ'}.`;
+      enArret = `En Arrêt ${jusqua(reglage.jusqua, t)}${reglage.par ? `, par ${masquer(sansConsole(reglage.par), role)}` : ''}${reglage.motif ? `${D}${guillemets(typo(masquer(String(reglage.motif).slice(0, 200), role)))}` : ''}${FINE}; puis ${MODES[reglage.avant] || 'son mode de départ'}.`;
     }
     const avert = m.classe === 'score' ? `Arrêt${D}plus aucune alerte de score${FINE}; les règles à points comptent, mais rien ne s’ouvre.`
       : m.classe === 'points' ? `Arrêt${D}plus de points${FINE}; qui ne fait que cela n’atteint plus le seuil.` : `Arrêt${D}plus aucune alerte, même pour une preuve sûre.`;

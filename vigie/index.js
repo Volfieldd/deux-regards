@@ -11,6 +11,7 @@ import { createSwitches } from './interrupteurs.js';
 import { createEdge } from './bordure.js';
 import { createNotifier } from './notifications.js';
 import { createConsole } from './console/server.js';
+import { canoniserReseaux } from './reseaux.js';
 
 // Service de la Vigie : réception des événements du site, décisions signées, lecture de Zitadel, vérification de la
 // chaîne et purge, moteur de règles, notifications, console (phase D3, facultative).
@@ -22,6 +23,9 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   // engine est défini plus bas : le résumé n'est demandé qu'une fois le service démarré.
   const ingest = createIngest({ store, decisions, ingestKey: config.ingestKey, now, logger, summary: () => engine.summary(), consoleUrl: config.notifications?.consoleUrl });
   const log = ingest.log;
+  // Clés de réseau IPv6 mal calculées avant l'audit D3-C4 (entités, liens, alertes ; jamais le journal chaîné) : réécrites une fois.
+  const reseaux = canoniserReseaux(store, { now });
+  if (reseaux && (reseaux.entites || reseaux.fusions || reseaux.liens || reseaux.alertes)) log.info({ reseaux }, 'Vigie : clés de réseau IPv6 réécrites');
   // Moteur d'entités (phase C1) : chaque événement écrit dans la base lui est remis, par une file (la réception répond
   // sans attendre l'analyse).
   const switches = createSwitches({ store, now });
@@ -43,6 +47,13 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     return r;
   };
   const check = () => record(store.verify());
+  // Vérification par paquets (tâche quotidienne, bouton « Vérifier la chaîne » de la console) : une seule à la fois ; qui
+  // la demande pendant qu'elle tourne attend la même et reçoit le même résultat, noté une fois (audit D3-D9 : des clics
+  // répétés empilaient les vérifications, chacune relisant toute la base).
+  let verification = null;
+  const verifyShared = () => (verification ??= (async () => {
+    try { return record(await store.verifyAsync()); } finally { verification = null; }
+  })());
   // Tâche quotidienne : depuis la dernière exécution enregistrée (un redémarrage ne la repousse pas).
   let dailyRunning = false;
   const daily = async () => {
@@ -50,7 +61,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     if (dailyRunning || now() - last < 24 * 3600e3) return;
     dailyRunning = true;
     try {
-      record(await store.verifyAsync());
+      await verifyShared();
       store.purge();
       engine.purge();
       store.setting.set('derniere_purge', now());
@@ -91,7 +102,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
 
   // Console (phase D3) : son propre port, sur le réseau du tunnel ; la réception reste sur le réseau interne.
   const consoleApp = config.console ? createConsole({ config: config.console, store, engine, switches, decisions, zitadel, logger, fetchImpl, now,
-    notifications: config.notifications || {}, edge, siteBackupDir: config.siteBackupDir, verifyChain: async () => record(await store.verifyAsync()) }) : null;
+    notifications: config.notifications || {}, edge, siteBackupDir: config.siteBackupDir, verifyChain: verifyShared }) : null;
 
   await ingest.listen({ host: config.host, port: config.ingestPort });
   // La console est facultative : si elle ne peut pas écouter (adresse absente du conteneur, port pris), la réception, le
@@ -105,7 +116,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     }
   }
   return {
-    store, decisions, ingest, zitadel, engine, switches, threats, edge, notifier, console: consoleApp, consoleUp,
+    store, decisions, ingest, zitadel, engine, switches, threats, edge, notifier, console: consoleApp, consoleUp, verifyChain: verifyShared,
     async close() { for (const t of timers) clearInterval(t); zitadel?.stop(); edge?.stop(); await consoleApp?.close().catch(() => {}); await ingest.close(); await engine.drain(); db.close(); },
   };
 }

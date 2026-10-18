@@ -7,7 +7,7 @@ import { testChannel } from '../notifications.js';
 import { setTrust, runRolesCheck } from '../reglages.js';
 import { RightsError, ROLES, LABELS } from './droits.js';
 import { FINE } from './format.js';
-import { netOf } from '../util.js';
+import { sansContacts } from '../util.js';
 
 // Actions de la console (phase D3c, annexe architecture § 5.4 et § 6). Une route par geste, en POST, toujours :
 //   1. les trois verrous et le jeton CSRF (crochets du serveur) ;
@@ -46,21 +46,31 @@ const entier = v => (typeof v === 'string' && /^\d{1,12}$/.test(v) ? Number(v) :
 
 export function register(app, ctx) {
   const { engine, switches, decisions, store, rights, sessions, now } = ctx;
-  const par = req => `console · ${req.moi.nom || req.moi.sub}`;
+  // Auteur d'un geste : le nom lisible et l'identifiant Zitadel (le nom affiché peut être changé par la personne ; audit
+  // D3-B2). Parenthèses retirées du nom : l'identifiant est toujours la dernière parenthèse.
+  const par = req => `console · ${String(req.moi.nom || '').replace(/[()]/g, '').trim().slice(0, 80) || 'sans nom'} (${req.moi.sub})`;
   // Connexion d'un administrateur depuis la cible ces 30 jours ? Adresse seule (index events_ip) ou réseau /24, /48
   // (index events_net) ; un réseau plus large n'est pas vérifié ici (le blocage en reste possible, avec motif).
+  // Adresses d'où un administrateur (dernier contrôle des rôles) s'est connecté ces 30 jours, comparées à la cible par un
+  // BlockList : tous les préfixes et toutes les écritures (/64 IPv6, /16, forme non canonique ; audit D3-B3).
   const q = {
-    parIp: ctx.db.prepare("SELECT DISTINCT sub FROM events WHERE ip = ? AND recu_a > ? AND type IN ('authn_login_success', 'session_created') AND sub IS NOT NULL LIMIT 200").pluck(),
-    parReseau: ctx.db.prepare("SELECT DISTINCT sub FROM events WHERE ip_net = ? AND recu_a > ? AND type IN ('authn_login_success', 'session_created') AND sub IS NOT NULL LIMIT 200").pluck(),
+    ipsDe: ctx.db.prepare("SELECT DISTINCT ip FROM events WHERE sub = ? AND type IN ('authn_login_success', 'session_created') AND recu_a > ? AND ip IS NOT NULL LIMIT 200").pluck(),
+    alerte: ctx.db.prepare('SELECT 1 FROM alerts WHERE id = ?').pluck(),
   };
+  const adminsDuSite = () => new Set(store.setting.get('controle_roles_admins', null)?.administrateurs || []);
   function adminSeen(t) {
-    const adm = new Set(store.setting.get('controle_roles_admins', null)?.administrateurs || []);
+    const adm = adminsDuSite();
     if (!adm.size) return false;
+    const bl = new net.BlockList();
+    bl.addSubnet(t.address, t.prefix, t.family);
     const depuis = now() - 30 * 864e5;
-    const full = (t.family === 'ipv4' && t.prefix === 32) || (t.family === 'ipv6' && t.prefix === 128);
-    const reseau = (t.family === 'ipv4' && t.prefix === 24) || (t.family === 'ipv6' && t.prefix === 48);
-    const subs = full ? q.parIp.all(t.address, depuis) : reseau ? q.parReseau.all(netOf(t.address), depuis) : [];
-    return subs.some(x => adm.has(x));
+    for (const sub of adm) {
+      for (const ip of q.ipsDe.all(sub, depuis)) {
+        const v = net.isIP(ip);
+        if (v && bl.check(ip, v === 6 ? 'ipv6' : 'ipv4')) return true;
+      }
+    }
+    return false;
   }
 
   // Une action : garde, geste, message, redirection.
@@ -118,7 +128,9 @@ export function register(app, ctx) {
     if (!KINDS.includes(kind)) throw new ActionError('type de décision inconnu', 'type');
     let motif = texte(body.motif);
     // Depuis la fiche d'une alerte, l'alerte est le motif (un mot de plus reste possible) ; ailleurs, motif obligatoire.
+    // L'alerte ne tient lieu de motif que si elle existe (audit D3-B8).
     const n = entier(body.alerte);
+    if (n && !q.alerte.get(n)) throw new ActionError(`alerte #${n} inconnue`, 'alerte');
     if (n) motif = (motif ? `alerte #${n} · ${motif}` : `alerte #${n}`).slice(0, 300);
     if (!motif) throw new ActionError('motif obligatoire : il dit aux autres pourquoi', 'motif');
     const d = duree(body) || { bloquer: '24h', revoquer_session: '48h', revoquer_compte: '48h', geler: '24h', verrouiller: '12h' }[kind];
@@ -138,7 +150,7 @@ export function register(app, ctx) {
       }
       // Adresse d'où un administrateur (contrôle des rôles) s'est connecté depuis 30 jours : seulement en le confirmant.
       if (body.confirme !== 'oui' && adminSeen(t)) throw new ActionError('un administrateur s’est connecté depuis cette adresse ces 30 derniers jours : cochez la confirmation pour la bloquer quand même', 'confirme');
-      const id = decisions.create({ kind, cible: t.cible, portee, duree: d, motif, par: par(req) });
+      const id = decisions.create({ kind, cible: t.cible, portee, duree: d, motif, par: par(req), alerte: n || undefined });
       return `Décision #${id} : ${t.cible} bloqué.`;
     }
     if (kind === 'verrouiller') {
@@ -147,17 +159,25 @@ export function register(app, ctx) {
       const comptes = [...new Set([req.moi.sub, ...liste(body.comptes)])];
       const adresses = [...new Set([...(ici ? [net.isIPv6(ici) ? net64(ici) : ici] : []), ...liste(body.adresses)])];
       details = { comptes, adresses };
-      const id = decisions.create({ kind, cible: 'admin', portee: 'admin', duree: d, motif, par: par(req), details });
+      const id = decisions.create({ kind, cible: 'admin', portee: 'admin', duree: d, motif, par: par(req), details, alerte: n || undefined });
       return `Décision #${id} : admin verrouillée (${comptes.length} compte${comptes.length > 1 ? 's' : ''}, ${adresses.length} adresse${adresses.length > 1 ? 's' : ''} admis).`;
     }
     if (!cible) throw new ActionError(kind === 'revoquer_session' ? 'empreinte de session attendue' : 'compte (sub) attendu', 'cible');
-    const id = decisions.create({ kind, cible, duree: d, motif, par: par(req) });
+    // Son propre compte, un Administrateur de la console ou un administrateur du site : seulement en le confirmant
+    // (audit D3-B5).
+    if (['geler', 'revoquer_compte'].includes(kind) && body.confirme !== 'oui') {
+      if (cible === req.moi.sub) throw new ActionError('c’est votre propre compte : cochez la confirmation pour le faire quand même', 'confirme');
+      if (rights.effective(cible, 'admin') === 'admin' || adminsDuSite().has(cible)) throw new ActionError('compte d’un administrateur : cochez la confirmation pour le faire quand même', 'confirme');
+    }
+    const id = decisions.create({ kind, cible, duree: d, motif, par: par(req), alerte: n || undefined });
     return `Décision #${id} prise.`;
   });
   action('/decisions/:id/lever', 'actions_forcees', { reauth: true, libelle: 'Lever une décision', retour: '/decisions' }, (req, body) => {
     const id = entier(req.params.id);
     if (!id) throw new ActionError('décision inconnue');
-    const n = decisions.lift({ id, par: par(req), motif: texte(body.motif) });
+    const motif = texte(body.motif);
+    if (!motif) throw new ActionError('motif obligatoire : il dit aux autres pourquoi la décision est levée', 'motif');
+    const n = decisions.lift({ id, par: par(req), motif });
     if (!n) throw new ActionError(`décision #${id} déjà levée ou échue`);
     return `Décision #${id} levée.`;
   });
@@ -183,11 +203,14 @@ export function register(app, ctx) {
     for (const kind of Object.keys(THRESHOLDS)) {
       if (body[kind] === undefined || body[kind] === '') continue;
       const v = Number(String(body[kind]).replace(',', '.'));
-      if (!(v > 0 && v <= 1000)) throw new ActionError(`seuil ${kind} : nombre de points, plus de 0 et 1000 au plus`, kind);
+      if (!(v >= 0.5 && v <= 1000)) throw new ActionError(`seuil ${kind} : nombre de points de 0,5 à 1000`, kind);
       if (v !== avant[kind]) changes.push([kind, v]);
     }
     if (!changes.length) throw new ActionError('aucun seuil changé');
-    for (const [kind, v] of changes) engine.setThreshold(kind, v, par(req), { motif: texte(body.motif, 200) });
+    // Tout ou rien (audit D3-B7) : un seuil relevé sans motif refuse l'envoi entier, avant toute écriture.
+    const motif = texte(body.motif, 200);
+    if (!motif && changes.some(([kind, v]) => v > avant[kind])) throw new ActionError('seuil relevé (surveillance réduite) : motif obligatoire', 'motif');
+    ctx.db.transaction(() => { for (const [kind, v] of changes) engine.setThreshold(kind, v, par(req), { motif }); })();
     return `Seuils : ${changes.map(([k, v]) => `${k} ${v}`).join(', ')}.`;
   });
   action('/reglages/confiance/ajouter', 'confiance', { reauth: true, libelle: 'Ajouter une adresse de confiance', retour: '/reglages' }, (req, body) => {
@@ -204,14 +227,15 @@ export function register(app, ctx) {
     const canal = req.params.canal === 'email' ? 'email' : req.params.canal === 'signal' ? 'signal' : null;
     if (!canal) throw new ActionError('canal inconnu');
     // Raison de l'échec sans numéro, adresse ni identifiant de groupe (le bandeau est vu par toute personne de la console).
-    const masque = t => String(t).replace(/[\w.+-]+@[\w.-]+/g, '…@…').replace(/\+?\d[\d ]{6,}\d/g, '…').replace(/group\.[\w+/=-]+/g, 'group.…').slice(0, 160);
+    const masque = t => sansContacts(t).slice(0, 160);
     try { await testChannel(ctx.notifications || {}, canal); } catch (err) { throw new ActionError(`essai ${canal} en échec : ${masque(err.message)}`); }
     store.own('vigie_interrupteur', { emetteur: par(req), detail: { essai_canal: canal } });
     return `Message d’essai envoyé sur ${canal === 'email' ? 'l’e-mail' : 'Signal'}.`;
   });
-  action('/sante/verifier', 'verifications', { retour: '/sante' }, async () => {
+  action('/sante/verifier', 'verifications', { retour: '/sante' }, async req => {
     if (!ctx.verifyChain) throw new ActionError('vérification indisponible');
     const r = await ctx.verifyChain();
+    store.own('vigie_interrupteur', { emetteur: par(req), detail: { verification_chaine: r.ok ? 'intacte' : 'rompue', lignes: r.lignes } });
     return r.ok ? `Chaîne intacte (${r.lignes} lignes).` : `CHAÎNE ROMPUE : ${r.ruptures.length} rupture(s), voir la santé.`;
   });
   action('/sante/bordure/copier', 'verifications', { retour: '/sante' }, async req => {
@@ -230,7 +254,7 @@ export function register(app, ctx) {
   action('/droits/:sub', 'droits', { reauth: true, libelle: 'Changer les droits d’une personne', retour: '/droits' }, (req, body) => {
     const sub = texte(req.params.sub, 200);
     if (!ROLES.includes(body.attribution)) throw new ActionError('rôle inconnu', 'attribution');
-    const changed = rights.assign({ par: req.moi.sub, parRole: req.moi.role, sub, role: body.attribution });
+    const changed = rights.assign({ par: req.moi.sub, parAuteur: par(req), parRole: req.moi.role, sub, role: body.attribution });
     const nom = rights.list().find(r => r.sub === sub)?.nom || sub;
     return changed ? `Attribution changée${FINE}: ${nom}, ${LABELS[body.attribution]}. Les Administrateurs sont prévenus.` : `Rien à changer${FINE}: ${nom} est déjà ${LABELS[body.attribution]}.`;
   });

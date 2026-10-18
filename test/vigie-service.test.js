@@ -217,15 +217,15 @@ test('ligne de commande : clés, blocage, gel, verrouillage, interrupteur, levé
   const k = keys();
   const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, VIGIE_INGEST_KEY: k.vigie.VIGIE_INGEST_KEY, VIGIE_LOG_KEY: k.vigie.VIGIE_LOG_KEY, VIGIE_DECISIONS_PRIVATE_KEY: k.vigie.VIGIE_DECISIONS_PRIVATE_KEY });
   assert.match(cli(['cles']), /VIGIE_DECISIONS_PUBKEY=/);
-  assert.match(cli(['bloquer', '203.0.113.7', '--duree', '2h', '--motif', 'scan'], { config, user: 'root' }), /Décision #1/);
-  assert.throws(() => cli(['bloquer', '0.0.0.0/0'], { config }), /trop large/);
-  assert.match(cli(['geler', 'zitadel-x', '--duree', '1h'], { config }), /gelé/);
-  assert.match(cli(['verrouiller', '--comptes', 'zitadel-moi'], { config }), /verrouillée/);
+  assert.match(cli(['bloquer', '203.0.113.7', '--portee', 'tout', '--duree', '2h', '--motif', 'scan'], { config, user: 'root' }), /Décision #1/);
+  assert.throws(() => cli(['bloquer', '0.0.0.0/0', '--portee', 'tout', '--motif', 'x'], { config }), /trop large/);
+  assert.match(cli(['geler', 'zitadel-x', '--duree', '1h', '--motif', 'essai'], { config }), /gelé/);
+  assert.match(cli(['verrouiller', '--comptes', 'zitadel-moi', '--motif', 'essai'], { config }), /verrouillée/);
   assert.throws(() => cli(['interrupteur', 'blocages', 'arret', '--duree', '2h'], { config }), /--motif/);
   assert.match(cli(['interrupteur', 'blocages', 'arret', '--duree', '2h', '--motif', 'essai'], { config }), /arret pour 2h/);
   assert.match(cli(['decisions'], { config }), /#1 {2}bloquer {2}203\.0\.113\.7\/32 \(tout\)[^\n]*ligne de commande \(root\)[^\n]*scan/);
-  assert.match(cli(['lever', '1'], { config }), /1 décision/);
-  assert.match(cli(['lever', '--tout'], { config }), /2 décision/);
+  assert.match(cli(['lever', '1', '--motif', 'fini'], { config }), /1 décision/);
+  assert.match(cli(['lever', '--tout', '--motif', 'fini'], { config }), /2 décision/);
   assert.match(cli(['etat'], { config }), /blocages ARRÊT jusqu'au/);
   assert.match(cli(['verifier'], { config }), /Chaîne intacte \(\d+ lignes\)/);
   const db = openVigieDb(config.databasePath);
@@ -398,7 +398,7 @@ test('revue B : ADMIN_SUBS jamais gelé ni tenu dehors ; ligne de commande sous 
   const k = keys();
   const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, ...k.vigie });
   t.mock.method(os, 'userInfo', () => { throw new Error('uv_os_get_passwd returned ENOENT'); });
-  assert.match(cli(['bloquer', '203.0.113.9', '--duree', '1h'], { config }), /Décision #1/);
+  assert.match(cli(['bloquer', '203.0.113.9', '--portee', 'tout', '--duree', '1h', '--motif', 'essai'], { config }), /Décision #1/);
   assert.match(cli(['decisions'], { config }), /ligne de commande \(/);
   assert.throws(() => cli(['interrupteur', 'blocages', 'arret'], { config }), /toujours pour une durée/);
   assert.throws(() => loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, ...k.vigie, VIGIE_LOG_KEY: k.vigie.VIGIE_INGEST_KEY }), /différente/);
@@ -488,4 +488,31 @@ test('console réglée mais impossible à écouter (audit D3-D7) : la réception
   vigie.engine.enqueue();
   await vigie.engine.drain?.();
   assert.equal(vigie.store.db.prepare("SELECT gravite FROM alerts WHERE regle = 'sigma.console_indisponible'").pluck().get(), 'haut');
+});
+
+test('vérification de la chaîne (audit D3-D9) : une seule à la fois, partagée par la console et la tâche quotidienne, notée une fois', async t => {
+  const dir = tmp(t);
+  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, VIGIE_HOST: '127.0.0.1', VIGIE_INGEST_PORT: '0', VIGIE_INGEST_KEY: KEY, VIGIE_LOG_KEY: LOG_KEY, VIGIE_DECISIONS_PRIVATE_KEY: VIGIE_KEYS.priv64 });
+  const vigie = await startVigie({ config, logger: false });
+  t.after(() => vigie.close());
+  vigie.store.add(Array.from({ length: 1500 }, (_, i) => ({ id: `v-${i}`, type: 'malicious_excess_404', severity: 'bas', composant: 'site · public', canal: 'ingestion signée', confiance: 'rapporté', ip: '203.0.113.9' })));
+  const verifyAsync = vigie.store.verifyAsync;
+  let lancees = 0;
+  vigie.store.verifyAsync = async () => { lancees += 1; return verifyAsync(); };
+  const notees = [];
+  const set = vigie.store.setting.set;
+  vigie.store.setting.set = (k, val) => { if (k === 'chaine_verifiee') notees.push(val); return set(k, val); };
+  // Trois demandes pendant qu'elle tourne (clics répétés) : une seule vérification, le même résultat pour chacune.
+  const [a, b, c] = [vigie.verifyChain(), vigie.verifyChain(), vigie.verifyChain()];
+  assert.equal(a, b);
+  assert.equal(b, c);
+  const r = await a;
+  assert.equal(r.ok, true);
+  assert.ok(r.lignes >= 1500);
+  assert.deepEqual(await c, r);
+  assert.equal(lancees, 1);
+  assert.equal(notees.length, 1, 'notée une fois');
+  // Finie : la suivante en relance une.
+  await vigie.verifyChain();
+  assert.equal(lancees, 2);
 });

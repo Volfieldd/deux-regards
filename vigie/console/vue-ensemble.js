@@ -6,7 +6,7 @@
 // ni détail d'événement.
 import { alertOrder } from '../moteur.js';
 import { responseOf } from '../notifications.js';
-import { FINE, adresseDetail, reseauVue, dateHeure, gravite, guillemets, heure, ilYa, jusqua, nombre, quand, duree, jour, paris } from './format.js';
+import { FINE, adresseDetail, cibleBlocage, masquer, reseauVue, dateHeure, gravite, guillemets, heure, ilYa, jusqua, nombre, quand, duree, jour, paris } from './format.js';
 import { provenanceAlertes, ecartsSante } from './ecrans/sante-flux.js';
 import { can } from './droits.js';
 
@@ -79,12 +79,9 @@ function requetes(db) {
     jours: db.prepare('SELECT type, SUM(n) n FROM daily WHERE day >= ? AND type IN (\'authn_login_success\', \'authz_blocked\', \'bordure_blocage\') GROUP BY type'),
     bloquees: db.prepare("SELECT COUNT(*) FROM decisions WHERE kind = 'bloquer' AND cree_a >= ?").pluck(),
   };
-  // Réponses automatiques d'alertes (décisions « alerte #n »), pour un nombre d'alertes donné.
-  const reponses = new Map();
-  q.reponses = n => {
-    if (!reponses.has(n)) reponses.set(n, db.prepare(`SELECT motif, kind, cree_a, fin FROM decisions WHERE auto = 1 AND motif IN (${Array(n).fill('?').join(', ')}) ORDER BY id LIMIT 500`));
-    return reponses.get(n);
-  };
+  // Réponses automatiques d'alertes : décisions rattachées à ces alertes (colonne indexée alerte_id, migration 012 ; audit
+  // D3-D3), numéros en JSON.
+  q.reponses = db.prepare('SELECT alerte_id, motif, kind, cree_a, fin FROM decisions WHERE alerte_id IN (SELECT value FROM json_each(?)) AND auto = 1 ORDER BY id LIMIT 500');
   cache.set(db, q);
   return q;
 }
@@ -182,7 +179,9 @@ function entiteVue(kind, key, role) {
   const k = ENTITES[kind] || kind;
   if (kind === 'ip') { const a = adresseDetail(key, role); return { k, texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee }; }
   if (kind === 'reseau') return { k, texte: reseauVue(key), mono: 'ip', v6: String(key).includes(':'), tronquee: false };
-  if (kind === 'vigie') return { k, texte: typo(key), mono: null, tronquee: false };
+  // Clé d'une entité « vigie » ou « site » : elle peut porter une adresse (« confiance:198.51.100.44 », audit D3-C3).
+  if (kind === 'vigie') return { k, texte: typo(masquer(key, role)), mono: null, tronquee: false };
+  if (kind === 'site') return { k, texte: masquer(key, role), mono: 'sub', tronquee: false };
   return { k, texte: String(key), mono: 'sub', tronquee: false };
 }
 
@@ -213,7 +212,7 @@ function ligneAlerte(a, { t, role, titres, reponses }) {
   const reponse = decs.length ? reponseFaite(decs) : a.mode === 'bloquer' ? (/interrupteur des blocages/.test(a.reponse || '') ? 'aucune réponse : blocages automatiques arrêtés' : 'aucune réponse automatique') : '';
   const score = a.regle === 'entite.score' && a.score != null ? `score ${virgule(a.score)}` : '';
   const sec = a.statut === 'en_cours'
-    ? [a.traite_par ? `par ${a.traite_par}` : '', reponse].filter(Boolean).join(' · ')
+    ? [a.traite_par ? `par ${masquer(a.traite_par, role)}` : '', reponse].filter(Boolean).join(' · ')
     : [reponse, score].filter(Boolean).join(' · ');
   return {
     id: a.id,
@@ -233,12 +232,12 @@ function ligneAlerte(a, { t, role, titres, reponses }) {
 function ligneDecision(d, t, role) {
   let cible = null;
   if (d.kind === 'bloquer') {
-    const a = adresseDetail(String(d.cible).replace(/\/(32|128)$/, ''), role);
+    const a = adresseDetail(cibleBlocage(d.cible), role);
     cible = { texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee };
   } else if (d.kind !== 'verrouiller') cible = { texte: String(d.cible), mono: 'sub', tronquee: false };
   const auto = /^alerte #(\d+)$/.exec(d.motif || '');
   const par = d.auto && auto ? [{ t: 'par la Vigie, alerte ' }, { t: `#${auto[1]}`, href: `/alertes/${auto[1]}` }]
-    : [{ t: `par ${d.auto ? 'la Vigie' : d.par}${d.motif ? `${FINE}: ${guillemets(d.motif)}` : ''}` }];
+    : [{ t: `par ${d.auto ? 'la Vigie' : masquer(d.par, role)}${d.motif ? `${FINE}: ${guillemets(masquer(d.motif, role))}` : ''}` }];
   return {
     id: d.id,
     type: DECISIONS[d.kind] || d.kind,
@@ -265,14 +264,15 @@ const liste = ids => ids.flatMap((id, i) => [...(i ? [{ t: i === ids.length - 1 
 
 // Cartes des interrupteurs (vue d'ensemble, réglages) : l'état et, à l'arrêt, qui, quand, pour combien de temps, pourquoi,
 // et l'alerte « Surveillance réduite » ouverte (reduite : son numéro, ou null).
-export function cartesInterrupteurs({ etat = {}, reduite = null, t = Date.now() }) {
+// Le motif et l'auteur passent par masquer (un Lecteur n'y lit jamais une adresse complète) ; rôle absent : Lecteur.
+export function cartesInterrupteurs({ etat = {}, reduite = null, t = Date.now(), role = 'viewer' }) {
   return ORDRE_INTER.map(n => {
     const x = INTERRUPTEURS[n], e = etat[n] || { marche: true };
     const base = { nom: n, titre: x.titre, objet: x.objet, effetMarche: x.marche, effetArret: x.effetArret };
     if (e.marche) return { ...base, marche: true, etat: { k: 'abouti', mot: 'Marche' }, morceaux: [{ t: x.marche }] };
     const morceaux = [{ t: `${x.arret} ` }];
-    const qui = e.par ? `Arrêté par ${String(e.par).replace(/^console · /, '')}` : 'Arrêté';   // « console · Julien » : Julien
-    morceaux.push({ t: `${qui}${e.a ? ` ${aQuand(e.a, t)}` : ''}${e.a && e.jusqua ? ` pour ${duree(e.jusqua - e.a)}` : ''}${e.motif ? `${FINE}: ${guillemets(e.motif)}` : ''}` });
+    const qui = e.par ? `Arrêté par ${masquer(String(e.par).replace(/^console · /, ''), role)}` : 'Arrêté';   // « console · Julien » : Julien
+    morceaux.push({ t: `${qui}${e.a ? ` ${aQuand(e.a, t)}` : ''}${e.a && e.jusqua ? ` pour ${duree(e.jusqua - e.a)}` : ''}${e.motif ? `${FINE}: ${guillemets(masquer(e.motif, role))}` : ''}` });
     if (reduite) morceaux.push({ t: `${FINE}; alerte ` }, { t: `#${reduite}`, href: `/alertes/${reduite}` }, { t: ' envoyée.' });
     else morceaux.push({ t: '.' });
     const jusqu = e.jusqua ? `Arrêt ${jusqua(e.jusqua, t)}` : 'Arrêt';
@@ -300,8 +300,8 @@ export function overview({ db, engine, switches, now = Date.now, role }) {
   for (const r of q.parGravite.all()) { compte[r.gravite] = (compte[r.gravite] || 0) + r.n; total += r.n; }
   const ids = lignes.map(a => a.id);
   const reponses = new Map();
-  if (ids.length) for (const d of q.reponses(ids.length).all(ids.map(id => `alerte #${id}`))) {
-    const id = Number(d.motif.slice(8));
+  if (ids.length) for (const d of q.reponses.all(JSON.stringify(ids))) {
+    const id = d.alerte_id;
     if (!reponses.has(id)) reponses.set(id, []);
     reponses.get(id).push(d);
   }
@@ -359,10 +359,10 @@ export function overview({ db, engine, switches, now = Date.now, role }) {
     if (!arretes.length) faits.push({ etat: { k: 'abouti', mot: 'Marche' }, morceaux: [{ t: 'Détection, alertes et blocages automatiques en marche.' }] });
     const c = q.derniereClose.get();
     if (c) {
-      const qui = c.traite_par ? ` par ${c.traite_par}` : '';
+      const qui = c.traite_par ? ` par ${masquer(c.traite_par, roleVu)}` : '';
       const quandC = c.traite_a ? ` ${aQuand(c.traite_a, t)}` : '';
       const texte = c.classement ? `, classée ${CLASSEMENTS[c.classement] || c.classement}${qui}${quandC}` : `, close${/^sans suite/.test(c.note || '') ? ' sans suite' : ''}${quandC}`;
-      const note = c.classement && c.note ? ` (${guillemets(c.note.slice(0, 120))})` : '';
+      const note = c.classement && c.note ? ` (${guillemets(masquer(c.note.slice(0, 120), roleVu))})` : '';
       faits.push({ etat: { k: 'abouti', mot: 'Close' }, morceaux: [{ t: `Dernière alerte${FINE}: ` }, { t: `#${c.id}`, href: `/alertes/${c.id}` }, { t: `${texte}${note}.` }] });
     }
   }
@@ -388,7 +388,7 @@ export function overview({ db, engine, switches, now = Date.now, role }) {
   const principale = premiere ? { href: `/alertes/${premiere.id}`, texte: `Ouvrir l’alerte ${gravite(premiere.gravite).mot.toLowerCase()} #${premiere.id}` } : null;
 
   // Interrupteurs : l'état et, à l'arrêt, qui, quand, pour combien de temps, pourquoi.
-  const interrupteurs = cartesInterrupteurs({ etat, reduite, t });
+  const interrupteurs = cartesInterrupteurs({ etat, reduite, t, role: roleVu });
 
   // Décisions en cours (les plus récentes d'abord).
   const decisions = { total: nbDecisions, lignes: q.decisions.all(t).map(d => ligneDecision(d, t, roleVu)) };

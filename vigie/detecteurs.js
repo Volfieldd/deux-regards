@@ -1,3 +1,5 @@
+import { cleReseau } from '../server/securite/adresses-ip.js';
+
 // Détecteurs comportementaux (phase C2, inspirés des détecteurs de marlinOS) : ils raisonnent sur l'historique d'une
 // entité, ce qu'une règle Sigma ne sait pas faire. Chacun renvoie des signaux de la même forme : { nom, cas, entite,
 // gravite, points, sourceUnique, tags, detail }.
@@ -145,7 +147,7 @@ export function createDetectors({ store, now = Date.now }) {
       WHERE type IN (${SLOW.map(() => '?').join(',')}) AND recu_a > ? AND ip_net IS NOT NULL GROUP BY ip_net HAVING h >= 12 LIMIT 1000`).all(...SLOW, t - 72 * 3600e3);
     for (const r of rows) {
       if (out.length >= 200) break;
-      if (r.n / r.h <= 5 && first(`lent|${r.ip_net}`, day(t))) out.push({ nom: 'exploration_lente', cas: 'DS15', entite: { kind: 'reseau', key: r.ip_net }, gravite: 'moyen', points: 4, tags: ['attack.reconnaissance', 'attack.t1595'], detail: { heures: r.h, evenements: r.n } });
+      if (r.n / r.h <= 5 && first(`lent|${r.ip_net}`, day(t))) out.push({ nom: 'exploration_lente', cas: 'DS15', entite: { kind: 'reseau', key: cleReseau(r.ip_net) || r.ip_net }, gravite: 'moyen', points: 4, tags: ['attack.reconnaissance', 'attack.t1595'], detail: { heures: r.h, evenements: r.n } });
     }
     return out;
   }

@@ -46,7 +46,12 @@ export class RightsError extends Error {}
 // actives, dans l'organisation propriétaire ; compte actif. Une erreur remonte (l'appelant décide : refuser l'action).
 export function createCeilingReader({ api, projectId, orgId }) {
   return async function read(sub) {
-    const user = await api(`/management/v1/users/${encodeURIComponent(sub)}`, { method: 'GET', org: orgId });
+    // Compte supprimé chez Zitadel (404) : aucun plafond, comme un compte désactivé (audit D3-A6), et non une panne.
+    let user;
+    try { user = await api(`/management/v1/users/${encodeURIComponent(sub)}`, { method: 'GET', org: orgId }); } catch (err) {
+      if (err.status === 404) return null;
+      throw err;
+    }
     const state = user?.user?.state;
     if (state && state !== 'USER_STATE_ACTIVE' && state !== 'USER_STATE_INITIAL') return null;
     const r = await api('/management/v1/users/grants/_search', {
@@ -70,7 +75,7 @@ export function createRights({ db, store, adminSubs, mode = 'deux-cles', now = D
     assign: db.prepare('UPDATE console_droits SET attribution = ?, attribue_par = ?, attribue_a = ? WHERE sub = ?'),
     all: db.prepare('SELECT * FROM console_droits ORDER BY premiere'),
   };
-  const emit = (type, sub, detail, par) => store.own(type, { emetteur: par ? `console · ${clean(par, 200)}` : 'vigie/console', sub, detail });
+  const emit = (type, sub, detail, par) => store.own(type, { emetteur: par ? (String(par).startsWith('console · ') ? par : `console · ${clean(par, 200)}`) : 'vigie/console', sub, detail });
 
   // Attribution qui vaut pour ce compte (amorce, une seule clé, ou celle réglée dans la Vigie ; Lecteur par défaut).
   function assignedOf(sub, row, ceiling) {
@@ -104,7 +109,7 @@ export function createRights({ db, store, adminSubs, mode = 'deux-cles', now = D
 
   // Attribution réglée par un Administrateur de la Vigie (écran Droits, phase D3c). Garde-fous : Administrateur
   // seulement, jamais son propre rôle, jamais un compte de l'amorce, au moins un Administrateur effectif.
-  function assign({ par, parRole, sub, role }) {
+  function assign({ par, parAuteur, parRole, sub, role }) {
     if (parRole !== 'admin') throw new RightsError('réservé aux Administrateurs de la Vigie');
     if (!ROLES.includes(role)) throw new RightsError(`rôle inconnu : ${role}`);
     if (sub === par) throw new RightsError('personne ne change son propre rôle');
@@ -114,7 +119,7 @@ export function createRights({ db, store, adminSubs, mode = 'deux-cles', now = D
     if (!row) throw new RightsError('compte inconnu de la console (jamais connecté)');
     if (row.attribution === role) return false;
     q.assign.run(role, par, now(), sub);
-    emit('vigie_console_droits', sub, { objet: 'attribution', avant: row.attribution || null, apres: role, effectif: effective(sub, row.plafond) }, par);
+    emit('vigie_console_droits', sub, { objet: 'attribution', avant: row.attribution || null, apres: role, effectif: effective(sub, row.plafond) }, parAuteur || par);
     return true;
   }
 

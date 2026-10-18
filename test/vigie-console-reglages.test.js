@@ -181,7 +181,7 @@ test('réglages : chaque formulaire extrait de la page réussit (interrupteur, s
   await v.send(cookie, f, corps(f, { mode: 'arret', motif: 'faux positifs', duree: '4h' }));
   assert.equal(v.engine.modeOf('sigma.cookie_rejoue'), 'arret');
   page = (await v.get(cookie, '/reglages')).body;
-  assert.match(page, /En Arrêt jusqu’à \d\d\sh\s\d\d, par Sébastien : « faux positifs » ; puis Observer\./);
+  assert.match(page, /En Arrêt jusqu’à \d\d\sh\s\d\d, par Sébastien \(sub-seb\) : « faux positifs » ; puis Observer\./);
   // Une règle à points n'a qu'Arrêt et Observer ; son retour rouvre le tableau replié au téléphone.
   const pts = trouve(page, '/reglages/regles/sigma.piege');
   assert.deepEqual([...pts.html.matchAll(/<option value="(\w+)"/g)].map(m => m[1]).filter(x => !['1h', '4h', '24h', '7j'].includes(x)), ['arret', 'observer']);
@@ -379,8 +379,9 @@ test('santé : vérifier la chaîne et recopier la bordure (Analyste), accepter 
   assert.match(page, /<p class="err" id="motif-acc-err">[\s\S]*?motif obligatoire/);
   f = trouve(page, '/sante/controle/accepter', 'sante-accepter');
   await v.send(cookie, f, corps(f, { motif: 'nouvel administrateur' }));
-  assert.equal(v.message(cookie).k, 'ok');
-  assert.match(v.message(cookie).texte, /^Référence acceptée/);
+  // Sauvegardes absentes : la référence n'est pas remplacée (audit D3-B6), le formulaire a bien été reçu.
+  assert.equal(v.message(cookie).k, 'erreur');
+  assert.match(v.message(cookie).texte, /aucune sauvegarde du site lisible/);
   // Une alerte du contrôle des rôles ouverte : pas de formulaire, la raison à sa place.
   const id = Number(v.db.prepare("INSERT INTO alerts (regle, cas, entite_kind, entite_key, gravite, mode, statut, premiere, derniere) VALUES ('sigma.controle_roles', 'DS8', 'vigie', 'x', 'critique', 'alerter', 'ouverte', ?, ?)").run(v.clock.t, v.clock.t).lastInsertRowid);
   page = (await v.get(cookie, '/sante')).body;

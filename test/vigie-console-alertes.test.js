@@ -350,11 +350,15 @@ test('bornes : pages de 50 (numérotées pour les non closes, par jeu de clés p
   const plan = (st, ...a) => db.prepare(`EXPLAIN QUERY PLAN ${st.source}`).all(...a).map(r => r.detail).join(' | ');
   assert.match(plan(q.historique, 1), /SEARCH events USING INDEX events_alerte/);
   assert.match(plan(q.evenements, 1, 10), /SEARCH a USING COVERING INDEX .*alert_id=\? AND seq<\?.*SEARCH e USING INTEGER PRIMARY KEY/);
-  for (const [nom, st, args] of [['historique', q.historique, [1]], ['evenements', q.evenements, [1, 10]], ['nbEvenements', q.nbEvenements, [1]], ['decisions', q.decisions, ['alerte #1']],
+  for (const [nom, st, args] of [['historique', q.historique, [1]], ['evenements', q.evenements, [1, 10]], ['nbEvenements', q.nbEvenements, [1]], ['decisions', q.decisions, [1]],
     ['alerte', q.alerte, [1]], ['autres', q.autres, ['ip', 'x', 1]]]) {
     assert.doesNotMatch(plan(st, ...args), /SCAN (events|e)\b/, nom);
     assert.match(st.source, /LIMIT|WHERE id = \?/, `${nom} : bornée`);
   }
+  // Décisions d'une alerte et réponses d'une page : par l'index de alerte_id (migration 012, audit D3-D3), jamais un
+  // parcours de la table des décisions (jamais purgée avant, 200 000 lignes en 13 mois au pire).
+  assert.match(plan(q.decisions, 1), /SEARCH decisions USING INDEX decisions_alerte \(alerte_id=\?\)/);
+  assert.match(plan(q.reponses, '[1,2]'), /SEARCH decisions USING INDEX decisions_alerte \(alerte_id=\?\)/);
   // Les listes préparées pour les filtres : bornées, par un index de la table des alertes.
   const formes = ["SELECT id FROM alerts WHERE statut != 'close' AND regle = ? ORDER BY derniere DESC LIMIT 51", "SELECT id FROM alerts WHERE statut = 'close' AND (derniere < ? OR (derniere = ? AND id < ?)) ORDER BY derniere DESC, id DESC LIMIT 51"];
   assert.match(db.prepare(`EXPLAIN QUERY PLAN ${formes[0]}`).all('x').map(r => r.detail).join(' '), /alerts_ouvertes/);

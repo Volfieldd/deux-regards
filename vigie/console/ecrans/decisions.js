@@ -12,7 +12,7 @@ import { can, LABELS, ACTIONS } from '../droits.js';
 import { FRESH } from '../sessions.js';
 import { MAX_IPV4, SCOPES, parseTarget } from '../../decisions.js';
 import { net64 } from '../../moteur.js';
-import { FINE, adresseDetail, dateHeure, guillemets, heure, ilYa, nombre, quand } from '../format.js';
+import { FINE, adresseDetail, cibleBlocage, dateHeure, guillemets, heure, ilYa, masquer, nombre, quand } from '../format.js';
 
 const NBSP = '\u00a0';
 const HISTOIRE = 20;                      // levées et échues montrées d'office
@@ -65,10 +65,9 @@ const propre = (v, max = 300) => {
   const signes = [...s];
   return signes.length > max ? `${signes.slice(0, max).join('')}…` : s;
 };
-// Adresses citées dans un texte libre (un motif) : tronquées pour un Lecteur.
-const RE_IP = /(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}(?:\/\d{1,3})?|\b\d{1,3}(?:\.\d{1,3}){3}(?:\/\d{1,2})?\b/gi;
+// Adresses citées dans un texte libre (un motif, un auteur) : tronquées pour un Lecteur (masquer, de format.js : une seule
+// fonction pour toute la console, audit D3-C2).
 const voitAdresses = role => can(role || 'viewer', 'adresses_completes');
-export const masque = (s, role) => (voitAdresses(role) ? String(s ?? '') : String(s ?? '').replace(RE_IP, m => (net.isIP(m.split('/')[0]) ? adresseDetail(m, 'viewer').texte : m)));
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Message d'une action (it.message, posé par actions.js) : jamais cru. Une erreur ne vaut que pour le formulaire qui l'a
@@ -170,9 +169,10 @@ const lireJson = s => { try { return s ? JSON.parse(s) : null; } catch { return 
 // Cible d'une décision, vue par un rôle.
 function cibleDe(q, d, role, t) {
   if (d.kind === 'bloquer') {
-    const [a, p] = String(d.cible).split('/');
-    const hote = p == null || p === '32' || p === '128';
-    const vu = adresseDetail(hote ? a : d.cible, role);
+    // Une adresse seule : /32 en IPv4, /128 en IPv6 (un /32 IPv6 est un réseau).
+    const seule = cibleBlocage(d.cible);
+    const hote = !seule.includes('/');
+    const vu = adresseDetail(seule, role);
     let taille = '';
     try { const x = parseTarget(d.cible); if (x.family === 'ipv4' && x.size > 1) taille = `${nombre(x.size)}${NBSP}adresses`; } catch { /* cible illisible */ }
     return { k: hote ? 'adresse' : 'réseau', texte: vu.texte, mono: 'ip', v6: vu.v6, tronquee: vu.tronquee,
@@ -205,8 +205,8 @@ function parDe(d, { role, moi, titres }) {
   const nom = par.startsWith('console · ') ? par.slice(10) : par;
   if (alerteN) sec.push({ t: `alerte #${alerteN[1]}`, href: `/alertes/${alerteN[1]}` });
   const reste = alerteN ? String(d.motif).slice(alerteN[0].length) : d.motif;
-  if (reste) { if (sec.length) sec.push({ t: ' · ' }); sec.push({ t: guillemets(propre(masque(reste, role), 120)) }); }
-  return { t: `${propre(nom, 60) || 'inconnu'}${vous ? ' (vous)' : ''}`, sec };
+  if (reste) { if (sec.length) sec.push({ t: ' · ' }); sec.push({ t: guillemets(propre(masquer(reste, role), 120)) }); }
+  return { t: `${propre(masquer(nom, role), 60) || 'inconnu'}${vous ? ' (vous)' : ''}`, sec };
 }
 
 export function ligneDecision(db, d, { t, role, moi = null, titres = new Map(), retour = null }) {
@@ -219,7 +219,7 @@ export function ligneDecision(db, d, { t, role, moi = null, titres = new Map(), 
     depuis: quand(d.cree_a, t),
     cible: cibleDe(q, d, role, t),
     fin: enCours ? { t: dateHeure(d.fin), sec: ilYa(d.fin, t) }
-      : d.leve_a ? { t: `levée ${quand(d.leve_a, t)}`, sec: d.leve_par ? `par ${propre(String(d.leve_par).replace(/^console · /, ''), 60)}` : '' }
+      : d.leve_a ? { t: `levée ${quand(d.leve_a, t)}`, sec: d.leve_par ? `par ${propre(masquer(String(d.leve_par).replace(/^console · /, ''), role), 60)}` : '' }
         : { t: `échue ${quand(d.fin, t)}`, sec: '' },
     par: parDe(d, { role, moi, titres }),
     lever: enCours && can(role, 'actions_forcees') ? lienLever(d, retour) : null,
