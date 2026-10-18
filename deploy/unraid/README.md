@@ -6,11 +6,11 @@ Ce dossier contient tout le nécessaire :
 
 | Fichier | Rôle |
 |---|---|
-| `compose.yaml` | la pile complète : site, sauvegarde quotidienne, tunnel Cloudflare, traducteur LibreTranslate (**méthode recommandée**) |
+| `compose.yaml` | la pile complète : site, sauvegarde quotidienne, tunnel Cloudflare, traducteur LibreTranslate (**méthode recommandée**) ; en option, par profil, la Vigie et sa passerelle Signal |
 | `env.example` | les réglages, à copier en `.env` de la pile |
-| `signal/` | **facultatif** : passerelle Signal de la Vigie (alertes de sécurité sur le téléphone), pile à part ; guide dans [`signal/README.md`](signal/README.md) |
+| `signal/` | **facultatif** : enregistrer le numéro de la passerelle Signal de la Vigie (alertes de sécurité sur le téléphone ; service `signal` de la pile, profil `signal`) ; guide dans [`signal/README.md`](signal/README.md) |
 | `vigie-phase-0.md` | **facultatif** : réglages de Cloudflare et de Zitadel qui préparent la Vigie (second facteur, compte de lecture des événements, règles du WAF, Access) ; la partie « maintenant » sert aussi sans Vigie |
-| `vigie.env.example` | **facultatif** : secrets de la Vigie, à copier en `vigie.env` à côté de `compose.yaml` (services `vigie` et `vigie-backup`, profil `vigie`) ; guide : [Vigie](https://github.com/Volfieldd/deux-regards/wiki/Vigie) |
+| `vigie.env.example` | **facultatif** : secrets de la Vigie, à copier en `vigie.env` dans le dossier de la pile, à côté de son `.env` (services `vigie` et `vigie-backup`, profil `vigie`) ; guide : [Vigie](https://github.com/Volfieldd/deux-regards/wiki/Vigie) |
 | `modeles/*.xml` | les mêmes conteneurs en modèles Unraid (onglet Docker), si vous préférez ne pas utiliser Compose |
 | `exporter-donnees.sh` | exporte les données d'une installation existante (serveur de test) pour les reprendre sur Unraid |
 
@@ -133,6 +133,12 @@ Le site n'a qu'une adresse : **`https://www.nicephos.art`** (`PUBLIC_URL`). Tout
 3. **Edit Stack → ENV File :** collez `env.example`, puis remplissez `PUBLIC_URL=https://www.nicephos.art`, `COOKIE_SECRET` (`openssl rand -base64 32` dans le terminal), la partie Zitadel et `TUNNEL_TOKEN`.
 4. **Compose Up.** Les quatre conteneurs apparaissent dans l'onglet Docker : `nicephos`, `nicephos-sauvegarde`, `nicephos-tunnel` et `nicephos-traduction`.
 
+**Vigie et Signal (facultatifs), dans la même pile :** `COMPOSE_PROFILES=vigie` dans le `.env` ajoute `nicephos-vigie` et `nicephos-vigie-sauvegarde` ; `COMPOSE_PROFILES=vigie,signal` ajoute aussi la passerelle `nicephos-signal`. Les réseaux internes se créent tout seuls. Il reste à préparer, avant le **Compose Up** :
+
+- les dossiers et les clés de la Vigie, et ses lignes dans le `.env` du site ([Vigie](https://github.com/Volfieldd/deux-regards/wiki/Vigie), « Installer sur Unraid ») ;
+- `vigie.env`, que Compose Manager n'affiche pas : créez-le dans le terminal, **dans le dossier de la pile**, celui qui contient déjà son `docker-compose.yml` et son `.env` (en général `/boot/config/plugins/compose.manager/projects/nicephos/`), puis `chmod 600`. Sans lui, la Vigie refuse de démarrer (« Variable manquante ») ; le reste de la pile n'en souffre pas ;
+- pour Signal, le dossier des clés (`SIGNAL_DATA_DIR`, propriétaire `1000:1000`) et l'enregistrement du numéro : [`signal/README.md`](signal/README.md).
+
 Au premier lancement sans données reprises, le site part d'une base vide : pas de photos, pas d'auteurs. Créez d'abord les auteurs dans l'admin.
 
 **Autre méthode : modèles Unraid** (sans plugin).
@@ -253,5 +259,6 @@ Pensez aussi à **l'authentification à deux facteurs** dans Zitadel (*Settings 
 - **Adresse des visiteurs :** réseau Docker dédié ; le site ne croit `X-Forwarded-For` (ni le pays de Cloudflare) que venant du tunnel (`TRUST_PROXY` = `TUNNEL_IP`, adresse que les autres conteneurs ne peuvent pas prendre), pas d'un poste du réseau local.
 - **Partages réseau :** `appdata` et `backups` non exportés (étape 2).
 - **Secrets :** le jeton du tunnel ne va qu'à `nicephos-tunnel`, jamais au site.
+- **Passerelle Signal** (facultative) : aucun port publié ; son API, sans authentification, n'est joignable que par le réseau interne de la Vigie, où le site n'est pas.
 - **Effacements :** une donnée effacée est mise à zéro dans la base, et les instantanés ne gardent pas ses restes ; une restauration ne ramène pas un original effacé que la base restaurée ne connaît plus.
 - **Base vide par erreur :** les vrais instantanés sont gardés, et `nicephos-sauvegarde` passe `unhealthy`.

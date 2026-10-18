@@ -1,11 +1,6 @@
 # Passerelle Signal de la Vigie
 
-La Vigie (composant de sécurité, voir [l'étude](../../../docs/etudes/annexe-vigie-architecture.md)) enverra ses alertes hautes et critiques sur Signal. Ce dossier prépare la passerelle **avant** la Vigie : on enregistre le numéro, on crée le groupe, on vérifie qu'un message arrive. La Vigie n'aura plus qu'à s'y brancher.
-
-| Fichier | Rôle |
-|---|---|
-| `compose.yaml` | la passerelle (`signal-cli-rest-api`, version épinglée), sans port publié, sur un réseau interne réservé à la Vigie |
-| `env.example` | le dossier des clés, et les valeurs à noter pour la Vigie |
+La Vigie (composant de sécurité, voir [l'étude](../../../docs/etudes/annexe-vigie-architecture.md)) envoie ses alertes hautes et critiques sur Signal. La passerelle (`signal-cli-rest-api`, version épinglée) est le service `signal` de la pile ([`../compose.yaml`](../compose.yaml)), sous le profil `signal` : sans port publié, sur un réseau interne que seule la Vigie rejoint. Ce guide enregistre le numéro, crée le groupe et vérifie qu'un message arrive ; la Vigie n'a plus qu'à s'y brancher.
 
 Coût : **gratuit**, sauf le numéro de téléphone si vous n'en avez pas de libre (voir étape 1).
 
@@ -38,7 +33,14 @@ chmod 700 /mnt/cache/appdata/nicephos/signal
 
 ## 3. Lancer la passerelle
 
-Docker Compose Manager → **Add New Stack** « nicephos-signal », coller `compose.yaml`, puis **Edit Stack → ENV FILE** avec `env.example` complété, puis **Compose Up**.
+Dans la pile `nicephos` (Compose Manager → **Edit Stack → ENV FILE**), ajouter `signal` au profil, et le dossier s'il n'est pas celui par défaut :
+
+```dotenv
+COMPOSE_PROFILES=vigie,signal
+# SIGNAL_DATA_DIR=/mnt/cache/appdata/nicephos/signal
+```
+
+Puis **Compose Pull** et **Compose Up**. Le conteneur `nicephos-signal` apparaît. Le profil `signal` seul (sans `vigie`) suffit pour enregistrer le numéro avant d'installer la Vigie.
 
 Vérifier :
 
@@ -46,9 +48,11 @@ Vérifier :
 docker exec nicephos-signal curl -s http://localhost:8080/v1/about
 ```
 
-La réponse indique la version et le mode (`json-rpc-native`).
+La réponse indique la version (`0.101`) et le mode (`json-rpc`).
 
-**Si le conteneur ne démarre pas** à cause du système de fichiers en lecture seule (message de `s6` dans les journaux) : retirer les lignes `read_only: true` et `tmpfs`, relancer, et me le signaler pour corriger le modèle.
+Le conteneur est durci comme le reste de la pile (système de fichiers en lecture seule, aucun privilège) ; `/run` et `/tmp` sont en mémoire.
+
+**Ancienne pile à part** (`nicephos-signal`, avant le 18 octobre 2026) : **Compose Down** de cette pile, puis supprimez-la dans Compose Manager **avant** de relancer la pile `nicephos` avec le profil `signal`. Le dossier des clés reste le même : rien à réenregistrer.
 
 ## 4. Enregistrer le numéro
 
@@ -129,7 +133,7 @@ Dans votre gestionnaire de mots de passe (jamais dans le dépôt, qui est public
 - le numéro de la Vigie et son PIN ;
 - l'identifiant du groupe (`group.…`).
 
-Ils iront dans le `.env` de la Vigie (`VIGIE_SIGNAL_URL`, `VIGIE_SIGNAL_NUMERO`, `VIGIE_SIGNAL_GROUPE`) à la phase B.
+Ils vont dans `vigie.env` (`VIGIE_SIGNAL_NUMERO`, `VIGIE_SIGNAL_GROUPE` ; `VIGIE_SIGNAL_URL` vaut `http://nicephos-signal:8080` par défaut), puis **Compose Up**. Essai : `docker exec nicephos-vigie node vigie/cli.js notifier essai signal`.
 
 ---
 
@@ -147,7 +151,7 @@ Au plus 20 messages par heure, puis un message de synthèse. Si l'envoi échoue 
 
 ## Entretien
 
-- **Mise à jour** : changer l'étiquette et l'empreinte de l'image dans `compose.yaml` (une PR), puis **Compose Pull** et **Compose Up**. Les clés restent dans le dossier.
+- **Mise à jour** : changer l'étiquette et l'empreinte de l'image du service `signal` dans `../compose.yaml` (une PR), puis **Compose Pull** et **Compose Up**. Les clés restent dans le dossier.
 - **Sauvegarde** : le dossier des clés peut être perdu sans drame (on réenregistre le numéro, étapes 4 à 7, avec le même PIN). Ne pas le copier dans les sauvegardes du site.
 - **Limite de Signal** : si Signal réclame un captcha à l'envoi (`rate-limit-challenge` dans les journaux), suivre l'étape 4.1 puis :
 
@@ -157,11 +161,11 @@ Au plus 20 messages par heure, puis un message de synthèse. Si l'envoi échoue 
     http://localhost:8080/v1/accounts/+33XXXXXXXXX/rate-limit-challenge
   ```
 
-- **Arrêter les messages** : **Compose Down** de cette pile ; la Vigie bascule sur l'e-mail.
+- **Arrêter les messages** : retirer `signal` de `COMPOSE_PROFILES` puis **Compose Up** (ou `docker stop nicephos-signal`) ; la Vigie bascule sur l'e-mail.
 
 ## Sécurité
 
-- L'API de la passerelle n'a pas d'authentification : elle n'a **aucun port publié** et vit sur le réseau interne `nicephos-vigie-signal` (sans sortie vers Internet), où seule la Vigie la rejoindra. Ne jamais ajouter de ligne `ports:`.
+- L'API de la passerelle n'a pas d'authentification : elle n'a **aucun port publié** et vit sur le réseau interne `nicephos-vigie-signal` (sans sortie vers Internet), où seule la Vigie la rejoint (le site n'y est pas). Ne jamais ajouter de ligne `ports:`.
 - Conteneur sans privilège (utilisateur non root, `cap_drop: ALL`, `no-new-privileges`, système de fichiers en lecture seule), mémoire bornée.
 - Les messages sont chiffrés de bout en bout par Signal ; la passerelle ne garde aucun historique utile (réception ignorée).
 - Le projet `signal-cli` n'est pas un client officiel de Signal : un usage raisonnable (quelques messages par jour) ne pose pas de problème connu, mais Signal peut changer ses règles.

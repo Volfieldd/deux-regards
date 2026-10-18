@@ -1,6 +1,8 @@
 # Nicephos sur Unraid (plugin « Docker Compose Manager »).
 # Quatre conteneurs : le site, la sauvegarde quotidienne, le tunnel Cloudflare (HTTPS, aucun port ouvert) et le
 # traducteur LibreTranslate (propositions de traduction dans l'admin, sur place : aucun texte ne sort du serveur).
+# Facultatifs, par profil (COMPOSE_PROFILES dans le .env) : « vigie » (la Vigie et sa sauvegarde), « signal » (la
+# passerelle Signal de ses alertes).
 # Réglages dans le fichier .env de la pile (modèle : env.example). Guide : README.md.
 #
 # DONNÉES : DATA_DIR et BACKUP_DIR doivent exister AVANT le premier lancement et appartenir à 99:100
@@ -48,11 +50,13 @@ networks:
       config:
         - subnet: ${VIGIE_NET_SUBNET:-172.29.43.0/24}
           ip_range: ${VIGIE_NET_IP_RANGE:-172.29.43.128/25}
-  # Passerelle Signal de la Vigie (deploy/unraid/signal/) : réseau interne créé par sa pile. Sans Signal, le créer vide
-  # une fois : docker network create --internal nicephos-vigie-signal
+  # Passerelle Signal de la Vigie (profil « signal ») : réseau sans sortie vers Internet entre la Vigie et la passerelle,
+  # dont l'API n'a aucune authentification ; le site n'y est pas. Sans le profil « signal », il existe mais reste vide.
   vigie-signal:
     name: nicephos-vigie-signal
-    external: true
+    internal: true
+  # Sortie vers les serveurs de Signal, pour la passerelle seule (ni le site ni la Vigie n'y sont).
+  signal-sortie: {}
 
 services:
   site:
@@ -249,6 +253,48 @@ services:
     logging: *logging
     mem_limit: 256m
     <<: *hardening
+
+  # Passerelle Signal des alertes de la Vigie (facultative ; enregistrement du numéro : signal/README.md). Ne démarre
+  # qu'avec le profil « signal » (COMPOSE_PROFILES=vigie,signal). Son API n'a AUCUNE authentification : aucun port
+  # publié, joignable seulement par le réseau interne vigie-signal, où seule la Vigie la rejoint ; signal-sortie ne lui
+  # sert qu'à sortir vers les serveurs de Signal.
+  # DONNÉES : SIGNAL_DATA_DIR contient les clés du compte Signal ; il doit exister avant et appartenir à 1000:1000
+  # (utilisateur de l'image), droits 700. Jamais dans un partage réseau, jamais dans les sauvegardes du site.
+  signal:
+    # Version épinglée par étiquette et empreinte (0.101, 25 septembre 2026).
+    image: bbernhard/signal-cli-rest-api:0.101@sha256:2cf09d66a86fdd210e42ee91662216364acc27da1163a8c44167a77ea3a6559a
+    container_name: nicephos-signal
+    profiles: [signal]
+    restart: unless-stopped
+    environment:
+      # Processus signal-cli permanent (binaire natif : démarrage rapide, mémoire modérée). Il reçoit en continu, ce que
+      # Signal attend d'un compte (pas besoin d'AUTO_RECEIVE_SCHEDULE dans ce mode).
+      MODE: json-rpc-native
+      LOG_LEVEL: warn
+      # Rien n'est attendu en réception : pièces jointes, stories et avatars ignorés.
+      JSON_RPC_IGNORE_ATTACHMENTS: "true"
+      JSON_RPC_IGNORE_STORIES: "true"
+      JSON_RPC_IGNORE_AVATARS: "true"
+    volumes:
+      - type: bind
+        source: ${SIGNAL_DATA_DIR:-/mnt/cache/appdata/nicephos/signal}
+        target: /home/.local/share/signal-cli
+        bind:
+          create_host_path: false
+    networks: [vigie-signal, signal-sortie]
+    # Aucun port publié (API sans authentification). Les commandes d'enregistrement passent par « docker exec ».
+    logging: *logging
+    mem_limit: 512m
+    pids_limit: 256
+    # Durcie comme le reste, essayée le 18 octobre 2026 : l'image tourne sous 1000:1000 (s6 sans root) ; /run et /tmp
+    # en mémoire lui appartiennent, et /tmp doit permettre l'exécution (signal-cli y décompresse sa bibliothèque native).
+    read_only: true
+    tmpfs:
+      - /run:uid=1000,gid=1000,mode=0755,exec
+      - /tmp:uid=1000,gid=1000,mode=1777,exec
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
 
 volumes:
   traduction-modeles:

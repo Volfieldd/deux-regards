@@ -367,6 +367,16 @@ test('A007, A045, A046, A047, A049, A210 : fichiers de déploiement', () => {
     assert.match(svc, /<<: \*hardening/, name);
   }
   assert.match(service(unraid, 'vigie-backup'), /network_mode: none/);
+  // Passerelle Signal (profil « signal ») : API sans authentification, donc aucun port, réseau interne créé par la pile
+  // (jamais « external » : un Compose Up avec la Vigie échouait faute de réseau), que le site ne rejoint pas.
+  const signal = service(unraid, 'signal');
+  assert.match(signal, /profiles: \[signal\]/);
+  assert.doesNotMatch(signal, /ports:/);
+  assert.match(signal, /networks: \[vigie-signal, signal-sortie\]/);
+  assert.match(signal, /read_only: true[\s\S]*cap_drop: \[ALL\]/);
+  assert.match(unraid, /\n {2}vigie-signal:\n {4}name: nicephos-vigie-signal\n {4}internal: true\n/);
+  assert.doesNotMatch(unraid, /external: true/);
+  assert.doesNotMatch(service(unraid, 'site'), /vigie-signal/);
   for (const u of uses) assert.match(u, /@[0-9a-f]{40}$/, u);
   assert.match(wf, /type=raw,value=latest,enable=\{\{is_default_branch\}\}/);
   assert.match(wf, /\nconcurrency:\n {2}group: image-\$\{\{ github\.ref \}\}\n {2}cancel-in-progress: false\n/);
