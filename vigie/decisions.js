@@ -102,14 +102,15 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
     return row.id;
   }).immediate();
 
-  const lift = ({ id = null, all = false, par }) => db.transaction(() => {
+  const lift = ({ id = null, all = false, par, motif = '' }) => db.transaction(() => {
     const t = now();
     const rows = all ? live() : live().filter(d => d.id === id);
     for (const d of rows) {
       const next = { ...d, leve_a: t, leve_par: par };
       db.prepare('UPDATE decisions SET leve_a = ?, leve_par = ?, mac = ? WHERE id = ?').run(t, par, rowMac(next), d.id);
     }
-    if (rows.length) { store.own('vigie_decision', { emetteur: par, detail: { action: 'levée', id, toutes: all, nombre: rows.length } }); bump(); }
+    const m = String(motif || '').trim().slice(0, 300) || undefined;
+    if (rows.length) { store.own('vigie_decision', { emetteur: par, detail: { action: 'levée', id, toutes: all, nombre: rows.length, motif: m } }); bump(); }
     return rows.length;
   }).immediate();
 

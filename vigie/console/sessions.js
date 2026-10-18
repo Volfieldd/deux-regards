@@ -24,6 +24,9 @@ export function createSessions({ db, now = Date.now }) {
     ceiling: db.prepare('UPDATE console_sessions SET plafond = ?, plafond_lu = ? WHERE id = ?'),
     auth: db.prepare('UPDATE console_sessions SET auth_a = ? WHERE id = ?'),
     purge: db.prepare('DELETE FROM console_sessions WHERE cree_a < ?'),
+    setMessage: db.prepare('UPDATE console_sessions SET message = ? WHERE id = ?'),
+    getMessage: db.prepare('SELECT message FROM console_sessions WHERE id = ?').pluck(),
+    clearMessage: db.prepare('UPDATE console_sessions SET message = NULL WHERE id = ? AND message IS NOT NULL'),
     txPut: db.prepare('INSERT INTO console_tx (state, verifier, nonce, retour, reauth, cree_a) VALUES (?, ?, ?, ?, ?, ?)'),
     txTake: db.prepare('DELETE FROM console_tx WHERE state = ? RETURNING *'),
     txPurge: db.prepare('DELETE FROM console_tx WHERE cree_a < ?'),
@@ -46,6 +49,14 @@ export function createSessions({ db, now = Date.now }) {
     closeSub: (sub, raison) => q.closeSub.run(now(), raison, sub).changes,
     setCeiling: (id, plafond) => q.ceiling.run(plafond, now(), id),
     setAuth: (id, at) => q.auth.run(Math.min(at, now()), id),
+    // Message d'une action pour la page suivante (une fois).
+    setMessage: (id, m) => q.setMessage.run(JSON.stringify(m).slice(0, 4000), id),
+    takeMessage: db.transaction(id => {
+      const v = q.getMessage.get(id);
+      if (!v) return null;
+      q.clearMessage.run(id);
+      try { return JSON.parse(v); } catch { return null; }
+    }),
     // Connexions en cours : à usage unique, 10 minutes ; 500 au plus (les plus anciennes cèdent la place).
     putTx(tx) {
       q.txPurge.run(now() - TX_TTL);

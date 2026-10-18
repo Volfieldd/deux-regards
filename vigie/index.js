@@ -90,7 +90,8 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   zitadel?.start(config.zitadel.intervalMs);
 
   // Console (phase D3) : son propre port, sur le réseau du tunnel ; la réception reste sur le réseau interne.
-  const consoleApp = config.console ? createConsole({ config: config.console, store, engine, switches, decisions, zitadel, logger, fetchImpl, now }) : null;
+  const consoleApp = config.console ? createConsole({ config: config.console, store, engine, switches, decisions, zitadel, logger, fetchImpl, now,
+    notifications: config.notifications || {}, edge, siteBackupDir: config.siteBackupDir, verifyChain: async () => record(await store.verifyAsync()) }) : null;
 
   await ingest.listen({ host: config.host, port: config.ingestPort });
   if (consoleApp) await consoleApp.app.listen({ host: config.console.host, port: config.console.port });

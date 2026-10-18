@@ -141,6 +141,8 @@ a.vg-lien { display: inline-flex; align-items: center; min-height: 24px; }
 .vg-bandeau .sec { display: block; color: var(--ink2); font-size: 13px; }
 .vg-bandeau--attention { background: var(--s2); box-shadow: inset 4px 0 0 var(--warn), inset 0 0 0 1px var(--line); }
 .vg-bandeau--attention > .ic { color: var(--warn); }
+.vg-bandeau--fait { background: var(--s2); box-shadow: inset 4px 0 0 var(--ok, var(--accent)), inset 0 0 0 1px var(--line); }
+.vg-bandeau--fait > .ic { color: var(--ok, var(--accent)); }
 @media (max-width: 720px) { .vg-bandeau { grid-template-columns: 20px minmax(0, 1fr); } .vg-bandeau > .btn, .vg-bandeau > form { grid-column: 1 / -1; } }
 
 /* ---------- 5. Phrase d'état (vue d'ensemble, santé, états) ----------

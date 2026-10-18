@@ -110,7 +110,8 @@ export function createStore({ db, logKey, retentionDays = 183, now = Date.now })
   // Événement constaté par la Vigie elle-même.
   const own = (type, { severity, detail, emetteur = '', sub, reference, composant, ip, ip_net } = {}) => addNow([{
     id: crypto.randomUUID(), recu_a: now(), survenu_a: now(), type, severity: severity || ALL[type].severity,
-    composant: composant || ALL[type].composant, emetteur, canal: 'interne', confiance: 'constaté', reference, sub, ip, ip_net, detail,
+    // Geste d'une personne depuis la console (« console · Nom ») : composant de la console, pas de la ligne de commande.
+    composant: composant || (String(emetteur).startsWith('console · ') && ALL[type].composant === 'vigie · ligne de commande' ? 'vigie · console' : ALL[type].composant), emetteur, canal: 'interne', confiance: 'constaté', reference, sub, ip, ip_net, detail,
   }]);
 
   // Vérifie la chaîne depuis l'ancre : { ok, lignes, ruptures, rupture (la première) }. Continue après une rupture.
