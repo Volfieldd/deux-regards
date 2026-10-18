@@ -5,14 +5,19 @@
 # passerelle Signal de ses alertes).
 # Réglages dans le fichier .env de la pile (modèle : env.example). Guide : README.md.
 #
-# DONNÉES : DATA_DIR et BACKUP_DIR doivent exister AVANT le premier lancement et appartenir à 99:100
-# (nobody:users). Compose refuse de démarrer s'ils manquent : jamais de dossier vide créé en silence.
+# DOSSIERS : tout se déduit de deux réglages du .env.
+#   NICEPHOS_DIR  data/ (site), vigie/ et vigie-secrets/ (Vigie), signal/ (passerelle) ; chacun monté seul :
+#                 le site ne voit que data/, jamais la base ni les secrets de la Vigie.
+#   BACKUP_DIR    sauvegardes du site ; celles de la Vigie vont dans « BACKUP_DIR-vigie », à côté.
+# DATA_DIR, VIGIE_DATA_DIR, VIGIE_SECRETS_DIR, SIGNAL_DATA_DIR et VIGIE_BACKUP_DIR restent possibles pour forcer un
+# chemin. Les dossiers doivent exister AVANT le premier lancement (propriétaires : README.md, étape 2). Compose refuse
+# de démarrer s'ils manquent : jamais de dossier vide créé en silence.
 
 name: nicephos
 
 x-data: &data
   type: bind
-  source: ${DATA_DIR:?DATA_DIR obligatoire (dossier des données, ex. /mnt/cache/appdata/nicephos/data)}
+  source: ${DATA_DIR:-${NICEPHOS_DIR:?NICEPHOS_DIR obligatoire (voir env.example)}/data}
   target: /data
   bind:
     create_host_path: false
@@ -126,7 +131,7 @@ services:
     volumes:
       - *data
       - type: bind
-        source: ${BACKUP_DIR:?BACKUP_DIR obligatoire (ex. /mnt/user/backups/nicephos, idéalement sur un autre disque)}
+        source: ${BACKUP_DIR:?BACKUP_DIR obligatoire (voir env.example)}
         target: /backups
         bind:
           create_host_path: false
@@ -203,18 +208,18 @@ services:
       vigie-signal: {}
     volumes:
       - type: bind
-        source: ${VIGIE_DATA_DIR:-/mnt/cache/appdata/nicephos/vigie}
+        source: ${VIGIE_DATA_DIR:-${NICEPHOS_DIR:?NICEPHOS_DIR obligatoire (voir env.example)}/vigie}
         target: /data
         bind:
           create_host_path: false
       - type: bind
-        source: ${VIGIE_SECRETS_DIR:-/mnt/cache/appdata/nicephos/vigie-secrets}
+        source: ${VIGIE_SECRETS_DIR:-${NICEPHOS_DIR:?NICEPHOS_DIR obligatoire (voir env.example)}/vigie-secrets}
         target: /secrets
         read_only: true
         bind:
           create_host_path: false
       - type: bind
-        source: ${BACKUP_DIR:-/mnt/user/backups/nicephos}
+        source: ${BACKUP_DIR:?BACKUP_DIR obligatoire (voir env.example)}
         target: /sauvegardes-site
         read_only: true
         bind:
@@ -241,12 +246,12 @@ services:
       disable: true
     volumes:
       - type: bind
-        source: ${VIGIE_DATA_DIR:-/mnt/cache/appdata/nicephos/vigie}
+        source: ${VIGIE_DATA_DIR:-${NICEPHOS_DIR:?NICEPHOS_DIR obligatoire (voir env.example)}/vigie}
         target: /data
         bind:
           create_host_path: false
       - type: bind
-        source: ${VIGIE_BACKUP_DIR:-/mnt/user/backups/nicephos-vigie}
+        source: ${VIGIE_BACKUP_DIR:-${BACKUP_DIR:?BACKUP_DIR obligatoire (voir env.example)}-vigie}
         target: /backups
         bind:
           create_host_path: false
@@ -258,7 +263,7 @@ services:
   # qu'avec le profil « signal » (COMPOSE_PROFILES=vigie,signal). Son API n'a AUCUNE authentification : aucun port
   # publié, joignable seulement par le réseau interne vigie-signal, où seule la Vigie la rejoint ; signal-sortie ne lui
   # sert qu'à sortir vers les serveurs de Signal.
-  # DONNÉES : SIGNAL_DATA_DIR contient les clés du compte Signal ; il doit exister avant et appartenir à 1000:1000
+  # DONNÉES : NICEPHOS_DIR/signal contient les clés du compte Signal ; il doit exister avant et appartenir à 1000:1000
   # (utilisateur de l'image), droits 700. Jamais dans un partage réseau, jamais dans les sauvegardes du site.
   signal:
     # Version épinglée par étiquette et empreinte (0.101, 25 septembre 2026).
@@ -277,7 +282,7 @@ services:
       JSON_RPC_IGNORE_AVATARS: "true"
     volumes:
       - type: bind
-        source: ${SIGNAL_DATA_DIR:-/mnt/cache/appdata/nicephos/signal}
+        source: ${SIGNAL_DATA_DIR:-${NICEPHOS_DIR:?NICEPHOS_DIR obligatoire (voir env.example)}/signal}
         target: /home/.local/share/signal-cli
         bind:
           create_host_path: false

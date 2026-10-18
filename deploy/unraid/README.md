@@ -17,8 +17,8 @@ Ce dossier contient tout le nécessaire :
 ```
 Internet ─HTTPS─► Cloudflare (www.nicephos.art ; autres adresses redirigées) ─tunnel─► nicephos-tunnel ─► nicephos:3000
                                                                                         │
-                                       /mnt/cache/appdata/nicephos/data ◄── /data ──────┘
-                 nicephos-sauvegarde (chaque jour) ──► /mnt/user/backups/nicephos
+                                               NICEPHOS_DIR/data ◄── /data ──────┘
+                 nicephos-sauvegarde (chaque jour) ──► BACKUP_DIR
 ```
 
 Aucun port n'est ouvert sur votre box : le tunnel sort vers Cloudflare, qui fournit le HTTPS.
@@ -43,18 +43,38 @@ L'image est construite par GitHub à chaque mise à jour de `main` (`.github/wor
 
 ## 2. Dossiers sur Unraid
 
-Dans le terminal Unraid (icône `>_` en haut à droite) :
+Tout part de deux réglages du `.env` de la pile (étape 5), à choisir maintenant :
+
+- **`NICEPHOS_DIR`** : le dossier de Nicephos, sur un pool, **chiffré de préférence** (voir « Chiffrer les données » plus bas). Il contient `data/` (le site) et, s'ils servent, `vigie/`, `vigie-secrets/` et `signal/`. Chacun est monté seul dans son conteneur : le site ne voit que `data/`.
+- **`BACKUP_DIR`** : les sauvegardes, sur **d'autres disques** que les données. Celles de la Vigie vont à côté, dans `BACKUP_DIR-vigie`.
+
+Dans le terminal Unraid (icône `>_` en haut à droite), posez vos deux chemins, puis créez les dossiers :
 
 ```bash
-mkdir -p /mnt/cache/appdata/nicephos/data /mnt/user/backups/nicephos
-chown -R 99:100 /mnt/cache/appdata/nicephos /mnt/user/backups/nicephos
+NICEPHOS=/mnt/cache/appdata/nicephos        # = NICEPHOS_DIR du .env (par exemple /mnt/volumes/nicephos)
+SAUVEGARDES=/mnt/user/backups/nicephos      # = BACKUP_DIR du .env
+
+mkdir -p "$NICEPHOS/data" "$SAUVEGARDES"
+chown 99:100 "$NICEPHOS/data" "$SAUVEGARDES"
+
+# Vigie (facultative)
+mkdir -p "$NICEPHOS/vigie" "$NICEPHOS/vigie-secrets" "$SAUVEGARDES-vigie"
+chown 99:100 "$NICEPHOS/vigie" "$NICEPHOS/vigie-secrets" "$SAUVEGARDES-vigie"
+chmod 700 "$NICEPHOS/vigie" "$NICEPHOS/vigie-secrets"
+
+# Passerelle Signal (facultative) : utilisateur de son image, pas 99:100
+mkdir -p "$NICEPHOS/signal"
+chown 1000:1000 "$NICEPHOS/signal"
+chmod 700 "$NICEPHOS/signal"
 ```
 
-- **Données sur le pool cache, chemin direct** (`/mnt/cache/…`, pas `/mnt/user/…`). La base SQLite fonctionne mal à travers la couche FUSE de `/mnt/user`. Si votre pool porte un autre nom, remplacez `cache`. Avec Unraid 6.12 et plus, un partage `appdata` « exclusif » convient aussi.
-- **Sauvegardes sur le tableau**, donc sur d'autres disques que les données. Ajoutez-y une copie hors de la machine (plugin de sauvegarde, disque externe, cloud).
+Les commandes des sections suivantes reprennent `$NICEPHOS` et `$SAUVEGARDES` : dans un nouveau terminal, reposez d'abord ces deux lignes.
+
+- **Chemin direct d'un pool** (`/mnt/<pool>/…`, jamais `/mnt/user/…`). La base SQLite fonctionne mal à travers la couche FUSE de `/mnt/user`. Avec Unraid 6.12 et plus, un partage « exclusif » convient aussi.
+- **Sauvegardes sur d'autres disques** (le tableau, par exemple). Ajoutez-y une copie hors de la machine (plugin de sauvegarde, disque externe, cloud).
 - **Disques chiffrés (recommandé, RGPD)** : la base contient des noms, des e-mails, des signatures. Voir « Chiffrer les données » plus bas.
 - **99:100**, c'est-à-dire `nobody:users` : l'utilisateur standard des conteneurs Unraid. Les conteneurs tournent sous cet utilisateur, sans aucun privilège.
-- **Partages réseau fermés (obligatoire)** : `mkdir /mnt/user/backups` crée le partage `backups`, et un partage d'Unraid peut être exporté sur le réseau local sans mot de passe (sécurité *Public*). Or l'invité SMB d'Unraid est justement `nobody` (99), le propriétaire de la base, des originaux et des sauvegardes : les droits des fichiers ne protègent alors rien. Dans **Shares**, ouvrez `backups` puis `appdata` : **SMB Security Settings → Export : No**, et **NFS Security Settings → Export : No** (ou, si vous devez y accéder, sécurité *Private* avec un utilisateur nommé, jamais *Public* ni *Secure*). Vérifiez depuis un autre ordinateur que `\\unraid\backups` n'apparaît plus.
+- **Partages réseau fermés (obligatoire)** : sous Unraid, le premier dossier d'un pool ou du tableau est un partage (`appdata` pour `/mnt/cache/appdata/…`, `nicephos` pour `/mnt/volumes/nicephos`, `backups` pour `/mnt/user/backups/…`), et un partage peut être exporté sur le réseau local sans mot de passe (sécurité *Public*). Or l'invité SMB d'Unraid est justement `nobody` (99), le propriétaire de la base, des originaux et des sauvegardes : les droits des fichiers ne protègent alors rien. Dans **Shares**, ouvrez le partage de `NICEPHOS_DIR` puis celui de `BACKUP_DIR` : **SMB Security Settings → Export : No**, et **NFS Security Settings → Export : No** (ou, si vous devez y accéder, sécurité *Private* avec un utilisateur nommé, jamais *Public* ni *Secure*). Vérifiez depuis un autre ordinateur qu'ils n'apparaissent plus (`\\unraid\backups`…).
 
 ## 3. Zitadel : la connexion à l'admin
 
@@ -130,14 +150,14 @@ Le site n'a qu'une adresse : **`https://www.nicephos.art`** (`PUBLIC_URL`). Tout
 
 1. Docker → en bas, **Add New Stack**, nommée `nicephos`.
 2. **Edit Stack → Compose File :** collez le contenu de `compose.yaml`.
-3. **Edit Stack → ENV File :** collez `env.example`, puis remplissez `PUBLIC_URL=https://www.nicephos.art`, `COOKIE_SECRET` (`openssl rand -base64 32` dans le terminal), la partie Zitadel et `TUNNEL_TOKEN`.
+3. **Edit Stack → ENV File :** collez `env.example`, puis remplissez `NICEPHOS_DIR` et `BACKUP_DIR` (les dossiers de l'étape 2), `PUBLIC_URL=https://www.nicephos.art`, `COOKIE_SECRET` (`openssl rand -base64 32` dans le terminal), la partie Zitadel et `TUNNEL_TOKEN`.
 4. **Compose Up.** Les quatre conteneurs apparaissent dans l'onglet Docker : `nicephos`, `nicephos-sauvegarde`, `nicephos-tunnel` et `nicephos-traduction`.
 
 **Vigie et Signal (facultatifs), dans la même pile :** `COMPOSE_PROFILES=vigie` dans le `.env` ajoute `nicephos-vigie` et `nicephos-vigie-sauvegarde` ; `COMPOSE_PROFILES=vigie,signal` ajoute aussi la passerelle `nicephos-signal`. Les réseaux internes se créent tout seuls. Il reste à préparer, avant le **Compose Up** :
 
-- les dossiers et les clés de la Vigie, et ses lignes dans le `.env` du site ([Vigie](https://github.com/Volfieldd/deux-regards/wiki/Vigie), « Installer sur Unraid ») ;
+- les clés de la Vigie (ses dossiers sont ceux de l'étape 2), et ses lignes dans le `.env` du site ([Vigie](https://github.com/Volfieldd/deux-regards/wiki/Vigie), « Installer sur Unraid ») ;
 - `vigie.env`, que Compose Manager n'affiche pas : créez-le dans le terminal, **dans le dossier de la pile**, celui qui contient déjà son `docker-compose.yml` et son `.env` (en général `/boot/config/plugins/compose.manager/projects/nicephos/`), puis `chmod 600`. Sans lui, la Vigie refuse de démarrer (« Variable manquante ») ; le reste de la pile n'en souffre pas ;
-- pour Signal, le dossier des clés (`SIGNAL_DATA_DIR`, propriétaire `1000:1000`) et l'enregistrement du numéro : [`signal/README.md`](signal/README.md).
+- pour Signal, l'enregistrement du numéro (son dossier est celui de l'étape 2) : [`signal/README.md`](signal/README.md).
 
 Au premier lancement sans données reprises, le site part d'une base vide : pas de photos, pas d'auteurs. Créez d'abord les auteurs dans l'admin.
 
@@ -159,7 +179,7 @@ Sur le serveur de test, dans le dossier du dépôt :
 
 ```bash
 deploy/unraid/exporter-donnees.sh            # → nicephos-donnees-AAAA-MM-JJ.tar.gz
-scp nicephos-donnees-*.tar.gz root@unraid:/mnt/cache/appdata/nicephos/
+scp nicephos-donnees-*.tar.gz root@unraid:/mnt/cache/appdata/nicephos/    # votre NICEPHOS_DIR
 ```
 
 L'archive n'est lisible que par vous (elle contient les données personnelles, en clair si le serveur de test n'a pas de `DATA_KEY`).
@@ -167,7 +187,7 @@ L'archive n'est lisible que par vous (elle contient les données personnelles, e
 Sur Unraid, **avant** le premier `Compose Up` (ou après avoir arrêté la pile) :
 
 ```bash
-cd /mnt/cache/appdata/nicephos
+cd "$NICEPHOS"                                 # posé à l'étape 2
 tar -xzf nicephos-donnees-*.tar.gz -C data
 rm -f data/site.db-wal data/site.db-shm
 chown -R 99:100 data
@@ -192,7 +212,7 @@ Les images servies ne sont pas dans l'archive : elles sont recalculées au déma
 
 ### Sauvegardes
 
-`nicephos-sauvegarde` fait une sauvegarde au démarrage, puis toutes les 24 h, dans `/mnt/user/backups/nicephos` :
+`nicephos-sauvegarde` fait une sauvegarde au démarrage, puis toutes les 24 h, dans `BACKUP_DIR` :
 
 - `db/` : instantanés de la base, les 14 derniers. Chacun est une copie compacte, contrôlée, sans les restes des données effacées ;
 - `files/` : originaux, logos et marque, tels qu'ils sont dans les données ;
@@ -206,11 +226,11 @@ Les images servies ne sont pas dans l'archive : elles sont recalculées au déma
 **Restaurer** (instantané au choix, le plus récent en général) :
 
 1. Arrêtez la pile (**Compose Down**).
-2. Dans le terminal Unraid, avec vos dossiers et le nom de l'instantané :
+2. Dans le terminal Unraid, avec `$NICEPHOS` et `$SAUVEGARDES` posés (étape 2) et le nom de l'instantané :
 
    ```bash
    docker run --rm --user 99:100 --network none \
-     -v /mnt/cache/appdata/nicephos/data:/data -v /mnt/user/backups/nicephos:/backups -e BACKUP_DIR=/backups \
+     -v "$NICEPHOS/data":/data -v "$SAUVEGARDES":/backups -e BACKUP_DIR=/backups \
      ghcr.io/volfieldd/deux-regards:latest node server/db/restore.js site-AAAA-MM-JJTHHMMSS.db
    ```
 
@@ -241,8 +261,10 @@ Dans Compose Manager : **Update Stack** (ou **Compose Pull**, puis **Compose Up*
 
 La base contient des données personnelles (noms, e-mails, signatures, photos de repère) : les ranger sur des disques chiffrés protège contre le vol du serveur ou un disque revendu. Unraid sait le faire (chiffrement LUKS) :
 
+Le plus simple est de choisir un pool chiffré **dès l'installation**, comme `NICEPHOS_DIR` (étape 2). Pour déplacer une installation existante :
+
 1. **Pool chiffré pour les données** : *Main → Add Pool* (ou un pool existant vidé), système de fichiers **« xfs - encrypted »** ou **« btrfs - encrypted »**, puis formatez. Unraid demande une phrase de passe (ou un fichier clé) au démarrage du tableau.
-2. **Déplacez les données** pile arrêtée : `rsync -a /mnt/cache/appdata/nicephos/ /mnt/<pool-chiffré>/appdata/nicephos/`, puis changez `DATA_DIR` dans le `.env` de la pile et relancez.
+2. **Déplacez tout le dossier** pile arrêtée : `rsync -a "$NICEPHOS/" /mnt/<pool-chiffré>/nicephos/` (données, Vigie, Signal, avec leurs propriétaires), puis changez `NICEPHOS_DIR` dans le `.env` de la pile et relancez.
 3. **Sauvegardes** : sur des disques du tableau eux aussi chiffrés (même choix de format, disque par disque), ou une copie hors de la machine déjà chiffrée.
 4. **La clé** : avec une phrase de passe tapée à chaque démarrage, un disque volé ne révèle rien ; mais après une coupure de courant, le site attend que vous déverrouilliez le tableau. Un fichier clé posé sur la clé USB d'Unraid démarre tout seul, mais protège moins (la clé USB voyage avec le serveur).
 5. **Chiffrement dans la base**, en plus des disques : ajoutez `DATA_KEY` au `.env` de la pile (`openssl rand -base64 32`, une seule fois) et gardez-en une copie dans un gestionnaire de mots de passe. Au redémarrage, les noms, e-mails, signatures, photos de repère et messages déjà enregistrés sont chiffrés ; Droits & confidentialité affiche « actif ». **Clé perdue = données illisibles**, sauvegardes comprises ; ne la changez pas sans aide.

@@ -377,6 +377,10 @@ test('A007, A045, A046, A047, A049, A210 : fichiers de déploiement', () => {
   assert.match(unraid, /\n {2}vigie-signal:\n {4}name: nicephos-vigie-signal\n {4}internal: true\n/);
   assert.doesNotMatch(unraid, /external: true/);
   assert.doesNotMatch(service(unraid, 'site'), /vigie-signal/);
+  // Dossiers : tous déduits de NICEPHOS_DIR et BACKUP_DIR (aucun chemin d'Unraid écrit en dur), chacun monté seul.
+  assert.doesNotMatch(unraid, /source: \$\{[A-Z_]+:-\/mnt\//);
+  for (const d of ['data', 'vigie', 'vigie-secrets', 'signal']) assert.match(unraid, new RegExp(`\\$\\{NICEPHOS_DIR:\\?[^}]*\\}/${d}\\}`), d);
+  assert.match(unraid, /\$\{VIGIE_BACKUP_DIR:-\$\{BACKUP_DIR:\?[^}]*\}-vigie\}/);
   for (const u of uses) assert.match(u, /@[0-9a-f]{40}$/, u);
   assert.match(wf, /type=raw,value=latest,enable=\{\{is_default_branch\}\}/);
   assert.match(wf, /\nconcurrency:\n {2}group: image-\$\{\{ github\.ref \}\}\n {2}cancel-in-progress: false\n/);

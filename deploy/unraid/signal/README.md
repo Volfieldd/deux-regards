@@ -18,26 +18,19 @@ La Vigie a besoin de **son propre numéro Signal** : un message que l'on s'envoi
 
 Ce numéro ne doit **jamais** être réenregistré ailleurs (sur un téléphone, par exemple) : Signal désactiverait la passerelle.
 
-## 2. Créer le dossier des clés
+## 2. Le dossier des clés
 
-Dans le terminal Unraid :
+C'est `NICEPHOS_DIR/signal`, créé à l'étape 2 du [guide Unraid](../README.md#2-dossiers-sur-unraid) (bloc « Passerelle Signal »), avec deux différences par rapport au reste :
 
-```bash
-mkdir -p /mnt/cache/appdata/nicephos/signal
-chown 1000:1000 /mnt/cache/appdata/nicephos/signal
-chmod 700 /mnt/cache/appdata/nicephos/signal
-```
-
-- `1000:1000` est l'utilisateur de l'image (et non `99:100` comme le site).
-- Le dossier contient les clés du compte Signal : hors de tout partage réseau (`appdata` non exporté, comme pour le site).
+- propriétaire `1000:1000`, l'utilisateur de l'image (et non `99:100` comme le site), droits `700` ;
+- il contient les clés du compte Signal : hors de tout partage réseau, et pas dans les sauvegardes du site.
 
 ## 3. Lancer la passerelle
 
-Dans la pile `nicephos` (Compose Manager → **Edit Stack → ENV FILE**), ajouter `signal` au profil, et le dossier s'il n'est pas celui par défaut :
+Dans la pile `nicephos` (Compose Manager → **Edit Stack → ENV FILE**), ajouter `signal` au profil :
 
 ```dotenv
 COMPOSE_PROFILES=vigie,signal
-# SIGNAL_DATA_DIR=/mnt/cache/appdata/nicephos/signal
 ```
 
 Puis **Compose Pull** et **Compose Up**. Le conteneur `nicephos-signal` apparaît. Le profil `signal` seul (sans `vigie`) suffit pour enregistrer le numéro avant d'installer la Vigie.

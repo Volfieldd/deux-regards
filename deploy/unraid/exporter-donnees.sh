@@ -6,7 +6,7 @@
 #
 #   deploy/unraid/exporter-donnees.sh [archive.tar.gz]
 # Puis sur Unraid, pile arrêtée (voir README, étape 6) :
-#   tar -xzf archive.tar.gz -C /mnt/cache/appdata/nicephos/data && rm -f …/data/site.db-wal …/data/site.db-shm
+#   tar -xzf archive.tar.gz -C <NICEPHOS_DIR>/data && rm -f …/data/site.db-wal …/data/site.db-shm
 #   && chown -R 99:100 …/data ; même DATA_KEY que le serveur de test ; archive effacée des deux machines ensuite.
 set -euo pipefail
 # L'archive contient des données personnelles (noms, e-mails, signatures, originaux) : lisible par son seul propriétaire.

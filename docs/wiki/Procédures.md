@@ -50,8 +50,8 @@ Chiffre dans la base les noms, e-mails, signatures, photos de repère et de cart
 Protège contre le vol du serveur ou un disque revendu (chiffrement LUKS d'Unraid).
 
 1. **Pool chiffré pour les données** : *Main → Add Pool* (ou un pool existant vidé), système de fichiers **« xfs - encrypted »** ou **« btrfs - encrypted »**, puis formatez. Unraid demande une phrase de passe (ou un fichier clé).
-2. **Pile arrêtée**, copiez les données : `rsync -a /mnt/cache/appdata/nicephos/ /mnt/<pool-chiffré>/appdata/nicephos/`, puis `chown -R 99:100` sur la copie.
-3. Changez `DATA_DIR` dans le `.env` de la pile, puis Compose Up. Vérifiez le site, puis effacez l'ancienne copie.
+2. **Pile arrêtée**, copiez les données : `rsync -a "$NICEPHOS/" /mnt/<pool-chiffré>/nicephos/` (`$NICEPHOS` : votre `NICEPHOS_DIR`, [guide Unraid](Unraid), étape 2 ; `rsync -a` garde les propriétaires, `99:100` et `1000:1000` pour Signal).
+3. Changez `NICEPHOS_DIR` dans le `.env` de la pile (Unraid ; `DATA_DIR` ailleurs), puis Compose Up. Vérifiez le site, puis effacez l'ancienne copie.
 4. **Sauvegardes** : sur des disques du tableau chiffrés eux aussi (même format, disque par disque), ou une copie hors de la machine déjà chiffrée.
 5. **Phrase de passe ou fichier clé ?** Une phrase tapée au démarrage protège mieux (un disque volé ne révèle rien), mais après une coupure de courant le site attend que vous déverrouilliez le tableau. Un fichier clé sur la clé USB d'Unraid démarre seul, mais voyage avec le serveur.
 6. Cochez **Droits & confidentialité → « Les données et les sauvegardes sont sur des disques chiffrés »**.
