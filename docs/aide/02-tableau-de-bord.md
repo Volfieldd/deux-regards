@@ -7,6 +7,8 @@ C’est la page **Aujourd’hui**, celle où l’on arrive. En haut, **Voir le s
   - **! dans un triangle, bientôt** : une personne qui **a refusé** alors que des photos publiées de sa sortie ne sont ni liées ni exclues (vérifiez si elle y figure) ; les **nouvelles personnes photographiées** ; des **publications Instagram en échec** (bloquées par un accord ou refusées par Instagram) ; **Instagram en pause** ;
   - **rond creux, quand vous avez le temps** : les **photos à finir**, les photos publiées **sans ville** (absentes de la carte du monde), les **titres sans traduction** en anglais ou en allemand, les **preuves d’antériorité** en attente après une erreur.
 
+  - **Sécurité** (comptes qui voient la Vigie, voir [Sécurité](reglages#sécurité)) : les alertes ouvertes dans la Vigie, en nombres par gravité, avec l’heure de la plus grave ; urgent pour une alerte haute ou critique, bientôt pour une moyenne ou quand le résumé de la Vigie n’arrive plus. Son bouton ouvre l’alerte dans la console, dans un nouvel onglet.
+
   Les urgences sont aussi comptées dans la barre latérale, à côté d’**Aujourd’hui** (✕ et leur nombre). Les liens « sans ville » et « sans traduction » ouvrent la photothèque filtrée ; la pastille du filtre, avec ✕, le retire.
 
 - **À finir** : les brouillons et les photos qui ont encore leur titre provisoire, chacun avec son geste direct : **Publier** (photo prête, pour qui publie), **Titrer** (ouvre la fiche), **Vérifier** (accords à vérifier : la fiche demande la confirmation), **Proposer** (pour qui propose au modérateur) ou **Voir** (photo bloquée par un accord). Le petit texte dit l'état : « prêt à publier », « accords à vérifier » ou « bloqué par un accord ». **Tout finir en un écran** ouvre la photothèque filtrée sur « À finir ».
@@ -23,5 +25,7 @@ C’est la page **Aujourd’hui**, celle où l’on arrive. En haut, **Voir le s
   - les **demandes RGPD** vous sont toujours envoyées, avec leurs relances (voir l'aide « Personnes photographiées »).
   - **Compte non lié :** un administrateur le relie à son photographe dans [Comptes et rôles](reglages#comptes-et-rôles).
   - **Compte lié :** vos imports vous sont attribués par défaut.
+
+**Bandeau rouge « … alertes critiques dans la Vigie »** : en tête de toutes les pages, pour les comptes qui voient la Vigie, tant qu’une alerte critique attend sa prise en charge dans la console ; **Ouvrir l’alerte** l’ouvre dans un nouvel onglet (voir [Sécurité](reglages#sécurité)).
 
 **Bandeau « Mise à jour des images en cours »** : il apparaît après un changement de filigrane, d’EXIF, de nom d’auteur… Le compteur avance tout seul ; voir [Filigrane et EXIF](filigrane-exif#mise-à-jour-des-images). Seuls les comptes qui règlent le filigrane le voient.

@@ -7,6 +7,8 @@ This is the **Today** page, the one you land on. At the top, **View site** and *
   - **! in a triangle, soon**: a person who **refused** while published photos from their outing are neither linked nor excluded (check whether they appear in them); **new photographed people**; **failed Instagram posts** (blocked by a consent or rejected by Instagram); **Instagram paused**;
   - **hollow circle, when you have time**: **photos to finish**, published photos **without a town** (missing from the world map), **titles without a translation** into English or German, **proofs of prior existence** pending after an error.
 
+  - **Security** (accounts that see Vigie, see [Security](reglages#sécurité)): the alerts open in Vigie, as numbers per severity, with the time of the most severe; urgent for a high or critical alert, soon for a medium one or when Vigie's summary no longer arrives. Its button opens the alert in the console, in a new tab.
+
   Urgent items are also counted in the sidebar, next to **Today** (✕ and their number). The “without a town” and “without a translation” links open the filtered photo library; the filter chip, with ✕, removes it.
 
 - **To finish**: drafts and photos that still have their provisional title, each with its direct action: **Publish** (photo ready, for those who publish), **Add title** (opens the details), **Check** (consents to check: the details ask for confirmation), **Propose** (for those who propose to the moderator) or **View** (photo blocked by a consent). The small text gives the state: “ready to publish”, “consents to check” or “blocked by a consent”. **Finish everything on one screen** opens the photo library filtered on “To finish”.
@@ -23,5 +25,7 @@ This is the **Today** page, the one you land on. At the top, **View site** and *
   - **GDPR requests** are always sent to you, with their reminders (see the “Photographed people” help).
   - **Account not linked:** an administrator links it to its photographer in [Accounts and roles](reglages#comptes-et-rôles).
   - **Account linked:** your imports are attributed to you by default.
+
+**Red banner “… critical alerts in Vigie”**: at the top of every page, for accounts that see Vigie, as long as a critical alert is waiting to be taken on in the console; **Open alert** opens it in a new tab (see [Security](reglages#sécurité)).
 
 **“Updating images” banner**: it appears after a change of watermark, EXIF, author name… The counter moves on by itself; see [Watermark and EXIF](filigrane-exif#mise-à-jour-des-images). Only accounts that set the watermark see it.

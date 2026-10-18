@@ -121,7 +121,14 @@ export function loadConfig(env = process.env) {
     const bordureKey = env.VIGIE_BORDURE_KEY || null;
     if (bordureKey && bordureKey.length < 32) throw new Error('VIGIE_BORDURE_KEY doit faire au moins 32 caractères');
     if (bordureKey && bordureKey === ingestKey) throw new Error('VIGIE_BORDURE_KEY doit être différente de VIGIE_INGEST_KEY (le Worker ne doit pas pouvoir écrire dans la Vigie)');
-    vigie = { url: `${u.origin}${u.pathname}`.replace(/\/+$/, ''), ingestKey, decisionsPubkey, bordureKey, apply: env.VIGIE_APPLIQUER !== '0' };
+    // Adresse publique de la console (lien « Sécurité » de l'admin, comptes securite.voir) : réglée côté site, jamais
+    // reprise du résumé reçu ; https:// dès que le site est en ligne.
+    let c;
+    try { c = new URL(env.VIGIE_CONSOLE_URL || 'https://vigie.nicephos.art'); } catch { throw new Error(`VIGIE_CONSOLE_URL n’est pas une adresse valide : ${env.VIGIE_CONSOLE_URL}`); }
+    if (c.protocol !== 'https:' && (deployed || c.protocol !== 'http:')) throw new Error('VIGIE_CONSOLE_URL doit commencer par https://');
+    if (c.username || c.password || c.search || c.hash) throw new Error('VIGIE_CONSOLE_URL : adresse simple attendue (sans identifiants ni paramètres)');
+    const consoleUrl = `${c.origin}${c.pathname}`.replace(/\/+$/, '');
+    vigie = { url: `${u.origin}${u.pathname}`.replace(/\/+$/, ''), ingestKey, decisionsPubkey, bordureKey, apply: env.VIGIE_APPLIQUER !== '0', consoleUrl };
   }
 
   return {

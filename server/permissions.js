@@ -47,6 +47,9 @@ export const PERMISSIONS = {
   'photographes.gerer': {},
   'comptes.gerer': {},
   'journal.voir': {},
+  // Lien « Sécurité » vers la console de la Vigie et résumé signé de ses alertes (nombres par gravité, heure, numéro) :
+  // montrer, rien d'autre. Aucune donnée de la Vigie n'est dans le site ; la console a ses propres verrous.
+  'securite.voir': {},
 };
 
 const ALL = 'tout', OWN = 'les miennes';

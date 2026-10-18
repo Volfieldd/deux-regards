@@ -28,6 +28,8 @@ import { RIGHTS, LANGS, rightsDefaults, withoutDefaults } from '../rights.js';
 import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, parseTimes, captionWarnings, InstagramError } from '../instagram.js';
 import { PRESETS as IG_PRESETS, BOUNDS as IG_BOUNDS } from '../instagram-limits.js';
 import * as cities from '../geo/cities.js';
+import { createVigieAdmin } from '../vigie-admin.js';
+import { LEVELS as TASK_LEVELS } from '../todo.js';
 import { TranslateError } from '../translate.js';
 import { registerEncounters } from './rencontres.js';
 import { registerOutings } from './sorties.js';
@@ -272,6 +274,10 @@ export default async function adminRoutes(app) {
     });
   };
 
+  // La Vigie dans l'admin (MV-10) : seulement si elle est réglée côté site, et pour les seuls comptes securite.voir.
+  const vigieView = app.decisions && app.config.vigie ? createVigieAdmin({ decisions: app.decisions, consoleUrl: app.config.vigie.consoleUrl }) : null;
+  const securiteOf = request => (vigieView && request.can('securite.voir') ? vigieView(request.t) : null);
+
   // Messages de validation (écrits en français dans le code) : traduits dans la langue de l'admin à l'affichage.
   const translateDeep = (t, v) => (typeof v === 'string' ? t.msg(v) : v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, k === 'values' ? x : translateDeep(t, x)])) : v);
   function render(request, reply, template, data) {
@@ -286,8 +292,9 @@ export default async function adminRoutes(app) {
       if (list.length && template !== 'releases') releasePopup = list;     // sur la page Nouveautés, déjà sous les yeux
       app.accounts.setSeenRelease(request.session.sub, RELEASE_CURRENT);
     }
+    const securite = data.securite === undefined ? securiteOf(request) : data.securite;
     return reply.render(`admin/${template}`, {
-      releasePopup, releaseCurrent: RELEASE_CURRENT,
+      releasePopup, releaseCurrent: RELEASE_CURRENT, securite,
       // Retour après la bascule clair / sombre : la page affichée, si elle a été obtenue par GET.
       adminTheme: adminTheme(request), navSeries: navSeries(request), currentPath: request.method === 'GET' ? request.url : '/admin',
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply), can: perm => Boolean(request.can(perm)), canAll: perm => Boolean(request.scope(perm)?.all),
@@ -298,7 +305,7 @@ export default async function adminRoutes(app) {
       // par /admin/images/etat, réservé à ce droit).
       variants: request.can('site.filigrane') ? app.variants.status() : { running: false, total: 0, done: 0, errors: [] },
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
-      translate: app.translator.enabled, encountersNew: newEncounters(request), reportsNew: request.can('signalements.traiter') ? app.feedback.pending() : 0, urgent: app.todo.urgentCount(perm => request.scope(perm)), toValidate: (request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0) + (request.scope('instagram.file')?.all ? app.instagram.proposals().length : 0), description: '',
+      translate: app.translator.enabled, encountersNew: newEncounters(request), reportsNew: request.can('signalements.traiter') ? app.feedback.pending() : 0, urgent: app.todo.urgentCount(perm => request.scope(perm)) + (securite?.task?.level === 'urgent' ? 1 : 0), toValidate: (request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0) + (request.scope('instagram.file')?.all ? app.instagram.proposals().length : 0), description: '',
       t: request.t, lang: request.t.lang, locale: request.t.locale, adminLangs: ADMIN_LANGS, langNames: ADMIN_LANG_NAMES,
       ...data, pageTitle: `${data.title} · ${request.t('Administration')} · ${siteName}`,
     });
@@ -344,8 +351,15 @@ export default async function adminRoutes(app) {
     const heroSlugs = Array.isArray(repo.settings().hero) ? repo.settings().hero : [];
     const hero = heroSlugs.map(s => published.find(p => p.slug === s)).filter(Boolean);
     const todo = photos.filter(p => p.status === 'draft' || p.provisional);
+    // Ligne de la Vigie : en tête de son niveau d'urgence.
+    const tasks = app.todo.list(request.t, perm => request.scope(perm));
+    const securite = securiteOf(request);
+    if (securite?.task) {
+      const at = tasks.findIndex(x => TASK_LEVELS.indexOf(x.level) >= TASK_LEVELS.indexOf(securite.task.level));
+      tasks.splice(at < 0 ? tasks.length : at, 0, securite.task);
+    }
     return render(request, reply, 'home', {
-      title: request.t('Aujourd’hui'), tasks: app.todo.list(request.t, perm => request.scope(perm)),
+      title: request.t('Aujourd’hui'), tasks, securite,
       // État des accords de chaque brouillon affiché (prête, à vérifier, bloquée) : « Publier » seulement si prête.
       todo: todo.slice(0, 6).map(withReady).map(p => ({ ...p, gate: (g => (g.blocked.length ? 'no' : g.verify.length ? 'warn' : 'ok'))(app.readiness.gate([p.id])) })), todoCount: todo.length,
       hero: (hero.length ? hero : published.slice(0, 5)).map(withReady).filter(p => p.ready),

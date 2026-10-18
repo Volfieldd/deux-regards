@@ -31,8 +31,9 @@
 <% it.tasks.forEach(task => { %>
       <li class="task <%= task.level %>">
         <span class="st" aria-hidden="true"></span>
-        <span class="t"><a href="<%= task.href %>"><%= task.title %></a><small><span class="sr-only"><%= t('{level} :', { level: LABEL[task.level] }) %> </span><%= task.detail %></small></span>
-        <a class="btn <%= task.level === 'urgent' ? '' : 'ghost' %>" href="<%= task.href %>" tabindex="-1" aria-hidden="true"><%= task.action %></a>
+<% /* Ligne de la Vigie : la console, dans un nouvel onglet. */ const out = task.external ? ' target="_blank" rel="noopener noreferrer"' : ''; %>
+        <span class="t"><a href="<%= task.href %>"<%~ out %>><%= task.title %><% if (task.external) { %><span class="sr-only"> <%= t('(nouvel onglet)') %></span><% } %></a><small><span class="sr-only"><%= t('{level} :', { level: LABEL[task.level] }) %> </span><%= task.detail %></small></span>
+        <a class="btn <%= task.level === 'urgent' ? '' : 'ghost' %>" href="<%= task.href %>"<%~ out %> tabindex="-1" aria-hidden="true"><%= task.action %></a>
       </li>
 <% }) %>
     </ul>

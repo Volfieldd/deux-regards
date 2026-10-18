@@ -1,0 +1,186 @@
+{
+ "Sécurité": {
+  "en": "Security",
+  "de": "Sicherheit"
+ },
+ "(nouvel onglet)": {
+  "en": "(new tab)",
+  "de": "(neuer Tab)"
+ },
+ "{d}, {h}": {
+  "en": "{d}, {h}",
+  "de": "{d}, {h}"
+ },
+ "Ouvrir l’alerte #{id}": {
+  "en": "Open alert #{id}",
+  "de": "Warnung #{id} öffnen"
+ },
+ "Ouvrir la Vigie": {
+  "en": "Open Vigie",
+  "de": "Vigie öffnen"
+ },
+ "{n} alertes critiques": {
+  "en": "{n} critical alerts",
+  "de": "{n} kritische Sicherheitswarnungen"
+ },
+ "{n} alerte critique": {
+  "en": "{n} critical alert",
+  "de": "{n} kritische Sicherheitswarnung"
+ },
+ "{n} critiques": {
+  "en": "{n} critical",
+  "de": "{n} kritische"
+ },
+ "{n} critique": {
+  "en": "{n} critical",
+  "de": "{n} kritische"
+ },
+ "{n} alertes hautes": {
+  "en": "{n} high alerts",
+  "de": "{n} hohe Sicherheitswarnungen"
+ },
+ "{n} alerte haute": {
+  "en": "{n} high alert",
+  "de": "{n} hohe Sicherheitswarnung"
+ },
+ "{n} hautes": {
+  "en": "{n} high",
+  "de": "{n} hohe"
+ },
+ "{n} haute": {
+  "en": "{n} high",
+  "de": "{n} hohe"
+ },
+ "{n} alertes moyennes": {
+  "en": "{n} medium alerts",
+  "de": "{n} mittlere Sicherheitswarnungen"
+ },
+ "{n} alerte moyenne": {
+  "en": "{n} medium alert",
+  "de": "{n} mittlere Sicherheitswarnung"
+ },
+ "{n} moyennes": {
+  "en": "{n} medium",
+  "de": "{n} mittlere"
+ },
+ "{n} moyenne": {
+  "en": "{n} medium",
+  "de": "{n} mittlere"
+ },
+ "{n} alertes basses": {
+  "en": "{n} low alerts",
+  "de": "{n} niedrige Sicherheitswarnungen"
+ },
+ "{n} alerte basse": {
+  "en": "{n} low alert",
+  "de": "{n} niedrige Sicherheitswarnung"
+ },
+ "{n} basses": {
+  "en": "{n} low",
+  "de": "{n} niedrige"
+ },
+ "{n} basse": {
+  "en": "{n} low",
+  "de": "{n} niedrige"
+ },
+ "{list} et {last}": {
+  "en": "{list} and {last}",
+  "de": "{list} und {last}"
+ },
+ "résumé indisponible depuis {when}": {
+  "en": "summary unavailable since {when}",
+  "de": "Zusammenfassung nicht verfügbar seit {when}"
+ },
+ "{n} alertes hautes ou critiques ouvertes": {
+  "en": "{n} open high or critical alerts",
+  "de": "{n} offene hohe oder kritische Sicherheitswarnungen"
+ },
+ "1 alerte haute ou critique ouverte": {
+  "en": "1 open high or critical alert",
+  "de": "1 offene hohe oder kritische Sicherheitswarnung"
+ },
+ "{n} alertes ouvertes": {
+  "en": "{n} open alerts",
+  "de": "{n} offene Sicherheitswarnungen"
+ },
+ "1 alerte ouverte": {
+  "en": "1 open alert",
+  "de": "1 offene Sicherheitswarnung"
+ },
+ "la Vigie, elle, envoie toujours ses alertes par Signal ou par e-mail": {
+  "en": "Vigie itself still sends its alerts by Signal or e-mail",
+  "de": "die Vigie selbst sendet ihre Warnungen weiterhin per Signal oder E-Mail"
+ },
+ "la dernière critique ouverte {when}": {
+  "en": "the latest critical one open since {when}",
+  "de": "die letzte kritische seit {when}"
+ },
+ "critique ouverte {when}": {
+  "en": "critical, open since {when}",
+  "de": "kritisch, seit {when}"
+ },
+ "la plus grave ouverte {when}": {
+  "en": "the most severe open since {when}",
+  "de": "die schwerste seit {when}"
+ },
+ "{a} ; une au moins n’est pas prise en charge": {
+  "en": "{a}; at least one not yet taken on",
+  "de": "{a}; mindestens eine noch nicht übernommen"
+ },
+ "une critique au moins n’est pas prise en charge": {
+  "en": "at least one critical alert not yet taken on",
+  "de": "mindestens eine kritische noch nicht übernommen"
+ },
+ "Sécurité : {alerts} dans la Vigie": {
+  "en": "Security: {alerts} in Vigie",
+  "de": "Sicherheit: {alerts} in der Vigie"
+ },
+ "Sécurité : au dernier résumé ({h}), {alerts} dans la Vigie": {
+  "en": "Security: at the last summary ({h}), {alerts} in Vigie",
+  "de": "Sicherheit: laut letzter Zusammenfassung ({h}) {alerts} in der Vigie"
+ },
+ "résumé de la Vigie indisponible depuis {when} : l’admin ne sait plus où elles en sont ; {relay}": {
+  "en": "Vigie summary unavailable since {when}: the admin no longer knows where they stand; {relay}",
+  "de": "Zusammenfassung der Vigie nicht verfügbar seit {when}: Die Verwaltung weiß nicht mehr, wie es um sie steht; {relay}"
+ },
+ "Sécurité : résumé de la Vigie indisponible depuis {when}": {
+  "en": "Security: Vigie summary unavailable since {when}",
+  "de": "Sicherheit: Zusammenfassung der Vigie nicht verfügbar seit {when}"
+ },
+ "dernier résumé reçu {when}, sans alerte ouverte ; l’admin ne peut plus le confirmer": {
+  "en": "last summary received at {when}, with no open alert; the admin can no longer confirm it",
+  "de": "letzte Zusammenfassung erhalten: {when}, ohne offene Sicherheitswarnung; die Verwaltung kann das nicht mehr bestätigen"
+ },
+ "aucun résumé reçu depuis le démarrage du site ; {relay}": {
+  "en": "no summary received since the site started; {relay}",
+  "de": "seit dem Start der Website keine Zusammenfassung erhalten; {relay}"
+ },
+ "{n} alertes critiques dans la Vigie": {
+  "en": "{n} critical alerts in Vigie",
+  "de": "{n} kritische Sicherheitswarnungen in der Vigie"
+ },
+ "1 alerte critique dans la Vigie": {
+  "en": "1 critical alert in Vigie",
+  "de": "1 kritische Sicherheitswarnung in der Vigie"
+ },
+ "{a} · la dernière ouverte {when}": {
+  "en": "{a} · the latest open since {when}",
+  "de": "{a} · die letzte seit {when}"
+ },
+ "{a} · ouverte {when}": {
+  "en": "{a} · open since {when}",
+  "de": "{a} · seit {when}"
+ },
+ "Au dernier résumé, {h} : {a}": {
+  "en": "At the last summary, {h}: {a}",
+  "de": "Laut letzter Zusammenfassung, {h}: {a}"
+ },
+ "Résumé de la Vigie indisponible depuis {when} : l’admin ne peut plus le confirmer.": {
+  "en": "Vigie summary unavailable since {when}: the admin can no longer confirm it.",
+  "de": "Zusammenfassung der Vigie nicht verfügbar seit {when}: Die Verwaltung kann das nicht mehr bestätigen."
+ },
+ "Une au moins attend sa prise en charge ; ce bandeau reste tant qu’une critique attend.": {
+  "en": "At least one is waiting to be taken on; this banner stays as long as a critical alert is waiting.",
+  "de": "Mindestens eine wartet auf Übernahme; dieser Hinweis bleibt, solange eine kritische wartet."
+ }
+}

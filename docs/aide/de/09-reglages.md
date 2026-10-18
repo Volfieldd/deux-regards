@@ -68,7 +68,7 @@ Solange eine Pflichtangabe fehlt (Namen, Adresse, E-Mail, Telefon, Verantwortlic
 
 - **Erste Anmeldung:** Das Konto wird angelegt. Gibt Zitadel ihm die Rolle „admin“, ist es Administrator; sonst bleibt es **wartend**, ohne Zugriff, und „Heute“ weist darauf hin. Name und Adresse stammen vom Identitätsanbieter (die Adresse nur, wenn er sie bestätigt hat): Prüfen Sie vor der Vergabe einer Rolle mit der Person die unter dem Konto angezeigte **Kennung (sub)**, die sie auch auf ihrer Seite „Konto wartend“ sieht. Ein nie bearbeitetes Konto, das 90 Tage wartend bleibt, wird gelöscht (ein Konto, dem ein Administrator die Rollen entzogen hat, bleibt erhalten, und der IdP kann ihm die Rolle „admin“ nicht zurückgeben).
 - **Eine Rolle vergeben:** Ankreuzen, dann **Diese Rolle vergeben** (oder **Speichern**). Sie gilt sofort, ohne neue Anmeldung; ihr Entzug ebenso.
-  - **Administrator**: alles, auch Konten und Protokoll.
+  - **Administrator**: alles, auch Konten, Protokoll und der Link zur Vigie ([Sicherheit](reglages#sécurité)).
   - **Moderator**: bestätigt, plant, veröffentlicht und zieht zurück (Website und Instagram), bearbeitet Meldungen, schickt Fotos zurück oder schreibt dem Fotografen Hinweise, stellt den Veröffentlichungsablauf ein; bearbeitet keine Fotos und sieht nie personenbezogene Daten (von einer Meldung liest er die Nachricht, nie die hinterlassene Adresse).
   - **Korrektor**: liest Texte Korrektur und übersetzt sie.
   - **Fotograf**: nur **seine eigenen** Fotos, Ausflüge und die Personen, denen er begegnet ist (die Einwilligung gilt pro Ausflug und pro Fotograf). Er importiert, bearbeitet und löscht seine Fotos (sie bleiben sein Eigentum), sieht die DSGVO-Anfragen, die ihn betreffen, nutzt die App Unterwegs und seine Karten; er veröffentlicht nicht (er schlägt vor, für die Website wie für Instagram) und sieht weder die Instagram-Warteschlange noch die Einstellungen noch die Besucherzahlen der Website (seine Statistiken zeigen nur seine Fotos). Was dem anderen Fotografen gehört, existiert für ihn nicht, auch nicht über die Adresse. Eine Person, der beide begegnet sind, erscheint ihm nur mit seinen eigenen Begegnungen; sie zusammenzuführen, zu trennen, zu exportieren oder zu löschen bleibt dem Administrator überlassen.
@@ -83,3 +83,14 @@ Das Menü zeigt nur die Seiten, die das Konto öffnen darf.
 ## Protokoll
 
 **Protokoll** (Administratoren): wer was in der Verwaltung getan hat, das Neueste zuerst: Anmeldungen (erfolgreich, wartend, abgelehnt), Änderungen, Veröffentlichungen, Aktionen für mehrere Fotos, geänderte Konten (mit Details: Rollen, Zustand, verknüpfter Fotograf), DSGVO-Exporte und heruntergeladene Originale. Nach Konto oder Stichwort filtern. Die Wahl von Sprache und Design wird nicht erfasst. **Ergebnis**: „erledigt“, oder „abgelehnt“, wenn der Server die Aktion abgelehnt hat (fehlendes Recht, oder Ablehnung mit einer Fehlermeldung oben auf der Seite). Das Protokoll wird 13 Monate aufbewahrt.
+
+## Sicherheit
+
+**Sicherheit** (Gruppe Einstellungen, nach Protokoll) öffnet in einem neuen Tab die Konsole der **Vigie**, der Sicherheitskomponente der Website (`https://vigie.nicephos.art`). Der Eintrag erscheint nur für Konten, die ihn sehen dürfen (die Rolle Administrator hat das Recht, die anderen Rollen nicht), und nur, wenn die Vigie installiert ist. Die Konsole hat eigene Sperren (Cloudflare Access, ihr Zitadel-Konto mit Zwei-Faktor-Authentifizierung): Administrator der Website zu sein, genügt nicht, um hineinzukommen.
+
+Die Verwaltung weiß nur, was die Vigie ihr jede Minute signiert schickt: die Anzahl offener Sicherheitswarnungen je Schweregrad, Uhrzeit und Nummer der schwersten; nie den Titel einer Regel, eine Adresse oder ein Konto.
+
+- **Zähler am Eintrag**: ▲ und die Anzahl hoher und kritischer Warnungen; die Zahl allein für mittlere; nichts, wenn keine Warnung offen ist.
+- **Heute**: eine Zeile „Sicherheit: … in der Vigie“ (siehe [Übersicht](tableau-de-bord)).
+- **Roter Hinweis** oben auf jeder Seite, solange eine kritische Warnung in der Konsole von niemandem übernommen ist; **Warnung #… öffnen** öffnet sie direkt.
+- **Zusammenfassung nicht verfügbar** (die Vigie antwortet der Website seit mehr als 5 Minuten nicht): ▲ allein am Eintrag, und die Verwaltung sagt, was sie wusste und seit wann sie es nicht mehr weiß („laut letzter Zusammenfassung, 14:10 Uhr … nicht verfügbar seit 14:11 Uhr“); ein kritischer Hinweis bleibt, mit Datum. Die Vigie selbst sendet ihre Warnungen weiterhin über ihre eigenen Kanäle (Signal, E-Mail).
