@@ -1,0 +1,41 @@
+<% /* Recherche en v2 : le même formulaire GET (/recherche, paramètre q, 100 caractères au plus), le même traitement du
+      serveur (server/search.js) ; le champ a son libellé visible et son aide reliée. La saisie n'est jamais réécrite : elle
+      revient échappée dans le champ, le titre et la phrase d'état (seuls les mots autour reçoivent leurs insécables).
+      Résultats en rangées (cartel « Auteur · Lieu · date », jamais l'heure) ; sans résultat ou avant la première
+      recherche, les séries à parcourir (it.series, couverture et compte : la v1 l'ignore). */ %>
+<% const t = it.t, s = t.search, v = it.v2, ic = v.ic, n = it.photos.length;
+   // Phrase d’état d’une langue, coupée autour de la saisie (« 3 photos pour « » … « » »).
+   const autour = text => text.split('\u0000').map(x => v.typo(x)); %>
+<% /* Titre : le même que la v1 (server/routes/public.js), avec ses insécables ; la saisie, telle quelle. */ %>
+<% layout('./layout', { pageTitle: it.q ? `${v.typo(s.title + t.colon)} ${it.q}\u00a0· ${it.siteName}` : v.typo(it.pageTitle), description: v.typo(it.description) }) %>
+<%~ include('./_entete', { ...it, courant: 'recherche' }) %>
+<main id="contenu">
+  <div class="wrap tete-page recherche-tete">
+    <h1 class="titre-page"><%= s.title %></h1>
+    <form class="recherche" method="get" action="<%= it.u('/recherche') %>" role="search">
+      <label class="recherche-l" for="q"><%= s.label %></label>
+      <p class="recherche-aide" id="q-aide"><%= v.typo(s.hint) %></p>
+      <div class="recherche-ligne">
+        <input id="q" name="q" type="search" value="<%= it.q %>" placeholder="<%= s.placeholder %>" maxlength="100" autocomplete="off" enterkeyhint="search" aria-describedby="q-aide"<%~ it.q ? '' : ' autofocus' %>>
+        <button class="btn" type="submit"><%~ ic('loupe') %><%= s.submit %></button>
+      </div>
+    </form>
+<% if (it.searched) { const [a, b] = autour(n ? s.results(n, '\u0000') : s.none('\u0000')); %>
+    <p class="recherche-etat" role="status"><%= a %><%= it.q %><%= b %></p>
+<% } else if (it.tooShort) { %>
+    <p class="recherche-etat" role="status"><%= v.typo(s.short) %></p>
+<% } %>
+  </div>
+<% if (n) { %>
+  <section class="wrap partie partie--pres" aria-labelledby="r-h">
+    <div class="partie-tete"><h2 class="titre-2" id="r-h"><%= t.pages.searchResults %></h2></div>
+<%~ include('./_rangees', { ...it, list: it.photos, filter: {}, labelledby: 'r-h', eager: 4 }) %>
+  </section>
+<% } else if (it.series?.length) { %>
+  <section class="wrap partie partie--pres" aria-labelledby="s-h">
+    <div class="partie-tete"><h2 class="titre-2" id="s-h"><%= t.pages.browse %></h2><a class="lien" href="<%= it.u('/') %>#galerie"><%= t.pages.allPhotos %><%~ ic('fleche', { size: 18 }) %></a></div>
+<%~ include('./_series', { ...it, list: it.series, labelledby: 's-h' }) %>
+  </section>
+<% } %>
+</main>
+<%~ include('./_pied', it) %>
