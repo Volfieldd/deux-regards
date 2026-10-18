@@ -172,7 +172,7 @@ Vérifier pendant une semaine dans **Security → Events** qu'aucun visiteur lé
    - onglet **Token Settings** : *User roles inside ID Token* coché ;
    - noter **Client ID** et **Client Secret** (montré une seule fois) pour le `.env` de la Vigie.
 3. **Authorizations → New** : chacun des deux administrateurs → **`vigie.admin`**.
-4. Seconde application dans le même projet, pour Cloudflare Access : « Cloudflare Access », type **Web**, méthode **CODE**, *Redirect URI* `https://<équipe>.cloudflareaccess.com/cdn-cgi/access/callback` (nom d'équipe : étape 3.2.1). Noter Client ID et secret.
+4. Seconde application dans le même projet, pour Cloudflare Access : « Cloudflare Access », type **Web**, méthode **CODE**, *Redirect URI* `https://<équipe>.cloudflareaccess.com/cdn-cgi/access/callback` (nom d'équipe : étape 3.2.1) ; onglet **Token Settings** : **User Info inside ID Token** coché (Cloudflare ne lit l'adresse e-mail que dans l'ID token : sans cette case, le test de la méthode de connexion répond « User email was not returned »). Noter Client ID et secret.
 
 ### 3.2 Cloudflare Zero Trust : Access devant la console
 
@@ -184,7 +184,7 @@ Vérifier pendant une semaine dans **Security → Events** qu'aucun visiteur lé
    - *Token URL* : `https://<instance>.zitadel.cloud/oauth/v2/token` ;
    - *Certificate URL* : `https://<instance>.zitadel.cloud/oauth/v2/keys` ;
    - *PKCE* : on ; *OIDC Claims* / scopes : `openid email profile` ;
-   - **Test** : la connexion doit aboutir avec votre compte Zitadel.
+   - **Test** : la connexion doit aboutir avec votre compte Zitadel, et la réponse contenir `email` (sinon : case *User Info inside ID Token* de l'étape 3.1.4, sur l'application « Cloudflare Access » et non « Console Vigie »).
    - Ajouter aussi **One-time PIN** (code par e-mail) comme méthode de secours.
 3. **Access → Applications → Add an application → Self-hosted** :
    - nom : « Vigie » ; *Application domain* : `vigie.nicephos.art` ; *Session duration* : **8 hours** ;

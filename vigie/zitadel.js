@@ -19,6 +19,9 @@ const KEEP = new Set(['roleKeys', 'projectId', 'grantId', 'grantedOrgId', 'roles
   'keyId', 'expirationDate', 'expiration', 'maxPasswordAttempts', 'maxOTPAttempts', 'showLockOutFailures', 'minLength', 'hasUppercase', 'hasLowercase',
   'hasNumber', 'hasSymbol', 'enabled', 'state', 'domain', 'targetType', 'endpoint', 'timeout', 'interruptOnError', 'executionId', 'targets']);
 const GAP = 20 * 3600e3;
+// Zitadel refuse plus de 30 types par requête (ListEventsRequest.EventTypes) : les types suivis sont lus par lots.
+const LOT = 30;
+const LOTS = Object.keys(TYPES).reduce((a, k, i) => { if (i % LOT === 0) a.push([]); a.at(-1).push(k); return a; }, []);
 
 // Corps d'une réponse lu par morceaux, abandonné au-delà de max octets.
 export async function readLimited(res, max) {
@@ -57,7 +60,12 @@ export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = f
     const res = await fetchImpl(url, { ...init, redirect: 'manual', signal: AbortSignal.timeout(15000) });
     const text = await readLimited(res, 5 * 1024 * 1024);
     if (res.status === 401) token = null;                                    // jeton refusé : redemandé au passage suivant
-    if (res.status < 200 || res.status >= 300) throw new Error(`Zitadel : réponse ${res.status}`);
+    if (res.status < 200 || res.status >= 300) {
+      // Motif donné par Zitadel (message d'erreur, jamais de donnée de compte) et appel en cause, pour le journal.
+      let why = null;
+      try { const j = JSON.parse(text); why = j.error_description || j.message || j.error; } catch { /* pas du JSON */ }
+      throw new Error(`Zitadel : réponse ${res.status} (${new URL(url).pathname})${why ? ` : ${clean(why, 200)}` : ''}`);
+    }
     return JSON.parse(text);
   };
 
@@ -75,24 +83,15 @@ export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = f
     return token;
   }
 
-  // Un passage : lit tout ce qui est arrivé depuis la dernière date (par pages de 500), l'ajoute à la base.
-  async function run() {
-    const lastOk = setting.get('zitadel_derniere_lecture');
-    // Trou de plus de 20 h : signalé une fois (pas à chaque essai tant que Zitadel reste injoignable).
-    if (lastOk && now() - lastOk > GAP && setting.get('zitadel_trou_signale') !== lastOk) {
-      setting.set('zitadel_trou_signale', lastOk);
-      store.own('vigie_zitadel_trou', { emetteur: 'vigie/zitadel.js', detail: { derniere_lecture: lastOk, heures: Math.round((now() - lastOk) / 3600e3) } });
-    }
-    // Curseur illisible ou dans le futur : on repart des 23 dernières heures (jamais bloqué).
-    const c = Date.parse(setting.get('zitadel_curseur') || '');
-    const start = Number.isFinite(c) && c <= now() + 5 * 60e3 ? Math.max(c - OVERLAP, now() - 23 * 3600e3) : now() - 23 * 3600e3;
-    let from = new Date(start);
-    let added = 0;
+  // Un lot de types : pages de 500 depuis « from ». Rend la date du dernier événement lu et si le lot est allé au bout
+  // (20 pages pleines au plus par passage).
+  async function readLot(types, start) {
+    let from = new Date(start), last = null, added = 0;
     for (let page = 0; page < 20; page++) {
       const r = await bounded(`${issuer}/admin/v1/events/_search`, {
         method: 'POST',
         headers: { authorization: `Bearer ${await accessToken()}`, 'content-type': 'application/json' },
-        body: JSON.stringify({ asc: true, limit: 500, creation_date: from.toISOString(), event_types: Object.keys(TYPES) }),
+        body: JSON.stringify({ asc: true, limit: 500, creation_date: from.toISOString(), event_types: types }),
       });
       const list = Array.isArray(r.events) ? r.events : [];
       const rows = [];
@@ -120,11 +119,36 @@ export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = f
       added += store.add(rows);
       const lastDate = list.at(-1)?.creationDate || list.at(-1)?.creation_date;
       const lastMs = Date.parse(lastDate || '');
-      if (Number.isFinite(lastMs) && lastMs <= now() + 5 * 60e3) setting.set('zitadel_curseur', new Date(lastMs).toISOString());
-      if (list.length < 500 || !Number.isFinite(lastMs)) break;
+      if (Number.isFinite(lastMs) && lastMs <= now() + 5 * 60e3) last = lastMs;
+      if (list.length < 500 || !Number.isFinite(lastMs)) return { added, last, finished: true };
       // Page pleine : on avance (d'une milliseconde si toute la page est à la même date, pour ne jamais tourner en rond).
       from = new Date(lastMs > from.getTime() ? lastMs : from.getTime() + 1);
     }
+    return { added, last, finished: false };
+  }
+
+  // Un passage : lit tout ce qui est arrivé depuis la dernière date, lot par lot, l'ajoute à la base.
+  async function run() {
+    const lastOk = setting.get('zitadel_derniere_lecture');
+    // Trou de plus de 20 h : signalé une fois (pas à chaque essai tant que Zitadel reste injoignable).
+    if (lastOk && now() - lastOk > GAP && setting.get('zitadel_trou_signale') !== lastOk) {
+      setting.set('zitadel_trou_signale', lastOk);
+      store.own('vigie_zitadel_trou', { emetteur: 'vigie/zitadel.js', detail: { derniere_lecture: lastOk, heures: Math.round((now() - lastOk) / 3600e3) } });
+    }
+    // Curseur illisible ou dans le futur : on repart des 23 dernières heures (jamais bloqué).
+    const c = Date.parse(setting.get('zitadel_curseur') || '');
+    const start = Number.isFinite(c) && c <= now() + 5 * 60e3 ? Math.max(c - OVERLAP, now() - 23 * 3600e3) : now() - 23 * 3600e3;
+    // Curseur suivant : date du dernier événement lu ; si un lot n'est pas allé au bout, la plus petite date où un lot
+    // s'est arrêté, pour que le passage suivant reprenne là (les doublons sont écartés).
+    let added = 0, seen = null, held = null;
+    for (const types of LOTS) {
+      const lot = await readLot(types, start);
+      added += lot.added;
+      if (!lot.finished) held = Math.min(held ?? Infinity, lot.last ?? start);
+      else if (lot.last !== null) seen = Math.max(seen ?? lot.last, lot.last);
+    }
+    const cursor = held ?? seen;
+    if (cursor !== null) setting.set('zitadel_curseur', new Date(cursor).toISOString());
     setting.set('zitadel_derniere_lecture', now());
     return added;
   }

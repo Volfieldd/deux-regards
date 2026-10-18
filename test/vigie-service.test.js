@@ -180,11 +180,19 @@ test('Zitadel : jeton par clé JWT, événements suivis seulement, charge rédui
     }
     assert.equal(init.headers.authorization, 'Bearer jeton');
     const body = JSON.parse(init.body);
-    assert.ok(body.event_types.includes('user.grant.added') && !body.event_types.includes('org.policy.label.changed'));
-    return new Response(JSON.stringify({ events }), { status: 200 });
+    assert.ok(!body.event_types.includes('org.policy.label.changed'));
+    // Comme Zitadel : plus de 30 types refusés (code 3), sinon les seuls types demandés (et un type non suivi glissé).
+    if (body.event_types.length > 30) return new Response(JSON.stringify({ code: 3, message: 'invalid ListEventsRequest.EventTypes: value must contain no more than 30 item(s)' }), { status: 400 });
+    return new Response(JSON.stringify({ events: events.filter(e => body.event_types.includes(e.type.type) || e.type.type === 'org.policy.label.changed') }), { status: 200 });
   };
   const z = createZitadelReader({ issuer: 'https://exemple.zitadel.cloud', keyFile: null, readKey: () => keyJson, store: v.store, fetchImpl, now: () => clock });
   assert.equal(await z.run(), 2);
+  // Tous les types suivis demandés, par lots de 30 au plus.
+  const lots = calls.filter(c => c.url.endsWith('/events/_search')).map(c => JSON.parse(c.init.body).event_types);
+  assert.ok(lots.length > 1 && lots.every(l => l.length <= 30));
+  assert.equal(new Set(lots.flat()).size, lots.flat().length);
+  assert.ok(lots.flat().includes('user.grant.added') && lots.flat().includes('user.human.password.check.failed'));
+  assert.equal(v.store.setting.get('zitadel_curseur'), '2026-10-17T11:59:40.000Z', 'curseur au dernier événement, tous lots confondus');
   const rows = v.db.prepare("SELECT * FROM events WHERE composant = 'zitadel' ORDER BY seq").all();
   assert.deepEqual(rows.map(r => [r.type, r.severity, r.canal, r.confiance, r.sub, r.ip]), [
     ['zitadel_droits', 'haut', 'API Zitadel', 'constaté', 'user-1', '198.51.100.4'], // compte visé, pas l'auteur
@@ -422,6 +430,33 @@ test('revue B : Zitadel — trou signalé une fois, curseur illisible ou futur s
   v.store.setting.set('zitadel_curseur', '2099-01-01T00:00:00Z');
   await z.run();
   assert.ok(Date.parse(v.store.setting.get('zitadel_curseur')) <= clock, 'curseur ramené au présent');
+});
+
+test('Zitadel : lot inachevé, le curseur reste où il s’est arrêté ; erreur de Zitadel lisible dans le journal', async t => {
+  const clock = Date.parse('2026-10-17T12:00:00Z');
+  const v = vigieOf(t, { now: () => clock });
+  const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const key = { keyId: 'k', key: privateKey.export({ type: 'pkcs8', format: 'pem' }), userId: 'u' };
+  let fail = null;
+  const fetchImpl = async (url, init) => {
+    if (url.endsWith('/token')) return new Response(JSON.stringify({ access_token: 'j', expires_in: 3600 }));
+    if (fail) return new Response(JSON.stringify(fail), { status: 400 });
+    const body = JSON.parse(init.body);
+    const from = Date.parse(body.creation_date);
+    // Premier lot : toujours des pages pleines (il n'ira pas au bout) ; les autres : un événement récent.
+    if (body.event_types.includes('user.grant.added')) {
+      return new Response(JSON.stringify({ events: Array.from({ length: 500 }, (_, i) => ({ aggregate: { id: `a${from}`, type: 'user' }, sequence: i, creationDate: new Date(from + 1000).toISOString(), type: { type: 'user.grant.added' } })) }));
+    }
+    return new Response(JSON.stringify({ events: [{ aggregate: { id: 'b', type: 'user' }, sequence: 1, creationDate: new Date(clock - 1000).toISOString(), type: { type: body.event_types[0] } }] }));
+  };
+  const z = createZitadelReader({ issuer: 'https://z.example', keyFile: null, readKey: () => key, store: v.store, fetchImpl, now: () => clock });
+  await z.run();
+  const cursor = Date.parse(v.store.setting.get('zitadel_curseur'));
+  assert.equal(cursor, clock - 23 * 3600e3 + 20 * 1000, 'curseur à l’arrêt du lot inachevé, pas au dernier événement des autres lots');
+  fail = { code: 3, message: 'invalid ListEventsRequest.EventTypes: value must contain no more than 30 item(s)' };
+  await assert.rejects(z.run(), /^Error: Zitadel : réponse 400 \(\/admin\/v1\/events\/_search\) : invalid ListEventsRequest\.EventTypes/);
+  fail = { error: 'invalid_grant', error_description: 'assertion invalid' };
+  await assert.rejects(z.run(), /: assertion invalid$/);
 });
 
 test('revue B : valeur mal typée dans un lot signé — écartée, le reste gardé (jamais d’erreur 500)', async t => {
