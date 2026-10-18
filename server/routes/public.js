@@ -316,7 +316,12 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     // Arrivée par le QR de la fenêtre « Partager » : comptée comme un partage, puis l'adresse est nettoyée (recharger
     // la page ou envoyer l'adresse affichée ne compte pas un nouveau scan ; la vue est comptée sur l'adresse propre).
     if (request.query.partage === 'qr') {
-      if (!BOTS.test(request.headers['user-agent'] || '') && shareLimit(request.ip)) app.shares.record(photo.id, 'qr');
+      // Limite atteinte (partagée avec les autres partages) : signalée à la Vigie comme par gate(), sans contrôle de
+      // provenance (un scan est une simple ouverture de page, sans Origin).
+      if (!BOTS.test(request.headers['user-agent'] || '')) {
+        if (shareLimit(request.ip)) app.shares.record(photo.id, 'qr');
+        else app.securite.emit('excess_rate_limit_exceeded', { request, emetteur: 'server/routes/public.js · partage QR', detail: { limite: 'partage', canal: 'qr' } });
+      }
       return reply.redirect(base.photoUrl(photo.slug, filter), 303);
     }
     app.stats.hit(request, { photoId: photo.id });

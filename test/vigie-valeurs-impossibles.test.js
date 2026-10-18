@@ -7,7 +7,8 @@ import { EVENTS } from '../server/securite/vocabulaire.js';
 
 // Valeurs impossibles (registre docs/etudes/vigie-besoins-des-briques.md, BV-3) : un filtre de galerie (regard, série,
 // ordre) ou un canal de partage qu'aucun lien ni bouton du site ne produit reste ignoré, comme avant, et il est signalé à
-// la Vigie (input_validation_fail, cas DS12) ; sauf une série ou un photographe disparu depuis moins de 30 jours.
+// la Vigie (input_validation_fail, cas DS12) ; sauf une série ou un photographe disparu depuis moins de 30 jours. Et le
+// partage par QR signale sa limite atteinte, comme les autres partages (BV-6).
 const KEY = 'cle-de-signature-vigie-0123456789abcdef';
 const VIGIE = { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: KEY, VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 };
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15';
@@ -114,3 +115,21 @@ test('sans Vigie : mêmes pages, mêmes réponses, rien n’est émis', async t 
   assert.equal((await c.share('copie')).statusCode, 204);
 });
 
+test('partage par QR : limite atteinte signalée (excess_rate_limit_exceeded, canal qr), redirection inchangée ; robots non comptés', async t => {
+  const c = await site(t);
+  const scan = (ua = UA) => c.app.inject({ url: `/photo/${SLUG}?partage=qr`, remoteAddress: '203.0.113.50', headers: { 'user-agent': ua } });
+  for (let i = 0; i < 60; i++) assert.equal((await scan()).statusCode, 303);
+  let v = await c.flush();
+  assert.equal(v.of('excess_rate_limit_exceeded').length, 0, 'sous la limite : rien');
+  const r = await scan();
+  assert.deepEqual([r.statusCode, r.headers.location], [303, `/photo/${SLUG}`]);
+  assert.equal(c.db.prepare("SELECT COUNT(*) FROM photo_shares WHERE via = 'qr'").pluck().get() >= 1, true);
+  // Un robot (aperçu de lien) n'est ni compté ni signalé.
+  assert.equal((await scan('Slackbot-LinkExpanding 1.0')).statusCode, 303);
+  v = await c.flush();
+  const e = v.of('excess_rate_limit_exceeded');
+  assert.equal(e.length, 1);
+  assert.deepEqual(e[0].detail, { limite: 'partage', canal: 'qr' });
+  assert.equal(e[0].origine.emetteur, 'server/routes/public.js · partage QR');
+  assert.equal(e[0].severity, EVENTS.excess_rate_limit_exceeded.severity);
+});
