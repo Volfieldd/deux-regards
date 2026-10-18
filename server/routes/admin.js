@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import multipart from '@fastify/multipart';
-import { createAdminRepo, ValidationError, titleFromFilename } from '../admin-repo.js';
+import { createAdminRepo, ValidationError, titleFromFilename, LIMITS } from '../admin-repo.js';
 import { createImportTracker } from '../imports.js';
 import { variantName, widthsFor } from '../images.js';
 import { importOriginal, removePhotoFiles, ImportError, MAX_FILE_BYTES } from '../media.js';
@@ -1744,7 +1744,7 @@ export default async function adminRoutes(app) {
   const seriesPage = (request, reply, extra = {}) => render(request, reply, 'series', {
     title: request.t('Séries'), categories: repo.categories(), covers: Object.fromEntries(Object.entries(repo.covers()).map(([k, p]) => [k, withReady(p)])),
     boards: Object.fromEntries(Object.entries(repo.boards(3)).map(([k, list]) => [k, list.map(withReady).filter(p => p.ready)])), errors: {}, values: {},
-    suggest: app.seriesSuggest.state(), describe: app.describer.state(), describeModels: app.describer.MODELS, translate: app.translator.enabled, ...extra,
+    suggest: app.seriesSuggest.state(), describe: app.describer.state(), describeModels: app.describer.MODELS, translate: app.translator.enabled, limits: LIMITS, ...extra,
   });
   app.get('/admin/series', P('series.gerer'), async (request, reply) => seriesPage(request, reply));
 

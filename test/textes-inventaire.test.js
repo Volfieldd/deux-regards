@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import { setup, VIGIE_KEYS } from './helpers.js';
 import { createSessionStore } from '../server/sessions.js';
 import { openDb } from '../server/db/index.js';
+import { intentParts } from '../server/v2-vues.js';
 
 // Données du site public v2 créées par la migration 053 (PLAN.md, point 8) : texte d'intention d'une série (MQ-03),
 // description courte d'un photographe (MQ-01), texte de remplacement d'une photo (UX-F-44) et numéro d'inventaire
@@ -145,4 +146,12 @@ test('numéro d’inventaire : rien de privé (ni l’heure, ni l’identifiant 
     assert.doesNotMatch(p.inventory, new RegExp(p.published_at.slice(11, 13) + p.published_at.slice(14, 16)), 'pas l’heure');
     assert.ok(Number(rank) <= 6, `rang de l’auteur, pas l’identifiant ${p.id}`);
   }
+});
+
+test('coupe du texte d’intention : à la fin d’une phrase, jamais dans un nombre', () => {
+  assert.deepEqual(intentParts('Un. Deux ! Trois ? Quatre.'), { head: 'Un. Deux !', rest: 'Trois ? Quatre.' });
+  assert.deepEqual(intentParts('À 1.5 km du port. « Rien », dit-il. Puis la suite…'), { head: 'À 1.5 km du port. « Rien », dit-il.', rest: 'Puis la suite…' });
+  assert.deepEqual(intentParts('Elle dit « Viens. » Il vient. Fin.'), { head: 'Elle dit « Viens. » Il vient.', rest: 'Fin.' });
+  assert.deepEqual(intentParts(''), { head: '', rest: '' });
+  assert.deepEqual(intentParts(null), { head: '', rest: '' });
 });

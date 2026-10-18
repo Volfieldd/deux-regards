@@ -1,12 +1,15 @@
 <% /* Page d'une série (MQ-03), /serie/<slug> : une salle d'exposition et non plus l'accueil déguisé. Le fil d'Ariane, un
       seul H1 (le nom), la fiche dite une fois (nombre de photos et ordre, photographes, années), puis les photos dès le
       premier écran, SANS COUVERTURE EN TÊTE (elle sert là où l'on choisit une série) ; la même série par un seul regard ;
-      les autres séries. Le texte d'intention de la maquette n'a pas de champ dans la base : il n'est pas montré. */ %>
+      les autres séries. Le texte d'intention (admin, page Séries ; migration 053), à droite du titre au bureau, dessous au
+      téléphone : ses deux premières phrases, puis le reste, entier au bureau, dans « Lire la suite » (un <details>, sans
+      script) au téléphone ; rien s'il n'est pas écrit. */ %>
 <% const t = it.t, v = it.v2, ic = v.ic, S = it.activeSerie, f = it.filter, list = it.photos, n = list.length;
    const by = it.regards.slice(1).map(r => ({ ...r, n: list.filter(p => p.author_slug === r.slug).length })).filter(r => r.n);
    const years = [...new Set(list.map(p => String(p.taken_on || '').slice(0, 4)).filter(y => /^\d{4}$/.test(y)))].sort();
    const span = years.length ? (years[0] === years.at(-1) ? years[0] : `${years[0]}–${years.at(-1)}`) : '';
-   const others = it.seriesAll.filter(c => c.slug !== S.slug && c.count && c.cover); %>
+   const others = it.seriesAll.filter(c => c.slug !== S.slug && c.count && c.cover);
+   const intent = v.intentParts(S.intent); %>
   <div class="wrap">
     <div class="ser-haut">
       <div class="ser-titre">
@@ -18,7 +21,12 @@
 <% } %><% if (span) { %>          <li><%= span %></li>
 <% } %>        </ul>
       </div>
-    </div>
+<% if (intent.head) { %>      <div class="ser-txt">
+        <p class="ser-int"><%= v.typo(intent.head) %></p>
+<% if (intent.rest) { %>        <p class="ser-int que-bureau"><%= v.typo(intent.rest) %></p>
+        <details class="depliant depliant--suite"><summary><%= t.v2.readMore %><span class="sr-only"><%= t.v2.readMoreOf %></span></summary><p class="ser-int"><%= v.typo(intent.rest) %></p></details>
+<% } %>      </div>
+<% } %>    </div>
   </div>
   <section class="wrap partie ser-photos" id="galerie" aria-labelledby="g-h">
     <div class="partie-tete"><h2 class="titre-2" id="g-h" tabindex="-1"><%= t.v2.seriePhotos(n) %></h2></div>

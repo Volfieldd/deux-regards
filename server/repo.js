@@ -24,8 +24,8 @@ export function createRepo(db) {
     published: db.prepare(`SELECT ${PHOTO_COLUMNS} FROM photos p
       JOIN categories c ON c.id = p.category_id JOIN authors a ON a.id = p.author_id
       WHERE p.status = 'published' ORDER BY p.position, p.id`),
-    categories: db.prepare('SELECT id, slug, name, name_en, name_de FROM categories ORDER BY position, id'),
-    authors: db.prepare('SELECT id, slug, name, bio, bio_en, bio_de FROM authors ORDER BY id'),
+    categories: db.prepare('SELECT id, slug, name, name_en, name_de, intent, intent_en, intent_de FROM categories ORDER BY position, id'),
+    authors: db.prepare('SELECT id, slug, name, bio, bio_en, bio_de, short_bio, short_bio_en, short_bio_de FROM authors ORDER BY id'),
     settings: db.prepare('SELECT key, value FROM settings'),
   };
 
@@ -39,8 +39,9 @@ export function createRepo(db) {
       if (ordre === 'recentes') list.sort((a, b) => (b.published_at || '').localeCompare(a.published_at || '') || b.id - a.id);
       return list.map((p, i) => ({ ...p, index: i }));
     },
-    categories: (lang = 'fr') => q.categories.all().map(c => ({ ...c, name: pick(c, 'name', lang) })),
-    authors: (lang = 'fr') => q.authors.all().map(a => ({ ...a, bio: pick(a, 'bio', lang) })),
+    // intent : texte d'intention de la série ; short_bio : description courte du photographe (migration 053).
+    categories: (lang = 'fr') => q.categories.all().map(c => ({ ...c, name: pick(c, 'name', lang), intent: pick(c, 'intent', lang) })),
+    authors: (lang = 'fr') => q.authors.all().map(a => ({ ...a, bio: pick(a, 'bio', lang), short_bio: pick(a, 'short_bio', lang) })),
     settings() {
       return Object.fromEntries(q.settings.all().map(r => [r.key, JSON.parse(r.value)]));
     },

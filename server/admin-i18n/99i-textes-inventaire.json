@@ -6,5 +6,13 @@
  "numéro d’inventaire à la première publication": {
   "en": "inventory number given at first publication",
   "de": "Inventarnummer bei der ersten Veröffentlichung"
+ },
+ "Texte d’intention": {
+  "en": "Statement",
+  "de": "Begleittext"
+ },
+ "page de la série : ce qu’elle cherche, en quelques phrases ; un paragraphe, {n} signes au plus": {
+  "en": "series page: what it is looking for, in a few sentences; one paragraph, {n} characters at most",
+  "de": "Seite der Serie: wonach sie sucht, in wenigen Sätzen; ein Absatz, höchstens {n} Zeichen"
  }
 }

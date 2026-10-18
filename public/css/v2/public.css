@@ -823,8 +823,20 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .ser-fiche a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
 @media (pointer: coarse) { .ser-fiche a { display: inline-flex; align-items: center; justify-content: center; min-height: var(--cible); min-width: var(--cible); } }
 .ser-photos { padding-top: var(--esp-6); }
+/* Texte d'intention (MQ-03) : à droite du titre au bureau, alignés en haut ; dessous au téléphone et sur tablette. Ses
+   deux premières phrases, puis le reste : entier dès 768 px (.que-bureau), dans « Lire la suite » en dessous (un
+   <details> à l'allure de lien, comme .depliant des formulaires, que cette page ne charge pas). */
+.ser-txt { display: grid; gap: var(--esp-3); align-content: start; }
+.ser-int { margin: 0; max-width: 58ch; font-size: var(--t-prose); line-height: 1.6; color: var(--prose); text-wrap: pretty; }
+.ser-int + .ser-int { margin-top: calc(-1 * var(--esp-2)); }
+.depliant--suite > summary { list-style: none; display: inline-flex; align-items: center; min-height: var(--cible); cursor: pointer; color: var(--ink);
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.depliant--suite > summary::-webkit-details-marker { display: none; }
+.depliant--suite[open] > summary { display: none; }
+@media (min-width: 768px) { .depliant--suite { display: none; } }
 /* Au bureau, le titre et la fiche gardent la colonne de gauche de la maquette (5/12) : la fiche ne court pas sur toute la
-   page ; la colonne de droite attend le texte d'intention, que la base n'a pas encore. */
-@media (min-width: 1024px) { .ser-haut { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; } }
+   page ; le texte d'intention prend celle de droite, à la hauteur du titre. */
+@media (min-width: 1024px) { .ser-haut { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; }
+  .ser-txt { padding-top: calc(var(--cible) + var(--esp-2)); } }
 
 @media (prefers-reduced-motion: reduce) { .lang-pick > summary .ic { transition: none; } }
