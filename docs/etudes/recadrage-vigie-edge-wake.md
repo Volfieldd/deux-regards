@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Statut | Étude de recadrage ; décisions D17 à D23 prises le 17 octobre 2026. Phases A et B faites et fusionnées (#100 à #104) ; la phase C est suspendue en attendant ce recadrage. |
+| Statut | Étude de recadrage ; décisions D17 à D23 prises le 17 octobre 2026, D24 à D26 (sorties réseau, sonde Suricata) le 18 octobre 2026. Phases A et B faites et fusionnées (#100 à #104) ; la phase C est suspendue en attendant ce recadrage. |
 | Date | 17 octobre 2026. Sources consultées ce jour-là. |
 | Demande | « J'aimerais introduire de nouveaux concepts, notamment : Detection at the edge et les concepts introduits par marlinOS, est-il possible de reprendre des composants, en particulier le pipeline Wake. Ça demande un recadrage je pense. » Source indiquée : marlinos.io. |
 | Base | [`journalisation-securite.md`](journalisation-securite.md), [`annexe-vigie-architecture.md`](annexe-vigie-architecture.md), [`annexe-vigie-cloudflare.md`](annexe-vigie-cloudflare.md), revues des phases A et B. |
@@ -80,12 +80,13 @@ Chez nous, pas de flotte de machines : les **sources indépendantes** sont celle
 | Bordure Cloudflare (nouveau) | constaté (signé par le Worker) | empreinte TLS, opérateur, requêtes bloquées en bordure, débit sur les images en cache |
 | Zitadel | constaté | mots de passe faux, facteurs, rôles |
 | Contrôles de la Vigie | constaté | chaîne, sauvegardes, battement |
+| Réseau (phase E, `D24` et `D25`) | constaté (mandataire de sortie et pare-feu de l'hôte, hors du site) | sortie du site refusée ou directe, flux entre conteneurs hors liste |
 
 Règle proposée (`D18`) :
 
 - alerte **« moyen » ou « haut »** : score de l'entité au-dessus du seuil **et** au moins **deux sources** distinctes y ont contribué ; une source seule peut faire monter le score, pas déclencher (contre la fatigue d'alerte, votre demande N8) ;
 - **exceptions à source unique**, parce qu'une seule observation suffit à prouver l'incident : rôle donné hors de l'application, ticket falsifié, déclencheur supprimé, chaîne rompue, cookie rejoué depuis un autre appareil, emprunt d'identité ou politique de connexion affaiblie dans Zitadel ;
-- un site compromis (MV11) ne peut plus déclencher seul une alerte « moyen » ou « haut » par de faux événements, ni en masquer une que la bordure et Zitadel confirment.
+- un site compromis (MV11) ne peut plus déclencher seul une alerte « moyen » ou « haut » par de faux événements, ni en masquer une que la bordure et Zitadel confirment ; avec la source réseau (phase E), une sortie qu'il tente hors de la liste autorisée se voit sans lui.
 
 ### 3.3 Détection en bordure : un Cloudflare Worker (`mmenrich` et « at the edge »)
 
@@ -172,7 +173,7 @@ Les verdicts et signaux peuvent être projetés en **OCSF 1.8.0** (classes Déte
 | **C2. Règles et détecteurs** | sous-ensemble de Sigma (sélection, `event_count`, `value_count`, `temporal`), DS1 à DS31 écrits en Sigma ; détecteurs comportementaux (3.5) ; listes de menaces (3.4) ; contrôle des rôles sur les sauvegardes du site (annexe architecture 4.4) ; un test par règle (attaque détectée, parcours normal silencieux, textes allemands et français compris) ; un mois en « observer » | oui |
 | **C3. Capteur en bordure** | Cloudflare Worker (en-têtes signés, blocage en bordure depuis KV, résumés dans Analytics Engine), routes limitées à l'admin, la connexion et les pages ; lecture par la Vigie ; essai sur l'instance de test d'abord | oui (100 000 requêtes par jour) |
 | **D. Console et notifications** | console `vigie.nicephos.art` (Access + Zitadel, quatre rôles) centrée sur les entités et la boucle en cinq temps ; décisions qui repartent vers la détection ; notifications (admin, e-mail, Signal) ; tête de la chaîne envoyée chaque nuit (NB1) | oui |
-| **E. Compléments** | recopie des blocages dans la liste Cloudflare par l'API ; export OCSF ; CrowdSec en option ; jeu d'attaques rejouable | oui |
+| **E. Compléments** | recopie des blocages dans la liste Cloudflare par l'API ; export OCSF ; CrowdSec en option ; jeu d'attaques rejouable ; **source réseau** : sorties du site par un mandataire à liste autorisée, sorties directes et flux entre conteneurs hors liste rejetés et journalisés par l'hôte, lus par la Vigie ([BV-10 et BV-11](vigie-besoins-des-briques.md#déploiement--sorties-réseau-et-flux-entre-conteneurs)) | oui |
 
 ---
 
@@ -183,6 +184,7 @@ Les verdicts et signaux peuvent être projetés en **OCSF 1.8.0** (classes Déte
 - **Bordure** : un Worker est du code chez Cloudflare (sous-traitant déjà déclaré) ; il traite les mêmes données que Cloudflare aujourd'hui. Quota gratuit : au-delà, la bordure se tait et le site continue seul.
 - **Empreinte TLS** : change avec une mise à jour du navigateur ; c'est un signal, pas une preuve (poids modéré, jamais une exception à source unique).
 - **Listes de menaces** : faux positifs possibles (adresses réattribuées) : étiquettes et points, jamais un blocage automatique seul.
+- **Source réseau** : un mandataire de plus à tenir à jour, et une liste de sorties à suivre quand le site gagne une dépendance externe (un oubli coupe la fonction, sans rien laisser sortir). Le résolveur DNS intégré de Docker échappe au pare-feu de l'hôte : une fuite par requêtes DNS reste possible tant qu'un résolveur à liste autorisée n'est pas posé.
 
 ---
 
@@ -199,6 +201,19 @@ Prises le 17 octobre 2026.
 | D21 | Export OCSF des verdicts | **oui**, phase E |
 | D22 | Listes de menaces gratuites (Spamhaus DROP, Feodo Tracker, sorties Tor) | **oui** (phase C2) ; CrowdSec plus tard |
 | D23 | Verdicts agrégés au lieu d'événements unitaires pour les familles publiques à fort volume | **oui** (phase C2) |
+| D24 | Sorties du site par un mandataire à liste autorisée, sorties directes rejetées par l'hôte, refus lus par la Vigie (BV-10) | **oui**, phase E (18 octobre 2026) |
+| D25 | Réseaux découpés par flux, flux entre conteneurs hors liste rejetés et journalisés (BV-11) | **oui**, phase E, avec D24 (18 octobre 2026) |
+| D26 | Sonde Suricata sur le trafic entrant et entre composants | **non** sur l'entrant ; en sortie, gardée en perspective (section 8) (18 octobre 2026) |
+
+---
+
+## 8. Perspectives
+
+**Suricata, seulement en sortie du site (`D26`).** Examinée le 18 octobre 2026 et écartée pour l'instant :
+
+- **Entrant : aucun gain.** Aucun port n'est ouvert ; le tunnel est chiffré jusqu'à `cloudflared`. Le seul tronçon en clair (`cloudflared` → `site:3000`) montre les requêtes que le site journalise déjà, sans compte, session ni rôle ; l'empreinte TLS du visiteur y est perdue (le TLS s'arrête chez Cloudflare), alors que le Worker (3.3) la voit et bloque avant le site. Les signatures web d'ET Open y relèveraient surtout le bruit des scanners, déjà compté par les règles de bordure et d'exploration.
+- **Entre composants et en sortie** : l'angle mort est réel, mais une liste autorisée avec journal des refus (`D24`, `D25`) le couvre en empêchant, sans privilège dans un conteneur et presque sans faux positif.
+- **Si un besoin apparaît malgré cela** : une sonde sur le seul pont de sortie du site, pour ce qu'une liste ne voit pas (balises régulières vers un serveur de commande, tunnels DNS, client TLS qui n'est pas Node par son empreinte JA3/JA4, réputation des destinations par les listes abuse.ch). `eve.json` limité aux flux, au DNS et au SNI, sans contenu HTTP ni capture de paquets ; règles ET Open restreintes aux familles malware et commande à distance ; constats lus par la Vigie comme la source réseau. Coût : `NET_RAW` et `NET_ADMIN` (le conteneur le plus privilégié de la pile, face à un trafic hostile), 0,5 à 1 Go de mémoire, des règles à suivre. Ce serait la réponse aux détecteurs « tunnels DNS et ICMP » et « balises » de `waked` (section 1), que la Vigie ne peut pas écrire sans source réseau.
 
 ---
 
