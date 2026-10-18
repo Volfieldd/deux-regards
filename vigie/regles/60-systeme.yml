@@ -66,3 +66,16 @@ detection:
   condition: selection
 level: medium
 vigie: { cas: MV11, entite: { kind: vigie, valeur: regles }, source_unique: true }
+---
+title: Canal de notification en échec (Signal ou e-mail)
+name: canal_echec
+id: 1beba84f-4c91-4c59-9f6e-bb52e6811b39
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion, attack.t1562]
+detection:
+  selection:
+    type: vigie_canal_echec
+  condition: selection
+level: medium
+vigie: { cas: DS24, entite: { kind: vigie, valeur: notifications }, source_unique: true }

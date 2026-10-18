@@ -41,7 +41,25 @@ export function loadVigieConfig(env = process.env) {
     if (!/^[a-z_][a-z0-9_]{0,63}$/.test(dataset)) throw new Error('VIGIE_CF_DATASET : nom de jeu de données invalide');
     bordure = { accountId: env.VIGIE_CF_ACCOUNT_ID, kvNamespace: env.VIGIE_CF_KV_NAMESPACE, dataset, tokenFile };
   }
+  // Notifications (phase D) : Signal (passerelle du réseau interne nicephos-vigie-signal), e-mail en secours.
+  let signal = null, mail = null;
+  if (env.VIGIE_SIGNAL_NUMERO) {
+    if (!/^\+\d{8,15}$/.test(env.VIGIE_SIGNAL_NUMERO)) throw new Error('VIGIE_SIGNAL_NUMERO : numéro international attendu (+33…)');
+    if (!/^group\.[A-Za-z0-9+/=_-]{8,200}$/.test(env.VIGIE_SIGNAL_GROUPE || '')) throw new Error('VIGIE_SIGNAL_GROUPE : identifiant du groupe attendu (group.…)');
+    const url = (env.VIGIE_SIGNAL_URL || 'http://nicephos-signal:8080').replace(/\/+$/, '');
+    if (!/^http:\/\/[a-z0-9-]+(?::\d+)?$/.test(url)) throw new Error('VIGIE_SIGNAL_URL : nom de service du réseau interne attendu (http://nicephos-signal:8080)');
+    signal = { url, number: env.VIGIE_SIGNAL_NUMERO, group: env.VIGIE_SIGNAL_GROUPE };
+  }
+  if (env.VIGIE_SMTP_URL) {
+    if (!/^smtps?:\/\//i.test(env.VIGIE_SMTP_URL)) throw new Error('VIGIE_SMTP_URL : smtps://… ou smtp://… attendu');
+    const to = String(env.VIGIE_MAIL_TO || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (!to.length || !env.VIGIE_MAIL_FROM) throw new Error('VIGIE_MAIL_FROM et VIGIE_MAIL_TO sont obligatoires avec VIGIE_SMTP_URL');
+    mail = { url: env.VIGIE_SMTP_URL, from: env.VIGIE_MAIL_FROM, to };
+  }
+  const consoleUrl = (env.VIGIE_CONSOLE_URL || 'https://vigie.nicephos.art').replace(/\/+$/, '');
+  if (!/^https:\/\//.test(consoleUrl)) throw new Error('VIGIE_CONSOLE_URL doit être en https://');
   return {
+    notifications: { signal, mail, consoleUrl },
     bordure,
     dataDir,
     databasePath: path.resolve(env.VIGIE_DATABASE || path.join(dataDir, 'vigie.db')),

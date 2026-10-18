@@ -11,13 +11,14 @@ const str = v => (typeof v === 'string' ? v : null);
 //     60 s près, nonce jamais vu (10 min), signature comparée en temps constant ; sinon 401 (le site garde ses lots) ;
 //   - corps de 1 Mo au plus, 500 événements au plus ; chaque champ revérifié et borné ; canal, confiance et place dans
 //     la chaîne sont fixés par la Vigie ; un événement invalide est écarté (et compté), les autres sont gardés ;
-//   - GET /v1/decisions?depuis=N : attente longue (25 s) puis la liste signée.
+//   - GET /v1/decisions?depuis=N : attente longue (25 s) puis la liste signée ;
+//   - GET /v1/resume : résumé signé des alertes ouvertes pour l'admin du site (phase D).
 
 const SKEW = 60e3;
 const WAIT = 25e3;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-export function createIngest({ store, decisions, ingestKey, now = Date.now, logger = false }) {
+export function createIngest({ store, decisions, ingestKey, now = Date.now, logger = false, summary = null, consoleUrl = 'https://vigie.nicephos.art' }) {
   // Pas de journal par requête : le site envoie chaque seconde ; les refus sont des événements de la Vigie.
   const app = Fastify({ logger, bodyLimit: 1024 * 1024, trustProxy: false });
   // Arrêt : les attentes longues répondent tout de suite (Docker n'attend que 10 s).
@@ -104,6 +105,14 @@ export function createIngest({ store, decisions, ingestKey, now = Date.now, logg
       });
     }
     return reply.header('cache-control', 'no-store').send(decisions.signed());
+  });
+
+  // Résumé des alertes pour l'admin du site (phase D) : requête signée comme les autres, réponse signée.
+  app.get('/v1/resume', { logLevel: 'warn' }, async (request, reply) => {
+    const bad = verify(request, `GET ${request.url}`);
+    if (bad) return refuse(reply, request, bad);
+    if (!summary) return reply.code(404).send({ error: 'résumé indisponible' });
+    return reply.header('cache-control', 'no-store').send(decisions.signedSummary(summary(), consoleUrl));
   });
 
   app.get('/healthz', { logLevel: 'warn' }, async () => ({ status: 'ok' }));

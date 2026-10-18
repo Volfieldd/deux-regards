@@ -48,6 +48,11 @@ networks:
       config:
         - subnet: ${VIGIE_NET_SUBNET:-172.29.43.0/24}
           ip_range: ${VIGIE_NET_IP_RANGE:-172.29.43.128/25}
+  # Passerelle Signal de la Vigie (deploy/unraid/signal/) : réseau interne créé par sa pile. Sans Signal, le créer vide
+  # une fois : docker network create --internal nicephos-vigie-signal
+  vigie-signal:
+    name: nicephos-vigie-signal
+    external: true
 
 services:
   site:
@@ -190,6 +195,8 @@ services:
         ipv4_address: ${VIGIE_INGEST_IP:-172.29.43.10}
         aliases: [vigie-reception]
       nicephos: {}
+      # Notifications Signal (phase D) : la passerelle n'a aucun port publié, seule la Vigie la joint ici.
+      vigie-signal: {}
     volumes:
       - type: bind
         source: ${VIGIE_DATA_DIR:-/mnt/cache/appdata/nicephos/vigie}

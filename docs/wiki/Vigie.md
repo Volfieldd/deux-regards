@@ -160,6 +160,27 @@ Un **Worker** Cloudflare (`bordure/worker.js`, offre gratuite) devant l'admin, l
 
 **Retirer** : supprimer la route (ou le Worker), retirer `VIGIE_BORDURE_KEY` du site et `VIGIE_CF_*` de la Vigie. Le site retire les empreintes de bordure de ses sessions avec le reste du contexte quand la Vigie est retirée.
 
+## Notifications (phase D)
+
+- **Quand** : à l'ouverture d'une alerte **haute ou critique**, et quand une alerte s'aggrave jusque-là ; seulement pour une règle en mode `alerter` ou `bloquer` (jamais `observer`, le mois d'observation) et interrupteur `alertes` en marche.
+- **Quoi** : un message court, **sans adresse, sans compte, sans donnée personnelle** :
+
+  ```
+  [Critique] Rôle donné, retiré ou compte changé hors de l'application
+  Source : site
+  14 h 02 · https://vigie.nicephos.art/alertes/412
+  ```
+
+- **Par où** : Signal d'abord (passerelle [`deploy/unraid/signal/`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/signal/README.md), groupe « Vigie Nicephos ») ; l'**e-mail** si Signal n'est pas réglé ou échoue. Un canal en échec ouvre une alerte (« canal en échec », une fois par heure). 20 messages par heure au plus et par canal, puis un message de synthèse à la fin de l'heure.
+- **Réglages** (`vigie.env`) : `VIGIE_SIGNAL_NUMERO`, `VIGIE_SIGNAL_GROUPE` (étape 8 du guide Signal), `VIGIE_SIGNAL_URL` (`http://nicephos-signal:8080` par défaut) ; `VIGIE_SMTP_URL`, `VIGIE_MAIL_FROM`, `VIGIE_MAIL_TO` (adresses séparées par des virgules) ; `VIGIE_CONSOLE_URL` (`https://vigie.nicephos.art`). La Vigie rejoint le réseau interne `nicephos-vigie-signal` de la passerelle : lancer la pile Signal avant (sans Signal, créer le réseau vide une fois : `docker network create --internal nicephos-vigie-signal`).
+- **Essai** : `docker exec nicephos-vigie node vigie/cli.js notifier essai signal` (ou `email`).
+- **Résumé pour l'admin du site** : le site lit chaque minute `GET /v1/resume` (requête signée, réponse signée par la clé des décisions, usage « resume ») : nombre d'alertes ouvertes par gravité, titre générique de la plus grave, date ; ni adresse, ni compte. Les alertes en observation n'y figurent pas. L'affichage dans l'admin (badge, « Aujourd'hui », bandeau d'une alerte critique) viendra avec la console, après maquettes et jury.
+
+| Commande | Effet |
+|---|---|
+| `notifier essai <signal\|email>` | message d'essai sur le canal |
+| `bordure` | état de la bordure : copie des blocages, battement du Worker, constats, en-têtes refusés par le site (et leur motif), part des sessions dont l'empreinte TLS change (grille de lecture de l'essai) |
+
 ## Horodatages et capacité
 
 - **Deux heures par événement** : `survenu_a`, l'heure de la source (site, Zitadel), et `recu_a`, l'heure de réception par la Vigie. Les détecteurs (heure inhabituelle, voyage impossible) prennent l'heure de la source, bornée à 30 jours en arrière et 5 minutes en avant ; hors bornes, l'heure reçue est gardée telle quelle dans le détail (`horodatage_site_brut`). Les horloges du site et de la Vigie ne peuvent pas diverger de plus de 60 s : un lot signé plus décalé est refusé.

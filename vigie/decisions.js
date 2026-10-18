@@ -145,6 +145,13 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
     return { payload, signature: crypto.sign(null, Buffer.from(payload), privateKey).toString('base64') };
   }
 
+  // Résumé des alertes pour l'admin du site (phase D), signé comme les décisions, usage « resume » : jamais pris pour
+  // une liste de décisions, ni par le site ni par la bordure.
+  function signedSummary(summary, consoleUrl) {
+    const payload = JSON.stringify({ usage: 'resume', emis_a: now(), console: consoleUrl, ...summary });
+    return { payload, signature: crypto.sign(null, Buffer.from(payload), privateKey).toString('base64') };
+  }
+
   // Changement fait par la ligne de commande (autre processus) : vu par le service en relisant la version. Une décision
   // échue fait aussi repartir la liste (le site retire tout de suite ce qui a expiré).
   let seen = setting.get('decisions_version', 0);
@@ -158,5 +165,5 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
   // Arrêt : les attentes longues en cours répondent tout de suite.
   const release = () => events.emit('change');
 
-  return { create, lift, active, signed, signedEdge, events, watch, release, version: () => setting.get('decisions_version', 0) || 0 };
+  return { create, lift, active, signed, signedEdge, signedSummary, events, watch, release, version: () => setting.get('decisions_version', 0) || 0 };
 }
