@@ -731,14 +731,9 @@ meter.vg-m.total::-moz-meter-bar { background: var(--danger); }
 @media (prefers-reduced-motion: reduce) { .vigie *, .vigie *::before, .vigie *::after { transition: none !important; animation: none !important; } }
 
 /* ---------- 22. Passe 3 : téléphone, seuils, commandes ----------
-   Au téléphone, une carte d'interrupteur n'a qu'un « Arrêter… » (.tel-seul) : motif et durées passent sur la page de confirmation ;
-   le formulaire complet reste au bureau (.bureau-seul). L'erreur d'un seuil n'étire pas les champs voisins. Une commande à copier
+   Une carte d'interrupteur n'a qu'un « Arrêter… » (finitions : au bureau aussi) : motif et durées passent sur la page de confirmation.
+   L'erreur d'un seuil n'étire pas les champs voisins. Une commande à copier
    (.vg-commande) se coupe aux espaces seulement, chaque mot insécable, et défile seule si un mot ne tient pas, à 320 px comme en espacement WCAG 1.4.12. */
-.vigie .tel-seul { display: none; }
-@media (max-width: 720px) {
-  .vigie .tel-seul { display: flex; }
-  .vigie .bureau-seul { display: none; }
-}
 .vg-seuils-f { align-items: start; }
 .vigie pre.vg-commande { margin: 6px 0 10px; padding: 8px 10px; max-width: 100%; overflow-x: auto; border-radius: var(--r-admin-panneau); background: var(--s1);
   box-shadow: inset 0 0 0 1px var(--line); font: 13px/1.5 var(--mono, ui-monospace, monospace); white-space: pre-wrap; overflow-wrap: normal; word-break: normal; }
@@ -750,3 +745,6 @@ meter.vg-m.total::-moz-meter-bar { background: var(--danger); }
    La légende des gravités dans la légende (caption) du tableau des alertes : la phrase d'ordre, puis l'échelle. */
 .vg-alertes caption .vg-cap-t { display: block; }
 .vg-alertes caption .grav-leg { margin-top: 10px; }
+/* Un identifiant dans le titre d’une page (« Compte zitadel-318204977 ») tient sur sa ligne au téléphone, espacement WCAG compris :
+   en chasse fixe, il est réduit sous 480 px plutôt que coupé (essai I1 en espacement, finitions). */
+@media (max-width: 480px) { .vigie .ep :is(h1, .h1) :is(.ip, .sub) { font-size: .64em; } }
