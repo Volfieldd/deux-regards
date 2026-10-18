@@ -13,7 +13,9 @@ nouvelle ou modifiée, on se demande trois choses :
 Ce registre ne code rien dans `vigie/` ni `server/securite/` : il liste. La Vigie décide, numérote et implémente ; elle
 coche ici ce qu'elle a pris (colonne « Pris »).
 
-Relevé du 18 octobre 2026, sur main après les PR #114, #115, #117, #119, #122 et #127.
+Relevé du 18 octobre 2026, sur main après les PR #114, #115, #117, #119, #122 et #127, complété par la PR #129 (pages v2 sans formulaire).
+
+Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1, BV-2, BV-4 et BV-6 (`server/securite/`, `vigie/`, point d'émission dans `app.audit.log`) ; le site prend BV-3, BV-5 et BV-7 (et l'émission du partage par QR de BV-6), dans la PR `fix/vigie-bv3-bv5-bv7`.
 
 ---
 
@@ -66,6 +68,9 @@ intéressent la Vigie), plutôt qu'un `emit` à chaque route.
 | #127 v2 | Signaler | idem | idem | aucun |
 | #127 v2 | Partager sans script : « Copier le lien » désormais compté par `POST /photo/<slug>/partage` | gonfler les statistiques de partage | `gate()` : `input_validation_fail` (autre site), `excess_rate_limit_exceeded` | **BV-6** (seuils) |
 | #127 v2 | Photo offerte `/pour-vous/<jeton>` | jeton deviné ; fuite du jeton par le Referer | `token_guess` (DS16) | **BV-7** (durcissement, hors Vigie) |
+| #129 v2 | Recherche `?q=` (formulaire GET, 100 caractères) | injection, sondage | `malicious_input` (E14) par le crochet commun, DS11, DS22, DS23 ; identique en v1 et v2 | **BV-8**, **BV-9** |
+| #129 v2 | Carte, voyages, 404 v2 | parcours systématique, scanners | `malicious_excess_404` (E17, DS15/DS16), piège (E18), règle `bordure_rafale` | aucun |
+| #129 v2 | Pages légales et confidentialité | — (texte identique à la v1, journal de sécurité compris) | — | aucun |
 
 ### BV-3 — Valeurs de filtre impossibles
 
@@ -105,6 +110,20 @@ Les J'aime et partages sont comptés par adresse et limités (`gate()`). La v2 a
 depuis la page sans script. Aucun événement nouveau ; proposition : que la Vigie suive le rapport
 `excess_rate_limit_exceeded` / envois acceptés sur `partage` et `aime` pour recaler la limite (phase D), et rattache une
 rafale sur ces deux routes au score d'adresse (DS22) plutôt qu'à DS15.
+
+### BV-8 — Saisie de recherche impossible pour le formulaire
+
+Le champ de recherche est limité à 100 caractères et n'existe qu'une fois. Le serveur coupe une saisie plus longue et
+garde un seul `q` sans rien dire. Une saisie plus longue, ou un `q` répété, ne vient donc pas de l'interface : c'est le
+signal de DS12. Proposition : `input_validation_fail` (raison « saisie de recherche hors formulaire », longueur, nombre
+de `q`), gravité `moyen` ; la règle DS12 existante s'applique.
+
+### BV-9 — Recherches en rafale
+
+Aujourd'hui, ni limite ni signal côté site sur `/recherche` (seule la règle `bordure_rafale` le voit, si le Worker
+Cloudflare est installé). Proposition : une limite par adresse (60 en 10 minutes) qui, une fois atteinte, répond 429 et
+émet `excess_rate_limit_exceeded` (détail : `limite: 'recherche'`), gravité `bas`, rattachée à DS15 et au score
+d'adresse (DS22).
 
 ### BV-7 — Referer de la photo offerte (durcissement, pas un cas de détection)
 
