@@ -87,7 +87,7 @@ test('exceptions à source unique : rôle donné hors de l’application → cri
 
 test('cookie rejoué depuis un autre appareil → révocation des sessions du compte ; interrupteur des blocages arrêté : aucune réponse', async t => {
   const v = engineOf(t);
-  v.switches.set('blocages', 'arret', { duree: '1h', par: 'test' });
+  v.switches.set('blocages', 'arret', { duree: '1h', par: 'test', motif: 'essai' });
   v.site('session_use_after_expire', 'haut', { composant: 'site · connexion', sub: 'zitadel-a', detail: JSON.stringify({ meme_reseau_et_navigateur: false }) });
   assert.equal(v.decisions.active().length, 0);
   assert.match(v.alerts().find(a => a.regle === 'sigma.cookie_rejoue').reponse, /interrupteur des blocages arrêté/);
@@ -109,7 +109,8 @@ test('modes : arrêt (rien), alerter ; détection arrêtée : rien ; blocage aut
   const real = () => v.alerts().filter(a => a.regle !== 'sigma.surveillance_reduite');
   assert.equal(real().length, 0, 'règle arrêtée : rien');
   assert.ok(v.alerts().some(a => a.entite_key === 'regle:sigma.configuration'), 'arrêt de la règle signalé');
-  v.switches.set('detection', 'arret', { duree: '1h', par: 'test' });
+  assert.throws(() => v.switches.set('detection', 'arret', { duree: '1h', par: 'test' }), /motif obligatoire/);
+  v.switches.set('detection', 'arret', { duree: '1h', par: 'test', motif: 'essai' });
   v.site('sys_restore', 'haut', { composant: 'site · système' });
   assert.equal(real().length, 0, 'détection arrêtée : rien');
   assert.ok(v.alerts().some(a => a.entite_key === 'interrupteur:detection'), 'arrêt de la détection signalé malgré elle');

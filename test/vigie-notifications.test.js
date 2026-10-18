@@ -152,11 +152,19 @@ test('surveillance réduite : un message à chaque geste (même alerte déjà ou
   await v.notifier.idle();
   const msgs = v.sent.slice(before).map(s => s.body.message);
   assert.equal(msgs.length, 4, 'chaque geste prévient, malgré le plafond et l’alerte déjà ouverte');
-  assert.match(msgs[0], /^\[Moyenne\] Surveillance réduite : blocages automatiques arrêtés jusqu'à 15 h 02/);
-  assert.match(msgs[1], /blocages automatiques arrêtés jusqu'au mar\. 27 oct\., 13 h 02/, 'sept jours plus tard, heure d’hiver comprise');
-  assert.match(msgs[2], /règle « Cookie d'une session fermée rejoué depuis un autre appareil » passée de bloquer à observer/);
+  assert.match(msgs[0], /^\[Moyenne\] Surveillance réduite : blocages automatiques arrêtés jusqu’à 15 h 02/);
+  assert.match(msgs[1], /blocages automatiques arrêtés jusqu’au mar\. 27 oct\., 13 h 02/, 'sept jours plus tard, heure d’hiver comprise');
+  assert.match(msgs[2], /règle « Cookie d'une session fermée rejoué depuis un autre appareil » passée de Bloquer à Observer/);
   assert.match(msgs[3], /seuil d’une adresse relevé de 7 à 20 points/);
   assert.ok(msgs.every(m => !/essai de la bordure|prolongé|bruit/.test(m)), 'jamais le motif');
+  assert.throws(() => v.engine.setThreshold('ip', 30, 'Julien'), /motif obligatoire/, 'seuil relevé sans motif : refusé partout');
+  // Au-delà de 60 gestes dans l'heure : comptés, puis une synthèse à l'heure suivante (jamais perdus sans trace).
+  const start = v.sent.length;
+  for (let i = 0; i < 70; i++) await v.notifier.send(`geste ${i}`, { prioritaire: true });
+  assert.equal(v.sent.length - start, 56, '60 par heure au plus (4 déjà envoyés)');
+  v.clock.t += 3600e3;
+  await v.notifier.tick();
+  assert.match(v.sent.at(-1).body.message, /14 autre\(s\) geste\(s\) l’heure précédente/);
   // Après un arrêt, une règle reprend le mode qu'elle avait (et non son mode de départ).
   v.engine.setMode('sigma.restauration', 'alerter', 'test');
   v.engine.setMode('sigma.restauration', 'arret', 'test', { duree: '1h', motif: 'm' });

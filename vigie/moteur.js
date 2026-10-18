@@ -405,8 +405,11 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     if (!Object.hasOwn(REGISTRY, regle)) throw new Error(`règle inconnue : ${regle}`);
     if (!MODES.includes(mode)) throw new Error(`mode : ${MODES.join(', ')}`);
     if (regle === 'sigma.surveillance_reduite' && mode !== 'alerter') throw new Error('la règle « Surveillance réduite » reste en mode alerter : c’est elle qui prévient quand on réduit la surveillance');
-    const m = String(motif || '').slice(0, 200) || undefined;
+    const m = String(motif || '').trim().slice(0, 200) || undefined;
     const before = modeOf(regle);
+    if (mode === 'arret' && !duree) throw new Error('arrêt d’une règle toujours pour une durée (--duree 4h, 7j au plus)');
+    // Toute réduction (arrêt, descente de mode) demande un motif, quel que soit l'appelant (console, ligne de commande).
+    if (!m && MODES.indexOf(mode) < MODES.indexOf(before)) throw new Error('surveillance réduite : motif obligatoire');
     if (mode === 'arret') {
       if (!duree) throw new Error('arrêt d’une règle toujours pour une durée (--duree 4h, 7j au plus)');
       const jusqua = now() + Math.min(parseDuration(duree), 7 * 864e5);
@@ -423,7 +426,8 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   const setThreshold = (kind, value, par, { motif = '' } = {}) => {
     if (!Object.hasOwn(THRESHOLDS, kind) || !(value > 0 && value <= 1000)) throw new Error(`seuil : ${Object.keys(THRESHOLDS).join(', ')}, valeur de 0 à 1000`);
     const before = thresholds()[kind];
-    const m = String(motif || '').slice(0, 200) || undefined;
+    const m = String(motif || '').trim().slice(0, 200) || undefined;
+    if (!m && value > before) throw new Error('seuil relevé (surveillance réduite) : motif obligatoire');
     setting.set('seuils', { ...setting.get('seuils', {}), [kind]: value });
     store.own('vigie_interrupteur', { emetteur: par, detail: { seuil: kind, valeur: value, motif: m } });
     // Seuil relevé : il faut plus de points pour une alerte, la surveillance est réduite.

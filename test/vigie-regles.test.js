@@ -108,7 +108,7 @@ detection:
   s:
     detail.valeur|re: '^(a+)+$'
   condition: s
-vigie: { cas: DS5, entite: { kind: ip, champ: ip }, source_unique: true, delai_re_ms: 20 }
+vigie: { cas: DS5, entite: { kind: ip, champ: ip }, source_unique: true, delai_re_ms: 200 }
 `);
   const { rules } = loadRules(dir);
   assert.equal(rules[0].expireAt, Date.parse('2026-10-20T23:59:59.999Z'));
