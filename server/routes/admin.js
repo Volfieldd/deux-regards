@@ -34,6 +34,7 @@ import { TranslateError } from '../translate.js';
 import { registerEncounters } from './rencontres.js';
 import { registerOutings } from './sorties.js';
 import { registerTrips } from './voyages.js';
+import { registerGaleries } from './galeries.js';
 import { ADMIN_LANGS, ADMIN_LANG_NAMES, translator } from '../admin-i18n.js';
 import { monthYear } from '../format.js';
 import { legalMissing } from '../legal.js';
@@ -2139,7 +2140,7 @@ export default async function adminRoutes(app) {
   const helpIn = lang => (app.config.production ? (helpCache[lang] ??= loadHelp(lang)) : loadHelp(lang));
   // Chapitres de l'aide réservés : ils n'apparaissent qu'à qui peut ouvrir l'une des pages qu'ils décrivent.
   const HELP_PERMS = { preuves: ['photos.voir'], series: ['series.gerer'], auteurs: ['photographes.gerer'], 'filigrane-exif': ['site.filigrane'], apparence: ['site.apparence'],
-    reglages: ['site.textes', 'reglages.droits', 'comptes.gerer', 'journal.voir'], statistiques: ['statistiques.voir'], instagram: ['instagram.voir'], rencontres: ['personnes.voir', 'terrain.app'] };
+    reglages: ['site.textes', 'reglages.droits', 'comptes.gerer', 'journal.voir'], statistiques: ['statistiques.voir'], instagram: ['instagram.voir'], rencontres: ['personnes.voir', 'terrain.app'], 'galeries-privees': ['galeries.voir'] };
   app.get('/admin/aide', P('admin.acceder'), async (request, reply) => {
     const help = helpIn(request.t.lang);
     const sections = help.sections.filter(sec => !HELP_PERMS[sec.id] || HELP_PERMS[sec.id].some(perm => request.can(perm)));
@@ -2150,6 +2151,7 @@ export default async function adminRoutes(app) {
   registerEncounters(app, { repo, render, P, W, done, failed, withReady });
   registerOutings(app, { repo, render, P, W, done, failed, withReady });
   registerTrips(app, { repo, render, P, W, done, failed, withReady });
+  registerGaleries(app, { repo, render, P, W, done, failed });
 
   // ---------- traductions ----------
   // Proposition de traduction d'un champ (LibreTranslate du réseau local) : l'auteur la relit avant d'enregistrer.

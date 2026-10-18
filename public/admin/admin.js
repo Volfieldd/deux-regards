@@ -313,6 +313,27 @@ const toast = (() => {
 // ----- textes réservés au JavaScript / sans JavaScript -----
 $$('[data-js-only]').forEach(el => { el.hidden = false; });
 
+// ----- galeries privées : au téléphone, le champ qui prend le focus ne reste jamais sous la barre d'onglets fixe (un champ
+// en partie visible n'est pas défilé par le navigateur ; WCAG 2.4.12) -----
+if ($('.gp')) document.addEventListener('focusin', e => {
+  const bar = $('.tabbar');
+  if (!bar || getComputedStyle(bar).display === 'none' || !e.target.closest?.('.gp')) return;
+  const r = e.target.getBoundingClientRect(), top = bar.getBoundingClientRect().top;
+  if (r.bottom > top && r.top < top) window.scrollBy(0, r.bottom - top + 16);
+});
+
+// ----- galeries privées : « Copier » le lien, le mot de passe ou un message (page affichée une seule fois) -----
+$$('[data-copier]').forEach(b => b.addEventListener('click', async () => {
+  const src = document.getElementById(b.dataset.copier);
+  if (!src) return;
+  try {
+    await navigator.clipboard.writeText(src.textContent.trim());
+    const label = b.textContent;
+    b.textContent = `✓ ${b.dataset.copie || label}`;
+    setTimeout(() => { b.textContent = label; }, 2500);
+  } catch { /* presse-papiers refusé : le texte reste sélectionnable */ }
+}));
+
 // ----- menu mobile -----
 // Sans script, « Menu » est un lien vers #admin-nav (ouvert par :target, voir admin.css) ; ici, il redevient un bouton.
 (function () {

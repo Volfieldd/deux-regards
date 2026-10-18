@@ -1,0 +1,85 @@
+<% layout('./layout') %>
+<% /* Fiche d'une galerie privée, en onglets (MQ-18, état 14 ; étude § 2.8) : Accès, Photos, Sélections, Activité, Réglages
+      (des liens, sans script). En tête : le retour, le titre et l'état, ce que contient la galerie et quand elle ferme ;
+      « Voir comme un invité » (vue équipe, rien n'est noté) et « Nouvel accès ». */ %>
+<% const t = it.t, s = it.s, tab = it.tab;
+   const LABELS = { acces: t('Accès'), photos: t('Photos'), selections: t('Sélections'), activite: t('Activité'), reglages: t('Réglages') };
+   const N = { acces: s.nInvites, photos: s.nPhotos, selections: it.nSelections };
+   const href = k => (k === 'acces' ? `/admin/galeries/${s.id}` : `/admin/galeries/${s.id}/${k}`);
+   const csrf = `<input type="hidden" name="_csrf" value="${it.csrf}">`; %>
+<div class="gp">
+<p class="help-link"><a href="/admin/aide#galeries-privees"><%= t('Aide sur cette page') %></a></p>
+<header class="ep">
+  <a class="ep-retour" href="/admin/galeries"><%= t('Galeries privées') %></a>
+  <div class="ep-titre"><h1><%= s.title %></h1><%~ include('./_galerie-etat', { key: s.stateKey, text: s.stateText }) %></div>
+  <p class="ep-meta"><span><%= s.author_id ? t('Galerie de {name}', { name: s.who }) : t('Galerie commune') %></span><span><%= s.nPhotos > 1 ? t('{n} photos', { n: s.nPhotos }) : t('{n} photo', { n: s.nPhotos }) %></span><span><%= s.state === 'fermee' ? t('fermée') : t('ferme le {date}', { date: s.closesText }) %></span></p>
+  <div class="ep-actions"><a class="btn ghost ep-secondaire" href="/admin/galeries/<%= s.id %>/apercu"><%= t('Voir comme un invité') %></a><% if (it.canShare && s.state !== 'fermee') { %><a class="btn" href="/admin/galeries/<%= s.id %>/acces/nouveau"><%= t('Nouvel accès') %></a><% } %></div>
+</header>
+<% if (s.state === 'brouillon') { %><div class="signal" role="note"><p class="signal-t"><span aria-hidden="true">○</span> <%= t('Brouillon : l’équipe seule voit cette galerie') %></p><p><%= t('Ses accès ne s’ouvrent qu’une fois la galerie ouverte. Ajoutez d’abord les photos, puis ouvrez-la.') %></p>
+<% if (it.canManage) { %><div class="actions"><form method="post" action="/admin/galeries/<%= s.id %>/ouvrir"><%~ csrf %><button class="btn" type="submit"><%= t('Ouvrir la galerie') %></button></form></div><% } %></div>
+<% } %>
+<nav class="onglets" aria-label="<%= t('Rubriques de la galerie') %>"><ul>
+<% it.tabs.forEach(k => { %>  <li><a href="<%= href(k) %>"<%~ k === tab ? ' aria-current="page"' : '' %>><%= LABELS[k] %><% if (N[k] !== undefined) { %> <span class="n"><%= N[k] %></span><% } %></a></li>
+<% }) %></ul></nav>
+<% if (tab === 'acces') { %>
+<% if (!it.invites.length) { %><p class="empty"><%= t('Aucun accès pour l’instant.') %><% if (it.canShare && s.state !== 'fermee') { %> <a class="more" href="/admin/galeries/<%= s.id %>/acces/nouveau"><%= t('Créer le premier accès') %></a><% } %></p>
+<% } else { %>
+<div class="tablewrap liste-wrap"><table class="liste-a">
+<caption><%= it.invites.length > 1 ? t('{n} accès. Dernière visite : la dernière page de la galerie ouverte avec le mot de passe.', { n: it.invites.length }) : t('1 accès. Dernière visite : la dernière page de la galerie ouverte avec le mot de passe.') %></caption>
+<thead><tr><th scope="col"><%= t('Accès') %></th><th scope="col"><%= t('Droits') %></th><th scope="col"><%= t('Fin de l’accès') %></th><th scope="col"><%= t('Dernière visite') %></th><th scope="col"><%= t('État') %></th></tr></thead>
+<tbody>
+<% it.invites.forEach(i => { %><tr><th scope="row"><a class="ligne-lien" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>"><%= i.label %></a><span class="sec"><%= i.is_group ? t('lien de groupe') : t('lien personnel') %> · <%= t('créé le {date}', { date: i.createdText }) %></span><% if (i.selection_sent_at && !i.selection_seen_at) { %><span class="att"><span aria-hidden="true">▲</span> <%= t('Sélection envoyée') %></span><% } %><% if (i.devices > 3) { %><span class="att"><span aria-hidden="true">▲</span> <%= t('Ouvert sur {n} appareils', { n: i.devices }) %></span><% } %></th>
+<td class="c-demi" data-label="<%= t('Droits') %>"><%= i.rightsLabel %></td><td class="c-demi" data-label="<%= t('Fin de l’accès') %>"><%= i.expiresText %></td>
+<td class="c-demi" data-label="<%= t('Dernière visite') %>"><%= i.lastText %><span class="sec"><%= i.devices > 1 ? t('{n} appareils', { n: i.devices }) : t('{n} appareil', { n: i.devices }) %></span></td>
+<td class="c-etat"><%~ include('./_galerie-etat', { key: i.stateKey, text: i.stateText }) %><% if (i.openedText) { %><span class="sec"><%= i.openedText %> · <%= i.nFav > 1 ? t('{n} favoris', { n: i.nFav }) : t('{n} favori', { n: i.nFav }) %></span><% } %></td></tr>
+<% }) %></tbody></table></div>
+<% } %>
+<% } else if (tab === 'photos') { %>
+<% if (it.exifAll) { %><div class="signal" role="alert"><p class="signal-t"><span aria-hidden="true">▲</span> <%= t('Réglage « Tout l’EXIF de l’original » actif : les invités ne voient aucune photo') %></p><p><%= t('Avec ce réglage, les images gardent la position GPS : la galerie privée ne les sert pas. Choisissez un autre mode dans Filigrane & EXIF.') %></p></div><% } %>
+<% if (!it.items.length) { %><p class="empty"><%= t('Aucune photo dans la galerie pour l’instant.') %></p>
+<% } else { %><ol class="gp-photos">
+<% it.items.forEach((p, k) => { %>  <li id="photo-<%= p.item_id %>"><img src="<%= p.thumb %>" alt="" width="<%= p.width >= p.height ? 96 : Math.round(96 * p.width / p.height) %>" height="<%= p.width >= p.height ? Math.round(96 * p.height / p.width) : 96 %>" loading="lazy">
+    <div class="gp-photo-t"><span class="t"><%= p.n %>. <%= p.title %></span><span class="sec"><%= p.author %> · <%= p.status === 'published' ? t('publiée') : t('brouillon') %></span>
+      <span class="etat etat--<%= p.level === 'ok' ? 'abouti' : p.level === 'warn' ? 'attention' : 'arret' %>"><span aria-hidden="true"><%= p.level === 'ok' ? '●' : p.level === 'warn' ? '▲' : '✕' %></span><%= t('usage privé : {level}', { level: p.levelText }) %></span>
+<% if (p.level !== 'ok' && p.reasons.length) { %>      <span class="sec"><%= p.reasons.join(' ; ') %><% if (p.confirmed_at) { %> · <%= t('confirmé par {name}', { name: p.confirmed_by }) %><% } %></span><% } %></div>
+<% if (it.canManage) { %>    <div class="btns-ligne">
+<% if (k > 0) { %>      <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/monter"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Monter') %><span class="sr-only"> : <%= p.title %></span></button></form><% } %>
+<% if (k < it.items.length - 1) { %>      <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/descendre"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Descendre') %><span class="sr-only"> : <%= p.title %></span></button></form><% } %>
+<% if (p.level === 'warn' && !p.confirmed_at) { %>      <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/confirmer"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Confirmer l’usage privé') %><span class="sr-only"> : <%= p.title %></span></button></form><% } %>
+      <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/retirer"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Retirer de la galerie') %><span class="sr-only"> : <%= p.title %></span></button></form>
+    </div>
+<% } %>  </li>
+<% }) %></ol>
+<% } %>
+<% if (it.canManage && it.candidates.length) { %><form class="panel form" method="post" action="/admin/galeries/<%= s.id %>/photos"><%~ csrf %>
+  <fieldset class="choix-a"><legend><%= t('Ajouter des photos') %></legend><p class="aide"><%= t('Une photo garde son statut (brouillon ou publiée). Une photo dont une personne a refusé la publication ne peut pas être ajoutée.') %></p>
+  <ul class="gp-candidats"><% it.candidates.forEach(p => { %><li><label><input type="checkbox" name="photos" value="<%= p.id %>"><img src="<%= p.thumb %>" alt="" width="<%= p.width >= p.height ? 72 : Math.round(72 * p.width / p.height) %>" height="<%= p.width >= p.height ? Math.round(72 * p.height / p.width) : 72 %>" loading="lazy"><span><%= p.title %></span></label></li><% }) %></ul></fieldset>
+  <div class="form-pied"><button class="btn" type="submit"><%= t('Ajouter les photos cochées') %></button></div>
+</form>
+<% } %>
+<% } else if (tab === 'selections') { %>
+<% if (!it.selections.length) { %><p class="empty"><%= t('Aucun favori pour l’instant.') %></p>
+<% } else { it.selections.forEach(i => { %><section class="panel" aria-labelledby="sel-<%= i.id %>"><h2 class="panel-t" id="sel-<%= i.id %>"><a class="ligne-lien" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>"><%= i.label %></a> · <%= i.nFav > 1 ? t('{n} favoris', { n: i.nFav }) : t('{n} favori', { n: i.nFav }) %></h2>
+<% if (i.selection_sent_at) { %><p class="lu"><%= t('Sélection envoyée') %></p><% } %>
+<ul class="favoris-a"><% i.favs.forEach(p => { %><li><img src="<%= p.thumb %>" alt="" height="80" width="<%= Math.round(80 * p.width / p.height) %>" loading="lazy"><span class="t"><%= p.title %></span><% if (p.source_name) { %><span class="sec"><%= p.source_name %></span><% } %></li><% }) %></ul>
+<div class="btns-ligne"><a class="btn ghost" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/selection.csv"><%= t('Exporter la sélection (CSV)') %></a></div></section>
+<% }) } %>
+<% } else if (tab === 'activite') { %>
+<section class="panel" aria-labelledby="act-t"><h2 class="panel-t" id="act-t"><%= t('Activité') %></h2>
+<% if (!it.events.length) { %><p class="empty"><%= t('Rien encore.') %></p><% } else { %><ol class="chrono">
+<% it.events.forEach(e => { %><li><time datetime="<%= new Date(e.at).toISOString() %>"><%= e.when %></time><span><% if (e.who) { %><b><%= e.who %></b> · <% } %><%= e.text %><% if (e.photo) { %> « <%= e.photo %> »<% } %><% if (e.antivirus) { %><br><span class="sec"><%= t('Souvent l’antivirus de la messagerie qui vérifie le lien, pas la personne.') %></span><% } %><% if (e.net) { %><br><span class="sec"><%= e.net %><% if (e.robot) { %> · <%= t('robot ou aperçu de lien') %><% } %></span><% } %></span></li>
+<% }) %></ol><% } %>
+<p class="hint"><%= t('Adresses IP tronquées, pays estimé par Cloudflare, aucun navigateur noté. Effacé avec l’accès, six mois après sa fin.') %></p></section>
+<% } else if (tab === 'reglages') { %>
+<form class="panel form gp-form" method="post" action="/admin/galeries/<%= s.id %>" novalidate><%~ csrf %>
+<% if (it.errors) { %>  <section class="resume-a" tabindex="-1" aria-labelledby="resume-t"><h2 id="resume-t"><%= t('Rien n’est enregistré : à corriger') %></h2><ul><% Object.keys(it.errors).forEach(k => { %><li><a href="#g-<%= k %>"><%= it.errors[k] %></a></li><% }) %></ul></section>
+<% } %><%~ include('./_galerie-champs', it) %>
+<% if (it.canManage) { %>  <div class="form-pied"><button class="btn" type="submit"><%= t('Enregistrer') %></button></div><% } %>
+</form>
+<% if (it.canManage) { %><section class="panel" aria-labelledby="etat-t"><h2 class="panel-t" id="etat-t"><%= t('Ouverture') %></h2>
+<% if (s.state === 'ouverte') { %><p><%= t('Fermer la galerie arrête tous ses accès tout de suite ; vous pourrez la rouvrir.') %></p><form method="post" action="/admin/galeries/<%= s.id %>/fermer"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Fermer la galerie') %></button></form>
+<% } else { %><p><%= t('Ouverte, la galerie s’affiche aux personnes qui ont un accès valide.') %></p><form method="post" action="/admin/galeries/<%= s.id %>/ouvrir"><%~ csrf %><button class="btn" type="submit"><%= t('Ouvrir la galerie') %></button></form><% } %>
+<p class="hint"><%= t('Supprimer efface la galerie, ses accès et leurs données ; les photos restent dans la photothèque.') %></p><p><a class="btn danger-c" href="/admin/galeries/<%= s.id %>/supprimer"><%= t('Supprimer la galerie…') %></a></p></section>
+<% } %>
+<% } %>
+</div>

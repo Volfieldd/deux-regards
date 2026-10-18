@@ -1,0 +1,1178 @@
+{
+ "Erreur :": {
+  "en": "Error:",
+  "de": "Fehler:"
+ },
+ "Titre de la galerie": {
+  "en": "Gallery title",
+  "de": "Titel der Galerie"
+ },
+ "Les invités le voient une fois le mot de passe accepté, jamais avant.": {
+  "en": "Guests see it once their password is accepted, never before.",
+  "de": "Gäste sehen ihn erst, wenn ihr Passwort akzeptiert ist, nie vorher."
+ },
+ "Titre en anglais": {
+  "en": "Title in English",
+  "de": "Titel auf Englisch"
+ },
+ "(facultatif)": {
+  "en": "(optional)",
+  "de": "(optional)"
+ },
+ "Titre en allemand": {
+  "en": "Title in German",
+  "de": "Titel auf Deutsch"
+ },
+ "Mot d’accueil": {
+  "en": "Welcome note",
+  "de": "Begrüßung"
+ },
+ "Ce que vous attendez de l’invité : « Marquez d’une étoile celles qui vous intéressent. » Signé de votre nom.": {
+  "en": "What you expect from the guest: “Star the ones you like.” Signed with your name.",
+  "de": "Was Sie vom Gast erwarten: „Markieren Sie die Fotos, die Ihnen gefallen, mit einem Stern.“ Mit Ihrem Namen unterzeichnet."
+ },
+ "Mot d’accueil en anglais": {
+  "en": "Welcome note in English",
+  "de": "Begrüßung auf Englisch"
+ },
+ "Mot d’accueil en allemand": {
+  "en": "Welcome note in German",
+  "de": "Begrüßung auf Deutsch"
+ },
+ "Fermeture de la galerie": {
+  "en": "Gallery closing date",
+  "de": "Schließung der Galerie"
+ },
+ "Écrivez-la comme vous voulez : « 30/11/2026 », « 30 nov. 2026 ». Un an au plus. À cette date, tous ses accès cessent de marcher.": {
+  "en": "Write it as you like: “30/11/2026”, “30 Nov 2026”. One year at most. On that date, all its accesses stop working.",
+  "de": "Schreiben Sie es, wie Sie möchten: „30.11.2026“, „30. Nov. 2026“. Höchstens ein Jahr. An diesem Tag hören alle Zugänge auf zu funktionieren."
+ },
+ "Accès de {name}": {
+  "en": "Access of {name}",
+  "de": "Zugang von {name}"
+ },
+ "lien de groupe": {
+  "en": "group link",
+  "de": "Gruppenlink"
+ },
+ "lien personnel": {
+  "en": "personal link",
+  "de": "persönlicher Link"
+ },
+ "créé le {date}": {
+  "en": "created on {date}",
+  "de": "erstellt am {date}"
+ },
+ "jusqu’au {date}": {
+  "en": "until {date}",
+  "de": "bis {date}"
+ },
+ "Voir comme un invité": {
+  "en": "View as a guest",
+  "de": "Als Gast ansehen"
+ },
+ "Révoquer l’accès…": {
+  "en": "Revoke access…",
+  "de": "Zugang widerrufen…"
+ },
+ "Suspendu après 30 mots de passe refusés": {
+  "en": "Suspended after 30 refused passwords",
+  "de": "Gesperrt nach 30 abgelehnten Passwörtern"
+ },
+ "En pause de sécurité jusqu’à {time} : {n} essais refusés": {
+  "en": "Security pause until {time}: {n} refused tries",
+  "de": "Sicherheitspause bis {time}: {n} abgelehnte Versuche"
+ },
+ "Le lien a peut-être fui : quelqu’un essaie des mots de passe. Si la personne vous appelle, redonnez-lui un nouveau mot de passe ; sinon, révoquez l’accès.": {
+  "en": "The link may have leaked: someone is trying passwords. If the person calls you, give them a new password; otherwise, revoke the access.",
+  "de": "Der Link ist vielleicht durchgesickert: Jemand probiert Passwörter aus. Wenn die Person Sie anruft, geben Sie ihr ein neues Passwort; sonst widerrufen Sie den Zugang."
+ },
+ "La pause se lève seule. Si la personne vous appelle, redonnez-lui le mot de passe de vive voix, puis débloquez : elle peut réessayer tout de suite. Après 10 refus, la pause dure 15 minutes ; après 30, l’accès est suspendu jusqu’à ce que vous le débloquiez.": {
+  "en": "The pause ends on its own. If the person calls you, give them the password by voice, then unblock: they can try again at once. After 10 refusals, the pause lasts 15 minutes; after 30, the access is suspended until you unblock it.",
+  "de": "Die Pause endet von selbst. Wenn die Person Sie anruft, nennen Sie ihr das Passwort mündlich und entsperren Sie dann: Sie kann es sofort erneut versuchen. Nach 10 Ablehnungen dauert die Pause 15 Minuten; nach 30 ist der Zugang gesperrt, bis Sie ihn entsperren."
+ },
+ "Débloquer l’accès": {
+  "en": "Unblock access",
+  "de": "Zugang entsperren"
+ },
+ "Nouveau mot de passe…": {
+  "en": "New password…",
+  "de": "Neues Passwort…"
+ },
+ "Ouvert": {
+  "en": "Opened",
+  "de": "Geöffnet"
+ },
+ "pas encore": {
+  "en": "not yet",
+  "de": "noch nicht"
+ },
+ "mot de passe accepté": {
+  "en": "password accepted",
+  "de": "Passwort akzeptiert"
+ },
+ "le lien seul ne compte pas": {
+  "en": "the link alone does not count",
+  "de": "der Link allein zählt nicht"
+ },
+ "Dernière visite": {
+  "en": "Last visit",
+  "de": "Letzter Besuch"
+ },
+ "Appareils": {
+  "en": "Devices",
+  "de": "Geräte"
+ },
+ "signalé au-delà de 3": {
+  "en": "flagged above 3",
+  "de": "gemeldet ab mehr als 3"
+ },
+ "Favoris": {
+  "en": "Favourites",
+  "de": "Favoriten"
+ },
+ "{n} sur {total}": {
+  "en": "{n} of {total}",
+  "de": "{n} von {total}"
+ },
+ "sélection envoyée": {
+  "en": "selection sent",
+  "de": "Auswahl gesendet"
+ },
+ "pas encore envoyée": {
+  "en": "not sent yet",
+  "de": "noch nicht gesendet"
+ },
+ "Sa sélection · {n} favoris": {
+  "en": "Their selection · {n} favourites",
+  "de": "Auswahl · {n} Favoriten"
+ },
+ "Sa sélection · {n} favori": {
+  "en": "Their selection · {n} favourite",
+  "de": "Auswahl · {n} Favorit"
+ },
+ "Envoyée le {date} ; vue par l’équipe : la personne ne peut plus la reprendre seule.": {
+  "en": "Sent on {date}; seen by the team: the person can no longer take it back alone.",
+  "de": "Gesendet am {date}; vom Team gesehen: Die Person kann sie nicht mehr selbst zurücknehmen."
+ },
+ "Envoyée le {date}.": {
+  "en": "Sent on {date}.",
+  "de": "Gesendet am {date}."
+ },
+ "Ses favoris, dans l’ordre où elle les a posés": {
+  "en": "Their favourites, in the order they were chosen",
+  "de": "Die Favoriten, in der Reihenfolge der Auswahl"
+ },
+ "favori à {time}": {
+  "en": "favourite at {time}",
+  "de": "Favorit um {time}"
+ },
+ "Exporter la sélection (CSV)": {
+  "en": "Export the selection (CSV)",
+  "de": "Auswahl exportieren (CSV)"
+ },
+ "Rouvrir la sélection": {
+  "en": "Reopen the selection",
+  "de": "Auswahl wieder öffnen"
+ },
+ "« Rouvrir » lui rend la main : elle pourra changer ses favoris et renvoyer sa sélection.": {
+  "en": "“Reopen” gives control back: they can change their favourites and send the selection again.",
+  "de": "„Wieder öffnen“ gibt der Person die Hand zurück: Sie kann ihre Favoriten ändern und die Auswahl erneut senden."
+ },
+ "Aucun favori pour l’instant.": {
+  "en": "No favourite yet.",
+  "de": "Noch kein Favorit."
+ },
+ "Activité": {
+  "en": "Activity",
+  "de": "Aktivität"
+ },
+ "Rien encore.": {
+  "en": "Nothing yet.",
+  "de": "Noch nichts."
+ },
+ "Souvent l’antivirus de la messagerie qui vérifie le lien, pas la personne.": {
+  "en": "Often the email antivirus checking the link, not the person.",
+  "de": "Oft der Virenscanner des E-Mail-Dienstes, der den Link prüft, nicht die Person."
+ },
+ "robot ou aperçu de lien": {
+  "en": "robot or link preview",
+  "de": "Robot oder Linkvorschau"
+ },
+ "Adresses IP tronquées, pays estimé par Cloudflare, aucun navigateur noté.": {
+  "en": "Truncated IP addresses, country estimated by Cloudflare, no browser recorded.",
+  "de": "Gekürzte IP-Adressen, Land von Cloudflare geschätzt, kein Browser gespeichert."
+ },
+ "Réglages de l’accès": {
+  "en": "Access settings",
+  "de": "Einstellungen des Zugangs"
+ },
+ "Fin de l’accès": {
+  "en": "End of access",
+  "de": "Ende des Zugangs"
+ },
+ "Au plus tard le {date}, fermeture de la galerie ; 6 mois au plus. Prolonger garde le lien et le mot de passe.": {
+  "en": "On {date} at the latest, when the gallery closes; 6 months at most. Extending keeps the link and the password.",
+  "de": "Spätestens am {date}, bei Schließung der Galerie; höchstens 6 Monate. Verlängern behält Link und Passwort."
+ },
+ "Ce que la personne peut faire": {
+  "en": "What the person can do",
+  "de": "Was die Person tun kann"
+ },
+ "Choisir ses favoris": {
+  "en": "Choose favourites",
+  "de": "Favoriten auswählen"
+ },
+ "Télécharger les photos en 2 048 px": {
+  "en": "Download the photos at 2,048 px",
+  "de": "Die Fotos in 2.048 px herunterladen"
+ },
+ "Et en grande taille, jusqu’à 4 000 px": {
+  "en": "And in large size, up to 4,000 px",
+  "de": "Und in großer Größe, bis 4.000 px"
+ },
+ "Lien et mot de passe": {
+  "en": "Link and password",
+  "de": "Link und Passwort"
+ },
+ "Affichés une seule fois, à la création. Un nouveau mot de passe garde le lien ; un nouveau lien garde le mot de passe. L’ancien cesse de marcher aussitôt.": {
+  "en": "Shown only once, at creation. A new password keeps the link; a new link keeps the password. The old one stops working at once.",
+  "de": "Nur einmal angezeigt, bei der Erstellung. Ein neues Passwort behält den Link; ein neuer Link behält das Passwort. Das alte funktioniert sofort nicht mehr."
+ },
+ "Nouveau lien…": {
+  "en": "New link…",
+  "de": "Neuer Link…"
+ },
+ "Données de cet accès": {
+  "en": "Data of this access",
+  "de": "Daten dieses Zugangs"
+ },
+ "Nom chiffré, activité, favoris et sélection : effacés seuls le {date}, six mois après la fin de l’accès.": {
+  "en": "Encrypted name, activity, favourites and selection: deleted automatically on {date}, six months after the access ends.",
+  "de": "Verschlüsselter Name, Aktivität, Favoriten und Auswahl: automatisch gelöscht am {date}, sechs Monate nach Ende des Zugangs."
+ },
+ "La personne peut demander à les effacer plus tôt ; « Effacer » révoque aussi l’accès.": {
+  "en": "The person can ask for earlier deletion; “Delete” also revokes the access.",
+  "de": "Die Person kann eine frühere Löschung verlangen; „Löschen“ widerruft auch den Zugang."
+ },
+ "Effacer l’accès et ses données…": {
+  "en": "Delete the access and its data…",
+  "de": "Zugang und seine Daten löschen…"
+ },
+ "Galeries privées": {
+  "en": "Private galleries",
+  "de": "Private Galerien"
+ },
+ "Nouvelle galerie": {
+  "en": "New gallery",
+  "de": "Neue Galerie"
+ },
+ "La galerie n’est pas créée : à corriger": {
+  "en": "The gallery was not created: to correct",
+  "de": "Die Galerie wurde nicht erstellt: bitte korrigieren"
+ },
+ "Tous les champs sont obligatoires, sauf mention « facultatif ».": {
+  "en": "All fields are required unless marked “optional”.",
+  "de": "Alle Felder sind Pflichtfelder, außer „optional“."
+ },
+ "Une galerie commune n’est visible que des comptes qui voient toutes les galeries.": {
+  "en": "A shared gallery is only visible to accounts that see all galleries.",
+  "de": "Eine gemeinsame Galerie sehen nur Konten, die alle Galerien sehen."
+ },
+ "Commune (les deux photographes)": {
+  "en": "Shared (both photographers)",
+  "de": "Gemeinsam (beide Fotografen)"
+ },
+ "Créer la galerie": {
+  "en": "Create the gallery",
+  "de": "Galerie erstellen"
+ },
+ "Nouvel accès": {
+  "en": "New access",
+  "de": "Neuer Zugang"
+ },
+ "Galerie de {name}": {
+  "en": "{name}’s gallery",
+  "de": "Galerie von {name}"
+ },
+ "Galerie commune": {
+  "en": "Shared gallery",
+  "de": "Gemeinsame Galerie"
+ },
+ "ouverte jusqu’au {date}": {
+  "en": "open until {date}",
+  "de": "geöffnet bis {date}"
+ },
+ "{n} autres accès": {
+  "en": "{n} other accesses",
+  "de": "{n} weitere Zugänge"
+ },
+ "1 autre accès": {
+  "en": "1 other access",
+  "de": "1 weiterer Zugang"
+ },
+ "aucun autre accès": {
+  "en": "no other access",
+  "de": "kein weiterer Zugang"
+ },
+ "La galerie est en brouillon": {
+  "en": "The gallery is a draft",
+  "de": "Die Galerie ist ein Entwurf"
+ },
+ "L’accès sera prêt, mais son lien ne s’ouvrira qu’une fois la galerie ouverte (onglet Réglages).": {
+  "en": "The access will be ready, but its link will only open once the gallery is open (Settings tab).",
+  "de": "Der Zugang ist bereit, aber sein Link öffnet sich erst, wenn die Galerie geöffnet ist (Reiter Einstellungen)."
+ },
+ "L’accès n’est pas créé : {n} points à corriger": {
+  "en": "The access was not created: {n} points to correct",
+  "de": "Der Zugang wurde nicht erstellt: {n} Punkte zu korrigieren"
+ },
+ "L’accès n’est pas créé : 1 point à corriger": {
+  "en": "The access was not created: 1 point to correct",
+  "de": "Der Zugang wurde nicht erstellt: 1 Punkt zu korrigieren"
+ },
+ "Pour qui": {
+  "en": "For whom",
+  "de": "Für wen"
+ },
+ "Nom de la personne": {
+  "en": "Name of the person",
+  "de": "Name der Person"
+ },
+ "Seule l’équipe le voit (chiffré, effacé six mois après la fin de l’accès). L’invité verra le titre de la galerie.": {
+  "en": "Only the team sees it (encrypted, deleted six months after the access ends). The guest will see the gallery title.",
+  "de": "Nur das Team sieht ihn (verschlüsselt, sechs Monate nach Ende des Zugangs gelöscht). Der Gast sieht den Titel der Galerie."
+ },
+ "Un accès pour": {
+  "en": "An access for",
+  "de": "Ein Zugang für"
+ },
+ "Une personne (lien personnel)": {
+  "en": "One person (personal link)",
+  "de": "Eine Person (persönlicher Link)"
+ },
+ "On sait qui a ouvert, et l’on peut révoquer cette seule personne.": {
+  "en": "You know who opened it, and you can revoke this person alone.",
+  "de": "Man weiß, wer geöffnet hat, und kann nur diese Person widerrufen."
+ },
+ "Un groupe (le même lien pour plusieurs personnes)": {
+  "en": "A group (the same link for several people)",
+  "de": "Eine Gruppe (derselbe Link für mehrere Personen)"
+ },
+ "Un couple, une rédaction. La liste des accès le signale.": {
+  "en": "A couple, an editorial team. The list of accesses flags it.",
+  "de": "Ein Paar, eine Redaktion. Die Liste der Zugänge weist darauf hin."
+ },
+ "Langue de la galerie pour cette personne": {
+  "en": "Gallery language for this person",
+  "de": "Sprache der Galerie für diese Person"
+ },
+ "Durée et droits": {
+  "en": "Duration and rights",
+  "de": "Dauer und Rechte"
+ },
+ "Écrivez-la comme vous voulez : « 30/11/2026 », « 30 nov. ». 30 jours par défaut, 6 mois au plus ; au plus tard le jour où la galerie ferme. Prolonger garde le même lien.": {
+  "en": "Write it as you like: “30/11/2026”, “30 Nov”. 30 days by default, 6 months at most; no later than the day the gallery closes. Extending keeps the same link.",
+  "de": "Schreiben Sie es, wie Sie möchten: „30.11.2026“, „30. Nov.“. Standardmäßig 30 Tage, höchstens 6 Monate; spätestens am Tag der Schließung der Galerie. Verlängern behält denselben Link."
+ },
+ "Choix rapides de la fin": {
+  "en": "Quick choices for the end",
+  "de": "Schnellauswahl für das Ende"
+ },
+ "Elle voit toujours toutes les photos de la galerie, avec le filigrane du site. Jamais l’original, jamais le GPS.": {
+  "en": "They always see all the photos of the gallery, with the site watermark. Never the original, never the GPS.",
+  "de": "Die Person sieht immer alle Fotos der Galerie, mit dem Wasserzeichen der Website. Nie das Original, nie das GPS."
+ },
+ "Une étoile sur chaque photo ; vous voyez sa sélection ici.": {
+  "en": "A star on each photo; you see the selection here.",
+  "de": "Ein Stern auf jedem Foto; Sie sehen die Auswahl hier."
+ },
+ "JPEG marqué « usage personnel », sans GPS.": {
+  "en": "JPEG marked “personal use”, without GPS.",
+  "de": "JPEG mit dem Vermerk „persönlicher Gebrauch“, ohne GPS."
+ },
+ "Seulement avec le téléchargement ; signalé à la sécurité.": {
+  "en": "Only with downloading; reported to security.",
+  "de": "Nur mit dem Download; der Sicherheit gemeldet."
+ },
+ "Photos de la galerie : {n}": {
+  "en": "Photos of the gallery: {n}",
+  "de": "Fotos der Galerie: {n}"
+ },
+ "Modifier les photos de la galerie": {
+  "en": "Edit the photos of the gallery",
+  "de": "Fotos der Galerie ändern"
+ },
+ "Photos de la galerie, dans l’ordre": {
+  "en": "Photos of the gallery, in order",
+  "de": "Fotos der Galerie, in Reihenfolge"
+ },
+ "{n} photos à vérifier avant d’envoyer": {
+  "en": "{n} photos to check before sending",
+  "de": "{n} Fotos vor dem Senden prüfen"
+ },
+ "1 photo à vérifier avant d’envoyer": {
+  "en": "1 photo to check before sending",
+  "de": "1 Foto vor dem Senden prüfen"
+ },
+ "Rien ne bloque l’envoi.": {
+  "en": "Nothing blocks sending.",
+  "de": "Nichts blockiert das Senden."
+ },
+ "Ouvrir la fiche de la photo": {
+  "en": "Open the photo’s page",
+  "de": "Fotoseite öffnen"
+ },
+ "Confirmer l’usage privé": {
+  "en": "Confirm private use",
+  "de": "Private Nutzung bestätigen"
+ },
+ "Retirer de la galerie": {
+  "en": "Remove from the gallery",
+  "de": "Aus der Galerie entfernen"
+ },
+ "Mot de passe : créé à l’étape suivante.": {
+  "en": "Password: created at the next step.",
+  "de": "Passwort: wird im nächsten Schritt erstellt."
+ },
+ "12 caractères faciles à dicter, en trois groupes de quatre, sans 0, O, 1, I ni L. Il s’affiche une seule fois, pour que vous le donniez par un autre moyen (SMS, appel). Il n’est jamais écrit dans le message du lien.": {
+  "en": "12 characters easy to dictate, in three groups of four, without 0, O, 1, I or L. It is shown only once, so you can give it by another channel (text message, call). It is never written in the link message.",
+  "de": "12 leicht zu diktierende Zeichen in drei Vierergruppen, ohne 0, O, 1, I oder L. Es wird nur einmal angezeigt, damit Sie es auf anderem Weg weitergeben (SMS, Anruf). Es steht nie in der Nachricht mit dem Link."
+ },
+ "Créer l’accès": {
+  "en": "Create the access",
+  "de": "Zugang erstellen"
+ },
+ "Le message à transmettre": {
+  "en": "The message to pass on",
+  "de": "Die weiterzugebende Nachricht"
+ },
+ "Le site n’envoie pas d’e-mail : à l’étape suivante, vous copiez ce message, avec le lien, et l’envoyez vous-même. Le mot de passe part à part, par un autre moyen. Texte seul, dans la langue choisie pour la personne.": {
+  "en": "The site does not send email: at the next step, you copy this message, with the link, and send it yourself. The password goes separately, by another channel. Plain text, in the language chosen for the person.",
+  "de": "Die Website sendet keine E-Mail: Im nächsten Schritt kopieren Sie diese Nachricht mit dem Link und senden sie selbst. Das Passwort geht getrennt, auf anderem Weg. Nur Text, in der für die Person gewählten Sprache."
+ },
+ "Voir la galerie comme un invité": {
+  "en": "View the gallery as a guest",
+  "de": "Galerie als Gast ansehen"
+ },
+ "Le lien et le mot de passe ont déjà été affichés": {
+  "en": "The link and the password have already been shown",
+  "de": "Link und Passwort wurden bereits angezeigt"
+ },
+ "Seule leur empreinte est gardée : ils ne peuvent pas être relus. S’ils sont perdus, remplacez-les.": {
+  "en": "Only their fingerprint is kept: they cannot be read again. If they are lost, replace them.",
+  "de": "Nur ihr Fingerabdruck wird gespeichert: Sie können nicht erneut gelesen werden. Wenn sie verloren sind, ersetzen Sie sie."
+ },
+ "Voir le suivi de l’accès": {
+  "en": "See the access tracking",
+  "de": "Verlauf des Zugangs ansehen"
+ },
+ "À donner à {name} par un autre moyen": {
+  "en": "To give to {name} by another channel",
+  "de": "An {name} auf anderem Weg weitergeben"
+ },
+ "Notez-les maintenant": {
+  "en": "Note them now",
+  "de": "Notieren Sie sie jetzt"
+ },
+ "En quittant cette page, ni le lien ni le mot de passe ne pourront être relus : seule leur empreinte est gardée. Perdus, ils se remplacent par « Nouveau mot de passe » ou « Nouveau lien ».": {
+  "en": "Once you leave this page, neither the link nor the password can be read again: only their fingerprint is kept. If lost, replace them with “New password” or “New link”.",
+  "de": "Wenn Sie diese Seite verlassen, können weder Link noch Passwort erneut gelesen werden: Nur ihr Fingerabdruck wird gespeichert. Verloren, werden sie mit „Neues Passwort“ oder „Neuer Link“ ersetzt."
+ },
+ "Mot de passe": {
+  "en": "Password",
+  "de": "Passwort"
+ },
+ "Copié": {
+  "en": "Copied",
+  "de": "Kopiert"
+ },
+ "Copier le mot de passe": {
+  "en": "Copy the password",
+  "de": "Passwort kopieren"
+ },
+ "La personne peut le taper avec ou sans espaces, en minuscules ou en majuscules.": {
+  "en": "The person can type it with or without spaces, in lower or upper case.",
+  "de": "Die Person kann es mit oder ohne Leerzeichen, klein oder groß eingeben."
+ },
+ "Lien personnel": {
+  "en": "Personal link",
+  "de": "Persönlicher Link"
+ },
+ "Copier le lien": {
+  "en": "Copy the link",
+  "de": "Link kopieren"
+ },
+ "Message du lien, prêt à envoyer par e-mail": {
+  "en": "Link message, ready to send by email",
+  "de": "Nachricht mit dem Link, bereit zum Senden per E-Mail"
+ },
+ "Copier le message": {
+  "en": "Copy the message",
+  "de": "Nachricht kopieren"
+ },
+ "Message du mot de passe, prêt à envoyer par SMS": {
+  "en": "Password message, ready to send by text message",
+  "de": "Nachricht mit dem Passwort, bereit zum Senden per SMS"
+ },
+ "J’ai transmis le lien et le mot de passe": {
+  "en": "I have passed on the link and the password",
+  "de": "Ich habe Link und Passwort weitergegeben"
+ },
+ "Accès": {
+  "en": "Accesses",
+  "de": "Zugänge"
+ },
+ "Sélections": {
+  "en": "Selections",
+  "de": "Auswahlen"
+ },
+ "fermée": {
+  "en": "closed",
+  "de": "geschlossen"
+ },
+ "ferme le {date}": {
+  "en": "closes on {date}",
+  "de": "schließt am {date}"
+ },
+ "Brouillon : l’équipe seule voit cette galerie": {
+  "en": "Draft: only the team sees this gallery",
+  "de": "Entwurf: Nur das Team sieht diese Galerie"
+ },
+ "Ses accès ne s’ouvrent qu’une fois la galerie ouverte. Ajoutez d’abord les photos, puis ouvrez-la.": {
+  "en": "Its accesses only open once the gallery is open. Add the photos first, then open it.",
+  "de": "Ihre Zugänge öffnen sich erst, wenn die Galerie geöffnet ist. Fügen Sie zuerst die Fotos hinzu, dann öffnen Sie sie."
+ },
+ "Ouvrir la galerie": {
+  "en": "Open the gallery",
+  "de": "Galerie öffnen"
+ },
+ "Rubriques de la galerie": {
+  "en": "Gallery sections",
+  "de": "Bereiche der Galerie"
+ },
+ "Aucun accès pour l’instant.": {
+  "en": "No access yet.",
+  "de": "Noch kein Zugang."
+ },
+ "Créer le premier accès": {
+  "en": "Create the first access",
+  "de": "Ersten Zugang erstellen"
+ },
+ "{n} accès. Dernière visite : la dernière page de la galerie ouverte avec le mot de passe.": {
+  "en": "{n} accesses. Last visit: the last gallery page opened with the password.",
+  "de": "{n} Zugänge. Letzter Besuch: die zuletzt mit dem Passwort geöffnete Seite der Galerie."
+ },
+ "1 accès. Dernière visite : la dernière page de la galerie ouverte avec le mot de passe.": {
+  "en": "1 access. Last visit: the last gallery page opened with the password.",
+  "de": "1 Zugang. Letzter Besuch: die zuletzt mit dem Passwort geöffnete Seite der Galerie."
+ },
+ "Droits": {
+  "en": "Rights",
+  "de": "Rechte"
+ },
+ "Sélection envoyée": {
+  "en": "Selection sent",
+  "de": "Auswahl gesendet"
+ },
+ "Ouvert sur {n} appareils": {
+  "en": "Opened on {n} devices",
+  "de": "Auf {n} Geräten geöffnet"
+ },
+ "{n} appareils": {
+  "en": "{n} devices",
+  "de": "{n} Geräte"
+ },
+ "{n} appareil": {
+  "en": "{n} device",
+  "de": "{n} Gerät"
+ },
+ "{n} favoris": {
+  "en": "{n} favourites",
+  "de": "{n} Favoriten"
+ },
+ "{n} favori": {
+  "en": "{n} favourite",
+  "de": "{n} Favorit"
+ },
+ "Réglage « Tout l’EXIF de l’original » actif : les invités ne voient aucune photo": {
+  "en": "“All EXIF from the original” setting active: guests see no photo",
+  "de": "Einstellung „Alle EXIF-Daten des Originals“ aktiv: Gäste sehen kein Foto"
+ },
+ "Avec ce réglage, les images gardent la position GPS : la galerie privée ne les sert pas. Choisissez un autre mode dans Filigrane & EXIF.": {
+  "en": "With this setting, images keep the GPS position: the private gallery does not serve them. Choose another mode in Watermark & EXIF.",
+  "de": "Mit dieser Einstellung behalten die Bilder die GPS-Position: Die private Galerie liefert sie nicht aus. Wählen Sie unter Wasserzeichen & EXIF einen anderen Modus."
+ },
+ "Aucune photo dans la galerie pour l’instant.": {
+  "en": "No photo in the gallery yet.",
+  "de": "Noch kein Foto in der Galerie."
+ },
+ "usage privé : {level}": {
+  "en": "private use: {level}",
+  "de": "private Nutzung: {level}"
+ },
+ "confirmé par {name}": {
+  "en": "confirmed by {name}",
+  "de": "bestätigt von {name}"
+ },
+ "Monter": {
+  "en": "Move up",
+  "de": "Nach oben"
+ },
+ "Descendre": {
+  "en": "Move down",
+  "de": "Nach unten"
+ },
+ "Ajouter des photos": {
+  "en": "Add photos",
+  "de": "Fotos hinzufügen"
+ },
+ "Une photo garde son statut (brouillon ou publiée). Une photo dont une personne a refusé la publication ne peut pas être ajoutée.": {
+  "en": "A photo keeps its status (draft or published). A photo whose publication a person has refused cannot be added.",
+  "de": "Ein Foto behält seinen Status (Entwurf oder veröffentlicht). Ein Foto, dessen Veröffentlichung eine Person abgelehnt hat, kann nicht hinzugefügt werden."
+ },
+ "Ajouter les photos cochées": {
+  "en": "Add the checked photos",
+  "de": "Angehakte Fotos hinzufügen"
+ },
+ "Adresses IP tronquées, pays estimé par Cloudflare, aucun navigateur noté. Effacé avec l’accès, six mois après sa fin.": {
+  "en": "Truncated IP addresses, country estimated by Cloudflare, no browser recorded. Deleted with the access, six months after it ends.",
+  "de": "Gekürzte IP-Adressen, Land von Cloudflare geschätzt, kein Browser gespeichert. Mit dem Zugang gelöscht, sechs Monate nach seinem Ende."
+ },
+ "Rien n’est enregistré : à corriger": {
+  "en": "Nothing was saved: to correct",
+  "de": "Nichts gespeichert: bitte korrigieren"
+ },
+ "Ouverture": {
+  "en": "Opening",
+  "de": "Öffnung"
+ },
+ "Fermer la galerie arrête tous ses accès tout de suite ; vous pourrez la rouvrir.": {
+  "en": "Closing the gallery stops all its accesses at once; you can reopen it.",
+  "de": "Das Schließen der Galerie stoppt sofort alle ihre Zugänge; Sie können sie wieder öffnen."
+ },
+ "Fermer la galerie": {
+  "en": "Close the gallery",
+  "de": "Galerie schließen"
+ },
+ "Ouverte, la galerie s’affiche aux personnes qui ont un accès valide.": {
+  "en": "When open, the gallery is shown to people with a valid access.",
+  "de": "Geöffnet wird die Galerie Personen mit gültigem Zugang angezeigt."
+ },
+ "Supprimer efface la galerie, ses accès et leurs données ; les photos restent dans la photothèque.": {
+  "en": "Deleting removes the gallery, its accesses and their data; the photos stay in the photo library.",
+  "de": "Löschen entfernt die Galerie, ihre Zugänge und deren Daten; die Fotos bleiben in der Fotothek."
+ },
+ "Supprimer la galerie…": {
+  "en": "Delete the gallery…",
+  "de": "Galerie löschen…"
+ },
+ "{n} galeries": {
+  "en": "{n} galleries",
+  "de": "{n} Galerien"
+ },
+ "{n} galerie": {
+  "en": "{n} gallery",
+  "de": "{n} Galerie"
+ },
+ "{n} accès": {
+  "en": "{n} accesses",
+  "de": "{n} Zugänge"
+ },
+ "heure de Paris": {
+  "en": "Paris time",
+  "de": "Pariser Zeit"
+ },
+ "Filtrer les galeries par état": {
+  "en": "Filter galleries by status",
+  "de": "Galerien nach Status filtern"
+ },
+ "Ouvertes": {
+  "en": "Open",
+  "de": "Geöffnet"
+ },
+ "Fermées": {
+  "en": "Closed",
+  "de": "Geschlossen"
+ },
+ "Aucune galerie privée pour l’instant.": {
+  "en": "No private gallery yet.",
+  "de": "Noch keine private Galerie."
+ },
+ "Créer la première": {
+  "en": "Create the first one",
+  "de": "Die erste erstellen"
+ },
+ "{n} galeries : les ouvertes d’abord, par date de fermeture. Un accès « ouvert » : son mot de passe a été accepté, pas seulement son lien chargé.": {
+  "en": "{n} galleries: open ones first, by closing date. An “opened” access: its password was accepted, not just its link loaded.",
+  "de": "{n} Galerien: geöffnete zuerst, nach Schließdatum. Ein „geöffneter“ Zugang: Sein Passwort wurde akzeptiert, nicht nur sein Link geladen."
+ },
+ "Galerie": {
+  "en": "Gallery",
+  "de": "Galerie"
+ },
+ "Accès ouverts": {
+  "en": "Opened accesses",
+  "de": "Geöffnete Zugänge"
+ },
+ "Dernière activité": {
+  "en": "Last activity",
+  "de": "Letzte Aktivität"
+ },
+ "États d’une galerie": {
+  "en": "Gallery statuses",
+  "de": "Status einer Galerie"
+ },
+ "Brouillon (l’équipe seule)": {
+  "en": "Draft (team only)",
+  "de": "Entwurf (nur das Team)"
+ },
+ "Ouverte": {
+  "en": "Open",
+  "de": "Geöffnet"
+ },
+ "Ferme dans 7 jours": {
+  "en": "Closes in 7 days",
+  "de": "Schließt in 7 Tagen"
+ },
+ "Fermée": {
+  "en": "Closed",
+  "de": "Geschlossen"
+ },
+ "Sous le nom, en ambre, des signaux, qui ne sont pas des états : sélection envoyée, accès en pause ou suspendu, lien ouvert sur plus de 3 appareils. Chaque photographe voit ses galeries, l’administrateur toutes ; Modérateur et Relecteur n’y ont pas accès.": {
+  "en": "Under the name, in amber, signals, which are not statuses: selection sent, access paused or suspended, link opened on more than 3 devices. Each photographer sees their galleries, the administrator all of them; Moderator and Proofreader have no access.",
+  "de": "Unter dem Namen, in Bernstein, Hinweise, die keine Status sind: Auswahl gesendet, Zugang pausiert oder gesperrt, Link auf mehr als 3 Geräten geöffnet. Jeder Fotograf sieht seine Galerien, der Administrator alle; Moderator und Korrektor haben keinen Zugriff."
+ },
+ "Sélection envoyée : « {title} »": {
+  "en": "Selection sent: “{title}”",
+  "de": "Auswahl gesendet: „{title}“"
+ },
+ "par l’accès de {label}": {
+  "en": "by the access of {label}",
+  "de": "über den Zugang von {label}"
+ },
+ "Accès suspendu : « {title} »": {
+  "en": "Access suspended: “{title}”",
+  "de": "Zugang gesperrt: „{title}“"
+ },
+ "trop de mots de passe refusés pour l’accès de {label} : débloquez-le ou donnez un nouveau mot de passe": {
+  "en": "too many refused passwords for the access of {label}: unblock it or give a new password",
+  "de": "zu viele abgelehnte Passwörter für den Zugang von {label}: entsperren Sie ihn oder geben Sie ein neues Passwort"
+ },
+ "Lien peut-être transféré : « {title} »": {
+  "en": "Link possibly forwarded: “{title}”",
+  "de": "Link vielleicht weitergeleitet: „{title}“"
+ },
+ "l’accès de {label} a été ouvert sur {n} appareils": {
+  "en": "the access of {label} was opened on {n} devices",
+  "de": "der Zugang von {label} wurde auf {n} Geräten geöffnet"
+ },
+ "« {title} » ferme dans {n} jours": {
+  "en": "“{title}” closes in {n} days",
+  "de": "„{title}“ schließt in {n} Tagen"
+ },
+ "« {title} » ferme demain": {
+  "en": "“{title}” closes tomorrow",
+  "de": "„{title}“ schließt morgen"
+ },
+ "galerie privée : prolongez-la ou prévenez les invités": {
+  "en": "private gallery: extend it or tell the guests",
+  "de": "private Galerie: verlängern Sie sie oder informieren Sie die Gäste"
+ },
+ "{date}, jusqu’à {time}": {
+  "en": "{date}, until {time}",
+  "de": "{date}, bis {time}"
+ },
+ "Sélection envoyée par {name}": {
+  "en": "Selection sent by {name}",
+  "de": "Auswahl gesendet von {name}"
+ },
+ "Accès de {name} suspendu": {
+  "en": "Access of {name} suspended",
+  "de": "Zugang von {name} gesperrt"
+ },
+ "Accès de {name} en pause": {
+  "en": "Access of {name} paused",
+  "de": "Zugang von {name} pausiert"
+ },
+ "Lien de {name} ouvert sur {n} appareils": {
+  "en": "Link of {name} opened on {n} devices",
+  "de": "Link von {name} auf {n} Geräten geöffnet"
+ },
+ "commune": {
+  "en": "shared",
+  "de": "gemeinsam"
+ },
+ "Ferme dans {n} jours": {
+  "en": "Closes in {n} days",
+  "de": "Schließt in {n} Tagen"
+ },
+ "Ferme demain": {
+  "en": "Closes tomorrow",
+  "de": "Schließt morgen"
+ },
+ "le {date} · données des invités effacées le {purge}": {
+  "en": "on {date} · guest data deleted on {purge}",
+  "de": "am {date} · Gästedaten gelöscht am {purge}"
+ },
+ "l’équipe seule": {
+  "en": "team only",
+  "de": "nur das Team"
+ },
+ "Envoyé, pas ouvert": {
+  "en": "Sent, not opened",
+  "de": "Gesendet, nicht geöffnet"
+ },
+ "En pause": {
+  "en": "Paused",
+  "de": "Pausiert"
+ },
+ "Suspendu": {
+  "en": "Suspended",
+  "de": "Gesperrt"
+ },
+ "Expiré": {
+  "en": "Expired",
+  "de": "Abgelaufen"
+ },
+ "Révoqué": {
+  "en": "Revoked",
+  "de": "Widerrufen"
+ },
+ "Expire dans {n} jours": {
+  "en": "Expires in {n} days",
+  "de": "Läuft in {n} Tagen ab"
+ },
+ "choisir des favoris": {
+  "en": "choose favourites",
+  "de": "Favoriten auswählen"
+ },
+ "télécharger en 2 048 px": {
+  "en": "download at 2,048 px",
+  "de": "in 2.048 px herunterladen"
+ },
+ "télécharger jusqu’à 4 000 px": {
+  "en": "download up to 4,000 px",
+  "de": "bis 4.000 px herunterladen"
+ },
+ "le {date} à {time}": {
+  "en": "on {date} at {time}",
+  "de": "am {date} um {time}"
+ },
+ "Accès créé.": {
+  "en": "Access created.",
+  "de": "Zugang erstellt."
+ },
+ "Lien consulté sans mot de passe.": {
+  "en": "Link opened without password.",
+  "de": "Link ohne Passwort aufgerufen."
+ },
+ "Mot de passe accepté.": {
+  "en": "Password accepted.",
+  "de": "Passwort akzeptiert."
+ },
+ "Mot de passe refusé.": {
+  "en": "Password refused.",
+  "de": "Passwort abgelehnt."
+ },
+ "Pause de sécurité après des refus.": {
+  "en": "Security pause after refusals.",
+  "de": "Sicherheitspause nach Ablehnungen."
+ },
+ "Accès suspendu après 30 refus.": {
+  "en": "Access suspended after 30 refusals.",
+  "de": "Zugang nach 30 Ablehnungen gesperrt."
+ },
+ "Visite de la galerie.": {
+  "en": "Gallery visit.",
+  "de": "Besuch der Galerie."
+ },
+ "Favori ajouté.": {
+  "en": "Favourite added.",
+  "de": "Favorit hinzugefügt."
+ },
+ "Favori retiré.": {
+  "en": "Favourite removed.",
+  "de": "Favorit entfernt."
+ },
+ "Sélection envoyée.": {
+  "en": "Selection sent.",
+  "de": "Auswahl gesendet."
+ },
+ "Sélection reprise par l’invité.": {
+  "en": "Selection taken back by the guest.",
+  "de": "Auswahl vom Gast zurückgenommen."
+ },
+ "Photo téléchargée.": {
+  "en": "Photo downloaded.",
+  "de": "Foto heruntergeladen."
+ },
+ "Archive téléchargée.": {
+  "en": "Archive downloaded.",
+  "de": "Archiv heruntergeladen."
+ },
+ "L’invité a quitté la galerie.": {
+  "en": "The guest left the gallery.",
+  "de": "Der Gast hat die Galerie verlassen."
+ },
+ "Nouveau lien.": {
+  "en": "New link.",
+  "de": "Neuer Link."
+ },
+ "Nouveau mot de passe.": {
+  "en": "New password.",
+  "de": "Neues Passwort."
+ },
+ "Accès débloqué.": {
+  "en": "Access unblocked.",
+  "de": "Zugang entsperrt."
+ },
+ "Accès révoqué.": {
+  "en": "Access revoked.",
+  "de": "Zugang widerrufen."
+ },
+ "Galerie créée : ajoutez-y des photos, puis ouvrez-la.": {
+  "en": "Gallery created: add photos, then open it.",
+  "de": "Galerie erstellt: Fügen Sie Fotos hinzu, dann öffnen Sie sie."
+ },
+ "accès effacé": {
+  "en": "deleted access",
+  "de": "gelöschter Zugang"
+ },
+ "Galerie enregistrée.": {
+  "en": "Gallery saved.",
+  "de": "Galerie gespeichert."
+ },
+ "Supprimer la galerie": {
+  "en": "Delete the gallery",
+  "de": "Galerie löschen"
+ },
+ "Supprimer la galerie « {title} » ?": {
+  "en": "Delete the gallery “{title}”?",
+  "de": "Galerie „{title}“ löschen?"
+ },
+ "Tous ses accès cessent de marcher tout de suite, puis la galerie, ses accès, leur journal et leurs favoris sont effacés. Rien ne pourra être rétabli.": {
+  "en": "All its accesses stop working at once, then the gallery, its accesses, their log and their favourites are deleted. Nothing can be restored.",
+  "de": "Alle Zugänge funktionieren sofort nicht mehr, dann werden die Galerie, ihre Zugänge, deren Protokoll und Favoriten gelöscht. Nichts lässt sich wiederherstellen."
+ },
+ "Les photos ne sont ni supprimées ni dépubliées : elles restent dans la photothèque.": {
+  "en": "The photos are neither deleted nor unpublished: they stay in the photo library.",
+  "de": "Die Fotos werden weder gelöscht noch zurückgezogen: Sie bleiben in der Fotothek."
+ },
+ "Galerie « {title} » supprimée : ses photos restent dans la photothèque.": {
+  "en": "Gallery “{title}” deleted: its photos stay in the photo library.",
+  "de": "Galerie „{title}“ gelöscht: Ihre Fotos bleiben in der Fotothek."
+ },
+ "{n} photos ajoutées à la galerie.": {
+  "en": "{n} photos added to the gallery.",
+  "de": "{n} Fotos zur Galerie hinzugefügt."
+ },
+ "1 photo ajoutée à la galerie.": {
+  "en": "1 photo added to the gallery.",
+  "de": "1 Foto zur Galerie hinzugefügt."
+ },
+ "Aucune photo ajoutée.": {
+  "en": "No photo added.",
+  "de": "Kein Foto hinzugefügt."
+ },
+ "Refusées, une personne photographiée ayant refusé : {titles}.": {
+  "en": "Refused, a photographed person having refused: {titles}.",
+  "de": "Abgelehnt, weil eine fotografierte Person abgelehnt hat: {titles}."
+ },
+ "Photo retirée de la galerie (elle reste dans la photothèque).": {
+  "en": "Photo removed from the gallery (it stays in the photo library).",
+  "de": "Foto aus der Galerie entfernt (es bleibt in der Fotothek)."
+ },
+ "Usage privé confirmé pour cette photo.": {
+  "en": "Private use confirmed for this photo.",
+  "de": "Private Nutzung für dieses Foto bestätigt."
+ },
+ "Ordre enregistré.": {
+  "en": "Order saved.",
+  "de": "Reihenfolge gespeichert."
+ },
+ "Dans 30 jours, le {date}": {
+  "en": "In 30 days, on {date}",
+  "de": "In 30 Tagen, am {date}"
+ },
+ "À la fermeture de la galerie, le {date}": {
+  "en": "When the gallery closes, on {date}",
+  "de": "Bei Schließung der Galerie, am {date}"
+ },
+ "Ce formulaire a expiré : vérifiez les champs, puis créez l’accès.": {
+  "en": "This form has expired: check the fields, then create the access.",
+  "de": "Dieses Formular ist abgelaufen: Prüfen Sie die Felder und erstellen Sie dann den Zugang."
+ },
+ "Cet accès est déjà créé : le lien et le mot de passe ont été montrés une seule fois.": {
+  "en": "This access is already created: the link and the password were shown only once.",
+  "de": "Dieser Zugang ist bereits erstellt: Link und Passwort wurden nur einmal angezeigt."
+ },
+ "Accès enregistré.": {
+  "en": "Access saved.",
+  "de": "Zugang gespeichert."
+ },
+ "Révoquer l’accès": {
+  "en": "Revoke the access",
+  "de": "Zugang widerrufen"
+ },
+ "Révoquer l’accès de {name} ?": {
+  "en": "Revoke the access of {name}?",
+  "de": "Zugang von {name} widerrufen?"
+ },
+ "Son lien et son mot de passe cessent de marcher tout de suite. Sa sélection reste visible ici. Pour lui rendre l’accès, il faudra en créer un nouveau.": {
+  "en": "Their link and password stop working at once. Their selection stays visible here. To give access back, you will have to create a new one.",
+  "de": "Link und Passwort funktionieren sofort nicht mehr. Die Auswahl bleibt hier sichtbar. Um den Zugang zurückzugeben, muss ein neuer erstellt werden."
+ },
+ "Si la galerie est ouverte chez la personne, la page suivante lui dira que l’accès n’est plus valable.": {
+  "en": "If the gallery is open on the person’s side, the next page will tell them that the access is no longer valid.",
+  "de": "Wenn die Galerie bei der Person geöffnet ist, sagt ihr die nächste Seite, dass der Zugang nicht mehr gültig ist."
+ },
+ "Les photos ne sont ni supprimées ni dépubliées.": {
+  "en": "The photos are neither deleted nor unpublished.",
+  "de": "Die Fotos werden weder gelöscht noch zurückgezogen."
+ },
+ "Révoquer l’accès de {name}": {
+  "en": "Revoke the access of {name}",
+  "de": "Zugang von {name} widerrufen"
+ },
+ "Effacer l’accès et ses données": {
+  "en": "Delete the access and its data",
+  "de": "Zugang und seine Daten löschen"
+ },
+ "Effacer l’accès de {name} et ses données ?": {
+  "en": "Delete the access of {name} and its data?",
+  "de": "Zugang von {name} und seine Daten löschen?"
+ },
+ "L’accès cesse de marcher tout de suite, puis tout ce qui le concerne est effacé. Rien ne pourra être rétabli.": {
+  "en": "The access stops working at once, then everything about it is deleted. Nothing can be restored.",
+  "de": "Der Zugang funktioniert sofort nicht mehr, dann wird alles, was ihn betrifft, gelöscht. Nichts lässt sich wiederherstellen."
+ },
+ "Effacés : son nom, l’activité de cet accès, ses favoris et la sélection envoyée.": {
+  "en": "Deleted: the name, the activity of this access, the favourites and the sent selection.",
+  "de": "Gelöscht: der Name, die Aktivität dieses Zugangs, die Favoriten und die gesendete Auswahl."
+ },
+ "Gardés : la galerie et ses photos.": {
+  "en": "Kept: the gallery and its photos.",
+  "de": "Behalten: die Galerie und ihre Fotos."
+ },
+ "Besoin de sa sélection ? Exportez-la d’abord.": {
+  "en": "Need the selection? Export it first.",
+  "de": "Brauchen Sie die Auswahl? Exportieren Sie sie zuerst."
+ },
+ "Nouveau lien": {
+  "en": "New link",
+  "de": "Neuer Link"
+ },
+ "Donner un nouveau lien à {name} ?": {
+  "en": "Give a new link to {name}?",
+  "de": "{name} einen neuen Link geben?"
+ },
+ "L’ancien lien cesse de marcher aussitôt ; le mot de passe reste le même. Le nouveau lien s’affiche une seule fois.": {
+  "en": "The old link stops working at once; the password stays the same. The new link is shown only once.",
+  "de": "Der alte Link funktioniert sofort nicht mehr; das Passwort bleibt gleich. Der neue Link wird nur einmal angezeigt."
+ },
+ "Créer un nouveau lien": {
+  "en": "Create a new link",
+  "de": "Neuen Link erstellen"
+ },
+ "Nouveau mot de passe": {
+  "en": "New password",
+  "de": "Neues Passwort"
+ },
+ "Donner un nouveau mot de passe à {name} ?": {
+  "en": "Give a new password to {name}?",
+  "de": "{name} ein neues Passwort geben?"
+ },
+ "L’ancien mot de passe cesse de marcher aussitôt ; le lien reste le même, et une pause ou une suspension en cours est levée. Le nouveau mot de passe s’affiche une seule fois.": {
+  "en": "The old password stops working at once; the link stays the same, and any current pause or suspension is lifted. The new password is shown only once.",
+  "de": "Das alte Passwort funktioniert sofort nicht mehr; der Link bleibt gleich, und eine laufende Pause oder Sperre wird aufgehoben. Das neue Passwort wird nur einmal angezeigt."
+ },
+ "Créer un nouveau mot de passe": {
+  "en": "Create a new password",
+  "de": "Neues Passwort erstellen"
+ },
+ "Accès de {name} révoqué.": {
+  "en": "Access of {name} revoked.",
+  "de": "Zugang von {name} widerrufen."
+ },
+ "Accès effacé, avec ses données.": {
+  "en": "Access deleted, with its data.",
+  "de": "Zugang mit seinen Daten gelöscht."
+ },
+ "Accès débloqué : la personne peut réessayer tout de suite.": {
+  "en": "Access unblocked: the person can try again at once.",
+  "de": "Zugang entsperrt: Die Person kann es sofort erneut versuchen."
+ },
+ "Cet accès est révoqué : créez-en un nouveau.": {
+  "en": "This access is revoked: create a new one.",
+  "de": "Dieser Zugang ist widerrufen: Erstellen Sie einen neuen."
+ },
+ "Sélection rouverte : la personne peut de nouveau changer ses favoris.": {
+  "en": "Selection reopened: the person can change their favourites again.",
+  "de": "Auswahl wieder geöffnet: Die Person kann ihre Favoriten wieder ändern."
+ },
+ "Galerie ouverte : ses accès marchent.": {
+  "en": "Gallery opened: its accesses work.",
+  "de": "Galerie geöffnet: Ihre Zugänge funktionieren."
+ },
+ "Galerie fermée : ses accès ne marchent plus.": {
+  "en": "Gallery closed: its accesses no longer work.",
+  "de": "Galerie geschlossen: Ihre Zugänge funktionieren nicht mehr."
+ },
+ "Donnez un titre à la galerie.": {
+  "en": "Give the gallery a title.",
+  "de": "Geben Sie der Galerie einen Titel."
+ },
+ "Date de fermeture illisible : écrivez par exemple « 30/11/2026 ».": {
+  "en": "Unreadable closing date: write for example “30/11/2026”.",
+  "de": "Unlesbares Schließdatum: Schreiben Sie zum Beispiel „30.11.2026“."
+ },
+ "La date de fermeture est déjà passée.": {
+  "en": "The closing date has already passed.",
+  "de": "Das Schließdatum ist bereits vorbei."
+ },
+ "Une galerie ferme dans l’année : un an au plus.": {
+  "en": "A gallery closes within the year: one year at most.",
+  "de": "Eine Galerie schließt innerhalb eines Jahres: höchstens ein Jahr."
+ },
+ "La date de fermeture est passée : repoussez-la d’abord, dans les réglages.": {
+  "en": "The closing date has passed: postpone it first, in the settings.",
+  "de": "Das Schließdatum ist vorbei: Verschieben Sie es zuerst in den Einstellungen."
+ },
+ "Écrivez le nom de la personne (seule l’équipe le voit).": {
+  "en": "Write the person’s name (only the team sees it).",
+  "de": "Schreiben Sie den Namen der Person (nur das Team sieht ihn)."
+ },
+ "Date illisible : écrivez par exemple « 30/11/2026 ».": {
+  "en": "Unreadable date: write for example “30/11/2026”.",
+  "de": "Unlesbares Datum: Schreiben Sie zum Beispiel „30.11.2026“."
+ },
+ "Cette date est déjà passée.": {
+  "en": "This date has already passed.",
+  "de": "Dieses Datum ist bereits vorbei."
+ },
+ "La galerie ferme avant : l’accès ne peut pas aller au-delà de sa fermeture.": {
+  "en": "The gallery closes earlier: the access cannot go beyond its closing.",
+  "de": "Die Galerie schließt vorher: Der Zugang kann nicht über ihre Schließung hinausgehen."
+ },
+ "Un accès dure 6 mois au plus.": {
+  "en": "An access lasts 6 months at most.",
+  "de": "Ein Zugang dauert höchstens 6 Monate."
+ },
+ "l’accord de {who} couvre le site seulement": {
+  "en": "the consent of {who} covers the website only",
+  "de": "die Einwilligung von {who} gilt nur für die Website"
+ },
+ "{who} : accord en ligne non vérifié": {
+  "en": "{who}: online consent not verified",
+  "de": "{who}: Online-Einwilligung nicht überprüft"
+ },
+ "rencontre n°{id}": {
+  "en": "encounter no. {id}",
+  "de": "Begegnung Nr. {id}"
+ },
+ "lecture": {
+  "en": "reading",
+  "de": "Lesen"
+ }
+}

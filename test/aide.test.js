@@ -27,7 +27,7 @@ test('aide : réservée à l’admin, toutes les sections, aucun lien interne ca
   const res = await c.as('/admin/aide');
   assert.equal(res.statusCode, 200);
   const help = loadHelp();
-  assert.equal(help.sections.length, 15);
+  assert.equal(help.sections.length, 16);
   const present = ids(res.body);
   for (const s of help.sections) assert.ok(present.has(s.id), s.id);
   for (const h of hrefs(res.body)) assert.ok(present.has(h), `lien vers #${h} sans cible`);
