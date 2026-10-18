@@ -42,6 +42,15 @@ Sur téléphone, le sous-titre est masqué sous 480 px de large.
 
 > Les fichiers de marque sont rangés dans les données (`STORAGE_DIR/brand/`, soit `DATA_DIR/brand/` sur l'hôte en Docker), servis sous `/brand/`, et sauvegardés avec elles. Ils ne sont pas dans le dépôt Git, qui est public.
 
+### Site public : v1 ou v2
+
+La refonte du site public issue de l'audit d'ergonomie du 16 octobre 2026 (« v2 ») s'installe **à côté** de la v1, page par page : gabarits `views/v2/`, feuilles `public/css/v2/tokens.css` (jetons de la planche MQ-00) et `public/css/v2/public.css` (composants), script `public/js/v2/site.js`. Une page v2 ne charge ni `css/site.css` ni la feuille du thème : elle prend du thème sa classe (`theme-nicephos mode-nuit`…), que `tokens.css` connaît.
+
+- **Réglage** : *Apparence → Site public : v1 ou v2* (clé `public_version`, v1 par défaut) ; pour tous les visiteurs.
+- **Aperçu** : *Ouvrir l'aperçu de la v2* ; seulement pour l'administrateur connecté (permission `site.apparence`), sur sa session ; bandeau « Aperçu de la v2 · Quitter l'aperçu » ; réponses `private, no-store`.
+- **Repli** : `reply.render('<page>')` (`server/app.js`) rend `views/v2/<page>.eta` s'il existe, sinon la v1 ; les gabarits de l'admin ne sont jamais concernés.
+- **Ajouter une page v2** : créer `views/v2/<page>.eta` (même nom que la v1, mêmes données de la route), `<% layout('./layout') %>`, en-tête et pied de page de `views/v2/`, les composants de `public.css` ; aucun attribut `style` (CSP) : un format de photo passe par une classe `.fmt-*` (`server/v2-vues.js`).
+
 ## Créer un thème
 
 Un thème, c'est :

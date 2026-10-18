@@ -18,6 +18,19 @@ Jedes Theme wird mit seinen drei Farben (Hintergrund, Tinte, Akzent) und einer B
 | **Nicephos — Nacht** | schwarze Galerie, weiße Linie, gesperrte Großbuchstaben, Sandakzent |
 | **Nicephos — Tag** | dieselbe Identität auf weißem Hintergrund |
 
+## Öffentliche Website: v1 oder v2
+
+**v2** ist die neue Gestaltung der öffentlichen Website, aus dem Ergonomie-Audit vom Oktober 2026. Ihre Seiten kommen nach und nach; derzeit: **die Seite eines Fotos** (der Betrachter). Eine Seite, die noch keine v2-Fassung hat, wird in v1 angezeigt. Die Verwaltung ändert sich nicht.
+
+1. **v2 vor allen anderen sehen:** Klicken Sie auf **v2-Vorschau öffnen**.
+   - **Nur Sie** sehen sie, in dieser Sitzung (dieses Gerät, dieser Browser), bis **Vorschau beenden**, zur Abmeldung oder zum Ende der Sitzung.
+   - Ein sandfarbenes Banner oben auf jeder Seite der Website erinnert daran, auch auf einer Seite, die noch in v1 ist; es trägt **Quitter l’aperçu** (Vorschau beenden).
+   - Die Besucher behalten v1, was immer sie senden (Cookie, Adresse): Die Wahl wird auf dem Server gespeichert, nie im Browser.
+   - Während der Vorschau werden Ihre Seiten in keinem Cache gespeichert (auch nicht bei Cloudflare): Ein Besucher kann die Seite, die Sie sehen, nicht erhalten.
+2. **Für alle aktivieren:** Kreuzen Sie **v2** an, dann **Fassung speichern**. Zurück zu v1 geht genauso, jederzeit.
+
+Das Öffnen und Schließen der Vorschau und jeder Wechsel der Fassung werden im [Protokoll](reglages#journal) festgehalten.
+
 ## Marke
 
 - **Nur der Name der Website** oder **Emblem + Name (+ Untertitel)**. Die zweite Wahl ist nur möglich, wenn ein Emblem oder ein Symbol hochgeladen wurde.
