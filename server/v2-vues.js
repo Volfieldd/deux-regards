@@ -21,6 +21,8 @@ const PATHS = {
   pause: '<path d="M9 6v12M15 6v12"/>',
   fleche: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.2"/>',
+  // Flux RSS des Carnets (MQ-11, repère 7).
+  flux: '<path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.4" fill="currentColor" stroke="none"/>',
 };
 export function ic(name, { size = 20, cls = '', fill = false } = {}) {
   return `<svg class="ic${cls ? ` ${cls}` : ''}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="${fill ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${PATHS[name]}</svg>`;
@@ -132,6 +134,7 @@ export function nearSizes(item, list, main) {
 // supérieurs) : jamais trop petite, et une photo de la dernière rangée, qui ne s'étire pas, n'est pas chargée trop grande.
 // Plages : celles des marges (--gut) et de la hauteur visée (200 px sur tablette, 240 au bureau), la tablette en deux
 // (une même photo y passe de la moitié au tiers de la rangée).
+// within : la largeur du bloc, si ce n'est pas la page (une galerie dans la colonne large d'un billet des Carnets).
 // etiree : rangée étirée sur une ligne (séries, « Autres séries », § 18) : chaque photo y prend exactement la largeur
 // du bloc (écran moins les marges et les écarts de 16 px) au prorata de son format.
 const up5 = x => Math.ceil(x / 5) * 5;
@@ -153,18 +156,25 @@ function rows(rs, W, h, gap = 16) {
   return w;
 }
 const widest = new WeakMap();        // liste → largeur la plus grande de chaque photo, par plage (calculée une fois)
-function widths(list) {
-  if (!widest.has(list)) {
+// within(vw, gut) : la largeur du bloc des rangées pour un écran de vw px (par défaut, la page moins ses marges).
+const pageWidth = (vw, gut) => vw - 2 * gut;
+function widths(list, within = pageWidth) {
+  if (!widest.has(list)) widest.set(list, new Map());
+  const memo = widest.get(list);
+  if (!memo.has(within)) {
     const rs = list.map(x => fmt(x).r);
-    widest.set(list, PLAGES.map(({ from, to, gut, h }) => {
+    memo.set(within, PLAGES.map(({ from, to, gut, h }) => {
       const max = rs.map(() => 0);
-      for (let vw = from; vw <= to; vw += 8) rows(rs, vw - 2 * gut, h).forEach((x, i) => { max[i] = Math.max(max[i], x); });
+      for (let vw = from; vw <= to; vw += 8) rows(rs, within(vw, gut), h).forEach((x, i) => { max[i] = Math.max(max[i], x); });
       return max.map(up5);
     }));
   }
-  return widest.get(list);
+  return memo.get(within);
 }
-export function rowSizes(item, list, { etiree = false } = {}) {
+// Colonne large d'un billet (css/v2/carnet.css, .billet > .f-large) : de 1 024 px, 10 colonnes sur 12 (écarts de 24 px) ;
+// en dessous, toute la largeur de la page.
+export const billetLarge = (vw, gut) => (vw >= 1024 ? ((vw - 2 * gut - 11 * 24) / 12) * 10 + 9 * 24 : vw - 2 * gut);
+export function rowSizes(item, list, { etiree = false, within } = {}) {
   const { r } = fmt(item), i = list.indexOf(item);
   const phone = `(max-width: 767px) calc((100vw - 48px) * ${n2(phoneShares(list)[i] ?? 1)})`;
   if (etiree) {
@@ -172,7 +182,7 @@ export function rowSizes(item, list, { etiree = false } = {}) {
     const share = gut => `calc((100vw - ${2 * gut + gaps}px) * ${k})`;
     return [phone, `(max-width: 1023px) ${share(40)}`, `(max-width: 1279px) ${share(56)}`, share(72)].join(', ');
   }
-  const w = widths(list).map(p => p[i]);
+  const w = widths(list, within).map(p => p[i]);
   return [phone, ...PLAGES.slice(0, -1).map((p, k) => `(max-width: ${p.to}px) ${w[k]}px`), `${w.at(-1)}px`].join(', ');
 }
 
@@ -198,7 +208,7 @@ export const nobr = s => esc(s).replace(/[\p{L}\p{N}’']+(?:-[\p{L}\p{N}’']+)
 // Espaces insécables (lexique des maquettes, § 2) dans un texte venu d'ailleurs (chaînes de la v1, noms) : fine
 // insécable avant « : ; ! ? » et dans les guillemets en français ; insécable avant « · » et devant une unité.
 export function typo(text, lang = 'fr') {
-  let s = String(text ?? '').replace(/ ·/g, '\u00a0·').replace(/(\d) (km|m)\b/g, '$1\u00a0$2');
+  let s = String(text ?? '').replace(/ ·/g, '\u00a0·').replace(/(\d) (km|m|cm|mm|min|g)\b/g, '$1\u00a0$2');
   if (lang === 'fr') s = s.replace(/ ([:;!?»])/g, '\u202f$1').replace(/« /g, '«\u202f');
   return s;
 }

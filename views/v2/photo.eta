@@ -5,7 +5,9 @@
 <% const p = it.photo, t = it.t, v = it.v2, ic = v.ic, n = t.near, f = v.fmt(p), pl = it.place;
    const nb = s => String(s).replace(/ /g, ' ');
    // Le contexte de la visionneuse : la vue d'où l'on vient (filtres de la galerie), qui règle l'ordre des voisines.
-   const ctx = it.filter.serie && it.filter.regard ? `${p.category}, ${t.by(p.author)}` : it.filter.serie ? p.category : it.filter.regard ? p.author : t.nav.gallery;
+   // Ouverte depuis un billet des Carnets (?carnet=, MQ-12 repère 16) : le titre du billet, ses photos dans son ordre.
+   const ctx = it.carnet ? it.carnet.title : it.filter.serie && it.filter.regard ? `${p.category}, ${t.by(p.author)}` : it.filter.serie ? p.category : it.filter.regard ? p.author : t.nav.gallery;
+   const ctxLang = it.carnet && it.carnet.lang !== it.lang ? ` lang="${it.carnet.lang}"` : '';
    const pos = `${it.position} / ${it.count}`;
    // L'heure suit la date (« 10 oct. 2026, 14 h 32 ») seulement si le photographe a choisi de la montrer (p.time).
    const date = [v.date(p.taken_on), p.time].filter(Boolean).join(', ');
@@ -13,15 +15,15 @@
    const prevUrl = it.photoUrl(it.prev.slug, it.filter), nextUrl = it.photoUrl(it.next.slug, it.filter);
    const kws = it.showKeywords && p.keywords ? p.keywords.split(',').map(k => k.trim()).filter(Boolean) : []; %>
 <% layout('./layout', { pageTitle: `${p.title} — ${p.author}\u00a0· ${ctx} (${pos})\u00a0· ${it.siteName}`, bodyClass: 'dark' }) %>
-<%~ include('./_contexte', { ...it, retour: { href: it.backUrl, label: ctx } }) %>
+<%~ include('./_contexte', { ...it, retour: { href: it.backUrl, label: ctx, prefix: it.carnet ? t.carnet.back : null, lang: it.carnet && it.carnet.lang !== it.lang ? it.carnet.lang : null } }) %>
 <main id="contenu" data-viewer data-prev="<%= prevUrl %>" data-next="<%= nextUrl %>" data-back="<%= it.backUrl %>">
   <div class="wrap vis-scene <%= f.cls %><%= f.vertical ? ' vis--cote' : '' %>">
     <figure class="vis-fig">
-      <figcaption class="cartel cartel--grand vis-cartel"><span class="vis-pos donnee"><%= pos %>&nbsp;· <%= ctx %></span><h1 class="cartel-t"><%= p.title %></h1><span class="cartel-m"><%= meta %></span></figcaption>
+      <figcaption class="cartel cartel--grand vis-cartel"><span class="vis-pos donnee"><%= pos %>&nbsp;· <span<%~ ctxLang %>><%= ctx %></span></span><h1 class="cartel-t"><%= p.title %></h1><span class="cartel-m"><%= meta %></span></figcaption>
       <div class="vis-cadre" data-cadre>
         <%~ it.picture(p, { sizes: v.visSizes(f), eager: true, alt: p.alt || p.title }) %>
 <% if (it.count > 1) { %>
-        <nav class="vis-nav" aria-label="<%= t.v2.photosOf(ctx) %>">
+        <nav class="vis-nav" aria-label="<%= it.carnet ? t.carnet.photosOf(ctx) : t.v2.photosOf(ctx) %>">
           <a class="vis-fleche vis-prec" href="<%= prevUrl %>" rel="prev"><%~ ic('prec', { size: 24 }) %><span class="vis-fleche-t"><%= t.v2.prev %><span class="sr-only"><%= t.v2.colon %> <%= it.prev.title %></span></span></a>
           <span class="vis-compte donnee"><%= pos %></span>
           <a class="vis-fleche vis-suiv" href="<%= nextUrl %>" rel="next"><span class="vis-fleche-t"><%= t.v2.next %><span class="sr-only"><%= t.v2.colon %> <%= it.next.title %></span></span><%~ ic('suiv', { size: 24 }) %></a>
@@ -45,7 +47,8 @@
 <% if (p.place || date) { %>
           <dt><%= p.time ? t.v2.placeDateTime : t.v2.placeDate %></dt><dd><%= [p.place, date].filter(Boolean).join(' · ') %></dd>
 <% } %>
-          <dt><%= t.v2.serie %></dt><dd><a href="<%= it.galleryUrl({ serie: p.category_slug }) %>"><%= p.category %></a></dd>
+<% if (it.carnet) { %>          <dt><%= t.carnet.post %></dt><dd><a href="<%= it.carnet.href %>"<%~ ctxLang %>><%= it.carnet.title %></a>, <%= t.carnet.photoOf(it.position, it.count) %></dd>
+<% } %>          <dt><%= t.v2.serie %></dt><dd><a href="<%= it.galleryUrl({ serie: p.category_slug }) %>"><%= p.category %></a></dd>
           <dt><%= t.v2.photographer %></dt><dd><a href="<%= it.galleryUrl({ regard: p.author_slug }) %>"><%= p.author %></a><% if (it.authorCount) { %>&nbsp;· <%= nb(t.photos(it.authorCount)) %><% } %></dd>
 <% if (kws.length) { %>
           <dt><%= t.search.keywords %></dt><dd><ul class="vis-mots"><% kws.forEach(k => { %><li><% if (it.searchPage) { %><a href="<%= it.u('/recherche') %>?q=<%= encodeURIComponent(k) %>" rel="nofollow"><%= k %></a><% } else { %><%= k %><% } %></li><% }) %></ul></dd>

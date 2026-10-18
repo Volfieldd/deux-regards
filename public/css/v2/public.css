@@ -124,6 +124,8 @@ button.sh-outil { border: 0; background: none; font: inherit; font-size: 15px; c
 .sh--tunnel.sh--prive .sh-marque { margin: 0; }
 /* Retour d'une galerie privée : « ← Galerie » sous 560 px (.sh-court), puis le titre, sur deux lignes, jamais d'ellipse. */
 .sh--prive .sh-retour-t { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.25; }
+/* Retour au billet des Carnets (MQ-12, état 16) : le titre d'un billet peut être long ; sur deux lignes, jamais coupé. */
+.sh-retour--long .sh-retour-t { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.25; }
 
 /* Contexte étroit : la liste des langues s'ancre au bord droit de l'en-tête, et non au sélecteur ; suivi de « Quitter »
    (galerie privée) ou de « Menu », elle sortirait de l'écran à 320 px. */

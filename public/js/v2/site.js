@@ -65,7 +65,8 @@ document.documentElement.classList.add('js');
       const r = readRetour();
       if (!r || r.gallery !== keyOf(location) || !r.slug) return;
       writeRetour({ ...r, slug: null, armed: false });
-      const tile = [...document.querySelectorAll('.rangees a.vignette')].find(a => decodeURIComponent(new URL(a.href).pathname).endsWith(`/photo/${r.slug}`));
+      // Un billet des Carnets : la photo dans le texte d'abord (ordre du document), avant sa vignette de la planche.
+      const tile = [...document.querySelectorAll('.billet-ouv-photo a, .billet a[href*="/photo/"], .rangees a.vignette')].find(a => decodeURIComponent(new URL(a.href).pathname).endsWith(`/photo/${r.slug}`));
       if (!tile) return;
       const b = tile.getBoundingClientRect();
       if (b.top < 0 || b.bottom > innerHeight) tile.scrollIntoView({ block: 'center' });

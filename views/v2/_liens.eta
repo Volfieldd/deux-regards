@@ -1,6 +1,8 @@
 <% /* Entrées du menu (MQ-00 § 3), dans l'ordre de la planche : Galerie, Séries, Carte et Voyages s'ils sont publiés,
       À propos. Seules les pages qui existent : la Galerie et les Séries sont des parties de l'accueil (/#galerie,
-      /#series) tant que /galerie et /series n'existent pas ; Carnets et Tirages viendront avec leurs pages.
-      it.courant : l'entrée de la page affichée (aria-current) : galerie, series, carte, voyages, a-propos. */ %>
-<% const t = it.t, home = it.u('/'), cc = k => (it.courant === k ? ' aria-current="page"' : ''); %>
-<li><a href="<%= home %>#galerie"<%~ cc('galerie') %>><%= t.nav.gallery %></a></li><li><a href="<%= home %>#series"<%~ cc('series') %>><%= t.nav.series %></a></li><% if (it.mapPage) { %><li><a href="<%= it.u('/carte') %>"<%~ cc('carte') %>><%= t.nav.map %></a></li><% } %><% if (it.tripsPage) { %><li><a href="<%= it.u('/voyages') %>"<%~ cc('voyages') %>><%= t.nav.trips %></a></li><% } %><li><a href="<%= it.u('/a-propos') %>"<%~ cc('a-propos') %>><%= t.nav.about %></a></li>
+      /#series) tant que /galerie et /series n'existent pas ; Carnets dès qu'un billet est publié (v2 seulement :
+      it.carnetPage) ; Tirages viendra avec sa page.
+      it.courant : l'entrée de la page affichée (aria-current) : galerie, series, carnets, carte, voyages, a-propos ;
+      it.courantSous : une page sous cette entrée (un billet sous Carnets : aria-current="true", MQ-12). */ %>
+<% const t = it.t, home = it.u('/'), cc = k => (it.courant === k ? ` aria-current="${it.courantSous ? 'true' : 'page'}"` : ''); %>
+<li><a href="<%= home %>#galerie"<%~ cc('galerie') %>><%= t.nav.gallery %></a></li><li><a href="<%= home %>#series"<%~ cc('series') %>><%= t.nav.series %></a></li><% if (it.carnetPage) { %><li><a href="<%= it.u('/carnet') %>"<%~ cc('carnets') %>><%= t.nav.carnets %></a></li><% } %><% if (it.mapPage) { %><li><a href="<%= it.u('/carte') %>"<%~ cc('carte') %>><%= t.nav.map %></a></li><% } %><% if (it.tripsPage) { %><li><a href="<%= it.u('/voyages') %>"<%~ cc('voyages') %>><%= t.nav.trips %></a></li><% } %><li><a href="<%= it.u('/a-propos') %>"<%~ cc('a-propos') %>><%= t.nav.about %></a></li>

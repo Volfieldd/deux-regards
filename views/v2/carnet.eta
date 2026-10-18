@@ -1,0 +1,83 @@
+<% /* Un billet des Carnets (maquette MQ-12) : fil d'Ariane ; l'ouverture en double page au bureau (rubrique, titre, chapô,
+      la couverture entière à son format, puis les auteurs, les dates, le temps de lecture et le sommaire avec sa carte au
+      trait) ; le corps à environ 65 signes, ses photos à l'une des tailles de l'éditeur (chacune mène à la visionneuse dans
+      le contexte du billet, ?carnet=) ; la signature, « Écrire à … » (mailto:, rien n'est stocké), « Partager ce billet » ;
+      la réponse publiée (droit de réponse) ; le voyage lié ; puis la planche des photos, les billets voisins, le flux.
+      Le corps est rendu par le serveur (server/carnet-markdown.js) : aucun HTML du billet n'arrive tel quel. */ %>
+<% layout('./layout', { pageTitle: it.v2.typo(it.pageTitle), description: it.v2.typo(it.description) }) %>
+<% const t = it.t, tc = it.tc, v = it.v2, ic = v.ic, post = it.post, b = it.body;
+   const la = it.l !== it.lang ? ` lang="${it.l}"` : '';
+   const cover = it.cover, g = cover ? v.fmt(cover) : null;
+   const coverHref = cover && it.coverN ? it.u(`/photo/${cover.slug}?carnet=${post.slug}`) : cover ? it.photoUrl(cover.slug) : '';
+   const coverSizes = g ? (g.vertical ? `(min-width: 900px) min(460px, calc(min(74vh, 680px) * ${g.r})), min(calc(100vw - 48px), calc(82vh * ${g.r}))` : `(min-width: 900px) min(calc(50vw - 80px), calc(min(74vh, 680px) * ${g.r})), calc(100vw - 48px)`) : '';
+   const year = new Date(post.published_at || post.updated_at).getUTCFullYear();
+   const m = it.map; %>
+<%~ include('./_entete', { ...it, courant: 'carnets', courantSous: true }) %>
+<main id="contenu" class="wrap" data-adresse="<%= `${it.siteName} · ${it.host}${it.u(`/carnet/${post.slug}`)} · © ${year} ${it.names}` %>">
+<% if (it.team) { %>  <div class="pages-note"><div class="msg" role="note"><%~ ic('info') %><p><%= v.typo(tc.preview) %> <a href="/admin/carnet/<%= post.id %>"><%= tc.edit %></a></p></div></div>
+<% } else if (it.l !== it.lang) { %>  <div class="pages-note"><div class="msg" role="note"><%~ ic('info') %><p><%= v.typo(tc.onlyFrBanner) %></p></div></div>
+<% } %><article aria-labelledby="titre"<%~ la %>>
+  <nav class="ariane" aria-label="<%= t.v2.breadcrumb %>"<%~ la ? ` lang="${it.lang}"` : '' %>><ol><li><a href="<%= it.u('/carnet') %>"><%= tc.title %></a></li><li><span aria-current="page"<%~ la %>><%= v.typo(it.title) %></span></li></ol></nav>
+  <div class="billet-ouv">
+    <div class="billet-ouv-t">
+      <p class="etiquette"<%~ la ? ` lang="${it.lang}"` : '' %>><%= v.typo(it.rubriqueName) %></p>
+      <h1 class="titre-page" id="titre"><%~ v.nobr(v.typo(it.title)) %></h1>
+<% if (it.dek) { %>      <p class="chapo"><%= v.typo(it.dek) %></p>
+<% } %>    </div>
+<% if (cover) { %>    <figure class="billet-ouv-photo photo <%= g.cls %>"<%~ it.coverN ? ` id="photo-${it.coverN}"` : '' %>>
+      <a href="<%= coverHref %>"><%~ it.picture(cover, { sizes: coverSizes, eager: true, alt: it.coverAlt }) %><% if (it.coverN) { %><span class="sr-only"><%= tc.seeBig(it.coverN, it.nPhotos) %></span><% } %></a>
+      <figcaption class="cartel cartel--grand" data-adresse="<%= it.host %>/photo/<%= cover.slug %>"><span class="cartel-t"><%= cover.title %></span><span class="cartel-m"><%= v.typo(it.coverMeta) %></span></figcaption>
+    </figure>
+<% } %>    <div class="billet-ouv-suite"<%~ la ? ` lang="${it.lang}"` : '' %>>
+      <div>
+        <p class="auteurs"><%= tc.by('').trim() %> <% it.authors.forEach((a, i) => { %><%= i ? (i === it.authors.length - 1 ? t.v2.and : ', ') : '' %><a href="<%= it.u(`/auteur/${a.slug}`) %>"><%= a.name %></a><% }) %></p>
+        <p class="billet-meta"><% if (it.published) { %><%= tc.published('').trim() %> <time datetime="<%= it.published.day %>"><%= it.published.text %></time><% } %><% if (it.revised) { %>&nbsp;· <%= tc.updated('').trim() %> <time datetime="<%= it.revised.day %>"><%= it.revised.text %></time><% } %>&nbsp;· <%= v.typo(tc.minutes(it.minutes)) %><% if (it.nPhotos) { %>&nbsp;· <%= t.photos(it.nPhotos) %><% } %></p>
+      </div>
+<% if (it.mention) { %>      <p class="mention"><span class="etiquette"><%= tc.mention %></span> <span<%~ la %>><%= v.typo(it.mention) %></span></p>
+<% } %><% if (b.headings.length >= 2) { %>      <nav class="sommaire" aria-labelledby="som-t">
+<% if (m) { const w = m.view; %>        <svg class="carte" viewBox="<%= w.x %> <%= w.y %> <%= w.w %> <%= w.h %>" role="img" aria-label="<%= v.typo(m.label) %>" focusable="false">
+          <use class="cote" href="<%= it.asset('carte-terre.svg') %>#terre" width="1000" height="520" stroke-width="<%= m.stroke %>"/>
+          <path class="trajet" d="M<%= m.pts.map(p => `${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' L') %>" stroke-width="<%= m.stroke %>" stroke-dasharray="<%= (m.stroke * 2.5).toFixed(3) %> <%= (m.stroke * 3.3).toFixed(3) %>"/>
+<% m.pts.forEach(p => { %>          <circle class="pt" cx="<%= p.x.toFixed(2) %>" cy="<%= p.y.toFixed(2) %>" r="<%= m.r %>"/><text x="<%= (p.x + m.r * 2).toFixed(2) %>" y="<%= (p.y + m.fs * 0.35).toFixed(2) %>" font-size="<%= m.fs %>"><%= p.n %> <%= p.name %></text>
+<% }) %>        </svg>
+<% } %>        <div>
+          <p class="sommaire-t" id="som-t"><%= tc.toc %></p>
+          <ol<%~ la %>>
+<% b.headings.forEach(h => { %>            <li><a href="#<%= h.id %>"><span class="s-n" aria-hidden="true"><%= h.n %></span><span><span class="s-nom"><%= v.typo(h.text) %></span><% if (h.photos) { %> <span class="s-d"<%~ la ? ` lang="${it.lang}"` : '' %>>·&nbsp;<%= t.photos(h.photos) %></span><% } %></span></a></li>
+<% }) %>          </ol>
+        </div>
+      </nav>
+<% } %>    </div>
+  </div>
+  <div class="billet">
+<%~ b.html %>
+    <p class="fin-signe"><%= it.names %></p>
+    <div class="actions fin-actions"<%~ la ? ` lang="${it.lang}"` : '' %>>
+<% if (it.mail) { %>      <a class="btn btn--filet" href="<%= it.mail %>"><%= tc.write(it.names) %></a>
+<% } %><% if (post.state === 'publie') { %>      <a class="lien" href="<%= it.u(`/carnet/${post.slug}/partager`) %>" rel="nofollow"><%~ ic('partager') %><%= tc.share %></a>
+<% } %>    </div>
+<% if (it.reply) { %>    <section class="reponse" aria-labelledby="reponse-t">
+      <h2 class="titre-3" id="reponse-t"<%~ la ? ` lang="${it.lang}"` : '' %>><%= tc.reply %></h2>
+<% if (it.reply.at) { %>      <p class="billet-meta"<%~ la ? ` lang="${it.lang}"` : '' %>><%= v.typo(tc.replyAt(it.reply.at)) %></p>
+<% } %>      <%~ it.reply.html %>
+    </section>
+<% } %><% if (it.trip) { %>    <p class="voyage-lie"<%~ la ? ` lang="${it.lang}"` : '' %>><a class="lien" href="<%= it.u(`/voyage/${it.trip.slug}`) %>"><%= v.typo(tc.trip(it.trip.name)) %><%~ ic('fleche', { size: 18 }) %></a></p>
+<% } %>  </div>
+</article>
+<div class="fin">
+<% if (it.list.length) { %>  <section aria-labelledby="planche-t">
+    <h2 id="planche-t"><%= tc.planche(it.list.length) %></h2>
+<%~ include('./_rangees', { ...it, list: it.list, filter: { carnet: post.slug }, labelledby: 'planche-t' }) %>
+  </section>
+<% } %>  <div>
+<% if (it.older || it.newer) { %>    <h2 id="voisins-t" class="sr-only"><%= tc.others %></h2>
+    <nav class="voisins" aria-labelledby="voisins-t">
+<% if (it.older) { %>      <a href="<%= it.older.href %>" class="prec"><span class="sens"><%= tc.prev %></span><span class="t"<%~ it.older.lang !== it.lang ? ` lang="${it.older.lang}"` : '' %>><%= v.typo(it.older.title) %></span><span class="m"><%= it.older.by %>&nbsp;· <%= it.older.date %></span></a>
+<% } else { %>      <span class="prec"></span>
+<% } %><% if (it.newer) { %>      <a href="<%= it.newer.href %>" class="suiv"><span class="sens"><%= tc.next %></span><span class="t"<%~ it.newer.lang !== it.lang ? ` lang="${it.newer.lang}"` : '' %>><%= v.typo(it.newer.title) %></span><span class="m"><%= it.newer.by %>&nbsp;· <%= it.newer.date %></span></a>
+<% } %>    </nav>
+<% } %>    <p class="actions fin-liens"><a class="lien" href="<%= it.feed.href %>" type="application/atom+xml"><%~ ic('flux', { size: 18 }) %><%= v.typo(tc.aboLink) %></a><% if (it.totalAll) { %><a class="lien" href="<%= it.u('/carnet') %>"><%= tc.allPosts(it.totalAll) %></a><% } %></p>
+  </div>
+</div>
+</main>
+<%~ include('./_pied', it) %>

@@ -20,13 +20,19 @@
 <% if (it.canonical) { %>
   <link rel="canonical" href="<%= it.publicUrl + it.localize(it.canonical, lang) %>">
   <meta property="og:url" content="<%= it.publicUrl + it.localize(it.canonical, lang) %>">
-<% it.langs.forEach(l => { %>
+<% /* it.alternates : les langues où la page existe vraiment (un billet : ses langues publiées, B67) ; sinon les trois. */ (it.alternates || it.langs).forEach(l => { %>
   <link rel="alternate" hreflang="<%= l %>" href="<%= it.publicUrl + it.localize(it.canonical, l) %>">
 <% }) %>
   <link rel="alternate" hreflang="x-default" href="<%= it.publicUrl + it.canonical %>">
 <% } %>
   <meta property="og:locale" content="<%= it.locales[lang] %>">
-  <meta property="og:type" content="website">
+<% if (it.robots) { %>  <meta name="robots" content="<%= it.robots %>">
+<% } %>  <meta property="og:type" content="<%= it.ogType || 'website' %>">
+<% if (it.article) { /* Billet des Carnets (B66) : dates, auteurs, rubrique. */ %>  <meta property="article:published_time" content="<%= it.article.published %>">
+  <meta property="article:modified_time" content="<%= it.article.modified %>">
+<% it.article.authors.forEach(a => { %>  <meta property="article:author" content="<%= a %>">
+<% }) %>  <meta property="article:tag" content="<%= it.article.tag %>">
+<% } %>
   <meta property="og:title" content="<%= it.pageTitle %>">
   <meta property="og:site_name" content="<%= it.siteName %>">
 <% if (it.description) { %>
@@ -40,6 +46,10 @@
   <link rel="stylesheet" href="<%= it.asset('css/v2/tokens.css') %>">
   <link rel="stylesheet" href="<%= it.asset('css/v2/public.css') %>">
   <link rel="stylesheet" href="<%= it.asset('css/v2/pages.css') %>">
+<% if (it.carnetCss) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/carnet.css') %>">
+<% } %><% if (it.feed) { /* Flux des Carnets (B58), déclaré sur leurs pages. */ %>  <link rel="alternate" type="application/atom+xml" title="<%= it.feed.title %>" href="<%= it.feed.href %>">
+<% } %><% if (it.jsonLd) { /* Bloc de données, non exécuté (CSP : rien à autoriser) ; « < » échappé (B68). */ %>  <script type="application/ld+json"><%~ it.jsonLd %></script>
+<% } %>
 <% if (it.formulaires || it.prive) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/formulaires.css') %>">
 <% } %><% if (it.prive) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/prive.css') %>">
 <% } %><% if (brand.favicon64) { %>
