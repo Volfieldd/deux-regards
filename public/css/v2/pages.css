@@ -12,7 +12,6 @@
 /* Note d'aperçu (carte ou voyage non publiés, pour l'équipe) : un message d'information sous l'en-tête. */
 .pages-note { padding-top: var(--esp-3); }
 .pages-note .msg { max-width: 76ch; }
-.pages-note .msg a { white-space: nowrap; }
 /* Partie qui suit la tête de page de près (résultats, séries proposées, photographes). */
 .partie--pres { padding-top: var(--esp-4); }
 /* « ↑ Sommaire », « ↑ Carte » : la flèche, décorative, n'est pas soulignée avec le mot. */
