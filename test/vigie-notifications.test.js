@@ -56,16 +56,20 @@ test('notification : alerte critique en mode bloquer → Signal (groupe), messag
   assert.match(text, /Source : site/);
   assert.match(text, /14 h 02 · https:\/\/vigie\.nicephos\.art\/alertes\/\d+/, 'heure de Paris');
   assert.doesNotMatch(text, /203\.0\.113|zitadel-/, 'ni adresse ni compte');
+  assert.match(text, /\nRéponse : compte gelé 1 j, sessions du compte fermées\n/, 'la réponse déjà faite, sans cible');
   // Mode « observer » (règle par défaut) : alerte ouverte, aucun message.
   v.site('sys_config_changed', 'haut');
   await v.notifier.idle();
   assert.equal(v.sent.length, 1);
-  // Interrupteur des alertes arrêté : rien, même en mode alerter.
+  // Interrupteur des alertes arrêté : cet arrêt lui-même est signalé (surveillance réduite), puis plus rien.
   v.engine.setMode('sigma.restauration', 'alerter', 'test');
-  v.switches.set('alertes', 'arret', { duree: '1h', par: 'test' });
+  v.switches.set('alertes', 'arret', { duree: '1h', par: 'test', motif: 'essai' });
+  await v.notifier.idle();
+  assert.equal(v.sent.length, 2);
+  assert.match(v.sent[1].body.message, /^\[Moyenne\] Surveillance réduite/);
   v.site('sys_restore', 'haut');
   await v.notifier.idle();
-  assert.equal(v.sent.length, 1);
+  assert.equal(v.sent.length, 2);
   assert.equal(v.mails.length, 0);
 });
 
@@ -96,7 +100,8 @@ test('résumé signé pour l’admin du site : nombres par gravité, titre gén�
   const s = v.engine.summary();
   assert.deepEqual(s.ouvertes, { critique: 1, haut: 0, moyen: 0, bas: 0 });
   assert.equal(s.critique_a_prendre, true);
-  assert.ok(s.plus_grave.titre);
+  assert.equal(s.plus_grave.titre, undefined, 'ni titre ni règle dans le résumé');
+  assert.ok(Number.isSafeInteger(s.plus_grave.id));
   const ingest = createIngest({ store: v.store, decisions: v.decisions, ingestKey: KEY, summary: () => v.engine.summary(), consoleUrl: 'https://vigie.nicephos.art' });
   t.after(() => ingest.close());
   const signedGet = p => { const ts = String(Date.now()), nonce = crypto.randomBytes(16).toString('hex'); return { 'x-vigie-ts': ts, 'x-vigie-nonce': nonce, 'x-vigie-sig': crypto.createHmac('sha256', KEY).update(`${ts}.${nonce}.GET ${p}`).digest('hex') }; };

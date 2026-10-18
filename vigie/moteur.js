@@ -4,6 +4,7 @@ import { pointsOf, THRESHOLDS, HALF_LIFE_MIN, SOURCE_MIN, QUORUM, sourceOf, MODE
 import { rank } from './vocabulaire.js';
 import { loadRules, createCorrelator, fieldOf, RegexTimeout } from './sigma.js';
 import { createDetectors, createChains, lru } from './detecteurs.js';
+import { parseDuration } from './decisions.js';
 
 // Moteur de détection de la Vigie (phases C1 et C2, recadrage du 17 octobre 2026, concepts de marlinOS) :
 //   - entités (adresse, réseau, compte, session) et score composite qui perd la moitié de sa valeur chaque heure,
@@ -57,7 +58,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     'entite.score': { cas: 'quorum', mode: 'observer', titre: 'Score d’une entité au-dessus du seuil, confirmé par deux sources' },
     ...Object.fromEntries([...rules.filter(r => r.generate && r.signal), ...correlations].map(r => [`sigma.${r.name}`, { cas: r.cas, mode: r.mode, titre: r.title, sourceUnique: r.sourceUnique, expire: r.expireAt }])),
     ...Object.fromEntries(['premiere_apparition', 'heure_inhabituelle', 'vitesse', 'voyage_impossible', 'pivot_identifiants', 'role_incoherent', 'exploration_lente', 'chaine_attaque', 'silence', 'menaces']
-      .map(n => [`detecteur.${n}`, { cas: { premiere_apparition: 'DS4', heure_inhabituelle: 'DS18', vitesse: 'DS17', voyage_impossible: 'DS3', pivot_identifiants: 'DS25', role_incoherent: 'DS10', exploration_lente: 'DS15', chaine_attaque: 'DS23', silence: 'DS24', menaces: 'D22' }[n], mode: 'observer', titre: n.replaceAll('_', ' ') }])),
+      .map(n => [`detecteur.${n}`, { cas: { premiere_apparition: 'DS4', heure_inhabituelle: 'DS18', vitesse: 'DS17', voyage_impossible: 'DS3', pivot_identifiants: 'DS25', role_incoherent: 'DS10', exploration_lente: 'DS15', chaine_attaque: 'DS23', silence: 'DS24', menaces: 'DS22' }[n], mode: 'observer', titre: n.replaceAll('_', ' ') }])),
   };
   const q = {
     entity: db.prepare('SELECT * FROM entities WHERE kind = ? AND key = ?'),
@@ -79,9 +80,16 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   };
 
   const modes = () => setting.get('regles_modes', {});
-  const modeOf = id => { const m = modes()[id]; return MODES.includes(m) ? m : REGISTRY[id]?.mode || 'observer'; };
+  // Mode d'une règle : réglé (texte), ou Arrêt pour une durée ({ mode: 'arret', jusqua }) : passée la durée, la règle
+  // reprend son mode de départ.
+  const modeOf = id => {
+    const m = modes()[id];
+    if (m && typeof m === 'object') return m.mode === 'arret' && m.jusqua > now() ? 'arret' : REGISTRY[id]?.mode || 'observer';
+    return MODES.includes(m) ? m : REGISTRY[id]?.mode || 'observer';
+  };
   const thresholds = () => ({ ...THRESHOLDS, ...setting.get('seuils', {}) });
-  const trusted = () => new Set(setting.get('adresses_confiance', []));
+  // Adresses de confiance : { ip, jusqua } (une adresse ancienne écrite seule reste, sans fin, jusqu'à son retrait).
+  const trusted = () => new Set(setting.get('adresses_confiance', []).filter(x => typeof x === 'string' || x.jusqua > now()).map(x => (typeof x === 'string' ? x : x.ip)));
   // Administrateurs connus : ceux du dernier contrôle des rôles réussi (sauvegarde du site), jamais la seule
   // déclaration du site, qu'un site compromis peut falsifier (arbitrage NC2). Avant le premier contrôle : aucun.
   const admins = () => {
@@ -269,15 +277,17 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   // Le curseur de la file est enregistré dans la même transaction : un arrêt brutal ne fait jamais analyser un lot deux
   // fois (revue C3). Détection arrêtée : le curseur avance quand même (ces événements ne seront pas analysés plus tard).
   const processAll = db.transaction((rows, cursorTo) => {
-    if (switches.isOn('detection')) {
-      for (const row of rows) {
+    // Détection arrêtée : seule la réduction de la surveillance est encore analysée (c'est elle qui le signale).
+    const on = switches.isOn('detection');
+    {
+      for (const row of on ? rows : rows.filter(r => r.type === 'vigie_surveillance_reduite')) {
         try { processOne(row); } catch (err) { log?.error({ err: err.message, type: row.type }, 'Vigie : moteur'); }
       }
     }
     if (cursorTo != null) setting.set('moteur_curseur', cursorTo);
   });
   function process(rows, cursorTo = null) {
-    if (!rows.length || (cursorTo == null && !switches.isOn('detection'))) return;
+    if (!rows.length || (cursorTo == null && !switches.isOn('detection') && !rows.some(r => r.type === 'vigie_surveillance_reduite'))) return;
     processAll.immediate(rows, cursorTo);
   }
   // File : la réception répond sans attendre le moteur. Le moteur garde seulement un curseur (dernier numéro analysé,
@@ -350,14 +360,18 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   // la plus grave, sa date ; ni adresse, ni compte, ni détail. Les alertes en observation n'y figurent pas (comme pour
   // les notifications). « critique_a_prendre » : une critique encore « ouverte » (le bandeau de l'admin reste jusqu'à
   // sa prise en charge dans la console).
+  // Ordre des alertes partout (console, ligne de commande, résumé de l'admin).
+  const alertOrder = (a, b) => rank(b.gravite) - rank(a.gravite) || (a.statut === 'ouverte' ? 0 : 1) - (b.statut === 'ouverte' ? 0 : 1) || b.derniere - a.derniere;
   function summary() {
-    const rows = db.prepare("SELECT id, regle, gravite, statut, premiere FROM alerts WHERE statut != 'close' AND mode != 'observer'").all();
+    const rows = db.prepare("SELECT id, regle, gravite, statut, premiere, derniere FROM alerts WHERE statut != 'close' AND mode != 'observer'").all();
     const ouvertes = { critique: 0, haut: 0, moyen: 0, bas: 0 };
     for (const r of rows) if (Object.hasOwn(ouvertes, r.gravite)) ouvertes[r.gravite] += 1;
-    const worst = rows.filter(r => Object.hasOwn(ouvertes, r.gravite)).sort((a, b) => rank(b.gravite) - rank(a.gravite) || b.premiere - a.premiere)[0];
+    // Même ordre que la console : gravité, ouverte avant prise en charge, la plus récente d'abord. Ni titre ni règle :
+    // l'admin du site peut être lue par un attaquant devenu administrateur, il n'apprend pas ce qui l'a vu.
+    const worst = rows.filter(r => Object.hasOwn(ouvertes, r.gravite)).sort(alertOrder)[0];
     return {
       ouvertes,
-      plus_grave: worst ? { titre: REGISTRY[worst.regle]?.titre || 'Alerte de sécurité', gravite: worst.gravite, depuis: worst.premiere } : null,
+      plus_grave: worst ? { id: worst.id, gravite: worst.gravite, depuis: worst.premiere } : null,
       critique_a_prendre: rows.some(r => r.gravite === 'critique' && r.statut === 'ouverte'),
     };
   }
@@ -383,11 +397,23 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     if (n) store.own('vigie_alerte', { emetteur: par, detail: { action: statut === 'close' ? 'close' : 'prise en charge', id, classement, note: String(note).slice(0, 200) } });
     return n;
   }
-  const setMode = (regle, mode, par) => {
+  // Arrêt d'une règle : toujours pour une durée (7 jours au plus), comme un interrupteur, et signalé (surveillance
+  // réduite) ; les autres modes restent tels quels.
+  const setMode = (regle, mode, par, { duree = null, motif = '' } = {}) => {
     if (!Object.hasOwn(REGISTRY, regle)) throw new Error(`règle inconnue : ${regle}`);
     if (!MODES.includes(mode)) throw new Error(`mode : ${MODES.join(', ')}`);
+    if (regle === 'sigma.surveillance_reduite' && mode !== 'alerter') throw new Error('la règle « Surveillance réduite » reste en mode alerter : c’est elle qui prévient quand on réduit la surveillance');
+    const m = String(motif || '').slice(0, 200) || undefined;
+    if (mode === 'arret') {
+      if (!duree) throw new Error('arrêt d’une règle toujours pour une durée (--duree 4h, 7j au plus)');
+      const jusqua = now() + Math.min(parseDuration(duree), 7 * 864e5);
+      setting.set('regles_modes', { ...modes(), [regle]: { mode: 'arret', jusqua, par, motif: m } });
+      store.own('vigie_interrupteur', { emetteur: par, detail: { regle, mode, jusqua, motif: m } });
+      store.own('vigie_surveillance_reduite', { emetteur: par, detail: { objet: `regle:${regle}`, jusqua, motif: m } });
+      return;
+    }
     setting.set('regles_modes', { ...modes(), [regle]: mode });
-    store.own('vigie_interrupteur', { emetteur: par, detail: { regle, mode } });
+    store.own('vigie_interrupteur', { emetteur: par, detail: { regle, mode, motif: m } });
   };
   const setThreshold = (kind, value, par) => {
     if (!Object.hasOwn(THRESHOLDS, kind) || !(value > 0 && value <= 1000)) throw new Error(`seuil : ${Object.keys(THRESHOLDS).join(', ')}, valeur de 0 à 1000`);

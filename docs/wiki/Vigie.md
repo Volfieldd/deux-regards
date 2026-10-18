@@ -94,7 +94,8 @@ Concepts repris de marlinOS ([recadrage](https://github.com/Volfieldd/deux-regar
 - **Exceptions à source unique** (alerte immédiate) : rôle donné hors de l'application, administrateur donné, déclencheurs ou tickets des comptes altérés, chaîne rompue, contrôle des rôles en écart ou impossible, moteur saturé, cookie rejoué depuis un autre appareil (autre réseau **et** autre navigateur), session reprise depuis un autre appareil, saisie malveillante depuis un compte de l'admin, Zitadel critique (emprunt d'identité, administrateur ajouté, politique affaiblie), configuration changée, restauration, déchiffrement impossible, ingestion refusée, trou Zitadel.
 - **Modes** (par règle) : `arret`, `observer` (alerte ouverte et marquée, sans notification ni réponse : le mois d'observation), `alerter`, `bloquer` (réponse automatique). Au départ, tout est en `observer`, sauf le cookie rejoué (sessions du compte fermées) et le rôle donné hors de l'application (compte gelé 24 h, sessions fermées), en `bloquer`, et les preuves sans réponse possible (administrateur donné, journal des comptes altéré, sauvegarde différente de ce que déclare le site, contrôle des rôles impossible, chaîne du journal rompue), en `alerter` : jamais muettes.
 - **Réponses automatiques** : seulement en mode `bloquer` et interrupteur `blocages` en marche ; jamais en double ; une adresse n'est jamais bloquée automatiquement si elle est privée (réseau Docker, proxy), « de confiance », ou d'où un **administrateur** s'est connecté (connexion réussie, 30 jours). Un compte ordinaire ne protège pas son adresse, et un événement qui cite un administrateur (cookie rejoué, refus de droit) non plus : sinon un attaquant s'achèterait l'exemption.
-- **Une alerte par règle et par entité** tant qu'elle est ouverte et active : les événements suivants s'y ajoutent (compteur, sources, gravité la plus haute). Une aggravation est notée (événement `vigie_alerte`, action `aggravee`) ; en mode `bloquer`, la réponse est reprise (au plus toutes les 15 minutes) si la décision a expiré ou a été levée alors que l'attaque continue. Après 24 heures sans nouvel événement, une reprise ouvre une nouvelle alerte ; une alerte restée **ouverte** 7 jours sans nouvel événement est close « sans suite » (une alerte prise en charge reste à son intervenant).
+- **Une alerte par règle et par entité** tant qu'elle est ouverte et active : les événements suivants s'y ajoutent (compteur, sources, gravité la plus haute). Une aggravation est notée (événement `vigie_alerte`, action `aggravee`) ; en mode `bloquer`, la réponse est reprise (au plus toutes les 15 minutes) si la décision a expiré ou a été levée alors que l'attaque continue. Après 24 heures sans nouvel événement, une reprise ouvre une nouvelle alerte ; une alerte restée **ouverte** 7 jours sans nouvel événement est close « sans suite » (une alerte prise en charge reste à son intervenant). Ordre partout (console, `alertes`, résumé de l'admin) : gravité, ouverte avant prise en charge, la plus récente d'abord.
+- **Surveillance réduite** : arrêter un interrupteur, passer une règle en arrêt, ajouter une adresse de confiance ou accepter une référence du contrôle des rôles ouvre l'alerte « Surveillance réduite » (Moyenne, mode Alerter), envoyée sur Signal **même si l'interrupteur des alertes ou de la détection vient d'être arrêté** ; cette règle ne s'arrête pas. `controle --accepter` est refusé tant qu'une alerte du contrôle des rôles est ouverte (classez-la d'abord).
 - **Analyse hors de la réception** : la réception répond au site sans attendre le moteur (file traitée par lots de 200). Si la file déborde (100 000 événements), les événements restent dans la base et la chaîne, mais ne sont pas analysés : alerte « moteur saturé ».
 
 | Commande | Effet |
@@ -103,8 +104,8 @@ Concepts repris de marlinOS ([recadrage](https://github.com/Volfieldd/deux-regar
 | `alerte <id>` | règle, entité, sources, réponse, et « D'où vient le signal » (les événements, leur heure à la source et l'écart jusqu'à leur réception par la Vigie, leur composant, leur émetteur, leur confiance) |
 | `prendre <id>`, `classer <id> <incident\|faux_positif\|test> --note "…"` | prise en charge ; clôture |
 | `entites` | entités les plus chaudes (score, sources) |
-| `regles`, `regle <règle> <mode>`, `seuil <classe> <points>` | modes et seuils |
-| `confiance ajouter\|retirer <ip>` | adresses jamais bloquées automatiquement |
+| `regles`, `regle <règle> <mode>`, `seuil <classe> <points>` | modes et seuils ; `regle <règle> arret --duree 4h --motif "…"` : une règle ne s'arrête que pour une durée (7 jours au plus), puis reprend son mode de départ |
+| `confiance ajouter <ip> --duree 7j --motif "…"`, `confiance retirer <ip>` | adresses jamais bloquées automatiquement, pour une durée (7 jours au plus) |
 
 ## Règles et détecteurs (phase C2)
 
@@ -168,13 +169,16 @@ Un **Worker** Cloudflare (`bordure/worker.js`, offre gratuite) devant l'admin, l
   ```
   [Critique] Rôle donné, retiré ou compte changé hors de l'application
   Source : site
+  Réponse : compte gelé 1 j, sessions du compte fermées
   14 h 02 · https://vigie.nicephos.art/alertes/412
   ```
+
+  La ligne « Réponse » dit ce que la Vigie a déjà fait (sans cible), ou « Aucune réponse automatique ». L'e-mail rappelle : « Ouvrez la Vigie depuis votre favori ; elle ne demande jamais votre mot de passe par message. »
 
 - **Par où** : Signal d'abord (passerelle [`deploy/unraid/signal/`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/signal/README.md), groupe « Vigie Nicephos ») ; l'**e-mail** si Signal n'est pas réglé ou échoue. Un canal en échec ouvre une alerte (« canal en échec », une fois par heure). 20 messages par heure au plus et par canal, puis un message de synthèse à la fin de l'heure.
 - **Réglages** (`vigie.env`) : `VIGIE_SIGNAL_NUMERO`, `VIGIE_SIGNAL_GROUPE` (étape 8 du guide Signal), `VIGIE_SIGNAL_URL` (`http://nicephos-signal:8080` par défaut) ; `VIGIE_SMTP_URL`, `VIGIE_MAIL_FROM`, `VIGIE_MAIL_TO` (adresses séparées par des virgules) ; `VIGIE_CONSOLE_URL` (`https://vigie.nicephos.art`). La Vigie rejoint le réseau interne `nicephos-vigie-signal` de la passerelle : lancer la pile Signal avant (sans Signal, créer le réseau vide une fois : `docker network create --internal nicephos-vigie-signal`).
 - **Essai** : `docker exec nicephos-vigie node vigie/cli.js notifier essai signal` (ou `email`).
-- **Résumé pour l'admin du site** : le site lit chaque minute `GET /v1/resume` (requête signée, réponse signée par la clé des décisions, usage « resume ») : nombre d'alertes ouvertes par gravité, titre générique de la plus grave, date ; ni adresse, ni compte. Les alertes en observation n'y figurent pas. L'affichage dans l'admin (badge, « Aujourd'hui », bandeau d'une alerte critique) viendra avec la console, après maquettes et jury.
+- **Résumé pour l'admin du site** : le site lit chaque minute `GET /v1/resume` (requête signée, réponse signée par la clé des décisions, usage « resume ») : nombre d'alertes ouvertes par gravité, gravité, date et numéro de la première (pour le lien vers la console) ; **ni titre, ni adresse, ni compte** (un attaquant devenu administrateur du site n'apprend pas ce qui l'a vu). Les alertes en observation n'y figurent pas. L'affichage dans l'admin (badge, « Aujourd'hui », bandeau d'une alerte critique) viendra avec la console, après maquettes et jury.
 
 | Commande | Effet |
 |---|---|

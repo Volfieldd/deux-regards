@@ -169,7 +169,9 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     if (!Number.isFinite(p.emis_a) || Math.abs(now() - p.emis_a) > 5 * 60e3) throw new Error('résumé périmé');
     const o = p.ouvertes || {};
     const n = k => (COUNT.test(String(o[k])) ? Number(o[k]) : 0);
-    const worst = p.plus_grave && typeof p.plus_grave.titre === 'string' ? { titre: p.plus_grave.titre.replace(/[\u0000-\u001f]/g, ' ').slice(0, 120), gravite: ['critique', 'haut', 'moyen', 'bas'].includes(p.plus_grave.gravite) ? p.plus_grave.gravite : 'moyen', depuis: Number(p.plus_grave.depuis) || null } : null;
+    // Ni titre ni règle (un attaquant devenu administrateur du site n'apprend pas ce qui l'a vu) : la gravité, la date
+    // et le numéro de l'alerte, pour le lien vers la console.
+    const worst = p.plus_grave && Number.isSafeInteger(p.plus_grave.id) ? { id: p.plus_grave.id, gravite: ['critique', 'haut', 'moyen', 'bas'].includes(p.plus_grave.gravite) ? p.plus_grave.gravite : 'moyen', depuis: Number(p.plus_grave.depuis) || null } : null;
     summary = { recu_a: now(), ouvertes: { critique: n('critique'), haut: n('haut'), moyen: n('moyen'), bas: n('bas') }, plus_grave: worst,
       critique_a_prendre: p.critique_a_prendre === true, console: /^https:\/\/[^\s"<>]+$/.test(p.console || '') ? p.console : null };
     return summary;
