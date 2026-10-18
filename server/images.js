@@ -78,7 +78,8 @@ export function rightsXmp({ artist, copyright, credit, webStatement }) {
 // Applique le niveau de métadonnées voulu à un pipeline sharp.
 //   null       : aucune (comportement par défaut de sharp)
 //   rights     : auteur et copyright (EXIF), mentions IPTC (XMP)
-//   shooting   : droits + appareil, objectif, exposition, date (sans GPS)
+//   shooting   : droits + appareil, objectif, exposition (sans GPS) ; date et heure seulement si meta.time (photo qui
+//                montre son heure sur le site, voir specFor)
 //   all        : tout l'EXIF de l'original, GPS compris
 // `shot` : balises de prise de vue déjà lues (shootingTags), pour le mode « shooting ».
 function applyMeta(pipeline, meta, shot) {
@@ -89,7 +90,8 @@ function applyMeta(pipeline, meta, shot) {
   const rights = { Artist: ascii(meta.artist), Copyright: ascii(meta.copyright) };
   if (meta.mode === 'rights') return pipeline.withExif({ IFD0: rights });
   shot ??= { IFD0: {}, IFD2: {} };
-  return pipeline.withExif({ IFD0: { ...shot.IFD0, ...rights }, IFD2: shot.IFD2 });
+  const { DateTimeOriginal, ...ifd2 } = shot.IFD2;
+  return pipeline.withExif({ IFD0: { ...shot.IFD0, ...rights }, IFD2: meta.time && DateTimeOriginal ? { ...ifd2, DateTimeOriginal } : ifd2 });
 }
 
 // ---------- rendu ----------

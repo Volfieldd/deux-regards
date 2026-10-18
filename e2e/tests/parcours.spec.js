@@ -27,7 +27,7 @@ test.describe('parcours d’une photo', () => {
   test.beforeAll(async ({ browser }) => {
     test.setTimeout(180_000);
     const page = await browser.newPage({ storageState: STATE });
-    for (const title of ['Lisière E2E', 'import test']) {
+    for (const title of ['Lisière E2E', 'import test', 'Heure E2E', 'import heure']) {
       while (await page.goto(`/admin/photos?vue=liste&q=${encodeURIComponent(title)}`).then(() => page.locator('.plist li').count())) {
         await page.locator('.plist li a.ttl').first().click();
         await page.getByText('Supprimer cette photo').click();
@@ -152,6 +152,51 @@ test.describe('parcours d’une photo', () => {
     await expect(page.locator('.contact li')).toHaveCount(initial);
     expect((await pub.goto('/photo/lisiere-e2e')).status()).toBe(404);
     await pub.close();
+  });
+
+  // Heure de prise de vue (EXIF de import-heure.jpg : 1er mai 2025, 14 h 32) : jamais sur le site tant que la case de
+  // la fiche n'est pas cochée ; cochée, la page de la photo la montre après la date.
+  test('heure de prise de vue : cachée sur le site par défaut, montrée une fois la case cochée', async ({ page, context }) => {
+    test.setTimeout(180_000);
+    await page.goto('/admin/photos');
+    const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('link', { name: '＋ Importer des photos' }).click()]);
+    await chooser.setFiles('fixtures/import-heure.jpg');
+    await expect(page.locator('[data-sum-title]')).toHaveText('1 photo prête sur 1', { timeout: 120_000 });
+    await page.goto(`/admin/photos?statut=draft&vue=liste&q=${encodeURIComponent('import heure')}`);
+    await page.locator('.plist li', { hasText: 'import heure' }).locator('a.ttl').click();
+    const editUrl = page.url();
+    // Date et heure lues dans l'appareil ; la case, décochée, rappelle l'heure.
+    await expect(page.getByLabel('Date')).toHaveValue('2025-05-01');
+    const box = page.getByRole('checkbox', { name: /Montrer l’heure sur le site/ });
+    await expect(box).not.toBeChecked();
+    await expect(page.locator('label', { has: box })).toContainText('(14 h 32)');
+    await page.getByLabel('Titre').fill('Heure E2E');
+    await page.getByLabel('Adresse').fill('');
+    await page.getByLabel('Publiée').check();
+    await page.getByRole('button', { name: 'Enregistrer' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Photo enregistrée.' })).toHaveText('Photo enregistrée.');
+
+    const pub = await context.browser().newPage();
+    const textOf = async url => { await pub.goto(url); return pub.locator('main').innerText(); };
+    expect(await textOf('/photo/heure-e2e')).not.toMatch(/14\s*h\s*32|14:32|2:32/);
+
+    // Cochée : la page de la photo la montre, dans chaque langue.
+    await page.goto(editUrl);
+    await box.check();
+    await page.getByRole('button', { name: 'Enregistrer' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Photo enregistrée.' })).toHaveText('Photo enregistrée.');
+    await expect(box).toBeChecked();
+    expect(await textOf('/photo/heure-e2e')).toMatch(/1\s+mai\s+2025,\s+14\s+h\s+32/);
+    expect(await textOf('/en/photo/heure-e2e')).toMatch(/2:32\s+pm/);
+    expect(await textOf('/de/photo/heure-e2e')).toMatch(/14:32\s+Uhr/);
+    // Ailleurs (la galerie), jamais.
+    expect(await textOf('/')).not.toMatch(/14\s*h\s*32/);
+    await pub.close();
+
+    await page.goto(editUrl);
+    await page.getByText('Supprimer cette photo').click();
+    await page.getByRole('button', { name: 'Supprimer définitivement' }).click();
+    await expect(page.locator('.flash[role=status]')).toHaveText('Photo supprimée.');
   });
 
   test('séries : création en tête, ordre au clavier, suppression qui déplace les photos', async ({ page }) => {

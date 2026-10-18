@@ -1,0 +1,22 @@
+{
+ "Montrer l’heure sur le site": {
+  "en": "Show the time on the site",
+  "de": "Uhrzeit auf der Website zeigen"
+ },
+ "Avec le lieu, l’heure dit où se trouvaient les personnes photographiées à ce moment-là. Le site ne la montre qu’avec une date au jour.": {
+  "en": "Together with the place, the time tells where the people photographed were at that moment. The site only shows it with a full date (day, month and year).",
+  "de": "Zusammen mit dem Ort verrät die Uhrzeit, wo sich die fotografierten Personen in diesem Moment aufhielten. Die Website zeigt sie nur mit einem vollständigen Datum (Tag, Monat und Jahr)."
+ },
+ "Date au mois : l’heure n’est pas montrée.": {
+  "en": "Date to the month only: the time is not shown.",
+  "de": "Datum nur auf den Monat genau: Die Uhrzeit wird nicht gezeigt."
+ },
+ "Métadonnées « Tout l’EXIF de l’original » ({link}) : les images servies portent l’heure (et la position GPS), quel que soit ce choix.": {
+  "en": "Metadata “All the EXIF of the original” ({link}): the images served carry the time (and the GPS position), whatever this choice.",
+  "de": "Metadaten „Alle EXIF-Daten des Originals“ ({link}): Die ausgelieferten Bilder enthalten die Uhrzeit (und die GPS-Position), unabhängig von dieser Wahl."
+ },
+ "heure montrée sur le site": {
+  "en": "time shown on the site",
+  "de": "Uhrzeit auf der Website gezeigt"
+ }
+}

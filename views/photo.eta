@@ -9,7 +9,7 @@
   <div class="vf wrap">
     <div class="vtext">
       <h1><%= p.title %></h1>
-      <div class="meta mono">N°<%= it.pad(p.n) %> · <%= p.category %> · <a href="<%= it.galleryUrl({ regard: p.author_slug }) %>"><%= p.author %></a><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + p.when : '' %></div>
+      <div class="meta mono">N°<%= it.pad(p.n) %> · <%= p.category %> · <a href="<%= it.galleryUrl({ regard: p.author_slug }) %>"><%= p.author %></a><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + (p.time ? `${it.v2.date(p.taken_on)}, ${p.time}` : p.when) : '' %></div>
 <% if (p.legend) { %>
       <p class="legend" id="legende"><%= p.legend %></p>
 <% } %><% const kws = it.showKeywords && p.keywords ? p.keywords.split(',').map(k => k.trim()).filter(Boolean) : []; if (kws.length) { %>
