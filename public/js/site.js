@@ -169,6 +169,11 @@
     });
   }
   if (document.getElementById('grid')) {
+    // Revenue par l'historique, la galerie ne rejoue pas l'apparition des vignettes : c'est la page qu'on a quittée, et
+    // leur décalage de 12 px pendant l'animation fausserait la position rendue par le navigateur comme la mesure ci-dessous.
+    if (performance.getEntriesByType?.('navigation')[0]?.type === 'back_forward') {
+      document.querySelectorAll('#grid .tile').forEach(t => { t.style.animation = 'none'; });
+    }
     // De retour sur la galerie (bouton Retour, Fermer, Échap) : la dernière photo vue doit être à l'écran.
     addEventListener('pageshow', () => requestAnimationFrame(() => {
       const r = readRetour();
