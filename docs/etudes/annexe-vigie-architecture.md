@@ -201,13 +201,13 @@ Pourquoi le site tire au lieu que la Vigie pousse : le site n'ouvre **aucune rou
 
 ### 4.3 Notification dans l'admin
 
-Avec les décisions, le site lit `GET /v1/summary` : nombre d'alertes ouvertes par gravité, le titre générique de la plus grave (« Session reprise depuis un autre navigateur »), sa date, le lien de la console. **Ni adresse, ni compte, ni détail.** L'admin l'affiche aux seuls comptes qui ont la permission `securite.voir` :
+Avec les décisions, le site lit `GET /v1/resume` (signé, usage « resume », phase D1) : nombre d'alertes ouvertes par gravité, le titre générique de la plus grave (« Session reprise depuis un autre navigateur »), sa date, le lien de la console. **Ni adresse, ni compte, ni détail.** L'admin l'affiche aux seuls comptes qui ont la permission `securite.voir` :
 
 - badge sur l'entrée « Sécurité » du menu ;
 - ligne dans « Aujourd'hui » (`server/todo.js`) : `urgent` pour haut et critique, `bientot` pour moyen ;
 - bandeau rouge en haut de toutes les pages pour une alerte critique, jusqu'à son acquittement dans la console.
 
-Un site compromis pourrait masquer ce bandeau : c'est pourquoi la Vigie a ses propres canaux (e-mail tout de suite pour haut et critique, autres canaux plus tard), qui ne passent pas par le site.
+Un site compromis pourrait masquer ce bandeau : c'est pourquoi la Vigie a ses propres canaux (Signal pour haut et critique, l'e-mail en secours ; `vigie/notifications.js`), qui ne passent pas par le site.
 
 ### 4.4 Rôles : contrôle indépendant du site
 
