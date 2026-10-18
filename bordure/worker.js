@@ -59,6 +59,7 @@ function point(env, data) {
 }
 
 export default {
+  scheduled: (event, env) => scheduled(event, env),
   async fetch(request, env) {
     const url = new URL(request.url);
     const headers = new Headers(request.headers);
@@ -109,6 +110,19 @@ export default {
     return res;
   },
 };
+
+// Battement (arbitrage NC3-2) : tâche planifiée de Cloudflare toutes les 5 minutes (gratuite) ; un point « battement »
+// avec l'état de la liste. Son absence (Worker retiré, quota du jour épuisé : les tâches planifiées s'arrêtent aussi)
+// est signalée par la Vigie en 20 minutes, que le site ait du trafic ou non.
+export async function scheduled(event, env) {
+  const now = Date.now();
+  let etat = 'sans liste';
+  try {
+    const list = await edgeList(env, now);
+    etat = list ? `liste ${list.version}, ${list.exact.size + list.blocks.length} blocage(s)` : cache.error ? `liste refusée : ${cache.error}` : 'sans liste';
+  } catch (err) { etat = `erreur : ${err.message}`; }
+  point(env, { indexes: ['bordure'], blobs: ['battement', '', '', '', '', '', '', '', etat.slice(0, 120)], doubles: [1, 0] });
+}
 
 // Pour les tests : liste en cache remise à zéro.
 export const resetCache = () => { cache = { at: 0, list: null, error: null }; };

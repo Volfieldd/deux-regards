@@ -93,7 +93,8 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     const contributions = Object.fromEntries(Object.entries(parse(row.contributions)).map(([s, v]) => [s, v * f]).filter(([, v]) => v >= 0.01));
     return { ...row, score: row.score * f, contributions, at: t };
   }
-  const sourcesOf = e => Object.entries(e.contributions).filter(([s, v]) => s !== 'menaces' && v >= SOURCE_MIN).map(([s]) => s).sort();
+  // Ni les listes de menaces ni les règles « contexte » ne comptent comme une source du quorum.
+  const sourcesOf = e => Object.entries(e.contributions).filter(([s, v]) => s !== 'menaces' && s !== 'contexte' && v >= SOURCE_MIN).map(([s]) => s).sort();
 
   function deposit(kind, key, points, source, t) {
     const e = current(kind, key, t) || { kind, key, score: 0, contributions: {}, signaux: 0, premiere: t, derniere: t };
@@ -246,7 +247,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
       matched.add(r.name);
       if (!r.generate || !r.signal) continue;
       signal({ regle: `sigma.${r.name}`, titre: r.title, cas: r.cas, entite: entityOf(r, row), gravite: r.graviteEvenement ? row.severity : r.gravite, points: r.points,
-        sourceUnique: r.sourceUnique, reponse: r.reponse, tags: r.tags }, row, sources);
+        sourceUnique: r.sourceUnique, reponse: r.reponse, tags: r.tags }, row, r.contexte ? ['contexte'] : sources);
     }
     // Corrélation : les points se partagent entre les sources qui y ont contribué (et non la seule source du dernier
     // événement), ce qui permet le quorum entre le site et Zitadel.

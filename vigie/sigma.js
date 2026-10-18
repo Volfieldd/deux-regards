@@ -150,7 +150,9 @@ function vigieBlock(doc, file) {
   }
   const reDelay = v.delai_re_ms == null ? null : Number(v.delai_re_ms);
   if (reDelay != null && !(Number.isInteger(reDelay) && reDelay >= 1 && reDelay <= 1000)) throw new RuleError(`${file} : delai_re_ms de 1 à 1000`);
-  return { cas: v.cas || null, entite, sourceUnique: v.source_unique === true, points: v.points ?? POINTS[gravite], reponse: v.reponse || null,
+  // contexte: true (arbitrage NC3-1) : les points de la règle comptent dans le score, jamais comme une source du quorum
+  // (le même fait déjà vu par une autre source, comme les erreurs 404 vues à la fois par le site et la bordure).
+  return { contexte: v.contexte === true, cas: v.cas || null, entite, sourceUnique: v.source_unique === true, points: v.points ?? POINTS[gravite], reponse: v.reponse || null,
     mode: v.mode || 'observer', gravite, graviteEvenement: v.gravite === 'evenement', signal: v.signal !== false, expireAt, reDelay };
 }
 
