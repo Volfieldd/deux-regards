@@ -748,3 +748,84 @@ meter.vg-m.total::-moz-meter-bar { background: var(--danger); }
 /* Un identifiant dans le titre d’une page (« Compte zitadel-318204977 ») tient sur sa ligne au téléphone, espacement WCAG compris :
    en chasse fixe, il est réduit sous 480 px plutôt que coupé (essai I1 en espacement, finitions). */
 @media (max-width: 480px) { .vigie .ep :is(h1, .h1) :is(.ip, .sub) { font-size: .64em; } }
+
+/* ---------- 24. Flux et provenance des alertes (MV-11, lexique § 3.17) ----------
+   Un diagramme de Sankey rendu par le serveur (dr-tmp/vigie-mq/flux.py, référence de vigie/flux.js en D3) : quatre colonnes, des
+   rubans en courbes de Bézier, une teinte par source (jamais seule : chaque nœud porte son libellé et son nombre), des hachures
+   obliques pour une corrélation, un aplat pour une règle sur un seul événement, la « part perdue » en gris, repliée vers le bas.
+   Au bureau (conteneur de 936 px au moins : le texte du SVG n'y descend jamais sous 13 px), le diagramme à l'horizontale ;
+   en dessous, le même pivoté de haut en bas, en trois étages, ses libellés en HTML entre les étages. Teintes propres au
+   diagramme (--fx-*), dérivées de la palette « Chambre noire » ; deux teintes ajoutées (Zitadel, Vigie), lisibles par les
+   daltoniens (Okabe et Ito) et à 3:1 au moins sur le fond, en sombre comme en clair. */
+.vigie { --fx-site: var(--accent-ink); --fx-bordure: var(--ok); --fx-zitadel: #d58fc6; --fx-vigie: #4fc4a1; --fx-perdu: var(--ink3); }
+[data-theme="light"] .vigie, .vigie[data-theme="light"] { --fx-zitadel: #94417f; --fx-vigie: #007a5c; }
+@media (prefers-color-scheme: light) { :root:not([data-theme]) .vigie:not([data-theme="dark"]) { --fx-zitadel: #94417f; --fx-vigie: #007a5c; } }
+.fx-fig { container: fx / inline-size; margin: 0 0 18px; }
+.fx-h { display: none; }
+.fx-v { display: grid; gap: 4px; max-width: 640px; }
+@container fx (min-width: 936px) {
+  .fx-fig:not(.fx-force-v) .fx-h { display: block; }
+  .fx-fig:not(.fx-force-v) .fx-v { display: none; }
+}
+.fx-svg { display: block; width: 100%; height: auto; max-width: 1080px; overflow: hidden; }
+.fx-svg text { font-family: var(--sans); font-size: 15px; fill: var(--ink2); }
+.fx-svg .fx-nb { fill: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.fx-svg .fx-col { fill: var(--ink3); letter-spacing: .06em; }
+.fx-svg .fx-halo { paint-order: stroke; stroke: var(--bg); stroke-width: 5px; stroke-linejoin: round; }
+.mq-ecran .fx-svg .fx-halo { stroke: var(--s1); }
+.fx-l { stroke: none; fill-opacity: .5; }
+.fx-l.fx-l-h { fill-opacity: .95; }
+.fx-l.fx-perdu { fill: var(--fx-perdu); fill-opacity: .22; }
+.fx-f-site { fill: var(--fx-site); } .fx-f-bordure { fill: var(--fx-bordure); } .fx-f-zitadel { fill: var(--fx-zitadel); } .fx-f-vigie { fill: var(--fx-vigie); }
+.fx-hach { color: var(--ink3); } .fx-hach.fx-site { color: var(--fx-site); } .fx-hach.fx-bordure { color: var(--fx-bordure); }
+.fx-hach.fx-zitadel { color: var(--fx-zitadel); } .fx-hach.fx-vigie { color: var(--fx-vigie); }
+.fx-hach-fond { fill: currentColor; opacity: .22; } .fx-hach-trait { fill: currentColor; opacity: .85; }
+.fx-n { stroke: none; }
+.fx-n.fx-n-neutre { fill: var(--ink2); } .fx-n.fx-n-perdu { fill: var(--fx-perdu); }
+.fx-n.fx-g-critique { fill: var(--danger); } .fx-n.fx-g-haute { fill: var(--danger-soft); stroke: var(--danger); stroke-width: 2px; }
+.fx-n.fx-g-moyenne { fill: var(--warn); } .fx-n.fx-g-alertes { fill: var(--danger); }
+.fx-estompe { opacity: .2; } .fx-l.fx-surligne { fill-opacity: 1; stroke: var(--ink); stroke-width: 1px; }
+.fx-leg { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0; padding: 0; list-style: none; color: var(--ink2); font-size: 13px; }
+.fx-leg li { display: inline-flex; align-items: center; gap: 8px; }
+.fx-sw { flex: none; display: inline-block; width: 22px; height: 12px; border-radius: 3px; background: var(--ink2); }
+.fx-sw.fx-f-site { background: var(--fx-site); } .fx-sw.fx-f-bordure { background: var(--fx-bordure); }
+.fx-sw.fx-f-zitadel { background: var(--fx-zitadel); } .fx-sw.fx-f-vigie { background: var(--fx-vigie); }
+.fx-sw.fx-n-perdu { background: var(--fx-perdu); opacity: .55; } .fx-sw.fx-g-critique { background: var(--danger); }
+.fx-sw.fx-g-haute { background: var(--danger-soft); box-shadow: inset 0 0 0 2px var(--danger); } .fx-sw.fx-g-moyenne { background: var(--warn); }
+.fx-sw.fx-sw-h { background: repeating-linear-gradient(45deg, var(--ink2) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1px var(--ink3); }
+.fx-sw.fx-sw-plein { background: var(--ink2); }
+.fx-v-col { display: grid; gap: 4px; }
+.fx-v-t { margin: 6px 0 0; color: var(--ink); font-size: 13px; font-weight: 500; } .fx-v-t .sec { color: var(--ink3); font-weight: 400; }
+.fx-v-liste { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; padding: 0; list-style: none; color: var(--ink2); font-size: 13px; }
+.fx-v-liste li { display: inline-flex; align-items: center; gap: 6px; }
+.fx-v-liste .n { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.fx-v .fx-svg { max-width: 640px; }
+.fx-phrase { margin: 0 0 14px; color: var(--ink); font-size: 17px; }
+.fx-cote { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+.fx-prov { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.fx-prov li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: baseline; font-size: 13px; color: var(--ink2); }
+.fx-prov .n { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.fx-prov .fx-barre { grid-column: 1 / -1; display: block; width: 100%; height: 6px; }
+.fx-barre rect { fill: var(--ink3); } .fx-barre .fond { fill: var(--line2); }
+.fx-periode { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
+.fx-periode a { display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 999px; color: var(--ink2);
+  box-shadow: inset 0 0 0 1px var(--line2); font-size: 13px; text-decoration: none; }
+.fx-periode a[aria-current] { color: var(--ink); background: var(--s2); box-shadow: inset 0 0 0 1px var(--ink3); font-weight: 500; }
+@media (pointer: coarse) { .fx-periode a { min-height: 44px; } }
+.vg-flux-t td.num, .vg-flux-t th.num { text-align: right; }
+.fx-suites { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 13px; color: var(--ink2); }
+.fx-suites b { color: var(--ink); font-weight: 500; }
+/* La vignette de MV-01 : sous la phrase d'état, environ 360 × 140 px au bureau, la pleine largeur au téléphone. */
+.vg-flux-mini { display: grid; gap: 6px; margin: 4px 0 0; }
+.vg-flux-mini .fx-svg { max-width: 360px; }
+.vg-flux-mini p { margin: 0; color: var(--ink2); font-size: 13px; }
+@media (max-width: 720px) { .vg-flux-mini .fx-svg { max-width: none; } }
+@media (forced-colors: active) {
+  .fx-l, .fx-n { stroke: CanvasText; stroke-width: 1px; }
+  .fx-svg text, .fx-svg .fx-nb { fill: CanvasText; } .fx-svg .fx-halo { stroke: Canvas; }
+  .fx-sw { border: 1px solid CanvasText; }
+}
+.mq-ecran.etroit > .ecran-a { max-width: 412px; }   /* un cadre d'état à la largeur d'un téléphone (hors produit) */
+@media (pointer: coarse), (max-width: 720px) { .vg-flux-t td a.vg-lien { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; } }
+@media (forced-colors: active) { .fx-periode a { border: 1px solid ButtonText; } .fx-periode a[aria-current] { border: 2px solid Highlight; } }
+.vg-etat.fx-tete { gap: 4px; } .vg-etat.fx-tete .fx-periode { margin: 0; } .vg-etat.fx-tete .fx-phrase { margin: 0; }
