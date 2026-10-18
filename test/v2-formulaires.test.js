@@ -174,13 +174,13 @@ for (const version of VERSIONS) {
       const r = await c.app.inject({ url, remoteAddress: '198.51.100.30' });
       assert.equal(r.statusCode, 404, url);
     }
-    // Lien valide puis expiré : mêmes en-têtes qu'en v1 (ni indexé, ni gardé ; vers un autre site, le Referer ne porte que
-    // l'origine, jamais le jeton), 410 une fois expiré.
+    // Lien valide puis expiré : mêmes en-têtes qu'en v1 (ni indexé, ni gardé, aucun Referer : le jeton ne sort jamais de
+    // la page), 410 une fois expiré.
     const enc = c.db.prepare("INSERT INTO encounters (ref, author_id, lang, created_at, updated_at) VALUES ('J-0901', 1, 'de', 1, 1)").run().lastInsertRowid;
     const photo = c.db.prepare("SELECT id FROM photos WHERE slug = ?").pluck().get(SLUG);
     c.db.prepare('INSERT INTO encounter_shares (token, encounter_id, photo_id, created_at, expires_at) VALUES (?, ?, ?, ?, ?)').run('offerteOffertE0123456789abcdefgh', enc, photo, Date.now(), Date.now() + 864e5);
     let r = await c.app.inject('/pour-vous/offerteOffertE0123456789abcdefgh');
-    assert.deepEqual([r.statusCode, r.headers['x-robots-tag'], r.headers['cache-control'], r.headers['referrer-policy']], [200, 'noindex', 'no-store', 'strict-origin-when-cross-origin']);
+    assert.deepEqual([r.statusCode, r.headers['x-robots-tag'], r.headers['cache-control'], r.headers['referrer-policy']], [200, 'noindex', 'no-store', 'no-referrer']);
     assert.match(r.body, /<html lang="de"/);
     assert.match(r.body, /href="\/pour-vous\/offerteOffertE0123456789abcdefgh\/photo\.jpg" download/);
     // Le jeton ne sort pas de la page : ni sélecteur de langue, ni autre adresse qui le recopie.

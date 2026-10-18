@@ -13,7 +13,8 @@ import { createSearch, MAX_QUERY } from '../search.js';
 import { tripStory } from '../trip-story.js';
 import { photoMap } from '../photo-map.js';
 import { LANGS, PREFIX, UI, pick, localize, splitLang, detectLang } from '../i18n.js';
-import { BOTS, countryOf } from '../stats.js';
+import { BOTS, countryOf, parisDay } from '../stats.js';
+import { scanValue } from '../securite/detection.js';
 import path from 'node:path';
 import sharp from 'sharp';
 import { createRateLimiter, clientKey } from '../ratelimit.js';
@@ -210,12 +211,32 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     });
   }
 
-  // Filtres valides uniquement ; une valeur inconnue est ignorée.
-  function readFilter(query, authors, categories) {
-    const regard = authors.some(a => a.slug === query.regard) ? query.regard : undefined;
-    const serie = categories.some(c => c.slug === query.serie) ? query.serie : undefined;
-    const ordre = ORDRES.includes(query.ordre) ? query.ordre : undefined;
-    return { regard, serie, ordre };
+  // Filtres valides uniquement ; une valeur inconnue est ignorée, et signalée à la Vigie : les filtres sont des liens, un
+  // navigateur qui les suit n'en produit jamais (adresse forgée, sondage : cas DS12). Pas pour une valeur que le crochet
+  // commun signale déjà comme saisie malveillante (DS11), ni pour une série ou un photographe disparu (supprimé, adresse
+  // changée) depuis moins de 30 jours : vieux liens, moteurs de recherche. Seule trace de ces anciennes adresses, sans
+  // migration : la mesure d'audience, qui ne compte la page d'une série ou d'un photographe que si elle existe (une page
+  // vue dans les 30 derniers jours existait donc alors).
+  const RECENT = 30 * 864e5;
+  const seenLately = app.db.prepare('SELECT 1 FROM stats_pages WHERE page = ? AND day >= ? LIMIT 1').pluck();
+  const ignored = (request, champ) => {
+    const value = request.query[champ];
+    if (!app.securite.enabled || value == null || value === '') return undefined;
+    const valeur = String(value);
+    if (scanValue('query', `query.${champ}`, valeur)) return undefined;
+    const page = { regard: 'auteur', serie: 'serie' }[champ];
+    if (page && seenLately.get(`${page}:${valeur}`, parisDay(new Date(Date.now() - RECENT)))) return undefined;
+    app.securite.emit('input_validation_fail', { request, emetteur: 'server/routes/public.js · filtres', detail: { raison: 'valeur de filtre hors liste', champ, valeur: valeur.slice(0, 60) } });
+    return undefined;
+  };
+  const readOrdre = request => (ORDRES.includes(request.query.ordre) ? request.query.ordre : ignored(request, 'ordre'));
+  function readFilter(request, authors, categories) {
+    const { regard, serie } = request.query;
+    return {
+      regard: authors.some(a => a.slug === regard) ? regard : ignored(request, 'regard'),
+      serie: categories.some(c => c.slug === serie) ? serie : ignored(request, 'serie'),
+      ordre: readOrdre(request),
+    };
   }
 
   // page : la page v2 qui montre cette vue (views/v2/home.eta) ; la v1 (views/home.eta) l'ignore. « accueil » : / sans
@@ -263,7 +284,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   }
 
   app.get('/', async (request, reply) => {
-    const filter = readFilter(request.query, repo.authors(), repo.categories());
+    const filter = readFilter(request, repo.authors(), repo.categories());
     app.stats.hit(request, { page: filter.serie ? `serie:${filter.serie}` : filter.regard ? `auteur:${filter.regard}` : 'accueil' });
     return renderGallery(reply, filter);
   });
@@ -271,18 +292,18 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   app.get('/serie/:slug', async (request, reply) => {
     if (!repo.categories().some(c => c.slug === request.params.slug)) return reply.callNotFound();
     app.stats.hit(request, { page: `serie:${request.params.slug}` });
-    return renderGallery(reply, { serie: request.params.slug, ordre: readFilter(request.query, [], []).ordre }, 'serie');
+    return renderGallery(reply, { serie: request.params.slug, ordre: readOrdre(request) }, 'serie');
   });
 
   app.get('/auteur/:slug', async (request, reply) => {
     if (!repo.authors().some(a => a.slug === request.params.slug)) return reply.callNotFound();
     app.stats.hit(request, { page: `auteur:${request.params.slug}` });
-    return renderGallery(reply, { regard: request.params.slug, ordre: readFilter(request.query, [], []).ordre });
+    return renderGallery(reply, { regard: request.params.slug, ordre: readOrdre(request) });
   });
 
   app.get('/photo/:slug', async (request, reply) => {
     const siteName = app.siteName();
-    let filter = readFilter(request.query, repo.authors(), repo.categories());
+    let filter = readFilter(request, repo.authors(), repo.categories());
     let list = repo.publishedPhotos({ author: filter.regard, category: filter.serie, ordre: filter.ordre, lang });
     let i = list.findIndex(p => p.slug === request.params.slug);
     if (i === -1 && (filter.regard || filter.serie)) {
@@ -295,7 +316,12 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     // Arrivée par le QR de la fenêtre « Partager » : comptée comme un partage, puis l'adresse est nettoyée (recharger
     // la page ou envoyer l'adresse affichée ne compte pas un nouveau scan ; la vue est comptée sur l'adresse propre).
     if (request.query.partage === 'qr') {
-      if (!BOTS.test(request.headers['user-agent'] || '') && shareLimit(request.ip)) app.shares.record(photo.id, 'qr');
+      // Limite atteinte (partagée avec les autres partages) : signalée à la Vigie comme par gate(), sans contrôle de
+      // provenance (un scan est une simple ouverture de page, sans Origin).
+      if (!BOTS.test(request.headers['user-agent'] || '')) {
+        if (shareLimit(request.ip)) app.shares.record(photo.id, 'qr');
+        else app.securite.emit('excess_rate_limit_exceeded', { request, emetteur: 'server/routes/public.js · partage QR', detail: { limite: 'partage', canal: 'qr' } });
+      }
       return reply.redirect(base.photoUrl(photo.slug, filter), 303);
     }
     app.stats.hit(request, { photoId: photo.id });
@@ -490,7 +516,11 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     if (!photo) return reply.callNotFound();
     const via = String(request.body?.via || '');
     if (!gate(request, shareLimit, 'partage')) return reply.code(429).send({ error: 'limit' });
-    return app.shares.record(photo.id, via) ? reply.code(204).send() : reply.code(422).send({ error: 'via' });
+    if (app.shares.record(photo.id, via)) return reply.code(204).send();
+    // Canal hors liste : les boutons du site n'envoient que ceux de VIAS (server/share.js) ; signalé comme un filtre forgé,
+    // sauf saisie déjà signalée comme malveillante par le crochet commun (DS11).
+    if (!scanValue('body', 'body.via', via)) app.securite.emit('input_validation_fail', { request, emetteur: 'server/routes/public.js · partage', detail: { raison: 'valeur hors liste', champ: 'via', valeur: via.slice(0, 60) } });
+    return reply.code(422).send({ error: 'via' });
   });
 
   // ---------- j'aime et signalements ----------
