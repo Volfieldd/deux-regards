@@ -753,19 +753,24 @@ meter.vg-m.total::-moz-meter-bar { background: var(--danger); }
    Deux diagrammes de Sankey rendus par le serveur (dr-tmp/vigie-mq/flux.py, référence de vigie/flux.js en D3) : « Les 6 alertes »
    (une bande égale par alerte) puis « Les 319 événements ». La teinte dit la source, la saturation dit l'issue : une bande qui
    mène à une alerte est en pleine teinte, cernée d'un trait à 3:1 au moins sur le fond ; une bande qui ne mène à rien est à 25 %
-   de sa teinte ; l'issue « sans alerte » est grise, nœud en contour, bandes à 11 %. Teintes écartées en luminance (Zitadel lilas
-   clair, la Vigie sarcelle sombre : 1,5 au moins entre deux voisines). Les libellés sont dans les gouttières, jamais sur une bande.
+   de sa teinte ; l'issue « sans alerte » est grise, nœud en contour, bandes à 11 %. Teintes écartées en luminance : 1,5 au moins
+   pour toutes les paires, dans les deux thèmes (§ 3.19, point 4). Libellés des colonnes du milieu au-dessus de leur nœud, sur
+   une ligne : les bandes coulent d'un nœud au suivant. Deux boîtes de dessin : 760 unités (texte à 14), 1 120 au-delà (texte à 15).
    Le diagramme s'affiche quand son conteneur a 706 px au moins (le texte du SVG, à 14 unités, reste à 13 px) : dès 1 024 px de
    fenêtre ; en dessous, la barre « 6 alertes par origine » et les tableaux, et un lien qui ouvre le diagramme à sa taille. */
-.vigie { --fx-vigie: #1d7d70; --fx-site: #f1aa4e; --fx-bordure: #2e84c5; --fx-zitadel: #d4a9e6; --fx-gris: var(--ink3); --fx-op: .92; }
-[data-theme="light"] .vigie, .vigie[data-theme="light"] { --fx-vigie: #196d62; --fx-site: #b66d0f; --fx-bordure: #246598; --fx-zitadel: #ad5cd0; --fx-op: .8; }
-@media (prefers-color-scheme: light) { :root:not([data-theme]) .vigie:not([data-theme="dark"]) { --fx-vigie: #196d62; --fx-site: #b66d0f; --fx-bordure: #246598; --fx-zitadel: #ad5cd0; --fx-op: .8; } }
+.vigie { --fx-vigie: #1a6f63; --fx-site: #f5c483; --fx-bordure: #2585d0; --fx-zitadel: #c98ce2; --fx-gris: var(--ink3); --fx-op: .92; }
+[data-theme="light"] .vigie, .vigie[data-theme="light"] { --fx-vigie: #0d3630; --fx-site: #c77810; --fx-bordure: #16507d; --fx-zitadel: #a036cd; --fx-op: .8; }
+@media (prefers-color-scheme: light) { :root:not([data-theme]) .vigie:not([data-theme="dark"]) { --fx-vigie: #0d3630; --fx-site: #c77810; --fx-bordure: #16507d; --fx-zitadel: #a036cd; --fx-op: .8; } }
 .fx-fig { container: fx / inline-size; margin: 0 0 14px; }
 .fx-dessin { display: none; }
+.fx-large { display: none; }
 @container fx (min-width: 706px) { .fx-fig .fx-dessin { display: block; } .fx-fig .fx-tel { display: none; } }
+@container fx (min-width: 971px) { .fx-fig .fx-std { display: none; } .fx-fig .fx-large { display: block; } }
 .fx-dessin:target { display: block; overflow-x: auto; }
+.fx-dessin:target .fx-std { display: block; } .fx-dessin:target .fx-large { display: none; }
 .fx-dessin:target .fx-svg { min-width: 760px; }
-.fx-svg { display: block; width: 100%; height: auto; max-width: 920px; overflow: hidden; }
+.fx-svg { display: block; width: 100%; height: auto; overflow: hidden; }
+.fx-svg.fx-large text, .fx-svg.fx-large .fx-p-mot { font-size: 15px; }
 .fx-svg text { font-family: var(--sans); font-size: 14px; fill: var(--ink2); }
 .fx-svg .fx-nb, .fx-svg .fx-num { fill: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .fx-svg .fx-col { fill: var(--ink3); letter-spacing: .06em; }
@@ -807,17 +812,15 @@ meter.vg-m.total::-moz-meter-bar { background: var(--danger); }
    (MV-11 au téléphone, « 6 alertes par origine » ; MV-01 sous le tableau des alertes). */
 .fx-barre-al { display: grid; gap: 8px; margin: 0 0 14px; }
 .fx-barre-t { margin: 0; color: var(--ink); font-size: 14px; font-weight: 500; }
-.fx-barre-g { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.fx-barre-g { display: flex; flex-wrap: wrap; gap: 10px 6px; margin: 0; padding: 0; list-style: none; }   /* trop étroite, la barre passe sur deux rangs, par groupe */
 .fx-barre-g > .g { display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; min-width: 0; }   /* les cases alignées en bas, quelle que soit la hauteur du libellé */
-.fx-barre-g > .g-1 { flex: 1 1 0; } .fx-barre-g > .g-2 { flex: 2 1 0; } .fx-barre-g > .g-3 { flex: 3 1 0; } .fx-barre-g > .g-4 { flex: 4 1 0; }
+.fx-barre-g > .g-1 { flex: 1 1 78px; } .fx-barre-g > .g-2 { flex: 2 1 162px; } .fx-barre-g > .g-3 { flex: 3 1 246px; } .fx-barre-g > .g-4 { flex: 4 1 330px; }
 .fx-barre-g .lb { color: var(--ink2); font-size: 13px; line-height: 1.3; } .fx-barre-g .lb b { color: var(--ink); font-variant-numeric: tabular-nums; }
 .fx-barre-g .cases { display: flex; gap: 3px; margin: 0; padding: 0; list-style: none; }
 .fx-barre-g .c { flex: 1 1 0; min-width: 0; }
-.fx-barre-g .c a { display: flex; align-items: center; justify-content: center; min-height: 32px; border-radius: 6px; font-size: 13px; font-weight: 500;
-  font-variant-numeric: tabular-nums; text-decoration: none; box-shadow: inset 0 0 0 1.5px currentColor; }
-.fx-barre-g .c-critique a { background: var(--danger); color: var(--on-danger); box-shadow: none; }
-.fx-barre-g .c-haute a { color: var(--danger); background: var(--danger-soft); } .fx-barre-g .c-moyenne a { color: var(--warn); }
-@media (pointer: coarse), (max-width: 720px) { .fx-barre-g .c a { min-height: 44px; } }
+.fx-barre-g .c .grav { display: flex; width: 100%; justify-content: center; min-height: 32px; border-radius: 6px; font-variant-numeric: tabular-nums; text-decoration: none; }
+.fx-barre-leg { margin: 2px 0 0; }
+@media (pointer: coarse), (max-width: 720px) { .fx-barre-g .c .grav { min-height: 44px; } }
 .fx-cote { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
 .fx-admins { margin: -4px 0 12px; }
 .fx-prov { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
@@ -844,3 +847,5 @@ meter.vg-m.total::-moz-meter-bar { background: var(--danger); }
 }
 .fx-barre-t { justify-self: start; }
 figure.fx-dessin { margin: 0; }
+.fx-plaque { fill: var(--bg); stroke: none; }   /* sous un libellé du milieu : la bande s'interrompt, le texte reste net */
+.mq-ecran .fx-plaque { fill: var(--s1); }
