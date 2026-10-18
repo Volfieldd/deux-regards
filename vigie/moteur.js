@@ -3,7 +3,8 @@ import { fileURLToPath } from 'node:url';
 import { pointsOf, THRESHOLDS, HALF_LIFE_MIN, SOURCE_MIN, QUORUM, sourceOf, MODES } from './poids.js';
 import { rank } from './vocabulaire.js';
 import { loadRules, createCorrelator, fieldOf, RegexTimeout } from './sigma.js';
-import { createDetectors, createChains, lru } from './detecteurs.js';
+import { createDetectors, createChains, lru, DETECTEURS } from './detecteurs.js';
+import { LISTS } from './menaces.js';
 import { parseDuration } from './decisions.js';
 import { cleReseau } from '../server/securite/adresses-ip.js';
 
@@ -62,8 +63,8 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   const REGISTRY = {
     'entite.score': { cas: 'quorum', mode: 'observer', titre: 'Score d’une entité au-dessus du seuil, confirmé par deux sources' },
     ...Object.fromEntries([...rules.filter(r => r.generate && r.signal), ...correlations].map(r => [`sigma.${r.name}`, { cas: r.cas, mode: r.mode, titre: r.title, sourceUnique: r.sourceUnique, expire: r.expireAt, tags: r.tags || [] }])),
-    ...Object.fromEntries(['premiere_apparition', 'heure_inhabituelle', 'vitesse', 'voyage_impossible', 'pivot_identifiants', 'role_incoherent', 'exploration_lente', 'chaine_attaque', 'silence', 'menaces']
-      .map(n => [`detecteur.${n}`, { cas: { premiere_apparition: 'DS4', heure_inhabituelle: 'DS18', vitesse: 'DS17', voyage_impossible: 'DS3', pivot_identifiants: 'DS25', role_incoherent: 'DS10', exploration_lente: 'DS15', chaine_attaque: 'DS23', silence: 'DS24', menaces: 'DS22' }[n], mode: 'observer', titre: n.replaceAll('_', ' ') }])),
+    // Détecteurs : leur barème (vigie/detecteurs.js, DETECTEURS), lu aussi par l'écran des réglages.
+    ...Object.fromEntries(Object.entries(DETECTEURS).map(([n, d]) => [`detecteur.${n}`, { cas: d.cas, mode: 'observer', titre: n.replaceAll('_', ' ') }])),
   };
   const q = {
     entity: db.prepare('SELECT * FROM entities WHERE kind = ? AND key = ?'),
@@ -226,7 +227,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     }
     if (sourceUnique) raise(regle, entite, gravite, row, { sources, reponse });
     else for (const s of sources.length ? sources : [null]) { score(entite, points / Math.max(sources.length, 1), s, row); }
-    if (tags.length && chain(entite, tags)) raise('detecteur.chaine_attaque', entite, 'critique', row, { sources });
+    if (tags.length && chain(entite, tags)) raise('detecteur.chaine_attaque', entite, DETECTEURS.chaine_attaque.gravite, row, { sources });
   }
 
   function processRow(row) {
@@ -247,7 +248,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
         const k = `${row.ip}|${l}`;
         if (threatSeen.get(k) === day) continue;
         threatSeen.set(k, day);
-        deposit('ip', clean(row.ip), { spamhaus_drop: 3, feodo: 3, tor: 1 }[l] || 1, 'menaces', t);
+        deposit('ip', clean(row.ip), LISTS[l]?.points ?? 1, 'menaces', t);
       }
     }
     // Règles Sigma et corrélations. Une règle qui échoue sur un événement est notée, les autres continuent.
@@ -361,7 +362,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     for (const s of detectors.periodic()) signal({ regle: `detecteur.${s.nom}`, titre: s.nom.replaceAll('_', ' '), ...s }, null, ['site']);
     const last = q.lastSite.get();
     if (last && now() - last > 3 * 60e3) {
-      if (!silent) { silent = true; raise('detecteur.silence', { kind: 'site', key: 'battement' }, 'haut', null, { sources: ['vigie'] }); }
+      if (!silent) { silent = true; raise('detecteur.silence', { kind: 'site', key: 'battement' }, DETECTEURS.silence.gravite, null, { sources: ['vigie'] }); }
     } else silent = false;
   }
 

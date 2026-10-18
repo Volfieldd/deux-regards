@@ -17,18 +17,15 @@ import { alertOrder } from '../../moteur.js';
 import { pointsOf, sourceOf } from '../../poids.js';
 import { loadRules } from '../../sigma.js';
 import { LISTS } from '../../menaces.js';
-import { adresseDetail, dateHeure, masquer, quand, ilYa, nombre, jour, guillemets, heure } from '../format.js';
+import { FINE, NBSP, adresseDetail, dateHeure, masquer, quand, ilYa, nombre, jour, guillemets, heure } from '../format.js';
+import { aQuand, lire, pluriel, typo } from '../lexique.js';
 import { sansContacts } from '../../util.js';
 import { can } from '../droits.js';
 import { FRESH } from '../sessions.js';
 import * as F from '../flux.js';
 
-const FINE = ' ', NBSP = ' ';
 const D = `${FINE}: `;
 const VERSION = (() => { try { return JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url), 'utf8')).version; } catch { return null; } })();
-const pluriel = (n, un, plusieurs = `${un}s`) => (n > 1 ? plusieurs : un);
-const lire = s => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
-const typo = s => String(s ?? '').replace(/'/g, '’').replace(/ ([:;!?])/g, `${FINE}$1`);
 const et = l => (l.length > 1 ? `${l.slice(0, -1).join(', ')} et ${l.at(-1)}` : l[0] || '');
 
 // ===================================================================================================================
@@ -91,6 +88,12 @@ function qFlux(db) {
     // Événements des alertes de la période, par alerte et par (type, gravité, composant), dans la table alert_flux
     // (migration 009, tenue par déclencheurs) : n, tous ses événements (diagramme des alertes) ; prop, ceux qu'elle porte
     // dans le diagramme des événements (rattachés par elle la première : un événement de deux alertes y compte une fois).
+    // premier a deux définitions dans la migration 009 (audit D3-D13) : le déclencheur alert_flux_lien compte l'alerte qui
+    // a rattaché l'événement la première (ordre d'arrivée des liens : l'alerte #10 peut précéder la #8) ; la reprise de
+    // l'existant (INSERT … SELECT en fin de fichier), faute de connaître l'ordre des liens d'avant la migration, prend la plus
+    // ancienne alerte (plus petit numéro). Écrit ici et non dans 009 : les migrations sont reconnues par leur seul nom
+    // (vigie/store.js, table migrations) ; un commentaire ajouté changerait le fichier sans rien changer aux bases qui l'ont
+    // déjà appliqué.
     evAlertes: db.prepare(`SELECT alert_id a, type, severity, composant, SUM(n) n, SUM(premier) prop FROM alert_flux
       WHERE alert_id IN (SELECT value FROM json_each(?)) AND jour >= ? AND type NOT IN (${ROUTINE_SQL})
       GROUP BY alert_id, type, severity, composant`),
@@ -340,7 +343,7 @@ export function vueFlux({ db, now = Date.now, role, periode = PERIODE_DEFAUT, al
 const SITE_SILENCE = 3 * 60e3;            // détecteur « silence » (DS24)
 const ZITADEL_TROU = 20 * 3600e3;         // vigie/zitadel.js (GAP)
 const CHAINE_RETARD = 48 * 3600e3;        // vérifiée chaque jour : au-delà de deux jours, la vérification ne tourne plus
-const ANALYSE_RETARD = 1000;              // comme la vue d'ensemble
+const ANALYSE_RETARD = 1000;              // événements reçus et pas encore analysés
 const LISTES_RETARD = 48 * 3600e3;        // listes de menaces : une fois par jour
 const LISTES ={ spamhaus_drop: 'Spamhaus DROP', feodo: 'abuse.ch Feodo Tracker', tor: 'Sorties Tor' };
 
@@ -372,7 +375,6 @@ const octets = n => {
   return `${Math.max(1, Math.round(n / 1024))}${NBSP}ko`;
 };
 const maillon = s => (typeof s === 'string' && s.length > 14 ? `${s.slice(0, 8)}…${s.slice(-4)}` : String(s ?? ''));
-const aQuand = (x, t) => { const s = quand(x, t); return s.includes(',') ? `le ${s}` : `à ${s}`; };
 const cmd = c => ({ cmd: c.split(' ') });
 const deuxPoints = s => `${s}${FINE}:`;
 
@@ -380,15 +382,16 @@ const deuxPoints = s => `${s}${FINE}:`;
 // 'panne'), kv, faits, seuil (morceaux), liens, serveur, commande }. commande : le geste de la carte (D3c), { k: 'verifier' |
 // 'bordure' | 'accepter', hint, bloquee (accepter : numéro de l'alerte ouverte qui l'interdit) } ; le gabarit ne le montre qu'à qui
 // a le droit (it.peut, calculé par la route). Une ligne de kv : { dt, t, sec, mono, secMono, subs,
-// ruptures }. retentionDays : durée de conservation réglée (store.retentionDays ; audit D3-D15) ; sans elle, celle de la
-// dernière purge.
+// ruptures }. resume : la ligne de la carte « Santé » de la vue d'ensemble (morceaux ; null : pas de ligne), qui n'est
+// qu'un résumé de cette page (mêmes seuils, mêmes écarts ; audit D3-D10). retentionDays : durée de conservation réglée
+// (store.retentionDays ; audit D3-D15) ; sans elle, celle de la dernière purge.
 export function vueSante({ db, engine, switches, now = Date.now, role, retentionDays = null }) {
   const q = qSante(db);
   const t = now();
   const reg = (k, d = null) => lire(q.reglage.get(k)) ?? d;
   const dernier = type => { const r = q.dernier.get(type); return r ? { ...r, detail: lire(r.detail) || {} } : null; };
   const cartes = [];
-  const carte = c => cartes.push({ cls: '', kv: [], liens: [], serveur: [], faits: null, commande: null, ...c });
+  const carte = c => cartes.push({ cls: '', kv: [], liens: [], serveur: [], faits: null, commande: null, resume: null, ...c });
   const ok = mot => ({ k: 'abouti', mot });
   const att = mot => ({ k: 'attention', mot });
   const arret = mot => ({ k: 'arret', mot });
@@ -426,7 +429,12 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
     const purgeTexte = !derniere ? 'pas encore faite'
       : `${dateHeure(derniere)}${D}${purge && Math.abs(purge.recu_a - derniere) < 3600e3 && purge.detail.lignes ? `${nombre(purge.detail.lignes)} lignes de plus de ${effacees}${NBSP}jours effacées${FINE}; ancre signée` : 'rien à effacer'}`;
     kv.push({ dt: 'Purge', t: purgeTexte, sec: conservation ? `conservation${D}${conservation}${NBSP}jours` : undefined });
-    carte({ id: 'chaine', icone: 'chaine', titre: 'Chaîne du journal', etat, cls, kv, faits,
+    const rs0 = c?.ruptures?.[0] || c?.rupture;
+    const resume = !c?.at ? [{ t: `Chaîne${D}jamais vérifiée` }]
+      : c.ok === false ? [{ t: 'Chaîne ' }, { t: 'rompue', b: true }, { t: `${rs0 ? ` (ligne ${nombre(rs0.seq)}${D}${typo(rs0.raison)})` : ''}, vérifiée ${aQuand(c.at, t)}` }]
+        : t - c.at > CHAINE_RETARD ? [{ t: 'Chaîne intacte, mais vérifiée ' }, { t: ilYa(c.at, t), b: true }]
+          : [{ t: 'Chaîne ' }, { t: 'intacte', b: true }, { t: `, vérifiée ${aQuand(c.at, t)}` }];
+    carte({ id: 'chaine', icone: 'chaine', titre: 'Chaîne du journal', etat, cls, kv, faits, resume,
       seuil: [{ t: `Alerte si une ligne est modifiée, insérée ou manquante, une fin effacée, une ancre de purge falsifiée${D}${guillemets('Chaîne du journal de la Vigie rompue')} ` }, { t: '(Critique, DS20, ', r: true }, { t: 'chaine_rompue', donnee: true }, { t: ')', r: true }, { t: '. Vérifiée chaque jour et à chaque démarrage.' }],
       // Environ 13,5 s par million de lignes (vigie-capacite.md § 3.1).
       commande: { k: 'verifier', hint: `environ ${Math.max(1, Math.round(lignesBase * 13.5e-6))}${NBSP}s${FINE}; la réception continue` },
@@ -451,7 +459,15 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
     kv.push({ dt: 'Lots refusés (24 h)', t: nombre(refuses) });
     if (perdus) kv.push({ dt: 'Événements perdus par le site (24 h)', t: nombre(perdus) });
     if (refuses && !cls) { etat = att('Écart'); cls = 'ecart'; faits = `${nombre(refuses)} ${pluriel(refuses, 'lot refusé', 'lots refusés')} en 24${NBSP}h.`; }
-    carte({ id: 'site', icone: 'site', titre: 'Site', etat, cls, kv, faits,
+    let resume;
+    if (!b) resume = [{ t: `Site${D}aucun battement reçu` }];
+    else if (t - b.recu_a > SITE_SILENCE) resume = [{ t: `Site${D}dernier battement ` }, { t: quand(b.recu_a, t), b: true }, { t: ` (${ilYa(b.recu_a, t)})` }];
+    else {
+      const attente = Number(b.detail.attente);
+      resume = [{ t: `Site${D}battement à ` }, { t: heure(b.recu_a), b: true }, { t: Number.isFinite(attente) ? `, ${nombre(attente)} en attente` : '' }];
+    }
+    if (refuses) resume.push({ t: D }, { t: `${nombre(refuses)} ${pluriel(refuses, 'lot refusé', 'lots refusés')} en 24${NBSP}h`, b: true });
+    carte({ id: 'site', icone: 'site', titre: 'Site', etat, cls, kv, faits, resume,
       seuil: [{ t: `Alerte si plus rien du site depuis 3 minutes${D}détecteur ` }, { t: 'silence', donnee: true }, { t: ' (Haute, DS24)', r: true }, { t: ` ; un lot à la signature fausse ou rejoué${D}${guillemets('Lot refusé par la Vigie')} ` }, { t: '(Haute)', r: true }, { t: '.' }] });
   }
 
@@ -475,7 +491,10 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
       if (Number.isFinite(curseur)) kv.push({ dt: 'Lu jusqu’à', t: quand(curseur, t), sec: 'reprise depuis ce point au passage suivant' });
     }
     kv.push({ dt: 'Trous de plus de 20 h (30 jours)', t: nombre(trous) });
-    carte({ id: 'zitadel', icone: 'zitadel', titre: 'Zitadel', etat, cls, kv, faits,
+    const resume = !z ? [{ t: `Zitadel${D}jamais lu (ou non configuré)` }]
+      : cls ? [{ t: `Zitadel${D}dernière lecture${err && err.recu_a > z ? ' réussie' : ''} ` }, { t: quand(z, t), b: true }, { t: ` (${ilYa(z, t)})` }]
+        : [{ t: `Zitadel lu ${aQuand(z, t).replace(/ .*$/, '')} ` }, { t: quand(z, t), b: true }];
+    carte({ id: 'zitadel', icone: 'zitadel', titre: 'Zitadel', etat, cls, kv, faits, resume,
       seuil: [{ t: `Alerte si plus de 20${NBSP}h sans lecture réussie${D}${guillemets(`Événements de Zitadel perdus (plus de 20${NBSP}h sans lecture)`)} ` }, { t: '(Moyenne, DS24)', r: true }, { t: '. Avant, chaque échec est noté, sans alerte.' }] });
   }
 
@@ -504,7 +523,14 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
       kv.push({ dt: 'Constats (24 h)', t: `${nombre(n('bordure_rafale'))} ${pluriel(n('bordure_rafale'), 'rafale')} de pages · ${nombre(n('bordure_erreurs'))} ${pluriel(n('bordure_erreurs'), 'rafale')} d’erreurs · ${nombre(n('bordure_blocage'))} ${pluriel(n('bordure_blocage'), 'blocage appliqué', 'blocages appliqués')}` });
       if (err && t - err.recu_a < 864e5) kv.push({ dt: 'Dernière erreur', t: quand(err.recu_a, t), sec: `${typo(err.detail.operation || '')}${D}${typo(masquer(String(err.detail.erreur || '').slice(0, 160), role))}` });
     }
-    carte({ id: 'bordure', icone: silence ? 'nuage-barre' : 'bordure', titre: 'Bordure Cloudflare', etat, cls, kv, faits,
+    let resume = null;
+    if (reglee) {
+      resume = [{ t: `Bordure${D}` }];
+      if (beat?.at) resume.push({ t: `battement ${aQuand(beat.at, t).replace(/ .*$/, '')} ` }, { t: quand(beat.at, t), b: true }); else resume.push({ t: 'aucun battement' });
+      if (kvL?.at) resume.push({ t: `, liste${kvL.version != null ? ` ${kvL.version}` : ''} copiée ${aQuand(kvL.at, t)}` });
+      if (silence) resume.push({ t: D }, { t: 'muette', b: true });
+    }
+    carte({ id: 'bordure', icone: silence ? 'nuage-barre' : 'bordure', titre: 'Bordure Cloudflare', etat, cls, kv, faits, resume,
       seuil: [{ t: `Alerte si plus de battement depuis 20${NBSP}min, aucune requête vue depuis 6${NBSP}h, ou une copie ou une lecture en échec${D}${guillemets('Bordure injoignable ou silencieuse (jeton, quota, Worker retiré)')} ` }, { t: '(Moyenne, DS24)', r: true }, { t: '.' }],
       commande: reglee ? { k: 'bordure', hint: `une copie toutes les 2${NBSP}min au plus` } : null,
       serveur: [{ p: deuxPoints('Diagnostic complet (copie, battement, en-têtes refusés par le site, empreintes TLS)') }, cmd('node vigie/cli.js bordure')] });
@@ -537,7 +563,11 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
       }
     }
     if (ref?.instantane_a) kv.push({ dt: 'Référence', t: `sauvegarde ${aQuand(ref.instantane_a, t)}`, sec: `${nombre((ref.administrateurs || []).length)} ${pluriel((ref.administrateurs || []).length, 'administrateur connu', 'administrateurs connus')}` });
-    carte({ id: 'roles', icone: 'droits', titre: 'Contrôle des rôles', etat, cls, kv, faits,
+    const controlee = vu?.at ? ` contrôlée ${aQuand(vu.at, t)}` : '';
+    const resume = ecart ? [{ t: `Contrôle des rôles${D}sauvegarde${controlee}${D}` }, { t: 'écart', b: true }, { t: ' (' }, { t: `#${ecart.id}`, href: `/alertes/${ecart.id}` }, { t: ')' }]
+      : !ref ? [{ t: `Contrôle des rôles${D}aucun contrôle réussi` }]
+        : [{ t: `Contrôle des rôles${D}sauvegarde${ref.instantane_a ? ` de ${quand(ref.instantane_a, t)}` : ''}${controlee}, ` }, { t: 'sans écart', b: true }];
+    carte({ id: 'roles', icone: 'droits', titre: 'Contrôle des rôles', etat, cls, kv, faits, resume,
       liens: ecart ? [{ href: `/alertes/${ecart.id}`, t: `Ouvrir l’alerte #${ecart.id}`, btn: true }] : [],
       seuil: [{ t: `Alerte si un administrateur n’est pas déclaré ou rien n’explique son arrivée, un déclencheur manque ou a changé${D}${guillemets('Sauvegarde du site différente de ce qu’il déclare…')} ` }, { t: '(Critique, DS8)', r: true },
         { t: ` ; sauvegarde absente, illisible ou de plus de 48${NBSP}h${D}${guillemets('Contrôle des rôles impossible ou incomplet')} ` }, { t: '(Haute)', r: true }, { t: '.' }],
@@ -562,7 +592,12 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
         kv.push({ dt: LISTES[k] || k, t: typeof v === 'number' ? `${nombre(v)} ${pluriel(v, 'entrée')} · ${def.points}${NBSP}${pluriel(def.points, 'point')}` : typeof v === 'string' ? typo(v.slice(0, 160)) : '—' });
       }
     }
-    carte({ id: 'menaces', icone: 'liste', titre: 'Listes de menaces', etat, cls, kv, faits,
+    const enErreur = m?.at ? Object.keys(LISTS).filter(k => typeof m[k] === 'string') : [];
+    const resume = !m?.at ? [{ t: `Listes de menaces${D}jamais lues` }]
+      : enErreur.length ? [{ t: `Listes de menaces${D}` }, { t: 'en erreur', b: true }, { t: ` (${enErreur.map(k => LISTES[k]).join(', ')})` }]
+        : cls ? [{ t: 'Listes de menaces lues ' }, { t: ilYa(m.at, t), b: true }]
+          : [{ t: `Listes de menaces à jour, lues ${aQuand(m.at, t)}` }];
+    carte({ id: 'menaces', icone: 'liste', titre: 'Listes de menaces', etat, cls, kv, faits, resume,
       seuil: [{ t: `Ajoutent des points à une adresse, jamais une source du quorum. Une liste vide, triplée ou de plus de 20${NBSP}000 entrées est refusée${D}la précédente reste, l’erreur s’écrit ici, sans alerte.` }],
       serveur: [{ p: deuxPoints('État des listes en ligne de commande') }, cmd('node vigie/cli.js menaces')] });
   }
@@ -581,7 +616,10 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
     kv.push({ dt: 'Détection', t: detection ? 'en marche' : 'arrêtée' });
     if (sature && t - sature.recu_a < 30 * 864e5) kv.push({ dt: 'Saturation (30 jours)', t: dateHeure(sature.recu_a), sec: `${nombre(sature.detail.ignores || 0)} événements non analysés` });
     if (lente && t - lente.recu_a < 864e5) kv.push({ dt: 'Règle arrêtée par son délai (24 h)', t: quand(lente.recu_a, t), secMono: String(lente.detail.regle || '').slice(0, 80) });
-    carte({ id: 'analyse', icone: 'sante', titre: 'Analyse', etat, cls, kv, faits,
+    const resume = !detection ? [{ t: `Analyse${D}` }, { t: 'détection arrêtée', b: true }]
+      : retard >= ANALYSE_RETARD ? [{ t: `Analyse${D}` }, { t: `${nombre(retard)} événements en attente`, b: true }]
+        : [{ t: retard ? `Analyse${D}${nombre(retard)} ${pluriel(retard, 'événement')} en attente` : `Analyse${D}aucun retard` }];
+    carte({ id: 'analyse', icone: 'sante', titre: 'Analyse', etat, cls, kv, faits, resume,
       seuil: [{ t: `Alerte si plus de 100${NBSP}000 événements attendent${D}le moteur saute en avant et ouvre ${guillemets('Moteur de la Vigie saturé (événements non analysés)')} ` }, { t: '(Haute)', r: true },
         { t: ` ; une règle arrêtée par son délai${D}${guillemets('Expression régulière d’une règle arrêtée par son délai')} ` }, { t: '(Moyenne)', r: true }, { t: '.' }] });
   }
@@ -607,7 +645,8 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
     const sept = q.jours.get(new Date(t - 6 * 864e5).toISOString().slice(0, 10)) || 0;
     const parJour = Math.round(sept / 7);
     kv.push({ dt: 'Au rythme actuel', t: `environ ${nombre(parJour)} ${pluriel(parJour, 'événement')} par jour`, sec: 'moyenne des 7 derniers jours' });
-    carte({ id: 'disque', icone: 'base', titre: 'Base et disque', etat, cls, kv, faits,
+    const resume = [{ t: `Disque${D}` }, { t: `${octets(libre)} libres`, b: true }];
+    carte({ id: 'disque', icone: 'base', titre: 'Base et disque', etat, cls, kv, faits, resume,
       seuil: [{ t: `Aucune alerte dans le code aujourd’hui${D}un seuil de disque libre est à créer. La console signale un écart sous 2${NBSP}Go ou 5${NBSP}% libres.` }] });
   }
 
@@ -624,7 +663,9 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
     kv.push({ dt: 'Échecs (24 h)', t: nombre(n24), sec: echec ? `le dernier ${aQuand(echec.recu_a, t)}, ${typo(echec.detail.canal || '')}${D}${guillemets(typo(masquer(sansContacts(String(echec.detail.erreur || '').slice(0, 300)), role).slice(0, 160)))}` : 'aucun échec noté' });
     kv.push({ dt: 'Envois réussis', t: 'non notés', sec: 'la Vigie ne garde que les échecs ; un message part à l’ouverture d’une alerte haute ou critique en mode Alerter ou Bloquer' });
     kv.push({ dt: 'Interrupteur Alertes', t: alertesOn ? 'Marche' : 'Arrêt' });
-    carte({ id: 'canaux', icone: 'alertes', titre: 'Canaux', etat, cls, kv, faits,
+    const resume = !alertesOn ? [{ t: `Canaux${D}` }, { t: 'interrupteur Alertes arrêté', b: true }]
+      : [{ t: `Canaux${D}` }, { t: `${nombre(n24)} ${pluriel(n24, 'échec')} d’envoi en 24${NBSP}h`, b: true }];
+    carte({ id: 'canaux', icone: 'alertes', titre: 'Canaux', etat, cls, kv, faits, resume,
       liens: [{ href: '/reglages#canaux', t: 'Envoyer un essai : Règles et réglages' }],
       seuil: [{ t: `Alerte si un envoi échoue${D}${guillemets('Canal de notification en échec (Signal ou e-mail)')} ` }, { t: '(Moyenne, DS24)', r: true }, { t: ', une fois par heure et par canal ; l’e-mail part à la place de Signal.' }] });
   }
@@ -655,17 +696,32 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
   return { maintenant: dateHeure(t), lecteur: role === 'viewer' || !role, phrase, faits, cartes, nCartes: cartes.length, ecarts: ecarts.length };
 }
 
-// Écarts de santé pour le badge de la barre latérale et la vue d'ensemble : la même règle que /sante, gardée une minute
-// (la page Santé relit tout ; le badge est sur chaque page). Renvoie { n, noms }.
+// Écarts de santé pour le badge de la barre latérale : la même règle que /sante, gardée une minute (la page Santé relit
+// tout ; le badge est sur chaque page). Renvoie { n, noms }. La vue d'ensemble, qui relit la santé, remet le compte à jour.
 const ecartsCache = new WeakMap();
+const ecartsDe = s => ({ n: s.ecarts, noms: s.cartes.filter(x => x.cls).map(x => x.id) });
 export function ecartsSante({ db, engine, switches, now = Date.now }) {
   const t = now();
   const c = ecartsCache.get(db);
   if (c && t - c.at < 60e3 && t >= c.at) return c.v;
-  const s = vueSante({ db, engine, switches, now, role: 'admin' });
-  const v = { n: s.ecarts, noms: s.cartes.filter(x => x.cls).map(x => x.id) };
+  const v = ecartsDe(vueSante({ db, engine, switches, now, role: 'admin' }));
   ecartsCache.set(db, { at: t, v });
   return v;
+}
+
+// Carte « Santé » de la vue d'ensemble (MV-01) : le résumé de /sante, une ligne par composant ({ k: 'ok' | 'att-s' |
+// 'arret' | 'neutre', morceaux }) : toujours le site, Zitadel, la bordure (réglée), la chaîne, le contrôle des rôles et
+// l'analyse, dans l'ordre de la maquette ; puis, seulement en écart, les autres (listes de menaces, disque, canaux), dans
+// l'ordre de /sante. Le nombre d'écarts est celui de /sante.
+export const RESUME_SANTE = ['site', 'zitadel', 'bordure', 'chaine', 'roles', 'analyse'];
+export function resumeSante({ db, engine, switches, now = Date.now, role }) {
+  const t = now();
+  const s = vueSante({ db, engine, switches, now: () => t, role });
+  ecartsCache.set(db, { at: t, v: ecartsDe(s) });
+  const rang = c => (RESUME_SANTE.includes(c.id) ? RESUME_SANTE.indexOf(c.id) : RESUME_SANTE.length);
+  const lignes = s.cartes.filter(c => c.resume && (c.cls || RESUME_SANTE.includes(c.id))).sort((a, b) => rang(a) - rang(b))
+    .map(c => ({ k: c.cls === 'panne' ? 'arret' : c.cls ? 'att-s' : c.etat.k === 'neutre' ? 'neutre' : 'ok', morceaux: c.resume }));
+  return { lignes, ecarts: s.ecarts };
 }
 
 // ===================================================================================================================
@@ -720,5 +776,4 @@ export function register(app, ctx) {
     return view(reply, req, 'flux', { page: 'flux', titre: 'Flux et provenance des alertes · Vigie', flux });
   });
 
-  return ['/sante', '/flux'];
 }

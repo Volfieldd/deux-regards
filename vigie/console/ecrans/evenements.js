@@ -26,7 +26,8 @@ import { alertOrder, isPrivate } from '../../moteur.js';
 import { HALF_LIFE_MIN, THRESHOLDS } from '../../poids.js';
 import { can } from '../droits.js';
 import { actionsForcees, lienLever } from './decisions.js';
-import { FINE, adresseDetail, cibleBlocage, cleReseau, formesReseau, masquer, reseauVue, dateHeure, duree, gravite, guillemets, heure, jour, jusqua, nombre, paris, quand } from '../format.js';
+import { FINE, NBSP, adresseDetail, cibleBlocage, cleReseau, formesReseau, masquer, reseauVue, dateHeure, duree, gravite, guillemets, heure, jour, jusqua, minuitParis, nombre, paris, quand } from '../format.js';
+import { CLASSEMENTS, DECISIONS, ENTITES, ENTITES_NOM, MODES, PORTEES, SOURCES, aQuand, lire, periode, pluriel, titreDe, typo, virgule } from '../lexique.js';
 import { sansContacts } from '../../util.js';
 
 export const PAGE = 50;                   // lignes par page du journal
@@ -37,7 +38,6 @@ export const EXPORT_LECTURE = 50_000;     // lignes lues au plus pour un export
 const DERNIERS = 10;                      // derniers événements d'une fiche d'entité
 const LIENS_MAX = 200;                    // liens lus par sens pour une fiche
 const ALERTES_MAX = 20;
-const NBSP = '\u00a0';
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Mots
@@ -152,7 +152,6 @@ const GRAVITES_F = [
   { v: 'basse', t: 'Basse et plus', g: 'bas' }, { v: 'moyenne', t: 'Moyenne et plus', g: 'moyen' },
   { v: 'haute', t: 'Haute et plus', g: 'haut' }, { v: 'critique', t: 'Critique', g: 'critique' },
 ];
-export const SOURCES = { site: 'site', zitadel: 'Zitadel', bordure: 'bordure Cloudflare', vigie: 'contrôles de la Vigie' };
 const CONTRIBUTIONS = { ...SOURCES, menaces: 'listes de menaces', contexte: 'contexte' };
 // Source d'un événement, d'après son composant (vigie/poids.js, sourceOf ; les actions de la ligne de commande et de la
 // console sont rangées sous « contrôles de la Vigie », comme MV-03 les montre).
@@ -165,36 +164,14 @@ export function sourceDe(composant) {
 }
 const TARD = { site: 60e3, zitadel: 120e3, bordure: 180e3, vigie: 60e3 };      // écart de réception dit tardif (lexique § 3.13, point 8)
 
-const ENTITES = { ip: 'Adresse', reseau: 'Réseau', compte: 'Compte', session: 'Session', appareil: 'Appareil', site: 'Site', vigie: 'Vigie' };
-const ENTITES_MIN = { ip: 'adresse', reseau: 'réseau', compte: 'compte', session: 'session', appareil: 'appareil', site: 'site', vigie: 'la Vigie' };
-export const KINDS = Object.keys(ENTITES);
-const MODES = { arret: 'Arrêt', observer: 'Observer', alerter: 'Alerter', bloquer: 'Bloquer' };
-const DECISIONS = { bloquer: 'Bloquer une adresse', revoquer_session: 'Fermer une session', revoquer_compte: 'Fermer les sessions d’un compte', geler: 'Geler un compte', verrouiller: 'Verrouiller l’admin' };
-const PORTEES = { tout: 'Tout le site', admin: 'L’admin et la connexion', auth: 'La connexion seulement' };
-const CLASSEMENTS = { incident: 'Incident confirmé', faux_positif: 'Faux positif', test: 'Test', sans_suite: 'Sans suite' };
+export const KINDS = Object.keys(ENTITES_NOM);
 const INTERRUPTEURS = { detection: 'Détection', alertes: 'Alertes', blocages: 'Blocages automatiques' };
-// Titres lisibles des détecteurs (lexique § 3.11), comme la vue d'ensemble.
-const DETECTEURS = {
-  premiere_apparition: 'Connexion d’un compte depuis un pays ou un appareil jamais vus',
-  heure_inhabituelle: 'Activité d’un compte à une heure jamais utilisée',
-  vitesse: 'Lectures d’un compte bien au-delà de son habitude',
-  voyage_impossible: 'Voyage impossible entre deux connexions d’un compte',
-  pivot_identifiants: 'Connexion réussie après des échecs répétés',
-  role_incoherent: 'Export réservé à l’administrateur fait par un autre compte',
-  exploration_lente: 'Exploration lente depuis un réseau (pièges et erreurs sur 12 heures)',
-  chaine_attaque: 'Chaîne d’attaque : repérage, tentative puis accès sur une même entité',
-  silence: 'Site silencieux : aucun battement depuis 3 minutes',
-  menaces: 'Adresse sur une liste de menaces (Spamhaus DROP, Feodo, Tor)',
-};
-
 // ---------------------------------------------------------------------------------------------------------------------
 // Écriture
 
 const deux = n => String(n).padStart(2, '0');
-const typo = s => String(s ?? '').replace(/'/g, '’').replace(/ ([:;!?])/g, `${FINE}$1`);
-const pluriel = (n, un, plusieurs = `${un}s`) => (n > 1 ? plusieurs : un);
-const virgule = x => nombre(Math.round(Number(x) * 10) / 10).replace('.', ',');
-const lire = s => { try { return s ? JSON.parse(s) : null; } catch { return s ? String(s) : null; } };
+// Détail d'un événement : son JSON, ou le texte tel quel s'il ne se lit pas en JSON (ancien détail écrit en clair).
+const lireDetail = s => { try { return s ? JSON.parse(s) : null; } catch { return s ? String(s) : null; } };
 const chaine = v => (typeof v === 'string' ? v : '');
 // Texte venu de la base, affiché : sans caractère de contrôle ni d'inversion du sens d'écriture (une saisie piégée ne
 // retourne pas la ligne à l'écran), borné.
@@ -224,12 +201,7 @@ function ecartTexte(ms) {
   else if (a < 3600) { const m = Math.floor(a / 60), s = a % 60; txt = s ? `${m}${NBSP}min${NBSP}${deux(s)}` : `${m}${NBSP}min`; } else txt = duree(a * 1000);
   return `reçu ${ms < 0 ? '−' : '+'}${NBSP}${txt}`;
 }
-const aQuand = (x, t) => { const s = quand(x, t); return s.includes(',') ? `le ${s}` : `à ${s}`; };
 const avantLe = (x, t) => (memeJour(x, t) ? `avant ${heure(x)}` : `avant le ${dateHeure(x)}`);
-function periodeDe(a, b, t) {
-  if (memeJour(a, b)) return quand(a, t).includes(',') ? `le ${jour(a)}, de ${heure(a)} à ${heure(b)}` : `de ${heure(a)} à ${heure(b)}`;
-  return `du ${dateHeure(a)} au ${dateHeure(b)}`;
-}
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Adresses : ce qu'un rôle en voit
@@ -333,7 +305,7 @@ function detailEnMorceaux(r, d, role, t) {
       return m;
     case 'vigie_interrupteur':
       if (d.interrupteur) txt(`${INTERRUPTEURS[d.interrupteur] || propre(d.interrupteur, 40)}${FINE}: ${d.etat === 'arret' ? `arrêt${Number.isFinite(d.jusqua) ? ` ${jusqua(d.jusqua, t)}` : ''}` : 'marche'}`);
-      else if (d.regle) { txt('règle '); m.push({ code: propre(d.regle, 80) }); txt(` en mode ${MODES[d.mode] || propre(d.mode, 20)}${Number.isFinite(d.jusqua) ? ` ${jusqua(d.jusqua, t)}` : ''}`); } else if (d.seuil) txt(`seuil d’une entité « ${ENTITES_MIN[d.seuil] || propre(d.seuil, 20)} »${FINE}: ${propre(d.valeur, 20)} points`);
+      else if (d.regle) { txt('règle '); m.push({ code: propre(d.regle, 80) }); txt(` en mode ${MODES[d.mode] || propre(d.mode, 20)}${Number.isFinite(d.jusqua) ? ` ${jusqua(d.jusqua, t)}` : ''}`); } else if (d.seuil) txt(`seuil d’une entité « ${ENTITES[d.seuil] || propre(d.seuil, 20)} »${FINE}: ${propre(d.valeur, 20)} points`);
       else if (d.adresse_confiance) { txt('adresse de confiance '); m.push({ code: propre(masquer(d.ip || d.adresse_confiance, role), 80) }); }
       if (d.motif) txt(motif(d.motif, role));
       return m;
@@ -393,7 +365,7 @@ function saisieDe(r, d, role) {
 }
 
 function ligneEvenement(r, { role, t, noms }) {
-  const d = lire(r.detail);
+  const d = lireDetail(r.detail);
   const dv = d && typeof d === 'object' ? detailPour(d, role, r.type) : d;
   const g = gravite(r.severity);
   const src = sourceDe(r.composant);
@@ -532,7 +504,7 @@ export function lireFiltres(query, role, t) {
   // Fenêtre de temps (aujourd'hui : depuis minuit à Paris).
   const p = PERIODES.find(x => x.v === f.periode);
   let debut = 0;
-  if (p.v === 'aujourdhui') { const pp = paris(t); debut = t - (pp.heure * 60 + pp.minute) * 60e3 - (((t % 60e3) + 60e3) % 60e3); } else if (p.ms) debut = t - p.ms;
+  if (p.v === 'aujourdhui') debut = minuitParis(t); else if (p.ms) debut = t - p.ms;
   // Lecture : un seul index, celui du filtre le plus sélectif.
   let driver;
   if (f.alerte) driver = { k: 'alerte', v: f.alerte };
@@ -775,7 +747,7 @@ export async function exportCsv({ db, query, role, t, tranche = EXPORT_TRANCHE }
       if (!lf.accepte(r)) continue;
       if (n === EXPORT_MAX) { tronque = true; break tranches; }
       n += 1;
-      lignes.push([r.seq, iso(Number.isFinite(r.survenu_a) ? r.survenu_a : r.recu_a), iso(r.recu_a), r.type, libelleDe(r, lire(r.detail)), gravite(r.severity).mot,
+      lignes.push([r.seq, iso(Number.isFinite(r.survenu_a) ? r.survenu_a : r.recu_a), iso(r.recu_a), r.type, libelleDe(r, lireDetail(r.detail)), gravite(r.severity).mot,
         SOURCES[sourceDe(r.composant)], r.composant, r.confiance, r.canal, r.emetteur, r.reference, r.sub, r.session, r.ip, r.ip_net, r.country, r.city, r.method, r.route,
         r.status, r.ua_family, r.retard ? 'oui' : 'non', r.detail].map(celluleCsv).join(';'));
     }
@@ -799,17 +771,11 @@ export async function exportCsv({ db, query, role, t, tranche = EXPORT_TRANCHE }
 // ---------------------------------------------------------------------------------------------------------------------
 // Alertes d'une entité ou d'un événement (lignes « .vg-lignes »)
 
-function titreDe(regle, titres) {
-  const brut = titres.get(regle);
-  const nom = regle.startsWith('detecteur.') ? regle.slice(10) : null;
-  if (nom && (!brut || brut === nom.replaceAll('_', ' '))) return typo(DETECTEURS[nom] || nom.replaceAll('_', ' '));
-  return typo(brut || regle);
-}
 function entiteCourte(kind, key, role) {
-  if (kind === 'ip') { const a = adresseVue(key, role); return { k: ENTITES_MIN.ip, texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee }; }
-  if (kind === 'reseau') { const a = reseauVueDe(key, role); return { k: ENTITES_MIN.reseau, texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee }; }
-  if (kind === 'site' || kind === 'vigie') return { k: ENTITES_MIN[kind], texte: cleTexte(key, role, 80), mono: null, tronquee: false };
-  return { k: ENTITES_MIN[kind] || propre(kind, 20), texte: propre(key, 200), mono: 'sub', tronquee: false };
+  if (kind === 'ip') { const a = adresseVue(key, role); return { k: ENTITES.ip, texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee }; }
+  if (kind === 'reseau') { const a = reseauVueDe(key, role); return { k: ENTITES.reseau, texte: a.texte, mono: 'ip', v6: a.v6, tronquee: a.tronquee }; }
+  if (kind === 'site' || kind === 'vigie') return { k: ENTITES[kind], texte: cleTexte(key, role, 80), mono: null, tronquee: false };
+  return { k: ENTITES[kind] || propre(kind, 20), texte: propre(key, 200), mono: 'sub', tronquee: false };
 }
 function ligneAlerte(a, { t, role, titres, avecEntite = false }) {
   const g = gravite(a.gravite);
@@ -818,7 +784,7 @@ function ligneAlerte(a, { t, role, titres, avecEntite = false }) {
   if (a.statut === 'close' && a.classement) sec.push(`${CLASSEMENTS[a.classement] || propre(a.classement, 30)}${a.traite_par ? `, par ${propre(masquer(a.traite_par, role), 60)}` : ''}${a.traite_a ? ` ${aQuand(a.traite_a, t)}` : ''}`);
   else if (a.statut === 'en_cours' && a.traite_par) sec.push(`par ${propre(masquer(a.traite_par, role), 60)}${a.traite_a ? ` ${aQuand(a.traite_a, t)}` : ''}`);
   sec.push(`mode ${MODES[a.mode] || propre(a.mode, 20)}`);
-  sec.push(`${nombre(a.compteur)} ${pluriel(a.compteur, 'occurrence')}, ${a.compteur > 1 ? periodeDe(a.premiere, a.derniere, t) : aQuand(a.derniere, t)}`);
+  sec.push(`${nombre(a.compteur)} ${pluriel(a.compteur, 'occurrence')}, ${a.compteur > 1 ? periode(a.premiere, a.derniere, t) : aQuand(a.derniere, t)}`);
   return {
     id: a.id, href: `/alertes/${a.id}`, titre: titreDe(a.regle, titres), cas: a.cas === 'quorum' ? 'score' : a.cas ? `cas ${propre(a.cas, 20)}` : '',
     grav: { classe: g.classe, mot: g.mot }, statut, sec: sec.join(' · '),
@@ -833,7 +799,7 @@ export function evenement({ db, seq, role, t, engine }) {
   const q = requetes(db);
   const r = q.seq.get(seq);
   if (!r) return null;
-  const d = lire(r.detail);
+  const d = lireDetail(r.detail);
   const l = ligneEvenement(r, { role, t, noms: nomsDe(q, [r.sub]) });
   const survenu = Number.isFinite(r.survenu_a) ? r.survenu_a : r.recu_a;
   const titres = new Map((engine?.rules?.() || []).map(x => [x.id, x.titre]));
@@ -945,7 +911,7 @@ function decisionsDe(q, kind, cle, t) {
 
 // Fiche d'une entité : { redirection } (un Lecteur et une adresse complète), null (inconnue), ou la fiche.
 export function fiche({ db, engine, switches, kind, cle, role, t }) {
-  if (!Object.hasOwn(ENTITES, kind) || typeof cle !== 'string' || !cle || cle.length > 200 || /[\u0000-\u001f\u007f]/.test(cle)) return null;
+  if (!Object.hasOwn(ENTITES_NOM, kind) || typeof cle !== 'string' || !cle || cle.length > 200 || /[\u0000-\u001f\u007f]/.test(cle)) return null;
   const lecteur = !voitAdresses(role);
   if (kind === 'ip') {
     if (!net.isIP(cle)) return null;
@@ -998,7 +964,7 @@ export function fiche({ db, engine, switches, kind, cle, role, t }) {
     parts: parts.map(([s, v], i) => ({ id: `s-${i}`, mot: CONTRIBUTIONS[s] || propre(s, 30), v: Math.round(v * 10) / 10, texte: virgule(v) })),
     auDessus: seuil != null && total >= seuil,
     phrase: seuil != null
-      ? `Seuil d’${article === 'une' ? 'une' : 'un'} ${ENTITES_MIN[kind]}${FINE}: ${nombre(seuil)} points${FINE}; Haute au double, ${nombre(seuil * 2)}. Le score perd la moitié de sa valeur chaque heure${retombe ? `${FINE}: sans nouveau signal, il repasse sous le seuil vers ${quand(retombe, t)}` : ''}.`
+      ? `Seuil d’${article === 'une' ? 'une' : 'un'} ${ENTITES[kind]}${FINE}: ${nombre(seuil)} points${FINE}; Haute au double, ${nombre(seuil * 2)}. Le score perd la moitié de sa valeur chaque heure${retombe ? `${FINE}: sans nouveau signal, il repasse sous le seuil vers ${quand(retombe, t)}` : ''}.`
       : `Pas de seuil pour cette classe d’entité${FINE}: elle porte les alertes de règles, sans score.`,
   };
 
@@ -1053,8 +1019,8 @@ export function fiche({ db, engine, switches, kind, cle, role, t }) {
   // En-tête.
   let titre;
   if (kind === 'ip') titre = { k: 'Adresse', texte: propre(cle, 60), mono: 'ip', v6: cle.includes(':') };
-  else if (kind === 'reseau') { const a = reseauVueDe(cle, role); titre = { k: 'Réseau', texte: a.texte, mono: 'ip', v6: a.v6 }; } else if (kind === 'compte' || kind === 'session') titre = { k: ENTITES[kind], texte: propre(cle, 200), mono: 'sub', nom: kind === 'compte' ? noms.get(cle) || null : null };
-  else titre = { k: ENTITES[kind], texte: cleTexte(cle, role), mono: null };
+  else if (kind === 'reseau') { const a = reseauVueDe(cle, role); titre = { k: 'Réseau', texte: a.texte, mono: 'ip', v6: a.v6 }; } else if (kind === 'compte' || kind === 'session') titre = { k: ENTITES_NOM[kind], texte: propre(cle, 200), mono: 'sub', nom: kind === 'compte' ? noms.get(cle) || null : null };
+  else titre = { k: ENTITES_NOM[kind], texte: cleTexte(cle, role), mono: null };
   const pastilles = [];
   if (score.auDessus) pastilles.push({ k: 'attention', mot: 'Au-dessus du seuil' });
   if (auto?.protegee) pastilles.push({ k: 'neutre', mot: auto.protegee });
@@ -1079,7 +1045,7 @@ export function fiche({ db, engine, switches, kind, cle, role, t }) {
     score, groupes, liensTronques: liens.length >= LIENS_MAX,
     alertes, nbAlertes: brutes.length,
     evenements, versJournal, decisions, auto: auto?.p || null,
-    maintenant: dateHeure(t), nomKind: ENTITES_MIN[kind],
+    maintenant: dateHeure(t), nomKind: ENTITES[kind],
   };
 }
 
@@ -1141,7 +1107,6 @@ export function register(app, ctx) {
     return ctx.view(reply, req, 'entite', { page: 'entites', titre: `Fiche ${de} · Vigie`, f, actions, message });
   });
 
-  return ['/evenements', '/entites'];
 }
 
 // Pour les essais (test/vigie-console-evenements.test.js) : les requêtes préparées, dont on vérifie le plan (index, bornes).

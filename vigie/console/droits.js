@@ -124,5 +124,5 @@ export function createRights({ db, store, adminSubs, mode = 'deux-cles', now = D
   }
 
   const list = () => q.all.all().map(r => ({ ...r, amorce: seed.has(r.sub), effectif: effective(r.sub, r.plafond) }));
-  return { effective, observe, assign, list, isSeed: sub => seed.has(sub), mode };
+  return { effective, observe, assign, list, mode };
 }

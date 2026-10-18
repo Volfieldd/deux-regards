@@ -474,3 +474,40 @@ test('export CSV par tranches (audit D3-D4) : même fichier quelle que soit la t
   assert.match(tout, /"2026-10-25 02:59:\d\d"/);
   assert.match(tout, /"2026-10-25 02:00:\d\d"/);
 });
+
+test('« Aujourd’hui » (audit D3-D8) : depuis minuit à Paris, juste les jours de changement d’heure (29 mars et 25 octobre 2026)', async t => {
+  const { minuitParis } = await import('../vigie/console/format.js');
+  // 29 mars 2026 : minuit à Paris est à 23 h 00 UTC la veille (UTC+1), même si l'après-midi est à UTC+2.
+  // 25 octobre 2026 : minuit à Paris est à 22 h 00 UTC la veille (UTC+2), même si l'après-midi est à UTC+1.
+  for (const [jour, minuit] of [['2026-03-29', '2026-03-28T23:00:00Z'], ['2026-10-25', '2026-10-24T22:00:00Z'], ['2026-07-14', '2026-07-13T22:00:00Z'], ['2026-12-31', '2026-12-30T23:00:00Z']]) {
+    for (const h of ['T00:00:00+01:00', 'T00:30:00Z', 'T01:59:59Z', 'T03:30:00Z', 'T12:00:00Z', 'T21:59:00Z']) {
+      const t0 = Date.parse(`${jour}${h}`);
+      if (t0 < Date.parse(minuit) || t0 >= Date.parse(minuit) + 23 * 3600e3) continue;
+      assert.equal(new Date(minuitParis(t0)).toISOString(), new Date(minuit).toISOString(), `${jour}${h}`);
+      assert.equal(lireFiltres({}, 'admin', t0).debut, Date.parse(minuit), `${jour}${h} : début du jour du journal`);
+    }
+  }
+  // Le journal par défaut (« Aujourd’hui »), le 29 mars à midi : l'événement de 0 h 30 (Paris) y est, celui de la veille
+  // à 23 h 30 non.
+  const v = setup(t);
+  v.clock.t = Date.parse('2026-03-28T22:30:00Z');
+  v.add({ type: 'malicious_input', ip: '203.0.113.5', route: '/veille-23h30' });
+  v.clock.t = Date.parse('2026-03-28T23:30:00Z');
+  v.add({ type: 'malicious_input', ip: '203.0.113.5', route: '/jour-0h30' });
+  v.clock.t = Date.parse('2026-03-29T10:00:00Z');
+  const admin = await v.login('sub-seb', 'Sébastien', 'admin');
+  const r = await admin('/evenements');
+  assert.equal(r.statusCode, 200);
+  assert.match(r.body, /\/jour-0h30/);
+  assert.doesNotMatch(r.body, /\/veille-23h30/);
+  // Le 25 octobre à midi : l'événement de 0 h 10 (Paris, 22 h 10 UTC la veille) y est, celui de 23 h 50 la veille non.
+  v.clock.t = Date.parse('2026-10-24T21:50:00Z');
+  v.add({ type: 'malicious_input', ip: '203.0.113.6', route: '/veille-23h50' });
+  v.clock.t = Date.parse('2026-10-24T22:10:00Z');
+  v.add({ type: 'malicious_input', ip: '203.0.113.6', route: '/jour-0h10' });
+  v.clock.t = Date.parse('2026-10-25T11:00:00Z');
+  const admin2 = await v.login('sub-seb', 'Sébastien', 'admin');
+  const r2 = await admin2('/evenements');
+  assert.match(r2.body, /\/jour-0h10/);
+  assert.doesNotMatch(r2.body, /\/veille-23h50/);
+});

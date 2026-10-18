@@ -6,7 +6,7 @@ import { cleReseau as cleReseauCanon, lireIp, reseauDe } from '../../server/secu
 // (« sam. 17 oct., 14 h 02 »), heures « 14 h 02 », nombres « 1 248 », espaces insécables. Le fuseau est celui de Paris, heure
 // d'été comprise, quel que soit celui du serveur (Intl, base de fuseaux de Node).
 
-const NBSP = ' ';            // espace insécable : « 14 h 02 », « 17 oct. », « 1 248 »
+export const NBSP = ' ';            // espace insécable : « 14 h 02 », « 17 oct. », « 1 248 »
 export const FINE = ' ';     // espace fine insécable : avant « : ; ! ? », dans les guillemets
 
 const JOURS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
@@ -24,6 +24,18 @@ export function paris(t) {
   const p = Object.fromEntries(PARIS.formatToParts(d).filter(x => x.type !== 'literal').map(x => [x.type, Number(x.value)]));
   const jourSemaine = new Date(Date.UTC(p.year, p.month - 1, p.day)).getUTCDay();
   return { annee: p.year, mois: p.month, jour: p.day, jourSemaine, heure: p.hour % 24, minute: p.minute };
+}
+
+// Minuit à Paris (début du jour, à Paris, de l'instant t), en millisecondes. Le décalage horaire de minuit n'est pas
+// toujours celui de t (jours de changement d'heure : à midi le 29 mars, Paris est à UTC+2, mais minuit était à UTC+1) :
+// deux passes, la seconde avec le décalage de l'instant trouvé par la première (audit D3-D8).
+export function minuitParis(t) {
+  const p = paris(t);
+  if (!p) return NaN;
+  const decalage = x => { const q = paris(x); return Date.UTC(q.annee, q.mois - 1, q.jour, q.heure, q.minute) - Math.floor(x / 60e3) * 60e3; };
+  const minuit = Date.UTC(p.annee, p.mois - 1, p.jour);
+  const m = minuit - decalage(Number(t instanceof Date ? t.getTime() : t));
+  return minuit - decalage(m);
 }
 
 const deux = n => String(n).padStart(2, '0');
@@ -103,10 +115,6 @@ const GRAVITES = {
   info: { mot: 'Info', classe: 'info', pluriel: 'info' },
 };
 export const gravite = g => GRAVITES[g] || GRAVITES.info;
-
-// Rôles de la console (annexe architecture, § 5.4).
-export const ROLES = { viewer: 'Lecteur', handler: 'Intervenant', analyst: 'Analyste', admin: 'Administrateur' };
-export const role = r => ROLES[r] || 'Lecteur';
 
 // Seuls ces rôles voient les adresses complètes (annexe § 5.4, droit « adresses_completes » de droits.js) ; tout autre rôle,
 // connu ou non, voit le réseau.

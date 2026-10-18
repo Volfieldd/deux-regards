@@ -516,3 +516,26 @@ test('vérification de la chaîne (audit D3-D9) : une seule à la fois, partagé
   await vigie.verifyChain();
   assert.equal(lancees, 2);
 });
+
+test('arrêt (audit D3-D16) : close() annule aussi les minuteries de démarrage (purge, contrôle des rôles, listes de menaces)', async t => {
+  const dir = tmp(t);
+  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, VIGIE_HOST: '127.0.0.1', VIGIE_INGEST_PORT: '0', VIGIE_INGEST_KEY: KEY, VIGIE_LOG_KEY: LOG_KEY, VIGIE_DECISIONS_PRIVATE_KEY: VIGIE_KEYS.priv64 });
+  // Les minuteries posées pendant le démarrage (d'une seconde au moins) et celles annulées ensuite.
+  const { setTimeout: st, clearTimeout: ct } = globalThis;
+  const posees = new Set(), annulees = new Set();
+  globalThis.setTimeout = (fn, ms, ...a) => { const h = st(fn, ms, ...a); if (ms >= 1000) posees.add(h); return h; };
+  globalThis.clearTimeout = h => { annulees.add(h); return ct(h); };
+  let vigie;
+  try {
+    vigie = await startVigie({ config, logger: false });
+    globalThis.setTimeout = st;
+    assert.ok(posees.size >= 3, `minuteries de démarrage : ${posees.size}`);
+    await vigie.close();
+    vigie = null;
+    assert.deepEqual([...posees].filter(h => !annulees.has(h)), [], 'aucune minuterie de démarrage ne survit à close()');
+  } finally {
+    globalThis.setTimeout = st;
+    globalThis.clearTimeout = ct;
+    await vigie?.close();
+  }
+});

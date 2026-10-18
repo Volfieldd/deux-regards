@@ -73,7 +73,7 @@ export function createConsole({ config, store, engine, switches, decisions, zita
     });
   });
 
-  const render = (reply, view, it, code = 200) => reply.code(code).type('text/html; charset=utf-8').send(eta.render(view, { titre: 'Vigie', v: VERSION, ...it }));
+  const render = (reply, view, it, code = 200) => reply.code(code).type('text/html; charset=utf-8').send(eta.render(view, { titre: 'Vigie', v: VERSION, roles: LABELS, ...it }));
   const page = (reply, cas, extra = {}, code = 200) => render(reply, 'acces', { cas, titre: 'Vigie', ...extra }, code);
 
   // Adresse du visiteur : celle que Cloudflare transmet, seulement une fois le jeton Access vérifié (sinon : la socket).
@@ -136,7 +136,7 @@ export function createConsole({ config, store, engine, switches, decisions, zita
         echec.delete(s.sub);
         rights.observe(s.sub, ceiling);
         if (!ceiling) sessions.closeSub(s.sub, 'plafond_retire');
-        else db.prepare('UPDATE console_sessions SET plafond = ?, plafond_lu = ? WHERE sub = ? AND ferme_a IS NULL').run(ceiling, now(), s.sub);
+        else sessions.setCeilingSub(s.sub, ceiling);
         return ceiling;
       })().finally(() => inflight.delete(s.sub)));
     }
@@ -327,13 +327,7 @@ export function createConsole({ config, store, engine, switches, decisions, zita
   const ctx = { db, store, engine, switches, decisions, rights, now, view, render, page, guard, isRefresh, log, sessions,
     notifications, edge, siteBackupDir, verifyChain, safeRetour,
     moiVue: req => ({ nom: req.moi.nom, sub: req.moi.sub, role: req.moi.role }) };
-  const served = new Set();
-  for (const mod of ECRANS) for (const url of mod.register(app, ctx) || []) served.add(url);
-  // Écrans pas encore codés : page d'attente dans la console (mêmes verrous).
-  for (const [url, pageId] of [['/alertes', 'alertes'], ['/evenements', 'evenements'], ['/entites', 'entites'], ['/sante', 'sante'], ['/flux', 'flux'],
-    ['/decisions', 'decisions'], ['/reglages', 'reglages'], ['/droits', 'droits']]) {
-    if (!served.has(url)) app.get(url, async (req, reply) => view(reply, req, 'a-venir', { page: pageId, titre: 'Vigie' }));
-  }
+  for (const mod of ECRANS) mod.register(app, ctx);
 
   app.setNotFoundHandler(async (req, reply) => {
     if (!req.moi) return toLogin(req, reply);

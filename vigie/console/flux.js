@@ -15,8 +15,8 @@
 //      nœuds (triés par la position de l'autre bout : aucun croisement au pied d'un nœud) ;
 //   4. svg(...) : rubans en courbes de Bézier cubiques, nœuds, libellés et nombres dans les gouttières.
 
-const FINE = '\u202f';      // espace fine insécable (avant « : »)
-const NBSP = '\u00a0';      // espace insécable (milliers, « 14 h 02 »)
+import { FINE, NBSP } from './format.js';
+import { pluriel } from './lexique.js';
 
 // Échappement de tout texte écrit dans le SVG (comme html.escape de Python : & < > " ').
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;' }[c]));
@@ -352,7 +352,6 @@ export const LARGEUR = 760;                       // tient dans la page dès 1 0
 export const LARGE = 1120, TAILLE_LARGE = 15;     // au-delà de 1 280 px (§ 3.19, point 1)
 export const ALERTES_UNE_A_UNE = 12;              // au-delà, les alertes du dessin sont rangées par gravité (une bande chacune)
 
-const pluriel = (n, un, plusieurs = `${un}s`) => (n > 1 ? plusieurs : un);
 export const total = (chemins, k = null, v = null) => somme(chemins.filter(c => k == null || c[k] === v).map(c => c.n));
 export const alertesDe = (chemins, chemin = null) => [...new Set(chemins.filter(c => c.alerte != null && (chemin == null || c.chemin === chemin)).map(c => c.alerte))];
 const nAlertes = (chemins, issue) => new Set(chemins.filter(c => c.issue === issue && c.alerte != null).map(c => c.alerte)).size;

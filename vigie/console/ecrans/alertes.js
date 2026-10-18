@@ -7,13 +7,12 @@
 // les gabarits est déjà mis en forme (dates à l'heure de Paris, mots du lexique) ; un Lecteur ne voit que des adresses
 // tronquées (adresseDetail), ni le texte brut de la réponse automatique (qui peut citer une adresse).
 import { alertOrder } from '../../moteur.js';
-import { responseOf } from '../../notifications.js';
 import { SOURCE_MIN, QUORUM, sourceOf } from '../../poids.js';
 import { can } from '../droits.js';
 import { actionsForcees, erreurDe, identite, lienLever } from './decisions.js';
-import { FINE, adresseDetail, cibleBlocage, cleReseau, masquer, reseauVue, dateHeure, gravite, guillemets, heure, jour, nombre, quand, jusqua, paris } from '../format.js';
+import { FINE, NBSP, adresseDetail, cibleBlocage, cleReseau, masquer, reseauVue, dateHeure, gravite, guillemets, heure, jour, nombre, quand, jusqua, paris } from '../format.js';
+import { CLASSEMENTS, ENTITES, MODES, PORTEES, RANG_SQL, SOURCES, aQuand, closeSansSuite, lire, periode, reponseFaite, titreDe, typo, virgule } from '../lexique.js';
 
-const NBSP = '\u00a0';
 const PAGE = 50;                          // alertes par page
 const PAGE_MAX = 200;                     // pages numérotées (alertes non closes) : au-delà, la liste se filtre
 const COMPTE_MAX = 10_000;                // comptes bornés : « plus de 10 000 »
@@ -21,33 +20,15 @@ const EVENEMENTS = 20;                    // événements d'une alerte par page
 const HISTOIRE = 50;                      // lignes d'historique montrées
 const AUTRES = 5;                         // autres alertes de la même entité
 const DECISIONS_MAX = 50;
-const RANG_SQL = "CASE gravite WHEN 'critique' THEN 4 WHEN 'haut' THEN 3 WHEN 'moyen' THEN 2 WHEN 'bas' THEN 1 ELSE 0 END";
 // Même expression et même condition que l'index events_alerte (vigie/migrations/007_index_historique_alertes.sql).
 const HISTORIQUE = `SELECT seq, recu_a, emetteur, detail FROM events
   WHERE type = 'vigie_alerte' AND (CASE WHEN json_valid(detail) THEN json_extract(detail, '$.id') END) = ? ORDER BY seq DESC LIMIT ${HISTOIRE + 1}`;
 
-// Mots du lexique (repris de vue-ensemble.js, qui ne les exporte pas).
-const SOURCES = { site: 'site', zitadel: 'Zitadel', bordure: 'bordure Cloudflare', vigie: 'contrôles de la Vigie' };
-const MODES = { arret: 'Arrêt', observer: 'Observer', alerter: 'Alerter', bloquer: 'Bloquer' };
-const ENTITES = { ip: 'adresse', reseau: 'réseau', compte: 'compte', session: 'session', appareil: 'appareil', site: 'site', vigie: 'la Vigie' };
+// Mots propres à la fiche (les autres : lexique.js).
 const ENTITE_TITRE = { ip: 'L’adresse', reseau: 'Le réseau', compte: 'Le compte', session: 'La session', appareil: 'L’appareil', site: 'Le site', vigie: 'La Vigie' };
 const FICHE_DE = { ip: 'Fiche de l’adresse', reseau: 'Fiche du réseau', compte: 'Fiche du compte', session: 'Fiche de la session', appareil: 'Fiche de l’appareil' };
 const SEUIL_DE = { ip: 'd’une adresse', reseau: 'd’un réseau', compte: 'd’un compte', session: 'd’une session', appareil: 'd’un appareil' };
-const CLASSEMENTS = { incident: 'Incident confirmé', faux_positif: 'Faux positif', test: 'Test', sans_suite: 'Sans suite' };
 const DECISION_FAITE = { geler: 'Compte gelé', revoquer_compte: 'Sessions du compte fermées', revoquer_session: 'Session fermée', bloquer: 'Adresse bloquée', verrouiller: 'Admin verrouillée' };
-const PORTEES = { tout: 'Tout le site', admin: 'L’admin et la connexion', auth: 'La connexion seulement' };
-const DETECTEURS = {
-  premiere_apparition: 'Connexion d’un compte depuis un pays ou un appareil jamais vus',
-  heure_inhabituelle: 'Activité d’un compte à une heure jamais utilisée',
-  vitesse: 'Lectures d’un compte bien au-delà de son habitude',
-  voyage_impossible: 'Voyage impossible entre deux connexions d’un compte',
-  pivot_identifiants: 'Connexion réussie après des échecs répétés',
-  role_incoherent: 'Export réservé à l’administrateur fait par un autre compte',
-  exploration_lente: 'Exploration lente depuis un réseau (pièges et erreurs sur 12 heures)',
-  chaine_attaque: 'Chaîne d’attaque : repérage, tentative puis accès sur une même entité',
-  silence: 'Site silencieux : aucun battement depuis 3 minutes',
-  menaces: 'Adresse sur une liste de menaces (Spamhaus DROP, Feodo, Tor)',
-};
 // Tactiques MITRE ATT&CK (étiquettes « attack.<tactique> » des règles Sigma), en français.
 const TACTIQUES = {
   reconnaissance: 'Reconnaissance', resource_development: 'Développement de ressources', initial_access: 'Accès initial', execution: 'Exécution',
@@ -74,14 +55,9 @@ const RAISONS = [/^adresse privée : aucun blocage automatique$/, /^aucun contr�
   /^interrupteur des blocages arrêté : aucune réponse$/, /^aucune réponse prévue pour cette règle$/];
 const NOMBRES = ['aucune', 'une', 'deux', 'trois', 'quatre'];
 
-// Apostrophe typographique et espace fine avant « : ; ! ? » dans un texte du code (titres des règles, en YAML).
-const typo = s => String(s ?? '').replace(/'/g, '’').replace(/ ([:;!?])/g, `${FINE}$1`);
-const virgule = x => nombre(Math.round(Number(x) * 10) / 10).replace('.', ',');
-const lire = s => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
 const deux = n => String(n).padStart(2, '0');
 const capitale = s => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 const enLettres = n => NOMBRES[n] || nombre(n);
-const aQuand = (x, t) => { const s = quand(x, t); return s.includes(',') ? `le ${s}` : `à ${s}`; };
 const memeJour = (a, b) => { const pa = paris(a), pb = paris(b); return Boolean(pa && pb && pa.annee === pb.annee && pa.mois === pb.mois && pa.jour === pb.jour); };
 // Qui a traité : « console · Julien » (vigie/moteur.js, classify) s'écrit « Julien » ; texte d'opérateur, masqué selon le
 // rôle (rôle absent : Lecteur).
@@ -104,11 +80,6 @@ function ecart(ms) {
   else txt = `${Math.round(a / 86400)}${NBSP}jours`;
   return `reçu ${ms < 0 ? '−' : '+'} ${txt}`;
 }
-function periode(a, b, t) {
-  if (memeJour(a, b)) return quand(a, t).includes(',') ? `le ${jour(a)}, de ${heure(a)} à ${heure(b)}` : `de ${heure(a)} à ${heure(b)}`;
-  return `du ${dateHeure(a)} au ${dateHeure(b)}`;
-}
-
 // « attack.persistence », « attack.t1098 » → { tactiques: ['Persistance'], techniques: ['T1098'] }.
 export function mitre(tags) {
   const tactiques = [], techniques = [];
@@ -127,12 +98,6 @@ function registre(engine) {
   const m = new Map();
   for (const r of engine?.rules?.() || []) m.set(r.id, r);
   return m;
-}
-function titreDe(regle, regles) {
-  const brut = regles.get(regle)?.titre;
-  const nom = regle.startsWith('detecteur.') ? regle.slice(10) : null;
-  if (nom && (!brut || brut === nom.replaceAll('_', ' '))) return typo(DETECTEURS[nom] || nom.replaceAll('_', ' '));
-  return typo(brut || regle);
 }
 const casDe = cas => (cas === 'quorum' ? 'score' : cas ? `cas ${cas}` : '');
 
@@ -165,8 +130,6 @@ function ficheEntite(kind, key, role) {
 
 const sourcesDe = s => (lire(s) || []).filter(x => Object.hasOwn(SOURCES, x)).map(x => ({ cle: x, mot: SOURCES[x] }));
 const eligible = a => ['haut', 'critique'].includes(a.gravite) || a.regle === 'sigma.surveillance_reduite';
-// « réponse faite : compte gelé 24 h, sessions du compte fermées » (mots de vigie/notifications.js, responseOf).
-const reponseFaite = decisions => responseOf(decisions).replace(/^Réponse : /, `réponse faite${FINE}: `).replace(/(\d) (h|j)\b/g, `$1${NBSP}$2`);
 
 // Requêtes préparées une fois par base (lecture seule) ; les listes filtrées, une fois par forme de filtre.
 const cache = new WeakMap();
@@ -179,7 +142,10 @@ function requetes(db) {
     alerte: db.prepare('SELECT * FROM alerts WHERE id = ?'),
     // Décisions rattachées à l'alerte (colonne indexée alerte_id, migration 012 ; audit D3-D3).
     decisions: db.prepare(`SELECT id, kind, cible, portee, motif, par, cree_a, fin, leve_a, leve_par, auto FROM decisions WHERE alerte_id = ? ORDER BY id LIMIT ${DECISIONS_MAX}`),
-    nbEvenements: db.prepare(`SELECT COUNT(*) FROM (SELECT 1 FROM alert_events WHERE alert_id = ? LIMIT ${COMPTE_MAX + 1})`).pluck(),
+    // Événements d'une alerte encore au journal (jointure sur events : une alerte est gardée 13 mois, ses événements
+    // 6 ; audit D3-D14), et liens notés (la différence : les événements effacés par la durée de conservation).
+    nbEvenements: db.prepare(`SELECT COUNT(*) FROM (SELECT 1 FROM alert_events a JOIN events e ON e.seq = a.seq WHERE a.alert_id = ? LIMIT ${COMPTE_MAX + 1})`).pluck(),
+    nbLiens: db.prepare(`SELECT COUNT(*) FROM (SELECT 1 FROM alert_events WHERE alert_id = ? LIMIT ${COMPTE_MAX + 1})`).pluck(),
     evenements: db.prepare(`SELECT e.seq, e.recu_a, e.survenu_a, e.type, e.severity, e.composant, e.emetteur, e.confiance, e.sub, e.ip, e.method, e.route, e.status, e.retard
       FROM alert_events a JOIN events e ON e.seq = a.seq WHERE a.alert_id = ? AND a.seq < ? ORDER BY a.seq DESC LIMIT ${EVENEMENTS + 1}`),
     historique: db.prepare(HISTORIQUE),
@@ -248,7 +214,7 @@ function ligneAlerte(a, { t, role, regles, reponses }) {
   if (a.statut === 'close') {
     const qui = a.traite_par ? ` par ${nomDe(a.traite_par, role)}` : '';
     const quandC = a.traite_a ? `, ${quand(a.traite_a, t)}` : '';
-    const sec = a.classement ? `classée ${CLASSEMENTS[a.classement] || a.classement}${qui}${quandC}` : `${/^sans suite/.test(a.note || '') ? 'sans suite' : 'close'}${quandC}`;
+    const sec = a.classement ? `classée ${CLASSEMENTS[a.classement] || a.classement}${qui}${quandC}` : `${closeSansSuite(a) ? 'sans suite' : 'close'}${quandC}`;
     statut = { k: 'abouti', mot: 'Close', sec };
   } else if (a.statut === 'en_cours') statut = { k: 'encours', mot: 'Prise en charge', sec: [a.traite_par ? `par ${nomDe(a.traite_par, role)}` : '', reponse].filter(Boolean).join(' · ') };
   else statut = { k: 'afaire', mot: 'Ouverte', sec: [reponse, score].filter(Boolean).join(' · ') };
@@ -488,18 +454,24 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
 
   // Événements de l'alerte, les plus récents d'abord, par pages de 20 (jeu de clés : seq).
   const nb = q.nbEvenements.get(a.id);
+  const liens = q.nbLiens.get(a.id);
+  const effaces = liens <= COMPTE_MAX ? Math.max(0, liens - nb) : 0;
+  const effacesTexte = effaces ? `${nombre(effaces)} ${effaces > 1 ? 'événements effacés' : 'événement effacé'} par la durée de conservation` : null;
   const debut = !(Number.isSafeInteger(avant) && avant > 0);
   let evs = q.evenements.all(a.id, debut ? Number.MAX_SAFE_INTEGER : avant);
   const plus = evs.length > EVENEMENTS;
   evs = evs.slice(0, EVENEMENTS);
+  const pied = nb ? `${compte(nb)} ${nb > 1 ? 'événements reliés' : 'événement relié'} à l’alerte${nb > evs.length ? (debut ? `${FINE}; les ${evs.length} plus récents ici` : `${FINE}; suite de la liste`) : ''}${effaces ? `${FINE}; ${effacesTexte}` : ''}.`
+    : effaces ? `Aucun événement relié encore au journal${FINE}; ${effacesTexte}.` : 'Aucun événement relié.';
   const evenements = {
     total: nb,
     totalTexte: compte(nb),
     lignes: evs.map(e => evenementVue(e, t, roleVu)),
     suite: plus ? `/alertes/${a.id}?avant=${evs.at(-1).seq}#t-signal` : null,
     debut: debut ? null : `/alertes/${a.id}#t-signal`,
-    // Liens vers des événements qui ne sont plus au journal (purgés après 6 mois).
-    effaces: debut && evs.length === 0 && nb > 0,
+    // Événements reliés qui ne sont plus au journal (effacés par la purge, après la durée de conservation).
+    effaces: debut && nb === 0 && effaces > 0 ? `${effacesTexte.charAt(0).toUpperCase()}${effacesTexte.slice(1)}.` : null,
+    pied,
   };
 
   // Règle : titre, cas, nature, tactiques MITRE.
@@ -521,7 +493,7 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
 
   const statut = a.statut === 'close' ? { k: 'abouti', mot: 'Close' } : a.statut === 'en_cours' ? { k: 'encours', mot: 'Prise en charge' } : { k: 'afaire', mot: 'Ouverte' };
   const classement = a.statut === 'close' ? {
-    mot: a.classement ? CLASSEMENTS[a.classement] || a.classement : /^sans suite/.test(a.note || '') ? 'Sans suite' : 'Close sans classement',
+    mot: a.classement ? CLASSEMENTS[a.classement] || a.classement : closeSansSuite(a) ? 'Sans suite' : 'Close sans classement',
     par: a.traite_par ? nomDe(a.traite_par, roleVu) : null,
     quand: a.traite_a ? dateHeure(a.traite_a) : null,
     note: a.note ? guillemets(masquer(String(a.note).slice(0, 500), roleVu)) : null,
@@ -561,9 +533,9 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
 // close), ajouter une note, actions forcées sur l'entité (alerte non close). Une erreur revenue de l'action est placée près
 // de son champ, la saisie reprise (erreurDe : valeurs jamais crues, toujours échappées par le gabarit).
 const CHOIX = [
-  { v: 'incident', t: 'Incident confirmé', sec: 'une attaque ou une erreur réelle' },
-  { v: 'faux_positif', t: 'Faux positif', sec: `rien d’anormal${FINE}: dites pourquoi dans la note` },
-  { v: 'test', t: 'Test', sec: 'un essai de votre part' },
+  { v: 'incident', t: CLASSEMENTS.incident, sec: 'une attaque ou une erreur réelle' },
+  { v: 'faux_positif', t: CLASSEMENTS.faux_positif, sec: `rien d’anormal${FINE}: dites pourquoi dans la note` },
+  { v: 'test', t: CLASSEMENTS.test, sec: 'un essai de votre part' },
 ];
 export function actionsFiche({ db, req, t, id, message = null }) {
   if (!can(req.moi.role, 'alertes_traiter')) return null;
@@ -604,5 +576,4 @@ export function register(app, ctx) {
     return ctx.view(reply, req, 'alertes-fiche', { page: 'alertes', titre: `Alerte #${vue.id} · Vigie`, vue, actions, message });
   });
 
-  return ['/alertes'];
 }

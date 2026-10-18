@@ -259,5 +259,4 @@ export function register(app, ctx) {
     return changed ? `Attribution changée${FINE}: ${nom}, ${LABELS[body.attribution]}. Les Administrateurs sont prévenus.` : `Rien à changer${FINE}: ${nom} est déjà ${LABELS[body.attribution]}.`;
   });
 
-  return [];
 }

@@ -500,3 +500,52 @@ test('santé : conservation lue dans store.retentionDays (audit D3-D15) ; premie
   const plan = v.db.prepare('EXPLAIN QUERY PLAN SELECT (SELECT MIN(seq) FROM events) mini, (SELECT MAX(seq) FROM events) maxi').all().map(r => r.detail).join(' | ');
   assert.doesNotMatch(plan, /SCAN events\b(?! USING)/);
 });
+
+test('alert_flux.premier (audit D3-D13) : l’alerte qui a rattaché l’événement la première, pas la plus petite par son numéro', t => {
+  const v = setup(t);
+  v.store.add([{ id: crypto.randomUUID(), recu_a: T0 - 3600e3, survenu_a: T0 - 3600e3, type: 'malicious_input', severity: 'moyen', composant: 'site · public',
+    canal: 'ingestion signée', confiance: 'rapporté', emetteur: 'server/routes/public.js', ip: '203.0.113.40', route: '/x' }]);
+  const seq = v.db.prepare('SELECT MAX(seq) FROM events').pluck().get();
+  const alerte = id => v.db.prepare(`INSERT INTO alerts (id, regle, entite_kind, entite_key, gravite, mode, premiere, derniere)
+    VALUES (?, 'entite.score', 'ip', '203.0.113.40', 'moyen', 'observer', ?, ?)`).run(id, T0 - 3600e3, T0 - 3600e3);
+  alerte(8);
+  alerte(10);
+  // L'alerte #10 rattache l'événement avant l'alerte #8 (ordre d'arrivée des liens, pas des numéros).
+  v.db.prepare('INSERT INTO alert_events (alert_id, seq) VALUES (?, ?)').run(10, seq);
+  v.db.prepare('INSERT INTO alert_events (alert_id, seq) VALUES (?, ?)').run(8, seq);
+  const premier = id => v.db.prepare('SELECT SUM(premier) FROM alert_flux WHERE alert_id = ?').pluck().get(id);
+  const n = id => v.db.prepare('SELECT SUM(n) FROM alert_flux WHERE alert_id = ?').pluck().get(id);
+  assert.equal(premier(10), 1, 'l’alerte #10, la première à le rattacher, porte l’événement');
+  assert.equal(premier(8), 0, 'l’alerte #8, venue après, ne le porte pas (malgré son plus petit numéro)');
+  assert.deepEqual([n(8), n(10)], [1, 1], 'chacune le compte dans ses événements');
+  // Dans les flux : l'événement compte une fois au diagramme des événements, porté par #10.
+  const fl = lireFlux({ db: v.db, now: v.now, jours: 7 });
+  const porte = fl.chemins.filter(c => c.alerte != null).reduce((s, c) => s + c.n, 0);
+  assert.equal(porte, 1);
+  assert.deepEqual([...new Set(fl.chemins.filter(c => c.alerte != null).map(c => c.alerte))], [10]);
+});
+
+test('santé (audit D3-D10) : la carte de la vue d’ensemble résume /sante (mêmes écarts), le badge compte comme /sante', async t => {
+  const { compteurs } = await import('../vigie/console/vue-ensemble.js');
+  const v = setup(t);
+  v.store.setting.set('chaine_verifiee', { at: T0 - 3600e3, ok: true, lignes: 10 });
+  v.store.setting.set('zitadel_derniere_lecture', T0 - 30 * 3600e3);                 // injoignable : panne
+  v.store.setting.set('menaces_maj', { at: T0 - 3600e3, spamhaus_drop: 'réponse 503', feodo: 12, tor: 40 });
+  v.switches.set('alertes', 'arret', { duree: '2h', par: 'console · Sébastien', motif: 'essai' });
+  const sante = vueSante({ db: v.db, engine: v.engine, switches: v.switches, now: v.now, role: 'admin' });
+  const vue = overview({ db: v.db, engine: v.engine, switches: v.switches, now: v.now, role: 'admin' });
+  assert.equal(vue.sante.ecarts, sante.ecarts);
+  assert.equal(vue.compteurs.sante, sante.ecarts);
+  assert.equal(compteurs({ db: v.db, engine: v.engine, switches: v.switches, now: v.now }).sante, sante.ecarts);
+  const ecarts = vue.sante.lignes.filter(l => l.k === 'att-s' || l.k === 'arret');
+  assert.equal(ecarts.length, sante.ecarts, 'une ligne par écart, aucune ligne « autres écarts »');
+  const texte = l => l.morceaux.map(m => m.t).join('');
+  assert.ok(!vue.sante.lignes.some(l => /autres? écarts?/.test(texte(l))));
+  const zitadel = vue.sante.lignes.find(l => /^Zitadel/.test(texte(l)));
+  assert.equal(zitadel.k, 'arret', 'Zitadel injoignable : la même panne que sur /sante');
+  assert.ok(vue.sante.lignes.some(l => l.k === 'att-s' && /^Listes de menaces/.test(texte(l)) && /Spamhaus DROP/.test(texte(l))));
+  assert.ok(vue.sante.lignes.some(l => l.k === 'att-s' && /^Canaux/.test(texte(l)) && /interrupteur Alertes arrêté/.test(texte(l))));
+  // Les lignes de toujours dans l'ordre de la maquette, puis les autres écarts dans l'ordre de /sante.
+  const de = id => texte({ morceaux: sante.cartes.find(c => c.id === id).resume });
+  assert.deepEqual(vue.sante.lignes.map(texte), ['site', 'zitadel', 'chaine', 'roles', 'analyse', 'menaces', 'canaux'].map(de));
+});

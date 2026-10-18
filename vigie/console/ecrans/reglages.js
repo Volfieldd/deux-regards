@@ -17,22 +17,18 @@ import { fileURLToPath } from 'node:url';
 import { loadRules } from '../../sigma.js';
 import { LISTS } from '../../menaces.js';
 import { THRESHOLDS } from '../../poids.js';
+import { DETECTEURS } from '../../detecteurs.js';
 import { can, LABELS } from '../droits.js';
 import { FRESH } from '../sessions.js';
-import { FINE, adresseDetail, dateHeure, gravite, guillemets, heure, jusqua, masquer, nombre, quand } from '../format.js';
+import { FINE, NBSP, adresseDetail, dateHeure, gravite, guillemets, heure, jusqua, masquer, quand } from '../format.js';
+import { ENTITES, MODES, lire, pluriel, titreDe, typo, virgule } from '../lexique.js';
 import { sansContacts } from '../../util.js';
 import { INTERRUPTEURS, cartesInterrupteurs, surveillanceReduite } from '../vue-ensemble.js';
 
-const NBSP = ' ';
 const D = `${FINE}: `;
-const typo = s => String(s ?? '').replace(/'/g, '’').replace(/ ([:;!?])/g, `${FINE}$1`);
-const pluriel = (n, un, plusieurs = `${un}s`) => (n > 1 ? plusieurs : un);
-const lire = s => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
 const norm = s => String(s ?? '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
-const virgule = x => nombre(x).replace('.', ',');
 const sansConsole = s => String(s).replace(/^console · /, '');
 
-export const MODES = { arret: 'Arrêt', observer: 'Observer', alerter: 'Alerter', bloquer: 'Bloquer' };
 const ORDRE_MODES = ['arret', 'observer', 'alerter', 'bloquer'];
 export const GRAVITES_FILTRE = { critique: 'Critique', haut: 'Haute', moyen: 'Moyenne', bas: 'Basse' };
 export const SEUILS = { ip: 'Adresse', reseau: 'Réseau', compte: 'Compte', session: 'Session', appareil: 'Appareil' };
@@ -41,33 +37,7 @@ export const DUREES_REGLE = [['1h', `1${NBSP}h`], ['4h', `4${NBSP}h`], ['24h', `
 // Durées d'un interrupteur : les autres en contour, la durée proposée (pleine) en dernier.
 export const DUREES_INTER = { autres: [['1h', `1${NBSP}h`], ['24h', `24${NBSP}h`]], proposee: ['4h', `4${NBSP}h`] };
 
-// Titres lisibles des détecteurs (lexique § 3.11) : le moteur écrit le nom brut (« exploration lente »).
-const TITRES_DET = {
-  'detecteur.premiere_apparition': 'Connexion d’un compte depuis un pays ou un appareil jamais vus',
-  'detecteur.heure_inhabituelle': 'Activité d’un compte à une heure jamais utilisée',
-  'detecteur.vitesse': 'Lectures d’un compte bien au-delà de son habitude',
-  'detecteur.voyage_impossible': 'Voyage impossible entre deux connexions d’un compte',
-  'detecteur.pivot_identifiants': 'Connexion réussie après des échecs répétés',
-  'detecteur.role_incoherent': 'Export réservé à l’administrateur fait par un autre compte',
-  'detecteur.exploration_lente': 'Exploration lente depuis un réseau (pièges et erreurs sur 12 heures)',
-  'detecteur.chaine_attaque': `Chaîne d’attaque${FINE}: repérage, tentative puis accès sur une même entité`,
-  'detecteur.silence': `Site silencieux${FINE}: aucun battement depuis 3 minutes`,
-  'detecteur.menaces': 'Adresse sur une liste de menaces (Spamhaus DROP, Feodo, Tor)',
-};
-// Ce que les détecteurs déposent (vigie/detecteurs.js, vigie/menaces.js) : engine.rules() ne le dit pas.
-const DETECTEURS = {
-  premiere_apparition: { gravite: 'bas', points: 1.5, entite: 'compte' },
-  heure_inhabituelle: { gravite: 'bas', points: 1, entite: 'compte' },
-  vitesse: { gravite: 'moyen', points: 3, entite: 'compte' },
-  voyage_impossible: { gravite: 'haut', points: 4, entite: 'compte' },
-  pivot_identifiants: { gravite: 'haut', points: 4, entite: 'compte' },
-  role_incoherent: { gravite: 'critique', sourceUnique: true, entite: 'compte' },
-  exploration_lente: { gravite: 'moyen', points: 4, entite: 'reseau' },
-  chaine_attaque: { gravite: 'critique', sourceUnique: true, entite: 'entite' },
-  silence: { gravite: 'haut', sourceUnique: true, entite: 'site' },
-  menaces: { gravite: null, points: null, entite: 'ip', listes: true },
-};
-const ENT = { ip: 'adresse', reseau: 'réseau', compte: 'compte', session: 'session', appareil: 'appareil', site: 'site', vigie: 'la Vigie', entite: 'l’entité visée' };
+const ENT = { ...ENTITES, entite: 'l’entité visée' };
 const REP = { geler_et_revoquer: `en Bloquer${FINE}: geler 24${NBSP}h, fermer les sessions`, revoquer_compte: `en Bloquer${FINE}: fermer les sessions du compte`,
   bloquer_ip: `en Bloquer${FINE}: bloquer l’adresse 24${NBSP}h` };
 const CAS_CLAIR = { quorum: 'score', MV11: 'intégrité de la Vigie' };
@@ -90,6 +60,8 @@ function metaSigma() {
   return metaLue;
 }
 
+// Ce que dépose une règle : un détecteur, son barème (vigie/detecteurs.js, DETECTEURS, celui du moteur ; engine.rules() ne
+// le dit pas) ; une règle Sigma, son fichier.
 function metaDe(r) {
   if (r.id === 'entite.score') return { classe: 'score', gravite: 'moyen' };
   const det = r.id.startsWith('detecteur.') ? DETECTEURS[r.id.slice(10)] : null;
@@ -229,7 +201,8 @@ export function vueReglages({ db, store, engine, switches, notifications, now = 
   // ---------- Règles ----------
   const f = lireFiltres(query);
   const modesRegles = store.setting.get('regles_modes', {}) || {};
-  const toutes = engine.rules().map(r => ({ ...r, titre: TITRES_DET[r.id] || typo(r.titre), meta: metaDe(r) }));
+  const titres = new Map(engine.rules().map(r => [r.id, r.titre]));
+  const toutes = engine.rules().map(r => ({ ...r, titre: titreDe(r.id, titres), meta: metaDe(r) }));
   const nb = Object.fromEntries(ORDRE_MODES.map(k => [k, toutes.filter(r => r.mode === k).length]));
   const cherche = norm(f.q);
   const garde = r => (!f.gravite || r.meta.gravite === f.gravite) && (!f.mode || r.mode === f.mode)
@@ -301,5 +274,4 @@ export function register(app, ctx) {
     const reglages = vueReglages({ db, store, engine, switches, notifications: ctx.notifications, now, role: req.moi.role, query: req.query || {}, message, authA: req.moi.authA });
     return view(reply, req, 'reglages', { page: 'reglages', titre: 'Règles et réglages · Vigie', reglages, message });
   });
-  return ['/reglages'];
 }

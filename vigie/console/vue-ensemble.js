@@ -5,38 +5,13 @@
 // donnée personnelle superflue : les adresses passent par adresseDetail (tronquées pour un Lecteur), ni agent utilisateur,
 // ni détail d'événement.
 import { alertOrder } from '../moteur.js';
-import { responseOf } from '../notifications.js';
-import { FINE, adresseDetail, cibleBlocage, masquer, reseauVue, dateHeure, gravite, guillemets, heure, ilYa, jusqua, nombre, quand, duree, jour, paris } from './format.js';
-import { provenanceAlertes, ecartsSante } from './ecrans/sante-flux.js';
+import { FINE, adresseDetail, cibleBlocage, masquer, reseauVue, dateHeure, gravite, guillemets, heure, jusqua, nombre, quand, duree } from './format.js';
+import { CLASSEMENTS, DECISIONS, ENTITES, MODES, PORTEES, RANG_SQL, SOURCES, aQuand, closeSansSuite, lire, periode, pluriel, reponseFaite, titreDe, typo, virgule } from './lexique.js';
+import { provenanceAlertes, ecartsSante, resumeSante } from './ecrans/sante-flux.js';
 import { can } from './droits.js';
 
 const LISTE_MAX = 50;                     // alertes affichées dans le tableau (le reste : « Toutes les alertes »)
 const DECISIONS_MAX = 20;
-const SITE_SILENCE = 3 * 60e3;            // comme le détecteur « silence » du moteur (DS24)
-const ZITADEL_TROU = 20 * 3600e3;         // comme vigie/zitadel.js (GAP)
-const CHAINE_RETARD = 48 * 3600e3;        // vérifiée chaque jour : au-delà de deux jours, la vérification ne tourne plus
-const ANALYSE_RETARD = 1000;              // événements reçus et pas encore analysés
-const RANG_SQL = "CASE gravite WHEN 'critique' THEN 4 WHEN 'haut' THEN 3 WHEN 'moyen' THEN 2 WHEN 'bas' THEN 1 ELSE 0 END";
-
-const SOURCES = { site: 'site', zitadel: 'Zitadel', bordure: 'bordure Cloudflare', vigie: 'contrôles de la Vigie' };
-const MODES = { arret: 'Arrêt', observer: 'Observer', alerter: 'Alerter', bloquer: 'Bloquer' };
-const ENTITES = { ip: 'adresse', reseau: 'réseau', compte: 'compte', session: 'session', appareil: 'appareil', site: 'site', vigie: 'la Vigie' };
-const DECISIONS = { bloquer: 'Bloquer une adresse', revoquer_session: 'Fermer une session', revoquer_compte: 'Fermer les sessions d’un compte', geler: 'Geler un compte', verrouiller: 'Verrouiller l’admin' };
-const PORTEES = { tout: 'Tout le site', admin: 'L’admin et la connexion', auth: 'La connexion seulement' };
-const CLASSEMENTS = { incident: 'Incident confirmé', faux_positif: 'Faux positif', test: 'Test' };
-// Titres lisibles des détecteurs (lexique § 3.11, proposés) : le moteur écrit le nom brut (« premiere apparition »).
-const DETECTEURS = {
-  premiere_apparition: 'Connexion d’un compte depuis un pays ou un appareil jamais vus',
-  heure_inhabituelle: 'Activité d’un compte à une heure jamais utilisée',
-  vitesse: 'Lectures d’un compte bien au-delà de son habitude',
-  voyage_impossible: 'Voyage impossible entre deux connexions d’un compte',
-  pivot_identifiants: 'Connexion réussie après des échecs répétés',
-  role_incoherent: 'Export réservé à l’administrateur fait par un autre compte',
-  exploration_lente: 'Exploration lente depuis un réseau (pièges et erreurs sur 12 heures)',
-  chaine_attaque: 'Chaîne d’attaque : repérage, tentative puis accès sur une même entité',
-  silence: 'Site silencieux : aucun battement depuis 3 minutes',
-  menaces: 'Adresse sur une liste de menaces (Spamhaus DROP, Feodo, Tor)',
-};
 // Les trois interrupteurs (MV-01, MV-06) : textes de la carte ; objet, la fin du nom lu au lecteur d'écran d'un bouton
 // (« Arrêter… la détection ») ; effetArret, ce que fait l'arrêt, écrit sur la carte des réglages avant le bouton.
 export const INTERRUPTEURS = {
@@ -51,12 +26,6 @@ export const INTERRUPTEURS = {
     effetArret: 'aucune règle n’agit d’elle-même ; les actions forcées restent possibles.' },
 };
 export const ORDRE_INTER = ['detection', 'alertes', 'blocages'];
-
-// Apostrophe typographique et espace fine avant « : ; ! ? » dans un texte du code (titres des règles, en YAML).
-const typo = s => String(s ?? '').replace(/'/g, '’').replace(/ ([:;!?])/g, `${FINE}$1`);
-const pluriel = (n, un, plusieurs = `${un}s`) => (n > 1 ? plusieurs : un);
-const virgule = x => nombre(Math.round(Number(x) * 10) / 10).replace('.', ',');
-const lire = s => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
 
 // Requêtes préparées une fois par base (lecture seule).
 const cache = new WeakMap();
@@ -74,8 +43,6 @@ function requetes(db) {
     derniereClose: db.prepare("SELECT id, classement, note, traite_par, traite_a, derniere FROM alerts WHERE statut = 'close' ORDER BY derniere DESC LIMIT 1"),
     nbDecisions: db.prepare('SELECT COUNT(*) FROM decisions WHERE leve_a IS NULL AND fin > ?').pluck(),
     decisions: db.prepare(`SELECT id, kind, cible, portee, motif, par, cree_a, fin, auto FROM decisions WHERE leve_a IS NULL AND fin > ? ORDER BY id DESC LIMIT ${DECISIONS_MAX}`),
-    battement: db.prepare("SELECT recu_a, detail FROM events WHERE type = 'sys_heartbeat' ORDER BY recu_a DESC LIMIT 1"),
-    dernierSeq: db.prepare('SELECT MAX(seq) FROM events').pluck(),
     jours: db.prepare('SELECT type, SUM(n) n FROM daily WHERE day >= ? AND type IN (\'authn_login_success\', \'authz_blocked\', \'bordure_blocage\') GROUP BY type'),
     bloquees: db.prepare("SELECT COUNT(*) FROM decisions WHERE kind = 'bloquer' AND cree_a >= ?").pluck(),
   };
@@ -88,75 +55,12 @@ function requetes(db) {
 
 const reglage = (q, cle, defaut = null) => { const v = lire(q.reglage.get(cle)); return v ?? defaut; };
 
-// « à 14 h 05 » aujourd'hui ; « le ven. 16 oct., 18 h 25 » un autre jour.
-const aQuand = (x, t) => { const s = quand(x, t); return s.includes(',') ? `le ${s}` : `à ${s}`; };
-
-// Santé en une ligne par composant (MV-01) : { k: 'ok' | 'att-s' | 'arret' | 'neutre', morceaux }. Les lignes en écart
-// (▲, ✕) font le compteur de la barre latérale.
-function sante(q, t) {
-  const lignes = [];
-  const ligne = (k, ...morceaux) => lignes.push({ k, morceaux });
-  const D = `${FINE}: `;                                    // « : » précédé d'une espace fine insécable
-  // Site : dernier battement (index events_type), événements en attente sur le site.
-  const b = q.battement.get();
-  if (!b) ligne('att-s', { t: `Site${D}aucun battement reçu` });
-  else {
-    const attente = Number(lire(b.detail)?.attente);
-    const suite = Number.isFinite(attente) ? `, ${nombre(attente)} en attente` : '';
-    if (t - b.recu_a > SITE_SILENCE) ligne('att-s', { t: `Site${D}dernier battement ` }, { t: quand(b.recu_a, t), b: true }, { t: ` (${ilYa(b.recu_a, t)})` });
-    else ligne('ok', { t: `Site${D}battement à ` }, { t: heure(b.recu_a), b: true }, { t: suite });
-  }
-  // Zitadel : dernière lecture réussie de son journal.
-  const z = reglage(q, 'zitadel_derniere_lecture');
-  if (!z) ligne('neutre', { t: `Zitadel${D}jamais lu (ou non configuré)` });
-  else if (t - z > ZITADEL_TROU) ligne('att-s', { t: `Zitadel${D}dernière lecture ` }, { t: quand(z, t), b: true }, { t: ` (${ilYa(z, t)})` });
-  else ligne('ok', { t: `Zitadel lu ${aQuand(z, t).replace(/ .*$/, '')} ` }, { t: quand(z, t), b: true });
-  // Bordure Cloudflare (facultative) : battement du Worker, liste copiée.
-  const bord = reglage(q, 'bordure_dernier_battement');
-  const kv = reglage(q, 'bordure_kv');
-  if (bord || kv) {
-    const silence = reglage(q, 'bordure_silence_signale', false) === true;
-    const m = [{ t: `Bordure${D}` }];
-    if (bord?.at) m.push({ t: 'battement ' + aQuand(bord.at, t).replace(/ .*$/, '') + ' ' }, { t: quand(bord.at, t), b: true }); else m.push({ t: 'aucun battement' });
-    if (kv?.at) m.push({ t: `, liste${kv.version != null ? ` ${kv.version}` : ''} copiée ${aQuand(kv.at, t)}` });
-    if (silence) m.push({ t: D }, { t: 'silencieuse', b: true });
-    ligne(silence ? 'att-s' : 'ok', ...m);
-  }
-  // Chaîne du journal : dernière vérification.
-  const c = reglage(q, 'chaine_verifiee');
-  if (!c?.at) ligne('att-s', { t: `Chaîne${D}jamais vérifiée` });
-  else if (c.ok === false) {
-    const r = c.rupture ? ` (ligne ${nombre(c.rupture.seq)}${D}${typo(c.rupture.raison)})` : '';
-    ligne('arret', { t: 'Chaîne ' }, { t: 'rompue', b: true }, { t: `${r}, vérifiée ${aQuand(c.at, t)}` });
-  } else if (t - c.at > CHAINE_RETARD) ligne('att-s', { t: 'Chaîne intacte, mais vérifiée ' }, { t: ilYa(c.at, t), b: true });
-  else ligne('ok', { t: 'Chaîne ' }, { t: 'intacte', b: true }, { t: `, vérifiée ${aQuand(c.at, t)}` });
-  // Contrôle des rôles (sauvegarde du site) : un écart ouvert est une alerte de la règle controle_roles.
-  const ecart = q.ouverteDe.get('sigma.controle_roles') ?? q.ouverteDe.get('sigma.controle_roles_degrade');
-  const vu = reglage(q, 'controle_roles_vu');
-  const ok = reglage(q, 'controle_roles_admins');
-  const controlee = vu?.at ? ` contrôlée ${aQuand(vu.at, t)}` : '';
-  if (ecart) ligne('att-s', { t: `Contrôle des rôles${D}sauvegarde${controlee}${D}` }, { t: 'écart', b: true }, { t: ' (' }, { t: `#${ecart}`, href: `/alertes/${ecart}` }, { t: ')' });
-  else if (!ok) ligne('att-s', { t: `Contrôle des rôles${D}aucun contrôle réussi` });
-  else ligne('ok', { t: `Contrôle des rôles${D}sauvegarde${ok.instantane_a ? ` de ${quand(ok.instantane_a, t)}` : ''}${controlee}, ` }, { t: 'sans écart', b: true });
-  // Analyse : événements reçus et pas encore analysés (curseur du moteur contre le dernier numéro).
-  const curseur = Number(reglage(q, 'moteur_curseur', 0)) || 0;
-  const retard = Math.max(0, (q.dernierSeq.get() ?? 0) - curseur);
-  if (retard >= ANALYSE_RETARD) ligne('att-s', { t: `Analyse${D}` }, { t: `${nombre(retard)} événements en attente`, b: true });
-  else ligne('ok', { t: retard ? `Analyse${D}${nombre(retard)} ${pluriel(retard, 'événement')} en attente` : `Analyse${D}aucun retard` });
-  return { lignes, ecarts: lignes.filter(l => l.k === 'att-s' || l.k === 'arret').length };
-}
-
-// Compteurs de la barre latérale, sur chaque page en session : trois requêtes indexées et la santé (réglages, battement
-// par l'index (type, recu_a), dernier numéro par la clé). La vue d'ensemble s'appuie sur la même fonction.
-function compter(q, t) {
-  const s = sante(q, t);
-  return { alertes: q.nbAlertes.get(), sante: s.ecarts, decisions: q.nbDecisions.get(t), detailSante: s };
-}
-// Badge Santé : la règle de /sante (ecartsSante) quand le moteur est donné ; sinon celle, plus courte, de la carte de MV-01.
+// Compteurs de la barre latérale, sur chaque page en session : deux requêtes indexées et les écarts de santé, comptés
+// par la règle de /sante (ecartsSante : la même fonction, gardée une minute pour le badge).
 export function compteurs({ db, engine, switches, now = Date.now }) {
   const q = requetes(db);
-  const { alertes, sante: ecarts, decisions } = compter(q, now());
-  return { alertes, sante: engine ? Math.max(ecarts, ecartsSante({ db, engine, switches, now }).n) : ecarts, decisions, bandeau: bandeauDe(q, engine) };
+  const t = now();
+  return { alertes: q.nbAlertes.get(), sante: ecartsSante({ db, engine, switches, now }).n, decisions: q.nbDecisions.get(t), bandeau: bandeauDe(q, engine) };
 }
 
 // Bandeau des critiques (maquettes MV-02 à MV-11, en tête de chaque page en session sauf la vue d'ensemble, qui le dit
@@ -166,11 +70,10 @@ function bandeauDe(q, engine) {
   const rows = q.critiques.all();
   if (!rows.length) return null;
   const shown = rows.slice(0, 3);
-  const titre = engine?.rules?.().find(r => r.id === rows[0].regle)?.titre || null;
   const n = rows.length > 3 ? 'Au moins 4' : String(rows.length);
   return {
     texte: `${n} ${rows.length > 1 ? 'alertes critiques' : 'alerte critique'} sans intervenant${FINE}: ${shown.map(r => `#${r.id} depuis ${heure(r.premiere)}`).join(', ')}.`,
-    sec: titre ? typo(titre) : null,
+    sec: engine?.rules ? titreDe(rows[0].regle, new Map(engine.rules().map(r => [r.id, r.titre]))) : null,
     id: rows[0].id,
   };
 }
@@ -184,23 +87,6 @@ function entiteVue(kind, key, role) {
   if (kind === 'site') return { k, texte: masquer(key, role), mono: 'sub', tronquee: false };
   return { k, texte: String(key), mono: 'sub', tronquee: false };
 }
-
-function periode(a, b, t) {
-  const pa = paris(a), pb = paris(b);
-  const memeJour = pa && pb && pa.annee === pb.annee && pa.mois === pb.mois && pa.jour === pb.jour;
-  if (memeJour) return quand(a, t).includes(',') ? `le ${jour(a)}, de ${heure(a)} à ${heure(b)}` : `de ${heure(a)} à ${heure(b)}`;
-  return `du ${dateHeure(a)} au ${dateHeure(b)}`;
-}
-
-function titreDe(regle, titres) {
-  const brut = titres.get(regle);
-  const nom = regle.startsWith('detecteur.') ? regle.slice(10) : null;
-  if (nom && (!brut || brut === nom.replaceAll('_', ' '))) return typo(DETECTEURS[nom] || nom.replaceAll('_', ' '));
-  return typo(brut || regle);
-}
-
-// « réponse faite : compte gelé 24 h, sessions du compte fermées » (mots de vigie/notifications.js, responseOf).
-const reponseFaite = decisions => responseOf(decisions).replace(/^Réponse : /, `réponse faite${FINE}: `).replace(/(\d) (h|j)\b/g, '$1\u00a0$2');
 
 function ligneAlerte(a, { t, role, titres, reponses }) {
   const g = gravite(a.gravite);
@@ -308,18 +194,10 @@ export function overview({ db, engine, switches, now = Date.now, role }) {
   const alertes = lignes.map(a => ligneAlerte(a, { t, role: roleVu, titres, reponses }));
   for (const a of lignes) if (a.statut === 'ouverte' && ouvertes[a.gravite]) ouvertes[a.gravite].push(a);
 
-  const nb = compter(q, t);
-  const s = nb.detailSante;
-  // Écarts comptés comme /sante (menaces, disque, canaux… que la carte ne détaille pas) : une ligne y renvoie.
-  if (engine) {
-    const e = ecartsSante({ db, engine, switches, now: () => t });
-    if (e.n > s.ecarts) {
-      s.lignes.push({ k: 'att-s', morceaux: [{ t: `${e.n - s.ecarts} autre${e.n - s.ecarts > 1 ? 's' : ''} écart${e.n - s.ecarts > 1 ? 's' : ''}${FINE}: ` }, { t: 'voir la santé', href: '/sante' }] });
-      s.ecarts = e.n;
-    }
-    nb.sante = s.ecarts;
-  }
-  const nbDecisions = nb.decisions;
+  // Santé : le résumé de /sante (mêmes seuils, mêmes écarts), qui remet aussi à jour le compte du badge.
+  const s = resumeSante({ db, engine, switches, now: () => t, role: roleVu });
+  const nbDecisions = q.nbDecisions.get(t);
+  const nb = { alertes: q.nbAlertes.get(), sante: s.ecarts, decisions: nbDecisions };
   const etat = switches?.state?.() || {};
   const reduite = q.ouverteDe.get('sigma.surveillance_reduite');
 
@@ -361,7 +239,7 @@ export function overview({ db, engine, switches, now = Date.now, role }) {
     if (c) {
       const qui = c.traite_par ? ` par ${masquer(c.traite_par, roleVu)}` : '';
       const quandC = c.traite_a ? ` ${aQuand(c.traite_a, t)}` : '';
-      const texte = c.classement ? `, classée ${CLASSEMENTS[c.classement] || c.classement}${qui}${quandC}` : `, close${/^sans suite/.test(c.note || '') ? ' sans suite' : ''}${quandC}`;
+      const texte = c.classement ? `, classée ${CLASSEMENTS[c.classement] || c.classement}${qui}${quandC}` : `, close${closeSansSuite(c) ? ' sans suite' : ''}${quandC}`;
       const note = c.classement && c.note ? ` (${guillemets(masquer(c.note.slice(0, 120), roleVu))})` : '';
       faits.push({ etat: { k: 'abouti', mot: 'Close' }, morceaux: [{ t: `Dernière alerte${FINE}: ` }, { t: `#${c.id}`, href: `/alertes/${c.id}` }, { t: `${texte}${note}.` }] });
     }

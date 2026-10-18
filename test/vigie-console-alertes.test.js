@@ -396,3 +396,28 @@ test('tactiques MITRE : étiquettes Sigma en français, techniques en majuscules
   assert.equal(mitre([]), null);
   assert.equal(mitre([PIEGE, 'attack.inconnue']), null);
 });
+
+test('fiche d’une alerte ancienne (audit D3-D14) : événements comptés par la jointure, ceux effacés par la conservation dits', async t => {
+  const v = setup(t);
+  const { alerte, evenement, lier, clock } = v;
+  clock.t = T0 - 3600e3;
+  // Alerte de 8 mois : trois de ses quatre événements ont été purgés (liens restés), le quatrième est encore au journal.
+  const vieille = alerte({ regle: 'sigma.oidc_echecs_repetes', entite_kind: 'ip', entite_key: IP, gravite: 'bas', mode: 'alerter', statut: 'close', classement: 'incident',
+    premiere: T0 - 240 * 864e5, derniere: T0 - 239 * 864e5, compteur: 4 });
+  for (const seq of [900_001, 900_002, 900_003]) lier.run(vieille, seq);
+  evenement(vieille);
+  // Alerte de 10 mois : tous ses événements effacés.
+  const toute = alerte({ regle: 'sigma.oidc_echecs_repetes', entite_kind: 'ip', entite_key: IP, gravite: 'bas', mode: 'alerter', statut: 'close', classement: 'test',
+    premiere: T0 - 300 * 864e5, derniere: T0 - 300 * 864e5, compteur: 2 });
+  for (const seq of [900_004, 900_005]) lier.run(toute, seq);
+  clock.t = T0;
+  const admin = await v.login('sub-seb', 'Sébastien', 'admin', 'seb@exemple.org');
+  const r = await admin(`/alertes/${vieille}`);
+  assert.equal(r.statusCode, 200);
+  assert.match(r.body, /1 événement relié à l’alerte\u202f; 3 événements effacés par la durée de conservation\./);
+  assert.equal((r.body.match(/class="vg-type"/g) || []).length, 1, 'un seul événement listé');
+  const r2 = await admin(`/alertes/${toute}`);
+  assert.match(r2.body, /<p class="vg-compte">2 événements effacés par la durée de conservation\.<\/p>/);
+  assert.match(r2.body, /Aucun événement relié encore au journal\u202f; 2 événements effacés par la durée de conservation\./);
+  assert.doesNotMatch(r2.body, /2 événements reliés/);
+});
