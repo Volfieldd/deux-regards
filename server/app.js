@@ -44,6 +44,8 @@ import { createShares } from './share.js';
 import { truncateIp } from './ip.js';
 import { TRAP_PATH } from './securite/piege.js';
 import { createPublicVersion } from './version-publique.js';
+import { createCarnet } from './carnet.js';
+import { createRepo } from './repo.js';
 
 export { truncateIp };
 
@@ -153,7 +155,11 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     const only = app.publicVersion.onlyV2(template);
     const pv = only || /^admin\//.test(template) || /^\/(?:admin|auth)(?:[/?#]|$)/.test(this.request.url) ? null : app.publicVersion.forRequest(this.request);
     const v2 = only || (pv?.version === 'v2' && app.publicVersion.hasV2(template));
+    // Page sans gabarit v1 (née avec la v2, comme les Carnets) servie en v1 : introuvable, jamais une erreur.
+    if (pv && !v2 && !app.publicVersion.hasV1(template)) return this.callNotFound();
     const common = { trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
+      // Lien « Carnets » du menu et du pied de page v2 : au moins un billet publié (le menu v1 ne change pas).
+      carnetPage: pv?.version === 'v2' && app.carnet.publishedCount() > 0,
       // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
       here: splitLang(this.request.url).path, langs: LANGS, langNames: NAMES, locales: LOCALES, localize,
       authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '',
@@ -259,9 +265,15 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     app.variants.schedule();
   };
   app.decorate('review', createReview({ db, readiness: app.readiness, notes: app.notes, accounts: app.accounts, mailer: app.mailer, siteName: app.siteName, publicUrl: config.publicUrl, publish: publishNow, log: app.log }));
-  // Publications programmées : vérifiées chaque minute.
+  // Carnets (server/carnet.js) : billets, circuit de publication, publication programmée.
+  app.decorate('publicRepo', createRepo(db));
+  app.decorate('carnet', createCarnet({ db, repo: app.publicRepo, readiness: app.readiness, accounts: app.accounts, mailer: app.mailer, audit: app.audit, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log }));
+  // Publications programmées : vérifiées chaque minute, photos d'abord (un billet programmé attend ses photos programmées
+  // à la même heure), puis billets (app.carnet.runDue, seule à publier un billet programmé).
   let reviewTimer = null;
-  app.addHook('onReady', async () => { reviewTimer = setInterval(() => app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée')), 60 * 1000); reviewTimer.unref(); });
+  const runDue = () => app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée'))
+    .then(() => app.carnet.runDue()).catch(err => app.log.error({ err }, 'carnets : publication programmée'));
+  app.addHook('onReady', async () => { reviewTimer = setInterval(runDue, 60 * 1000); reviewTimer.unref(); });
   app.addHook('onClose', async () => clearInterval(reviewTimer));
   app.decorate('trips', createTrips({ db }));
   // Galeries privées (server/spaces.js) : galeries, photos, accès, autorisations des invités ; purges chaque heure.

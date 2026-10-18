@@ -1,7 +1,7 @@
 import { monthYear, clockTime } from './format.js';
 import { pick } from './i18n.js';
 
-const PHOTO_COLUMNS = `p.id, p.likes, p.slug, p.title, p.place, p.taken_on, p.legend, p.status, p.position, p.file, p.width, p.height, p.variant_key, p.updated_at, p.published_at, p.on_map, p.city_id, p.city_name, p.city_cc, p.city_lat, p.city_lon,
+export const PHOTO_COLUMNS = `p.id, p.likes, p.slug, p.title, p.place, p.taken_on, p.legend, p.status, p.position, p.file, p.width, p.height, p.variant_key, p.updated_at, p.published_at, p.on_map, p.city_id, p.city_name, p.city_cc, p.city_lat, p.city_lon,
   p.title_en, p.title_de, p.legend_en, p.legend_de, p.place_en, p.place_de, p.keywords, p.alt_text, p.alt_text_en, p.alt_text_de, p.inventory,
   CASE WHEN p.show_time = 1 AND p.taken_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]' THEN p.taken_time END AS shown_time,
   c.slug AS category_slug, c.name AS category, c.name_en AS category_en, c.name_de AS category_de, a.slug AS author_slug, a.name AS author`;
@@ -14,7 +14,7 @@ const PHOTO_COLUMNS = `p.id, p.likes, p.slug, p.title, p.place, p.taken_on, p.le
 // alt : le texte de remplacement écrit dans l'admin (migration 053), avec le même repli ; '' s'il n'y en a pas (les
 // gabarits mettent alors le titre, ou rien pour une vignette dont le lien dit déjà le titre). Jamais la description
 // suggérée (photo_descriptions), que le site public ne lit pas. inventory : le numéro d'inventaire (« J26-003 »).
-const decorate = lang => (p, i) => ({
+export const decorate = lang => (p, i) => ({
   ...p, n: i + 1, when: monthYear(p.taken_on, lang), time: clockTime(p.shown_time, lang), index: i,
   title: pick(p, 'title', lang), legend: pick(p, 'legend', lang), place: pick(p, 'place', lang), category: pick(p, 'category', lang),
   alt: pick(p, 'alt_text', lang),
@@ -39,6 +39,15 @@ export function createRepo(db) {
         .filter(p => (!author || p.author_slug === author) && (!category || p.category_slug === category));
       if (ordre === 'recentes') list.sort((a, b) => (b.published_at || '').localeCompare(a.published_at || '') || b.id - a.id);
       return list.map((p, i) => ({ ...p, index: i }));
+    },
+    // Photos d'un billet des Carnets (server/carnet.js), quel que soit leur statut, décorées dans la langue de la page :
+    // le site public n'en montre que les publiées ; l'aperçu de l'équipe, toutes, marquées.
+    photosByIds(ids, lang = 'fr') {
+      const list = [...new Set(ids.map(Number).filter(Number.isInteger))];
+      if (!list.length) return new Map();
+      const rows = db.prepare(`SELECT ${PHOTO_COLUMNS}, p.author_id FROM photos p JOIN categories c ON c.id = p.category_id JOIN authors a ON a.id = p.author_id
+        WHERE p.id IN (${list.map(() => '?').join(',')})`).all(...list);
+      return new Map(rows.map(decorate(lang)).map(p => [p.id, p]));
     },
     // intent : texte d'intention de la série ; short_bio : description courte du photographe (migration 053).
     categories: (lang = 'fr') => q.categories.all().map(c => ({ ...c, name: pick(c, 'name', lang), intent: pick(c, 'intent', lang) })),
