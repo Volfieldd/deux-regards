@@ -428,7 +428,7 @@ couverts ici.
 - **Tâches de fond** : fermeture à l'échéance (G3, G63) ; purge 6 mois après la fin (G71) ; archives effacées après
   24 h (G46) ; purge Cloudflare d'une photo passée en privé (G43, jeton d'API).
 - **Choix ouverts** : mot de passe obligatoire (étude : oui) ; durées, appareils et essais (D15, annexe § 9) ; lien de
-  groupe (G5) ; pleine définition (annexe § 9.2) ; page `/prive` des accès (G78). Voir « À trancher ».
+  groupe (G5) ; pleine définition (annexe § 9.2) ; page `/prive` des accès (G78). Voir « Tranché ».
 
 ### Abus possibles et ce que la Vigie voit déjà
 
@@ -676,9 +676,11 @@ cache-control », Always Online, M6, M20) et resservie sans passer par lui.
 
 ---
 
-## À trancher (Carnets et galeries privées)
+## Tranché (Carnets et galeries privées)
 
-| # | Décision | Recommandation |
+Le propriétaire a validé les dix recommandations le 18 octobre 2026 : elles valent décision pour l'implémentation. L'étude (`blog-galeries-boutique.md`, `annexe-galeries-privees-securite.md`) n'est pas réécrite, et ce tableau l'emporte sur elle (par exemple, la durée du lien est de 6 mois au plus, et non 12).
+
+| # | Décision | Retenu |
 |---|---|---|
 | 1 | Mot de passe d'une galerie : obligatoire ou facultatif | **Obligatoire** (méthode C de l'étude, § 2.3). Avec un lien seul, le jeton devient le seul secret : BV-18 devrait alerter dès le 2e réseau, et l'échéance passer à 7 jours. |
 | 2 | Durée du lien : 30 jours par défaut, 12 mois au plus (G8, D15) | 30 jours par défaut, **6 mois au plus** ; BV-23 transmet `echeance_jours`, la Vigie signale en `bas` au-delà de 90 jours. |
