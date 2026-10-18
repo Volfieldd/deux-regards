@@ -6,6 +6,7 @@ Ein Datenblatt pro Fotograf.
 |---|---|
 | **Name** | auf der Website angezeigt (Filter „zwei Blicke“, Bildunterschriften, Über uns) |
 | **Adresse** | `/auteur/<adresse>` (nur bestehende Datenblätter) |
+| **Kurzbeschreibung** | sein Blick, ein Satz unter seinem Namen („der Morgen, die Kais, die Flüsse“), höchstens 160 Zeichen, in einer Zeile. In der v2 der Website zeigt die Startseite sie nach seiner Zahl der Fotos, unter „Zwei Blicke“. Englische und deutsche Fassung optional (leer: die französische). |
 | **Biografie** | auf der Seite „Über uns“ angezeigt; englische und deutsche Fassung optional, darunter eingeklappt (leer: die französische Biografie) |
 | **Signatur der Instagram-Beiträge** | wird unter der Bildunterschrift der Instagram-Beiträge seiner Fotos angefügt, die eine Bildunterschrift haben; Foto für Foto entfernbar (siehe [Instagram](instagram#la-légende)) |
 | **Buchstabe der Einwilligungskarten** | der Buchstabe der Einwilligungskarten (J-0142); leer: der erste Buchstabe der Adresse. Er wird mit dem Datenblatt gespeichert: Eine spätere Änderung der Adresse ändert den Buchstaben nicht mehr (gedruckte Karten und QR-Codes bleiben gültig). Ein Buchstabe pro Fotograf: Ein bereits vergebener Buchstabe, eingegeben oder nicht, wird abgelehnt (siehe [Begegnungen](rencontres)). |
