@@ -78,6 +78,12 @@ test.describe('parcours d’une photo', () => {
     await expect(page.locator('h1')).toHaveText('Compléter et publier');
     await expect(page.locator('input[data-field=title]')).toHaveValue('import test');
     await expect(page.getByText('Titre provisoire (nom du fichier)')).toBeVisible();
+    // Texte de remplacement sous le titre : vide (jamais prérempli), enregistré à la sortie du champ.
+    const altLot = page.locator('input[data-field=alt_text]');
+    await expect(altLot).toHaveValue('');
+    await altLot.fill('Une lisière au matin.');
+    await altLot.press('Tab');
+    await expect(page.locator('[data-state]')).toHaveText('✓ Enregistré');
     await page.goto('/admin/photos?statut=draft&vue=liste');
     const row = page.locator('.plist li', { hasText: 'import test' });
     await expect(row).toHaveCount(1);
@@ -85,6 +91,7 @@ test.describe('parcours d’une photo', () => {
 
     // Édition : erreur de validation puis succès.
     await row.locator('a.ttl').click();
+    await expect(page.locator('textarea[name=alt_text]')).toHaveValue('Une lisière au matin.');
     await page.getByLabel('Date').fill('2024-13');
     await page.getByRole('button', { name: 'Enregistrer' }).click();
     await expect(page.getByText(/Date non comprise/)).toBeVisible();
@@ -325,6 +332,22 @@ test.describe('parcours d’une photo', () => {
     await expect(page.locator('[data-toast]')).toContainText('Modification annulée.');
     await page.reload();
     expect((await data())[0].title).toBe(first.title);                       // annulé côté serveur
+
+    // Texte de remplacement : sous la légende, enregistré à la sortie du champ, puis remis comme avant.
+    await page.locator(`#photo-${first.id}`).click();
+    const alt = insp.locator('[data-one-field=alt_text]');
+    await expect(alt).toHaveValue(first.alt_text);
+    await alt.fill('Un quai désert, au matin.');
+    await alt.press('Enter');
+    await expect(page.locator('[data-toast]')).toContainText('enregistrée');
+    await page.reload();
+    expect((await data())[0].alt_text).toBe('Un quai désert, au matin.');
+    await page.locator(`#photo-${first.id}`).click();
+    await insp.locator('[data-one-field=alt_text]').fill(first.alt_text);
+    await insp.locator('[data-one-field=alt_text]').press('Enter');
+    await expect(page.locator('[data-toast]')).toContainText('enregistrée');
+    await page.reload();
+    expect((await data())[0].alt_text).toBe(first.alt_text);
 
     // Glisser la photo sur une autre série de la barre latérale, puis « Annuler » dans le message.
     const target = page.locator('[data-drop-series]').filter({ hasNotText: first.category }).first();

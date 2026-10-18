@@ -392,6 +392,58 @@ test('description suggérée : jamais publiée ni enregistrée sans une personne
   assert.ok((await c.visit(`/en/photo/${p.slug}`)).body.includes('alt="A quay at dawn, two mooring posts."'));
 });
 
+// ---------- « Compléter et publier » et inspecteur ----------
+
+test('« Compléter et publier » et inspecteur : texte de remplacement écrit par une personne, mêmes droits, bornes et journal', async t => {
+  const c = await site(t, { describeOptions: { manual: true, model: { describe: async () => 'A quay at dawn.', unload: async () => {}, remove: async () => {} } } });
+  const admin = c.as('admin'), relu = c.as('relecteur'), ph = c.photographer();
+  const mine = c.first(c.seb), other = c.first(c.jul);
+  // Une description suggérée existe : ni l'écran du lot ni l'inspecteur ne la proposent ni ne la recopient.
+  c.app.describer.save({ on: true, model: 'base', from: 1, to: 6 });
+  await admin.post(`/admin/photos/${mine.id}/description`);
+  await c.app.describer.idle();
+  assert.equal(c.app.describer.forPhoto(mine.id).en, 'A quay at dawn.');
+  const lot = (await admin.get(`/admin/photos/lot?ids=${mine.id},${other.id}`)).body;
+  for (const p of [mine, other]) {
+    assert.match(lot, new RegExp(`<label>Texte de remplacement<input name="alt_text_${p.id}" value="" maxlength="250" placeholder="[^"]+" aria-label="Texte de remplacement de la photo ${p.id}" data-field="alt_text"></label>`));
+  }
+  const lib = (await admin.get('/admin/photos')).body;
+  assert.match(lib, /<input data-one-field="alt_text" maxlength="250" aria-label="Texte de remplacement"/);
+  const data = JSON.parse(lib.match(/<script type="application\/json" id="photos-data">([\s\S]*?)<\/script>/)[1]);
+  assert.equal(data.find(p => p.id === mine.id).alt_text, '');
+  for (const body of [lot, lib, JSON.stringify(await (await admin.get(`/admin/photos/${mine.id}/donnees`)).json())]) assert.doesNotMatch(body, /A quay at dawn/);
+  // Sans script : le tableau entier ; une ligne, 250 signes au plus, côté serveur.
+  const long = `Un quai,\nà l’aube.${'x'.repeat(300)}`;
+  assert.equal((await admin.post('/admin/photos/lot', { ids: `${mine.id}`, [`title_${mine.id}`]: mine.title, [`alt_text_${mine.id}`]: long })).statusCode, 303);
+  const saved = c.row(mine.id).alt_text;
+  assert.equal(saved.length, 250);
+  assert.match(saved, /^Un quai, à l’aube\.x+$/);
+  assert.equal(c.row(mine.id).alt_text_en, '', 'la suggestion n’est jamais enregistrée seule');
+  // Un champ absent garde sa valeur (formulaire d'une version précédente, autre ligne).
+  await admin.post('/admin/photos/lot', { ids: `${mine.id}`, [`title_${mine.id}`]: mine.title });
+  assert.equal(c.row(mine.id).alt_text, saved);
+  // Avec script : champ par champ (le lot comme l'inspecteur) ; la réponse et les données de l'inspecteur le portent.
+  const r = await admin.json(`/admin/photos/${mine.id}/champs`, { alt_text: 'Deux bittes\r\nd’amarrage.' });
+  assert.equal(r.statusCode, 200);
+  assert.equal(r.json().photo.alt_text, 'Deux bittes d’amarrage.');
+  assert.equal((await (await admin.get(`/admin/photos/${mine.id}/donnees`)).json()).alt_text, 'Deux bittes d’amarrage.');
+  // Relecteur (photos.textes) : par le lot aussi.
+  assert.equal((await relu.post('/admin/photos/lot', { ids: `${other.id}`, [`title_${other.id}`]: other.title, [`alt_text_${other.id}`]: 'Une ruelle.' })).statusCode, 303);
+  assert.equal(c.row(other.id).alt_text, 'Une ruelle.');
+  // Photographe : les siennes seulement ; une photo d'un autre glissée dans le lot n'est pas écrite.
+  assert.equal((await ph.post('/admin/photos/lot', { ids: `${mine.id},${other.id}`, [`title_${mine.id}`]: mine.title, [`alt_text_${mine.id}`]: 'Le quai.', [`alt_text_${other.id}`]: 'piraté' })).statusCode, 303);
+  assert.equal(c.row(mine.id).alt_text, 'Le quai.');
+  assert.equal(c.row(other.id).alt_text, 'Une ruelle.');
+  assert.equal((await ph.json(`/admin/photos/${other.id}/champs`, { alt_text: 'piraté' })).statusCode, 404);
+  assert.equal(c.row(other.id).alt_text, 'Une ruelle.');
+  // Journal : le nom du champ, jamais sa valeur.
+  const log = c.db.prepare("SELECT action, detail FROM audit_log WHERE action IN ('POST /admin/photos/lot', 'POST /admin/photos/:id/champs') AND detail LIKE '%alt_text%' ORDER BY id").all();
+  assert.deepEqual(log.map(x => x.action), ['POST /admin/photos/lot', 'POST /admin/photos/:id/champs', 'POST /admin/photos/lot', 'POST /admin/photos/lot']);
+  assert.ok(log.every(x => /^champs : (photo \d+ : )?alt_text$/.test(x.detail)), JSON.stringify(log));
+  const all = c.db.prepare('SELECT detail FROM audit_log').pluck().all().join('\n');
+  assert.doesNotMatch(all, /quai|ruelle|bittes|piraté|A quay/i);
+});
+
 // ---------- texte de remplacement sur le site ----------
 
 test('alt : le texte de remplacement dans la visionneuse (v1 et v2) et les vignettes v2 ; le titre, ou rien, sans lui', async t => {

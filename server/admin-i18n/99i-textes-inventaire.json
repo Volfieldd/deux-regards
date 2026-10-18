@@ -46,5 +46,17 @@
  "son regard, une phrase sous son nom sur l’accueil du site · {n} signes au plus · ex. « le matin, les quais, les fleuves »": {
   "en": "their way of seeing, one phrase under their name on the home page · {n} characters at most · e.g. “mornings, quays, rivers”",
   "de": "sein Blick, ein Satz unter seinem Namen auf der Startseite · höchstens {n} Zeichen · z. B. „der Morgen, die Kais, die Flüsse“"
+ },
+ "Texte de remplacement de la photo {id}": {
+  "en": "Alternative text of photo {id}",
+  "de": "Alternativtext des Fotos {id}"
+ },
+ "ce qu’on voit, en une ligne": {
+  "en": "what can be seen, in one line",
+  "de": "was zu sehen ist, in einer Zeile"
+ },
+ "une ligne": {
+  "en": "one line",
+  "de": "eine Zeile"
  }
 }

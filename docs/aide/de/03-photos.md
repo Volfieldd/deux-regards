@@ -39,13 +39,14 @@ Bei der Verarbeitung wendet die Website die Ausrichtung der Kamera an, berechnet
 
 ### 3. Vervollständigen und veröffentlichen
 
-Alle Fotos des Stapels sind auf einem einzigen Bildschirm versammelt: Titel, Serie, Ort und Datum. Ein Bildschirm zeigt höchstens 200: darüber hinaus (eine große Speicherkarte) steht es oben, mit einem Link zu den nächsten.
+Alle Fotos des Stapels sind auf einem einzigen Bildschirm versammelt: Titel und Alternativtext, Serie, Ort und Datum. Ein Bildschirm zeigt höchstens 200: darüber hinaus (eine große Speicherkarte) steht es oben, mit einem Link zu den nächsten.
 
 - **Am Computer:** eine Tabelle, eine Zeile pro Foto.
-- **Auf dem Telefon:** **eine Karte pro Foto**, mit Kästchen, Miniatur und Zustand, darunter die Felder Titel, Serie, Ort und Datum untereinander.
+- **Auf dem Telefon:** **eine Karte pro Foto**, mit Kästchen, Miniatur und Zustand, darunter die Felder Titel, Alternativtext, Serie, Ort und Datum untereinander.
 
 - **Jedes Feld wird gespeichert, wenn Sie es verlassen** (Tab, Klick an eine andere Stelle oder Eingabe). Die Spalte **Zustand** zeigt „Wird gespeichert…“ und dann „✓ Gespeichert“. Die Meldung unten am Bildschirm bietet einige Sekunden lang **Rückgängig** an.
 - **Vorläufiger Titel:** Solange der Titel der aus dem Dateinamen ist, wird das unter dem Feld angezeigt.
+- **Alternativtext:** unter dem Titel, was auf dem Foto zu sehen ist, in einer Zeile (höchstens 250 Zeichen; ein Zeilenumbruch wird zu einem Leerzeichen). Blinde Menschen hören ihn anstelle des Fotos. Leer wird er nie von selbst gefüllt: Die vorgeschlagene Beschreibung wird in den Details übernommen.
 - **Datum:** bereits ausgefüllt, wenn die Kamera es gespeichert hat. Andernfalls in Alltagssprache: „oct. 2026“, „octobre 2026“, „10/2026“, „5/10/2026“ oder „2026-10“. Die Website zeigt an, was sie verstanden hat („verstanden: oct. 2026“).
 - **Für die angekreuzten Fotos** (anfangs alle) wendet die obere Leiste eine **Serie** (auch eine neue), einen **Ort** oder ein **Datum** an, **sobald Sie sie ändern** — ohne Schaltfläche, mit **Rückgängig** in der Meldung. Dann **Veröffentlichen**.
   - Am Computer bleibt die Leiste sichtbar, wenn Sie in der Tabelle scrollen.
@@ -54,7 +55,7 @@ Alle Fotos des Stapels sind auf einem einzigen Bildschirm versammelt: Titel, Ser
 In der Praxis, für einen Stapel: Titel eingeben, den Ort einmal in der Leiste, dann **Veröffentlichen**.
 - **Fotos mit vorläufigem Titel veröffentlichen:** Ein Klick genügt. Der vorläufige Titel wird vorher angezeigt („Vorläufiger Titel (Dateiname)“ unter dem Titel) und in der folgenden Meldung erwähnt, mit **Rückgängig**, um zurückzugehen.
 
-Bildunterschrift, Wasserzeichen und Nachweis werden in den Details jedes Fotos eingestellt (siehe unten).
+Bildunterschrift, Übersetzungen, vorgeschlagene Beschreibung, Wasserzeichen und Nachweis werden in den Details jedes Fotos eingestellt (siehe unten).
 
 ## Der Kontaktbogen
 
@@ -72,7 +73,7 @@ Bildunterschrift, Wasserzeichen und Nachweis werden in den Details jedes Fotos e
 Er ändert sich je nach Auswahl:
 
 - **Nichts ausgewählt**: die Zahlen der Fotothek und die Tastenkürzel.
-- **Ein Foto** (ein Klick darauf): oben im Bereich die Schaltfläche **Details öffnen**; dann das große Bild, **Titel**, **Bildunterschrift**, **Serie** (Chips), **Ort**, **Datum**, **Fotograf** und sein **Publikum** über 30 Tage (für Konten, die die Statistiken sehen). Jedes Feld wird gespeichert, wenn Sie es verlassen (oder Eingabe); die Meldung unten bietet **Rückgängig** an. **Details öffnen** oder der Link **Alle Details** unten im Bereich führt zu den Details (Wasserzeichen, Instagram, Prioritätsnachweis, Löschen).
+- **Ein Foto** (ein Klick darauf): oben im Bereich die Schaltfläche **Details öffnen**; dann das große Bild, **Titel**, **Bildunterschrift**, **Alternativtext** (auf Französisch, eine Zeile; seine Übersetzungen und die vorgeschlagene Beschreibung sind in den Details), **Serie** (Chips), **Ort**, **Datum**, **Fotograf** und sein **Publikum** über 30 Tage (für Konten, die die Statistiken sehen). Jedes Feld wird gespeichert, wenn Sie es verlassen (oder Eingabe); die Meldung unten bietet **Rückgängig** an. **Details öffnen** oder der Link **Alle Details** unten im Bereich führt zu den Details (Wasserzeichen, Instagram, Prioritätsnachweis, Löschen).
 - **Mehrere Fotos**: siehe unten.
 
 Unten immer: **Veröffentlichen**, **Veröffentlichung zurückziehen**, **Löschen…**.

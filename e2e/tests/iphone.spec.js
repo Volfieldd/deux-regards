@@ -27,7 +27,7 @@ test('compléter et publier : chaque champ de chaque photo est touchable', async
   const lot = await ids(page);
   await page.goto(`/admin/photos/lot?ids=${lot.join(',')}`);
   for (const id of lot) {
-    for (const f of ['title', 'category_id', 'place', 'taken_on']) {
+    for (const f of ['title', 'alt_text', 'category_id', 'place', 'taken_on']) {
       expect(await touchable(page.locator(`tr[data-id="${id}"] [data-field="${f}"]`)), `photo ${id}, champ ${f}`).toBe(true);
     }
   }

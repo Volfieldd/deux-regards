@@ -39,13 +39,14 @@ During processing, the site applies the camera orientation, computes the served 
 
 ### 3. Complete and publish
 
-All the photos in the batch are gathered on a single screen: title, series, place and date. A screen shows 200 at most: beyond that (a large memory card), it says so at the top and leads to the next ones.
+All the photos in the batch are gathered on a single screen: title and alternative text, series, place and date. A screen shows 200 at most: beyond that (a large memory card), it says so at the top and leads to the next ones.
 
 - **On a computer:** a table, one row per photo.
-- **On a phone:** **one card per photo**, with its checkbox, thumbnail and state, then the Title, Series, Place and Date fields one below the other.
+- **On a phone:** **one card per photo**, with its checkbox, thumbnail and state, then the Title, Alternative text, Series, Place and Date fields one below the other.
 
 - **Each field is saved when you leave it** (Tab, click elsewhere or Enter). The **State** column shows “Saving…” then “✓ Saved”. The message at the bottom of the screen offers **Undo** for a few seconds.
 - **Provisional title:** as long as the title is the one from the file name, this is flagged under the field.
+- **Alternative text:** under the title, what can be seen in the photo, in one line (250 characters at most; a line break becomes a space). Blind people hear it instead of the photo. When empty, it is never filled in automatically: the suggested description is taken up in the details.
 - **Date:** already filled in when the camera recorded it. Otherwise, in everyday language: “oct. 2026”, “octobre 2026”, “10/2026”, “5/10/2026” or “2026-10”. The site shows what it understood (“understood: oct. 2026”).
 - **For the ticked photos** (all of them, at first), the top bar applies a **series** (including a new one), a **place** or a **date** **as soon as you change them** — no button to click, with **Undo** in the message. Then **Publish**.
   - On a computer, the bar stays visible when you scroll the table.
@@ -54,7 +55,7 @@ All the photos in the batch are gathered on a single screen: title, series, plac
 In practice, for a batch: type the titles, the place once in the bar, then **Publish**.
 - **Publishing photos with a provisional title:** a single click is enough. The provisional title is flagged beforehand (“Provisional title (file name)” under the title) and recalled in the message that follows, with **Undo** to go back.
 
-Caption, watermark and proof are set in each photo's details (see below).
+Caption, translations, suggested description, watermark and proof are set in each photo's details (see below).
 
 ## The contact sheet
 
@@ -72,7 +73,7 @@ Caption, watermark and proof are set in each photo's details (see below).
 It changes with the selection:
 
 - **Nothing selected**: the photo library figures and the shortcuts.
-- **One photo** (a click on it): at the top of the panel, the **Open details** button; then the large image, **title**, **caption**, **series** (chips), **place**, **date**, **photographer** and its **audience** over 30 days (for accounts that see statistics). Each field is saved when you leave it (or Enter); the message at the bottom offers **Undo**. **Open details**, or the **Full details** link at the bottom of the panel, leads to the details page (watermark, Instagram, proof of prior existence, deletion).
+- **One photo** (a click on it): at the top of the panel, the **Open details** button; then the large image, **title**, **caption**, **alternative text** (in French, one line; its translations and the suggested description are in the details), **series** (chips), **place**, **date**, **photographer** and its **audience** over 30 days (for accounts that see statistics). Each field is saved when you leave it (or Enter); the message at the bottom offers **Undo**. **Open details**, or the **Full details** link at the bottom of the panel, leads to the details page (watermark, Instagram, proof of prior existence, deletion).
 - **Several photos**: see below.
 
 At the bottom, always: **Publish**, **Unpublish**, **Delete…**.
