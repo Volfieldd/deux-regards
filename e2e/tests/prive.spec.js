@@ -15,15 +15,12 @@ const day = n => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
 
 async function admin(browser, info) {
   test.skip(!process.env.E2E_LOCAL_AUTH || process.env.E2E_ALLOW_WRITES !== '1', 'E2E_LOCAL_AUTH et E2E_ALLOW_WRITES=1 : crée une galerie et un accès');
-  const ctx = await browser.newContext({ ...info.project.use, storageState: { cookies: [], origins: [] } });
+  // La session de auth.setup.js (une connexion de moins : la limite de 30 connexions par 10 minutes et par adresse sert
+  // à toute la suite).
+  const ctx = await browser.newContext({ ...info.project.use, storageState: 'results/.auth/admin.json' });
   const page = await ctx.newPage();
-  await page.goto('/auth/local?next=%2Fadmin%2Fgaleries');
-  await page.getByLabel('Se connecter en tant que').selectOption('julien');
-  await page.getByLabel('Jeton de test').fill(process.env.E2E_LOCAL_AUTH);
-  await page.getByRole('button', { name: 'Se connecter' }).click();
+  await page.goto('/admin/galeries');
   await expect(page).toHaveURL(/\/admin\/galeries$/);
-  const news = page.getByRole('dialog', { name: /Nouveau depuis votre dernière visite/ });
-  if (await news.isVisible()) await news.getByRole('button', { name: 'C’est noté' }).click();
   return { ctx, page };
 }
 // Parcours de l'équipe (MQ-18) : nouvelle galerie, photos, ouverture, nouvel accès ; renvoie le lien et le mot de passe.
