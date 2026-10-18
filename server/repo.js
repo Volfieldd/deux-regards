@@ -2,7 +2,7 @@ import { monthYear, clockTime } from './format.js';
 import { pick } from './i18n.js';
 
 const PHOTO_COLUMNS = `p.id, p.likes, p.slug, p.title, p.place, p.taken_on, p.legend, p.status, p.position, p.file, p.width, p.height, p.variant_key, p.updated_at, p.published_at, p.on_map, p.city_id, p.city_name, p.city_cc, p.city_lat, p.city_lon,
-  p.title_en, p.title_de, p.legend_en, p.legend_de, p.place_en, p.place_de, p.keywords,
+  p.title_en, p.title_de, p.legend_en, p.legend_de, p.place_en, p.place_de, p.keywords, p.alt_text, p.alt_text_en, p.alt_text_de, p.inventory,
   CASE WHEN p.show_time = 1 AND p.taken_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]' THEN p.taken_time END AS shown_time,
   c.slug AS category_slug, c.name AS category, c.name_en AS category_en, c.name_de AS category_de, a.slug AS author_slug, a.name AS author`;
 
@@ -11,6 +11,9 @@ const PHOTO_COLUMNS = `p.id, p.likes, p.slug, p.title, p.place, p.taken_on, p.le
 // dans la langue de la page (« 14 h 32 »), '' sinon. Seule la page d'une photo l'affiche.
 // n : rang de la photo parmi toutes les photos publiées, quel que soit le filtre (N°01, N°02… sans trou).
 // Titre, légende, lieu et série dans la langue de la page (repli sur une autre langue si la traduction manque).
+// alt : le texte de remplacement écrit dans l'admin (migration 053), avec le même repli ; '' s'il n'y en a pas (les
+// gabarits mettent alors le titre, ou rien pour une vignette dont le lien dit déjà le titre). Jamais la description
+// suggérée (photo_descriptions), que le site public ne lit pas. inventory : le numéro d'inventaire (« J26-003 »).
 const decorate = lang => (p, i) => ({
   ...p, n: i + 1, when: monthYear(p.taken_on, lang), time: clockTime(p.shown_time, lang), index: i,
   title: pick(p, 'title', lang), legend: pick(p, 'legend', lang), place: pick(p, 'place', lang), category: pick(p, 'category', lang),

@@ -1,0 +1,10 @@
+{
+ "inventaire {n}": {
+  "en": "inventory {n}",
+  "de": "Inventarnummer {n}"
+ },
+ "numéro d’inventaire à la première publication": {
+  "en": "inventory number given at first publication",
+  "de": "Inventarnummer bei der ersten Veröffentlichung"
+ }
+}

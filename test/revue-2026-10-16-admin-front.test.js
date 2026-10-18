@@ -302,6 +302,7 @@ test('Compléter le lot : au-delà de 200 photos, la page le dit et mène aux su
   const c = await world(t);
   const row = c.db.prepare('SELECT * FROM photos ORDER BY id LIMIT 1').get();
   delete row.id;
+  delete row.inventory;                 // unique : chaque copie publiée reçoit le sien (migration 053)
   const cols = Object.keys(row);
   const insert = c.db.prepare(`INSERT INTO photos (${cols.join(', ')}) VALUES (${cols.map(k => `@${k}`).join(', ')})`);
   const ids = c.db.transaction(() => Array.from({ length: 205 }, (_, i) => Number(insert.run({ ...row, slug: `lot-${i}`, file: `lot-${i}.jpg`, sha256: `${i}`.padStart(64, '0') }).lastInsertRowid)))();

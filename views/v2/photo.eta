@@ -49,6 +49,9 @@
           <dt><%= t.v2.photographer %></dt><dd><a href="<%= it.galleryUrl({ regard: p.author_slug }) %>"><%= p.author %></a><% if (it.authorCount) { %>&nbsp;· <%= nb(t.photos(it.authorCount)) %><% } %></dd>
 <% if (kws.length) { %>
           <dt><%= t.search.keywords %></dt><dd><ul class="vis-mots"><% kws.forEach(k => { %><li><% if (it.searchPage) { %><a href="<%= it.u('/recherche') %>?q=<%= encodeURIComponent(k) %>" rel="nofollow"><%= k %></a><% } else { %><%= k %><% } %></li><% }) %></ul></dd>
+<% } %><% /* Numéro d'inventaire (UX-T-05) : donné à la première publication, il ne bouge plus quand l'ordre change ; la
+      position « 4 / 10 » sert à la navigation. */ if (p.inventory) { %>
+          <dt><%= t.v2.inventory %></dt><dd class="donnee"><%= p.inventory %></dd>
 <% } %>
         </dl>
       </div>

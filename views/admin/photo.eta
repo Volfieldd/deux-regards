@@ -33,7 +33,7 @@
 <div class="edit">
   <figure class="preview">
     <%~ it.picture(it.photo, { sizes: '(min-width: 900px) 40vw, 92vw', alt: '' }) %>
-    <figcaption class="mono"><%= it.photo.width %> × <%= it.photo.height %> px<% if (it.photo.status === 'published') { %> · <a href="/photo/<%= it.photo.slug %>" target="_blank" rel="noopener"><%= t('voir sur le site') %></a><% } %></figcaption>
+    <figcaption class="mono"><%= it.photo.width %> × <%= it.photo.height %> px · <%= it.photo.inventory ? t('inventaire {n}', { n: it.photo.inventory }) : t('numéro d’inventaire à la première publication') %><% if (it.photo.status === 'published') { %> · <a href="/photo/<%= it.photo.slug %>" target="_blank" rel="noopener"><%= t('voir sur le site') %></a><% } %></figcaption>
   </figure>
 <% if (full) { %>
   <form class="panel form" method="post" action="/admin/photos/<%= it.photo.id %>" novalidate>

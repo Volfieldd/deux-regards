@@ -162,7 +162,7 @@ export function createAdminRepo(db) {
       const needle = fold(text(search, 100));
       return q.photos.all()
         .filter(p => (!author || p.author_slug === author) && (!category || p.category_slug === category) && (!status || p.status === status))
-        .filter(p => !needle || [p.title, p.place, p.legend, p.slug, p.keywords, p.title_en, p.title_de, p.legend_en, p.legend_de, p.place_en, p.place_de].some(v => fold(v).includes(needle)))
+        .filter(p => !needle || [p.title, p.place, p.legend, p.slug, p.keywords, p.title_en, p.title_de, p.legend_en, p.legend_de, p.place_en, p.place_de, p.alt_text, p.alt_text_en, p.alt_text_de, p.inventory].some(v => fold(v).includes(needle)))
         .map(p => ({ ...p, n: p.position + 1, when: monthYear(p.taken_on), provisional: isProvisional(p) }));
     },
     photo: id => q.photo.get(id),
