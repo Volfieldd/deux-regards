@@ -1,0 +1,21 @@
+<% /* Voyages en v2 (/voyages) : chaque voyage publié, sa couverture d'abord, au format de la photo et à hauteur commune
+      (300 px, 380 au bureau), son nom et « dates · jours · photos ». Mêmes données que la v1 (views/trips.eta). */ %>
+<% layout('./layout', { pageTitle: it.v2.typo(it.pageTitle), description: it.v2.typo(it.description) }) %>
+<% const t = it.t, tv = t.trips, v = it.v2;
+   // La couverture prend la largeur de sa colonne, ou sa largeur à la hauteur commune si elle est plus étroite.
+   const sizes = p => { const r = v.fmt(p).r; return `(max-width: 767px) min(calc(100vw - 48px), ${Math.round(300 * r)}px), (max-width: 1279px) min(calc(50vw - 52px), ${Math.round(300 * r)}px), min(calc(50vw - 68px), ${Math.round(380 * r)}px)`; }; %>
+<%~ include('./_entete', { ...it, courant: 'voyages' }) %>
+<main id="contenu">
+  <div class="wrap tete-page"><h1 class="titre-page"><%= tv.title %></h1><p class="chapo"><%= t.pages.tripsLead(it.list.length) %></p></div>
+  <div class="wrap">
+    <ul class="voyages">
+<% it.list.forEach(tr => { const g = tr.cover ? v.fmt(tr.cover) : null; %>      <li><article class="voyage-e" aria-labelledby="voyage-<%= tr.id %>">
+<% if (tr.cover) { %>        <div class="voyage-e-img <%= g.cls %>"><%~ it.picture(tr.cover, { sizes: sizes(tr.cover), alt: '' }) %></div>
+<% } %>        <h2 class="voyage-e-titre" id="voyage-<%= tr.id %>"><a href="<%= it.u(`/voyage/${tr.slug}`) %>"><%= tr.name %></a></h2>
+        <p class="voyage-e-meta"><%= v.typo(`${tr.span} · ${tv.days(tr.days)} · ${t.photos(tr.photos.length)}`) %></p>
+<% if (tr.intro) { %>        <p class="voyage-e-chapo"><%= v.typo(tr.intro.split(/\n{2,}/)[0]) %></p>
+<% } %>      </article></li>
+<% }) %>    </ul>
+  </div>
+</main>
+<%~ include('./_pied', it) %>

@@ -1,0 +1,65 @@
+<% /* Un voyage en v2 (/voyage/<slug>) : l'ouverture (fil d'Ariane, titre, « dates · jours · photos · par … », le texte du
+      voyage, le sommaire des jours) à côté de la couverture, entière, à son format (plus de titre posé sur la photo,
+      UX-F-01) ; la carte de l'itinéraire ; puis les jours, chacun avec ses photos en rangées (cartel « Auteur · Lieu » :
+      le jour est dit par son titre ; jamais l'heure, qui ne sert qu'à l'ordre).
+      Carte : le fond, l'itinéraire et les encarts « J1 · 12 oct. / Angers » dans un SVG cadré sur les étapes (calculés
+      par server/trip-story.js, sans chevauchement à la taille où leur texte fait 14 px au moins) ; les étapes, en pixels,
+      par-dessus (liens vers leur jour, nom lu « Étape 1, 12 oct. : Angers ») : sous 904 px de large, les encarts
+      s'effacent et les étapes numérotées restent, la carte ne défile plus de côté (UX-F-25). */ %>
+<% layout('./layout', { pageTitle: it.v2.typo(it.pageTitle), description: it.v2.typo(it.description) }) %>
+<% const t = it.t, tv = t.trips, pg = t.pages, v = it.v2, ic = v.ic, tr = it.tr, st = it.story, vw = st.view;
+   const fine = it.asset('carte-terre-fine.svg');
+   const cover = tr.cover, g = cover ? v.fmt(cover) : null;
+   // La couverture : la largeur de la page au téléphone (82 % de la hauteur de l’écran au plus), sa colonne au bureau
+   // (74 % de la hauteur, 680 px au plus), à son format.
+   const coverSizes = r => `(max-width: 899px) min(calc(100vw - 48px), calc(82vh * ${r})), min(calc(50vw - 80px), calc(min(74vh, 680px) * ${r}))`; %>
+<%~ include('./_entete', { ...it, courant: 'voyages' }) %>
+<main id="contenu">
+<% if (it.preview) { %>  <div class="wrap pages-note"><div class="msg" role="note"><%~ ic('info') %><p><%= v.typo(tv.preview) %> <a href="/admin/voyages/<%= tr.id %>"><%= tv.settings %></a></p></div></div>
+<% } %>  <div class="wrap voyage-ouv">
+    <div class="voyage-ouv-t">
+      <nav class="ariane" aria-label="<%= t.v2.breadcrumb %>"><ol><li><a href="<%= it.u('/voyages') %>"><%= tv.title %></a></li><li aria-current="page"><%= tr.name %></li></ol></nav>
+      <h1 class="titre-page"><%= tr.name %></h1>
+      <p class="voyage-meta"><%= v.typo(`${tr.span} · ${tv.days(st.days.length)} · ${t.photos(tr.photos.length)}${tr.who.length ? ` · ${tv.by(tr.who.join(t.v2.and))}` : ''}`) %></p>
+<% if (tr.intro) { %>      <div class="voyage-intro"><% tr.intro.split(/\n{2,}/).forEach(par => { %><p><%= v.typo(par) %></p><% }) %></div>
+<% } %>      <nav class="voyage-som" aria-labelledby="som-t">
+        <p class="voyage-som-t" id="som-t"><%= tv.story %></p>
+        <ol>
+<% st.days.forEach(d => { %>          <li><a href="#<%= d.id %>"><span class="s-n" aria-hidden="true"><%= d.n %></span><span><span class="sr-only"><%= tv.day(d.n) %>&nbsp;· </span><span class="s-nom"><%= d.long %><%= d.place ? `, ${d.place}` : '' %></span> <span class="s-d"><%= v.typo(`· ${pg.dayPhotos(d.photos.length)}`) %></span></span></a></li>
+<% }) %>        </ol>
+      </nav>
+    </div>
+<% if (cover) { %>    <figure class="voyage-ouv-photo <%= g.cls %>"><%~ it.picture(cover, { sizes: coverSizes(g.r), eager: true, alt: '' }) %></figure>
+<% } %>  </div>
+<% if (vw) { const X = s => v.pct(s.x, vw.x, vw.w), Y = s => v.pct(s.y, vw.y, vw.h), when = s => s.when.replace(/ /g, '\u00a0'); %>
+  <figure class="wrap partie voyage-carte" data-trip-map>
+    <div class="voyage-carte-cadre">
+      <svg class="voyage-carte-fond" viewBox="<%= vw.x.toFixed(2) %> <%= vw.y.toFixed(2) %> <%= vw.w.toFixed(2) %> <%= vw.h.toFixed(2) %>" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-carte-fond data-tiles="<%= it.asset('carte-tuiles/index.json') %>">
+        <use class="terre" href="<%= fine %>#terre" width="<%= it.map.width %>" height="<%= it.map.height %>" data-base/>
+        <g class="detail" data-detail display="none"></g>
+        <use class="frontieres" href="<%= fine %>#frontieres" width="<%= it.map.width %>" height="<%= it.map.height %>"/>
+<% if (st.stops.length > 1) { %>        <path class="voyage-route" d="<%= st.path %>" vector-effect="non-scaling-stroke"/>
+<% } %><% st.stops.forEach(s => { %>        <g class="voyage-encart">
+<% if (s.leader) { %>          <line x1="<%= s.leader.x1.toFixed(2) %>" y1="<%= s.leader.y1.toFixed(2) %>" x2="<%= s.leader.x2.toFixed(2) %>" y2="<%= s.leader.y2.toFixed(2) %>" vector-effect="non-scaling-stroke"/>
+<% } %>          <rect x="<%= s.box.x.toFixed(2) %>" y="<%= s.box.y.toFixed(2) %>" width="<%= s.box.w.toFixed(2) %>" height="<%= s.box.h.toFixed(2) %>" vector-effect="non-scaling-stroke"/>
+          <text x="<%= (s.box.x + st.u).toFixed(2) %>" y="<%= (s.box.y + st.fs * 1.15).toFixed(2) %>" font-size="<%= st.fs.toFixed(2) %>"><tspan class="voyage-encart-n"><%= tv.short(s.n) %></tspan>&#160;· <%= when(s) %></text>
+          <text class="voyage-encart-ville" x="<%= (s.box.x + st.u).toFixed(2) %>" y="<%= (s.box.y + st.fs * 2.4).toFixed(2) %>" font-size="<%= (st.fs * 0.95).toFixed(2) %>"><%= s.city %></text>
+        </g>
+<% }) %>      </svg>
+      <svg class="voyage-carte-etapes" role="group" aria-label="<%= v.typo(tv.map(tr.name)) %>">
+<% st.stops.forEach(s => { %>        <a class="voyage-etape" href="<%= s.href %>" aria-label="<%= v.typo(tv.stop(s.n, when(s), s.city)) %>"><svg x="<%= X(s) %>%" y="<%= Y(s) %>%" overflow="visible"><circle r="13"/><text y="1"><%= s.n %></text></svg></a>
+<% }) %>      </svg>
+    </div>
+    <figcaption><%= v.typo(`${t.map.base} · ${t.map.credit}`) %></figcaption>
+  </figure>
+<% } %>
+  <section class="wrap partie voyage-jours" aria-labelledby="jours-t">
+    <div class="partie-tete"><h2 class="titre-2" id="jours-t"><%= tv.story %></h2></div>
+<% st.days.forEach(d => { %>    <section class="voyage-jour" id="<%= d.id %>" aria-labelledby="<%= d.id %>-t">
+      <h3 class="voyage-jour-t" id="<%= d.id %>-t"><span class="s-n" aria-hidden="true"><%= String(d.n).padStart(2, '0') %></span><span><span class="sr-only"><%= tv.day(d.n) %>&nbsp;· </span><%= d.long %><% if (d.place) { %> <span class="voyage-jour-lieu"><%= d.place %></span><% } %></span></h3>
+<%~ include('./_rangees', { ...it, list: d.photos, filter: {}, labelledby: `${d.id}-t`, meta: p => [p.author, p.place].filter(Boolean).join(' · ') }) %>
+    </section>
+<% }) %>  </section>
+  <p class="wrap voyage-retour"><a class="lien" href="<%= it.u('/voyages') %>"><%~ ic('retour', { size: 18 }) %><%= tv.back %></a></p>
+</main>
+<%~ include('./_pied', it) %>
