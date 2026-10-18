@@ -16,7 +16,9 @@
 <% } %>      </div>
       <ul class="liste-liens" aria-label="<%= t.v2.seeGallery %>">
         <li><a href="<%= it.u('/') %>#galerie"><span class="liste-liens-n"><%= it.regards[0].name %></span><span class="liste-liens-d"><%= t.v2.bothDesc(it.total) %></span><%~ ic('fleche', { size: 18 }) %></a></li>
-<% authors.forEach(r => { %>        <li><a href="<%= it.galleryUrl({ regard: r.slug }) %>#filtres"><span class="liste-liens-n"><%= r.name %></span><span class="liste-liens-d"><%= t.photos(r.count) %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+<% /* Sous le nom, le nombre de photos, puis la description courte du photographe, son regard (« le matin, les quais,
+      les fleuves » ; admin, page Photographes, migration 053), si elle est écrite. */
+   authors.forEach(r => { %>        <li><a href="<%= it.galleryUrl({ regard: r.slug }) %>#filtres"><span class="liste-liens-n"><%= r.name %></span><span class="liste-liens-d"><%= t.photos(r.count) %><% if (r.short_bio) { %>&nbsp;· <%= v.typo(r.short_bio) %><% } %></span><%~ ic('fleche', { size: 18 }) %></a></li>
 <% }) %>      </ul>
     </div>
   </section>

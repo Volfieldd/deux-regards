@@ -1839,7 +1839,7 @@ export default async function adminRoutes(app) {
   // ---------- auteurs ----------
   // holds : ce qui empêche encore de supprimer chaque photographe (photos, rencontres, voyages, compte lié).
   const authorsPage = (request, reply, extra = {}) => render(request, reply, 'authors', {
-    title: request.t('Photographes'), authors: repo.authors().map(a => ({ ...a, holds: repo.authorHolds(a.id).map(m => request.t.msg(m)) })), errors: {}, values: {}, ...extra,
+    title: request.t('Photographes'), authors: repo.authors().map(a => ({ ...a, holds: repo.authorHolds(a.id).map(m => request.t.msg(m)) })), errors: {}, values: {}, limits: LIMITS, ...extra,
   });
   app.get('/admin/auteurs', P('photographes.gerer'), async (request, reply) => authorsPage(request, reply));
 

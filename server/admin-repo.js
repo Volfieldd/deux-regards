@@ -441,10 +441,12 @@ export function createAdminRepo(db) {
       const holder = /^[A-Z]$/.test(prefix) && owner && owner.id !== Number(id) ? owner : null;
       if (typed && !/^[A-Z]$/.test(typed)) errors.card_prefix = 'Lettre des cartes : une seule lettre, de A à Z.';
       else if (holder) errors.card_prefix = `La lettre ${prefix} est déjà celle de ${holder.name} : choisissez-en une autre.`;
-      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), card_prefix: /^[A-Z]$/.test(prefix) ? prefix : '', ig_signature: text(body.ig_signature, 200) };
+      // Description courte (son « regard », sous son nom sur l'accueil v2), en trois langues : gardée si absente du formulaire.
+      const short = Object.fromEntries(['short_bio', 'short_bio_en', 'short_bio_de'].map(k => [k, k in body ? line(body[k], LIMITS.short_bio) : current?.[k] ?? '']));
+      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), ...short, card_prefix: /^[A-Z]$/.test(prefix) ? prefix : '', ig_signature: text(body.ig_signature, 200) };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
-      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, card_prefix = @card_prefix, ig_signature = @ig_signature WHERE id = @id').run({ ...values, id });
-      db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, card_prefix, ig_signature) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @card_prefix, @ig_signature)').run(values);
+      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, short_bio = @short_bio, short_bio_en = @short_bio_en, short_bio_de = @short_bio_de, card_prefix = @card_prefix, ig_signature = @ig_signature WHERE id = @id').run({ ...values, id });
+      db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, short_bio, short_bio_en, short_bio_de, card_prefix, ig_signature) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @short_bio, @short_bio_en, @short_bio_de, @card_prefix, @ig_signature)').run(values);
     },
     // Ce qui retient un photographe (phrases en français, une par cause) : ses photos, ses rencontres (données
     // personnelles, qui ne seraient plus visibles que des administrateurs), ses voyages (devenus « communs ») et le

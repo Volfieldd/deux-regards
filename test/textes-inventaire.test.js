@@ -148,6 +148,46 @@ test('numéro d’inventaire : rien de privé (ni l’heure, ni l’identifiant 
   }
 });
 
+test('v2 : texte d’intention (deux phrases, puis « Lire la suite »), description courte et inventaire, en trois langues', async t => {
+  const c = await site(t);
+  const admin = c.as('admin'), modo = c.as('moderateur'), p = c.first(c.jul);
+  const s = c.db.prepare('SELECT * FROM categories WHERE id = ?').get(p.category_id);
+  const INTENT = {
+    '': ['Des passants, des seuils : la ville quand elle ne pose pas. Julien y cherche les visages.', 'Tout a été fait à pied, sans flash.', 'Lire la suite', ' du texte de la série'],
+    '/en': ['Passers-by, doorways: the city when it is not posing. Julien looks for faces.', 'Everything was done on foot, without flash.', 'Read more', ' about the series'],
+    '/de': ['Passanten, Schwellen: die Stadt, wenn sie nicht posiert. Julien sucht die Gesichter.', 'Alles zu Fuß, ohne Blitz.', 'Weiterlesen', ' (Text der Serie)'],
+  };
+  await modo.post(`/admin/series/${s.id}`, { name: s.name, intent: `${INTENT[''][0]} ${INTENT[''][1]}`, intent_en: `${INTENT['/en'][0]} ${INTENT['/en'][1]}`, intent_de: `${INTENT['/de'][0]} ${INTENT['/de'][1]}` });
+  const SHORT = { '': ['la rue, et ceux qui y passent', '12 photos'], '/en': ['the street, and those who pass by', 'photos'], '/de': ['die Straße und wer vorbeigeht', 'Fotos'] };
+  await admin.post(`/admin/auteurs/${c.jul}`, { name: 'Julien', short_bio: SHORT[''][0], short_bio_en: SHORT['/en'][0], short_bio_de: SHORT['/de'][0] });
+  const INV = { '': 'Inventaire', '/en': 'Inventory number', '/de': 'Inventarnummer' };
+  c.app.publicVersion.save('v2');
+  for (const prefix of ['', '/en', '/de']) {
+    const [head, rest, more, of] = INTENT[prefix];
+    const serie = (await c.visit(`${prefix}/serie/${s.slug}`)).body;
+    const at = serie.indexOf('<div class="ser-txt">'), box = serie.slice(at, serie.indexOf('</details>', at) + 10);
+    assert.ok(box.includes(`<p class="ser-int">${prefix ? head : head.replace(' :', ' :')}</p>`), `tête ${prefix || '/'}`);
+    assert.ok(box.includes(`<p class="ser-int que-bureau">${rest}</p>`), `suite au bureau ${prefix || '/'}`);
+    assert.ok(box.includes(`<details class="depliant depliant--suite"><summary>${more}<span class="sr-only">${of}</span></summary><p class="ser-int">${rest}</p></details>`), `dépliant ${prefix || '/'}`);
+    const home = (await c.visit(`${prefix}/`)).body;
+    assert.match(home, new RegExp(`<span class="liste-liens-n">Julien</span><span class="liste-liens-d">6 [^<]+&nbsp;· ${SHORT[prefix][0]}</span>`), `regard ${prefix || '/'}`);
+    const photo = (await c.visit(`${prefix}/photo/${p.slug}`)).body;
+    assert.ok(photo.includes(`<dt>${INV[prefix]}</dt><dd class="donnee">${p.inventory}</dd>`), `inventaire ${prefix || '/'}`);
+  }
+  // Repli : une langue sans traduction montre le français.
+  await modo.post(`/admin/series/${s.id}`, { name: s.name, intent_de: '' });
+  assert.ok((await c.visit(`/de/serie/${s.slug}`)).body.includes(`<p class="ser-int">${INTENT[''][0]}</p>`));
+  // Deux phrases ou moins : pas de « Lire la suite » ; rien d'écrit : ni bloc, ni séparateur.
+  await modo.post(`/admin/series/${s.id}`, { name: s.name, intent: 'Une seule phrase.', intent_en: '', intent_de: '' });
+  const short = (await c.visit(`/serie/${s.slug}`)).body;
+  assert.ok(short.includes('<p class="ser-int">Une seule phrase.</p>'));
+  assert.doesNotMatch(short, /depliant--suite|que-bureau">/);
+  await modo.post(`/admin/series/${s.id}`, { name: s.name, intent: '' });
+  assert.doesNotMatch((await c.visit(`/serie/${s.slug}`)).body, /ser-txt/);
+  await admin.post(`/admin/auteurs/${c.jul}`, { name: 'Julien', short_bio: '', short_bio_en: '', short_bio_de: '' });
+  assert.match((await c.visit('/')).body, /<span class="liste-liens-n">Julien<\/span><span class="liste-liens-d">6 photos<\/span>/);
+});
+
 test('coupe du texte d’intention : à la fin d’une phrase, jamais dans un nombre', () => {
   assert.deepEqual(intentParts('Un. Deux ! Trois ? Quatre.'), { head: 'Un. Deux !', rest: 'Trois ? Quatre.' });
   assert.deepEqual(intentParts('À 1.5 km du port. « Rien », dit-il. Puis la suite…'), { head: 'À 1.5 km du port. « Rien », dit-il.', rest: 'Puis la suite…' });
