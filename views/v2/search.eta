@@ -24,6 +24,8 @@
     <p class="recherche-etat" role="status"><%= a %><%= it.q %><%= b %></p>
 <% } else if (it.tooShort) { %>
     <p class="recherche-etat" role="status"><%= v.typo(s.short) %></p>
+<% } else if (it.limited) { %>
+    <p class="recherche-etat" role="status"><%= v.typo(s.limited) %></p>
 <% } %>
   </div>
 <% if (n) { %>

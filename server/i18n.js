@@ -209,7 +209,7 @@ export const UI = {
     },
     search: {
       title: 'Rechercher', label: 'Mots-clés', placeholder: 'brume, Loire, portrait…', submit: 'Chercher',
-      hint: 'Dans les titres, légendes, lieux, villes et régions, séries, photographes et mots-clés. Chaque mot doit être trouvé.', short: 'Tapez au moins deux lettres.',
+      hint: 'Dans les titres, légendes, lieux, villes et régions, séries, photographes et mots-clés. Chaque mot doit être trouvé.', short: 'Tapez au moins deux lettres.', limited: 'Beaucoup de recherches en peu de temps : réessayez dans quelques minutes.',
       results: (n, q) => `${n} photo${n > 1 ? 's' : ''} pour « ${q} »`, none: q => `Aucune photo pour « ${q} ». Essayez un autre mot, ou moins de mots.`,
       description: 'Rechercher parmi les photos par mots-clés.', keywords: 'Mots-clés',
     },
@@ -373,7 +373,7 @@ export const UI = {
     },
     search: {
       title: 'Search', label: 'Keywords', placeholder: 'mist, Loire, portrait…', submit: 'Search',
-      hint: 'In titles, captions, places, towns and regions, series, photographers and keywords. Every word must be found.', short: 'Type at least two letters.',
+      hint: 'In titles, captions, places, towns and regions, series, photographers and keywords. Every word must be found.', short: 'Type at least two letters.', limited: 'Many searches in a short time: please try again in a few minutes.',
       results: (n, q) => `${n} photo${n === 1 ? '' : 's'} for “${q}”`, none: q => `No photo for “${q}”. Try another word, or fewer words.`,
       description: 'Search the photos by keyword.', keywords: 'Keywords',
     },
@@ -536,7 +536,7 @@ export const UI = {
     },
     search: {
       title: 'Suchen', label: 'Stichwörter', placeholder: 'Nebel, Loire, Porträt…', submit: 'Suchen',
-      hint: 'In Titeln, Bildunterschriften, Orten, Städten und Regionen, Serien, Fotografen und Stichwörtern. Jedes Wort muss gefunden werden.', short: 'Geben Sie mindestens zwei Buchstaben ein.',
+      hint: 'In Titeln, Bildunterschriften, Orten, Städten und Regionen, Serien, Fotografen und Stichwörtern. Jedes Wort muss gefunden werden.', short: 'Geben Sie mindestens zwei Buchstaben ein.', limited: 'Viele Suchen in kurzer Zeit: Bitte versuchen Sie es in einigen Minuten erneut.',
       results: (n, q) => `${n} ${n === 1 ? 'Foto' : 'Fotos'} für „${q}“`, none: q => `Kein Foto für „${q}“. Versuchen Sie ein anderes Wort oder weniger Wörter.`,
       description: 'Die Fotos nach Stichwörtern durchsuchen.', keywords: 'Stichwörter',
     },
