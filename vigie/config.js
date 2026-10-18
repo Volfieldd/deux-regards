@@ -58,8 +58,37 @@ export function loadVigieConfig(env = process.env) {
   }
   const consoleUrl = (env.VIGIE_CONSOLE_URL || 'https://vigie.nicephos.art').replace(/\/+$/, '');
   if (!/^https:\/\//.test(consoleUrl)) throw new Error('VIGIE_CONSOLE_URL doit être en https://');
+  // Console (phase D3, annexe architecture § 5) : facultative, ouverte par VIGIE_CONSOLE_CLIENT_ID. Trois verrous : jeton
+  // Cloudflare Access, connexion Zitadel propre à la console (projet « Vigie »), droits à deux clés relus chez Zitadel
+  // (compte de service de la lecture des événements : la console l'exige).
+  let consoleCfg = null;
+  if (env.VIGIE_CONSOLE_CLIENT_ID) {
+    if (!issuer) throw new Error('La console exige VIGIE_ZITADEL_ISSUER et le compte de service (relecture des droits chez Zitadel)');
+    if (!/^[0-9]{6,30}$/.test(env.VIGIE_CONSOLE_PROJECT_ID || '')) throw new Error('VIGIE_CONSOLE_PROJECT_ID : identifiant du projet Zitadel « Vigie » attendu');
+    if (!/^[0-9]{6,30}$/.test(env.VIGIE_CONSOLE_ORG_ID || '')) throw new Error('VIGIE_CONSOLE_ORG_ID : identifiant de l’organisation propriétaire du projet « Vigie » attendu');
+    if (!/^[A-Za-z0-9@._-]{6,200}$/.test(env.VIGIE_CONSOLE_CLIENT_ID)) throw new Error('VIGIE_CONSOLE_CLIENT_ID illisible');
+    const secretFile = path.resolve(env.VIGIE_CONSOLE_SECRET_FILE || '/secrets/console-secret');
+    let clientSecret = '';
+    try { clientSecret = fs.readFileSync(secretFile, 'utf8').trim(); } catch { /* absent */ }
+    if (clientSecret.length < 16) throw new Error(`VIGIE_CONSOLE_SECRET_FILE : secret client de l’application « Console Vigie » introuvable ou trop court (${secretFile})`);
+    const adminSubs = String(env.VIGIE_ADMIN_SUBS || '').split(',').map(x => x.trim()).filter(Boolean);
+    if (!adminSubs.length || adminSubs.some(x => !/^[A-Za-z0-9@._-]{1,200}$/.test(x))) throw new Error('VIGIE_ADMIN_SUBS : au moins un identifiant (sub) Zitadel, séparés par des virgules (amorce des Administrateurs de la console)');
+    const roles = env.VIGIE_ROLES || 'deux-cles';
+    if (!['deux-cles', 'zitadel'].includes(roles)) throw new Error('VIGIE_ROLES : deux-cles (par défaut) ou zitadel');
+    consoleCfg = {
+      url: consoleUrl, issuer, clientId: env.VIGIE_CONSOLE_CLIENT_ID, clientSecret,
+      projectId: env.VIGIE_CONSOLE_PROJECT_ID, orgId: env.VIGIE_CONSOLE_ORG_ID,
+      access: { team: env.VIGIE_ACCESS_TEAM, aud: env.VIGIE_ACCESS_AUD },
+      adminSubs, roles,
+      host: env.VIGIE_CONSOLE_HOST || '127.0.0.1',                       // la pile la fixe à l'adresse du réseau du tunnel
+      port: int(env.VIGIE_CONSOLE_PORT, 4200, 0, 65535),
+    };
+    if (!/^[a-z0-9-]{1,63}$/.test(consoleCfg.access.team || '')) throw new Error('VIGIE_ACCESS_TEAM : nom d’équipe Cloudflare Access attendu (la console n’est jamais servie sans Access)');
+    if (!/^[0-9a-f]{64}$/.test(consoleCfg.access.aud || '')) throw new Error('VIGIE_ACCESS_AUD : étiquette d’audience de l’application Access (64 caractères hexadécimaux)');
+  }
   return {
     notifications: { signal, mail, consoleUrl },
+    console: consoleCfg,
     bordure,
     dataDir,
     databasePath: path.resolve(env.VIGIE_DATABASE || path.join(dataDir, 'vigie.db')),

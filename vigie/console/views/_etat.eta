@@ -1,0 +1,12 @@
+<%
+/* Pastille d'état (admin-plus.css § 4 : symbole et mot) : include('./_etat', { etatK, etatMot }). */
+const S = {
+  afaire: '<svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>',
+  encours: '<svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>',
+  abouti: '<svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>',
+  attention: '<svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>',
+  arret: '<svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg>',
+  neutre: '<svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.1-7.5 9.5-4.3-1.4-7.5-4.9-7.5-9.5V6z"/></svg>',
+};
+const k = Object.hasOwn(S, it.etatK) ? it.etatK : 'neutre';
+if (it.symboleSeul) { %><%~ S[k] %><% } else { %><span class="etat etat--<%= k %>"><%~ S[k] %><%= it.etatMot %></span><% } %>

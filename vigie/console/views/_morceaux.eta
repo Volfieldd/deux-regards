@@ -1,0 +1,7 @@
+<%
+/* Une phrase en morceaux : { t } du texte, { t, href } un lien local, { t, b } en gras. Tout est échappé ; un lien ne mène
+   qu'à un chemin local. */
+for (const m of it.morceaux || []) {
+  const local = typeof m.href === 'string' && m.href.startsWith('/') && !m.href.startsWith('//');
+  if (local) { %><a href="<%= m.href %>"><%= m.t %></a><% } else if (m.b) { %><b><%= m.t %></b><% } else { %><%= m.t %><% }
+} %>

@@ -129,9 +129,20 @@ export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = f
     return added;
   }
 
+  // Appel en lecture à l'API de Zitadel avec le même compte de service (console : relecture du plafond des droits).
+  // Chemin relatif à l'émetteur, jamais une adresse complète ; org : en-tête x-zitadel-orgid de l'API de gestion.
+  async function api(apiPath, { method = 'POST', body, org } = {}) {
+    if (!/^\/(?:management|admin|v2)\/[A-Za-z0-9/_.-]+$/.test(apiPath)) throw new Error('Zitadel : chemin d’API refusé');
+    const headers = { authorization: `Bearer ${await accessToken()}` };
+    if (body !== undefined) headers['content-type'] = 'application/json';
+    if (org) headers['x-zitadel-orgid'] = org;
+    return bounded(`${issuer}${apiPath}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  }
+
   let timer = null, failures = 0, stopped = false;
   return {
     run,
+    api,
     start(intervalMs) {
       const tick = async () => {
         if (stopped) return;

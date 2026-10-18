@@ -37,6 +37,12 @@ export const OWN = {
   vigie_surveillance_reduite: E('moyen', 'vigie · contrôle'),
   vigie_decision: E('moyen', 'vigie · ligne de commande'),
   vigie_interrupteur: E('moyen', 'vigie · ligne de commande'),
+  // Console (phase D3) : connexions, refus (DS30), arrivées et changements de droits (DS29). Constatés par la Vigie.
+  vigie_console_connexion: E('info', 'vigie · console'),
+  vigie_console_sortie: E('info', 'vigie · console'),
+  vigie_console_refus: E('moyen', 'vigie · console'),
+  vigie_console_arrivee: E('moyen', 'vigie · console'),
+  vigie_console_droits: E('haut', 'vigie · console'),
 };
 export const ALL = { ...SITE, ...OWN };
 export const isSiteType = t => Object.hasOwn(SITE, t);

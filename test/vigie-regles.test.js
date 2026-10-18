@@ -137,7 +137,7 @@ test('règles livrées : toutes chargées, chacune avec son cas, sa gravité et 
     assert.ok(r.tags.some(x => x.startsWith('attack.')), `${r.name} : tactique MITRE`);
   }
   const cas = new Set(all.map(r => r.cas));
-  for (const c of ['DS1', 'DS2', 'DS5', 'DS6', 'DS7', 'DS8', 'DS9', 'DS10', 'DS11', 'DS12', 'DS13', 'DS14', 'DS15', 'DS16', 'DS18', 'DS19', 'DS20', 'DS21', 'DS24', 'DS25', 'DS26', 'DS27', 'DS28', 'DS31']) assert.ok(cas.has(c), c);
+  for (const c of ['DS1', 'DS2', 'DS5', 'DS6', 'DS7', 'DS8', 'DS9', 'DS10', 'DS11', 'DS12', 'DS13', 'DS14', 'DS15', 'DS16', 'DS18', 'DS19', 'DS20', 'DS21', 'DS24', 'DS25', 'DS26', 'DS27', 'DS28', 'DS29', 'DS30', 'DS31']) assert.ok(cas.has(c), c);
   // DS3, DS4, DS17, DS23 et DS10 (rôle incohérent) : détecteurs comportementaux.
 });
 

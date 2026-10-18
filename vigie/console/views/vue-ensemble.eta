@@ -1,0 +1,94 @@
+<%
+/* Vue d'ensemble (MV-01) : l'état en une phrase, les interrupteurs, les alertes ouvertes, les décisions en cours, la santé,
+   sept jours. Données : it.vue = overview() (vigie/console/vue-ensemble.js), déjà mises en forme. it.fragment : le contenu
+   seul, sans la page autour (rafraîchissement par console.js, qui remplace le contenu de #contenu). */
+const vue = it.vue || {};
+if (!it.fragment) layout('./layout', { rafraichir: true, titre: it.titre && it.titre !== 'Vigie' ? it.titre : 'Vue d’ensemble' });
+const faits = vue.faits || [];
+const al = vue.alertes || { total: 0, lignes: [], plus: 0 };
+const dec = vue.decisions || { total: 0, lignes: [] };
+const SYMBOLE = { ok: 'abouti', 'att-s': 'attention', arret: 'arret', neutre: 'afaire' };
+const pl = (n, un, plusieurs) => (n > 1 ? plusieurs : un);
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Vue d’ensemble</h1></div>
+  <p class="ep-meta"><span><%= vue.maintenant && vue.maintenant.texte %></span><span class="tel-non">heure de Paris</span><span class="js-seul">actualisée chaque minute</span></p>
+  <% /* D3c : l'identité confirmée dans la méta (« Identité confirmée à …, valable jusqu’à … ») et « Nouvelle décision… » en contour, avant le bouton plein. */ %>
+<% if (vue.principale) { %>
+  <div class="ep-actions"><a class="btn" href="<%= vue.principale.href %>"><%= vue.principale.texte %></a></div>
+<% } %>
+</header>
+<% if (vue.lecteur) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule : vous voyez, vous n’agissez pas.</b> Les adresses sont tronquées à leur réseau (/24, /48).</span></p>
+<% } %>
+<div class="vg-etat">
+  <h2 class="phrase" id="t-etat"><%= vue.phrase %></h2>
+<% if (faits.length) { %>
+  <ul class="faits">
+<% for (const f of faits) { %>
+    <li><% if (f.grav) { %><%~ include('./_grav', { gravClasse: f.grav.classe, gravMot: f.grav.mot }) %><% } else { %><%~ include('./_etat', { etatK: f.etat.k, etatMot: f.etat.mot }) %><% } %><span><%~ include('./_morceaux', { morceaux: f.morceaux }) %></span></li>
+<% } %>
+  </ul>
+<% } %>
+<% const aussi = (vue.aussi && vue.aussi.items) || []; if (aussi.length) { %>
+  <p class="aussi"><% if (vue.aussi.prefixe) { %>Aussi : <% } %><% aussi.forEach((m, i) => { %><% if (i) { %> · <% } %><% const premier = !vue.aussi.prefixe && i === 0 && m[0] && !m[0].href; %><%~ include('./_morceaux', { morceaux: premier ? [{ ...m[0], t: m[0].t.charAt(0).toUpperCase() + m[0].t.slice(1) }, ...m.slice(1)] : m }) %><% }) %>.</p>
+<% } %>
+</div>
+
+<h2 class="vg-section-t" id="t-inter">Interrupteurs</h2>
+<ul class="vg-inters" aria-labelledby="t-inter">
+<% for (const s of vue.interrupteurs || []) { %>
+<li class="vg-inter<%= s.marche ? '' : ' arret' %>"><div class="tete"><h3><%= s.titre %></h3><%~ include('./_etat', { etatK: s.etat.k, etatMot: s.etat.mot }) %></div><p><%~ include('./_morceaux', { morceaux: s.morceaux }) %></p><% if (vue.lecteur) { %><p class="lecture">Lecture seule.</p><% } else { %><% /* D3c : « Arrêter… » (vers /reglages#interrupteurs) ou « Remettre en marche maintenant » (POST /interrupteurs/<nom>, ré-authentification). */ %><% } %></li>
+<% } %>
+</ul>
+
+<% if (al.total > 0) { %>
+<h2 class="vg-section-t" id="t-al">Alertes ouvertes <span class="n"><%= al.total %></span></h2>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-alertes">
+<caption><div class="vg-cap-t"><%= al.total %> <%= pl(al.total, 'alerte ouverte', 'alertes ouvertes') %> : la plus grave d’abord ; à gravité égale, celles que personne n’a prises en charge, puis la plus récente</div><div class="grav-leg"><span class="lb">Gravité d’une alerte, de la plus haute à la plus basse</span><ul class="grav-legende" aria-label="Gravité d’une alerte"><li><%~ include('./_grav', { gravClasse: 'critique', gravMot: 'Critique' }) %></li><li><%~ include('./_grav', { gravClasse: 'haute', gravMot: 'Haute' }) %></li><li><%~ include('./_grav', { gravClasse: 'moyenne', gravMot: 'Moyenne' }) %></li></ul></div></caption>
+<thead><tr><th scope="col">Gravité</th><th scope="col">Alerte</th><th scope="col">Entité</th><th scope="col">Sources</th><th scope="col" class="num">Occurrences</th><th scope="col">Mode</th><th scope="col">Statut</th></tr></thead>
+<tbody>
+<% for (const a of al.lignes) { %>
+<tr<% if (a.crit) { %> class="vg-crit"<% } %>><td class="c-grav"><%~ include('./_grav', { gravClasse: a.grav.classe, gravMot: a.grav.mot }) %></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/<%= a.id %>"><%= a.titre %><span class="sr-only"> (#<%= a.id %>)</span></a><span class="sec">#<%= a.id %><% if (a.cas) { %> · <%= a.cas %><% } %></span></th>
+<td class="c-ent"><%~ include('./_ent', { ent: a.entite }) %></td><td class="c-src" data-label="Sources"><% if (a.sources.length) { %><ul class="srcs" aria-label="Sources"><% for (const s of a.sources) { %><li><span class="src"><%~ include('./_ic', { icone: s.cle, taille: 14 }) %><%= s.mot %></span></li><% } %></ul><% } else { %><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span><% } %></td>
+<td class="c-occ num" data-label="Occurrences"><%= a.occ.n %><span class="sec"><%= a.occ.sec %></span></td>
+<td class="c-mode" data-label="Mode"><%= a.mode.mot %><% if (a.mode.sec) { %><span class="sec"><%= a.mode.sec %></span><% } %></td>
+<td class="c-etat"><%~ include('./_etat', { etatK: a.statut.k, etatMot: a.statut.mot }) %><% if (a.statut.sec) { %><span class="sec"><%= a.statut.sec %></span><% } %></td></tr>
+<% } %>
+</tbody></table></div>
+<% } %>
+<div class="pied-liste"><% if (al.plus > 0) { %><span><%= al.plus %> autre<%= al.plus > 1 ? 's' : '' %> alerte<%= al.plus > 1 ? 's' : '' %> ouverte<%= al.plus > 1 ? 's' : '' %>, moins grave<%= al.plus > 1 ? 's' : '' %> ou plus ancienne<%= al.plus > 1 ? 's' : '' %>.</span> <% } %><a class="lien-a" href="/alertes?statut=toutes">Toutes les alertes, closes comprises</a></div>
+<% /* D3b : la barre de provenance des alertes (MV-11, « Provenance des N alertes ») et « Voir les flux » vers /flux, ici, sous le tableau. */ %>
+
+<div class="vg-bas">
+<section class="panel" aria-labelledby="t-dec"><h2 class="panel-t" id="t-dec">Décisions en cours <span class="n"><%= dec.total %></span></h2>
+<% if (dec.lignes.length) { %>
+<ul class="vg-lignes">
+<% for (const d of dec.lignes) { %>
+<li><span class="t"><%= d.type %><% if (d.cible) { %> · <% if (d.cible.mono === 'ip') { %><span class="ip<%= d.cible.v6 ? ' v6' : '' %>"><%= d.cible.texte %></span><% if (d.cible.tronquee) { %> <span class="tronq">(tronquée)</span><% } %><% } else { %><span class="sub"><%= d.cible.texte %></span><% } %><% } %></span><span class="n">#<%= d.id %></span><span class="sec"><%~ include('./_morceaux', { morceaux: d.sec }) %></span></li>
+<% } %>
+</ul>
+<% if (dec.total > dec.lignes.length) { %><p class="vg-compte"><%= dec.total - dec.lignes.length %> de plus sur la page Décisions.</p><% } %>
+<% } else { %>
+<p class="vg-compte">Aucune décision en cours.</p>
+<% } %>
+<p class="panel-pied"><span>Appliquées par le site en quelques secondes ; chacune expire seule.</span><a class="vg-lien" href="/decisions"><%= vue.lecteur ? 'Toutes les décisions' : 'Décisions : lever, nouvelle décision' %></a></p>
+</section>
+<div class="cote">
+<section class="panel" aria-labelledby="t-sante"><h2 class="panel-t" id="t-sante">Santé</h2>
+<ul class="vg-sante">
+<% for (const l of (vue.sante && vue.sante.lignes) || []) { %>
+<li class="<%= l.k %>"><%~ include('./_etat', { etatK: SYMBOLE[l.k] || 'afaire', symboleSeul: true }) %><span><% if (l.k === 'att-s' || l.k === 'arret') { %><span class="sr-only">Écart : </span><% } %><%~ include('./_morceaux', { morceaux: l.morceaux }) %></span></li>
+<% } %>
+</ul>
+<p class="panel-pied"><span><%= vue.sante && vue.sante.ecarts ? `${vue.sante.ecarts} ${pl(vue.sante.ecarts, 'écart', 'écarts')}` : 'Tout répond' %></span><a class="vg-lien" href="/sante">Santé et intégrité</a></p>
+</section>
+<section aria-labelledby="t-7j"><h2 class="vg-section-t" id="t-7j">Sur 7 jours</h2>
+<dl class="chiffres">
+<% for (const c of vue.septJours || []) { %>
+<div><dt><%= c.libelle %></dt><dd><%= c.valeur %></dd></div>
+<% } %>
+</dl></section>
+</div>
+</div>

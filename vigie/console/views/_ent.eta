@@ -1,0 +1,4 @@
+<%
+/* Une entité nommée (vigie.css § 3) : son type, sa clé en chasse fixe, « (tronquée) » pour un Lecteur. include('./_ent', { ent }). */
+const e = it.ent || {};
+%><span class="ent"><span class="k"><%= e.k %></span><% if (e.mono === 'ip') { %><span class="ip<%= e.v6 ? ' v6' : '' %>"><%= e.texte %></span><% } else if (e.mono === 'sub') { %><span class="sub"><%= e.texte %></span><% } else { %><%= e.texte %><% } %><% if (e.tronquee) { %><span class="tronq">(tronquée)</span><% } %></span>
