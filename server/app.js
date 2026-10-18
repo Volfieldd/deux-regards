@@ -288,7 +288,11 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   const headers = { ...SECURITY_HEADERS, 'content-security-policy': csp([app.oidc.origin].filter(Boolean)) };
 
   app.addHook('onSend', async (request, reply) => {
+    // Adresse qui porte un jeton ou un code (ceux que redactUrl masque dans les journaux), ou route qui le demande : aucun
+    // Referer, même vers le site. Les autres en-têtes restent imposés.
+    const noReferrer = reply.getHeader('referrer-policy') === 'no-referrer' || redactUrl(request.url).includes('[masqué]');
     reply.headers(headers);
+    if (noReferrer) reply.header('referrer-policy', 'no-referrer');
     // Rien de l'admin ne se garde en cache, quel que soit le gestionnaire (fichier envoyé par sendFile compris).
     if (/^\/admin(?:[/?#]|$)/.test(request.url)) reply.header('cache-control', 'no-store');
     // Aperçu de la v2 : rien de ce que voit l'administrateur ne peut entrer dans un cache partagé (Cloudflare) et être
