@@ -215,6 +215,31 @@ test('droits : séries et photographes réservés à leurs gestionnaires ; le re
   assert.match((await admin.get('/admin/auteurs')).body, /name="short_bio" value="le matin, les quais, les fleuves" maxlength="160"/);
 });
 
+test('journal : chaque modification de ces textes est notée avec le nom du champ, jamais sa valeur', async t => {
+  const c = await site(t);
+  const admin = c.as('admin'), modo = c.as('moderateur');
+  const p = c.first(c.seb), s = c.db.prepare('SELECT * FROM categories LIMIT 1').get();
+  c.db.prepare('UPDATE authors SET card_prefix = upper(substr(slug, 1, 1))').run();            // lettre déjà enregistrée
+  await admin.post(`/admin/photos/${p.id}`, c.form(p, { alt_text: 'Un secret bien gardé.' }));
+  await admin.json(`/admin/photos/${p.id}/champs`, { alt_text_en: 'A quay.' });
+  await admin.post(`/admin/photos/${p.id}/textes`, { alt_text_de: 'Ein Kai.', legend: 'Nouvelle légende' });
+  await modo.post(`/admin/series/${s.id}`, { name: s.name, intent: 'Une intention.', intent_de: 'Eine Absicht.' });
+  await admin.post(`/admin/auteurs/${c.seb}`, { name: 'Sébastien', short_bio: 'les quais' });
+  assert.deepEqual(audits(c.db, 'POST /admin/photos/:id').map(r => [r.target, r.detail]), [[String(p.id), 'champs : alt_text']]);
+  assert.deepEqual(audits(c.db, 'POST /admin/photos/:id/champs').map(r => r.detail), ['champs : alt_text_en']);
+  assert.deepEqual(audits(c.db, 'POST /admin/photos/:id/textes').map(r => r.detail), ['champs : legend, alt_text_de']);
+  assert.deepEqual(audits(c.db, 'POST /admin/series/:id').map(r => [r.target, r.detail]), [[String(s.id), 'champs : intent, intent_de']]);
+  assert.deepEqual(audits(c.db, 'POST /admin/auteurs/:id').map(r => r.detail), ['champs : short_bio']);
+  assert.equal(c.db.prepare("SELECT COUNT(*) FROM audit_log WHERE detail LIKE '%secret%' OR detail LIKE '%quais%'").pluck().get(), 0);
+  // Rien de changé : rien de noté en plus de l'action.
+  await admin.json(`/admin/photos/${p.id}/champs`, { alt_text_en: 'A quay.' });
+  assert.equal(audits(c.db, 'POST /admin/photos/:id/champs').at(-1).detail, '');
+  // Lot : le numéro de chaque photo précède ses champs.
+  const q = c.first(c.jul);
+  await admin.post('/admin/photos/lot', { ids: `${p.id},${q.id}`, [`title_${p.id}`]: 'Titre A', [`title_${q.id}`]: q.title });
+  assert.equal(audits(c.db, 'POST /admin/photos/lot').at(-1).detail, `champs : photo ${p.id} : title`);
+});
+
 // ---------- bornes et échappement ----------
 
 test('bornes : une ligne pour le texte de remplacement et la description courte, longueurs coupées côté serveur', async t => {

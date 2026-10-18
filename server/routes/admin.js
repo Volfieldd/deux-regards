@@ -170,13 +170,22 @@ export default async function adminRoutes(app) {
   // GPS) le sont aussi : leur route le demande (config.audit).
   app.decorateRequest('audited', false);
   app.decorateRequest('refused', false);
+  // Champs modifiés par l'action (noms des colonnes, jamais leurs valeurs : un texte peut porter une donnée personnelle),
+  // notés dans le détail de sa ligne du journal : quel texte publié a changé, et sur quelle photo, série ou photographe
+  // (la Vigie pourra les lire : registre des briques, BV-20 et BV-21).
+  app.decorateRequest('auditChanges', null);
+  const noteChanges = (request, before, after, label = '') => {
+    const fields = Object.keys(after || {}).filter(k => !BOOKKEEPING.has(k) && String(before?.[k] ?? '') !== String(after[k] ?? ''));
+    if (fields.length) (request.auditChanges ||= []).push(`${label}${fields.join(', ')}`);
+  };
   app.addHook('onResponse', async (request, reply) => {
     if (request.session && ((request.method !== 'GET' && request.method !== 'HEAD') || request.routeOptions.config?.audit)) {
       const action = `${request.method} ${request.routeOptions.url}`;
       request.log.info({ audit: true, sub: request.session.sub, action, params: request.params, status: reply.statusCode }, 'action admin');
       if (!request.audited && !['POST /admin/langue', 'POST /admin/theme'].includes(action)) {
         // Statut gardé : celui de l'issue (422 pour un refus par failed(), redirigé en 303), lu « fait » ou « refusé ».
-        app.audit.log({ sub: request.session.sub, name: request.session.name, action, target: Object.values(request.params || {}).join(' / '), status: request.refused && reply.statusCode < 400 ? 422 : reply.statusCode });
+        app.audit.log({ sub: request.session.sub, name: request.session.name, action, target: Object.values(request.params || {}).join(' / '), status: request.refused && reply.statusCode < 400 ? 422 : reply.statusCode,
+          detail: request.auditChanges?.length ? `champs : ${request.auditChanges.join(' ; ')}` : '' });
       }
     }
   });
@@ -196,8 +205,11 @@ export default async function adminRoutes(app) {
   // une annulation ou un changement de série, de lieu ou de carte, lui, repasse devant lui.
   const BOOKKEEPING = new Set(['updated_at', 'series_checked']);
   const snapshot = ids => new Map([].concat(ids).map(Number).map(id => [id, repo.photo(id)]));
+  // Les champs changés sont notés au journal (noteChanges), précédés du numéro de la photo quand ce n'est pas celle de
+  // l'adresse (lot, actions groupées).
   const editedIfChanged = (request, before) => edited(request, [...before].filter(([id, p]) => {
     const now = repo.photo(id);
+    if (p && now) noteChanges(request, p, now, String(request.params?.id) === String(id) ? '' : `photo ${id} : `);
     return p && now && Object.keys(now).some(k => !BOOKKEEPING.has(k) && String(p[k] ?? '') !== String(now[k] ?? ''));
   }).map(([id]) => id));
   const editable = (request, photo) => Boolean(photo) && (photo.status !== 'published' || request.owns('photos.publiees.modifier', photo.author_id));
@@ -1798,9 +1810,11 @@ export default async function adminRoutes(app) {
 
   app.post('/admin/series/:id', W('series.gerer'), async (request, reply) => {
     const id = byId(request.params.id);
-    if (!repo.categories().some(c => c.id === id)) return reply.callNotFound();
+    const before = repo.categories().find(c => c.id === id);
+    if (!before) return reply.callNotFound();
     try {
       repo.saveCategory(id, request.body || {});
+      noteChanges(request, before, repo.categories().find(c => c.id === id));
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
       return seriesPage(request, reply.code(422), { editErrors: { id, errors: err.errors, values: err.values } });
@@ -1864,9 +1878,11 @@ export default async function adminRoutes(app) {
 
   app.post('/admin/auteurs/:id', W('photographes.gerer'), async (request, reply) => {
     const id = byId(request.params.id);
-    if (!repo.authors().some(a => a.id === id)) return reply.callNotFound();
+    const before = repo.authors().find(a => a.id === id);
+    if (!before) return reply.callNotFound();
     try {
       repo.saveAuthor(id, request.body || {});
+      noteChanges(request, before, repo.authors().find(a => a.id === id));
       app.variants.schedule();          // le nom de l'auteur peut figurer dans le filigrane et l'EXIF
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
