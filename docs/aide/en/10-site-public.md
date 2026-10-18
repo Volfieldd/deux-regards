@@ -53,6 +53,8 @@ The next photo depends on the active filter: in “Street, by Julien”, you sta
 
 **Where and nearby**: if the photo’s record has **Show on the world map** ticked, a small map is shown next to the text, framed on its town. The photo’s thumbnail appears in a circle, and the other photos taken within 250 km as markers, with their town’s name; each marker leads to its photo. Below the photo, the **Nearby** row shows the closest ones, with their town and distance. Only photos ticked “on the map” appear, and only the town is known, never the exact position. The **See the world map** link appears if the Map page is published.
 
+**Date and time**: the photo’s date as you entered it (to the month or to the day). The shooting time only appears if the record ticks **Show the time on the site** and the date is to the day: “1 May 2025, 2:32 pm” (“14 h 32”, “14:32 Uhr”), in the caption and the “Place, date and time” line. It is only shown on the photo’s page, never in the gallery, Nearby, the map or the sharing previews.
+
 ## Other pages
 
 - **About:** full logo, tagline, text, authors’ biographies.

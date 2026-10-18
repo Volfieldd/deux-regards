@@ -110,7 +110,8 @@ Schlägt das Speichern fehl (Sitzung abgelaufen…), kehrt die vorherige Reihenf
 | **Adresse** | das Ende der URL: `/photo/<adresse>`. Leer: aus dem Titel abgeleitet. Kleinbuchstaben, Ziffern und Bindestriche; sie muss eindeutig sein. Eine Änderung macht alte geteilte Links ungültig (die Start-Diashow dagegen folgt). |
 | **Serie**, **Fotograf** | Listen |
 | **Ort** | freier Text, 120 Zeichen |
-| **Datum** | in Alltagssprache: „mars 2024“, „3/2024“, „2/3/2024“ oder `2024-03` |
+| **Datum** | in Alltagssprache: „mars 2024“, „3/2024“, „2/3/2024“ oder `2024-03`. Die von der Kamera gelesene Aufnahmezeit („aufgenommen um 14:32“) steht daneben; die Verwaltung zeigt sie immer mit dem Datum (Datenblatt, Fotothek, „Ergänzen und veröffentlichen“, Zu bestätigen, Ausflüge). |
+| **Uhrzeit auf der Website zeigen** | nur angeboten, wenn die Aufnahmezeit bekannt ist, **anfangs nicht angekreuzt**. Angekreuzt zeigt die Seite des Fotos die Uhrzeit nach dem Datum („1. Mai 2025, 14:32 Uhr“; „14 h 32“ auf Französisch, „2:32 pm“ auf Englisch), und nur, wenn das Datum tagesgenau ist (nicht „mars 2024“). Zusammen mit dem Ort verrät die Uhrzeit, wo sich die fotografierten Personen in diesem Moment aufhielten: nur bewusst ankreuzen. Nirgends sonst auf der Website (Galerie, In der Nähe, Karte, Teilen, Sitemap); bei den Metadaten „Aufnahmedaten“ folgen Datum und Uhrzeit der ausgelieferten Bilder dem Kästchen (siehe [Wasserzeichen und EXIF](filigrane-exif)). Gleiches Recht wie das Datum: Fotografen stellen es für ihre eigenen Fotos ein. |
 | **Bildunterschrift** | unter dem Foto angezeigt, 2000 Zeichen |
 | **Status** | Entwurf oder Veröffentlicht |
 | **Wasserzeichen** | „Laut Einstellungen“ oder „Nie auf diesem Foto“ (siehe [Wasserzeichen und EXIF](filigrane-exif)) |

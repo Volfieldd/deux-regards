@@ -53,6 +53,8 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
 
 **Où et à proximité** : si la fiche de la photo coche **Afficher sur la carte du monde**, une petite carte est affichée à côté du texte, cadrée sur sa ville. La vignette de la photo y apparaît dans un cercle, et les autres photos prises à moins de 250 km en pastilles, avec le nom de leur ville ; chaque pastille mène à sa photo. Sous la photo, la rangée **À proximité** montre les plus proches, avec leur ville et leur distance. Seules les photos cochées « sur la carte » apparaissent, et seule la ville est connue, jamais la position exacte. Le lien **Voir la carte du monde** apparaît si la page Carte est publiée.
 
+**Date et heure** : la date de la photo telle que vous l'avez saisie (au mois ou au jour). L'heure de prise de vue n'apparaît que si la fiche coche **Montrer l'heure sur le site** et que la date est au jour : « 1 mai 2025, 14 h 32 » (« 2:32 pm », « 14:32 Uhr »), dans le cartel et la ligne « Lieu, date et heure ». Elle n'est montrée que sur la page de la photo, jamais dans la galerie, À proximité, la carte ni les aperçus de partage.
+
 ## Autres pages
 
 - **À propos :** logo complet, accroche, texte, biographies des auteurs.
