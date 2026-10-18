@@ -68,7 +68,7 @@ As long as a required item is missing (names, address, email, phone, person resp
 
 - **First sign-in:** the account is created. If Zitadel gives it the “admin” role, it is an administrator; otherwise it stays **pending**, with no access, and “Today” says so. Name and address come from the identity provider (the address only if it verified it): before giving a role, check with the person the **identifier (sub)** shown under the account, which they also see on their “Account pending” page. An account never dealt with and left pending for 90 days is deleted (an account whose roles an administrator removed is kept, and the IdP cannot give it the “admin” role back).
 - **Give a role:** tick it, then **Give this role** (or **Save**). It takes effect at once, without signing in again; removing it too.
-  - **Administrator**: everything, including accounts and the log.
+  - **Administrator**: everything, including accounts, the log and the link to Vigie ([Security](reglages#sécurité)).
   - **Moderator**: approves, schedules, publishes and unpublishes (site and Instagram), handles reports, sends photos back or writes notes to the photographer, sets the publishing workflow; does not edit photos and never sees personal data (of a report, they read the message, never the address left).
   - **Proofreader**: proofreads and translates texts.
   - **Photographer**: only **their own** photos, outings and the people they met (consent is given per outing and per photographer). They import, edit and delete their photos (which remain their property), see the GDPR requests that concern them, use the Field app and their cards; they do not publish (they propose, for the site as for Instagram), and see neither the Instagram queue, nor settings, nor site traffic (their Statistics show only their photos). What belongs to the other photographer does not exist for them, even by typing the address. A person met by both only appears with their own encounters; merging, splitting, exporting or erasing them is left to the administrator.
@@ -83,3 +83,14 @@ The menu only shows the pages the account can open.
 ## Log
 
 **Log** (administrators): who did what in the admin, most recent first: sign-ins (successful, pending, refused), changes, publishing, actions on several photos, changed accounts (with the detail: roles, status, linked photographer), GDPR exports and downloaded originals. Filter by account or by word. Choosing the language and theme is not recorded. **Result**: “done”, or “refused” when the server refused the action (missing right, or refusal announced by an error message at the top of the page). The log is kept for 13 months.
+
+## Security
+
+**Security** (Settings group, after Log) opens, in a new tab, the console of **Vigie**, the site's security component (`https://vigie.nicephos.art`). The entry only appears to accounts allowed to see it (the Administrator role has it; the other roles do not) and only if Vigie is installed. The console has its own locks (Cloudflare Access, its Zitadel account with two-factor authentication): being an administrator of the site is not enough to get in.
+
+The admin only knows what Vigie sends it every minute, signed: the number of open alerts per severity, the time and number of the most severe; never the title of a rule, an address or an account.
+
+- **Entry badge**: ▲ and the number of high and critical alerts; the number alone for medium ones; nothing when no alert is open.
+- **Today**: a row “Security: … in Vigie” (see [Dashboard](tableau-de-bord)).
+- **Red banner**, at the top of every page, as long as a critical alert is taken on by nobody in the console; **Open alert #…** opens it directly.
+- **Summary unavailable** (Vigie has not answered the site for more than 5 minutes): ▲ alone on the entry, and the admin says what it knew and since when it no longer knows (“at the last summary, 14:10 … unavailable since 14:11”); a critical banner stays, dated. Vigie itself keeps sending its alerts through its own channels (Signal, e-mail).

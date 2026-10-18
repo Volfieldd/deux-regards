@@ -7,6 +7,8 @@ Das ist die Seite **Heute**, auf der Sie landen. Oben **Website ansehen** und **
   - **! im Dreieck, bald**: eine Person, die **abgelehnt hat**, während veröffentlichte Fotos ihres Ausflugs weder verknüpft noch ausgeschlossen sind (prüfen Sie, ob sie darauf zu sehen ist); die **neuen fotografierten Personen**; **fehlgeschlagene Instagram-Beiträge** (durch eine Einwilligung gesperrt oder von Instagram abgelehnt); **Instagram pausiert**;
   - **leerer Kreis, wenn Sie Zeit haben**: die **zu vervollständigenden Fotos**, veröffentlichte Fotos **ohne Ort** (fehlen auf der Weltkarte), **Titel ohne Übersetzung** ins Englische oder Deutsche, **Prioritätsnachweise**, die nach einem Fehler ausstehen.
 
+  - **Sicherheit** (Konten, die die Vigie sehen, siehe [Sicherheit](reglages#sécurité)): die in der Vigie offenen Sicherheitswarnungen, als Anzahl je Schweregrad, mit der Uhrzeit der schwersten; dringend bei einer hohen oder kritischen Warnung, bald bei einer mittleren oder wenn die Zusammenfassung der Vigie nicht mehr ankommt. Die Schaltfläche öffnet die Warnung in der Konsole, in einem neuen Tab.
+
   Die dringenden Punkte werden auch in der Seitenleiste neben **Heute** gezählt (✕ und ihre Anzahl). Die Links „ohne Ort“ und „ohne Übersetzung“ öffnen die gefilterte Fotothek; der Filter-Chip mit ✕ entfernt den Filter.
 
 - **Zu vervollständigen**: die Entwürfe und die Fotos, die noch ihren vorläufigen Titel haben, jeweils mit der direkten Aktion: **Veröffentlichen** (Foto bereit, für Konten, die veröffentlichen), **Betiteln** (öffnet die Details), **Prüfen** (Einwilligungen zu prüfen: Die Details verlangen eine Bestätigung), **Vorschlagen** (für Konten, die dem Moderator vorschlagen) oder **Ansehen** (Foto durch eine Einwilligung gesperrt). Der kleine Text nennt den Stand: „bereit zur Veröffentlichung“, „Einwilligungen zu prüfen“ oder „durch eine Einwilligung gesperrt“. **Alles auf einer Seite vervollständigen** öffnet die Fotothek, gefiltert auf „Zu vervollständigen“.
@@ -23,5 +25,7 @@ Das ist die Seite **Heute**, auf der Sie landen. Oben **Website ansehen** und **
   - **DSGVO-Anfragen** werden Ihnen immer gesendet, mit ihren Erinnerungen (siehe die Hilfe „Fotografierte Personen“).
   - **Konto nicht verknüpft:** Ein Administrator verknüpft es unter [Konten und Rollen](reglages#comptes-et-rôles) mit seinem Fotografen.
   - **Konto verknüpft:** Ihre Importe werden Ihnen standardmäßig zugeordnet.
+
+**Roter Hinweis „… kritische Sicherheitswarnungen in der Vigie“**: oben auf jeder Seite, für Konten, die die Vigie sehen, solange eine kritische Warnung in der Konsole auf Übernahme wartet; **Warnung öffnen** öffnet sie in einem neuen Tab (siehe [Sicherheit](reglages#sécurité)).
 
 **Banner „Bilder werden aktualisiert“**: Es erscheint nach einer Änderung von Wasserzeichen, EXIF, Autorenname… Der Zähler läuft von selbst weiter; siehe [Wasserzeichen und EXIF](filigrane-exif#mise-à-jour-des-images). Nur Konten, die das Wasserzeichen einstellen, sehen es.

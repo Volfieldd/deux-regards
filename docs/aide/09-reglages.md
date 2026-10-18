@@ -68,7 +68,7 @@ Tant qu'il manque une rubrique obligatoire (noms, adresse, e-mail, téléphone, 
 
 - **Première connexion :** le compte est créé. Si Zitadel lui donne le rôle « admin », il est administrateur ; sinon il reste **en attente**, sans accès, et « Aujourd'hui » l'indique. Nom et adresse viennent du fournisseur d'identité (l'adresse seulement s'il l'a vérifiée) : avant de donner un rôle, vérifiez avec la personne l'**identifiant (sub)** affiché sous le compte, qu'elle voit aussi sur sa page « Compte en attente ». Un compte jamais traité, resté en attente 90 jours, est effacé (un compte dont un administrateur a retiré les rôles est gardé, et l’IdP ne peut pas lui redonner le rôle « admin »).
 - **Donner un rôle :** cochez-le, puis **Donner ce rôle** (ou **Enregistrer**). Il s'applique tout de suite, sans nouvelle connexion ; le retirer aussi.
-  - **Administrateur** : tout, y compris les comptes et le journal.
+  - **Administrateur** : tout, y compris les comptes, le journal et le lien vers la Vigie ([Sécurité](reglages#sécurité)).
   - **Modérateur** : valide, programme, publie et dépublie (site et Instagram), traite les signalements, renvoie au photographe ou lui adresse une remarque, règle le circuit de publication ; il ne retouche pas les photos et ne voit jamais les données personnelles (d'un signalement, il lit le message, jamais l'adresse laissée).
   - **Relecteur** : relit et traduit les textes.
   - **Photographe** : seulement **ses** photos, ses sorties et les personnes qu'il a rencontrées (l'accord est donné par sortie et par photographe). Il importe, modifie et supprime ses photos (elles restent sa propriété), voit les demandes RGPD qui le concernent, utilise l'app Terrain et ses cartes ; il ne publie pas (il propose, sur le site comme pour Instagram), et ne voit ni la file Instagram, ni les réglages, ni la fréquentation du site (ses Statistiques ne montrent que ses photos). Ce qui est à l'autre photographe n'existe pas pour lui, même en tapant l'adresse. Une personne rencontrée par les deux ne lui apparaît qu'avec ses propres rencontres ; la rapprocher, la séparer, l'exporter ou l'effacer reste à l'administrateur.
@@ -83,3 +83,14 @@ Le menu ne montre que les pages que le compte peut ouvrir.
 ## Journal
 
 **Journal** (administrateurs) : qui a fait quoi dans l'admin, les plus récents d'abord : connexions (réussies, en attente, refusées), modifications, publications, actions sur plusieurs photos, comptes modifiés (avec le détail : rôles, état, photographe lié), exports RGPD et originaux téléchargés. Filtrez par compte ou par mot. Le choix de la langue et du thème n'y figure pas. **Résultat** : « fait », ou « refusé » quand le serveur a refusé l'action (droit manquant, ou refus annoncé par un message d'erreur en haut de la page). Le journal est gardé 13 mois.
+
+## Sécurité
+
+**Sécurité** (groupe Réglages, après Journal) ouvre, dans un nouvel onglet, la console de la **Vigie**, le composant de sécurité du site (`https://vigie.nicephos.art`). L'entrée n'apparaît qu'aux comptes qui ont le droit de la voir (le rôle Administrateur l'a ; les autres rôles, non) et seulement si la Vigie est installée. La console a ses propres verrous (Cloudflare Access, son compte Zitadel avec double authentification) : être administrateur du site ne suffit pas pour y entrer.
+
+L'admin n'en sait que ce que la Vigie lui envoie chaque minute, signé : le nombre d'alertes ouvertes par gravité, l'heure et le numéro de la plus grave ; jamais le titre d'une règle, une adresse ou un compte.
+
+- **Badge de l'entrée** : ▲ et le nombre des alertes hautes et critiques ; le nombre seul pour les moyennes ; rien quand aucune alerte n'est ouverte.
+- **Aujourd'hui** : une ligne « Sécurité : … dans la Vigie » (voir [Tableau de bord](tableau-de-bord)).
+- **Bandeau rouge**, en tête de toutes les pages, tant qu'une alerte critique n'est prise en charge par personne dans la console ; **Ouvrir l'alerte #…** l'ouvre directement.
+- **Résumé indisponible** (la Vigie ne répond plus au site depuis plus de 5 minutes) : ▲ seul sur l'entrée, et l'admin dit ce qu'elle savait et depuis quand elle ne sait plus (« au dernier résumé, 14 h 10 … indisponible depuis 14 h 11 ») ; un bandeau critique reste affiché, daté. La Vigie, elle, continue d'envoyer ses alertes par ses propres canaux (Signal, e-mail).

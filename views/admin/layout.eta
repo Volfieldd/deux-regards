@@ -50,8 +50,13 @@
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
     moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
     logout: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>',
+    vigie: '<path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.1-7.5 9.5-4.3-1.4-7.5-4.9-7.5-9.5V6z"/>',
+    critique: '<path d="M8.2 3h7.6L21 8.2v7.6L15.8 21H8.2L3 15.8V8.2z"/><path d="M12 7.5v5.5M12 16.5h.01"/>',
   };
   const ic = (k, s = 18) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+  // Petite flèche qui sort : le lien s'ouvre dans un nouvel onglet (dit aussi au lecteur d'écran).
+  const ext = (s = 12) => `<svg class="ic sec-ext" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON.site}</svg>`;
+  const sec = it.securite;
   const cur = (key) => it.section === key || (key === 'photos' && (it.section === 'photo' || it.section === 'batch' || it.section === 'confirm-delete'));
   const b = it.brand || {};
   const nextTheme = it.adminTheme === 'light' ? 'dark' : 'light';
@@ -110,7 +115,8 @@
     <%~ item(['accounts', '/admin/comptes', 'Comptes et rôles', 'key', null, 'comptes.gerer']) %>
     <%~ item(['circuit', '/admin/circuit', 'Circuit de publication', 'journal', null, 'circuit.regler']) %>
     <%~ item(['journal', '/admin/journal', 'Journal', 'journal', null, 'journal.voir']) %>
-    <%~ item(['appearance', '/admin/apparence', 'Apparence', 'appearance', null, 'site.apparence']) %>
+<% if (sec) { /* La console de la Vigie (comptes securite.voir, Vigie réglée) : autre origine, nouvel onglet ; badge du résumé. */ %>    <a class="nav-sec" href="<%= sec.href %>" target="_blank" rel="noopener noreferrer"><%~ ic('vigie') %><%= t('Sécurité') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span><%~ ext() %><% if (sec.badge) { %><span class="nav-badge<%= sec.badge.attention ? ' attention' : '' %>"><span aria-hidden="true"><%= sec.badge.text %></span><span class="sr-only">, <%= sec.badge.sr %></span></span><% } %></a>
+<% } %>    <%~ item(['appearance', '/admin/apparence', 'Apparence', 'appearance', null, 'site.apparence']) %>
     <%~ item(['images', '/admin/images', 'Filigrane & EXIF', 'images', null, 'site.filigrane']) %>
     <%~ item(['droits', '/admin/droits', 'Droits & confidentialité', 'shield', null, 'reglages.droits']) %>
     <%~ item(['help', '/admin/aide', 'Aide', 'help']) %>
@@ -146,6 +152,9 @@
 <% const HELP = { review: 'photos-le-circuit-de-publication', circuit: 'photos-le-circuit-de-publication', accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', trips: 'rencontres-les-voyages', trip: 'rencontres-les-voyages', releases: 'tableau-de-bord', reports: 'site-public-visionneuse-page-dune-photo', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>"><%= t('Aide sur cette page') %></a></p>
+<% } %>
+<% if (sec && sec.banner) { const bn = sec.banner; %>
+  <div class="sec-bandeau" role="alert"><%~ ic('critique', 20) %><p><span class="t"><%= bn.title %></span><span class="sec"><%= bn.detail %></span></p><a class="btn ghost" href="<%= bn.href %>" target="_blank" rel="noopener noreferrer"><%= bn.action %><span class="sr-only"> <%= t('(nouvel onglet)') %></span><%~ ext(14) %></a></div>
 <% } %>
 <% if (it.variants.running || it.variants.errors.length) { %>
   <div class="flash<%= it.variants.errors.length ? ' error' : '' %>" data-variants>

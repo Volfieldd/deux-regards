@@ -160,6 +160,9 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
   // Résumé des alertes pour l'admin (phase D) : signé par la Vigie (usage « resume »), frais de 5 minutes ; ni adresse
   // ni compte. null tant qu'il n'est pas lu, ou s'il est refusé.
   let summary = null;
+  // Première lecture manquée depuis le dernier résumé reçu (Vigie injoignable, réponse refusée) : l'admin dit
+  // « indisponible depuis » cette heure-là.
+  let summaryFailedAt = null;
   const COUNT = /^\d{1,6}$/;
   function acceptSummary(signed) {
     if (!signed || typeof signed.payload !== 'string' || typeof signed.signature !== 'string') throw new Error('résumé sans signature');
@@ -174,13 +177,16 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     const worst = p.plus_grave && Number.isSafeInteger(p.plus_grave.id) ? { id: p.plus_grave.id, gravite: ['critique', 'haut', 'moyen', 'bas'].includes(p.plus_grave.gravite) ? p.plus_grave.gravite : 'moyen', depuis: Number(p.plus_grave.depuis) || null } : null;
     summary = { recu_a: now(), ouvertes: { critique: n('critique'), haut: n('haut'), moyen: n('moyen'), bas: n('bas') }, plus_grave: worst,
       critique_a_prendre: p.critique_a_prendre === true, console: /^https:\/\/[^\s"<>]+$/.test(p.console || '') ? p.console : null };
+    summaryFailedAt = null;
     return summary;
   }
   async function pollSummary() {
     const p = '/v1/resume';
-    const res = await fetchImpl(`${url}${p}`, { headers: signedGet(p), redirect: 'manual', signal: AbortSignal.timeout(10000) });
-    if (res.status !== 200) { await res.body?.cancel?.().catch(() => {}); throw new Error(`Vigie : réponse ${res.status}`); }
-    return acceptSummary(JSON.parse(await readLimited(res, 64 * 1024)));
+    try {
+      const res = await fetchImpl(`${url}${p}`, { headers: signedGet(p), redirect: 'manual', signal: AbortSignal.timeout(10000) });
+      if (res.status !== 200) { await res.body?.cancel?.().catch(() => {}); throw new Error(`Vigie : réponse ${res.status}`); }
+      return acceptSummary(JSON.parse(await readLimited(res, 64 * 1024)));
+    } catch (err) { summaryFailedAt ??= now(); throw err; }
   }
   let summaryTimer = null;
 
@@ -195,6 +201,10 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     // Résumé lu il y a moins de 5 minutes, sinon null (Vigie injoignable : l'admin le dit au lieu d'afficher un vieux
     // « aucune alerte »).
     get summary() { return summary && now() - summary.recu_a < 5 * 60e3 ? summary : null; },
+    // Dernier résumé reçu, même périmé (recu_a : son heure), et l'heure de la première lecture manquée depuis : l'admin
+    // montre le dernier état connu, daté, au lieu de rien (jamais un faux « aucune alerte »). null : jamais reçu.
+    get lastSummary() { return summary; },
+    get summaryFailedAt() { return summaryFailedAt; },
     get state() { return state; },
     // Adresse bloquée pour ce chemin ? Renvoie la portée, ou null. pathname : gabarit de la route ou chemin décodé
     // (jamais l'adresse brute, que le routeur décode : « /%61dmin » est « /admin »).

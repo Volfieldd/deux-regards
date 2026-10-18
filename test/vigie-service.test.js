@@ -133,12 +133,21 @@ test('décisions : bornées, jamais tout le monde, signées ; attente longue ren
   const s = v.decisions.signed();
   assert.ok(crypto.verify(null, Buffer.from(s.payload), VIGIE_KEYS.publicKey, Buffer.from(s.signature, 'base64')));
   assert.deepEqual(JSON.parse(s.payload).blocages.map(b => [b.cible, b.portee]), [['203.0.113.0/24', 'admin']]);
-  // Attente longue : la réponse arrive dès qu'une décision change.
+  // Attente longue : la réponse arrive dès qu'une décision change. Le signal « change » de la décision créée plus haut
+  // part au tour suivant de la boucle (setImmediate) : on le laisse passer, sinon il libérerait l'attente à peine
+  // installée et la boucle ci-dessous attendrait sans fin un écouteur déjà parti (test bloqué une fois sur six).
+  await new Promise(r => setImmediate(r));
   const version = v.decisions.version();
   const url = `/v1/decisions?depuis=${version}`;
   const waiting = v.ingest.inject({ method: 'GET', url, headers: signed(`GET ${url}`) });
   // La décision n'arrive qu'une fois l'attente installée (jamais un délai fixe : la machine peut être chargée).
-  while (!v.decisions.events.listenerCount('change')) await new Promise(r => setTimeout(r, 5));
+  for (let i = 0; !v.decisions.events.listenerCount('change'); i++) {
+    assert.ok(i < 2000, 'l’attente longue ne s’est jamais installée');
+    await new Promise(r => setTimeout(r, 5));
+  }
+  // L'attente tient tant que rien ne change (avant le correctif, elle rendait la main dès la requête lue).
+  await new Promise(r => setTimeout(r, 50));
+  assert.equal(v.decisions.events.listenerCount('change'), 1, 'attente toujours en place');
   v.decisions.create({ kind: 'geler', cible: 'zitadel-x', duree: '1h', par: 'test' });
   const res = await waiting;
   assert.equal(res.statusCode, 200);
