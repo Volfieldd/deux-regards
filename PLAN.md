@@ -322,4 +322,7 @@ Plus tard (noté le 15 octobre 2026 ; étude détaillée dans [`docs/etudes/blog
 - **Photos privées protégées** : galeries privées visibles de l'administration (connexion Zitadel) et de personnes choisies, qui reçoivent un lien temporaire et un mot de passe.
 - **Boutique** : panier et achat (tirages, peut-être fichiers numériques), jusqu'au paiement et à la facturation.
 
+Plus tard (noté le 18 octobre 2026 ; note de cadrage dans [`docs/etudes/stories-instagram-musique.md`](docs/etudes/stories-instagram-musique.md)) :
+- **Stories Instagram en musique** : petit montage (3 à 10 photos, transitions, un morceau de quelques secondes) rendu par un conteneur dédié (`montage`, profil Compose, facultatif), musique tirée d'une phonothèque à fiche de licence obligatoire, sortie en téléchargement puis par la file Instagram ; décisions DS1 à DS7 à prendre ; code après la fin de la phase D de la Vigie.
+
 Écarté pour l'instant : suggestions de titres et légendes par IA (contrainte de coût nul ; l'offre gratuite de Gemini exige le payant pour des utilisateurs dans l'EEE ; piste possible : modèle local via Ollama).
