@@ -13,7 +13,11 @@ import path from 'node:path';
 export const VERSIONS = ['v1', 'v2'];
 const KEY = 'public_version';
 const PERM = 'site.apparence';
-const MAX_PREVIEWS = 64;                     // borne de la mémoire : au-delà, les plus anciens aperçus sont oubliés
+const MAX_PREVIEWS = 64;
+// Pages qui n'existent qu'en v2 (galeries privées, MQ-16 et MQ-17) : de nouvelles pages, hors menu, sans gabarit v1 ;
+// servies en v2 quel que soit le réglage (un invité s'en sert même si le site est en v1). La v1 reste figée : aucun de
+// ses gabarits n'est touché, et une page v1 n'est jamais servie en v2 par ce biais (préfixe « prive- » seulement).
+export const ONLY_V2 = /^prive-[a-z]+$/;                     // borne de la mémoire : au-delà, les plus anciens aperçus sont oubliés
 
 export function createPublicVersion({ db, viewsDir, cache = false }) {
   const read = db.prepare('SELECT value FROM settings WHERE key = ?').pluck();
@@ -55,6 +59,8 @@ export function createPublicVersion({ db, viewsDir, cache = false }) {
       const applied = setting();
       return { version: applied === 'v2' || preview ? 'v2' : 'v1', preview: preview && applied !== 'v2' };
     },
+    // Page sans version v1 : toujours en v2.
+    onlyV2: template => ONLY_V2.test(template),
     // Le gabarit v2 de cette page existe-t-il ? Sinon, la page reste en v1.
     hasV2(template) {
       if (!/^[a-z][\w-]*$/i.test(template)) return false;                     // pages publiques seulement (pas « admin/… »)

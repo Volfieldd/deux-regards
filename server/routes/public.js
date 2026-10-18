@@ -57,7 +57,7 @@ export default async function publicRoutes(app) {
   // Mêmes pages en français (racine), en anglais (/en) et en allemand (/de).
   for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, searchLimit, codeGuard });
 
-  // Sélecteur de langue : retient le choix (seul cookie du site, posé à ce moment-là) puis ouvre la page demandée.
+  // Sélecteur de langue : retient le choix (cookie de langue, posé à ce moment-là ; l'autre cookie du site public est celui des galeries privées) puis ouvre la page demandée.
   // Adresses habituelles des mentions légales en Allemagne et en anglais.
   app.get('/impressum', async (request, reply) => reply.redirect('/de/mentions-legales', 301));
   app.get('/legal-notice', async (request, reply) => reply.redirect('/en/mentions-legales', 301));
@@ -141,9 +141,10 @@ export default async function publicRoutes(app) {
     return reply.header('cache-control', 'no-store').header('x-robots-tag', 'noindex').type('image/jpeg').send(buf);
   });
 
-  // Moteurs de recherche : tout le site public, jamais l'admin ni la connexion.
+  // Moteurs de recherche : tout le site public, jamais l'admin ni la connexion. Galeries privées : /prive/ interdit (tout y
+  // répond 404 sans session) ; /g/ ne l'est pas : une page interdite ne voit jamais son « noindex » (G36, M7).
   app.get('/robots.txt', async (request, reply) => reply.type('text/plain; charset=utf-8')
-    .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nDisallow: /partage/\nDisallow: /langue/\nDisallow: /pour-vous/\n${app.securite.enabled ? `Disallow: ${TRAP_PATH}\n` : ''}Allow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
+    .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nDisallow: /partage/\nDisallow: /langue/\nDisallow: /pour-vous/\nDisallow: /prive/\n${app.securite.enabled ? `Disallow: ${TRAP_PATH}\n` : ''}Allow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
 
   // Chaque page dans ses trois langues, avec les liens hreflang entre elles.
   app.get('/sitemap.xml', async (request, reply) => {

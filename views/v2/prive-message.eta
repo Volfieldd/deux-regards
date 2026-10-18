@@ -1,0 +1,28 @@
+<% /* Messages des pages privées (MQ-16 états 14 à 16, MQ-17 états 13 et 14), en-tête du mot de passe, sans sortie :
+      introuvable (404 uniforme, T10), retire (accès retiré : même statut), revoque (lien remplacé ou accès révoqué, 410),
+      fini (accès ou galerie arrivés à échéance, 410, sans titre de galerie, G11), suspendu (30 refus, 403), occupe (503,
+      G18), limite (429, G20), quitte (après « Quitter la galerie », G29), refuse (envoi refusé : autre site, jeton CSRF). */ %>
+<% const P = it.P, ty = it.v2.typo, ic = it.v2.ic, k = it.kind, who = it.who || it.siteName;
+   const titles = { introuvable: P.notFoundTitle, retire: P.removedTitle, revoque: P.revokedTitle, fini: it.date ? P.endedTitle(it.dateOf(it.date)) : P.revokedTitle,
+     suspendu: P.suspendedTitle, occupe: P.busyTitle, limite: P.limitTitle, quitte: P.leftTitle, refuse: P.refusedTitle };
+   const writeTo = it.contact ? `<a class="btn btn--filet" href="${it.contact}">${it.v2.esc(P.write(who))}</a>` : ''; %>
+<% layout('./layout', { pageTitle: ty(`${titles[k]} · ${P.label} · ${it.siteName}`) }) %>
+<%~ include('./_prive-entete', { ...it, mode: 'tunnel' }) %>
+<main id="contenu" class="wrap">
+  <div class="pv-msg">
+    <h1 tabindex="-1"><% if (k === 'fini' && it.date) { %><%~ ty(P.endedTitle(`<time datetime="${it.isoDay(it.date)}">${it.dateOf(it.date)}</time>`)) %><% } else { %><%= ty(titles[k]) %><% } %></h1>
+<% if (k === 'introuvable') { %>    <p class="pv-p"><%= ty(P.notFound) %></p>
+<% } else if (k === 'retire') { %>    <p class="pv-p"><%= ty(P.removed(who)) %></p>
+<% if (writeTo) { %>    <p class="pv-p"><%~ writeTo %></p><% } %>
+<% } else if (k === 'refuse') { %>    <p class="pv-p"><%= ty(P.refused) %></p>
+<% } else if (k === 'revoque') { %>    <p class="pv-p"><%= ty(P.revoked(who)) %></p>
+<% if (writeTo) { %>    <p class="pv-p"><%~ writeTo %></p><% } %>
+<% } else if (k === 'fini') { %>    <p class="pv-p"><%= ty(P.ended(who)) %></p>
+<% if (writeTo) { %>    <p class="pv-p"><%~ writeTo %></p><% } %>
+<% } else if (k === 'suspendu') { const s = P.suspended(who); %>    <div class="msg msg--erreur" role="alert"><%~ ic('alerte', { size: 18 }) %><p><b><%= ty(P.error) %></b> <%= ty(s[0]) %><%= ty(s[1]) %><% if (it.contact) { %><a href="<%= it.contact %>"><%= s[2] %></a><% } else { %><%= s[2] %><% } %><%= ty(s[3]) %></p></div>
+<% } else if (k === 'occupe') { %>    <div class="msg" role="status"><%~ ic('horloge', { size: 18 }) %><p><b><%= ty(P.busy[0]) %></b><%= ty(P.busy[1]) %></p></div>
+<% } else if (k === 'limite') { %>    <div class="msg" role="status"><%~ ic('horloge', { size: 18 }) %><p><%= ty(P.limit) %></p></div>
+<% } else if (k === 'quitte') { %>    <p class="pv-p"><% if (it.until) { %><%~ ty(P.left(`<time datetime="${it.isoDay(it.until)}">${it.dateOf(it.until)}</time>`)) %><% } else { %><%= ty(P.leftNone) %><% } %></p>
+<% } %>  </div>
+</main>
+<%~ include('./_prive-pied', it) %>
