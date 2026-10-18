@@ -17,6 +17,20 @@ Relevé du 18 octobre 2026, sur main après les PR #114, #115, #117, #119, #122 
 
 Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1, BV-2, BV-4 et BV-6 (`server/securite/`, `vigie/`, point d'émission dans `app.audit.log`) ; le site prend BV-3, BV-5 et BV-7 (et l'émission du partage par QR de BV-6), dans la PR `fix/vigie-bv3-bv5-bv7`.
 
+### Suivi (colonne « Pris »)
+
+| Besoin | Rattaché à | Pris | Où | État |
+|---|---|---|---|---|
+| BV-1 Réglage public sensible changé | DS9 (contact ou directeur de la publication), DS23 (après une session reprise) | ✓ Vigie | `feat/vigie-actions-admin` : point d'émission unique dans `server/securite/site.js`, événement `config_public_changed`, règles `vigie/regles/80-admin.yml` | fait |
+| BV-2 Donnée personnelle rendue publique | DS18 | ✓ Vigie | même PR : `privacy_exposure_changed` (heure visible, EXIF complet), règles `exif_complet` et `heures_visibles_en_masse` | fait |
+| BV-3 Valeurs de filtre impossibles | DS12 | ✓ site | `fix/vigie-bv3-bv5-bv7` | en cours |
+| BV-4 Seuils DS15 face à la v2 | DS15 | ✓ Vigie | recalage sur le trafic de l'aperçu (phase D), sans changement avant d'avoir des chiffres | à faire |
+| BV-5 Aucun lien interne vers une 404 | prérequis de DS15 | ✓ site | `fix/vigie-bv3-bv5-bv7` | en cours |
+| BV-6 Statistiques gonflées | DS22 | ✓ Vigie et site | déjà couvert par `excess_rate_limit_exceeded` (1 point sur l'adresse) ; émission du partage par QR côté site | en cours |
+| BV-7 Referer de la photo offerte | durcissement | ✓ site | `fix/vigie-bv3-bv5-bv7` | en cours |
+| BV-8 Saisie de recherche impossible | DS12 | site (prochain lot) | `input_validation_fail`, la règle DS12 existante s'applique | à faire |
+| BV-9 Recherches en rafale | DS15, DS22 | site (prochain lot) | limite et `excess_rate_limit_exceeded` ; la Vigie compte déjà 1 point par dépassement | à faire |
+
 ---
 
 ## Constat transversal : la Vigie ne voit pas les changements faits dans l'admin

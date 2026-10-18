@@ -27,6 +27,9 @@ export const EVENTS = {
   authz_blocked: E('bas', 'site · public'),           // requête refusée par une décision de la Vigie (blocage, verrouillage)
   // E9, E10 : comptes et rôles
   privilege_permissions_changed: E('bas', 'site · admin'),
+  // Ce qu'un compte fait une fois entré (registre des briques, BV-1 et BV-2)
+  config_public_changed: E('bas', 'site · admin'),
+  privacy_exposure_changed: E('info', 'site · admin'),
   user_created: E('bas', 'site · admin'),
   user_deleted: E('bas', 'site · admin'),
   user_rescued: E('haut', 'site · admin'),
