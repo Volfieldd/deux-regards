@@ -31,6 +31,18 @@ Le site existe en **français** (adresses habituelles, `/photo/…`), **anglais*
 - **Ordre :** au-dessus de la grille, **Sélection** (l'ordre que vous avez choisi dans la photothèque, par défaut) ou **Plus récentes** (par date de publication, la dernière publiée d'abord). L'ordre se cumule avec les filtres, garde son adresse (`?ordre=recentes`) et vaut aussi pour la photo précédente et suivante. La date retenue est celle de la **première** publication : une photo dépubliée puis republiée garde sa place.
 - **Galerie :** toutes les photos publiées, dans l'ordre de l'admin.
 
+## Accueil, galerie et séries en v2
+
+Quand la **v2** est appliquée (Apparence → Site public : v1 ou v2), ces pages changent ainsi :
+
+- **Ouverture :** la photo **entière**, à la hauteur de l'écran, sans voile ni texte posé dessus ; dessous, votre accroche en titre et son cartel (titre, auteur, lieu, date, **Voir la photo**). Le diaporama est **à l'arrêt** : les points choisissent une photo, **Lire** le lance (une photo toutes les 6 secondes), **Pause** l'arrête ; il attend sous la souris, s'arrête dès que le clavier entre dans l'ouverture et ne tourne pas si le visiteur a demandé moins d'animations. Seule la première photo est chargée avec la page. Le cadre prend le format le plus large de vos photos d'ouverture : une verticale parmi des horizontales y tient entière, plus étroite.
+- **Deux regards :** « Les deux » mène à la galerie de l'accueil, un photographe à sa galerie (`/auteur/julien`).
+- **Séries :** une rangée de couvertures (la première photo de chaque série), chacune vers la page de sa série.
+- **Galerie :** en bas de l'accueil (`/#galerie`). Une barre de **filtres** (le regard, l'**Ordre** dans un menu, les séries avec leur couverture et leur nombre de photos) ; chaque choix ouvre une page qui a sa propre adresse, à partager, sans script. Au-delà du téléphone, la barre reste en haut de l'écran pendant qu'on fait défiler.
+- **Rangées :** chaque photo garde son format (une verticale reste verticale), à hauteur commune, et **dans l'ordre de la photothèque** : la première rangée se lit de gauche à droite, puis la suivante ; le clavier suit le même ordre. Au téléphone, deux photos au plus par rangée.
+- **Deux filtres sans photo commune** (une adresse partagée, par exemple « Voyage, par Julien ») : la page le dit et propose la série entière ou toutes les photos du photographe ; chaque filtre se retire d'un geste (**✕**).
+- **Page d'une série** (`/serie/rue`) : son nom en titre, le nombre de photos, les photographes et les années, puis les photos dès le premier écran (sans grande couverture), « La même série, un seul regard » et les autres séries.
+
 ## Visionneuse (page d'une photo)
 
 | Geste | Effet |

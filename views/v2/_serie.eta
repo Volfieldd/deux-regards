@@ -1,0 +1,40 @@
+<% /* Page d'une série (MQ-03), /serie/<slug> : une salle d'exposition et non plus l'accueil déguisé. Le fil d'Ariane, un
+      seul H1 (le nom), la fiche dite une fois (nombre de photos et ordre, photographes, années), puis les photos dès le
+      premier écran, SANS COUVERTURE EN TÊTE (elle sert là où l'on choisit une série) ; la même série par un seul regard ;
+      les autres séries. Le texte d'intention de la maquette n'a pas de champ dans la base : il n'est pas montré. */ %>
+<% const t = it.t, v = it.v2, ic = v.ic, S = it.activeSerie, f = it.filter, list = it.photos, n = list.length;
+   const by = it.regards.slice(1).map(r => ({ ...r, n: list.filter(p => p.author_slug === r.slug).length })).filter(r => r.n);
+   const years = [...new Set(list.map(p => String(p.taken_on || '').slice(0, 4)).filter(y => /^\d{4}$/.test(y)))].sort();
+   const span = years.length ? (years[0] === years.at(-1) ? years[0] : `${years[0]}–${years.at(-1)}`) : '';
+   const others = it.seriesAll.filter(c => c.slug !== S.slug && c.count && c.cover); %>
+  <div class="wrap">
+    <div class="ser-haut">
+      <div class="ser-titre">
+        <nav class="ariane" aria-label="<%= t.v2.breadcrumb %>"><ol><li><a href="<%= it.u('/') %>#series"><%= t.nav.series %></a></li><li aria-current="page"><%= S.name %></li></ol></nav>
+        <h1 class="titre-page"><%= S.name %></h1>
+        <ul class="ser-fiche" aria-label="<%= t.v2.serieBrief %>">
+          <li><b><%= t.photos(n) %></b>, <%= f.ordre ? t.v2.orderLineRecent : t.v2.orderLineOurs %></li>
+<% if (by.length) { %>          <li><%= t.by('') %><% by.forEach((r, i) => { %><%= i === 0 ? '' : i === by.length - 1 ? t.v2.and : ', ' %><a href="<%= it.galleryUrl({ regard: r.slug }) %>#filtres"><%= r.name %></a><% }) %></li>
+<% } %><% if (span) { %>          <li><%= span %></li>
+<% } %>        </ul>
+      </div>
+    </div>
+  </div>
+  <section class="wrap partie ser-photos" id="galerie" aria-labelledby="g-h">
+    <div class="partie-tete"><h2 class="titre-2" id="g-h" tabindex="-1"><%= t.v2.seriePhotos(n) %></h2></div>
+<%~ include('./_rangees', { ...it, list, labelledby: 'g-h', eager: 4 }) %>
+  </section>
+<% if (by.length > 1) { %>
+  <section class="wrap partie" aria-labelledby="r-h">
+    <div class="partie-tete"><h2 class="titre-2" id="r-h"><%= t.v2.oneRegard %></h2></div>
+    <ul class="liste-liens liste-liens--deux">
+<% by.forEach(r => { %>      <li><a href="<%= it.galleryUrl({ regard: r.slug, serie: S.slug }) %>#filtres"><span class="liste-liens-n"><%= S.name %>, <%= t.by(r.name) %></span><span class="liste-liens-d"><%= t.photos(r.n) %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+<% }) %>    </ul>
+  </section>
+<% } %>
+<% if (others.length) { %>
+  <section class="wrap partie" aria-labelledby="a-h">
+    <div class="partie-tete"><h2 class="titre-2" id="a-h"><%= t.v2.otherSeries %></h2><a class="lien" href="<%= it.u('/') %>#series"><%= t.allSeries %><%~ ic('fleche', { size: 18 }) %></a></div>
+<%~ include('./_series', { ...it, list: others, labelledby: 'a-h' }) %>
+  </section>
+<% } %>

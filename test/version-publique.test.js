@@ -242,12 +242,14 @@ test('visionneuse v2 : points d’accroche de la Vigie repris (lien piège cach�
 test('aides v2 : format arrondi vers le bas, sizes, date abrégée insécable', () => {
   assert.deepEqual(fmt({ width: 900, height: 600 }), { r: 1.5, cls: 'fmt-150', vertical: false });
   assert.deepEqual(fmt({ width: 4000, height: 2667 }), { r: 1.5, cls: 'fmt-150', vertical: false });
-  assert.equal(fmt({ width: 600, height: 900 }).cls, 'fmt-66');                       // jamais plus large que la photo
+  assert.equal(fmt({ width: 600, height: 920 }).cls, 'fmt-64');                       // jamais plus large que la photo
+  assert.deepEqual(fmt({ width: 600, height: 900 }), { r: 0.6667, cls: 'fmt-2x3', vertical: true });   // formats courants : exacts
+  assert.equal(fmt({ width: 1920, height: 1080 }).cls, 'fmt-16x9');
   assert.equal(fmt({ width: 10000, height: 1000 }).cls, 'fmt-400');
   assert.equal(fmt({ width: 100, height: 1000 }).cls, 'fmt-30');
   assert.equal(fmt({}).cls, 'fmt-150');
   assert.match(visSizes(fmt({ width: 900, height: 600 })), /min\(calc\(100vw - 160px\), calc\(\(100vh - 191px\) \* 1\.5\), 1350px\)$/);
-  assert.match(visSizes(fmt({ width: 600, height: 900 })), /calc\(\(100vh - 120px\) \* 0\.66\)/);
+  assert.match(visSizes(fmt({ width: 600, height: 900 })), /calc\(\(100vh - 120px\) \* 0\.67\)/);
   assert.equal(shortDate('2026-10-10'), '10 oct. 2026');
   assert.equal(shortDate('2026-10-10', 'de'), '10. Okt. 2026');
   assert.equal(shortDate('2024-03'), 'mars 2024');

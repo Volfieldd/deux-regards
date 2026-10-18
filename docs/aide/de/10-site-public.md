@@ -31,6 +31,18 @@ Die Website gibt es auf **Französisch** (übliche Adressen, `/photo/…`), **En
 - **Reihenfolge:** über dem Raster **Auswahl** (die Reihenfolge, die Sie in der Fotothek gewählt haben, Standard) oder **Neueste** (nach Veröffentlichungsdatum, das zuletzt veröffentlichte zuerst). Die Reihenfolge kombiniert sich mit den Filtern, behält ihre Adresse (`?ordre=recentes`) und gilt auch für das vorherige und nächste Foto. Maßgeblich ist das Datum der **ersten** Veröffentlichung: Ein zurückgezogenes und wieder veröffentlichtes Foto behält seinen Platz.
 - **Galerie:** alle veröffentlichten Fotos, in der Reihenfolge der Verwaltung.
 
+## Startseite, Galerie und Serien in v2
+
+Wenn die **v2** angewendet ist (Erscheinungsbild → Öffentliche Website: v1 oder v2), ändern sich diese Seiten so:
+
+- **Eröffnung:** das **ganze** Foto in Bildschirmhöhe, ohne Schleier und ohne Text darauf; darunter Ihr Leitsatz als Titel und die Bildangabe (Titel, Fotograf, Ort, Datum, **Foto ansehen**). Die Diashow ist **angehalten**: Die Punkte wählen ein Foto, **Abspielen** startet sie (alle 6 Sekunden ein Foto), **Pause** hält sie an; unter der Maus wartet sie, sobald die Tastatur die Eröffnung erreicht, hält sie an, und sie läuft nicht, wenn der Besucher weniger Bewegung gewünscht hat. Nur das erste Foto wird mit der Seite geladen. Der Rahmen nimmt das breiteste Format Ihrer Eröffnungsfotos an: Ein Hochformat zwischen Querformaten passt ganz hinein, schmaler.
+- **Zwei Blicke:** „Beide“ führt zur Galerie der Startseite, ein Fotograf zu seiner Galerie (`/auteur/julien`).
+- **Serien:** eine Reihe von Titelbildern (das erste Foto jeder Serie), jedes zur Seite seiner Serie.
+- **Galerie:** unten auf der Startseite (`/#galerie`). Eine **Filterleiste** (der Blick, die **Reihenfolge** in einem Menü, die Serien mit Titelbild und Anzahl der Fotos); jede Auswahl öffnet eine Seite mit eigener Adresse zum Teilen, ohne Skript. Ab Tablet-Breite bleibt die Leiste beim Blättern oben.
+- **Reihen:** Jedes Foto behält sein Format (ein Hochformat bleibt hoch), in gemeinsamer Höhe und **in der Reihenfolge der Fotothek**: Die erste Reihe liest sich von links nach rechts, dann die nächste; die Tastatur folgt derselben Reihenfolge. Auf dem Telefon höchstens zwei Fotos pro Reihe.
+- **Zwei Filter ohne gemeinsames Foto** (eine geteilte Adresse, etwa „Reise, von Julien“): Die Seite sagt es und bietet die ganze Serie oder alle Fotos des Fotografen an; jeder Filter lässt sich mit einem Griff entfernen (**✕**).
+- **Seite einer Serie** (`/serie/rue`): ihr Name als Titel, die Anzahl der Fotos, die Fotografen und die Jahre, dann die Fotos ab dem ersten Bildschirm (ohne großes Titelbild), „Dieselbe Serie, ein Blick“ und die weiteren Serien.
+
 ## Bildbetrachter (Seite eines Fotos)
 
 | Geste | Wirkung |

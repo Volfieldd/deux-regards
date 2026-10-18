@@ -1,0 +1,6 @@
+<% /* Entrées du menu (MQ-00 § 3), dans l'ordre de la planche : Galerie, Séries, Carte et Voyages s'ils sont publiés,
+      À propos. Seules les pages qui existent : la Galerie et les Séries sont des parties de l'accueil (/#galerie,
+      /#series) tant que /galerie et /series n'existent pas ; Carnets et Tirages viendront avec leurs pages.
+      it.courant : l'entrée de la page affichée (aria-current). */ %>
+<% const t = it.t, home = it.u('/'), cc = k => (it.courant === k ? ' aria-current="page"' : ''); %>
+<li><a href="<%= home %>#galerie"<%~ cc('galerie') %>><%= t.nav.gallery %></a></li><li><a href="<%= home %>#series"<%~ cc('series') %>><%= t.nav.series %></a></li><% if (it.mapPage) { %><li><a href="<%= it.u('/carte') %>"><%= t.nav.map %></a></li><% } %><% if (it.tripsPage) { %><li><a href="<%= it.u('/voyages') %>"><%= t.nav.trips %></a></li><% } %><li><a href="<%= it.u('/a-propos') %>"><%= t.nav.about %></a></li>

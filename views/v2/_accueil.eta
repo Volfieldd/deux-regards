@@ -1,0 +1,34 @@
+<% /* Accueil (MQ-01) : l'ouverture, puis où aller ensuite : les regards (la galerie de chacun), les séries (une rangée de
+      couvertures), et la galerie elle-même (MQ-02), à l'ancre #galerie que gardent les anciens liens. Les ancres
+      #regards, #series et #galerie mènent toujours quelque part. Pas de Carnets : la rubrique n'existe pas encore. */ %>
+<% const t = it.t, v = it.v2, ic = v.ic, authors = it.regards.slice(1).filter(r => r.count);
+   const series = it.seriesAll.filter(c => c.count && c.cover); %>
+<% if (it.hero.length) { %>
+<%~ include('./_ouverture', it) %>
+<% } else { %>
+  <div class="wrap tete-page"><h1 class="titre-page"><%= it.promise %></h1><p class="chapo"><%= it.promiseSub %></p></div>
+<% } %>
+  <section class="wrap partie" id="regards" aria-labelledby="acc-regards-t">
+    <div class="acc-regards">
+      <div class="acc-regards-txt">
+        <h2 class="titre-2" id="acc-regards-t"><%= t.v2.regards(authors.length) %></h2>
+<% if (it.intro) { %>        <p class="acc-texte"><%= it.intro %></p>
+<% } %>      </div>
+      <ul class="liste-liens" aria-label="<%= t.v2.seeGallery %>">
+        <li><a href="<%= it.u('/') %>#galerie"><span class="liste-liens-n"><%= it.regards[0].name %></span><span class="liste-liens-d"><%= t.v2.bothDesc(it.total) %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+<% authors.forEach(r => { %>        <li><a href="<%= it.galleryUrl({ regard: r.slug }) %>#filtres"><span class="liste-liens-n"><%= r.name %></span><span class="liste-liens-d"><%= t.photos(r.count) %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+<% }) %>      </ul>
+    </div>
+  </section>
+<% if (series.length) { %>
+  <section class="wrap partie" id="series" aria-labelledby="acc-series-t">
+    <div class="partie-tete"><h2 class="titre-2" id="acc-series-t"><%= t.nav.series %></h2></div>
+<%~ include('./_series', { ...it, list: series, labelledby: 'acc-series-t' }) %>
+  </section>
+<% } else { %>
+  <span id="series"></span>
+<% } %>
+  <section class="partie acc-galerie" id="galerie" aria-labelledby="acc-galerie-t">
+    <div class="wrap partie-tete"><div><h2 class="titre-2" id="acc-galerie-t"><%= t.nav.gallery %></h2><p><%= t.v2.galleryLead(it.total, it.names) %></p></div></div>
+<%~ include('./_galerie', it) %>
+  </section>

@@ -13,6 +13,10 @@ const PATHS = {
   coeur: '<path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.7 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.2 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z"/>',
   partager: '<path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/>',
   plein: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  lire: '<path d="M8 5.5v13l10.5-6.5z"/>',
+  pause: '<path d="M9 6v12M15 6v12"/>',
+  fleche: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.2"/>',
 };
 export function ic(name, { size = 20, cls = '', fill = false } = {}) {
   return `<svg class="ic${cls ? ` ${cls}` : ''}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="${fill ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${PATHS[name]}</svg>`;
@@ -21,8 +25,14 @@ export function ic(name, { size = 20, cls = '', fill = false } = {}) {
 // Format d'une photo : rapport largeur / hauteur arrondi au centième pair inférieur, de 0,30 à 4,00 (classes .fmt-* de
 // css/v2/public.css) : la place réservée n'est jamais plus large que la photo à la hauteur visée. Un format à moins
 // d'un demi-centième du cran supérieur (4 000 × 2 667, pour 3:2) y monte : 2 px de trop en hauteur au plus.
+// Les formats courants que les centièmes pairs ne disent pas (2:3, 3:4, 4:3, 5:4, 16:9, 9:16, 5:7) ont leur classe
+// exacte (.fmt-2x3…) : dans une rangée, une verticale 2:3 et une horizontale 3:2 ont alors la même hauteur au pixel près
+// (au centième pair, la verticale était 1 % plus basse et son cartel décalé de 3 px).
+const EXACTS = [[2, 3], [3, 4], [4, 3], [5, 4], [16, 9], [9, 16], [5, 7]];
 export function fmt(p) {
   const raw = p?.width > 0 && p?.height > 0 ? p.width / p.height : 1.5;
+  const exact = EXACTS.find(([a, b]) => Math.abs(raw / (a / b) - 1) < 0.004);
+  if (exact) return { r: Number((exact[0] / exact[1]).toFixed(4)), cls: `fmt-${exact[0]}x${exact[1]}`, vertical: raw < 1 };
   const r = Math.min(4, Math.max(0.3, Math.floor((raw + 0.005) * 50) / 50));
   const n = Math.round(r * 100);
   return { r, cls: `fmt-${n}`, vertical: raw < 1 };
@@ -56,7 +66,12 @@ export function visSizes({ r, vertical }) {
 // de la largeur W de la rangée, deux photos au plus par ligne (.v + .v + li et .c à 47 % au moins, .v à la moitié au
 // plus), lignes étirées au prorata des formats, dernière ligne à sa taille. Calculé une fois, en fraction de W (pour
 // W = 364 px, un Pixel 7 : l'écart de 8 px y pèse 2,2 %), comme outils/sizes-tel.py des maquettes.
+const shares = new WeakMap();        // liste → parts (calculées une fois par liste, et non une fois par photo)
 export function phoneShares(list) {
+  if (!shares.has(list)) shares.set(list, composeShares(list));
+  return shares.get(list);
+}
+function composeShares(list) {
   const W = 364, gap = 8 / W;
   const items = list.map((x, i) => {
     const { r } = fmt(x);
@@ -104,6 +119,77 @@ export function nearSizes(item, list, main) {
     share(width[2]),
   ].join(', ');
 }
+
+// sizes d'une vignette des rangées de la galerie et d'une série (css/v2/public.css § 6) : la place que la photo aura
+// vraiment. Au téléphone, sa part de la rangée (phoneShares). Au-delà, les rangées se composent comme le navigateur les
+// compose (flex-wrap : une photo passe à la ligne quand sa largeur de base, format × hauteur visée, ne tient plus ;
+// chaque rangée s'étire au prorata des formats, sauf la dernière) ; on refait cette composition pour chaque largeur
+// d'écran d'une plage, de 8 en 8 px, et l'on garde la plus grande largeur atteinte par la photo (arrondie aux 5 px
+// supérieurs) : jamais trop petite, et une photo de la dernière rangée, qui ne s'étire pas, n'est pas chargée trop grande.
+// Plages : celles des marges (--gut) et de la hauteur visée (200 px sur tablette, 240 au bureau), la tablette en deux
+// (une même photo y passe de la moitié au tiers de la rangée).
+// etiree : rangée étirée sur une ligne (séries, « Autres séries », § 18) : chaque photo y prend exactement la largeur
+// du bloc (écran moins les marges et les écarts de 16 px) au prorata de son format.
+const up5 = x => Math.ceil(x / 5) * 5;
+const PLAGES = [{ to: 895, from: 768, gut: 40, h: 200 }, { to: 1023, from: 896, gut: 40, h: 200 }, { to: 1279, from: 1024, gut: 56, h: 200 }, { to: 1599, from: 1280, gut: 72, h: 240 }, { to: 2560, from: 1600, gut: 72, h: 240 }];
+function rows(rs, W, h, gap = 16) {
+  const w = new Array(rs.length), lines = [];
+  let line = [], used = 0;
+  rs.forEach((r, i) => {
+    const need = (line.length ? gap : 0) + r * h;
+    if (line.length && used + need > W + 1e-6) { lines.push(line); line = []; used = 0; }
+    used += (line.length ? gap : 0) + r * h;
+    line.push(i);
+  });
+  if (line.length) lines.push(line);
+  lines.forEach((l, k) => {
+    const sum = l.reduce((a, i) => a + rs[i], 0), free = W - gap * (l.length - 1) - sum * h;
+    l.forEach(i => { w[i] = k === lines.length - 1 ? rs[i] * h : rs[i] * h + free * rs[i] / sum; });
+  });
+  return w;
+}
+const widest = new WeakMap();        // liste → largeur la plus grande de chaque photo, par plage (calculée une fois)
+function widths(list) {
+  if (!widest.has(list)) {
+    const rs = list.map(x => fmt(x).r);
+    widest.set(list, PLAGES.map(({ from, to, gut, h }) => {
+      const max = rs.map(() => 0);
+      for (let vw = from; vw <= to; vw += 8) rows(rs, vw - 2 * gut, h).forEach((x, i) => { max[i] = Math.max(max[i], x); });
+      return max.map(up5);
+    }));
+  }
+  return widest.get(list);
+}
+export function rowSizes(item, list, { etiree = false } = {}) {
+  const { r } = fmt(item), i = list.indexOf(item);
+  const phone = `(max-width: 767px) calc((100vw - 48px) * ${n2(phoneShares(list)[i] ?? 1)})`;
+  if (etiree) {
+    const k = n2(r / (list.reduce((s, x) => s + fmt(x).r, 0) || 1)), gaps = (list.length - 1) * 16;
+    const share = gut => `calc((100vw - ${2 * gut + gaps}px) * ${k})`;
+    return [phone, `(max-width: 1023px) ${share(40)}`, `(max-width: 1279px) ${share(56)}`, share(72)].join(', ');
+  }
+  const w = widths(list).map(p => p[i]);
+  return [phone, ...PLAGES.slice(0, -1).map((p, k) => `(max-width: ${p.to}px) ${w[k]}px`), `${w.at(-1)}px`].join(', ');
+}
+
+// sizes de la photo de l'ouverture (css/v2/public.css § 19) : le cadre a la hauteur de l'écran moins l'en-tête et la
+// promesse (300 px au téléphone, 272 sur tablette, 228 au bureau ; 300 px au moins, 860 au plus) au format le plus large
+// de la liste (frame), dans la largeur de la page ; une photo plus étroite y tient à sa hauteur (part = son format / frame).
+export function ouvSizes(frame, part = 1) {
+  const k = n2(Math.min(1, part));
+  const h = reste => `calc(max(300px, 100vh - ${reste}px) * ${n2(frame)})`;
+  const w = (marge, reste) => `min(calc(100vw - ${marge}px), ${h(reste)}, ${Math.round(860 * frame)}px)`;
+  const at = x => (k === 1 ? x : `calc(${x} * ${k})`);
+  return [`(max-width: 359px) ${at(w(32, 300))}`, `(max-width: 767px) ${at(w(48, 300))}`, `(max-width: 1023px) ${at(w(80, 272))}`,
+    `(max-width: 1279px) ${at(w(112, 272))}`, at(w(144, 228))].join(', ');
+}
+
+// Texte échappé pour un fragment HTML écrit en JavaScript dans un gabarit (cartel de l'ouverture, dans un <template>).
+export const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// Un titre de vignette ne se coupe jamais dans un mot composé (« d’après-midi », « contre-jour », lexique § 0.4) : le
+// texte échappé, chaque mot à trait d'union dans un <span class="nobr">. À écrire avec <%~ … %>.
+export const nobr = s => esc(s).replace(/[\p{L}\p{N}’']+(?:-[\p{L}\p{N}’']+)+/gu, m => `<span class="nobr">${m}</span>`);
 
 // Espaces insécables (lexique des maquettes, § 2) dans un texte venu d'ailleurs (chaînes de la v1, noms) : fine
 // insécable avant « : ; ! ? » et dans les guillemets en français ; insécable avant « · » et devant une unité.

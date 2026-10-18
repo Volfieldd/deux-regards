@@ -1,17 +1,14 @@
-<% /* Menu (MQ-00 § 3) : un <details>, sans script ; le mot « Menu » ne change pas, l'icône devient ✕. Seules les pages qui
-      existent : Accueil (aujourd'hui la galerie), Séries, Galerie, Carte et Voyages s'ils sont publiés, À propos,
-      Rechercher. Carnets et Tirages viendront avec leurs pages. */ %>
-<% const t = it.t, ic = it.v2.ic, home = it.u('/'); %>
+<% /* Menu (MQ-00 § 3) : un <details>, sans script ; le mot « Menu » ne change pas, l'icône devient ✕. Les entrées de
+      _liens.eta, puis Rechercher. En-tête Contexte (visionneuse) : « Accueil » en tête, le panneau nommé « Navigation » ;
+      en-tête Site (it.site), la marque est déjà visible : le panneau, second repère de navigation de la page, est nommé
+      « Navigation (téléphone) ». */ %>
+<% const t = it.t, ic = it.v2.ic, home = it.u('/'), site = Boolean(it.site); %>
       <details class="sh-menu" data-menu>
         <summary><span class="sh-ouvrir"><%~ ic('menu') %><span class="sh-menu-t"><%= t.v2.menu %></span></span><span class="sh-fermer"><%~ ic('fermer') %><span class="sh-menu-t"><%= t.v2.menu %></span></span></summary>
-        <nav class="sh-panneau" aria-label="<%= t.nav.label %>">
+        <nav class="sh-panneau" aria-label="<%= site ? t.v2.navPhone : t.nav.label %>">
           <ul>
-            <li><a href="<%= home %>"><%= t.v2.home %><span class="sh-panneau-marque"><%= it.siteName %></span></a></li>
-            <li><a href="<%= home %>#series"><%= t.nav.series %></a></li>
-            <li><a href="<%= home %>#galerie"><%= t.nav.gallery %></a></li>
-<% if (it.mapPage) { %>            <li><a href="<%= it.u('/carte') %>"><%= t.nav.map %></a></li>
-<% } %><% if (it.tripsPage) { %>            <li><a href="<%= it.u('/voyages') %>"><%= t.nav.trips %></a></li>
-<% } %>            <li><a href="<%= it.u('/a-propos') %>"><%= t.nav.about %></a></li>
+<% if (!site) { %>            <li><a href="<%= home %>"><%= t.v2.home %><span class="sh-panneau-marque"><%= it.siteName %></span></a></li>
+<% } %>            <%~ include('./_liens', it) %>
 <% if (it.searchPage) { %>            <li><a href="<%= it.u('/recherche') %>"><%~ ic('loupe') %><%= t.nav.search %></a></li>
 <% } %>          </ul>
         </nav>
