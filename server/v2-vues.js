@@ -66,7 +66,12 @@ export function visSizes({ r, vertical }) {
 // de la largeur W de la rangée, deux photos au plus par ligne (.v + .v + li et .c à 47 % au moins, .v à la moitié au
 // plus), lignes étirées au prorata des formats, dernière ligne à sa taille. Calculé une fois, en fraction de W (pour
 // W = 364 px, un Pixel 7 : l'écart de 8 px y pèse 2,2 %), comme outils/sizes-tel.py des maquettes.
+const shares = new WeakMap();        // liste → parts (calculées une fois par liste, et non une fois par photo)
 export function phoneShares(list) {
+  if (!shares.has(list)) shares.set(list, composeShares(list));
+  return shares.get(list);
+}
+function composeShares(list) {
   const W = 364, gap = 8 / W;
   const items = list.map((x, i) => {
     const { r } = fmt(x);
