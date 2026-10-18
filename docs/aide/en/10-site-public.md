@@ -31,6 +31,18 @@ The site exists in **French** (usual addresses, `/photo/…`), **English** (`/en
 - **Order:** above the grid, **Selection** (the order you chose in the photo library, by default) or **Most recent** (by publication date, latest published first). The order combines with the filters, keeps its address (`?ordre=recentes`) and also applies to the previous and next photo. The date used is that of the **first** publication: a photo unpublished and then republished keeps its place.
 - **Gallery:** all published photos, in the admin’s order.
 
+## Home page, gallery and series in v2
+
+When **v2** is applied (Appearance → Public site: v1 or v2), these pages change as follows:
+
+- **Opening:** the **whole** photo, at the height of the screen, with no veil or text on top; below it, your tagline as the title and its label (title, photographer, place, date, **View photo**). The slideshow is **stopped**: the dots choose a photo, **Play** starts it (one photo every 6 seconds), **Pause** stops it; it waits under the mouse, stops as soon as the keyboard enters the opening, and does not run if the visitor asked for less motion. Only the first photo loads with the page. The frame takes the widest format of your opening photos: a vertical one among horizontals fits whole, narrower.
+- **Two points of view:** “Both” leads to the gallery of the home page, a photographer to their gallery (`/auteur/julien`).
+- **Series:** a row of covers (the first photo of each series), each leading to its series page.
+- **Gallery:** at the bottom of the home page (`/#galerie`). A **filter** bar (the photographer, the **Order** in a menu, the series with their cover and number of photos); each choice opens a page with its own address, to share, without script. Beyond the phone, the bar stays at the top of the screen while scrolling.
+- **Rows:** each photo keeps its format (a vertical stays vertical), at a common height, and **in the order of the photo library**: the first row reads from left to right, then the next; the keyboard follows the same order. On a phone, two photos per row at most.
+- **Two filters with no photo in common** (a shared address, for example “Travel, by Julien”): the page says so and offers the whole series or all the photographer’s photos; each filter is removed in one gesture (**✕**).
+- **A series page** (`/serie/rue`): its name as the title, the number of photos, the photographers and the years, then the photos from the first screen (no large cover), “The same series, one photographer” and the other series.
+
 ## Viewer (a photo’s page)
 
 | Gesture | Effect |

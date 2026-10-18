@@ -20,7 +20,7 @@ Jedes Theme wird mit seinen drei Farben (Hintergrund, Tinte, Akzent) und einer B
 
 ## Öffentliche Website: v1 oder v2
 
-**v2** ist die neue Gestaltung der öffentlichen Website, aus dem Ergonomie-Audit vom Oktober 2026. Ihre Seiten kommen nach und nach; derzeit: **die Seite eines Fotos** (der Betrachter). Eine Seite, die noch keine v2-Fassung hat, wird in v1 angezeigt. Die Verwaltung ändert sich nicht.
+**v2** ist die neue Gestaltung der öffentlichen Website, aus dem Ergonomie-Audit vom Oktober 2026. Ihre Seiten kommen nach und nach; derzeit: **die Seite eines Fotos** (der Betrachter), **die Startseite mit ihrer Galerie** (mit den Ansichten eines Fotografen und den Filtern) und **die Seite einer Serie** (siehe [Die Website aus Sicht der Besucher](site-public)). Eine Seite, die noch keine v2-Fassung hat, wird in v1 angezeigt. Die Verwaltung ändert sich nicht.
 
 1. **v2 vor allen anderen sehen:** Klicken Sie auf **v2-Vorschau öffnen**.
    - **Nur Sie** sehen sie, in dieser Sitzung (dieses Gerät, dieser Browser), bis **Vorschau beenden**, zur Abmeldung oder zum Ende der Sitzung.

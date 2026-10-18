@@ -20,7 +20,7 @@ Chaque thème est présenté avec ses trois couleurs (fond, encre, accent) et un
 
 ## Site public : v1 ou v2
 
-La **v2** est la nouvelle présentation du site public, issue de l'audit d'ergonomie d'octobre 2026. Ses pages arrivent une à une ; aujourd'hui : **la page d'une photo** (la visionneuse). Une page qui n'a pas encore sa version v2 s'affiche en v1. L'administration ne change pas.
+La **v2** est la nouvelle présentation du site public, issue de l'audit d'ergonomie d'octobre 2026. Ses pages arrivent une à une ; aujourd'hui : **la page d'une photo** (la visionneuse), **l'accueil et sa galerie** (avec les vues d'un photographe et des filtres) et **la page d'une série** (voir [Le site vu par les visiteurs](site-public)). Une page qui n'a pas encore sa version v2 s'affiche en v1. L'administration ne change pas.
 
 1. **Voir la v2 avant tout le monde :** cliquez sur **Ouvrir l'aperçu de la v2**.
    - **Vous seul** la voyez, sur cette session (cet appareil, ce navigateur), jusqu'à **Quitter l'aperçu**, la déconnexion ou la fin de la session.
