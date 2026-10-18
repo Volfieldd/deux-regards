@@ -20,7 +20,14 @@ const VIGIE = { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: 'cle-de-signat
 const cookiesOf = res => Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
 // Résumé signé comme le sert la Vigie (GET /v1/resume, usage « resume », clé des décisions).
 const signed = payload => { const p = JSON.stringify({ usage: 'resume', emis_a: Date.now(), ...payload }); return { payload: p, signature: crypto.sign(null, Buffer.from(p), VIGIE_KEYS.privateKey).toString('base64') }; };
-const MV10 = { ouvertes: { critique: 2, haut: 1, moyen: 1, bas: 0 }, plus_grave: { id: 413, gravite: 'critique', depuis: Date.now() - 15 * 60e3 }, critique_a_prendre: true };
+// « depuis » 15 min plus tôt, mais jamais la veille à Paris (sinon le bandeau écrit aussi le jour : test faux juste
+// après minuit) : au plus tôt, une minute après minuit, heure de Paris.
+const minuitParis = (() => {
+  const t = Date.now();
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(t).map(x => [x.type, x.value]));
+  return t - ((Number(p.hour) * 60 + Number(p.minute)) * 60 + Number(p.second)) * 1000;
+})();
+const MV10 = { ouvertes: { critique: 2, haut: 1, moyen: 1, bas: 0 }, plus_grave: { id: 413, gravite: 'critique', depuis: Math.max(Date.now() - 15 * 60e3, minuitParis + 60e3) }, critique_a_prendre: true };
 const side = html => html.slice(html.indexOf('<aside class="side"'), html.indexOf('</aside>'));
 const entry = html => (/<a class="nav-sec"[\s\S]*?<\/a>/.exec(html) || [''])[0];
 
@@ -146,11 +153,11 @@ test('admin avec la Vigie : entrée « Sécurité » et badge, ligne d’« Aujo
   assert.match(side(home), /href="\/admin\/journal"[\s\S]*class="nav-sec"/, 'après « Journal »');
   assert.doesNotMatch(home, /piege\.example/);
   // Bandeau : en tête de la page, lien vers l'alerte dans un nouvel onglet.
-  assert.match(home, /<div class="sec-bandeau" role="alert"><svg[^>]*>[\s\S]*?<\/svg><p><span class="t">2 alertes critiques dans la Vigie · la dernière ouverte à \d{1,2} h \d{2}<\/span><span class="sec">Une au moins attend sa prise en charge ; ce bandeau reste tant qu’une critique attend\.<\/span><\/p><a class="btn ghost" href="https:\/\/vigie\.nicephos\.art\/alertes\/413" target="_blank" rel="noopener noreferrer">Ouvrir l’alerte #413<span class="sr-only"> \(nouvel onglet\)<\/span>/);
+  assert.match(home, /<div class="sec-bandeau" role="alert"><svg[^>]*>[\s\S]*?<\/svg><p><span class="t">2 alertes critiques dans la Vigie · la dernière ouverte (?:le [^<]+? )?à \d{1,2} h \d{2}<\/span><span class="sec">Une au moins attend sa prise en charge ; ce bandeau reste tant qu’une critique attend\.<\/span><\/p><a class="btn ghost" href="https:\/\/vigie\.nicephos\.art\/alertes\/413" target="_blank" rel="noopener noreferrer">Ouvrir l’alerte #413<span class="sr-only"> \(nouvel onglet\)<\/span>/);
   // Ligne urgente d'« Aujourd'hui », en tête ; comptée dans le badge des urgences.
   const tasks = home.slice(home.indexOf('class="task-list"'), home.indexOf('</ul>', home.indexOf('class="task-list"')));
   assert.match(tasks, /^class="task-list">\s*<li class="task urgent">[\s\S]*?<a href="https:\/\/vigie\.nicephos\.art\/alertes\/413" target="_blank" rel="noopener noreferrer">Sécurité : 2 alertes critiques, 1 haute et 1 moyenne dans la Vigie<span class="sr-only"> \(nouvel onglet\)<\/span><\/a>/);
-  assert.match(tasks, /la dernière critique ouverte à \d{1,2} h \d{2} ; une au moins n’est pas prise en charge/);
+  assert.match(tasks, /la dernière critique ouverte (?:le [^;]+? )?à \d{1,2} h \d{2} ; une au moins n’est pas prise en charge/);
   assert.match(side(home), /<span aria-hidden="true">✕ 1<\/span>/);
   // Aucun style en ligne (CSP) dans ce qui est ajouté.
   for (const frag of [e, /<div class="sec-bandeau"[\s\S]*?<\/div>/.exec(home)[0]]) assert.doesNotMatch(frag, /style=/);

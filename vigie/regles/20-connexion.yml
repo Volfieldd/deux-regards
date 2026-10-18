@@ -8,6 +8,9 @@ generate: false
 detection:
   selection:
     type: authn_login_fail
+    # Connexion de l'admin seulement : les mots de passe des galeries privées (composant « site · public ») ont leurs
+    # propres règles (registre BV-16) ; une invitée qui se trompe n'est pas une force brute sur l'admin.
+    composant: site · connexion
   condition: selection
 level: low
 vigie: { signal: false }
@@ -77,6 +80,7 @@ generate: false
 detection:
   site:
     type: authn_login_fail
+    composant: site · connexion
   zitadel:
     type: zitadel_echec
   condition: 1 of site or zitadel
