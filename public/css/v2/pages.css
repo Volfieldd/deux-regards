@@ -1,0 +1,73 @@
+/* =====================================================================================================
+   Site public v2 : pages sans formulaire d'envoi (À propos, Droits d'utilisation, Mentions légales, Confidentialité,
+   Recherche, Carte, Voyages, un voyage, page introuvable). Chargé après css/v2/tokens.css et css/v2/public.css
+   (views/v2/layout.eta) ; n'emploie que leurs jetons et leurs composants (planche MQ-00 : tête de page, chapô, parties,
+   listes à filets, fil d'Ariane, rangées, cartel, boutons, messages, sommaire du billet). Aucune de ces pages n'a de
+   maquette dédiée : leur mise en page applique la planche.
+   1. Lecture longue (sommaire, ancres, lignes de 65 signes)  2. À propos  3. Recherche et page introuvable
+   4. Carte du monde  5. Voyages et un voyage  6. Impression des pages de texte (UX-F-35)
+   Rien ici n'exige JavaScript ; ce qui n'a de sens qu'avec lui porte la classe .js-seul (public.css § 0).
+   ===================================================================================================== */
+
+/* Note d'aperçu (carte ou voyage non publiés, pour l'équipe) : un message d'information sous l'en-tête. */
+.pages-note { padding-top: var(--esp-3); }
+.pages-note .msg { max-width: 76ch; }
+.pages-note .msg a { white-space: nowrap; }
+/* Partie qui suit la tête de page de près (résultats, séries proposées, photographes). */
+.partie--pres { padding-top: var(--esp-4); }
+/* « ↑ Sommaire », « ↑ Carte » : la flèche, décorative, n'est pas soulignée avec le mot. */
+.lien > span[aria-hidden="true"] { display: inline-block; text-decoration: none; }
+
+/* ---------- 1. Lecture longue : Confidentialité, Mentions légales, Droits d'utilisation, À propos ----------
+   Le texte tient en lignes de 65 signes environ (68ch à 18 px), en --prose ; chaque partie sous un intertitre à ancre
+   (titre 3), le sommaire « Sur cette page » en tête. Au bureau (≥ 1 024 px), le sommaire passe à gauche et reste visible
+   (collant, s'il tient dans la hauteur de l'écran) : il ne couvre jamais le texte, le focus n'y passe jamais dessous ;
+   « ↑ Sommaire », au bout de chaque partie, ne sert qu'au téléphone et sur tablette. */
+.lecture { display: grid; gap: var(--esp-5) var(--esp-8); padding-bottom: var(--esp-2); }
+.lecture-som { align-self: start; }
+.lecture-som .etiquette { margin-bottom: var(--esp-1); }
+.lecture-som ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); counter-reset: som; }
+.lecture-som a { display: flex; align-items: baseline; gap: var(--esp-1); min-height: var(--cible); padding-block: 10px; border-bottom: 1px solid var(--rule);
+  color: var(--ink); font-size: var(--t-texte); line-height: 1.4; }
+.lecture-som a::before { counter-increment: som; content: counter(som); flex: none; min-width: 1.6em; color: var(--mute); font-size: var(--t-petit); font-variant-numeric: tabular-nums; }
+.lecture-som a:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.lecture-texte { min-width: 0; max-width: 68ch; font-size: var(--t-prose); line-height: 1.65; color: var(--prose); }
+.lecture-texte p { margin: 0 0 1em; text-wrap: pretty; overflow-wrap: break-word; }
+.lecture-texte a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: var(--field); overflow-wrap: anywhere; }
+.lecture-texte a:hover { text-decoration-color: var(--ink); }
+.lecture-texte a.lien { min-height: var(--cible); }
+.lecture-partie { padding-top: var(--esp-4); }
+.lecture-partie:first-child { padding-top: 0; }
+.lecture-partie h2 { margin: 0 0 var(--esp-2); color: var(--ink); scroll-margin-top: var(--esp-3); text-wrap: balance; }
+.lecture-haut { margin: 0 !important; font-size: var(--t-petit); }
+.lecture-maj { margin: 0; color: var(--mute); font-size: var(--t-petit); }
+.lecture-contact { margin-top: var(--esp-4) !important; padding-top: var(--esp-2); border-top: 1px solid var(--rule); color: var(--ink); }
+.lecture-texte--prose { color: var(--prose); }
+@media (max-width: 767px) { .lecture-texte { font-size: 17px; } }
+@media (min-width: 1024px) {
+  .lecture { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); align-items: start; }
+  .lecture--seule { grid-template-columns: minmax(0, 1fr); }
+  .lecture-haut { display: none; }
+}
+@media (min-width: 1024px) and (min-height: 720px) { .lecture-som { position: sticky; top: var(--esp-3); } }
+
+/* ---------- 2. À propos : les photographes, chacun sous un filet, deux colonnes dès 768 px ---------- */
+.apropos-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--esp-5) var(--esp-8); }
+@media (min-width: 768px) { .apropos-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.apropos-qui { display: grid; gap: var(--esp-1); align-content: start; padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+.apropos-qui h3 { margin: 0; }
+.apropos-qui p { margin: 0; max-width: 60ch; color: var(--prose); line-height: 1.6; text-wrap: pretty; }
+.apropos-qui .lien { justify-self: start; }
+
+/* ---------- 6. Impression des pages de texte (UX-F-35) : noir sur blanc quel que soit le thème, sans l'en-tête, le
+   sommaire ni le pied de page ; l'adresse après chaque lien qui sort de la page. ---------- */
+@media print {
+  @page { margin: 16mm 18mm; }
+  :root:has(.lecture) { --paper: #fff; --ink: #111; --prose: #222; --mute: #555; --rule: #ccc; --field: #888; }
+  body:has(.lecture) { background: #fff; color: #111; }
+  body:has(.lecture) :is(.sh, .skip, .apercu-v2, .lecture-som, .lecture-haut, .apropos-gens .lien, footer.sf) { display: none !important; }
+  .lecture { display: block; padding: 0; }
+  .lecture-texte { max-width: none; font-size: 11pt; line-height: 1.55; }
+  .lecture-partie { break-inside: avoid-page; }
+  .lecture-texte a[href^="mailto:"]::after, .lecture-texte a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 10pt; color: #444; }
+}

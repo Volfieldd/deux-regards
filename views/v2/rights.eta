@@ -1,0 +1,20 @@
+<% /* Droits d'utilisation en v2 (/droits, cible des métadonnées IPTC des images) : le texte réglé dans l'admin (ou celui
+      par défaut, server/rights.js), le contact, puis la mesure d'audience, en lecture longue (lignes de 65 signes). Même
+      contenu que la v1 (views/rights.eta). */ %>
+<% layout('./layout', { pageTitle: it.v2.typo(it.pageTitle), description: it.v2.typo(it.description) }) %>
+<% const r = it.r, v = it.v2; %>
+<%~ include('./_entete', it) %>
+<main id="contenu">
+  <div class="wrap tete-page"><h1 class="titre-page"><%= r.title %></h1></div>
+  <div class="wrap lecture lecture--seule">
+    <div class="lecture-texte">
+<% it.paragraphs.forEach(p => { %>      <p><%= v.typo(p) %></p>
+<% }) %><% if (it.contact) { %>      <p class="lecture-contact"><%= v.typo(r.contact) %> <% if (it.contactHref) { %><a class="lien" href="<%= it.contactHref %>"><%= it.contact %></a><% } else { %><%= it.contact %><% } %></p>
+<% } %>      <section class="lecture-partie" aria-labelledby="audience">
+        <h2 class="titre-3" id="audience"><%= r.audienceTitle %></h2>
+        <p><%= v.typo(r.audience) %></p>
+      </section>
+    </div>
+  </div>
+</main>
+<%~ include('./_pied', it) %>

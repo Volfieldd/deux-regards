@@ -1,4 +1,5 @@
 // Aides des gabarits du site public v2 (views/v2/) : icônes de la planche, format des photos et tailles d'images.
+import { slugify } from './slug.js';
 
 // Icônes au trait de la planche (MQ-00) : 24 unités, trait de 1,6, décoratives (le mot est toujours visible ou lu).
 const PATHS = {
@@ -200,4 +201,33 @@ export function typo(text, lang = 'fr') {
   let s = String(text ?? '').replace(/ ·/g, '\u00a0·').replace(/(\d) (km|m)\b/g, '$1\u00a0$2');
   if (lang === 'fr') s = s.replace(/ ([:;!?»])/g, '\u202f$1').replace(/« /g, '«\u202f');
   return s;
+}
+
+// Ancre d'un intertitre (sommaire des pages de texte) : son texte en adresse (« Qui est responsable » → qui-est-responsable),
+// numérotée si deux intertitres se ressemblent. ids : l'ensemble des ancres déjà prises dans la page.
+export function ancre(text, ids = new Set()) {
+  const base = slugify(String(text ?? '')) || 'partie';
+  let id = base;
+  for (let i = 2; ids.has(id); i++) id = `${base}-${i}`;
+  ids.add(id);
+  return id;
+}
+
+// Position d'un repère dans un cadre de carte, en pourcentage (repères en pixels posés par-dessus le fond, comme la
+// mini-carte de la visionneuse) : les noms et les vignettes gardent leur taille quand la carte rétrécit.
+export const pct = (v, from, size) => Number((((v - from) / size) * 100).toFixed(3));
+
+// Cadrage de la carte du monde (UX-F-25) : l'ensemble des lieux et une marge d'un sixième du cadre de chaque côté (la
+// vignette d'une ville, 16 px de rayon et son nombre, tient entière dans le cadre de 150 px de haut d'un écran de 320 px),
+// au format du fond (1000 × 520), dans ses limites ; une seule ville reste située (60 unités, environ 22° de longitude).
+// Calculé par le serveur : la carte s'ouvre cadrée avec ou sans script ; « Monde » (avec script) montre le monde entier.
+export function cadrage(places, { W = 1000, H = 520, min = 60 } = {}) {
+  if (!places.length) return { x: 0, y: 0, w: W, h: H };
+  const xs = places.map(p => p.x), ys = places.map(p => p.y);
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  let w = Math.max(min, (Math.max(...xs) - Math.min(...xs)) * 1.5, ((Math.max(...ys) - Math.min(...ys)) * 1.5 * W) / H);
+  w = Math.min(W, w);
+  const h = (w * H) / W;
+  const r = n => Number(n.toFixed(2));
+  return { x: r(Math.min(W - w, Math.max(0, cx - w / 2))), y: r(Math.min(H - h, Math.max(0, cy - h / 2))), w: r(w), h: r(h) };
 }

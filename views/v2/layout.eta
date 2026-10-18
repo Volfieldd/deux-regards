@@ -34,6 +34,7 @@
 <% } %>
   <link rel="stylesheet" href="<%= it.asset('css/v2/tokens.css') %>">
   <link rel="stylesheet" href="<%= it.asset('css/v2/public.css') %>">
+  <link rel="stylesheet" href="<%= it.asset('css/v2/pages.css') %>">
 <% if (it.formulaires) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/formulaires.css') %>">
 <% } %><% if (brand.favicon64) { %>
   <link rel="icon" type="image/png" href="/brand/<%= brand.favicon64 %>">
