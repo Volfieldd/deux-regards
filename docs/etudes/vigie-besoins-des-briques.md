@@ -32,7 +32,7 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 | BV-9 Recherches en rafale | DS15, DS22 | ✓ site | `fix/vigie-bv8-bv9-recherche` : 60 recherches en 10 min par adresse, puis 429 et `excess_rate_limit_exceeded` (`limite: 'recherche'`) | fait |
 | BV-12 Construction active neutralisée dans un billet | DS11, DS23 | | Carnets, phase 35 : `malicious_input` émis par le rendu (`server/carnet-markdown.js`) ; corps de l'aperçu hors du crochet commun ; règle `billet_construction_active` | proposé |
 | BV-13 Filtres et contexte du carnet hors liste | DS12 | | Carnets, phase 35 : `input_validation_fail` (émetteur `· carnet`), comme BV-3 | proposé |
-| BV-14 Hors portée signalé pour les objets à plusieurs auteurs | DS10 | | phases 35 et 37a, et `server/routes/voyages.js` dès maintenant : `authz_fail` ; règle `ecriture_hors_portee` | proposé |
+| BV-14 Hors portée signalé pour les objets à plusieurs auteurs | DS10 | ✓ site (voyages) ; Carnets et galeries à leur implémentation ; règle : Vigie | voyages fait (`fix/vigie-bv14-voyages` : `authz_fail` « hors portée », émetteur `server/routes/voyages.js · portée`, consultation et rattachement d'une sortie) ; phases 35 et 37a ; règle `ecriture_hors_portee` | en partie |
 | BV-15 Lettre d'information | DS9, DS10, DS16, DS21, DS22 | | phase 44, si la lettre est retenue | proposé |
 | BV-16 Force brute du mot de passe d'un accès | DS16, DS21, DS31 | | galeries, phase 37a : `authn_login_fail` (composant public), `authn_login_lock` (nouveau) | proposé |
 | BV-17 Énumération des liens et des espaces | DS16 | | galeries, phase 37a : `token_guess`, limite `galerie_lien` | proposé |
