@@ -152,6 +152,19 @@ export const UI = {
       title: 'À proximité', map: city => `Carte : la photo a été prise à ${city}`, here: city => `Prise à ${city}`, same: 'même ville',
       km: n => `${n} km`, more: n => `${n} photo${n > 1 ? 's' : ''} à proximité`, others: (city, n) => `${city} : ${n} photo${n > 1 ? 's' : ''}`, world: 'Voir la carte du monde',
     },
+    // Site public v2 (views/v2/) : mots du lexique de l'audit d'ergonomie (docs/audit-ergonomie-2026-10-16/maquettes/LEXIQUE-ET-DONNEES.md).
+    v2: {
+      skip: 'Aller au contenu', menu: 'Menu', home: 'Accueil', homeOf: site => `${site}, accueil`, back: 'Retour\u202f: ',
+      prev: 'Précédente', next: 'Suivante', photosOf: ctx => `Photos\u202f: ${ctx}`,
+      placeDate: 'Lieu et date', serie: 'Série', photographer: 'Photographe',
+      keys: 'Clavier', keysPrevNext: 'précédente, suivante', keyEsc: 'Échap', keysBack: 'retour',
+      fullscreen: 'Plein écran', quit: 'Quitter', fullscreenLabel: 'Photo en plein écran',
+      rights: 'Droits et licences', rightsText: 'Pour la presse, une entreprise ou tout usage hors du cadre privé\u202f: nos conditions et comment nous écrire.',
+      me: 'Vous êtes sur cette photo\u202f?', meLink: 'Recevez-la, ou donnez ou refusez votre accord',
+      reportText: 'Une erreur dans le texte, une photo qui ne devrait pas être en ligne\u202f?', colon: '\u202f:',
+      footerBrand: authors => `photographies de ${authors}`, footerNote: 'Toutes les images sont les nôtres et restent protégées par le droit d’auteur.',
+      footerNav: 'Pied de page', footerSite: 'Le site',
+    },
     search: {
       title: 'Rechercher', label: 'Mots-clés', placeholder: 'brume, Loire, portrait…', submit: 'Chercher',
       hint: 'Dans les titres, légendes, lieux, villes et régions, séries, photographes et mots-clés. Chaque mot doit être trouvé.', short: 'Tapez au moins deux lettres.',
@@ -253,6 +266,18 @@ export const UI = {
       title: 'Nearby', map: city => `Map: the photo was taken in ${city}`, here: city => `Taken in ${city}`, same: 'same town',
       km: n => `${n} km`, more: n => `${n} photo${n === 1 ? '' : 's'} nearby`, others: (city, n) => `${city}: ${n} photo${n === 1 ? '' : 's'}`, world: 'See the world map',
     },
+    v2: {
+      skip: 'Skip to content', menu: 'Menu', home: 'Home', homeOf: site => `${site}, home`, back: 'Back: ',
+      prev: 'Previous', next: 'Next', photosOf: ctx => `Photos: ${ctx}`,
+      placeDate: 'Place and date', serie: 'Series', photographer: 'Photographer',
+      keys: 'Keyboard', keysPrevNext: 'previous, next', keyEsc: 'Esc', keysBack: 'back',
+      fullscreen: 'Full screen', quit: 'Exit', fullscreenLabel: 'Photo in full screen',
+      rights: 'Rights and licences', rightsText: 'For the press, a company or any use beyond private use: our terms and how to write to us.',
+      me: 'Are you in this photo?', meLink: 'Receive it, or give or refuse your consent',
+      reportText: 'A mistake in the text, a photo that should not be online?', colon: ':',
+      footerBrand: authors => `photographs by ${authors}`, footerNote: 'All the images are ours and remain protected by copyright.',
+      footerNav: 'Footer', footerSite: 'The site',
+    },
     search: {
       title: 'Search', label: 'Keywords', placeholder: 'mist, Loire, portrait…', submit: 'Search',
       hint: 'In titles, captions, places, towns and regions, series, photographers and keywords. Every word must be found.', short: 'Type at least two letters.',
@@ -353,6 +378,18 @@ export const UI = {
     near: {
       title: 'In der Nähe', map: city => `Karte: Das Foto wurde in ${city} aufgenommen`, here: city => `Aufgenommen in ${city}`, same: 'selber Ort',
       km: n => `${n} km`, more: n => `${n} ${n === 1 ? 'Foto' : 'Fotos'} in der Nähe`, others: (city, n) => `${city}: ${n} ${n === 1 ? 'Foto' : 'Fotos'}`, world: 'Weltkarte ansehen',
+    },
+    v2: {
+      skip: 'Zum Inhalt springen', menu: 'Menü', home: 'Startseite', homeOf: site => `${site}, Startseite`, back: 'Zurück: ',
+      prev: 'Vorheriges', next: 'Nächstes', photosOf: ctx => `Fotos: ${ctx}`,
+      placeDate: 'Ort und Datum', serie: 'Serie', photographer: 'Fotograf',
+      keys: 'Tastatur', keysPrevNext: 'vorheriges, nächstes', keyEsc: 'Esc', keysBack: 'zurück',
+      fullscreen: 'Vollbild', quit: 'Beenden', fullscreenLabel: 'Foto im Vollbild',
+      rights: 'Rechte und Lizenzen', rightsText: 'Für die Presse, ein Unternehmen oder jede Nutzung über den privaten Rahmen hinaus: unsere Bedingungen und wie Sie uns schreiben.',
+      me: 'Sind Sie auf diesem Foto?', meLink: 'Erhalten Sie es, oder geben oder verweigern Sie Ihre Einwilligung',
+      reportText: 'Ein Fehler im Text, ein Foto, das nicht online sein sollte?', colon: ':',
+      footerBrand: authors => `Fotografien von ${authors}`, footerNote: 'Alle Bilder sind unsere eigenen und bleiben urheberrechtlich geschützt.',
+      footerNav: 'Fußzeile', footerSite: 'Die Website',
     },
     search: {
       title: 'Suchen', label: 'Stichwörter', placeholder: 'Nebel, Loire, Porträt…', submit: 'Suchen',

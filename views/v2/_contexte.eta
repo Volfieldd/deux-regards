@@ -1,0 +1,13 @@
+<% /* En-tête « Contexte » (MQ-00 § 1, visionneuse) : un retour qui dit où il mène, la marque au centre (dès 560 px), la
+      langue et le Menu. it.retour : { href, label }. */ %>
+<% const t = it.t, ic = it.v2.ic; %>
+<header class="sh sh--contexte">
+  <div class="sh-bar">
+    <a class="sh-retour" href="<%= it.retour.href %>" data-retour><%~ ic('retour') %><span class="sh-retour-t"><span class="sr-only"><%= t.v2.back %></span><%= it.retour.label %></span></a>
+    <a class="sh-marque" href="<%= it.u('/') %>" aria-label="<%= t.v2.homeOf(it.siteName) %>"><%= it.siteName %></a>
+    <div class="sh-outils">
+<%~ include('./_langue', it) %>
+<%~ include('./_menu', it) %>
+    </div>
+  </div>
+</header>

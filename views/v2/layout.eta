@@ -1,0 +1,50 @@
+<!doctype html>
+<% /* Gabarit commun des pages v2 du site public (server/version-publique.js) : mêmes métadonnées que la v1
+      (views/layout.eta), feuilles et script de la v2 seulement. */ %>
+<% const theme = it.theme || {}; const brand = it.brand || {};
+   const ogImage = it.ogImage ? it.publicUrl + it.ogImage : (brand.share ? `${it.publicUrl}/brand/${brand.share}` : null);
+   const lang = it.lang || 'fr'; const t = it.t; %>
+<html lang="<%= lang %>"<% if (theme.classes) { %> class="<%= theme.classes %>"<% } %>>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="<%= it.bodyClass === 'dark' ? 'dark' : theme.scheme || 'light' %>">
+  <title><%= it.pageTitle %></title>
+<% if (it.description) { %>
+  <meta name="description" content="<%= it.description %>">
+<% } %>
+<% if (it.canonical) { %>
+  <link rel="canonical" href="<%= it.publicUrl + it.localize(it.canonical, lang) %>">
+  <meta property="og:url" content="<%= it.publicUrl + it.localize(it.canonical, lang) %>">
+<% it.langs.forEach(l => { %>
+  <link rel="alternate" hreflang="<%= l %>" href="<%= it.publicUrl + it.localize(it.canonical, l) %>">
+<% }) %>
+  <link rel="alternate" hreflang="x-default" href="<%= it.publicUrl + it.canonical %>">
+<% } %>
+  <meta property="og:locale" content="<%= it.locales[lang] %>">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="<%= it.pageTitle %>">
+  <meta property="og:site_name" content="<%= it.siteName %>">
+<% if (it.description) { %>
+  <meta property="og:description" content="<%= it.description %>">
+<% } %>
+<% if (ogImage) { %>
+  <meta property="og:image" content="<%= ogImage %>">
+  <meta name="twitter:card" content="summary_large_image">
+<% } %>
+  <link rel="stylesheet" href="<%= it.asset('css/v2/tokens.css') %>">
+  <link rel="stylesheet" href="<%= it.asset('css/v2/public.css') %>">
+<% if (brand.favicon64) { %>
+  <link rel="icon" type="image/png" href="/brand/<%= brand.favicon64 %>">
+  <link rel="apple-touch-icon" href="/brand/<%= brand.favicon180 %>">
+<% } %>
+  <script src="<%= it.asset('js/v2/site.js') %>" defer></script>
+</head>
+<body class="<%= it.bodyClass || '' %>">
+<a class="skip" href="#contenu"><%= t.v2.skip %></a>
+<% if (it.apercuV2) { %>
+<div class="apercu-v2" role="note" lang="fr"><form method="post" action="/admin/apparence/apercu-v2"><input type="hidden" name="_csrf" value="<%= it.apercuV2.csrf %>"><input type="hidden" name="apercu" value="0"><input type="hidden" name="vers" value="<%= it.apercuV2.vers %>"><span>Aperçu de la v2 (visible par vous seul)</span> <a href="/admin/apparence">Apparence</a> <button type="submit">Quitter l’aperçu</button></form></div>
+<% } %>
+<%~ it.body %>
+</body>
+</html>

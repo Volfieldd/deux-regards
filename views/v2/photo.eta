@@ -1,0 +1,122 @@
+<% /* Visionneuse v2 (maquette MQ-04 de l'audit d'ergonomie du 16 oct. 2026) : la photo d'abord, à la hauteur de l'écran ;
+      le cartel dessous (à côté d'une verticale, dès 900 px) ; J'aime et Partager ; la légende et les données ; les
+      liens Droits, « Vous êtes sur cette photo ? », Signaler ; le clavier et le plein écran (avec script) ; À proximité
+      et la carte. Tout marche sans script : liens, formulaire POST, <details>, pages Partager et Signaler. */ %>
+<% const p = it.photo, t = it.t, v = it.v2, ic = v.ic, n = t.near, f = v.fmt(p), pl = it.place;
+   const nb = s => String(s).replace(/ /g, ' ');
+   // Le contexte de la visionneuse : la vue d'où l'on vient (filtres de la galerie), qui règle l'ordre des voisines.
+   const ctx = it.filter.serie && it.filter.regard ? `${p.category}, ${t.by(p.author)}` : it.filter.serie ? p.category : it.filter.regard ? p.author : t.nav.gallery;
+   const pos = `${it.position} / ${it.count}`;
+   const date = v.date(p.taken_on);
+   const meta = [p.author, p.place, date].filter(Boolean).join(' · ');
+   const prevUrl = it.photoUrl(it.prev.slug, it.filter), nextUrl = it.photoUrl(it.next.slug, it.filter);
+   const kws = it.showKeywords && p.keywords ? p.keywords.split(',').map(k => k.trim()).filter(Boolean) : []; %>
+<% layout('./layout', { pageTitle: `${p.title} — ${p.author}\u00a0· ${ctx} (${pos})\u00a0· ${it.siteName}`, bodyClass: 'dark' }) %>
+<%~ include('./_contexte', { ...it, retour: { href: it.backUrl, label: ctx } }) %>
+<main id="contenu" data-viewer data-prev="<%= prevUrl %>" data-next="<%= nextUrl %>" data-back="<%= it.backUrl %>">
+  <div class="wrap vis-scene <%= f.cls %><%= f.vertical ? ' vis--cote' : '' %>">
+    <figure class="vis-fig">
+      <figcaption class="cartel cartel--grand vis-cartel"><span class="vis-pos donnee"><%= pos %>&nbsp;· <%= ctx %></span><h1 class="cartel-t"><%= p.title %></h1><span class="cartel-m"><%= meta %></span></figcaption>
+      <div class="vis-cadre" data-cadre>
+        <%~ it.picture(p, { sizes: v.visSizes(f), eager: true }) %>
+<% if (it.count > 1) { %>
+        <nav class="vis-nav" aria-label="<%= t.v2.photosOf(ctx) %>">
+          <a class="vis-fleche vis-prec" href="<%= prevUrl %>" rel="prev"><%~ ic('prec', { size: 24 }) %><span class="vis-fleche-t"><%= t.v2.prev %><span class="sr-only"><%= t.v2.colon %> <%= it.prev.title %></span></span></a>
+          <span class="vis-compte donnee"><%= pos %></span>
+          <a class="vis-fleche vis-suiv" href="<%= nextUrl %>" rel="next"><span class="vis-fleche-t"><%= t.v2.next %><span class="sr-only"><%= t.v2.colon %> <%= it.next.title %></span></span><%~ ic('suiv', { size: 24 }) %></a>
+        </nav>
+<% } %>
+      </div>
+      <div class="vis-actions">
+        <form class="bascule-form" method="post" action="<%= it.u(`/photo/${p.slug}/aime`) %>" data-like data-slug="<%= p.slug %>">
+          <button class="bascule" type="submit" aria-pressed="false"><%~ ic('coeur', { cls: 'ic-vide' }) %><%~ ic('coeur', { cls: 'ic-plein', fill: true }) %><%= t.fb.like %> <span class="bascule-n" data-like-n><%= p.likes > 0 ? p.likes : '' %></span></button>
+          <span class="sr-only" aria-live="polite" data-like-live></span>
+        </form>
+        <a class="lien" href="<%= it.u(`/photo/${p.slug}/partager`) %>" rel="nofollow" data-share data-share-title="<%= it.share.title %>" data-share-url="<%= it.share.url %>" data-share-count="<%= it.u(`/photo/${p.slug}/partage`) %>" aria-haspopup="dialog"><%~ ic('partager') %><%= t.share.button %></a>
+      </div>
+    </figure>
+    <div class="vis-plus">
+      <div>
+<% if (p.legend) { %>
+        <p class="vis-legende"><%= p.legend %></p>
+<% } %>
+        <dl class="def">
+<% if (p.place || date) { %>
+          <dt><%= t.v2.placeDate %></dt><dd><%= [p.place, date].filter(Boolean).join(' · ') %></dd>
+<% } %>
+          <dt><%= t.v2.serie %></dt><dd><a href="<%= it.galleryUrl({ serie: p.category_slug }) %>"><%= p.category %></a></dd>
+          <dt><%= t.v2.photographer %></dt><dd><a href="<%= it.galleryUrl({ regard: p.author_slug }) %>"><%= p.author %></a><% if (it.authorCount) { %>&nbsp;· <%= nb(t.photos(it.authorCount)) %><% } %></dd>
+<% if (kws.length) { %>
+          <dt><%= t.search.keywords %></dt><dd><ul class="vis-mots"><% kws.forEach(k => { %><li><% if (it.searchPage) { %><a href="<%= it.u('/recherche') %>?q=<%= encodeURIComponent(k) %>" rel="nofollow"><%= k %></a><% } else { %><%= k %><% } %></li><% }) %></ul></dd>
+<% } %>
+        </dl>
+      </div>
+      <div class="vis-cote">
+        <div>
+          <p><a class="lien" href="<%= it.u('/droits') %>"><%= t.v2.rights %></a></p>
+          <p><%= t.v2.rightsText %></p>
+        </div>
+        <div>
+          <p><%= t.v2.me %></p>
+          <p><a class="lien" href="<%= it.u('/bonjour') %>"><%= t.v2.meLink %></a></p>
+        </div>
+        <div>
+          <p><%= t.v2.reportText %></p>
+          <p><a class="lien" href="<%= it.u(`/photo/${p.slug}/signaler`) %>" rel="nofollow"><%= t.fb.reportTitle %></a></p>
+        </div>
+        <div class="vis-clavier js-seul">
+          <p><%= t.v2.keys %><%= t.v2.colon %> <kbd>←</kbd> <kbd>→</kbd> <%= t.v2.keysPrevNext %>&nbsp;· <kbd><%= t.v2.keyEsc %></kbd> <%= t.v2.keysBack %></p>
+          <button class="btn btn--filet" type="button" data-plein-ouvrir><%~ ic('plein') %><%= t.v2.fullscreen %></button>
+        </div>
+      </div>
+    </div>
+<% if (pl) { const vw = pl.view; const px = x => ((x - vw.x) / vw.w * 100).toFixed(2), py = y => ((y - vw.y) / vw.h * 100).toFixed(2);
+     const fine = it.asset('carte-terre-fine.svg'); const mx = Number(px(pl.me.x)); %>
+    <section class="vis-pres" aria-labelledby="pres-t">
+<% if (pl.list.length) { const items = pl.list.map(x => x.photo); %>
+      <div>
+        <h2 class="titre-2" id="pres-t"><%= n.title %></h2>
+        <ul class="rangees rangees--etiree" aria-labelledby="pres-t">
+<% pl.list.forEach(x => { const g = v.fmt(x.photo); %>          <li class="<%= g.cls %><%= g.r < 1 ? ' v' : g.r === 1 ? ' c' : '' %>"><a class="vignette" href="<%= it.photoUrl(x.photo.slug) %>"><%~ it.picture(x.photo, { sizes: v.nearSizes(x.photo, items, f), alt: '' }) %><span class="cartel cartel--ligne"><span class="cartel-t"><%= x.photo.title %></span><span class="cartel-m"><%= [x.same ? n.same : nb(n.km(x.km)), x.city, x.photo.author].join(' · ') %></span></span></a></li>
+<% }) %>        </ul>
+      </div>
+<% } else { %>
+      <h2 class="sr-only" id="pres-t"><%= n.title %></h2>
+<% } %>
+      <figure class="vis-carte" data-zoom-map>
+        <div class="vis-carte-cadre">
+          <svg viewBox="<%= vw.x.toFixed(2) %> <%= vw.y.toFixed(2) %> <%= vw.w.toFixed(2) %> <%= vw.h.toFixed(2) %>" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-carte-fond data-tiles="<%= it.asset('carte-tuiles/index.json') %>">
+            <use class="terre" href="<%= fine %>#terre" width="1000" height="520" data-base/>
+            <g class="detail" data-detail display="none"></g>
+            <use class="frontieres" href="<%= fine %>#frontieres" width="1000" height="520"/>
+          </svg>
+          <svg class="vis-carte-reperes" role="group" aria-label="<%= v.typo(n.map(pl.me.city)) %>">
+            <defs><clipPath id="vis-carte-rond" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath></defs>
+<% /* Le nom d'une autre ville se pose du côté opposé à la photo (jamais sur la vignette d'ici), et dans le cadre. */
+   pl.others.forEach(o => { const ox = Number(px(o.x)), end = ox > 85 || (ox >= 15 && ox < mx); %>            <a class="vis-carte-o" href="<%= it.photoUrl(o.href) %>" aria-label="<%= v.typo(`${n.others(o.city, o.photos.length)} · ${n.km(o.km)}`) %>"><svg x="<%= ox %>%" y="<%= py(o.y) %>%" overflow="visible"><circle r="12" fill="transparent" stroke="none"/><circle r="5"/><text x="<%= end ? -10 : 10 %>" y="4"<%~ end ? ' text-anchor="end"' : '' %>><%= o.city %></text></svg></a>
+<% }) %>            <svg class="vis-carte-ici" x="<%= mx %>%" y="<%= py(pl.me.y) %>%" overflow="visible"><circle r="17"/><image href="/media/<%= it.thumb %>" x="-15" y="-15" width="30" height="30" preserveAspectRatio="xMidYMid slice" clip-path="url(#vis-carte-rond)"/><text x="0" y="34" text-anchor="<%= mx < 18 ? 'start' : mx > 82 ? 'end' : 'middle' %>"><%= pl.me.city %></text></svg>
+          </svg>
+        </div>
+        <figcaption><%= n.here(pl.me.city) %><%= pl.count ? ` · ${n.more(pl.count)}` : '' %><% if (it.mapPage) { %>&nbsp;· <a class="lien" href="<%= it.u('/carte') %>#lieu-<%= p.city_id %>"><%= n.world %></a><% } %></figcaption>
+      </figure>
+    </section>
+<% } %>
+  </div>
+</main>
+<%~ include('./_pied', it) %>
+<% if (it.count > 1) { %>
+<template data-next-image><%~ it.picture(it.next, { sizes: v.visSizes(v.fmt(it.next)), alt: '' }).replace(' loading="lazy"', '') %></template>
+<% } %>
+<dialog class="share-dialog" data-share-dialog aria-labelledby="share-title">
+  <div class="share-h"><h2 id="share-title"><%= t.share.title %></h2><button type="button" class="share-x" data-share-close aria-label="<%= t.share.close %>"><%~ ic('fermer') %></button></div>
+  <%~ include('./_partage', { ...it, deferThumb: true }) %>
+</dialog>
+<dialog class="vis-plein" data-plein aria-label="<%= t.v2.fullscreenLabel %>">
+  <div data-plein-photo></div>
+<% if (it.count > 1) { %>
+  <a class="vis-fleche vis-prec" href="<%= prevUrl %>" rel="prev" data-plein-nav><%~ ic('prec', { size: 24 }) %><span class="vis-fleche-t"><%= t.v2.prev %><%= t.v2.colon %> <%= it.prev.title %></span></a>
+  <a class="vis-fleche vis-suiv" href="<%= nextUrl %>" rel="next" data-plein-nav><span class="vis-fleche-t"><%= t.v2.next %><%= t.v2.colon %> <%= it.next.title %></span><%~ ic('suiv', { size: 24 }) %></a>
+<% } %>
+  <button class="vis-quitter" type="button" data-plein-fermer><%~ ic('fermer') %><%= t.v2.quit %> <kbd><%= t.v2.keyEsc %></kbd></button>
+  <span class="vis-compte donnee"><%= pos %></span>
+</dialog>

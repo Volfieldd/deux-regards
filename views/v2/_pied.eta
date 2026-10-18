@@ -1,0 +1,23 @@
+<% /* Pied de page complet (MQ-00 § 4) : la marque et ses photographes, la note des droits, les liens du site. Le lien piège
+      de la Vigie (it.trapLink, comme en v1 : views/footer.eta) reste caché, hors du clavier et des lecteurs d'écran. */ %>
+<% const t = it.t; %>
+<footer class="sf sf--complet wrap">
+  <div class="sf-in">
+    <div>
+      <p class="sf-marque"><b><%= it.siteName %></b><% if (it.authorNames) { %>&nbsp;· <%= t.v2.footerBrand(it.authorNames) %><% } %></p>
+      <p class="sf-note"><%= t.v2.footerNote %></p>
+    </div>
+    <nav class="sf-groupes" aria-label="<%= t.v2.footerNav %>">
+      <div>
+        <h2 id="sf-site"><%= t.v2.footerSite %></h2>
+        <ul aria-labelledby="sf-site">
+          <li><a href="<%= it.u('/a-propos') %>"><%= t.nav.about %></a></li>
+          <li><a href="<%= it.u('/droits') %>"><%= t.v2.rights %></a></li>
+          <li><a href="<%= it.u('/confidentialite') %>"><%= t.footer.privacy %></a></li>
+          <li><a href="<%= it.u('/mentions-legales') %>"><%= t.footer.legal %></a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+<% if (it.trapLink) { %>  <a href="<%= it.trapLink %>" rel="nofollow" hidden tabindex="-1" aria-hidden="true">archives</a>
+<% } %></footer>
