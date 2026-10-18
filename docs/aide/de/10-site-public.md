@@ -11,7 +11,7 @@ Die Website gibt es auf **Französisch** (übliche Adressen, `/photo/…`), **En
   - Seite auf Deutsch: Deutsch, sonst Französisch, sonst Englisch;
   - Seite auf Englisch: Englisch, sonst Französisch, sonst Deutsch;
   - Seite auf Französisch: Französisch, sonst Englisch, sonst Deutsch.
-- **Auswahl:** am Ende des Menüs (und oben auf der Seite eines Fotos) die Flagge und das Sprachkürzel (🇫🇷 FR). Sie öffnet **dieselbe Seite** in einer anderen Sprache, Filter inbegriffen. Die Wahl wird gespeichert (das einzige Cookie der Website, erst in diesem Moment gesetzt).
+- **Auswahl:** am Ende des Menüs (und oben auf der Seite eines Fotos) die Flagge und das Sprachkürzel (🇫🇷 FR). Sie öffnet **dieselbe Seite** in einer anderen Sprache, Filter inbegriffen. Die Wahl wird gespeichert (das Sprach-Cookie, erst in diesem Moment gesetzt; das einzige andere Cookie der öffentlichen Website ist das einer mit ihrem Passwort geöffneten privaten Galerie).
 - **Sprache bei der Ankunft** auf einer französischen Seite, wenn der Besucher nichts gewählt hat:
   - französischsprachige Länder (Frankreich, Monaco, Überseegebiete, frankophones Afrika…): Französisch;
   - Deutschland, Österreich, Liechtenstein: Deutsch;

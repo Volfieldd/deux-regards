@@ -90,6 +90,14 @@ Pièges :
 
 **Vérifier :** `curl -sI "https://nicephos.art/serie/rue?x=1"` doit répondre `301` avec `location: https://www.nicephos.art/serie/rue?x=1`, et `curl -sI https://www.nicephos.art/` doit répondre `200`.
 
+## Cloudflare : galeries privées (avant d'ouvrir la première)
+
+Les pages et les images des galeries privées ne doivent jamais entrer dans le cache de Cloudflare (annexe de sécurité, § 3.6 et § 8 ; registre de la Vigie, BV-26) :
+
+1. **Caching › Cache Rules** : une règle « Bypass cache » pour `URI Path` commence par `/g/` **ou** commence par `/prive/` ; vérifier qu'aucune règle « Ignore cache-control header » ou « Edge TTL » ne couvre ces chemins.
+2. **Caching › Configuration** : **Always Online désactivé** (il transmettrait à Internet Archive les adresses GET les plus demandées qui ont répondu 200, dont `/g/<jeton>`) ; vérifier Crawler Hints.
+3. Après la mise en ligne : le contrôle de [Exploitation](Exploitation#galeries-privées--contrôle-du-cache).
+
 ## Sauvegardes
 
 Le service `backup` fait une sauvegarde au démarrage, puis toutes les 24 h :
