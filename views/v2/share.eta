@@ -1,0 +1,15 @@
+<% /* « Partager » sans la fenêtre de la visionneuse (/photo/<slug>/partager) : sans script, dans un nouvel onglet ou sur un
+      très vieux navigateur. La fenêtre de la v2 (views/v2/_partage.eta) en page, sous l'en-tête Contexte qui ramène à la
+      photo. Aucun formulaire : des liens ; avec le script, « Copier le lien » et le compte des partages passent par la même
+      route que la fenêtre (POST /photo/<slug>/partage). */ %>
+<% const t = it.t, s = it.share.s, p = it.photo, back = it.photoUrl(p.slug); %>
+<% layout('./layout', { pageTitle: it.v2.typo(it.pageTitle), formulaires: true }) %>
+<%~ include('./_contexte', { ...it, retour: { href: back, label: p.title } }) %>
+<main id="contenu" class="wrap">
+  <div class="partage-page" data-share-page data-share-url="<%= it.share.url %>" data-share-title="<%= it.share.title %>" data-share-count="<%= it.u(`/photo/${p.slug}/partage`) %>">
+    <h1 class="titre-page"><%= s.title %></h1>
+    <%~ include('./_partage', it) %>
+    <p class="pf-suite"><a class="lien" href="<%= back %>"><%= s.back %></a></p>
+  </div>
+</main>
+<%~ include('./_pied', it) %>

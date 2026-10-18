@@ -1,0 +1,29 @@
+<% /* Photo offerte à une personne photographiée (/pour-vous/<jeton>, lien privé de 30 jours, dans sa langue) : la photo, son
+      cartel et « Télécharger la photo » ; lien expiré (410) : comment en demander un autre. Aucun formulaire. En-tête
+      réduit à la marque, comme en v1 (views/gift.eta) : ni menu de langue ni lien qui recopierait le jeton dans une
+      autre adresse ; la page n'est ni indexée ni gardée en cache (server/routes/public.js). */ %>
+<% const g = it.g, s = it.s, ty = it.v2.typo, ic = it.v2.ic;
+   const w = s.width >= s.height ? 1200 : Math.round(1200 * s.width / s.height), hgt = s.width >= s.height ? Math.round(1200 * s.height / s.width) : 1200; %>
+<% layout('./layout', { pageTitle: ty(it.pageTitle), formulaires: true }) %>
+<header class="sh sh--tunnel">
+  <div class="sh-bar">
+    <a class="sh-marque" href="<%= it.u('/') %>" aria-label="<%= it.t.v2.homeOf(it.siteName) %>"><%= it.siteName %></a>
+  </div>
+</header>
+<main id="contenu" class="wrap offerte">
+<% if (s.expired) { %>
+  <h1 class="titre-page"><%= g.expired %></h1>
+  <div class="msg"><%~ ic('horloge', { size: 18 }) %><p><%= ty(g.expiredText) %></p></div>
+  <p><a class="btn" href="<%= it.u('/bonjour') %><%= s.ref ? '/' + s.ref : '' %>"><%= g.contact %></a></p>
+<% } else { %>
+  <h1 class="titre-page"><%= g.title %></h1>
+  <p class="chapo"><%= ty(g.text) %></p>
+  <figure class="offerte-fig">
+    <img src="<%= it.base %>/apercu.jpg" alt="<%= s.title %>" width="<%= w %>" height="<%= hgt %>" fetchpriority="high">
+    <figcaption class="cartel"><span class="cartel-t"><%= s.title %></span><span class="cartel-m"><%= g.by(s.author) %></span></figcaption>
+  </figure>
+  <div class="envoi"><a class="btn" href="<%= it.base %>/photo.jpg" download><%= g.download %></a><p class="donnee"><%= g.format.replace(/(\d) px/, '$1\u00a0px') %></p></div>
+  <p class="note-donnees"><%= ty(g.personal) %> <%= ty(g.until(it.date)) %></p>
+<% } %>
+</main>
+<%~ include('./_pied', it) %>

@@ -188,12 +188,10 @@ document.querySelectorAll('[data-like]').forEach(form => {
 });
 
 // Partager. Sur téléphone : le menu de partage du téléphone. Sur ordinateur, ou sans ce menu : la fenêtre « Partager »
-// (réseaux, lien à copier, QR). Sans ce script, le lien mène à une page qui contient les mêmes liens. Chaque partage est
-// compté, sans rien savoir du visiteur.
-document.querySelectorAll('[data-share]').forEach(btn => {
-  const dialog = document.querySelector('[data-share-dialog]');
-  if (!dialog || typeof dialog.showModal !== 'function') return;
-  const { shareTitle: title, shareUrl: url, shareCount: countUrl } = btn.dataset;
+// (réseaux, lien à copier, QR). Sans ce script, le lien mène à une page qui contient les mêmes liens (views/v2/share.eta) ;
+// avec lui, cette page a les mêmes gestes que la fenêtre. Chaque partage est compté, sans rien savoir du visiteur.
+// box : la fenêtre ou la page ; done : ce qui suit un partage par le menu du téléphone (fermer la fenêtre).
+const wireShare = (box, { shareTitle: title, shareUrl: url, shareCount: countUrl }, done = () => {}) => {
   const count = via => {
     const body = new URLSearchParams({ via });
     try { if (navigator.sendBeacon && navigator.sendBeacon(countUrl, body)) return; } catch { /* repli ci-dessous */ }
@@ -203,25 +201,15 @@ document.querySelectorAll('[data-share]').forEach(btn => {
     try { await navigator.share({ title, url }); count('telephone'); return true; } catch (err) { return err && err.name === 'AbortError'; }
   };
   const canNative = typeof navigator.share === 'function';
-  const phone = matchMedia('(pointer: coarse)').matches;
-  const more = dialog.querySelector('[data-share-more-item]');
+  const more = box.querySelector('[data-share-more-item]');
   if (more) more.hidden = !canNative;
-  btn.addEventListener('click', async e => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    e.preventDefault();
-    if (canNative && phone && await native()) return;
-    dialog.querySelectorAll('img[data-src]').forEach(img => { img.src = img.dataset.src; img.removeAttribute('data-src'); });
-    dialog.showModal();
-  });
-  dialog.querySelector('[data-share-close]')?.addEventListener('click', () => dialog.close());
-  dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
-  dialog.querySelector('[data-share-nets]')?.addEventListener('click', async e => {
+  box.querySelector('[data-share-nets]')?.addEventListener('click', async e => {
     const a = e.target.closest('[data-via]');
     if (a) { count(a.dataset.via); return; }
-    if (e.target.closest('[data-share-more]') && await native()) dialog.close();
+    if (e.target.closest('[data-share-more]') && await native()) done();
   });
-  const copy = dialog.querySelector('[data-share-copy]');
-  const field = dialog.querySelector('[data-share-url]');
+  const copy = box.querySelector('[data-share-copy]');
+  const field = box.querySelector('[data-share-url]');
   const label = copy?.textContent;
   let timer = null;
   copy?.addEventListener('click', async () => {
@@ -235,7 +223,24 @@ document.querySelectorAll('[data-share]').forEach(btn => {
     timer = setTimeout(() => { copy.textContent = label; copy.classList.remove('done'); }, 2500);
   });
   field?.addEventListener('focus', () => field.select());
+  return { native, canNative };
+};
+document.querySelectorAll('[data-share]').forEach(btn => {
+  const dialog = document.querySelector('[data-share-dialog]');
+  if (!dialog || typeof dialog.showModal !== 'function') return;
+  const { native, canNative } = wireShare(dialog, btn.dataset, () => dialog.close());
+  const phone = matchMedia('(pointer: coarse)').matches;
+  btn.addEventListener('click', async e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    if (canNative && phone && await native()) return;
+    dialog.querySelectorAll('img[data-src]').forEach(img => { img.src = img.dataset.src; img.removeAttribute('data-src'); });
+    dialog.showModal();
+  });
+  dialog.querySelector('[data-share-close]')?.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
 });
+document.querySelectorAll('[data-share-page]').forEach(page => wireShare(page, page.dataset));
 
 // Mini-carte : cadrage serré → tuiles détaillées (1:10m) de la zone, lues une fois. Sans ce script, le fond 1:50m reste.
 document.querySelectorAll('[data-zoom-map]').forEach(fig => {

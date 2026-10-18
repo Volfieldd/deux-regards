@@ -43,6 +43,17 @@ Wenn die **v2** angewendet ist (Erscheinungsbild → Öffentliche Website: v1 od
 - **Zwei Filter ohne gemeinsames Foto** (eine geteilte Adresse, etwa „Reise, von Julien“): Die Seite sagt es und bietet die ganze Serie oder alle Fotos des Fotografen an; jeder Filter lässt sich mit einem Griff entfernen (**✕**).
 - **Seite einer Serie** (`/serie/rue`): ihr Name als Titel, die Anzahl der Fotos, die Fotografen und die Jahre, dann die Fotos ab dem ersten Bildschirm (ohne großes Titelbild), „Dieselbe Serie, ein Blick“ und die weiteren Serien.
 
+## Formulare in v2 („Ich habe Sie fotografiert“, Melden, Teilen)
+
+Wenn die **v2** angewendet ist, erhalten die Seite „Ich habe Sie fotografiert“ (`/bonjour`), „Dieses Foto melden“ und die Seite **Teilen** (die ohne Skript oder in einem neuen Tab geöffnet wird) die Gestaltung der v2. Die Felder ändern sich nicht: Was die Person sendet und was Sie erhalten, ist dasselbe wie in v1.
+
+- **Eine einzige Regel** oben: Alle Felder sind Pflichtfelder, außer den als „optional“ markierten; die Hilfe jedes Feldes steht unter seinem Namen („Nötig, wenn Sie einer Veröffentlichung zustimmen“).
+- **Nach einem unvollständigen Senden** bleiben die Eingaben erhalten, und jeder Fehler steht unter seinem Feld (unter dem Titel der Gruppe bei Kästchen), „⚠ Fehler:“ und wie man ihn behebt; der Titel des Tabs beginnt mit „Fehler“. Ab zwei Punkten erhält eine **Zusammenfassung** oben den Fokus, mit einem Link zu jedem Feld; bei nur einem steht der Cursor schon im Feld.
+- **Zu viele Sendungen von derselben Verbindung** (8 pro Stunde auf `/bonjour`, 5 bei Melden): Eine eigene Meldung, die kein Eingabefehler ist, bittet, es in einer Stunde erneut zu versuchen; nichts von den Eingaben geht verloren.
+- **Nach dem Senden** erhält der Titel „Danke, notiert.“ (oder die Meldung von Melden) den Fokus; die Referenz der Karte wird wiederholt.
+- **Teilen**: das Fenster des Bildbetrachters als Seite, unter einem Link zurück zum Foto; mit dem Skript funktioniert **Link kopieren** auch dort.
+- Das **geschenkte Foto** (`/pour-vous/…`) behält seine Kopfzeile, die nur den Namen der Website zeigt, ohne Menü und ohne Sprache.
+
 ## Bildbetrachter (Seite eines Fotos)
 
 | Geste | Wirkung |

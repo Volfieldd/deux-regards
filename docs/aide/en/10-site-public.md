@@ -43,6 +43,17 @@ When **v2** is applied (Appearance → Public site: v1 or v2), these pages chang
 - **Two filters with no photo in common** (a shared address, for example “Travel, by Julien”): the page says so and offers the whole series or all the photographer’s photos; each filter is removed in one gesture (**✕**).
 - **A series page** (`/serie/rue`): its name as the title, the number of photos, the photographers and the years, then the photos from the first screen (no large cover), “The same series, one photographer” and the other series.
 
+## Forms in v2 (“I took your photo”, Report, Share)
+
+When **v2** is applied, the “I took your photo” page (`/bonjour`), “Report this photo” and the **Share** page (the one that opens without script, or in a new tab) take the v2 design. The fields do not change: what the person sends, and what you receive, is the same as in v1.
+
+- **One rule** at the top: all fields are required unless marked “optional”; each field’s help is written under its name (“Needed if you agree to a publication”).
+- **After an incomplete submission**, what was entered is kept and each error is written under its field (under the group’s title for boxes), “⚠ Error:” then how to correct it; the tab title starts with “Error”. From two things to correct, a **summary** at the top receives the focus, with a link to each field; with only one, the cursor is already in the field.
+- **Too many submissions from the same connection** (8 per hour on `/bonjour`, 5 on Report): a separate message, which is not an input error, asks to try again in an hour; nothing that was entered is lost.
+- **After sending**, the title “Thank you, it’s noted.” (or the Report message) receives the focus; the card reference is recalled.
+- **Share**: the viewer’s window, as a page, under a link back to the photo; with the script, **Copy link** works there too.
+- The **gift photo** (`/pour-vous/…`) keeps its header reduced to the site name, with no menu or language.
+
 ## Viewer (a photo’s page)
 
 | Gesture | Effect |

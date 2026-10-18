@@ -43,6 +43,17 @@ Quand la **v2** est appliquée (Apparence → Site public : v1 ou v2), ces pages
 - **Deux filtres sans photo commune** (une adresse partagée, par exemple « Voyage, par Julien ») : la page le dit et propose la série entière ou toutes les photos du photographe ; chaque filtre se retire d'un geste (**✕**).
 - **Page d'une série** (`/serie/rue`) : son nom en titre, le nombre de photos, les photographes et les années, puis les photos dès le premier écran (sans grande couverture), « La même série, un seul regard » et les autres séries.
 
+## Formulaires en v2 (« Je vous ai photographié », Signaler, Partager)
+
+Quand la **v2** est appliquée, la page « Je vous ai photographié » (`/bonjour`), « Signaler cette photo » et la page **Partager** (celle qui s'ouvre sans script, ou dans un nouvel onglet) prennent le dessin de la v2. Les champs ne changent pas : ce que la personne envoie, et ce que vous recevez, est le même qu'en v1.
+
+- **Une seule règle** en tête : tous les champs sont obligatoires, sauf ceux marqués « facultatif » ; l'aide de chaque champ est écrite sous son nom (« Nécessaire si vous acceptez une publication »).
+- **Après un envoi incomplet**, la saisie est gardée et chaque erreur est écrite sous son champ (sous le titre du groupe pour des cases), « ⚠ Erreur : » puis comment corriger ; le titre de l'onglet commence par « Erreur ». Dès deux points à corriger, un **résumé** en tête reçoit le focus, avec un lien vers chaque champ ; un seul point : le curseur est déjà dans le champ.
+- **Trop d'envois depuis la même connexion** (8 par heure sur `/bonjour`, 5 sur Signaler) : un message à part, qui n'est pas une erreur de saisie, demande de réessayer dans une heure ; rien de ce qui a été saisi n'est perdu.
+- **Après l'envoi**, le titre « Merci, c'est noté. » (ou le message de Signaler) reçoit le focus ; la référence de la carte est rappelée.
+- **Partager** : la fenêtre de la visionneuse, en page, sous un retour vers la photo ; avec le script, **Copier le lien** y marche aussi.
+- La **photo offerte** (`/pour-vous/…`) garde son en-tête réduit au nom du site, sans menu ni langue.
+
 ## Visionneuse (page d'une photo)
 
 | Geste | Effet |
