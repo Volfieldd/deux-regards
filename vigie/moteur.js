@@ -417,14 +417,19 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     if (!MODES.includes(mode)) throw new Error(`mode : ${MODES.join(', ')}`);
     if (regle === 'sigma.surveillance_reduite' && mode !== 'alerter') throw new Error('la règle « Surveillance réduite » reste en mode alerter : c’est elle qui prévient quand on réduit la surveillance');
     const m = String(motif || '').trim().slice(0, 200) || undefined;
-    const before = modeOf(regle);
+    // Mode de référence : pendant un arrêt, celui que la règle reprendra à sa fin (jamais « arret » lui-même). Sinon,
+    // passer en Observer pendant un arrêt serait vu comme une hausse : sans motif, sans avis, et pour toujours (audit
+    // D3-B1) ; et un second arrêt perdrait le mode à reprendre.
+    const stored = modes()[regle];
+    const enArret = stored && typeof stored === 'object' && stored.mode === 'arret' && stored.jusqua > now();
+    const before = enArret ? (MODES.includes(stored.avant) && stored.avant !== 'arret' ? stored.avant : REGISTRY[regle].mode || 'observer') : modeOf(regle);
     if (mode === 'arret' && !duree) throw new Error('arrêt d’une règle toujours pour une durée (--duree 4h, 7j au plus)');
-    // Toute réduction (arrêt, descente de mode) demande un motif, quel que soit l'appelant (console, ligne de commande).
+    // Toute réduction (arrêt, prolongation d'un arrêt, descente de mode) demande un motif, quel que soit l'appelant.
     if (!m && MODES.indexOf(mode) < MODES.indexOf(before)) throw new Error('surveillance réduite : motif obligatoire');
     if (mode === 'arret') {
       if (!duree) throw new Error('arrêt d’une règle toujours pour une durée (--duree 4h, 7j au plus)');
       const jusqua = now() + Math.min(parseDuration(duree), 7 * 864e5);
-      setting.set('regles_modes', { ...modes(), [regle]: { mode: 'arret', jusqua, par, motif: m, avant: before === 'arret' ? undefined : before } });
+      setting.set('regles_modes', { ...modes(), [regle]: { mode: 'arret', jusqua, par, motif: m, avant: before } });
       store.own('vigie_interrupteur', { emetteur: par, detail: { regle, mode, jusqua, motif: m } });
       store.own('vigie_surveillance_reduite', { emetteur: par, detail: { objet: `regle:${regle}`, jusqua, motif: m } });
       return;

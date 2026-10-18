@@ -467,3 +467,25 @@ test('revue B : valeur mal typée dans un lot signé — écartée, le reste gar
   assert.deepEqual(res.json(), { recus: 2, gardes: 1, ecartes: 1 });
   assert.equal(v.db.prepare('SELECT ip FROM events WHERE type = ?').pluck().get('malicious_input'), null);
 });
+
+test('console réglée mais impossible à écouter (audit D3-D7) : la réception continue, une alerte haute le dit', async t => {
+  const dir = tmp(t);
+  const secret = path.join(dir, 'console-secret');
+  fs.writeFileSync(secret, 's'.repeat(40));
+  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, VIGIE_HOST: '127.0.0.1', VIGIE_INGEST_PORT: '0', VIGIE_INGEST_KEY: KEY, VIGIE_LOG_KEY: LOG_KEY,
+    VIGIE_DECISIONS_PRIVATE_KEY: VIGIE_KEYS.priv64, VIGIE_ZITADEL_ISSUER: 'https://exemple.zitadel.cloud', VIGIE_ZITADEL_KEY_FILE: path.join(dir, 'absent.json'),
+    VIGIE_CONSOLE_CLIENT_ID: '345678901234567890@vigie', VIGIE_CONSOLE_PROJECT_ID: '345678901234567000', VIGIE_CONSOLE_ORG_ID: '345678901234560000',
+    VIGIE_CONSOLE_SECRET_FILE: secret, VIGIE_ACCESS_TEAM: 'nicephos-essai', VIGIE_ACCESS_AUD: 'a1'.repeat(32), VIGIE_ADMIN_SUBS: 'sub-seb',
+    VIGIE_CONSOLE_HOST: '192.0.2.123', VIGIE_CONSOLE_PORT: '0' });
+  const vigie = await startVigie({ config, logger: false, fetchImpl: async () => new Response('{}', { status: 503 }) });
+  t.after(() => vigie.close());
+  assert.equal(vigie.consoleUp, false);
+  const port = vigie.ingest.server.address().port;
+  assert.equal((await fetch(`http://127.0.0.1:${port}/healthz`)).status, 200, 'réception toujours servie');
+  const ev = vigie.store.db.prepare("SELECT detail FROM events WHERE type = 'vigie_console_indisponible'").pluck().get();
+  assert.match(ev, /EADDRNOTAVAIL/);
+  await vigie.engine.drain?.();
+  vigie.engine.enqueue();
+  await vigie.engine.drain?.();
+  assert.equal(vigie.store.db.prepare("SELECT gravite FROM alerts WHERE regle = 'sigma.console_indisponible'").pluck().get(), 'haut');
+});

@@ -94,10 +94,19 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     notifications: config.notifications || {}, edge, siteBackupDir: config.siteBackupDir, verifyChain: async () => record(await store.verifyAsync()) }) : null;
 
   await ingest.listen({ host: config.host, port: config.ingestPort });
-  if (consoleApp) await consoleApp.app.listen({ host: config.console.host, port: config.console.port });
+  // La console est facultative : si elle ne peut pas écouter (adresse absente du conteneur, port pris), la réception, le
+  // moteur et les décisions continuent ; l'échec est écrit dans le journal du conteneur et ouvre une alerte haute
+  // (audit D3-D7 : avant, le service entier quittait et redémarrait en boucle).
+  let consoleUp = false;
+  if (consoleApp) {
+    try { await consoleApp.app.listen({ host: config.console.host, port: config.console.port }); consoleUp = true; } catch (err) {
+      log.error({ err: err.message, host: config.console.host, port: config.console.port }, 'Vigie : console indisponible (la réception continue)');
+      store.own('vigie_console_indisponible', { emetteur: 'vigie/index.js', detail: { erreur: String(err.code || err.message).slice(0, 120), adresse: `${config.console.host}:${config.console.port}` } });
+    }
+  }
   return {
-    store, decisions, ingest, zitadel, engine, switches, threats, edge, notifier, console: consoleApp,
-    async close() { for (const t of timers) clearInterval(t); zitadel?.stop(); edge?.stop(); await consoleApp?.close(); await ingest.close(); await engine.drain(); db.close(); },
+    store, decisions, ingest, zitadel, engine, switches, threats, edge, notifier, console: consoleApp, consoleUp,
+    async close() { for (const t of timers) clearInterval(t); zitadel?.stop(); edge?.stop(); await consoleApp?.close().catch(() => {}); await ingest.close(); await engine.drain(); db.close(); },
   };
 }
 

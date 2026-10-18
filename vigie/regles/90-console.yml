@@ -53,3 +53,16 @@ detection:
   condition: selection
 level: high
 vigie: { cas: DS29, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+title: Console de la Vigie réglée mais indisponible (adresse ou port)
+name: console_indisponible
+id: 1601d407-0b28-4675-8bf0-9088a6ff4eb7
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.impact, attack.t1499]
+detection:
+  selection:
+    type: vigie_console_indisponible
+  condition: selection
+level: high
+vigie: { cas: D3-D7, entite: { kind: vigie, valeur: console }, source_unique: true, mode: alerter }
