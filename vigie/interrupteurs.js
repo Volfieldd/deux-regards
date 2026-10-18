@@ -15,6 +15,8 @@ export function createSwitches({ store, now = Date.now }) {
     if (!SWITCHES.includes(name)) throw new Error(`interrupteur inconnu : ${name} (${SWITCHES.join(', ')})`);
     if (!['marche', 'arret'].includes(etat)) throw new Error('état attendu : marche ou arret');
     if (etat === 'arret' && !duree) throw new Error('arrêt toujours pour une durée (--duree 2h, 7j au plus) : un interrupteur ne reste jamais éteint par oubli');
+    // Motif obligatoire pour un arrêt : il dit aux autres Administrateurs pourquoi (la console comme la ligne de commande).
+    if (etat === 'arret' && !String(motif || '').trim()) throw new Error('arrêt d’un interrupteur : motif obligatoire');
     const jusqua = etat === 'arret' ? now() + Math.min(parseDuration(duree), MAX_OFF) : null;
     const m = String(motif || '').slice(0, 200);
     store.setting.set('interrupteurs', { ...read(), [name]: { etat, jusqua, par, a: now(), motif: m || undefined } });

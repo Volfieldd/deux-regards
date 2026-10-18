@@ -27,13 +27,16 @@ export function testChannel(config, canal, { fetchImpl = fetch, transport = null
 const dayOf = t => new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', weekday: 'short', day: 'numeric', month: 'short' }).format(t);
 const dayHour = t => `${dayOf(t)}, ${hourOf(t)}`;
 const SWITCH_TEXT = { detection: 'détection arrêtée', alertes: 'notifications arrêtées', blocages: 'blocages automatiques arrêtés' };
+// Mots du lexique de la console pour les modes (« passée de Bloquer à Observer », « d’Alerter »).
+const MODE_A = { bloquer: 'Bloquer', alerter: 'Alerter', observer: 'Observer', arret: 'Arrêt' };
+const MODE_DE = { bloquer: 'de Bloquer', alerter: 'd’Alerter', observer: 'd’Observer' };
 const SEUIL_TEXT = { ip: 'd’une adresse', reseau: 'd’un réseau', compte: 'd’un compte', session: 'd’une session', appareil: 'd’un appareil' };
 export function reducedText(d, { titreOf = id => id, t = Date.now() } = {}) {
-  const until = d.jusqua ? ` jusqu'${dayOf(d.jusqua) === dayOf(t) ? `à ${hourOf(d.jusqua)}` : `au ${dayHour(d.jusqua)}`}` : '';      // jour de Paris
+  const until = d.jusqua ? ` jusqu’${dayOf(d.jusqua) === dayOf(t) ? `à ${hourOf(d.jusqua)}` : `au ${dayHour(d.jusqua)}`}` : '';      // jour de Paris
   const [kind, ...rest] = String(d.objet || '').split(':');
   const id = rest.join(':');
   if (kind === 'interrupteur') return `${SWITCH_TEXT[id] || `interrupteur ${id} arrêté`}${until}`;
-  if (kind === 'regle') return d.mode && d.mode !== 'arret' ? `règle « ${titreOf(id)} » passée de ${d.avant} à ${d.mode}` : `règle « ${titreOf(id)} » arrêtée${until}`;
+  if (kind === 'regle') return d.mode && d.mode !== 'arret' ? `règle « ${titreOf(id)} » passée ${MODE_DE[d.avant] || `de ${d.avant}`} à ${MODE_A[d.mode] || d.mode}` : `règle « ${titreOf(id)} » arrêtée${until}`;
   if (kind === 'seuil') return `seuil ${SEUIL_TEXT[id] || id} relevé de ${d.avant} à ${d.valeur} points`;
   if (kind === 'confiance') return `adresse de confiance ajoutée${until}`;
   if (kind === 'controle_roles') return 'référence du contrôle des rôles acceptée';
@@ -77,15 +80,28 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
     store.own('vigie_canal_echec', { emetteur: 'vigie/notifications.js', detail: { canal, erreur: String(err.message).slice(0, 200) } });
   };
   // Un canal, dans son budget horaire ; renvoie vrai si le message est parti.
-  const reducedBudget = new Map();          // canal → { hour, sent }
+  const reducedBudget = new Map();          // canal → { hour, sent, lost }
+  async function reducedSummary(canal, r, hour) {
+    if (!r || r.hour === hour || !r.lost) return;
+    const n = r.lost;
+    r.lost = 0;
+    try { await senders[canal](`[Moyenne] Surveillance réduite : ${n} autre(s) geste(s) l’heure précédente, non envoyés un à un (plus de ${REDUCED_PER_HOUR} par heure).\n${consoleUrl}/reglages`); } catch (err) { failed(canal, err); }
+  }
   async function viaChannel(canal, text, { prioritaire = false } = {}) {
     if (!channels[canal]) return false;
     const hour = Math.floor(now() / 3600e3);
     if (prioritaire) {
+      if (text === null) {                    // appel de tick() : seulement la synthèse de l'heure finie
+        const r = reducedBudget.get(canal);
+        await reducedSummary(canal, r, hour);
+        return true;
+      }
       const r = reducedBudget.get(canal);
-      const rb = r && r.hour === hour ? r : { hour, sent: 0 };
+      // Heure nouvelle : synthèse de ce qui n'a pas pu partir pendant la précédente (jamais perdu sans trace).
+      await reducedSummary(canal, r, hour);
+      const rb = r && r.hour === hour ? r : { hour, sent: 0, lost: 0 };
       reducedBudget.set(canal, rb);
-      if (rb.sent >= REDUCED_PER_HOUR) return true;
+      if (rb.sent >= REDUCED_PER_HOUR) { rb.lost += 1; return true; }
       rb.sent += 1;
       try { await senders[canal](text); return true; } catch (err) { failed(canal, err); return false; }
     }
@@ -153,6 +169,7 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
   async function tick() {
     const hour = Math.floor(now() / 3600e3);
     for (const [canal, b] of budget) if (b.hour !== hour && b.skipped) await viaChannel(canal, '');
+    for (const [canal, r] of reducedBudget) if (r.hour !== hour && r.lost) await viaChannel(canal, null, { prioritaire: true });
   }
 
   return {
