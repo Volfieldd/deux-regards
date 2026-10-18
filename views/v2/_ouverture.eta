@@ -1,0 +1,29 @@
+<% /* Ouverture de l'accueil (MQ-01 repères 2 à 6, public.css § 19) : la photo entière, à la hauteur de l'écran, sans voile
+      ni zoom ni texte posé dessus ; la promesse en H1 (avant le diaporama dans le document, sous la photo à l'écran) ; le
+      cartel, lien vers la photo. Le diaporama est À L'ARRÊT : les points et « Lire » exigent le script (.js-seul) ; les
+      autres photos ne se chargent que si l'on choisit un point ou lance la lecture (<template>). Une seule liste
+      (réglage « Ouverture », settings.hero) : le cadre prend le format le plus large de la liste, une photo plus étroite y
+      tient à sa hauteur. */ %>
+<% const t = it.t, v = it.v2, ic = v.ic, hero = it.hero, n = hero.length;
+   const frame = hero.reduce((a, p) => (v.fmt(p).r > v.fmt(a).r ? p : a), hero[0]), F = v.fmt(frame);
+   const pic = (p, eager) => it.picture(p, { sizes: v.ouvSizes(F.r, v.fmt(p).r / F.r), eager, alt: '' });
+   const cartel = p => `<a href="${it.photoUrl(p.slug)}"><span class="cartel-t">${v.nobr(p.title)}</span><span class="cartel-m">${it.v2.esc([p.author, p.place, v.date(p.taken_on)].filter(Boolean).join(' · '))}&nbsp;· <span class="ouverture-voir">${it.v2.esc(t.seePhoto)}</span></span></a>`; %>
+<div class="wrap ouverture-zone">
+  <section class="ouverture <%= F.cls %>" aria-labelledby="acc-h1" data-ouverture>
+    <div class="ouverture-promesse"><h1 class="ouverture-h1" id="acc-h1"><%= it.promise %></h1><p class="ouverture-sous"><%= it.promiseSub %></p></div>
+    <figure class="ouverture-diapo"<% if (n > 1) { %> aria-roledescription="<%= t.v2.slideshow %>"<% } %> aria-labelledby="ouv-cartel">
+      <div class="ouverture-cadre" data-ouv-cadre><%~ pic(hero[0], true) %></div>
+<% if (n > 1) { %>
+      <div class="ouverture-ctl js-seul">
+        <ul class="ouverture-points" aria-label="<%= t.v2.slidePoints(n) %>">
+<% hero.forEach((p, i) => { %>          <li><button class="ouverture-point" type="button" aria-pressed="<%= i === 0 %>" aria-label="<%= t.v2.slidePoint(i + 1, n, p.title) %>" data-ouv-point="<%= i %>"></button></li>
+<% }) %>        </ul>
+        <button class="bascule ouverture-pause" type="button" data-ouv-lire><span class="ouv-lire"><%~ ic('lire', { size: 18 }) %><%= t.v2.play %><span class="sr-only"><%= t.v2.playMore %></span></span><span class="ouv-pause" hidden><%~ ic('pause', { size: 18 }) %><%= t.v2.pause %></span></button>
+      </div>
+<% } %>
+      <figcaption class="cartel ouverture-cartel" id="ouv-cartel" aria-live="polite" data-ouv-cartel><%~ cartel(hero[0]) %></figcaption>
+    </figure>
+  </section>
+</div>
+<% hero.slice(1).forEach((p, i) => { %><template data-ouv-diapo="<%= i + 1 %>"><div data-image><%~ pic(p, false) %></div><div data-cartel><%~ cartel(p) %></div></template>
+<% }) %>

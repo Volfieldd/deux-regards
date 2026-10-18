@@ -271,3 +271,52 @@ document.querySelectorAll('[data-filtres]').forEach(barre => {
   set();
   addEventListener('resize', set);
 });
+
+// Diaporama de l'ouverture (MQ-01) : À L'ARRÊT par défaut, rien ne bouge sans geste. Un point choisit une photo (annoncée
+// poliment) ; « Lire » le lance, « Pause » l'arrête ; il attend sous la souris, s'arrête quand le focus entre ailleurs
+// que sur son bouton, et ne tourne pas en mouvement réduit. Les photos suivantes viennent de leur <template> au premier
+// besoin : seule la première est chargée avec la page.
+document.querySelectorAll('[data-ouverture]').forEach(ouv => {
+  const cadre = ouv.querySelector('[data-ouv-cadre]');
+  const cartel = ouv.querySelector('[data-ouv-cartel]');
+  const points = [...ouv.querySelectorAll('[data-ouv-point]')];
+  const lire = ouv.querySelector('[data-ouv-lire]');
+  if (points.length < 2 || !cadre || !cartel) return;
+  const slides = [{ image: [...cadre.childNodes], cartel: [...cartel.childNodes] }];
+  document.querySelectorAll('template[data-ouv-diapo]').forEach(tp => { slides[Number(tp.dataset.ouvDiapo)] = tp; });
+  const get = i => {
+    if (slides[i] instanceof HTMLTemplateElement) {
+      const c = document.importNode(slides[i].content, true);
+      slides[i] = { image: [...c.querySelector('[data-image]').childNodes], cartel: [...c.querySelector('[data-cartel]').childNodes] };
+    }
+    return slides[i];
+  };
+  let cur = 0, timer = null, held = false;
+  const show = (i, announce) => {
+    cur = (i + points.length) % points.length;
+    const s = get(cur);
+    cartel.setAttribute('aria-live', announce ? 'polite' : 'off');
+    cadre.replaceChildren(...s.image);
+    cartel.replaceChildren(...s.cartel);
+    points.forEach((b, k) => b.setAttribute('aria-pressed', String(k === cur)));
+  };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const label = () => {
+    if (!lire) return;
+    lire.querySelector('.ouv-lire').hidden = timer !== null;
+    lire.querySelector('.ouv-pause').hidden = timer === null;
+  };
+  const stop = () => { clearInterval(timer); timer = null; label(); };
+  const play = () => {
+    if (reduce.matches) return;
+    clearInterval(timer);
+    timer = setInterval(() => { if (!held && !document.hidden) show(cur + 1, false); }, 6000);
+    label();
+  };
+  points.forEach((b, k) => b.addEventListener('click', () => { stop(); show(k, true); }));
+  lire?.addEventListener('click', () => (timer === null ? play() : stop()));
+  ouv.addEventListener('mouseenter', () => { held = true; });
+  ouv.addEventListener('mouseleave', () => { held = false; });
+  ouv.addEventListener('focusin', e => { if (e.target !== lire && timer !== null) stop(); });
+  reduce.addEventListener?.('change', () => { if (reduce.matches) stop(); });
+});

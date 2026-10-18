@@ -7,16 +7,19 @@
    const names = list(it.regards.slice(1).filter(r => r.count).map(r => r.name));
    const label = A && S ? `${S.name}, ${t.by(A.name)}` : A ? t.by(A.name) : S ? S.name : '';
    const serieBy = S ? list(it.regards.slice(1).filter(r => it.photos.some(p => p.author_slug === r.slug)).map(r => r.name)) : '';
-   const pageTitle = page === 'serie' ? `${serieBy ? t.v2.serieTitle(S.name, serieBy) : S.name} · ${site}`
+   const pageTitle = page === 'accueil' ? t.v2.titleHome(site, names)
+     : page === 'serie' ? `${serieBy ? t.v2.serieTitle(S.name, serieBy) : S.name} · ${site}`
      : t.nav.gallery + (label ? `, ${label} (${t.photos(it.photos.length)})` : '') + ` · ${site}`; %>
 <% layout('./layout', { pageTitle }) %>
-<%~ include('./_entete', { ...it, courant: page === 'serie' ? 'series' : 'galerie' }) %>
+<%~ include('./_entete', { ...it, courant: page === 'serie' ? 'series' : page === 'galerie' ? 'galerie' : null }) %>
 <main id="contenu">
 <% if (page === 'serie' && S) { %>
 <%~ include('./_serie', it) %>
-<% } else { %>
+<% } else if (page === 'galerie') { %>
   <div class="wrap tete-page"><h1 class="titre-page"><%= t.nav.gallery %></h1><p class="chapo"><%= t.v2.galleryLead(it.total, names) %></p></div>
 <%~ include('./_galerie', { ...it, gridId: 'galerie' }) %>
+<% } else { %>
+<%~ include('./_accueil', { ...it, names, promise: it.tagline || site, promiseSub: t.v2.promiseSub(names) }) %>
 <% } %>
 </main>
 <%~ include('./_pied', it) %>
