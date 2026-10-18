@@ -749,4 +749,18 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .filtres-defile .filtre picture { grid-row: 1 / span 2; }
 .partie-tete h2[tabindex]:focus { outline: 0; }
 
+/* Page d'une série (MQ-03), sans couverture : la première rangée de photos est l'ouverture de la page. */
+.ser-haut { display: grid; gap: var(--esp-3) var(--esp-8); padding-top: var(--esp-2); }
+.ser-titre { display: grid; gap: var(--esp-2); align-content: start; }
+.ser-titre .ser-fiche { margin-top: var(--esp-1); }
+.ser-fiche { display: flex; flex-wrap: wrap; gap: var(--esp-1) var(--esp-3); list-style: none; margin: 0; padding: var(--esp-2) 0 0; border-top: 1px solid var(--rule); color: var(--prose); }
+.ser-fiche li { white-space: nowrap; }
+.ser-fiche b { font-weight: 500; color: var(--ink); }
+.ser-fiche a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
+@media (pointer: coarse) { .ser-fiche a { display: inline-flex; align-items: center; justify-content: center; min-height: var(--cible); min-width: var(--cible); } }
+.ser-photos { padding-top: var(--esp-6); }
+/* Au bureau, le titre et la fiche gardent la colonne de gauche de la maquette (5/12) : la fiche ne court pas sur toute la
+   page ; la colonne de droite attend le texte d'intention, que la base n'a pas encore. */
+@media (min-width: 1024px) { .ser-haut { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; } }
+
 @media (prefers-reduced-motion: reduce) { .lang-pick > summary .ic { transition: none; } }

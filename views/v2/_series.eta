@@ -1,0 +1,7 @@
+<% /* Séries en une rangée étirée (MQ-01 repère 8, MQ-03 repère 7) : la couverture de chaque série (sa première photo dans
+      l'ordre de la galerie) à son format, son nom et son compte en clair ; chacune mène à /serie/<slug>.
+      it.list : séries avec leur couverture et leur compte ; it.labelledby. */ %>
+<% const t = it.t, v = it.v2, covers = it.list.map(c => c.cover); %>
+<ul class="rangees rangees--etiree" aria-labelledby="<%= it.labelledby %>">
+<% it.list.forEach(c => { const g = v.fmt(c.cover); %>  <li class="<%= g.cls %><%= g.r < 1 ? ' v' : g.r === 1 ? ' c' : '' %>"><a class="vignette" href="<%= it.galleryUrl({ serie: c.slug }) %>"><%~ it.picture(c.cover, { sizes: v.rowSizes(c.cover, covers, { etiree: true }), alt: '' }) %><span class="cartel cartel--ligne"><span class="cartel-t"><%~ v.nobr(c.name) %></span><span class="cartel-m"><%= t.photos(c.count) %></span></span></a></li>
+<% }) %></ul>
