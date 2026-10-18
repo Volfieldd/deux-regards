@@ -221,6 +221,10 @@ test('retour à la série après une photo : position conservée, même après a
   }, slug);
   const open = async () => {
     await page.goto('/serie/paysage');
+    // Vignettes posées d'abord : tant que leur apparition court (12 px de décalage, échelonnée), Playwright juge la tuile
+    // instable et, avant de cliquer, la refait défiler (bas de la tuile au bas de l'écran, 134 px plus haut sur Pixel 7) :
+    // la page quittée n'était plus celle mesurée, d'où l'échec « à 2 px près » contre la marge de 120 px.
+    await page.waitForFunction(() => [...document.querySelectorAll('#grid .tile')].every(t => t.getAnimations().every(a => a.playState === 'finished')));
     const tile = page.locator('#grid a.tile').last();
     await tile.scrollIntoViewIfNeeded();
     const y = await page.evaluate(() => scrollY);
@@ -233,7 +237,9 @@ test('retour à la série après une photo : position conservée, même après a
   const y = await open();
   await page.locator('.viewer a.back').click();
   await page.waitForURL(/\/serie\/paysage$/);
-  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(y - 120);
+  // Le navigateur rend la position par une ancre (un élément et son décalage) qu'il recale pendant le chargement : mesuré
+  // 0 à 12 px d'écart. 24 px de marge, quand un retour en haut de la série serait à plus de 2 000 px.
+  await expect.poll(() => page.evaluate(y0 => Math.abs(scrollY - y0), y)).toBeLessThanOrEqual(24);
   // Deux photos plus loin, puis le bouton Retour du navigateur : un seul retour, la dernière photo vue à l'écran.
   await open();
   for (let i = 0; i < 2; i++) { const u = page.url(); await page.keyboard.press('ArrowLeft'); await page.waitForURL(x => x.href !== u); }
