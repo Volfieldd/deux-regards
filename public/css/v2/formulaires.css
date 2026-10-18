@@ -1,0 +1,130 @@
+/* =====================================================================================================
+   Site public v2 : pages à formulaire (/bonjour, Signaler, Partager sans script, photo offerte). Chargé après
+   css/v2/public.css, sur ces pages seulement (views/v2/layout.eta, it.formulaires).
+   Composants de la planche MQ-00 (docs/audit-ergonomie-2026-10-16/maquettes/_commun/public.css, § 10 et § 22), repris
+   sans les états simulés des maquettes (.is-focus) ; puis, en section 40, la mise en page des pages, d'après le <style>
+   de MQ-05 (et la planche pour les pages qui n'ont pas de maquette). Les numéros de section sont ceux de la maquette.
+   Rien ici n'exige JavaScript : le dépliant est un <details>, les cases et les radios sont dessinées en CSS.
+   ===================================================================================================== */
+
+/* ---------- 10. Formulaires ----------
+   Une phrase en tête : « Tous les champs sont obligatoires, sauf mention « facultatif ». »
+   Ordre : libellé · aide · champ · erreur (sous le champ ; sous la légende pour un groupe).
+   Erreur : ⚠ + « Erreur : » en gras + une phrase qui dit comment corriger ; bord de 2 px ; saisie gardée.
+   Résumé en tête au-delà d'un point, focus posé dessus (autofocus) ; un seul point : le focus va au champ. */
+.form { display: grid; gap: var(--esp-4); max-width: 640px; min-width: 0; }
+.form-oblig { margin: 0; color: var(--mute); font-size: var(--t-petit); }
+.champ { display: grid; gap: var(--esp-1); min-width: 0; }
+.champ > label, .groupe > legend { font-weight: 500; font-size: var(--t-texte); color: var(--ink); }
+.facultatif { font-weight: 400; color: var(--mute); }
+.champ-aide { margin: 0; color: var(--mute); font-size: var(--t-meta); line-height: 1.5; }
+.champ input:not([type="radio"]):not([type="checkbox"]), .champ select, .champ textarea {
+  width: 100%; min-height: var(--esp-6); padding: 11px 14px; border: 1px solid var(--field); border-radius: var(--r-site);
+  background: var(--paper); color: var(--ink); font: 400 var(--t-texte)/1.4 var(--sans); }
+.champ textarea { min-height: 128px; resize: vertical; }
+.champ input:focus, .champ select:focus, .champ textarea:focus { outline: var(--focus-l) solid var(--ink); outline-offset: 0; border-color: var(--ink); }
+.champ--court input { max-width: 12ch; }
+.champ [aria-invalid="true"] { border: 2px solid var(--error) !important; padding: 10px 13px; }
+.champ-err { display: flex; align-items: flex-start; gap: var(--esp-1); margin: 0; color: var(--error); font-size: var(--t-petit); line-height: 1.5; }
+.champ-err .ic { margin-top: 2px; }
+.champ-err b { font-weight: 500; }
+.groupe { display: grid; gap: var(--esp-demi); margin: 0; padding: 0; border: 0; min-width: 0; }
+.groupe > legend { padding: 0; margin-bottom: var(--esp-1); }
+.groupe > .champ-aide, .groupe > .champ-err { margin-bottom: var(--esp-1); }
+/* Cases et boutons radio dessinés : vides et cerclés à 3:1, pleins quand cochés, dans les trois thèmes. */
+.choix { display: flex; align-items: flex-start; gap: 12px; min-height: var(--cible); padding-block: 10px; cursor: pointer; font-size: var(--t-texte); line-height: 1.5; }
+.choix input { appearance: none; -webkit-appearance: none; flex: none; display: grid; place-content: center; width: 22px; height: 22px; margin: 1px 0 0;
+  border: 2px solid var(--field); border-radius: 50%; background: var(--paper); cursor: pointer; }
+.choix input[type="checkbox"] { border-radius: 0; }
+.choix input::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); transform: scale(0); }
+.choix input[type="checkbox"]::before { width: 12px; height: 12px; border-radius: 0; background: var(--paper); clip-path: polygon(14% 52%, 0 66%, 38% 100%, 100% 22%, 86% 8%, 38% 72%); }
+.choix input:checked { border-color: var(--ink); }
+.choix input:checked::before { transform: scale(1); }
+.choix input[type="checkbox"]:checked { background: var(--ink); }
+.choix input:focus-visible { outline: var(--focus-l) solid var(--ink); outline-offset: 2px; }
+.choix:hover input { border-color: var(--ink); }
+.groupe--erreur .choix input, .choix input[aria-invalid="true"] { border-color: var(--error); }
+@media (forced-colors: active) { .choix input::before { background: CanvasText; } .choix input[type="checkbox"]:checked { background: Highlight; } }
+/* Résumé des erreurs : une <section> titrée par son <h2>, une région nommée lue au focus. */
+.resume { display: grid; gap: var(--esp-1); padding: var(--esp-2) 0 var(--esp-2) var(--esp-3); border-left: 3px solid var(--error); }
+.resume:focus-visible { outline-offset: 4px; }
+.resume-t { display: flex; align-items: center; gap: var(--esp-1); margin: 0; font: 500 var(--t-titre-3)/1.3 var(--sans); color: var(--ink); }
+.resume-t .ic { color: var(--error); }
+.resume ul { margin: 0; padding-left: 20px; }
+.resume a { display: block; padding-block: 10px; color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+
+/* ---------- 22. Formulaires : compléments (extrait) ----------
+   .bloc : un groupe de champs sous un titre (fieldset, légende en titre 3) ; .depliant : un <details> à l'allure de lien ;
+   .sous-choix : cases rattachées à un choix ; .duo : deux champs côte à côte s'il y a la place ; .envoi : le bouton et ce
+   qui suit ; .note-donnees : ce qu'on fait des données ; .piege : le champ anti-robots ; .photo-ref : la photo dont on parle. */
+.bloc { display: grid; gap: var(--esp-3); margin: 0; padding: var(--esp-3) 0 0; border: 0; border-top: 1px solid var(--rule); min-width: 0; }
+.bloc > legend { float: left; width: 100%; padding: 0; margin: 0 0 var(--esp-1); font: 400 var(--t-titre-3)/1.3 var(--sans); color: var(--ink); }
+.bloc > legend + * { clear: left; }
+.bloc .groupe > legend { font-weight: 500; }
+.bloc > legend + .champ-aide { margin-top: calc(-1 * var(--esp-2)); }
+.bloc.groupe { gap: var(--esp-demi); }
+.bloc.groupe > legend { margin-bottom: var(--esp-2); }
+.depliant > summary { list-style: none; display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); cursor: pointer; color: var(--ink);
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.depliant > summary::-webkit-details-marker { display: none; }
+.depliant > summary .ic { transition: transform .2s; }
+.depliant[open] > summary .ic { transform: rotate(180deg); }
+.depliant > div { display: grid; gap: var(--esp-3); margin-top: var(--esp-2); padding-left: var(--esp-2); border-left: 1px solid var(--field); }
+.sous-choix { display: grid; margin: 0 0 0 34px; padding: 0; list-style: none; }
+.duo { display: grid; gap: var(--esp-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.envoi { display: flex; flex-wrap: wrap; align-items: center; gap: var(--esp-2) var(--esp-3); }
+.envoi p { margin: 0; color: var(--mute); font-size: var(--t-petit); }
+.note-donnees { margin: 0; color: var(--mute); font-size: var(--t-meta); line-height: 1.55; max-width: 60ch; }
+.note-donnees a, .champ-aide a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* Champ piège (anti-robots, surveillé par la Vigie) : caché comme en v1 (css/site.css, .hello-trap), hors de l'écran, de
+   l'arbre d'accessibilité (aria-hidden) et des tabulations (tabindex="-1"), sans autocomplétion. */
+.piege { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.photo-ref { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: var(--esp-1) var(--esp-3); align-items: end; }
+.photo-ref img { display: block; width: 160px; height: auto; background: var(--frame); }
+.photo-ref .cartel { padding-top: 0; }
+.photo-ref .lien { font-size: var(--t-petit); }
+@media (max-width: 420px) { .photo-ref { grid-template-columns: 120px minmax(0, 1fr); } .photo-ref img { width: 120px; } }
+
+/* =====================================================================================================
+   40. Mise en page des pages (le <style> de MQ-05 ; la planche pour Signaler, Partager et la photo offerte)
+   ===================================================================================================== */
+
+/* Page à formulaire (.pf) : l'intro, le formulaire, puis « Ce qui se passe ensuite ». Dès 1 024 px, deux colonnes :
+   à gauche l'intro et la suite, à droite le formulaire. .pf--seul : une seule colonne (remerciement, page sans formulaire). */
+.pf { display: grid; gap: var(--esp-6); padding-block: var(--esp-6) 0; }
+.pf-intro { display: grid; gap: var(--esp-2); align-content: start; min-width: 0; }
+.pf-intro > * { margin: 0; }
+.pf-ensuite { align-self: start; padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+.pf-ensuite h2 { margin: 0 0 var(--esp-2); font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.pf-ensuite ol { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--esp-2); counter-reset: e; }
+.pf-ensuite li { counter-increment: e; display: grid; grid-template-columns: 2em minmax(0, 1fr); color: var(--prose); line-height: 1.55; }
+.pf-ensuite li::before { content: counter(e) / ''; color: var(--mute); font-variant-numeric: tabular-nums; }
+@media (min-width: 1024px) {
+  .pf:not(.pf--seul) { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); grid-template-rows: auto 1fr; grid-template-areas: "intro form" "ensuite form";
+    column-gap: var(--esp-8); row-gap: var(--esp-6); align-items: start; }
+  .pf:not(.pf--seul) > .pf-intro { grid-area: intro; } .pf > .form { grid-area: form; } .pf > .pf-ensuite { grid-area: ensuite; }
+}
+.pf--seul { max-width: 720px; }
+.pf .titre-page[tabindex]:focus:not(:focus-visible) { outline: none; }
+.pf-carte { margin: 0; color: var(--prose); }
+.pf-droits { margin: 0; }
+.pf-suite { display: flex; flex-wrap: wrap; gap: 0 var(--esp-3); }
+/* Retour de l'en-tête Contexte (Signaler, Partager) : il nomme la photo, dont le titre peut être long ; comme celui d'une
+   galerie privée (public.css, .sh--prive), il passe à la ligne au lieu de se couper d'une ellipse. */
+.sh--contexte .sh-retour-t { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.25; overflow-wrap: anywhere; }
+.sh--contexte .sh-retour { padding-block: 4px; }
+/* La photo dont on parle (Signaler) : sous l'intro, son cartel et le retour. */
+.pf-intro .photo-ref { margin-top: var(--esp-2); }
+.photo-ref picture { display: block; }
+
+/* Partager, sans la fenêtre (sans script, ou ouvert dans un nouvel onglet) : la fenêtre de la visionneuse, en page. */
+.partage-page { display: grid; gap: var(--esp-3); max-width: 540px; padding-block: var(--esp-6) 0; }
+.partage-page h1 { margin: 0; }
+.partage-page .share-copy-btn:focus-visible { outline-offset: 2px; }
+.partage-page .pf-suite { margin: 0; }
+
+/* Photo offerte (/pour-vous/…) : la photo entière dans l'écran, son cartel, le téléchargement. */
+.offerte { display: grid; gap: var(--esp-3); padding-block: var(--esp-6) 0; justify-items: start; }
+.offerte > * { margin: 0; }
+.offerte-fig { display: grid; gap: var(--esp-1); margin: var(--esp-2) 0 0; max-width: 100%; }
+.offerte-fig img { width: auto; max-width: 100%; max-height: calc(100vh - 320px); max-height: calc(100dvh - 320px); min-height: 0; background: var(--frame); }
