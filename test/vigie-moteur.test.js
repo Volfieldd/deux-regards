@@ -90,7 +90,8 @@ test('cookie rejoué depuis un autre appareil → révocation des sessions du co
   v.switches.set('blocages', 'arret', { duree: '1h', par: 'test' });
   v.site('session_use_after_expire', 'haut', { composant: 'site · connexion', sub: 'zitadel-a', detail: JSON.stringify({ meme_reseau_et_navigateur: false }) });
   assert.equal(v.decisions.active().length, 0);
-  assert.match(v.alerts()[0].reponse, /interrupteur des blocages arrêté/);
+  assert.match(v.alerts().find(a => a.regle === 'sigma.cookie_rejoue').reponse, /interrupteur des blocages arrêté/);
+  assert.ok(v.alerts().find(a => a.regle === 'sigma.surveillance_reduite' && a.entite_key === 'interrupteur:blocages'), 'arrêt signalé (surveillance réduite)');
   v.clock.t += 2 * 3600e3;                                                 // interrupteur rallumé seul
   v.site('session_use_after_expire', 'haut', { composant: 'site · connexion', sub: 'zitadel-b', detail: JSON.stringify({ meme_reseau_et_navigateur: false }) });
   assert.deepEqual(v.decisions.active().map(d => [d.kind, d.cible]), [['revoquer_compte', 'zitadel-b']]);
@@ -101,12 +102,21 @@ test('cookie rejoué depuis un autre appareil → révocation des sessions du co
 
 test('modes : arrêt (rien), alerter ; détection arrêtée : rien ; blocage automatique jamais pour une adresse d’administrateur ou privée', async t => {
   const v = engineOf(t);
-  v.engine.setMode('sigma.configuration', 'arret', 'test');
+  assert.throws(() => v.engine.setMode('sigma.configuration', 'arret', 'test'), /pour une durée/);
+  assert.throws(() => v.engine.setMode('sigma.surveillance_reduite', 'arret', 'test', { duree: '1h' }), /reste en mode alerter/);
+  v.engine.setMode('sigma.configuration', 'arret', 'test', { duree: '1h', motif: 'essai' });
   v.site('sys_config_changed', 'haut', { composant: 'site · système' });
-  assert.equal(v.alerts().length, 0);
+  const real = () => v.alerts().filter(a => a.regle !== 'sigma.surveillance_reduite');
+  assert.equal(real().length, 0, 'règle arrêtée : rien');
+  assert.ok(v.alerts().some(a => a.entite_key === 'regle:sigma.configuration'), 'arrêt de la règle signalé');
   v.switches.set('detection', 'arret', { duree: '1h', par: 'test' });
   v.site('sys_restore', 'haut', { composant: 'site · système' });
-  assert.equal(v.alerts().length, 0);
+  assert.equal(real().length, 0, 'détection arrêtée : rien');
+  assert.ok(v.alerts().some(a => a.entite_key === 'interrupteur:detection'), 'arrêt de la détection signalé malgré elle');
+  // Passée la durée, la règle reprend son mode de départ.
+  v.clock.t += 2 * 3600e3;
+  assert.equal(v.engine.modeOf('sigma.configuration'), 'observer');
+  v.clock.t -= 2 * 3600e3;
   v.clock.t += 2 * 3600e3;
   // Score d'une adresse, mode « bloquer » : bloquée 24 h…
   v.engine.setMode('entite.score', 'bloquer', 'test');
@@ -277,10 +287,16 @@ test('ligne de commande : alertes, détail avec l’origine du signal, entités,
   assert.match(cli(['regle', 'entite.score', 'alerter'], { config }), /alerter/);
   assert.throws(() => cli(['regle', 'inconnue', 'alerter'], { config }), /règle inconnue/);
   assert.match(cli(['seuil', 'ip', '9'], { config }), /9 points/);
-  assert.match(cli(['confiance', 'ajouter', '203.0.113.1'], { config }), /203\.0\.113\.1/);
+  assert.throws(() => cli(['confiance', 'ajouter', '203.0.113.1'], { config }), /pour une durée/);
+  assert.match(cli(['confiance', 'ajouter', '203.0.113.1', '--duree', '7j', '--motif', 'box'], { config }), /203\.0\.113\.1 \(jusqu'au/);
   assert.match(cli(['prendre', '1'], { config }), /prise en charge/);
   assert.match(cli(['classer', '1', 'faux_positif', '--note', 'changement prévu'], { config }), /close \(faux_positif\)/);
   assert.equal(cli(['alertes'], { config }), 'Aucune alerte.');
+  // « controle --accepter » refusé tant qu'une alerte du contrôle des rôles est ouverte.
+  const db2 = openVigieDb(config.databasePath);
+  db2.prepare("INSERT INTO alerts (regle, entite_kind, entite_key, gravite, mode, premiere, derniere) VALUES ('sigma.controle_roles', 'site', 'comptes', 'critique', 'alerter', 1, 1)").run();
+  db2.close();
+  assert.throws(() => cli(['controle', '--accepter'], { config }), /encore ouverte : classez-la d'abord/);
 });
 
 test('bout en bout : un lot signé du site et un événement Zitadel sur le même compte ouvrent une alerte de score', async t => {

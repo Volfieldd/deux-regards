@@ -34,6 +34,7 @@ export const OWN = {
   vigie_bordure_silence: E('moyen', 'vigie · contrôle'),
   // Notifications (phase D)
   vigie_canal_echec: E('moyen', 'vigie · contrôle'),
+  vigie_surveillance_reduite: E('moyen', 'vigie · contrôle'),
   vigie_decision: E('moyen', 'vigie · ligne de commande'),
   vigie_interrupteur: E('moyen', 'vigie · ligne de commande'),
 };

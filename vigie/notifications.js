@@ -22,9 +22,14 @@ export function testChannel(config, canal, { fetchImpl = fetch, transport = null
 }
 
 // Texte d'un message (exporté pour les tests et la ligne de commande).
-export function messageOf({ id, gravite, titre, sources = [], t, console: url, action = 'ouverte' }) {
+// Réponse déjà faite, sans cible (ni compte ni adresse) : de quoi savoir à 23 h si l'urgence demeure.
+const DONE = { geler: 'compte gelé', revoquer_compte: 'sessions du compte fermées', revoquer_session: 'session fermée', bloquer: 'adresse bloquée', verrouiller: 'admin verrouillée' };
+const lengthOf = ms => (ms >= 864e5 - 60e3 ? `${Math.round(ms / 864e5)} j` : `${Math.round(ms / 3600e3)} h`);
+export const responseOf = decisions => (decisions.length ? `Réponse : ${decisions.map(d => `${DONE[d.kind] || d.kind}${d.kind === 'geler' || d.kind === 'bloquer' ? ` ${lengthOf(d.fin - d.cree_a)}` : ''}`).join(', ')}` : 'Aucune réponse automatique');
+
+export function messageOf({ id, gravite, titre, sources = [], t, console: url, action = 'ouverte', reponse = null }) {
   const from = sources.map(s => SOURCES[s] || s).join(', ') || 'Vigie';
-  return [`[${LABEL[gravite] || gravite}] ${titre}${action === 'aggravee' ? ' (aggravée)' : ''}`, `Source : ${from}`, `${hourOf(t)} · ${url}/alertes/${id}`].join('\n');
+  return [`[${LABEL[gravite] || gravite}] ${titre}${action === 'aggravee' ? ' (aggravée)' : ''}`, `Source : ${from}`, ...(reponse ? [reponse] : []), `${hourOf(t)} · ${url}/alertes/${id}`].join('\n');
 }
 
 export function createNotifier({ store, engine, switches, config = {}, fetchImpl = fetch, now = Date.now, log, transport = null }) {
@@ -41,7 +46,7 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
     if (r.status !== 201 && r.status !== 200) throw new Error(`passerelle Signal : réponse ${r.status}${/rate.?limit/i.test(body) ? ' (limite de Signal : captcha à résoudre)' : ''}`);
   }
   async function sendMail(text) {
-    await mailer.sendMail({ from: mail.from, to: mail.to, subject: text.split('\n')[0].slice(0, 120), text: `${text}\n\nVigie Nicephos — ce message ne contient aucune donnée personnelle ; le détail est dans la console.` });
+    await mailer.sendMail({ from: mail.from, to: mail.to, subject: text.split('\n')[0].slice(0, 120), text: `${text}\n\nVigie Nicephos — ce message ne contient aucune donnée personnelle ; le détail est dans la console.\nOuvrez la Vigie depuis votre favori ; elle ne demande jamais votre mot de passe par message.` });
   }
   const senders = { signal: sendSignal, email: sendMail };
 
@@ -78,14 +83,18 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
 
   // Alerte ouverte ou aggravée → message, selon la gravité, le mode et l'interrupteur.
   async function onAlert(detail, t = now()) {
-    if (!['ouverte', 'aggravee'].includes(detail.action) || !switches.isOn('alertes')) return false;
-    if (!['haut', 'critique'].includes(detail.gravite)) return false;
+    if (!['ouverte', 'aggravee'].includes(detail.action)) return false;
     const a = store.db.prepare('SELECT * FROM alerts WHERE id = ?').get(detail.id);
     if (!a || !['alerter', 'bloquer'].includes(a.mode)) return false;
+    // La surveillance réduite part toujours (y compris quand c'est l'interrupteur des alertes qu'on vient d'arrêter),
+    // quelle que soit sa gravité ; les autres alertes : hautes et critiques, interrupteur en marche.
+    const reduced = a.regle === 'sigma.surveillance_reduite';
+    if (!reduced && (!switches.isOn('alertes') || !['haut', 'critique'].includes(detail.gravite))) return false;
     const rule = engine.rules().find(r => r.id === a.regle);
     let sources = [];
     try { sources = JSON.parse(a.sources); } catch { /* illisible */ }
-    return send(messageOf({ id: a.id, gravite: detail.gravite, titre: rule?.titre || a.regle, sources, t, console: consoleUrl, action: detail.action }));
+    const decisions = store.db.prepare('SELECT kind, cree_a, fin FROM decisions WHERE motif = ? AND auto = 1 ORDER BY id').all(`alerte #${a.id}`);
+    return send(messageOf({ id: a.id, gravite: detail.gravite, titre: rule?.titre || a.regle, sources, t, console: consoleUrl, action: detail.action, reponse: reduced ? null : responseOf(decisions) }));
   }
 
   // Abonnement : les alertes écrites dans la chaîne (vigie_alerte), traitées hors de l'écriture.
