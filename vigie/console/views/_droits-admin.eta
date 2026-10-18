@@ -1,0 +1,94 @@
+<%
+/* Droits, page de l'Administrateur (MV-08) : include('./_droits-admin', { d, csrf, message, identite }). */
+const d = it.d;
+const m = it.message && it.message.k === 'erreur' && it.message.valeurs && typeof it.message.valeurs.personne === 'string' ? it.message : null;
+const errPour = p => (m && m.valeurs.personne === p.sub ? m : null);
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Droits</h1></div>
+  <p class="ep-meta"><span><%= d.maintenant %></span><span><%= d.resume %></span><span class="tel-non">réservé aux Administrateurs de la Vigie</span><% if (it.identite) { %><span class="tel-non"><span class="vg-identite"><%~ include('./_droits-ic', { icone: 'cadenas', taille: 13 }) %>Identité confirmée à <%= it.identite.a %>, valable jusqu’à <%= it.identite.jusqua %></span></span><% } %></p>
+</header>
+<div class="vg-cles-w"><ul class="vg-cles" aria-label="Les deux clés du droit effectif">
+<li><span class="t"><%~ include('./_droits-ic', { icone: 'cle', taille: 16 }) %> Plafond, dans Zitadel</span><span class="sec">le rôle <span class="donnee">vigie.*</span> donné dans le projet « Vigie », relu toutes les 5 minutes et avant toute action ; sans lui, on n’entre pas</span></li>
+<li class="op" aria-hidden="true">et</li>
+<% if (d.mode === 'zitadel') { %>
+<li><span class="t"><%~ include('./_droits-ic', { icone: 'cle', taille: 16 }) %> Attribution : suit le plafond</span><span class="sec">une seule clé (<span class="donnee">VIGIE_ROLES=zitadel</span>) : les rôles se règlent dans Zitadel, la console n’a rien à attribuer</span></li>
+<% } else { %>
+<li><span class="t"><%~ include('./_droits-ic', { icone: 'cle', taille: 16 }) %> Attribution, ici</span><span class="sec">donnée par un Administrateur de la Vigie ; sans elle, on est Lecteur</span></li>
+<% } %>
+<li class="op" aria-hidden="true">=</li>
+<li class="eff"><span class="t">Droit effectif : le plus faible des deux</span><span class="sec">une Vigie compromise ne donne pas plus que Zitadel ; un rôle ajouté dans Zitadel ne donne que la lecture tant que personne ne le confirme ici</span></li>
+</ul></div>
+<% if (d.mode === 'zitadel') { %>
+<p class="note-a vg-sur"><%~ include('./_ic', { icone: 'info' }) %><span><b>Une seule clé (<span class="donnee">VIGIE_ROLES=zitadel</span>).</b> Les rôles se donnent et se retirent dans Zitadel, projet « Vigie » ; cette page les montre sans formulaire. Pour revenir aux deux clés : <span class="donnee">VIGIE_ROLES=deux-cles</span> dans <span class="donnee">vigie.env</span>, puis redémarrer la Vigie.</span></p>
+<% } %>
+<% for (const a of d.arrivees) { %>
+<div class="signal vg-arrivee"><p class="signal-t"><%~ include('./_droits-ic', { icone: 'avert', taille: 16 }) %><span><%= a.nom || a.sub %> : première venue le <%= a.depuis %>, sans attribution, donc en lecture seule.</span></p>
+<p>Plafond dans Zitadel : <%= a.plafondT %> (<span class="donnee"><%= a.plafond.code %></span>). Confirmez son rôle, ou laissez ce compte ainsi : en Lecteur, il ne peut rien changer. <a class="vg-lien" href="#<%= a.id %>">Attribuer le rôle de <%= a.nom || a.sub %></a></p></div>
+<% } %>
+<h2 class="vg-section-t" id="t-pers">Personnes <span class="n"><%= d.nPersonnes %></span></h2>
+<% if (d.personnes.length) { %>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-droits">
+<caption><%= d.nPersonnes %> <%= d.nPersonnes > 1 ? 'personnes connues' : 'personne connue' %> de la console, dans l’ordre de leur arrivée ; le plafond est celui lu à leur dernière venue.</caption>
+<thead><tr><th scope="col">Personne</th><th scope="col">Plafond (Zitadel)</th><th scope="col">Attribution (Vigie)</th><th scope="col">Droit effectif</th><th scope="col">Changer l’attribution</th></tr></thead>
+<tbody>
+<% for (const p of d.personnes) { %>
+<%~ include('./_droits-personne', { p, csrf: it.csrf, err: errPour(p) }) %>
+<% } %>
+</tbody></table></div>
+<% } else { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span>Personne n’est encore venu dans la console.</span></p>
+<% } %>
+<div class="deux-col vg-sur">
+<div>
+<section class="panel" aria-labelledby="t-journal"><h2 class="panel-t" id="t-journal">Journal des droits</h2>
+<% if (d.journal.length) { %>
+<ol class="chrono">
+<% for (const l of d.journal) { %>
+<li><time datetime="<%= l.iso %>"><%= l.quand %></time><span><%~ include('./_droits-txt', { morceaux: l.morceaux }) %><% for (const s of l.sec) { %><span class="sec"> · <%~ include('./_droits-txt', { morceaux: [s] }) %></span><% } %></span></li>
+<% } %>
+</ol>
+<% } else { %>
+<p class="aide-panel">Rien encore : ni connexion, ni arrivée, ni changement.</p>
+<% } %>
+<p class="panel-pied"><span><% if (d.journalPlein) { %>Les 40 plus récents : connexions, arrivées, plafonds et attributions.<% } else { %>Connexions, arrivées, plafonds et attributions.<% } %></span><a class="vg-lien" href="/evenements?periode=30j&amp;type=vigie_console_droits">Changements de droits, 30 jours</a></p>
+</section>
+<section class="panel" aria-labelledby="t-refus"><h2 class="panel-t" id="t-refus">Connexions refusées, 7 jours</h2>
+<% if (d.refus.length) { %>
+<ol class="chrono">
+<% for (const l of d.refus) { %>
+<li><time datetime="<%= l.iso %>"><%= l.quand %></time><span><%~ include('./_droits-txt', { morceaux: l.morceaux }) %><% for (const s of l.sec) { %><span class="sec"> · <%~ include('./_droits-txt', { morceaux: [s] }) %></span><% } %></span></li>
+<% } %>
+</ol>
+<% } %>
+<p class="panel-pied"><span><%= d.refusTexte %></span><a class="vg-lien" href="/evenements?periode=7j&amp;type=vigie_console_refus">Connexions refusées, dans les événements</a></p>
+</section>
+<section class="panel" aria-labelledby="t-garde"><h2 class="panel-t" id="t-garde">Garde-fous</h2>
+<ul class="vg-garde-fous">
+<li><%~ include('./_droits-ic', { icone: 'bouclier' }) %><span><b>Au moins un Administrateur</b> : personne ne change son propre rôle, donc qui retire un droit reste Administrateur.</span></li>
+<li><%~ include('./_droits-ic', { icone: 'bouclier' }) %><span><b>Personne ne change son propre rôle</b>, même pour le baisser.</span></li>
+<li><%~ include('./_droits-ic', { icone: 'bouclier' }) %><span><b>L’amorce l’emporte</b> : un compte de <span class="donnee">VIGIE_ADMIN_SUBS</span> garde l’attribution Administrateur ; pour le rétrograder, le retirer de l’amorce (<span class="donnee">vigie.env</span>, sur le serveur). Pour lui couper l’accès, retirez son plafond <span class="donnee">vigie.*</span> dans Zitadel : il perd l’accès dans les 5 minutes, et ne peut plus agir dès la requête suivante.</span></li>
+<li><%~ include('./_droits-ic', { icone: 'bouclier' }) %><span><b>Retirer un droit</b> passe par une confirmation, l’action en danger ; changer un droit demande une identité confirmée il y a moins de 5 minutes.</span></li>
+<li><%~ include('./_droits-ic', { icone: 'bouclier' }) %><span><b>Tout changement</b> est noté au journal chaîné et envoyé aux Administrateurs (Haute) ; <b>une arrivée sans attribution</b> aussi, en Moyenne.</span></li>
+<li><%~ include('./_droits-ic', { icone: 'bouclier' }) %><span><b>Une connexion refusée</b> (sans rôle, sans second facteur, sans jeton Access) est un événement (Moyenne ; Haute au-delà de 3 en 1 h).</span></li>
+<li><%~ include('./_droits-ic', { icone: 'bouclier' }) %><span><b>Deux clés</b> : le réglage par défaut (<span class="donnee">VIGIE_ROLES=deux-cles</span>) ; avec <span class="donnee">zitadel</span>, l’attribution suit le plafond.<% if (d.mode === 'zitadel') { %> Réglage actuel : <span class="donnee">zitadel</span>.<% } %></span></li>
+</ul>
+</section>
+</div>
+<div class="cote">
+<section class="panel" aria-labelledby="t-roles"><h2 class="panel-t" id="t-roles">Ce que permet chaque rôle</h2>
+<p class="aide-panel">Chacun comprend le précédent.</p>
+<%~ include('./_droits-roles', { roles: d.roles }) %>
+</section>
+<section class="panel" aria-labelledby="t-sessions"><h2 class="panel-t" id="t-sessions">Sessions ouvertes</h2>
+<% if (d.sessions.length) { %>
+<ol class="chrono">
+<% for (const s of d.sessions) { %>
+<li><time datetime="<%= s.depuisIso %>">depuis <%= s.depuis %></time><span><%~ include('./_droits-txt', { morceaux: s.morceaux }) %><%= s.vous ? ' (vous)' : '' %> · <%= s.role %><span class="sec"> · dernière activité <%= s.vu %></span><% if (s.ip) { %><span class="sec"> · <span class="ip"><%= s.ip %></span></span><% } %><span class="sec"> · <%= s.nav %></span></span></li>
+<% } %>
+</ol>
+<% } %>
+<p class="panel-pied"><span><%= d.sessionsTexte %> Une session se ferme après 15 min sans activité, 1 h au plus.</span></p>
+</section>
+</div>
+</div>

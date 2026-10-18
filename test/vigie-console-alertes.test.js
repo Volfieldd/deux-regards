@@ -134,8 +134,8 @@ function verifierPage(html) {
   assert.doesNotMatch(html, /<style\b/i, 'feuille en ligne');
   assert.ok(!html.includes(PIEGE), 'valeur piégée rendue telle quelle');
   assert.doesNotMatch(html, /<img\b/i, 'image injectée');
-  // Lecture seule (D3b) : aucun formulaire d'action, sauf la sortie.
-  for (const f of html.match(/<form\b[^>]*>/gi) || []) assert.ok(/method="get"/.test(f) || /action="\/auth\/logout"/.test(f), `formulaire d'action : ${f}`);
+  // Formulaires : GET, la sortie, ou les gestes de la console (D3c, vigie/console/actions.js), jamais une autre adresse.
+  for (const f of html.match(/<form\b[^>]*>/gi) || []) assert.ok(/method="get"/.test(f) || /action="(\/auth\/logout|\/alertes\/\d+\/(prendre|classer|note)|\/decisions)"/.test(f), `formulaire d'action : ${f}`);
 }
 
 test('liste : Administrateur et Lecteur, ordre de gravité, adresses tronquées pour le Lecteur, valeurs piégées échappées', async t => {
@@ -229,8 +229,9 @@ test('fiche (MV-02) : règle, cas, tactiques MITRE, entité, réponse faite, év
   assert.match(h, /reçu \+ 1 s/);
   // Historique : l'ouverture.
   assert.match(h, /<ol class="chrono">\s*<li><time datetime="[^"]+">14 h 02<\/time><span>Ouverte, gravité Critique, mode Bloquer<\/span><\/li>/);
-  // Lecture seule : aucun bouton d'action (D3c).
-  assert.doesNotMatch(h, /Prendre en charge<\/button>|Classer et clore|Geler 7 jours/);
+  // Gestes (D3c) pour un Administrateur : vigie-console-decisions.test.js les vérifie en détail.
+  assert.match(h, /Prendre en charge<\/button>/);
+  assert.match(h, /Classer et clore l’alerte/);
 
   // #2 : score par source, quorum, 20 événements sur 37, les plus récents d'abord, suite par jeu de clés.
   const r2 = await admin(`/alertes/${ids.a2}`);
@@ -280,6 +281,9 @@ test('fiche : un Lecteur ne voit que des adresses tronquées, jamais dans une ad
     verifierPage(r.body);
     for (const ip of [IP, '192.0.2.77', '2001:db8:4:1c::5e', encodeURIComponent(IP)]) assert.ok(!r.body.includes(ip), `#${id} : ${ip}`);
     assert.match(r.body, /Lecture seule/);
+    // Aucun geste pour un Lecteur : ni formulaire POST (sauf la sortie), ni bouton dans le contenu.
+    for (const f of r.body.match(/<form\b[^>]*method="post"[^>]*>/gi) || []) assert.match(f, /action="\/auth\/logout"/, `#${id} : ${f}`);
+    assert.doesNotMatch(r.body.slice(r.body.indexOf('<main'), r.body.indexOf('</main>')), /<button/i);
   }
   const r2 = await lecteur(`/alertes/${ids.a2}`);
   assert.ok(r2.body.includes('<span class="ip">198.51.100.0/24</span>'));

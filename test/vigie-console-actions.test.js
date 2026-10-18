@@ -69,9 +69,20 @@ test('décisions : motif obligatoire, sa propre adresse seulement confirmée, ve
   assert.equal(ev.composant, 'vigie · console');
   // Sa propre adresse (celle que donne Cloudflare) : refusé sans la case.
   await v.post(cookie, '/decisions', { type: 'bloquer', cible: '198.51.100.0/24', motif: 'essai' });
+  assert.equal(v.message(cookie).champ, 'portee', 'portée à choisir, jamais « tout » par défaut');
+  await v.post(cookie, '/decisions', { type: 'bloquer', cible: '198.51.100.0/24', portee: 'tout', motif: 'essai' });
   assert.equal(v.message(cookie).champ, 'confirme');
-  await v.post(cookie, '/decisions', { type: 'bloquer', cible: '198.51.100.0/24', motif: 'essai', confirme: 'oui' });
+  await v.post(cookie, '/decisions', { type: 'bloquer', cible: '198.51.100.0/24', portee: 'tout', motif: 'essai', confirme: 'oui' });
   assert.equal(v.message(cookie).k, 'ok');
+  // Adresse d'une connexion d'administrateur (contrôle des rôles) : confirmation aussi ; depuis une alerte, motif facultatif.
+  v.store.setting.set('controle_roles_admins', { administrateurs: ['zitadel-admin'], instantane_a: v.clock.t });
+  v.store.add([{ id: 'c0ffee00-0000-4000-8000-000000000001', recu_a: v.clock.t, survenu_a: v.clock.t, type: 'authn_login_success', severity: 'info', canal: 'ingestion signée', confiance: 'rapporté', composant: 'site · connexion', sub: 'zitadel-admin', ip: '192.0.2.50', ip_net: '192.0.2.0' }]);
+  for (const cible of ['192.0.2.50', '192.0.2.0/24']) {
+    await v.post(cookie, '/decisions', { type: 'bloquer', cible, portee: 'admin', alerte: '7' });
+    assert.equal(v.message(cookie).champ, 'confirme', cible);
+  }
+  await v.post(cookie, '/decisions', { type: 'bloquer', cible: '192.0.2.50', portee: 'admin', alerte: '7', confirme: 'oui' });
+  assert.equal(v.db.prepare('SELECT motif FROM decisions ORDER BY id DESC').pluck().get(), 'alerte #7');
   // Verrouillage : le compte et l'adresse de qui verrouille sont admis d'office.
   await v.post(cookie, '/decisions', { type: 'verrouiller', comptes: 'sub-julien', motif: 'compte admin apparu hors de l’application' });
   const lock = v.db.prepare("SELECT * FROM decisions WHERE kind = 'verrouiller'").get();

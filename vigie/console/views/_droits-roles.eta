@@ -1,0 +1,8 @@
+<%
+/* Ce que permet chaque rôle (annexe § 5.4, tiré de vigie/console/droits.js ACTIONS) : include('./_droits-roles', { roles }). */
+%>
+<dl class="vg-defs">
+<% for (const r of it.roles || []) { %>
+<dt><%= r.label %><span class="donnee"><%= r.code %></span></dt><dd><%= r.permet %></dd>
+<% } %>
+</dl>

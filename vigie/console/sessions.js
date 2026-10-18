@@ -50,7 +50,12 @@ export function createSessions({ db, now = Date.now }) {
     setCeiling: (id, plafond) => q.ceiling.run(plafond, now(), id),
     setAuth: (id, at) => q.auth.run(Math.min(at, now()), id),
     // Message d'une action pour la page suivante (une fois).
-    setMessage: (id, m) => q.setMessage.run(JSON.stringify(m).slice(0, 4000), id),
+    // Jamais coupé au milieu (un JSON coupé serait perdu) : trop long, les valeurs saisies sont laissées de côté.
+    setMessage: (id, m) => {
+      let j = JSON.stringify(m);
+      if (j.length > 8000) j = JSON.stringify({ ...m, valeurs: {} });
+      q.setMessage.run(j.length > 8000 ? JSON.stringify({ k: m.k, texte: String(m.texte).slice(0, 500) }) : j, id);
+    },
     takeMessage: db.transaction(id => {
       const v = q.getMessage.get(id);
       if (!v) return null;

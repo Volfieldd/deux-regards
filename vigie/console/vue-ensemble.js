@@ -8,6 +8,7 @@ import { alertOrder } from '../moteur.js';
 import { responseOf } from '../notifications.js';
 import { FINE, adresseDetail, reseauVue, dateHeure, gravite, guillemets, heure, ilYa, jusqua, nombre, quand, duree, jour, paris } from './format.js';
 import { provenanceAlertes, ecartsSante } from './ecrans/sante-flux.js';
+import { can } from './droits.js';
 
 const LISTE_MAX = 50;                     // alertes affichées dans le tableau (le reste : « Toutes les alertes »)
 const DECISIONS_MAX = 20;
@@ -36,15 +37,20 @@ const DETECTEURS = {
   silence: 'Site silencieux : aucun battement depuis 3 minutes',
   menaces: 'Adresse sur une liste de menaces (Spamhaus DROP, Feodo, Tor)',
 };
-const INTERRUPTEURS = {
+// Les trois interrupteurs (MV-01, MV-06) : textes de la carte ; objet, la fin du nom lu au lecteur d'écran d'un bouton
+// (« Arrêter… la détection ») ; effetArret, ce que fait l'arrêt, écrit sur la carte des réglages avant le bouton.
+export const INTERRUPTEURS = {
   detection: { titre: 'Détection', court: 'Détection', marche: 'Les règles tournent.', arret: 'Les règles ne tournent pas.',
-    fait: 'Détection arrêtée', effet: 'les règles ne tournent pas, les événements reçus ne seront pas analysés.' },
+    fait: 'Détection arrêtée', effet: 'les règles ne tournent pas, les événements reçus ne seront pas analysés.', objet: 'la détection',
+    effetArret: 'aucune règle ne tourne ; les événements reçus pendant l’arrêt ne seront jamais analysés.' },
   alertes: { titre: 'Alertes', court: 'Alertes', marche: 'Notifications Signal et e-mail.', arret: 'Aucune notification Signal ni e-mail.',
-    fait: 'Alertes arrêtées', effet: 'aucune notification Signal ni e-mail.' },
+    fait: 'Alertes arrêtées', effet: 'aucune notification Signal ni e-mail.', objet: 'les alertes',
+    effetArret: 'les alertes s’ouvrent dans la console, aucun message ne part.' },
   blocages: { titre: 'Blocages automatiques', court: 'Blocages', marche: 'Les règles en mode Bloquer agissent d’elles-mêmes.', arret: 'Aucune règle n’agit d’elle-même.',
-    fait: 'Blocages automatiques arrêtés', effet: 'aucune règle ne bloque, ne ferme ni ne gèle d’elle-même.' },
+    fait: 'Blocages automatiques arrêtés', effet: 'aucune règle ne bloque, ne ferme ni ne gèle d’elle-même.', objet: 'les blocages automatiques',
+    effetArret: 'aucune règle n’agit d’elle-même ; les actions forcées restent possibles.' },
 };
-const ORDRE_INTER = ['detection', 'alertes', 'blocages'];
+export const ORDRE_INTER = ['detection', 'alertes', 'blocages'];
 
 // Apostrophe typographique et espace fine avant « : ; ! ? » dans un texte du code (titres des règles, en YAML).
 const typo = s => String(s ?? '').replace(/'/g, '’').replace(/ ([:;!?])/g, `${FINE}$1`);
@@ -257,6 +263,28 @@ function phraseDe(compte) {
 
 const liste = ids => ids.flatMap((id, i) => [...(i ? [{ t: i === ids.length - 1 ? ' et ' : ', ' }] : []), { t: `#${id}`, href: `/alertes/${id}` }]);
 
+// Cartes des interrupteurs (vue d'ensemble, réglages) : l'état et, à l'arrêt, qui, quand, pour combien de temps, pourquoi,
+// et l'alerte « Surveillance réduite » ouverte (reduite : son numéro, ou null).
+export function cartesInterrupteurs({ etat = {}, reduite = null, t = Date.now() }) {
+  return ORDRE_INTER.map(n => {
+    const x = INTERRUPTEURS[n], e = etat[n] || { marche: true };
+    const base = { nom: n, titre: x.titre, objet: x.objet, effetMarche: x.marche, effetArret: x.effetArret };
+    if (e.marche) return { ...base, marche: true, etat: { k: 'abouti', mot: 'Marche' }, morceaux: [{ t: x.marche }] };
+    const morceaux = [{ t: `${x.arret} ` }];
+    const qui = e.par ? `Arrêté par ${String(e.par).replace(/^console · /, '')}` : 'Arrêté';   // « console · Julien » : Julien
+    morceaux.push({ t: `${qui}${e.a ? ` ${aQuand(e.a, t)}` : ''}${e.a && e.jusqua ? ` pour ${duree(e.jusqua - e.a)}` : ''}${e.motif ? `${FINE}: ${guillemets(e.motif)}` : ''}` });
+    if (reduite) morceaux.push({ t: `${FINE}; alerte ` }, { t: `#${reduite}`, href: `/alertes/${reduite}` }, { t: ' envoyée.' });
+    else morceaux.push({ t: '.' });
+    const jusqu = e.jusqua ? `Arrêt ${jusqua(e.jusqua, t)}` : 'Arrêt';
+    // « Il se rallume seul à 15 h 10. » (réglages, MV-06).
+    const rallume = e.jusqua ? `Il se rallume seul ${jusqua(e.jusqua, t).replace(/^jusqu’/, '')}.` : null;
+    return { ...base, marche: false, etat: { k: 'attention', mot: jusqu }, morceaux, rallume };
+  });
+}
+
+// Alerte « Surveillance réduite » ouverte (son numéro), pour les cartes des interrupteurs.
+export const surveillanceReduite = db => requetes(db).ouverteDe.get('sigma.surveillance_reduite') || null;
+
 export function overview({ db, engine, switches, now = Date.now, role }) {
   const q = requetes(db);
   const t = now();
@@ -360,17 +388,7 @@ export function overview({ db, engine, switches, now = Date.now, role }) {
   const principale = premiere ? { href: `/alertes/${premiere.id}`, texte: `Ouvrir l’alerte ${gravite(premiere.gravite).mot.toLowerCase()} #${premiere.id}` } : null;
 
   // Interrupteurs : l'état et, à l'arrêt, qui, quand, pour combien de temps, pourquoi.
-  const interrupteurs = ORDRE_INTER.map(n => {
-    const x = INTERRUPTEURS[n], e = etat[n] || { marche: true };
-    if (e.marche) return { nom: n, titre: x.titre, marche: true, etat: { k: 'abouti', mot: 'Marche' }, morceaux: [{ t: x.marche }] };
-    const morceaux = [{ t: `${x.arret} ` }];
-    const qui = e.par ? `Arrêté par ${e.par}` : 'Arrêté';
-    morceaux.push({ t: `${qui}${e.a ? ` ${aQuand(e.a, t)}` : ''}${e.a && e.jusqua ? ` pour ${duree(e.jusqua - e.a)}` : ''}${e.motif ? `${FINE}: ${guillemets(e.motif)}` : ''}` });
-    if (reduite) morceaux.push({ t: `${FINE}; alerte ` }, { t: `#${reduite}`, href: `/alertes/${reduite}` }, { t: ' envoyée.' });
-    else morceaux.push({ t: '.' });
-    const jusqu = e.jusqua ? `Arrêt ${jusqua(e.jusqua, t)}` : 'Arrêt';
-    return { nom: n, titre: x.titre, marche: false, etat: { k: 'attention', mot: jusqu }, morceaux };
-  });
+  const interrupteurs = cartesInterrupteurs({ etat, reduite, t });
 
   // Décisions en cours (les plus récentes d'abord).
   const decisions = { total: nbDecisions, lignes: q.decisions.all(t).map(d => ligneDecision(d, t, roleVu)) };
@@ -390,6 +408,8 @@ export function overview({ db, engine, switches, now = Date.now, role }) {
   return {
     maintenant: { texte: dateHeure(t), iso: new Date(t).toISOString() },
     lecteur,
+    // Interrupteurs : « Arrêter… » (vers les réglages) et « Remettre en marche maintenant » pour qui a le droit des réglages.
+    peutRegler: Boolean(role) && can(role, 'reglages'),
     compteurs: { alertes: nb.alertes, sante: nb.sante, decisions: nb.decisions },
     phrase: phraseDe(compte),
     faits: faits.slice(0, 3),

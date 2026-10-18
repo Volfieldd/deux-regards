@@ -1,0 +1,21 @@
+<%
+/* « Vos droits » (MV-08, état 11) : la page Droits d'un Lecteur, d'un Intervenant ou d'un Analyste. Ses deux clés, ce
+   qu'il faudrait pour un autre rôle ; jamais la liste des autres personnes. include('./_droits-soi', { d, identite }). */
+const d = it.d;
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Vos droits</h1></div>
+  <p class="ep-meta"><span><%= d.maintenant %></span><% if (d.nom) { %><span><%= d.nom %></span><% } %><span><span class="sub"><%= d.sub %></span></span></p>
+</header>
+<ul class="vg-cles" aria-label="Vos deux clés">
+<li><span class="t"><%~ include('./_droits-ic', { icone: 'cle', taille: 16 }) %> Plafond : <%= d.plafond %></span><span class="sec">donné dans Zitadel, projet « Vigie »<% if (d.plafondCode) { %> (<span class="donnee"><%= d.plafondCode %></span>)<% } %></span></li>
+<li class="op" aria-hidden="true">et</li>
+<li><span class="t"><%~ include('./_droits-ic', { icone: 'cle', taille: 16 }) %> Attribution : <%= d.attribution %></span><span class="sec"><%= d.attributionSec %></span></li>
+<li class="op" aria-hidden="true">=</li>
+<li class="eff"><span class="t">Vous êtes <%= d.effectif %></span><span class="sec">le plus faible des deux</span></li>
+</ul>
+<p class="note-a vg-sur"><%~ include('./_ic', { icone: 'info' }) %><span><% if (d.mode === 'zitadel') { %><b>Pour un autre rôle</b>, demandez-le à qui gère le projet « Vigie » dans Zitadel.<% } else { %><b>Pour un autre rôle</b>, il faut les deux clés : que Zitadel vous l’accorde, et qu’un Administrateur de la Vigie<%= d.admins ? ' (' + d.admins + ')' : '' %> vous l’attribue ici.<% } %> La liste des personnes et leurs rôles sont réservés aux Administrateurs.</span></p>
+<section class="panel" aria-labelledby="t-roles"><h2 class="panel-t" id="t-roles">Ce que permet chaque rôle</h2>
+<p class="aide-panel">Chacun comprend le précédent.</p>
+<%~ include('./_droits-roles', { roles: d.roles }) %>
+</section>

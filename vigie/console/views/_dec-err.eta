@@ -1,0 +1,4 @@
+<%
+/* Erreur près d'un champ (admin-plus.css, .err) : include('./_dec-err', { id, texte }). Le texte vient du message de l'action :
+   toujours échappé. */
+%><p class="err" id="<%= it.id %>"><%~ include('./_dec-ic', { icone: 'erreur' }) %><span><b>Erreur&#8239;:</b> <%= it.texte %></span></p>

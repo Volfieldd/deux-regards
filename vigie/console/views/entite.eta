@@ -3,8 +3,11 @@
    seuil, « Vue avec », les derniers événements ; à côté, ses alertes, ce que la Vigie ferait d'elle-même (une adresse), les
    décisions en cours qui la visent. Données : it.f = fiche() (vigie/console/ecrans/evenements.js), déjà mises en forme ;
    pour un Lecteur, une adresse n'a pas de fiche (redirection vers son réseau) et les adresses vues sont tronquées.
-   Lecture seule : les actions forcées viendront en D3c. */
+   Gestes (D3c), selon le droit : it.actions = actionsForcees() (vigie/console/ecrans/decisions.js), null pour un Lecteur ;
+   formulaires POST /decisions (_dec-actions, _dec-form) et « Lever… » des décisions en cours, avec retour sur cette fiche. */
 const f = it.f;
+const ac = it.actions || null;
+const geste = ac ? { ip: 'Bloquer…', reseau: 'Bloquer…', compte: 'Geler…', session: 'Fermer la session…' }[f.kind] : null;
 layout('./layout', { titre: it.titre });
 const s = f.score;
 const sans = f.kind === 'ip' || f.kind === 'reseau' ? 'adresse' : f.kind === 'compte' ? 'compte' : null;
@@ -14,9 +17,8 @@ const titreAlertes = { ip: 'Alertes de l’adresse', reseau: 'Alertes du réseau
   <a class="ep-retour" href="/entites">Entités</a>
   <div class="ep-titre"><h1><span class="k"><%= f.titre.k %></span> <% if (f.titre.mono === 'ip') { %><span class="ip<%= f.titre.v6 ? ' v6' : '' %>"><%= f.titre.texte %></span><% } else if (f.titre.mono === 'sub') { %><span class="sub"><%= f.titre.texte %></span><% } else { %><%= f.titre.texte %><% } %><% if (f.titre.nom) { %> <span class="nom">(<%= f.titre.nom %>)</span><% } %></h1><% if (f.pastilles.length) { %><span class="ep-pastilles"><% for (const p of f.pastilles) { %><%~ include('./_etat', { etatK: p.k, etatMot: p.mot }) %><% } %></span><% } %></div>
   <p class="ep-meta"><% for (const m of f.meta) { %><% if (m.reseau) { %><span>réseau&nbsp;<span class="ip<%= m.reseau.v6 ? ' v6' : '' %>"><%= m.reseau.texte %></span></span><% } else { %><span><%= m.t %></span><% } %><% } %></p>
-  <% /* D3c : « Bloquer… » (adresse), « Geler… » et « Fermer les sessions… » (compte) en contour, vers #agir, avant le bouton plein. */ %>
-<% if (f.principale) { %>
-  <div class="ep-actions"><a class="btn" href="<%= f.principale.href %>"><%= f.principale.texte %></a></div>
+<% if (f.principale || geste) { %>
+  <div class="ep-actions"><% if (geste) { %><a class="btn ghost<%= f.principale ? ' ep-secondaire' : '' %>" href="#agir"><%= geste %></a><% if (f.principale) { %><details class="menu ep-plus"><summary class="btn ghost" aria-label="Plus d’actions"><%~ include('./_dec-ic', { icone: 'points', taille: 18 }) %></summary><div class="menu-pop"><a href="#agir"><%= geste %></a></div></details><% } %><% } %><% if (f.principale) { %><a class="btn" href="<%= f.principale.href %>"><%= f.principale.texte %></a><% } %></div>
 <% } %>
 </header>
 <% if (f.lecteur && f.kind === 'reseau') { %>
@@ -78,22 +80,25 @@ const titreAlertes = { ip: 'Alertes de l’adresse', reseau: 'Alertes du réseau
 <p class="vg-sans">Aucune alerte, ouverte ou close (13&nbsp;mois).</p>
 <% } %>
 </section>
-<section class="panel" id="agir" aria-labelledby="t-agir"><h2 class="panel-t" id="t-agir"><%= f.kind === 'ip' ? 'Réponse et décisions sur l’adresse' : 'Décisions en cours' %></h2>
+<section class="panel" id="agir" aria-labelledby="t-agir"><h2 class="panel-t" id="t-agir"><%= ac ? ac.titre : f.kind === 'ip' ? 'Réponse et décisions sur l’adresse' : 'Décisions en cours' %></h2>
 <% if (f.auto) { %>
 <div class="vg-auto"><%~ include('./_ic', { icone: 'decisions' }) %><% for (const p of f.auto) { %><p><% if (p.b) { %><b><%= p.b %></b><% if (p.t) { %> <% } %><% } %><%= p.t || '' %></p><% } %></div>
 <% } %>
 <% if (f.decisions.length) { %>
 <ul class="vg-lignes">
 <% for (const d of f.decisions) { %>
-<li><span class="t"><%= d.type %> · <span class="<%= d.cible.mono %>"><%= d.cible.texte %></span></span><span class="n">#<%= d.id %></span><span class="sec"><%~ include('./_morceaux', { morceaux: d.sec }) %></span></li>
+<li><span class="t"><%= d.type %> · <span class="<%= d.cible.mono %>"><%= d.cible.texte %></span></span><span class="n">#<%= d.id %></span><span class="sec"><%~ include('./_morceaux', { morceaux: d.sec }) %></span><% if (d.lever) { %><a class="vg-lien" href="<%= d.lever.href %>"><%= d.lever.texte %><span class="sr-only"><%= d.lever.sr %></span></a><% } %></li>
 <% } %>
 </ul>
 <% } else { %>
 <p class="vg-sans">Aucune décision en cours <%= f.kind === 'ip' ? 'sur cette adresse ni sur un réseau qui la contient' : f.kind === 'reseau' ? 'sur ce réseau ni sur ses adresses' : 'sur cette entité' %>.</p>
 <% } %>
-<% /* D3c : les actions forcées (Bloquer l’adresse avec portée et un bouton par durée ; Geler, Fermer les sessions d’un compte ;
-      Lever…), avec la ré-authentification et la confirmation d’une adresse vue avec un administrateur. */ %>
+<% if (ac) { %>
+<%~ include('./_dec-actions', { a: ac }) %>
+<p class="panel-pied"><span>Toutes les décisions en cours, une autre décision&#8239;: la page Décisions.</span><a class="vg-lien" href="/decisions">Décisions</a></p>
+<% } else { %>
 <p class="panel-pied"><span>Les décisions se prennent et se lèvent depuis la page Décisions.</span><a class="vg-lien" href="/decisions">Décisions en cours</a></p>
+<% } %>
 </section>
 </div>
 </div>

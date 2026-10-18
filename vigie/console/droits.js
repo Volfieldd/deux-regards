@@ -23,6 +23,7 @@ export const ACTIONS = {
   reglages: 'analyst',
   verifications: 'analyst',
   droits: 'admin',
+  confiance: 'admin',                    // adresses de confiance (annexe § 5.4 : Administrateur)
 };
 export const can = (role, action) => {
   if (!Object.hasOwn(ACTIONS, action)) throw new Error(`action inconnue : ${action}`);
@@ -118,5 +119,5 @@ export function createRights({ db, store, adminSubs, mode = 'deux-cles', now = D
   }
 
   const list = () => q.all.all().map(r => ({ ...r, amorce: seed.has(r.sub), effectif: effective(r.sub, r.plafond) }));
-  return { effective, observe, assign, list, isSeed: sub => seed.has(sub) };
+  return { effective, observe, assign, list, isSeed: sub => seed.has(sub), mode };
 }

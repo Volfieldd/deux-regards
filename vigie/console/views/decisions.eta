@@ -1,0 +1,81 @@
+<%
+/* Décisions (MV-05, /decisions) : en cours (ce que le site applique, signé par la Vigie), « Lever… » vers la confirmation,
+   nouvelle décision (type, cible, portée, motif, un bouton par durée), verrouiller l'admin, puis les levées et échues
+   récentes. Données : it.vue = pageDecisions() (vigie/console/ecrans/decisions.js), déjà mises en forme. Un Lecteur voit
+   la liste, adresses tronquées, sans formulaire. Les gestes sont des POST vers vigie/console/actions.js. */
+const vue = it.vue;
+layout('./layout', { titre: it.titre });
+const lever = vue.agir;
+const n = vue.nbEnCours;
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Décisions</h1></div>
+  <p class="ep-meta"><span><%= vue.maintenant %></span><span><%= n %> en cours</span><span class="tel-non">ce que le site applique, signé par la Vigie</span><% if (vue.identite && vue.identite.fraiche) { %><span class="tel-non"><span class="vg-identite"><%~ include('./_dec-ic', { icone: 'cadenas', taille: 13 }) %><%= vue.identite.texte %></span></span><% } %></p>
+<% if (vue.agir) { %>
+  <div class="ep-actions"><a class="btn ghost ep-secondaire" href="#nouvelle">Nouvelle décision</a><a class="btn ghost" href="#verrouiller">Verrouiller l’admin…</a></div>
+<% } %>
+</header>
+<% if (vue.lecteur) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule&#8239;: vous voyez les décisions, vous ne les prenez ni ne les levez</b> (réservé aux <%= vue.requis %>s). Les adresses sont tronquées à leur réseau (/24, /48).</span></p>
+<% } else if (!vue.agir) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span>Prendre ou lever une décision est réservé aux <%= vue.requis %>s.</span></p>
+<% } %>
+<h2 class="vg-section-t" id="t-cours">En cours <span class="n"><%= n %></span></h2>
+<% if (vue.enCours.length) { %>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-decisions">
+<caption><%= n > 1 ? `${n} décisions en cours` : 'Une décision en cours' %>, de la plus récente à la plus ancienne<%= n > vue.enCours.length ? ` (les ${vue.enCours.length} plus récentes ici)` : '' %>. Le site les applique en quelques secondes&#8239;; chacune se lève seule à sa fin.</caption>
+<thead><tr><th scope="col">Décision</th><th scope="col">Cible</th><th scope="col">Jusqu’au</th><th scope="col">Décidée par</th><% if (lever) { %><th scope="col"><span class="sr-only">Lever</span></th><% } %></tr></thead>
+<tbody>
+<% for (const l of vue.enCours) { %><%~ include('./_dec-ligne', { l, lever, finLabel: 'Jusqu’au' }) %>
+<% } %></tbody></table></div>
+<% } else { %>
+<p class="vg-sans">Aucune décision en cours&#8239;: le site n’applique ni blocage, ni gel, ni fermeture de session, ni verrouillage.</p>
+<% } %>
+<div class="pied-liste"><span>Levées et échues&#8239;: en bas de page, et au journal de la Vigie.</span><a class="lien-a" href="#t-histoire">Les décisions levées et échues</a></div>
+<% if (vue.agir) { const ident = vue.identite; %>
+<% if (ident && !ident.fraiche) { %>
+<div class="vg-reauth"><%~ include('./_dec-ic', { icone: 'cadenas', taille: 18 }) %><p><%= ident.texte %> Après la confirmation, vous revenez sur cette page&#8239;: renvoyez alors le formulaire.</p></div>
+<% } %>
+<div class="deux-col">
+<section class="panel" id="nouvelle" aria-labelledby="t-nouv"><h2 class="panel-t" id="t-nouv">Nouvelle décision</h2>
+<nav class="vg-types" aria-labelledby="lb-type"><span class="lb" id="lb-type">Type de décision</span><ul class="chips"><% for (const ty of vue.types) { %><li><a class="chip" href="<%= ty.href %>"<% if (ty.courant) { %> aria-current="true"<% } %>><%= ty.t %></a></li><% } %></ul></nav>
+<%~ include('./_dec-form', { f: vue.nouvelle }) %>
+</section>
+<div class="cote">
+<% const vr = vue.verrouiller; const ev = vr.err; const en = k => Boolean(ev && ev.place === k); %>
+<section class="panel" id="verrouiller" aria-labelledby="t-verr"><h2 class="panel-t" id="t-verr">Verrouiller l’admin</h2>
+<p class="aide-panel">Le geste d’urgence&#8239;: seuls les comptes et adresses autorisés entrent dans l’admin et la connexion, toutes les autres sessions sont refusées, le site public reste ouvert. 24&nbsp;h au plus&#8239;; il se lève seul.</p>
+<form class="vg-form" method="post" action="/decisions"<% if (en('general')) { %> aria-describedby="v-err"<% } %>><input type="hidden" name="_csrf" value="<%= vr.csrf %>"><input type="hidden" name="formulaire" value="verrouiller"><input type="hidden" name="type" value="verrouiller"><input type="hidden" name="retour" value="/decisions">
+<% if (en('general')) { %><%~ include('./_dec-err', { id: 'v-err', texte: ev.texte }) %>
+<% } %>
+<fieldset class="choix-a"><legend>Comptes autorisés</legend>
+<ul class="vg-office"><li><%~ include('./_dec-ic', { icone: 'coche', taille: 16 }) %><span>Vous<% if (vr.moi.nom) { %>, <%= vr.moi.nom %><% } %> · <span class="sub"><%= vr.moi.sub %></span></span><span class="sec">ajouté d’office&#8239;: vous ne pouvez pas vous enfermer dehors</span></li></ul>
+<div class="champ-a"><label for="v-comptes">Autres comptes <span class="facultatif">(facultatif)</span></label><p class="aide" id="v-comptes-aide">Leur identifiant Zitadel (sub), séparés par des virgules.</p><input class="vg-mono" id="v-comptes" name="comptes" type="text" maxlength="4000" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="v-comptes-aide<%= en('comptes') ? ' v-comptes-err' : '' %>" value="<%= vr.comptes %>"<% if (en('comptes')) { %> aria-invalid="true"<% } %>><% if (en('comptes')) { %><%~ include('./_dec-err', { id: 'v-comptes-err', texte: ev.texte }) %><% } %></div>
+</fieldset>
+<fieldset class="choix-a"><legend>Adresses autorisées</legend>
+<% if (vr.ip) { %><ul class="vg-office"><li><%~ include('./_dec-ic', { icone: 'coche', taille: 16 }) %><span>Votre adresse actuelle, <span class="ip<%= vr.ip.reseau ? ' v6' : '' %>"><%= vr.ip.texte %></span></span><span class="sec"><% if (vr.ip.reseau) { %>ajoutée d’office avec son réseau <span class="ip v6"><%= vr.ip.reseau %></span>&#8239;: un téléphone change d’adresse dans son /64<% } else { %>ajoutée d’office<% } %></span></li></ul>
+<% } else { %><p class="aide">Votre adresse n’est pas connue de la console&#8239;: ajoutez-la ci-dessous pour garder l’accès à l’admin depuis cet appareil.</p>
+<% } %>
+<div class="champ-a"><label for="v-adresses">Autres adresses <span class="facultatif">(facultatif)</span></label><p class="aide" id="v-adresses-aide">Adresses ou réseaux, séparés par des virgules&#8239;; mêmes limites qu’un blocage.</p><input class="vg-mono" id="v-adresses" name="adresses" type="text" maxlength="4000" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="v-adresses-aide<%= en('adresses') ? ' v-adresses-err' : '' %>" value="<%= vr.adresses %>"<% if (en('adresses')) { %> aria-invalid="true"<% } %>><% if (en('adresses')) { %><%~ include('./_dec-err', { id: 'v-adresses-err', texte: ev.texte }) %><% } %></div>
+</fieldset>
+<div class="champ-a"><label for="v-motif">Motif</label><p class="aide" id="v-motif-aide">300 signes au plus&#8239;; gardé au journal, lu par les autres.</p><input id="v-motif" name="motif" type="text" maxlength="300" required aria-describedby="v-motif-aide<%= en('motif') ? ' v-motif-err' : '' %>" value="<%= vr.motif %>"<% if (en('motif')) { %> aria-invalid="true"<% } %>><% if (en('motif')) { %><%~ include('./_dec-err', { id: 'v-motif-err', texte: ev.texte }) %><% } %></div>
+<div class="duree-l"><span class="lb" id="v-lbd">Durée, puis envoi</span>
+<div class="btns-ligne" role="group" aria-labelledby="v-lbd"><% for (const d of vr.durees) { %><button class="btn ghost" type="submit" name="duree" value="<%= d.v %>"><%= d.t %></button><% } %></div>
+<p class="hint">Au moins un compte ou une adresse autorisés, sinon personne n’entrerait plus&#8239;: le vôtre l’est toujours. À la fin, l’admin se rouvre seule.</p></div>
+</form>
+</section>
+</div>
+</div>
+<% } %>
+<h2 class="vg-section-t" id="t-histoire">Levées et échues <span class="n"><%= vue.histoire.length %><%= vue.histoirePlus ? '+' : '' %></span></h2>
+<% if (vue.histoire.length) { %>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-decisions">
+<caption><%= vue.histoire.length === 1 ? 'Une décision levée ou échue' : vue.toutes ? `Les ${vue.histoire.length} dernières décisions levées ou échues` : `Les ${vue.histoire.length} plus récentes` %><%= vue.histoire.length > 1 ? ', de la plus récente à la plus ancienne' : '' %>. Le journal de la Vigie garde chacune, avec qui l’a prise et levée.</caption>
+<thead><tr><th scope="col">Décision</th><th scope="col">Cible</th><th scope="col">Fin</th><th scope="col">Décidée par</th></tr></thead>
+<tbody>
+<% for (const l of vue.histoire) { %><%~ include('./_dec-ligne', { l, lever: false, finLabel: 'Fin' }) %>
+<% } %></tbody></table></div>
+<% if (vue.histoirePlus) { %><div class="pied-liste"><span>Les plus anciennes sont au journal de la Vigie.</span><% if (!vue.toutes) { %><a class="lien-a" href="/decisions?toutes#t-histoire">Les 200 dernières</a><% } %></div><% } %>
+<% } else { %>
+<p class="vg-sans">Aucune décision levée ni échue.</p>
+<% } %>

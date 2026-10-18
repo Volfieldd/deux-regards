@@ -1,5 +1,6 @@
-// Alertes de la console (phase D3b) : la liste (/alertes) et la fiche d'une alerte (/alertes/<n°>, MV-02). LECTURE SEULE :
-// aucune écriture, aucun événement noté ; les gestes (prendre en charge, classer, actions forcées, lever) viennent en D3c.
+// Alertes de la console (phases D3b et D3c) : la liste (/alertes) et la fiche d'une alerte (/alertes/<n°>, MV-02). Ce module
+// n'écrit rien : la fiche porte les formulaires des gestes (prendre en charge, classer, ajouter une note, actions forcées,
+// « Lever… »), selon le droit, et les routes POST de vigie/console/actions.js les font.
 // Requêtes bornées (LIMIT) et indexées : la table des alertes par ses index (alerts_ouvertes, alerts_derniere) ; les
 // événements d'une alerte par alert_events (clé alert_id, seq) puis la clé des événements, par pages de 20 à jeu de clés
 // (seq), jamais OFFSET sur events ; l'historique par l'index partiel events_alerte (migration 007). Tout ce qui part vers
@@ -8,6 +9,8 @@
 import { alertOrder } from '../../moteur.js';
 import { responseOf } from '../../notifications.js';
 import { SOURCE_MIN, QUORUM, sourceOf } from '../../poids.js';
+import { can } from '../droits.js';
+import { actionsForcees, erreurDe, identite, lienLever } from './decisions.js';
 import { FINE, adresseDetail, reseauVue, dateHeure, gravite, guillemets, heure, jour, nombre, quand, jusqua, paris } from '../format.js';
 
 const NBSP = '\u00a0';
@@ -166,7 +169,7 @@ function requetes(db) {
   q = {
     sql: sql => { if (!formes.has(sql)) formes.set(sql, db.prepare(sql)); return formes.get(sql); },
     alerte: db.prepare('SELECT * FROM alerts WHERE id = ?'),
-    decisions: db.prepare(`SELECT id, kind, cible, portee, motif, par, cree_a, fin, leve_a, leve_par, auto FROM decisions WHERE motif = ? ORDER BY id LIMIT ${DECISIONS_MAX}`),
+    decisions: db.prepare(`SELECT id, kind, cible, portee, motif, par, cree_a, fin, leve_a, leve_par, auto FROM decisions WHERE (motif || ' · ') LIKE (? || ' · %') ORDER BY id LIMIT ${DECISIONS_MAX}`),
     nbEvenements: db.prepare(`SELECT COUNT(*) FROM (SELECT 1 FROM alert_events WHERE alert_id = ? LIMIT ${COMPTE_MAX + 1})`).pluck(),
     evenements: db.prepare(`SELECT e.seq, e.recu_a, e.survenu_a, e.type, e.severity, e.composant, e.emetteur, e.confiance, e.sub, e.ip, e.method, e.route, e.status, e.retard
       FROM alert_events a JOIN events e ON e.seq = a.seq WHERE a.alert_id = ? AND a.seq < ? ORDER BY a.seq DESC LIMIT ${EVENEMENTS + 1}`),
@@ -334,7 +337,7 @@ export function liste({ db, engine, now = Date.now, role, query = {} }) {
 
 // ---------- Fiche ----------
 
-function ligneDecision(d, t, role) {
+function ligneDecision(d, t, role, retour) {
   let cible = null;
   if (d.kind === 'bloquer') {
     const a = adresseDetail(String(d.cible).replace(/\/(32|128)$/, ''), role);
@@ -342,12 +345,14 @@ function ligneDecision(d, t, role) {
   } else if (d.kind !== 'verrouiller') cible = { texte: String(d.cible), mono: 'sub', tronquee: false };
   const etat = d.leve_a ? `levée ${aQuand(d.leve_a, t)}${d.leve_par ? ` par ${d.leve_par}` : ''}`
     : d.fin <= t ? `expirée ${aQuand(d.fin, t)}` : jusqua(d.fin, t);
-  const par = d.auto ? 'par la Vigie' : `par ${d.par}`;
+  const par = d.auto ? 'par la Vigie' : `par ${String(d.par).replace(/^console · /, '')}`;
+  const enCours = !d.leve_a && d.fin > t;
   return {
     id: d.id,
     type: DECISION_FAITE[d.kind] || d.kind,
     cible,
-    enCours: !d.leve_a && d.fin > t,
+    enCours,
+    lever: enCours && can(role, 'actions_forcees') ? lienLever(d, retour) : null,
     sec: [d.portee ? PORTEES[d.portee] || d.portee : '', etat, `${par} ${aQuand(d.cree_a, t)}`].filter(Boolean).join(' · '),
   };
 }
@@ -466,10 +471,11 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
 
   // Réponse : décisions dont le motif cite l'alerte (automatiques, ou prises à la main depuis la fiche), et les raisons
   // d'une absence de réponse.
+  // Le motif « alerte #n° » (automatiques) ou « alerte #n° · … » (prises à la main depuis la fiche, vigie/console/actions.js).
   const decs = q.decisions.all(`alerte #${a.id}`);
   const auto = decs.filter(d => d.auto);
   const reponse = {
-    lignes: decs.map(d => ligneDecision(d, t, roleVu)),
+    lignes: decs.map(d => ligneDecision(d, t, roleVu, `/alertes/${a.id}`)),
     resume: auto.length ? capitale(reponseFaite(auto)) : null,
     raisons: raisonsReponse(a.reponse, roleVu),
     attendue: a.mode === 'bloquer',
@@ -544,6 +550,34 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
   };
 }
 
+// ---------- Gestes de la fiche (D3c) ----------
+
+// Formulaires de la fiche, selon le droit (null pour un Lecteur) : prendre en charge (alerte ouverte), classer (alerte non
+// close), ajouter une note, actions forcées sur l'entité (alerte non close). Une erreur revenue de l'action est placée près
+// de son champ, la saisie reprise (erreurDe : valeurs jamais crues, toujours échappées par le gabarit).
+const CHOIX = [
+  { v: 'incident', t: 'Incident confirmé', sec: 'une attaque ou une erreur réelle' },
+  { v: 'faux_positif', t: 'Faux positif', sec: `rien d’anormal${FINE}: dites pourquoi dans la note` },
+  { v: 'test', t: 'Test', sec: 'un essai de votre part' },
+];
+export function actionsFiche({ db, req, t, id, message = null }) {
+  if (!can(req.moi.role, 'alertes_traiter')) return null;
+  const a = requetes(db).alerte.get(id);
+  if (!a) return null;
+  const close = a.statut === 'close';
+  const errC = erreurDe(message, 'classer');
+  const errN = erreurDe(message, 'note');
+  const place = (e, champs) => (e ? { place: champs.includes(e.champ) ? e.champ : 'general', texte: e.texte } : null);
+  return {
+    csrf: req.moi.csrf,
+    identite: identite(req, t),
+    prendre: a.statut === 'ouverte' ? `/alertes/${a.id}/prendre` : null,
+    classer: close ? null : { action: `/alertes/${a.id}/classer`, choix: CHOIX.map(c => ({ ...c, coche: errC?.valeurs.classement === c.v })), note: errC?.valeurs.note || '', err: place(errC, ['classement', 'note']) },
+    note: { action: `/alertes/${a.id}/note`, valeur: errN?.valeurs.note || '', err: place(errN, ['note']) },
+    forcees: close ? null : actionsForcees({ db, kind: a.entite_kind, key: a.entite_key, req, t, retour: `/alertes/${a.id}`, alerte: a.id, message, prefixe: 'a' }),
+  };
+}
+
 // ---------- Routes ----------
 
 export function register(app, ctx) {
@@ -559,7 +593,10 @@ export function register(app, ctx) {
     const av = typeof req.query?.avant === 'string' && /^[1-9]\d{0,15}$/.test(req.query.avant) ? Number(req.query.avant) : null;
     const vue = id ? fiche({ db, engine, now, role: req.moi.role, id, avant: av }) : null;
     if (!vue) return ctx.view(reply, req, 'alertes-introuvable', { page: 'alertes', titre: 'Alerte introuvable · Vigie', numero: id }, 404);
-    return ctx.view(reply, req, 'alertes-fiche', { page: 'alertes', titre: `Alerte #${vue.id} · Vigie`, vue });
+    // Le message d'une action est lu ici (une fois) pour placer une erreur près de son champ, puis passé à la page.
+    const message = ctx.isRefresh(req) ? null : ctx.sessions.takeMessage(req.moi.sid);
+    const actions = actionsFiche({ db, req, t: now(), id: vue.id, message });
+    return ctx.view(reply, req, 'alertes-fiche', { page: 'alertes', titre: `Alerte #${vue.id} · Vigie`, vue, actions, message });
   });
 
   return ['/alertes'];

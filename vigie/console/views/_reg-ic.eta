@@ -1,0 +1,9 @@
+<%
+/* Icônes des réglages (MV-06) qui ne sont ni dans _ic ni dans _flux-ic (dessins des maquettes, dr-tmp/vigie-mq/commun.py, PB) ;
+   les autres passent à _flux-ic. include('./_reg-ic', { icone, taille }). Tracés constants : rien de la requête n'y entre. */
+const P = {
+  attention: '<path d="M12 3.5l9 16H3z"/><path d="M12 10v4.5M12 17.2h.01"/>',
+  envoi: '<path d="M4 12l16-8-6 16-2.5-6.5z"/><path d="M11.5 13.5L20 4"/>',
+};
+const taille = Number(it.taille) || 18;
+if (Object.hasOwn(P, it.icone)) { %><svg class="ic" width="<%= taille %>" height="<%= taille %>" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><%~ P[it.icone] %></svg><% } else { %><%~ include('./_flux-ic', { icone: it.icone, taille }) %><% } %>

@@ -1,0 +1,12 @@
+<%
+/* Une décision dans un tableau .vg-decisions (MV-05) : include('./_dec-ligne', { l, lever, finLabel }). l vient de
+   ligneDecision() (vigie/console/ecrans/decisions.js) : cible déjà tronquée pour un Lecteur, motif masqué. lever : la
+   colonne « Lever » existe (droit actions_forcees). */
+const l = it.l;
+const c = l.cible;
+%><tr><th scope="row"><%= l.type %><span class="sec">#<%= l.id %> · depuis <%= l.depuis %></span></th>
+<td class="c-cible" data-label="Cible"><span class="ent"><span class="k"><%= c.k %></span><% if (c.mono === 'ip') { %><span class="ip<%= c.v6 ? ' v6' : '' %>"><%= c.texte %></span><% } else if (c.mono === 'sub') { %><span class="sub"><%= c.texte %></span><% } else { %><%= c.texte %><% } %><% if (c.tronquee) { %><span class="tronq">(tronquée)</span><% } %><% if (c.nom) { %><span class="nom">(<%= c.nom %>)</span><% } %></span><% if (c.sec) { %><span class="sec"><%= c.sec %></span><% } %></td>
+<td class="c-fin" data-label="<%= it.finLabel %>"><%= l.fin.t %><% if (l.fin.sec) { %><span class="sec"><%= l.fin.sec %></span><% } %></td>
+<td class="c-par" data-label="Décidée par"><%= l.par.t %><% if (l.par.sec.length) { %><span class="sec"><%~ include('./_morceaux', { morceaux: l.par.sec }) %></span><% } %></td>
+<% if (it.lever) { %><td class="c-lever c-haut"><% if (l.lever) { %><a class="vg-lien" href="<%= l.lever.href %>"><%= l.lever.texte %><span class="sr-only"><%= l.lever.sr %></span></a><% } %></td>
+<% } %></tr>

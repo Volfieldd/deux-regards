@@ -1,6 +1,7 @@
 // Écrans « Santé et intégrité » (MV-07, /sante) et « Flux et provenance des alertes » (MV-11, /flux) de la console, phase D3b,
 // et la barre de provenance de la vue d'ensemble (MV-01). LECTURE SEULE : aucune écriture, aucun événement noté ; les
-// commandes (vérifier la chaîne, recopier la liste de la bordure, accepter une référence, tester un canal) arrivent en D3c.
+// commandes de la santé (vérifier la chaîne, recopier la liste de la bordure, accepter une référence) sont des formulaires
+// vers les routes d'action (vigie/console/actions.js, phase D3c), montrés seulement à qui a le droit.
 //
 // Requêtes bornées et indexées : la table events peut compter des millions de lignes.
 //   - Flux : les volumes viennent de la table daily (compteurs par jour UTC, type, gravité, composant : quelques centaines
@@ -16,7 +17,9 @@ import { alertOrder } from '../../moteur.js';
 import { pointsOf, sourceOf } from '../../poids.js';
 import { loadRules } from '../../sigma.js';
 import { LISTS } from '../../menaces.js';
-import { adresseDetail, dateHeure, quand, ilYa, nombre, jour, guillemets } from '../format.js';
+import { adresseDetail, dateHeure, quand, ilYa, nombre, jour, guillemets, heure } from '../format.js';
+import { can } from '../droits.js';
+import { FRESH } from '../sessions.js';
 import * as F from '../flux.js';
 
 const FINE = ' ', NBSP = ' ';
@@ -355,7 +358,9 @@ const cmd = c => ({ cmd: c.split(' ') });
 const deuxPoints = s => `${s}${FINE}:`;
 
 // Les composants, toujours dans cet ordre (MV-07). Une carte : { id, icone, titre, etat { k, mot }, cls ('' | 'ecart' |
-// 'panne'), kv, faits, seuil (morceaux), liens, serveur, d3c }. Une ligne de kv : { dt, t, sec, mono, secMono, subs,
+// 'panne'), kv, faits, seuil (morceaux), liens, serveur, commande }. commande : le geste de la carte (D3c), { k: 'verifier' |
+// 'bordure' | 'accepter', hint, bloquee (accepter : numéro de l'alerte ouverte qui l'interdit) } ; le gabarit ne le montre qu'à qui
+// a le droit (it.peut, calculé par la route). Une ligne de kv : { dt, t, sec, mono, secMono, subs,
 // ruptures }.
 export function vueSante({ db, engine, switches, now = Date.now, role }) {
   const q = qSante(db);
@@ -363,7 +368,7 @@ export function vueSante({ db, engine, switches, now = Date.now, role }) {
   const reg = (k, d = null) => lire(q.reglage.get(k)) ?? d;
   const dernier = type => { const r = q.dernier.get(type); return r ? { ...r, detail: lire(r.detail) || {} } : null; };
   const cartes = [];
-  const carte = c => cartes.push({ cls: '', kv: [], liens: [], serveur: [], faits: null, d3c: null, ...c });
+  const carte = c => cartes.push({ cls: '', kv: [], liens: [], serveur: [], faits: null, commande: null, ...c });
   const ok = mot => ({ k: 'abouti', mot });
   const att = mot => ({ k: 'attention', mot });
   const arret = mot => ({ k: 'arret', mot });
@@ -400,7 +405,8 @@ export function vueSante({ db, engine, switches, now = Date.now, role }) {
     kv.push({ dt: 'Purge', t: purgeTexte, sec: `conservation${D}${conservation}${NBSP}jours` });
     carte({ id: 'chaine', icone: 'chaine', titre: 'Chaîne du journal', etat, cls, kv, faits,
       seuil: [{ t: `Alerte si une ligne est modifiée, insérée ou manquante, une fin effacée, une ancre de purge falsifiée${D}${guillemets('Chaîne du journal de la Vigie rompue')} ` }, { t: '(Critique, DS20, ', r: true }, { t: 'chaine_rompue', donnee: true }, { t: ')', r: true }, { t: '. Vérifiée chaque jour et à chaque démarrage.' }],
-      d3c: 'Vérifier maintenant (POST /sante/verifier, environ 16 s, la réception continue)',
+      // Environ 13,5 s par million de lignes (vigie-capacite.md § 3.1).
+      commande: { k: 'verifier', hint: `environ ${Math.max(1, Math.round(lignesBase * 13.5e-6))}${NBSP}s${FINE}; la réception continue` },
       serveur: [{ p: deuxPoints('Comparer la tête avec le journal du conteneur') }, cmd('docker logs nicephos-vigie | grep tete_chaine'), { p: deuxPoints('Vérifier en ligne de commande') }, cmd('node vigie/cli.js verifier')] });
   }
 
@@ -477,7 +483,7 @@ export function vueSante({ db, engine, switches, now = Date.now, role }) {
     }
     carte({ id: 'bordure', icone: silence ? 'nuage-barre' : 'bordure', titre: 'Bordure Cloudflare', etat, cls, kv, faits,
       seuil: [{ t: `Alerte si plus de battement depuis 20${NBSP}min, aucune requête vue depuis 6${NBSP}h, ou une copie ou une lecture en échec${D}${guillemets('Bordure injoignable ou silencieuse (jeton, quota, Worker retiré)')} ` }, { t: '(Moyenne, DS24)', r: true }, { t: '.' }],
-      d3c: reglee ? 'Recopier la liste maintenant (POST /sante/bordure/copier, une copie toutes les 2 min au plus)' : null,
+      commande: reglee ? { k: 'bordure', hint: `une copie toutes les 2${NBSP}min au plus` } : null,
       serveur: [{ p: deuxPoints('Diagnostic complet (copie, battement, en-têtes refusés par le site, empreintes TLS)') }, cmd('node vigie/cli.js bordure')] });
   }
 
@@ -512,7 +518,7 @@ export function vueSante({ db, engine, switches, now = Date.now, role }) {
       liens: ecart ? [{ href: `/alertes/${ecart.id}`, t: `Ouvrir l’alerte #${ecart.id}`, btn: true }] : [],
       seuil: [{ t: `Alerte si un administrateur n’est pas déclaré ou rien n’explique son arrivée, un déclencheur manque ou a changé${D}${guillemets('Sauvegarde du site différente de ce qu’il déclare…')} ` }, { t: '(Critique, DS8)', r: true },
         { t: ` ; sauvegarde absente, illisible ou de plus de 48${NBSP}h${D}${guillemets('Contrôle des rôles impossible ou incomplet')} ` }, { t: '(Haute)', r: true }, { t: '.' }],
-      d3c: 'Accepter comme référence… (refusé tant qu’une alerte du contrôle des rôles est ouverte ; motif, confirmation, identité)',
+      commande: { k: 'accepter', bloquee: ecart ? ecart.id : null },
       serveur: [{ p: deuxPoints('Accepter n’efface rien : l’instantané remplace la référence, sans durée. Refusé tant qu’une alerte du contrôle des rôles est ouverte. En ligne de commande') }, cmd('node vigie/cli.js controle --accepter --motif "…"')] });
   }
 
@@ -642,12 +648,30 @@ export function ecartsSante({ db, engine, switches, now = Date.now }) {
 // Routes
 // ===================================================================================================================
 
+// Ce que la personne peut faire sur la santé (phase D3c) : vérifier la chaîne et recopier la liste de la bordure (Analyste),
+// accepter la référence du contrôle des rôles (Administrateur), chacun seulement si la Vigie sait le faire (pas de bouton mort).
+export function peutSante(ctx, role) {
+  const verif = Boolean(role) && can(role, 'verifications');
+  return { verifier: verif && Boolean(ctx.verifyChain), bordure: verif && Boolean(ctx.edge), accepter: Boolean(role) && can(role, 'droits') && Boolean(ctx.siteBackupDir), verif };
+}
+
+// L'identité confirmée (en-tête) : « Identité confirmée à 14 h 17, valable jusqu’à 14 h 22 ».
+function identite(authA, t) {
+  if (!Number.isFinite(authA)) return null;
+  return authA + FRESH > t ? { texte: `Identité confirmée à ${heure(authA)}, valable jusqu’à ${heure(authA + FRESH)}`, fraiche: true }
+    : { texte: `Identité confirmée à ${heure(authA)}${FINE}; redemandée au prochain geste sensible`, fraiche: false };
+}
+
 export function register(app, ctx) {
   const { db, engine, switches, now, view, log } = ctx;
 
   app.get('/sante', async (req, reply) => {
+    // Le message de l'action précédente, lu ici pour remettre un refus près de son bouton (et montré en tête par le layout).
+    const message = ctx.isRefresh(req) ? null : ctx.sessions.takeMessage(req.moi.sid);
     const sante = vueSante({ db, engine, switches, now, role: req.moi.role });
-    return view(reply, req, 'sante', { page: 'sante', titre: 'Santé et intégrité · Vigie', sante });
+    const t = now();
+    return view(reply, req, 'sante', { page: 'sante', titre: 'Santé et intégrité · Vigie', sante, message, peut: peutSante(ctx, req.moi.role),
+      identite: identite(req.moi.authA, t), reauthFraiche: Number.isFinite(req.moi.authA) && req.moi.authA + FRESH > t });
   });
 
   // Paramètres : période (7j par défaut, 30j), alerte (un entier). Une valeur inconnue est ignorée et dite en tête de page,

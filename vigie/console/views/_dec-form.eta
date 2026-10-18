@@ -1,0 +1,42 @@
+<%
+/* Formulaire d'une décision (POST /decisions, vigie/console/actions.js) : include('./_dec-form', { f }), f venant de
+   formulaireDecision() (vigie/console/ecrans/decisions.js). Mêmes champs partout (MV-02, MV-04, MV-05) : type, cible (fixe :
+   cachée ; sinon un champ), portée d'un blocage (aucune cochée d'avance, requise), motif (requis par le serveur), la case
+   « bloquer quand même » quand la cible contient votre adresse, puis un bouton par durée (« Bloquer 24 h »), et pour les
+   décisions longues une autre durée. L'erreur revenue du serveur est près de son champ (aria-invalid, aria-describedby) ;
+   la saisie refusée est reprise, toujours échappée. */
+const f = it.f;
+const p = f.id;
+const e = f.err || null;
+const en = k => Boolean(e && e.place === k);
+const decrit = (...ids) => ids.filter(Boolean).join(' ');
+%>
+<form class="vg-form" method="post" action="/decisions"<% if (en('general')) { %> aria-describedby="<%= p %>-err"<% } %>>
+<input type="hidden" name="_csrf" value="<%= f.csrf %>"><input type="hidden" name="formulaire" value="<%= f.formulaire %>"><input type="hidden" name="type" value="<%= f.type %>"><input type="hidden" name="retour" value="<%= f.retour %>"><% if (f.alerte) { %><input type="hidden" name="alerte" value="<%= f.alerte %>"><% } %><% if (f.cible.fixe) { %><input type="hidden" name="cible" value="<%= f.cible.valeur %>"><% } %>
+<% if (en('general')) { %><%~ include('./_dec-err', { id: p + '-err', texte: e.texte }) %>
+<% } %>
+<% if (!f.cible.fixe) { %>
+<div class="champ-a"><label for="<%= p %>-cible"><%= f.cible.label %></label><p class="aide" id="<%= p %>-cible-aide"><%= f.cible.aide %></p><input class="vg-mono" id="<%= p %>-cible" name="cible" type="text" maxlength="200" required autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="<%= decrit(p + '-cible-aide', en('cible') && p + '-cible-err') %>" value="<%= f.cible.valeur %>"<% if (en('cible')) { %> aria-invalid="true"<% } %>><% if (en('cible')) { %><%~ include('./_dec-err', { id: p + '-cible-err', texte: e.texte }) %><% } %></div>
+<% } %>
+<% if (f.portee) { %>
+<fieldset class="choix-a"<% if (en('portee')) { %> aria-describedby="<%= p %>-portee-err"<% } %>><legend>Portée</legend><% for (const o of f.portee) { %><label><input type="radio" name="portee" value="<%= o.v %>" required<% if (o.coche) { %> checked<% } %><% if (en('portee')) { %> aria-invalid="true"<% } %>><span><%= o.t %></span><span class="sec"><%= o.sec %></span></label><% } %><% if (en('portee')) { %><%~ include('./_dec-err', { id: p + '-portee-err', texte: e.texte }) %><% } %></fieldset>
+<% } %>
+<div class="champ-a"><label for="<%= p %>-motif">Motif</label><p class="aide" id="<%= p %>-motif-aide">300 signes au plus<% if (f.alerte) { %>, gardé au journal après «&#8239;alerte #<%= f.alerte %>&#8239;»<% } else { %>&#8239;; gardé au journal<% } %>, lu par les autres.</p><input id="<%= p %>-motif" name="motif" type="text" maxlength="300" required aria-describedby="<%= decrit(p + '-motif-aide', en('motif') && p + '-motif-err') %>" value="<%= f.motif.valeur %>"<% if (en('motif')) { %> aria-invalid="true"<% } %>><% if (en('motif')) { %><%~ include('./_dec-err', { id: p + '-motif-err', texte: e.texte }) %><% } %></div>
+<% if (f.gardeFous) { const g = f.gardeFous; %>
+<div class="vg-refus"><p class="t">Ce que la Vigie refuse, dit avant l’envoi</p><ul class="vg-garde-fous">
+<li><%~ include('./_dec-ic', { icone: 'bouclier' }) %><span><b>Jamais tout le monde</b>&#8239;: ni <span class="ip">0.0.0.0/0</span>, ni <span class="ip v6">::/0</span>, ni une plage IPv6 qui contient l’IPv4, ni la boucle locale.</span></li>
+<li><%~ include('./_dec-ic', { icone: 'bouclier' }) %><span>Un réseau plus large qu’un <b>/8</b> en IPv4 ou qu’un <b>/32</b> en IPv6.</span></li>
+<li><%~ include('./_dec-ic', { icone: 'bouclier' }) %><span>Plus que l’équivalent d’un /8 bloqué au total&#8239;: <b><%= g.total %>&nbsp;adresse<%= g.n > 1 ? 's' : '' %></b> IPv4 <%= g.n > 1 ? 'le sont' : 'l’est' %> aujourd’hui, sur <%= g.max %>.</span></li>
+<% if (g.ip) { %><li class="vous"><%~ include('./_dec-ic', { icone: 'triangle' }) %><span>Votre adresse actuelle, <span class="ip<%= g.ip.includes(':') ? ' v6' : '' %>"><%= g.ip %></span>, ou un réseau qui la contient&#8239;: une confirmation de plus vous est demandée.</span></li><% } %>
+</ul></div>
+<% } %>
+<% if (f.confirme) { const c = f.confirme; %>
+<fieldset class="choix-a"<% if (en('confirme')) { %> aria-describedby="<%= p %>-confirme-err"<% } %>><legend>Votre propre adresse</legend><p class="avert"><%~ include('./_dec-ic', { icone: 'triangle' }) %><span>Votre adresse actuelle, <span class="ip<%= c.ip.includes(':') ? ' v6' : '' %>"><%= c.ip %></span>, est dans <span class="ip<%= String(c.cible).includes(':') ? ' v6' : '' %>"><%= c.cible %></span>&#8239;: pendant la durée choisie, depuis cet appareil, le site vous serait fermé sur la portée choisie. La console de la Vigie resterait ouverte&#8239;: vous pourriez y lever ce blocage.</span></p><label><input type="checkbox" name="confirme" value="oui"<% if (en('confirme')) { %> aria-invalid="true"<% } %>><span>Bloquer quand même, mon adresse comprise</span></label><% if (en('confirme')) { %><%~ include('./_dec-err', { id: p + '-confirme-err', texte: e.texte }) %><% } %></fieldset>
+<% } %>
+<div class="duree-l"><span class="lb" id="<%= p %>-lbd">Durée, puis envoi</span>
+<% if (f.libre) { %>
+<div class="champ-a"><label for="<%= p %>-libre">Autre durée <span class="facultatif">(<%= f.libre.max %> au plus)</span></label><p class="aide" id="<%= p %>-libre-aide">30min, 2h, 3j…&#8239;; remplie, c’est elle qui compte, quel que soit le bouton.</p><input id="<%= p %>-libre" name="duree_libre" type="text" maxlength="20" autocomplete="off" spellcheck="false" aria-describedby="<%= decrit(p + '-libre-aide', en('libre') && p + '-libre-err') %>" value="<%= f.libre.valeur %>"<% if (en('libre')) { %> aria-invalid="true"<% } %>><% if (en('libre')) { %><%~ include('./_dec-err', { id: p + '-libre-err', texte: e.texte }) %><% } %></div>
+<% } %>
+<div class="btns-ligne" role="group" aria-labelledby="<%= p %>-lbd"><% for (const d of f.durees) { %><button class="btn ghost" type="submit" name="duree" value="<%= d.v %>"><%= d.t %></button><% } %><% if (f.libre) { %><button class="btn ghost" type="submit" name="duree" value="libre"><%= f.libre.bouton %></button><% } %></div>
+<% if (f.hint) { %><p class="hint"><%= f.hint %></p><% } %></div>
+</form>
