@@ -399,7 +399,7 @@ Pourquoi c'est important : une faille corrigée de Zitadel (CVE-2026-85056, conn
 
 ## 8. Autres canaux de notification
 
-**Choix (`D10`) : Signal**, par une passerelle auto-hébergée (`signal-cli-rest-api`, gratuite) dans sa propre pile Compose, sur un réseau interne que seule la Vigie rejoint. Le paquet de déploiement et la marche à suivre (numéro, enregistrement, PIN, groupe « Vigie Nicephos », essai) sont prêts : [`deploy/unraid/signal/`](../../deploy/unraid/signal/README.md). Le seul coût possible est le numéro : la ligne fixe de la box (vérification par appel vocal) le rend gratuit. L'e-mail reste le canal de secours si Signal échoue. Les autres canaux ci-dessous restent possibles par la même interface.
+**Choix (`D10`) : Signal**, par une passerelle auto-hébergée (`signal-cli-rest-api`, gratuite), sur un réseau interne que seule la Vigie rejoint. D'abord pile Compose à part, elle est depuis le 18 octobre 2026 le service `signal` de la pile principale (profil `signal`) : mêmes réseaux, même isolement, et plus de réseau à créer à la main. La marche à suivre (numéro, enregistrement, PIN, groupe « Vigie Nicephos », essai) : [`deploy/unraid/signal/`](../../deploy/unraid/signal/README.md). Le seul coût possible est le numéro : la ligne fixe de la box (vérification par appel vocal) le rend gratuit. L'e-mail reste le canal de secours si Signal échoue. Les autres canaux ci-dessous restent possibles par la même interface.
 
 Une interface commune `notify/` : chaque canal reçoit le même message court, **sans adresse, sans compte, sans donnée personnelle** : « Vigie : 1 alerte critique, Rôle donné hors de l'application, 14 h 02 » et le lien de la console (qui exige toujours Access et Zitadel).
 
@@ -508,7 +508,7 @@ Prises le 17 octobre 2026.
 |---|---|---|
 | D8 | Adresse de la console | `vigie.nicephos.art` (variable `VIGIE_PUBLIC_URL`) ; exclue de la redirection vers `www` |
 | D9 | Second facteur exigé, y compris après Google | oui : compatible avec Zitadel (*Force MFA*, sans « local only ») ; la console exige `mfa` dans `amr` (section 7.2) |
-| D10 | Canal hors admin | **Signal**, passerelle auto-hébergée ; paquet prêt dans `deploy/unraid/signal/` ; e-mail en secours |
+| D10 | Canal hors admin | **Signal**, passerelle auto-hébergée (service `signal` de la pile, profil `signal` ; guide dans `deploy/unraid/signal/`) ; e-mail en secours |
 | D11 | Recopie des blocages chez Cloudflare | oui, par l'API des listes (annexe Cloudflare, section 8), pour les blocages de 24 h et plus |
 | D12 | Qui accède à la console | les deux administrateurs ; plafond tenu dans Zitadel (rôles `vigie.*`), quatre rôles dans la Vigie à deux clés (section 5.4) |
 | D16 | La Vigie est-elle obligatoire | non : composant facultatif (section 3.3) |

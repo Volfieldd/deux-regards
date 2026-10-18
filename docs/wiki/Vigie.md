@@ -11,7 +11,7 @@ La Vigie est un composant **à part** du site : son propre conteneur, sa propre 
 | C1 | Moteur d'entités : score composite qui s'efface avec le temps, quorum entre sources (deux sources pour une alerte « moyen » ou « haut »), exceptions à source unique, alertes, modes par règle, réponses automatiques prudentes | fait |
 | C2 | Règles au format Sigma, détecteurs comportementaux, listes de menaces, contrôle des rôles sur les sauvegardes, verdicts agrégés | fait |
 | C3 | Capteur en bordure (Cloudflare Worker) | à venir |
-| D | Console `vigie.nicephos.art` (Cloudflare Access + Zitadel), notifications (admin, e-mail, Signal) | à venir |
+| D | Notifications (e-mail, Signal) ; console `vigie.nicephos.art` (Cloudflare Access + Zitadel) et affichage dans l'admin | notifications faites ; console et affichage à venir |
 
 ---
 
@@ -19,15 +19,9 @@ La Vigie est un composant **à part** du site : son propre conteneur, sa propre 
 
 Prérequis : la phase 0 faite ([`deploy/unraid/vigie-phase-0.md`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/vigie-phase-0.md)) ; les sauvegardes du site en place (service `backup`, `BACKUP_DIR`) : la Vigie les lit en lecture seule pour contrôler les administrateurs et **refuse de démarrer sans elles** (`VIGIE_SITE_BACKUP_DIR`, déjà réglé dans `compose.yaml`) ; pour Zitadel, la clé JSON du compte de service `vigie-lecture`.
 
-1. **Dossiers** (terminal Unraid) :
+1. **Dossiers** : `NICEPHOS_DIR/vigie`, `NICEPHOS_DIR/vigie-secrets` et `BACKUP_DIR-vigie`, créés à l'étape 2 du [guide Unraid](Unraid) (bloc « Vigie »).
 
-   ```bash
-   mkdir -p /mnt/cache/appdata/nicephos/vigie /mnt/cache/appdata/nicephos/vigie-secrets /mnt/user/backups/nicephos-vigie
-   chown -R 99:100 /mnt/cache/appdata/nicephos/vigie /mnt/cache/appdata/nicephos/vigie-secrets /mnt/user/backups/nicephos-vigie
-   chmod 700 /mnt/cache/appdata/nicephos/vigie /mnt/cache/appdata/nicephos/vigie-secrets
-   ```
-
-   Pour Zitadel : copier la clé JSON dans `/mnt/cache/appdata/nicephos/vigie-secrets/zitadel.json` (`chmod 600`, propriétaire `99:100`).
+   Pour Zitadel : copier la clé JSON dans `$NICEPHOS/vigie-secrets/zitadel.json` (`chmod 600`, propriétaire `99:100`).
 
 2. **Clés** (une seule fois) :
 
@@ -41,7 +35,7 @@ Prérequis : la phase 0 faite ([`deploy/unraid/vigie-phase-0.md`](https://github
 
    Gardez une copie des trois clés de la Vigie dans votre gestionnaire de mots de passe. `VIGIE_LOG_KEY` perdue : la chaîne du journal ne se vérifie plus (les événements restent lisibles).
 
-3. **`vigie.env`** : les trois clés ; pour Zitadel, `VIGIE_ZITADEL_ISSUER=https://<instance>.zitadel.cloud`.
+3. **`vigie.env`** : les trois clés ; pour Zitadel, `VIGIE_ZITADEL_ISSUER=https://<instance>.zitadel.cloud`. Compose Manager ne l'affiche pas : créez-le dans le terminal, dans le dossier de la pile (celui qui contient son `docker-compose.yml` et son `.env`, en général `/boot/config/plugins/compose.manager/projects/nicephos/`), puis `chmod 600`.
 
 4. **`.env` du site** : ajouter
 
@@ -49,7 +43,7 @@ Prérequis : la phase 0 faite ([`deploy/unraid/vigie-phase-0.md`](https://github
    VIGIE_URL=http://vigie-reception:4100
    VIGIE_INGEST_KEY=…            # la même que dans vigie.env
    VIGIE_DECISIONS_PUBKEY=…
-   COMPOSE_PROFILES=vigie        # démarre aussi la Vigie et sa sauvegarde
+   COMPOSE_PROFILES=vigie        # démarre aussi la Vigie et sa sauvegarde ; « vigie,signal » : et la passerelle Signal
    ```
 
 5. **Compose Pull** puis **Compose Up**.
@@ -175,8 +169,8 @@ Un **Worker** Cloudflare (`bordure/worker.js`, offre gratuite) devant l'admin, l
 
   La ligne « Réponse » dit ce que la Vigie a déjà fait (sans cible), ou « Aucune réponse automatique ». L'e-mail rappelle : « Ouvrez la Vigie depuis votre favori ; elle ne demande jamais votre mot de passe par message. »
 
-- **Par où** : Signal d'abord (passerelle [`deploy/unraid/signal/`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/signal/README.md), groupe « Vigie Nicephos ») ; l'**e-mail** si Signal n'est pas réglé ou échoue. Un canal en échec ouvre une alerte (« canal en échec », une fois par heure). 20 messages par heure au plus et par canal, puis un message de synthèse à la fin de l'heure.
-- **Réglages** (`vigie.env`) : `VIGIE_SIGNAL_NUMERO`, `VIGIE_SIGNAL_GROUPE` (étape 8 du guide Signal), `VIGIE_SIGNAL_URL` (`http://nicephos-signal:8080` par défaut) ; `VIGIE_SMTP_URL`, `VIGIE_MAIL_FROM`, `VIGIE_MAIL_TO` (adresses séparées par des virgules) ; `VIGIE_CONSOLE_URL` (`https://vigie.nicephos.art`). La Vigie rejoint le réseau interne `nicephos-vigie-signal` de la passerelle : lancer la pile Signal avant (sans Signal, créer le réseau vide une fois : `docker network create --internal nicephos-vigie-signal`).
+- **Par où** : Signal d'abord (service `signal` de la pile, profil `signal` ; numéro et groupe « Vigie Nicephos » : [`deploy/unraid/signal/`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/signal/README.md)) ; l'**e-mail** si Signal n'est pas réglé ou échoue. Un canal en échec ouvre une alerte (« canal en échec », une fois par heure). 20 messages par heure au plus et par canal, puis un message de synthèse à la fin de l'heure.
+- **Réglages** (`vigie.env`) : `VIGIE_SIGNAL_NUMERO`, `VIGIE_SIGNAL_GROUPE` (étape 8 du guide Signal), `VIGIE_SIGNAL_URL` (`http://nicephos-signal:8080` par défaut) ; `VIGIE_SMTP_URL`, `VIGIE_MAIL_FROM`, `VIGIE_MAIL_TO` (adresses séparées par des virgules) ; `VIGIE_CONSOLE_URL` (`https://vigie.nicephos.art`). La Vigie et la passerelle partagent le réseau interne `nicephos-vigie-signal`, créé par la pile (vide sans le profil `signal`).
 - **Essai** : `docker exec nicephos-vigie node vigie/cli.js notifier essai signal` (ou `email`).
 - **Contre l'imitation** : les messages invitent à ouvrir un lien vers la console ; une fausse page pourrait le copier. Défenses : second facteur par **clé d'accès** (passkey, WebAuthn) exigé pour l'application « Vigie » dans Zitadel (fait le 18 oct. 2026), la phrase « ouvrez la Vigie depuis votre favori » dans chaque e-mail, et, pour l'e-mail de secours, un domaine d'envoi protégé par **SPF, DKIM et DMARC** (réglage du fournisseur de messagerie).
 - **Résumé pour l'admin du site** : le site lit chaque minute `GET /v1/resume` (requête signée, réponse signée par la clé des décisions, usage « resume ») : nombre d'alertes ouvertes par gravité, gravité, date et numéro de la première (pour le lien vers la console) ; **ni titre, ni adresse, ni compte** (un attaquant devenu administrateur du site n'apprend pas ce qui l'a vu). Les alertes en observation n'y figurent pas. L'affichage dans l'admin (badge, « Aujourd'hui », bandeau d'une alerte critique) viendra avec la console, après maquettes et jury.
@@ -192,8 +186,8 @@ Un **Worker** Cloudflare (`bordure/worker.js`, offre gratuite) devant l'admin, l
 - **Capacité** : abaques, facteurs limitants et leviers dans [`docs/etudes/vigie-capacite.md`](https://github.com/Volfieldd/deux-regards/blob/main/docs/etudes/vigie-capacite.md). Pour mesurer sur la machine, dans un conteneur à part, sans secret ni réseau (base jetable, effacée à la fin, jamais la vraie) :
 
   ```bash
-  mkdir -p /mnt/cache/appdata/nicephos/vigie-banc && chown 99:100 /mnt/cache/appdata/nicephos/vigie-banc
-  docker run --rm --network none --user 99:100 -v /mnt/cache/appdata/nicephos/vigie-banc:/banc \
+  mkdir -p "$NICEPHOS/vigie-banc" && chown 99:100 "$NICEPHOS/vigie-banc"     # $NICEPHOS : guide Unraid, étape 2
+  docker run --rm --network none --user 99:100 -v "$NICEPHOS/vigie-banc":/banc \
     ghcr.io/volfieldd/deux-regards-vigie:latest node vigie/banc.js --dossier /banc --historique 1000000 --evenements 5000
   ```
 
@@ -209,7 +203,7 @@ Un **Worker** Cloudflare (`bordure/worker.js`, offre gratuite) devant l'admin, l
 
 - **Événements** : 6 mois (`VIGIE_RETENTION_DAYS`), chaînés (une ligne modifiée, insérée à la main ou effacée se voit à la vérification quotidienne, critique) ; compteurs par jour 25 mois. Chaque nuit, la tête de la chaîne (numéro, maillon, signature) est écrite dans le journal du conteneur (`docker logs nicephos-vigie | grep tete_chaine`) : la comparer d'un jour à l'autre montre une base revenue en arrière.
 - **Zitadel** : 210 types d'événements suivis (`vigie/zitadel/types-suivis.json`, tirés de la liste de l'instance), lus toutes les minutes ; seuls quelques champs sans donnée personnelle sont gardés (rôles, projet, réglages de connexion, adresse IP de l'agent quand Zitadel la donne) ; plus de 20 h sans lecture : signalé.
-- **Sauvegardes** : conteneur `nicephos-vigie-sauvegarde`, un instantané contrôlé par jour, 14 gardés, dans `/mnt/user/backups/nicephos-vigie`.
+- **Sauvegardes** : conteneur `nicephos-vigie-sauvegarde`, un instantané contrôlé par jour, 14 gardés, dans `BACKUP_DIR-vigie` (par exemple `/mnt/user/backups/nicephos-vigie`).
 
 ## Retirer la Vigie
 
