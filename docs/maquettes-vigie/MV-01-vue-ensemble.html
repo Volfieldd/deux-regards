@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="Maquette MV-01 : vue d’ensemble de la console de la Vigie (état en une phrase, interrupteurs, alertes ouvertes, décisions, santé).">
+<title>Vue d’ensemble · Vigie · Nicephos (maquette MV-01)</title>
+<link rel="stylesheet" href="../audit-ergonomie-2026-10-16/maquettes/_commun/admin.css">
+<link rel="stylesheet" href="../audit-ergonomie-2026-10-16/maquettes/_commun/tokens.css">
+<link rel="stylesheet" href="../audit-ergonomie-2026-10-16/maquettes/_commun/admin-plus.css">
+<link rel="stylesheet" href="_vigie/vigie.css">
+<link rel="stylesheet" href="../audit-ergonomie-2026-10-16/maquettes/_commun/annotations.css">
+</head>
+<body class="admin vigie">
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="shell">
+<aside class="side" id="admin-nav" aria-label="Menu de la console">
+  <div class="side-haut"><a class="word" href="/"><span class="marque mq-a">Vigie<span class="mq-pin d" aria-hidden="true">10</span></span><span class="mention">Sécurité de Nicephos</span></a><a class="side-fermer" href="#contenu"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Fermer<span class="sr-only"> le menu</span></a></div>
+  <nav class="nav" aria-label="Vue d’ensemble">
+    <a href="/" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Vue d’ensemble</a>
+  </nav>
+  <p class="grp" id="nav-surveiller">Surveiller</p>
+  <nav class="nav" aria-labelledby="nav-surveiller">
+    <a href="/alertes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>Alertes<span class="nav-badge"><span aria-hidden="true">6</span><span class="sr-only">, 6 ouvertes</span></span></a>
+    <a href="/evenements"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg>Événements</a>
+    <a href="/entites"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="M12 1.5v3.5M12 19v3.5M1.5 12H5M19 12h3.5"/></svg>Entités</a>
+    <a href="/sante"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></svg>Santé<span class="nav-badge attention"><span aria-hidden="true">▲ 1</span><span class="sr-only">, 1 écart</span></span></a>
+  </nav>
+  <p class="grp" id="nav-agir">Agir</p>
+  <nav class="nav" aria-labelledby="nav-agir">
+    <a href="/decisions"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.1-7.5 9.5-4.3-1.4-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.6"/></svg>Décisions<span class="nav-badge neutre"><span aria-hidden="true">4</span><span class="sr-only">, 4 en cours</span></span></a>
+  </nav>
+  <p class="grp" id="nav-regler">Régler</p>
+  <nav class="nav" aria-labelledby="nav-regler">
+    <a href="/reglages"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>Règles et réglages</a>
+    <a href="/droits"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg>Droits</a>
+  </nav>
+  <div class="foot">
+    <div class="me">
+      <span class="av" aria-hidden="true">S</span><span class="who"><span class="me-nom">Sébastien</span><small>Administrateur</small></span>
+      <form method="post" action="/theme"><input type="hidden" name="_csrf" value="v9a2…"><input type="hidden" name="back" value="/"><button class="iconbtn btn-theme" type="submit" name="theme" value="light" title="Mode clair / sombre"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button></form>
+      <form method="post" action="/deconnexion"><input type="hidden" name="_csrf" value="v9a2…"><button class="iconbtn" type="submit" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button></form>
+    </div>
+  </div>
+</aside>
+<main class="main" id="contenu" tabindex="-1">
+<header class="ep mq-a"><span class="mq-pin d" aria-hidden="true">1</span>
+  <div class="ep-titre"><h1>Vue d’ensemble</h1></div>
+  <p class="ep-meta"><span>sam. 17 oct., 14 h 20</span><span class="tel-non">heure de Paris</span><span class="js-seul">actualisée toutes les 30 s</span><span class="vg-identite"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg>Identité confirmée à 14 h 17, valable jusqu’à 14 h 22</span></p>
+  <div class="ep-actions"><a class="btn ghost ep-secondaire" href="/decisions#nouvelle">Nouvelle décision…</a><a class="btn" href="/alertes/413">Ouvrir l’alerte critique #413</a></div>
+</header>
+<div class="vg-etat">
+  <h2 class="phrase mq-a" id="t-etat"><span class="mq-pin" aria-hidden="true">2</span>2 alertes critiques et 2 hautes à traiter.</h2>
+  <ul class="faits">
+    <li class="mq-a"><span class="mq-pin" aria-hidden="true">3</span><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span><span><a href="/alertes/413">#413</a> et <a href="/alertes/412">#412</a>, ouvertes à 14 h 05 et 14 h 02, sans intervenant : un administrateur apparu hors de l’application, le compte <span class="sub">zitadel-329906113</span>. La Vigie l’a gelé 24 h et a fermé ses sessions.</span></li>
+    <li><span class="etat etat--attention"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Blocages</span><span>Blocages automatiques arrêtés jusqu’à 15 h 10 (#414) : aucune règle ne bloque, ne ferme ni ne gèle d’elle-même.</span></li>
+  </ul>
+  <p class="aussi">Aussi : #407, haute, prise en charge · 2 moyennes (#414, #405) · <a href="/decisions">4 décisions en cours</a> · <a href="/sante">santé : 1 écart</a> (#413).</p>
+</div>
+<h2 class="vg-section-t mq-a" id="t-inter">Interrupteurs<span class="mq-pin d" aria-hidden="true">4</span></h2>
+<ul class="vg-inters" aria-labelledby="t-inter">
+<li class="vg-inter"><div class="tete"><h3>Détection</h3><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Marche</span></div><p>Les règles tournent.</p><div class="btns-ligne"><a class="btn ghost" href="/reglages#interrupteurs">Arrêter…<span class="sr-only"> la détection</span></a></div></li>
+<li class="vg-inter"><div class="tete"><h3>Alertes</h3><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Marche</span></div><p>Notifications Signal et e-mail.</p><div class="btns-ligne"><a class="btn ghost" href="/reglages#interrupteurs">Arrêter…<span class="sr-only"> les alertes</span></a></div></li>
+<li class="vg-inter arret"><div class="tete"><h3>Blocages automatiques</h3><span class="etat etat--attention"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Arrêt jusqu’à 15 h 10</span></div><p>Aucune règle n’agit d’elle-même. Arrêté par Julien à 14 h 10 pour 1 h : « essai de la bordure » ; alerte #414 envoyée.</p><form method="post" action="/interrupteurs/blocages"><input type="hidden" name="_csrf" value="v9a2…"><input type="hidden" name="etat" value="marche"><button class="btn ghost" type="submit">Remettre en marche maintenant</button></form></li>
+</ul>
+<h2 class="vg-section-t mq-a" id="t-al">Alertes ouvertes <span class="n">6</span><span class="mq-pin d" aria-hidden="true">5</span></h2>
+<div class="liste-wrap tablewrap mq-a"><table class="liste-a vg-alertes">
+<caption><div class="vg-cap-t">6 alertes ouvertes : la plus grave d’abord ; à gravité égale, celles que personne n’a prises en charge, puis la plus récente</div><div class="grav-leg"><span class="lb mq-a">Gravité d’une alerte, de la plus haute à la plus basse<span class="mq-pin d" aria-hidden="true">6</span></span><ul class="grav-legende" aria-label="Gravité d’une alerte"><li><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span></li><li><span class="grav grav--haute"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Haute</span></li><li><span class="grav grav--moyenne"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Moyenne</span></li></ul></div></caption>
+<thead><tr><th scope="col">Gravité</th><th scope="col">Alerte</th><th scope="col">Entité</th><th scope="col">Sources</th><th scope="col" class="num">Occurrences</th><th scope="col">Mode</th><th scope="col">Statut</th></tr></thead>
+<tbody>
+<tr class="vg-crit"><td class="c-grav"><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/413">Sauvegarde du site différente de ce qu’il déclare (administrateur non déclaré, déclencheur absent)<span class="sr-only"> (#413)</span></a><span class="sec">#413 · cas DS8</span></th>
+<td class="c-ent"><span class="ent"><span class="k">site</span><span class="sub">comptes</span></span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>contrôles de la Vigie</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">1<span class="sec">à 14 h 05</span></td>
+<td class="c-mode" data-label="Mode">Alerter<span class="sec">message à 14 h 05</span></td>
+<td class="c-etat"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouverte</span><span class="sec">le même compte que #412, sur la sauvegarde de 14 h 04</span></td></tr>
+<tr class="vg-crit"><td class="c-grav"><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/412">Rôle donné, retiré ou compte changé hors de l’application<span class="sr-only"> (#412)</span></a><span class="sec">#412 · cas DS8</span></th>
+<td class="c-ent"><span class="ent"><span class="k">compte</span><span class="sub">zitadel-329906113</span></span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>site</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">1<span class="sec">à 14 h 02</span></td>
+<td class="c-mode" data-label="Mode">Bloquer<span class="sec">réponse automatique</span></td>
+<td class="c-etat"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouverte</span><span class="sec">réponse faite : compte gelé 24 h, sessions du compte fermées</span></td></tr>
+<tr><td class="c-grav"><span class="grav grav--haute"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Haute</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/409">Score d’une entité au-dessus du seuil, confirmé par deux sources<span class="sr-only"> (#409)</span></a><span class="sec">#409 · score</span></th>
+<td class="c-ent"><span class="ent"><span class="k">adresse</span><span class="ip">198.51.100.23</span></span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>site</span></li><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 18.5h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.6 1.6A3.4 3.4 0 0 0 7 18.5z"/></svg>bordure Cloudflare</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">37<span class="sec">de 13 h 41 à 14 h 12</span></td>
+<td class="c-mode" data-label="Mode">Observer<span class="sec">sans notification</span></td>
+<td class="c-etat"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouverte</span><span class="sec">score 15,2 (site 9,1 · bordure 6,1)</span></td></tr>
+<tr><td class="c-grav"><span class="grav grav--haute"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Haute</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/407">Cookie d’une session fermée rejoué depuis un autre appareil<span class="sr-only"> (#407)</span></a><span class="sec">#407 · cas DS1</span></th>
+<td class="c-ent"><span class="ent"><span class="k">compte</span><span class="sub">zitadel-318204977</span><span class="nom">(Julien)</span></span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>site</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">1<span class="sec">à 11 h 26</span></td>
+<td class="c-mode" data-label="Mode">Bloquer<span class="sec">réponse automatique</span></td>
+<td class="c-etat"><span class="etat etat--encours"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Prise en charge</span><span class="sec">par Sébastien · sessions du compte fermées</span></td></tr>
+<tr><td class="c-grav"><span class="grav grav--moyenne"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Moyenne</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/414">Surveillance réduite (interrupteur ou règle arrêtés, adresse de confiance, référence acceptée)<span class="sr-only"> (#414)</span></a><span class="sec">#414 · cas DS24</span></th>
+<td class="c-ent"><span class="ent"><span class="k">la Vigie</span>blocages automatiques</span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>contrôles de la Vigie</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">1<span class="sec">à 14 h 10</span></td>
+<td class="c-mode" data-label="Mode">Alerter<span class="sec">message à 14 h 10</span></td>
+<td class="c-etat"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouverte</span><span class="sec">arrêtés par Julien jusqu’à 15 h 10</span></td></tr>
+<tr><td class="c-grav"><span class="grav grav--moyenne"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Moyenne</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/405">Score d’une entité au-dessus du seuil, confirmé par deux sources<span class="sr-only"> (#405)</span></a><span class="sec">#405 · score</span></th>
+<td class="c-ent"><span class="ent"><span class="k">réseau</span><span class="ip">203.0.113.0/24</span></span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>site</span></li><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 18.5h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.6 1.6A3.4 3.4 0 0 0 7 18.5z"/></svg>bordure Cloudflare</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">12<span class="sec">de 9 h 10 à 13 h 58</span></td>
+<td class="c-mode" data-label="Mode">Observer<span class="sec">sans notification</span></td>
+<td class="c-etat"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouverte</span><span class="sec">score 13,1 (site 8,4 · bordure 4,7) · surtout des pièges</span></td></tr>
+</tbody></table></div>
+<div class="pied-liste"><a class="lien-a" href="/alertes?statut=toutes">Toutes les alertes, closes comprises</a></div>
+<div class="vg-bas">
+<section class="panel mq-a" aria-labelledby="t-dec"><span class="mq-pin d" aria-hidden="true">7</span><h2 class="panel-t" id="t-dec">Décisions en cours <span class="n">4</span></h2>
+<ul class="vg-lignes">
+<li><span class="t">Fermer les sessions d’un compte · <span class="sub">zitadel-329906113</span></span><span class="n">#88</span><span class="sec">jusqu’au lun. 19 oct., 14 h 02 · par la Vigie, alerte #412</span></li>
+<li><span class="t">Geler un compte · <span class="sub">zitadel-329906113</span></span><span class="n">#87</span><span class="sec">jusqu’au dim. 18 oct., 14 h 02 · par la Vigie, alerte #412</span></li>
+<li><span class="t">Bloquer une adresse · <span class="ip">203.0.113.0/24</span></span><span class="n">#86</span><span class="sec">L’admin et la connexion · jusqu’au sam. 24 oct., 10 h 00 · par Sébastien : « scanner depuis mardi »</span></li>
+<li><span class="t">Fermer les sessions d’un compte · <span class="sub">zitadel-318204977</span> (Julien)</span><span class="n">#84</span><span class="sec">jusqu’au lun. 19 oct., 11 h 26 · par la Vigie, alerte #407</span></li>
+
+</ul>
+<p class="panel-pied"><span>Appliquées par le site en quelques secondes ; chacune expire seule.</span><a class="vg-lien" href="/decisions">Décisions : lever, nouvelle décision</a></p>
+</section>
+<div class="cote">
+<section class="panel mq-a" aria-labelledby="t-sante"><span class="mq-pin d" aria-hidden="true">8</span><h2 class="panel-t" id="t-sante">Santé</h2>
+<ul class="vg-sante">
+<li class="ok"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg><span>Site : battement à <b>14 h 19</b>, 0 en attente</span></li>
+<li class="ok"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg><span>Zitadel lu à <b>14 h 19</b></span></li>
+<li class="ok"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg><span>Bordure : battement à <b>14 h 15</b>, liste 31 (1 blocage) copiée à 14 h 03</span></li>
+<li class="ok"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg><span>Chaîne <b>intacte</b>, vérifiée à 03 h 10</span></li>
+<li class="att-s"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg><span>Contrôle des rôles : sauvegarde de 14 h 04, contrôlée à 14 h 05 : <b>écart</b> (#413)</span></li>
+<li class="ok"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg><span>Analyse : aucun retard</span></li>
+<li class="ok"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg><span>Signal : message à 14 h 10</span></li>
+</ul>
+<p class="panel-pied"><span>Disque libre : 182 Go</span><a class="vg-lien" href="/sante">Santé et intégrité</a></p>
+</section>
+<section class="mq-a" aria-labelledby="t-7j"><span class="mq-pin d" aria-hidden="true">9</span><h2 class="vg-section-t" id="t-7j">Sur 7 jours</h2>
+<dl class="chiffres">
+<div><dt>Connexions à l’admin</dt><dd>64</dd></div>
+<div><dt>Adresses bloquées</dt><dd>4</dd></div>
+<div><dt>Tentatives repoussées</dt><dd>1 913</dd></div>
+</dl></section>
+</div>
+</div>
+<div class="mq-etats">
+<section class="mq-ecran" inert aria-labelledby="etat-a"><p class="mq-etat" id="etat-a"><span class="mq-pin" aria-hidden="true">11</span>État · Aucune alerte : ven. 16 oct., 21 h 00 (lexique § 3.7)</p>
+<div class="ecran-a vg-page">
+<header class="ep mq-a">
+  <div class="ep-titre"><h2 class="h1">Vue d’ensemble</h2></div>
+  <p class="ep-meta"><span>ven. 16 oct., 21 h 00</span><span>heure de Paris</span></p>
+  
+</header>
+<div class="vg-etat">
+  <h3 class="phrase" id="t-etat-a">Rien à traiter : aucune alerte ouverte.</h3>
+  <ul class="faits">
+    <li><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Marche</span><span>Détection, alertes et blocages automatiques en marche.</span></li>
+    <li><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Close</span><span>Dernière alerte : <a href="/alertes/398">#398</a>, classée Faux positif par Julien à 20 h 05 (« box redémarrée »).</span></li>
+  </ul>
+  <p class="aussi">Aucune décision en cours · santé : tout répond.</p>
+</div>
+<p class="note-a"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5h.01"/></svg><span>La liste des alertes ouvertes n’est pas affichée vide : la phrase suffit, et « <a class="vg-lien" href="/alertes?statut=toutes">Toutes les alertes, closes comprises</a> » reste au même endroit.</span></p>
+</div>
+</section>
+<section class="mq-ecran" inert aria-labelledby="etat-b"><p class="mq-etat" id="etat-b"><span class="mq-pin" aria-hidden="true">12</span>État · La Vigie en écart d’intégrité : chaîne du journal rompue (hypothèse, lexique § 3.7)</p>
+<div class="ecran-a vg-page">
+<div class="vg-bandeau" role="alert"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 14.5l-2.2 2.2a3.3 3.3 0 0 1-4.6-4.6L5.5 9.8M14 9.5l2.2-2.2a3.3 3.3 0 0 1 4.6 4.6L18.5 14.2"/><path d="M8.5 3.5l1 2.2M15.5 20.5l-1-2.2M3.5 8.5l2.2 1M20.5 15.5l-2.2-1"/></svg><p><span class="t">Chaîne du journal rompue à la ligne 1 181 950 : ligne modifiée ou insérée.</span><span class="sec">Vérification de 03 h 10 : cette ligne seule ne peut plus être crue ; les autres lignes, avant et après, sont intactes. La Vigie continue de recevoir et d’analyser.</span></p><a class="btn ghost" href="/sante#chaine">Voir la chaîne</a></div>
+<header class="ep mq-a">
+  <div class="ep-titre"><h2 class="h1">Vue d’ensemble</h2></div>
+  <p class="ep-meta"><span>sam. 17 oct., 14 h 20</span><span>heure de Paris</span></p>
+  
+</header>
+<div class="vg-etat">
+  <h3 class="phrase" id="t-etat-b">3 alertes critiques et 2 hautes à traiter.</h3>
+  <ul class="faits">
+    <li><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span><span><a href="/alertes?regle=chaine_rompue">Chaîne du journal de la Vigie rompue</a>, ouverte à 03 h 10 et envoyée sur Signal : personne ne l’a prise en charge.</span></li>
+    <li><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span><span><a href="/alertes/413">#413</a> et <a href="/alertes/412">#412</a>, ouvertes à 14 h 05 et 14 h 02 : personne ne les a prises en charge.</span></li>
+  </ul>
+  <p class="aussi">Le bandeau reste en tête de chaque page de la console tant que personne n’a pris l’alerte en charge ; la même rupture ressort à chaque vérification.</p>
+</div>
+</div>
+</section>
+<section class="mq-ecran" inert aria-labelledby="etat-c"><p class="mq-etat" id="etat-c"><span class="mq-pin" aria-hidden="true">13</span>État · Vue d’une Lectrice : Camille (lexique § 3.6), adresses tronquées, aucune action</p>
+<div class="ecran-a vg-page">
+<header class="ep mq-a">
+  <div class="ep-titre"><h2 class="h1">Vue d’ensemble</h2></div>
+  <p class="ep-meta"><span>sam. 17 oct., 14 h 20</span><span>Camille, Lectrice</span></p>
+  
+</header>
+<p class="note-a"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5h.01"/></svg><span><b>Lectrice : vous voyez, vous n’agissez pas.</b> Les adresses sont tronquées à leur réseau (/24, /48).</span></p>
+<div class="vg-etat">
+  <h3 class="phrase" id="t-etat-c">2 alertes critiques et 2 hautes à traiter.</h3>
+  <ul class="faits">
+    <li><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span><span><a href="/alertes/413">#413</a> et <a href="/alertes/412">#412</a>, ouvertes à 14 h 05 et 14 h 02 : personne ne les a prises en charge.</span></li>
+    <li><span class="etat etat--attention"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Blocages</span><span>Blocages automatiques arrêtés jusqu’à 15 h 10 (#414).</span></li>
+  </ul>
+</div>
+<h3 class="vg-section-t mq-a" id="t-inter-c">Interrupteurs</h3>
+<ul class="vg-inters" aria-labelledby="t-inter-c">
+<li class="vg-inter"><div class="tete"><h4>Détection</h4><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Marche</span></div><p>Les règles tournent.</p><p class="lecture">Lecture seule.</p></li>
+<li class="vg-inter"><div class="tete"><h4>Alertes</h4><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Marche</span></div><p>Notifications Signal et e-mail.</p><p class="lecture">Lecture seule.</p></li>
+<li class="vg-inter arret"><div class="tete"><h4>Blocages automatiques</h4><span class="etat etat--attention"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>Arrêt jusqu’à 15 h 10</span></div><p>Aucune règle n’agit d’elle-même. Arrêté par Julien à 14 h 10 pour 1 h : « essai de la bordure » ; alerte #414 envoyée.</p><p class="lecture">Lecture seule.</p></li>
+</ul>
+<h3 class="vg-section-t">Alertes ouvertes <span class="n">6</span></h3>
+<div class="liste-wrap tablewrap mq-a"><table class="liste-a vg-alertes">
+<caption><div class="vg-cap-t">6 alertes ouvertes : la plus grave d’abord ; à gravité égale, celles que personne n’a prises en charge, puis la plus récente</div><div class="grav-leg"><span class="lb">Gravité d’une alerte, de la plus haute à la plus basse</span><ul class="grav-legende" aria-label="Gravité d’une alerte"><li><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span></li><li><span class="grav grav--haute"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Haute</span></li><li><span class="grav grav--moyenne"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Moyenne</span></li></ul></div></caption>
+<thead><tr><th scope="col">Gravité</th><th scope="col">Alerte</th><th scope="col">Entité</th><th scope="col">Sources</th><th scope="col" class="num">Occurrences</th><th scope="col">Mode</th><th scope="col">Statut</th></tr></thead>
+<tbody>
+<tr class="vg-crit"><td class="c-grav"><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/413">Sauvegarde du site différente de ce qu’il déclare (administrateur non déclaré, déclencheur absent)<span class="sr-only"> (#413)</span></a><span class="sec">#413 · cas DS8</span></th>
+<td class="c-ent"><span class="ent"><span class="k">site</span><span class="sub">comptes</span></span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>contrôles de la Vigie</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">1<span class="sec">à 14 h 05</span></td>
+<td class="c-mode" data-label="Mode">Alerter<span class="sec">message à 14 h 05</span></td>
+<td class="c-etat"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouverte</span><span class="sec">le même compte que #412, sur la sauvegarde de 14 h 04</span></td></tr>
+<tr class="vg-crit"><td class="c-grav"><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/412">Rôle donné, retiré ou compte changé hors de l’application<span class="sr-only"> (#412)</span></a><span class="sec">#412 · cas DS8</span></th>
+<td class="c-ent"><span class="ent"><span class="k">compte</span><span class="sub">zitadel-329906113</span></span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>site</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">1<span class="sec">à 14 h 02</span></td>
+<td class="c-mode" data-label="Mode">Bloquer<span class="sec">réponse automatique</span></td>
+<td class="c-etat"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouverte</span><span class="sec">réponse faite : compte gelé 24 h, sessions du compte fermées</span></td></tr>
+<tr><td class="c-grav"><span class="grav grav--haute"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Haute</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/409">Score d’une entité au-dessus du seuil, confirmé par deux sources<span class="sr-only"> (#409)</span></a><span class="sec">#409 · score</span></th>
+<td class="c-ent"><span class="ent"><span class="k">adresse</span><span class="ip">198.51.100.0/24</span><span class="tronq">(tronquée)</span></span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>site</span></li><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 18.5h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.6 1.6A3.4 3.4 0 0 0 7 18.5z"/></svg>bordure Cloudflare</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">37<span class="sec">de 13 h 41 à 14 h 12</span></td>
+<td class="c-mode" data-label="Mode">Observer<span class="sec">sans notification</span></td>
+<td class="c-etat"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouverte</span><span class="sec">score 15,2 (site 9,1 · bordure 6,1)</span></td></tr>
+<tr><td class="c-grav"><span class="grav grav--haute"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Haute</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/407">Cookie d’une session fermée rejoué depuis un autre appareil<span class="sr-only"> (#407)</span></a><span class="sec">#407 · cas DS1</span></th>
+<td class="c-ent"><span class="ent"><span class="k">compte</span><span class="sub">zitadel-318204977</span><span class="nom">(Julien)</span></span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>site</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">1<span class="sec">à 11 h 26</span></td>
+<td class="c-mode" data-label="Mode">Bloquer<span class="sec">réponse automatique</span></td>
+<td class="c-etat"><span class="etat etat--encours"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Prise en charge</span><span class="sec">par Sébastien · sessions du compte fermées</span></td></tr>
+<tr><td class="c-grav"><span class="grav grav--moyenne"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Moyenne</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/414">Surveillance réduite (interrupteur ou règle arrêtés, adresse de confiance, référence acceptée)<span class="sr-only"> (#414)</span></a><span class="sec">#414 · cas DS24</span></th>
+<td class="c-ent"><span class="ent"><span class="k">la Vigie</span>blocages automatiques</span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>contrôles de la Vigie</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">1<span class="sec">à 14 h 10</span></td>
+<td class="c-mode" data-label="Mode">Alerter<span class="sec">message à 14 h 10</span></td>
+<td class="c-etat"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouverte</span><span class="sec">arrêtés par Julien jusqu’à 15 h 10</span></td></tr>
+<tr><td class="c-grav"><span class="grav grav--moyenne"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Moyenne</span></td>
+<th scope="row"><a class="ligne-lien" href="/alertes/405">Score d’une entité au-dessus du seuil, confirmé par deux sources<span class="sr-only"> (#405)</span></a><span class="sec">#405 · score</span></th>
+<td class="c-ent"><span class="ent"><span class="k">réseau</span><span class="ip">203.0.113.0/24</span></span></td><td class="c-src" data-label="Sources"><ul class="srcs" aria-label="Sources"><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></svg>site</span></li><li><span class="src"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 18.5h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.6 1.6A3.4 3.4 0 0 0 7 18.5z"/></svg>bordure Cloudflare</span></li></ul></td>
+<td class="c-occ num" data-label="Occurrences">12<span class="sec">de 9 h 10 à 13 h 58</span></td>
+<td class="c-mode" data-label="Mode">Observer<span class="sec">sans notification</span></td>
+<td class="c-etat"><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouverte</span><span class="sec">score 13,1 (site 8,4 · bordure 4,7) · surtout des pièges</span></td></tr>
+</tbody></table></div>
+</div>
+</section>
+<section class="mq-ecran" inert aria-labelledby="etat-d"><p class="mq-etat" id="etat-d"><span class="mq-pin" aria-hidden="true">14</span>État · Après « Remettre en marche maintenant », à 14 h 21 : le retour en tête de la page</p>
+<div class="ecran-a vg-page">
+<p class="vg-retour" role="status"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Blocages automatiques remis en marche à 14 h 21, par vous.<span class="sec">L’alerte #414, Surveillance réduite, reste ouverte jusqu’à son classement.</span></span></p>
+<header class="ep mq-a">
+  <div class="ep-titre"><h2 class="h1">Vue d’ensemble</h2></div>
+  <p class="ep-meta"><span>sam. 17 oct., 14 h 21</span><span class="vg-identite"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg>Identité confirmée à 14 h 17, valable jusqu’à 14 h 22</span></p>
+  
+</header>
+<h3 class="vg-section-t mq-a" id="t-inter-d">Interrupteurs</h3>
+<ul class="vg-inters" aria-labelledby="t-inter-d">
+<li class="vg-inter"><div class="tete"><h4>Détection</h4><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Marche</span></div><p>Les règles tournent.</p><div class="btns-ligne"><a class="btn ghost" href="/reglages#interrupteurs">Arrêter…<span class="sr-only"> la détection</span></a></div></li>
+<li class="vg-inter"><div class="tete"><h4>Alertes</h4><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Marche</span></div><p>Notifications Signal et e-mail.</p><div class="btns-ligne"><a class="btn ghost" href="/reglages#interrupteurs">Arrêter…<span class="sr-only"> les alertes</span></a></div></li>
+<li class="vg-inter"><div class="tete"><h4>Blocages automatiques</h4><span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>Marche</span></div><p>Les règles en mode Bloquer agissent d’elles-mêmes.</p><div class="btns-ligne"><a class="btn ghost" href="/reglages#interrupteurs">Arrêter…<span class="sr-only"> les blocages automatiques</span></a></div></li>
+</ul>
+</div>
+</section>
+</div>
+</main>
+</div>
+<nav class="tabbar" aria-label="Navigation rapide">
+  <a href="/" aria-current="page"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Vue d’ensemble</a>
+  <a href="/alertes"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>Alertes</a>
+  <a href="/decisions"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.1-7.5 9.5-4.3-1.4-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.6"/></svg>Décisions</a>
+  <a href="#admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</a>
+</nav>
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MV-01 · console de la Vigie · vue d’ensemble (<code>/</code>) · Sébastien, Administrateur · samedi 17 octobre 2026, 14 h 20 (lexique de la console, § 3) · « Chambre noire » au bureau, clair au téléphone (le mode suit le système) · v5, finitions du 18 oct. (jury v3)</p>
+  <h2 id="mq-t">Ce que montre l’écran</h2>
+  <p class="mq-lead">Pendant un incident, l’un des deux photographes ouvre la console : il lit d’abord l’état en une phrase, voit que la critique n’a pas d’intervenant et que les blocages automatiques sont arrêtés, puis ouvre l’alerte. Tout le reste (liste, décisions, santé, chiffres) se lit ensuite, dans cet ordre. Composants : ceux de l’administration (planche MQ-00) et, pour ce qui est propre à la console, <code>_vigie/vigie.css</code> (une seule feuille pour les neuf écrans de la console).</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>Un seul bouton plein : l’étape suivante</b><p>« Ouvrir l’alerte critique #413 », la plus récente des deux critiques sans intervenant (ordre du § 3.14) ; « Nouvelle décision… » en contour. La méta dit l’heure, l’identité confirmée et jusqu’à quand (« valable jusqu’à 14 h 22 ») : au-delà, Zitadel la redemande. Le rafraîchissement par script (30 s) lit une route qui ne prolonge pas la session (<code>ETag</code>, 304) : la session expire toujours après 15 min sans geste.</p><span class="mq-ref">annexe § 5.3, § 5.5 · lexique § 3.14, points 6, 12, 16 · <code>etat</code></span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>L’état en une phrase d’abord</b><p>« 2 alertes critiques et 2 hautes à traiter. » en Jost 300, sans chiffre géant ni cadran. Sur cette page, la phrase remplace le bandeau critique des autres pages.</p><span class="mq-ref">lexique § 4 (MV-01) · B&amp;S 1.1, 2.1 · <code>vigie.css</code> § 4, § 5</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Ce qui commande l’action, et rien d’autre</b><p>Les deux critiques sans intervenant, réunies parce qu’elles parlent du même compte, avec la réponse déjà faite ; l’arrêt des blocages et son alerte #414. La ligne « Aussi » garde le reste à une ligne.</p><span class="mq-ref">résumé du moteur, <code>critique_a_prendre</code> · annexe § 6.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Interrupteurs en tête, avec leur fin</b><p>Trois cartes : le nom, l’état, l’effet, un bouton qui dit ce qu’il fera. Arrêter affaiblit la surveillance : « Arrêter… » mène à la carte des réglages (<code>/reglages#interrupteurs</code>, MV-06) : motif, durée (7 jours au plus), confirmation, identité. Chaque geste envoie son message « Surveillance réduite », même quand #414 est déjà ouverte, hors du plafond des alertes : « [Moyenne] Surveillance réduite : blocages automatiques arrêtés jusqu’à 15 h 10 ».</p><span class="mq-ref">lexique § 3.14, point 1 ; § 3.15, point 1 · vigie/notifications.js (<code>onReduced</code>, <code>reducedText</code>)</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>Alertes : un ordre, partout</b><p>Gravité, puis Ouverte avant Prise en charge, puis la plus récente d’abord : #413 (14 h 05) avant #412 (14 h 02), #409 avant #407 ; le même ordre que le résumé de l’admin. Chaque ligne : gravité, titre (son numéro lu au lecteur d’écran), entité, sources, occurrences, mode et sa conséquence, statut. Une carte par alerte sous 1 100 px.</p><span class="mq-ref">lexique § 3.14, point 6 · vigie/cli.js, <code>alertes</code> (tri à aligner) · lexique § 3.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>La gravité jamais par la couleur seule</b><p>Le mot, une jauge de quatre barres et la couleur, qui double. La légende fait partie de la légende du tableau (<code>caption</code>) : lue avec lui au lecteur d’écran, elle ne garde que les trois gravités d’une alerte (Critique, Haute, Moyenne).</p><span class="mq-ref">WCAG 1.4.1, 1.4.3, 1.3.1 · lexique § 3.14 point 16, § 3.16 point 4</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Décisions en cours : un résumé, un lien</b><p>Ce que le site applique, sur quoi, jusqu’à quand, par qui et pourquoi. « Lever » est sur la page Décisions, avec sa confirmation : on ne lève pas une protection depuis un résumé.</p><span class="mq-ref">annexe § 5.3, § 6.3 · lexique § 3.4 (numéros du § 3.13 : #87 le gel, #88 la fermeture des sessions) · <code>decisions</code>, <code>lever &lt;n°&gt;</code></span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>La santé en une ligne</b><p>Un symbole et un mot par composant ; le seul écart (contrôle des rôles) en ▲, avec son alerte, #413. Signal : dernier message à 14 h 10 (#414).</p><span class="mq-ref">annexe § 5.3 (Santé) · <code>etat</code>, <code>controle</code></span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Trois chiffres sur 7 jours, en dernier</b><p>Sur une ligne, à toutes les largeurs : ils situent, ils ne commandent rien.</p><span class="mq-ref">lexique § 3.5, § 3.14 point 16 · admin-plus.css § 9 (<code>.chiffres</code>)</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>La barre latérale de l’admin, à la marque de la Vigie</b><p>« Vigie », « Sécurité de Nicephos » ; trois groupes par tâche ; le compteur des alertes appelle (6), celui des décisions est neutre (4 en cours : rien à faire). Au téléphone, « Menu » ouvre la barre sans script.</p><span class="mq-ref">lexique § 0, § 3.14 point 16 · admin-plus.css § 1</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>Aucune alerte : une phrase, pas un tableau vide</b><p>« Rien à traiter : aucune alerte ouverte. » ; les interrupteurs et la dernière alerte close le confirment ; aucun bouton plein.</p><span class="mq-ref">B&amp;S 1.3 · lexique § 3.7</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>La Vigie en écart d’intégrité</b><p>Bandeau en tête de chaque page : le fait, ce qui ne peut plus être cru (cette ligne seule), ce qui reste intact (les autres lignes, avant et après : la vérification continue et liste toutes les ruptures), un lien vers la chaîne (MV-07). Filet et aplat léger, jamais un fond rouge plein. La rupture a sa propre alerte critique (DS20), en mode Alerter : envoyée sur Signal.</p><span class="mq-ref">vigie/store.js (« ligne modifiée ou insérée ») · règle <code>chaine_rompue</code>, Alerter (lexique § 3.13) · <code>verifier</code></span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>Une Lectrice voit tout, tronqué, et n’agit pas</b><p>Adresses tronquées par le serveur, « (tronquée) » écrit à côté ; aucun bouton, « Lecture seule » à la place.</p><span class="mq-ref">annexe § 5.4 · lexique § 3.6, § 3.14 point 11</span></li>
+    <li><span class="mq-num" aria-hidden="true">14</span><b>Le retour après une action</b><p>En tête de la page qui revient (<code>role="status"</code>) : ce qui a été fait, par qui, à quelle heure, et ce qui reste (l’alerte #414 ne se ferme pas seule).</p><span class="mq-ref">lexique § 3.14, point 2</span></li>
+  </ol>
+  <h3>À créer</h3>
+  <p>Le serveur de la console (<code>vigie:4200</code>) et ses gabarits Eta : <code>/</code>, <code>/alertes</code>, <code>/decisions</code> (formulaire d’une nouvelle décision à l’ancre <code>#nouvelle</code>), <code>/sante</code>, <code>/reglages</code> (durées d’un arrêt à l’ancre <code>#interrupteurs</code>), <code>POST /interrupteurs/&lt;nom&gt;</code>, <code>POST /theme</code>, <code>POST /deconnexion</code> ; la connexion Zitadel de la console et la ré-authentification ; la troncature des adresses côté serveur pour un Lecteur ; le script facultatif de rafraîchissement ; les chiffres sur 7 jours (le code compte les événements par jour, pas encore par catégorie) ; le motif principal d’une alerte de score (règle qui a déposé le plus de points, d’après les signaux <code>vigie_signal</code>) ; le rapprochement de #412 et #413 par le compte.</p>
+  <h3>Écarts avec le lexique et le code</h3>
+  <p>Finitions (lexique § 3.16) : la légende des gravités dans la légende (<code>caption</code>) du tableau des alertes. Passe 3 (lexique § 3.15) : #414 n’est plus muette tant qu’elle est ouverte, chaque geste qui réduit la surveillance envoie un message ; son titre et son cas (DS24) lus dans le code ; la légende des gravités collée au tableau des alertes. Passe 2 (lexique § 3.14) : l’ordre des alertes (#413 en tête), le bouton plein vers #413, le compteur des décisions neutre, la légende à trois gravités, l’identité en une ligne d’en-tête au lieu de l’encart avant les interrupteurs, le retour après une action (état 14). L’arrêt des blocages par Julien à 14 h 10 ouvre l’alerte « Surveillance réduite » (§ 3.14, point 1) : elle a le numéro #414 (ajouté au lexique, § 3.2) et part sur Signal à 14 h 10, qui devient le dernier message ; d’où 6 alertes ouvertes. Plus haut dans l’historique : lexique § 3.8, § 3.9 et § 3.13.</p>
+  <p><b>Styles à embarquer (D3).</b> La console dépend des classes de l’admin refondue (<code>liste-a</code>, <code>champ-a</code>, <code>note-a</code>, <code>kv-a</code>, <code>plier</code>), qui n’existent pas encore dans <code>public/admin/admin.css</code> : elle embarquera ces styles avec <code>vigie.css</code> (lexique § 3.14, point 18).</p>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>v5 du 18 oct. 2026, finitions (jury v3)</b> (Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils de dr-work/outils copiés et adaptés à la console dans dr-tmp/vigie-mq, repassés tous ensemble par ctrl-vigie.sh et build-vigie.sh : consol-vigie.mjs (console, 13 px) ou consol-admin-c.mjs (admin, 12 px, barre allemande), debord-hauteurs-vigie.mjs ou -c.mjs, controle-annotations-vigie.mjs, formulaires-vigie.mjs, coherence-vigie.py ; tels quels : focus-colle.mjs, p2adm-focus.mjs --sans-inert, radios-cadres.py, insecables.py, html-validate 11) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900, Chambre noire) et sur Pixel 7 (clair), cadres d’état inertes, puis 0 encore les 4 inert retirés · débordement : aucun à 320, 360, 412, 600, 721, 820, 1 024, 1 100, 1 180, 1 280 et 1 440 px, ni à 320 et 412 px tous les &lt;details&gt; ouverts, ni de 320 à 1 440 px au pas de 16 px à 900, 1 024 et 1 100 px de haut (270 mesures) ; aucune ellipse ; toute ligne qui défile montre sa suite · barre latérale (la même sur les huit écrans en session) : rien n’en sort à aucune largeur ; le bas du compte à 900 px dans une fenêtre de 900 ; sans script, « Menu » l’ouvre au téléphone · focus visible sur les 47 éléments focalisables, cadres d’état compris (inert retiré), en sombre et en clair · focus jamais caché par une barre fixe (WCAG 2.4.11), au bureau, sur Pixel 7 et à 320 px, menu ouvert compris · cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher · textes : rien sous 13 px (règle de la console), SVG compris · formulaires : champs nommés, aucun bouton d’envoi hors formulaire, un jeton _csrf dans chaque formulaire POST, cadres d’état compris · html-validate : 0 erreur · annotations : rien à redire à 1 440, 412 et 320 px · insécables : 0 à poser · aucun groupe de radios · cohérence des données avec les neuf autres maquettes et le lexique (numéros, heures, adresses, comptes, liens) : 0 contradiction · essais des jurés (essais-vigie.mjs) : espacement du texte (WCAG 1.4.12) à 320, 412 et 1 440 px, puis à 320 et 412 px tous les &lt;details&gt; ouverts, sans rien de coupé ni débordant, contraste forcé (bordure de chaque bouton, sélection en Highlight), aucun identifiant coupé en fin de ligne à 320, 412 et 1 440 px, &lt;details&gt; ouverts compris, et une commande en bloc coupée seulement à une espace, jamais dans un mot (espacement WCAG compris), aucun lien de même nom vers deux cibles, ni dans l’écran ni dans un cadre d’état (inert retiré), aucune transition en mouvement réduit · poids : 318 ko au bureau comme au téléphone, polices et CSS compris ; aucun script, aucune ressource tierce.</p>
+</aside>
+
+</body>
+</html>
