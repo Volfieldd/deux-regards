@@ -1,0 +1,17 @@
+<% /* En-tête « Site » (MQ-00 § 1, accueil, galerie, séries) : la marque, le menu (une ligne dès 1 280 px, deux de 768 à
+      1 279 px), Rechercher, la langue ; au téléphone, la marque, la langue et Menu. Ni Tirages ni panier : la boutique
+      n'est pas de ce lot. it.courant : l'entrée active du menu. */ %>
+<% const t = it.t, ic = it.v2.ic; %>
+<header class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="<%= it.u('/') %>" aria-label="<%= t.v2.homeOf(it.siteName) %>"><%= it.siteName %></a>
+    <nav class="sh-nav" aria-label="<%= t.nav.label %>">
+      <ul><%~ include('./_liens', it) %></ul>
+    </nav>
+    <div class="sh-outils">
+<% if (it.searchPage) { %>      <a class="sh-outil sh-recherche" href="<%= it.u('/recherche') %>"><%~ ic('loupe') %><span class="sh-outil-t"><%= t.nav.search %></span></a>
+<% } %><%~ include('./_langue', it) %>
+<%~ include('./_menu', { ...it, site: true }) %>
+    </div>
+  </div>
+</header>

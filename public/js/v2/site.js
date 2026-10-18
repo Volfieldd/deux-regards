@@ -1,5 +1,7 @@
 // Site public v2 : amélioration progressive. Tout marche sans ce script (liens, formulaires POST, <details>, pages
-// Partager et Signaler) ; il ajoute le clavier, le glissé, le plein écran, J'aime et Partager sans rechargement.
+// Partager et Signaler) ; il ajoute le clavier, le glissé, le plein écran, J'aime et Partager sans rechargement ; sur
+// l'accueil, la galerie et les séries : le diaporama de l'ouverture (à l'arrêt par défaut), la hauteur de la barre de
+// filtres et le retour à la photo quittée.
 // Repris de js/site.js (v1) pour ce qui ne change pas (J'aime, Partager, retour à la galerie, tuiles de la carte), sans la
 // dissuasion du clic droit (UX-F-34 : une photo s'enregistre, se partage, se zoome comme ailleurs).
 document.documentElement.classList.add('js');
@@ -39,7 +41,25 @@ document.documentElement.classList.add('js');
   const keyOf = u => u.pathname + u.search;
 
   const viewer = document.querySelector('[data-viewer]');
-  if (!viewer) return;
+  // ----- accueil, galerie, série : la photo ouverte est notée, pour y revenir à l'endroit quitté -----
+  if (!viewer) {
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[href^="/photo/"], a[href^="/en/photo/"], a[href^="/de/photo/"]');
+      if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      writeRetour({ gallery: keyOf(location), slug: null, armed: false });
+    });
+    // De retour sur la galerie (Retour, « ← Galerie », Échap) : la dernière photo vue doit être à l'écran.
+    addEventListener('pageshow', () => requestAnimationFrame(() => {
+      const r = readRetour();
+      if (!r || r.gallery !== keyOf(location) || !r.slug) return;
+      writeRetour({ ...r, slug: null, armed: false });
+      const tile = [...document.querySelectorAll('.rangees a.vignette')].find(a => decodeURIComponent(new URL(a.href).pathname).endsWith(`/photo/${r.slug}`));
+      if (!tile) return;
+      const b = tile.getBoundingClientRect();
+      if (b.top < 0 || b.bottom > innerHeight) tile.scrollIntoView({ block: 'center' });
+    }));
+    return;
+  }
 
   const slug = decodeURIComponent(location.pathname.split('/').pop());
   const r = readRetour();
@@ -242,4 +262,12 @@ document.querySelectorAll('[data-zoom-map]').forEach(fig => {
       base.setAttribute('display', 'none');
     });
   }).catch(() => {});
+});
+
+// Barre de filtres de la galerie, collante dès 768 px : la page réserve sa hauteur réelle au défilement (scroll-padding-top,
+// css/v2/public.css § 17), pour qu'un élément atteint au clavier ne passe jamais dessous. Sans ce script : 106 px.
+document.querySelectorAll('[data-filtres]').forEach(barre => {
+  const set = () => document.documentElement.style.setProperty('--filtres-h', `${Math.ceil(barre.getBoundingClientRect().height)}px`);
+  set();
+  addEventListener('resize', set);
 });

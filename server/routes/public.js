@@ -218,7 +218,9 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     return { regard, serie, ordre };
   }
 
-  function renderGallery(reply, filter) {
+  // page : la page v2 qui montre cette vue (views/v2/home.eta) ; la v1 (views/home.eta) l'ignore. « accueil » : / sans
+  // filtre ni ordre ; « serie » : /serie/:slug ; « galerie » : toute autre vue filtrée ou ordonnée.
+  function renderGallery(reply, filter, page = filter.regard || filter.serie || filter.ordre ? 'galerie' : 'accueil') {
     // Le nom du site est réglable dans l'admin : relu à chaque page.
     const siteName = app.siteName();
     const authors = repo.authors(lang);
@@ -240,6 +242,11 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       { slug: undefined, name: t.both, count: all.length },
       ...authors.map(a => ({ ...a, count: all.filter(p => p.author_slug === a.slug).length })),
     ];
+    // v2 : chaque série avec toutes ses photos publiées (page d'une série, galerie sans photo commune à deux filtres).
+    const seriesAll = categories.map(c => {
+      const inCat = all.filter(p => p.category_slug === c.slug);
+      return { ...c, count: inCat.length, cover: inCat[0] };
+    });
     const activeAuthor = authors.find(a => a.slug === filter.regard);
     const activeSerie = categories.find(c => c.slug === filter.serie);
 
@@ -247,7 +254,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const tagline = pick(settings, 'tagline', lang);
     return reply.render('home', {
       ...base, filter, settings, tagline, intro: pick(settings, 'intro', lang), hero, series, regards, photos, total: all.length,
-      categoriesCount: categories.length, activeAuthor, activeSerie,
+      categoriesCount: categories.length, activeAuthor, activeSerie, page, seriesAll,
       pageTitle: title ? `${title} · ${siteName}` : siteName, siteName,
       canonical: galleryUrl({ regard: filter.regard, serie: filter.serie }),   // même contenu, quel que soit l'ordre
       description: tagline,
@@ -264,7 +271,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   app.get('/serie/:slug', async (request, reply) => {
     if (!repo.categories().some(c => c.slug === request.params.slug)) return reply.callNotFound();
     app.stats.hit(request, { page: `serie:${request.params.slug}` });
-    return renderGallery(reply, { serie: request.params.slug, ordre: readFilter(request.query, [], []).ordre });
+    return renderGallery(reply, { serie: request.params.slug, ordre: readFilter(request.query, [], []).ordre }, 'serie');
   });
 
   app.get('/auteur/:slug', async (request, reply) => {

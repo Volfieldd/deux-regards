@@ -1,0 +1,30 @@
+<% /* La galerie (MQ-02) : la barre de filtres, puis le titre de la grille qui dit ce qu'on voit (« Les deux regards ·
+      12 photos », « Les photos de Julien · 6 sur 12 », l'ordre dit une fois), les étiquettes ✕ quand deux filtres se
+      cumulent, les rangées dans l'ordre composé dans l'admin, et une fin de liste qui dit où aller. Partagée par
+      l'accueil (/#galerie) et les vues filtrées (/auteur/<slug>, /?regard=&serie=, ?ordre=recentes).
+      it.gridId : l'id de la grille (« galerie » hors de l'accueil : la visionneuse y ramène, /…#galerie). */ %>
+<% const t = it.t, v = it.v2, ic = v.ic, f = it.filter, A = it.activeAuthor, S = it.activeSerie;
+   const nAuthors = it.regards.length - 1, n = it.photos.length;
+   const title = A && S ? `${S.name}, ${t.by(A.name)}` : A ? t.v2.gridAuthor(A.name) : S ? t.v2.gridSerie(S.name) : t.v2.gridAll(nAuthors);
+   const serieAll = S && it.seriesAll.find(c => c.slug === S.slug);
+   const authorAll = A && it.regards.find(r => r.slug === A.slug);
+   const nSeries = it.seriesAll.filter(c => c.count).length; %>
+<%~ include('./_filtres', it) %>
+  <section class="wrap gal-grille"<% if (it.gridId) { %> id="<%= it.gridId %>"<% } %> aria-labelledby="g-h">
+    <div class="partie-tete partie-tete--serre"><h2 class="titre-2" id="g-h" tabindex="-1"><%= title %></h2><p><%= t.v2.count(n, it.total) %>&nbsp;· <%= f.ordre ? t.v2.orderLineRecent : t.v2.orderLineOurs %></p></div>
+<% if (A && S) { %>
+    <ul class="actifs" aria-label="<%= t.v2.activeFilters %>">
+      <li><a class="actif" href="<%= it.galleryUrl({ serie: S.slug, ordre: f.ordre }) %>"><%= A.name %><span class="sr-only"><%= t.v2.removeFilter %></span><%~ ic('fermer') %></a></li>
+      <li><a class="actif" href="<%= it.galleryUrl({ regard: A.slug, ordre: f.ordre }) %>#filtres"><%= S.name %><span class="sr-only"><%= t.v2.removeFilter %></span><%~ ic('fermer') %></a></li>
+    </ul>
+<% } %>
+<% if (n) { %>
+<%~ include('./_rangees', { ...it, list: it.photos, labelledby: 'g-h', eager: it.page === 'galerie' ? 4 : 0 }) %>
+    <div class="gal-fin"><p><%= t.v2.shown(n) %></p><% if (nSeries) { %><a class="lien" href="<%= it.u('/') %>#series"><%= t.v2.seeSeries(nSeries) %><%~ ic('fleche', { size: 18 }) %></a><% } %><% if (it.mapPage) { %><a class="lien" href="<%= it.u('/carte') %>"><%= t.v2.seeMap %><%~ ic('fleche', { size: 18 }) %></a><% } %></div>
+<% } else { %>
+    <div class="gal-vide">
+      <div class="msg"><%~ ic('info', { size: 18 }) %><p><b><%= A && S ? t.v2.emptyMsg(A.name, S.name) : t.emptyGallery %></b></p></div>
+<% if (A && S) { %>      <div class="actions"><% if (serieAll?.count) { %><a class="lien" href="<%= it.galleryUrl({ serie: S.slug }) %>"><%= t.v2.emptySerie(S.name, serieAll.count) %></a><% } %><% if (authorAll?.count) { %><a class="lien" href="<%= it.galleryUrl({ regard: A.slug }) %>#filtres"><%= t.v2.emptyAuthor(A.name, authorAll.count) %></a><% } %></div>
+<% } %>    </div>
+<% } %>
+  </section>

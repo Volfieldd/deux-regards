@@ -3,11 +3,12 @@
    seul : la feuille de la v1 (css/site.css) et ses thèmes (themes/*.css) ne sont pas chargés sur une page v2.
    Repris de docs/audit-ergonomie-2026-10-16/maquettes/_commun/public.css, sans les annotations ni les règles propres
    aux maquettes (états simulés .is-focus, .is-hover, .is-lent ; cadre d'état du plein écran), et seulement les
-   composants dont les pages v2 ont besoin aujourd'hui (la visionneuse, MQ-04). Les numéros de section sont ceux de la
+   composants dont les pages v2 ont besoin aujourd'hui (la visionneuse, MQ-04 ; l'accueil, la galerie et la page d'une série,
+   MQ-01 à MQ-03). Les numéros de section sont ceux de la
    maquette, pour retrouver chaque règle.
    Ajouts propres au code, en fin de fichier (section 30) : socle (polices, remise à zéro), bandeau d'aperçu, formats
    des photos (classes .fmt-*, sans style en ligne : CSP), visionneuse à côté d'une verticale, plein écran réel,
-   fenêtre « Partager », mini-carte.
+   fenêtre « Partager », mini-carte ; section 31 : la mise en page de l'accueil, de la galerie et d'une série.
    Rien ici n'exige JavaScript : menus et listes de langues sont des <details>, les bascules des formulaires.
    ===================================================================================================== */
 
@@ -361,9 +362,103 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .chapo a:hover { text-decoration-color: var(--ink); }
 .chapo--texte { font-size: var(--t-texte); }
 
-/* ---------- 15. Têtes de page et de partie (extrait : titre de partie) ---------- */
+/* ---------- 13. Messages : succès, erreur, information ----------
+   Un filet de couleur à gauche, une icône, un texte qui commence par ce qui vient de se passer. Pas d'aplat. */
+.msg { display: flex; align-items: flex-start; gap: 12px; padding: 12px var(--esp-2); border-left: 3px solid var(--mute); color: var(--ink); }
+.msg p { margin: 0; line-height: 1.5; }
+.msg p { min-width: 0; overflow-wrap: anywhere; } /* un long mot (adresse e-mail) passe à la ligne, WCAG 1.4.12 */
+.msg .ic { margin-top: 3px; color: var(--mute); }
+.msg b { font-weight: 500; }
+.msg a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.msg--ok { border-left-color: var(--ok); } .msg--ok .ic { color: var(--ok); }
+.msg--erreur { border-left-color: var(--error); } .msg--erreur .ic { color: var(--error); }
+.msg form { margin: 0; }
+/* Message qui reçoit le focus après une action (tabindex="-1") : contour au clavier seulement. */
+.msg[tabindex]:focus { outline: none; }
+.msg[tabindex]:focus-visible { outline: var(--focus-l) solid var(--ink); outline-offset: var(--focus-o); }
+
+/* ---------- 15. Têtes de page et de partie ----------
+   .tete-page : titre de page (h1 .titre-page), chapô, fil d'Ariane éventuel. .partie : une partie de page, 96 px plus bas ;
+   .partie-tete : son titre (h2 .titre-2), une phrase ou un compte, et à droite le lien « Tous les… ». */
+.tete-page { display: grid; gap: var(--esp-2); padding-block: var(--esp-6) var(--esp-5); }
+.tete-page > * { margin: 0; }
+@media (max-width: 767px) { .tete-page { padding-block: var(--esp-5) var(--esp-4); } }
 .titre-2 { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); letter-spacing: 0; text-wrap: balance; }
 .titre-3 { margin: 0; font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.partie { padding-top: var(--esp-12); }
+.partie-tete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--esp-1) var(--esp-4); margin-bottom: var(--esp-3); }
+.partie-tete > div { display: grid; gap: var(--esp-1); }
+.partie-tete h2 { margin: 0; }
+.partie-tete h2:focus { outline: 0; }
+.partie-tete p { margin: 0; color: var(--mute); }
+.partie-tete--serre { justify-content: flex-start; gap: var(--esp-1) var(--esp-3); }
+.partie-tete .lien { white-space: nowrap; }
+
+/* ---------- 16. Listes de liens à filets ----------
+   Un choix par ligne, toute la ligne est le lien : un nom, une précision, une flèche. Choix du regard (accueil, série),
+   tirages d'un billet (.liste-liens--compacte : le nom et la précision sur une ligne). */
+.liste-liens { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.liste-liens a { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px var(--esp-2); min-height: var(--esp-8);
+  padding-block: 10px; border-bottom: 1px solid var(--rule); color: var(--ink); }
+.liste-liens-n { font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.liste-liens-d { grid-column: 1; color: var(--mute); font-size: var(--t-petit); }
+.liste-liens .ic { grid-column: 2; grid-row: 1 / span 2; }
+.liste-liens a:hover .liste-liens-n { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+@media (min-width: 768px) { .liste-liens--deux { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--esp-8); } }
+.liste-liens--compacte a { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 var(--esp-2); min-height: var(--cible); }
+.liste-liens--compacte .liste-liens-n { font: inherit; }
+.liste-liens--compacte a:hover .liste-liens-n { text-underline-offset: 4px; }
+
+/* ---------- 17. Filtres : des liens, une adresse par choix (partageable, sans script) ----------
+   L'entrée active comme dans le menu (500, soulignée de sable) ; chaque choix annonce son nombre : jamais de liste vide.
+   .filtres-barre : la barre collante de la Galerie (un seul filet, en bas). Un groupe = une étiquette + une liste.
+   .filtres-defile : au téléphone, une ligne qui défile ; ses choix ont tous la même largeur, calculée pour que le dernier
+   visible soit toujours coupé à moitié au bord de l'écran (2,5 choix visibles sous 480 px, 3,5 au-delà) : la vignette coupée
+   dit qu'il y a une suite, à toutes les largeurs (passe 4 ; avant, « Rue » commençait juste après le bord d'un Pixel 7).
+   .actifs : filtres cumulés, une étiquette ✕ par filtre, seulement quand il y en a plusieurs. */
+.filtres { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-6); padding-block: var(--esp-1); border-block: 1px solid var(--rule); }
+.filtres-barre { position: sticky; top: 0; z-index: 15; background: var(--paper); border-bottom: 1px solid var(--rule); }
+/* Passe 4 (jury v2) : au téléphone, la barre n'est plus collante (149 px, 18 % d'un Pixel 7, 26 % à 320 × 640, en permanence
+   au-dessus des photos) ; elle reste en tête de la Galerie, et « Filtres » se retrouve en remontant. Collante à partir de
+   768 px, où elle tient sur deux lignes basses : la page réserve sa hauteur au défilement (scroll-padding-top), pour qu'un
+   élément qui reçoit le focus au clavier ne passe jamais dessous (WCAG 2.4.11, RGAA 10.7 ; contrôle outils/focus-colle.mjs).
+   Règle générale : tout élément collant qui reste au-dessus du contenu réserve sa hauteur par scroll-padding-top. */
+@media (max-width: 767px) { .filtres-barre { position: static; } }
+@media (min-width: 768px) { html:has(.filtres-barre) { scroll-padding-top: calc(var(--filtres-h, 106px) + var(--esp-2)); } }
+.filtres-barre .filtres { display: grid; gap: 0; border: 0; }
+.filtres-ligne { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--esp-4); min-width: 0; }
+.filtres-groupe { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-2); min-width: 0; }
+.filtres-groupe > .etiquette { flex: none; min-width: 5.5em; }
+.filtres-groupe ul { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-3); list-style: none; margin: 0; padding: 0; }
+.filtres-groupe li { display: flex; align-items: center; flex: none; }
+.filtre { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); color: var(--ink); font-size: 15px; white-space: nowrap; }
+.filtre:hover .filtre-nom { text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 1px; }
+.filtre[aria-current] .filtre-nom { font-weight: 500; text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
+.filtre-n { color: var(--mute); font-size: var(--t-petit); font-weight: 400; font-variant-numeric: tabular-nums; }
+.filtre--vide { color: var(--mute); cursor: default; }
+.filtre img { display: block; height: 32px; width: auto; flex: none; background: var(--frame); }
+.filtres:has(.filtres-note) { justify-content: space-between; }
+.filtres-note { margin: 0; display: inline-flex; align-items: center; gap: var(--esp-1); color: var(--mute); font-size: var(--t-petit); }
+.filtres-defile { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--gut)); padding-inline: var(--gut); scroll-padding-inline: var(--gut); }
+.filtres-defile::-webkit-scrollbar { display: none; }
+.filtres-defile ul { flex-wrap: nowrap; }
+@media (max-width: 767px) {
+  .filtres-defile { --vus: 2.5; column-gap: 0; }
+  .filtres-defile ul { gap: 0 var(--esp-2); }
+  .filtres-defile li { flex: none; width: calc((100vw - var(--gut) - var(--esp-2) * (var(--vus) - .5)) / var(--vus)); }
+  .filtres-defile .filtre { width: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto;
+    align-content: center; column-gap: var(--esp-1); white-space: normal; line-height: 1.25; padding-block: 4px; }
+  .filtres-defile .filtre img { grid-row: 1 / span 2; }
+  .filtres-defile .filtre-nom, .filtres-defile .filtre-n { grid-column: 2; min-width: 0; overflow-wrap: anywhere; }
+  .filtres:not(.filtres-barre .filtres) { display: grid; gap: 0; }
+  .filtres-groupe > .etiquette { min-width: 0; }
+  .filtres-groupe ul { gap: 0 var(--esp-2); }
+  .filtres-defile > .etiquette { display: none; }
+}
+@media (min-width: 480px) and (max-width: 767px) { .filtres-defile { --vus: 3.5; } }
+.actifs { display: flex; flex-wrap: wrap; gap: var(--esp-1); list-style: none; margin: 0; padding: 0; }
+.actif { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); padding: 0 12px 0 var(--esp-2); border: 1px solid var(--field); color: var(--ink); font-size: 15px; }
+.actif:hover { border-color: var(--ink); }
 /* ---------- 18. Rangées : variantes ----------
    .rangees--etiree : une rangée étirée sur toute la largeur au-delà du téléphone (séries, « À proximité », autres tirages).
    .diptyque--rangee : dans la Galerie, le diptyque prend toute une rangée, à la place de sa première photo.
@@ -528,6 +623,9 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .fmt-366{--r:3.66;--vis-r:3.66} .fmt-368{--r:3.68;--vis-r:3.68} .fmt-370{--r:3.7;--vis-r:3.7} .fmt-372{--r:3.72;--vis-r:3.72} .fmt-374{--r:3.74;--vis-r:3.74} .fmt-376{--r:3.76;--vis-r:3.76}
 .fmt-378{--r:3.78;--vis-r:3.78} .fmt-380{--r:3.8;--vis-r:3.8} .fmt-382{--r:3.82;--vis-r:3.82} .fmt-384{--r:3.84;--vis-r:3.84} .fmt-386{--r:3.86;--vis-r:3.86} .fmt-388{--r:3.88;--vis-r:3.88}
 .fmt-390{--r:3.9;--vis-r:3.9} .fmt-392{--r:3.92;--vis-r:3.92} .fmt-394{--r:3.94;--vis-r:3.94} .fmt-396{--r:3.96;--vis-r:3.96} .fmt-398{--r:3.98;--vis-r:3.98} .fmt-400{--r:4;--vis-r:4}
+/* Formats courants dits exactement (server/v2-vues.js, fmt) : 2:3, 3:4, 4:3, 5:4, 16:9, 9:16, 5:7. */
+.fmt-2x3{--r:0.6667;--vis-r:0.6667} .fmt-3x4{--r:0.75;--vis-r:0.75} .fmt-4x3{--r:1.3333;--vis-r:1.3333} .fmt-5x4{--r:1.25;--vis-r:1.25}
+.fmt-16x9{--r:1.7778;--vis-r:1.7778} .fmt-9x16{--r:0.5625;--vis-r:0.5625} .fmt-5x7{--r:0.7143;--vis-r:0.7143}
 
 /* La photo garde son propre format (attributs width et height) : la classe arrondie ne règle que la place, jamais l'image,
    qui n'est ni déformée ni recadrée. */
@@ -631,5 +729,24 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 
 /* Mots-clés (réglage « Afficher les mots-clés ») : dans les données, chacun mène à la recherche. */
 .vis-mots { display: flex; flex-wrap: wrap; gap: 0 var(--esp-2); margin: 0; padding: 0; list-style: none; }
+
+/* =====================================================================================================
+   31. Accueil, galerie et page d'une série (MQ-01, MQ-02, MQ-03) : la mise en page propre de chaque page, reprise du
+   <style> de sa maquette ; ce que le code ajoute : l'ouverture à une seule liste, les classes de format.
+   ===================================================================================================== */
+
+/* Galerie (MQ-02) */
+.gal-grille { padding-top: var(--esp-5); }
+.gal-grille > .actifs { margin-bottom: var(--esp-3); }
+.gal-fin { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-4); margin: var(--esp-5) 0 0; padding-top: var(--esp-2); border-top: 1px solid var(--rule); color: var(--mute); }
+.gal-fin p { margin: 0; }
+.gal-vide { display: grid; gap: var(--esp-2); max-width: 640px; padding-block: var(--esp-3); }
+.gal-vide .actions { gap: 0 var(--esp-4); }
+.filtre picture { flex: none; }
+/* Le nom lu d'une série vide (« : aucune de Julien », .sr-only en position absolue) reste dans la ligne qui défile : sans
+   cela, il sortait de l'écran et la page défilait à l'horizontale au téléphone. */
+.filtres-groupe li { position: relative; }
+.filtres-defile .filtre picture { grid-row: 1 / span 2; }
+.partie-tete h2[tabindex]:focus { outline: 0; }
 
 @media (prefers-reduced-motion: reduce) { .lang-pick > summary .ic { transition: none; } }

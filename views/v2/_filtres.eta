@@ -1,0 +1,36 @@
+<% /* Barre de filtres de la galerie (MQ-02 repères 2 à 4, public.css § 17) : des liens, une adresse par choix (les
+      paramètres du code : /auteur/<slug>, /serie/<slug>, ?regard=&serie=, ?ordre=recentes), sans script. Le regard avec le
+      compte de chacun ; l'Ordre dans un <details> ; les séries avec leur couverture et leur compte, qui suit le regard
+      (« 0 » : plus un lien). Collante à partir de 768 px. */ %>
+<% const t = it.t, v = it.v2, ic = v.ic, f = it.filter;
+   // L'ancre ramène à la barre ; une série seule ouvre sa page (/serie/<slug>), qui commence par son titre.
+   const to = g => it.galleryUrl(g) + (g.serie && !g.regard ? '' : '#filtres');
+   const covers = new Map(it.seriesAll.map(c => [c.slug, c.cover]));
+   const cur = on => (on ? ' aria-current="page"' : ''); %>
+  <div class="filtres-barre" id="filtres" data-filtres>
+    <div class="wrap filtres">
+      <div class="filtres-ligne">
+        <nav class="filtres-groupe" aria-label="<%= t.v2.regard %>"><span class="etiquette" aria-hidden="true"><%= t.v2.regard %></span>
+          <ul>
+<% it.regards.forEach(r => { %>          <li><a class="filtre" href="<%= to({ regard: r.slug, serie: f.serie, ordre: f.ordre }) %>"<%~ cur(r.slug === f.regard) %>><span class="filtre-nom"><%= r.name %></span> <span class="filtre-n"><%= r.count %></span></a></li>
+<% }) %>          </ul>
+        </nav>
+        <details class="deroulant">
+          <summary><span class="deroulant-t"><%= t.v2.orderT %></span> <span><%= f.ordre ? t.v2.orderRecent : t.v2.orderOurs %></span><%~ ic('bas', { size: 16 }) %></summary>
+          <ul aria-label="<%= t.v2.orderT.replace(/\s*:$/, '') %>">
+            <li><a href="<%= to({ regard: f.regard, serie: f.serie }) %>"<%~ f.ordre ? '' : ' aria-current="true"' %>><%= t.v2.orderOursCap %><% if (!f.ordre) { %><%~ ic('coche', { size: 18 }) %><% } %></a></li>
+            <li><a href="<%= to({ regard: f.regard, serie: f.serie, ordre: 'recentes' }) %>"<%~ f.ordre ? ' aria-current="true"' : '' %>><%= t.v2.orderRecentCap %><% if (f.ordre) { %><%~ ic('coche', { size: 18 }) %><% } %></a></li>
+          </ul>
+        </details>
+      </div>
+      <div class="filtres-ligne">
+        <nav class="filtres-groupe filtres-defile" aria-label="<%= t.nav.series %>"><span class="etiquette" aria-hidden="true"><%= t.nav.series %></span>
+          <ul>
+<% it.series.forEach(c => { const cover = covers.get(c.slug); if (!cover) return; const img = it.picture(cover, { sizes: Math.ceil(32 * v.fmt(cover).r) + 'px', alt: '' }); %>
+<% if (c.count) { %>          <li><a class="filtre" href="<%= to({ regard: f.regard, serie: c.slug, ordre: f.ordre }) %>"<%~ cur(c.slug === f.serie) %>><%~ img %><span class="filtre-nom"><%= c.name %></span> <span class="filtre-n"><%= c.count %></span></a></li>
+<% } else { %>          <li><span class="filtre filtre--vide"><%~ img %><span class="filtre-nom"><%= c.name %></span> <span class="filtre-n">0<span class="sr-only"><%= t.v2.noneOf(it.activeAuthor?.name || '') %></span></span></span></li>
+<% } %><% }) %>          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
