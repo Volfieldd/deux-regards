@@ -122,8 +122,8 @@ test('repli : une page sans gabarit v2 reste en v1 (aperçu comme réglage v2) ;
   const c = await site(t);
   const a = c.as('admin');
   await a.post('/admin/apparence/apercu-v2', { apercu: '1' });
-  // Page d'erreur d'une adresse publique (views/auth-error.eta, sans gabarit v2 : À propos et la page introuvable ont
-  // désormais le leur) : un envoi illisible vers « J'aime ».
+  // Page d'erreur d'une adresse publique (views/auth-error.eta) : la seule page publique restée sans gabarit v2, toutes les
+  // autres (À propos, page introuvable comprises) ont désormais le leur. Ici, un envoi illisible vers « J'aime ».
   const error = await c.app.inject({ method: 'POST', url: `${PHOTO}/aime`, cookies: { session: a.token }, headers: { accept: 'text/html', 'content-type': 'application/json' }, payload: '{illisible' });
   assert.equal(error.statusCode, 400);
   assert.match(error.body, /css\/site\.css/);                                         // la v1
