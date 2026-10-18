@@ -32,6 +32,8 @@ export const OWN = {
   bordure_erreur_worker: E('bas', 'bordure'),
   vigie_bordure_erreur: E('moyen', 'vigie · contrôle'),
   vigie_bordure_silence: E('moyen', 'vigie · contrôle'),
+  // Notifications (phase D)
+  vigie_canal_echec: E('moyen', 'vigie · contrôle'),
   vigie_decision: E('moyen', 'vigie · ligne de commande'),
   vigie_interrupteur: E('moyen', 'vigie · ligne de commande'),
 };

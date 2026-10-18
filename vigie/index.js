@@ -9,6 +9,7 @@ import { createThreats } from './menaces.js';
 import { checkRoles } from './controle-roles.js';
 import { createSwitches } from './interrupteurs.js';
 import { createEdge } from './bordure.js';
+import { createNotifier } from './notifications.js';
 
 // Service de la Vigie : réception des événements du site, décisions signées, lecture de Zitadel, vérification de la
 // chaîne et purge. La console (phase D) et les règles (phase C) viendront s'y ajouter.
@@ -17,7 +18,8 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   const db = openVigieDb(config.databasePath);
   const store = createStore({ db, logKey: config.logKey, retentionDays: config.retentionDays, now });
   const decisions = createDecisions({ store, privateKey: config.decisionsKey, now });
-  const ingest = createIngest({ store, decisions, ingestKey: config.ingestKey, now, logger });
+  // engine est défini plus bas : le résumé n'est demandé qu'une fois le service démarré.
+  const ingest = createIngest({ store, decisions, ingestKey: config.ingestKey, now, logger, summary: () => engine.summary(), consoleUrl: config.notifications?.consoleUrl });
   const log = ingest.log;
   // Moteur d'entités (phase C1) : chaque événement écrit dans la base lui est remis, par une file (la réception répond
   // sans attendre l'analyse).
@@ -25,6 +27,8 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   const threats = createThreats({ store, fetchImpl, now, log, enabled: config.threatLists });
   const engine = createEngine({ store, decisions, switches, threats, now, log });
   store.onAdded(() => engine.enqueue());
+  // Notifications (phase D) : Signal, e-mail en secours ; alertes hautes et critiques hors observation.
+  const notifier = createNotifier({ store, engine, switches, config: config.notifications || {}, fetchImpl, now, log });
   engine.enqueue();                                  // reprise : événements reçus mais pas encore analysés
 
   // Chaîne vérifiée au démarrage puis chaque jour, avant la purge ; rupture : critique. La tête de la chaîne est
@@ -65,7 +69,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   setTimeout(safe('purge', daily), 60e3).unref();
   // Site silencieux et fenêtres de corrélation échues : chaque minute ; détecteurs périodiques : chaque heure ; listes de menaces : chaque jour (première après 2 min) ;
   // contrôle des rôles : à chaque nouvelle sauvegarde du site (vérifié chaque heure).
-  timers.push(setInterval(safe('détecteurs', () => { engine.tick(); engine.enqueue(); }), 60e3));   // enqueue : écrits de la ligne de commande
+  timers.push(setInterval(safe('détecteurs', () => { engine.tick(); engine.enqueue(); notifier.tick().catch(() => {}); }), 60e3));   // enqueue : écrits de la ligne de commande
   const refreshThreats = () => { if (config.threatLists) threats.update().catch(err => log.warn({ err: err.message }, 'Vigie : listes de menaces')); };
   setTimeout(refreshThreats, 120e3).unref();
   timers.push(setInterval(refreshThreats, 24 * 3600e3));
@@ -86,7 +90,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
 
   await ingest.listen({ host: config.host, port: config.ingestPort });
   return {
-    store, decisions, ingest, zitadel, engine, switches, threats, edge,
+    store, decisions, ingest, zitadel, engine, switches, threats, edge, notifier,
     async close() { for (const t of timers) clearInterval(t); zitadel?.stop(); edge?.stop(); await ingest.close(); await engine.drain(); db.close(); },
   };
 }

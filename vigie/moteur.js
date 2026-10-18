@@ -343,6 +343,22 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     } else silent = false;
   }
 
+  // Résumé pour l'admin du site (annexe architecture 4.3) : nombres d'alertes ouvertes par gravité, titre générique de
+  // la plus grave, sa date ; ni adresse, ni compte, ni détail. Les alertes en observation n'y figurent pas (comme pour
+  // les notifications). « critique_a_prendre » : une critique encore « ouverte » (le bandeau de l'admin reste jusqu'à
+  // sa prise en charge dans la console).
+  function summary() {
+    const rows = db.prepare("SELECT id, regle, gravite, statut, premiere FROM alerts WHERE statut != 'close' AND mode != 'observer'").all();
+    const ouvertes = { critique: 0, haut: 0, moyen: 0, bas: 0 };
+    for (const r of rows) if (Object.hasOwn(ouvertes, r.gravite)) ouvertes[r.gravite] += 1;
+    const worst = rows.filter(r => Object.hasOwn(ouvertes, r.gravite)).sort((a, b) => rank(b.gravite) - rank(a.gravite) || b.premiere - a.premiere)[0];
+    return {
+      ouvertes,
+      plus_grave: worst ? { titre: REGISTRY[worst.regle]?.titre || 'Alerte de sécurité', gravite: worst.gravite, depuis: worst.premiere } : null,
+      critique_a_prendre: rows.some(r => r.gravite === 'critique' && r.statut === 'ouverte'),
+    };
+  }
+
   function top(limit = 20) {
     const t = now();
     return db.prepare('SELECT kind, key FROM entities WHERE derniere > ?').all(t - 7 * 864e5).map(r => current(r.kind, r.key, t))
@@ -376,6 +392,6 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     store.own('vigie_interrupteur', { emetteur: par, detail: { seuil: kind, valeur: value } });
   };
 
-  return { process, enqueue, drain, lag, detectors, tick, closeQuiet, current, top, purge, classify, setMode, setThreshold, modeOf, thresholds,
+  return { process, enqueue, drain, lag, detectors, tick, closeQuiet, summary, current, top, purge, classify, setMode, setThreshold, modeOf, thresholds,
     rules: () => Object.entries(REGISTRY).map(([id, r]) => ({ id, ...r, mode: modeOf(id) })), counts: () => ({ regles: rules.length, correlations: correlations.length }) };
 }

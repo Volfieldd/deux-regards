@@ -9,6 +9,7 @@ import { createSwitches } from './interrupteurs.js';
 import { createEngine } from './moteur.js';
 import { createThreats } from './menaces.js';
 import { checkRoles } from './controle-roles.js';
+import { testChannel } from './notifications.js';
 
 // Secours en ligne de commande (annexe architecture, section 6.4), dans le conteneur :
 //   docker exec nicephos-vigie node vigie/cli.js <commande>
@@ -37,7 +38,10 @@ const HELP = `Commandes :
   confiance <ajouter|retirer> <ip>         adresse jamais bloquée automatiquement
   menaces                                  état des listes de menaces (Spamhaus DROP, Feodo, Tor)
   controle [--accepter --motif "…"]       contrôle des rôles sur la dernière sauvegarde du site ;
-                                           --accepter : l'instantané devient la référence`;
+                                           --accepter : l'instantané devient la référence
+  bordure                                  état de la bordure Cloudflare : copie des blocages, battement, en-têtes
+                                           refusés par le site, stabilité des empreintes TLS (essai, phase C3)
+  notifier essai <signal|email>            envoie un message d'essai sur le canal`;
 
 function args(argv) {
   const pos = [], opt = {};
@@ -69,6 +73,11 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
       '# .env de la Vigie (jamais ailleurs) :', ...Object.entries(k.vigie).map(([a, b]) => `${a}=${b}`),
       '', '# .env du site (même VIGIE_INGEST_KEY, et la clé publique des décisions) :', `VIGIE_INGEST_KEY=${k.vigie.VIGIE_INGEST_KEY}`, ...Object.entries(k.site).map(([a, b]) => `${a}=${b}`),
     ].join('\n');
+  }
+  // Essai d'un canal : sans la base (asynchrone : le message part, ou l'erreur du canal s'affiche).
+  if (cmd === 'notifier') {
+    if (rest[0] !== 'essai' || !['signal', 'email'].includes(rest[1])) throw new DecisionError('usage : notifier essai <signal|email>');
+    return testChannel(config.notifications || {}, rest[1]).then(() => `Message d’essai envoyé sur ${rest[1]}.`);
   }
   const db = openVigieDb(config.databasePath);
   try {
@@ -141,6 +150,23 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         store.own('vigie_interrupteur', { emetteur: par, detail: { adresse_confiance: rest[0], ip } });
         return `Adresses de confiance : ${[...list].join(', ') || 'aucune'}.`;
       }
+      case 'bordure': {
+        // Grille de lecture de l'essai sur l'instance de test (docs/wiki/Vigie.md, bordure).
+        const iso = t => (t ? `${new Date(t).toISOString().slice(0, 16).replace('T', ' ')} UTC` : 'jamais');
+        const kv = store.setting.get('bordure_kv'), beat = store.setting.get('bordure_dernier_battement');
+        const day = now() - 864e5, week = now() - 7 * 864e5;
+        const refused = db.prepare("SELECT json_extract(detail, '$.raison') r, COUNT(*) n FROM events WHERE type = 'edge_signature_invalid' AND recu_a > ? GROUP BY r").all(day);
+        const withEdge = db.prepare("SELECT COUNT(DISTINCT reference) FROM events WHERE type = 'session_created' AND recu_a > ? AND json_extract(detail, '$.bordure.tls') IS NOT NULL").pluck().get(week);
+        const tlsChanged = db.prepare("SELECT COUNT(DISTINCT session) FROM events WHERE type = 'session_context_change' AND recu_a > ? AND json_extract(detail, '$.tls_change') = 1").pluck().get(week);
+        const seen = db.prepare("SELECT type, COUNT(*) n FROM events WHERE composant = 'bordure' AND recu_a > ? GROUP BY type").all(day);
+        return [
+          `Blocages copiés dans KV : ${kv ? `version ${kv.version}, le ${iso(kv.at)}` : 'jamais (VIGIE_CF_* non réglées ?)'}`,
+          `Dernier battement du Worker : ${beat ? `${iso(beat.at)} (${beat.etat || '—'})` : 'jamais'} ; dernière requête vue : ${iso(store.setting.get('bordure_derniere_donnee'))} ; minute lue jusqu'à : ${iso(store.setting.get('bordure_curseur'))}`,
+          `Constats de la bordure (24 h) : ${seen.map(r => `${r.type} ${r.n}`).join(', ') || 'aucun'}`,
+          `En-têtes refusés par le site (24 h) : ${refused.map(r => `${r.r} ${r.n}`).join(', ') || 'aucun'}${refused.some(r => r.r === 'adresse différente') ? ' → vérifier TRUST_PROXY (adresse vue par le site)' : ''}`,
+          `Empreinte TLS (7 jours) : ${withEdge} session(s) avec la bordure, ${tlsChanged} dont l'empreinte a changé${withEdge ? ` (${Math.round((100 * tlsChanged) / withEdge)} %)` : ''}`,
+        ].join('\n');
+      }
       case 'menaces': {
         const st = createThreats({ store, now }).state();
         return st ? `Listes mises à jour le ${new Date(st.at).toISOString().slice(0, 16).replace('T', ' ')} UTC : ${Object.entries(st).filter(([k]) => k !== 'at').map(([k, v]) => `${k} ${v}`).join(', ')}` : 'Listes jamais téléchargées.';
@@ -167,6 +193,6 @@ if (isMain) {
   try {
     const argv = process.argv.slice(2);
     // Sortie sans séquences de terminal : clés, adresses et émetteurs viennent d'événements reçus.
-    console.log(run(argv, { config: argv[0] === 'cles' || !argv[0] ? null : loadVigieConfig() }).replace(/[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/g, '?'));
+    console.log((await run(argv, { config: !argv[0] || ['cles', 'aide', 'help'].includes(argv[0]) ? null : loadVigieConfig() })).replace(/[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/g, '?'));
   } catch (err) { console.error(err.message); process.exitCode = 1; }
 }

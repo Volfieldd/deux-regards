@@ -157,12 +157,42 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     } finally { clearTimeout(t); }
   }
 
+  // Résumé des alertes pour l'admin (phase D) : signé par la Vigie (usage « resume »), frais de 5 minutes ; ni adresse
+  // ni compte. null tant qu'il n'est pas lu, ou s'il est refusé.
+  let summary = null;
+  const COUNT = /^\d{1,6}$/;
+  function acceptSummary(signed) {
+    if (!signed || typeof signed.payload !== 'string' || typeof signed.signature !== 'string') throw new Error('résumé sans signature');
+    if (!crypto.verify(null, Buffer.from(signed.payload), pubkey, Buffer.from(signed.signature, 'base64'))) throw new Error('signature du résumé fausse');
+    const p = JSON.parse(signed.payload);
+    if (p.usage !== 'resume') throw new Error('pas un résumé');
+    if (!Number.isFinite(p.emis_a) || Math.abs(now() - p.emis_a) > 5 * 60e3) throw new Error('résumé périmé');
+    const o = p.ouvertes || {};
+    const n = k => (COUNT.test(String(o[k])) ? Number(o[k]) : 0);
+    const worst = p.plus_grave && typeof p.plus_grave.titre === 'string' ? { titre: p.plus_grave.titre.replace(/[\u0000-\u001f]/g, ' ').slice(0, 120), gravite: ['critique', 'haut', 'moyen', 'bas'].includes(p.plus_grave.gravite) ? p.plus_grave.gravite : 'moyen', depuis: Number(p.plus_grave.depuis) || null } : null;
+    summary = { recu_a: now(), ouvertes: { critique: n('critique'), haut: n('haut'), moyen: n('moyen'), bas: n('bas') }, plus_grave: worst,
+      critique_a_prendre: p.critique_a_prendre === true, console: /^https:\/\/[^\s"<>]+$/.test(p.console || '') ? p.console : null };
+    return summary;
+  }
+  async function pollSummary() {
+    const p = '/v1/resume';
+    const res = await fetchImpl(`${url}${p}`, { headers: signedGet(p), redirect: 'manual', signal: AbortSignal.timeout(10000) });
+    if (res.status !== 200) { await res.body?.cancel?.().catch(() => {}); throw new Error(`Vigie : réponse ${res.status}`); }
+    return acceptSummary(JSON.parse(await readLimited(res, 64 * 1024)));
+  }
+  let summaryTimer = null;
+
   const t = () => now();
   const live = (map, k) => { const f = map?.get(k); return f && (typeof f === 'number' ? f : f.fin) > t() ? map.get(k) : null; };
   const on = () => apply && state;
   return {
     poll,
     accept,
+    acceptSummary,
+    pollSummary,
+    // Résumé lu il y a moins de 5 minutes, sinon null (Vigie injoignable : l'admin le dit au lieu d'afficher un vieux
+    // « aucune alerte »).
+    get summary() { return summary && now() - summary.recu_a < 5 * 60e3 ? summary : null; },
     get state() { return state; },
     // Adresse bloquée pour ce chemin ? Renvoie la portée, ou null. pathname : gabarit de la route ou chemin décodé
     // (jamais l'adresse brute, que le routeur décode : « /%61dmin » est « /admin »).
@@ -210,7 +240,11 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
         if (running) { timer = setTimeout(loop, wait === 1000 ? 0 : wait); timer.unref?.(); }
       };
       timer = setTimeout(loop, 0); timer.unref?.();
+      // Résumé : chaque minute.
+      const sum = async () => { try { await pollSummary(); } catch (err) { if (running) log?.warn({ err: err.message }, 'Vigie : résumé non lu'); } };
+      sum();
+      summaryTimer = setInterval(sum, 60e3); summaryTimer.unref?.();
     },
-    stop() { running = false; clearTimeout(timer); controller?.abort(); },
+    stop() { running = false; clearTimeout(timer); clearInterval(summaryTimer); controller?.abort(); },
   };
 }
