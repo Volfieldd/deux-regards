@@ -98,6 +98,25 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
 - **Confidentialité** (`/confidentialite`, en trois langues, lien en pied de page) : qui est responsable, ce que le site collecte et pourquoi, combien de temps, qui le reçoit, et comment exercer ses droits (voir [Droits & confidentialité](reglages#droits-et-confidentialité)).
 - **Page introuvable :** pour une adresse inconnue ou une photo dépubliée.
 
+## Autres pages en v2
+
+Quand la **v2** est appliquée, les autres pages du site prennent la même présentation (en-tête, pied de page complet, mêmes boutons) :
+
+- **Confidentialité, Mentions légales :** le même texte qu'en v1, avec un sommaire **Sur cette page** : un clic mène à la partie choisie. Au bureau, le sommaire reste à gauche du texte ; au téléphone, il ouvre la page et chaque partie se termine par **↑ Sommaire**. Lignes courtes, faciles à lire ; à l'impression, noir sur blanc, sans menu.
+- **Droits d'utilisation, À propos :** le même texte, en lignes courtes ; À propos montre vos photographes, leur biographie et **Voir les photos de…** (sans le logo en tête : la marque est dans l'en-tête).
+- **Rechercher :** le même champ, avec son libellé et son aide au-dessus ; les photos trouvées en rangées. Sans résultat (ou avant de chercher), les séries à parcourir.
+- **Carte :** elle s'ouvre **cadrée sur vos lieux** (avec ou sans JavaScript) ; **Monde** montre le monde entier. Le nom de chaque ville s'écrit à côté de sa vignette quand il a la place. Chaque lieu de la liste a son **↑ Carte**.
+
+  | Geste | Effet |
+  |---|---|
+  | **+**, **−**, **Monde** | zoom avant, arrière, monde entier |
+  | les quatre boutons fléchés, ou **← → ↑ ↓** au clavier (sur une vignette ou un bouton de la carte) | déplacer la carte |
+  | **+** et **−** au clavier | zoom avant, arrière |
+
+  Une vignette sortie du cadre n'est plus atteinte au clavier.
+- **Voyages :** chaque voyage avec sa couverture à son format ; la page d'un voyage montre la photo entière à côté du titre (plus de titre posé sur la photo), le sommaire des jours, la carte de l'itinéraire (sans défilement de côté au téléphone : les étapes y sont numérotées, les encarts n'apparaissent qu'au bureau), puis les jours en rangées.
+- **Page introuvable :** un champ pour chercher une photo, la galerie, les séries, À propos ; le sélecteur de langue mène à l'accueil de chaque langue.
+
 ## Toujours
 
 - **Sans JavaScript, au clavier, avec un lecteur d'écran :** le site fonctionne.

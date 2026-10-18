@@ -98,6 +98,25 @@ The next photo depends on the active filter: in “Street, by Julien”, you sta
 - **Privacy** (`/confidentialite`, in three languages, linked in the footer): who is responsible, what the site collects and why, for how long, who receives it, and how to exercise your rights (see [Rights & privacy](reglages#droits-et-confidentialité)).
 - **Page not found:** for an unknown address or an unpublished photo.
 
+## Other pages in v2
+
+When **v2** is applied, the other pages of the site take the same design (header, full footer, same buttons):
+
+- **Privacy, Legal notice:** the same text as in v1, with an **On this page** table of contents: a click leads to the chosen part. On a computer, the table of contents stays to the left of the text; on a phone, it opens the page and each part ends with **↑ Contents**. Short lines, easy to read; printed black on white, without the menu.
+- **Terms of use, About:** the same text, in short lines; About shows your photographers, their biography and **See the photos by…** (without the logo at the top: the brand is in the header).
+- **Search:** the same field, with its label and its help above; the photos found in rows. With no result (or before searching), the series to browse.
+- **Map:** it opens **framed on your places** (with or without JavaScript); **World** shows the whole world. The name of each town is written next to its thumbnail when there is room. Each place in the list has its **↑ Map**.
+
+  | Gesture | Effect |
+  |---|---|
+  | **+**, **−**, **World** | zoom in, out, whole world |
+  | the four arrow buttons, or **← → ↑ ↓** on the keyboard (on a thumbnail or a button of the map) | move the map |
+  | **+** and **−** on the keyboard | zoom in, out |
+
+  A thumbnail outside the frame can no longer be reached with the keyboard.
+- **Trips:** each trip with its cover in its own format; a trip's page shows the whole photo next to the title (no more title over the photo), the list of days, the map of the route (no sideways scrolling on a phone: the stops are numbered there, the labels only appear on a computer), then the days in rows.
+- **Page not found:** a field to search for a photo, the gallery, the series, About; the language selector leads to the home page of each language.
+
 ## Always
 
 - **Without JavaScript, with the keyboard, with a screen reader:** the site works.
