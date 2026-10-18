@@ -53,6 +53,20 @@ Deux causes, toutes deux corrigées :
 
 Taille sur disque : environ **500 octets par événement**, index compris.
 
+### Rafale sur une adresse (18 octobre 2026, audit D3-D12)
+
+Le mélange ci-dessus n'ouvre aucune alerte : il ne mesurait pas le coût des déclencheurs de la migration 009, qui tiennent la table `alert_flux` de la console à chaque événement rattaché à une alerte. Le banc ajoute donc une rafale (`--rafale N`, 5 000 par défaut, 0 pour s'en passer) :
+- le site et Zitadel voient la même adresse (quorum) : une alerte de score s'ouvre ;
+- puis N pages introuvables de cette adresse, en lots de 20, chacune rattachée à l'alerte ;
+- enfin, le déclencheur seul : les mêmes liens écrits pour une autre alerte, avec puis sans lui (trois fois, médiane).
+
+| Historique | Événements de la rafale | Rattachés à l'alerte | ms par événement de la rafale | Calcul par événement | Déclencheur, par lien | Lien sans déclencheur | Part du déclencheur |
+|---|---|---|---|---|---|---|---|
+| 100 000 | 5 000 | 5 007 | 0,34 | 344 µs | 6 µs | 4,5 µs | 1,8 % |
+| 1 000 000 | 5 000 | 5 007 | 1,50 | 641 µs | 7 µs | 11,4 µs | 1,1 % |
+
+Le déclencheur coûte quelques microsecondes par lien, moins de 2 % du calcul d'un événement : une adresse qui balaie le site et rattache des dizaines de milliers d'événements à son alerte ne ralentit pas le moteur (la relecture de mesure de la revue donnait +13,5 µs par lien, au plus +2 %). À un million de lignes, le temps écoulé par événement (1,5 ms) vient surtout de l'écriture sur disque, pas du calcul.
+
 ## 3. Abaques
 
 Durée de conservation par défaut : 183 jours (`VIGIE_RETENTION_DAYS`). Les durées de vérification sont extrapolées à environ 13,5 s par million de lignes (mesuré : 40,7 s pour 3 millions).

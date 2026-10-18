@@ -17,21 +17,18 @@ import { fileURLToPath } from 'node:url';
 import { loadRules } from '../../sigma.js';
 import { LISTS } from '../../menaces.js';
 import { THRESHOLDS } from '../../poids.js';
+import { DETECTEURS } from '../../detecteurs.js';
 import { can, LABELS } from '../droits.js';
 import { FRESH } from '../sessions.js';
-import { FINE, adresseDetail, dateHeure, gravite, guillemets, heure, jusqua, nombre, quand } from '../format.js';
+import { FINE, NBSP, adresseDetail, dateHeure, gravite, guillemets, heure, jusqua, masquer, quand } from '../format.js';
+import { ENTITES, MODES, lire, pluriel, titreDe, typo, virgule } from '../lexique.js';
+import { sansContacts } from '../../util.js';
 import { INTERRUPTEURS, cartesInterrupteurs, surveillanceReduite } from '../vue-ensemble.js';
 
-const NBSP = ' ';
 const D = `${FINE}: `;
-const typo = s => String(s ?? '').replace(/'/g, '’').replace(/ ([:;!?])/g, `${FINE}$1`);
-const pluriel = (n, un, plusieurs = `${un}s`) => (n > 1 ? plusieurs : un);
-const lire = s => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
 const norm = s => String(s ?? '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
-const virgule = x => nombre(x).replace('.', ',');
 const sansConsole = s => String(s).replace(/^console · /, '');
 
-export const MODES = { arret: 'Arrêt', observer: 'Observer', alerter: 'Alerter', bloquer: 'Bloquer' };
 const ORDRE_MODES = ['arret', 'observer', 'alerter', 'bloquer'];
 export const GRAVITES_FILTRE = { critique: 'Critique', haut: 'Haute', moyen: 'Moyenne', bas: 'Basse' };
 export const SEUILS = { ip: 'Adresse', reseau: 'Réseau', compte: 'Compte', session: 'Session', appareil: 'Appareil' };
@@ -40,33 +37,7 @@ export const DUREES_REGLE = [['1h', `1${NBSP}h`], ['4h', `4${NBSP}h`], ['24h', `
 // Durées d'un interrupteur : les autres en contour, la durée proposée (pleine) en dernier.
 export const DUREES_INTER = { autres: [['1h', `1${NBSP}h`], ['24h', `24${NBSP}h`]], proposee: ['4h', `4${NBSP}h`] };
 
-// Titres lisibles des détecteurs (lexique § 3.11) : le moteur écrit le nom brut (« exploration lente »).
-const TITRES_DET = {
-  'detecteur.premiere_apparition': 'Connexion d’un compte depuis un pays ou un appareil jamais vus',
-  'detecteur.heure_inhabituelle': 'Activité d’un compte à une heure jamais utilisée',
-  'detecteur.vitesse': 'Lectures d’un compte bien au-delà de son habitude',
-  'detecteur.voyage_impossible': 'Voyage impossible entre deux connexions d’un compte',
-  'detecteur.pivot_identifiants': 'Connexion réussie après des échecs répétés',
-  'detecteur.role_incoherent': 'Export réservé à l’administrateur fait par un autre compte',
-  'detecteur.exploration_lente': 'Exploration lente depuis un réseau (pièges et erreurs sur 12 heures)',
-  'detecteur.chaine_attaque': `Chaîne d’attaque${FINE}: repérage, tentative puis accès sur une même entité`,
-  'detecteur.silence': `Site silencieux${FINE}: aucun battement depuis 3 minutes`,
-  'detecteur.menaces': 'Adresse sur une liste de menaces (Spamhaus DROP, Feodo, Tor)',
-};
-// Ce que les détecteurs déposent (vigie/detecteurs.js, vigie/menaces.js) : engine.rules() ne le dit pas.
-const DETECTEURS = {
-  premiere_apparition: { gravite: 'bas', points: 1.5, entite: 'compte' },
-  heure_inhabituelle: { gravite: 'bas', points: 1, entite: 'compte' },
-  vitesse: { gravite: 'moyen', points: 3, entite: 'compte' },
-  voyage_impossible: { gravite: 'haut', points: 4, entite: 'compte' },
-  pivot_identifiants: { gravite: 'haut', points: 4, entite: 'compte' },
-  role_incoherent: { gravite: 'critique', sourceUnique: true, entite: 'compte' },
-  exploration_lente: { gravite: 'moyen', points: 4, entite: 'reseau' },
-  chaine_attaque: { gravite: 'critique', sourceUnique: true, entite: 'entite' },
-  silence: { gravite: 'haut', sourceUnique: true, entite: 'site' },
-  menaces: { gravite: null, points: null, entite: 'ip', listes: true },
-};
-const ENT = { ip: 'adresse', reseau: 'réseau', compte: 'compte', session: 'session', appareil: 'appareil', site: 'site', vigie: 'la Vigie', entite: 'l’entité visée' };
+const ENT = { ...ENTITES, entite: 'l’entité visée' };
 const REP = { geler_et_revoquer: `en Bloquer${FINE}: geler 24${NBSP}h, fermer les sessions`, revoquer_compte: `en Bloquer${FINE}: fermer les sessions du compte`,
   bloquer_ip: `en Bloquer${FINE}: bloquer l’adresse 24${NBSP}h` };
 const CAS_CLAIR = { quorum: 'score', MV11: 'intégrité de la Vigie' };
@@ -89,6 +60,8 @@ function metaSigma() {
   return metaLue;
 }
 
+// Ce que dépose une règle : un détecteur, son barème (vigie/detecteurs.js, DETECTEURS, celui du moteur ; engine.rules() ne
+// le dit pas) ; une règle Sigma, son fichier.
 function metaDe(r) {
   if (r.id === 'entite.score') return { classe: 'score', gravite: 'moyen' };
   const det = r.id.startsWith('detecteur.') ? DETECTEURS[r.id.slice(10)] : null;
@@ -144,9 +117,9 @@ export function identiteDe(authA, t) {
 
 // Indice court d'un numéro : ses deux derniers chiffres (« …78 ») ; rien d'autre du numéro, de l'adresse ou du groupe.
 const finNumero = n => { const m = /(\d{2})$/.exec(String(n || '')); return m ? `…${m[1]}` : null; };
-// Le texte d'une erreur d'envoi, sans adresse e-mail, numéro ni identifiant de groupe.
-export const masquer = s => typo(String(s || '').slice(0, 200))
-  .replace(/[^\s<>@"'«»]+@[^\s<>@"'«»]+/g, '•••@•••').replace(/\+?\d[\d ]{6,}\d/g, '•••').replace(/group\.[A-Za-z0-9+/=_-]+/g, 'group.•••');
+// Le texte d'une erreur d'envoi, sans adresse e-mail, numéro ni identifiant de groupe (vigie/util.js, sansContacts : le même
+// masque qu'à l'écriture de l'événement, repris ici pour les anciens), adresses IP tronquées selon le rôle.
+export const erreurEnvoi = (s, role) => typo(masquer(sansContacts(String(s || '').slice(0, 300)), role).slice(0, 200));
 
 const requetesCache = new WeakMap();
 function requetes(db) {
@@ -169,7 +142,7 @@ export function vueReglages({ db, store, engine, switches, notifications, now = 
   // ---------- Interrupteurs ----------
   const etat = switches?.state?.() || {};
   const ouvrir = typeof query.arreter === 'string' ? query.arreter : '';
-  const interrupteurs = cartesInterrupteurs({ etat, reduite: surveillanceReduite(db), t }).map(c => {
+  const interrupteurs = cartesInterrupteurs({ etat, reduite: surveillanceReduite(db), t, role }).map(c => {
     const refus = refusDe(message, `inter-${c.nom}`, ['motif', 'duree_libre']) || refusDe(message, `inter-${c.nom}-marche`, []);
     return { ...c, ouvert: c.marche && (ouvrir === c.nom || Boolean(refus)), refus,
       motif: refus?.valeurs.motif || '', dureeLibre: refus?.valeurs.duree_libre || '' };
@@ -190,8 +163,10 @@ export function vueReglages({ db, store, engine, switches, notifications, now = 
   const confiance = (store.setting.get('adresses_confiance', []) || []).filter(x => x && typeof x === 'object' && typeof x.ip === 'string' && x.jusqua > t)
     .sort((a, b) => a.jusqua - b.jusqua).map(x => {
       const a = adresseDetail(x.ip, role);
-      return { ip: x.ip, texte: a.texte, v6: a.v6, tronquee: a.tronquee, jusqua: dateHeure(x.jusqua), par: x.par ? sansConsole(x.par) : null,
-        motif: x.motif ? typo(String(x.motif).slice(0, 200)) : null, refus: refusDe(message, `confiance-retirer:${x.ip}`, []) };
+      // L'adresse entière ne part vers la page que pour qui peut la retirer (champ caché du formulaire) ; motif et auteur
+      // masqués selon le rôle (audit D3-C2).
+      return { ip: peut.confiance ? x.ip : null, texte: a.texte, v6: a.v6, tronquee: a.tronquee, jusqua: dateHeure(x.jusqua), par: x.par ? masquer(sansConsole(x.par), role) : null,
+        motif: x.motif ? typo(masquer(String(x.motif).slice(0, 200), role)) : null, refus: refusDe(message, `confiance-retirer:${x.ip}`, []) };
     });
   const refusAjout = refusDe(message, 'confiance-ajouter', ['ip', 'motif']);
   const ajout = { ouvert: Boolean(refusAjout), refus: refusAjout, ip: refusAjout?.valeurs.ip || '', motif: refusAjout?.valeurs.motif || '' };
@@ -205,8 +180,8 @@ export function vueReglages({ db, store, engine, switches, notifications, now = 
     const essai = essais.find(r => r.detail.essai_canal === k);
     const echec = echecs.find(r => r.detail.canal === k);
     if (regle) {
-      kv.push({ dt: 'Dernier essai', t: essai ? quand(essai.recu_a, t) : 'aucun', sec: essai?.emetteur ? `par ${sansConsole(essai.emetteur)}` : null });
-      kv.push({ dt: 'Dernier échec', t: echec ? quand(echec.recu_a, t) : 'aucun noté', sec: echec ? masquer(echec.detail.erreur) : null });
+      kv.push({ dt: 'Dernier essai', t: essai ? quand(essai.recu_a, t) : 'aucun', sec: essai?.emetteur ? `par ${masquer(sansConsole(essai.emetteur), role)}` : null });
+      kv.push({ dt: 'Dernier échec', t: echec ? quand(echec.recu_a, t) : 'aucun noté', sec: echec ? erreurEnvoi(echec.detail.erreur, role) : null });
     }
     kv.push({ dt: 'Réglé dans', env });
     return { k, titre, regle, etat: regle ? { k: 'abouti', mot: 'Réglé' } : { k: 'neutre', mot: 'Non réglé' }, kv, texte, refus: refusDe(message, `canal-${k}`, []) };
@@ -226,7 +201,8 @@ export function vueReglages({ db, store, engine, switches, notifications, now = 
   // ---------- Règles ----------
   const f = lireFiltres(query);
   const modesRegles = store.setting.get('regles_modes', {}) || {};
-  const toutes = engine.rules().map(r => ({ ...r, titre: TITRES_DET[r.id] || typo(r.titre), meta: metaDe(r) }));
+  const titres = new Map(engine.rules().map(r => [r.id, r.titre]));
+  const toutes = engine.rules().map(r => ({ ...r, titre: titreDe(r.id, titres), meta: metaDe(r) }));
   const nb = Object.fromEntries(ORDRE_MODES.map(k => [k, toutes.filter(r => r.mode === k).length]));
   const cherche = norm(f.q);
   const garde = r => (!f.gravite || r.meta.gravite === f.gravite) && (!f.mode || r.mode === f.mode)
@@ -256,7 +232,7 @@ export function vueReglages({ db, store, engine, switches, notifications, now = 
     const reglage = modesRegles[r.id];
     let enArret = null;
     if (r.mode === 'arret' && reglage && typeof reglage === 'object' && reglage.jusqua) {
-      enArret = `En Arrêt ${jusqua(reglage.jusqua, t)}${reglage.par ? `, par ${sansConsole(reglage.par)}` : ''}${reglage.motif ? `${D}${guillemets(typo(String(reglage.motif).slice(0, 200)))}` : ''}${FINE}; puis ${MODES[reglage.avant] || 'son mode de départ'}.`;
+      enArret = `En Arrêt ${jusqua(reglage.jusqua, t)}${reglage.par ? `, par ${masquer(sansConsole(reglage.par), role)}` : ''}${reglage.motif ? `${D}${guillemets(typo(masquer(String(reglage.motif).slice(0, 200), role)))}` : ''}${FINE}; puis ${MODES[reglage.avant] || 'son mode de départ'}.`;
     }
     const avert = m.classe === 'score' ? `Arrêt${D}plus aucune alerte de score${FINE}; les règles à points comptent, mais rien ne s’ouvre.`
       : m.classe === 'points' ? `Arrêt${D}plus de points${FINE}; qui ne fait que cela n’atteint plus le seuil.` : `Arrêt${D}plus aucune alerte, même pour une preuve sûre.`;
@@ -298,5 +274,4 @@ export function register(app, ctx) {
     const reglages = vueReglages({ db, store, engine, switches, notifications: ctx.notifications, now, role: req.moi.role, query: req.query || {}, message, authA: req.moi.authA });
     return view(reply, req, 'reglages', { page: 'reglages', titre: 'Règles et réglages · Vigie', reglages, message });
   });
-  return ['/reglages'];
 }

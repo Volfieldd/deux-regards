@@ -1,5 +1,4 @@
-// Écrans de la console, un module par groupe. Chaque module exporte register(app, ctx) et renvoie la liste des adresses
-// de premier niveau qu'il sert (« /alertes »…), pour que la page d'attente ne s'y ajoute pas.
+// Écrans de la console, un module par groupe. Chaque module exporte register(app, ctx), qui déclare ses routes.
 import * as alertes from './alertes.js';
 import * as evenements from './evenements.js';
 import * as santeFlux from './sante-flux.js';

@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { readLimited } from './zitadel.js';
+import { sansContacts } from './util.js';
 
 // Notifications de la Vigie (phase D, annexe architecture sections 4.3 et 8, décision D10) : Signal (passerelle
 // signal-cli-rest-api sur un réseau interne), l'e-mail en secours. Un message court, SANS adresse, sans compte, sans
@@ -40,6 +41,10 @@ export function reducedText(d, { titreOf = id => id, t = Date.now() } = {}) {
   if (kind === 'seuil') return `seuil ${SEUIL_TEXT[id] || id} relevé de ${d.avant} à ${d.valeur} points`;
   if (kind === 'confiance') return `adresse de confiance ajoutée${until}`;
   if (kind === 'controle_roles') return 'référence du contrôle des rôles acceptée';
+  if (kind === 'decision' || kind === 'decisions') {
+    const k = Array.isArray(d.kinds) ? d.kinds : [];
+    return k.includes('verrouiller') ? 'verrouillage de l’admin levé' : `${d.nombre > 1 ? `${d.nombre} décisions levées` : 'décision levée'} avant sa fin`;
+  }
   return 'surveillance réduite';
 }
 
@@ -74,10 +79,12 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
 
   const failed = (canal, err) => {
     const hour = Math.floor(now() / 3600e3);
-    log?.warn({ err: err.message, canal }, 'Vigie : notification non envoyée');
+    // Ni adresse e-mail, ni numéro, ni groupe Signal dans le journal ni dans l'événement, lu par tous sur /sante (D3-C5).
+    const erreur = sansContacts(String(err?.message ?? err).slice(0, 300)).slice(0, 200);
+    log?.warn({ err: erreur, canal }, 'Vigie : notification non envoyée');
     if (failedTold.get(canal) === hour) return;
     failedTold.set(canal, hour);
-    store.own('vigie_canal_echec', { emetteur: 'vigie/notifications.js', detail: { canal, erreur: String(err.message).slice(0, 200) } });
+    store.own('vigie_canal_echec', { emetteur: 'vigie/notifications.js', detail: { canal, erreur } });
   };
   // Un canal, dans son budget horaire ; renvoie vrai si le message est parti.
   const reducedBudget = new Map();          // canal → { hour, sent, lost }
@@ -145,7 +152,7 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
     const rule = engine.rules().find(r => r.id === a.regle);
     let sources = [];
     try { sources = JSON.parse(a.sources); } catch { /* illisible */ }
-    const decisions = store.db.prepare('SELECT kind, cree_a, fin FROM decisions WHERE motif = ? AND auto = 1 ORDER BY id').all(`alerte #${a.id}`);
+    const decisions = store.db.prepare('SELECT kind, cree_a, fin FROM decisions WHERE alerte_id = ? AND auto = 1 ORDER BY id').all(a.id);
     return send(messageOf({ id: a.id, gravite: detail.gravite, titre: rule?.titre || a.regle, sources, t, console: consoleUrl, action: detail.action, reponse: responseOf(decisions) }));
   }
 

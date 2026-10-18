@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import net from 'node:net';
+import { fileURLToPath } from 'node:url';
 import Fastify, { LogController } from 'fastify';
 import cookie from '@fastify/cookie';
 import formbody from '@fastify/formbody';
@@ -24,6 +25,8 @@ import { ECRANS } from './ecrans/index.js';
 // Pages rendues sur le serveur (Eta), CSP stricte sans script ni style en ligne, rien en cache, aucun Referer.
 
 const SESSION = '__Host-vigie';
+// Effacement d'un cookie __Host- : Secure obligatoire, sinon le navigateur ignore l'en-tête (audit D3-A5).
+const EFFACE = { path: '/', secure: true, httpOnly: true, sameSite: 'lax' };
 const TX = '__Host-vigie-tx';
 const VERSION = (() => { try { return JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version; } catch { return '0'; } })();
 
@@ -41,7 +44,7 @@ export function createConsole({ config, store, engine, switches, decisions, zita
   const readCeiling = readCeilingImpl || createCeilingReader({ api: zitadel.api, projectId: config.projectId, orgId: config.orgId });
   const rights = createRights({ db, store, adminSubs: config.adminSubs, mode: config.roles, now });
   const sessions = createSessions({ db, now });
-  const eta = new Eta({ views: new URL('./views/', import.meta.url).pathname, autoEscape: true, cache: true });
+  const eta = new Eta({ views: fileURLToPath(new URL('./views/', import.meta.url)), autoEscape: true, cache: true });
   const consoleOrigin = new URL(config.url).origin;
 
   // Aucune ligne par requête : le retour de Zitadel porte le code et le state dans son adresse.
@@ -49,7 +52,7 @@ export function createConsole({ config, store, engine, switches, decisions, zita
   const log = app.log;
   app.register(cookie);
   app.register(formbody);
-  app.register(fstatic, { root: new URL('./public/', import.meta.url).pathname, prefix: '/static/', decorateReply: false, index: false, dotfiles: 'deny',
+  app.register(fstatic, { root: fileURLToPath(new URL('./public/', import.meta.url)), prefix: '/static/', decorateReply: false, index: false, dotfiles: 'deny',
     cacheControl: false, etag: true, lastModified: false });
 
   const csp = ["default-src 'none'", "script-src 'self'", "style-src 'self'", "img-src 'self' data:", "font-src 'self'", "connect-src 'self'",
@@ -70,7 +73,7 @@ export function createConsole({ config, store, engine, switches, decisions, zita
     });
   });
 
-  const render = (reply, view, it, code = 200) => reply.code(code).type('text/html; charset=utf-8').send(eta.render(view, { titre: 'Vigie', v: VERSION, ...it }));
+  const render = (reply, view, it, code = 200) => reply.code(code).type('text/html; charset=utf-8').send(eta.render(view, { titre: 'Vigie', v: VERSION, roles: LABELS, ...it }));
   const page = (reply, cas, extra = {}, code = 200) => render(reply, 'acces', { cas, titre: 'Vigie', ...extra }, code);
 
   // Adresse du visiteur : celle que Cloudflare transmet, seulement une fois le jeton Access vérifié (sinon : la socket).
@@ -116,14 +119,24 @@ export function createConsole({ config, store, engine, switches, decisions, zita
   });
 
   // Relecture du plafond chez Zitadel (une à la fois par compte).
+  // Échec récent (moins d'une minute) : on ne retente pas à chaque page (Zitadel lent : jusqu'à 2 × 15 s d'attente
+  // par page, audit D3-D6) ; la lecture continue sur le dernier plafond lu, dans la limite de la grâce.
   const inflight = new Map();
+  const echec = new Map();                       // sub → heure du dernier échec de relecture
+  const echecRecent = sub => now() - (echec.get(sub) ?? -Infinity) < 60e3;
   function recheck(s) {
     if (!inflight.has(s.sub)) {
       inflight.set(s.sub, (async () => {
-        const ceiling = await readCeiling(s.sub);
+        let ceiling;
+        try { ceiling = await readCeiling(s.sub); } catch (err) {
+          if (echec.size > 1000) echec.clear();
+          echec.set(s.sub, now());
+          throw err;
+        }
+        echec.delete(s.sub);
         rights.observe(s.sub, ceiling);
         if (!ceiling) sessions.closeSub(s.sub, 'plafond_retire');
-        else db.prepare('UPDATE console_sessions SET plafond = ?, plafond_lu = ? WHERE sub = ? AND ferme_a IS NULL').run(ceiling, now(), s.sub);
+        else sessions.setCeilingSub(s.sub, ceiling);
         return ceiling;
       })().finally(() => inflight.delete(s.sub)));
     }
@@ -137,12 +150,33 @@ export function createConsole({ config, store, engine, switches, decisions, zita
   };
 
   // 2 et 3. Session et droit effectif, sur toutes les routes sauf /auth/*, /static/* et /robots.txt.
+  // Provenance (Fetch Metadata, audit D3-A1) : www.nicephos.art et la console sont du même site au sens des cookies ;
+  // un site compromis pourrait faire charger une adresse de la console par le navigateur d'un administrateur (image,
+  // feuille) : export noté à son nom, session prolongée. Seules passent les requêtes de la console elle-même, celles
+  // tapées ou ouvertes d'un favori, et les navigations de page ; l'export, seulement depuis la console. Navigateur qui
+  // n'envoie pas ces en-têtes : rien à vérifier (le jeton Access reste exigé). Refus noté une fois par 10 minutes.
+  const MEME_ORIGINE = new Set(['/evenements.csv']);
+  let provenanceVue = 0;
+  function provenanceRefusee(req) {
+    const site = req.headers['sec-fetch-site'];
+    if (!site || site === 'same-origin') return false;
+    const chemin = req.url.split('?')[0];
+    if (MEME_ORIGINE.has(chemin)) return true;
+    if (site === 'none') return false;
+    const nav = req.method === 'GET' && req.headers['sec-fetch-mode'] === 'navigate' && ['document', undefined].includes(req.headers['sec-fetch-dest']);
+    return !nav;
+  }
+
   app.addHook('preHandler', async (req, reply) => {
     if (req.routeOptions?.config?.public || req.url.startsWith('/static/')) return;
+    if (provenanceRefusee(req)) {
+      if (now() - provenanceVue > 10 * 60e3) { provenanceVue = now(); refuse(req, 'provenance', { detail: { site: clean(req.headers['sec-fetch-site'], 20), dest: clean(req.headers['sec-fetch-dest'], 20) } }); }
+      return page(reply, 'interdit', { raison: 'droit', requis: null }, 403);
+    }
     const s = sessions.find(req.cookies[SESSION]);
     if (!s) return toLogin(req, reply);
     const t = now();
-    const end = (raison, cas, extra, code = 401) => { sessions.close(s.id, raison); reply.clearCookie(SESSION, { path: '/' }); return page(reply, cas, extra, code); };
+    const end = (raison, cas, extra, code = 401) => { sessions.close(s.id, raison); reply.clearCookie(SESSION, EFFACE); return page(reply, cas, extra, code); };
     // Le cookie ne vaut qu'avec l'identité Cloudflare Access de son ouverture (cookie volé rejoué sous un autre compte).
     if ((s.access || null) !== (req.access.email || req.access.sub || null)) {
       refuse(req, 'access_autre', { sub: s.sub });
@@ -151,7 +185,8 @@ export function createConsole({ config, store, engine, switches, decisions, zita
     if (t - s.vu_a > IDLE) return end('inactivite', 'expiree', { raison: 'inactivite' });
     if (t - s.cree_a > ABSOLUTE) return end('duree', 'expiree', { raison: 'duree' });
     let ceiling = s.plafond;
-    if (t - s.plafond_lu > CEILING_EVERY) {
+    if (t - s.plafond_lu > CEILING_GRACE && echecRecent(s.sub)) return end('plafond_illisible', 'zitadel', {}, 503);
+    if (t - s.plafond_lu > CEILING_EVERY && !echecRecent(s.sub)) {
       try { ceiling = await recheck(s); } catch (err) {
         log.warn({ err: err.message }, 'Vigie : console : plafond illisible');
         if (t - s.plafond_lu > CEILING_GRACE) return end('plafond_illisible', 'zitadel', {}, 503);
@@ -166,7 +201,8 @@ export function createConsole({ config, store, engine, switches, decisions, zita
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       const site = req.headers['sec-fetch-site'], origin = req.headers.origin;
       const token = typeof req.body?._csrf === 'string' ? req.body._csrf : '';
-      const ok = token.length === s.csrf.length && crypto.timingSafeEqual(Buffer.from(token), Buffer.from(s.csrf));
+      // Format d'abord (un jeton en caractères multi-octets faisait lever timingSafeEqual : 500 sans trace ; audit D3-A4).
+      const ok = /^[A-Za-z0-9_-]{1,100}$/.test(token) && token.length === s.csrf.length && crypto.timingSafeEqual(Buffer.from(token), Buffer.from(s.csrf));
       const sameOrigin = site ? site === 'same-origin' : !origin || origin === consoleOrigin;
       if (!ok || !sameOrigin) {
         refuse(req, 'csrf', { sub: s.sub });
@@ -181,13 +217,16 @@ export function createConsole({ config, store, engine, switches, decisions, zita
     if (!Object.hasOwn(ACTIONS, action)) throw new Error(`action inconnue : ${action}`);
     const s = sessions.byId(req.moi.sid);
     let ceiling;
-    try { ceiling = await recheck(s); } catch (err) {
+    try {
+      if (echecRecent(s.sub)) throw new Error('Zitadel en échec il y a moins d’une minute');
+      ceiling = await recheck(s);
+    } catch (err) {
       log.warn({ err: err.message }, 'Vigie : console : plafond illisible avant une action');
       page(reply, 'zitadel', {}, 503);
       return false;
     }
     const role = rights.effective(s.sub, ceiling);
-    if (!role) { reply.clearCookie(SESSION, { path: '/' }); page(reply, 'refusee', { qui: req.access.email }, 403); return false; }
+    if (!role) { reply.clearCookie(SESSION, EFFACE); page(reply, 'refusee', { qui: req.access.email }, 403); return false; }
     req.moi.role = role;
     if (!can(role, action)) { page(reply, 'interdit', { raison: 'droit', requis: LABELS[ACTIONS[action]] }, 403); return false; }
     if (reauth && now() - s.auth_a > FRESH) {
@@ -227,7 +266,7 @@ export function createConsole({ config, store, engine, switches, decisions, zita
   app.get('/auth/callback', { config: { public: true } }, async (req, reply) => {
     const q = req.query || {};
     const cookieState = req.cookies[TX];
-    reply.clearCookie(TX, { path: '/' });
+    reply.clearCookie(TX, EFFACE);
     const tx = typeof q.state === 'string' && q.state === cookieState ? sessions.takeTx(q.state) : null;
     if (!tx) { refuse(req, 'etat'); return page(reply, 'expiree', { raison: 'inactivite' }, 400); }
     if (q.error) {
@@ -243,12 +282,13 @@ export function createConsole({ config, store, engine, switches, decisions, zita
     const sub = clean(c.sub, 200);
     // Second facteur exigé (D9) : Zitadel met « mfa » dans amr dès deux facteurs (clé d'accès comprise).
     if (!c.amr.includes('mfa')) { refuse(req, 'mfa', { sub, detail: { amr: c.amr.slice(0, 8) } }); return page(reply, 'mfa', {}, 403); }
-    const authA = c.authTime ?? now();
+    // Sans auth_time, l'heure de l'authentification est inconnue : jamais tenue pour récente (audit D3-A3).
+    const authA = c.authTime ?? 0;
     if (tx.reauth) {
       const s = sessions.byId(tx.reauth);
       if (!s) return page(reply, 'expiree', { raison: 'inactivite' }, 401);
       // Même compte, et authentification faite à l'instant (prompt=login), pas une session Zitadel ancienne.
-      if (s.sub !== sub || authA < tx.cree_a - 5000) {
+      if (s.sub !== sub || !c.authTime || authA < tx.cree_a - 5000) {
         refuse(req, s.sub !== sub ? 'reauth_autre' : 'reauth_ancienne', { sub });
         return page(reply, 'autre', { retour: tx.retour }, 403);
       }
@@ -268,7 +308,7 @@ export function createConsole({ config, store, engine, switches, decisions, zita
   app.post('/auth/logout', async (req, reply) => {
     sessions.close(req.moi.sid, 'sortie');
     store.own('vigie_console_sortie', { emetteur: 'vigie/console', sub: req.moi.sub, ip: req.ip2 || undefined });
-    reply.clearCookie(SESSION, { path: '/' });
+    reply.clearCookie(SESSION, EFFACE);
     let url = null;
     try { url = await oidc.logoutUrl(); } catch { /* Zitadel injoignable : la session de la console est fermée quand même */ }
     return reply.redirect(url || '/', 302);
@@ -287,13 +327,7 @@ export function createConsole({ config, store, engine, switches, decisions, zita
   const ctx = { db, store, engine, switches, decisions, rights, now, view, render, page, guard, isRefresh, log, sessions,
     notifications, edge, siteBackupDir, verifyChain, safeRetour,
     moiVue: req => ({ nom: req.moi.nom, sub: req.moi.sub, role: req.moi.role }) };
-  const served = new Set();
-  for (const mod of ECRANS) for (const url of mod.register(app, ctx) || []) served.add(url);
-  // Écrans pas encore codés : page d'attente dans la console (mêmes verrous).
-  for (const [url, pageId] of [['/alertes', 'alertes'], ['/evenements', 'evenements'], ['/entites', 'entites'], ['/sante', 'sante'], ['/flux', 'flux'],
-    ['/decisions', 'decisions'], ['/reglages', 'reglages'], ['/droits', 'droits']]) {
-    if (!served.has(url)) app.get(url, async (req, reply) => view(reply, req, 'a-venir', { page: pageId, titre: 'Vigie' }));
-  }
+  for (const mod of ECRANS) mod.register(app, ctx);
 
   app.setNotFoundHandler(async (req, reply) => {
     if (!req.moi) return toLogin(req, reply);

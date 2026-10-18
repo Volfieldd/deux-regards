@@ -12,15 +12,15 @@ import { can, LABELS, ACTIONS } from '../droits.js';
 import { FRESH } from '../sessions.js';
 import { MAX_IPV4, SCOPES, parseTarget } from '../../decisions.js';
 import { net64 } from '../../moteur.js';
-import { FINE, adresseDetail, dateHeure, guillemets, heure, ilYa, nombre, quand } from '../format.js';
+import { FINE, NBSP, adresseDetail, cibleBlocage, dateHeure, guillemets, heure, ilYa, masquer, nombre, quand } from '../format.js';
+import { DECISIONS, PORTEES as PORTEES_MOT, lire, titreDe, typo } from '../lexique.js';
 
-const NBSP = '\u00a0';
 const HISTOIRE = 20;                      // levées et échues montrées d'office
 const HISTOIRE_MAX = 200;                 // avec ?toutes
 const EN_COURS_MAX = 200;                 // décisions en cours montrées (10 000 actives au plus, MAX_ACTIVE)
 
 // Mots du lexique (§ 1, § 3.11).
-export const TYPES = { bloquer: 'Bloquer une adresse', revoquer_compte: 'Fermer les sessions d’un compte', geler: 'Geler un compte', revoquer_session: 'Fermer une session', verrouiller: 'Verrouiller l’admin' };
+export const TYPES = DECISIONS;
 export const NOUVELLES = ['bloquer', 'revoquer_compte', 'geler', 'revoquer_session'];
 const VERBE = { bloquer: 'Bloquer', geler: 'Geler', revoquer_compte: 'Fermer les sessions', revoquer_session: 'Fermer la session', verrouiller: 'Verrouiller' };
 const LEVER = { bloquer: 'Lever le blocage', revoquer_compte: 'Lever la fermeture des sessions', geler: 'Lever le gel', revoquer_session: 'Lever la fermeture de la session', verrouiller: 'Lever le verrouillage' };
@@ -37,9 +37,9 @@ const EFFET = {
   revoquer_session: 'cette session est refusée',
 };
 const PORTEES = {
-  tout: { t: 'Tout le site', sec: 'réponse 403 sur toutes les pages' },
-  admin: { t: 'L’admin et la connexion', sec: 'le site public reste ouvert à cette adresse' },
-  auth: { t: 'La connexion seulement', sec: 'la connexion par Zitadel lui est refusée' },
+  tout: { t: PORTEES_MOT.tout, sec: 'réponse 403 sur toutes les pages' },
+  admin: { t: PORTEES_MOT.admin, sec: 'le site public reste ouvert à cette adresse' },
+  auth: { t: PORTEES_MOT.auth, sec: 'la connexion par Zitadel lui est refusée' },
 };
 export const DUREES = { bloquer: ['1h', '24h', '7j', '30j'], geler: ['1h', '24h', '7j', '30j'], revoquer_compte: ['24h', '48h'], revoquer_session: ['24h', '48h'], verrouiller: ['1h', '12h', '24h'] };
 const MAX_TEXTE = { bloquer: '30\u00a0jours', geler: '30\u00a0jours', revoquer_compte: '48\u00a0h', revoquer_session: '48\u00a0h', verrouiller: '24\u00a0h' };
@@ -56,7 +56,6 @@ const HINT = {
   revoquer_compte: 'Toute session du compte ouverte avant maintenant est refusée ; il peut se reconnecter. 48 h au plus.',
   revoquer_session: 'Cette session est refusée ; 48 h au plus.',
 };
-const typo = s => String(s).replace(/ ([:;!?])/g, `${FINE}$1`).replace(/(\d) (h|min|jours?|adresses)\b/g, `$1${NBSP}$2`);
 
 export const dureeTexte = d => String(d).replace(/^(\d+)(h|min)$/, `$1${NBSP}$2`).replace(/^(\d+)j$/, (m, n) => `${n}${NBSP}jour${Number(n) > 1 ? 's' : ''}`);
 // Texte venu de la base ou d'une saisie : sans caractère de contrôle ni d'inversion du sens d'écriture, borné.
@@ -65,10 +64,9 @@ const propre = (v, max = 300) => {
   const signes = [...s];
   return signes.length > max ? `${signes.slice(0, max).join('')}…` : s;
 };
-// Adresses citées dans un texte libre (un motif) : tronquées pour un Lecteur.
-const RE_IP = /(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}(?:\/\d{1,3})?|\b\d{1,3}(?:\.\d{1,3}){3}(?:\/\d{1,2})?\b/gi;
+// Adresses citées dans un texte libre (un motif, un auteur) : tronquées pour un Lecteur (masquer, de format.js : une seule
+// fonction pour toute la console, audit D3-C2).
 const voitAdresses = role => can(role || 'viewer', 'adresses_completes');
-export const masque = (s, role) => (voitAdresses(role) ? String(s ?? '') : String(s ?? '').replace(RE_IP, m => (net.isIP(m.split('/')[0]) ? adresseDetail(m, 'viewer').texte : m)));
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Message d'une action (it.message, posé par actions.js) : jamais cru. Une erreur ne vaut que pour le formulaire qui l'a
@@ -163,23 +161,23 @@ function requetes(db) {
   cache.set(db, q);
   return q;
 }
-// Titres des règles (registre du moteur), apostrophes typographiques.
-export const titresDe = engine => new Map((engine?.rules?.() || []).map(r => [r.id, typo(String(r.titre || r.id).replace(/'/g, '’'))]));
-const lireJson = s => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
+// Titres bruts des règles (registre du moteur) ; titreDe (lexique.js) les met au propre.
+export const titresDe = engine => new Map((engine?.rules?.() || []).map(r => [r.id, r.titre]));
 
 // Cible d'une décision, vue par un rôle.
 function cibleDe(q, d, role, t) {
   if (d.kind === 'bloquer') {
-    const [a, p] = String(d.cible).split('/');
-    const hote = p == null || p === '32' || p === '128';
-    const vu = adresseDetail(hote ? a : d.cible, role);
+    // Une adresse seule : /32 en IPv4, /128 en IPv6 (un /32 IPv6 est un réseau).
+    const seule = cibleBlocage(d.cible);
+    const hote = !seule.includes('/');
+    const vu = adresseDetail(seule, role);
     let taille = '';
     try { const x = parseTarget(d.cible); if (x.family === 'ipv4' && x.size > 1) taille = `${nombre(x.size)}${NBSP}adresses`; } catch { /* cible illisible */ }
     return { k: hote ? 'adresse' : 'réseau', texte: vu.texte, mono: 'ip', v6: vu.v6, tronquee: vu.tronquee,
       sec: [PORTEES[d.portee]?.t || '', taille].filter(Boolean).join(' · ') };
   }
   if (d.kind === 'verrouiller') {
-    const det = lireJson(d.details) || {};
+    const det = lire(d.details) || {};
     const comptes = (Array.isArray(det.comptes) ? det.comptes : []).slice(0, 10).map(s => propre(s, 120));
     const adresses = (Array.isArray(det.adresses) ? det.adresses : []).slice(0, 10).map(x => adresseDetail(String(x), role).texte);
     const admis = [...comptes, ...adresses];
@@ -196,7 +194,7 @@ function parDe(d, { role, moi, titres }) {
   const sec = [];
   if (d.auto) {
     const regle = /^Vigie · règle (\S{1,120})$/.exec(d.par || '')?.[1];
-    if (regle) sec.push({ t: 'règle ' }, { t: titres.get(regle) || regle, href: `/reglages#r-${regle.replace(/[^A-Za-z0-9_-]/g, '-')}` });
+    if (regle) sec.push({ t: 'règle ' }, { t: titreDe(regle, titres), href: `/reglages#r-${regle.replace(/[^A-Za-z0-9_-]/g, '-')}` });
     if (alerteN) { if (sec.length) sec.push({ t: ' · ' }); sec.push({ t: `alerte #${alerteN[1]}`, href: `/alertes/${alerteN[1]}` }); }
     return { t: 'la Vigie, d’elle-même', sec };
   }
@@ -205,8 +203,8 @@ function parDe(d, { role, moi, titres }) {
   const nom = par.startsWith('console · ') ? par.slice(10) : par;
   if (alerteN) sec.push({ t: `alerte #${alerteN[1]}`, href: `/alertes/${alerteN[1]}` });
   const reste = alerteN ? String(d.motif).slice(alerteN[0].length) : d.motif;
-  if (reste) { if (sec.length) sec.push({ t: ' · ' }); sec.push({ t: guillemets(propre(masque(reste, role), 120)) }); }
-  return { t: `${propre(nom, 60) || 'inconnu'}${vous ? ' (vous)' : ''}`, sec };
+  if (reste) { if (sec.length) sec.push({ t: ' · ' }); sec.push({ t: guillemets(propre(masquer(reste, role), 120)) }); }
+  return { t: `${propre(masquer(nom, role), 60) || 'inconnu'}${vous ? ' (vous)' : ''}`, sec };
 }
 
 export function ligneDecision(db, d, { t, role, moi = null, titres = new Map(), retour = null }) {
@@ -219,7 +217,7 @@ export function ligneDecision(db, d, { t, role, moi = null, titres = new Map(), 
     depuis: quand(d.cree_a, t),
     cible: cibleDe(q, d, role, t),
     fin: enCours ? { t: dateHeure(d.fin), sec: ilYa(d.fin, t) }
-      : d.leve_a ? { t: `levée ${quand(d.leve_a, t)}`, sec: d.leve_par ? `par ${propre(String(d.leve_par).replace(/^console · /, ''), 60)}` : '' }
+      : d.leve_a ? { t: `levée ${quand(d.leve_a, t)}`, sec: d.leve_par ? `par ${propre(masquer(String(d.leve_par).replace(/^console · /, ''), role), 60)}` : '' }
         : { t: `échue ${quand(d.fin, t)}`, sec: '' },
     par: parDe(d, { role, moi, titres }),
     lever: enCours && can(role, 'actions_forcees') ? lienLever(d, retour) : null,
@@ -391,5 +389,4 @@ export function register(app, ctx) {
     return ctx.view(reply, req, 'decisions-lever', { page: 'decisions', titre: `Lever la décision #${vue.id} · Vigie`, vue });
   });
 
-  return ['/decisions'];
 }

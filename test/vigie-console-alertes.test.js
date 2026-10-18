@@ -350,11 +350,15 @@ test('bornes : pages de 50 (numérotées pour les non closes, par jeu de clés p
   const plan = (st, ...a) => db.prepare(`EXPLAIN QUERY PLAN ${st.source}`).all(...a).map(r => r.detail).join(' | ');
   assert.match(plan(q.historique, 1), /SEARCH events USING INDEX events_alerte/);
   assert.match(plan(q.evenements, 1, 10), /SEARCH a USING COVERING INDEX .*alert_id=\? AND seq<\?.*SEARCH e USING INTEGER PRIMARY KEY/);
-  for (const [nom, st, args] of [['historique', q.historique, [1]], ['evenements', q.evenements, [1, 10]], ['nbEvenements', q.nbEvenements, [1]], ['decisions', q.decisions, ['alerte #1']],
+  for (const [nom, st, args] of [['historique', q.historique, [1]], ['evenements', q.evenements, [1, 10]], ['nbEvenements', q.nbEvenements, [1]], ['decisions', q.decisions, [1]],
     ['alerte', q.alerte, [1]], ['autres', q.autres, ['ip', 'x', 1]]]) {
     assert.doesNotMatch(plan(st, ...args), /SCAN (events|e)\b/, nom);
     assert.match(st.source, /LIMIT|WHERE id = \?/, `${nom} : bornée`);
   }
+  // Décisions d'une alerte et réponses d'une page : par l'index de alerte_id (migration 012, audit D3-D3), jamais un
+  // parcours de la table des décisions (jamais purgée avant, 200 000 lignes en 13 mois au pire).
+  assert.match(plan(q.decisions, 1), /SEARCH decisions USING INDEX decisions_alerte \(alerte_id=\?\)/);
+  assert.match(plan(q.reponses, '[1,2]'), /SEARCH decisions USING INDEX decisions_alerte \(alerte_id=\?\)/);
   // Les listes préparées pour les filtres : bornées, par un index de la table des alertes.
   const formes = ["SELECT id FROM alerts WHERE statut != 'close' AND regle = ? ORDER BY derniere DESC LIMIT 51", "SELECT id FROM alerts WHERE statut = 'close' AND (derniere < ? OR (derniere = ? AND id < ?)) ORDER BY derniere DESC, id DESC LIMIT 51"];
   assert.match(db.prepare(`EXPLAIN QUERY PLAN ${formes[0]}`).all('x').map(r => r.detail).join(' '), /alerts_ouvertes/);
@@ -391,4 +395,29 @@ test('tactiques MITRE : étiquettes Sigma en français, techniques en majuscules
     { tactiques: ['Persistance', 'Élévation de privilèges'], techniques: ['T1098', 'T1110.001'] });
   assert.equal(mitre([]), null);
   assert.equal(mitre([PIEGE, 'attack.inconnue']), null);
+});
+
+test('fiche d’une alerte ancienne (audit D3-D14) : événements comptés par la jointure, ceux effacés par la conservation dits', async t => {
+  const v = setup(t);
+  const { alerte, evenement, lier, clock } = v;
+  clock.t = T0 - 3600e3;
+  // Alerte de 8 mois : trois de ses quatre événements ont été purgés (liens restés), le quatrième est encore au journal.
+  const vieille = alerte({ regle: 'sigma.oidc_echecs_repetes', entite_kind: 'ip', entite_key: IP, gravite: 'bas', mode: 'alerter', statut: 'close', classement: 'incident',
+    premiere: T0 - 240 * 864e5, derniere: T0 - 239 * 864e5, compteur: 4 });
+  for (const seq of [900_001, 900_002, 900_003]) lier.run(vieille, seq);
+  evenement(vieille);
+  // Alerte de 10 mois : tous ses événements effacés.
+  const toute = alerte({ regle: 'sigma.oidc_echecs_repetes', entite_kind: 'ip', entite_key: IP, gravite: 'bas', mode: 'alerter', statut: 'close', classement: 'test',
+    premiere: T0 - 300 * 864e5, derniere: T0 - 300 * 864e5, compteur: 2 });
+  for (const seq of [900_004, 900_005]) lier.run(toute, seq);
+  clock.t = T0;
+  const admin = await v.login('sub-seb', 'Sébastien', 'admin', 'seb@exemple.org');
+  const r = await admin(`/alertes/${vieille}`);
+  assert.equal(r.statusCode, 200);
+  assert.match(r.body, /1 événement relié à l’alerte\u202f; 3 événements effacés par la durée de conservation\./);
+  assert.equal((r.body.match(/class="vg-type"/g) || []).length, 1, 'un seul événement listé');
+  const r2 = await admin(`/alertes/${toute}`);
+  assert.match(r2.body, /<p class="vg-compte">2 événements effacés par la durée de conservation\.<\/p>/);
+  assert.match(r2.body, /Aucun événement relié encore au journal\u202f; 2 événements effacés par la durée de conservation\./);
+  assert.doesNotMatch(r2.body, /2 événements reliés/);
 });

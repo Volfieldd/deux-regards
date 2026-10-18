@@ -28,7 +28,7 @@ test('alertes : prendre en charge, classer, noter ; Lecteur refusé ; message mo
   assert.equal(r.statusCode, 303);
   assert.equal(r.headers.location, `/alertes/${id}`);
   assert.equal(v.db.prepare('SELECT statut, traite_par FROM alerts WHERE id = ?').get(id).statut, 'en_cours');
-  assert.equal(v.db.prepare('SELECT traite_par FROM alerts WHERE id = ?').pluck().get(id), 'console · Sébastien');
+  assert.equal(v.db.prepare('SELECT traite_par FROM alerts WHERE id = ?').pluck().get(id), 'console · Sébastien (sub-seb)');
   assert.deepEqual(v.message(cookie), { k: 'ok', texte: `Alerte #${id} prise en charge.`, action: 'alertes' });
   // Le message est montré par la page suivante, puis effacé.
   const page = await v.get(cookie, `/alertes/${id}`);
@@ -38,7 +38,7 @@ test('alertes : prendre en charge, classer, noter ; Lecteur refusé ; message mo
 
   await v.post(cookie, `/alertes/${id}/note`, { note: 'Vu avec Julien : <b>essai</b>' });
   const note = v.events('vigie_alerte').at(-1);
-  assert.deepEqual(note.detail, { action: 'note', id, note: 'Vu avec Julien : <b>essai</b>' });
+  assert.deepEqual(note.detail, { action: 'note', id, note: 'Vu avec Julien : <b>essai</b>', par_sub: 'sub-seb' });
   await v.post(cookie, `/alertes/${id}/classer`, { classement: 'mauvais' });
   assert.equal(v.message(cookie).k, 'erreur');
   assert.equal(v.message(cookie).champ, 'classement');
@@ -60,11 +60,14 @@ test('décisions : motif obligatoire, sa propre adresse seulement confirmée, ve
   await v.post(cookie, '/decisions', { type: 'bloquer', cible: '203.0.113.9' });
   assert.equal(v.message(cookie).champ, 'motif');
   assert.equal(v.db.prepare('SELECT COUNT(*) FROM decisions').pluck().get(), 0);
-  const r = await v.post(cookie, '/decisions', { type: 'bloquer', cible: '203.0.113.9', portee: 'admin', duree: '2h', motif: 'balayage', alerte: '12', retour: '/entites/ip/203.0.113.9' });
+  const a12 = v.alerte();
+  await v.post(cookie, '/decisions', { type: 'bloquer', cible: '203.0.113.9', portee: 'admin', duree: '2h', alerte: '987654' });
+  assert.equal(v.message(cookie).champ, 'alerte', 'alerte inexistante : refusée (audit D3-B8)');
+  const r = await v.post(cookie, '/decisions', { type: 'bloquer', cible: '203.0.113.9', portee: 'admin', duree: '2h', motif: 'balayage', alerte: String(a12), retour: '/entites/ip/203.0.113.9' });
   assert.equal(r.headers.location, '/entites/ip/203.0.113.9');
   const d = v.db.prepare('SELECT * FROM decisions ORDER BY id DESC').get();
   assert.deepEqual({ kind: d.kind, cible: d.cible, portee: d.portee, motif: d.motif, par: d.par, duree: d.fin - d.cree_a },
-    { kind: 'bloquer', cible: '203.0.113.9/32', portee: 'admin', motif: 'alerte #12 · balayage', par: 'console · Sébastien', duree: 2 * 3600e3 });
+    { kind: 'bloquer', cible: '203.0.113.9/32', portee: 'admin', motif: `alerte #${a12} · balayage`, par: 'console · Sébastien (sub-seb)', duree: 2 * 3600e3 });
   const ev = v.events('vigie_decision').at(-1);
   assert.equal(ev.composant, 'vigie · console');
   // Sa propre adresse (celle que donne Cloudflare) : refusé sans la case.
@@ -77,12 +80,19 @@ test('décisions : motif obligatoire, sa propre adresse seulement confirmée, ve
   // Adresse d'une connexion d'administrateur (contrôle des rôles) : confirmation aussi ; depuis une alerte, motif facultatif.
   v.store.setting.set('controle_roles_admins', { administrateurs: ['zitadel-admin'], instantane_a: v.clock.t });
   v.store.add([{ id: 'c0ffee00-0000-4000-8000-000000000001', recu_a: v.clock.t, survenu_a: v.clock.t, type: 'authn_login_success', severity: 'info', canal: 'ingestion signée', confiance: 'rapporté', composant: 'site · connexion', sub: 'zitadel-admin', ip: '192.0.2.50', ip_net: '192.0.2.0' }]);
-  for (const cible of ['192.0.2.50', '192.0.2.0/24']) {
-    await v.post(cookie, '/decisions', { type: 'bloquer', cible, portee: 'admin', alerte: '7' });
+  const a7 = v.alerte();
+  for (const cible of ['192.0.2.50', '192.0.2.0/24', '192.0.2.48/28', '192.0.0.0/16']) {
+    await v.post(cookie, '/decisions', { type: 'bloquer', cible, portee: 'admin', alerte: String(a7) });
     assert.equal(v.message(cookie).champ, 'confirme', cible);
   }
-  await v.post(cookie, '/decisions', { type: 'bloquer', cible: '192.0.2.50', portee: 'admin', alerte: '7', confirme: 'oui' });
-  assert.equal(v.db.prepare('SELECT motif FROM decisions ORDER BY id DESC').pluck().get(), 'alerte #7');
+  await v.post(cookie, '/decisions', { type: 'bloquer', cible: '192.0.2.50', portee: 'admin', alerte: String(a7), confirme: 'oui' });
+  assert.equal(v.db.prepare('SELECT motif FROM decisions ORDER BY id DESC').pluck().get(), `alerte #${a7}`);
+  // IPv6 : /64 et écriture non canonique couvrent aussi l'adresse d'un administrateur (audit D3-B3).
+  v.store.add([{ id: 'c0ffee00-0000-4000-8000-000000000002', recu_a: v.clock.t, survenu_a: v.clock.t, type: 'session_created', severity: 'info', canal: 'ingestion signée', confiance: 'rapporté', composant: 'site · connexion', sub: 'zitadel-admin', ip: '2001:db8:1:2::50', ip_net: '2001:db8:1::' }]);
+  for (const cible of ['2001:db8:1:2::/64', '2001:DB8:1:2:0:0:0:50', '2001:db8::/32']) {
+    await v.post(cookie, '/decisions', { type: 'bloquer', cible, portee: 'admin', motif: 'x' });
+    assert.equal(v.message(cookie).champ, 'confirme', cible);
+  }
   // Verrouillage : le compte et l'adresse de qui verrouille sont admis d'office.
   await v.post(cookie, '/decisions', { type: 'verrouiller', comptes: 'sub-julien', motif: 'compte admin apparu hors de l’application' });
   const lock = v.db.prepare("SELECT * FROM decisions WHERE kind = 'verrouiller'").get();
@@ -195,4 +205,49 @@ test('vérifications et administration : chaîne, canal, bordure, référence de
   v.ceilings['sub-camille'] = 'analyst';
   const c = await v.login({ sub: 'sub-camille', roles: ['vigie.analyst'] });
   assert.equal((await v.post(c.cookie, '/droits/sub-camille', { attribution: 'admin' })).statusCode, 403);
+});
+
+test('suites de la revue D3 : levée motivée et signalée, son propre compte, seuils tout ou rien, confiance canonique, référence gardée sans sauvegarde', async t => {
+  const v = env(t);
+  const { cookie } = await v.login();
+  const reduites = () => v.events('vigie_surveillance_reduite');
+  // Levée : motif obligatoire ; lever un verrouillage prévient les Administrateurs (D3-B4).
+  await v.post(cookie, '/decisions', { type: 'verrouiller', comptes: 'sub-julien', motif: 'urgence' });
+  const lock = v.db.prepare("SELECT id FROM decisions WHERE kind = 'verrouiller'").pluck().get();
+  await v.post(cookie, `/decisions/${lock}/lever`, {});
+  assert.equal(v.message(cookie).champ, 'motif');
+  const n = reduites().length;
+  await v.post(cookie, `/decisions/${lock}/lever`, { motif: 'fausse alerte' });
+  assert.equal(reduites().length, n + 1);
+  assert.equal(reduites().at(-1).detail.objet, `decision:${lock}`);
+  // Son propre compte (D3-B5).
+  await v.post(cookie, '/decisions', { type: 'geler', cible: 'sub-seb', motif: 'essai' });
+  assert.equal(v.message(cookie).champ, 'confirme');
+  // Seuils : rien d'écrit si un relèvement manque de motif (D3-B7) ; minimum 0,5.
+  const avant = v.engine.thresholds();
+  await v.post(cookie, '/reglages/seuils', { ip: String(avant.ip - 1), reseau: String(avant.reseau + 5) });
+  assert.equal(v.message(cookie).champ, 'motif');
+  assert.deepEqual(v.engine.thresholds(), avant, 'rien d’écrit');
+  await v.post(cookie, '/reglages/seuils', { compte: '0.1' });
+  assert.equal(v.message(cookie).champ, 'compte');
+  // Adresses de confiance : forme canonique (D3-B9).
+  await v.post(cookie, '/reglages/confiance/ajouter', { ip: '2001:0DB8::0007', duree: '1j', motif: 'bureau' });
+  assert.equal(v.store.setting.get('adresses_confiance')[0].ip, '2001:db8::7');
+  await v.post(cookie, '/reglages/confiance/retirer', { ip: '2001:db8:0:0:0:0:0:7' });
+  assert.deepEqual(v.store.setting.get('adresses_confiance'), []);
+  await v.post(cookie, '/reglages/confiance/retirer', { ip: '192.0.2.99' });
+  assert.match(v.message(cookie).texte, /absente/);
+});
+
+test('référence des rôles (audit D3-B6) : sans sauvegarde lisible, refusée et l’ancienne gardée', async t => {
+  const fs = await import('node:fs'), os = await import('node:os'), path = await import('node:path');
+  const { runRolesCheck } = await import('../vigie/reglages.js');
+  const v = env(t);
+  const vide = fs.mkdtempSync(path.join(os.tmpdir(), 'vigie-sauv-'));
+  t.after(() => fs.rmSync(vide, { recursive: true, force: true }));
+  const ref = { administrateurs: ['zitadel-admin'], instantane_a: v.clock.t };
+  v.store.setting.set('controle_roles_admins', ref);
+  assert.throws(() => runRolesCheck(v.store, { accepter: true, motif: 'nouvel admin', par: 'test', siteBackupDir: vide, now: () => v.clock.t }), /aucune sauvegarde du site lisible/);
+  assert.deepEqual(v.store.setting.get('controle_roles_admins'), ref);
+  assert.equal(v.events('vigie_surveillance_reduite').length, 0);
 });

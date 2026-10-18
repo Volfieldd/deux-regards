@@ -1,7 +1,7 @@
 import * as client from 'openid-client';
 
 // Connexion Zitadel propre à la console (annexe architecture § 5.2) : application « Console Vigie » du projet « Vigie »,
-// méthode CODE avec secret client, plus PKCE, state et nonce (vérifiés par openid-client avec la signature, l'émetteur et
+// méthode CODE avec secret client, plus PKCE, state et nonce (vérifiés par openid-client avec l'émetteur et
 // l'audience). Rôles lus dans le jeton d'identité (« User roles inside ID Token »), dans l'organisation propriétaire du
 // projet ; amr et auth_time lus dans le jeton d'identité seul (jamais dans userinfo).
 
@@ -41,7 +41,8 @@ export function createConsoleOidc({ issuer, clientId, clientSecret, projectId, o
       const cfg = await server();
       const u = new URL(redirectUri);
       u.search = new URLSearchParams(query).toString();
-      const tokens = await client.authorizationCodeGrant(cfg, u, { pkceCodeVerifier: tx.verifier, expectedState: tx.state, expectedNonce: tx.nonce });
+      // Ré-authentification : max_age vérifié par la bibliothèque (auth_time exigé et récent ; audit D3-A3).
+      const tokens = await client.authorizationCodeGrant(cfg, u, { pkceCodeVerifier: tx.verifier, expectedState: tx.state, expectedNonce: tx.nonce, ...(tx.reauth ? { maxAge: 300 } : {}) });
       const c = tokens.claims();
       return {
         sub: c.sub,

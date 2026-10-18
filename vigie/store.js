@@ -108,11 +108,18 @@ export function createStore({ db, logKey, retentionDays = 183, now = Date.now })
   };
 
   // Événement constaté par la Vigie elle-même.
-  const own = (type, { severity, detail, emetteur = '', sub, reference, composant, ip, ip_net } = {}) => addNow([{
-    id: crypto.randomUUID(), recu_a: now(), survenu_a: now(), type, severity: severity || ALL[type].severity,
-    // Geste d'une personne depuis la console (« console · Nom ») : composant de la console, pas de la ligne de commande.
-    composant: composant || (String(emetteur).startsWith('console · ') && ALL[type].composant === 'vigie · ligne de commande' ? 'vigie · console' : ALL[type].composant), emetteur, canal: 'interne', confiance: 'constaté', reference, sub, ip, ip_net, detail,
-  }]);
+  // Geste d'une personne depuis la console (« console · Nom (sub) ») : composant de la console, pas de la ligne de
+  // commande ; son identifiant Zitadel aussi dans le détail (par_sub), le nom affiché pouvant être changé par la
+  // personne elle-même (audit D3-B2).
+  const CONSOLE_PAR = /^console · .* \(([A-Za-z0-9@._:-]{1,200})\)$/;
+  const own = (type, { severity, detail, emetteur = '', sub, reference, composant, ip, ip_net } = {}) => {
+    const geste = CONSOLE_PAR.exec(String(emetteur));
+    const d = geste && (detail == null || (typeof detail === 'object' && !Array.isArray(detail))) ? { ...(detail || {}), par_sub: geste[1] } : detail;
+    return addNow([{
+      id: crypto.randomUUID(), recu_a: now(), survenu_a: now(), type, severity: severity || ALL[type].severity,
+      composant: composant || (String(emetteur).startsWith('console · ') && ALL[type].composant === 'vigie · ligne de commande' ? 'vigie · console' : ALL[type].composant), emetteur, canal: 'interne', confiance: 'constaté', reference, sub, ip, ip_net, detail: d,
+    }]);
+  };
 
   // Vérifie la chaîne depuis l'ancre : { ok, lignes, ruptures, rupture (la première) }. Continue après une rupture.
   // Par paquets de 5 000 lignes : verify() d'une traite (ligne de commande, tests), verifyAsync() en rendant la main

@@ -16,7 +16,7 @@ export function networkOf(request) {
   const country = viaProxy && /^[A-Z]{2}$/.test(String(h['cf-ipcountry'] || '').toUpperCase()) ? String(h['cf-ipcountry']).toUpperCase() : undefined;
   return {
     ip: ip || undefined,
-    ip_net: ip ? truncateIp(ip) : undefined,
+    ip_net: ip ? truncateIp(ip) || undefined : undefined,
     country: country && country !== 'XX' && country !== 'T1' ? country : undefined,
     city: viaProxy && h['cf-ipcity'] ? neutralize(h['cf-ipcity'], 80) : undefined,
     lat: viaProxy ? num(h['cf-iplatitude']) : undefined,

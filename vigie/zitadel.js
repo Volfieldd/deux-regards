@@ -64,7 +64,7 @@ export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = f
       // Motif donné par Zitadel (message d'erreur, jamais de donnée de compte) et appel en cause, pour le journal.
       let why = null;
       try { const j = JSON.parse(text); why = j.error_description || j.message || j.error; } catch { /* pas du JSON */ }
-      throw new Error(`Zitadel : réponse ${res.status} (${new URL(url).pathname})${why ? ` : ${clean(why, 200)}` : ''}`);
+      throw Object.assign(new Error(`Zitadel : réponse ${res.status} (${new URL(url).pathname})${why ? ` : ${clean(why, 200)}` : ''}`), { status: res.status });
     }
     return JSON.parse(text);
   };

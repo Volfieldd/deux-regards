@@ -1,6 +1,6 @@
 <%
 /* Alerte introuvable (404) : numéro inconnu, ou qui n'est pas un numéro. Une page en session, sobre, avec deux chemins de
-   retour (comme a-venir.eta). Rien de l'adresse demandée n'est repris, sauf un numéro reconnu comme tel. */
+   retour. Rien de l'adresse demandée n'est repris, sauf un numéro reconnu comme tel. */
 layout('./layout', { titre: 'Alerte introuvable' });
 %>
 <header class="ep">

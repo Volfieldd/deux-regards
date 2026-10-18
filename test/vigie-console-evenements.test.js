@@ -435,3 +435,79 @@ test('bornes : chaque lecture du journal passe par un index, dans son ordre (san
   assert.equal(masquer('de 198.51.100.23 et 2001:db8:4:1c::5e à 14:02:33 (::ffff:192.0.2.7)', 'viewer'), 'de 198.51.100.0/24 et 2001:db8:4::/48 à 14:02:33 (192.0.2.0/24)');
   assert.equal(masquer('198.51.100.23', 'handler'), '198.51.100.23');
 });
+
+test('export CSV par tranches (audit D3-D4) : même fichier quelle que soit la tranche, heures de Paris justes (changement d’heure compris)', async t => {
+  const { exportCsv, EXPORT_TRANCHE } = await import('../vigie/console/ecrans/evenements.js');
+  const v = setup(t);
+  // Autour du passage à l'heure d'hiver (25 octobre 2026, 3 h → 2 h à Paris) : 400 événements, parfois plusieurs dans la
+  // même milliseconde (ordre par numéro), de gravités et d'adresses diverses.
+  v.clock.t = Date.parse('2026-10-25T00:20:00Z');
+  const seqs = [];
+  for (let i = 0; i < 400; i++) {
+    if (i % 3) v.clock.t += 13_337;
+    seqs.push(v.add({ type: i % 5 ? 'malicious_excess_404' : 'malicious_input', severity: i % 4 ? 'bas' : 'moyen', ip: `203.0.113.${i % 9}`, ip_net: '203.0.113.0', route: `/r${i}` }, (i % 7) * 1000));
+  }
+  const id = Number(v.db.prepare("INSERT INTO alerts (regle, entite_kind, entite_key, gravite, mode, premiere, derniere) VALUES ('entite.score', 'ip', '203.0.113.1', 'haut', 'observer', 1, 2)").run().lastInsertRowid);
+  for (const s of seqs.filter((_, i) => i % 2)) v.db.prepare('INSERT INTO alert_events (alert_id, seq) VALUES (?, ?)').run(id, s);
+  const t1 = v.clock.t + 60e3;
+  const paris = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+  for (const query of [{ periode: '7j' }, { periode: 'tout', type: 'tout' }, { periode: '7j', gravite: 'moyen' }, { periode: '7j', adresse: '203.0.113.4' }, { alerte: String(id) }]) {
+    const ref = await exportCsv({ db: v.db, query, role: 'admin', t: t1, tranche: EXPORT_TRANCHE });
+    assert.ok(ref.n > 0, JSON.stringify(query));
+    for (const tranche of [1, 7, 64, 199]) {
+      const r = await exportCsv({ db: v.db, query, role: 'admin', t: t1, tranche });
+      assert.deepEqual(r, ref, `${JSON.stringify(query)}, tranche de ${tranche}`);
+    }
+    // Les heures : celles de Paris à la seconde, lues une à une par Intl.
+    const lignes = ref.csv.replace(/^\ufeff/, '').split('\r\n').filter(Boolean).slice(1).map(l => l.split(';').map(c => c.slice(1, -1)));
+    for (const l of lignes) {
+      const r = v.db.prepare('SELECT recu_a, survenu_a FROM events WHERE seq = ?').get(Number(l[0]));
+      assert.equal(l[1], paris.format(r.survenu_a).replace('T', ' '));
+      assert.equal(l[2], paris.format(r.recu_a).replace('T', ' '));
+    }
+    // Toujours du plus récent au plus ancien (ordre de réception, puis numéro), sans doublon.
+    const nums = lignes.map(l => Number(l[0]));
+    assert.equal(new Set(nums).size, nums.length);
+  }
+  // L'heure d'été puis l'heure d'hiver dans le même fichier : 2 h 59 (heure d'été) puis de nouveau 2 h 00 à Paris.
+  const tout = (await exportCsv({ db: v.db, query: { periode: '7j' }, role: 'admin', t: t1 })).csv;
+  assert.match(tout, /"2026-10-25 02:59:\d\d"/);
+  assert.match(tout, /"2026-10-25 02:00:\d\d"/);
+});
+
+test('« Aujourd’hui » (audit D3-D8) : depuis minuit à Paris, juste les jours de changement d’heure (29 mars et 25 octobre 2026)', async t => {
+  const { minuitParis } = await import('../vigie/console/format.js');
+  // 29 mars 2026 : minuit à Paris est à 23 h 00 UTC la veille (UTC+1), même si l'après-midi est à UTC+2.
+  // 25 octobre 2026 : minuit à Paris est à 22 h 00 UTC la veille (UTC+2), même si l'après-midi est à UTC+1.
+  for (const [jour, minuit] of [['2026-03-29', '2026-03-28T23:00:00Z'], ['2026-10-25', '2026-10-24T22:00:00Z'], ['2026-07-14', '2026-07-13T22:00:00Z'], ['2026-12-31', '2026-12-30T23:00:00Z']]) {
+    for (const h of ['T00:00:00+01:00', 'T00:30:00Z', 'T01:59:59Z', 'T03:30:00Z', 'T12:00:00Z', 'T21:59:00Z']) {
+      const t0 = Date.parse(`${jour}${h}`);
+      if (t0 < Date.parse(minuit) || t0 >= Date.parse(minuit) + 23 * 3600e3) continue;
+      assert.equal(new Date(minuitParis(t0)).toISOString(), new Date(minuit).toISOString(), `${jour}${h}`);
+      assert.equal(lireFiltres({}, 'admin', t0).debut, Date.parse(minuit), `${jour}${h} : début du jour du journal`);
+    }
+  }
+  // Le journal par défaut (« Aujourd’hui »), le 29 mars à midi : l'événement de 0 h 30 (Paris) y est, celui de la veille
+  // à 23 h 30 non.
+  const v = setup(t);
+  v.clock.t = Date.parse('2026-03-28T22:30:00Z');
+  v.add({ type: 'malicious_input', ip: '203.0.113.5', route: '/veille-23h30' });
+  v.clock.t = Date.parse('2026-03-28T23:30:00Z');
+  v.add({ type: 'malicious_input', ip: '203.0.113.5', route: '/jour-0h30' });
+  v.clock.t = Date.parse('2026-03-29T10:00:00Z');
+  const admin = await v.login('sub-seb', 'Sébastien', 'admin');
+  const r = await admin('/evenements');
+  assert.equal(r.statusCode, 200);
+  assert.match(r.body, /\/jour-0h30/);
+  assert.doesNotMatch(r.body, /\/veille-23h30/);
+  // Le 25 octobre à midi : l'événement de 0 h 10 (Paris, 22 h 10 UTC la veille) y est, celui de 23 h 50 la veille non.
+  v.clock.t = Date.parse('2026-10-24T21:50:00Z');
+  v.add({ type: 'malicious_input', ip: '203.0.113.6', route: '/veille-23h50' });
+  v.clock.t = Date.parse('2026-10-24T22:10:00Z');
+  v.add({ type: 'malicious_input', ip: '203.0.113.6', route: '/jour-0h10' });
+  v.clock.t = Date.parse('2026-10-25T11:00:00Z');
+  const admin2 = await v.login('sub-seb', 'Sébastien', 'admin');
+  const r2 = await admin2('/evenements');
+  assert.match(r2.body, /\/jour-0h10/);
+  assert.doesNotMatch(r2.body, /\/veille-23h50/);
+});

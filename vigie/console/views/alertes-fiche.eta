@@ -67,11 +67,11 @@ const RETOUR = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill=
 <% } %>
 </ol>
 <% } else if (ev.effaces) { %>
-<p class="vg-compte">Les <%= ev.totalTexte %> événements de l’alerte ne sont plus au journal (conservés 6 mois).</p>
+<p class="vg-compte"><%= ev.effaces %></p>
 <% } else { %>
 <p class="vg-compte">Aucun événement relié à cette alerte<%= ev.debut ? ' avant ceux déjà vus' : '' %>.</p>
 <% } %>
-<nav class="vg-pages" aria-label="Pages des événements de l’alerte"><p><%= ev.total ? `${ev.totalTexte} ${ev.total > 1 ? 'événements reliés' : 'événement relié'} à l’alerte${ev.total > ev.lignes.length ? (ev.debut ? ' ; suite de la liste' : ` ; les ${ev.lignes.length} plus récents ici`) : ''}.` : 'Aucun événement relié.' %></p><% if (ev.suite || ev.debut) { %><div class="btns-ligne"><% if (ev.debut) { %><a class="btn ghost" href="<%= ev.debut %>">Les plus récents</a><% } %><% if (ev.suite) { %><a class="btn ghost" href="<%= ev.suite %>" rel="next">Plus anciens</a><% } %></div><% } %></nav>
+<nav class="vg-pages" aria-label="Pages des événements de l’alerte"><p><%= ev.pied %></p><% if (ev.suite || ev.debut) { %><div class="btns-ligne"><% if (ev.debut) { %><a class="btn ghost" href="<%= ev.debut %>">Les plus récents</a><% } %><% if (ev.suite) { %><a class="btn ghost" href="<%= ev.suite %>" rel="next">Plus anciens</a><% } %></div><% } %></nav>
 </section>
 
 <section class="panel" aria-labelledby="t-ent"><h2 class="panel-t" id="t-ent"><%= ent.titre %></h2>

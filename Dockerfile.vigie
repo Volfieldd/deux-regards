@@ -15,11 +15,13 @@ ENV NODE_ENV=production \
     VIGIE_DATA_DIR=/data \
     VIGIE_INGEST_PORT=4100
 WORKDIR /app
-# Le vocabulaire des événements est commun au site et à la Vigie : seul ce fichier du site est repris.
+# Le vocabulaire des événements et le calcul des réseaux (/24, /48) sont communs au site et à la Vigie : seuls ces deux
+# fichiers du site sont repris.
 RUN echo '{ "private": true, "type": "module" }' > package.json
 COPY --from=deps /app/vigie/node_modules ./vigie/node_modules
 COPY vigie ./vigie
 COPY server/securite/vocabulaire.js ./server/securite/vocabulaire.js
+COPY server/securite/adresses-ip.js ./server/securite/adresses-ip.js
 USER node
 EXPOSE 4100 4200
 STOPSIGNAL SIGTERM
