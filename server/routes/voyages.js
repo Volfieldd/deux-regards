@@ -11,7 +11,17 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
   const span = (tr, t) => (!tr.from ? t('aucune journée') : tr.from === tr.to ? fmtDay(tr.from, t) : t('du {from} au {to}', { from: fmtDay(tr.from, t), to: fmtDay(tr.to, t) }));
   const sees = (request, tr) => { const s = request.scope('sorties.voir'); return Boolean(s && (s.all || (tr.author_id != null && tr.author_id === s.authorId))); };
   const manages = (request, tr) => request.owns('sorties.gerer', tr.author_id ?? -2);
-  const load = request => { const tr = trips.get(Number(request.params.id)); return tr && sees(request, tr) ? tr : null; };
+  // Le voyage d'un autre photographe, hors de la portée du compte : introuvable comme un voyage qui n'existe pas, mais
+  // signalé à la Vigie (« hors portée », cas DS10 ; registre docs/etudes/vigie-besoins-des-briques.md, BV-14), comme les
+  // photos et les fiches (server/routes/admin.js). Un identifiant inconnu n'est pas signalé.
+  const outOfScope = (request, perm = 'sorties.voir') => app.securite.emit('authz_fail', { request, emetteur: 'server/routes/voyages.js · portée', detail: { raison: 'hors portée', permission: perm } });
+  const load = request => {
+    const tr = trips.get(Number(request.params.id));
+    if (!tr) return null;
+    if (sees(request, tr)) return tr;
+    outOfScope(request);
+    return null;
+  };
   const back = id => `/admin/voyages/${id}`;
   const names = () => new Map(repo.authors().map(a => [a.id, a]));
   // Voyage commun : « les deux photographes » quand il y en a deux, sinon « tous les photographes ».
@@ -163,6 +173,7 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
       return done(reply, to, request.t('Sortie détachée de son voyage.'));
     }
     const tr = trips.get(id);
+    if (tr && !sees(request, tr)) outOfScope(request, 'sorties.gerer');
     if (!tr || !sees(request, tr) || !manages(request, tr) || (tr.author_id != null && tr.author_id !== a.id)) return failed(reply, to, request.t('Ce voyage ne peut pas recevoir cette sortie.'));
     trips.addDays(tr.id, [{ author_id: a.id, day: request.params.day }]);
     return done(reply, to, request.t('Sortie rattachée au voyage « {name} ».', { name: tr.name }));

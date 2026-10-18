@@ -571,6 +571,27 @@ test('N7 : « hors portée » signalé pour la chose d’un autre, pas pour une 
   assert.equal(fails[0].route, '/admin/photos/:id');
 });
 
+test('BV-14 : le voyage d’un autre photographe est signalé « hors portée », pas un voyage qui n’existe pas', async t => {
+  const c = await withVigie(t);
+  const seb = c.db.prepare("SELECT id FROM authors WHERE slug = 'sebastien'").pluck().get();
+  const jul = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
+  const other = c.app.trips.create({ name: 'Voyage de Sébastien', authorId: seb });
+  const mine = c.app.trips.create({ name: 'Voyage de Julien', authorId: jul });
+  c.app.accounts.ensure({ sub: 'photographe-j', name: 'J', roles: ['photographe'] });
+  c.app.accounts.update(c.app.accounts.bySub('photographe-j').id, { authorId: jul }, 'test');
+  const token = (await import('../server/sessions.js')).createSessionStore(c.db).create({ sub: 'photographe-j', name: 'J', ctx: { net: '127.0.0.0', ua: 'autre · autre', fp: null } });
+  const get = url => c.app.inject({ url, cookies: { session: token }, headers: { accept: 'text/html' } });
+  assert.equal((await get(`/admin/voyages/${other}`)).statusCode, 404, 'introuvable, comme un voyage qui n’existe pas');
+  assert.equal((await get('/admin/voyages/999999')).statusCode, 404);
+  assert.equal((await get(`/admin/voyages/${mine}`)).statusCode, 200);
+  const v = await c.flush();
+  const fails = v.of('authz_fail').filter(e => e.detail.raison === 'hors portée');
+  assert.equal(fails.length, 1);
+  assert.equal(fails[0].route, '/admin/voyages/:id');
+  assert.equal(fails[0].origine.emetteur, 'server/routes/voyages.js · portée');
+  assert.equal(fails[0].detail.permission, 'sorties.voir');
+});
+
 test('D23 : pièges et jetons faux d’une même adresse — le premier tout de suite, puis un résumé par fenêtre de 5 minutes', async t => {
   const c = await withVigie(t);
   for (let i = 0; i < 12; i++) await c.app.inject({ url: '/.env', remoteAddress: '198.51.100.30' });
