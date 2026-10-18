@@ -165,14 +165,14 @@ Vérifier pendant une semaine dans **Security → Events** qu'aucun visiteur lé
 
 1. **Projects → Create New Project** : « Vigie ». Dans le projet :
    - **Roles → New**, quatre rôles (clé / nom affiché) : `vigie.viewer` « Lecteur », `vigie.handler` « Intervenant », `vigie.analyst` « Analyste », `vigie.admin` « Administrateur » ;
-   - réglages du projet : **Assert Roles on Authentication** et **Check authorization on Authentication** cochés (un compte sans rôle `vigie.*` est refusé dès Zitadel).
+   - réglages du projet : **Assert Roles on Authentication** (nouvelle console : *Assign user roles during authentication*) et **Check authorization on Authentication** cochés (un compte sans rôle `vigie.*` est refusé dès Zitadel).
 2. **Applications → New** : « Console Vigie », type **Web**, méthode **CODE** (secret client ; la Vigie ajoute PKCE) :
    - *Redirect URIs* : `https://vigie.nicephos.art/auth/callback` ;
    - *Post Logout URIs* : `https://vigie.nicephos.art/` ;
-   - onglet **Token Settings** : *User roles inside ID Token* coché ;
+   - onglet **Token Settings** : **User roles inside ID Token** et **Include user's profile info in the ID Token** (ancien nom : *User Info inside ID Token*) cochés, puis **Save** (la case seule ne s'enregistre pas). La console ne lit les rôles et le nom que dans l'ID token : sans la première case, elle répond « Connexion refusée : votre compte Zitadel n'a aucun rôle » même avec `vigie.admin` ;
    - noter **Client ID** et **Client Secret** (montré une seule fois) pour le `.env` de la Vigie.
 3. **Authorizations → New** : chacun des deux administrateurs → **`vigie.admin`**.
-4. Seconde application dans le même projet, pour Cloudflare Access : « Cloudflare Access », type **Web**, méthode **CODE**, *Redirect URI* `https://<équipe>.cloudflareaccess.com/cdn-cgi/access/callback` (nom d'équipe : étape 3.2.1) ; onglet **Token Settings** : **User Info inside ID Token** coché (Cloudflare ne lit l'adresse e-mail que dans l'ID token : sans cette case, le test de la méthode de connexion répond « User email was not returned »). Noter Client ID et secret.
+4. Seconde application dans le même projet, pour Cloudflare Access : « Cloudflare Access », type **Web**, méthode **CODE**, *Redirect URI* `https://<équipe>.cloudflareaccess.com/cdn-cgi/access/callback` (nom d'équipe : étape 3.2.1) ; onglet **Token Settings** : **Include user's profile info in the ID Token** (ancien nom : *User Info inside ID Token*) coché, puis **Save** (Cloudflare ne lit l'adresse e-mail que dans l'ID token : sans cette case, le test de la méthode de connexion répond « User email was not returned »). Noter Client ID et secret.
 
 ### 3.2 Cloudflare Zero Trust : Access devant la console
 
@@ -183,15 +183,16 @@ Vérifier pendant une semaine dans **Security → Events** qu'aucun visiteur lé
    - *Auth URL* : `https://<instance>.zitadel.cloud/oauth/v2/authorize` ;
    - *Token URL* : `https://<instance>.zitadel.cloud/oauth/v2/token` ;
    - *Certificate URL* : `https://<instance>.zitadel.cloud/oauth/v2/keys` ;
-   - *PKCE* : on ; *OIDC Claims* / scopes : `openid email profile` ;
-   - **Test** : la connexion doit aboutir avec votre compte Zitadel, et la réponse contenir `email` (sinon : case *User Info inside ID Token* de l'étape 3.1.4, sur l'application « Cloudflare Access » et non « Console Vigie »).
+   - *PKCE* : on ; scopes : ceux par défaut (`openid email profile`) ; *OIDC Claims* : vide (ce champ n'est pas celui des scopes) ;
+   - **Test** : la connexion doit aboutir avec votre compte Zitadel, et la réponse contenir `email`. Une réponse avec seulement `id` et `amr` (`"oidc_fields": {}`) veut dire que l'e-mail manque dans l'ID token : case *Include user's profile info in the ID Token* de l'étape 3.1.4, sur l'application dont le Client ID est celui saisi ici (« Cloudflare Access », pas « Console Vigie »), et adresse e-mail renseignée sur le compte.
    - Ajouter aussi **One-time PIN** (code par e-mail) comme méthode de secours.
 3. **Access → Applications → Add an application → Self-hosted** :
    - nom : « Vigie » ; *Application domain* : `vigie.nicephos.art` ; *Session duration* : **8 hours** ;
    - *Identity providers* : Zitadel et One-time PIN ; *Instant Auth* : off ;
    - politique **Allow** « Administrateurs » : *Include → Emails* : les deux adresses ;
    - noter l'**Application Audience (AUD) Tag** (onglet *Overview* de l'application) : il ira dans le `.env` de la Vigie (`VIGIE_ACCESS_AUD`), avec le nom d'équipe (`VIGIE_ACCESS_TEAM`).
-4. **Networks → Tunnels → nicephos → Public Hostname → Add** : `vigie.nicephos.art`, service **HTTP**, URL : `172.29.42.20:4200` (adresse fixe de la console, `VIGIE_CONSOLE_IP`). **Seulement quand la Vigie tourne avec la console réglée** (étape 3.5).
+4. **Networks → Tunnels → nicephos → Public Hostname → Add** : `vigie.nicephos.art`, service **HTTP** (pas HTTPS), URL : `172.29.42.20:4200` (adresse fixe de la console sur le réseau du tunnel, `VIGIE_CONSOLE_IP`). **Jamais l'adresse de l'Unraid** (`10.21.30.222:4200`…) : le port 4200 n'est pas publié sur l'hôte, Cloudflare répondrait « Host Error ». **Seulement quand la Vigie tourne avec la console réglée** (étape 3.5).
+5. **Un seul connecteur** : onglet **Connectors** du tunnel. Seul le conteneur `nicephos-tunnel` de la pile est sur le réseau de la console ; un second `cloudflared` lancé avec le même jeton (modèle Unraid « Cloudflared Tunnel », autre machine) reçoit une partie des requêtes et ne joint pas `172.29.42.20` : 502 « Bad gateway » une fois sur deux, typiquement au retour de Zitadel. Arrêter l'autre (et son démarrage automatique), après avoir vérifié que `nicephos-tunnel` joint les autres services du tunnel (wiki [Vigie, Dépannage](https://github.com/Volfieldd/deux-regards/wiki/Vigie#dépannage)), ou lui donner un tunnel à lui.
 
 ### 3.5 `vigie.env` : la console
 
@@ -206,9 +207,9 @@ VIGIE_ACCESS_AUD=<Application Audience (AUD) Tag>
 VIGIE_ADMIN_SUBS=<sub Zitadel des deux administrateurs, séparés par une virgule>
 ```
 
-Le **Client Secret** va dans un fichier, jamais dans `vigie.env` : `VIGIE_SECRETS_DIR/console-secret` (une ligne, `chmod 600`, propriétaire 99:100). Le sub d'un compte se lit dans Zitadel (**Users →** le compte, champ *ID*). La console exige aussi la lecture des événements (`VIGIE_ZITADEL_ISSUER` et `zitadel.json`, étape 1.3) : elle relit les rôles `vigie.*` toutes les 5 minutes par ce compte de service.
+Une valeur par ligne, rien d'autre après le `=` (pas de commentaire en fin de ligne). Le **Client Secret** va dans un fichier, jamais dans `vigie.env` : `VIGIE_SECRETS_DIR/console-secret` (celui de « Console Vigie », pas de « Cloudflare Access » ; une ligne, `chmod 600`, propriétaire 99:100). Le sub d'un compte se lit dans Zitadel (**Users →** le compte, champ *ID*). La console exige aussi la lecture des événements : `VIGIE_ZITADEL_ISSUER=https://<instance>.zitadel.cloud` décommenté dans `vigie.env` et la clé dans `VIGIE_SECRETS_DIR/zitadel.json` (étape 1.3) ; elle relit les rôles `vigie.*` toutes les 5 minutes par ce compte de service. Sans eux, la Vigie refuse de démarrer : « La console exige VIGIE_ZITADEL_ISSUER et le compte de service ».
 
-Première connexion : vérifier que la console vous laisse entrer avec la clé d'accès. Un refus « clé d'accès exigée » veut dire que le jeton ne porte pas `mfa` dans `amr` : revoir l'étape 1.1, et me transmettre la ligne `vigie_console_refus` du journal (`docker exec nicephos-vigie node vigie/cli.js console`), qui donne le contenu de `amr`.
+Première connexion : vérifier que la console vous laisse entrer avec la clé d'accès. Un refus « clé d'accès exigée » veut dire que le jeton ne porte pas `mfa` dans `amr` : revoir l'étape 1.1, et me transmettre la ligne `vigie_console_refus` du journal (`docker exec nicephos-vigie node vigie/cli.js console`), qui donne le contenu de `amr`. Autres symptômes (« Host Error », 502, « User email was not returned », « Connexion refusée ») : wiki [Vigie, Dépannage](https://github.com/Volfieldd/deux-regards/wiki/Vigie#dépannage).
 
 ### 3.3 Redirection vers `www` : exclure la console
 
