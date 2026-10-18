@@ -69,7 +69,7 @@ picture { display: block; }
 }
 @media (max-width: 480px) { .brand-emblem .subtitle { display: none; } }
 .preview-bar { margin: 0; padding: 6px var(--gut); background: var(--safelight); color: #fff; position: relative; z-index: 10; }
-.preview-bar a { text-decoration: underline; }
+.preview-bar a, .preview-bar button { text-decoration: underline; }
 
 /* ---------- ouverture · B ---------- */
 .hero { position: relative; background: var(--dark); color: var(--dark-ink); height: min(86vh, 820px); min-height: 520px; overflow: hidden; }

@@ -1973,11 +1973,18 @@ export default async function adminRoutes(app) {
 
   app.get('/admin/apparence', P('site.apparence'), async (request, reply) => render(request, reply, 'appearance', {
     title: request.t('Apparence'), THEMES, BRAND_MODES, BRAND_SLOTS, themeId: app.appearance.themeId(), brand: app.appearance.brand(),
+    publicVersion: app.publicVersion.setting(), previewV2: app.publicVersion.previewOn(request),
   }));
 
   app.post('/admin/apparence', W('site.apparence'), async (request, reply) => {
     const body = request.body || {};
     if (ownKey(THEMES, body.theme)) repo.saveSetting('theme', body.theme);
+    // Site public v1 ou v2 : pour tous les visiteurs. Le changement est noté au journal avec son sens.
+    const before = app.publicVersion.setting();
+    if (typeof body.site_public === 'string' && body.site_public !== before && app.publicVersion.save(body.site_public)) {
+      request.audited = true;
+      app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'POST /admin/apparence', target: 'site public', status: 303, detail: `site public : ${before} → ${body.site_public}` });
+    }
     const brand = app.appearance.brand();
     saveBrand({
       ...brand,
@@ -1985,6 +1992,17 @@ export default async function adminRoutes(app) {
       subtitle: typeof body.subtitle === 'string' ? body.subtitle.replace(/[\x00-\x1f\x7f]/g, '').trim().slice(0, 60) : brand.subtitle,
     });
     return done(reply, '/admin/apparence', request.t('Apparence enregistrée.'));
+  });
+
+  // Aperçu de la v2 du site public, pour cette session seulement (server/version-publique.js) : « apercu=1 » l'ouvre (sur
+  // l'accueil, ou la page « vers »), « apercu=0 » le quitte (retour à la page « vers », ou à Apparence). Noté au journal.
+  app.post('/admin/apparence/apercu-v2', W('site.apparence'), async (request, reply) => {
+    const on = request.body?.apercu === '1';
+    app.publicVersion.setPreview(request, on);
+    request.audited = true;
+    app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'POST /admin/apparence/apercu-v2', target: 'site public', status: 303, detail: on ? 'aperçu de la v2 ouvert' : 'aperçu de la v2 quitté' });
+    const to = safeNext(typeof request.body?.vers === 'string' ? request.body.vers : '', on ? '/' : '/admin/apparence');
+    return reply.redirect(/^\/(?:admin|auth)(?:[/?#]|$)/.test(to) && on ? '/' : to, 303);
   });
 
   // Marque : quatre emplacements (emblème, icône, logo complet, image de partage). PNG, WebP ou JPEG ;
