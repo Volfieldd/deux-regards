@@ -206,6 +206,8 @@ export const UI = {
       emptySerie: (serie, n) => `Voir toute la série ${serie} (${n >= 2 ? `${n} photos` : `${n} photo`})`, emptyAuthor: (name, n) => `Voir les ${n} photos de ${name}`,
       breadcrumb: 'Fil d’Ariane', serieBrief: 'La série en bref', serieTitle: (name, names) => `${name} — série de ${names}`,
       seriePhotos: n => (n === 1 ? 'La photo' : `Les ${n} photos`), oneRegard: 'La même série, un seul regard', otherSeries: 'Autres séries',
+      // Texte d'intention d'une série (MQ-03), numéro d'inventaire de la visionneuse (MQ-04, UX-T-05).
+      readMore: 'Lire la suite', readMoreOf: ' du texte de la série', inventory: 'Inventaire',
     },
     search: {
       title: 'Rechercher', label: 'Mots-clés', placeholder: 'brume, Loire, portrait…', submit: 'Chercher',
@@ -370,6 +372,7 @@ export const UI = {
       emptySerie: (serie, n) => `See the whole ${serie} series (${n} ${n === 1 ? 'photo' : 'photos'})`, emptyAuthor: (name, n) => `See the ${n} photos by ${name}`,
       breadcrumb: 'Breadcrumb', serieBrief: 'The series at a glance', serieTitle: (name, names) => `${name} — series by ${names}`,
       seriePhotos: n => (n === 1 ? 'The photo' : `The ${n} photos`), oneRegard: 'The same series, one photographer', otherSeries: 'Other series',
+      readMore: 'Read more', readMoreOf: ' about the series', inventory: 'Inventory number',
     },
     search: {
       title: 'Search', label: 'Keywords', placeholder: 'mist, Loire, portrait…', submit: 'Search',
@@ -533,6 +536,7 @@ export const UI = {
       emptySerie: (serie, n) => `Die ganze Serie ${serie} ansehen (${n} ${n === 1 ? 'Foto' : 'Fotos'})`, emptyAuthor: (name, n) => `Die ${n} Fotos von ${name} ansehen`,
       breadcrumb: 'Brotkrümelnavigation', serieBrief: 'Die Serie im Überblick', serieTitle: (name, names) => `${name} — Serie von ${names}`,
       seriePhotos: n => (n === 1 ? 'Das Foto' : `Die ${n} Fotos`), oneRegard: 'Dieselbe Serie, ein Blick', otherSeries: 'Weitere Serien',
+      readMore: 'Weiterlesen', readMoreOf: ' (Text der Serie)', inventory: 'Inventarnummer',
     },
     search: {
       title: 'Suchen', label: 'Stichwörter', placeholder: 'Nebel, Loire, Porträt…', submit: 'Suchen',

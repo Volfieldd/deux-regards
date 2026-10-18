@@ -66,8 +66,11 @@ test('migration 052 : une colonne show_time à 0 pour toutes les photos, 0 ou 1 
   assert.equal(c.db.prepare('SELECT COUNT(*) FROM photos WHERE show_time != 0').pluck().get(), 0);
   assert.ok(c.db.prepare('SELECT 1 FROM migrations WHERE name = ?').get('052_heure_publique.sql'));
   assert.throws(() => c.db.prepare('UPDATE photos SET show_time = 2 WHERE id = ?').run(c.a.id), /CHECK/);
-  // Aucun déclencheur sur la colonne (la Vigie surveille les déclencheurs des comptes, pas ceux des photos).
-  assert.deepEqual(c.db.prepare("SELECT name FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'photos'").pluck().all().sort(), ['photos_published_at_insert', 'photos_published_at_update']);
+  // Aucun déclencheur sur la colonne (la Vigie surveille les déclencheurs des comptes, pas ceux des photos) : ceux des
+  // photos sont la date de première publication (009) et le numéro d'inventaire (053).
+  assert.deepEqual(c.db.prepare("SELECT name FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'photos'").pluck().all().sort(),
+    ['photos_inventory_insert', 'photos_inventory_stable', 'photos_inventory_update', 'photos_published_at_insert', 'photos_published_at_update']);
+  assert.deepEqual(c.db.prepare("SELECT name FROM sqlite_master WHERE type = 'trigger' AND sql LIKE '%show_time%'").pluck().all(), []);
 });
 
 test('format de l’heure : 14 h 32, 2:32 pm, 14:32 Uhr ; rien sans case cochée, sans jour ou sans heure', () => {

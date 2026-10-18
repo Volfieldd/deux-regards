@@ -6,6 +6,7 @@ Une fiche par photographe.
 |---|---|
 | **Nom** | affiché sur le site (filtre « deux regards », légendes, À propos) |
 | **Adresse** | `/auteur/<adresse>` (fiches existantes seulement) |
+| **Description courte** | son regard, une phrase sous son nom (« le matin, les quais, les fleuves »), 160 signes au plus, sur une ligne. En v2 du site, l'accueil l'affiche après son nombre de photos, dans « Deux regards ». Version anglaise et allemande facultative (vide : la française). |
 | **Biographie** | affichée sur la page « À propos » ; version anglaise et allemande facultative, repliée dessous (vide : la biographie française) |
 | **Signature des posts Instagram** | ajoutée sous la légende des posts Instagram de ses photos qui ont une légende, retirable photo par photo (voir [Instagram](instagram#la-légende)) |
 | **Lettre des cartes** | la lettre des cartes d’accord (J-0142) ; vide : la première lettre de l'adresse. Elle est enregistrée avec la fiche : changer ensuite l'adresse ne change plus la lettre (cartes imprimées et QR restent valables). Une lettre par photographe : une lettre déjà prise, saisie ou non, est refusée (voir [Rencontres](rencontres)). |

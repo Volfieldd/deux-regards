@@ -6,6 +6,8 @@
         <label><%= t('Nom') %> <input name="name" value="<%= v.name || '' %>" required maxlength="80"<%~ bad('name') %>></label>
 <% if (v.id) { %>        <label><%= t('Adresse') %> <span class="mono">/auteur/</span><input name="slug" value="<%= v.slug %>" maxlength="80"<%~ bad('slug') %>></label><% } %>
       </div>
+      <label><%= t('Description courte') %> <span class="mono"><%= t('son regard, une phrase sous son nom sur l’accueil du site · {n} signes au plus · ex. « le matin, les quais, les fleuves »', { n: it.limits.short_bio }) %></span><input name="short_bio" value="<%= v.short_bio || '' %>" maxlength="<%= it.limits.short_bio %>"></label>
+      <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'short_bio', label: t('Description courte'), max: it.limits.short_bio }) %>
       <label><%= t('Biographie') %> <textarea name="bio" rows="3" maxlength="2000"><%= v.bio || '' %></textarea></label>
       <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'bio', label: t('Biographie'), max: 2000, rows: 3 }) %>
       <label><%= t('Lettre des cartes d’accord') %> <span class="mono"><%= t('J-0142 ; vide : {letter}', { letter: v.slug ? v.slug.charAt(0).toUpperCase() : t('première lettre de l’adresse') }) %></span><input name="card_prefix" value="<%= v.card_prefix || '' %>" maxlength="1" autocapitalize="characters" class="mono" size="2"<%~ bad('card_prefix') %>></label>

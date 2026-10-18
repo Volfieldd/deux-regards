@@ -203,6 +203,14 @@ export function typo(text, lang = 'fr') {
   return s;
 }
 
+// Texte d'intention d'une série (MQ-03) : ses deux premières phrases (head), puis le reste (rest, « Lire la suite » au
+// téléphone). La coupe tombe à la fin d'une phrase : un point, un point d'exclamation ou d'interrogation, des points de
+// suspension (un guillemet ou une parenthèse fermants peuvent suivre), puis une espace ; « 1.5 » ne coupe pas.
+export function intentParts(text, n = 2) {
+  const parts = String(text ?? '').trim().split(/(?<=[.!?…][»”"’)\]]?)\s+/u).filter(Boolean);
+  return { head: parts.slice(0, n).join(' '), rest: parts.slice(n).join(' ') };
+}
+
 // Ancre d'un intertitre (sommaire des pages de texte) : son texte en adresse (« Qui est responsable » → qui-est-responsable),
 // numérotée si deux intertitres se ressemblent. ids : l'ensemble des ancres déjà prises dans la page.
 export function ancre(text, ids = new Set()) {

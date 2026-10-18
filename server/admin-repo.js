@@ -13,6 +13,18 @@ export class ValidationError extends Error {
 }
 
 const text = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
+// Texte d'une seule ligne (texte de remplacement, description courte, texte d'intention) : retours à la ligne,
+// tabulations et autres caractères de contrôle remplacés par une espace, espaces répétées réduites. Il est écrit tel
+// quel dans un attribut alt ou une phrase : rien n'y est lu comme du HTML (échappé à l'affichage).
+const line = (v, max) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max).trim() : '');
+// Bornes des textes du site public v2 (migration 053).
+//   - Texte de remplacement : 250 signes. Une ou deux phrases sur ce qu'on voit (« Une minoterie à six cheminées sur la
+//     Maine, à demi noyée dans la brume bleue du matin. » : 86 signes) ; les guides d'accessibilité conseillent de
+//     rester vers 125 signes en français, et l'allemand est un tiers plus long : 250 laisse cette marge sans permettre
+//     un texte qu'un lecteur d'écran lirait d'un bloc pendant une minute. Plus long, c'est la légende.
+//   - Description courte d'un photographe : une phrase sous son nom (« le matin, les quais, les fleuves »), 160 signes.
+//   - Texte d'intention d'une série : environ 330 signes dans la maquette (MQ-03), 800 au plus, en un paragraphe.
+export const LIMITS = { alt_text: 250, short_bio: 160, intent: 800 };
 // Mois d'un instant à l'heure de Paris (« 2026-11 »).
 const PARIS_MONTH = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit' });
 const parisMonth = d => PARIS_MONTH.format(d).slice(0, 7);
@@ -162,7 +174,7 @@ export function createAdminRepo(db) {
       const needle = fold(text(search, 100));
       return q.photos.all()
         .filter(p => (!author || p.author_slug === author) && (!category || p.category_slug === category) && (!status || p.status === status))
-        .filter(p => !needle || [p.title, p.place, p.legend, p.slug, p.keywords, p.title_en, p.title_de, p.legend_en, p.legend_de, p.place_en, p.place_de].some(v => fold(v).includes(needle)))
+        .filter(p => !needle || [p.title, p.place, p.legend, p.slug, p.keywords, p.title_en, p.title_de, p.legend_en, p.legend_de, p.place_en, p.place_de, p.alt_text, p.alt_text_en, p.alt_text_de, p.inventory].some(v => fold(v).includes(needle)))
         .map(p => ({ ...p, n: p.position + 1, when: monthYear(p.taken_on), provisional: isProvisional(p) }));
     },
     photo: id => q.photo.get(id),
@@ -210,8 +222,10 @@ export function createAdminRepo(db) {
       const showTime = truthy(body.show_time) && /^\d{2}:\d{2}$/.test(before?.taken_time || '') ? 1 : 0;
       // Traductions facultatives (site en anglais et en allemand) : gardées telles quelles si le formulaire ne les envoie pas.
       const tr = (field, max) => Object.fromEntries(['en', 'de'].map(l => [`${field}_${l}`, `${field}_${l}` in body ? text(body[`${field}_${l}`], max) : (before?.[`${field}_${l}`] ?? '')]));
+      // Texte de remplacement, en trois langues, sur une ligne : gardé tel quel si le formulaire ne l'envoie pas.
+      const alt = Object.fromEntries(['alt_text', 'alt_text_en', 'alt_text_de'].map(k => [k, k in body ? line(body[k], LIMITS.alt_text) : (before?.[k] ?? '')]));
       const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn === undefined ? text(body.taken_on, 40) : takenOn, legend: text(body.legend, 2000), status, watermark,
-        ...tr('title', 160), ...tr('legend', 2000), ...tr('place', 120),
+        ...tr('title', 160), ...tr('legend', 2000), ...tr('place', 120), ...alt,
         keywords: 'keywords' in body ? normKeywords(body.keywords) : (before?.keywords ?? ''),
         city_label: 'city_label' in body ? text(body.city_label, 120) : cities.labelOf(before), on_map: loc.on_map, show_time: showTime };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
@@ -220,6 +234,7 @@ export function createAdminRepo(db) {
         db.prepare(`UPDATE photos SET series_checked = CASE WHEN category_id = @category_id THEN series_checked ELSE 1 END, title = @title, slug = @slug, category_id = @category_id, author_id = @author_id, place = @place,
           taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark,
           title_en = @title_en, title_de = @title_de, legend_en = @legend_en, legend_de = @legend_de, place_en = @place_en, place_de = @place_de,
+          alt_text = @alt_text, alt_text_en = @alt_text_en, alt_text_de = @alt_text_de,
           keywords = @keywords, show_time = @show_time, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
         db.prepare(`UPDATE photos SET city_id = @city_id, city_name = @city_name, city_cc = @city_cc, city_lat = @city_lat, city_lon = @city_lon,
           city_source = @city_source, on_map = @on_map WHERE id = @id`).run({ ...loc, id });
@@ -238,7 +253,7 @@ export function createAdminRepo(db) {
       if (!p) return null;
       const merged = { ...p, taken_on: p.taken_on || '', watermark: p.watermark === 0 ? 'none' : 'default' };
       for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend', 'keywords', 'city_id', 'city_label', 'on_map', 'show_time',
-        'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de']) if (k in body) merged[k] = body[k];
+        'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de', 'alt_text', 'alt_text_en', 'alt_text_de']) if (k in body) merged[k] = body[k];
       // Brouillon dont l'adresse dérive encore du titre : elle suit le nouveau titre.
       merged.slug = 'title' in body && p.status === 'draft' && p.slug === uniqueSlug('photos', p.title, id) ? '' : p.slug;
       this.updatePhoto(id, merged);
@@ -341,11 +356,13 @@ export function createAdminRepo(db) {
       const name = text(body.name, 80);
       if (!name) errors.name = 'Le nom est obligatoire.';
       const slug = checkedSlug('categories', id ? body.slug : '', name, id, errors);
-      const old = id ? db.prepare('SELECT name_en, name_de FROM categories WHERE id = ?').get(id) : null;
+      const old = id ? db.prepare('SELECT name_en, name_de, intent, intent_en, intent_de FROM categories WHERE id = ?').get(id) : null;
       const name_en = 'name_en' in body ? text(body.name_en, 80) : old?.name_en ?? '';
       const name_de = 'name_de' in body ? text(body.name_de, 80) : old?.name_de ?? '';
-      if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values: { name, slug, name_en, name_de } });
-      if (id) return db.prepare('UPDATE categories SET name = ?, slug = ?, name_en = ?, name_de = ? WHERE id = ?').run(name, slug, name_en, name_de, id);
+      // Texte d'intention (page de la série, MQ-03), en trois langues : gardé tel quel si le formulaire ne l'envoie pas.
+      const intent = Object.fromEntries(['intent', 'intent_en', 'intent_de'].map(k => [k, k in body ? line(body[k], LIMITS.intent) : old?.[k] ?? '']));
+      if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values: { name, slug, name_en, name_de, ...intent } });
+      if (id) return db.prepare('UPDATE categories SET name = @name, slug = @slug, name_en = @name_en, name_de = @name_de, intent = @intent, intent_en = @intent_en, intent_de = @intent_de WHERE id = @id').run({ name, slug, name_en, name_de, ...intent, id });
       // Nouvelle série en tête : c'est celle sur laquelle on travaille.
       return db.transaction(() => {
         db.prepare('UPDATE categories SET position = position + 1').run();
@@ -427,10 +444,12 @@ export function createAdminRepo(db) {
       const holder = /^[A-Z]$/.test(prefix) && owner && owner.id !== Number(id) ? owner : null;
       if (typed && !/^[A-Z]$/.test(typed)) errors.card_prefix = 'Lettre des cartes : une seule lettre, de A à Z.';
       else if (holder) errors.card_prefix = `La lettre ${prefix} est déjà celle de ${holder.name} : choisissez-en une autre.`;
-      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), card_prefix: /^[A-Z]$/.test(prefix) ? prefix : '', ig_signature: text(body.ig_signature, 200) };
+      // Description courte (son « regard », sous son nom sur l'accueil v2), en trois langues : gardée si absente du formulaire.
+      const short = Object.fromEntries(['short_bio', 'short_bio_en', 'short_bio_de'].map(k => [k, k in body ? line(body[k], LIMITS.short_bio) : current?.[k] ?? '']));
+      const values = { name, slug, bio: text(body.bio, 2000), bio_en: text(body.bio_en, 2000), bio_de: text(body.bio_de, 2000), ...short, card_prefix: /^[A-Z]$/.test(prefix) ? prefix : '', ig_signature: text(body.ig_signature, 200) };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
-      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, card_prefix = @card_prefix, ig_signature = @ig_signature WHERE id = @id').run({ ...values, id });
-      db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, card_prefix, ig_signature) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @card_prefix, @ig_signature)').run(values);
+      if (id) return db.prepare('UPDATE authors SET name = @name, slug = @slug, bio = @bio, bio_en = @bio_en, bio_de = @bio_de, short_bio = @short_bio, short_bio_en = @short_bio_en, short_bio_de = @short_bio_de, card_prefix = @card_prefix, ig_signature = @ig_signature WHERE id = @id').run({ ...values, id });
+      db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, short_bio, short_bio_en, short_bio_de, card_prefix, ig_signature) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @short_bio, @short_bio_en, @short_bio_de, @card_prefix, @ig_signature)').run(values);
     },
     // Ce qui retient un photographe (phrases en français, une par cause) : ses photos, ses rencontres (données
     // personnelles, qui ne seraient plus visibles que des administrateurs), ses voyages (devenus « communs ») et le

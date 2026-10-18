@@ -19,7 +19,7 @@
     <figure class="vis-fig">
       <figcaption class="cartel cartel--grand vis-cartel"><span class="vis-pos donnee"><%= pos %>&nbsp;· <%= ctx %></span><h1 class="cartel-t"><%= p.title %></h1><span class="cartel-m"><%= meta %></span></figcaption>
       <div class="vis-cadre" data-cadre>
-        <%~ it.picture(p, { sizes: v.visSizes(f), eager: true }) %>
+        <%~ it.picture(p, { sizes: v.visSizes(f), eager: true, alt: p.alt || p.title }) %>
 <% if (it.count > 1) { %>
         <nav class="vis-nav" aria-label="<%= t.v2.photosOf(ctx) %>">
           <a class="vis-fleche vis-prec" href="<%= prevUrl %>" rel="prev"><%~ ic('prec', { size: 24 }) %><span class="vis-fleche-t"><%= t.v2.prev %><span class="sr-only"><%= t.v2.colon %> <%= it.prev.title %></span></span></a>
@@ -49,6 +49,9 @@
           <dt><%= t.v2.photographer %></dt><dd><a href="<%= it.galleryUrl({ regard: p.author_slug }) %>"><%= p.author %></a><% if (it.authorCount) { %>&nbsp;· <%= nb(t.photos(it.authorCount)) %><% } %></dd>
 <% if (kws.length) { %>
           <dt><%= t.search.keywords %></dt><dd><ul class="vis-mots"><% kws.forEach(k => { %><li><% if (it.searchPage) { %><a href="<%= it.u('/recherche') %>?q=<%= encodeURIComponent(k) %>" rel="nofollow"><%= k %></a><% } else { %><%= k %><% } %></li><% }) %></ul></dd>
+<% } %><% /* Numéro d'inventaire (UX-T-05) : donné à la première publication, il ne bouge plus quand l'ordre change ; la
+      position « 4 / 10 » sert à la navigation. */ if (p.inventory) { %>
+          <dt><%= t.v2.inventory %></dt><dd class="donnee"><%= p.inventory %></dd>
 <% } %>
         </dl>
       </div>
@@ -78,7 +81,7 @@
       <div>
         <h2 class="titre-2" id="pres-t"><%= n.title %></h2>
         <ul class="rangees rangees--etiree" aria-labelledby="pres-t">
-<% pl.list.forEach(x => { const g = v.fmt(x.photo); %>          <li class="<%= g.cls %><%= g.r < 1 ? ' v' : g.r === 1 ? ' c' : '' %>"><a class="vignette" href="<%= it.photoUrl(x.photo.slug) %>"><%~ it.picture(x.photo, { sizes: v.nearSizes(x.photo, items, f), alt: '' }) %><span class="cartel cartel--ligne"><span class="cartel-t"><%= x.photo.title %></span><span class="cartel-m"><%= [x.same ? n.same : nb(n.km(x.km)), x.city, x.photo.author].join(' · ') %></span></span></a></li>
+<% pl.list.forEach(x => { const g = v.fmt(x.photo); %>          <li class="<%= g.cls %><%= g.r < 1 ? ' v' : g.r === 1 ? ' c' : '' %>"><a class="vignette" href="<%= it.photoUrl(x.photo.slug) %>"><%~ it.picture(x.photo, { sizes: v.nearSizes(x.photo, items, f), alt: x.photo.alt || '' }) %><span class="cartel cartel--ligne"><span class="cartel-t"><%= x.photo.title %></span><span class="cartel-m"><%= [x.same ? n.same : nb(n.km(x.km)), x.city, x.photo.author].join(' · ') %></span></span></a></li>
 <% }) %>        </ul>
       </div>
 <% } else { %>

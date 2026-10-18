@@ -199,6 +199,79 @@ test.describe('parcours d’une photo', () => {
     await expect(page.locator('.flash[role=status]')).toHaveText('Photo supprimée.');
   });
 
+  // Données de la v2 (migration 053) : écrites dans l'admin, lues sur le site public (aperçu de la v2 pour l'admin, v1
+  // pour un visiteur), puis remises à vide. Photo, série et photographe du jeu de démonstration.
+  test('textes du site v2 : texte de remplacement, intention d’une série, regard, inventaire (admin → site public)', async ({ page, context }) => {
+    test.setTimeout(180_000);
+    const ALT = 'La Loire sous la brume, une barque immobile près de la rive.';
+    const INTENT = ['Ce que l’eau garde du matin : la brume, les lignes, le silence.', 'Sébastien y cherche les heures sans personne.', 'Tout a été pris à pied, le long des fleuves.'];
+    const SHORT = 'le matin, les quais, les fleuves';
+    const fiche = async () => {
+      await page.goto(`/admin/photos?vue=liste&q=${encodeURIComponent('Brume sur la Loire')}`);
+      await page.locator('.plist li', { hasText: 'Brume sur la Loire' }).locator('a.ttl').first().click();
+    };
+    const card = () => page.locator('.scard[data-id]').filter({ has: page.locator('.title', { hasText: /^Paysage$/ }) });
+    const author = () => page.locator('section.panel').filter({ has: page.locator('h2', { hasText: 'Sébastien' }) });
+    const saveTexts = async (alt, intent, short) => {
+      await fiche();
+      await page.locator('textarea[name=alt_text]').fill(alt);
+      await page.getByRole('button', { name: 'Enregistrer' }).first().click();
+      await expect(page.getByRole('status').filter({ hasText: 'Photo enregistrée.' })).toHaveText('Photo enregistrée.');
+      await page.goto('/admin/series');
+      await card().getByText('Modifier', { exact: true }).click();
+      await card().locator('textarea[name=intent]').fill(intent);
+      await card().getByRole('button', { name: 'Enregistrer' }).click();
+      await expect(page.locator('.flash[role=status]')).toHaveText('Série enregistrée.');
+      await page.goto('/admin/auteurs');
+      await author().locator('input[name=short_bio]').fill(short);
+      await author().getByRole('button', { name: 'Enregistrer' }).click();
+      await expect(page.locator('.flash[role=status]')).toHaveText('Auteur enregistré.');
+    };
+    try {
+      await saveTexts(ALT, INTENT.join(' '), SHORT);
+      // L'inventaire se lit dans la fiche ; il n'a pas de champ.
+      await fiche();
+      const caption = await page.locator('figure.preview figcaption').innerText();
+      const inventory = caption.match(/inventaire ([A-Z]\d{2}-\d{3,})/)?.[1];
+      expect(inventory, caption).toBeTruthy();
+      await expect(page.locator('[name=inventory]')).toHaveCount(0);
+
+      // Un visiteur (v1) : seul l'attribut alt de la photo change.
+      const visitor = await context.browser().newPage();
+      await visitor.goto('/photo/brume-sur-la-loire');
+      await expect(visitor.locator('.vimg img')).toHaveAttribute('alt', ALT);
+      await expect(visitor.locator('main')).not.toContainText(inventory);
+      await visitor.goto('/');
+      await expect(visitor.locator('main')).not.toContainText(SHORT);
+      await visitor.close();
+
+      // L'administrateur, dans l'aperçu de la v2.
+      await page.goto('/admin/apparence');
+      await page.getByRole('button', { name: 'Ouvrir l’aperçu de la v2' }).click();
+      await page.goto('/serie/paysage');
+      await expect(page.locator('.ser-txt .ser-int').first()).toHaveText(`${INTENT[0]} ${INTENT[1]}`.replace(' :', ' :'));
+      await expect(page.locator('.ser-txt .que-bureau')).toBeVisible();
+      await expect(page.locator('.depliant--suite')).toBeHidden();
+      await expect(page.locator('.rangees a[href^="/photo/brume-sur-la-loire"] img')).toHaveAttribute('alt', ALT);
+      // Au téléphone : deux phrases, puis « Lire la suite », sans script.
+      await page.setViewportSize({ width: 412, height: 915 });
+      await expect(page.locator('.ser-txt .que-bureau')).toBeHidden();
+      await page.locator('.depliant--suite > summary').click();
+      await expect(page.locator('.depliant--suite[open] .ser-int')).toHaveText(INTENT[2]);
+      await page.setViewportSize({ width: 1280, height: 2600 });
+      await page.goto('/');
+      await expect(page.locator('#regards .liste-liens-d').filter({ hasText: SHORT })).toHaveCount(1);
+      await page.goto('/photo/brume-sur-la-loire');
+      await expect(page.locator('.vis-cadre img')).toHaveAttribute('alt', ALT);
+      await expect(page.locator('dl.def dt', { hasText: 'Inventaire' })).toHaveCount(1);
+      await expect(page.locator('dl.def dd.donnee')).toHaveText(inventory);
+      await page.goto('/admin/apparence');
+      await page.getByRole('button', { name: 'Quitter l’aperçu' }).click();
+    } finally {
+      await saveTexts('', '', '');
+    }
+  });
+
   test('séries : création en tête, ordre au clavier, suppression qui déplace les photos', async ({ page }) => {
     await page.goto('/admin/series');
     const cards = page.locator('.scard[data-id]');
