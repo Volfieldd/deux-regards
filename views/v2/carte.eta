@@ -1,0 +1,61 @@
+<% /* Carte du monde en v2 (/carte) : les photos publiées que leur auteur a mises sur la carte, groupées par ville (jamais
+      de position exacte). Le fond (Natural Earth) dans un SVG cadré sur les lieux (v2.cadrage : un sixième du cadre de marge, UX-F-25),
+      les vignettes des villes par-dessus, en pixels, à leur place en pourcentage (comme la mini-carte de la visionneuse) :
+      elles gardent leur taille quand la carte rétrécit. Sans script : la carte cadrée, chaque vignette mène à son lieu
+      dans la liste. Avec script (js/v2/site.js) : zoom (boutons, pincement, Ctrl + molette, + et −), déplacement (glisser,
+      boutons, flèches du clavier), « Monde », vignettes voisines réunies, noms des villes quand ils ont la place ; une
+      vignette hors du cadre est retirée du parcours au clavier. Chaque lieu de la liste a son « ↑ Carte ». */ %>
+<% layout('./layout', { pageTitle: it.v2.typo(it.pageTitle), description: it.v2.typo(it.description) }) %>
+<% const t = it.t, m = t.map, pg = t.pages, v = it.v2, ic = v.ic, W = it.map.width, H = it.map.height;
+   const terre = it.asset('carte-terre.svg'), fine = it.asset('carte-terre-fine.svg');
+   const vue = v.cadrage(it.places, { W, H }), fond = vue.w < W / 2.5 ? fine : terre;
+   const names = it.places.slice(0, 8).map(c => c.name).join(', ') + (it.places.length > 8 ? '…' : ''); %>
+<%~ include('./_entete', { ...it, courant: 'carte', mapPage: true }) %>
+<main id="contenu">
+<% if (it.preview) { %>  <div class="wrap pages-note"><div class="msg" role="note" lang="fr"><%~ ic('info') %><p>Aperçu réservé aux photographes : cette page n’est pas publiée. Les visiteurs ne la voient pas et le menu du site ne la montre pas. <a href="/admin/site#carte">Publier la carte du monde (Site public)</a></p></div></div>
+<% } %>  <div class="wrap tete-page">
+    <h1 class="titre-page"><%= m.title %></h1>
+    <p class="chapo chapo--texte"><%= it.places.length ? v.typo(`${t.photos(it.count)} · ${t.places(it.places.length)}`) : m.none %></p>
+  </div>
+<% if (it.places.length) { %>  <div class="wrap">
+    <figure class="carte" id="carte" data-carte data-w="<%= W %>" data-h="<%= H %>" data-cluster-one="<%= v.typo(m.cluster('{name}', 1, '{n}')) %>" data-cluster-many="<%= v.typo(m.cluster('{name}', 99, '{n}')).replace('99', '{others}') %>">
+      <div class="carte-cadre" data-carte-vue>
+        <svg class="carte-fond" viewBox="<%= vue.x %> <%= vue.y %> <%= vue.w %> <%= vue.h %>" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-carte-svg data-tiles="<%= it.asset('carte-tuiles/index.json') %>">
+          <use class="globe" href="<%= terre %>#globe" width="<%= W %>" height="<%= H %>"/>
+          <use class="terre" href="<%= fond %>#terre" data-fine="<%= fine %>#terre" data-gros="<%= terre %>#terre" width="<%= W %>" height="<%= H %>"/>
+          <g class="detail" data-detail display="none"></g>
+          <use class="frontieres" href="<%= fond %>#frontieres" data-fine="<%= fine %>#frontieres" data-gros="<%= terre %>#frontieres" width="<%= W %>" height="<%= H %>"/>
+        </svg>
+        <svg class="carte-reperes" role="group" aria-labelledby="carte-titre" data-pins>
+          <title id="carte-titre"><%= v.typo(`${m.svgTitle} : ${names}`) %></title>
+          <defs><clipPath id="carte-rond" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath></defs>
+<% it.places.forEach(c => { const n = c.photos.length; %>          <a class="pin" href="#lieu-<%= c.id %>" data-pin="<%= c.id %>" data-x="<%= c.x %>" data-y="<%= c.y %>" data-n="<%= n %>" data-name="<%= c.name %>" aria-label="<%= v.typo(`${c.name}, ${c.country}${t.colon} ${t.photos(n)}`) %>"><svg x="<%= v.pct(c.x, vue.x, vue.w) %>%" y="<%= v.pct(c.y, vue.y, vue.h) %>%" overflow="visible" data-pin-pos><circle class="pin-bord" r="16"/><image href="<%= c.thumb %>" x="-14" y="-14" width="28" height="28" preserveAspectRatio="xMidYMid slice" clip-path="url(#carte-rond)"/><g class="pin-n"<%~ n > 1 ? '' : ' display="none"' %> data-pin-badge><circle cx="14" cy="-14" r="10"/><text x="14" y="-14" data-pin-count><%= n %></text></g><text class="pin-nom" x="22" y="5" display="none" data-pin-nom><%= c.name %></text></svg></a>
+<% }) %>        </svg>
+      </div>
+      <div class="carte-outils js-seul" role="group" aria-label="<%= pg.mapTools %>">
+        <button type="button" class="carte-btn" data-carte-zoom="in" aria-label="<%= m.zoomIn %>">+</button>
+        <button type="button" class="carte-btn" data-carte-zoom="out" aria-label="<%= m.zoomOut %>">−</button>
+        <button type="button" class="carte-btn carte-btn--mot" data-carte-zoom="reset"><%= m.world %></button>
+        <span class="carte-pas">
+          <button type="button" class="carte-btn" data-carte-pan="w" aria-label="<%= pg.panW %>"><%~ ic('prec', { size: 18 }) %></button>
+          <button type="button" class="carte-btn" data-carte-pan="n" aria-label="<%= pg.panN %>"><%~ ic('prec', { size: 18, cls: 'ic-haut' }) %></button>
+          <button type="button" class="carte-btn" data-carte-pan="s" aria-label="<%= pg.panS %>"><%~ ic('suiv', { size: 18, cls: 'ic-bas' }) %></button>
+          <button type="button" class="carte-btn" data-carte-pan="e" aria-label="<%= pg.panE %>"><%~ ic('suiv', { size: 18 }) %></button>
+        </span>
+      </div>
+      <figcaption><span class="js-seul carte-aide"><%= v.typo(pg.mapHelp) %></span><span class="js-seul carte-aide-doigt"><%= v.typo(pg.mapHelpTouch) %></span> <%= v.typo(`${m.base} · ${m.credit}`) %></figcaption>
+    </figure>
+  </div>
+  <section class="wrap partie lieux" aria-labelledby="lieux-t">
+    <div class="partie-tete"><h2 class="titre-2" id="lieux-t"><%= pg.places %></h2></div>
+<% it.places.forEach(c => { %>    <section class="lieu" id="lieu-<%= c.id %>" aria-labelledby="lieu-<%= c.id %>-t">
+      <div class="lieu-tete">
+        <h3 class="titre-3" id="lieu-<%= c.id %>-t"><%= c.name %> <span class="lieu-m"><%= v.typo(`${c.country} · ${t.photos(c.photos.length)}`) %></span></h3>
+        <a class="lien lieu-haut" href="#carte"><span aria-hidden="true">↑</span> <%= pg.backToMap %></a>
+      </div>
+<%~ include('./_rangees', { ...it, list: c.photos, filter: {}, labelledby: `lieu-${c.id}-t` }) %>
+    </section>
+<% }) %>  </section>
+<% } else { %>  <div class="wrap"><p class="chapo"><%= it.preview ? 'Aucune photo sur la carte : choisissez la ville d’une photo publiée et cochez « Afficher sur la carte » dans sa fiche.' : m.soon %></p></div>
+<% } %></main>
+<%~ include('./_pied', it) %>

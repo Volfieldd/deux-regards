@@ -1,0 +1,204 @@
+/* =====================================================================================================
+   Site public v2 : pages sans formulaire d'envoi (À propos, Droits d'utilisation, Mentions légales, Confidentialité,
+   Recherche, Carte, Voyages, un voyage, page introuvable). Chargé après css/v2/tokens.css et css/v2/public.css
+   (views/v2/layout.eta) ; n'emploie que leurs jetons et leurs composants (planche MQ-00 : tête de page, chapô, parties,
+   listes à filets, fil d'Ariane, rangées, cartel, boutons, messages, sommaire du billet). Aucune de ces pages n'a de
+   maquette dédiée : leur mise en page applique la planche.
+   1. Lecture longue (sommaire, ancres, lignes de 65 signes)  2. À propos  3. Recherche et page introuvable
+   4. Carte du monde  5. Voyages et un voyage  6. Impression des pages de texte (UX-F-35)
+   Rien ici n'exige JavaScript ; ce qui n'a de sens qu'avec lui porte la classe .js-seul (public.css § 0).
+   ===================================================================================================== */
+
+/* Note d'aperçu (carte ou voyage non publiés, pour l'équipe) : un message d'information sous l'en-tête. */
+.pages-note { padding-top: var(--esp-3); }
+.pages-note .msg { max-width: 76ch; }
+.pages-note .msg a { white-space: nowrap; }
+/* Partie qui suit la tête de page de près (résultats, séries proposées, photographes). */
+.partie--pres { padding-top: var(--esp-4); }
+/* « ↑ Sommaire », « ↑ Carte » : la flèche, décorative, n'est pas soulignée avec le mot. */
+.lien > span[aria-hidden="true"] { display: inline-block; text-decoration: none; }
+
+/* ---------- 1. Lecture longue : Confidentialité, Mentions légales, Droits d'utilisation, À propos ----------
+   Le texte tient en lignes de 65 signes environ (68ch à 18 px), en --prose ; chaque partie sous un intertitre à ancre
+   (titre 3), le sommaire « Sur cette page » en tête. Au bureau (≥ 1 024 px), le sommaire passe à gauche et reste visible
+   (collant, s'il tient dans la hauteur de l'écran) : il ne couvre jamais le texte, le focus n'y passe jamais dessous ;
+   « ↑ Sommaire », au bout de chaque partie, ne sert qu'au téléphone et sur tablette. */
+.lecture { display: grid; gap: var(--esp-5) var(--esp-8); padding-bottom: var(--esp-2); }
+.lecture-som { align-self: start; }
+.lecture-som .etiquette { margin-bottom: var(--esp-1); }
+.lecture-som ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); counter-reset: som; }
+.lecture-som a { display: flex; align-items: baseline; gap: var(--esp-1); min-height: var(--cible); padding-block: 10px; border-bottom: 1px solid var(--rule);
+  color: var(--ink); font-size: var(--t-texte); line-height: 1.4; }
+.lecture-som a::before { counter-increment: som; content: counter(som); flex: none; min-width: 1.6em; color: var(--mute); font-size: var(--t-petit); font-variant-numeric: tabular-nums; }
+.lecture-som a:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.lecture-texte { min-width: 0; max-width: 68ch; font-size: var(--t-prose); line-height: 1.65; color: var(--prose); }
+.lecture-texte p { margin: 0 0 1em; text-wrap: pretty; overflow-wrap: break-word; }
+.lecture-texte a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: var(--field); overflow-wrap: anywhere; }
+.lecture-texte a:hover { text-decoration-color: var(--ink); }
+.lecture-texte a.lien { min-height: var(--cible); }
+.lecture-partie { padding-top: var(--esp-4); }
+.lecture-partie:first-child { padding-top: 0; }
+.lecture-partie h2 { margin: 0 0 var(--esp-2); color: var(--ink); scroll-margin-top: var(--esp-3); text-wrap: balance; }
+.lecture-haut { margin: 0 !important; font-size: var(--t-petit); }
+.lecture-maj { margin: 0; color: var(--mute); font-size: var(--t-petit); }
+.lecture-contact { margin-top: var(--esp-4) !important; padding-top: var(--esp-2); border-top: 1px solid var(--rule); color: var(--ink); }
+.lecture-texte--prose { color: var(--prose); }
+@media (max-width: 767px) { .lecture-texte { font-size: 17px; } }
+@media (min-width: 1024px) {
+  .lecture { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); align-items: start; }
+  .lecture--seule { grid-template-columns: minmax(0, 1fr); }
+  .lecture-haut { display: none; }
+}
+@media (min-width: 1024px) and (min-height: 720px) { .lecture-som { position: sticky; top: var(--esp-3); } }
+
+/* ---------- 2. À propos : les photographes, chacun sous un filet, deux colonnes dès 768 px ---------- */
+.apropos-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--esp-5) var(--esp-8); }
+@media (min-width: 768px) { .apropos-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.apropos-qui { display: grid; gap: var(--esp-1); align-content: start; padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+.apropos-qui h3 { margin: 0; }
+.apropos-qui p { margin: 0; max-width: 60ch; color: var(--prose); line-height: 1.6; text-wrap: pretty; }
+.apropos-qui .lien { justify-self: start; }
+
+/* ---------- 3. Recherche et page introuvable : un champ à libellé visible, son aide, le bouton plein ----------
+   Champ à angles vifs, filet --field (3:1), 48 px de haut, 16 px de texte (pas de zoom forcé sur iOS) ; le libellé et
+   l'aide au-dessus, l'aide reliée par aria-describedby. Au téléphone, le bouton passe sous le champ quand la place manque. */
+.recherche { display: grid; gap: var(--esp-1); max-width: 640px; margin: 0; }
+.recherche-l { font-weight: 500; font-size: var(--t-texte); color: var(--ink); }
+.recherche-aide { margin: 0; color: var(--mute); font-size: var(--t-petit); line-height: 1.5; }
+.recherche-ligne { display: flex; flex-wrap: wrap; gap: var(--esp-1); margin-top: var(--esp-demi); }
+.recherche-ligne input { flex: 1 1 14em; min-width: 0; min-height: var(--esp-6); padding: 0 var(--esp-2); border: 1px solid var(--field); border-radius: var(--r-site);
+  background: var(--paper); color: var(--ink); font: 400 var(--t-texte)/1.2 var(--sans); }
+.recherche-ligne input::placeholder { color: var(--mute); opacity: 1; }
+.recherche-ligne input:hover { border-color: var(--ink); }
+.recherche-ligne input:focus-visible { border-color: var(--ink); }
+.recherche-ligne .btn { flex: none; }
+.recherche-etat { margin: 0; max-width: 60ch; color: var(--ink); overflow-wrap: anywhere; }
+.recherche-tete { gap: var(--esp-3); }
+.introuvable { display: grid; gap: var(--esp-5); max-width: 640px; }
+
+/* ---------- 4. Carte du monde (/carte) ----------
+   Le fond dans un SVG cadré (viewBox), les vignettes des villes dans un SVG en pixels par-dessus, à leur place en
+   pourcentage (comme la mini-carte de la visionneuse, public.css § 30) : 32 px de diamètre à toutes les largeurs, le nombre
+   de photos et le nom de la ville en 13 px. Commandes sous la carte (44 px), jamais posées dessus. */
+.carte { margin: 0; display: grid; gap: var(--esp-2); }
+.carte-cadre { position: relative; aspect-ratio: 1000 / 520; overflow: hidden; border: 1px solid var(--rule); background: color-mix(in srgb, var(--ink) 3%, var(--paper));
+  touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.carte-cadre.zoomed { touch-action: none; cursor: grab; }
+.carte-cadre.dragging { cursor: grabbing; }
+.carte-cadre > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.carte-fond .globe { fill: var(--ink); fill-opacity: .035; }
+.carte-fond .terre, .carte-fond .detail path { fill: color-mix(in srgb, var(--ink) 16%, var(--paper)); }
+.carte-fond .frontieres { fill: none; stroke: var(--paper); stroke-width: .8; stroke-linejoin: round; }
+.pin { cursor: pointer; }
+.pin .pin-bord { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5px; }
+.pin image { pointer-events: none; }
+.pin .pin-n circle { fill: var(--ink); }
+.pin .pin-n text { fill: var(--paper); font: 500 var(--t-meta)/1 var(--sans); text-anchor: middle; dominant-baseline: central; }
+.pin-nom { fill: var(--ink); font: 400 var(--t-meta)/1 var(--sans); paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-linejoin: round; pointer-events: none; }
+.pin:hover .pin-bord { stroke-width: 3px; }
+.pin:focus { outline: none; }
+.pin:focus-visible .pin-bord { stroke-width: 4px; }
+.pin:hover .pin-nom, .pin:focus-visible .pin-nom { text-decoration: underline; }
+.carte-outils { display: flex; flex-wrap: wrap; align-items: center; gap: var(--esp-1); }
+.carte-pas { display: inline-flex; flex-wrap: wrap; gap: var(--esp-1); margin-left: auto; }
+.carte-btn { display: inline-grid; place-items: center; min-width: var(--cible); min-height: var(--cible); padding: 0 var(--esp-1); border: 1px solid var(--field);
+  border-radius: var(--r-site); background: var(--paper); color: var(--ink); font: 400 20px/1 var(--sans); }
+.carte-btn--mot { padding-inline: var(--esp-2); font-size: 15px; }
+.carte-btn:hover:not(:disabled) { border-color: var(--ink); }
+.carte-btn:disabled { color: var(--mute); border-color: var(--rule); cursor: default; }
+.carte-btn .ic-haut, .carte-btn .ic-bas { rotate: 90deg; }
+.carte figcaption { color: var(--mute); font-size: var(--t-meta); line-height: 1.5; }
+.carte-aide-doigt { display: none; }
+@media (pointer: coarse) { .carte-aide { display: none; } .carte-aide-doigt { display: inline; } }
+.lieu { padding-top: var(--esp-5); scroll-margin-top: var(--esp-2); }
+.lieu-tete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 var(--esp-3); margin-bottom: var(--esp-2); }
+.lieu-tete h3 { margin: 0; }
+.lieu-m { margin-left: var(--esp-1); color: var(--mute); font-size: var(--t-petit); white-space: nowrap; }
+.lieu:target h3 { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
+
+/* ---------- 5. Voyages (/voyages) et un voyage (/voyage/<slug>) ----------
+   Liste : la couverture d'abord, au format de la photo, à hauteur commune (300 px, 380 au bureau) ; tout l'encart est le lien
+   (comme .billet-e de la planche). Un voyage : l'ouverture du billet (texte et sommaire des jours à gauche, couverture
+   entière à droite dès 900 px), la carte de l'itinéraire, les jours (titre de jour du billet, .jour). */
+.voyages { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--esp-8); }
+@media (min-width: 768px) { .voyages { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .voyages { gap: var(--esp-10) var(--esp-8); } }
+.voyage-e { --h: 300px; position: relative; display: grid; gap: var(--esp-1); align-content: start; }
+@media (min-width: 1280px) { .voyage-e { --h: 380px; } }
+.voyage-e-img { margin-bottom: var(--esp-1); }
+.voyage-e-img img { display: block; width: min(100%, calc(var(--h) * var(--r))); height: auto; aspect-ratio: var(--r); background: var(--frame); }
+.voyage-e-titre { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); text-wrap: balance; }
+.voyage-e-titre a { display: inline-flex; align-items: center; min-height: var(--cible); color: var(--ink); }
+.voyage-e-titre a::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+.voyage-e:hover .voyage-e-titre a { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+.voyage-e-titre a:focus-visible { outline-offset: 4px; }
+.voyage-e-meta { margin: 0; color: var(--mute); font-size: var(--t-petit); }
+.voyage-e-chapo { margin: 0; max-width: 60ch; color: var(--prose); line-height: 1.6; text-wrap: pretty; }
+
+.voyage-ouv { display: grid; gap: var(--esp-4); padding-top: var(--esp-3); }
+.voyage-ouv-t { display: flex; flex-direction: column; gap: var(--esp-2); min-width: 0; }
+.voyage-ouv-t > * { margin: 0; }
+.voyage-meta { color: var(--mute); font-size: var(--t-petit); }
+.voyage-intro p { margin: 0 0 .8em; max-width: 46ch; color: var(--prose); font-size: var(--t-prose); line-height: 1.6; text-wrap: pretty; }
+.voyage-intro p:last-child { margin-bottom: 0; }
+.voyage-som { padding-top: var(--esp-2); border-top: 1px solid var(--rule); }
+.voyage-som-t { margin: 0 0 var(--esp-demi); color: var(--mute); font-size: var(--t-petit); }
+.voyage-som ol { list-style: none; margin: 0; padding: 0; }
+.voyage-som a { display: flex; align-items: baseline; gap: var(--esp-1); min-height: var(--cible); padding-block: 10px; color: var(--ink); }
+.voyage-som a:hover .s-nom { text-decoration: underline; text-underline-offset: 4px; }
+.voyage-som .s-n { flex: none; min-width: 1.2em; color: var(--mute); font-variant-numeric: tabular-nums; }
+.voyage-som .s-d { color: var(--mute); font-size: var(--t-petit); white-space: nowrap; }
+.voyage-ouv-photo { margin: 0; }
+.voyage-ouv-photo img { display: block; width: auto; height: auto; max-width: 100%; max-height: 82vh; background: var(--frame); }
+@media (min-width: 900px) {
+  .voyage-ouv { grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); column-gap: var(--esp-6); align-items: stretch; padding-top: var(--esp-4); }
+  .voyage-ouv-t { padding-top: var(--esp-3); }
+  .voyage-som { margin-top: auto !important; }
+  .voyage-ouv-photo { justify-self: end; align-self: start; }
+  .voyage-ouv-photo img { max-height: min(74vh, 680px); }
+}
+
+/* Carte de l'itinéraire : le fond, l'itinéraire et les encarts dans le SVG cadré (unités de carte), les étapes numérotées
+   en pixels par-dessus. Les encarts ne s'affichent que si la carte a 904 px de large au moins : leur texte y fait 14 px au
+   moins (1,55 % de la largeur), et ils ne se chevauchent pas (server/trip-story.js). En dessous, les étapes et le sommaire
+   des jours disent la même chose ; la carte tient dans la largeur, sans défilement de côté. */
+.voyage-carte { margin: 0; display: grid; gap: var(--esp-1); container-type: inline-size; }
+.voyage-carte-cadre { position: relative; aspect-ratio: 5 / 3; overflow: hidden; border: 1px solid var(--rule); background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
+.voyage-carte-cadre > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.voyage-carte-fond .terre, .voyage-carte-fond .detail path { fill: color-mix(in srgb, var(--ink) 13%, var(--paper)); }
+.voyage-carte-fond .frontieres { fill: none; stroke: var(--paper); stroke-width: .6; }
+.voyage-route { fill: none; stroke: var(--ink); stroke-width: 2px; stroke-dasharray: 2 6; stroke-linecap: round; }
+.voyage-encart { display: none; }
+@container (min-width: 904px) { .voyage-encart { display: inline; } }
+.voyage-encart rect { fill: var(--paper); stroke: var(--ink); stroke-width: 1px; }
+.voyage-encart line { stroke: var(--ink); stroke-width: 1px; }
+.voyage-encart text { fill: var(--ink); font-family: var(--sans); }
+.voyage-encart-n { font-weight: 500; }
+.voyage-encart text.voyage-encart-ville { fill: var(--mute); }
+.voyage-etape circle { fill: var(--ink); stroke: var(--paper); stroke-width: 2px; }
+.voyage-etape text { fill: var(--paper); font: 500 var(--t-meta)/1 var(--sans); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.voyage-etape:focus { outline: none; }
+.voyage-etape:hover circle, .voyage-etape:focus-visible circle { fill: var(--paper); stroke: var(--ink); stroke-width: 3px; }
+.voyage-etape:hover text, .voyage-etape:focus-visible text { fill: var(--ink); }
+.voyage-carte figcaption { color: var(--mute); font-size: var(--t-meta); line-height: 1.5; }
+.voyage-jour { padding-top: var(--esp-5); scroll-margin-top: var(--esp-2); }
+.voyage-jour-t { display: flex; align-items: baseline; gap: var(--esp-2); margin: 0 0 var(--esp-3); padding-top: var(--esp-3); border-top: 1px solid var(--rule);
+  font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); color: var(--ink); }
+.voyage-jour-t .s-n { flex: none; color: var(--mute); font-variant-numeric: tabular-nums; }
+.voyage-jour-lieu { display: block; margin-top: var(--esp-1); color: var(--mute); font: 400 var(--t-petit)/1.4 var(--sans); }
+.voyage-jour:target .voyage-jour-t .s-n { color: var(--safelight); }
+.voyage-jours > .partie-tete { margin-bottom: 0; }
+.voyage-retour { margin: 0; padding-top: var(--esp-6); }
+
+/* ---------- 6. Impression des pages de texte (UX-F-35) : noir sur blanc quel que soit le thème, sans l'en-tête, le
+   sommaire ni le pied de page ; l'adresse après chaque lien qui sort de la page. ---------- */
+@media print {
+  @page { margin: 16mm 18mm; }
+  :root:has(.lecture) { --paper: #fff; --ink: #111; --prose: #222; --mute: #555; --rule: #ccc; --field: #888; }
+  body:has(.lecture) { background: #fff; color: #111; }
+  body:has(.lecture) :is(.sh, .skip, .apercu-v2, .lecture-som, .lecture-haut, .apropos-gens .lien, footer.sf) { display: none !important; }
+  .lecture { display: block; padding: 0; }
+  .lecture-texte { max-width: none; font-size: 11pt; line-height: 1.55; }
+  .lecture-partie { break-inside: avoid-page; }
+  .lecture-texte a[href^="mailto:"]::after, .lecture-texte a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 10pt; color: #444; }
+}

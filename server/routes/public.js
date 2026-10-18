@@ -384,8 +384,15 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       app.stats.hit(request, { page: 'recherche' });
     }
     if (q) reply.header('x-robots-tag', 'noindex');
+    // v2 : sans résultat (ou avant la première recherche), les séries à parcourir, avec leur couverture et leur compte ; la
+    // v1 l'ignore. La recherche elle-même ne change pas.
+    const shown = photos.length ? [] : repo.publishedPhotos({ lang });
+    const series = photos.length ? [] : repo.categories(lang).map(c => {
+      const inCat = shown.filter(p => p.category_slug === c.slug);
+      return { ...c, count: inCat.length, cover: inCat[0] };
+    }).filter(c => c.count);
     return reply.render('search', {
-      ...base, siteName, q, searched: terms.length > 0, tooShort: Boolean(q) && !terms.length, photos,
+      ...base, siteName, q, searched: terms.length > 0, tooShort: Boolean(q) && !terms.length, photos, series,
       pageTitle: q ? `${t.search.title}${t.colon} ${q} · ${siteName}` : `${t.search.title} · ${siteName}`, canonical: '/recherche',
       description: t.search.description,
     });

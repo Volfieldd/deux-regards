@@ -97,6 +97,25 @@ Das nächste Foto hängt vom aktiven Filter ab: In „Straße, von Julien“ ble
 - **Datenschutz** (`/confidentialite`, in drei Sprachen, Link in der Fußzeile): wer verantwortlich ist, was die Website erhebt und warum, wie lange, wer es erhält und wie man seine Rechte ausübt (siehe [Rechte & Datenschutz](reglages#droits-et-confidentialité)).
 - **Seite nicht gefunden:** für eine unbekannte Adresse oder ein zurückgezogenes Foto.
 
+## Weitere Seiten in v2
+
+Wenn die **v2** angewendet ist, erhalten die übrigen Seiten der Website dieselbe Gestaltung (Kopfzeile, vollständige Fußzeile, dieselben Schaltflächen):
+
+- **Datenschutz, Impressum:** derselbe Text wie in v1, mit einem Inhaltsverzeichnis **Auf dieser Seite**: Ein Klick führt zum gewählten Teil. Am Computer bleibt das Inhaltsverzeichnis links neben dem Text; am Telefon steht es oben, und jeder Teil endet mit **↑ Inhalt**. Kurze Zeilen, leicht zu lesen; gedruckt schwarz auf weiß, ohne Menü.
+- **Nutzungsrechte, Über uns:** derselbe Text, in kurzen Zeilen; „Über uns“ zeigt Ihre Fotografen, ihre Biografie und **Die Fotos von … ansehen** (ohne das Logo oben: Die Marke steht in der Kopfzeile).
+- **Suchen:** dasselbe Feld, mit Beschriftung und Hilfe darüber; die gefundenen Fotos in Reihen. Ohne Ergebnis (oder vor der Suche) die Serien zum Stöbern.
+- **Karte:** Sie öffnet sich **auf Ihre Orte zugeschnitten** (mit oder ohne JavaScript); **Welt** zeigt die ganze Welt. Der Name jeder Stadt steht neben ihrem Vorschaubild, wenn Platz ist. Jeder Ort der Liste hat sein **↑ Karte**.
+
+  | Geste | Wirkung |
+  |---|---|
+  | **+**, **−**, **Welt** | vergrößern, verkleinern, ganze Welt |
+  | die vier Pfeilschaltflächen oder **← → ↑ ↓** auf der Tastatur (auf einem Vorschaubild oder einer Schaltfläche der Karte) | Karte verschieben |
+  | **+** und **−** auf der Tastatur | vergrößern, verkleinern |
+
+  Ein Vorschaubild außerhalb des Ausschnitts ist mit der Tastatur nicht mehr erreichbar.
+- **Reisen:** jede Reise mit ihrem Titelbild in seinem Format; die Seite einer Reise zeigt das ganze Foto neben dem Titel (kein Titel mehr auf dem Foto), die Liste der Tage, die Karte der Route (am Telefon ohne seitliches Scrollen: Die Etappen sind dort nummeriert, die Beschriftungen erscheinen nur am Computer), dann die Tage in Reihen.
+- **Seite nicht gefunden:** ein Feld, um ein Foto zu suchen, die Galerie, die Serien, „Über uns“; die Sprachauswahl führt zur Startseite jeder Sprache.
+
 ## Immer
 
 - **Ohne JavaScript, mit der Tastatur, mit einem Screenreader:** Die Website funktioniert.

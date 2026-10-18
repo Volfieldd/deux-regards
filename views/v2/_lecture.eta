@@ -1,0 +1,24 @@
+<% /* Lecture longue (Confidentialité, Mentions légales) : le sommaire de la page, puis ses parties, chacune sous son
+      intertitre à ancre (MQ-00 : « ↑ Sommaire », lignes de 65 signes environ). Au bureau, le sommaire reste à gauche,
+      collant ; au téléphone et sur tablette, il ouvre la page et chaque partie se termine par « ↑ Sommaire ».
+      it.sections : [intertitre, paragraphes] (server/privacy.js, server/legal.js), dans leur ordre et avec leur texte ;
+      un paragraphe est un texte, ou { text, link, href } (l'e-mail en lien). it.fin : HTML ajouté après la dernière
+      partie (contact). Rien n'est réécrit : seuls les espaces insécables du lexique s'ajoutent (v2.typo). */ %>
+<% const t = it.t, v = it.v2, ids = new Set(['sommaire', 'contenu']);
+   const parts = it.sections.map(([h, ps]) => ({ h, ps, id: v.ancre(h, ids) })); %>
+<div class="wrap lecture">
+  <nav class="lecture-som" id="sommaire" aria-labelledby="sommaire-t">
+    <h2 class="etiquette" id="sommaire-t"><%= t.pages.toc %></h2>
+    <ol>
+<% parts.forEach(s => { %>      <li><a href="#<%= s.id %>"><%= v.typo(s.h) %></a></li>
+<% }) %>    </ol>
+  </nav>
+  <div class="lecture-texte">
+<% parts.forEach(s => { %>    <section class="lecture-partie" aria-labelledby="<%= s.id %>">
+      <h2 class="titre-3" id="<%= s.id %>"><%= v.typo(s.h) %></h2>
+<% s.ps.forEach(p => { %>      <p><% if (typeof p === 'string') { %><%= v.typo(p) %><% } else { %><%= v.typo(p.text) %><a href="<%= p.href %>"><%= p.link %></a><% } %></p>
+<% }) %>      <p class="lecture-haut"><a class="lien" href="#sommaire"><span aria-hidden="true">↑</span> <%= t.pages.toTop %></a></p>
+    </section>
+<% }) %><%~ it.fin || '' %>
+  </div>
+</div>

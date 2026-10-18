@@ -3,9 +3,10 @@
       suivante ; le clavier suit le même ordre. Chaque photo garde son format (classe .fmt-*, .v pour une verticale, .c pour
       une carrée), son sizes selon sa place ; un seul cartel, entier : titre, puis « Auteur · Lieu · date » (sans l'auteur
       quand la vue est déjà celle d'un regard). Jamais l'heure de prise de vue (page d'une photo seulement).
-      it.list, it.filter (contexte de la visionneuse), it.labelledby, it.eager (images du premier écran), it.etiree. */ %>
+      it.list, it.filter (contexte de la visionneuse), it.labelledby, it.eager (images du premier écran), it.etiree ; it.meta :
+      la méta du cartel quand la page la dit autrement (un jour de voyage : « Auteur · Lieu », le jour est son titre). */ %>
 <% const v = it.v2, list = it.list, etiree = Boolean(it.etiree), eager = it.eager || 0;
-   const meta = p => [it.filter?.regard ? null : p.author, p.place, v.date(p.taken_on)].filter(Boolean).join(' · '); %>
+   const meta = it.meta || (p => [it.filter?.regard ? null : p.author, p.place, v.date(p.taken_on)].filter(Boolean).join(' · ')); %>
 <ul class="rangees<%= etiree ? ' rangees--etiree' : '' %>" aria-labelledby="<%= it.labelledby %>">
 <% list.forEach((p, i) => { const g = v.fmt(p); %>  <li class="<%= g.cls %><%= g.r < 1 ? ' v' : g.r === 1 ? ' c' : '' %>"><a class="vignette" href="<%= it.photoUrl(p.slug, it.filter) %>"><%~ it.picture(p, { sizes: v.rowSizes(p, list, { etiree }), eager: i < eager, alt: '' }) %><span class="cartel cartel--ligne"><span class="cartel-t"><%~ v.nobr(p.title) %></span><span class="cartel-m"><%= meta(p) %></span></span></a></li>
 <% }) %></ul>

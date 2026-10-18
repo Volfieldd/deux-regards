@@ -20,7 +20,7 @@ Each theme is shown with its three colours (background, ink, accent) and a descr
 
 ## Public site: v1 or v2
 
-**v2** is the new design of the public site, from the usability audit of October 2026. Its pages arrive one by one; today: **the page of a photo** (the viewer), **the home page and its gallery** (with the views of a photographer and the filters) **the page of a series**, and the form pages: “I took your photo”, Report, Share without script and the gift photo (see [The site as visitors see it](site-public)). A page that does not have its v2 version yet is shown in v1. The administration does not change.
+**v2** is the new design of the public site, from the usability audit of October 2026. Its pages arrive one by one; today: **the page of a photo** (the viewer), **the home page and its gallery** (with the views of a photographer and the filters) **the page of a series**, the form pages (“I took your photo”, Report, Share without script, the gift photo), and the other public pages: About, Terms of use, Legal notice, Privacy, Search, Map, Trips, page not found (see [The site as visitors see it](site-public)). A page that does not have its v2 version yet is shown in v1. The administration does not change.
 
 1. **See v2 before everyone else:** click **Open the v2 preview**.
    - **Only you** see it, in this session (this device, this browser), until **Leave the preview**, sign-out or the end of the session.

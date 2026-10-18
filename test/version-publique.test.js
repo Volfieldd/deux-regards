@@ -122,14 +122,16 @@ test('repli : une page sans gabarit v2 reste en v1 (aperçu comme réglage v2) ;
   const c = await site(t);
   const a = c.as('admin');
   await a.post('/admin/apparence/apercu-v2', { apercu: '1' });
-  const about = await a.get('/a-propos');
-  assert.equal(about.statusCode, 200);
-  assert.match(about.body, /css\/site\.css/);                                         // la v1
-  assert.doesNotMatch(about.body, /css\/v2\//);
-  assert.match(about.body, /cette page n’a pas encore sa version v2/);                 // le bandeau, même en v1
+  // Page d'erreur d'une adresse publique (views/auth-error.eta) : la seule page publique restée sans gabarit v2, toutes les
+  // autres (À propos, page introuvable comprises) ont désormais le leur. Ici, un envoi illisible vers « J'aime ».
+  const error = await c.app.inject({ method: 'POST', url: `${PHOTO}/aime`, cookies: { session: a.token }, headers: { accept: 'text/html', 'content-type': 'application/json' }, payload: '{illisible' });
+  assert.equal(error.statusCode, 400);
+  assert.match(error.body, /css\/site\.css/);                                         // la v1
+  assert.doesNotMatch(error.body, /css\/v2\//);
+  assert.match(error.body, /cette page n’a pas encore sa version v2/);                 // le bandeau, même en v1
   const notFound = await a.get('/nexiste-pas');
   assert.equal(notFound.statusCode, 404);
-  assert.match(notFound.body, /css\/site\.css/);
+  assert.match(notFound.body, /css\/v2\/pages\.css/);                                 // la page introuvable v2
   // L'admin et ses pages ne prennent ni la v2 ni le bandeau.
   const admin = await a.get('/admin/apparence');
   assert.doesNotMatch(admin.body, /css\/v2\/|Aperçu de la v2 \(visible/);
@@ -138,7 +140,8 @@ test('repli : une page sans gabarit v2 reste en v1 (aperçu comme réglage v2) ;
   assert.equal(c.app.publicVersion.hasV2('../layout'), false);
   assert.equal(c.app.publicVersion.hasV2('admin/home'), false);
   assert.equal(c.app.publicVersion.hasV2('photo'), true);
-  assert.equal(c.app.publicVersion.hasV2('about'), false);
+  assert.equal(c.app.publicVersion.hasV2('about'), true);
+  assert.equal(c.app.publicVersion.hasV2('auth-error'), false);
 });
 
 test('réglage v2 : tout le monde voit la v2 (sans no-store ni bandeau) ; noté au journal ; valeur inconnue ignorée', async t => {

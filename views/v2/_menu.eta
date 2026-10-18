@@ -9,7 +9,7 @@
           <ul>
 <% if (!site) { %>            <li><a href="<%= home %>"><%= t.v2.home %><span class="sh-panneau-marque"><%= it.siteName %></span></a></li>
 <% } %>            <%~ include('./_liens', it) %>
-<% if (it.searchPage) { %>            <li><a href="<%= it.u('/recherche') %>"><%~ ic('loupe') %><%= t.nav.search %></a></li>
+<% if (it.searchPage) { %>            <li><a href="<%= it.u('/recherche') %>"<%~ it.courant === 'recherche' ? ' aria-current="page"' : '' %>><%~ ic('loupe') %><%= t.nav.search %></a></li>
 <% } %>          </ul>
         </nav>
       </details>

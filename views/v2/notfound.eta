@@ -1,0 +1,28 @@
+<% /* Page introuvable (404) en v2 : ce qui s'est passé, puis où aller (UX-F-26) : chercher une photo (le formulaire GET de
+      /recherche, si la recherche est ouverte), la galerie, les séries, À propos ; le pied de page complet. Le sélecteur de
+      langue mène à l'accueil de chaque langue (et non à la même adresse introuvable). Aucune donnée lue : une 404 reste
+      légère, même en rafale. */ %>
+<% layout('./layout', { pageTitle: it.v2.typo(it.pageTitle), description: it.v2.typo(it.description) }) %>
+<% const t = it.t, v = it.v2, ic = v.ic, home = it.u('/'); %>
+<%~ include('./_entete', { ...it, here: '/' }) %>
+<main id="contenu">
+  <div class="wrap tete-page">
+    <h1 class="titre-page"><%= t.notFoundTitle %></h1>
+    <p class="chapo"><%= v.typo(t.notFound) %> <%= v.typo(t.pages.notFoundLead) %></p>
+  </div>
+  <div class="wrap introuvable">
+<% if (it.searchPage) { %>    <form class="recherche" method="get" action="<%= it.u('/recherche') %>" role="search">
+      <label class="recherche-l" for="q"><%= t.pages.notFoundSearch %></label>
+      <div class="recherche-ligne">
+        <input id="q" name="q" type="search" placeholder="<%= t.search.placeholder %>" maxlength="100" autocomplete="off" enterkeyhint="search">
+        <button class="btn" type="submit"><%~ ic('loupe') %><%= t.search.submit %></button>
+      </div>
+    </form>
+<% } %>    <ul class="liste-liens">
+      <li><a href="<%= home %>#galerie"><span class="liste-liens-n"><%= t.backHome %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+      <li><a href="<%= home %>#series"><span class="liste-liens-n"><%= t.nav.series %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+      <li><a href="<%= it.u('/a-propos') %>"><span class="liste-liens-n"><%= t.nav.about %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+    </ul>
+  </div>
+</main>
+<%~ include('./_pied', it) %>
