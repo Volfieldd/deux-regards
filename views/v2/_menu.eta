@@ -1,0 +1,18 @@
+<% /* Menu (MQ-00 § 3) : un <details>, sans script ; le mot « Menu » ne change pas, l'icône devient ✕. Seules les pages qui
+      existent : Accueil (aujourd'hui la galerie), Séries, Galerie, Carte et Voyages s'ils sont publiés, À propos,
+      Rechercher. Carnets et Tirages viendront avec leurs pages. */ %>
+<% const t = it.t, ic = it.v2.ic, home = it.u('/'); %>
+      <details class="sh-menu" data-menu>
+        <summary><span class="sh-ouvrir"><%~ ic('menu') %><span class="sh-menu-t"><%= t.v2.menu %></span></span><span class="sh-fermer"><%~ ic('fermer') %><span class="sh-menu-t"><%= t.v2.menu %></span></span></summary>
+        <nav class="sh-panneau" aria-label="<%= t.nav.label %>">
+          <ul>
+            <li><a href="<%= home %>"><%= t.v2.home %><span class="sh-panneau-marque"><%= it.siteName %></span></a></li>
+            <li><a href="<%= home %>#series"><%= t.nav.series %></a></li>
+            <li><a href="<%= home %>#galerie"><%= t.nav.gallery %></a></li>
+<% if (it.mapPage) { %>            <li><a href="<%= it.u('/carte') %>"><%= t.nav.map %></a></li>
+<% } %><% if (it.tripsPage) { %>            <li><a href="<%= it.u('/voyages') %>"><%= t.nav.trips %></a></li>
+<% } %>            <li><a href="<%= it.u('/a-propos') %>"><%= t.nav.about %></a></li>
+<% if (it.searchPage) { %>            <li><a href="<%= it.u('/recherche') %>"><%~ ic('loupe') %><%= t.nav.search %></a></li>
+<% } %>          </ul>
+        </nav>
+      </details>

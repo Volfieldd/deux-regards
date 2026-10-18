@@ -51,6 +51,9 @@
 <% if (theme.preview) { %>
 <p class="preview-bar mono" role="note">Aperçu du thème « <%= theme.label %> » (visible par vous seul) · <a href="/admin/apparence">Apparence</a> · <a href="?theme=off">Quitter l’aperçu</a></p>
 <% } %>
+<% if (it.apercuV2) { %>
+<div class="preview-bar mono" role="note"><form method="post" action="/admin/apparence/apercu-v2"><input type="hidden" name="_csrf" value="<%= it.apercuV2.csrf %>"><input type="hidden" name="apercu" value="0"><input type="hidden" name="vers" value="<%= it.apercuV2.vers %>">Aperçu de la v2 (visible par vous seul) : cette page n’a pas encore sa version v2 · <a href="/admin/apparence">Apparence</a> · <button type="submit">Quitter l’aperçu</button></form></div>
+<% } %>
 <%~ it.body %>
 </body>
 </html>

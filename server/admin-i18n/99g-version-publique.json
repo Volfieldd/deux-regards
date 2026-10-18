@@ -1,0 +1,50 @@
+{
+ "Site public : v1 ou v2": {
+  "en": "Public site: v1 or v2",
+  "de": "Öffentliche Website: v1 oder v2"
+ },
+ "La v2 est la nouvelle présentation du site public, issue de l’audit d’ergonomie. Ses pages arrivent une à une : une page qui n’a pas encore sa version v2 reste en v1. L’administration ne change pas.": {
+  "en": "v2 is the new design of the public site, from the usability audit. Its pages arrive one by one: a page that does not have its v2 version yet stays in v1. The administration does not change.",
+  "de": "v2 ist die neue Gestaltung der öffentlichen Website, aus dem Ergonomie-Audit. Ihre Seiten kommen nach und nach: Eine Seite, die noch keine v2-Fassung hat, bleibt in v1. Die Verwaltung ändert sich nicht."
+ },
+ "Version vue par les visiteurs": {
+  "en": "Version seen by visitors",
+  "de": "Fassung für die Besucher"
+ },
+ "le site actuel": {
+  "en": "the current site",
+  "de": "die aktuelle Website"
+ },
+ "la nouvelle présentation (aujourd’hui : la page d’une photo)": {
+  "en": "the new design (today: the page of a photo)",
+  "de": "die neue Gestaltung (derzeit: die Seite eines Fotos)"
+ },
+ "Enregistrer la version": {
+  "en": "Save the version",
+  "de": "Fassung speichern"
+ },
+ "La v2 est appliquée : tous les visiteurs la voient.": {
+  "en": "v2 is applied: all visitors see it.",
+  "de": "v2 ist aktiv: Alle Besucher sehen sie."
+ },
+ "Aperçu de la v2 ouvert : vous seul voyez la v2, sur cette session.": {
+  "en": "v2 preview open: only you see v2, in this session.",
+  "de": "v2-Vorschau geöffnet: Nur Sie sehen v2, in dieser Sitzung."
+ },
+ "Voir le site en v2": {
+  "en": "View the site in v2",
+  "de": "Website in v2 ansehen"
+ },
+ "Quitter l’aperçu": {
+  "en": "Leave the preview",
+  "de": "Vorschau beenden"
+ },
+ "Avant d’appliquer la v2, voyez-la : l’aperçu ne montre la v2 qu’à vous, le temps de votre session ou jusqu’à « Quitter l’aperçu ». Les visiteurs gardent la v1.": {
+  "en": "Before applying v2, look at it: the preview shows v2 to you only, for your session or until “Leave the preview”. Visitors keep v1.",
+  "de": "Bevor Sie v2 aktivieren, sehen Sie sie sich an: Die Vorschau zeigt v2 nur Ihnen, für Ihre Sitzung oder bis „Vorschau beenden“. Die Besucher behalten v1."
+ },
+ "Ouvrir l’aperçu de la v2": {
+  "en": "Open the v2 preview",
+  "de": "v2-Vorschau öffnen"
+ }
+}

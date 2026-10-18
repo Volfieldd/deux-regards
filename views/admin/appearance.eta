@@ -30,6 +30,38 @@
   <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer l’apparence') %></button></p>
 </form>
 
+<section class="panel" id="site-public" aria-labelledby="site-public-t">
+  <h2 id="site-public-t"><%= t('Site public : v1 ou v2') %></h2>
+  <p class="mono"><%= t('La v2 est la nouvelle présentation du site public, issue de l’audit d’ergonomie. Ses pages arrivent une à une : une page qui n’a pas encore sa version v2 reste en v1. L’administration ne change pas.') %></p>
+  <form class="form" method="post" action="/admin/apparence">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <fieldset>
+      <legend><%= t('Version vue par les visiteurs') %></legend>
+      <label class="inline"><input type="radio" name="site_public" value="v1"<%~ it.publicVersion === 'v1' ? ' checked' : '' %>> <strong>v1</strong> <span class="mono"><%= t('le site actuel') %></span></label>
+      <label class="inline"><input type="radio" name="site_public" value="v2"<%~ it.publicVersion === 'v2' ? ' checked' : '' %>> <strong>v2</strong> <span class="mono"><%= t('la nouvelle présentation (aujourd’hui : la page d’une photo)') %></span></label>
+    </fieldset>
+    <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer la version') %></button></p>
+  </form>
+<% if (it.publicVersion === 'v2') { %>
+  <p class="mono"><%= t('La v2 est appliquée : tous les visiteurs la voient.') %></p>
+<% } else if (it.previewV2) { %>
+  <form class="row" method="post" action="/admin/apparence/apercu-v2">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <input type="hidden" name="apercu" value="0">
+    <p class="mono"><%= t('Aperçu de la v2 ouvert : vous seul voyez la v2, sur cette session.') %></p>
+    <a class="btn ghost" href="/"><%= t('Voir le site en v2') %></a>
+    <button class="btn ghost" type="submit"><%= t('Quitter l’aperçu') %></button>
+  </form>
+<% } else { %>
+  <form class="row" method="post" action="/admin/apparence/apercu-v2">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <input type="hidden" name="apercu" value="1">
+    <p class="mono"><%= t('Avant d’appliquer la v2, voyez-la : l’aperçu ne montre la v2 qu’à vous, le temps de votre session ou jusqu’à « Quitter l’aperçu ». Les visiteurs gardent la v1.') %></p>
+    <button class="btn ghost" type="submit"><%= t('Ouvrir l’aperçu de la v2') %></button>
+  </form>
+<% } %>
+</section>
+
 <% Object.entries(it.BRAND_SLOTS).forEach(([slot, def]) => { const file = b[def.field]; %>
 <section class="panel brand-slot" id="marque-<%= slot %>">
   <h2><%= t(def.label) %></h2>

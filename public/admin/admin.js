@@ -329,12 +329,15 @@ $$('[data-js-only]').forEach(el => { el.hidden = false; });
   // Menu ouvert, la page (et la barre d'onglets, la fenêtre « Nouveautés ») est inerte : ni le clavier ni un lecteur
   // d'écran n'y entrent ; à la fermeture, le focus revient au bouton « Menu ». La palette (⌘K) reste utilisable.
   const rest = () => [$('.shell > .main'), ...$$('body > :not(.shell, .skip, script, [data-cmdk])')].filter(Boolean);
+  // Le focus entre dans le menu un instant après l'ouverture ; refermé avant (Échap aussitôt), il reste sur « Menu ».
+  let entering;
   const set = open => {
     const was = side.classList.contains('open');
     side.classList.toggle('open', open);
     btn.setAttribute('aria-expanded', String(open));
     for (const el of rest()) el.inert = open;
-    if (open) setTimeout(() => $('a[aria-current], a', side)?.focus(), 50);
+    clearTimeout(entering);
+    if (open) entering = setTimeout(() => { if (side.classList.contains('open')) $('a[aria-current], a', side)?.focus(); }, 50);
     else if (was) btn.focus();
   };
   btn.addEventListener('click', e => { e.stopPropagation(); set(!side.classList.contains('open')); });

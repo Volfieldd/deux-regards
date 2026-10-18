@@ -41,6 +41,7 @@ import { createImageModel, createSeriesSuggest } from './series-suggest.js';
 import { createShares } from './share.js';
 import { truncateIp } from './ip.js';
 import { TRAP_PATH } from './securite/piege.js';
+import { createPublicVersion } from './version-publique.js';
 
 export { truncateIp };
 
@@ -135,15 +136,23 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     WHERE t.public = 1 AND p.status = 'published')`).pluck();
   const asset = assetUrls(path.join(ROOT, 'public'), config.production);
   app.decorate('appearance', createAppearance(app));
+  // Site public v1 ou v2 (réglage, aperçu d'un administrateur, repli sur v1 : server/version-publique.js).
+  app.decorate('publicVersion', createPublicVersion({ db, viewsDir: path.join(ROOT, 'views'), cache: config.production }));
   app.decorateReply('render', function (template, data) {
     const names = authorNames.all();
     const brand = app.appearance.brand();
     const theme = app.appearance.forRequest(this.request, this);
+    // Pages publiques seulement : l'admin et ses pages d'erreur restent ce qu'elles sont.
+    const pv = /^admin\//.test(template) || /^\/(?:admin|auth)(?:[/?#]|$)/.test(this.request.url) ? null : app.publicVersion.forRequest(this.request);
+    const v2 = pv?.version === 'v2' && app.publicVersion.hasV2(template);
     const common = { trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
       // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
       here: splitLang(this.request.url).path, langs: LANGS, langNames: NAMES, locales: LOCALES, localize,
-      authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '' };
-    return this.type('text/html; charset=utf-8').send(eta.render(`./${template}`, { ...common, ...data }));
+      authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '',
+      // Bandeau « Aperçu de la v2 · Quitter l'aperçu » (formulaire POST, jeton CSRF de la session), en v2 comme sur une
+      // page restée en v1 faute de gabarit v2 : l'administrateur sait toujours où il est.
+      apercuV2: pv?.preview ? { csrf: this.request.session.csrf, vers: this.request.url } : null };
+    return this.type('text/html; charset=utf-8').send(eta.render(v2 ? `./v2/${template}` : `./${template}`, { ...common, ...data }));
   });
 
   await app.register(fastifyStatic, {
@@ -282,6 +291,9 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     reply.headers(headers);
     // Rien de l'admin ne se garde en cache, quel que soit le gestionnaire (fichier envoyé par sendFile compris).
     if (/^\/admin(?:[/?#]|$)/.test(request.url)) reply.header('cache-control', 'no-store');
+    // Aperçu de la v2 : rien de ce que voit l'administrateur ne peut entrer dans un cache partagé (Cloudflare) et être
+    // servi ensuite à un visiteur. Les fichiers statiques, les images et la marque, identiques pour tous, gardent leur cache.
+    else if (!/^\/(?:static|fonts|media|brand)\//.test(request.url) && app.publicVersion.previewOn(request)) reply.header('cache-control', 'private, no-store');
     // Seul l'écran « Rencontre » de l'admin (sur le téléphone) peut demander la position, au site lui-même.
     if (request.routeOptions?.config?.geolocation) reply.header('permissions-policy', 'camera=(), microphone=(), geolocation=(self)');
     // Sans includeSubDomains : à ajouter quand tous les sous-domaines de nicephos.art seront servis en HTTPS (PLAN.md, feuille de route).

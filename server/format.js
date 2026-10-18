@@ -14,3 +14,12 @@ export function monthYear(takenOn, lang = 'fr') {
 }
 
 export const pad = n => String(n).padStart(2, '0');
+
+// Date abrégée d'une photo (site public v2, lexique de l'audit) : '2026-10-10' → « 10 oct. 2026 » (« 10 Oct 2026 »,
+// « 10. Okt. 2026 ») ; une photo datée au mois garde « mars 2024 ». Espaces insécables : une date ne se coupe pas.
+const DAY_MONTH_YEAR = Object.fromEntries(['fr', 'en', 'de'].map(l => [l, new Intl.DateTimeFormat({ fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[l], { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })]));
+export function shortDate(takenOn, lang = 'fr') {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(takenOn || '');
+  const text = m ? (DAY_MONTH_YEAR[lang] || DAY_MONTH_YEAR.fr).format(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))) : monthYear(takenOn, lang);
+  return text.replace(/ /g, '\u00a0');
+}

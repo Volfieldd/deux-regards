@@ -1,7 +1,8 @@
 import { createRepo } from '../repo.js';
 import { galleryUrl, photoUrl, ORDRES } from '../urls.js';
 import { widthsFor, variantName } from '../images.js';
-import { pad } from '../format.js';
+import { pad, shortDate } from '../format.js';
+import * as v2 from '../v2-vues.js';
 import { picture } from '../picture.js';
 import { RIGHTS, rightsText } from '../rights.js';
 import { PRIVACY, UPDATED as PRIVACY_UPDATED, UPDATED_SECURITY_LOG } from '../privacy.js';
@@ -182,7 +183,9 @@ const clip = (text, max) => { const s = String(text || '').trim(); return s.leng
 // Aides des gabarits pour une langue : textes, adresses préfixées, photos et vignettes.
 function helpers(lang) {
   const u = path => localize(path, lang);
-  return { picture, pad, lang, t: UI[lang], u, galleryUrl: f => u(galleryUrl(f)), photoUrl: (slug, f) => u(photoUrl(slug, f)) };
+  return { picture, pad, lang, t: UI[lang], u, galleryUrl: f => u(galleryUrl(f)), photoUrl: (slug, f) => u(photoUrl(slug, f)),
+    // Gabarits v2 (views/v2/) : icônes, formats, tailles d'images, date abrégée.
+    v2: { ...v2, date: takenOn => shortDate(takenOn, lang), typo: s => v2.typo(s, lang) } };
 }
 
 async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, codeGuard }) {
@@ -289,6 +292,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       return reply.redirect(base.photoUrl(photo.slug, filter), 303);
     }
     app.stats.hit(request, { photoId: photo.id });
+    const published = repo.publishedPhotos({ lang });
     const prev = list[(i - 1 + list.length) % list.length];
     const next = list[(i + 1) % list.length];
     return reply.render('photo', {
@@ -303,8 +307,10 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       // Mots-clés sous la légende, si le réglage le demande (Site public) ; chacun mène à la recherche.
       showKeywords: repo.settings().keywords_shown === true,
       // Où la photo a été prise, et les photos prises à proximité (seulement celles qui sont sur la carte).
-      place: photoMap(photo, repo.publishedPhotos({ lang }), lang),
+      place: photoMap(photo, published, lang),
       thumb: variantName(photo.file, widthsFor(photo.width)[0], 'webp', photo.variant_key),
+      // v2 : nombre de photos publiées du photographe (données de la visionneuse).
+      authorCount: published.filter(p => p.author_slug === photo.author_slug).length,
     });
   });
 

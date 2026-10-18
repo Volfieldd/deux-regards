@@ -18,6 +18,19 @@ Each theme is shown with its three colours (background, ink, accent) and a descr
 | **Nicephos — night** | black gallery, white line, spaced capitals, sand accent |
 | **Nicephos — day** | the same identity on a white background |
 
+## Public site: v1 or v2
+
+**v2** is the new design of the public site, from the usability audit of October 2026. Its pages arrive one by one; today: **the page of a photo** (the viewer). A page that does not have its v2 version yet is shown in v1. The administration does not change.
+
+1. **See v2 before everyone else:** click **Open the v2 preview**.
+   - **Only you** see it, in this session (this device, this browser), until **Leave the preview**, sign-out or the end of the session.
+   - A sand-coloured banner at the top of every page of the site reminds you, even on a page still in v1; it carries **Quitter l’aperçu** (leave the preview).
+   - Visitors keep v1, whatever they send (cookie, address): the choice is kept on the server, never in the browser.
+   - During the preview, your pages are kept in no cache (Cloudflare included): a visitor cannot receive the page you see.
+2. **Apply it to everyone:** tick **v2**, then **Save the version**. Going back to v1 works the same way, at any time.
+
+Opening and closing the preview, and every change of version, are recorded in the [Log](reglages#journal).
+
 ## Brand
 
 - **Site name only**, or **Emblem + name (+ subtitle)**. The second option is only available once an emblem or an icon has been uploaded.

@@ -18,6 +18,19 @@ Chaque thème est présenté avec ses trois couleurs (fond, encre, accent) et un
 | **Nicephos — nuit** | galerie noire, trait blanc, capitales espacées, accent sable |
 | **Nicephos — jour** | la même identité sur fond blanc |
 
+## Site public : v1 ou v2
+
+La **v2** est la nouvelle présentation du site public, issue de l'audit d'ergonomie d'octobre 2026. Ses pages arrivent une à une ; aujourd'hui : **la page d'une photo** (la visionneuse). Une page qui n'a pas encore sa version v2 s'affiche en v1. L'administration ne change pas.
+
+1. **Voir la v2 avant tout le monde :** cliquez sur **Ouvrir l'aperçu de la v2**.
+   - **Vous seul** la voyez, sur cette session (cet appareil, ce navigateur), jusqu'à **Quitter l'aperçu**, la déconnexion ou la fin de la session.
+   - Un bandeau sable le rappelle en haut de chaque page du site, même d'une page restée en v1 ; il porte **Quitter l'aperçu**.
+   - Les visiteurs gardent la v1, quoi qu'ils envoient (cookie, adresse) : le choix est gardé sur le serveur, jamais dans le navigateur.
+   - Pendant l'aperçu, vos pages ne sont gardées dans aucun cache (Cloudflare compris) : un visiteur ne peut pas recevoir la page que vous voyez.
+2. **L'appliquer à tous :** cochez **v2**, puis **Enregistrer la version**. Revenir à la v1 se fait de la même façon, à tout moment.
+
+L'ouverture et la fermeture de l'aperçu, et chaque changement de version, sont notés au [Journal](reglages#journal).
+
 ## Marque
 
 - **Nom du site seulement**, ou **Emblème + nom (+ sous-titre)**. Le second choix n'est possible qu'avec un emblème ou une icône envoyés.
