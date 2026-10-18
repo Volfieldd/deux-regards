@@ -38,6 +38,8 @@ export default async function publicRoutes(app) {
   const likeLimit = createRateLimiter({ limit: 120, windowMs: 3600 * 1000 });
   const reportLimit = createRateLimiter({ limit: 5, windowMs: 3600 * 1000 });
   const shareLimit = createRateLimiter({ limit: 60, windowMs: 3600 * 1000 });
+  // Recherche : 60 recherches en 10 minutes par adresse au plus (partagé entre les trois langues ; registre de la Vigie, BV-9).
+  const searchLimit = createRateLimiter({ limit: 60, windowMs: 10 * 60 * 1000 });
   // Codes de contrôle des cartes (3 caractères) : au plus 5 codes faux par référence en 24 h, d'où que viennent les
   // essais (en base, partagé entre les langues). Au-delà, tout code de cette référence est ignoré : la demande est
   // traitée comme une référence tapée sans code (non vérifiée ; sur une rencontre établie, seul un refus s'applique).
@@ -53,7 +55,7 @@ export default async function publicRoutes(app) {
     fail: ref => { cq.forget.run(Date.now() - CODE_WINDOW); cq.add.run(ref, Date.now()); return cq.count.get(ref, Date.now() - CODE_WINDOW) === CODE_TRIES; },
   };
   // Mêmes pages en français (racine), en anglais (/en) et en allemand (/de).
-  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, codeGuard });
+  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, searchLimit, codeGuard });
 
   // Sélecteur de langue : retient le choix (seul cookie du site, posé à ce moment-là) puis ouvre la page demandée.
   // Adresses habituelles des mentions légales en Allemagne et en anglais.
@@ -189,7 +191,7 @@ function helpers(lang) {
     v2: { ...v2, date: takenOn => shortDate(takenOn, lang), typo: s => v2.typo(s, lang) } };
 }
 
-async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, codeGuard }) {
+async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, searchLimit, codeGuard }) {
   const finder = createSearch({ db: app.db });
   const t = UI[lang];
   const base = helpers(lang);
@@ -401,8 +403,20 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   app.get('/recherche', async (request, reply) => {
     if (repo.settings().search_page === false && !request.can('site.textes')) return reply.callNotFound();
     const siteName = app.siteName();
-    const q = String(request.query.q || '').trim().slice(0, MAX_QUERY);
-    const terms = finder.terms(q);
+    // Le champ n'existe qu'une fois et prend 100 caractères au plus (maxlength) : un « q » répété ou plus long ne vient pas
+    // du formulaire. Coupé comme avant, et signalé à la Vigie (BV-8, cas DS12), sans la saisie elle-même ; une saisie
+    // malveillante est déjà signalée par le crochet commun (DS11).
+    const raw = request.query.q;
+    const nombreQ = Array.isArray(raw) ? raw.length : raw === undefined ? 0 : 1;
+    const longueur = Array.isArray(raw) ? Math.max(...raw.map(v => String(v).length)) : String(raw ?? '').length;
+    if ((nombreQ > 1 || longueur > MAX_QUERY) && ![].concat(raw).some(v => scanValue('query', 'query.q', String(v)))) {
+      app.securite.emit('input_validation_fail', { request, emetteur: 'server/routes/public.js · recherche', detail: { raison: 'saisie de recherche hors formulaire', longueur, nombre_q: nombreQ } });
+    }
+    const q = String(raw || '').trim().slice(0, MAX_QUERY);
+    // Recherches en rafale (BV-9) : au-delà de la limite, 429, la saisie gardée dans le champ, et un signalement.
+    const limited = Boolean(q) && !searchLimit(request.ip);
+    if (limited) app.securite.emit('excess_rate_limit_exceeded', { request, emetteur: 'server/routes/public.js · recherche', detail: { limite: 'recherche' } });
+    const terms = limited ? [] : finder.terms(q);
     let photos = [];
     if (terms.length) {
       const byId = new Map(repo.publishedPhotos({ lang }).map(p => [p.id, p]));
@@ -410,6 +424,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       app.stats.hit(request, { page: 'recherche' });
     }
     if (q) reply.header('x-robots-tag', 'noindex');
+    if (limited) reply.code(429);
     // v2 : sans résultat (ou avant la première recherche), les séries à parcourir, avec leur couverture et leur compte ; la
     // v1 l'ignore. La recherche elle-même ne change pas.
     const shown = photos.length ? [] : repo.publishedPhotos({ lang });
@@ -418,7 +433,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       return { ...c, count: inCat.length, cover: inCat[0] };
     }).filter(c => c.count);
     return reply.render('search', {
-      ...base, siteName, q, searched: terms.length > 0, tooShort: Boolean(q) && !terms.length, photos, series,
+      ...base, siteName, q, searched: terms.length > 0, tooShort: !limited && Boolean(q) && !terms.length, limited, photos, series,
       pageTitle: q ? `${t.search.title}${t.colon} ${q} · ${siteName}` : `${t.search.title} · ${siteName}`, canonical: '/recherche',
       description: t.search.description,
     });

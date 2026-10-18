@@ -23,13 +23,13 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 |---|---|---|---|---|
 | BV-1 Réglage public sensible changé | DS9 (contact ou directeur de la publication), DS23 (après une session reprise) | ✓ Vigie | `feat/vigie-actions-admin` : point d'émission unique dans `server/securite/site.js`, événement `config_public_changed`, règles `vigie/regles/80-admin.yml` | fait |
 | BV-2 Donnée personnelle rendue publique | DS18 | ✓ Vigie | même PR : `privacy_exposure_changed` (heure visible, EXIF complet), règles `exif_complet` et `heures_visibles_en_masse` | fait |
-| BV-3 Valeurs de filtre impossibles | DS12 | ✓ site | `fix/vigie-bv3-bv5-bv7` | en cours |
+| BV-3 Valeurs de filtre impossibles | DS12 | ✓ site | PR #133 : `input_validation_fail` (émetteurs `· filtres`, `· partage`), exception de 30 jours lue dans `stats_pages` | fait |
 | BV-4 Seuils DS15 face à la v2 | DS15 | ✓ Vigie | recalage sur le trafic de l'aperçu (phase D), sans changement avant d'avoir des chiffres | à faire |
-| BV-5 Aucun lien interne vers une 404 | prérequis de DS15 | ✓ site | `fix/vigie-bv3-bv5-bv7` | en cours |
-| BV-6 Statistiques gonflées | DS22 | ✓ Vigie et site | déjà couvert par `excess_rate_limit_exceeded` (1 point sur l'adresse) ; émission du partage par QR côté site | en cours |
-| BV-7 Referer de la photo offerte | durcissement | ✓ site | `fix/vigie-bv3-bv5-bv7` | en cours |
-| BV-8 Saisie de recherche impossible | DS12 | site (prochain lot) | `input_validation_fail`, la règle DS12 existante s'applique | à faire |
-| BV-9 Recherches en rafale | DS15, DS22 | site (prochain lot) | limite et `excess_rate_limit_exceeded` ; la Vigie compte déjà 1 point par dépassement | à faire |
+| BV-5 Aucun lien interne vers une 404 | prérequis de DS15 | ✓ site | PR #133 : `test/liens-internes.test.js` (v1 et v2, 3 langues ; lien piège jamais suivi) | fait |
+| BV-6 Statistiques gonflées | DS22 | ✓ Vigie et site | déjà couvert par `excess_rate_limit_exceeded` (1 point sur l'adresse) ; partage par QR : PR #133 (émetteur `· partage QR`) | fait |
+| BV-7 Referer de la photo offerte | durcissement | ✓ site | PR #133 : `no-referrer` gardé dans `onSend` pour les adresses à jeton ou à code (`redactUrl`) | fait |
+| BV-8 Saisie de recherche impossible | DS12 | ✓ site | `fix/vigie-bv8-bv9-recherche` : `input_validation_fail` (émetteur `· recherche`, détail `raison`, `longueur`, `nombre_q`, jamais la saisie) | fait |
+| BV-9 Recherches en rafale | DS15, DS22 | ✓ site | `fix/vigie-bv8-bv9-recherche` : 60 recherches en 10 min par adresse, puis 429 et `excess_rate_limit_exceeded` (`limite: 'recherche'`) | fait |
 
 ---
 
