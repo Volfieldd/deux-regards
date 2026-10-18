@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Statut | Note de cadrage. Rien n'est développé. Le code n'a pas été modifié. |
+| Statut | Note de cadrage. Rien n'est développé. Décisions DS1 à DS7 **prises le 18 octobre 2026** (propositions retenues telles quelles, section 12). |
 | Date | 18 octobre 2026. Toutes les sources ont été consultées ce jour-là. |
 | Base lue | `main` à `e204683` (version 1.90.0). |
 | Demande | « Réfléchir à un module de Nicephos qui permet de poster des stories Instagram avec de la musique (libre de droits, ou dans des conditions compatibles avec l'usage de musiques sous licence) : grosso modo un mini module de montage qui enchaîne les photos avec une transition et une petite musique de quelques secondes. » Contrainte ajoutée : **un module Docker dédié, en plus** du site. |
@@ -34,7 +34,7 @@
 - **Trois sorties**, dans l'ordre de livraison : télécharger le MP4 ; le partager depuis le téléphone (Instagram ajoute alors sa propre musique si l'on veut) ; le publier par la file Instagram.
 - **Coût : 0 €.** Du calcul sur l'Unraid, quelques Mo par morceau, des MP4 effacés après quelques jours.
 - **Calendrier** : de nouvelles routes, un envoi de fichiers, un droit et une migration ; d'après la décision du 18 octobre 2026, le code attend la **fin de la phase D de la Vigie**. Cette note, elle, peut être arbitrée tout de suite.
-- **Sept décisions** (section 12) : sortie par défaut, sources de musique admises, qui gère la phonothèque, circuit de validation, durée par défaut, durée de conservation des MP4, publication de l'image du conteneur.
+- **Sept décisions, prises le 18 octobre 2026** (section 12) : télécharger d'abord puis la file Instagram ; sources de musique limitées à la liste de DS2 ; phonothèque gérée par l'administrateur ; circuit des posts ; 3,5 s par photo et fondu de 0,7 s ; MP4 gardés 7 jours ; image du conteneur construite sur le serveur.
 
 ---
 
@@ -363,7 +363,7 @@ Une story n'a pas de légende. Le crédit va donc **dans l'image** (RE6) : titre
 
 | Phase | Contenu | Livrable | Dépend de |
 |---|---|---|---|
-| **S0** (hors code) | Décisions DS1 à DS7 ; choix des 5 à 10 premiers morceaux avec leur fiche ; essai manuel d'une story par l'API sur le compte réel (type de compte, compte dans la limite) ; question à la SACEM si un doute reste (section 6) | décisions notées dans le PLAN | — |
+| **S0** (hors code) | Décisions DS1 à DS7 (prises le 18 octobre 2026) ; choix des 5 à 10 premiers morceaux avec leur fiche ; essai manuel d'une story par l'API sur le compte réel (type de compte, compte dans la limite) ; question à la SACEM si un doute reste (section 6) | décisions notées dans le PLAN | — |
 | **S1** | Conteneur `montage` (`montage/`, `Dockerfile.montage`, profils Compose, réseau interne), `MONTAGE_URL` et `MONTAGE_KEY`, client signé côté site, rendu sans musique, écran de montage minimal, **Télécharger** ; mesures sur l'Unraid ; tests du contrat (bornes, signature, délai, injection) | une PR | fin de la phase D de la Vigie ; maquettes AD2 |
 | **S2** | Phonothèque : envoi, normalisation par le conteneur, fiche licence, crédit incrusté, musique dans le rendu ; sauvegarde des morceaux | une PR | S1 |
 | **S3** | Stories dans la file Instagram : tables, accords, circuit, adresse `.mp4`, attente de 5 minutes, conservation ; **Partager** depuis le téléphone | une PR | S2 ; essai S0 concluant |
@@ -380,9 +380,11 @@ Chaque phase : revue de code et de sécurité avant la suivante ; tests e2e de l
 | API d'Instagram | 0 € (pas d'offre payante, `server/instagram-limits.js:2`) |
 | Machine | ~1 min de 2 cœurs par rendu ; ~415 Mo d'image ; quelques Mo par morceau ; MP4 de 2 à 20 Mo gardés 7 jours |
 
-## 12. Décisions à prendre
+## 12. Décisions
 
-| Id | Question | Proposition |
+Toutes **prises le 18 octobre 2026** par les auteurs : chaque proposition est retenue telle quelle.
+
+| Id | Question | Décision |
 |---|---|---|
 | DS1 | Sortie livrée en premier | Télécharger (S1), puis la file Instagram (S3) ; « sans musique » toujours proposé |
 | DS2 | Sources de musique admises | domaine public et CC0 (enregistrement compris), CC BY 4.0, Pixabay sans bouclier Content ID, Sound Collection de Meta (Instagram seulement), autorisation écrite d'un musicien ; jamais NC, ND, SA, YouTube Audio Library ni musique du commerce ; abonnement payant : non pour l'instant (coût nul) |
