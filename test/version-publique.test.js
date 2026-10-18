@@ -234,7 +234,7 @@ test('visionneuse v2 : points d’accroche de la Vigie repris (lien piège cach�
   assert.match(b, /<a href="\/galerie\/tout-telecharger" rel="nofollow" hidden tabindex="-1" aria-hidden="true">archives<\/a>/);
   assert.match((await c.visit('/robots.txt')).body, /Disallow: \/galerie\/tout-telecharger/);
   // Sans Vigie, pas de lien piège (comme en v1).
-  const plain = await site(t);
+  const plain = await site(t, { env: { VIGIE_URL: '' } });               // sans Vigie, même sous npm run test:vigie
   plain.app.publicVersion.save('v2');
   assert.doesNotMatch((await plain.visit(PHOTO)).body, /tout-telecharger/);
 });
