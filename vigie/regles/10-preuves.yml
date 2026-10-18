@@ -1,4 +1,6 @@
 # Preuves à source unique (décision D18) : une seule observation suffit, alerte immédiate sans quorum.
+# Modes de départ (D3) : DS1 et DS8 hors du mois d'observation ; les preuves DS8 sans réponse possible (administrateur
+# donné, journal des comptes, sauvegarde) et la chaîne rompue (DS20) en « alerter » : notifiées, jamais muettes.
 title: Rôle donné, retiré ou compte changé hors de l'application
 name: role_hors_application
 id: 7eb3ad9a-4b84-5996-bca3-667469c7fbfe
@@ -28,7 +30,7 @@ detection:
     detail.hors_application: true
   condition: selection and not filtre
 level: high
-vigie: { cas: DS8, entite: { kind: compte, champ: detail.compte }, source_unique: true }
+vigie: { cas: DS8, entite: { kind: compte, champ: detail.compte }, source_unique: true, mode: alerter }
 ---
 title: Journal des comptes altéré (déclencheur absent ou modifié, ticket resté ouvert)
 name: integrite_comptes
@@ -42,7 +44,7 @@ detection:
     severity: critique
   condition: selection
 level: critical
-vigie: { cas: DS8, entite: { kind: site, valeur: site }, source_unique: true }
+vigie: { cas: DS8, entite: { kind: site, valeur: site }, source_unique: true, mode: alerter }
 ---
 title: Chaîne du journal de la Vigie rompue
 name: chaine_rompue
@@ -55,7 +57,7 @@ detection:
     type: log_integrity_fail
   condition: selection
 level: critical
-vigie: { cas: DS20, entite: { kind: vigie, valeur: chaine }, source_unique: true }
+vigie: { cas: DS20, entite: { kind: vigie, valeur: chaine }, source_unique: true, mode: alerter }
 ---
 title: Cookie d'une session fermée rejoué depuis un autre appareil
 name: cookie_rejoue
@@ -234,4 +236,4 @@ detection:
     severity: critique
   condition: selection
 level: critical
-vigie: { cas: DS8, entite: { kind: site, valeur: comptes }, source_unique: true }
+vigie: { cas: DS8, entite: { kind: site, valeur: comptes }, source_unique: true, mode: alerter }

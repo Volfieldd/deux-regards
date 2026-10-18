@@ -52,7 +52,7 @@ detection:
     severity: haut
   condition: selection
 level: high
-vigie: { cas: DS8, entite: { kind: vigie, valeur: controle_roles }, source_unique: true }
+vigie: { cas: DS8, entite: { kind: vigie, valeur: controle_roles }, source_unique: true, mode: alerter }
 ---
 title: Expression régulière d'une règle arrêtée par son délai
 name: regle_lente
