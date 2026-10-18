@@ -1,0 +1,16 @@
+<%
+/* Alerte introuvable (404) : numéro inconnu, ou qui n'est pas un numéro. Une page en session, sobre, avec deux chemins de
+   retour (comme a-venir.eta). Rien de l'adresse demandée n'est repris, sauf un numéro reconnu comme tel. */
+layout('./layout', { titre: 'Alerte introuvable' });
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Alerte introuvable</h1></div>
+</header>
+<div class="vg-vide">
+<p class="t"><%= it.numero ? `Aucune alerte n°\u00a0${it.numero}.` : 'Cette adresse ne désigne aucune alerte.' %></p>
+<p>Le numéro est peut-être faux, ou l’alerte a été effacée : une alerte close est gardée 13 mois, puis la Vigie l’efface avec ses liens vers le journal.</p>
+<ul>
+<li><a class="vg-lien" href="/alertes">Les alertes non closes</a></li>
+<li><a class="vg-lien" href="/alertes?statut=toutes">Toutes les alertes, closes comprises</a></li>
+</ul>
+</div>

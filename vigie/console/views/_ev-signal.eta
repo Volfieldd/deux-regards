@@ -1,0 +1,8 @@
+<%
+/* Un événement dans une liste .vg-signal (fiche d'une entité, MV-04 « Derniers événements ») : l'heure à la source et l'écart,
+   ce qui s'est passé et sa gravité, la source, l'émetteur, la confiance. L'adresse et le compte de l'événement quand ils ne
+   sont pas l'entité de la fiche. include('./_ev-signal', { l, sans }). */
+const l = it.l;
+%><li><div class="h"><%~ include('./_ev-heure', { l }) %></div>
+<div class="quoi"><div class="vg-quoi"><%~ include('./_ev-quoi', { l, lienClasse: 'vg-lien' }) %><% if (l.adresse && it.sans !== 'adresse') { %><span class="vg-detail">adresse <%~ include('./_ev-adresse', { a: l.adresse }) %></span><% } %><% if (l.compte && it.sans !== 'compte') { %><span class="vg-detail">compte <%~ include('./_ev-compte', { c: l.compte }) %></span><% } %></div><%~ include('./_grav', { gravClasse: l.grav.classe, gravMot: l.grav.mot }) %></div>
+<div class="d-ou"><%~ include('./_ev-source', { l, liste: false }) %></div></li>

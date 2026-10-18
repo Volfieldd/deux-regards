@@ -1,0 +1,5 @@
+<%
+/* Saisie suspecte (vigie.css § 9, .vg-saisie) : famille, champ, longueur ; l'extrait en chasse fixe, échappé, coupé à 24 signes,
+   la suite dite ; pour un rôle sous Analyste, l'extrait n'est pas envoyé et la phrase le dit. include('./_ev-saisie', { s }). */
+const s = it.s;
+if (s) { %><p class="vg-saisie"><span class="vg-saisie-t"><%= s.famille %> <b><%= s.familles %></b><% if (s.champ) { %> dans <code><%= s.champ %></code><% } %><% if (s.longueur) { %> · <%= s.longueur %><% } %></span><% if (s.extrait != null) { %><code class="vg-saisie-x"><%= s.extrait %></code><% if (s.reste) { %><span class="vg-saisie-coupe"><%= s.reste %></span><% } %><% } else if (s.reserve) { %><span class="vg-saisie-r">Extrait réservé aux Analystes et aux Administrateurs.</span><% } %><% if (s.autres) { %><span class="vg-saisie-coupe"><%= s.autres %></span><% } %></p><% } %>

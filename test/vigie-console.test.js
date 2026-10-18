@@ -407,3 +407,19 @@ test('configuration : console facultative, exigences complètes quand elle est o
   }
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test('bandeau des critiques : en tête des pages en session (pas sur la vue d’ensemble), sans intervenant seulement', async t => {
+  const v = setup(t);
+  const { cookie } = await v.login();
+  const get = url => v.app.inject({ url, headers: v.h(), cookies: { '__Host-vigie': cookie } });
+  assert.doesNotMatch((await get('/sante')).body, /vg-bandeau/);
+  const ins = v.db.prepare("INSERT INTO alerts (regle, cas, entite_kind, entite_key, gravite, mode, statut, premiere, derniere) VALUES ('sigma.chaine_rompue', 'DS8', 'vigie', 'chaine', 'critique', ?, ?, ?, ?)");
+  ins.run('alerter', 'ouverte', v.clock.t, v.clock.t);
+  ins.run('observer', 'ouverte', v.clock.t, v.clock.t);
+  ins.run('alerter', 'en_cours', v.clock.t, v.clock.t);
+  const page = (await get('/sante')).body;
+  assert.match(page, /class="vg-bandeau" role="alert"/);
+  assert.match(page, /1 alerte critique sans intervenant/);
+  assert.match(page, /href="\/alertes\/1"/);
+  assert.doesNotMatch((await get('/')).body, /class="vg-bandeau"/);
+});

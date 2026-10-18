@@ -1,0 +1,8 @@
+<%
+/* Légende d'un diagramme de flux (MV-11) : la teinte de chaque source ; pour les événements, ce que disent la saturation, le
+   nœud « sans alerte » et les hachures. include('./_flux-leg', { evenements }). */
+%><ul class="fx-leg"><li><span class="fx-sw fx-f-vigie" aria-hidden="true"></span>contrôles de la Vigie</li><li><span class="fx-sw fx-f-site" aria-hidden="true"></span>site</li><li><span class="fx-sw fx-f-bordure" aria-hidden="true"></span>bordure Cloudflare</li><li><span class="fx-sw fx-f-zitadel" aria-hidden="true"></span>Zitadel</li><% if (it.evenements) { %>
+<li><span class="fx-sw fx-sw-alerte" aria-hidden="true"></span>pleine teinte, contour : mène à une alerte</li>
+<li><span class="fx-sw fx-sw-sans" aria-hidden="true"></span>teinte pâle : ne mène à aucune</li>
+<li><span class="fx-sw fx-n-sans" aria-hidden="true"></span>« sans alerte » : son nombre se lit à son nœud, en contour ; ses bandes, grises, sont à peine tracées</li><% } %>
+<li><span class="fx-sw fx-sw-h" aria-hidden="true"></span>hachures : corrélation</li></ul>

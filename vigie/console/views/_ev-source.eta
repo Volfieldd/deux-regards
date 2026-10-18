@@ -1,0 +1,6 @@
+<%
+/* Source (puce neutre), confiance en toutes lettres (« constaté » porte ✓), émetteur (vigie.css § 2). include('./_ev-source',
+   { l, liste }) : liste vraie dans le tableau du journal (.vg-src-l), sinon la colonne « d'où » d'une liste .vg-signal. */
+const l = it.l;
+const conf = () => l.conf.constate ? `<span class="conf conf--constate">${include('./_ic', { icone: 'coche', taille: 13 })}constaté</span>` : '<span class="conf">rapporté</span>';
+%><span class="src"><%~ include('./_ic', { icone: l.source.cle, taille: 14 }) %><%= l.source.mot %></span><% if (it.liste) { %><span class="vg-src-l"><%~ conf() %><% if (l.emetteur) { %><span class="emet"><%= l.emetteur %></span><% } %></span><% } else { %><% if (l.emetteur) { %><span class="emetteur"><%= l.emetteur %></span><% } %><%~ conf() %><% } %>

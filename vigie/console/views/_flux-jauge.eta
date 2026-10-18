@@ -1,0 +1,5 @@
+<%
+/* Une barre de proportion (provenances, MV-11) : SVG décoratif, la largeur en attribut de présentation (CSP sans style en
+   ligne) ; le nombre est écrit à côté. include('./_flux-jauge', { pc }) avec pc de 1 à 100. */
+const pc = Math.max(0, Math.min(100, Math.round(Number(it.pc) || 0)));
+%><svg class="fx-barre" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="fond" width="100" height="6" rx="3"></rect><rect width="<%= pc %>" height="6" rx="3"></rect></svg>

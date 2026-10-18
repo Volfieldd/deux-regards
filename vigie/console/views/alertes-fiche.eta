@@ -1,0 +1,119 @@
+<%
+/* Fiche d'une alerte (MV-02, phase D3b) : ce qui s'est passé, la réponse déjà faite, d'où vient le signal (la règle, ses
+   tactiques MITRE, les sources, les événements de l'alerte), l'entité et son score, le classement, l'historique. Données :
+   it.vue = fiche() (vigie/console/ecrans/alertes.js), déjà mises en forme. Lecture seule : les gestes viennent en D3c. */
+const vue = it.vue || {};
+layout('./layout', { titre: it.titre && it.titre !== 'Vigie' ? it.titre : `Alerte #${vue.id}` });
+const ent = vue.entite || {};
+const rep = vue.reponse || { lignes: [], raisons: [] };
+const ev = vue.evenements || { lignes: [] };
+const rg = vue.regle || {};
+const hist = vue.historique || { lignes: [] };
+const RETOUR = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
+%>
+<header class="ep">
+  <a class="ep-retour" href="<%= vue.retour %>"><%~ RETOUR %>Alertes</a>
+  <div class="ep-titre"><h1><%= vue.titre %></h1><span class="ep-pastilles"><%~ include('./_grav', { gravClasse: vue.grav.classe, gravMot: vue.grav.mot }) %><%~ include('./_etat', { etatK: vue.statut.k, etatMot: vue.statut.mot }) %></span></div>
+  <p class="ep-meta"><span>Alerte #<%= vue.id %></span><span class="tel-non">règle «&#8239;<%= rg.titre %>&#8239;»<% if (rg.cas) { %> <span class="vg-code"><%= rg.cas %></span><% } %></span><span><%~ include('./_ent', { ent }) %></span><span><%= vue.quand %></span><% if (vue.priseEnCharge) { %><span><%= vue.priseEnCharge %></span><% } %></p>
+  <% /* D3c : « Classer… » en contour, menu « Plus d’actions » et « Prendre en charge » (bouton plein, POST /alertes/<n°>/prendre) ; l'identité confirmée dans la méta. */ %>
+</header>
+<% if (vue.lecteur) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule : vous voyez l’alerte, son score et d’où vient le signal.</b> Les adresses sont tronquées à leur réseau (/24, /48).</span></p>
+<% } %>
+<% /* D3c : « À faire maintenant » (étapes propres à la règle, .vg-afaire) en tête d'une alerte critique, avant ce qui s'est passé. */ %>
+<div class="deux-col">
+<div>
+<section class="panel" aria-labelledby="t-passe"><h2 class="panel-t" id="t-passe">Ce qui s’est passé</h2>
+<p class="vg-lede"><%= vue.occ %>, sur <%~ include('./_ent', { ent }) %><% if (vue.sources.length) { %>, vue par <%= vue.sources.map(s => s.mot).join(', ').replace(/, ([^,]*)$/, ' et $1') %><% } %>.
+<span class="sec"><%= vue.mode.sec %><% if (vue.mode.actuel) { %> <%= vue.mode.actuel %><% } %></span></p>
+<% if (vue.autres.lignes.length) { %>
+<p class="panel-pied"><span>Autres alertes sur la même entité : <% vue.autres.lignes.forEach((x, i) => { %><%= i ? ', ' : '' %><a href="<%= x.href %>">#<%= x.id %></a> (<%= x.grav %>, <%= x.statut %>)<% }) %><%= vue.autres.plus ? ', …' : '' %>.</span></p>
+<% } %>
+</section>
+
+<% if (rep.attendue || rep.lignes.length || rep.raisons.length) { %>
+<section class="panel" aria-labelledby="t-rep"><h2 class="panel-t" id="t-rep"><%= rep.lignes.length ? 'Réponse déjà faite' : 'Réponse automatique' %></h2>
+<% if (rep.lignes.length) { %>
+<ul class="vg-lignes">
+<% for (const d of rep.lignes) { %>
+<li><span class="t"><%= d.type %><% if (d.cible) { %> · <% if (d.cible.mono === 'ip') { %><span class="ip<%= d.cible.v6 ? ' v6' : '' %>"><%= d.cible.texte %></span><% if (d.cible.tronquee) { %> <span class="tronq">(tronquée)</span><% } %><% } else { %><span class="sub"><%= d.cible.texte %></span><% } %><% } %></span><span class="n">#<%= d.id %></span><span class="sec"><%= d.sec %></span><% if (d.enCours) { %><% /* D3c : « Lever… » (vers /decisions/<n°>/lever), selon le droit. */ %><% } %></li>
+<% } %>
+</ul>
+<% } %>
+<% if (rep.raisons.length) { %><p class="vg-compte"><%= rep.lignes.length ? 'Aussi' : 'Aucune décision' %> : <%= rep.raisons.join(' ; ') %>.</p><% } else if (!rep.lignes.length) { %><p class="vg-compte">Aucune réponse automatique faite pour cette alerte.</p><% } %>
+</section>
+<% } %>
+
+<section class="panel" aria-labelledby="t-signal"><h2 class="panel-t" id="t-signal">D’où vient le signal</h2>
+<div class="vg-regle"><p class="r">Règle «&#8239;<%= rg.titre %>&#8239;» · mode <%= vue.mode.mot %> <span class="vg-code"><%= rg.id %><% if (rg.cas) { %> · <%= rg.cas %><% } %></span></p>
+<% if (rg.nature) { %><p><%= rg.nature %></p><% } %>
+<% if (rg.mitre) { %><p>MITRE ATT&amp;CK : <%= rg.mitre.tactiques.length ? rg.mitre.tactiques.join(', ') : (rg.mitre.techniques.length > 1 ? 'techniques' : 'technique') %><% if (rg.mitre.techniques.length) { %> <span class="vg-code"><%= rg.mitre.techniques.join(' · ') %></span><% } %></p><% } %>
+</div>
+<p class="vg-verdict<%= vue.verdict.seul ? ' vg-verdict--seul' : '' %>"><%~ include('./_ic', { icone: vue.verdict.seul ? 'info' : 'coche', taille: 16 }) %><span><%= vue.verdict.texte %></span></p>
+<% if (ev.lignes.length) { %>
+<p class="vg-signal-tete" aria-hidden="true"><span>Heure à la source · reçu</span><span>Ce qui s’est passé</span><span>Source · émetteur · confiance</span></p>
+<ol class="vg-signal" aria-label="Événements de l’alerte, du plus récent au plus ancien">
+<% for (const e of ev.lignes) { %>
+<li><div class="h"><time datetime="<%= e.iso %>"><%= e.heure %></time><% if (e.ecart) { %><span class="vg-ecart<%= e.tard ? ' tard' : '' %>"><%= e.ecart %><% if (e.tard) { %><span class="sr-only"> (arrivé en retard)</span><% } %></span><% } else { %><span class="vg-ecart">—<span class="sr-only"> (constaté par la Vigie, sans écart)</span></span><% } %></div>
+<div class="quoi"><span class="vg-type"><a class="vg-lien t" href="<%= e.href %>"><%= e.type || e.code %><span class="sr-only"> (événement n° <%= e.seq %>)</span></a><% if (e.type) { %><code class="vg-code"><%= e.code %></code><% } %></span><% if (e.route) { %><span class="vg-route">route <code><%= e.route %></code></span><% } %><% if (e.adresse || e.compte) { %><span class="vg-detail"><% if (e.adresse) { %>adresse <span class="ip<%= e.adresse.v6 ? ' v6' : '' %>"><%= e.adresse.texte %></span><% if (e.adresse.tronquee) { %> <span class="tronq">(tronquée)</span><% } %><% } %><% if (e.adresse && e.compte) { %> · <% } %><% if (e.compte) { %>compte <span class="sub"><%= e.compte %></span><% } %></span><% } %><%~ include('./_grav', { gravClasse: e.grav.classe, gravMot: e.grav.mot }) %></div>
+<div class="d-ou"><% if (e.source) { %><span class="src"><%~ include('./_ic', { icone: e.source.cle, taille: 14 }) %><%= e.source.mot %></span><% } else { %><span class="src"><%= e.composant %></span><% } %><% if (e.emetteur) { %><span class="emetteur"><%= e.emetteur %></span><% } %><% if (e.constate) { %><span class="conf conf--constate"><%~ include('./_ic', { icone: 'coche', taille: 13 }) %>constaté</span><% } else { %><span class="conf">rapporté</span><% } %></div></li>
+<% } %>
+</ol>
+<% } else if (ev.effaces) { %>
+<p class="vg-compte">Les <%= ev.totalTexte %> événements de l’alerte ne sont plus au journal (conservés 6 mois).</p>
+<% } else { %>
+<p class="vg-compte">Aucun événement relié à cette alerte<%= ev.debut ? ' avant ceux déjà vus' : '' %>.</p>
+<% } %>
+<nav class="vg-pages" aria-label="Pages des événements de l’alerte"><p><%= ev.total ? `${ev.totalTexte} ${ev.total > 1 ? 'événements reliés' : 'événement relié'} à l’alerte${ev.total > ev.lignes.length ? (ev.debut ? ' ; suite de la liste' : ` ; les ${ev.lignes.length} plus récents ici`) : ''}.` : 'Aucun événement relié.' %></p><% if (ev.suite || ev.debut) { %><div class="btns-ligne"><% if (ev.debut) { %><a class="btn ghost" href="<%= ev.debut %>">Les plus récents</a><% } %><% if (ev.suite) { %><a class="btn ghost" href="<%= ev.suite %>" rel="next">Plus anciens</a><% } %></div><% } %></nav>
+</section>
+
+<section class="panel" aria-labelledby="t-ent"><h2 class="panel-t" id="t-ent"><%= ent.titre %></h2>
+<dl class="kv-a">
+<dt><%= ent.k.charAt(0).toUpperCase() + ent.k.slice(1) %></dt><dd><% if (ent.mono === 'ip') { %><span class="ip<%= ent.v6 ? ' v6' : '' %>"><%= ent.texte %></span><% if (ent.tronquee) { %> <span class="tronq">(tronquée)</span><% } %><% } else if (ent.mono === 'sub') { %><span class="sub"><%= ent.texte %></span><% } else { %><%= ent.texte %><% } %></dd>
+<dt>Occurrences</dt><dd><%= vue.compteur %><span class="sec">première <%= vue.premiere %> · dernière <%= vue.derniere %></span></dd>
+<dt>Sources</dt><dd><% if (vue.sources.length) { %><ul class="srcs" aria-label="Sources"><% for (const s of vue.sources) { %><li><span class="src"><%~ include('./_ic', { icone: s.cle, taille: 14 }) %><%= s.mot %></span></li><% } %></ul><% } else { %>aucune<% } %></dd>
+<% if (vue.scoreOuverture) { %><dt>Score</dt><dd><%= vue.scoreOuverture %><span class="sec">au dernier signal de l’alerte</span></dd><% } %>
+</dl>
+<% if (ent.fiche) { %><p class="panel-pied"><span>Liens, sessions, événements</span><a class="vg-lien" href="<%= ent.fiche.href %>"><%= ent.fiche.texte %></a></p><% } %>
+</section>
+</div>
+
+<div class="cote">
+<% if (vue.score) { %>
+<section class="panel" aria-labelledby="t-score"><h2 class="panel-t" id="t-score">Score par source</h2>
+<dl class="vg-score">
+<% for (const l of vue.score.lignes) { %>
+<dt id="<%= l.id %>"><%= l.mot %></dt><dd><meter class="vg-m" min="0" max="<%= vue.score.max %>" value="<%= l.valeur %>" aria-labelledby="<%= l.id %>"><%= l.texte %></meter></dd><dd class="v"><%= l.texte %></dd>
+<% } %>
+<dt id="s-total" class="total">Total</dt><dd><meter class="vg-m total" min="0" max="<%= vue.score.max %>" value="<%= vue.score.total.valeur %>" aria-labelledby="s-total"><%= vue.score.total.texte %></meter></dd><dd class="v total"><%= vue.score.total.texte %></dd>
+</dl>
+<p class="vg-seuils">Maintenant (le score perd la moitié de sa valeur chaque heure). <%= vue.score.seuils %></p>
+</section>
+<% } %>
+<% /* D3c : « Actions forcées sur <l’entité> » (geler, fermer les sessions, bloquer l’adresse avec portée et durée, verrouiller l’admin), selon le droit, avec ré-authentification. */ %>
+<% if (vue.classement) { %>
+<section class="panel" aria-labelledby="t-classe"><h2 class="panel-t" id="t-classe">Classement</h2>
+<dl class="kv-a">
+<dt>Classée</dt><dd><%= vue.classement.mot %></dd>
+<% if (vue.classement.par) { %><dt>Par</dt><dd><%= vue.classement.par %><%= vue.classement.quand ? `, ${vue.classement.quand}` : '' %></dd><% } %>
+<% if (vue.classement.note) { %><dt>Note</dt><dd><%= vue.classement.note %></dd><% } %>
+</dl>
+<p class="panel-pied"><span>Si le signal revient, une nouvelle alerte s’ouvre.</span></p>
+</section>
+<% } else { %>
+<% /* D3c : « Classer l’alerte » (Incident confirmé, Faux positif, Test ; note de 500 signes ; POST /alertes/<n°>/classer). */ %>
+<% } %>
+<section class="panel" aria-labelledby="t-hist"><h2 class="panel-t" id="t-hist">Historique</h2>
+<% if (hist.lignes.length) { %>
+<ol class="chrono">
+<% for (const h of hist.lignes) { %>
+<li><time datetime="<%= h.iso %>"><%= h.quand %></time><span><%= h.texte %><% if (h.note) { %> : <%= h.note %><% } %></span></li>
+<% } %>
+</ol>
+<% if (hist.coupe) { %><p class="vg-compte">Les <%= hist.lignes.length %> derniers changements ; les plus anciens sont au journal.</p><% } %>
+<% } else { %>
+<p class="vg-compte">Aucun changement noté au journal pour cette alerte.</p>
+<% } %>
+</section>
+</div>
+</div>

@@ -1,0 +1,4 @@
+<%
+/* Compte d'un événement : le lien vers sa fiche, le nom connu dessous ; « — » sans compte. include('./_ev-compte', { c }). */
+const c = it.c;
+if (c) { %><a class="vg-lien" href="<%= c.href %>"><span class="sub"><%= c.texte %></span></a><% if (c.nom) { %><span class="nom"><%= c.nom %></span><% } %><% } else { %><span class="vg-sans-val">—<span class="sr-only"> (aucun)</span></span><% } %>

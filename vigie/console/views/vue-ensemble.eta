@@ -59,7 +59,14 @@ const pl = (n, un, plusieurs) => (n > 1 ? plusieurs : un);
 </tbody></table></div>
 <% } %>
 <div class="pied-liste"><% if (al.plus > 0) { %><span><%= al.plus %> autre<%= al.plus > 1 ? 's' : '' %> alerte<%= al.plus > 1 ? 's' : '' %> ouverte<%= al.plus > 1 ? 's' : '' %>, moins grave<%= al.plus > 1 ? 's' : '' %> ou plus ancienne<%= al.plus > 1 ? 's' : '' %>.</span> <% } %><a class="lien-a" href="/alertes?statut=toutes">Toutes les alertes, closes comprises</a></div>
-<% /* D3b : la barre de provenance des alertes (MV-11, « Provenance des N alertes ») et « Voir les flux » vers /flux, ici, sous le tableau. */ %>
+<% /* Barre de provenance des alertes (MV-11, lexique § 3.19, point 2), sous le tableau : par origine, la même que celle de /flux
+   au téléphone, sur la même période (7 jours) et avec les mêmes nombres ; « Voir les flux » vers /flux. */ %>
+<% const pv = vue.provenance; if (pv && pv.n > 0) { %>
+<%~ include('./_flux-barre', { barre: pv.groupes, titre: `Provenance des ${pv.n} ${pl(pv.n, 'alerte', 'alertes')} des ${pv.periode}`, tid: 't-prov', niveau: 2,
+  lienFlux: { href: '/flux', texte: 'Voir les flux', suite: `les ${pv.n} ${pl(pv.n, 'alerte', 'alertes')} et les ${pv.evenements} événements des ${pv.periode}, de leur origine à leur issue` } }) %>
+<% } else if (pv) { %>
+<p class="fx-voir"><a class="vg-lien" href="/flux">Voir les flux</a> <span class="sec">aucune alerte sur les <%= pv.periode %> ; les <%= pv.evenements %> événements, de leur origine à leur issue</span></p>
+<% } %>
 
 <div class="vg-bas">
 <section class="panel" aria-labelledby="t-dec"><h2 class="panel-t" id="t-dec">Décisions en cours <span class="n"><%= dec.total %></span></h2>

@@ -178,8 +178,11 @@ test('vue d’ensemble : données de la base, ordre des alertes, santé, décisi
   // Gravité, puis ouverte avant prise en charge, puis la plus récente : #413, #412, #409, #407, puis les moyennes.
   assert.deepEqual(vue.alertes.lignes.map(a => a.id), [a413, a412, a409, a407, a414, a399]);
   assert.equal(vue.alertes.total, 6);
-  assert.deepEqual(c, vue.compteurs, 'la barre latérale et la vue d’ensemble ne divergent pas');
-  assert.deepEqual(c, { alertes: 6, sante: 1, decisions: 3 });
+  const { bandeau, ...nombres } = c;
+  assert.deepEqual(nombres, vue.compteurs, 'la barre latérale et la vue d’ensemble ne divergent pas');
+  assert.deepEqual(nombres, { alertes: 6, sante: 1, decisions: 3 });
+  assert.match(bandeau.texte, /^2 alertes critiques sans intervenant/);
+  assert.equal(bandeau.id, a413);
 
   assert.equal(vue.phrase, '2 alertes critiques et 2 hautes à traiter.');
   const [f1, f2] = vue.faits;

@@ -1,0 +1,83 @@
+<%
+/* Un événement du journal (/evenements/<n°>) : ce qui s'est passé, ses deux heures (à la source, à la réception), son origine
+   (canal, confiance, émetteur, référence), qui et d'où, les alertes qui le contiennent, son maillon dans la chaîne, le détail
+   transmis. Données : it.ev = evenement() (vigie/console/ecrans/evenements.js), déjà mises en forme ; le détail venu du site
+   est échappé (<%= %>), ses adresses tronquées pour un Lecteur. Lecture seule. */
+const ev = it.ev;
+layout('./layout', { titre: it.titre });
+const q = ev.qui;
+%>
+<header class="ep">
+  <a class="ep-retour" href="/evenements">Événements</a>
+  <div class="ep-titre"><h1><%= ev.type.t %></h1><span class="ep-pastilles"><%~ include('./_grav', { gravClasse: ev.grav.classe, gravMot: ev.grav.mot }) %></span></div>
+  <p class="ep-meta"><span>événement n°&nbsp;<%= ev.seq %></span><span class="vg-code"><%= ev.type.code %></span><span><%= ev.heure.texte %></span></p>
+</header>
+<% if (ev.lecteur) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule&#8239;: adresses tronquées.</b> Toute adresse de cet événement, détail compris, est ramenée à son réseau (/24, /48)&#8239;; l’extrait d’une saisie n’est pas montré.</span></p>
+<% } %>
+<div class="deux-col">
+<div>
+<section class="panel" aria-labelledby="t-quoi"><h2 class="panel-t" id="t-quoi">Ce qui s’est passé</h2>
+<div class="vg-type"><span class="t"><%= ev.type.t %></span><span class="vg-code"><%= ev.type.code %></span></div>
+<% if (ev.route) { %><span class="vg-route">route <% if (ev.route.length > 28) { %><span class="vg-code"><%= ev.route %></span><% } else { %><code><%= ev.route %></code><% } %><% if (q.requete) { %> · <%= q.requete %><% } %></span><% } else if (q.requete) { %><span class="vg-route"><%= q.requete %></span><% } %>
+<% if (ev.detail.length) { %><span class="vg-detail"><%~ include('./_ev-morceaux', { morceaux: ev.detail }) %></span><% } %>
+<%~ include('./_ev-saisie', { s: ev.saisie }) %>
+</section>
+<section class="panel" aria-labelledby="t-heures"><h2 class="panel-t" id="t-heures">Deux heures</h2>
+<dl class="kv-a">
+<dt>À la source</dt><dd><%= ev.deuxHeures.source %><span class="sec"><%= ev.source.cle === 'vigie' && !ev.ecart ? 'constaté par la Vigie elle-même' : 'heure donnée par la source' %></span></dd>
+<dt>Reçu par la Vigie</dt><dd><%= ev.deuxHeures.recu %><% if (ev.ecart) { %><span class="sec"><%= ev.ecart.texte %><%= ev.ecart.tard ? ', en retard' : '' %></span><% } %></dd>
+<% if (ev.deuxHeures.retard) { %><dt>Arrivée</dt><dd>en retard&#8239;: le site l’a gardé en attente avant de l’envoyer</dd><% } %>
+</dl>
+</section>
+<section class="panel" aria-labelledby="t-origine"><h2 class="panel-t" id="t-origine">Origine</h2>
+<dl class="kv-a">
+<dt>Source</dt><dd><span class="src"><%~ include('./_ic', { icone: ev.source.cle, taille: 14 }) %><%= ev.source.mot %></span><span class="sec">composant <%= ev.origine.composant %></span></dd>
+<dt>Confiance</dt><dd><% if (ev.conf.constate) { %><span class="conf conf--constate"><%~ include('./_ic', { icone: 'coche', taille: 13 }) %>constaté</span><span class="sec">vu par la Vigie elle-même</span><% } else { %><span class="conf">rapporté</span><span class="sec">dit par la source, non vérifiable par la Vigie</span><% } %></dd>
+<dt>Canal</dt><dd><%= ev.origine.canal %></dd>
+<dt>Émetteur</dt><dd><%= ev.emetteur || '—' %></dd>
+<dt>Référence</dt><dd><% if (ev.origine.referenceHref) { %><a class="vg-lien" href="<%= ev.origine.referenceHref %>"><%= ev.origine.reference %></a><% } else { %><%= ev.origine.reference || '—' %><% } %></dd>
+</dl>
+</section>
+<section class="panel" aria-labelledby="t-detail"><h2 class="panel-t" id="t-detail">Détail transmis</h2>
+<% if (ev.detailKv.length) { %>
+<dl class="kv-a">
+<% for (const x of ev.detailKv) { %><dt><span class="vg-code"><%= x.k %></span></dt><dd><%= x.v %></dd>
+<% } %></dl>
+<p class="panel-pied"><span>Tel que reçu, échappé (rien ne s’exécute)&#8239;; 60 valeurs au plus.</span></p>
+<% } else { %>
+<p class="vg-sans">Aucun détail.</p>
+<% } %>
+</section>
+</div>
+<div class="cote">
+<section class="panel" aria-labelledby="t-qui"><h2 class="panel-t" id="t-qui">Qui, d’où</h2>
+<dl class="kv-a">
+<dt>Adresse</dt><dd><%~ include('./_ev-adresse', { a: ev.adresse }) %></dd>
+<dt>Réseau</dt><dd><%~ include('./_ev-adresse', { a: q.reseau }) %></dd>
+<dt>Compte</dt><dd><%~ include('./_ev-compte', { c: ev.compte }) %></dd>
+<dt>Session</dt><dd><% if (q.session) { %><a class="vg-lien" href="<%= q.session.href %>"><span class="sub"><%= q.session.texte %></span></a><% } else { %><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span><% } %></dd>
+<% if (q.lieu) { %><dt>Lieu</dt><dd><%= q.lieu %></dd><% } %>
+<% if (q.navigateur || q.agent) { %><dt>Navigateur</dt><dd><%= q.navigateur || '—' %><% if (q.agent) { %><span class="sec"><%= q.agent %></span><% } %></dd><% } %>
+</dl>
+</section>
+<section class="panel" aria-labelledby="t-alertes"><h2 class="panel-t" id="t-alertes">Alertes qui le contiennent</h2>
+<% if (ev.alertes.length) { %>
+<ul class="vg-lignes">
+<% for (const a of ev.alertes) { %>
+<li><span class="t"><%= a.titre %></span><span class="n">#<%= a.id %></span><span class="sec"><%~ include('./_grav', { gravClasse: a.grav.classe, gravMot: a.grav.mot }) %> <%~ include('./_etat', { etatK: a.statut.k, etatMot: a.statut.mot }) %><% if (a.entite) { %> · <%= a.entite.k %> <% if (a.entite.mono === 'ip') { %><span class="ip<%= a.entite.v6 ? ' v6' : '' %>"><%= a.entite.texte %></span><% if (a.entite.tronquee) { %> <span class="tronq">(tronquée)</span><% } %><% } else if (a.entite.mono === 'sub') { %><span class="sub"><%= a.entite.texte %></span><% } else { %><%= a.entite.texte %><% } %><% } %> · <%= a.sec %></span><a class="vg-lien" href="<%= a.href %>">Ouvrir l’alerte #<%= a.id %></a></li>
+<% } %>
+</ul>
+<% } else { %>
+<p class="vg-sans">Aucune alerte ne le contient.</p>
+<% } %>
+</section>
+<section class="panel" aria-labelledby="t-chaine"><h2 class="panel-t" id="t-chaine">Dans la chaîne du journal</h2>
+<dl class="kv-a">
+<dt>Numéro</dt><dd><%= ev.seq %></dd>
+<dt>Maillon</dt><dd><span class="vg-code"><%= ev.chaine.maillon %></span><span class="sec">HMAC de la ligne et du maillon précédent&#8239;: une ligne changée se voit à la vérification</span></dd>
+</dl>
+<% if (ev.chaine.avant || ev.chaine.apres) { %><p class="panel-pied"><% if (ev.chaine.avant) { %><a class="vg-lien" href="/evenements/<%= ev.chaine.avant %>">Ligne précédente, n°&nbsp;<%= ev.chaine.avant %></a><% } %><% if (ev.chaine.apres) { %><a class="vg-lien" href="/evenements/<%= ev.chaine.apres %>">Ligne suivante, n°&nbsp;<%= ev.chaine.apres %></a><% } %></p><% } %>
+</section>
+</div>
+</div>

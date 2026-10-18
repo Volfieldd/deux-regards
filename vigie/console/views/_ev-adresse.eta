@@ -1,0 +1,5 @@
+<%
+/* Adresse d'un événement (vigie.css § 3) : le lien vers sa fiche (le réseau pour un Lecteur), « (tronquée) » ; « — » sans
+   adresse. include('./_ev-adresse', { a }). */
+const a = it.a;
+if (a) { %><% if (a.href) { %><a class="vg-lien" href="<%= a.href %>"><span class="ip<%= a.v6 ? ' v6' : '' %>"><%= a.texte %></span></a><% } else { %><span class="ip<%= a.v6 ? ' v6' : '' %>"><%= a.texte %></span><% } %><% if (a.tronquee) { %><span class="tronq">(tronquée)</span><% } %><% } else { %><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span><% } %>

@@ -2,10 +2,9 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import net from 'node:net';
 import { readLimited } from './zitadel.js';
-import { clean } from './util.js';
+import { clean, netOf } from './util.js';
 
 // Réseau d'une adresse (/24 en IPv4, /48 en IPv6), comme le site.
-const netOf = ip => (net.isIPv4(ip) ? ip.replace(/\.\d+$/, '.0') : `${ip.split(':').slice(0, 3).join(':')}::`);
 
 // Bordure Cloudflare (phase C3, décision D19), côté Vigie :
 //   - copie les blocages d'adresses dans Workers KV (clé « blocages »), en liste signée réservée à la bordure (ni

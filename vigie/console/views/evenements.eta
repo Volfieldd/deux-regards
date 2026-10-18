@@ -1,0 +1,70 @@
+<%
+/* Journal des événements (MV-03). Données : it.j = journal() (vigie/console/ecrans/evenements.js), déjà mises en forme ;
+   tout ce qui vient du journal passe par <%= %> (échappé). Filtres en GET, sans script ; lecture seule. */
+const j = it.j;
+layout('./layout', { titre: it.titre });
+const f = j.filtres;
+const sel = (a, b) => (String(a) === String(b) ? ' selected' : '');
+const err = k => j.erreurs[k];
+%>
+<header class="ep">
+  <div class="ep-titre"><h1>Événements</h1></div>
+  <p class="ep-meta"><span><%= j.maintenant %></span><span class="tel-non">journal chaîné, gardé 6&nbsp;mois</span><% if (j.nbErreurs) { %><span><%= j.nbErreurs %> filtre<%= j.nbErreurs > 1 ? 's refusés' : ' refusé' %></span><% } %></p>
+  <% /* D3c : l'identité confirmée dans la méta (« Identité confirmée à …, valable jusqu’à … »). */ %>
+</header>
+<% if (j.lecteur) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule&#8239;: vous lisez le journal, tronqué.</b> Adresses tronquées à leur réseau, filtre par adresse ramené au /24 ou au /48, extrait d’une saisie non montré, pas d’export.</span></p>
+<% } %>
+<% if (!j.nbErreurs) { %><p class="vg-replie-lien"><span><%= j.resumeFiltres %></span><a href="#filtres">Modifier<span class="sr-only"> les filtres</span></a></p><% } %>
+<form class="vg-filtres<%= j.nbErreurs ? '' : ' vg-replie' %>" id="filtres" method="get" action="/evenements" role="search" aria-label="Filtrer le journal">
+<div class="champ-a"><label for="f-periode">Période</label><select id="f-periode" name="periode">
+<% for (const o of j.options.periodes) { %><option value="<%= o.v %>"<%= sel(o.v, f.periode) %>><%= o.t %></option>
+<% } %></select></div>
+<div class="champ-a"><label for="f-gravite">Gravité</label><select id="f-gravite" name="gravite"><option value=""<%= sel('', f.gravite) %>>Toutes</option>
+<% for (const o of j.options.gravites) { %><option value="<%= o.v %>"<%= sel(o.v, f.gravite) %>><%= o.t %></option>
+<% } %></select></div>
+<div class="champ-a"><label for="f-source">Source</label><select id="f-source" name="source"><option value=""<%= sel('', f.source) %>>Toutes</option>
+<% for (const o of j.options.sources) { %><option value="<%= o.v %>"<%= sel(o.v, f.source) %>><%= o.t %></option>
+<% } %></select></div>
+<div class="champ-a"><label for="f-type">Type</label><select id="f-type" name="type"><option value=""<%= sel('', f.type) %>>Sans la routine</option>
+<option value="tout"<%= sel('tout', f.type) %>>Avec la routine</option>
+<% for (const g of j.options.types) { %><optgroup label="<%= g.groupe %>">
+<% for (const o of g.items) { %><option value="<%= o.v %>"<%= sel(o.v, f.type) %>><%= o.t %></option>
+<% } %></optgroup>
+<% } %></select></div>
+<div class="champ-a"><label for="f-adresse">Adresse ou réseau <span class="facultatif">(facultatif)</span></label><p class="aide" id="f-adresse-aide">adresse, réseau /24 ou /48</p><input class="vg-mono" id="f-adresse" name="adresse" value="<%= f.adresse %>" spellcheck="false" autocomplete="off" aria-describedby="f-adresse-aide<%= err('adresse') ? ' f-adresse-err' : '' %>"<% if (err('adresse')) { %> aria-invalid="true"<% } %>><% if (err('adresse')) { %><p class="err" id="f-adresse-err"><%~ include('./_ic', { icone: 'interdit', taille: 16 }) %><span><b>Erreur&#8239;:</b> <%= err('adresse') %></span></p><% } %></div>
+<div class="champ-a"><label for="f-compte">Compte <span class="facultatif">(facultatif)</span></label><p class="aide" id="f-compte-aide">identifiant Zitadel&#8239;: zitadel-…</p><input class="vg-mono" id="f-compte" name="compte" value="<%= f.compte %>" spellcheck="false" autocomplete="off" aria-describedby="f-compte-aide<%= err('compte') ? ' f-compte-err' : '' %>"<% if (err('compte')) { %> aria-invalid="true"<% } %>><% if (err('compte')) { %><p class="err" id="f-compte-err"><%~ include('./_ic', { icone: 'interdit', taille: 16 }) %><span><b>Erreur&#8239;:</b> <%= err('compte') %></span></p><% } %></div>
+<% if (f.alerte) { %><input type="hidden" name="alerte" value="<%= f.alerte %>"><% } %>
+<div class="pied"><a class="lien-a" href="/evenements">Tout effacer</a><button class="btn" type="submit">Filtrer</button></div>
+</form>
+<% if (j.nbErreurs) { %><p class="vg-sans">La liste ne tient pas compte du filtre refusé&#8239;: elle montre les événements des autres filtres.</p><% } %>
+<% if (j.alerte) { %>
+<p class="vg-compte"><% if (j.alerte.existe) { %>Événements rattachés à l’alerte <a class="vg-lien" href="/alertes/<%= j.alerte.id %>">#<%= j.alerte.id %></a><% } else { %>Alerte #<%= j.alerte.id %> inconnue (ou close depuis plus de 13&nbsp;mois)<% } %> · <a class="vg-lien" href="<%= j.alerte.sans %>">Retirer le filtre de l’alerte</a></p>
+<% } %>
+<div class="vg-resume">
+<div><h2 class="vg-section-t" id="t-liste"><%= j.liste.titre %></h2><% if (j.liste.phrase || j.liste.routine || j.liste.incomplet) { %><p><%= j.liste.phrase %><% if (j.liste.routine) { %><span class="sec"><%= j.liste.routine.texte %> <a href="<%= j.liste.routine.href %>">Les afficher</a></span><% } %><% if (j.liste.incomplet) { %><span class="sec"><%= j.liste.incomplet %></span><% } %></p><% } %></div>
+<% if (j.export) { %><div class="vg-export"><a class="btn ghost" href="<%= j.export.href %>"><%= j.export.texte %></a><span class="sec">adresses entières · formules neutralisées pour le tableur · noté au journal</span></div><% } %>
+</div>
+<% if (j.liste.lignes.length) { %>
+<div class="liste-wrap vg-evenements-w"><table class="liste-a vg-evenements">
+<caption><%= j.liste.caption %></caption>
+<thead><tr><th scope="col">Heure à la source · reçu</th><th scope="col">Gravité</th><th scope="col">Événement</th><th scope="col">Source · confiance · émetteur</th><th scope="col">Adresse</th><th scope="col">Compte</th></tr></thead>
+<tbody>
+<% for (const l of j.liste.lignes) { %>
+<tr<% if (l.crit) { %> class="vg-crit"<% } %>><td class="c-h"><%~ include('./_ev-heure', { l }) %></td><td class="c-g"><%~ include('./_grav', { gravClasse: l.grav.classe, gravMot: l.grav.mot }) %></td><th scope="row" class="c-ev"><%~ include('./_ev-quoi', { l }) %></th><td class="c-src" data-label="Source"><%~ include('./_ev-source', { l, liste: true }) %></td><td class="c-ip" data-label="Adresse"><%~ include('./_ev-adresse', { a: l.adresse }) %></td><td class="c-cpt" data-label="Compte"><%~ include('./_ev-compte', { c: l.compte }) %></td></tr>
+<% } %>
+</tbody></table></div>
+<% } else if (j.vide) { %>
+<div class="vg-vide">
+<h3 class="t"><%~ include('./_ev-morceaux', { morceaux: j.vide.phrase }) %></h3>
+<% if (j.vide.sec) { %><p><%= j.vide.sec %></p><% } %>
+<% if (j.vide.issues.length) { %><ul>
+<% for (const i of j.vide.issues) { %><li><a class="vg-lien" href="<%= i.href %>"><%= i.t %></a></li>
+<% } %></ul><% } %>
+</div>
+<% } %>
+<% if (j.pages) { %>
+<nav class="vg-pages" aria-label="Pages du journal"><p><%= j.pages.texte %></p><% if (j.pages.plusRecents || j.pages.plusAnciens) { %><div class="btns-ligne"><% if (j.pages.plusRecents) { %><a class="btn ghost" href="<%= j.pages.plusRecents %>">Les plus récents</a><% } %><% if (j.pages.plusAnciens) { %><a class="btn ghost" href="<%= j.pages.plusAnciens %>" rel="next">Plus anciens</a><% } %></div><% } %></nav>
+<% if (j.pages.fenetre) { %><p class="vg-compte"><%= j.pages.fenetre %></p><% } %>
+<% } %>
+<div class="pied-liste"><div class="grav-leg"><span class="lb">Gravité, de la plus haute à la plus basse</span><ul class="grav-legende" aria-label="Échelle de gravité"><li><%~ include('./_grav', { gravClasse: 'critique', gravMot: 'Critique' }) %></li><li><%~ include('./_grav', { gravClasse: 'haute', gravMot: 'Haute' }) %></li><li><%~ include('./_grav', { gravClasse: 'moyenne', gravMot: 'Moyenne' }) %></li><li><%~ include('./_grav', { gravClasse: 'basse', gravMot: 'Basse' }) %></li><li><%~ include('./_grav', { gravClasse: 'info', gravMot: 'Info' }) %></li></ul></div><span>Heure de la source&#8239;; l’écart dit quand la Vigie l’a reçu (la bordure est lue chaque minute).</span></div>

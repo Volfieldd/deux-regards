@@ -1,0 +1,99 @@
+<%
+/* Fiche d'une entité (MV-04, /entites/<ip|reseau|compte|session|…>/<clé>) : ce qu'on en sait, le score par source et le
+   seuil, « Vue avec », les derniers événements ; à côté, ses alertes, ce que la Vigie ferait d'elle-même (une adresse), les
+   décisions en cours qui la visent. Données : it.f = fiche() (vigie/console/ecrans/evenements.js), déjà mises en forme ;
+   pour un Lecteur, une adresse n'a pas de fiche (redirection vers son réseau) et les adresses vues sont tronquées.
+   Lecture seule : les actions forcées viendront en D3c. */
+const f = it.f;
+layout('./layout', { titre: it.titre });
+const s = f.score;
+const sans = f.kind === 'ip' || f.kind === 'reseau' ? 'adresse' : f.kind === 'compte' ? 'compte' : null;
+const titreAlertes = { ip: 'Alertes de l’adresse', reseau: 'Alertes du réseau et de ses adresses', compte: 'Alertes du compte', session: 'Alertes de la session' }[f.kind] || 'Alertes de l’entité';
+%>
+<header class="ep">
+  <a class="ep-retour" href="/entites">Entités</a>
+  <div class="ep-titre"><h1><span class="k"><%= f.titre.k %></span> <% if (f.titre.mono === 'ip') { %><span class="ip<%= f.titre.v6 ? ' v6' : '' %>"><%= f.titre.texte %></span><% } else if (f.titre.mono === 'sub') { %><span class="sub"><%= f.titre.texte %></span><% } else { %><%= f.titre.texte %><% } %><% if (f.titre.nom) { %> <span class="nom">(<%= f.titre.nom %>)</span><% } %></h1><% if (f.pastilles.length) { %><span class="ep-pastilles"><% for (const p of f.pastilles) { %><%~ include('./_etat', { etatK: p.k, etatMot: p.mot }) %><% } %></span><% } %></div>
+  <p class="ep-meta"><% for (const m of f.meta) { %><% if (m.reseau) { %><span>réseau&nbsp;<span class="ip<%= m.reseau.v6 ? ' v6' : '' %>"><%= m.reseau.texte %></span></span><% } else { %><span><%= m.t %></span><% } %><% } %></p>
+  <% /* D3c : « Bloquer… » (adresse), « Geler… » et « Fermer les sessions… » (compte) en contour, vers #agir, avant le bouton plein. */ %>
+<% if (f.principale) { %>
+  <div class="ep-actions"><a class="btn" href="<%= f.principale.href %>"><%= f.principale.texte %></a></div>
+<% } %>
+</header>
+<% if (f.lecteur && f.kind === 'reseau') { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule&#8239;: vous voyez le réseau, pas l’adresse.</b> Une adresse complète n’est jamais acceptée dans l’adresse d’une page ni dans un filtre&#8239;; les adresses de ce réseau sont tronquées.</span></p>
+<% } else if (f.lecteur) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Lecture seule&#8239;: vous voyez, vous n’agissez pas.</b> Les adresses sont tronquées à leur réseau (/24, /48).</span></p>
+<% } %>
+<div class="deux-col">
+<div>
+<section class="panel" aria-labelledby="t-sait"><h2 class="panel-t" id="t-sait">Ce qu’on en sait</h2>
+<p class="vg-lede"><%= f.lede.t %><span class="sec"><%= f.lede.sec %></span></p>
+</section>
+<section class="panel" aria-labelledby="t-score"><h2 class="panel-t" id="t-score">Score par source, à <%= s.a %></h2>
+<% if (s.parts.length) { %>
+<dl class="vg-score">
+<% for (const p of s.parts) { %><dt id="<%= p.id %>"><%= p.mot %></dt><dd><meter class="vg-m" min="0" max="<%= s.max %>" value="<%= p.v %>" aria-labelledby="<%= p.id %>"><%= p.texte %></meter></dd><dd class="v"><%= p.texte %></dd>
+<% } %><dt id="s-tot" class="total">Total</dt><dd><meter class="vg-m total" min="0" max="<%= s.max %>" value="<%= s.total.v %>" aria-labelledby="s-tot"><%= s.total.texte %></meter></dd><dd class="v total"><%= s.total.texte %></dd>
+</dl>
+<% } else { %>
+<p class="vg-compte">Aucun point en cours (score <%= s.total.texte %>).</p>
+<% } %>
+<p class="vg-seuils"><%= s.phrase %></p>
+</section>
+<section class="panel" aria-labelledby="t-liens"><h2 class="panel-t" id="t-liens">Vue avec</h2>
+<% if (f.groupes.length) { %>
+<ul class="vg-lignes">
+<% for (const g of f.groupes) { %><% for (const i of g.items) { %>
+<li><span class="t"><%= { ip: 'adresse', reseau: 'réseau', compte: 'compte', session: 'session', appareil: 'appareil', site: 'site', vigie: 'Vigie' }[g.k] %>&nbsp;<% if (i.mono === 'ip') { %><span class="ip<%= i.v6 ? ' v6' : '' %>"><%= i.texte %></span><% } else if (i.mono === 'sub') { %><span class="sub"><%= i.texte %></span><% } else { %><%= i.texte %><% } %><% if (i.tronquee) { %> <span class="tronq">(tronquée)</span><% } %><% if (i.nom) { %> <span class="nom">(<%= i.nom %>)</span><% } %></span><span class="n"><%= i.quand %></span><a class="vg-lien" href="<%= i.href %>"><%= i.lien %></a></li>
+<% } %><% if (g.reste) { %><li><span class="t"><%= g.titre %></span><span class="sec">et <%= g.reste %> de plus, les moins récents</span></li><% } %>
+<% } %>
+</ul>
+<% if (f.liensTronques) { %><p class="vg-compte">Les liens les plus nombreux ne sont pas tous lus (200 par sens au plus).</p><% } %>
+<% } else { %>
+<p class="vg-sans">Vue avec aucune autre entité en 90&nbsp;jours (ni réseau, ni compte, ni session).</p>
+<% } %>
+</section>
+<section class="panel" aria-labelledby="t-evts"><h2 class="panel-t" id="t-evts">Derniers événements</h2>
+<% if (f.evenements.length) { %>
+<p class="vg-signal-tete" aria-hidden="true"><span>Heure à la source · reçu</span><span>Ce qui s’est passé</span><span>Source · émetteur · confiance</span></p>
+<ol class="vg-signal" aria-label="Les <%= f.evenements.length %> derniers événements, du plus récent au plus ancien">
+<% for (const l of f.evenements) { %><%~ include('./_ev-signal', { l, sans }) %>
+<% } %></ol>
+<% } else { %>
+<p class="vg-sans"><%= f.kind === 'session' ? 'Aucun événement retrouvé par le compte de cette session.' : ['appareil', 'site', 'vigie'].includes(f.kind) ? 'Les événements ne se cherchent pas par cette classe d’entité ; voyez ses alertes.' : 'Aucun événement de cette entité dans le journal (6 mois).' %></p>
+<% } %>
+<% if (f.versJournal.length) { %><p class="panel-pied"><% for (const v of f.versJournal) { %><a class="vg-lien" href="<%= v.href %>"><%= v.t %></a><% } %></p><% } %>
+</section>
+</div>
+<div class="cote">
+<section class="panel" aria-labelledby="t-alertes"><h2 class="panel-t" id="t-alertes"><%= titreAlertes %></h2>
+<% if (f.alertes.length) { %>
+<ul class="vg-lignes">
+<% for (const a of f.alertes) { %>
+<li><span class="t"><%= a.titre %></span><span class="n">#<%= a.id %></span><span class="sec"><%~ include('./_grav', { gravClasse: a.grav.classe, gravMot: a.grav.mot }) %> <%~ include('./_etat', { etatK: a.statut.k, etatMot: a.statut.mot }) %><% if (a.entite) { %> · <%= a.entite.k %> <span class="ip<%= a.entite.v6 ? ' v6' : '' %>"><%= a.entite.texte %></span><% if (a.entite.tronquee) { %> <span class="tronq">(tronquée)</span><% } %><% } %> · <%= a.sec %></span><a class="vg-lien" href="<%= a.href %>">Ouvrir l’alerte #<%= a.id %></a></li>
+<% } %>
+</ul>
+<% if (f.nbAlertes > f.alertes.length) { %><p class="vg-compte"><%= f.nbAlertes - f.alertes.length %> de plus, les plus anciennes, sur la page Alertes.</p><% } %>
+<% } else { %>
+<p class="vg-sans">Aucune alerte, ouverte ou close (13&nbsp;mois).</p>
+<% } %>
+</section>
+<section class="panel" id="agir" aria-labelledby="t-agir"><h2 class="panel-t" id="t-agir"><%= f.kind === 'ip' ? 'Réponse et décisions sur l’adresse' : 'Décisions en cours' %></h2>
+<% if (f.auto) { %>
+<div class="vg-auto"><%~ include('./_ic', { icone: 'decisions' }) %><% for (const p of f.auto) { %><p><% if (p.b) { %><b><%= p.b %></b><% if (p.t) { %> <% } %><% } %><%= p.t || '' %></p><% } %></div>
+<% } %>
+<% if (f.decisions.length) { %>
+<ul class="vg-lignes">
+<% for (const d of f.decisions) { %>
+<li><span class="t"><%= d.type %> · <span class="<%= d.cible.mono %>"><%= d.cible.texte %></span></span><span class="n">#<%= d.id %></span><span class="sec"><%~ include('./_morceaux', { morceaux: d.sec }) %></span></li>
+<% } %>
+</ul>
+<% } else { %>
+<p class="vg-sans">Aucune décision en cours <%= f.kind === 'ip' ? 'sur cette adresse ni sur un réseau qui la contient' : f.kind === 'reseau' ? 'sur ce réseau ni sur ses adresses' : 'sur cette entité' %>.</p>
+<% } %>
+<% /* D3c : les actions forcées (Bloquer l’adresse avec portée et un bouton par durée ; Geler, Fermer les sessions d’un compte ;
+      Lever…), avec la ré-authentification et la confirmation d’une adresse vue avec un administrateur. */ %>
+<p class="panel-pied"><span>Les décisions se prennent et se lèvent depuis la page Décisions.</span><a class="vg-lien" href="/decisions">Décisions en cours</a></p>
+</section>
+</div>
+</div>

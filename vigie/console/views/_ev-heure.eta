@@ -1,0 +1,5 @@
+<%
+/* L'heure à la source, puis l'écart de réception (vigie.css § 9) : « à la minute » pour la bordure ; « — » pour ce que la
+   Vigie constate elle-même. include('./_ev-heure', { l }). */
+const l = it.l;
+%><time datetime="<%= l.heure.iso %>"><%= l.heure.texte %></time><% if (l.heure.minute) { %><span class="vg-ecart">à la minute</span><% } %><% if (l.ecart) { %><span class="vg-ecart<%= l.ecart.tard ? ' tard' : '' %>"><%= l.ecart.texte %><% if (l.ecart.tard) { %><span class="sr-only"> (en retard)</span><% } %></span><% } else { %><span class="vg-ecart">—<span class="sr-only"> (constaté par la Vigie, sans écart)</span></span><% } %>
