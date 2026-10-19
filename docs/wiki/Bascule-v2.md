@@ -2,11 +2,13 @@
 
 Liste de contrôle pour faire voir la v2 du site public à tous les visiteurs (PLAN.md, point 8 ; Spécifications, P23). Chaque case se vérifie ; on ne bascule pas tant qu'une case reste vide. Le geste lui-même est décrit dans l'aide d'[Apparence](Aide-Apparence#site-public--v1-ou-v2).
 
+**La v1 est gardée, pour de bon** (décision du propriétaire, 19 octobre 2026). Basculer, c'est choisir la version que voient les visiteurs, pas retirer l'autre : la v1 reste un retour possible à tout moment, d'un réglage, sans déploiement ni perte ; elle sert de référence pour comparer (un administrateur passe d'une version à l'autre d'un clic sur le bouton « Voir en v1 / Voir en v2 » des pages publiques) ; et elle ne coûte presque rien à garder, puisqu'elle ne reçoit plus que les correctifs de sécurité et d'accessibilité. Les nouveautés (Carnets, galeries privées et la suite) n'existent qu'en v2.
+
 ## 1. Avant de basculer
 
-- [ ] **Aperçu essayé sur trois écrans** : *Apparence → Ouvrir l'aperçu de la v2*, puis le site parcouru sur un **iPad** (en portrait et en paysage), un **ordinateur** et un **téléphone** : accueil et galerie, une série, la visionneuse (photo suivante, plein écran, rotation), Rechercher, Carte, Voyages, À propos, pages légales, « Je vous ai photographié », Signaler, Partager, une page introuvable ; en français, en anglais et en allemand ; thème de nuit et de jour. Rien de cassé, rien d'illisible.
+- [ ] **v2 essayée sur trois écrans** : bouton **Voir en v2** en haut d'une page publique (ou *Apparence → Voir le site en v2*), puis le site parcouru sur un **iPad** (en portrait et en paysage), un **ordinateur** et un **téléphone** : accueil et galerie, une série, la visionneuse (photo suivante, plein écran, rotation), Rechercher, Carte, Voyages, À propos, pages légales, « Je vous ai photographié », Signaler, Partager, une page introuvable ; en français, en anglais et en allemand ; thème de nuit et de jour. Rien de cassé, rien d'illisible.
 - [ ] **Test des liens internes vert** sur le code qui sera en ligne : `node --test test/liens-internes.test.js` (aucun lien de la v2 vers une 404, en trois langues ; registre de la Vigie, BV-5). Le lancer après la dernière fusion, pas avant.
-- [ ] **Seuils d'aspiration de la Vigie recalés** (BV-4, règle DS15 : « toutes les tailles d'une même photo », « plus de 300 images en 10 minutes ») sur le trafic de l'aperçu. **À confirmer avec la session de la Vigie** : ce recalage est le sien (`server/securite/`, `vigie/`) ; noter ici la date et les seuils retenus.
+- [ ] **Seuils d'aspiration de la Vigie recalés** (BV-4, règle DS15 : « toutes les tailles d'une même photo », « plus de 300 images en 10 minutes ») sur le trafic des administrateurs en vue v2. **À confirmer avec la session de la Vigie** : ce recalage est le sien (`server/securite/`, `vigie/`) ; noter ici la date et les seuils retenus.
 - [ ] **Sauvegarde récente et vérifiée** : la dernière a moins de 24 h et n'a pas d'alerte (`cat $BACKUP_DIR/last.json`, ou `node server/db/backup.js --etat` dans le conteneur `backup`) ; sinon, une sauvegarde manuelle (`docker compose run --rm backup node server/db/backup.js`). Voir [Déploiement](Déploiement#sauvegardes).
 - [ ] **Aucune alerte ouverte** dans la Vigie qui touche le site public (entrée « Sécurité » de l'admin, ou la console).
 
@@ -28,12 +30,11 @@ Une fois par jour, sept jours :
 
 Un problème qui touche les visiteurs et qui ne se corrige pas dans la journée : revenir en v1 (§ 2), corriger, recommencer la liste.
 
-## 4. Retirer la v1 (plus tard)
+## 4. Après la bascule : la v1 reste
 
-Pas en même temps que la bascule : après **au moins quatre semaines** en v2 pour tous, sans retour en v1 ni alerte restée inexpliquée. Une **PR dédiée**, avec son « Impact sur la Vigie » :
+Il n'y a pas d'étape de retrait. La v1 reste en place derrière le réglage :
 
-- [ ] gabarits v1 du site public (`views/*.eta` qui ont leur double dans `views/v2/`), les gabarits v2 prenant leur place ; les pages d'erreur et de connexion (`auth-error.eta`, `local-login.eta`) reçoivent d'abord leur version v2 ;
-- [ ] CSS v1 (`public/css/site.css` et ce qui ne sert qu'à elle, feuilles de thème v1 comprises une fois le thème repris par `public/css/v2/tokens.css`) ;
-- [ ] réglage et aperçu : `server/version-publique.js`, la section « Site public : v1 ou v2 » d'Apparence, la route de l'aperçu, le bandeau, la clé `public_version` ;
-- [ ] tests adaptés : `test/version-publique.test.js`, les parcours v1 de `test/liens-internes.test.js`, les comparaisons « la v1 identique », les tests e2e de la v1 ;
-- [ ] documentation : aide d'Apparence et du site public (trois langues), [Apparence et thèmes](Apparence-et-thèmes), Spécifications (P23), PLAN.md, cette page.
+- [ ] **Retour en v1 toujours possible** : le § 2 (« Revenir en arrière ») reste valable aussi longtemps que la v1 existe, c'est-à-dire toujours.
+- [ ] **Correctifs de sécurité et d'accessibilité appliqués aux deux versions** : une PR qui corrige un gabarit ou une route publique dit si la v1 est touchée et la corrige aussi (les routes, les formulaires et leurs défenses sont communs ; les gabarits ne le sont pas).
+- [ ] **Pas de nouveauté en v1** : une page ou une fonction nouvelle naît en v2 seulement, introuvable (404) en v1, comme les Carnets ; ses tests vérifient qu'aucune page v1 n'y mène (voir `test/carnet-public.test.js`).
+- [ ] **Bouton de l'administrateur** : en vue v1, un administrateur voit exactement ce que verrait un visiteur si l'on revenait en v1 ; c'est la façon de vérifier, de temps en temps, que la v1 tient encore.

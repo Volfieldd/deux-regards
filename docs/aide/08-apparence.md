@@ -6,15 +6,20 @@ L'apparence du **site public** : version (v1 ou v2), thème, logo et icône. L'a
 
 En tête de la page. La **v2** est la nouvelle présentation du site public, issue de l'audit d'ergonomie d'octobre 2026. Elle couvre toutes les pages publiques (voir [Le site vu par les visiteurs](site-public)), sauf les pages d'erreur et de connexion, qui gardent la présentation v1. L'administration ne change pas.
 
-1. **Voir la v2 avant tout le monde :** cliquez sur **Ouvrir l'aperçu de la v2**.
-   - **Vous seul** la voyez, sur cette session (cet appareil, ce navigateur), jusqu'à **Quitter l'aperçu**, la déconnexion ou la fin de la session.
-   - Un bandeau sable le rappelle en haut de chaque page du site, même d'une page restée en v1 ; il porte **Quitter l'aperçu**.
-   - Les visiteurs gardent la v1, quoi qu'ils envoient (cookie, adresse) : le choix est gardé sur le serveur, jamais dans le navigateur.
-   - Pendant l'aperçu, vos pages ne sont gardées dans aucun cache (Cloudflare compris) : un visiteur ne peut pas recevoir la page que vous voyez.
-2. **Avant de l'appliquer à tous :** suivez la [liste de contrôle de la bascule](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (essais sur iPad, ordinateur et téléphone, sauvegarde récente, ce qu'il faut surveiller la première semaine).
+**La v1 est gardée**, pour de bon : elle reste un retour possible à tout moment, et reçoit les correctifs de sécurité et d'accessibilité. Les nouveautés (Carnets, galeries privées) n'existent qu'en v2.
+
+1. **Passer d'une version à l'autre, pour vous seul :** en haut de chaque page du site public, un petit bouton **Voir en v2** (ou **Voir en v1**) change la version que vous voyez ; un clic, et la même page s'affiche dans l'autre version.
+   - À côté, une phrase rappelle ce que voient les visiteurs : « Vous voyez la v1, comme les visiteurs » ou « Vous seul voyez la v2 ; les visiteurs voient la v1 ».
+   - **Vous seul** voyez ce bouton et cette vue, sur cette session (cet appareil, ce navigateur), jusqu'à un nouveau clic, la déconnexion ou la fin de la session. Il faut le droit d'apparence.
+   - Les visiteurs voient toujours la version choisie ici, quoi qu'ils envoient (cookie, adresse) : votre vue est gardée sur le serveur, jamais dans le navigateur.
+   - Tant que vous êtes connecté, vos pages ne sont gardées dans aucun cache (Cloudflare compris) : un visiteur ne peut pas recevoir la page que vous voyez, ni le bouton.
+   - En vue v1, les Carnets sont introuvables, comme pour un visiteur en v1 : sur une page des Carnets, le bouton dit **Voir l'accueil en v1** et ouvre l'accueil.
+   - Le bouton n'apparaît pas sur les pages des invités des galeries privées.
+   - Depuis cette section, **Voir le site en v2** (ou **en v1**) fait la même chose et ouvre l'accueil ; **Revenir à la version des visiteurs** oublie votre vue.
+2. **Avant d'appliquer la v2 à tous :** suivez la [liste de contrôle de la bascule](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (essais sur iPad, ordinateur et téléphone, sauvegarde récente, ce qu'il faut surveiller la première semaine).
 3. **L'appliquer à tous :** cochez **v2**, puis **Enregistrer la version**. Revenir à la v1 se fait de la même façon, à tout moment.
 
-L'ouverture et la fermeture de l'aperçu, et chaque changement de version, sont notés au [Journal](reglages#journal).
+Chaque clic sur le bouton, et chaque changement de version, sont notés au [Journal](reglages#journal).
 
 ## Choisir un thème
 

@@ -2025,7 +2025,7 @@ export default async function adminRoutes(app) {
 
   app.get('/admin/apparence', P('site.apparence'), async (request, reply) => render(request, reply, 'appearance', {
     title: request.t('Apparence'), THEMES, BRAND_MODES, BRAND_SLOTS, themeId: app.appearance.themeId(), brand: app.appearance.brand(),
-    publicVersion: app.publicVersion.setting(), previewV2: app.publicVersion.previewOn(request),
+    publicVersion: app.publicVersion.setting(), vueSession: app.publicVersion.viewOf(request),
   }));
 
   app.post('/admin/apparence', W('site.apparence'), async (request, reply) => {
@@ -2046,15 +2046,21 @@ export default async function adminRoutes(app) {
     return done(reply, '/admin/apparence', request.t('Apparence enregistrée.'));
   });
 
-  // Aperçu de la v2 du site public, pour cette session seulement (server/version-publique.js) : « apercu=1 » l'ouvre (sur
-  // l'accueil, ou la page « vers »), « apercu=0 » le quitte (retour à la page « vers », ou à Apparence). Noté au journal.
+  // Vue de la session sur le site public (server/version-publique.js, bouton « Voir en v1 / Voir en v2 » des pages
+  // publiques) : « vue=v1 » ou « vue=v2 » la force pour cette session seulement, « vue=suivre » l'oublie (la session suit
+  // le réglage, comme les visiteurs). Ancienne forme gardée : « apercu=1 » vaut « vue=v2 », « apercu=0 » « vue=suivre ».
+  // Retour à la page « vers » (du site seulement) ; noté au journal d'audit. Ce n'est pas un réglage : rien ne change
+  // pour les visiteurs.
   app.post('/admin/apparence/apercu-v2', W('site.apparence'), async (request, reply) => {
-    const on = request.body?.apercu === '1';
-    app.publicVersion.setPreview(request, on);
+    const b = request.body || {};
+    const vue = typeof b.vue === 'string' ? b.vue : b.apercu === '1' ? 'v2' : b.apercu === '0' ? 'suivre' : '';
+    if (!app.publicVersion.setView(request, vue)) return reply.code(400).send({ error: request.t('Vue inconnue.') });
     request.audited = true;
-    app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'POST /admin/apparence/apercu-v2', target: 'site public', status: 303, detail: on ? 'aperçu de la v2 ouvert' : 'aperçu de la v2 quitté' });
-    const to = safeNext(typeof request.body?.vers === 'string' ? request.body.vers : '', on ? '/' : '/admin/apparence');
-    return reply.redirect(/^\/(?:admin|auth)(?:[/?#]|$)/.test(to) && on ? '/' : to, 303);
+    const applied = app.publicVersion.setting();
+    app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'POST /admin/apparence/apercu-v2', target: 'site public', status: 303,
+      detail: vue === 'suivre' ? `vue de la session : suit le réglage (${applied})` : `vue de la session : ${vue} (visiteurs : ${applied})` });
+    const to = safeNext(typeof b.vers === 'string' ? b.vers : '', vue === 'suivre' ? '/admin/apparence' : '/');
+    return reply.redirect(/^\/(?:admin|auth)(?:[/?#]|$)/.test(to) && vue !== 'suivre' ? '/' : to, 303);
   });
 
   // Marque : quatre emplacements (emblème, icône, logo complet, image de partage). PNG, WebP ou JPEG ;

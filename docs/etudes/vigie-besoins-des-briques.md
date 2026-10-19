@@ -129,6 +129,8 @@ l'implémentation de la brique (précision de la session de la Vigie, 18 octobre
 | #147 v2 | Texte de remplacement dans « Compléter et publier » (champ par champ et tableau sans script) et dans l'inspecteur | défacement par un compte volé ; écriture sur la photo d'un autre photographe | `app.audit.log` avec le **nom** du champ (`champs : alt_text`, « photo 12 : alt_text » pour le lot), jamais sa valeur ; `authz_fail` hors portée (DS10), CSRF (DS14) | **BV-20**, **BV-21** (mêmes signaux que la fiche) |
 | #147 v2 | Migration 054 : déclencheurs du numéro d'inventaire recréés (année de Paris) | — | référence des déclencheurs reprise après la migration (`vigie_declencheurs`) ; ni ceux des comptes ni celui des sessions ne changent | aucun |
 | #147 v2 | Liste de contrôle de la bascule (`docs/wiki/Bascule-v2.md`) | faux positifs d'aspiration et de 404 après la bascule | DS15, `malicious_excess_404` | **BV-4** (recalage avant la bascule, à confirmer par la Vigie), **BV-5** (test des liens internes) |
+| v2 bouton | `POST /admin/apparence/apercu-v2` étendue (`vue=v1\|v2\|suivre`) : vue de la session d'un administrateur, bouton « Voir en v1 / Voir en v2 » des pages publiques | vue posée par une page tierce ; par un compte sans droit | `authz_csrf_fail` (DS14), `authz_fail` (DS10) ; journal d'audit « vue de la session : v2 (visiteurs : v1) » | aucun : préférence d'affichage de la session, pas un réglage public (pas de `config_public_changed`) |
+| v2 bouton | Pages publiques d'une session en `private, no-store` (304 compris, sans `CDN-Cache-Control`) | page portant le bouton ou le jeton CSRF d'un administrateur gardée par Cloudflare | — | aucun |
 
 ### BV-3 — Valeurs de filtre impossibles
 

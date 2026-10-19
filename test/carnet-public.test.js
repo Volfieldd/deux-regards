@@ -44,7 +44,7 @@ test('aperçu de la v2 d’un administrateur : les Carnets apparaissent pour lui
   const r = await adm.get('/carnet');
   assert.equal(r.statusCode, 200);
   assert.equal(r.headers['cache-control'], 'private, no-store');
-  assert.match(r.body, /Aperçu de la v2/);
+  assert.match(r.body, /Vous seul voyez la v2/);
   assert.match((await adm.get('/')).body, /<a href="\/carnet"[^>]*>Carnets<\/a>/);
   assert.equal((await c.see('/carnet')).statusCode, 404);
   assert.equal((await c.see('/carnet/flux.xml')).statusCode, 404);

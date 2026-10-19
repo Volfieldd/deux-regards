@@ -6,15 +6,20 @@ Das Erscheinungsbild der **öffentlichen Website**: Fassung (v1 oder v2), Theme,
 
 Oben auf der Seite. **v2** ist die neue Gestaltung der öffentlichen Website, aus dem Ergonomie-Audit vom Oktober 2026. Sie umfasst alle öffentlichen Seiten (siehe [Die Website aus Sicht der Besucher](site-public)) außer den Fehler- und Anmeldeseiten, die die Gestaltung von v1 behalten. Die Verwaltung ändert sich nicht.
 
-1. **v2 vor allen anderen sehen:** Klicken Sie auf **v2-Vorschau öffnen**.
-   - **Nur Sie** sehen sie, in dieser Sitzung (dieses Gerät, dieser Browser), bis **Vorschau beenden**, zur Abmeldung oder zum Ende der Sitzung.
-   - Ein sandfarbenes Banner oben auf jeder Seite der Website erinnert daran, auch auf einer Seite, die noch in v1 ist; es trägt **Quitter l’aperçu** (Vorschau beenden).
-   - Die Besucher behalten v1, was immer sie senden (Cookie, Adresse): Die Wahl wird auf dem Server gespeichert, nie im Browser.
-   - Während der Vorschau werden Ihre Seiten in keinem Cache gespeichert (auch nicht bei Cloudflare): Ein Besucher kann die Seite, die Sie sehen, nicht erhalten.
-2. **Bevor Sie sie für alle aktivieren:** Folgen Sie der [Checkliste für die Umstellung](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (Tests auf iPad, Computer und Telefon, aktuelle Sicherung, was in der ersten Woche zu beobachten ist; auf Französisch).
+**v1 bleibt erhalten**, dauerhaft: Sie bleibt jederzeit ein möglicher Weg zurück und erhält Sicherheits- und Barrierefreiheitskorrekturen. Neues (Reisetagebücher, private Galerien) gibt es nur in v2.
+
+1. **Zwischen den Fassungen wechseln, nur für Sie:** Oben auf jeder Seite der öffentlichen Website ändert eine kleine Schaltfläche **In v2 ansehen** (oder **In v1 ansehen**) die Fassung, die Sie sehen; ein Klick, und dieselbe Seite erscheint in der anderen Fassung.
+   - Daneben erinnert ein Satz daran, was die Besucher sehen: „Sie sehen v1, wie die Besucher“ oder „Nur Sie sehen v2; die Besucher sehen v1“.
+   - **Nur Sie** sehen diese Schaltfläche und diese Ansicht, in dieser Sitzung (dieses Gerät, dieser Browser), bis zu einem neuen Klick, zur Abmeldung oder zum Ende der Sitzung. Dafür ist das Recht für das Erscheinungsbild nötig.
+   - Die Besucher sehen immer die hier gewählte Fassung, was immer sie senden (Cookie, Adresse): Ihre Ansicht wird auf dem Server gespeichert, nie im Browser.
+   - Solange Sie angemeldet sind, werden Ihre Seiten in keinem Cache gespeichert (auch nicht bei Cloudflare): Ein Besucher kann weder die Seite, die Sie sehen, noch die Schaltfläche erhalten.
+   - In der Ansicht v1 sind die Reisetagebücher nicht auffindbar, wie für einen Besucher in v1: Auf einer Seite der Reisetagebücher lautet die Schaltfläche **Startseite in v1 ansehen** und öffnet die Startseite.
+   - Auf den Gastseiten der privaten Galerien erscheint die Schaltfläche nicht.
+   - In diesem Abschnitt bewirkt **Website in v2 ansehen** (oder **in v1**) dasselbe und öffnet die Startseite; **Zurück zur Fassung der Besucher** vergisst Ihre Ansicht.
+2. **Bevor Sie v2 für alle aktivieren:** Folgen Sie der [Checkliste für die Umstellung](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (Tests auf iPad, Computer und Telefon, aktuelle Sicherung, was in der ersten Woche zu beobachten ist; auf Französisch).
 3. **Für alle aktivieren:** Kreuzen Sie **v2** an, dann **Fassung speichern**. Zurück zu v1 geht genauso, jederzeit.
 
-Das Öffnen und Schließen der Vorschau und jeder Wechsel der Fassung werden im [Protokoll](reglages#journal) festgehalten.
+Jeder Klick auf die Schaltfläche und jeder Wechsel der Fassung werden im [Protokoll](reglages#journal) festgehalten.
 
 ## Ein Theme wählen
 

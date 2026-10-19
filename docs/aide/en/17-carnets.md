@@ -1,6 +1,6 @@
 # Notebooks
 
-The **Notebooks** are the site's posts: travel stories and workshop notes, dated and signed, with photos from the photo library. You write them in the administration (sidebar, “Publish” group, **Notebooks**); they appear on the public site **in version 2 only**: while v1 is applied (Settings → Appearance), their pages are only visible in the v2 preview.
+The **Notebooks** are the site's posts: travel stories and workshop notes, dated and signed, with photos from the photo library. You write them in the administration (sidebar, “Publish” group, **Notebooks**); they appear on the public site **in version 2 only**: while v1 is applied (Settings → Appearance), their pages are only visible to administrators in the v2 view (**View in v2** button at the top of the site's pages).
 
 The **Notebooks** page lists the posts, newest first, with their state (○ Draft, ◐ Proposed or Scheduled, ▲ To rework, ● Published, ✕ Withdrawn), their signatures, their section and their date. **New post**: a title, a section (Trips or Workshop notes) and one or two signatures; a photographer always signs their own posts.
 

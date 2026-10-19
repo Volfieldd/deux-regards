@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-// Visionneuse v2 (maquette MQ-04), vue dans l'aperçu de la v2 : chaque test ouvre sa propre session d'administrateur
+// Visionneuse v2 (maquette MQ-04), vue dans la vue v2 : chaque test ouvre sa propre session d'administrateur
 // (connexion locale de test) et y ouvre l'aperçu ; les visiteurs et les autres tests gardent la v1. La même page, une
 // fois la v2 appliquée (Réglages → Apparence), est celle de tous les visiteurs.
 const PHOTO = '/photo/brume-sur-la-loire';            // 3:2 dans le jeu de démonstration
@@ -17,7 +17,7 @@ test.afterEach(() => { expect(errors, 'erreurs console / CSP').toEqual([]); });
 
 // Session d'administrateur neuve, aperçu de la v2 ouvert ; options : celles du contexte (écran, script…).
 async function apercu(browser, info, options = {}) {
-  test.skip(!process.env.E2E_LOCAL_AUTH, 'E2E_LOCAL_AUTH absent : l’aperçu de la v2 demande une session d’administrateur');
+  test.skip(!process.env.E2E_LOCAL_AUTH, 'E2E_LOCAL_AUTH absent : la vue v2 demande une session d’administrateur');
   const ctx = await browser.newContext({ ...info.project.use, storageState: { cookies: [], origins: [] }, ...options });
   const page = await ctx.newPage();
   await page.goto('/auth/local?next=%2Fadmin%2Fapparence');
@@ -27,7 +27,7 @@ async function apercu(browser, info, options = {}) {
   await expect(page).toHaveURL(/\/admin\/apparence$/);
   const news = page.getByRole('dialog', { name: /Nouveau depuis votre dernière visite/ });
   if (await news.isVisible()) await news.getByRole('button', { name: 'C’est noté' }).click();
-  await page.getByRole('button', { name: 'Ouvrir l’aperçu de la v2' }).click();
+  await page.getByRole('button', { name: 'Voir le site en v2' }).click();
   watch(page);
   return { ctx, page };
 }
@@ -49,7 +49,7 @@ test.describe('bureau et tablette', () => {
       const [width, height] = taille.split('x').map(Number);
       await page.setViewportSize({ width, height });
       await page.goto(PHOTO);
-      await expect(page.locator('.apercu-v2')).toBeVisible();
+      await expect(page.locator('.vue-site')).toBeVisible();
       await expect.poll(() => page.locator('.vis-cadre img').evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
       const m = await mesure(page);
       expect(Math.abs(m.w - a.w), `${taille} : largeur ${m.w}`).toBeLessThanOrEqual(2);

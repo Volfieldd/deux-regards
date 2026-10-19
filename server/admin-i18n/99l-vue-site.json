@@ -1,0 +1,30 @@
+{
+ "La v1 est appliquée : tous les visiteurs la voient.": {
+  "en": "v1 is applied: all visitors see it.",
+  "de": "v1 ist aktiv: Alle Besucher sehen sie."
+ },
+ "Sur chaque page du site public, un petit bouton « Voir en v1 » ou « Voir en v2 », visible par vous seul, change la version que vous voyez, sur cette session : pour comparer, ou voir la v2 avant de l’appliquer. Les visiteurs voient toujours la version choisie ici. Les Carnets et les galeries privées n’existent qu’en v2.": {
+  "en": "On every page of the public site, a small “View in v1” or “View in v2” button, visible to you only, changes the version you see, in this session: to compare, or to look at v2 before applying it. Visitors always see the version chosen here. Notebooks and private galleries only exist in v2.",
+  "de": "Auf jeder Seite der öffentlichen Website ändert eine kleine Schaltfläche „In v1 ansehen“ oder „In v2 ansehen“, nur für Sie sichtbar, die Fassung, die Sie sehen, in dieser Sitzung: zum Vergleichen oder um v2 vor dem Aktivieren anzusehen. Die Besucher sehen immer die hier gewählte Fassung. Reisetagebücher und private Galerien gibt es nur in v2."
+ },
+ "Votre vue : la {v}, pour vous seul, sur cette session.": {
+  "en": "Your view: {v}, for you only, in this session.",
+  "de": "Ihre Ansicht: {v}, nur für Sie, in dieser Sitzung."
+ },
+ "Revenir à la version des visiteurs": {
+  "en": "Back to the visitors’ version",
+  "de": "Zurück zur Fassung der Besucher"
+ },
+ "Votre vue suit ce réglage, comme les visiteurs.": {
+  "en": "Your view follows this setting, like visitors.",
+  "de": "Ihre Ansicht folgt dieser Einstellung, wie bei den Besuchern."
+ },
+ "Voir le site en {v}": {
+  "en": "View the site in {v}",
+  "de": "Website in {v} ansehen"
+ },
+ "Vue inconnue.": {
+  "en": "Unknown view.",
+  "de": "Unbekannte Ansicht."
+ }
+}
