@@ -84,3 +84,65 @@ correlation:
   timespan: 1h
 level: high
 vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+# Textes publiés (BV-20, BV-21) : émis par server/securite/textes-publics.js après chaque écriture de l'admin et chaque
+# publication programmée (sub nul : entité « site »).
+title: Texte publié qui gagne un lien, une adresse e-mail ou un numéro de téléphone
+name: texte_public_contact
+id: 0d2b1ab9-6a0b-463e-8a02-cf9597235b35
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.initial_access, attack.t1566]
+description: Un lien ou un contact ajouté à une légende, une présentation ou un texte d'intention sert à hameçonner les visiteurs (comme un contact des droits remplacé, DS9).
+detection:
+  selection:
+    type: config_public_changed
+    detail.objet: texte_public
+  condition: selection
+level: medium
+vigie: { cas: DS9, entite: { kind: compte, champ: sub, sinon: textes_publics }, source_unique: true, mode: alerter }
+---
+title: Textes publiés réécrits en masse d'un seul geste
+name: textes_publics_geste_massif
+id: 430c3909-0b56-4d09-b9d2-a72380914e57
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.impact, attack.t1491]
+description: Cinquante textes publiés ou plus changés par un seul envoi (le tableau des titres en envoie beaucoup d'un coup pour une traduction ; au-delà, défacement possible).
+detection:
+  selection:
+    type: config_public_changed
+    detail.objet: textes_publics
+    detail.nombre|gte: 50
+  condition: selection
+level: medium
+vigie: { cas: DS9, entite: { kind: compte, champ: sub, sinon: textes_publics }, source_unique: true, mode: alerter }
+---
+title: Texte publié changé
+name: textes_publics_changes
+id: cbd6134c-6446-4a3e-9172-059c3fbb9d46
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: config_public_changed
+    detail.objet: textes_publics
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Textes publiés changés en série par un même compte
+name: textes_publics_en_serie
+id: bcbd5a59-3d64-42db-9e9e-0c793ed20d86
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.impact, attack.t1491]
+correlation:
+  type: event_count
+  rules: [textes_publics_changes]
+  group-by: [sub]
+  timespan: 10m
+  condition: { gte: 20 }
+level: medium
+vigie: { cas: DS9, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }

@@ -42,13 +42,15 @@ export function runRolesCheck(store, { accepter = false, motif, par, siteBackupD
   if (!accepter) return checkRoles({ store, siteBackupDir, now });
   // Accepter : la référence n'est remplacée que si une sauvegarde lisible la remplace (audit D3-B6) ; sinon l'ancienne
   // est remise (sans elle, plus aucun blocage automatique d'adresse ni confirmation pour une adresse d'administrateur).
-  const avant = { admins: store.setting.get('controle_roles_admins', null), declencheurs: store.setting.get('controle_roles_declencheurs', null) };
+  const avant = { admins: store.setting.get('controle_roles_admins', null), declencheurs: store.setting.get('controle_roles_declencheurs', null), acces: store.setting.get('controle_roles_acces', null) };
   store.setting.set('controle_roles_admins', null);
   store.setting.set('controle_roles_declencheurs', null);
+  store.setting.set('controle_roles_acces', null);
   const r = checkRoles({ store, siteBackupDir, now });
   if (r.ok === null || r.erreur) {
     store.setting.set('controle_roles_admins', avant.admins);
     store.setting.set('controle_roles_declencheurs', avant.declencheurs);
+    store.setting.set('controle_roles_acces', avant.acces);
     throw new DecisionError(`aucune sauvegarde du site lisible : référence non acceptée${r.raison ? ` (${r.raison})` : ''}`);
   }
   store.own('vigie_interrupteur', { emetteur: par, detail: { controle_roles: 'référence acceptée', motif: m } });

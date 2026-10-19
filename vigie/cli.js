@@ -24,6 +24,7 @@ const HELP = `Commandes :
   revoquer-session <empreinte> --motif "…" [--duree 48h]
   revoquer-compte <sub> --motif "…"        ferme toutes les sessions ouvertes de ce compte
   geler <sub> --motif "…" [--duree 24h]    compte traité comme désactivé sur le site
+  suspendre-acces <n°> --motif "…" [--duree 7j]   accès d'une galerie privée suspendu par le site (l'équipe le rouvre)
   verrouiller --comptes <sub,…> [--adresses <ip,…>] --motif "…" [--duree 12h]
   lever <id> --motif "…" | lever --tout --motif "…"
   interrupteur <detection|alertes|blocages> marche | arret --duree 2h   (7j au plus)
@@ -124,6 +125,7 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         return `Décision #${decisions.create({ kind: 'bloquer', cible: rest[0], portee: opt.portee, duree: opt.duree || '24h', motif, par })} : ${rest[0]} bloqué.`;
       case 'revoquer-session': motifExige(); return `Décision #${decisions.create({ kind: 'revoquer_session', cible: rest[0], duree: opt.duree || '48h', motif, par })} : session révoquée.`;
       case 'revoquer-compte': motifExige(); return `Décision #${decisions.create({ kind: 'revoquer_compte', cible: rest[0], duree: '48h', motif, par })} : sessions de ${rest[0]} fermées.`;
+      case 'suspendre-acces': motifExige(); return `Décision #${decisions.create({ kind: 'suspendre_acces', cible: rest[0], duree: opt.duree || '7j', motif, par })} : accès ${rest[0]} à suspendre (le site l’applique une fois ; l’équipe le rouvre dans l’admin).`;
       case 'geler': motifExige(); return `Décision #${decisions.create({ kind: 'geler', cible: rest[0], duree: opt.duree || '24h', motif, par })} : ${rest[0]} gelé.`;
       case 'verrouiller': {
         const split = v => (typeof v === 'string' ? v.split(',').map(s => s.trim()).filter(Boolean) : []);

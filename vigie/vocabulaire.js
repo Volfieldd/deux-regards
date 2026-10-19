@@ -30,6 +30,9 @@ export const OWN = {
   bordure_rafale: E('moyen', 'bordure'),
   bordure_nouvel_operateur: E('bas', 'bordure'),
   bordure_erreur_worker: E('bas', 'bordure'),
+  // Réponse d'une page ou d'une image privée (/g/…, /prive/…, ou en-tête privé du site) servie par le cache de Cloudflare
+  // (registre des briques, BV-26) : le site ne la voit jamais passer.
+  bordure_cache_prive: E('haut', 'bordure'),
   vigie_bordure_erreur: E('moyen', 'vigie · contrôle'),
   vigie_bordure_silence: E('moyen', 'vigie · contrôle'),
   // Notifications (phase D)

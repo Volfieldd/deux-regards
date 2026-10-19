@@ -8,10 +8,13 @@ import { reseauDe } from '../server/securite/adresses-ip.js';
 // monde. Chaque ligne porte un HMAC (clé du journal) : une décision écrite à la main dans la base n'est jamais signée
 // pour le site.
 
-export const KINDS = ['bloquer', 'revoquer_session', 'revoquer_compte', 'geler', 'verrouiller'];
+// suspendre_acces : un accès d'une galerie privée (son numéro), suspendu par le site comme après 30 refus (registre des
+// briques, BV-18, « Tranché » 5). Le site l'applique une fois par décision ; lever la décision ne rouvre pas l'accès
+// (l'équipe le débloque dans l'admin du site).
+export const KINDS = ['bloquer', 'revoquer_session', 'revoquer_compte', 'geler', 'verrouiller', 'suspendre_acces'];
 export const SCOPES = ['tout', 'admin', 'auth'];
 const DAY = 864e5;
-export const MAX_DURATION = { bloquer: 30 * DAY, revoquer_session: 2 * DAY, revoquer_compte: 2 * DAY, geler: 30 * DAY, verrouiller: DAY };
+export const MAX_DURATION = { bloquer: 30 * DAY, revoquer_session: 2 * DAY, revoquer_compte: 2 * DAY, geler: 30 * DAY, verrouiller: DAY, suspendre_acces: 30 * DAY };
 export const MAX_ACTIVE = 10_000;
 // Espace d'adresses IPv4 bloqué au total : l'équivalent d'un /8 au plus.
 export const MAX_IPV4 = 2 ** 24;
@@ -82,6 +85,7 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
     if (!KINDS.includes(kind)) throw new DecisionError(`action inconnue : ${kind}`);
     if (alerte != null && !(Number.isSafeInteger(Number(alerte)) && Number(alerte) > 0)) throw new DecisionError('numéro d’alerte invalide');
     if (!par) throw new DecisionError('auteur de la décision manquant');
+    const t0 = now();                                       // une seule lecture de l'heure : durée exacte, jamais 1 ms de trop
     const ms = Math.min(typeof duree === 'number' ? duree : parseDuration(duree), MAX_DURATION[kind]);
     let target = String(cible || '').trim();
     const current = active();
@@ -94,6 +98,8 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
       if (used + t.size > MAX_IPV4) throw new DecisionError('trop d’adresses IPv4 bloquées au total (l’équivalent d’un /8 au plus)');
     } else if (kind === 'revoquer_session') {
       if (!/^[0-9a-f]{12,64}$/.test(target)) throw new DecisionError('empreinte de session attendue (12 caractères hexadécimaux au moins)');
+    } else if (kind === 'suspendre_acces') {
+      if (!/^[1-9]\d{0,14}$/.test(target)) throw new DecisionError('numéro d’accès attendu (celui de la galerie privée, tel que le journal l’écrit : detail.acces)');
     } else if (kind === 'verrouiller') {
       target = 'admin';
       const d = details || {};
@@ -103,7 +109,7 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
       details = { comptes, adresses };
     } else if (!target || target.length > 200) throw new DecisionError('compte (sub) attendu');
     if (current.length >= MAX_ACTIVE) throw new DecisionError(`trop de décisions actives (${MAX_ACTIVE} au plus)`);
-    const row = { kind, cible: target, portee, motif: String(motif).slice(0, 300), par, cree_a: now(), fin: now() + ms, auto: auto ? 1 : 0, details: details ? JSON.stringify(details) : null };
+    const row = { kind, cible: target, portee, motif: String(motif).slice(0, 300), par, cree_a: t0, fin: t0 + ms, auto: auto ? 1 : 0, details: details ? JSON.stringify(details) : null };
     const cite = /^alerte #([1-9]\d{0,14})(?: · |$)/.exec(row.motif);
     const alerteId = alerte != null ? Number(alerte) : cite ? Number(cite[1]) : null;
     row.id = Number(db.prepare('INSERT INTO decisions (kind, cible, portee, motif, par, cree_a, fin, auto, details, alerte_id) VALUES (@kind, @cible, @portee, @motif, @par, @cree_a, @fin, @auto, @details, @alerte_id)')
@@ -145,6 +151,9 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
       sessions: by('revoquer_session').map(d => ({ prefixe: d.cible, fin: d.fin })),
       comptes: by('revoquer_compte').map(d => ({ sub: d.cible, avant: d.cree_a, fin: d.fin })),
       gels: by('geler').map(d => ({ sub: d.cible, fin: d.fin })),
+      // Accès des galeries privées à suspendre : « depuis » distingue deux décisions successives sur le même accès (le site
+      // applique chacune une fois).
+      acces: by('suspendre_acces').map(d => ({ id: Number(d.cible), depuis: d.cree_a, fin: d.fin })),
       verrouillage: lock ? { fin: lock.fin, ...JSON.parse(lock.details) } : null,
     });
     return { payload, signature: crypto.sign(null, Buffer.from(payload), privateKey).toString('base64') };

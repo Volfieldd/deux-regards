@@ -14,7 +14,7 @@ export const MODES = { arret: 'Arrêt', observer: 'Observer', alerter: 'Alerter'
 export const ENTITES = { ip: 'adresse', reseau: 'réseau', compte: 'compte', session: 'session', appareil: 'appareil', site: 'site', vigie: 'la Vigie' };
 export const ENTITES_NOM = { ip: 'Adresse', reseau: 'Réseau', compte: 'Compte', session: 'Session', appareil: 'Appareil', site: 'Site', vigie: 'Vigie' };
 // Types de décisions (lexique § 1), dans l'ordre du formulaire « Nouvelle décision ».
-export const DECISIONS = { bloquer: 'Bloquer une adresse', revoquer_compte: 'Fermer les sessions d’un compte', geler: 'Geler un compte', revoquer_session: 'Fermer une session', verrouiller: 'Verrouiller l’admin' };
+export const DECISIONS = { bloquer: 'Bloquer une adresse', revoquer_compte: 'Fermer les sessions d’un compte', geler: 'Geler un compte', revoquer_session: 'Fermer une session', verrouiller: 'Verrouiller l’admin', suspendre_acces: 'Suspendre un accès de galerie privée' };
 // Portées d'un blocage (vigie/decisions.js, SCOPES).
 export const PORTEES = { tout: 'Tout le site', admin: 'L’admin et la connexion', auth: 'La connexion seulement' };
 // Classements d'une alerte close : ceux qu'admet la table alerts (contrainte CHECK, migration 003). Une alerte close par
@@ -28,7 +28,7 @@ export const DETECTEURS = {
   vitesse: 'Lectures d’un compte bien au-delà de son habitude',
   voyage_impossible: 'Voyage impossible entre deux connexions d’un compte',
   pivot_identifiants: 'Connexion réussie après des échecs répétés',
-  role_incoherent: 'Export réservé à l’administrateur fait par un autre compte',
+  role_incoherent: 'Geste réservé à un autre rôle fait par un compte (export, galerie privée, billet)',
   exploration_lente: 'Exploration lente depuis un réseau (pièges et erreurs sur 12 heures)',
   chaine_attaque: 'Chaîne d’attaque : repérage, tentative puis accès sur une même entité',
   silence: 'Site silencieux : aucun battement depuis 3 minutes',

@@ -277,8 +277,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     if (dueRunning) return;
     dueRunning = true;
     try {
-      await app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée'));
-      await app.carnet.runDue().catch(err => app.log.error({ err }, 'carnets : publication programmée'));
+      const photos = await app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée'));
+      const billets = await app.carnet.runDue().catch(err => app.log.error({ err }, 'carnets : publication programmée'));
+      // Textes mis en ligne sans écriture de l'admin : comparés par la Vigie (BV-20, BV-21 ; sub nul).
+      if (photos || billets) app.securite?.watchPublication?.();
     } finally { dueRunning = false; }
   };
   app.addHook('onReady', async () => { reviewTimer = setInterval(runDue, 60 * 1000); reviewTimer.unref(); });

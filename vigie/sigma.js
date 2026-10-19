@@ -17,7 +17,7 @@ import { parseAllDocuments } from 'yaml';
 export const LEVELS = { informational: 'info', low: 'bas', medium: 'moyen', high: 'haut', critical: 'critique' };
 export const POINTS = { info: 0, bas: 0.5, moyen: 1.5, haut: 3, critique: 5 };
 const KINDS = ['ip', 'reseau', 'compte', 'session', 'appareil', 'site', 'vigie'];
-const RESPONSES = ['revoquer_compte', 'geler_et_revoquer', 'bloquer_ip'];
+const RESPONSES = ['revoquer_compte', 'geler_et_revoquer', 'bloquer_ip', 'suspendre_acces'];
 const MODES = ['arret', 'observer', 'alerter', 'bloquer'];
 
 export class RuleError extends Error {}
@@ -135,6 +135,10 @@ function vigieBlock(doc, file) {
   if (!gravite) throw new RuleError(`${file} : level attendu (${Object.keys(LEVELS).join(', ')})`);
   const entite = v.entite || { kind: 'compte', champ: 'sub' };
   if (!KINDS.includes(entite.kind)) throw new RuleError(`${file} : entité inconnue ${entite.kind}`);
+  // Préfixe facultatif de la clé (« acces: » : l'accès 12 d'une galerie privée s'écrit « acces:12 », jamais « 12 » seul,
+  // qui ne dirait pas ce qu'il désigne dans la console).
+  if (entite.prefixe != null && !/^[a-z_]{1,20}:$/.test(String(entite.prefixe))) throw new RuleError(`${file} : préfixe d'entité invalide ${entite.prefixe}`);
+  if (v.reponse === 'suspendre_acces' && !(entite.kind === 'site' && entite.prefixe === 'acces:')) throw new RuleError(`${file} : suspendre_acces vise un accès (entité site, préfixe « acces: »)`);
   if (v.reponse && !RESPONSES.includes(v.reponse)) throw new RuleError(`${file} : réponse inconnue ${v.reponse}`);
   if (v.mode && !MODES.includes(v.mode)) throw new RuleError(`${file} : mode inconnu ${v.mode}`);
   // Les points ne se déposent que sur une adresse, un réseau, un compte, une session ou un appareil : une règle sur le site

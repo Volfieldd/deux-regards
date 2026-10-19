@@ -15,6 +15,10 @@ export const EVENTS = {
   authn_login_pending: E('bas', 'site · connexion'),
   authn_login_disabled: E('moyen', 'site · connexion'),
   authn_local_attempt: E('moyen', 'site · connexion'),
+  // Palier posé après des mots de passe refusés (pause, suspension) : galeries privées (registre des briques, BV-16), nom
+  // du vocabulaire d'OWASP. « haut » pour une suspension. Avant ce type, le site envoyait authn_login_disabled avec
+  // detail.type_attendu = 'authn_login_lock' : la Vigie lit les deux formes (vigie/regles/85-galeries-carnets.yml).
+  authn_login_lock: E('moyen', 'site · public'),
   // E4, E5, E6 : sessions
   session_created: E('info', 'site · connexion'),
   session_destroyed: E('info', 'site · connexion'),

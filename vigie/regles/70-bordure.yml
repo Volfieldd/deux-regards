@@ -66,3 +66,22 @@ detection:
   condition: selection
 level: medium
 vigie: { cas: DS24, entite: { kind: vigie, valeur: bordure }, source_unique: true }
+---
+title: Page ou image privée servie par le cache de Cloudflare
+name: bordure_cache_prive
+id: 4d0ffa41-b37e-4cd3-b7e5-388fd23d4b91
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+# Registre des briques, BV-26 : une page ou une image de /g/ ou /prive/ (ou une réponse que le site marque privée) gardée
+# par Cloudflare et resservie sans passer par le site (« Ignore cache-control », Always Online). Violation probable :
+# instruire tout de suite (procédure de violation, notification à la CNIL sous 72 h si un risque existe, étude § 2.7),
+# puis contrôler la règle « Bypass cache » et Always Online (annexe de sécurité, § 8). Le registre proposait « critique » ;
+# « haute » ici : le constat dit que le réglage est faux, pas encore qu'une personne a vu la galerie d'une autre.
+description: Réponse privée servie par le cache de Cloudflare (cf-cache-status ni DYNAMIC ni BYPASS).
+tags: [attack.collection, attack.t1530]
+detection:
+  selection:
+    type: bordure_cache_prive
+  condition: selection
+level: high
+vigie: { cas: DS18, entite: { kind: site, valeur: cache_prive }, source_unique: true, mode: alerter }
