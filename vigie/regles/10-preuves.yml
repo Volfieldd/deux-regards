@@ -87,7 +87,10 @@ detection:
     sub|exists: true
   condition: selection
 level: high
-vigie: { cas: DS2, source_unique: true, gravite: evenement, reponse: revoquer_compte }
+# Réponse douce (décision du propriétaire du 19 octobre 2026) : le site redemande l'identité du compte avant toute
+# écriture dans l'admin (verifier_identite, 24 h) ; la personne légitime confirme en quelques secondes, un voleur de
+# cookie de session, non. D'où le mode « bloquer » d'emblée (l'ancienne réponse, fermer les sessions, restait en Observer).
+vigie: { cas: DS2, source_unique: true, gravite: evenement, mode: bloquer, reponse: verifier_identite }
 ---
 title: Saisie malveillante depuis un compte de l'admin
 name: saisie_compte_admin

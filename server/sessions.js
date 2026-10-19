@@ -10,8 +10,8 @@ export const hash = token => crypto.createHash('sha256').update(token).digest('h
 // Sessions côté serveur. Le cookie porte un jeton aléatoire ; la base n'en garde que l'empreinte.
 export function createSessionStore(db, { now = Date.now } = {}) {
   const q = {
-    insert: db.prepare(`INSERT INTO sessions (id, sub, name, email, roles, id_token, csrf, created_at, expires_at, ctx_ip, ctx_net, ctx_country, ctx_ua, ctx_fp, ctx_asn, ctx_tls, ctx_tls_brut)
-      VALUES (@id, @sub, @name, @email, @roles, @id_token, @csrf, @created_at, @expires_at, @ctx_ip, @ctx_net, @ctx_country, @ctx_ua, @ctx_fp, @ctx_asn, @ctx_tls, @ctx_tls_brut)`),
+    insert: db.prepare(`INSERT INTO sessions (id, sub, name, email, roles, id_token, csrf, created_at, expires_at, ctx_ip, ctx_net, ctx_country, ctx_ua, ctx_fp, ctx_asn, ctx_tls, ctx_tls_brut, auth_time)
+      VALUES (@id, @sub, @name, @email, @roles, @id_token, @csrf, @created_at, @expires_at, @ctx_ip, @ctx_net, @ctx_country, @ctx_ua, @ctx_fp, @ctx_asn, @ctx_tls, @ctx_tls_brut, @auth_time)`),
     revoked: db.prepare('SELECT * FROM sessions_revoked WHERE id = ?'),
     get: db.prepare('SELECT * FROM sessions WHERE id = ?'),
     touch: db.prepare('UPDATE sessions SET expires_at = ? WHERE id = ?'),
@@ -21,7 +21,8 @@ export function createSessionStore(db, { now = Date.now } = {}) {
 
   return {
     // ctx : contexte de la connexion (adresse, réseau, pays, navigateur), seulement quand la Vigie est configurée.
-    create({ sub, name = '', email = '', roles = [], idToken = null, ctx = null }) {
+    // authTime : heure de l'authentification chez l'IdP (auth_time, en ms), null si l'IdP ne l'a pas donnée.
+    create({ sub, name = '', email = '', roles = [], idToken = null, ctx = null, authTime = null }) {
       const token = crypto.randomBytes(32).toString('base64url');
       const t = now();
       q.purge.run(t);
@@ -31,6 +32,7 @@ export function createSessionStore(db, { now = Date.now } = {}) {
         created_at: t, expires_at: Math.min(t + IDLE_TTL, t + ABSOLUTE_TTL),
         ctx_ip: ctx?.ip ?? null, ctx_net: ctx?.net ?? null, ctx_country: ctx?.country ?? null, ctx_ua: ctx?.ua ?? null, ctx_fp: ctx?.fp ?? null,
         ctx_asn: ctx?.asn ?? null, ctx_tls: ctx?.tls ?? null, ctx_tls_brut: ctx?.tlsBrut ?? null,
+        auth_time: Number.isFinite(authTime) ? Math.round(authTime) : null,
       });
       return token;
     },

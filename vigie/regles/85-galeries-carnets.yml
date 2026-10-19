@@ -5,8 +5,10 @@
 #   - Un invité n'est jamais un compte (G4) : ses règles groupent par detail.acces (l'accès, son numéro), par ip ou par
 #     reference (« visiteur:<12 signes> », identité technique de la session visiteur), jamais par sub.
 #   - Une alerte sur un accès vise l'entité « site » de clé « acces:<numéro> » (préfixe de l'entité, vigie/sigma.js).
-#   - Mode « alerter » partout le premier mois (Tranché 5) ; seule acces_pays_multiples porte une réponse automatique
-#     (suspendre_acces), appliquée quand on la passera en mode « bloquer ».
+#   - Mode « alerter » partout le premier mois (Tranché 5) ; acces_pays_multiples porte une réponse automatique
+#     (suspendre_acces), appliquée quand on la passera en mode « bloquer ». Seule exception : billet_apres_session_reprise,
+#     en mode « bloquer » avec la réponse douce verifier_identite (décision du propriétaire du 19 octobre 2026, hors du
+#     périmètre du Tranché 5, qui vise les accès des galeries).
 
 # ---------------------------------------------------------------------------------------------------------------------
 # BV-16 — Force brute du mot de passe d'un accès
@@ -508,7 +510,9 @@ correlation:
   group-by: [sub]
   timespan: 1h
 level: high
-vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+# Une écriture a suivi la reprise : la même réponse douce que session_autre_appareil (verifier_identite), qui arrête
+# les écritures suivantes ; rien de plus si l'identité a été confirmée après la reprise (vigie/moteur.js).
+vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: bloquer, reponse: verifier_identite }
 ---
 # ---------------------------------------------------------------------------------------------------------------------
 # BV-21 appliqué aux billets (Tranché 10 : une corrélation à part, 3 billets en 1 h, plutôt que 20 en 10 minutes)

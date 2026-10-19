@@ -28,4 +28,6 @@ This is the **Today** page, the one you land on. At the top, **View site** and *
 
 **Red banner “… critical alerts in Vigie”**: at the top of every page, for accounts that see Vigie, as long as a critical alert is waiting to be taken on in the console; **Open alert** opens it in a new tab (see [Security](reglages#sécurité)).
 
+**Banner “For security, confirm your identity before changing anything”**: Vigie noticed that your session was used from another device, and asks for a new sign-in before any change. You can still look at everything (except exports and photo originals); saving anything leads to the sign-in (what you had just typed is not kept). Click **Confirm my identity**: Zitadel asks for your sign-in and your passkey again, then brings you back to the page; the banner goes away. Confirm with your own account: another account is refused. If it was not you, tell the Vigie administrator.
+
 **“Updating images” banner**: it appears after a change of watermark, EXIF, author name… The counter moves on by itself; see [Watermark and EXIF](filigrane-exif#mise-à-jour-des-images). Only accounts that set the watermark see it.

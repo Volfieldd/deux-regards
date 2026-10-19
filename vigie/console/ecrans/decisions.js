@@ -21,10 +21,10 @@ const EN_COURS_MAX = 200;                 // décisions en cours montrées (10 0
 
 // Mots du lexique (§ 1, § 3.11).
 export const TYPES = DECISIONS;
-export const NOUVELLES = ['bloquer', 'revoquer_compte', 'geler', 'revoquer_session', 'suspendre_acces'];
-const VERBE = { bloquer: 'Bloquer', geler: 'Geler', revoquer_compte: 'Fermer les sessions', revoquer_session: 'Fermer la session', verrouiller: 'Verrouiller', suspendre_acces: 'Suspendre l’accès' };
-const LEVER = { bloquer: 'Lever le blocage', revoquer_compte: 'Lever la fermeture des sessions', geler: 'Lever le gel', revoquer_session: 'Lever la fermeture de la session', verrouiller: 'Lever le verrouillage', suspendre_acces: 'Lever la décision de suspension' };
-const LEVER_TITRE = { bloquer: 'Lever ce blocage ?', revoquer_compte: 'Lever la fermeture des sessions de ce compte ?', geler: 'Lever le gel de ce compte ?', revoquer_session: 'Lever la fermeture de cette session ?', verrouiller: 'Lever le verrouillage de l’admin ?', suspendre_acces: 'Lever la décision de suspendre cet accès ?' };
+export const NOUVELLES = ['bloquer', 'verifier_identite', 'revoquer_compte', 'geler', 'revoquer_session', 'suspendre_acces'];
+const VERBE = { bloquer: 'Bloquer', geler: 'Geler', revoquer_compte: 'Fermer les sessions', revoquer_session: 'Fermer la session', verrouiller: 'Verrouiller', suspendre_acces: 'Suspendre l’accès', verifier_identite: 'Redemander l’identité' };
+const LEVER = { bloquer: 'Lever le blocage', revoquer_compte: 'Lever la fermeture des sessions', geler: 'Lever le gel', revoquer_session: 'Lever la fermeture de la session', verrouiller: 'Lever le verrouillage', suspendre_acces: 'Lever la décision de suspension', verifier_identite: 'Lever la vérification d’identité' };
+const LEVER_TITRE = { bloquer: 'Lever ce blocage ?', revoquer_compte: 'Lever la fermeture des sessions de ce compte ?', geler: 'Lever le gel de ce compte ?', revoquer_session: 'Lever la fermeture de cette session ?', verrouiller: 'Lever le verrouillage de l’admin ?', suspendre_acces: 'Lever la décision de suspendre cet accès ?', verifier_identite: 'Ne plus redemander l’identité de ce compte ?' };
 const EFFET_LEVER = {
   bloquer: 'L’adresse retrouve l’accès au site dans les secondes qui suivent ; la bordure Cloudflare la libère en 4 à 5 min.',
   geler: 'Le compte retrouve l’accès au site dans les secondes qui suivent : il peut se connecter et ouvrir une session neuve.',
@@ -32,6 +32,7 @@ const EFFET_LEVER = {
   revoquer_session: 'La session redevient valable, si elle n’a pas expiré.',
   verrouiller: 'L’admin et la connexion se rouvrent à tous les comptes que le site admet.',
   suspendre_acces: 'L’accès reste suspendu : seule l’équipe le rouvre, dans l’admin du site (Débloquer, ou Nouveau mot de passe…). Lever la décision empêche seulement de la reprendre.',
+  verifier_identite: 'Les sessions du compte ouvertes avant la décision peuvent de nouveau écrire dans l’admin sans confirmer leur identité.',
 };
 const EFFET = {
   geler: 'traité comme désactivé : aucune session, connexion refusée',
@@ -43,13 +44,14 @@ const PORTEES = {
   admin: { t: PORTEES_MOT.admin, sec: 'le site public reste ouvert à cette adresse' },
   auth: { t: PORTEES_MOT.auth, sec: 'la connexion par Zitadel lui est refusée' },
 };
-export const DUREES = { bloquer: ['1h', '24h', '7j', '30j'], geler: ['1h', '24h', '7j', '30j'], revoquer_compte: ['24h', '48h'], revoquer_session: ['24h', '48h'], verrouiller: ['1h', '12h', '24h'], suspendre_acces: ['7j', '30j'] };
-const MAX_TEXTE = { bloquer: '30\u00a0jours', geler: '30\u00a0jours', revoquer_compte: '48\u00a0h', revoquer_session: '48\u00a0h', verrouiller: '24\u00a0h', suspendre_acces: '30\u00a0jours' };
+export const DUREES = { bloquer: ['1h', '24h', '7j', '30j'], geler: ['1h', '24h', '7j', '30j'], revoquer_compte: ['24h', '48h'], revoquer_session: ['24h', '48h'], verrouiller: ['1h', '12h', '24h'], suspendre_acces: ['7j', '30j'], verifier_identite: ['24h', '7j'] };
+const MAX_TEXTE = { bloquer: '30\u00a0jours', geler: '30\u00a0jours', revoquer_compte: '48\u00a0h', revoquer_session: '48\u00a0h', verrouiller: '24\u00a0h', suspendre_acces: '30\u00a0jours', verifier_identite: '7\u00a0jours' };
 const LIBRE = { bloquer: true, geler: true };      // « Autre durée » : pour les décisions longues seulement
 const CIBLE = {
   bloquer: { label: 'Adresse ou réseau', aide: 'Une adresse (198.51.100.23) ou un réseau (198.51.100.0/24) ; en IPv4 de /8 à /32, en IPv6 de /32 à /128.' },
   revoquer_compte: { label: 'Compte', aide: 'Son identifiant Zitadel (sub), tel que le journal l’écrit.' },
   geler: { label: 'Compte', aide: 'Son identifiant Zitadel (sub), tel que le journal l’écrit.' },
+  verifier_identite: { label: 'Compte', aide: 'Son identifiant Zitadel (sub), tel que le journal l’écrit.' },
   revoquer_session: { label: 'Empreinte de la session', aide: '12 caractères hexadécimaux au moins (0 à 9, a à f), tels que le journal les écrit.' },
   suspendre_acces: { label: 'Numéro de l’accès', aide: 'Le numéro de l’accès de la galerie privée, tel que le journal l’écrit (detail.acces, ou l’entité « acces:12 »).' },
 };
@@ -58,6 +60,7 @@ const HINT = {
   geler: 'Le gel se lève seul à la fin ; 30 jours au plus. Le site l’applique en quelques secondes.',
   revoquer_compte: 'Toute session du compte ouverte avant maintenant est refusée ; il peut se reconnecter. 48 h au plus.',
   revoquer_session: 'Cette session est refusée ; 48 h au plus.',
+  verifier_identite: 'Toute session du compte authentifiée avant maintenant doit confirmer son identité chez Zitadel (clé d’accès) avant d’écrire dans l’admin ; elle peut toujours la consulter. 7 jours au plus.',
   suspendre_acces: 'Le site suspend l’accès une fois, comme après 30 mots de passe refusés : les invités sortent, l’équipe le rouvre dans l’admin. 30 jours au plus.',
 };
 
@@ -190,7 +193,8 @@ function cibleDe(q, d, role, t) {
   if (d.kind === 'suspendre_acces') return { k: 'accès', texte: `accès n°${NBSP}${propre(d.cible, 20)}`, mono: null, sec: typo(EFFET.suspendre_acces) };
   const nom = d.kind !== 'revoquer_session' ? q.nom.get(String(d.cible)) : null;
   return { k: d.kind === 'revoquer_session' ? 'session' : 'compte', texte: propre(d.cible, 200), mono: 'sub', nom: nom ? propre(nom, 60) : null,
-    sec: typo(d.kind === 'revoquer_compte' ? `toute session ouverte avant ${quand(d.cree_a, t)} est refusée` : EFFET[d.kind] || '') };
+    sec: typo(d.kind === 'revoquer_compte' ? `toute session ouverte avant ${quand(d.cree_a, t)} est refusée`
+      : d.kind === 'verifier_identite' ? `toute session authentifiée avant ${quand(d.cree_a, t)} confirme son identité avant d’écrire` : EFFET[d.kind] || '') };
 }
 
 // Qui l'a décidée : la Vigie d'elle-même (règle, alerte), ou une personne (console, ligne de commande), avec le motif.
@@ -252,6 +256,10 @@ export function actionsForcees({ db, kind, key, req, t, retour, alerte = null, m
   const lisible = /^[A-Za-z0-9._@:-]{1,200}$/.test(cle);
   if (kind === 'compte' && !lisible) items.push({ h: 'Geler, fermer les sessions', sans: 'Identifiant de compte illisible : rien à faire d’ici.' });
   else if (kind === 'compte') {
+    // La plus douce d'abord : redemander l'identité (décision du propriétaire du 19 octobre 2026).
+    const vi = fait('verifier_identite');
+    items.push({ h: 'Redemander l’identité', p: 'Avant toute écriture dans l’admin, le site redemande une connexion chez Zitadel (clé d’accès) à toute session authentifiée avant maintenant ; la personne légitime passe en quelques secondes.',
+      fait: vi ? faitTexte(vi) : null, form: vi ? null : form('verifier_identite', { cible: cle, durees: ['24h', '7j'], libre: false }) });
     const gel = fait('geler');
     items.push({ h: gel ? 'Geler plus longtemps' : 'Geler le compte', p: 'Traité comme désactivé : aucune session, connexion refusée ; il retrouve l’accès seul à la fin.',
       fait: gel ? faitTexte(gel) : null, form: form('geler', { cible: cle, durees: ['24h', '7j', '30j'], libre: false }) });

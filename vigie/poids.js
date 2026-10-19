@@ -6,7 +6,7 @@
 export const BY_SEVERITY = { info: 0, bas: 0.5, moyen: 1.5, haut: 3, critique: 5 };
 export const BY_TYPE = {
   // Faits ordinaires : aucun point (ils servent au contexte et aux liens).
-  authn_login_success: 0, session_created: 0, session_destroyed: 0, session_expired: 0, sys_startup: 0, sys_heartbeat: 0,
+  authn_login_success: 0, authn_reauth_success: 0, session_created: 0, session_destroyed: 0, session_expired: 0, sys_startup: 0, sys_heartbeat: 0,
   sys_state: 0, zitadel_connexion: 0, vigie_demarrage: 0, vigie_purge: 0, vigie_alerte: 0, vigie_decision: 0, vigie_interrupteur: 0,
   vigie_signal: 0, vigie_controle_roles: 0, vigie_moteur_sature: 0, vigie_regle_lente: 0,
   // Bordure (phase C3) : notée par ses règles Sigma (70-bordure.yml), jamais deux fois.
@@ -20,6 +20,9 @@ export const BY_TYPE = {
   // Signaux d'exploration ou d'attaque.
   // Types qu'une règle Sigma à un seul événement note déjà (piège, connexion de test, Zitadel « haut ») : pas de points de
   // base en plus (jamais compté deux fois).
+  // Écriture arrêtée faute d'identité confirmée : la personne légitime en fait une ou deux avant de confirmer ; la série
+  // est notée par sa règle (ecritures_sans_identite, 10-preuves.yml).
+  authz_reauth_required: 0,
   malicious_honeypot: 0, authn_local_attempt: 0, zitadel_facteur: 0, zitadel_droits: 0, zitadel_politique: 0,
   malicious_input: 2, malicious_excess_404: 1.5, malicious_excess_events: 2, input_validation_fail: 1.5,
   token_guess: 0.5, authn_login_fail: 1, authz_fail: 1, authz_csrf_fail: 1.5, authz_blocked: 0.5, upload_rejected: 2,

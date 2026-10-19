@@ -8,6 +8,10 @@ import path from 'node:path';
 //   - adresse ou réseau bloqué : 403 (tout le site, l'admin, ou la connexion seulement) ;
 //   - session révoquée, sessions d'un compte ouvertes avant une date, compte gelé (traité comme désactivé) ;
 //   - verrouillage de l'admin : seuls les comptes et adresses listés entrent ;
+//   - vérification d'identité d'un compte (décision verifier_identite, 7 jours au plus) : une session authentifiée chez
+//     Zitadel avant le début de la décision n'écrit plus rien dans l'admin sans une nouvelle authentification du même
+//     compte (server/auth.js, requireFreshIdentity) ; les comptes de l'amorce (ADMIN_SUBS) n'en sont pas exemptés (rien ne
+//     les tient dehors : ils confirment leur identité comme les autres) ;
 //   - accès d'une galerie privée suspendu (registre des briques, BV-18) : par app.spaces.suspend(acces), une fois par
 //     décision ; sans galeries privées (spaces absent, ou sans suspend), la liste est acceptée et ces entrées ignorées.
 // Garde-fous : signature fausse, liste plus ancienne que la précédente, réseau trop large (/0 à /7 en IPv4, moins de
@@ -16,7 +20,7 @@ import path from 'node:path';
 // VIGIE_APPLIQUER=0 : rien n'est appliqué (dernier recours).
 
 const DAY = 864e5;
-const MAX = { bloquer: 30 * DAY, session: 2 * DAY, compte: 2 * DAY, gel: 30 * DAY, verrou: DAY + 3600e3, acces: 30 * DAY };
+const MAX = { bloquer: 30 * DAY, session: 2 * DAY, compte: 2 * DAY, gel: 30 * DAY, verrou: DAY + 3600e3, acces: 30 * DAY, verif: 7 * DAY };
 const SCOPES = new Set(['tout', 'admin', 'auth']);
 
 export function pubkeyOf(b64) {
@@ -94,7 +98,9 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     if (state && p.emis_a < state.emis_a && t - p.emis_a > 5 * 60e3) throw new Error('liste plus ancienne que celle en place');
     if (state && signed.payload === state.payload) return state;               // même liste (attente longue écoulée)
     const cap = (fin, max) => Math.min(Number(fin) || 0, t + max);
-    const all = [...(p.blocages || []), ...(p.sessions || []), ...(p.comptes || []), ...(p.gels || []), ...(p.acces || [])];
+    // Vérifications d'identité (liste absente d'une Vigie d'avant ce genre : aucune).
+    if (p.verifications != null && !Array.isArray(p.verifications)) throw new Error('vérifications d’identité invalides');
+    const all = [...(p.blocages || []), ...(p.sessions || []), ...(p.comptes || []), ...(p.gels || []), ...(p.acces || []), ...(p.verifications || [])];
     if (all.length > 10_000) throw new Error('trop de décisions (10 000 au plus)');
     const raw = [];
     let ipv4 = 0;
@@ -108,6 +114,7 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     if (ipv4 > MAX_IPV4) throw new Error('trop d’adresses IPv4 bloquées au total');
     for (const s of p.sessions || []) if (!SESSION_PREFIX.test(String(s.prefixe))) throw new Error('empreinte de session invalide');
     for (const a of p.acces || []) if (!Number.isSafeInteger(a?.id) || a.id < 1 || !Number.isFinite(a.depuis)) throw new Error('accès de galerie privée invalide');
+    for (const v of p.verifications || []) if (typeof v?.sub !== 'string' || !v.sub || v.sub.length > 200 || !Number.isFinite(v.depuis)) throw new Error('vérification d’identité invalide');
     const acces = (p.acces || []).filter(a => cap(a.fin, MAX.acces) > t).map(a => ({ id: a.id, depuis: a.depuis, fin: cap(a.fin, MAX.acces) }));
     const lock = p.verrouillage && cap(p.verrouillage.fin, MAX.verrou) > t ? {
       fin: cap(p.verrouillage.fin, MAX.verrou),
@@ -122,9 +129,12 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
       sessions: live((p.sessions || []).map(s => ({ key: String(s.prefixe), fin: s.fin })), MAX.session),
       comptes: (() => { const m = new Map(); for (const c of p.comptes || []) { const fin = cap(c.fin, MAX.compte), k = String(c.sub), prev = m.get(k); if (fin > t) m.set(k, { avant: Math.max(Number(c.avant) || 0, prev?.avant || 0), fin: Math.max(fin, prev?.fin || 0) }); } return m; })(),
       gels: live((p.gels || []).map(g => ({ key: String(g.sub), fin: g.fin })), MAX.gel),
+      // Plusieurs vérifications sur le même compte : la plus récente (« depuis ») et la plus longue l’emportent. Un début
+      // daté après la réception (horloge de la Vigie en avance) est ramené à maintenant : jamais une vérification impossible.
+      verifs: (() => { const m = new Map(); for (const v of p.verifications || []) { const fin = cap(v.fin, MAX.verif), prev = m.get(v.sub); if (fin > t) m.set(v.sub, { depuis: Math.max(Math.min(Number(v.depuis), t), prev?.depuis || 0), fin: Math.max(fin, prev?.fin || 0) }); } return m; })(),
       lock,
       acces,
-      counts: { blocages: (p.blocages || []).length, sessions: (p.sessions || []).length, comptes: (p.comptes || []).length, gels: (p.gels || []).length, verrouillage: Boolean(lock), acces: acces.length },
+      counts: { blocages: (p.blocages || []).length, sessions: (p.sessions || []).length, comptes: (p.comptes || []).length, gels: (p.gels || []).length, verrouillage: Boolean(lock), acces: acces.length, verifications: (p.verifications || []).length },
     };
     if (fromCache) for (const a of acces) suspended.add(`${a.id}|${a.depuis}`);
     else if (apply) suspendAccesses(acces);
@@ -260,6 +270,16 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
       return null;
     },
     frozen: sub => Boolean(on() && !owners.has(sub) && live(state.gels, sub)),
+    // Vérification d'identité en cours pour ce compte : { depuis, fin }, ou null.
+    verification: sub => (on() && sub ? live(state.verifs, String(sub)) : null),
+    // Session qui doit confirmer son identité avant d'écrire : authentifiée (auth_time) avant le début de la vérification.
+    // Sans heure d'authentification (session d'avant la migration 058, IdP muet), la session est tenue pour ancienne.
+    identityRequired(session) {
+      if (!session) return null;
+      const v = this.verification(session.sub);
+      if (!v) return null;
+      return (Number(session.auth_time) || 0) >= v.depuis ? null : v;
+    },
     // Verrouillage de l'admin : null (pas de verrouillage) ; sinon vrai si ce compte ou cette adresse peut entrer.
     lockAllows(sub, ip) {
       if (!on() || !state.lock || state.lock.fin <= t()) return null;

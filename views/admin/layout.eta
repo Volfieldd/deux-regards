@@ -164,6 +164,9 @@
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>"><%= t('Aide sur cette page') %></a></p>
 <% } %>
+<% if (it.identite) { const id = it.identite; /* vérification d'identité demandée par la Vigie (server/verification-identite.js) */ %>
+  <div class="sec-bandeau identite" role="status"><%~ ic('shield', 20) %><p><span class="t"><%= id.title %></span><span class="sec"><%= id.detail %></span></p><a class="btn" href="<%= id.href %>"><%= id.action %></a></div>
+<% } %>
 <% if (sec && sec.banner) { const bn = sec.banner; %>
   <div class="sec-bandeau" role="alert"><%~ ic('critique', 20) %><p><span class="t"><%= bn.title %></span><span class="sec"><%= bn.detail %></span></p><a class="btn ghost" href="<%= bn.href %>" target="_blank" rel="noopener noreferrer"><%= bn.action %><span class="sr-only"> <%= t('(nouvel onglet)') %></span><%~ ext(14) %></a></div>
 <% } %>

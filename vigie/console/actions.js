@@ -123,7 +123,7 @@ export function register(app, ctx) {
   });
 
   // ---------- Décisions (Intervenant, ré-authentification) ----------
-  action('/decisions', 'actions_forcees', { reauth: true, libelle: 'Prendre une décision (bloquer, révoquer, geler, verrouiller)', retour: '/decisions' }, (req, body) => {
+  action('/decisions', 'actions_forcees', { reauth: true, libelle: 'Prendre une décision (bloquer, redemander l’identité, révoquer, geler, verrouiller)', retour: '/decisions' }, (req, body) => {
     const kind = body.type;
     if (!KINDS.includes(kind)) throw new ActionError('type de décision inconnu', 'type');
     let motif = texte(body.motif);
@@ -133,7 +133,7 @@ export function register(app, ctx) {
     if (n && !q.alerte.get(n)) throw new ActionError(`alerte #${n} inconnue`, 'alerte');
     if (n) motif = (motif ? `alerte #${n} · ${motif}` : `alerte #${n}`).slice(0, 300);
     if (!motif) throw new ActionError('motif obligatoire : il dit aux autres pourquoi', 'motif');
-    const d = duree(body) || { bloquer: '24h', revoquer_session: '48h', revoquer_compte: '48h', geler: '24h', verrouiller: '12h', suspendre_acces: '7j' }[kind];
+    const d = duree(body) || { bloquer: '24h', revoquer_session: '48h', revoquer_compte: '48h', geler: '24h', verrouiller: '12h', suspendre_acces: '7j', verifier_identite: '24h' }[kind];
     const cible = texte(body.cible, 200);
     const ici = req.ip2 && net.isIP(req.ip2) ? req.ip2 : null;
     let details = null;
@@ -164,7 +164,9 @@ export function register(app, ctx) {
     }
     if (!cible) throw new ActionError(kind === 'revoquer_session' ? 'empreinte de session attendue' : kind === 'suspendre_acces' ? 'numéro d’accès attendu' : 'compte (sub) attendu', 'cible');
     // Son propre compte, un Administrateur de la console ou un administrateur du site : seulement en le confirmant
-    // (audit D3-B5).
+    // (audit D3-B5). Pas pour verifier_identite : elle ne tient personne dehors (une connexion chez Zitadel, quelques
+    // secondes), et un administrateur dont le cookie de session a pu être volé est justement le cas qu'elle sert ; une
+    // case de plus retarderait le geste utile sans rien protéger.
     if (['geler', 'revoquer_compte'].includes(kind) && body.confirme !== 'oui') {
       if (cible === req.moi.sub) throw new ActionError('c’est votre propre compte : cochez la confirmation pour le faire quand même', 'confirme');
       if (rights.effective(cible, 'admin') === 'admin' || adminsDuSite().has(cible)) throw new ActionError('compte d’un administrateur : cochez la confirmation pour le faire quand même', 'confirme');

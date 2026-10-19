@@ -1,0 +1,14 @@
+{
+ "Par sécurité, confirmez votre identité avant de modifier quoi que ce soit.": {
+  "en": "For security, confirm your identity before changing anything.",
+  "de": "Bestätigen Sie aus Sicherheitsgründen Ihre Identität, bevor Sie etwas ändern."
+ },
+ "Une nouvelle connexion est demandée pour ce compte, clé d’accès comprise. Vous pouvez consulter l’administration ; rien ne sera enregistré avant cette confirmation.": {
+  "en": "A new sign-in is required for this account, passkey included. You can still browse the administration; nothing will be saved until you confirm.",
+  "de": "Für dieses Konto ist eine neue Anmeldung erforderlich, einschließlich Passkey. Sie können die Verwaltung weiter ansehen; vor dieser Bestätigung wird nichts gespeichert."
+ },
+ "Confirmer mon identité": {
+  "en": "Confirm my identity",
+  "de": "Meine Identität bestätigen"
+ }
+}

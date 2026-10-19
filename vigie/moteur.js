@@ -81,6 +81,10 @@ export function createEngine({ store, decisions, switches, threats = null, now =
       VALUES (@regle, @cas, @entite_kind, @entite_key, @gravite, @mode, @t, @t, 1, @score, @sources)`),
     update: db.prepare('UPDATE alerts SET derniere = ?, compteur = compteur + 1, gravite = ?, score = COALESCE(?, score), sources = ? WHERE id = ?'),
     respond: db.prepare('UPDATE alerts SET reponse = ? WHERE id = ?'),
+    // Vérification d'identité (verifier_identite) : dernière identité confirmée par le site, dernière session reprise
+    // depuis un autre appareil (preuve des trois règles qui répondent ainsi), dans l'ordre de réception (seq).
+    lastReauth: db.prepare("SELECT seq, recu_a FROM events WHERE sub = ? AND type = 'authn_reauth_success' ORDER BY seq DESC LIMIT 1"),
+    lastReprise: db.prepare("SELECT seq FROM events WHERE sub = ? AND type = 'session_context_change' AND severity IN ('haut', 'critique') ORDER BY seq DESC LIMIT 1").pluck(),
     addEvent: db.prepare('INSERT OR IGNORE INTO alert_events (alert_id, seq) VALUES (?, ?)'),
     lastSite: db.prepare("SELECT MAX(recu_a) FROM events WHERE composant LIKE 'site%'").pluck(),
   };
@@ -195,6 +199,21 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     const what = reponse || (regle === 'entite.score' && entite.kind === 'ip' ? 'bloquer_ip' : null);
     if (what === 'revoquer_compte' && entite.kind === 'compte') make('revoquer_compte', entite.key, '48h');
     else if (what === 'geler_et_revoquer' && entite.kind === 'compte') { make('geler', entite.key, '24h'); make('revoquer_compte', entite.key, '48h'); }
+    // Vérification d'identité (réponse douce, décision du propriétaire du 19 octobre 2026) : le site redemande l'identité
+    // du compte avant toute écriture dans l'admin, 24 h. Un administrateur, un compte de l'amorce (ADMIN_SUBS) ou celui
+    // qui règle la Vigie n'en est pas exempté : c'est le cas utile, et personne n'est tenu dehors (il confirme son identité
+    // en quelques secondes). Rien de nouveau si l'identité a déjà été confirmée après la dernière session reprise (une
+    // écriture faite après la confirmation, qui ouvre une corrélation, n'est plus suspecte), ni si une vérification en
+    // cours n'a pas encore été satisfaite ; une vérification satisfaite puis une nouvelle reprise : une nouvelle décision.
+    else if (what === 'verifier_identite' && entite.kind === 'compte') {
+      const sub = entite.key;
+      const ok = q.lastReauth.get(sub);
+      const reprise = q.lastReprise.get(sub);
+      if (ok && reprise && ok.seq > reprise) done.push('identité confirmée après la dernière session reprise : aucune réponse');
+      else if (!active.some(d => d.kind === 'verifier_identite' && d.cible === sub && d.cree_a > (ok?.recu_a ?? 0))) {
+        try { decisions.create({ kind: 'verifier_identite', cible: sub, duree: '24h', par, auto: true, motif: `alerte #${id}`, alerte: id }); done.push(`verifier_identite ${sub}`); } catch (err) { done.push(`verifier_identite refusé : ${err.message}`); }
+      }
+    }
     // Accès d'une galerie privée qui fuit (registre des briques, BV-18 ; « Tranché » 5) : le site le suspend comme après
     // 30 refus (autorisations retirées ; l'équipe débloque ou donne un nouveau mot de passe). Mode « bloquer » seulement.
     else if (what === 'suspendre_acces' && entite.kind === 'site' && /^acces:[1-9]\d{0,14}$/.test(entite.key)) make('suspendre_acces', entite.key.slice(6), '7j');

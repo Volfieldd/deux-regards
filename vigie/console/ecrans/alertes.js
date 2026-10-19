@@ -28,7 +28,7 @@ const HISTORIQUE = `SELECT seq, recu_a, emetteur, detail FROM events
 const ENTITE_TITRE = { ip: 'L’adresse', reseau: 'Le réseau', compte: 'Le compte', session: 'La session', appareil: 'L’appareil', site: 'Le site', vigie: 'La Vigie' };
 const FICHE_DE = { ip: 'Fiche de l’adresse', reseau: 'Fiche du réseau', compte: 'Fiche du compte', session: 'Fiche de la session', appareil: 'Fiche de l’appareil' };
 const SEUIL_DE = { ip: 'd’une adresse', reseau: 'd’un réseau', compte: 'd’un compte', session: 'd’une session', appareil: 'd’un appareil' };
-const DECISION_FAITE = { geler: 'Compte gelé', revoquer_compte: 'Sessions du compte fermées', revoquer_session: 'Session fermée', bloquer: 'Adresse bloquée', verrouiller: 'Admin verrouillée' };
+const DECISION_FAITE = { geler: 'Compte gelé', revoquer_compte: 'Sessions du compte fermées', revoquer_session: 'Session fermée', bloquer: 'Adresse bloquée', verrouiller: 'Admin verrouillée', suspendre_acces: 'Accès suspendu', verifier_identite: 'Identité redemandée' };
 // Tactiques MITRE ATT&CK (étiquettes « attack.<tactique> » des règles Sigma), en français.
 const TACTIQUES = {
   reconnaissance: 'Reconnaissance', resource_development: 'Développement de ressources', initial_access: 'Accès initial', execution: 'Exécution',
@@ -52,7 +52,8 @@ const GRAVITES_MOT = { critique: 'Critique', haute: 'Haute et plus', moyenne: 'M
 // Raisons d'une absence de réponse automatique (textes de vigie/moteur.js, respond) : les seules montrées à un Lecteur.
 const RAISONS = [/^adresse privée : aucun blocage automatique$/, /^aucun contrôle des rôles réussi : aucun blocage automatique d’adresse$/,
   /^adresse de confiance : aucune réponse$/, /^adresse d’une connexion d’administrateur : aucun blocage automatique$/,
-  /^interrupteur des blocages arrêté : aucune réponse$/, /^aucune réponse prévue pour cette règle$/];
+  /^interrupteur des blocages arrêté : aucune réponse$/, /^aucune réponse prévue pour cette règle$/,
+  /^identité confirmée après la dernière session reprise : aucune réponse$/];
 const NOMBRES = ['aucune', 'une', 'deux', 'trois', 'quatre'];
 
 const deux = n => String(n).padStart(2, '0');
@@ -333,11 +334,11 @@ function ligneDecision(d, t, role, retour) {
 // décisions ont leurs lignes). Un Lecteur n'en voit que les raisons connues (le reste peut citer une adresse).
 function raisonsReponse(texte, role) {
   const morceaux = String(texte || '').split(' ; ').map(s => s.trim()).filter(Boolean)
-    .filter(s => !/^(bloquer|geler|revoquer_compte|revoquer_session|verrouiller) (?!refusé)/.test(s));
+    .filter(s => !/^(bloquer|geler|revoquer_compte|revoquer_session|verrouiller|suspendre_acces|verifier_identite) (?!refusé)/.test(s));
   return morceaux.map(s => {
     if (RAISONS.some(r => r.test(s))) return typo(masquer(s, role));
     if (role === 'viewer') return /refusé/.test(s) ? 'une réponse a été refusée par les garde-fous' : null;
-    return typo(masquer(s, role).replace(/^(bloquer|geler|revoquer_compte|revoquer_session|verrouiller) refusé/, (m, k) => `${DECISION_FAITE[k] || k}${FINE}: refusé`));
+    return typo(masquer(s, role).replace(/^(bloquer|geler|revoquer_compte|revoquer_session|verrouiller|suspendre_acces|verifier_identite) refusé/, (m, k) => `${DECISION_FAITE[k] || k}${FINE}: refusé`));
   }).filter(Boolean);
 }
 

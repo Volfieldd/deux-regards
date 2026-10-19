@@ -49,6 +49,18 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // Un cookie de transaction par state : deux connexions dans deux onglets ne s'écrasent pas.
   const txCookie = state => `${prefix}oidc-${state}`;
   const cookieBase = { path: '/', httpOnly: true, secure: config.secureCookies, sameSite: 'lax' };
+  // Vérification d'identité : lien vers /auth/verifier, et la page de l'admin où revenir (celle d'où part l'écriture,
+  // d'après Referer quand il vient du site lui-même ; sinon l'accueil de l'admin).
+  const verifyHref = next => `/auth/verifier?next=${encodeURIComponent(next)}`;
+  const backTo = request => {
+    try {
+      const r = new URL(String(request.headers.referer || ''));
+      if (r.host !== request.headers.host) return '/admin';
+      const p = safeNext(r.pathname + r.search);
+      return /^\/admin(?:[/?#]|$)/.test(p) && p.length <= NEXT_MAX ? p : '/admin';
+    } catch { return '/admin'; }
+  };
+  app.decorate('identityHref', verifyHref);
 
   // Tentatives de connexion par IP sur 10 minutes (30 par défaut) : large pour un humain, freine les abus.
   const allow = createRateLimiter({ limit: config.authRateLimit, windowMs: 10 * 60 * 1000 });
@@ -215,6 +227,29 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     return reply.code(403).send({ error: (request.t || (x => x))('Jeton CSRF invalide.') });
   });
 
+  // Vérification d'identité demandée par la Vigie (décision verifier_identite ; server/securite/decisions.js) : une
+  // écriture de l'admin (méthode autre que GET et HEAD) d'une session authentifiée chez Zitadel avant le début de la
+  // décision est arrêtée ; la personne confirme son identité (/auth/verifier : nouvelle connexion, second facteur), puis
+  // revient à sa page. Les lectures restent permises : l'admin montre un bandeau qui explique (server/verification-identite.js).
+  // Crochet commun de l'admin (server/routes/admin.js), après la session et la permission : jamais dans un gabarit.
+  // Préférences d'affichage et aperçu d'un billet : n'écrivent rien que la Vigie protège, laissés passer.
+  // Lectures arrêtées elles aussi : les exportations et originaux (routes notées au journal, config.audit), qu'un voleur
+  // de cookie de session emporterait en une requête (export d'une personne, sélection d'une galerie, original d'une photo).
+  const NO_WRITE = new Set(['/admin/langue', '/admin/theme', '/admin/carnet/:id/apercu']);
+  app.decorate('requireFreshIdentity', async function (request, reply) {
+    const read = request.method === 'GET' || request.method === 'HEAD';
+    if (!request.session || (read && !request.routeOptions.config?.audit) || (!read && NO_WRITE.has(request.routeOptions.url))) return;
+    const v = app.decisions?.identityRequired(request.session);
+    if (!v) return;
+    const t = request.t || (x => x);
+    const href = verifyHref(backTo(request));
+    // Une fois par minute, par session et par route (l'enregistrement automatique d'un billet ne fait pas une rafale).
+    securite.emitThrottled?.(`verifier:${String(request.session.id).slice(0, 12)}:${request.routeOptions.url}`, 'authz_reauth_required', { request, emetteur: 'server/auth.js · vérification d’identité', detail: { depuis: v.depuis } });
+    reply.header('cache-control', 'no-store');
+    if (request.headers.accept?.includes('text/html')) return reply.redirect(href, 303);
+    return reply.code(403).send({ error: t('Par sécurité, confirmez votre identité avant de modifier quoi que ce soit.'), verifier: href });
+  });
+
   app.addHook('onRequest', async (request, reply) => {
     if (!isAttempt(request) || allow(request.ip)) return;
     securite.emit('excess_rate_limit_exceeded', { request, composant: 'site · connexion', emetteur: 'server/auth.js · limite de connexion', detail: { limite: 'connexion', par_10_min: config.authRateLimit } });
@@ -255,6 +290,32 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     return reply.header('cache-control', 'no-store').redirect(start.url);
   });
 
+  // Vérification d'identité (décision verifier_identite de la Vigie) : nouvelle connexion chez Zitadel du compte de la
+  // session, prompt=login et max_age=300 (la clé d'accès est redemandée, auth_time exigé), comme la ré-authentification
+  // de la console de la Vigie. Au retour, une session neuve (jamais l'ancienne prolongée : pas de fixation), seulement
+  // pour le même compte et une authentification faite à l'instant.
+  app.get('/auth/verifier', async (request, reply) => {
+    let next = safeNext(request.query.next);
+    if (next.length > NEXT_MAX) next = '/admin';
+    if (!request.session) return reply.redirect(`/auth/login?next=${encodeURIComponent(next)}`);
+    reply.header('cache-control', 'no-store');
+    if (!oidc.configured) {
+      if (config.localAuthToken) return reply.redirect(`/auth/local?verifier=1&next=${encodeURIComponent(next)}`);
+      return renderError(reply, 503, { title: 'Connexion indisponible', message: 'La connexion n’est pas encore configurée sur ce serveur.' });
+    }
+    let start;
+    try {
+      start = await oidc.start({ reauth: true });
+    } catch (err) {
+      request.log.error(err, 'fournisseur OIDC injoignable');
+      return renderError(reply, 502, { title: 'Connexion indisponible', message: 'Le service de connexion ne répond pas. Réessayez dans un instant.', retry: true, retryHref: verifyHref(next) });
+    }
+    const pending = Object.keys(request.cookies).filter(n => n.startsWith(`${prefix}oidc-`));
+    if (pending.length >= TX_MAX) for (const n of pending) reply.clearCookie(n, cookieBase);
+    reply.setCookie(txCookie(start.tx.state), JSON.stringify({ ...start.tx, next, reauth: request.session.sub, at: Date.now() }), { ...cookieBase, signed: true, maxAge: TX_TTL });
+    return reply.redirect(start.url);
+  });
+
   app.get('/auth/callback', async (request, reply) => {
     const { state } = request.query;
     const name = typeof state === 'string' && STATE_RE.test(state) ? txCookie(state) : null;
@@ -285,6 +346,19 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     }
 
     const { claims } = result;
+    // Vérification d'identité : le même compte que la session (et que celui qui l'a demandée), authentifié à l'instant.
+    if (tx.reauth) {
+      const same = claims.sub === tx.reauth && (!request.session || request.session.sub === tx.reauth);
+      const fresh = Number.isFinite(result.authTime) && result.authTime >= (Number(tx.at) || Infinity) - 5000;
+      if (!same || !fresh) {
+        securite.emit('authn_login_fail', { request, sub: claims.sub, severity: same ? 'moyen' : 'haut', emetteur: 'server/auth.js · vérification d’identité',
+          detail: { raison: same ? 'vérification d’identité : authentification ancienne' : 'vérification d’identité : autre compte', compte_attendu: same ? undefined : String(tx.reauth).slice(0, 200) } });
+        audit.log({ sub: tx.reauth, name: request.session?.name || '', action: same ? 'vérification d’identité refusée (authentification ancienne)' : 'vérification d’identité refusée (autre compte)' });
+        return renderError(reply, 403, same
+          ? { title: 'Identité non confirmée', message: 'Le service de connexion n’a pas redemandé votre identité. Réessayez.', retry: true, retryHref: verifyHref(safeNext(tx.next)) }
+          : { title: 'Identité non confirmée', message: 'Ce n’est pas le compte de cette session : confirmez l’identité avec le même compte.', retry: true, retryHref: verifyHref(safeNext(tx.next)) });
+      }
+    }
     // L'adresse n'est retenue que si l'IdP l'a vérifiée : sinon, n'importe qui pourrait se présenter sous celle d'un autre
     // (page « Comptes et rôles », e-mails de l'admin). Certains IdP envoient la chaîne « true ».
     const verified = claims.email_verified === true || claims.email_verified === 'true';
@@ -314,8 +388,11 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       return renderError(reply, 403, { ...pendingPage, switchAccount: true, sub: who.sub });
     }
 
-    openSession(request, reply, { ...who, idToken: result.idToken });
-    audit.log({ ...who, action: 'connexion' });
+    // Vérification d'identité : l'authentification a eu lieu après le clic (contrôlé plus haut, à 5 s près) ; l'heure du clic
+    // sert de plancher, pour qu'une horloge de Zitadel un peu en retard ne laisse pas la session « d'avant » la décision.
+    openSession(request, reply, { ...who, idToken: result.idToken, authTime: tx.reauth ? Math.max(result.authTime, Number(tx.at)) : result.authTime });
+    audit.log({ ...who, action: tx.reauth ? 'identité confirmée' : 'connexion' });
+    if (tx.reauth) securite.emit('authn_reauth_success', { request, sub: who.sub, emetteur: 'server/auth.js · vérification d’identité', detail: { methode: 'oidc', amr: Array.isArray(claims.amr) ? claims.amr.slice(0, 10).map(String) : undefined, verification: Boolean(app.decisions?.verification(who.sub)) } });
     securite.emit('authn_login_success', { request, sub: who.sub, emetteur: 'server/auth.js · retour OIDC',
       detail: { methode: 'oidc', amr: Array.isArray(claims.amr) ? claims.amr.slice(0, 10).map(String) : undefined, administrateur_idp: Boolean(result.admin), appareil: fpOf(request.headers) } });
     return reply.header('cache-control', 'no-store').redirect(safeNext(tx.next));
@@ -323,6 +400,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
 
   // Nouvelle session à chaque connexion ; l'ancienne éventuelle est détruite. Elle ne porte pas de rôles : ceux du
   // compte sont relus à chaque requête.
+  // authTime : heure de l'authentification chez l'IdP (auth_time), gardée avec la session (vérification d'identité).
   function openSession(request, reply, user) {
     sessions.destroy(request.cookies[SESSION_COOKIE]);
     const token = sessions.create({ ...user, ctx: securite.enabled ? ctxOf(request) : null });
@@ -343,12 +421,15 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     app.get('/auth/local', async (request, reply) => {
       const next = safeNext(request.query.next);
       leaveIfNoRole(request, reply);
+      // Vérification d'identité (décision verifier_identite) : le formulaire, même avec une session ouverte.
+      if (request.session && request.query.verifier === '1') return renderLocal(reply, 200, { next, verifier: true });
       if (request.session) return reply.redirect(next);
       return renderLocal(reply, 200, { next });
     });
 
     app.post('/auth/local', async (request, reply) => {
       const { token, author, next } = request.body || {};
+      const verifier = request.body?.verifier === '1';
       const who = authors.all().find(a => a.slug === author);
       if (!sameToken(token, config.localAuthToken) || !who) {
         securite.emit('authn_login_fail', { request, emetteur: 'server/auth.js · connexion de test', detail: { raison: 'jeton ou compte de test invalide' } });
@@ -358,15 +439,21 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
       // « local:<photographe> », administrateur à sa création. Ses rôles ne changent ensuite que dans « Comptes et
       // rôles » (garde-fous, journal) ; désactivé ou sans rôle, comme en OIDC, aucune session.
       const sub = who.linked || `local:${who.slug}`;
+      // Vérification d'identité : seulement le compte de la session ouverte.
+      if (verifier && (!request.session || request.session.sub !== sub)) {
+        securite.emit('authn_login_fail', { request, sub, severity: 'haut', emetteur: 'server/auth.js · vérification d’identité', detail: { raison: 'vérification d’identité : autre compte', compte_attendu: request.session?.sub } });
+        return renderLocal(reply, 403, { next: safeNext(next), verifier: true, error: 'Ce n’est pas le compte de cette session.' });
+      }
       const account = accounts.ensureLocal({ sub, name: `${who.name} (test)`, authorId: who.id, roles: ['admin'] });
       const vigieDenied = app.decisions?.frozen(sub) ? 'compte gelé' : app.decisions?.lockAllows(sub, request.ip) === false ? 'administration verrouillée' : null;
       if (vigieDenied) securite.emit('authz_blocked', { request, sub, emetteur: 'server/auth.js · connexion de test', detail: { raison: vigieDenied } });
       if (account.status === 'desactive' || !hasRole(accounts.rolesOf(sub)) || vigieDenied) {
         return renderLocal(reply, 403, { next: safeNext(next), error: 'Ce compte est désactivé ou n’a pas de rôle.' });
       }
-      openSession(request, reply, { sub, name: `${who.name} (test)` });
-      audit.log({ sub, name: `${who.name} (test)`, action: 'connexion (test)' });
+      openSession(request, reply, { sub, name: `${who.name} (test)`, authTime: Date.now() });
+      audit.log({ sub, name: `${who.name} (test)`, action: verifier ? 'identité confirmée (test)' : 'connexion (test)' });
       securite.emit('authn_login_success', { request, sub, emetteur: 'server/auth.js · connexion de test', detail: { methode: 'test', appareil: fpOf(request.headers) } });
+      if (verifier) securite.emit('authn_reauth_success', { request, sub, emetteur: 'server/auth.js · connexion de test', detail: { methode: 'test', verification: Boolean(app.decisions?.verification(sub)) } });
       return reply.header('cache-control', 'no-store').redirect(safeNext(next), 303);
     });
   }

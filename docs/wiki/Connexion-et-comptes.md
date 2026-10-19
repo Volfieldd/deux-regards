@@ -48,7 +48,19 @@ Toutes les connexions et les actions de l'admin sont notées dans le **Journal**
 | Stockage | côté serveur ; la base ne garde que l'empreinte SHA-256 du jeton |
 | Nouvelle connexion | nouvelle session à chaque fois, l'ancienne est détruite |
 | Formulaires | jeton anti-falsification (CSRF) sur toute écriture, déconnexion comprise |
+| Heure d'authentification | celle que Zitadel met dans le jeton d'identité (`auth_time`), gardée avec la session (migration 058 ; heure de la connexion pour la connexion de test) : elle sert à la vérification d'identité ci-dessous |
 | Retour de Zitadel | 10 minutes au plus après le départ (cookie de transaction signé, un par onglet, quatre au plus : au-delà, les plus anciens sont oubliés) ; sinon « Connexion expirée » |
+
+## Vérification d'identité demandée par la Vigie
+
+Quand la [Vigie](Vigie) soupçonne qu'une session a été reprise depuis un autre appareil (cookie copié), elle peut, plutôt que fermer les sessions ou geler le compte, **redemander l'identité** du compte (décision `verifier_identite`, 24 h par défaut, 7 jours au plus ; aussi à la main depuis sa console ou sa ligne de commande) :
+
+- toute session du compte **authentifiée avant la décision** garde la lecture de l'admin (sauf les exportations et les originaux, routes notées au Journal), mais **aucune écriture** ne passe : un formulaire envoyé mène à une nouvelle connexion chez Zitadel, un enregistrement fait en arrière-plan est refusé avec le message « Par sécurité, confirmez votre identité avant de modifier quoi que ce soit » ; ce que l'on venait de saisir n'est pas gardé ;
+- l'admin affiche un bandeau avec le lien **Confirmer mon identité** (`/auth/verifier`) : Zitadel redemande la connexion, clé d'accès comprise (`prompt=login`, `max_age=300`), puis ramène à la page ;
+- au retour, le site exige **le même compte** et une authentification faite à l'instant (sinon « Identité non confirmée », la session reste restreinte) ; il ouvre une **session neuve** (l'ancienne est détruite) et tout redevient normal ;
+- la langue et le thème de l'admin, et l'aperçu d'un billet, restent permis ; un compte non visé ne voit rien ; sans Vigie, rien ne change. Avec la connexion locale de test, la confirmation redemande le jeton de test pour le même photographe.
+
+Les écritures arrêtées, la confirmation et un retour d'un autre compte sont signalés à la Vigie et notés au Journal (« identité confirmée »).
 
 ## Repli sans Zitadel
 
