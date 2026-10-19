@@ -2,7 +2,8 @@
 // ou un « ? » jamais seul en début de ligne, « 22 h 40 », « 1 600 px » et « 19 oct. 2026 » jamais coupés. Les textes de
 // l'admin (et ceux de la v1, repris tels quels) sont écrits avec des espaces ordinaires : la page est corrigée à l'envoi,
 // comme le fait l'outil des maquettes (insecables.py), dont ce sont les règles.
-// Jamais touchés : <style>, <script> (le bloc des textes du script compris), <code>, <pre>, <kbd>, <textarea>, les valeurs
+// Jamais touchés : <style>, <script> (le bloc des textes du script compris), <code>, <pre>, <kbd>, <textarea>, <output> (le
+// lien et le mot de passe d'un accès privé, montrés une fois, tels qu'ils ont été tirés), les valeurs
 // des champs et les adresses ; le texte d'une autre langue (élément ou ancêtre lang="en", lang="de").
 const NNBSP = ' ', NBSP = ' ';
 const MOIS = '(?:janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.)';
@@ -21,7 +22,7 @@ const RULES = [
   // Milliers (« 1 280 », « 15 000 ») ; pas une année ni un numéro collé (2026, R0004012, +33 1 99 00 12 34).
   [/(?<![\d,.])(?<!\d )(?<!\d )(?<!\d )(\d{1,3})((?:[  ]\d{3})+)(?!\d)/g, (m, a, b) => a + b.replace(/ /g, NBSP)],
 ];
-const SKIP = new Set(['style', 'script', 'code', 'pre', 'kbd', 'textarea']);
+const SKIP = new Set(['style', 'script', 'code', 'pre', 'kbd', 'textarea', 'output']);
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
 const TAG = /<(\/?)([a-zA-Z][\w-]*)([^>]*)>/g;
 const ATTRS = /(\s(?:alt|title|aria-label|placeholder|content)=")([^"]*)(")/g;
