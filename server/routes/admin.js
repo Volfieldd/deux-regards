@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { FOCALS } from '../point-focal.js';
 import { ROLES, PERMISSIONS, SCOPES, grantsOf } from '../permissions.js';
 import { MailError } from '../mailer.js';
 import { DescribeError } from '../describe.js';
@@ -1010,7 +1011,7 @@ export default async function adminRoutes(app) {
     return fr.translated ? { field: 'alt_text', text: fr.text, en: fr.en, de: de?.translated ? de.text : '' } : { field: 'alt_text_en', text: fr.en, de: de?.translated ? de.text : '' };
   };
   const photoExtras = (photo, t, request) => ({
-    altMax: LIMITS.alt_text,
+    altMax: LIMITS.alt_text, FOCALS,
     seePeople: request.owns('personnes.voir', photo.author_id), seeStats: request.owns('statistiques.voir', photo.author_id),
     proof: app.proofs.get(photo.id), tsa: app.config.tsa,
     audience: request.owns('statistiques.voir', photo.author_id) ? photoStats(photo.id) : null, shares: request.owns('statistiques.voir', photo.author_id) ? app.shares.forPhoto(photo.id) : 0, insta: instaOf(photo, t),
@@ -2408,7 +2409,8 @@ export default async function adminRoutes(app) {
     noteChanges(request, was, repo.settings());
     app.variants.schedule();            // {site} peut figurer dans le filigrane
     // Admin v2 : enregistrement au geste (le formulaire entier, comme sans script) ; l'ouverture telle qu'enregistrée.
-    if (asJson(request)) return { ok: true, hero: repo.settings().hero || [] };
+    if (asJson(request)) return { ok: true, hero: repo.settings().hero || [], hero_tel: repo.settings().hero_tel || [] };
+    if (request.body?.hero_tel_op) return done(reply, '/admin/site#ouverture-tel', request.t('Ordre de l’ouverture enregistré.'));
     if (request.body?.hero_op || request.body?.hero_save) return done(reply, '/admin/site#ouverture', request.t('Ordre de l’ouverture enregistré.'));
     return done(reply, part === 'droits' ? '/admin/droits' : '/admin/site', request.t('Réglages enregistrés.'));
   });

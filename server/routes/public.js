@@ -264,6 +264,8 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const heroSlugs = Array.isArray(settings.hero) ? settings.hero : [];
     let hero = heroSlugs.map(s => all.find(p => p.slug === s)).filter(Boolean);
     if (!hero.length) hero = all.slice(0, HERO_COUNT);
+    // Ouverture du téléphone (v3, réglage hero_tel) : vide, le téléphone montre la même que le bureau.
+    const heroTel = (Array.isArray(settings.hero_tel) ? settings.hero_tel : []).map(s => all.find(p => p.slug === s)).filter(Boolean);
 
     const series = categories.map(c => {
       const inCat = byRegard.filter(p => p.category_slug === c.slug);
@@ -284,7 +286,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const title = [activeSerie?.name, activeAuthor && t.by(activeAuthor.name)].filter(Boolean).join(', ');
     const tagline = pick(settings, 'tagline', lang);
     return reply.render('home', {
-      ...base, filter, settings, tagline, intro: pick(settings, 'intro', lang), hero, series, regards, photos, total: all.length,
+      ...base, filter, settings, tagline, intro: pick(settings, 'intro', lang), hero, heroTel, series, regards, photos, total: all.length,
       categoriesCount: categories.length, activeAuthor, activeSerie, page, seriesAll,
       pageTitle: title ? `${title} · ${siteName}` : siteName, siteName,
       canonical: galleryUrl({ regard: filter.regard, serie: filter.serie }),   // même contenu, quel que soit l'ordre

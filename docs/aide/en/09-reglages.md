@@ -17,6 +17,7 @@ In **admin v2**, each field is saved when you leave it (the whole form is sent, 
 | **World map** | see below |
 | **Search** | see below |
 | **Opening slideshow photos** | the full-screen slideshow on the home page, in the chosen order (see below) |
+| **Opening slideshow on phones (v3)** | the home-page slideshow on phones, with public site v3 (see below) |
 
 ### World map
 
@@ -41,6 +42,16 @@ The full-screen slideshow on the home page, **in the order you choose**.
 - **Photo unpublished or deleted:** it leaves the opening slideshow. **Address changed:** it stays.
 
 Click **Save opening slideshow** (or **Save public site** at the bottom of the page). Without JavaScript, the ← → ✕ buttons save immediately.
+
+### Opening slideshow on phones (v3)
+
+With the public site in **v3** (see [Appearance](apparence)), the opening photo fills the screen: on a computer, a landscape photo fills it; on a phone, a portrait one does. This second list is the opening **for phones**.
+
+- **Same gestures** as the slideshow above: tick, order with ← →, remove with ✕; 8 photos at most.
+- **Portrait photos only:** the pool only offers published photos that are taller than wide.
+- **None chosen:** phones show the slideshow above (a landscape photo takes the width, the title comes below).
+- **In v1 and v2**, this list is not used: the opening is the same everywhere.
+- Each opening photo keeps its **focal point** (photo record): in v3, the opening crops by 10 % at most around it.
 
 ## Rights and privacy
 

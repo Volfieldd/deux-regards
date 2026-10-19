@@ -1,5 +1,5 @@
 <% layout('./layout') %>
-<% const s = it.settings; const hero = Array.isArray(s.hero) ? s.hero : []; const chosen = hero.map(slug => it.published.find(p => p.slug === slug)).filter(Boolean); %>
+<% const s = it.settings; const hero = Array.isArray(s.hero) ? s.hero : []; const heroTel = Array.isArray(s.hero_tel) ? s.hero_tel : []; %>
 <% const site = it.part === 'site'; const t = it.t; %>
 <h1><%= it.title %></h1>
 <% if (site) { %>
@@ -89,9 +89,18 @@
     <label class="inline"><input type="checkbox" name="search_page"<%~ s.search_page !== false ? ' checked' : '' %>> <%= t('Proposer la recherche') %> <span class="mono"><%= t('lien « Rechercher » dans le menu du site') %></span></label>
     <label class="inline"><input type="checkbox" name="keywords_shown"<%~ s.keywords_shown ? ' checked' : '' %>> <%= t('Afficher les mots-clés sur la page de la photo') %> <span class="mono"><%= t('sinon, ils servent seulement à la recherche') %></span></label>
   </section>
-  <fieldset class="panel hero-panel" id="ouverture" data-hero data-max="<%= it.heroMax %>">
-    <legend><%= t('Photos de l’ouverture') %></legend>
-    <p class="hint"><%= t('Le diaporama plein écran de l’accueil, dans cet ordre.') %> <%= t('{n} photos au plus ; sans choix, les 5 premières de la galerie.', { n: it.heroMax }) %></p>
+<% /* Deux listes d'ouverture : celle de toutes les versions (hero) et celle du téléphone (hero_tel, site public v3 : des
+      verticales ; vide, le téléphone montre la première). */
+   [{ name: 'hero', id: 'ouverture', list: hero, legend: t('Photos de l’ouverture'), pool: it.published,
+      hint: `${t('Le diaporama plein écran de l’accueil, dans cet ordre.')} ${t('{n} photos au plus ; sans choix, les 5 premières de la galerie.', { n: it.heroMax })}`,
+      empty: t('Aucune photo choisie : l’ouverture montre les 5 premières photos de la galerie.'), add: t('Ajouter des photos publiées'), none: t('Aucune photo publiée pour l’instant.') },
+    { name: 'hero_tel', id: 'ouverture-tel', list: heroTel, legend: t('Ouverture au téléphone (v3)'), pool: it.published.filter(p => p.height > p.width),
+      hint: t('Au téléphone, en v3, la photo prend toute la largeur : des verticales la remplissent. {n} photos au plus ; sans choix, le téléphone montre l’ouverture ci-dessus.', { n: it.heroMax }),
+      empty: t('Aucune photo choisie : au téléphone, l’ouverture est celle ci-dessus.'), add: t('Ajouter des photos verticales publiées'), none: t('Aucune photo verticale publiée pour l’instant.') }].forEach(L => {
+   const chosen = L.list.map(slug => it.published.find(p => p.slug === slug)).filter(Boolean); %>
+  <fieldset class="panel hero-panel" id="<%= L.id %>" data-hero data-name="<%= L.name %>" data-max="<%= it.heroMax %>">
+    <legend><%= L.legend %></legend>
+    <p class="hint"><%= L.hint %></p>
     <p class="actions"><span class="counter" role="status" data-hero-count><%= chosen.length > 1 ? t('{n} / {max} choisies', { n: chosen.length, max: it.heroMax }) : t('{n} / {max} choisie', { n: chosen.length, max: it.heroMax }) %></span>
       <button class="btn" type="submit" name="hero_save" value="1"><%= t('Enregistrer l’ouverture') %></button></p>
     <h3><%= t('Ordre du diaporama') %></h3>
@@ -99,30 +108,31 @@
     <ol class="chosen" data-hero-chosen>
 <% chosen.forEach((p, i) => { %>
       <li class="it" data-slug="<%= p.slug %>">
-        <input type="hidden" name="hero" value="<%= p.slug %>">
+        <input type="hidden" name="<%= L.name %>" value="<%= p.slug %>">
         <span class="n mono" aria-hidden="true"><%= i + 1 %></span>
         <%~ it.picture(p, { sizes: '120px', alt: '' }) %>
         <span class="t"><%= p.title %></span>
         <span class="mv">
-          <button type="submit" name="hero_op" value="left:<%= p.slug %>" aria-label="<%= t('Avancer « {title} »', { title: p.title }) %>" data-hero-left>←</button>
-          <button type="submit" name="hero_op" value="right:<%= p.slug %>" aria-label="<%= t('Reculer « {title} »', { title: p.title }) %>" data-hero-right>→</button>
-          <button type="submit" name="hero_op" value="remove:<%= p.slug %>" aria-label="<%= t('Retirer « {title} » de l’ouverture', { title: p.title }) %>" data-hero-remove>✕</button>
+          <button type="submit" name="<%= L.name %>_op" value="left:<%= p.slug %>" aria-label="<%= t('Avancer « {title} »', { title: p.title }) %>" data-hero-left>←</button>
+          <button type="submit" name="<%= L.name %>_op" value="right:<%= p.slug %>" aria-label="<%= t('Reculer « {title} »', { title: p.title }) %>" data-hero-right>→</button>
+          <button type="submit" name="<%= L.name %>_op" value="remove:<%= p.slug %>" aria-label="<%= t('Retirer « {title} » de l’ouverture', { title: p.title }) %>" data-hero-remove>✕</button>
         </span>
       </li>
 <% }) %>
     </ol>
-<% if (!chosen.length) { %>    <p class="hint" data-hero-empty><%= t('Aucune photo choisie : l’ouverture montre les 5 premières photos de la galerie.') %></p>
+<% if (!chosen.length) { %>    <p class="hint" data-hero-empty><%= L.empty %></p>
 <% } %>
-    <h3><%= t('Ajouter des photos publiées') %></h3>
+    <h3><%= L.add %></h3>
     <p class="hint"><%= t('Une case cochée ajoute la photo en fin de diaporama.') %> <span data-hero-full<%~ chosen.length >= it.heroMax ? '' : ' hidden' %>><strong><%= t('Le diaporama est complet ({n} photos) : retirez-en une pour en ajouter une autre.', { n: it.heroMax }) %></strong></span></p>
     <div class="herogrid" data-hero-pool>
-<% it.published.forEach(p => { const on = hero.includes(p.slug); %>
-      <label class="pick" data-slug="<%= p.slug %>" data-title="<%= p.title %>"<%~ on ? ' hidden' : '' %>><input type="checkbox" name="hero" value="<%= p.slug %>"<%~ on ? ' disabled' : '' %><%~ !on && chosen.length >= it.heroMax ? ' disabled' : '' %>>
+<% L.pool.forEach(p => { const on = L.list.includes(p.slug); %>
+      <label class="pick" data-slug="<%= p.slug %>" data-title="<%= p.title %>"<%~ on ? ' hidden' : '' %>><input type="checkbox" name="<%= L.name %>" value="<%= p.slug %>"<%~ on ? ' disabled' : '' %><%~ !on && chosen.length >= it.heroMax ? ' disabled' : '' %>>
         <%~ it.picture(p, { sizes: '160px', alt: '' }) %><span><%= p.title %></span></label>
 <% }) %>
     </div>
-<% if (!it.published.length) { %><p><%= t('Aucune photo publiée pour l’instant.') %></p><% } %>
+<% if (!L.pool.length) { %><p><%= L.none %></p><% } %>
   </fieldset>
+<% }) %>
 <% } %>
   <p class="actions"><button class="btn" type="submit"><%= site ? t('Enregistrer le site public') : t('Enregistrer') %></button></p>
 </form>

@@ -654,3 +654,23 @@ test('ce qu’un compte fait une fois entré : réglage public, contact remplac�
   assert.equal(exp[0].severity, 'moyen');
   assert.equal(exp[0].sub, 'local:julien');
 });
+
+test('ouverture du téléphone (hero_tel, site public v3) : un réglage public suivi comme l’ouverture, sans ses valeurs', async t => {
+  const c = await withVigie(t);
+  const cookies = await c.login();
+  const csrf = c.db.prepare('SELECT csrf FROM sessions').pluck().get();
+  const write = () => c.app.inject({ method: 'POST', url: '/admin/theme', cookies, remoteAddress: '203.0.113.7', headers: { 'user-agent': UA_MAC }, payload: { _csrf: csrf, theme: 'dark' } });
+  const set = (k, v) => c.db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run(k, JSON.stringify(v));
+  const slugs = c.db.prepare("SELECT slug FROM photos WHERE status = 'published' ORDER BY id LIMIT 2").pluck().all();
+  await write();                                                       // point de départ
+  set('hero_tel', slugs);
+  await write();
+  await write();                                                       // rien de changé : rien d'émis
+  const v = await c.flush();
+  const pub = v.of('config_public_changed').filter(e => !e.detail.objet);
+  assert.equal(pub.length, 1);
+  assert.deepEqual(pub[0].detail.cles, ['hero_tel']);
+  assert.ok(!pub[0].detail.valeurs?.hero_tel, 'pas de valeurs (comme hero)');
+  assert.ok(!JSON.stringify(pub).includes(slugs[0]), 'jamais les adresses des photos');
+  assert.equal(pub[0].severity, 'bas');
+});

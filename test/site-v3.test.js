@@ -35,7 +35,7 @@ test('accueil v3 : plein cadre, en-tête posé sur la photo, promesse en H1 ensu
   c.app.publicVersion.save('v3');
   const body = (await c.see('/')).body;
   assert.match(body, /<header class="sh sh--site sh--sur-photo">/);
-  assert.match(body, /<section class="plein" style="--r: [\d.]+" aria-labelledby="ouv-cartel"[^>]*data-ouverture>/);
+  assert.match(body, /<section class="plein fmt-[\dx]+" aria-labelledby="ouv-cartel"[^>]*data-ouverture>/);
   assert.match(body, /<picture class="plein-pic(?: plein-pic--entiere)?">/);
   assert.match(body, /fetchpriority="high"/);
   assert.doesNotMatch(body, /class="wrap ouverture-zone"/);

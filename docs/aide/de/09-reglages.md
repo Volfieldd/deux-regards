@@ -17,6 +17,7 @@ In der **Verwaltung v2** wird jedes Feld beim Verlassen gespeichert (das ganze F
 | **Weltkarte** | siehe unten |
 | **Suche** | siehe unten |
 | **Fotos der Start-Diashow** | die Vollbild-Diashow der Startseite, in der gewählten Reihenfolge (siehe unten) |
+| **Start-Diashow auf dem Handy (v3)** | die Diashow der Startseite auf dem Handy, mit der öffentlichen Website v3 (siehe unten) |
 
 ### Weltkarte
 
@@ -41,6 +42,16 @@ Die Vollbild-Diashow der Startseite, **in der von Ihnen gewählten Reihenfolge**
 - **Foto zurückgezogen oder gelöscht:** Es verlässt die Start-Diashow. **Adresse geändert:** Es bleibt darin.
 
 Klicken Sie auf **Start-Diashow speichern** (oder **Öffentliche Website speichern** unten auf der Seite). Ohne JavaScript speichern die Schaltflächen ← → ✕ sofort.
+
+### Start-Diashow auf dem Handy (v3)
+
+Mit der öffentlichen Website in **v3** (siehe [Erscheinungsbild](apparence)) füllt das Startfoto den Bildschirm: am Computer ein Querformat, am Handy ein Hochformat. Diese zweite Liste ist der Einstieg **für das Handy**.
+
+- **Dieselben Handgriffe** wie bei der Diashow oben: ankreuzen, mit ← → ordnen, mit ✕ entfernen; höchstens 8 Fotos.
+- **Nur Hochformate:** Die Auswahl bietet nur veröffentlichte Fotos an, die höher als breit sind.
+- **Ohne Auswahl:** Das Handy zeigt die Diashow oben (ein Querformat nimmt die Breite ein, der Titel steht darunter).
+- **In v1 und v2** dient diese Liste nicht: Der Einstieg ist überall derselbe.
+- Jedes Foto der Diashow behält seinen **Schwerpunkt** (Datenblatt des Fotos): In v3 beschneidet der Einstieg höchstens 10 % um ihn herum.
 
 ## Rechte und Datenschutz
 

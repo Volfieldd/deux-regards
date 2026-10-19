@@ -279,7 +279,8 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   // Ce qu'un compte fait une fois entré (registre des briques, docs/etudes/vigie-besoins-des-briques.md, BV-1 et BV-2) :
   // un seul point d'émission, après chaque écriture d'un compte de l'admin, qui compare à l'état d'avant
   //   - les réglages qui changent ce que voient tous les visiteurs ou qui servent de point de contact (version du site
-  //     public, mentions légales, contacts des droits et de la confidentialité, accroche, ouverture, thème, EXIF) :
+  //     public, mentions légales, contacts des droits et de la confidentialité, accroche, ouvertures du bureau et du téléphone,
+  //     thème, EXIF) :
   //     config_public_changed, « moyen » si un contact ou le directeur de la publication change (une adresse remplacée
   //     sert à hameçonner les personnes qui exercent leurs droits) ; valeurs seulement pour les réglages sans donnée
   //     personnelle ;
@@ -287,7 +288,7 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   //     privacy_exposure_changed.
   // Quelle que soit la route (aucun emit à ajouter route par route) ; ce qui change hors de l'admin (ligne de commande)
   // est vu à l'écriture suivante.
-  const WATCHED = /^(public_version|site_name|tagline(_en|_de)?|hero|theme|exif|rights_contact|privacy_contact|carnet_contact|privacy_mfa|privacy_encrypted|legal_[a-z_]+)$/;
+  const WATCHED = /^(public_version|site_name|tagline(_en|_de)?|hero(_tel)?|theme|exif|rights_contact|privacy_contact|carnet_contact|privacy_mfa|privacy_encrypted|legal_[a-z_]+)$/;
   const CONTACT = new Set(['rights_contact', 'privacy_contact', 'carnet_contact', 'legal_email', 'legal_phone', 'legal_address', 'legal_names', 'legal_director']);
   const PLAIN = new Set(['public_version', 'theme', 'exif', 'privacy_mfa', 'privacy_encrypted', 'legal_host']);
   const settingsRows = db.prepare('SELECT key, value FROM settings');

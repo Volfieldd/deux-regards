@@ -5,7 +5,7 @@
       page). Avec le script, chaque champ s'enregistre quand on le quitte, chaque case et chaque geste de l'ouverture tout
       de suite (le formulaire entier part, comme sans script), avec « Défaire » 10 s ; une traduction proposée remplit le
       champ sans rien enregistrer. Sans script : les boutons ← → ✕ de l'ouverture et « Enregistrer le site public ». */ %>
-<% const hero = Array.isArray(s.hero) ? s.hero : []; const chosen = hero.map(slug => it.published.find(p => p.slug === slug)).filter(Boolean);
+<% const hero = Array.isArray(s.hero) ? s.hero : []; const heroTel = Array.isArray(s.hero_tel) ? s.hero_tel : [];
    const ic = (d, sz = 14) => '<svg class="ic" width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + d + '</svg>';
    const chev = ic('<path d="M9 6l6 6-6 6"/>');
    const ext = ic('<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>', 12);
@@ -34,11 +34,11 @@
 </header>
 <div class="rg">
 <p class="rub-intro"><%= t('Les textes, l’ouverture de l’accueil, la carte du monde et la recherche. L’allure du site (thème, logos, sous-titre) se règle dans Réglages › Identité et apparence ; les thèmes des photos, dans Séries.') %></p>
-<nav class="sur-page" aria-label="<%= t('Sur cette page') %>"><%= t('Sur cette page :') %> <a href="#textes"><%= t('Textes') %></a><a href="#ouverture"><%= t('Ouverture de l’accueil') %></a><a href="#carte"><%= t('Carte du monde') %></a><a href="#recherche"><%= t('Recherche') %></a></nav>
+<nav class="sur-page" aria-label="<%= t('Sur cette page') %>"><%= t('Sur cette page :') %> <a href="#textes"><%= t('Textes') %></a><a href="#ouverture"><%= t('Ouverture de l’accueil') %></a><a href="#ouverture-tel"><%= t('Ouverture au téléphone') %></a><a href="#carte"><%= t('Carte du monde') %></a><a href="#recherche"><%= t('Recherche') %></a></nav>
 <form class="form rg-form" id="site-f" method="post" action="/admin/reglages" novalidate data-site>
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
   <input type="hidden" name="part" value="site">
-  <!-- [html-validate-disable-block form-dup-name: l’ouverture est une liste ordonnée, name="hero" répété comme dans la v1 ; le serveur en reçoit les adresses dans l’ordre] -->
+  <!-- [html-validate-disable-block form-dup-name: les ouvertures sont des listes ordonnées, name="hero" et name="hero_tel" répétés comme dans la v1 ; le serveur en reçoit les adresses dans l’ordre] -->
   <button type="submit" hidden data-envoi-defaut><%= t('Enregistrer') %></button>
   <section class="panel" id="textes" aria-labelledby="textes-t">
     <h2 id="textes-t"><%= t('Textes') %></h2>
@@ -52,40 +52,50 @@
     <%~ trans('about', t('À propos'), { rows: 8, max: 10000 }) %>
   </section>
 
-  <section class="panel rg-ouverture" id="ouverture" aria-labelledby="ouverture-t" data-hero data-max="<%= it.heroMax %>">
-    <h2 id="ouverture-t"><%= t('Photos de l’ouverture') %></h2>
-    <p class="hint"><%= t('Le diaporama plein écran de l’accueil, dans cet ordre.') %> <%= t('{n} photos au plus ; sans choix, les 5 premières de la galerie.', { n: it.heroMax }) %></p>
+<% /* Deux listes d'ouverture : celle de toutes les versions (hero) et celle du téléphone (hero_tel, site public v3 : des
+      verticales ; vide, le téléphone montre la première). */
+   [{ name: 'hero', id: 'ouverture', list: hero, legend: t('Photos de l’ouverture'), pool: it.published,
+      hint: `${t('Le diaporama plein écran de l’accueil, dans cet ordre.')} ${t('{n} photos au plus ; sans choix, les 5 premières de la galerie.', { n: it.heroMax })}`,
+      empty: t('Aucune photo choisie : l’ouverture montre les 5 premières photos de la galerie.'), add: t('Ajouter des photos publiées'), none: t('Aucune photo publiée pour l’instant.') },
+    { name: 'hero_tel', id: 'ouverture-tel', list: heroTel, legend: t('Ouverture au téléphone (v3)'), pool: it.published.filter(p => p.height > p.width),
+      hint: t('Au téléphone, en v3, la photo prend toute la largeur : des verticales la remplissent. {n} photos au plus ; sans choix, le téléphone montre l’ouverture ci-dessus.', { n: it.heroMax }),
+      empty: t('Aucune photo choisie : au téléphone, l’ouverture est celle ci-dessus.'), add: t('Ajouter des photos verticales publiées'), none: t('Aucune photo verticale publiée pour l’instant.') }].forEach(L => {
+   const chosen = L.list.map(slug => it.published.find(p => p.slug === slug)).filter(Boolean); %>
+  <section class="panel rg-ouverture" id="<%= L.id %>" aria-labelledby="<%= L.id %>-t" data-hero data-name="<%= L.name %>" data-max="<%= it.heroMax %>">
+    <h2 id="<%= L.id %>-t"><%= L.legend %></h2>
+    <p class="hint"><%= L.hint %></p>
     <p class="rg-compte-h" role="status" data-hero-count><%= chosen.length > 1 ? t('{n} / {max} choisies', { n: chosen.length, max: it.heroMax }) : t('{n} / {max} choisie', { n: chosen.length, max: it.heroMax }) %></p>
-    <h3 id="ordre-t"><%= t('Ordre du diaporama') %></h3>
+    <h3 id="<%= L.id %>-ordre-t"><%= t('Ordre du diaporama') %></h3>
     <p class="hint"><span class="js-seul"><%= t('← et → changent l’ordre, ✕ retire la photo ; chaque geste s’enregistre, avec « Défaire ».') %></span><span class="sans-script"><%= t('← → changent l’ordre, ✕ retire la photo (les réglages sont enregistrés en même temps).') %></span></p>
-    <ol class="chosen rg-chosen" aria-labelledby="ordre-t" data-hero-chosen>
+    <ol class="chosen rg-chosen" aria-labelledby="<%= L.id %>-ordre-t" data-hero-chosen>
 <% chosen.forEach((p, i) => { %>
       <li class="it" data-slug="<%= p.slug %>" data-title="<%= p.title %>">
-        <input type="hidden" name="hero" value="<%= p.slug %>">
+        <input type="hidden" name="<%= L.name %>" value="<%= p.slug %>">
         <span class="n mono" aria-hidden="true"><%= i + 1 %></span>
         <%~ it.picture(p, { sizes: '120px', alt: '' }) %>
         <span class="t"><%= p.title %></span>
         <span class="mv">
-          <button type="submit" name="hero_op" value="left:<%= p.slug %>" aria-label="<%= t('Avancer « {title} »', { title: p.title }) %>" data-hero-op="left"<%~ i === 0 ? ' disabled' : '' %>>←</button>
-          <button type="submit" name="hero_op" value="right:<%= p.slug %>" aria-label="<%= t('Reculer « {title} »', { title: p.title }) %>" data-hero-op="right"<%~ i === chosen.length - 1 ? ' disabled' : '' %>>→</button>
-          <button type="submit" name="hero_op" value="remove:<%= p.slug %>" aria-label="<%= t('Retirer « {title} » de l’ouverture', { title: p.title }) %>" data-hero-op="remove">✕</button>
+          <button type="submit" name="<%= L.name %>_op" value="left:<%= p.slug %>" aria-label="<%= t('Avancer « {title} »', { title: p.title }) %>" data-hero-op="left"<%~ i === 0 ? ' disabled' : '' %>>←</button>
+          <button type="submit" name="<%= L.name %>_op" value="right:<%= p.slug %>" aria-label="<%= t('Reculer « {title} »', { title: p.title }) %>" data-hero-op="right"<%~ i === chosen.length - 1 ? ' disabled' : '' %>>→</button>
+          <button type="submit" name="<%= L.name %>_op" value="remove:<%= p.slug %>" aria-label="<%= t('Retirer « {title} » de l’ouverture', { title: p.title }) %>" data-hero-op="remove">✕</button>
         </span>
       </li>
 <% }) %>
     </ol>
-    <p class="hint" data-hero-empty<%~ chosen.length ? ' hidden' : '' %>><%= t('Aucune photo choisie : l’ouverture montre les 5 premières photos de la galerie.') %></p>
+    <p class="hint" data-hero-empty<%~ chosen.length ? ' hidden' : '' %>><%= L.empty %></p>
     <fieldset class="rg-pool">
-      <legend><%= t('Ajouter des photos publiées') %></legend>
+      <legend><%= L.add %></legend>
       <p class="hint"><%= t('Une case cochée ajoute la photo en fin de diaporama.') %> <span data-hero-full<%~ chosen.length >= it.heroMax ? '' : ' hidden' %>><strong><%= t('Le diaporama est complet ({n} photos) : retirez-en une pour en ajouter une autre.', { n: it.heroMax }) %></strong></span></p>
       <div class="herogrid" data-hero-pool>
-<% it.published.forEach(p => { const on = hero.includes(p.slug); %>
-        <label class="pick" data-slug="<%= p.slug %>" data-title="<%= p.title %>"<%~ on ? ' hidden' : '' %>><input type="checkbox" name="hero" value="<%= p.slug %>"<%~ on ? ' disabled' : '' %><%~ !on && chosen.length >= it.heroMax ? ' disabled' : '' %>>
+<% L.pool.forEach(p => { const on = L.list.includes(p.slug); %>
+        <label class="pick" data-slug="<%= p.slug %>" data-title="<%= p.title %>"<%~ on ? ' hidden' : '' %>><input type="checkbox" name="<%= L.name %>" value="<%= p.slug %>"<%~ on ? ' disabled' : '' %><%~ !on && chosen.length >= it.heroMax ? ' disabled' : '' %>>
           <%~ it.picture(p, { sizes: '160px', alt: '' }) %><span><%= p.title %></span></label>
 <% }) %>
       </div>
-<% if (!it.published.length) { %>      <p><%= t('Aucune photo publiée pour l’instant.') %></p><% } %>
+<% if (!L.pool.length) { %>      <p><%= L.none %></p><% } %>
     </fieldset>
   </section>
+<% }) %>
 
   <section class="panel" id="carte" aria-labelledby="carte-t">
     <h2 id="carte-t"><%= t('Carte du monde') %></h2>

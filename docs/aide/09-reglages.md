@@ -17,6 +17,7 @@ En **admin v2**, chaque champ s'enregistre quand vous le quittez (le formulaire 
 | **Carte du monde** | voir ci-dessous |
 | **Recherche** | voir ci-dessous |
 | **Photos de l'ouverture** | le diaporama plein écran de l'accueil, dans l'ordre choisi (voir ci-dessous) |
+| **Ouverture au téléphone (v3)** | le diaporama de l'accueil au téléphone, en site public v3 (voir ci-dessous) |
 
 ### Carte du monde
 
@@ -41,6 +42,16 @@ Le diaporama plein écran de l'accueil, **dans l'ordre que vous choisissez**.
 - **Photo dépubliée ou supprimée :** elle sort de l'ouverture. **Adresse modifiée :** elle y reste.
 
 Cliquez sur **Enregistrer l'ouverture** (ou **Enregistrer le site public** en bas de page). Sans JavaScript, les boutons ← → ✕ enregistrent aussitôt.
+
+### Ouverture au téléphone (v3)
+
+Avec le site public en **v3** (voir [Apparence](apparence)), la photo d'ouverture prend tout l'écran : au bureau, une horizontale le remplit ; au téléphone, c'est une verticale. Cette seconde liste est l'ouverture **du téléphone**.
+
+- **Mêmes gestes** que l'ouverture ci-dessus : cochez, ordonnez avec ← →, retirez avec ✕ ; 8 photos au plus.
+- **Seulement des verticales :** la réserve ne propose que les photos publiées plus hautes que larges.
+- **Sans choix :** le téléphone montre l'ouverture ci-dessus (une horizontale y prend la largeur, le titre vient dessous).
+- **En v1 et en v2**, cette liste ne sert pas : l'ouverture est la même partout.
+- Chaque photo de l'ouverture garde son **point fort** (fiche de la photo) : en v3, l'ouverture recadre de 10 % au plus autour de lui.
 
 ## Droits et confidentialité
 
