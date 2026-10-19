@@ -320,6 +320,10 @@ dialog.confirm[open]:not(:modal) { position: static; display: block; margin: 0 0
 dialog.confirm.cible:target:not([open]) { display: block; position: static; margin: 24px 0; }
 dialog.confirm .avert { margin: 0 0 12px; }
 dialog.confirm .champ-a input, dialog.confirm .champ-a textarea { width: 100%; }
+/* Fenêtre « Nouveau depuis votre dernière visite » (vague 4) : le numéro de version à 12 px (rien sous 12 px) ; la liste qui
+   défile montre son focus. */
+.release-pop .rel-v { font-size: 12px; }
+.release-pop .rel-pop-list:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
 
 /* ---------- 7. La photothèque (planche MQ-00 ; UX-A-02, 08, 10, 14, 16, 24, 31) ----------
    La mise en page de la v1 (admin.css : .library, planche, inspecteur, loupe, import) ; l'en-tête de page type, les filtres

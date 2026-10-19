@@ -24,7 +24,7 @@ In der Fotothek **erscheint jedes hochgeladene Foto sofort auf dem Kontaktbogen*
 - **Während des Hochladens** lassen Sie die Seite geöffnet (der Browser warnt Sie, wenn Sie sie verlassen). **Die Verarbeitung** dagegen läuft auf dem Server weiter, auch wenn Sie die Seite wechseln: Die Anzeige **Verarbeitung: *n* Fotos** bleibt unten in der Seitenleiste sichtbar, auf allen Seiten.
 - Sobald das Hochladen beendet ist, erscheint **Die *n* Fotos vervollständigen und veröffentlichen →** (oder **Das Foto…**) und erhält den Fokus (außer wenn Sie gerade tippen oder anderswo auf der Seite arbeiten): Es führt zu Schritt 3, auch wenn die Verarbeitung noch nicht fertig ist. Die importierten Fotos werden auch im Kontaktbogen ausgewählt, außer während einer Eingabe oder wenn schon eine Auswahl besteht.
 
-| | |
+| Punkt | Regel |
 |---|---|
 | Formate | JPEG, PNG, WebP, TIFF, AVIF. **HEIC** vom iPhone wird nicht unterstützt: Foto als JPEG exportieren (oder die Kamera auf „Maximale Kompatibilität“ stellen) |
 | Größe | höchstens 90 MB und 120 Megapixel pro Datei (weniger bei 16 Bit oder mit Transparenz); ein Hochformat-Panorama darf höchstens etwa 8-mal so hoch wie breit sein |

@@ -78,6 +78,14 @@ Das nächste Foto hängt vom aktiven Filter ab: In „Straße, von Julien“ ble
 
 **Datum und Uhrzeit**: das Datum des Fotos, wie Sie es eingegeben haben (auf den Monat oder den Tag genau). Die Aufnahmezeit erscheint nur, wenn im Datenblatt **Uhrzeit auf der Website zeigen** angekreuzt und das Datum tagesgenau ist: „1. Mai 2025, 14:32 Uhr“ („14 h 32“, „2:32 pm“), in der Bildlegende und der Zeile „Ort, Datum und Uhrzeit“. Sie wird nur auf der Seite des Fotos gezeigt, nie in der Galerie, unter In der Nähe, auf der Karte oder in den Vorschauen beim Teilen.
 
+## Meldungen von Besuchern
+
+Die Seite **Meldungen von Besuchern** (Seitenleiste, Gruppe Personen; Administratoren und Moderatoren) empfängt, was Besucher über den Link **Melden** eines Fotos senden: die Art (sollte nicht online sein, Vorschlag zum Text, etwas anderes), die Nachricht, die Sprache des Besuchers und die für eine Antwort hinterlassene Adresse (nur für Administratoren sichtbar; der Moderator weiß nur, dass eine Adresse hinterlassen wurde). Nachricht und Adresse werden verschlüsselt und nach 12 Monaten gelöscht. Eine Meldung nimmt nichts von selbst offline: Öffnen Sie das Foto und entscheiden Sie.
+
+- **Als erledigt markieren** legt die Meldung zu den erledigten; der Zähler in der Seitenleiste sinkt.
+- **Löschen…** löscht Nachricht und Adresse; in der Verwaltung v2 fragt zuerst ein Dialog (Abbrechen steht vorn).
+- In der Verwaltung v2 sortieren die Filter **Neu** und **Erledigt** die Liste; jede Karte nennt das Foto, zeigt die Art als Plakette mit Symbol und die Nachricht in ihrer Sprache.
+
 ## Weitere Seiten
 
 - **Reisen** (sobald eine Reise veröffentlicht ist, siehe [Fotografierte Personen](rencontres#les-voyages)): die Liste der Reisen, dann eine Seite pro Reise. Oben ein großes Foto, der Name, die Daten, die Fotografen, dann der Text. Danach eine **auf die Reise zugeschnittene Karte**: die Route als gepunktete Linie, eine nummerierte Markierung pro Etappe (zwei Tage hintereinander am selben Ort ergeben eine) und ein Kästchen „T1 · 1. Sept. · Lissabon“ an jeder Etappe; ein Klick auf eine Etappe führt zu ihrem Tag. Schließlich die Erzählung **Tag für Tag** mit den veröffentlichten Fotos jedes Tages, in der Reihenfolge der Aufnahme (das große Foto ist das erste, wie in der Verwaltung). Nur veröffentlichte Fotos erscheinen, und die Karte verortet nur die mit Häkchen bei „Auf der Weltkarte anzeigen“ (ohne sie keine Karte). Auf dem Telefon lässt sich die Karte mit dem Finger verschieben.

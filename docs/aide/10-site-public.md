@@ -78,6 +78,14 @@ La photo suivante dépend du filtre actif : dans « Rue, par Julien », on reste
 
 **Date et heure** : la date de la photo telle que vous l'avez saisie (au mois ou au jour). L'heure de prise de vue n'apparaît que si la fiche coche **Montrer l'heure sur le site** et que la date est au jour : « 1 mai 2025, 14 h 32 » (« 2:32 pm », « 14:32 Uhr »), dans le cartel et la ligne « Lieu, date et heure ». Elle n'est montrée que sur la page de la photo, jamais dans la galerie, À proximité, la carte ni les aperçus de partage.
 
+## Signalements des visiteurs
+
+La page **Signalements des visiteurs** (barre latérale, groupe Personnes ; administrateurs et modérateurs) reçoit ce que les visiteurs envoient par le lien **Signaler** d'une photo : le type (ne devrait pas être en ligne, suggestion pour le texte, autre chose), le message, la langue du visiteur, et l'adresse qu'il a laissée pour une réponse (visible des seuls administrateurs ; le modérateur sait seulement qu'une adresse a été laissée). Message et adresse sont chiffrés et effacés au bout de 12 mois. Un signalement ne dépublie rien tout seul : ouvrez la photo et décidez.
+
+- **Marquer comme traité** range le signalement parmi les traités ; le compteur de la barre latérale baisse.
+- **Supprimer…** efface le message et l'adresse ; en admin v2, un dialogue le demande d'abord (Annuler en premier).
+- En admin v2, les filtres **Nouveaux** et **Traités** trient la liste ; chaque carte nomme la photo, dit le type par une pastille à symbole et montre le message dans sa langue.
+
 ## Autres pages
 
 - **À propos :** logo complet, accroche, texte, biographies des auteurs.

@@ -24,7 +24,7 @@ Dans la photothèque, chaque photo envoyée **apparaît aussitôt dans la planch
 - **Pendant l'envoi**, gardez la page ouverte (le navigateur vous prévient si vous la quittez). **Le traitement**, lui, continue sur le serveur même si vous changez de page : l'indicateur **Traitement : *n* photos** reste affiché en bas de la barre latérale, sur toutes les pages.
 - Dès que l'envoi est terminé, **Compléter et publier les *n* photos →** (ou **la photo**) apparaît (et reçoit le focus, sauf si vous êtes en train de saisir ou de travailler ailleurs dans la page) : il mène à l'étape 3, même si le traitement n'est pas fini. Les photos importées sont aussi choisies dans la planche, sauf pendant une saisie ou si une sélection est déjà en cours.
 
-| | |
+| Point | Règle |
 |---|---|
 | Formats | JPEG, PNG, WebP, TIFF, AVIF. Le **HEIC** de l'iPhone n'est pas pris en charge : exportez la photo en JPEG (ou réglez l'appareil sur « Le plus compatible ») |
 | Taille | 90 Mo et 120 mégapixels par fichier au plus (moins en 16 bits ou avec transparence) ; un panorama vertical ne doit pas être plus haut qu’environ 8 fois sa largeur |

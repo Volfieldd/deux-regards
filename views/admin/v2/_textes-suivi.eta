@@ -1,0 +1,12 @@
+<%
+  // Textes de suivi-v2.js (Circuit de publication, Aide, Nouveautés), traduits par le serveur : un bloc de données, jamais
+  // exécuté (CSP), réuni par admin-v2.js à ceux de views/admin/v2/_textes.eta. La clé est le texte français.
+  const t = it.t;
+  const tk = k => [k, t(k)];
+  const out = Object.fromEntries([
+    tk('Oui'), tk('Non'), tk('« {nom} » : {reglage} · {valeur}'), tk('« {nom} » rétabli : {reglage} · {valeur}'),
+    tk('Tapez au moins deux lettres.'), tk('{n} passages contiennent « {q} ».'), tk('{n} passage contient « {q} ».'), tk('Les 30 premiers sont listés.'),
+    tk('Aucun passage ne contient « {q} ». Essayez un autre mot, ou parcourez le sommaire.'),
+  ]);
+%>
+<script type="application/json" id="v2-textes-page"><%~ JSON.stringify({ t: out }).replace(/</g, '\\u003c') %></script>

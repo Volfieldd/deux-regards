@@ -209,9 +209,10 @@
   <form method="dialog" class="rel-pop-in">
     <p class="eyebrow"><%= t('Version {v}', { v: it.releaseCurrent }) %></p>
     <h2 id="rel-pop-t"><%= rp.length > 1 ? t('Nouveau depuis votre dernière visite : {n} versions', { n: rp.length }) : t('Nouveau depuis votre dernière visite') %></h2>
-    <div class="rel-pop-list">
+<% /* La liste défile si elle est longue : atteinte au clavier et nommée (WCAG 2.1.1). */ %>
+    <section class="rel-pop-list" tabindex="0" aria-label="<%= t('Notes des versions') %>">
 <% rp.forEach(r => { %>      <section><h3><span class="rel-v mono"><%= r.version %></span> <%= r.title %></h3><ul><% r.items.forEach(i => { %><li><%= i %></li><% }) %></ul></section>
-<% }) %>    </div>
+<% }) %>    </section>
     <p class="actions"><button class="btn" type="submit" autofocus><%= t('C’est noté') %></button> <a class="more" href="/admin/nouveautes"><%= t('Toutes les nouveautés') %></a></p>
   </form>
 </dialog>

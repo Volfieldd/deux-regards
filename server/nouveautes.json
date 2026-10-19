@@ -1,5 +1,46 @@
 [
   {
+    "version": "1.175.0",
+    "date": "2026-10-19",
+    "pr": 175,
+    "title": {
+      "fr": "Admin v2 : Journal, Statistiques, Signalements, Circuit, Aide et Nouveautés",
+      "en": "Admin v2: Log, Statistics, Reports, Publishing workflow, Help and What’s new",
+      "de": "Verwaltung v2: Protokoll, Statistiken, Meldungen, Veröffentlichungsablauf, Hilfe und Neuigkeiten"
+    },
+    "items": [
+      {
+        "fr": "En admin v2, le Journal donne un nom lisible à chaque action (plus d’adresse « POST /admin/… »), nomme sa cible avec un lien (« Photo n° 12 ») et regroupe les connexions d’un même jour ; filtres par type et par période, 50 lignes par page, à l’heure de Paris.",
+        "en": "In admin v2, the Log gives each action a readable name (no more “POST /admin/…” address), names its target with a link (“Photo no. 12”) and groups the sign-ins of the same day; filters by type and period, 50 lines per page, in Paris time.",
+        "de": "In der Verwaltung v2 gibt das Protokoll jeder Aktion einen lesbaren Namen (keine Adresse „POST /admin/…“ mehr), nennt ihr Ziel mit einem Link („Foto Nr. 12“) und fasst die Anmeldungen eines Tages zusammen; Filter nach Art und Zeitraum, 50 Zeilen pro Seite, in Pariser Zeit.",
+        "perm": "journal.voir"
+      },
+      {
+        "fr": "Statistiques en v2 : la période en filtres, les chiffres en cartes avec leur évolution écrite, le graphique et ses données dans un tableau.",
+        "en": "Statistics in v2: the period as filters, the figures as cards with their change spelled out, the chart and its data in a table.",
+        "de": "Statistiken in v2: der Zeitraum als Filter, die Zahlen als Karten mit ausgeschriebener Entwicklung, die Grafik und ihre Daten in einer Tabelle.",
+        "perm": "statistiques.voir"
+      },
+      {
+        "fr": "Signalements des visiteurs en v2 : filtres « Nouveaux » et « Traités », une carte par signalement, et « Supprimer… » qui demande d’abord confirmation.",
+        "en": "Visitor reports in v2: “New” and “Handled” filters, one card per report, and “Delete…” that asks for confirmation first.",
+        "de": "Meldungen von Besuchern in v2: Filter „Neu“ und „Erledigt“, eine Karte pro Meldung, und „Löschen…“ fragt zuerst nach.",
+        "perm": "signalements.traiter"
+      },
+      {
+        "fr": "Circuit de publication en v2 : un interrupteur par droit, enregistré dès que vous le basculez, avec « Défaire ».",
+        "en": "Publishing workflow in v2: one switch per permission, saved as soon as you flip it, with “Undo”.",
+        "de": "Veröffentlichungsablauf in v2: ein Schalter pro Recht, gespeichert, sobald Sie ihn umlegen, mit „Rückgängig“.",
+        "perm": "circuit.regler"
+      },
+      {
+        "fr": "Aide en v2 : sommaire replié au téléphone, recherche qui liste les passages trouvés avec le mot surligné ; Nouveautés : les plus anciennes rangées par mois.",
+        "en": "Help in v2: contents folded on a phone, a search that lists the passages found with the word highlighted; What’s new: older versions grouped by month.",
+        "de": "Hilfe in v2: Inhalt auf dem Handy eingeklappt, eine Suche, die die gefundenen Abschnitte mit hervorgehobenem Wort auflistet; Neuigkeiten: ältere Versionen nach Monat gruppiert."
+      }
+    ]
+  },
+  {
     "version": "1.174.0",
     "date": "2026-10-19",
     "pr": 174,

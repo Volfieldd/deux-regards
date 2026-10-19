@@ -1,0 +1,146 @@
+<% const t = it.t, E = __eta.e, tot = it.totals, pv = it.previous; %>
+<% /* Statistiques (audience ; admin v2, vague 4 « suivi et aide »). Mêmes chiffres, même droit (statistiques.voir, portée
+      « les miennes » pour un photographe : ses photos seulement), même route que la v1 (views/admin/stats.eta ; GET
+      /admin/statistiques?periode=30|90|365). La v2 : la période en filtres à état courant visible, les chiffres en cartes
+      avec leur évolution écrite (symbole et mot, jamais la couleur seule), le graphique sans texte rendu trop petit (les
+      graduations et les dates en HTML, sous le dessin du serveur), ses données dans un tableau titré, les classements en
+      listes nommées (« « Quai, 7h12 » : 42 vues »), « Ce qui est mesuré » au pied. */ %>
+<% layout('./layout', { pageTitle: `${t('Statistiques')} · ${t('Administration')} · ${it.siteName}` }) %>
+<% const fmt = n => n.toLocaleString(it.locale);
+   const IC = {
+     haut: '<path d="M12 5l7 12H5z" fill="currentColor" stroke="none"/>', bas: '<path d="M12 19L5 7h14z" fill="currentColor" stroke="none"/>', egal: '<path d="M5 9h14M5 15h14"/>',
+     chev: '<path d="M9 6l6 6-6 6"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const per = it.PERIODS[it.days];
+   // Évolution par rapport à la période précédente, de même durée : symbole et mot.
+   const delta = (now, before) => {
+     if (!before) return now ? '<span class="st-delta st-delta--haut">' + ic('haut') + E(t('nouveau sur la période')) + '</span>' : '';
+     const d = Math.round(((now - before) / before) * 100);
+     const k = d > 0 ? 'haut' : d < 0 ? 'bas' : 'egal';
+     return '<span class="st-delta st-delta--' + k + '">' + ic(k) + E(d === 0 ? t('stable par rapport aux {period} précédents', { period: per }) : t('{d} % par rapport aux {period} précédents', { d: (d > 0 ? '+' : '−') + Math.abs(d), period: per })) + '</span>';
+   };
+   const jour = d => new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T12:00:00Z`));
+   const meter = (n, max) => '<span class="meter" aria-hidden="true"><i class="w' + Math.max(1, Math.round((n / Math.max(1, max)) * 20)) + '"></i></span>';
+   const vues = n => (n > 1 ? t('{n} vues', { n: fmt(n) }) : t('{n} vue', { n: fmt(n) }));
+   const label = s => (s === 'direct' ? t('Accès direct (favori, lien tapé, messagerie)') : s === 'autres' ? t('Autres sites') : s);
+   /* Haut de l'axe du graphique (même arrondi que server/charts.js) : la graduation est écrite en HTML. */
+   const maxPt = Math.max(1, ...it.points.map(p => Math.max(p.views, p.visitors)));
+   const nice = (() => { const m = 10 ** Math.floor(Math.log10(maxPt)); const k = Math.ceil(maxPt / m); return (m === 1 && k % 2 ? k + 1 : k) * m; })(); %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/suivi-v2.css') %>">
+<p class="help-link"><a href="/admin/aide#statistiques"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-suivi">
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Statistiques') %></h1></div>
+  <p class="ep-meta"><span><%= t('du {from} au {to}', { from: jour(it.from), to: jour(it.to) }) %></span><span><%= t('mesure anonyme, sans cookie') %></span></p>
+</header>
+<p class="rub-intro"><%= it.own ? t('Vos photos : ouvertures en grand et partages. La fréquentation du site entier est réservée à l’administrateur.') : t('Mesure anonyme, sans cookie ni service extérieur ; les visites de l’équipe et des robots ne sont pas comptées.') %></p>
+<nav class="chips filtres-l" aria-label="<%= t('Période') %>">
+<% Object.entries(it.PERIODS).forEach(([k, l]) => { %>  <a class="chip" href="/admin/statistiques?periode=<%= k %>"<%~ Number(k) === it.days ? ' aria-current="page"' : '' %>><%= l %></a>
+<% }) %></nav>
+
+<div class="st-grille">
+<% if (!it.own) { %>
+  <section class="st-chiffres-s st-large" aria-labelledby="st-chiffres-t">
+    <h2 id="st-chiffres-t" class="sr-only"><%= t('Chiffres de la période') %></h2>
+    <ul class="st-chiffres">
+      <li class="panel"><span class="st-n"><%= fmt(tot.visitors) %></span><span class="st-l"><%= t('visiteurs') %></span><%~ delta(tot.visitors, pv.visitors) %></li>
+      <li class="panel"><span class="st-n"><%= fmt(tot.views) %></span><span class="st-l"><%= t('pages vues') %></span><%~ delta(tot.views, pv.views) %></li>
+      <li class="panel"><span class="st-n"><%= fmt(it.photoViews) %></span><span class="st-l"><%= t('photos ouvertes en grand') %></span></li>
+      <li class="panel"><span class="st-n"><%= tot.visitors ? Math.round((tot.mobile / tot.visitors) * 100) : 0 %> %</span><span class="st-l"><%= t('des visiteurs sur téléphone') %></span></li>
+    </ul>
+    <p class="hint"><%= t('Visiteurs : visiteurs différents chaque jour, additionnés sur la période.') %></p>
+  </section>
+
+  <section class="panel st-large" aria-labelledby="st-freq-t">
+    <h2 id="st-freq-t"><%= t('Fréquentation') %></h2>
+    <p class="st-legende" aria-hidden="true"><span><span class="key bar"></span><%= t('pages vues') %></span><span><span class="key line"></span><%= t('visiteurs') %></span></p>
+    <figure class="st-graphe" aria-labelledby="st-graphe-l">
+      <div class="st-axe" aria-hidden="true"><span><%= fmt(nice) %></span><span><%= fmt(Math.round(nice / 2)) %></span><span>0</span></div>
+      <div class="chartbox"><%~ it.chart %></div>
+      <p class="st-dates" aria-hidden="true"><span><%= it.points[0].label %></span><span><%= it.points.at(-1).label %></span></p>
+      <figcaption id="st-graphe-l" class="sr-only"><%= it.days === 365 ? t('Pages vues et visiteurs, par mois, du {from} au {to}.', { from: it.points[0].label, to: it.points.at(-1).label }) : t('Pages vues et visiteurs, par jour, du {from} au {to}.', { from: it.points[0].label, to: it.points.at(-1).label }) %> <%= t('Les données sont dans le tableau « Voir les données ».') %></figcaption>
+    </figure>
+    <details class="plier-p st-donnees"><summary><%~ ic('chev', 16) %><span><span class="h"><%= t('Voir les données') %></span></span></summary>
+      <section class="tablewrap" tabindex="0" aria-label="<%= t('Données de la fréquentation') %>"><table class="liste-a st-table">
+        <caption><%= it.days === 365 ? t('Pages vues et visiteurs, par mois, le plus récent d’abord.') : t('Pages vues et visiteurs, par jour, le plus récent d’abord.') %></caption>
+        <thead><tr><th scope="col"><%= it.days === 365 ? t('Mois') : t('Jour') %></th><th scope="col" class="num"><%= t('Pages vues') %></th><th scope="col" class="num"><%= t('Visiteurs') %></th></tr></thead>
+        <tbody><% it.points.slice().reverse().forEach(p => { %><tr><th scope="row"><%= p.label %></th><td class="num"><%= fmt(p.views) %></td><td class="num"><%= fmt(p.visitors) %></td></tr><% }) %></tbody>
+      </table></section>
+    </details>
+  </section>
+<% } %>
+
+  <section class="panel" aria-labelledby="st-top-t">
+    <h2 id="st-top-t"><%= t('Photos les plus vues') %></h2>
+<% if (!it.top.length) { %>    <p class="hint"><%= t('Aucune photo ouverte sur la période.') %></p>
+<% } else { const max = it.top[0].views; %>
+    <ol class="st-rang">
+<% it.top.forEach((r, i) => { %>      <li><span class="st-pos" aria-hidden="true"><%= i + 1 %></span><span class="st-img"><% if (r.photo.ready) { %><%~ it.picture(r.photo, { sizes: '56px', alt: '' }) %><% } %></span>
+        <span class="st-t"><a class="ligne-lien" href="/admin/photos/<%= r.photo.id %>"><%= r.photo.title %></a><%~ meter(r.views, max) %></span><span class="st-v"><%= vues(r.views) %></span></li>
+<% }) %>    </ol>
+<% } %>
+  </section>
+
+  <section class="panel" aria-labelledby="st-part-t">
+<% const sh = it.shares; const shmax = Math.max(1, ...sh.byVia.map(r => r.n)); %>
+    <h2 id="st-part-t"><%= t('Partages') %> <span class="sec"><%= t('{n} sur la période', { n: fmt(sh.total) }) %></span></h2>
+<% if (!sh.total) { %>    <p class="hint"><%= t('Aucun partage sur la période.') %></p>
+<% } else { %>
+    <ul class="st-rang st-rang--plat">
+<% sh.byVia.forEach(r => { %>      <li><span class="st-t"><span><%= r.label %></span><%~ meter(r.n, shmax) %></span><span class="st-v"><%= fmt(r.n) %></span></li>
+<% }) %>    </ul>
+    <h3 class="st-sous"><%= t('Photos les plus partagées') %></h3>
+    <ol class="st-rang">
+<% sh.top.forEach((r, i) => { %>      <li><span class="st-pos" aria-hidden="true"><%= i + 1 %></span><span class="st-img"><% if (r.photo.ready) { %><%~ it.picture(r.photo, { sizes: '56px', alt: '' }) %><% } %></span><span class="st-t"><a class="ligne-lien" href="/admin/photos/<%= r.photo.id %>"><%= r.photo.title %></a></span><span class="st-v"><%= r.n > 1 ? t('{n} partages', { n: fmt(r.n) }) : t('{n} partage', { n: fmt(r.n) }) %></span></li>
+<% }) %>    </ol>
+<% } %>
+    <p class="hint"><%= t('Comptés sans rien savoir du visiteur : un nombre par photo, par moyen et par jour. Sur téléphone, le menu du téléphone ne dit pas quelle app a été choisie.') %></p>
+  </section>
+
+<% if (!it.own) { %>
+  <section class="panel" aria-labelledby="st-pages-t">
+    <h2 id="st-pages-t"><%= t('Pages') %></h2>
+<% if (!it.pages.length) { %>    <p class="hint"><%= t('Aucune page vue sur la période.') %></p>
+<% } else { const pmax = it.pages[0].views; %>
+    <ul class="st-rang st-rang--plat">
+<% it.pages.forEach(r => { %>      <li><span class="st-t"><span><%= r.label %></span><%~ meter(r.views, pmax) %></span><span class="st-v"><%= vues(r.views) %></span></li>
+<% }) %>    </ul>
+<% } %>
+  </section>
+
+  <section class="panel" aria-labelledby="st-src-t">
+    <h2 id="st-src-t"><%= t('Provenance') %></h2>
+<% if (!it.sources.length) { %>    <p class="hint"><%= t('Aucune visite sur la période.') %></p>
+<% } else { const smax = it.sources[0].visits; %>
+    <ul class="st-rang st-rang--plat">
+<% it.sources.forEach(r => { %>      <li><span class="st-t"><span><%= label(r.source) %></span><%~ meter(r.visits, smax) %></span><span class="st-v"><%= r.visits > 1 ? t('{n} visites', { n: fmt(r.visits) }) : t('{n} visite', { n: fmt(r.visits) }) %></span></li>
+<% }) %>    </ul>
+<% } %>
+  </section>
+
+  <section class="panel st-large" aria-labelledby="st-pays-t">
+    <h2 id="st-pays-t"><%= t('Pays') %> <span class="sec"><%= t('visiteurs, selon Cloudflare') %></span></h2>
+<% const cmax = it.countries.length ? it.countries[0].visitors : 1; %>
+    <div class="st-monde">
+      <svg class="carte" viewBox="0 0 1000 520" role="img" aria-labelledby="st-carte-t">
+        <title id="st-carte-t"><%= t('Carte des visiteurs par pays sur la période') %><%= it.countries.length ? ` : ${it.countries.slice(0, 5).map(r => `${r.name} ${fmt(r.visitors)}`).join(', ')}` : ` : ${t('aucune visite')}` %></title>
+        <image href="<%= it.asset('admin/carte-monde.svg') %>" x="0" y="0" width="1000" height="520"/>
+<% it.bubbles.forEach(b => { %>        <circle cx="<%= b.x %>" cy="<%= b.y %>" r="<%= b.r %>"><title><%= b.name %> · <%= b.visitors > 1 ? t('{n} visiteurs', { n: fmt(b.visitors) }) : t('{n} visiteur', { n: fmt(b.visitors) }) %></title></circle>
+<% }) %>      </svg>
+<% if (!it.countries.length) { %>      <p class="hint"><%= t('Aucune visite sur la période.') %> <%= t('Les pays apparaissent à partir des visites suivant la mise à jour ; Cloudflare doit transmettre le pays (option') %> <em>IP Geolocation</em>, <%= t('activée par défaut).') %></p>
+<% } else { %>
+      <ul class="st-rang st-rang--plat">
+<% it.countries.slice(0, 10).forEach(r => { %>        <li><span class="st-t"><span><%= r.name %></span><%~ meter(r.visitors, cmax) %></span><span class="st-v"><%= r.visitors > 1 ? t('{n} visiteurs', { n: fmt(r.visitors) }) : t('{n} visiteur', { n: fmt(r.visitors) }) %></span></li>
+<% }) %>      </ul>
+<% } %>
+    </div>
+  </section>
+<% } %>
+
+  <section class="panel st-large" aria-labelledby="st-mesure-t">
+    <h2 id="st-mesure-t"><%= t('Ce qui est mesuré') %></h2>
+    <p class="hint"><%= t('Les pages du site et les photos ouvertes dans la visionneuse, jour par jour. Un visiteur est reconnu pour la journée seulement, par une empreinte anonyme oubliée à minuit : aucune adresse IP ni aucun cookie. Son pays est celui que transmet Cloudflare ; le site ne le calcule pas et ne garde pas l’adresse. Les navigateurs qui demandent à ne pas être suivis ne sont pas comptés. Les compteurs sont effacés au bout de 25 mois. La page « Droits d’utilisation » du site en informe les visiteurs.') %></p>
+  </section>
+</div>
+</div>

@@ -24,7 +24,7 @@ In the photo library, each uploaded photo **appears straight away on the contact
 - **During the upload**, keep the page open (the browser warns you if you leave it). **Processing**, on the other hand, carries on on the server even if you change page: the **Processing: *n* photos** indicator stays at the bottom of the sidebar, on every page.
 - As soon as the upload is finished, **Complete and publish the *n* photos →** (or **the photo**) appears (and receives focus, unless you are typing or working elsewhere on the page): it leads to step 3, even if processing is not finished. The imported photos are also selected on the contact sheet, except while you are typing or if a selection is already in progress.
 
-| | |
+| Item | Rule |
 |---|---|
 | Formats | JPEG, PNG, WebP, TIFF, AVIF. iPhone **HEIC** is not supported: export the photo as JPEG (or set the camera to “Most Compatible”) |
 | Size | 90 MB and 120 megapixels per file at most (less in 16 bits or with transparency); a vertical panorama must not be taller than about 8 times its width |
