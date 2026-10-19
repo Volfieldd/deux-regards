@@ -204,6 +204,24 @@
     ]
   },
   {
+    "version": "1.178.0",
+    "date": "2026-10-19",
+    "pr": 178,
+    "title": {
+      "fr": "Un installateur pour Unraid et Linux",
+      "en": "An installer for Unraid and Linux",
+      "de": "Ein Installationsprogramm für Unraid und Linux"
+    },
+    "items": [
+      {
+        "fr": "Installer ou réinstaller Nicephos avec une seule commande : l’installateur affiche les prérequis, pose ses questions, configure seul la connexion à l’admin (Zitadel) et le domaine (Cloudflare), puis démarre le site. Il montre d’abord ce qu’il va faire et ne supprime jamais rien (guide Unraid, « Installation automatique »).",
+        "en": "Install or reinstall Nicephos with a single command: the installer lists the prerequisites, asks its questions, sets up the admin sign-in (Zitadel) and the domain (Cloudflare) on its own, then starts the site. It first shows what it will do and never deletes anything (Unraid guide, “Automatic installation”).",
+        "de": "Nicephos mit einem einzigen Befehl installieren oder neu installieren: Das Installationsprogramm zeigt die Voraussetzungen, stellt seine Fragen, richtet die Anmeldung zur Verwaltung (Zitadel) und die Domain (Cloudflare) selbst ein und startet dann die Website. Es zeigt zuerst, was es tun wird, und löscht nie etwas (Unraid-Anleitung, „Automatische Installation“).",
+        "perm": "comptes.gerer"
+      }
+    ]
+  },
+  {
     "version": "1.176.0",
     "date": "2026-10-19",
     "pr": 176,
