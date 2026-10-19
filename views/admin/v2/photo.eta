@@ -1,0 +1,366 @@
+<% layout('./layout') %>
+<% const t = it.t, E = __eta.e, fr = it.lang === 'fr'; %>
+<% /* La fiche d'une photo (admin v2) : MQ-09 (une règle d'enregistrement, un témoin, « Défaire », un dialogue pour ce qui
+      ne se défait pas), constats UX-A-03, 05, 06, 08, 09, 14, 23 et 27. Les champs, les droits et les routes d'écriture sont
+      ceux de la v1 (views/admin/photo.eta) : avec le script, chaque champ s'enregistre quand on le quitte
+      (POST /admin/photos/:id/champs) ; sans script, « Enregistrer la fiche » envoie tout le formulaire (POST /admin/photos/:id),
+      ou les textes seuls (POST /admin/photos/:id/textes). Publier, programmer, renvoyer, dépublier et supprimer passent
+      d'abord par un dialogue (sans script, il s'ouvre dans la page par son ancre). Une suggestion (description, traduction,
+      mot-clé) remplit le champ sans rien enregistrer : « Enregistrer » le fait. */ %>
+<% const P = it.photo, v = it.values, e = it.errors || {}, R = it.ready, F = R.faces, RV = it.review;
+   const can = it.can, pubOk = can('photos.publier'), propose = can('photos.proposer'), seePeople = it.seePeople;
+   // Une photo publiée ne se modifie qu’avec « modifier ses photos publiées » (réglable par photographe).
+   const editableHere = P.status !== 'published' || can('photos.publiees.modifier');
+   const full = can('photos.modifier') && editableHere;
+   const texts = !full && can('photos.textes') && editableHere;
+   const id = P.id, base = `/admin/photos/${id}`;
+   const IC = {
+     retour: '<path d="M19 12H5M11 6l-6 6 6 6"/>', alerte: '<path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/>', chev: '<path d="M9 6l6 6-6 6"/>',
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', encours: '<path d="M12 2.7a9.3 9.3 0 0 1 0 18.6z" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>',
+     abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>', attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>',
+     arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>', plus: '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>',
+     site: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+     corbeille: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', s: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+   };
+   const ic = (k, s = 14) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${IC[k]}</svg>`;
+   const when = ms => new Intl.DateTimeFormat(it.locale, { dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ms);
+   const day = ms => new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Paris' }).format(ms);
+   // État de la photo : une pastille, un symbole, un mot (lexique § 3).
+   const ETAT = P.status === 'published' ? ['abouti', t('Publiée')] : RV.state === 'programmee' ? ['encours', t('Programmée le {date}', { date: when(RV.at) })]
+     : RV.state === 'proposee' ? ['encours', t('Proposée, attend le modérateur')] : RV.state === 'a_reprendre' ? ['attention', t('À reprendre')] : ['afaire', t('Brouillon')];
+   // Accords pour le site et pour Instagram (server/readiness.js) : en règle, à vérifier, refusé.
+   const ACC = { ok: 'abouti', warn: 'attention', no: 'arret' };
+   const acc = (usage, level) => (level === 'ok' ? t('{usage} : accords en règle', { usage }) : level === 'warn' ? t('{usage} : accord à vérifier', { usage }) : t('{usage} : accord refusé', { usage }));
+   // Un champ (MQ-00 § 7) : libellé, aide, champ, erreur sous le champ reliée par aria-describedby ; data-champ : sa clé pour
+   // l’enregistrement au champ quitté.
+   const err = k => (e[k] ? `<p class="err" id="err-${k}">${ic('alerte')}<span><b>${E(t('Erreur :'))}</b> ${E(e[k])}</span></p>` : '');
+   const described = (k, aide) => [aide && k + '-a', e[k] && 'err-' + k].filter(Boolean).join(' ');
+   // (Pas de gabarit littéral dans un autre : l’analyseur d’Eta ne les suit pas ; des concaténations à la place.)
+   const field = (k, label, { aide = '', optional = false, rows = 0, max = 160, value, lang = '', extra = '', placeholder = '' } = {}) => {
+     const val = value !== undefined ? value : (v[k] ?? '');
+     const by = described(k, aide);
+     const attrs = ' id="' + k + '" name="' + k + '" maxlength="' + max + '"' + (lang ? ' lang="' + lang + '"' : '') + (placeholder ? ' placeholder="' + E(placeholder) + '"' : '')
+       + (by ? ' aria-describedby="' + by + '"' : '') + (e[k] ? ' aria-invalid="true"' : '') + ' data-champ="' + k + '" data-label="' + E(label) + '"' + extra;
+     return '<div class="champ-a"><label for="' + k + '">' + E(label) + (optional ? ' <span class="facultatif">' + E(t('(facultatif)')) + '</span>' : '') + '</label>'
+       + (aide ? '<p class="aide" id="' + k + '-a">' + aide + '</p>' : '')
+       + (rows ? '<textarea' + attrs + ' rows="' + rows + '">' + E(val) + '</textarea>' : '<input type="text"' + attrs + ' value="' + E(val) + '">') + err(k) + '</div>';
+   };
+   // Traductions d’un champ (anglais, allemand) : repliées, avec ce qui manque ; « Proposer une traduction » si un traducteur
+   // est réglé (une suggestion : rien n’est enregistré sans « Enregistrer »).
+   const trans = (k, label, { rows = 0, max = 160 } = {}) => {
+     const n = ['en', 'de'].filter(l => String(v[k + '_' + l] || '').trim()).length;
+     const one = l => field(k + '_' + l, l === 'en' ? t('{label} en anglais', { label }) : t('{label} en allemand', { label }), { optional: true, rows, max, lang: l })
+       + (it.translate ? '<p class="tr-act js-seul"><button class="btn ghost" type="button" data-proposer-trad="' + k + '" data-vers="' + l + '">' + E(t('Proposer une traduction')) + '</button></p><p class="hint" role="status" data-trad-statut="' + k + '_' + l + '"></p>' : '');
+     return '<details class="tr-f"' + (e[k + '_en'] || e[k + '_de'] ? ' open' : '') + '><summary>' + ic('chev') + E(t('{label} en anglais et en allemand', { label })) + ' <span class="sec">· ' + E(n === 2 ? t('2 sur 2') : n === 1 ? t('1 sur 2') : t('à traduire')) + '</span></summary>'
+       + '<div class="tr-corps">' + one('en') + one('de') + '<p class="hint">' + E(t('Vide : la version française s’affiche (sur la page allemande comme sur la page anglaise).')) + '</p></div></details>';
+   };
+   const hasErr = Object.keys(e).length;
+   const NAMES = { title: t('Titre'), slug: t('Adresse'), category_id: t('Série'), author_id: t('Photographe'), taken_on: t('Date de la prise de vue'), city: t('Ville de la carte'), on_map: t('Carte du monde'), status: t('Publication'), legend: t('Légende'), alt_text: t('Texte de remplacement'), place: t('Lieu') };
+   const time = it.time;
+   const exifHour = time ? (it.read ? t('L’appareil indique le {date} à {time}.', { date: it.read, time }) : t('L’appareil indique {time}.', { time })) : '';
+   const published = P.published_at && P.status === 'published' ? day(new Date(String(P.published_at).replace(' ', 'T') + 'Z')) : ''; %>
+<p class="help-link"><a href="/admin/aide#photos-la-fiche-dune-photo"><%= t('Aide sur cette page') %></a></p>
+<header class="ep">
+  <a class="ep-retour" href="/admin/photos"><%~ ic('retour') %><%= t('Photothèque') %></a>
+  <div class="ep-titre"><h1 data-fiche-titre><%= P.title %></h1><span class="etat etat--<%= ETAT[0] %>"><%~ ic(ETAT[0], 12) %><%= ETAT[1] %></span></div>
+  <p class="ep-meta"><span><%= P.author || t('sans photographe') %></span><% if (published) { %><span><%= t('publiée le {date}', { date: published }) %></span><% } %><span><%= P.inventory ? t('inventaire {n}', { n: P.inventory }) : t('numéro d’inventaire à la première publication') %></span><span role="status" data-temoin><% if (hasErr) { const first = Object.keys(e)[0]; %><a class="enreg enreg--attente" href="#<%= first === 'city' ? 'city_label' : first %>"><%~ ic('alerte') %><%= hasErr > 1 ? t('{n} champs non enregistrés : {champs}', { n: hasErr, champs: Object.keys(e).map(k => NAMES[k] || k).join(', ') }) : t('{n} champ non enregistré : {champs}', { n: 1, champs: NAMES[first] || first }) %></a><% } %></span></p>
+<% const mainAction = pubOk && P.status === 'published' ? 'depublier' : pubOk && RV.state !== 'programmee' ? 'publier' : propose && !pubOk && P.status !== 'published' && !['proposee', 'programmee'].includes(RV.state) && R.site.level !== 'no' ? 'proposer' : null; %>
+  <div class="ep-actions">
+    <details class="menu ep-plus"><summary class="btn ghost"><%~ ic('plus', 16) %><span class="sr-only"><%= t('Plus d’actions') %></span></summary><div class="menu-pop">
+<% if (P.status === 'published') { %>      <a href="/photo/<%= P.slug %>" target="_blank" rel="noopener"><%= t('Voir sur le site') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span></a>
+<% } %>      <a href="#publication"><%= t('Publication et historique') %></a>
+<% if (can('photos.supprimer')) { %>      <a href="#dlg-supprimer" data-ouvre="dlg-supprimer"><%= t('Supprimer la photo…') %></a>
+<% } %>    </div></details>
+<% if (P.status === 'published') { %>    <a class="btn ghost ep-secondaire" href="/photo/<%= P.slug %>" target="_blank" rel="noopener"><%= t('Voir sur le site') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span></a>
+<% } %><% if (mainAction === 'depublier') { %>    <a class="btn danger-c" href="#dlg-depublier" data-ouvre="dlg-depublier" id="ouvre-depublier"><%= t('Dépublier…') %></a>
+<% } else if (mainAction === 'publier') { %>    <a class="btn" href="#dlg-publier" data-ouvre="dlg-publier" id="ouvre-publier"><%= t('Publier…') %></a>
+<% } else if (mainAction === 'proposer') { %>    <a class="btn" href="#dlg-proposer" data-ouvre="dlg-proposer" id="ouvre-proposer"><%= RV.state === 'a_reprendre' ? t('Proposer de nouveau…') : t('Proposer…') %></a>
+<% } %>  </div>
+</header>
+
+<section class="fiche-etats" aria-labelledby="etats-t">
+  <h2 class="sr-only" id="etats-t"><%= t('Accords et visages') %></h2>
+  <p class="fiche-pastilles"><span class="etat etat--<%= ACC[R.site.level] %>"><%~ ic(ACC[R.site.level], 12) %><%= acc(t('Site'), R.site.level) %></span><span class="etat etat--<%= ACC[R.instagram.level] %>"><%~ ic(ACC[R.instagram.level], 12) %><%= acc('Instagram', R.instagram.level) %></span><% if (it.provisional) { %><a class="att" href="#title"><%~ ic('alerte', 12) %><%= t('Titre provisoire (nom du fichier)') %></a><% } %></p>
+  <div class="fiche-visages"><span><%= F.source === 'main' ? (F.has ? t('quelqu’un sur la photo (indiqué à la main)') : t('personne de reconnaissable (indiqué à la main)')) : F.source === 'attente' ? t('visages : examen en attente') : F.source === 'echec' ? t('visages : examen impossible') : F.n ? (F.n > 1 ? t('{n} visages détectés', { n: F.n }) : t('{n} visage détecté', { n: F.n })) : t('aucun visage détecté') %></span>
+<% if (can('personnes.gerer')) { %>    <form class="btns-ligne" method="post" action="<%= base %>/visages"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (!(F.source === 'main' && F.has)) { %>      <button class="lien-a" type="submit" name="valeur" value="oui"><%= t('Indiquer : il y a quelqu’un') %></button>
+<% } %><% if (!(F.source === 'main' && !F.has)) { %>      <button class="lien-a" type="submit" name="valeur" value="non"><%= t('Indiquer : personne de reconnaissable') %></button>
+<% } %><% if (F.source === 'main') { %>      <button class="lien-a" type="submit" name="valeur" value="auto"><%= t('Revenir à la détection') %></button>
+<% } %>    </form>
+<% } %></div>
+<% const reasons = [...new Set([...R.site.reasons, ...R.instagram.reasons])]; if (reasons.length && seePeople) { %>  <ul class="fiche-raisons"><% reasons.forEach(r => { %><li><%= r %></li><% }) %></ul>
+<% } else if (reasons.length) { %>  <p class="hint"><%= t('Le détail (personnes et accords) est visible du photographe et des administrateurs.') %></p>
+<% } %><% if (it.confirmations.length) { %>  <p class="hint"><%= t('Confirmations :') %> <%= it.confirmations.map(c => t('{usage} par {name} le {date}', { usage: c.usage === 'site' ? t('site') : 'Instagram', name: c.by_name || '?', date: day(c.at) })).join(' · ') %></p>
+<% } %></section>
+
+<div class="fiche">
+  <figure class="fiche-photo">
+    <%~ it.picture(P, { sizes: '(min-width: 1181px) calc((100vw - 352px) * 5 / 12), (min-width: 961px) calc((100vw - 323px) * 5 / 12), (min-width: 721px) 420px, 260px', alt: '' }) %>
+    <figcaption><%= [P.place, it.read ? (time ? `${it.read}, ${time}` : it.read) : ''].filter(Boolean).join(' · ') || t('sans lieu ni date') %> · <%= P.width %> × <%= P.height %> px</figcaption>
+  </figure>
+<% if (full || texts) { %>
+  <form class="form fiche-form" id="fiche-f" method="post" action="<%= full ? base : `${base}/textes` %>" novalidate data-autosave data-url="<%= base %>/champs">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (hasErr) { %>    <section class="resume-a" id="resume-fiche" tabindex="-1" aria-labelledby="resume-fiche-t"><h2 id="resume-fiche-t"><%~ ic('alerte') %><%= hasErr > 1 ? t('Fiche non enregistrée : {n} champs à corriger', { n: hasErr }) : t('Fiche non enregistrée : 1 champ à corriger') %></h2>
+      <ul><% Object.entries(e).forEach(([k, m]) => { %><li><a href="#<%= k === 'city' ? 'city_label' : k === 'status' ? 'publication' : k %>"><%= NAMES[k] || k %> : <%= m %></a></li><% }) %></ul></section>
+<% } %>
+    <p class="hint"><%= t('Tous les champs sont obligatoires, sauf mention « facultatif ».') %> <span class="js-seul"><%= t('Chacun s’enregistre quand vous le quittez ; « Défaire » revient en arrière pendant 10 secondes.') %></span></p>
+<% if (texts) { %>    <p class="note-a"><%~ ic('alerte', 16) %><span><%= t('Ce compte corrige les textes ; la série, la date, le lieu sur la carte et le reste sont réglés par le photographe ou un administrateur.') %></span></p>
+<% } %>
+    <h2><%= t('Ce que voit le visiteur') %></h2>
+    <%~ field('title', t('Titre'), { aide: E(t('Sous la photo, sur le site.')) + (P.status === 'published' ? ' ' + E(t('Adresse de sa page : {url}.', { url: `/photo/${P.slug}` })) : ''), extra: ' required' }) %>
+    <%~ trans('title', t('Titre')) %>
+    <%~ field('legend', t('Légende'), { optional: true, rows: 3, max: 2000 }) %>
+    <%~ trans('legend', t('Légende'), { rows: 3, max: 2000 }) %>
+    <div class="champ-a"><label for="alt_text"><%= t('Texte de remplacement') %> <span class="facultatif"><%= t('(facultatif)') %></span></label>
+      <p class="aide" id="alt_text-a"><%= t('Lu par les personnes aveugles à la place de la photo : ce qu’on y voit, en une phrase. Vide : le titre est lu.') %> <%= t('Une ligne, {n} signes au plus.', { n: it.altMax }) %></p>
+      <textarea id="alt_text" name="alt_text" rows="2" maxlength="<%= it.altMax %>" aria-describedby="<%= described('alt_text', true) %>"<%~ e.alt_text ? ' aria-invalid="true"' : '' %> data-champ="alt_text" data-label="<%= t('Texte de remplacement') %>"><%= v.alt_text || '' %></textarea><%~ err('alt_text') %>
+<% if (it.description) { const d = it.description, u = d.use || {}; %>      <div class="sugg-bloc" id="description" role="status" data-desc data-desc-url="<%= base %>/description"<%~ d.pending ? ' data-desc-pending' : '' %>>
+        <p class="t"><span class="s" aria-hidden="true">✦</span><span><%= t('Suggestion de description') %></span></p>
+        <p data-desc-text><%= d.pending ? t('en cours de calcul…') : d.text ? `« ${d.text} »` : d.error ? t('Dernier essai sans succès : {error}', { error: t.msg(d.error) }) : t('pas encore calculée') %></p>
+<% if (d.text && !d.translated && it.lang !== 'en') { %>        <p class="hint"><%= it.translate ? t('en anglais : traduction pas encore faite, nouvel essai dans quelques minutes') : t('en anglais : aucun traducteur configuré') %></p>
+<% } %>        <p class="hint"><%= t('Florence-2, sur ce serveur : une phrase factuelle, à relire et à réécrire à votre façon. Rien n’est publié sans « Enregistrer ».') %></p>
+        <div class="actions btns-ligne"><% if (d.text && u.text) { %><button class="btn ghost js-seul" type="button" data-desc-use="<%= u.text %>" data-desc-field="<%= u.field %>"<% if (u.en) { %> data-desc-en="<%= u.en %>"<% } %><% if (u.de) { %> data-desc-de="<%= u.de %>"<% } %>><%= u.field === 'alt_text' ? t('Reprendre ce texte') : t('Reprendre comme texte de remplacement anglais') %></button><% } %><button class="btn ghost" type="submit" form="desc-form" data-desc-demande><%= d.text ? t('Décrire de nouveau') : t('Décrire cette photo') %></button><% if (d.text) { %><button class="btn ghost js-seul" type="button" data-desc-ignorer><%= t('Ignorer') %></button><% } %></div>
+        <p class="hint" data-desc-statut></p>
+      </div>
+<% } %>    </div>
+    <%~ trans('alt_text', t('Texte de remplacement'), { rows: 2, max: it.altMax }) %>
+    <%~ field('keywords', t('Mots-clés'), { optional: true, max: 1200, aide: E(t('séparés par des virgules · pour la recherche sur le site ; en plusieurs langues si besoin')), placeholder: t('brume, Loire, matin') }) %>
+<% if (it.keywordSuggestions && it.keywordSuggestions.length) { %>    <div class="kw-v2" data-kw-sugg><p class="hint"><span aria-hidden="true">✦ </span><%= t('Suggestions de mots-clés :') %> <span class="sans-script"><%= it.keywordSuggestions.map(k => k.word).join(', ') %></span></p>
+      <p class="pills js-seul"><% it.keywordSuggestions.forEach(k => { %><button class="pill" type="button" data-kw-add="<%= k.word %>">+ <%= k.word %></button><% }) %></p>
+      <p class="hint" role="status" data-kw-statut></p></div>
+<% } else if (it.keywordSuggestions === null && !it.seriesSuggestOn && can('series.gerer')) { %>    <p class="hint"><%= t('Mots-clés suggérés : activez les propositions de séries (page Séries), le même modèle les calcule.') %></p>
+<% } %>
+<% if (full) { %>
+    <h2><%= t('Où et quand') %></h2>
+    <div class="row">
+      <div class="champ-a"><label for="category_id"><%= t('Série') %></label><select id="category_id" name="category_id" data-champ="category_id" data-label="<%= t('Série') %>"<%~ e.category_id ? ' aria-invalid="true" aria-describedby="err-category_id"' : '' %>><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select><%~ err('category_id') %>
+<% if (it.suggest && it.suggest.length) { %>        <div class="sugg-serie" data-suggest-fiche>
+<% it.suggest.forEach(x => { %>          <button class="sugg js-seul" type="button" data-accepter="<%= x.id %>"><span class="s" aria-hidden="true">✦</span><%= t('Suggestion : {name}', { name: x.name }) %><span class="sr-only">,</span> <span class="acc"><%= t('Accepter') %></span></button>
+          <p class="hint"><%= t('ressemble à {n} de ses {total} photos', { n: x.votes, total: x.size }) %><% if (x.like && x.like.length) { %> <span class="mini"><% x.like.forEach(l => { %><img src="<%= l.thumb %>" alt="" width="24" height="24" title="<%= l.title %>"><% }) %></span><% } %></p>
+<% }) %>          <button class="lien-a js-seul" type="button" data-garder-serie><%= t('Garder « {name} »', { name: P.category }) %></button>
+          <label class="chk-ligne sans-script"><input type="checkbox" name="serie_choisie" value="1"><span><%= t('Garder « {name} » (la suggestion disparaît)', { name: P.category }) %></span></label>
+        </div>
+<% } %></div>
+      <div class="champ-a"><label for="author_id"><%= t('Photographe') %></label><select id="author_id" name="author_id" data-champ="author_id" data-label="<%= t('Photographe') %>"<%~ e.author_id ? ' aria-invalid="true" aria-describedby="err-author_id"' : '' %>><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ a.id === Number(v.author_id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select><%~ err('author_id') %></div>
+    </div>
+<% } %>
+    <%~ field('place', t('Lieu'), { optional: true, max: 120, aide: E(t('Ce qu’on lit sous la photo : « la Maine, Angers ».')) }) %>
+    <%~ trans('place', t('Lieu'), { max: 120 }) %>
+<% if (full) { %>
+    <div class="champ-a ville-f" data-city><label for="city_label"><%= t('Ville de la carte') %> <span class="facultatif"><%= t('(facultatif)') %></span></label>
+      <p class="aide" id="city_label-a"><%= t('La commune de la carte du monde : toutes les communes de France, plus de 500 habitants ailleurs.') %> <%~ t('Villes : {link}, licence CC BY 4.0.', { link: '<a href="https://www.geonames.org" target="_blank" rel="noopener">GeoNames</a>' }) %></p>
+      <input type="text" id="city_label" name="city_label" value="<%= v.city_label || '' %>" maxlength="120" autocomplete="off" placeholder="<%= t('Commencez à taper : Angers, Lisbonne…') %>" aria-describedby="<%= ['city_label-a', e.city && 'err-city_label', P.city_source === 'gps' && v.city_label && 'city-gps'].filter(Boolean).join(' ') %>"<%~ e.city ? ' aria-invalid="true"' : '' %> data-city-input data-label="<%= t('Ville de la carte') %>">
+      <input type="hidden" name="city_id" value="<%= v.city_id || '' %>" data-city-id>
+<% if (e.city) { %>      <p class="err" id="err-city_label"><%~ ic('alerte') %><span><b><%= t('Erreur :') %></b> <%= e.city %></span></p>
+<% } %><% if (P.city_source === 'gps' && v.city_label) { %>      <p class="lu" id="city-gps"><%= t('Proposée d’après le GPS de la photo : vérifiez-la. Seule la ville est gardée, jamais la position exacte.') %></p>
+<% } %>    </div>
+    <div class="choix-a"><label><input type="checkbox" name="on_map" id="on_map"<%~ Number(v.on_map) ? ' checked' : '' %> data-champ="on_map" data-label="<%= t('Carte du monde') %>"<%~ e.on_map ? ' aria-invalid="true" aria-describedby="err-on_map"' : '' %>><span><%= t('Afficher sur la carte du monde') %></span><span class="sec"><%= t('Il faut une ville de la carte.') %></span></label><%~ err('on_map') %></div>
+    <div class="champ-a"><label for="taken_on"><%= t('Date de la prise de vue') %> <span class="facultatif"><%= t('(facultatif)') %></span></label>
+      <p class="aide" id="taken_on-a"><%= t('Écrivez-la comme vous voulez : « 11/10/2026 », « 11 oct. 2026 », « octobre 2026 ».') %><%= exifHour ? ' ' + exifHour : '' %></p>
+      <input type="text" id="taken_on" name="taken_on" value="<%= v.taken_on || '' %>" maxlength="40" inputmode="text" aria-describedby="<%= ['taken_on-a', 'taken_on-lu', e.taken_on && 'err-taken_on'].filter(Boolean).join(' ') %>"<%~ e.taken_on ? ' aria-invalid="true"' : '' %> data-champ="taken_on" data-label="<%= t('Date de la prise de vue') %>">
+      <p class="lu" id="taken_on-lu" data-lu data-texte="<%= t('Lu : {date}', { date: '{date}' }) %>"><%= it.read && !e.taken_on ? t('Lu : {date}', { date: it.read }) : '' %></p><%~ err('taken_on') %></div>
+<% /* Heure sur le site : seulement si l'heure de prise de vue est connue ; décochée par défaut (BV-2 : la Vigie le voit). */
+   if (/^\d{2}:\d{2}$/.test(P.taken_time || '')) { const showTime = Number(v.show_time) === 1; %>
+    <div class="choix-a"><label><input type="checkbox" name="show_time" value="1" id="show_time"<%~ showTime ? ' checked' : '' %> aria-describedby="show_time-a" data-champ="show_time" data-label="<%= t('Heure sur le site') %>"><span><%= t('Montrer l’heure sur le site ({time})', { time }) %></span><span class="sec" id="show_time-a"><%= t('Avec le lieu, l’heure dit où se trouvaient les personnes photographiées à ce moment-là. Le site ne la montre qu’avec une date au jour.') %><% if (showTime && !/^\d{4}-\d{2}-\d{2}$/.test(P.taken_on || '')) { %> <%= t('Date au mois : l’heure n’est pas montrée.') %><% } %></span></label></div>
+<% if (it.exifAll) { %>    <p class="avert"><%~ ic('alerte') %><span><%~ t('Métadonnées « Tout l’EXIF de l’original » ({link}) : les images servies portent l’heure (et la position GPS), quel que soit ce choix.', { link: `<a href="/admin/images">${E(t('Filigrane et EXIF'))}</a>` }) %></span></p>
+<% } %><% } else if (it.exifAll) { %>    <p class="avert"><%~ ic('alerte') %><span><%~ t('Métadonnées « Tout l’EXIF de l’original » ({link}) : les images servies portent la position GPS de l’original.', { link: `<a href="/admin/images">${E(t('Filigrane et EXIF'))}</a>` }) %></span></p>
+<% } %>
+    <h2><%= t('Diffusion') %></h2>
+    <div class="champ-a"><label for="watermark"><%= t('Filigrane') %></label><p class="aide" id="watermark-a"><%~ t('Celui des {link}, ou aucun sur cette photo.', { link: `<a href="/admin/images">${E(t('réglages'))}</a>` }) %></p>
+      <select id="watermark" name="watermark" aria-describedby="watermark-a" data-champ="watermark" data-label="<%= t('Filigrane') %>"><option value="default"<%~ v.watermark !== 0 && v.watermark !== 'none' ? ' selected' : '' %>><%= t('Selon les réglages') %></option><option value="none"<%~ v.watermark === 0 || v.watermark === 'none' ? ' selected' : '' %>><%= t('Jamais sur cette photo') %></option></select></div>
+    <%~ field('slug', t('Adresse'), { optional: true, max: 80, aide: E(t('/photo/… sur le site ; minuscules, chiffres et tirets. Vide : tirée du titre.')) + (P.status === 'published' ? ' ' + E(t('Photo publiée : changer l’adresse casse les liens déjà partagés.')) : '') }) %>
+    <p class="hint"><%~ t('Instagram : voir la rubrique {link}.', { link: '<a class="lien-a" href="#instagram">Instagram</a>' }) %></p>
+<% } else { %>
+    <dl class="kv-a"><dt><%= t('Série') %></dt><dd><%= P.category %></dd><dt><%= t('Photographe') %></dt><dd><%= P.author %></dd><dt><%= t('Date') %></dt><dd><%= it.read || '—' %></dd></dl>
+<% } %>
+    <p class="sans-script form-pied"><button class="btn" type="submit"<%~ full ? ` name="status" value="${P.status}"` : '' %>><%= full ? t('Enregistrer la fiche') : t('Enregistrer les textes') %></button></p>
+  </form>
+<% } else { %>
+  <div class="fiche-form">
+    <dl class="kv-a"><dt><%= t('Titre') %></dt><dd><%= P.title %></dd><dt><%= t('Légende') %></dt><dd><%= P.legend || '—' %></dd><dt><%= t('Lieu') %></dt><dd><%= P.place || '—' %></dd><dt><%= t('Texte de remplacement') %></dt><dd><%= P.alt_text || '—' %></dd><dt><%= t('Série') %></dt><dd><%= P.category %> · <%= P.author %></dd></dl>
+    <p class="note-a"><%~ ic('alerte', 16) %><span><%= can('photos.modifier') && !editableHere ? t('Publiée sur le site. La modifier demande un droit que le modérateur peut vous donner.') : t('Pour une correction, écrivez une remarque au photographe (plus bas) ou renvoyez-lui la photo.') %></span></p>
+  </div>
+<% } %>
+</div>
+<% if (it.description) { /* « Décrire cette photo » : son propre formulaire, hors de la fiche (Entrée dans un champ n'en part pas). */ %>
+<form id="desc-form" class="form-cache" method="post" action="<%= base %>/description"><input type="hidden" name="_csrf" value="<%= it.csrf %>"></form>
+<% } %>
+
+<div class="fiche-bas">
+<% const ACT = { proposee: t('proposée'), retiree: t('proposition retirée'), programmee: t('programmée'), deprogrammee: t('programmation annulée'), modifiee: t('modifiée après validation'), publiee: t('publiée'), renvoyee: t('renvoyée avec une remarque'), depubliee: t('dépubliée') }; %>
+<% if (propose || pubOk) { %>
+<section class="panel" id="publication" aria-labelledby="pub-t">
+  <h2 id="pub-t"><%= t('Publication') %></h2>
+  <p class="fiche-pub"><span class="etat etat--<%= ETAT[0] %>"><%~ ic(ETAT[0], 12) %><%= ETAT[1] %></span></p>
+<% if (P.status === 'published') { %>
+<% if (pubOk) { %>  <p class="hint"><%= t('En ligne. « Dépublier… » demande une raison, que le photographe reçoit.') %></p>
+  <p class="btns-ligne"><a class="btn danger-c" href="#dlg-depublier" data-ouvre="dlg-depublier"><%= t('Dépublier…') %></a><% if (R.site.level === 'warn' && !it.siteConfirmed && seePeople && full) { %> <a class="btn ghost" href="#dlg-confirmer" data-ouvre="dlg-confirmer"><%= t('Confirmer les accords…') %></a><% } %></p>
+<% } else { %>  <p class="hint"><%= can('photos.publiees.modifier') ? t('Publiée sur le site. Vos modifications y apparaissent tout de suite.') : t('Publiée sur le site. La modifier demande un droit que le modérateur peut vous donner.') %></p>
+<% } %>
+<% } else if (RV.state === 'programmee') { %>
+  <p><%= t('Validée : elle sera publiée le {date}.', { date: when(RV.at) }) %></p>
+  <form method="post" action="<%= base %>/<%= pubOk ? 'deprogrammer' : 'retirer-proposition' %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= pubOk ? t('Annuler la programmation') : t('Retirer la proposition') %></button></form>
+<% } else { %>
+<% if (RV.state === 'proposee') { const last = RV.history.find(h => h.action === 'proposee'); %>  <p><%= t('Proposée par {name} le {date}.', { name: last?.by_name || '?', date: last ? when(last.at) : '' }) %><% if (last?.message) { %> <q><%= last.message %></q><% } %></p>
+<% } %><% if (RV.state === 'a_reprendre') { %>  <p class="avert"><%~ ic('alerte') %><span><%= t('Renvoyée : voyez la remarque ci-dessous, corrigez, puis proposez-la de nouveau.') %></span></p>
+<% } %><% if (propose && !pubOk && RV.state === 'proposee') { %>  <p class="hint"><%= t('Proposée : le modérateur va la publier, la programmer ou vous la renvoyer avec une remarque.') %></p>
+  <form method="post" action="<%= base %>/retirer-proposition"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Retirer la proposition') %></button></form>
+<% } else if (propose && !pubOk) { %><% if (R.site.level === 'no') { %>  <p class="hint"><%= t('Bloquée par un refus : elle ne peut pas être proposée.') %></p>
+<% } else { %>  <p class="btns-ligne"><a class="btn ghost" href="#dlg-proposer" data-ouvre="dlg-proposer"><%= t('Proposer à la publication…') %></a></p>
+<% } %><% } %>
+<% if (pubOk) { %>  <p class="btns-ligne"><a class="btn ghost" href="#dlg-publier" data-ouvre="dlg-publier"><%= t('Publier ou programmer…') %></a><% if (RV.state === 'proposee') { %> <a class="btn ghost" href="#dlg-renvoyer" data-ouvre="dlg-renvoyer"><%= t('Renvoyer au photographe…') %></a><% } %></p>
+<% } %>
+<% } %>
+<% if (RV.history.length) { %>  <details class="plier"><summary><%~ ic('chev') %><%= t('Historique') %></summary><ul class="chrono"><% RV.history.forEach(h => { %><li><time><%= when(h.at) %></time><span><%= ACT[h.action] || h.action %> · <%= h.by_name || '—' %><%= h.publish_at ? ` · ${when(h.publish_at)}` : '' %><% if (h.message) { %> · <q><%= h.message %></q><% } %></span></li><% }) %></ul></details>
+<% } %>
+</section>
+<% } %>
+<% if (it.notes.length || can('taches.adresser')) { %>
+<details class="panel plier-p" id="remarques"<%~ it.notes.length ? ' open' : '' %>>
+  <summary><%~ ic('chev') %><span><span class="h"><%= t('Remarques') %></span><span class="sec"><%= it.notes.length ? (it.notes.length > 1 ? t('{n} à traiter', { n: it.notes.length }) : t('1 à traiter')) : t('aucune') %></span></span></summary>
+  <ul class="objets-a remarques-l">
+<% it.notes.forEach(n => { %>    <li><p class="t"><%= n.from_name || t('l’équipe') %> <span class="sec"><%= new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).format(n.created_at) %></span></p><p class="detail"><%= n.message %></p>
+<% if (can('taches.adresser') || it.ownPhoto) { %>      <form class="actions" method="post" action="/admin/remarques/<%= n.id %>/fait"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= base %>#remarques"><button class="btn ghost" type="submit"><%= t('Fait') %><span class="sr-only"> : <%= n.message.slice(0, 60) %></span></button></form>
+<% } %>    </li>
+<% }) %>  </ul>
+<% if (can('taches.adresser')) { %>  <form class="form" method="post" action="<%= base %>/remarques">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <div class="champ-a"><label for="remarque"><%= t('Remarque pour le photographe') %></label><p class="aide" id="remarque-a"><%= t('elle apparaît dans son « Aujourd’hui » ; parlez de la photo, jamais des personnes') %></p><textarea id="remarque" name="message" rows="2" maxlength="1000" required aria-describedby="remarque-a"></textarea></div>
+    <p class="btns-ligne"><button class="btn ghost" type="submit"><%= t('Envoyer au photographe') %></button></p>
+  </form>
+<% } %></details>
+<% } %>
+<% if (seePeople && it.encounters && it.encounters.length) { %>
+<details class="panel plier-p" id="rencontres"<%~ R.site.level !== 'ok' || R.instagram.level !== 'ok' ? ' open' : '' %>>
+  <summary><%~ ic('chev') %><span><span class="h"><%= t('Personnes et accords') %></span><span class="sec"><%= it.encounters.length > 1 ? t('{n} personnes', { n: it.encounters.length }) : t('{n} personne', { n: it.encounters.length }) %> · <%= t('accords de la sortie et photos liées') %></span></span></summary>
+  <p class="hint"><%= t('Les personnes rencontrées par {author} le jour de cette photo (date EXIF), et celles liées à la photo. Vérifiez que celles qui y apparaissent ont accepté l’usage prévu.', { author: P.author || t('le photographe') }) %></p>
+<% if (it.outingUrl) { %>  <p><a class="lien-a" href="<%= it.outingUrl %>"><%= t('Ouvrir la sortie') %></a></p><% } %>
+  <ul class="objets-a">
+<% it.encounters.forEach(r => { const uses = r.consent ? ['site', 'instagram', 'print', 'name'].filter(s => r.consent[s]).map(s => ({ site: t('site'), instagram: 'Instagram', print: t('expositions et tirages'), name: t('avec son prénom') })[s]).join(', ') : ''; %>    <li><% if (r.hasPortrait) { %><img src="/admin/rencontres/<%= r.id %>/portrait?mini=1" alt="" width="64" height="64" loading="lazy"><% } else { %><span aria-hidden="true"></span><% } %>
+      <p class="t"><a class="lien-a" href="/admin/rencontres/<%= r.id %>"><%= t('Rencontre {ref}', { ref: r.ref || t('sans carte') }) %><%= r.name ? ` · ${r.name}` : '' %></a><span class="sec"><%= r.via === 'session' ? t('même sortie') : t('liée à la photo') %></span></p>
+      <p class="detail"><% if (r.refused && r.via === 'lien') { %><span class="etat etat--arret"><%~ ic('arret', 12) %><%= t('Refuse la publication : la photo ne peut pas être publiée') %></span><% } else if (r.refused) { %><span class="etat etat--attention"><%~ ic('attention', 12) %><%= t('A refusé : si elle est sur cette photo, liez-la au refus (fiche de la rencontre)') %></span><% } else if (r.consent) { %><span class="etat etat--abouti"><%~ ic('abouti', 12) %><%= r.consent_source !== 'en_ligne' ? t('Accord signé : {uses}', { uses }) : t('Accord en ligne : {uses}', { uses }) %></span><% } else { %><span class="etat etat--afaire"><%~ ic('afaire', 12) %><%= t('Ni accord ni refus pour l’instant') %></span><% } %></p>
+<% if (r.via === 'session') { %>      <form class="actions" method="post" action="/admin/rencontres/<%= r.id %>/session/<%= id %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="exclure" value="1"><input type="hidden" name="depuis" value="photo"><button class="btn ghost" type="submit"><%= t('Pas sur cette photo') %><span class="sr-only"> : <%= t('Rencontre {ref}', { ref: r.ref || t('sans carte') }) %></span></button></form>
+<% } %>    </li>
+<% }) %>  </ul>
+</details>
+<% } %>
+<% const au = it.audience; if (it.seeStats) { %>
+<details class="panel plier-p" id="audience">
+  <summary><%~ ic('chev') %><span><span class="h"><%= t('Audience') %></span><span class="sec"><%= au && au.total ? (au.total > 1 ? t('{n} vues en 30 jours', { n: au.total }) : t('{n} vue en 30 jours', { n: au.total })) : t('pas encore vue en grand') %><%= P.likes ? ` · ${t('{n} j’aime sur le site', { n: P.likes })}` : '' %><%= it.shares ? ` · ${it.shares > 1 ? t('{n} partages', { n: it.shares }) : t('{n} partage', { n: it.shares })}` : '' %></span></span></summary>
+<% if (au && au.total) { %>  <p><%~ au.total > 1 ? t('{n} ouvertures en grand', { n: `<strong>${E(au.total)}</strong>` }) : t('{n} ouverture en grand', { n: `<strong>${E(au.total)}</strong>` }) %><%= au.rank ? ' · ' + (au.rank === 1 ? t('1ʳᵉ photo la plus vue') : t('{rank}ᵉ photo la plus vue', { rank: au.rank })) : '' %></p>
+  <%~ au.spark %>
+<% } else { %>  <p class="hint"><%= P.status === 'draft' ? t('Pas encore ouverte en grand ces 30 derniers jours (brouillon : invisible sur le site).') : t('Pas encore ouverte en grand ces 30 derniers jours.') %></p>
+<% } %>  <p><a class="lien-a" href="/admin/statistiques"><%= t('Toutes les statistiques') %></a></p>
+</details>
+<% } %>
+<%~ include('./_photo-instagram', { ...it, ic, base }) %>
+<% const pf = it.proof, proofOk = pf && pf.status === 'ok' && pf.sha256 === P.sha256; %>
+<details class="panel plier-p" id="preuve">
+  <summary><%~ ic('chev') %><span><span class="h"><%= t('Preuve d’antériorité') %></span><span class="sec"><%= proofOk ? t('horodatée') : P.sha256 ? t('empreinte calculée') : t('en cours') %></span></span></summary>
+  <dl class="kv-a">
+    <dt><%= t('Empreinte SHA-256 de l’original') %></dt><dd><code class="donnee"><%= P.sha256 || t('en cours de calcul') %></code></dd>
+    <dt><%= t('Horodatage RFC 3161') %></dt>
+    <dd><% if (proofOk) { %><% const cn = /CN=([^,]+)/.exec(pf.signer), org = /O=([^,]+)/.exec(pf.signer); %><strong><%= t('Horodatée le {date} UTC', { date: t('{date} à {time}', { date: pf.gen_time.slice(0, 10), time: pf.gen_time.slice(11, 19) }) }) %></strong><span class="sec"><%= t('Autorité : {name}', { name: (cn ? cn[1] : pf.signer) + (org ? ' (' + org[1] + ')' : '') }) %> · <%= t('n° {n}', { n: pf.serial }) %></span>
+<% } else if (!it.tsa.url) { %><%= t('Désactivé sur ce serveur.') %>
+<% } else if (pf && pf.status === 'error') { %><span class="err"><%= t('En attente : {error} (essai n° {n}, nouvel essai automatique).', { error: t.msg(pf.error), n: pf.attempts }) %></span>
+<% } else { %><%= t('En attente (quelques secondes après l’import).') %><% } %></dd>
+  </dl>
+<% if (proofOk) { %>  <p class="btns-ligne">
+<% if (can('photos.original')) { %>    <a class="btn ghost" href="<%= base %>/original" download><%= t('Original') %></a>
+<% } %>    <a class="btn ghost" href="<%= base %>/preuve.tsr" download><%= t('Jeton (.tsr)') %></a>
+    <a class="btn ghost" href="<%= base %>/preuve.txt" download><%= t('Fiche de preuve') %></a>
+<% if (it.tsa.caFile) { %>    <a class="btn ghost" href="/admin/preuves/autorite.pem" download><%= t('Certificat de l’autorité') %></a><% } %>
+  </p>
+<% if (full) { %>  <form method="post" action="<%= base %>/verifier"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Vérifier la preuve') %></button></form>
+<% } %><% } else if (pf && pf.status === 'error' && full) { %>  <form method="post" action="/admin/preuves/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= base %>"><button class="btn ghost" type="submit"><%= t('Réessayer maintenant') %></button></form>
+<% } %></details>
+<% if (can('photos.supprimer')) { %>
+<section class="panel fiche-danger" aria-labelledby="sup-t">
+  <h2 id="sup-t"><%= t('Supprimer cette photo') %></h2>
+  <p class="hint"><%= t('L’original, ses variantes et sa preuve d’antériorité seront effacés. Cette action est définitive : téléchargez d’abord l’original et la preuve si vous voulez les garder.') %></p>
+  <p><a class="btn danger-c" href="#dlg-supprimer" data-ouvre="dlg-supprimer"><%= t('Supprimer la photo…') %></a></p>
+</section>
+<% } %>
+</div>
+
+<% /* Dialogues : ce qui ne se défait pas (MQ-09, états 10 et 11). Avec le script, des fenêtres modales (Annuler d'abord) ;
+      sans script, le lien mène à l'ancre et le dialogue s'affiche dans la page (dialog:target, v2.css). */ %>
+<% if (pubOk && P.status === 'published') { %>
+<dialog class="confirm cible" id="dlg-depublier" aria-labelledby="dd-t" aria-describedby="dd-d">
+  <form method="post" action="<%= base %>/depublier" novalidate>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <h2 id="dd-t"><%= t('Dépublier « {title} » ?', { title: P.title }) %></h2>
+    <p id="dd-d"><%= t('La photo quitte la galerie, sa série et la carte ; son adresse mène à la galerie. {name} reçoit la raison. « Publier » la remettra en ligne.', { name: P.author || t('le photographe') }) %></p>
+    <div class="champ-a"><label for="dd-raison"><%= t('Raison, pour {name}', { name: P.author || t('le photographe') }) %></label><textarea id="dd-raison" name="raison" rows="3" maxlength="1000" required></textarea></div>
+    <div class="actions"><a class="btn ghost" href="#publication" data-annuler><%= t('Annuler') %></a><button class="btn danger" type="submit"><%~ ic('x', 16) %><%= t('Dépublier la photo') %></button></div>
+  </form>
+</dialog>
+<% if (R.site.level === 'warn' && !it.siteConfirmed && seePeople && full) { %>
+<dialog class="confirm cible" id="dlg-confirmer" aria-labelledby="dc-t" aria-describedby="dc-d">
+  <h2 id="dc-t"><%= t('Confirmer les accords de « {title} » ?', { title: P.title }) %></h2>
+  <p id="dc-d"><%= t('Photo en ligne à vérifier ({reasons}).', { reasons: R.site.reasons.join(' ; ') }) %></p>
+  <div class="choix-a"><label><input type="checkbox" name="confirmer" value="1" form="fiche-f" required><span><%= t('Je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.') %></span></label></div>
+  <div class="actions"><a class="btn ghost" href="#publication" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit" form="fiche-f" name="status" value="published" data-envoi><%= t('Confirmer') %></button></div>
+</dialog>
+<% } %>
+<% } %>
+<% if (pubOk && P.status !== 'published' && RV.state !== 'programmee') { const ok = R.site.level === 'ok' || it.siteConfirmed; %>
+<dialog class="confirm cible" id="dlg-publier" aria-labelledby="dp-t" aria-describedby="dp-d">
+  <h2 id="dp-t"><%= t('Publier « {title} » ?', { title: P.title }) %></h2>
+<% if (it.provisional) { %>  <p class="avert"><%~ ic('alerte') %><span><%= t('Son titre est encore le nom du fichier : corrigez-le d’abord, l’adresse de la page se fige à la publication.') %> <a class="lien-a" href="#title" data-annuler-vers="title"><%= t('Corriger le titre') %></a></span></p>
+<% } %><% if (ok) { %>  <form method="post" action="<%= base %>/valider">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <p id="dp-d"><%= t('Elle sera en ligne tout de suite, ou à la date choisie ; « Dépublier » la retirera.') %></p>
+    <fieldset class="choix-a"><legend><%= t('Quand') %></legend>
+      <label><input type="radio" name="quand" value="maintenant" checked><span><%= t('Publier maintenant') %></span></label>
+      <label><input type="radio" name="quand" value="date"><span><%= t('Programmer : le jour et l’heure ci-dessous (heure de Paris)') %></span></label></fieldset>
+    <div class="champ-a"><label for="dp-date"><%= t('Jour et heure de publication') %> <span class="facultatif"><%= t('(si programmée)') %></span></label><input type="datetime-local" id="dp-date" name="date"></div>
+    <div class="actions"><a class="btn ghost" href="#publication" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Valider') %></button></div>
+  </form>
+<% } else if (R.site.level === 'warn' && seePeople && full) { %>
+  <p id="dp-d"><%= t('Photo à vérifier ({reasons}) : cochez la confirmation pour la publier.', { reasons: R.site.reasons.join(' ; ') }) %></p>
+  <div class="choix-a"><label><input type="checkbox" name="confirmer" value="1" form="fiche-f" required><span><%= t('Pour publier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.') %></span></label></div>
+  <div class="actions"><a class="btn ghost" href="#publication" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit" form="fiche-f" name="status" value="published" data-envoi><%= t('Publier la photo') %></button></div>
+<% } else { %>
+  <p id="dp-d"><%= R.site.level === 'no' ? t('Bloquée : elle ne peut pas être publiée.') : t('À vérifier : la confirmation des accords revient au photographe ou à un administrateur, qui voient les personnes.') %></p>
+  <div class="actions"><a class="btn ghost" href="#publication" data-annuler><%= t('Fermer') %></a></div>
+<% } %>
+</dialog>
+<% if (RV.state === 'proposee') { %>
+<dialog class="confirm cible" id="dlg-renvoyer" aria-labelledby="dr-t" aria-describedby="dr-d">
+  <form method="post" action="<%= base %>/renvoyer" novalidate>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <h2 id="dr-t"><%= t('Renvoyer « {title} » au photographe ?', { title: P.title }) %></h2>
+    <p id="dr-d"><%= t('Elle redevient un brouillon « à reprendre » ; {name} reçoit votre remarque.', { name: P.author || t('le photographe') }) %></p>
+    <div class="champ-a"><label for="dr-mot"><%= t('Remarque pour {name}', { name: P.author || t('le photographe') }) %></label><textarea id="dr-mot" name="message" rows="3" maxlength="1000" required></textarea></div>
+    <div class="actions"><a class="btn ghost" href="#publication" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Renvoyer avec la remarque') %></button></div>
+  </form>
+</dialog>
+<% } %>
+<% } %>
+<% if (propose && !pubOk && P.status !== 'published' && !['proposee', 'programmee'].includes(RV.state) && R.site.level !== 'no') { %>
+<dialog class="confirm cible" id="dlg-proposer" aria-labelledby="dpr-t" aria-describedby="dpr-d">
+  <form method="post" action="<%= base %>/proposer" novalidate>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <h2 id="dpr-t"><%= t('Proposer « {title} » à la publication ?', { title: P.title }) %></h2>
+    <p id="dpr-d"><%= t('La modération la publie, la programme ou vous la renvoie avec une remarque.') %></p>
+<% if (it.provisional) { %>    <p class="avert"><%~ ic('alerte') %><span><%= t('Son titre est encore le nom du fichier : corrigez-le d’abord, l’adresse de la page se fige à la publication.') %> <a class="lien-a" href="#title" data-annuler-vers="title"><%= t('Corriger le titre') %></a></span></p>
+<% } %><% if (R.site.level === 'warn' && !it.siteConfirmed) { %>    <div class="choix-a"><label><input type="checkbox" name="confirmer" value="1"><span><%= t('À vérifier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.') %></span><span class="sec"><%= R.site.reasons.join(' ; ') %></span></label></div>
+<% } %>    <div class="champ-a"><label for="dpr-mot"><%= t('Un mot pour la modération') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><textarea id="dpr-mot" name="message" rows="2" maxlength="1000"></textarea></div>
+    <div class="actions"><a class="btn ghost" href="#publication" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Proposer la photo') %></button></div>
+  </form>
+</dialog>
+<% } %>
+<% if (can('photos.supprimer')) { %>
+<dialog class="confirm cible" id="dlg-supprimer" aria-labelledby="ds-t" aria-describedby="ds-d">
+  <form method="post" action="<%= base %>/delete">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <h2 id="ds-t"><%= t('Supprimer « {title} » ?', { title: P.title }) %></h2>
+    <p id="ds-d"><%= t('L’original, ses variantes et sa preuve d’antériorité seront effacés. Cette action est définitive : téléchargez d’abord l’original et la preuve si vous voulez les garder.') %></p>
+    <div class="actions"><a class="btn ghost" href="#<%= 'sup-t' %>" data-annuler><%= t('Annuler') %></a><button class="btn danger" type="submit"><%~ ic('corbeille', 16) %><%= t('Supprimer définitivement') %></button></div>
+  </form>
+</dialog>
+<% } %>
+<%~ include('./_textes-photo', it) %>
+<script src="<%= it.asset('admin/v2/photo-v2.js') %>" defer></script>

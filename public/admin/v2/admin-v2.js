@@ -12,7 +12,12 @@ const LANG = ['en', 'de'].includes(document.documentElement.lang) ? document.doc
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ----- textes : traduits par le serveur (views/admin/v2/_textes.eta), la clé est le texte français -----
-const DATA = (() => { try { return JSON.parse($('#v2-textes')?.textContent || '{}'); } catch { return {}; } })();
+// Un écran peut ajouter ses propres textes (#v2-textes-page, la fiche d'une photo, la photothèque) : réunis ici.
+const DATA = (() => {
+  const read = sel => { try { return JSON.parse($(sel)?.textContent || '{}'); } catch { return {}; } };
+  const all = read('#v2-textes'), page = read('#v2-textes-page');
+  return { ...all, ...page, t: { ...(all.t || {}), ...(page.t || {}) } };
+})();
 function T(key, params) {
   let s = DATA.t?.[key] ?? key;
   if (params) s = s.replace(/\{(\w+)\}/g, (m, k) => (Object.hasOwn(params, k) ? String(params[k]) : m));
@@ -143,6 +148,8 @@ const temoin = (() => {
   return {
     ok(field) { pending.delete(field); saved = hour(); render(); },
     ko(field, label) { pending.set(field, label); render(); },
+    // Le champ n'attend plus rien (suggestion retirée) : il quitte le témoin sans « Enregistré à… ».
+    drop(field) { pending.delete(field); if (!pending.size && box) box.replaceChildren(); render(); },
     pending: () => [...pending.values()],
     any: () => pending.size > 0,
   };
@@ -222,6 +229,8 @@ function autosave(scope) {
     }
     // Revenu à la valeur enregistrée après un refus : plus rien à enregistrer, l'erreur et le témoin s'effacent.
     const commit = () => { const prev = field.dataset.saved; const now = valueOf(); if (now !== prev) save(now, prev); else if (field.getAttribute('aria-invalid') === 'true') { fieldError(field, ''); temoin.ok(field); } };
+    // Une suggestion acceptée (fiche d'une photo) ne s'enregistre que par ce bouton : field._commit().
+    field._commit = commit;
     if (field.matches('select')) onPick(field, commit);
     else if (field.type === 'checkbox' || field.type === 'radio') field.addEventListener('change', commit);
     else {
@@ -231,6 +240,7 @@ function autosave(scope) {
     }
   });
   // Avec le script, le formulaire ne part plus en entier : chaque champ s'enregistre seul.
+  // Un bouton qui envoie tout le formulaire exprès (« Publier la photo » d'un dialogue de la fiche : [data-envoi]) passe.
   if (scope.matches('form[data-autosave]')) scope.addEventListener('submit', e => { if (!e.submitter || e.submitter.matches('.sans-script button, .sans-script')) e.preventDefault(); });
 }
 $$('[data-autosave], [data-v2-lot]').forEach(autosave);

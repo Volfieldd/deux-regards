@@ -1,5 +1,33 @@
 [
   {
+    "version": "1.166.0",
+    "date": "2026-10-19",
+    "pr": 166,
+    "title": {
+      "fr": "L’admin v2 : la fiche, la photothèque et « À valider »",
+      "en": "Admin v2: the photo record, the photo library and “To approve”",
+      "de": "Verwaltung v2: Datenblatt, Fotothek und „Zu bestätigen“"
+    },
+    "items": [
+      {
+        "fr": "En v2, la fiche d’une photo s’enregistre champ par champ, avec « Défaire » ; publier, dépublier (avec une raison) ou supprimer passent par une confirmation, et une suggestion n’est jamais enregistrée sans « Enregistrer ».",
+        "en": "In v2, a photo’s record is saved field by field, with “Undo”; publishing, unpublishing (with a reason) or deleting asks for confirmation, and a suggestion is never saved without “Save”.",
+        "de": "In v2 wird das Datenblatt eines Fotos Feld für Feld gespeichert, mit „Rückgängig“; Veröffentlichen, Zurückziehen (mit Grund) oder Löschen verlangt eine Bestätigung, und ein Vorschlag wird nie ohne „Speichern“ gespeichert."
+      },
+      {
+        "fr": "La photothèque en v2 : filtres par état, la touche P qui demande confirmation, « Défaire » sans recharger la page ; les raccourcis d’une touche se coupent dans « Mon compte ».",
+        "en": "The photo library in v2: filters by state, the P key asks for confirmation, “Undo” without reloading the page; single-key shortcuts can be turned off in “My account”.",
+        "de": "Die Fotothek in v2: Filter nach Status, die Taste P fragt nach Bestätigung, „Rückgängig“ ohne Neuladen der Seite; Einzeltasten-Kürzel lassen sich in „Mein Konto“ ausschalten."
+      },
+      {
+        "fr": "« À valider » en v2 : le titre provisoire et l’état des accords sur chaque ligne ; renvoyer ou annuler une programmation sans quitter la page.",
+        "en": "“To approve” in v2: the provisional title and consent state on each line; send back or cancel a schedule without leaving the page.",
+        "de": "„Zu bestätigen“ in v2: vorläufiger Titel und Stand der Einwilligungen in jeder Zeile; zurückschicken oder eine Planung aufheben, ohne die Seite zu verlassen.",
+        "perm": "photos.publier"
+      }
+    ]
+  },
+  {
     "version": "1.160.0",
     "date": "2026-10-19",
     "pr": 160,

@@ -22,6 +22,17 @@
   </form>
 </section>
 
+<% /* Raccourcis d'une touche de la photothèque (UX-A-02) : un interrupteur enregistré au geste (Défaire 10 s) ; sans script, son
+      bouton. Ctrl K, Ctrl A et Ctrl Z, qui ont une touche de modification, restent toujours. */ %>
+<section class="panel compte-p assist" aria-labelledby="rac-t">
+  <form method="post" action="/admin/compte/raccourcis" data-inter data-nom="<%= t('Raccourcis d’une touche') %>">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/compte"><input type="hidden" name="raccourcis" value="off">
+    <div class="assist-tete"><h2 id="rac-t"><%= t('Raccourcis d’une touche') %></h2><label class="inter"><span class="inter-mot" aria-hidden="true"><span class="inter-oui"><%= t('Allumé') %></span><span class="inter-non"><%= t('Éteint') %></span></span><input type="checkbox" role="switch" name="raccourcis" value="on"<%~ it.shortcuts ? ' checked' : '' %> aria-labelledby="rac-t" aria-describedby="rac-e"><span class="inter-piste" aria-hidden="true"></span></label></div>
+    <p class="assist-effet" id="rac-e"><%= t('Dans la photothèque, quand une vignette ou l’inspecteur a le focus : P publie la sélection (après confirmation), I ouvre l’import, L ou Espace la loupe. Éteints, ces touches ne font plus rien ; Ctrl K, Ctrl A et Ctrl Z restent.') %></p>
+    <p class="sans-script"><button class="btn ghost" type="submit"><%= t('Enregistrer') %></button></p>
+  </form>
+</section>
+
 <section class="panel compte-p" aria-labelledby="avis-t">
   <h2 id="avis-t"><%= t('Avis par e-mail') %></h2>
   <p class="hint"><%~ it.me ? t('Ce compte est lié au photographe {name} : vos imports lui sont attribués par défaut.', { name: `<strong>${__eta.e(it.me.name)}</strong>` }) : __eta.e(t('Ce compte n’est lié à aucun photographe : un administrateur peut le relier dans « Comptes et rôles ».')) %></p>

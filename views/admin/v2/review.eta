@@ -1,0 +1,128 @@
+<% layout('./layout') %>
+<% const t = it.t, E = __eta.e; %>
+<% /* À valider (admin v2) : les propositions des photographes (la plus ancienne d'abord), les publications programmées, les
+      propositions Instagram. Les routes et les droits sont ceux de la v1 (views/admin/review.eta) : valider les photos
+      cochées (POST /admin/a-valider : publier maintenant ou programmer), renvoyer avec une remarque
+      (POST /admin/photos/:id/renvoyer), annuler une programmation (POST /admin/photos/:id/deprogrammer), Instagram
+      (POST /admin/instagram/propositions/:id/valider ou renvoyer). La v2 : une liste à pastilles (lexique § 3), le titre
+      provisoire et l'accord dits sur la ligne (UX-A-03), un dialogue avant ce qui ne se défait pas (publier, renvoyer : MQ-09),
+      chaque action à sa place, sans passer par la fiche. Sans script, les dialogues s'ouvrent dans la page (:target). */ %>
+<% const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', encours: '<path d="M12 2.7a9.3 9.3 0 0 1 0 18.6z" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>',
+     abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>', attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>',
+     arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>', alerte: '<path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/>',
+   };
+   const ic = (k, s = 14) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const P = it.pending, S = it.scheduled, IG = it.instagram;
+   const hour = time => (it.lang === 'fr' ? time.replace(':', ' h ') : time);
+   const ready = P.filter(r => r.ready).length; %>
+<p class="help-link"><a href="/admin/aide#photos-le-circuit-de-publication"><%= t('Aide sur cette page') %></a></p>
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('À valider') %></h1></div>
+  <p class="ep-meta"><span><%= P.length > 1 ? t('{n} photos proposées', { n: P.length }) : t('{n} photo proposée', { n: P.length }) %></span><span><%= S.length > 1 ? t('{n} programmées', { n: S.length }) : t('{n} programmée', { n: S.length }) %></span><% if (IG) { %><span><%= IG.length > 1 ? t('{n} pour Instagram', { n: IG.length }) : t('{n} pour Instagram', { n: IG.length }) %></span><% } %></p>
+</header>
+<p class="rv-intro"><%= t('Les photos proposées par les photographes, la plus ancienne d’abord. Publiez-les ou programmez-les ; renvoyez-en une avec une remarque si elle doit être reprise. Une photo dont un accord est à vérifier attend la confirmation du photographe ou d’un administrateur.') %></p>
+
+<section aria-labelledby="rv-prop-t">
+  <h2 class="rv-titre" id="rv-prop-t"><%= t('Proposées') %> <span class="n"><%= P.length %></span></h2>
+<% if (!P.length) { %>  <p class="hint"><%= t('Aucune photo à valider.') %></p>
+<% } else { %>
+  <form method="post" action="/admin/a-valider" id="valider-f" class="rv-form" data-valider>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <table class="liste-a rv-liste">
+      <caption><%= t('Cochez les photos à valider, puis choisissez quand les publier, sous la liste.') %></caption>
+      <thead><tr><th scope="col"><span class="sr-only"><%= t('Choisir') %></span></th><th scope="col"><%= t('Photo') %></th><th scope="col"><%= t('État') %></th><th scope="col"><%= t('Proposée') %></th><th scope="col"><span class="sr-only"><%= t('Actions') %></span></th></tr></thead>
+      <tbody>
+        <!-- [html-validate-disable-block form-dup-name: les cases des lignes forment un groupe, name="ids" répété comme dans la v1 ; le serveur en reçoit la liste] -->
+<% P.forEach(r => { const p = r.photo; const lvl = r.ready ? 'ok' : p.site.level; %>
+        <tr data-photo="<%= p.id %>"<%~ p.provisional ? ' data-provisoire' : '' %> data-titre="<%= p.title %>">
+          <td class="c-chk"><% if (r.ready) { %><label class="chk-l"><input class="chk" type="checkbox" name="ids" value="<%= p.id %>" aria-labelledby="rv-<%= p.id %>"></label><% } %></td>
+          <th scope="row" class="c-photo" id="rv-<%= p.id %>"><div class="rv-objet"><% if (p.ready) { %><%~ it.picture(p, { sizes: '96px', alt: '' }) %><% } else { %><span class="ph" aria-hidden="true"></span><% } %><span class="t"><a class="ligne-lien" href="/admin/photos/<%= p.id %>"><%= p.title %></a><span class="sec"><%= r.author %> · <%= p.category %><%= p.taken_on ? ' · ' + p.taken_on : '' %><% if (p.taken_time) { %> · <%= hour(p.taken_time) %><%= p.show_time && /^\d{4}-\d{2}-\d{2}$/.test(p.taken_on || '') ? ' (' + t('heure montrée sur le site') + ')' : '' %><% } %></span></span></div></th>
+          <td class="c-etat"><div class="etat-c"><span class="etat etat--<%= lvl === 'ok' ? 'abouti' : lvl === 'warn' ? 'attention' : 'arret' %>"><%~ ic(lvl === 'ok' ? 'abouti' : lvl === 'warn' ? 'attention' : 'arret', 12) %><%= r.ready && p.site.level === 'warn' ? t('Accord confirmé par le photographe') : lvl === 'ok' ? t('Accords en règle') : lvl === 'warn' ? t('Accord à vérifier') : t('Accord refusé') %></span>
+<% if (p.provisional) { %>            <span class="att"><%~ ic('alerte', 12) %><%= t('Titre provisoire (nom du fichier)') %></span>
+<% } %><% if (!r.ready) { %>            <span class="sec"><%= lvl === 'no' ? t('Elle ne peut pas être publiée : renvoyez-la au photographe.') : t('Le photographe ou un administrateur confirme d’abord l’accord, dans la fiche.') %></span>
+<% } %></div></td>
+          <td class="c-quand"><%= t('le {date}', { date: r.when }) %><% if (r.message) { %><q class="rv-msg"><%= r.message %></q><% } %></td>
+          <td class="c-act"><a class="btn ghost" href="#dlg-renvoyer-<%= p.id %>" data-ouvre="dlg-renvoyer-<%= p.id %>" id="ouvre-renvoyer-<%= p.id %>"><%= t('Renvoyer…') %><span class="sr-only"> « <%= p.title %> »</span></a></td>
+        </tr>
+<% }) %>
+      </tbody>
+    </table>
+<% if (ready) { %>
+    <div class="panel rv-barre">
+      <fieldset class="choix-a choix-a--ligne"><legend><%= t('Pour les photos cochées') %></legend>
+        <label><input type="radio" name="quand" value="maintenant" checked><span><%= t('Publier maintenant') %></span></label>
+        <label><input type="radio" name="quand" value="date"><span><%= t('Programmer, au jour et à l’heure choisis (heure de Paris)') %></span></label>
+      </fieldset>
+      <div class="champ-a rv-date"><label for="rv-date"><%= t('Jour et heure de publication') %> <span class="facultatif"><%= t('(si programmée)') %></span></label><input type="datetime-local" id="rv-date" name="date"></div>
+      <p class="form-pied"><span class="hint" role="status" data-rv-compte></span><button class="btn" type="submit" data-rv-valider><%= t('Valider les photos cochées') %></button></p>
+    </div>
+<% } %>
+  </form>
+<% } %>
+</section>
+
+<% if (S.length) { %>
+<section aria-labelledby="rv-prog-t">
+  <h2 class="rv-titre" id="rv-prog-t"><%= t('Programmées') %> <span class="n"><%= S.length %></span></h2>
+  <ul class="objets-a rv-prog panel">
+<% S.forEach(r => { const p = r.photo; %>    <li><% if (p.ready) { %><%~ it.picture(p, { sizes: '64px', alt: '' }) %><% } else { %><span class="ph" aria-hidden="true"></span><% } %>
+      <p class="t"><a class="ligne-lien" href="/admin/photos/<%= r.id %>#publication"><%= p.title %></a><span class="sec"><%= r.author %></span></p>
+      <p class="detail"><span class="etat etat--encours"><%~ ic('encours', 12) %><%= t('Programmée le {date}', { date: r.when }) %></span></p>
+      <form class="actions" method="post" action="/admin/photos/<%= r.id %>/deprogrammer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/a-valider"><button class="btn ghost" type="submit"><%= t('Annuler la programmation') %><span class="sr-only"> : « <%= p.title %> »</span></button></form>
+    </li>
+<% }) %>  </ul>
+</section>
+<% } %>
+
+<% if (IG) { %>
+<section id="instagram" aria-labelledby="rv-ig-t">
+  <h2 class="rv-titre" id="rv-ig-t">Instagram <span class="n"><%= IG.length %></span></h2>
+  <p class="hint"><%= t('Les photos que les photographes proposent pour Instagram, avec leurs choix (cadre, filigrane, légende). Mettez-les dans la file telles quelles, ou renvoyez-les avec une remarque.') %></p>
+<% if (!IG.length) { %>  <p class="hint"><%= t('Aucune photo proposée pour Instagram.') %></p><% } else { %>
+  <ul class="objets-a rv-ig panel">
+<% IG.forEach(r => { const p = r.photo; %>    <li><a class="rv-apercu" href="/admin/instagram/apercu.jpg?photo=<%= p.id %>&amp;cadre=<%= r.frame %>&amp;filigrane=<%= r.watermark ? 1 : 0 %>" target="_blank" rel="noopener"><% if (p.ready) { %><%~ it.picture(p, { sizes: '64px', alt: '' }) %><% } else { %><span class="ph" aria-hidden="true"></span><% } %><span class="sr-only"><%= t('Aperçu exact de l’image envoyée (nouvel onglet)') %> : <%= p.title %></span></a>
+      <p class="t"><a class="ligne-lien" href="/admin/photos/<%= p.id %>#instagram"><%= p.title %></a><span class="sec"><%= r.author %> · <%= t('proposée le {date}', { date: r.when }) %> · <%= it.lang === 'de' ? t(r.frameLabel) : t(r.frameLabel).toLowerCase() %><%= r.watermark ? ' · ' + t('filigrane') : '' %></span></p>
+<% if (r.message) { %>      <p class="detail"><q class="rv-msg"><%= r.message %></q></p><% } %>
+      <details class="plier detail"><summary><%= t('Légende') %> <span class="sec"><%= r.caption.length %> / 2200</span></summary><pre class="cap-full"><%= r.caption %></pre></details>
+      <div class="actions btns-ligne">
+        <form method="post" action="/admin/instagram/propositions/<%= r.id %>/valider"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn" type="submit"><%= t('Mettre dans la file Instagram') %><span class="sr-only"> : « <%= p.title %> »</span></button></form>
+        <a class="btn ghost" href="#dlg-ig-<%= r.id %>" data-ouvre="dlg-ig-<%= r.id %>"><%= t('Renvoyer…') %><span class="sr-only"> « <%= p.title %> »</span></a>
+      </div>
+    </li>
+<% }) %>  </ul>
+<% } %>
+</section>
+<% } %>
+
+<% /* Dialogues : renvoyer avec une remarque (le photographe la reçoit : rien ne se défait), et la confirmation de la
+      validation (titres provisoires et nombre de photos dits d'abord, UX-A-03), remplie par admin-v2.js. */ %>
+<% P.forEach(r => { const p = r.photo; %>
+<dialog class="confirm cible" id="dlg-renvoyer-<%= p.id %>" aria-labelledby="dr-<%= p.id %>-t" aria-describedby="dr-<%= p.id %>-d">
+  <form method="post" action="/admin/photos/<%= p.id %>/renvoyer" novalidate>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/a-valider">
+    <h2 id="dr-<%= p.id %>-t"><%= t('Renvoyer « {title} » au photographe ?', { title: p.title }) %></h2>
+    <p id="dr-<%= p.id %>-d"><%= t('Elle redevient un brouillon « à reprendre » ; {name} reçoit votre remarque.', { name: r.author || t('le photographe') }) %></p>
+    <div class="champ-a"><label for="dr-<%= p.id %>-m"><%= t('Remarque pour {name}', { name: r.author || t('le photographe') }) %></label><textarea id="dr-<%= p.id %>-m" name="message" rows="3" maxlength="1000" required></textarea></div>
+    <div class="actions"><a class="btn ghost" href="#rv-<%= p.id %>" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Renvoyer avec la remarque') %></button></div>
+  </form>
+</dialog>
+<% }) %>
+<% ;(IG || []).forEach(r => { %>
+<dialog class="confirm cible" id="dlg-ig-<%= r.id %>" aria-labelledby="dig-<%= r.id %>-t">
+  <form method="post" action="/admin/instagram/propositions/<%= r.id %>/renvoyer" novalidate>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <h2 id="dig-<%= r.id %>-t"><%= t('Renvoyer « {title} » sans la mettre dans la file Instagram ?', { title: r.photo.title }) %></h2>
+    <div class="champ-a"><label for="dig-<%= r.id %>-m"><%= t('Remarque pour {name}', { name: r.author || t('le photographe') }) %></label><textarea id="dig-<%= r.id %>-m" name="message" rows="3" maxlength="1000" required></textarea></div>
+    <div class="actions"><a class="btn ghost" href="#instagram" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Renvoyer avec la remarque') %></button></div>
+  </form>
+</dialog>
+<% }) %>
+<dialog class="confirm" data-dlg-valider aria-labelledby="dv-t" aria-describedby="dv-d">
+  <h2 id="dv-t" data-dlg-titre><%= t('Valider les photos cochées ?') %></h2>
+  <p id="dv-d" data-dlg-texte></p>
+  <ul class="liste-c" data-dlg-liste></ul>
+  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn" type="button" data-dlg-ok><%= t('Valider') %></button></div>
+</dialog>
+<%~ include('./_textes-review', it) %>
+<script src="<%= it.asset('admin/v2/review-v2.js') %>" defer></script>

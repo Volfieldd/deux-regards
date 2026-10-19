@@ -13,12 +13,14 @@ const lang = async (page, l) => {
 };
 
 test('en allemand, aucun débordement sur les écrans de la v2', async ({ page }) => {
-  test.setTimeout(240_000);
+  test.setTimeout(360_000);
   await page.goto('/admin/photos');
   const ids = await page.locator('.tile').evaluateAll(ts => ts.slice(0, 3).map(t => Number(t.dataset.id)));
   await lang(page, 'de');
   try {
-    const urls = ['/admin', '/admin/reglages/assistants', '/admin/droits', '/admin/images', '/admin/auteurs', '/admin/compte', `/admin/photos/lot?ids=${ids.join(',')}`, '/admin/rencontre', '/admin/rencontre/accueil'];
+    const urls = ['/admin', '/admin/reglages/assistants', '/admin/droits', '/admin/images', '/admin/auteurs', '/admin/compte', `/admin/photos/lot?ids=${ids.join(',')}`, '/admin/rencontre', '/admin/rencontre/accueil',
+      // Vague 2 : la fiche d'une photo, la photothèque (planche et liste), À valider.
+      `/admin/photos/${ids[0]}`, '/admin/photos', '/admin/photos?vue=liste', '/admin/a-valider'];
     for (const [w, h] of [[320, 640], [412, 839], [1032, 1250], [1376, 900], [1440, 900]]) {
       await page.setViewportSize({ width: w, height: h });
       for (const url of urls) {
