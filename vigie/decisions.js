@@ -85,6 +85,7 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
     if (!KINDS.includes(kind)) throw new DecisionError(`action inconnue : ${kind}`);
     if (alerte != null && !(Number.isSafeInteger(Number(alerte)) && Number(alerte) > 0)) throw new DecisionError('numéro d’alerte invalide');
     if (!par) throw new DecisionError('auteur de la décision manquant');
+    const t0 = now();                                       // une seule lecture de l'heure : durée exacte, jamais 1 ms de trop
     const ms = Math.min(typeof duree === 'number' ? duree : parseDuration(duree), MAX_DURATION[kind]);
     let target = String(cible || '').trim();
     const current = active();
@@ -108,7 +109,7 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
       details = { comptes, adresses };
     } else if (!target || target.length > 200) throw new DecisionError('compte (sub) attendu');
     if (current.length >= MAX_ACTIVE) throw new DecisionError(`trop de décisions actives (${MAX_ACTIVE} au plus)`);
-    const row = { kind, cible: target, portee, motif: String(motif).slice(0, 300), par, cree_a: now(), fin: now() + ms, auto: auto ? 1 : 0, details: details ? JSON.stringify(details) : null };
+    const row = { kind, cible: target, portee, motif: String(motif).slice(0, 300), par, cree_a: t0, fin: t0 + ms, auto: auto ? 1 : 0, details: details ? JSON.stringify(details) : null };
     const cite = /^alerte #([1-9]\d{0,14})(?: · |$)/.exec(row.motif);
     const alerteId = alerte != null ? Number(alerte) : cite ? Number(cite[1]) : null;
     row.id = Number(db.prepare('INSERT INTO decisions (kind, cible, portee, motif, par, cree_a, fin, auto, details, alerte_id) VALUES (@kind, @cible, @portee, @motif, @par, @cree_a, @fin, @auto, @details, @alerte_id)')
