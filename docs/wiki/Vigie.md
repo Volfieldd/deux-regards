@@ -253,7 +253,83 @@ Adresse : `https://vigie.nicephos.art`, servie par la Vigie elle-même sur le po
 - **Formulaires** : jeton CSRF de la session, et requête de même origine (`Origin`, `Sec-Fetch-Site`).
 - **En-têtes** : CSP stricte (`default-src 'none'`, scripts et styles de la console seulement, rien en ligne, `frame-ancestors 'none'`), `no-store`, `no-referrer`, `noindex`.
 - **Journal et alertes** : connexions (`vigie_console_connexion`), sorties, **connexions refusées** (`vigie_console_refus`, DS30 : jeton Access absent ou faux, sans rôle `vigie.*`, sans second facteur, cookie rejoué sous une autre identité Access, CSRF, ré-authentification par un autre compte ; alerte moyenne, haute au-delà de 3 en une heure), **arrivée d'un compte sans attribution** (`vigie_console_arrivee`, DS29, moyenne) et **changement de droits** (`vigie_console_droits`, DS29, haute : plafond changé chez Zitadel ou attribution changée). Jeton Access absent : une ligne par adresse et par 10 minutes, 30 par heure au plus.
-- **Réglages** (`vigie.env`, guide [`vigie-phase-0.md`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/vigie-phase-0.md), étapes 3.1 et 3.2) : `VIGIE_CONSOLE_CLIENT_ID`, `VIGIE_CONSOLE_PROJECT_ID`, `VIGIE_CONSOLE_ORG_ID`, `VIGIE_ACCESS_TEAM`, `VIGIE_ACCESS_AUD`, `VIGIE_ADMIN_SUBS`, `VIGIE_ROLES` (`deux-cles` par défaut, ou `zitadel` : une seule clé) ; secret client dans `VIGIE_SECRETS_DIR/console-secret`. La console exige aussi `VIGIE_ZITADEL_ISSUER` et le compte de service. Dans Cloudflare : nom public `vigie.nicephos.art` du tunnel vers `http://172.29.42.20:4200`.
+- **Réglages** (`vigie.env`, guide [`vigie-phase-0.md`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/vigie-phase-0.md), étapes 3.1 et 3.2) : `VIGIE_CONSOLE_CLIENT_ID`, `VIGIE_CONSOLE_PROJECT_ID`, `VIGIE_CONSOLE_ORG_ID`, `VIGIE_ACCESS_TEAM`, `VIGIE_ACCESS_AUD`, `VIGIE_ADMIN_SUBS`, `VIGIE_ROLES` (`deux-cles` par défaut, ou `zitadel` : une seule clé) ; secret client dans `VIGIE_SECRETS_DIR/console-secret`. La console exige aussi `VIGIE_ZITADEL_ISSUER` et le compte de service. Dans Zitadel, application « Console Vigie », onglet *Token Settings* : *User roles inside ID Token* et *Include user's profile info in the ID Token* cochés ; application « Cloudflare Access » : *Include user's profile info in the ID Token* coché. Dans Cloudflare : nom public `vigie.nicephos.art` du tunnel vers `http://172.29.42.20:4200`, un seul connecteur. En cas de souci : [Dépannage](#dépannage).
+
+## Dépannage
+
+Symptômes rencontrés à la première mise en service (octobre 2026), dans l'ordre où ils apparaissent. Les commandes se lancent dans le terminal de l'Unraid.
+
+### La Vigie refuse de démarrer
+
+Le journal du conteneur (`docker logs nicephos-vigie`) donne la variable en cause ; la Vigie préfère ne pas démarrer plutôt que tourner avec un réglage douteux.
+
+- **« La console exige VIGIE_ZITADEL_ISSUER et le compte de service »** : `VIGIE_CONSOLE_CLIENT_ID` est réglé (la console est demandée) mais `VIGIE_ZITADEL_ISSUER` est vide ou encore commenté dans `vigie.env`. Le décommenter (`https://<instance>.zitadel.cloud`) et poser la clé JSON du compte `vigie-lecture` dans `VIGIE_SECRETS_DIR/zitadel.json` (`chmod 600`, propriétaire `99:100`). Pour démarrer sans console : commenter `VIGIE_CONSOLE_CLIENT_ID`.
+- **Une variable de la console « attendue » ou « illisible »** alors qu'elle semble remplie : dans `vigie.env`, rien après la valeur (pas d'explication ni de commentaire en fin de ligne) ; le secret client est dans `VIGIE_SECRETS_DIR/console-secret`, celui de « Console Vigie ».
+
+### « Zitadel : lecture impossible » dans le journal
+
+Le message donne l'appel en cause et le motif de Zitadel :
+
+- `(/oauth/v2/token) : …` : le jeton est refusé. Clé JSON créée ailleurs que sur le compte de service (**Users → Service Users → vigie-lecture → Keys → JSON** : le fichier contient `"type":"serviceaccount"` et un `userId`), clé expirée, ou horloge de l'Unraid décalée ;
+- `(/admin/v1/events/_search) : 403` / `PermissionDenied` : le rôle `IAM_OWNER_VIEWER` n'est pas posé au niveau de l'**instance** (phase 0, étape 1.3.3) ;
+- `no more than 30 item(s)` : image d'avant le 18 octobre 2026 (Zitadel refuse plus de 30 types par requête ; la Vigie lit désormais par lots) → **Compose Pull** puis **Compose Up** ;
+- seulement `réponse 400` sans motif : image plus ancienne encore, même remède.
+
+Une lecture réussie se voit dans `docker exec nicephos-vigie node vigie/cli.js etat` (« Zitadel : lu le … »). La console a besoin de ce même compte pour relire les rôles : tant que la lecture échoue, elle refuse toute action.
+
+### Cloudflare : « User email was not returned »
+
+Au test de la méthode de connexion Zitadel (Zero Trust → *Settings → Authentication → Login methods → Zitadel → Test*), une réponse avec seulement `id` et `amr` (`"oidc_fields": {}`) : Zitadel ne met pas l'e-mail dans l'ID token, or Cloudflare ne lit que lui. `amr` y est toujours, c'est normal.
+
+- Dans Zitadel, l'application dont le **Client ID** est l'*App ID* saisi dans Cloudflare (« Cloudflare Access », pas « Console Vigie ») → *Token Settings* → **Include user's profile info in the ID Token** (ancien nom : *User Info inside ID Token*) → **Save**.
+- Côté Cloudflare, scopes par défaut (`openid email profile`), champ *OIDC Claims* vide.
+- Le compte Zitadel a une adresse e-mail, et c'est elle qui figure dans la politique Access.
+
+### « Host Error » ou « Bad gateway » (502) sur `vigie.nicephos.art`
+
+Cloudflare n'atteint pas la console. Dans l'ordre :
+
+1. **Adresse du tunnel** : le nom public doit pointer vers **HTTP** `172.29.42.20:4200`, pas vers l'adresse de l'Unraid (le port 4200 n'est pas publié sur l'hôte). Les journaux du tunnel montrent la configuration reçue :
+   ```bash
+   docker logs nicephos-tunnel --tail 50 2>&1 | grep -i -E "error|vigie|4200"
+   ```
+2. **La console répond-elle, depuis le réseau du tunnel ?** Un `403` est la bonne réponse (pas de jeton Access) :
+   ```bash
+   docker run --rm --network container:nicephos-tunnel --entrypoint node ghcr.io/volfieldd/deux-regards-vigie:latest \
+     -e "fetch('http://172.29.42.20:4200/').then(r=>console.log('depuis le tunnel:',r.status)).catch(e=>console.log('échec:',e.cause?.code||e.message))"
+   ```
+3. **Un second connecteur sur le même tunnel** : si la console répond `403` ci-dessus mais que le 502 revient une fois sur deux (souvent au retour de Zitadel, après une redirection qui a marché), un autre `cloudflared` fait tourner le même tunnel et reçoit une partie des requêtes sans pouvoir joindre le réseau de la console. Le voir :
+   ```bash
+   docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}' | grep -i -E "cloudflare|tunnel"
+   ```
+   et dans Zero Trust, onglet **Connectors** du tunnel. Avant d'arrêter l'autre (et de couper son démarrage automatique), vérifier que `nicephos-tunnel` joint aussi les autres services servis par ce tunnel, en remplaçant les adresses :
+   ```bash
+   docker run --rm --network container:nicephos-tunnel --entrypoint node ghcr.io/volfieldd/deux-regards-vigie:latest -e "
+   for (const u of ['http://<adresse-unraid>:<port>/','http://172.29.42.20:4200/'])
+     fetch(u,{redirect:'manual'}).then(r=>console.log(u,r.status)).catch(e=>console.log(u,'échec:',e.cause?.code||e.message))"
+   ```
+   Si l'un échoue, garder les deux conteneurs mais donner à la pile son propre tunnel (`TUNNEL_TOKEN` du `.env`), pour `www`, `nicephos.art` et `vigie` seulement. Ne pas brancher un `cloudflared` extérieur sur le réseau `nicephos`.
+
+La console elle-même ne répond jamais 502 (Cloudflare remplacerait sa page par la sienne). Quand l'échange du code avec Zitadel échoue au retour de connexion, elle répond 503, page « Connexion impossible pour l’instant », note « Vigie : console : retour de Zitadel refusé » dans son journal et un refus de raison `jeton`, motif à côté (`node vigie/cli.js console`, ci-dessous) : souvent le secret client (`console-secret` d'une autre application, ou régénéré depuis) ou une application « Console Vigie » qui n'est pas en méthode **CODE**.
+
+### « Connexion refusée » ou « Clé d’accès exigée » dans la console
+
+Cloudflare Access et la connexion Zitadel sont passés ; la console refuse l'entrée. La raison exacte est notée à chaque refus :
+
+```bash
+docker exec nicephos-vigie node vigie/cli.js console
+```
+
+(« Connexions refusées », colonne raison) :
+
+- **`role`** : aucun rôle `vigie.*` dans l'ID token. Vérifier, dans Zitadel :
+  1. **Projet Vigie → Authorizations** : le compte a `vigie.admin` (clé exacte, pas le nom affiché) ;
+  2. application **« Console Vigie »** → *Token Settings* : **User roles inside ID Token** et **Include user's profile info in the ID Token** cochés, **Save** ; réglage du projet *Assert Roles on Authentication* (*Assign user roles during authentication*) coché ;
+  3. `VIGIE_CONSOLE_ORG_ID` : identifiant numérique de l'organisation **propriétaire du projet** ; un rôle donné dans une autre organisation est ignoré.
+- **`zitadel`** (avec une erreur) : Zitadel a refusé lui-même, en général un compte sans autorisation dans le projet quand *Check authorization on Authentication* est coché.
+- **`mfa`** (« Clé d’accès exigée ») : pas de second facteur dans `amr`, contenu de `amr` à côté (phase 0, étape 1.1).
+
+Après une correction dans Zitadel : **Se reconnecter**. `VIGIE_ADMIN_SUBS` ne suffit pas seule : elle règle l'attribution côté Vigie, le plafond vient toujours de Zitadel.
 
 ## Horodatages et capacité
 
