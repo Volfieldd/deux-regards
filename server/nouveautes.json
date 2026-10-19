@@ -1,5 +1,29 @@
 [
   {
+    "version": "1.167.0",
+    "date": "2026-10-19",
+    "pr": 167,
+    "title": {
+      "fr": "Le site public v3, à essayer",
+      "en": "Public site v3, ready to try",
+      "de": "Die öffentliche Website v3 zum Ausprobieren"
+    },
+    "items": [
+      {
+        "fr": "Une troisième version du site public : les pages de la v2, redessinées. À l’accueil, la photo en plein cadre, l’en-tête et son titre posés dessus ; les regards présentés par leurs photos ; des titres plus grands et des boutons sans cadre.",
+        "en": "A third version of the public site: the pages of v2, redesigned. On the home page, the photo full-bleed, with the header and its title laid over it; the photographers shown by their photos; larger headings and buttons without frames.",
+        "de": "Eine dritte Version der öffentlichen Website: die Seiten der v2, neu gestaltet. Auf der Startseite das Foto randlos, Kopfzeile und Titel darauf; die Fotografen über ihre Fotos vorgestellt; größere Überschriften und Schaltflächen ohne Rahmen.",
+        "perm": "site.apparence"
+      },
+      {
+        "fr": "Elle se choisit comme les autres : « Voir en v3 » en haut des pages publiques, pour vous seul, ou Apparence → « Site public : v1, v2 ou v3 », pour tous. Ni prix ni bouton d’achat : la boutique viendra plus tard.",
+        "en": "It is chosen like the others: “View in v3” at the top of public pages, for you only, or Appearance → “Public site: v1, v2 or v3”, for everyone. No prices or buy button: the shop will come later.",
+        "de": "Sie wird wie die anderen gewählt: „In v3 ansehen“ oben auf den öffentlichen Seiten, nur für Sie, oder Erscheinungsbild → „Öffentliche Website: v1, v2 oder v3“, für alle. Weder Preise noch Kaufschaltfläche: der Shop kommt später.",
+        "perm": "site.apparence"
+      }
+    ]
+  },
+  {
     "version": "1.166.0",
     "date": "2026-10-19",
     "pr": 166,
