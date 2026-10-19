@@ -86,6 +86,7 @@ test('onglets des Réglages en cases au téléphone : tous visibles, passés à 
 });
 
 test('focus jamais caché sous une barre fixe ou collante (WCAG 2.4.11)', async ({ page }) => {
+  test.setTimeout(120_000);           // trois pages, soixante tabulations chacune
   const ids = await lotIds(page);
   for (const url of [`/admin/photos/lot?ids=${ids.join(',')}`, '/admin/droits', '/admin/reglages/assistants']) {
     await page.goto(url);
