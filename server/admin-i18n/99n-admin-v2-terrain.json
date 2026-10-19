@@ -1,0 +1,426 @@
+{
+ "1 demande sur les données": {
+  "en": "1 data request",
+  "de": "1 Datenanfrage"
+ },
+ "1 est encore publiée.": {
+  "en": "1 is still published.",
+  "de": "1 ist noch veröffentlicht."
+ },
+ "1 nouvelle demande": {
+  "en": "1 new request",
+  "de": "1 neue Anfrage"
+ },
+ "1ʳᵉ sur {total}": {
+  "en": "1st of {total}",
+  "de": "1. von {total}"
+ },
+ "Accord": {
+  "en": "Consent",
+  "de": "Einwilligung"
+ },
+ "Aperçu de la page": {
+  "en": "Page preview",
+  "de": "Seitenvorschau"
+ },
+ "Appliquer le refus…": {
+  "en": "Apply the refusal…",
+  "de": "Ablehnung anwenden…"
+ },
+ "Appliquer le refus à la photo publiée ?": {
+  "en": "Apply the refusal to the published photo?",
+  "de": "Ablehnung auf das veröffentlichte Foto anwenden?"
+ },
+ "Appliquer le refus aux {n} photos publiées ?": {
+  "en": "Apply the refusal to the {n} published photos?",
+  "de": "Ablehnung auf die {n} veröffentlichten Fotos anwenden?"
+ },
+ "À traiter": {
+  "en": "To handle",
+  "de": "Zu bearbeiten"
+ },
+ "Aucune photo cochée : cochez celles où figure une personne, ou celles où personne de la sortie ne figure.": {
+  "en": "No photo ticked: tick those showing a person, or those where nobody from the outing appears.",
+  "de": "Kein Foto markiert: Markieren Sie die Fotos mit einer Person oder die, auf denen niemand vom Ausflug zu sehen ist."
+ },
+ "Aucune photo n’est encore publiée : la page attendra la première.": {
+  "en": "No photo is published yet: the page will wait for the first one.",
+  "de": "Noch kein Foto ist veröffentlicht: Die Seite wartet auf das erste."
+ },
+ "Carte non enregistrée : 1 champ à corriger": {
+  "en": "Card not saved: 1 field to correct",
+  "de": "Karte nicht gespeichert: 1 Feld zu korrigieren"
+ },
+ "Carte non enregistrée : {n} champs à corriger": {
+  "en": "Card not saved: {n} fields to correct",
+  "de": "Karte nicht gespeichert: {n} Felder zu korrigieren"
+ },
+ "Cette action est définitive.": {
+  "en": "This cannot be undone.",
+  "de": "Dies kann nicht rückgängig gemacht werden."
+ },
+ "cette personne": {
+  "en": "this person",
+  "de": "dieser Person"
+ },
+ "Corriger la rencontre et la carte": {
+  "en": "Correct the encounter and the card",
+  "de": "Begegnung und Karte korrigieren"
+ },
+ "Créer la série": {
+  "en": "Create the series",
+  "de": "Serie anlegen"
+ },
+ "dans l’ordre de l’index du site": {
+  "en": "in the order of the site’s index",
+  "de": "in der Reihenfolge des Website-Index"
+ },
+ "Dans « Modifier », chaque champ s’enregistre quand vous le quittez ; « Défaire » revient en arrière pendant 10 secondes. Pour changer l’ordre : la poignée ⠿ et les flèches haut et bas, ou le menu ⋯.": {
+  "en": "In “Edit”, each field is saved when you leave it; “Undo” goes back for 10 seconds. To change the order: the ⠿ handle and the up and down arrows, or the ⋯ menu.",
+  "de": "Unter „Bearbeiten“ wird jedes Feld beim Verlassen gespeichert; „Rückgängig“ ist 10 Sekunden lang möglich. Reihenfolge ändern: der Griff ⠿ mit den Pfeiltasten auf und ab, oder das Menü ⋯."
+ },
+ "demandes reçues par /bonjour et accords saisis": {
+  "en": "requests received via /bonjour and entered consents",
+  "de": "über /bonjour eingegangene Anfragen und erfasste Einwilligungen"
+ },
+ "Dépublier et retirer de la file Instagram": {
+  "en": "Unpublish and remove from the Instagram queue",
+  "de": "Veröffentlichung zurücknehmen und aus der Instagram-Warteschlange nehmen"
+ },
+ "Dernier accord : {usages}": {
+  "en": "Latest consent: {usages}",
+  "de": "Letzte Einwilligung: {usages}"
+ },
+ "Droits : accès": {
+  "en": "Rights: access",
+  "de": "Rechte: Auskunft"
+ },
+ "Droits : effacement": {
+  "en": "Rights: erasure",
+  "de": "Rechte: Löschung"
+ },
+ "Effacer cette personne…": {
+  "en": "Erase this person…",
+  "de": "Diese Person löschen…"
+ },
+ "Effacer les données…": {
+  "en": "Erase the data…",
+  "de": "Daten löschen…"
+ },
+ "Effacer les données de « {name} » ?": {
+  "en": "Erase the data of “{name}”?",
+  "de": "Die Daten von „{name}“ löschen?"
+ },
+ "Effacer « {name} » ?": {
+  "en": "Erase “{name}”?",
+  "de": "„{name}“ löschen?"
+ },
+ "Elles repassent en brouillon et quittent la file Instagram ; elles ne pourront plus être publiées tant que le refus tient. Les posts déjà publiés sur Instagram ne sont pas touchés : supprimez-les dans l’application Instagram.": {
+  "en": "They go back to draft and leave the Instagram queue; they cannot be published again while the refusal stands. Posts already published on Instagram are not touched: delete them in the Instagram app.",
+  "de": "Sie werden wieder Entwürfe und verlassen die Instagram-Warteschlange; solange die Ablehnung gilt, können sie nicht mehr veröffentlicht werden. Bereits auf Instagram veröffentlichte Beiträge bleiben unberührt: Löschen Sie sie in der Instagram-App."
+ },
+ "Enregistrer la carte": {
+  "en": "Save the card",
+  "de": "Karte speichern"
+ },
+ "la journée du {date} du voyage": {
+  "en": "the day of {date} from the trip",
+  "de": "den Tag {date} aus der Reise"
+ },
+ "La lettre et le numéro de la carte : J-0142.": {
+  "en": "The card’s letter and number: J-0142.",
+  "de": "Buchstabe und Nummer der Karte: J-0142."
+ },
+ "La page est en ligne : ce que vous enregistrez y paraît tout de suite.": {
+  "en": "The page is online: what you save appears there at once.",
+  "de": "Die Seite ist online: Was Sie speichern, erscheint dort sofort."
+ },
+ "La plus récente d’abord.": {
+  "en": "Most recent first.",
+  "de": "Die neueste zuerst."
+ },
+ "La rencontre est ajoutée sans décision : demandez-lui son accord.": {
+  "en": "The encounter is added without a decision: ask the person for consent.",
+  "de": "Die Begegnung wird ohne Entscheidung hinzugefügt: Bitten Sie die Person um ihre Einwilligung."
+ },
+ "Le nom et le texte d’intention sont ceux de la page de chaque série sur le site.": {
+  "en": "The name and the statement are those of each series’ page on the site.",
+  "de": "Name und Begleittext sind die der Seite jeder Serie auf der Website."
+ },
+ "Les brouillons dont les accords sont en règle partent au modérateur, qui les publie, les programme ou vous les renvoie.": {
+  "en": "Drafts whose consents are in order go to the moderator, who publishes, schedules or returns them.",
+  "de": "Entwürfe mit gültigen Einwilligungen gehen an die Moderation, die sie veröffentlicht, plant oder zurückschickt."
+ },
+ "Les brouillons dont les accords sont en règle partent en ligne tout de suite ; ceux à vérifier ou bloqués restent en brouillon. « Dépublier », sur la fiche d’une photo, la retire.": {
+  "en": "Drafts whose consents are in order go online at once; those to check or blocked stay drafts. “Unpublish”, on a photo’s page, takes it down.",
+  "de": "Entwürfe mit gültigen Einwilligungen gehen sofort online; zu prüfende oder gesperrte bleiben Entwürfe. „Veröffentlichung zurücknehmen“ auf der Seite eines Fotos nimmt es offline."
+ },
+ "Les {n} plus récentes.": {
+  "en": "The {n} most recent.",
+  "de": "Die {n} neuesten."
+ },
+ "Les photos ne sont jamais publiées : gardées en privé, chiffrées.": {
+  "en": "The photos are never published: kept private, encrypted.",
+  "de": "Die Fotos werden nie veröffentlicht: privat und verschlüsselt aufbewahrt."
+ },
+ "Les plus récentes d’abord.": {
+  "en": "Most recent first.",
+  "de": "Die neuesten zuerst."
+ },
+ "Les propositions de série et les descriptions se règlent dans {link}.": {
+  "en": "Series suggestions and descriptions are set in {link}.",
+  "de": "Serienvorschläge und Beschreibungen werden unter {link} eingestellt."
+ },
+ "Liée à : {who}": {
+  "en": "Linked to: {who}",
+  "de": "Verknüpft mit: {who}"
+ },
+ "Lier la photo cochée": {
+  "en": "Link the ticked photo",
+  "de": "Markiertes Foto verknüpfen"
+ },
+ "Lier les {n} photos cochées": {
+  "en": "Link the {n} ticked photos",
+  "de": "Die {n} markierten Fotos verknüpfen"
+ },
+ "Lier les photos cochées à cette personne": {
+  "en": "Link the ticked photos to this person",
+  "de": "Markierte Fotos mit dieser Person verknüpfen"
+ },
+ "Mettre en ligne": {
+  "en": "Put online",
+  "de": "Online stellen"
+ },
+ "Mettre la page en ligne…": {
+  "en": "Put the page online…",
+  "de": "Seite online stellen…"
+ },
+ "Mettre la page « {name} » en ligne ?": {
+  "en": "Put the page “{name}” online?",
+  "de": "Die Seite „{name}“ online stellen?"
+ },
+ "{n} à trier": {
+  "en": "{n} to sort",
+  "de": "{n} zu sortieren"
+ },
+ "{n} demandes sur les données": {
+  "en": "{n} data requests",
+  "de": "{n} Datenanfragen"
+ },
+ "{n}ᵉ sur {total}": {
+  "en": "{n} of {total}",
+  "de": "{n}. von {total}"
+ },
+ "{n} événement": {
+  "en": "{n} event",
+  "de": "{n} Ereignis"
+ },
+ "{n} événements, le plus récent d’abord": {
+  "en": "{n} events, most recent first",
+  "de": "{n} Ereignisse, das neueste zuerst"
+ },
+ "{n} nouvelles demandes": {
+  "en": "{n} new requests",
+  "de": "{n} neue Anfragen"
+ },
+ "Nouvelle demande": {
+  "en": "New request",
+  "de": "Neue Anfrage"
+ },
+ "{n} refus à appliquer": {
+  "en": "{n} refusals to apply",
+  "de": "{n} Ablehnungen anzuwenden"
+ },
+ "{n} rencontre": {
+  "en": "{n} encounter",
+  "de": "{n} Begegnung"
+ },
+ "{n} sont encore publiées.": {
+  "en": "{n} are still published.",
+  "de": "{n} sind noch veröffentlicht."
+ },
+ "{n} sortie": {
+  "en": "{n} outing",
+  "de": "{n} Ausflug"
+ },
+ "{n} sorties": {
+  "en": "{n} outings",
+  "de": "{n} Ausflüge"
+ },
+ "{n} voyage": {
+  "en": "{n} trip",
+  "de": "{n} Reise"
+ },
+ "{n} voyages": {
+  "en": "{n} trips",
+  "de": "{n} Reisen"
+ },
+ "Page en ligne": {
+  "en": "Page online",
+  "de": "Seite online"
+ },
+ "Page réservée à l’équipe": {
+  "en": "Page for the team only",
+  "de": "Seite nur für das Team"
+ },
+ "Pas encore de texte d’intention : la page de la série n’a que ses photos.": {
+  "en": "No statement yet: the series page only shows its photos.",
+  "de": "Noch kein Begleittext: Die Serienseite zeigt nur ihre Fotos."
+ },
+ "Personne qui y figure": {
+  "en": "Person shown",
+  "de": "Abgebildete Person"
+ },
+ "photographe à choisir": {
+  "en": "photographer to choose",
+  "de": "Fotograf zu wählen"
+ },
+ "Photos à lier": {
+  "en": "Photos to link",
+  "de": "Zu verknüpfende Fotos"
+ },
+ "Pour changer l’ordre : le menu ⋯ de chaque série.": {
+  "en": "To change the order: each series’ ⋯ menu.",
+  "de": "Reihenfolge ändern: das Menü ⋯ jeder Serie."
+ },
+ "Proposer la photo prête ?": {
+  "en": "Propose the ready photo?",
+  "de": "Das fertige Foto vorschlagen?"
+ },
+ "Proposer les {n} photos prêtes ?": {
+  "en": "Propose the {n} ready photos?",
+  "de": "Die {n} fertigen Fotos vorschlagen?"
+ },
+ "Proposer les photos prêtes · {n}…": {
+  "en": "Propose the ready photos · {n}…",
+  "de": "Fertige Fotos vorschlagen · {n}…"
+ },
+ "Publier la photo prête ?": {
+  "en": "Publish the ready photo?",
+  "de": "Das fertige Foto veröffentlichen?"
+ },
+ "Publier les {n} photos prêtes ?": {
+  "en": "Publish the {n} ready photos?",
+  "de": "Die {n} fertigen Fotos veröffentlichen?"
+ },
+ "Publier les photos prêtes · {n}…": {
+  "en": "Publish the ready photos · {n}…",
+  "de": "Fertige Fotos veröffentlichen · {n}…"
+ },
+ "rattachez-y ensuite ses journées": {
+  "en": "then attach its days",
+  "de": "danach ihre Tage zuordnen"
+ },
+ "Refus": {
+  "en": "Refusal",
+  "de": "Ablehnung"
+ },
+ "Réglages › Assistants d’analyse": {
+  "en": "Settings › Analysis assistants",
+  "de": "Einstellungen › Analyse-Assistenten"
+ },
+ "Rencontres « {etat} », la plus récente d’abord.": {
+  "en": "Encounters “{etat}”, most recent first.",
+  "de": "Begegnungen „{etat}“, die neueste zuerst."
+ },
+ "Résultats de la recherche « {q} ».": {
+  "en": "Results for “{q}”.",
+  "de": "Suchergebnisse für „{q}“."
+ },
+ "Rétablir les accords de la sortie": {
+  "en": "Restore the outing’s consents",
+  "de": "Einwilligungen des Ausflugs wiederherstellen"
+ },
+ "Retirer la page": {
+  "en": "Take the page down",
+  "de": "Seite offline nehmen"
+ },
+ "Retirer la page du site…": {
+  "en": "Take the page off the site…",
+  "de": "Seite von der Website nehmen…"
+ },
+ "Retirer la page « {name} » du site ?": {
+  "en": "Take the page “{name}” off the site?",
+  "de": "Die Seite „{name}“ von der Website nehmen?"
+ },
+ "Saisir la carte signée de cette rencontre": {
+  "en": "Enter this encounter’s signed card",
+  "de": "Unterschriebene Karte dieser Begegnung erfassen"
+ },
+ "Sans décision": {
+  "en": "No decision",
+  "de": "Keine Entscheidung"
+ },
+ "Sa page publique /voyage/{slug} disparaîtra : un lien déjà partagé mènera à une page introuvable.": {
+  "en": "Its public page /voyage/{slug} will disappear: a link already shared will lead to a missing page.",
+  "de": "Ihre öffentliche Seite /voyage/{slug} verschwindet: Ein bereits geteilter Link führt dann ins Leere."
+ },
+ "Sa page /serie/{slug} disparaîtra du site.": {
+  "en": "Its page /serie/{slug} will disappear from the site.",
+  "de": "Ihre Seite /serie/{slug} verschwindet von der Website."
+ },
+ "« {serie} » : 1ʳᵉ sur {total}.": {
+  "en": "“{serie}”: 1st of {total}.",
+  "de": "„{serie}“: 1. von {total}."
+ },
+ "« {serie} » : {n}ᵉ sur {total}.": {
+  "en": "“{serie}”: {n} of {total}.",
+  "de": "„{serie}“: {n}. von {total}."
+ },
+ "Séries, dans l’ordre de l’index du site": {
+  "en": "Series, in the order of the site’s index",
+  "de": "Serien, in der Reihenfolge des Website-Index"
+ },
+ "/serie/… sur le site ; changer l’adresse casse les liens déjà partagés.": {
+  "en": "/serie/… on the site; changing the address breaks links already shared.",
+  "de": "/serie/… auf der Website; eine neue Adresse macht bereits geteilte Links ungültig."
+ },
+ "Ses {days} et ses {photos} restent ; son nom et ses textes sont effacés. Cette action est définitive.": {
+  "en": "Its {days} and its {photos} remain; its name and texts are erased. This cannot be undone.",
+  "de": "Ihre {days} und ihre {photos} bleiben; Name und Texte werden gelöscht. Dies kann nicht rückgängig gemacht werden."
+ },
+ "Son nom, son texte et ses photos publiées seront visibles de tous à l’adresse /voyage/{slug}.": {
+  "en": "Its name, text and published photos will be visible to everyone at /voyage/{slug}.",
+  "de": "Name, Text und veröffentlichte Fotos sind dann für alle unter /voyage/{slug} sichtbar."
+ },
+ "Sortie": {
+  "en": "Outing",
+  "de": "Ausflug"
+ },
+ "Suivi": {
+  "en": "Follow-up",
+  "de": "Bearbeitung"
+ },
+ "Supprimer le voyage": {
+  "en": "Delete the trip",
+  "de": "Reise löschen"
+ },
+ "Supprimer le voyage…": {
+  "en": "Delete the trip…",
+  "de": "Reise löschen…"
+ },
+ "Supprimer « {name} » ?": {
+  "en": "Delete “{name}”?",
+  "de": "„{name}“ löschen?"
+ },
+ "Tous les champs sont facultatifs, sauf les usages quand la carte est signée.": {
+  "en": "All fields are optional, except the uses when the card is signed.",
+  "de": "Alle Felder sind optional, außer den Verwendungen, wenn die Karte unterschrieben ist."
+ },
+ "Toutes les rencontres, la plus récente d’abord.": {
+  "en": "All encounters, most recent first.",
+  "de": "Alle Begegnungen, die neueste zuerst."
+ },
+ "Usages acceptés": {
+  "en": "Accepted uses",
+  "de": "Erlaubte Verwendungen"
+ },
+ "Voir la page": {
+  "en": "View the page",
+  "de": "Seite ansehen"
+ },
+ "/voyage/{slug} ne sera plus visible du public ; l’équipe garde son aperçu. « Mettre la page en ligne » la rétablira, à la même adresse.": {
+  "en": "/voyage/{slug} will no longer be public; the team keeps its preview. “Put the page online” will restore it at the same address.",
+  "de": "/voyage/{slug} ist dann nicht mehr öffentlich; das Team behält die Vorschau. „Seite online stellen“ stellt sie unter derselben Adresse wieder her."
+ }
+}

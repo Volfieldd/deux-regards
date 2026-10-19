@@ -68,6 +68,8 @@ export function registerOutings(app, { repo, render, done, failed, P, W, withRea
     const o = load(request);
     if (!o) return reply.callNotFound();
     out.setPlace(o.author.id, o.day, o.starts, request.body?.lieu);
+    // Admin v2 : le lieu s'enregistre quand on quitte le champ (fetch JSON) ; sans script, le formulaire et la redirection.
+    if (request.headers.accept && !request.headers.accept.includes('text/html')) return { ok: true, lieu: String(request.body?.lieu || '').trim().slice(0, 120) };
     return done(reply, back(o), request.t('Lieu de la sortie enregistré.'));
   });
   // « Publier les photos prêtes » : les brouillons prêts de la sortie ; à vérifier et bloquées restent en brouillon.

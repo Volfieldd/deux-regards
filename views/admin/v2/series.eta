@@ -1,0 +1,120 @@
+<% layout('./layout') %>
+<% const t = it.t, E = __eta.e; %>
+<% /* Séries (admin v2, vague 3b). Mêmes champs, mêmes droits et mêmes routes que la v1 (views/admin/series.eta ;
+      POST /admin/series, /admin/series/:id, …/:id/move, …/:id/delete, /admin/series/order) ; les assistants d'analyse,
+      eux, sont dans Réglages › Assistants d'analyse (UX-A-17). La v2 : une carte par série, son nom et son texte
+      d'intention lisibles sans ouvrir de formulaire ; « Modifier » déplie les champs, qui s'enregistrent quand on les
+      quitte (le formulaire entier, en JSON, à la route de la v1 ; « Défaire » 10 s ; MQ-09) ; l'ordre se change au
+      clavier ou par le menu, sans recharger la page, avec « Défaire » ; supprimer passe par un dialogue qui dit où vont les
+      photos. Sans script : les formulaires de la v1 (Enregistrer, Monter, Descendre, Supprimer). Le texte d'intention est
+      un texte public (page de la série) : ses écritures passent par la même route, vue par la Vigie (BV-20, BV-21). */ %>
+<% const IC = {
+     chev: '<path d="M9 6l6 6-6 6"/>', plus: '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>',
+     corbeille: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', alerte: '<path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/>',
+     grip: '<circle cx="9" cy="6" r="1.4" fill="currentColor"/><circle cx="15" cy="6" r="1.4" fill="currentColor"/><circle cx="9" cy="12" r="1.4" fill="currentColor"/><circle cx="15" cy="12" r="1.4" fill="currentColor"/><circle cx="9" cy="18" r="1.4" fill="currentColor"/><circle cx="15" cy="18" r="1.4" fill="currentColor"/>',
+   };
+   const ic = (k, s = 14) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const C = it.categories, others = c => C.filter(o => o.id !== c.id);
+   const canEmpty = it.canAll('photos.modifier') && it.canAll('photos.publiees.modifier');
+   const nb = n => n > 1 ? t('{n} photos', { n }) : t('{n} photo', { n });
+   // Un champ (MQ-00 § 7) d'une série : id propre à la carte, data-champ (sa clé) et data-label (son nom dans le témoin).
+   const field = (c, k, label, { v, rows = 0, max = 80, aide = '', lang = '', optional = false, err = '' } = {}) => {
+     const id = k + '-' + c.id;
+     const by = [aide && id + '-a', err && 'err-' + id].filter(Boolean).join(' ');
+     const attrs = ' id="' + id + '" name="' + k + '" maxlength="' + max + '"' + (lang ? ' lang="' + lang + '"' : '') + (by ? ' aria-describedby="' + by + '"' : '') + (err ? ' aria-invalid="true"' : '') + (k === 'name' ? ' required' : '') + ' data-champ="' + k + '" data-label="' + E(label) + '"';
+     return '<div class="champ-a"><label for="' + id + '">' + E(label) + (optional ? ' <span class="facultatif">' + E(t('(facultatif)')) + '</span>' : '') + '</label>'
+       + (aide ? '<p class="aide" id="' + id + '-a">' + E(aide) + '</p>' : '')
+       + (rows ? '<textarea' + attrs + ' rows="' + rows + '">' + E(v ?? '') + '</textarea>' : '<input type="text"' + attrs + ' value="' + E(v ?? '') + '">')
+       + (err ? '<p class="err" id="err-' + id + '"><span><b>' + E(t('Erreur :')) + '</b> ' + E(err) + '</span></p>' : '') + '</div>';
+   };
+   // Traductions (anglais, allemand) repliées ; « Proposer une traduction » si un traducteur est réglé : une suggestion,
+   // jamais enregistrée sans « Enregistrer ».
+   const trans = (c, k, label, v, { rows = 0, max = 80 } = {}) => {
+     const n = ['en', 'de'].filter(l => String(v[k + '_' + l] || '').trim()).length;
+     const one = l => field(c, k + '_' + l, l === 'en' ? t('{label} en anglais', { label }) : t('{label} en allemand', { label }), { v: v[k + '_' + l], rows, max, lang: l, optional: true })
+       + (it.translate ? '<p class="tr-act js-seul"><button class="btn ghost" type="button" data-trad="' + k + '_' + l + '-' + c.id + '" data-trad-de="' + k + '-' + c.id + ' ' + k + '_' + (l === 'en' ? 'de' : 'en') + '-' + c.id + '" data-trad-vers="' + l + '">' + E(t('Proposer une traduction')) + '<span class="sr-only"> : ' + E(l === 'en' ? t('{label} en anglais', { label }) : t('{label} en allemand', { label })) + '</span></button></p><p class="hint" role="status" data-trad-statut="' + k + '_' + l + '-' + c.id + '"></p>' : '');
+     return '<details class="tr-f"><summary>' + ic('chev') + E(t('{label} en anglais et en allemand', { label })) + ' <span class="sec">· ' + E(n === 2 ? t('2 sur 2') : n === 1 ? t('1 sur 2') : t('à traduire')) + '</span></summary>'
+       + '<div class="tr-corps">' + one('en') + one('de') + '<p class="hint">' + E(t('Vide : la version française s’affiche (sur la page allemande comme sur la page anglaise).')) + '</p></div></details>';
+   };
+   const newErr = it.errors && it.errors.name; %>
+<p class="help-link"><a href="/admin/aide#series"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-terrain">
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Séries') %></h1></div>
+  <p class="ep-meta"><span><%= C.length > 1 ? t('{n} séries', { n: C.length }) : t('{n} série', { n: C.length }) %></span><span><%= t('dans l’ordre de l’index du site') %></span><span role="status" data-temoin></span></p>
+  <div class="ep-actions"><a class="btn" href="#nouvelle-serie" data-nouvelle-serie>＋ <%= t('Nouvelle série') %></a></div>
+</header>
+<p class="rub-intro"><%= t('Le nom et le texte d’intention sont ceux de la page de chaque série sur le site.') %> <span class="js-seul"><%= t('Dans « Modifier », chaque champ s’enregistre quand vous le quittez ; « Défaire » revient en arrière pendant 10 secondes. Pour changer l’ordre : la poignée ⠿ et les flèches haut et bas, ou le menu ⋯.') %></span><span class="sans-script"><%= t('Pour changer l’ordre : le menu ⋯ de chaque série.') %></span><% if (it.can('series.propositions')) { %> <%~ t('Les propositions de série et les descriptions se règlent dans {link}.', { link: '<a class="lien-a" href="/admin/reglages/assistants">' + E(t('Réglages › Assistants d’analyse')) + '</a>' }) %><% } %></p>
+
+<details class="panel plier-p serie-nouvelle" id="nouvelle-serie"<%~ newErr ? ' open' : '' %>>
+  <summary><%~ ic('chev', 16) %><span><span class="h"><%= t('Nouvelle série') %></span><span class="sec"><%= t('Elle prend la première place ; déplaçable ensuite.') %></span></span></summary>
+  <form class="form" method="post" action="/admin/series">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <div class="champ-a"><label for="serie-nouvelle-nom"><%= t('Nom') %></label><input type="text" id="serie-nouvelle-nom" name="name" value="<%= it.values.name || '' %>" required maxlength="80"<%~ newErr ? ' aria-invalid="true" aria-describedby="err-serie-nouvelle"' : '' %>><% if (newErr) { %><p class="err" id="err-serie-nouvelle"><span><b><%= t('Erreur :') %></b> <%= it.errors.name %></span></p><% } %></div>
+    <p class="btns-ligne"><button class="btn" type="submit"><%= t('Créer la série') %></button></p>
+  </form>
+</details>
+
+<ol class="series-l" data-series-l aria-label="<%= t('Séries, dans l’ordre de l’index du site') %>">
+<% C.forEach((c, i) => { const ed = it.editErrors && it.editErrors.id === c.id ? it.editErrors : null; const v = ed ? ed.values : c; const errs = ed ? ed.errors : {}; const board = (it.boards && it.boards[c.id]) || []; %>
+  <li class="panel serie-c" id="serie-<%= c.id %>" data-id="<%= c.id %>" data-nom="<%= c.name %>">
+    <div class="serie-couv<%= board.length === 1 ? ' une' : board.length === 2 ? ' deux' : '' %>" aria-hidden="true">
+<% if (board.length) { board.forEach((p, k) => { %>      <%~ it.picture(p, { sizes: k && board.length > 2 ? '(max-width: 720px) calc(50vw - 36px), 120px' : k ? '(max-width: 720px) calc(100vw - 72px), 120px' : '(max-width: 720px) calc(100vw - 72px), 240px', alt: '' }) %>
+<% }) } else { %>      <span class="vide"><%= t('Aucune photo') %></span>
+<% } %>    </div>
+    <div class="serie-corps">
+      <div class="serie-tete">
+        <button class="serie-poignee js-seul" type="button" data-poignee aria-describedby="poignee-aide"><%~ ic('grip', 18) %><span class="sr-only"><%= t('Déplacer « {name} » (flèches haut et bas)', { name: c.name }) %></span></button>
+        <h2 id="nom-serie-<%= c.id %>" data-serie-nom><%= c.name %></h2>
+        <span class="sec serie-rang" data-rang><%= i === 0 ? t('1ʳᵉ sur {total}', { total: C.length }) : t('{n}ᵉ sur {total}', { n: i + 1, total: C.length }) %></span>
+      </div>
+      <p class="sec"><%= nb(c.count) %> · <span class="donnee" data-serie-adresse>/serie/<%= c.slug %></span></p>
+      <p class="serie-intention" data-serie-intention<%~ c.intent ? '' : ' data-vide' %>><%= c.intent || t('Pas encore de texte d’intention : la page de la série n’a que ses photos.') %></p>
+      <div class="btns-ligne serie-actes">
+        <a class="btn ghost" href="/admin/photos?serie=<%= c.slug %>"><%= t('Photos') %><span class="sr-only"> « <%= c.name %> »</span></a>
+        <details class="menu">
+          <summary class="btn ghost" aria-label="<%= t('Plus d’actions pour « {name} »', { name: c.name }) %>"><%~ ic('plus', 16) %></summary>
+          <div class="menu-pop">
+<% [['up', t('Monter d’une place'), i === 0], ['down', t('Descendre d’une place'), i === C.length - 1]].forEach(([dir, label, off]) => { if (off) return; %>            <form method="post" action="/admin/series/<%= c.id %>/move" data-deplacer="<%= dir %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="dir" value="<%= dir %>"><button type="submit"><%= label %></button></form>
+<% }) %>            <a href="#dlg-suppr-<%= c.id %>" data-ouvre="dlg-suppr-<%= c.id %>"><%= t('Supprimer…') %></a>
+          </div>
+        </details>
+      </div>
+      <details class="plier modif"<%~ ed ? ' open' : '' %>>
+        <summary><%~ ic('chev') %><%= t('Modifier') %><span class="sr-only"> « <%= c.name %> »</span></summary>
+        <form class="form serie-form" method="post" action="/admin/series/<%= c.id %>" novalidate data-serie-auto data-url="/admin/series/<%= c.id %>">
+          <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+          <%~ field(c, 'name', t('Nom'), { v: v.name, err: errs.name }) %>
+          <%~ trans(c, 'name', t('Nom'), v) %>
+          <%~ field(c, 'intent', t('Texte d’intention'), { v: v.intent, rows: 4, max: it.limits.intent, optional: true, aide: t('page de la série : ce qu’elle cherche, en quelques phrases ; un paragraphe, {n} signes au plus', { n: it.limits.intent }) }) %>
+          <%~ trans(c, 'intent', t('Texte d’intention'), v, { rows: 4, max: it.limits.intent }) %>
+          <details class="plier"<%~ errs.slug ? ' open' : '' %>>
+            <summary><%~ ic('chev') %><%= t('Adresse de la série (avancé)') %></summary>
+            <%~ field(c, 'slug', t('Adresse'), { v: v.slug, aide: t('/serie/… sur le site ; changer l’adresse casse les liens déjà partagés.'), err: errs.slug }) %>
+          </details>
+          <p class="sans-script form-pied"><button class="btn" type="submit"><%= t('Enregistrer « {name} »', { name: c.name }) %></button></p>
+        </form>
+      </details>
+    </div>
+    <dialog class="confirm cible" id="dlg-suppr-<%= c.id %>" aria-labelledby="ds-t-<%= c.id %>" aria-describedby="ds-d-<%= c.id %>">
+      <form method="post" action="/admin/series/<%= c.id %>/delete">
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+        <h2 id="ds-t-<%= c.id %>"><%= t('Supprimer « {name} » ?', { name: c.name }) %></h2>
+<% if (c.count && !canEmpty) { %>        <p id="ds-d-<%= c.id %>"><%= t('« {name} » contient', { name: c.name }) %> <strong><%= nb(c.count) %></strong>. <%= t('Seul un compte qui peut modifier toutes les photos peut la vider ; une série vide se supprime ici.') %></p>
+        <div class="actions"><a class="btn ghost" href="#serie-<%= c.id %>" data-annuler><%= t('Fermer') %></a></div>
+<% } else if (c.count && others(c).length) { %>        <p id="ds-d-<%= c.id %>"><%= t('« {name} » contient', { name: c.name }) %> <strong><%= nb(c.count) %></strong>. <%= t('Elles ne seront pas supprimées : choisissez où les déplacer.') %> <%= t('Sa page /serie/{slug} disparaîtra du site.', { slug: c.slug }) %></p>
+        <div class="champ-a"><label for="vers-<%= c.id %>"><%= t('Déplacer vers') %></label><select id="vers-<%= c.id %>" name="move_to"><% others(c).forEach(o => { %><option value="<%= o.id %>"><%= o.name %></option><% }) %></select></div>
+        <div class="actions"><a class="btn ghost" href="#serie-<%= c.id %>" data-annuler><%= t('Annuler') %></a><button class="btn danger" type="submit"><%~ ic('corbeille', 16) %><%= c.count > 1 ? t('Déplacer les {n} photos et supprimer', { n: c.count }) : t('Déplacer la photo et supprimer') %></button></div>
+<% } else if (c.count) { %>        <p id="ds-d-<%= c.id %>"><%= c.count > 1 ? t('C’est la seule série : ses {n} photos n’auraient nulle part où aller. Créez d’abord une autre série.', { n: c.count }) : t('C’est la seule série : sa photo n’aurait nulle part où aller. Créez d’abord une autre série.', { n: c.count }) %></p>
+        <div class="actions"><a class="btn ghost" href="#serie-<%= c.id %>" data-annuler><%= t('Fermer') %></a></div>
+<% } else { %>        <p id="ds-d-<%= c.id %>"><%= t('La série est vide.') %> <%= t('Sa page /serie/{slug} disparaîtra du site.', { slug: c.slug }) %></p>
+        <div class="actions"><a class="btn ghost" href="#serie-<%= c.id %>" data-annuler><%= t('Annuler') %></a><button class="btn danger" type="submit"><%~ ic('corbeille', 16) %><%= t('Supprimer « {name} »', { name: c.name }) %></button></div>
+<% } %>      </form>
+    </dialog>
+  </li>
+<% }) %>
+</ol>
+<p class="sr-only" id="poignee-aide"><%= t('Flèches haut ou gauche : avancer d’une place. Flèches bas ou droite : reculer d’une place.') %></p>
+</div>
+<%~ include('./_textes-contenus', it) %>
+<script src="<%= it.asset('admin/v2/contenus-v2.js') %>" defer></script>

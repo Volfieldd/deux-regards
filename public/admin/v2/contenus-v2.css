@@ -1,0 +1,160 @@
+/* Admin v2, vague 3b (terrain et contenus) : Personnes, Demandes et rencontres, la fiche d'une personne, une
+   rencontre, Séries, Sorties, une sortie, Voyages, un voyage. Les composants de la planche MQ-00 (admin-plus.css) et des
+   écrans précédents (v2.css) servent tels quels ; ce fichier n'ajoute que ce que ces écrans demandent, sous .v2-terrain
+   (l'enveloppe de leur contenu) : il ne change rien aux autres écrans. Chargé après v2.css (views/admin/v2/layout.eta).
+   Grille : aucun texte sous 12 px, aucun titre coupé, des cibles de 24 px au bureau et de 44 px au toucher, rien qui
+   déborde de 320 px (libellés allemands compris). */
+
+/* ---------- commun ---------- */
+.v2-terrain .btn { white-space: normal; text-wrap: balance; line-height: 1.25; padding-block: 6px; text-align: center; }
+.v2-terrain .etat { white-space: normal; }
+.v2-terrain .etats-l { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.v2-terrain .ep-titre h1 { overflow-wrap: anywhere; }
+.v2-terrain .sec { color: var(--ink3); font-size: var(--at-petit); }
+.v2-terrain .panel > h2 .sec, .v2-terrain .plier > summary .sec { margin-left: 6px; font-weight: 400; }
+.v2-terrain .ref, .v2-terrain .donnee { font-family: var(--mono); font-size: var(--at-petit); }
+.v2-terrain .row { align-items: flex-start; }
+.v2-terrain .row > .champ-a { flex: 1 1 220px; min-width: 0; }
+.v2-terrain .champ-a input, .v2-terrain .champ-a select, .v2-terrain .champ-a textarea { width: 100%; max-width: 100%; }
+.v2-terrain .champ-a input[type="date"], .v2-terrain .champ-a input[type="time"] { max-width: 16em; }
+.v2-terrain .plier { margin-top: 14px; }
+.v2-terrain .plier > summary { overflow-wrap: anywhere; }
+.v2-terrain .plier > form, .v2-terrain .plier > .form, .v2-terrain .plier > ul, .v2-terrain .plier > p { margin-top: 12px; }
+.v2-terrain .lien-a { overflow-wrap: anywhere; }
+@media (max-width: 720px), (pointer: coarse) { .v2-terrain .lien-a { min-width: 44px; } }
+.v2-terrain fieldset.vign-choix { margin: 0; padding: 0; border: 0; min-width: 0; }
+.v2-terrain .fiche-danger { margin-top: 8px; }
+
+/* Recherche au-dessus d'une liste : le champ et son bouton sur une ligne, l'un sous l'autre au téléphone. */
+.v2-terrain .cherche-p { justify-content: flex-start; align-items: flex-end; }
+.v2-terrain .cherche-p .champ-a { flex: 1 1 260px; max-width: 420px; margin: 0; }
+
+/* Visage (vignette ronde, décorative : le nom est dit à côté) ou initiale. */
+.v2-terrain .pers-visage { flex: none; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--photo-bg); }
+.v2-terrain .pers-visage.grand { width: 64px; height: 64px; }
+.v2-terrain .pers-ini { flex: none; display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--s2); color: var(--ink2); font-size: 15px; font-weight: 500; }
+.v2-terrain .pers-ini.petit { width: 26px; height: 26px; font-size: 12px; }
+.v2-terrain .pers-objet { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
+.v2-terrain .pers-objet .t { display: grid; gap: 2px; min-width: 0; }
+.v2-terrain .pers-objets > li { grid-template-columns: 40px minmax(0, 1fr); }
+.v2-terrain .pers-objets > li > .pers-ini, .v2-terrain .pers-objets > li > .pers-visage { grid-row: span 3; }
+.v2-terrain .pers-objets .t { margin: 0; }
+.v2-terrain .pers-objets .actions { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+.v2-terrain .pers-objets form { margin: 0; }
+.v2-terrain .pers-sortie { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.v2-terrain .pers-sortie .champ-a { max-width: 560px; }
+
+/* Photos en vignettes (une personne, une rencontre, une sortie, un voyage) : vignette, titre en lien, état, actions. */
+.v2-terrain .vign-p { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr)); gap: 16px 14px; margin: 0; padding: 0; list-style: none; }
+.v2-terrain .vign-p > li { display: grid; gap: 4px; align-content: start; min-width: 0; }
+.v2-terrain .vign-p > li > label { display: grid; gap: 4px; position: relative; cursor: pointer; }
+.v2-terrain .vign-p > li > label > .chk { position: absolute; top: 6px; left: 6px; z-index: 1; margin: 0; }
+.v2-terrain .vign-p .vign-img { display: block; aspect-ratio: 3 / 2; overflow: hidden; border-radius: 6px; background: var(--photo-bg); }
+.v2-terrain .vign-p .vign-img :is(img, picture, .ph) { display: block; width: 100%; height: 100%; object-fit: cover; }
+.v2-terrain .vign-p > li > label:has(.chk:checked) .vign-img { box-shadow: 0 0 0 3px var(--accent); }
+.v2-terrain .vign-p > li > label > .t { font-size: var(--at-texte); overflow-wrap: anywhere; }
+.v2-terrain .vign-p > li.exclue .vign-img { opacity: .45; }
+.v2-terrain .vign-p form { margin: 0; }
+.v2-terrain .vign-p .btns-ligne { gap: 6px; }
+.v2-terrain .vign-p .btn { min-height: 32px; padding-inline: 10px; font-size: 13px; }
+@media (max-width: 720px), (pointer: coarse) { .v2-terrain .vign-p .btn { min-height: 44px; } .v2-terrain .vign-p > li > label > .chk { width: 24px; height: 24px; } }
+
+/* ---------- listes en tableau (Personnes, Demandes et rencontres, Sorties) ---------- */
+.v2-terrain .liste-a .c-etat, .v2-terrain .liste-a .c-accord, .v2-terrain .liste-a .c-traiter { min-width: 0; }
+.v2-terrain .liste-a .c-quand { color: var(--ink2); font-size: var(--at-petit); white-space: nowrap; }
+.v2-terrain .renc-mot { display: block; margin-top: 4px; color: var(--ink2); font-size: var(--at-petit); font-weight: 400; font-style: italic; overflow-wrap: anywhere; }
+.v2-terrain .liste-a th[scope="row"] { font-weight: 400; }
+.v2-terrain .liste-a .ligne-lien { font-weight: 500; overflow-wrap: anywhere; }
+@media (max-width: 1100px) { .v2-terrain .liste-a .c-quand { white-space: normal; } }
+.v2-terrain .sorties-filtres { flex-direction: column; align-items: flex-start; }
+.v2-terrain .sortie-photos { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; min-width: 0; }
+.v2-terrain .sortie-photos > span:last-child { display: grid; }
+.v2-terrain .sortie-bande { flex-wrap: wrap; gap: 4px; min-width: 0; max-width: 100%; }
+.v2-terrain .sortie-bande img { height: 40px; width: auto; max-width: 60px; object-fit: cover; }
+.v2-terrain .sortie-visages { display: flex; gap: 4px; margin-bottom: 6px; }
+.v2-terrain .sortie-visages .pers-visage { width: 26px; height: 26px; }
+
+/* ---------- une rencontre ---------- */
+.v2-terrain .renc-grille { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 0 18px; align-items: start; }
+@media (max-width: 960px) { .v2-terrain .renc-grille { grid-template-columns: minmax(0, 1fr); } }
+.v2-terrain .renc-captures { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; }
+.v2-terrain .renc-captures figure { margin: 0; display: grid; gap: 4px; max-width: 100%; }
+.v2-terrain .renc-captures img { display: block; max-width: 100%; height: auto; border-radius: 6px; background: var(--photo-bg); }
+.v2-terrain .renc-captures .renc-signature { background: #fff; }
+.v2-terrain .renc-captures figcaption { color: var(--ink3); font-size: var(--at-min); }
+.v2-terrain .renc-histo .chrono li > span { overflow-wrap: anywhere; }
+.v2-terrain .renc-histo .att-t { display: block; color: var(--warn); }
+.v2-terrain .renc-histo q { display: block; }
+.v2-terrain .renc-tete { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; margin: 0 0 12px; }
+.v2-terrain .renc-tete h2 { margin: 0; }
+.v2-terrain .renc-carte img { display: block; max-width: 100%; height: auto; border-radius: 6px; }
+.v2-terrain .renc-liens .share-url { font-family: var(--mono); }
+.v2-terrain .renc-liens > li { grid-template-columns: 0 minmax(0, 1fr); column-gap: 0; }
+.v2-terrain .renc-form .choix-a { margin: 0; }
+.v2-terrain .renc-form .choix-a--ligne { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.v2-terrain .renc-form input[type="file"] { padding: 8px 0; }
+.v2-terrain .renc-suivi { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+/* ---------- séries ---------- */
+.v2-terrain .series-l { display: grid; gap: 16px; margin: 0 0 16px; padding: 0; list-style: none; }
+.v2-terrain .serie-c { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 18px; margin: 0; align-items: start; }
+@media (max-width: 720px) { .v2-terrain .serie-c { grid-template-columns: minmax(0, 1fr); } }
+.v2-terrain .serie-couv { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: 3px; aspect-ratio: 3 / 2; overflow: hidden; border-radius: 8px; background: var(--photo-bg); }
+.v2-terrain .serie-couv > :first-child { grid-row: span 2; }
+.v2-terrain .serie-couv.une { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.v2-terrain .serie-couv.deux { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+.v2-terrain .serie-couv.deux > :first-child { grid-row: auto; }
+.v2-terrain .serie-couv :is(img, picture) { display: block; width: 100%; height: 100%; object-fit: cover; }
+.v2-terrain .serie-couv .vide { grid-column: 1 / -1; grid-row: 1 / -1; display: grid; place-items: center; color: var(--ink2); font-size: var(--at-petit); }
+.v2-terrain .serie-corps { display: grid; gap: 6px; min-width: 0; }
+.v2-terrain .serie-corps > p { margin: 0; }
+.v2-terrain .serie-tete { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.main .v2-terrain .serie-tete h2 { margin: 0; font-size: var(--at-h2); overflow-wrap: anywhere; }
+.v2-terrain .serie-poignee { display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: var(--r-admin); background: transparent; color: var(--ink2); cursor: grab; }
+.v2-terrain .serie-poignee:hover { background: var(--s2); color: var(--ink); }
+.v2-terrain .serie-poignee:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+@media (max-width: 720px), (pointer: coarse) { .v2-terrain .serie-poignee { width: 44px; height: 44px; } }
+.v2-terrain .serie-intention { max-width: 64ch; color: var(--ink2); overflow-wrap: anywhere; white-space: pre-line; }
+.v2-terrain .serie-intention[data-vide] { color: var(--ink3); font-style: italic; }
+.v2-terrain .serie-actes { margin-top: 4px; }
+.v2-terrain .serie-actes .menu { margin-left: auto; }
+.v2-terrain .serie-actes .menu > summary { list-style: none; }
+.v2-terrain .serie-actes .menu > summary::-webkit-details-marker { display: none; }
+.v2-terrain .serie-form { margin-top: 12px; }
+.v2-terrain .serie-nouvelle .form { max-width: 560px; margin-top: 4px; }
+
+/* ---------- une sortie ---------- */
+.v2-terrain .sortie-voyage { margin: -8px 0 16px; }
+.v2-terrain .sortie-voyage .champ-a { margin: 0; min-width: 0; flex: 0 1 280px; }
+.v2-terrain .sortie-grille { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 0 18px; align-items: start; }
+@media (max-width: 1100px) { .v2-terrain .sortie-grille { grid-template-columns: minmax(0, 1fr); } }
+.v2-terrain .sortie-sugg { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.v2-terrain .sortie-cochees { position: sticky; bottom: 12px; z-index: 2; display: grid; gap: 10px; margin: 18px 0 0; box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+@media (max-width: 720px) { .v2-terrain .sortie-cochees { position: static; } }
+.v2-terrain .sortie-cochees .t { margin: 0; font-weight: 500; }
+.v2-terrain .sortie-cochees .champ-a { margin: 0; max-width: 420px; }
+.v2-terrain .sortie-cote .panel .form + .form, .v2-terrain .sortie-cote .panel .form + form { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+/* ---------- voyages ---------- */
+.v2-terrain .voyages-l { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+.v2-terrain .voyage-c { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 14px; margin: 0; align-items: start; }
+@media (max-width: 400px) { .v2-terrain .voyage-c { grid-template-columns: minmax(0, 1fr); } }
+.v2-terrain .voyage-couv { display: block; aspect-ratio: 3 / 2; overflow: hidden; border-radius: 6px; background: var(--photo-bg); }
+.v2-terrain .voyage-couv :is(img, picture, .ph) { display: block; width: 100%; height: 100%; object-fit: cover; }
+.v2-terrain .voyage-corps { display: grid; gap: 4px; min-width: 0; }
+.v2-terrain .voyage-corps p { margin: 0; }
+.main .v2-terrain .voyage-corps h2 { margin: 0; font-size: var(--at-h2); overflow-wrap: anywhere; }
+.v2-terrain .voyage-corps .ligne-lien { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .v2-terrain .voyage-corps .ligne-lien { min-height: 44px; } }
+.v2-terrain .voyage-jours { display: grid; margin: 0; padding: 0; list-style: none; }
+.v2-terrain .voyage-jours > li { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto auto; gap: 6px 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.v2-terrain .voyage-jours > li:first-child { border-top: 0; }
+.v2-terrain .voyage-jours .t { display: grid; gap: 2px; min-width: 0; }
+.v2-terrain .voyage-jours form { margin: 0; }
+@media (max-width: 720px) { .v2-terrain .voyage-jours > li { grid-template-columns: 40px minmax(0, 1fr); } .v2-terrain .voyage-jours .sortie-bande { display: none; } .v2-terrain .voyage-jours form { grid-column: 2; } }
+.v2-terrain .voyage-n { color: var(--ink3); }
+.v2-terrain .voyage-choix { max-height: 320px; overflow: auto; }
+.v2-terrain .voyage-choix label { flex-wrap: wrap; }
+.v2-terrain .voyage-page { display: grid; gap: 8px; margin: 0 0 16px; padding: 0 0 14px; border-bottom: 1px solid var(--line); }
+.v2-terrain .voyage-page p { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.v2-terrain .voyage-form { max-width: 720px; }

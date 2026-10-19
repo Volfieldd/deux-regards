@@ -1,0 +1,126 @@
+<% layout('./layout') %>
+<% const t = it.t, E = __eta.e; %>
+<% /* La fiche d'une personne (admin v2, vague 3b). Mêmes données, mêmes droits, mêmes images et mêmes routes que la v1
+      (views/admin/person.eta ; GET /admin/personnes/:id, et POST …/fusionner, …/ecarter, …/rattacher, …/detacher,
+      …/sortie, …/photos, …/effacer, GET …/export.zip) : rien de personnel en plus. La v2 : la décision en tête (pastille à
+      symbole), les rencontres en liste d'objets, les vignettes sans lien muet (UX-A-28), les recherches repliées, et
+      l'effacement, qui ne se défait pas, derrière un dialogue (MQ-09 ; sans script, il s'ouvre dans la page). */ %>
+<% const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>',
+     attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>', arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>',
+     chev: '<path d="M9 6l6 6-6 6"/>', retour: '<path d="M19 12H5M11 6l-6 6 6 6"/>', alerte: '<path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/>',
+     corbeille: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>';
+   const p = it.person, D = p.latest;
+   const LABELS = { site: t('site'), instagram: t('Instagram'), print: t('tirages'), name: t('prénom') };
+   const pl = (n, zero, one, many) => n > 1 ? many : n === 1 ? one : zero;
+   const usages = c => Object.keys(LABELS).filter(s => c && c[s]).map(s => LABELS[s]).join(', ');
+   const dayOf = e => e.session_day || e.met_on || '';
+   const who = p.name || p.ref || t('Sans nom');
+   const csrf = '<input type="hidden" name="_csrf" value="' + E(it.csrf) + '">'; %>
+<p class="help-link"><a href="/admin/aide#rencontres-les-personnes"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-terrain">
+<header class="ep">
+  <a class="ep-retour" href="/admin/personnes"><%~ ic('retour', 14) %><%= t('Personnes') %></a>
+  <div class="ep-titre"><% if (p.faceFrom) { %><img class="pers-visage grand" src="/admin/rencontres/<%= p.faceFrom %>/portrait?mini=1" alt="" width="64" height="64"><% } %><h1><%= who %></h1></div>
+  <p class="ep-meta"><span class="ref"><%= p.meetings.map(e => e.ref).filter(Boolean).join(' · ') || t('sans carte') %></span><span><%= pl(p.meetings.length, t('0 rencontre'), t('1 rencontre'), t('{n} rencontres', { n: p.meetings.length })) %></span><span><%= pl(p.photos.length, t('0 photo'), t('1 photo'), t('{n} photos', { n: p.photos.length })) %></span></p>
+<% if (it.can('terrain.app')) { %>  <div class="ep-actions"><a class="btn ghost" href="/admin/rencontre">＋ <%= t('Nouvelle rencontre sur le téléphone') %></a></div>
+<% } %></header>
+<section class="fiche-etats" aria-labelledby="pp-dec">
+  <h2 class="sr-only" id="pp-dec"><%= t('Décision de la personne') %></h2>
+  <p class="fiche-pastilles"><% if (p.refused) { %><%~ etat('arret', t('Refuse la publication')) %><span class="sec"><%= t('un refus vaut pour toutes ses rencontres et toutes ses photos') %></span><% } else if (D && D.consent) { %><%~ etat('abouti', t('Dernier accord : {usages}', { usages: usages(D.consent) })) %><span class="sec"><%= t('un accord ne vaut que pour la sortie où il a été donné') %></span><% } else { %><%~ etat('afaire', t('Sans décision')) %><% } %>
+<% if (p.rights) { %><a class="att" href="#droits"><%~ ic('alerte') %><%= p.rights.rights_request === 'effacement' ? t('Droits : effacement') : t('Droits : accès') %></a><% } %></p>
+</section>
+
+<% if (it.others.length) { %>
+<section class="panel" aria-labelledby="pp-same">
+  <h2 id="pp-same"><%= t('Rapprochement proposé') %> <span class="sec"><%= t('même adresse e-mail') %></span></h2>
+  <ul class="objets-a pers-objets">
+<% it.others.forEach(o => { const name = o.name || o.ref || t('Sans nom'); %>    <li><span class="pers-ini" aria-hidden="true"><%= name.charAt(0).toUpperCase() %></span>
+      <p class="t"><a class="lien-a" href="/admin/personnes/<%= o.id %>"><%= name %></a><span class="sec ref"><%= o.meetings.map(e => e.ref).filter(Boolean).join(' · ') %></span></p>
+      <div class="actions btns-ligne">
+        <form method="post" action="/admin/personnes/<%= p.id %>/fusionner"><%~ csrf %><input type="hidden" name="autre" value="<%= o.id %>"><button class="btn" type="submit"><%= t('C’est la même personne') %><span class="sr-only"> : <%= name %></span></button></form>
+        <form method="post" action="/admin/personnes/<%= p.id %>/ecarter"><%~ csrf %><input type="hidden" name="autre" value="<%= o.id %>"><button class="btn ghost" type="submit"><%= t('Ce n’est pas elle') %><span class="sr-only"> : <%= name %></span></button></form>
+      </div></li>
+<% }) %>  </ul>
+  <p class="hint"><%= t('Jamais d’après le visage : seulement une adresse identique, à confirmer.') %></p>
+</section>
+<% } %>
+
+<section class="panel" id="rencontres" aria-labelledby="pp-meet">
+  <h2 id="pp-meet"><%= t('Rencontres') %> <span class="sec"><%= t('une par sortie, chacune avec son accord') %></span></h2>
+  <ul class="objets-a pers-objets">
+<% p.meetings.forEach(e => { const url = e.author_id && dayOf(e) ? it.outingUrl(e.author_id, dayOf(e), e.met_time) : null; const ref = e.ref || t('Sans carte'); %>    <li><span class="pers-ini" aria-hidden="true"><%= ref.charAt(0).toUpperCase() %></span>
+      <p class="t"><a class="lien-a" href="/admin/rencontres/<%= e.id %>"><%= t('Rencontre {ref}', { ref }) %></a><span class="sec"><%= [e.author, dayOf(e), e.met_time].filter(Boolean).join(' · ') || t('date inconnue') %></span></p>
+      <p class="detail"><% if (e.refused) { %><%~ etat('arret', t('Refus')) %><% } else if (e.consent) { %><%~ etat(e.consent_source === 'en_ligne' && !e.verified ? 'attention' : 'abouti', e.consent_source === 'en_ligne' && !e.verified ? t('en ligne, non vérifié : {usages}', { usages: usages(e.consent) }) : t('accord : {usages}', { usages: usages(e.consent) })) %><% } else { %><%~ etat('afaire', t('Sans décision')) %><% } %></p>
+<% if (url || (p.meetings.length > 1 && it.canManage)) { %>      <div class="actions btns-ligne"><% if (url) { %><a class="btn ghost" href="<%= url %>"><%= t('Ouvrir la sortie') %><span class="sr-only"> <%= dayOf(e) %></span></a><% } %>
+<% if (p.meetings.length > 1 && it.canManage) { %>        <form method="post" action="/admin/personnes/<%= p.id %>/detacher"><%~ csrf %><input type="hidden" name="rencontre" value="<%= e.id %>"><button class="btn ghost" type="submit"><%= t('Ce n’est pas elle') %><span class="sr-only"> : <%= t('Rencontre {ref}', { ref }) %></span></button></form>
+<% } %>      </div>
+<% } %>    </li>
+<% }) %>  </ul>
+<% if (p.shared) { %>  <p class="note-a"><%~ ic('alerte', 16) %><span><%= t('Cette personne a aussi été photographiée par l’autre photographe : vous ne voyez que vos rencontres, et seul un administrateur peut la rapprocher, la séparer ou la modifier.') %></span></p>
+<% } %>
+<% if (it.canManage) { %>  <form class="form pers-sortie" method="post" action="/admin/personnes/<%= p.id %>/sortie">
+    <%~ csrf %>
+    <div class="champ-a"><label for="pp-sortie"><%= t('Était aussi là lors de la sortie') %></label><p class="aide" id="pp-sortie-a"><%= t('La rencontre est ajoutée sans décision : demandez-lui son accord.') %></p><select id="pp-sortie" name="sortie" aria-describedby="pp-sortie-a"><% it.outings.forEach(o => { %><option value="<%= o.author.id %>|<%= o.day %>|<%= o.starts %>"><%= o.day %> · <%= o.author.name %><%= o.place ? ` · ${o.place}` : '' %><%= o.starts !== '00:00' ? ` · ${t('à partir de {time}', { time: o.starts })}` : '' %></option><% }) %></select></div>
+    <p class="btns-ligne"><button class="btn ghost" type="submit"><%= t('Ajouter la rencontre') %></button></p>
+  </form>
+  <details class="plier" id="rattacher"<%~ it.search && it.attachable.length ? ' open' : '' %>>
+    <summary><%~ ic('chev', 14) %><%= t('Rattacher une rencontre existante') %> <span class="sec"><%= t('la même personne, saisie à part') %></span></summary>
+    <form class="filtres-l cherche-p" method="get" action="/admin/personnes/<%= p.id %>#rattacher" role="search"><div class="champ-a"><label for="pp-cherche-r"><%= t('Chercher une rencontre') %></label><input type="search" id="pp-cherche-r" name="q" value="<%= it.search %>" placeholder="<%= t('Référence, nom, adresse…') %>"></div><button class="btn ghost" type="submit"><%~ ic('search', 16) %><%= t('Chercher') %></button></form>
+<% if (it.attachable.length) { %>    <ul class="objets-a pers-objets">
+<% it.attachable.forEach(e => { const ref = e.ref || t('Sans carte'); %>      <li><span class="pers-ini" aria-hidden="true"><%= ref.charAt(0).toUpperCase() %></span><p class="t"><%= ref %><%= e.name ? ` · ${e.name}` : '' %><span class="sec"><%= e.author || '' %> · <%= e.met_on || '' %></span></p>
+        <form class="actions" method="post" action="/admin/personnes/<%= p.id %>/rattacher"><%~ csrf %><input type="hidden" name="rencontre" value="<%= e.id %>"><button class="btn ghost" type="submit"><%= t('Rattacher') %><span class="sr-only"> : <%= ref %></span></button></form></li>
+<% }) %>    </ul>
+<% } else { %>    <p class="hint"><%= it.search ? t('Aucune autre rencontre pour cette recherche.') : t('Aucune autre rencontre.') %></p><% } %>
+  </details>
+<% } %></section>
+
+<section class="panel" id="photos" aria-labelledby="pp-photos">
+  <h2 id="pp-photos"><%= t('Photos') %> <span class="sec"><%= t('liées à l’une de ses rencontres') %></span></h2>
+<% if (p.photos.length) { %>  <ul class="vign-p">
+<% p.photos.forEach(ph => { %>    <li><span class="vign-img" aria-hidden="true"><% if (ph.ready) { %><%~ it.picture(ph, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></span><a class="lien-a" href="/admin/photos/<%= ph.id %>"><%= ph.title %></a><span class="sec"><%= ph.status === 'published' ? t('publiée') : t('brouillon') %></span></li>
+<% }) %>  </ul>
+<% } else { %>  <p class="hint"><%= t('Aucune photo liée : les photos de ses sorties la concernent déjà si elles ont un visage ; liez celles où elle figure.') %></p><% } %>
+<% if (it.canManage) { %>  <details class="plier" id="lier"<%~ it.search && it.photoCandidates.length ? ' open' : '' %>>
+    <summary><%~ ic('chev', 14) %><%= t('Lier des photos où elle figure') %> <span class="sec"><%= t('rattachées à sa rencontre de la sortie de chaque photo (créée sans décision si besoin)') %></span></summary>
+    <form class="filtres-l cherche-p" method="get" action="/admin/personnes/<%= p.id %>#lier" role="search"><div class="champ-a"><label for="pp-cherche-p"><%= t('Chercher une photo') %></label><input type="search" id="pp-cherche-p" name="q" value="<%= it.search %>" placeholder="<%= t('Titre, lieu…') %>"></div><button class="btn ghost" type="submit"><%~ ic('search', 16) %><%= t('Chercher') %></button></form>
+    <form method="post" action="/admin/personnes/<%= p.id %>/photos" data-cocher>
+      <%~ csrf %>
+      <fieldset class="vign-choix"><legend class="sr-only"><%= t('Photos à lier') %></legend>
+      <!-- [html-validate-disable-block form-dup-name: les cases forment un groupe, name="photo" répété comme dans la v1 ; le serveur en reçoit la liste] -->
+      <ul class="vign-p">
+<% it.photoCandidates.forEach(ph => { %>        <li><label><input class="chk" type="checkbox" name="photo" value="<%= ph.id %>"><span class="vign-img"><% if (ph.ready) { %><%~ it.picture(ph, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></span><span class="t"><%= ph.title %></span></label><span class="sec"><%= ph.taken_on %> · <%= ph.author %></span></li>
+<% }) %>      </ul></fieldset>
+<% if (!it.photoCandidates.length) { %>      <p class="hint"><%= t('Aucune photo trouvée.') %></p><% } %>
+      <p class="btns-ligne"><button class="btn ghost" type="submit" data-cocher-bouton><%= t('Lier les photos cochées') %></button></p>
+    </form>
+  </details>
+<% } %></section>
+
+<section class="panel" id="droits" aria-labelledby="pp-rights">
+  <h2 id="pp-rights"><%= t('Droits de la personne') %> <span class="sec"><%= t('RGPD, toutes rencontres confondues') %></span></h2>
+<% if (p.rights) { %>  <p class="avert"><%~ ic('alerte') %><span><%= p.rights.rights_request === 'effacement' ? t('Demande d’effacement en cours (rencontre {ref}) : traitez-la sur la fiche de la rencontre.', { ref: p.rights.ref || t('sans carte') }) : t('Demande d’accès en cours (rencontre {ref}) : traitez-la sur la fiche de la rencontre.', { ref: p.rights.ref || t('sans carte') }) %></span></p><% } %>
+<% if (it.can('personnes.exporter') || it.can('personnes.effacer')) { %>  <p class="btns-ligne">
+<% if (it.can('personnes.exporter')) { %>    <a class="btn ghost" href="/admin/personnes/<%= p.id %>/export.zip"><%= t('Exporter ses données (.zip)') %></a>
+<% } %><% if (it.can('personnes.effacer')) { %>    <a class="btn danger-c" href="#dlg-effacer" data-ouvre="dlg-effacer"><%= t('Effacer cette personne…') %></a>
+<% } %>  </p>
+<% } %><% if (!it.can('personnes.effacer')) { %>  <p class="hint"><%= t('L’export et l’effacement des données sont faits par un administrateur.') %></p>
+<% } %></section>
+
+<% if (it.can('personnes.effacer')) { %>
+<dialog class="confirm cible" id="dlg-effacer" aria-labelledby="de-t" aria-describedby="de-d">
+  <form method="post" action="/admin/personnes/<%= p.id %>/effacer">
+    <%~ csrf %>
+    <h2 id="de-t"><%= t('Effacer « {name} » ?', { name: who }) %></h2>
+    <p id="de-d"><%= p.meetings.length > 1 ? t('Ses {n} rencontres et leurs données (adresse, messages, signature, visage, cartes) seront effacées. Si elle refusait la publication et que des photos liées restent, une trace anonyme garde le refus.', { n: p.meetings.length }) : t('Sa rencontre et ses données (adresse, messages, signature, visage, cartes) seront effacées. Si elle refusait la publication et que des photos liées restent, une trace anonyme garde le refus.', { n: p.meetings.length }) %> <%= t('Cette action est définitive.') %></p>
+<% if (p.photos.length) { %>    <div class="choix-a"><label><input type="checkbox" name="photos"><span><%= p.photos.length > 1 ? t('Supprimer aussi les {n} photos liées', { n: p.photos.length }) : t('Supprimer aussi la photo liée', { n: p.photos.length }) %></span></label></div>
+<% } %>    <div class="actions"><a class="btn ghost" href="#droits" data-annuler><%= t('Annuler') %></a><button class="btn danger" type="submit"><%~ ic('corbeille', 16) %><%= t('Effacer définitivement') %></button></div>
+  </form>
+</dialog>
+<% } %>
+</div>
+<%~ include('./_textes-contenus', it) %>
+<script src="<%= it.asset('admin/v2/contenus-v2.js') %>" defer></script>

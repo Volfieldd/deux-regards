@@ -1,0 +1,15 @@
+<%
+  // Textes de contenus-v2.js (Personnes, une rencontre, Séries, Sorties, Voyages), traduits par le serveur : un bloc de
+  // données, jamais exécuté (CSP), réuni par admin-v2.js à ceux de views/admin/v2/_textes.eta. La clé est le texte français.
+  const t = it.t;
+  const tk = k => [k, t(k)];
+  const out = Object.fromEntries([
+    tk('Pour les {n} photos cochées :'), tk('Pour la photo cochée :'), tk('Lier les {n} photos cochées'), tk('Lier la photo cochée'),
+    tk('Lier les photos cochées'), tk('Cochez au moins une photo.'), tk('« {champ} » de « {photo} »'), tk('« {champ} » enregistré.'),
+    tk('« {champ} » rétabli.'), tk('Erreur : {msg}'), tk('« {serie} » : {n}ᵉ sur {total}.'), tk('Ordre rétabli.'), tk('{n}ᵉ sur {total}'), tk('1ʳᵉ sur {total}'), tk('« {serie} » : 1ʳᵉ sur {total}.'),
+    tk('Suggestion à relire : rien n’est enregistré avant « Enregistrer ».'), tk('Enregistrer'), tk('Défaire'), tk('Suggestion retirée.'),
+    tk('Traduction en cours…'), tk('Rien à traduire : remplissez d’abord le texte français.'),
+    tk('Pas encore de texte d’intention : la page de la série n’a que ses photos.')
+  ]);
+%>
+<script type="application/json" id="v2-textes-page"><%~ JSON.stringify({ t: out }).replace(/</g, '\\u003c') %></script>

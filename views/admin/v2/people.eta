@@ -1,0 +1,51 @@
+<% const t = it.t, E = __eta.e; %>
+<% /* Personnes (admin v2, vague 3b) : la liste des personnes photographiées. Mêmes données, mêmes droits et mêmes images que
+      la v1 (views/admin/people.eta, route GET /admin/personnes de server/routes/rencontres.js) : rien de personnel en plus.
+      La v2 : un titre qui n'est plus celui des demandes (UX-A-16 : « Personnes » ici, « Demandes et rencontres » là-bas), un
+      tableau en cartes sous 1 100 px, la décision en pastille à symbole (lexique § 3), le visage décoratif et le nom en lien. */ %>
+<% layout('./layout', { pageTitle: `${t('Personnes')} · ${t('Administration')} · ${it.siteName}` }) %>
+<% const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>',
+     attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>', arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>',
+     search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>';
+   const LABELS = { site: t('site'), instagram: t('Instagram'), print: t('tirages'), name: t('prénom') };
+   const pl = (n, zero, one, many) => n > 1 ? many : n === 1 ? one : zero;
+   const L = it.list;
+   const fresh = L.filter(p => p.fresh).length, rights = L.filter(p => p.rights).length; %>
+<p class="help-link"><a href="/admin/aide#rencontres-les-personnes"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-terrain">
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Personnes') %></h1></div>
+  <p class="ep-meta"><span><%= L.length > 1 ? t('{n} personnes', { n: L.length }) : t('{n} personne', { n: L.length }) %></span><% if (fresh) { %><span><%= fresh > 1 ? t('{n} nouvelles demandes', { n: fresh }) : t('1 nouvelle demande') %></span><% } %><% if (rights) { %><span><%= rights > 1 ? t('{n} demandes sur les données', { n: rights }) : t('1 demande sur les données') %></span><% } %></p>
+  <div class="ep-actions">
+    <a class="btn ghost" href="/admin/rencontres"><%= t('Demandes et rencontres') %></a>
+<% if (it.can('terrain.app')) { %>    <a class="btn" href="/admin/rencontre">＋ <%= t('Nouvelle rencontre') %></a>
+<% } %>  </div>
+</header>
+<p class="rub-intro"><%= t('Une personne peut avoir été rencontrée lors de plusieurs sorties : une rencontre par sortie, chacune avec son accord ; un refus vaut pour toutes.') %></p>
+<form class="filtres-l cherche-p" method="get" action="/admin/personnes" role="search">
+  <div class="champ-a"><label for="pp-q"><%= t('Rechercher une personne') %></label><input type="search" id="pp-q" name="q" value="<%= it.search %>" placeholder="<%= t('Nom, référence, adresse…') %>"></div>
+  <button class="btn ghost" type="submit"><%~ ic('search', 16) %><%= t('Rechercher') %></button>
+</form>
+<% if (!L.length) { %>
+<p class="panel hint"><%= it.search ? t('Aucune personne pour cette recherche. Elles apparaissent à chaque rencontre : sur le téléphone (Nouvelle rencontre), par une carte signée saisie, ou par une demande sur /bonjour.') : t('Aucune personne. Elles apparaissent à chaque rencontre : sur le téléphone (Nouvelle rencontre), par une carte signée saisie, ou par une demande sur /bonjour.') %></p>
+<% } else { %>
+<table class="liste-a pers-liste">
+  <caption><%= it.search ? t('Résultats de la recherche « {q} ».', { q: it.search }) : t('Les plus récentes d’abord.') %></caption>
+  <thead><tr><th scope="col"><%= t('Personne') %></th><th scope="col"><%= t('Décision') %></th><th scope="col"><%= t('À traiter') %></th></tr></thead>
+  <tbody>
+<% L.forEach(p => { const D = p.latest; %>
+    <tr>
+      <th scope="row" class="c-pers"><div class="pers-objet"><% if (p.faceFrom) { %><img class="pers-visage" src="/admin/rencontres/<%= p.faceFrom %>/portrait?mini=1" alt="" width="40" height="40" loading="lazy"><% } else { %><span class="pers-ini" aria-hidden="true"><%= (p.name || p.ref || '?').charAt(0).toUpperCase() %></span><% } %>
+        <span class="t"><a class="ligne-lien" href="/admin/personnes/<%= p.id %>"><%= p.name || p.ref || t('Sans nom') %></a><span class="sec"><span class="ref"><%= p.meetings.map(e => e.ref).filter(Boolean).join(' · ') || t('sans carte') %></span> · <%= pl(p.meetings.length, t('0 rencontre'), t('1 rencontre'), t('{n} rencontres', { n: p.meetings.length })) %> · <%= pl(p.photos.length, t('0 photo'), t('1 photo'), t('{n} photos', { n: p.photos.length })) %></span></span></div></th>
+      <td class="c-etat"><% if (p.refused) { %><%~ etat('arret', t('Refuse la publication')) %><% } else if (D && D.consent) { %><%~ etat('abouti', t('Dernier accord : {usages}', { usages: Object.keys(LABELS).filter(s => D.consent[s]).map(s => LABELS[s]).join(', ') })) %><% } else { %><%~ etat('afaire', t('Sans décision')) %><% } %></td>
+      <td class="c-traiter"><% const todo = [p.fresh && etat('attention', t('Nouvelle demande')), p.rights && etat('arret', p.rights.rights_request === 'effacement' ? t('Droits : effacement') : t('Droits : accès')), p.suggestions && etat('attention', t('Rapprochement proposé'))].filter(Boolean); %><%~ todo.length ? '<span class="etats-l">' + todo.join('') + '</span>' : '<span class="sec">' + E(t('rien')) + '</span>' %></td>
+    </tr>
+<% }) %>
+  </tbody>
+</table>
+<% } %>
+</div>

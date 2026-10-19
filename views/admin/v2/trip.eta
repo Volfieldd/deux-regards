@@ -1,0 +1,160 @@
+<% layout('./layout') %>
+<% const t = it.t, E = __eta.e; %>
+<% /* Un voyage (admin v2, vague 3b). Mêmes champs, mêmes droits et mêmes routes que la v1 (views/admin/trip.eta ;
+      POST /admin/voyages/:id, …/journees, …/journees/retirer, …/proposer, …/publier, …/supprimer). La v2 : le nom et les
+      textes de la page publique s'enregistrent quand on les quitte (JSON, même route ; « Défaire » 10 s ; MQ-09), leurs
+      traductions repliées ; mettre la page en ligne ou l'en retirer, publier les photos prêtes et supprimer le voyage
+      passent par un dialogue qui dit ce qui change (UX-A-07 : plus de suppression en un clic) ; sans script, les dialogues
+      s'ouvrent dans la page et le formulaire garde son bouton. La route garde son contrôle de portée (authz_fail hors
+      portée, BV-14) et les textes publics restent vus par la Vigie (BV-20, BV-21). */ %>
+<% const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>',
+     attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>', arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>',
+     retour: '<path d="M19 12H5M11 6l-6 6 6 6"/>', chev: '<path d="M9 6l6 6-6 6"/>', corbeille: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+     site: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>', alerte: '<path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>';
+   const tr = it.tr; const LV = { ok: t('prête'), warn: t('à vérifier'), no: t('bloquée') }, LK = { ok: 'abouti', warn: 'attention', no: 'arret' };
+   const base = `/admin/voyages/${tr.id}`;
+   const csrf = '<input type="hidden" name="_csrf" value="' + E(it.csrf) + '">';
+   const locked = !tr.public && !it.pagePublish;
+   const action = it.readyDrafts && it.can('photos.publier') ? 'publier' : it.readyDrafts && it.can('photos.proposer') ? 'proposer' : null;
+   const pageState = tr.public ? (tr.nPublished ? t('en ligne') : t('en attente d’une photo publiée')) : t('aperçu réservé à l’équipe');
+   // Un champ (MQ-00 § 7) enregistré au champ quitté (data-champ : sa clé, data-label : son nom dans le témoin).
+   const field = (k, label, { rows = 0, max = 120, aide = '', lang = '', optional = false, extra = '' } = {}) => {
+     const id = 'tr-' + k.replace('_', '-');
+     const attrs = ' id="' + id + '" name="' + k + '" maxlength="' + max + '"' + (lang ? ' lang="' + lang + '"' : '') + (aide ? ' aria-describedby="' + id + '-a"' : '') + ' data-champ="' + k + '" data-label="' + E(label) + '"' + extra;
+     return '<div class="champ-a"><label for="' + id + '">' + E(label) + (optional ? ' <span class="facultatif">' + E(t('(facultatif)')) + '</span>' : '') + '</label>' + (aide ? '<p class="aide" id="' + id + '-a">' + E(aide) + '</p>' : '')
+       + (rows ? '<textarea' + attrs + ' rows="' + rows + '">' + E(tr[k] ?? '') + '</textarea>' : '<input type="text"' + attrs + ' value="' + E(tr[k] ?? '') + '">') + '</div>';
+   };
+   const trans = (k, label, { rows = 0, max = 120 } = {}) => {
+     const n = ['en', 'de'].filter(l => String(tr[k + '_' + l] || '').trim()).length;
+     const one = l => field(k + '_' + l, l === 'en' ? t('{label} en anglais', { label }) : t('{label} en allemand', { label }), { rows, max, lang: l, optional: true })
+       + (it.translate ? '<p class="tr-act js-seul"><button class="btn ghost" type="button" data-trad="tr-' + k + '-' + l + '" data-trad-de="tr-' + k + ' tr-' + k + '-' + (l === 'en' ? 'de' : 'en') + '" data-trad-vers="' + l + '">' + E(t('Proposer une traduction')) + '<span class="sr-only"> : ' + E(l === 'en' ? t('{label} en anglais', { label }) : t('{label} en allemand', { label })) + '</span></button></p><p class="hint" role="status" data-trad-statut="tr-' + k + '-' + l + '"></p>' : '');
+     return '<details class="tr-f"><summary>' + ic('chev', 14) + E(t('{label} en anglais et en allemand', { label })) + ' <span class="sec">· ' + E(n === 2 ? t('2 sur 2') : n === 1 ? t('1 sur 2') : t('à traduire')) + '</span></summary>'
+       + '<div class="tr-corps">' + one('en') + one('de') + '<p class="hint">' + E(t('Vide : la version française s’affiche (sur la page allemande comme sur la page anglaise).')) + '</p></div></details>';
+   }; %>
+<p class="help-link"><a href="/admin/aide#rencontres-les-voyages"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-terrain">
+<header class="ep">
+  <a class="ep-retour" href="/admin/voyages"><%~ ic('retour', 14) %><%= t('Voyages') %></a>
+  <div class="ep-titre"><h1 data-voyage-titre><%= tr.name %></h1><%~ tr.public ? etat('abouti', t('Page en ligne')) : etat('afaire', t('Page réservée à l’équipe')) %></div>
+  <p class="ep-meta"><span><%= tr.span %></span><span><%= tr.who %></span><span><%= tr.nDays > 1 ? t('{n} journées', { n: tr.nDays }) : t('{n} journée', { n: tr.nDays }) %></span><span><%= tr.nPhotos > 1 ? t('{n} photos', { n: tr.nPhotos }) : t('{n} photo', { n: tr.nPhotos }) %></span><span><%= tr.nPeople > 1 ? t('{n} personnes', { n: tr.nPeople }) : t('{n} personne', { n: tr.nPeople }) %></span><span role="status" data-temoin></span></p>
+  <div class="ep-actions">
+    <a class="btn ghost" href="/voyage/<%= tr.slug %>" target="_blank" rel="noopener"><%= tr.public ? t('Voir la page') : t('Aperçu de la page') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span></a>
+<% if (action) { %>    <a class="btn" href="#dlg-lot" data-ouvre="dlg-lot"><%= action === 'publier' ? t('Publier les photos prêtes · {n}…', { n: it.readyDrafts }) : t('Proposer les photos prêtes · {n}…', { n: it.readyDrafts }) %></a>
+<% } %>  </div>
+</header>
+
+<section class="panel" id="journees" aria-labelledby="tr-days">
+  <h2 id="tr-days"><%= t('Journées du voyage') %> <span class="sec"><%= t('chacune est une sortie') %></span></h2>
+<% if (!it.days.length) { %>  <p class="hint"><%= t('Aucune journée : rattachez-en ci-dessous, ou depuis la page d’une sortie.') %></p>
+<% } else { %>  <ol class="voyage-jours">
+<% it.days.forEach((d, i) => { %>    <li>
+      <span class="voyage-n donnee"><%= t('J{n}', { n: i + 1 }) %></span>
+      <span class="t"><a class="lien-a" href="<%= d.url %>"><%= d.when %><%= d.place ? ` · ${d.place}` : '' %></a><span class="sec"><%= d.author ? d.author.name : '' %> · <%= d.nPhotos > 1 ? t('{n} photos', { n: d.nPhotos }) : t('{n} photo', { n: d.nPhotos }) %> · <%= d.nPeople > 1 ? t('{n} personnes', { n: d.nPeople }) : t('{n} personne', { n: d.nPeople }) %></span></span>
+      <span class="vignettes-a sortie-bande" aria-hidden="true"><% d.strip.forEach(p => { %><%~ it.picture(p, { sizes: '48px', alt: '' }) %><% }) %></span>
+<% if (it.manage) { %>      <form method="post" action="<%= base %>/journees/retirer"><%~ csrf %><input type="hidden" name="jour" value="<%= d.author_id %>:<%= d.day %>"><button class="btn ghost" type="submit"><%= t('Retirer') %><span class="sr-only"> <%= t('la journée du {date} du voyage', { date: d.when }) %></span></button></form>
+<% } %>    </li>
+<% }) %>  </ol>
+<% } %>
+<% if (it.manage) { %>
+  <details class="plier" id="rattacher"<%~ !it.days.length ? ' open' : '' %>>
+    <summary><%~ ic('chev', 14) %><%= t('Rattacher des journées') %></summary>
+    <form class="form" method="post" action="<%= base %>/journees">
+      <%~ csrf %>
+      <div class="row">
+        <div class="champ-a"><label for="tr-du"><%= t('Du') %></label><input type="date" id="tr-du" name="du"></div>
+        <div class="champ-a"><label for="tr-au"><%= t('Au') %></label><input type="date" id="tr-au" name="au"></div>
+<% if (tr.author_id == null && it.allTrips) { %>        <div class="champ-a"><label for="tr-ph"><%= t('Photographe') %></label><select id="tr-ph" name="photographe"><option value=""><%= it.authors.length === 2 ? t('les deux') : t('tous') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
+<% } %>      </div>
+      <p class="hint"><%= t('Toutes les journées de prise de vue entre ces deux dates (photos datées par l’appareil, ou rencontres). Une journée déjà dans un autre voyage y est déplacée.') %></p>
+<% if (it.nearby.length) { %>      <fieldset class="choix-a voyage-choix"><legend><%= t('Ou cochez des sorties') %> <span class="sec"><%= t('les plus récentes d’abord') %></span></legend>
+<% it.nearby.forEach(o => { %>        <label><input type="checkbox" name="jours" value="<%= o.author.id %>:<%= o.day %>"><span><%= o.when %><%= o.place ? ` · ${o.place}` : '' %></span><span class="sec"><%= o.author.name %><%= o.other ? ` · ${t('dans « {name} »', { name: o.other.name })}` : '' %></span></label>
+<% }) %>      </fieldset>
+<% } %>      <p class="btns-ligne"><button class="btn" type="submit"><%= t('Rattacher') %></button></p>
+    </form>
+  </details>
+<% } %>
+</section>
+
+<section class="panel" aria-labelledby="tr-photos">
+  <h2 id="tr-photos"><%= t('Photos du voyage') %> <span class="sec"><%= tr.nPublished > 1 ? t('{n} publiées', { n: tr.nPublished }) : t('{n} publiée', { n: tr.nPublished }) %></span></h2>
+<% if (!it.photos.length) { %>  <p class="hint"><%= t('Aucune photo : les photos d’un voyage sont celles de ses journées (date de l’appareil).') %></p>
+<% } else { %>  <ul class="vign-p">
+<% it.photos.forEach(p => { %>    <li><span class="vign-img" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '140px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></span><a class="lien-a" href="/admin/photos/<%= p.id %>"><%= p.title %></a>
+      <span class="etats-l"><%~ p.status === 'published' ? etat('abouti', t('publiée')) : etat(LK[p.level], LV[p.level]) %></span></li>
+<% }) %>  </ul>
+<% } %>
+</section>
+
+<% if (it.manage) { %>
+<section class="panel" id="reglages" aria-labelledby="tr-texte">
+  <h2 id="tr-texte"><%= t('Nom et texte') %> <span class="sec"><%= t('pour la page publique du voyage') %></span></h2>
+  <div class="voyage-page">
+    <p><%~ tr.public ? etat('abouti', t('Page en ligne')) : etat('afaire', t('Page réservée à l’équipe')) %> <a class="lien-a" href="/voyage/<%= tr.slug %>" target="_blank" rel="noopener">/voyage/<%= tr.slug %><span class="sr-only"> <%= t('(nouvel onglet)') %></span></a> <span class="sec"><%= pageState %></span></p>
+<% if (tr.public) { %>    <p class="btns-ligne"><a class="btn ghost" href="#dlg-retirer" data-ouvre="dlg-retirer"><%= t('Retirer la page du site…') %></a></p>
+<% } else if (!locked) { %>    <p class="btns-ligne"><a class="btn ghost" href="#dlg-en-ligne" data-ouvre="dlg-en-ligne"><%= t('Mettre la page en ligne…') %></a></p>
+<% } else { %>    <p class="hint" id="tr-public-hint"><%= t('La mise en ligne de la page revient à qui publie sur le site : un administrateur, ou un photographe qui publie sans validation.') %></p>
+<% } %>    <p class="hint"><%= t('Sur la page publique, la carte ne situe que les photos cochées « Afficher sur la carte du monde », et chaque jour porte sa date.') %></p>
+  </div>
+  <form class="form voyage-form" method="post" action="<%= base %>" novalidate data-autosave data-url="<%= base %>" data-objet="<%= tr.name %>">
+    <%~ csrf %>
+    <p class="hint js-seul"><%= t('Chaque champ s’enregistre quand vous le quittez ; « Défaire » revient en arrière pendant 10 secondes.') %><%= tr.public ? ' ' + t('La page est en ligne : ce que vous enregistrez y paraît tout de suite.') : '' %></p>
+    <%~ field('name', t('Nom'), { extra: ' required' }) %>
+    <%~ trans('name', t('Nom')) %>
+    <%~ field('intro', t('Texte'), { rows: 4, max: 4000, optional: true }) %>
+    <%~ trans('intro', t('Texte'), { rows: 3, max: 4000 }) %>
+<% if (it.allTrips) { %>    <div class="champ-a"><label for="tr-auteur"><%= t('Photographe') %></label><select id="tr-auteur" name="author_id" data-champ="author_id" data-label="<%= t('Photographe') %>"><option value=""><%= it.authors.length === 2 ? t('les deux photographes') : t('tous les photographes') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ tr.author_id === a.id ? ' selected' : '' %>><%= a.name %></option><% }) %></select></div>
+<% } %>    <p class="sans-script form-pied"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>
+  </form>
+</section>
+
+<section class="panel fiche-danger" aria-labelledby="tr-suppr">
+  <h2 id="tr-suppr"><%= t('Supprimer ce voyage') %></h2>
+  <p class="hint"><%= t('Ses sorties et ses photos restent ; son nom, ses textes et sa page publique sont effacés.') %></p>
+  <p><a class="btn danger-c" href="#dlg-supprimer" data-ouvre="dlg-supprimer"><%= t('Supprimer le voyage…') %></a></p>
+</section>
+
+<dialog class="confirm cible" id="dlg-supprimer" aria-labelledby="dsv-t" aria-describedby="dsv-d">
+  <form method="post" action="<%= base %>/supprimer">
+    <%~ csrf %>
+    <h2 id="dsv-t"><%= t('Supprimer « {name} » ?', { name: tr.name }) %></h2>
+    <p id="dsv-d"><%= tr.public ? t('Sa page publique /voyage/{slug} disparaîtra : un lien déjà partagé mènera à une page introuvable.', { slug: tr.slug }) + ' ' : '' %><%= t('Ses {days} et ses {photos} restent ; son nom et ses textes sont effacés. Cette action est définitive.', { days: tr.nDays > 1 ? t('{n} journées', { n: tr.nDays }) : t('{n} journée', { n: tr.nDays }), photos: tr.nPhotos > 1 ? t('{n} photos', { n: tr.nPhotos }) : t('{n} photo', { n: tr.nPhotos }) }) %></p>
+    <div class="actions"><a class="btn ghost" href="#tr-suppr" data-annuler><%= t('Annuler') %></a><button class="btn danger" type="submit"><%~ ic('corbeille', 16) %><%= t('Supprimer le voyage') %></button></div>
+  </form>
+</dialog>
+<% if (tr.public) { %>
+<dialog class="confirm cible" id="dlg-retirer" aria-labelledby="drp-t" aria-describedby="drp-d">
+  <form method="post" action="<%= base %>">
+    <%~ csrf %><input type="hidden" name="public_set" value="1">
+    <h2 id="drp-t"><%= t('Retirer la page « {name} » du site ?', { name: tr.name }) %></h2>
+    <p id="drp-d"><%= t('/voyage/{slug} ne sera plus visible du public ; l’équipe garde son aperçu. « Mettre la page en ligne » la rétablira, à la même adresse.', { slug: tr.slug }) %></p>
+    <div class="actions"><a class="btn ghost" href="#reglages" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Retirer la page') %></button></div>
+  </form>
+</dialog>
+<% } else if (!locked) { %>
+<dialog class="confirm cible" id="dlg-en-ligne" aria-labelledby="dep-t" aria-describedby="dep-d">
+  <form method="post" action="<%= base %>">
+    <%~ csrf %><input type="hidden" name="public_set" value="1"><input type="hidden" name="public" value="on">
+    <h2 id="dep-t"><%= t('Mettre la page « {name} » en ligne ?', { name: tr.name }) %></h2>
+    <p id="dep-d"><%= t('Son nom, son texte et ses photos publiées seront visibles de tous à l’adresse /voyage/{slug}.', { slug: tr.slug }) %><%= tr.nPublished ? '' : ' ' + t('Aucune photo n’est encore publiée : la page attendra la première.') %></p>
+    <div class="actions"><a class="btn ghost" href="#reglages" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Mettre en ligne') %></button></div>
+  </form>
+</dialog>
+<% } %>
+<% } %>
+<% if (action) { %>
+<dialog class="confirm cible" id="dlg-lot" aria-labelledby="dl-t" aria-describedby="dl-d">
+  <form method="post" action="<%= base %>/<%= action %>">
+    <%~ csrf %>
+    <h2 id="dl-t"><%= action === 'publier' ? (it.readyDrafts > 1 ? t('Publier les {n} photos prêtes ?', { n: it.readyDrafts }) : t('Publier la photo prête ?')) : (it.readyDrafts > 1 ? t('Proposer les {n} photos prêtes ?', { n: it.readyDrafts }) : t('Proposer la photo prête ?')) %></h2>
+    <p id="dl-d"><%= action === 'publier' ? t('Les brouillons dont les accords sont en règle partent en ligne tout de suite ; ceux à vérifier ou bloqués restent en brouillon. « Dépublier », sur la fiche d’une photo, la retire.') : t('Les brouillons dont les accords sont en règle partent au modérateur, qui les publie, les programme ou vous les renvoie.') %></p>
+    <div class="actions"><a class="btn ghost" href="#contenu" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= action === 'publier' ? t('Publier') : t('Proposer') %></button></div>
+  </form>
+</dialog>
+<% } %>
+</div>
+<%~ include('./_textes-contenus', it) %>
+<script src="<%= it.asset('admin/v2/contenus-v2.js') %>" defer></script>

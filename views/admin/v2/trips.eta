@@ -1,0 +1,51 @@
+<% layout('./layout') %>
+<% const t = it.t, E = __eta.e; %>
+<% /* Voyages (admin v2, vague 3b) : des sorties regroupées. Mêmes données, mêmes droits et mêmes routes que la v1
+      (views/admin/trips.eta ; GET et POST /admin/voyages). La v2 : une carte par voyage (couverture décorative, nom en lien,
+      page publique en pastille), la création repliée. */ %>
+<% const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>',
+     chev: '<path d="M9 6l6 6-6 6"/>', retour: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>'; %>
+<p class="help-link"><a href="/admin/aide#rencontres-les-voyages"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-terrain">
+<header class="ep">
+  <a class="ep-retour" href="/admin/sorties"><%~ ic('retour', 14) %><%= t('Sorties') %></a>
+  <div class="ep-titre"><h1><%= t('Voyages') %></h1></div>
+  <p class="ep-meta"><span><%= it.list.length > 1 ? t('{n} voyages', { n: it.list.length }) : t('{n} voyage', { n: it.list.length }) %></span></p>
+<% if (it.can('sorties.gerer')) { %>  <div class="ep-actions"><a class="btn" href="#nouveau-voyage" data-ouvre-plier="nouveau-voyage">＋ <%= t('Nouveau voyage') %></a></div>
+<% } %></header>
+<p class="rub-intro"><%= t('Un voyage regroupe des sorties : « Maroc 2025 », dix journées de prise de vue. C’est facultatif ; une journée appartient à un voyage au plus. Ses photos et ses personnes se retrouvent sur la page du voyage.') %></p>
+<% if (it.can('sorties.gerer')) { %>
+<details class="panel plier-p" id="nouveau-voyage">
+  <summary><%~ ic('chev', 16) %><span><span class="h"><%= t('Nouveau voyage') %></span><span class="sec"><%= t('rattachez-y ensuite ses journées') %></span></span></summary>
+  <form class="form" method="post" action="/admin/voyages">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <div class="row">
+      <div class="champ-a"><label for="voy-nom"><%= t('Nom') %></label><input type="text" id="voy-nom" name="name" maxlength="120" required placeholder="<%= t('Maroc 2025') %>"></div>
+<% if (it.allTrips) { %>      <div class="champ-a"><label for="voy-auteur"><%= t('Photographe') %></label><select id="voy-auteur" name="author_id"><option value=""><%= it.authors.length === 2 ? t('les deux photographes') : t('tous les photographes') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
+<% } %>    </div>
+    <p class="btns-ligne"><button class="btn" type="submit"><%= t('Créer le voyage') %></button></p>
+  </form>
+</details>
+<% } %>
+<% if (!it.list.length) { %>
+<p class="panel hint"><%= t('Aucun voyage pour l’instant.') %></p>
+<% } else { %>
+<ul class="voyages-l">
+<% it.list.forEach(tr => { %>  <li class="panel voyage-c">
+    <span class="voyage-couv" aria-hidden="true"><% if (tr.cover && tr.cover.ready) { %><%~ it.picture(tr.cover, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></span>
+    <div class="voyage-corps">
+      <h2><a class="ligne-lien" href="/admin/voyages/<%= tr.id %>"><%= tr.name %></a></h2>
+      <p class="sec"><%= tr.span %> · <%= tr.who %></p>
+      <p class="sec"><%= tr.nDays > 1 ? t('{n} journées', { n: tr.nDays }) : t('{n} journée', { n: tr.nDays }) %> · <%= tr.nPhotos > 1 ? t('{n} photos', { n: tr.nPhotos }) : t('{n} photo', { n: tr.nPhotos }) %> (<%= tr.nPublished > 1 ? t('{n} publiées', { n: tr.nPublished }) : t('{n} publiée', { n: tr.nPublished }) %>) · <%= tr.nPeople > 1 ? t('{n} personnes', { n: tr.nPeople }) : t('{n} personne', { n: tr.nPeople }) %></p>
+      <p><%~ tr.public ? etat('abouti', t('Page en ligne')) : etat('afaire', t('Page réservée à l’équipe')) %></p>
+    </div>
+  </li>
+<% }) %></ul>
+<% } %>
+</div>
+<%~ include('./_textes-contenus', it) %>
+<script src="<%= it.asset('admin/v2/contenus-v2.js') %>" defer></script>

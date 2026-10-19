@@ -1,5 +1,35 @@
 [
   {
+    "version": "1.169.0",
+    "date": "2026-10-19",
+    "pr": 169,
+    "title": {
+      "fr": "L’admin v2 : Personnes, Séries, Sorties et Voyages",
+      "en": "Admin v2: People, Series, Outings and Trips",
+      "de": "Verwaltung v2: Personen, Serien, Ausflüge und Reisen"
+    },
+    "items": [
+      {
+        "fr": "En v2, « Personnes » et « Demandes et rencontres » ont chacune leur titre ; la fiche d’une rencontre met la décision de la personne en tête, et effacer ses données ou appliquer un refus passe par une confirmation.",
+        "en": "In v2, “People” and “Requests and encounters” each have their own title; an encounter’s page puts the person’s decision first, and erasing their data or applying a refusal asks for confirmation.",
+        "de": "In v2 haben „Personen“ und „Anfragen und Begegnungen“ jeweils ihren eigenen Titel; die Seite einer Begegnung zeigt die Entscheidung der Person zuerst, und das Löschen ihrer Daten oder das Anwenden einer Ablehnung verlangt eine Bestätigung.",
+        "perm": "personnes.voir"
+      },
+      {
+        "fr": "Séries : le nom et le texte d’intention s’enregistrent quand vous quittez le champ, avec « Défaire » ; l’ordre se change au clavier (la poignée ⠿ et les flèches) ou par le menu ⋯, sans recharger la page.",
+        "en": "Series: the name and the statement are saved when you leave the field, with “Undo”; the order changes from the keyboard (the ⠿ handle and the arrows) or through the ⋯ menu, without reloading the page.",
+        "de": "Serien: Name und Begleittext werden beim Verlassen des Feldes gespeichert, mit „Rückgängig“; die Reihenfolge ändert sich per Tastatur (Griff ⠿ und Pfeiltasten) oder über das Menü ⋯, ohne die Seite neu zu laden.",
+        "perm": "series.gerer"
+      },
+      {
+        "fr": "Sorties et voyages : le lieu d’une sortie, le nom et le texte d’un voyage s’enregistrent en quittant le champ ; mettre la page d’un voyage en ligne, la retirer ou supprimer le voyage passe par une confirmation qui dit ce qui change.",
+        "en": "Outings and trips: an outing’s place, a trip’s name and text are saved when you leave the field; putting a trip’s page online, taking it down or deleting the trip asks for a confirmation that says what changes.",
+        "de": "Ausflüge und Reisen: der Ort eines Ausflugs, Name und Text einer Reise werden beim Verlassen des Feldes gespeichert; eine Reiseseite online stellen, offline nehmen oder die Reise löschen verlangt eine Bestätigung, die sagt, was sich ändert.",
+        "perm": "sorties.voir"
+      }
+    ]
+  },
+  {
     "version": "1.167.0",
     "date": "2026-10-19",
     "pr": 167,

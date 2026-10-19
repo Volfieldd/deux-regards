@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { creerRencontre, effacerRencontre, creerVoyage, supprimerVoyage } from './terrain-donnees.js';
 
 // Admin v2 en allemand (le plus long des trois) : aucun débordement à 320, 412, 1 032 × 1 250, 1 376 × 900 et 1 440 px.
 // La langue est celle du compte de test de la v2 : ce projet passe après les autres tests de la v2, et la remet en français.
@@ -13,14 +14,19 @@ const lang = async (page, l) => {
 };
 
 test('en allemand, aucun débordement sur les écrans de la v2', async ({ page }) => {
-  test.setTimeout(360_000);
+  test.setTimeout(600_000);
   await page.goto('/admin/photos');
   const ids = await page.locator('.tile').evaluateAll(ts => ts.slice(0, 3).map(t => Number(t.dataset.id)));
+  // Vague 3b : une rencontre (et sa sortie) et un voyage le temps du test.
+  const r = await creerRencontre(page, { jour: '2025-10-20', nom: 'Deutsch Essai' });
+  const tid = await creerVoyage(page, 'Reise Essai');
   await lang(page, 'de');
   try {
     const urls = ['/admin', '/admin/reglages/assistants', '/admin/droits', '/admin/images', '/admin/auteurs', '/admin/compte', `/admin/photos/lot?ids=${ids.join(',')}`, '/admin/rencontre', '/admin/rencontre/accueil',
       // Vague 2 : la fiche d'une photo, la photothèque (planche et liste), À valider.
-      `/admin/photos/${ids[0]}`, '/admin/photos', '/admin/photos?vue=liste', '/admin/a-valider'];
+      `/admin/photos/${ids[0]}`, '/admin/photos', '/admin/photos?vue=liste', '/admin/a-valider',
+      // Vague 3b : Personnes, Demandes et rencontres, une rencontre, Séries, Sorties, une sortie, Voyages, un voyage.
+      '/admin/personnes', '/admin/rencontres', `/admin/rencontres/${r.id}`, '/admin/series', '/admin/sorties', '/admin/sorties/sebastien/2025-10-20', '/admin/voyages', `/admin/voyages/${tid}`];
     for (const [w, h] of [[320, 640], [412, 839], [1032, 1250], [1376, 900], [1440, 900]]) {
       await page.setViewportSize({ width: w, height: h });
       for (const url of urls) {
@@ -46,5 +52,7 @@ test('en allemand, aucun débordement sur les écrans de la v2', async ({ page }
     await expect(page.locator('.side .grp')).toHaveText(['Fotos', 'Personen', 'Veröffentlichen', 'Team']);
   } finally {
     await lang(page, 'fr');
+    await effacerRencontre(page, r.id);
+    await supprimerVoyage(page, tid);
   }
 });

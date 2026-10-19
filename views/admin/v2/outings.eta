@@ -1,0 +1,52 @@
+<% layout('./layout') %>
+<% const t = it.t, E = __eta.e; %>
+<% /* Sorties (admin v2, vague 3b) : une ligne par journée de prise de vue. Mêmes données, mêmes droits et mêmes images que la
+      v1 (views/admin/outings.eta ; GET /admin/sorties). La v2 : des filtres à symbole et à état courant visible, un tableau en
+      cartes sous 1 100 px, les accords comptés en pastilles. */ %>
+<% const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>',
+     attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>', arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>';
+   const TAG = { refus: 'arret', 'a-trier': 'attention', terminee: 'abouti' };
+   const pl = (n, zero, one, many) => n > 1 ? many : n === 1 ? one : zero;
+   const q = o => { const p = new URLSearchParams(); const all = { photographe: it.author ? it.author.slug : '', etat: it.state, ...o }; for (const [k, v] of Object.entries(all)) if (v) p.set(k, v); const s = p.toString(); return '/admin/sorties' + (s ? '?' + s : ''); }; %>
+<p class="help-link"><a href="/admin/aide#rencontres-les-sorties"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-terrain">
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Sorties') %></h1></div>
+  <p class="ep-meta"><span><%= it.total > 1 ? t('{n} sorties', { n: it.total }) : t('{n} sortie', { n: it.total }) %></span><% if (it.counts.refus) { %><span><%= t('{n} refus à appliquer', { n: it.counts.refus }) %></span><% } %><% if (it.counts['a-trier']) { %><span><%= t('{n} à trier', { n: it.counts['a-trier'] }) %></span><% } %></p>
+  <div class="ep-actions"><a class="btn ghost" href="/admin/voyages"><%= t('Voyages') %></a></div>
+</header>
+<p class="rub-intro"><%= t('Une sortie, c’est une journée de prise de vue d’un photographe : ses photos de ce jour-là (date de l’appareil) et les personnes rencontrées. Elles se créent toutes seules, à l’import des photos ou à la première rencontre du jour ; une sortie se coupe en deux (matin, soir) depuis sa fiche.') %></p>
+<div class="filtres-l sorties-filtres">
+  <nav class="chips" aria-label="<%= t('État') %>">
+    <a class="chip" href="<%= q({ etat: '' }) %>"<%~ !it.state ? ' aria-current="page"' : '' %>><%= t('Toutes') %> <span class="n"><%= it.total %></span></a>
+<% Object.entries(it.STATES).forEach(([k, label]) => { %>    <a class="chip" href="<%= q({ etat: k }) %>"<%~ it.state === k ? ' aria-current="page"' : '' %>><span class="chip-st chip-st--<%= TAG[k] %>"><%~ ic(TAG[k]) %></span><%= label %> <span class="n"><%= it.counts[k] %></span></a>
+<% }) %>  </nav>
+<% if (it.authors.length > 1) { %>  <nav class="chips" aria-label="<%= t('Photographe') %>">
+    <a class="chip" href="<%= q({ photographe: '' }) %>"<%~ !it.author ? ' aria-current="page"' : '' %>><%= it.authors.length === 2 ? t('Les deux') : t('Tous') %></a>
+<% it.authors.forEach(a => { %>    <a class="chip" href="<%= q({ photographe: a.slug }) %>"<%~ it.author && it.author.id === a.id ? ' aria-current="page"' : '' %>><%= a.name %></a>
+<% }) %>  </nav>
+<% } %></div>
+<% if (!it.list.length) { %>
+<p class="panel hint"><%= it.state ? t('Aucune sortie dans cet état : importez des photos datées par l’appareil, ou enregistrez une rencontre.') : t('Aucune sortie : importez des photos datées par l’appareil, ou enregistrez une rencontre.') %></p>
+<% } else { %>
+<table class="liste-a sorties-liste">
+  <caption><%= it.list.length < it.total && !it.state ? t('Les {n} plus récentes.', { n: it.list.length }) : t('La plus récente d’abord.') %></caption>
+  <thead><tr><th scope="col"><%= t('Sortie') %></th><th scope="col"><%= t('Photos') %></th><th scope="col"><%= t('Personnes') %></th><th scope="col"><%= t('État') %></th></tr></thead>
+  <tbody>
+<% it.list.forEach(o => { %>
+    <tr>
+      <th scope="row" class="c-sortie"><span class="t"><a class="ligne-lien" href="<%= o.url %>"><%= o.when %><%= o.place ? ` · ${o.place}` : '' %></a><span class="sec"><%= o.author.name %><%= o.range ? ` · ${o.range}` : '' %><%= o.trip ? ` · ${t('voyage « {name} »', { name: o.trip.name })}` : '' %></span></span></th>
+      <td class="c-photos"><div class="sortie-photos"><span class="vignettes-a sortie-bande" aria-hidden="true"><% o.strip.forEach(p => { %><%~ it.picture(p, { sizes: '48px', alt: '' }) %><% }) %></span><span><%= pl(o.counts.photos, t('0 photo'), t('1 photo'), t('{n} photos', { n: o.counts.photos })) %><span class="sec"><%= o.counts.published > 1 ? t('{n} publiées', { n: o.counts.published }) : t('{n} publiée', { n: o.counts.published }) %></span></span></div></td>
+      <td class="c-pers"><% if (!o.people.length) { %><span class="sec"><%= t('personne') %></span><% } else { %><span class="sortie-visages" aria-hidden="true"><% o.people.slice(0, 5).forEach(e => { %><% if (e.hasPortrait) { %><img class="pers-visage" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="26" height="26" loading="lazy"><% } else { %><span class="pers-ini petit"><%= (e.name || e.ref || '?').charAt(0).toUpperCase() %></span><% } %><% }) %></span>
+        <span class="etats-l"><% if (o.counts.accords) { %><%~ etat('abouti', o.counts.accords > 1 ? t('{n} accords', { n: o.counts.accords }) : t('{n} accord', { n: o.counts.accords })) %><% } %><% if (o.counts.refusals) { %><%~ etat('arret', t('{n} refus', { n: o.counts.refusals })) %><% } %><% if (o.counts.undecided) { %><%~ etat('afaire', t('{n} sans décision', { n: o.counts.undecided })) %><% } %></span><% } %></td>
+      <td class="c-etat"><%~ etat(TAG[o.state], it.STATES[o.state]) %></td>
+    </tr>
+<% }) %>
+  </tbody>
+</table>
+<% } %>
+</div>
