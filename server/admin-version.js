@@ -10,6 +10,7 @@ import path from 'node:path';
 // ne change, et la table accounts, surveillée par la Vigie, n'est pas touchée.
 export const ADMIN_VERSIONS = ['v1', 'v2'];
 const KEY = 'admin_version';
+const SHORTCUTS = 'raccourcis';
 
 export function createAdminVersion({ db, viewsDir, cache = false }) {
   const idOf = db.prepare('SELECT id FROM accounts WHERE sub = ?').pluck();
@@ -41,6 +42,18 @@ export function createAdminVersion({ db, viewsDir, cache = false }) {
       const id = sub ? idOf.get(sub) : null;
       if (!id) return false;
       write.run(id, KEY, v, Date.now());
+      return true;
+    },
+    // Raccourcis d'une touche de la photothèque v2 (P, I, L, Espace ; UX-A-02) : allumés par défaut, coupables dans « Mon
+    // compte ». Une préférence du compte, gardée comme la version (account_prefs) ; ⌘K, ⌘A et ⌘Z restent toujours.
+    shortcuts(sub) {
+      const id = sub ? idOf.get(sub) : null;
+      return (id ? read.get(id, SHORTCUTS) : null) !== 'off';
+    },
+    setShortcuts(sub, on) {
+      const id = sub ? idOf.get(sub) : null;
+      if (!id) return false;
+      write.run(id, SHORTCUTS, on ? 'on' : 'off', Date.now());
       return true;
     },
     // Gabarit servi à cette requête : « admin/v2/<écran> » si le compte a choisi la v2 et que l'écran l'a, sinon

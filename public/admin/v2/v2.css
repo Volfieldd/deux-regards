@@ -3,6 +3,7 @@
    dans admin/v2/admin-plus.css (planche MQ-00) ; ici, ce qui est propre à un écran, repris des styles « locaux » des
    maquettes, et ce que le code demande en plus (le message d'action animé, le dialogue de sortie). Aucun style en ligne.
    1 coquille et message d'action · 2 Aujourd'hui · 3 Réglages · 4 le lot · 5 Mon compte
+   · 6 la fiche d’une photo · 7 la photothèque · 8 À valider
    ===================================================================================================== */
 
 /* ---------- 1. Coquille et message d'action ---------- */
@@ -228,3 +229,170 @@ dialog.confirm[open]:not(:modal) { position: static; display: block; margin: 0 0
 .compte-p .form { display: grid; gap: 16px; }
 .compte-p .choix-a label > span b { font-weight: 500; }
 .admin .resume-a a { min-width: 44px; }
+
+/* ---------- 6. La fiche d'une photo (MQ-09, état principal ; UX-A-05, 06, 23) ----------
+   La photo à gauche (5/12, collante), le formulaire à droite (7/12) ; une colonne sous 960 px. Sous la fiche, les rubriques
+   (publication, remarques, accords, audience, Instagram, preuve), deux par rangée dès 1 200 px. */
+.fiche-etats { display: grid; gap: 6px; margin: -8px 0 20px; }
+.fiche-etats p, .fiche-etats ul { margin: 0; }
+.fiche-pastilles { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.fiche-visages { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; color: var(--ink2); font-size: 13px; }
+.fiche-visages form { margin: 0; gap: 4px 14px; }
+.fiche-visages .lien-a { border: 0; background: none; padding: 0; font: inherit; font-size: 13px; cursor: pointer; }
+.fiche-raisons { padding-left: 20px; color: var(--ink2); font-size: 13px; }
+.fiche { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; align-items: start; }
+.fiche-photo { position: sticky; top: 24px; margin: 0; }
+.fiche-photo picture, .fiche-photo img { display: block; width: 100%; height: auto; border-radius: 8px; background: var(--photo-bg); }
+.fiche-photo figcaption { padding: 8px 2px 0; color: var(--ink2); font-size: 12px; }
+.fiche-form { display: grid; gap: 18px; min-width: 0; }
+.main .fiche-form h2 { margin: 8px 0 0; font-size: var(--at-h3); font-weight: 500; color: var(--ink2); }
+.fiche-form .hint, .fiche-form .note-a { margin: 0; }
+.fiche-form .row { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+.fiche-form .row > .champ-a { flex: 1 1 200px; }
+.fiche-form input[type="text"], .fiche-form textarea, .fiche-form select { width: 100%; }
+.fiche-form .resume-a { margin: 0; }
+.fiche-form .form-pied { padding-top: 12px; }
+@media (max-width: 960px) { .fiche { grid-template-columns: minmax(0, 1fr); gap: 16px; } .fiche-photo { position: static; max-width: 420px; } }
+@media (max-width: 720px) { .fiche-photo { max-width: 260px; } }
+/* Traductions d'un champ : repliées sous lui, ce qui manque dit dans la ligne. */
+.tr-f { margin-top: -10px; }
+.tr-f > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; color: var(--ink2); font-size: 13px; cursor: pointer; list-style: none; }
+.tr-f > summary::-webkit-details-marker { display: none; }
+.tr-f > summary .ic { flex: none; transition: transform .15s; }
+.tr-f[open] > summary .ic { transform: rotate(90deg); }
+.tr-f > summary .sec { color: var(--ink3); }
+.tr-corps { display: grid; gap: 12px; margin: 6px 0 0; padding: 12px 0 4px 16px; border-left: 2px solid var(--line2); }
+.tr-corps .tr-act { margin: -4px 0 0; }
+.tr-corps .tr-act .btn { min-height: 32px; font-size: 13px; }
+@media (max-width: 720px), (pointer: coarse) { .tr-f > summary { min-height: 44px; } .tr-corps .tr-act .btn { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .tr-f > summary .ic { transition: none; } }
+.champ-a .sugg-bloc { margin-top: 6px; }
+.sugg-bloc[hidden] { display: none; }
+.sugg-bloc .hint:empty, .champ-a .hint:empty, .tr-corps .hint:empty, .kw-v2 .hint:empty { display: none; }
+.kw-v2 { display: grid; gap: 6px; margin-top: -10px; }
+.kw-v2 p { margin: 0; }
+.kw-v2 .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.kw-v2 .pill { min-height: 32px; font: inherit; font-size: 13px; cursor: pointer; }
+@media (max-width: 720px), (pointer: coarse) { .kw-v2 .pill { min-height: 44px; } }
+.sugg-serie { display: grid; gap: 4px; justify-items: start; margin-top: 4px; }
+.sugg-serie .hint { margin: 0; font-size: 12px; }
+.sugg-serie .mini { display: inline-flex; gap: 3px; vertical-align: middle; }
+.sugg-serie .mini img { width: 24px; height: 24px; object-fit: cover; border-radius: 3px; }
+.sugg-serie .lien-a { border: 0; background: none; padding: 0; font: inherit; font-size: 13px; cursor: pointer; }
+.chk-ligne { display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: 13px; }
+@media (max-width: 720px), (pointer: coarse) { .chk-ligne { min-height: 44px; } }
+.ville-f { position: relative; }
+.ville-f .city-list { position: absolute; left: 0; right: 0; top: calc(100% + 2px); z-index: 20; margin: 0; padding: 6px; list-style: none; border-radius: 12px; background: var(--s1); box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+.ville-f .city-list li { display: flex; align-items: center; min-height: 40px; padding: 4px 10px; border-radius: 8px; cursor: pointer; }
+.ville-f .city-list li[aria-selected="true"], .ville-f .city-list li:hover { background: var(--s2); }
+@media (max-width: 720px), (pointer: coarse) { .ville-f .city-list li { min-height: 44px; } }
+/* Rubriques sous la fiche : panneaux, repliables (leur ligne dit ce qu'ils contiennent). */
+.fiche-bas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; margin-top: 32px; }
+.fiche-bas > .panel { margin: 0; min-width: 0; }
+.fiche-bas .panel > p, .fiche-bas .panel form { margin: 0 0 10px; }
+.fiche-bas .panel > :last-child { margin-bottom: 0; }
+.plier-p > summary { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: -6px 0; cursor: pointer; list-style: none; }
+.plier-p > summary::-webkit-details-marker { display: none; }
+.plier-p > summary > .ic { flex: none; transition: transform .15s; }
+.plier-p[open] > summary > .ic { transform: rotate(90deg); }
+.plier-p[open] > summary { margin-bottom: 12px; }
+.plier-p > summary > span { display: grid; gap: 2px; min-width: 0; }
+.plier-p > summary .h { font-size: var(--at-h2); font-weight: 500; }
+.plier-p > summary .sec { color: var(--ink3); font-size: 12.5px; }
+@media (prefers-reduced-motion: reduce) { .plier-p > summary > .ic { transition: none; } }
+.fiche-pub { margin: 0 0 10px; }
+.fiche-bas .chrono { margin-top: 8px; }
+.fiche-bas .objets-a > li > span[aria-hidden] { grid-row: span 3; }
+.fiche-bas .objets-a > li > form { grid-column: 2; margin: 0; }
+.fiche-bas .kv-a { margin: 0 0 12px; }
+.fiche-bas .kv-a .sec { display: block; color: var(--ink3); font-size: 12px; }
+.fiche-bas .form { display: grid; gap: 12px; }
+.fiche-bas textarea { width: 100%; }
+.ig-v2-corps { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.ig-v2-corps > form:not(.ig-form) { grid-column: 2; }
+.ig-apercu { margin: 0; }
+.ig-apercu img { display: block; width: 100%; height: auto; border-radius: 6px; background: var(--photo-bg); }
+.ig-apercu figcaption { margin-top: 4px; font-size: 12px; }
+.ig-form select, .ig-form textarea { width: 100%; }
+@media (max-width: 540px) { .ig-v2-corps { grid-template-columns: minmax(0, 1fr); } .ig-v2-corps > form:not(.ig-form) { grid-column: 1; } .ig-apercu { max-width: 220px; } }
+.fiche-danger .hint { max-width: 62ch; }
+/* Dialogue sans script : le lien « Publier… » mène à son ancre, et le dialogue fermé s'affiche dans la page (:target). */
+dialog.confirm.cible:target:not([open]) { display: block; position: static; margin: 24px 0; }
+dialog.confirm .avert { margin: 0 0 12px; }
+dialog.confirm .champ-a input, dialog.confirm .champ-a textarea { width: 100%; }
+
+/* ---------- 7. La photothèque (planche MQ-00 ; UX-A-02, 08, 10, 14, 16, 24, 31) ----------
+   La mise en page de la v1 (admin.css : .library, planche, inspecteur, loupe, import) ; l'en-tête de page type, les filtres
+   d'état à symbole et le bouton « Filtrer » toujours là ; les badges des vignettes portent le symbole de leur état. */
+.lib-ep { margin: 0; padding: 16px 24px 12px; }
+.lib-sub-v2 { gap: 10px 14px; padding-bottom: 12px; }
+.lib-sub-v2 .chips { flex-basis: 100%; }
+.filters-v2 .btn { min-height: 34px; }
+.filters-v2 .lien-a { margin-left: 4px; }
+.lib-v2 .drop-hint .sans-script { display: inline; }
+html.js .lib-v2 .drop-hint .sans-script { display: none !important; }
+.lib-v2 .tile .badge .ic { display: inline-block; vertical-align: -1px; }
+.lib-v2 .insp-etat { margin: 2px 0 0; color: var(--ink3); font-size: 12.5px; }
+.lib-v2 .insp-hd h2 { overflow-wrap: anywhere; }
+.lib-v2 .insp .fld > label.lb { cursor: default; }
+.lib-v2 .insp .lu:empty { display: none; }
+.lib-v2 .insp .fld .err { margin-top: -2px; }
+.lib-v2 .insp .sug-list { display: grid; gap: 6px; justify-items: start; }
+.lib-v2 .insp .sug-list .lien-a { border: 0; background: none; padding: 0; font: inherit; font-size: 13px; cursor: pointer; }
+.lib-v2 .insp .city-list { margin: 4px 0 0; padding: 6px; list-style: none; border-radius: 12px; background: var(--s1); box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+.lib-v2 .insp .city-list li { display: flex; align-items: center; min-height: 40px; padding: 4px 10px; border-radius: 8px; cursor: pointer; }
+.lib-v2 .insp .city-list li[aria-selected="true"], .lib-v2 .insp .city-list li:hover { background: var(--s2); }
+.lib-v2 .insp .titles label { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 8px; align-items: center; }
+.lib-v2 .insp .titles label .err { grid-column: 1 / -1; }
+.lib-v2 .insp .titles img, .lib-v2 .insp .titles .ph { width: 48px; height: 32px; object-fit: cover; border-radius: 4px; }
+.plist-v2 li { grid-template-columns: 32px 46px 84px minmax(0, 1fr) auto 44px; }
+.plist-v2 .info .sec { color: var(--ink3); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plist-v2 .info .att { justify-self: start; }
+.plist-v2 .chk-l { margin: 0; }
+@media (max-width: 720px) {
+  .lib-ep { padding: 12px 14px 8px; }
+  .plist-v2 li { grid-template-columns: 44px 84px minmax(0, 1fr) 44px; grid-template-areas: "c t i m" "c t e m"; row-gap: 4px; }
+  .plist-v2 .chk-l { grid-area: c; } .plist-v2 .thumb { grid-area: t; } .plist-v2 .info { grid-area: i; } .plist-v2 .etat { grid-area: e; justify-self: start; } .plist-v2 .menu { grid-area: m; }
+  .plist-v2 .handle { display: none; }
+  .plist-v2 .ttl { display: inline-flex; align-items: center; min-height: 44px; }
+}
+.lib-v2 .insp-bd { grid-template-columns: minmax(0, 1fr); }
+.lib-v2 .insp .fld { min-width: 0; }
+.lib-v2 .insp .fld > .lb .r { min-width: 0; overflow-wrap: anywhere; text-align: right; }
+.lib-v2 .insp .fld :is(input:not([type="checkbox"]), textarea, select) { width: 100%; min-width: 0; }
+
+/* ---------- 8. À valider (UX-A-03, 16 ; MQ-09) ----------
+   Une ligne par proposition (.liste-a, en cartes sous 1 100 px) ; sous la liste, quand publier les photos cochées. */
+.rv-intro { margin: -12px 0 24px; color: var(--ink2); max-width: 72ch; }
+.main .rv-titre { display: flex; align-items: baseline; gap: 8px; margin: 28px 0 12px; font-size: var(--at-h2); font-weight: 500; }
+.main section:first-of-type > .rv-titre { margin-top: 0; }
+.rv-titre .n { color: var(--ink3); font-size: 14px; font-weight: 400; }
+.rv-liste { border-radius: var(--r-admin-panneau); }
+.rv-liste .c-chk { width: 44px; }
+.rv-liste .c-act { text-align: right; white-space: nowrap; }
+.rv-liste .etat-c { display: grid; gap: 4px; justify-items: start; }
+.rv-liste .etat-c .sec { color: var(--ink3); font-size: 12px; max-width: 32ch; }
+.rv-objet { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: start; }
+.rv-objet picture { display: block; grid-column: 1; grid-row: 1; }
+.rv-objet .t { grid-column: 2; grid-row: 1; }
+.rv-objet img, .rv-objet .ph { width: 96px; height: 64px; object-fit: cover; border-radius: 5px; display: block; background: var(--s3); }
+.rv-objet .t { display: grid; gap: 2px; min-width: 0; font-weight: 500; }
+.rv-objet .t .sec { margin: 0; font-weight: 400; }
+.rv-msg { display: block; margin-top: 4px; color: var(--ink2); font-size: 13px; }
+.rv-barre { display: grid; gap: 14px; margin: 16px 0 0; }
+.rv-barre .rv-date input { width: min(280px, 100%); }
+.rv-barre .form-pied { margin: 0; }
+.rv-prog, .rv-ig { margin: 0; padding: 14px 16px; }
+.rv-prog picture, .rv-ig picture { display: block; grid-row: span 3; }
+.rv-prog img, .rv-ig img, .rv-prog .ph, .rv-ig .ph { width: 64px; height: 43px; object-fit: cover; border-radius: 4px; display: block; background: var(--s3); grid-row: span 3; }
+.rv-ig .rv-apercu { display: block; grid-row: span 4; align-self: start; }
+.rv-prog > li > form, .rv-ig .actions { grid-column: 2; margin: 0; }
+.rv-ig .actions form { margin: 0; }
+.rv-ig .cap-full { white-space: pre-wrap; font: 13px/1.5 var(--sans, inherit); margin: 6px 0 0; }
+@media (max-width: 1100px) {
+  .rv-liste .c-chk { grid-column: 2; grid-row: 1; justify-self: end; }
+  .rv-liste th.c-photo { grid-column: 1; grid-row: 1; }
+  .rv-liste .c-act { text-align: left; }
+  .rv-liste .c-quand { color: var(--ink2); font-size: 13px; }
+}
+@media (max-width: 540px) { .rv-objet { grid-template-columns: 64px minmax(0, 1fr); } .rv-objet img, .rv-objet .ph { width: 64px; height: 43px; } }

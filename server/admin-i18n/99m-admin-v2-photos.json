@@ -1,0 +1,886 @@
+{
+ "Rien à traduire : remplissez d’abord le texte français.": {
+  "en": "Nothing to translate: fill in the French text first.",
+  "de": "Nichts zu übersetzen: Füllen Sie zuerst den französischen Text aus."
+ },
+ "Traduction en cours…": {
+  "en": "Translating…",
+  "de": "Wird übersetzt…"
+ },
+ "Aucune photo sélectionnée": {
+  "en": "No photo selected",
+  "de": "Kein Foto ausgewählt"
+ },
+ "{n} brouillons": {
+  "en": "{n} drafts",
+  "de": "{n} Entwürfe"
+ },
+ "{n} brouillon": {
+  "en": "{n} draft",
+  "de": "{n} Entwurf"
+ },
+ "Titre de la photo {title}": {
+  "en": "Title of photo {title}",
+  "de": "Titel des Fotos {title}"
+ },
+ "Déjà publiées": {
+  "en": "Already published",
+  "de": "Bereits veröffentlicht"
+ },
+ "Déjà publiée": {
+  "en": "Already published",
+  "de": "Bereits veröffentlicht"
+ },
+ "Fermer la loupe": {
+  "en": "Close the loupe",
+  "de": "Lupe schließen"
+ },
+ "Photo précédente": {
+  "en": "Previous photo",
+  "de": "Vorheriges Foto"
+ },
+ "Photo suivante": {
+  "en": "Next photo",
+  "de": "Nächstes Foto"
+ },
+ "L’ordre n’a pas pu être enregistré. Rechargez la page et réessayez.": {
+  "en": "The order could not be saved. Reload the page and try again.",
+  "de": "Die Reihenfolge konnte nicht gespeichert werden. Laden Sie die Seite neu und versuchen Sie es erneut."
+ },
+ "Développement…": {
+  "en": "Developing…",
+  "de": "Wird entwickelt…"
+ },
+ "Développement": {
+  "en": "Developing",
+  "de": "Entwicklung"
+ },
+ "Développement · {done} / {total}": {
+  "en": "Developing · {done} / {total}",
+  "de": "Entwicklung · {done} / {total}"
+ },
+ "En file": {
+  "en": "Queued",
+  "de": "In der Warteschlange"
+ },
+ "{n} Ko": {
+  "en": "{n} KB",
+  "de": "{n} KB"
+ },
+ "{n} Mo": {
+  "en": "{n} MB",
+  "de": "{n} MB"
+ },
+ "Trop lourde ({max} max.)": {
+  "en": "Too large ({max} max.)",
+  "de": "Zu groß ({max} max.)"
+ },
+ "Ce n’est pas une image": {
+  "en": "Not an image",
+  "de": "Kein Bild"
+ },
+ "Trop grande (120 Mpx max.)": {
+  "en": "Too big (120 MP max.)",
+  "de": "Zu groß (120 MP max.)"
+ },
+ "… Vérification": {
+  "en": "… Checking",
+  "de": "… Prüfung"
+ },
+ "✓ Prête à envoyer": {
+  "en": "✓ Ready to upload",
+  "de": "✓ Bereit zum Hochladen"
+ },
+ "… En attente": {
+  "en": "… Waiting",
+  "de": "… Wartet"
+ },
+ "↑ Envoi": {
+  "en": "↑ Uploading",
+  "de": "↑ Hochladen"
+ },
+ "… En file": {
+  "en": "… Queued",
+  "de": "… In der Warteschlange"
+ },
+ "… Traitement": {
+  "en": "… Processing",
+  "de": "… Verarbeitung"
+ },
+ "✓ Prête": {
+  "en": "✓ Ready",
+  "de": "✓ Bereit"
+ },
+ "! Échec": {
+  "en": "! Failed",
+  "de": "! Fehlgeschlagen"
+ },
+ "— Annulée": {
+  "en": "— Cancelled",
+  "de": "— Abgebrochen"
+ },
+ "Ne sera pas envoyée": {
+  "en": "Will not be uploaded",
+  "de": "Wird nicht hochgeladen"
+ },
+ "Sera envoyée": {
+  "en": "Will be uploaded",
+  "de": "Wird hochgeladen"
+ },
+ "Envoi {pct} % · {done} / {total}": {
+  "en": "Uploading {pct}% · {done} / {total}",
+  "de": "Hochladen {pct} % · {done} / {total}"
+ },
+ "Traitement : images {done} / {total}": {
+  "en": "Processing: images {done} / {total}",
+  "de": "Verarbeitung: Bilder {done} / {total}"
+ },
+ "Envoyée · traitement en attente": {
+  "en": "Uploaded · processing pending",
+  "de": "Hochgeladen · Verarbeitung ausstehend"
+ },
+ "Envoyée · images prêtes": {
+  "en": "Uploaded · images ready",
+  "de": "Hochgeladen · Bilder bereit"
+ },
+ "Non envoyée": {
+  "en": "Not uploaded",
+  "de": "Nicht hochgeladen"
+ },
+ "Retirer {name}": {
+  "en": "Remove {name}",
+  "de": "{name} entfernen"
+ },
+ "Envoyer les {n} photos valides": {
+  "en": "Upload the {n} valid photos",
+  "de": "Die {n} gültigen Fotos hochladen"
+ },
+ "Envoyer la photo valide": {
+  "en": "Upload the valid photo",
+  "de": "Das gültige Foto hochladen"
+ },
+ "{n} fichiers écartés : ils ne seront pas envoyés.": {
+  "en": "{n} files rejected: they will not be uploaded.",
+  "de": "{n} Dateien abgelehnt: Diese werden nicht hochgeladen."
+ },
+ "{n} fichier écarté : il ne sera pas envoyé.": {
+  "en": "{n} file rejected: it will not be uploaded.",
+  "de": "{n} Datei abgelehnt: Diese wird nicht hochgeladen."
+ },
+ "Ajoutez d’autres photos": {
+  "en": "Add more photos",
+  "de": "Weitere Fotos hinzufügen"
+ },
+ "environ {time} restantes": {
+  "en": "about {time} left",
+  "de": "noch etwa {time}"
+ },
+ "environ {time} restante": {
+  "en": "about {time} left",
+  "de": "noch etwa {time}"
+ },
+ "calcul du temps restant…": {
+  "en": "estimating time left…",
+  "de": "Restzeit wird berechnet…"
+ },
+ "{ready} photos prêtes sur {total}": {
+  "en": "{ready} of {total} photos ready",
+  "de": "{ready} von {total} Fotos bereit"
+ },
+ "{ready} photo prête sur {total}": {
+  "en": "{ready} of {total} photos ready",
+  "de": "{ready} von {total} Fotos bereit"
+ },
+ "· {n} en traitement": {
+  "en": "· {n} processing",
+  "de": "· {n} in Verarbeitung"
+ },
+ "· {n} en file": {
+  "en": "· {n} queued",
+  "de": "· {n} in der Warteschlange"
+ },
+ "· {n} en envoi": {
+  "en": "· {n} uploading",
+  "de": "· {n} beim Hochladen"
+ },
+ "· {n} en échec ou annulées": {
+  "en": "· {n} failed or cancelled",
+  "de": "· {n} fehlgeschlagen oder abgebrochen"
+ },
+ "· {n} en échec ou annulée": {
+  "en": "· {n} failed or cancelled",
+  "de": "· {n} fehlgeschlagen oder abgebrochen"
+ },
+ "Compléter et publier les {n} photos →": {
+  "en": "Complete and publish the {n} photos →",
+  "de": "Die {n} Fotos vervollständigen und veröffentlichen →"
+ },
+ "Compléter et publier la photo →": {
+  "en": "Complete and publish the photo →",
+  "de": "Das Foto vervollständigen und veröffentlichen →"
+ },
+ "Envoi en cours : gardez cette page ouverte. Le traitement des photos déjà envoyées continue même si vous la quittez.": {
+  "en": "Uploading: keep this page open. Photos already uploaded keep processing even if you leave it.",
+  "de": "Hochladen läuft: Lassen Sie diese Seite geöffnet. Bereits hochgeladene Fotos werden weiter verarbeitet, auch wenn Sie die Seite verlassen."
+ },
+ "Envoi terminé. Le traitement continue sur le serveur : vous pouvez compléter les photos dès maintenant.": {
+  "en": "Upload finished. Processing continues on the server: you can complete the photos now.",
+  "de": "Hochladen abgeschlossen. Die Verarbeitung läuft auf dem Server weiter: Sie können die Fotos schon jetzt vervollständigen."
+ },
+ "Toutes les photos sont prêtes.": {
+  "en": "All photos are ready.",
+  "de": "Alle Fotos sind bereit."
+ },
+ "Envoi de {n} photos commencé.": {
+  "en": "Started uploading {n} photos.",
+  "de": "Hochladen von {n} Fotos gestartet."
+ },
+ "Envoi de {n} photo commencé.": {
+  "en": "Started uploading {n} photo.",
+  "de": "Hochladen von {n} Foto gestartet."
+ },
+ "Envoi des photos restantes annulé. Les photos déjà envoyées sont conservées en brouillon.": {
+  "en": "Remaining uploads cancelled. Photos already uploaded are kept as drafts.",
+  "de": "Hochladen der restlichen Fotos abgebrochen. Bereits hochgeladene Fotos bleiben als Entwurf erhalten."
+ },
+ "Refusée": {
+  "en": "Rejected",
+  "de": "Abgelehnt"
+ },
+ "{name} refusée : {reason}.": {
+  "en": "{name} rejected: {reason}.",
+  "de": "{name} abgelehnt: {reason}."
+ },
+ "Session expirée : rechargez la page": {
+  "en": "Session expired: reload the page",
+  "de": "Sitzung abgelaufen: Laden Sie die Seite neu"
+ },
+ "Erreur du serveur ({status})": {
+  "en": "Server error ({status})",
+  "de": "Serverfehler ({status})"
+ },
+ "Connexion interrompue à {n} %": {
+  "en": "Connection lost at {n}%",
+  "de": "Verbindung bei {n} % unterbrochen"
+ },
+ "{name} : connexion interrompue. Vous pouvez réessayer cette photo.": {
+  "en": "{name}: connection lost. You can retry this photo.",
+  "de": "{name}: Verbindung unterbrochen. Sie können dieses Foto erneut versuchen."
+ },
+ "{name} prête.": {
+  "en": "{name} ready.",
+  "de": "{name} bereit."
+ },
+ "photo supprimée entre-temps": {
+  "en": "photo deleted in the meantime",
+  "de": "Foto inzwischen gelöscht"
+ },
+ "Import terminé : {n} photos prêtes.": {
+  "en": "Import finished: {n} photos ready.",
+  "de": "Import abgeschlossen: {n} Fotos bereit."
+ },
+ "Import terminé : {n} photo prête.": {
+  "en": "Import finished: {n} photo ready.",
+  "de": "Import abgeschlossen: {n} Foto bereit."
+ },
+ "accord refusé": {
+  "en": "consent refused",
+  "de": "Einwilligung verweigert"
+ },
+ "Voir le post": {
+  "en": "See the post",
+  "de": "Beitrag ansehen"
+ },
+ "Personnes et accords": {
+  "en": "People and consents",
+  "de": "Personen und Einwilligungen"
+ },
+ "Suggestion à relire : rien n’est enregistré avant « Enregistrer ».": {
+  "en": "Suggestion to review: nothing is saved before “Save”.",
+  "de": "Vorschlag zum Prüfen: Nichts wird vor „Speichern“ gespeichert."
+ },
+ "Suggestion retirée.": {
+  "en": "Suggestion removed.",
+  "de": "Vorschlag entfernt."
+ },
+ "Reprendre ce texte": {
+  "en": "Use this text",
+  "de": "Diesen Text übernehmen"
+ },
+ "{n} photos sélectionnées": {
+  "en": "{n} photos selected",
+  "de": "{n} Fotos ausgewählt"
+ },
+ "Publier {n} photos…": {
+  "en": "Publish {n} photos…",
+  "de": "{n} Fotos veröffentlichen…"
+ },
+ "Publier la photo…": {
+  "en": "Publish the photo…",
+  "de": "Foto veröffentlichen…"
+ },
+ "« {title} » sélectionnée · {state} · {serie}": {
+  "en": "“{title}” selected · {state} · {serie}",
+  "de": "„{title}“ ausgewählt · {state} · {serie}"
+ },
+ "{n} vues en 30 jours": {
+  "en": "{n} views in 30 days",
+  "de": "{n} Aufrufe in 30 Tagen"
+ },
+ "{n} vue en 30 jours": {
+  "en": "{n} view in 30 days",
+  "de": "{n} Aufruf in 30 Tagen"
+ },
+ "Publier « {title} » ?": {
+  "en": "Publish “{title}”?",
+  "de": "„{title}“ veröffentlichen?"
+ },
+ "Elles seront en ligne tout de suite ; celles dont un accord est à vérifier ou refusé restent en brouillon. « Défaire » les dépublie.": {
+  "en": "They go online right away; those with a consent to check or refused stay as drafts. “Undo” unpublishes them.",
+  "de": "Sie gehen sofort online; Fotos mit zu prüfender oder verweigerter Einwilligung bleiben Entwürfe. „Rückgängig“ nimmt sie wieder offline."
+ },
+ "Corriger dans sa fiche": {
+  "en": "Correct it in its record",
+  "de": "Im Datenblatt korrigieren"
+ },
+ "Publier quand même": {
+  "en": "Publish anyway",
+  "de": "Trotzdem veröffentlichen"
+ },
+ "Supprimer les {n} photos ?": {
+  "en": "Delete the {n} photos?",
+  "de": "Die {n} Fotos löschen?"
+ },
+ "Supprimer les {n} photos": {
+  "en": "Delete the {n} photos",
+  "de": "Die {n} Fotos löschen"
+ },
+ "Supprimer la photo": {
+  "en": "Delete the photo",
+  "de": "Foto löschen"
+ },
+ "← → photo suivante · Échap : fermer": {
+  "en": "← → next photo · Esc: close",
+  "de": "← → nächstes Foto · Esc: schließen"
+ },
+ "Ordre rétabli.": {
+  "en": "Order restored.",
+  "de": "Reihenfolge wiederhergestellt."
+ },
+ "{n} photos cochées": {
+  "en": "{n} photos ticked",
+  "de": "{n} Fotos angehakt"
+ },
+ "{n} photo cochée": {
+  "en": "{n} photo ticked",
+  "de": "{n} Foto angehakt"
+ },
+ "Aucune photo cochée.": {
+  "en": "No photo ticked.",
+  "de": "Kein Foto angehakt."
+ },
+ "Programmer les {n} photos…": {
+  "en": "Schedule the {n} photos…",
+  "de": "Die {n} Fotos planen…"
+ },
+ "Programmer la photo…": {
+  "en": "Schedule the photo…",
+  "de": "Foto planen…"
+ },
+ "Publier les {n} photos…": {
+  "en": "Publish the {n} photos…",
+  "de": "Die {n} Fotos veröffentlichen…"
+ },
+ "Programmer les {n} photos le {date} ?": {
+  "en": "Schedule the {n} photos for {date}?",
+  "de": "Die {n} Fotos für {date} planen?"
+ },
+ "Programmer la photo le {date} ?": {
+  "en": "Schedule the photo for {date}?",
+  "de": "Foto für {date} planen?"
+ },
+ "Elles seront en ligne tout de suite ; leurs photographes sont prévenus.": {
+  "en": "They go online right away; their photographers are notified.",
+  "de": "Sie gehen sofort online; ihre Fotografen werden benachrichtigt."
+ },
+ "Valider quand même": {
+  "en": "Approve anyway",
+  "de": "Trotzdem freigeben"
+ },
+ "Programmer les {n} photos": {
+  "en": "Schedule the {n} photos",
+  "de": "Die {n} Fotos planen"
+ },
+ "Programmer la photo": {
+  "en": "Schedule the photo",
+  "de": "Foto planen"
+ },
+ "Raccourcis d’une touche": {
+  "en": "Single-key shortcuts",
+  "de": "Einzeltasten-Kürzel"
+ },
+ "Dans la photothèque, quand une vignette ou l’inspecteur a le focus : P publie la sélection (après confirmation), I ouvre l’import, L ou Espace la loupe. Éteints, ces touches ne font plus rien ; Ctrl K, Ctrl A et Ctrl Z restent.": {
+  "en": "In the photo library, when a thumbnail or the inspector has focus: P publishes the selection (after confirmation), I opens the import, L or Space the magnifier. Off, these keys do nothing; Ctrl K, Ctrl A and Ctrl Z remain.",
+  "de": "In der Fotothek, wenn ein Vorschaubild oder der Inspektor den Fokus hat: P veröffentlicht die Auswahl (nach Bestätigung), I öffnet den Import, L oder Leertaste die Lupe. Ausgeschaltet bewirken diese Tasten nichts; Strg K, Strg A und Strg Z bleiben."
+ },
+ "Programmée le {date}": {
+  "en": "Scheduled for {date}",
+  "de": "Geplant für {date}"
+ },
+ "Proposée, attend le modérateur": {
+  "en": "Proposed, awaiting the moderator",
+  "de": "Vorgeschlagen, wartet auf die Moderation"
+ },
+ "{usage} : accords en règle": {
+  "en": "{usage}: consents in order",
+  "de": "{usage}: Einwilligungen in Ordnung"
+ },
+ "{usage} : accord à vérifier": {
+  "en": "{usage}: consent to check",
+  "de": "{usage}: Einwilligung zu prüfen"
+ },
+ "{usage} : accord refusé": {
+  "en": "{usage}: consent refused",
+  "de": "{usage}: Einwilligung verweigert"
+ },
+ "{label} en anglais": {
+  "en": "{label} in English",
+  "de": "{label} auf Englisch"
+ },
+ "{label} en allemand": {
+  "en": "{label} in German",
+  "de": "{label} auf Deutsch"
+ },
+ "Date de la prise de vue": {
+  "en": "Date taken",
+  "de": "Aufnahmedatum"
+ },
+ "L’appareil indique le {date} à {time}.": {
+  "en": "The camera says {date} at {time}.",
+  "de": "Die Kamera zeigt {date} um {time}."
+ },
+ "L’appareil indique {time}.": {
+  "en": "The camera says {time}.",
+  "de": "Die Kamera zeigt {time}."
+ },
+ "sans photographe": {
+  "en": "no photographer",
+  "de": "ohne Fotograf"
+ },
+ "Publication et historique": {
+  "en": "Publication and history",
+  "de": "Veröffentlichung und Verlauf"
+ },
+ "Supprimer la photo…": {
+  "en": "Delete the photo…",
+  "de": "Foto löschen…"
+ },
+ "Dépublier…": {
+  "en": "Unpublish…",
+  "de": "Offline nehmen…"
+ },
+ "Publier…": {
+  "en": "Publish…",
+  "de": "Veröffentlichen…"
+ },
+ "Proposer de nouveau…": {
+  "en": "Propose again…",
+  "de": "Erneut vorschlagen…"
+ },
+ "Proposer…": {
+  "en": "Propose…",
+  "de": "Vorschlagen…"
+ },
+ "Accords et visages": {
+  "en": "Consents and faces",
+  "de": "Einwilligungen und Gesichter"
+ },
+ "Site": {
+  "en": "Site",
+  "de": "Website"
+ },
+ "Indiquer : il y a quelqu’un": {
+  "en": "Mark: someone is in it",
+  "de": "Angeben: Jemand ist darauf"
+ },
+ "Indiquer : personne de reconnaissable": {
+  "en": "Mark: no one recognisable",
+  "de": "Angeben: Niemand erkennbar"
+ },
+ "sans lieu ni date": {
+  "en": "no place or date",
+  "de": "ohne Ort und Datum"
+ },
+ "Fiche non enregistrée : {n} champs à corriger": {
+  "en": "Record not saved: {n} fields to correct",
+  "de": "Datenblatt nicht gespeichert: {n} Felder zu korrigieren"
+ },
+ "Fiche non enregistrée : 1 champ à corriger": {
+  "en": "Record not saved: 1 field to correct",
+  "de": "Datenblatt nicht gespeichert: 1 Feld zu korrigieren"
+ },
+ "Chacun s’enregistre quand vous le quittez ; « Défaire » revient en arrière pendant 10 secondes.": {
+  "en": "Each one is saved when you leave it; “Undo” goes back for 10 seconds.",
+  "de": "Jedes Feld wird beim Verlassen gespeichert; „Rückgängig“ geht 10 Sekunden lang zurück."
+ },
+ "Ce que voit le visiteur": {
+  "en": "What the visitor sees",
+  "de": "Was Besucher sehen"
+ },
+ "Sous la photo, sur le site.": {
+  "en": "Under the photo, on the site.",
+  "de": "Unter dem Foto, auf der Website."
+ },
+ "Adresse de sa page : {url}.": {
+  "en": "Address of its page: {url}.",
+  "de": "Adresse der Seite: {url}."
+ },
+ "Une ligne, {n} signes au plus.": {
+  "en": "One line, {n} characters at most.",
+  "de": "Eine Zeile, höchstens {n} Zeichen."
+ },
+ "Suggestion de description": {
+  "en": "Description suggestion",
+  "de": "Beschreibungsvorschlag"
+ },
+ "Ignorer": {
+  "en": "Ignore",
+  "de": "Ignorieren"
+ },
+ "Suggestions de mots-clés :": {
+  "en": "Keyword suggestions:",
+  "de": "Stichwortvorschläge:"
+ },
+ "Où et quand": {
+  "en": "Where and when",
+  "de": "Wo und wann"
+ },
+ "Garder « {name} » (la suggestion disparaît)": {
+  "en": "Keep “{name}” (the suggestion goes away)",
+  "de": "„{name}“ behalten (der Vorschlag verschwindet)"
+ },
+ "Ce qu’on lit sous la photo : « la Maine, Angers ».": {
+  "en": "What is read under the photo: “the Maine, Angers”.",
+  "de": "Was unter dem Foto steht: „die Maine, Angers“."
+ },
+ "La commune de la carte du monde : toutes les communes de France, plus de 500 habitants ailleurs.": {
+  "en": "The town on the world map: every town in France, over 500 inhabitants elsewhere.",
+  "de": "Der Ort auf der Weltkarte: alle Gemeinden Frankreichs, anderswo über 500 Einwohner."
+ },
+ "Il faut une ville de la carte.": {
+  "en": "A map town is needed.",
+  "de": "Ein Ort für die Karte ist nötig."
+ },
+ "Écrivez-la comme vous voulez : « 11/10/2026 », « 11 oct. 2026 », « octobre 2026 ».": {
+  "en": "Write it as you like: “11/10/2026”, “11 Oct 2026”, “October 2026”.",
+  "de": "Schreiben Sie es, wie Sie wollen: „11.10.2026“, „11. Okt. 2026“, „Oktober 2026“."
+ },
+ "Heure sur le site": {
+  "en": "Time on the site",
+  "de": "Uhrzeit auf der Website"
+ },
+ "Montrer l’heure sur le site ({time})": {
+  "en": "Show the time on the site ({time})",
+  "de": "Uhrzeit auf der Website zeigen ({time})"
+ },
+ "Métadonnées « Tout l’EXIF de l’original » ({link}) : les images servies portent la position GPS de l’original.": {
+  "en": "Metadata “All EXIF from the original” ({link}): served images carry the original’s GPS position.",
+  "de": "Metadaten „Alle EXIF-Daten des Originals“ ({link}): Ausgelieferte Bilder enthalten die GPS-Position des Originals."
+ },
+ "Celui des {link}, ou aucun sur cette photo.": {
+  "en": "The one from the {link}, or none on this photo.",
+  "de": "Das aus den {link}, oder keines auf diesem Foto."
+ },
+ "Selon les réglages": {
+  "en": "As in the settings",
+  "de": "Gemäß den Einstellungen"
+ },
+ "/photo/… sur le site ; minuscules, chiffres et tirets. Vide : tirée du titre.": {
+  "en": "/photo/… on the site; lowercase, digits and hyphens. Empty: taken from the title.",
+  "de": "/photo/… auf der Website; Kleinbuchstaben, Ziffern und Bindestriche. Leer: aus dem Titel."
+ },
+ "Photo publiée : changer l’adresse casse les liens déjà partagés.": {
+  "en": "Published photo: changing the address breaks links already shared.",
+  "de": "Veröffentlichtes Foto: Eine neue Adresse macht bereits geteilte Links ungültig."
+ },
+ "Enregistrer la fiche": {
+  "en": "Save the record",
+  "de": "Datenblatt speichern"
+ },
+ "Enregistrer les textes": {
+  "en": "Save the texts",
+  "de": "Texte speichern"
+ },
+ "En ligne. « Dépublier… » demande une raison, que le photographe reçoit.": {
+  "en": "Online. “Unpublish…” asks for a reason, which the photographer receives.",
+  "de": "Online. „Offline nehmen…“ verlangt einen Grund, den der Fotograf erhält."
+ },
+ "Confirmer les accords…": {
+  "en": "Confirm the consents…",
+  "de": "Einwilligungen bestätigen…"
+ },
+ "Proposer à la publication…": {
+  "en": "Propose for publication…",
+  "de": "Zur Veröffentlichung vorschlagen…"
+ },
+ "Publier ou programmer…": {
+  "en": "Publish or schedule…",
+  "de": "Veröffentlichen oder planen…"
+ },
+ "Renvoyer au photographe…": {
+  "en": "Send back to the photographer…",
+  "de": "An den Fotografen zurückschicken…"
+ },
+ "Ouvrir la sortie": {
+  "en": "Open the outing",
+  "de": "Ausflug öffnen"
+ },
+ "Désactivé sur ce serveur.": {
+  "en": "Turned off on this server.",
+  "de": "Auf diesem Server ausgeschaltet."
+ },
+ "Dépublier « {title} » ?": {
+  "en": "Unpublish “{title}”?",
+  "de": "„{title}“ offline nehmen?"
+ },
+ "La photo quitte la galerie, sa série et la carte ; son adresse mène à la galerie. {name} reçoit la raison. « Publier » la remettra en ligne.": {
+  "en": "The photo leaves the gallery, its series and the map; its address leads to the gallery. {name} receives the reason. “Publish” will put it back online.",
+  "de": "Das Foto verlässt die Galerie, seine Serie und die Karte; seine Adresse führt zur Galerie. {name} erhält den Grund. „Veröffentlichen“ stellt es wieder online."
+ },
+ "Raison, pour {name}": {
+  "en": "Reason, for {name}",
+  "de": "Grund, für {name}"
+ },
+ "Dépublier la photo": {
+  "en": "Unpublish the photo",
+  "de": "Foto offline nehmen"
+ },
+ "Confirmer les accords de « {title} » ?": {
+  "en": "Confirm the consents for “{title}”?",
+  "de": "Einwilligungen für „{title}“ bestätigen?"
+ },
+ "Photo en ligne à vérifier ({reasons}).": {
+  "en": "Online photo to check ({reasons}).",
+  "de": "Online-Foto zu prüfen ({reasons})."
+ },
+ "Je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.": {
+  "en": "I confirm that the recognisable people in this photo agreed to the site, or are not recognisable in it.",
+  "de": "Ich bestätige, dass die erkennbaren Personen auf diesem Foto der Website zugestimmt haben oder darauf nicht erkennbar sind."
+ },
+ "Confirmer": {
+  "en": "Confirm",
+  "de": "Bestätigen"
+ },
+ "Son titre est encore le nom du fichier : corrigez-le d’abord, l’adresse de la page se fige à la publication.": {
+  "en": "Its title is still the file name: correct it first, the page address is fixed on publication.",
+  "de": "Der Titel ist noch der Dateiname: Korrigieren Sie ihn zuerst, die Seitenadresse wird bei der Veröffentlichung festgelegt."
+ },
+ "Corriger le titre": {
+  "en": "Correct the title",
+  "de": "Titel korrigieren"
+ },
+ "Elle sera en ligne tout de suite, ou à la date choisie ; « Dépublier » la retirera.": {
+  "en": "It will be online right away, or on the chosen date; “Unpublish” will take it down.",
+  "de": "Es geht sofort oder zum gewählten Datum online; „Offline nehmen“ zieht es zurück."
+ },
+ "Programmer : le jour et l’heure ci-dessous (heure de Paris)": {
+  "en": "Schedule: the day and time below (Paris time)",
+  "de": "Planen: Tag und Uhrzeit unten (Pariser Zeit)"
+ },
+ "(si programmée)": {
+  "en": "(if scheduled)",
+  "de": "(falls geplant)"
+ },
+ "Renvoyer « {title} » au photographe ?": {
+  "en": "Send “{title}” back to the photographer?",
+  "de": "„{title}“ an den Fotografen zurückschicken?"
+ },
+ "Elle redevient un brouillon « à reprendre » ; {name} reçoit votre remarque.": {
+  "en": "It becomes a draft “to rework” again; {name} receives your note.",
+  "de": "Es wird wieder ein Entwurf „zu überarbeiten“; {name} erhält Ihre Anmerkung."
+ },
+ "Remarque pour {name}": {
+  "en": "Note for {name}",
+  "de": "Anmerkung für {name}"
+ },
+ "Proposer « {title} » à la publication ?": {
+  "en": "Propose “{title}” for publication?",
+  "de": "„{title}“ zur Veröffentlichung vorschlagen?"
+ },
+ "La modération la publie, la programme ou vous la renvoie avec une remarque.": {
+  "en": "Moderation publishes it, schedules it or sends it back to you with a note.",
+  "de": "Die Moderation veröffentlicht oder plant es oder schickt es Ihnen mit einer Anmerkung zurück."
+ },
+ "Filtrer par état": {
+  "en": "Filter by state",
+  "de": "Nach Status filtern"
+ },
+ "Suggestion de série": {
+  "en": "Series suggestion",
+  "de": "Serienvorschlag"
+ },
+ "retirer ce filtre": {
+  "en": "remove this filter",
+  "de": "diesen Filter entfernen"
+ },
+ "Chercher dans la photothèque": {
+  "en": "Search the photo library",
+  "de": "In der Fotothek suchen"
+ },
+ "Effacer les filtres": {
+  "en": "Clear the filters",
+  "de": "Filter löschen"
+ },
+ "Clic : voir · Maj ou Ctrl + clic : plusieurs · Ctrl K : rechercher, agir": {
+  "en": "Click: view · Shift or Ctrl + click: several · Ctrl K: search, act",
+  "de": "Klick: ansehen · Umschalt oder Strg + Klick: mehrere · Strg K: suchen, handeln"
+ },
+ "L : loupe": {
+  "en": "L: magnifier",
+  "de": "L: Lupe"
+ },
+ "glisser : changer l’ordre": {
+  "en": "drag: change the order",
+  "de": "ziehen: Reihenfolge ändern"
+ },
+ "Cochez des photos, puis agissez dans le panneau « Sélection ».": {
+  "en": "Tick photos, then act in the “Selection” panel.",
+  "de": "Haken Sie Fotos an und handeln Sie dann im Bereich „Auswahl“."
+ },
+ "Cliquez une photo pour la voir ici. Maj + clic ou Ctrl + clic pour en choisir plusieurs : série, lieu, date et publication s’appliquent alors à toutes.": {
+  "en": "Click a photo to see it here. Shift + click or Ctrl + click to choose several: series, place, date and publication then apply to all.",
+  "de": "Klicken Sie ein Foto an, um es hier zu sehen. Umschalt + Klick oder Strg + Klick für mehrere: Serie, Ort, Datum und Veröffentlichung gelten dann für alle."
+ },
+ "Défaire la dernière action": {
+  "en": "Undo the last action",
+  "de": "Letzte Aktion rückgängig machen"
+ },
+ "Publier la sélection (après confirmation)": {
+  "en": "Publish the selection (after confirmation)",
+  "de": "Auswahl veröffentlichen (nach Bestätigung)"
+ },
+ "Raccourcis d’une touche coupés.": {
+  "en": "Single-key shortcuts off.",
+  "de": "Einzeltasten-Kürzel aus."
+ },
+ "Touches d’une lettre : seulement quand une vignette ou ce panneau a le focus.": {
+  "en": "Single-letter keys: only when a thumbnail or this panel has focus.",
+  "de": "Einzelbuchstaben-Tasten: nur wenn ein Vorschaubild oder dieser Bereich den Fokus hat."
+ },
+ "Les rallumer dans « Mon compte »": {
+  "en": "Turn them back on in “My account”",
+  "de": "In „Mein Konto“ wieder einschalten"
+ },
+ "Les couper dans « Mon compte »": {
+  "en": "Turn them off in “My account”",
+  "de": "In „Mein Konto“ ausschalten"
+ },
+ "Chaque champ s’enregistre quand vous le quittez ; « Défaire » revient en arrière pendant 10 secondes.": {
+  "en": "Each field is saved when you leave it; “Undo” goes back for 10 seconds.",
+  "de": "Jedes Feld wird beim Verlassen gespeichert; „Rückgängig“ geht 10 Sekunden lang zurück."
+ },
+ "une ligne, facultatif": {
+  "en": "one line, optional",
+  "de": "eine Zeile, optional"
+ },
+ "ex. oct. 2026, 10/2026, 2026-10-16": {
+  "en": "e.g. Oct 2026, 10/2026, 2026-10-16",
+  "de": "z. B. Okt. 2026, 10/2026, 2026-10-16"
+ },
+ "Ouvrir la fiche : filigrane, accords, Instagram, preuve": {
+  "en": "Open the record: watermark, consents, Instagram, proof",
+  "de": "Datenblatt öffnen: Wasserzeichen, Einwilligungen, Instagram, Nachweis"
+ },
+ "Les originaux, toutes leurs images et leurs preuves d’antériorité seront effacés. Cette action est définitive.": {
+  "en": "The originals, all their images and their proofs of prior existence will be erased. This cannot be undone.",
+  "de": "Die Originale, alle ihre Bilder und ihre Existenznachweise werden gelöscht. Dies ist endgültig."
+ },
+ "{n} programmées": {
+  "en": "{n} scheduled",
+  "de": "{n} geplant"
+ },
+ "{n} programmée": {
+  "en": "{n} scheduled",
+  "de": "{n} geplant"
+ },
+ "{n} pour Instagram": {
+  "en": "{n} for Instagram",
+  "de": "{n} für Instagram"
+ },
+ "Les photos proposées par les photographes, la plus ancienne d’abord. Publiez-les ou programmez-les ; renvoyez-en une avec une remarque si elle doit être reprise. Une photo dont un accord est à vérifier attend la confirmation du photographe ou d’un administrateur.": {
+  "en": "Photos proposed by the photographers, oldest first. Publish or schedule them; send one back with a note if it needs rework. A photo whose consent needs checking waits for the photographer’s or an administrator’s confirmation.",
+  "de": "Von den Fotografen vorgeschlagene Fotos, das älteste zuerst. Veröffentlichen oder planen Sie sie; schicken Sie eines mit einer Anmerkung zurück, wenn es überarbeitet werden muss. Ein Foto mit zu prüfender Einwilligung wartet auf die Bestätigung des Fotografen oder einer Administration."
+ },
+ "Cochez les photos à valider, puis choisissez quand les publier, sous la liste.": {
+  "en": "Tick the photos to approve, then choose when to publish them, below the list.",
+  "de": "Haken Sie die freizugebenden Fotos an und wählen Sie unter der Liste, wann sie veröffentlicht werden."
+ },
+ "Accord confirmé par le photographe": {
+  "en": "Consent confirmed by the photographer",
+  "de": "Einwilligung vom Fotografen bestätigt"
+ },
+ "Accords en règle": {
+  "en": "Consents in order",
+  "de": "Einwilligungen in Ordnung"
+ },
+ "Elle ne peut pas être publiée : renvoyez-la au photographe.": {
+  "en": "It cannot be published: send it back to the photographer.",
+  "de": "Es kann nicht veröffentlicht werden: Schicken Sie es an den Fotografen zurück."
+ },
+ "Le photographe ou un administrateur confirme d’abord l’accord, dans la fiche.": {
+  "en": "The photographer or an administrator first confirms the consent, in the record.",
+  "de": "Der Fotograf oder eine Administration bestätigt zuerst die Einwilligung im Datenblatt."
+ },
+ "le {date}": {
+  "en": "on {date}",
+  "de": "am {date}"
+ },
+ "Pour les photos cochées": {
+  "en": "For the ticked photos",
+  "de": "Für die angehakten Fotos"
+ },
+ "Programmer, au jour et à l’heure choisis (heure de Paris)": {
+  "en": "Schedule, on the chosen day and time (Paris time)",
+  "de": "Planen, zum gewählten Tag und zur gewählten Uhrzeit (Pariser Zeit)"
+ },
+ "Renvoyer « {title} » sans la mettre dans la file Instagram ?": {
+  "en": "Send “{title}” back without putting it in the Instagram queue?",
+  "de": "„{title}“ zurückschicken, ohne es in die Instagram-Warteschlange zu stellen?"
+ },
+ "Compte introuvable : rien n’a changé.": {
+  "en": "Account not found: nothing changed.",
+  "de": "Konto nicht gefunden: Nichts wurde geändert."
+ },
+ "Raccourcis d’une touche allumés.": {
+  "en": "Single-key shortcuts on.",
+  "de": "Einzeltasten-Kürzel an."
+ },
+ "Raccourcis d’une touche coupés : seuls Ctrl K, Ctrl A et Ctrl Z restent.": {
+  "en": "Single-key shortcuts off: only Ctrl K, Ctrl A and Ctrl Z remain.",
+  "de": "Einzeltasten-Kürzel aus: Nur Strg K, Strg A und Strg Z bleiben."
+ },
+ "Description prête : à relire, puis « Reprendre ce texte ».": {
+  "en": "Description ready: review it, then “Use this text”.",
+  "de": "Beschreibung bereit: prüfen, dann „Diesen Text übernehmen“."
+ },
+ "Elles partiront en ligne à l’heure dite ; d’ici là, « Annuler la programmation » les retient.": {
+  "en": "They will go online at the set time; until then, “Cancel scheduling” holds them back.",
+  "de": "Sie gehen zur festgelegten Zeit online; bis dahin hält „Planung aufheben“ sie zurück."
+ },
+ "{n} gardent le nom du fichier comme titre : l’adresse de leur page se fige à la publication. Renvoyez-les plutôt au photographe, ou publiez quand même.": {
+  "en": "{n} keep the file name as title: their page address is fixed on publication. Rather send them back to the photographer, or publish anyway.",
+  "de": "{n} behalten den Dateinamen als Titel: Ihre Seitenadresse wird bei der Veröffentlichung festgelegt. Schicken Sie sie lieber an den Fotografen zurück oder veröffentlichen Sie trotzdem."
+ },
+ "{n} garde le nom du fichier comme titre : l’adresse de sa page se fige à la publication. Renvoyez-la plutôt au photographe, ou publiez quand même.": {
+  "en": "{n} keeps the file name as title: its page address is fixed on publication. Rather send it back to the photographer, or publish anyway.",
+  "de": "{n} behält den Dateinamen als Titel: Die Seitenadresse wird bei der Veröffentlichung festgelegt. Schicken Sie es lieber an den Fotografen zurück oder veröffentlichen Sie trotzdem."
+ },
+ "{n} gardent le nom du fichier comme titre : l’adresse de leur page se fige à la publication. Corrigez-les d’abord, ou publiez quand même.": {
+  "en": "{n} keep the file name as title: their page address is fixed on publication. Correct them first, or publish anyway.",
+  "de": "{n} behalten den Dateinamen als Titel: Ihre Seitenadresse wird bei der Veröffentlichung festgelegt. Korrigieren Sie sie zuerst oder veröffentlichen Sie trotzdem."
+ },
+ "{n} garde le nom du fichier comme titre : l’adresse de sa page se fige à la publication. Corrigez-le d’abord, ou publiez quand même.": {
+  "en": "{n} keeps the file name as title: its page address is fixed on publication. Correct it first, or publish anyway.",
+  "de": "{n} behält den Dateinamen als Titel: Die Seitenadresse wird bei der Veröffentlichung festgelegt. Korrigieren Sie ihn zuerst oder veröffentlichen Sie trotzdem."
+ }
+}

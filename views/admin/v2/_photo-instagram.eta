@@ -1,0 +1,83 @@
+<% /* Fiche d'une photo, rubrique Instagram (admin v2) : les mêmes formulaires et les mêmes routes que la v1
+      (views/admin/photo.eta) : la file (instagram.file), la proposition au modérateur (instagram.proposer), la demande de
+      republication ; le dessin de la planche MQ-00 (champs, choix, pastilles). L'aperçu suit le cadre et le filigrane
+      choisis (photo-v2.js). */ %>
+<% const t = it.t, E = __eta.e, fr = it.lang === 'fr', ic = it.ic, base = it.base, P = it.photo, R = it.ready, seePeople = it.seePeople; %>
+<% const ig = it.insta, igFile = it.igFile, pr = it.igProposal;
+   // Erreur Instagram : ses raisons (« bloquée : J-0042 refuse la publication ») nomment les accords ; qui ne voit pas les
+   // personnes n’en lit que la nature, comme pour le bandeau d’état.
+   const IG_HIDE = { 'bloquée': 'bloquée par un accord (détail réservé au photographe et aux administrateurs)', 'à vérifier': 'à vérifier : un accord manque (détail réservé au photographe et aux administrateurs)' };
+   const igErr = m => t.msg(seePeople ? m : String(m || '').replace(/(^|: )(bloquée|à vérifier) : [\s\S]*$/, (x, pre, k) => pre + IG_HIDE[k]));
+   const date = ms => new Intl.DateTimeFormat(it.locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ms);
+   const sum = ig.post && ig.post.status === 'published' ? t('publiée sur Instagram') : ig.active ? t('dans la file') : ig.post && ig.post.status === 'failed' ? t('en échec') : R.instagram.level === 'no' ? t('accord refusé') : R.instagram.level === 'warn' ? t('accord à vérifier') : t('pas encore partagée');
+   const demande = () => (ig.post.retry_requested_at ? `<p><span class="etat etat--encours">${ic('encours', 12)}${E(t('Republication demandée'))}</span> <span class="hint">${E(t('l’équipe qui gère la file Instagram est prévenue'))}</span></p>`
+     : `<form class="btns-ligne" method="post" action="${base}/instagram/demande"><input type="hidden" name="_csrf" value="${E(it.csrf)}"><button class="btn" type="submit">${E(t('Demander la republication'))}</button> <span class="hint">${E(t('la file Instagram est gérée par le modérateur : il sera prévenu'))}</span></form>`); %>
+<% if (igFile || it.igPropose) { %>
+<details class="panel plier-p ig-v2" id="instagram" data-ig<%~ ig.active || R.instagram.level !== 'ok' ? ' open' : '' %>>
+  <summary><%~ ic('chev') %><span><span class="h">Instagram</span><span class="sec"><%= sum %></span></span></summary>
+<% if (ig.post && ig.post.status === 'published') { %>
+  <p><span class="etat etat--abouti"><%~ ic('abouti', 12) %><%= t('Publiée sur Instagram') %></span><% if (ig.post.permalink) { %> <a class="lien-a" href="<%= ig.post.permalink %>" target="_blank" rel="noopener"><%= t('Voir le post') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span></a><% } %></p>
+<% if (ig.engagement) { const g = ig.engagement; %>  <p><strong><%= g.likes %></strong> <%= g.likes > 1 ? t('likes') : t('like') %> · <strong><%= g.comments %></strong> <%= g.comments > 1 ? t('commentaires') : t('commentaire') %> <span class="hint"><%= t('relevé le {date}', { date: new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(g.day)) }) %></span></p>
+<% if (ig.likesSpark) { %>  <figure class="ig-spark"><%~ ig.likesSpark %><figcaption class="hint"><%= t('likes, {n} derniers relevés', { n: g.series.length }) %></figcaption></figure>
+<% } %><% } else { %>  <p class="hint"><%~ t('Likes et commentaires : relevés chaque matin (voir {link}).', { link: '<a href="/admin/instagram#likes">Instagram</a>' }) %></p>
+<% } %>
+<% } else if (ig.post && ig.post.status === 'publishing') { %>
+  <p><%= t('Envoi à Instagram en cours…') %></p>
+<% } else if (ig.active) { const slot = ig.slot || '', sp = slot.indexOf(' '); const d = x => (/^\d{4}-\d{2}-\d{2}$/.test(x) ? new Intl.DateTimeFormat(it.locale, { timeZone: 'UTC', day: 'numeric', month: 'long' }).format(new Date(`${x}T12:00:00Z`)) : x);
+   const at = sp < 0 ? (fr ? slot.replace(':', ' h ') : slot) : t('{date} à {time}', { date: d(slot.slice(0, sp)), time: fr ? slot.slice(sp + 1).replace(':', ' h ') : slot.slice(sp + 1) }); %>
+  <p><span class="etat etat--encours"><%~ ic('encours', 12) %><%~ t('Dans la file : prévue le {slot}.', { slot: `<strong>${E(at)}</strong>` }) %></span><% if (ig.post.error) { %> <span class="err"><%= t('Dernier essai : {error}', { error: igErr(ig.post.error) }) %></span><% } %></p>
+<% } else if (ig.post && ig.post.status === 'failed' && !igFile) { %>
+  <p class="err"><%~ ic('alerte') %><span><%= t('Échec de la publication : {error}', { error: igErr(ig.post.error) }) %></span></p>
+  <%~ demande() %>
+<% } else if (ig.post && ig.post.status === 'failed') { %>
+  <p class="err"><%~ ic('alerte') %><span><%= t('Échec de la publication : {error}', { error: igErr(ig.post.error) }) %></span></p>
+<% if (ig.post.retry_requested_at) { %>  <p><span class="etat etat--attention"><%~ ic('attention', 12) %><%= t('Republication demandée') %></span> <span class="hint"><%= t('par {name}, le {date}', { name: ig.post.retry_requested_by || t('le photographe'), date: date(ig.post.retry_requested_at) }) %></span></p>
+<% } %>  <form class="btns-ligne" method="post" action="/admin/instagram/<%= ig.post.id %>/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= base %>#instagram"><button class="btn" type="submit"><%= t('Republier (remettre en tête de file)') %></button> <span class="hint"><%= t('ou modifiez le cadre et la légende ci-dessous puis remettez-la dans la file') %></span></form>
+<% } %>
+<% if (ig.blocked.length && !seePeople) { %>
+  <p class="avert" role="note"><%~ ic('alerte') %><span><b><%= t('Instagram bloqué') %></b> · <%= t('Le détail (personnes et accords) est visible du photographe et des administrateurs.') %></span></p>
+<% } else if (ig.blocked.length) { %>
+  <p class="avert" role="note"><%~ ic('alerte') %><span><%~ t('{title} : {reasons}. Aucune confirmation ne lève ce blocage : si la personne n’est pas sur cette photo, indiquez-le dans {link}.', { title: `<b>${E(t('Instagram bloqué'))}</b>`, reasons: E(ig.blocked.join(' ; ')), link: `<a class="lien-a" href="#rencontres">${E(t('Personnes et accords'))}</a>` }) %></span></p>
+<% } else if (P.status !== 'published') { %>
+  <p class="hint"><%= t('Publiez d’abord la photo sur le site pour la partager sur Instagram.') %></p>
+<% } else if (!igFile && ig.active) { %>
+  <p class="hint"><%= t('La file Instagram est réglée par le modérateur.') %></p>
+<% } else if (!ig.post || ig.active || ig.post.status === 'failed' || ig.post.status === 'published') { if (!(ig.post && ig.post.status === 'publishing')) {
+     const src = !igFile && pr ? pr : ig.post; const fFrame = src ? src.frame : ig.s.frame, fWm = src ? src.watermark : ig.s.watermark;
+     const cap = !igFile && pr && pr.caption ? pr.caption : ig.caption; %>
+<% if (!igFile && pr) { %>  <p><span class="etat etat--encours"><%~ ic('encours', 12) %><%= t('Proposée pour Instagram') %></span> <span class="hint"><%= t('le {date}, en attente du modérateur', { date: date(pr.at) }) %></span></p>
+  <form method="post" action="<%= base %>/instagram/retirer-proposition"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Retirer la proposition') %></button></form>
+<% } else if (!igFile) { %>  <p class="hint"><%= t('Proposez la photo : le modérateur la met dans la file Instagram, ou vous la renvoie avec une remarque.') %></p>
+<% } %>
+  <div class="ig-v2-corps">
+    <figure class="ig-apercu"><img src="/admin/instagram/apercu.jpg?photo=<%= P.id %>&amp;cadre=<%= fFrame %>&amp;filigrane=<%= fWm ? 1 : 0 %>" alt="<%= t('Aperçu de l’image envoyée à Instagram') %>" data-ig-preview loading="lazy" width="270" height="270">
+      <figcaption class="hint"><%= t('L’image telle qu’elle partira (1080 px, JPEG, sans métadonnées)') %></figcaption></figure>
+    <form class="form ig-form" method="post" action="<%= igFile ? '/admin/instagram/file' : `${base}/instagram/proposer` %>" data-ig-form>
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="photo_id" value="<%= P.id %>"><input type="hidden" name="back" value="<%= base %>#instagram"><input type="hidden" name="watermark_set" value="1">
+      <div class="champ-a"><label for="ig-cadre"><%= t('Cadre') %></label><select id="ig-cadre" name="frame" data-ig-frame><% Object.entries(ig.FRAMES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ fFrame === k ? ' selected' : '' %>><%= t(l) %></option><% }) %></select></div>
+      <div class="choix-a">
+        <label><input type="checkbox" name="watermark" data-ig-watermark<%~ fWm ? ' checked' : '' %>><span><%= t('Avec le filigrane') %></span></label>
+<% if (R.instagram.level === 'warn' && !it.igConfirmed && seePeople) { %>        <label><input type="checkbox" name="confirmer" value="1"><span><%= t('Instagram à vérifier ({reasons}) : je confirme que les personnes reconnaissables ont accepté Instagram, ou n’y sont pas reconnaissables.', { reasons: R.instagram.reasons.join(' ; ') }) %></span></label>
+<% } %><% if (ig.signature) { %>        <input type="hidden" name="signature_set" value="1"><label><input type="checkbox" name="signature"<%~ P.ig_signature !== 0 ? ' checked' : '' %>><span><%= t('Ajouter ma signature') %></span><span class="sec">« <%= ig.signature %> »<%= String(P.legend || '').trim() ? '' : ' · ' + t('seulement si la photo a une légende') %></span></label>
+<% } %>        <label><input type="checkbox" name="custom" data-ig-custom<%~ (!igFile && pr ? Boolean(pr.caption) : ig.custom) ? ' checked' : '' %>><span><%= t('Légende personnalisée pour cette photo') %></span><span class="sec"><%= t('sinon, celle du modèle') %></span></label>
+      </div>
+      <div class="champ-a"><div class="lb-l"><label for="ig-legende"><%= t('Légende') %></label><span class="compteur" data-ig-count><%= cap.length %> / 2200</span></div><textarea id="ig-legende" name="caption" rows="8" maxlength="2200" data-ig-caption><%= cap %></textarea></div>
+<% if (ig.warnings.length) { %>      <ul class="dlg-cons" data-ig-warnings><% ig.warnings.forEach(w => { %><li><%= w %></li><% }) %></ul>
+<% } %><% if (!igFile) { %>      <div class="champ-a"><label for="ig-mot"><%= t('Un mot pour le modérateur') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><textarea id="ig-mot" name="message" rows="2" maxlength="1000"><%= pr ? pr.message : '' %></textarea></div>
+<% } %>      <p class="btns-ligne">
+        <button class="btn ghost js-seul" type="button" data-ig-template hidden><%= t('Revenir au modèle') %></button>
+        <button class="btn" type="submit"><%= !igFile ? (pr ? t('Mettre à jour la proposition') : ig.post && ig.post.status === 'published' ? t('Proposer de nouveau pour Instagram') : t('Proposer pour Instagram')) : ig.active ? t('Mettre à jour') : ig.post && ig.post.status === 'published' ? t('Republier (remettre dans la file)') : t('Ajouter à la file Instagram') %></button>
+      </p>
+<% if (!ig.connected && igFile) { %>      <p class="hint"><%~ t('Aucun compte connecté : la photo attendra dans la file ({link}).', { link: '<a href="/admin/instagram">Instagram</a>' }) %></p><% } %>
+    </form>
+<% if (igFile && ig.active && ig.post.status === 'queued') { %>    <form method="post" action="/admin/instagram/<%= ig.post.id %>/annuler"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= base %>#instagram"><button class="btn ghost" type="submit"><%= t('Retirer de la file') %></button></form>
+<% } %>  </div>
+<% } } %>
+</details>
+<% } else if ((it.ownPhoto || it.canAll('photos.proposer')) && it.can('photos.proposer') && ig.post && ig.post.status === 'failed') { %>
+<details class="panel plier-p ig-v2" id="instagram" open>
+  <summary><%~ ic('chev') %><span><span class="h">Instagram</span><span class="sec"><%= t('en échec') %></span></span></summary>
+  <p class="err"><%~ ic('alerte') %><span><%= t('Échec de la publication : {error}', { error: igErr(ig.post.error) }) %></span></p>
+  <%~ demande() %>
+</details>
+<% } %>

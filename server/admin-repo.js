@@ -252,10 +252,11 @@ export function createAdminRepo(db) {
       const p = q.photo.get(id);
       if (!p) return null;
       const merged = { ...p, taken_on: p.taken_on || '', watermark: p.watermark === 0 ? 'none' : 'default' };
+      // Filigrane (« default » ou « none ») et adresse : la fiche de l'admin v2 les enregistre aussi champ par champ.
       for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend', 'keywords', 'city_id', 'city_label', 'on_map', 'show_time',
-        'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de', 'alt_text', 'alt_text_en', 'alt_text_de']) if (k in body) merged[k] = body[k];
-      // Brouillon dont l'adresse dérive encore du titre : elle suit le nouveau titre.
-      merged.slug = 'title' in body && p.status === 'draft' && p.slug === uniqueSlug('photos', p.title, id) ? '' : p.slug;
+        'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de', 'alt_text', 'alt_text_en', 'alt_text_de', 'watermark']) if (k in body) merged[k] = body[k];
+      // Brouillon dont l'adresse dérive encore du titre : elle suit le nouveau titre ; une adresse envoyée l'emporte.
+      merged.slug = 'slug' in body ? body.slug : 'title' in body && p.status === 'draft' && p.slug === uniqueSlug('photos', p.title, id) ? '' : p.slug;
       this.updatePhoto(id, merged);
       // Vue rapide : un clic sur une série, même celle qu'elle a déjà, vaut choix.
       if ('category_id' in body) db.prepare('UPDATE photos SET series_checked = 1 WHERE id = ?').run(id);

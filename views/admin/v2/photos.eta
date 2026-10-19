@@ -1,0 +1,217 @@
+<% layout('./layout') %>
+<% const t = it.t, E = __eta.e; %>
+<% /* La photothèque (admin v2) : planche contact, liste, inspecteur et sélection, import. Les routes, les droits et les
+      champs sont ceux de la v1 (views/admin/photos.eta) ; la v2 applique la planche MQ-00 et les constats UX-A-02 (touche P
+      confirmée, raccourcis d'une touche coupables dans « Mon compte »), 03 (titres provisoires montrés avant de publier),
+      08 (« Défaire » joignable, le focus gardé), 09 (focus jamais sous la feuille de l'inspecteur), 10 (les listes de filtre
+      n'agissent qu'à « Filtrer »), 14 (l'erreur d'un champ sous lui), 16 (filtres d'état à symbole, lexique § 3), 24 et 31
+      (annonces de sélection : le titre de la photo). Sans script : les filtres, les liens, l'import et les actions groupées
+      (formulaire POST et jeton), comme la v1. */ %>
+<% const prop = it.can('photos.proposer') && !it.can('photos.publier');
+   const mod = it.can('photos.modifier'), pub = it.can('photos.publier'), del = it.can('photos.supprimer'), order = it.canAll('photos.modifier'), imp = it.can('photos.importer');
+   const f = it.filter;
+   // (Pas de gabarit littéral dans un autre : l’analyseur d’Eta ne les suit pas ; des concaténations à la place.)
+   const params = o => { const p = new URLSearchParams(); const all = { q: f.q, auteur: f.author, serie: f.category, statut: it.todo ? 'afinir' : f.status, manque: it.missing ? it.missing.key : '', vue: it.view === 'liste' ? 'liste' : '', ...o }; for (const [k, v] of Object.entries(all)) if (v) p.set(k, v); const s = p.toString(); return '/admin/photos' + (s ? '?' + s : ''); };
+   const back = params({});
+   const status = it.todo ? 'afinir' : f.status;
+   const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', encours: '<path d="M12 2.7a9.3 9.3 0 0 1 0 18.6z" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>',
+     abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>', attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>',
+     arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>', upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+     corbeille: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', alerte: '<path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/>',
+   };
+   const ic = (k, s = 14) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   // Filtres d'état (lexique § 3) : le symbole dans sa couleur, le mot, le nombre ; ceux qui ne comptent rien sont tus.
+   const chip = (href, label, n, sym, current) => '<a class="chip" href="' + E(href) + '"' + (current ? ' aria-current="page"' : '') + '>' + (sym ? '<span class="chip-st chip-st--' + sym + '">' + ic(sym, 12) + '</span>' : '') + E(label) + '<span class="n">' + n + '</span></a>';
+   const STATE = p => (p.status === 'published' ? ['abouti', t('Publiée')] : p.review === 'programmee' ? ['encours', t('Programmée')] : p.review === 'proposee' ? ['encours', t('Proposée')] : p.review === 'a_reprendre' ? ['attention', t('À reprendre')] : ['afaire', t('Brouillon')]); %>
+<div class="library lib-v2" data-library<%~ it.shortcuts === false ? ' data-raccourcis="off"' : '' %>>
+<section class="lib" aria-labelledby="lib-title">
+  <header class="ep lib-ep">
+    <div class="ep-titre"><h1 id="lib-title"><%= t('Photothèque') %></h1></div>
+    <p class="ep-meta"><span><%= it.photos.length > 1 ? t('{n} photos', { n: it.photos.length }) : t('{n} photo', { n: it.photos.length }) %><%= it.filtered ? ' ' + t('sur {n}', { n: it.totals.all }) : '' %></span><span role="status" data-temoin></span></p>
+    <div class="ep-actions">
+      <a class="btn ghost ep-secondaire" href="/" target="_blank" rel="noopener"><%= t('Voir le site') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span></a>
+<% if (imp) { %>      <a class="btn" href="/admin/photos?importer#import" data-import-open><%~ ic('upload', 16) %><%= t('Importer des photos') %></a>
+<% } %>    </div>
+  </header>
+
+  <div class="lib-sub lib-sub-v2">
+    <nav class="chips" aria-label="<%= t('Filtrer par état') %>">
+      <%~ chip(params({ statut: '', manque: '' }), t('Toutes'), it.totals.all, null, !status && !it.missing) %>
+      <%~ chip(params({ statut: 'draft', manque: '' }), t('Brouillons'), it.totals.draft, 'afaire', status === 'draft' && !it.missing) %>
+      <%~ chip(params({ statut: 'afinir', manque: '' }), t('À finir'), it.totals.todo, 'afaire', status === 'afinir' && !it.missing) %>
+      <%~ chip(params({ statut: 'published', manque: '' }), t('Publiées'), it.totals.published, 'abouti', status === 'published' && !it.missing) %>
+<% ;[['proposees', t('Proposées'), 'encours'], ['programmees', t('Programmées'), 'encours'], ['a-reprendre', t('À reprendre'), 'attention'], ['verifier', t('Accord à vérifier'), 'attention'], ['bloquee', t('Accord refusé'), 'arret'], ['sans-visage', t('Sans visage'), null], ['proposee', '✦ ' + t('Suggestion de série'), null]].forEach(([k, label, sym]) => { const on = it.missing && it.missing.key === k; if (!it.totals[k] && !on) return; %>
+      <%~ chip(params({ manque: on ? '' : k }), label, it.totals[k], sym, on) %>
+<% }) %><% if (it.missing && !['verifier', 'bloquee', 'sans-visage', 'proposee', 'proposees', 'programmees', 'a-reprendre'].includes(it.missing.key)) { %>      <a class="chip" href="<%= params({ manque: '' }) %>" aria-current="page"><%= it.missing.label %><span class="n"><%= it.photos.length %></span><span class="sr-only"> : </span><%~ ic('x', 12) %><span class="sr-only"><%= t('retirer ce filtre') %></span></a>
+<% } %>    </nav>
+    <form class="filters filters-v2" method="get" action="/admin/photos" role="search" aria-label="<%= t('Chercher dans la photothèque') %>">
+<% if (status) { %><input type="hidden" name="statut" value="<%= status %>"><% } %>
+<% if (it.missing) { %><input type="hidden" name="manque" value="<%= it.missing.key %>"><% } %>
+<% if (it.view === 'liste') { %><input type="hidden" name="vue" value="liste"><% } %>
+      <input type="search" name="q" value="<%= f.q %>" placeholder="<%= t('Titre, lieu, légende…') %>" aria-label="<%= t('Rechercher') %>">
+      <select name="auteur" aria-label="<%= t('Photographe') %>"><option value=""><%= t('Tous les photographes') %></option><% it.authors.forEach(a => { %><option value="<%= a.slug %>"<%~ a.slug === f.author ? ' selected' : '' %>><%= a.name %></option><% }) %></select>
+      <select name="serie" aria-label="<%= t('Série') %>"><option value=""><%= t('Toutes les séries') %></option><% it.categories.forEach(c => { %><option value="<%= c.slug %>"<%~ c.slug === f.category ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
+      <button class="btn ghost" type="submit"><%= t('Filtrer') %></button>
+<% if (it.filtered) { %>      <a class="lien-a" href="<%= it.view === 'liste' ? '/admin/photos?vue=liste' : '/admin/photos' %>"><%= t('Effacer les filtres') %></a><% } %>
+    </form>
+    <span class="sp"></span>
+<% if (it.view === 'planche') { %>    <label class="density js-seul"><%= t('Taille') %> <input type="range" min="110" max="320" value="190" step="10" data-density aria-label="<%= t('Taille des vignettes') %>"></label>
+<% } %>    <nav class="seg" aria-label="<%= t('Affichage') %>">
+      <a href="<%= params({ vue: '' }) %>"<%~ it.view === 'planche' ? ' aria-current="page"' : '' %>><%= t('Planche') %></a>
+      <a href="<%= params({ vue: 'liste' }) %>"<%~ it.view === 'liste' ? ' aria-current="page"' : '' %>><%= t('Liste') %></a>
+    </nav>
+  </div>
+
+<% if (imp) { %>  <%~ include('../_import', it) %>
+<% } %>
+
+  <div class="canvas" data-canvas>
+    <p class="drop-hint"><span class="js-seul"><%= t('Clic : voir · Maj ou Ctrl + clic : plusieurs · Ctrl K : rechercher, agir') %><%= it.shortcuts === false ? '' : ' · ' + t('L : loupe') %><%= it.filtered || it.view === 'liste' || !order ? '' : ' · ' + t('glisser : changer l’ordre') %></span>
+      <span class="sans-script"><%= t('Cochez des photos, puis agissez dans le panneau « Sélection ».') %></span></p>
+<% if (it.view === 'planche') { %>
+    <ol class="contact"<%~ it.filtered || !order ? '' : ' data-sortable' %> data-contact aria-label="<%= t('Photos') %>">
+<% it.photos.forEach(p => { const [st, stLabel] = STATE(p); %>
+      <li id="photo-<%= p.id %>" class="tile <%= it.ratioClass(p) %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
+        <input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="<%= t('Sélectionner « {title} »', { title: p.title }) %>">
+        <a class="img" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '320px', alt: '' }) %><% } else { %><span class="ph"><%= t('Traitement…') %></span><% } %></a>
+        <span class="badges"><% if (p.status !== 'published' || p.review) { %><span class="badge" data-statut><%~ ic(st, 10) %> <%= stLabel %></span><% } %><% if (p.provisional) { %><span class="badge warn" data-prov><%~ ic('alerte', 10) %> <%= t('Titre provisoire') %></span><% } %><% if (p.site && p.site.level !== 'ok') { %><span class="badge warn" data-accord<%~ p.seePeople ? ' title="' + E(p.site.reasons.join(' ; ')) + '"' : '' %>><%~ ic(p.site.level === 'no' ? 'arret' : 'attention', 10) %> <%= p.site.level === 'no' ? t('Accord refusé') : t('Accord à vérifier') %></span><% } %><% if (p.suggest && p.suggest.length) { %><span class="badge sug"><span aria-hidden="true">✦</span> <%= p.suggest[0].name %></span><% } %></span>
+        <span class="cap"><a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.category %><%= p.when ? ' · ' + p.when : '' %><%= p.status === 'published' ? ' · ' + t('publiée') : '' %></small></span>
+      </li>
+<% }) %>
+    </ol>
+<% } else { %>
+    <ol class="plist plist-v2"<%~ it.filtered || !order ? '' : ' data-sortable' %>>
+<% it.photos.forEach((p, i) => { const [st, stLabel] = STATE(p); %>
+      <li id="photo-<%= p.id %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
+        <label class="chk-l"><input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="<%= t('Sélectionner « {title} »', { title: p.title }) %>"></label>
+        <span class="handle" aria-hidden="true">N°<%= it.pad(p.n) %></span>
+        <a class="thumb" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '96px', alt: '' }) %><% } else { %><span class="ph"><%= t('Traitement…') %></span><% } %></a>
+        <div class="info">
+          <a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a>
+          <span class="sec"><%= p.category %> · <%= p.author %><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + p.when : '' %></span>
+<% if (p.provisional) { %>          <span class="att"><%~ ic('alerte', 12) %><%= t('Titre provisoire (nom du fichier)') %></span>
+<% } %><% if (p.site && p.site.level !== 'ok') { %>          <span class="att"><%~ ic(p.site.level === 'no' ? 'arret' : 'attention', 12) %><%= p.site.level === 'no' ? t('Accord refusé') : t('Accord à vérifier') %></span>
+<% } %>        </div>
+        <span class="etat etat--<%= st %>"><%~ ic(st, 12) %><%= stLabel %></span>
+        <details class="menu">
+          <summary class="iconbtn"><span aria-hidden="true">⋯</span><span class="sr-only"><%= t('Actions pour « {title} »', { title: p.title }) %></span></summary>
+          <div class="menu-pop">
+            <a href="/admin/photos/<%= p.id %>"><%= t('Ouvrir la fiche') %></a>
+<% if (!it.filtered && order) { [['up', t('Monter d’une place'), i === 0], ['down', t('Descendre d’une place'), i === it.photos.length - 1]].forEach(([dir, label, off]) => { if (off) return; %>
+            <form method="post" action="/admin/photos/<%= p.id %>/move"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="dir" value="<%= dir %>"><button type="submit"><%= label %></button></form>
+<% }) } %>
+          </div>
+        </details>
+      </li>
+<% }) %>
+    </ol>
+<% } %>
+<% if (!it.photos.length) { %><p class="empty"><%= it.filtered ? t('Aucune photo pour ces filtres.') : t('Aucune photo.') %></p><% } %>
+  </div>
+</section>
+
+<aside class="insp" aria-labelledby="insp-titre" data-inspector>
+  <form class="bulk" id="bulk" method="post" action="/admin/photos/actions" data-bulk>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <input type="hidden" name="back" value="<%= back %>">
+    <div class="insp-hd">
+      <span class="stack" data-insp-stack hidden></span>
+      <div><h2 id="insp-titre" data-insp-title><%= t('Sélection') %></h2><p class="insp-etat" data-insp-sub><%= t('Pour les photos cochées :') %></p></div>
+      <button class="iconbtn push js-seul" type="button" data-bulk-clear hidden><%~ ic('x', 16) %><span class="sr-only"><%= t('Tout désélectionner (Échap)') %></span></button>
+    </div>
+    <p class="sr-only" role="status" data-annonce></p>
+
+    <div class="insp-bd" data-insp-empty hidden>
+      <div class="fld"><p class="hint"><%= t('Cliquez une photo pour la voir ici. Maj + clic ou Ctrl + clic pour en choisir plusieurs : série, lieu, date et publication s’appliquent alors à toutes.') %></p></div>
+      <div class="fld">
+        <span class="lb"><%= t('Photothèque') %></span>
+        <p class="stat"><%= t('Publiées') %> <b><%= it.totals.published %></b></p>
+        <p class="stat"><%= t('Brouillons') %> <b><%= it.totals.draft %></b></p>
+        <p class="stat"><%= t('À finir') %> <b><%= it.totals.todo %></b></p>
+      </div>
+      <div class="fld"><span class="lb"><%= t('Raccourcis') %></span>
+        <p class="stat"><span><%= t('Rechercher, agir') %></span><kbd>Ctrl K</kbd></p>
+        <p class="stat"><span><%= t('Tout sélectionner') %></span><kbd>Ctrl A</kbd></p>
+        <p class="stat"><span><%= t('Défaire la dernière action') %></span><kbd>Ctrl Z</kbd></p>
+<% if (it.shortcuts !== false) { %><% if (pub) { %>        <p class="stat"><span><%= t('Publier la sélection (après confirmation)') %></span><kbd>P</kbd></p>
+<% } %><% if (imp) { %>        <p class="stat"><span><%= t('Importer') %></span><kbd>I</kbd></p>
+<% } %>        <p class="stat"><span><%= t('Loupe') %></span><kbd>L</kbd></p>
+<% } %>        <p class="hint"><%= it.shortcuts === false ? t('Raccourcis d’une touche coupés.') : t('Touches d’une lettre : seulement quand une vignette ou ce panneau a le focus.') %> <a class="lien-a" href="/admin/compte#rac-t"><%= it.shortcuts === false ? t('Les rallumer dans « Mon compte »') : t('Les couper dans « Mon compte »') %></a></p>
+      </div>
+    </div>
+
+    <div data-insp-one hidden>
+      <p class="insp-autosave hint"><%= t('Chaque champ s’enregistre quand vous le quittez ; « Défaire » revient en arrière pendant 10 secondes.') %></p>
+      <div class="preview-one" data-one-preview></div>
+      <div class="insp-bd">
+        <div class="fld"><label class="lb" for="one-title"><%= t('Titre') %> <span class="r" data-one-n></span></label><input id="one-title" class="big-title" data-one-field="title" maxlength="160"<%~ it.can('photos.textes') ? '' : ' readonly' %>><span class="att" data-one-prov hidden><%~ ic('alerte', 12) %><%= t('Titre provisoire (nom du fichier)') %></span></div>
+        <div class="fld"><label class="lb" for="one-legend"><%= t('Légende') %> <span class="r"><%= t('facultatif') %></span></label><textarea id="one-legend" data-one-field="legend" rows="2" maxlength="2000"<%~ it.can('photos.textes') ? '' : ' readonly' %> placeholder="<%= t('Quelques mots pour le visiteur…') %>"></textarea></div>
+        <div class="fld"><label class="lb" for="one-alt"><%= t('Texte de remplacement') %> <span class="r"><%= t('une ligne, facultatif') %></span></label><input id="one-alt" data-one-field="alt_text" maxlength="<%= it.altMax %>"<%~ it.can('photos.textes') ? '' : ' readonly' %> placeholder="<%= t('ce qu’on voit, en une ligne') %>"></div>
+        <div class="fld"<%~ mod ? '' : ' hidden' %>><span class="lb" id="one-serie-l"><%= t('Série') %></span><div class="sug-list" data-one-suggest hidden></div><div class="pills" data-one-series role="group" aria-labelledby="one-serie-l"><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %></div></div>
+        <div class="fld" data-city<%~ mod ? '' : ' hidden' %>><label class="lb" for="one-city"><%= t('Ville de la carte') %> <span class="r"><%= t('facultatif') %></span></label><input id="one-city" data-city-input data-one-city maxlength="120" placeholder="<%= t('Angers, Lisbonne…') %>" autocomplete="off"><input type="hidden" data-city-id>
+          <label class="chk-ligne"><input type="checkbox" data-one-onmap> <%= t('Afficher sur la carte') %></label><span class="hint" data-one-citynote hidden><%= t('Proposée d’après le GPS de la photo : vérifiez-la.') %></span></div>
+        <div class="fld"><label class="lb" for="one-place"><%= t('Lieu') %> <span class="r"><%= t('facultatif') %></span></label><input id="one-place" data-one-field="place" maxlength="120"<%~ it.can('photos.textes') ? '' : ' readonly' %> placeholder="<%= t('Où ?') %>"></div>
+        <div class="fld"<%~ mod ? '' : ' hidden' %>><label class="lb" for="one-date"><%= t('Date') %> <span class="r"><%= t('ex. oct. 2026, 10/2026, 2026-10-16') %></span></label><input id="one-date" data-one-field="taken_on" maxlength="40" aria-describedby="one-when"><p class="lu" id="one-when" data-one-when></p></div>
+        <div class="fld"<%~ mod ? '' : ' hidden' %>><label class="lb" for="one-author"><%= t('Photographe') %></label><select id="one-author" data-one-field="author_id"><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
+<% if (it.can('statistiques.voir')) { %>        <div class="fld" data-one-audience><span class="lb"><%= t('Audience') %> <span class="r"><%= t('30 jours') %></span></span><div class="aud" data-one-aud><span class="hint">…</span></div></div>
+<% } %>        <div class="fld"><a class="btn ghost" data-one-link href="#"><%= t('Ouvrir la fiche : filigrane, accords, Instagram, preuve') %></a></div>
+      </div>
+    </div>
+
+    <div class="insp-bd" data-insp-many>
+<% if (!mod) { %>      <p class="hint"><%= t('Ce compte ne peut pas changer la série, le lieu ou la date de plusieurs photos à la fois.') %></p>
+<% } %>      <div class="fld"<%~ mod ? '' : ' hidden' %>>
+        <span class="lb" id="many-serie-l"><%= t('Série') %></span>
+        <div class="pills js-seul" data-many-series role="group" aria-labelledby="many-serie-l"><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %><% if (it.can('series.gerer')) { %><button class="pill" type="button" data-category="new">＋ <%= t('Nouvelle') %></button><% } %></div>
+        <div class="group">
+          <select name="category_id" aria-label="<%= t('Série de destination') %>" data-bulk-category>
+            <option value=""><%= t('Série…') %></option>
+<% it.categories.forEach(c => { %>            <option value="<%= c.id %>"><%= c.name %></option>
+<% }) %><% if (it.can('series.gerer')) { %>            <option value="new">＋ <%= t('Nouvelle série…') %></option><% } %>
+          </select>
+          <input name="new_category" maxlength="80" placeholder="<%= t('Nom de la nouvelle série') %>" aria-label="<%= t('Nom de la nouvelle série') %>" data-bulk-new>
+          <button class="btn ghost sans-script" type="submit" name="action" value="category"><%= t('Changer de série') %></button>
+        </div>
+      </div>
+      <div class="fld"<%~ mod ? '' : ' hidden' %>>
+        <span class="lb"><%= t('Lieu et date') %> <span class="r js-seul"><%= t('appliqués dès la sortie du champ') %></span></span>
+        <input name="place" maxlength="120" placeholder="<%= t('Lieu') %>" aria-label="<%= t('Lieu pour la sélection') %>" data-many-field="place">
+        <input name="taken_on" maxlength="40" placeholder="<%= t('Date : oct. 2026') %>" aria-label="<%= t('Date pour la sélection') %>" data-many-field="taken_on">
+        <button class="btn ghost sans-script" type="submit" name="action" value="fields"><%= t('Appliquer lieu et date') %></button>
+      </div>
+      <div class="fld"<%~ mod ? '' : ' hidden' %>><span class="lb"><%= t('Carte du site') %> <span class="r"><%= t('photos qui ont une ville') %></span></span>
+        <div class="two"><button class="btn ghost" type="submit" name="action" value="map_on" data-many-map="map_on"><%= t('Sur la carte') %></button><button class="btn ghost" type="submit" name="action" value="map_off" data-many-map="map_off"><%= t('Retirer de la carte') %></button></div></div>
+      <div class="fld" data-many-titles hidden><span class="lb"><%= t('Titres provisoires') %></span><div class="titles" data-titles></div></div>
+    </div>
+
+    <div class="insp-ft">
+<% if (pub) { %>      <button class="btn" type="submit" name="action" value="publish" data-publish><%= t('Publier…') %></button>
+<% } %><% if (prop) { %>      <button class="btn" type="submit" name="action" value="propose" data-propose><%= t('Proposer à la publication') %></button>
+<% } %>      <div class="two">
+<% if (pub) { %>        <button class="btn ghost" type="submit" name="action" value="draft" data-depublier><%= t('Dépublier') %></button>
+<% } %><% if (del) { %>        <button class="btn danger-c" type="submit" name="action" value="delete" data-bulk-delete><%= t('Supprimer…') %></button>
+<% } %>      </div>
+    </div>
+  </form>
+</aside>
+</div>
+
+<script type="application/json" id="photos-data"><%~ it.json %></script>
+
+<% /* Publier la sélection : d'abord ce qui reste à revoir (titres provisoires, accords), comme le lot (MQ-08) ; puis
+      « Défaire ». Supprimer : définitif, Annuler d'abord. Remplis par photos-v2.js ; sans script, les boutons du panneau
+      envoient le formulaire (et la suppression passe par sa page de confirmation, comme la v1). */ %>
+<dialog class="confirm" data-dlg-publier aria-labelledby="dpub-t" aria-describedby="dpub-d">
+  <h2 id="dpub-t" data-dlg-titre></h2>
+  <p id="dpub-d" data-dlg-texte></p>
+  <ul class="liste-c" data-dlg-liste></ul>
+  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn" type="button" data-dlg-ok></button></div>
+</dialog>
+<dialog class="confirm" data-dlg-supprimer aria-labelledby="dsup-t" aria-describedby="dsup-d">
+  <h2 id="dsup-t" data-dlg-titre></h2>
+  <p id="dsup-d"><%= t('Les originaux, toutes leurs images et leurs preuves d’antériorité seront effacés. Cette action est définitive.') %></p>
+  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn danger" type="button" data-dlg-ok><%~ ic('corbeille', 16) %><span data-dlg-bouton></span></button></div>
+</dialog>
+<%~ include('./_textes-photos', it) %>
+<script src="<%= it.asset('admin/v2/photos-v2.js') %>" defer></script>

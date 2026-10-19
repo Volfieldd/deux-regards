@@ -191,8 +191,9 @@ export default async function adminRoutes(app) {
       request.log.info({ audit: true, sub: request.session.sub, action, params: request.params, status: reply.statusCode }, 'action admin');
       // L'aperçu d'un billet et son enregistrement automatique (une demande toutes les 1,5 à 30 s pendant qu'on écrit) ne
       // le sont pas non plus (étude des Carnets, B34) : ils n'écrivent rien du billet ; « Enregistrer » est noté.
-      // Le choix de l'admin v1 ou v2 (POST /admin/version) est une préférence du compte, comme la langue et le thème.
-      if (!request.audited && !['POST /admin/langue', 'POST /admin/theme', 'POST /admin/version', 'POST /admin/carnet/:id/apercu', 'POST /admin/carnet/:id/brouillon'].includes(action)) {
+      // Le choix de l'admin v1 ou v2 (POST /admin/version) est une préférence du compte, comme la langue et le thème ; de
+      // même les raccourcis d'une touche de la photothèque v2 (POST /admin/compte/raccourcis).
+      if (!request.audited && !['POST /admin/langue', 'POST /admin/theme', 'POST /admin/version', 'POST /admin/compte/raccourcis', 'POST /admin/carnet/:id/apercu', 'POST /admin/carnet/:id/brouillon'].includes(action)) {
         // Statut gardé : celui de l'issue (422 pour un refus par failed(), redirigé en 303), lu « fait » ou « refusé ».
         app.audit.log({ sub: request.session.sub, name: request.session.name, action, target: Object.values(request.params || {}).join(' / '), status: request.refused && reply.statusCode < 400 ? 422 : reply.statusCode,
           detail: request.auditChanges?.length ? `champs : ${request.auditChanges.join(' ; ')}` : '' });
@@ -326,7 +327,8 @@ export default async function adminRoutes(app) {
     return reply.render(v2 ? shown : `admin/${template}`, {
       // Choix de l'admin (menu du compte) ; en v2, les onglets des Réglages et le rôle affiché sous le nom.
       adminVersion: version, adminV2: v2,
-      ...(v2 ? { settingsTabs: settingsTabs(request), roleNames: (request.session.roles || []).map(r => request.t(ROLES[r]?.label || r)) } : {}),
+      // shortcuts : raccourcis d'une touche de la photothèque (préférence du compte, « Mon compte »).
+      ...(v2 ? { settingsTabs: settingsTabs(request), roleNames: (request.session.roles || []).map(r => request.t(ROLES[r]?.label || r)), shortcuts: adminVersion.shortcuts(request.session.sub) } : {}),
       releasePopup, releaseCurrent: RELEASE_CURRENT, securite,
       // Retour après la bascule clair / sombre : la page affichée, si elle a été obtenue par GET.
       adminTheme: adminTheme(request), navSeries: navSeries(request), currentPath: request.method === 'GET' ? request.url : '/admin',
@@ -361,7 +363,7 @@ export default async function adminRoutes(app) {
   const hourOf = (time, lang) => (lang === 'fr' ? time.replace(':', ' h ') : time);
   // Données d'une photo pour l'inspecteur de la photothèque.
   const dataOf = (p, lang = 'fr') => ({
-    id: p.id, n: p.n, title: p.title, slug: p.slug, legend: p.legend, alt_text: p.alt_text || '', status: p.status, provisional: p.provisional,
+    id: p.id, n: p.n, title: p.title, slug: p.slug, legend: p.legend, alt_text: p.alt_text || '', status: p.status, provisional: p.provisional, review: p.review || null,
     category_id: p.category_id, category: p.category, author_id: p.author_id, author: p.author, place: p.place,
     taken_on: p.taken_on, when: p.when, time: p.taken_time ? hourOf(p.taken_time, lang) : '', width: p.width, height: p.height, ready: p.ready,
     city_id: p.city_id ?? null, city: cities.labelOf(p, lang), city_source: p.city_source ?? null, on_map: Boolean(p.on_map),
@@ -1019,6 +1021,8 @@ export default async function adminRoutes(app) {
     suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(photo.id)), undefined, true, request),
     ready: app.readiness.state(photo.id, null, t), confirmations: app.readiness.confirmations(photo.id), igConfirmed: app.readiness.confirmed(photo.id, 'instagram'),
     siteConfirmed: app.readiness.confirmed(photo.id, 'site'),
+    // Fiche de l'admin v2 : titre provisoire (UX-A-03), date lue, heure de prise de vue dans la langue de l'admin.
+    moderators: moderators(request), provisional: Boolean(repo.photoView(photo.id)?.provisional), read: readDate(photo.taken_on, t.lang), time: photo.taken_time ? hourOf(photo.taken_time, t.lang) : '',
   });
   const photoStats = id => {
     const { from, to } = app.stats.range(30);
@@ -1208,6 +1212,16 @@ export default async function adminRoutes(app) {
     if (!ADMIN_VERSIONS.includes(v) || !adminVersion.set(request.session.sub, v)) return failed(reply, back, request.t('Version de l’admin inconnue : rien n’a changé.'));
     if (!request.headers.accept?.includes('text/html')) return { ok: true, version: v };
     return done(reply, back, v === 'v2' ? request.t('Vous êtes dans l’admin v2. Pour revenir à la v1 : « Revenir à l’admin v1 », au pied du menu.') : request.t('Vous êtes de retour dans l’admin v1. La v2 reste à un clic : « Essayer l’admin v2 », au pied du menu.'));
+  });
+  // Raccourcis d'une touche de la photothèque v2 (UX-A-02) : les couper, ou les rallumer, depuis « Mon compte ». Une
+  // préférence du compte (account_prefs), pas au journal ; « raccourcis » vaut off (champ caché) puis on (case cochée), ou
+  // « action » en JSON (l'interrupteur enregistré au geste, admin-v2.js).
+  app.post('/admin/compte/raccourcis', W('admin.acceder'), async (request, reply) => {
+    const on = switchAction(request.body?.action ?? request.body?.raccourcis) === 'on';
+    const back = safeBack(request, '/admin/compte');
+    if (!adminVersion.setShortcuts(request.session.sub, on)) return failed(reply, back, request.t('Compte introuvable : rien n’a changé.'));
+    if (!request.headers.accept?.includes('text/html')) return { ok: true, raccourcis: on };
+    return done(reply, back, on ? request.t('Raccourcis d’une touche allumés.') : request.t('Raccourcis d’une touche coupés : seuls Ctrl K, Ctrl A et Ctrl Z restent.'));
   });
   // Mon compte (v2) : la version de l'admin et les e-mails des avis. En v1, ces réglages sont sur « Aujourd'hui ».
   app.get('/admin/compte', P('admin.acceder'), async (request, reply) => {

@@ -1,0 +1,42 @@
+<%
+  // Textes de photos-v2.js (la photothèque), traduits par le serveur : un bloc de données, jamais exécuté (CSP), réuni par admin-v2.js à ceux de
+  // views/admin/v2/_textes.eta. La clé est le texte français.
+  const t = it.t;
+  const tk = k => [k, t(k)];
+  const out = Object.fromEntries([
+    tk('{n} photos'), tk('{n} photo'), tk('publiée'), tk('programmée'), tk('proposée'), tk('à reprendre'), tk('brouillon'),
+    tk('Photothèque'), tk('Aucune photo sélectionnée'), tk('{n} photos sélectionnées'), tk('{n} brouillons'), tk('{n} brouillon'),
+    tk('{n} publiées'), tk('{n} publiée'), tk('Titre de la photo {title}'), tk('Publier {n} photos…'), tk('Publier la photo…'),
+    tk('Déjà publiées'), tk('« {title} » sélectionnée · {state} · {serie}'), tk('Traitement…'), tk('Lu : {date}'), tk('prise à {time}'),
+    tk('Suggestion : {name}'), tk('Accepter'), tk('Garder « {name} »'), tk('Déjà publiée'), tk('{n} vues en 30 jours'),
+    tk('{n} vue en 30 jours'), tk('1ʳᵉ photo la plus vue'), tk('{rank}ᵉ photo la plus vue'),
+    tk('Pas encore ouverte en grand ces 30 derniers jours.'), tk('Sélectionner « {title} »'), tk('Titre provisoire'), tk('Titre'),
+    tk('Légende'), tk('Texte de remplacement'), tk('Lieu'), tk('Date'), tk('Photographe'), tk('Série'), tk('« {champ} » de « {photo} »'),
+    tk('Erreur : {msg}'), tk('Ville de la carte'), tk('Villes proposées'), tk('Publier les {n} photos ?'), tk('Publier « {title} » ?'),
+    tk('Elles seront en ligne tout de suite ; celles dont un accord est à vérifier ou refusé restent en brouillon. « Défaire » les dépublie.'),
+    tk('titre provisoire'), tk('Corriger dans sa fiche'), tk('Publier quand même'), tk('Publier les {n} photos'), tk('Publier la photo'),
+    tk('Supprimer les {n} photos ?'), tk('Supprimer « {title} » ?'), tk('Supprimer les {n} photos'), tk('Supprimer la photo'), tk('Loupe'),
+    tk('← → photo suivante · Échap : fermer'), tk('Fermer la loupe'), tk('Photo précédente'), tk('Photo suivante'), tk('Ordre rétabli.'),
+    tk('Ordre enregistré.'), tk('L’ordre n’a pas pu être enregistré. Rechargez la page et réessayez.'), tk('Développement…'),
+    tk('Développement'), tk('Développement · {done} / {total}'), tk('En file'), tk('{n} Ko'), tk('{n} Mo'), tk('Trop lourde ({max} max.)'),
+    tk('Ce n’est pas une image'), tk('Trop grande (120 Mpx max.)'), tk('… Vérification'), tk('✓ Prête à envoyer'), tk('… En attente'),
+    tk('↑ Envoi'), tk('… En file'), tk('… Traitement'), tk('✓ Prête'), tk('! Échec'), tk('— Annulée'), tk('Ne sera pas envoyée'),
+    tk('Sera envoyée'), tk('Envoi {pct} % · {done} / {total}'), tk('Traitement : images {done} / {total}'),
+    tk('Envoyée · traitement en attente'), tk('Envoyée · images prêtes'), tk('Non envoyée'), tk('Retirer {name}'), tk('Réessayer'),
+    tk('Envoyer les {n} photos valides'), tk('Envoyer la photo valide'), tk('Envoyer'),
+    tk('{n} fichiers écartés : ils ne seront pas envoyés.'), tk('{n} fichier écarté : il ne sera pas envoyé.'),
+    tk('Ajoutez d’autres photos'), tk('Glissez vos photos ici'), tk('environ {time} restantes'), tk('environ {time} restante'),
+    tk('calcul du temps restant…'), tk('{ready} photos prêtes sur {total}'), tk('{ready} photo prête sur {total}'),
+    tk('· {n} en traitement'), tk('· {n} en file'), tk('· {n} en envoi'), tk('· {n} en échec ou annulées'), tk('· {n} en échec ou annulée'),
+    tk('Compléter et publier les {n} photos →'), tk('Compléter et publier la photo →'),
+    tk('Envoi en cours : gardez cette page ouverte. Le traitement des photos déjà envoyées continue même si vous la quittez.'),
+    tk('Envoi terminé. Le traitement continue sur le serveur : vous pouvez compléter les photos dès maintenant.'),
+    tk('Toutes les photos sont prêtes.'), tk('Envoi de {n} photos commencé.'), tk('Envoi de {n} photo commencé.'),
+    tk('Envoi des photos restantes annulé. Les photos déjà envoyées sont conservées en brouillon.'), tk('Refusée'),
+    tk('{name} refusée : {reason}.'), tk('Session expirée : rechargez la page'), tk('Erreur du serveur ({status})'),
+    tk('Connexion interrompue à {n} %'), tk('{name} : connexion interrompue. Vous pouvez réessayer cette photo.'),
+    tk('Traitement : {n} photos'), tk('Traitement : {n} photo'), tk('{name} prête.'), tk('photo supprimée entre-temps'),
+    tk('Import terminé : {n} photos prêtes.'), tk('Import terminé : {n} photo prête.')
+  ]);
+%>
+<script type="application/json" id="v2-textes-page"><%~ JSON.stringify({ t: out }).replace(/</g, '\\u003c') %></script>
